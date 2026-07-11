@@ -935,6 +935,48 @@ class HudMain(QObject):
         for pid, pos in positions.items():
             if pid in stat_dict:
                 stat_dict[pid]["position"] = pos
+        self._advance_live_positions(stat_dict, hand_id)
+
+    def _advance_live_positions(self, stat_dict: dict, hand_id: str) -> None:
+        """Estimate each player's CURRENT-hand position for positional panels.
+
+        An import-driven HUD only knows the *last imported* hand's position, but
+        the table has already moved to the next hand, so a positional panel would
+        be one hand stale (a BB villain still showing the SB panel). Advance the
+        button one seat from the last hand and store the result as live_position;
+        block_visible prefers it over the imported position.
+
+        Best-effort: it assumes the same seated players next hand (true between
+        Spin&Go hands until someone busts), and leaves live_position unset when
+        the button can't be found so the caller falls back to the imported one.
+        """
+        try:
+            seat_players = self.db_connection.get_seat_players(hand_id)
+        except Exception:
+            return
+        if len(seat_players) < 2:
+            return
+        seats = sorted(seat_players)
+        n = len(seats)
+        btn_codes = {"0", "BTN", "BU", "D", "BUTTON"}
+        btn_seat = None
+        for seat in seats:
+            pid = seat_players[seat].get("player_id")
+            pos = stat_dict.get(pid, {}).get("position")
+            if pos is not None and str(pos).strip().upper() in btn_codes:
+                btn_seat = seat
+                break
+        if btn_seat is None:
+            return
+        # Button moves one occupied seat clockwise; SB/BB follow, then seats
+        # after the BB. Codes use DerivedStats' convention (0=BTN, S, B, 1..).
+        new_btn = (seats.index(btn_seat) + 1) % n
+        codes = ["0", "S", "B"] + [str(i) for i in range(1, n)]
+        for k in range(n):
+            seat = seats[(new_btn + k) % n]
+            pid = seat_players[seat].get("player_id")
+            if pid in stat_dict:
+                stat_dict[pid]["live_position"] = codes[k]
 
     def get_cards(self, new_hand_id: str, poker_game: str) -> dict[str, Any]:
         """Get card data for a given hand."""

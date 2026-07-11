@@ -749,3 +749,36 @@ def test_process_message_enotsock_handling() -> None:
             mock_log.info.assert_any_call("ZMQ socket closed during poll")
             mock_log.exception.assert_not_called()
 
+
+
+def test_advance_live_positions_rotates_button(hud_main) -> None:
+    """Positional panels need the CURRENT hand's position; _advance_live_positions
+    moves the button one seat from the last imported hand (works even when a
+    player is sitting out, since they are still seated)."""
+    # 3 seated players; last hand seat1=BTN, seat2=SB, seat3=BB (seat3 could be
+    # an absent hero -- still seated, still in the rotation).
+    hud_main.db_connection.get_seat_players.return_value = {
+        1: {"player_id": 11}, 2: {"player_id": 12}, 3: {"player_id": 13},
+    }
+    stat_dict = {
+        11: {"position": "0"},  # BTN last hand
+        12: {"position": "S"},  # SB
+        13: {"position": "B"},  # BB
+    }
+    hud_main._advance_live_positions(stat_dict, "H1")
+    # button advances to seat2: seat2=BTN, seat3=SB, seat1=BB
+    assert stat_dict[12]["live_position"] == "0"
+    assert stat_dict[13]["live_position"] == "S"
+    assert stat_dict[11]["live_position"] == "B"
+
+
+def test_advance_live_positions_no_button_is_noop(hud_main) -> None:
+    """If no button can be identified, leave live_position unset so callers fall
+    back to the imported position."""
+    hud_main.db_connection.get_seat_players.return_value = {
+        1: {"player_id": 11}, 2: {"player_id": 12},
+    }
+    stat_dict = {11: {"position": "S"}, 12: {"position": "B"}}
+    hud_main._advance_live_positions(stat_dict, "H1")
+    assert "live_position" not in stat_dict[11]
+    assert "live_position" not in stat_dict[12]

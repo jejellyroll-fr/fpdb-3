@@ -1021,7 +1021,10 @@ class SimpleStatWindow(Aux_Base.SeatWindow):
 
         player_pos = ""
         if pdata is not None:
-            player_pos = pdata.get("position", "")
+            # Prefer live_position (the current hand, estimated by advancing the
+            # button) over the imported last-hand position, so "current" mode
+            # shows the panel for where the villain actually sits now.
+            player_pos = pdata.get("live_position") or pdata.get("position", "")
         # In "all" mode every position panel is shown (stacked), because an
         # import-driven HUD only knows the *previous* hand's position and would
         # otherwise display a one-hand-stale panel. "current" filters by position.
