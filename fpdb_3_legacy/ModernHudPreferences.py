@@ -1418,29 +1418,9 @@ class ModernHudPreferences(QDialog):
         self.profile_combo.currentIndexChanged.connect(self.on_profile_selected)
         profile_bar.addWidget(self.profile_combo)
 
-        # Positional-panel mode for multi-block HUDs. "all" stacks SB/BB/BU
-        # together (an import-driven HUD is one hand behind the live position, so
-        # showing a single positional panel would be stale); "current" shows only
-        # the panel matching the last imported position.
-        profile_bar.addSpacing(20)
-        self.positional_mode_label = QLabel("Positional panels:")
-        self.positional_mode_label.setProperty("class", "subtitle")
-        profile_bar.addWidget(self.positional_mode_label)
-        self.positional_mode_combo = QComboBox()
-        self.positional_mode_combo.addItem("Show all (stacked)", "all")
-        self.positional_mode_combo.addItem("Only current position", "current")
-        self.positional_mode_combo.setMinimumWidth(180)
-        self.positional_mode_combo.currentIndexChanged.connect(self._on_positional_mode_changed)
-        profile_bar.addWidget(self.positional_mode_combo)
-
-        # Whether the hero's own stat windows are drawn (multi-block HUDs are
-        # usually hero-hidden; this exposes the toggle per profile).
-        profile_bar.addSpacing(20)
-        self.show_hero_checkbox = QCheckBox("Show hero HUD")
-        self.show_hero_checkbox.toggled.connect(self._on_show_hero_changed)
-        profile_bar.addWidget(self.show_hero_checkbox)
-
-        profile_bar.addSpacing(20)
+        # Push the action buttons to the right so a short profile name doesn't
+        # leave them crowding the combo.
+        profile_bar.addStretch()
 
         # Profile action buttons with better styling
         self.add_profile_btn = QPushButton("➕ New Profile")
@@ -1468,9 +1448,39 @@ class ModernHudPreferences(QDialog):
         profile_bar.addWidget(self.del_profile_btn)
         profile_bar.addWidget(self.export_profile_btn)
         profile_bar.addWidget(self.import_profile_btn)
-        profile_bar.addStretch()
 
         header_layout.addLayout(profile_bar)
+
+        # Second row: per-profile HUD display options, kept off the (already
+        # crowded) profile/buttons row so they never overlap it.
+        hud_options_bar = QHBoxLayout()
+        hud_options_bar.setSpacing(10)
+
+        # Positional-panel mode for multi-block HUDs. "all" stacks SB/BB/BU
+        # together (an import-driven HUD is one hand behind the live position, so
+        # a single positional panel would be stale); "current" shows only the
+        # panel matching the last imported position.
+        self.positional_mode_label = QLabel("Positional panels:")
+        self.positional_mode_label.setProperty("class", "subtitle")
+        hud_options_bar.addWidget(self.positional_mode_label)
+        self.positional_mode_combo = QComboBox()
+        self.positional_mode_combo.addItem("Show all (stacked)", "all")
+        self.positional_mode_combo.addItem("Only current position", "current")
+        self.positional_mode_combo.setMinimumWidth(180)
+        self.positional_mode_combo.currentIndexChanged.connect(self._on_positional_mode_changed)
+        hud_options_bar.addWidget(self.positional_mode_combo)
+
+        hud_options_bar.addSpacing(24)
+
+        # Whether the hero's own stat windows are drawn (multi-block HUDs are
+        # usually hero-hidden; this exposes the toggle per profile).
+        self.show_hero_checkbox = QCheckBox("Show hero HUD")
+        self.show_hero_checkbox.toggled.connect(self._on_show_hero_changed)
+        hud_options_bar.addWidget(self.show_hero_checkbox)
+
+        hud_options_bar.addStretch()
+        header_layout.addLayout(hud_options_bar)
+
         main_layout.addWidget(header_frame)
 
         # Main content area with tabs
