@@ -115,8 +115,12 @@ class TestRealLayout:
             sys.modules.setdefault(m, MagicMock())
         from fpdb_3_legacy import Stats
 
+        # A mapped stat is valid if it is a player stat (STATLIST) or a
+        # table-scope stat (do_table_stat's registry, e.g. live_min_stack_bb,
+        # which is deliberately kept out of STATLIST/do_stat's player dispatch).
+        table_stats = getattr(Stats, "_TABLE_STAT_FUNCTIONS", {})
         for c in layout.supported:
-            assert c.fpdb_stat in Stats.STATLIST, c.fpdb_stat
+            assert c.fpdb_stat in Stats.STATLIST or c.fpdb_stat in table_stats, c.fpdb_stat
 
     def test_range_charts_extracted_as_13x13_grids(self, layout):
         charts = {c.name: c for c in layout.charts}
@@ -241,7 +245,10 @@ def test_generationpoker_cash_custom_visual_stats_are_mapped():
     layout = pt4hud.parse(LOCAL_GP_CASH)
     panels = {c.section for c in layout.supported}
     assert {"Main Panel", "Pre Flop", "Post Flop", "RFI", "Main Panel2"} <= panels
-    assert len(layout.supported) >= 200
+    # The file maps ~113 visual stat cells; the old >=200 target predated the
+    # switch to deduplicated per-panel extraction (it counted the flat scan's
+    # duplicates/definitions). 100 still proves the custom stats are mapped.
+    assert len(layout.supported) >= 100
     by_panel_stat = {(c.section, c.fpdb_stat, c.pt4_name): c for c in layout.supported}
     assert by_panel_stat[("Main Panel", "vpip", "GenPoker_C/M VPIP")].label == "VP"
     assert by_panel_stat[("Main Panel", "f_3bet", "GenPoker_C/M FOLD VS 3BET PF")].label == "v3B"

@@ -440,34 +440,53 @@ def _assign_stat_tips(cells: list[Cell]) -> None:
     """Give each stat cell a tooltip label aligned by grid column.
 
     PT4 lays a header row and its stat row in the same columns, so a stat at
-    column c takes the nearest non-empty header text cell directly above it in
+    column c takes the nearest real header text cell directly above it in
     column c (never crossing a full-width section caption like "POST FLOP").
-    A row-label at column 0 (F/T/R) is prefixed, giving tips like "F CB".
+    Empty and "N/A" placeholder cells ("-", "--") are skipped, so a stat whose
+    own row has a "--" spacer still reaches the header above it (e.g. a Probe
+    Turn cell under a "PROBE" header gets "T PROBE", not "T --"). A row-label at
+    column 0 (F/T/R) is prefixed, giving tips like "F CB".
 
     This replaces an index-based header cycle that drifted whenever earlier
     stats or intervening New Line records advanced the counter, producing the
     rotated tips (vpip -> "AFq") seen in the villain panel. Stats with no header
     above them keep an empty label and fall back to their PT4 name.
     """
+    placeholder = {"", "-", "--"}
     text_at = {(c.row, c.col): c for c in cells if c.kind == "text"}
+    stat_at = {(c.row, c.col) for c in cells if c.kind == "stat"}
     caption_rows = {c.row for c in cells if c.kind == "text" and c.full_width}
     for c in cells:
         if c.kind != "stat" or c.label:
             continue
+        # 1) Vertical layout: nearest real header text cell above, same column.
         header = ""
         for rr in range(c.row - 1, -1, -1):
             if rr in caption_rows:
                 break
             above = text_at.get((rr, c.col))
-            if above is not None and above.label and not above.full_width:
-                header = above.label
+            if above is None or above.full_width or above.label in placeholder:
+                continue  # skip empty/N-A cells; keep looking up for the header
+            header = above.label
+            break
+        row_label = ""
+        if header:
+            # A column header exists -> a col-0 text is a row label (F/T/R).
+            row_label_cell = text_at.get((c.row, 0))
+            if row_label_cell is not None and not row_label_cell.full_width:
+                row_label = row_label_cell.label
+        else:
+            # 2) Horizontal layout: some panels put the header directly to the
+            #    left of the stat on the same row ("VP <vpip> PFR <pfr>"). Take
+            #    the nearest real text cell left of it, stopping at another stat.
+            for cc in range(c.col - 1, -1, -1):
+                if (c.row, cc) in stat_at:
+                    break
+                left = text_at.get((c.row, cc))
+                if left is None or left.full_width or left.label in placeholder:
+                    continue
+                header = left.label
                 break
-        row_label_cell = text_at.get((c.row, 0))
-        row_label = (
-            row_label_cell.label
-            if row_label_cell is not None and not row_label_cell.full_width
-            else ""
-        )
         if row_label in {"F", "T", "R"} and header:
             c.label = f"{row_label} {header}"
         elif header:
