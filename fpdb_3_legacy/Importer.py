@@ -400,10 +400,9 @@ class Importer:
             fpdbfile: The file object to add and update with a file ID.
         """
         file = os.path.splitext(os.path.basename(fpdbfile.path))[0]
-        try:  # TODO: this is a dirty hack. GBI needs it, GAI fails with it.
-            file = str(file, "utf8", "replace")
-        except TypeError:
-            pass
+        # Filenames are str on Python 3; decode only if a bytes path slips in.
+        if isinstance(file, bytes):
+            file = file.decode("utf8", "replace")
         fpdbfile.fileId = self.database.get_id(file)
         if not fpdbfile.fileId:
             now = datetime.datetime.utcnow()
