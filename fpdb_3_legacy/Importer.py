@@ -751,14 +751,10 @@ class Importer:
         totpartial = 0
         totskipped = 0
         toterrors = 0
-        filecount = 0
-        fileerrorcount = 0
-        moveimportedfiles = False  # TODO need to wire this into GUI and make it prettier
-        movefailedfiles = False  # TODO and this too
 
         # prepare progress popup window
         has_callbacks = hasattr(self, 'progress_start_cb') and self.progress_start_cb is not None
-        
+
         if not has_callbacks:
             ProgressDialog = ImportProgressDialog(len(self.filelist), self.parent)
             ProgressDialog.resize(500, 200)
@@ -767,7 +763,6 @@ class Importer:
             self.progress_start_cb(len(self.filelist))
 
         for f in self.filelist:
-            filecount += 1
             if not has_callbacks:
                 ProgressDialog.progress_update(f, str(self.database.getHandCount()))
             else:
@@ -796,26 +791,12 @@ class Importer:
                 self.database.rollback()
                 log.exception(f"A fatal error occurred while processing file: {f}. Error: {e}")
                 toterrors += 1
+                self._relocate_processed_file(f, failed=True)
                 continue
 
-            if moveimportedfiles or movefailedfiles:
-                try:
-                    if moveimportedfiles:
-                        shutil.move(
-                            f,
-                            "c:\\fpdbimported\\%d-%s" % (filecount, os.path.basename(f[3:])),
-                        )
-                except (shutil.Error, OSError) as e:
-                    fileerrorcount += 1
-                    log.exception(f"Error moving imported file {f}: {e}")
-                    if movefailedfiles:
-                        try:
-                            shutil.move(
-                                f,
-                                "c:\\fpdbfailed\\%d-%s" % (fileerrorcount, os.path.basename(f[3:])),
-                            )
-                        except (shutil.Error, OSError) as e:
-                            log.exception(f"Error moving failed file {f}: {e}")
+            # Optionally archive the file once processed: successful imports go to
+            # the "imported" directory, files that produced errors to the "failed" one.
+            self._relocate_processed_file(f, failed=errors > 0)
 
         if not has_callbacks:
             ProgressDialog.accept()
@@ -826,6 +807,50 @@ class Importer:
         return totstored, totdups, totpartial, totskipped, toterrors
 
     # end def importFiles
+
+    def _relocate_processed_file(self, filepath: str, *, failed: bool) -> None:
+        """Move a just-processed file to the configured imported/failed directory.
+
+        Controlled by the importer settings:
+          - ``moveimportedfiles`` / ``moveImportedFilesDir`` for successful imports,
+          - ``movefailedfiles`` / ``moveFailedFilesDir`` for files with errors.
+        No-op if the relevant flag is disabled or no target directory is set, so
+        the default behaviour is to leave files in place.
+
+        Args:
+            filepath: Path of the file that was just processed.
+            failed: True if the file failed to import (errors or exception).
+        """
+        if failed:
+            enabled = self.settings.get("movefailedfiles")
+            target_dir = self.settings.get("moveFailedFilesDir")
+        else:
+            enabled = self.settings.get("moveimportedfiles")
+            target_dir = self.settings.get("moveImportedFilesDir")
+
+        if not enabled or not target_dir:
+            return
+
+        kind = "failed" if failed else "imported"
+        try:
+            os.makedirs(target_dir, exist_ok=True)
+            dest = os.path.join(target_dir, os.path.basename(filepath))
+            shutil.move(filepath, dest)
+            log.info(f"Moved {kind} file {filepath!r} to {dest!r}")
+        except (shutil.Error, OSError) as e:
+            log.exception(f"Error moving {kind} file {filepath!r} to {target_dir!r}: {e}")
+
+    def setMoveImportedFiles(self, enabled, target_dir=None) -> None:
+        """Enable/disable moving successfully imported files, with an optional target dir."""
+        self.settings["moveimportedfiles"] = bool(enabled)
+        if target_dir is not None:
+            self.settings["moveImportedFilesDir"] = target_dir
+
+    def setMoveFailedFiles(self, enabled, target_dir=None) -> None:
+        """Enable/disable moving files that failed to import, with an optional target dir."""
+        self.settings["movefailedfiles"] = bool(enabled)
+        if target_dir is not None:
+            self.settings["moveFailedFilesDir"] = target_dir
 
     def _import_despatch(self, fpdbfile):
         """Dispatch the import process for a given file based on its type.

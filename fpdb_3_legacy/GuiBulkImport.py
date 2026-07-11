@@ -1,5 +1,5 @@
 """GuiBulkImport module for FPDB bulk import functionality.
-from __future__ import annotations
+
 Copyright 2008-2011 Steffen Schaumburg
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
@@ -16,6 +16,8 @@ In the "official" distribution you can find the license in agpl-3.0.txt.
 """
 
 #    Standard Library modules
+from __future__ import annotations
+
 import os
 import sys
 from pathlib import Path
@@ -25,6 +27,7 @@ from typing import Any
 from PySide6.QtCore import Qt, QThread, Signal
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (
+    QCheckBox,
     QFileDialog,
     QHBoxLayout,
     QLabel,
@@ -142,6 +145,7 @@ class GuiBulkImport(QWidget):
             self.importer.setHandsInDB(self.n_hands_in_db)
             self.importer.setMode("bulk")
             self.importer.setCallHud(False)
+            self._apply_move_settings()
 
             self.starttime = time()
 
@@ -301,6 +305,18 @@ class GuiBulkImport(QWidget):
         custom_dir_layout.addWidget(self.chooseButton)
         self.layout().addLayout(custom_dir_layout)
 
+        # Optional: relocate files once processed (backend in Importer).
+        self.moveImportedCheck, self.moveImportedDir = self._build_move_row(
+            "Move imported files to:",
+            checked=bool(self.settings.get("moveimportedfiles")),
+            directory=self.settings.get("moveImportedFilesDir", ""),
+        )
+        self.moveFailedCheck, self.moveFailedDir = self._build_move_row(
+            "Move failed files to:",
+            checked=bool(self.settings.get("movefailedfiles")),
+            directory=self.settings.get("moveFailedFilesDir", ""),
+        )
+
         self.load_button = QPushButton("Bulk Import")
         
         download_icon_path = icons_dir / "16x16" / "cil-cloud-download.png"
@@ -330,6 +346,34 @@ class GuiBulkImport(QWidget):
         )
         if newdir:
             self.importDir.setText(newdir)
+
+    def _build_move_row(self, label: str, *, checked: bool, directory: str) -> tuple[QCheckBox, QLineEdit]:
+        """Build a "move files to <dir>" row (checkbox + path field + Browse) and add it.
+
+        Returns the checkbox and line edit so load_clicked can read them.
+        """
+        row = QHBoxLayout()
+        checkbox = QCheckBox(label)
+        checkbox.setChecked(checked)
+        row.addWidget(checkbox)
+        line_edit = QLineEdit(directory)
+        row.addWidget(line_edit)
+        browse = QPushButton("Browse...")
+        browse.clicked.connect(lambda: self._browse_into(line_edit))
+        row.addWidget(browse)
+        self.layout().addLayout(row)
+        return checkbox, line_edit
+
+    def _browse_into(self, line_edit: QLineEdit) -> None:
+        """Open a directory chooser and write the result into ``line_edit``."""
+        newdir = QFileDialog.getExistingDirectory(self, "Choose a destination directory", line_edit.text())
+        if newdir:
+            line_edit.setText(newdir)
+
+    def _apply_move_settings(self) -> None:
+        """Push the move-files widget state into the importer before running an import."""
+        self.importer.setMoveImportedFiles(self.moveImportedCheck.isChecked(), self.moveImportedDir.text())
+        self.importer.setMoveFailedFiles(self.moveFailedCheck.isChecked(), self.moveFailedDir.text())
 
 
 def main(argv=None) -> int:
