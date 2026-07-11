@@ -52,6 +52,22 @@ def test_flat_stat_set_is_single_block():
     assert {s.stat_name for s in ss.blocks[0].stats.values()} == {"vpip", "pfr"}
 
 
+def test_build_block_layouts_propagates_scope():
+    """_build_block_layouts must carry scope through to block_layouts, else a
+    table block is created once per seat instead of one table window (found live:
+    Min Stack (Table) rendered as a per-seat player stat -> TypeError)."""
+    ss = _ss('<ss name="t" rows="0" cols="0">'
+             '<block label="SB 3h" scope="player">'
+             '<stat _rowcol="(1,1)" _stat_name="vpip"/></block>'
+             '<block label="Min Stack (Table)" scope="table">'
+             '<stat _rowcol="(1,1)" _stat_name="live_min_stack_bb"/></block></ss>')
+    aw = Aux_Hud.SimpleHUD.__new__(Aux_Hud.SimpleHUD)
+    aw.game_params = ss
+    aw.nrows, aw.ncols = ss.rows, ss.cols
+    aw._build_block_layouts()
+    assert [b["scope"] for b in aw.block_layouts] == ["player", "table"]
+
+
 def test_multiblock_stat_set_parses_panels():
     ss = _ss('<ss name="t" rows="2" cols="2">'
              '<block label="SB 3h" rows="1" cols="2">'
@@ -135,14 +151,17 @@ def test_block_derives_grid_size_when_unspecified():
 # ---------------------------------------------------------------------------
 # Aux_Hud multi-block rendering
 # ---------------------------------------------------------------------------
-def _fake_aw(block_layouts, position=""):
+def _fake_aw(block_layouts, position="", positional_mode="all"):
     hud = types.SimpleNamespace(
         stat_dict={1: {"screen_name": "p", "seat": 1, "n": 0, "position": position}},
         hand_instance=None,
         layout=types.SimpleNamespace(hh_seats={1: 1}),
         site="TestSite",
     )
-    game_params = types.SimpleNamespace(name="test", show_hero_hud="", is_multiblock=len(block_layouts) > 1)
+    game_params = types.SimpleNamespace(
+        name="test", show_hero_hud="", is_multiblock=len(block_layouts) > 1,
+        positional_mode=positional_mode,
+    )
     config = types.SimpleNamespace(
         stat_sets={},
         supported_sites={},
@@ -158,6 +177,7 @@ def _fake_aw(block_layouts, position=""):
     aw._show_hero_hud = types.MethodType(Aux_Hud.SimpleHUD._show_hero_hud, aw)
     aw._is_hero_player = types.MethodType(Aux_Hud.SimpleHUD._is_hero_player, aw)
     aw._hide_seat_for_villain_only = types.MethodType(Aux_Hud.SimpleHUD._hide_seat_for_villain_only, aw)
+    aw._positional_mode = types.MethodType(Aux_Hud.SimpleHUD._positional_mode, aw)
     return aw
 
 
@@ -292,11 +312,28 @@ def test_position_conditional_blocks_show_only_matching():
         _block("BB 3h", [["pfr"]], position="BB"),
         _block("Info", [["n"]], position=""),  # always shown
     ]
-    win = Aux_Hud.SimpleStatWindow(aw=_fake_aw(blocks, position="S"), seat=1)  # player in SB
+    # "current" mode filters by the last imported position (player in SB here)
+    win = Aux_Hud.SimpleStatWindow(aw=_fake_aw(blocks, position="S", positional_mode="current"), seat=1)
     win.create_contents(1)
     win.update_contents(1)
     visible = [not container.isHidden() for container, _pos in win.block_widgets]
     assert visible == [True, False, True]  # SB shown, BB hidden, Info always shown
+
+
+def test_all_mode_shows_every_position_panel_regardless_of_position():
+    """Default 'all' mode shows SB/BB/BU together even when the player's last
+    imported position matches only one of them (import lag would otherwise show a
+    stale single panel)."""
+    blocks = [
+        _block("SB 3h", [["vpip"]], position="SB"),
+        _block("BB 3h", [["pfr"]], position="BB"),
+        _block("BU 3h", [["n"]], position="BTN"),
+    ]
+    win = Aux_Hud.SimpleStatWindow(aw=_fake_aw(blocks, position="S", positional_mode="all"), seat=1)
+    win.create_contents(1)
+    win.update_contents(1)
+    visible = [not container.isHidden() for container, _pos in win.block_widgets]
+    assert visible == [True, True, True]
 
 
 def test_empty_position_pt4_blocks_all_show_for_each_villain():

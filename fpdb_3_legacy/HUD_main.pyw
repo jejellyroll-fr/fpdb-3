@@ -35,7 +35,7 @@ from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QApplication, QLabel, QVBoxLayout, QWidget
 from qt_material import apply_stylesheet
 
-from fpdb_3_legacy import Configuration, Database, Deck, Hud, Options
+from fpdb_3_legacy import Aux_Base, Configuration, Database, Deck, Hud, Options
 from fpdb_3_legacy.HudStatsPersistence import get_hud_stats_persistence
 from fpdb_3_legacy.loggingFpdb import get_logger, hud_trace
 from fpdb_3_legacy.SmartHudManager import RestartReason, get_smart_hud_manager
@@ -447,6 +447,12 @@ class HudMain(QObject):
 
     def check_tables(self) -> None:
         """Periodically check the status of poker tables."""
+        # Skip while a HUD window is being dragged: the geometry poll (an
+        # expensive AppleScript scan on macOS) and the window re-raise (topify)
+        # both run on the UI thread and re-order the dragged window, which makes
+        # the drag stutter. Table geometry changes are picked up on the next tick.
+        if Aux_Base.is_drag_active():
+            return
         if not self.hud_dict:
             # log.info("Waiting for hands ...")
             pass

@@ -1418,6 +1418,21 @@ class ModernHudPreferences(QDialog):
         self.profile_combo.currentIndexChanged.connect(self.on_profile_selected)
         profile_bar.addWidget(self.profile_combo)
 
+        # Positional-panel mode for multi-block HUDs. "all" stacks SB/BB/BU
+        # together (an import-driven HUD is one hand behind the live position, so
+        # showing a single positional panel would be stale); "current" shows only
+        # the panel matching the last imported position.
+        profile_bar.addSpacing(20)
+        self.positional_mode_label = QLabel("Positional panels:")
+        self.positional_mode_label.setProperty("class", "subtitle")
+        profile_bar.addWidget(self.positional_mode_label)
+        self.positional_mode_combo = QComboBox()
+        self.positional_mode_combo.addItem("Show all (stacked)", "all")
+        self.positional_mode_combo.addItem("Only current position", "current")
+        self.positional_mode_combo.setMinimumWidth(180)
+        self.positional_mode_combo.currentIndexChanged.connect(self._on_positional_mode_changed)
+        profile_bar.addWidget(self.positional_mode_combo)
+
         profile_bar.addSpacing(20)
 
         # Profile action buttons with better styling
@@ -2189,6 +2204,9 @@ class ModernHudPreferences(QDialog):
                 "xpad": getattr(stat_set, "xpad", 0),
                 "ypad": getattr(stat_set, "ypad", 0),
                 "multiblock": True,
+                # "all" = show every position panel stacked; "current" = only the
+                # panel matching the last imported position. Editable in the UI.
+                "positional_mode": getattr(stat_set, "positional_mode", "all") or "all",
                 "blocks": block_meta,
                 "stats": stats,
             }
@@ -2520,6 +2538,13 @@ class ModernHudPreferences(QDialog):
         group = popup_data.get("group", "")
         self.popup_preview.set_popup(popup_name, popup_class, stats, source, group)
 
+    def _on_positional_mode_changed(self, _index: int) -> None:
+        """Store the chosen positional-panel mode on the current profile."""
+        name = self.profile_combo.currentText()
+        profile = self.hud_profiles.get(name) if self.hud_profiles else None
+        if isinstance(profile, dict):
+            profile["positional_mode"] = self.positional_mode_combo.currentData() or "all"
+
     def on_profile_selected(self, index) -> None:
         if index < 0 or index >= self.profile_combo.count():
             self.stat_table.setRowCount(0)
@@ -2528,6 +2553,18 @@ class ModernHudPreferences(QDialog):
             return
         name = self.profile_combo.currentText()
         profile = self.hud_profiles.get(name, {})
+
+        # Reflect this profile's positional-panel mode in the combo (multi-block
+        # only). Block the signal so setting it here doesn't mark a fake edit.
+        # Guarded: some code paths build a bare dialog without this control.
+        if getattr(self, "positional_mode_combo", None) is not None:
+            is_multiblock = isinstance(profile, dict) and profile.get("multiblock")
+            self.positional_mode_combo.setEnabled(bool(is_multiblock))
+            self.positional_mode_label.setEnabled(bool(is_multiblock))
+            mode = profile.get("positional_mode", "all") if isinstance(profile, dict) else "all"
+            self.positional_mode_combo.blockSignals(True)
+            self.positional_mode_combo.setCurrentIndex(max(0, self.positional_mode_combo.findData(mode)))
+            self.positional_mode_combo.blockSignals(False)
 
         # Handle both old format (list) and new format (dict with rows/cols/stats)
         if isinstance(profile, list):
@@ -3916,6 +3953,11 @@ class ModernHudPreferences(QDialog):
                         stats = profile_data.get("stats", [])
                         rows = profile_data.get("rows", 5)
                         cols = profile_data.get("cols", 5)
+                        # Persist the positional-panel mode for multi-block HUDs.
+                        if profile_data.get("multiblock"):
+                            stat_set_node.setAttribute(
+                                "positional_mode", profile_data.get("positional_mode", "all") or "all"
+                            )
 
                     self._write_profile_stats(stat_set_node, profile_data, rows, cols)
 

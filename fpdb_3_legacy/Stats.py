@@ -4958,6 +4958,9 @@ misslist = [
     "Hand",
 ]
 STATLIST = [x for x in STATLIST if x not in ("do_stat", "do_tip", "get_valid_stats")]
+# Table-scope stats take a single table-stats dict, not (stat_dict, player), so
+# they must never enter the player-stat dispatch built from STATLIST.
+STATLIST = [x for x in STATLIST if x not in ("do_table_stat", "live_min_stack_bb")]
 STATLIST = [x for x in STATLIST if not x.startswith("_")]
 STATLIST = [x for x in STATLIST if x not in dir(sys)]
 STATLIST = [x for x in STATLIST if x not in dir(codecs)]

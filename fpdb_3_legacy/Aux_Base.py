@@ -25,10 +25,32 @@ if TYPE_CHECKING:
     from PySide6.QtGui import QMouseEvent
 
 #    Standard Library modules
-from fpdb_3_legacy.loggingFpdb import get_logger
+from fpdb_3_legacy.loggingFpdb import get_logger, hud_trace
 
 # logging has been set up in fpdb.py or HUD_main.py, use their settings:
 log = get_logger("hud_main")
+
+
+def _drag_trace(msg: str, *args: object) -> None:
+    """Emit a drag diagnostic on the FPDB_HUD_TRACE channel (no-op otherwise)."""
+    hud_trace(msg, *args)
+
+
+# True while a HUD window is being dragged. HUD_main.check_tables polls this to
+# suspend its 800ms geometry scan + window re-raise (topify), which on macOS
+# re-orders the dragged window mid-drag and makes the drag stutter.
+_drag_active = False
+
+
+def is_drag_active() -> bool:
+    """Whether a HUD window is currently being dragged."""
+    return _drag_active
+
+
+def set_drag_active(active: bool) -> None:
+    """Mark drag start/stop (set from SeatWindow press/release)."""
+    global _drag_active
+    _drag_active = active
 
 
 def _nearest_screen(app: Any, x: int, y: int) -> Any:
@@ -249,9 +271,13 @@ class SeatWindow(QWidget):
             aw: The parent AuxWindow.
             seat: The seat number for this window.
         """
+        # NB: WindowDoesNotAcceptFocus is intentionally NOT set here. It blocks the
+        # native window move (startSystemMove), which is the only smooth way to
+        # drag a frameless stay-on-top window on macOS. WA_ShowWithoutActivating
+        # (below) keeps the HUD from stealing focus when it is shown.
         super().__init__(
             None,
-            Qt.WindowType.Window | Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowDoesNotAcceptFocus | Qt.WindowType.WindowStaysOnTopHint,
+            Qt.WindowType.Window | Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint,
         )
         self.lastPos = None
         # True while the OS is handling the drag via startSystemMove(); used to
@@ -261,6 +287,7 @@ class SeatWindow(QWidget):
         self.seat = seat
         self.resize(10, 10)
         self.setAttribute(Qt.WidgetAttribute.WA_AlwaysShowToolTips)
+        self.setAttribute(Qt.WidgetAttribute.WA_ShowWithoutActivating)
 
     def mousePressEvent(self, event: QMouseEvent) -> None:
         """Handle mouse press events for the seat window.
@@ -293,29 +320,32 @@ class SeatWindow(QWidget):
             self.button_release_right(event)
 
     def button_press_left(self, event: QMouseEvent) -> None:
-        """Handle left mouse button press.
+        """Start dragging the window.
 
-        Records the global position of the mouse when the left button is pressed.
+        Records the cursor's global position and grabs the mouse. The grab is the
+        key part: these HUD windows are frameless and WindowDoesNotAcceptFocus, so
+        (a) macOS startSystemMove() is a no-op for them, and (b) without a grab the
+        window stops receiving move events the moment it slides out from under the
+        cursor. grabMouse() keeps every move/release event coming to this widget
+        until the button is released, which makes the manual drag reliable on all
+        platforms.
 
-        Args:
-            event: The mouse event containing button and position information.
+        Qt6: globalPosition() returns a QPointF with correct high-DPI/Retina
+        coordinates, rounded to a QPoint.
         """
-        # Qt6: globalPos() is deprecated; globalPosition() returns a QPointF with
-        # correct high-DPI/Retina coordinates, which we round to a QPoint. This is
-        # kept only as a fallback for the manual drag in mouseMoveEvent.
         self.lastPos = event.globalPosition().toPoint()
-
-        # Preferred path: delegate to the OS native window move. On macOS/Qt6 the
-        # manual move() inside mouseMoveEvent loses the mouse grab after the first
-        # event (the window stops following the cursor), so the native move is the
-        # robust way to drag a frameless window. When this succeeds the platform
-        # drives the drag; the manual fallback in mouseMoveEvent must then be
-        # skipped, otherwise the window is moved twice (native + manual) and flies
-        # off the table on Windows.
+        self._press_origin = self.pos()
+        set_drag_active(True)
+        # Prefer the native window move (smooth on macOS). Fall back to a manual
+        # grabMouse drag only where the platform can't start a system move.
         self._system_move_active = False
         handle = self.windowHandle()
         if handle is not None and handle.startSystemMove():
             self._system_move_active = True
+        else:
+            self.grabMouse()
+        _drag_trace("drag-start seat=%s native=%s pos=%s", getattr(self, "seat", "?"),
+                    self._system_move_active, (self.lastPos.x(), self.lastPos.y()))
 
     def button_press_middle(self, event: QMouseEvent) -> None:
         """Handle middle mouse button press.
@@ -343,9 +373,9 @@ class SeatWindow(QWidget):
         Args:
             event: The mouse event containing button and position information.
         """
-        # Fallback manual drag (used only on platforms where startSystemMove() is
-        # unavailable). When the OS is already driving the drag, do nothing here,
-        # otherwise the window would be moved twice and jump off the table.
+        # When the OS is driving a native move, do nothing here (moving again
+        # would fight it). Otherwise move manually by the cursor delta; the
+        # button_press_left grab keeps events flowing even off-window.
         if self._system_move_active:
             return
         if self.lastPos is not None:
@@ -361,9 +391,22 @@ class SeatWindow(QWidget):
         Args:
             _event: The mouse event containing button and position information.
         """
+        # Only the manual drag holds a mouse grab; the native move does not.
+        if self.lastPos is not None and not self._system_move_active:
+            self.releaseMouse()
         self.lastPos = None
+        was_native = self._system_move_active
         self._system_move_active = False
-        self.aw.configure_event_cb(self, self.seat)
+        set_drag_active(False)
+        # Persist only on a real move. A plain click (press+release, no drag)
+        # must not overwrite the stored position with the current spot, which is
+        # what used to fill the position store with stale offsets.
+        moved = self.pos() != getattr(self, "_press_origin", self.pos())
+        final = (self.pos().x(), self.pos().y())
+        _drag_trace("drag-end seat=%s block=%s native=%s moved=%s final=%s", getattr(self, "seat", "?"),
+                    getattr(self, "block_key", None), was_native, moved, final)
+        if moved:
+            self.aw.configure_event_cb(self, self.seat)
 
     def button_release_middle(self, event: QMouseEvent) -> None:
         """Handle middle mouse button release.

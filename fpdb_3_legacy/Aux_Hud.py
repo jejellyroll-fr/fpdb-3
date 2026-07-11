@@ -210,6 +210,16 @@ class SimpleHUD(Aux_Base.AuxSeats):
 
         self._build_block_layouts()
 
+    def _positional_mode(self) -> str:
+        """'all' (show every position panel, stacked) or 'current' (only the
+        panel matching the last imported position). Defaults to 'all'."""
+        config_stat_set = getattr(self.config, "stat_sets", {}).get(self.game_params.name)
+        for stat_set in (self.game_params, config_stat_set):
+            mode = getattr(stat_set, "positional_mode", "") if stat_set is not None else ""
+            if mode:
+                return str(mode).strip().lower()
+        return "all"
+
     def _show_hero_hud(self) -> bool:
         """Whether this stat-set should display hero stat windows."""
         config_stat_set = getattr(self.config, "stat_sets", {}).get(self.game_params.name)
@@ -284,6 +294,11 @@ class SimpleHUD(Aux_Base.AuxSeats):
                                              "hicolor": getattr(st, "stat_hicolor", "")}
             self.block_layouts.append(
                 {"label": blk.label, "position": getattr(blk, "position", ""),
+                 # scope/audience/id drive create() (a table block gets one window,
+                 # not one per seat) and visibility; they MUST be carried through.
+                 "scope": getattr(blk, "scope", "player"),
+                 "audience": getattr(blk, "audience", "everyone"),
+                 "id": getattr(blk, "id", ""),
                  "bgcolor": getattr(blk, "bgcolor", ""), "fgcolor": getattr(blk, "fgcolor", ""),
                  "bordercolor": getattr(blk, "bordercolor", ""),
                  "title_bgcolor": getattr(blk, "title_bgcolor", ""),
@@ -526,7 +541,26 @@ class SimpleHUD(Aux_Base.AuxSeats):
         if seat == "table":
             return (offset_x, offset_y)
         anchor_x, anchor_y = getattr(self, "_seat_anchor_ref", {}).get(seat, (0, 0))
+        if self._positional_mode() == "all":
+            # The imported x/y offsets assume one panel is shown at a time. When
+            # showing them all, lay the player blocks out as a clean vertical
+            # stack instead (a starting layout; the user can drag to fine-tune,
+            # and drags persist and override this).
+            return (anchor_x, anchor_y + self._stack_offset(block_index))
         return (anchor_x + offset_x, anchor_y + offset_y)
+
+    def _stack_offset(self, block_index: int) -> int:
+        """Cumulative height of the player blocks laid out before this one, so
+        'all'-mode blocks stack vertically without overlapping. Heights are
+        estimated from each block's grid row count (drag corrects any drift)."""
+        row_px, title_px, pad_px = 15, 18, 5
+        offset = 0
+        for i in range(block_index):
+            b = self.block_layouts[i]
+            if b.get("scope") == "table":
+                continue
+            offset += int(b.get("nrows", 1) or 1) * row_px + (title_px if b.get("label") else 0) + pad_px
+        return offset
 
     def _canonical_for(self, key: tuple[int | str, int]) -> tuple[int, int]:
         """Canonical position for a block window.
@@ -763,10 +797,10 @@ class SimpleStatWindow(Aux_Base.SeatWindow):
         self.popup_count = 0
         self.setWindowTitle("HUD - stats")
 
-    def button_release_left(self, _event: Any) -> None:
-        """Persist either the seat window position or the PT4 block-window offset."""
-        self.lastPos = None
-        self.aw.configure_event_cb(self, getattr(self, "block_key", self.seat))
+    # button_release_left is inherited from Aux_Base.SeatWindow: it releases the
+    # drag grab and, only if the window actually moved, calls configure_event_cb
+    # (which resolves the block from widget.block_index). Overriding it here used
+    # to persist on every click, filling the position store with stale offsets.
 
     def button_release_right(self, event: Any) -> None:  # show pop up
         """Show a popup window with detailed statistics when the right mouse button is released.
@@ -988,9 +1022,13 @@ class SimpleStatWindow(Aux_Base.SeatWindow):
         player_pos = ""
         if pdata is not None:
             player_pos = pdata.get("position", "")
+        # In "all" mode every position panel is shown (stacked), because an
+        # import-driven HUD only knows the *previous* hand's position and would
+        # otherwise display a one-hand-stale panel. "current" filters by position.
+        show_all_positions = self.aw._positional_mode() == "all"
         has_visible_block = False
         for box, (container, block_pos) in zip(self.stat_boxes, self.block_widgets, strict=False):
-            visible = block_visible(block_pos, player_pos)
+            visible = True if show_all_positions else block_visible(block_pos, player_pos)
             container.setVisible(visible)
             if not visible:
                 continue

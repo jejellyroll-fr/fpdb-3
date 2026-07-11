@@ -89,6 +89,15 @@ def test_simplestat_table_scope_reads_hud_table_stats():
     assert stat.number[5] == "Live Min Stack (BB)"
 
 
+def test_live_min_stack_bb_never_enters_player_dispatch():
+    """A table stat must not leak into do_stat's player-stat dispatch, where it
+    would be called as fn(stat_dict, player) and raise TypeError (found live)."""
+    assert "live_min_stack_bb" not in Stats.STATLIST
+    assert "do_table_stat" not in Stats.STATLIST
+    # do_stat with a real player id must return None, not raise
+    assert Stats.do_stat({5185: {"vpip": 1}}, 5185, "live_min_stack_bb") is None
+
+
 def test_simplestat_table_scope_missing_value_is_falsy():
     from fpdb_3_legacy import Aux_Hud
 

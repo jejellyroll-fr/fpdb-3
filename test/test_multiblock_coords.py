@@ -57,7 +57,10 @@ def aw(monkeypatch, store):
         max=3,
     )
     obj.hud = hud
-    obj.game_params = types.SimpleNamespace(name="SS")
+    # Default the pure coordinate-math tests to 'current' so they exercise the
+    # offset-based canonical layout; the positional tests set the mode they need.
+    obj.game_params = types.SimpleNamespace(name="SS", positional_mode="current")
+    obj.config = types.SimpleNamespace(stat_sets={})
     obj.block_positions = {}
     obj._seat_anchor_ref = {1: (50, 60), 2: (300, 60), 3: (600, 60)}
     # block 0 at seat anchor, block 1 offset 54px down (villain info style).
@@ -124,6 +127,31 @@ def test_reference_is_frozen_against_layout_mutation(aw):
     aw.hud.layout.width = aw.hud.layout.height = 9999
     aw.hud.table.width, aw.hud.table.height = 1584, 1092
     assert aw.scale_factors == (2.0, 2.0)
+
+
+def test_all_mode_stacks_player_blocks_without_overlap(aw):
+    """In 'all' mode the default layout stacks player blocks vertically (their
+    imported offsets assume one-at-a-time display), so they don't pile up."""
+    aw.game_params.positional_mode = "all"
+    aw.block_layouts = [
+        {"scope": "player", "label": "SB 3h", "nrows": 7, "x": 0, "y": 0},
+        {"scope": "player", "label": "BB 3h", "nrows": 7, "x": 0, "y": 0},
+        {"scope": "player", "label": "Villain Info 3H", "nrows": 4, "x": 0, "y": 54},
+        {"scope": "table", "label": "Min Stack (Table)", "nrows": 5, "x": 0, "y": 54},
+    ]
+    ys = [aw._default_canonical((1, i))[1] for i in range(3)]
+    assert ys == sorted(ys) and len(set(ys)) == 3          # strictly increasing, no overlap
+    assert aw._default_canonical(("table", 3)) == (0, 54)  # table block keeps its offset
+
+
+def test_current_mode_uses_imported_offsets(aw):
+    aw.game_params.positional_mode = "current"
+    aw.block_layouts = [
+        {"scope": "player", "label": "SB 3h", "nrows": 7, "x": 0, "y": 0},
+        {"scope": "player", "label": "BB 3h", "nrows": 7, "x": 0, "y": 0},
+    ]
+    # both keep the imported (0,0) offset -> anchor, matching one-at-a-time display
+    assert aw._default_canonical((1, 0)) == aw._default_canonical((1, 1))
 
 
 def test_saved_positions_survive_a_restart(tmp_path):

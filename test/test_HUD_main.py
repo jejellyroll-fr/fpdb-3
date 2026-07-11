@@ -147,6 +147,26 @@ def test_check_tables(hud_main, status, expected_method) -> None:
         mock_method.assert_called_once_with(None, mock_hud)
 
 
+def test_check_tables_skipped_during_drag(hud_main) -> None:
+    """While a HUD window is dragged, check_tables must not poll geometry or
+    re-raise windows (that stutters the drag on macOS)."""
+    from fpdb_3_legacy import Aux_Base
+
+    mock_hud = MagicMock()
+    mock_hud.table.check_table.return_value = "client_moved"
+    hud_main.hud_dict = {"test_table": mock_hud}
+
+    Aux_Base.set_drag_active(True)
+    try:
+        with patch.object(hud_main, "_handle_table_status") as mock_status, \
+             patch.object(hud_main, "_topify_mac_windows") as mock_topify:
+            hud_main.check_tables()
+            mock_status.assert_not_called()
+            mock_topify.assert_not_called()
+    finally:
+        Aux_Base.set_drag_active(False)
+
+
 # Ensures that create_HUD creates a new HUD and adds it to the hud_dict.
 def test_create_hud(hud_main) -> None:
     with (
