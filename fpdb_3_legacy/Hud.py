@@ -177,10 +177,18 @@ class Hud:
         # resize self.layout object; this will then be picked-up
         # by all attached aux's when called by hud_main.idle_update
 
-        if not hasattr(self, "ref_layout_width") or not self.ref_layout_width:
+        # Freeze each reference field if not already set. They are set
+        # independently (not all-or-nothing) because Aux_Hud._ensure_reference
+        # may have frozen ref_layout_width/height first from the config layout;
+        # gating the whole block on ref_layout_width then skipped setting
+        # ref_layout_locations/common and crashed here.
+        if not getattr(self, "ref_layout_width", None):
             self.ref_layout_width = self.layout.width or 792
+        if not getattr(self, "ref_layout_height", None):
             self.ref_layout_height = self.layout.height or 546
+        if not getattr(self, "ref_layout_locations", None):
             self.ref_layout_locations = copy.deepcopy(self.layout.location)
+        if not getattr(self, "ref_layout_common", None):
             self.ref_layout_common = self.layout.common
 
         x_scale = 1.0 * self.table.width / self.ref_layout_width

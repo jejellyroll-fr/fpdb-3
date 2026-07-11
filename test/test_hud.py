@@ -670,3 +670,29 @@ class TestMuckedCards(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
+
+
+class TestResizeWindowsRefLayout(unittest.TestCase):
+    """resize_windows must not crash when Aux_Hud._ensure_reference has already
+    frozen ref_layout_width/height (but not locations/common)."""
+
+    def test_resize_windows_freezes_missing_ref_fields(self) -> None:
+        import types
+        from fpdb_3_legacy.Hud import Hud as HudClass
+
+        h = HudClass.__new__(HudClass)
+        h.max = 3
+        h.layout = types.SimpleNamespace(
+            width=792, height=546,
+            location=[None, (681, 221), (2, 221), (162, 413)], common=(323, 232),
+        )
+        h.table = types.SimpleNamespace(width=1360, height=880)
+        h.aux_windows = []
+        # Only width/height pre-set (as _ensure_reference does); no locations.
+        h.ref_layout_width = 792
+        h.ref_layout_height = 546
+
+        h.resize_windows()  # must not raise AttributeError
+
+        self.assertTrue(hasattr(h, "ref_layout_locations"))
+        self.assertEqual(h.layout.location[1], (1169, 356))  # (681,221) * 1360/792
