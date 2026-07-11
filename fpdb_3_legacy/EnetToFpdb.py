@@ -23,7 +23,6 @@ from fpdb_3_legacy import L10n
 
 _ = L10n.get_translation()
 
-# TODO: straighten out discards for draw games
 
 import sys
 from fpdb_3_legacy.HandHistoryConverter import *
@@ -456,7 +455,6 @@ class Enet(HandHistoryConverter):
                 )
 
     def readShowdownActions(self, hand):
-        # TODO: pick up mucks also??
         for shows in self.re_ShowdownAction.finditer(hand.handText):
             cards = shows.group("CARDS")
             cards = [cards[i : i + 2] for i in range(len(cards)) if i % 2 == 0 and i + 2 <= len(cards)]

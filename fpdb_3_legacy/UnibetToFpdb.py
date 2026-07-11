@@ -21,7 +21,6 @@ from __future__ import annotations
 # import L10n
 # _ = L10n.get_translation()
 
-# TODO: straighten out discards for draw games
 
 import datetime
 import re

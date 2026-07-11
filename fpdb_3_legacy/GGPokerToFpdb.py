@@ -21,7 +21,6 @@ Handles Hold'em, Omaha, Short Deck and other game types from GGPoker.
 #    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 ########################################################################
 
-# TODO(dev): straighten out discards for draw games
 
 import datetime
 import re

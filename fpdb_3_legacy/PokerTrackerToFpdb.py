@@ -31,7 +31,6 @@ from fpdb_3_legacy import MergeStructures
 # import L10n
 # _ = L10n.get_translation()
 
-# TODO: straighten out discards for draw games
 
 
 # PokerTracker HH Format

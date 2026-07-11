@@ -26,7 +26,6 @@ The converter handles various game types including Hold'em, Omaha, Stud,
 Draw games, and tournaments across different betting structures.
 """
 
-# TODO(@fpdb): straighten out discards for draw games
 
 import datetime
 import re
@@ -1936,7 +1935,6 @@ class PokerStars(HandHistoryConverter):
         Returns:
             None
         """
-        # TODO(@fpdb): pick up mucks also??
         for shows in self.re_showdown_action.finditer(hand.handText):
             cards = shows.group("CARDS").split(" ")
             hand.addShownCards(cards, shows.group("PNAME"))
