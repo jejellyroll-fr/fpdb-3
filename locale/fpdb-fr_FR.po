@@ -3750,7 +3750,7 @@ msgstr ""
 #: fpdb.pyw:818
 #, fuzzy
 msgid "Configure"
-msgstr "Fichier de configuration"
+msgstr "Configurer"
 
 #: fpdb.pyw:821
 msgid "Cash"
@@ -4641,3 +4641,128 @@ msgstr ""
 
 #~ msgid "markStreets appeared to fail: First 100 chars: '%s'"
 #~ msgstr "markStreets : echec : premiers 100 caractères : '%s'"
+
+# --- Vague 2: fpdb-3 UI (menus & database panel) ---
+
+msgid "A database name is required."
+msgstr "Un nom de base de données est requis."
+
+msgid "About"
+msgstr "À propos"
+
+msgid "Add database"
+msgstr "Ajouter une base de données"
+
+msgid "Add..."
+msgstr "Ajouter…"
+
+msgid "Auto Note Rules"
+msgstr "Règles de notes automatiques"
+
+msgid "Auto Notes Workbench"
+msgstr "Atelier de notes automatiques"
+
+msgid "Backend"
+msgstr "Moteur"
+
+msgid "Backend:"
+msgstr "Moteur :"
+
+msgid "Configured databases:"
+msgstr "Bases de données configurées :"
+
+msgid "Create database"
+msgstr "Créer la base de données"
+
+msgid "Create tables"
+msgstr "Créer les tables"
+
+msgid "Database"
+msgstr "Base de données"
+
+msgid "Databases…"
+msgstr "Bases de données…"
+
+msgid "Default"
+msgstr "Par défaut"
+
+msgid "Delete"
+msgstr "Supprimer"
+
+msgid "Dump Database to Textfile"
+msgstr "Exporter la base vers un fichier texte"
+
+msgid "Edit database"
+msgstr "Modifier la base de données"
+
+msgid "Edit..."
+msgstr "Modifier…"
+
+msgid "File"
+msgstr "Fichier"
+
+msgid "HUD Preferences"
+msgstr "Préférences du HUD"
+
+msgid "Host / Path"
+msgstr "Hôte / Chemin"
+
+msgid "Host:"
+msgstr "Hôte :"
+
+msgid "Import filters"
+msgstr "Filtres d'import"
+
+msgid "Language"
+msgstr "Langue"
+
+msgid "Manage HUD Sites"
+msgstr "Gérer les sites du HUD"
+
+msgid "Migrate to..."
+msgstr "Migrer vers…"
+
+msgid "Name:"
+msgstr "Nom :"
+
+msgid "Opponents Report"
+msgstr "Rapport sur les adversaires"
+
+msgid "Password:"
+msgstr "Mot de passe :"
+
+msgid "Port:"
+msgstr "Port :"
+
+msgid "Seat Settings"
+msgstr "Paramètres des sièges"
+
+msgid "Set as default"
+msgstr "Définir par défaut"
+
+msgid "Stats Guide"
+msgstr "Guide des stats"
+
+msgid "System default"
+msgstr "Langue du système"
+
+msgid "Test connection"
+msgstr "Tester la connexion"
+
+msgid "Themes"
+msgstr "Thèmes"
+
+msgid "Tools"
+msgstr "Outils"
+
+msgid "Tourney Hand Viewer"
+msgstr "Visionneuse de mains de tournoi"
+
+msgid "User"
+msgstr "Utilisateur"
+
+msgid "User:"
+msgstr "Utilisateur :"
+
+msgid "View"
+msgstr "Affichage"

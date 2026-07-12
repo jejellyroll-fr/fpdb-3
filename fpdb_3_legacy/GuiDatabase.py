@@ -33,6 +33,8 @@ from PySide6.QtWidgets import (
 )
 
 from fpdb_3_legacy import Database, db_backends, db_migrate
+from fpdb_3_legacy.i18n import N_
+from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.loggingFpdb import get_logger
 
 log = get_logger("gui_database")
@@ -48,7 +50,7 @@ class DatabaseEditDialog(QDialog):
         super().__init__(parent)
         self.config = config
         self.existing = existing  # a Configuration.Database or None (add mode)
-        self.setWindowTitle("Edit database" if existing else "Add database")
+        self.setWindowTitle(_("Edit database") if existing else _("Add database"))
 
         layout = QVBoxLayout(self)
         form = QFormLayout()
@@ -56,29 +58,29 @@ class DatabaseEditDialog(QDialog):
         self.nameEdit = QLineEdit(getattr(existing, "db_name", ""))
         if existing is not None:
             self.nameEdit.setEnabled(False)  # the name is the identity key
-        form.addRow("Name:", self.nameEdit)
+        form.addRow(_("Name:"), self.nameEdit)
 
         self.backendCombo = QComboBox()
         self._populate_backends(getattr(existing, "db_server", "sqlite"))
         self.backendCombo.currentIndexChanged.connect(self._on_backend_changed)
-        form.addRow("Backend:", self.backendCombo)
+        form.addRow(_("Backend:"), self.backendCombo)
 
         self.hostEdit = QLineEdit(getattr(existing, "db_ip", "") or "localhost")
         self.portEdit = QLineEdit(getattr(existing, "db_port", "") or "")
         self.userEdit = QLineEdit(getattr(existing, "db_user", "") or "")
         self.passwordEdit = QLineEdit(getattr(existing, "db_pass", "") or "")
         self.passwordEdit.setEchoMode(QLineEdit.EchoMode.Password)
-        self._host_row = ("Host:", self.hostEdit)
+        self._host_row = (_("Host:"), self.hostEdit)
         form.addRow(*self._host_row)
-        form.addRow("Port:", self.portEdit)
-        form.addRow("User:", self.userEdit)
-        form.addRow("Password:", self.passwordEdit)
+        form.addRow(_("Port:"), self.portEdit)
+        form.addRow(_("User:"), self.userEdit)
+        form.addRow(_("Password:"), self.passwordEdit)
         self._form = form
         layout.addLayout(form)
 
         # Test connection row.
         test_row = QHBoxLayout()
-        self.testButton = QPushButton("Test connection")
+        self.testButton = QPushButton(_("Test connection"))
         self.testButton.clicked.connect(self._on_test)
         test_row.addWidget(self.testButton)
         self.testResult = QLabel("")
@@ -135,23 +137,23 @@ class DatabaseEditDialog(QDialog):
         vals = self.values()
         name = vals["db_name"]
         if not name:
-            return False, "A database name is required."
+            return False, _("A database name is required.")
         # On add, the name is the unique key across configured databases.
         if self.existing is None and name in getattr(self.config, "supported_databases", {}):
             return False, f"A database named '{name}' already exists."
         if vals["db_server"] in _SERVER_BACKENDS:
             if not vals.get("db_ip"):
-                return False, "A host is required for PostgreSQL/MySQL."
+                return False, _("A host is required for PostgreSQL/MySQL.")
             port = vals.get("db_port", "")
             if port and not (port.isdigit() and 1 <= int(port) <= 65535):
-                return False, "Port must be a number between 1 and 65535."
+                return False, _("Port must be a number between 1 and 65535.")
         return True, ""
 
     def accept(self) -> None:
         """Validate before closing; keep the dialog open on invalid input."""
         ok, message = self.validate()
         if not ok:
-            QMessageBox.warning(self, "Invalid database settings", message)
+            QMessageBox.warning(self, _("Invalid database settings"), message)
             return
         super().accept()
 
@@ -167,7 +169,7 @@ class DatabaseEditDialog(QDialog):
         vals = self.values()
         server = vals["db_server"]
         if not vals["db_name"]:
-            return db_backends.ConnectionResult(ok=False, message="A database name is required.")
+            return db_backends.ConnectionResult(ok=False, message=_("A database name is required."))
         if server == "sqlite":
             return db_backends.test_connection(
                 "sqlite", database=vals["db_name"], sqlite_dir=getattr(self.config, "dir_database", None),
@@ -185,29 +187,29 @@ class DatabaseEditDialog(QDialog):
 class GuiDatabase(QWidget):
     """Panel listing configured databases with add/edit/delete/select actions."""
 
-    _COLUMNS = ("Name", "Backend", "Host / Path", "User", "Default")
+    _COLUMNS = (N_("Name"), N_("Backend"), N_("Host / Path"), N_("User"), N_("Default"))
 
     def __init__(self, config: Any, parent: Any = None) -> None:
         super().__init__(parent)
         self.config = config
 
         layout = QVBoxLayout(self)
-        layout.addWidget(QLabel("Configured databases:"))
+        layout.addWidget(QLabel(_("Configured databases:")))
 
         self.table = QTableWidget(0, len(self._COLUMNS))
-        self.table.setHorizontalHeaderLabels(self._COLUMNS)
+        self.table.setHorizontalHeaderLabels([_(c) for c in self._COLUMNS])
         self.table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
         self.table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         layout.addWidget(self.table)
 
         buttons = QHBoxLayout()
-        self.addButton = QPushButton("Add...")
-        self.editButton = QPushButton("Edit...")
-        self.deleteButton = QPushButton("Delete")
-        self.defaultButton = QPushButton("Set as default")
-        self.createDbButton = QPushButton("Create database")
-        self.createButton = QPushButton("Create tables")
-        self.migrateButton = QPushButton("Migrate to...")
+        self.addButton = QPushButton(_("Add..."))
+        self.editButton = QPushButton(_("Edit..."))
+        self.deleteButton = QPushButton(_("Delete"))
+        self.defaultButton = QPushButton(_("Set as default"))
+        self.createDbButton = QPushButton(_("Create database"))
+        self.createButton = QPushButton(_("Create tables"))
+        self.migrateButton = QPushButton(_("Migrate to..."))
         self.addButton.clicked.connect(self._on_add)
         self.editButton.clicked.connect(self._on_edit)
         self.deleteButton.clicked.connect(self._on_delete)
@@ -477,12 +479,12 @@ class GuiDatabase(QWidget):
         if dialog.exec() == QDialog.DialogCode.Accepted:
             values = dialog.values()
             if not values["db_name"]:
-                QMessageBox.warning(self, "Add database", "A database name is required.")
+                QMessageBox.warning(self, _("Add database"), _("A database name is required."))
                 return
             try:
                 self.apply_add(values)
             except ValueError as exc:  # duplicate name
-                QMessageBox.warning(self, "Add database", str(exc))
+                QMessageBox.warning(self, _("Add database"), str(exc))
 
     def _on_edit(self) -> None:
         name = self.selected_db_name()
@@ -499,13 +501,17 @@ class GuiDatabase(QWidget):
         if len(getattr(self.config, "supported_databases", {})) <= 1:
             QMessageBox.warning(
                 self,
-                "Delete database",
-                "This is the only configured database and cannot be deleted — "
-                "fpdb needs at least one. Add another database first.",
+                _("Delete database"),
+                _(
+                    "This is the only configured database and cannot be deleted — "
+                    "fpdb needs at least one. Add another database first.",
+                ),
             )
             return
         confirm = QMessageBox.question(
-            self, "Delete database", f"Remove '{name}' from the configuration?\n(The database itself is not deleted.)",
+            self,
+            _("Delete database"),
+            f"Remove '{name}' from the configuration?\n(The database itself is not deleted.)",
         )
         if confirm == QMessageBox.StandardButton.Yes:
             self.apply_delete(name)
@@ -517,7 +523,7 @@ class GuiDatabase(QWidget):
         self.apply_set_default(name)
         QMessageBox.information(
             self,
-            "Default database changed",
+            _("Default database changed"),
             f"'{name}' is now the default database.\n\n"
             "Restart fpdb for the change to take effect — the running session "
             "stays connected to the previous database.",
@@ -529,7 +535,7 @@ class GuiDatabase(QWidget):
             return
         confirm = QMessageBox.question(
             self,
-            "Create tables",
+            _("Create tables"),
             f"Create the fpdb tables in '{name}'?\n\n"
             "This only initialises an empty database; a database that already "
             "contains fpdb tables is left untouched.",
@@ -538,9 +544,9 @@ class GuiDatabase(QWidget):
             return
         result = self.create_schema(name)
         if result.ok:
-            QMessageBox.information(self, "Create tables", result.message)
+            QMessageBox.information(self, _("Create tables"), result.message)
         else:
-            QMessageBox.warning(self, "Create tables", result.message)
+            QMessageBox.warning(self, _("Create tables"), result.message)
 
     def _on_create_database(self) -> None:
         name = self.selected_db_name()
@@ -552,8 +558,8 @@ class GuiDatabase(QWidget):
         if entry.db_server == "sqlite":
             QMessageBox.information(
                 self,
-                "Create database",
-                "SQLite databases are created automatically. Use 'Create tables' to initialise the schema.",
+                _("Create database"),
+                _("SQLite databases are created automatically. Use 'Create tables' to initialise the schema."),
             )
             return
         host = entry.db_ip or "localhost"
@@ -562,7 +568,7 @@ class GuiDatabase(QWidget):
         default_admin = "postgres" if entry.db_server == "postgresql" else "root"
         admin_user, ok = QInputDialog.getText(
             self,
-            "Create database",
+            _("Create database"),
             f"Administrator/superuser account allowed to create '{entry.db_name}' on {host}\n"
             f"(this will also create the '{entry.db_user}' login and grant it access):",
             QLineEdit.EchoMode.Normal,
@@ -572,7 +578,7 @@ class GuiDatabase(QWidget):
             return
         admin_password, ok = QInputDialog.getText(
             self,
-            "Create database",
+            _("Create database"),
             f"Password for '{admin_user}':",
             QLineEdit.EchoMode.Password,
         )
@@ -582,11 +588,11 @@ class GuiDatabase(QWidget):
         if result.ok:
             QMessageBox.information(
                 self,
-                "Create database",
+                _("Create database"),
                 f"{result.message}\n\nUse 'Create tables' next to initialise the fpdb schema.",
             )
         else:
-            QMessageBox.warning(self, "Create database", result.message)
+            QMessageBox.warning(self, _("Create database"), result.message)
 
     def _on_migrate(self) -> None:
         source = self.selected_db_name()
@@ -595,17 +601,17 @@ class GuiDatabase(QWidget):
         others = [name for name in self.config.supported_databases if name != source]
         if not others:
             QMessageBox.warning(
-                self, "Migrate database", "There is no other database to migrate into. Add one first.",
+                self, _("Migrate database"), _("There is no other database to migrate into. Add one first."),
             )
             return
         dest, chosen = QInputDialog.getItem(
-            self, "Migrate database", f"Copy all data from '{source}' into:", others, 0, editable=False,
+            self, _("Migrate database"), f"Copy all data from '{source}' into:", others, 0, editable=False,
         )
         if not chosen or not dest:
             return
         confirm = QMessageBox.warning(
             self,
-            "Migrate database",
+            _("Migrate database"),
             f"This will REPLACE all data in '{dest}' with the data from '{source}'.\n\n"
             "The destination's current contents will be lost. Continue?",
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.Cancel,
@@ -617,7 +623,7 @@ class GuiDatabase(QWidget):
         # Progress widget: busy-spinner while the schema is rebuilt, then a bar
         # that advances one step per copied table.
         dialog = QProgressDialog(f"Preparing '{dest}'…", None, 0, 0, self)
-        dialog.setWindowTitle("Migrating database")
+        dialog.setWindowTitle(_("Migrating database"))
         dialog.setWindowModality(Qt.WindowModality.WindowModal)
         dialog.setCancelButton(None)  # a half-finished migration is worse than waiting
         dialog.setMinimumDuration(0)
@@ -641,8 +647,8 @@ class GuiDatabase(QWidget):
 
         if report.ok:
             QMessageBox.information(
-                self, "Migrate database",
+                self, _("Migrate database"),
                 f"Copied {report.total_rows} rows across {len(report.tables)} tables into '{dest}'.",
             )
         else:
-            QMessageBox.warning(self, "Migrate database", f"Migration failed: {report.error}")
+            QMessageBox.warning(self, _("Migrate database"), f"Migration failed: {report.error}")
