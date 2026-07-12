@@ -36,15 +36,22 @@ Tests ajoutés : `test/test_menu_layout.py`, `test/test_translations.py`.
 
 ---
 
-## Vague 2 — Internationalisation en largeur 🌍
+## Vague 2 — Internationalisation en largeur 🌍 — 🟡 EN COURS
 
-- **Sélecteur de langue** dans l'UI, persisté dans `HUD_config.xml` (`<general ui_language>`), appliqué au (re)démarrage. Le mécanisme de lecture existe déjà.
-- **Marquer les chaînes** `_()` : priorité aux dialogues fréquents (`GuiDatabase`, `GuiBulkImport`, `GuiAutoImport`, `Filters`), puis le reste.
-- Mettre en place l'extraction automatique (`pybabel extract` + `babel.cfg`, `--keyword=N_`) pour régénérer `fpdb.pot`.
-- **Re-valider les `.po` de 2011** (certaines traductions inadaptées, ex. « Configure » → « Fichier de configuration »). Workflow traducteurs (Weblate/Crowdin).
+**Fait (2026-07-12)**
+- ✅ **Sélecteur de langue** : View ▸ Language (native names via `QLocale`), écrit `ui_language` dans `HUD_config.xml` (`set_general` + `save`), appliqué au redémarrage. Logique pure `menu_layout.language_options` (testée).
+- ✅ **Helper i18n partagé** (`fpdb_3_legacy/i18n.py`) : `_` / `N_` avec fallback identité (test-safe).
+- ✅ **Marquage exemplar** : panneau `GuiDatabase` (chaînes statiques) marqué `_()`.
+- ✅ **Outillage d'extraction** : `tools/update_pot.py` (xgettext, `--keyword=_ --keyword=N_`) → `locale/fpdb.pot` (git-ignoré).
+- ✅ **Traductions FR** des chaînes menus + panneau DB (vagues 1-2) + re-validation d'une entrée erronée (« Configure » → « Configurer »).
+
+**Reste à faire**
+- Marquer `_()` les autres dialogues fréquents (`GuiBulkImport`, `GuiAutoImport`, `Filters`, `fpdb.pyw`…) + passe *format* pour les f-strings (`_("… {x}").format(...)`).
+- Traduire les nouvelles chaînes dans les 13 autres langues (travail traducteurs ; workflow Weblate/Crowdin).
+- Re-valider en masse les `.po` de 2011.
 - Formats localisés : nombres / devises / dates dans stats et graphes (€/$/BB selon locale).
 
-**Effort** ~5j · **Impact** élevé.
+**Effort restant** ~3-4j · **Impact** élevé.
 
 ---
 
@@ -90,7 +97,7 @@ Les bugs multi-backend récents (`Rank` réservé, `boolean` vs `smallint`, `set
 | Vague | Contenu | Effort | Valeur | Statut |
 |---|---|---|---|---|
 | **1** | Menus déclaratifs + réorg ; fondation i18n | ~3j | Élevée | ✅ Fait |
-| **2** | i18n en largeur (sélecteur, marquage, formats) | ~5j | Élevée | À faire |
+| **2** | i18n en largeur (sélecteur, marquage, formats) | ~5j | Élevée | 🟡 En cours |
 | **3** | Abstraction de dialecte SQL | ~4-6j | Élevée | À faire |
 | **4** | Domaine poker (stats, parsers, equity) | ~1-2 sem | Moyen/élevé | À faire |
 | **5** | Dette longue (god-modules, mypy, ruff) | continu | Moyen | À faire |
