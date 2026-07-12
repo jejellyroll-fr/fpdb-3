@@ -49,13 +49,6 @@ class MigrationReport:
         return self.error is None
 
 
-def _quote(backend: int, identifier: str) -> str:
-    """Quote a table/column identifier for the given backend."""
-    if backend == _MYSQL:
-        return f"`{identifier}`"
-    return f'"{identifier}"'  # sqlite and postgresql
-
-
 def list_data_tables(db: Any) -> list[str]:
     """Return the user tables of an fpdb database (excludes internal tables)."""
     cursor = db.get_cursor()
@@ -68,19 +61,34 @@ def list_data_tables(db: Any) -> list[str]:
     return [row[0] for row in cursor.fetchall()]
 
 
-def _set_fk_enforcement(db: Any, *, enabled: bool) -> None:
-    """Enable/disable foreign-key enforcement on ``db`` (best effort)."""
+def _disable_fk(db: Any) -> None:
+    """Disable foreign-key enforcement on ``db``.
+
+    Raises on failure. On PostgreSQL this uses ``session_replication_role``,
+    which needs a privileged role; a failure there is fatal (a copy would abort
+    the transaction table by table), so we let it propagate and fail early.
+    """
     cursor = db.get_cursor()
+    if db.backend == _SQLITE:
+        cursor.execute("PRAGMA foreign_keys = OFF")
+    elif db.backend == _MYSQL:
+        cursor.execute("SET FOREIGN_KEY_CHECKS = 0")
+    elif db.backend == _PGSQL:
+        cursor.execute("SET session_replication_role = 'replica'")
+
+
+def _enable_fk(db: Any) -> None:
+    """Re-enable foreign-key enforcement on ``db`` (best effort)."""
     try:
+        cursor = db.get_cursor()
         if db.backend == _SQLITE:
-            cursor.execute(f"PRAGMA foreign_keys = {'ON' if enabled else 'OFF'}")
+            cursor.execute("PRAGMA foreign_keys = ON")
         elif db.backend == _MYSQL:
-            cursor.execute(f"SET FOREIGN_KEY_CHECKS = {1 if enabled else 0}")
+            cursor.execute("SET FOREIGN_KEY_CHECKS = 1")
         elif db.backend == _PGSQL:
-            # Requires replication/superuser; ignored if not permitted.
-            cursor.execute(f"SET session_replication_role = '{'origin' if enabled else 'replica'}'")
-    except Exception as exc:  # noqa: BLE001 - relaxing FKs is best-effort
-        log.warning("Could not toggle foreign-key enforcement (%s): %s", "on" if enabled else "off", exc)
+            cursor.execute("SET session_replication_role = 'origin'")
+    except Exception as exc:  # noqa: BLE001 - re-enabling is best-effort cleanup
+        log.warning("Could not re-enable foreign-key enforcement: %s", exc)
 
 
 def _reset_sequences(dest: Any, tables: list[str]) -> None:
@@ -98,24 +106,29 @@ def _reset_sequences(dest: Any, tables: list[str]) -> None:
             sequence = row[0] if row else None
             if not sequence:
                 continue
-            cursor.execute(f'SELECT setval(%s, COALESCE((SELECT MAX(id) FROM "{table}"), 0) + 1, false)', (sequence,))
+            cursor.execute(f"SELECT setval(%s, COALESCE((SELECT MAX(id) FROM {table}), 0) + 1, false)", (sequence,))
         except Exception as exc:  # noqa: BLE001 - a table may have no id sequence
             log.debug("No sequence reset for %s: %s", table, exc)
 
 
 def _copy_table(source: Any, dest: Any, table: str) -> int:
-    """Replace the destination table's rows with the source's, preserving ids."""
+    """Replace the destination table's rows with the source's, preserving ids.
+
+    Identifiers are used unquoted, matching how fpdb creates its schema and runs
+    its own queries. That keeps them case-consistent across backends (PostgreSQL
+    folds unquoted names to lower case, as it did when the tables were created).
+    """
     src_cursor = source.get_cursor()
-    src_cursor.execute(f"SELECT * FROM {_quote(source.backend, table)}")
+    src_cursor.execute(f"SELECT * FROM {table}")
     columns = [desc[0] for desc in src_cursor.description]
 
     dest_cursor = dest.get_cursor()
-    dest_cursor.execute(f"DELETE FROM {_quote(dest.backend, table)}")
+    dest_cursor.execute(f"DELETE FROM {table}")
 
     placeholder = dest.sql.query.get("placeholder", "%s")
-    column_list = ", ".join(_quote(dest.backend, col) for col in columns)
+    column_list = ", ".join(columns)
     placeholders = ", ".join([placeholder] * len(columns))
-    insert = f"INSERT INTO {_quote(dest.backend, table)} ({column_list}) VALUES ({placeholders})"
+    insert = f"INSERT INTO {table} ({column_list}) VALUES ({placeholders})"
 
     copied = 0
     while True:
@@ -141,7 +154,18 @@ def migrate(source: Any, dest: Any, *, progress: ProgressCallback | None = None)
     report = MigrationReport()
     tables = list_data_tables(source)
 
-    _set_fk_enforcement(dest, enabled=False)
+    # Relax destination foreign keys so table order doesn't matter. On PostgreSQL
+    # this needs a privileged role; if it fails the transaction is aborted, so we
+    # stop early with a clear message rather than cascading table errors.
+    try:
+        _disable_fk(dest)
+    except Exception as exc:  # noqa: BLE001 - fail fast on an unusable destination
+        log.exception("Could not disable destination foreign keys")
+        dest.rollback()
+        _enable_fk(dest)
+        report.error = f"Cannot disable foreign keys on the destination: {exc}"
+        return report
+
     try:
         for index, table in enumerate(tables):
             if progress is not None:
@@ -157,5 +181,5 @@ def migrate(source: Any, dest: Any, *, progress: ProgressCallback | None = None)
         dest.rollback()
         report.error = str(exc)
     finally:
-        _set_fk_enforcement(dest, enabled=True)
+        _enable_fk(dest)
     return report

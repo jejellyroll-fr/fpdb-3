@@ -129,5 +129,28 @@ def test_report_lists_rows_per_table(config):
     dest.close_connection()
 
 
+def test_migrate_fails_fast_when_fk_disable_fails():
+    """On PostgreSQL, an unprivileged FK-disable must stop early, not cascade."""
+    from unittest.mock import MagicMock
+
+    source = MagicMock()
+    source.backend = 4  # sqlite -> list_data_tables uses sqlite_master
+    source.get_cursor.return_value.fetchall.return_value = [("Players",)]
+
+    dest = MagicMock()
+    dest.backend = 3  # postgresql
+    dest.get_cursor.return_value.execute.side_effect = Exception(
+        "permission denied to set parameter session_replication_role",
+    )
+
+    report = db_migrate.migrate(source, dest)
+
+    assert report.ok is False
+    assert "Cannot disable foreign keys" in report.error
+    dest.rollback.assert_called()
+    # It must not have attempted to copy any table into the aborted transaction.
+    assert report.tables == {}
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
