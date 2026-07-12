@@ -15,6 +15,7 @@ from __future__ import annotations
 import importlib.util
 import os
 from dataclasses import dataclass
+from types import ModuleType
 
 # db_server -> (human label, driver module name, needs host/port/user/pass fields)
 BACKENDS: dict[str, tuple[str, str, bool]] = {
@@ -36,13 +37,34 @@ def backend_id(server: str) -> int:
         raise ValueError(msg) from None
 
 
+# Acceptable driver modules per backend. MySQL accepts the pure-Python pymysql
+# as a drop-in fallback (via install_as_MySQLdb), so it works without the system
+# libraries that mysqlclient needs.
+_DRIVER_MODULES: dict[str, tuple[str, ...]] = {
+    "sqlite": ("sqlite3",),
+    "postgresql": ("psycopg",),
+    "mysql": ("MySQLdb", "pymysql"),
+}
+
+
 def driver_available(server: str) -> bool:
-    """Return True if the Python driver for ``server`` is importable."""
-    try:
-        module_name = BACKENDS[server][1]
-    except KeyError:
+    """Return True if a Python driver for ``server`` is importable."""
+    modules = _DRIVER_MODULES.get(server)
+    if not modules:
         return False
-    return importlib.util.find_spec(module_name) is not None
+    return any(importlib.util.find_spec(module) is not None for module in modules)
+
+
+def import_mysqldb() -> ModuleType:
+    """Import MySQLdb, falling back to pymysql's MySQLdb-compatible shim."""
+    try:
+        import MySQLdb  # noqa: PLC0415 - optional driver imported on demand
+    except ImportError:
+        import pymysql  # noqa: PLC0415 - pure-Python fallback
+
+        pymysql.install_as_MySQLdb()
+        import MySQLdb  # noqa: PLC0415
+    return MySQLdb
 
 
 def available_backends() -> dict[str, bool]:
@@ -159,7 +181,7 @@ def _test_postgresql(database, host, port, user, password) -> ConnectionResult:
 
 
 def _test_mysql(database, host, port, user, password) -> ConnectionResult:
-    import MySQLdb
+    MySQLdb = import_mysqldb()
 
     kwargs = {
         "host": host or "localhost",
@@ -280,7 +302,7 @@ def _postgresql_tables(database, host, port, user, password) -> set[str]:
 
 
 def _mysql_tables(database, host, port, user, password) -> set[str]:
-    import MySQLdb
+    MySQLdb = import_mysqldb()
 
     kwargs = {
         "host": host or "localhost",

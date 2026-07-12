@@ -37,6 +37,24 @@ def test_available_backends_reflects_missing_driver():
     assert backends == {"sqlite": False, "postgresql": False, "mysql": False}
 
 
+def test_mysql_available_via_pymysql():
+    """MySQL must be offered when only the pure-Python pymysql driver is present."""
+    with patch.object(
+        db_backends.importlib.util,
+        "find_spec",
+        side_effect=lambda name: object() if name == "pymysql" else None,
+    ):
+        assert db_backends.driver_available("mysql") is True  # pymysql fallback
+        assert db_backends.driver_available("postgresql") is False  # psycopg absent
+
+
+def test_import_mysqldb_returns_usable_driver():
+    """import_mysqldb returns a MySQLdb-compatible module (pymysql shim if needed)."""
+    driver = db_backends.import_mysqldb()
+    assert hasattr(driver, "connect")
+    assert hasattr(driver, "Error")
+
+
 # --- SQLite (real driver, real filesystem) ---------------------------------
 
 
