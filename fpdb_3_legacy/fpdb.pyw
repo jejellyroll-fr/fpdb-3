@@ -224,9 +224,17 @@ class fpdb(QMainWindow):
         buttons.rejected.connect(dialog.reject)
         buttons.accepted.connect(dialog.accept)
         layout.addWidget(buttons)
+
+        # The panel edits and saves the config in place, including possibly
+        # switching the default database. The running session, however, is still
+        # connected through self.db/self.sql to the database it started with, so
+        # keep the in-memory selection pinned to that active database — otherwise
+        # tabs opened later this session would build Database(self.config) against
+        # a different backend (wrong SQL dialect) despite the restart warning.
+        active_db = getattr(self.config, "db_selected", None)
         dialog.exec()
-        # GuiDatabase persists each change itself; a database switch only takes
-        # effect on restart (the panel tells the user), so nothing to reconnect here.
+        if active_db in getattr(self.config, "supported_databases", {}):
+            self.config.db_selected = active_db
 
     def dia_database_stats(self, widget, data=None) -> None:
         self.warning_box(
