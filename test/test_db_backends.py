@@ -266,9 +266,9 @@ def test_create_database_postgresql_skips_when_present():
     fake_psycopg = MagicMock()
     conn = fake_psycopg.connect.return_value
     conn.execute.return_value.fetchone.return_value = (1,)  # already exists
-    with patch.object(db_backends, "driver_available", return_value=True), patch.dict(
-        sys.modules, {"psycopg": fake_psycopg},
-    ):
+    with patch.object(db_backends, "driver_available", return_value=True), patch.object(
+        db_backends, "server_installed", return_value=True,
+    ), patch.dict(sys.modules, {"psycopg": fake_psycopg}):
         result = db_backends.create_database("postgresql", database="fpdb", admin_user="a", admin_password="p")
     assert result.ok is True
     assert "already existed" in result.message
@@ -281,9 +281,9 @@ def test_create_database_postgresql_creates_missing_role_and_grants():
     conn = fake_psycopg.connect.return_value
     # First fetchone() = role lookup (absent), second = database lookup (absent).
     conn.execute.return_value.fetchone.side_effect = [None, None]
-    with patch.object(db_backends, "driver_available", return_value=True), patch.dict(
-        sys.modules, {"psycopg": fake_psycopg},
-    ):
+    with patch.object(db_backends, "driver_available", return_value=True), patch.object(
+        db_backends, "server_installed", return_value=True,
+    ), patch.dict(sys.modules, {"psycopg": fake_psycopg}):
         result = db_backends.create_database(
             "postgresql", database="fpdb", admin_user="postgres", admin_password="p",
             app_user="fpdb", app_password="secret",
@@ -293,6 +293,74 @@ def test_create_database_postgresql_creates_missing_role_and_grants():
     assert any("CREATE ROLE" in s and '"fpdb"' in s for s in statements)
     assert any("CREATE DATABASE" in s and 'OWNER "fpdb"' in s for s in statements)
     assert any("GRANT ALL PRIVILEGES ON DATABASE" in s for s in statements)
+
+
+# --- server-installed detection --------------------------------------------
+
+
+def test_server_installed_true_when_binary_on_path():
+    with patch.object(db_backends.shutil, "which", side_effect=lambda b: "/usr/bin/psql" if b == "psql" else None):
+        assert db_backends.server_installed("postgresql") is True
+
+
+def test_server_installed_false_when_no_binary():
+    with patch.object(db_backends.shutil, "which", return_value=None):
+        assert db_backends.server_installed("postgresql") is False
+        assert db_backends.server_installed("mysql") is False
+
+
+def test_create_database_refuses_when_local_server_not_installed():
+    with patch.object(db_backends, "driver_available", return_value=True), patch.object(
+        db_backends, "server_installed", return_value=False,
+    ):
+        result = db_backends.create_database("mysql", database="fpdb", host="localhost", admin_user="root")
+    assert result.ok is False
+    assert "does not appear to be installed" in result.message
+
+
+def test_create_database_remote_host_skips_install_check():
+    fake_psycopg = MagicMock()
+    conn = fake_psycopg.connect.return_value
+    conn.execute.return_value.fetchone.return_value = None
+    with patch.object(db_backends, "driver_available", return_value=True), patch.object(
+        db_backends, "server_installed", return_value=False,
+    ), patch.dict(sys.modules, {"psycopg": fake_psycopg}):
+        result = db_backends.create_database(
+            "postgresql", database="fpdb", host="db.example.com", admin_user="admin", admin_password="p",
+        )
+    assert result.ok is True  # remote: no local-install gate, connection attempted
+
+
+def test_test_connection_unreachable_reports_not_installed():
+    fake_psycopg = MagicMock()
+
+    class OperationalError(Exception):
+        pass
+
+    fake_psycopg.OperationalError = OperationalError
+    fake_psycopg.connect.side_effect = OperationalError("Connection refused")
+    with patch.object(db_backends, "driver_available", return_value=True), patch.object(
+        db_backends, "server_installed", return_value=False,
+    ), patch.dict(sys.modules, {"psycopg": fake_psycopg}):
+        result = db_backends.test_connection("postgresql", database="fpdb", host="localhost")
+    assert result.ok is False
+    assert "not appear to be installed" in result.message
+
+
+def test_test_connection_unreachable_reports_not_running():
+    fake_psycopg = MagicMock()
+
+    class OperationalError(Exception):
+        pass
+
+    fake_psycopg.OperationalError = OperationalError
+    fake_psycopg.connect.side_effect = OperationalError("Connection refused")
+    with patch.object(db_backends, "driver_available", return_value=True), patch.object(
+        db_backends, "server_installed", return_value=True,
+    ), patch.dict(sys.modules, {"psycopg": fake_psycopg}):
+        result = db_backends.test_connection("postgresql", database="fpdb", host="localhost")
+    assert result.ok is False
+    assert "not running" in result.message
 
 
 def test_create_database_mysql_issues_create_if_not_exists():
