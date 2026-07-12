@@ -1060,110 +1060,58 @@ class fpdb(QMainWindow):
         d.exec()
 
     def createMenuBar(self) -> None:
+        """Build the menu bar from the declarative layout in ``menu_layout``."""
+        from fpdb_3_legacy import menu_layout
+
+        _t = menu_layout.translate
         mb = self.menuBar()
-        configMenu = mb.addMenu("Configure")
-        importMenu = mb.addMenu("Import")
-        hudMenu = mb.addMenu("HUD")
-        cashMenu = mb.addMenu("Cash")
-        tournamentMenu = mb.addMenu("Tournament")
-        maintenanceMenu = mb.addMenu("Maintenance")
-        toolsMenu = mb.addMenu("Tools")
-        helpMenu = mb.addMenu("Help")
-        themeMenu = mb.addMenu("Themes")
+        mb.clear()
+        for menu_spec in menu_layout.menu_layout():
+            menu = mb.addMenu(_t(menu_spec.title))
+            for item in menu_spec.items:
+                if item.handler == menu_layout.THEMES_SUBMENU:
+                    self._build_themes_submenu(menu, _t(item.label))
+                    continue
+                if item.separator_before:
+                    menu.addSeparator()
+                action = self.makeAction(
+                    _t(item.label),
+                    getattr(self, item.handler),
+                    item.shortcut,
+                    _t(item.tip) if item.tip else None,
+                )
+                if item.handler == "show_logger_dev_tool":
+                    self.logger_dev_tool_action = action
+                menu.addAction(action)
 
-        configMenu.addAction(self.makeAction("Site Settings", self.dia_site_preferences))
-        configMenu.addAction(self.makeAction("Seat Settings", self.dia_site_preferences_seat))
-        configMenu.addAction(self.makeAction("HUD Preferences", self.dia_hud_preferences))
-        configMenu.addAction(
-            self.makeAction("Auto Notes", self.dia_auto_note_rules, tip="Edit automatic player-note rules"),
-        )
-        configMenu.addAction(
-            self.makeAction(
-                "Import PT4 HUD (.pt4hud)",
-                self.dia_import_pt4hud,
-                tip="Import a PokerTracker 4 HUD layout (stats + range charts)",
-            ),
-        )
-        configMenu.addAction(
-            self.makeAction(
-                "Import PT4 Stats (.pt4stat)",
-                self.dia_import_pt4stat,
-                tip="Import PokerTracker 4 custom statistics as declarative stat descriptors",
-            ),
-        )
-        configMenu.addAction(self.makeAction("Manage HUD Sites", self.dia_manage_hud_sites))
-        configMenu.addAction(
-            self.makeAction("Adv Preferences", self.dia_advanced_preferences, tip="Edit your preferences"),
-        )
-        configMenu.addAction(
-            self.makeAction(
-                "Databases",
-                self.dia_database_config,
-                tip="Add, edit, test and select the database (SQLite / PostgreSQL / MySQL)",
-            ),
-        )
-        configMenu.addAction(self.makeAction("Import filters", self.dia_import_filters))
-        # Add the Logger Dev Tool action
-        self.logger_dev_tool_action = self.makeAction(
-            "Logger Dev Tool", self.show_logger_dev_tool, tip="Advanced logger manager"
-        )
-        configMenu.addAction(self.logger_dev_tool_action)
-        configMenu.addSeparator()
-        configMenu.addAction(self.makeAction("Close Fpdb", self.quit, "Ctrl+Q", "Quit the Program"))
+    def _build_themes_submenu(self, parent_menu, title) -> None:
+        """Create the Themes submenu under ``parent_menu`` and fill it."""
+        self._themes_menu = parent_menu.addMenu(title)
+        self._populate_themes_menu()
 
-        importMenu.addAction(self.makeAction("Bulk Import", self.tab_bulk_import, "Ctrl+B"))
-        hudMenu.addAction(self.makeAction("HUD and Auto Import", self.tab_auto_import, "Ctrl+A"))
-        cashMenu.addAction(self.makeAction("Graphs", self.tabGraphViewer, "Ctrl+G"))
-        cashMenu.addAction(self.makeAction("Ring Player Stats", self.tab_ring_player_stats, "Ctrl+P"))
-        cashMenu.addAction(self.makeAction("Opponents Report", self.tab_opponents_report, "Ctrl+O"))
-        cashMenu.addAction(self.makeAction("Hand Viewer", self.tab_hand_viewer))
-        cashMenu.addAction(self.makeAction("Session Stats", self.tab_session_stats, "Ctrl+S"))
-        tournamentMenu.addAction(self.makeAction("Tourney Graphs", self.tabTourneyGraphViewer))
-        tournamentMenu.addAction(self.makeAction("Tourney Stats", self.tab_tourney_player_stats, "Ctrl+T"))
-        tournamentMenu.addAction(self.makeAction("Tourney Hand Viewer", self.tab_tourney_viewer_stats))
-        maintenanceMenu.addAction(self.makeAction("Statistics", self.dia_database_stats, "View Database Statistics"))
-        maintenanceMenu.addAction(self.makeAction("Create or Recreate Tables", self.dia_recreate_tables))
-        maintenanceMenu.addAction(self.makeAction("Rebuild HUD Cache", self.dia_recreate_hudcache))
-        maintenanceMenu.addAction(self.makeAction("Rebuild DB Indexes", self.dia_rebuild_indexes))
-        maintenanceMenu.addAction(self.makeAction("Dump Database to Textfile (takes ALOT of time)", self.dia_dump_db))
-        toolsMenu.addAction(self.makeAction("Launch SwC HTTP Capture", self.launch_swc_capture))
-        toolsMenu.addAction(self.makeAction("Auto Notes Workbench", self.tab_auto_notes_workbench))
-        helpMenu.addAction(self.makeAction("Log Messages", self.dia_logs, "Log and Debug Messages"))
-        helpMenu.addAction(self.makeAction("Help Tab", self.tab_main_help))
-        helpMenu.addAction(self.makeAction("Stats Guide", self.tabStatsInfo))
-        helpMenu.addSeparator()
-        helpMenu.addAction(self.makeAction("Infos", self.dia_about, "About the program"))
+    def _populate_themes_menu(self) -> None:
+        """(Re)fill the Themes submenu from the available Qt themes."""
+        from fpdb_3_legacy.menu_layout import translate as _t
 
-        # Get available themes from ThemeManager
+        menu = getattr(self, "_themes_menu", None)
+        if menu is None:
+            return
+        menu.clear()
         try:
             from fpdb_3_legacy.ThemeManager import ThemeManager
 
-            theme_manager = ThemeManager()
-            themes = theme_manager.get_available_qt_themes()
+            themes = ThemeManager().get_available_qt_themes()
         except ImportError:
-            # Fallback theme list if ThemeManager not available
             themes = [
-                "dark_purple.xml",
-                "dark_teal.xml",
-                "dark_blue.xml",
-                "dark_cyan.xml",
-                "dark_pink.xml",
-                "dark_red.xml",
-                "light_purple.xml",
-                "light_teal.xml",
-                "light_blue.xml",
-                "light_cyan.xml",
-                "light_pink.xml",
-                "light_red.xml",
+                "dark_purple.xml", "dark_teal.xml", "dark_blue.xml", "dark_cyan.xml",
+                "dark_pink.xml", "dark_red.xml", "light_purple.xml", "light_teal.xml",
+                "light_blue.xml", "light_cyan.xml", "light_pink.xml", "light_red.xml",
             ]
-
         for theme in themes:
-            themeMenu.addAction(QAction(theme, self, triggered=partial(self.change_theme, theme)))
-
-        # Add separator and theme creation option
-        themeMenu.addSeparator()
-        themeMenu.addAction(
-            self.makeAction("Create Custom Theme...", self.show_theme_creator, tip="Create a new custom theme")
+            menu.addAction(QAction(theme, self, triggered=partial(self.change_theme, theme)))
+        menu.addSeparator()
+        menu.addAction(
+            self.makeAction(_t("Create Custom Theme..."), self.show_theme_creator, tip=_t("Create a new custom theme")),
         )
 
     def makeAction(self, name, callback, shortcut=None, tip=None, checkable=False):
@@ -1207,36 +1155,9 @@ class fpdb(QMainWindow):
             self.statusBar().showMessage(f"Error: {e}")
 
     def refresh_themes_menu(self) -> None:
-        """Refresh the themes menu to include new custom themes."""
+        """Refresh the themes submenu to include new custom themes."""
         try:
-            # Find and clear the themes menu
-            menu_bar = self.menuBar()
-            themes_menu = None
-            for action in menu_bar.actions():
-                if action.text() == "Themes":
-                    themes_menu = action.menu()
-                    break
-
-            if themes_menu:
-                themes_menu.clear()
-
-                # Get updated theme list from ThemeManager
-                from fpdb_3_legacy.ThemeManager import ThemeManager
-
-                theme_manager = ThemeManager()
-                themes = theme_manager.get_available_qt_themes()
-
-                # Re-add all themes
-                for theme in themes:
-                    themes_menu.addAction(QAction(theme, self, triggered=partial(self.change_theme, theme)))
-
-                # Re-add separator and theme creator
-                themes_menu.addSeparator()
-                themes_menu.addAction(
-                    self.makeAction("Create Custom Theme...", self.show_theme_creator, tip="Create a new custom theme")
-                )
-
-                log.info(f"Themes menu refreshed with {len(themes)} themes")
+            self._populate_themes_menu()
         except Exception as e:
             log.exception(f"Error refreshing themes menu: {e}")
 
