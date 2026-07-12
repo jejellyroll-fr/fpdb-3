@@ -211,10 +211,16 @@ class fpdb(QMainWindow):
         if GuiAutoNoteRules.exec_auto_note_rules_dialog(self.config, self):
             self.reload_config()
 
-    def dia_database_config(self, widget, data=None) -> None:
-        """Open the database configuration panel (add/edit/select/create databases)."""
-        # Reload from XML first so we edit the current on-disk config.
-        self.load_profile()
+    def dia_database_config(self, widget, data=None, *, reload_config=True) -> None:
+        """Open the database configuration panel (add/edit/select/create databases).
+
+        ``reload_config`` re-reads the config from XML first so the panel reflects
+        on-disk changes. Startup recovery passes False: it already holds a valid
+        (just-loaded) config, and reloading would re-attempt the failing/slow
+        connection before the settings can even be shown.
+        """
+        if reload_config:
+            self.load_profile()
         dialog = QDialog(self)
         dialog.setWindowTitle("Databases")
         dialog.resize(720, 420)
@@ -1344,9 +1350,18 @@ class fpdb(QMainWindow):
                 "PostgreSQL client reports: Unable to connect - "
                 "Please check that the PostgreSQL service has been started."
             )
+        except Exceptions.FpdbError as e:
+            # Any other connection failure (e.g. host cannot be resolved). Catch
+            # it here so a bad database config does not crash fpdb at startup.
+            err_msg = str(e)
+        self._db_connect_error = err_msg
         if err_msg is not None:
             self.db = None
-            self.warning_box(err_msg)
+            # During startup recovery (_ensure_database_or_prompt) a single
+            # recovery dialog is shown instead of this warning; warn directly
+            # otherwise (e.g. reloads triggered from the menus).
+            if not getattr(self, "_suppress_db_warning", False):
+                self.warning_box(err_msg)
         if self.db is not None and not self.db.is_connected():
             self.db = None
 
@@ -1378,6 +1393,32 @@ class fpdb(QMainWindow):
         # Validate the configuration if the database version is up-to-date
         if hasattr(self.db, "wrongDbVersion") and not self.db.wrongDbVersion:
             self.validate_config()
+
+    def _ensure_database_or_prompt(self) -> None:
+        """If the startup database connection failed, let the user fix it or quit.
+
+        Instead of crashing (or silently running with no database), offer to open
+        the Databases settings so the connection or the selected database can be
+        corrected, then retry — looping until fpdb connects or the user quits.
+        """
+        while self.db is None:
+            detail = getattr(self, "_db_connect_error", None) or "The database could not be opened."
+            choice = QMessageBox.critical(
+                self,
+                "Database connection failed",
+                f"fpdb could not connect to the configured database:\n\n{detail}\n\n"
+                "Open the database settings to fix the connection or select a "
+                "different database, then fpdb will retry.",
+                QMessageBox.StandardButton.Open | QMessageBox.StandardButton.Close,
+                QMessageBox.StandardButton.Open,
+            )
+            if choice != QMessageBox.StandardButton.Open:
+                log.error("Startup aborted: no usable database connection.")
+                sys.exit(1)
+            # Open the panel with the already-loaded config: reloading here would
+            # re-attempt the failing/slow connection before showing the settings.
+            self.dia_database_config(None, None, reload_config=False)
+            self.load_profile(create_db=True)
 
     def obtain_global_lock(self, source):
         ret = self.lock.acquire(source=source)  # will return false if lock is already held
@@ -1803,7 +1844,10 @@ class fpdb(QMainWindow):
             self.show()
             self.visible = True
 
+        self._suppress_db_warning = True
         self.load_profile(create_db=True)
+        self._ensure_database_or_prompt()
+        self._suppress_db_warning = False
 
         # Register GUI observer (ConfigurationManager already initialized dans load_profile)
         self._register_gui_observer()
