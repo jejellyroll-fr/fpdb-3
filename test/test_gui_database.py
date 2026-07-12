@@ -69,12 +69,32 @@ def test_apply_add_calls_config_and_refreshes(_qapp):
 def test_apply_delete_and_set_default(_qapp):
     from fpdb_3_legacy.GuiDatabase import GuiDatabase
 
-    config = _fake_config([_fake_db("fpdb", "sqlite")])
+    config = _fake_config([_fake_db("fpdb", "sqlite"), _fake_db("other", "postgresql")])
     panel = GuiDatabase(config)
     panel.apply_delete("fpdb")
     config.del_db_parameters.assert_called_once_with("fpdb")
     panel.apply_set_default("fpdb")
     config.set_db_parameters.assert_called_once_with(db_name="fpdb", default="True")
+
+
+def test_apply_delete_refuses_last_database(_qapp):
+    from fpdb_3_legacy.GuiDatabase import GuiDatabase
+
+    config = _fake_config([_fake_db("only", "sqlite")])
+    panel = GuiDatabase(config)
+    with pytest.raises(ValueError, match="last database"):
+        panel.apply_delete("only")
+    config.del_db_parameters.assert_not_called()
+    config.save.assert_not_called()
+
+
+def test_apply_delete_allowed_when_more_than_one(_qapp):
+    from fpdb_3_legacy.GuiDatabase import GuiDatabase
+
+    config = _fake_config([_fake_db("a", "sqlite"), _fake_db("b", "postgresql")])
+    panel = GuiDatabase(config)
+    panel.apply_delete("a")
+    config.del_db_parameters.assert_called_once_with("a")
 
 
 def test_selected_db_name(_qapp):
