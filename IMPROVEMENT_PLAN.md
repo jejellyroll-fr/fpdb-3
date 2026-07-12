@@ -41,12 +41,12 @@ Tests ajoutés : `test/test_menu_layout.py`, `test/test_translations.py`.
 **Fait (2026-07-12)**
 - ✅ **Sélecteur de langue** : View ▸ Language (native names via `QLocale`), écrit `ui_language` dans `HUD_config.xml` (`set_general` + `save`), appliqué au redémarrage. Logique pure `menu_layout.language_options` (testée).
 - ✅ **Helper i18n partagé** (`fpdb_3_legacy/i18n.py`) : `_` / `N_` avec fallback identité (test-safe).
-- ✅ **Marquage `_()`** des panneaux les plus utilisés : `GuiDatabase`, `GuiBulkImport`, `GuiAutoImport` (+ passe *format* : le récapitulatif d'import massif utilise `_("… {x}").format(...)`).
+- ✅ **Marquage `_()`** des panneaux les plus utilisés : `GuiDatabase`, `GuiBulkImport`, `GuiAutoImport`, `Filters` (barre de filtres, présente partout) (+ passe *format* : le récapitulatif d'import massif utilise `_("… {x}").format(...)`).
 - ✅ **Outillage d'extraction** : `tools/update_pot.py` (xgettext, `--keyword=_ --keyword=N_`) → `locale/fpdb.pot` (git-ignoré).
-- ✅ **Traductions FR** des chaînes menus + 3 panneaux (vagues 1-2) + re-validation d'une entrée erronée (« Configure » → « Configurer »).
+- ✅ **Traductions FR** des chaînes menus + 4 panneaux + re-validation d'une entrée erronée (« Configure » → « Configurer »). NB : restaurer `_()` sur `Filters` a **réactivé ~38 traductions FR existantes** (2011) dont le `_()` avait été retiré.
 
 **Reste à faire**
-- Marquer `_()` les dialogues restants (`Filters`, `fpdb.pyw`, viewers/graphes…) + finir la passe *format* des f-strings.
+- Marquer `_()` les dialogues restants (`fpdb.pyw`, viewers/graphes, `GuiRingPlayerStats`…) — souvent des `_()` retirés à restaurer + finir la passe *format* des f-strings.
 - Traduire les nouvelles chaînes dans les 13 autres langues (travail traducteurs ; workflow Weblate/Crowdin).
 - Re-valider en masse les `.po` de 2011.
 - Formats localisés : nombres / devises / dates dans stats et graphes (€/$/BB selon locale).
