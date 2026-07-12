@@ -123,7 +123,8 @@ def test_hud_base_path_is_module_dir_and_holds_hud_main():
     assert os.path.isfile(os.path.join(base, "HUD_main.pyw"))
 
 
-def test_launch_hud_uses_module_relative_path(monkeypatch):
+@pytest.mark.skipif(sys.platform == "win32", reason="exercises the POSIX/source HUD-launch branch")
+def test_launch_hud_uses_module_relative_path(monkeypatch, tmp_path):
     """_launch_hud must find HUD_main.pyw even when sys.path[0]/CWD are unrelated."""
     settings = _make_settings(MagicMock())
     settings["cl_options"] = ""
@@ -134,7 +135,7 @@ def test_launch_hud_uses_module_relative_path(monkeypatch):
     gui_mod = sys.modules["fpdb_3_legacy.GuiAutoImport"]
     # Simulate a hostile launch environment.
     monkeypatch.setattr(gui_mod.sys, "path", ["/nowhere", *sys.path])
-    monkeypatch.chdir("/tmp")
+    monkeypatch.chdir(tmp_path)
 
     with patch.object(gui_mod.subprocess, "Popen", return_value=MagicMock()) as mock_popen:
         gui._launch_hud()
@@ -145,6 +146,7 @@ def test_launch_hud_uses_module_relative_path(monkeypatch):
     assert os.path.isfile(hud_path)  # resolved to a real file regardless of CWD/sys.path
 
 
+@pytest.mark.skipif(sys.platform == "win32", reason="exercises the POSIX/source HUD-launch branch (list command)")
 def test_launch_hud_spawns_hud_main():
     """_launch_hud builds a HUD_main command and spawns it via subprocess.Popen."""
     settings = _make_settings(MagicMock())
