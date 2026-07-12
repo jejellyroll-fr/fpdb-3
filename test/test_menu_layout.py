@@ -51,10 +51,32 @@ def test_all_handlers_are_defined_on_the_main_window():
     with open(FPDB_PYW, encoding="utf-8") as fh:
         source = fh.read()
     defined = set(re.findall(r"def (\w+)\s*\(", source))
+    sentinels = {menu_layout.THEMES_SUBMENU, menu_layout.LANGUAGE_SUBMENU}
     for _menu, item in _all_items():
-        if item.handler == menu_layout.THEMES_SUBMENU:
+        if item.handler in sentinels:
             continue
         assert item.handler in defined, f"handler '{item.handler}' not defined in fpdb.pyw"
+
+
+def test_view_menu_exposes_themes_and_language_submenus():
+    handlers = {item.handler for _m, item in _all_items()}
+    assert menu_layout.THEMES_SUBMENU in handlers
+    assert menu_layout.LANGUAGE_SUBMENU in handlers
+
+
+def test_language_options_puts_system_first_and_marks_current():
+    options = menu_layout.language_options(["fr_FR", "es_ES", "de_DE"], "fr_FR")
+    assert options[0] == (menu_layout.SYSTEM_LANGUAGE, False)  # System default is always first
+    assert ("fr_FR", True) in options  # the configured language is marked current
+    assert ("es_ES", False) in options
+    assert [code for code, _checked in options] == ["system", "fr_FR", "es_ES", "de_DE"]
+
+
+def test_language_options_defaults_to_system_when_unset():
+    for current in (None, "", "system"):
+        options = menu_layout.language_options(["fr_FR"], current)
+        assert options[0] == (menu_layout.SYSTEM_LANGUAGE, True)
+        assert ("fr_FR", False) in options
 
 
 def test_translate_is_identity_without_a_bound_domain():

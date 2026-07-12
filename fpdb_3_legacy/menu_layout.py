@@ -15,7 +15,7 @@ up.
 
 from __future__ import annotations
 
-import gettext as _gettext
+import builtins
 from dataclasses import dataclass
 
 
@@ -25,8 +25,14 @@ def N_(message: str) -> str:
 
 
 def translate(message: str) -> str:
-    """Translate ``message`` via the current gettext domain (identity if unbound)."""
-    return _gettext.gettext(message)
+    """Translate ``message`` via the installed gettext ``_`` (identity if none).
+
+    ``L10n.set_locale_translation`` installs the chosen catalog as the builtin
+    ``_`` (that is how the rest of fpdb localises), so honour the same hook.
+    Until it is installed — including in tests — this returns ``message`` as-is.
+    """
+    func = getattr(builtins, "_", None)
+    return func(message) if callable(func) else message
 
 
 @dataclass(frozen=True)
@@ -48,9 +54,25 @@ class Menu:
     items: tuple[MenuItem, ...]
 
 
-# Sentinel used as an item's handler to mark where the dynamic Themes submenu
-# should be inserted (its content comes from ThemeManager at runtime).
+# Sentinels used as an item's handler to mark where a dynamically-built submenu
+# should be inserted (their content is resolved at runtime by the main window).
 THEMES_SUBMENU = "__themes_submenu__"
+LANGUAGE_SUBMENU = "__language_submenu__"
+
+# Special language code meaning "follow the operating-system language".
+SYSTEM_LANGUAGE = "system"
+
+
+def language_options(available: list[str], current: str | None) -> list[tuple[str, bool]]:
+    """Ordered ``(code, is_current)`` entries for the Language menu.
+
+    ``system`` (follow the OS) comes first, then each installed locale code.
+    ``current`` is the configured ``ui_language`` ("system" when unset).
+    """
+    active = current or SYSTEM_LANGUAGE
+    options = [(SYSTEM_LANGUAGE, active == SYSTEM_LANGUAGE)]
+    options.extend((code, code == active) for code in available)
+    return options
 
 
 def menu_layout() -> tuple[Menu, ...]:
@@ -150,7 +172,10 @@ def menu_layout() -> tuple[Menu, ...]:
         ),
         Menu(
             N_("View"),
-            (MenuItem(N_("Themes"), THEMES_SUBMENU),),
+            (
+                MenuItem(N_("Themes"), THEMES_SUBMENU),
+                MenuItem(N_("Language"), LANGUAGE_SUBMENU),
+            ),
         ),
         Menu(
             N_("Help"),

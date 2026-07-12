@@ -1072,6 +1072,9 @@ class fpdb(QMainWindow):
                 if item.handler == menu_layout.THEMES_SUBMENU:
                     self._build_themes_submenu(menu, _t(item.label))
                     continue
+                if item.handler == menu_layout.LANGUAGE_SUBMENU:
+                    self._build_language_submenu(menu, _t(item.label))
+                    continue
                 if item.separator_before:
                     menu.addSeparator()
                 action = self.makeAction(
@@ -1112,6 +1115,52 @@ class fpdb(QMainWindow):
         menu.addSeparator()
         menu.addAction(
             self.makeAction(_t("Create Custom Theme..."), self.show_theme_creator, tip=_t("Create a new custom theme")),
+        )
+
+    def _build_language_submenu(self, parent_menu, title) -> None:
+        """Create the Language submenu: System default + every installed locale."""
+        from pathlib import Path
+
+        from PySide6.QtCore import QLocale
+
+        from fpdb_3_legacy import menu_layout
+        from fpdb_3_legacy.Configuration import GRAPHICS_PATH
+        from fpdb_3_legacy.i18n_compile import available_locales
+
+        menu = parent_menu.addMenu(title)
+        locale_dir = Path(GRAPHICS_PATH).parent / "locale"
+        try:
+            available = available_locales(locale_dir)
+        except Exception:  # noqa: BLE001 - a missing locale dir must not break the menu
+            available = []
+        current = self.config.general.get("ui_language", "system") if getattr(self, "config", None) else "system"
+
+        for code, checked in menu_layout.language_options(available, current):
+            if code == menu_layout.SYSTEM_LANGUAGE:
+                label = menu_layout.translate("System default")
+            else:
+                label = QLocale(code).nativeLanguageName().capitalize() or code
+            action = QAction(label, self, checkable=True)
+            action.setChecked(checked)
+            action.triggered.connect(partial(self._on_select_language, code))
+            menu.addAction(action)
+
+    def _on_select_language(self, code) -> None:
+        """Persist the chosen UI language and tell the user a restart is needed."""
+        from fpdb_3_legacy.menu_layout import translate as _t
+
+        try:
+            self.config.set_general(lang=code)
+            self.config.save()
+            self.config.general["ui_language"] = code
+        except Exception as exc:  # noqa: BLE001 - report a failed save to the user
+            log.exception("Could not save UI language %r", code)
+            QMessageBox.warning(self, _t("Language"), f"{_t('Could not save the language setting:')}\n{exc}")
+            return
+        QMessageBox.information(
+            self,
+            _t("Language"),
+            _t("The language change will take effect the next time you start fpdb."),
         )
 
     def makeAction(self, name, callback, shortcut=None, tip=None, checkable=False):
