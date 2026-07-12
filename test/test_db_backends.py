@@ -157,5 +157,51 @@ def test_mysql_access_denied_is_friendly():
     assert "Access denied" in result.message
 
 
+# --- inspect_database (read-only schema state) -----------------------------
+
+
+def test_inspect_sqlite_missing_file_is_empty(tmp_path):
+    state, _ = db_backends.inspect_database("sqlite", database="nope.db3", sqlite_dir=str(tmp_path))
+    assert state == db_backends.STATE_EMPTY
+    assert not (tmp_path / "nope.db3").exists()  # must not create the file
+
+
+def test_inspect_sqlite_empty_file(tmp_path):
+    import sqlite3
+
+    sqlite3.connect(str(tmp_path / "e.db3")).close()  # empty DB, no tables
+    state, _ = db_backends.inspect_database("sqlite", database="e.db3", sqlite_dir=str(tmp_path))
+    assert state == db_backends.STATE_EMPTY
+
+
+def test_inspect_sqlite_detects_fpdb_schema(tmp_path):
+    import sqlite3
+
+    conn = sqlite3.connect(str(tmp_path / "fpdb.db3"))
+    conn.execute("CREATE TABLE Settings (version INTEGER)")
+    conn.commit()
+    conn.close()
+    state, _ = db_backends.inspect_database("sqlite", database="fpdb.db3", sqlite_dir=str(tmp_path))
+    assert state == db_backends.STATE_INITIALISED
+
+
+def test_inspect_sqlite_detects_foreign_tables(tmp_path):
+    import sqlite3
+
+    conn = sqlite3.connect(str(tmp_path / "user.db3"))
+    conn.execute("CREATE TABLE my_notes (id INTEGER, body TEXT)")
+    conn.commit()
+    conn.close()
+    state, _ = db_backends.inspect_database("sqlite", database="user.db3", sqlite_dir=str(tmp_path))
+    assert state == db_backends.STATE_FOREIGN
+
+
+def test_inspect_missing_driver_is_unreachable():
+    with patch.object(db_backends, "driver_available", return_value=False):
+        state, detail = db_backends.inspect_database("postgresql", database="fpdb")
+    assert state == db_backends.STATE_UNREACHABLE
+    assert "not installed" in detail
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
