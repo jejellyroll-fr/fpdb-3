@@ -108,6 +108,32 @@ def test_selected_db_name(_qapp):
     assert panel.selected_db_name() == "b"
 
 
+def test_create_database_delegates_entry_fields(_qapp):
+    from fpdb_3_legacy import GuiDatabase as gui_db_module
+    from fpdb_3_legacy.GuiDatabase import GuiDatabase
+
+    config = _fake_config([_fake_db("pg", "postgresql", ip="dbhost", port="5432", user="alice")])
+    panel = GuiDatabase(config)
+    with patch.object(gui_db_module.db_backends, "create_database") as create:
+        create.return_value = gui_db_module.db_backends.ConnectionResult(ok=True, message="Created database 'pg'.")
+        result = panel.create_database("pg", "admin", "secret")
+    assert result.ok is True
+    create.assert_called_once_with(
+        "postgresql", database="pg", host="dbhost", port="5432",
+        admin_user="admin", admin_password="secret",
+    )
+
+
+def test_create_database_unknown_name_is_reported(_qapp):
+    from fpdb_3_legacy.GuiDatabase import GuiDatabase
+
+    config = _fake_config([_fake_db("fpdb", "sqlite")])
+    panel = GuiDatabase(config)
+    result = panel.create_database("missing", "admin", "secret")
+    assert result.ok is False
+    assert "Unknown database" in result.message
+
+
 # --- DatabaseEditDialog ----------------------------------------------------
 
 

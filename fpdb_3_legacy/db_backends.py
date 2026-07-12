@@ -15,6 +15,7 @@ from __future__ import annotations
 import importlib.util
 import os
 from dataclasses import dataclass
+from types import ModuleType
 
 # db_server -> (human label, driver module name, needs host/port/user/pass fields)
 BACKENDS: dict[str, tuple[str, str, bool]] = {
@@ -36,13 +37,34 @@ def backend_id(server: str) -> int:
         raise ValueError(msg) from None
 
 
+# Acceptable driver modules per backend. MySQL accepts the pure-Python pymysql
+# as a drop-in fallback (via install_as_MySQLdb), so it works without the system
+# libraries that mysqlclient needs.
+_DRIVER_MODULES: dict[str, tuple[str, ...]] = {
+    "sqlite": ("sqlite3",),
+    "postgresql": ("psycopg",),
+    "mysql": ("MySQLdb", "pymysql"),
+}
+
+
 def driver_available(server: str) -> bool:
-    """Return True if the Python driver for ``server`` is importable."""
-    try:
-        module_name = BACKENDS[server][1]
-    except KeyError:
+    """Return True if a Python driver for ``server`` is importable."""
+    modules = _DRIVER_MODULES.get(server)
+    if not modules:
         return False
-    return importlib.util.find_spec(module_name) is not None
+    return any(importlib.util.find_spec(module) is not None for module in modules)
+
+
+def import_mysqldb() -> ModuleType:
+    """Import MySQLdb, falling back to pymysql's MySQLdb-compatible shim."""
+    try:
+        import MySQLdb  # noqa: PLC0415 - optional driver imported on demand
+    except ImportError:
+        import pymysql  # noqa: PLC0415 - pure-Python fallback
+
+        pymysql.install_as_MySQLdb()
+        import MySQLdb  # noqa: PLC0415
+    return MySQLdb
 
 
 def available_backends() -> dict[str, bool]:
@@ -159,7 +181,7 @@ def _test_postgresql(database, host, port, user, password) -> ConnectionResult:
 
 
 def _test_mysql(database, host, port, user, password) -> ConnectionResult:
-    import MySQLdb
+    MySQLdb = import_mysqldb()
 
     kwargs = {
         "host": host or "localhost",
@@ -280,7 +302,7 @@ def _postgresql_tables(database, host, port, user, password) -> set[str]:
 
 
 def _mysql_tables(database, host, port, user, password) -> set[str]:
-    import MySQLdb
+    MySQLdb = import_mysqldb()
 
     kwargs = {
         "host": host or "localhost",
@@ -300,3 +322,81 @@ def _mysql_tables(database, host, port, user, password) -> set[str]:
     finally:
         conn.close()
     return {row[0] for row in rows}
+
+
+# --- database creation (CREATE DATABASE) -----------------------------------
+#
+# fpdb's "Create tables" only builds the schema inside an existing database.
+# For a fresh PostgreSQL/MySQL server the database itself must be created first,
+# which needs an administrator account (the fpdb user usually cannot). These
+# helpers connect to the server's maintenance database with admin credentials
+# and issue CREATE DATABASE. SQLite needs nothing (the file is created on use).
+
+
+def create_database(
+    server: str,
+    *,
+    database: str,
+    host: str | None = None,
+    port: str | int | None = None,
+    admin_user: str | None = None,
+    admin_password: str | None = None,
+) -> ConnectionResult:
+    """Create the server-side database ``database`` using admin credentials."""
+    if server not in BACKENDS:
+        return ConnectionResult(ok=False, message=f"Unsupported database backend: {server!r}")
+    if server == "sqlite":
+        return ConnectionResult(ok=True, message="SQLite databases are created automatically on first use.")
+    if not driver_available(server):
+        return ConnectionResult(ok=False, message=f"Driver for {server} is not installed.")
+    if not database:
+        return ConnectionResult(ok=False, message="A database name is required.")
+    try:
+        if server == "postgresql":
+            return _create_postgresql_database(database, host, port, admin_user, admin_password)
+        return _create_mysql_database(database, host, port, admin_user, admin_password)
+    except Exception as exc:  # noqa: BLE001 - surface any driver/permission error
+        return ConnectionResult(ok=False, message=str(exc))
+
+
+def _create_postgresql_database(database, host, port, user, password) -> ConnectionResult:
+    import psycopg
+
+    # CREATE DATABASE cannot run in a transaction, so use autocommit, and it
+    # cannot take a bind parameter for the name, so quote the identifier safely.
+    conn = psycopg.connect(
+        host=host or None,
+        port=_coerce_port(port),
+        user=user or None,
+        password=password or None,
+        dbname="postgres",  # maintenance database
+        autocommit=True,
+        connect_timeout=5,
+    )
+    try:
+        exists = conn.execute("SELECT 1 FROM pg_database WHERE datname = %s", (database,)).fetchone()
+        if exists:
+            return ConnectionResult(ok=True, message=f"Database '{database}' already exists.")
+        conn.execute(f'CREATE DATABASE "{database.replace(chr(34), chr(34) * 2)}"')
+    finally:
+        conn.close()
+    return ConnectionResult(ok=True, message=f"Created database '{database}'.")
+
+
+def _create_mysql_database(database, host, port, user, password) -> ConnectionResult:
+    mysqldb = import_mysqldb()
+
+    conn = mysqldb.connect(
+        host=host or "localhost",
+        user=user or None,
+        passwd=password or "",
+        port=_coerce_port(port) or 3306,
+        connect_timeout=5,
+    )
+    try:
+        cursor = conn.cursor()
+        cursor.execute(f"CREATE DATABASE IF NOT EXISTS `{database.replace('`', '``')}`")
+        conn.commit()
+    finally:
+        conn.close()
+    return ConnectionResult(ok=True, message=f"Created database '{database}' (or it already existed).")

@@ -37,6 +37,24 @@ def test_available_backends_reflects_missing_driver():
     assert backends == {"sqlite": False, "postgresql": False, "mysql": False}
 
 
+def test_mysql_available_via_pymysql():
+    """MySQL must be offered when only the pure-Python pymysql driver is present."""
+    with patch.object(
+        db_backends.importlib.util,
+        "find_spec",
+        side_effect=lambda name: object() if name == "pymysql" else None,
+    ):
+        assert db_backends.driver_available("mysql") is True  # pymysql fallback
+        assert db_backends.driver_available("postgresql") is False  # psycopg absent
+
+
+def test_import_mysqldb_returns_usable_driver():
+    """import_mysqldb returns a MySQLdb-compatible module (pymysql shim if needed)."""
+    driver = db_backends.import_mysqldb()
+    assert hasattr(driver, "connect")
+    assert hasattr(driver, "Error")
+
+
 # --- SQLite (real driver, real filesystem) ---------------------------------
 
 
@@ -201,6 +219,74 @@ def test_inspect_missing_driver_is_unreachable():
         state, detail = db_backends.inspect_database("postgresql", database="fpdb")
     assert state == db_backends.STATE_UNREACHABLE
     assert "not installed" in detail
+
+
+# --- create_database (CREATE DATABASE) -------------------------------------
+
+
+def test_create_database_sqlite_is_noop():
+    result = db_backends.create_database("sqlite", database="fpdb.db3")
+    assert result.ok is True
+    assert "automatically" in result.message
+
+
+def test_create_database_requires_a_name():
+    with patch.object(db_backends, "driver_available", return_value=True):
+        result = db_backends.create_database("postgresql", database="")
+    assert result.ok is False
+    assert "name is required" in result.message
+
+
+def test_create_database_reports_missing_driver():
+    with patch.object(db_backends, "driver_available", return_value=False):
+        result = db_backends.create_database("postgresql", database="fpdb")
+    assert result.ok is False
+    assert "Driver" in result.message
+
+
+def test_create_database_postgresql_creates_when_absent():
+    fake_psycopg = MagicMock()
+    conn = fake_psycopg.connect.return_value
+    conn.execute.return_value.fetchone.return_value = None  # database not present
+    with patch.object(db_backends, "driver_available", return_value=True), patch.dict(
+        sys.modules, {"psycopg": fake_psycopg},
+    ):
+        result = db_backends.create_database(
+            "postgresql", database="fpdb", host="h", admin_user="admin", admin_password="p",
+        )
+    assert result.ok is True
+    assert "Created" in result.message
+    statements = [str(c.args[0]) for c in conn.execute.call_args_list if c.args]
+    assert any("CREATE DATABASE" in s for s in statements)
+    # Connected to the maintenance database, not the target one.
+    assert fake_psycopg.connect.call_args.kwargs["dbname"] == "postgres"
+
+
+def test_create_database_postgresql_skips_when_present():
+    fake_psycopg = MagicMock()
+    conn = fake_psycopg.connect.return_value
+    conn.execute.return_value.fetchone.return_value = (1,)  # already exists
+    with patch.object(db_backends, "driver_available", return_value=True), patch.dict(
+        sys.modules, {"psycopg": fake_psycopg},
+    ):
+        result = db_backends.create_database("postgresql", database="fpdb", admin_user="a", admin_password="p")
+    assert result.ok is True
+    assert "already exists" in result.message
+    statements = [str(c.args[0]) for c in conn.execute.call_args_list if c.args]
+    assert not any("CREATE DATABASE" in s for s in statements)
+
+
+def test_create_database_mysql_issues_create_if_not_exists():
+    fake_mysqldb = MagicMock()
+    with patch.object(db_backends, "driver_available", return_value=True), patch.object(
+        db_backends, "import_mysqldb", return_value=fake_mysqldb,
+    ):
+        result = db_backends.create_database(
+            "mysql", database="fpdb", host="h", admin_user="root", admin_password="p",
+        )
+    assert result.ok is True
+    cursor = fake_mysqldb.connect.return_value.cursor.return_value
+    assert "CREATE DATABASE IF NOT EXISTS" in cursor.execute.call_args.args[0]
 
 
 if __name__ == "__main__":
