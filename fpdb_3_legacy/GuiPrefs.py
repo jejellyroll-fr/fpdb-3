@@ -27,32 +27,34 @@ from PySide6.QtWidgets import (
 )
 
 from fpdb_3_legacy import Configuration
+from fpdb_3_legacy.i18n import N_
+from fpdb_3_legacy.i18n import gettext as _
 
 rewrite = {
-    "general": ("General"),
-    "supported_databases": ("Databases"),
-    "import": ("Import"),
-    "hud_ui": ("HUD"),
-    "supported_sites": ("Sites"),
-    "supported_games": ("Games"),
-    "popup_windows": ("Popup Windows"),
-    "pu": ("Window"),
-    "pu_name": ("Popup Name"),
-    "pu_stat": ("Stat"),
-    "pu_stat_name": ("Stat Name"),
-    "aux_windows": ("Auxiliary Windows"),
-    "aw stud_mucked": ("Stud mucked"),
-    "aw mucked": ("Mucked"),
-    "hhcs": ("Hand History Converters"),
-    "gui_cash_stats": ("Ring Player Stats"),
-    "field_type": ("Field Type"),
-    "col_title": ("Column Heading"),
-    "xalignment": ("Left/Right Align"),
-    "disp_all": ("Show in Summaries"),
-    "disp_posn": ("Show in Position Stats"),
-    "col_name": ("Stat Name"),
-    "field_format": ("Format"),
-    "gui_tour_stats": ("Tour Player Stats"),
+    "general": N_("General"),
+    "supported_databases": N_("Databases"),
+    "import": N_("Import"),
+    "hud_ui": N_("HUD"),
+    "supported_sites": N_("Sites"),
+    "supported_games": N_("Games"),
+    "popup_windows": N_("Popup Windows"),
+    "pu": N_("Window"),
+    "pu_name": N_("Popup Name"),
+    "pu_stat": N_("Stat"),
+    "pu_stat_name": N_("Stat Name"),
+    "aux_windows": N_("Auxiliary Windows"),
+    "aw stud_mucked": N_("Stud mucked"),
+    "aw mucked": N_("Mucked"),
+    "hhcs": N_("Hand History Converters"),
+    "gui_cash_stats": N_("Ring Player Stats"),
+    "field_type": N_("Field Type"),
+    "col_title": N_("Column Heading"),
+    "xalignment": N_("Left/Right Align"),
+    "disp_all": N_("Show in Summaries"),
+    "disp_posn": N_("Show in Position Stats"),
+    "col_name": N_("Stat Name"),
+    "field_format": N_("Format"),
+    "gui_tour_stats": N_("Tour Player Stats"),
 }
 
 
@@ -71,7 +73,7 @@ class GuiPrefs(QDialog):
         self.configView = QTreeWidget()
         self.configView.setColumnCount(2)
         self.configView.setHeaderLabels(
-            [("Setting"), ("Value (double-click to change)")],
+            [_("Setting"), _("Value (double-click to change)")],
         )
 
         if self.doc.documentElement.tagName == "FreePokerToolsConfig":
@@ -99,7 +101,7 @@ class GuiPrefs(QDialog):
         """Rewrite text using the rewrite dictionary."""
         upd = False
         if s in rewrite:
-            s = rewrite[s]
+            s = _(rewrite[s])  # rewrite holds N_()-marked labels; translate at use
             upd = True
         return (s, upd)
 

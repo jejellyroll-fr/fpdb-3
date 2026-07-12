@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 from __future__ import annotations
+
 # Copyright 2010-2011 Maxime Grandchamp
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -14,22 +15,16 @@ from __future__ import annotations
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 # In the "official" distribution you can find the license in agpl-3.0.txt.
 #
-
-
 # This code once was in GuiReplayer.py and was split up in this and the former by zarturo.
-
-
 # import L10n
 # _ = L10n.get_translation()
-
 import contextlib
 import os
 from time import time
 
+import numpy as np
 from matplotlib.backends.backend_qt5agg import FigureCanvas
 from matplotlib.figure import Figure
-from matplotlib.font_manager import FontProperties
-import numpy as np
 from PySide6.QtWidgets import (
     QFrame,
     QMessageBox,
@@ -39,8 +34,8 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
 )
 
-from fpdb_3_legacy import Database
-from fpdb_3_legacy import Filters
+from fpdb_3_legacy import Database, Filters
+from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.loggingFpdb import get_logger
 
 # import L10n
@@ -82,9 +77,9 @@ class GuiGraphViewer(QSplitter):
         }
 
         self.filters = Filters.Filters(self.db, display=filters_display)
-        self.filters.registerButton1Name("Refresh Graph")
+        self.filters.registerButton1Name(_("Refresh Graph"))
         self.filters.registerButton1Callback(self.generateGraph)
-        self.filters.registerButton2Name("Export to File")
+        self.filters.registerButton2Name(_("Export to File"))
         self.filters.registerButton2Callback(self.exportGraph)
 
         scroll = QScrollArea()
@@ -154,7 +149,7 @@ class GuiGraphViewer(QSplitter):
                     playerids.append(pid)
                     pname = self.db.get_player_name_by_id(pid) or _hname
                     names = names + "\n" + pname + " on " + site
-                    
+
                     actual_site_id = self.db.get_player_site_id(pid)
                     if actual_site_id is not None:
                         sitenos.append(actual_site_id)
@@ -196,7 +191,7 @@ class GuiGraphViewer(QSplitter):
             from PySide6.QtWidgets import QMessageBox
             msg = QMessageBox(self)
             msg.setIcon(QMessageBox.Icon.Information)
-            msg.setWindowTitle("FPDB 3 info")
+            msg.setWindowTitle(_("FPDB 3 info"))
             msg.setText("No data found for the selected filters.")
             msg.exec()
             self.db.rollback()
@@ -300,7 +295,7 @@ class GuiGraphViewer(QSplitter):
                 blue,
                 color=get_modern_color("line_showdown", "b"),
                 linewidth=1.8,
-                label=("Showdown") + f" ({display_in}): {blue[-1]:.2f}",
+                label=_("Showdown") + f" ({display_in}): {blue[-1]:.2f}",
             )
 
         if "nonshowdown" in graphops:
@@ -308,7 +303,7 @@ class GuiGraphViewer(QSplitter):
                 red,
                 color=get_modern_color("line_nonshowdown", "m"),
                 linewidth=1.8,
-                label=("Non-showdown") + f" ({display_in}): {red[-1]:.2f}",
+                label=_("Non-showdown") + f" ({display_in}): {red[-1]:.2f}",
             )
         if "ev" in graphops:
             self.ax.plot(
@@ -322,7 +317,7 @@ class GuiGraphViewer(QSplitter):
             green,
             color=get_modern_color("line_hands", "c"),
             linewidth=2.5,
-            label=("Hands") + ": %d\n" % len(green) + ("Profit") + f": ({display_in}): {green[-1]:.2f}",
+            label=_("Hands") + ": %d\n" % len(green) + _("Profit") + f": ({display_in}): {green[-1]:.2f}",
         )
 
         handles, labels = self.ax.get_legend_handles_labels()
@@ -415,7 +410,7 @@ class GuiGraphViewer(QSplitter):
             green,
             color=self.colors["line_hands"],
             linewidth=0.5,
-            label=("Hands") + ": %d\n" % len(green) + ("Profit") + f": {green[-1]:.2f}",
+            label=_("Hands") + ": %d\n" % len(green) + _("Profit") + f": {green[-1]:.2f}",
         )
 
     def getRingProfitGraph(self, names, sites, limits, games, currencies, units):
@@ -508,7 +503,7 @@ class GuiGraphViewer(QSplitter):
         path = f"{os.getcwd()}/graph.png"
         self.fig.savefig(path)
         msg = QMessageBox()
-        msg.setWindowTitle("FPDB 3 info")
+        msg.setWindowTitle(_("FPDB 3 info"))
         mess = f"Your graph is saved in {path}"
         msg.setText(mess)
         msg.exec()

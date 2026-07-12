@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 from __future__ import annotations
+
 # Copyright 2008-2011 Steffen Schaumburg
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -13,17 +14,15 @@ from __future__ import annotations
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 # In the "official" distribution you can find the license in agpl-3.0.txt.
-
-
 import sys
 import traceback
 from time import gmtime, localtime, strftime, time
 
 import matplotlib as mpl
+import numpy as np
 from matplotlib.backends.backend_qt5agg import FigureCanvas
 from matplotlib.figure import Figure
 from mplfinance.original_flavor import candlestick_ochl
-import numpy as np
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QStandardItem, QStandardItemModel
 from PySide6.QtWidgets import (
@@ -35,9 +34,8 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
 )
 
-from fpdb_3_legacy import Database
-from fpdb_3_legacy import Filters
-from fpdb_3_legacy import GuiHandViewer
+from fpdb_3_legacy import Database, Filters, GuiHandViewer
+from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.loggingFpdb import get_logger
 
 # import L10n
@@ -59,10 +57,10 @@ try:
             mpl.use("qt5agg")
         except ValueError as e:
             log.exception(f"error importing matplotlib: {e}")
+    import numpy as np
     from matplotlib.backends.backend_qt5agg import FigureCanvas
     from matplotlib.figure import Figure
     from mplfinance.original_flavor import candlestick_ochl
-    import numpy as np
 
 except ImportError as inst:
     log.exception("Failed to load numpy and/or matplotlib in Session Viewer")
@@ -100,7 +98,7 @@ class GuiSessionViewer(QSplitter):
         settings.update(self.conf.get_default_paths())
 
         # text used on screen stored here so that it can be configured
-        self.filterText = {"handhead": ("Hand Breakdown for all levels listed above")}
+        self.filterText = {"handhead": _("Hand Breakdown for all levels listed above")}
 
         filters_display = {
             "Heroes": True,
@@ -264,7 +262,7 @@ class GuiSessionViewer(QSplitter):
             from PySide6.QtWidgets import QMessageBox
             msg = QMessageBox(self)
             msg.setIcon(QMessageBox.Icon.Information)
-            msg.setWindowTitle("FPDB 3 info")
+            msg.setWindowTitle(_("FPDB 3 info"))
             msg.setText("No data found for the selected filters.")
             msg.exec()
             self.db.rollback()
@@ -418,7 +416,7 @@ class GuiSessionViewer(QSplitter):
                 self.times.append(
                     (times[first_idx] - PADDING * 60, times[last_idx] + PADDING * 60),
                 )
-                minutesplayed = ((times[last_idx] - times[first_idx])) // (60)
+                minutesplayed = (times[last_idx] - times[first_idx]) // (60)
                 minutesplayed = minutesplayed + PADDING
                 if minutesplayed == 0:
                     minutesplayed = 1
@@ -427,8 +425,8 @@ class GuiSessionViewer(QSplitter):
                 won = (sum(profits[first_idx:end_idx])) // (100.0)
                 hwm = cum_sum[first_idx - 1 : end_idx].max()  # NumPy 2.x: use array method
                 lwm = cum_sum[first_idx - 1 : end_idx].min()  # NumPy 2.x: use array method
-                open = ((sum(profits[:first_idx]))) // (100)
-                close = ((sum(profits[:end_idx]))) // (100)
+                open = (sum(profits[:first_idx])) // (100)
+                close = (sum(profits[:end_idx])) // (100)
 
                 total_hands = total_hands + hds
                 total_time = total_time + minutesplayed
@@ -625,7 +623,7 @@ class GuiSessionViewer(QSplitter):
             fontweight="bold",
             pad=10,
         )
-        self.ax.set_xlabel(("Session"), fontsize=10, color=fg, labelpad=8)
+        self.ax.set_xlabel(_("Session"), fontsize=10, color=fg, labelpad=8)
         self.ax.set_ylabel("$", color=fg, labelpad=8)
         self.ax.tick_params(axis="x", colors=fg, labelsize=9)
         self.ax.tick_params(axis="y", colors=fg, labelsize=9)
