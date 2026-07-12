@@ -226,6 +226,11 @@ class GuiDatabase(QWidget):
         self.refresh()
 
     def apply_delete(self, db_name: str) -> None:
+        # fpdb refuses to start with an empty <supported_databases>, so never
+        # remove the last configured database.
+        if len(getattr(self.config, "supported_databases", {})) <= 1:
+            msg = "Cannot delete the last database — fpdb needs at least one."
+            raise ValueError(msg)
         self.config.del_db_parameters(db_name)
         self.config.save()
         self.refresh()
@@ -260,6 +265,14 @@ class GuiDatabase(QWidget):
     def _on_delete(self) -> None:
         name = self.selected_db_name()
         if name is None:
+            return
+        if len(getattr(self.config, "supported_databases", {})) <= 1:
+            QMessageBox.warning(
+                self,
+                "Delete database",
+                "This is the only configured database and cannot be deleted — "
+                "fpdb needs at least one. Add another database first.",
+            )
             return
         confirm = QMessageBox.question(
             self, "Delete database", f"Remove '{name}' from the configuration?\n(The database itself is not deleted.)",
