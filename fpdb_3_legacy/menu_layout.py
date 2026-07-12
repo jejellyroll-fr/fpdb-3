@@ -15,24 +15,12 @@ up.
 
 from __future__ import annotations
 
-import builtins
 from dataclasses import dataclass
 
+from fpdb_3_legacy.i18n import N_
+from fpdb_3_legacy.i18n import gettext as translate
 
-def N_(message: str) -> str:
-    """Mark a string for translation extraction without translating it now."""
-    return message
-
-
-def translate(message: str) -> str:
-    """Translate ``message`` via the installed gettext ``_`` (identity if none).
-
-    ``L10n.set_locale_translation`` installs the chosen catalog as the builtin
-    ``_`` (that is how the rest of fpdb localises), so honour the same hook.
-    Until it is installed — including in tests — this returns ``message`` as-is.
-    """
-    func = getattr(builtins, "_", None)
-    return func(message) if callable(func) else message
+__all__ = ["LANGUAGE_SUBMENU", "THEMES_SUBMENU", "Menu", "MenuItem", "N_", "menu_layout", "translate"]
 
 
 @dataclass(frozen=True)

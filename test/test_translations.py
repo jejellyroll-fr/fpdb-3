@@ -42,6 +42,16 @@ def test_parse_po_reads_known_french_entry():
     assert messages["Graphs"] == "Graphiques"
 
 
+def test_french_covers_new_ui_strings():
+    """The menu/database strings introduced in Vague 1-2 are translated in fr."""
+    messages = i18n_compile.parse_po(LOCALE_DIR / "fpdb-fr_FR.po")
+    assert messages["Create database"] == "Créer la base de données"
+    assert messages["Migrate to..."] == "Migrer vers…"
+    assert messages["Language"] == "Langue"
+    # Re-validated: was wrongly "Fichier de configuration".
+    assert messages["Configure"] == "Configurer"
+
+
 def test_compile_produces_a_loadable_catalog(tmp_path):
     # Stage a single .po in an isolated locale dir and compile it.
     (tmp_path / "fpdb-fr_FR.po").write_bytes((LOCALE_DIR / "fpdb-fr_FR.po").read_bytes())
