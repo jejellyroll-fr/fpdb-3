@@ -13,6 +13,7 @@ import time
 import traceback
 from optparse import OptionParser
 
+import interlocks
 from PySide6.QtCore import QDateTime, QThread, QTimer, Signal
 from PySide6.QtGui import QColor, QPalette, QTextCharFormat, QTextCursor
 from PySide6.QtWidgets import (
@@ -28,9 +29,8 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-import interlocks
-
 from fpdb_3_legacy import Configuration, Importer
+from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.loggingFpdb import get_logger
 
 # Import for dynamic reloading configuration
@@ -118,7 +118,7 @@ class GuiAutoImport(QWidget):
         # to attach; the caller drives the import loop via run_headless().
 
     def setupGui(self) -> None:
-        self.setWindowTitle("FPDB Auto Import")
+        self.setWindowTitle(_("FPDB Auto Import"))
         self.setGeometry(100, 100, 800, 600)
 
         # Set minimal custom styles for specific needs
@@ -145,7 +145,7 @@ class GuiAutoImport(QWidget):
         self.setLayout(mainLayout)
 
         # --- Settings Group ---
-        settingsGroup = QGroupBox("Settings")
+        settingsGroup = QGroupBox(_("Settings"))
         settingsLayout = QFormLayout()
         settingsGroup.setLayout(settingsLayout)
         mainLayout.addWidget(settingsGroup)
@@ -154,10 +154,10 @@ class GuiAutoImport(QWidget):
         self.intervalEntry.setValue(
             int(self.config.get_import_parameters().get("interval")),
         )
-        settingsLayout.addRow(QLabel("Time between imports (seconds):"), self.intervalEntry)
+        settingsLayout.addRow(QLabel(_("Time between imports (seconds):")), self.intervalEntry)
 
         # --- Log Group ---
-        logGroup = QGroupBox("Log")
+        logGroup = QGroupBox(_("Log"))
         logLayout = QVBoxLayout()
         logGroup.setLayout(logLayout)
         mainLayout.addWidget(logGroup)
@@ -170,7 +170,7 @@ class GuiAutoImport(QWidget):
         # --- Controls ---
         controlsLayout = QHBoxLayout()
 
-        self.startButton = QCheckBox("Start Auto Import")
+        self.startButton = QCheckBox(_("Start Auto Import"))
         self.startButton.stateChanged.connect(self.startClicked)
         controlsLayout.addWidget(self.startButton)
 
@@ -188,12 +188,12 @@ class GuiAutoImport(QWidget):
         mainLayout.addLayout(controlsLayout)
 
         # Status label
-        self.statusLabel = QLabel("Ready")
+        self.statusLabel = QLabel(_("Ready"))
         # Use qt_material property for styling
         self.statusLabel.setProperty("class", "caption")
         mainLayout.addWidget(self.statusLabel)
 
-        self.addText("Auto Import Ready.\n", "info")
+        self.addText(_("Auto Import Ready.\n"), "info")
 
     def apply_theme(self, theme_name="dark_purple.xml") -> None:
         """Apply a qt_material theme to the widget."""
@@ -435,9 +435,9 @@ class GuiAutoImport(QWidget):
 
     def reset_startbutton(self) -> bool:
         if self.pipe_to_hud is not None:
-            self.startButton.set_label("Stop Auto Import")
+            self.startButton.set_label(_("Stop Auto Import"))
         else:
-            self.startButton.set_label("Start Auto Import")
+            self.startButton.set_label(_("Start Auto Import"))
 
         return False
 
@@ -584,7 +584,7 @@ class GuiAutoImport(QWidget):
                 self.doAutoImportBool = True
                 self.intervalEntry.setEnabled(False)
                 self.progressBar.setVisible(True)
-                self.statusLabel.setText("Auto Import Running...")
+                self.statusLabel.setText(_("Auto Import Running..."))
 
                 if self.pipe_to_hud is None:
                     log.debug("start hud - pipe_to_hud is none:")
@@ -620,7 +620,7 @@ class GuiAutoImport(QWidget):
             self.settings["global_lock"].release()
             self.addText("\nStopping Auto Import. Global lock released.", "unlock")
             self.progressBar.setVisible(False)
-            self.statusLabel.setText("Ready")
+            self.statusLabel.setText(_("Ready"))
             if self.pipe_to_hud and self.pipe_to_hud.poll() is not None:
                 self.addText("\n * Stop Auto Import: HUD already terminated.", "hud")
             else:

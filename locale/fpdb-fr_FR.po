@@ -4789,3 +4789,23 @@ msgstr "Déplacer les fichiers en échec vers :"
 
 msgid "Choose a destination directory"
 msgstr "Choisir un répertoire de destination"
+
+# --- Vague 2: auto import panel ---
+
+msgid "FPDB Auto Import"
+msgstr "Import automatique FPDB"
+
+msgid "Time between imports (seconds):"
+msgstr "Délai entre imports (secondes) :"
+
+msgid "Ready"
+msgstr "Prêt"
+
+msgid "Auto Import Running..."
+msgstr "Import automatique en cours…"
+
+msgid "Settings"
+msgstr "Paramètres"
+
+msgid "Log"
+msgstr "Journal"
