@@ -206,6 +206,33 @@ def test_suspend_foreign_keys_drops_and_restore_readds_on_postgresql():
     )
 
 
+def test_boolean_columns_converted_only_for_postgresql():
+    """SQLite/MySQL 0/1 ints must become real bools when the target is PostgreSQL."""
+    from unittest.mock import MagicMock
+
+    dest = MagicMock()
+    dest.backend = 3  # postgresql
+    dest.get_cursor.return_value.fetchall.return_value = [("fast",), ("ante",)]
+
+    indices = db_migrate._boolean_column_indices(dest, "TourneyTypes", ["id", "fast", "ante", "name"])
+    assert indices == (1, 2)  # 'fast' and 'ante', matched case-insensitively
+
+    row = db_migrate._coerce_booleans((5, 1, 0, "x"), indices)
+    assert row == (5, True, False, "x")  # ids/text untouched, ints -> bool
+
+    # None stays None (nullable boolean columns).
+    assert db_migrate._coerce_booleans((5, None, 1, "x"), indices) == (5, None, True, "x")
+
+
+def test_boolean_columns_noop_for_non_postgresql():
+    from unittest.mock import MagicMock
+
+    for backend in (2, 4):  # mysql, sqlite accept 0/1 directly
+        dest = MagicMock()
+        dest.backend = backend
+        assert db_migrate._boolean_column_indices(dest, "TourneyTypes", ["id", "fast"]) == ()
+
+
 def test_suspend_foreign_keys_uses_session_flag_on_mysql():
     from unittest.mock import MagicMock
 

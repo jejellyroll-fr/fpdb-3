@@ -149,6 +149,35 @@ def _reset_sequences(dest: Any, tables: list[str]) -> None:
             log.debug("No sequence reset for %s: %s", table, exc)
 
 
+def _boolean_column_indices(dest: Any, table: str, columns: list[str]) -> tuple[int, ...]:
+    """Indices of ``columns`` that are BOOLEAN on a PostgreSQL destination.
+
+    SQLite and MySQL store booleans as 0/1 integers; PostgreSQL has a real
+    boolean type and rejects an integer for it (no implicit cast). So when
+    copying into PostgreSQL those columns must be converted from int to bool.
+    Other destinations accept 0/1 directly, so nothing needs converting.
+    """
+    if dest.backend != _PGSQL:
+        return ()
+    cursor = dest.get_cursor()
+    cursor.execute(
+        "SELECT column_name FROM information_schema.columns "
+        "WHERE table_schema = 'public' AND table_name = %s AND data_type = 'boolean'",
+        (table.lower(),),
+    )
+    boolean_names = {row[0].lower() for row in cursor.fetchall()}
+    return tuple(i for i, name in enumerate(columns) if name.lower() in boolean_names)
+
+
+def _coerce_booleans(row: Any, indices: tuple[int, ...]) -> tuple:
+    """Return ``row`` with the given integer columns turned into bool (None kept)."""
+    values = list(row)
+    for i in indices:
+        if values[i] is not None:
+            values[i] = bool(values[i])
+    return tuple(values)
+
+
 def _copy_table(source: Any, dest: Any, table: str) -> int:
     """Replace the destination table's rows with the source's, preserving ids.
 
@@ -163,6 +192,9 @@ def _copy_table(source: Any, dest: Any, table: str) -> int:
     dest_cursor = dest.get_cursor()
     dest_cursor.execute(f"DELETE FROM {table}")
 
+    # PostgreSQL needs integer 0/1 turned into real booleans for boolean columns.
+    bool_indices = _boolean_column_indices(dest, table, columns)
+
     placeholder = dest.sql.query.get("placeholder", "%s")
     column_list = ", ".join(columns)
     placeholders = ", ".join([placeholder] * len(columns))
@@ -173,6 +205,8 @@ def _copy_table(source: Any, dest: Any, table: str) -> int:
         rows = src_cursor.fetchmany(_BATCH)
         if not rows:
             break
+        if bool_indices:
+            rows = [_coerce_booleans(row, bool_indices) for row in rows]
         dest_cursor.executemany(insert, rows)
         copied += len(rows)
     return copied
