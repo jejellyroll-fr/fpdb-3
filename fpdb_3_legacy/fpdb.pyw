@@ -211,10 +211,16 @@ class fpdb(QMainWindow):
         if GuiAutoNoteRules.exec_auto_note_rules_dialog(self.config, self):
             self.reload_config()
 
-    def dia_database_config(self, widget, data=None) -> None:
-        """Open the database configuration panel (add/edit/select/create databases)."""
-        # Reload from XML first so we edit the current on-disk config.
-        self.load_profile()
+    def dia_database_config(self, widget, data=None, *, reload_config=True) -> None:
+        """Open the database configuration panel (add/edit/select/create databases).
+
+        ``reload_config`` re-reads the config from XML first so the panel reflects
+        on-disk changes. Startup recovery passes False: it already holds a valid
+        (just-loaded) config, and reloading would re-attempt the failing/slow
+        connection before the settings can even be shown.
+        """
+        if reload_config:
+            self.load_profile()
         dialog = QDialog(self)
         dialog.setWindowTitle("Databases")
         dialog.resize(720, 420)
@@ -1409,7 +1415,9 @@ class fpdb(QMainWindow):
             if choice != QMessageBox.StandardButton.Open:
                 log.error("Startup aborted: no usable database connection.")
                 sys.exit(1)
-            self.dia_database_config(None, None)
+            # Open the panel with the already-loaded config: reloading here would
+            # re-attempt the failing/slow connection before showing the settings.
+            self.dia_database_config(None, None, reload_config=False)
             self.load_profile(create_db=True)
 
     def obtain_global_lock(self, source):
