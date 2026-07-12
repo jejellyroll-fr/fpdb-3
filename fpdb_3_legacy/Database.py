@@ -1731,6 +1731,27 @@ class Database:
 
     # end def connect
 
+    def _pg_set_isolation(self, level: int) -> None:
+        """psycopg2/psycopg3 compatibility for the old ``set_isolation_level(int)``.
+
+        psycopg2 used ``connection.set_isolation_level(0)`` for autocommit (needed
+        around DDL such as CREATE/DROP INDEX, VACUUM and ANALYZE) and ``(1)`` to
+        return to a normal read-committed transaction. psycopg3 has no level 0 —
+        its ``IsolationLevel`` enum starts at 1, so ``set_isolation_level(0)``
+        raises "0 is not a valid IsolationLevel" — and instead exposes an
+        ``autocommit`` flag. Map the old integers onto that flag, which works on
+        both drivers (psycopg2 connections also have ``autocommit``).
+        """
+        conn = self.connection
+        if hasattr(conn, "autocommit"):
+            try:
+                conn.commit()  # autocommit cannot be toggled with an open transaction
+            except Exception:  # noqa: BLE001 - nothing to commit is fine
+                pass
+            conn.autocommit = level == 0
+        else:  # pragma: no cover - only a very old psycopg2 would lack autocommit
+            conn.set_isolation_level(level)
+
     def transaction(self) -> DatabaseTransaction:
         """Return a transaction context manager for this database."""
         return DatabaseTransaction(self)
@@ -2502,7 +2523,7 @@ class Database:
             c.execute("SET autocommit=0")
             return None
         if self.backend == self.PGSQL:
-            self.connection.set_isolation_level(
+            self._pg_set_isolation(
                 0,
             )  # allow table/index operations to work
         for fk in self.foreignKeys[self.backend]:
@@ -2610,7 +2631,7 @@ class Database:
                     return -1
 
         if self.backend == self.PGSQL:
-            self.connection.set_isolation_level(1)  # go back to normal isolation level
+            self._pg_set_isolation(1)  # go back to normal isolation level
         self.commit()  # seems to clear up errors if there were any in postgres
         ptime = time() - stime
         log.debug(f"prepare import took {ptime} seconds")
@@ -2629,7 +2650,7 @@ class Database:
             return None
 
         if self.backend == self.PGSQL:
-            self.connection.set_isolation_level(
+            self._pg_set_isolation(
                 0,
             )  # allow table/index operations to work
         for fk in self.foreignKeys[self.backend]:
@@ -2724,7 +2745,7 @@ class Database:
                     return -1
 
         if self.backend == self.PGSQL:
-            self.connection.set_isolation_level(1)  # go back to normal isolation level
+            self._pg_set_isolation(1)  # go back to normal isolation level
         self.commit()  # seems to clear up errors if there were any in postgres
         atime = time() - stime
         log.debug(f"After import took {atime} seconds")
@@ -2972,7 +2993,7 @@ class Database:
     def createAllIndexes(self) -> None:
         """Create new indexes."""
         if self.backend == self.PGSQL:
-            self.connection.set_isolation_level(
+            self._pg_set_isolation(
                 0,
             )  # allow table/index operations to work
         c = self.get_cursor()
@@ -2991,7 +3012,7 @@ class Database:
                 c.execute(s)
 
         if self.backend == self.PGSQL:
-            self.connection.set_isolation_level(1)  # go back to normal isolation level
+            self._pg_set_isolation(1)  # go back to normal isolation level
 
     # end def createAllIndexes
 
@@ -3001,7 +3022,7 @@ class Database:
         """
         # maybe upgrade to use data dictionary?? (but take care to exclude PK and FK)
         if self.backend == self.PGSQL:
-            self.connection.set_isolation_level(
+            self._pg_set_isolation(
                 0,
             )  # allow table/index operations to work
         for idx in self.indexes[self.backend]:
@@ -3034,7 +3055,7 @@ class Database:
             else:
                 return -1
         if self.backend == self.PGSQL:
-            self.connection.set_isolation_level(1)  # go back to normal isolation level
+            self._pg_set_isolation(1)  # go back to normal isolation level
             return None
         return None
 
@@ -3044,7 +3065,7 @@ class Database:
         """Create foreign keys."""
         try:
             if self.backend == self.PGSQL:
-                self.connection.set_isolation_level(
+                self._pg_set_isolation(
                     0,
                 )  # allow table/index operations to work
             c = self.get_cursor()
@@ -3113,7 +3134,7 @@ class Database:
 
         try:
             if self.backend == self.PGSQL:
-                self.connection.set_isolation_level(
+                self._pg_set_isolation(
                     1,
                 )  # go back to normal isolation level
         except Exception:  # intentional broad catch: reset isolation_level (PG) best-effort after DDL
@@ -3127,7 +3148,7 @@ class Database:
         """
         # maybe upgrade to use data dictionary?? (but take care to exclude PK and FK)
         if self.backend == self.PGSQL:
-            self.connection.set_isolation_level(
+            self._pg_set_isolation(
                 0,
             )  # allow table/index operations to work
         c = self.get_cursor()
@@ -3192,7 +3213,7 @@ class Database:
                 pass
 
         if self.backend == self.PGSQL:
-            self.connection.set_isolation_level(1)  # go back to normal isolation level
+            self._pg_set_isolation(1)  # go back to normal isolation level
 
     # end def dropAllForeignKeys
 
@@ -3963,12 +3984,12 @@ class Database:
             except Exception:  # intentional broad catch: analyzeDB (MySQL/SQLite) maintenance best-effort
                 log.exception(f"Error during analyze: {sys.exc_info()[1]!s}")
         elif self.backend == self.PGSQL:
-            self.connection.set_isolation_level(0)  # allow analyze to work
+            self._pg_set_isolation(0)  # allow analyze to work
             try:
                 self.get_cursor().execute(self.sql.query["analyze"])
             except Exception:  # intentional broad catch: analyzeDB (PG) maintenance best-effort
                 log.exception(f"Error during analyze: {sys.exc_info()[1]!s}")
-            self.connection.set_isolation_level(1)  # go back to normal isolation level
+            self._pg_set_isolation(1)  # go back to normal isolation level
         self.commit()
         atime = time() - stime
         log.info(f"Analyze took {atime:.1f} seconds")
@@ -3984,12 +4005,12 @@ class Database:
             except Exception:  # intentional broad catch: vacuumDB (MySQL/SQLite) maintenance best-effort
                 log.exception(f"Error during vacuum: {sys.exc_info()[1]!s}")
         elif self.backend == self.PGSQL:
-            self.connection.set_isolation_level(0)  # allow vacuum to work
+            self._pg_set_isolation(0)  # allow vacuum to work
             try:
                 self.get_cursor().execute(self.sql.query["vacuum"])
             except Exception as e:  # intentional broad catch: vacuumDB (PG) maintenance best-effort
                 log.exception(f"Error during vacuum: {e!s}")
-            self.connection.set_isolation_level(1)  # go back to normal isolation level
+            self._pg_set_isolation(1)  # go back to normal isolation level
         self.commit()
         atime = time() - stime
         log.debug(f"Vacuum took {atime:.1f} seconds")
