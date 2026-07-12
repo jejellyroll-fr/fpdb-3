@@ -185,3 +185,118 @@ def _test_mysql(database, host, port, user, password) -> ConnectionResult:
         return ConnectionResult(ok=False, message=text)
     conn.close()
     return ConnectionResult(ok=True, message=f"MySQL OK — {database}@{host or 'localhost'}")
+
+
+# --- schema inspection -----------------------------------------------------
+#
+# Used before creating the fpdb schema so we never hand a database to
+# ``Database`` when it holds foreign tables. That matters for SQLite: connecting
+# with ``Database`` uses create=True, and a missing ``Settings`` table makes it
+# drop every table in the file. Inspecting first, read-only, avoids that.
+
+# Possible states returned by inspect_database.
+STATE_UNREACHABLE = "unreachable"  # could not connect / driver missing
+STATE_EMPTY = "empty"  # reachable, no user tables
+STATE_INITIALISED = "initialised"  # already holds the fpdb schema (marker table)
+STATE_FOREIGN = "foreign"  # holds tables, but not the fpdb schema
+
+_MARKER_TABLE = "settings"  # fpdb's Settings table, compared case-insensitively
+
+
+def inspect_database(
+    server: str,
+    *,
+    database: str | None = None,
+    host: str | None = None,
+    port: str | int | None = None,
+    user: str | None = None,
+    password: str | None = None,
+    sqlite_dir: str | None = None,
+) -> tuple[str, str]:
+    """Report the state of a target database **without modifying it**.
+
+    Returns ``(state, detail)`` where ``state`` is one of STATE_UNREACHABLE /
+    STATE_EMPTY / STATE_INITIALISED / STATE_FOREIGN. ``detail`` carries an error
+    message when unreachable.
+    """
+    if server not in BACKENDS:
+        return STATE_UNREACHABLE, f"Unsupported database backend: {server!r}"
+    if not driver_available(server):
+        return STATE_UNREACHABLE, f"Driver '{BACKENDS[server][1]}' is not installed for {server}."
+    try:
+        if server == "sqlite":
+            tables = _sqlite_tables(database, sqlite_dir)
+        elif server == "postgresql":
+            tables = _postgresql_tables(database, host, port, user, password)
+        else:
+            tables = _mysql_tables(database, host, port, user, password)
+    except Exception as exc:  # noqa: BLE001 - any driver error means we cannot inspect it
+        return STATE_UNREACHABLE, str(exc)
+
+    if not tables:
+        return STATE_EMPTY, ""
+    if _MARKER_TABLE in {t.lower() for t in tables}:
+        return STATE_INITIALISED, ""
+    return STATE_FOREIGN, ""
+
+
+def _sqlite_tables(database: str | None, sqlite_dir: str | None) -> set[str]:
+    import sqlite3
+
+    name = database or "fpdb.db3"
+    if name == ":memory:":
+        return set()  # a fresh in-memory DB is always empty
+    path = os.path.join(sqlite_dir, name) if sqlite_dir else name
+    if not os.path.exists(path):
+        return set()  # no file yet: nothing to inspect, and don't create one
+    conn = sqlite3.connect(path, timeout=5.0)
+    try:
+        rows = conn.execute(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'",
+        ).fetchall()
+    finally:
+        conn.close()
+    return {row[0] for row in rows}
+
+
+def _postgresql_tables(database, host, port, user, password) -> set[str]:
+    import psycopg
+
+    conn = psycopg.connect(
+        host=host or None,
+        port=_coerce_port(port),
+        user=user or None,
+        password=password or None,
+        dbname=database or None,
+        connect_timeout=5,
+    )
+    try:
+        rows = conn.execute(
+            "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'",
+        ).fetchall()
+    finally:
+        conn.close()
+    return {row[0] for row in rows}
+
+
+def _mysql_tables(database, host, port, user, password) -> set[str]:
+    import MySQLdb
+
+    kwargs = {
+        "host": host or "localhost",
+        "user": user or None,
+        "passwd": password or "",
+        "db": database or None,
+        "connect_timeout": 5,
+    }
+    coerced_port = _coerce_port(port)
+    if coerced_port:
+        kwargs["port"] = coerced_port
+    conn = MySQLdb.connect(**kwargs)
+    try:
+        cursor = conn.cursor()
+        cursor.execute("SHOW TABLES")
+        rows = cursor.fetchall()
+    finally:
+        conn.close()
+    return {row[0] for row in rows}
