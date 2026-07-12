@@ -60,6 +60,7 @@ from fpdb_3_legacy import GuiAutoNotesWorkbench
 from fpdb_3_legacy import GuiBulkImport
 from fpdb_3_legacy import GuiGraphViewer
 from fpdb_3_legacy import GuiHandViewer
+from fpdb_3_legacy import GuiDatabase
 from fpdb_3_legacy import GuiLogView
 from fpdb_3_legacy import GuiOpponentsReport
 from fpdb_3_legacy import GuiPrefs
@@ -209,6 +210,31 @@ class fpdb(QMainWindow):
         self.load_profile()
         if GuiAutoNoteRules.exec_auto_note_rules_dialog(self.config, self):
             self.reload_config()
+
+    def dia_database_config(self, widget, data=None) -> None:
+        """Open the database configuration panel (add/edit/select/create databases)."""
+        # Reload from XML first so we edit the current on-disk config.
+        self.load_profile()
+        dialog = QDialog(self)
+        dialog.setWindowTitle("Databases")
+        dialog.resize(720, 420)
+        layout = QVBoxLayout(dialog)
+        layout.addWidget(GuiDatabase.GuiDatabase(self.config, dialog))
+        buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Close)
+        buttons.rejected.connect(dialog.reject)
+        buttons.accepted.connect(dialog.accept)
+        layout.addWidget(buttons)
+
+        # The panel edits and saves the config in place, including possibly
+        # switching the default database. The running session, however, is still
+        # connected through self.db/self.sql to the database it started with, so
+        # keep the in-memory selection pinned to that active database — otherwise
+        # tabs opened later this session would build Database(self.config) against
+        # a different backend (wrong SQL dialect) despite the restart warning.
+        active_db = getattr(self.config, "db_selected", None)
+        dialog.exec()
+        if active_db in getattr(self.config, "supported_databases", {}):
+            self.config.db_selected = active_db
 
     def dia_database_stats(self, widget, data=None) -> None:
         self.warning_box(
@@ -1062,6 +1088,13 @@ class fpdb(QMainWindow):
         configMenu.addAction(self.makeAction("Manage HUD Sites", self.dia_manage_hud_sites))
         configMenu.addAction(
             self.makeAction("Adv Preferences", self.dia_advanced_preferences, tip="Edit your preferences"),
+        )
+        configMenu.addAction(
+            self.makeAction(
+                "Databases",
+                self.dia_database_config,
+                tip="Add, edit, test and select the database (SQLite / PostgreSQL / MySQL)",
+            ),
         )
         configMenu.addAction(self.makeAction("Import filters", self.dia_import_filters))
         # Add the Logger Dev Tool action
