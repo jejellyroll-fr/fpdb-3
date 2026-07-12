@@ -18,6 +18,7 @@ from PySide6.QtWidgets import (
     QDialogButtonBox,
     QFormLayout,
     QHBoxLayout,
+    QInputDialog,
     QLabel,
     QLineEdit,
     QMessageBox,
@@ -28,7 +29,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from fpdb_3_legacy import Database, db_backends
+from fpdb_3_legacy import Database, db_backends, db_migrate
 from fpdb_3_legacy.loggingFpdb import get_logger
 
 log = get_logger("gui_database")
@@ -202,12 +203,17 @@ class GuiDatabase(QWidget):
         self.deleteButton = QPushButton("Delete")
         self.defaultButton = QPushButton("Set as default")
         self.createButton = QPushButton("Create tables")
+        self.migrateButton = QPushButton("Migrate to...")
         self.addButton.clicked.connect(self._on_add)
         self.editButton.clicked.connect(self._on_edit)
         self.deleteButton.clicked.connect(self._on_delete)
         self.defaultButton.clicked.connect(self._on_set_default)
         self.createButton.clicked.connect(self._on_create_schema)
-        for b in (self.addButton, self.editButton, self.deleteButton, self.defaultButton, self.createButton):
+        self.migrateButton.clicked.connect(self._on_migrate)
+        for b in (
+            self.addButton, self.editButton, self.deleteButton,
+            self.defaultButton, self.createButton, self.migrateButton,
+        ):
             buttons.addWidget(b)
         layout.addLayout(buttons)
 
@@ -349,6 +355,37 @@ class GuiDatabase(QWidget):
             finally:
                 db.close_connection()
 
+    def migrate_to(self, source_name: str, dest_name: str) -> db_migrate.MigrationReport:
+        """Copy all data from ``source_name`` into ``dest_name`` (replacing it).
+
+        The destination schema is ensured first (created if empty, refused if it
+        holds non-fpdb tables); then the data is copied preserving primary keys.
+        """
+        schema = self.create_schema(dest_name)
+        if not schema.ok:
+            report = db_migrate.MigrationReport()
+            report.error = schema.message
+            return report
+
+        previous = self.config.db_selected
+        source = dest = None
+        try:
+            self.config.db_selected = source_name
+            source = Database.Database(self.config)
+            self.config.db_selected = dest_name
+            dest = Database.Database(self.config)
+            return db_migrate.migrate(source, dest)
+        except Exception as exc:  # noqa: BLE001 - surface connection errors as a report
+            log.exception("migrate_to: failed %r -> %r", source_name, dest_name)
+            report = db_migrate.MigrationReport()
+            report.error = str(exc)
+            return report
+        finally:
+            self.config.db_selected = previous
+            for db in (source, dest):
+                if db is not None:
+                    db.close_connection()
+
     # --- button handlers ---------------------------------------------------
 
     def _on_add(self) -> None:
@@ -420,3 +457,37 @@ class GuiDatabase(QWidget):
             QMessageBox.information(self, "Create tables", result.message)
         else:
             QMessageBox.warning(self, "Create tables", result.message)
+
+    def _on_migrate(self) -> None:
+        source = self.selected_db_name()
+        if source is None:
+            return
+        others = [name for name in self.config.supported_databases if name != source]
+        if not others:
+            QMessageBox.warning(
+                self, "Migrate database", "There is no other database to migrate into. Add one first.",
+            )
+            return
+        dest, chosen = QInputDialog.getItem(
+            self, "Migrate database", f"Copy all data from '{source}' into:", others, 0, editable=False,
+        )
+        if not chosen or not dest:
+            return
+        confirm = QMessageBox.warning(
+            self,
+            "Migrate database",
+            f"This will REPLACE all data in '{dest}' with the data from '{source}'.\n\n"
+            "The destination's current contents will be lost. Continue?",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.Cancel,
+            QMessageBox.StandardButton.Cancel,
+        )
+        if confirm != QMessageBox.StandardButton.Yes:
+            return
+        report = self.migrate_to(source, dest)
+        if report.ok:
+            QMessageBox.information(
+                self, "Migrate database",
+                f"Copied {report.total_rows} rows across {len(report.tables)} tables into '{dest}'.",
+            )
+        else:
+            QMessageBox.warning(self, "Migrate database", f"Migration failed: {report.error}")
