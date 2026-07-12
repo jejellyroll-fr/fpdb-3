@@ -202,17 +202,19 @@ class GuiDatabase(QWidget):
         self.editButton = QPushButton("Edit...")
         self.deleteButton = QPushButton("Delete")
         self.defaultButton = QPushButton("Set as default")
+        self.createDbButton = QPushButton("Create database")
         self.createButton = QPushButton("Create tables")
         self.migrateButton = QPushButton("Migrate to...")
         self.addButton.clicked.connect(self._on_add)
         self.editButton.clicked.connect(self._on_edit)
         self.deleteButton.clicked.connect(self._on_delete)
         self.defaultButton.clicked.connect(self._on_set_default)
+        self.createDbButton.clicked.connect(self._on_create_database)
         self.createButton.clicked.connect(self._on_create_schema)
         self.migrateButton.clicked.connect(self._on_migrate)
         for b in (
-            self.addButton, self.editButton, self.deleteButton,
-            self.defaultButton, self.createButton, self.migrateButton,
+            self.addButton, self.editButton, self.deleteButton, self.defaultButton,
+            self.createDbButton, self.createButton, self.migrateButton,
         ):
             buttons.addWidget(b)
         layout.addLayout(buttons)
@@ -355,6 +357,20 @@ class GuiDatabase(QWidget):
             finally:
                 db.close_connection()
 
+    def create_database(self, db_name: str, admin_user: str, admin_password: str) -> db_backends.ConnectionResult:
+        """Create the server-side database for ``db_name`` using admin credentials."""
+        entry = self.config.supported_databases.get(db_name)
+        if entry is None:
+            return db_backends.ConnectionResult(ok=False, message=f"Unknown database '{db_name}'.")
+        return db_backends.create_database(
+            entry.db_server,
+            database=entry.db_name,
+            host=entry.db_ip,
+            port=entry.db_port,
+            admin_user=admin_user,
+            admin_password=admin_password,
+        )
+
     def migrate_to(self, source_name: str, dest_name: str) -> db_migrate.MigrationReport:
         """Copy all data from ``source_name`` into ``dest_name`` (replacing it).
 
@@ -457,6 +473,49 @@ class GuiDatabase(QWidget):
             QMessageBox.information(self, "Create tables", result.message)
         else:
             QMessageBox.warning(self, "Create tables", result.message)
+
+    def _on_create_database(self) -> None:
+        name = self.selected_db_name()
+        if name is None:
+            return
+        entry = self.config.supported_databases.get(name)
+        if entry is None:
+            return
+        if entry.db_server == "sqlite":
+            QMessageBox.information(
+                self,
+                "Create database",
+                "SQLite databases are created automatically. Use 'Create tables' to initialise the schema.",
+            )
+            return
+        host = entry.db_ip or "localhost"
+        default_admin = entry.db_user or ("postgres" if entry.db_server == "postgresql" else "root")
+        admin_user, ok = QInputDialog.getText(
+            self,
+            "Create database",
+            f"Administrator account allowed to create '{entry.db_name}' on {host}:",
+            QLineEdit.EchoMode.Normal,
+            default_admin,
+        )
+        if not ok:
+            return
+        admin_password, ok = QInputDialog.getText(
+            self,
+            "Create database",
+            f"Password for '{admin_user}':",
+            QLineEdit.EchoMode.Password,
+        )
+        if not ok:
+            return
+        result = self.create_database(name, admin_user, admin_password)
+        if result.ok:
+            QMessageBox.information(
+                self,
+                "Create database",
+                f"{result.message}\n\nUse 'Create tables' next to initialise the fpdb schema.",
+            )
+        else:
+            QMessageBox.warning(self, "Create database", result.message)
 
     def _on_migrate(self) -> None:
         source = self.selected_db_name()
