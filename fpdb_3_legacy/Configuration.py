@@ -2228,17 +2228,17 @@ class Config:
                 db_node.removeAttribute("default")
         if db_name in self.supported_databases:
             if db_desc is not None:
-                self.supported_databases[db_name].dp_desc = db_desc
+                self.supported_databases[db_name].db_desc = db_desc
             if db_ip is not None:
-                self.supported_databases[db_name].dp_ip = db_ip
+                self.supported_databases[db_name].db_ip = db_ip
             if db_port is not None:
-                self.supported_databases[db_name].dp_port = db_port
+                self.supported_databases[db_name].db_port = db_port
             if db_user is not None:
-                self.supported_databases[db_name].dp_user = db_user
+                self.supported_databases[db_name].db_user = db_user
             if db_pass is not None:
-                self.supported_databases[db_name].dp_pass = db_pass
+                self.supported_databases[db_name].db_pass = db_pass
             if db_server is not None:
-                self.supported_databases[db_name].dp_server = db_server
+                self.supported_databases[db_name].db_server = db_server
             self.supported_databases[db_name].db_selected = defaultb
         if defaultb:
             self.db_selected = db_name
@@ -2311,17 +2311,17 @@ class Config:
 
         if db_name in self.supported_databases:
             if db_desc is not None:
-                self.supported_databases[db_name].dp_desc = db_desc
+                self.supported_databases[db_name].db_desc = db_desc
             if db_ip is not None:
-                self.supported_databases[db_name].dp_ip = db_ip
+                self.supported_databases[db_name].db_ip = db_ip
             if db_port is not None:
-                self.supported_databases[db_name].dp_port = db_port
+                self.supported_databases[db_name].db_port = db_port
             if db_user is not None:
-                self.supported_databases[db_name].dp_user = db_user
+                self.supported_databases[db_name].db_user = db_user
             if db_pass is not None:
-                self.supported_databases[db_name].dp_pass = db_pass
+                self.supported_databases[db_name].db_pass = db_pass
             if db_server is not None:
-                self.supported_databases[db_name].dp_server = db_server
+                self.supported_databases[db_name].db_server = db_server
             self.supported_databases[db_name].db_selected = defaultb
         else:
             db = Database(node=db_node)
@@ -2329,6 +2329,19 @@ class Config:
 
         if defaultb:
             self.db_selected = db_name
+
+    def del_db_parameters(self, db_name="fpdb") -> None:
+        """Remove a database from the config (both the XML node and the cache).
+
+        If the removed database was the selected one, another configured
+        database (if any) becomes the selection.
+        """
+        db_node = self.get_db_node(db_name)
+        if db_node is not None and db_node.parentNode is not None:
+            db_node.parentNode.removeChild(db_node)
+        self.supported_databases.pop(db_name, None)
+        if self.db_selected == db_name:
+            self.db_selected = next(iter(self.supported_databases), None)
 
     def get_backend(self, name):
         """Returns the number of the currently used backend."""
