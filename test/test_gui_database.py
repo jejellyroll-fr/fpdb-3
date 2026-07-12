@@ -233,6 +233,20 @@ def test_validate_rejects_non_numeric_port(_qapp):
     assert "Port must be" in message
 
 
+def test_validate_rejects_out_of_range_port(_qapp):
+    dialog = _dialog_for("postgresql", name="pg", host="h", port="70000")
+    ok, message = dialog.validate()
+    assert ok is False
+    assert "65535" in message
+
+
+def test_validate_accepts_boundary_ports(_qapp):
+    for port in ("1", "65535"):
+        dialog = _dialog_for("postgresql", name="pg", host="h", port=port)
+        ok, _ = dialog.validate()
+        assert ok is True, f"port {port} should be valid"
+
+
 def test_validate_accepts_valid_server_config(_qapp):
     dialog = _dialog_for("postgresql", name="pg", host="h", port="5432")
     ok, _ = dialog.validate()
