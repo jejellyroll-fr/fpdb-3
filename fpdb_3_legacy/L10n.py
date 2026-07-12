@@ -159,6 +159,17 @@ def set_locale_translation(config_path: str | None = None) -> None:
     path_string = str(locale_path)
     log.info("Locale path: %s", path_string)
 
+    # The .mo catalogs are build artifacts (git-ignored); compile any that are
+    # missing or stale from the shipped .po files so translations load at runtime.
+    try:
+        from fpdb_3_legacy.i18n_compile import ensure_compiled
+
+        recompiled = ensure_compiled(locale_path)
+        if recompiled:
+            log.info("Compiled translation catalogs: %s", ", ".join(recompiled))
+    except Exception as exc:  # noqa: BLE001 - never let i18n setup block startup
+        log.warning("Could not compile translation catalogs: %s", exc)
+
     gettext.bindtextdomain("fpdb", path_string)
     gettext.textdomain("fpdb")
 
