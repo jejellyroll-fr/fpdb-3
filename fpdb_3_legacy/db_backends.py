@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import importlib.util
 import os
+import shutil
 from dataclasses import dataclass
 from types import ModuleType
 
@@ -53,6 +54,43 @@ def driver_available(server: str) -> bool:
     if not modules:
         return False
     return any(importlib.util.find_spec(module) is not None for module in modules)
+
+
+# Local server executables used to detect an actual *server* installation,
+# distinct from the Python driver. Lets us tell "not installed" apart from
+# "installed but not running" when a local connection is refused.
+_SERVER_BINARIES: dict[str, tuple[str, ...]] = {
+    "postgresql": ("postgres", "pg_ctl", "pg_ctlcluster", "psql"),
+    "mysql": ("mariadbd", "mysqld", "mysql.server", "mariadb", "mysql"),
+}
+
+_LOCAL_HOSTS = {"", "localhost", "127.0.0.1", "::1"}
+
+
+def _is_local_host(host: str | None) -> bool:
+    """True when ``host`` points at the local machine (or is unset)."""
+    return (host or "localhost").strip().lower() in _LOCAL_HOSTS
+
+
+def server_installed(server: str) -> bool:
+    """Best-effort check for a locally installed DB server (binary on PATH)."""
+    return any(shutil.which(binary) for binary in _SERVER_BINARIES.get(server, ()))
+
+
+def _looks_unreachable(text: str) -> bool:
+    """True when a driver error text indicates the server could not be reached."""
+    needles = ("Connection refused", "could not connect", "Can't connect", "(2002", "(2003")
+    return any(needle in text for needle in needles)
+
+
+def _unreachable_hint(server: str, host: str | None) -> str:
+    """Guidance appended to an 'unreachable' message for a local server."""
+    if not _is_local_host(host) or server not in BACKENDS:
+        return ""
+    label = BACKENDS[server][0]
+    if not server_installed(server):
+        return f" {label} does not appear to be installed on this machine — install it and start the server."
+    return f" {label} appears to be installed but not running — start the server and try again."
 
 
 def import_mysqldb() -> ModuleType:
@@ -174,7 +212,8 @@ def _test_postgresql(database, host, port, user, password) -> ConnectionResult:
         if "does not exist" in text:
             return ConnectionResult(ok=False, message=f"Database not found: {text.strip()}")
         if "Connection refused" in text or "could not connect" in text:
-            return ConnectionResult(ok=False, message=f"Server unreachable: {text.strip()}")
+            hint = _unreachable_hint("postgresql", host)
+            return ConnectionResult(ok=False, message=f"Server unreachable: {text.strip()}{hint}")
         return ConnectionResult(ok=False, message=text.strip())
     conn.close()
     return ConnectionResult(ok=True, message=f"PostgreSQL OK — {database}@{host or 'localhost'}")
@@ -201,7 +240,8 @@ def _test_mysql(database, host, port, user, password) -> ConnectionResult:
         if code == 1045:
             return ConnectionResult(ok=False, message=f"Access denied: {text}")
         if code in (2002, 2003):
-            return ConnectionResult(ok=False, message=f"Server unreachable: {text}")
+            hint = _unreachable_hint("mysql", host)
+            return ConnectionResult(ok=False, message=f"Server unreachable: {text}{hint}")
         if code == 1049:
             return ConnectionResult(ok=False, message=f"Database not found: {text}")
         return ConnectionResult(ok=False, message=text)
@@ -360,12 +400,24 @@ def create_database(
         return ConnectionResult(ok=False, message=f"Driver for {server} is not installed.")
     if not database:
         return ConnectionResult(ok=False, message="A database name is required.")
+    # Refuse early if a local server is not even installed — no point trying to
+    # connect, and the raw "Connection refused" is confusing.
+    if _is_local_host(host) and not server_installed(server):
+        label = BACKENDS[server][0]
+        return ConnectionResult(
+            ok=False,
+            message=f"{label} does not appear to be installed on this machine. "
+            "Install it and start the server, then try again.",
+        )
     try:
         if server == "postgresql":
             return _create_postgresql_database(database, host, port, admin_user, admin_password, app_user, app_password)
         return _create_mysql_database(database, host, port, admin_user, admin_password, app_user, app_password)
     except Exception as exc:  # noqa: BLE001 - surface any driver/permission error
-        return ConnectionResult(ok=False, message=str(exc))
+        text = str(exc)
+        if _is_local_host(host) and _looks_unreachable(text):
+            text += _unreachable_hint(server, host)
+        return ConnectionResult(ok=False, message=text.strip())
 
 
 def _pg_ident(name: str) -> str:
