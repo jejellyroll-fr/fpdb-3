@@ -469,10 +469,12 @@ def test_recreate_schema_rebuilds_a_partial_schema(_qapp):
     panel = m.GuiDatabase(config)
     fake_db = MagicMock()
     with patch.object(m.db_backends, "inspect_database", return_value=(m.db_backends.STATE_INITIALISED, "")), \
-            patch.object(m.Database, "Database", return_value=fake_db):
+            patch.object(m.Database, "Database", return_value=fake_db), \
+            patch.object(m.db_migrate, "drop_all_tables") as drop_all:
         result = panel._recreate_schema("db")
     assert result.ok is True
-    fake_db.recreate_tables.assert_called_once()  # drop + create every table
+    drop_all.assert_called_once_with(fake_db)  # robust teardown of any partial schema
+    fake_db.create_tables.assert_called_once()  # then create every table afresh
     fake_db.close_connection.assert_called_once()
 
 
