@@ -12,7 +12,9 @@ from __future__ import annotations
 from contextlib import contextmanager
 from typing import Any
 
+from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
+    QApplication,
     QComboBox,
     QDialog,
     QDialogButtonBox,
@@ -22,6 +24,7 @@ from PySide6.QtWidgets import (
     QLabel,
     QLineEdit,
     QMessageBox,
+    QProgressDialog,
     QPushButton,
     QTableWidget,
     QTableWidgetItem,
@@ -373,13 +376,58 @@ class GuiDatabase(QWidget):
             app_password=entry.db_pass,
         )
 
-    def migrate_to(self, source_name: str, dest_name: str) -> db_migrate.MigrationReport:
+    def _recreate_schema(self, db_name: str) -> db_backends.ConnectionResult:
+        """Drop and recreate the full fpdb schema on ``db_name`` (destructive).
+
+        Used before a migration, which replaces the destination's contents
+        anyway. Unlike ``create_schema`` this always rebuilds every table, so a
+        partially created schema (e.g. left by an earlier failed attempt) is
+        repaired rather than mistaken for a complete one. A database holding
+        foreign (non-fpdb) tables is still refused untouched.
+        """
+        db_entry = self.config.supported_databases.get(db_name)
+        if db_entry is None:
+            return db_backends.ConnectionResult(ok=False, message=f"Unknown database '{db_name}'.")
+
+        state, detail = db_backends.inspect_database(db_entry.db_server, **self._inspect_params(db_name))
+        if state == db_backends.STATE_UNREACHABLE:
+            return db_backends.ConnectionResult(ok=False, message=f"Could not connect: {detail}")
+        if state == db_backends.STATE_FOREIGN:
+            return db_backends.ConnectionResult(
+                ok=False,
+                message=f"'{db_name}' already contains non-fpdb tables — refusing to modify it.",
+            )
+
+        # state is EMPTY or INITIALISED (possibly partial): rebuild from scratch.
+        with self._selected(db_name):
+            try:
+                db = Database.Database(self.config)
+            except Exception as exc:  # noqa: BLE001 - surface connection errors to the user
+                log.exception("_recreate_schema: could not connect to %r", db_name)
+                return db_backends.ConnectionResult(ok=False, message=f"Could not connect: {exc}")
+            try:
+                db.recreate_tables()  # drop + create + indexes + default rows (destructive)
+                return db_backends.ConnectionResult(ok=True, message=f"Prepared fresh fpdb schema in '{db_name}'.")
+            except Exception as exc:  # noqa: BLE001 - report any schema-creation failure
+                log.exception("_recreate_schema: failed for %r", db_name)
+                return db_backends.ConnectionResult(ok=False, message=f"Failed to create schema: {exc}")
+            finally:
+                db.close_connection()
+
+    def migrate_to(
+        self,
+        source_name: str,
+        dest_name: str,
+        *,
+        progress: db_migrate.ProgressCallback | None = None,
+    ) -> db_migrate.MigrationReport:
         """Copy all data from ``source_name`` into ``dest_name`` (replacing it).
 
-        The destination schema is ensured first (created if empty, refused if it
-        holds non-fpdb tables); then the data is copied preserving primary keys.
+        The destination schema is rebuilt fresh first (refused if it holds
+        non-fpdb tables); then the data is copied preserving primary keys.
+        ``progress`` is forwarded to the copy engine as ``(index, total, table)``.
         """
-        schema = self.create_schema(dest_name)
+        schema = self._recreate_schema(dest_name)
         if not schema.ok:
             report = db_migrate.MigrationReport()
             report.error = schema.message
@@ -392,7 +440,7 @@ class GuiDatabase(QWidget):
             source = Database.Database(self.config)
             self.config.db_selected = dest_name
             dest = Database.Database(self.config)
-            return db_migrate.migrate(source, dest)
+            return db_migrate.migrate(source, dest, progress=progress)
         except Exception as exc:  # noqa: BLE001 - surface connection errors as a report
             log.exception("migrate_to: failed %r -> %r", source_name, dest_name)
             report = db_migrate.MigrationReport()
@@ -547,7 +595,32 @@ class GuiDatabase(QWidget):
         )
         if confirm != QMessageBox.StandardButton.Yes:
             return
-        report = self.migrate_to(source, dest)
+
+        # Progress widget: busy-spinner while the schema is rebuilt, then a bar
+        # that advances one step per copied table.
+        dialog = QProgressDialog(f"Preparing '{dest}'…", None, 0, 0, self)
+        dialog.setWindowTitle("Migrating database")
+        dialog.setWindowModality(Qt.WindowModality.WindowModal)
+        dialog.setCancelButton(None)  # a half-finished migration is worse than waiting
+        dialog.setMinimumDuration(0)
+        dialog.setAutoClose(False)
+        dialog.setAutoReset(False)
+        dialog.show()
+        QApplication.processEvents()
+
+        def on_progress(index: int, total: int, table: str) -> None:
+            dialog.setMaximum(total)
+            dialog.setValue(index)
+            dialog.setLabelText(f"Copying '{table}'… ({index + 1}/{total})")
+            QApplication.processEvents()
+
+        try:
+            report = self.migrate_to(source, dest, progress=on_progress)
+            if report.ok and report.tables:
+                dialog.setValue(dialog.maximum())
+        finally:
+            dialog.close()
+
         if report.ok:
             QMessageBox.information(
                 self, "Migrate database",
