@@ -9,6 +9,7 @@ MySQL/MariaDB). The heavy lifting lives elsewhere: connection testing in
 
 from __future__ import annotations
 
+from contextlib import contextmanager
 from typing import Any
 
 from PySide6.QtWidgets import (
@@ -27,7 +28,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from fpdb_3_legacy import db_backends
+from fpdb_3_legacy import Database, db_backends
 from fpdb_3_legacy.loggingFpdb import get_logger
 
 log = get_logger("gui_database")
@@ -175,11 +176,13 @@ class GuiDatabase(QWidget):
         self.editButton = QPushButton("Edit...")
         self.deleteButton = QPushButton("Delete")
         self.defaultButton = QPushButton("Set as default")
+        self.createButton = QPushButton("Create tables")
         self.addButton.clicked.connect(self._on_add)
         self.editButton.clicked.connect(self._on_edit)
         self.deleteButton.clicked.connect(self._on_delete)
         self.defaultButton.clicked.connect(self._on_set_default)
-        for b in (self.addButton, self.editButton, self.deleteButton, self.defaultButton):
+        self.createButton.clicked.connect(self._on_create_schema)
+        for b in (self.addButton, self.editButton, self.deleteButton, self.defaultButton, self.createButton):
             buttons.addWidget(b)
         layout.addLayout(buttons)
 
@@ -240,6 +243,58 @@ class GuiDatabase(QWidget):
         self.config.save()
         self.refresh()
 
+    # --- schema creation ---------------------------------------------------
+
+    @contextmanager
+    def _selected(self, db_name: str):
+        """Temporarily point the config at ``db_name`` so Database targets it."""
+        previous = self.config.db_selected
+        self.config.db_selected = db_name
+        try:
+            yield
+        finally:
+            self.config.db_selected = previous
+
+    @staticmethod
+    def _core_table_present(db: Any) -> bool:
+        """True if the target database already has fpdb tables (checks Players)."""
+        try:
+            cursor = db.get_cursor()
+            cursor.execute("SELECT 1 FROM Players LIMIT 1")
+            cursor.fetchone()
+        except Exception:  # noqa: BLE001 - any error means the table is not usable/absent
+            return False
+        return True
+
+    def create_schema(self, db_name: str) -> db_backends.ConnectionResult:
+        """Ensure the fpdb schema exists on the target database, non-destructively.
+
+        A database that already holds fpdb tables is left untouched (its data is
+        never dropped). An empty one is initialised via the same
+        create_tables()/createAllIndexes() path as first run. Note that SQLite
+        self-initialises on connect, so this mainly benefits PostgreSQL/MySQL.
+        """
+        with self._selected(db_name):
+            try:
+                db = Database.Database(self.config)
+            except Exception as exc:  # noqa: BLE001 - surface connection errors to the user
+                log.exception("create_schema: could not connect to %r", db_name)
+                return db_backends.ConnectionResult(ok=False, message=f"Could not connect: {exc}")
+            try:
+                if self._core_table_present(db):
+                    # Already initialised (existing data, or SQLite auto-created
+                    # it on connect) — do not touch it.
+                    return db_backends.ConnectionResult(ok=True, message=f"'{db_name}' is already initialised.")
+                db.create_tables()  # creates tables + fills default data + commits
+                db.createAllIndexes()
+                db.commit()
+                return db_backends.ConnectionResult(ok=True, message=f"Created fpdb schema in '{db_name}'.")
+            except Exception as exc:  # noqa: BLE001 - report any schema-creation failure
+                log.exception("create_schema: failed for %r", db_name)
+                return db_backends.ConnectionResult(ok=False, message=f"Failed to create schema: {exc}")
+            finally:
+                db.close_connection()
+
     # --- button handlers ---------------------------------------------------
 
     def _on_add(self) -> None:
@@ -282,5 +337,32 @@ class GuiDatabase(QWidget):
 
     def _on_set_default(self) -> None:
         name = self.selected_db_name()
-        if name is not None:
-            self.apply_set_default(name)
+        if name is None:
+            return
+        self.apply_set_default(name)
+        QMessageBox.information(
+            self,
+            "Default database changed",
+            f"'{name}' is now the default database.\n\n"
+            "Restart fpdb for the change to take effect — the running session "
+            "stays connected to the previous database.",
+        )
+
+    def _on_create_schema(self) -> None:
+        name = self.selected_db_name()
+        if name is None:
+            return
+        confirm = QMessageBox.question(
+            self,
+            "Create tables",
+            f"Create the fpdb tables in '{name}'?\n\n"
+            "This only initialises an empty database; a database that already "
+            "contains fpdb tables is left untouched.",
+        )
+        if confirm != QMessageBox.StandardButton.Yes:
+            return
+        result = self.create_schema(name)
+        if result.ok:
+            QMessageBox.information(self, "Create tables", result.message)
+        else:
+            QMessageBox.warning(self, "Create tables", result.message)
