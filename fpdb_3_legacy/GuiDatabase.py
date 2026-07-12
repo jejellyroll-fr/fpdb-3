@@ -369,6 +369,8 @@ class GuiDatabase(QWidget):
             port=entry.db_port,
             admin_user=admin_user,
             admin_password=admin_password,
+            app_user=entry.db_user,
+            app_password=entry.db_pass,
         )
 
     def migrate_to(self, source_name: str, dest_name: str) -> db_migrate.MigrationReport:
@@ -489,11 +491,14 @@ class GuiDatabase(QWidget):
             )
             return
         host = entry.db_ip or "localhost"
-        default_admin = entry.db_user or ("postgres" if entry.db_server == "postgresql" else "root")
+        # Creating a database (and the fpdb role/user) needs a privileged
+        # account, not the application user being provisioned.
+        default_admin = "postgres" if entry.db_server == "postgresql" else "root"
         admin_user, ok = QInputDialog.getText(
             self,
             "Create database",
-            f"Administrator account allowed to create '{entry.db_name}' on {host}:",
+            f"Administrator/superuser account allowed to create '{entry.db_name}' on {host}\n"
+            f"(this will also create the '{entry.db_user}' login and grant it access):",
             QLineEdit.EchoMode.Normal,
             default_admin,
         )

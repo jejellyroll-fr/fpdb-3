@@ -255,7 +255,7 @@ def test_create_database_postgresql_creates_when_absent():
             "postgresql", database="fpdb", host="h", admin_user="admin", admin_password="p",
         )
     assert result.ok is True
-    assert "Created" in result.message
+    assert "created database 'fpdb'" in result.message
     statements = [str(c.args[0]) for c in conn.execute.call_args_list if c.args]
     assert any("CREATE DATABASE" in s for s in statements)
     # Connected to the maintenance database, not the target one.
@@ -271,9 +271,28 @@ def test_create_database_postgresql_skips_when_present():
     ):
         result = db_backends.create_database("postgresql", database="fpdb", admin_user="a", admin_password="p")
     assert result.ok is True
-    assert "already exists" in result.message
+    assert "already existed" in result.message
     statements = [str(c.args[0]) for c in conn.execute.call_args_list if c.args]
     assert not any("CREATE DATABASE" in s for s in statements)
+
+
+def test_create_database_postgresql_creates_missing_role_and_grants():
+    fake_psycopg = MagicMock()
+    conn = fake_psycopg.connect.return_value
+    # First fetchone() = role lookup (absent), second = database lookup (absent).
+    conn.execute.return_value.fetchone.side_effect = [None, None]
+    with patch.object(db_backends, "driver_available", return_value=True), patch.dict(
+        sys.modules, {"psycopg": fake_psycopg},
+    ):
+        result = db_backends.create_database(
+            "postgresql", database="fpdb", admin_user="postgres", admin_password="p",
+            app_user="fpdb", app_password="secret",
+        )
+    assert result.ok is True
+    statements = [str(c.args[0]) for c in conn.execute.call_args_list if c.args]
+    assert any("CREATE ROLE" in s and '"fpdb"' in s for s in statements)
+    assert any("CREATE DATABASE" in s and 'OWNER "fpdb"' in s for s in statements)
+    assert any("GRANT ALL PRIVILEGES ON DATABASE" in s for s in statements)
 
 
 def test_create_database_mysql_issues_create_if_not_exists():
@@ -286,7 +305,24 @@ def test_create_database_mysql_issues_create_if_not_exists():
         )
     assert result.ok is True
     cursor = fake_mysqldb.connect.return_value.cursor.return_value
-    assert "CREATE DATABASE IF NOT EXISTS" in cursor.execute.call_args.args[0]
+    statements = [c.args[0] for c in cursor.execute.call_args_list if c.args]
+    assert any("CREATE DATABASE IF NOT EXISTS" in s for s in statements)
+
+
+def test_create_database_mysql_creates_user_and_grants():
+    fake_mysqldb = MagicMock()
+    with patch.object(db_backends, "driver_available", return_value=True), patch.object(
+        db_backends, "import_mysqldb", return_value=fake_mysqldb,
+    ):
+        result = db_backends.create_database(
+            "mysql", database="fpdb", host="h", admin_user="root", admin_password="p",
+            app_user="fpdb", app_password="secret",
+        )
+    assert result.ok is True
+    cursor = fake_mysqldb.connect.return_value.cursor.return_value
+    statements = [c.args[0] for c in cursor.execute.call_args_list if c.args]
+    assert any("CREATE USER IF NOT EXISTS 'fpdb'@'%'" in s for s in statements)
+    assert any("GRANT ALL PRIVILEGES ON `fpdb`.* TO 'fpdb'@'%'" in s for s in statements)
 
 
 if __name__ == "__main__":

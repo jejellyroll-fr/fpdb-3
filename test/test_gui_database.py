@@ -121,6 +121,7 @@ def test_create_database_delegates_entry_fields(_qapp):
     create.assert_called_once_with(
         "postgresql", database="pg", host="dbhost", port="5432",
         admin_user="admin", admin_password="secret",
+        app_user="alice", app_password="",
     )
 
 

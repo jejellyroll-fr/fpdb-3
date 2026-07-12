@@ -341,8 +341,17 @@ def create_database(
     port: str | int | None = None,
     admin_user: str | None = None,
     admin_password: str | None = None,
+    app_user: str | None = None,
+    app_password: str | None = None,
 ) -> ConnectionResult:
-    """Create the server-side database ``database`` using admin credentials."""
+    """Provision the server-side database ``database`` using admin credentials.
+
+    Beyond ``CREATE DATABASE`` this also makes the configured application
+    account (``app_user``) usable: it creates the PostgreSQL role / MySQL user
+    when missing and grants it access, so the panel's own connection works
+    right after. Creating just the database is not enough — the fpdb login
+    account must exist too.
+    """
     if server not in BACKENDS:
         return ConnectionResult(ok=False, message=f"Unsupported database backend: {server!r}")
     if server == "sqlite":
@@ -353,50 +362,98 @@ def create_database(
         return ConnectionResult(ok=False, message="A database name is required.")
     try:
         if server == "postgresql":
-            return _create_postgresql_database(database, host, port, admin_user, admin_password)
-        return _create_mysql_database(database, host, port, admin_user, admin_password)
+            return _create_postgresql_database(database, host, port, admin_user, admin_password, app_user, app_password)
+        return _create_mysql_database(database, host, port, admin_user, admin_password, app_user, app_password)
     except Exception as exc:  # noqa: BLE001 - surface any driver/permission error
         return ConnectionResult(ok=False, message=str(exc))
 
 
-def _create_postgresql_database(database, host, port, user, password) -> ConnectionResult:
+def _pg_ident(name: str) -> str:
+    """Quote a PostgreSQL identifier."""
+    return '"' + name.replace('"', '""') + '"'
+
+
+def _pg_literal(value: str) -> str:
+    """Quote a PostgreSQL string literal."""
+    return "'" + value.replace("'", "''") + "'"
+
+
+def _create_postgresql_database(
+    database, host, port, admin_user, admin_password, app_user, app_password,
+) -> ConnectionResult:
     import psycopg
 
-    # CREATE DATABASE cannot run in a transaction, so use autocommit, and it
-    # cannot take a bind parameter for the name, so quote the identifier safely.
+    # CREATE DATABASE / ROLE cannot run in a transaction, so use autocommit, and
+    # they cannot take bind parameters for identifiers, so quote them safely.
     conn = psycopg.connect(
         host=host or None,
         port=_coerce_port(port),
-        user=user or None,
-        password=password or None,
+        user=admin_user or None,
+        password=admin_password or None,
         dbname="postgres",  # maintenance database
         autocommit=True,
         connect_timeout=5,
     )
+    actions: list[str] = []
     try:
-        exists = conn.execute("SELECT 1 FROM pg_database WHERE datname = %s", (database,)).fetchone()
-        if exists:
-            return ConnectionResult(ok=True, message=f"Database '{database}' already exists.")
-        conn.execute(f'CREATE DATABASE "{database.replace(chr(34), chr(34) * 2)}"')
+        # Ensure the application role exists so the configured user can log in.
+        if app_user and app_user != admin_user:
+            role_ident = _pg_ident(app_user)
+            role_exists = conn.execute("SELECT 1 FROM pg_roles WHERE rolname = %s", (app_user,)).fetchone()
+            if not role_exists:
+                conn.execute(f"CREATE ROLE {role_ident} LOGIN PASSWORD {_pg_literal(app_password or '')}")
+                actions.append(f"created role '{app_user}'")
+            elif app_password:
+                conn.execute(f"ALTER ROLE {role_ident} LOGIN PASSWORD {_pg_literal(app_password)}")
+                actions.append(f"updated password for role '{app_user}'")
+
+        db_ident = _pg_ident(database)
+        db_exists = conn.execute("SELECT 1 FROM pg_database WHERE datname = %s", (database,)).fetchone()
+        if not db_exists:
+            owner = f" OWNER {_pg_ident(app_user)}" if app_user else ""
+            conn.execute(f"CREATE DATABASE {db_ident}{owner}")
+            actions.append(f"created database '{database}'")
+        else:
+            actions.append(f"database '{database}' already existed")
+        if app_user:
+            conn.execute(f"GRANT ALL PRIVILEGES ON DATABASE {db_ident} TO {_pg_ident(app_user)}")
     finally:
         conn.close()
-    return ConnectionResult(ok=True, message=f"Created database '{database}'.")
+    return ConnectionResult(ok=True, message="PostgreSQL: " + ", ".join(actions) + ".")
 
 
-def _create_mysql_database(database, host, port, user, password) -> ConnectionResult:
+def _my_literal(value: str) -> str:
+    """Quote a MySQL string literal (backslash-escaping)."""
+    return "'" + value.replace("\\", "\\\\").replace("'", "\\'") + "'"
+
+
+def _create_mysql_database(
+    database, host, port, admin_user, admin_password, app_user, app_password,
+) -> ConnectionResult:
     mysqldb = import_mysqldb()
 
     conn = mysqldb.connect(
         host=host or "localhost",
-        user=user or None,
-        passwd=password or "",
+        user=admin_user or None,
+        passwd=admin_password or "",
         port=_coerce_port(port) or 3306,
         connect_timeout=5,
     )
+    actions: list[str] = []
     try:
         cursor = conn.cursor()
-        cursor.execute(f"CREATE DATABASE IF NOT EXISTS `{database.replace('`', '``')}`")
+        db_quoted = "`" + database.replace("`", "``") + "`"
+        cursor.execute(f"CREATE DATABASE IF NOT EXISTS {db_quoted}")
+        actions.append(f"database '{database}' ready")
+        # Ensure the application account exists and can reach the new database.
+        if app_user and app_user != admin_user:
+            user_lit = _my_literal(app_user)
+            pw_lit = _my_literal(app_password or "")
+            cursor.execute(f"CREATE USER IF NOT EXISTS {user_lit}@'%' IDENTIFIED BY {pw_lit}")
+            cursor.execute(f"GRANT ALL PRIVILEGES ON {db_quoted}.* TO {user_lit}@'%'")
+            cursor.execute("FLUSH PRIVILEGES")
+            actions.append(f"granted user '{app_user}'")
         conn.commit()
     finally:
         conn.close()
-    return ConnectionResult(ok=True, message=f"Created database '{database}' (or it already existed).")
+    return ConnectionResult(ok=True, message="MySQL: " + ", ".join(actions) + ".")
