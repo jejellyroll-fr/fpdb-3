@@ -139,8 +139,8 @@ class DatabaseEditDialog(QDialog):
             if not vals.get("db_ip"):
                 return False, "A host is required for PostgreSQL/MySQL."
             port = vals.get("db_port", "")
-            if port and not (port.isdigit() and int(port) > 0):
-                return False, "Port must be a positive number."
+            if port and not (port.isdigit() and 1 <= int(port) <= 65535):
+                return False, "Port must be a number between 1 and 65535."
         return True, ""
 
     def accept(self) -> None:
