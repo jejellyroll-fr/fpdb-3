@@ -4829,3 +4829,8 @@ msgstr "Réinitialiser"
 
 msgid "Off Suit"
 msgstr "Dépareillées"
+
+# --- Vague 2: preferences & viewers ---
+
+msgid "Tour Player Stats"
+msgstr "Stats joueur tournoi"
