@@ -427,5 +427,87 @@ def test_create_schema_refuses_foreign_sqlite_file(_qapp, tmp_path):
     assert rows == [("do not delete me",)]
 
 
+# --- migration (migrate_to) ------------------------------------------------
+
+
+def test_migrate_to_orchestrates_schema_then_copy(_qapp):
+    from fpdb_3_legacy import GuiDatabase as m
+
+    config = _fake_config([_fake_db("src", selected=True), _fake_db("dst")])
+    panel = m.GuiDatabase(config)
+    panel.create_schema = MagicMock(return_value=m.db_backends.ConnectionResult(ok=True, message="ok"))
+    report = m.db_migrate.MigrationReport(tables={"Players": 3}, total_rows=3)
+    with patch.object(m.Database, "Database", return_value=MagicMock()), \
+            patch.object(m.db_migrate, "migrate", return_value=report) as do_migrate:
+        result = panel.migrate_to("src", "dst")
+    panel.create_schema.assert_called_once_with("dst")  # destination schema ensured first
+    do_migrate.assert_called_once()
+    assert result.total_rows == 3
+
+
+def test_migrate_to_aborts_when_dest_schema_refused(_qapp):
+    from fpdb_3_legacy import GuiDatabase as m
+
+    config = _fake_config([_fake_db("src", selected=True), _fake_db("dst")])
+    panel = m.GuiDatabase(config)
+    panel.create_schema = MagicMock(
+        return_value=m.db_backends.ConnectionResult(ok=False, message="non-fpdb tables"),
+    )
+    with patch.object(m.db_migrate, "migrate") as do_migrate:
+        result = panel.migrate_to("src", "dst")
+    assert result.ok is False
+    assert "non-fpdb tables" in result.error
+    do_migrate.assert_not_called()  # never migrate into an unsafe destination
+
+
+def test_migrate_to_restores_db_selected(_qapp):
+    from fpdb_3_legacy import GuiDatabase as m
+
+    config = _fake_config([_fake_db("src", selected=True), _fake_db("dst")])
+    config.db_selected = "src"
+    panel = m.GuiDatabase(config)
+    panel.create_schema = MagicMock(return_value=m.db_backends.ConnectionResult(ok=True, message="ok"))
+    with patch.object(m.Database, "Database", return_value=MagicMock()), \
+            patch.object(m.db_migrate, "migrate", return_value=m.db_migrate.MigrationReport()):
+        panel.migrate_to("src", "dst")
+    assert config.db_selected == "src"
+
+
+def test_migrate_to_real_sqlite(_qapp, tmp_path):
+    """End-to-end through the panel: source data lands in the destination."""
+    import shutil
+
+    from fpdb_3_legacy import Configuration
+    from fpdb_3_legacy.GuiDatabase import GuiDatabase
+
+    cfg_path = tmp_path / "HUD_config.xml"
+    shutil.copy(CONFIG_TEMPLATE, cfg_path)
+    config = Configuration.Config(file=str(cfg_path))
+    config.dir_database = str(tmp_path)
+    config.add_db_parameters(db_name="src.db3", db_server="sqlite")
+    config.add_db_parameters(db_name="dst.db3", db_server="sqlite")
+
+    # Put a recognisable row in the source.
+    from fpdb_3_legacy import Database
+
+    config.db_selected = "src.db3"
+    src = Database.Database(config)
+    cur = src.get_cursor()
+    cur.execute("INSERT INTO Players (id, name, siteId, hero) VALUES (?, ?, ?, ?)", (7, "migrated_hero", 2, 1))
+    src.commit()
+    src.close_connection()
+
+    panel = GuiDatabase(config)
+    report = panel.migrate_to("src.db3", "dst.db3")
+    assert report.ok, report.error
+
+    import sqlite3
+
+    conn = sqlite3.connect(str(tmp_path / "dst.db3"))
+    row = conn.execute("SELECT name FROM Players WHERE id = 7").fetchone()
+    conn.close()
+    assert row == ("migrated_hero",)
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
