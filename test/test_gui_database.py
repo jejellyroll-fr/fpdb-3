@@ -454,6 +454,41 @@ def test_create_schema_refuses_foreign_sqlite_file(_qapp, tmp_path):
     assert rows == [("do not delete me",)]
 
 
+# --- _recreate_schema (destructive rebuild used before migration) ----------
+
+
+def test_recreate_schema_rebuilds_a_partial_schema(_qapp):
+    """A half-created schema (marker table present) must be fully rebuilt.
+
+    inspect_database reports INITIALISED as soon as the Settings marker exists,
+    even when later tables are missing — so migration must recreate, not no-op.
+    """
+    from fpdb_3_legacy import GuiDatabase as m
+
+    config = _fake_config([_fake_db("db", selected=True)])
+    panel = m.GuiDatabase(config)
+    fake_db = MagicMock()
+    with patch.object(m.db_backends, "inspect_database", return_value=(m.db_backends.STATE_INITIALISED, "")), \
+            patch.object(m.Database, "Database", return_value=fake_db):
+        result = panel._recreate_schema("db")
+    assert result.ok is True
+    fake_db.recreate_tables.assert_called_once()  # drop + create every table
+    fake_db.close_connection.assert_called_once()
+
+
+def test_recreate_schema_refuses_foreign_tables(_qapp):
+    from fpdb_3_legacy import GuiDatabase as m
+
+    config = _fake_config([_fake_db("db", selected=True)])
+    panel = m.GuiDatabase(config)
+    with patch.object(m.db_backends, "inspect_database", return_value=(m.db_backends.STATE_FOREIGN, "")), \
+            patch.object(m.Database, "Database") as build_db:
+        result = panel._recreate_schema("db")
+    assert result.ok is False
+    assert "non-fpdb tables" in result.message
+    build_db.assert_not_called()  # never drop a user's unrelated database
+
+
 # --- migration (migrate_to) ------------------------------------------------
 
 
@@ -462,12 +497,12 @@ def test_migrate_to_orchestrates_schema_then_copy(_qapp):
 
     config = _fake_config([_fake_db("src", selected=True), _fake_db("dst")])
     panel = m.GuiDatabase(config)
-    panel.create_schema = MagicMock(return_value=m.db_backends.ConnectionResult(ok=True, message="ok"))
+    panel._recreate_schema = MagicMock(return_value=m.db_backends.ConnectionResult(ok=True, message="ok"))
     report = m.db_migrate.MigrationReport(tables={"Players": 3}, total_rows=3)
     with patch.object(m.Database, "Database", return_value=MagicMock()), \
             patch.object(m.db_migrate, "migrate", return_value=report) as do_migrate:
         result = panel.migrate_to("src", "dst")
-    panel.create_schema.assert_called_once_with("dst")  # destination schema ensured first
+    panel._recreate_schema.assert_called_once_with("dst")  # destination schema rebuilt first
     do_migrate.assert_called_once()
     assert result.total_rows == 3
 
@@ -477,7 +512,7 @@ def test_migrate_to_aborts_when_dest_schema_refused(_qapp):
 
     config = _fake_config([_fake_db("src", selected=True), _fake_db("dst")])
     panel = m.GuiDatabase(config)
-    panel.create_schema = MagicMock(
+    panel._recreate_schema = MagicMock(
         return_value=m.db_backends.ConnectionResult(ok=False, message="non-fpdb tables"),
     )
     with patch.object(m.db_migrate, "migrate") as do_migrate:
@@ -493,7 +528,7 @@ def test_migrate_to_restores_db_selected(_qapp):
     config = _fake_config([_fake_db("src", selected=True), _fake_db("dst")])
     config.db_selected = "src"
     panel = m.GuiDatabase(config)
-    panel.create_schema = MagicMock(return_value=m.db_backends.ConnectionResult(ok=True, message="ok"))
+    panel._recreate_schema = MagicMock(return_value=m.db_backends.ConnectionResult(ok=True, message="ok"))
     with patch.object(m.Database, "Database", return_value=MagicMock()), \
             patch.object(m.db_migrate, "migrate", return_value=m.db_migrate.MigrationReport()):
         panel.migrate_to("src", "dst")
