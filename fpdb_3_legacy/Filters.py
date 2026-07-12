@@ -38,6 +38,7 @@ from PySide6.QtWidgets import (
 )
 
 from fpdb_3_legacy import SQL, Card, Configuration, Database
+from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.loggingFpdb import get_logger
 
 if __name__ == "__main__":
@@ -248,76 +249,76 @@ class Filters(QWidget):
         self.cbTourneyBuyin = {}
 
         self.gameName = {
-            "27_1draw": ("Single Draw 2-7 Lowball"),
-            "27_3draw": ("Triple Draw 2-7 Lowball"),
-            "a5_3draw": ("Triple Draw A-5 Lowball"),
-            "5_studhi": ("5 Card Stud"),
-            "badugi": ("Badugi"),
-            "badacey": ("Badacey"),
-            "badeucey": ("Badeucey"),
-            "drawmaha": ("2-7 Drawmaha"),
-            "a5_1draw": ("A-5 Single Draw"),
-            "27_razz": ("2-7 Razz"),
-            "fivedraw": ("5 Card Draw"),
-            "holdem": ("Hold'em"),
-            "6_holdem": ("Hold'em"),
-            "omahahi": ("Omaha"),
-            "fusion": ("Fusion"),
-            "omahahilo": ("Omaha Hi/Lo"),
-            "razz": ("Razz"),
-            "studhi": ("7 Card Stud"),
-            "studhilo": ("7 Card Stud Hi/Lo"),
-            "5_omahahi": ("5 Card Omaha"),
-            "5_omaha8": ("5 Card Omaha Hi/Lo"),
-            "cour_hi": ("Courchevel"),
-            "cour_hilo": ("Courchevel Hi/Lo"),
-            "2_holdem": ("Double hold'em"),
-            "irish": ("Irish"),
-            "6_omahahi": ("6 Card Omaha"),
+            "27_1draw": _("Single Draw 2-7 Lowball"),
+            "27_3draw": _("Triple Draw 2-7 Lowball"),
+            "a5_3draw": _("Triple Draw A-5 Lowball"),
+            "5_studhi": _("5 Card Stud"),
+            "badugi": _("Badugi"),
+            "badacey": _("Badacey"),
+            "badeucey": _("Badeucey"),
+            "drawmaha": _("2-7 Drawmaha"),
+            "a5_1draw": _("A-5 Single Draw"),
+            "27_razz": _("2-7 Razz"),
+            "fivedraw": _("5 Card Draw"),
+            "holdem": _("Hold'em"),
+            "6_holdem": _("Hold'em"),
+            "omahahi": _("Omaha"),
+            "fusion": _("Fusion"),
+            "omahahilo": _("Omaha Hi/Lo"),
+            "razz": _("Razz"),
+            "studhi": _("7 Card Stud"),
+            "studhilo": _("7 Card Stud Hi/Lo"),
+            "5_omahahi": _("5 Card Omaha"),
+            "5_omaha8": _("5 Card Omaha Hi/Lo"),
+            "cour_hi": _("Courchevel"),
+            "cour_hilo": _("Courchevel Hi/Lo"),
+            "2_holdem": _("Double hold'em"),
+            "irish": _("Irish"),
+            "6_omahahi": _("6 Card Omaha"),
         }
 
         self.currencyName = {
-            "USD": ("US Dollar"),
-            "EUR": ("Euro"),
-            "T$": ("Tournament Dollar"),
-            "play": ("Play Money"),
+            "USD": _("US Dollar"),
+            "EUR": _("Euro"),
+            "T$": _("Tournament Dollar"),
+            "play": _("Play Money"),
         }
 
         self.filterText = {
-            "limitsall": ("All"),
-            "limitsnone": ("None"),
-            "limitsshow": ("Show Limits"),
-            "gamesall": ("All"),
-            "gamesnone": ("None"),
-            "positionsall": ("All"),
-            "positionsnone": ("None"),
-            "currenciesall": ("All"),
-            "currenciesnone": ("None"),
-            "seatsbetween": ("Between:"),
-            "seatsand": ("And:"),
-            "seatsshow": ("Show Number of Players"),
-            "playerstitle": ("Hero:"),
-            "sitestitle": (("Sites") + ":"),
-            "gamestitle": (("Games") + ":"),
-            "tourneytitle": (("Tourney") + ":"),
-            "tourneycat": (("Category") + ":"),
-            "limitstitle": ("Limits:"),
-            "positionstitle": ("Positions:"),
-            "seatstitle": ("Number of Players:"),
-            "tourneylim": (("Limit Type") + ":"),
-            "groupstitle": ("Grouping:"),
-            "posnshow": ("Show Position Stats"),
-            "tourneybuyin": (("Buyin") + ":"),
-            "datestitle": ("Date:"),
-            "currenciestitle": (("Currencies") + ":"),
-            "groupsall": ("All Players"),
-            "cardstitle": (("Hole Cards") + ":"),
+            "limitsall": _("All"),
+            "limitsnone": _("None"),
+            "limitsshow": _("Show Limits"),
+            "gamesall": _("All"),
+            "gamesnone": _("None"),
+            "positionsall": _("All"),
+            "positionsnone": _("None"),
+            "currenciesall": _("All"),
+            "currenciesnone": _("None"),
+            "seatsbetween": _("Between:"),
+            "seatsand": _("And:"),
+            "seatsshow": _("Show Number of Players"),
+            "playerstitle": _("Hero:"),
+            "sitestitle": (_("Sites") + ":"),
+            "gamestitle": (_("Games") + ":"),
+            "tourneytitle": (_("Tourney") + ":"),
+            "tourneycat": (_("Category") + ":"),
+            "limitstitle": _("Limits:"),
+            "positionstitle": _("Positions:"),
+            "seatstitle": _("Number of Players:"),
+            "tourneylim": (_("Limit Type") + ":"),
+            "groupstitle": _("Grouping:"),
+            "posnshow": _("Show Position Stats"),
+            "tourneybuyin": (_("Buyin") + ":"),
+            "datestitle": _("Date:"),
+            "currenciestitle": (_("Currencies") + ":"),
+            "groupsall": _("All Players"),
+            "cardstitle": (_("Hole Cards") + ":"),
             "limitsFL": "FL",
             "limitsNL": "NL",
             "limitsPL": "PL",
             "limitsCN": "CAP",
-            "ring": ("Ring"),
-            "tour": ("Tourney"),
+            "ring": _("Ring"),
+            "tour": _("Tourney"),
             "limitsHP": "HP",
         }
 
@@ -871,7 +872,7 @@ class Filters(QWidget):
 
     def createCardsControls(self, hbox: QHBoxLayout) -> None:
         """Create cards control buttons."""
-        selections = ["All", "Suited", "Off Suit"]
+        selections = [_("All"), _("Suited"), _("Off Suit")]
         for s in selections:
             cb = QCheckBox(s)
             cb.clicked.connect(self.__set_cards)
@@ -957,14 +958,14 @@ class Filters(QWidget):
             self.cbGroups["allplayers"] = QCheckBox(self.filterText["groupsall"])
             hbox.addWidget(self.cbGroups["allplayers"])
 
-            lbl = QLabel("Min # Hands:")
+            lbl = QLabel(_("Min # Hands:"))
             hbox.addWidget(lbl)
 
             self.phands = QSpinBox()
             self.phands.setMaximum(int(1e5))
             hbox.addWidget(self.phands)
 
-        refresh_button = QPushButton("Refresh Filters")
+        refresh_button = QPushButton(_("Refresh Filters"))
         refresh_button.clicked.connect(self.update_filters_for_hero)
         vbox.addWidget(refresh_button)
 
@@ -1399,7 +1400,7 @@ class Filters(QWidget):
         hbox1 = QHBoxLayout()
         vbox1.addLayout(hbox1)
 
-        label = QLabel("Show Graph In:")
+        label = QLabel(_("Show Graph In:"))
         hbox1.addWidget(label)
 
         self.cbGraphops["$"] = QRadioButton("$$", frame)
@@ -1409,13 +1410,13 @@ class Filters(QWidget):
         self.cbGraphops["BB"] = QRadioButton("BB", frame)
         hbox1.addWidget(self.cbGraphops["BB"])
 
-        self.cbGraphops["showdown"] = QCheckBox("Showdown Winnings")
+        self.cbGraphops["showdown"] = QCheckBox(_("Showdown Winnings"))
         vbox1.addWidget(self.cbGraphops["showdown"])
 
-        self.cbGraphops["nonshowdown"] = QCheckBox("Non-Showdown Winnings")
+        self.cbGraphops["nonshowdown"] = QCheckBox(_("Non-Showdown Winnings"))
         vbox1.addWidget(self.cbGraphops["nonshowdown"])
 
-        self.cbGraphops["ev"] = QCheckBox("EV")
+        self.cbGraphops["ev"] = QCheckBox(_("EV"))
         vbox1.addWidget(self.cbGraphops["ev"])
 
     def fillSeatsFrame(self, frame: QGroupBox) -> None:
@@ -1466,18 +1467,18 @@ class Filters(QWidget):
         table = QGridLayout()
         frame.setLayout(table)
 
-        lbl_start = QLabel("From:")
-        btn_start = QPushButton("Cal")
+        lbl_start = QLabel(_("From:"))
+        btn_start = QPushButton(_("Cal"))
         btn_start.clicked.connect(
             partial(self.__calendar_dialog, date_edit=self.start_date),
         )
-        clr_start = QPushButton("Reset")
+        clr_start = QPushButton(_("Reset"))
         clr_start.clicked.connect(self.__clear_start_date)
 
-        lbl_end = QLabel("To:")
-        btn_end = QPushButton("Cal")
+        lbl_end = QLabel(_("To:"))
+        btn_end = QPushButton(_("Cal"))
         btn_end.clicked.connect(partial(self.__calendar_dialog, date_edit=self.end_date))
-        clr_end = QPushButton("Reset")
+        clr_end = QPushButton(_("Reset"))
         clr_end.clicked.connect(self.__clear_end_date)
 
         table.addWidget(lbl_start, 0, 0)
@@ -1618,14 +1619,14 @@ class Filters(QWidget):
     def __calendar_dialog(self, *_args: object, date_edit: QDateEdit) -> None:
         """Open calendar dialog for date selection."""
         d = QDialog()
-        d.setWindowTitle("Pick a date")
+        d.setWindowTitle(_("Pick a date"))
 
         vb = QVBoxLayout()
         d.setLayout(vb)
         cal = QCalendarWidget()
         vb.addWidget(cal)
 
-        btn = QPushButton("Done")
+        btn = QPushButton(_("Done"))
         btn.clicked.connect(
             partial(self.__get_date, dlg=d, calendar=cal, date_edit=date_edit),
         )

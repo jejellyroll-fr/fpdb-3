@@ -4809,3 +4809,23 @@ msgstr "Paramètres"
 
 msgid "Log"
 msgstr "Journal"
+
+# --- Vague 2: filters panel ---
+
+msgid "Category"
+msgstr "Catégorie"
+
+msgid "Limit Type"
+msgstr "Type de limite"
+
+msgid "Buyin"
+msgstr "Buy-in"
+
+msgid "Refresh Filters"
+msgstr "Rafraîchir les filtres"
+
+msgid "Reset"
+msgstr "Réinitialiser"
+
+msgid "Off Suit"
+msgstr "Dépareillées"
