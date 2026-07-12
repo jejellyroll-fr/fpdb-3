@@ -82,34 +82,51 @@ def drop_all_tables(db: Any) -> None:
     db.commit()
 
 
-def _disable_fk(db: Any) -> None:
-    """Disable foreign-key enforcement on ``db``.
+def _suspend_foreign_keys(db: Any) -> Any:
+    """Relax foreign-key enforcement for the bulk copy; return a restore token.
 
-    Raises on failure. On PostgreSQL this uses ``session_replication_role``,
-    which needs a privileged role; a failure there is fatal (a copy would abort
-    the transaction table by table), so we let it propagate and fail early.
+    MySQL and SQLite toggle a session flag. PostgreSQL's global switch
+    (``session_replication_role``) needs a superuser, which the fpdb role
+    usually is not — so instead we drop every foreign-key constraint (an
+    owner-level operation) and hand back their definitions so they can be
+    re-created afterwards. Raises on failure so the caller can stop early.
     """
     cursor = db.get_cursor()
     if db.backend == _SQLITE:
         cursor.execute("PRAGMA foreign_keys = OFF")
-    elif db.backend == _MYSQL:
+        return None
+    if db.backend == _MYSQL:
         cursor.execute("SET FOREIGN_KEY_CHECKS = 0")
-    elif db.backend == _PGSQL:
-        cursor.execute("SET session_replication_role = 'replica'")
+        return None
+    # PostgreSQL: drop and remember every foreign-key constraint.
+    cursor.execute(
+        "SELECT conrelid::regclass::text, conname, pg_get_constraintdef(oid) "
+        "FROM pg_constraint WHERE contype = 'f'",
+    )
+    constraints = cursor.fetchall()
+    for table, name, _definition in constraints:
+        cursor.execute(f'ALTER TABLE {table} DROP CONSTRAINT "{name}"')
+    db.commit()
+    return constraints
 
 
-def _enable_fk(db: Any) -> None:
-    """Re-enable foreign-key enforcement on ``db`` (best effort)."""
+def _restore_foreign_keys(db: Any, token: Any) -> None:
+    """Re-enable foreign-key enforcement (best effort), reversing the suspend."""
     try:
         cursor = db.get_cursor()
         if db.backend == _SQLITE:
             cursor.execute("PRAGMA foreign_keys = ON")
-        elif db.backend == _MYSQL:
+            return
+        if db.backend == _MYSQL:
             cursor.execute("SET FOREIGN_KEY_CHECKS = 1")
-        elif db.backend == _PGSQL:
-            cursor.execute("SET session_replication_role = 'origin'")
+            return
+        if not token:
+            return
+        for table, name, definition in token:
+            cursor.execute(f'ALTER TABLE {table} ADD CONSTRAINT "{name}" {definition}')
+        db.commit()
     except Exception as exc:  # noqa: BLE001 - re-enabling is best-effort cleanup
-        log.warning("Could not re-enable foreign-key enforcement: %s", exc)
+        log.warning("Could not fully re-enable foreign-key enforcement: %s", exc)
 
 
 def _reset_sequences(dest: Any, tables: list[str]) -> None:
@@ -175,15 +192,14 @@ def migrate(source: Any, dest: Any, *, progress: ProgressCallback | None = None)
     report = MigrationReport()
     tables = list_data_tables(source)
 
-    # Relax destination foreign keys so table order doesn't matter. On PostgreSQL
-    # this needs a privileged role; if it fails the transaction is aborted, so we
-    # stop early with a clear message rather than cascading table errors.
+    # Relax destination foreign keys so table order doesn't matter. If this fails
+    # the transaction is aborted, so we stop early with a clear message rather
+    # than cascading table errors.
     try:
-        _disable_fk(dest)
+        fk_token = _suspend_foreign_keys(dest)
     except Exception as exc:  # noqa: BLE001 - fail fast on an unusable destination
         log.exception("Could not disable destination foreign keys")
         dest.rollback()
-        _enable_fk(dest)
         report.error = f"Cannot disable foreign keys on the destination: {exc}"
         return report
 
@@ -202,5 +218,5 @@ def migrate(source: Any, dest: Any, *, progress: ProgressCallback | None = None)
         dest.rollback()
         report.error = str(exc)
     finally:
-        _enable_fk(dest)
+        _restore_foreign_keys(dest, fk_token)
     return report
