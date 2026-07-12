@@ -406,7 +406,12 @@ class GuiDatabase(QWidget):
                 log.exception("_recreate_schema: could not connect to %r", db_name)
                 return db_backends.ConnectionResult(ok=False, message=f"Could not connect: {exc}")
             try:
-                db.recreate_tables()  # drop + create + indexes + default rows (destructive)
+                # Robust teardown (bypasses Database.drop_tables), then a clean
+                # create — so a partially created schema is rebuilt in full.
+                db_migrate.drop_all_tables(db)
+                db.create_tables()  # create every table + fill default rows + commit
+                db.createAllIndexes()
+                db.commit()
                 return db_backends.ConnectionResult(ok=True, message=f"Prepared fresh fpdb schema in '{db_name}'.")
             except Exception as exc:  # noqa: BLE001 - report any schema-creation failure
                 log.exception("_recreate_schema: failed for %r", db_name)

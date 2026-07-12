@@ -129,6 +129,35 @@ def test_report_lists_rows_per_table(config):
     dest.close_connection()
 
 
+def test_drop_all_tables_clears_a_sqlite_database(config):
+    """drop_all_tables must remove every user table so a rebuild starts clean."""
+    source = _build_db(config, "source.db3")
+    assert db_migrate.list_data_tables(source)  # schema present to begin with
+
+    db_migrate.drop_all_tables(source)
+
+    assert db_migrate.list_data_tables(source) == []  # nothing left to collide with
+    source.close_connection()
+
+
+def test_drop_all_tables_disables_fk_checks_on_mysql():
+    """On MySQL the drop must bracket FK checks off/on so order doesn't matter."""
+    from unittest.mock import MagicMock
+
+    db = MagicMock()
+    db.backend = 2  # mysql
+    cursor = db.get_cursor.return_value
+    cursor.fetchall.return_value = [("HandsStove",), ("Rank",)]
+
+    db_migrate.drop_all_tables(db)
+
+    statements = [c.args[0] for c in cursor.execute.call_args_list if c.args]
+    assert statements[0] == "SET FOREIGN_KEY_CHECKS = 0"
+    assert "SET FOREIGN_KEY_CHECKS = 1" in statements
+    assert any(s.startswith("DROP TABLE IF EXISTS HandsStove") for s in statements)
+    assert not any("CASCADE" in s for s in statements)  # CASCADE is PostgreSQL-only
+
+
 def test_migrate_fails_fast_when_fk_disable_fails():
     """On PostgreSQL, an unprivileged FK-disable must stop early, not cascade."""
     from unittest.mock import MagicMock

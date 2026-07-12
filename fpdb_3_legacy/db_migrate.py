@@ -61,6 +61,27 @@ def list_data_tables(db: Any) -> list[str]:
     return [row[0] for row in cursor.fetchall()]
 
 
+def drop_all_tables(db: Any) -> None:
+    """Drop every user table on ``db``, regardless of foreign keys or order.
+
+    Used to rebuild a destination schema from scratch before a migration. This
+    deliberately bypasses ``Database.drop_tables`` (whose MySQL path swallows
+    errors from its constraint-removal step and can leave tables behind, so a
+    following ``create_tables`` fails with "table already exists"). Foreign-key
+    constraints are neutralised per backend: FK checks off for MySQL, CASCADE
+    for PostgreSQL, and SQLite allows the drops directly.
+    """
+    cursor = db.get_cursor()
+    if db.backend == _MYSQL:
+        cursor.execute("SET FOREIGN_KEY_CHECKS = 0")
+    suffix = " CASCADE" if db.backend == _PGSQL else ""
+    for table in list_data_tables(db):
+        cursor.execute(f"DROP TABLE IF EXISTS {table}{suffix}")
+    if db.backend == _MYSQL:
+        cursor.execute("SET FOREIGN_KEY_CHECKS = 1")
+    db.commit()
+
+
 def _disable_fk(db: Any) -> None:
     """Disable foreign-key enforcement on ``db``.
 
