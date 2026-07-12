@@ -159,7 +159,7 @@ def test_drop_all_tables_disables_fk_checks_on_mysql():
 
 
 def test_migrate_fails_fast_when_fk_disable_fails():
-    """On PostgreSQL, an unprivileged FK-disable must stop early, not cascade."""
+    """If the destination FK teardown fails, migration must stop, not cascade."""
     from unittest.mock import MagicMock
 
     source = MagicMock()
@@ -168,8 +168,9 @@ def test_migrate_fails_fast_when_fk_disable_fails():
 
     dest = MagicMock()
     dest.backend = 3  # postgresql
+    # The pg_constraint lookup (first step of the PG teardown) is refused.
     dest.get_cursor.return_value.execute.side_effect = Exception(
-        "permission denied to set parameter session_replication_role",
+        "permission denied for table pg_constraint",
     )
 
     report = db_migrate.migrate(source, dest)
@@ -179,6 +180,42 @@ def test_migrate_fails_fast_when_fk_disable_fails():
     dest.rollback.assert_called()
     # It must not have attempted to copy any table into the aborted transaction.
     assert report.tables == {}
+
+
+def test_suspend_foreign_keys_drops_and_restore_readds_on_postgresql():
+    """PostgreSQL teardown must drop FK constraints and re-add them from defs."""
+    from unittest.mock import MagicMock
+
+    db = MagicMock()
+    db.backend = 3  # postgresql
+    cursor = db.get_cursor.return_value
+    cursor.fetchall.return_value = [
+        ("handsstove", "handsstove_rankid_fkey", "FOREIGN KEY (rankid) REFERENCES rank(id)"),
+    ]
+
+    token = db_migrate._suspend_foreign_keys(db)
+    drop_stmts = [c.args[0] for c in cursor.execute.call_args_list if c.args]
+    assert any("DROP CONSTRAINT" in s and "handsstove_rankid_fkey" in s for s in drop_stmts)
+    assert token  # constraints remembered for restore
+
+    cursor.reset_mock()
+    db_migrate._restore_foreign_keys(db, token)
+    add_stmts = [c.args[0] for c in cursor.execute.call_args_list if c.args]
+    assert any(
+        "ADD CONSTRAINT" in s and "FOREIGN KEY (rankid) REFERENCES rank(id)" in s for s in add_stmts
+    )
+
+
+def test_suspend_foreign_keys_uses_session_flag_on_mysql():
+    from unittest.mock import MagicMock
+
+    db = MagicMock()
+    db.backend = 2  # mysql
+    cursor = db.get_cursor.return_value
+
+    token = db_migrate._suspend_foreign_keys(db)
+    assert token is None
+    assert cursor.execute.call_args.args[0] == "SET FOREIGN_KEY_CHECKS = 0"
 
 
 if __name__ == "__main__":
