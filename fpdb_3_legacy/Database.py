@@ -1555,8 +1555,15 @@ class Database:
         self.hand_inc = 1
 
         if backend == Database.MYSQL_INNODB:
-            #####not working mysql connector on py3.9####
-            import MySQLdb
+            # Prefer mysqlclient (MySQLdb); fall back to the pure-Python pymysql
+            # shim so MySQL works without the system libraries mysqlclient needs.
+            try:
+                import MySQLdb
+            except ImportError:
+                import pymysql
+
+                pymysql.install_as_MySQLdb()
+                import MySQLdb
 
             # Note: SQLAlchemy 2.0 removed pool.manage
             # MySQLdb has its own connection pooling, so we don't need it

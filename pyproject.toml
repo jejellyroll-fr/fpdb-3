@@ -28,6 +28,7 @@ dependencies = [
     "mplfinance>=0.12.10b0",
     "xlrd==2.0.1",
     "playwright>=1.40.0",
+    "pymysql>=1.1.0",
 ]
 
 [project.optional-dependencies]
