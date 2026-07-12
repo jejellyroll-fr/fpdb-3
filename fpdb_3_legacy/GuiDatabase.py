@@ -266,14 +266,45 @@ class GuiDatabase(QWidget):
             return False
         return True
 
+    def _inspect_params(self, db_name: str) -> dict[str, Any]:
+        """Build db_backends.inspect_database kwargs from the configured entry."""
+        db = self.config.supported_databases[db_name]
+        if db.db_server == "sqlite":
+            return {"database": db.db_name, "sqlite_dir": getattr(self.config, "dir_database", None)}
+        return {
+            "database": db.db_name,
+            "host": db.db_ip,
+            "port": db.db_port,
+            "user": db.db_user,
+            "password": db.db_pass,
+        }
+
     def create_schema(self, db_name: str) -> db_backends.ConnectionResult:
         """Ensure the fpdb schema exists on the target database, non-destructively.
 
-        A database that already holds fpdb tables is left untouched (its data is
-        never dropped). An empty one is initialised via the same
-        create_tables()/createAllIndexes() path as first run. Note that SQLite
-        self-initialises on connect, so this mainly benefits PostgreSQL/MySQL.
+        The database is first inspected read-only. Only a genuinely *empty*
+        database is initialised; one that already holds the fpdb schema is a
+        no-op, and one holding foreign (non-fpdb) tables is refused untouched.
+        Inspecting before touching it matters for SQLite, where merely connecting
+        with ``Database`` would drop existing tables when the ``Settings`` table
+        is missing.
         """
+        db_entry = self.config.supported_databases.get(db_name)
+        if db_entry is None:
+            return db_backends.ConnectionResult(ok=False, message=f"Unknown database '{db_name}'.")
+
+        state, detail = db_backends.inspect_database(db_entry.db_server, **self._inspect_params(db_name))
+        if state == db_backends.STATE_UNREACHABLE:
+            return db_backends.ConnectionResult(ok=False, message=f"Could not connect: {detail}")
+        if state == db_backends.STATE_INITIALISED:
+            return db_backends.ConnectionResult(ok=True, message=f"'{db_name}' is already initialised.")
+        if state == db_backends.STATE_FOREIGN:
+            return db_backends.ConnectionResult(
+                ok=False,
+                message=f"'{db_name}' already contains non-fpdb tables — refusing to modify it.",
+            )
+
+        # state == STATE_EMPTY: safe to initialise.
         with self._selected(db_name):
             try:
                 db = Database.Database(self.config)
@@ -281,13 +312,11 @@ class GuiDatabase(QWidget):
                 log.exception("create_schema: could not connect to %r", db_name)
                 return db_backends.ConnectionResult(ok=False, message=f"Could not connect: {exc}")
             try:
-                if self._core_table_present(db):
-                    # Already initialised (existing data, or SQLite auto-created
-                    # it on connect) — do not touch it.
-                    return db_backends.ConnectionResult(ok=True, message=f"'{db_name}' is already initialised.")
-                db.create_tables()  # creates tables + fills default data + commits
-                db.createAllIndexes()
-                db.commit()
+                # SQLite self-creates the schema on connect; other backends need it.
+                if not self._core_table_present(db):
+                    db.create_tables()  # creates tables + fills default data + commits
+                    db.createAllIndexes()
+                    db.commit()
                 return db_backends.ConnectionResult(ok=True, message=f"Created fpdb schema in '{db_name}'.")
             except Exception as exc:  # noqa: BLE001 - report any schema-creation failure
                 log.exception("create_schema: failed for %r", db_name)

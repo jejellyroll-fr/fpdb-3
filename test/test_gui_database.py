@@ -200,13 +200,26 @@ def test_create_schema_leaves_existing_tables_untouched(_qapp):
 
     config = _fake_config([_fake_db("db", selected=True)])
     panel = m.GuiDatabase(config)
-    fake_db = MagicMock()  # get_cursor().execute() succeeds -> table present
-    with patch.object(m.Database, "Database", return_value=fake_db):
+    with patch.object(m.db_backends, "inspect_database", return_value=(m.db_backends.STATE_INITIALISED, "")), \
+            patch.object(m.Database, "Database") as build_db:
         result = panel.create_schema("db")
     assert result.ok is True
     assert "already initialised" in result.message
-    fake_db.create_tables.assert_not_called()  # never wipes/recreates existing data
-    fake_db.close_connection.assert_called_once()
+    build_db.assert_not_called()  # already an fpdb DB: never even connect with Database
+
+
+def test_create_schema_refuses_foreign_tables(_qapp):
+    """The Codex-flagged data-loss case: a DB with non-fpdb tables is left alone."""
+    from fpdb_3_legacy import GuiDatabase as m
+
+    config = _fake_config([_fake_db("db", selected=True)])
+    panel = m.GuiDatabase(config)
+    with patch.object(m.db_backends, "inspect_database", return_value=(m.db_backends.STATE_FOREIGN, "")), \
+            patch.object(m.Database, "Database") as build_db:
+        result = panel.create_schema("db")
+    assert result.ok is False
+    assert "non-fpdb tables" in result.message
+    build_db.assert_not_called()  # never hand a foreign DB to Database (which could drop it)
 
 
 def test_create_schema_creates_when_empty(_qapp):
@@ -216,7 +229,8 @@ def test_create_schema_creates_when_empty(_qapp):
     panel = m.GuiDatabase(config)
     fake_db = MagicMock()
     fake_db.get_cursor.return_value.execute.side_effect = Exception("no such table: Players")
-    with patch.object(m.Database, "Database", return_value=fake_db):
+    with patch.object(m.db_backends, "inspect_database", return_value=(m.db_backends.STATE_EMPTY, "")), \
+            patch.object(m.Database, "Database", return_value=fake_db):
         result = panel.create_schema("db")
     assert result.ok is True
     fake_db.create_tables.assert_called_once()
@@ -224,15 +238,17 @@ def test_create_schema_creates_when_empty(_qapp):
     fake_db.close_connection.assert_called_once()
 
 
-def test_create_schema_reports_connection_failure(_qapp):
+def test_create_schema_reports_unreachable(_qapp):
     from fpdb_3_legacy import GuiDatabase as m
 
     config = _fake_config([_fake_db("db", selected=True)])
     panel = m.GuiDatabase(config)
-    with patch.object(m.Database, "Database", side_effect=Exception("connection refused")):
+    with patch.object(m.db_backends, "inspect_database", return_value=(m.db_backends.STATE_UNREACHABLE, "refused")), \
+            patch.object(m.Database, "Database") as build_db:
         result = panel.create_schema("db")
     assert result.ok is False
     assert "Could not connect" in result.message
+    build_db.assert_not_called()
 
 
 def test_create_schema_restores_db_selected(_qapp):
@@ -241,7 +257,8 @@ def test_create_schema_restores_db_selected(_qapp):
     config = _fake_config([_fake_db("main", selected=True), _fake_db("other")])
     config.db_selected = "main"
     panel = m.GuiDatabase(config)
-    with patch.object(m.Database, "Database", return_value=MagicMock()):
+    with patch.object(m.db_backends, "inspect_database", return_value=(m.db_backends.STATE_EMPTY, "")), \
+            patch.object(m.Database, "Database", return_value=MagicMock()):
         panel.create_schema("other")
     assert config.db_selected == "main"  # temporary switch was reverted
 
@@ -273,6 +290,42 @@ def test_create_schema_real_sqlite(_qapp, tmp_path):
     again = panel.create_schema("fresh.db3")
     assert again.ok is True
     assert "already initialised" in again.message
+
+
+def test_create_schema_refuses_foreign_sqlite_file(_qapp, tmp_path):
+    """Codex regression: a non-fpdb SQLite file must be refused, not wiped."""
+    import shutil
+    import sqlite3
+
+    from fpdb_3_legacy import Configuration
+    from fpdb_3_legacy.GuiDatabase import GuiDatabase
+
+    # A user's own SQLite database with unrelated tables and data.
+    user_db = tmp_path / "user.db3"
+    conn = sqlite3.connect(str(user_db))
+    conn.execute("CREATE TABLE important (id INTEGER, note TEXT)")
+    conn.execute("INSERT INTO important VALUES (1, 'do not delete me')")
+    conn.commit()
+    conn.close()
+
+    cfg_path = tmp_path / "HUD_config.xml"
+    shutil.copy(CONFIG_TEMPLATE, cfg_path)
+    config = Configuration.Config(file=str(cfg_path))
+    config.dir_database = str(tmp_path)
+    config.add_db_parameters(db_name="user.db3", db_server="sqlite")
+
+    panel = GuiDatabase(config)
+    result = panel.create_schema("user.db3")
+
+    assert result.ok is False
+    assert "non-fpdb tables" in result.message
+    # The user's table and data must be completely intact.
+    conn = sqlite3.connect(str(user_db))
+    tables = {r[0] for r in conn.execute("SELECT name FROM sqlite_master WHERE type='table'")}
+    rows = conn.execute("SELECT note FROM important").fetchall()
+    conn.close()
+    assert "important" in tables
+    assert rows == [("do not delete me",)]
 
 
 if __name__ == "__main__":
