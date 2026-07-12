@@ -478,6 +478,28 @@ def test_recreate_schema_rebuilds_a_partial_schema(_qapp):
     fake_db.close_connection.assert_called_once()
 
 
+def test_recreate_schema_auth_failure_hints_create_database(_qapp):
+    """A PostgreSQL auth failure must point the user at 'Create database'."""
+    from fpdb_3_legacy import GuiDatabase as m
+
+    config = _fake_config([_fake_db("db", "postgresql", ip="localhost", user="fpdb", selected=True)])
+    panel = m.GuiDatabase(config)
+    detail = 'password authentication failed for user "fpdb"'
+    with patch.object(m.db_backends, "inspect_database", return_value=(m.db_backends.STATE_UNREACHABLE, detail)), \
+            patch.object(m.Database, "Database") as build_db:
+        result = panel._recreate_schema("db")
+    assert result.ok is False
+    assert "Create database" in result.message
+    build_db.assert_not_called()
+
+
+def test_connect_error_no_hint_for_non_auth_failure(_qapp):
+    from fpdb_3_legacy import GuiDatabase as m
+
+    message = m.GuiDatabase._connect_error("Connection refused", "postgresql")
+    assert "Create database" not in message  # not an auth problem
+
+
 def test_recreate_schema_refuses_foreign_tables(_qapp):
     from fpdb_3_legacy import GuiDatabase as m
 

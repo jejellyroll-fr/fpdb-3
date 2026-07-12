@@ -315,6 +315,19 @@ class GuiDatabase(QWidget):
             "password": db.db_pass,
         }
 
+    @staticmethod
+    def _connect_error(detail: str, server: str) -> str:
+        """Build a 'could not connect' message, hinting at Create database on auth failures."""
+        message = f"Could not connect: {detail}"
+        lowered = detail.lower()
+        auth_failure = any(s in lowered for s in ("authentication failed", "access denied", "password", "role"))
+        if server in _SERVER_BACKENDS and auth_failure:
+            message += (
+                "\n\nThe login account may not exist yet — use 'Create database' to create the "
+                "role/user (with the password from this entry) and the database, then retry."
+            )
+        return message
+
     def create_schema(self, db_name: str) -> db_backends.ConnectionResult:
         """Ensure the fpdb schema exists on the target database, non-destructively.
 
@@ -331,7 +344,7 @@ class GuiDatabase(QWidget):
 
         state, detail = db_backends.inspect_database(db_entry.db_server, **self._inspect_params(db_name))
         if state == db_backends.STATE_UNREACHABLE:
-            return db_backends.ConnectionResult(ok=False, message=f"Could not connect: {detail}")
+            return db_backends.ConnectionResult(ok=False, message=self._connect_error(detail, db_entry.db_server))
         if state == db_backends.STATE_INITIALISED:
             return db_backends.ConnectionResult(ok=True, message=f"'{db_name}' is already initialised.")
         if state == db_backends.STATE_FOREIGN:
@@ -391,7 +404,7 @@ class GuiDatabase(QWidget):
 
         state, detail = db_backends.inspect_database(db_entry.db_server, **self._inspect_params(db_name))
         if state == db_backends.STATE_UNREACHABLE:
-            return db_backends.ConnectionResult(ok=False, message=f"Could not connect: {detail}")
+            return db_backends.ConnectionResult(ok=False, message=self._connect_error(detail, db_entry.db_server))
         if state == db_backends.STATE_FOREIGN:
             return db_backends.ConnectionResult(
                 ok=False,
