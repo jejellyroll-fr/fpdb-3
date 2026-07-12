@@ -51,7 +51,12 @@ if __name__ == "__main__":
 log = get_logger("gui_auto_import")
 
 if os.name == "nt":
-    import win32console
+    try:
+        import win32console
+    except ImportError:
+        # pywin32 is optional (e.g. not installed in CI); console detection for
+        # the HUD launch degrades gracefully when it is unavailable.
+        win32console = None
 
 
 def to_raw(string) -> str:
@@ -503,7 +508,7 @@ class GuiAutoImport(QWidget):
 
         elif os.name == "nt":  # Windows installation source
             path = to_raw(self._hud_base_path())
-            use_pythonw = win32console.GetConsoleWindow() == 0
+            use_pythonw = win32console is not None and win32console.GetConsoleWindow() == 0
             # Use the current interpreter (e.g. the uv/venv python) so the
             # HUD subprocess shares the same environment and installed
             # packages (zmq, PyQt, ...). Falling back to a bare
@@ -547,7 +552,9 @@ class GuiAutoImport(QWidget):
             "universal_newlines": True,
         }
         # Capture stdout/err for windows « exe »
-        if self.config.install_method == "exe" or (os.name == "nt" and win32console.GetConsoleWindow() == 0):
+        if self.config.install_method == "exe" or (
+            os.name == "nt" and win32console is not None and win32console.GetConsoleWindow() == 0
+        ):
             popen_kwargs.update(stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
         if env is not None:
