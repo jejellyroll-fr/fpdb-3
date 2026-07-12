@@ -4766,3 +4766,26 @@ msgstr "Utilisateur :"
 
 msgid "View"
 msgstr "Affichage"
+
+# --- Vague 2: bulk import panel ---
+
+msgid "Importing..."
+msgstr "Importation en cours…"
+
+msgid "Bulk Import Error"
+msgstr "Erreur d'import massif"
+
+msgid "Configured Import Directories:"
+msgstr "Répertoires d'import configurés :"
+
+msgid "Path"
+msgstr "Chemin"
+
+msgid "Move imported files to:"
+msgstr "Déplacer les fichiers importés vers :"
+
+msgid "Move failed files to:"
+msgstr "Déplacer les fichiers en échec vers :"
+
+msgid "Choose a destination directory"
+msgstr "Choisir un répertoire de destination"

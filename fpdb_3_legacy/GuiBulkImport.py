@@ -41,12 +41,10 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from fpdb_3_legacy import Configuration
-from fpdb_3_legacy import Database
-from fpdb_3_legacy import Importer
-from fpdb_3_legacy import interlocks
-from fpdb_3_legacy.RegressionFileComparator import compare_importer_sidecars
+from fpdb_3_legacy import Configuration, Database, Importer, interlocks
+from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.loggingFpdb import get_logger
+from fpdb_3_legacy.RegressionFileComparator import compare_importer_sidecars
 
 #    fpdb/FreePokerTools modules
 
@@ -138,7 +136,7 @@ class GuiBulkImport(QWidget):
                 return
 
             self.load_button.setEnabled(False)
-            self.load_button.setText("Importing...")
+            self.load_button.setText(_("Importing..."))
             self.progress_bar.setVisible(True)
             self.progress_bar.setRange(0, 0)
 
@@ -157,12 +155,12 @@ class GuiBulkImport(QWidget):
             self.import_thread = BulkImportThread(self.importer, import_sources)
             self.import_thread.finished.connect(self.import_finished)
             self.import_thread.error.connect(self.import_error)
-            
+
             # Connect thread-safe progress signals to Main Thread slots
             self.import_thread.progress_started.connect(self.on_progress_started)
             self.import_thread.progress_updated.connect(self.on_progress_updated)
             self.import_thread.progress_completed.connect(self.on_progress_completed)
-            
+
             self.import_thread.start()
         else:
             log.warning("bulk import aborted - global lock not available")
@@ -201,7 +199,7 @@ class GuiBulkImport(QWidget):
         self.settings["global_lock"].release()
 
         self.load_button.setEnabled(True)
-        self.load_button.setText("Bulk Import")
+        self.load_button.setText(_("Bulk Import"))
         self.progress_bar.setVisible(False)
 
         # Always give the user explicit feedback. Without this, a run that finds
@@ -210,23 +208,35 @@ class GuiBulkImport(QWidget):
         if file_count == 0:
             QMessageBox.warning(
                 self,
-                "Bulk Import",
-                "No importable hand-history files were found in the selected "
-                "directories.\n\nCheck that the configured paths contain hand "
-                "histories (plain text files), not just archives or exports.",
+                _("Bulk Import"),
+                _(
+                    "No importable hand-history files were found in the selected "
+                    "directories.\n\nCheck that the configured paths contain hand "
+                    "histories (plain text files), not just archives or exports.",
+                ),
             )
         else:
             QMessageBox.information(
                 self,
-                "Bulk Import",
-                f"Import complete.\n\n"
-                f"Files processed: {file_count}\n"
-                f"Stored: {stored}\n"
-                f"Duplicates: {dups}\n"
-                f"Partial: {partial}\n"
-                f"Skipped: {skipped}\n"
-                f"Errors: {errs}\n"
-                f"Time: {elapsed:.2f}s",
+                _("Bulk Import"),
+                _(
+                    "Import complete.\n\n"
+                    "Files processed: {files}\n"
+                    "Stored: {stored}\n"
+                    "Duplicates: {dups}\n"
+                    "Partial: {partial}\n"
+                    "Skipped: {skipped}\n"
+                    "Errors: {errs}\n"
+                    "Time: {elapsed:.2f}s",
+                ).format(
+                    files=file_count,
+                    stored=stored,
+                    dups=dups,
+                    partial=partial,
+                    skipped=skipped,
+                    errs=errs,
+                    elapsed=f"{elapsed:.2f}",
+                ),
             )
 
         main_window = getattr(self, "main_window", None) or self.parent()
@@ -242,9 +252,9 @@ class GuiBulkImport(QWidget):
         self.settings["global_lock"].release()
 
         self.load_button.setEnabled(True)
-        self.load_button.setText("Bulk Import")
+        self.load_button.setText(_("Bulk Import"))
         self.progress_bar.setVisible(False)
-        QMessageBox.warning(self, "Bulk Import Error", error_msg)
+        QMessageBox.warning(self, _("Bulk Import Error"), error_msg)
 
     def get_vbox(self) -> Any:
         """Return the main widget container."""
@@ -267,7 +277,7 @@ class GuiBulkImport(QWidget):
         # Configured import directories
         self.import_tree = QTreeWidget()
         self.import_tree.setColumnCount(2)
-        self.import_tree.setHeaderLabels(["Site", "Path"])
+        self.import_tree.setHeaderLabels([_("Site"), _("Path")])
         self.import_tree.setColumnWidth(0, 200)
 
         # The project icons directory is located at the root of the project (parent of fpdb_3_legacy)
@@ -290,15 +300,15 @@ class GuiBulkImport(QWidget):
                     item.setCheckState(0, Qt.CheckState.Unchecked)
                     item.setIcon(0, icon)
 
-        self.layout().addWidget(QLabel("Configured Import Directories:"))
+        self.layout().addWidget(QLabel(_("Configured Import Directories:")))
         self.layout().addWidget(self.import_tree)
 
         # Custom import directory
         custom_dir_layout = QHBoxLayout()
         self.importDir = QLineEdit(self.settings.get("bulkImport-defaultPath", ""))
         custom_dir_layout.addWidget(self.importDir)
-        self.chooseButton = QPushButton("Browse...")
-        
+        self.chooseButton = QPushButton(_("Browse..."))
+
         browse_icon_path = icons_dir / "16x16" / "cil-folder-open.png"
         self.chooseButton.setIcon(QIcon(str(browse_icon_path)) if browse_icon_path.exists() else QIcon())
         self.chooseButton.clicked.connect(self.browseClicked)
@@ -307,18 +317,18 @@ class GuiBulkImport(QWidget):
 
         # Optional: relocate files once processed (backend in Importer).
         self.moveImportedCheck, self.moveImportedDir = self._build_move_row(
-            "Move imported files to:",
+            _("Move imported files to:"),
             checked=bool(self.settings.get("moveimportedfiles")),
             directory=self.settings.get("moveImportedFilesDir", ""),
         )
         self.moveFailedCheck, self.moveFailedDir = self._build_move_row(
-            "Move failed files to:",
+            _("Move failed files to:"),
             checked=bool(self.settings.get("movefailedfiles")),
             directory=self.settings.get("moveFailedFilesDir", ""),
         )
 
-        self.load_button = QPushButton("Bulk Import")
-        
+        self.load_button = QPushButton(_("Bulk Import"))
+
         download_icon_path = icons_dir / "16x16" / "cil-cloud-download.png"
         self.load_button.setIcon(QIcon(str(download_icon_path)) if download_icon_path.exists() else QIcon())
         self.load_button.clicked.connect(self.load_clicked)
@@ -341,7 +351,7 @@ class GuiBulkImport(QWidget):
         """Handle browse button click to select import directory."""
         newdir = QFileDialog.getExistingDirectory(
             self,
-            "Please choose the path that you want to Auto Import",
+            _("Please choose the path that you want to Auto Import"),
             self.importDir.text(),
         )
         if newdir:
@@ -358,7 +368,7 @@ class GuiBulkImport(QWidget):
         row.addWidget(checkbox)
         line_edit = QLineEdit(directory)
         row.addWidget(line_edit)
-        browse = QPushButton("Browse...")
+        browse = QPushButton(_("Browse..."))
         browse.clicked.connect(lambda: self._browse_into(line_edit))
         row.addWidget(browse)
         self.layout().addLayout(row)
@@ -366,7 +376,7 @@ class GuiBulkImport(QWidget):
 
     def _browse_into(self, line_edit: QLineEdit) -> None:
         """Open a directory chooser and write the result into ``line_edit``."""
-        newdir = QFileDialog.getExistingDirectory(self, "Choose a destination directory", line_edit.text())
+        newdir = QFileDialog.getExistingDirectory(self, _("Choose a destination directory"), line_edit.text())
         if newdir:
             line_edit.setText(newdir)
 
