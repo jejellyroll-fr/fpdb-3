@@ -180,6 +180,91 @@ def test_dialog_test_requires_name(_qapp):
     assert "name is required" in result.message
 
 
+# --- Phase 3: field validation ---------------------------------------------
+
+
+def _dialog_for(server, **fields):
+    from fpdb_3_legacy.GuiDatabase import DatabaseEditDialog
+
+    config = fields.pop("config", None) or _fake_config()
+    dialog = DatabaseEditDialog(config)
+    dialog.nameEdit.setText(fields.get("name", "db"))
+    dialog.backendCombo.setCurrentIndex(dialog.backendCombo.findData(server))
+    dialog.hostEdit.setText(fields.get("host", ""))
+    dialog.portEdit.setText(fields.get("port", ""))
+    return dialog
+
+
+def test_validate_requires_name(_qapp):
+    dialog = _dialog_for("sqlite", name="")
+    ok, message = dialog.validate()
+    assert ok is False
+    assert "name is required" in message
+
+
+def test_validate_rejects_duplicate_name_on_add(_qapp):
+    config = _fake_config([_fake_db("taken")])
+    dialog = _dialog_for("sqlite", name="taken", config=config)
+    ok, message = dialog.validate()
+    assert ok is False
+    assert "already exists" in message
+
+
+def test_validate_allows_existing_name_on_edit(_qapp):
+    from fpdb_3_legacy.GuiDatabase import DatabaseEditDialog
+
+    config = _fake_config([_fake_db("edit_me")])
+    dialog = DatabaseEditDialog(config, existing=config.supported_databases["edit_me"])
+    ok, _ = dialog.validate()
+    assert ok is True  # editing keeps its own name; not a duplicate
+
+
+def test_validate_requires_host_for_server_backends(_qapp):
+    dialog = _dialog_for("postgresql", name="pg", host="")
+    ok, message = dialog.validate()
+    assert ok is False
+    assert "host is required" in message.lower()
+
+
+def test_validate_rejects_non_numeric_port(_qapp):
+    dialog = _dialog_for("postgresql", name="pg", host="h", port="abc")
+    ok, message = dialog.validate()
+    assert ok is False
+    assert "Port must be" in message
+
+
+def test_validate_accepts_valid_server_config(_qapp):
+    dialog = _dialog_for("postgresql", name="pg", host="h", port="5432")
+    ok, _ = dialog.validate()
+    assert ok is True
+
+
+def test_validate_sqlite_needs_no_host(_qapp):
+    dialog = _dialog_for("sqlite", name="fpdb.db3")
+    ok, _ = dialog.validate()
+    assert ok is True
+
+
+def test_accept_blocks_on_invalid_input(_qapp):
+    from PySide6.QtWidgets import QDialog
+
+    from fpdb_3_legacy import GuiDatabase as m
+
+    dialog = _dialog_for("postgresql", name="pg", host="")  # missing host
+    with patch.object(m.QMessageBox, "warning") as warn:
+        dialog.accept()
+    warn.assert_called_once()
+    assert dialog.result() != QDialog.DialogCode.Accepted  # stays open
+
+
+def test_accept_passes_on_valid_input(_qapp):
+    from PySide6.QtWidgets import QDialog
+
+    dialog = _dialog_for("sqlite", name="fpdb.db3")
+    dialog.accept()
+    assert dialog.result() == QDialog.DialogCode.Accepted
+
+
 # --- Phase 2: switch-active prompt + create schema -------------------------
 
 
