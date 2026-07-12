@@ -126,6 +126,31 @@ class DatabaseEditDialog(QDialog):
             result["db_pass"] = self.passwordEdit.text()
         return result
 
+    def validate(self) -> tuple[bool, str]:
+        """Check the entered values; returns (ok, message) with the first error."""
+        vals = self.values()
+        name = vals["db_name"]
+        if not name:
+            return False, "A database name is required."
+        # On add, the name is the unique key across configured databases.
+        if self.existing is None and name in getattr(self.config, "supported_databases", {}):
+            return False, f"A database named '{name}' already exists."
+        if vals["db_server"] in _SERVER_BACKENDS:
+            if not vals.get("db_ip"):
+                return False, "A host is required for PostgreSQL/MySQL."
+            port = vals.get("db_port", "")
+            if port and not (port.isdigit() and 1 <= int(port) <= 65535):
+                return False, "Port must be a number between 1 and 65535."
+        return True, ""
+
+    def accept(self) -> None:
+        """Validate before closing; keep the dialog open on invalid input."""
+        ok, message = self.validate()
+        if not ok:
+            QMessageBox.warning(self, "Invalid database settings", message)
+            return
+        super().accept()
+
     def _on_test(self) -> None:
         result = self.test_connection()
         color = "green" if result.ok else "red"
