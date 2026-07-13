@@ -23,6 +23,7 @@ from __future__ import annotations
 import datetime
 import re
 from decimal import Decimal
+from typing import Any
 
 from fpdb_3_legacy.HandHistoryConverter import FpdbHandPartial, FpdbParseError, HandHistoryConverter
 from fpdb_3_legacy.loggingFpdb import get_logger
@@ -243,7 +244,7 @@ class PacificPoker(HandHistoryConverter):
         ]
 
     def determineGameType(self, handText):
-        info = {}
+        info: dict[str, Any] = {}
         m = self.re_GameInfo_old.search(handText)
         is_new = False
         if not m:
@@ -502,6 +503,8 @@ class PacificPoker(HandHistoryConverter):
         ):  # a list of streets which get dealt community cards (i.e. all but PREFLOP)
             # print "DEBUG readCommunityCards:", street, hand.streets.group(street)
             m = self.re_Board.search(hand.streets[street])
+            if m is None:
+                raise FpdbHandPartial("Could not identify community cards")
             cards = self.splitCards(m.group("CARDS"))
             hand.setCommunityCards(street, cards)
 
