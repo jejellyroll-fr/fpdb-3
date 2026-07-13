@@ -17,7 +17,7 @@ from __future__ import annotations
 import sys
 from functools import lru_cache
 from itertools import combinations_with_replacement
-from typing import Any
+from typing import Any, cast
 
 from fpdb_3_legacy.loggingFpdb import get_logger
 
@@ -547,11 +547,13 @@ def calcStartCards(hand: Any, player: Any) -> int:
     if category in ("holdem", "6_holdem", "fusion"):
         value1 = card_map.get(hcs[0][0])
         value2 = card_map.get(hcs[1][0])
+        if value1 is None or value2 is None:
+            return HOLDEM_UNKNOWN_HAND
         return twoStartCards(value1, hcs[0][1], value2, hcs[1][1])
     if "omaha" in category or "cour" in category:
-        return fourStartCardsValue(hcs[:4])
+        return fourStartCardsValue(list(hcs[:4]))
     if category in ("razz", "27_razz"):
-        idx = encodeRazzStartHand(hcs)
+        idx = encodeRazzStartHand(list(hcs))
         return idx + 184
     return HOLDEM_UNKNOWN_HAND
 
@@ -876,7 +878,8 @@ def fourStartCards(cards: list[tuple[str, str]]) -> str:
 
 @lru_cache(maxsize=1)
 def _omaha_rank_combos() -> list[tuple[int, int, int, int]]:
-    return sorted((tuple(reversed(combo)) for combo in combinations_with_replacement(range(CARD_VALUE_MIN, CARD_VALUE_MAX + 1), FOUR_CARDS)), reverse=True)
+    combos = combinations_with_replacement(range(CARD_VALUE_MIN, CARD_VALUE_MAX + 1), FOUR_CARDS)
+    return sorted((cast(tuple[int, int, int, int], tuple(reversed(combo))) for combo in combos), reverse=True)
 
 
 def _normalise_card_tuple(card: str | tuple[str, str]) -> tuple[int, str] | None:
@@ -914,7 +917,7 @@ def fourStartCardsValue(cards: list[str | tuple[str, str]]) -> int:
     if any(card is None for card in parsed):
         return HOLDEM_UNKNOWN_HAND
     normalised = [card for card in parsed if card is not None]
-    ranks = tuple(sorted((value for value, _suit in normalised), reverse=True))
+    ranks = cast(tuple[int, int, int, int], tuple(sorted((value for value, _suit in normalised), reverse=True)))
     try:
         rank_index = _omaha_rank_combos().index(ranks)
         suit_index = OMAHA_SUIT_CLASSES.index(omahaSuitClass(normalised))
@@ -3663,8 +3666,8 @@ def main(argv=None):
             ]
             for value1, suit1, value2, suit2 in example_cards:
                 try:
-                    result = twoStartCards(value1, suit1, value2, suit2)
-                    print(f"  twoStartCards({value1}{suit1}, {value2}{suit2}) = {result}")
+                    start_value = twoStartCards(value1, suit1, value2, suit2)
+                    print(f"  twoStartCards({value1}{suit1}, {value2}{suit2}) = {start_value}")
                 except CARD_CLI_ERRORS as e:
                     print(f"  twoStartCards({value1}{suit1}, {value2}{suit2}) = Error: {e}")
         except CARD_CLI_ERRORS as e:
@@ -3679,8 +3682,8 @@ def main(argv=None):
             ]
             for hand in test_hands:
                 try:
-                    result = is_suited(hand)
-                    print(f"  is_suited({hand}) = {result}")
+                    suited = is_suited(hand)
+                    print(f"  is_suited({hand}) = {suited}")
                 except CARD_CLI_ERRORS as e:
                     print(f"  is_suited({hand}) = Error: {e}")
         except CARD_CLI_ERRORS as e:
@@ -3718,8 +3721,8 @@ def main(argv=None):
         ]
         for value1, suit1, value2, suit2 in example_cards:
             try:
-                result = twoStartCards(value1, suit1, value2, suit2)
-                print(f"  twoStartCards({value1}{suit1}, {value2}{suit2}) = {result}")
+                start_value = twoStartCards(value1, suit1, value2, suit2)
+                print(f"  twoStartCards({value1}{suit1}, {value2}{suit2}) = {start_value}")
             except CARD_CLI_ERRORS as e:
                 print(f"  twoStartCards({value1}{suit1}, {value2}{suit2}) = Error: {e}")
 
@@ -3732,8 +3735,8 @@ def main(argv=None):
         ]
         for hand in test_hands:
             try:
-                result = is_suited(hand)
-                print(f"  is_suited({hand}) = {result}")
+                suited = is_suited(hand)
+                print(f"  is_suited({hand}) = {suited}")
             except CARD_CLI_ERRORS as e:
                 print(f"  is_suited({hand}) = Error: {e}")
 
@@ -3742,8 +3745,8 @@ def main(argv=None):
         print("Note: Use --interactive for full interactive testing")
         for idx in [0, 1, 10, 50]:
             try:
-                result = decodeRazzStartHand(idx)
-                print(f"  decodeRazzStartHand({idx}) = '{result}'")
+                razz_hand = decodeRazzStartHand(idx)
+                print(f"  decodeRazzStartHand({idx}) = '{razz_hand}'")
             except CARD_CLI_ERRORS as e:
                 print(f"  decodeRazzStartHand({idx}) = Error: {e}")
 
