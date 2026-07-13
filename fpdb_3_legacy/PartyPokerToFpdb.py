@@ -26,10 +26,8 @@ import re
 import time
 from decimal import Decimal, InvalidOperation
 
-from fpdb_3_legacy import Database
 from fpdb_3_legacy.HandHistoryConverter import FpdbHandPartial, FpdbParseError, HandHistoryConverter
 from fpdb_3_legacy.loggingFpdb import get_logger
-from fpdb_3_legacy.TourneySummary import TourneySummary
 
 # Getting configured logger
 log = get_logger("partypoker_parser")
@@ -366,14 +364,8 @@ class PartyPoker(HandHistoryConverter):
 
         log.info("Initialized base parser")
 
-        # Initialize database connection only if autostart=True (normal operation)
-        # Skip for testing scenarios where autostart=False
-        if autostart and not hasattr(self, "db"):
-            self.db = Database.Database(self.config)
-            log.debug(f"Initialized database connection config: {self.config!s}")
-
         log.debug(
-            f"Completed PartyPoker parser initialization sitename: {sitename}, has_db: {hasattr(self, 'db')}",
+            f"Completed PartyPoker parser initialization sitename: {sitename}",
         )
 
     def allHandsAsList(self):
@@ -1724,63 +1716,13 @@ class PartyPoker(HandHistoryConverter):
         if not hasattr(hand, "endTime"):
             hand.endTime = hand.startTime
 
-        # Create TourneySummary
-        try:
-            if not hasattr(self, "db"):
-                self.db = Database.Database(self.config)
-            summary = TourneySummary(
-                db=self.db,
-                config=self.config,
-                siteName=self.sitename,
-                summaryText=hand.handText,
-                builtFrom="HHC",
-                header="",
-            )
+        # During a normal import, Importer injects its existing database
+        # connection. Standalone parsing stays side-effect free.
+        if getattr(self, "db", None) is not None and hand.ranks:
+            from fpdb_3_legacy.PartyPokerSummary import PartyPokerSummary
 
-            # Set summary attributes
-            summary.tourNo = hand.tourNo
-            summary.buyin = hand.buyin
-            summary.fee = hand.fee
-            summary.buyinCurrency = hand.buyinCurrency
-            summary.currency = hand.buyinCurrency
-            summary.startTime = hand.startTime
-            summary.endTime = hand.endTime
-            summary.gametype = hand.gametype
-            summary.maxseats = hand.maxseats
-            summary.entries = hand.entries
-            summary.speed = "Normal"
-            summary.isSng = hand.isSng
-            summary.isRebuy = hand.isRebuy
-            summary.isAddOn = hand.isAddOn
-            summary.isKO = hand.isKO
-
-            # Add players to summary
-            for pname, rank in hand.ranks.items():
-                winnings = hand.winnings.get(pname, Decimal(0))
-                winningsCurrency = hand.buyinCurrency
-                summary.addPlayer(
-                    rank=rank,
-                    name=pname,
-                    winnings=int(winnings * 100),
-                    winningsCurrency=winningsCurrency,
-                    rebuyCount=0,
-                    addOnCount=0,
-                    koCount=0,
-                )
-
-                log.debug(
-                    f"Added player to summary method: PartyPoker:readTourneyResults, player: {pname}, rank: {rank}, winnings: {winnings}, currency: {winningsCurrency}",
-                )
-
+            summary = PartyPokerSummary.from_hand(self.db, self.config, hand, self.sitename)
             summary.insertOrUpdate()
-            log.debug(
-                f"Tournament summary saved method: PartyPoker:readTourneyResults, entries: {hand.entries}, prizepool: {hand.prizepool}",
-            )
-
-        except Exception as e:  # intentional broad catch: tournament summary persistence is best-effort.
-            log.exception(
-                f"Error processing tournament summary method: PartyPoker:readTourneyResults, error: {e!s}",
-            )
 
         log.debug(
             f"Exiting readTourneyResults method - method: PartyPoker:readTourneyResults, total_players: {len(hand.ranks)}, total_winners: {len(hand.winnings)}",

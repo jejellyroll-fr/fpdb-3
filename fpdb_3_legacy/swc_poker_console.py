@@ -809,7 +809,7 @@ class SwCPokerConsoleDialog(QDialog):
         
         # Step counter
         is_showdown = (self.current_step >= total_steps)
-        self.lbl_step_num.setText(f"Showdown" if (is_showdown and total_steps > 0) else f"Step {self.current_step} / {total_steps}")
+        self.lbl_step_num.setText("Showdown" if (is_showdown and total_steps > 0) else f"Step {self.current_step} / {total_steps}")
         
         # Render action history up to current step
         actions_text = ""

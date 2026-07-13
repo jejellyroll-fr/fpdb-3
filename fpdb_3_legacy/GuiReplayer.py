@@ -39,6 +39,7 @@ from PySide6.QtWidgets import (
 )
 
 from fpdb_3_legacy import SQL, Card, Configuration, Database, Deck, Hand
+from fpdb_3_legacy.equity import EquityUnavailableError, calculate_equity
 from fpdb_3_legacy.http_capture_ofc import OFCHand, build_ofc_hand, load_ofc_hand
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.loggingFpdb import get_logger
@@ -69,6 +70,35 @@ _RANK_VALUE = {r: i for i, r in enumerate("23456789TJQKA", start=2)}
 
 def _is_real_card(card: str) -> bool:
     return bool(card) and card not in {"0", "0x"} and len(card) == 2 and card[0] in _RANK_VALUE
+
+
+def replay_hero_equity(frame, hero_name: str, game: str, *, backend=None, iterations: int = 20_000) -> Decimal | None:
+    """Return hero equity for a replay frame when every live pocket is known."""
+    active_players = [player for player in frame.players if player.action != "folds"]
+    if len(active_players) < 2:
+        return None
+    pockets = []
+    hero_index = None
+    for player in active_players:
+        cards = list(player.holecards or [])
+        if not cards or not all(_is_real_card(card) for card in cards):
+            return None
+        if player.name == hero_name:
+            hero_index = len(pockets)
+        pockets.append(cards)
+    if hero_index is None:
+        return None
+
+    board = []
+    visible_streets = set(frame.render_board or ())
+    for street in ("FLOP", "TURN", "RIVER"):
+        if street in visible_streets:
+            board.extend(card for card in (frame.board.get(street) or []) if _is_real_card(card))
+    try:
+        result = calculate_equity(game, pockets, board, iterations=iterations, backend=backend)
+    except (EquityUnavailableError, RuntimeError, ValueError):
+        return None
+    return result.players[hero_index].equity
 
 
 def _rank_five(cards: list[str]) -> tuple:
@@ -2011,10 +2041,33 @@ class GuiReplayer(QWidget):
         if pot_after_call <= 0:
             return ""
         equity_needed = (call_amount / pot_after_call) * Decimal(100)
-        return f"Hero call {self.currency}{call_amount:.2f} · pot odds {equity_needed:.1f}%"
+        summary = f"Hero call {self.currency}{call_amount:.2f} · pot odds {equity_needed:.1f}%"
+        hand = self.replay_model.hand
+        category = hand.gametype.get("category", "")
+        game_info = Card.games.get(category)
+        game = game_info[1] if game_info else None
+        if not game:
+            return summary
+        cache = getattr(self, "_equity_cache", None)
+        if cache is None:
+            cache = self._equity_cache = {}
+        key = (
+            game,
+            tuple((player.name, tuple(player.holecards), player.action) for player in frame.players),
+            tuple(sorted(frame.render_board)),
+            tuple((street, tuple(frame.board.get(street) or [])) for street in ("FLOP", "TURN", "RIVER")),
+        )
+        if key not in cache:
+            cache[key] = replay_hero_equity(frame, self.Heroes, game)
+        equity = cache[key]
+        if equity is not None:
+            equity_pct = equity * Decimal(100)
+            edge = equity_pct - equity_needed
+            summary += f" · equity {equity_pct:.1f}% · edge {edge:+.1f} pts"
+        return summary
 
     def _draw_summary(self, painter: QPainter, frame: ReplayFrame, layout: ReplayLayout, current_index: int) -> None:
-        summary_width = min(420, max(260, layout.table_rect.width() * 0.34))
+        summary_width = min(620, max(300, layout.table_rect.width() * 0.46))
         if layout.timeline_rect.isNull():
             x = self.width() - summary_width - 28
         else:

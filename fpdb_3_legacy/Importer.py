@@ -1094,6 +1094,11 @@ class Importer:
                 ftpArchive=fpdbfile.archive,
                 sitename=fpdbfile.site.name,
             )
+            if filter_name == "PartyPoker":
+                # Party tournament results are embedded in hand histories.
+                # Reuse the Importer's connection without making standalone
+                # hand parsing open a database by itself.
+                hhc.db = self.database
             hhc.setAutoPop(self.mode == "auto")
             hhc.start()
 

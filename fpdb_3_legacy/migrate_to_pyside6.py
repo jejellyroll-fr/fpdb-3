@@ -220,7 +220,7 @@ class PySide6Migrator:
         print("=" * 70)
         print(f"Files processed:     {self.stats['files_processed']}")
         print(f"Files modified:      {Colors.GREEN}{self.stats['files_modified']}{Colors.NC}")
-        print(f"\nChanges made:")
+        print("\nChanges made:")
         print(f"  - Imports replaced:    {self.stats['imports_replaced']}")
         print(f"  - Signals replaced:    {self.stats['signals_replaced']}")
         print(f"  - QVariant removed:    {self.stats['qvariant_removed']}")

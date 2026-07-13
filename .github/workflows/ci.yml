@@ -8,6 +8,26 @@ on:
   workflow_dispatch:
 
 jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+      - name: Install Ruff
+        run: uv tool install ruff
+      - name: Enforce repository lint ratchet
+        run: ruff check fpdb_3_legacy fpdb test tests --select F541,F601
+      - name: Lint newly modernized modules
+        run: >-
+          ruff check
+          fpdb_3_legacy/equity.py
+          fpdb_3_legacy/PartyPokerSummary.py
+          test/test_equity.py
+          test/test_live_parser_regression.py
+          test/test_partypoker_summary.py
+          test/test_stats_known_hands.py
+          tests/helpers/parser_regression.py
+
   test:
     runs-on: ${{ matrix.os }}
     strategy:

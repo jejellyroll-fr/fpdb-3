@@ -163,7 +163,6 @@ class HudPreviewWidget(QWidget):
             "squeeze": "6.2",
             "iso": "31",
             "cold_call": "9",
-            "three_b": "9.0",
             "float_bet": "24",
             "float_turn": "18",
             "float_river": "12",

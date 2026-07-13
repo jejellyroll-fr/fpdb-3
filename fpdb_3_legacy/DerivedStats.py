@@ -24,14 +24,10 @@ from decimal import ROUND_DOWN, Decimal
 from typing import Any
 
 from fpdb_3_legacy import Card
+from fpdb_3_legacy.equity import EquityUnavailableError, calculate_equity, expected_pot_share, load_poker_eval
 from fpdb_3_legacy.loggingFpdb import get_logger
 
-try:
-    from pokereval import PokerEval
-
-    pokereval = PokerEval()
-except ImportError:
-    pokereval = None
+pokereval = load_poker_eval()
 
 
 # logging has been set up in fpdb.py or HUD_main.py, use their settings:
@@ -380,7 +376,7 @@ class DerivedStats:
         self.assembleHandsPlayers(hand)
         self.assembleHandsActions(hand)
 
-        if pokereval and hand.gametype["category"] in Card.games:
+        if pokereval and hand.gametype["category"] in Card.games and getattr(hand, "playerIds", None):
             self.assembleHandsStove(hand)
             self.assembleHandsPots(hand)
 
@@ -3364,8 +3360,8 @@ class DerivedStats:
                             board_id = (n + 1) if (len(board["board"]) > 1) else n
                             cards += board["board"][n] if (board["board"][n] and "omaha" not in evalgame) else []
                             bcards = board["board"][n] if (board["board"][n] and "omaha" in evalgame) else []
-                            cards = [str(c) if Card.encodeCardList.get(c) else "0x" for c in cards]
-                            bcards = [str(b) if Card.encodeCardList.get(b) else "0x" for b in bcards]
+                            cards = [str(c) if Card.encodeCard(c) else "0x" for c in cards]
+                            bcards = [str(b) if Card.encodeCard(b) else "0x" for b in bcards]
                             holecards[pname]["hole"] = cards[hrange[street_idx][0] : hrange[street_idx][1]]
                             holecards[pname]["cards"] += [cards]
                             notnull = ("0x" not in cards) and ("0x" not in bcards)
@@ -3594,21 +3590,18 @@ class DerivedStats:
         try:
             log.debug("Getting boards dict for hand %s", hand.handid)
             boards = {}
+            cumulative_board = []
 
             for street_name in streets:
                 try:
-                    if street_name in hand.board:
-                        board_cards = hand.board[street_name]
-
-                        # Check if this street had all-in action
-                        allin = False
-                        if street_name in hand.actions:
-                            street_actions = hand.actions[street_name]
-                            # If no actions on street, might be all-in
-                            if not street_actions:
-                                allin = True
-
-                        boards[street_name] = {"board": [board_cards], "allin": allin}
+                    if street_name == "PREFLOP" or street_name in hand.board:
+                        cumulative_board.extend(hand.board.get(street_name, []) or [])
+                        street_actions = hand.actions.get(street_name, [])
+                        allin = any(
+                            isinstance(action, (list, tuple)) and len(action) > 2 and action[-1] is True
+                            for action in street_actions
+                        )
+                        boards[street_name] = {"board": [list(cumulative_board)], "allin": allin}
                         log.debug("Added board for %s: %s", street_name, boards[street_name])
                     else:
                         log.error("Street %s not found in hand.board", street_name)
@@ -3686,30 +3679,41 @@ class DerivedStats:
             for street_name, street_data in boards.items():
                 if street_data.get("allin", False):
                     try:
-                        # Use pokereval to calculate equity
                         if pokereval:
-                            # Prepare data for pokereval
                             player_hands = []
+                            evaluated_players = []
                             for player in valid_players:
                                 if player in holecards:
                                     hole = holecards[player].get("hole", [])
                                     if hole and hole != ["0x", "0x"]:
                                         player_hands.append(hole)
+                                        evaluated_players.append(player)
 
                             if len(player_hands) >= MIN_PLAYERS_FOR_GAME:
                                 board_cards = street_data["board"][0] if street_data["board"] else []
 
-                                # Calculate equity using pokereval
-                                result = pokereval.poker_eval(game=game_type, pockets=player_hands, board=board_cards)
+                                result = calculate_equity(
+                                    game_type,
+                                    player_hands,
+                                    board_cards,
+                                    backend=pokereval,
+                                )
+                                pot = Decimal(hand.totalpot)
+                                rake = Decimal(hand.rake)
+                                for player, player_result in zip(evaluated_players, result.players, strict=True):
+                                    committed = Decimal(hand.pot.committed.get(player, 0)) + Decimal(
+                                        hand.pot.common.get(player, 0)
+                                    )
+                                    expected = expected_pot_share(player_result.equity, pot, rake)
+                                    self.handsplayers[player]["allInEV"] = int(100 * (expected - committed))
+                                    log.debug(
+                                        "Player %s all-in equity=%s expected-profit=%s",
+                                        player,
+                                        player_result.equity,
+                                        expected - committed,
+                                    )
 
-                                # Store results
-                                for i, player in enumerate(valid_players[: len(player_hands)]):
-                                    if i < len(result["eval"]):
-                                        equity = result["eval"][i]["ev"]
-                                        self.handsplayers[player]["allInEV"] = int(100 * equity)
-                                        log.debug("Player %s all-in EV: %s", player, equity)
-
-                    except RuntimeError:
+                    except (EquityUnavailableError, RuntimeError):
                         log.exception("RuntimeError in pokereval calculation")
                     except (AttributeError, KeyError, TypeError, ValueError):
                         log.exception("Error calculating equity for %s", street_name)

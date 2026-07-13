@@ -41,7 +41,7 @@ class TestNumPyMigration(unittest.TestCase):
         cumulative = cumsum(profits)
         self.assertEqual(len(cumulative), len(profits))
         self.assertAlmostEqual(cumulative[-1], sum(profits))
-        print(f"✅ cumsum() avec floats : OK")
+        print("✅ cumsum() avec floats : OK")
 
     def test_array_max_method(self):
         """Test array.max() - remplace numpy.max() déprécié."""
@@ -189,7 +189,7 @@ class TestSQLAlchemyCompatibility(unittest.TestCase):
         try:
             from sqlalchemy import pool
 
-            print(f"✅ sqlalchemy.pool importé avec succès")
+            print("✅ sqlalchemy.pool importé avec succès")
         except ImportError as e:
             self.fail(f"Impossible d'importer sqlalchemy.pool : {e}")
 
@@ -223,7 +223,7 @@ class TestMatplotlibCompatibility(unittest.TestCase):
             from matplotlib.backends.backend_qtagg import FigureCanvas
             from matplotlib.figure import Figure
 
-            print(f"✅ matplotlib QtAgg backend importé")
+            print("✅ matplotlib QtAgg backend importé")
         except ImportError as e:
             self.fail(f"Impossible d'importer backend QtAgg : {e}")
 
@@ -246,7 +246,7 @@ class TestMplfinanceCompatibility(unittest.TestCase):
         try:
             from mplfinance.original_flavor import candlestick_ochl
 
-            print(f"✅ mplfinance candlestick_ochl importé")
+            print("✅ mplfinance candlestick_ochl importé")
         except ImportError as e:
             self.fail(f"Impossible d'importer candlestick_ochl : {e}")
 

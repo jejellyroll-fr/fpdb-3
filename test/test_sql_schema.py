@@ -31,6 +31,16 @@ def test_postgresql_leaves_rank_unquoted():
     assert "`" not in query
 
 
+def test_hud_aggregation_projects_preflop_actions_by_position():
+    """Modern positional stats need both numerator and opportunity aliases."""
+    query = Sql(db_server="sqlite").query["get_stats_from_hand_aggregated"].lower()
+
+    for prefix in ("tb", "fb", "sqz"):
+        for position in ("bb", "sb", "btn", "co", "mp", "ep"):
+            assert f"as {prefix}_{position}" in query
+            assert f"as {prefix}_opp_{position}" in query
+
+
 if __name__ == "__main__":
     import pytest
 
