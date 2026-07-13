@@ -76,6 +76,7 @@ jobs:
           fpdb_3_legacy/ThemeManager.py
           fpdb_3_legacy/ThemeCreatorDialog.py
           fpdb_3_legacy/DetectInstalledSites.py
+          fpdb_3_legacy/detect_site.py
           fpdb_3_legacy/Card.py
           fpdb_3_legacy/Hand.py
           fpdb_3_legacy/HandHistory.py
