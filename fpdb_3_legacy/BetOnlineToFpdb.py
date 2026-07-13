@@ -20,7 +20,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 import datetime
 import re
 from decimal import Decimal
-from typing import Any, ClassVar
+from typing import Any, ClassVar, NoReturn
 
 from fpdb_3_legacy.HandHistoryConverter import FpdbHandPartial, FpdbParseError, HandHistoryConverter
 from fpdb_3_legacy.loggingFpdb import get_logger
@@ -289,7 +289,7 @@ class BetOnline(HandHistoryConverter):
             self._handle_missing_game_info(hand_text)
         return m
 
-    def _handle_missing_game_info(self, hand_text: str) -> None:
+    def _handle_missing_game_info(self, hand_text: str) -> NoReturn:
         """Handle cases where game info is not found."""
         # BetOnline starts writing the hh the moment you sit down.
         # Test if the hh contains the join line, and throw a partial if so.
@@ -327,7 +327,8 @@ class BetOnline(HandHistoryConverter):
             info["bb"] = self.clearMoneyString(mg["BB"])
 
         # Set currency
-        info["currency"] = self.currencies.get(mg.get("CURRENCY"), "USD")
+        currency = mg.get("CURRENCY")
+        info["currency"] = self.currencies.get(currency, "USD") if isinstance(currency, str) else "USD"
 
         # Set mix
         if "MIXED" in mg and mg["MIXED"] is not None:
@@ -568,6 +569,7 @@ class BetOnline(HandHistoryConverter):
     def markStreets(self, hand: Any) -> None:
         """Mark the different streets in the hand text."""
         self._process_draw_games(hand)
+        m: re.Match[str] | None = None
 
         if hand.gametype["base"] == "hold":
             m = self._mark_hold_streets(hand)
@@ -594,7 +596,7 @@ class BetOnline(HandHistoryConverter):
             discard_split[0] += "*** DRAW ***\r\n"
             hand.handText = "".join(discard_split)
 
-    def _mark_hold_streets(self, hand: Any) -> re.Match[str]:
+    def _mark_hold_streets(self, hand: Any) -> re.Match[str] | None:
         """Mark streets for hold'em games."""
         m = re.search(
             r"\*\*\* HOLE CARDS \*\*\*(?P<PREFLOP>.+(?=\*\*\* FLOP \*\*\*)|.+)"
@@ -612,7 +614,9 @@ class BetOnline(HandHistoryConverter):
 
         return m
 
-    def _handle_board_variations(self, hand: Any, m: re.Match[str], m2: re.Match[str]) -> re.Match[str]:
+    def _handle_board_variations(
+        self, hand: Any, m: re.Match[str], m2: re.Match[str]
+    ) -> re.Match[str] | None:
         """Handle board variations in hold'em games."""
         if m2.group("FLOP") and not m.group("FLOP"):
             return self._search_flop_board(hand)
@@ -622,7 +626,7 @@ class BetOnline(HandHistoryConverter):
             return self._search_river_board(hand)
         return m
 
-    def _search_flop_board(self, hand: Any) -> re.Match[str]:
+    def _search_flop_board(self, hand: Any) -> re.Match[str] | None:
         """Search for flop board pattern."""
         return re.search(
             r"\*\*\* HOLE CARDS \*\*\*(?P<PREFLOP>.+(?=Board )|.+)"
@@ -631,7 +635,7 @@ class BetOnline(HandHistoryConverter):
             re.DOTALL,
         )
 
-    def _search_turn_board(self, hand: Any) -> re.Match[str]:
+    def _search_turn_board(self, hand: Any) -> re.Match[str] | None:
         """Search for turn board pattern."""
         return re.search(
             r"\*\*\* HOLE CARDS \*\*\*(?P<PREFLOP>.+(?=\*\*\* FLOP \*\*\*)|.+)"
@@ -641,7 +645,7 @@ class BetOnline(HandHistoryConverter):
             re.DOTALL,
         )
 
-    def _search_river_board(self, hand: Any) -> re.Match[str]:
+    def _search_river_board(self, hand: Any) -> re.Match[str] | None:
         """Search for river board pattern."""
         return re.search(
             r"\*\*\* HOLE CARDS \*\*\*(?P<PREFLOP>.+(?=\*\*\* FLOP \*\*\*)|.+)"
@@ -652,7 +656,7 @@ class BetOnline(HandHistoryConverter):
             re.DOTALL,
         )
 
-    def _mark_stud_streets(self, hand: Any) -> re.Match[str]:
+    def _mark_stud_streets(self, hand: Any) -> re.Match[str] | None:
         """Mark streets for stud games."""
         return re.search(
             r"(?P<ANTES>.+(?=\*\*\* 3rd STREET \*\*\*)|.+)"
@@ -665,7 +669,7 @@ class BetOnline(HandHistoryConverter):
             re.DOTALL,
         )
 
-    def _mark_draw_streets(self, hand: Any) -> re.Match[str]:
+    def _mark_draw_streets(self, hand: Any) -> re.Match[str] | None:
         """Mark streets for draw games."""
         if hand.gametype["category"] in ("27_1draw", "fivedraw"):
             return re.search(
@@ -704,6 +708,8 @@ class BetOnline(HandHistoryConverter):
                     hand.setCommunityCards(street, cards)
             else:
                 m = self.re_board2.search(hand.streets[street])
+                if m is None:
+                    raise FpdbParseError("Could not identify community cards")
                 cards = m.group("CARDS").split(" ")
                 cards = [c[:-1].replace("10", "T") + c[-1].lower() for c in cards]
                 hand.setCommunityCards(street, cards)
@@ -766,8 +772,9 @@ class BetOnline(HandHistoryConverter):
         if self.skin in ("ActionPoker", "GearPoker"):
             if hand.gametype["sb"] is None and hand.gametype["bb"] is not None:
                 bb_doubled = str(Decimal(hand.gametype["bb"]) * 2)
-                if self.Lim_Blinds.get(bb_doubled) is not None:
-                    hand.gametype["sb"] = self.Lim_Blinds.get(bb_doubled)[0]
+                blinds = self.Lim_Blinds.get(bb_doubled)
+                if blinds is not None:
+                    hand.gametype["sb"] = blinds[0]
             elif hand.gametype["bb"] is None and hand.gametype["sb"] is not None:
                 for _k, v in list(self.Lim_Blinds.items()):
                     if hand.gametype["sb"] == v[0]:
@@ -819,7 +826,7 @@ class BetOnline(HandHistoryConverter):
                     newcards = found.group("NEWCARDS").split(" ")
                     newcards = [c[:-1].replace("10", "T") + c[-1].lower() for c in newcards]
                 if found.group("OLDCARDS") is None:
-                    oldcards = []
+                    oldcards: list[str] = []
                 else:
                     oldcards = found.group("OLDCARDS").split(" ")
                     oldcards = [c[:-1].replace("10", "T") + c[-1].lower() for c in oldcards]
@@ -977,7 +984,7 @@ class BetOnline(HandHistoryConverter):
         """Returns string to search in windows titles."""
         if type_ == "tour":
             return r"\(" + re.escape(str(tournament)) + r"\-" + re.escape(str(table_number)) + r"\)"
-        return re.escape(table_name)
+        return re.escape(table_name or "")
 
     def readSTP(self, hand: Any) -> None:
         """Read Splash the Pot - not implemented for BetOnline."""
