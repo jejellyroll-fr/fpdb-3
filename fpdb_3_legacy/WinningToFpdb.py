@@ -23,7 +23,7 @@ from __future__ import annotations
 import datetime
 import re
 from decimal import Decimal
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 # _ = L10n.get_translation()
 from fpdb_3_legacy.HandHistoryConverter import FpdbHandPartial, FpdbParseError, HandHistoryConverter
@@ -555,7 +555,7 @@ class Winning(HandHistoryConverter):
 
     def _determineGameType2(self, handText):
         log.debug("Starting _determineGameType2")
-        info = {}
+        info: dict[str, Any] = {}
         log.debug(f"Input handText: {handText[:200]}...")
         log.debug(f"Attempting regex match with handText: {handText[:200]}")
         m = self.re_GameInfo2.search(handText)
@@ -858,9 +858,9 @@ class Winning(HandHistoryConverter):
                     hand.buyin = 0
                     hand.fee = 0
                     hand.buyinCurrency = "FREE"  # Default value for tournaments
-                    m2 = self.re_Table2.match(info[key])
-                    if m2:
-                        hand.tablename = m2.group("TABLENO")
+                    table_match = self.re_Table2.match(info[key])
+                    if table_match:
+                        hand.tablename = table_match.group("TABLENO")
                         log.debug(f"Table number: {hand.tablename}")
                 else:
                     hand.tablename = info[key]
@@ -1291,7 +1291,7 @@ class Winning(HandHistoryConverter):
                 continue  # already processed these
             log.debug(f"Processing street: {street}")
             m = self.re_HeroCards1.finditer(hand.streets[street])
-            players = {}
+            players: dict[str, list[str]] = {}
             for found in m:
                 player = found.group("PNAME")
                 card = found.group("CARD").replace("10", "T")
@@ -1371,7 +1371,7 @@ class Winning(HandHistoryConverter):
         for street in ("PREFLOP", "DEAL"):
             if street in hand.streets:
                 log.debug(f"Processing street: {street}")
-                newcards = []
+                newcards: list[str] = []
                 m = self.re_HeroCards2.finditer(hand.streets[street])
                 for found in m:
                     hand.hero = found.group("PNAME")
@@ -1623,7 +1623,7 @@ class Winning(HandHistoryConverter):
             bovadaUncalled_v1 = False
             bovadaUncalled_v2 = False
             blindsantes = 0
-            adjustment = 0
+            adjustment = Decimal("0")
 
             if acts is not None and len([a for a in acts if a[1] != "folds"]) == 0:
                 log.debug("All actions in PREFLOP are folds, checking uncalled bets")
