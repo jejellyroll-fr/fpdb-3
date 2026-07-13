@@ -25,7 +25,7 @@ import datetime
 import re
 from decimal import Decimal
 from re import Match
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING, Any, ClassVar
 
 from fpdb_3_legacy.HandHistoryConverter import FpdbHandPartial, FpdbParseError, HandHistoryConverter
 from fpdb_3_legacy.loggingFpdb import get_logger
@@ -235,7 +235,7 @@ class Cake(HandHistoryConverter):
         re.MULTILINE,
     )
 
-    def compilePlayerRegexs(self, hand: "Hand") -> None:  # noqa: ARG002
+    def compilePlayerRegexs(self, hand: "Hand") -> None:  # type: ignore[override]  # noqa: ARG002
         """Compile player-dependent regexes.
 
         Cake's player-related regexes (``re_hero_cards``, ``re_shown_cards``,
@@ -275,7 +275,7 @@ class Cake(HandHistoryConverter):
 
         """
         # Initialize dictionary to store game type info
-        info = {}
+        info: dict[str, Any] = {}
 
         # Search for game info in hand text - try tournament formats first
         m = self.re_game_info_tournament.search(hand_text)
@@ -417,7 +417,7 @@ class Cake(HandHistoryConverter):
         if not self.re_trim.match(hand.handText):
             hand.handText = "".join(self.re_trim.split(hand.handText)[1:])
 
-        info = {}
+        info: dict[str, Any] = {}
         # Try tournament formats first
         m = self.re_game_info_tournament.search(hand.handText)
         if m is None:
@@ -455,7 +455,7 @@ class Cake(HandHistoryConverter):
 
             # extract hand ID
             elif key == "HID":
-                hand.handid = re.sub("[A-Z]+", "", info[key])
+                hand.handid = re.sub("[A-Z]+", "", info[key])  # type: ignore[assignment]
 
             # extract table name
             if key == "TABLE":
@@ -560,6 +560,8 @@ class Cake(HandHistoryConverter):
         if street in ("FLOP", "TURN", "RIVER"):
             # Parse the community cards from the hand object's streets dictionary
             m = self.re_board.search(hand.streets[street])
+            if m is None:
+                raise FpdbHandPartial("Could not identify community cards")
             # Set the community cards in the hand object
             hand.setCommunityCards(street, m.group("CARDS").split(","))
 
@@ -592,7 +594,7 @@ class Cake(HandHistoryConverter):
         """
         if m := self.re_bring_in.search(hand.handText, re.DOTALL):
             # The BringIn information was found, add it to the hand object.
-            hand.addBringIn(m.group("PNAME"), self.convertMoneyString("BRINGIN", m))
+            hand.addBringIn(m.group("PNAME"), self.convertMoneyString("BRINGIN", m))  # type: ignore[attr-defined]
 
     def readBlinds(self, hand: "Hand") -> None:
         """Parses the hand text and extracts the blinds information.
@@ -792,7 +794,7 @@ class Cake(HandHistoryConverter):
                     player = m.group("PNAME").replace("_", " ")
 
                 # Add shown cards to the hand.
-                hand.addShownCards(
+                hand.addShownCards(  # type: ignore[attr-defined]
                     cards=cards,
                     player=player,
                     shown=shown,
