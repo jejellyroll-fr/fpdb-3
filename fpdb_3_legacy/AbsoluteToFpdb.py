@@ -145,30 +145,28 @@ class Absolute(HandHistoryConverter):
             self.compiledPlayers = players
             player_re = "(?P<PNAME>" + "|".join(map(re.escape, players)) + ")"
             # (?P<CURRENCY>\$| €|)(?P<BB>[0-9]*[.0-9]+)
-            self.re_PostSB = re.compile(r"^%s - Posts small blind (?:\$| €|)(?P<SB>[,.0-9]+)" % player_re, re.MULTILINE)
-            self.re_PostBB = re.compile(r"^%s - Posts big blind (?:\$| €|)(?P<BB>[.,0-9]+)" % player_re, re.MULTILINE)
-            self.re_Post = re.compile(r"^%s - Posts (?:\$| €|)(?P<BB>[.,0-9]+)$" % player_re, re.MULTILINE)
+            self.re_PostSB = re.compile(r"^{} - Posts small blind (?:\$| €|)(?P<SB>[,.0-9]+)".format(player_re), re.MULTILINE)
+            self.re_PostBB = re.compile(r"^{} - Posts big blind (?:\$| €|)(?P<BB>[.,0-9]+)".format(player_re), re.MULTILINE)
+            self.re_Post = re.compile(r"^{} - Posts (?:\$| €|)(?P<BB>[.,0-9]+)$".format(player_re), re.MULTILINE)
             # TODO: Absolute posting when coming in new: %s - Posts $0.02 .. should that be a new Post line? where do we need to add support for that? *confused*
             self.re_PostBoth = re.compile(
-                r"^%s - Posts (dead )?(?:\$| €|)(?P<BB>[,.0-9]+) (dead )?(?:\$| €|)(?P<SB>[,.0-9]+)" % player_re,
+                r"^{} - Posts (dead )?(?:\$| €|)(?P<BB>[,.0-9]+) (dead )?(?:\$| €|)(?P<SB>[,.0-9]+)".format(player_re),
                 re.MULTILINE,
             )
             self.re_Action = re.compile(
-                r"^%s - (?P<ATYPE>Bets |Raises |All-In |All-In\(Raise\) |Calls |Folds|Checks)?\$?(?P<BET>[,.0-9]+)?"
-                % player_re,
+                r"^{} - (?P<ATYPE>Bets |Raises |All-In |All-In\(Raise\) |Calls |Folds|Checks)?\$?(?P<BET>[,.0-9]+)?".format(player_re),
                 re.MULTILINE,
             )
             self.re_ShowdownAction = re.compile(
-                r"^%s - Shows \[(?P<CARDS>.*)\] \((?P<STRING>.+?)\)" % player_re, re.MULTILINE
+                r"^{} - Shows \[(?P<CARDS>.*)\] \((?P<STRING>.+?)\)".format(player_re), re.MULTILINE
             )
             self.re_CollectPot = re.compile(
-                r"^Seat [0-9]: %s(?: \(dealer\)|)(?: \(big blind\)| \(small blind\)|) (?:won|collected) Total \((?:\$| €|)(?P<POT>[,.0-9]+)\)(.*72 Prop Win \((?:\$| €|)(?P<PROP>[,.0-9]+)\))?"
-                % player_re,
+                r"^Seat [0-9]: {}(?: \(dealer\)|)(?: \(big blind\)| \(small blind\)|) (?:won|collected) Total \((?:\$| €|)(?P<POT>[,.0-9]+)\)(.*72 Prop Win \((?:\$| €|)(?P<PROP>[,.0-9]+)\))?".format(player_re),
                 re.MULTILINE,
             )
-            self.re_Antes = re.compile(r"^%s - Ante (?:\$| €|)(?P<ANTE>[,.0-9]+)" % player_re, re.MULTILINE)
-            self.re_BringIn = re.compile(r"^%s - Bring-In (?:\$| €|)(?P<BRINGIN>[.0-9]+)\." % player_re, re.MULTILINE)
-            self.re_HeroCards = re.compile(r"^(Dealt to )?%s (- Pocket )?\[(?P<CARDS>.*)\]" % player_re, re.MULTILINE)
+            self.re_Antes = re.compile(r"^{} - Ante (?:\$| €|)(?P<ANTE>[,.0-9]+)".format(player_re), re.MULTILINE)
+            self.re_BringIn = re.compile(r"^{} - Bring-In (?:\$| €|)(?P<BRINGIN>[.0-9]+)\.".format(player_re), re.MULTILINE)
+            self.re_HeroCards = re.compile(r"^(Dealt to )?{} (- Pocket )?\[(?P<CARDS>.*)\]".format(player_re), re.MULTILINE)
 
     def readSupportedGames(self):
         return [
@@ -355,7 +353,7 @@ class Absolute(HandHistoryConverter):
         # community cards by type hand but it might be worth checking somehow.
         # if street in ('FLOP','TURN','RIVER'):
         #    a list of streets which get dealt community cards (i.e. all but PREFLOP)
-        log.debug("readCommunityCards (%s)" % street)
+        log.debug("readCommunityCards ({})".format(street))
         m = self.re_Board.search(hand.streets[street])
         cards = m.group("CARDS")
         cards = [validCard(card) for card in cards.split(" ")]
@@ -365,7 +363,7 @@ class Absolute(HandHistoryConverter):
         log.debug(_("reading antes"))
         m = self.re_Antes.finditer(hand.handText)
         for player in m:
-            log.debug("hand.addAnte(%s,%s)" % (player.group("PNAME"), player.group("ANTE")))
+            log.debug("hand.addAnte({},{})".format(player.group("PNAME"), player.group("ANTE")))
             hand.addAnte(player.group("PNAME"), player.group("ANTE"))
 
     def readBringIn(self, hand):
@@ -399,7 +397,7 @@ class Absolute(HandHistoryConverter):
                 if acts["ATYPE"] == "All-In ":
                     if acts["BET"] is None:
                         # timeout all-in
-                        raise FpdbHandPartial("Partial hand history: %s" % hand.handid)
+                        raise FpdbHandPartial("Partial hand history: {}".format(hand.handid))
                     bet = acts["BET"].replace(",", "")
                     if found_small:
                         hand.addBlind(acts["PNAME"], "big blind", bet)
@@ -469,7 +467,7 @@ class Absolute(HandHistoryConverter):
             elif action.group("ATYPE") == "Bets " or action.group("ATYPE") == "All-In ":
                 if action.group("BET") is None:
                     # timeout all-in
-                    raise FpdbHandPartial("Partial hand history: %s" % hand.handid)
+                    raise FpdbHandPartial("Partial hand history: {}".format(hand.handid))
                 bet = action.group("BET").replace(",", "")
                 hand.setUncalledBets(None)
                 hand.addBet(street, action.group("PNAME"), bet)

@@ -112,17 +112,16 @@ class OnGame(HandHistoryConverter):
     # Table:\s(\[SPEED\]\s)?(?P<TABLE>[-\'\w\#\s\.]+)\s\[\d+\]\s\(
     re_HandInfo = re.compile(
         """
-            \\*{5}\\sHistory\\sfor\\shand\\s(?P<HID>[-A-Z\\d]+)(?P<TOUR>\\s\\(TOURNAMENT:(\\s\"(?P<NAME>.+?)\",)?\\s(?P<TID>[-A-Z\\d]+)?(?P<BUY>,\\sbuy-in:\\s(?P<BUYINCUR>[%(LS)s]?)(?P<BUYIN>[%(NUM)s]+))?\\))?\\s\\*{5}\\s?
+            \\*{{5}}\\sHistory\\sfor\\shand\\s(?P<HID>[-A-Z\\d]+)(?P<TOUR>\\s\\(TOURNAMENT:(\\s\"(?P<NAME>.+?)\",)?\\s(?P<TID>[-A-Z\\d]+)?(?P<BUY>,\\sbuy-in:\\s(?P<BUYINCUR>[{LS}]?)(?P<BUYIN>[{NUM}]+))?\\))?\\s\\*{{5}}\\s?
             Start\\shand:\\s(?P<DATETIME>.+?)\\s?
             Table:\\s(\\[SPEED\\]\\s)?(?P<TABLE>.+?)\\s\\[(?P<TABLENO>\\d+)\\]\\s\\(
             (
             (?P<LIMIT>NO_LIMIT|Limit|LIMIT|Pot\\sLimit|POT_LIMIT)\\s
             (?P<GAME>TEXAS_HOLDEM|OMAHA_HI|OMAHA_HI_LO|SEVEN_CARD_STUD|SEVEN_CARD_STUD_HI_LO|RAZZ|FIVE_CARD_DRAW)\\s
-            (?P<CURRENCY>%(LS)s|)?(?P<SB>[%(NUM)s]+)/(%(LS)s)?(?P<BB>[%(NUM)s]+),\\s(ante:\\s(%(LS)s)?[%(NUM)s]+,\\s)?
+            (?P<CURRENCY>{LS}|)?(?P<SB>[{NUM}]+)/({LS})?(?P<BB>[{NUM}]+),\\s(ante:\\s({LS})?[{NUM}]+,\\s)?
             (?P<MONEY>Play\\smoney|Real\\smoney|TC|Chips)?\\)
             )
-            """
-        % substitutions,
+            """.format(**substitutions),
         re.MULTILINE | re.DOTALL | re.VERBOSE,
     )
 
@@ -149,7 +148,7 @@ class OnGame(HandHistoryConverter):
     # Seat 5: mleo17 ($9.37)
     # Seat 2: Montferat (1500)
     re_PlayerInfo = re.compile(
-        "Seat (?P<SEAT>[0-9]+):\\s(?P<PNAME>.*)\\s\\((%(LS)s)?(?P<CASH>[%(NUM)s]+)\\)" % substitutions
+        "Seat (?P<SEAT>[0-9]+):\\s(?P<PNAME>.*)\\s\\(({LS})?(?P<CASH>[{NUM}]+)\\)".format(**substitutions)
     )
 
     def compilePlayerRegexs(self, hand):
@@ -166,49 +165,48 @@ class OnGame(HandHistoryConverter):
             # player_re = "(?P<PNAME>" + "|".join(map(re.escape, players)) + ")"
             # subst = {'PLYR': player_re, 'CUR': self.sym[hand.gametype['currency']]}
             self.re_PostSB = re.compile(
-                "%(PLYR)s posts small blind \\((%(CUR)s)?(?P<SB>[%(NUM)s]+)\\)" % self.substitutions, re.MULTILINE
+                "{PLYR} posts small blind \\(({CUR})?(?P<SB>[{NUM}]+)\\)".format(**self.substitutions), re.MULTILINE
             )
             self.re_PostBB = re.compile(
-                "%(PLYR)s posts big blind \\((%(CUR)s)?(?P<BB>[%(NUM)s]+)\\)" % self.substitutions, re.MULTILINE
+                "{PLYR} posts big blind \\(({CUR})?(?P<BB>[{NUM}]+)\\)".format(**self.substitutions), re.MULTILINE
             )
             self.re_Antes = re.compile(
-                r"^%(PLYR)s posts ante (%(CUR)s)?(?P<ANTE>[%(NUM)s]+)" % self.substitutions, re.MULTILINE
+                r"^{PLYR} posts ante ({CUR})?(?P<ANTE>[{NUM}]+)".format(**self.substitutions), re.MULTILINE
             )
             self.re_BringIn = re.compile(
-                r"^%(PLYR)s (small|big) bring in (%(CUR)s)?(?P<BRINGIN>[%(NUM)s]+)" % self.substitutions, re.MULTILINE
+                r"^{PLYR} (small|big) bring in ({CUR})?(?P<BRINGIN>[{NUM}]+)".format(**self.substitutions), re.MULTILINE
             )
             self.re_PostBoth = re.compile(
-                "%(PLYR)s posts small \\& big blind \\( (%(CUR)s)?(?P<SBBB>[%(NUM)s]+)\\)" % self.substitutions
+                "{PLYR} posts small \\& big blind \\( ({CUR})?(?P<SBBB>[{NUM}]+)\\)".format(**self.substitutions)
             )
             self.re_PostDead = re.compile(
-                "%(PLYR)s posts dead blind \\((%(CUR)s)?(?P<DEAD>[%(NUM)s]+)\\)" % self.substitutions, re.MULTILINE
+                "{PLYR} posts dead blind \\(({CUR})?(?P<DEAD>[{NUM}]+)\\)".format(**self.substitutions), re.MULTILINE
             )
             self.re_HeroCards = re.compile(
-                "(New\\shand\\sfor|Dealing\\sto)\\s%(PLYR)s:\\s\\[(?P<CARDS>.*)\\]" % self.substitutions
+                "(New\\shand\\sfor|Dealing\\sto)\\s{PLYR}:\\s\\[(?P<CARDS>.*)\\]".format(**self.substitutions)
             )
 
             self.re_Action = re.compile(
-                "(, )?%(PLYR)s(?P<ATYPE> bets| checks| raises| calls| folds| changed)( (%(CUR)s)?(?P<BET>[%(NUM)s]+))?( to (%(CUR)s)?(?P<BET2>[%(NUM)s]+))?( and is all-in)?"
-                % self.substitutions
+                "(, )?{PLYR}(?P<ATYPE> bets| checks| raises| calls| folds| changed)( ({CUR})?(?P<BET>[{NUM}]+))?( to ({CUR})?(?P<BET2>[{NUM}]+))?( and is all-in)?".format(**self.substitutions)
             )
             # self.re_Board = re.compile(r"\[board cards (?P<CARDS>.+) \]")
 
             # Uchilka shows [ KC,JD ]
-            self.re_ShowdownAction = re.compile("%(PLYR)s shows \\[ (?P<CARDS>.+) \\]" % self.substitutions)
+            self.re_ShowdownAction = re.compile("{PLYR} shows \\[ (?P<CARDS>.+) \\]".format(**self.substitutions))
 
             # Main pot: $3.57 won by mleo17 ($3.40)
             # Side pot 1: $3.26 won by maac_5 ($3.10)
             # Main pot: $2.87 won by maac_5 ($1.37), sagi34 ($1.36)
             self.re_Pot = re.compile("(Main|Side)\\spot(\\s\\d+)?:\\s.*won\\sby(?P<POT>.*$)", re.MULTILINE)
             self.re_CollectPot = re.compile(
-                "\\s(?P<PNAME>.+?)\\s\\((%(CUR)s)?(?P<POT>[%(NUM)s]+)(\\s(High|Low))?\\)" % self.substitutions
+                "\\s(?P<PNAME>.+?)\\s\\(({CUR})?(?P<POT>[{NUM}]+)(\\s(High|Low))?\\)".format(**self.substitutions)
             )
             # Seat 5: mleo17 ($3.40), net: +$2.57, [Jd, Qd] (TWO_PAIR QUEEN, JACK)
             self.re_ShownCards = re.compile(
                 "^Seat (?P<SEAT>[0-9]+): (?P<PNAME>.*) \\(.*\\), net:.* \\[(?P<CARDS>.*)\\](?:[ \\t]+\\((?P<STRING>.+)\\))?.*",
                 re.MULTILINE,
             )
-            self.re_sitsOut = re.compile("%(PLYR)s sits out" % self.substitutions, re.MULTILINE)
+            self.re_sitsOut = re.compile("{PLYR} sits out".format(**self.substitutions), re.MULTILINE)
 
     def readSupportedGames(self):
         return [
@@ -310,7 +308,7 @@ class OnGame(HandHistoryConverter):
                 # So we need to re-interpret te string to be useful
                 a = self.re_DateTime.search(info[key])
                 if a:
-                    datetimestr = "%s/%s/%s %s:%s:%s" % (
+                    datetimestr = "{}/{}/{} {}:{}:{}".format(
                         a.group("Y"),
                         a.group("M"),
                         a.group("D"),
@@ -575,12 +573,11 @@ class OnGame(HandHistoryConverter):
         "Returns string to search in windows titles"
         regex = re.escape(str(table_name))
         if type == "tour":
-            regex = "%s" % table_number
+            regex = "{}".format(table_number)
         log.info(
-            "OnGame.getTableTitleRe: table_name='%s' tournament='%s' table_number='%s'"
-            % (table_name, tournament, table_number)
+            "OnGame.getTableTitleRe: table_name='{}' tournament='{}' table_number='{}'".format(table_name, tournament, table_number)
         )
-        log.info("OnGame.getTableTitleRe: returns: '%s'" % (regex))
+        log.info("OnGame.getTableTitleRe: returns: '{}'".format(regex))
         return regex
 
     def readSTP(self, hand):

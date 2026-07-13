@@ -96,31 +96,28 @@ class Entraction(HandHistoryConverter):
           \\s(?P<HID>[0-9]+)\\s-\\s
           (?P<GAME>Texas\\sHold\'em|Omaha\\sHigh|5-Card\\sOmaha\\sHigh)\\s
           (?P<LIMIT>No\\sLimit|Pot\\sLimit|Fixed\\sLimit)\\s
-          (?P<CURRENCY>%(LEGAL_ISO)s|)?\\s?
-          (?P<SB>[%(NUM)s]+)/
-          (?P<BB>[%(NUM)s]+)\\s
-          (and\\s[%(NUM)s]+\\sante\\s)?
+          (?P<CURRENCY>{LEGAL_ISO}|)?\\s?
+          (?P<SB>[{NUM}]+)/
+          (?P<BB>[{NUM}]+)\\s
+          (and\\s[{NUM}]+\\sante\\s)?
           \\-\\sTable\\s\"(?P<TABLE>.+?)(\\s(?P<TOURNO>\\d+)\\s(?P<TABLENO>\\d+))?\"
-        """
-        % substitutions,
+        """.format(**substitutions),
         re.MULTILINE | re.VERBOSE,
     )
 
     re_PlayerInfo = re.compile(
         """
           ^(?P<PNAME>.*)\\s
-          \\((%(LEGAL_ISO)s)?\\s?(?P<CASH>[%(NUM)s]+)\\s
-          in\\sseat\\s(?P<SEAT>[0-9]+)\\)"""
-        % substitutions,
+          \\(({LEGAL_ISO})?\\s?(?P<CASH>[{NUM}]+)\\s
+          in\\sseat\\s(?P<SEAT>[0-9]+)\\)""".format(**substitutions),
         re.MULTILINE | re.VERBOSE,
     )
 
     re_HandInfo = re.compile(
         """
           \\s(?P<HID>[0-9]+)\\s-\\s.+?
-          Table\\s"(?P<TABLE>(?P<BUYIN>(?P<BIAMT>[%(LS)s%(NUM)s]+)?\\+?(?P<BIRAKE>[%(NUM)s]+)?)?.+?)(\\s(?P<TOURNO>\\d+)\\s(?P<TABLENO>\\d+))?\"
-        """
-        % substitutions,
+          Table\\s"(?P<TABLE>(?P<BUYIN>(?P<BIAMT>[{LS}{NUM}]+)?\\+?(?P<BIRAKE>[{NUM}]+)?)?.+?)(\\s(?P<TOURNO>\\d+)\\s(?P<TABLENO>\\d+))?\"
+        """.format(**substitutions),
         re.MULTILINE | re.VERBOSE,
     )
 
@@ -138,29 +135,28 @@ class Entraction(HandHistoryConverter):
         """(?P<Y>[0-9]{4})\\/(?P<M>[0-9]{2})\\/(?P<D>[0-9]{2})[\\- ]+(?P<H>[0-9]+):(?P<MIN>[0-9]+):(?P<S>[0-9]+)""",
         re.MULTILINE,
     )
-    re_PostSB = re.compile(r"^Small Blind: {16}(?P<PNAME>.*)\s+\((?P<SB>[%(NUM)s]+)\)" % substitutions, re.MULTILINE)
-    re_PostBB = re.compile(r"^Big Blind: {18}(?P<PNAME>.*)\s+\((?P<BB>[%(NUM)s]+)\)" % substitutions, re.MULTILINE)
+    re_PostSB = re.compile(r"^Small Blind: {{16}}(?P<PNAME>.*)\s+\((?P<SB>[{NUM}]+)\)".format(**substitutions), re.MULTILINE)
+    re_PostBB = re.compile(r"^Big Blind: {{18}}(?P<PNAME>.*)\s+\((?P<BB>[{NUM}]+)\)".format(**substitutions), re.MULTILINE)
     re_PostBoth = re.compile(
-        r"^Small \+ Big Blind: {10}(?P<PNAME>.*)\s+\((?P<SBBB>[%(NUM)s]+)\)" % substitutions, re.MULTILINE
+        r"^Small \+ Big Blind: {{10}}(?P<PNAME>.*)\s+\((?P<SBBB>[{NUM}]+)\)".format(**substitutions), re.MULTILINE
     )
     re_PostSecondSB = re.compile(
-        r"^Blind out of turn: {10}(?P<PNAME>.*)\s+\((?P<SB>[%(NUM)s]+)\)" % substitutions, re.MULTILINE
+        r"^Blind out of turn: {{10}}(?P<PNAME>.*)\s+\((?P<SB>[{NUM}]+)\)".format(**substitutions), re.MULTILINE
     )
-    re_Antes = re.compile(r"^%(PLYR)s\s+Ante\s+\((?P<ANTE>[%(NUM)s]+)\)" % substitutions, re.MULTILINE)
+    re_Antes = re.compile(r"^{PLYR}\s+Ante\s+\((?P<ANTE>[{NUM}]+)\)".format(**substitutions), re.MULTILINE)
     re_BringIn = re.compile(
-        r"^%(PLYR)s: brings[- ]in( low|) for %(CUR)s(?P<BRINGIN>[%(NUM)s]+)" % substitutions, re.MULTILINE
+        r"^{PLYR}: brings[- ]in( low|) for {CUR}(?P<BRINGIN>[{NUM}]+)".format(**substitutions), re.MULTILINE
     )
-    re_HeroCards = re.compile(r"^%(PLYR)s was dealt:\s+(?P<CARDS>.+)" % substitutions, re.MULTILINE)
+    re_HeroCards = re.compile(r"^{PLYR} was dealt:\s+(?P<CARDS>.+)".format(**substitutions), re.MULTILINE)
     re_Action = re.compile(
         r"""
-                        ^%(PLYR)s\s+(?P<ATYPE>Fold|Check|Call|Bet|Raise|All\-In)\s+?
-                        (\((?P<BET>[%(NUM)s]+)\))?$"""
-        % substitutions,
+                        ^{PLYR}\s+(?P<ATYPE>Fold|Check|Call|Bet|Raise|All\-In)\s+?
+                        (\((?P<BET>[{NUM}]+)\))?$""".format(**substitutions),
         re.MULTILINE | re.VERBOSE,
     )
-    re_ShowdownAction = re.compile(r"^%(PLYR)s\sdidn\'t\sshow\shand\s\((?P<CARDS>.+)\)" % substitutions, re.MULTILINE)
-    re_ShownCards = re.compile(r"^%(PLYR)s\sshows:\s+(?P<CARDS>.+)\s\((?P<STRING>.+?)\)" % substitutions, re.MULTILINE)
-    re_CollectPot = re.compile(r"^%(PLYR)s\swins:\s+(%(LEGAL_ISO)s)\s(?P<POT>[%(NUM)s]+)" % substitutions, re.MULTILINE)
+    re_ShowdownAction = re.compile(r"^{PLYR}\sdidn\'t\sshow\shand\s\((?P<CARDS>.+)\)".format(**substitutions), re.MULTILINE)
+    re_ShownCards = re.compile(r"^{PLYR}\sshows:\s+(?P<CARDS>.+)\s\((?P<STRING>.+?)\)".format(**substitutions), re.MULTILINE)
+    re_CollectPot = re.compile(r"^{PLYR}\swins:\s+({LEGAL_ISO})\s(?P<POT>[{NUM}]+)".format(**substitutions), re.MULTILINE)
 
     def compilePlayerRegexs(self, hand):
         pass
@@ -242,7 +238,7 @@ class Entraction(HandHistoryConverter):
 
         for key in info:
             if key == "Y":
-                datetimestr = "%s/%s/%s %s:%s:%s" % (info["Y"], info["M"], info["D"], info["H"], info["MIN"], info["S"])
+                datetimestr = "{}/{}/{} {}:{}:{}".format(info["Y"], info["M"], info["D"], info["H"], info["MIN"], info["S"])
                 hand.startTime = datetime.datetime.strptime(datetimestr, "%Y/%m/%d %H:%M:%S")
                 if info["TZ"]:
                     hand.startTime = HandHistoryConverter.changeTimezone(hand.startTime, info["TZ"], "UTC")
@@ -269,7 +265,7 @@ class Entraction(HandHistoryConverter):
                             # FIXME: handle other currencies, play money
                             log.error(
                                 _("EntractionToFpdb.readHandInfo: Failed to detect currency.")
-                                + " Hand ID: %s: '%s'" % (hand.handid, info[key])
+                                + " Hand ID: {}: '{}'".format(hand.handid, info[key])
                             )
                             raise FpdbParseError
 

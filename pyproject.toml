@@ -78,6 +78,18 @@ ignore = [
     "E713",
 ]
 
+[tool.ruff.lint.per-file-ignores]
+# Legacy display/SQL formatting uses width-sensitive percent specifiers that
+# require dedicated migrations rather than unsafe mechanical rewrites.
+"fpdb_3_legacy/Configuration.py" = ["UP031"]
+"fpdb_3_legacy/Database.py" = ["UP031"]
+"fpdb_3_legacy/DerivedStats.py" = ["UP031"]
+"fpdb_3_legacy/GuiGraphViewer.py" = ["UP031"]
+"fpdb_3_legacy/GuiTourneyGraphViewer.py" = ["UP031"]
+"fpdb_3_legacy/Mucked.py" = ["UP031"]
+"fpdb_3_legacy/PokerStarsSummary.py" = ["UP031"]
+"fpdb_3_legacy/Stats.py" = ["UP031"]
+
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["fpdb_3_legacy", "fpdb_3_legacy.*", "fpdb", "fpdb.*"]

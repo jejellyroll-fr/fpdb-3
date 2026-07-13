@@ -115,48 +115,47 @@ class Boss(HandHistoryConverter):
     # <ACTION TYPE="HAND_BLINDS" PLAYER="prato" KIND="HAND_SB" VALUE="0.25"></ACTION>
 
     re_PostSB = re.compile(
-        r'^<ACTION TYPE="HAND_BLINDS" PLAYER="%s" KIND="HAND_SB" VALUE="(?P<SB>[.0-9]+)"></ACTION>' % player_re,
+        r'^<ACTION TYPE="HAND_BLINDS" PLAYER="{}" KIND="HAND_SB" VALUE="(?P<SB>[.0-9]+)"></ACTION>'.format(player_re),
         re.MULTILINE,
     )
     re_PostBB = re.compile(
-        r'^<ACTION TYPE="HAND_BLINDS" PLAYER="%s" KIND="HAND_BB" VALUE="(?P<BB>[.0-9]+)"></ACTION>' % player_re,
+        r'^<ACTION TYPE="HAND_BLINDS" PLAYER="{}" KIND="HAND_BB" VALUE="(?P<BB>[.0-9]+)"></ACTION>'.format(player_re),
         re.MULTILINE,
     )
     re_PostDSB = re.compile(
-        r'^<ACTION TYPE="HAND_BLINDS" PLAYER="%s" KIND="HAND_DSB" VALUE="(?P<DSB>[.0-9]+)"></ACTION>' % player_re,
+        r'^<ACTION TYPE="HAND_BLINDS" PLAYER="{}" KIND="HAND_DSB" VALUE="(?P<DSB>[.0-9]+)"></ACTION>'.format(player_re),
         re.MULTILINE,
     )
     re_PostBoth = re.compile(
-        r'^<ACTION TYPE="HAND_BLINDS" PLAYER="%s" KIND="HAND_AB" VALUE="(?P<SBBB>[.0-9]+)"></ACTION>' % player_re,
+        r'^<ACTION TYPE="HAND_BLINDS" PLAYER="{}" KIND="HAND_AB" VALUE="(?P<SBBB>[.0-9]+)"></ACTION>'.format(player_re),
         re.MULTILINE,
     )
     re_Antes = re.compile(
-        r'^<ACTION TYPE="HAND_ANTE" PLAYER="%s" VALUE="(?P<ANTE>[.0-9]+)"></ACTION>' % player_re, re.MULTILINE
+        r'^<ACTION TYPE="HAND_ANTE" PLAYER="{}" VALUE="(?P<ANTE>[.0-9]+)"></ACTION>'.format(player_re), re.MULTILINE
     )
-    re_BringIn = re.compile(r"^%s: brings[- ]in( low|) for \$?(?P<BRINGIN>[.0-9]+)" % player_re, re.MULTILINE)
+    re_BringIn = re.compile(r"^{}: brings[- ]in( low|) for \$?(?P<BRINGIN>[.0-9]+)".format(player_re), re.MULTILINE)
     re_FlopPot = re.compile(r'^<ACTION TYPE="HAND_BOARD" VALUE="BOARD_FLOP" POT="(?P<POT>[.0-9]+)"', re.MULTILINE)
     re_DrawPot = re.compile(r'^<ACTION TYPE="HAND_BOARD" POT="(?P<POT>[.0-9]+)"', re.MULTILINE)
     re_ShowDownPot = re.compile(r'^<SHOWDOWN NAME="HAND_SHOWDOWN" POT="(?P<POT>[.0-9]+)"', re.MULTILINE)
 
     re_HeroCards = re.compile(
-        r'PLAYER="%s">(?P<CARDS>(\s+<CARD LINK="[0-9]+"></CARD>){2,5})</ACTION>' % player_re, re.MULTILINE
+        r'PLAYER="{}">(?P<CARDS>(\s+<CARD LINK="[0-9]+"></CARD>){{2,5}})</ACTION>'.format(player_re), re.MULTILINE
     )
 
     #'^<ACTION TYPE="(?P<ATYPE>[_A-Z]+)" PLAYER="%s"( VALUE="(?P<BET>[.0-9]+)")?></ACTION>'
     re_Action = re.compile(
-        r'^<ACTION TYPE="(?P<ATYPE>[_A-Z]+)" PLAYER="%s"( VALUE="(?P<BET>[.0-9]+)")?></ACTION>' % player_re,
+        r'^<ACTION TYPE="(?P<ATYPE>[_A-Z]+)" PLAYER="{}"( VALUE="(?P<BET>[.0-9]+)")?></ACTION>'.format(player_re),
         re.MULTILINE,
     )
 
     re_ShowdownAction = re.compile(
-        r'<RESULT (WINTYPE="WINTYPE_(HILO|LO|HI)" )?PLAYER="%s" WIN="[.\d]+" HAND=".+">(?P<CARDS>(\s+<CARD LINK="[0-9]+"></CARD>){2,5})</RESULT>'
-        % player_re,
+        r'<RESULT (WINTYPE="WINTYPE_(HILO|LO|HI)" )?PLAYER="{}" WIN="[.\d]+" HAND=".+">(?P<CARDS>(\s+<CARD LINK="[0-9]+"></CARD>){{2,5}})</RESULT>'.format(player_re),
         re.MULTILINE,
     )
     # <RESULT PLAYER="wig0r" WIN="4.10" HAND="$(STR_G_WIN_TWOPAIR) $(STR_G_CARDS_TENS) $(STR_G_ANDTEXT) $(STR_G_CARDS_EIGHTS)">
     #
     re_CollectPot = re.compile(
-        r'<RESULT (WINTYPE="WINTYPE_(HILO|LO|HI)" )?PLAYER="%s" WIN="(?P<POT>[.\d]+)" HAND=".+"' % player_re,
+        r'<RESULT (WINTYPE="WINTYPE_(HILO|LO|HI)" )?PLAYER="{}" WIN="(?P<POT>[.\d]+)" HAND=".+"'.format(player_re),
         re.MULTILINE,
     )
 
@@ -292,7 +291,7 @@ class Boss(HandHistoryConverter):
         for a in m:
             # <ACTION TYPE="HAND_DEAL" PLAYER="Player38">
             m1 = re.search(
-                r'<ACTION TYPE="HAND_DEAL" PLAYER="%s">' % re.escape(a.group("PNAME")), hand.handText, re.MULTILINE
+                r'<ACTION TYPE="HAND_DEAL" PLAYER="{}">'.format(re.escape(a.group("PNAME"))), hand.handText, re.MULTILINE
             )
             if m1:
                 hand.addPlayer(int(a.group("SEAT")), a.group("PNAME"), a.group("CASH"))

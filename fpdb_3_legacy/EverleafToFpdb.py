@@ -61,24 +61,21 @@ class Everleaf(HandHistoryConverter):
     re_TailSplitHands = re.compile(r"(\n\n\n+)")
     re_HID = re.compile(r"(Game\s\#|partie\s)(?P<HID>[0-9]+)")
     re_GameInfo = re.compile(
-        r"^(Blinds )? ?(?P<CURRENCY>[%(LS)s]?)(?P<SB>[%(NUM)s]+) ?/ ? ?[%(LS)s]?(?P<BB>[%(NUM)s]+) (?P<LIMIT>NL|PL|) ?(?P<GAME>(Hold\'em|Omaha|7\sCard\sStud))"
-        % substitutions,
+        r"^(Blinds )? ?(?P<CURRENCY>[{LS}]?)(?P<SB>[{NUM}]+) ?/ ? ?[{LS}]?(?P<BB>[{NUM}]+) (?P<LIMIT>NL|PL|) ?(?P<GAME>(Hold\'em|Omaha|7\sCard\sStud))".format(**substitutions),
         re.MULTILINE,
     )
     re_HandInfo = re.compile(
-        r".*\n(.*#|.* partie )[0-9]+.*(\n|\n\n)(Blinds )? ?(?P<CURRENCY>[%(LS)s])?(?P<SB>[%(NUM)s]+) ?/ ?(?:[%(LS)s])?(?P<BB>[%(NUM)s]+) (?P<GAMETYPE>.+?)(\s-\s(?P<MAX>\d+)\sMax)? - (?P<DATETIME>\d\d\d\d/\d\d/\d\d - \d\d:\d\d:\d\d)\nTable (?P<TABLE>.+$)"
-        % substitutions,
+        r".*\n(.*#|.* partie )[0-9]+.*(\n|\n\n)(Blinds )? ?(?P<CURRENCY>[{LS}])?(?P<SB>[{NUM}]+) ?/ ?(?:[{LS}])?(?P<BB>[{NUM}]+) (?P<GAMETYPE>.+?)(\s-\s(?P<MAX>\d+)\sMax)? - (?P<DATETIME>\d\d\d\d/\d\d/\d\d - \d\d:\d\d:\d\d)\nTable (?P<TABLE>.+$)".format(**substitutions),
         re.MULTILINE,
     )
     re_Button = re.compile(r"^Seat (?P<BUTTON>\d+) is the button$", re.MULTILINE)
     re_PlayerInfo = re.compile(
         r"""^Seat\s(?P<SEAT>[0-9]+):\s(?P<PNAME>.*)\s+
                                     \(
-                                      \s+[%(LS)s]?\s?(?P<CASH>[%(NUM)s]+)
+                                      \s+[{LS}]?\s?(?P<CASH>[{NUM}]+)
                                           (\s(USD|EURO|EUR|Chips|GEL)?(new\splayer|All-in)?)?
                                   \s?\)$
-                                  """
-        % substitutions,
+                                  """.format(**substitutions),
         re.MULTILINE | re.VERBOSE,
     )
     re_Board = re.compile(r"\[ (?P<CARDS>.+) \]")
@@ -92,47 +89,44 @@ class Everleaf(HandHistoryConverter):
             self.compiledPlayers = players
 
             self.re_PostSB = re.compile(
-                r"^%(PLAYERS)s: posts small blind \[ ?[%(LS)s]? ?(?P<SB>[%(NUM)s]+)\s?.*\]$" % self.substitutions,
+                r"^{PLAYERS}: posts small blind \[ ?[{LS}]? ?(?P<SB>[{NUM}]+)\s?.*\]$".format(**self.substitutions),
                 re.MULTILINE,
             )
             self.re_PostBB = re.compile(
-                r"^%(PLAYERS)s: posts big blind \[ ?[%(LS)s]? ?(?P<BB>[%(NUM)s]+)\s?.*\]$" % self.substitutions,
+                r"^{PLAYERS}: posts big blind \[ ?[{LS}]? ?(?P<BB>[{NUM}]+)\s?.*\]$".format(**self.substitutions),
                 re.MULTILINE,
             )
             self.re_PostBoth = re.compile(
-                r"^%(PLAYERS)s: posts both blinds \[ ?[%(LS)s]? ?(?P<SBBB>[%(NUM)s]+)\s.*\]$" % self.substitutions,
+                r"^{PLAYERS}: posts both blinds \[ ?[{LS}]? ?(?P<SBBB>[{NUM}]+)\s.*\]$".format(**self.substitutions),
                 re.MULTILINE,
             )
             self.re_Antes = re.compile(
-                r"^%(PLAYERS)s: posts ante \[ ?[%(LS)s]? ?(?P<ANTE>[%(NUM)s]+)\s.*\]$" % self.substitutions,
+                r"^{PLAYERS}: posts ante \[ ?[{LS}]? ?(?P<ANTE>[{NUM}]+)\s.*\]$".format(**self.substitutions),
                 re.MULTILINE,
             )
             self.re_BringIn = re.compile(
-                r"^%(PLAYERS)s posts bring-in  ?[%(LS)s]?\s?(?P<BRINGIN>[%(NUM)s]+)\." % self.substitutions,
+                r"^{PLAYERS} posts bring-in  ?[{LS}]?\s?(?P<BRINGIN>[{NUM}]+)\.".format(**self.substitutions),
                 re.MULTILINE,
             )
             self.re_Completes = re.compile(
-                r"^%(PLAYERS)s completes to  ?[%(LS)s]?\s?(?P<BET>[%(NUM)s]+)\." % self.substitutions, re.MULTILINE
+                r"^{PLAYERS} completes to  ?[{LS}]?\s?(?P<BET>[{NUM}]+)\.".format(**self.substitutions), re.MULTILINE
             )
             self.re_HeroCards = re.compile(
-                r"^Dealt to %(PLAYERS)s \[ (?P<CARDS>.*) \]$" % self.substitutions, re.MULTILINE
+                r"^Dealt to {PLAYERS} \[ (?P<CARDS>.*) \]$".format(**self.substitutions), re.MULTILINE
             )
             # ^%s(?P<ATYPE>: bets| checks| raises| calls| folds)(\s\[(?:\$| €|) (?P<BET>[.,\d]+) (USD|EURO|EUR|Chips)\])?
             self.re_Action = re.compile(
-                r"^%(PLAYERS)s(?P<ATYPE>: bets| checks| raises| calls| folds)(\s\[(?: ?[%(LS)s]?) ?(?P<BET>[%(NUM)s]+)\s?(USD|EURO|EUR|Chips|GEL|)\])?"
-                % self.substitutions,
+                r"^{PLAYERS}(?P<ATYPE>: bets| checks| raises| calls| folds)(\s\[(?: ?[{LS}]?) ?(?P<BET>[{NUM}]+)\s?(USD|EURO|EUR|Chips|GEL|)\])?".format(**self.substitutions),
                 re.MULTILINE,
             )
             self.re_ShowdownAction = re.compile(
                 # The combination may be separated from the cards by a space or
                 # glued directly to the bracket (Partouche skin), or absent.
-                r"^%(PLAYERS)s (?P<SHOWED>shows|mucks) \[ (?P<CARDS>.*?) \](?:[ \t]*(?P<STRING>.+))?$"
-                % self.substitutions,
+                r"^{PLAYERS} (?P<SHOWED>shows|mucks) \[ (?P<CARDS>.*?) \](?:[ \t]*(?P<STRING>.+))?$".format(**self.substitutions),
                 re.MULTILINE,
             )
             self.re_CollectPot = re.compile(
-                r"^%(PLAYERS)s wins ( (high|low) )?\(?\s?[%(LS)s]?\s?(?P<POT>[%(NUM)s]+)\s?(USD|EURO|EUR|chips|GEL)?\)?"
-                % self.substitutions,
+                r"^{PLAYERS} wins ( (high|low) )?\(?\s?[{LS}]?\s?(?P<POT>[{NUM}]+)\s?(USD|EURO|EUR|chips|GEL)?\)?".format(**self.substitutions),
                 re.MULTILINE,
             )
 
@@ -301,7 +295,7 @@ class Everleaf(HandHistoryConverter):
         # If this has been called, street is a street which gets dealt community cards by type hand
         # but it might be worth checking somehow.
         #        if street in ('FLOP','TURN','RIVER'):   # a list of streets which get dealt community cards (i.e. all but PREFLOP)
-        log.debug("readCommunityCards (%s)" % street)
+        log.debug("readCommunityCards ({})".format(street))
         m = self.re_Board.search(hand.streets[street])
         cards = m.group("CARDS")
         cards = [card.strip() for card in cards.split(",")]
@@ -311,13 +305,13 @@ class Everleaf(HandHistoryConverter):
         log.debug(_("reading antes"))
         m = self.re_Antes.finditer(hand.handText)
         for player in m:
-            log.debug("hand.addAnte(%s,%s)" % (player.group("PNAME"), player.group("ANTE")))
+            log.debug("hand.addAnte({},{})".format(player.group("PNAME"), player.group("ANTE")))
             hand.addAnte(player.group("PNAME"), self.clearMoneyString(player.group("ANTE")))
 
     def readBringIn(self, hand):
         m = self.re_BringIn.search(hand.handText, re.DOTALL)
         if m:
-            log.debug("Player bringing in: %s for %s" % (m.group("PNAME"), m.group("BRINGIN")))
+            log.debug("Player bringing in: {} for {}".format(m.group("PNAME"), m.group("BRINGIN")))
             hand.addBringIn(m.group("PNAME"), self.clearMoneyString(m.group("BRINGIN")))
         else:
             log.warning(_("No bringin found."))
@@ -356,7 +350,7 @@ class Everleaf(HandHistoryConverter):
         log.warning(_("%s cannot read all stud/razz hands yet.") % hand.sitename)
 
     def readAction(self, hand, street):
-        log.debug("readAction (%s)" % street)
+        log.debug("readAction ({})".format(street))
         if street == "THIRD":
             m = self.re_Completes.finditer(hand.streets[street])
             for action in m:
@@ -387,7 +381,7 @@ class Everleaf(HandHistoryConverter):
         for shows in self.re_ShowdownAction.finditer(hand.handText):
             cards = shows.group("CARDS")
             cards = cards.split(", ")
-            log.debug("readShowdownActions %s %s" % (cards, shows.group("PNAME")))
+            log.debug("readShowdownActions {} {}".format(cards, shows.group("PNAME")))
             hand.addShownCards(cards, shows.group("PNAME"))
 
     def readCollectPot(self, hand):
@@ -409,15 +403,15 @@ class Everleaf(HandHistoryConverter):
                 elif m.group("SHOWED") in ("mucks", "mucked"):
                     mucked = True
 
-                log.debug("readShownCards %s cards=%s" % (player, cards))
+                log.debug("readShownCards {} cards={}".format(player, cards))
                 #                hand.addShownCards(cards=None, player=m.group('PNAME'), holeandboard=cards)
                 hand.addShownCards(cards=cards, player=player, shown=shown, mucked=mucked, string=string)
 
     @staticmethod
     def getTableTitleRe(type, table_name=None, tournament=None, table_number=None):
         if tournament:
-            return re.escape("%s - Tournament ID: %s - " % (table_number, tournament))
-        return "%s (\\(\\d+\\) )?-" % (re.escape(table_name))
+            return re.escape("{} - Tournament ID: {} - ".format(table_number, tournament))
+        return "{} (\\(\\d+\\) )?-".format(re.escape(table_name))
 
     def readSTP(self, hand):
         """Read Splash the Pot - not implemented."""

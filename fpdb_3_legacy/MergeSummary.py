@@ -211,7 +211,7 @@ class MergeSummary(TourneySummary):
                 m1 = self.re_DateTimeHH.search(m.group("DATETIME"))
                 if m1:
                     mg = m1.groupdict()
-                    datetimestr = "%s/%s/%s %s:%s:%s" % (mg["Y"], mg["M"], mg["D"], mg["H"], mg["MIN"], mg["S"])
+                    datetimestr = "{}/{}/{} {}:{}:{}".format(mg["Y"], mg["M"], mg["D"], mg["H"], mg["MIN"], mg["S"])
                     # tz = a.group('TZ')  # just assume ET??
                     self.startTime = datetime.datetime.strptime(
                         datetimestr, "%Y/%m/%d %H:%M:%S"
@@ -415,7 +415,7 @@ class MergeSummary(TourneySummary):
                     m2 = self.re_HTMLDateTime.search(m.group("STARTTIME"))
                     if m2:
                         month = self.months[m2.group("M")]
-                        datetimestr = "%s/%s/%s %s:%s:%s" % (
+                        datetimestr = "{}/{}/{} {}:{}:{}".format(
                             m2.group("Y"),
                             month,
                             m2.group("D"),
