@@ -98,7 +98,9 @@ in_path   (default '-' = sys.stdin)
         self.in_path = in_path
         self.base_name = self.getBasename()
         self.out_path = out_path
-        self.kodec = None
+        self.kodec: str | None = None
+        self.obs = ""
+        self.whole_file = ""
 
         # Ensure site_id is initialized from the class variable or a default
         self.site_id = getattr(self, "site_id", getattr(self, "siteId", None))
@@ -108,11 +110,11 @@ in_path   (default '-' = sys.stdin)
             except HHC_SITE_ID_ERRORS:
                 self.site_id = None
 
-        self.processedHands = []
+        self.processedHands: list[object] = []
         self.numHands = 0
         self.numErrors = 0
         self.numPartial = 0
-        self.parsing_issues = []
+        self.parsing_issues: list[str] = []
         self.isCarraige = False
         self.autoPop = False
 
@@ -126,7 +128,7 @@ in_path   (default '-' = sys.stdin)
             self.in_fh = sys.stdin
         self.out_fh = get_out_fh(out_path, self.import_parameters)
 
-        self.compiledPlayers = set()
+        self.compiledPlayers: set[str] = set()
         self.maxseats = 0
 
         self.parsedObjectType = (
@@ -137,7 +139,7 @@ in_path   (default '-' = sys.stdin)
             self.start()
 
     @property
-    def siteId(self) -> int:
+    def siteId(self) -> int | None:
         """Backward compatibility property for siteId access."""
         return getattr(self, "site_id", None)
 
@@ -282,6 +284,9 @@ HandHistoryConverter: '{sitename}'
             log.info(f"Read no hands from file: '{self.in_path}'")
             return []
         split_hands_re = getattr(self, "re_split_hands", getattr(self, "re_SplitHands", None))
+        if split_hands_re is None:
+            msg = f"No hand splitter configured for {self.sitename}"
+            raise FpdbParseError(msg)
         handlist = re.split(split_hands_re, self.obs)
         # When re_SplitHands matches at the very start of the file (e.g. the
         # Microgaming/Prima "----PRIMA.DAT----" marker leads the first hand),
@@ -300,6 +305,10 @@ HandHistoryConverter: '{sitename}'
             log.info("Removing text < 50 characters & resetting index")
         return handlist
 
+    def parseHeader(self, handText: str, whole_file: str) -> dict[str, object] | None:
+        """Parse a shared game header for converters that enable ``copyGameHeader``."""
+        raise NotImplementedError
+
     def processHand(self, handText):
         if self.isPartial(handText):
             msg = f"Could not identify as a {self.sitename} hand"
@@ -317,7 +326,6 @@ HandHistoryConverter: '{sitename}'
         game_details = None
 
         if gametype is None:
-            gametype = "unmatched"
             # TODO: not ideal, just trying to not error. Throw ParseException?
             self.numErrors += 1
         else:
@@ -342,7 +350,7 @@ HandHistoryConverter: '{sitename}'
             limit = gametype["limitType"]
             game_details = [type, base, limit]
 
-        if game_details in self.readSupportedGames():
+        if gametype is not None and game_details in self.readSupportedGames():
             if gametype["base"] == "hold":
                 hand = Hand.HoldemOmahaHand(
                     self.config,
@@ -368,7 +376,7 @@ HandHistoryConverter: '{sitename}'
                     handText,
                 )
         else:
-            log.error(f"{self.sitename} Unsupported game type: {gametype}")
+            log.error(f"{self.sitename} Unsupported game type: {gametype or 'unmatched'}")
             raise FpdbParseError
 
         if hand:
@@ -594,9 +602,9 @@ or None if we fail to get the info """
         if hand.rake is None:
             hand.rake = hand.totalpot - hand.totalcollected  #  * Decimal('0.05') # probably not quite right
         if self.site_id == 9 and hand.gametype["type"] == "tour":
-            round = -5  # round up to 10
+            round = -5.0  # round up to 10
         elif hand.gametype["type"] == "tour":
-            round = -1
+            round = -1.0
         else:
             round = -0.01
         if self.site_id == 15 and hand.totalcollected > hand.totalpot:
