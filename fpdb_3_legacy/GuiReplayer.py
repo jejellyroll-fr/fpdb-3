@@ -24,6 +24,7 @@ from collections import Counter
 from dataclasses import dataclass, field
 from decimal import Decimal
 from math import cos, hypot, pi, sin
+from typing import Any
 
 from PySide6.QtCore import QPointF, QRectF, Qt, QTimer
 from PySide6.QtGui import QColor, QFont, QFontMetrics, QImage, QLinearGradient, QPainter, QPen, QPixmap
@@ -77,7 +78,7 @@ def replay_hero_equity(frame, hero_name: str, game: str, *, backend=None, iterat
     active_players = [player for player in frame.players if player.action != "folds"]
     if len(active_players) < 2:
         return None
-    pockets = []
+    pockets: list[list[str]] = []
     hero_index = None
     for player in active_players:
         cards = list(player.holecards or [])
@@ -89,7 +90,7 @@ def replay_hero_equity(frame, hero_name: str, game: str, *, backend=None, iterat
     if hero_index is None:
         return None
 
-    board = []
+    board: list[str] = []
     visible_streets = set(frame.render_board or ())
     for street in ("FLOP", "TURN", "RIVER"):
         if street in visible_streets:
@@ -155,7 +156,7 @@ def best_hand(holecards: list[str], board: list[str], base: str, category: str):
     cat = (category or "").lower()
     omaha_like = any(k in cat for k in ("omaha", "cour", "fusion", "irish"))
 
-    best = None
+    best: tuple[tuple, frozenset[str]] | None = None
     if base == "hold" and omaha_like:
         if len(hole) < 2 or len(board) < 3:
             return (None, frozenset())
@@ -582,7 +583,7 @@ class GuiReplayer(QWidget):
         self.sql = querylist
         self.newpot = Decimal()
         self.db = Database.Database(self.conf, sql=self.sql)
-        self.states = []  # List with all table states.
+        self.states: list[Any] = []  # List with all table states.
         self.handlist = handlist
         self.handidx = 0
         self.Heroes = ""
@@ -670,8 +671,8 @@ class GuiReplayer(QWidget):
         self.playing = False
 
         # Fold animation state: {player_name: start_monotonic_time}
-        self._fold_anim = {}
-        self._discard_anim = {}  # player_name -> start time, for draw discard toss
+        self._fold_anim: dict[str, Any] = {}
+        self._discard_anim: dict[str, Any] = {}  # player_name -> start time, for draw discard toss
         self._fold_anim_value = None  # slider value the current anims belong to
         self._fold_timer = QTimer()
         self._fold_timer.timeout.connect(self._fold_tick)
@@ -679,7 +680,7 @@ class GuiReplayer(QWidget):
         self.tableImage = None
         self.playerBackdrop = None
 
-        self.cardImages = None
+        self.cardImages: list[Any] | None = None
         self.deck_inst = Deck.Deck(self.conf, deck_type=self.deckType, height=CARD_HEIGHT, width=CARD_WIDTH)
         self._apply_replayer_style()
         self._update_deck_preview()
