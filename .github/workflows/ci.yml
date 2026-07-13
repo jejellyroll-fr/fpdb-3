@@ -87,6 +87,7 @@ jobs:
           fpdb_3_legacy/TourneySummary.py
           fpdb_3_legacy/PartyPokerSummary.py
           fpdb_3_legacy/PacificPokerSummary.py
+          fpdb_3_legacy/PacificPokerToFpdb.py
           fpdb_3_legacy/UnibetSummary.py
           fpdb_3_legacy/WinningSummary.py
           fpdb_3_legacy/iPokerSummary.py
