@@ -57,7 +57,7 @@ class HandHistoryConverter(ABC):
     # codepage indicates the encoding of the text file.
     # cp1252 is a safe default
     # "utf_8" is more likely if there are funny characters
-    codepage = "cp1252"
+    codepage: str | tuple[str, ...] = "cp1252"
 
     re_tzOffset = re.compile(r"^\w+[+-]\d{4}$")
     _re_stars_archive = re.compile(r"^Hand #\d+", re.MULTILINE)
@@ -475,7 +475,7 @@ or None if we fail to get the info """
     """
 
     @abstractmethod
-    def compilePlayerRegexs(self):
+    def compilePlayerRegexs(self, hand: object) -> None:
         pass
 
     """Compile dynamic regexes -- compile player dependent regexes.

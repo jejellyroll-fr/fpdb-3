@@ -72,6 +72,8 @@ log = get_logger("ipoker_parser")
 class iPoker(IPokerStreetsActionsMixin, IPokerHandInfoMixin, IPokerTournamentResultsMixin, IPokerXMLFormatMixin, HandHistoryConverter):  # noqa: N801
     """A class for converting iPoker hand history files to the PokerTH format."""
 
+    tinfo: dict[str, Any]
+
     # Constants
     DECIMAL_PARTS_COUNT = 2
     MIN_CLIENT_VERSION_FOR_UNCALLED_BETS = 20
@@ -464,7 +466,7 @@ class iPoker(IPokerStreetsActionsMixin, IPokerHandInfoMixin, IPokerTournamentRes
         log.debug("Supported games: %s", supported_games)
         return supported_games
 
-    def parseHeader(self, hand_text: str, whole_file: str) -> str | None:
+    def parseHeader(self, hand_text: str, whole_file: str) -> dict[str, Any]:
         """Parses the header of a hand history and returns the game type.
 
         Args:
@@ -472,8 +474,7 @@ class iPoker(IPokerStreetsActionsMixin, IPokerHandInfoMixin, IPokerTournamentRes
             whole_file (str): The entire text of the hand history.
 
         Returns:
-            str: The game type, if it can be determined from the header or the whole file.
-                None otherwise.
+            The parsed game-type mapping.
 
         Raises:
             FpdbParseError: If the hand history is an iPoker hand lacking actions/starttime.
@@ -573,12 +574,12 @@ class iPoker(IPokerStreetsActionsMixin, IPokerHandInfoMixin, IPokerTournamentRes
             xml_source = getattr(self, "whole_file", hand.handText)
 
             # Get hero data from session/general
-            hero_name = re.search(r"<nickname>([^<]*)</nickname>", xml_source)
+            hero_name_match = re.search(r"<nickname>([^<]*)</nickname>", xml_source)
             hero_place = re.search(r"<place>([^<]*)</place>", xml_source)
             hero_win = re.search(r"<win>([^<]*)</win>", xml_source)
 
-            if hero_name:
-                hero_name = hero_name.group(1)
+            if hero_name_match:
+                hero_name = hero_name_match.group(1)
 
                 # Get hero rank (None if not found or N/A)
                 hero_rank = None
@@ -631,7 +632,7 @@ class iPoker(IPokerStreetsActionsMixin, IPokerHandInfoMixin, IPokerTournamentRes
                     try:
                         rewarddrawn = Decimal(rewarddrawn_match.group(1).replace(",", ".").replace("€", ""))
                         if summary.buyin > 0:
-                            multiplier = rewarddrawn / (summary.buyin / 100)
+                            multiplier = rewarddrawn / (Decimal(summary.buyin) / Decimal(100))
                             summary.tourneyMultiplier = int(multiplier) if multiplier > 1 else 1
                         else:
                             summary.tourneyMultiplier = 1
@@ -1289,18 +1290,19 @@ class iPoker(IPokerStreetsActionsMixin, IPokerHandInfoMixin, IPokerTournamentRes
         log.info("iPoker table_name='%s' tournament='%s' table_number='%s'", table_name, tournament, table_number)
 
         # Generate the regex pattern based on the input parameters
-        regex = str(table_name)
+        normalized_table_name = table_name or ""
+        regex = normalized_table_name
 
         if game_type == "tour":
             regex = rf"([^\(]+)\s{table_number}"
             log.debug("Generated regex for 'tour': %s", regex)
             return regex
-        if table_name.find("(No DP),") != -1:
-            regex = table_name.split("(No DP),")[0]
-        elif table_name.find(",") != -1:
-            regex = table_name.split(",")[0]
+        if normalized_table_name.find("(No DP),") != -1:
+            regex = normalized_table_name.split("(No DP),")[0]
+        elif normalized_table_name.find(",") != -1:
+            regex = normalized_table_name.split(",")[0]
         else:
-            regex = table_name.split(" ")[0]
+            regex = normalized_table_name.split(" ")[0]
 
         # Log the generated regex pattern and return it
         log.info("iPoker returns: '%s'", regex)
