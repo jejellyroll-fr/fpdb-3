@@ -33,6 +33,12 @@ from fpdb_3_legacy.TourneySummary import TourneySummary, log
 
 
 class FullTiltPokerSummary(TourneySummary):
+    buyinCurrency: str | None
+    hhtype = "summary"
+    isKO: bool
+    koBounty: int
+    tourNo: str | None
+
     limits = {"No Limit": "nl", "Pot Limit": "pl", "Limit": "fl", "LIMIT": "fl", "NL": "nl", "PL": "pl", "Fixed": "fl"}
     games = {  # base, category
         "Hold'em": ("hold", "holdem"),
@@ -193,8 +199,7 @@ class FullTiltPokerSummary(TourneySummary):
     # into mojibake. BOM'd utf-16 files are handled by the BOM check in readFile.
     codepage = ["utf-8", "cp1252", "utf-16"]
 
-    @staticmethod
-    def getSplitRe(self, head):
+    def getSplitRe(self, _head: str) -> re.Pattern[str]:
         re_SplitTourneys = re.compile("^Full Tilt Poker Tournament Summary")
         self.hhtype = "summary"
         return re_SplitTourneys
@@ -219,7 +224,7 @@ class FullTiltPokerSummary(TourneySummary):
         if "SNG" in info:
             self.isSng = True
         if "tournament key" in info:
-            self.tourNo = int(float(info["tournament key"]))
+            self.tourNo = str(int(float(info["tournament key"])))
         if "tournament name" in info:
             self.tourneyName = info["tournament name"]
             self.readTourneyName(self.tourneyName)
@@ -472,9 +477,9 @@ class FullTiltPokerSummary(TourneySummary):
             self.buyinCurrency = "FREE"
         self.currency = self.buyinCurrency
 
-        m = self.re_Player.finditer(self.summaryText)
+        player_matches = self.re_Player.finditer(self.summaryText)
         playercount = 0
-        for a in m:
+        for a in player_matches:
             mg = a.groupdict()
             # print "DEBUG: a.groupdict(): %s" % mg
             if mg["NAME"] != "[Player not loa":
@@ -511,7 +516,7 @@ class FullTiltPokerSummary(TourneySummary):
                 if name in koCounts:
                     koCount = koCounts[name]
 
-                if "TICKET" and mg["TICKET"] is not None:
+                if "TICKET" in mg and mg["TICKET"] is not None:
                     # print "Tournament Ticket Level %s" % mg['LEVEL']
                     step_values = {
                         "1": "330",  # Step 1 -    $3.30 USD
@@ -531,8 +536,8 @@ class FullTiltPokerSummary(TourneySummary):
         # Some files dont contain the normals lines, and only contain the line
         # <PLAYER> finished in XXXXrd place
         if playercount == 0:
-            m = self.re_Finished.finditer(self.summaryText)
-            for a in m:
+            finished_matches = self.re_Finished.finditer(self.summaryText)
+            for a in finished_matches:
                 winnings = 0
                 name = a.group("NAME")
                 rank = int(a.group("RANK"))
@@ -556,6 +561,9 @@ class FullTiltPokerSummary(TourneySummary):
     def readTourneyName(self, tourneyName, matchNo=None):
         entryId = 1
         n = self.re_TourneyExtraInfo.search(tourneyName)
+        if n is None:
+            msg = f"Full Tilt tournament name not recognized: {tourneyName!r}"
+            raise FpdbParseError(msg)
         if n.group("SNG") is not None:
             self.isSng = True
         if "Rush" in tourneyName:
@@ -597,7 +605,7 @@ class FullTiltPokerSummary(TourneySummary):
         if n.group("STEPNO") is not None:
             self.stepNo = int(n.group("STEPNO"))
         if self.isMatrix and self.entries > 0:
-            self.buyin = self.prizepool / self.entries
+            self.buyin = self.prizepool // self.entries
             buyinfee = int(100 * Decimal(self.clearMoneyString(n.group("BUYINGUAR"))))
             self.fee = buyinfee - self.buyin
             self.isSng = True

@@ -149,3 +149,12 @@ def test_ftp_unparseable_text_raises() -> None:
     summary = make_summary("this is not a full tilt summary")
     with pytest.raises(FpdbParseError):
         summary.parseSummary()
+
+
+def test_ftp_unknown_tournament_name_raises_parse_error() -> None:
+    summary = make_summary("unused")
+    summary.re_TourneyExtraInfo = MagicMock()
+    summary.re_TourneyExtraInfo.search.return_value = None
+
+    with pytest.raises(FpdbParseError, match="tournament name not recognized"):
+        summary.readTourneyName("unsupported tournament format")
