@@ -5416,6 +5416,12 @@ class Database:
 
         dialects.dialect_for_backend(self.backend).repair_sequence(self, table)
 
+    def repair_sequences(self) -> None:
+        """Synchronize every backend identity sequence after a data migration."""
+        from fpdb_3_legacy import dialects
+
+        dialects.dialect_for_backend(self.backend).repair_sequences(self)
+
     def updateFile(self, fdata) -> None:
         q = self.sql.query["update_file"]
         q = q.replace("%s", self.sql.query["placeholder"])

@@ -155,6 +155,7 @@ def test_repair_sequence_noop_for_non_postgresql():
     for server in ("sqlite", "mysql"):
         db = _db(0)
         dialects.dialect_for_server(server).repair_sequence(db, "Files")
+        dialects.dialect_for_server(server).repair_sequences(db)
         db.get_cursor.assert_not_called()
 
 
@@ -204,6 +205,21 @@ def test_repair_sequence_postgresql_locks_and_sets_next_unused_id():
     assert "MAX(id)" in statements[2]
     assert "+ 1, false" in statements[2]
     assert cursor.execute.call_args_list[2].args[1] == ("files_id_seq",)
+
+
+def test_repair_sequences_postgresql_repairs_every_serial_id_table():
+    db = _db(dialects.PGSQL)
+    cursor = db.get_cursor.return_value
+    cursor.fetchall.return_value = [("files",), ("players",)]
+    cursor.fetchone.side_effect = [("files_id_seq",), ("players_id_seq",)]
+
+    dialects.dialect_for_server("postgresql").repair_sequences(db)
+
+    statements = [call.args[0] for call in cursor.execute.call_args_list]
+    assert "information_schema.columns" in statements[0]
+    assert 'LOCK TABLE "files"' in statements[1]
+    assert 'LOCK TABLE "players"' in statements[4]
+    assert sum("setval" in statement for statement in statements) == 2
 
 
 if __name__ == "__main__":
