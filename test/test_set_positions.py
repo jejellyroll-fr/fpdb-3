@@ -91,8 +91,8 @@ class TestSetPositions:
         assert stats.hands["maxPosition"] == 3
 
         # Check street0FirstToAct and street0InPosition
-        assert stats.handsplayers["Player1"]["street0FirstToAct"] == True  # SB acts first
-        assert stats.handsplayers["Player2"]["street0InPosition"] == True  # BB is in position preflop
+        assert stats.handsplayers["Player1"]["street0FirstToAct"] is True  # SB acts first
+        assert stats.handsplayers["Player2"]["street0InPosition"] is True  # BB is in position preflop
 
     def test_heads_up_positions(self, stats) -> None:
         """Test position assignment in heads-up."""
@@ -124,8 +124,8 @@ class TestSetPositions:
         assert stats.handsplayers["Player2"]["position"] == "B"  # BB
 
         # SB is first to act preflop in HU
-        assert stats.handsplayers["Player1"]["street0FirstToAct"] == True
-        assert stats.handsplayers["Player2"]["street0InPosition"] == True
+        assert stats.handsplayers["Player1"]["street0FirstToAct"] is True
+        assert stats.handsplayers["Player2"]["street0InPosition"] is True
 
     def test_stud_positions(self, stats) -> None:
         """Test position assignment in stud games."""
@@ -161,11 +161,11 @@ class TestSetPositions:
 
         # In stud, bring-in gets position "S"
         assert stats.handsplayers["Player1"]["position"] == "S"
-        assert stats.handsplayers["Player1"]["street0FirstToAct"] == True
+        assert stats.handsplayers["Player1"]["street0FirstToAct"] is True
 
         # Last to act gets position 0 and is in position
         assert stats.handsplayers["Player3"]["position"] == 0
-        assert stats.handsplayers["Player3"]["street0InPosition"] == True
+        assert stats.handsplayers["Player3"]["street0InPosition"] is True
 
         # Middle player
         assert stats.handsplayers["Player2"]["position"] == 1
@@ -196,7 +196,7 @@ class TestSetPositions:
         stats.setPositions(hand)
 
         # Button blind should be in position
-        assert stats.handsplayers["Player1"]["street0InPosition"] == True
+        assert stats.handsplayers["Player1"]["street0InPosition"] is True
         assert stats.handsplayers["Player2"]["position"] == "B"
 
     def test_straddle_position(self, stats) -> None:
@@ -266,7 +266,7 @@ class TestSetPositions:
 
         # Big blind should still get position "B"
         assert stats.handsplayers["Player2"]["position"] == "B"
-        assert stats.handsplayers["Player2"]["street0InPosition"] == True
+        assert stats.handsplayers["Player2"]["street0InPosition"] is True
 
         # Other positions
         assert stats.handsplayers["Player4"]["position"] == 0  # Button
@@ -296,7 +296,7 @@ class TestSetPositions:
 
         # BB should still have correct position even if not in pfbao list
         assert stats.handsplayers["Player2"]["position"] == "B"
-        assert stats.handsplayers["Player2"]["street0InPosition"] == True
+        assert stats.handsplayers["Player2"]["street0InPosition"] is True
 
 
 if __name__ == "__main__":

@@ -106,7 +106,7 @@ class TestStudPositions:
 
         # Player2 should be bring-in with position 'S'
         assert stats.handsplayers["Player2"]["position"] == "S"
-        assert stats.handsplayers["Player2"]["street0FirstToAct"] == True
+        assert stats.handsplayers["Player2"]["street0FirstToAct"] is True
 
         # Other players should have numeric positions
         assert isinstance(stats.handsplayers["Player1"]["position"], int)
@@ -130,7 +130,7 @@ class TestStudPositions:
                 break
 
         assert last_player is not None
-        assert stats.handsplayers[last_player]["street0InPosition"] == True
+        assert stats.handsplayers[last_player]["street0InPosition"] is True
 
     def test_bring_in_completes(self, stats, mock_stud_hand) -> None:
         """Test that bring-in player who completes still has bring-in position."""
@@ -151,7 +151,7 @@ class TestStudPositions:
 
         # Player2 should still be bring-in even though they completed
         assert stats.handsplayers["Player2"]["position"] == "S"
-        assert stats.handsplayers["Player2"]["street0FirstToAct"] == True
+        assert stats.handsplayers["Player2"]["street0FirstToAct"] is True
 
     def test_stud_steal_positions(self, stats, mock_stud_hand) -> None:
         """Test steal positions for Stud games."""
@@ -168,13 +168,13 @@ class TestStudPositions:
 
         # In Stud, steal positions are (2, 1, 0)
         # Player4 completed first, so they should have steal opportunity
-        assert stats.handsplayers["Player4"]["raiseFirstInChance"] == True
+        assert stats.handsplayers["Player4"]["raiseFirstInChance"] is True
 
         # Check if Player4 is in steal position
         player4_pos = stats.handsplayers["Player4"]["position"]
         if player4_pos in (2, 1, 0):
-            assert stats.handsplayers["Player4"]["stealChance"] == True
-            assert stats.handsplayers["Player4"]["stealDone"] == True
+            assert stats.handsplayers["Player4"]["stealChance"] is True
+            assert stats.handsplayers["Player4"]["stealDone"] is True
 
     def test_heads_up_stud(self, stats) -> None:
         """Test heads-up Stud positions."""
@@ -209,11 +209,11 @@ class TestStudPositions:
 
         # Player1 is bring-in
         assert stats.handsplayers["Player1"]["position"] == "S"
-        assert stats.handsplayers["Player1"]["street0FirstToAct"] == True
+        assert stats.handsplayers["Player1"]["street0FirstToAct"] is True
 
         # Player2 should have position 0 and be in position
         assert stats.handsplayers["Player2"]["position"] == 0
-        assert stats.handsplayers["Player2"]["street0InPosition"] == True
+        assert stats.handsplayers["Player2"]["street0InPosition"] is True
 
     def test_no_actions_stud(self, stats) -> None:
         """Test Stud with no actions (all-in antes)."""

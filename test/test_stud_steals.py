@@ -155,14 +155,14 @@ class TestStudSteals:
         self.stats.getStats(self.hand)
 
         # Player4 should have steal opportunity and execution
-        assert self.stats.handsplayers["Player4"]["stealChance"] == True
-        assert self.stats.handsplayers["Player4"]["stealDone"] == True
-        assert self.stats.handsplayers["Player4"]["success_Steal"] == True
+        assert self.stats.handsplayers["Player4"]["stealChance"] is True
+        assert self.stats.handsplayers["Player4"]["stealDone"] is True
+        assert self.stats.handsplayers["Player4"]["success_Steal"] is True
 
         # Player1 (bring-in) should have fold to steal stats
         # Note: In current implementation, bring-in position is 'S', not 'B'
-        assert self.stats.handsplayers["Player1"]["foldSbToStealChance"] == True
-        assert self.stats.handsplayers["Player1"]["foldedSbToSteal"] == True
+        assert self.stats.handsplayers["Player1"]["foldSbToStealChance"] is True
+        assert self.stats.handsplayers["Player1"]["foldedSbToSteal"] is True
 
     def test_steal_defended(self) -> None:
         """Test steal attempt that gets defended."""
@@ -200,13 +200,13 @@ class TestStudSteals:
         self.stats.getStats(self.hand)
 
         # Player3 should have steal attempt but not successful
-        assert self.stats.handsplayers["Player3"]["stealChance"] == True
-        assert self.stats.handsplayers["Player3"]["stealDone"] == True
-        assert self.stats.handsplayers["Player3"]["success_Steal"] == False
+        assert self.stats.handsplayers["Player3"]["stealChance"] is True
+        assert self.stats.handsplayers["Player3"]["stealDone"] is True
+        assert self.stats.handsplayers["Player3"]["success_Steal"] is False
 
         # Player1 should have fold to steal chance but didn't fold
-        assert self.stats.handsplayers["Player1"]["foldSbToStealChance"] == True
-        assert self.stats.handsplayers["Player1"]["foldedSbToSteal"] == False
+        assert self.stats.handsplayers["Player1"]["foldSbToStealChance"] is True
+        assert self.stats.handsplayers["Player1"]["foldedSbToSteal"] is False
 
     def test_complete_as_steal(self) -> None:
         """Test that complete can be a steal attempt in Stud."""
@@ -244,9 +244,9 @@ class TestStudSteals:
         self.stats.getStats(self.hand)
 
         # Player3's complete should count as a steal
-        assert self.stats.handsplayers["Player3"]["stealChance"] == True
-        assert self.stats.handsplayers["Player3"]["stealDone"] == True
-        assert self.stats.handsplayers["Player3"]["success_Steal"] == True
+        assert self.stats.handsplayers["Player3"]["stealChance"] is True
+        assert self.stats.handsplayers["Player3"]["stealDone"] is True
+        assert self.stats.handsplayers["Player3"]["success_Steal"] is True
 
     def test_non_steal_position_raise(self) -> None:
         """Test raise from non-steal position (early position)."""
@@ -279,10 +279,10 @@ class TestStudSteals:
 
         # Player2 is not in steal position (position would be 4 or 5)
         # Should have raiseFirstIn but not steal
-        assert self.stats.handsplayers["Player2"]["raiseFirstInChance"] == True
-        assert self.stats.handsplayers["Player2"]["raisedFirstIn"] == True
-        assert self.stats.handsplayers["Player2"]["stealChance"] == False
-        assert self.stats.handsplayers["Player2"]["stealDone"] == False
+        assert self.stats.handsplayers["Player2"]["raiseFirstInChance"] is True
+        assert self.stats.handsplayers["Player2"]["raisedFirstIn"] is True
+        assert self.stats.handsplayers["Player2"]["stealChance"] is False
+        assert self.stats.handsplayers["Player2"]["stealDone"] is False
 
     def test_heads_up_steal(self) -> None:
         """Test steal in heads-up Stud."""
@@ -315,9 +315,9 @@ class TestStudSteals:
         self.stats.getStats(self.hand)
 
         # In HU, the non-bring-in player should have steal opportunity
-        assert self.stats.handsplayers["Hero"]["stealChance"] == True
-        assert self.stats.handsplayers["Hero"]["stealDone"] == True
-        assert self.stats.handsplayers["Hero"]["success_Steal"] == True
+        assert self.stats.handsplayers["Hero"]["stealChance"] is True
+        assert self.stats.handsplayers["Hero"]["stealDone"] is True
+        assert self.stats.handsplayers["Hero"]["success_Steal"] is True
 
     def test_steal_positions_calculation(self) -> None:
         """Test that steal positions are correctly identified in Stud."""
@@ -350,8 +350,8 @@ class TestStudSteals:
 
         # Hero in last position (position 0) should have steal opportunity
         assert self.stats.handsplayers["Hero"]["position"] == 0
-        assert self.stats.handsplayers["Hero"]["stealChance"] == True
-        assert self.stats.handsplayers["Hero"]["stealDone"] == True
+        assert self.stats.handsplayers["Hero"]["stealChance"] is True
+        assert self.stats.handsplayers["Hero"]["stealDone"] is True
 
     def test_raise_to_steal_after_steal_attempt(self) -> None:
         """Test re-steal scenario."""
@@ -390,11 +390,11 @@ class TestStudSteals:
         self.stats.getStats(self.hand)
 
         # Player1 should have raiseToSteal stats
-        assert self.stats.handsplayers["Player1"]["raiseToStealChance"] == True
-        assert self.stats.handsplayers["Player1"]["raiseToStealDone"] == True
+        assert self.stats.handsplayers["Player1"]["raiseToStealChance"] is True
+        assert self.stats.handsplayers["Player1"]["raiseToStealDone"] is True
 
         # Player3's steal should fail
-        assert self.stats.handsplayers["Player3"]["success_Steal"] == False
+        assert self.stats.handsplayers["Player3"]["success_Steal"] is False
 
 
 if __name__ == "__main__":

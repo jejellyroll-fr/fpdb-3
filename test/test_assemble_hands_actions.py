@@ -89,7 +89,7 @@ class TestAssembleHandsActions:
         assert self.derived_stats.handsactions[1]["amount"] == 1000  # 10 * 100
         assert self.derived_stats.handsactions[1]["raiseTo"] == 1000
         assert self.derived_stats.handsactions[1]["amountCalled"] == 500
-        assert self.derived_stats.handsactions[1]["allIn"] == False
+        assert self.derived_stats.handsactions[1]["allIn"] is False
 
     def test_all_in_action(self) -> None:
         """Test handling of all-in actions."""
@@ -108,11 +108,11 @@ class TestAssembleHandsActions:
         self.derived_stats.assembleHandsActions(self.mock_hand)
 
         # Verify
-        assert self.derived_stats.handsactions[1]["allIn"] == True
-        assert self.derived_stats.handsactions[2]["allIn"] == True
-        assert self.derived_stats.handsplayers["Player1"]["wentAllIn"] == True
-        assert self.derived_stats.handsplayers["Player1"]["street0AllIn"] == True
-        assert self.derived_stats.handsplayers["Player2"]["wentAllIn"] == True
+        assert self.derived_stats.handsactions[1]["allIn"] is True
+        assert self.derived_stats.handsactions[2]["allIn"] is True
+        assert self.derived_stats.handsplayers["Player1"]["wentAllIn"] is True
+        assert self.derived_stats.handsplayers["Player1"]["street0AllIn"] is True
+        assert self.derived_stats.handsplayers["Player2"]["wentAllIn"] is True
 
     def test_discard_actions(self) -> None:
         """Test handling of discard actions in draw games."""
