@@ -78,13 +78,5 @@ def test_modern_submenu_attributes() -> bool | None:
 def test_initialization_order() -> None:
     """Test that the initialization order is correct."""
     # Simulate the corrected initialization order
-    steps = [
-        "1. Extract theme/icon names from kwargs",
-        "2. Initialize theme = get_theme(theme_name)",
-        "3. Initialize icon_provider = get_icon_provider(icon_provider_name)",
-        "4. Initialize sections = {}",
-        "5. Call super().__init__() which calls create()",
-        "6. create() calls setup_window_style() which uses self.theme",
-    ]
 
     # Steps are documented above for reference

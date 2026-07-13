@@ -592,7 +592,7 @@ def test_idle_create(import_path, hud_main) -> None:
         # Check logs - the method creates a label with site and temp_key
         expected_log_message = f"adding label {table.site} - {args.temp_key}"
 
-        log_message_found = any(call[0][0] == expected_log_message for call in mock_log.debug.call_args_list)
+        assert any(call[0][0] == expected_log_message for call in mock_log.debug.call_args_list)
 
 
 # Ensures that idle_update updates the HUD and auxiliary windows.

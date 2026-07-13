@@ -2570,7 +2570,7 @@ Seat 1: Player1 ($10.00 in chips)
 Dealt to Player1 [As Kh]
 Player1: folds"""
 
-        game_info = self.parser.determineGameType(rio_hand)
+        self.parser.determineGameType(rio_hand)
         self.assertEqual(self.parser.sitename, "Run It Once Poker")
 
     def test_determine_game_type_split_pot_game(self) -> None:

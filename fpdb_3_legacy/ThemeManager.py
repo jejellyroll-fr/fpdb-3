@@ -459,7 +459,6 @@ class ThemeManager:
         card = "#222b32" if dark else c["sidebar_panel"]
         card_hover = "#2f3740" if dark else c["panel_alt"]
         input_bg = "#20262b" if dark else c["input"]
-        border = "#46505a" if dark else c["border"]
         text = "#eef3f7" if dark else c["text"]
         muted = "#aeb8c2" if dark else c["muted_text"]
         accent = c["accent"]

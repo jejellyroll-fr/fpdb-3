@@ -161,7 +161,6 @@ class MergeSummary(TourneySummary):
     def parseSummaryFromHH(self, mg):
         obj = getattr(MergeToFpdb, "Merge", None)
         hhc = obj(self.config, in_path=self.in_path, sitename=None, autostart=False)
-        update = False
         handsList = hhc.allHandsAsList()
         handsDict = {}
         Structures = MergeStructures.MergeStructures()

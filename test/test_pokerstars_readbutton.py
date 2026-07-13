@@ -203,7 +203,6 @@ Seat 8: Hero ($100.00 in chips)"""
         self.assertIsNotNone(self.parser.re_button)
 
         # Test the pattern directly
-        pattern = r"Seat #(?P<BUTTON>\d+) is the button"
         test_text = "Seat #5 is the button"
         match = self.parser.re_button.search(test_text)
 

@@ -286,7 +286,6 @@ class Boss(HandHistoryConverter):
 
     def readPlayerStacks(self, hand):
         m = self.re_PlayerInfo.finditer(hand.handText)
-        players = []
         for a in m:
             # <ACTION TYPE="HAND_DEAL" PLAYER="Player38">
             m1 = re.search(
@@ -426,7 +425,7 @@ class Boss(HandHistoryConverter):
         m = self.re_HeroCards.finditer(hand.streets[street])
         for player in m:
             # ~ logging.debug(player.groupdict())
-            (pname, oldcards, newcards) = (player.group("PNAME"), player.group("OLDCARDS"), player.group("NEWCARDS"))
+            (_pname, oldcards, newcards) = (player.group("PNAME"), player.group("OLDCARDS"), player.group("NEWCARDS"))
             if oldcards:
                 oldcards = [c.strip() for c in oldcards.split(" ")]
             if newcards:

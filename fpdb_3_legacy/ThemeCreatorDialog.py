@@ -287,7 +287,6 @@ class ThemeCreatorDialog(QDialog):
 
         # Apply preview colors to the preview text
         try:
-            bg_color = colors.get("background", "#2b2b2b")
             text_color = colors.get("text", "#ffffff")
             surface_color = colors.get("surface", "#404040")
 
@@ -453,7 +452,7 @@ def main(argv=None):
 
     # Simple - just launch the theme creator dialog like the original
     print("Launching theme creator dialog...")
-    app = QApplication(sys.argv)
+    _app = QApplication(sys.argv)
     result = show_theme_creator()
     print(f"Dialog result: {result}")
     return 0

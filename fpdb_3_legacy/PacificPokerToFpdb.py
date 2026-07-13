@@ -261,7 +261,7 @@ class PacificPoker(HandHistoryConverter):
 
         # Handle both old and new formats
         if not is_new:  # Old format
-            hid = mg["HID"]
+            mg["HID"]
             limit = mg.get("LIMIT")
             game = mg.get("GAME")
             sb = mg.get("SB")
@@ -269,7 +269,7 @@ class PacificPoker(HandHistoryConverter):
             currency1 = mg.get("CURRENCY1")
             currency2 = mg.get("CURRENCY2")
         else:  # New format
-            hid = mg["HID2"]
+            mg["HID2"]
             limit = "Pot Limit"  # These are PLO hands from gametype_id=2
             game = mg.get("GAME2")
             sb = mg.get("SB3", mg.get("SB2"))
@@ -332,7 +332,6 @@ class PacificPoker(HandHistoryConverter):
         # Try old format first
         m = self.re_HandInfo_old.search(hand.handText, re.DOTALL)
         m2 = self.re_GameInfo_old.search(hand.handText)
-        is_new = False
         if m is None or m2 is None:
             # Fall back to new format
             m = self.re_HandInfo_new.search(hand.handText, re.DOTALL)
@@ -341,7 +340,6 @@ class PacificPoker(HandHistoryConverter):
                 tmp = hand.handText[0:200]
                 log.error(f"readHandInfo failed: '{tmp}'")
                 raise FpdbParseError
-            is_new = True
 
         info.update(m.groupdict())
         info.update(m2.groupdict())

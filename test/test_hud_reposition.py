@@ -72,7 +72,7 @@ def test_first_show_positions_then_reuses_without_moving():
 
     win._position_and_show_block(1)
     assert len(win.moves) == 1          # placed once
-    first_pos = win.moves[0]
+    win.moves[0]
     assert win.shown == 1
 
     # same geometry generation -> subsequent hands only show, never move

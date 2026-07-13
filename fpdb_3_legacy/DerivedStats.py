@@ -1563,7 +1563,7 @@ class DerivedStats:
 
         # set blinds first, then others from pfbao list, avoids problem if bb
         # is missing from pfbao list or if there is no small blind
-        sb, bb, bi, ub, st = False, False, False, False, False
+        sb, bb, bi, ub = False, False, False, False
         if hand.gametype["base"] == "stud":
             # Stud position is determined after cards are dealt
             # First player to act is always the bring-in position in stud
@@ -1575,8 +1575,6 @@ class DerivedStats:
             ub = [x[0] for x in hand.actions[hand.actionStreets[0]] if x[1] == "button blind"]
             bb = [x[0] for x in hand.actions[hand.actionStreets[0]] if x[1] == "big blind"]
             sb = [x[0] for x in hand.actions[hand.actionStreets[0]] if x[1] == "small blind"]
-            st = [x[0] for x in hand.actions[hand.actionStreets[0]] if x[1] == "straddle"]
-
         # Set positions in order: Button=0, SB=S, BB=B, then others backwards (CO=1, HJ=2...)
         
         # Button position
@@ -2639,7 +2637,6 @@ class DerivedStats:
         """
         log.debug("Starting calcSteals for hand ID: %s", hand.handid)
         steal_attempt = False
-        raised = False
         stealer = None
         if hand.gametype["base"] == "stud":
             steal_positions = (2, 1, 0)

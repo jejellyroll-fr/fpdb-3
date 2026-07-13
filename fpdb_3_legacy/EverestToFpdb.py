@@ -342,13 +342,10 @@ class Everest(HandHistoryConverter):
             name = self.playerNameFromSeatNo(m.group("PSEAT"), hand)
             if name != hand.hero:
                 show = False
-                muck = False
-                if m.group("SHOW") == "SHOW":
-                    show = True
-                if m.group("SHOW") == "MUCK":
-                    muck = True
+                show = m.group("SHOW") == "SHOW"
+                muck = m.group("SHOW") == "MUCK"
                 cards = [c.replace("10", "T").strip() for c in m.group("CARDS").split(",")]
-                hand.addShownCards(cards=cards, player=name, shown=show, mucked=show)
+                hand.addShownCards(cards=cards, player=name, shown=show, mucked=muck)
 
     def readSTP(self, hand):
         """Read Splash the Pot - not implemented for Everest."""

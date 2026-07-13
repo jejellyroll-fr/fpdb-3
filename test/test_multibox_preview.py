@@ -105,7 +105,7 @@ def test_canvas_renders_typed_chips():
     kinds = sorted(c.kind for c in cv.chips)
     # 2 stats + 2 non-empty texts (BB, POST FLOP) + 1 hline; empty label skipped
     assert kinds == ["hline", "stat", "stat", "text", "text"]
-    labels = {ch.findChild(QLabel) for ch in cv.chips}  # at least chips exist
+    {ch.findChild(QLabel) for ch in cv.chips}  # at least chips exist
     assert len(cv.chips) == 5
 
 

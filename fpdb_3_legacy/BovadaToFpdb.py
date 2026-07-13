@@ -1155,7 +1155,7 @@ class Bovada(HandHistoryConverter):
                         re.MULTILINE,
                     )
                     m = self.re_antes.search(hand.handText)
-                    if m1 := re_ante_plyr.search(hand.handText):
+                    if re_ante_plyr.search(hand.handText):
                         player = self.playerSeatFromPosition(
                             "BovadaToFpdb.readBlinds.postBB",
                             hand.handid,

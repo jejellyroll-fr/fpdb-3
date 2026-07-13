@@ -3985,12 +3985,10 @@ class ModernHudPreferences(QDialog):
                     # Handle both old and new format
                     if isinstance(profile_data, list):
                         # Old format - list of stats
-                        stats = profile_data
                         rows = 5
                         cols = 5
                     else:
                         # New format - dict with rows/cols/stats
-                        stats = profile_data.get("stats", [])
                         rows = profile_data.get("rows", 5)
                         cols = profile_data.get("cols", 5)
                         # Persist the positional-panel mode for multi-block HUDs.

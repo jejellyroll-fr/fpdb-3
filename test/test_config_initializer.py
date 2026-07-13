@@ -75,7 +75,7 @@ class TestConfigInitializer(unittest.TestCase):
         mock_cwd_path.exists.return_value = True
         mock_path.cwd.return_value.__truediv__.return_value = mock_cwd_path
 
-        result = ConfigInitializer._find_config_path(config_file)
+        ConfigInitializer._find_config_path(config_file)
 
         # Should find the file in current directory
         mock_path.cwd.assert_called_once()

@@ -375,7 +375,7 @@ class SwCPokerConsoleDialog(QDialog):
                 # Restore selection if it existed
                 if selected_text and display_str == selected_text:
                     self.lst_hands.setCurrentItem(item)
-            except Exception as e:
+            except Exception:
                 pass
                 
         # If nothing was selected previously, select the first hand
