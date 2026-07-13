@@ -95,7 +95,7 @@ class RangeChartPopup(Popup):
     file at ``pop.pu_class_params["source"]``.
     """
 
-    def create(self) -> None:
+    def create(self) -> None:  # type: ignore[override]
         super().create()
         charts = self._load_charts()
         layout = QVBoxLayout()

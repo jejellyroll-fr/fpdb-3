@@ -90,7 +90,7 @@ def build_block_popup_widget(group: dict, cell_px: int = 24, parent: QWidget | N
 class BlockPopup(Popup):
     """HUD popup that displays an imported PT4 popup group as a coloured grid."""
 
-    def create(self) -> None:
+    def create(self) -> None:  # type: ignore[override]
         super().create()
         layout = QVBoxLayout()
         layout.setContentsMargins(4, 4, 4, 4)
