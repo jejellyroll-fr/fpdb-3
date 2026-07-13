@@ -170,6 +170,10 @@ class Importer:
 
         self.writeq = None
         self.database = Database.Database(self.config, sql=self.sql)
+        # Explicit ids copied into PostgreSQL do not advance BIGSERIAL. Repair
+        # the Files sequence once before auto/bulk import starts inserting rows.
+        with self.database.transaction():
+            self.database.repair_sequence("Files")
         self.writerdbs = []
         self.settings.setdefault("threads", 1)
         for _i in range(self.settings["threads"]):
