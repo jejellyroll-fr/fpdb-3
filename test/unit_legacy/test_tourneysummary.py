@@ -250,6 +250,26 @@ class TestReadFile:
         assert content is None
 
 
+class TestExcelSummaries:
+    def test_groups_rows_by_text_tournament_id(self, monkeypatch) -> None:
+        rows = [
+            ["Tournament report"],
+            ["Tournament ID", "Player", "Winnings"],
+            ["42", "Alice", "100"],
+            ["42", "Bob", "0"],
+        ]
+        sheet = types.SimpleNamespace(nrows=len(rows), row_values=lambda index: rows[index])
+        workbook = types.SimpleNamespace(sheet_by_index=lambda _index: sheet)
+        fake_xlrd = types.SimpleNamespace(open_workbook=lambda _filename: workbook)
+        monkeypatch.setattr("fpdb_3_legacy.TourneySummary.xlrd", fake_xlrd)
+
+        summaries = TourneySummary.summaries_from_excel("report.xls", "Tournament ID")
+
+        assert len(summaries) == 1
+        assert [entry["Player"] for entry in summaries[0]] == ["Alice", "Bob"]
+        assert summaries[0][0]["header"] == "Tournament report"
+
+
 class TestStr:
     def test_str_contains_sections(self) -> None:
         ts = _make_summary()
