@@ -41,6 +41,7 @@ class SealsWithClubs(HandHistoryConverter):
     filetype = "text"
     codepage = ("utf8", "cp1252")
     siteId = 23  # Needs to match id entry in Sites database
+    compiledPlayers: set[str] = set()
     substitutions = {
         "PLYR": r"(?P<PNAME>\w+)",
         "BRKTS": r"(\(button\) |\(small blind\) |\(big blind\) |\(button\) \(small blind\) |\(button\) \(big blind\) )?",
@@ -289,9 +290,6 @@ class SealsWithClubs(HandHistoryConverter):
             if "," in mg["BB"]:
                 mg["BB"] = mg["BB"].replace(",", "")
             info["bb"] = mg["BB"]
-        if "CURRENCY" in mg and mg["CURRENCY"] is not None:
-            info["currency"] = self.currencies[mg["CURRENCY"]]
-
         info["type"] = "ring" if "TOURNO" in mg and mg["TOURNO"] is None else "tour"
         if info["type"] == "ring":
             info["currency"] = "mBTC"
@@ -354,7 +352,7 @@ class SealsWithClubs(HandHistoryConverter):
             raise FpdbHandPartial(msg)
 
     def _readPlayerStacksOld(self, hand) -> None:
-        plist = {}
+        plist: dict[str, bool] = {}
         for a in self.re_OldPlayerInfo.finditer(hand.handText):
             if plist.get(a.group("PNAME")) is None:
                 hand.addPlayer(int(a.group("SEAT")), a.group("PNAME"), a.group("CASH"))
@@ -477,7 +475,7 @@ class SealsWithClubs(HandHistoryConverter):
             )
         pre, post = handsplit
         m = self.re_PlayerInfo.finditer(pre)
-        plist = {}
+        plist: dict[str, list[int | str]] = {}
 
         for a in m:
             if plist.get(a.group("PNAME")) is None:
