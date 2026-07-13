@@ -20,7 +20,6 @@ from __future__ import annotations
 ########################################################################
 
 #    Standard Library modules
-from contextlib import suppress
 from functools import partial
 from pathlib import Path
 from typing import Any
@@ -47,6 +46,9 @@ from fpdb_3_legacy.loggingFpdb import get_logger, hud_trace
 # logging has been set up in fpdb.py or HUD_main.py, use their settings:
 log = get_logger("hud_main")
 
+BlockKey = tuple[int | str, int]
+WindowKey = str | BlockKey
+
 import json
 import logging
 import os
@@ -55,7 +57,7 @@ import os
 class HUDLayoutPositionsStore:
     def __init__(self) -> None:
         self.path = os.path.join(os.path.expanduser("~"), ".fpdb", "HUD_layout_positions.json")
-        self.data = {"version": 1, "positions": {}}
+        self.data: dict[str, Any] = {"version": 1, "positions": {}}
         self.load()
 
     def load(self) -> None:
@@ -88,8 +90,10 @@ class HUDLayoutPositionsStore:
         self.data.setdefault("positions", {})[key] = {"x": x, "y": y}
         self.save()
 
-_positions_store = None
-def get_positions_store():
+_positions_store: HUDLayoutPositionsStore | None = None
+
+
+def get_positions_store() -> HUDLayoutPositionsStore:
     global _positions_store
     if _positions_store is None:
         _positions_store = HUDLayoutPositionsStore()
@@ -341,7 +345,7 @@ class SimpleHUD(Aux_Base.AuxSeats):
 
         self._build_block_layouts()
 
-    def create_contents(self, container: Any, i: int) -> None:
+    def create_contents(self, container: Any, i: int | str) -> None:
         """Create the contents of the specified container.
 
         This method delegates the creation of contents to the container's create_contents method.
@@ -353,7 +357,7 @@ class SimpleHUD(Aux_Base.AuxSeats):
         # this is a call to whatever is in self.aw_class_window but it isn't obvious
         container.create_contents(i)
 
-    def update_contents(self, container: Any, i: int) -> None:
+    def update_contents(self, container: Any, i: int | str) -> None:
         """Update the contents of the specified container.
 
         This method delegates the update of contents to the container's update_contents method.
@@ -446,7 +450,9 @@ class SimpleHUD(Aux_Base.AuxSeats):
             return True
         return getattr(self, "hero_display_seat", None) == seat
 
-    def _seat_player_debug(self, seat: int) -> tuple[Any, str, Any]:
+    def _seat_player_debug(self, seat: int | str) -> tuple[Any, str, Any]:
+        if not isinstance(seat, int):
+            return None, "", ""
         try:
             player_id = self.get_id_from_seat(seat)
         except Exception:
@@ -534,7 +540,7 @@ class SimpleHUD(Aux_Base.AuxSeats):
             int(round((abs_y - table_y) / y_scale)),
         )
 
-    def _default_canonical(self, key: tuple[int | str, int]) -> tuple[int, int]:
+    def _default_canonical(self, key: BlockKey) -> tuple[int, int]:
         """Layout-default canonical position for a block that has never moved."""
         seat, block_index = key
         offset_x, offset_y = self._block_offset(block_index)
@@ -562,7 +568,7 @@ class SimpleHUD(Aux_Base.AuxSeats):
             offset += int(b.get("nrows", 1) or 1) * row_px + (title_px if b.get("label") else 0) + pad_px
         return offset
 
-    def _canonical_for(self, key: tuple[int | str, int]) -> tuple[int, int]:
+    def _canonical_for(self, key: BlockKey) -> tuple[int, int]:
         """Canonical position for a block window.
 
         Priority: a user drag saved to the positions store, then the value
@@ -593,12 +599,12 @@ class SimpleHUD(Aux_Base.AuxSeats):
         log.debug("=== SIMPLEHUD MULTI-BLOCK CREATE() METHOD CALLED ===")
         self.adj = self.adj_seats()
         self.hero_display_seat = self._hero_display_seat()
-        self.m_windows = {}
-        self.block_positions = {}
+        self.m_windows: dict[WindowKey, Any] = {}
+        self.block_positions: dict[BlockKey, tuple[int, int]] = {}
         # Unscaled reference seat anchors, captured once. Kept separate from the
         # live layout.location (which Hud.resize_windows rescales) so canonical
         # defaults stay stable across resizes.
-        self._seat_anchor_ref = {}
+        self._seat_anchor_ref: dict[int, tuple[int, int]] = {}
         self._ensure_reference()
 
         x, y = self.hud.layout.common
@@ -626,7 +632,7 @@ class SimpleHUD(Aux_Base.AuxSeats):
         if not self.uses_timer:
             self.m_windows["common"].show()
 
-    def _create_block_window(self, key: tuple[int | str, int], seat: int | str) -> None:
+    def _create_block_window(self, key: BlockKey, seat: int | str) -> None:
         """Create one block window and place it via the single coordinate model."""
         block_index = key[1]
         blk = self.block_layouts[block_index]
@@ -668,6 +674,10 @@ class SimpleHUD(Aux_Base.AuxSeats):
                 window.move(clamped_x, clamped_y)
                 continue
 
+            if not isinstance(key, tuple):
+                log.warning("Ignoring unexpected HUD window key: %r", key)
+                continue
+
             seat, block_index = key
             canon = self._canonical_for(key)
             screen_x, screen_y = self._canonical_to_screen(canon)
@@ -684,11 +694,11 @@ class SimpleHUD(Aux_Base.AuxSeats):
         self.positions["common"] = self.hud.layout.common
         self.move_windows()
 
-    def _block_label(self, key: str | tuple[int | str, int]) -> str:
+    def _block_label(self, key: WindowKey) -> str:
         """Human-readable name for an m_windows key, for diagnostics."""
         if key == "common":
             return "common"
-        with suppress(Exception):
+        if isinstance(key, tuple):
             return self.block_layouts[key[1]].get("label", "") or f"block#{key[1]}"
         return str(key)
 
@@ -703,9 +713,11 @@ class SimpleHUD(Aux_Base.AuxSeats):
         for key, window in windows:
             try:
                 self.update_contents(window, key if key == "common" else key[0])
-                if key != "common":
+                if isinstance(key, tuple):
                     seat, block_index = key
                     rel_pos = self.block_positions.get(key, self.positions.get(seat, (0, 0)))
+                    if rel_pos is None:
+                        rel_pos = (0, 0)
                     abs_pos = (window.pos().x(), window.pos().y())
                     self._log_block_window_position("update", seat, block_index, rel_pos, abs_pos, window.isVisible())
                 updated += 1
@@ -904,7 +916,9 @@ class SimpleStatWindow(Aux_Base.SeatWindow):
             grid.setHorizontalSpacing(2 if multi else 4)
             grid.setVerticalSpacing(1)
             grid.setContentsMargins(1 if multi else 0, 1 if multi else 0, 1 if multi else 0, 0)
-            box = [[None] * blk["ncols"] for _ in range(blk["nrows"])]
+            box: list[list[SimpleStat | EmptyStat | None]] = [
+                [None] * blk["ncols"] for _ in range(blk["nrows"])
+            ]
             btexts = blk.get("texts", [])
             # When the panel carries explicit PT4 text items (column/row headers,
             # captions) render them at their grid positions; otherwise fall back to
@@ -938,25 +952,27 @@ class SimpleStatWindow(Aux_Base.SeatWindow):
                     if stat_name:
                         cranges = blk.get("colorranges")
                         cr = cranges[r][c] if cranges else None
-                        box[r][c] = self.aw.aw_class_stat(
+                        stat_widget = self.aw.aw_class_stat(
                             stat_name, seat=self.seat, popup=blk["popups"][r][c], aw=self.aw, colors=cr,
                         )
+                        box[r][c] = stat_widget
                         if blk["hudcolors"][r][c] or blk["hudbgcolors"][r][c]:
-                            box[r][c].set_color(fg=blk["hudcolors"][r][c], bg=blk["hudbgcolors"][r][c])
+                            stat_widget.set_color(fg=blk["hudcolors"][r][c], bg=blk["hudbgcolors"][r][c])
                         span = max(1, (blk.get("colspans") or [[1]])[r][c] if blk.get("colspans") else 1)
                         align = (blk.get("aligns") or [[""]])[r][c] if blk.get("aligns") else ""
                         if align:
-                            box[r][c].widget.setAlignment(_ALIGN.get(align, Qt.AlignmentFlag.AlignCenter))
-                        grid.addWidget(box[r][c].widget, grid_row + 1 if show_headers else grid_row, c, 1, span)
-                        box[r][c].widget.setFont(self.aw.font)
+                            stat_widget.widget.setAlignment(_ALIGN.get(align, Qt.AlignmentFlag.AlignCenter))
+                        grid.addWidget(stat_widget.widget, grid_row + 1 if show_headers else grid_row, c, 1, span)
+                        stat_widget.widget.setFont(self.aw.font)
                         if multi:
-                            box[r][c].widget.setMinimumWidth(20)
+                            stat_widget.widget.setMinimumWidth(20)
                     elif not btexts:
                         # Keep empty placeholders only in the legacy (no-text) mode;
                         # with text items the empty cells are intentional spacing.
-                        box[r][c] = EmptyStat(aw=self.aw)
-                        grid.addWidget(box[r][c].widget, grid_row + 1 if show_headers else grid_row, c)
-                        box[r][c].widget.setFont(self.aw.font)
+                        empty_stat = EmptyStat(aw=self.aw)
+                        box[r][c] = empty_stat
+                        grid.addWidget(empty_stat.widget, grid_row + 1 if show_headers else grid_row, c)
+                        empty_stat.widget.setFont(self.aw.font)
                     else:
                         box[r][c] = EmptyStat(aw=self.aw)
             # Horizontal-line separators (PT4 "Horz Line" items).
@@ -1078,7 +1094,7 @@ class SimpleStat:
         self.lab.aw_popup = popup
         self.lab.stat_dict = None
         self.widget = self.lab
-        self.stat_dict = None
+        self.stat_dict: dict[Any, Any] | None = None
         self.hud = aw.hud
         self.aux_params = aw.aux_params
         self.colors = colors or {}
@@ -1185,7 +1201,7 @@ class SimpleTableMW(Aux_Base.SeatWindow):
 
     #    BTW: It might be better to do this with a different AW.
 
-    def __init__(self, hud: Any, aw: Any | None = None) -> None:
+    def __init__(self, hud: Any, aw: Any) -> None:
         """Initializes the SimpleTableMW, the main table HUD menu window.
 
         This constructor sets up the menu label, icon, layout, and positions the menu window relative to the table.
