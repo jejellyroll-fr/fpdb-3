@@ -184,6 +184,7 @@ class AuxWindow:
         self.hud = hud
         self.params = params
         self.config = config
+        self.container: Any | None = None
 
     #   Override these methods as needed
     def update_data(self, *args: Any) -> None:
@@ -221,8 +222,9 @@ class AuxWindow:
 
         Attempts to destroy the window container, suppressing any exceptions that may occur.
         """
-        with contextlib.suppress(Exception):
-            self.container.destroy()
+        if self.container is not None:
+            with contextlib.suppress(Exception):
+                self.container.destroy()
 
     def kill(self) -> None:
         """Kill this auxiliary window.
@@ -247,7 +249,7 @@ class AuxWindow:
         """
         return sum(seat != "common" and cards_tuple[0] != 0 for seat, cards_tuple in list(cards.items()))
 
-    def get_id_from_seat(self, seat: int) -> str | None:
+    def get_id_from_seat(self, seat: int) -> int | str | None:
         """Determine player id from seat number, given stat_dict.
 
         hh_seats is a list of the actual seat numbers used in the hand history.
@@ -264,7 +266,7 @@ class AuxWindow:
 class SeatWindow(QWidget):
     """A window for a single seat at the table."""
 
-    def __init__(self, aw: AuxWindow | None = None, seat: int | None = None) -> None:
+    def __init__(self, aw: Any = None, seat: int | str | None = None) -> None:
         """Initialize the SeatWindow.
 
         Args:
@@ -279,7 +281,7 @@ class SeatWindow(QWidget):
             None,
             Qt.WindowType.Window | Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint,
         )
-        self.lastPos = None
+        self.lastPos: QPoint | None = None
         # True while the OS is handling the drag via startSystemMove(); used to
         # skip the manual move() fallback so the window is not moved twice.
         self._system_move_active = False
@@ -405,7 +407,7 @@ class SeatWindow(QWidget):
         final = (self.pos().x(), self.pos().y())
         _drag_trace("drag-end seat=%s block=%s native=%s moved=%s final=%s", getattr(self, "seat", "?"),
                     getattr(self, "block_key", None), was_native, moved, final)
-        if moved:
+        if moved and self.aw is not None and self.seat is not None:
             self.aw.configure_event_cb(self, self.seat)
 
     def button_release_middle(self, event: QMouseEvent) -> None:
@@ -451,7 +453,7 @@ class AuxSeats(AuxWindow):
             params: A dictionary of parameters for this window.
         """
         super().__init__(hud, params, config)
-        self.positions = {}  # dict of window positions. normalised for favourite seat and offset
+        self.positions: dict[Any, tuple[int, int]] = {}
         # but _not_ offset to the absolute screen position
         self.displayed = False  # the seat windows are displayed
         self.uses_timer = False  # the Aux_seats object uses a timer to control hiding
@@ -460,13 +462,13 @@ class AuxSeats(AuxWindow):
         self.aw_class_window = SeatWindow  # classname to be used by the aw_class_window
 
     #    placeholders that should be overridden--so we don't throw errors
-    def create_contents(self) -> None:
+    def create_contents(self, *_args: Any) -> None:
         """Create the contents for each seat window.
 
         This method is a placeholder and should be overridden to populate each seat window with its contents.
         """
 
-    def create_common(self, x: int, y: int) -> None:
+    def create_common(self, x: int, y: int) -> Any:
         """Create the common window at the specified position.
 
         This method is a placeholder and should be overridden to create the common window at the given coordinates.
@@ -476,7 +478,7 @@ class AuxSeats(AuxWindow):
             y: The y-coordinate for the common window.
         """
 
-    def update_contents(self) -> None:
+    def update_contents(self, *_args: Any) -> None:
         """Update the contents for each seat window.
 
         This method is a placeholder and should be overridden to update the contents of each seat window.
@@ -574,8 +576,9 @@ class AuxSeats(AuxWindow):
         """
         log.debug("=== AUX_BASE CREATE() METHOD CALLED ===")
         self.adj = self.adj_seats()
-        self.m_windows = {}  # windows to put the card/hud items in
-        for i in [*list(range(1, self.hud.max + 1)), "common"]:
+        self.m_windows: dict[Any, Any] = {}
+        window_keys: list[int | str] = [*range(1, self.hud.max + 1), "common"]
+        for i in window_keys:
             if i == "common":
                 #    The common window is different from the others. Note that it needs to
                 #    get realized, shown, topified, etc. in create_common
@@ -585,6 +588,9 @@ class AuxSeats(AuxWindow):
                 self.m_windows[i] = self.create_common(x, y)
                 self.hud.layout.common = self.create_scale_position(x, y)
             else:
+                if not isinstance(i, int):
+                    log.warning("Ignoring unexpected HUD window key during creation: %r", i)
+                    continue
                 (x, y) = self.hud.layout.location[self.adj[i]]
                 log.debug("Seat %s: Loading position from layout: (%s, %s)", i, x, y)
                 self.m_windows[i] = self.aw_class_window(self, i)
@@ -738,7 +744,7 @@ class AuxSeats(AuxWindow):
         """
         log.warning("AuxSeats.save_layout called - save_layout method should be handled in the aux")
 
-    def configure_event_cb(self, widget: SeatWindow, i: int | str) -> None:
+    def configure_event_cb(self, widget: SeatWindow, i: Any) -> None:
         """Update the current location for each statblock.
 
         This method is needed to record moves for an individual block.
@@ -767,11 +773,13 @@ class AuxSeats(AuxWindow):
                 new_position[1],
             )
             self.positions[i] = new_position  # write this back to our map
-            if i != "common":
+            if isinstance(i, int):
                 self.hud.layout.location[self.adj[i]] = new_position  # update the hud-level dict,
                 # so other aux can be told
-            else:
+            elif i == "common":
                 self.hud.layout.common = new_position
+            else:
+                log.warning("Ignoring unexpected HUD seat identifier while saving position: %r", i)
 
     def adj_seats(self) -> list[int]:
         """Determine how to adjust seating arrangements.

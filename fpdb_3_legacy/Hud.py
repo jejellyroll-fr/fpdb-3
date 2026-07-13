@@ -87,6 +87,12 @@ class Hud:
         # create a local/discrete version of the dictionary,
         # so the different hud-windows get cross-contaminated
         self.aux_windows: list[Any] = []
+        self.stat_dict: dict[Any, Any] = {}
+        self.seat_players: dict[Any, Any] = {}
+        self.hand_instance: Any = None
+        self.table_name = ""
+        self.tablenumber: Any = None
+        self.tablehudlabel: Any = None
 
         self.site_parameters = config.get_site_parameters(self.table.site)
         self.supported_games_parameters = config.get_supported_games_parameters(
@@ -262,7 +268,7 @@ class Hud:
         #    write the layouts back to the HUD_config
         self.config.save()
 
-    def create(self, hand: int, config: Any, stat_dict: dict[str, Any]) -> None:
+    def create(self, hand: int | str, config: Any, stat_dict: dict[Any, Any]) -> None:
         """Update this hud, to the stats and players as of "hand".
 
         hand is the hand id of the most recent hand played at this table.
@@ -296,7 +302,7 @@ class Hud:
             except Exception:  # intentional broad catch: aux window callback boundary.
                 log.exception("Error creating aux window")
 
-    def update(self, hand: int, config: Any) -> None:
+    def update(self, hand: int | str, config: Any) -> None:
         """Re-load a hand instance and refresh the aux windows for ``hand``."""
         # re-load a hand instance (factory will load correct type for this hand)
         if self.db_hud_connection is not None:
@@ -314,7 +320,7 @@ class Hud:
             except Exception:  # intentional broad catch: aux window callback boundary.
                 log.exception("Error updating aux window")
 
-    def get_cards(self, hand: int) -> dict[str, Any]:
+    def get_cards(self, hand: int | str) -> dict[str, Any]:
         """Get the cards for a given hand."""
         if self.db_hud_connection is None:
             return {}

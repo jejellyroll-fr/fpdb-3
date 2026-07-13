@@ -82,6 +82,7 @@ jobs:
           fpdb_3_legacy/Importer.py
           fpdb_3_legacy/GuiBulkImport.py
           fpdb_3_legacy/GuiAutoImport.py
+          fpdb_3_legacy/Aux_Base.py
           fpdb_3_legacy/Aux_Hud.py
           fpdb_3_legacy/Aux_Classic_Hud.py
           fpdb_3_legacy/Hud.py

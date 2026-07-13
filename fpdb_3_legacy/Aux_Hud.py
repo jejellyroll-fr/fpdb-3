@@ -599,7 +599,7 @@ class SimpleHUD(Aux_Base.AuxSeats):
         log.debug("=== SIMPLEHUD MULTI-BLOCK CREATE() METHOD CALLED ===")
         self.adj = self.adj_seats()
         self.hero_display_seat = self._hero_display_seat()
-        self.m_windows: dict[WindowKey, Any] = {}
+        self.m_windows: dict[Any, Any] = {}
         self.block_positions: dict[BlockKey, tuple[int, int]] = {}
         # Unscaled reference seat anchors, captured once. Kept separate from the
         # live layout.location (which Hud.resize_windows rescales) so canonical
@@ -743,9 +743,13 @@ class SimpleHUD(Aux_Base.AuxSeats):
     def configure_event_cb(self, widget: Aux_Base.SeatWindow, i: int | str | tuple[int, int]) -> None:
         block_index = getattr(widget, "block_index", None)
         if block_index is None:
-            super().configure_event_cb(widget, i)
+            if isinstance(i, (int, str)):
+                super().configure_event_cb(widget, i)
             return
         seat = widget.seat
+        if seat is None:
+            log.warning("Ignoring block position update without a seat identifier")
+            return
         new_abs_position = widget.pos()
         # Persist the canonical position derived from the actual (unclamped) drop
         # point, via the single inverse converter. Only this (seat, block) key is
@@ -1100,7 +1104,7 @@ class SimpleStat:
         self.colors = colors or {}
         self._bg = ""
 
-    def update(self, player_id: str | None, stat_dict: dict) -> None:
+    def update(self, player_id: int | str | None, stat_dict: dict) -> None:
         """Update the statistic display for a given player.
 
         This method recalculates the statistic value and updates the label text for the specified player.
@@ -1230,8 +1234,10 @@ class SimpleTableMW(Aux_Base.SeatWindow):
         lab.setStyleSheet(f"background: {self.aw.bgcolor}; color: {self.aw.fgcolor};")
 
         self.setLayout(QVBoxLayout())
-        self.layout().setContentsMargins(0, 0, 0, 0)
-        self.layout().addWidget(lab)
+        layout = self.layout()
+        if layout is not None:
+            layout.setContentsMargins(0, 0, 0, 0)
+            layout.addWidget(lab)
 
         table_x = max(0, self.hud.table.x) if self.hud.table.x is not None else 50
         table_y = max(0, self.hud.table.y) if self.hud.table.y is not None else 50
