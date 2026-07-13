@@ -334,7 +334,7 @@ class GGPoker(HandHistoryConverter):
         re.MULTILINE | re.VERBOSE,
     )
 
-    def compilePlayerRegexs(self, hand: "Hand") -> None:
+    def compilePlayerRegexs(self, hand: Hand) -> None:
         """Compile player-specific regex patterns for the hand."""
         players = {player[1] for player in hand.players}
         if not players <= self.compiledPlayers:  # x <= y means 'x is subset of y'
@@ -474,7 +474,7 @@ class GGPoker(HandHistoryConverter):
 
         return info
 
-    def _parse_datetime(self, hand: "Hand", datetime_str: str) -> None:
+    def _parse_datetime(self, hand: Hand, datetime_str: str) -> None:
         """Parse and set hand start time from datetime string."""
         # 2008/11/12 10:00:48 CET [2008/11/12 4:00:48 ET]
         # (both dates are parsed so ET date overrides the other)
@@ -495,7 +495,7 @@ class GGPoker(HandHistoryConverter):
         )
         hand.startTime = HandHistoryConverter.changeTimezone(hand.startTime, "ET", "UTC")
 
-    def _detect_currency(self, buyin_str: str, hand: "Hand") -> None:
+    def _detect_currency(self, buyin_str: str, hand: Hand) -> None:
         """Detect and set currency from buyin string."""
         currency_mapping = {
             "$": "USD",
@@ -518,7 +518,7 @@ class GGPoker(HandHistoryConverter):
             log.error("Failed to detect currency. Hand ID: %s: '%s'", hand.handid, buyin_str)
             raise FpdbParseError
 
-    def _process_buyin_info(self, hand: "Hand", info: dict) -> None:
+    def _process_buyin_info(self, hand: Hand, info: dict) -> None:
         """Process tournament buyin information."""
         buyin_str = info["BUYIN"].strip()
 
@@ -543,7 +543,7 @@ class GGPoker(HandHistoryConverter):
             hand.buyin = int(100 * Decimal(info["BIAMT"]))
             hand.fee = 0
 
-    def _handle_bounty_and_fees(self, hand: "Hand", info: dict) -> None:
+    def _handle_bounty_and_fees(self, hand: Hand, info: dict) -> None:
         """Handle bounty tournaments and fee calculation."""
         if info["BOUNTY"] is not None:
             # Swap BOUNTY and BIRAKE values for bounty tournaments
@@ -558,20 +558,20 @@ class GGPoker(HandHistoryConverter):
         hand.buyin = int(100 * Decimal(info["BIAMT"])) + hand.koBounty
         hand.fee = int(100 * Decimal(info["BIRAKE"]))
 
-    def readHandInfo(self, hand: "Hand") -> None:
+    def readHandInfo(self, hand: Hand) -> None:
         """Read and parse hand information from hand text."""
         self._validate_hand_summary(hand)
         info = self._extract_hand_info(hand)
         self._process_hand_info(hand, info)
         self._check_special_conditions(hand)
 
-    def _validate_hand_summary(self, hand: "Hand") -> None:
+    def _validate_hand_summary(self, hand: Hand) -> None:
         """Validate that hand has proper summary structure."""
         if hand.handText.count("*** SUMMARY ***") != 1:
             msg = "Hand is not cleanly split into pre and post Summary"
             raise FpdbHandPartial(msg)
 
-    def _extract_hand_info(self, hand: "Hand") -> dict[str, str]:
+    def _extract_hand_info(self, hand: Hand) -> dict[str, str]:
         """Extract hand information using regex patterns."""
         info = {}
         m = self.re_hand_info.search(hand.handText, re.DOTALL)
@@ -585,7 +585,7 @@ class GGPoker(HandHistoryConverter):
         info.update(m2.groupdict())
         return info
 
-    def _process_hand_info(self, hand: "Hand", info: dict[str, str]) -> None:
+    def _process_hand_info(self, hand: Hand, info: dict[str, str]) -> None:
         """Process extracted hand information into hand object."""
         for key in info:
             if key == "DATETIME":
@@ -607,7 +607,7 @@ class GGPoker(HandHistoryConverter):
         # Process rake and pot information from summary
         self._process_rake_info(hand)
 
-    def _process_rake_info(self, hand: "Hand") -> None:
+    def _process_rake_info(self, hand: Hand) -> None:
         """Process rake and pot information from summary section."""
         # Extract rake and pot information from summary
         rake_match = self.re_rake.search(hand.handText)
@@ -623,7 +623,7 @@ class GGPoker(HandHistoryConverter):
             if pot_total:
                 hand.totalpot = Decimal(pot_total)
 
-    def _check_special_conditions(self, hand: "Hand") -> None:
+    def _check_special_conditions(self, hand: Hand) -> None:
         """Check for special game conditions."""
         if "Zoom" in self.in_path or "Rush" in self.in_path:
             hand.gametype["fast"], hand.isFast = True, True
@@ -632,7 +632,7 @@ class GGPoker(HandHistoryConverter):
             msg = f"Hand '{hand.handid}' was cancelled."
             raise FpdbHandPartial(msg)
 
-    def readButton(self, hand: "Hand") -> None:
+    def readButton(self, hand: Hand) -> None:
         """Read and set button position from hand text."""
         m = self.re_button.search(hand.handText)
         if m:
@@ -640,7 +640,7 @@ class GGPoker(HandHistoryConverter):
         else:
             hand.buttonpos = 0
 
-    def readPlayerStacks(self, hand: "Hand") -> None:
+    def readPlayerStacks(self, hand: Hand) -> None:
         """Read and set player stack information from hand text."""
         log.debug("readPlayerStacks")
         pre, _post = hand.handText.split("*** SUMMARY ***")
@@ -652,7 +652,7 @@ class GGPoker(HandHistoryConverter):
                 self.clearMoneyString(a.group("CASH")),
             )
 
-    def markStreets(self, hand: "Hand") -> None:
+    def markStreets(self, hand: Hand) -> None:
         """Mark different streets in the hand text."""
         # PREFLOP = ** Dealing down cards **
         # This re fails if,  say, river is missing; then we don't get the ** that starts the river.
@@ -712,7 +712,7 @@ class GGPoker(HandHistoryConverter):
 
     def readCommunityCards(
         self,
-        hand: "Hand",
+        hand: Hand,
         street: str,
     ) -> None:  # street has been matched by markStreets, so exists in this hand
         """Read and set community cards for a given street."""
@@ -722,27 +722,27 @@ class GGPoker(HandHistoryConverter):
             m = self.re_board.search(hand.streets[street])
             hand.setCommunityCards(street, m.group("CARDS").split()) if m else None
 
-    def readSTP(self, hand: "Hand") -> None:
+    def readSTP(self, hand: Hand) -> None:
         """Read straight to play information from hand text."""
         log.debug("readSTP")
         m = self.re_stp.search(hand.handText)
         if m:
             hand.tourneyTypeId = 0
 
-    def readAntes(self, hand: "Hand") -> None:
+    def readAntes(self, hand: Hand) -> None:
         """Read and add ante information from hand text."""
         log.debug("readAntes")
         m = self.re_antes.finditer(hand.handText)
         for player in m:
             hand.addAnte(player.group("PNAME"), self.clearMoneyString(player.group("ANTE")))
 
-    def readBringIn(self, hand: "Hand") -> None:
+    def readBringIn(self, hand: Hand) -> None:
         """Read and add bring-in information from hand text."""
         m = self.re_bring_in.search(hand.handText, re.DOTALL)
         if m:
             hand.addBringIn(m.group("PNAME"), self.clearMoneyString(m.group("BRINGIN")))
 
-    def readBlinds(self, hand: "Hand") -> None:
+    def readBlinds(self, hand: Hand) -> None:
         """Read and add blind information from hand text."""
         live_blind, straddles = True, {}
         for a in self.re_post_sb.finditer(hand.handText):
@@ -771,7 +771,7 @@ class GGPoker(HandHistoryConverter):
             else:
                 hand.addBlind(a.group("PNAME"), "secondsb", self.clearMoneyString(a.group("BUB")))
 
-    def readHoleCards(self, hand: "Hand") -> None:
+    def readHoleCards(self, hand: Hand) -> None:
         """Read and set hole cards for players from hand text."""
         # First, mark all players who were dealt cards (even if hidden)
         self._mark_dealt_players(hand)
@@ -780,7 +780,7 @@ class GGPoker(HandHistoryConverter):
         self._process_remaining_streets(hand)
         self._fix_draw_games(hand)
 
-    def _mark_dealt_players(self, hand: "Hand") -> None:
+    def _mark_dealt_players(self, hand: Hand) -> None:
         """Mark all players who were dealt cards (even if cards are hidden)."""
         # Find all "Dealt to" lines and mark those players as dealt
         for m in self.re_dealt_cards.finditer(hand.handText):
@@ -789,7 +789,7 @@ class GGPoker(HandHistoryConverter):
             # Don't add empty cards as it causes issues with holecards processing
             hand.dealt.add(player_name)
 
-    def _process_initial_streets(self, hand: "Hand") -> None:
+    def _process_initial_streets(self, hand: Hand) -> None:
         """Process PREFLOP and DEAL streets for hero cards."""
         # First mark the streets in the hand text
         self.markStreets(hand)
@@ -798,14 +798,14 @@ class GGPoker(HandHistoryConverter):
             if street in hand.streets:
                 self._process_hero_cards_for_street(hand, street)
 
-    def _process_remaining_streets(self, hand: "Hand") -> None:
+    def _process_remaining_streets(self, hand: Hand) -> None:
         """Process all other streets for hole cards."""
         for street, text in hand.streets.items():
             if not text or street in ("PREFLOP", "DEAL"):
                 continue  # already done these
             self._process_hero_cards_for_street(hand, street)
 
-    def _process_hero_cards_for_street(self, hand: "Hand", street: str) -> None:
+    def _process_hero_cards_for_street(self, hand: Hand, street: str) -> None:
         """Process hero cards for a specific street."""
         m = self.re_HeroCards.finditer(hand.streets[street])
         for found in m:
@@ -818,7 +818,7 @@ class GGPoker(HandHistoryConverter):
 
     def _add_hole_cards_by_game_type(
         self,
-        hand: "Hand",
+        hand: Hand,
         street: str,
         player: str,
         newcards: list[str],
@@ -844,7 +844,7 @@ class GGPoker(HandHistoryConverter):
             else:
                 hand.addHoleCards(street, player, closed=newcards, shown=False, mucked=False, dealt=True)
 
-    def _fix_draw_games(self, hand: "Hand") -> None:
+    def _fix_draw_games(self, hand: Hand) -> None:
         """Fix draw games by inserting DRAW marker."""
         if hand.gametype["category"] in ("27_1draw", "fivedraw"):
             # isolate the first discard/stand pat line (thanks Carl for the regex)
@@ -859,7 +859,7 @@ class GGPoker(HandHistoryConverter):
                 discard_split[0] += "*** DRAW ***"
                 hand.handText = "".join(discard_split)
 
-    def readAction(self, hand: "Hand", street: str) -> None:
+    def readAction(self, hand: Hand, street: str) -> None:
         """Read and parse player actions for a given street."""
         log.debug(f"readAction: CALLED for street {street}")
         s = street + "2" if hand.gametype["split"] and street in hand.communityStreets else street
@@ -917,7 +917,7 @@ class GGPoker(HandHistoryConverter):
         if street_actions:
             log.debug(f"readAction: first action: {street_actions[0]}")
 
-    def readShowdownActions(self, hand: "Hand") -> bool:
+    def readShowdownActions(self, hand: Hand) -> bool:
         """Read and parse showdown actions from hand text."""
         for shows in self.re_showdown_action.finditer(hand.handText):
             cards = shows.group("CARDS")
@@ -973,7 +973,7 @@ class GGPoker(HandHistoryConverter):
                 )
         return True
 
-    def readTourneyResults(self, hand: "Hand") -> None:
+    def readTourneyResults(self, hand: Hand) -> None:
         """Reads knockout bounties and add them to the koCounts dict."""
         if self.re_bounty.search(hand.handText) is None:
             return
@@ -999,7 +999,7 @@ class GGPoker(HandHistoryConverter):
         if ko_amounts:
             hand.koCounts.update(ko_amounts)
 
-    def readCollectPot(self, hand: "Hand") -> None:
+    def readCollectPot(self, hand: Hand) -> None:
         """Read and parse pot collection information from hand text."""
         i = 0
         pre, post = hand.handText.split("*** SUMMARY ***")
@@ -1032,7 +1032,7 @@ class GGPoker(HandHistoryConverter):
                 pot = self.clearMoneyString(m.group("POT"))
                 hand.addCollectPot(player=player, pot=pot)
 
-    def readOther(self, hand: "Hand") -> None:
+    def readOther(self, hand: Hand) -> None:
         """Read other information from hand text."""
 
     @staticmethod
@@ -1061,7 +1061,7 @@ class GGPoker(HandHistoryConverter):
         log.debug("Method readSummaryInfo non implemented.")
         return True
 
-    def readShownCards(self, hand: "Hand") -> None:
+    def readShownCards(self, hand: Hand) -> None:
         """Read shown cards from hand text."""
         for m in self.re_ShownCards.finditer(hand.handText):
             if m.group("CARDS") is not None:

@@ -143,7 +143,7 @@ class ParserMockHand:
     # --- Class helpers -------------------------------------------------
 
     @classmethod
-    def minimal(cls, gametype: dict[str, Any] | None = None) -> "ParserMockHand":
+    def minimal(cls, gametype: dict[str, Any] | None = None) -> ParserMockHand:
         return cls(hand_text="", gametype=gametype or {})
 
     # --- Parser write surface -----------------------------------------

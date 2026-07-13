@@ -259,7 +259,7 @@ class HudPreviewWidget(QWidget):
         color = (color or "").strip()
         return color if color and not color.lower().startswith("rgba") else fallback
 
-    def _cell_label(self, stat: dict) -> "SimpleLabel":
+    def _cell_label(self, stat: dict) -> SimpleLabel:
         """Build a single styled value cell (text colour, optional bg colour)."""
         scaled = max(8, round(self.hud_font_size * self.preview_scale))
         stat_name = stat.get("stat", "")
@@ -366,7 +366,7 @@ class HudPreviewWidget(QWidget):
         vbox.addWidget(grid_host)
         return box
 
-    def _text_item_label(self, text: dict) -> "SimpleLabel":
+    def _text_item_label(self, text: dict) -> SimpleLabel:
         """A non-data header/caption label inside a block."""
         scaled = max(8, round(self.hud_font_size * self.preview_scale))
         lab = SimpleLabel(text.get("label", ""))
