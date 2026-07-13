@@ -1103,12 +1103,13 @@ Player4: posts button blind $0.05"""
         street_text = "Dealt to Hero [As Ks]"
         hand = Mock()
         hand.streets = {"PREFLOP": street_text}
+        hand.holeStreets = []  # no draw streets (readHoleCards iterates this)
         hand.addHoleCards = Mock()
         hand.hero = None
 
-        # Mock the regex
+        # Mock the regex; OLDCARDS is None for a genuine initial deal.
         mock_match = Mock()
-        mock_match.group.side_effect = lambda x: {"PNAME": "Hero", "NEWCARDS": "As Ks"}[x]
+        mock_match.group.side_effect = lambda x: {"PNAME": "Hero", "NEWCARDS": "As Ks", "OLDCARDS": None}.get(x)
 
         self.parser.re_hero_cards = Mock()
         self.parser.re_hero_cards.finditer = Mock(return_value=[mock_match])
@@ -2588,6 +2589,8 @@ Player1: folds"""
         """Test readCommunityCards raises FpdbHandPartial on empty cards."""
         hand = Mock()
         hand.streets = {"FLOP": "[]"}
+        # No SUMMARY Board line, so board recovery finds nothing and it still raises.
+        hand.handText = "*** FLOP *** []\n"
 
         # Mock empty card detection
         self.parser.re_empty_card = Mock()

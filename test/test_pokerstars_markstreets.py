@@ -286,8 +286,8 @@ Player1: discards 2 cards
 
         self.parser.markStreets(hand)
 
-        # Should add DRAW marker with \r\n
-        self.assertIn("*** DRAW ***\r\n", hand.handText)
+        # The DRAW marker is inserted matching the input's line endings (\n here).
+        self.assertIn("*** DRAW ***\n", hand.handText)
 
     def test_markstreets_reassemble_split_text(self):
         """Test that split text is properly reassembled in draw games."""
