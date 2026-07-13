@@ -115,47 +115,47 @@ class Boss(HandHistoryConverter):
     # <ACTION TYPE="HAND_BLINDS" PLAYER="prato" KIND="HAND_SB" VALUE="0.25"></ACTION>
 
     re_PostSB = re.compile(
-        r'^<ACTION TYPE="HAND_BLINDS" PLAYER="{}" KIND="HAND_SB" VALUE="(?P<SB>[.0-9]+)"></ACTION>'.format(player_re),
+        rf'^<ACTION TYPE="HAND_BLINDS" PLAYER="{player_re}" KIND="HAND_SB" VALUE="(?P<SB>[.0-9]+)"></ACTION>',
         re.MULTILINE,
     )
     re_PostBB = re.compile(
-        r'^<ACTION TYPE="HAND_BLINDS" PLAYER="{}" KIND="HAND_BB" VALUE="(?P<BB>[.0-9]+)"></ACTION>'.format(player_re),
+        rf'^<ACTION TYPE="HAND_BLINDS" PLAYER="{player_re}" KIND="HAND_BB" VALUE="(?P<BB>[.0-9]+)"></ACTION>',
         re.MULTILINE,
     )
     re_PostDSB = re.compile(
-        r'^<ACTION TYPE="HAND_BLINDS" PLAYER="{}" KIND="HAND_DSB" VALUE="(?P<DSB>[.0-9]+)"></ACTION>'.format(player_re),
+        rf'^<ACTION TYPE="HAND_BLINDS" PLAYER="{player_re}" KIND="HAND_DSB" VALUE="(?P<DSB>[.0-9]+)"></ACTION>',
         re.MULTILINE,
     )
     re_PostBoth = re.compile(
-        r'^<ACTION TYPE="HAND_BLINDS" PLAYER="{}" KIND="HAND_AB" VALUE="(?P<SBBB>[.0-9]+)"></ACTION>'.format(player_re),
+        rf'^<ACTION TYPE="HAND_BLINDS" PLAYER="{player_re}" KIND="HAND_AB" VALUE="(?P<SBBB>[.0-9]+)"></ACTION>',
         re.MULTILINE,
     )
     re_Antes = re.compile(
-        r'^<ACTION TYPE="HAND_ANTE" PLAYER="{}" VALUE="(?P<ANTE>[.0-9]+)"></ACTION>'.format(player_re), re.MULTILINE
+        rf'^<ACTION TYPE="HAND_ANTE" PLAYER="{player_re}" VALUE="(?P<ANTE>[.0-9]+)"></ACTION>', re.MULTILINE
     )
-    re_BringIn = re.compile(r"^{}: brings[- ]in( low|) for \$?(?P<BRINGIN>[.0-9]+)".format(player_re), re.MULTILINE)
+    re_BringIn = re.compile(rf"^{player_re}: brings[- ]in( low|) for \$?(?P<BRINGIN>[.0-9]+)", re.MULTILINE)
     re_FlopPot = re.compile(r'^<ACTION TYPE="HAND_BOARD" VALUE="BOARD_FLOP" POT="(?P<POT>[.0-9]+)"', re.MULTILINE)
     re_DrawPot = re.compile(r'^<ACTION TYPE="HAND_BOARD" POT="(?P<POT>[.0-9]+)"', re.MULTILINE)
     re_ShowDownPot = re.compile(r'^<SHOWDOWN NAME="HAND_SHOWDOWN" POT="(?P<POT>[.0-9]+)"', re.MULTILINE)
 
     re_HeroCards = re.compile(
-        r'PLAYER="{}">(?P<CARDS>(\s+<CARD LINK="[0-9]+"></CARD>){{2,5}})</ACTION>'.format(player_re), re.MULTILINE
+        rf'PLAYER="{player_re}">(?P<CARDS>(\s+<CARD LINK="[0-9]+"></CARD>){{2,5}})</ACTION>', re.MULTILINE
     )
 
     #'^<ACTION TYPE="(?P<ATYPE>[_A-Z]+)" PLAYER="%s"( VALUE="(?P<BET>[.0-9]+)")?></ACTION>'
     re_Action = re.compile(
-        r'^<ACTION TYPE="(?P<ATYPE>[_A-Z]+)" PLAYER="{}"( VALUE="(?P<BET>[.0-9]+)")?></ACTION>'.format(player_re),
+        rf'^<ACTION TYPE="(?P<ATYPE>[_A-Z]+)" PLAYER="{player_re}"( VALUE="(?P<BET>[.0-9]+)")?></ACTION>',
         re.MULTILINE,
     )
 
     re_ShowdownAction = re.compile(
-        r'<RESULT (WINTYPE="WINTYPE_(HILO|LO|HI)" )?PLAYER="{}" WIN="[.\d]+" HAND=".+">(?P<CARDS>(\s+<CARD LINK="[0-9]+"></CARD>){{2,5}})</RESULT>'.format(player_re),
+        rf'<RESULT (WINTYPE="WINTYPE_(HILO|LO|HI)" )?PLAYER="{player_re}" WIN="[.\d]+" HAND=".+">(?P<CARDS>(\s+<CARD LINK="[0-9]+"></CARD>){{2,5}})</RESULT>',
         re.MULTILINE,
     )
     # <RESULT PLAYER="wig0r" WIN="4.10" HAND="$(STR_G_WIN_TWOPAIR) $(STR_G_CARDS_TENS) $(STR_G_ANDTEXT) $(STR_G_CARDS_EIGHTS)">
     #
     re_CollectPot = re.compile(
-        r'<RESULT (WINTYPE="WINTYPE_(HILO|LO|HI)" )?PLAYER="{}" WIN="(?P<POT>[.\d]+)" HAND=".+"'.format(player_re),
+        rf'<RESULT (WINTYPE="WINTYPE_(HILO|LO|HI)" )?PLAYER="{player_re}" WIN="(?P<POT>[.\d]+)" HAND=".+"',
         re.MULTILINE,
     )
 

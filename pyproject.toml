@@ -74,6 +74,12 @@ indent-width = 4
 select = ["E", "F", "I", "UP", "W"]
 ignore = [
     "E401",
+    # Legacy entry points intentionally initialize translations, mocks, or
+    # sys.path before importing modules that depend on that state.
+    "E402",
+    # Regex, SQL, QSS, and generated display strings are frequently
+    # indivisible; formatting code is still enforced independently.
+    "E501",
     "E731",
     "E713",
 ]

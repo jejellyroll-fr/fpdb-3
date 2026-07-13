@@ -15,10 +15,8 @@ jobs:
       - uses: astral-sh/setup-uv@v3
       - name: Install Ruff
         run: uv tool install ruff
-      - name: Enforce repository lint ratchet
-        run: >-
-          ruff check fpdb_3_legacy fpdb test tests
-          --select E701,E711,E712,E721,E722,F401,F403,F405,F507,F541,F601,F811,F821,F841,I001,UP006,UP007,UP009,UP015,UP031,UP035,UP036,UP037,UP045,W291,W292,W293
+      - name: Lint repository
+        run: ruff check fpdb_3_legacy fpdb test tests
       - name: Lint newly modernized modules
         run: >-
           ruff check

@@ -295,7 +295,7 @@ class Everleaf(HandHistoryConverter):
         # If this has been called, street is a street which gets dealt community cards by type hand
         # but it might be worth checking somehow.
         #        if street in ('FLOP','TURN','RIVER'):   # a list of streets which get dealt community cards (i.e. all but PREFLOP)
-        log.debug("readCommunityCards ({})".format(street))
+        log.debug(f"readCommunityCards ({street})")
         m = self.re_Board.search(hand.streets[street])
         cards = m.group("CARDS")
         cards = [card.strip() for card in cards.split(",")]
@@ -350,7 +350,7 @@ class Everleaf(HandHistoryConverter):
         log.warning(_("%s cannot read all stud/razz hands yet.") % hand.sitename)
 
     def readAction(self, hand, street):
-        log.debug("readAction ({})".format(street))
+        log.debug(f"readAction ({street})")
         if street == "THIRD":
             m = self.re_Completes.finditer(hand.streets[street])
             for action in m:
@@ -403,15 +403,15 @@ class Everleaf(HandHistoryConverter):
                 elif m.group("SHOWED") in ("mucks", "mucked"):
                     mucked = True
 
-                log.debug("readShownCards {} cards={}".format(player, cards))
+                log.debug(f"readShownCards {player} cards={cards}")
                 #                hand.addShownCards(cards=None, player=m.group('PNAME'), holeandboard=cards)
                 hand.addShownCards(cards=cards, player=player, shown=shown, mucked=mucked, string=string)
 
     @staticmethod
     def getTableTitleRe(type, table_name=None, tournament=None, table_number=None):
         if tournament:
-            return re.escape("{} - Tournament ID: {} - ".format(table_number, tournament))
-        return "{} (\\(\\d+\\) )?-".format(re.escape(table_name))
+            return re.escape(f"{table_number} - Tournament ID: {tournament} - ")
+        return f"{re.escape(table_name)} (\\(\\d+\\) )?-"
 
     def readSTP(self, hand):
         """Read Splash the Pot - not implemented."""

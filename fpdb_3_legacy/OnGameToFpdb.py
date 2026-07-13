@@ -573,11 +573,11 @@ class OnGame(HandHistoryConverter):
         "Returns string to search in windows titles"
         regex = re.escape(str(table_name))
         if type == "tour":
-            regex = "{}".format(table_number)
+            regex = f"{table_number}"
         log.info(
-            "OnGame.getTableTitleRe: table_name='{}' tournament='{}' table_number='{}'".format(table_name, tournament, table_number)
+            f"OnGame.getTableTitleRe: table_name='{table_name}' tournament='{tournament}' table_number='{table_number}'"
         )
-        log.info("OnGame.getTableTitleRe: returns: '{}'".format(regex))
+        log.info(f"OnGame.getTableTitleRe: returns: '{regex}'")
         return regex
 
     def readSTP(self, hand):

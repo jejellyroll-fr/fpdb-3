@@ -265,7 +265,7 @@ class Entraction(HandHistoryConverter):
                             # FIXME: handle other currencies, play money
                             log.error(
                                 _("EntractionToFpdb.readHandInfo: Failed to detect currency.")
-                                + " Hand ID: {}: '{}'".format(hand.handid, info[key])
+                                + f" Hand ID: {hand.handid}: '{info[key]}'"
                             )
                             raise FpdbParseError
 
