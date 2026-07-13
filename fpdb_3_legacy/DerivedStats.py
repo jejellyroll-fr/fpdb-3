@@ -1576,7 +1576,7 @@ class DerivedStats:
             bb = [x[0] for x in hand.actions[hand.actionStreets[0]] if x[1] == "big blind"]
             sb = [x[0] for x in hand.actions[hand.actionStreets[0]] if x[1] == "small blind"]
         # Set positions in order: Button=0, SB=S, BB=B, then others backwards (CO=1, HJ=2...)
-        
+
         # Button position
         if ub:
             self.handsplayers[ub[0]]["position"] = 0
@@ -1632,7 +1632,7 @@ class DerivedStats:
 
         # We want to find players who are NOT blinds/BTN and assign them CO, HJ, etc.
         # starting from the player right before the Button (CO).
-        
+
         try:
             log.debug("setPositions: players=%s, sb=%s, bb=%s", players, sb, bb)
             btn_idx = -1
@@ -1669,7 +1669,7 @@ class DerivedStats:
                     self.handsplayers[button_name]["position"] = 0
                     self.handsplayers[button_name]["street0InPosition"] = True
                     assigned_players.add(button_name)
-            
+
             if btn_idx != -1:
                 # Set Button position to 0 explicitly, except heads-up where
                 # the button is also the small blind and keeps the blind marker.
@@ -2715,7 +2715,7 @@ class DerivedStats:
                 if posn in steal_positions:
                     log.debug("calcSteals: Setting stealChance for %s (position %s)", pname, posn)
                     player_stats["stealChance"] = True
-                
+
                 if act in ("bets", "raises", "calls", "completes", "checks"):
                     log.debug("calcSteals: Pot OPENED by %s with %s", pname, act)
                     pot_opened = True

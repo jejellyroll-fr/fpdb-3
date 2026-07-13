@@ -927,7 +927,7 @@ class BetOnline(HandHistoryConverter):
         for m in self.re_total_pot.finditer(hand.handText):
             pot_amount = Decimal(self.clearMoneyString(m.group("POT")))
             hand.totalpot = pot_amount
-            
+
             # If rake is present, record it
             if m.group("RAKE") is not None:
                 rake_amount = Decimal(self.clearMoneyString(m.group("RAKE")))

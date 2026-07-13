@@ -95,7 +95,7 @@ onlinehelp = {
 
 class RingStatsController(QObject):
     """Contrôleur centralisant l'accès aux données et leur formatage."""
-    
+
     # Signaux pour communiquer avec les fenêtres de visualisation
     summary_model_ready = Signal(QStandardItemModel)
     hand_model_ready = Signal(QStandardItemModel)
@@ -111,7 +111,7 @@ class RingStatsController(QObject):
         self.sql = sql
         self.columns = config.get_gui_cash_stat_params()
         self._workers: list[DbWorker] = []
-        
+
         # Détection automatique de l'environnement de test ou SQLite pour exécution synchrone
         # En mode SQLite, nous forçons l'exécution synchrone pour éviter les exceptions de thread
         import sys
@@ -135,7 +135,7 @@ class RingStatsController(QObject):
         games = filter_widget.getGames()
         currencies = filter_widget.getCurrencies()
         num_hands = filter_widget.getNumHands()
-        
+
         debug_log(f"Filters: sites={sites}, heroes={heroes}, limits={limits}, seats={seats}, groups={groups}, dates={dates}, games={games}, currencies={currencies}")
 
         # Reset states
@@ -193,17 +193,17 @@ class RingStatsController(QObject):
         debug_log(f"SQL for {query_name}:\n{sql}")
         # Nettoyer les anciens workers
         self._workers = [w for w in self._workers if not w.isFinished()]
-        
+
         worker = DbWorker(self.cursor, query_name, sql)
         worker.finished.connect(callback)
-        
+
         def on_error(err):
             log.error(f"DbWorker error for {query_name}: {err}")
             debug_log(f"DbWorker error for {query_name}: {err}")
-            
+
         worker.error.connect(on_error)
         self._workers.append(worker)
-        
+
         if self.async_mode:
             worker.start()
         else:
@@ -217,11 +217,11 @@ class RingStatsController(QObject):
             self._last_profit_data = ([], [], [], [])
             self.no_data_found.emit()
             return
-            
+
         # Créer le modèle standard de données
         colshow = colshowposn if "posn" in self._last_groups else colshowsumm
         cols_to_show = [x for x in self.columns if x[colshow]]
-        
+
         model = QStandardItemModel(0, len(cols_to_show))
         for col, column in enumerate(cols_to_show):
             header_item = QStandardItem(column[colheading])
@@ -241,7 +241,7 @@ class RingStatsController(QObject):
         """Callback appelé lorsque la requête chronologique de profit est terminée."""
         debug_log(f"_on_profit_query_finished: returned {len(result) if result else 0} rows")
         import numpy as np
-        
+
         if not result:
             self._last_profit_data = ([], [], [], [])
             self._check_and_emit_dashboard()
@@ -252,17 +252,17 @@ class RingStatsController(QObject):
             blue = np.array([0.0, *[float(x[1]) if x[2] else 0.0 for x in result]])
             red = np.array([0.0, *[float(x[1]) if not x[2] else 0.0 for x in result]])
             orange = np.array([0.0, *[float(x[3]) if x[3] is not None else 0.0 for x in result]])
-            
+
             greenline = green.cumsum() / 100.0
             blueline = blue.cumsum() / 100.0
             redline = red.cumsum() / 100.0
             orangeline = orange.cumsum() / 100.0
-            
+
             self._last_profit_data = (greenline, blueline, redline, orangeline)
         except Exception as e:
             log.error(f"Error processing profit data: {e}")
             self._last_profit_data = ([], [], [], [])
-            
+
         self._check_and_emit_dashboard()
 
     def _check_and_emit_dashboard(self) -> None:
@@ -274,10 +274,10 @@ class RingStatsController(QObject):
         debug_log(f"_on_hands_query_finished: returned {len(result) if result else 0} rows")
         if not result:
             return
-            
+
         colshow = colshowposn if "posn" in self._last_groups else colshowsumm
         cols_to_show = [x for x in self.columns if x[colshow]]
-        
+
         model = QStandardItemModel(0, len(cols_to_show))
         for col, column in enumerate(cols_to_show):
             alias = column[colalias]
@@ -312,7 +312,7 @@ class RingStatsController(QObject):
     def _on_positions_query_finished(self, name: str, result: list, colnames: list) -> None:
         """Callback pour l'affichage de la table de poker positionnelle."""
         position_stats = {}
-        
+
         vpip_idx = colnames.index("vpip") if "vpip" in colnames else -1
         pfr_idx = colnames.index("pfr") if "pfr" in colnames else -1
         net_idx = colnames.index("net") if "net" in colnames else -1
@@ -330,17 +330,17 @@ class RingStatsController(QObject):
                     pos_label = "BB"
                 elif db_pos == "0":
                     pos_label = "Btn"
-                
+
                 vpip = float(row[vpip_idx]) if vpip_idx != -1 and row[vpip_idx] is not None and row[vpip_idx] != -999 else 0.0
                 pfr = float(row[pfr_idx]) if pfr_idx != -1 and row[pfr_idx] is not None and row[pfr_idx] != -999 else 0.0
                 net = float(row[net_idx]) if net_idx != -1 and row[net_idx] is not None else 0.0
-                
+
                 position_stats[pos_label] = {
                     "vpip": vpip,
                     "pfr": pfr,
                     "net": net
                 }
-                
+
         debug_log(f"_on_positions_query_finished: resolved {len(position_stats)} positions: {list(position_stats.keys())}")
         self.position_data_ready.emit(position_stats)
 
@@ -357,7 +357,7 @@ class RingStatsController(QObject):
             for col, column in enumerate(cols_to_show):
                 value = None
                 sortValue = -1e9
-                
+
                 if column[colalias] in colnames:
                     value = result[sqlrow][colnames.index(column[colalias])]
                     if column[colalias] == "plposition":
@@ -400,7 +400,7 @@ class RingStatsController(QObject):
                 item = QStandardItem("")
                 if value is not None and value != -999:
                     item = QStandardItem(column[colformat] % value)
-                    
+
                     # Déterminer la valeur de tri (sortValue)
                     if column[colalias] == "game" and holecards:
                         cat_idx = colnames.index("category")
@@ -422,7 +422,7 @@ class RingStatsController(QObject):
 
                 item.setData(sortValue, Qt.ItemDataRole.UserRole)
                 item.setEditable(False)
-                
+
                 # Appliquer la couleur vert/rouge sur les profits
                 if column[colalias] in _WINNINGS_ALIASES and value is not None and value != -999:
                     try:
@@ -434,7 +434,7 @@ class RingStatsController(QObject):
                 # Alignements des cellules (à droite sauf pour la colonne 0)
                 if col != 0:
                     item.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
-                
+
                 # Tooltip d'aide en survol
                 if column[colalias] != "game" and len(treerow) > 0:
                     desc_heading = column[colheading]
@@ -466,7 +466,7 @@ class RingStatsController(QObject):
                 continue
             total_hands += h
             total_net += float(row[net_idx]) if net_idx != -1 and row[net_idx] is not None else 0.0
-            
+
             # Agrégation pondérée par le nombre de mains
             weighted_vpip += (float(row[vpip_idx]) if vpip_idx != -1 and row[vpip_idx] is not None and row[vpip_idx] != -999 else 0.0) * h
             weighted_pfr += (float(row[pfr_idx]) if pfr_idx != -1 and row[pfr_idx] is not None and row[pfr_idx] != -999 else 0.0) * h
@@ -485,7 +485,7 @@ class RingStatsController(QObject):
     def _get_refined_sql(self, query: str, holecards: bool, filter_widget, playerids, sitenos, limits, seats, groups, dates, games, currencies, num_hands, force_position: bool = False) -> str:
         """Adapte et affine la requête SQL brute en injectant les filtres actifs."""
         self._last_groups = groups
-        
+
         tmp = self.sql.query[query]
         having = ""
         colshow = colshowsumm
@@ -598,19 +598,19 @@ class RingStatsController(QObject):
         tmp = self.sql.query["getRingProfitAllHandsPlayerIdSiteInDollars"]
         nametest = str(tuple(playerids)).replace("L", "").replace(",)", ")") if playerids else "1 = 2"
         sitetest = str(tuple(sitenos)).replace("L", "").replace(",)", ")") if sitenos else "1 = 2"
-        
+
         gametest = ""
         if len(games) > 0:
             gametest = str(tuple(games)).replace("L", "").replace(",)", ")").replace("u'", "'")
             gametest = f"and gt.category in {gametest}"
         else:
             gametest = "and gt.category IS NULL"
-            
+
         currencytest = str(tuple(currencies)).replace(",)", ")").replace("u'", "'")
         currencytest = f"AND gt.currency in {currencytest}"
-        
+
         bbtest = filter_widget.get_limits_where_clause(limits)
-        
+
         tmp = tmp.replace("<player_test>", nametest)
         tmp = tmp.replace("<site_test>", sitetest)
         tmp = tmp.replace("<startdate_test>", dates[0])

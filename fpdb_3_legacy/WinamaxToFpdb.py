@@ -658,11 +658,11 @@ class Winamax(HandHistoryConverter):
         # Extract all player names mentioned in the action part (blinds + streets + summary)
         # to identify participating players.
         header_end = hand.handText.find("*** ANTE/BLINDS ***")
-        if header_end == -1: 
+        if header_end == -1:
             header_end = hand.handText.find("*** PRE-FLOP ***")
-        
+
         relevant_text = hand.handText[header_end:] if header_end != -1 else hand.handText
-        
+
         m = self.re_player_info.finditer(pre)
         plist = {}
 

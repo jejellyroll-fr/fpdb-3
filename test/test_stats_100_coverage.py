@@ -1263,7 +1263,7 @@ def test_m_ratio_with_returned_money():
         bets = {"BLINDSANTES": {}}
         pot = type('obj', (object,), {'returned': {"Player1": 5.0}})()
         collectees = {}
-    
+
     hand = MockHandWithReturn()
     stat_dict = {1: {"screen_name": "Player1"}}
     result = do_stat(stat_dict, stat="m_ratio", player=1, hand_instance=hand)
@@ -1278,7 +1278,7 @@ def test_m_ratio_with_collectees():
         bets = {"BLINDSANTES": {}}
         pot = type('obj', (object,), {'returned': {}})()
         collectees = {"Player1": 10.0}
-    
+
     hand = MockHandWithCollectees()
     stat_dict = {1: {"screen_name": "Player1"}}
     result = do_stat(stat_dict, stat="m_ratio", player=1, hand_instance=hand)
@@ -1341,7 +1341,7 @@ def test_stat_override_three_decimals():
 def test_deprecated_stats_all_return_dash():
     """Verify all deprecated stats return '-'."""
     stat_dict = {1: {}}
-    deprecated_stats = ["iso", "three_bet_vs_steal", "call_vs_steal", 
+    deprecated_stats = ["iso", "three_bet_vs_steal", "call_vs_steal",
                         "avg_bet_size_flop", "avg_bet_size_turn", "avg_bet_size_river"]
     for stat_name in deprecated_stats:
         result = do_stat(stat_dict, stat=stat_name, player=1)
@@ -1523,7 +1523,7 @@ def test_m_ratio_no_compulsory_bets():
         bets = {"BLINDSANTES": {}}
         pot = type('obj', (object,), {'returned': {}})()
         collectees = {}
-    
+
     hand = MockHandNoBets()
     stat_dict = {1: {"screen_name": "Player1"}}
     result = do_stat(stat_dict, stat="m_ratio", player=1, hand_instance=hand)
@@ -1770,7 +1770,7 @@ def test_bbstack_with_bb():
         bets = {"BLINDSANTES": {}}
         pot = type('obj', (object,), {'returned': {}})()
         collectees = {}
-    
+
     hand = MockHandWithBB()
     stat_dict = {1: {"screen_name": "Player1"}}
     result = do_stat(stat_dict, stat="bbstack", player=1, hand_instance=hand)
@@ -1786,7 +1786,7 @@ def test_bbstack_missing_bb():
         bets = {"BLINDSANTES": {}}
         pot = type('obj', (object,), {'returned': {}})()
         collectees = {}
-    
+
     hand = MockHandMissingBB()
     stat_dict = {1: {"screen_name": "Player1"}}
     result = do_stat(stat_dict, stat="bbstack", player=1, hand_instance=hand)
@@ -1802,7 +1802,7 @@ def test_m_ratio_missing_sb():
         bets = {"BLINDSANTES": {}}
         pot = type('obj', (object,), {'returned': {}})()
         collectees = {}
-    
+
     hand = MockHandNoSB()
     stat_dict = {1: {"screen_name": "Player1"}}
     result = do_stat(stat_dict, stat="m_ratio", player=1, hand_instance=hand)

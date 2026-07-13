@@ -22,15 +22,15 @@ class HoldemGridCell(QFrame):
         super().__init__(parent)
         self.setObjectName("handCell")
         self.hand_text = hand_text
-        
+
         layout = QVBoxLayout(self)
         layout.setContentsMargins(2, 2, 2, 2)
-        
+
         self.label = QLabel(hand_text)
         self.label.setObjectName("handCellText")
         self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(self.label)
-        
+
         self.setToolTip(f"Main : {hand_text}\nAucune statistique disponible")
         c = get_theme_palette()
         self.set_color(c.get("window", "#2d3748"))  # Couleur du thème par défaut
@@ -47,13 +47,13 @@ class HoldemGridCell(QFrame):
             f"VPIP : {vpip:.1f}%<br/>"
             f"Profit : {profit:+.2f} €"
         )
-        
+
         c = get_theme_palette()
         color_up = c.get("graph_up", "#48bb78")
         color_down = c.get("graph_down", "#f56565")
         accent = c.get("accent", "#319795")
         bg_card = c.get("sidebar", "#1a202c")
-        
+
         if n > 0:
             if color_by == "vpip":
                 # Coloration par VPIP % (dégradé bleu/vert du thème)
@@ -73,7 +73,7 @@ class HoldemGridCell(QFrame):
                     color = c.get("border", "#4a5568")
         else:
             color = bg_card
-            
+
         self.set_color(color)
 
     def _interpolate_color(self, hex1: str, hex2: str, factor: float) -> str:
@@ -83,11 +83,11 @@ class HoldemGridCell(QFrame):
             h2 = hex2.lstrip('#')
             r1, g1, b1 = int(h1[0:2], 16), int(h1[2:4], 16), int(h1[4:6], 16)
             r2, g2, b2 = int(h2[0:2], 16), int(h2[2:4], 16), int(h2[4:6], 16)
-            
+
             r = int(r1 + factor * (r2 - r1))
             g = int(g1 + factor * (g2 - g1))
             b = int(b1 + factor * (b2 - b1))
-            
+
             return f"#{r:02x}{g:02x}{b:02x}"
         except Exception:
             return hex2
@@ -110,18 +110,18 @@ class OmahaChartsCanvas(FigureCanvas):
     def plot_omaha_analysis(self, suitedness: dict[str, int], pairs: dict[str, int], variant_title: str) -> None:
         self.fig.clear()
         self.update_style()
-        
+
         c = get_theme_palette()
         text_color = c.get("text", "#edf2f7")
         accent = c.get("accent", "#319795")
         accent_soft = c.get("accent_soft", "#4fd1c5")
         orange = c.get("graph_ev", "#f59e3d")
         color_down = c.get("graph_down", "#f56565")
-        
+
         # 2 Graphiques côte à côte : Répartition des couleurs (Suits) et des Paires
         ax1 = self.fig.add_subplot(121)
         ax2 = self.fig.add_subplot(122)
-        
+
         for ax in (ax1, ax2):
             ax.set_facecolor(c.get("sidebar", "#1a202c"))
             for spine in ax.spines.values():
@@ -133,7 +133,7 @@ class OmahaChartsCanvas(FigureCanvas):
             labels = list(suitedness.keys())
             values = list(suitedness.values())
             colors = [accent, accent_soft, orange, color_down][:len(labels)]
-            ax1.pie(values, labels=labels, autopct='%1.1f%%', colors=colors, 
+            ax1.pie(values, labels=labels, autopct='%1.1f%%', colors=colors,
                     textprops={'color': text_color, 'fontsize': 8})
             ax1.set_title(f"Couleurs ({variant_title})", color=text_color, fontsize=9, fontweight='bold')
         else:
@@ -150,7 +150,7 @@ class OmahaChartsCanvas(FigureCanvas):
             ax2.tick_params(axis='x', rotation=30)
         else:
             ax2.text(0.5, 0.5, "Aucune donnée", color=text_color, ha='center')
-            
+
         self.fig.tight_layout()
         self.draw()
 
@@ -162,7 +162,7 @@ class StartingHandsTab(QWidget):
         super().__init__(parent)
         self.layout = QVBoxLayout(self)
         self.layout.setContentsMargins(12, 12, 12, 12)
-        
+
         # Titre dynamique de l'onglet
         self.title_label = QLabel("Analyse des Mains de Départ")
         c = get_theme_palette()
@@ -185,7 +185,7 @@ class StartingHandsTab(QWidget):
         toggle_lbl = QLabel("Colorer la grille par :")
         toggle_lbl.setStyleSheet(f"font-size: 11px; font-weight: bold; color: {c.get('muted_text', '#a0aec0')};")
         toggle_layout.addWidget(toggle_lbl)
-        
+
         self.color_by_combo = QComboBox()
         self.color_by_combo.addItems(["Profit Net (€)", "VPIP (%)"])
         self.color_by_combo.currentIndexChanged.connect(self.on_color_by_changed)
@@ -219,7 +219,7 @@ class StartingHandsTab(QWidget):
             for col in range(13):
                 c1 = ranks[row]
                 c2 = ranks[col]
-                
+
                 if row < col:
                     # Suited (en haut à droite)
                     hand = f"{c1}{c2}s"
@@ -257,7 +257,7 @@ class StartingHandsTab(QWidget):
     def update_omaha_data(self, hand_stats: list[dict], variant: str = "omaha4") -> None:
         """Affiche et génère les graphiques d'analyse Omaha à partir de la liste des mains."""
         self._set_mode("omaha")
-        
+
         # Dénomination selon la variante Omaha
         if variant == "omaha5":
             variant_title = "Omaha 5-Card"
@@ -271,14 +271,14 @@ class StartingHandsTab(QWidget):
             variant_title = "Omaha 4-Card"
             self.title_label.setText("Analyses des textures d'Omaha 4-Card")
             pairs_counts = {"Double Paired": 0, "Single Paired": 0, "No Pair": 0}
-        
+
         # Agrégation statistique des mains Omaha
         suitedness_counts = {"Double Suited": 0, "Single Suited": 0, "Rainbow": 0, "Autre": 0}
 
         for row in hand_stats:
             hand_str = str(row.get("hand", ""))
             n = row.get("n", 0)
-            
+
             # 1. Analyse de suitedness (ds, ss, r)
             if "ds" in hand_str:
                 suitedness_counts["Double Suited"] += n
@@ -296,7 +296,7 @@ class StartingHandsTab(QWidget):
                 counts = {}
                 for char in ranks_part:
                     counts[char] = counts.get(char, 0) + 1
-                
+
                 vals = list(counts.values())
                 if variant in ("omaha5", "omaha6"):
                     if 4 in vals:
@@ -327,15 +327,15 @@ class StartingHandsTab(QWidget):
         """Bascule l'affichage entre Hold'em et Omaha."""
         if self.active_mode == mode:
             return
-            
+
         self.active_mode = mode
-        
+
         # Vider le layout du conteneur
         while self.container_layout.count() > 0:
             item = self.container_layout.takeAt(0)
             if item.widget():
                 item.widget().setParent(None)
-                
+
         # Ajouter le widget correspondant
         if mode == "holdem":
             scroll = QScrollArea()

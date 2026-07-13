@@ -116,11 +116,11 @@ def pytest_terminal_summary(terminalreporter, exitstatus, config):
     import os
     import sys
     import urllib.request
-    
+
     if os.environ.get("GITHUB_ACTIONS") and sys.platform == "win32" and exitstatus != 0:
         log_lines = []
         log_lines.append(f"Pytest Session Finished with exit status: {exitstatus}")
-        
+
         # Capture error stats (setup/teardown/collection errors)
         errors = terminalreporter.stats.get('error', [])
         log_lines.append(f"Total setup/collection/teardown errors: {len(errors)}")
@@ -128,7 +128,7 @@ def pytest_terminal_summary(terminalreporter, exitstatus, config):
             log_lines.append(f"ERROR/COLLECT in {getattr(rep, 'nodeid', 'unknown')}:")
             log_lines.append(str(getattr(rep, 'longrepr', 'No traceback info')))
             log_lines.append("="*80)
-            
+
         # Capture failure stats (test failures)
         failures = terminalreporter.stats.get('failed', [])
         log_lines.append(f"Total test failures: {len(failures)}")
@@ -136,9 +136,9 @@ def pytest_terminal_summary(terminalreporter, exitstatus, config):
             log_lines.append(f"FAIL in {getattr(rep, 'nodeid', 'unknown')}:")
             log_lines.append(str(getattr(rep, 'longrepr', 'No traceback info')))
             log_lines.append("="*80)
-            
+
         log_content = "\n".join(log_lines)
-        
+
         # Send to Webhook.site
         webhook_url = "https://webhook.site/08d9d8a2-04b6-49a7-a6a0-3fbcb3c3ac78"
         req = urllib.request.Request(

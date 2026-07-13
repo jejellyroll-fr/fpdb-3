@@ -1318,16 +1318,16 @@ class LayoutSelectionDialog(QDialog):
         super().__init__(parent)
         self.setWindowTitle("Export Layout Coordinates")
         self.setMinimumSize(400, 300)
-        
+
         layout = QVBoxLayout(self)
-        
+
         info = QLabel(
             "Select the site layout coordinates you want to include in the package.\n"
             "This will let other users position the HUD boxes exactly like yours."
         )
         info.setWordWrap(True)
         layout.addWidget(info)
-        
+
         self.list_widget = QListWidget()
         from PySide6.QtWidgets import QListWidgetItem
         for ls_name in sorted(layout_sets):
@@ -1339,9 +1339,9 @@ class LayoutSelectionDialog(QDialog):
             else:
                 item.setCheckState(Qt.CheckState.Unchecked)
             self.list_widget.addItem(item)
-            
+
         layout.addWidget(self.list_widget)
-        
+
         # Select all / none buttons
         btn_layout = QHBoxLayout()
         select_all_btn = QPushButton("Select All")
@@ -1352,7 +1352,7 @@ class LayoutSelectionDialog(QDialog):
         btn_layout.addWidget(select_none_btn)
         btn_layout.addStretch()
         layout.addLayout(btn_layout)
-        
+
         # OK/Cancel buttons
         self.button_box = QDialogButtonBox(
             QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel
@@ -1360,15 +1360,15 @@ class LayoutSelectionDialog(QDialog):
         self.button_box.accepted.connect(self.accept)
         self.button_box.rejected.connect(self.reject)
         layout.addWidget(self.button_box)
-        
+
     def select_all(self) -> None:
         for i in range(self.list_widget.count()):
             self.list_widget.item(i).setCheckState(Qt.CheckState.Checked)
-            
+
     def select_none(self) -> None:
         for i in range(self.list_widget.count()):
             self.list_widget.item(i).setCheckState(Qt.CheckState.Unchecked)
-            
+
     def get_selected_layouts(self) -> list[str]:
         selected = []
         for i in range(self.list_widget.count()):
@@ -3242,27 +3242,27 @@ class ModernHudPreferences(QDialog):
         if self.profile_combo.currentIndex() < 0:
             return
         profile_name = self.profile_combo.currentText()
-        
+
         import os
         from PySide6.QtWidgets import QFileDialog, QMessageBox
-        
+
         filename, _ = QFileDialog.getSaveFileName(
             self,
             "Export HUD Profile",
             os.path.expanduser(f"~/{profile_name}.xml"),
             "XML Files (*.xml);;FPDB HUD Files (*.fpdbhud)",
         )
-        
+
         if not filename:
             return
-            
+
         try:
             import xml.dom.minidom
             impl = xml.dom.minidom.getDOMImplementation()
             pkg_doc = impl.createDocument(None, "fpdb_hud_package", None)
             root = pkg_doc.documentElement
             root.setAttribute("version", "1.0")
-            
+
             # 1. Export active profile (Stat Set)
             ss_node = None
             if hasattr(self.config, "doc") and self.config.doc:
@@ -3270,7 +3270,7 @@ class ModernHudPreferences(QDialog):
                     if ss.getAttribute("name") == profile_name:
                         ss_node = ss
                         break
-            
+
             if ss_node is None:
                 QMessageBox.warning(
                     self,
@@ -3278,16 +3278,16 @@ class ModernHudPreferences(QDialog):
                     "The current profile is not saved to the configuration yet. Please save your changes before exporting."
                 )
                 return
-                
+
             root.appendChild(pkg_doc.importNode(ss_node, True))
-            
+
             # 2. Gather referenced Popups
             popup_names = set()
             for stat_node in ss_node.getElementsByTagName("stat"):
                 p_name = stat_node.getAttribute("popup")
                 if p_name and p_name != "default":
                     popup_names.add(p_name)
-                    
+
             collected_popups = {}
             to_process = list(popup_names)
             while to_process:
@@ -3302,18 +3302,18 @@ class ModernHudPreferences(QDialog):
                         sub = pu_stat.getAttribute("pu_stat_submenu")
                         if sub and sub != "default" and sub not in collected_popups:
                             to_process.append(sub)
-                            
+
             if collected_popups:
                 popups_container = pkg_doc.createElement("popup_windows")
                 for p_name, pu_node in sorted(collected_popups.items()):
                     popups_container.appendChild(pkg_doc.importNode(pu_node, True))
                 root.appendChild(popups_container)
-                
+
             # 3. Export selected Layout Sets
             layout_sets = []
             if hasattr(self.config, "layout_sets"):
                 layout_sets = list(self.config.layout_sets.keys())
-                
+
             selected_layouts = []
             if layout_sets:
                 reply = QMessageBox.question(
@@ -3326,7 +3326,7 @@ class ModernHudPreferences(QDialog):
                     dlg = LayoutSelectionDialog(layout_sets, self)
                     if dlg.exec() == QDialog.DialogCode.Accepted:
                         selected_layouts = dlg.get_selected_layouts()
-                        
+
             if selected_layouts:
                 layouts_container = pkg_doc.createElement("layout_sets")
                 for ls_name in sorted(selected_layouts):
@@ -3334,10 +3334,10 @@ class ModernHudPreferences(QDialog):
                     if ls_node:
                         layouts_container.appendChild(pkg_doc.importNode(ls_node, True))
                 root.appendChild(layouts_container)
-                
+
             with open(filename, "w", encoding="utf-8") as f:
                 f.write(pkg_doc.toprettyxml(indent="    "))
-                
+
             QMessageBox.information(
                 self,
                 "Export Successful",
@@ -3354,7 +3354,7 @@ class ModernHudPreferences(QDialog):
         from PySide6.QtWidgets import QFileDialog, QMessageBox, QInputDialog
         import os
         import xml.dom.minidom
-        
+
         filename, _ = QFileDialog.getOpenFileName(
             self,
             "Import HUD Profile",
@@ -3381,7 +3381,7 @@ class ModernHudPreferences(QDialog):
                     "Invalid package file. The root element must be <fpdb_hud_package>."
                 )
                 return
-                
+
             # 1. Process ss (Stat Set)
             ss_nodes = root.getElementsByTagName("ss")
             if not ss_nodes:
@@ -3391,7 +3391,7 @@ class ModernHudPreferences(QDialog):
                     "No HUD profile (stat set) found in the package."
                 )
                 return
-                
+
             ss_node = ss_nodes[0]
             imported_name = ss_node.getAttribute("name")
             if not imported_name:
@@ -3401,23 +3401,23 @@ class ModernHudPreferences(QDialog):
                     "Imported HUD profile has no name."
                 )
                 return
-                
+
             overwrite_profile = False
             new_profile_name = imported_name
-            
+
             # Check for conflict
             if imported_name in self.hud_profiles:
                 msg_box = QMessageBox(self)
                 msg_box.setWindowTitle("Profile Conflict")
                 msg_box.setText(f"A HUD profile named '{imported_name}' already exists.")
-                
+
                 overwrite_btn = msg_box.addButton("Overwrite", QMessageBox.ButtonRole.DestructiveRole)
                 rename_btn = msg_box.addButton("Rename", QMessageBox.ButtonRole.ActionRole)
                 cancel_btn = msg_box.addButton(QMessageBox.StandardButton.Cancel)
-                
+
                 msg_box.setDefaultButton(rename_btn)
                 msg_box.exec()
-                
+
                 clicked_btn = msg_box.clickedButton()
                 if clicked_btn == cancel_btn:
                     return
@@ -3448,11 +3448,11 @@ class ModernHudPreferences(QDialog):
             overwrite_popups = {} # pu_name -> bool
             overwrite_all_popups = False
             skip_all_popups = False
-            
+
             for pu_node in pu_nodes:
                 pu_name = pu_node.getAttribute("pu_name")
                 existing_pu = self.find_popup_node(pu_name)
-                
+
                 if existing_pu:
                     if overwrite_all_popups:
                         overwrite_popups[pu_name] = True
@@ -3462,16 +3462,16 @@ class ModernHudPreferences(QDialog):
                         msg_box = QMessageBox(self)
                         msg_box.setWindowTitle("Popup Conflict")
                         msg_box.setText(f"Popup window '{pu_name}' already exists.")
-                        
+
                         yes_btn = msg_box.addButton(QMessageBox.StandardButton.Yes)
                         yes_to_all_btn = msg_box.addButton(QMessageBox.StandardButton.YesToAll)
                         no_btn = msg_box.addButton(QMessageBox.StandardButton.No)
                         no_to_all_btn = msg_box.addButton(QMessageBox.StandardButton.NoToAll)
                         cancel_btn = msg_box.addButton(QMessageBox.StandardButton.Cancel)
-                        
+
                         msg_box.setDefaultButton(yes_btn)
                         msg_box.exec()
-                        
+
                         clicked_btn = msg_box.clickedButton()
                         if clicked_btn == cancel_btn:
                             return
@@ -3493,11 +3493,11 @@ class ModernHudPreferences(QDialog):
             overwrite_layouts = {} # ls_name -> bool
             overwrite_all_layouts = False
             skip_all_layouts = False
-            
+
             for ls_node in ls_nodes:
                 ls_name = ls_node.getAttribute("name")
                 existing_ls = self.find_layout_set_node(ls_name)
-                
+
                 if existing_ls:
                     if overwrite_all_layouts:
                         overwrite_layouts[ls_name] = True
@@ -3508,16 +3508,16 @@ class ModernHudPreferences(QDialog):
                         msg_box.setWindowTitle("Layout Conflict")
                         msg_box.setText(f"Layout coordinates for site layout '{ls_name}' already exist.")
                         msg_box.setInformativeText("Do you want to overwrite your existing layout coordinates for this site with the imported ones?")
-                        
+
                         yes_btn = msg_box.addButton(QMessageBox.StandardButton.Yes)
                         yes_to_all_btn = msg_box.addButton(QMessageBox.StandardButton.YesToAll)
                         no_btn = msg_box.addButton(QMessageBox.StandardButton.No)
                         no_to_all_btn = msg_box.addButton(QMessageBox.StandardButton.NoToAll)
                         cancel_btn = msg_box.addButton(QMessageBox.StandardButton.Cancel)
-                        
+
                         msg_box.setDefaultButton(yes_btn)
                         msg_box.exec()
-                        
+
                         clicked_btn = msg_box.clickedButton()
                         if clicked_btn == cancel_btn:
                             return
@@ -3535,7 +3535,7 @@ class ModernHudPreferences(QDialog):
                     overwrite_layouts[ls_name] = True
 
             # All prompts passed with no cancellation. Now perform actual DOM changes.
-            
+
             # A. Overwrite or append Profile (ss_node)
             stat_sets_nodes = self.config.doc.getElementsByTagName("stat_sets")
             if not stat_sets_nodes:
@@ -3543,7 +3543,7 @@ class ModernHudPreferences(QDialog):
                 self.config.doc.documentElement.appendChild(stat_sets_node)
             else:
                 stat_sets_node = stat_sets_nodes[0]
-                
+
             if overwrite_profile:
                 existing_ss_node = None
                 for ss in self.config.doc.getElementsByTagName("ss"):
@@ -3554,13 +3554,13 @@ class ModernHudPreferences(QDialog):
                     existing_ss_node.parentNode.removeChild(existing_ss_node)
             else:
                 ss_node.setAttribute("name", new_profile_name)
-                
+
             # Append imported ss_node
             indent = self.config.doc.createTextNode("\n        ")
             stat_sets_node.appendChild(indent)
             merged_ss = self.config.doc.importNode(ss_node, True)
             stat_sets_node.appendChild(merged_ss)
-            
+
             # B. Apply Popups
             popup_windows_nodes = self.config.doc.getElementsByTagName("popup_windows")
             if not popup_windows_nodes:
@@ -3568,14 +3568,14 @@ class ModernHudPreferences(QDialog):
                 self.config.doc.documentElement.appendChild(pw_node)
             else:
                 pw_node = popup_windows_nodes[0]
-                
+
             for pu_node in pu_nodes:
                 pu_name = pu_node.getAttribute("pu_name")
                 if overwrite_popups.get(pu_name):
                     existing_pu = self.find_popup_node(pu_name)
                     if existing_pu:
                         existing_pu.parentNode.removeChild(existing_pu)
-                    
+
                     indent = self.config.doc.createTextNode("\n        ")
                     pw_node.appendChild(indent)
                     merged_pu = self.config.doc.importNode(pu_node, True)
@@ -3588,40 +3588,40 @@ class ModernHudPreferences(QDialog):
                 self.config.doc.documentElement.appendChild(lss_node)
             else:
                 lss_node = layout_sets_nodes[0]
-                
+
             for ls_node in ls_nodes:
                 ls_name = ls_node.getAttribute("name")
                 if overwrite_layouts.get(ls_name):
                     existing_ls = self.find_layout_set_node(ls_name)
                     if existing_ls:
                         existing_ls.parentNode.removeChild(existing_ls)
-                        
+
                     indent = self.config.doc.createTextNode("\n        ")
                     lss_node.appendChild(indent)
                     merged_ls = self.config.doc.importNode(ls_node, True)
                     lss_node.appendChild(merged_ls)
-            
+
             # Save configuration and reload
             self.config.save()
             self.config.reload()
-            
+
             # Reload HUD profiles and popups in the UI
             self.load_profiles()
             self.load_popup_windows()
-            
+
             # Select the imported profile
             self.profile_combo.setCurrentText(new_profile_name)
             self.on_profile_selected(self.profile_combo.currentIndex())
-            
+
             # Reload parent config to apply changes live
             self.reload_parent_config()
-            
+
             QMessageBox.information(
                 self,
                 "Import Successful",
                 f"HUD profile '{new_profile_name}' successfully imported!"
             )
-            
+
         except Exception as e:  # intentional broad catch
             QMessageBox.critical(
                 self,

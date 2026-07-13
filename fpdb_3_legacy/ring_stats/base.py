@@ -12,11 +12,11 @@ from fpdb_3_legacy.ring_stats.styles import get_modern_qss
 
 class DbWorker(QThread):
     """Worker asynchrone pour exécuter des requêtes SQL lourdes en arrière-plan."""
-    
+
     # Signal émis lorsque les données sont chargées avec succès
     # Arguments: (query_name, result_rows, column_names)
     finished = Signal(str, list, list)
-    
+
     # Signal émis en cas d'erreur de base de données
     # Arguments: (error_message)
     error = Signal(str)
@@ -39,7 +39,7 @@ class DbWorker(QThread):
 
 class ModernStatsWidget(QTabWidget):
     """Classe de base pour toutes les fenêtres de statistiques modernisées.
-    
+
     Gère :
     - L'application de la feuille de style (QSS) liée au thème actif
     - Le chargement asynchrone des données
@@ -64,7 +64,7 @@ class ModernStatsWidget(QTabWidget):
 
     def run_async_query(self, cursor, query_name: str, query_sql: str, callback, error_callback=None) -> None:
         """Lance une requête SQL en arrière-plan sans bloquer la GUI.
-        
+
         Args:
             cursor: Le curseur de la base de données.
             query_name: Identifiant de la requête (pour le callback).
@@ -74,15 +74,15 @@ class ModernStatsWidget(QTabWidget):
         """
         # Nettoyage des workers terminés
         self._workers = [w for w in self._workers if not w.isFinished()]
-        
+
         worker = DbWorker(cursor, query_name, query_sql)
         worker.finished.connect(callback)
-        
+
         if error_callback:
             worker.error.connect(error_callback)
         else:
             worker.error.connect(self.handle_db_error)
-            
+
         self._workers.append(worker)
         worker.start()
 

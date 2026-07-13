@@ -43,19 +43,19 @@ def deep_diff(x, y, path=""):
     diffs = []
     if type(x) is not type(y):
         return [f"{path}: type mismatch ({type(x).__name__} vs {type(y).__name__})"]
-        
+
     if isinstance(x, dict):
         x_keys = set(x.keys())
         y_keys = set(y.keys())
-        
+
         for k in sorted(x_keys - y_keys):
             diffs.append(f"{path}.{k}: missing in actual" if path else f"{k}: missing in actual")
         for k in sorted(y_keys - x_keys):
             diffs.append(f"{path}.{k}: extra in actual" if path else f"{k}: extra in actual")
-            
+
         for k in sorted(x_keys & y_keys):
             diffs.extend(deep_diff(x[k], y[k], f"{path}.{k}" if path else k))
-            
+
     elif isinstance(x, (list, tuple)):
         if "pots.side" in path:
             x_sorted = sorted(x)
@@ -69,7 +69,7 @@ def deep_diff(x, y, path=""):
                 diffs.append(f"{path}: length mismatch ({len(x)} vs {len(y)})")
             for i in range(min(len(x), len(y))):
                 diffs.extend(deep_diff(x[i], y[i], f"{path}[{i}]"))
-            
+
     elif isinstance(x, Decimal) and isinstance(y, Decimal):
         tol = _tolerance(path)
         if abs(x - y) > tol:
@@ -81,7 +81,7 @@ def deep_diff(x, y, path=""):
     else:
         if x != y:
             diffs.append(f"{path}: value mismatch ({repr(x)} vs {repr(y)})")
-            
+
     return diffs
 
 class SnapshotIO:

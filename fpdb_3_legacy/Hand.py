@@ -339,7 +339,7 @@ class Hand:
         # Blinds and antes
         blinds_list = []
         antes_list = []
-        
+
         # Unpack blinds and antes from actions
         if "BLINDSANTES" in self.actions:
             for act in self.actions["BLINDSANTES"]:
@@ -348,7 +348,7 @@ class Hand:
                 amount = Decimal("0.00")
                 if len(act) > 2 and act[2] is not None:
                     amount = safe_decimal(act[2])
-                
+
                 if action_type == "ante":
                     antes_list.append({
                         "player": player,
@@ -422,7 +422,7 @@ class Hand:
                     "player": pname,
                     "cards": p_hc
                 })
-        
+
         has_sd = len(shown_list) > 0 or len(self.shown) > 0 or len(self.mucked) > 0
 
         # Pots — emit the algorithm's layer breakdown, but only when those

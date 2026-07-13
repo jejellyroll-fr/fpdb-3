@@ -723,9 +723,9 @@ def test_process_message_closed_socket() -> None:
     with patch("zmq.Context"), patch("zmq.Poller") as mock_poller_cls:
         receiver = HUD_main.ZMQReceiver()
         receiver.socket.closed = True
-        
+
         receiver.process_message()
-        
+
         mock_poller_cls.return_value.poll.assert_not_called()
 
 
@@ -735,15 +735,15 @@ def test_process_message_enotsock_handling() -> None:
     with patch("zmq.Context"), patch("zmq.Poller") as mock_poller_cls:
         receiver = HUD_main.ZMQReceiver()
         receiver.socket.closed = False
-        
+
         error = zmq.ZMQError()
         if hasattr(zmq, "ENOTSOCK"):
             error.errno = zmq.ENOTSOCK
         else:
             error.errno = 88  # Fallback for standard Unix ENOTSOCK
-            
+
         mock_poller_cls.return_value.poll.side_effect = error
-        
+
         with patch("HUD_main.log") as mock_log:
             receiver.process_message()
             mock_log.info.assert_any_call("ZMQ socket closed during poll")

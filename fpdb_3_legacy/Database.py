@@ -2400,10 +2400,10 @@ class Database:
         elif len(rows) > 1:
             # If there are multiple players with this name, let's try to match siteName prefix or sub-network
             q2 = """
-                SELECT p.id 
+                SELECT p.id
                 FROM Players p
                 JOIN Sites s ON p.siteId = s.id
-                WHERE p.name = %s 
+                WHERE p.name = %s
                 AND (s.name LIKE %s OR %s LIKE s.name || '%')
             """.replace("%s", ph)
             c.execute(q2, (playerName, siteName + "%", siteName))

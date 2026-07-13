@@ -464,17 +464,17 @@ class ThemeManager:
         accent = c["accent"]
         accent_hover = c["accent_hover"]
         accent_panel = c["accent_soft"]
-        
+
         # Transparent border styles that scale naturally with dark/light themes
         border_rgba = "rgba(255, 255, 255, 0.08)" if dark else "rgba(0, 0, 0, 0.08)"
-        
+
         return f"""
             QWidget {{
                 background-color: {sidebar};
                 color: {text};
                 font-size: 13px;
             }}
-            
+
             /* Cadres et Groupes */
             QGroupBox {{
                 border: 1px solid {border_rgba};
@@ -500,7 +500,7 @@ class ThemeManager:
                 border-color: {accent_hover}2b;
                 background-color: {card_hover};
             }}
-            
+
             /* Titres de section épurés (plus de boîte verte opaque avec bordure) */
             QLabel#filterTitle {{
                 background-color: transparent;
@@ -516,7 +516,7 @@ class ThemeManager:
                 margin-top: 14px;
                 margin-bottom: 2px;
             }}
-            
+
             /* Boutons d'action principaux (au bas de la sidebar) */
             #filterSidebar QPushButton {{
                 background-color: {accent};
@@ -537,7 +537,7 @@ class ThemeManager:
             #filterSidebar QPushButton:pressed {{
                 background-color: {accent_panel};
             }}
-            
+
             /* Boutons secondaires / options (à l'intérieur des cadres) */
             #filterSidebar QGroupBox QPushButton {{
                 background-color: {input_bg};
@@ -560,7 +560,7 @@ class ThemeManager:
                 background-color: {accent_panel};
                 color: #ffffff;
             }}
-            
+
             /* Cases à cocher et boutons radio modernisés */
             QCheckBox, QRadioButton {{
                 spacing: 8px;
@@ -604,7 +604,7 @@ class ThemeManager:
                 border-color: {accent};
                 image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><circle cx='12' cy='12' r='6' fill='white'/></svg>");
             }}
-            
+
             /* Champs de saisie */
             QComboBox, QDateEdit, QSpinBox, QLineEdit {{
                 background-color: {input_bg};
@@ -636,7 +636,7 @@ class ThemeManager:
                 border: none;
                 width: 20px;
             }}
-            
+
             /* Boutons de sélection numérique (Spin/Date buttons) */
             QDateEdit::up-button, QDateEdit::down-button,
             QSpinBox::up-button, QSpinBox::down-button {{
@@ -700,7 +700,7 @@ class ThemeManager:
             colors = self.get_legacy_palette()
             theme_colors = self.get_theme_colors()
             filter_stylesheet = self.build_filter_stylesheet()
-            
+
             widgets = []
             try:
                 widgets = list(app.allWidgets())

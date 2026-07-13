@@ -29,16 +29,16 @@ def main(argv=None):
 
     sql = SQL.Sql(db_server=settings["db-server"])
     main_window = QMainWindow()
-    
+
     # Instanciation de la classe modernisée
     viewer = GuiRingPlayerStats(config, sql, main_window)
     main_window.setCentralWidget(viewer)
     main_window.show()
     main_window.resize(1400, 800)
-    
+
     # Lancement initial des stats
     viewer.refreshStats()
-    
+
     app.exec()
     return 0
 
