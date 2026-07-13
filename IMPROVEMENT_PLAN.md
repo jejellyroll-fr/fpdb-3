@@ -55,14 +55,20 @@ Tests ajoutés : `test/test_menu_layout.py`, `test/test_translations.py`.
 
 ---
 
-## Vague 3 — Abstraction de dialecte SQL 🏗️
+## Vague 3 — Abstraction de dialecte SQL 🏗️ — 🟡 EN COURS
 
-Les bugs multi-backend récents (`Rank` réservé, `boolean` vs `smallint`, `set_isolation_level(0)`, `session_replication_role`) viennent tous de `SQL.py` qui code en dur des variantes par backend sur ~12k lignes.
+Les bugs multi-backend récents (`Rank` réservé, `boolean` vs `smallint`, `set_isolation_level(0)`, `session_replication_role`) viennent tous de variantes par backend codées en dur et éparpillées.
 
-- Interface `Dialect` (quote_identifier, boolean_literal, autocommit, drop/recreate FK, reset_sequence, serial/identity…) avec impls `SqliteDialect` / `PostgresDialect` / `MySQLDialect`.
-- Centraliser les quirks corrigés au cas par cas → **une seule source de vérité**, fin du whack-a-mole.
+**Fait (2026-07-12) — étape 1**
+- ✅ `fpdb_3_legacy/dialects.py` : classe `Dialect` + `SqliteDialect`/`PostgresDialect`/`MySQLDialect` possédant les quirks — placeholder, `quote_identifier`, `list_tables`, `drop_all_tables`, `suspend/restore_foreign_keys` (PG drop+recreate sans superuser), `boolean_columns`/`coerce_row`, `reset_sequences` — + fabriques `dialect_for_backend`/`dialect_for_server`. Tests : `test/test_dialects.py`.
+- ✅ `db_migrate.py` : **délègue** toute décision par-backend au dialecte (API publique et comportement inchangés).
 
-**Effort** ~4-6j · **Impact** élevé (fiabilité du multi-backend récemment ajouté).
+**Reste à faire**
+- Faire déléguer `db_backends.create_database` (quoting rôle/base) au dialecte.
+- Migrer `Database._pg_set_isolation` → `dialect.set_autocommit` (module central, prudence).
+- À terme, faire produire par le dialecte le quoting d'identifiants de `SQL.py` (le fix `Rank`) — gros chantier séparé.
+
+**Effort restant** ~3-5j · **Impact** élevé (fiabilité du multi-backend).
 
 ---
 
@@ -98,6 +104,6 @@ Les bugs multi-backend récents (`Rank` réservé, `boolean` vs `smallint`, `set
 |---|---|---|---|---|
 | **1** | Menus déclaratifs + réorg ; fondation i18n | ~3j | Élevée | ✅ Fait |
 | **2** | i18n en largeur (sélecteur, marquage, formats) | ~5j | Élevée | 🟡 En cours |
-| **3** | Abstraction de dialecte SQL | ~4-6j | Élevée | À faire |
+| **3** | Abstraction de dialecte SQL | ~4-6j | Élevée | 🟡 En cours |
 | **4** | Domaine poker (stats, parsers, equity) | ~1-2 sem | Moyen/élevé | À faire |
 | **5** | Dette longue (god-modules, mypy, ruff) | continu | Moyen | À faire |
