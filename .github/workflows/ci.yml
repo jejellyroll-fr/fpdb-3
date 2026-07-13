@@ -105,6 +105,7 @@ jobs:
           fpdb_3_legacy/EntractionToFpdb.py
           fpdb_3_legacy/BossToFpdb.py
           fpdb_3_legacy/EverleafToFpdb.py
+          fpdb_3_legacy/MicrogamingToFpdb.py
           fpdb_3_legacy/WinamaxSummary.py
           fpdb_3_legacy/WinamaxToFpdb.py
           fpdb_3_legacy/PokerStarsSummary.py

@@ -36,7 +36,7 @@ from fpdb_3_legacy.HandHistoryConverter import FpdbParseError, HandHistoryConver
 class Microgaming(HandHistoryConverter):
     sitename = "Microgaming"
     filetype = "text"
-    codepage = ["utf-8", "cp1252"]
+    codepage = ("utf-8", "cp1252")
     siteId = 20
 
     # Static regexes
@@ -244,6 +244,8 @@ class Microgaming(HandHistoryConverter):
             if hand.gametype["type"] == "tour":
                 if key == "TABLE":
                     m1 = self.re_Table.search(info[key])
+                    if m1 is None:
+                        raise FpdbParseError("Could not identify tournament table")
                     mg1 = m1.groupdict()
                     hand.tourNo = mg1["TOURNO"]
                     hand.tablename = mg1["TABLENO"]
@@ -430,24 +432,24 @@ class Microgaming(HandHistoryConverter):
                 if hand.version == 1:
                     hand.addRaiseTo(street, pname, action.group("BET"))
                 else:
-                    amount = Decimal(action.group("BET"))
+                    raise_amount = Decimal(action.group("BET"))
                     if sum(hand.bets[street][pname]) == 0 and hand.pot.common[pname] > 0:
-                        amount += hand.pot.common[pname]
-                    hand.addCallandRaise(street, pname, str(amount))
+                        raise_amount += hand.pot.common[pname]
+                    hand.addCallandRaise(street, pname, str(raise_amount))
             elif action.group("ATYPE") == "Bet":
                 if street in ("PREFLOP", "THIRD", "DEAL"):
                     if hand.version == 1:
                         hand.addRaiseTo(street, pname, action.group("BET"))
                     else:
-                        amount = Decimal(action.group("BET"))
+                        raise_amount = Decimal(action.group("BET"))
                         if sum(hand.bets[street][pname]) == 0 and hand.pot.common[pname] > 0:
-                            amount += hand.pot.common[pname]
-                        hand.addCallandRaise(street, pname, str(amount))
+                            raise_amount += hand.pot.common[pname]
+                        hand.addCallandRaise(street, pname, str(raise_amount))
                 else:
                     hand.addBet(street, pname, action.group("BET"))
             elif action.group("ATYPE") == "AllIn":
-                amount = action.group("BET").replace(",", "")
-                if Decimal(amount) <= (hand.lastBet[street] - sum(hand.bets[street][pname])):
+                all_in_amount = action.group("BET").replace(",", "")
+                if Decimal(all_in_amount) <= (hand.lastBet[street] - sum(hand.bets[street][pname])):
                     hand.setUncalledBets(False)
                 hand.addAllIn(street, pname, action.group("BET"))
                 allIns += 1
@@ -455,8 +457,8 @@ class Microgaming(HandHistoryConverter):
                 if Decimal(action.group("BET")) == Decimal(hand.gametype["sb"]):
                     hand.addBlind(pname, "secondsb", action.group("BET"))
                 else:
-                    amount = str(Decimal(action.group("BET")) + Decimal(action.group("BET")) / 2)
-                    hand.addBlind(pname, "both", amount)
+                    both_amount = str(Decimal(action.group("BET")) + Decimal(action.group("BET")) / 2)
+                    hand.addBlind(pname, "both", both_amount)
             elif action.group("ATYPE") == "Disconnect":
                 pass  # Deal with elsewhere
             elif action.group("ATYPE") == "Reconnect":
