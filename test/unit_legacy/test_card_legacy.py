@@ -322,6 +322,10 @@ class TestCalcStartCards:
         hand = self._FakeHand("fusion", ["As", "Ks", "Qh", "Jd"])
         assert Card.decodeStartHandValue("fusion", Card.calcStartCards(hand, "hero")) == "AKs"
 
+    def test_holdem_unknown_rank_returns_unknown_hand(self) -> None:
+        hand = self._FakeHand("holdem", ["Xs", "Kh"])
+        assert Card.calcStartCards(hand, "hero") == Card.HOLDEM_UNKNOWN_HAND
+
     def test_omaha_class(self) -> None:
         hand = self._FakeHand("omahahi", ["As", "Ks", "Qh", "Jh"])
         assert Card.decodeStartHandValue("omahahi", Card.calcStartCards(hand, "hero")) == "AKQJ ds"

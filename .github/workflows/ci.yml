@@ -62,6 +62,7 @@ jobs:
           fpdb_3_legacy/PopupThemes.py
           fpdb_3_legacy/ThemeManager.py
           fpdb_3_legacy/DetectInstalledSites.py
+          fpdb_3_legacy/Card.py
       - name: Lint newly modernized modules
         run: >-
           ruff check
