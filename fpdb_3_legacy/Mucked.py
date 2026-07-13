@@ -227,9 +227,10 @@ class Stud_cards:
             ):
                 if i[1] != 0:
                     # Pixmaps are stored in dict with rank+suit keys
-                    (_rank, _suit) = Card.valueSuitFromCard(i[1])
-                    _rank = Card.card_map[_rank]
-                    self.eb[(i[0], c - 1)].setPixmap(self.card_images[_suit][_rank])
+                    card_symbol = Card.valueSuitFromCard(i[1])
+                    rank, suit = card_symbol[0], card_symbol[1]
+                    rank_index = Card.card_map[rank]
+                    self.eb[(i[0], c - 1)].setPixmap(self.card_images[suit][rank_index])
         #    action in tools tips for later streets
         # round_to_col = (0, 3, 4, 5, 6)
         # for round in range(1, len(self.tips)):
@@ -370,9 +371,10 @@ class Flop_Mucked(Aux_Base.AuxSeats, QObject):
                     break
 
                 # This gives us the card symbol again
-                (_rank, _suit) = Card.valueSuitFromCard(card)
-                _rank = Card.card_map[_rank]
-                px = self.card_images[_suit][_rank]
+                card_symbol = Card.valueSuitFromCard(card)
+                rank, suit = card_symbol[0], card_symbol[1]
+                rank_index = Card.card_map[rank]
+                px = self.card_images[suit][rank_index]
                 if self.card_scale != 1.0:
                     px = px.scaled(
                         int(self.card_width),
