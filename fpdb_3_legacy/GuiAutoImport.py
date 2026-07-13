@@ -12,6 +12,7 @@ import sys
 import time
 import traceback
 from optparse import OptionParser
+from typing import Any
 
 import interlocks
 from PySide6.QtCore import QDateTime, QThread, QTimer, Signal
@@ -88,13 +89,14 @@ class GuiAutoImport(QWidget):
         if not cli:
             QWidget.__init__(self, parent)
             self.log_message.connect(self._addText_slot)
-        self.importtimer = None
+        self.importtimer: QTimer | None = None
+        self.import_thread: AutoImportThread | None = None
         self.settings = settings
         self.config = config
         self.sql = sql
         self.parent = parent
 
-        self.pipe_to_hud = None
+        self.pipe_to_hud: subprocess.Popen[Any] | None = None
         self.doAutoImportBool = False
 
         self.cli = cli
@@ -124,7 +126,7 @@ class GuiAutoImport(QWidget):
         # Set minimal custom styles for specific needs
         self.setStyleSheet("""
             QTextEdit#logView {
-                font-family: "SF Mono", Monaco, "Cascadia Code", "Roboto Mono", Consolas, "Courier New", monospace;
+                font-family: Monaco, "Cascadia Code", "Roboto Mono", Consolas, "Courier New", monospace;
                 font-size: 13px;
                 line-height: 1.4;
                 border-radius: 8px;
@@ -222,7 +224,7 @@ class GuiAutoImport(QWidget):
     def _addText_slot(self, text, level="info") -> None:
         """Add formatted text to the log with timestamp, icon and color coding."""
         cursor = self.textview.textCursor()
-        cursor.movePosition(QTextCursor.End)
+        cursor.movePosition(QTextCursor.MoveOperation.End)
 
         # Clean text: remove leading newlines to ensure timestamp stays at line start
         clean_text = text.lstrip("\n")
@@ -327,7 +329,7 @@ class GuiAutoImport(QWidget):
     def do_import(self) -> bool:
         """Callback for timer to do an import iteration asynchronously."""
         if self.doAutoImportBool:
-            if hasattr(self, "import_thread") and self.import_thread.isRunning():
+            if self.import_thread is not None and self.import_thread.isRunning():
                 log.debug("AutoImport: previous import thread is still running, deferring this iteration.")
                 return True
 
@@ -477,7 +479,7 @@ class GuiAutoImport(QWidget):
         entry point).
         """
         if getattr(sys, "frozen", False):
-            return sys._MEIPASS
+            return str(getattr(sys, "_MEIPASS"))
         return os.path.dirname(os.path.abspath(__file__))
 
     def _launch_hud(self) -> None:
@@ -490,6 +492,7 @@ class GuiAutoImport(QWidget):
         # ------------------------------------------------------------------
         # 1) build command line
         # ------------------------------------------------------------------
+        command: str | list[str]
         if getattr(sys, "frozen", False) == "pyoxidizer":
             command = [sys.executable, "--hud", *self.settings["cl_options"].split()]
             bs = 1
@@ -546,7 +549,7 @@ class GuiAutoImport(QWidget):
         # ------------------------------------------------------------------
         # 3) launch HUD
         # ------------------------------------------------------------------
-        popen_kwargs = {
+        popen_kwargs: dict[str, Any] = {
             "bufsize": bs,
             "stdin": subprocess.PIPE,
             "universal_newlines": True,
@@ -614,7 +617,7 @@ class GuiAutoImport(QWidget):
             if self.importtimer:
                 self.importtimer.stop()
                 self.importtimer = None
-            if hasattr(self, "import_thread") and self.import_thread.isRunning():
+            if self.import_thread is not None and self.import_thread.isRunning():
                 self.import_thread.wait()
             self.importer.autoSummaryGrab(True)
             self.settings["global_lock"].release()
