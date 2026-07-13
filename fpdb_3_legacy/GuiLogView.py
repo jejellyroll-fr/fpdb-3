@@ -19,6 +19,7 @@ import json
 import os
 from collections import deque
 from datetime import datetime
+from typing import Any
 
 from PySide6.QtCore import (
     QAbstractTableModel,
@@ -67,7 +68,7 @@ class LogTableModel(QAbstractTableModel):
     def __init__(self, parent=None) -> None:
         super().__init__(parent)
         self.headers = ["Level", "Date/Time", "Module", "Function", "Message"]
-        self.log_entries = []
+        self.log_entries: list[Any] = []
 
     def rowCount(self, parent=QModelIndex()):
         return len(self.log_entries)
@@ -186,12 +187,15 @@ class GuiLogView(QWidget):
         self.config = config
         self.main_window = mainwin
         self.closeq = closeq
+        self.logfile: str | None = None
 
         # Increase the default window size
         self.resize(1200, 800)
         self.setWindowTitle(_("Log Viewer"))
 
         self.setLayout(QVBoxLayout())
+        layout = self.layout()
+        assert layout is not None
 
         # Initialize the custom model and proxy model
         self.model = LogTableModel(self)
@@ -211,7 +215,7 @@ class GuiLogView(QWidget):
         self.listview.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
         self.listview.setHorizontalScrollMode(QAbstractItemView.ScrollMode.ScrollPerPixel)
 
-        self.layout().addWidget(self.listview)
+        layout.addWidget(self.listview)
 
         # Combobox for selecting log file
         hb1 = QHBoxLayout()
@@ -220,7 +224,7 @@ class GuiLogView(QWidget):
         self.update_logfile_list()
         self.logfile_combo.currentIndexChanged.connect(self.__set_logfile)
         hb1.addWidget(self.logfile_combo)
-        self.layout().addLayout(hb1)
+        layout.addLayout(hb1)
 
         # Checkboxes for log levels
         hb3 = QHBoxLayout()
@@ -244,7 +248,7 @@ class GuiLogView(QWidget):
         hb3.addWidget(self.filter_info)
         hb3.addWidget(self.filter_warning)
         hb3.addWidget(self.filter_error)
-        self.layout().addLayout(hb3)
+        layout.addLayout(hb3)
 
         # Add a filter by "Module"
         hb4 = QHBoxLayout()
@@ -252,7 +256,7 @@ class GuiLogView(QWidget):
         self.module_filter_edit = QLineEdit()
         self.module_filter_edit.textChanged.connect(self.filter_log)
         hb4.addWidget(self.module_filter_edit)
-        self.layout().addLayout(hb4)
+        layout.addLayout(hb4)
 
         # Buttons for refreshing and copying
         hb2 = QHBoxLayout()
@@ -263,7 +267,7 @@ class GuiLogView(QWidget):
         copybutton = QPushButton(_("Copy selection to clipboard"))
         copybutton.clicked.connect(self.copy_to_clipboard)
         hb2.addWidget(copybutton)
-        self.layout().addLayout(hb2)
+        layout.addLayout(hb2)
 
         # Load the initial log file
         self.loadLog()
