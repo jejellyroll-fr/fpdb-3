@@ -113,6 +113,9 @@ class Dialect:
 
     def reset_sequences(self, db: Any, tables: list[str]) -> None:
         """Reset identity sequences after ids were preserved (no-op by default)."""
+
+    def repair_sequence(self, db: Any, table: str) -> None:
+        """Bring one identity sequence in sync with its table (no-op by default)."""
         return
 
 
@@ -239,6 +242,28 @@ class PostgresDialect(Dialect):
                 cursor.execute(f"SELECT setval(%s, COALESCE((SELECT MAX(id) FROM {table}), 0) + 1, false)", (sequence,))
             except Exception as exc:  # noqa: BLE001 - a table may have no id sequence
                 log.debug("No sequence reset for %s: %s", table, exc)
+
+    def repair_sequence(self, db: Any, table: str) -> None:
+        """Repair a stale serial sequence without racing normal table inserts.
+
+        PostgreSQL does not advance a sequence when rows are copied with explicit
+        ids.  This commonly happens during a cross-backend migration and leaves
+        the next auto-generated id colliding with an existing row.
+        """
+        cursor = db.get_cursor()
+        # fpdb's PostgreSQL DDL uses unquoted identifiers, so PostgreSQL stores
+        # legacy mixed-case names such as ``Files`` as lower-case ``files``.
+        physical_table = table.lower()
+        quoted_table = self.quote_identifier(physical_table)
+        cursor.execute(f"LOCK TABLE {quoted_table} IN SHARE ROW EXCLUSIVE MODE")
+        cursor.execute("SELECT pg_get_serial_sequence(%s, 'id')", (physical_table,))
+        row = cursor.fetchone()
+        sequence = row[0] if row else None
+        if sequence:
+            cursor.execute(
+                f"SELECT setval(%s, COALESCE((SELECT MAX(id) FROM {quoted_table}), 0) + 1, false)",
+                (sequence,),
+            )
 
 
 _DIALECTS: dict[int, Dialect] = {

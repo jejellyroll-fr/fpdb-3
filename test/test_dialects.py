@@ -151,6 +151,13 @@ def test_reset_sequences_noop_for_non_postgresql():
         db.get_cursor.assert_not_called()
 
 
+def test_repair_sequence_noop_for_non_postgresql():
+    for server in ("sqlite", "mysql"):
+        db = _db(0)
+        dialects.dialect_for_server(server).repair_sequence(db, "Files")
+        db.get_cursor.assert_not_called()
+
+
 def test_set_autocommit_toggles_flag_after_committing():
     conn = MagicMock()
     dialects.dialect_for_server("postgresql").set_autocommit(conn, True)
@@ -182,6 +189,21 @@ def test_reset_sequences_postgresql_sets_each_sequence():
     statements = [c.args[0] for c in cursor.execute.call_args_list if c.args]
     assert any("pg_get_serial_sequence" in s for s in statements)
     assert any("setval" in s for s in statements)
+
+
+def test_repair_sequence_postgresql_locks_and_sets_next_unused_id():
+    db = _db(dialects.PGSQL)
+    cursor = db.get_cursor.return_value
+    cursor.fetchone.return_value = ("files_id_seq",)
+
+    dialects.dialect_for_server("postgresql").repair_sequence(db, "Files")
+
+    statements = [call.args[0] for call in cursor.execute.call_args_list]
+    assert statements[0] == 'LOCK TABLE "files" IN SHARE ROW EXCLUSIVE MODE'
+    assert "pg_get_serial_sequence" in statements[1]
+    assert "MAX(id)" in statements[2]
+    assert "+ 1, false" in statements[2]
+    assert cursor.execute.call_args_list[2].args[1] == ("files_id_seq",)
 
 
 if __name__ == "__main__":

@@ -5410,6 +5410,12 @@ class Database:
         c.execute(q, fdata)
         return self.get_last_insert_id(c)
 
+    def repair_sequence(self, table: str) -> None:
+        """Synchronize a backend identity sequence with the stored row ids."""
+        from fpdb_3_legacy import dialects
+
+        dialects.dialect_for_backend(self.backend).repair_sequence(self, table)
+
     def updateFile(self, fdata) -> None:
         q = self.sql.query["update_file"]
         q = q.replace("%s", self.sql.query["placeholder"])
