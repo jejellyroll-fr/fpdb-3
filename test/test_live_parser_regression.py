@@ -14,6 +14,7 @@ from fpdb_3_legacy.CakeToFpdb import Cake
 from fpdb_3_legacy.Configuration import Config
 from fpdb_3_legacy.EntractionToFpdb import Entraction
 from fpdb_3_legacy.EverleafToFpdb import Everleaf
+from fpdb_3_legacy.FulltiltToFpdb import Fulltilt
 from fpdb_3_legacy.GGPokerToFpdb import GGPoker
 from fpdb_3_legacy.iPoker.base import iPoker
 from fpdb_3_legacy.KingsClubToFpdb import KingsClub
@@ -81,6 +82,13 @@ CASES.append(
         "everleaf/Stud/7-Stud-EUR-0.05-0.10.201108-new-format.txt",
         Everleaf,
         REGRESSION_FILES / "Everleaf" / "Stud" / "7-Stud-EUR-0.05-0.10.201108-new-format.txt",
+    )
+)
+CASES.append(
+    (
+        "fulltilt/Draw/3-Draw-Limit-USD-1500-3000-201101.FTP.Archive.sample.txt",
+        Fulltilt,
+        REGRESSION_FILES / "FTP" / "Draw" / "3-Draw-Limit-USD-1500-3000-201101.FTP.Archive.sample.txt",
     )
 )
 CASES.append(

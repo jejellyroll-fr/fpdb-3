@@ -37,10 +37,11 @@ from fpdb_3_legacy.HandHistoryConverter import FpdbHandPartial, FpdbParseError, 
 class Fulltilt(HandHistoryConverter):
     sitename = "Fulltilt"
     filetype = "text"
+    compiledPlayers: set[str] = set()
     # utf-16 must come last: without a BOM it silently mis-decodes even-length
     # ASCII/utf-8 files into CJK mojibake. Genuine utf-16 exports carry a BOM and
     # are handled before this list is consulted.
-    codepage = ["utf-8", "cp1252", "utf-16"]
+    codepage = ("utf-8", "cp1252", "utf-16")
     siteId = 1  # Needs to match id entry in Sites database
 
     substitutions = {
@@ -514,6 +515,8 @@ class Fulltilt(HandHistoryConverter):
         # Done: if there's a way to figure these out, we should.. otherwise we have to stuff it with unknowns
         if m.group("TOURNAMENT") is not None:
             n = self.re_TourneyExtraInfo.search(m.group("TOURNAMENT"))
+            if n is None:
+                raise FpdbParseError("Could not identify tournament details")
             turbo = None
             if n.group("SPEED1") is not None:
                 turbo = n.group("SPEED1")
@@ -542,9 +545,9 @@ class Fulltilt(HandHistoryConverter):
                 hand.isFast, hand.gametype["fast"] = True, True
             if "On Demand" in m.group("TOURNAMENT"):
                 hand.isOnDemand = True
-            m1 = self.re_EntryNo.search(self.in_path)
-            if m1:
-                hand.entryId = int(m1.group("ENTRYNO"))
+            entry_match = self.re_EntryNo.search(self.in_path)
+            if entry_match:
+                hand.entryId = int(entry_match.group("ENTRYNO"))
 
             hand.buyin = 0
             hand.fee = 0
@@ -633,9 +636,9 @@ class Fulltilt(HandHistoryConverter):
                         plist[b.group("PNAME")][2] = True
 
         # Add remaining players
-        for a in plist:
-            seat, stack, sitout = plist[a]
-            hand.addPlayer(seat, a, stack, None, sitout)
+        for player_name in plist:
+            seat, stack, sitout = plist[player_name]
+            hand.addPlayer(seat, player_name, stack, None, sitout)
 
         if plist == {}:
             # No players! The hand is either missing stacks or everyone is sitting out
@@ -700,9 +703,13 @@ class Fulltilt(HandHistoryConverter):
         if street in ("FLOPET", "FLOP", "TURN", "RIVER"):
             # print "DEBUG readCommunityCards:", street, hand.streets[street]
             m = self.re_Board.search(hand.streets[street])
+            if m is None:
+                raise FpdbParseError("Could not identify community cards")
             hand.setCommunityCards(street, m.group("CARDS").split(" "))
         if street in ("FLOP1", "TURN1", "RIVER1", "FLOP2", "TURN2", "RIVER2"):
             m = self.re_Board.search(hand.streets[street])
+            if m is None:
+                raise FpdbParseError("Could not identify community cards")
             hand.setCommunityCards(street, m.group("CARDS").split(" "))
             hand.runItTimes = 2
 
@@ -741,11 +748,11 @@ class Fulltilt(HandHistoryConverter):
         # log.debug(_("No bringin found, handid =%s") % hand.handid)
 
     def readButton(self, hand):
-        try:
-            hand.buttonpos = int(self.re_Button.search(hand.handText).group("BUTTON"))
-        except AttributeError:
+        button_match = self.re_Button.search(hand.handText)
+        if button_match is None:
             # FTP has no indication that a hand is cancelled.
             raise FpdbHandPartial(_("%s Failed to detect button (hand #%s cancelled?)") % ("readButton:", hand.handid))
+        hand.buttonpos = int(button_match.group("BUTTON"))
 
     def readHoleCards(self, hand):
         #    streets PREFLOP, PREDRAW, and THIRD are special cases beacause
@@ -772,7 +779,7 @@ class Fulltilt(HandHistoryConverter):
                 else:
                     newcards = found.group("NEWCARDS").split(" ")
                 if found.group("OLDCARDS") is None:
-                    oldcards = []
+                    oldcards: list[str] = []
                 else:
                     oldcards = found.group("OLDCARDS").split(" ")
 
