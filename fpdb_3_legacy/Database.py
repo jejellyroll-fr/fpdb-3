@@ -4086,12 +4086,14 @@ class Database:
         if self.backend == self.PGSQL and self.import_options["hhBulkPath"] != "":
             # COPY much faster under postgres. Requires superuser privileges
             m = re_insert.match(q)
+            if m is None:
+                raise FpdbError(f"Unable to derive a COPY statement from query: {q}")
             rand = "".join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(5))
             bulk_file = os.path.join(
                 self.import_options["hhBulkPath"],
                 m.group("TABLENAME") + "_" + rand,
             )
-            with open(bulk_file, "wb") as csvfile:
+            with open(bulk_file, "w", encoding="utf-8", newline="") as csvfile:
                 writer = csv.writer(
                     csvfile,
                     delimiter="\t",
@@ -4593,10 +4595,10 @@ class Database:
         date_to: str | None = None,
         site_id: int | None = None,
         limit_type: str | None = None,
-    ) -> tuple[str, list]:
+    ) -> tuple[str, list[Any]]:
         placeholder = self.sql.query["placeholder"]
-        filters = []
-        params = []
+        filters: list[str] = []
+        params: list[Any] = []
         if player_filter:
             filters.append(f"lower(p.name) like lower({placeholder})")
             params.append(f"%{player_filter}%")
@@ -4804,9 +4806,7 @@ class Database:
                 if tid:
                     self.s["bk"][j]["tourneys"].add(tid)
             elif len(id) > 1:
-                merged = {}
-                merged["ids"] = [hid]
-                merged["tourneys"] = set()
+                merged: dict[str, Any] = {"ids": [hid], "tourneys": set()}
                 if tid:
                     merged["tourneys"].add(tid)
                 for n in id:
@@ -4818,7 +4818,7 @@ class Database:
                     if not merged.get("sessionEnd") or merged.get("sessionEnd") < h["sessionEnd"]:
                         merged["sessionEnd"] = h["sessionEnd"]
                     merged["ids"] += h["ids"]
-                    merged["tourneys"].union(h["tourneys"])
+                    merged["tourneys"].update(h["tourneys"])
                     self.s["bk"][n]["delete"] = True
 
                 self.s["bk"] = [item for item in self.s["bk"] if not item.get("delete")]
@@ -5012,39 +5012,41 @@ class Database:
         THRESHOLD = timedelta(seconds=int(self.sessionTimeout * 60))
         if pdata:  # gametype['type']=='ring' and
             for p, pid in list(pids.items()):
-                hp = {}
+                hp: dict[str, Any] = {}
                 k = (gametypeId, pid)
                 hp["startTime"] = startTime.replace(tzinfo=None)
                 hp["hid"] = hid
                 hp["ids"] = []
                 pdata[p]["n"] = 1
                 hp["line"] = [int(pdata[p][s]) if isinstance(pdata[p][s], bool) else pdata[p][s] for s in CACHE_KEYS]
-                id = []
-                sessionplayer = self.sc.get(k)
+                session_indices: list[int] = []
+                sessionplayer: list[dict[str, Any]] | None = self.sc.get(k)
                 if sessionplayer is not None:
                     lower = hp["startTime"] - THRESHOLD
                     upper = hp["startTime"] + THRESHOLD
                     for i in range(len(sessionplayer)):
                         if lower <= sessionplayer[i]["endTime"] and upper >= sessionplayer[i]["startTime"]:
-                            if len(id) == 0:
+                            if len(session_indices) == 0:
                                 for idx, val in enumerate(hp["line"]):
                                     sessionplayer[i]["line"][idx] += val
                             if (hp["startTime"] <= sessionplayer[i]["endTime"]) and (
                                 hp["startTime"] >= sessionplayer[i]["startTime"]
                             ):
-                                id.append(i)
+                                session_indices.append(i)
                             elif hp["startTime"] < sessionplayer[i]["startTime"]:
                                 sessionplayer[i]["startTime"] = hp["startTime"]
-                                id.append(i)
+                                session_indices.append(i)
                             elif hp["startTime"] > sessionplayer[i]["endTime"]:
                                 sessionplayer[i]["endTime"] = hp["startTime"]
-                                id.append(i)
-                if len(id) == 1:
-                    i = id[0]
+                                session_indices.append(i)
+                if len(session_indices) == 1:
+                    i = session_indices[0]
                     if pids[p] == heroes[0]:
                         self.sc[k][i]["ids"].append(hid)
-                elif len(id) == 2:
-                    i, j = id[0], id[1]
+                elif len(session_indices) == 2:
+                    i, j = session_indices[0], session_indices[1]
+                    if sessionplayer is None:
+                        continue
                     if sessionplayer[i]["startTime"] < sessionplayer[j]["startTime"]:
                         sessionplayer[i]["endTime"] = sessionplayer[j]["endTime"]
                     else:
@@ -5055,7 +5057,7 @@ class Database:
                     if pids[p] == heroes[0]:
                         self.sc[k][i]["ids"].append(hid)
                         self.sc[k][i]["ids"] += g["ids"]
-                elif len(id) == 0:
+                elif len(session_indices) == 0:
                     if sessionplayer is None:
                         self.sc[k] = []
                     hp["endTime"] = hp["startTime"]
@@ -5084,7 +5086,11 @@ class Database:
             for k, sessionplayer in list(self.sc.items()):
                 for session in sessionplayer:
                     hid = session["hid"]
-                    sid = self.s.get(hid)["id"]
+                    session_record = self.s.get(hid)
+                    if session_record is None:
+                        log.warning("Ignoring session cache entry without its session record: hand %s", hid)
+                        continue
+                    sid = session_record["id"]
                     lower = session["startTime"] - THRESHOLD
                     upper = session["endTime"] + THRESHOLD
                     row = [lower, upper, *list(k[:2])]
@@ -5094,7 +5100,7 @@ class Database:
                         ["id", "sessionId", "startTime", "endTime", *CACHE_KEYS],
                     )
                     num = len(r)
-                    d = [0] * num
+                    d: list[dict[str, Any]] = [{} for _ in range(num)]
                     for z in range(num):
                         d[z] = {}
                         d[z]["line"] = [int(r[z][s]) if isinstance(r[z][s], bool) else r[z][s] for s in CACHE_KEYS]
@@ -5113,9 +5119,8 @@ class Database:
                         for n in r:
                             merge.append(n["id"])
                         merge.sort()
-                        r = d
-                        r.append(session)
-                        for n in r:
+                        merged_rows = d + [session]
+                        for n in merged_rows:
                             start = min(start, n["startTime"]) if start else n["startTime"]
                             end = max(end, n["endTime"]) if end else n["endTime"]
                             for idx in range(len(CACHE_KEYS)):
@@ -5193,6 +5198,9 @@ class Database:
             c = self.get_cursor()
             for k, tc in list(self.tc.items()):
                 sc = self.s.get(tc["hid"])
+                if sc is None:
+                    log.warning("Ignoring tournament cache entry without its session record: hand %s", tc["hid"])
+                    continue
                 tc["startTime"] = tc["startTime"].replace(tzinfo=None)
                 tc["endTime"] = tc["endTime"].replace(tzinfo=None)
                 c.execute(select_TC, k)
@@ -5265,33 +5273,34 @@ class Database:
             # insert_W = self.sql.query["insert_W"].replace("%s", self.sql.query["placeholder"])
             # insert_M = self.sql.query["insert_M"].replace("%s", self.sql.query["placeholder"])
 
-            dccache, inserts = {}, []
-            for k, line in list(self.dcbulk.items()):
-                sc = self.s.get(k[0])
+            dccache: dict[tuple[Any, ...], list[Any]] = {}
+            inserts: list[Any] = []
+            for cache_key, line in list(self.dcbulk.items()):
+                sc = self.s.get(cache_key[0])
                 if sc is not None:
                     garbageWeekMonths = (sc["wid"], sc["mid"]) in self.wmnew or (
                         sc["wid"],
                         sc["mid"],
                     ) in self.wmold
-                    garbageTourneyTypes = k[2] in self.ttnew or k[2] in self.ttold
+                    garbageTourneyTypes = cache_key[2] in self.ttnew or cache_key[2] in self.ttold
                     if self.import_options["hhBulkPath"] == "" or (not garbageWeekMonths and not garbageTourneyTypes):
-                        n = (sc["wid"], sc["mid"], k[1], k[2], k[3], k[4])
-                        startCards = dccache.get(n)
+                        group_key = (sc["wid"], sc["mid"], cache_key[1], cache_key[2], cache_key[3], cache_key[4])
+                        startCards = dccache.get(group_key)
                         # Add line to the old line in the hudcache.
                         if startCards is not None:
                             for idx, val in enumerate(line):
-                                dccache[n][idx] += val
+                                dccache[group_key][idx] += val
                         else:
-                            dccache[n] = line
+                            dccache[group_key] = line
 
             c = self.get_cursor()
-            for k, item in list(dccache.items()):
-                if k[3]:
+            for cache_key, item in list(dccache.items()):
+                if cache_key[3]:
                     q = select_cardscache_tour
-                    row = list(k)
+                    row = list(cache_key)
                 else:
                     q = select_cardscache_ring
-                    row = list(k[:3]) + list(k[-2:])
+                    row = list(cache_key[:3]) + list(cache_key[-2:])
                 c.execute(q, row)
                 result = c.fetchone()
                 if result:
@@ -5299,7 +5308,7 @@ class Database:
                     update = [*item, id]
                     c.execute(update_cardscache, update)
                 else:
-                    insert = list(k) + item
+                    insert = list(cache_key) + item
                     inserts.append(insert)
 
             if inserts:
@@ -5357,33 +5366,37 @@ class Database:
             # insert_W = self.sql.query["insert_W"].replace("%s", self.sql.query["placeholder"])
             # insert_M = self.sql.query["insert_M"].replace("%s", self.sql.query["placeholder"])
 
-            position_cache, inserts = {}, []
-            for k, line in list(self.pcbulk.items()):
-                sc = self.s.get(k[0])
+            position_cache: dict[tuple[Any, ...], list[Any]] = {}
+            inserts: list[Any] = []
+            for cache_key, line in list(self.pcbulk.items()):
+                sc = self.s.get(cache_key[0])
                 if sc is not None:
                     garbageWeekMonths = (sc["wid"], sc["mid"]) in self.wmnew or (
                         sc["wid"],
                         sc["mid"],
                     ) in self.wmold
-                    garbageTourneyTypes = k[2] in self.ttnew or k[2] in self.ttold
+                    garbageTourneyTypes = cache_key[2] in self.ttnew or cache_key[2] in self.ttold
                     if self.import_options["hhBulkPath"] == "" or (not garbageWeekMonths and not garbageTourneyTypes):
-                        n = (sc["wid"], sc["mid"], k[1], k[2], k[3], k[4], k[5], k[6])
-                        positions = position_cache.get(n)
+                        group_key = (
+                            sc["wid"], sc["mid"], cache_key[1], cache_key[2], cache_key[3],
+                            cache_key[4], cache_key[5], cache_key[6],
+                        )
+                        positions = position_cache.get(group_key)
                         # Add line to the old line in the hudcache.
                         if positions is not None:
                             for idx, val in enumerate(line):
-                                position_cache[n][idx] += val
+                                position_cache[group_key][idx] += val
                         else:
-                            position_cache[n] = line
+                            position_cache[group_key] = line
 
             c = self.get_cursor()
-            for k, item in list(position_cache.items()):
-                if k[3]:  # Check if it's a tournament
+            for cache_key, item in list(position_cache.items()):
+                if cache_key[3]:  # Check if it's a tournament
                     q = select_positionscache_tour
-                    row = list(k)
+                    row = list(cache_key)
                 else:  # It's a ring game
                     q = select_positionscache_ring
-                    row = list(k[:3]) + list(k[-4:])
+                    row = list(cache_key[:3]) + list(cache_key[-4:])
 
                 c.execute(q, row)
                 result = c.fetchone()
@@ -5392,7 +5405,7 @@ class Database:
                     update = [*item, id]
                     c.execute(update_positionscache, update)
                 else:
-                    insert = list(k) + item
+                    insert = list(cache_key) + item
                     inserts.append(insert)
 
             if inserts:
@@ -5543,7 +5556,7 @@ class Database:
 
         except Exception:  # intentional broad catch: hero-id resolution over config/pids best-effort, log only
             err = traceback.extract_tb(sys.exc_info()[2])[-1]
-            log.exception(f"Error acquiring hero ids: {sys.exc_value!s}")
+            log.exception("Error acquiring hero ids")
             log.exception(f"traceback: {err}")
         return hero_ids
 
@@ -5551,9 +5564,8 @@ class Database:
         data = cursor.fetchall()
         if not data:
             return []
-        results = [0] * len(data)
+        results: list[dict[Any, Any]] = [{} for _ in data]
         for i in range(len(data)):
-            results[i] = {}
             for n in range(len(desc)):
                 results[i][desc[n]] = data[i][n]
         return results
@@ -5569,6 +5581,7 @@ class Database:
 
     def isDuplicate(self, siteId, siteHandNo, heroSeat, publicDB) -> bool:
         q = self.sql.query["isAlreadyInDB"].replace("%s", self.sql.query["placeholder"])
+        key: tuple[Any, ...]
         if publicDB:
             key = (siteHandNo, siteId, heroSeat)
             q = q.replace("<heroSeat>", " AND heroSeat=%s").replace(
@@ -5943,6 +5956,7 @@ class Database:
 
     def cleanUpTourneyTypes(self) -> None:
         if self.ttold:
+            tables: tuple[str, ...] | set[str]
             if self.callHud and self.cacheSessions:
                 tables = ("HudCache", "CardsCache", "PositionsCache")
             elif self.callHud:
@@ -6065,6 +6079,7 @@ class Database:
             self.commit()
 
     def rebuild_caches(self) -> None:
+        tables: tuple[str, ...] | set[str]
         if self.callHud and self.cacheSessions:
             tables = ("HudCache", "CardsCache", "PositionsCache")
         elif self.callHud:
@@ -6152,6 +6167,7 @@ class Database:
         columnNames = [desc[0] for desc in cursor.description]
         result = cursor.fetchone()
 
+        row: tuple[Any, ...]
         if result is not None:
             if self.backend == self.PGSQL:
                 expectedValues = (
