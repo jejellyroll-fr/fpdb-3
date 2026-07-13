@@ -32,7 +32,7 @@ import datetime
 import re
 from decimal import Decimal
 from pathlib import Path
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING, Any, ClassVar
 
 from fpdb_3_legacy.HandHistoryConverter import FpdbHandPartial, FpdbParseError, HandHistoryConverter
 from fpdb_3_legacy.loggingFpdb import get_logger
@@ -162,6 +162,7 @@ class PokerStars(HandHistoryConverter):
     # Class Variables
 
     sitename = "PokerStars"
+    compiledPlayers: set[str] = set()
     filetype = "text"
     codepage = ("utf8", "cp1252", "ISO-8859-1")
     site_id = 32  # Default to PokerStars.COM, will be overridden by detectPokerStarsSkin
@@ -766,7 +767,7 @@ class PokerStars(HandHistoryConverter):
         log.info(f"Split multiple hands: {len(hands)} valid hands extracted")
         return hands
 
-    def compilePlayerRegexs(self, hand: Hand) -> None:
+    def compilePlayerRegexs(self, hand: Hand) -> None:  # type: ignore[override]
         """Compiles player-specific regular expressions for parsing hand text.
 
         Generates and stores regex patterns for hero cards and shown cards based on the current set of players in the hand.
@@ -877,7 +878,7 @@ class PokerStars(HandHistoryConverter):
 
         return info
 
-    def _parseGameFlags(self, mg: dict) -> dict[str, bool]:
+    def _parseGameFlags(self, mg: dict) -> dict[str, bool | str]:
         """Parses game flags from match group dictionary.
 
         Determines game attributes such as fast format, home game, split game, and buyin type from the provided match group.
@@ -930,7 +931,7 @@ class PokerStars(HandHistoryConverter):
                 self.in_path if hasattr(self, "in_path") else None,
             )
 
-    def determineGameType(self, hand_text: str) -> dict[str, str]:
+    def determineGameType(self, hand_text: str) -> dict[str, Any]:
         """Determines the game type and related attributes from hand text.
 
         Parses the hand text to extract game type, site, format, currency, and blind information for the current hand.
@@ -948,7 +949,7 @@ class PokerStars(HandHistoryConverter):
             raise FpdbParseError
 
         mg = m.groupdict()
-        info = self._parseBasicGameInfo(mg)
+        info: dict[str, Any] = self._parseBasicGameInfo(mg)
         info.update(self._parseGameFlags(mg))
 
         # Site detection
@@ -1352,7 +1353,7 @@ class PokerStars(HandHistoryConverter):
                 msg = f"Hand '{hand.handid}' is not cleanly split into pre and post Summary"
                 raise FpdbHandPartial(msg)
 
-        info = {}
+        info: dict[str, Any] = {}
         m = self.re_hand_info.search(hand.handText, re.DOTALL)
         m2 = self.re_game_info.search(hand.handText)
         if m is None or m2 is None:
@@ -1512,6 +1513,8 @@ class PokerStars(HandHistoryConverter):
                     re.DOTALL,
                 )
         log.debug("type: %s, value: %s", type(m), m)
+        if m is None:
+            raise FpdbHandPartial("Could not identify hand streets")
         mg = m.groupdict()
         log.debug("type mg: %s, value: %s", type(mg), mg)
         hand.addStreets(m)
@@ -1558,6 +1561,8 @@ class PokerStars(HandHistoryConverter):
                 )
             else:
                 m = self.re_board.search(hand.streets[street])
+                if m is None:
+                    raise FpdbHandPartial("Could not identify community cards")
                 hand.setCommunityCards(street, m.group("CARDS").split(" "))
         if street in {"FLOP1", "TURN1", "RIVER1", "FLOP2", "TURN2", "RIVER2"}:
             hand.runItTimes = 2
@@ -1572,7 +1577,7 @@ class PokerStars(HandHistoryConverter):
         cards = m.group("CARDS").split()
         slices = {"FLOP": (0, 3), "TURN": (3, 4), "RIVER": (4, 5)}
         start, end = slices.get(street, (None, None))
-        if start is None or len(cards) < end:
+        if start is None or end is None or len(cards) < end:
             return None
         recovered = cards[start:end]
         return recovered if all(recovered) else None
@@ -1622,7 +1627,7 @@ class PokerStars(HandHistoryConverter):
             None
         """
         if m := self.re_bring_in.search(hand.handText, re.DOTALL):
-            hand.addBringIn(m.group("PNAME"), self.clearMoneyString(m.group("BRINGIN")))
+            hand.addBringIn(m.group("PNAME"), self.clearMoneyString(m.group("BRINGIN")))  # type: ignore[attr-defined]
 
     def readBlinds(self, hand: Hand) -> None:
         """Reads blind and straddle information from the hand text and updates the hand object.
@@ -1861,9 +1866,9 @@ class PokerStars(HandHistoryConverter):
             self._processAction(action, hand, street)
 
         # Process uncalled bets
-        if m := self.re_uncalled.search(hand.streets[s]):
-            uncalled_player = m.group("PNAME").strip()  # Remove leading/trailing spaces
-            uncalled_amount = m.group("BET")
+        if uncalled_match := self.re_uncalled.search(hand.streets[s]):
+            uncalled_player = uncalled_match.group("PNAME").strip()  # Remove leading/trailing spaces
+            uncalled_amount = uncalled_match.group("BET")
             log.info("Processing uncalled bet: %s -> %s", uncalled_player, uncalled_amount)
 
             # Check if this could be a walk scenario by looking for collection by same player
@@ -1897,8 +1902,8 @@ class PokerStars(HandHistoryConverter):
                         collection_amount,
                     )
                     if not hasattr(hand, "walk_adjustments"):
-                        hand.walk_adjustments = {}
-                    hand.walk_adjustments[uncalled_player] = uncalled_decimal
+                        hand.walk_adjustments = {}  # type: ignore[attr-defined]
+                    hand.walk_adjustments[uncalled_player] = uncalled_decimal  # type: ignore[attr-defined]
                 elif uncalled_decimal > collection_amount:
                     # This is likely a BB walk: BB gets only SB contribution, BB bet returned
                     log.info(
@@ -1908,8 +1913,8 @@ class PokerStars(HandHistoryConverter):
                         collection_amount,
                     )
                     if not hasattr(hand, "walk_adjustments"):
-                        hand.walk_adjustments = {}
-                    hand.walk_adjustments[uncalled_player] = uncalled_decimal
+                        hand.walk_adjustments = {}  # type: ignore[attr-defined]
+                    hand.walk_adjustments[uncalled_player] = uncalled_decimal  # type: ignore[attr-defined]
                 else:
                     log.info(
                         "Not a walk - uncalled bet (%s) < collection (%s) for %s",
@@ -1939,7 +1944,7 @@ class PokerStars(HandHistoryConverter):
         """
         for shows in self.re_showdown_action.finditer(hand.handText):
             cards = shows.group("CARDS").split(" ")
-            hand.addShownCards(cards, shows.group("PNAME"))
+            hand.addShownCards(cards, shows.group("PNAME"))  # type: ignore[attr-defined]
 
     def _processProgressiveBounties(self, hand: Hand) -> None:
         """Processes progressive knockout bounties and updates the hand object.
@@ -1967,9 +1972,9 @@ class PokerStars(HandHistoryConverter):
 
             for pname, amount in list(ko_amounts.items()):
                 if pname == winner:
-                    hand.koCounts[pname] = (amount + hand.endBounty[pname]) / Decimal(hand.koBounty)
+                    hand.koCounts[pname] = (amount + hand.endBounty[pname]) / Decimal(hand.koBounty)  # type: ignore[assignment]
                 else:
-                    hand.koCounts[pname] = amount / Decimal(hand.koBounty)
+                    hand.koCounts[pname] = amount / Decimal(hand.koBounty)  # type: ignore[assignment]
 
     def _processRegularBounties(self, hand: Hand) -> None:
         """Processes regular knockout bounties and updates the hand object.
@@ -2004,7 +2009,7 @@ class PokerStars(HandHistoryConverter):
         for pname in pnames:
             if pname not in hand.koCounts:
                 hand.koCounts[pname] = 0
-            hand.koCounts[pname] += Decimal("1") / Decimal(len(pnames))
+            hand.koCounts[pname] += Decimal("1") / Decimal(len(pnames))  # type: ignore[assignment]
 
     def _processSingleBounty(self, hand: Hand, match: re.Match) -> None:
         """Processes a single knockout bounty and updates the hand object.
@@ -2124,9 +2129,10 @@ class PokerStars(HandHistoryConverter):
                 bovada_uncalled_v2 = True
             elif m0 is None:
                 bovada_uncalled_v1 = True
-                has_sb = any(a[1] == "small blind" for a in hand.actions.get("BLINDSANTES"))
+                blinds_antes = hand.actions.get("BLINDSANTES") or []
+                has_sb = any(a[1] == "small blind" for a in blinds_antes)
                 adjustment = (Decimal(hand.bb) - Decimal(hand.sb)) if has_sb else Decimal(hand.bb)
-                blindsantes = sum(a[2] for a in hand.actions.get("BLINDSANTES"))
+                blindsantes = sum((Decimal(a[2]) for a in blinds_antes), Decimal("0"))
 
         return bovada_uncalled_v1, bovada_uncalled_v2, blindsantes, adjustment
 
@@ -2163,7 +2169,7 @@ class PokerStars(HandHistoryConverter):
         self,
         hand: Hand,
         match: re.Match,
-        adjustments: tuple[bool, bool, float, float],
+        adjustments: tuple[bool, bool, Decimal, Decimal],
     ) -> None:
         """Adds cash out pot collection information to the hand object, applying adjustments.
 
@@ -2283,33 +2289,33 @@ class PokerStars(HandHistoryConverter):
             m = re_revealed_cards.finditer(hand.handText)
             for found in m:
                 cards = found.group("NEWCARDS").split(" ")
-                hand.addShownCards(
+                hand.addShownCards(  # type: ignore[attr-defined]
                     cards=cards,
                     player=found.group("PNAME"),
                     shown=True,
                     mucked=False,
                 )
 
-        for m in self.re_shown_cards.finditer(hand.handText):
-            if m.group("CARDS") is not None:
-                cards = m.group("CARDS")
+        for shown_match in self.re_shown_cards.finditer(hand.handText):
+            if shown_match.group("CARDS") is not None:
+                cards = shown_match.group("CARDS")
                 cards = cards.split(
                     " ",
                 )  # needs to be a list, not a set--stud needs the order
-                string = m.group("STRING")
-                if m.group("STRING2"):
-                    string += "|" + m.group("STRING2")
+                string = shown_match.group("STRING")
+                if shown_match.group("STRING2"):
+                    string += "|" + shown_match.group("STRING2")
 
                 (shown, mucked) = (False, False)
-                if m.group("SHOWED") == "showed":
+                if shown_match.group("SHOWED") == "showed":
                     shown = True
-                elif m.group("SHOWED") == "mucked":
+                elif shown_match.group("SHOWED") == "mucked":
                     mucked = True
 
                 # print "DEBUG: hand.addShownCards(%s, %s, %s, %s)" %(cards, m.group('PNAME'), shown, mucked)
-                hand.addShownCards(
+                hand.addShownCards(  # type: ignore[attr-defined]
                     cards=cards,
-                    player=m.group("PNAME"),
+                    player=shown_match.group("PNAME"),
                     shown=shown,
                     mucked=mucked,
                     string=string,
@@ -2342,7 +2348,7 @@ class PokerStars(HandHistoryConverter):
                 log.info("Parsed from hand text: Total pot=%s, Rake=%s", total_pot, rake)
 
                 # Mark that rake was explicitly parsed (to avoid recalculation)
-                hand.rake_parsed = True
+                hand.rake_parsed = True  # type: ignore[attr-defined]
 
             except (ValueError, TypeError) as e:
                 log.warning("Failed to parse rake/pot values: %s", e)
