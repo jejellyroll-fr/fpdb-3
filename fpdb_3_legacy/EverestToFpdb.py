@@ -203,11 +203,12 @@ class Everest(HandHistoryConverter):
             hand.gametype["bb"] = bb
 
         if hand.maxseats is None:
-            if hand.gametype["type"] == "tour" and self.maxseats == 0:
+            maxseats = getattr(self, "maxseats", 0)
+            if hand.gametype["type"] == "tour" and maxseats == 0:
                 hand.maxseats = self.guessMaxSeats(hand)
                 self.maxseats = hand.maxseats
             elif hand.gametype["type"] == "tour":
-                hand.maxseats = self.maxseats
+                hand.maxseats = maxseats
             else:
                 hand.maxseats = None
         # FIXME: u'DATETIME': u'1291155932'
@@ -244,6 +245,8 @@ class Everest(HandHistoryConverter):
 
     def readCommunityCards(self, hand, street):
         m = self.re_Board.search(hand.streets[street])
+        if m is None:
+            raise FpdbParseError("Could not identify community cards")
         if street == "FLOP":
             cards = [c.replace("10", "T").strip() for c in m.group("CARDS").split(",")]
             hand.setCommunityCards(street, cards)
@@ -279,7 +282,10 @@ class Everest(HandHistoryConverter):
             i += 1
 
     def readButton(self, hand):
-        hand.buttonpos = int(self.re_Button.search(hand.handText).group("BUTTON"))
+        button_match = self.re_Button.search(hand.handText)
+        if button_match is None:
+            raise FpdbParseError("Could not identify button position")
+        hand.buttonpos = int(button_match.group("BUTTON"))
 
     def readHoleCards(self, hand):
         cards = []
