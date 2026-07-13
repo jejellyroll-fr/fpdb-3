@@ -37,6 +37,7 @@ class Everleaf(HandHistoryConverter):
     filetype = "text"
     codepage = ("utf-8", "cp1252")
     siteId = 3  # Needs to match id entry in Sites database
+    compiledPlayers: set[str] = set()
 
     substitutions = {
         "LEGAL_ISO": "USD|EUR|GBP|CAD|FPP",  # legal ISO currency codes
@@ -223,6 +224,8 @@ class Everleaf(HandHistoryConverter):
 
         # log.debug("HID %s, Table %s" % (m.group('HID'),  m.group('TABLE')))
         mh = self.re_HID.search(hand.handText)
+        if mh is None:
+            raise FpdbParseError("Could not identify hand ID")
         hand.handid = mh.group("HID")
         hand.tablename = m.group("TABLE")
         if m.group("MAX"):
@@ -297,6 +300,8 @@ class Everleaf(HandHistoryConverter):
         #        if street in ('FLOP','TURN','RIVER'):   # a list of streets which get dealt community cards (i.e. all but PREFLOP)
         log.debug(f"readCommunityCards ({street})")
         m = self.re_Board.search(hand.streets[street])
+        if m is None:
+            raise FpdbParseError("Could not identify community cards")
         cards = m.group("CARDS")
         cards = [card.strip() for card in cards.split(",")]
         hand.setCommunityCards(street=street, cards=cards)
@@ -329,7 +334,10 @@ class Everleaf(HandHistoryConverter):
             hand.addBlind(a.group("PNAME"), "both", self.clearMoneyString(a.group("SBBB")))
 
     def readButton(self, hand):
-        hand.buttonpos = int(self.re_Button.search(hand.handText).group("BUTTON"))
+        button_match = self.re_Button.search(hand.handText)
+        if button_match is None:
+            raise FpdbParseError("Could not identify button")
+        hand.buttonpos = int(button_match.group("BUTTON"))
 
     def readHoleCards(self, hand):
         m = self.re_HeroCards.search(hand.handText)
