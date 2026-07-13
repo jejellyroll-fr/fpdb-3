@@ -25,6 +25,14 @@ jobs:
           fpdb_3_legacy/equity.py
           fpdb_3_legacy/dialects.py
           fpdb_3_legacy/pt4_adapter
+          fpdb_3_legacy/http_capture_models.py
+          fpdb_3_legacy/http_capture_actions.py
+          fpdb_3_legacy/http_capture_adapter.py
+          fpdb_3_legacy/http_capture_diff.py
+          fpdb_3_legacy/http_capture_hand_builder.py
+          fpdb_3_legacy/http_capture_db_import.py
+          fpdb_3_legacy/http_capture_ofc.py
+          fpdb_3_legacy/swc_http_adapter.py
       - name: Lint newly modernized modules
         run: >-
           ruff check

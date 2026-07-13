@@ -265,9 +265,14 @@ def build_ofc_hand(hand_data: dict[str, Any]) -> OFCHand:
             )
         )
 
+    site = hand_data.get("site")
+    hand_id = hand_data.get("hand_id")
+    if site is None or hand_id is None:
+        raise ValueError("OFC hand requires site and hand_id")
+
     return OFCHand(
-        site=hand_data.get("site"),
-        hand_id=hand_data.get("hand_id"),
+        site=site,
+        hand_id=hand_id,
         table_id=hand_data.get("table_id"),
         timestamp=hand_data.get("timestamp"),
         variant=hand_data.get("ofc_variant", {}),
@@ -282,9 +287,14 @@ def build_ofc_hand(hand_data: dict[str, Any]) -> OFCHand:
 def ofc_hand_from_dict(data: dict[str, Any]) -> OFCHand:
     """Rehydrate an OFCHand from its serialized dictionary form."""
 
+    site = data.get("site")
+    hand_id = data.get("hand_id")
+    if site is None or hand_id is None:
+        raise ValueError("Serialized OFC hand requires site and hand_id")
+
     return OFCHand(
-        site=data.get("site"),
-        hand_id=data.get("hand_id"),
+        site=site,
+        hand_id=hand_id,
         table_id=data.get("table_id"),
         timestamp=data.get("timestamp"),
         variant=dict(data.get("variant", {})),
