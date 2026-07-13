@@ -46,12 +46,9 @@ Tests ajoutés : `test/test_menu_layout.py`, `test/test_translations.py`.
 - ✅ **Traductions FR** couvrant toutes les chaînes marquées + re-validations (« Configure » → « Configurer », correction d'entrées vides/espaces). **Découverte clé** : beaucoup de modules avaient des `_()` *retirés* alors que les catalogues 2011 gardaient la traduction — restaurer `_()` a réactivé des dizaines de libellés FR pour peu de nouvelles traductions.
 
 **Reste à faire (hors dev / séparable)**
-- Traduire les chaînes dans les 13 autres langues (travail traducteurs ; `.pot` prêt).
+- Traduire les chaînes dans les 13 autres langues (travail traducteurs ; `.pot` prêt, workflow Weblate/Crowdin).
 - Re-valider en masse les `.po` de 2011 (qualité).
-- Formats localisés : nombres / devises / dates dans stats et graphes (feature distincte).
-- Traduire les nouvelles chaînes dans les 13 autres langues (travail traducteurs ; workflow Weblate/Crowdin).
-- Re-valider en masse les `.po` de 2011.
-- Formats localisés : nombres / devises / dates dans stats et graphes (€/$/BB selon locale).
+- Formats localisés : nombres / devises / dates dans stats et graphes (€/$/BB selon locale — feature distincte).
 
 **Effort restant** ~2-3j · **Impact** élevé.
 
