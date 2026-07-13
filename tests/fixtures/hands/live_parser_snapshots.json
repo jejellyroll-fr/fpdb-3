@@ -11,6 +11,7 @@
   "betonline/Flop/NLHE-10max-USD-1.00-2.00-201204.ActionPoker.txt": {"hand_count": 1, "sha256": "020280d94840e0f5aba576659bcb5967958ad33f4d1491b050dd8c6fc062c6af"},
   "betonline/Flop/NLHE-10max-play-10-20-201204.GearPoker.txt": {"hand_count": 2, "sha256": "33e050c633c40749bf94883704d21f4598cc7f02eddf651b3b987a2910412624"},
   "betonline/Flop/PLO-10max-USD-0.05-0.10-201209.txt": {"hand_count": 17, "sha256": "fd692600d80541f6827c763132ab494c1a02a6763f7af1d64573cb21426796b1"},
+  "boss/Draw/5CD-FL-EUR-2-4.Opoker.sample.xml": {"hand_count": 14, "sha256": "30c1adf56f1225d003c5276559946b58ccc113a4b6ce6c63fccbb220b2597993"},
   "bovada/ignition.txt": {"hand_count": 1, "sha256": "b24ae7da9bb643f0de505b79148a7d82382230007451eb71459017a9d7518478"},
   "bovada/zone_poker.txt": {"hand_count": 277, "sha256": "b2f438143c43b446e3a8dd8688b545f831aa2b28d0cf5f08beee8c9ed17c9797"},
   "cake/cash_nlhe.txt": {"hand_count": 20, "sha256": "9fdae6c773516a76a018c9fac1b76a138aa82693534dadd5797307490a42c072"},

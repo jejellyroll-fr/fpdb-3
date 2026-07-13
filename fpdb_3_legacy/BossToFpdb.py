@@ -330,12 +330,14 @@ class Boss(HandHistoryConverter):
 
             boardCards = []
             if street == "FLOP":
-                m = self.re_Card.findall(hand.streets[street])
-                for card in m:
+                cards = self.re_Card.findall(hand.streets[street])
+                for card in cards:
                     boardCards.append(self.convertBossCards(card))
             else:
-                m = self.re_BoardLast.search(hand.streets[street])
-                boardCards.append(self.convertBossCards(m.group("CARD")))
+                board_match = self.re_BoardLast.search(hand.streets[street])
+                if board_match is None:
+                    raise FpdbParseError("Could not identify community card")
+                boardCards.append(self.convertBossCards(board_match.group("CARD")))
 
             hand.setCommunityCards(street, boardCards)
 
@@ -508,7 +510,7 @@ class Boss(HandHistoryConverter):
                     contributed -= lastbet
             except IndexError as e:
                 log.error(
-                    _("BossToFpdb.calculateAntes(): '%s': Major failure while calculating pot: '%s'") % (self.handid, e)
+                    _("BossToFpdb.calculateAntes(): '%s': Major failure while calculating pot: '%s'") % (hand.handid, e)
                 )
                 raise FpdbParseError
             if street == "DEAL":

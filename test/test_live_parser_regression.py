@@ -8,6 +8,7 @@ from pathlib import Path
 import pytest
 
 from fpdb_3_legacy.BetOnlineToFpdb import BetOnline
+from fpdb_3_legacy.BossToFpdb import Boss
 from fpdb_3_legacy.BovadaToFpdb import Bovada
 from fpdb_3_legacy.CakeToFpdb import Cake
 from fpdb_3_legacy.Configuration import Config
@@ -58,6 +59,13 @@ CASES += [
     (f"betonline/{path.relative_to(REGRESSION_FILES / 'BetOnline').as_posix()}", BetOnline, path)
     for path in sorted((REGRESSION_FILES / "BetOnline").rglob("*.txt"))
 ]
+CASES.append(
+    (
+        "boss/Draw/5CD-FL-EUR-2-4.Opoker.sample.xml",
+        Boss,
+        REGRESSION_FILES / "Boss" / "Draw" / "5CD-FL-EUR-2-4.Opoker.sample.xml",
+    )
+)
 CASES.append(
     (
         "entraction/Flop/LHE-HU-EUR-10-20-201103.txt",
