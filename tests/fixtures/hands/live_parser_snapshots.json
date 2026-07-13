@@ -16,6 +16,7 @@
   "bovada/zone_poker.txt": {"hand_count": 277, "sha256": "b2f438143c43b446e3a8dd8688b545f831aa2b28d0cf5f08beee8c9ed17c9797"},
   "cake/cash_nlhe.txt": {"hand_count": 20, "sha256": "9fdae6c773516a76a018c9fac1b76a138aa82693534dadd5797307490a42c072"},
   "entraction/Flop/LHE-HU-EUR-10-20-201103.txt": {"hand_count": 1, "sha256": "d4b76bbf860b2719e9a6ce6f82fa48fe1c6737bb8aca319a124f9e50166914d8"},
+  "everleaf/Stud/7-Stud-EUR-0.05-0.10.201108-new-format.txt": {"hand_count": 6, "sha256": "a0af8d8bb9ebe560f2056c541dcf17b765e902bc66fd9964d4715202e0c587be"},
   "ggpoker/plo_cash.txt": {"hand_count": 13, "sha256": "6bb40ce803cc2eb1c1432f1f001b7a3059ec4b2a12d67cb288a597f6f623701d"},
   "ipoker/Flop/6+Holdem-EUR-0.25-0.50-201702.txt": {"hand_count": 1, "sha256": "c001d667ad5a1859d9f8bebc2046d0cb837046ead5605b71f558aa6367a17ab2"},
   "kingclub/5card_plo.txt": {"hand_count": 1, "sha256": "d2cf7c00bdfe2b6a339f5138cdb46c3850237da212d465fbff5c79cf2317c468"},

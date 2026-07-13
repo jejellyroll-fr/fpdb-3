@@ -13,6 +13,7 @@ from fpdb_3_legacy.BovadaToFpdb import Bovada
 from fpdb_3_legacy.CakeToFpdb import Cake
 from fpdb_3_legacy.Configuration import Config
 from fpdb_3_legacy.EntractionToFpdb import Entraction
+from fpdb_3_legacy.EverleafToFpdb import Everleaf
 from fpdb_3_legacy.GGPokerToFpdb import GGPoker
 from fpdb_3_legacy.iPoker.base import iPoker
 from fpdb_3_legacy.KingsClubToFpdb import KingsClub
@@ -71,6 +72,13 @@ CASES.append(
         "entraction/Flop/LHE-HU-EUR-10-20-201103.txt",
         Entraction,
         REGRESSION_FILES / "Entraction" / "Flop" / "LHE-HU-EUR-10-20-201103.txt",
+    )
+)
+CASES.append(
+    (
+        "everleaf/Stud/7-Stud-EUR-0.05-0.10.201108-new-format.txt",
+        Everleaf,
+        REGRESSION_FILES / "Everleaf" / "Stud" / "7-Stud-EUR-0.05-0.10.201108-new-format.txt",
     )
 )
 CASES += [
