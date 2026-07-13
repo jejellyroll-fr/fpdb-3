@@ -92,6 +92,7 @@ jobs:
           fpdb_3_legacy/GuiTourneyGraphViewer.py
           fpdb_3_legacy/GuiHandViewer.py
           fpdb_3_legacy/GuiTourHandViewer.py
+          fpdb_3_legacy/GuiReplayer.py
           fpdb_3_legacy/GuiStatsInfo.py
           fpdb_3_legacy/GuiConfigObserver.py
           fpdb_3_legacy/GuiLogView.py
