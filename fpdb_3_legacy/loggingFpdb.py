@@ -409,7 +409,7 @@ class LoggerRegistry:
             return True
         return False
 
-    def get_logger_info(self, name: str) -> Union[LoggerInfo, None]:
+    def get_logger_info(self, name: str) -> LoggerInfo | None:
         """Retrieve information about a specific logger.
 
         Returns the LoggerInfo object for the given logger name, or None if the logger does not exist. If the logger is not found, it will attempt to discover and register it before returning the result.
@@ -428,7 +428,7 @@ class LoggerRegistry:
     def filter_loggers(
         self,
         pattern: str = "",
-        level_filter: Union[int, None] = None,
+        level_filter: int | None = None,
     ) -> dict[str, LoggerInfo]:
         """Filter registered loggers by name pattern and/or logging level.
 
@@ -467,7 +467,7 @@ def get_logger_registry() -> LoggerRegistry:
 class LogConfig:
     """Configuration manager for logger settings with JSON persistence."""
 
-    def __init__(self, config_dir: Union[str, None] = None) -> None:
+    def __init__(self, config_dir: str | None = None) -> None:
         """Initialize the LogConfig instance and set up configuration file paths.
 
         Sets the directory and file path for logger configuration, creating the directory if it does not exist. If no directory is provided, defaults to a 'fpdb_logs' folder in the user's home directory.
@@ -1192,7 +1192,7 @@ class TimedSizedRotatingFileHandler(TimedRotatingFileHandler):
         when: str = "midnight",
         interval: int = 1,
         backup_count: int = 0,
-        encoding: Union[str, None] = None,
+        encoding: str | None = None,
         delay: bool = False,  # noqa: FBT001, FBT002
         utc: bool = False,  # noqa: FBT001, FBT002
         at_time: Any = None,
@@ -1388,7 +1388,7 @@ def ensure_console_handlers_configured() -> None:
         logging.getLogger(__name__).debug(f"Error configuring console handlers: {e}")
 
 
-def setup_logging(log_dir: Union[str, None] = None, *, console_only: bool = False) -> None:
+def setup_logging(log_dir: str | None = None, *, console_only: bool = False) -> None:
     """Configure the logging system.
 
     This function sets up console and file handlers with custom formatters,

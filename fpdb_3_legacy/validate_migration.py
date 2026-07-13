@@ -190,10 +190,7 @@ def main():
     print(f"Python {sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}\n")
 
     # Vérifier compatibilité Python
-    if sys.version_info < (3, 10):
-        print("❌ Python < 3.10 non supporté")
-        return 1
-    elif sys.version_info >= (3, 13):
+    if sys.version_info >= (3, 13):
         print(f"✅ Python 3.{sys.version_info.minor} compatible avec migration\n")
     else:
         print(f"⚠️  Python 3.{sys.version_info.minor} - Migration ciblée pour 3.13+\n")

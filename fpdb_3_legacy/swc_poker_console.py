@@ -356,7 +356,7 @@ class SwCPokerConsoleDialog(QDialog):
         for fn in json_files:
             filepath = os.path.join(self.output_dir, fn)
             try:
-                with open(filepath, "r") as f:
+                with open(filepath) as f:
                     hand = json.load(f)
                 hand_id = hand.get("hand_id")
                 raw_game_type = hand.get("game_type", "OFC")
