@@ -664,7 +664,7 @@ class PokerStars(HandHistoryConverter):
         # The default setting is PokerStars.COM
         return "PokerStars.COM", SITE_POKERSTARS_COM
 
-    def readOther(self, hand: "Hand") -> None:
+    def readOther(self, hand: Hand) -> None:
         """Read other information from hand text."""
 
     def allHandsAsList(self) -> list[str]:
@@ -765,7 +765,7 @@ class PokerStars(HandHistoryConverter):
         log.info(f"Split multiple hands: {len(hands)} valid hands extracted")
         return hands
 
-    def compilePlayerRegexs(self, hand: "Hand") -> None:
+    def compilePlayerRegexs(self, hand: Hand) -> None:
         """Compiles player-specific regular expressions for parsing hand text.
 
         Generates and stores regex patterns for hero cards and shown cards based on the current set of players in the hand.
@@ -1030,7 +1030,7 @@ class PokerStars(HandHistoryConverter):
 
         hand.addWonPot(pname, Decimal(pot), pot_type, is_cashout=is_cashout)
 
-    def _processDateTime(self, datetime_str: str, hand: "Hand") -> None:
+    def _processDateTime(self, datetime_str: str, hand: Hand) -> None:
         """Processes and sets the hand start time from a date-time string.
 
         Parses the date-time string from the hand text and sets the hand's start time, converting to UTC if necessary.
@@ -1072,7 +1072,7 @@ class PokerStars(HandHistoryConverter):
                 "UTC",
             )
 
-    def _setFreeBuyin(self, hand: "Hand", currency: str) -> None:
+    def _setFreeBuyin(self, hand: Hand, currency: str) -> None:
         """Sets buyin and fee to zero for freeroll tournaments.
 
         Updates the hand object to reflect a free buyin and fee, and sets the buyin currency.
@@ -1088,7 +1088,7 @@ class PokerStars(HandHistoryConverter):
         hand.fee = 0
         hand.buyinCurrency = currency
 
-    def _processBuyinInfo(self, info: dict, hand: "Hand") -> None:
+    def _processBuyinInfo(self, info: dict, hand: Hand) -> None:
         """Processes buyin information and updates the hand object.
 
         Determines buyin type, currency, bounty, and fee details from the info dictionary and sets relevant attributes on the hand object.
@@ -1119,7 +1119,7 @@ class PokerStars(HandHistoryConverter):
         hand.isFast = "Zoom" in info["TITLE"] or "Rush" in info["TITLE"]
         hand.isHomeGame = "Home" in info["TITLE"]
 
-    def _detectBuyinCurrency(self, buyin_str: str, hand: "Hand") -> None:
+    def _detectBuyinCurrency(self, buyin_str: str, hand: Hand) -> None:
         """Detects the buyin currency from the buyin string and updates the hand object.
 
         Analyzes the buyin string for currency symbols or keywords and sets the buyinCurrency attribute on the hand object.
@@ -1165,7 +1165,7 @@ class PokerStars(HandHistoryConverter):
         """
         info["BOUNTY"], info["BIRAKE"] = info["BIRAKE"], info["BOUNTY"]
 
-    def _processBountyAndFees(self, info: dict, hand: "Hand") -> None:
+    def _processBountyAndFees(self, info: dict, hand: Hand) -> None:
         """Processes bounty and fee information for a hand.
 
         Calculates and sets the bounty, buyin, and fee values on the hand object based on the provided info dictionary.
@@ -1193,7 +1193,7 @@ class PokerStars(HandHistoryConverter):
             hand.buyin = int(100 * Decimal(info["BIAMT"]))
             hand.fee = 0
 
-    def _processHandInfo(self, info: dict, hand: "Hand") -> None:
+    def _processHandInfo(self, info: dict, hand: Hand) -> None:
         """Processes extracted hand information and updates the hand object.
 
         Iterates through the info dictionary and delegates processing of each key to the appropriate handler.
@@ -1208,7 +1208,7 @@ class PokerStars(HandHistoryConverter):
         for key in info:
             self._processHandInfoKey(key, info, hand)
 
-    def _processHandInfoKey(self, key: str, info: dict, hand: "Hand") -> None:
+    def _processHandInfoKey(self, key: str, info: dict, hand: Hand) -> None:
         """Processes a single key from the hand info dictionary and updates the hand object.
 
         Delegates processing of the key to the appropriate handler based on its type (basic, tournament, or table field).
@@ -1228,7 +1228,7 @@ class PokerStars(HandHistoryConverter):
         elif key in {"TABLE", "BUTTON", "MAX"}:
             self._processTableFields(key, info, hand)
 
-    def _processBasicHandFields(self, key: str, info: dict, hand: "Hand") -> None:
+    def _processBasicHandFields(self, key: str, info: dict, hand: Hand) -> None:
         """Processes basic hand fields and updates the hand object.
 
         Handles the DATETIME, HID, and TOURNO keys by setting the corresponding attributes on the hand object.
@@ -1248,7 +1248,7 @@ class PokerStars(HandHistoryConverter):
         elif key == "TOURNO" and info[key] is not None:
             hand.tourNo = info[key][-18:]
 
-    def _processTournamentFields(self, key: str, info: dict, hand: "Hand") -> None:
+    def _processTournamentFields(self, key: str, info: dict, hand: Hand) -> None:
         """Processes tournament-specific fields and updates the hand object.
 
         Handles the BUYIN, LEVEL, and SHOOTOUT keys by setting the corresponding tournament attributes on the hand object.
@@ -1268,7 +1268,7 @@ class PokerStars(HandHistoryConverter):
         elif key == "SHOOTOUT" and info[key] is not None:
             hand.isShootout = True
 
-    def _processTableFields(self, key: str, info: dict, hand: "Hand") -> None:
+    def _processTableFields(self, key: str, info: dict, hand: Hand) -> None:
         """Processes table-related fields and updates the hand object.
 
         Handles the TABLE, BUTTON, and MAX keys by setting the corresponding table attributes on the hand object.
@@ -1288,7 +1288,7 @@ class PokerStars(HandHistoryConverter):
         elif key == "MAX" and info[key] is not None:
             hand.maxseats = int(info[key])
 
-    def _processTableInfo(self, info: dict, hand: "Hand") -> None:
+    def _processTableInfo(self, info: dict, hand: Hand) -> None:
         """Processes table information and updates the hand object.
 
         Sets the table name on the hand object based on tournament and table info fields.
@@ -1308,7 +1308,7 @@ class PokerStars(HandHistoryConverter):
         else:
             hand.tablename = info["TABLE"]
 
-    def readHandInfo(self, hand: "Hand") -> None:
+    def readHandInfo(self, hand: Hand) -> None:
         """Reads and processes hand information from the hand text.
 
         Extracts summary, game, and table information from the hand text, checks for partial or malformed hands, and updates the hand object with parsed details.
@@ -1374,7 +1374,7 @@ class PokerStars(HandHistoryConverter):
         # Parse rake and total pot from hand text if available
         self._parseRakeAndPot(hand)
 
-    def readButton(self, hand: "Hand") -> None:
+    def readButton(self, hand: Hand) -> None:
         """Reads the button position from the hand text and updates the hand object.
 
         Searches for the button position in the hand text and sets it on the hand object, logging if not found.
@@ -1390,7 +1390,7 @@ class PokerStars(HandHistoryConverter):
         else:
             log.info("readButton: not found")
 
-    def readPlayerStacks(self, hand: "Hand") -> None:
+    def readPlayerStacks(self, hand: Hand) -> None:
         """Reads player stack information from the hand text and updates the hand object.
 
         Extracts seat, player name, cash, sitout status, and bounty for each player before the summary section.
@@ -1413,7 +1413,7 @@ class PokerStars(HandHistoryConverter):
                 self.clearMoneyString(a.group("BOUNTY")),
             )
 
-    def markStreets(self, hand: "Hand") -> None:
+    def markStreets(self, hand: Hand) -> None:
         """Reads player stack information from the hand text and updates the hand object.
 
         Extracts seat, player name, cash, sitout status, and bounty for each player before the summary section.
@@ -1517,7 +1517,7 @@ class PokerStars(HandHistoryConverter):
 
     def readCommunityCards(
         self,
-        hand: "Hand",
+        hand: Hand,
         street: str,
     ) -> None:
         """Reads and sets community cards for a given street in the hand.
@@ -1561,7 +1561,7 @@ class PokerStars(HandHistoryConverter):
         if street in {"FLOP1", "TURN1", "RIVER1", "FLOP2", "TURN2", "RIVER2"}:
             hand.runItTimes = 2
 
-    def _recover_board_from_summary(self, hand: "Hand", street: str):
+    def _recover_board_from_summary(self, hand: Hand, street: str):
         """Return the community card(s) for a street from the SUMMARY Board line,
         used when the street line itself has a blank card. Returns None if the
         board cannot supply the needed cards (genuinely incomplete)."""
@@ -1576,7 +1576,7 @@ class PokerStars(HandHistoryConverter):
         recovered = cards[start:end]
         return recovered if all(recovered) else None
 
-    def readSTP(self, hand: "Hand") -> None:
+    def readSTP(self, hand: Hand) -> None:
         """Reads STP (Side Pot) information from the hand text and updates the hand object.
 
         Searches for the STP amount in the hand text and adds it to the hand object if found.
@@ -1590,7 +1590,7 @@ class PokerStars(HandHistoryConverter):
         if m := self.re_stp.search(hand.handText):
             hand.addSTP(m.group("AMOUNT"))
 
-    def readAntes(self, hand: "Hand") -> None:
+    def readAntes(self, hand: Hand) -> None:
         """Reads ante information from the hand text and updates the hand object.
 
         Extracts ante amounts for each player and adds them to the hand object.
@@ -1609,7 +1609,7 @@ class PokerStars(HandHistoryConverter):
                 self.clearMoneyString(player.group("ANTE")),
             )
 
-    def readBringIn(self, hand: "Hand") -> None:
+    def readBringIn(self, hand: Hand) -> None:
         """Reads bring-in bet information from the hand text and updates the hand object.
 
         Searches for the bring-in bet in the hand text and adds it to the hand object if found.
@@ -1623,7 +1623,7 @@ class PokerStars(HandHistoryConverter):
         if m := self.re_bring_in.search(hand.handText, re.DOTALL):
             hand.addBringIn(m.group("PNAME"), self.clearMoneyString(m.group("BRINGIN")))
 
-    def readBlinds(self, hand: "Hand") -> None:
+    def readBlinds(self, hand: Hand) -> None:
         """Reads blind and straddle information from the hand text and updates the hand object.
 
         Extracts small blind, big blind, dead blinds, straddle, and button blind postings from the hand text and adds them to the hand object.
@@ -1683,7 +1683,7 @@ class PokerStars(HandHistoryConverter):
                 self.clearMoneyString(a.group("BUB")),
             )
 
-    def readHoleCards(self, hand: "Hand") -> None:
+    def readHoleCards(self, hand: Hand) -> None:
         """Reads and sets hole cards for each player from the hand text.
 
         Extracts hero and player hole cards for each street, handling special cases for stud games and updating the hand object accordingly.
@@ -1786,7 +1786,7 @@ class PokerStars(HandHistoryConverter):
                         dealt=False,
                     )
 
-    def _processAction(self, action: re.Match, hand: "Hand", street: str) -> None:
+    def _processAction(self, action: re.Match, hand: Hand, street: str) -> None:
         """Processes a single betting action and updates the hand object.
 
         Interprets the action type and delegates to the appropriate hand method to record the action for the specified street.
@@ -1819,7 +1819,7 @@ class PokerStars(HandHistoryConverter):
         else:
             log.debug("Unimplemented readAction: %r %r", pname, atype)
 
-    def _processRaise(self, action: re.Match, hand: "Hand", street: str, pname: str) -> None:
+    def _processRaise(self, action: re.Match, hand: Hand, street: str, pname: str) -> None:
         """Processes a raise action and updates the hand object.
 
         Determines the type of raise (to amount or call and raise) and records it for the specified street and player.
@@ -1838,7 +1838,7 @@ class PokerStars(HandHistoryConverter):
         elif action["BET"] is not None:
             hand.addCallandRaise(street, pname, self.clearMoneyString(action["BET"]))
 
-    def readAction(self, hand: "Hand", street: str) -> None:
+    def readAction(self, hand: Hand, street: str) -> None:
         """Reads and processes betting actions for a given street in the hand.
 
         Extracts and records all player actions for the specified street, including folds, checks, calls, raises, bets, discards, and stands pat. Also detects and handles uncalled bets and walk scenarios.
@@ -1925,7 +1925,7 @@ class PokerStars(HandHistoryConverter):
 
             hand.addUncalled(street, uncalled_player, uncalled_amount)
 
-    def readShowdownActions(self, hand: "Hand") -> None:
+    def readShowdownActions(self, hand: Hand) -> None:
         """Reads showdown actions from the hand text and updates the hand object.
 
         Extracts shown cards for each player at showdown and adds them to the hand object.
@@ -1940,7 +1940,7 @@ class PokerStars(HandHistoryConverter):
             cards = shows.group("CARDS").split(" ")
             hand.addShownCards(cards, shows.group("PNAME"))
 
-    def _processProgressiveBounties(self, hand: "Hand") -> None:
+    def _processProgressiveBounties(self, hand: Hand) -> None:
         """Processes progressive knockout bounties and updates the hand object.
 
         Calculates progressive bounty amounts for each player, sets end bounty values, and updates the hand's progressive status and koCounts.
@@ -1970,7 +1970,7 @@ class PokerStars(HandHistoryConverter):
                 else:
                     hand.koCounts[pname] = amount / Decimal(hand.koBounty)
 
-    def _processRegularBounties(self, hand: "Hand") -> None:
+    def _processRegularBounties(self, hand: Hand) -> None:
         """Processes regular knockout bounties and updates the hand object.
 
         Iterates through bounty matches in the hand text, handling split and single bounties, and updates the koCounts for each player.
@@ -1987,7 +1987,7 @@ class PokerStars(HandHistoryConverter):
             else:
                 self._processSingleBounty(hand, a)
 
-    def _processSplitBounty(self, hand: "Hand", match: re.Match) -> None:
+    def _processSplitBounty(self, hand: Hand, match: re.Match) -> None:
         """Processes split knockout bounties and updates the hand object.
 
         Splits the bounty among multiple players listed in the match and updates their koCounts accordingly.
@@ -2005,7 +2005,7 @@ class PokerStars(HandHistoryConverter):
                 hand.koCounts[pname] = 0
             hand.koCounts[pname] += Decimal("1") / Decimal(len(pnames))
 
-    def _processSingleBounty(self, hand: "Hand", match: re.Match) -> None:
+    def _processSingleBounty(self, hand: Hand, match: re.Match) -> None:
         """Processes a single knockout bounty and updates the hand object.
 
         Increments the koCounts for the player listed in the match to reflect a single bounty win.
@@ -2024,7 +2024,7 @@ class PokerStars(HandHistoryConverter):
 
     def _recordTourneyResult(
         self,
-        hand: "Hand",
+        hand: Hand,
         player_name: str,
         rank: int,
         winnings: Decimal | None = None,
@@ -2042,7 +2042,7 @@ class PokerStars(HandHistoryConverter):
             hand.tourneyWinnings[player_name] = int(winnings * 100)
             hand.tourneyWinningsCurrency[player_name] = winnings_currency or hand.gametype.get("currency")
 
-    def _readTourneyRanks(self, hand: "Hand") -> None:
+    def _readTourneyRanks(self, hand: Hand) -> None:
         """Read PokerStars tournament finish ranks from a hand history."""
         if not isinstance(getattr(hand, "tourneyRanks", None), dict):
             hand.tourneyRanks = {}
@@ -2080,7 +2080,7 @@ class PokerStars(HandHistoryConverter):
             if len(unranked_players) == 1:
                 self._recordTourneyResult(hand, unranked_players[0], 1)
 
-    def readTourneyResults(self, hand: "Hand") -> None:
+    def readTourneyResults(self, hand: Hand) -> None:
         """Reads tournament results and updates bounty information for the hand.
 
         Determines whether the hand contains progressive or regular bounties and processes them accordingly to update player KO counts.
@@ -2097,7 +2097,7 @@ class PokerStars(HandHistoryConverter):
             self._processRegularBounties(hand)
         self._readTourneyRanks(hand)
 
-    def _calculateBovadaAdjustments(self, hand: "Hand") -> tuple[bool, bool, Decimal, Decimal]:
+    def _calculateBovadaAdjustments(self, hand: Hand) -> tuple[bool, bool, Decimal, Decimal]:
         """Calculates Bovada-specific adjustments for pot collection scenarios.
 
         Determines if a hand contains Bovada walk scenarios and calculates necessary adjustments for blinds and pot amounts.
@@ -2131,7 +2131,7 @@ class PokerStars(HandHistoryConverter):
 
     def _addCollectPotWithAdjustment(
         self,
-        hand: "Hand",
+        hand: Hand,
         match: re.Match,
         adjustments: tuple[bool, bool, Decimal, Decimal],
     ) -> None:
@@ -2160,7 +2160,7 @@ class PokerStars(HandHistoryConverter):
 
     def _addCashOutPotWithAdjustment(
         self,
-        hand: "Hand",
+        hand: Hand,
         match: re.Match,
         adjustments: tuple[bool, bool, float, float],
     ) -> None:
@@ -2186,7 +2186,7 @@ class PokerStars(HandHistoryConverter):
         else:
             hand.addCashOutPot(player=player, pot=pot)
 
-    def readCollectPot(self, hand: "Hand") -> None:
+    def readCollectPot(self, hand: Hand) -> None:
         """Reads pot collection information from the hand text and updates the hand object.
 
         Processes all pot collections for the hand, applying Bovada-specific adjustments and handling walk scenarios and cash out fees.
@@ -2263,7 +2263,7 @@ class PokerStars(HandHistoryConverter):
                 self._addCashOutPotWithAdjustment(hand, m, adjustments)
                 i += 1
 
-    def readShownCards(self, hand: "Hand") -> None:
+    def readShownCards(self, hand: Hand) -> None:
         """Reads shown and mucked cards from the hand text and updates the hand object.
 
         Extracts revealed cards for each player, including shown and mucked cards, and adds them to the hand object with appropriate flags.
@@ -2314,7 +2314,7 @@ class PokerStars(HandHistoryConverter):
                     string=string,
                 )
 
-    def _parseRakeAndPot(self, hand: "Hand") -> None:
+    def _parseRakeAndPot(self, hand: Hand) -> None:
         """Parses rake and total pot information from the hand text and updates the hand object.
 
         Searches for explicit rake and pot values in the summary section, parses them, and sets them on the hand object. Marks rake as parsed to avoid recalculation.

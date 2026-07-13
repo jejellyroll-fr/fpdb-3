@@ -181,7 +181,7 @@ class Winamax(HandHistoryConverter):
         r"Seat\s(?P<SEAT>[0-9]+):\s(?P<PNAME>.+?)\s".format(),
     )
 
-    def compilePlayerRegexs(self, hand: "Hand") -> None:
+    def compilePlayerRegexs(self, hand: Hand) -> None:
         """Compile player-specific regex patterns based on players in the hand.
 
         Args:
@@ -391,7 +391,7 @@ class Winamax(HandHistoryConverter):
 
         return info
 
-    def readHandInfo(self, hand: "Hand") -> None:
+    def readHandInfo(self, hand: Hand) -> None:
         """Parse and extract hand information from Winamax hand history text.
 
         Args:
@@ -415,7 +415,7 @@ class Winamax(HandHistoryConverter):
         self._detect_lottery_tournaments(hand, info)
         self._set_mixed_game_type(hand)
 
-    def _process_hand_info_keys(self, hand: "Hand", info: dict) -> None:
+    def _process_hand_info_keys(self, hand: Hand, info: dict) -> None:
         """Processes and dispatches parsed hand info keys to their respective handlers.
 
         This method iterates over the parsed hand information and calls the appropriate handler function for each key.
@@ -452,14 +452,14 @@ class Winamax(HandHistoryConverter):
         }
         return handlers.get(key)
 
-    def _set_mixed_game_type(self, hand: "Hand") -> None:
+    def _set_mixed_game_type(self, hand: Hand) -> None:
         """Set mixed game type if this is a mixed game."""
         if hasattr(hand, "gametype") and hand.gametype.get("mix"):
             hand.mixed = hand.gametype["mix"]
         else:
             hand.mixed = None
 
-    def _parse_datetime(self, hand: "Hand", value: str) -> None:
+    def _parse_datetime(self, hand: Hand, value: str) -> None:
         """Parses and sets the hand's start time from a date-time string.
 
         This function extracts the date and time from the provided string and
@@ -482,7 +482,7 @@ class Winamax(HandHistoryConverter):
             "%Y/%m/%d %H:%M:%S",
         ).replace(tzinfo=datetime.timezone.utc)
 
-    def _parse_hand_id(self, hand: "Hand", info: dict) -> None:
+    def _parse_hand_id(self, hand: Hand, info: dict) -> None:
         """Parses and sets the hand's unique identifier from parsed info.
 
         This function constructs the hand ID using the provided info dictionary and assigns it to the hand object.
@@ -496,7 +496,7 @@ class Winamax(HandHistoryConverter):
         """
         hand.handid = f"{int(info['HID1'][:14])}{int(info['HID2'])}"
 
-    def _parse_table_info(self, hand: "Hand", value: str, info: dict) -> None:
+    def _parse_table_info(self, hand: Hand, value: str, info: dict) -> None:
         """Parses and sets the table information for the hand.
 
         This function assigns the table name and related properties to the hand object based on the parsed information.
@@ -539,7 +539,7 @@ class Winamax(HandHistoryConverter):
             return "WIFP"
         return "EUR" if info["MONEY"] else "play"
 
-    def _process_bounty_info(self, hand: "Hand", info: dict) -> None:
+    def _process_bounty_info(self, hand: Hand, info: dict) -> None:
         """Processes and sets bounty information for tournament hands.
 
         This function updates the hand and info dictionaries to reflect bounty values,
@@ -563,7 +563,7 @@ class Winamax(HandHistoryConverter):
         else:
             hand.isKO = False
 
-    def _parse_buyin_info(self, hand: "Hand", value: str, info: dict) -> None:
+    def _parse_buyin_info(self, hand: Hand, value: str, info: dict) -> None:
         """Parses and sets the buy-in and fee information for tournament hands.
 
         This function processes the buy-in, fee, and currency details from the provided info dictionary and
@@ -614,7 +614,7 @@ class Winamax(HandHistoryConverter):
             if hand.buyin == 0 and hand.fee == 0:
                 hand.buyinCurrency = "FREE"
 
-    def _detect_lottery_tournaments(self, hand: "Hand", info: dict) -> None:
+    def _detect_lottery_tournaments(self, hand: Hand, info: dict) -> None:
         """Detects and marks lottery-style tournaments such as Expresso.
 
         This function checks the tournament name and updates the hand object to indicate
@@ -632,7 +632,7 @@ class Winamax(HandHistoryConverter):
             hand.isLottery = "Expresso" in tourname
             hand.tourneyMultiplier = 1
 
-    def readPlayerStacks(self, hand: "Hand") -> None:
+    def readPlayerStacks(self, hand: Hand) -> None:
         """Parse player stacks from hand text.
 
         Splits hand text at summary section and extracts player information
@@ -691,7 +691,7 @@ class Winamax(HandHistoryConverter):
                 raise FpdbHandPartial(msg)
 
 
-    def markStreets(self, hand: "Hand") -> None:
+    def markStreets(self, hand: Hand) -> None:
         """Identifies and marks the different streets (betting rounds) in the hand history.
 
         This function uses regular expressions to extract the text for each street
@@ -747,7 +747,7 @@ class Winamax(HandHistoryConverter):
     # ['player1name', 'player2name', ...] where player1name is the sb and player2name is bb,
     # addtional players are assumed to post a bb oop
 
-    def readButton(self, hand: "Hand") -> None:
+    def readButton(self, hand: Hand) -> None:
         """Parses and sets the dealer button position for the hand.
 
         This function searches the hand text for the button position and updates the hand object accordingly.
@@ -767,7 +767,7 @@ class Winamax(HandHistoryConverter):
 
     def readCommunityCards(
         self,
-        hand: "Hand",
+        hand: Hand,
         street: str,
     ) -> None:
         """Parses and sets the community cards for the specified street.
@@ -787,7 +787,7 @@ class Winamax(HandHistoryConverter):
             m = self.re_board.search(hand.streets[street])
             hand.setCommunityCards(street, m.group("CARDS").split(" "))
 
-    def readBlinds(self, hand: "Hand") -> None:
+    def readBlinds(self, hand: Hand) -> None:
         """Parses and sets the blinds posted in the hand.
 
         This function extracts small blind, big blind, dead blind,
@@ -829,7 +829,7 @@ class Winamax(HandHistoryConverter):
             else:
                 hand.addBlind(a.group("PNAME"), "secondsb", a.group("SB"))
 
-    def readAntes(self, hand: "Hand") -> None:
+    def readAntes(self, hand: Hand) -> None:
         """Parses and sets the antes posted in the hand.
 
         This function extracts ante postings from the hand text and updates the hand object with each player's ante.
@@ -846,7 +846,7 @@ class Winamax(HandHistoryConverter):
             log.debug("hand add Ante(%s,%s)", player.group("PNAME"), player.group("ANTE"))
             hand.addAnte(player.group("PNAME"), player.group("ANTE"))
 
-    def readBringIn(self, hand: "Hand") -> None:
+    def readBringIn(self, hand: Hand) -> None:
         """Parses and sets the bring-in bet for stud games.
 
         This function searches the hand text for a bring-in posting and
@@ -862,7 +862,7 @@ class Winamax(HandHistoryConverter):
             log.debug("read BringIn: %s for %s", m.group("PNAME"), m.group("BRINGIN"))
             hand.addBringIn(m.group("PNAME"), m.group("BRINGIN"))
 
-    def readSTP(self, hand: "Hand") -> None:
+    def readSTP(self, hand: Hand) -> None:
         """Parses and sets special tournament pot (STP) or bomb pot amounts.
 
         This function searches the hand text for STP or bomb pot amounts and
@@ -881,7 +881,7 @@ class Winamax(HandHistoryConverter):
             # Store bomb pot amount in dedicated field
             hand.bombPot = int(Decimal(m.group("AMOUNT")) * 100)  # Convert to cents
 
-    def readHoleCards(self, hand: "Hand") -> None:
+    def readHoleCards(self, hand: Hand) -> None:
         """Read and parse hole cards for all players from hand history.
 
         Processes hero cards from PREFLOP/DEAL/BLINDSANTES streets and other players'
@@ -893,7 +893,7 @@ class Winamax(HandHistoryConverter):
         self._process_hero_streets(hand)
         self._process_other_streets(hand)
 
-    def _process_hero_streets(self, hand: "Hand") -> None:
+    def _process_hero_streets(self, hand: Hand) -> None:
         """Processes and adds hero hole cards from the initial streets.
 
         This function iterates through the preflop, deal, and blinds/antes streets
@@ -913,7 +913,7 @@ class Winamax(HandHistoryConverter):
                         hand.hero = found.group("PNAME")
                         self._add_hero_hole_cards(hand, street, newcards)
 
-    def _add_hero_hole_cards(self, hand: "Hand", street: str, newcards: list[str]) -> None:
+    def _add_hero_hole_cards(self, hand: Hand, street: str, newcards: list[str]) -> None:
         """Adds the hero's hole cards for a given street to the hand object.
 
         This function updates the hand with the hero's hole cards, marking them as dealt and not shown or mucked.
@@ -943,7 +943,7 @@ class Winamax(HandHistoryConverter):
         )
         log.debug("Hero cards %s: %s", hand.hero, newcards)
 
-    def _process_other_streets(self, hand: "Hand") -> None:
+    def _process_other_streets(self, hand: Hand) -> None:
         """Processes and adds player hole cards from streets other than the initial ones.
 
         This function iterates through all streets except PREFLOP, DEAL, and BLINDSANTES,
@@ -962,7 +962,7 @@ class Winamax(HandHistoryConverter):
             for found in m:
                 self._process_player_cards(hand, street, found)
 
-    def _process_player_cards(self, hand: "Hand", street: str, found: Match[str]) -> None:
+    def _process_player_cards(self, hand: Hand, street: str, found: Match[str]) -> None:
         """Processes and adds a player's hole cards for a given street.
 
         This function extracts new and old cards for a player from the match object and
@@ -1001,7 +1001,7 @@ class Winamax(HandHistoryConverter):
             return []
         return [c for c in cards_str.split(" ") if c != "X"]
 
-    def _add_stud_hero_cards(self, hand: "Hand", street: str, player: str, newcards: list[str]) -> None:
+    def _add_stud_hero_cards(self, hand: Hand, street: str, player: str, newcards: list[str]) -> None:
         """Adds the hero's hole cards for stud games on the THIRD street.
 
         This function sets the hero, marks the player as dealt,
@@ -1030,7 +1030,7 @@ class Winamax(HandHistoryConverter):
 
     def _add_regular_hole_cards(
         self,
-        hand: "Hand",
+        hand: Hand,
         street: str,
         player: str,
         newcards: list[str],
@@ -1061,7 +1061,7 @@ class Winamax(HandHistoryConverter):
             dealt=False,
         )
 
-    def readAction(self, hand: "Hand", street: str) -> None:
+    def readAction(self, hand: Hand, street: str) -> None:
         """Parses and processes all player actions for a given street.
 
         This function iterates through the actions in the specified street, determines the action type and player,
@@ -1090,7 +1090,7 @@ class Winamax(HandHistoryConverter):
 
     def _process_action(
         self,
-        hand: "Hand",
+        hand: Hand,
         street: str,
         action_type: str,
         player_name: str,
@@ -1137,7 +1137,7 @@ class Winamax(HandHistoryConverter):
                 action_type,
             )
 
-    def _process_raise_action(self, hand: "Hand", street: str, player_name: str, action: Match[str]) -> None:
+    def _process_raise_action(self, hand: Hand, street: str, player_name: str, action: Match[str]) -> None:
         """Processes a raise action for a given street and player.
 
         This function checks for a bring-in amount and adds it to the raise-to amount if present,
@@ -1158,7 +1158,7 @@ class Winamax(HandHistoryConverter):
             betto = action.group("BETTO")
         hand.addRaiseTo(street, player_name, betto)
 
-    def _process_bet_action(self, hand: "Hand", street: str, player_name: str, action: re.Match[str]) -> None:
+    def _process_bet_action(self, hand: Hand, street: str, player_name: str, action: re.Match[str]) -> None:
         """Processes a bet action for a given street and player.
 
         This function determines whether the bet should be treated as a raise or a standard bet based on the street,
@@ -1178,7 +1178,7 @@ class Winamax(HandHistoryConverter):
         else:
             hand.addBet(street, player_name, action.group("BET"))
 
-    def readShowdownActions(self, hand: "Hand") -> None:
+    def readShowdownActions(self, hand: Hand) -> None:
         """Parses and processes all showdown actions in the hand.
 
         This function extracts shown cards for each player at showdown and updates the hand object accordingly.
@@ -1196,7 +1196,7 @@ class Winamax(HandHistoryConverter):
             log.debug("add Shown Cards(%s, %s)", cards, shows.group("PNAME"))
             hand.addShownCards(cards, shows.group("PNAME"))
 
-    def readCollectPot(self, hand: "Hand") -> None:
+    def readCollectPot(self, hand: Hand) -> None:
         """Parses and processes all pot collection actions in the hand.
 
         This function identifies players who collect pots and updates the hand object with the collected amounts.
@@ -1211,7 +1211,7 @@ class Winamax(HandHistoryConverter):
         for m in self.re_collect_pot.finditer(hand.handText):
             hand.addCollectPot(player=m.group("PNAME"), pot=m.group("POT"))
 
-    def readShownCards(self, hand: "Hand") -> None:
+    def readShownCards(self, hand: Hand) -> None:
         """Parses and processes all shown cards in the hand.
 
         This function extracts shown cards for each player from the hand text and updates the hand object,
@@ -1248,7 +1248,7 @@ class Winamax(HandHistoryConverter):
         log.info("Reading summary info for Winamax.")
         return True
 
-    def readTourneyResults(self, hand: "Hand") -> None:  # noqa: ARG002
+    def readTourneyResults(self, hand: Hand) -> None:  # noqa: ARG002
         """Implement the abstract method from HandHistoryConverter."""
         # Add the actual implementation here, or use a placeholder if not needed
         log.info("Reading tournay result info for Winamax.")
@@ -1294,7 +1294,7 @@ class Winamax(HandHistoryConverter):
         log.info("Winamax.getTableTitleRe: returns: '%s'", regex)
         return regex
 
-    def readOther(self, hand: "Hand") -> None:
+    def readOther(self, hand: Hand) -> None:
         """Read other information from hand that doesn't fit standard categories.
 
         Args:
