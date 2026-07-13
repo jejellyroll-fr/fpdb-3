@@ -10,7 +10,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from decimal import Decimal
 from importlib import import_module
-from typing import Protocol
+from typing import Any, Protocol
 
 COMMUNITY_CARD_GAMES = frozenset(
     {"holdem", "holdem8", "omaha", "omaha8", "omaha5", "omaha5_8", "omaha6", "shortdeck"}
@@ -23,6 +23,12 @@ class EquityUnavailableError(RuntimeError):
 
 class PokerEvalBackend(Protocol):
     def poker_eval(self, **kwargs) -> dict: ...
+
+    def best(self, *args: Any, **kwargs: Any) -> Any: ...
+
+    def card2string(self, card: Any) -> str: ...
+
+    def winners(self, **kwargs: Any) -> dict: ...
 
 
 @dataclass(frozen=True)
