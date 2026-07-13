@@ -118,6 +118,10 @@ class Dialect:
         """Bring one identity sequence in sync with its table (no-op by default)."""
         return
 
+    def repair_sequences(self, db: Any) -> None:
+        """Repair every owned identity sequence (no-op by default)."""
+        return
+
 
 class SqliteDialect(Dialect):
     name = "sqlite"
@@ -264,6 +268,20 @@ class PostgresDialect(Dialect):
                 f"SELECT setval(%s, COALESCE((SELECT MAX(id) FROM {quoted_table}), 0) + 1, false)",
                 (sequence,),
             )
+
+    def repair_sequences(self, db: Any) -> None:
+        """Repair all fpdb ``id`` sequences after an explicit-id migration."""
+        cursor = db.get_cursor()
+        cursor.execute(
+            """SELECT table_name
+               FROM information_schema.columns
+               WHERE table_schema = current_schema()
+                 AND column_name = 'id'
+                 AND column_default LIKE 'nextval(%'
+               ORDER BY table_name""",
+        )
+        for (table,) in cursor.fetchall():
+            self.repair_sequence(db, table)
 
 
 _DIALECTS: dict[int, Dialect] = {
