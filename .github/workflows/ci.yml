@@ -37,6 +37,7 @@ jobs:
           fpdb_3_legacy/i18n.py
           fpdb_3_legacy/i18n_compile.py
           fpdb_3_legacy/ConfigInitializer.py
+          fpdb_3_legacy/ConfigReloadWidget.py
           fpdb_3_legacy/Configuration.py
           fpdb_3_legacy/ConfigurationManager.py
           fpdb_3_legacy/Filters.py
