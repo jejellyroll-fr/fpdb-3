@@ -178,7 +178,7 @@ class ClassicStat(Aux_Hud.SimpleStat):
     def __init__(
         self,
         stat: str,
-        seat: int,
+        seat: int | str,
         popup: Any,
         aw: Any,
         colors: dict | None = None,
@@ -306,7 +306,7 @@ class ClassicStat(Aux_Hud.SimpleStat):
             int | None: The player ID if found, otherwise None.
         """
         return next(
-            (player_id_ for player_id_, data in self.stat_dict.items() if data["seat"] == self.lab.aw_seat), None
+            (player_id_ for player_id_, data in (self.stat_dict or {}).items() if data["seat"] == self.lab.aw_seat), None
         )
 
     def get_player_name(self, player_id: int) -> str:
@@ -415,7 +415,7 @@ class ClassicStat(Aux_Hud.SimpleStat):
         finally:
             db.close_connection()
 
-    def update(self, player_id: int, stat_dict: dict) -> bool | None:
+    def update(self, player_id: int | str | None, stat_dict: dict) -> None:
         """Updates the display of the statistic for a given player.
 
         This method refreshes the statistic's value, color,
@@ -426,12 +426,12 @@ class ClassicStat(Aux_Hud.SimpleStat):
             stat_dict: A dictionary containing statistics for all players.
 
         Returns:
-            bool | None: Returns False if the stat was not created, otherwise None.
+            None.
         """
         super().update(player_id, stat_dict)
 
         if not self.number:  # stat did not create, so exit now
-            return False
+            return
 
         fg = self.hudcolor
 
@@ -491,7 +491,7 @@ class ClassicStat(Aux_Hud.SimpleStat):
 
         # Special handling for player_note stat - change color based on notes
         elif self.stat == "player_note":
-            if self.has_comment(player_id):
+            if isinstance(player_id, int) and self.has_comment(player_id):
                 # Orange/yellow color when notes exist
                 statstring = f'<span style="color: #FFA500; font-size: 16px;">{self.number[1]}</span>'
             else:
