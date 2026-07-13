@@ -16,6 +16,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 
 import fpdb_3_legacy.Configuration as Configuration
 from fpdb_3_legacy.IdentifySite import IdentifySite, import_fpdb_module
+from fpdb_3_legacy.parser_registry import get_parser_class, get_summary_class
 
 
 def test_import_fpdb_module_resolves_converter() -> None:
@@ -32,6 +33,23 @@ def test_import_fpdb_module_resolves_summary() -> None:
 def test_import_fpdb_module_unknown_raises() -> None:
     with pytest.raises(ModuleNotFoundError):
         import_fpdb_module("DefinitelyNotAConverter")
+
+
+def test_import_fpdb_module_rejects_non_module_names() -> None:
+    with pytest.raises(ModuleNotFoundError, match="Unsupported fpdb module name"):
+        import_fpdb_module("../PokerStarsToFpdb")
+
+
+def test_typed_registries_resolve_parser_and_summary_classes() -> None:
+    assert get_parser_class("PokerStars").__name__ == "PokerStars"
+    assert get_summary_class("BovadaSummary").__name__ == "BovadaSummary"
+
+
+def test_typed_registries_report_unknown_names() -> None:
+    with pytest.raises(KeyError, match="Unknown parser filter_name"):
+        get_parser_class("MissingRoom")
+    with pytest.raises(KeyError, match="Unknown summary importer"):
+        get_summary_class("MissingSummary")
 
 
 def test_identify_site_loads_converters() -> None:

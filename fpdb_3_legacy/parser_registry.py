@@ -3,7 +3,9 @@ from __future__ import annotations
 
 import importlib
 import re
+from collections.abc import Mapping
 from functools import cache
+from types import ModuleType
 
 from fpdb_3_legacy.AbsoluteToFpdb import Absolute
 from fpdb_3_legacy.BetfairToFpdb import Betfair
@@ -19,6 +21,7 @@ from fpdb_3_legacy.EverleafToFpdb import Everleaf
 from fpdb_3_legacy.FullTiltPokerSummary import FullTiltPokerSummary
 from fpdb_3_legacy.FulltiltToFpdb import Fulltilt
 from fpdb_3_legacy.GGPokerToFpdb import GGPoker
+from fpdb_3_legacy.HandHistoryConverter import HandHistoryConverter
 from fpdb_3_legacy.iPokerSummary import iPokerSummary
 from fpdb_3_legacy.iPokerToFpdb import iPoker
 from fpdb_3_legacy.KingsClubToFpdb import KingsClub
@@ -43,7 +46,7 @@ from fpdb_3_legacy.WinamaxToFpdb import Winamax
 from fpdb_3_legacy.WinningSummary import WinningSummary
 from fpdb_3_legacy.WinningToFpdb import Winning
 
-LEGACY_MODULE_REGISTRY = {
+LEGACY_MODULE_REGISTRY: dict[str, str] = {
     "AbsoluteToFpdb": "fpdb_3_legacy.AbsoluteToFpdb",
     "BetfairToFpdb": "fpdb_3_legacy.BetfairToFpdb",
     "BetOnlineToFpdb": "fpdb_3_legacy.BetOnlineToFpdb",
@@ -83,7 +86,7 @@ LEGACY_MODULE_REGISTRY = {
     "iPokerToFpdb": "fpdb_3_legacy.iPokerToFpdb",
 }
 
-PARSER_CLASS_REGISTRY = {
+PARSER_CLASS_REGISTRY: dict[str, type[HandHistoryConverter]] = {
     "Absolute": Absolute,
     "BetOnline": BetOnline,
     "Betfair": Betfair,
@@ -112,7 +115,7 @@ PARSER_CLASS_REGISTRY = {
     "iPoker": iPoker,
 }
 
-SUMMARY_CLASS_REGISTRY = {
+SUMMARY_CLASS_REGISTRY: dict[str, type[TourneySummary]] = {
     "BovadaSummary": BovadaSummary,
     "FullTiltPokerSummary": FullTiltPokerSummary,
     "MergeSummary": MergeSummary,
@@ -129,18 +132,18 @@ SUMMARY_CLASS_REGISTRY = {
 _VALID_LEGACY_MODULE_NAME = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 
 
-def _unknown_key(kind: str, name: str, known: dict[str, type]) -> KeyError:
+def _unknown_key(kind: str, name: str, known: Mapping[str, object]) -> KeyError:
     return KeyError(f"Unknown {kind} '{name}'. Known values: {', '.join(sorted(known))}")
 
 
-def get_parser_class(filter_name: str) -> type:
+def get_parser_class(filter_name: str) -> type[HandHistoryConverter]:
     try:
         return PARSER_CLASS_REGISTRY[filter_name]
     except KeyError:
         raise _unknown_key("parser filter_name", filter_name, PARSER_CLASS_REGISTRY) from None
 
 
-def get_summary_class(summary_name: str) -> type:
+def get_summary_class(summary_name: str) -> type[TourneySummary]:
     try:
         return SUMMARY_CLASS_REGISTRY[summary_name]
     except KeyError:
@@ -148,7 +151,7 @@ def get_summary_class(summary_name: str) -> type:
 
 
 @cache
-def import_fpdb_module(name: str):
+def import_fpdb_module(name: str) -> ModuleType:
     """Compatibility loader for scripts that still expect module objects."""
     if not _VALID_LEGACY_MODULE_NAME.fullmatch(name):
         exc = ModuleNotFoundError(f"Unsupported fpdb module name: {name!r}")
