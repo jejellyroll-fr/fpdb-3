@@ -3,7 +3,7 @@ from __future__ import annotations
 import decimal
 import re
 from decimal import Decimal, InvalidOperation
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from fpdb_3_legacy.loggingFpdb import get_logger
 
@@ -13,6 +13,13 @@ log = get_logger("ipoker_parser")
 class IPokerTournamentResultsMixin:
     """Tournament result parsing helpers for iPoker hand histories."""
 
+    if TYPE_CHECKING:
+
+        def _clean_currency_amount(self, amount_str: str) -> str: ...
+
+        @staticmethod
+        def clearMoneyString(money: str) -> str: ...
+
     def _initialize_tournament_data(self, hand: Any) -> None:
         """Initialize tournament data structures."""
         hand.winnings = {}
@@ -21,9 +28,9 @@ class IPokerTournamentResultsMixin:
         hand.isProgressive = False
         log.debug("Initialized tournament data structures method: iPoker:readTourneyResults, is_progressive: False")
 
-    def _parse_tournament_data(self, hand_text: str) -> dict:  # noqa: C901, PLR0912, PLR0915
+    def _parse_tournament_data(self, hand_text: str) -> dict[str, Any]:  # noqa: C901, PLR0912, PLR0915
         """Parse tournament data from hand text."""
-        tournament_data = {
+        tournament_data: dict[str, Any] = {
             "buyin_amount": Decimal(0),
             "fee_amount": Decimal(0),
             "totbuyin_amount": Decimal(0),
@@ -154,7 +161,7 @@ class IPokerTournamentResultsMixin:
         self._validate_tournament_data(tournament_data)
         return tournament_data
 
-    def _extract_tournament_data_from_match(self, mg: dict, tournament_data: dict) -> None:
+    def _extract_tournament_data_from_match(self, mg: dict[str, Any], tournament_data: dict[str, Any]) -> None:
         """Extract tournament data from regex match."""
         if mg.get("TOURNO"):
             tournament_data["tourno"] = mg["TOURNO"]
@@ -172,7 +179,7 @@ class IPokerTournamentResultsMixin:
         self._process_fee_amounts(mg, tournament_data)
         self._process_total_buyin(mg, tournament_data)
 
-    def _process_buyin_amount(self, mg: dict, tournament_data: dict) -> None:
+    def _process_buyin_amount(self, mg: dict[str, Any], tournament_data: dict[str, Any]) -> None:
         """Process buy-in amount from match groups."""
         if mg.get("BIAMT"):
             amt_str = mg["BIAMT"].strip()
@@ -190,7 +197,7 @@ class IPokerTournamentResultsMixin:
                 log.exception("Failed to convert BIAMT to Decimal: %s", amt_str)
                 tournament_data["buyin_amount"] = Decimal(0)
 
-    def _process_fee_amounts(self, mg: dict, tournament_data: dict) -> None:
+    def _process_fee_amounts(self, mg: dict[str, Any], tournament_data: dict[str, Any]) -> None:
         """Process fee amounts (BIRAKE and BIRAKE2) from match groups."""
         if mg.get("BIRAKE"):
             rake_str = mg["BIRAKE"].strip().replace(",", ".")
@@ -212,7 +219,7 @@ class IPokerTournamentResultsMixin:
             except InvalidOperation:
                 log.exception("Failed to convert BIRAKE2 to Decimal: %s", rake2_str)
 
-    def _process_total_buyin(self, mg: dict, tournament_data: dict) -> None:
+    def _process_total_buyin(self, mg: dict[str, Any], tournament_data: dict[str, Any]) -> None:
         """Process total buy-in amount from match groups."""
         if mg.get("TOTBUYIN"):
             totbuy_str = mg["TOTBUYIN"].strip().replace(",", ".")
@@ -224,7 +231,7 @@ class IPokerTournamentResultsMixin:
             except InvalidOperation:
                 log.exception("Failed to convert TOTBUYIN to Decimal: %s", totbuy_str)
 
-    def _validate_tournament_data(self, tournament_data: dict) -> None:
+    def _validate_tournament_data(self, tournament_data: dict[str, Any]) -> None:
         """Validate and adjust tournament data."""
         if (
             tournament_data["totbuyin_amount"] > 0
@@ -235,7 +242,7 @@ class IPokerTournamentResultsMixin:
             tournament_data["fee_amount"] = Decimal(0)
             log.debug("Using TOTBUYIN as buy-in amount since BIAMT and fees were missing.")
 
-    def _set_tournament_attributes(self, tournament_data: dict, hand: Any) -> None:
+    def _set_tournament_attributes(self, tournament_data: dict[str, Any], hand: Any) -> None:
         """Set tournament attributes from parsed data."""
         hand.tourNo = tournament_data["tourno"]
         hand.buyin = int(tournament_data["buyin_amount"] * 100)
