@@ -17,6 +17,7 @@ from __future__ import annotations
 import glob
 import os
 import sys
+from decimal import Decimal
 
 import pytest
 
@@ -61,6 +62,23 @@ def test_cash_files_not_detected_as_tour(config, filepath):
     """Ring games must not be promoted to tournaments by the relaxed check."""
     game_type, _ = _detect_type(config, filepath)
     assert game_type != "tour", f"{os.path.basename(filepath)} wrongly detected as tour"
+
+
+def test_tournament_results_keep_decimal_multiplier(config) -> None:
+    parser = iPoker(config, autostart=False)
+    parser.whole_file = """
+<tournamentcode>826763510</tournamentcode>
+<tournamentname>Twister 0.20€</tournamentname>
+<buyin>0,20€</buyin>
+<rewarddrawn>0,80€</rewarddrawn>
+<win>1,20€</win>
+"""
+
+    result = parser._parse_tournament_data(parser.whole_file)
+
+    assert result["buyin_amount"] == Decimal("0.20")
+    assert result["hero_winnings"] == Decimal("1.20")
+    assert result["multiplier"] == Decimal("4")
 
 
 if __name__ == "__main__":
