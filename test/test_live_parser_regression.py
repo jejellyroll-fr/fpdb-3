@@ -17,6 +17,7 @@ from fpdb_3_legacy.EverleafToFpdb import Everleaf
 from fpdb_3_legacy.GGPokerToFpdb import GGPoker
 from fpdb_3_legacy.iPoker.base import iPoker
 from fpdb_3_legacy.KingsClubToFpdb import KingsClub
+from fpdb_3_legacy.MicrogamingToFpdb import Microgaming
 from fpdb_3_legacy.PacificPokerToFpdb import PacificPoker
 from fpdb_3_legacy.PartyPokerToFpdb import PartyPoker
 from fpdb_3_legacy.PokerStarsToFpdb import PokerStars
@@ -79,6 +80,13 @@ CASES.append(
         "everleaf/Stud/7-Stud-EUR-0.05-0.10.201108-new-format.txt",
         Everleaf,
         REGRESSION_FILES / "Everleaf" / "Stud" / "7-Stud-EUR-0.05-0.10.201108-new-format.txt",
+    )
+)
+CASES.append(
+    (
+        "microgaming/Flop/PLO-6max-EUR-5-10-201603.v5.secondsb.raised.txt",
+        Microgaming,
+        REGRESSION_FILES / "Microgaming" / "Flop" / "PLO-6max-EUR-5-10-201603.v5.secondsb.raised.txt",
     )
 )
 CASES += [

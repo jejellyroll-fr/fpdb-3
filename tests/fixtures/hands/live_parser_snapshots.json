@@ -21,6 +21,7 @@
   "ipoker/Flop/6+Holdem-EUR-0.25-0.50-201702.txt": {"hand_count": 1, "sha256": "c001d667ad5a1859d9f8bebc2046d0cb837046ead5605b71f558aa6367a17ab2"},
   "kingclub/5card_plo.txt": {"hand_count": 1, "sha256": "d2cf7c00bdfe2b6a339f5138cdb46c3850237da212d465fbff5c79cf2317c468"},
   "kingclub/nlhe.txt": {"hand_count": 1, "sha256": "0f2b0815aa7b0d1aaaaa8db751dc88e069b52a587cbcb79aa685f29783b6b408"},
+  "microgaming/Flop/PLO-6max-EUR-5-10-201603.v5.secondsb.raised.txt": {"hand_count": 1, "sha256": "4f4623d7be4df67d960fc4e6627f90ebe311dd43071a68c75202c9879db5cb2f"},
   "pacific/blast_forced_allin.txt": {"hand_count": 1, "sha256": "6ba9a7656caa3efb87456f5b7d23be083f7e4f782ea9881e256fd786b8a34af4"},
   "pacific/blast_normal.txt": {"hand_count": 1, "sha256": "de9cc5fd0410fc2e1071ba85dd0fc49ec4277f2c65afcc1ae1db64247674028d"},
   "pacific/jackpot_table.txt": {"hand_count": 1, "sha256": "5a957cfb4b9c1b1ef3b24570ac8bb3d9f447411d07222f674846deb370a4078c"},
