@@ -11,6 +11,7 @@ from fpdb_3_legacy.BetOnlineToFpdb import BetOnline
 from fpdb_3_legacy.BovadaToFpdb import Bovada
 from fpdb_3_legacy.CakeToFpdb import Cake
 from fpdb_3_legacy.Configuration import Config
+from fpdb_3_legacy.EntractionToFpdb import Entraction
 from fpdb_3_legacy.GGPokerToFpdb import GGPoker
 from fpdb_3_legacy.iPoker.base import iPoker
 from fpdb_3_legacy.KingsClubToFpdb import KingsClub
@@ -57,6 +58,13 @@ CASES += [
     (f"betonline/{path.relative_to(REGRESSION_FILES / 'BetOnline').as_posix()}", BetOnline, path)
     for path in sorted((REGRESSION_FILES / "BetOnline").rglob("*.txt"))
 ]
+CASES.append(
+    (
+        "entraction/Flop/LHE-HU-EUR-10-20-201103.txt",
+        Entraction,
+        REGRESSION_FILES / "Entraction" / "Flop" / "LHE-HU-EUR-10-20-201103.txt",
+    )
+)
 CASES += [
     (f"swc/{path.relative_to(REGRESSION_FILES / 'SealsWithClubs').as_posix()}", SealsWithClubs, path)
     for path in sorted((REGRESSION_FILES / "SealsWithClubs").rglob("*.txt"))
