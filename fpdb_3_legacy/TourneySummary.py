@@ -17,6 +17,7 @@ from __future__ import annotations
 # import L10n
 # _ = L10n.get_translation()
 # TODO: check to keep only the needed modules
+import datetime
 import pprint
 import re
 import sys
@@ -119,23 +120,23 @@ class TourneySummary:
         self.header = header
 
         self.summaryText = summaryText
-        self.tourneyName = None
-        self.tourneyTypeId = None
-        self.tourneyId = None
-        self.startTime = None
-        self.endTime = None
-        self.tourNo = None
-        self.currency = None
-        self.buyinCurrency = None
+        self.tourneyName: str | None = None
+        self.tourneyTypeId: int | None = None
+        self.tourneyId: int | None = None
+        self.startTime: datetime.datetime | None = None
+        self.endTime: datetime.datetime | None = None
+        self.tourNo: str | None = None
+        self.currency: str | None = None
+        self.buyinCurrency: str | None = None
         self.buyin = 0
         self.fee = 0
-        self.hero = None
+        self.hero: str | None = None
         self.maxseats = 0
         self.entries = 0
         self.speed = "Normal"
         self.prizepool = 0  # Make it a dict in order to deal (eventually later) with non-money winnings : {'MONEY' : amount, 'OTHER' : Value ??}
         self.buyInChips = 0
-        self.mixed = None
+        self.mixed: str | None = None
         self.isRebuy = False
         self.isAddOn = False
         self.isKO = False
@@ -143,12 +144,12 @@ class TourneySummary:
         self.isMatrix = False
         self.isShootout = False
         self.isFast = False
-        self.rebuyChips = None
-        self.addOnChips = None
+        self.rebuyChips: int | None = None
+        self.addOnChips: int | None = None
         self.rebuyCost = 0
         self.addOnCost = 0
-        self.totalRebuyCount = None
-        self.totalAddOnCount = None
+        self.totalRebuyCount: int | None = None
+        self.totalAddOnCount: int | None = None
         self.koBounty = 0
         self.isSng = False
         self.stack = "Regular"
@@ -171,14 +172,14 @@ class TourneySummary:
         self.isFlighted = False
         self.isGuarantee = False
         self.guaranteeAmt = 0
-        self.added = None
-        self.addedCurrency = None
+        self.added: int | None = None
+        self.addedCurrency: str | None = None
         self.isLottery = False
         self.tourneyMultiplier = 1
-        self.gametype = {"category": None, "limitType": None, "mix": "none"}
+        self.gametype: dict[str, str | None] = {"category": None, "limitType": None, "mix": "none"}
         self.players: dict[str, list[int]] = {}
-        self.comment = None
-        self.commentTs = None
+        self.comment: str | None = None
+        self.commentTs: datetime.datetime | None = None
 
         # Collections indexed by player names
         self.playerIds: dict[str, int] = {}
@@ -189,9 +190,6 @@ class TourneySummary:
         self.rebuyCounts: dict[str, list[int | None]] = {}
         self.addOnCounts: dict[str, list[int | None]] = {}
         self.koCounts: dict[str, list[int | None]] = {}
-
-        # currency symbol for this summary
-        self.sym = None
 
         if builtFrom == "IMAP":
             # Fix line endings?

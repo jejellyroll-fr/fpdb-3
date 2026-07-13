@@ -134,8 +134,9 @@ class WinningSummary(TourneySummary):
     def parseSummaryArchive(self, info: dict[str, Any]) -> None:  # noqa: PLR0912, PLR0915, C901
         """Parse tournament archive information."""
         if "TOURNAME" in info and info["TOURNAME"] is not None:
-            self.tourneyName = info["TOURNAME"]
-            m3 = self.re_html_tourney_extra_info.search(self.tourneyName)
+            tourney_name = info["TOURNAME"]
+            self.tourneyName = tourney_name
+            m3 = self.re_html_tourney_extra_info.search(tourney_name)
             if m3 is not None:
                 info.update(m3.groupdict())
 
@@ -183,13 +184,14 @@ class WinningSummary(TourneySummary):
             self.speed = self.speeds[info["SPEED"]]
             self.isSng = True
 
-        if "On Demand" in self.tourneyName:
+        tourney_name = self.tourneyName or ""
+        if "On Demand" in tourney_name:
             self.isOnDemand = True
 
-        if " KO" in self.tourneyName or "Knockout" in self.tourneyName:
+        if " KO" in tourney_name or "Knockout" in tourney_name:
             self.isKO = True
 
-        if "R/A" in self.tourneyName:
+        if "R/A" in tourney_name:
             self.isRebuy = True
             self.isAddOn = True
             self.addOnCost = self.buyin

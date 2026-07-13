@@ -129,8 +129,8 @@ class PacificPokerSummary(TourneySummary):
                 else:
                     self.fee = int(100 * self.convert_to_decimal(mg["BIRAKE"]))
 
-        self.entries = mg["ENTRIES"]
-        self.prizepool = self.buyin * int(self.entries)
+        self.entries = int(mg["ENTRIES"])
+        self.prizepool = self.buyin * self.entries
         if "REBUYAMT" in mg and mg["REBUYAMT"] is not None:
             self.isRebuy = True
             self.rebuyCost = int(100 * self.convert_to_decimal(mg["REBUYAMT"]))
