@@ -1746,14 +1746,15 @@ def test_summarize_generated_notes_by_rule_set_sorts_by_count_then_rule_set_id()
             {"ruleId": "holdem_cash_001"},
             {"ruleId": "hwang_plo_081"},
             {"ruleId": "unknown_rule"},
+            {},
         ],
     )
 
     assert summary == [
         {"ruleSet": "hwang_plo_preflop", "count": 2},
+        {"ruleSet": "unknown", "count": 2},
         {"ruleSet": "holdem_cash_preflop", "count": 1},
         {"ruleSet": "manual_override", "count": 1},
-        {"ruleSet": "unknown", "count": 1},
     ]
 
 

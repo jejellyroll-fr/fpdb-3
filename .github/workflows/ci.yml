@@ -47,6 +47,10 @@ jobs:
           fpdb_3_legacy/http_capture_replay.py
           fpdb_3_legacy/http_capture_analyze.py
           fpdb_3_legacy/swc_http_capture.py
+          fpdb_3_legacy/stat_adapters.py
+          fpdb_3_legacy/AutoNoteRules.py
+          fpdb_3_legacy/AutoNotes.py
+          fpdb_3_legacy/PlayerProfiler.py
       - name: Lint newly modernized modules
         run: >-
           ruff check
