@@ -4921,3 +4921,98 @@ msgstr "Tout désélectionner"
 
 msgid "Clear All"
 msgstr "Tout effacer"
+
+# --- Vague 2: replayer, auto-notes workbench, HUD popups ---
+
+msgid "FPDB Hand Replayer"
+msgstr "Rejoueur de mains FPDB"
+
+msgid "Prev"
+msgstr "Préc."
+
+msgid "Previous action"
+msgstr "Action précédente"
+
+msgid "Start"
+msgstr "Début"
+
+msgid "End"
+msgstr "Fin"
+
+msgid "Play"
+msgstr "Lecture"
+
+msgid "Next"
+msgstr "Suiv."
+
+msgid "Next action"
+msgstr "Action suivante"
+
+msgid "Hide Cards"
+msgstr "Masquer les cartes"
+
+msgid "Deck:"
+msgstr "Jeu de cartes :"
+
+msgid "Card deck"
+msgstr "Jeu de cartes"
+
+msgid "Current card deck preview"
+msgstr "Aperçu du jeu de cartes actuel"
+
+msgid "Run"
+msgstr "Exécuter"
+
+msgid "Player Notes"
+msgstr "Notes joueur"
+
+msgid "Pool"
+msgstr "Pool"
+
+msgid "Hand-history source"
+msgstr "Source d'historique de mains"
+
+msgid "Folder"
+msgstr "Dossier"
+
+msgid "Rule set"
+msgstr "Jeu de règles"
+
+msgid "Dry Run"
+msgstr "Simulation"
+
+msgid "Write Notes"
+msgstr "Écrire les notes"
+
+msgid "Database hands"
+msgstr "Mains de la base"
+
+msgid "Dry Run DB"
+msgstr "Simulation (base)"
+
+msgid "Write DB Notes"
+msgstr "Écrire les notes (base)"
+
+msgid "Idle"
+msgstr "Inactif"
+
+msgid "Search"
+msgstr "Rechercher"
+
+msgid "Load Notes"
+msgstr "Charger les notes"
+
+msgid "Notes: 0"
+msgstr "Notes : 0"
+
+msgid "Top rule: -"
+msgstr "Règle principale : -"
+
+msgid "Latest: -"
+msgstr "Dernière : -"
+
+msgid "HUD - stats"
+msgstr "HUD - stats"
+
+msgid "Stat Set (HUD):"
+msgstr "Jeu de stats (HUD) :"
