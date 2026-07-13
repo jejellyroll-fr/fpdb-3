@@ -124,7 +124,9 @@ class TestHudCacheQuerySync:
 
     def setup_method(self) -> None:
         self.sql = SQL.Sql(db_server="sqlite")
-        self.n_keys = len(Database.CACHE_KEYS)
+        # HudCache has the shared CACHE_KEYS plus its own HUDCACHE_EXTRA_KEYS
+        # (turn delayed-cbet / probe), appended after the CACHE_KEYS values.
+        self.n_keys = len(Database.CACHE_KEYS) + len(Database.HUDCACHE_EXTRA_KEYS)
 
     def test_insert_hudcache_columns_match_values(self) -> None:
         query = self.sql.query["insert_hudcache"]
