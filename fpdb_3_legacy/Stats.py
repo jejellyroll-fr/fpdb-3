@@ -2235,6 +2235,99 @@ def squeeze(stat_dict, player):
         return (stat, "NA", "SQZ=NA", "SQZ_pf=NA", "(0/0)", "% squeeze preflop")
 
 
+def _preflop_action_by_position(stat_dict, player, prefix, position, label):
+    """Calculate a preflop action frequency in one HudCache position bucket."""
+    stat = 0.0
+    try:
+        opportunities = float(stat_dict[player].get(f"{prefix}_opp_{position}", 0))
+        done = float(stat_dict[player].get(f"{prefix}_{position}", 0))
+        if opportunities == 0:
+            return format_no_data_stat(label, f"% {label} preflop")
+        stat = done / opportunities
+        return (
+            stat,
+            f"{100.0 * stat:3.1f}",
+            f"{label}={100.0 * stat:3.1f}%",
+            f"{label}={100.0 * stat:3.1f}%",
+            f"({done:.0f}/{opportunities:.0f})",
+            f"% {label} preflop",
+        )
+    except STATS_DATA_ERRORS:
+        return (stat, "NA", f"{label}=NA", f"{label}=NA", "(0/0)", f"% {label} preflop")
+
+
+def three_bet_bb(stat_dict, player):
+    return _preflop_action_by_position(stat_dict, player, "tb", "bb", "3B BB")
+
+
+def three_bet_sb(stat_dict, player):
+    return _preflop_action_by_position(stat_dict, player, "tb", "sb", "3B SB")
+
+
+def three_bet_btn(stat_dict, player):
+    return _preflop_action_by_position(stat_dict, player, "tb", "btn", "3B BTN")
+
+
+def three_bet_co(stat_dict, player):
+    return _preflop_action_by_position(stat_dict, player, "tb", "co", "3B CO")
+
+
+def three_bet_mp(stat_dict, player):
+    return _preflop_action_by_position(stat_dict, player, "tb", "mp", "3B MP")
+
+
+def three_bet_ep(stat_dict, player):
+    return _preflop_action_by_position(stat_dict, player, "tb", "ep", "3B EP")
+
+
+def four_bet_bb(stat_dict, player):
+    return _preflop_action_by_position(stat_dict, player, "fb", "bb", "4B BB")
+
+
+def four_bet_sb(stat_dict, player):
+    return _preflop_action_by_position(stat_dict, player, "fb", "sb", "4B SB")
+
+
+def four_bet_btn(stat_dict, player):
+    return _preflop_action_by_position(stat_dict, player, "fb", "btn", "4B BTN")
+
+
+def four_bet_co(stat_dict, player):
+    return _preflop_action_by_position(stat_dict, player, "fb", "co", "4B CO")
+
+
+def four_bet_mp(stat_dict, player):
+    return _preflop_action_by_position(stat_dict, player, "fb", "mp", "4B MP")
+
+
+def four_bet_ep(stat_dict, player):
+    return _preflop_action_by_position(stat_dict, player, "fb", "ep", "4B EP")
+
+
+def squeeze_bb(stat_dict, player):
+    return _preflop_action_by_position(stat_dict, player, "sqz", "bb", "SQZ BB")
+
+
+def squeeze_sb(stat_dict, player):
+    return _preflop_action_by_position(stat_dict, player, "sqz", "sb", "SQZ SB")
+
+
+def squeeze_btn(stat_dict, player):
+    return _preflop_action_by_position(stat_dict, player, "sqz", "btn", "SQZ BTN")
+
+
+def squeeze_co(stat_dict, player):
+    return _preflop_action_by_position(stat_dict, player, "sqz", "co", "SQZ CO")
+
+
+def squeeze_mp(stat_dict, player):
+    return _preflop_action_by_position(stat_dict, player, "sqz", "mp", "SQZ MP")
+
+
+def squeeze_ep(stat_dict, player):
+    return _preflop_action_by_position(stat_dict, player, "sqz", "ep", "SQZ EP")
+
+
 def raiseToSteal(stat_dict, player):
     """Calculate the raise to steal stat for a player.
 
@@ -2429,6 +2522,15 @@ def WMsF(stat_dict, player):
             "(0/0)",
             "% won money when seen flop/4th street",
         )
+
+
+def wwsf(stat_dict, player):
+    """Return the standard Won When Saw Flop statistic.
+
+    ``WMsF`` is fpdb's historical name for WWSF.  Keep the legacy entry point
+    for existing HUD layouts while exposing the name used by modern trackers.
+    """
+    return WMsF(stat_dict, player)
 
 
 def a_freq1(stat_dict, player):
@@ -3251,6 +3353,21 @@ def f_cb3(stat_dict, player):
             "(0/0)",
             "% fold to continuation bet river/6th street",
         )
+
+
+def fold_to_cbet_flop(stat_dict, player):
+    """Return fold-to-cbet on the flop using the modern stat name."""
+    return f_cb1(stat_dict, player)
+
+
+def fold_to_cbet_turn(stat_dict, player):
+    """Return fold-to-cbet on the turn using the modern stat name."""
+    return f_cb2(stat_dict, player)
+
+
+def fold_to_cbet_river(stat_dict, player):
+    """Return fold-to-cbet on the river using the modern stat name."""
+    return f_cb3(stat_dict, player)
 
 
 def f_cb4(stat_dict, player):
@@ -4674,40 +4791,40 @@ def overbet_frequency(stat_dict, player):
         return format_no_data_stat("overbet", "% overbet frequency")
 
 
-def three_bet_range(stat_dict, player):
+def _preflop_range(stat_dict, player, action_key, label, description):
+    """Return the observed starting-hand range for a preflop action."""
+    stat = 0.0
     try:
-        # Retrieve and check for division by zero in PFR
-        pfr_opp = float(stat_dict[player].get("pfr_opp", 0))
-        if pfr_opp != 0:
-            pfr = float(stat_dict[player]["pfr"]) / pfr_opp
-        else:
-            pfr = 0  # Avoid division by zero for PFR
-
-        # Retrieve and check for division by zero in 3-Bet
-        tb_opp_0 = float(stat_dict[player].get("tb_opp_0", 0))
-        if tb_opp_0 != 0:
-            three_bet = float(stat_dict[player]["tb_0"]) / tb_opp_0
-        else:
-            three_bet = 0  # Avoid division by zero for 3-Bet
-
-        # Calculate the 3-Bet Range
-        stat = pfr * three_bet
+        hands = float(stat_dict[player].get("n", 0))
+        actions = float(stat_dict[player].get(action_key, 0))
+        if hands == 0:
+            return format_no_data_stat(label, description)
+        stat = actions / hands
         return (
             stat,
-            "%3.1f" % (100.0 * stat),
-            "3BR=%3.1f%%" % (100.0 * stat),
-            "3BetRange=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)*(%d/%d)"
-            % (
-                stat_dict[player]["pfr"],
-                stat_dict[player]["pfr_opp"],
-                stat_dict[player]["tb_0"],
-                stat_dict[player]["tb_opp_0"],
-            ),
-            "3-Bet Range",
+            f"{100.0 * stat:3.1f}",
+            f"{label}={100.0 * stat:3.1f}%",
+            f"{label}={100.0 * stat:3.1f}%",
+            f"({actions:.0f}/{hands:.0f})",
+            description,
         )
-    except (KeyError, ValueError, TypeError):
-        return (0, "NA", "3BR=NA", "3BetRange=NA", "(0/0)*(0/0)", "3-Bet Range")
+    except STATS_DATA_ERRORS:
+        return (stat, "NA", f"{label}=NA", f"{label}=NA", "(0/0)", description)
+
+
+def three_bet_range(stat_dict, player):
+    """Observed percentage of all dealt hands that were 3-bet."""
+    return _preflop_range(stat_dict, player, "tb_0", "3BR", "3-bet range")
+
+
+def four_bet_range(stat_dict, player):
+    """Observed percentage of all dealt hands that were 4-bet."""
+    return _preflop_range(stat_dict, player, "fb_0", "4BR", "4-bet range")
+
+
+def squeeze_range(stat_dict, player):
+    """Observed percentage of all dealt hands that were squeezed."""
+    return _preflop_range(stat_dict, player, "sqz_0", "SQZR", "squeeze range")
 
 
 def check_raise_frequency(stat_dict, player):
@@ -4994,7 +5111,7 @@ def main(argv=None):
         for i, stat in enumerate(sorted(STATLIST), 1):
             print(f"  {i:3}. {stat}")
 
-        print(f"\n=== Valid Stats with Descriptions ===")
+        print("\n=== Valid Stats with Descriptions ===")
         try:
             stat_descriptions = get_valid_stats()
             if stat_descriptions:
@@ -5003,8 +5120,8 @@ def main(argv=None):
             else:
                 print("  No stat descriptions available")
         except Exception as e:  # intentional broad catch: dynamic stat registry contains legacy helpers.
-            print(f"  Could not retrieve stat descriptions (this is normal)")
-            print(f"  Note: Some functions in STATLIST are not poker stats")
+            print("  Could not retrieve stat descriptions (this is normal)")
+            print("  Note: Some functions in STATLIST are not poker stats")
 
     if args.show_stats or args.validate_stats or args.interactive:
         try:

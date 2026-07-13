@@ -1,4 +1,5 @@
 from decimal import Decimal
+from types import SimpleNamespace
 
 from fpdb_3_legacy.GuiReplayer import (
     CONTROL_RESERVED_HEIGHT,
@@ -11,9 +12,50 @@ from fpdb_3_legacy.GuiReplayer import (
     build_replay_layout,
     hidden_card_count,
     order_players_clockwise,
+    replay_hero_equity,
     seat_anchors,
     visible_hole_card_count,
 )
+
+
+class _FakeEquityBackend:
+    def poker_eval(self, **kwargs):
+        assert kwargs["board"] == ["2c", "3d", "4h", "__", "__"]
+        return {
+            "info": (1000, 0, 1),
+            "eval": [
+                {"ev": 750, "winhi": 700, "tiehi": 100, "losehi": 200},
+                {"ev": 250, "winhi": 200, "tiehi": 100, "losehi": 700},
+            ],
+        }
+
+
+def test_replay_equity_uses_visible_board_and_known_live_pockets():
+    frame = SimpleNamespace(
+        players=[
+            ReplayPlayer("hero", 1, Decimal(0), Decimal(0), "calls", False, ["As", "Ah"]),
+            ReplayPlayer("villain", 2, Decimal(0), Decimal(0), "raises", False, ["Ks", "Kh"]),
+        ],
+        board={"FLOP": ["2c", "3d", "4h"], "TURN": ["5s"]},
+        render_board={"FLOP"},
+    )
+
+    equity = replay_hero_equity(frame, "hero", "holdem", backend=_FakeEquityBackend(), iterations=1000)
+
+    assert equity == Decimal("0.75")
+
+
+def test_replay_equity_hides_when_a_live_pocket_is_unknown():
+    frame = SimpleNamespace(
+        players=[
+            ReplayPlayer("hero", 1, Decimal(0), Decimal(0), "calls", False, ["As", "Ah"]),
+            ReplayPlayer("villain", 2, Decimal(0), Decimal(0), "raises", False, ["0", "0"]),
+        ],
+        board={},
+        render_board=set(),
+    )
+
+    assert replay_hero_equity(frame, "hero", "holdem", backend=_FakeEquityBackend()) is None
 
 
 class _FakeHand:

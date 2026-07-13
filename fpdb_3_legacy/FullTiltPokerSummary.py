@@ -98,7 +98,6 @@ class FullTiltPokerSummary(TourneySummary):
         "April": 4,
         "Apr": 4,
         "May": 5,
-        "May": 5,
         "June": 6,
         "Jun": 6,
         "July": 7,

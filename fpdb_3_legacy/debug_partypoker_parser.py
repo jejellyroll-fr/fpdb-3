@@ -26,21 +26,21 @@ if result and result.hands:
     print(f"\nHand ID: {hand_dict.get('hand_id')}")
     print(f"Game Type: {hand_dict.get('game_type')}")
     print(f"Limit Type: {hand_dict.get('limit_type')}")
-    print(f"\n🔍 BLINDS INFO:")
+    print("\n🔍 BLINDS INFO:")
     print(f"  - SB (from dict): {hand_dict.get('sb')}")
     print(f"  - BB (from dict): {hand_dict.get('bb')}")
     print(f"  - Currency: {hand_dict.get('currency')}")
 
-    print(f"\n🔍 ACTIONS (looking for blind posts):")
+    print("\n🔍 ACTIONS (looking for blind posts):")
     for i, action in enumerate(hand_dict.get("actions", [])[:10]):
         action_type = action.get("type", "")
         if "blind" in action_type.lower():
             print(f"  [{i}] {action.get('player')}: {action_type} = {action.get('amount')}")
 
-    print(f"\n🔍 FULL DICT KEYS:")
+    print("\n🔍 FULL DICT KEYS:")
     print(f"  {list(hand_dict.keys())}")
 
-    print(f"\n🔍 PLAYERS:")
+    print("\n🔍 PLAYERS:")
     for p in hand_dict.get("players", []):
         print(f"  - {p.get('name')}: seat={p.get('seat')}, stack={p.get('stack')}")
 

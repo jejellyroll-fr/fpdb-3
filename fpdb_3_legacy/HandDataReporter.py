@@ -3,6 +3,7 @@ from __future__ import annotations
 import contextlib
 import json
 from datetime import datetime
+from decimal import Decimal
 from typing import Any
 
 HAND_REPORT_DATA_ERRORS = (AttributeError, KeyError, TypeError, ValueError)
@@ -429,6 +430,12 @@ class HandDataReporter:
                         "hole_cards": hole_cards,
                     }
 
+                    player_stats = (getattr(hand_obj, "handsplayers", {}) or {}).get(player_name, {})
+                    if "allInEV" in player_stats:
+                        all_in_ev_x100 = player_stats["allInEV"]
+                        player_info["all_in_ev_x100"] = all_in_ev_x100
+                        player_info["all_in_ev"] = str(Decimal(all_in_ev_x100) / Decimal(100))
+
                     hand_data["players"][player_name] = player_info
                     hand_data["all_players_list"].append(f"Seat {seat_no}: {player_name}{special_pos} (${stack})")
 
@@ -564,6 +571,7 @@ class HandDataReporter:
                         "seatNo",
                         "startCash",
                         "winnings",
+                        "allInEV",
                         "street0VPI",
                         "street0Aggr",
                         "wonWhenSeenStreet1",

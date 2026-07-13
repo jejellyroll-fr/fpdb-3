@@ -75,15 +75,15 @@ def check_imports() -> bool:
         import numpy as np
         from numpy import append, cumsum, diff, nonzero
 
-        print(f"✅ NumPy imports       OK (max/min/sum removed as expected)")
+        print("✅ NumPy imports       OK (max/min/sum removed as expected)")
 
         # Test que max/min/sum ne sont plus importés directement
         try:
             from numpy import max, min, sum
 
-            print(f"⚠️  NumPy max/min/sum  STILL AVAILABLE (unexpected, but OK)")
+            print("⚠️  NumPy max/min/sum  STILL AVAILABLE (unexpected, but OK)")
         except ImportError:
-            print(f"✅ NumPy max/min/sum  REMOVED (expected in NumPy 2.x)")
+            print("✅ NumPy max/min/sum  REMOVED (expected in NumPy 2.x)")
     except VALIDATION_IMPORT_ERRORS as e:
         print(f"❌ NumPy imports       FAILED: {e}")
         imports_ok = False
@@ -92,7 +92,7 @@ def check_imports() -> bool:
     try:
         from sqlalchemy import pool
 
-        print(f"✅ SQLAlchemy pool     OK")
+        print("✅ SQLAlchemy pool     OK")
     except VALIDATION_IMPORT_ERRORS as e:
         print(f"❌ SQLAlchemy pool     FAILED: {e}")
         imports_ok = False
@@ -102,7 +102,7 @@ def check_imports() -> bool:
         from matplotlib.backends.backend_qtagg import FigureCanvas
         from matplotlib.figure import Figure
 
-        print(f"✅ matplotlib QtAgg    OK")
+        print("✅ matplotlib QtAgg    OK")
     except VALIDATION_IMPORT_ERRORS as e:
         print(f"❌ matplotlib QtAgg    FAILED: {e}")
         imports_ok = False
@@ -111,7 +111,7 @@ def check_imports() -> bool:
     try:
         from mplfinance.original_flavor import candlestick_ochl
 
-        print(f"✅ mplfinance          OK")
+        print("✅ mplfinance          OK")
     except VALIDATION_IMPORT_ERRORS as e:
         print(f"❌ mplfinance          FAILED: {e}")
         imports_ok = False
@@ -121,7 +121,7 @@ def check_imports() -> bool:
         from PySide6.QtWidgets import QApplication
         from PySide6.QtCore import Qt
 
-        print(f"✅ PySide6             OK")
+        print("✅ PySide6             OK")
     except VALIDATION_IMPORT_ERRORS as e:
         print(f"❌ PySide6             FAILED: {e}")
         imports_ok = False
@@ -131,7 +131,7 @@ def check_imports() -> bool:
         from fastapi import FastAPI
         from pydantic import BaseModel
 
-        print(f"✅ FastAPI/Pydantic    OK")
+        print("✅ FastAPI/Pydantic    OK")
     except VALIDATION_IMPORT_ERRORS as e:
         print(f"⚠️  FastAPI/Pydantic    OPTIONAL: {e}")
 

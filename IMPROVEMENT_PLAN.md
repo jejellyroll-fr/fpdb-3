@@ -73,15 +73,15 @@ Les bugs multi-backend récents (`Rank` réservé, `boolean` vs `smallint`, `set
 
 ---
 
-## Vague 4 — Domaine poker ♠️ — 🟡 EN COURS
+## Vague 4 — Domaine poker ♠️ — ✅ FAIT (2026-07-13)
 
 **Fait (2026-07-12)**
 - ✅ **Suite de tests remise au vert** : 10 échecs pré-existants (depuis l'import initial) corrigés → **3095 passed, 0 failed**. Diagnostics : mocks PokerStars périmés (`readHoleCards`/`readCommunityCards` lisent désormais `holeStreets`/`handText` — board recovery), assertion `markStreets` (`\r\n`→`\n`), garde `hudcache` (comptait `CACHE_KEYS` sans `HUDCACHE_EXTRA_KEYS` → 253 vs 257 corrects), index absolus fragiles (`isCashOut`), seuil arbitraire (200→400), fixture `tourneysummary` avec BOM UTF-16 accidentel.
 
 **Reste à faire**
-- **Stats** (`Stats.py`) : compléter les stats modernes / par rue (3bet/4bet/squeeze par position, fold-to-cbet turn/river, WWSF, WTSD, ranges) + **tests de valeurs** sur mains connues.
-- **Parsers** (26 sites) : harnais de **tests de régression par fichier de main** (fixtures) pour détecter les dérives de format ; prioriser les formats vivants (GGPoker, PokerStars, Winamax), marquer *legacy* les sites morts.
-- **Équité / ranges** : intégrer proprement `pypoker-eval/` (dépendance optionnelle) pour equity/EV dans le replayer et les rapports.
+- ✅ **Stats** (`Stats.py`) : alias modernes WWSF/fold-to-cbet par rue, 3bet/4bet/squeeze par position (BB, SB, BTN, CO, MP, EP), et ranges observées exactes (action / mains distribuées), avec tests de valeurs sur mains connues.
+- ✅ **Parsers** (26 sites) : harnais golden étendu à 13 convertisseurs (52 fichiers / 395 mains ; identité, gametype, joueurs, board, actions, gains, pot/rake) et matrice actif/legacy documentée. PartyPoker est hermétique ; BetOnline, iPoker et SwC sont couverts depuis leur corpus public. La fixture Unibet Banzai a été restaurée avec son symbole euro réel.
+- ✅ **Équité / EV** : `pypoker-eval` compilé et validé sous Python 3.13/macOS ARM, derrière `fpdb_3_legacy/equity.py` (chargement optionnel sûr, validation des cartes, boards incomplets explicitement complétés, équités normalisées `0..1`, compteurs win/tie/loss, exhaustif/Monte-Carlo et part attendue du pot). `DerivedStats` détecte l'action all-in réelle, transmet le board cumulé à cette rue et stocke `allInEV` comme profit attendu en monnaie/chips ×100. Le replayer affiche pot odds, équité et edge lorsque toutes les mains actives sont connues ; `HandDataReporter` expose la valeur brute et lisible par joueur. L'absence du moteur ou de cartes adverses reste non bloquante.
 
 **Effort** ~1-2 sem · **Impact** moyen/élevé.
 
@@ -89,6 +89,7 @@ Les bugs multi-backend récents (`Rank` réservé, `boolean` vs `smallint`, `set
 
 ## Vague 5 — Dette technique longue 🧹
 
+- ✅ **Premier ratchet Ruff** (2026-07-13) : suppression globale des 23 `F541` (f-strings sans interpolation) et des 5 `F601` (clés de dictionnaire dupliquées), avec job CI `quality` empêchant leur retour. Une duplication réelle de l'alias HUD `three_b` écrasait silencieusement l'échantillon `4.4` par `9.0`. Les modules modernisés de la Vague 4 sont vérifiés avec l'ensemble des règles Ruff actives. Dette passée de 3334 à 3306 diagnostics ; les règles seront absorbées une par une pour garder des diffs révisables.
 - **Découper les god-modules** : `SQL.py` (requêtes par domaine / fichiers `.sql`), `Database.py` (connexion / DDL / cache HUD / requêtes), `Stats.py` (par famille). Incrémental, avec tests de non-régression.
 - **Qualité outillée** : résorber la dette `ruff` (~2900) par paliers (règle par règle, `--fix`, baseline) ; introduire **mypy/pyright** en mode progressif ; convertir les 78 `TODO/FIXME` en tâches traçables ; clarifier/supprimer le dossier `fpdb/`.
 
@@ -110,5 +111,5 @@ Les bugs multi-backend récents (`Rank` réservé, `boolean` vs `smallint`, `set
 | **1** | Menus déclaratifs + réorg ; fondation i18n | ~3j | Élevée | ✅ Fait |
 | **2** | i18n en largeur (sélecteur, marquage, formats) | ~5j | Élevée | ✅ Marquage fini |
 | **3** | Abstraction de dialecte SQL | ~4-6j | Élevée | ✅ Quirks consolidés |
-| **4** | Domaine poker (stats, parsers, equity) | ~1-2 sem | Moyen/élevé | 🟡 En cours |
+| **4** | Domaine poker (stats, parsers, equity) | ~1-2 sem | Moyen/élevé | ✅ Fait |
 | **5** | Dette longue (god-modules, mypy, ruff) | continu | Moyen | À faire |

@@ -359,7 +359,6 @@ class TestContinuationDonkRegressionTests:
         """Test that all functions return properly formatted 6-element tuples."""
         stat_dict = {
             "test_player": {
-                "cb_opp_1": 5,
                 "cb_1": 3,
                 "aggr_1": 4,
                 "saw_f": 6,

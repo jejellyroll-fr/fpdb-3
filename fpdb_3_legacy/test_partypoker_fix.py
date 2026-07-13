@@ -87,7 +87,7 @@ def test_partypoker_parser():
                 print("   ❌ determineGameType returned None")
                 return False
 
-            print(f"   ✅ determineGameType succeeded")
+            print("   ✅ determineGameType succeeded")
             print(f"      Game: {gametype.get('category')}, Limit: {gametype.get('limitType')}")
             print(f"      Blinds: {gametype.get('sb')}/{gametype.get('bb')}, Currency: {gametype.get('currency')}")
 
@@ -117,7 +117,7 @@ def test_partypoker_parser():
 
             signal.alarm(0)
 
-            print(f"   ✅ Hand creation succeeded!")
+            print("   ✅ Hand creation succeeded!")
             print(f"      Hand ID: {legacy_hand.handid}")
             print(f"      Players: {len(legacy_hand.players)}")
             print(f"      Button: {legacy_hand.buttonpos}")
