@@ -91,6 +91,7 @@ class Stud_list:
         self.params = params
         self.config = config
         self.hero = hero
+        self.mucked_cards: Stud_cards | None = None
 
     def create(self, container) -> None:
         self.container = container
@@ -155,8 +156,8 @@ class Stud_cards:
         self.config = config
 
         self.card_images = self.parent.hud.parent.deck.get_all_card_images()
-        self.grid_contents = {}
-        self.eb = {}
+        self.grid_contents: dict[tuple[int, int], QLabel] = {}
+        self.eb: dict[tuple[int, int], QLabel] = {}
 
         self.rows = 8
         self.cols = 7
@@ -258,7 +259,7 @@ class Flop_Mucked(Aux_Base.AuxSeats, QObject):
     """AuxWindow class for displaying mucked cards for flop games."""
 
     def __init__(self, hud, config, params) -> None:
-        super().__init__(hud, config, params)
+        super().__init__(hud, config, params)  # type: ignore[call-arg]
         QObject.__init__(self)
         self.card_images = self.hud.parent.deck.get_all_card_images()
 
@@ -376,8 +377,8 @@ class Flop_Mucked(Aux_Base.AuxSeats, QObject):
                     px = px.scaled(
                         int(self.card_width),
                         int(self.card_height),
-                        Qt.KeepAspectRatio,
-                        Qt.SmoothTransformation,
+                        Qt.AspectRatioMode.KeepAspectRatio,
+                        Qt.TransformationMode.SmoothTransformation,
                     )
                 painter.drawPixmap(x, 0, px)
                 x += px.width()
