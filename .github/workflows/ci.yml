@@ -37,6 +37,14 @@ jobs:
           fpdb_3_legacy/i18n.py
           fpdb_3_legacy/i18n_compile.py
           fpdb_3_legacy/ConfigInitializer.py
+          fpdb_3_legacy/db_backends.py
+          fpdb_3_legacy/db_migrate.py
+          fpdb_3_legacy/http_capture_importability.py
+          fpdb_3_legacy/http_capture_registry.py
+          fpdb_3_legacy/http_capture_archive.py
+          fpdb_3_legacy/http_capture_build.py
+          fpdb_3_legacy/http_capture_refresh.py
+          fpdb_3_legacy/http_capture_replay.py
       - name: Lint newly modernized modules
         run: >-
           ruff check
