@@ -5,7 +5,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from fpdb_3_legacy.DerivedStats import DerivedStats
+from fpdb_3_legacy.DerivedStats import DerivedStats, _chip_increment
 from fpdb_3_legacy.equity import (
     EquityUnavailableError,
     calculate_equity,
@@ -28,6 +28,12 @@ class FakePokerEval:
                 {"ev": 175, "winhi": 300, "tiehi": 100, "losehi": 1600},
             ],
         }
+
+
+def test_split_pot_chip_increment_stays_decimal() -> None:
+    """Odd split pots must not multiply Decimal by a float during auto-import."""
+    assert _chip_increment(100) == Decimal("0.01")
+    assert _chip_increment(1) == Decimal("1")
 
 
 def test_calculate_equity_normalizes_backend_permille() -> None:
