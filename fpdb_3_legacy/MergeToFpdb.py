@@ -321,7 +321,7 @@ class Merge(HandHistoryConverter):
         if not m:
             return None
 
-        self.info = {}
+        self.info: dict[str, object] = {}
         mg = m.groupdict()
         # print "DEBUG: mg: %s" % mg
 
@@ -487,11 +487,12 @@ class Merge(HandHistoryConverter):
             hand.addPlayer(int(seat) + 1, name, stack)
 
         if hand.maxseats is None:
-            if hand.gametype["type"] == "tour" and self.maxseats == 0:
+            maxseats = getattr(self, "maxseats", 0)
+            if hand.gametype["type"] == "tour" and maxseats == 0:
                 hand.maxseats = self.guessMaxSeats(hand)
                 self.maxseats = hand.maxseats
             elif hand.gametype["type"] == "tour":
-                hand.maxseats = self.maxseats
+                hand.maxseats = maxseats
             else:
                 hand.maxseats = None
 
@@ -602,7 +603,7 @@ class Merge(HandHistoryConverter):
                 if not hand.gametype["bb"] or hand.gametype["secondGame"]:
                     hand.gametype["bb"] = bb
             for a in self.re_PostBoth.finditer(blindsantes):
-                bb = Decimal(self.info["bb"])
+                bb = Decimal(str(self.info["bb"]))
                 amount = Decimal(a.group("SBBB"))
                 player = self.playerNameFromSeatNo(a.group("PSEAT"), hand)
                 self.adjustMergeTourneyStack(hand, player, a.group("SBBB"))
@@ -700,12 +701,15 @@ class Merge(HandHistoryConverter):
             hand.stacks[player] += amount
 
     def readButton(self, hand) -> None:
-        hand.buttonpos = int(self.re_Button.search(hand.handText).group("BUTTON"))
+        button_match = self.re_Button.search(hand.handText)
+        if button_match is None:
+            raise FpdbHandPartial("Could not identify button position")
+        hand.buttonpos = int(button_match.group("BUTTON"))
 
     def readHoleCards(self, hand) -> None:
         #    streets PREFLOP, PREDRAW, and THIRD are special cases beacause
         #    we need to grab hero's cards
-        herocards = []
+        herocards: list[str] = []
         for street in ("PREFLOP", "DEAL"):
             if street in list(hand.streets.keys()):
                 m = self.re_HeroCards.finditer(hand.streets[street])
@@ -735,7 +739,7 @@ class Merge(HandHistoryConverter):
                         if found.group("CARDS") is None:
                             cards = []
                             newcards = []
-                            oldcards = []
+                            oldcards: list[str] = []
                         elif hand.gametype["base"] == "stud":
                             cards = found.group("CARDS").replace("null", "").split(",")
                             cards = [c for c in cards if c != ""]
@@ -881,7 +885,7 @@ class Merge(HandHistoryConverter):
                 )
 
     def determineErrorType(self, hand, function) -> None:
-        message = False
+        message: str | bool = False
         m = self.re_Connection.search(hand.handText)
         if m:
             message = ("Found {}. Hand missing information.").format(m.group("TYPE"))
