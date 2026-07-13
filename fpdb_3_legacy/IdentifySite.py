@@ -20,8 +20,10 @@ import os
 import re
 import sys
 from time import time
+from typing import Any
 
 from fpdb_3_legacy import Configuration
+from fpdb_3_legacy.HandHistoryConverter import HandHistoryConverter
 from fpdb_3_legacy.loggingFpdb import get_logger
 from fpdb_3_legacy.parser_registry import (
     LEGACY_MODULE_REGISTRY as LEGACY_MODULE_REGISTRY,
@@ -57,22 +59,27 @@ re_XLS["Fulltilt"] = re.compile(r"Player\sTournament\sReport\sfor\s.+?\s\(.*\)")
 
 
 class FPDBFile:
-    path = ""
-    ftype = None  # Valid: hh, summary, both
-    site = None
-    kodec = None
-    archive = False
-    archiveHead = False
-    archiveDivider = False
-    gametype = False
-    hero = "-"
-
-    def __init__(self, path) -> None:
+    def __init__(self, path: str) -> None:
         self.path = path
+        self.ftype: str | None = None  # Valid: hh, summary, both
+        self.site: Site | None = None
+        self.kodec: str | None = None
+        self.archive = False
+        self.archiveHead = False
+        self.archiveDivider = False
+        self.gametype: object = False
+        self.hero = "-"
 
 
 class Site:
-    def __init__(self, name, hhc_fname, filter_name, summary, obj) -> None:
+    def __init__(
+        self,
+        name: str,
+        hhc_fname: str,
+        filter_name: str,
+        summary: str | None,
+        obj: type[HandHistoryConverter],
+    ) -> None:
         self.name = name
         # FIXME: rename filter to hhc_fname
         self.hhc_fname = hhc_fname
@@ -83,34 +90,36 @@ class Site:
         self.copyGameHeader = obj.copyGameHeader
         self.summaryInFile = obj.summaryInFile
         self.re_Identify = getattr(obj, "re_identify", getattr(obj, "re_Identify", None))
+        self.re_SumIdentify: re.Pattern[str] | None = None
+        self.re_HeroCards: re.Pattern[str] | None = None
+        self.re_HeroCards1: re.Pattern[str] | None = None
+        self.re_HeroCards2: re.Pattern[str] | None = None
+        self.summary: str | None = summary
         # self.obj            = obj
         if summary:
-            self.summary = summary
             sum_class = get_summary_class(summary)
             self.re_SumIdentify = (
                 getattr(sum_class, "re_identify", getattr(sum_class, "re_Identify", None)) if sum_class else None
             )
-        else:
-            self.summary = None
         self.line_delimiter = self.getDelimiter(filter_name)
         self.line_addendum = self.getAddendum(filter_name)
         self.spaces = filter_name == "Entraction"
         self.getHeroRegex(obj, filter_name)
 
-    def getDelimiter(self, filter_name):
+    def getDelimiter(self, filter_name: str) -> str | None:
         line_delimiter = None
         if filter_name == "PokerStars":
             line_delimiter = "\n\n"
         elif filter_name in ("Fulltilt", "PokerTracker"):
             line_delimiter = "\n\n\n"
-        elif self.re_SplitHands.match("\n\n") and filter_name != "Entraction":
+        elif self.re_SplitHands is not None and self.re_SplitHands.match("\n\n") and filter_name != "Entraction":
             line_delimiter = "\n\n"
-        elif self.re_SplitHands.match("\n\n\n"):
+        elif self.re_SplitHands is not None and self.re_SplitHands.match("\n\n\n"):
             line_delimiter = "\n\n\n"
 
         return line_delimiter
 
-    def getAddendum(self, filter_name):
+    def getAddendum(self, filter_name: str) -> str:
         line_addendum = ""
         if filter_name == "OnGame":
             line_addendum = "*"
@@ -121,23 +130,24 @@ class Site:
 
         return line_addendum
 
-    def getHeroRegex(self, obj, filter_name) -> None:
-        self.re_HeroCards = None
+    def getHeroRegex(self, obj: type[HandHistoryConverter], filter_name: str) -> None:
         if hasattr(obj, "re_hero_cards") and filter_name not in ("Bovada", "Enet"):
             self.re_HeroCards = obj.re_hero_cards
         elif hasattr(obj, "re_HeroCards") and filter_name not in ("Bovada", "Enet"):
             self.re_HeroCards = obj.re_HeroCards
         if filter_name == "PokerTracker":
-            self.re_HeroCards1 = obj.re_HeroCards1
-            self.re_HeroCards2 = obj.re_HeroCards2
+            self.re_HeroCards1 = getattr(obj, "re_HeroCards1", None)
+            self.re_HeroCards2 = getattr(obj, "re_HeroCards2", None)
 
 
 class IdentifySite:
-    def __init__(self, config, hhcs=None) -> None:
+    def __init__(self, config: Any, hhcs: Any = None) -> None:
         self.config = config
         self.codepage = ("utf8", "cp1252", "ISO-8859-1")
-        self.sitelist = {}
-        self.filelist = {}
+        self.sitelist: dict[int | None, Site] = {}
+        self.filelist: dict[str | bytes, FPDBFile] = {}
+        self.re_Identify_PT: re.Pattern[str] | None = None
+        self.re_SumIdentify_PT: re.Pattern[str] | None = None
         self.generateSiteList(hhcs)
 
     def detectiPokerSkin(self, handText):
@@ -384,8 +394,8 @@ class IdentifySite:
                 if site.name == "SealsWithClubs":
                     f.site = site
                     f.ftype = "hh"
-                    if f.site.re_HeroCards:
-                        h = f.site.re_HeroCards.search(first_chunk)
+                    if site.re_HeroCards:
+                        h = site.re_HeroCards.search(first_chunk)
                         if h and "PNAME" in h.groupdict():
                             f.hero = h.group("PNAME")
                     else:
@@ -395,7 +405,7 @@ class IdentifySite:
         # DEBUG:print('idsite self.sitelist.items',self.sitelist.items())
         for _id, site in list(self.sitelist.items()):
             filter_name = site.filter_name
-            m = site.re_Identify.search(first_chunk)
+            m = site.re_Identify.search(first_chunk) if site.re_Identify is not None else None
             if m and filter_name in ("Fulltilt", "PokerStars"):
                 m1 = re_Divider[filter_name].search(whole_file.replace("\r\n", "\n"))
                 if m1:
@@ -409,13 +419,14 @@ class IdentifySite:
             if m:
                 # For PokerStars, we need to determine the specific skin
                 if filter_name == "PokerStars":
-                    f.site = self._select_pokerstars_skin_site(path, whole_file, site)
+                    selected_site = self._select_pokerstars_skin_site(path, whole_file, site)
                 else:
-                    f.site = site
+                    selected_site = site
+                f.site = selected_site
 
                 f.ftype = "hh"
-                if f.site.re_HeroCards:
-                    h = f.site.re_HeroCards.search(whole_file[:5000])
+                if selected_site.re_HeroCards:
+                    h = selected_site.re_HeroCards.search(whole_file[:5000])
                     if h and "PNAME" in h.groupdict():
                         f.hero = h.group("PNAME")
                 else:
@@ -433,7 +444,7 @@ class IdentifySite:
                             f.ftype = "summary"
                             return f
                 else:
-                    m3 = site.re_SumIdentify.search(whole_file[:10000])
+                    m3 = site.re_SumIdentify.search(whole_file[:10000]) if site.re_SumIdentify is not None else None
                     if m3:
                         if site.filter_name == "PokerStars":
                             f.site = self._select_pokerstars_skin_site(path, whole_file, site)
@@ -442,8 +453,8 @@ class IdentifySite:
                         f.ftype = "summary"
                         return f
 
-        m1 = self.re_Identify_PT.search(whole_file[:5000])
-        m2 = self.re_SumIdentify_PT.search(whole_file[:100])
+        m1 = self.re_Identify_PT.search(whole_file[:5000]) if self.re_Identify_PT is not None else None
+        m2 = self.re_SumIdentify_PT.search(whole_file[:100]) if self.re_SumIdentify_PT is not None else None
         if m1 or m2:
             filter = "PokerTrackerToFpdb"
             filter_name = "PokerTracker"
@@ -457,24 +468,29 @@ class IdentifySite:
                 detected_site_name = self.detectiPokerSkin(whole_file)
                 log.debug(f"Detected iPoker skin from PokerTracker format: {detected_site_name}")
 
-            f.site = Site(detected_site_name, filter, filter_name, summary, obj)
+            pt_site = Site(detected_site_name, filter, filter_name, summary, obj)
+            f.site = pt_site
             if m1:
                 f.ftype = "hh"
                 if re.search(r"\*{2}\sGame\sID\s", m1.group()):
-                    f.site.line_delimiter = None
-                    f.site.re_SplitHands = re.compile(r"End\sof\sgame\s\d+")
+                    pt_site.line_delimiter = None
+                    pt_site.re_SplitHands = re.compile(r"End\sof\sgame\s\d+")
                 elif re.search(r"\*{2}\sHand\s\#\s", m1.group()):
-                    f.site.line_delimiter = None
-                    f.site.re_SplitHands = re.compile(r"Rake:\s[^\s]+")
+                    pt_site.line_delimiter = None
+                    pt_site.re_SplitHands = re.compile(r"Rake:\s[^\s]+")
                 elif re.search(r"Server\spoker\d+\.ipoker\.com", whole_file[:250]):
-                    f.site.line_delimiter = None
-                    f.site.spaces = True
-                    f.site.re_SplitHands = re.compile(r"GAME\s\#")
-                m3 = f.site.re_HeroCards1.search(whole_file[:5000])
+                    pt_site.line_delimiter = None
+                    pt_site.spaces = True
+                    pt_site.re_SplitHands = re.compile(r"GAME\s\#")
+                m3 = pt_site.re_HeroCards1.search(whole_file[:5000]) if pt_site.re_HeroCards1 is not None else None
                 if m3:
                     f.hero = m3.group("PNAME")
                 else:
-                    m4 = f.site.re_HeroCards2.search(whole_file[:5000])
+                    m4 = (
+                        pt_site.re_HeroCards2.search(whole_file[:5000])
+                        if pt_site.re_HeroCards2 is not None
+                        else None
+                    )
                     if m4:
                         f.hero = m4.group("PNAME")
             else:
@@ -486,7 +502,7 @@ class IdentifySite:
     def getFilesForSite(self, sitename, ftype):
         files_for_site = []
         for _name, f in list(self.filelist.items()):
-            if f.ftype is not None and f.site.name == sitename and f.ftype == "hh":
+            if f.ftype is not None and f.site is not None and f.site.name == sitename and f.ftype == "hh":
                 files_for_site.append(f)
         return files_for_site
 
@@ -496,6 +512,8 @@ class IdentifySite:
                 # Filenames are str on Python 3; decode only if a bytes path slips in.
                 if isinstance(name, bytes):
                     name = name.decode("utf8", "replace")
+                if f.site is None:
+                    continue
                 obj = get_parser_class(f.site.filter_name)
                 hhc = obj(
                     self.config,
@@ -526,13 +544,13 @@ def main(argv=None) -> None:
         tmp = ""
         tmp += f": Type: {ffile.ftype} "
         count += 1
-        if ffile.ftype == "hh":
+        if ffile.ftype == "hh" and ffile.site is not None:
             tmp += f"Conv: {ffile.site.hhc_fname}"
-        elif ffile.ftype == "summary":
+        elif ffile.ftype == "summary" and ffile.site is not None:
             tmp += f"Conv: {ffile.site.summary}"
 
     IdSite.getFilesForSite("PokerStars", "hh")
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    main()
