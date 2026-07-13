@@ -761,6 +761,11 @@ class DatabaseTransaction:
             log.warning(f"Transaction rolling back due to exception: {exc_val}")
             try:
                 self.db.rollback(force=True)
+                # IDs inserted during the failed transaction may already be in
+                # the lazy caches. They no longer exist after rollback and must
+                # never be reused by the next auto-import cycle.
+                self.db.resetCache()
+                self.db.resetBulkCache()
             except Exception as e:  # intentional broad catch: transaction rollback during teardown is best-effort, just log
                 log.exception(f"Rollback failed: {e}")
         else:
@@ -771,6 +776,8 @@ class DatabaseTransaction:
                     log.exception(f"Commit failed: {e}")
                     try:
                         self.db.rollback(force=True)
+                        self.db.resetCache()
+                        self.db.resetBulkCache()
                     except Exception as roll_err:  # intentional broad catch: rollback after a failed commit is best-effort, just log
                         log.exception(f"Rollback after failed commit also failed: {roll_err}")
                     raise e
