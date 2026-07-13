@@ -16,8 +16,8 @@ from __future__ import annotations
 # In the "official" distribution you can find the license in agpl-3.0.txt.
 # Note that this now contains the replayer only! The list of hands has been moved to GuiHandViewer by zarturo.
 import copy
-import os
 import itertools
+import os
 import time
 import xml.dom.minidom
 from collections import Counter
@@ -40,6 +40,7 @@ from PySide6.QtWidgets import (
 
 from fpdb_3_legacy import SQL, Card, Configuration, Database, Deck, Hand
 from fpdb_3_legacy.http_capture_ofc import OFCHand, build_ofc_hand, load_ofc_hand
+from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.loggingFpdb import get_logger
 
 # import L10n
@@ -555,7 +556,7 @@ class GuiReplayer(QWidget):
         self.handlist = handlist
         self.handidx = 0
         self.Heroes = ""
-        self.setWindowTitle("FPDB Hand Replayer")
+        self.setWindowTitle(_("FPDB Hand Replayer"))
 
         self.replayBox = QVBoxLayout()
         self.replayBox.setContentsMargins(10, 4, 10, 10)
@@ -563,25 +564,25 @@ class GuiReplayer(QWidget):
         self.setLayout(self.replayBox)
 
         # Buttons
-        self.prevButton = QPushButton("Prev")
-        self.prevButton.setToolTip("Previous action")
+        self.prevButton = QPushButton(_("Prev"))
+        self.prevButton.setToolTip(_("Previous action"))
         self.prevButton.clicked.connect(self.prev_clicked)
         self.prevButton.setFocusPolicy(Qt.FocusPolicy.NoFocus)
 
-        self.startButton = QPushButton("Start")
+        self.startButton = QPushButton(_("Start"))
         self.startButton.clicked.connect(self.start_clicked)
         self.startButton.setFocusPolicy(Qt.FocusPolicy.NoFocus)
 
-        self.endButton = QPushButton("End")
+        self.endButton = QPushButton(_("End"))
         self.endButton.clicked.connect(self.end_clicked)
         self.endButton.setFocusPolicy(Qt.FocusPolicy.NoFocus)
 
-        self.playPauseButton = QPushButton("Play")
+        self.playPauseButton = QPushButton(_("Play"))
         self.playPauseButton.clicked.connect(self.play_clicked)
         self.playPauseButton.setFocusPolicy(Qt.FocusPolicy.NoFocus)
 
-        self.nextButton = QPushButton("Next")
-        self.nextButton.setToolTip("Next action")
+        self.nextButton = QPushButton(_("Next"))
+        self.nextButton.setToolTip(_("Next action"))
         self.nextButton.clicked.connect(self.next_clicked)
         self.nextButton.setFocusPolicy(Qt.FocusPolicy.NoFocus)
 
@@ -603,18 +604,18 @@ class GuiReplayer(QWidget):
         self.buttonBox2.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.buttonBox2.setSpacing(12)
 
-        self.showCards = QCheckBox("Hide Cards")
+        self.showCards = QCheckBox(_("Hide Cards"))
         self.showCards.setChecked(True)
         self.buttonBox2.addWidget(self.showCards)
 
-        self.deckLabel = QLabel("Deck:")
+        self.deckLabel = QLabel(_("Deck:"))
         self.deckLabel.setStyleSheet("font-weight: 600; color: #9aa5ad; margin-left: 10px;")
         self.buttonBox2.addWidget(self.deckLabel)
 
         self.deckType = getattr(getattr(self.conf, "ui", None), "deck_type", "simple") or "simple"
         self.deckTypeCombo = QComboBox()
         self.deckTypeCombo.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-        self.deckTypeCombo.setToolTip("Card deck")
+        self.deckTypeCombo.setToolTip(_("Card deck"))
         self._populate_deck_selector()
         self.deckTypeCombo.currentTextChanged.connect(self._deck_type_changed)
         self.deckTypeCombo.setMaximumWidth(140)
@@ -623,7 +624,7 @@ class GuiReplayer(QWidget):
         self.deckPreview = QLabel()
         self.deckPreview.setObjectName("deckPreviewLabel")
         self.deckPreview.setFixedSize(72, 38)
-        self.deckPreview.setToolTip("Current card deck preview")
+        self.deckPreview.setToolTip(_("Current card deck preview"))
         self.buttonBox2.addWidget(self.deckPreview)
 
         self.stateSlider = QSlider(Qt.Orientation.Horizontal)

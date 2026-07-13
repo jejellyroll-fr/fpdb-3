@@ -38,6 +38,7 @@ from fpdb_3_legacy.backfill_autonotes import (
     format_stats_json,
 )
 from fpdb_3_legacy.Database import Database
+from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.loggingFpdb import get_logger
 
 log = get_logger("gui_autonotes_workbench")
@@ -110,9 +111,9 @@ class GuiAutoNotesWorkbench(QWidget):
         self.run_tab = QWidget()
         self.player_tab = QWidget()
         self.pool_tab = QWidget()
-        self.tabs.addTab(self.run_tab, "Run")
-        self.tabs.addTab(self.player_tab, "Player Notes")
-        self.tabs.addTab(self.pool_tab, "Pool")
+        self.tabs.addTab(self.run_tab, _("Run"))
+        self.tabs.addTab(self.player_tab, _("Player Notes"))
+        self.tabs.addTab(self.pool_tab, _("Pool"))
 
         self._build_run_tab(self.run_tab)
         self._build_player_tab(self.player_tab)
@@ -121,50 +122,50 @@ class GuiAutoNotesWorkbench(QWidget):
     def _build_run_tab(self, tab: QWidget) -> None:
         layout = QVBoxLayout(tab)
         source_row = QHBoxLayout()
-        source_row.addWidget(QLabel("Hand-history source"))
+        source_row.addWidget(QLabel(_("Hand-history source")))
         self.path_edit = QLineEdit()
         self.path_edit.setPlaceholderText("File or directory to re-scan")
         source_row.addWidget(self.path_edit, 1)
 
-        self.browse_dir_button = QPushButton("Folder")
+        self.browse_dir_button = QPushButton(_("Folder"))
         self.browse_dir_button.clicked.connect(self.browse_folder)
         source_row.addWidget(self.browse_dir_button)
 
-        self.browse_file_button = QPushButton("File")
+        self.browse_file_button = QPushButton(_("File"))
         self.browse_file_button.clicked.connect(self.browse_file)
         source_row.addWidget(self.browse_file_button)
         layout.addLayout(source_row)
 
         control_row = QHBoxLayout()
-        control_row.addWidget(QLabel("Rule set"))
+        control_row.addWidget(QLabel(_("Rule set")))
         self.ruleset_combo = QComboBox()
         self.ruleset_combo.addItem("All configured rule sets", "")
         for rule_set in configured_rule_summary(self.config):
             self.ruleset_combo.addItem(rule_set["ruleSet"], rule_set["ruleSet"])
         control_row.addWidget(self.ruleset_combo, 1)
 
-        self.dry_run_button = QPushButton("Dry Run")
+        self.dry_run_button = QPushButton(_("Dry Run"))
         self.dry_run_button.clicked.connect(self.run_dry_run)
         control_row.addWidget(self.dry_run_button)
 
-        self.write_button = QPushButton("Write Notes")
+        self.write_button = QPushButton(_("Write Notes"))
         self.write_button.clicked.connect(self.run_write)
         control_row.addWidget(self.write_button)
         layout.addLayout(control_row)
 
         db_row = QHBoxLayout()
-        db_row.addWidget(QLabel("Database hands"))
+        db_row.addWidget(QLabel(_("Database hands")))
         self.db_limit_spin = QSpinBox()
         self.db_limit_spin.setRange(1, 1_000_000)
         self.db_limit_spin.setValue(1000)
         self.db_limit_spin.setSingleStep(100)
         db_row.addWidget(self.db_limit_spin)
 
-        self.db_dry_run_button = QPushButton("Dry Run DB")
+        self.db_dry_run_button = QPushButton(_("Dry Run DB"))
         self.db_dry_run_button.clicked.connect(self.run_database_dry_run)
         db_row.addWidget(self.db_dry_run_button)
 
-        self.db_write_button = QPushButton("Write DB Notes")
+        self.db_write_button = QPushButton(_("Write DB Notes"))
         self.db_write_button.clicked.connect(self.run_database_write)
         db_row.addWidget(self.db_write_button)
         db_row.addStretch(1)
@@ -180,7 +181,7 @@ class GuiAutoNotesWorkbench(QWidget):
         ]
 
         status_row = QHBoxLayout()
-        self.status_label = QLabel("Idle")
+        self.status_label = QLabel(_("Idle"))
         status_row.addWidget(self.status_label)
         self.progress_bar = QProgressBar()
         self.progress_bar.setRange(0, 1)
@@ -210,16 +211,16 @@ class GuiAutoNotesWorkbench(QWidget):
         layout = QVBoxLayout(tab)
 
         search_row = QHBoxLayout()
-        search_row.addWidget(QLabel("Player"))
+        search_row.addWidget(QLabel(_("Player")))
         self.player_search_edit = QLineEdit()
         self.player_search_edit.setPlaceholderText("Name fragment")
         search_row.addWidget(self.player_search_edit, 1)
 
-        search_button = QPushButton("Search")
+        search_button = QPushButton(_("Search"))
         search_button.clicked.connect(self.search_players)
         search_row.addWidget(search_button)
 
-        load_button = QPushButton("Load Notes")
+        load_button = QPushButton(_("Load Notes"))
         load_button.clicked.connect(self.load_selected_player_notes)
         search_row.addWidget(load_button)
         layout.addLayout(search_row)
@@ -232,10 +233,10 @@ class GuiAutoNotesWorkbench(QWidget):
         layout.addWidget(self.players_table)
 
         overview_row = QHBoxLayout()
-        self.player_overview_name = QLabel("Player")
-        self.player_overview_notes = QLabel("Notes: 0")
-        self.player_overview_top_rule = QLabel("Top rule: -")
-        self.player_overview_latest = QLabel("Latest: -")
+        self.player_overview_name = QLabel(_("Player"))
+        self.player_overview_notes = QLabel(_("Notes: 0"))
+        self.player_overview_top_rule = QLabel(_("Top rule: -"))
+        self.player_overview_latest = QLabel(_("Latest: -"))
         for label in (
             self.player_overview_name,
             self.player_overview_notes,
@@ -271,19 +272,19 @@ class GuiAutoNotesWorkbench(QWidget):
         layout = QVBoxLayout(content)
 
         refresh_row = QHBoxLayout()
-        refresh_row.addWidget(QLabel("Player"))
+        refresh_row.addWidget(QLabel(_("Player")))
         self.pool_player_filter = QLineEdit()
         self.pool_player_filter.setPlaceholderText("Name fragment")
         refresh_row.addWidget(self.pool_player_filter, 1)
 
-        refresh_row.addWidget(QLabel("Site"))
+        refresh_row.addWidget(QLabel(_("Site")))
         self.pool_site_filter = QComboBox()
         self.pool_site_filter.addItem("All sites", None)
         for site_name, site_id in sorted((getattr(self.config, "site_ids", {}) or {}).items()):
             self.pool_site_filter.addItem(str(site_name), site_id)
         refresh_row.addWidget(self.pool_site_filter)
 
-        refresh_row.addWidget(QLabel("Limit"))
+        refresh_row.addWidget(QLabel(_("Limit")))
         self.pool_limit_filter = QComboBox()
         self.pool_limit_filter.addItem("All", "")
         for limit_type in ("nl", "pl", "fl", "cn", "cp"):
@@ -292,7 +293,7 @@ class GuiAutoNotesWorkbench(QWidget):
         layout.addLayout(refresh_row)
 
         date_row = QHBoxLayout()
-        date_row.addWidget(QLabel("From"))
+        date_row.addWidget(QLabel(_("From")))
         self.pool_from_date = QDateEdit()
         self.pool_from_date.setCalendarPopup(True)
         self.pool_from_date.setDisplayFormat("yyyy-MM-dd")
@@ -302,7 +303,7 @@ class GuiAutoNotesWorkbench(QWidget):
         self.pool_from_date.setCalendarPopup(True)
         date_row.addWidget(self.pool_from_date)
 
-        date_row.addWidget(QLabel("To"))
+        date_row.addWidget(QLabel(_("To")))
         self.pool_to_date = QDateEdit()
         self.pool_to_date.setCalendarPopup(True)
         self.pool_to_date.setDisplayFormat("yyyy-MM-dd")
@@ -310,7 +311,7 @@ class GuiAutoNotesWorkbench(QWidget):
         self.pool_to_date.setMinimumDate(QDate(1970, 1, 1))
         date_row.addWidget(self.pool_to_date)
 
-        refresh_button = QPushButton("Refresh Pool Summary")
+        refresh_button = QPushButton(_("Refresh Pool Summary"))
         refresh_button.clicked.connect(self.refresh_pool_summary)
         date_row.addWidget(refresh_button)
         date_row.addStretch(1)
@@ -322,7 +323,7 @@ class GuiAutoNotesWorkbench(QWidget):
         self.pool_players_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
         self.pool_players_table.setAlternatingRowColors(True)
         self.pool_players_table.setMinimumHeight(220)
-        layout.addWidget(QLabel("Top players by generated notes"))
+        layout.addWidget(QLabel(_("Top players by generated notes")))
         layout.addWidget(self.pool_players_table)
 
         self.pool_rules_table = QTableWidget(0, 3)
@@ -331,7 +332,7 @@ class GuiAutoNotesWorkbench(QWidget):
         self.pool_rules_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
         self.pool_rules_table.setAlternatingRowColors(True)
         self.pool_rules_table.setMinimumHeight(220)
-        layout.addWidget(QLabel("Top rules"))
+        layout.addWidget(QLabel(_("Top rules")))
         layout.addWidget(self.pool_rules_table)
 
         self.recent_notes_table = QTableWidget(0, 9)
@@ -346,7 +347,7 @@ class GuiAutoNotesWorkbench(QWidget):
         self.recent_notes_table.itemDoubleClicked.connect(
             lambda item: self.open_replayer_from_table(self.recent_notes_table, item.row(), 3),
         )
-        layout.addWidget(QLabel("Recent generated notes"))
+        layout.addWidget(QLabel(_("Recent generated notes")))
         layout.addWidget(self.recent_notes_table, 1)
 
     def _database(self) -> Database:

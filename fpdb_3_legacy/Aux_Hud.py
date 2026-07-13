@@ -1,5 +1,6 @@
 #    Copyright 2011-2012,  Ray E. Barker
 from __future__ import annotations
+
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -39,18 +40,17 @@ from PySide6.QtWidgets import (
 )
 
 #    FreePokerTools modules
-from fpdb_3_legacy import Aux_Base
-from fpdb_3_legacy import Configuration
-from fpdb_3_legacy import Popup
-from fpdb_3_legacy import Stats
+from fpdb_3_legacy import Aux_Base, Configuration, Popup, Stats
+from fpdb_3_legacy.i18n import gettext as _t
 from fpdb_3_legacy.loggingFpdb import get_logger, hud_trace
 
 # logging has been set up in fpdb.py or HUD_main.py, use their settings:
 log = get_logger("hud_main")
 
 import json
-import os
 import logging
+import os
+
 
 class HUDLayoutPositionsStore:
     def __init__(self) -> None:
@@ -61,7 +61,7 @@ class HUDLayoutPositionsStore:
     def load(self) -> None:
         if os.path.exists(self.path):
             try:
-                with open(self.path, "r", encoding="utf-8") as f:
+                with open(self.path, encoding="utf-8") as f:
                     self.data = json.load(f)
             except Exception:
                 log.exception("Error loading HUD layout positions JSON")
@@ -795,7 +795,7 @@ class SimpleStatWindow(Aux_Base.SeatWindow):
         """
         super().__init__(aw, seat)
         self.popup_count = 0
-        self.setWindowTitle("HUD - stats")
+        self.setWindowTitle(_t("HUD - stats"))
 
     # button_release_left is inherited from Aux_Base.SeatWindow: it releases the
     # drag grab and, only if the window actually moved, calls configure_event_cb
@@ -1335,7 +1335,7 @@ class SimpleTablePopupMenu(QWidget):
         # Add stat set selector
         stat_sets_dict = self._create_stat_sets_dict()
         if len(stat_sets_dict) > 1:  # Only show if there are multiple stat sets
-            vbox.addWidget(QLabel("Stat Set (HUD):"))
+            vbox.addWidget(QLabel(_t("Stat Set (HUD):")))
             self.stat_set_combo = self.build_stat_set_combo(stat_sets_dict)
             vbox.addWidget(self.stat_set_combo)
             vbox.addWidget(QLabel(""))
@@ -1363,7 +1363,7 @@ class SimpleTablePopupMenu(QWidget):
             QVBoxLayout: The vertical layout containing all player stats controls.
         """
         vbox = QVBoxLayout()
-        vbox.addWidget(QLabel("Show Player Stats for"))
+        vbox.addWidget(QLabel(_t("Show Player Stats for")))
         vbox.addWidget(
             self.build_combo_and_set_active("h_agg_bb_mult", multiplier_dict),
         )
@@ -1371,10 +1371,10 @@ class SimpleTablePopupMenu(QWidget):
             self.build_combo_and_set_active("h_seats_style", seats_style_dict),
         )
         hbox = QHBoxLayout()
-        hbox.addWidget(QLabel("Custom"))
+        hbox.addWidget(QLabel(_t("Custom")))
         self.h_nums_low_spinner = self.build_spinner("h_seats_cust_nums_low", 1, 9)
         hbox.addWidget(self.h_nums_low_spinner)
-        hbox.addWidget(QLabel("To"))
+        hbox.addWidget(QLabel(_t("To")))
         self.h_nums_high_spinner = self.build_spinner("h_seats_cust_nums_high", 2, 10)
         hbox.addWidget(self.h_nums_high_spinner)
         vbox.addLayout(hbox)
@@ -1407,16 +1407,16 @@ class SimpleTablePopupMenu(QWidget):
             QVBoxLayout: The vertical layout containing all opponent stats controls.
         """
         vbox = QVBoxLayout()
-        vbox.addWidget(QLabel("Show Opponent Stats for"))
+        vbox.addWidget(QLabel(_t("Show Opponent Stats for")))
         vbox.addWidget(self.build_combo_and_set_active("agg_bb_mult", multiplier_dict))
         vbox.addWidget(
             self.build_combo_and_set_active("seats_style", seats_style_dict),
         )
         hbox = QHBoxLayout()
-        hbox.addWidget(QLabel("Custom"))
+        hbox.addWidget(QLabel(_t("Custom")))
         self.nums_low_spinner = self.build_spinner("seats_cust_nums_low", 1, 9)
         hbox.addWidget(self.nums_low_spinner)
-        hbox.addWidget(QLabel("To"))
+        hbox.addWidget(QLabel(_t("To")))
         self.nums_high_spinner = self.build_spinner("seats_cust_nums_high", 2, 10)
         hbox.addWidget(self.nums_high_spinner)
         vbox.addLayout(hbox)
