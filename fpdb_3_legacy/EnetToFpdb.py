@@ -376,6 +376,8 @@ class Enet(HandHistoryConverter):
         ):  # a list of streets which get dealt community cards (i.e. all but PREFLOP)
             # print "DEBUG readCommunityCards:", street, hand.streets.group(street)
             m = self.re_Board.search(hand.streets[street])
+            if m is None:
+                raise FpdbParseError("Could not identify community cards")
             cards = m.group("CARDS")
             cards = [cards[i : i + 2] for i in range(len(cards)) if i % 2 == 0 and i + 2 <= len(cards)]
             hand.setCommunityCards(street, cards)
