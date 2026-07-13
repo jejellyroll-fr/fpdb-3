@@ -11,9 +11,9 @@ The destination must already have the fpdb schema (see GuiDatabase's "Create
 tables"). Its existing contents are replaced by the source's — migration is a
 destructive operation on the destination, by design.
 
-The engine talks to the two ``Database`` instances through their cursors and
-``sql.query['placeholder']``, so it is backend-agnostic; only foreign-key
-handling and sequence reset are per-backend.
+The engine stays backend-agnostic by routing every per-backend decision
+(parameter placeholder, table listing/dropping, foreign-key handling, boolean
+coercion, sequence reset) through a :class:`dialects.Dialect`.
 """
 
 from __future__ import annotations
@@ -22,14 +22,10 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 from typing import Any
 
+from fpdb_3_legacy import dialects
 from fpdb_3_legacy.loggingFpdb import get_logger
 
 log = get_logger("db_migrate")
-
-# Database backend ids (kept in sync with Database.{MYSQL_INNODB,PGSQL,SQLITE}).
-_MYSQL = 2
-_PGSQL = 3
-_SQLITE = 4
 
 _BATCH = 1000
 
@@ -51,131 +47,51 @@ class MigrationReport:
 
 def list_data_tables(db: Any) -> list[str]:
     """Return the user tables of an fpdb database (excludes internal tables)."""
-    cursor = db.get_cursor()
-    if db.backend == _SQLITE:
-        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'")
-    elif db.backend == _PGSQL:
-        cursor.execute("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'")
-    else:  # mysql
-        cursor.execute("SHOW TABLES")
-    return [row[0] for row in cursor.fetchall()]
+    return dialects.dialect_for_backend(db.backend).list_tables(db)
 
 
 def drop_all_tables(db: Any) -> None:
     """Drop every user table on ``db``, regardless of foreign keys or order.
 
-    Used to rebuild a destination schema from scratch before a migration. This
+    Used to rebuild a destination schema from scratch before a migration; this
     deliberately bypasses ``Database.drop_tables`` (whose MySQL path swallows
-    errors from its constraint-removal step and can leave tables behind, so a
-    following ``create_tables`` fails with "table already exists"). Foreign-key
-    constraints are neutralised per backend: FK checks off for MySQL, CASCADE
-    for PostgreSQL, and SQLite allows the drops directly.
+    errors and can leave tables behind). The per-backend mechanics live in the
+    Dialect (FK checks off for MySQL, CASCADE for PostgreSQL, plain for SQLite).
     """
-    cursor = db.get_cursor()
-    if db.backend == _MYSQL:
-        cursor.execute("SET FOREIGN_KEY_CHECKS = 0")
-    suffix = " CASCADE" if db.backend == _PGSQL else ""
-    for table in list_data_tables(db):
-        cursor.execute(f"DROP TABLE IF EXISTS {table}{suffix}")
-    if db.backend == _MYSQL:
-        cursor.execute("SET FOREIGN_KEY_CHECKS = 1")
-    db.commit()
+    dialects.dialect_for_backend(db.backend).drop_all_tables(db)
 
 
 def _suspend_foreign_keys(db: Any) -> Any:
     """Relax foreign-key enforcement for the bulk copy; return a restore token.
 
-    MySQL and SQLite toggle a session flag. PostgreSQL's global switch
-    (``session_replication_role``) needs a superuser, which the fpdb role
-    usually is not — so instead we drop every foreign-key constraint (an
-    owner-level operation) and hand back their definitions so they can be
-    re-created afterwards. Raises on failure so the caller can stop early.
+    Delegates to the destination Dialect: MySQL/SQLite toggle a session flag,
+    PostgreSQL drops and remembers the FK constraints (its global switch needs a
+    superuser). Raises on failure so the caller can stop early.
     """
-    cursor = db.get_cursor()
-    if db.backend == _SQLITE:
-        cursor.execute("PRAGMA foreign_keys = OFF")
-        return None
-    if db.backend == _MYSQL:
-        cursor.execute("SET FOREIGN_KEY_CHECKS = 0")
-        return None
-    # PostgreSQL: drop and remember every foreign-key constraint.
-    cursor.execute(
-        "SELECT conrelid::regclass::text, conname, pg_get_constraintdef(oid) "
-        "FROM pg_constraint WHERE contype = 'f'",
-    )
-    constraints = cursor.fetchall()
-    for table, name, _definition in constraints:
-        cursor.execute(f'ALTER TABLE {table} DROP CONSTRAINT "{name}"')
-    db.commit()
-    return constraints
+    return dialects.dialect_for_backend(db.backend).suspend_foreign_keys(db)
 
 
 def _restore_foreign_keys(db: Any, token: Any) -> None:
     """Re-enable foreign-key enforcement (best effort), reversing the suspend."""
     try:
-        cursor = db.get_cursor()
-        if db.backend == _SQLITE:
-            cursor.execute("PRAGMA foreign_keys = ON")
-            return
-        if db.backend == _MYSQL:
-            cursor.execute("SET FOREIGN_KEY_CHECKS = 1")
-            return
-        if not token:
-            return
-        for table, name, definition in token:
-            cursor.execute(f'ALTER TABLE {table} ADD CONSTRAINT "{name}" {definition}')
-        db.commit()
+        dialects.dialect_for_backend(db.backend).restore_foreign_keys(db, token)
     except Exception as exc:  # noqa: BLE001 - re-enabling is best-effort cleanup
         log.warning("Could not fully re-enable foreign-key enforcement: %s", exc)
 
 
 def _reset_sequences(dest: Any, tables: list[str]) -> None:
     """Reset PostgreSQL identity sequences to max(id)+1 after preserving ids."""
-    if dest.backend != _PGSQL:
-        return
-    cursor = dest.get_cursor()
-    for table in tables:
-        try:
-            cursor.execute(
-                "SELECT pg_get_serial_sequence(%s, 'id')",
-                (table,),
-            )
-            row = cursor.fetchone()
-            sequence = row[0] if row else None
-            if not sequence:
-                continue
-            cursor.execute(f"SELECT setval(%s, COALESCE((SELECT MAX(id) FROM {table}), 0) + 1, false)", (sequence,))
-        except Exception as exc:  # noqa: BLE001 - a table may have no id sequence
-            log.debug("No sequence reset for %s: %s", table, exc)
+    dialects.dialect_for_backend(dest.backend).reset_sequences(dest, tables)
 
 
 def _boolean_column_indices(dest: Any, table: str, columns: list[str]) -> tuple[int, ...]:
-    """Indices of ``columns`` that are BOOLEAN on a PostgreSQL destination.
-
-    SQLite and MySQL store booleans as 0/1 integers; PostgreSQL has a real
-    boolean type and rejects an integer for it (no implicit cast). So when
-    copying into PostgreSQL those columns must be converted from int to bool.
-    Other destinations accept 0/1 directly, so nothing needs converting.
-    """
-    if dest.backend != _PGSQL:
-        return ()
-    cursor = dest.get_cursor()
-    cursor.execute(
-        "SELECT column_name FROM information_schema.columns "
-        "WHERE table_schema = 'public' AND table_name = %s AND data_type = 'boolean'",
-        (table.lower(),),
-    )
-    boolean_names = {row[0].lower() for row in cursor.fetchall()}
-    return tuple(i for i, name in enumerate(columns) if name.lower() in boolean_names)
+    """Indices of ``columns`` needing int->bool conversion on ``dest`` (PG only)."""
+    return dialects.dialect_for_backend(dest.backend).boolean_columns(dest, table, columns)
 
 
 def _coerce_booleans(row: Any, indices: tuple[int, ...]) -> tuple:
     """Return ``row`` with the given integer columns turned into bool (None kept)."""
-    values = list(row)
-    for i in indices:
-        if values[i] is not None:
-            values[i] = bool(values[i])
-    return tuple(values)
+    return dialects.Dialect.coerce_row(row, indices)
 
 
 def _copy_table(source: Any, dest: Any, table: str) -> int:
@@ -185,6 +101,8 @@ def _copy_table(source: Any, dest: Any, table: str) -> int:
     its own queries. That keeps them case-consistent across backends (PostgreSQL
     folds unquoted names to lower case, as it did when the tables were created).
     """
+    dest_dialect = dialects.dialect_for_backend(dest.backend)
+
     src_cursor = source.get_cursor()
     src_cursor.execute(f"SELECT * FROM {table}")
     columns = [desc[0] for desc in src_cursor.description]
@@ -193,9 +111,9 @@ def _copy_table(source: Any, dest: Any, table: str) -> int:
     dest_cursor.execute(f"DELETE FROM {table}")
 
     # PostgreSQL needs integer 0/1 turned into real booleans for boolean columns.
-    bool_indices = _boolean_column_indices(dest, table, columns)
+    bool_indices = dest_dialect.boolean_columns(dest, table, columns)
 
-    placeholder = dest.sql.query.get("placeholder", "%s")
+    placeholder = dest_dialect.placeholder
     column_list = ", ".join(columns)
     placeholders = ", ".join([placeholder] * len(columns))
     insert = f"INSERT INTO {table} ({column_list}) VALUES ({placeholders})"
