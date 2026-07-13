@@ -185,7 +185,7 @@ class TourneySummary:
         self.playerIds: dict[str, int] = {}
         self.tourneysPlayersIds: dict[str, int] = {}
         self.ranks: dict[str, list[int | None]] = {}
-        self.winnings: dict[str, list[int]] = {}
+        self.winnings: dict[str, list[int | None]] = {}
         self.winningsCurrency: dict[str, list[str | None]] = {}
         self.rebuyCounts: dict[str, list[int | None]] = {}
         self.addOnCounts: dict[str, list[int | None]] = {}

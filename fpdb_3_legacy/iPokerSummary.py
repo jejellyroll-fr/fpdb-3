@@ -182,7 +182,7 @@ class iPokerSummary(TourneySummary):  # noqa: N801
 
         if "GAME" in mg:
             if mg.get("CATEGORY") is None:
-                self.info["base"], self.info["category"] = ("hold", "5_omahahi")
+                self.gametype["base"], self.gametype["category"] = ("hold", "5_omahahi")
                 log.debug("No CATEGORY found, defaulting to hold/5_omahahi.")
             else:
                 self.gametype["base"], self.gametype["category"] = self.games[mg["CATEGORY"]]
@@ -281,7 +281,7 @@ class iPokerSummary(TourneySummary):  # noqa: N801
                 log.debug("Match %d: %s", i, mat.groupdict())
 
             # Build mg2 dictionary from all matches
-            mg2 = {
+            mg2: dict[str, str | None] = {
                 "TOURNO": None,
                 "NAME": None,
                 "PLACE": None,
@@ -300,8 +300,8 @@ class iPokerSummary(TourneySummary):  # noqa: N801
 
             self.buyin = 0
             self.fee = 0
-            self.prizepool = None
-            self.entries = None
+            self.prizepool = 0
+            self.entries = 0
 
             if mg2["TOURNO"]:
                 self.tourNo = mg2["TOURNO"]
@@ -315,9 +315,10 @@ class iPokerSummary(TourneySummary):  # noqa: N801
                     winnings = int(100 * self.convert_to_decimal(mg2["WIN"]))
                     log.debug("Calculated winnings: %s", winnings)
 
-            self.tourneyName = mg2["NAME"]
-            if self.tourNo and (" " + self.tourNo) in mg2["NAME"]:
-                self.tourneyName = mg2["NAME"].replace(" " + self.tourNo, "")
+            tourney_name = mg2["NAME"]
+            self.tourneyName = tourney_name
+            if self.tourNo and tourney_name and (" " + self.tourNo) in tourney_name:
+                self.tourneyName = tourney_name.replace(" " + self.tourNo, "")
             log.debug("Set tourneyName to %s", self.tourneyName)
 
             # Handle "Token" buyin scenario
@@ -357,9 +358,11 @@ class iPokerSummary(TourneySummary):  # noqa: N801
                         "Set BIRAKE=0 due to missing explicit rake info, but BIAMT is present.",
                     )
 
-            if mg2.get("BIAMT") and mg2.get("BIRAKE"):
+            buyin_text = mg2.get("BIAMT")
+            rake_text = mg2.get("BIRAKE")
+            if buyin_text and rake_text:
                 try:
-                    self.buyin = int(100 * self.convert_to_decimal(mg2["BIAMT"]))
+                    self.buyin = int(100 * self.convert_to_decimal(buyin_text))
                 except (ValueError, TypeError):
                     log.debug(
                         "Failed to parse BIAMT='%s', setting buyin=0.",
@@ -367,7 +370,7 @@ class iPokerSummary(TourneySummary):  # noqa: N801
                     )
                     self.buyin = 0
                 try:
-                    self.fee = int(100 * self.convert_to_decimal(mg2["BIRAKE"]))
+                    self.fee = int(100 * self.convert_to_decimal(rake_text))
                 except (ValueError, TypeError):
                     log.debug(
                         "Failed to parse BIRAKE='%s', setting fee=0.",
@@ -376,7 +379,7 @@ class iPokerSummary(TourneySummary):  # noqa: N801
                     self.fee = 0
                 log.debug("Set buyin=%s, fee=%s", self.buyin, self.fee)
 
-                if self.re_fpp.match(mg2["BIAMT"]):
+                if self.re_fpp.match(buyin_text):
                     self.buyinCurrency = "FPP"
                     log.debug("Detected FPP buyin currency.")
             else:
