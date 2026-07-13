@@ -5,11 +5,16 @@ import logging
 
 import pytest
 
+from fpdb_3_legacy.iPoker.base import iPoker
 from fpdb_3_legacy.PokerTrackerToFpdb import PokerTracker
 
 # Logging configuration
 logging.basicConfig(level=logging.DEBUG, format="%(name)s - %(levelname)s - %(message)s")
 log = logging.getLogger(__name__)
+
+
+def test_ipoker_table_title_without_table_name_is_safe() -> None:
+    assert iPoker.getTableTitleRe("ring", None) == ""
 
 
 @pytest.mark.parametrize("file_path", ["regression-test-files/cash/iPoker/Flop/6+Holdem-EUR-0.25-0.50-201702.txt"])

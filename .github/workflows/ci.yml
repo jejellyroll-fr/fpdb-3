@@ -80,6 +80,9 @@ jobs:
           fpdb_3_legacy/parser_registry.py
           fpdb_3_legacy/IdentifySite.py
           fpdb_3_legacy/Importer.py
+          fpdb_3_legacy/iPoker/__init__.py
+          fpdb_3_legacy/iPoker/dispatcher.py
+          fpdb_3_legacy/iPoker/base.py
       - name: Lint newly modernized modules
         run: >-
           ruff check
