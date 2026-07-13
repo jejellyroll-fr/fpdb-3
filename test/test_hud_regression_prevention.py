@@ -62,7 +62,9 @@ class TestHudRestartRegression(unittest.TestCase):
 
         # Should attempt refresh
         aux_window.refresh_stats_layout.assert_called_once()
-        aux_window.update.assert_called_once()
+        aux_window.destroy.assert_called_once()
+        aux_window.create.assert_called_once()
+        aux_window.update_gui.assert_called_once_with(None)
 
     def test_refresh_failure_still_allows_restart(self) -> None:
         """Ensure that when refresh fails, restart still works."""

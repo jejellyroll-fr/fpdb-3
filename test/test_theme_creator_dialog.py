@@ -252,13 +252,13 @@ class TestThemeCreatorIntegration(unittest.TestCase):
         # but we can test that it creates the dialog
         with patch("fpdb_3_legacy.ThemeCreatorDialog.ThemeCreatorDialog") as mock_dialog_class:
             mock_dialog = Mock()
-            mock_dialog.exec_.return_value = 0  # Cancelled
+            mock_dialog.exec.return_value = 0  # Cancelled
             mock_dialog_class.return_value = mock_dialog
 
             result = show_theme_creator()
 
             mock_dialog_class.assert_called_once()
-            mock_dialog.exec_.assert_called_once()
+            mock_dialog.exec.assert_called_once()
             self.assertEqual(result, 0)
 
 
