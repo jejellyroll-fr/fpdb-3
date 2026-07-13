@@ -26,13 +26,12 @@ Handles Hold'em, Omaha, Short Deck and other game types from GGPoker.
 import datetime
 import re
 from decimal import Decimal
-from typing import TYPE_CHECKING, ClassVar
+from typing import Any, ClassVar, TypeAlias
 
 from fpdb_3_legacy.HandHistoryConverter import FpdbHandPartial, FpdbParseError, HandHistoryConverter
-
-if TYPE_CHECKING:
-    from fpdb_3_legacy.Hand import Hand
 from fpdb_3_legacy.loggingFpdb import get_logger
+
+Hand: TypeAlias = Any
 
 # GGpoker HH Format
 log = get_logger("ggpoker_parser")
@@ -148,6 +147,7 @@ class GGPoker(HandHistoryConverter):
     }
 
     currencies: ClassVar[dict[str, str]] = {"$": "USD", "": "T$", "¥": "CNY"}
+    compiledPlayers: set[str] = set()
 
     # Poker Hand #TM316262814: Tournament #9364957, WSOP #77: $5,000 No Limit Hold'em Main Event [Flight W],
     # $25M GTD Hold'em No Limit - Level10 (1,000/2,000) - 2020/08/30 15:49:08
@@ -391,7 +391,8 @@ class GGPoker(HandHistoryConverter):
         info = {}
 
         # Limit type
-        info["limitType"] = self.limits.get(mg.get("LIMIT"), "pl")
+        limit = mg.get("LIMIT")
+        info["limitType"] = self.limits.get(limit, "pl") if isinstance(limit, str) else "pl"
 
         # Game base and category
         if "GAME" in mg:
@@ -408,9 +409,9 @@ class GGPoker(HandHistoryConverter):
 
         return info
 
-    def _parse_game_type_and_currency(self, mg: dict) -> dict[str, str]:
+    def _parse_game_type_and_currency(self, mg: dict) -> dict[str, Any]:
         """Parse game type and currency information."""
-        info = {}
+        info: dict[str, Any] = {}
 
         # Currency
         if "CURRENCY" in mg:
@@ -1017,9 +1018,9 @@ class GGPoker(HandHistoryConverter):
             for line in post.splitlines():
                 if not line.startswith("Seat "):
                     continue
-                m = self.re_collect_pot.search(line)
-                if m:
-                    player = m.group("PNAME")
+                collect_match = self.re_collect_pot.search(line)
+                if collect_match:
+                    player = collect_match.group("PNAME")
                     win_matches = re.finditer(r"(?:won|collected)\s+\(?{CUR}(?P<POT>[,.\d]+)\)?".format(**self.substitutions), line, re.IGNORECASE)
                     for wm in win_matches:
                         pot = self.clearMoneyString(wm.group("POT"))
