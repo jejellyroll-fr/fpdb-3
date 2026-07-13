@@ -205,8 +205,7 @@ class OnGame(HandHistoryConverter):
             )
             # Seat 5: mleo17 ($3.40), net: +$2.57, [Jd, Qd] (TWO_PAIR QUEEN, JACK)
             self.re_ShownCards = re.compile(
-                "^Seat (?P<SEAT>[0-9]+): (?P<PNAME>.*) \\(.*\\), net:.* \\[(?P<CARDS>.*)\\](?:[ \\t]+\\((?P<STRING>.+)\\))?.*"
-                % self.substitutions,
+                "^Seat (?P<SEAT>[0-9]+): (?P<PNAME>.*) \\(.*\\), net:.* \\[(?P<CARDS>.*)\\](?:[ \\t]+\\((?P<STRING>.+)\\))?.*",
                 re.MULTILINE,
             )
             self.re_sitsOut = re.compile("%(PLYR)s sits out" % self.substitutions, re.MULTILINE)
