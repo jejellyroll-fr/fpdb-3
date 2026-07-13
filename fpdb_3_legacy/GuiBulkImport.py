@@ -235,7 +235,7 @@ class GuiBulkImport(QWidget):
                     partial=partial,
                     skipped=skipped,
                     errs=errs,
-                    elapsed=f"{elapsed:.2f}",
+                    elapsed=elapsed,
                 ),
             )
 
