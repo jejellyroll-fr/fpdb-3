@@ -151,6 +151,29 @@ def test_reset_sequences_noop_for_non_postgresql():
         db.get_cursor.assert_not_called()
 
 
+def test_set_autocommit_toggles_flag_after_committing():
+    conn = MagicMock()
+    dialects.dialect_for_server("postgresql").set_autocommit(conn, True)
+    conn.commit.assert_called_once()  # must not toggle mid-transaction
+    assert conn.autocommit is True
+    dialects.dialect_for_server("postgresql").set_autocommit(conn, False)
+    assert conn.autocommit is False
+
+
+def test_set_autocommit_falls_back_without_autocommit_attribute():
+    class OldConn:
+        def __init__(self):
+            self.levels = []
+
+        def set_isolation_level(self, level):
+            self.levels.append(level)
+
+    conn = OldConn()
+    dialects.dialect_for_server("postgresql").set_autocommit(conn, True)
+    dialects.dialect_for_server("postgresql").set_autocommit(conn, False)
+    assert conn.levels == [0, 1]  # legacy psycopg2 integer API
+
+
 def test_reset_sequences_postgresql_sets_each_sequence():
     db = _db(dialects.PGSQL)
     cursor = db.get_cursor.return_value

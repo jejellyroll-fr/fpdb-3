@@ -1734,23 +1734,14 @@ class Database:
     def _pg_set_isolation(self, level: int) -> None:
         """psycopg2/psycopg3 compatibility for the old ``set_isolation_level(int)``.
 
-        psycopg2 used ``connection.set_isolation_level(0)`` for autocommit (needed
-        around DDL such as CREATE/DROP INDEX, VACUUM and ANALYZE) and ``(1)`` to
-        return to a normal read-committed transaction. psycopg3 has no level 0 —
-        its ``IsolationLevel`` enum starts at 1, so ``set_isolation_level(0)``
-        raises "0 is not a valid IsolationLevel" — and instead exposes an
-        ``autocommit`` flag. Map the old integers onto that flag, which works on
-        both drivers (psycopg2 connections also have ``autocommit``).
+        Level 0 meant autocommit (needed around DDL such as CREATE/DROP INDEX,
+        VACUUM and ANALYZE) and 1 meant a normal transaction. The psycopg2/psycopg3
+        compatibility now lives in the Dialect; this maps the old integer onto its
+        ``set_autocommit`` flag.
         """
-        conn = self.connection
-        if hasattr(conn, "autocommit"):
-            try:
-                conn.commit()  # autocommit cannot be toggled with an open transaction
-            except Exception:  # noqa: BLE001 - nothing to commit is fine
-                pass
-            conn.autocommit = level == 0
-        else:  # pragma: no cover - only a very old psycopg2 would lack autocommit
-            conn.set_isolation_level(level)
+        from fpdb_3_legacy import dialects
+
+        dialects.dialect_for_backend(self.backend).set_autocommit(self.connection, level == 0)
 
     def transaction(self) -> DatabaseTransaction:
         """Return a transaction context manager for this database."""
