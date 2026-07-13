@@ -76,8 +76,12 @@ Les bugs multi-backend récents (`Rank` réservé, `boolean` vs `smallint`, `set
 
 ---
 
-## Vague 4 — Domaine poker ♠️
+## Vague 4 — Domaine poker ♠️ — 🟡 EN COURS
 
+**Fait (2026-07-12)**
+- ✅ **Suite de tests remise au vert** : 10 échecs pré-existants (depuis l'import initial) corrigés → **3095 passed, 0 failed**. Diagnostics : mocks PokerStars périmés (`readHoleCards`/`readCommunityCards` lisent désormais `holeStreets`/`handText` — board recovery), assertion `markStreets` (`\r\n`→`\n`), garde `hudcache` (comptait `CACHE_KEYS` sans `HUDCACHE_EXTRA_KEYS` → 253 vs 257 corrects), index absolus fragiles (`isCashOut`), seuil arbitraire (200→400), fixture `tourneysummary` avec BOM UTF-16 accidentel.
+
+**Reste à faire**
 - **Stats** (`Stats.py`) : compléter les stats modernes / par rue (3bet/4bet/squeeze par position, fold-to-cbet turn/river, WWSF, WTSD, ranges) + **tests de valeurs** sur mains connues.
 - **Parsers** (26 sites) : harnais de **tests de régression par fichier de main** (fixtures) pour détecter les dérives de format ; prioriser les formats vivants (GGPoker, PokerStars, Winamax), marquer *legacy* les sites morts.
 - **Équité / ranges** : intégrer proprement `pypoker-eval/` (dépendance optionnelle) pour equity/EV dans le replayer et les rapports.
@@ -109,5 +113,5 @@ Les bugs multi-backend récents (`Rank` réservé, `boolean` vs `smallint`, `set
 | **1** | Menus déclaratifs + réorg ; fondation i18n | ~3j | Élevée | ✅ Fait |
 | **2** | i18n en largeur (sélecteur, marquage, formats) | ~5j | Élevée | ✅ Marquage fini |
 | **3** | Abstraction de dialecte SQL | ~4-6j | Élevée | ✅ Quirks consolidés |
-| **4** | Domaine poker (stats, parsers, equity) | ~1-2 sem | Moyen/élevé | À faire |
+| **4** | Domaine poker (stats, parsers, equity) | ~1-2 sem | Moyen/élevé | 🟡 En cours |
 | **5** | Dette longue (god-modules, mypy, ruff) | continu | Moyen | À faire |
