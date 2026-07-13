@@ -67,6 +67,9 @@ jobs:
           fpdb_3_legacy/Deck.py
           fpdb_3_legacy/TourneySummary.py
           fpdb_3_legacy/PartyPokerSummary.py
+          fpdb_3_legacy/PacificPokerSummary.py
+          fpdb_3_legacy/UnibetSummary.py
+          fpdb_3_legacy/WinningSummary.py
       - name: Lint newly modernized modules
         run: >-
           ruff check
