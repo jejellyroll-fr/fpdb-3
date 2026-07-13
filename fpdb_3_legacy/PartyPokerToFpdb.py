@@ -23,6 +23,7 @@ from __future__ import annotations
 import datetime
 import re
 from decimal import Decimal, InvalidOperation
+from typing import Any
 
 from fpdb_3_legacy.HandHistoryConverter import FpdbHandPartial, FpdbParseError, HandHistoryConverter
 from fpdb_3_legacy.loggingFpdb import get_logger
@@ -36,6 +37,17 @@ PARTYPOKER_DECIMAL_ERRORS = (InvalidOperation, TypeError, ValueError)
 
 
 class PartyPoker(HandHistoryConverter):
+    compiledPlayers: set[str] = set()
+    mixes: dict[str, str]
+    re_Antes: Any
+    re_PostSB: Any
+    re_PostBB: Any
+    re_PostBUB: Any
+    re_PostDead: Any
+    re_HeroCards: Any
+    re_CollectPot: Any
+    re_ShownCards: Any
+    db: Any
     sitename = "PartyPoker"
     codepage = ("utf8", "cp1252")
     siteId = 9
@@ -336,9 +348,9 @@ class PartyPoker(HandHistoryConverter):
 
         # Initialize instance variables BEFORE super().__init__() because
         # autostart=True triggers start() which uses these attributes
-        self.last_bet = {}
-        self.player_bets = {}
-        self.playerMap = {}
+        self.last_bet: dict[str, Any] = {}
+        self.player_bets: dict[str, Any] = {}
+        self.playerMap: dict[str, Any] = {}
 
         # Define and initialize regex patterns BEFORE super().__init__()
         # because autostart=True triggers start() -> processHand() which uses re_Action
@@ -484,7 +496,8 @@ class PartyPoker(HandHistoryConverter):
 
         # Clean input text
         handText = handText.replace("\x00", "")
-        info, extra = {}, {}
+        info: dict[str, Any] = {}
+        extra: dict[str, Any] = {}
 
         # Search game info using different patterns
         patterns = {
@@ -542,8 +555,7 @@ class PartyPoker(HandHistoryConverter):
 
         # Set site info if available
         if mg.get("SITE"):
-            self.sitename = self.sites.get(mg["SITE"], (self.sitename,))[0]
-            self.siteId = self.sites.get(mg["SITE"], (self.siteId,))[1]
+            self.sitename, self.siteId = self.sites.get(mg["SITE"], (self.sitename, self.siteId))
             log.info(
                 f"Site determined site_name: {self.sitename}, site_id: {self.siteId}",
             )
@@ -638,7 +650,7 @@ class PartyPoker(HandHistoryConverter):
             )
 
         # Set currency
-        info["currency"] = self.currencies.get(mg.get("CURRENCY"), "EUR")
+        info["currency"] = self.currencies.get(str(mg.get("CURRENCY") or ""), "EUR")
         log.debug(f"Currency set currency: {info['currency']}")
 
         # Set mixed game type if present
