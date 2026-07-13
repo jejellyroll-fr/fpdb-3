@@ -78,6 +78,7 @@ jobs:
           fpdb_3_legacy/FullTiltPokerSummary.py
           fpdb_3_legacy/BovadaSummary.py
           fpdb_3_legacy/parser_registry.py
+          fpdb_3_legacy/IdentifySite.py
       - name: Lint newly modernized modules
         run: >-
           ruff check
