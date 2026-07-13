@@ -21,9 +21,11 @@ import os
 import re
 import shutil
 import sys
+from collections.abc import Callable
 from time import process_time, time
+from typing import Any
 
-import zmq
+import zmq as _zmq
 from PySide6.QtCore import QCoreApplication
 from PySide6.QtWidgets import QDialog, QLabel, QProgressBar, QVBoxLayout
 
@@ -32,6 +34,8 @@ from fpdb_3_legacy.Exceptions import FpdbHandDuplicate, FpdbHandPartial, FpdbPar
 from fpdb_3_legacy.iPoker.dispatcher import get_parser_class_for_path as get_ipoker_parser_class_for_path
 from fpdb_3_legacy.loggingFpdb import get_logger
 from fpdb_3_legacy.parser_registry import get_parser_class, get_summary_class
+
+zmq: Any = _zmq
 
 # Event-driven imports (optional, for new architecture)
 try:
@@ -137,20 +141,20 @@ class Importer:
         self.parent = parent
         self.event_bus = event_bus
 
-        self.import_issues = []
+        self.import_issues: list[Any] = []
         self.idsite = IdentifySite.IdentifySite(config)
 
-        self.filelist = {}
-        self.dirlist = {}
-        self.siteIds = {}
-        self.removeFromFileList = {}  # to remove deleted files
+        self.filelist: dict[str, IdentifySite.FPDBFile] = {}
+        self.dirlist: dict[Any, list[Any]] = {}
+        self.siteIds: dict[str, int] = {}
+        self.removeFromFileList: dict[str, bool] = {}  # to remove deleted files
         self.monitor = False
-        self.updatedsize = {}
-        self.updatedtime = {}
+        self.updatedsize: dict[str, int] = {}
+        self.updatedtime: dict[str, float] = {}
         self.lines = None
         self.faobs = None  # File as one big string
         self.mode = None
-        self.pos_in_file = {}  # dict to remember how far we have read in the file
+        self.pos_in_file: dict[str, int] = {}  # dict to remember how far we have read in the file
 
         # Configuration of default parameters
         self.callHud = self.config.get_import_parameters().get("callFpdbHud")
@@ -172,17 +176,22 @@ class Importer:
             self.writerdbs.append(Database.Database(self.config, sql=self.sql))
 
         # Modification: specify port for ZMQ
-        self.zmq_sender = None
+        self.zmq_sender: ZMQSender | None = None
 
         # HandDataReporter for quality analysis
         self.hand_data_reporter = None
 
         process_time()  # init clock in windows
-        self.progress_start_cb = None
-        self.progress_update_cb = None
-        self.progress_end_cb = None
+        self.progress_start_cb: Callable[[int], None] | None = None
+        self.progress_update_cb: Callable[[str, str], None] | None = None
+        self.progress_end_cb: Callable[[], None] | None = None
 
-    def set_progress_callbacks(self, start_cb, update_cb, end_cb) -> None:
+    def set_progress_callbacks(
+        self,
+        start_cb: Callable[[int], None],
+        update_cb: Callable[[str, str], None],
+        end_cb: Callable[[], None],
+    ) -> None:
         """Configure progress callbacks for thread-safe UI updates."""
         self.progress_start_cb = start_cb
         self.progress_update_cb = update_cb
@@ -350,7 +359,7 @@ class Importer:
         Resets the updated size, update time, file position, and file list dictionaries to empty.
         """
         self.updatedsize = {}
-        self.updatetime = {}
+        self.updatedtime = {}
         self.pos_in_file = {}
         self.filelist = {}
 
@@ -399,6 +408,9 @@ class Importer:
         Args:
             fpdbfile: The file object to add and update with a file ID.
         """
+        if fpdbfile.site is None:
+            msg = f"Cannot register unidentified file: {fpdbfile.path}"
+            raise ValueError(msg)
         file = os.path.splitext(os.path.basename(fpdbfile.path))[0]
         # Filenames are str on Python 3; decode only if a bytes path slips in.
         if isinstance(file, bytes):
@@ -438,16 +450,19 @@ class Importer:
 
         self.addFileToList(fpdbfile)
         self.filelist[filename] = fpdbfile
+        fpdb_site = fpdbfile.site
+        if fpdb_site is None:
+            return False
         if site not in self.siteIds:
             # Get id from Sites table in DB
-            result = self.database.get_site_id(fpdbfile.site.name)
+            result = self.database.get_site_id(fpdb_site.name)
             if len(result) == 1:
-                self.siteIds[fpdbfile.site.name] = result[0][0]
+                self.siteIds[fpdb_site.name] = result[0][0]
             elif len(result) == 0:
-                log.warning(f"Database ID for {fpdbfile.site.name} not found")
+                log.warning(f"Database ID for {fpdb_site.name} not found")
             else:
                 log.warning(
-                    f"More than 1 Database ID found for {fpdbfile.site.name}",
+                    f"More than 1 Database ID found for {fpdb_site.name}",
                 )
 
         return True
@@ -752,19 +767,24 @@ class Importer:
         toterrors = 0
 
         # prepare progress popup window
-        has_callbacks = hasattr(self, 'progress_start_cb') and self.progress_start_cb is not None
+        has_callbacks = all(
+            callback is not None
+            for callback in (self.progress_start_cb, self.progress_update_cb, self.progress_end_cb)
+        )
 
         if not has_callbacks:
             ProgressDialog = ImportProgressDialog(len(self.filelist), self.parent)
             ProgressDialog.resize(500, 200)
             ProgressDialog.show()
         else:
+            assert self.progress_start_cb is not None
             self.progress_start_cb(len(self.filelist))
 
         for f in self.filelist:
             if not has_callbacks:
                 ProgressDialog.progress_update(f, str(self.database.getHandCount()))
             else:
+                assert self.progress_update_cb is not None
                 self.progress_update_cb(f, str(self.database.getHandCount()))
 
             try:
@@ -801,6 +821,7 @@ class Importer:
             ProgressDialog.accept()
             del ProgressDialog
         else:
+            assert self.progress_end_cb is not None
             self.progress_end_cb()
 
         return totstored, totdups, totpartial, totskipped, toterrors
@@ -940,11 +961,8 @@ class Importer:
                         try:
                             if not os.path.isdir(f):
                                 # Extract site name from the file object
-                                site_name = (
-                                    self.filelist[f].site.name
-                                    if self.filelist[f] and self.filelist[f].site
-                                    else "Unknown"
-                                )
+                                tracked_site = self.filelist[f].site
+                                site_name = tracked_site.name if tracked_site is not None else "Unknown"
 
                                 # Extract hand number from filename (assuming it's in the filename)
                                 import re
@@ -975,10 +993,9 @@ class Importer:
                         try:
                             if not os.path.isdir(f):
                                 # Use detected sitename if available, otherwise fall back to config sitename
+                                tracked_site = self.filelist[f].site
                                 site_name = detected_sitename or (
-                                    self.filelist[f].site.name
-                                    if self.filelist[f] and self.filelist[f].site
-                                    else "Unknown"
+                                    tracked_site.name if tracked_site is not None else "Unknown"
                                 )
 
                                 # Extract hand number from filename
@@ -1075,7 +1092,11 @@ class Importer:
         if self.hand_data_reporter:
             self.hand_data_reporter.start_file(fpdbfile.path)
 
-        filter_name = fpdbfile.site.filter_name
+        fpdb_site = fpdbfile.site
+        if fpdb_site is None:
+            msg = f"Cannot import unidentified file: {fpdbfile.path}"
+            raise ValueError(msg)
+        filter_name = fpdb_site.filter_name
         obj = get_parser_class(filter_name)
         if filter_name == "iPoker":
             obj = get_ipoker_parser_class_for_path(fpdbfile.path)
@@ -1092,13 +1113,13 @@ class Importer:
                 autostart=False,
                 starsArchive=fpdbfile.archive,
                 ftpArchive=fpdbfile.archive,
-                sitename=fpdbfile.site.name,
+                sitename=fpdb_site.name,
             )
             if filter_name == "PartyPoker":
                 # Party tournament results are embedded in hand histories.
                 # Reuse the Importer's connection without making standalone
                 # hand parsing open a database by itself.
-                hhc.db = self.database
+                setattr(hhc, "db", self.database)
             hhc.setAutoPop(self.mode == "auto")
             hhc.start()
 
@@ -1313,10 +1334,11 @@ class Importer:
                         log.info(f"ZMQ DEBUG - to_hud contains {len(to_hud)} hands: {to_hud}")
                         if self.zmq_sender is None:
                             self.zmq_sender = ZMQSender()
+                        zmq_sender = self.zmq_sender
                         for hid in to_hud:
                             try:
                                 log.info(f"Sending hand ID {hid} to HUD via ZMQ socket")
-                                self.zmq_sender.send_hand_id(hid)
+                                zmq_sender.send_hand_id(hid)
                             except OSError as e:
                                 log.exception(f"Failed to send hand ID to HUD via socket: {e}")
 

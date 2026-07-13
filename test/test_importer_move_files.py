@@ -13,8 +13,11 @@ from __future__ import annotations
 import os
 import sys
 
+import pytest
+
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
+from fpdb_3_legacy.IdentifySite import FPDBFile
 from fpdb_3_legacy.Importer import Importer
 
 
@@ -103,6 +106,31 @@ def test_setters_populate_settings():
     assert imp.settings["moveFailedFilesDir"] == "/data/failed"
 
 
+def test_clear_file_list_resets_updated_time_tracking() -> None:
+    """Regression: clearFileList must reset ``updatedtime``, not a misspelled shadow."""
+    imp = _make_importer({})
+    imp.updatedsize = {"hand.txt": 10}
+    imp.updatedtime = {"hand.txt": 123.0}
+    imp.pos_in_file = {"hand.txt": 5}
+    imp.filelist = {"hand.txt": object()}
+
+    imp.clearFileList()
+
+    assert imp.updatedsize == {}
+    assert imp.updatedtime == {}
+    assert imp.pos_in_file == {}
+    assert imp.filelist == {}
+    assert not hasattr(imp, "updatetime")
+
+
+def test_unidentified_file_cannot_be_registered() -> None:
+    imp = _make_importer({})
+    unidentified = FPDBFile("unknown-room.txt")
+
+    with pytest.raises(ValueError, match="Cannot register unidentified file"):
+        imp.addFileToList(unidentified)
+
+
 def test_move_failure_is_swallowed(tmp_path):
     """A move that fails (missing source) is logged, not raised."""
     imp = _make_importer(
@@ -113,6 +141,4 @@ def test_move_failure_is_swallowed(tmp_path):
 
 
 if __name__ == "__main__":
-    import pytest
-
     pytest.main([__file__, "-v"])

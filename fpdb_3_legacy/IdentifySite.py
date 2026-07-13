@@ -69,6 +69,7 @@ class FPDBFile:
         self.archiveDivider = False
         self.gametype: object = False
         self.hero = "-"
+        self.fileId: int | None = None
 
 
 class Site:

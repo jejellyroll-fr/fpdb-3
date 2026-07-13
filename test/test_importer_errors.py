@@ -225,10 +225,10 @@ def test_error_triggers_autopop(importer, mock_fpdb_file, monkeypatch, caplog) -
 
     # --- PATCH CORRECTION ---
     # Patch 'os.path.exists' WHERE IT IS IMPORTED/USED in the Importer module
-    monkeypatch.setattr("Importer.os.path.exists", lambda path: True)
+    monkeypatch.setattr("fpdb_3_legacy.Importer.os.path.exists", lambda path: True)
     # Patch 'os.stat' WHERE IT IS IMPORTED/USED in the Importer module
     monkeypatch.setattr(
-        "Importer.os.stat",
+        "fpdb_3_legacy.Importer.os.stat",
         lambda path: os.stat_result((0, 0, 0, 0, 0, 0, 100, 0, time.time() - 10, 0)),
     )
     # -------------------------
