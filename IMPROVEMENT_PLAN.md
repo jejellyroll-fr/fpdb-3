@@ -61,16 +61,18 @@ Tests ajoutés : `test/test_menu_layout.py`, `test/test_translations.py`.
 
 Les bugs multi-backend récents (`Rank` réservé, `boolean` vs `smallint`, `set_isolation_level(0)`, `session_replication_role`) viennent tous de variantes par backend codées en dur et éparpillées.
 
-**Fait (2026-07-12) — étape 1**
-- ✅ `fpdb_3_legacy/dialects.py` : classe `Dialect` + `SqliteDialect`/`PostgresDialect`/`MySQLDialect` possédant les quirks — placeholder, `quote_identifier`, `list_tables`, `drop_all_tables`, `suspend/restore_foreign_keys` (PG drop+recreate sans superuser), `boolean_columns`/`coerce_row`, `reset_sequences` — + fabriques `dialect_for_backend`/`dialect_for_server`. Tests : `test/test_dialects.py`.
-- ✅ `db_migrate.py` : **délègue** toute décision par-backend au dialecte (API publique et comportement inchangés).
+**Fait (2026-07-12) — étapes 1 à 3**
+- ✅ `fpdb_3_legacy/dialects.py` : classe `Dialect` + `SqliteDialect`/`PostgresDialect`/`MySQLDialect` possédant les quirks — placeholder, `quote_identifier` (casse-préservée), `quote_literal`, `set_autocommit`, `list_tables`, `drop_all_tables`, `suspend/restore_foreign_keys` (PG drop+recreate sans superuser), `boolean_columns`/`coerce_row`, `reset_sequences` — + fabriques `dialect_for_backend`/`dialect_for_server`. Tests : `test/test_dialects.py`.
+- ✅ `db_migrate.py` : délègue toute décision par-backend au dialecte.
+- ✅ `db_backends.create_database` : quoting identifiants/littéraux (rôle/base) via le dialecte.
+- ✅ `Database._pg_set_isolation` : délègue à `dialect.set_autocommit` (shim psycopg2/3 centralisé).
 
-**Reste à faire**
-- Faire déléguer `db_backends.create_database` (quoting rôle/base) au dialecte.
-- Migrer `Database._pg_set_isolation` → `dialect.set_autocommit` (module central, prudence).
-- À terme, faire produire par le dialecte le quoting d'identifiants de `SQL.py` (le fix `Rank`) — gros chantier séparé.
+→ **Les 3 quirks à l'origine des bugs multi-backend (migration, création de base, isolation) sont désormais dans le dialecte.**
 
-**Effort restant** ~3-5j · **Impact** élevé (fiabilité du multi-backend).
+**Reste à faire (gros chantier séparé, optionnel)**
+- Faire produire par le dialecte le quoting d'identifiants de `SQL.py` (12k lignes de requêtes par-backend en dur ; le fix `Rank`). Rendements décroissants, risque élevé.
+
+**Impact** élevé (fiabilité du multi-backend) — atteint pour l'essentiel.
 
 ---
 
@@ -106,6 +108,6 @@ Les bugs multi-backend récents (`Rank` réservé, `boolean` vs `smallint`, `set
 |---|---|---|---|---|
 | **1** | Menus déclaratifs + réorg ; fondation i18n | ~3j | Élevée | ✅ Fait |
 | **2** | i18n en largeur (sélecteur, marquage, formats) | ~5j | Élevée | ✅ Marquage fini |
-| **3** | Abstraction de dialecte SQL | ~4-6j | Élevée | 🟡 En cours |
+| **3** | Abstraction de dialecte SQL | ~4-6j | Élevée | ✅ Quirks consolidés |
 | **4** | Domaine poker (stats, parsers, equity) | ~1-2 sem | Moyen/élevé | À faire |
 | **5** | Dette longue (god-modules, mypy, ruff) | continu | Moyen | À faire |
