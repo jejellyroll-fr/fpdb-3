@@ -118,6 +118,7 @@ Les bugs multi-backend récents (`Rank` réservé, `boolean` vs `smallint`, `set
 - ✅ **Point d’entrée API** (2026-07-13) : `fpdb_api.py`, lanceur Uvicorn avec factory applicative, rejoint le ratchet CI.
 - ✅ **Rapporteur de données de mains** (2026-07-13) : schémas de rapports par fichier/session, analyse d’échec et structures de cartes/actions explicités ; dette mypy ramenée de 41 à zéro sans modifier l’extraction. Le module rejoint le ratchet CI.
 - ✅ **Détection de fuites** (2026-07-13) : le moteur de métriques, règles et recommandations d’exploitation, déjà conforme, rejoint le ratchet CI.
+- ✅ **Gestionnaire d’erreurs d’import** (2026-07-13) : classification temporaire/récupérable/permanente et historique de retry, déjà conformes, rejoignent le ratchet CI.
 - **Découper les god-modules** : `SQL.py` (requêtes par domaine / fichiers `.sql`), `Database.py` (connexion / DDL / cache HUD / requêtes), `Stats.py` (par famille). Incrémental, avec tests de non-régression.
 - **Qualité outillée** : résorber la dette `ruff` (~2900) par paliers (règle par règle, `--fix`, baseline) ; introduire **mypy/pyright** en mode progressif ; convertir les 78 `TODO/FIXME` en tâches traçables ; clarifier/supprimer le dossier `fpdb/`.
 
