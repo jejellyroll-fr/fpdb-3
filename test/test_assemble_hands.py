@@ -235,7 +235,7 @@ class TestAssembleHands:
 
         self._setup_and_assemble_hand(stats, setup_run_it_twice)
 
-        assert stats.hands["runItTwice"] == True
+        assert stats.hands["runItTwice"] is True
         assert len(stats.hands["boards"]) == 2
 
         # Check first board
@@ -258,7 +258,7 @@ class TestAssembleHands:
         self._setup_and_assemble_hand(stats, setup_split_pot)
 
         # In split games, boards are handled differently
-        assert stats.hands["runItTwice"] == False
+        assert stats.hands["runItTwice"] is False
         assert len(stats.hands["boards"]) == 1
 
     def test_empty_actions(self, stats: DerivedStats) -> None:
