@@ -418,6 +418,8 @@ class GuiOpponentsReport(QSplitter):
         self.filters = Filters.Filters(self.db, display=filters_display)
         self.filters.registerButton2Name(_("Refresh"))
         self.filters.registerButton2Callback(self.refreshStats)
+        filters_layout = self.filters.layout()
+        assert filters_layout is not None
 
         # Minimum head-to-head hands selector.
         minhands_box = QWidget()
@@ -428,7 +430,7 @@ class GuiOpponentsReport(QSplitter):
         self.minhands_spin.setRange(1, 100000)
         self.minhands_spin.setValue(20)
         minhands_layout.addWidget(self.minhands_spin)
-        self.filters.layout().addWidget(minhands_box)
+        filters_layout.addWidget(minhands_box)
 
         # Top-N opponents selector (caps the result set, like DriveHUD's top 50).
         topn_box = QWidget()
@@ -439,7 +441,7 @@ class GuiOpponentsReport(QSplitter):
         self.maxopponents_spin.setRange(1, 100000)
         self.maxopponents_spin.setValue(50)
         topn_layout.addWidget(self.maxopponents_spin)
-        self.filters.layout().addWidget(topn_box)
+        filters_layout.addWidget(topn_box)
 
         # Sort mode selector.
         sort_box = QWidget()
@@ -451,7 +453,7 @@ class GuiOpponentsReport(QSplitter):
             self.sort_combo.addItem(label)
         self.sort_combo.currentIndexChanged.connect(self._on_sort_changed)
         sort_layout.addWidget(self.sort_combo)
-        self.filters.layout().addWidget(sort_box)
+        filters_layout.addWidget(sort_box)
 
         scroll = QScrollArea()
         scroll.setObjectName("filterSidebar")

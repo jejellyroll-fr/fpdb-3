@@ -622,7 +622,7 @@ class GuiDatabase(QWidget):
 
         # Progress widget: busy-spinner while the schema is rebuilt, then a bar
         # that advances one step per copied table.
-        dialog = QProgressDialog(f"Preparing '{dest}'…", None, 0, 0, self)
+        dialog = QProgressDialog(f"Preparing '{dest}'…", "", 0, 0, self)
         dialog.setWindowTitle(_("Migrating database"))
         dialog.setWindowModality(Qt.WindowModality.WindowModal)
         dialog.setCancelButton(None)  # a half-finished migration is worse than waiting
