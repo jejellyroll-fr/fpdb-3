@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from time import time
+from typing import Any
 
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QStandardItem, QStandardItemModel
@@ -39,8 +40,8 @@ class GuiTourneyPlayerStats(QSplitter):
         self.main_window = mainwin
         self.debug = debug
 
-        self.liststore = []
-        self.listcols = []
+        self.liststore: list[Any] = []
+        self.listcols: list[list[str]] = []
 
         filters_display = {
             "Heroes": True,
@@ -53,7 +54,7 @@ class GuiTourneyPlayerStats(QSplitter):
 
         self.stats_frame = None
         self.stats_vbox = None
-        self.detailFilters = []
+        self.detailFilters: list[Any] = []
 
         self.filters = Filters.Filters(self.db, display=filters_display)
         self.filters.registerButton2Name(_("Refresh Stats"))
@@ -169,7 +170,7 @@ class GuiTourneyPlayerStats(QSplitter):
 
         # Create Header
         for _col, column in enumerate(self.columns):
-            s = column[colheading]
+            s = str(column[colheading])
             self.listcols[grid].append(s)
         model.setHorizontalHeaderLabels(self.listcols[grid])
 
@@ -183,9 +184,9 @@ class GuiTourneyPlayerStats(QSplitter):
                         row_data[colnames.index("speed")] == "Hyper"
                         and row_data[colnames.index("siteName")] == "Full Tilt Poker"
                     ):
-                        value = value + " " + "Super Turbo"
+                        value = f"{value} Super Turbo"
                     else:
-                        value = value + " " + row_data[colnames.index("speed")]
+                        value = f"{value} {row_data[colnames.index('speed')]}"
                 if column[colalias] in ["knockout", "reEntry"]:
                     value = "Yes" if row_data[colnames.index(column[colalias])] == 1 else "No"
                 item = QStandardItem("")
@@ -274,7 +275,10 @@ class GuiTourneyPlayerStats(QSplitter):
         layout.addWidget(table)
 
         def _on_row_double_clicked(row: int, _col: int) -> None:
-            data = table.item(row, 0).data(Qt.ItemDataRole.UserRole)
+            item = table.item(row, 0)
+            if item is None:
+                return
+            data = item.data(Qt.ItemDataRole.UserRole)
             if not data:
                 return
             tid, tno, hands = data
@@ -476,15 +480,19 @@ class GuiTourneyPlayerStats(QSplitter):
             return result, colnames
 
     def refreshStats(self) -> None:
-        for i in reversed(range(self.stats_frame.layout().count())):
-            widgetToRemove = self.stats_frame.layout().itemAt(i).widget()
-            self.stats_frame.layout().removeWidget(widgetToRemove)
-            widgetToRemove.setParent(None)
+        if self.stats_frame is None or self.stats_frame.layout() is None:
+            return
+        layout = self.stats_frame.layout()
+        for i in reversed(range(layout.count())):
+            widgetToRemove = layout.itemAt(i).widget()
+            if widgetToRemove is not None:
+                layout.removeWidget(widgetToRemove)
+                widgetToRemove.setParent(None)
 
         self.liststore = []
         self.listcols = []
         self.stats_vbox = QSplitter(Qt.Orientation.Vertical)
-        self.stats_frame.layout().addWidget(self.stats_vbox)
+        layout.addWidget(self.stats_vbox)
         try:
             self.fillStatsFrame(self.stats_vbox)
         except ValueError as e:
