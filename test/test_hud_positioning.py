@@ -261,10 +261,12 @@ class TestHudStatSetSwitching(unittest.TestCase):
 
             # Should try refresh first
             self.parent_window.aw.refresh_stats_layout.assert_called_once()
-            self.parent_window.aw.update.assert_called_once_with(self.hud.stat_dict)
+            self.parent_window.aw.destroy.assert_called_once()
+            self.parent_window.aw.create.assert_called_once()
+            self.parent_window.aw.update_gui.assert_called_once_with(None)
 
             # Should log success, not restart
-            mock_log.info.assert_called_with("HUD refreshed with new stat set: %s", "StatSet1")
+            mock_log.info.assert_called_with("HUD rebuilt with new stat set: %s", "StatSet1")
             self.hud.parent.kill_hud.assert_not_called()
 
     def test_change_stat_set_restarts_on_refresh_failure(self) -> None:
@@ -280,7 +282,7 @@ class TestHudStatSetSwitching(unittest.TestCase):
 
             # Should log failure and restart
             mock_log.info.assert_called_with(
-                "Refreshing HUD failed, restarting to apply stat set '%s': %s",
+                "Rebuilding HUD failed, restarting to apply stat set '%s': %s",
                 "StatSet1",
                 unittest.mock.ANY,
             )
@@ -298,9 +300,10 @@ class TestHudStatSetSwitching(unittest.TestCase):
         game_params.xpad = 5
         game_params.ypad = 5
         game_params.stats = {
-            "stat1": Mock(rowcol=(0, 0), stat_name="vpip", popup="popup1", tip="tip1"),
-            "stat2": Mock(rowcol=(0, 1), stat_name="pfr", popup="popup2", tip="tip2"),
+            (0, 0): Mock(rowcol=(0, 0), stat_name="vpip", popup="popup1", tip="tip1"),
+            (0, 1): Mock(rowcol=(0, 1), stat_name="pfr", popup="popup2", tip="tip2"),
         }
+        game_params.blocks = []
         simple_hud.game_params = game_params
 
         # Call refresh_stats_layout

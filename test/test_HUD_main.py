@@ -52,6 +52,7 @@ def hud_main(app):
     options.dbname = "test_db"
     options.config = None
     options.errorsToConsole = False
+    options.log_level = "INFO"
     options.xloc = None
     options.yloc = None
 
@@ -539,9 +540,8 @@ def test_client_destroyed(hud_main) -> None:
 
 
 # Verifies that idle_create creates a new HUD and adds it to hud_dict, along with logging.
-@pytest.mark.parametrize("import_path", ["HUD_main.QLabel", "PySide6.QtWidgets.QLabel"])
-def test_idle_create(import_path, hud_main) -> None:
-    with patch(import_path), patch("HUD_main.log") as mock_log:
+def test_idle_create(hud_main) -> None:
+    with patch.object(HUD_main, "log") as mock_log:
         # Configuration
         mock_hud = MagicMock()
         mock_hud.tablehudlabel = MagicMock()
@@ -591,9 +591,7 @@ def test_idle_create(import_path, hud_main) -> None:
                 )
 
         # Check logs - the method creates a label with site and temp_key
-        expected_log_message = f"adding label {table.site} - {args.temp_key}"
-
-        assert any(call[0][0] == expected_log_message for call in mock_log.debug.call_args_list)
+        mock_log.debug.assert_any_call("adding label %s", f"{table.site} - {args.temp_key}")
 
 
 # Ensures that idle_update updates the HUD and auxiliary windows.

@@ -316,6 +316,7 @@ def test_bulk_import_2026_exports_ignore_non_hand_banner() -> None:
     db_params = config.get_db_parameters().copy()
     db_params.update(
         {
+            "db-backend": Database.SQLITE,
             "db-server": "sqlite",
             "db-databaseName": db_file.name,
             "db-host": "",
