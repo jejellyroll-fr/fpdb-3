@@ -25,8 +25,6 @@ from typing import Any, ClassVar
 from fpdb_3_legacy.HandHistoryConverter import FpdbHandPartial, FpdbParseError, HandHistoryConverter
 from fpdb_3_legacy.loggingFpdb import get_logger
 
-
-
 log = get_logger("parser")
 # BetOnline HH Format
 

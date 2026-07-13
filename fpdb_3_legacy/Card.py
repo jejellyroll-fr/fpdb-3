@@ -1,5 +1,6 @@
 """Card-related utilities for poker games."""
 from __future__ import annotations
+
 # Copyright 2008-2011 Carl Gherardi
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by

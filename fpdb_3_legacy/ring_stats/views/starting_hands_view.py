@@ -6,11 +6,13 @@ Affiche l'onglet 'Analyse des Mains' :
 """
 
 from __future__ import annotations
+
 import re
-from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QGridLayout, QLabel, QScrollArea, QFrame, QComboBox
+
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
+from PySide6.QtCore import Qt
+from PySide6.QtWidgets import QComboBox, QFrame, QGridLayout, QHBoxLayout, QLabel, QScrollArea, QVBoxLayout, QWidget
 
 from fpdb_3_legacy.ring_stats.styles import get_theme_palette
 

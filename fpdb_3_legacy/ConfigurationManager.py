@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 from __future__ import annotations
+
 """ConfigurationManager.py.
 
 Singleton manager for fpdb configuration with dynamic reload support.

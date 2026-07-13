@@ -1,5 +1,6 @@
 # Copyright 2009-2011 Matt Turnbull
 from __future__ import annotations
+
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
 # the Free Software Foundation, version 3 of the License.

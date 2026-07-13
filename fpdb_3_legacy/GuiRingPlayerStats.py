@@ -5,7 +5,9 @@ Conserve une compatibilité descendante totale et inclut le lanceur autonome pou
 """
 
 from __future__ import annotations
+
 import sys
+
 from PySide6.QtWidgets import QApplication, QMainWindow
 
 # Import de la classe modernisée depuis le package ring_stats

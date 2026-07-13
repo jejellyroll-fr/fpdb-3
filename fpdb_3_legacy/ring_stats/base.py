@@ -5,8 +5,10 @@ modernes, ainsi que le système d'exécution de requêtes asynchrones en arrièr
 """
 
 from __future__ import annotations
+
 from PySide6.QtCore import QThread, Signal
-from PySide6.QtWidgets import QTabWidget, QMessageBox
+from PySide6.QtWidgets import QMessageBox, QTabWidget
+
 from fpdb_3_legacy.ring_stats.styles import get_modern_qss
 
 

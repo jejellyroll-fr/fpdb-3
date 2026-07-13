@@ -4,7 +4,9 @@
 import copy
 import unittest
 from unittest.mock import Mock, patch
+
 import pytest
+
 pytestmark = pytest.mark.qt
 
 import fpdb_3_legacy.Aux_Base as Aux_Base

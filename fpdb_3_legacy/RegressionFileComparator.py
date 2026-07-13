@@ -7,7 +7,6 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-
 IGNORED_HAND_KEYS = {
     "fileId",
     "gameId",

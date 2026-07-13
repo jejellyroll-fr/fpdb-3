@@ -6,9 +6,11 @@ Widgets graphiques réutilisables pour les vues statistiques de FPDB :
 """
 
 from __future__ import annotations
-from PySide6.QtCore import Qt, QRectF
-from PySide6.QtGui import QPainter, QColor, QPen, QBrush
+
+from PySide6.QtCore import QRectF, Qt
+from PySide6.QtGui import QBrush, QColor, QPainter, QPen
 from PySide6.QtWidgets import QFrame, QLabel, QVBoxLayout, QWidget
+
 from fpdb_3_legacy.ring_stats.styles import get_theme_palette
 
 

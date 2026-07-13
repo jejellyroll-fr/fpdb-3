@@ -3244,6 +3244,7 @@ class ModernHudPreferences(QDialog):
         profile_name = self.profile_combo.currentText()
 
         import os
+
         from PySide6.QtWidgets import QFileDialog, QMessageBox
 
         filename, _ = QFileDialog.getSaveFileName(
@@ -3351,9 +3352,10 @@ class ModernHudPreferences(QDialog):
             )
 
     def import_profile(self) -> None:
-        from PySide6.QtWidgets import QFileDialog, QMessageBox, QInputDialog
         import os
         import xml.dom.minidom
+
+        from PySide6.QtWidgets import QFileDialog, QInputDialog, QMessageBox
 
         filename, _ = QFileDialog.getOpenFileName(
             self,

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from __future__ import annotations
+
 """Test script for Full Tilt Poker Run It Twice parser."""
 
 from fpdb.infrastructure.parsers.fulltilt_parser import FullTiltParser

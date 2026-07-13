@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 from __future__ import annotations
+
 """FPDB API - Web API server entry point"""
 
 import uvicorn

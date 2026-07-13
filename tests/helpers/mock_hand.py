@@ -34,7 +34,6 @@ from __future__ import annotations
 from decimal import Decimal
 from typing import Any
 
-
 _STREETS_HOLDEM = ["PREFLOP", "FLOP", "TURN", "RIVER"]
 _STREETS_ALL = [
     "PREFLOP",

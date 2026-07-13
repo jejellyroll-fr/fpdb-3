@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Tests for main() and module-level code coverage."""
 
+import os
 import subprocess
 import sys
-import os
 
 import pytest
 
@@ -12,7 +12,14 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 
 def test_deprecated_stats():
     """Test deprecated stats return format_no_data_stat tuples."""
-    from fpdb_3_legacy.Stats import iso, three_bet_vs_steal, call_vs_steal, avg_bet_size_flop, avg_bet_size_turn, avg_bet_size_river
+    from fpdb_3_legacy.Stats import (
+        avg_bet_size_flop,
+        avg_bet_size_river,
+        avg_bet_size_turn,
+        call_vs_steal,
+        iso,
+        three_bet_vs_steal,
+    )
 
     stat_dict = {"player1": {}}
 
@@ -67,7 +74,7 @@ def test_format_no_data_stat_with_denominator_only():
 
 def test_all_stats_via_do_stat():
     """Test calling all stats via do_stat to hit STAT_FUNCTIONS dispatch."""
-    from fpdb_3_legacy.Stats import do_stat, STATLIST
+    from fpdb_3_legacy.Stats import STATLIST, do_stat
 
     base_dict = {
         "p": {k: 10 for k in ["vpip", "vpip_opp", "street0Aggr", "street0AggrChance",

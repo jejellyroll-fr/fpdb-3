@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 from __future__ import annotations
+
 # -*- coding: utf-8 -*-
 
 # Copyright 2008-2011 Steffen Schaumburg
@@ -22,8 +23,8 @@ from fpdb_3_legacy import L10n
 
 _ = L10n.get_translation()
 
-from decimal import Decimal
 import datetime
+from decimal import Decimal
 
 from fpdb_3_legacy.Exceptions import FpdbParseError
 from fpdb_3_legacy.HandHistoryConverter import *

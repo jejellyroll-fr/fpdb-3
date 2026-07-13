@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from __future__ import annotations
+
 """
 Script de validation de la migration PySide6
 Vérifie que tous les composants Qt sont correctement migrés

@@ -677,6 +677,7 @@ class TestResizeWindowsRefLayout(unittest.TestCase):
 
     def test_resize_windows_freezes_missing_ref_fields(self) -> None:
         import types
+
         from fpdb_3_legacy.Hud import Hud as HudClass
 
         h = HudClass.__new__(HudClass)

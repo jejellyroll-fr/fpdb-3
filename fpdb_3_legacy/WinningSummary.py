@@ -20,7 +20,6 @@ import re
 from decimal import Decimal
 from typing import Any, ClassVar
 
-
 from fpdb_3_legacy.HandHistoryConverter import FpdbHandPartial, FpdbParseError, HandHistoryConverter
 from fpdb_3_legacy.loggingFpdb import get_logger
 from fpdb_3_legacy.TourneySummary import TourneySummary

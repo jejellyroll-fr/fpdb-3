@@ -1,5 +1,6 @@
 # fpdb-3-legacy/__init__.py
 from __future__ import annotations
+
 """
 FPDB-3 Legacy Module Package
 

@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 from __future__ import annotations
+
 """ThemeCreatorDialog.py
 
 Dialog for creating custom themes within fpdb.

@@ -5,6 +5,7 @@ synchronisées avec le ThemeManager de FPDB.
 """
 
 from __future__ import annotations
+
 from fpdb_3_legacy.ThemeManager import ThemeManager
 
 

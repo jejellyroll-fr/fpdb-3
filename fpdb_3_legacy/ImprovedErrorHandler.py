@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from __future__ import annotations
+
 """Improved error handler for import operations to prevent unnecessary HUD restarts.
 
 This module provides better error classification and handling to distinguish

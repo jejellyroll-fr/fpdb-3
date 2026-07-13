@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 # Copyright (c) 2009-2011 Eric Blade, and the FPDB team.
-
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
 # the Free Software Foundation, version 3 of the License.
@@ -15,13 +14,11 @@ from __future__ import annotations
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 # In the "official" distribution you can find the license in agpl-3.0.txt.
-
 # Ported from Python 2 to Python 3: the original relied on htmllib/formatter
 # (both removed from the stdlib). This module now builds on html.parser, with a
 # small compatibility shim that keeps the original start_<tag>/end_<tag>
 # dispatch and save_bgn()/save_end() text-capture API, so the parsing logic
 # below is unchanged.
-
 import urllib.request
 from html.parser import HTMLParser
 

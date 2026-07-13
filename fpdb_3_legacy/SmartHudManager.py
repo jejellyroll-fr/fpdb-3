@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from __future__ import annotations
+
 """Smart HUD Manager to prevent unnecessary HUD restarts.
 
 This module provides intelligent decision-making for HUD restarts,

@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 from __future__ import annotations
+
 """Mucked.py.
 
 Mucked cards display for FreePokerTools HUD.
@@ -9,10 +10,8 @@ from PySide6.QtCore import QObject, Qt
 from PySide6.QtGui import QPainter, QPixmap, QStandardItem, QStandardItemModel
 from PySide6.QtWidgets import QGridLayout, QLabel, QTableView, QVBoxLayout, QWidget
 
-from fpdb_3_legacy import Aux_Base
-
 #    FreePokerTools modules
-from fpdb_3_legacy import Card
+from fpdb_3_legacy import Aux_Base, Card
 
 #    Standard Library modules
 from fpdb_3_legacy.loggingFpdb import get_logger

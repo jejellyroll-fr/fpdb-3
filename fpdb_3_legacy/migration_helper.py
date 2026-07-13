@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from __future__ import annotations
+
 """Helper interactif pour la migration Python 3.13/3.14.
 
 Ce script guide l'utilisateur à travers le processus de migration

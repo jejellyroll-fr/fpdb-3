@@ -1,8 +1,7 @@
 # Code from http://ender.snowburst.org:4747/~jjohns/interlocks.py
 from __future__ import annotations
+
 # Thanks JJ!
-
-
 import base64
 import doctest
 import os

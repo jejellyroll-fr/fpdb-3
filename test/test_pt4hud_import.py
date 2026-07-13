@@ -296,9 +296,10 @@ def test_full_dialog_multiblock_preview_gets_real_geometry(tmp_path):
 @pytest.mark.skipif(not (os.path.exists(FIXTURE) and os.path.exists(EXAMPLE)), reason="fixtures missing")
 def test_import_emits_text_items_in_grid():
     """Import captures PT4 text labels (headers/captions) as positioned <text> items."""
+    import tempfile
+
     from fpdb_3_legacy import Configuration as Conf
     from fpdb_3_legacy import pt4hud
-    import tempfile
 
     td = tempfile.mkdtemp()
     cfg = os.path.join(td, "HUD_config.xml")
@@ -533,8 +534,16 @@ def test_add_hline_appears_and_persists(tmp_path):
 def test_group_panel_list_select_rename_delete(tmp_path):
     """PT4-style Panels list + Group Properties: list, select, rename, delete."""
     from PySide6.QtCore import Qt
-    from PySide6.QtWidgets import (QApplication, QComboBox, QGroupBox, QLineEdit,
-                                   QListWidget, QSlider, QVBoxLayout, QWidget)
+    from PySide6.QtWidgets import (
+        QApplication,
+        QComboBox,
+        QGroupBox,
+        QLineEdit,
+        QListWidget,
+        QSlider,
+        QVBoxLayout,
+        QWidget,
+    )
 
     from fpdb_3_legacy import Configuration as Conf
     from fpdb_3_legacy import ModernHudPreferences as M
@@ -624,8 +633,18 @@ def test_group_panel_list_select_rename_delete(tmp_path):
 def test_group_items_and_item_properties(tmp_path):
     """PT4-style Group Items list + Item Properties edit (block-aware, persists)."""
     from PySide6.QtCore import Qt
-    from PySide6.QtWidgets import (QApplication, QComboBox, QGroupBox, QLineEdit, QListWidget,
-                                   QSlider, QSpinBox, QTabWidget, QVBoxLayout, QWidget)
+    from PySide6.QtWidgets import (
+        QApplication,
+        QComboBox,
+        QGroupBox,
+        QLineEdit,
+        QListWidget,
+        QSlider,
+        QSpinBox,
+        QTabWidget,
+        QVBoxLayout,
+        QWidget,
+    )
 
     from fpdb_3_legacy import Configuration as Conf
     from fpdb_3_legacy import ModernHudPreferences as M
@@ -871,8 +890,8 @@ def test_blockpopup_renders_grid_in_preview(tmp_path):
     from PySide6.QtWidgets import QApplication, QLabel, QPushButton
 
     from fpdb_3_legacy import Configuration as Conf
-    from fpdb_3_legacy import pt4hud
     from fpdb_3_legacy import ModernHudPreferences as M
+    from fpdb_3_legacy import pt4hud
 
     QApplication.instance() or QApplication([])
     cfg = tmp_path / "HUD_config.xml"

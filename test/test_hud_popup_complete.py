@@ -10,6 +10,7 @@ import sys
 from unittest.mock import Mock
 
 import pytest
+
 pytestmark = pytest.mark.qt
 from PySide6.QtCore import Qt
 from PySide6.QtTest import QTest

@@ -8,7 +8,9 @@ import os
 import sys
 import unittest
 from unittest.mock import Mock, patch
+
 import pytest
+
 pytestmark = pytest.mark.qt
 
 # Add the parent directory to Python path for imports

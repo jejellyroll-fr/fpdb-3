@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from __future__ import annotations
+
 """Synchronize data from legacy database to modern database
 
 This script syncs new hands and players from the legacy database (desktop app)
@@ -21,16 +22,15 @@ import logging
 import time
 from pathlib import Path
 
-from sqlalchemy import create_engine, func
-from sqlalchemy.orm import sessionmaker
-
+from fpdb.infrastructure.adapters.legacy_schema_adapter import LegacySchemaAdapter
+from fpdb.infrastructure.database.models.hand_model import HandModel
 from fpdb.infrastructure.database.models.legacy_models import (
     LegacyHandModel,
     LegacyPlayerModel,
 )
-from fpdb.infrastructure.database.models.hand_model import HandModel
 from fpdb.infrastructure.database.models.player_model import PlayerModel
-from fpdb.infrastructure.adapters.legacy_schema_adapter import LegacySchemaAdapter
+from sqlalchemy import create_engine, func
+from sqlalchemy.orm import sessionmaker
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")

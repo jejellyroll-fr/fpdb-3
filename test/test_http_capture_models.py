@@ -1,5 +1,5 @@
-from decimal import Decimal
 import json
+from decimal import Decimal
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest.mock import MagicMock
@@ -7,9 +7,11 @@ from unittest.mock import MagicMock
 import pytest
 
 from fpdb_3_legacy.Database import Database
-from fpdb_3_legacy.http_capture_archive import JsonHandArchive, JsonlRawCaptureArchive
+from fpdb_3_legacy.GuiReplayer import GuiReplayer
 from fpdb_3_legacy.http_capture_analyze import analyze_raw_archive
+from fpdb_3_legacy.http_capture_archive import JsonHandArchive, JsonlRawCaptureArchive
 from fpdb_3_legacy.http_capture_build import build_capture_file
+from fpdb_3_legacy.http_capture_db_import import import_http_capture_directory, import_http_capture_file
 from fpdb_3_legacy.http_capture_diff import diff_snapshot_steps
 from fpdb_3_legacy.http_capture_hand_builder import (
     CaptureNotImportableError,
@@ -23,10 +25,8 @@ from fpdb_3_legacy.http_capture_hand_builder import (
     summarize_fpdb_hand,
     validate_hand_operations,
 )
-from fpdb_3_legacy.http_capture_db_import import import_http_capture_directory, import_http_capture_file
 from fpdb_3_legacy.http_capture_importability import evaluate_capture_importability
-from fpdb_3_legacy.http_capture_models import RawCaptureMessage
-from fpdb_3_legacy.http_capture_models import swc_game_definition
+from fpdb_3_legacy.http_capture_models import RawCaptureMessage, swc_game_definition
 from fpdb_3_legacy.http_capture_ofc import (
     build_ofc_hand,
     import_ofc_hand,
@@ -40,7 +40,6 @@ from fpdb_3_legacy.http_capture_refresh import refresh_normalized_hand
 from fpdb_3_legacy.http_capture_registry import get_http_capture_adapter, registered_http_capture_sites
 from fpdb_3_legacy.http_capture_replay import replay_raw_archive, replay_swc_raw_archive
 from fpdb_3_legacy.SQL import Sql
-from fpdb_3_legacy.GuiReplayer import GuiReplayer
 from fpdb_3_legacy.swc_http_adapter import (
     SwCHttpAdapter,
     describe_socketio_frame,

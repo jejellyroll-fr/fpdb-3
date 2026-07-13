@@ -5,12 +5,14 @@ des graphiques en barres par position pour comparer les statistiques (VPIP/PFR).
 """
 
 from __future__ import annotations
+
 import math
-from PySide6.QtCore import Qt, QRectF
-from PySide6.QtGui import QPainter, QColor, QPen, QBrush, QFont
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QSplitter
+
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
+from PySide6.QtCore import QRectF, Qt
+from PySide6.QtGui import QBrush, QColor, QFont, QPainter, QPen
+from PySide6.QtWidgets import QSplitter, QVBoxLayout, QWidget
 
 from fpdb_3_legacy.ring_stats.styles import get_theme_palette
 
