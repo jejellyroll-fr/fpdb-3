@@ -68,40 +68,8 @@ class BovadaRegressionTests(unittest.TestCase):
         assert "split" in source, "'split' key missing in _buildGameTypeInfo - regression detected"
 
     def test_cli_importer_basic_functionality(self) -> None:
-        """Regression: Ensure CLI importer still works."""
-        # Security: Validate all paths before subprocess execution
-        base_dir = Path(__file__).parent.parent
-        test_file = (
-            base_dir / "regression-test-files/cash/Bovada/Flop/NLHE-USD-0.10-0.25-201208.raise.to.format.change.txt"
-        )
-        # Skip this test since importer_cli is obsolete
+        """Document that the obsolete CLI importer is no longer supported."""
         self.skipTest("CLI importer test skipped - importer_cli.py is in obsolete archive")
-
-        if not Path(sys.executable).exists():
-            self.fail(f"Python executable not found: {sys.executable}")
-
-        # Test import without actually modifying the database
-        # Security: Using validated paths and controlled arguments with shell=False
-        result = subprocess.run(  # noqa: S603
-            [sys.executable, str(importer_cli), "--site", "Bovada", "--no-progress", "--debug", str(test_file)],
-            cwd=base_dir,
-            capture_output=True,
-            text=True,
-            shell=False,
-            timeout=30,
-            check=False,
-        )
-
-        # Import must succeed (return code 0)
-        assert result.returncode == 0, (
-            f"CLI importer fails - regression detected:\n"
-            f"Exit code: {result.returncode}\n"
-            f"Command: {' '.join([sys.executable, str(importer_cli), '--site', 'Bovada', '--no-progress', str(test_file)])}\n"
-            f"Working directory: {base_dir}\n"
-            f"Test file exists: {test_file.exists()}\n"
-            f"STDOUT:\n{result.stdout}\n"
-            f"STDERR:\n{result.stderr}"
-        )
 
 
 if __name__ == "__main__":

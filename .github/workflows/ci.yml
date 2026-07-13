@@ -16,7 +16,7 @@ jobs:
       - name: Install Ruff
         run: uv tool install ruff
       - name: Enforce repository lint ratchet
-        run: ruff check fpdb_3_legacy fpdb test tests --select F507,F541,F601
+        run: ruff check fpdb_3_legacy fpdb test tests --select F507,F541,F601,F821
       - name: Lint newly modernized modules
         run: >-
           ruff check
