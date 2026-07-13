@@ -108,6 +108,7 @@ Les bugs multi-backend récents (`Rank` réservé, `boolean` vs `smallint`, `set
 - ✅ **Préférences et AutoNotes GUI** (2026-07-13) : `GuiPrefs.py`, `GuiAutoNoteRules.py` et `GuiAutoNotesWorkbench.py`, déjà sans diagnostic, rejoignent le ratchet CI.
 - ✅ **Rapport opposants et base GUI** (2026-07-13) : `GuiOpponentsReport.py` et `GuiDatabase.py` rejoignent le ratchet ; le dialogue de progression de migration respecte le contrat Qt avec une action vide explicite.
 - ✅ **Replayer** (2026-07-13) : état de table, showdown, boards multi-runs, cache d’équité, side pots et rendu de cartes explicités ; dette mypy locale ramenée de 41 à zéro. `GuiReplayer.py` rejoint le ratchet CI.
+- ✅ **Gestionnaire de configuration** (2026-07-13) : `ConfigurationManager.py` rejoint le ratchet ; ses états de configuration absente sont contrôlés avant reload et capture d’état.
 - **Découper les god-modules** : `SQL.py` (requêtes par domaine / fichiers `.sql`), `Database.py` (connexion / DDL / cache HUD / requêtes), `Stats.py` (par famille). Incrémental, avec tests de non-régression.
 - **Qualité outillée** : résorber la dette `ruff` (~2900) par paliers (règle par règle, `--fix`, baseline) ; introduire **mypy/pyright** en mode progressif ; convertir les 78 `TODO/FIXME` en tâches traçables ; clarifier/supprimer le dossier `fpdb/`.
 
