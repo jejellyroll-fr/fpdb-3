@@ -12,7 +12,7 @@ class StatComparison:
     pt4_value: Any
     fpdb_value: Any
     matched: bool
-    delta: Optional[float] = None
+    delta: float | None = None
 
 
 def compare_hand(

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """controller.py
 
 Le contrôleur du package ring_stats.

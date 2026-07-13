@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """positional_view.py
 
 Affiche l'onglet 'Heatmap de Position' avec une table de poker 2D interactive et

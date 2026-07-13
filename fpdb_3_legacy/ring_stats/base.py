@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """base.py
 
 Contient la classe de base ModernStatsWidget pour les widgets de statistiques

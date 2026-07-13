@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """widgets.py
 
 Widgets graphiques réutilisables pour les vues statistiques de FPDB :

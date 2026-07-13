@@ -19,7 +19,7 @@ Usage:
 import argparse
 import json
 import sys
-from typing import Dict, Any
+from typing import Any
 
 try:
     import requests
