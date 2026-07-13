@@ -51,6 +51,11 @@ jobs:
           fpdb_3_legacy/AutoNoteRules.py
           fpdb_3_legacy/AutoNotes.py
           fpdb_3_legacy/PlayerProfiler.py
+          fpdb_3_legacy/Exceptions.py
+          fpdb_3_legacy/ConfigObservers.py
+          fpdb_3_legacy/AutoImportConfigObserver.py
+          fpdb_3_legacy/PopupIcons.py
+          fpdb_3_legacy/ModernPopup.py
       - name: Lint newly modernized modules
         run: >-
           ruff check
