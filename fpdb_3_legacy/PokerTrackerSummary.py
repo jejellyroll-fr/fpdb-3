@@ -186,7 +186,7 @@ class PokerTrackerSummary(TourneySummary):
             self.koBounty = int(100 * float(self.clearMoneyString(mg["BOUNTY"])))
             self.isKO = True
         if "ENTRIES" in mg:
-            self.entries = mg["ENTRIES"]
+            self.entries = int(mg["ENTRIES"])
         if "DATETIME" in mg:
             m1 = self.re_date_time.finditer(mg["DATETIME"])
             for a in m1:
@@ -223,12 +223,12 @@ class PokerTrackerSummary(TourneySummary):
                 self.entries,
             )
 
-        m = self.re_player.finditer(self.summaryText)
-        for a in m:
+        player_matches = self.re_player.finditer(self.summaryText)
+        for a in player_matches:
             mg = a.groupdict()
             name = mg["NAME"]
-            rank = int(mg["RANK"])
-            winnings = 0
+            rank: int | None = int(mg["RANK"])
+            winnings: int | None = 0
             rebuy_count = None
             add_on_count = None
             ko_count = None
