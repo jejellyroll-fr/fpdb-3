@@ -9,6 +9,7 @@ l'architecture d'onglets asynchrones.
 
 from __future__ import annotations
 from PySide6.QtCore import Qt
+from PySide6.QtGui import QStandardItemModel
 from PySide6.QtWidgets import (
     QSplitter, QScrollArea, QPushButton, QDialog, QVBoxLayout, QHBoxLayout,
     QLabel, QGridLayout, QCheckBox, QSpinBox, QDialogButtonBox, QTableWidget, QTableWidgetItem

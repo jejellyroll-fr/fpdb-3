@@ -117,9 +117,8 @@ def show_status():
     for lib_name, min_version in libs_to_check:
         try:
             if lib_name == "PyQt5":
-                import PySide6.QtCore
+                from PySide6 import __version__ as version
 
-                version = PyQt5.QtCore.PYQT_VERSION_STR
             else:
                 lib = __import__(lib_name)
                 version = lib.__version__

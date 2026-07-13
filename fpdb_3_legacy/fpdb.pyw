@@ -19,6 +19,7 @@ import codecs
 import contextlib
 import cProfile
 import io
+import logging
 import os
 import pstats
 import queue

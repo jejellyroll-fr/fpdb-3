@@ -1768,7 +1768,7 @@ class PartyPoker(HandHistoryConverter):
 
         return rendered_cards
 
-    def readOther(self, hand: "Hand") -> None:
+    def readOther(self, hand) -> None:
         """Read other information from hand history.
 
         This method is called by Hand.py during parsing. For PartyPoker,
