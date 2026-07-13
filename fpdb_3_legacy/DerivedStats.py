@@ -3491,7 +3491,7 @@ class DerivedStats:
                         holes = [
                             str(c)
                             for c in hcs[hrange[-1][0] : hrange[-1][1]]
-                            if Card.encodeCardList.get(c) is not None or c == "0x"
+                            if Card.ENCODE_CARD_LIST.get(c) is not None or c == "0x"
                         ]
                         board = [str(c) for c in b if "omaha" in evalgame]
                         if "omaha" not in evalgame:
