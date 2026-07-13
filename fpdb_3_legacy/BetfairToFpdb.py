@@ -36,6 +36,7 @@ class Betfair(HandHistoryConverter):
     filetype = "text"
     codepage = "cp1252"
     site_id = 7  # Needs to match id entry in Sites database
+    compiledPlayers: set[str] = set()
 
     # Static regexes
     re_game_info = re.compile(
@@ -201,12 +202,16 @@ class Betfair(HandHistoryConverter):
             "RIVER",
         ):  # a list of streets which get dealt community cards (i.e. all but PREFLOP)
             m = self.re_board.search(hand.streets[street])
+            if m is None:
+                raise FpdbParseError("Could not identify community cards")
             hand.setCommunityCards(street, m.group("CARDS").split(", "))
 
     def readBlinds(self, hand: Any) -> None:
         """Read blind information from hand text."""
         try:
             m = self.re_post_sb.search(hand.handText)
+            if m is None:
+                raise AttributeError
             hand.addBlind(m.group("PNAME"), "small blind", m.group("SB"))
         except AttributeError:
             hand.addBlind(None, None, None)
@@ -238,7 +243,10 @@ class Betfair(HandHistoryConverter):
 
     def readButton(self, hand: Any) -> None:
         """Read button position from hand text."""
-        hand.buttonpos = int(self.re_button.search(hand.handText).group("BUTTON"))
+        button_match = self.re_button.search(hand.handText)
+        if button_match is None:
+            raise FpdbParseError("Could not identify button position")
+        hand.buttonpos = int(button_match.group("BUTTON"))
 
     def readHoleCards(self, hand: Any) -> None:
         """Read hole cards from hand text."""

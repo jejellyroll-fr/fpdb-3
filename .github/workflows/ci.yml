@@ -81,6 +81,7 @@ jobs:
           fpdb_3_legacy/Hand.py
           fpdb_3_legacy/HandHistory.py
           fpdb_3_legacy/AbsoluteToFpdb.py
+          fpdb_3_legacy/BetfairToFpdb.py
           fpdb_3_legacy/CakeToFpdb.py
           fpdb_3_legacy/EverestToFpdb.py
           fpdb_3_legacy/DerivedStats.py
