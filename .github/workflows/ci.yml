@@ -63,6 +63,7 @@ jobs:
           fpdb_3_legacy/ThemeManager.py
           fpdb_3_legacy/DetectInstalledSites.py
           fpdb_3_legacy/Card.py
+          fpdb_3_legacy/HandHistoryConverter.py
       - name: Lint newly modernized modules
         run: >-
           ruff check
