@@ -156,7 +156,7 @@ class WinamaxSummary(TourneySummary):
 
         self._parse_tournament_details(soup)
         self._parse_prizepool(soup)
-        self._parse_gametype(left_content)
+        self._parse_html_gametype(left_content)
         self._parse_players(left_content)
         self._parse_tournament_number()
 
@@ -179,7 +179,7 @@ class WinamaxSummary(TourneySummary):
                 if label == "Buy-in":
                     self._parse_buyin(value)
                 elif label == "Nombre de joueurs inscrits":
-                    self.entries = value
+                    self.entries = int(value)
                 elif label == "D\xc3\xa9but du tournoi":
                     self.startTime = datetime.datetime.strptime(
                         value,
@@ -217,9 +217,9 @@ class WinamaxSummary(TourneySummary):
         title_divs = soup.findAll("div", {"class": "title2"})
         for match in self.re_prizepool.finditer(str(title_divs)):
             match_groups = match.groupdict()
-            self.prizepool = match_groups["PRIZEPOOL"].replace(",", ".")
+            self.prizepool = int(100 * self.convert_to_decimal(match_groups["PRIZEPOOL"]))
 
-    def _parse_gametype(self, left_content: list[Any]) -> None:
+    def _parse_html_gametype(self, left_content: list[Any]) -> None:
         """Parses the game type from the provided HTML content.
 
         This method sets the limit type and category for the tournament based on the parsed game type information.

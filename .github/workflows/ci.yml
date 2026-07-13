@@ -73,6 +73,7 @@ jobs:
           fpdb_3_legacy/iPokerSummary.py
           fpdb_3_legacy/PokerTrackerSummary.py
           fpdb_3_legacy/MergeSummary.py
+          fpdb_3_legacy/WinamaxSummary.py
       - name: Lint newly modernized modules
         run: >-
           ruff check

@@ -7,6 +7,7 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
+from bs4 import BeautifulSoup
 
 # Add project path for imports
 sys.path.insert(0, str((Path(__file__).parent / "..").resolve()))
@@ -1053,3 +1054,20 @@ You finished in 50th place
             # Verify lottery fields are initialized
             assert summary.isLottery is False
             assert summary.tourneyMultiplier == 1
+
+    def test_html_helpers_keep_gametype_and_money_units(self) -> None:
+        """HTML parsing uses its dedicated gametype path and stores cents."""
+        with patch("fpdb_3_legacy.TourneySummary.TourneySummary.__init__", return_value=None):
+            summary = WinamaxSummary(
+                config=self.config,
+                db=self.db,
+                siteName="Winamax",
+                summaryText="",
+            )
+            summary.gametype = {}
+
+            summary._parse_html_gametype(["<h1>No Limit Hold'em</h1>"])
+            summary._parse_prizepool(BeautifulSoup('<div class="title2">Prizepool: 12,50</div>', "html.parser"))
+
+            assert summary.gametype == {"limitType": "nl", "category": "holdem"}
+            assert summary.prizepool == 1250
