@@ -20,6 +20,7 @@ from __future__ import annotations
 # _ = L10n.get_translation()
 from functools import partial
 from io import StringIO
+from typing import Any
 
 from PySide6.QtCore import QCoreApplication, QSortFilterProxyModel, Qt
 from PySide6.QtGui import QPainter, QPixmap, QStandardItem, QStandardItemModel
@@ -48,7 +49,7 @@ class TourHandViewer(QSplitter):
         self.config = config
         self.main_window = mainwin
         self.sql = querylist
-        self.replayer = None
+        self.replayer: Any = None
 
         self.db = Database.Database(self.config, sql=self.sql)
 
@@ -149,11 +150,14 @@ class TourHandViewer(QSplitter):
         )
 
         self.view.doubleClicked.connect(self.row_activated)
-        self.view.contextMenuEvent = self.contextMenu
+        setattr(self.view, "contextMenuEvent", self.contextMenu)
+        def resize_rows(_index, start, end) -> None:
+            for row in range(start, end + 1):
+                self.view.resizeRowToContents(row)
         self.filterModel.rowsInserted.connect(
-            lambda index, start, end: [self.view.resizeRowToContents(r) for r in range(start, end + 1)],
+            resize_rows,
         )
-        self.filterModel.filterAcceptsRow = lambda row, sourceParent: self.is_row_in_card_filter(row)
+        setattr(self.filterModel, "filterAcceptsRow", lambda row, sourceParent: self.is_row_in_card_filter(row))
 
         self.view.resizeColumnsToContents()
         self.view.setSortingEnabled(True)
@@ -415,7 +419,8 @@ class TourHandViewer(QSplitter):
         hand = self.hands[int(index.sibling(index.row(), self.colnum["HandId"]).data())]
         m = QMenu()
         copyAction = m.addAction(_("Copy to clipboard"))
-        copyAction.triggered.connect(partial(self.copyHandToClipboard, hand=hand))
+        if copyAction is not None:
+            copyAction.triggered.connect(partial(self.copyHandToClipboard, hand=hand))
         m.move(event.globalPosition().toPoint())
         m.exec()
 
