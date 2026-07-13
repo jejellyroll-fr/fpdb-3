@@ -27,6 +27,7 @@ import sqlite3
 import sys
 from functools import partial
 from importlib import import_module
+from typing import Any
 
 import interlocks
 from loggingFpdb import get_logger, setup_logging
@@ -148,6 +149,15 @@ except Exception:
 
 
 class fpdb(QMainWindow):
+    config: Any
+    db: Any
+    nb: QTabWidget
+    nb_tab_names: list[str]
+    threads: list[Any]
+    closeq: queue.Queue[Any]
+    quitting: bool
+    custom_title_bar: Any
+    display_config_created_dialogue: bool
     # def launch_ppt(self):
     #     path = os.getcwd()
     #     if os.name == "nt":
@@ -1117,7 +1127,9 @@ class fpdb(QMainWindow):
                 "light_blue.xml", "light_cyan.xml", "light_pink.xml", "light_red.xml",
             ]
         for theme in themes:
-            menu.addAction(QAction(theme, self, triggered=partial(self.change_theme, theme)))
+            action = QAction(theme, self)
+            action.triggered.connect(partial(self.change_theme, theme))
+            menu.addAction(action)
         menu.addSeparator()
         menu.addAction(
             self.makeAction(_t("Create Custom Theme..."), self.show_theme_creator, tip=_t("Create a new custom theme")),
@@ -1272,7 +1284,7 @@ class fpdb(QMainWindow):
                 "To create a new configuration, see:"
                 " fpdb.sourceforge.net/apps/mediawiki/fpdb/index.php?title=Reset_Configuration",
             )
-            label.setTextInteractionFlags(Qt.TextSelectableByMouse)
+            label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
             diaConfigVersionWarning.layout().addWidget(label)
             label = QLabel(
                 "A new configuration will destroy all personal settings"
@@ -1725,7 +1737,8 @@ class fpdb(QMainWindow):
         with contextlib.suppress(ValueError):
             self.threads.remove(item)
 
-        item.deleteLater()
+        if item is not None:
+            item.deleteLater()
 
     def __init__(self) -> None:
         super().__init__()
@@ -1738,15 +1751,18 @@ class fpdb(QMainWindow):
             self.setWindowIcon(QIcon(cards))
         set_locale_translation()
         self.lock = interlocks.InterProcessLock(name="fpdb_global_lock")
+        self.config = None
         self.db = None
-        self.status_bar = None
+        self.status_bar: Any = None
         self.quitting = False
         self.visible = False
-        self.threads = []
-        self.closeq = queue.Queue(20)
+        self.threads: list[Any] = []
+        self.closeq: queue.Queue[Any] = queue.Queue(20)
 
         # Connect cleanup handler to application aboutToQuit signal
-        QCoreApplication.instance().aboutToQuit.connect(self.cleanup)
+        app_instance = QCoreApplication.instance()
+        if app_instance is not None:
+            app_instance.aboutToQuit.connect(self.cleanup)
         # Register cleanup handler for other exit scenarios (abort/crash)
         atexit.register(self.cleanup)
 
@@ -1801,7 +1817,7 @@ class fpdb(QMainWindow):
             self.menu_bar = self.menuBar()
             self.central_layout.setMenuBar(self.menu_bar)
 
-        self.nb = QTabWidget()
+        self.nb: QTabWidget = QTabWidget()
         self.nb.setTabsClosable(True)
         self.nb.tabCloseRequested.connect(self.close_tab)
         self.central_layout.addWidget(self.nb)
@@ -1809,7 +1825,7 @@ class fpdb(QMainWindow):
 
         self.createMenuBar()
 
-        self.nb_tab_names = []
+        self.nb_tab_names: list[str] = []
 
         self.tab_main_help(None, None)
 
@@ -1886,7 +1902,7 @@ class CustomTitleBar(QWidget):
 
         self.title = QLabel(_("Free Poker DB 3"))
         self.title.setObjectName("customTitleBarLabel")
-        self.title.setAlignment(Qt.AlignCenter)
+        self.title.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         self.btn_minimize = QPushButton("-")
         self.btn_maximize = QPushButton("+")
@@ -1900,9 +1916,9 @@ class CustomTitleBar(QWidget):
         self.btn_maximize.setFixedSize(button_size, button_size)
         self.btn_close.setFixedSize(button_size, button_size)
 
-        self.btn_minimize.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-        self.btn_maximize.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-        self.btn_close.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        self.btn_minimize.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
+        self.btn_maximize.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
+        self.btn_close.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
 
         self.btn_minimize.clicked.connect(parent.showMinimized)
         self.btn_maximize.clicked.connect(self.toggle_maximize_restore)
@@ -1936,11 +1952,11 @@ class CustomTitleBar(QWidget):
             self.setStyleSheet(app.styleSheet())
 
     def mousePressEvent(self, event) -> None:
-        if event.button() == Qt.LeftButton:
+        if event.button() == Qt.MouseButton.LeftButton:
             self.main_window.oldPos = event.globalPos()
 
     def mouseMoveEvent(self, event) -> None:
-        if event.buttons() == Qt.LeftButton:
+        if event.buttons() == Qt.MouseButton.LeftButton:
             delta = QPoint(event.globalPos() - self.main_window.oldPos)
             self.main_window.move(self.main_window.x() + delta.x(), self.main_window.y() + delta.y())
             self.main_window.oldPos = event.globalPos()
