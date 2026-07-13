@@ -23,6 +23,7 @@ from __future__ import annotations
 import datetime
 import re
 from decimal import Decimal
+from typing import Any
 
 from fpdb_3_legacy.HandHistoryConverter import FpdbHandPartial, FpdbParseError, HandHistoryConverter
 from fpdb_3_legacy.loggingFpdb import get_logger
@@ -42,6 +43,7 @@ class _StreetMatch:
 
 
 class Unibet(HandHistoryConverter):
+    compiledPlayers: set[str] = set()
     # Class Variables
 
     sitename = "Unibet"
@@ -490,7 +492,7 @@ class Unibet(HandHistoryConverter):
         return info
 
     def determineGameType(self, handText):
-        info = {}
+        info: dict[str, Any] = {}
         m = self.re_GameInfo.search(handText)
         if not m:
             # Try the 2026 "Unibet Hand #" formats before giving up.
@@ -621,7 +623,7 @@ class Unibet(HandHistoryConverter):
 
         # 2026 tournament buy-in/fee (chips elsewhere, but the buy-in is real money).
         if info.get("TBUYIN") is not None:
-            hand.buyinCurrency = self._CURRENCY_SYMBOLS.get(info.get("TCURRENCY"), "EUR")
+            hand.buyinCurrency = self._CURRENCY_SYMBOLS.get(str(info.get("TCURRENCY") or ""), "EUR")
             hand.buyin = int(round(100 * Decimal(info["TBUYIN"])))
             hand.fee = int(round(100 * Decimal(info["TFEE"]))) if info.get("TFEE") else 0
             hand.isKO = False
@@ -634,22 +636,17 @@ class Unibet(HandHistoryConverter):
                 # 2008/09/07 06:23:14 ET
                 datetimestr = "00:00:00 2000/01/01"  # default used if time not found
                 if self.siteId == 26:
-                    m2 = self.re_DateTime2.finditer(info[key])
-
+                    date_matches = self.re_DateTime2.finditer(info[key])
                 else:
-                    m1 = self.re_DateTime1.finditer(info[key])
-                    for a in m1:
-                        datetimestr1 = str(a.group("H")) + ":" + str(a.group("MIN")) + ":" + str(a.group("S"))
-                        datetimestr2 = str(a.group("Y")) + "/" + str(a.group("M")) + "/" + str(a.group("D"))
-                        datetimestr = datetimestr2 + " " + datetimestr1
-                        # print("datetimestr", datetimestr)
-                        # tz = a.group('TZ')  # just assume ET??
-                        # print ("   tz = ", tz, " datetime =", datetimestr)
-                    hand.startTime = datetime.datetime.strptime(
-                        datetimestr,
-                        "%Y/%m/%d %H:%M:%S",
-                    )  # also timezone at end, e.g. " ET"
-                    # hand.startTime = HandHistoryConverter.changeTimezone(hand.startTime, "ET", "UTC")
+                    date_matches = self.re_DateTime1.finditer(info[key])
+                for date_match in date_matches:
+                    datetimestr1 = f"{date_match.group('H')}:{date_match.group('MIN')}:{date_match.group('S')}"
+                    datetimestr2 = f"{date_match.group('Y')}/{date_match.group('M')}/{date_match.group('D')}"
+                    datetimestr = f"{datetimestr2} {datetimestr1}"
+                hand.startTime = datetime.datetime.strptime(
+                    datetimestr,
+                    "%Y/%m/%d %H:%M:%S",
+                )  # also timezone at end, e.g. " ET"
 
             if key == "HID":
                 hand.handid = info[key]
