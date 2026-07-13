@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 from __future__ import annotations
+
 """Returns a dict of SQL statements used in fpdb."""
 
 import re

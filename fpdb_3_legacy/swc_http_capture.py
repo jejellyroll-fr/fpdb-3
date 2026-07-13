@@ -9,7 +9,12 @@ import time
 
 from fpdb_3_legacy.http_capture_archive import JsonHandArchive, JsonlRawCaptureArchive
 from fpdb_3_legacy.http_capture_models import RawCaptureMessage
-from fpdb_3_legacy.swc_http_adapter import SwCHttpAdapter, describe_socketio_frame, extract_game_state_from_socketio, utc_now_iso
+from fpdb_3_legacy.swc_http_adapter import (
+    SwCHttpAdapter,
+    describe_socketio_frame,
+    extract_game_state_from_socketio,
+    utc_now_iso,
+)
 
 try:
     from playwright.sync_api import sync_playwright

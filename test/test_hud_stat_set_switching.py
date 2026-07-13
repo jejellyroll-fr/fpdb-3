@@ -2,7 +2,9 @@
 """Tests for HUD stat set switching functionality."""
 
 import unittest
+
 import pytest
+
 pytestmark = pytest.mark.qt
 import xml.dom.minidom
 from unittest.mock import Mock, patch

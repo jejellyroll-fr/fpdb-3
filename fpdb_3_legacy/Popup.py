@@ -5,7 +5,6 @@ Popup windows for the HUD.
 
 import ctypes
 
-
 from fpdb_3_legacy.loggingFpdb import get_logger
 
 #    Copyright 2011-2012,  Ray E. Barker

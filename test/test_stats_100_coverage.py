@@ -3,15 +3,16 @@
 
 import os
 import sys
+
 import pytest
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from fpdb_3_legacy.Stats import (
-    do_stat,
-    format_no_data_stat,
     __stat_override,
+    do_stat,
     do_tip,
+    format_no_data_stat,
 )
 
 
@@ -1549,8 +1550,8 @@ def test_wmsd_zero_wmsd():
 # Test for main() function branches
 def test_main_with_show_stats_no_db(monkeypatch):
     """Test main with --show-stats without DB."""
-    from fpdb_3_legacy.Stats import main
     from fpdb_3_legacy.Database import Database
+    from fpdb_3_legacy.Stats import main
     monkeypatch.setattr(Database, "__init__", lambda *args, **kwargs: None)
     monkeypatch.setattr(Database, "get_last_hand", lambda *args: None)
     result = main(["--show-stats"])
@@ -1559,8 +1560,8 @@ def test_main_with_show_stats_no_db(monkeypatch):
 
 def test_main_interactive_no_db(monkeypatch):
     """Test main with --interactive without DB."""
-    from fpdb_3_legacy.Stats import main
     from fpdb_3_legacy.Database import Database
+    from fpdb_3_legacy.Stats import main
     monkeypatch.setattr(Database, "__init__", lambda *args, **kwargs: None)
     monkeypatch.setattr(Database, "get_last_hand", lambda *args: None)
     result = main(["--interactive"])
@@ -1653,8 +1654,8 @@ def test_get_valid_stats():
 # Test for main with validate-stats
 def test_main_validate_stats_no_db(monkeypatch):
     """Test main with --validate-stats."""
-    from fpdb_3_legacy.Stats import main
     from fpdb_3_legacy.Database import Database
+    from fpdb_3_legacy.Stats import main
     monkeypatch.setattr(Database, "__init__", lambda *args, **kwargs: None)
     monkeypatch.setattr(Database, "get_last_hand", lambda *args: None)
     result = main(["--validate-stats"])
@@ -1693,8 +1694,8 @@ def test_non_sd_winrate_zero():
 # Test for main() function exception paths
 def test_main_show_stats_exception(monkeypatch):
     """Test main with --show-stats when DB fails."""
-    from fpdb_3_legacy.Stats import main
     from fpdb_3_legacy.Database import Database
+    from fpdb_3_legacy.Stats import main
     def raise_err(*args, **kwargs):
         raise Exception("DB Error")
     monkeypatch.setattr(Database, "__init__", raise_err)
@@ -1752,8 +1753,8 @@ def test_vpip_opp_zero_vpip_bad():
 # Tests for main() - validate stats path with exception
 def test_main_validate_stats_with_exception(monkeypatch):
     """Test main validate-stats with exception."""
-    from fpdb_3_legacy.Stats import main
     from fpdb_3_legacy.Database import Database
+    from fpdb_3_legacy.Stats import main
     def raise_err(*args, **kwargs):
         raise Exception("DB Error")
     monkeypatch.setattr(Database, "__init__", raise_err)
@@ -2379,8 +2380,8 @@ def test_playername_key_error():
 # Tests for stat_main paths (require database)
 def test_main_show_stats_path(monkeypatch):
     """Test main --show-stats path with exception."""
-    from fpdb_3_legacy.Stats import main
     from fpdb_3_legacy.Database import Database
+    from fpdb_3_legacy.Stats import main
     monkeypatch.setattr(Database, "__init__", lambda *args, **kwargs: None)
     monkeypatch.setattr(Database, "get_last_hand", lambda *args: None)
     result = main(["--show-stats"])
@@ -2579,7 +2580,7 @@ def test_n_type_error():
 
 def test_hand_instance_threading():
     """Test thread-local hand instance storage."""
-    from fpdb_3_legacy.Stats import _set_hand_instance, _get_hand_instance
+    from fpdb_3_legacy.Stats import _get_hand_instance, _set_hand_instance
 
     class MockHand:
         pass

@@ -1,15 +1,28 @@
-import os
 import json
+import os
 import sys
-from fpdb_3_legacy import Database, GuiReplayer, SQL
-from fpdb_3_legacy.http_capture_db_import import import_http_capture_directory, import_http_capture_hand
-from PySide6.QtCore import Qt, QProcess, QFileSystemWatcher
+
+from PySide6.QtCore import QFileSystemWatcher, QProcess, Qt
 from PySide6.QtGui import QFont
 from PySide6.QtWidgets import (
-    QDialog, QVBoxLayout, QHBoxLayout, QSplitter, QListWidget,
-    QTextEdit, QPushButton, QLabel, QFrame, QGridLayout, QMessageBox,
-    QListWidgetItem, QScrollArea, QWidget
+    QDialog,
+    QFrame,
+    QGridLayout,
+    QHBoxLayout,
+    QLabel,
+    QListWidget,
+    QListWidgetItem,
+    QMessageBox,
+    QPushButton,
+    QScrollArea,
+    QSplitter,
+    QTextEdit,
+    QVBoxLayout,
+    QWidget,
 )
+
+from fpdb_3_legacy import SQL, Database, GuiReplayer
+from fpdb_3_legacy.http_capture_db_import import import_http_capture_directory, import_http_capture_hand
 
 # 4-color suit map
 SUIT_SYMBOLS = {"s": "♠", "h": "♥", "d": "♦", "c": "♣"}

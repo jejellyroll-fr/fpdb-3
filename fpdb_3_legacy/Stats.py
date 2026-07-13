@@ -1,7 +1,7 @@
 """Manage collecting and formatting of stats and tooltips."""
 from __future__ import annotations
-#    Copyright 2008-2011, Ray E. Barker
 
+#    Copyright 2008-2011, Ray E. Barker
 #
 #    This program is free software; you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -16,9 +16,7 @@ from __future__ import annotations
 #    You should have received a copy of the GNU General Public License
 #    along with this program; if not, write to the Free Software
 #    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
-
 ########################################################################
-
 #    How to write a new stat:
 #        0  Do not use a name like "xyz_2". Names ending in _ and a single digit are
 #           used to indicate the number of decimal places the user wants to see in the Hud.
@@ -46,7 +44,6 @@ from __future__ import annotations
 #           "None", the stat must return its description in tuple [5] and must not traceback
 #        7  Stats needing values from the hand instance can find these in _get_hand_instance().foo
 #           attribute
-
 # String manipulation
 import codecs
 import re
@@ -55,13 +52,8 @@ import re
 import sys
 
 # import Charset
-from fpdb_3_legacy import Card
-
 #    FreePokerTools modules
-from fpdb_3_legacy import Configuration
-from fpdb_3_legacy import Database
-from fpdb_3_legacy import Hand
-from fpdb_3_legacy import L10n
+from fpdb_3_legacy import Card, Configuration, Database, Hand, L10n
 from fpdb_3_legacy.loggingFpdb import get_logger
 
 if __name__ == "__main__":
@@ -78,6 +70,7 @@ _ = L10n.get_translation()
 
 # Thread-local storage for hand instance (replaces global variable)
 import threading
+
 _thread_local = threading.local()
 
 def _get_hand_instance():

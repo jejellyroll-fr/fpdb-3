@@ -7,12 +7,13 @@ des statistiques pour le tableau de bord, les positions et les cartes.
 """
 
 from __future__ import annotations
-from PySide6.QtCore import QObject, Signal, Qt
+
+from PySide6.QtCore import QObject, Qt, Signal
 from PySide6.QtGui import QBrush, QColor, QStandardItem, QStandardItemModel
 
 from fpdb_3_legacy import Card
-from fpdb_3_legacy.ring_stats.base import DbWorker
 from fpdb_3_legacy.loggingFpdb import get_logger
+from fpdb_3_legacy.ring_stats.base import DbWorker
 from fpdb_3_legacy.ring_stats.styles import get_theme_palette
 
 log = get_logger("ring_stats_controller")

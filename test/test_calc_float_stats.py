@@ -9,7 +9,7 @@ from unittest.mock import Mock
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from fpdb_3_legacy.DerivedStats import DerivedStats, _INIT_STATS
+from fpdb_3_legacy.DerivedStats import _INIT_STATS, DerivedStats
 
 STREETS = ["BLINDSANTES", "PREFLOP", "FLOP", "TURN", "RIVER"]
 

@@ -17,11 +17,10 @@ safe no-op (returning ``True``) on non-macOS so callers need no platform guard.
 
 from __future__ import annotations
 
+import logging
 import platform
 import subprocess
 from dataclasses import dataclass
-
-import logging
 
 logger = logging.getLogger(__name__)
 

@@ -7,21 +7,33 @@ l'architecture d'onglets asynchrones.
 """
 
 from __future__ import annotations
+
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QStandardItemModel
 from PySide6.QtWidgets import (
-    QSplitter, QScrollArea, QPushButton, QDialog, QVBoxLayout, QHBoxLayout,
-    QLabel, QGridLayout, QCheckBox, QSpinBox, QDialogButtonBox, QTableWidget, QTableWidgetItem
+    QCheckBox,
+    QDialog,
+    QDialogButtonBox,
+    QGridLayout,
+    QHBoxLayout,
+    QLabel,
+    QPushButton,
+    QScrollArea,
+    QSpinBox,
+    QSplitter,
+    QTableWidget,
+    QTableWidgetItem,
+    QVBoxLayout,
 )
 
 from fpdb_3_legacy import Card, Database, Filters
+from fpdb_3_legacy.loggingFpdb import get_logger
 from fpdb_3_legacy.ring_stats.base import ModernStatsWidget
 from fpdb_3_legacy.ring_stats.controller import RingStatsController
 from fpdb_3_legacy.ring_stats.views.dashboard_view import DashboardTab
-from fpdb_3_legacy.ring_stats.views.table_view import StatsTableView
 from fpdb_3_legacy.ring_stats.views.positional_view import PositionalTab
 from fpdb_3_legacy.ring_stats.views.starting_hands_view import StartingHandsTab
-from fpdb_3_legacy.loggingFpdb import get_logger
+from fpdb_3_legacy.ring_stats.views.table_view import StatsTableView
 
 log = get_logger("ring_stats_main")
 
@@ -146,8 +158,8 @@ class GuiRingPlayerStats(QSplitter):
         # Forcer la mise à jour des feuilles de style pour s'adapter à un changement de thème
         self._apply_theme()
 
-        from PySide6.QtWidgets import QApplication
         from PySide6.QtCore import Qt
+        from PySide6.QtWidgets import QApplication
 
         is_sync = not getattr(self.controller, "async_mode", True)
         if is_sync:

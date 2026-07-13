@@ -37,9 +37,7 @@ from time import sleep, strftime, time
 
 import pytz
 
-from fpdb_3_legacy import Card
-from fpdb_3_legacy import Configuration
-from fpdb_3_legacy import SQL
+from fpdb_3_legacy import SQL, Card, Configuration
 from fpdb_3_legacy.Exceptions import (
     FpdbError,
     FpdbMySQLAccessDenied,

@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 from __future__ import annotations
+
 #
 #    Copyright 2008-2012, Chaz Littlejohn
 #
@@ -17,16 +18,13 @@ from __future__ import annotations
 #    along with this program; if not, write to the Free Software
 #    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 ########################################################################
-
-
 import datetime
 import re
 from decimal import Decimal
 
-
+from fpdb_3_legacy import MergeStructures
 from fpdb_3_legacy.HandHistoryConverter import FpdbHandPartial, FpdbParseError, HandHistoryConverter
 from fpdb_3_legacy.loggingFpdb import get_logger
-from fpdb_3_legacy import MergeStructures
 
 # import L10n
 # _ = L10n.get_translation()

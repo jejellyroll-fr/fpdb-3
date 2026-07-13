@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 from __future__ import annotations
+
 # -*- coding: utf-8 -*-
 #
 #    Copyright 2010-2011, Carl Gherardi
@@ -17,14 +18,13 @@ from __future__ import annotations
 #    You should have received a copy of the GNU General Public License
 #    along with this program; if not, write to the Free Software
 #    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
-
 ########################################################################
-
 from fpdb_3_legacy import L10n
 
 _ = L10n.get_translation()
 
 from decimal import Decimal
+
 from fpdb_3_legacy.HandHistoryConverter import *
 
 

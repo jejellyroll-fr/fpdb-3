@@ -13,6 +13,7 @@ from unittest.mock import Mock
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
 import pytest
+
 pytestmark = pytest.mark.qt
 from PySide6.QtWidgets import QLabel
 

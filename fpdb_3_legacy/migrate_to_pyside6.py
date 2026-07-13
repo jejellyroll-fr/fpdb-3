@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from __future__ import annotations
+
 """
 Script de Migration Automatique PyQt5 → PySide6
 

@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 from __future__ import annotations
+
 """DerivedStats module for calculating poker statistics."""
 
 # Copyright 2008-2011 Carl Gherardi

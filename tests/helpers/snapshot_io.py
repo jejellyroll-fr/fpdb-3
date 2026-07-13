@@ -1,6 +1,6 @@
 import json
-from pathlib import Path
 from decimal import Decimal
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent / "fixtures" / "expected"
 

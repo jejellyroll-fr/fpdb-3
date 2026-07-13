@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 from __future__ import annotations
+
 """
 Simple test script to verify PartyPoker parser doesn't block.
 This tests the fix for re.DOTALL blocking issue.
 """
 
-import sys
 import os
 import signal
+import sys
 import tempfile
 from pathlib import Path
 
@@ -33,8 +34,7 @@ except ImportError:
     sys.modules["PySide6.QtWidgets"] = MagicMock()
 
 # Import after mocking
-from fpdb_3_legacy import Configuration
-from fpdb_3_legacy import PartyPokerToFpdb
+from fpdb_3_legacy import Configuration, PartyPokerToFpdb
 from fpdb_3_legacy import Hand as LegacyHandModule
 
 

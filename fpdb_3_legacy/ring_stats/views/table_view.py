@@ -5,8 +5,10 @@ des limites de jeu et la table détaillée du breakdown des mains.
 """
 
 from __future__ import annotations
+
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QTableView, QLabel, QSplitter, QComboBox
+from PySide6.QtWidgets import QComboBox, QHBoxLayout, QLabel, QSplitter, QTableView, QVBoxLayout, QWidget
+
 from fpdb_3_legacy.ring_stats.styles import get_theme_palette
 
 

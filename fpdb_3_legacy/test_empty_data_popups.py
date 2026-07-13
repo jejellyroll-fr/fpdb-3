@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
 import unittest
 from unittest.mock import MagicMock, patch
+
 from PySide6.QtWidgets import QApplication
 
 # Ensure QApplication is initialized for widgets
 app = QApplication.instance() or QApplication([])
 
 from fpdb_3_legacy.GuiGraphViewer import GuiGraphViewer
-from fpdb_3_legacy.GuiTourneyGraphViewer import GuiTourneyGraphViewer
-from fpdb_3_legacy.GuiSessionViewer import GuiSessionViewer
 from fpdb_3_legacy.GuiRingPlayerStats import GuiRingPlayerStats
+from fpdb_3_legacy.GuiSessionViewer import GuiSessionViewer
+from fpdb_3_legacy.GuiTourneyGraphViewer import GuiTourneyGraphViewer
 from fpdb_3_legacy.GuiTourneyPlayerStats import GuiTourneyPlayerStats
 
 
@@ -254,7 +255,7 @@ class TestEmptyDataPopups(unittest.TestCase):
 
     def test_gui_stats_info_guide(self):
         """Test GuiStatsInfo instantiates and filters statistics correctly."""
-        from fpdb_3_legacy.GuiStatsInfo import GuiStatsInfo, STATS_DATA
+        from fpdb_3_legacy.GuiStatsInfo import STATS_DATA, GuiStatsInfo
 
         # Instantiate guide
         guide = GuiStatsInfo(self.mock_conf, None)
@@ -320,8 +321,9 @@ class TestEmptyDataPopups(unittest.TestCase):
 
     def test_filters_update_sites_for_hero(self):
         """Test that update_sites_for_hero correctly checks parent site for variant."""
-        from fpdb_3_legacy.Filters import Filters
         from PySide6.QtWidgets import QCheckBox
+
+        from fpdb_3_legacy.Filters import Filters
         filters = Filters(self.mock_db)
 
         # Mock cbSites
@@ -389,7 +391,9 @@ class TestHudImportExport(unittest.TestCase):
         import os
         import tempfile
         import xml.dom.minidom
-        from PySide6.QtWidgets import QMessageBox, QDialog
+
+        from PySide6.QtWidgets import QDialog, QMessageBox
+
         from fpdb_3_legacy.ModernHudPreferences import ModernHudPreferences
 
         # Setup temp file path
@@ -461,6 +465,7 @@ class TestHudImportExport(unittest.TestCase):
     def test_hud_import(self, mock_info, mock_input, mock_msg_exec, mock_open):
         import os
         import tempfile
+
         from fpdb_3_legacy.ModernHudPreferences import ModernHudPreferences
 
         # Create a package XML to import

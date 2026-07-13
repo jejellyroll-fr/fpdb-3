@@ -10,6 +10,7 @@ import sys
 from unittest.mock import Mock, patch
 
 import pytest
+
 pytestmark = pytest.mark.qt
 from PySide6.QtCore import QPoint, Qt
 from PySide6.QtGui import QMouseEvent

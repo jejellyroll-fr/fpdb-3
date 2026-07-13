@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from __future__ import annotations
+
 """Script de validation de la migration Python 3.13/3.14 + PySide6.
 
 Ce script vérifie que toutes les bibliothèques sont correctement installées

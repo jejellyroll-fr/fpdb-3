@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 from __future__ import annotations
+
 """ModernSeatPreferences.py.
 
 Modern interface for dynamic management of favorite seats by site.

@@ -26,7 +26,8 @@ os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 from PySide6.QtGui import QFont
 from PySide6.QtWidgets import QApplication, QGridLayout, QLabel
 
-from fpdb_3_legacy import Aux_Classic_Hud, Aux_Hud, Configuration as Conf
+from fpdb_3_legacy import Aux_Classic_Hud, Aux_Hud
+from fpdb_3_legacy import Configuration as Conf
 
 
 @pytest.fixture(scope="module", autouse=True)

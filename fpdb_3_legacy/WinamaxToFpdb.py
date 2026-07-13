@@ -1,5 +1,6 @@
 """Winamx poker hand history parser for FPDB."""
 from __future__ import annotations
+
 #    Copyright 2008-2011, Carl Gherardi
 #
 #    This program is free software; you can redistribute it and/or modify
@@ -16,7 +17,6 @@ from __future__ import annotations
 #    along with this program; if not, write to the Free Software
 #    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 ########################################################################
-
 import datetime
 import platform
 import re

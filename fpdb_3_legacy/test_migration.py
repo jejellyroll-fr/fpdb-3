@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from __future__ import annotations
+
 """Tests de validation pour la migration NumPy 2.x.
 
 Ce module teste les fonctionnalités NumPy critiques utilisées dans FPDB.

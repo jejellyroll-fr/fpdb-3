@@ -12,7 +12,6 @@ from dataclasses import asdict, dataclass, field
 from decimal import Decimal
 from typing import Any
 
-
 OFC_ROW_LIMITS = {"top": 3, "middle": 5, "bottom": 5}
 
 

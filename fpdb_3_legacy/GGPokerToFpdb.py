@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 """GGPoker hand history parser for FPDB.
 This module provides parsing functionality for GGPoker hand history files.
 Handles Hold'em, Omaha, Short Deck and other game types from GGPoker.

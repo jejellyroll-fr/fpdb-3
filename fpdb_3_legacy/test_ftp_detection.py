@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from __future__ import annotations
+
 """Test Full Tilt Poker site detection."""
 
 from fpdb.infrastructure.parsers.parser_factory import ParserFactory

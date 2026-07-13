@@ -277,6 +277,7 @@ class HUDManualTestWindow(QMainWindow):
 
 
 import pytest
+
 pytestmark = pytest.mark.qt
 
 

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from __future__ import annotations
+
 """Regression test for the draw-game starting-hand bug.
 
 For draw games the hero's *original* dealt cards (the DEAL street) must be
@@ -32,7 +33,6 @@ except ImportError:
 import Configuration
 import Hand as LegacyHand
 from PokerStarsToFpdb import PokerStars
-
 
 FIVE_CARD_DRAW_HH = """PokerStars Hand #35839231732:  5 Card Draw Limit ($0.05/$0.10 USD) - 2009/11/25 19:17:00 ET
 Table 'Test' 6-max Seat #1 is the button

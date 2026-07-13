@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 from __future__ import annotations
+
 """ModernSitePreferences.py.
 
 Modern and responsive interface for site settings in fpdb.

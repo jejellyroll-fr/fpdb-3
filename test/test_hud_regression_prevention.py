@@ -2,7 +2,9 @@
 """Regression tests to prevent HUD restart and positioning issues."""
 
 import copy
+
 import pytest
+
 pytestmark = pytest.mark.qt
 import unittest
 from unittest.mock import Mock, patch

@@ -5,13 +5,14 @@ et le graphique de profit cumulé Matplotlib.
 """
 
 from __future__ import annotations
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QGridLayout, QLabel
+
+import numpy as np
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
-import numpy as np
+from PySide6.QtWidgets import QGridLayout, QLabel, QVBoxLayout, QWidget
 
-from fpdb_3_legacy.ring_stats.views.widgets import KpiCard, GapMeter
 from fpdb_3_legacy.ring_stats.styles import get_theme_palette
+from fpdb_3_legacy.ring_stats.views.widgets import GapMeter, KpiCard
 
 
 class ProfitGraphCanvas(FigureCanvas):

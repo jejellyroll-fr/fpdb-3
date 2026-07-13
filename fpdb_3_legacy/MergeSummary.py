@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from __future__ import annotations
-# -*- coding: utf-8 -*-
 
+# -*- coding: utf-8 -*-
 # Copyright 2008-2011 Carl Gherardi
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -15,18 +15,18 @@ from __future__ import annotations
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 # In the "official" distribution you can find the license in agpl-3.0.txt.
-
 from fpdb_3_legacy import L10n
 
 _ = L10n.get_translation()
 
-from decimal import Decimal
 import datetime
+from decimal import Decimal
+
 from bs4 import BeautifulSoup
 
+from fpdb_3_legacy import MergeStructures, MergeToFpdb
 from fpdb_3_legacy.Exceptions import FpdbParseError
 from fpdb_3_legacy.HandHistoryConverter import *
-from fpdb_3_legacy import MergeToFpdb, MergeStructures
 from fpdb_3_legacy.TourneySummary import *
 
 

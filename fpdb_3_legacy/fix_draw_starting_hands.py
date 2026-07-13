@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from __future__ import annotations
+
 """Maintenance script: find (and optionally delete) draw-game hands whose stored
 starting hand was corrupted by the historical ``addShownCards`` ordering bug.
 

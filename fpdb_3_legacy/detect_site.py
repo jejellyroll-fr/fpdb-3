@@ -1,11 +1,10 @@
 # Site detection utility for legacy FPDB parsers
 from __future__ import annotations
+
 import re
 
 # Import all site parsers
-from fpdb_3_legacy import PokerStarsToFpdb
-from fpdb_3_legacy import SealsWithClubsToFpdb
-from fpdb_3_legacy import GGPokerToFpdb
+from fpdb_3_legacy import GGPokerToFpdb, PokerStarsToFpdb, SealsWithClubsToFpdb
 
 # Map site header patterns to (parser_module, parser_class, site_name)
 SITE_DETECTORS = [

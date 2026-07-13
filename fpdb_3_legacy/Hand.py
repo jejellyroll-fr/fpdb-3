@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 from __future__ import annotations
+
 # Copyright 2008-2011 Carl Gherardi
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -13,15 +14,12 @@ from __future__ import annotations
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 # In the "official" distribution you can find the license in agpl-3.0.txt.
-
 import datetime
 import pprint
 import sys
 from decimal import Decimal, InvalidOperation
 
-from fpdb_3_legacy import Card
-from fpdb_3_legacy import Configuration
-from fpdb_3_legacy import DerivedStats
+from fpdb_3_legacy import Card, Configuration, DerivedStats
 from fpdb_3_legacy.Exceptions import FpdbHandDuplicate, FpdbHandPartial, FpdbParseError
 from fpdb_3_legacy.loggingFpdb import get_logger
 

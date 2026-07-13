@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 from __future__ import annotations
+
 """Test de la Feature 1.1: Migration Stack Technique Moderne"""
 
-import numpy as np
 import sys
 from pathlib import Path
 
+import numpy as np
 
 LEGACY_DIR = Path(__file__).resolve().parent
 
