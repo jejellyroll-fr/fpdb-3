@@ -36,17 +36,19 @@ Tests ajoutés : `test/test_menu_layout.py`, `test/test_translations.py`.
 
 ---
 
-## Vague 2 — Internationalisation en largeur 🌍 — 🟡 EN COURS
+## Vague 2 — Internationalisation en largeur 🌍 — ✅ MARQUAGE TERMINÉ
 
 **Fait (2026-07-12)**
 - ✅ **Sélecteur de langue** : View ▸ Language (native names via `QLocale`), écrit `ui_language` dans `HUD_config.xml` (`set_general` + `save`), appliqué au redémarrage. Logique pure `menu_layout.language_options` (testée).
 - ✅ **Helper i18n partagé** (`fpdb_3_legacy/i18n.py`) : `_` / `N_` avec fallback identité (test-safe).
-- ✅ **Marquage `_()`** de 7 modules GUI : menus, `GuiDatabase`, `GuiBulkImport`, `GuiAutoImport`, `Filters`, `GuiPrefs`, `GuiGraphViewer`, `GuiSessionViewer` (+ passe *format* : le récap d'import massif utilise `_("… {x}").format(...)`). Patron module-level = `N_()` + traduction au point d'usage (cf. `GuiPrefs.rewrite`).
+- ✅ **Marquage `_()` de TOUS les modules GUI** : menus + `GuiDatabase`, `GuiBulkImport`, `GuiAutoImport`, `Filters`, `GuiPrefs`, `GuiGraphViewer`, `GuiSessionViewer`, `GuiTourneyPlayerStats`, `GuiOpponentsReport`, `GuiTourneyGraphViewer`, `GuiTourHandViewer`, `GuiHandViewer`, `GuiLogView`, `GuiAutoNoteRules`, `fpdb.pyw`, `GuiReplayer`, `GuiAutoNotesWorkbench`, `Aux_Hud` (popups HUD). Les 3 restants (`GuiRingPlayerStats`, `GuiStatsInfo`, `GuiConfigObserver`) n'ont **aucune chaîne UI en dur**. Patrons : module-level = `N_()` + traduction au point d'usage (`GuiPrefs.rewrite`) ; conflit `_` jetable → alias `_t` (`Aux_Hud`) ou renommage.
 - ✅ **Outillage d'extraction** : `tools/update_pot.py` (xgettext, `--keyword=_ --keyword=N_`) → `locale/fpdb.pot` (git-ignoré).
-- ✅ **Traductions FR** + re-validation (« Configure » → « Configurer »). **Découverte clé** : la plupart de ces modules avaient des `_()` *retirés* alors que les catalogues 2011 contenaient encore la traduction — restaurer `_()` a **réactivé ~65 libellés FR existants** (Filters ~38, Prefs/viewers ~27) pour très peu de nouvelles traductions.
+- ✅ **Traductions FR** couvrant toutes les chaînes marquées + re-validations (« Configure » → « Configurer », correction d'entrées vides/espaces). **Découverte clé** : beaucoup de modules avaient des `_()` *retirés* alors que les catalogues 2011 gardaient la traduction — restaurer `_()` a réactivé des dizaines de libellés FR pour peu de nouvelles traductions.
 
-**Reste à faire**
-- Marquer `_()` les dialogues restants (`fpdb.pyw`, `GuiRingPlayerStats`, `GuiTourneyPlayerStats`, replayer, popups HUD…) — chercher le motif `("Mot")` = `_()` retiré à restaurer + finir la passe *format* des f-strings.
+**Reste à faire (hors dev / séparable)**
+- Traduire les chaînes dans les 13 autres langues (travail traducteurs ; `.pot` prêt).
+- Re-valider en masse les `.po` de 2011 (qualité).
+- Formats localisés : nombres / devises / dates dans stats et graphes (feature distincte).
 - Traduire les nouvelles chaînes dans les 13 autres langues (travail traducteurs ; workflow Weblate/Crowdin).
 - Re-valider en masse les `.po` de 2011.
 - Formats localisés : nombres / devises / dates dans stats et graphes (€/$/BB selon locale).
@@ -103,7 +105,7 @@ Les bugs multi-backend récents (`Rank` réservé, `boolean` vs `smallint`, `set
 | Vague | Contenu | Effort | Valeur | Statut |
 |---|---|---|---|---|
 | **1** | Menus déclaratifs + réorg ; fondation i18n | ~3j | Élevée | ✅ Fait |
-| **2** | i18n en largeur (sélecteur, marquage, formats) | ~5j | Élevée | 🟡 En cours |
+| **2** | i18n en largeur (sélecteur, marquage, formats) | ~5j | Élevée | ✅ Marquage fini |
 | **3** | Abstraction de dialecte SQL | ~4-6j | Élevée | 🟡 En cours |
 | **4** | Domaine poker (stats, parsers, equity) | ~1-2 sem | Moyen/élevé | À faire |
 | **5** | Dette longue (god-modules, mypy, ruff) | continu | Moyen | À faire |
