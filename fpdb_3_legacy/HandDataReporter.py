@@ -259,7 +259,7 @@ class HandDataReporter:
                                         )
 
                             analysis["attributes"][attr_name] = attr_info
-                    except:
+                    except Exception:
                         analysis["attributes"][attr_name] = {"error": "Could not access"}
 
         return analysis

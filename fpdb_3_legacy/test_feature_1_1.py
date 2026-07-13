@@ -181,14 +181,14 @@ def main():
             import sqlalchemy
 
             print(f"  • SQLAlchemy: {sqlalchemy.__version__}")
-        except:
+        except ImportError:
             pass
 
         try:
             import matplotlib
 
             print(f"  • matplotlib: {matplotlib.__version__}")
-        except:
+        except ImportError:
             pass
 
         try:
@@ -197,7 +197,7 @@ def main():
 
             print(f"  • FastAPI: {fastapi.__version__}")
             print(f"  • Pydantic: {pydantic.__version__}")
-        except:
+        except ImportError:
             pass
 
         return 0

@@ -711,10 +711,10 @@ class Fulltilt(HandHistoryConverter):
             hand.runItTimes = 2
 
     def readBlinds(self, hand):
-        try:
-            m = self.re_PostSB.search(hand.handText)
+        m = self.re_PostSB.search(hand.handText)
+        if m:
             hand.addBlind(m.group("PNAME"), "small blind", self.clearMoneyString(m.group("SB")))
-        except:  # no small blind
+        else:
             hand.addBlind(None, None, None)
         for a in self.re_PostDead.finditer(hand.handText):
             hand.addBlind(a.group("PNAME"), "secondsb", self.clearMoneyString(a.group("SB")))

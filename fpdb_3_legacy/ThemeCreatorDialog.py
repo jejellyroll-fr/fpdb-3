@@ -84,14 +84,11 @@ class ColorPickerWidget(QWidget):
     def on_hex_changed(self, text: str):
         """Handle hex input changes."""
         if text.startswith("#") and len(text) == 7:
-            try:
-                color = QColor(text)
-                if color.isValid():
-                    self.color = color
-                    self.update_button_color()
-                    self.colorChanged.emit(text)
-            except:
-                pass
+            color = QColor(text)
+            if color.isValid():
+                self.color = color
+                self.update_button_color()
+                self.colorChanged.emit(text)
 
     def get_color(self) -> str:
         """Get current color as hex string."""

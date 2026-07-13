@@ -88,7 +88,7 @@ def test_all_stats_via_do_stat():
     for stat in STATLIST:
         try:
             do_stat(base_dict, stat=stat, player="p")
-        except:
+        except Exception:
             pass  # Some stats need more specific data
 
 
