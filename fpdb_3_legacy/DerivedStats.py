@@ -92,7 +92,7 @@ def _chip_increment(factor: int) -> Decimal:
 def _buildStatsInitializer() -> dict:  # noqa: PLR0915
     # TODO @future: REFACTOR - This function is too long (79 statements > 50)
     # Consider breaking into smaller functions for different stat categories
-    init = {}
+    init: dict[str, Any] = {}
     # Init vars that may not be used, but still need to be inserted.
     # All stud street4 need this when importing holdem
     init["effStack"] = 0
@@ -328,10 +328,10 @@ def _buildStatsInitializer() -> dict:  # noqa: PLR0915
     init["val_r_raise_made_bp"] = 0
     # Bet-sizing: postflop raise faced per street and level (2/3/4-bet), as basis
     # points of the pot before the raise (PT4 amt_{f,t,r}_{2,3,4}bet_facing).
-    for _s in ("f", "t", "r"):
+    for street_code in ("f", "t", "r"):
         for _lvl in (2, 3, 4):
-            init[f"cnt_{_s}_{_lvl}bet_facing"] = 0
-            init[f"val_{_s}_{_lvl}bet_facing_bp"] = 0
+            init[f"cnt_{street_code}_{_lvl}bet_facing"] = 0
+            init[f"val_{street_code}_{_lvl}bet_facing_bp"] = 0
     # Bet-sizing completion (low-value / parity):
     # Raw amounts invested per street (cents) + blinds + total.
     init["amt_blind"] = 0
@@ -341,13 +341,13 @@ def _buildStatsInitializer() -> dict:  # noqa: PLR0915
     init["amt_bet_r"] = 0
     init["amt_bet_ttl"] = 0
     # Generic raise faced per street (first raise faced, any level), basis points.
-    for _s in ("p", "f", "t", "r"):
-        init[f"cnt_{_s}_raise_facing"] = 0
-        init[f"val_{_s}_raise_facing_bp"] = 0
+    for street_code in ("p", "f", "t", "r"):
+        init[f"cnt_{street_code}_raise_facing"] = 0
+        init[f"val_{street_code}_raise_facing_bp"] = 0
     # Size of the player's *second* raise per street, basis points.
-    for _s in ("p", "f", "t", "r"):
-        init[f"cnt_{_s}_raise_made_2"] = 0
-        init[f"val_{_s}_raise_made_2_bp"] = 0
+    for street_code in ("p", "f", "t", "r"):
+        init[f"cnt_{street_code}_raise_made_2"] = 0
+        init[f"val_{street_code}_raise_made_2_bp"] = 0
     # Preflop 5-bet faced (rare), basis points.
     init["cnt_p_5bet_facing"] = 0
     init["val_p_5bet_facing_bp"] = 0
@@ -363,11 +363,11 @@ class DerivedStats:
 
     def __init__(self) -> None:
         """Initialize DerivedStats instance."""
-        self.hands = {}
-        self.handsplayers = {}
-        self.handsactions = {}
-        self.handsstove = []
-        self.handspots = []
+        self.hands: dict[str, Any] = {}
+        self.handsplayers: dict[str, dict[str, Any]] = {}
+        self.handsactions: dict[Any, Any] = {}
+        self.handsstove: list[Any] = []
+        self.handspots: list[Any] = []
 
         # Check environment variable for rake rounding mode
         self.use_round_down = os.environ.get("FPDB_RAKE_ROUND_DOWN", "true").lower() in ("true", "1", "yes")
@@ -624,7 +624,7 @@ class DerivedStats:
                         cards = [Card.encodeCard(c) for c in boardcards[:5]]
                     except IndexError:
                         log.exception("Run %s: Error encoding split board cards", i + 1)
-                        cards = ["0x"] * 5
+                        cards = [0] * 5
                 else:
                     self.hands["runItTwice"] = True
                     # Pad trailing slots (keep flop/turn/river in order) so an
@@ -635,7 +635,7 @@ class DerivedStats:
                         cards = [Card.encodeCard(c) for c in boardcards[:5]]
                     except IndexError:
                         log.exception("Run %s: Error encoding board cards", i + 1)
-                        cards = ["0x"] * 5
+                        cards = [0] * 5
 
                 self.hands["boards"].append([board_id, *cards])
                 log.debug("Run %s: Appended to boards: %s", i + 1, [board_id, *cards])
@@ -738,7 +738,7 @@ class DerivedStats:
         total_players = len(hand.players)
         for player in hand.players:
             player_name = player[1]
-            player_stats = self.handsplayers.get(player_name)
+            player_stats = self.handsplayers[player_name]
             player_stats["seatNo"] = player[0]
             player_stats["seat"] = player[0]  # Duplicate for consistency with requested name
             player_stats["cnt_players"] = total_players
@@ -785,20 +785,21 @@ class DerivedStats:
         even_split = hand.totalpot / num_collectees if num_collectees > 0 else 0
         unraked = [c for c in hand.collectees.values() if even_split == c]
         for player, winnings in hand.collectees.items():
-            collectee_stats = self.handsplayers.get(player)
+            collectee_stats = self.handsplayers[player]
             collectee_stats["winnings"] = int(CENTS_MULTIPLIER * winnings)
             # Splits evenly on split pots and gives remainder to first player
             # Gets overwritten when calculating multi-way pots in assembleHandsPots
             if num_collectees == 0:
                 collectee_stats["rake"] = 0
             elif len(unraked) == 0:
-                rake = int(100 * hand.rake) / num_collectees
-                remainder_1, remainder_2 = 0, 0
-                if rake > 0 and i == 0:
-                    leftover = int(100 * hand.rake) - (rake * num_collectees)
-                    remainder_1 = int(100 * hand.rake) % rake
+                rake_share = int(100 * hand.rake) / num_collectees
+                remainder_1 = 0.0
+                remainder_2 = 0.0
+                if rake_share > 0 and i == 0:
+                    leftover = int(100 * hand.rake) - (rake_share * num_collectees)
+                    remainder_1 = int(100 * hand.rake) % rake_share
                     remainder_2 = leftover if remainder_1 == 0 else 0
-                collectee_stats["rake"] = rake + remainder_1 + remainder_2
+                collectee_stats["rake"] = rake_share + remainder_1 + remainder_2
             else:
                 collectee_stats["rake"] = int(100 * (even_split - winnings))
             if collectee_stats["street1Seen"]:
@@ -815,7 +816,7 @@ class DerivedStats:
 
         contributed, i = [], 0
         for player, money_committed in hand.pot.committed.items():
-            committed_player_stats = self.handsplayers.get(player)
+            committed_player_stats = self.handsplayers[player]
 
             # Note: pot.committed already has uncalled bets subtracted via pot.removeMoney()
             # So we use money_committed directly without additional subtraction
@@ -861,7 +862,7 @@ class DerivedStats:
             player_name = player[1]
             hcs = hand.join_holecards(player_name, asList=True)
             hcs = hcs + ["0x"] * 18
-            player_stats = self.handsplayers.get(player_name)
+            player_stats = self.handsplayers[player_name]
             if player_stats["sawShowdown"]:
                 player_stats["showdownWinnings"] = player_stats["totalProfit"]
             else:
@@ -1423,7 +1424,7 @@ class DerivedStats:
         running = int(CENTS_MULTIPLIER * _pot_stp(hand))
         for street in hand.actionStreets:
             keys = streets_map.get(street)
-            made_count = {}  # how many raises each player has made this street
+            made_count: dict[str, int] = {}  # raises made by each player this street
             for a in hand.actions.get(street, []):
                 pname, act = a[0], a[1]
                 ps = self.handsplayers.get(pname)
@@ -1431,7 +1432,7 @@ class DerivedStats:
                     n = made_count.get(pname, 0)
                     # First raise -> raise_made; second raise -> raise_made_2.
                     cnt_key, bp_key = (keys[0], keys[1]) if n == 0 else (keys[2], keys[3]) if n == 1 else (None, None)
-                    if cnt_key and running > 0 and not ps.get(cnt_key):
+                    if cnt_key is not None and bp_key is not None and running > 0 and not ps.get(cnt_key):
                         ps[cnt_key] = 1
                         try:
                             ps[bp_key] = int(int(CENTS_MULTIPLIER * a[3]) * 10000 // running)
@@ -1569,7 +1570,10 @@ class DerivedStats:
 
         # set blinds first, then others from pfbao list, avoids problem if bb
         # is missing from pfbao list or if there is no small blind
-        sb, bb, bi, ub = False, False, False, False
+        sb: list[str] = []
+        bb: list[str] = []
+        bi: list[str] = []
+        ub: list[str] = []
         if hand.gametype["base"] == "stud":
             # Stud position is determined after cards are dealt
             # First player to act is always the bring-in position in stud
@@ -2411,7 +2415,7 @@ class DerivedStats:
                     # This raise is a squeeze: the raiser + caller(s) are the
                     # defenders (the squeezer itself is excluded).
                     squeeze = True
-                    defenders = ({raiser} | set(callers)) - {pname}
+                    defenders = {name for name in [raiser, *callers] if isinstance(name, str) and name != pname}
 
     def calc3BetPostflop(self, hand: Any) -> None:
         """Per-street postflop 3-bet (re-raise) chance/done and fold-to-3bet.
@@ -2628,7 +2632,7 @@ class DerivedStats:
                     fast_forward = False  # raisefound, end fast-forward
             else:
                 player = tupleread[0]
-                player_stats = self.handsplayers.get(player)
+                player_stats = self.handsplayers[player]
                 player_stats["street0CalledRaiseChance"] += 1
                 if action == "calls":
                     player_stats["street0CalledRaiseDone"] += 1
@@ -2645,7 +2649,7 @@ class DerivedStats:
         steal_attempt = False
         stealer = None
         if hand.gametype["base"] == "stud":
-            steal_positions = (2, 1, 0)
+            steal_positions: tuple[int | str, ...] = (2, 1, 0)
         elif len([x for x in hand.actions[hand.actionStreets[0]] if x[1] == "button blind"]) > 0:
             steal_positions = (3, 2, 1)
         else:
@@ -3298,7 +3302,7 @@ class DerivedStats:
         """Calculate call statistics for a given street."""
         for act in hand.actions[hand.actionStreets[i + 1]]:
             if act[1] in ("calls"):
-                player_stats = self.handsplayers.get(act[0])
+                player_stats = self.handsplayers[act[0]]
                 # Initialize street stats if they don't exist (for run-it-twice scenarios)
                 if f"street{i}Calls" not in player_stats:
                     player_stats[f"street{i}Calls"] = 0
@@ -3308,7 +3312,7 @@ class DerivedStats:
         """Calculate bet statistics for a given street."""
         for act in hand.actions[hand.actionStreets[i + 1]]:
             if act[1] in ("bets"):
-                player_stats = self.handsplayers.get(act[0])
+                player_stats = self.handsplayers[act[0]]
                 # Initialize street stats if they don't exist (for run-it-twice scenarios)
                 if f"street{i}Bets" not in player_stats:
                     player_stats[f"street{i}Bets"] = 0
@@ -3318,7 +3322,7 @@ class DerivedStats:
         """Calculate raise statistics for a given street."""
         for act in hand.actions[hand.actionStreets[i + 1]]:
             if act[1] in ("completes", "raises"):
-                player_stats = self.handsplayers.get(act[0])
+                player_stats = self.handsplayers[act[0]]
                 # Initialize street stats if they don't exist (for run-it-twice scenarios)
                 if f"street{i}Raises" not in player_stats:
                     player_stats[f"street{i}Raises"] = 0
@@ -3328,7 +3332,7 @@ class DerivedStats:
         """Calculate fold statistics for a given street."""
         for act in hand.actions[hand.actionStreets[i + 1]]:
             if act[1] in ("folds"):
-                player_stats = self.handsplayers.get(act[0])
+                player_stats = self.handsplayers[act[0]]
                 # Initialize street stats if they don't exist (for run-it-twice scenarios)
                 if f"otherRaisedStreet{i}" not in player_stats:
                     player_stats[f"otherRaisedStreet{i}"] = False
@@ -3341,14 +3345,18 @@ class DerivedStats:
 
     def assembleHandsStove(self, hand: Any) -> None:  # noqa: C901, PLR0912, PLR0915
         """Assemble hands stove data for equity calculations."""
+        engine = pokereval
+        if engine is None:
+            return
         category = hand.gametype["category"]
-        holecards, holeplayers = {}, []
+        holecards: dict[str, dict[str, Any]] = {}
+        holeplayers: list[str] = []
         base, evalgame, hilo, streets, last, hrange = Card.games[category]
         hi_lo_key = {"h": [("h", "hi")], "l": [("l", "low")], "s": [("h", "hi"), ("l", "low")], "r": [("l", "hi")]}
         boards = self.getBoardsDict(hand, base, streets)
         for player in hand.players:
             pname = player[1]
-            hp = self.handsplayers.get(pname)
+            hp = self.handsplayers[pname]
             if evalgame:
                 hcs = hand.join_holecards(pname, asList=True)
                 holecards[pname] = {}
@@ -3377,10 +3385,10 @@ class DerivedStats:
                             if notnull and (postflop or maxcards):
                                 for hl, side in hi_lo_key[hilo]:
                                     try:
-                                        value, rank = pokereval.best(side, cards, bcards)
+                                        value, rank = engine.best(side, cards, bcards)
                                         rank_id = Card.hands[rank[0]][0]
                                         if rank is not None and rank[0] != "Nothing":
-                                            _cards = "".join([pokereval.card2string(i)[0] for i in rank[1:]])
+                                            _cards = "".join([engine.card2string(i)[0] for i in rank[1:]])
                                         else:
                                             _cards = None
                                         self.handsstove.append(
@@ -3431,15 +3439,16 @@ class DerivedStats:
 
     def assembleHandsPots(self, hand: Any) -> None:  # noqa: C901, PLR0912, PLR0915
         """Assemble hands pots data and calculate winnings."""
-        category, positions, players_pots, pot_found, position_dict, showdown, allin_ante = (
-            hand.gametype["category"],
-            [],
-            {},
-            {},
-            {},
-            False,
-            False,
-        )
+        engine = pokereval
+        if engine is None:
+            return
+        category = hand.gametype["category"]
+        positions: list[Any] = []
+        players_pots: dict[str, list[Any]] = {}
+        pot_found: dict[str, list[Any]] = {}
+        position_dict: dict[Any, str] = {}
+        showdown = False
+        allin_ante = False
         for p in hand.players:
             players_pots[p[1]] = [0, []]
             pot_found[p[1]] = [0, 0]
@@ -3506,7 +3515,7 @@ class DerivedStats:
                             holeplayers.append(p)
                     if len(holecards) > 1:
                         try:
-                            win = pokereval.winners(game=evalgame, pockets=holecards, board=board)
+                            win = engine.winners(game=evalgame, pockets=holecards, board=board)
                         except RuntimeError:
                             log.exception(
                                 "assembleHandsPots: error evaluating winners for hand %s %s",
@@ -3597,7 +3606,7 @@ class DerivedStats:
         try:
             log.debug("Getting boards dict for hand %s", hand.handid)
             boards = {}
-            cumulative_board = []
+            cumulative_board: list[Any] = []
 
             for street_name in streets:
                 try:
@@ -3775,10 +3784,13 @@ class DerivedStats:
                     try:
                         # Calculate equity for draw games
                         # Note: Draw games don't use board cards
-                        iterations = Card.iter.get(0, 1000)  # Default iterations
+                        iterations = 1000
 
                         # Use poker_eval for draw games
-                        evs = pokereval.poker_eval(
+                        engine = pokereval
+                        if engine is None:
+                            return
+                        evs = engine.poker_eval(
                             game="5draw",  # Default for draw games
                             iterations=iterations,
                             pockets=player_cards,
@@ -3821,7 +3833,8 @@ class DerivedStats:
         try:
             log.debug("Awarding pots for hand %s", hand.handid)
 
-            if not pokereval:
+            engine = pokereval
+            if engine is None:
                 log.warning("pokereval not available for pot awarding")
                 return
 
@@ -3845,7 +3858,7 @@ class DerivedStats:
                         board = boards[0]  # Use first board
 
                         # Calculate winners using pokereval
-                        winners = pokereval.winners(
+                        winners = engine.winners(
                             game=hand.gametype["category"],
                             pockets=[hole for _, hole in holeplayers],
                             board=board,
