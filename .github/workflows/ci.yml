@@ -15,8 +15,16 @@ jobs:
       - uses: astral-sh/setup-uv@v3
       - name: Install Ruff
         run: uv tool install ruff
+      - name: Install mypy
+        run: uv tool install mypy
       - name: Lint repository
         run: ruff check fpdb_3_legacy fpdb test tests
+      - name: Type-check modernized core
+        run: >-
+          mypy
+          fpdb_3_legacy/equity.py
+          fpdb_3_legacy/dialects.py
+          fpdb_3_legacy/pt4_adapter
       - name: Lint newly modernized modules
         run: >-
           ruff check
