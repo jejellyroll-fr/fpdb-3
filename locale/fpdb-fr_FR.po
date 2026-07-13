@@ -119,7 +119,7 @@ msgstr ""
 #: Aux_Hud.py:271 Aux_Hud.py:305 Aux_Hud.py:322
 #, fuzzy
 msgid "Custom"
-msgstr "  Personnalisé"
+msgstr "Personnalisé"
 
 #: Aux_Hud.py:272
 #, fuzzy
@@ -164,7 +164,7 @@ msgstr ""
 
 #: Aux_Hud.py:301
 msgid "Show Player Stats for"
-msgstr ""
+msgstr "Afficher les stats joueur pour"
 
 #: Aux_Hud.py:308 Aux_Hud.py:325
 #, fuzzy
@@ -173,7 +173,7 @@ msgstr "À:"
 
 #: Aux_Hud.py:318
 msgid "Show Opponent Stats for"
-msgstr ""
+msgstr "Afficher les stats adversaire pour"
 
 #: BetOnlineToFpdb.py:209
 msgid "BetOnlineToFpdb.determineGameType: '%s'"
