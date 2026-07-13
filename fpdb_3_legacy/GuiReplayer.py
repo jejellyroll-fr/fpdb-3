@@ -167,21 +167,21 @@ def best_hand(holecards: list[str], board: list[str], base: str, category: str):
                 if best is None or rank > best[0]:
                     best = (rank, frozenset(five))
     elif base == "hold":
-        pool = hole + board
+        pool: list[str] = hole + board
         if len(pool) < 5:
             return (None, frozenset())
-        for five in itertools.combinations(pool, 5):
-            rank = _rank_five(list(five))
+        for five_cards in itertools.combinations(pool, 5):
+            rank = _rank_five(list(five_cards))
             if best is None or rank > best[0]:
-                best = (rank, frozenset(five))
+                best = (rank, frozenset(five_cards))
     else:  # stud / draw: hole cards only
         pool = hole
         if len(pool) < 5:
             return (None, frozenset(pool))
-        for five in itertools.combinations(pool, 5):
-            rank = _rank_five(list(five))
+        for five_cards in itertools.combinations(pool, 5):
+            rank = _rank_five(list(five_cards))
             if best is None or rank > best[0]:
-                best = (rank, frozenset(five))
+                best = (rank, frozenset(five_cards))
     return best if best else (None, frozenset())
 
 
@@ -257,37 +257,37 @@ class ReplayPlayer:
     allin: bool = False
     # Showdown info (only populated on the final frame).
     combination: str | None = None
-    winning_cards: frozenset = field(default_factory=frozenset)
+    winning_cards: frozenset[str] = field(default_factory=frozenset)
     is_winner: bool = False
     cashout: Decimal | None = None
     # Draw games: cards discarded on the frame the player just drew (the actual
     # cards for the hero, otherwise an empty list with discard_count set).
     discard_count: int = 0
-    discard_cards: list = field(default_factory=list)
+    discard_cards: list[str] = field(default_factory=list)
     # Run-it-twice/three: hole card -> list of run outline colours (one per run
     # whose winning combination this card is part of).
-    hole_run_colors: dict = field(default_factory=dict)
+    hole_run_colors: dict[str, list[str]] = field(default_factory=dict)
 
 
 @dataclass
 class ReplayFrame:
     street: str | None
-    board: dict
-    render_board: set
+    board: dict[str, list[str]]
+    render_board: set[str]
     pot: Decimal
     players: list[ReplayPlayer]
     pots: list[tuple[str, Decimal]] = field(default_factory=list)
     # Run-it boards: one dict per run with color/board_highlight/winner/combo.
-    runs: list = field(default_factory=list)
+    runs: list[dict[str, Any]] = field(default_factory=list)
     # Game category (e.g. "cour_hi"); used to expose the Courchevel flopet pre-flop.
     category: str = ""
 
 
 @dataclass
 class ReplayModel:
-    hand: object
+    hand: Any
     info: str
-    states: list
+    states: list[Any]
     seen_streets: set[str]
 
 
@@ -942,7 +942,7 @@ class GuiReplayer(QWidget):
         if ofc_hand.rounds:
             for index in range(len(ofc_hand.rounds)):
                 current_round = ofc_hand.rounds[index]
-                actor = current_round.get("player")
+                actor = str(current_round.get("player") or "")
                 actor_rows = visible_rows.setdefault(
                     actor,
                     {row: ["--"] * limit for row, limit in row_limits.items()},
@@ -1156,7 +1156,7 @@ class GuiReplayer(QWidget):
 
         self.render_card_width = card_w
         self.render_card_height = card_h
-        self.render_card_spacing = card_w + gap
+        self.render_card_spacing: float = float(card_w + gap)
         for row_index, (row_key, label, limit) in enumerate(row_defs):
             y = board.y() + 10 + row_index * (card_h + 4)
             painter.setFont(QFont("Helvetica", 8, QFont.Weight.Bold))
@@ -1377,7 +1377,7 @@ class GuiReplayer(QWidget):
         players = []
         for player in state.players.values():
             combination = None
-            winning_cards = frozenset()
+            winning_cards: frozenset[str] = frozenset()
             is_winner = False
             if is_showdown:
                 combination = showdown_strings.get(player.name)
@@ -1445,7 +1445,7 @@ class GuiReplayer(QWidget):
         runs_info = []
         for i, run in enumerate(board_runs):
             color = RUN_COLORS[i % len(RUN_COLORS)]
-            info = {"color": color, "board_highlight": frozenset(), "winner": None, "combo": ""}
+            info: dict[str, Any] = {"color": color, "board_highlight": frozenset(), "winner": None, "combo": ""}
             real_cards = sum(1 for c in run if c not in ("0", "0x", None))
             if contesting and real_cards >= 5:
                 best_rank = winner = winner_cards = None
@@ -1459,9 +1459,9 @@ class GuiReplayer(QWidget):
                     # Outline only the board cards that form the winning
                     # combination (e.g. the 3 board cards of an Omaha hand),
                     # in the run's colour.
-                    info["board_highlight"] = frozenset(c for c in winner_cards if c in run)
+                    info["board_highlight"] = frozenset(c for c in (winner_cards or frozenset()) if c in run)
                     # The hole cards the winner uses, for nested outlines.
-                    hole_used = frozenset(winner_cards) & frozenset(self._normalized_cards(list(winner.holecards or [])))
+                    hole_used = frozenset(winner_cards or frozenset()) & frozenset(self._normalized_cards(list(winner.holecards or [])))
                     for card in hole_used:
                         winner.hole_run_colors.setdefault(card, []).append(color)
             runs_info.append(info)
@@ -1552,6 +1552,7 @@ class GuiReplayer(QWidget):
             is_win = card in highlight and card not in {"0", "0x", None}
             card_token = f"T{card[-1]}" if isinstance(card, str) and len(card) == 3 and card.startswith("10") else card
             card_index = Card.encodeCard(card_token)
+            assert self.cardImages is not None
             pixmap = self.cardImages[card_index]
             card_y = y + lift if is_win else y
             card_rect = QRectF(x, card_y, card_width, card_height)
@@ -1588,6 +1589,7 @@ class GuiReplayer(QWidget):
             colors = card_colors.get(card, []) if card not in {"0", "0x", None} else []
             card_y = y + lift if colors else y
             card_rect = QRectF(x, card_y, card_width, card_height)
+            assert self.cardImages is not None
             pixmap = self.cardImages[Card.encodeCard(card)]
             if any_highlight and not colors:
                 painter.save()
@@ -1655,6 +1657,7 @@ class GuiReplayer(QWidget):
         painter.rotate(10 * e)
         painter.translate(-cx, -cy)
         for c in draw_cards:
+            assert self.cardImages is not None
             painter.drawPixmap(QRectF(x, y, card_w, card_h).toRect(), self.cardImages[Card.encodeCard(c)])
             x += spacing
         painter.restore()
@@ -1745,7 +1748,7 @@ class GuiReplayer(QWidget):
             runs.append(list(frame.board["FLOP"][:1]))
         board_cards = [c for run in runs for c in run]
 
-        board_highlight = frozenset()
+        board_highlight: frozenset[str] = frozenset()
         for fplayer in frame.players:
             if fplayer.is_winner and fplayer.winning_cards:
                 board_highlight |= fplayer.winning_cards
@@ -1926,9 +1929,9 @@ class GuiReplayer(QWidget):
             combo_font_size = max(9, int(10 * card_scale))
             combo_font = QFont("Helvetica", combo_font_size, QFont.Weight.Bold)
             metrics = QFontMetrics(combo_font)
-            text = player.combination
+            combo_text = player.combination
             pad_x, pad_y = 10, 5
-            text_w = metrics.horizontalAdvance(text)
+            text_w = metrics.horizontalAdvance(combo_text)
             pill_w = text_w + pad_x * 2
             pill_h = metrics.height() + pad_y * 2
             center_x = seat.panel_rect.center().x()
@@ -1958,7 +1961,7 @@ class GuiReplayer(QWidget):
             painter.drawRoundedRect(combo_rect, pill_h / 2, pill_h / 2)
             painter.setPen(QColor("#ffd34d") if is_win else QColor("#c4cdd4"))
             painter.setFont(combo_font)
-            painter.drawText(combo_rect, Qt.AlignmentFlag.AlignCenter, text)
+            painter.drawText(combo_rect, Qt.AlignmentFlag.AlignCenter, combo_text)
 
         if player.chips and player.action != "collected":
             painter.setPen(Qt.PenStyle.NoPen)
@@ -2048,9 +2051,8 @@ class GuiReplayer(QWidget):
         game = game_info[1] if game_info else None
         if not game:
             return summary
-        cache = getattr(self, "_equity_cache", None)
-        if cache is None:
-            cache = self._equity_cache = {}
+        cache: dict[Any, Decimal | None] = getattr(self, "_equity_cache", None) or {}
+        self._equity_cache = cache
         key = (
             game,
             tuple((player.name, tuple(player.holecards), player.action) for player in frame.players),
@@ -2340,7 +2342,7 @@ class ICM:
     def __init__(self, stacks, payouts) -> None:
         self.stacks = stacks
         self.payouts = payouts
-        self.equities = []
+        self.equities: list[Decimal] = []
         self.prepare()
 
     def prepare(self) -> None:
@@ -2367,7 +2369,7 @@ class TableState:
         self.pot = Decimal(0)
         self.street = None
         self.board = hand.board
-        self.renderBoard = set()
+        self.renderBoard: set[str] = set()
         self.bet = Decimal(0)
         self.called = Decimal(0)
         self.gametype = hand.gametype["category"]
@@ -2459,7 +2461,7 @@ class TableState:
             player.stack -= action[2]
             self.newpot += action[2]
         elif action[1] == "discards":
-            player.action += " " + str(action[2])
+            player.action = (player.action or "") + " " + str(action[2])
             try:
                 player.discardCount = int(action[2])
             except (TypeError, ValueError):
@@ -2528,7 +2530,7 @@ class TableState:
             },
         )
         if not cap_levels:
-            return [("Pot", total)]
+            return [("Pot", Decimal(total))]
 
         # Pot boundaries are the all-in caps, plus the overall top so that any
         # chips committed above the highest cap (e.g. a live player betting
@@ -2538,7 +2540,7 @@ class TableState:
         if boundaries[-1] < top:
             boundaries.append(top)
 
-        layers = []
+        layers: list[list[Any]] = []
         prev = Decimal(0)
         for level in boundaries:
             contributors = [c for c in contributions.values() if c > prev]
@@ -2554,7 +2556,7 @@ class TableState:
                 layers.append([amount, eligible])
 
         # Merge adjacent layers that share the same set of eligible winners.
-        merged: list[list] = []
+        merged: list[list[Any]] = []
         for amount, eligible in layers:
             if merged and merged[-1][1] == eligible:
                 merged[-1][0] += amount
@@ -2562,12 +2564,12 @@ class TableState:
                 merged.append([amount, eligible])
 
         if not merged:
-            return [("Pot", total)]
+            return [("Pot", Decimal(total))]
         if len(merged) == 1:
             # Single contended pot (uncalled bets, if any, were excluded above).
             return [("Pot", merged[0][0])]
 
-        result = [("Main pot", merged[0][0])]
+        result: list[tuple[str, Decimal]] = [("Main pot", Decimal(merged[0][0]))]
         for index, (amount, _eligible) in enumerate(merged[1:], start=1):
             result.append((f"Side pot {index}", amount))
         return result
@@ -2598,12 +2600,12 @@ class Player:
         self.chips = Decimal(0)
         self.seat = seat
         self.name = name
-        self.action = None
+        self.action: str | None = None
         self.justacted = False
         self.allin = False
         self.folded = False
         self.discardCount = 0
-        self.discardCards = []
+        self.discardCards: list[str] = []
         self.holecards = hand.join_holecards(name, asList=True)
         self.streetcards = {}
         if hand.gametype["base"] == "draw":
