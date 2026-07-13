@@ -4834,3 +4834,20 @@ msgstr "Dépareillées"
 
 msgid "Tour Player Stats"
 msgstr "Stats joueur tournoi"
+
+# --- Vague 2: viewers & reports ---
+
+msgid "FPDB 3 info"
+msgstr "Infos FPDB 3"
+
+msgid "Min hands vs hero:"
+msgstr "Mains min. contre le héros :"
+
+msgid "Top N opponents:"
+msgstr "Top N adversaires :"
+
+msgid "Sort by:"
+msgstr "Trier par :"
+
+msgid "Copy to clipboard"
+msgstr "Copier dans le presse-papiers"

@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 from __future__ import annotations
+
 from time import time
 
 from PySide6.QtCore import Qt
@@ -20,6 +21,7 @@ from PySide6.QtWidgets import (
 
 # import Charset
 from fpdb_3_legacy import Filters, GuiTourHandViewer
+from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.loggingFpdb import get_logger
 
 log = get_logger("gui_tourney_player_stats")
@@ -54,7 +56,7 @@ class GuiTourneyPlayerStats(QSplitter):
         self.detailFilters = []
 
         self.filters = Filters.Filters(self.db, display=filters_display)
-        self.filters.registerButton2Name("_Refresh Stats")
+        self.filters.registerButton2Name(_("Refresh Stats"))
         self.filters.registerButton2Callback(self.refreshStats)
 
         scroll = QScrollArea()
@@ -145,7 +147,7 @@ class GuiTourneyPlayerStats(QSplitter):
             from PySide6.QtWidgets import QMessageBox
             msg = QMessageBox(self)
             msg.setIcon(QMessageBox.Icon.Information)
-            msg.setWindowTitle("FPDB 3 info")
+            msg.setWindowTitle(_("FPDB 3 info"))
             msg.setText("No data found for the selected filters.")
             msg.exec()
             raise ValueError("No data found")
@@ -507,10 +509,8 @@ def main(argv=None):
     settings.update(config.get_import_parameters())
     settings.update(config.get_default_paths())
 
-    from PySide6.QtWidgets import QApplication, QMainWindow
 
-    from fpdb_3_legacy import Database
-    from fpdb_3_legacy import SQL
+    from fpdb_3_legacy import SQL, Database
 
     app = QApplication([])
     sql = SQL.Sql(db_server=settings["db-server"])
