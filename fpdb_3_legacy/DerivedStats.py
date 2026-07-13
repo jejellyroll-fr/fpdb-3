@@ -84,6 +84,11 @@ ANTE_ALL_IN_POSITION = 9
 MIN_RUN_IT_TIMES = 2
 
 
+def _chip_increment(factor: int) -> Decimal:
+    """Return the smallest distributable unit without mixing Decimal and float."""
+    return Decimal(1) / Decimal(factor)
+
+
 def _buildStatsInitializer() -> dict:  # noqa: PLR0915
     # TODO @future: REFACTOR - This function is too long (79 statements > 50)
     # Consider breaking into smaller functions for different stat categories
@@ -3527,7 +3532,7 @@ class DerivedStats:
                                     pname = position_dict[n]
                                     ppot = pot_split
                                     if mod_split > 0:
-                                        cent = Decimal("0.01") * (100 / factor)
+                                        cent = _chip_increment(factor)
                                         ppot += cent
                                         mod_split -= cent
                                     players_pots[pname][0] += ppot
