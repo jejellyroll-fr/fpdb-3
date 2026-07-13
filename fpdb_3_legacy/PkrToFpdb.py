@@ -31,6 +31,7 @@ from fpdb_3_legacy.HandHistoryConverter import FpdbHandPartial, FpdbParseError, 
 
 
 class Pkr(HandHistoryConverter):
+    compiledPlayers: set[str] = set()
     # Class Variables
 
     sitename = "PKR"
@@ -326,6 +327,8 @@ class Pkr(HandHistoryConverter):
         ):  # a list of streets which get dealt community cards (i.e. all but PREFLOP)
             # print "DEBUG readCommunityCards:", street, hand.streets.group(street)
             m = self.re_Board.search(hand.streets[street])
+            if m is None:
+                raise FpdbParseError("Could not identify community cards")
             if street == "FLOP" and re.search(r"\[\S\S \S\S \S\S\]", hand.streets[street]):
                 cards = m.group("CARDS").strip("[]").split(" ")
             else:
