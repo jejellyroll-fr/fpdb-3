@@ -122,6 +122,12 @@ jobs:
           QT_QPA_PLATFORM: offscreen
         run: |
           python -m pytest -p no:pytest-qt -m "not qt and not perf" --tb=short
+      - name: Run Qt regression tests (offscreen)
+        if: runner.os == 'Linux'
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: |
+          python -m pytest -m qt --tb=short
 
   build:
     runs-on: ${{ matrix.os }}

@@ -103,7 +103,7 @@ Les bugs multi-backend récents (`Rank` réservé, `boolean` vs `smallint`, `set
 
 ## CI / packaging (transversal)
 
-- **CI** : matrice OS (cf. correctifs Windows récents) + lint + mypy + tests + **compilation `.mo`** dans le build (Briefcase), et embarquer `locale/**/*.mo` dans les bundles.
+- **CI** : matrice OS + lint + mypy + tests non-Qt sur Linux/macOS/Windows ; suite Qt complète exécutée hors-écran sous Linux ; **compilation `.mo`** dans le build (Briefcase), et embarquer `locale/**/*.mo` dans les bundles.
 - **Migration DB** : tests d'intégration réels PostgreSQL/MySQL en CI (services conteneurisés) — la couverture multi-backend actuelle est mockée.
 
 ---
