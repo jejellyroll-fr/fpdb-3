@@ -3,11 +3,12 @@ from __future__ import annotations
 Themes and color schemes for modern popup windows.
 """
 
-from typing import Any
-
 from fpdb_3_legacy.loggingFpdb import get_logger
 
 log = get_logger("popup_themes")
+
+FontSpec = dict[str, str | int]
+StatThresholds = dict[str, dict[str, float]]
 
 
 class PopupTheme:
@@ -15,15 +16,15 @@ class PopupTheme:
 
     def __init__(self, name: str) -> None:
         self.name = name
-        self.colors = {}
-        self.fonts = {}
-        self.spacing = {}
+        self.colors: dict[str, str] = {}
+        self.fonts: dict[str, FontSpec] = {}
+        self.spacing: dict[str, int] = {}
 
     def get_color(self, element: str) -> str:
         """Get color for a specific element."""
         return self.colors.get(element, "#FFFFFF")
 
-    def get_font(self, element: str) -> dict[str, Any]:
+    def get_font(self, element: str) -> FontSpec:
         """Get font properties for a specific element."""
         return self.fonts.get(element, {"family": "Arial", "size": 10})
 
@@ -185,7 +186,7 @@ def get_theme(theme_name: str = "material_dark") -> PopupTheme:
     return theme_class()
 
 
-def get_stat_color(theme: PopupTheme, stat_name: str, value: float, thresholds: dict[str, float] | None = None) -> str:
+def get_stat_color(theme: PopupTheme, stat_name: str, value: float, thresholds: StatThresholds | None = None) -> str:
     """Get color for a stat based on its value and thresholds."""
     if thresholds is None:
         # Default thresholds for common stats
