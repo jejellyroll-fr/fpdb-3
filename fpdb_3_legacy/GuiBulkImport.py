@@ -256,10 +256,9 @@ class GuiBulkImport(QWidget):
         self.progress_bar.setVisible(False)
         QMessageBox.warning(self, _("Bulk Import Error"), error_msg)
 
-    def get_vbox(self) -> Any:
+    def get_vbox(self) -> QVBoxLayout:
         """Return the main widget container."""
-        """Returns the vbox of this thread."""
-        return self.layout()
+        return self.main_layout
 
     def __init__(self, settings: Any, config: Any, sql: Any = None, parent: Any = None) -> None:
         """Initialize the bulk import widget."""
@@ -272,7 +271,8 @@ class GuiBulkImport(QWidget):
 
         self.importer = Importer.Importer(self, self.settings, config, sql, self)
 
-        self.setLayout(QVBoxLayout())
+        self.main_layout = QVBoxLayout()
+        self.setLayout(self.main_layout)
 
         # Configured import directories
         self.import_tree = QTreeWidget()
@@ -300,8 +300,8 @@ class GuiBulkImport(QWidget):
                     item.setCheckState(0, Qt.CheckState.Unchecked)
                     item.setIcon(0, icon)
 
-        self.layout().addWidget(QLabel(_("Configured Import Directories:")))
-        self.layout().addWidget(self.import_tree)
+        self.main_layout.addWidget(QLabel(_("Configured Import Directories:")))
+        self.main_layout.addWidget(self.import_tree)
 
         # Custom import directory
         custom_dir_layout = QHBoxLayout()
@@ -313,7 +313,7 @@ class GuiBulkImport(QWidget):
         self.chooseButton.setIcon(QIcon(str(browse_icon_path)) if browse_icon_path.exists() else QIcon())
         self.chooseButton.clicked.connect(self.browseClicked)
         custom_dir_layout.addWidget(self.chooseButton)
-        self.layout().addLayout(custom_dir_layout)
+        self.main_layout.addLayout(custom_dir_layout)
 
         # Optional: relocate files once processed (backend in Importer).
         self.moveImportedCheck, self.moveImportedDir = self._build_move_row(
@@ -332,12 +332,12 @@ class GuiBulkImport(QWidget):
         download_icon_path = icons_dir / "16x16" / "cil-cloud-download.png"
         self.load_button.setIcon(QIcon(str(download_icon_path)) if download_icon_path.exists() else QIcon())
         self.load_button.clicked.connect(self.load_clicked)
-        self.layout().addWidget(self.load_button)
+        self.main_layout.addWidget(self.load_button)
 
         self.progress_bar = QProgressBar()
         self.progress_bar.setTextVisible(False)
         self.progress_bar.setVisible(False)
-        self.layout().addWidget(self.progress_bar)
+        self.main_layout.addWidget(self.progress_bar)
 
         #    see how many hands are in the db and adjust accordingly
         tcursor = self.importer.database.cursor
@@ -371,7 +371,7 @@ class GuiBulkImport(QWidget):
         browse = QPushButton(_("Browse..."))
         browse.clicked.connect(lambda: self._browse_into(line_edit))
         row.addWidget(browse)
-        self.layout().addLayout(row)
+        self.main_layout.addLayout(row)
         return checkbox, line_edit
 
     def _browse_into(self, line_edit: QLineEdit) -> None:
