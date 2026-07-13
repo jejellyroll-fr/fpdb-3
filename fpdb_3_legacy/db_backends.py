@@ -420,20 +420,16 @@ def create_database(
         return ConnectionResult(ok=False, message=text.strip())
 
 
-def _pg_ident(name: str) -> str:
-    """Quote a PostgreSQL identifier."""
-    return '"' + name.replace('"', '""') + '"'
-
-
-def _pg_literal(value: str) -> str:
-    """Quote a PostgreSQL string literal."""
-    return "'" + value.replace("'", "''") + "'"
-
-
 def _create_postgresql_database(
     database, host, port, admin_user, admin_password, app_user, app_password,
 ) -> ConnectionResult:
     import psycopg
+
+    from fpdb_3_legacy import dialects
+
+    dialect = dialects.dialect_for_server("postgresql")
+    _pg_ident = dialect.quote_identifier
+    _pg_literal = dialect.quote_literal
 
     # CREATE DATABASE / ROLE cannot run in a transaction, so use autocommit, and
     # they cannot take bind parameters for identifiers, so quote them safely.
@@ -474,14 +470,12 @@ def _create_postgresql_database(
     return ConnectionResult(ok=True, message="PostgreSQL: " + ", ".join(actions) + ".")
 
 
-def _my_literal(value: str) -> str:
-    """Quote a MySQL string literal (backslash-escaping)."""
-    return "'" + value.replace("\\", "\\\\").replace("'", "\\'") + "'"
-
-
 def _create_mysql_database(
     database, host, port, admin_user, admin_password, app_user, app_password,
 ) -> ConnectionResult:
+    from fpdb_3_legacy import dialects
+
+    dialect = dialects.dialect_for_server("mysql")
     mysqldb = import_mysqldb()
 
     conn = mysqldb.connect(
@@ -494,13 +488,13 @@ def _create_mysql_database(
     actions: list[str] = []
     try:
         cursor = conn.cursor()
-        db_quoted = "`" + database.replace("`", "``") + "`"
+        db_quoted = dialect.quote_identifier(database)
         cursor.execute(f"CREATE DATABASE IF NOT EXISTS {db_quoted}")
         actions.append(f"database '{database}' ready")
         # Ensure the application account exists and can reach the new database.
         if app_user and app_user != admin_user:
-            user_lit = _my_literal(app_user)
-            pw_lit = _my_literal(app_password or "")
+            user_lit = dialect.quote_literal(app_user)
+            pw_lit = dialect.quote_literal(app_password or "")
             cursor.execute(f"CREATE USER IF NOT EXISTS {user_lit}@'%' IDENTIFIED BY {pw_lit}")
             cursor.execute(f"GRANT ALL PRIVILEGES ON {db_quoted}.* TO {user_lit}@'%'")
             cursor.execute("FLUSH PRIVILEGES")

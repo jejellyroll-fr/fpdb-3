@@ -52,11 +52,20 @@ def test_placeholders_per_backend():
 
 
 def test_quote_identifier_per_backend():
+    # Case-preserving so CREATE DATABASE/ROLE use the exact configured name.
     assert dialects.dialect_for_server("mysql").quote_identifier("Rank") == "`Rank`"
     assert dialects.dialect_for_server("sqlite").quote_identifier("Rank") == '"Rank"'
-    # PostgreSQL folds unquoted names to lower case; quoting matches that.
-    assert dialects.dialect_for_server("postgresql").quote_identifier("Rank") == '"rank"'
+    assert dialects.dialect_for_server("postgresql").quote_identifier("Rank") == '"Rank"'
     assert dialects.dialect_for_server("mysql").quote_identifier("a`b") == "`a``b`"
+    assert dialects.dialect_for_server("postgresql").quote_identifier('a"b') == '"a""b"'
+
+
+def test_quote_literal_per_backend():
+    # ANSI single-quote doubling for PostgreSQL/SQLite; backslash escaping for MySQL.
+    assert dialects.dialect_for_server("postgresql").quote_literal("O'Brien") == "'O''Brien'"
+    assert dialects.dialect_for_server("sqlite").quote_literal("a'b") == "'a''b'"
+    assert dialects.dialect_for_server("mysql").quote_literal("O'Brien") == "'O\\'Brien'"
+    assert dialects.dialect_for_server("mysql").quote_literal("a\\b") == "'a\\\\b'"
 
 
 # --- boolean coercion ------------------------------------------------------
