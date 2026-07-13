@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 from __future__ import annotations
+
 # Copyright 2008-2011 Carl Gherardi
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -13,7 +14,6 @@ from __future__ import annotations
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 # In the "official" distribution you can find the license in agpl-3.0.txt.
-
 import glob
 import json
 import os
@@ -46,6 +46,7 @@ from PySide6.QtWidgets import (
 )
 
 from fpdb_3_legacy import Configuration
+from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.loggingFpdb import get_logger
 
 if __name__ == "__main__":
@@ -188,7 +189,7 @@ class GuiLogView(QWidget):
 
         # Increase the default window size
         self.resize(1200, 800)
-        self.setWindowTitle("Log Viewer")
+        self.setWindowTitle(_("Log Viewer"))
 
         self.setLayout(QVBoxLayout())
 
@@ -214,7 +215,7 @@ class GuiLogView(QWidget):
 
         # Combobox for selecting log file
         hb1 = QHBoxLayout()
-        hb1.addWidget(QLabel("Select Log File:"))
+        hb1.addWidget(QLabel(_("Select Log File:")))
         self.logfile_combo = QComboBox(self)
         self.update_logfile_list()
         self.logfile_combo.currentIndexChanged.connect(self.__set_logfile)
@@ -247,7 +248,7 @@ class GuiLogView(QWidget):
 
         # Add a filter by "Module"
         hb4 = QHBoxLayout()
-        hb4.addWidget(QLabel("Filter by Module:"))
+        hb4.addWidget(QLabel(_("Filter by Module:")))
         self.module_filter_edit = QLineEdit()
         self.module_filter_edit.textChanged.connect(self.filter_log)
         hb4.addWidget(self.module_filter_edit)
@@ -255,11 +256,11 @@ class GuiLogView(QWidget):
 
         # Buttons for refreshing and copying
         hb2 = QHBoxLayout()
-        refreshbutton = QPushButton("Refresh")
+        refreshbutton = QPushButton(_("Refresh"))
         refreshbutton.clicked.connect(self.refresh)
         hb2.addWidget(refreshbutton)
 
-        copybutton = QPushButton("Copy selection to clipboard")
+        copybutton = QPushButton(_("Copy selection to clipboard"))
         copybutton.clicked.connect(self.copy_to_clipboard)
         hb2.addWidget(copybutton)
         self.layout().addLayout(hb2)
@@ -365,7 +366,7 @@ def main(argv=None):
     layout.addWidget(i)
     # Increase the size of the main window
     main_window.resize(1600, 900)
-    main_window.setWindowTitle("Log Viewer")
+    main_window.setWindowTitle(_("Log Viewer"))
     main_window.show()
     app.exec()
     return 0
