@@ -26,9 +26,9 @@ import queue
 import sqlite3
 import sys
 from functools import partial
+from importlib import import_module
 
 import interlocks
-import numpy as np
 from loggingFpdb import get_logger, setup_logging
 from PySide6.QtCore import QCoreApplication, QDate, QPoint, Qt
 from PySide6.QtGui import QAction, QIcon
@@ -83,6 +83,8 @@ from fpdb_3_legacy.Exceptions import FpdbError
 from fpdb_3_legacy.GuiConfigObserver import GuiConfigObserver
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.L10n import set_locale_translation
+
+np = import_module("numpy")
 
 # Early configuration initialization (fix issue #22)
 ensure_config_initialized()
