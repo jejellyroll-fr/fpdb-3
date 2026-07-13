@@ -69,9 +69,9 @@ def parse_po(path: Path) -> dict[str, str]:
                     val, target = body, "str"
                 continue
             cont = _CONT.match(line)
-            if cont and target == "id":
+            if cont and target == "id" and key is not None:
                 key += _unescape(cont.group(1))
-            elif cont and target == "str":
+            elif cont and target == "str" and val is not None:
                 val += _unescape(cont.group(1))
     flush()
     return messages
