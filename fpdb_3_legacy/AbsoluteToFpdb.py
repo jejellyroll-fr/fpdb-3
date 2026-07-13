@@ -35,6 +35,7 @@ from fpdb_3_legacy.HandHistoryConverter import FpdbHandPartial, FpdbParseError, 
 
 
 class Absolute(HandHistoryConverter):
+    compiledPlayers: set[str] = set()
     # Class Variables
     sitename = "Absolute"
     filetype = "text"
@@ -355,6 +356,8 @@ class Absolute(HandHistoryConverter):
         #    a list of streets which get dealt community cards (i.e. all but PREFLOP)
         log.debug(f"readCommunityCards ({street})")
         m = self.re_Board.search(hand.streets[street])
+        if m is None:
+            raise FpdbParseError("Could not identify community cards")
         cards = m.group("CARDS")
         cards = [validCard(card) for card in cards.split(" ")]
         hand.setCommunityCards(street=street, cards=cards)
@@ -410,7 +413,10 @@ class Absolute(HandHistoryConverter):
             hand.addBlind(a.group("PNAME"), "both", a.group("BB"))
 
     def readButton(self, hand):
-        hand.buttonpos = int(self.re_Button.search(hand.handText).group("BUTTON"))
+        button_match = self.re_Button.search(hand.handText)
+        if button_match is None:
+            raise FpdbParseError("Could not identify button position")
+        hand.buttonpos = int(button_match.group("BUTTON"))
 
     def readHoleCards(self, hand):
         #    streets PREFLOP, PREDRAW, and THIRD are special cases beacause
@@ -436,7 +442,7 @@ class Absolute(HandHistoryConverter):
                     newcards = []
                 else:
                     newcards = [validCard(card) for card in found.group("CARDS").split(" ") if card != "H"]
-                    oldcards = []
+                    oldcards: list[str] = []
 
                 if street == "THIRD" and len(newcards) == 3:  # hero in stud game
                     hand.hero = player
