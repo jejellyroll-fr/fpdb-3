@@ -262,14 +262,14 @@ class Flop_Mucked(Aux_Base.AuxSeats, QObject):
         super().__init__(hud, config, params)
         QObject.__init__(self)
         self.card_images = self.hud.parent.deck.get_all_card_images()
-        
+
         # Get card dimensions and scale them (default scale to 70% if not specified)
         try:
             scale_param = self.params.get("scale") or self.hud.parent.hud_params.get("mucked_cards_size") or 70
             self.card_scale = float(scale_param) / 100.0
         except (ValueError, TypeError):
             self.card_scale = 0.7
-            
+
         self.card_height = int(float(self.hud.parent.hud_params["card_ht"]) * self.card_scale)
         self.card_width = int(float(self.hud.parent.hud_params["card_wd"]) * self.card_scale)
         self.uses_timer = True  # this Aux_seats object uses a timer to control hiding

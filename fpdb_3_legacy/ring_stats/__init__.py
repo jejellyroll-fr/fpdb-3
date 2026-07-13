@@ -32,7 +32,7 @@ colalias, colheading, colshowsumm, colshowposn, colformat, coltype, colxalign = 
 
 class GuiRingPlayerStats(QSplitter):
     """Widget principal de statistiques Cash Game (Ring Player Stats) modernisé.
-    
+
     Conserve le comportement d'origine (Splitter avec filtres à gauche)
     mais remplace les tableaux bruts de droite par un QTabWidget moderne
     contenant les tableaux de bord, graphes, heatmaps de positions et starting hands.
@@ -44,7 +44,7 @@ class GuiRingPlayerStats(QSplitter):
         self.conf = config
         self.main_window = mainwin
         self.sql = querylist
-        
+
         # Initialisation de la base de données
         self.db = Database.Database(self.conf, sql=self.sql)
         self.cursor = self.db.cursor
@@ -99,25 +99,25 @@ class GuiRingPlayerStats(QSplitter):
 
         # 2. Zone d'affichage des statistiques modernisée (Droite)
         self.stats_tabs = ModernStatsWidget(self)
-        
+
         # Onglet 1 : Tableau de Bord
         self.dashboard_tab = DashboardTab(self.stats_tabs)
         self.stats_tabs.addTab(self.dashboard_tab, "Tableau de Bord")
-        
+
         # Onglet 2 : Tableaux détaillés
         self.table_tab = StatsTableView(self.stats_tabs)
         self.stats_tabs.addTab(self.table_tab, "Tableaux de Stats")
-        
+
         # Onglet 3 : Heatmap des Positions
         self.position_tab = PositionalTab(self.stats_tabs)
         self.stats_tabs.addTab(self.position_tab, "Heatmap Position")
-        
+
         # Onglet 4 : Starting Hands
         self.hands_tab = StartingHandsTab(self.stats_tabs)
         self.stats_tabs.addTab(self.hands_tab, "Starting Hands")
 
         self.addWidget(self.stats_tabs)
-        
+
         # Configuration des étirements
         self.setStretchFactor(0, 0)
         self.setStretchFactor(1, 1)
@@ -148,11 +148,11 @@ class GuiRingPlayerStats(QSplitter):
 
         from PySide6.QtWidgets import QApplication
         from PySide6.QtCore import Qt
-        
+
         is_sync = not getattr(self.controller, "async_mode", True)
         if is_sync:
             QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
-            
+
         try:
             # Lancer le rechargement des requêtes
             self.controller.refresh_all(self.filters)
@@ -180,7 +180,7 @@ class GuiRingPlayerStats(QSplitter):
         """Intercepte le modèle de mains détaillé pour mettre à jour la grille/graphe de starting hands."""
         hand_stats = {}
         omaha_rows = []
-        
+
         # Trouver la colonne qui contient les cartes de départ (Hand)
         hand_col_idx = 0
         try:
@@ -195,7 +195,7 @@ class GuiRingPlayerStats(QSplitter):
 
         categories = model.property("categories") or []
         log.info("Active categories for hands tab: %s", categories)
-        
+
         # Déterminer la variante Omaha
         variant = "omaha4"
         if any(cat in categories for cat in ["5_omahahi", "5_omahalo"]):
@@ -235,7 +235,7 @@ class GuiRingPlayerStats(QSplitter):
                     n = 0
                     vpip = 0.0
                     net = 0.0
-                
+
                 hand_stats[hand_text] = {"n": n, "net": net, "vpip": vpip}
             self.hands_tab.update_holdem_data(hand_stats)
         else:
@@ -352,7 +352,7 @@ class GuiRingPlayerStats(QSplitter):
         handbox.addWidget(btnBox)
         btnBox.accepted.connect(detailDialog.accept)
         btnBox.rejected.connect(detailDialog.reject)
-        
+
         if detailDialog.exec():
             self.detailFilters = []
             for ht in self.handtests:

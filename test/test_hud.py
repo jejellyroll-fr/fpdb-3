@@ -656,12 +656,12 @@ class TestMuckedCards(unittest.TestCase):
 
         # Instantiate Flop_Mucked with parameters
         params = {"opacity": "0.7"}
-        
+
         mucked = Flop_Mucked(mock_hud, mock_config, params)
-        
+
         # Scale should be 0.7
         assert mucked.card_scale == 0.7
-        
+
         # Dimensions should be 70% of 78 and 56
         assert mucked.card_width == int(56 * 0.7)  # 39
         assert mucked.card_height == int(78 * 0.7)  # 54

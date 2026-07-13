@@ -16,21 +16,21 @@ def get_theme_palette() -> dict[str, str]:
 def get_modern_qss() -> str:
     """Génère la feuille de style QSS globale pour les composants modernes."""
     c = get_theme_palette()
-    
+
     # Text colors
     text_color = c.get("text", "#edf2f7")
     muted_color = c.get("muted_text", "#a0aec0")
-    
+
     # Border & backgrounds
     border_color = c.get("border", "#4a5568")
     bg_window = c.get("window", "#2d3748")
     bg_card = c.get("sidebar", "#1a202c")
     bg_base = c.get("base", "#1a202c")
-    
+
     # Accents
     accent = c.get("accent", "#319795")
     accent_hover = c.get("accent_hover", "#4fd1c5")
-    
+
     # Up/Down (Profit/Loss colors)
     color_up = c.get("graph_up", "#48bb78")
     color_down = c.get("graph_down", "#f56565")

@@ -81,7 +81,7 @@ class TestEmptyDataPopups(unittest.TestCase):
     def test_gui_graph_viewer_empty(self, mock_exec):
         """Test GuiGraphViewer shows QMessageBox and returns early when data is empty."""
         viewer = GuiGraphViewer(self.mock_sql, self.mock_conf, None, self.mock_colors)
-        
+
         # Mock filters and getRingProfitGraph
         viewer.filters = MagicMock()
         viewer.filters.getSites.return_value = ["PokerStars"]
@@ -91,13 +91,13 @@ class TestEmptyDataPopups(unittest.TestCase):
         viewer.filters.getGames.return_value = []
         viewer.filters.getCurrencies.return_value = []
         viewer.filters.getGraphOps.return_value = ["$"]
-        
+
         # Mock getRingProfitGraph to return empty/None
         viewer.getRingProfitGraph = MagicMock(return_value=(None, None, None, None))
-        
+
         # Run generateGraph
         viewer.generateGraph(None)
-        
+
         # Assert QMessageBox was shown
         mock_exec.assert_called_once()
         viewer.db.rollback.assert_called()
@@ -106,20 +106,20 @@ class TestEmptyDataPopups(unittest.TestCase):
     def test_gui_tourney_graph_viewer_empty(self, mock_exec):
         """Test GuiTourneyGraphViewer shows QMessageBox and returns early when data is empty."""
         viewer = GuiTourneyGraphViewer(self.mock_sql, self.mock_conf, None, self.mock_colors)
-        
+
         # Mock filters and getData
         viewer.filters = MagicMock()
         viewer.filters.getSites.return_value = ["PokerStars"]
         viewer.filters.getHeroes.return_value = {"PokerStars": "jeje_sat"}
         viewer.filters.getSiteIds.return_value = {"PokerStars": 2}
         viewer.filters.getGames.return_value = []
-        
+
         # Mock getData to return None (empty data)
         viewer.getData = MagicMock(return_value=None)
-        
+
         # Run generateGraph
         viewer.generateGraph(None)
-        
+
         # Assert QMessageBox was shown
         mock_exec.assert_called_once()
         viewer.db.rollback.assert_called()
@@ -128,7 +128,7 @@ class TestEmptyDataPopups(unittest.TestCase):
     def test_gui_session_viewer_empty(self, mock_exec):
         """Test GuiSessionViewer shows QMessageBox and returns early when data is empty."""
         viewer = GuiSessionViewer(self.mock_conf, self.mock_sql, None, None, self.mock_colors)
-        
+
         # Mock filters
         viewer.filters = MagicMock()
         viewer.filters.getSites.return_value = ["PokerStars"]
@@ -138,13 +138,13 @@ class TestEmptyDataPopups(unittest.TestCase):
         viewer.filters.getCurrencies.return_value = ["USD"]
         viewer.filters.getLimits.return_value = ["All"]
         viewer.filters.getSeats.return_value = None
-        
+
         # Mock generateDatasets to return empty lists
         viewer.generateDatasets = MagicMock(return_value=([], []))
-        
+
         # Mock clearGraphData
         viewer.clearGraphData = MagicMock()
-        
+
         # Run createStatsPane
         viewer.createStatsPane(
             MagicMock(),
@@ -155,7 +155,7 @@ class TestEmptyDataPopups(unittest.TestCase):
             ["All"],
             None,
         )
-        
+
         # Assert QMessageBox was shown and graph cleared
         mock_exec.assert_called_once()
         viewer.clearGraphData.assert_called_once()
@@ -165,7 +165,7 @@ class TestEmptyDataPopups(unittest.TestCase):
     def test_gui_ring_player_stats_empty(self, mock_exec):
         """Test GuiRingPlayerStats raises ValueError and catches it to show QMessageBox and rollback."""
         viewer = GuiRingPlayerStats(self.mock_conf, self.mock_sql, None)
-        
+
         # Mock filters
         viewer.filters = MagicMock()
         viewer.filters.getSites.return_value = ["PokerStars"]
@@ -179,10 +179,10 @@ class TestEmptyDataPopups(unittest.TestCase):
         viewer.filters.getCurrencies.return_value = []
         viewer.filters.getNumHands.return_value = 0
         viewer.filters.get_limits_where_clause.return_value = "1=1"
-        
+
         # Run refreshStats
         viewer.refreshStats(None)
-        
+
         # Assert QMessageBox was shown
         mock_exec.assert_called_once()
         viewer.db.rollback.assert_called()
@@ -206,7 +206,7 @@ class TestEmptyDataPopups(unittest.TestCase):
         """Test GuiTourneyPlayerStats raises ValueError and catches it to show QMessageBox and rollback."""
         # Note: GuiTourneyPlayerStats takes db in constructor
         viewer = GuiTourneyPlayerStats(self.mock_conf, self.mock_db, self.mock_sql, None)
-        
+
         # Mock filters
         viewer.filters = MagicMock()
         viewer.filters.getSites.return_value = ["PokerStars"]
@@ -216,10 +216,10 @@ class TestEmptyDataPopups(unittest.TestCase):
         viewer.filters.getDates.return_value = ("2000-01-01", "2030-01-01")
         viewer.filters.getTourneyTypes.return_value = []
         viewer.filters.getNumTourneys.return_value = 0
-        
+
         # Run refreshStats
         viewer.refreshStats()
-        
+
         # Assert QMessageBox was shown
         mock_exec.assert_called_once()
         viewer.db.rollback.assert_called()
@@ -231,10 +231,10 @@ class TestEmptyDataPopups(unittest.TestCase):
         viewer = GuiHandViewer(self.mock_conf, self.mock_sql, None)
         viewer.filters = MagicMock()
         viewer.filters.getDates.return_value = ("2000-01-01", "2030-01-01")
-        
+
         # Mock get_hand_ids_from_date_range to return empty
         viewer.get_hand_ids_from_date_range = MagicMock(return_value=[])
-        
+
         viewer.loadHands(None)
         mock_exec.assert_called_once()
 
@@ -245,31 +245,31 @@ class TestEmptyDataPopups(unittest.TestCase):
         viewer = TourHandViewer(self.mock_conf, self.mock_sql, None)
         viewer.filters = MagicMock()
         viewer.filters.getDates.return_value = ("2000-01-01", "2030-01-01")
-        
+
         # Mock get_hand_ids_from_date_range to return empty
         viewer.get_hand_ids_from_date_range = MagicMock(return_value=[])
-        
+
         viewer.loadHands(None)
         mock_exec.assert_called_once()
 
     def test_gui_stats_info_guide(self):
         """Test GuiStatsInfo instantiates and filters statistics correctly."""
         from fpdb_3_legacy.GuiStatsInfo import GuiStatsInfo, STATS_DATA
-        
+
         # Instantiate guide
         guide = GuiStatsInfo(self.mock_conf, None)
-        
+
         # Check that it populated some stats
         total_stats = sum(len(stats) for stats in STATS_DATA.values())
         self.assertGreater(guide.list_widget.count(), total_stats)
-        
+
         # Test filtering/searching
         guide.filter_stats("VPIP")
         self.assertGreater(guide.list_widget.count(), 0)
-        
+
         first_item = guide.list_widget.item(0)
         self.assertIn("VPIP", first_item.text())
-        
+
         # Test detail display
         guide.list_widget.setCurrentItem(first_item)
         self.assertIn("Voluntarily Put In Pot", guide.text_browser.toHtml())
@@ -278,13 +278,13 @@ class TestEmptyDataPopups(unittest.TestCase):
         """Test that get_hero_ids correctly maps site variant to player ID."""
         from fpdb_3_legacy.Filters import Filters
         filters = Filters(self.mock_db)
-        
+
         # Mock site variants
         heroes = {"PokerStars": "jeje_sat"}
-        
+
         # Call get_hero_ids
         hero_ids = filters.get_hero_ids(heroes)
-        
+
         # Assert get_player_id was called with site variant logic and resolved correct ID
         self.mock_db.get_player_id.assert_called_once_with(self.mock_db.config, "PokerStars", "jeje_sat")
         self.assertEqual(hero_ids, [8])
@@ -294,7 +294,7 @@ class TestEmptyDataPopups(unittest.TestCase):
         from fpdb_3_legacy.Filters import Filters
         filters = Filters(self.mock_db)
         filters.siteid = {"PokerStars": 2}
-        
+
         # Test fallback works and maps to site 33 (e.g. PokerStars.FR)
         actual_id = filters.get_actual_site_id("PokerStars", "jeje_sat")
         self.assertEqual(actual_id, 2)  # Since mock returns 2 (mock site variant)
@@ -303,10 +303,10 @@ class TestEmptyDataPopups(unittest.TestCase):
         """Test that get_hero_for_site robustly maps site variants to configured heroes."""
         from fpdb_3_legacy.Filters import Filters
         filters = Filters(self.mock_db)
-        
+
         # Mock getHeroes return value
         filters.getHeroes = MagicMock(return_value={"PokerStars": "jeje_sat", "Unibet Poker": "jejesat"})
-        
+
         # Test exact match
         self.assertEqual(filters.get_hero_for_site("PokerStars"), "jeje_sat")
         # Test variant prefix match
@@ -340,7 +340,7 @@ class TestHudImportExport(unittest.TestCase):
     def setUp(self):
         import xml.dom.minidom
         self.temp_files = []
-        
+
         # Create a mock configuration with a valid DOM tree
         self.xml_content = """<?xml version="1.0" ?>
         <FreePokerToolsConfig>
@@ -368,14 +368,14 @@ class TestHudImportExport(unittest.TestCase):
         </FreePokerToolsConfig>
         """
         self.doc = xml.dom.minidom.parseString(self.xml_content)
-        
+
         self.mock_config = MagicMock()
         self.mock_config.doc = self.doc
         self.mock_config.hud_profiles = None
         self.mock_config.stat_sets = {}
         self.mock_config.popup_windows = {}
         self.mock_config.layout_sets = {"ps_default": MagicMock()}
-        
+
     def tearDown(self):
         import os
         for f in self.temp_files:
@@ -391,20 +391,20 @@ class TestHudImportExport(unittest.TestCase):
         import xml.dom.minidom
         from PySide6.QtWidgets import QMessageBox, QDialog
         from fpdb_3_legacy.ModernHudPreferences import ModernHudPreferences
-        
+
         # Setup temp file path
         fd, temp_path = tempfile.mkstemp(suffix=".xml")
         os.close(fd)
         self.temp_files.append(temp_path)
-        
+
         # Mock file dialog to return our temp path
         mock_save.return_value = (temp_path, "XML Files (*.xml)")
         # Mock layout selection prompt to say Yes
         mock_question.return_value = QMessageBox.StandardButton.Yes
-        
+
         # Instantiate ModernHudPreferences with mock config
         prefs = ModernHudPreferences(self.mock_config)
-        
+
         # Set hud_profiles explicitly to avoid KeyError or MagicMock behavior
         prefs.hud_profiles = {
             "test_profile": {
@@ -420,35 +420,35 @@ class TestHudImportExport(unittest.TestCase):
         prefs.profile_combo.clear()
         prefs.profile_combo.addItem("test_profile")
         prefs.profile_combo.setCurrentIndex(0)
-        
+
         # Mock LayoutSelectionDialog exec to accept and return ps_default
         with patch("fpdb_3_legacy.ModernHudPreferences.LayoutSelectionDialog") as MockDlgClass:
             mock_dlg = MockDlgClass.return_value
             mock_dlg.exec.return_value = QDialog.DialogCode.Accepted
             mock_dlg.get_selected_layouts.return_value = ["ps_default"]
-            
+
             # Run export
             prefs.export_profile()
-            
+
         # Verify file exists and has correct tags
         self.assertTrue(os.path.exists(temp_path))
         exported_doc = xml.dom.minidom.parse(temp_path)
         root = exported_doc.documentElement
-        
+
         self.assertEqual(root.tagName, "fpdb_hud_package")
-        
+
         # Check ss tag
         ss_nodes = root.getElementsByTagName("ss")
         self.assertEqual(len(ss_nodes), 1)
         self.assertEqual(ss_nodes[0].getAttribute("name"), "test_profile")
-        
+
         # Check popup tags (should gather test_popup and sub_popup recursively)
         pu_nodes = root.getElementsByTagName("pu")
         self.assertEqual(len(pu_nodes), 2)
         pu_names = [pu.getAttribute("pu_name") for pu in pu_nodes]
         self.assertIn("test_popup", pu_names)
         self.assertIn("sub_popup", pu_names)
-        
+
         # Check layout set tags
         ls_nodes = root.getElementsByTagName("ls")
         self.assertEqual(len(ls_nodes), 1)
@@ -462,7 +462,7 @@ class TestHudImportExport(unittest.TestCase):
         import os
         import tempfile
         from fpdb_3_legacy.ModernHudPreferences import ModernHudPreferences
-        
+
         # Create a package XML to import
         package_content = """<?xml version="1.0" ?>
         <fpdb_hud_package version="1.0">
@@ -487,35 +487,35 @@ class TestHudImportExport(unittest.TestCase):
         with os.fdopen(fd, "w") as f:
             f.write(package_content)
         self.temp_files.append(temp_path)
-        
+
         # Mock file dialog to return package
         mock_open.return_value = (temp_path, "XML Files (*.xml)")
-        
+
         # Instantiate preferences
         prefs = ModernHudPreferences(self.mock_config)
         prefs.hud_profiles = {}
-        
+
         # Mock load methods and reload parent config
         prefs.load_profiles = MagicMock()
         prefs.load_popup_windows = MagicMock()
         prefs.reload_parent_config = MagicMock()
-        
+
         # Run import
         prefs.import_profile()
-        
+
         # Verify that nodes were added to the active doc
         ss_nodes = self.mock_config.doc.getElementsByTagName("ss")
         ss_names = [ss.getAttribute("name") for ss in ss_nodes]
         self.assertIn("imported_profile", ss_names)
-        
+
         pu_nodes = self.mock_config.doc.getElementsByTagName("pu")
         pu_names = [pu.getAttribute("pu_name") for pu in pu_nodes]
         self.assertIn("imp_popup", pu_names)
-        
+
         ls_nodes = self.mock_config.doc.getElementsByTagName("ls")
         ls_names = [ls.getAttribute("name") for ls in ls_nodes]
         self.assertIn("imp_layout", ls_names)
-        
+
         # Check calls
         self.mock_config.save.assert_called_once()
         self.mock_config.reload.assert_called_once()
@@ -525,38 +525,38 @@ class TestHudImportExport(unittest.TestCase):
     @patch("PySide6.QtWidgets.QMessageBox.information")
     def test_hud_general_settings(self, mock_info):
         from fpdb_3_legacy.ModernHudPreferences import ModernHudPreferences
-        
+
         # Setup mock return for get_hud_ui_parameters
         self.mock_config.get_hud_ui_parameters.return_value = {
             "player_profiling": "True",
             "profile_in_name": "False",
             "profile_min_hands": "25"
         }
-        
+
         # Instantiate preferences
         prefs = ModernHudPreferences(self.mock_config)
-        
+
         # Check that UI loaded values correctly
         self.assertTrue(prefs.profiling_checkbox.isChecked())
         self.assertFalse(prefs.profile_in_name_checkbox.isChecked())
         self.assertEqual(prefs.profile_min_hands_spin.value(), 25)
-        
+
         # Modify the UI values
         prefs.profiling_checkbox.setChecked(False)
         prefs.profile_in_name_checkbox.setChecked(True)
         prefs.profile_min_hands_spin.setValue(40)
-        
+
         # Verify has_unsaved_changes is True
         self.assertTrue(prefs.has_unsaved_changes())
-        
+
         # Mock load methods to avoid exceptions during accept
         prefs.load_profiles = MagicMock()
         prefs.load_popup_windows = MagicMock()
         prefs.accept = MagicMock()
-        
+
         # Run save_changes
         prefs.save_changes()
-        
+
         # Verify set_hud_ui_parameters was called with new values
         self.mock_config.set_hud_ui_parameters.assert_called_once_with({
             "player_profiling": "False",

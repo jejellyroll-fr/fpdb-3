@@ -1065,7 +1065,7 @@ def import_to_config(
                 blk.setAttribute(attr, value)
             blk.setAttribute("rows", str(g.rows))
             blk.setAttribute("cols", str(g.cols))
-            
+
             for c in g.cells:
                 r, col = c.row, c.col
                 if c.kind == "text":

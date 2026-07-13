@@ -41,11 +41,11 @@ def test_main_validate_stats():
 def test_do_stat_all_exception_paths():
     """Test exception branches in do_stat."""
     from fpdb_3_legacy.Stats import do_stat
-    
+
     # Test with player as non-existent key (KeyError path)
     stat_dict = {"1": {"vpip": 10, "vpip_opp": 20}}
     result = do_stat(stat_dict, stat="vpip", player=999)  # KeyError
-    
+
     # Test with stat that returns None
     result = do_stat(stat_dict, stat="nonexistent_stat_xyz", player=1)
     assert result is None
@@ -68,7 +68,7 @@ def test_format_no_data_stat_with_denominator_only():
 def test_all_stats_via_do_stat():
     """Test calling all stats via do_stat to hit STAT_FUNCTIONS dispatch."""
     from fpdb_3_legacy.Stats import do_stat, STATLIST
-    
+
     base_dict = {
         "p": {k: 10 for k in ["vpip", "vpip_opp", "street0Aggr", "street0AggrChance",
                               "street1Seen", "street1CBChance", "street1CBDone",
@@ -84,7 +84,7 @@ def test_all_stats_via_do_stat():
                               "street1Discards", "street2Discards", "street3Discards",
                               "street0Calls", "street0Raises", "street0Bets"]}
     }
-    
+
     for stat in STATLIST:
         try:
             do_stat(base_dict, stat=stat, player="p")

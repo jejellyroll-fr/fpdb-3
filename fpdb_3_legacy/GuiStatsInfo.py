@@ -412,84 +412,84 @@ class GuiStatsInfo(QSplitter):
         super().__init__(parent)
         self.config = config
         self.parent = parent
-        
+
         # Color fallbacks
         self.accent_color = "#b64fd8"
         self.fg_color = "#ffffff"
-        
+
         # Left sidebar layout
         self.sidebar_widget = QWidget()
         self.sidebar_layout = QVBoxLayout(self.sidebar_widget)
         self.sidebar_layout.setContentsMargins(10, 10, 10, 10)
         self.sidebar_layout.setSpacing(8)
-        
+
         # Search filter field
         self.search_box = QLineEdit()
         self.search_box.setPlaceholderText("Search statistics...")
         self.search_box.textChanged.connect(self.filter_stats)
         self.sidebar_layout.addWidget(self.search_box)
-        
+
         # Sidebar list widget
         self.list_widget = QListWidget()
         self.list_widget.setObjectName("statsListWidget")
         self.list_widget.currentItemChanged.connect(self.display_stat_detail)
         self.sidebar_layout.addWidget(self.list_widget)
-        
+
         self.addWidget(self.sidebar_widget)
-        
+
         # Right detail area
         self.scroll_area = QScrollArea()
         self.scroll_area.setObjectName("filterSidebar")
         self.scroll_area.setWidgetResizable(True)
-        
+
         self.statsInfoFrame = QFrame()
         self.statsInfoFrame.setObjectName("statsInfoFrame")
         self.detail_layout = QVBoxLayout(self.statsInfoFrame)
         self.detail_layout.setContentsMargins(20, 20, 20, 20)
         self.detail_layout.setSpacing(15)
-        
+
         # Rich Text Browser for documentation rendering
         self.text_browser = QTextBrowser()
         self.text_browser.setObjectName("statDetailsBrowser")
         self.text_browser.setOpenExternalLinks(True)
         self.detail_layout.addWidget(self.text_browser)
-        
+
         self.scroll_area.setWidget(self.statsInfoFrame)
         self.addWidget(self.scroll_area)
-        
+
         # Splitter sizing
         self.setStretchFactor(0, 1)
         self.setStretchFactor(1, 3)
         self.setSizes([300, 900])
-        
+
         # Initial population of stats list
         self.populate_list()
-        
+
         # Select first item by default if any
         self.select_first_valid_item()
 
     def populate_list(self, filter_text: str = "") -> None:
         self.list_widget.clear()
-        
+
         for category, stats in STATS_DATA.items():
             category_added = False
             for stat in stats:
                 name = stat["name"]
                 abbr = stat["abbr"]
-                
+
                 # Check filter matching
                 if filter_text:
                     match = (filter_text.lower() in name.lower()) or (filter_text.lower() in abbr.lower())
                     if not match:
                         continue
-                
+
                 # Add category header if not added yet
                 if not category_added and not filter_text:
                     header = QListWidgetItem()
                     header.setFlags(Qt.ItemFlag.NoItemFlags)
                     header.setData(Qt.ItemDataRole.UserRole, None)
                     self.list_widget.addItem(header)
-                    
+
                     label = QLabel(category.upper())
                     label.setStyleSheet(
                         f"color: {self.accent_color}; "
@@ -501,7 +501,7 @@ class GuiStatsInfo(QSplitter):
                     self.list_widget.setItemWidget(header, label)
                     header.setSizeHint(label.sizeHint())
                     category_added = True
-                
+
                 # Indent child items under category headers
                 display_text = f"  {name} ({abbr})" if not filter_text else f"{name} ({abbr})"
                 item = QListWidgetItem(display_text)
@@ -524,37 +524,37 @@ class GuiStatsInfo(QSplitter):
         if current is None:
             self.text_browser.clear()
             return
-            
+
         stat = current.data(Qt.ItemDataRole.UserRole)
         if stat is None:
             # Category header selected, ignore
             return
-            
+
         name = stat["name"]
         abbr = stat["abbr"]
         desc = stat["desc"]
         formula = stat["formula"]
         sql_ref = stat["sql"]
-        
+
         # Rich premium-aligned HTML documentation
         html = f"""
         <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; margin: 10px;">
             <h1 style="color: #60a5fa; font-size: 24px; font-weight: bold; margin-bottom: 5px; border-bottom: 2px solid #2d3748; padding-bottom: 10px;">
                 {name} <span style="color: #94a3b8; font-size: 16px; font-weight: normal;">({abbr})</span>
             </h1>
-            
+
             <div style="margin: 20px 0;">
                 <h3 style="color: #38bdf8; font-size: 14px; font-weight: bold; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.5px;">Description</h3>
                 <p style="color: #e2e8f0; font-size: 14px; margin-top: 0;">{desc}</p>
             </div>
-            
+
             <div style="margin: 20px 0; background-color: #1e293b; border-left: 4px solid #10b981; border-radius: 4px; padding: 15px;">
                 <h3 style="color: #10b981; font-size: 14px; font-weight: bold; text-transform: uppercase; margin-top: 0; margin-bottom: 8px; letter-spacing: 0.5px;">Formula</h3>
                 <code style="color: #a7f3d0; font-family: 'Courier New', Courier, monospace; font-size: 13px; font-weight: bold; word-break: break-all;">
                     {formula}
                 </code>
             </div>
-            
+
             <div style="margin: 20px 0; background-color: #0f172a; border-radius: 6px; padding: 15px; border: 1px solid #1e293b;">
                 <h3 style="color: #f59e0b; font-size: 13px; font-weight: bold; text-transform: uppercase; margin-top: 0; margin-bottom: 8px; letter-spacing: 0.5px;">SQL Database Field / Logic</h3>
                 <code style="color: #fde047; font-family: 'Courier New', Courier, monospace; font-size: 12px; word-break: break-all;">
@@ -571,13 +571,13 @@ class GuiStatsInfo(QSplitter):
         fg_color = theme_colors.get("foreground", "#ffffff")
         self.accent_color = colors.get("accent", "#b64fd8")
         self.fg_color = fg_color
-        
+
         # Apply clean dark blue background to details browser
         self.statsInfoFrame.setStyleSheet(f"background-color: {bg_color};")
         self.text_browser.setStyleSheet(
             f"background-color: {bg_color}; border: 0; color: {fg_color};"
         )
-        
+
         # Apply sidebar and search colors
         self.sidebar_widget.setStyleSheet(f"background-color: {colors.get('sidebar', '#1a1e24')};")
         self.search_box.setStyleSheet(
@@ -590,7 +590,7 @@ class GuiStatsInfo(QSplitter):
             f"color: {colors.get('text', '#ffffff')}; "
             f"border: 1px solid {colors.get('border', '#46505a')};"
         )
-        
+
         # Repopulate list to apply the new category header colors
         current_text = self.search_box.text()
         self.populate_list(current_text)

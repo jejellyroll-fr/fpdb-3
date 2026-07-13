@@ -113,7 +113,7 @@ class OnGame(HandHistoryConverter):
         """
             \\*{5}\\sHistory\\sfor\\shand\\s(?P<HID>[-A-Z\\d]+)(?P<TOUR>\\s\\(TOURNAMENT:(\\s\"(?P<NAME>.+?)\",)?\\s(?P<TID>[-A-Z\\d]+)?(?P<BUY>,\\sbuy-in:\\s(?P<BUYINCUR>[%(LS)s]?)(?P<BUYIN>[%(NUM)s]+))?\\))?\\s\\*{5}\\s?
             Start\\shand:\\s(?P<DATETIME>.+?)\\s?
-            Table:\\s(\\[SPEED\\]\\s)?(?P<TABLE>.+?)\\s\\[(?P<TABLENO>\\d+)\\]\\s\\( 
+            Table:\\s(\\[SPEED\\]\\s)?(?P<TABLE>.+?)\\s\\[(?P<TABLENO>\\d+)\\]\\s\\(
             (
             (?P<LIMIT>NO_LIMIT|Limit|LIMIT|Pot\\sLimit|POT_LIMIT)\\s
             (?P<GAME>TEXAS_HOLDEM|OMAHA_HI|OMAHA_HI_LO|SEVEN_CARD_STUD|SEVEN_CARD_STUD_HI_LO|RAZZ|FIVE_CARD_DRAW)\\s
