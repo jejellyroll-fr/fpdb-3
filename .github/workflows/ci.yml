@@ -79,6 +79,7 @@ jobs:
           fpdb_3_legacy/BovadaSummary.py
           fpdb_3_legacy/parser_registry.py
           fpdb_3_legacy/IdentifySite.py
+          fpdb_3_legacy/Importer.py
       - name: Lint newly modernized modules
         run: >-
           ruff check
