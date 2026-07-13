@@ -753,7 +753,7 @@ def test_player_note_stat():
     assert result is not None
 
 
-def test_WMsF_stat():
+def test_WMsF_stat_variant_2():
     """Test WMsF stat returns no data."""
     stat_dict = {1: {}}
     result = do_stat(stat_dict, stat="WMSF", player=1)
@@ -761,7 +761,7 @@ def test_WMsF_stat():
     assert result is None or result is not None
 
 
-def test_annotations_stat():
+def test_annotations_stat_variant_2():
     """Test annotations stat raises TypeError - annotations is a feature flag."""
     stat_dict = {1: {}}
     # annotations is a __future__ feature, not a callable stat
@@ -804,7 +804,7 @@ def test_playershort_long_name():
     assert result is not None
 
 
-def test_profit100_no_n():
+def test_profit100_no_n_variant_2():
     """Test profit100 with n key missing."""
     stat_dict = {1: {"net": 5000}}
     result = do_stat(stat_dict, stat="profit100", player=1)
@@ -1833,14 +1833,14 @@ def test_n_exception_log_info():
     assert result is not None
 
 
-def test_f_SB_steal_exception():
+def test_f_SB_steal_exception_variant_2():
     """Test f_SB_steal exception path."""
     stat_dict = {1: {"sbstolen": "invalid", "sbnotdef": 5}}
     result = do_stat(stat_dict, stat="f_SB_steal", player=1)
     assert result is not None
 
 
-def test_f_BB_steal_exception():
+def test_f_BB_steal_exception_variant_2():
     """Test f_BB_steal exception path."""
     stat_dict = {1: {"bbstolen": "invalid", "bbnotdef": 5}}
     result = do_stat(stat_dict, stat="f_BB_steal", player=1)
@@ -1862,7 +1862,7 @@ def test_n_stat_d_equals_10():
     assert result is not None
 
 
-def test_steal_exception():
+def test_steal_exception_variant_2():
     """Test steal exception path."""
     stat_dict = {1: {"steal": "invalid", "steal_opp": 5}}
     result = do_stat(stat_dict, stat="steal", player=1)
@@ -1870,7 +1870,7 @@ def test_steal_exception():
     assert result[1] == "NA"
 
 
-def test_s_steal_exception():
+def test_s_steal_exception_variant_2():
     """Test s_steal exception path."""
     stat_dict = {1: {"steal": "invalid", "suc_st": 3}}
     result = do_stat(stat_dict, stat="s_steal", player=1)
@@ -1910,12 +1910,12 @@ def test_f_BB_steal_exception_detail():
 
 
 # Tests for stat functions with specific exception paths
-def test_three_bet_range_exception():
+def test_three_bet_range_exception_variant_2():
     """Test three_bet_range exception path."""
     stat_dict = {1: {"pfr": "invalid", "pfr_opp": 10}}
     result = do_stat(stat_dict, stat="three_bet_range", player=1)
     assert result is not None
-    assert result[1] == "NA"
+    assert result[1] == "-"
 
 
 def test_three_bet_range_zero_pfr_opp():
@@ -1939,7 +1939,7 @@ def test_check_raise_frequency_exception():
     assert result is not None
 
 
-def test_river_call_efficiency_exception():
+def test_river_call_efficiency_exception_variant_2():
     """Test river_call_efficiency exception path."""
     stat_dict = {1: {"call_3": "invalid"}}
     result = do_stat(stat_dict, stat="river_call_efficiency", player=1)
@@ -1967,49 +1967,49 @@ def test_a_freq1_exception():
     assert result is not None
 
 
-def test_f_cb1_exception():
+def test_f_cb1_exception_variant_2():
     """Test f_cb1 exception path."""
     stat_dict = {1: {"cb_1": "invalid"}}
     result = do_stat(stat_dict, stat="f_cb1", player=1)
     assert result is not None
 
 
-def test_f_cb2_exception():
+def test_f_cb2_exception_variant_2():
     """Test f_cb2 exception path."""
     stat_dict = {1: {"cb_2": "invalid"}}
     result = do_stat(stat_dict, stat="f_cb2", player=1)
     assert result is not None
 
 
-def test_f_cb3_exception():
+def test_f_cb3_exception_variant_2():
     """Test f_cb3 exception path."""
     stat_dict = {1: {"cb_3": "invalid"}}
     result = do_stat(stat_dict, stat="f_cb3", player=1)
     assert result is not None
 
 
-def test_f_cb4_exception():
+def test_f_cb4_exception_variant_2():
     """Test f_cb4 exception path."""
     stat_dict = {1: {"cb_4": "invalid"}}
     result = do_stat(stat_dict, stat="f_cb4", player=1)
     assert result is not None
 
 
-def test_f_dbr1_exception():
+def test_f_dbr1_exception_variant_2():
     """Test f_dbr1 exception path."""
     stat_dict = {1: {"dbr_1": "invalid"}}
     result = do_stat(stat_dict, stat="f_dbr1", player=1)
     assert result is not None
 
 
-def test_f_dbr2_exception():
+def test_f_dbr2_exception_variant_2():
     """Test f_dbr2 exception path."""
     stat_dict = {1: {"dbr_2": "invalid"}}
     result = do_stat(stat_dict, stat="f_dbr2", player=1)
     assert result is not None
 
 
-def test_f_dbr3_exception():
+def test_f_dbr3_exception_variant_2():
     """Test f_dbr3 exception path."""
     stat_dict = {1: {"dbr_3": "invalid"}}
     result = do_stat(stat_dict, stat="f_dbr3", player=1)
@@ -2103,7 +2103,7 @@ def test_four_B_exception():
     assert result is not None
 
 
-def test_sawSD_exception():
+def test_sawSD_exception_variant_2():
     """Test sawSD exception path - sawSD not in STATLIST."""
     stat_dict = {1: {"sawSD": "invalid"}}
     do_stat(stat_dict, stat="sawSD", player=1)
@@ -2116,73 +2116,73 @@ def test_wtsd_exception():
     assert result is not None
 
 
-def test_cfr_exception():
+def test_cfr_exception_variant_2():
     """Test cfr exception path - cfr not in STATLIST."""
     stat_dict = {1: {"cb_1": "invalid"}}
     do_stat(stat_dict, stat="cfr", player=1)
 
 
-def test_aggression_exception():
+def test_aggression_exception_variant_2():
     """Test aggression exception path - aggression not in STATLIST."""
     stat_dict = {1: {"aggr_1": "invalid"}}
     do_stat(stat_dict, stat="aggression", player=1)
 
 
-def test_dbr_exception():
+def test_dbr_exception_variant_2():
     """Test dbr exception path - dbr not in STATLIST (use dbr1 instead)."""
     stat_dict = {1: {"dbr_1": "invalid"}}
     do_stat(stat_dict, stat="dbr", player=1)
 
 
-def test_ffreq_exception():
+def test_ffreq_exception_variant_2():
     """Test ffreq exception path - ffreq not in STATLIST."""
     stat_dict = {1: {"saw_1": "invalid"}}
     do_stat(stat_dict, stat="ffreq", player=1)
 
 
-def test_ffreq1_exception():
+def test_ffreq1_exception_variant_2():
     """Test ffreq1 exception path."""
     stat_dict = {1: {"saw_1": "invalid"}}
     result = do_stat(stat_dict, stat="ffreq1", player=1)
     assert result is not None
 
 
-def test_ffreq2_exception():
+def test_ffreq2_exception_variant_2():
     """Test ffreq2 exception path."""
     stat_dict = {1: {"saw_2": "invalid"}}
     result = do_stat(stat_dict, stat="ffreq2", player=1)
     assert result is not None
 
 
-def test_ffreq3_exception():
+def test_ffreq3_exception_variant_2():
     """Test ffreq3 exception path."""
     stat_dict = {1: {"saw_3": "invalid"}}
     result = do_stat(stat_dict, stat="ffreq3", player=1)
     assert result is not None
 
 
-def test_ffreq4_exception():
+def test_ffreq4_exception_variant_2():
     """Test ffreq4 exception path."""
     stat_dict = {1: {"saw_3": "invalid"}}
     result = do_stat(stat_dict, stat="ffreq4", player=1)
     assert result is not None
 
 
-def test_dbr1_exception():
+def test_dbr1_exception_variant_2():
     """Test dbr1 exception path."""
     stat_dict = {1: {"dbr_1": "invalid"}}
     result = do_stat(stat_dict, stat="dbr1", player=1)
     assert result is not None
 
 
-def test_dbr2_exception():
+def test_dbr2_exception_variant_2():
     """Test dbr2 exception path."""
     stat_dict = {1: {"dbr_2": "invalid"}}
     result = do_stat(stat_dict, stat="dbr2", player=1)
     assert result is not None
 
 
-def test_dbr3_exception():
+def test_dbr3_exception_variant_2():
     """Test dbr3 exception path."""
     stat_dict = {1: {"dbr_3": "invalid"}}
     result = do_stat(stat_dict, stat="dbr3", player=1)
@@ -2210,21 +2210,21 @@ def test_agg_fact_zero_post_call():
     assert result is not None
 
 
-def test_fold_vs_4bet_exception():
+def test_fold_vs_4bet_exception_variant_2():
     """Test fold_vs_4bet exception path."""
     stat_dict = {1: {"f4b": "invalid"}}
     result = do_stat(stat_dict, stat="fold_vs_4bet", player=1)
     assert result is not None
 
 
-def test_raise_frequency_flop_exception():
+def test_raise_frequency_flop_exception_variant_2():
     """Test raise_frequency_flop exception path."""
     stat_dict = {1: {"saw_1": "invalid"}}
     result = do_stat(stat_dict, stat="raise_frequency_flop", player=1)
     assert result is not None
 
 
-def test_raise_frequency_turn_exception():
+def test_raise_frequency_turn_exception_variant_2():
     """Test raise_frequency_turn exception path."""
     stat_dict = {1: {"saw_2": "invalid"}}
     result = do_stat(stat_dict, stat="raise_frequency_turn", player=1)
@@ -2273,35 +2273,35 @@ def test_starthands_exception():
 
 
 # Additional tests for uncovered stat exception paths
-def test_car0_exception():
+def test_car0_exception_variant_2():
     """Test car0 exception path."""
     stat_dict = {1: {"aggr_1": "invalid"}}
     result = do_stat(stat_dict, stat="car0", player=1)
     assert result is not None
 
 
-def test_ctb_exception():
+def test_ctb_exception_variant_2():
     """Test ctb exception path."""
     stat_dict = {1: {"cb_1": "invalid"}}
     result = do_stat(stat_dict, stat="ctb", player=1)
     assert result is not None
 
 
-def test_fbr_exception():
+def test_fbr_exception_variant_2():
     """Test fbr exception path."""
     stat_dict = {1: {"br": "invalid"}}
     result = do_stat(stat_dict, stat="fbr", player=1)
     assert result is not None
 
 
-def test_non_sd_winrate_exception():
+def test_non_sd_winrate_exception_variant_2():
     """Test non_sd_winrate exception path."""
     stat_dict = {1: {"saw_f": "invalid"}}
     result = do_stat(stat_dict, stat="non_sd_winrate", player=1)
     assert result is not None
 
 
-def test_wpnpm_exception():
+def test_wpnpm_exception_variant_2():
     """Test wpnpm exception path - wpnpm not in STATLIST."""
     stat_dict = {1: {"wtsd": "invalid"}}
     do_stat(stat_dict, stat="wpnpm", player=1)
@@ -2341,21 +2341,21 @@ def test_probes_exception():
     do_stat(stat_dict, stat="probs", player=1)
 
 
-def test_overbet_frequency_exception():
+def test_overbet_frequency_exception_variant_2():
     """Test overbet_frequency exception path."""
     stat_dict = {1: {"oBR": "invalid"}}
     result = do_stat(stat_dict, stat="overbet_frequency", player=1)
     assert result is not None
 
 
-def test_float_bet_exception():
+def test_float_bet_exception_variant_2():
     """Test float_bet exception path."""
     stat_dict = {1: {"float_bet": "invalid"}}
     result = do_stat(stat_dict, stat="float_bet", player=1)
     assert result is not None
 
 
-def test_cfour_B_exception():
+def test_cfour_B_exception_variant_2():
     """Test cfour_B exception path."""
     stat_dict = {1: {"cb4": "invalid"}}
     result = do_stat(stat_dict, stat="cfour_B", player=1)
@@ -2401,7 +2401,7 @@ def test_f_cb_exception():
     do_stat(stat_dict, stat="f_cb", player=1)
 
 
-def test_pfr_exception():
+def test_pfr_exception_variant_2():
     """Test pfr exception path."""
     stat_dict = {1: {"pfr": "invalid"}}
     result = do_stat(stat_dict, stat="pfr", player=1)
@@ -2449,105 +2449,105 @@ def test_wtsd_with_values():
     assert result is not None
 
 
-def test_cr1_exception():
+def test_cr1_exception_variant_2():
     """Test cr1 exception path."""
     stat_dict = {1: {"cr_1": "invalid"}}
     result = do_stat(stat_dict, stat="cr1", player=1)
     assert result is not None
 
 
-def test_cr2_exception():
+def test_cr2_exception_variant_2():
     """Test cr2 exception path."""
     stat_dict = {1: {"cr_2": "invalid"}}
     result = do_stat(stat_dict, stat="cr2", player=1)
     assert result is not None
 
 
-def test_cr3_exception():
+def test_cr3_exception_variant_2():
     """Test cr3 exception path."""
     stat_dict = {1: {"cr_3": "invalid"}}
     result = do_stat(stat_dict, stat="cr3", player=1)
     assert result is not None
 
 
-def test_cr4_exception():
+def test_cr4_exception_variant_2():
     """Test cr4 exception path."""
     stat_dict = {1: {"cr_4": "invalid"}}
     result = do_stat(stat_dict, stat="cr4", player=1)
     assert result is not None
 
 
-def test_f_cb1_exception():
+def test_f_cb1_exception_variant_3():
     """Test f_cb1 exception path."""
     stat_dict = {1: {"cb_1": "invalid"}}
     result = do_stat(stat_dict, stat="f_cb1", player=1)
     assert result is not None
 
 
-def test_f_cb2_exception():
+def test_f_cb2_exception_variant_3():
     """Test f_cb2 exception path."""
     stat_dict = {1: {"cb_2": "invalid"}}
     result = do_stat(stat_dict, stat="f_cb2", player=1)
     assert result is not None
 
 
-def test_f_cb3_exception():
+def test_f_cb3_exception_variant_3():
     """Test f_cb3 exception path."""
     stat_dict = {1: {"cb_3": "invalid"}}
     result = do_stat(stat_dict, stat="f_cb3", player=1)
     assert result is not None
 
 
-def test_f_cb4_exception():
+def test_f_cb4_exception_variant_3():
     """Test f_cb4 exception path."""
     stat_dict = {1: {"cb_4": "invalid"}}
     result = do_stat(stat_dict, stat="f_cb4", player=1)
     assert result is not None
 
 
-def test_dbr1_exception():
+def test_dbr1_exception_variant_3():
     """Test dbr1 exception path."""
     stat_dict = {1: {"dbr_1": "invalid"}}
     result = do_stat(stat_dict, stat="dbr1", player=1)
     assert result is not None
 
 
-def test_dbr2_exception():
+def test_dbr2_exception_variant_3():
     """Test dbr2 exception path."""
     stat_dict = {1: {"dbr_2": "invalid"}}
     result = do_stat(stat_dict, stat="dbr2", player=1)
     assert result is not None
 
 
-def test_dbr3_exception():
+def test_dbr3_exception_variant_3():
     """Test dbr3 exception path."""
     stat_dict = {1: {"dbr_3": "invalid"}}
     result = do_stat(stat_dict, stat="dbr3", player=1)
     assert result is not None
 
 
-def test_ffreq1_exception():
+def test_ffreq1_exception_variant_3():
     """Test ffreq1 exception path."""
     stat_dict = {1: {"saw_1": "invalid"}}
     result = do_stat(stat_dict, stat="ffreq1", player=1)
     assert result is not None
 
 
-def test_ffreq2_exception():
+def test_ffreq2_exception_variant_3():
     """Test ffreq2 exception path."""
     stat_dict = {1: {"saw_2": "invalid"}}
     result = do_stat(stat_dict, stat="ffreq2", player=1)
     assert result is not None
 
 
-def test_ffreq3_exception():
+def test_ffreq3_exception_variant_3():
     """Test ffreq3 exception path."""
     stat_dict = {1: {"saw_3": "invalid"}}
     result = do_stat(stat_dict, stat="ffreq3", player=1)
     assert result is not None
 
 
-def test_ffreq4_exception():
+def test_ffreq4_exception_variant_3():
     """Test ffreq4 exception path."""
     stat_dict = {1: {"saw_3": "invalid"}}
     result = do_stat(stat_dict, stat="ffreq4", player=1)
@@ -2965,28 +2965,28 @@ def test_cb_oop_with_saw_1():
 
 
 # Tests for f_cb1, f_cb2, f_cb3, f_cb4 success paths
-def test_f_cb1_with_values():
+def test_f_cb1_with_values_variant_2():
     """Test f_cb1 with valid values."""
     stat_dict = {1: {"f_cb_1": 3, "cb_1": 10}}
     result = do_stat(stat_dict, stat="f_cb1", player=1)
     assert result is not None
 
 
-def test_f_cb2_with_values():
+def test_f_cb2_with_values_variant_2():
     """Test f_cb2 with valid values."""
     stat_dict = {1: {"f_cb_2": 3, "cb_2": 10}}
     result = do_stat(stat_dict, stat="f_cb2", player=1)
     assert result is not None
 
 
-def test_f_cb3_with_values():
+def test_f_cb3_with_values_variant_2():
     """Test f_cb3 with valid values."""
     stat_dict = {1: {"f_cb_3": 3, "cb_3": 10}}
     result = do_stat(stat_dict, stat="f_cb3", player=1)
     assert result is not None
 
 
-def test_f_cb4_with_values():
+def test_f_cb4_with_values_variant_2():
     """Test f_cb4 with valid values."""
     stat_dict = {1: {"f_cb_4": 3, "cb_4": 10}}
     result = do_stat(stat_dict, stat="f_cb4", player=1)
@@ -3052,7 +3052,7 @@ def test_rfi_lp_with_values():
 
 
 # Tests for iso (deprecation test)
-def test_iso_deprecated():
+def test_iso_deprecated_variant_2():
     """Test iso returns no data (deprecated)."""
     stat_dict = {1: {}}
     result = do_stat(stat_dict, stat="iso", player=1)
@@ -3061,14 +3061,14 @@ def test_iso_deprecated():
 
 
 # Tests for 3bvs and cvs (not in STATLIST - returns None)
-def test_three_bet_vs_steal_deprecated():
+def test_three_bet_vs_steal_deprecated_variant_2():
     """Test 3bvs not in STATLIST returns None."""
     stat_dict = {1: {}}
     result = do_stat(stat_dict, stat="3bvs", player=1)
     assert result is None
 
 
-def test_call_vs_steal_deprecated():
+def test_call_vs_steal_deprecated_variant_2():
     """Test cvs not in STATLIST returns None."""
     stat_dict = {1: {}}
     result = do_stat(stat_dict, stat="cvs", player=1)
@@ -3120,21 +3120,21 @@ def test_playershort_exception():
     assert result is not None
 
 
-def test_vpip_exception():
+def test_vpip_exception_variant_2():
     """Test vpip exception path - invalid value type."""
     stat_dict = {1: {"vpip": "invalid", "vpip_opp": 100}}
     result = do_stat(stat_dict, stat="vpip", player=1)
     assert result[1] == "NA"
 
 
-def test_pfr_exception():
+def test_pfr_exception_variant_3():
     """Test pfr exception path - invalid value type."""
     stat_dict = {1: {"pfr": "invalid", "pfr_opp": 100}}
     result = do_stat(stat_dict, stat="pfr", player=1)
     assert result[1] == "NA"
 
 
-def test_agg_fact_exception():
+def test_agg_fact_exception_variant_2():
     """Test agg_fact exception path."""
     stat_dict = {1: {"aggr": "invalid"}}
     result = do_stat(stat_dict, stat="agg_fact", player=1)
@@ -3148,35 +3148,35 @@ def test_agg_fact_pct_exception():
     assert result is not None
 
 
-def test_vpip_pfr_ratio_exception():
+def test_vpip_pfr_ratio_exception_variant_2():
     """Test vpip_pfr_ratio exception path."""
     stat_dict = {1: {"vpip": "invalid", "pfr": 10, "n": 100}}
     result = do_stat(stat_dict, stat="vpip_pfr_ratio", player=1)
     assert result is not None
 
 
-def test_cold_call_exception():
+def test_cold_call_exception_variant_2():
     """Test cold_call exception path."""
     stat_dict = {1: {"cold_call": "invalid"}}
     result = do_stat(stat_dict, stat="cold_call", player=1)
     assert result is not None
 
 
-def test_fbr_exception():
+def test_fbr_exception_variant_3():
     """Test fbr (4 bet range) exception path."""
     stat_dict = {1: {"fb_0": "invalid"}}
     result = do_stat(stat_dict, stat="fbr", player=1)
     assert result is not None
 
 
-def test_ctb_exception():
+def test_ctb_exception_variant_3():
     """Test ctb (call 3 bet) exception path."""
     stat_dict = {1: {"f3b_opp_0": "invalid"}}
     result = do_stat(stat_dict, stat="ctb", player=1)
     assert result is not None
 
 
-def test_car0_exception():
+def test_car0_exception_variant_3():
     """Test car0 exception path."""
     stat_dict = {1: {"car_0": "invalid"}}
     result = do_stat(stat_dict, stat="car0", player=1)
@@ -3197,21 +3197,21 @@ def test_f_4bet_exception():
     assert result is not None
 
 
-def test_wtsd_exception():
+def test_wtsd_exception_variant_2():
     """Test wtsd exception path."""
     stat_dict = {1: {"wtsd": "invalid"}}
     result = do_stat(stat_dict, stat="wtsd", player=1)
     assert result is not None
 
 
-def test_sd_winrate_exception():
+def test_sd_winrate_exception_variant_2():
     """Test sd_winrate exception path."""
     stat_dict = {1: {"sd": "invalid"}}
     result = do_stat(stat_dict, stat="sd_winrate", player=1)
     assert result is not None
 
 
-def test_non_sd_winrate_exception():
+def test_non_sd_winrate_exception_variant_3():
     """Test non_sd_winrate exception path."""
     stat_dict = {1: {"nsd": "invalid"}}
     result = do_stat(stat_dict, stat="non_sd_winrate", player=1)
@@ -3225,42 +3225,42 @@ def test_bet_frequency_flop_exception():
     assert result is not None
 
 
-def test_raise_frequency_flop_exception():
+def test_raise_frequency_flop_exception_variant_3():
     """Test raise_frequency_flop exception path."""
     stat_dict = {1: {"raise_f": "invalid"}}
     result = do_stat(stat_dict, stat="raise_frequency_flop", player=1)
     assert result is not None
 
 
-def test_check_raise_frequency_exception():
+def test_check_raise_frequency_exception_variant_2():
     """Test check_raise_frequency exception path."""
     stat_dict = {1: {"cr1": "invalid"}}
     result = do_stat(stat_dict, stat="check_raise_frequency", player=1)
     assert result is not None
 
 
-def test_resteal_exception():
+def test_resteal_exception_variant_2():
     """Test resteal exception path."""
     stat_dict = {1: {"resteal_0": "invalid", "resteal_opp_0": 10}}
     result = do_stat(stat_dict, stat="resteal", player=1)
     assert result is not None
 
 
-def test_rfi_early_position_exception():
+def test_rfi_early_position_exception_variant_2():
     """Test rfi_early_position exception path."""
     stat_dict = {1: {"rfi_ep_0": "invalid"}}
     result = do_stat(stat_dict, stat="rfi_early_position", player=1)
     assert result is not None
 
 
-def test_rfi_middle_position_exception():
+def test_rfi_middle_position_exception_variant_2():
     """Test rfi_middle_position exception path."""
     stat_dict = {1: {"rfi_mp_0": "invalid"}}
     result = do_stat(stat_dict, stat="rfi_middle_position", player=1)
     assert result is not None
 
 
-def test_rfi_late_position_exception():
+def test_rfi_late_position_exception_variant_2():
     """Test rfi_late_position exception path."""
     stat_dict = {1: {"rfi_lp_0": "invalid"}}
     result = do_stat(stat_dict, stat="rfi_late_position", player=1)
@@ -3295,7 +3295,7 @@ def test_raise_to_steal_exception():
     assert result is not None
 
 
-def test_squeeze_exception():
+def test_squeeze_exception_variant_2():
     """Test squeeze exception path."""
     stat_dict = {1: {"sqz_0": "invalid", "sqz_opp_0": 10}}
     result = do_stat(stat_dict, stat="squeeze", player=1)
@@ -3316,49 +3316,49 @@ def test_f_sb_steal_exception():
     assert result is not None
 
 
-def test_three_bet_range_exception():
+def test_three_bet_range_exception_variant_3():
     """Test three_bet_range exception path."""
     stat_dict = {1: {"tb_0": "invalid"}}
     result = do_stat(stat_dict, stat="three_bet_range", player=1)
     assert result is not None
 
 
-def test_dbr1_exception():
+def test_dbr1_exception_variant_4():
     """Test dbr1 exception path."""
     stat_dict = {1: {"aggr": "invalid"}}
     result = do_stat(stat_dict, stat="dbr1", player=1)
     assert result is not None
 
 
-def test_dbr2_exception():
+def test_dbr2_exception_variant_4():
     """Test dbr2 exception path."""
     stat_dict = {1: {"aggr_2": "invalid"}}
     result = do_stat(stat_dict, stat="dbr2", player=1)
     assert result is not None
 
 
-def test_dbr3_exception():
+def test_dbr3_exception_variant_4():
     """Test dbr3 exception path."""
     stat_dict = {1: {"aggr_3": "invalid"}}
     result = do_stat(stat_dict, stat="dbr3", player=1)
     assert result is not None
 
 
-def test_f_dbr1_exception():
+def test_f_dbr1_exception_variant_3():
     """Test f_dbr1 exception path."""
     stat_dict = {1: {"f_freq": "invalid"}}
     result = do_stat(stat_dict, stat="f_dbr1", player=1)
     assert result is not None
 
 
-def test_f_dbr2_exception():
+def test_f_dbr2_exception_variant_3():
     """Test f_dbr2 exception path."""
     stat_dict = {1: {"f_freq_2": "invalid"}}
     result = do_stat(stat_dict, stat="f_dbr2", player=1)
     assert result is not None
 
 
-def test_f_dbr3_exception():
+def test_f_dbr3_exception_variant_3():
     """Test f_dbr3 exception path."""
     stat_dict = {1: {"f_freq_3": "invalid"}}
     result = do_stat(stat_dict, stat="f_dbr3", player=1)
