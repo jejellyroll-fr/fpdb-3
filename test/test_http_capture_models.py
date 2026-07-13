@@ -31,6 +31,7 @@ from fpdb_3_legacy.http_capture_ofc import (
     build_ofc_hand,
     import_ofc_hand,
     load_ofc_hand,
+    ofc_hand_from_dict,
     query_ofc_player_stats,
     reconstruct_ofc_rounds,
     render_ofc_hand_html,
@@ -472,6 +473,20 @@ def test_ofc_hand_model_and_visual_renderers_from_normalized_capture():
     assert 'class="ofc-replayer"' in html
     assert "OFC Hand #777001" in html
     assert "2c 2d 2h" in html
+
+
+@pytest.mark.parametrize("missing_key", ["site", "hand_id"])
+def test_ofc_hand_requires_persistent_identity(missing_key):
+    normalized = _normalized_complete_ofc_hand()
+    normalized.pop(missing_key)
+
+    with pytest.raises(ValueError, match="requires site and hand_id"):
+        build_ofc_hand(normalized)
+
+    serialized = build_ofc_hand(_normalized_complete_ofc_hand()).to_dict()
+    serialized.pop(missing_key)
+    with pytest.raises(ValueError, match="requires site and hand_id"):
+        ofc_hand_from_dict(serialized)
 
 
 def test_ofc_hand_imports_into_dedicated_sqlite_tables_and_stats():

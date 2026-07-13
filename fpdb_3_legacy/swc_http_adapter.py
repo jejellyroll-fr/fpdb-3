@@ -478,8 +478,11 @@ class SwCHttpAdapter:
         event: dict[str, Any],
         players_by_seat: dict[int, str],
     ) -> dict[str, Any] | None:
+        seat_idx = event.get("seat-idx")
+        if seat_idx is None:
+            return None
         try:
-            player = players_by_seat[int(event.get("seat-idx"))]
+            player = players_by_seat[int(seat_idx)]
         except (KeyError, TypeError, ValueError):
             return None
 

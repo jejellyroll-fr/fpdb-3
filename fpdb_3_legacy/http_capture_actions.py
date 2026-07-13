@@ -92,7 +92,7 @@ def _reconstruct_single_commit_action(previous_step: dict[str, Any], step: dict[
 
 
 def _matching_stack_delta_indexes(candidates: list[dict[str, Any]], player: str | None, amount_delta: Decimal) -> set[int]:
-    consumed = set()
+    consumed: set[int] = set()
     if not player:
         return consumed
     for index, candidate in enumerate(candidates):

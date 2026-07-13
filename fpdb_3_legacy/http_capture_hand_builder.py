@@ -107,6 +107,7 @@ def plan_hand_build(hand_data: dict[str, Any]) -> HandBuildPlan:
     if reasons:
         raise CaptureNotImportableError("; ".join(reasons))
 
+    assert hand_class is not None
     return HandBuildPlan(hand_class=hand_class, base=base, category=category, decision=decision)
 
 
