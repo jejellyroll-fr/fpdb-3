@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 from __future__ import annotations
 
+from typing import Any
+
 from PySide6.QtCore import Qt, QTimer, Signal
 from PySide6.QtGui import QColor, QFont, QLinearGradient, QPainter, QPen
 from PySide6.QtWidgets import (
@@ -95,7 +97,7 @@ class ColorPreviewWidget(QWidget):
         painter.fillRect(0, 0, width, height, gradient)
 
         # Draw threshold markers
-        painter.setPen(QPen(Qt.black, 2))
+        painter.setPen(QPen(QColor(Qt.GlobalColor.black), 2))
         low_x = int(width * self.low_threshold / 100)
         high_x = int(width * self.high_threshold / 100)
 
@@ -124,8 +126,8 @@ class HudPreviewWidget(QWidget):
         self.hud_font = "Sans"
         self.hud_font_size = 8
         self.preview_scale = 1.45
-        self.stats = []  # List of dicts: {row, col, stat, click, popup}
-        self.blocks = []  # Multi-panel layout: list of block dicts (styled boxes)
+        self.stats: list[dict[str, Any]] = []  # List of dicts: {row, col, stat, click, popup}
+        self.blocks: list[dict[str, Any]] = []  # Multi-panel layout: list of block dicts (styled boxes)
         self.sample_values = {
             "playershort": "trips.",
             "playernote": "📝",
@@ -587,6 +589,8 @@ class PopupPreviewWidget(QWidget):
     def _clear_layout(self, layout: QVBoxLayout | QGridLayout) -> None:
         while layout.count():
             item = layout.takeAt(0)
+            if item is None:
+                continue
             if child_layout := item.layout():
                 self._clear_layout(child_layout)
             if widget := item.widget():
@@ -751,7 +755,7 @@ class HudDesignCanvas(QScrollArea):
         self._grid.setVerticalSpacing(4)
         self.block_index = 0
         self.chips: list[_CanvasChip] = []
-        self.selected_ref = None
+        self.selected_ref: Any = None
         # Compact mode packs cells tightly (no icon/row buttons) for dense grids
         # such as 13x13 push-chart popups; off for normal HUD/popup editing.
         self.compact = False
@@ -760,6 +764,8 @@ class HudDesignCanvas(QScrollArea):
         self.chips = []
         while self._grid.count():
             item = self._grid.takeAt(0)
+            if item is None:
+                continue
             w = item.widget()
             if w is not None:
                 w.setParent(None)
@@ -1579,7 +1585,7 @@ class ModernHudPreferences(QDialog):
 
         self.item_props_tabs = QTabWidget()
         self.item_props_tabs.setMinimumWidth(250)
-        self._item_color_btns = {}
+        self._item_color_btns: dict[str, QPushButton] = {}
         # --- Item tab ---
         item_tab = QWidget()
         itf = QFormLayout(item_tab)
@@ -1917,7 +1923,8 @@ class ModernHudPreferences(QDialog):
 
         # PT4-style Item Properties for the selected popup item/cell.
         self._popup_group = None          # loaded BlockPopup group (editable cells)
-        self._popup_item_cell = None      # the selected cell dict
+        self._popup_item_cell: dict[str, Any] | None = None  # the selected cell dict
+        self._popup_item_mode: str | None = None
         self.pi_props_box = QGroupBox("Item Properties")
         self.pi_props_box.setMinimumWidth(360)
         pif = QFormLayout(self.pi_props_box)
@@ -1935,7 +1942,7 @@ class ModernHudPreferences(QDialog):
         pif.addRow("Type:", self.pi_type)
         self.pi_pos = QLabel("—")
         pif.addRow("Position:", self.pi_pos)
-        self._popup_item_color_btns = {}
+        self._popup_item_color_btns: dict[str, QPushButton] = {}
         self.pi_fg = self._popup_item_color_btn("fg")
         pif.addRow("Foreground:", self.pi_fg)
         self.pi_bg = self._popup_item_color_btn("bg")
@@ -2179,7 +2186,7 @@ class ModernHudPreferences(QDialog):
             d["align"] = stat.align
         return d
 
-    def _profile_from_stat_set(self, stat_set) -> dict:
+    def _profile_from_stat_set(self, stat_set) -> Any:
         """Convert a Configuration.Stat_sets object into the editor profile."""
         blocks = getattr(stat_set, "blocks", None)
         if blocks and len(blocks) > 1:
@@ -2630,7 +2637,7 @@ class ModernHudPreferences(QDialog):
         # self._row_items maps each table row -> (block_index|None, kind, ref dict)
         # so add/edit/remove operate on the actual block item (block-aware), which
         # is what gets saved for multi-panel profiles.
-        entries = []  # (gr, gc, display_dict, block_index, kind, ref)
+        entries: list[tuple[Any, Any, Any, int | None, str, Any]] = []
         blocks = profile.get("blocks") if isinstance(profile, dict) else None
         if blocks:
             row_offset = 0
@@ -3261,6 +3268,7 @@ class ModernHudPreferences(QDialog):
             impl = xml.dom.minidom.getDOMImplementation()
             pkg_doc = impl.createDocument(None, "fpdb_hud_package", None)
             root = pkg_doc.documentElement
+            assert root is not None
             root.setAttribute("version", "1.0")
 
             # 1. Export active profile (Stat Set)
@@ -3375,6 +3383,7 @@ class ModernHudPreferences(QDialog):
         try:
             import_doc = xml.dom.minidom.parse(filename)
             root = import_doc.documentElement
+            assert root is not None
             if root.tagName != "fpdb_hud_package":
                 QMessageBox.critical(
                     self,

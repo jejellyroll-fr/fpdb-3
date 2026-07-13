@@ -61,6 +61,7 @@ jobs:
           fpdb_3_legacy/AutoImportConfigObserver.py
           fpdb_3_legacy/PopupIcons.py
           fpdb_3_legacy/ModernPopup.py
+          fpdb_3_legacy/ModernHudPreferences.py
           fpdb_3_legacy/ModernSeatPreferences.py
           fpdb_3_legacy/L10n.py
           fpdb_3_legacy/Options.py

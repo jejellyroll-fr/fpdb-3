@@ -112,6 +112,7 @@ Les bugs multi-backend récents (`Rank` réservé, `boolean` vs `smallint`, `set
 - ✅ **Point d’entrée `fpdb.pyw`** (2026-07-13) : état central Qt (configuration, DB, onglets, threads et fermeture) explicité ; API Qt modernisées et dette mypy ramenée de 104 à zéro. Le module rejoint le ratchet CI.
 - ✅ **Préférences de siège HUD** (2026-07-13) : collections des sélecteurs, cartes de rooms et valeurs de configuration rendues explicites ; adaptation Qt 6 de la couleur de rendu et dette mypy ramenée de 9 à zéro. Le module rejoint le ratchet CI.
 - ✅ **Widget de rechargement de configuration** (2026-07-13) : utilisation explicite de l’énumération Qt 6 pour le pixmap transparent ; le module rejoint le ratchet CI.
+- ✅ **Préférences HUD modernes** (2026-07-13) : formats de profils historiques et multi-blocs, widgets de configuration, export/import XML et références de canvas explicités ; dette mypy ramenée de 22 à zéro. Le module rejoint le ratchet CI.
 - **Découper les god-modules** : `SQL.py` (requêtes par domaine / fichiers `.sql`), `Database.py` (connexion / DDL / cache HUD / requêtes), `Stats.py` (par famille). Incrémental, avec tests de non-régression.
 - **Qualité outillée** : résorber la dette `ruff` (~2900) par paliers (règle par règle, `--fix`, baseline) ; introduire **mypy/pyright** en mode progressif ; convertir les 78 `TODO/FIXME` en tâches traçables ; clarifier/supprimer le dossier `fpdb/`.
 
