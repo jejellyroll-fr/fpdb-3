@@ -21,6 +21,7 @@ from __future__ import annotations
 import datetime
 import re
 from decimal import Decimal
+from typing import Any, ClassVar
 
 from fpdb_3_legacy import MergeStructures
 from fpdb_3_legacy.HandHistoryConverter import FpdbHandPartial, FpdbParseError, HandHistoryConverter
@@ -42,6 +43,20 @@ class PokerTracker(HandHistoryConverter):
     filetype = "text"
     codepage = ("utf8", "cp1252")
     site_id = 14  # Default to iPoker, will be overridden by site detection
+    obs: str
+    whole_file: str
+    mixes: ClassVar[dict[str, str]] = {
+        "HORSE": "horse",
+        "8-Game": "8game",
+        "8-GAME": "8game",
+        "HOSE": "hose",
+        "Mixed PLH/PLO": "plh_plo",
+        "Mixed NLH/PLO": "nlh_plo",
+        "Mixed Omaha H/L": "plo_lo",
+        "Mixed Hold'em": "mholdem",
+        "Mixed Omaha": "momaha",
+        "Triple Stud": "3stud",
+    }
     sym = {
         "USD": r"\$",
         "CAD": r"\$",
@@ -501,7 +516,7 @@ class PokerTracker(HandHistoryConverter):
                 self.sitename = detected_skin
                 log.debug(f"Detected iPoker skin: {self.sitename}")
 
-        info = {}
+        info: dict[str, Any] = {}
         if self.is_ipoker_skin() or self.sitename == "Merge":
             m = self.re_GameInfo1.search(handText)
         elif self.sitename == "Everest":
@@ -565,7 +580,8 @@ class PokerTracker(HandHistoryConverter):
         return info
 
     def readHandInfo(self, hand) -> None:
-        info, m = {}, None
+        info: dict[str, Any] = {}
+        m = None
         if self.is_ipoker_skin() or self.sitename == "Merge":
             m3 = self.re_Tournament.search(hand.handText, re.DOTALL)
             if m3:
@@ -582,7 +598,7 @@ class PokerTracker(HandHistoryConverter):
             log.error(f"read Hand Info failed: '{tmp}'")
             raise FpdbParseError
 
-        if self.sitename not in ("Everest", "Microgaming"):
+        if self.sitename not in ("Everest", "Microgaming") and m is not None:
             info.update(m.groupdict())
         info.update(m2.groupdict())
 
@@ -634,6 +650,8 @@ class PokerTracker(HandHistoryConverter):
                 if self.sitename == "Merge":
                     if self.Structures is None:
                         self.Structures = MergeStructures.MergeStructures()
+                    if m is None:
+                        raise FpdbParseError("Could not identify tournament table")
                     tourneyname = re.split(",", m.group("TABLE"))[0].strip()
                     structure = self.Structures.lookupSnG(
                         tourneyname,
@@ -786,9 +804,13 @@ class PokerTracker(HandHistoryConverter):
             # print "DEBUG readCommunityCards:", street, hand.streets.group(street)
             if self.sitename == "Microgaming":
                 m = self.re_Board2.search(hand.streets[street])
+                if m is None:
+                    raise FpdbParseError("Could not identify community cards")
                 cards = [c.replace("10", "T").strip() for c in m.group("CARDS").replace(" of ", "").split(", ")]
             else:
                 m = self.re_Board1.search(hand.streets[street])
+                if m is None:
+                    raise FpdbParseError("Could not identify community cards")
                 if self.is_ipoker_skin():
                     cards = [c[1:].replace("10", "T") + c[0].lower() for c in m.group("CARDS").split(" ")]
                 else:
@@ -858,7 +880,6 @@ class PokerTracker(HandHistoryConverter):
                     hand.addBlind(a.group("PNAME"), "both", amount)
             for a in self.re_Action2.finditer(self.re_Hole.split(hand.handText)[0]):
                 if a.group("ATYPE") == " went all-in":
-                    amount = Decimal(self.clearMoneyString(a.group("BET")))
                     player = a.group("PNAME")
                     if bb is None:
                         hand.addBlind(
