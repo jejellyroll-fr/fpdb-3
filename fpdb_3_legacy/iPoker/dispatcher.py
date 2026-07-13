@@ -2,8 +2,12 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from importlib import import_module
+from typing import TYPE_CHECKING, Any
 
 from fpdb_3_legacy.loggingFpdb import get_logger
+
+if TYPE_CHECKING:
+    from fpdb_3_legacy.iPoker.base import iPoker
 
 log = get_logger("ipoker_dispatcher")
 
@@ -109,7 +113,7 @@ def detect_skin(path: str) -> str:
     return DEFAULT_DISPATCHER.detect_site_name(path)
 
 
-def get_parser_class_for_skin(skin: IPokerSkin | None) -> type:
+def get_parser_class_for_skin(skin: IPokerSkin | None) -> type[iPoker]:
     if skin is None:
         from fpdb_3_legacy.iPoker.base import iPoker
 
@@ -119,11 +123,11 @@ def get_parser_class_for_skin(skin: IPokerSkin | None) -> type:
     return getattr(module, skin.class_name)
 
 
-def get_parser_class_for_path(path: str) -> type:
+def get_parser_class_for_path(path: str) -> type[iPoker]:
     return get_parser_class_for_skin(DEFAULT_DISPATCHER.detect(path))
 
 
-def resolve_site_id(config, site_name: str) -> int:
+def resolve_site_id(config: Any, site_name: str) -> int:
     if site_name == "iPoker":
         return 14
 

@@ -83,6 +83,7 @@ jobs:
           fpdb_3_legacy/iPoker/__init__.py
           fpdb_3_legacy/iPoker/dispatcher.py
           fpdb_3_legacy/iPoker/base.py
+          fpdb_3_legacy/iPoker/skins
       - name: Lint newly modernized modules
         run: >-
           ruff check
