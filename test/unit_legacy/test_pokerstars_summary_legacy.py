@@ -261,6 +261,24 @@ def test_parse_summary_dispatch_unknown_type_raises() -> None:
         summary.parseSummary()
 
 
+def test_parse_summary_xls_accepts_python3_mapping_rows() -> None:
+    """Regression: the XLS parser must iterate dictionaries with ``items``."""
+    summary = make_summary("unused", hhtype="xls")
+    row = {"header": "Tournament export"}
+    summary.summaryText = [row]
+    player_match = MagicMock()
+    player_match.groupdict.return_value = {"PLAYER": "hero"}
+    summary.re_xls_player = MagicMock()
+    summary.re_xls_player.search.return_value = player_match
+    summary.re_xls_tourney_info = {}
+    summary.parseSummaryArchive = MagicMock()
+
+    summary.parseSummaryXLS()
+
+    assert row["PLAYER"] == "hero"
+    summary.parseSummaryArchive.assert_called_once_with(row)
+
+
 def test_parse_summary_from_hh_not_supported() -> None:
     summary = make_summary("anything")
     with pytest.raises(FpdbParseError):

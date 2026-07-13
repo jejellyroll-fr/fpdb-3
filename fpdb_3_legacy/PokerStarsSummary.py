@@ -20,7 +20,7 @@ import datetime
 import quopri
 import re
 from decimal import Decimal
-from typing import ClassVar, NoReturn
+from typing import Any, ClassVar, NoReturn
 
 from fpdb_3_legacy import PokerStarsStructures
 from fpdb_3_legacy.HandHistoryConverter import FpdbHandPartial, FpdbParseError, HandHistoryConverter
@@ -324,7 +324,9 @@ class PokerStarsSummary(TourneySummary):
     def parseSummary(self) -> None:
         """Parse tournament summary based on detected format type."""
         # Clean email format if present
-        self.summaryText = self._cleanEmailFormat(self.summaryText)
+        summary_text: Any = getattr(self, "summaryText")
+        if isinstance(summary_text, str):
+            self.summaryText = self._cleanEmailFormat(summary_text)
         if self.hhtype == "summary":
             self.parseSummaryFile()
         elif self.hhtype == "html":
@@ -349,7 +351,15 @@ class PokerStarsSummary(TourneySummary):
 
     def parseSummaryXLS(self) -> None:
         """Parse tournament summary from Excel/XLS format."""
-        info = self.summaryText[0]
+        if (
+            not isinstance(self.summaryText, list)
+            or not self.summaryText
+            or not isinstance(self.summaryText[0], dict)
+        ):
+            msg = "PokerStars XLS summary must contain at least one row"
+            raise FpdbParseError(msg)
+
+        info: dict[str, Any] = self.summaryText[0]
         m = self.re_xls_player.search(info["header"])
         if m is None:
             tmp1 = info["header"]
@@ -358,7 +368,7 @@ class PokerStarsSummary(TourneySummary):
             raise FpdbParseError
         info.update(m.groupdict())
         mg = {}
-        for k, j in info.iteritems():
+        for k, j in info.items():
             if self.re_xls_tourney_info.get(k) is not None:
                 m1 = self.re_xls_tourney_info[k].search(j)
                 if m1:
@@ -422,7 +432,7 @@ class PokerStarsSummary(TourneySummary):
             if self.buyin != 0:
                 rebuys = int(rebuy_add_on_amt / self.buyin)
                 if rebuys != 0:
-                    self.fee = self.fee / (rebuys + 1)
+                    self.fee //= rebuys + 1
             self.rebuyCost = self.buyin + self.fee
             self.addOnCost = self.buyin + self.fee
         if "REBUYADDON1" in info and info["REBUYADDON1"] is not None:
@@ -505,7 +515,7 @@ class PokerStarsSummary(TourneySummary):
         if self.buyinCurrency not in ("FREE", "PSFP"):
             self.prizepool = int(float(self.entries)) * self.buyin
 
-        if self.isSng:
+        if self.isSng and self.endTime is not None:
             self.lookupStructures(self.endTime)
 
         if info.get("NAME") is not None and info.get("RANK") is not None:
@@ -798,13 +808,13 @@ class PokerStarsSummary(TourneySummary):
         m3 = self.re_rank.search(self.summaryText)
         hero_rank = int(m3.group("RANK")) if m3 else 0
 
-        m = re_player.finditer(self.summaryText)
-        for a in m:
+        player_matches = re_player.finditer(self.summaryText)
+        for a in player_matches:
             mg = a.groupdict()
             # print "DEBUG: a.groupdict(): %s" % mg
             name = mg["NAME"]
-            rank = int(mg["RANK"])
-            winnings = 0
+            rank: int | None = int(mg["RANK"])
+            winnings: int | None = 0
             rebuy_count = None
             add_on_count = None
             ko_count = None
