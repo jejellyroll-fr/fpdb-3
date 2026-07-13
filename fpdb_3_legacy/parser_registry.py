@@ -6,6 +6,7 @@ import re
 from collections.abc import Mapping
 from functools import cache
 from types import ModuleType
+from typing import cast
 
 from fpdb_3_legacy.AbsoluteToFpdb import Absolute
 from fpdb_3_legacy.BetfairToFpdb import Betfair
@@ -112,7 +113,9 @@ PARSER_CLASS_REGISTRY: dict[str, type[HandHistoryConverter]] = {
     "Unibet": Unibet,
     "Winamax": Winamax,
     "Winning": Winning,
-    "iPoker": iPoker,
+    # Mixin methods satisfy the abstract converter contract at runtime; mypy
+    # does not infer that across iPoker's multiple-inheritance composition.
+    "iPoker": cast(type[HandHistoryConverter], iPoker),
 }
 
 SUMMARY_CLASS_REGISTRY: dict[str, type[TourneySummary]] = {
