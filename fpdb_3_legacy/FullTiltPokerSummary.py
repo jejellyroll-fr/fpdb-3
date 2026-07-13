@@ -212,7 +212,7 @@ class FullTiltPokerSummary(TourneySummary):
     def parseSummaryXLS(self):
         info = self.summaryText[0]
         m = self.re_HeroXLS.search(info["header"])
-        if m == None:
+        if m is None:
             tmp1 = info["header"]
             tmp2 = str(info)[0:200]
             log.error(_("FullTiltPokerSummary.parseSummaryXLS: '%s' '%s") % (tmp1, tmp2))
@@ -263,7 +263,7 @@ class FullTiltPokerSummary(TourneySummary):
             m3 = self.re_GameXLS.search(info["game type desc"])
             if m3:
                 base, self.gametype["category"] = self.games[m3.group("GAME")]
-                if m3.group("LIMIT") != None:
+                if m3.group("LIMIT") is not None:
                     self.gametype["limitType"] = self.limits[m3.group("LIMIT")]
                 elif base == "mixed":
                     self.gametype["limitType"] = "mx"
@@ -275,9 +275,9 @@ class FullTiltPokerSummary(TourneySummary):
         if "buy in amount" in info:
             m4 = self.re_BuyInXLS.search(info["buy in amount"])
             if m4:
-                if m4.group("BUYIN") != None:
+                if m4.group("BUYIN") is not None:
                     self.buyin = int(100 * Decimal(self.clearMoneyString(m4.group("BUYIN"))))
-                if m4.group("FEE") != None:
+                if m4.group("FEE") is not None:
                     self.fee = int(100 * Decimal(self.clearMoneyString(m4.group("FEE"))))
                 self.buyinCurrency = self.setCurrency(m4, self.buyinCurrency)
                 self.currency = self.buyinCurrency
@@ -292,7 +292,7 @@ class FullTiltPokerSummary(TourneySummary):
 
         entryId = 1
         for entry in self.summaryText:
-            if info.get("NAME") != None and entry.get("position"):
+            if info.get("NAME") is not None and entry.get("position"):
                 name = info["NAME"]
                 rank = int(Decimal(entry["position"]))
                 winnings = 0
@@ -344,7 +344,7 @@ class FullTiltPokerSummary(TourneySummary):
 
     def parseSummaryFile(self):
         m = self.re_TourneyInfo.search(self.summaryText[:2000])
-        if m == None:
+        if m is None:
             tmp = self.summaryText[0:200]
             log.error(_("FullTiltPokerSummary.parseSummary: '%s'") % tmp)
             raise FpdbParseError
@@ -359,60 +359,60 @@ class FullTiltPokerSummary(TourneySummary):
             self.tourNo = mg["TOURNO"]
         if "GAME" in mg:
             base, self.gametype["category"] = self.games[mg["GAME"]]
-        if "LIMIT" in mg and mg["LIMIT"] != None:
+        if "LIMIT" in mg and mg["LIMIT"] is not None:
             self.gametype["limitType"] = self.limits[mg["LIMIT"]]
         elif base == "mixed":
             self.gametype["limitType"] = "mx"
         else:
             self.gametype["limitType"] = "nl"
-        if mg["BUYIN"] != None:
+        if mg["BUYIN"] is not None:
             self.buyin = int(100 * Decimal(self.clearMoneyString(mg["BUYIN"])))
-        if mg["FEE"] != None:
+        if mg["FEE"] is not None:
             self.fee = int(100 * Decimal(self.clearMoneyString(mg["FEE"])))
         if "PRIZEPOOL" in mg:
-            if mg["PRIZEPOOL"] != None:
+            if mg["PRIZEPOOL"] is not None:
                 self.prizepool = int(100 * Decimal(self.clearMoneyString(mg["PRIZEPOOL"])))
         if "ENTRIES" in mg:
             self.entries = int(mg["ENTRIES"])
-        if "REBUYAMT" in mg and mg["REBUYAMT"] != None:
+        if "REBUYAMT" in mg and mg["REBUYAMT"] is not None:
             self.isRebuy = True
             self.rebuyCost = int(100 * Decimal(self.clearMoneyString(mg["REBUYAMT"])))
-        if "ADDON" in mg and mg["ADDON"] != None:
+        if "ADDON" in mg and mg["ADDON"] is not None:
             self.isAddOn = True
             self.addOnCost = int(100 * Decimal(self.clearMoneyString(mg["ADDON"])))
-        if "KOBOUNTY" in mg and mg["KOBOUNTY"] != None:
+        if "KOBOUNTY" in mg and mg["KOBOUNTY"] is not None:
             self.isKO = True
             self.koBounty = int(100 * Decimal(self.clearMoneyString(mg["KOBOUNTY"])))
-        if "PREBUYS" in mg and mg["PREBUYS"] != None:
+        if "PREBUYS" in mg and mg["PREBUYS"] is not None:
             rebuyCounts[mg["P2NAME"]] = int(mg["PREBUYS"])
-        if "PADDONS" in mg and mg["PADDONS"] != None:
+        if "PADDONS" in mg and mg["PADDONS"] is not None:
             addOnCounts[mg["P1NAME"]] = int(mg["PADDONS"])
-        if "PBOUNTIES" in mg and mg["PBOUNTIES"] != None and mg["PBOUNTIES"][0] != "%":
+        if "PBOUNTIES" in mg and mg["PBOUNTIES"] is not None and mg["PBOUNTIES"][0] != "%":
             koCounts[mg["PNAMEBOUNTIES"]] = int(mg["PBOUNTIES"])
-        if "SATELLITE" in mg and mg["SATELLITE"] != None:
+        if "SATELLITE" in mg and mg["SATELLITE"] is not None:
             self.isSatellite = True
 
         entryId = 1
-        if mg["TOURNAMENT"] != None:
+        if mg["TOURNAMENT"] is not None:
             self.tourneyName = mg["TOURNAMENT"]
-            if mg["TOURPAREN"] != None:
+            if mg["TOURPAREN"] is not None:
                 self.tourneyName += " " + mg["TOURPAREN"]
             entryId = self.readTourneyName(mg["TOURNAMENT"], mg["MATCHNO"])
 
         tableAttributes = None
-        if mg["TABLEATTRIBUTES"] != None and mg["TOURPAREN"] != None:
+        if mg["TABLEATTRIBUTES"] is not None and mg["TOURPAREN"] is not None:
             tableAttributes = mg["TOURPAREN"] + " " + mg["TABLEATTRIBUTES"]
-        elif mg["TABLEATTRIBUTES"] != None:
+        elif mg["TABLEATTRIBUTES"] is not None:
             tableAttributes = mg["TABLEATTRIBUTES"]
-        elif mg["TOURPAREN"] != None:
+        elif mg["TOURPAREN"] is not None:
             tableAttributes = mg["TOURPAREN"]
         if tableAttributes:
             # search for keywords "max" and "heads up"
             max_found = self.re_Max.search(tableAttributes)
             if max_found:
-                if max_found.group("MAX") != None:
+                if max_found.group("MAX") is not None:
                     self.maxseats = int(max_found.group("MAX"))
-                elif max_found.group("HU") != None:
+                elif max_found.group("HU") is not None:
                     self.maxseats = 2
             speed_found = self.re_Speed.search(tableAttributes)
             if speed_found:
@@ -440,7 +440,7 @@ class FullTiltPokerSummary(TourneySummary):
                 self.isCashOut = True
 
         datetimestr = ""
-        if mg["YEAR"] == None:
+        if mg["YEAR"] is None:
             datetimestr = "%s/%s/%s %s:%s:%s" % (mg["Y"], mg["M"], mg["D"], mg["H"], mg["MIN"], mg["S"])
             self.startTime = datetime.datetime.strptime(datetimestr, "%Y/%m/%d %H:%M:%S")
         else:
@@ -451,7 +451,7 @@ class FullTiltPokerSummary(TourneySummary):
             self.startTime = HandHistoryConverter.changeTimezone(self.startTime, mg["TZ"], "UTC")
 
         m = self.re_Currency.search(self.summaryText)
-        if m == None:
+        if m is None:
             log.error("FullTiltPokerSummary.parseSummary: " + _("Unable to locate currency"))
             raise FpdbParseError
         # print "DEBUG: m.groupdict(): %s" % m.groupdict()
@@ -487,14 +487,14 @@ class FullTiltPokerSummary(TourneySummary):
                 addOnCount = None
                 koCount = None
 
-                if "WINNINGS" in mg and mg["WINNINGS"] != None:
+                if "WINNINGS" in mg and mg["WINNINGS"] is not None:
                     winnings = int(100 * Decimal(self.clearMoneyString(mg["WINNINGS"])))
-                    if "CURRENCY" in mg and mg["CURRENCY"] != None:
+                    if "CURRENCY" in mg and mg["CURRENCY"] is not None:
                         if mg["CURRENCY"] == "$":
                             self.currency = "USD"
                         elif mg["CURRENCY"] == "€":
                             self.currency = "EUR"
-                    elif "CURRENCY1" in mg and mg["CURRENCY1"] != None:
+                    elif "CURRENCY1" in mg and mg["CURRENCY1"] is not None:
                         if mg["CURRENCY1"] == "FPP":
                             self.currency = "FTFP"
                         elif mg["CURRENCY1"] == "FTP":
@@ -513,7 +513,7 @@ class FullTiltPokerSummary(TourneySummary):
                 if name in koCounts:
                     koCount = koCounts[name]
 
-                if "TICKET" and mg["TICKET"] != None:
+                if "TICKET" and mg["TICKET"] is not None:
                     # print "Tournament Ticket Level %s" % mg['LEVEL']
                     step_values = {
                         "1": "330",  # Step 1 -    $3.30 USD
@@ -572,7 +572,7 @@ class FullTiltPokerSummary(TourneySummary):
                 self.isKO = True
             elif re.search("Matrix", special):
                 self.isMatrix = True
-                if matchNo != None:
+                if matchNo is not None:
                     entryId = int(matchNo)
                 else:
                     entryId = 5
@@ -590,13 +590,13 @@ class FullTiltPokerSummary(TourneySummary):
                 self.speed = "Hyper"
             else:
                 self.speed = n.group("SPEED2")
-        if n.group("GUARANTEE") != None:
+        if n.group("GUARANTEE") is not None:
             self.isGuarantee = True
-        if self.isGuarantee and n.group("BUYINGUAR") != None:
+        if self.isGuarantee and n.group("BUYINGUAR") is not None:
             self.guaranteeAmt = int(100 * Decimal(self.clearMoneyString(n.group("BUYINGUAR"))))
-        if n.group("STEP") != None:
+        if n.group("STEP") is not None:
             self.isStep = True
-        if n.group("STEPNO") != None:
+        if n.group("STEPNO") is not None:
             self.stepNo = int(n.group("STEPNO"))
         if self.isMatrix and self.entries > 0:
             self.buyin = self.prizepool / self.entries

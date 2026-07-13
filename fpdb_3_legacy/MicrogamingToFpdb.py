@@ -252,7 +252,7 @@ class Microgaming(HandHistoryConverter):
                     hand.fee = 0
                     hand.buyinCurrency = "NA"
                     hand.isKO = False
-            if key == "MAX" and info.get(key) != None:
+            if key == "MAX" and info.get(key) is not None:
                 hand.maxseats = int(info[key])
 
         hand.setUncalledBets(True)
@@ -352,18 +352,18 @@ class Microgaming(HandHistoryConverter):
     def readDrawCards(self, hand, street):
         logging.debug("readDrawCards")
         m = self.re_HeroCards.finditer(hand.streets[street])
-        if m == None:
+        if m is None:
             hand.involved = False
         else:
             for player in m:
                 hand.hero = player.group("PNAME")  # Only really need to do this once
                 newcards = player.group("NEWCARDS")
                 oldcards = player.group("OLDCARDS")
-                if newcards == None:
+                if newcards is None:
                     newcards = []
                 else:
                     newcards = newcards.split(" ")
-                if oldcards == None:
+                if oldcards is None:
                     oldcards = []
                 else:
                     oldcards = oldcards.split(" ")

@@ -242,13 +242,13 @@ class OnGame(HandHistoryConverter):
         # print "DEBUG: mg: %s" % mg
 
         info["type"] = "ring"
-        if mg["TOUR"] != None:
-            if mg["TID"] != None:
+        if mg["TOUR"] is not None:
+            if mg["TID"] is not None:
                 info["type"] = "tour"
             else:
                 raise FpdbHandPartial
 
-        if "CURRENCY" in mg and mg["CURRENCY"] != None:
+        if "CURRENCY" in mg and mg["CURRENCY"] is not None:
             if "MONEY" in mg and mg["MONEY"] == "Play money":
                 info["currency"] = "play"
             else:
