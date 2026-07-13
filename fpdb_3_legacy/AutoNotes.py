@@ -592,7 +592,14 @@ def summarize_generated_notes_by_rule_set(notes: list[dict]) -> list[dict]:
 
 
 def _note_rule_set_id(note: dict) -> str:
-    return note.get("ruleSet") or available_rule_id_to_rule_set_id().get(note.get("ruleId"), "unknown")
+    rule_set_id = note.get("ruleSet")
+    if isinstance(rule_set_id, str) and rule_set_id:
+        return rule_set_id
+
+    rule_id = note.get("ruleId")
+    if not isinstance(rule_id, str):
+        return "unknown"
+    return available_rule_id_to_rule_set_id().get(rule_id, "unknown")
 
 
 def _cards(context: PreflopContext, player: str) -> list[str]:
