@@ -46,6 +46,7 @@ class Table(Table_Window):
     def __init__(self, *args, **kwargs):
         """Initialize table with platform detector."""
         self._detector = get_table_detector()
+        self.gdkhandle: QWindow | None = None
         super().__init__(*args, **kwargs)
 
     def find_table_parameters(self) -> None:
@@ -91,7 +92,7 @@ class Table(Table_Window):
         else:
             log.info("WINDOW DETECTION SUCCESS: Table window found and configured")
 
-    def get_geometry(self) -> dict[str, int]:
+    def get_geometry(self) -> dict[str, int] | None:
         """Get window geometry coordinates.
 
         This function serves a double purpose: it fetches the geometry and
