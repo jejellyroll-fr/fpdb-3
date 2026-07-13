@@ -273,7 +273,7 @@ class ModernSubmenu(Popup):
 
         super().__init__(*args, **kwargs)
 
-    def create(self) -> None:
+    def create(self) -> None:  # type: ignore[override]
         """Create the modern popup window."""
         super().create()
 

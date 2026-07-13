@@ -4,6 +4,7 @@ Popup windows for the HUD.
 """
 
 import ctypes
+from typing import Any
 
 from fpdb_3_legacy.loggingFpdb import get_logger
 
@@ -146,7 +147,7 @@ class Popup(QWidget):
         #    Any button click gets rid of popup.
         self.destroy_pop()
 
-    def create(self) -> None:
+    def create(self) -> None:  # type: ignore[override]
         # popup_count is used by Aux_hud to prevent multiple active popups per player
         # do not increment count if this popup is a child of another popup
         if self.parent_popup:
@@ -163,7 +164,7 @@ class Popup(QWidget):
 
 
 class default(Popup):
-    def create(self) -> None:
+    def create(self) -> None:  # type: ignore[override]
         super().create()
         player_id = None
         for id in list(self.stat_dict.keys()):
@@ -171,10 +172,13 @@ class default(Popup):
                 player_id = id
         if player_id is None:
             self.destroy_pop()
+            return
 
         self.lab = QLabel()
         self.setLayout(QVBoxLayout())
-        self.layout().addWidget(self.lab)
+        layout = self.layout()
+        if layout is not None:
+            layout.addWidget(self.lab)
 
         text, tip_text = "", ""
         for stat in self.pop.pu_stats:
@@ -201,7 +205,7 @@ class default(Popup):
 
 class Submenu(Popup):
     # fixme refactor this class, too much repeat code
-    def create(self) -> None:
+    def create(self) -> None:  # type: ignore[override]
         super().create()
 
         player_id = None
@@ -210,17 +214,19 @@ class Submenu(Popup):
                 player_id = id
         if player_id is None:
             self.destroy_pop()
+            return
 
         number_of_items = len(self.pop.pu_stats)
         if number_of_items < 1:
             self.destroy_pop()
+            return
 
         self.grid = QGridLayout()
         self.grid.setContentsMargins(0, 0, 0, 0)
         self.grid.setSpacing(0)
         self.setLayout(self.grid)
 
-        grid_line = {}
+        grid_line: dict[int, dict[str, Any]] = {}
         row = 1
 
         for stat, submenu_to_run in self.pop.pu_stats_submenu:
@@ -276,7 +282,7 @@ class Submenu(Popup):
     def mousePressEvent(self, event) -> None:
         widget = self.childAt(event.pos())
         submenu = "_destroy"
-        if hasattr(widget, "submenu"):
+        if widget is not None and hasattr(widget, "submenu"):
             submenu = widget.submenu
         if submenu == "_destroy":
             self.destroy_pop()
@@ -297,7 +303,7 @@ class Multicol(Popup):
     # like a default, but will flow into columns of 16 items
     # use "blank" items if the default flowing affects readability
 
-    def create(self) -> None:
+    def create(self) -> None:  # type: ignore[override]
         super().create()
 
         player_id = None
@@ -306,10 +312,12 @@ class Multicol(Popup):
                 player_id = id
         if player_id is None:
             self.destroy_pop()
+            return
 
         number_of_items = len(self.pop.pu_stats)
         if number_of_items < 1:
             self.destroy_pop()
+            return
 
         number_of_cols = (number_of_items) // (16)
         if number_of_cols % 16:
