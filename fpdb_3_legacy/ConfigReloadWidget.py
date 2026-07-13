@@ -62,7 +62,7 @@ class ConfigReloadWidget(QWidget):
     def update_status_icon(self, status: str) -> None:
         """Update icon according to status."""
         pixmap = QPixmap(16, 16)
-        pixmap.fill(Qt.transparent)
+        pixmap.fill(Qt.GlobalColor.transparent)
 
         painter = QPainter(pixmap)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
