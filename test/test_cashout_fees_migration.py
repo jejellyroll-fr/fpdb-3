@@ -65,9 +65,8 @@ class TestCashOutFeesMigration(unittest.TestCase):
         """Test that store_hands_players has correct number of placeholders."""
         insert_query = self.sql.query.get("store_hands_players")
 
-        # Count column names (between INSERT and VALUES)
+        # Column names (between INSERT and VALUES)
         columns_section = insert_query.split("values")[0]
-        columns = [col.strip() for col in columns_section.split(",") if col.strip() and "INSERT" not in col.upper()]
 
         # Count placeholders (%s)
         values_section = insert_query.split("values")[1] if "values" in insert_query else ""
