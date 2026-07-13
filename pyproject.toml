@@ -45,6 +45,7 @@ test = [
     "psycopg[binary]>=3.1.0",
     "PySide6>=6.8.1",
     "ruff>=0.12.8",
+    "mypy>=1.11",
 ]
 test-no-gui = [
     "pytest>=8.3.2",
@@ -54,6 +55,7 @@ test-no-gui = [
     "hypothesis>=6.100.0",
     "psycopg[binary]>=3.1.0",
     "ruff>=0.12.8",
+    "mypy>=1.11",
 ]
 windows = ["pywin32==306", "configparser", "PySide6>=6.8.1"]
 linux = ["xcffib==1.5.0", "PySide6>=6.8.1"]
@@ -95,6 +97,13 @@ ignore = [
 "fpdb_3_legacy/Mucked.py" = ["UP031"]
 "fpdb_3_legacy/PokerStarsSummary.py" = ["UP031"]
 "fpdb_3_legacy/Stats.py" = ["UP031"]
+
+[tool.mypy]
+python_version = "3.11"
+check_untyped_defs = true
+follow_imports = "skip"
+ignore_missing_imports = true
+warn_unused_configs = true
 
 [tool.setuptools.packages.find]
 where = ["."]

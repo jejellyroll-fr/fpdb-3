@@ -97,7 +97,7 @@ def calculate_equity(
         msg = "pypoker-eval is not installed or its native extension cannot be loaded"
         raise EquityUnavailableError(msg)
 
-    arguments = {"game": game, "pockets": pockets, "board": board, "dead": dead}
+    arguments: dict[str, object] = {"game": game, "pockets": pockets, "board": board, "dead": dead}
     if iterations is not None:
         if iterations <= 0:
             msg = "iterations must be positive"
