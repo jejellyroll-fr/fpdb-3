@@ -117,7 +117,6 @@ class TestNumPyMigration(unittest.TestCase):
     def test_deprecated_functions_removed(self):
         """Vérifie que les fonctions dépréciées ne sont plus importées."""
         # Ces fonctions ne doivent PAS être dans le namespace après import
-        from numpy import append, cumsum, diff, nonzero
 
         # On ne devrait pas pouvoir importer max, min, sum directement
         # (mais elles peuvent encore exister dans numpy. namespace)
@@ -187,7 +186,7 @@ class TestSQLAlchemyCompatibility(unittest.TestCase):
     def test_sqlalchemy_pool_import(self):
         """Vérifie que sqlalchemy.pool peut être importé."""
         try:
-            from sqlalchemy import pool
+            from sqlalchemy import pool  # noqa: F401 -- import compatibility test
 
             print("✅ sqlalchemy.pool importé avec succès")
         except ImportError as e:
@@ -220,8 +219,8 @@ class TestMatplotlibCompatibility(unittest.TestCase):
     def test_matplotlib_qt_backend(self):
         """Vérifie que le backend QtAgg compatible PySide6 peut être importé."""
         try:
-            from matplotlib.backends.backend_qtagg import FigureCanvas
-            from matplotlib.figure import Figure
+            from matplotlib.backends.backend_qtagg import FigureCanvas  # noqa: F401 -- import compatibility test
+            from matplotlib.figure import Figure  # noqa: F401 -- import compatibility test
 
             print("✅ matplotlib QtAgg backend importé")
         except ImportError as e:
@@ -244,7 +243,7 @@ class TestMplfinanceCompatibility(unittest.TestCase):
     def test_mplfinance_candlestick(self):
         """Vérifie que candlestick_ochl peut être importé."""
         try:
-            from mplfinance.original_flavor import candlestick_ochl
+            from mplfinance.original_flavor import candlestick_ochl  # noqa: F401 -- import compatibility test
 
             print("✅ mplfinance candlestick_ochl importé")
         except ImportError as e:

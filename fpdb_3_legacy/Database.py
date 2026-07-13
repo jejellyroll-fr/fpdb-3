@@ -81,7 +81,7 @@ log = get_logger("database")
 # Each database driver (MySQLdb, psycopg, sqlite3) now handles its own connection pooling
 # SQLAlchemy import kept for potential future use of core features
 try:
-    import sqlalchemy
+    import sqlalchemy  # noqa: F401 -- availability probe
 
     use_sqlalchemy = True
 except ImportError:

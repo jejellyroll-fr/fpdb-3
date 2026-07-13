@@ -1,11 +1,10 @@
 import os
 import json
-import time
 import sys
 from fpdb_3_legacy import Database, GuiReplayer, SQL
 from fpdb_3_legacy.http_capture_db_import import import_http_capture_directory, import_http_capture_hand
-from PySide6.QtCore import Qt, QProcess, QFileSystemWatcher, QSize
-from PySide6.QtGui import QColor, QFont, QPalette
+from PySide6.QtCore import Qt, QProcess, QFileSystemWatcher
+from PySide6.QtGui import QFont
 from PySide6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QSplitter, QListWidget,
     QTextEdit, QPushButton, QLabel, QFrame, QGridLayout, QMessageBox,

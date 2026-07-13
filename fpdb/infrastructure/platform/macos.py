@@ -10,7 +10,6 @@ from __future__ import annotations
 import logging
 import os
 import subprocess
-import zlib
 
 from . import permissions
 from .protocol import Platform, TableGeometry, TableInfo

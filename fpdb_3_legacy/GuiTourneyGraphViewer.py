@@ -40,7 +40,6 @@ try:
             log.exception(f"Matplotlib use error: {e}")
     from matplotlib.backends.backend_qt5agg import FigureCanvas
     from matplotlib.figure import Figure
-    from matplotlib.font_manager import FontProperties
     from numpy import cumsum
 except ImportError as inst:
     log.exception(

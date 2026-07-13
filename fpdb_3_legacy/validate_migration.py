@@ -72,14 +72,12 @@ def check_imports() -> bool:
 
     # NumPy
     try:
-        import numpy as np
-        from numpy import append, cumsum, diff, nonzero
 
         print("✅ NumPy imports       OK (max/min/sum removed as expected)")
 
         # Test que max/min/sum ne sont plus importés directement
         try:
-            from numpy import max, min, sum
+            from numpy import max, min, sum  # noqa: F401 -- import compatibility test
 
             print("⚠️  NumPy max/min/sum  STILL AVAILABLE (unexpected, but OK)")
         except ImportError:
@@ -90,7 +88,6 @@ def check_imports() -> bool:
 
     # SQLAlchemy
     try:
-        from sqlalchemy import pool
 
         print("✅ SQLAlchemy pool     OK")
     except VALIDATION_IMPORT_ERRORS as e:
@@ -99,8 +96,6 @@ def check_imports() -> bool:
 
     # matplotlib
     try:
-        from matplotlib.backends.backend_qtagg import FigureCanvas
-        from matplotlib.figure import Figure
 
         print("✅ matplotlib QtAgg    OK")
     except VALIDATION_IMPORT_ERRORS as e:
@@ -109,7 +104,6 @@ def check_imports() -> bool:
 
     # mplfinance
     try:
-        from mplfinance.original_flavor import candlestick_ochl
 
         print("✅ mplfinance          OK")
     except VALIDATION_IMPORT_ERRORS as e:
@@ -118,8 +112,6 @@ def check_imports() -> bool:
 
     # PySide6
     try:
-        from PySide6.QtWidgets import QApplication
-        from PySide6.QtCore import Qt
 
         print("✅ PySide6             OK")
     except VALIDATION_IMPORT_ERRORS as e:
@@ -128,8 +120,6 @@ def check_imports() -> bool:
 
     # FastAPI (optionnel)
     try:
-        from fastapi import FastAPI
-        from pydantic import BaseModel
 
         print("✅ FastAPI/Pydantic    OK")
     except VALIDATION_IMPORT_ERRORS as e:

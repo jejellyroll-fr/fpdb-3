@@ -23,7 +23,6 @@ from __future__ import annotations
 
 import datetime
 import re
-import time
 from decimal import Decimal, InvalidOperation
 
 from fpdb_3_legacy.HandHistoryConverter import FpdbHandPartial, FpdbParseError, HandHistoryConverter

@@ -12,7 +12,7 @@ import re
 import time
 from dataclasses import dataclass
 from logging.handlers import TimedRotatingFileHandler
-from typing import Any, Union
+from typing import Any
 
 import colorlog
 from colorlog import ColoredFormatter

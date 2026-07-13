@@ -23,7 +23,7 @@ from fpdb_3_legacy.http_capture_hand_builder import (
     summarize_fpdb_hand,
     validate_hand_operations,
 )
-from fpdb_3_legacy.http_capture_db_import import import_http_capture_directory, import_http_capture_file, import_http_capture_hand
+from fpdb_3_legacy.http_capture_db_import import import_http_capture_directory, import_http_capture_file
 from fpdb_3_legacy.http_capture_importability import evaluate_capture_importability
 from fpdb_3_legacy.http_capture_models import RawCaptureMessage
 from fpdb_3_legacy.http_capture_models import swc_game_definition
