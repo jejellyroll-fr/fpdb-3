@@ -101,6 +101,7 @@ Les bugs multi-backend récents (`Rank` réservé, `boolean` vs `smallint`, `set
 - ✅ **Filtres stats/HUD `Filters.py`** (2026-07-13) : contrôles Qt, sélection héros/sites et requêtes de disponibilité explicités ; dette mypy locale ramenée de 74 à zéro. Le curseur de base ne masque plus la méthode Qt homonyme et les identifiants héros acceptent correctement la relation site → alias. Le module rejoint le ratchet CI.
 - ✅ **Rapports joueurs cash/tournoi** (2026-07-13) : `GuiRingPlayerStats.py` et `GuiTourneyPlayerStats.py` rejoignent le ratchet ; la vue tournoi garde les valeurs Qt explicites et protège son rafraîchissement avant création du frame.
 - ✅ **Vues graphiques/session** (2026-07-13) : `GuiGraphViewer.py` et `GuiSessionViewer.py` rejoignent le ratchet ; leurs dépendances NumPy/Matplotlib optionnelles sont chargées dynamiquement, compatible avec la cible mypy Python 3.11.
+- ✅ **Graphe tournoi** (2026-07-13) : `GuiTourneyGraphViewer.py` rejoint le ratchet ; les courbes ChipEV et dépendances graphiques optionnelles sont explicites.
 - **Découper les god-modules** : `SQL.py` (requêtes par domaine / fichiers `.sql`), `Database.py` (connexion / DDL / cache HUD / requêtes), `Stats.py` (par famille). Incrémental, avec tests de non-régression.
 - **Qualité outillée** : résorber la dette `ruff` (~2900) par paliers (règle par règle, `--fix`, baseline) ; introduire **mypy/pyright** en mode progressif ; convertir les 78 `TODO/FIXME` en tâches traçables ; clarifier/supprimer le dossier `fpdb/`.
 

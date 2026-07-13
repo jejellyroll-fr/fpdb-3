@@ -16,7 +16,9 @@ from __future__ import annotations
 # In the "official" distribution you can find the license in agpl-3.0.txt.
 import os
 import sys
+from importlib import import_module
 from time import time
+from typing import Any
 
 from PySide6.QtWidgets import QFrame, QMessageBox, QScrollArea, QSplitter, QVBoxLayout
 
@@ -31,16 +33,16 @@ log = get_logger("gui_tourney_graph_viewer")
 
 try:
     calluse = "matplotlib" not in sys.modules
-    import matplotlib as mpl
+    mpl = import_module("matplotlib")
 
     if calluse:
         try:
             mpl.use("qt5agg")
         except ValueError as e:
             log.exception(f"Matplotlib use error: {e}")
-    from matplotlib.backends.backend_qt5agg import FigureCanvas
-    from matplotlib.figure import Figure
-    from numpy import cumsum
+    FigureCanvas = getattr(import_module("matplotlib.backends.backend_qt5agg"), "FigureCanvas")
+    Figure = getattr(import_module("matplotlib.figure"), "Figure")
+    cumsum = getattr(import_module("numpy"), "cumsum")
 except ImportError as inst:
     log.exception(
         "Failed to load libs for graphing, graphing will not function. Please install numpy and matplotlib if you want to use graphs.",
@@ -104,8 +106,8 @@ class GuiTourneyGraphViewer(QSplitter):
         self.setStretchFactor(0, 0)
         self.setStretchFactor(1, 1)
 
-        self.fig = None
-        self.canvas = None
+        self.fig: Any = None
+        self.canvas: Any = None
 
         self.db.rollback()
         self.exportFile = None
@@ -128,7 +130,7 @@ class GuiTourneyGraphViewer(QSplitter):
             self.canvas = None
 
         # Declarative ChipEV-by-position curves, recomputed on each generate.
-        self.chipev_curves = []
+        self.chipev_curves: list[Any] = []
 
     def generateGraph(self, widget) -> None:
         self.clearGraphData()
