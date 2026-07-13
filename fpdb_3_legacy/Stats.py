@@ -5119,7 +5119,7 @@ def main(argv=None):
                     print(f"  {stat_name}: {description}")
             else:
                 print("  No stat descriptions available")
-        except Exception as e:  # intentional broad catch: dynamic stat registry contains legacy helpers.
+        except Exception:  # intentional broad catch: dynamic stat registry contains legacy helpers.
             print("  Could not retrieve stat descriptions (this is normal)")
             print("  Note: Some functions in STATLIST are not poker stats")
 
@@ -5143,7 +5143,7 @@ def main(argv=None):
     if args.show_stats:
         try:
             stat_dict = db_connection.get_stats_from_hand(h, "ring")
-            hand_instance = Hand.hand_factory(h, c, db_connection)
+            Hand.hand_factory(h, c, db_connection)
 
             print(f"\n=== Statistics for Hand {h} ===")
             for player, stats in stat_dict.items():
@@ -5159,7 +5159,7 @@ def main(argv=None):
         print("\n=== Validating Stat Functions ===")
         try:
             stat_dict = db_connection.get_stats_from_hand(h, "ring")
-            hand_instance = Hand.hand_factory(h, c, db_connection)
+            Hand.hand_factory(h, c, db_connection)
 
             valid_count = 0
             error_count = 0
@@ -5194,7 +5194,7 @@ def main(argv=None):
                 print("No hands found.")
                 return 1
             stat_dict = db_connection.get_stats_from_hand(h, "ring")
-            hand_instance = Hand.hand_factory(h, c, db_connection)
+            Hand.hand_factory(h, c, db_connection)
         except Exception as e:  # intentional broad catch: interactive CLI spans DB and hand factory code.
             print(f"Error during interactive test: {e}")
             return 1

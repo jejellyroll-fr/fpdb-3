@@ -747,7 +747,7 @@ class Fulltilt(HandHistoryConverter):
     def readButton(self, hand):
         try:
             hand.buttonpos = int(self.re_Button.search(hand.handText).group("BUTTON"))
-        except AttributeError as e:
+        except AttributeError:
             # FTP has no indication that a hand is cancelled.
             raise FpdbHandPartial(_("%s Failed to detect button (hand #%s cancelled?)") % ("readButton:", hand.handid))
 

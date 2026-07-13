@@ -375,7 +375,7 @@ class Microgaming(HandHistoryConverter):
         m = self.re_HeroCards.finditer(hand.streets[street])
         for player in m:
             # ~ logging.debug(player.groupdict())
-            (pname, oldcards, newcards) = (player.group("PNAME"), player.group("OLDCARDS"), player.group("NEWCARDS"))
+            (_pname, oldcards, newcards) = (player.group("PNAME"), player.group("OLDCARDS"), player.group("NEWCARDS"))
             if oldcards:
                 oldcards = [c.strip() for c in oldcards.split(" ")]
             if newcards:

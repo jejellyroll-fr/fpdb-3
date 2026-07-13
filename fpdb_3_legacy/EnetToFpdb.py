@@ -430,7 +430,6 @@ class Enet(HandHistoryConverter):
     def readAction(self, hand, street):
         m = self.re_Action.finditer(hand.streets[street])
         for action in m:
-            acts = action.groupdict()
             # print "DEBUG: acts: %s" %acts
             if action.group("ATYPE") == " folds":
                 hand.addFold(street, action.group("PNAME"))

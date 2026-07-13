@@ -617,7 +617,7 @@ def test_annotations_stat():
     """Test annotations stat returns tuple."""
     stat_dict = {1: {}}
     try:
-        result = do_stat(stat_dict, stat="annotations", player=1)
+        do_stat(stat_dict, stat="annotations", player=1)
         # annotations is a decorator, not callable as stat
     except TypeError:
         pass  # Expected for non-callable
@@ -1377,7 +1377,6 @@ def test_bbper100_bigblind_key_error():
 # Test for saw_f with n=0 returns 0.0 (ZeroDivisionError not caught - potential bug)
 def test_saw_f_exception_n_zero():
     """Test saw_f with n=0 - note ZeroDivisionError is not caught."""
-    stat_dict = {1: {"saw_f": 50, "n": 0}}
     # This would raise ZeroDivisionError - not caught by saw_f
     # stat = num / den line 791 not protected
     # This is a potential bug in Stats.py
@@ -1576,7 +1575,7 @@ def test_main_interactive_no_db(monkeypatch):
 def test_wpnpm_exception():
     """Test wpnpm stat."""
     stat_dict = {1: {"wpnpm": "bad", "n": 100}}
-    result = do_stat(stat_dict, stat="wpnpm", player=1)
+    do_stat(stat_dict, stat="wpnpm", player=1)
     # wpnpm may return None if not in STATLIST
 
 
@@ -2060,38 +2059,38 @@ def test_fB_exception():
     """Test fB (folded blind to steal) exception path."""
     # fB is not in STATLIST, test with valid stat that exists
     stat_dict = {1: {"folded_blind": 5, "blind_stolen": 10}}
-    result = do_stat(stat_dict, stat="fB", player=1)
+    do_stat(stat_dict, stat="fB", player=1)
     # fB may not be in STATLIST, so just pass
 
 
 def test_sawSD_exception():
     """Test sawSD exception path."""
     stat_dict = {1: {"sawSD": "invalid"}}
-    result = do_stat(stat_dict, stat="sawSD", player=1)
+    do_stat(stat_dict, stat="sawSD", player=1)
 
 
 def test_cfr_exception():
     """Test cfr exception path."""
     stat_dict = {1: {"cb_1": "invalid"}}
-    result = do_stat(stat_dict, stat="cfr", player=1)
+    do_stat(stat_dict, stat="cfr", player=1)
 
 
 def test_aggression_exception():
     """Test aggression exception path."""
     stat_dict = {1: {"aggr_1": "invalid"}}
-    result = do_stat(stat_dict, stat="aggression", player=1)
+    do_stat(stat_dict, stat="aggression", player=1)
 
 
 def test_dbr_exception():
     """Test dbr exception path."""
     stat_dict = {1: {"dbr_1": "invalid"}}
-    result = do_stat(stat_dict, stat="dbr", player=1)
+    do_stat(stat_dict, stat="dbr", player=1)
 
 
 def test_ffreq_exception():
     """Test ffreq exception path."""
     stat_dict = {1: {"saw_1": "invalid"}}
-    result = do_stat(stat_dict, stat="ffreq", player=1)
+    do_stat(stat_dict, stat="ffreq", player=1)
 
 
 def test_three_B_exception():
@@ -2111,7 +2110,7 @@ def test_four_B_exception():
 def test_sawSD_exception():
     """Test sawSD exception path - sawSD not in STATLIST."""
     stat_dict = {1: {"sawSD": "invalid"}}
-    result = do_stat(stat_dict, stat="sawSD", player=1)
+    do_stat(stat_dict, stat="sawSD", player=1)
 
 
 def test_wtsd_exception():
@@ -2124,25 +2123,25 @@ def test_wtsd_exception():
 def test_cfr_exception():
     """Test cfr exception path - cfr not in STATLIST."""
     stat_dict = {1: {"cb_1": "invalid"}}
-    result = do_stat(stat_dict, stat="cfr", player=1)
+    do_stat(stat_dict, stat="cfr", player=1)
 
 
 def test_aggression_exception():
     """Test aggression exception path - aggression not in STATLIST."""
     stat_dict = {1: {"aggr_1": "invalid"}}
-    result = do_stat(stat_dict, stat="aggression", player=1)
+    do_stat(stat_dict, stat="aggression", player=1)
 
 
 def test_dbr_exception():
     """Test dbr exception path - dbr not in STATLIST (use dbr1 instead)."""
     stat_dict = {1: {"dbr_1": "invalid"}}
-    result = do_stat(stat_dict, stat="dbr", player=1)
+    do_stat(stat_dict, stat="dbr", player=1)
 
 
 def test_ffreq_exception():
     """Test ffreq exception path - ffreq not in STATLIST."""
     stat_dict = {1: {"saw_1": "invalid"}}
-    result = do_stat(stat_dict, stat="ffreq", player=1)
+    do_stat(stat_dict, stat="ffreq", player=1)
 
 
 def test_ffreq1_exception():
@@ -2198,7 +2197,7 @@ def test_dbr3_exception():
 def test_agg_freq_exception():
     """Test agg_freq exception path - not in STATLIST."""
     stat_dict = {1: {"aggr_1": "invalid"}}
-    result = do_stat(stat_dict, stat="agg_freq", player=1)
+    do_stat(stat_dict, stat="agg_freq", player=1)
 
 
 def test_agg_fact_exception():
@@ -2246,7 +2245,7 @@ def test_squeeze_exception():
 def test_rfi_exception():
     """Test rfi exception path - rfi not in STATLIST."""
     stat_dict = {1: {"rfi": "invalid"}}
-    result = do_stat(stat_dict, stat="rfi", player=1)
+    do_stat(stat_dict, stat="rfi", player=1)
 
 
 def test_rfi_early_position_exception():
@@ -2309,13 +2308,13 @@ def test_non_sd_winrate_exception():
 def test_wpnpm_exception():
     """Test wpnpm exception path - wpnpm not in STATLIST."""
     stat_dict = {1: {"wtsd": "invalid"}}
-    result = do_stat(stat_dict, stat="wpnpm", player=1)
+    do_stat(stat_dict, stat="wpnpm", player=1)
 
 
 def test_WMsD_exception():
     """Test WMsD exception path - WMsD not in STATLIST."""
     stat_dict = {1: {"wonAtSD": "invalid"}}
-    result = do_stat(stat_dict, stat="WMsD", player=1)
+    do_stat(stat_dict, stat="WMsD", player=1)
 
 
 def test_sd_winrate_exception():
@@ -2343,7 +2342,7 @@ def test_profit100_division_error():
 def test_probes_exception():
     """Test probes exception path."""
     stat_dict = {1: {"prb": "invalid"}}
-    result = do_stat(stat_dict, stat="probs", player=1)
+    do_stat(stat_dict, stat="probs", player=1)
 
 
 def test_overbet_frequency_exception():
@@ -2370,7 +2369,7 @@ def test_cfour_B_exception():
 def test_cr_exception():
     """Test cr exception path - cr not in STATLIST."""
     stat_dict = {1: {"cr_1": "invalid"}}
-    result = do_stat(stat_dict, stat="cr", player=1)
+    do_stat(stat_dict, stat="cr", player=1)
 
 
 # Tests for playername exception path (lines 462-463)
@@ -2403,7 +2402,7 @@ def test_steal_with_values():
 def test_f_cb_exception():
     """Test f_cb exception path."""
     stat_dict = {1: {"cb_1": "invalid"}}
-    result = do_stat(stat_dict, stat="f_cb", player=1)
+    do_stat(stat_dict, stat="f_cb", player=1)
 
 
 def test_pfr_exception():
@@ -2416,7 +2415,7 @@ def test_pfr_exception():
 def test_fold_to_steal_exception():
     """Test fold_to_steal exception path - not in STATLIST."""
     stat_dict = {1: {"folded_blind": "invalid"}}
-    result = do_stat(stat_dict, stat="fold_to_steal", player=1)
+    do_stat(stat_dict, stat="fold_to_steal", player=1)
 
 
 def test_saw_exception():

@@ -283,8 +283,8 @@ class TestDefaultPopup(unittest.TestCase):
         popup.create = Mock()
 
         # Mock QLabel and layout
-        mock_label = Mock()
-        mock_layout = Mock()
+        Mock()
+        Mock()
 
         # Just verify create can be called
         popup.create()
@@ -321,8 +321,8 @@ class TestDefaultPopup(unittest.TestCase):
         popup.pop = self.mock_pop
         popup.create = Mock()
 
-        mock_label = Mock()
-        mock_layout = Mock()
+        Mock()
+        Mock()
 
         # Just verify create can be called
         popup.create()
@@ -362,7 +362,7 @@ class TestSubmenuPopup(unittest.TestCase):
         popup.pop = self.mock_pop
         popup.create = Mock()
 
-        mock_layout = Mock()
+        Mock()
 
         # Just verify create can be called
         popup.create()
@@ -419,7 +419,7 @@ class TestMulticolPopup(unittest.TestCase):
         popup.pop = self.mock_pop
         popup.create = Mock()
 
-        mock_layout = Mock()
+        Mock()
 
         # Just verify create can be called
         popup.create()
@@ -447,7 +447,7 @@ class TestMulticolPopup(unittest.TestCase):
             popup.pop = Mock()
             popup.pop.pu_stats = [f"stat_{i}" for i in range(num_stats)]
 
-            mock_layout = Mock()
+            Mock()
 
             with patch("fpdb_3_legacy.Popup.Stats.do_stat") as mock_do_stat:
                 # Mock all stats to return valid data

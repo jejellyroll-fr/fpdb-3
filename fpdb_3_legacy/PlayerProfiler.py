@@ -86,11 +86,6 @@ def classify_player(stat_dict, player_id, min_hands=10):
 
     vpip_pfr_gap = vpip - pfr
 
-    # Calculate 3-bet
-    tb_opp = float(player_stats.get("TB_opp_0", 0))
-    tb_val = float(player_stats.get("TB_0", 0))
-    three_bet = 100.0 * tb_val / tb_opp if tb_opp > 0 else 0.0
-
     # Calculate Aggression % and Factor
     bet_raise = (
         float(player_stats.get("aggr_1", 0))

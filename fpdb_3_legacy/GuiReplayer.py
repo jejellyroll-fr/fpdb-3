@@ -1249,7 +1249,6 @@ class GuiReplayer(QWidget):
 
         current = state.current_round or {}
         current_player = state.actor or current.get("player")
-        placed = current.get("placed") or {}
         highlight_cards = set(state.pending_cards) if state.phase == "deal" else set(state.placed_cards)
         highlight_by_player = {current_player: highlight_cards} if current_player else {}
         player_count = max(1, len(ofc_hand.players))

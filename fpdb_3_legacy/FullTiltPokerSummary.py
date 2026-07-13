@@ -290,7 +290,7 @@ class FullTiltPokerSummary(TourneySummary):
             self.isRebuy = True
             self.rebuyCost = self.buyin
 
-        koAmt, entryId = 0, 1
+        entryId = 1
         for entry in self.summaryText:
             if info.get("NAME") != None and entry.get("position"):
                 name = info["NAME"]

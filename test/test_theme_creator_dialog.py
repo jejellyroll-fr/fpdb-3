@@ -88,7 +88,7 @@ class TestThemeCreatorDialog(unittest.TestCase):
 
     def test_color_change_updates_preview(self):
         """Test that changing colors updates the preview."""
-        original_preview = self.dialog.preview_text.toPlainText()
+        self.dialog.preview_text.toPlainText()
 
         # Change primary color
         self.dialog.color_pickers["primary"].set_color("#FF0000")

@@ -348,7 +348,7 @@ class TestCustomThemeIntegration(unittest.TestCase):
 
         # Test the workflow with mocked file operations
         with patch("fpdb_3_legacy.ThemeManager.CUSTOM_THEMES_DIR") as mock_dir:
-            with patch("shutil.copy2") as mock_copy:
+            with patch("shutil.copy2"):
                 with patch("pathlib.Path.exists", return_value=True):  # Mock file exists
                     with patch.object(theme_manager, "_validate_custom_theme", return_value=True):
                         with patch.object(theme_manager, "_detect_available_themes") as mock_detect:

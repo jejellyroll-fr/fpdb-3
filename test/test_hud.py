@@ -445,7 +445,6 @@ class TestHudMethods(unittest.TestCase):
     def test_get_cards_with_database(self) -> None:
         """Test get_cards method with database connection."""
         hand_id = 12345
-        expected_cards = {"hole": ["Ah", "Kh"], "flop": ["Qh", "Jh", "Th"]}
 
         # Mock database connection
         mock_db = Mock()

@@ -1049,7 +1049,6 @@ def import_to_config(
     ss = doc.createElement("ss")
     ss.setAttribute("name", name)
     ss.setAttribute("cols", str(cols))
-    panels = _panel_groups(place_cells)
     n_blocks = 0
     if multiblock and layout.groups:
         ss.setAttribute("show_hero_hud", "false")

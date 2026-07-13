@@ -161,7 +161,7 @@ class TestNumPyMigration(unittest.TestCase):
         greenline = cumsum(green)
         blueline = cumsum(blue)
         redline = cumsum(red)
-        orangeline = cumsum(orange)
+        cumsum(orange)
 
         self.assertEqual(len(greenline), len(winnings) + 1)
         self.assertAlmostEqual(greenline[-1], sum([x[1] for x in winnings]))

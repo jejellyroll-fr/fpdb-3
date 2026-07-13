@@ -471,10 +471,10 @@ def test_block_layout_captures_colorranges():
     aw = types.SimpleNamespace(game_params=ss, nrows=1, ncols=1, block_layouts=[])
     Aux_Hud.SimpleStatWindowHud._build_block_layouts(aw) if hasattr(Aux_Hud, "SimpleStatWindowHud") else None
     # call the real builder bound to a stub holding game_params
-    builder = Aux_Hud.SimpleStatWindow.__dict__.get("_build_block_layouts")
+    Aux_Hud.SimpleStatWindow.__dict__.get("_build_block_layouts")
     # the builder lives on the aux-window class; invoke via the class that defines it
     import inspect
-    owner = next(c for c in inspect.getmro(type(aw)) if False) if False else None
+    next(c for c in inspect.getmro(type(aw)) if False) if False else None
     # Simplest: find the method on whichever Aux_Hud class defines it
     for cls in vars(Aux_Hud).values():
         if isinstance(cls, type) and "_build_block_layouts" in cls.__dict__:
