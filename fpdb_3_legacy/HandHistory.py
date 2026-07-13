@@ -195,7 +195,7 @@ def main(argv=None):
 
     # Simple test - just parse test.xml like the original
     try:
-        with open("test.xml", "r") as file:
+        with open("test.xml") as file:
             xml_string = file.read()
 
         print("Parsing test.xml...")

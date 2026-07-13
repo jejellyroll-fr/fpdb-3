@@ -99,10 +99,8 @@ def show_status():
 
     if sys.version_info >= (3, 13):
         print_success("Python 3.13+ détecté - Migration supportée")
-    elif sys.version_info >= (3, 10):
-        print_warning("Python 3.10-3.12 - Migration ciblée pour 3.13+")
     else:
-        print_error("Python < 3.10 - Non supporté")
+        print_warning("Python 3.10-3.12 - Migration ciblée pour 3.13+")
 
     # Check key libraries
     print("\n" + Colors.BOLD + "Bibliothèques:" + Colors.NC)

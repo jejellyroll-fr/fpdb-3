@@ -119,7 +119,7 @@ def test_code_modifications():
     print("Test des modifications de code...")
 
     # Vérifier GuiGraphViewer.py
-    with open(LEGACY_DIR / "GuiGraphViewer.py", "r") as f:
+    with open(LEGACY_DIR / "GuiGraphViewer.py") as f:
         content = f.read()
 
     # Ne devrait plus avoir "from numpy import cumsum"
@@ -134,7 +134,7 @@ def test_code_modifications():
     print("  ✓ GuiGraphViewer.py: migrations NumPy correctes")
 
     # Vérifier GuiSessionViewer.py
-    with open(LEGACY_DIR / "GuiSessionViewer.py", "r") as f:
+    with open(LEGACY_DIR / "GuiSessionViewer.py") as f:
         content = f.read()
 
     # Ne devrait plus avoir "from numpy import append, cumsum, diff, nonzero"
@@ -145,7 +145,7 @@ def test_code_modifications():
     print("  ✓ GuiSessionViewer.py: migrations NumPy correctes")
 
     # Vérifier Database.py
-    with open(LEGACY_DIR / "Database.py", "r") as f:
+    with open(LEGACY_DIR / "Database.py") as f:
         content = f.read()
 
     # Devrait avoir le nouveau commentaire SQLAlchemy 2.0

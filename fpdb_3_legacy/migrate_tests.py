@@ -5,7 +5,7 @@ import re
 
 
 def migrate_file(filepath):
-    with open(filepath, "r") as f:
+    with open(filepath) as f:
         content = f.read()
 
     new_content = content
