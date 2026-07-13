@@ -26,21 +26,21 @@ def analyze_raw_archive(raw_path: str | Path) -> dict[str, Any]:
     """Return high-level diagnostics for a raw capture JSONL archive."""
 
     records = _read_jsonl(Path(raw_path))
-    sites = Counter()
-    message_types = Counter()
-    transports = Counter()
-    directions = Counter()
-    hands_by_site: dict[str, set] = defaultdict(set)
-    tables_by_site: dict[str, set] = defaultdict(set)
-    games_by_site: dict[str, Counter] = defaultdict(Counter)
+    sites: Counter[str] = Counter()
+    message_types: Counter[str] = Counter()
+    transports: Counter[str] = Counter()
+    directions: Counter[str] = Counter()
+    hands_by_site: dict[str, set[Any]] = defaultdict(set)
+    tables_by_site: dict[str, set[Any]] = defaultdict(set)
+    games_by_site: dict[str, Counter[str]] = defaultdict(Counter)
     unrecognized = 0
 
     for record in records:
-        site = record.get("site") or "unknown"
+        site = str(record.get("site") or "unknown")
         sites[site] += 1
-        message_types[record.get("message_type") or "unknown"] += 1
-        transports[record.get("transport") or "unknown"] += 1
-        directions[record.get("direction") or "unknown"] += 1
+        message_types[str(record.get("message_type") or "unknown")] += 1
+        transports[str(record.get("transport") or "unknown")] += 1
+        directions[str(record.get("direction") or "unknown")] += 1
         if record.get("hand_id") is not None:
             hands_by_site[site].add(record.get("hand_id"))
         if record.get("table_id") is not None:
