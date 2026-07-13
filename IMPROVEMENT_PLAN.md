@@ -121,6 +121,7 @@ Les bugs multi-backend récents (`Rank` réservé, `boolean` vs `smallint`, `set
 - ✅ **Gestionnaire d’erreurs d’import** (2026-07-13) : classification temporaire/récupérable/permanente et historique de retry, déjà conformes, rejoignent le ratchet CI.
 - ✅ **Structures de tournois PokerStars** (2026-07-13) : les signatures de structure à trois ou quatre paramètres sont explicitement supportées ; dette mypy ramenée de 4 à zéro. Le module rejoint le ratchet CI.
 - ✅ **Verrous inter-processus** (2026-07-13) : ressources fichiers/Win32/socket et sélection de backend explicités ; dette mypy ramenée de 17 à zéro sans modifier le contrat polymorphe historique. Le module rejoint le ratchet CI.
+- ✅ **Historique XML de mains** (2026-07-13) : le modèle de parsing XML historique `HandHistory.py`, déjà conforme, rejoint le ratchet CI.
 - **Découper les god-modules** : `SQL.py` (requêtes par domaine / fichiers `.sql`), `Database.py` (connexion / DDL / cache HUD / requêtes), `Stats.py` (par famille). Incrémental, avec tests de non-régression.
 - **Qualité outillée** : résorber la dette `ruff` (~2900) par paliers (règle par règle, `--fix`, baseline) ; introduire **mypy/pyright** en mode progressif ; convertir les 78 `TODO/FIXME` en tâches traçables ; clarifier/supprimer le dossier `fpdb/`.
 
