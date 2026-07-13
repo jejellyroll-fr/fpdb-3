@@ -32,6 +32,10 @@ from fpdb_3_legacy.TourneySummary import TourneySummary, log
 
 
 class MergeSummary(TourneySummary):
+    startTime: datetime.datetime | None
+    tourNo: str | None
+    gametype: dict[str, str | None]
+
     limits = {
         "No Limit": "nl",
         "No Limit ": "nl",
@@ -141,8 +145,7 @@ class MergeSummary(TourneySummary):
 
     codepage = ["utf-8"]
 
-    @staticmethod
-    def getSplitRe(self, head):
+    def getSplitRe(self, _head: str) -> re.Pattern[str]:
         re_SplitTourneys = re.compile("PokerStars Tournament ")
         return re_SplitTourneys
 
@@ -160,10 +163,9 @@ class MergeSummary(TourneySummary):
             raise FpdbParseError
 
     def parseSummaryFromHH(self, mg):
-        obj = getattr(MergeToFpdb, "Merge", None)
-        hhc = obj(self.config, in_path=self.in_path, sitename=None, autostart=False)
+        hhc = MergeToFpdb.Merge(self.config, in_path=self.in_path, sitename=None, autostart=False)
         handsList = hhc.allHandsAsList()
-        handsDict = {}
+        handsDict: dict[str, list[str]] = {}
         Structures = MergeStructures.MergeStructures()
         for handText in handsList:
             m = self.re_HandInfoHH.search(handText)
@@ -180,21 +182,23 @@ class MergeSummary(TourneySummary):
         for tourNo, hands in handsDict.items():
             self.resetInfo()
             self.db.resetBulkCache()
-            m = self.re_GameTypeHH.search(hands[0])
-            if m:
-                mg = m.groupdict()
+            game_match = self.re_GameTypeHH.search(hands[0])
+            if game_match is None:
+                log.error(_("MergeSummary.determineGameType: game type not found"))
+                continue
+            gametype = game_match.groupdict()
 
-            if "LIMIT" in mg:
-                self.gametype["limitType"] = self.limits[mg["LIMIT"]]
-            if "GAME" in mg:
-                if mg["GAME"] == "HORSE":
+            if "LIMIT" in gametype:
+                self.gametype["limitType"] = self.limits[gametype["LIMIT"]]
+            if "GAME" in gametype:
+                if gametype["GAME"] == "HORSE":
                     log.error(_("MergeSummary.determineGameType: HORSE found, unsupported"))
                     raise FpdbParseError
                     # (self.info['base'], self.info['category']) = self.Multigametypes[m2.group('MULTIGAMETYPE')]
                 else:
-                    self.gametype["category"] = self.games[mg["GAME"]][1]
-            if "SEATS" in mg and mg["SEATS"] is not None:
-                self.maxseats = int(mg["SEATS"])
+                    self.gametype["category"] = self.games[gametype["GAME"]][1]
+            if "SEATS" in gametype and gametype["SEATS"] is not None:
+                self.maxseats = int(gametype["SEATS"])
 
             for handText in hands:
                 m = self.re_HandInfoHH.search(handText)
@@ -330,7 +334,7 @@ class MergeSummary(TourneySummary):
         self.guarantee = None
         self.added = None
         self.addedCurrency = None
-        self.gametype = {"category": None, "limitType": None, "mix": "none"}
+        self.gametype: dict[str, str | None] = {"category": None, "limitType": None, "mix": "none"}
         self.comment = None
         self.commentTs = None
 
