@@ -489,8 +489,7 @@ def bbstack(stat_dict, player):
 
     # current big blind limit
 
-    current_bigblindlimit = 0
-    current_bigblindlimit += float(hand_instance.gametype.get("bb", 0))
+    current_bigblindlimit = float(hand_instance.gametype.get("bb", 0))
 
     stack = _calculate_end_stack(stat_dict, player, hand_instance)
 

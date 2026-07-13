@@ -89,6 +89,8 @@ jobs:
           fpdb_3_legacy/BlockPopup.py
           fpdb_3_legacy/Popup.py
           fpdb_3_legacy/RangeChartPopup.py
+          fpdb_3_legacy/Stats.py
+          fpdb_3_legacy/SmartHudManager.py
           fpdb_3_legacy/Hud.py
           fpdb_3_legacy/HUD_main.pyw
           fpdb_3_legacy/HudStatsPersistence.py
