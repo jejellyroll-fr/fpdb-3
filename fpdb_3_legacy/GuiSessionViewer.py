@@ -16,12 +16,14 @@ from __future__ import annotations
 # In the "official" distribution you can find the license in agpl-3.0.txt.
 import sys
 import traceback
+from importlib import import_module
 from time import gmtime, localtime, strftime, time
+from typing import Any
 
-import matplotlib as mpl
-import numpy as np
-from matplotlib.backends.backend_qt5agg import FigureCanvas
-from matplotlib.figure import Figure
+mpl = import_module("matplotlib")
+np = import_module("numpy")
+FigureCanvas = getattr(import_module("matplotlib.backends.backend_qt5agg"), "FigureCanvas")
+Figure = getattr(import_module("matplotlib.figure"), "Figure")
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QStandardItem, QStandardItemModel
 from PySide6.QtWidgets import (
@@ -49,17 +51,11 @@ DEBUG = False
 
 try:
     calluse = not "matplotlib" in sys.modules
-    import matplotlib as mpl
-
     if calluse:
         try:
             mpl.use("qt5agg")
         except ValueError as e:
             log.exception(f"error importing matplotlib: {e}")
-    import numpy as np
-    from matplotlib.backends.backend_qt5agg import FigureCanvas
-    from matplotlib.figure import Figure
-
 except ImportError as inst:
     log.exception("Failed to load numpy and/or matplotlib in Session Viewer")
     log.exception(f"ImportError: {inst.args}")
@@ -72,19 +68,19 @@ class GuiSessionViewer(QSplitter):
         self.conf = config
         self.sql = querylist
         self.window = mainwin
-        self.owner = owner
+        self.owner: Any = owner
         self.colors = colors
 
-        self.liststore = None
+        self.liststore: Any = None
 
         self.MYSQL_INNODB = 2
         self.PGSQL = 3
         self.SQLITE = 4
 
-        self.fig = None
-        self.canvas = None
-        self.ax = None
-        self.graphBox = None
+        self.fig: Any = None
+        self.canvas: Any = None
+        self.ax: Any = None
+        self.graphBox: Any = None
 
         # create new db connection to avoid conflicts with other threads
         self.db = Database.Database(self.conf, sql=self.sql)
@@ -139,12 +135,12 @@ class GuiSessionViewer(QSplitter):
             (1.0, "Profit"),
         ]
 
-        self.detailFilters = []
+        self.detailFilters: list[Any] = []
 
         self.stats_frame = QFrame()
         self.stats_frame.setObjectName("statsSurface")
         self.stats_frame.setLayout(QVBoxLayout())
-        self.view = None
+        self.view: Any = None
         heading = QLabel(self.filterText["handhead"])
         heading.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.stats_frame.layout().addWidget(heading)
@@ -400,9 +396,9 @@ class GuiSessionViewer(QSplitter):
 
         total_hands = 0
         total_time = 0
-        global_open = None
-        global_lwm = None
-        global_hwm = None
+        global_open: Any = None
+        global_lwm: Any = None
+        global_hwm: Any = None
 
         self.times = []
         for i in range(len(index[0])):
@@ -673,6 +669,8 @@ class GuiSessionViewer(QSplitter):
                     if isinstance(tabobject, GuiHandViewer.GuiHandViewer):
                         replayer = tabobject
                         break
+            if replayer is None:
+                return
             reformat = lambda t: strftime("%Y-%m-%d %H:%M:%S+00:00", gmtime(t))
             handids = replayer.get_hand_ids_from_date_range(
                 reformat(self.times[index.row()][0]),

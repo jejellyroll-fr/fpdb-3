@@ -20,11 +20,13 @@ from __future__ import annotations
 # _ = L10n.get_translation()
 import contextlib
 import os
+from importlib import import_module
 from time import time
+from typing import Any
 
-import numpy as np
-from matplotlib.backends.backend_qt5agg import FigureCanvas
-from matplotlib.figure import Figure
+np = import_module("numpy")
+FigureCanvas = getattr(import_module("matplotlib.backends.backend_qt5agg"), "FigureCanvas")
+Figure = getattr(import_module("matplotlib.figure"), "Figure")
 from PySide6.QtWidgets import (
     QFrame,
     QMessageBox,
@@ -98,8 +100,8 @@ class GuiGraphViewer(QSplitter):
         self.setStretchFactor(0, 0)
         self.setStretchFactor(1, 1)
 
-        self.fig = None
-        self.canvas = None
+        self.fig: Any = None
+        self.canvas: Any = None
         self.exportFile = None
 
         self.db.rollback()
