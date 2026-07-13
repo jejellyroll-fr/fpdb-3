@@ -55,6 +55,8 @@ class FakeImporter:
         self.call_hud = None
         self.hands_in_db = None
         self.progress_callbacks = None
+        self.move_imported = None
+        self.move_failed = None
 
     def clearFileList(self):
         self.cleared += 1
@@ -83,6 +85,12 @@ class FakeImporter:
 
     def setCallHud(self, value):
         self.call_hud = value
+
+    def setMoveImportedFiles(self, enabled, target_dir=None):
+        self.move_imported = (enabled, target_dir)
+
+    def setMoveFailedFiles(self, enabled, target_dir=None):
+        self.move_failed = (enabled, target_dir)
 
 
 class FakeConfig:
