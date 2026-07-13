@@ -18,7 +18,7 @@ In the "official" distribution you can find the license in agpl-3.0.txt.
 import datetime
 import re
 from decimal import Decimal
-from typing import ClassVar
+from typing import ClassVar, NoReturn
 
 from fpdb_3_legacy import BovadaToFpdb
 from fpdb_3_legacy.HandHistoryConverter import FpdbParseError, HandHistoryConverter
@@ -59,16 +59,10 @@ class BovadaSummary(TourneySummary):
     )
     re_stand = re.compile(r"{PLYR}  ?\[ME\] : Stand".format(**substitutions), re.MULTILINE)
 
-    @staticmethod
-    def get_split_re() -> re.Pattern[str]:
-        """Return a compiled regular expression for splitting tournament summaries.
-
-        This static method provides a regex pattern used to identify the start of each tournament summary section.
-
-        Returns:
-            re.Pattern[str]: The compiled regular expression for splitting summaries.
-        """
-        return re.compile("PokerStars Tournament ")  # This is a placeholder for the actual split regex.
+    def getSplitRe(self, _head: str) -> re.Pattern[str]:
+        """Return the Bovada hand marker used to split embedded summaries."""
+        self.hhtype = "summary"
+        return re.compile(r"^(?:Ignition|Bovada|Bodog(?:\.com|\.eu|\sUK|\sCanada|88)?)\sHand", re.MULTILINE)
 
     def _get_summary_excerpt(self) -> str:
         """Return a short excerpt from the tournament summary text.
@@ -80,7 +74,7 @@ class BovadaSummary(TourneySummary):
         """
         return self.summaryText[:200]
 
-    def _raise_parse_error(self, message: str) -> None:
+    def _raise_parse_error(self, message: str) -> NoReturn:
         """Log an error and raise an FpdbParseError with a summary excerpt.
 
         This method logs the provided error message along with a short excerpt of the summary,
@@ -118,7 +112,7 @@ class BovadaSummary(TourneySummary):
         self._raise_parse_error("Failed to detect currency")
         return ""  # This line is never reached but satisfies linter
 
-    def _process_buyin_info(self, info: dict, hhc: HandHistoryConverter) -> None:
+    def _process_buyin_info(self, info: dict, hhc: BovadaToFpdb.Bovada) -> None:
         """Process and assign buy-in, fee, and tournament name information.
 
         This method detects the currency, processes buy-in and fee amounts,
@@ -187,7 +181,7 @@ class BovadaSummary(TourneySummary):
 
         return rebuys, addons
 
-    def _process_datetime(self, info: dict, hhc: HandHistoryConverter) -> None:
+    def _process_datetime(self, info: dict, hhc: BovadaToFpdb.Bovada) -> None:
         """Parse and set the tournament start time from the info dictionary.
 
         This method extracts the date and time from the info dictionary using the hand history converter's regex,
@@ -200,7 +194,7 @@ class BovadaSummary(TourneySummary):
         if "DATETIME" not in info or info["CURRENCY"] is None:
             return
 
-        m1 = hhc.re_DateTime.finditer(info["DATETIME"])
+        m1 = hhc.re_date_time.finditer(info["DATETIME"])
         datetimestr = "2000/01/01 00:00:00"  # default used if time not found
         for a in m1:
             datetimestr = f"{a.group('Y')}/{a.group('M')}/{a.group('D')} {a.group('H')}:{a.group('MIN')}:{a.group('S')}"
@@ -222,13 +216,13 @@ class BovadaSummary(TourneySummary):
         """
         self.buyin = 0
         self.fee = 0
-        self.prizepool = None
-        self.entries = None
+        self.prizepool = 0
+        self.entries = 0
 
         if self.currency is None:
             self.buyinCurrency = "FREE"
 
-    def _process_game_info(self, info: dict, hhc: HandHistoryConverter) -> None:
+    def _process_game_info(self, info: dict, hhc: BovadaToFpdb.Bovada) -> None:
         """Process and assign game type and currency information from the summary.
 
         This method sets the game type's limit and category, and updates the buy-in currency and currency
@@ -268,10 +262,11 @@ class BovadaSummary(TourneySummary):
                     self.currency,
                     rebuys,
                     addons,
+                    None,
                     rank_id,
                 )
             else:
-                self.addPlayer(win[0], "Hero", win[1], self.currency, 0, 0, rank_id)
+                self.addPlayer(win[0], "Hero", win[1], self.currency, 0, 0, None, rank_id)
 
     def parseSummary(self) -> None:
         """Parse the tournament summary and populate summary attributes.
@@ -282,14 +277,13 @@ class BovadaSummary(TourneySummary):
         Raises:
             FpdbParseError: If required information cannot be found or parsed from the summary.
         """
-        obj = getattr(BovadaToFpdb, "Bovada", None)
-        hhc = obj(self.config, in_path=self.in_path, sitename=None, autostart=False)
-        m = hhc.re_GameInfo.search(self.summaryText)
+        hhc = BovadaToFpdb.Bovada(self.config, in_path=self.in_path, sitename=None, autostart=False)
+        m = hhc.re_game_info.search(self.summaryText)
         if m is None:
             self._raise_parse_error("parseSummary not found: '%s'")
 
         info = m.groupdict()
-        if m := hhc.re_Buyin.search(self.in_path):
+        if m := hhc.re_buyin.search(self.in_path):
             info = info | m.groupdict()
 
         if info["TOURNO"] is None:
