@@ -84,13 +84,12 @@ class TestCashOutFeesMigration(unittest.TestCase):
         self.assertIn("cashOutFee", HANDS_PLAYERS_KEYS, "cashOutFee should be in HANDS_PLAYERS_KEYS")
         self.assertIn("isCashOut", HANDS_PLAYERS_KEYS, "isCashOut should be in HANDS_PLAYERS_KEYS")
 
-        # Verify they're at the expected positions (should be last after reverse)
-        # Since the list is reversed, isCashOut should be at index 0, cashOutFee at index 1
+        # cashOutFee must immediately follow isCashOut. (This used to assert the
+        # absolute indices 0/1, which broke as soon as later keys were appended;
+        # only their relative order is meaningful.)
+        i = HANDS_PLAYERS_KEYS.index("isCashOut")
         self.assertEqual(
-            HANDS_PLAYERS_KEYS[0], "isCashOut", "isCashOut should be first in HANDS_PLAYERS_KEYS (after reverse)"
-        )
-        self.assertEqual(
-            HANDS_PLAYERS_KEYS[1], "cashOutFee", "cashOutFee should be second in HANDS_PLAYERS_KEYS (after reverse)"
+            HANDS_PLAYERS_KEYS[i + 1], "cashOutFee", "cashOutFee should immediately follow isCashOut"
         )
 
     def test_backward_compatibility(self):
@@ -195,8 +194,10 @@ class TestCashOutFeesPerformance(unittest.TestCase):
 
     def test_hands_players_keys_length(self):
         """Test that adding cashOutFee doesn't significantly impact key list size."""
-        # This is more of a sanity check
-        self.assertLess(len(HANDS_PLAYERS_KEYS), 200, "HANDS_PLAYERS_KEYS shouldn't be excessively long")
+        # Sanity check against runaway growth. The list legitimately grew past the
+        # original 200 (per-street 3-bet/probe/delayed-cbet stats, etc.); keep a
+        # generous ceiling rather than an arbitrarily tight one.
+        self.assertLess(len(HANDS_PLAYERS_KEYS), 400, "HANDS_PLAYERS_KEYS shouldn't be excessively long")
         self.assertGreater(len(HANDS_PLAYERS_KEYS), 50, "HANDS_PLAYERS_KEYS should contain substantial data")
 
     def test_key_lookup_performance(self):

@@ -240,10 +240,12 @@ class TestReadFile:
 
     def test_returns_none_when_all_codecs_fail(self, tmp_path) -> None:
         f = tmp_path / "bin.dat"
-        f.write_bytes(b"\xff\xfe\x00invalid")
+        # 0xff 0xff is NOT a UTF-16 BOM (those are ff fe / fe ff), so readFile does
+        # not take the BOM fast-path and falls through to the codepage loop, where
+        # the invalid bytes fail every codec -> None.
+        f.write_bytes(b"\xff\xffinvalid")
         ts = _make_summary()
         ts.codepage = ["utf-8"]
-        # utf-8 strict decode fails -> logged -> returns None
         content = TourneySummary.readFile(ts, str(f))
         assert content is None
 
