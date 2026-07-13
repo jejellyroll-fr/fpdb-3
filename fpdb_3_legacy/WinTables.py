@@ -50,6 +50,7 @@ class Table(Table_Window):
         """Initialize table with platform detector."""
         self._detector = get_table_detector()
         self._table_geometry = None
+        self.gdkhandle: QWindow | None = None
         super().__init__(*args, **kwargs)
 
     def _matches_winamax_tournament(self, title: str) -> bool:
