@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """__init__.py
 
 Point d'entrée du package ring_stats.

@@ -23,9 +23,8 @@ Version: 1.0
 import argparse
 import re
 import shutil
-from pathlib import Path
-from typing import Dict, List, Tuple
 import sys
+from pathlib import Path
 
 PYSIDE6_MIGRATION_ERRORS = (OSError, UnicodeDecodeError, re.error)
 
@@ -107,7 +106,7 @@ class PySide6Migrator:
             "exec_replaced": 0,
         }
 
-    def find_pyqt5_files(self, directory: Path = Path(".")) -> List[Path]:
+    def find_pyqt5_files(self, directory: Path = Path(".")) -> list[Path]:
         """Find all Python files using PyQt5.
 
         Args:
@@ -131,7 +130,7 @@ class PySide6Migrator:
 
         return sorted(pyqt5_files)
 
-    def migrate_file(self, file_path: Path) -> Tuple[bool, int]:
+    def migrate_file(self, file_path: Path) -> tuple[bool, int]:
         """Migrate a single file from PyQt5 to PySide6.
 
         Args:

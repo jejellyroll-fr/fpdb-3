@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """dashboard_view.py
 
 Affiche l'onglet principal 'Tableau de Bord' avec les KPI Cards, la jauge de Gap,

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """table_view.py
 
 Contient l'onglet 'Tableaux de Statistiques' qui regroupe la table récapitulative

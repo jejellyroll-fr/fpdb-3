@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 from __future__ import annotations
 
 # Copyright (c) 2009-2011 Eric Blade, and the FPDB team.

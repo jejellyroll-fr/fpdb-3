@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """starting_hands_view.py
 
 Affiche l'onglet 'Analyse des Mains' :

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """GuiRingPlayerStats.py
 
 Point d'entrée redirigeant vers l'implémentation modernisée et modulaire du package ring_stats.

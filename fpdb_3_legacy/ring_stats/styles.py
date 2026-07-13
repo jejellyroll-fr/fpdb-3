@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """styles.py
 
 Fournit les feuilles de style (QSS) dynamiques et les palettes de couleurs
