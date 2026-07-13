@@ -397,7 +397,7 @@ class Absolute(HandHistoryConverter):
             for a in self.re_Action.finditer(self.re_Pocket.split(hand.handText)[0]):
                 acts = a.groupdict()
                 if acts["ATYPE"] == "All-In ":
-                    if acts["BET"] == None:
+                    if acts["BET"] is None:
                         # timeout all-in
                         raise FpdbHandPartial("Partial hand history: %s" % hand.handid)
                     bet = acts["BET"].replace(",", "")
@@ -467,7 +467,7 @@ class Absolute(HandHistoryConverter):
                 hand.setUncalledBets(None)
                 hand.addCall(street, action.group("PNAME"), bet)
             elif action.group("ATYPE") == "Bets " or action.group("ATYPE") == "All-In ":
-                if action.group("BET") == None:
+                if action.group("BET") is None:
                     # timeout all-in
                     raise FpdbHandPartial("Partial hand history: %s" % hand.handid)
                 bet = action.group("BET").replace(",", "")

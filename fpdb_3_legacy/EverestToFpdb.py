@@ -203,7 +203,7 @@ class Everest(HandHistoryConverter):
             bb = self.clearMoneyString(mg["BB"])
             hand.gametype["bb"] = bb
 
-        if hand.maxseats == None:
+        if hand.maxseats is None:
             if hand.gametype["type"] == "tour" and self.maxseats == 0:
                 hand.maxseats = self.guessMaxSeats(hand)
                 self.maxseats = hand.maxseats

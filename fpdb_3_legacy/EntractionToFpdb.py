@@ -249,7 +249,7 @@ class Entraction(HandHistoryConverter):
             if key == "TOURNO":
                 hand.tourNo = info[key]
             if key == "BUYIN":
-                if hand.tourNo != None:
+                if hand.tourNo is not None:
                     if info[key] == "Freeroll" or info["BIAMT"] is None:
                         hand.buyin = 0
                         hand.fee = 0
@@ -282,7 +282,7 @@ class Entraction(HandHistoryConverter):
                     hand.tablename = info[key]
             if key == "BUTTON":
                 hand.buttonpos = info[key]
-            if key == "MAX" and info[key] != None:
+            if key == "MAX" and info[key] is not None:
                 hand.maxseats = int(info[key])
 
     def readButton(self, hand):

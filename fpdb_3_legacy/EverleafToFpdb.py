@@ -219,7 +219,7 @@ class Everleaf(HandHistoryConverter):
 
     def readHandInfo(self, hand):
         m = self.re_HandInfo.search(hand.handText)
-        if m == None:
+        if m is None:
             tmp = hand.handText[0:200]
             log.error(_("EverleafToFpdb.readHandInfo: '%s'") % tmp)
             raise FpdbParseError

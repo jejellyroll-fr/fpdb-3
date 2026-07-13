@@ -299,7 +299,7 @@ class Enet(HandHistoryConverter):
             if key == "TOURNO":
                 hand.tourNo = info[key]
             if key == "BUYIN":
-                if hand.tourNo != None:
+                if hand.tourNo is not None:
                     # print "DEBUG: info['BUYIN']: %s" % info['BUYIN']
                     # print "DEBUG: info['BIAMT']: %s" % info['BIAMT']
                     # print "DEBUG: info['BIRAKE']: %s" % info['BIRAKE']
@@ -332,13 +332,13 @@ class Enet(HandHistoryConverter):
             if key == "LEVEL":
                 hand.level = info[key]
             if key == "TABLE":
-                if hand.tourNo != None:
+                if hand.tourNo is not None:
                     hand.tablename = re.split(" ", info[key])[1]
                 else:
                     hand.tablename = info[key]
             if key == "BUTTON":
                 hand.buttonpos = info[key]
-            if key == "MAX" and info[key] != None:
+            if key == "MAX" and info[key] is not None:
                 hand.maxseats = int(info[key])
 
     def readButton(self, hand):

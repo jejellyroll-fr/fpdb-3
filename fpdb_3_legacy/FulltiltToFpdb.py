@@ -453,7 +453,7 @@ class Fulltilt(HandHistoryConverter):
             datetimestr = "2000/01/01 00:00:00"
             dateformat = "%Y/%m/%d %H:%M:%S"
             for a in m1:
-                if a.group("TZ2") == None:
+                if a.group("TZ2") is None:
                     datetimestr = "%s/%s/%s %s:%s:%s" % (
                         a.group("Y"),
                         a.group("M"),
@@ -603,13 +603,13 @@ class Fulltilt(HandHistoryConverter):
                 if special == "Shootout":
                     hand.isShootout = True
 
-            if n.group("GUARANTEE") != None:
+            if n.group("GUARANTEE") is not None:
                 hand.isGuarantee = True
-            if hand.isGuarantee and n.group("BUYINGUAR") != None:
+            if hand.isGuarantee and n.group("BUYINGUAR") is not None:
                 hand.guaranteeAmt = int(100 * Decimal(self.clearMoneyString(n.group("BUYINGUAR"))))
-            if n.group("STEP") != None:
+            if n.group("STEP") is not None:
                 hand.isStep = True
-            if n.group("STEPNO") != None:
+            if n.group("STEPNO") is not None:
                 hand.stepNo = int(n.group("STEPNO"))
 
     def readPlayerStacks(self, hand):
