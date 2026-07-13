@@ -231,7 +231,7 @@ class Fulltilt(HandHistoryConverter):
         re.MULTILINE,
     )
     re_SummarySitout = re.compile(
-        "Seat (?P<SEAT>[0-9]+): (?P<PNAME>.{2,15}?) (\\(button\\) )?is sitting out?$" % substitutions, re.MULTILINE
+        "Seat (?P<SEAT>[0-9]+): (?P<PNAME>.{2,15}?) (\\(button\\) )?is sitting out?$", re.MULTILINE
     )
     re_Board = re.compile(r"\[(?P<CARDS>.+)\]")
     re_Mixed = re.compile(r"\s\-\s(?P<MIXED>\d+\-Game|HA|HEROS|HO|HOE|HORSE|HOSE|OA|OE|SE)\s\-\s", re.VERBOSE)
