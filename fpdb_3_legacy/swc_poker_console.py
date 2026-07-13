@@ -648,12 +648,18 @@ class SwCPokerConsoleDialog(QDialog):
                     current_round = 5
                 else:
                     def get_ofc_round(count):
-                        if count == 0: return 0
-                        elif count <= 5: return 1
-                        elif count <= 7: return 2
-                        elif count <= 9: return 3
-                        elif count <= 11: return 4
-                        else: return 5
+                        if count == 0:
+                            return 0
+                        elif count <= 5:
+                            return 1
+                        elif count <= 7:
+                            return 2
+                        elif count <= 9:
+                            return 3
+                        elif count <= 11:
+                            return 4
+                        else:
+                            return 5
                     
                     round_num = get_ofc_round(max_placed)
                     if round_num > current_round:
@@ -967,8 +973,10 @@ class SwCPokerConsoleDialog(QDialog):
                 hcnu = p_cards.get("hcnu", "")
                 lcnu = p_cards.get("lcnu", "")
                 comb_text = []
-                if hcnu: comb_text.append(f"Comb: {hcnu}")
-                if lcnu: comb_text.append(f"Low: {lcnu}")
+                if hcnu:
+                    comb_text.append(f"Comb: {hcnu}")
+                if lcnu:
+                    comb_text.append(f"Low: {lcnu}")
                 if comb_text:
                     comb_lbl = QLabel(" | ".join(comb_text))
                     comb_lbl.setStyleSheet("font-style: italic; color: #a0a0a0; border: none;")

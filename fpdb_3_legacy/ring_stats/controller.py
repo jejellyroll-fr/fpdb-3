@@ -362,9 +362,12 @@ class RingStatsController(QObject):
                 if column[colalias] in colnames:
                     value = result[sqlrow][colnames.index(column[colalias])]
                     if column[colalias] == "plposition":
-                        if value == "B": value = "BB"
-                        elif value == "S": value = "SB"
-                        elif value == "0": value = "Btn"
+                        if value == "B":
+                            value = "BB"
+                        elif value == "S":
+                            value = "SB"
+                        elif value == "0":
+                            value = "Btn"
                 elif column[colalias] == "game":
                     if holecards:
                         cat_idx = colnames.index("category")
@@ -618,5 +621,4 @@ class RingStatsController(QObject):
         tmp = tmp.replace("<currency_test>", currencytest)
         tmp = tmp.replace(",)", ")")
         return tmp
-
 

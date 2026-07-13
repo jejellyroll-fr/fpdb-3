@@ -1623,10 +1623,14 @@ class DerivedStats:
         # Assign positions to remaining players
         # The CO is 1, HJ is 2, etc. (distance backwards from button)
         assigned_players = set()
-        if ub: assigned_players.add(ub[0])
-        if sb: assigned_players.add(sb[0])
-        if bb: assigned_players.add(bb[0])
-        if bi: assigned_players.add(bi[0])
+        if ub:
+            assigned_players.add(ub[0])
+        if sb:
+            assigned_players.add(sb[0])
+        if bb:
+            assigned_players.add(bb[0])
+        if bi:
+            assigned_players.add(bi[0])
 
         # We want to find players who are NOT blinds/BTN and assign them CO, HJ, etc.
         # starting from the player right before the Button (CO).
