@@ -520,7 +520,7 @@ class GuiStatsInfo(QSplitter):
         self.populate_list(text)
         self.select_first_valid_item()
 
-    def display_stat_detail(self, current: QListWidgetItem, previous: QListWidgetItem = None) -> None:
+    def display_stat_detail(self, current: QListWidgetItem, previous: QListWidgetItem | None = None) -> None:
         if current is None:
             self.text_browser.clear()
             return
