@@ -133,6 +133,7 @@ Les bugs multi-backend récents (`Rank` réservé, `boolean` vs `smallint`, `set
 - ✅ **Convertisseur PartyPoker** (2026-07-13) : état des mises/joueurs, cache regex, flags et identification site/devise explicités ; dette mypy ramenée de 7 à zéro. Le module rejoint le ratchet CI sans modifier le parsing des résultats de tournoi.
 - ✅ **Convertisseur Cake** (2026-07-13) : données de partie/tournoi et board nullable explicités ; dette mypy ramenée de 2 à zéro. Le module rejoint le ratchet CI.
 - ✅ **Convertisseur Betfair** (2026-07-13) : cache joueurs et regex de board/blind/bouton nullables explicités ; dette mypy ramenée de 4 à zéro. Le module rejoint le ratchet CI.
+- ✅ **Convertisseur OnGame** (2026-07-13) : jeux mixtes, cache joueurs, drapeaux fast et board nullable explicités ; dette mypy ramenée de 5 à zéro. Le module rejoint le ratchet CI.
 - **Découper les god-modules** : `SQL.py` (requêtes par domaine / fichiers `.sql`), `Database.py` (connexion / DDL / cache HUD / requêtes), `Stats.py` (par famille). Incrémental, avec tests de non-régression.
 - **Qualité outillée** : résorber la dette `ruff` (~2900) par paliers (règle par règle, `--fix`, baseline) ; introduire **mypy/pyright** en mode progressif ; convertir les 78 `TODO/FIXME` en tâches traçables ; clarifier/supprimer le dossier `fpdb/`.
 

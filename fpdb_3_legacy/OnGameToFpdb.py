@@ -26,6 +26,7 @@ import datetime
 import re
 import sys
 from decimal import Decimal
+from typing import Any
 
 from fpdb_3_legacy.HandHistoryConverter import FpdbHandPartial, FpdbParseError, HandHistoryConverter, log
 
@@ -38,7 +39,8 @@ class OnGame(HandHistoryConverter):
     codepage = ("utf8", "cp1252")
     siteId = 5  # Needs to match id entry in Sites database
 
-    mixes = {}  # Legal mixed games
+    mixes: dict[str, str] = {}  # Legal mixed games
+    compiledPlayers: set[str] = set()
     sym = {"USD": "\\$", "CAD": "\\$", "T$": "", "EUR": "\u20ac", "GBP": "\xa3"}
     substitutions = {
         "LEGAL_ISO": "USD|EUR|GBP|CAD|FPP",  # legal ISO currency codes
@@ -229,7 +231,7 @@ class OnGame(HandHistoryConverter):
     def determineGameType(self, handText):
         # Inspect the handText and return the gametype dict
         # gametype dict is: {'limitType': xxx, 'base': xxx, 'category': xxx}
-        info = {}
+        info: dict[str, Any] = {}
         m = self.re_HandInfo.search(handText)
         if not m:
             tmp = handText[0:200]
@@ -287,7 +289,7 @@ class OnGame(HandHistoryConverter):
         return info
 
     def readHandInfo(self, hand):
-        info = {}
+        info: dict[str, Any] = {}
         m = self.re_HandInfo.search(hand.handText)
         if m is None:
             tmp = hand.handText[0:200]
@@ -445,6 +447,8 @@ class OnGame(HandHistoryConverter):
         ):  # a list of streets which get dealt community cards (i.e. all but PREFLOP)
             # print "DEBUG readCommunityCards:", street, hand.streets.group(street)
             m = self.re_Board.search(hand.streets[street])
+            if m is None:
+                raise FpdbHandPartial("Could not identify community cards")
             hand.setCommunityCards(street, m.group("CARDS").split(", "))
 
     def readBlinds(self, hand):
