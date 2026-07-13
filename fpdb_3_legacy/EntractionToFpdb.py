@@ -315,6 +315,8 @@ class Entraction(HandHistoryConverter):
         if street in ("FLOP", "TURN", "RIVER"):
             # print "DEBUG readCommunityCards: %s %s" %(street, hand.streets[street])
             m = self.re_Board.search(hand.streets[street])
+            if m is None:
+                raise FpdbHandPartial("Could not identify community cards")
             hand.setCommunityCards(street, m.group("CARDS").split(" - "))
 
     def readAntes(self, hand):
