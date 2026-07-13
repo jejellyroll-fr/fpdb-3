@@ -21,6 +21,7 @@ from __future__ import annotations
 from decimal import Decimal
 from functools import partial
 from io import StringIO
+from typing import Any
 
 from PySide6.QtCore import QCoreApplication, QSortFilterProxyModel, Qt
 from PySide6.QtGui import QBrush, QColor, QPainter, QPixmap, QStandardItem, QStandardItemModel
@@ -53,7 +54,7 @@ class GuiHandViewer(QSplitter):
         self.config = config
         self.main_window = mainwin
         self.sql = querylist
-        self.replayer = None
+        self.replayer: Any = None
 
         self.db = Database.Database(self.config, sql=self.sql)
 
@@ -159,16 +160,19 @@ class GuiHandViewer(QSplitter):
         )
 
         self.view.doubleClicked.connect(self.row_activated)
-        self.view.contextMenuEvent = self.contextMenu
+        setattr(self.view, "contextMenuEvent", self.contextMenu)
+        def resize_rows(_index, start, end) -> None:
+            for row in range(start, end + 1):
+                self.view.resizeRowToContents(row)
         self.filterModel.rowsInserted.connect(
-            lambda index, start, end: [self.view.resizeRowToContents(r) for r in range(start, end + 1)],
+            resize_rows,
         )
-        self.filterModel.filterAcceptsRow = lambda row, sourceParent: self.is_row_in_card_filter(row)
+        setattr(self.filterModel, "filterAcceptsRow", lambda row, sourceParent: self.is_row_in_card_filter(row))
 
         # Pagination state: the full list of hand ids is kept and only one page
         # is reconstructed/rendered at a time (each hand is rebuilt from the DB,
         # which is expensive on large databases such as GGPoker).
-        self.all_handids = []
+        self.all_handids: list[Any] = []
         self.page = 0
         self.page_size = 100
 
@@ -297,7 +301,7 @@ class GuiHandViewer(QSplitter):
         return 0
 
     def reload_hands(self, handids) -> None:
-        self.hands = {}
+        self.hands: dict[Any, Any] = {}
         self.all_handids = list(handids)
         self.page = 0
         self.model.removeRows(0, self.model.rowCount())
@@ -605,7 +609,8 @@ class GuiHandViewer(QSplitter):
         hand = self.hands[int(index.sibling(index.row(), self.colnum["HandId"]).data())]
         m = QMenu()
         copyAction = m.addAction(_("Copy to clipboard"))
-        copyAction.triggered.connect(partial(self.copyHandToClipboard, hand=hand))
+        if copyAction is not None:
+            copyAction.triggered.connect(partial(self.copyHandToClipboard, hand=hand))
         m.move(event.globalPosition().toPoint())
         m.exec()
 
