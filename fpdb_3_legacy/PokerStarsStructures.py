@@ -32,7 +32,7 @@ class PokerStarsStructures:
             for d in ("2011/05/05 00:00:00", "2011/05/20 00:00:00")
         ]
         self.versions.append(datetime.now(tz=pytz.utc))
-        self.SnG_Structures = []
+        self.SnG_Structures: list[dict[tuple[int, ...], str]] = []
         self.SnG_Structures.append(
             {
                 (150, 25, 9): "Turbo",  # 7-10 handed, under 45 entrants
