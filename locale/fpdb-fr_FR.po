@@ -4886,3 +4886,38 @@ msgstr "Activer ou désactiver les règles de notes automatiques."
 
 msgid "Generate automatic notes"
 msgstr "Générer des notes automatiques"
+
+# --- Vague 2: main window dialogs ---
+
+msgid "PT4 HUD imported"
+msgstr "HUD PT4 importé"
+
+msgid "PT4 stats import"
+msgstr "Import des stats PT4"
+
+msgid "Enable or disable sites for HUD display"
+msgstr "Activer ou désactiver les sites pour l'affichage du HUD"
+
+msgid "Search:"
+msgstr "Rechercher :"
+
+msgid "Skip these games when importing"
+msgstr "Ignorer ces jeux à l'import"
+
+msgid "Confirm recreating HUD cache"
+msgstr "Confirmer la reconstruction du cache HUD"
+
+msgid "Unsaved Changes"
+msgstr "Modifications non enregistrées"
+
+msgid "You have unsaved configuration changes."
+msgstr "Vous avez des modifications de configuration non enregistrées."
+
+msgid "Select All"
+msgstr "Tout sélectionner"
+
+msgid "Deselect All"
+msgstr "Tout désélectionner"
+
+msgid "Clear All"
+msgstr "Tout effacer"

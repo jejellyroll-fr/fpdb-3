@@ -26,7 +26,9 @@ import sqlite3
 import sys
 from functools import partial
 
+import interlocks
 import numpy as np
+from loggingFpdb import get_logger, setup_logging
 from PySide6.QtCore import QCoreApplication, QDate, QPoint, Qt
 from PySide6.QtGui import QAction, QIcon
 from PySide6.QtWidgets import (
@@ -50,35 +52,36 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from fpdb_3_legacy import Card
-from fpdb_3_legacy import Configuration
-from fpdb_3_legacy import Database
-from fpdb_3_legacy import Exceptions
-from fpdb_3_legacy import GuiAutoImport
-from fpdb_3_legacy import GuiAutoNoteRules
-from fpdb_3_legacy import GuiAutoNotesWorkbench
-from fpdb_3_legacy import GuiBulkImport
-from fpdb_3_legacy import GuiGraphViewer
-from fpdb_3_legacy import GuiHandViewer
-from fpdb_3_legacy import GuiDatabase
-from fpdb_3_legacy import GuiLogView
-from fpdb_3_legacy import GuiOpponentsReport
-from fpdb_3_legacy import GuiPrefs
-from fpdb_3_legacy import GuiRingPlayerStats
-from fpdb_3_legacy import GuiSessionViewer
-from fpdb_3_legacy import GuiTourHandViewer
-from fpdb_3_legacy import GuiTourneyGraphViewer
-from fpdb_3_legacy import GuiTourneyPlayerStats
-import interlocks
-from fpdb_3_legacy import ModernHudPreferences
-from fpdb_3_legacy import Options
-from fpdb_3_legacy import SQL
+from fpdb_3_legacy import (
+    SQL,
+    Card,
+    Configuration,
+    Database,
+    Exceptions,
+    GuiAutoImport,
+    GuiAutoNoteRules,
+    GuiAutoNotesWorkbench,
+    GuiBulkImport,
+    GuiDatabase,
+    GuiGraphViewer,
+    GuiHandViewer,
+    GuiLogView,
+    GuiOpponentsReport,
+    GuiPrefs,
+    GuiRingPlayerStats,
+    GuiSessionViewer,
+    GuiTourHandViewer,
+    GuiTourneyGraphViewer,
+    GuiTourneyPlayerStats,
+    ModernHudPreferences,
+    Options,
+)
 from fpdb_3_legacy.ConfigInitializer import ensure_config_initialized
 from fpdb_3_legacy.ConfigurationManager import ConfigurationManager
 from fpdb_3_legacy.Exceptions import FpdbError
 from fpdb_3_legacy.GuiConfigObserver import GuiConfigObserver
+from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.L10n import set_locale_translation
-from loggingFpdb import get_logger, setup_logging
 
 # Early configuration initialization (fix issue #22)
 ensure_config_initialized()
@@ -245,7 +248,7 @@ class fpdb(QMainWindow):
     def dia_database_stats(self, widget, data=None) -> None:
         self.warning_box(
             string=f"Number of Hands: {self.db.getHandCount()}\nNumber of Tourneys: {self.db.getTourneyCount()}\nNumber of TourneyTypes: {self.db.getTourneyTypeCount()}",
-            diatitle="Database Statistics",
+            diatitle=_("Database Statistics"),
         )
 
     # end def dia_database_stats
@@ -280,7 +283,7 @@ class fpdb(QMainWindow):
         """
         from PySide6.QtWidgets import QFileDialog, QMessageBox
 
-        path, _ = QFileDialog.getOpenFileName(
+        path, _filter = QFileDialog.getOpenFileName(
             self, "Import PT4 HUD layout", "", "PT4 HUD layout (*.pt4hud);;All files (*)",
         )
         if not path:
@@ -307,7 +310,7 @@ class fpdb(QMainWindow):
         if summary["unmapped"]:
             lines.append(f"• {len(summary['unmapped'])} custom formula stat(s) could not be mapped.")
         lines.append("\nAssign the new stat-set / popup to a game in HUD Preferences.")
-        QMessageBox.information(self, "PT4 HUD imported", "\n".join(lines))
+        QMessageBox.information(self, _("PT4 HUD imported"), "\n".join(lines))
 
     def dia_import_pt4stat(self, widget, data=None) -> None:
         """Import PokerTracker 4 .pt4stat custom-statistic definitions.
@@ -320,7 +323,7 @@ class fpdb(QMainWindow):
         """
         from PySide6.QtWidgets import QFileDialog, QMessageBox
 
-        paths, _ = QFileDialog.getOpenFileNames(
+        paths, _filter = QFileDialog.getOpenFileNames(
             self, "Import PT4 stats", "", "PT4 stat (*.pt4stat);;All files (*)",
         )
         if not paths:
@@ -345,23 +348,23 @@ class fpdb(QMainWindow):
             lines.append(f"\nSkipped {len(report.skipped)} stat(s) (unsupported / need data FPDB does not store):")
             for fname, warns in report.skipped.items():
                 lines.append(f"• {fname}: {'; '.join(warns)[:200]}")
-        QMessageBox.information(self, "PT4 stats import", "\n".join(lines))
+        QMessageBox.information(self, _("PT4 stats import"), "\n".join(lines))
 
     def dia_manage_hud_sites(self, widget, data=None) -> None:
         """Dialog to manage HUD sites - enable/disable sites."""
         dia = QDialog(self)
-        dia.setWindowTitle("Manage HUD Sites")
+        dia.setWindowTitle(_("Manage HUD Sites"))
         dia.resize(800, 600)
         dia.setLayout(QVBoxLayout())
 
         # Header
-        header_label = QLabel("Enable or disable sites for HUD display")
+        header_label = QLabel(_("Enable or disable sites for HUD display"))
         header_label.setProperty("class", "h2")
         dia.layout().addWidget(header_label)
 
         # Search box
         search_layout = QHBoxLayout()
-        search_label = QLabel("Search:")
+        search_label = QLabel(_("Search:"))
         self.site_search = QLineEdit()
         self.site_search.setPlaceholderText("Type to filter sites...")
         search_layout.addWidget(search_label)
@@ -435,11 +438,11 @@ class fpdb(QMainWindow):
         # Buttons
         button_layout = QHBoxLayout()
 
-        select_all_btn = QPushButton("Select All")
+        select_all_btn = QPushButton(_("Select All"))
         select_all_btn.clicked.connect(lambda: self.set_all_sites(site_checkboxes, True))
         button_layout.addWidget(select_all_btn)
 
-        deselect_all_btn = QPushButton("Deselect All")
+        deselect_all_btn = QPushButton(_("Deselect All"))
         deselect_all_btn.clicked.connect(lambda: self.set_all_sites(site_checkboxes, False))
         button_layout.addWidget(deselect_all_btn)
 
@@ -522,7 +525,7 @@ class fpdb(QMainWindow):
             checkbox.setChecked(state)
 
     def dia_import_filters(self, checkState) -> None:
-        from PySide6.QtWidgets import QGroupBox, QGridLayout
+        from PySide6.QtWidgets import QGridLayout, QGroupBox
 
         GAME_NAMES = {
             "holdem": "Hold'em",
@@ -575,9 +578,9 @@ class fpdb(QMainWindow):
         border_color = palette.get("border", "#483d65")
 
         dia = QDialog(self)
-        dia.setWindowTitle("Skip these games when importing")
+        dia.setWindowTitle(_("Skip these games when importing"))
         dia.resize(750, 580)
-        
+
         main_layout = QVBoxLayout()
         main_layout.setContentsMargins(18, 18, 18, 18)
         main_layout.setSpacing(12)
@@ -609,8 +612,8 @@ class fpdb(QMainWindow):
         search_input.setClearButtonEnabled(True)
         top_layout.addWidget(search_input)
 
-        select_all_btn = QPushButton("Select All")
-        select_none_btn = QPushButton("Clear All")
+        select_all_btn = QPushButton(_("Select All"))
+        select_none_btn = QPushButton(_("Clear All"))
         top_layout.addWidget(select_all_btn)
         top_layout.addWidget(select_none_btn)
         dia.layout().addLayout(top_layout)
@@ -772,14 +775,14 @@ class fpdb(QMainWindow):
     def dia_recreate_hudcache(self, widget, data=None) -> None:
         if self.obtain_global_lock("dia_recreate_hudcache"):
             self.dia_confirm = QDialog()
-            self.dia_confirm.setWindowTitle("Confirm recreating HUD cache")
+            self.dia_confirm.setWindowTitle(_("Confirm recreating HUD cache"))
             self.dia_confirm.setLayout(QVBoxLayout())
-            self.dia_confirm.layout().addWidget(QLabel("Please confirm that you want to re-create the HUD cache."))
+            self.dia_confirm.layout().addWidget(QLabel(_("Please confirm that you want to re-create the HUD cache.")))
 
             hb1 = QHBoxLayout()
             self.h_start_date = QDateEdit(QDate.fromString(self.db.get_hero_hudcache_start(), "yyyy-MM-dd"))
             lbl = QLabel(" Hero's cache starts: ")
-            btn = QPushButton("Cal")
+            btn = QPushButton(_("Cal"))
             btn.clicked.connect(partial(self.__calendar_dialog, entry=self.h_start_date))
 
             hb1.addWidget(lbl)
@@ -791,7 +794,7 @@ class fpdb(QMainWindow):
             hb2 = QHBoxLayout()
             self.start_date = QDateEdit(QDate.fromString(self.db.get_hero_hudcache_start(), "yyyy-MM-dd"))
             lbl = QLabel(" Villains' cache starts: ")
-            btn = QPushButton("Cal")
+            btn = QPushButton(_("Cal"))
             btn.clicked.connect(partial(self.__calendar_dialog, entry=self.start_date))
 
             hb2.addWidget(lbl)
@@ -1045,14 +1048,14 @@ class fpdb(QMainWindow):
 
     def __calendar_dialog(self, widget, entry) -> None:
         d = QDialog(self.dia_confirm)
-        d.setWindowTitle("Pick a date")
+        d.setWindowTitle(_("Pick a date"))
 
         vb = QVBoxLayout()
         d.setLayout(vb)
         cal = QCalendarWidget()
         vb.addWidget(cal)
 
-        btn = QPushButton("Done")
+        btn = QPushButton(_("Done"))
         btn.clicked.connect(partial(self.__get_date, calendar=cal, entry=entry, win=d))
 
         vb.addWidget(btn)
@@ -1251,7 +1254,7 @@ class fpdb(QMainWindow):
             self.display_config_created_dialogue = False
         elif self.config.wrongConfigVersion:
             diaConfigVersionWarning = QDialog()
-            diaConfigVersionWarning.setWindowTitle("Strong Warning - Local configuration out of date")
+            diaConfigVersionWarning.setWindowTitle(_("Strong Warning - Local configuration out of date"))
             diaConfigVersionWarning.setLayout(QVBoxLayout())
             label = QLabel("\nYour local configuration file needs to be updated.")
             diaConfigVersionWarning.layout().addWidget(label)
@@ -1271,9 +1274,9 @@ class fpdb(QMainWindow):
                 " (hud layout, site folders, screennames, favourite seats).\n",
             )
             diaConfigVersionWarning.layout().addWidget(label)
-            label = QLabel("To keep existing personal settings, you must edit the local file.")
+            label = QLabel(_("To keep existing personal settings, you must edit the local file."))
             diaConfigVersionWarning.layout().addWidget(label)
-            label = QLabel("See the release note for information about the edits needed")
+            label = QLabel(_("See the release note for information about the edits needed"))
             diaConfigVersionWarning.layout().addWidget(label)
             btns = QDialogButtonBox(QDialogButtonBox.Ok)
             btns.accepted.connect(diaConfigVersionWarning.accept)
@@ -1464,8 +1467,8 @@ class fpdb(QMainWindow):
             if pending_changes:
                 # Changes detected, prompt user
                 msg_box = QMessageBox(self)
-                msg_box.setWindowTitle("Unsaved Changes")
-                msg_box.setText("You have unsaved configuration changes.")
+                msg_box.setWindowTitle(_("Unsaved Changes"))
+                msg_box.setText(_("You have unsaved configuration changes."))
                 msg_box.setInformativeText("Do you want to save your changes before quitting?")
                 msg_box.setStandardButtons(QMessageBox.Save | QMessageBox.Discard | QMessageBox.Cancel)
                 msg_box.setDefaultButton(QMessageBox.Save)
@@ -1658,7 +1661,7 @@ class fpdb(QMainWindow):
                 log.warning(f"site {site} missing from db")
                 dia = QMessageBox()
                 dia.setIcon(QMessageBox.Warning)
-                dia.setWindowTitle("Unknown Site")
+                dia.setWindowTitle(_("Unknown Site"))
                 dia.setText(f"Warning: Unable to find site '{site}' in database")
                 dia.setInformativeText(
                     "This site is configured but not found in the database. You may need to recreate the database tables.",
@@ -1764,7 +1767,7 @@ class fpdb(QMainWindow):
                 options.yloc = 0
             self.move(options.xloc, options.yloc)
 
-        self.setWindowTitle("Free Poker DB 3")
+        self.setWindowTitle(_("Free Poker DB 3"))
         defx, defy = 1920, 1080
         sg = QApplication.primaryScreen().availableGeometry()
         defx = min(sg.width(), defx)
@@ -1876,7 +1879,7 @@ class CustomTitleBar(QWidget):
         self.setAutoFillBackground(True)
         self.main_window = parent
 
-        self.title = QLabel("Free Poker DB 3")
+        self.title = QLabel(_("Free Poker DB 3"))
         self.title.setObjectName("customTitleBarLabel")
         self.title.setAlignment(Qt.AlignCenter)
 
