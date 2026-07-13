@@ -98,6 +98,8 @@ jobs:
           fpdb_3_legacy/GuiPrefs.py
           fpdb_3_legacy/GuiAutoNoteRules.py
           fpdb_3_legacy/GuiAutoNotesWorkbench.py
+          fpdb_3_legacy/GuiOpponentsReport.py
+          fpdb_3_legacy/GuiDatabase.py
           fpdb_3_legacy/GuiRingPlayerStats.py
           fpdb_3_legacy/GuiTourneyPlayerStats.py
           fpdb_3_legacy/Aux_Base.py
