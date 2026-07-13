@@ -125,6 +125,7 @@ Les bugs multi-backend récents (`Rank` réservé, `boolean` vs `smallint`, `set
 - ✅ **Convertisseur PokerStars** (2026-07-13) : contrats de regex, cartes communes, collectes et cash-outs explicités ; les ajustements monétaires restent en `Decimal`. Dette mypy ramenée de 20 à zéro et module ajouté au ratchet CI.
 - ✅ **Convertisseur Winamax** (2026-07-13) : caches de joueurs, routage des métadonnées, mains/stacks/cartes et nullabilité regex explicités ; dette mypy ramenée de 8 à zéro. Le module rejoint le ratchet CI.
 - ✅ **Détection de room** (2026-07-13) : `detect_site.py`, déjà conforme, rejoint le ratchet CI.
+- ✅ **Convertisseur Absolute** (2026-07-13) : cache joueurs, board, bouton et cartes fermées explicités ; dette mypy ramenée de 4 à zéro. Le module rejoint le ratchet CI.
 - **Découper les god-modules** : `SQL.py` (requêtes par domaine / fichiers `.sql`), `Database.py` (connexion / DDL / cache HUD / requêtes), `Stats.py` (par famille). Incrémental, avec tests de non-régression.
 - **Qualité outillée** : résorber la dette `ruff` (~2900) par paliers (règle par règle, `--fix`, baseline) ; introduire **mypy/pyright** en mode progressif ; convertir les 78 `TODO/FIXME` en tâches traçables ; clarifier/supprimer le dossier `fpdb/`.
 
