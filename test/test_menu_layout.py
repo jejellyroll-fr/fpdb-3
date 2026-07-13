@@ -64,12 +64,18 @@ def test_view_menu_exposes_themes_and_language_submenus():
     assert menu_layout.LANGUAGE_SUBMENU in handlers
 
 
-def test_language_options_puts_system_first_and_marks_current():
+def test_language_options_puts_system_and_english_first_and_marks_current():
     options = menu_layout.language_options(["fr_FR", "es_ES", "de_DE"], "fr_FR")
     assert options[0] == (menu_layout.SYSTEM_LANGUAGE, False)  # System default is always first
+    assert options[1] == (menu_layout.SOURCE_LANGUAGE, False)  # English (source) always offered
     assert ("fr_FR", True) in options  # the configured language is marked current
-    assert ("es_ES", False) in options
-    assert [code for code, _checked in options] == ["system", "fr_FR", "es_ES", "de_DE"]
+    assert [code for code, _checked in options] == ["system", "en", "fr_FR", "es_ES", "de_DE"]
+
+
+def test_language_options_marks_english_when_selected():
+    options = menu_layout.language_options(["fr_FR"], "en")
+    assert (menu_layout.SOURCE_LANGUAGE, True) in options
+    assert ("fr_FR", False) in options
 
 
 def test_language_options_defaults_to_system_when_unset():
@@ -77,6 +83,11 @@ def test_language_options_defaults_to_system_when_unset():
         options = menu_layout.language_options(["fr_FR"], current)
         assert options[0] == (menu_layout.SYSTEM_LANGUAGE, True)
         assert ("fr_FR", False) in options
+
+
+def test_language_options_does_not_duplicate_english_from_available():
+    codes = [code for code, _c in menu_layout.language_options(["en", "fr_FR"], "system")]
+    assert codes.count("en") == 1  # en is the fixed source entry, not repeated
 
 
 def test_translate_is_identity_without_a_bound_domain():

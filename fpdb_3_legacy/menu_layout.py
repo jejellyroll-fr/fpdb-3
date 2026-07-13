@@ -49,17 +49,20 @@ LANGUAGE_SUBMENU = "__language_submenu__"
 
 # Special language code meaning "follow the operating-system language".
 SYSTEM_LANGUAGE = "system"
+# Source language of the UI strings: selecting it disables translation.
+SOURCE_LANGUAGE = "en"
 
 
 def language_options(available: list[str], current: str | None) -> list[tuple[str, bool]]:
     """Ordered ``(code, is_current)`` entries for the Language menu.
 
-    ``system`` (follow the OS) comes first, then each installed locale code.
+    ``system`` (follow the OS) comes first, then ``en`` (the untranslated source
+    strings — there is no ``en`` catalog), then each installed locale code.
     ``current`` is the configured ``ui_language`` ("system" when unset).
     """
     active = current or SYSTEM_LANGUAGE
-    options = [(SYSTEM_LANGUAGE, active == SYSTEM_LANGUAGE)]
-    options.extend((code, code == active) for code in available)
+    options = [(SYSTEM_LANGUAGE, active == SYSTEM_LANGUAGE), (SOURCE_LANGUAGE, active == SOURCE_LANGUAGE)]
+    options.extend((code, code == active) for code in available if code != SOURCE_LANGUAGE)
     return options
 
 
