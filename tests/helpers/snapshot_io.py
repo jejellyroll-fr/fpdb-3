@@ -42,7 +42,7 @@ def _tolerance(path: str) -> Decimal:
 def deep_diff(x, y, path=""):
     """Pure-python recursive deep diff between structured objects with targeted tolerances."""
     diffs = []
-    if type(x) != type(y):
+    if type(x) is not type(y):
         return [f"{path}: type mismatch ({type(x).__name__} vs {type(y).__name__})"]
         
     if isinstance(x, dict):

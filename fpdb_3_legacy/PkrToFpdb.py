@@ -344,10 +344,10 @@ class Pkr(HandHistoryConverter):
         pass
 
     def readBlinds(self, hand):
-        try:
-            m = self.re_PostSB.search(hand.handText)
+        m = self.re_PostSB.search(hand.handText)
+        if m:
             hand.addBlind(m.group("PNAME"), "small blind", self.clearMoneyString(m.group("SB")))
-        except:  # no small blind
+        else:
             hand.addBlind(None, None, None)
         for a in self.re_PostBB.finditer(hand.handText):
             hand.addBlind(a.group("PNAME"), "big blind", self.clearMoneyString(a.group("BB")))

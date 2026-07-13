@@ -78,7 +78,7 @@ class APITester:
         try:
             data = response.json()
             print(f"   Response: {json.dumps(data, indent=2)[:200]}...")
-        except:
+        except ValueError:
             print(f"   Response: {response.text[:200]}...")
 
     def test_health_check(self):
