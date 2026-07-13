@@ -29,16 +29,16 @@ import shutil
 import sys
 import traceback
 import xml.dom.minidom
+import xml.parsers.expat
 from pathlib import Path
+from typing import Any
 
 if platform.system() == "Windows":
     import os
 
-    winpaths_appdata = os.getenv("APPDATA")
-
-    winpaths_appdata = winpaths_appdata.replace("\\", "/")
+    winpaths_appdata = (os.getenv("APPDATA") or os.path.expanduser("~")).replace("\\", "/")
 else:
-    winpaths_appdata = False
+    winpaths_appdata = ""
 
 from fpdb_3_legacy.loggingFpdb import get_logger
 
@@ -106,7 +106,7 @@ elif sysPlatform == "Windows":
     else:
         OS_FAMILY = "XP"
 else:
-    OS_FAMILY = False
+    OS_FAMILY = ""
 
 
 if OS_FAMILY in ["XP", "Win7"]:
@@ -125,7 +125,7 @@ if OS_FAMILY in ["XP", "Win7"]:
     PYFPDB_PATH = os.path.join(FPDB_ROOT_PATH, "pyfpdb")
     PYFPDB_PATH = PYFPDB_PATH.replace("\\", "/")
 elif OS_FAMILY == "Mac":
-    APPDATA_PATH = os.getenv("HOME")
+    APPDATA_PATH = os.getenv("HOME") or os.path.expanduser("~")
     CONFIG_PATH = os.path.join(APPDATA_PATH, ".fpdb")
     GRAPHICS_PATH = os.path.join(FPDB_ROOT_PATH, "gfx")
     PYFPDB_PATH = str(SOURCE_DIR) if INSTALL_METHOD == "source" else os.path.join(FPDB_ROOT_PATH, "pyfpdb")
@@ -135,8 +135,8 @@ elif OS_FAMILY == "Linux":
     GRAPHICS_PATH = os.path.join(FPDB_ROOT_PATH, "gfx")
     PYFPDB_PATH = str(SOURCE_DIR) if INSTALL_METHOD == "source" else os.path.join(FPDB_ROOT_PATH)
 else:
-    APPDATA_PATH = False
-    CONFIG_PATH = False
+    APPDATA_PATH = ""
+    CONFIG_PATH = ""
 
 POSIX = os.name == "posix"
 
@@ -298,8 +298,8 @@ class Layout:
         self.width = int(node.getAttribute("width"))
         self.height = int(node.getAttribute("height"))
 
-        self.location = []
-        self.hh_seats = []
+        self.location: list[Any] = []
+        self.hh_seats: list[Any] = []
         self.location = [None for x in range(self.max + 1)]  # fill array with max seats+1 empty entries
         # hh_seats is used to map the seat numbers specified in hand history files (and stored in db) onto
         #   the contiguous integerss, 1 to self.max, used to index hud stat_windows (and aw seat_windows) for display
@@ -461,7 +461,7 @@ class HeroProfile:
     def __init__(self, node) -> None:
         self.name = node.getAttribute("name")
         self.default = string_to_bool(node.getAttribute("default"), default=False)
-        self.links = []  # list of (site_name, alias)
+        self.links: list[tuple[str, str]] = []
         seen = set()
         for link in node.getElementsByTagName("link"):
             site = link.getAttribute("site_name")
@@ -472,14 +472,14 @@ class HeroProfile:
 
     def aliases_by_site(self):
         """Return ``{site_name: [alias, ...]}`` for this profile."""
-        out = {}
+        out: dict[str, list[str]] = {}
         for site, alias in self.links:
             out.setdefault(site, []).append(alias)
         return out
 
     def sites(self):
         """Return the ordered, deduplicated list of sites in this profile."""
-        out = []
+        out: list[str] = []
         for site, _alias in self.links:
             if site not in out:
                 out.append(site)
@@ -748,6 +748,7 @@ class Database:
 
 class Aux_window:
     def __init__(self, node) -> None:
+        self.name = ""
         for name, value in list(node.attributes.items()):
             setattr(self, name, value)
 
@@ -766,6 +767,7 @@ class Aux_window:
 
 class Supported_games:
     def __init__(self, node) -> None:
+        self.game_name = ""
         for name, value in list(node.attributes.items()):
             setattr(self, name, value)
 
@@ -795,6 +797,7 @@ class Supported_games:
 
 class Layout_set:
     def __init__(self, node) -> None:
+        self.name = ""
         for name, value in list(node.attributes.items()):
             setattr(self, name, value)
 
@@ -1287,14 +1290,14 @@ class RawHands:
             if save in ("none", "error", "all"):
                 self.save = save
             else:
-                log.warning(f"Invalid config value for {self.raw_hands.save}, defaulting to error")
+                log.warning(f"Invalid raw_hands save value {save!r}, defaulting to error")
                 self.save = "error"
 
             compression = node.getAttribute("compression")
-            if save in ("none", "gzip", "bzip2"):
+            if compression in ("none", "gzip", "bzip2"):
                 self.compression = compression
             else:
-                log.warning(f"Invalid config value for {self.raw_hands.compression}, defaulting to none")
+                log.warning(f"Invalid raw_hands compression value {compression!r}, defaulting to none")
                 self.compression = "none"
 
     # end def __init__
@@ -1317,14 +1320,14 @@ class RawTourneys:
             if save in ("none", "error", "all"):
                 self.save = save
             else:
-                log.warning(f"Invalid config value for {self.raw_tourneys.save}, defaulting to error")
+                log.warning(f"Invalid raw_tourneys save value {save!r}, defaulting to error")
                 self.save = "error"
 
             compression = node.getAttribute("compression")
-            if save in ("none", "gzip", "bzip2"):
+            if compression in ("none", "gzip", "bzip2"):
                 self.compression = compression
             else:
-                log.warning(f"Invalid config value for {self.raw_tourneys.compression}, defaulting to none")
+                log.warning(f"Invalid raw_tourneys compression value {compression!r}, defaulting to none")
                 self.compression = "none"
 
     # end def __init__
@@ -1379,27 +1382,28 @@ class Config:
 
         self.file = file
 
-        self.supported_sites = {}
-        self.hero_profiles = {}  # profileName --> HeroProfile (multiroom hero)
-        self.supported_games = {}
-        self.supported_databases = {}  # databaseName --> Database instance
-        self.aux_windows = {}
-        self.layout_sets = {}
-        self.stat_sets = {}
-        self.hhcs = {}
-        self.popup_windows = {}
+        self.supported_sites: dict[str, Any] = {}
+        self.hero_profiles: dict[str, HeroProfile] = {}
+        self.supported_games: dict[str, Supported_games] = {}
+        self.supported_databases: dict[str, Database] = {}
+        self.aux_windows: dict[str, Aux_window] = {}
+        self.layout_sets: dict[str, Layout_set] = {}
+        self.stat_sets: dict[str, Any] = {}
+        self.hhcs: dict[str, Any] = {}
+        self.popup_windows: dict[str, Any] = {}
         self.db_selected = None  # database the user would like to use
         self.general = General()
-        self.emails = {}
+        self.emails: dict[str, Any] = {}
         self.gui_cash_stats = GUICashStats()
         self.gui_tour_stats = GUITourStats()
-        self.site_ids = {}  # site ID list from the database
-        self.doc = None  # Root of XML tree
+        self.site_ids: dict[str, int] = {}
+        self.doc: Any = None  # Root of XML tree
 
         added, n = (
             1,
             0,
         )  # use n to prevent infinite loop if add_missing_elements() fails somehow
+        doc: Any = None
         while added > 0 and n < 2:
             n = n + 1
             log.info(f"Reading configuration file {file}")
@@ -1410,10 +1414,15 @@ class Config:
 
             except (OSError, xml.parsers.expat.ExpatError) as e:
                 log.exception(f"Error while processing XML: {traceback.format_exc()} Exception: {e}")
+                self.file_error = str(e)
+                break
 
             if (not self.example_copy) and (example_file is not None):
                 # reads example file and adds missing elements into current config
                 added = self.add_missing_elements(doc, example_file)
+
+        if doc is None:
+            raise ValueError(f"Unable to load configuration file {file}")
 
         if doc.getElementsByTagName("general") == []:
             self.general.get_defaults()
@@ -1576,16 +1585,16 @@ class Config:
         for cnode in doc.getElementsByTagName("FreePokerToolsConfig"):
             for example_cnode in example_doc.childNodes:
                 if example_cnode.localName == "FreePokerToolsConfig":
-                    for e in example_cnode.childNodes:
-                        # print "nodetype", e.nodeType, "name", e.localName, "found", len(doc.getElementsByTagName(e.localName))
-                        if e.nodeType == e.ELEMENT_NODE and doc.getElementsByTagName(e.localName) == []:
-                            new = doc.importNode(e, True)  # True means do deep copy
+                    for example_node in example_cnode.childNodes:
+                        # print "nodetype", example_node.nodeType, "name", example_node.localName, "found", len(doc.getElementsByTagName(example_node.localName))
+                        if example_node.nodeType == example_node.ELEMENT_NODE and doc.getElementsByTagName(example_node.localName) == []:
+                            new = doc.importNode(example_node, True)  # True means do deep copy
                             t_node = self.doc.createTextNode("    ")
                             cnode.appendChild(t_node)
                             cnode.appendChild(new)
                             t_node = self.doc.createTextNode("\r\n\r\n")
                             cnode.appendChild(t_node)
-                            log.debug(f"... adding missing config section: {e.localName}")
+                            log.debug(f"... adding missing config section: {example_node.localName}")
                             nodes_added = nodes_added + 1
 
         if nodes_added > 0:
@@ -1598,6 +1607,18 @@ class Config:
         config_file = os.path.join(CONFIG_PATH, "default.conf") if CONFIG_PATH else False
 
         return config_file if config_file and os.path.exists(config_file) else None
+
+    def read_default_conf(self, file_name: str) -> dict[str, str]:
+        """Read the legacy ``key=value`` database defaults file."""
+        values: dict[str, str] = {}
+        with open(file_name, encoding="utf-8") as config_file:
+            for raw_line in config_file:
+                line = raw_line.strip()
+                if not line or line.startswith("#") or "=" not in line:
+                    continue
+                key, value = line.split("=", 1)
+                values[key.strip()] = value.strip()
+        return values
 
     def get_doc(self):
         return self.doc
@@ -2163,7 +2184,7 @@ class Config:
     #            thus we can drop self.db_selected (holding database name) entirely and replace it with self._active_database = Database, avoiding to define the same
     #            thing multiple times
     def get_db_parameters(self):
-        db = {}
+        db: dict[str, Any] = {}
         name = self.db_selected
 
         if name not in self.supported_databases:
@@ -3005,7 +3026,7 @@ class Config:
             locations = self.layout_sets[set].layout[max].location
         except (KeyError, AttributeError) as e:
             log.exception(f"Error retrieving layout set locations for set='{set}', max='{max}': {e}")
-            locations = (
+            locations = [
                 (0, 0),
                 (684, 61),
                 (689, 239),
@@ -3017,7 +3038,7 @@ class Config:
                 (0, 280),
                 (121, 280),
                 (46, 30),
-            )
+            ]
         return locations
 
     def get_supported_sites(self, all=False):

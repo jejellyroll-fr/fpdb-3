@@ -5,7 +5,7 @@ from xml.dom.minidom import Document
 import pytest
 
 sys.path.append(str(Path(__file__).parent.parent))
-from fpdb_3_legacy.Configuration import Config
+from fpdb_3_legacy.Configuration import Config, RawHands, RawTourneys
 
 
 # Test for increment_position
@@ -32,6 +32,19 @@ def test_increment_position_negative_values() -> None:
         config.increment_position("(-1,0)")
     with pytest.raises(AssertionError):
         config.increment_position("(0,-1)")
+
+
+@pytest.mark.parametrize("config_class", [RawHands, RawTourneys])
+def test_raw_history_compression_is_validated_independently(config_class) -> None:
+    doc = Document()
+    node = doc.createElement("raw")
+    node.setAttribute("save", "all")
+    node.setAttribute("compression", "invalid")
+
+    raw_history = config_class(node)
+
+    assert raw_history.save == "all"
+    assert raw_history.compression == "none"
 
 
 @pytest.fixture
