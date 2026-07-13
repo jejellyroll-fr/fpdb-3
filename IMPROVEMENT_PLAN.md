@@ -77,6 +77,7 @@ Les bugs multi-backend récents (`Rank` réservé, `boolean` vs `smallint`, `set
 
 **Fait (2026-07-12)**
 - ✅ **Suite de tests remise au vert** : 10 échecs pré-existants (depuis l'import initial) corrigés → **3095 passed, 0 failed**. Diagnostics : mocks PokerStars périmés (`readHoleCards`/`readCommunityCards` lisent désormais `holeStreets`/`handText` — board recovery), assertion `markStreets` (`\r\n`→`\n`), garde `hudcache` (comptait `CACHE_KEYS` sans `HUDCACHE_EXTRA_KEYS` → 253 vs 257 corrects), index absolus fragiles (`isCashOut`), seuil arbitraire (200→400), fixture `tourneysummary` avec BOM UTF-16 accidentel.
+- ✅ **Régression HUD positionnel corrigée** (2026-07-13) : les profils historiques sans attribut `positional_mode` avaient commencé à afficher simultanément tous les panneaux SB/BB/BU. Le comportement par défaut redevient positionnel (`current`) ; l'affichage empilé reste un choix explicite.
 
 **Reste à faire**
 - ✅ **Stats** (`Stats.py`) : alias modernes WWSF/fold-to-cbet par rue, 3bet/4bet/squeeze par position (BB, SB, BTN, CO, MP, EP), et ranges observées exactes (action / mains distribuées), avec tests de valeurs sur mains connues.

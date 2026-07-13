@@ -212,13 +212,13 @@ class SimpleHUD(Aux_Base.AuxSeats):
 
     def _positional_mode(self) -> str:
         """'all' (show every position panel, stacked) or 'current' (only the
-        panel matching the last imported position). Defaults to 'all'."""
+        panel matching the live position). Defaults to 'current'."""
         config_stat_set = getattr(self.config, "stat_sets", {}).get(self.game_params.name)
         for stat_set in (self.game_params, config_stat_set):
             mode = getattr(stat_set, "positional_mode", "") if stat_set is not None else ""
             if mode:
                 return str(mode).strip().lower()
-        return "all"
+        return "current"
 
     def _show_hero_hud(self) -> bool:
         """Whether this stat-set should display hero stat windows."""

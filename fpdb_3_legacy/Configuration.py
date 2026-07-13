@@ -670,11 +670,10 @@ class Stat_sets:
         self.name = node.getAttribute("name")
         self.show_hero_hud = node.getAttribute("show_hero_hud")
         # How position-bound panels (SB/BB/BU) display in a multi-block HUD:
-        #   "all"     -> show them all at once, stacked (PT4-style; the default,
-        #                because an import-driven HUD can't know the live position
-        #                and would otherwise show a one-hand-stale panel);
-        #   "current" -> show only the panel matching the last imported position.
-        self.positional_mode = node.getAttribute("positional_mode") or "all"
+        #   "current" -> show only the panel matching the estimated live position
+        #                (the positional HUD's expected behaviour and default);
+        #   "all"     -> show every position panel at once, stacked.
+        self.positional_mode = node.getAttribute("positional_mode") or "current"
         self.rows = int(node.getAttribute("rows"))
         self.cols = int(node.getAttribute("cols"))
         self.xpad = node.getAttribute("xpad")
