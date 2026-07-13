@@ -8,6 +8,7 @@ import os
 import os.path
 import sys
 import time
+from typing import Any
 
 from fpdb_3_legacy.loggingFpdb import get_logger
 
@@ -20,7 +21,7 @@ log = get_logger("interlocks")
 INTERLOCK_CLI_ERRORS = (AssertionError, OSError, RuntimeError, TypeError, ValueError)
 INTERLOCK_LIST_ERRORS = (OSError,)
 
-InterProcessLock = None
+InterProcessLock: Any = None
 
 """
 Just use me like a thread lock.  acquire() / release() / locked()
@@ -51,13 +52,13 @@ class InterProcessLockBase:
 
     def getHashedName(self):
         log.debug(f"Original name: {self.name}")  # debug
-        test = base64.b64encode(self.name.encode())
-        log.debug(f"Base64 encoded: {test}")
-        test = test.replace(b"=", b"")
-        log.debug(f"Base64 encoded (without '='): {test}")
-        test = test.decode()
-        log.debug(f"Final decoded string: {test}")
-        return test
+        encoded_name = base64.b64encode(self.name.encode())
+        log.debug("Base64 encoded: %r", encoded_name)
+        encoded_name = encoded_name.replace(b"=", b"")
+        log.debug("Base64 encoded (without '='): %r", encoded_name)
+        hashed_name = encoded_name.decode()
+        log.debug(f"Final decoded string: {hashed_name}")
+        return hashed_name
 
     def acquire_impl(self, wait) -> None:
         pass
@@ -83,7 +84,7 @@ class InterProcessLockBase:
         return True
 
     def release(self) -> None:
-        self.release_impl()
+        self.release_impl()  # type: ignore[attr-defined]  # implemented by platform-specific lock subclasses
         self._has_lock = False
         self.heldBy = None
 
@@ -100,7 +101,7 @@ LOCK_FILE_DIRECTORY = "/tmp"
 class InterProcessLockFcntl(InterProcessLockBase):
     def __init__(self, name=None) -> None:
         InterProcessLockBase.__init__(self, name)
-        self.lockfd = 0
+        self.lockfd: Any = None
         self.lock_file_name = os.path.join(
             LOCK_FILE_DIRECTORY,
             self.getHashedName() + ".lck",
@@ -123,7 +124,7 @@ class InterProcessLockFcntl(InterProcessLockBase):
             fcntl.flock(self.lockfd, fcntrl_options)
         except OSError:
             self.lockfd.close()
-            self.lockfd = 0
+            self.lockfd = None
             raise SingleInstanceError(
                 "Could not acquire exclusive lock on " + self.lock_file_name,
             )
@@ -131,7 +132,7 @@ class InterProcessLockFcntl(InterProcessLockBase):
     def release_impl(self) -> None:
         fcntl.lockf(self.lockfd, fcntl.LOCK_UN)
         self.lockfd.close()
-        self.lockfd = 0
+        self.lockfd = None
         try:
             os.unlink(self.lock_file_name)
         except OSError:
@@ -143,7 +144,7 @@ class InterProcessLockFcntl(InterProcessLockBase):
 class InterProcessLockWin32(InterProcessLockBase):
     def __init__(self, name=None) -> None:
         InterProcessLockBase.__init__(self, name)
-        self.mutex = None
+        self.mutex: Any = None
 
     def acquire_impl(self, wait) -> None:
         self.mutex = win32event.CreateMutex(None, 0, self.getHashedName())
@@ -161,7 +162,7 @@ class InterProcessLockWin32(InterProcessLockBase):
 class InterProcessLockSocket(InterProcessLockBase):
     def __init__(self, name=None) -> None:
         InterProcessLockBase.__init__(self, name)
-        self.socket = None
+        self.socket: Any = None
         self.portno = 65530 - abs(self.getHashedName().__hash__()) % 32749
 
     def acquire_impl(self, wait) -> None:
@@ -359,7 +360,7 @@ def main(argv=None):
         import tempfile
 
         temp_dir = tempfile.gettempdir()
-        lock_files = []
+        lock_files: list[str] = []
 
         try:
             for filename in os.listdir(temp_dir):
