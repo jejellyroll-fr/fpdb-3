@@ -56,6 +56,7 @@ jobs:
           fpdb_3_legacy/AutoImportConfigObserver.py
           fpdb_3_legacy/PopupIcons.py
           fpdb_3_legacy/ModernPopup.py
+          fpdb_3_legacy/L10n.py
       - name: Lint newly modernized modules
         run: >-
           ruff check

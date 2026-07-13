@@ -16,14 +16,15 @@ In the "official" distribution you can find the license in agpl-3.0.txt.
 """
 
 # You may find http://boodebr.org/main/python/all-about-python-and-unicode helpful
+import builtins
 import gettext
 import locale
 import platform
 import shutil
 import subprocess
 import xml.etree.ElementTree as ET
+from collections.abc import Callable
 from pathlib import Path
-from typing import Any
 
 from PySide6.QtCore import QTranslator
 
@@ -70,7 +71,7 @@ def pass_through(to_translate: str) -> str:
     return to_translate
 
 
-def set_translation(to_lang: str) -> None:
+def set_translation(to_lang: str) -> QTranslator | None:
     """Set the translation language."""
     try:
         trans = gettext.translation("fpdb", localedir="locale", languages=[to_lang])
@@ -82,15 +83,13 @@ def set_translation(to_lang: str) -> None:
     return translation
 
 
-def get_translation() -> Any:
+def get_translation() -> Callable[[str], str]:
     """Get the current translation function."""
-    try:
-        return _
-    except NameError:
-        return pass_through
+    translation = getattr(builtins, "_", None)
+    return translation if callable(translation) else pass_through
 
 
-def init_translation() -> None:
+def init_translation() -> QTranslator | Callable[[str], str] | None:
     """Initialize translation system."""
     import fpdb_3_legacy.Configuration as Configuration
 
@@ -109,7 +108,7 @@ def init_translation() -> None:
     return set_translation(conf.general["ui_language"])
 
 
-def get_installed_translations() -> dict[str, str]:
+def get_installed_translations() -> tuple[dict[str, str], dict[str, str]]:
     """Get installed translations mapping."""
     la_list = []
     la_co_list = []

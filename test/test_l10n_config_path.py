@@ -17,6 +17,23 @@ from fpdb_3_legacy import L10n
 MINIMAL_CONFIG = '<config><general ui_language="en"></general></config>'
 
 
+def test_get_translation_falls_back_without_gettext_install(monkeypatch) -> None:
+    """The translation accessor remains callable before gettext is installed."""
+    monkeypatch.delattr(L10n.builtins, "_", raising=False)
+
+    assert L10n.get_translation()("unchanged") == "unchanged"
+
+
+def test_get_translation_uses_gettext_installed_callable(monkeypatch) -> None:
+    """The translation accessor returns the process-wide gettext function."""
+    def translate(message: str) -> str:
+        return f"translated:{message}"
+
+    monkeypatch.setattr(L10n.builtins, "_", translate, raising=False)
+
+    assert L10n.get_translation() is translate
+
+
 def test_explicit_valid_config_path(tmp_path) -> None:
     """A valid explicit config path is used and does not raise."""
     cfg = tmp_path / "HUD_config.xml"
