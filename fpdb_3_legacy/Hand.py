@@ -60,6 +60,7 @@ class Hand:
     discardStreets: list[str]
     sb: Decimal
     bb: Decimal
+    handid_selected: int
 
     UPS = {
         "a": "A",
@@ -126,18 +127,18 @@ class Hand:
         self.gametype.setdefault("homeGame", False)
         self.gametype.setdefault("split", False)
         self.gametype.setdefault("currency", "USD")
-        self.startTime = 0
+        self.startTime: datetime.datetime | int = 0
         self.handText = handText
         self.handid = 0
-        self.in_path = None
+        self.in_path: str | None = None
         self.cancelled = False
         self.dbid_hands = 0
-        self.playerIds = None
-        self.dbid_hpid = None
+        self.playerIds: dict[str, int] = {}
+        self.dbid_hpid: Any = None
         self.dbid_gt = 0
         self.tablename = ""
         self.hero = ""
-        self.maxseats = None
+        self.maxseats: int | None = None
         self.counted_seats = 0
         self.buttonpos = 0
         self.runItTimes = 0
@@ -147,21 +148,21 @@ class Hand:
         self.cashedOut = False
         self.cashOutFees: dict[str, Decimal] = {}  # Cash out fees per player
         self.cashOutAmounts: dict[str, Decimal] = {}  # Insurance amounts per player
-        self.endTime = None
+        self.endTime: datetime.datetime | None = None
         self.pot = Pot()  # Initialize the Pot instance
         self.roundPenny = False
 
         # tourney stuff
-        self.tourNo = None
-        self.tourneyId = None
-        self.tourneyName = None
-        self.tourneyTypeId = None
-        self.buyin = None
-        self.buyinCurrency = None
-        self.buyInChips = None
-        self.fee = None  # the Database code is looking for this one .. ?
-        self.level = None
-        self.mixed = None
+        self.tourNo: Any = None
+        self.tourneyId: Any = None
+        self.tourneyName: str | None = None
+        self.tourneyTypeId: Any = None
+        self.buyin: Any = None
+        self.buyinCurrency: str | None = None
+        self.buyInChips: Any = None
+        self.fee: Any = None  # the Database code is looking for this one .. ?
+        self.level: Any = None
+        self.mixed: str | None = None
         self.speed = "Normal"
         self.isSng = False
         self.isRebuy = False
@@ -194,8 +195,8 @@ class Hand:
         self.isFlighted = False
         self.isGuarantee = False
         self.guaranteeAmt = 0
-        self.added = None
-        self.addedCurrency = None
+        self.added: Any = None
+        self.addedCurrency: str | None = None
         self.isLottery = False
         self.tourneyMultiplier = 1
         self.entryId = 1
@@ -254,9 +255,9 @@ class Hand:
 
         # Things to do with money
         self.pot = Pot()
-        self.totalpot = None
-        self.totalcollected = Decimal("0.00")
-        self.rake = None
+        self.totalpot: Decimal | None = None
+        self.totalcollected: Decimal = Decimal("0.00")
+        self.rake: Decimal | int | None = None
         self.bombPot = 0  # Bomb pot amount in cents (0 = no bomb pot)
         self.roundPenny = False
         self.fastFold = False
@@ -952,17 +953,17 @@ class Hand:
         # Descriptor must be lowercase: postgres returns lowercase, SQLite preserves case
         rows = c.fetchall()
         col_names = [col[0].lower() for col in c.description]
-        res = [dict(zip(col_names, row, strict=False)) for row in rows]
+        player_rows = [dict(zip(col_names, row, strict=False)) for row in rows]
 
         # Resolve hero name first
         hero_name = None
-        for row in res:
+        for row in player_rows:
             if row["seatno"] == heroSeat:
                 hero_name = row["name"]
                 break
-        self.hero = hero_name
+        self.hero = hero_name or ""
 
-        for row in res:
+        for row in player_rows:
             self.addPlayer(
                 row["seatno"],
                 row["name"],
@@ -1053,14 +1054,14 @@ class Hand:
         # Descriptor must be lowercase: postgres returns lowercase, SQLite preserves case
         rows = c.fetchall()
         col_names = [col[0].lower() for col in c.description]
-        res = dict(zip(col_names, rows[0], strict=False))
+        hand_info = dict(zip(col_names, rows[0], strict=False))
 
-        self.tablename = res["tablename"]
-        self.handid = res["sitehandno"]
+        self.tablename = hand_info["tablename"]
+        self.handid = hand_info["sitehandno"]
         # self.startTime currently unused in the replayer and commented out.
         # However a startTime is needed for a valid output by writeHand:
-        if isinstance(res["starttime"], datetime.datetime):
-            self.startTime = res["starttime"]
+        if isinstance(hand_info["starttime"], datetime.datetime):
+            self.startTime = hand_info["starttime"]
         else:
             # Handle string formats from different DB backends
             # SQLite default: %Y-%m-%d %H:%M:%S or %Y-%m-%d %H:%M:%S.%f
@@ -1073,7 +1074,7 @@ class Hand:
             parsed = False
             for fmt in formats:
                 try:
-                    self.startTime = datetime.datetime.strptime(res["starttime"], fmt)
+                    self.startTime = datetime.datetime.strptime(hand_info["starttime"], fmt)
                     parsed = True
                     break
                 except ValueError:
@@ -1082,7 +1083,7 @@ class Hand:
             if not parsed:
                 log.warning(
                     "Could not parse starttime: '%s', defaulting to 1970-01-01",
-                    res["starttime"],
+                    hand_info["starttime"],
                 )
                 self.startTime = datetime.datetime.strptime(
                     "1970-01-01 12:00:00",
@@ -1093,11 +1094,11 @@ class Hand:
             map(
                 Card.valueSuitFromCard,
                 [
-                    res["boardcard1"],
-                    res["boardcard2"],
-                    res["boardcard3"],
-                    res["boardcard4"],
-                    res["boardcard5"],
+                    hand_info["boardcard1"],
+                    hand_info["boardcard2"],
+                    hand_info["boardcard3"],
+                    hand_info["boardcard4"],
+                    hand_info["boardcard5"],
                 ],
             ),
         )
@@ -1108,7 +1109,7 @@ class Hand:
         if cards[4]:
             self.setCommunityCards("RIVER", [cards[4]])
 
-        if res["runittwice"] or self.gametype["split"]:
+        if hand_info["runittwice"] or self.gametype["split"]:
             # Fetch the boards first so we know how many runs there were
             # (run-it-twice and run-it-three both come through here).
             q = db.sql.query["singleHandBoards"]
@@ -1190,8 +1191,8 @@ class Hand:
         # Descriptor must be lowercase: postgres returns lowercase, SQLite preserves case
         rows = c.fetchall()
         col_names = [col[0].lower() for col in c.description]
-        res = [dict(zip(col_names, row, strict=False)) for row in rows]
-        for row in res:
+        action_rows = [dict(zip(col_names, row, strict=False)) for row in rows]
+        for row in action_rows:
             name = row["name"]
             street = row["street"]
             act = row["actionid"]
@@ -1227,9 +1228,9 @@ class Hand:
             elif act == 12:  # Discard
                 self.addDiscard(street, name, row["numdiscarded"], discards)
             elif act == 13:  # Bringin
-                self.addBringIn(name, bet)
+                getattr(self, "addBringIn")(name, bet)
             elif act == 14:  # Complete
-                self.addComplete(street, name, bet)
+                getattr(self, "addComplete")(street, name, bet)
             elif act == 15:
                 self.addBlind(name, "straddle", bet)
             elif act == 16:
@@ -1240,6 +1241,8 @@ class Hand:
                 log.warning(f"unknown action: '{act}'")
 
         self.totalPot()
+        if self.totalpot is None:
+            raise FpdbParseError("Pot calculation did not produce a total")
         self.rake = self.totalpot - self.totalcollected
 
         # Restore showdown combinations / winning cards parsed at import time
@@ -1589,6 +1592,7 @@ class Hand:
 
     def addDiscard(self, street, player, num, cards=None) -> None:
         self.checkPlayerExists(player, "addDiscard")
+        act: tuple[Any, ...]
         if cards:
             act = (player, "discards", Decimal(num), cards)
             self.discardDrawHoleCards(cards, player, street)
@@ -1814,7 +1818,10 @@ class Hand:
             # stud hands where the last bet is folded to and the site prints no
             # "Uncalled bet returned" line). Otherwise the surplus inflates the pot
             # and the hand is rejected as "rake > 25%".
-            effective_pot = self.totalpot + sum(self.pot.common.values()) + self.pot.stp
+            totalpot = self.totalpot
+            if totalpot is None:
+                raise FpdbParseError("Pot total was cleared during calculation")
+            effective_pot = totalpot + sum(self.pot.common.values()) + self.pot.stp
             diff = self.totalcollected - effective_pot
             log.debug(
                 f"Single-player leftover detected. diff={diff}, leftover={leftover_sum}",
@@ -1967,7 +1974,7 @@ class Hand:
         )
 
     def printHand(self) -> None:
-        log.debug(self.writeHand(sys.stdout))
+        self.writeHand(sys.stdout)
 
     def actionString(self, act, street=None) -> str | None:
         log.debug(f"Hand.actionString(act={act}, street={street})")
@@ -2114,7 +2121,8 @@ class Hand:
 
     def getStreetTotals(self):
         # tmp maps to street0..street4 pots plus the final pot (6 slots).
-        tmp, i = [0, 0, 0, 0, 0, 0], 0
+        tmp: list[Decimal | int] = [0, 0, 0, 0, 0, 0]
+        i = 0
         for street in self.allStreets:
             if street == "BLINDSANTES":
                 continue
@@ -2149,20 +2157,18 @@ class Hand:
         else:  # non-mixed cash games
             gs = gs + f" {self.getGameTypeAsString()} ({self.getStakesAsString()}) - "
 
-        try:
-            timestr = datetime.datetime.strftime(self.startTime, "%Y/%m/%d %H:%M:%S ET")
-        except TypeError:
-            log.exception(
+        if not isinstance(self.startTime, datetime.datetime):
+            log.error(
                 "*** ERROR - HAND: calling writeGameLine with unexpected STARTTIME value. "
                 f"Expecting datetime.date object, received: {self.startTime}",
             )
-            log.exception(
+            log.error(
                 "*** Make sure your HandHistoryConverter is setting hand.startTime properly!",
             )
             log.debug(f"*** Game String: {gs}")
             return gs
-        else:
-            return gs + timestr
+        timestr = datetime.datetime.strftime(self.startTime, "%Y/%m/%d %H:%M:%S ET")
+        return gs + timestr
 
     def writeTableLine(self):
         table_string = "Table "
@@ -2222,7 +2228,7 @@ class HoldemOmahaHand(Hand):
         # Initialize specific attributes for HoldemOmahaHand
         self.sb = gametype["sb"]
         self.bb = gametype["bb"]
-        self.committed = {}  # Initialize the committed attribute as a dictionary
+        self.committed: dict[str, Decimal] = {}
 
         if hasattr(hhc, "in_path"):
             self.in_path = hhc.in_path
@@ -3148,7 +3154,7 @@ class StudHand(Hand):
         """Function returns a string for the stud writeHand method by default
         With asList = True it returns the set cards for a player including down cards if they aren't know.
         """
-        holecards = []
+        holecards: list[str] = []
         for street in self.holeStreets:
             if player in self.holecards[street]:
                 if (self.gametype["category"] == "5_studhi" and street == "SECOND") or (
@@ -3194,18 +3200,22 @@ class StudHand(Hand):
 
 
 class Pot:
+    totalpot: Decimal
+    totalcollected: Decimal | None
+    rake: Decimal
+
     def __init__(self) -> None:
-        self.contenders = set()
-        self.committed = {}
-        self.streettotals = {}
-        self.common = {}
-        self.antes = {}
-        self.total = None
-        self.returned = {}
+        self.contenders: set[str] = set()
+        self.committed: dict[str, Decimal] = {}
+        self.streettotals: dict[str, Decimal | int] = {}
+        self.common: dict[str, Decimal] = {}
+        self.antes: dict[str, Decimal] = {}
+        self.total: Decimal | None = None
+        self.returned: dict[str, Decimal] = {}
         self.sym = "$"  # this is the default currency symbol
-        self.pots = []
+        self.pots: list[tuple[Decimal, set[str]]] = []
         self.handid = 0
-        self.stp = 0
+        self.stp: Decimal | int = 0
 
     def setSym(self, sym) -> None:
         self.sym = sym
@@ -3299,14 +3309,22 @@ class Pot:
             "1.00",
         )  # No rake applied if the total pot is below this value
 
+        if self.total is None:
+            self.total = (
+                sum(self.committed.values(), Decimal(0))
+                + sum(self.common.values(), Decimal(0))
+                + Decimal(self.stp)
+            )
+        total = self.total
+
         # Calculate the rake on the main pot
-        if self.total < minimum_pot_for_rake:
+        if total < minimum_pot_for_rake:
             self.rake = Decimal("0.00")
             log.debug(
                 "Total pot below the minimum threshold for rake. No rake applied.",
             )
         else:
-            self.rake = min(self.total * rake_percentage, max_rake)
+            self.rake = min(total * rake_percentage, max_rake)
             log.debug(f"Rake calculated: {self.rake:.2f}")
 
         # Apply the rake to the main pot only
@@ -3315,7 +3333,7 @@ class Pot:
             if len(participants) > 1:  # Apply rake only if the pot is contested
                 log.debug(f"Main pot before rake deduction: {main_pot:.2f}")
                 self.pots[0] = (main_pot - self.rake, participants)
-                self.total -= self.rake
+                self.total = total - self.rake
                 log.debug(f"Main pot after rake deduction: {self.pots[0][0]:.2f}")
             else:
                 log.debug("Main pot is uncontested. No rake applied.")
@@ -3367,6 +3385,7 @@ def hand_factory(hand_id, config, db_connection):
 
     log.debug(f"gameinfo {gameinfo} for hand {hand_id}")
 
+    hand_instance: Hand
     if gameinfo["base"] == "hold":
         hand_instance = HoldemOmahaHand(
             config=config,

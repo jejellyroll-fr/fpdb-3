@@ -24,6 +24,7 @@ if sys.platform.startswith("linux") and os.getenv("FPDB_FORCE_X11") == "1":
 import time
 from collections.abc import Callable
 from dataclasses import dataclass
+from optparse import Values
 from pathlib import Path
 from typing import Any
 
@@ -163,7 +164,7 @@ class HudMainWindow(QWidget):
 class HudMain(QObject):
     """A main() object to own both the socket thread and the gui."""
 
-    def __init__(self, options: "Options.Values", db_name: str = "fpdb") -> None:
+    def __init__(self, options: Values, db_name: str = "fpdb") -> None:
         """Initialize the main HUD application."""
         self.options = options
         QObject.__init__(self)

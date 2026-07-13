@@ -322,7 +322,7 @@ HandHistoryConverter: '{sitename}'
         else:
             gametype = self.determineGameType(handText)
 
-        hand = None
+        hand: Hand.Hand | None = None
         game_details = None
 
         if gametype is None:
