@@ -69,6 +69,7 @@ jobs:
           fpdb_3_legacy/RegressionFileComparator.py
           fpdb_3_legacy/PopupThemes.py
           fpdb_3_legacy/ThemeManager.py
+          fpdb_3_legacy/ThemeCreatorDialog.py
           fpdb_3_legacy/DetectInstalledSites.py
           fpdb_3_legacy/Card.py
           fpdb_3_legacy/Hand.py
