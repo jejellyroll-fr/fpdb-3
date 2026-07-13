@@ -15,8 +15,8 @@ class HandDataReporter:
 
     def __init__(self, report_level: str = "detailed") -> None:
         self.report_level = report_level
-        self.files_stats = {}
-        self.session_stats = {
+        self.files_stats: dict[str, dict[str, Any]] = {}
+        self.session_stats: dict[str, Any] = {
             "total_files": 0,
             "total_hands": 0,
             "successful_hands": 0,
@@ -142,7 +142,7 @@ class HandDataReporter:
         if not hand_obj:
             return {"status": "no_hand_object", "reason": "Hand object was not created (early parsing failure)"}
 
-        analysis = {
+        analysis: dict[str, Any] = {
             "status": "hand_object_available",
             "basic_info": {},
             "parsed_elements": {},
@@ -210,7 +210,7 @@ class HandDataReporter:
 
     def _analyze_object_structure(self, obj: Any, max_depth: int = 2) -> dict[str, Any]:
         """Analyze the complete structure of an object for debugging."""
-        analysis = {}
+        analysis: dict[str, Any] = {}
 
         if max_depth <= 0:
             return {"type": str(type(obj)), "value": str(obj)[:100]}
@@ -223,7 +223,7 @@ class HandDataReporter:
                     try:
                         attr_value = getattr(obj, attr_name)
                         if attr_value is not None:
-                            attr_info = {
+                            attr_info: dict[str, Any] = {
                                 "type": str(type(attr_value)),
                                 "value": str(attr_value)[:200]
                                 if not isinstance(attr_value, (dict, list))
@@ -407,7 +407,7 @@ class HandDataReporter:
 
                         # Stud structure: {'THIRD': {'Hero': [['2s', '4c', '7h'], []], ...}}
                         else:
-                            all_cards = []
+                            all_cards: list[str] = []
                             stud_streets = ["THIRD", "FOURTH", "FIFTH", "SIXTH", "SEVENTH"]
                             for street in stud_streets:
                                 if street in hand_obj.holecards:

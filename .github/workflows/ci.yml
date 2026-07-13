@@ -24,6 +24,7 @@ jobs:
           mypy
           fpdb_3_legacy/equity.py
           fpdb_3_legacy/fpdb_api.py
+          fpdb_3_legacy/HandDataReporter.py
           fpdb_3_legacy/dialects.py
           fpdb_3_legacy/pt4_adapter
           fpdb_3_legacy/http_capture_models.py
