@@ -49,24 +49,22 @@ class Everest(HandHistoryConverter):
     re_TailSplitHands = re.compile(r"(</game>)")
     re_GameInfo = re.compile(
         """<SESSION\\stime="\\d+"\\s
-                                    tableName="(?P<TABLE>[%(TAB)s]+)"\\s
+                                    tableName="(?P<TABLE>[{TAB}]+)"\\s
                                     id="(?P<ID>[\\d\\.]+)"\\s
                                     type="(?P<TYPE>[a-zA-Z ]+)"\\s
-                                    money="(?P<CURRENCY>[%(LS)s])?"\\s
+                                    money="(?P<CURRENCY>[{LS}])?"\\s
                                     screenName=".+"\\s
                                     game="(?P<GAME>hold\\-em|omaha\\-hi)"\\s
                                     gametype="(?P<LIMIT>[-a-zA-Z ]+)"/>
-                                """
-        % substitutions,
+                                """.format(**substitutions),
         re.VERBOSE | re.MULTILINE,
     )
     re_HandInfo = re.compile(
         """time="(?P<DATETIME>[0-9]+)"\\s
                                  id="(?P<HID>[0-9]+)"\\s
                                  index="\\d+?"\\s
-                                 blinds="([%(LS)s]?(?P<SB>[%(NUM)s]+)\\s?[%(LS)s]?/[%(LS)s]?(?P<BB>[%(NUM)s]+)\\s?[%(LS)s]?)"
-                                """
-        % substitutions,
+                                 blinds="([{LS}]?(?P<SB>[{NUM}]+)\\s?[{LS}]?/[{LS}]?(?P<BB>[{NUM}]+)\\s?[{LS}]?)"
+                                """.format(**substitutions),
         re.VERBOSE | re.MULTILINE,
     )
     re_Button = re.compile(r'<DEALER position="(?P<BUTTON>[0-9]+)"\/>')

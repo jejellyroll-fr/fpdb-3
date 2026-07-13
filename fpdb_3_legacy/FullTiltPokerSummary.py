@@ -125,46 +125,44 @@ class FullTiltPokerSummary(TourneySummary):
                         (\\s+)?(\\sMatch\\s(?P<MATCHNO>\\d)\\s)?
                         (?P<GAME>Hold\'em|Irish|Courchevel\\sHi|Razz|RAZZ|5(-|\\s)Card\\sStud(\\sHi)?|7\\sCard\\sStud|7\\sCard\\sStud\\sHi/Lo|Stud\\sH/L|Stud\\sHi|Omaha|((5|6)\\sCard\\s)?Omaha\\sHi|Omaha\\sHi/Lo|Omaha\\sH/L|2\\-7\\sSingle\\sDraw|Badugi|Triple\\sDraw\\s2\\-7\\sLowball|2\\-7\\sTriple\\sDraw|5\\sCard\\sDraw|A-5\\sTriple\\sDraw|\\d+\\-Game(\\sMixed)?|HORSE|HA|HEROS|HO|HOE|HORSE|HOSE|OA|OE|SE)\\s+
                         ((?P<LIMIT>No\\sLimit|Limit|LIMIT|Pot\\sLimit)\\s+)?(\\((?P<TABLEATTRIBUTES>.+)\\)\\s+)?
-                        (Buy-In:\\s[%(LS)s]?(?P<BUYIN>[%(NUM)s]+)(\\sFTP|\\sT\\$|\\sPlay\\sChips)?(\\s\\+\\s[%(LS)s]?(?P<FEE>[%(NUM)s]+)(\\sFTP|\\sT\\$|\\sPlay\\sChips)?)?\\s+)?
-                        (Knockout\\sBounty:\\s[%(LS)s](?P<KOBOUNTY>[%(NUM)s]+)\\s+)?
-                        ((?P<PNAMEBOUNTIES>(.{2,15}|\\d+))\\sreceived\\s(?P<PBOUNTIES>(%%)?\\d+)\\sKnockout\\sBounty\\sAwards?\\s+)?
-                        (Add-On:\\s[%(LS)s]?(?P<ADDON>[%(NUM)s]+)(\\sFTP|\\sT\\$|\\sPlay\\sChips)?\\s+)?
-                        (Rebuy:\\s[%(LS)s]?(?P<REBUYAMT>[%(NUM)s]+)(\\sFTP|\\sT\\$|\\sPlay\\sChips)?\\s+)?
-                        ((?P<P1NAME>.{2,15})\\sperformed\\s(?P<PADDONS>\\d+)\\sAdd-Ons?\\s+)?
-                        ((?P<P2NAME>.{2,15})\\sperformed\\s(?P<PREBUYS>\\d+)\\sRebuys?\\s+)?
+                        (Buy-In:\\s[{LS}]?(?P<BUYIN>[{NUM}]+)(\\sFTP|\\sT\\$|\\sPlay\\sChips)?(\\s\\+\\s[{LS}]?(?P<FEE>[{NUM}]+)(\\sFTP|\\sT\\$|\\sPlay\\sChips)?)?\\s+)?
+                        (Knockout\\sBounty:\\s[{LS}](?P<KOBOUNTY>[{NUM}]+)\\s+)?
+                        ((?P<PNAMEBOUNTIES>(.{{2,15}}|\\d+))\\sreceived\\s(?P<PBOUNTIES>(%)?\\d+)\\sKnockout\\sBounty\\sAwards?\\s+)?
+                        (Add-On:\\s[{LS}]?(?P<ADDON>[{NUM}]+)(\\sFTP|\\sT\\$|\\sPlay\\sChips)?\\s+)?
+                        (Rebuy:\\s[{LS}]?(?P<REBUYAMT>[{NUM}]+)(\\sFTP|\\sT\\$|\\sPlay\\sChips)?\\s+)?
+                        ((?P<P1NAME>.{{2,15}})\\sperformed\\s(?P<PADDONS>\\d+)\\sAdd-Ons?\\s+)?
+                        ((?P<P2NAME>.{{2,15}})\\sperformed\\s(?P<PREBUYS>\\d+)\\sRebuys?\\s+)?
                         (Buy-In\\sChips:\\s(?P<CHIPS>\\d+)\\s+)?
                         (Add-On\\sChips:\\s(?P<ADDONCHIPS>\\d+)\\s+)?
                         (Rebuy\\sChips:\\s(?P<REBUYCHIPS>\\d+)\\s+)?
-                        (Cashout\\svalue\\sof\\s\\d+\\schips:\\s[%(LS)s]?\\d+(\\sFTP|\\sT\\$|\\sPlay\\sChips)?\\s+)?
+                        (Cashout\\svalue\\sof\\s\\d+\\schips:\\s[{LS}]?\\d+(\\sFTP|\\sT\\$|\\sPlay\\sChips)?\\s+)?
                         (?P<ENTRIES>[0-9]+)\\sEntries\\s+
                         (Total\\sAdd-Ons:\\s(?P<ADDONS>\\d+)\\s+)?
                         (Total\\sRebuys:\\s(?P<REBUYS>\\d+)\\s*)?
-                        (Total\\sPrize\\sPool:\\s[%(LS)s]?(?P<PRIZEPOOL>[%(NUM)s]+)(\\sFTP|\\sT\\$|\\sPlay\\sChips)?\\s+)?
-                        (Total\\sCashout\\sPool:\\s[%(LS)s]?(?P<TOTALCASHOUT>[%(NUM)s]+)(\\sFTP|\\sT\\$|\\sPlay\\sChips)?\\s+)?
-                        (Current\\sCashout\\sPool:\\s[%(LS)s]?(?P<CURRENTCASHOUT>[%(NUM)s]+)(\\sFTP|\\sT\\$|\\sPlay\\sChips)?\\s+)?
+                        (Total\\sPrize\\sPool:\\s[{LS}]?(?P<PRIZEPOOL>[{NUM}]+)(\\sFTP|\\sT\\$|\\sPlay\\sChips)?\\s+)?
+                        (Total\\sCashout\\sPool:\\s[{LS}]?(?P<TOTALCASHOUT>[{NUM}]+)(\\sFTP|\\sT\\$|\\sPlay\\sChips)?\\s+)?
+                        (Current\\sCashout\\sPool:\\s[{LS}]?(?P<CURRENTCASHOUT>[{NUM}]+)(\\sFTP|\\sT\\$|\\sPlay\\sChips)?\\s+)?
                         (?P<SATELLITE>Top\\s(\\d+\\s)?finishers?\\sreceives?\\s.+\\s+)?
                         (Target\\sTournament\\s.+\\s+)?
-                        Tournament\\sstarted:\\s(?P<DATETIME>((?P<Y>[\\d]{4})\\/(?P<M>[\\d]{2})\\/(?P<D>[\\d]+)\\s+(?P<H>[\\d]+):(?P<MIN>[\\d]+):(?P<S>[\\d]+)\\s?(?P<TZ>[A-Z]+)\\s|\\w+,\\s(?P<MONTH>\\w+)\\s(?P<DAY>\\d+),\\s(?P<YEAR>[\\d]{4})\\s(?P<HOUR>\\d+):(?P<MIN2>\\d+)))
-                               """
-        % substitutions,
+                        Tournament\\sstarted:\\s(?P<DATETIME>((?P<Y>[\\d]{{4}})\\/(?P<M>[\\d]{{2}})\\/(?P<D>[\\d]+)\\s+(?P<H>[\\d]+):(?P<MIN>[\\d]+):(?P<S>[\\d]+)\\s?(?P<TZ>[A-Z]+)\\s|\\w+,\\s(?P<MONTH>\\w+)\\s(?P<DAY>\\d+),\\s(?P<YEAR>[\\d]{{4}})\\s(?P<HOUR>\\d+):(?P<MIN2>\\d+)))
+                               """.format(**substitutions),
         re.VERBOSE | re.MULTILINE | re.DOTALL,
     )
 
     re_TourneyExtraInfo = re.compile(
         """(((?P<SPEED1>(Turbo|Super\\sTurbo|Escalator))\\s?)?
-                                         ((?P<CURRENCY>[%(LS)s])?(?P<BUYINGUAR>[%(NUM)s]+)?(\\s*\\+\\s*[%(LS)s]?(?P<FEE>[%(NUM)s]+))?\\s?)?
+                                         ((?P<CURRENCY>[{LS}])?(?P<BUYINGUAR>[{NUM}]+)?(\\s*\\+\\s*[{LS}]?(?P<FEE>[{NUM}]+))?\\s?)?
                                          ((?P<SPEED2>(Turbo|Super\\sTurbo|Escalator))\\s?)?
                                          ((?P<SPECIAL>(Play\\sMoney|Freeroll|KO|Knockout|Heads\\sUp|Heads\\-Up|Head\'s\\sUp|Matrix|Rebuy|Madness|Rush))\\s?)?
                                          ((?P<SHOOTOUT>Shootout)\\s?)?
                                          ((?P<SNG>Sit\\s&\\sGo)\\s?)?
                                          ((?P<STEP>Step\\s(?P<STEPNO>\\d))\\s?)?
                                          ((?P<GUARANTEE>Guar(antee)?))?)
-                                    """
-        % substitutions,
+                                    """.format(**substitutions),
         re.MULTILINE | re.VERBOSE,
     )
 
-    re_Currency = re.compile("""(?P<CURRENCY>[%(LS)s]|FPP|FTP|T\\$|Play\\sChips)""" % substitutions)
+    re_Currency = re.compile("""(?P<CURRENCY>[{LS}]|FPP|FTP|T\\$|Play\\sChips)""".format(**substitutions))
     re_Max = re.compile("((?P<MAX>\\d+)\\sHanded)|(?P<HU>Heads\\sUp)", re.MULTILINE)
     re_Stack = re.compile("((?P<STACK>(Deep|Super))\\sStack)", re.MULTILINE)
     re_NewToGame = re.compile("(?P<NEWTOGAME>New\\sto\\sthe\\sGame)", re.MULTILINE)
@@ -172,8 +170,7 @@ class FullTiltPokerSummary(TourneySummary):
     re_Multi = re.compile("(?P<MULTI>(Multi-Entry|Re-Entry))", re.MULTILINE)
     re_Chance = re.compile("((?P<CHANCE>\\d)x\\sChance)", re.MULTILINE)
     re_Player = re.compile(
-        """(?P<RANK>[\\d]+):\\s(?P<NAME>[^,\r\n]{2,15})(,\\s(?P<CURRENCY>[%(LS)s])?(?P<WINNINGS>[%(NUM)s]+)(\\s(?P<CURRENCY1>FTP|T\\$|Play\\sChips))?)?(,\\s(?P<TICKET>Step\\s(?P<LEVEL>\\d)\\sTicket))?"""
-        % substitutions
+        """(?P<RANK>[\\d]+):\\s(?P<NAME>[^,\r\n]{{2,15}})(,\\s(?P<CURRENCY>[{LS}])?(?P<WINNINGS>[{NUM}]+)(\\s(?P<CURRENCY1>FTP|T\\$|Play\\sChips))?)?(,\\s(?P<TICKET>Step\\s(?P<LEVEL>\\d)\\sTicket))?""".format(**substitutions)
     )
     re_Finished = re.compile("""(?P<NAME>[^,\r\n]{2,15}) finished in (?P<RANK>[\\d]+)\\S\\S place""")
     # 19-Aug-2013 15:32
@@ -186,11 +183,10 @@ class FullTiltPokerSummary(TourneySummary):
         re.VERBOSE | re.MULTILINE | re.DOTALL,
     )
     re_BuyInXLS = re.compile(
-        "(?P<CURRENCY1>[%(LS)s])?(?P<BUYIN>[%(NUM)s]+)(\\s(?P<CURRENCY2>(FTP|T\\$|Play\\sChips)))?(\\s\\+\\s[%(LS)s]?(?P<FEE>[%(NUM)s]+)(\\sFTP|\\sT\\$|\\sPlay\\sChips)?)?"
-        % substitutions
+        "(?P<CURRENCY1>[{LS}])?(?P<BUYIN>[{NUM}]+)(\\s(?P<CURRENCY2>(FTP|T\\$|Play\\sChips)))?(\\s\\+\\s[{LS}]?(?P<FEE>[{NUM}]+)(\\sFTP|\\sT\\$|\\sPlay\\sChips)?)?".format(**substitutions)
     )
     re_WinningsXLS = re.compile(
-        "(?P<CURRENCY1>[%(LS)s])?(?P<WINNINGS>[%(NUM)s]+)(\\s?(?P<CURRENCY2>(FTP|T\\$|Play\\sChips)))?" % substitutions
+        "(?P<CURRENCY1>[{LS}])?(?P<WINNINGS>[{NUM}]+)(\\s?(?P<CURRENCY2>(FTP|T\\$|Play\\sChips)))?".format(**substitutions)
     )
 
     # utf-16 last: without a BOM it mis-decodes even-length ASCII/utf-8 summaries
@@ -232,7 +228,7 @@ class FullTiltPokerSummary(TourneySummary):
             datetimestr = "2000/01/01 12:00:00"  # default used if time not found
             for a in m1:
                 month = self.months[a.group("M")]
-                datetimestr = "%s/%s/%s %s:%s:%s" % (
+                datetimestr = "{}/{}/{} {}:{}:{}".format(
                     a.group("Y"),
                     month,
                     a.group("D"),
@@ -249,7 +245,7 @@ class FullTiltPokerSummary(TourneySummary):
             datetimestr = "2000/01/01 12:00:00"  # default used if time not found
             for a in m2:
                 month = self.months[a.group("M")]
-                datetimestr = "%s/%s/%s %s:%s:%s" % (
+                datetimestr = "{}/{}/{} {}:{}:{}".format(
                     a.group("Y"),
                     month,
                     a.group("D"),
@@ -443,10 +439,10 @@ class FullTiltPokerSummary(TourneySummary):
 
         datetimestr = ""
         if mg["YEAR"] is None:
-            datetimestr = "%s/%s/%s %s:%s:%s" % (mg["Y"], mg["M"], mg["D"], mg["H"], mg["MIN"], mg["S"])
+            datetimestr = "{}/{}/{} {}:{}:{}".format(mg["Y"], mg["M"], mg["D"], mg["H"], mg["MIN"], mg["S"])
             self.startTime = datetime.datetime.strptime(datetimestr, "%Y/%m/%d %H:%M:%S")
         else:
-            datetimestr = "%s/%s/%s %s:%s" % (mg["YEAR"], mg["MONTH"], mg["DAY"], mg["HOUR"], mg["MIN2"])
+            datetimestr = "{}/{}/{} {}:{}".format(mg["YEAR"], mg["MONTH"], mg["DAY"], mg["HOUR"], mg["MIN2"])
             self.startTime = datetime.datetime.strptime(datetimestr, "%Y/%B/%d %H:%M")
 
         if "TZ" in mg and mg["TZ"] is not None:

@@ -180,13 +180,12 @@ class Fulltilt(HandHistoryConverter):
         """\\#(?P<HID>[0-9]+):\\s
                                     (?:(?P<TOURNAMENT>.+)\\s\\((?P<TOURNO>\\d+)\\),\\s)?
                                     .+?
-                                    \\s-\\s(?P<STAKES1>(?P<CURRENCY1>[%(LS)s]|)?(?P<SB1>[%(NUM)s]+)/[%(LS)s]?(?P<BB1>[%(NUM)s]+)\\s(Ante\\s\\$?(?P<ANTE1>[%(NUM)s]+)\\s)?-\\s)?
-                                    (?P<CAP>([%(LS)s]?[%(NUM)s]+\\s)?(Cap\\s|CAP\\s)?)
+                                    \\s-\\s(?P<STAKES1>(?P<CURRENCY1>[{LS}]|)?(?P<SB1>[{NUM}]+)/[{LS}]?(?P<BB1>[{NUM}]+)\\s(Ante\\s\\$?(?P<ANTE1>[{NUM}]+)\\s)?-\\s)?
+                                    (?P<CAP>([{LS}]?[{NUM}]+\\s)?(Cap\\s|CAP\\s)?)
                                     (?P<LIMIT>(No\\sLimit|Pot\\sLimit|Limit|NL|PL|FL))\\s
                                     (?P<GAME>(Hold\'em|((5|6)\\sCard\\s)?Omaha(\\sH/L|\\sHi/Lo|\\sHi|)|Irish|Courchevel\\sHi|5(-|\\s)Card\\sStud(\\sHi)?|7\\sCard\\sStud|7\\sCard\\sStud|Stud\\sH/L|Razz|Stud\\sHi|2-7\\sTriple\\sDraw|5\\sCard\\sDraw|Badugi|2-7\\sSingle\\sDraw|A-5\\sTriple\\sDraw))\\s
-                                    (?P<STAKES2>-\\s(?P<CURRENCY2>[%(LS)s]|)?(?P<SB2>[%(NUM)s]+)/[%(LS)s]?(?P<BB2>[%(NUM)s]+)\\s(Ante\\s\\$?(?P<ANTE2>[%(NUM)s]+)\\s)?)?-\\s
-                                 """
-        % substitutions,
+                                    (?P<STAKES2>-\\s(?P<CURRENCY2>[{LS}]|)?(?P<SB2>[{NUM}]+)/[{LS}]?(?P<BB2>[{NUM}]+)\\s(Ante\\s\\$?(?P<ANTE2>[{NUM}]+)\\s)?)?-\\s
+                                 """.format(**substitutions),
         re.VERBOSE,
     )
     re_Identify = re.compile("FullTiltPoker|Full\\sTilt\\sPoker\\sGame\\s#\\d+:")
@@ -205,34 +204,31 @@ class Fulltilt(HandHistoryConverter):
                                     (?P<TABLE>.+?)(\\s|,)
                                     (?P<ENTRYID>\\sEntry\\s\\#\\d+\\s)?)
                                     (\\((?P<TABLEATTRIBUTES>.+)\\)\\s)?-\\s
-                                    (?P<STAKES1>[%(LS)s]?(?P<SB1>[%(NUM)s]+)/[%(LS)s]?(?P<BB1>[%(NUM)s]+)\\s(Ante\\s[%(LS)s]?(?P<ANTE1>[%(NUM)s]+)\\s)?-\\s)?
-                                    (?P<CAP>([%(LS)s]?[%(NUM)s]+\\s)?(Cap\\s|CAP\\s)?)
+                                    (?P<STAKES1>[{LS}]?(?P<SB1>[{NUM}]+)/[{LS}]?(?P<BB1>[{NUM}]+)\\s(Ante\\s[{LS}]?(?P<ANTE1>[{NUM}]+)\\s)?-\\s)?
+                                    (?P<CAP>([{LS}]?[{NUM}]+\\s)?(Cap\\s|CAP\\s)?)
                                     (?P<GAMETYPE>[-\\da-zA-Z\\/\'\\s]+)\\s
-                                    (?P<STAKES2>-\\s[%(LS)s]?(?P<SB2>[%(NUM)s]+)/[%(LS)s]?(?P<BB2>[%(NUM)s]+)\\s(Ante\\s[%(LS)s]?(?P<ANTE2>[%(NUM)s]+)\\s)?)?-\\s
+                                    (?P<STAKES2>-\\s[{LS}]?(?P<SB2>[{NUM}]+)/[{LS}]?(?P<BB2>[{NUM}]+)\\s(Ante\\s[{LS}]?(?P<ANTE2>[{NUM}]+)\\s)?)?-\\s
                                     (?P<DATETIME>.+$)
                                     (?P<PARTIAL>\\(partial\\))?\\s
-                                 """
-        % substitutions,
+                                 """.format(**substitutions),
         re.MULTILINE | re.VERBOSE,
     )
     re_Cancelled = re.compile("Hand\\s\\#[0-9]+\\shas\\sbeen\\scanceled?")
     re_TourneyExtraInfo = re.compile(
         """(((?P<SPEED1>(Turbo|Super\\sTurbo|Escalator))\\s?)?
-                                         ((?P<CURRENCY>[%(LS)s])?(?P<BUYINGUAR>[%(NUM)s]+)?(\\s*\\+\\s*[%(LS)s]?(?P<FEE>[%(NUM)s]+))?\\s?)?
+                                         ((?P<CURRENCY>[{LS}])?(?P<BUYINGUAR>[{NUM}]+)?(\\s*\\+\\s*[{LS}]?(?P<FEE>[{NUM}]+))?\\s?)?
                                          ((?P<SPEED2>(Turbo|Super\\sTurbo|Escalator))\\s?)?
                                          ((?P<SPECIAL>(Play\\sMoney|Freeroll|KO|Knockout|Heads\\sUp|Heads\\-Up|Head\'s\\sUp|Matrix|Rebuy|Madness|Rush))\\s?)?
                                          ((?P<SHOOTOUT>Shootout)\\s?)?
                                          ((?P<SNG>Sit\\s&\\sGo)\\s?)?
                                          ((?P<STEP>Step\\s(?P<STEPNO>\\d))\\s?)?
                                          ((?P<GUARANTEE>Guar(antee)?))?)
-                                    """
-        % substitutions,
+                                    """.format(**substitutions),
         re.MULTILINE | re.VERBOSE,
     )
     re_Button = re.compile("^The button is in seat #(?P<BUTTON>\\d+)", re.MULTILINE)
     re_PlayerInfo = re.compile(
-        "Seat (?P<SEAT>[0-9]+): (?P<PNAME>.{2,15}) \\([%(LS)s]?(?P<CASH>[%(NUM)s]+)\\)(?P<SITOUT>, is sitting out)?$"
-        % substitutions,
+        "Seat (?P<SEAT>[0-9]+): (?P<PNAME>.{{2,15}}) \\([{LS}]?(?P<CASH>[{NUM}]+)\\)(?P<SITOUT>, is sitting out)?$".format(**substitutions),
         re.MULTILINE,
     )
     re_SummarySitout = re.compile(
@@ -262,56 +258,51 @@ class Fulltilt(HandHistoryConverter):
 
             # log.debug("player_re: " + player_re)
             self.re_PostSB = re.compile(
-                r"^%(PLAYERS)s posts the small blind of [%(LS)s]?(?P<SB>[%(NUM)s]+)" % self.substitutions, re.MULTILINE
+                r"^{PLAYERS} posts the small blind of [{LS}]?(?P<SB>[{NUM}]+)".format(**self.substitutions), re.MULTILINE
             )
             self.re_PostDead = re.compile(
-                r"^%(PLAYERS)s posts a dead small blind of [%(LS)s]?(?P<SB>[%(NUM)s]+)" % self.substitutions,
+                r"^{PLAYERS} posts a dead small blind of [{LS}]?(?P<SB>[{NUM}]+)".format(**self.substitutions),
                 re.MULTILINE,
             )
             self.re_PostBB = re.compile(
-                r"^%(PLAYERS)s posts (the big blind of )?[%(LS)s]?(?P<BB>[%(NUM)s]+)" % self.substitutions, re.MULTILINE
+                r"^{PLAYERS} posts (the big blind of )?[{LS}]?(?P<BB>[{NUM}]+)".format(**self.substitutions), re.MULTILINE
             )
             self.re_Antes = re.compile(
-                r"^%(PLAYERS)s antes [%(LS)s]?(?P<ANTE>[%(NUM)s]+)" % self.substitutions, re.MULTILINE
+                r"^{PLAYERS} antes [{LS}]?(?P<ANTE>[{NUM}]+)".format(**self.substitutions), re.MULTILINE
             )
             self.re_ReturnsAnte = re.compile(
-                r"^Ante of [%(LS)s]?[%(NUM)s]+ returned to %(PLAYERS)s" % self.substitutions, re.MULTILINE
+                r"^Ante of [{LS}]?[{NUM}]+ returned to {PLAYERS}".format(**self.substitutions), re.MULTILINE
             )
             self.re_BringIn = re.compile(
-                r"^%(PLAYERS)s brings in for [%(LS)s]?(?P<BRINGIN>[%(NUM)s]+)" % self.substitutions, re.MULTILINE
+                r"^{PLAYERS} brings in for [{LS}]?(?P<BRINGIN>[{NUM}]+)".format(**self.substitutions), re.MULTILINE
             )
             self.re_PostBoth = re.compile(
-                r"^%(PLAYERS)s posts small \& big blinds \[[%(LS)s]? (?P<SBBB>[%(NUM)s]+)" % self.substitutions,
+                r"^{PLAYERS} posts small \& big blinds \[[{LS}]? (?P<SBBB>[{NUM}]+)".format(**self.substitutions),
                 re.MULTILINE,
             )
             self.re_HeroCards = re.compile(
-                r"^Dealt to %s(?: \[(?P<OLDCARDS>.+?)\])?( \[(?P<NEWCARDS>.+?)\])" % player_re, re.MULTILINE
+                r"^Dealt to {}(?: \[(?P<OLDCARDS>.+?)\])?( \[(?P<NEWCARDS>.+?)\])".format(player_re), re.MULTILINE
             )
             self.re_Action = re.compile(
-                r"^%(PLAYERS)s(?P<ATYPE> bets| checks| raises to| completes it to| calls| folds| discards| stands pat)( [%(LS)s]?(?P<BET>[%(NUM)s]+))?( on| cards?)?( \[(?P<CARDS>.+?)\])?"
-                % self.substitutions,
+                r"^{PLAYERS}(?P<ATYPE> bets| checks| raises to| completes it to| calls| folds| discards| stands pat)( [{LS}]?(?P<BET>[{NUM}]+))?( on| cards?)?( \[(?P<CARDS>.+?)\])?".format(**self.substitutions),
                 re.MULTILINE,
             )
-            self.re_ShowdownAction = re.compile(r"^%s shows \[(?P<CARDS>.*)\]" % player_re, re.MULTILINE)
+            self.re_ShowdownAction = re.compile(r"^{} shows \[(?P<CARDS>.*)\]".format(player_re), re.MULTILINE)
             self.re_CollectPot = re.compile(
-                r"^Seat (?P<SEAT>[0-9]+): %(PLAYERS)s (\(button\) |\(small blind\) |\(big blind\) )?(collected|showed \[.*\] and won) \([%(LS)s]?(?P<POT>[%(NUM)s]+)\)(, mucked| with.*)?"
-                % self.substitutions,
+                r"^Seat (?P<SEAT>[0-9]+): {PLAYERS} (\(button\) |\(small blind\) |\(big blind\) )?(collected|showed \[.*\] and won) \([{LS}]?(?P<POT>[{NUM}]+)\)(, mucked| with.*)?".format(**self.substitutions),
                 re.MULTILINE,
             )
             self.re_CollectPot2 = re.compile(
-                r"^%(PLAYERS)s (ties for|wins) (the (main |side )?pot|pot (1|2)) \([%(LS)s]?(?P<POT>[%(NUM)s]+)\)"
-                % self.substitutions,
+                r"^{PLAYERS} (ties for|wins) (the (main |side )?pot|pot (1|2)) \([{LS}]?(?P<POT>[{NUM}]+)\)".format(**self.substitutions),
                 re.MULTILINE,
             )
             self.re_CollectSidePot = re.compile(
-                r"^Seat (?P<SEAT>[0-9]+): %(PLAYERS)s \s?(ties for|wins) (the (main |side )?pot|pot (1|2)) \([%(LS)s]?(?P<POT>[%(NUM)s]+)\)"
-                % self.substitutions,
+                r"^Seat (?P<SEAT>[0-9]+): {PLAYERS} \s?(ties for|wins) (the (main |side )?pot|pot (1|2)) \([{LS}]?(?P<POT>[{NUM}]+)\)".format(**self.substitutions),
                 re.MULTILINE,
             )
-            self.re_SitsOut = re.compile(r"^%s sits out" % player_re, re.MULTILINE)
+            self.re_SitsOut = re.compile(r"^{} sits out".format(player_re), re.MULTILINE)
             self.re_ShownCards = re.compile(
-                r"^Seat (?P<SEAT>[0-9]+): %s (\(button\) |\(small blind\) |\(big blind\) )?(?P<SHOWED>showed|mucked) \[(?P<CARDS>.*)\](( and won \(.*\) with | and lost with | \- )(?P<STRING>.*))?"
-                % player_re,
+                r"^Seat (?P<SEAT>[0-9]+): {} (\(button\) |\(small blind\) |\(big blind\) )?(?P<SHOWED>showed|mucked) \[(?P<CARDS>.*)\](( and won \(.*\) with | and lost with | \- )(?P<STRING>.*))?".format(player_re),
                 re.MULTILINE,
             )
 
@@ -393,13 +384,13 @@ class Fulltilt(HandHistoryConverter):
         else:
             stakesId = "2"
 
-        if "SB%s" % stakesId in mg:
-            info["sb"] = self.clearMoneyString(mg["SB%s" % stakesId])
-        if "BB%s" % stakesId in mg:
-            info["bb"] = self.clearMoneyString(mg["BB%s" % stakesId])
+        if "SB{}".format(stakesId) in mg:
+            info["sb"] = self.clearMoneyString(mg["SB{}".format(stakesId)])
+        if "BB{}".format(stakesId) in mg:
+            info["bb"] = self.clearMoneyString(mg["BB{}".format(stakesId)])
 
-        if mg["CURRENCY%s" % stakesId] is not None:
-            info["currency"] = currencies[mg["CURRENCY%s" % stakesId]]
+        if mg["CURRENCY{}".format(stakesId)] is not None:
+            info["currency"] = currencies[mg["CURRENCY{}".format(stakesId)]]
 
         if mg["TOURNO"] is None:
             info["type"] = "ring"
@@ -414,7 +405,7 @@ class Fulltilt(HandHistoryConverter):
         if m:
             info["mix"] = mixes[m.groupdict()["MIXED"]]
 
-        if not mg["CURRENCY%s" % stakesId] and info["type"] == "ring":
+        if not mg["CURRENCY{}".format(stakesId)] and info["type"] == "ring":
             info["currency"] = "play"
 
         if info["limitType"] == "fl" and info["bb"] is not None:
@@ -459,7 +450,7 @@ class Fulltilt(HandHistoryConverter):
             dateformat = "%Y/%m/%d %H:%M:%S"
             for a in m1:
                 if a.group("TZ2") is None:
-                    datetimestr = "%s/%s/%s %s:%s:%s" % (
+                    datetimestr = "{}/{}/{} {}:{}:{}".format(
                         a.group("Y"),
                         a.group("M"),
                         a.group("D"),
@@ -469,7 +460,7 @@ class Fulltilt(HandHistoryConverter):
                     )
                     timezone = a.group("TZ")
                 else:  # Short-lived date format
-                    datetimestr = "%s/%s/%s %s:%s" % (
+                    datetimestr = "{}/{}/{} {}:{}".format(
                         a.group("Y2"),
                         a.group("M2"),
                         a.group("D2"),
@@ -874,10 +865,9 @@ class Fulltilt(HandHistoryConverter):
         else:
             regex = re.escape(str(table_name))
         log.info(
-            "Fulltilt.getTableTitleRe: table_name='%s' tournament='%s' table_number='%s'"
-            % (table_name, tournament, table_number)
+            "Fulltilt.getTableTitleRe: table_name='{}' tournament='{}' table_number='{}'".format(table_name, tournament, table_number)
         )
-        log.info("Fulltilt.getTableTitleRe: returns: '%s'" % (regex))
+        log.info("Fulltilt.getTableTitleRe: returns: '{}'".format(regex))
         return regex
 
     def readSTP(self, hand):

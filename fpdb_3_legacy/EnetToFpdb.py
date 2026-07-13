@@ -114,21 +114,20 @@ class Enet(HandHistoryConverter):
     re_GameInfo = re.compile(
         """
           Game\\s\\#(?P<HID>[0-9]+):\\s+
-          (\\{.*\\}\\s+)?(Tournament\\s\\#                # open paren of tournament info
+          (\\{{.*\\}}\\s+)?(Tournament\\s\\#                # open paren of tournament info
           (?P<TOURNO>\\d+),\\s
           # here's how I plan to use LS
-          (?P<BUYIN>(?P<BIAMT>[%(LS)s%(NUM)s]+)?\\+?(?P<BIRAKE>[%(LS)s%(NUM)s]+)?\\+?\\s?(?P<TOUR_ISO>%(LEGAL_ISO)s)?|Freeroll)\\s+)?
+          (?P<BUYIN>(?P<BIAMT>[{LS}{NUM}]+)?\\+?(?P<BIRAKE>[{LS}{NUM}]+)?\\+?\\s?(?P<TOUR_ISO>{LEGAL_ISO})?|Freeroll)\\s+)?
           # close paren of tournament info
           (?P<GAME>Hold\'em|Omaha)\\s
           \\(?                            # open paren of the stakes
-          (?P<CURRENCY>%(LS)s|)?
-          (?P<SB>[%(NUM)s]+)/(%(LS)s)?
-          (?P<BB>[%(NUM)s]+)
+          (?P<CURRENCY>{LS}|)?
+          (?P<SB>[{NUM}]+)/({LS})?
+          (?P<BB>[{NUM}]+)
           \\)                        # close paren of the stakes
           \\s-\\s
           (?P<DATETIME>.*$)
-        """
-        % substitutions,
+        """.format(**substitutions),
         re.MULTILINE | re.VERBOSE,
     )
 
@@ -136,8 +135,7 @@ class Enet(HandHistoryConverter):
         """
           ^Seat\\s(?P<SEAT>[0-9]+):\\s
           (?P<PNAME>.*)\\s
-          \\((%(LS)s)?(?P<CASH>[%(NUM)s]+)\\sin\\schips\\)"""
-        % substitutions,
+          \\(({LS})?(?P<CASH>[{NUM}]+)\\sin\\schips\\)""".format(**substitutions),
         re.MULTILINE | re.VERBOSE,
     )
 
@@ -164,41 +162,38 @@ class Enet(HandHistoryConverter):
 
     # These used to be compiled per player, but regression tests say
     # we don't have to, and it makes life faster.
-    re_PostSB = re.compile(r"^%(PLYR)s: posts small blind %(CUR)s(?P<SB>[%(NUM)s]+)" % substitutions, re.MULTILINE)
-    re_PostBB = re.compile(r"^%(PLYR)s: posts big blind %(CUR)s(?P<BB>[%(NUM)s]+)" % substitutions, re.MULTILINE)
-    re_PostDead = re.compile(r"^%(PLYR)s: posts small blind $" % substitutions, re.MULTILINE)
-    re_Antes = re.compile(r"^%(PLYR)s: posts the ante %(CUR)s(?P<ANTE>[%(NUM)s]+)" % substitutions, re.MULTILINE)
+    re_PostSB = re.compile(r"^{PLYR}: posts small blind {CUR}(?P<SB>[{NUM}]+)".format(**substitutions), re.MULTILINE)
+    re_PostBB = re.compile(r"^{PLYR}: posts big blind {CUR}(?P<BB>[{NUM}]+)".format(**substitutions), re.MULTILINE)
+    re_PostDead = re.compile(r"^{PLYR}: posts small blind $".format(**substitutions), re.MULTILINE)
+    re_Antes = re.compile(r"^{PLYR}: posts the ante {CUR}(?P<ANTE>[{NUM}]+)".format(**substitutions), re.MULTILINE)
     re_BringIn = re.compile(
-        r"^%(PLYR)s: brings[- ]in( low|) for %(CUR)s(?P<BRINGIN>[%(NUM)s]+)" % substitutions, re.MULTILINE
+        r"^{PLYR}: brings[- ]in( low|) for {CUR}(?P<BRINGIN>[{NUM}]+)".format(**substitutions), re.MULTILINE
     )
     re_PostBoth = re.compile(
-        r"^%(PLYR)s: posts small \& big blinds %(CUR)s(?P<SBBB>[%(NUM)s]+)" % substitutions, re.MULTILINE
+        r"^{PLYR}: posts small \& big blinds {CUR}(?P<SBBB>[{NUM}]+)".format(**substitutions), re.MULTILINE
     )
     re_HeroCards = re.compile(
-        r"^Dealt to %(PLYR)s(?: \[(?P<OLDCARDS>.+?)\])?( \[(?P<NEWCARDS>.+?)\])" % substitutions, re.MULTILINE
+        r"^Dealt to {PLYR}(?: \[(?P<OLDCARDS>.+?)\])?( \[(?P<NEWCARDS>.+?)\])".format(**substitutions), re.MULTILINE
     )
     re_Action = re.compile(
         r"""
-                        ^%(PLYR)s:(?P<ATYPE>\sbets|\schecks|\sraises|\scalls|\sfolds|\sgoes\sall\-in)
-                        (\s%(CUR)s(?P<BET>[%(NUM)s]+))?
+                        ^{PLYR}:(?P<ATYPE>\sbets|\schecks|\sraises|\scalls|\sfolds|\sgoes\sall\-in)
+                        (\s{CUR}(?P<BET>[{NUM}]+))?
                         (\son|\scards?)?
-                        (\s\[(?P<CARDS>.+?)\])?\s*$"""
-        % substitutions,
+                        (\s\[(?P<CARDS>.+?)\])?\s*$""".format(**substitutions),
         re.MULTILINE | re.VERBOSE,
     )
-    re_ShowdownAction = re.compile(r"^%s: shows \[(?P<CARDS>.*)\]" % substitutions["PLYR"], re.MULTILINE)
-    re_sitsOut = re.compile("^%s sits out" % substitutions["PLYR"], re.MULTILINE)
+    re_ShowdownAction = re.compile(r"^{}: shows \[(?P<CARDS>.*)\]".format(substitutions["PLYR"]), re.MULTILINE)
+    re_sitsOut = re.compile("^{} sits out".format(substitutions["PLYR"]), re.MULTILINE)
     re_ShownCards = re.compile(
-        "^Seat (?P<SEAT>[0-9]+): %(PLYR)s %(BRKTS)s(?P<SHOWED>showed|mucked) \\[(?P<CARDS>.*)\\]( and (lost|won \\(%(CUR)s(?P<POT>[%(NUM)s]+)\\)) with (?P<STRING>.*))?"
-        % substitutions,
+        "^Seat (?P<SEAT>[0-9]+): {PLYR} {BRKTS}(?P<SHOWED>showed|mucked) \\[(?P<CARDS>.*)\\]( and (lost|won \\({CUR}(?P<POT>[{NUM}]+)\\)) with (?P<STRING>.*))?".format(**substitutions),
         re.MULTILINE,
     )
     re_CollectPot = re.compile(
-        r"Seat (?P<SEAT>[0-9]+): %(PLYR)s %(BRKTS)s(collected|showed \[.*\] and won) \(%(CUR)s(?P<POT>[%(NUM)s]+)\)(, mucked| with.*|)"
-        % substitutions,
+        r"Seat (?P<SEAT>[0-9]+): {PLYR} {BRKTS}(collected|showed \[.*\] and won) \({CUR}(?P<POT>[{NUM}]+)\)(, mucked| with.*|)".format(**substitutions),
         re.MULTILINE,
     )
-    re_Rake = re.compile(r"^Rake: %(CUR)s(?P<RAKE>[%(NUM)s]+)" % substitutions, re.MULTILINE)
+    re_Rake = re.compile(r"^Rake: {CUR}(?P<RAKE>[{NUM}]+)".format(**substitutions), re.MULTILINE)
 
     def compilePlayerRegexs(self, hand):
         pass
@@ -282,7 +277,7 @@ class Enet(HandHistoryConverter):
                 m1 = self.re_DateTime.finditer(info[key])
                 datetimestr = "2000/01/01 00:00:00"  # default used if time not found
                 for a in m1:
-                    datetimestr = "%s/%s/%s %s:%s:%s" % (
+                    datetimestr = "{}/{}/{} {}:{}:{}".format(
                         a.group("Y"),
                         a.group("M"),
                         a.group("D"),
@@ -323,7 +318,7 @@ class Enet(HandHistoryConverter):
                             # FIXME: handle other currencies, play money
                             log.error(
                                 _("EnetToFpdb.readHandInfo: Failed to detect currency.")
-                                + " Hand ID: %s: '%s'" % (hand.handid, info[key])
+                                + " Hand ID: {}: '{}'".format(hand.handid, info[key])
                             )
                             raise FpdbParseError
 

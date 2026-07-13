@@ -92,11 +92,10 @@ class Pkr(HandHistoryConverter):
           Limit\\sType:\\s(?P<LIMIT>NO\\sLIMIT|LIMIT|POT\\sLIMIT)\\s
           Table\\sType:\\s(RING|TOURNAMENT)\\s
           Money\\sType:\\s(?P<MONEY>PLAY\\sMONEY|REAL\\sMONEY|TOURNAMENT\\sCHIPS|Real\\smoney|Tournament\\schips)\\s
-          Blinds\\sare\\snow\\s(?P<CURRENCY>%(LS)s|)?
-          (?P<SB>[%(NUM)s]+)\\s?/\\s?(%(LS)s)?
-          (?P<BB>[%(NUM)s]+)
-          """
-        % substitutions,
+          Blinds\\sare\\snow\\s(?P<CURRENCY>{LS}|)?
+          (?P<SB>[{NUM}]+)\\s?/\\s?({LS})?
+          (?P<BB>[{NUM}]+)
+          """.format(**substitutions),
         re.MULTILINE | re.VERBOSE,
     )
 
@@ -104,10 +103,9 @@ class Pkr(HandHistoryConverter):
         """
               ^Seat\\s(?P<SEAT>[0-9]+):\\s
               (?P<PNAME>.+?)
-              (\\s\\(bounty\\svalue\\s(%(LS)s)?[%(NUM)s]+,\\sbounty\\swon\\s(%(LS)s)?[%(NUM)s]+\\))?\\s-\\s
-              (%(LS)s)?(?P<CASH>[%(NUM)s]+)
-            """
-        % substitutions,
+              (\\s\\(bounty\\svalue\\s({LS})?[{NUM}]+,\\sbounty\\swon\\s({LS})?[{NUM}]+\\))?\\s-\\s
+              ({LS})?(?P<CASH>[{NUM}]+)
+            """.format(**substitutions),
         re.MULTILINE | re.VERBOSE,
     )
 
@@ -144,35 +142,34 @@ class Pkr(HandHistoryConverter):
                 "NUM": ".,\\d",
             }
             self.re_PostSB = re.compile(
-                r"^%(PLYR)s posts small blind \(%(CUR)s(?P<SB>[%(NUM)s]+)\)" % subst, re.MULTILINE
+                r"^{PLYR} posts small blind \({CUR}(?P<SB>[{NUM}]+)\)".format(**subst), re.MULTILINE
             )
             # FIXME: Sionel posts $0.04 is a second big blind in a different format.
             self.re_PostBB = re.compile(
-                r"^%(PLYR)s posts big blind \(%(CUR)s(?P<BB>[%(NUM)s]+)\)" % subst, re.MULTILINE
+                r"^{PLYR} posts big blind \({CUR}(?P<BB>[{NUM}]+)\)".format(**subst), re.MULTILINE
             )
-            self.re_Antes = re.compile(r"^%(PLYR)s posts ante of %(CUR)s(?P<ANTE>[%(NUM)s]+)" % subst, re.MULTILINE)
+            self.re_Antes = re.compile(r"^{PLYR} posts ante of {CUR}(?P<ANTE>[{NUM}]+)".format(**subst), re.MULTILINE)
             self.re_BringIn = re.compile(
-                r"^%(PLYR)s brings[- ]in( low|) for %(CUR)s(?P<BRINGIN>[%(NUM)s]+)" % subst, re.MULTILINE
+                r"^{PLYR} brings[- ]in( low|) for {CUR}(?P<BRINGIN>[{NUM}]+)".format(**subst), re.MULTILINE
             )
-            self.re_Post = re.compile(r"^%(PLYR)s posts %(CUR)s(?P<BB>[%(NUM)s]+)$" % subst, re.MULTILINE)
+            self.re_Post = re.compile(r"^{PLYR} posts {CUR}(?P<BB>[{NUM}]+)$".format(**subst), re.MULTILINE)
             self.re_HeroCards = re.compile(
-                r"^Dealing( (?P<OLDCARDS>\[.+\]))?( (?P<NEWCARDS>\[.+\])) to %(PLYR)s" % subst, re.MULTILINE
+                r"^Dealing( (?P<OLDCARDS>\[.+\]))?( (?P<NEWCARDS>\[.+\])) to {PLYR}".format(**subst), re.MULTILINE
             )
             self.re_Action = re.compile(
                 r"""
-                        ^%(PLYR)s(?P<ATYPE>\sbets|\schecks|\sraises|\scalls|\sfolds)(\sand\sshows\s\[.+\])?(\sto)?
-                        (\s(%(CUR)s)?(?P<BET>[%(NUM)s]+))?(\s\(all\-in\))?\s*$
-                        """
-                % subst,
+                        ^{PLYR}(?P<ATYPE>\sbets|\schecks|\sraises|\scalls|\sfolds)(\sand\sshows\s\[.+\])?(\sto)?
+                        (\s({CUR})?(?P<BET>[{NUM}]+))?(\s\(all\-in\))?\s*$
+                        """.format(**subst),
                 re.MULTILINE | re.VERBOSE,
             )
-            self.re_ShowdownAction = re.compile(r"^%(PLYR)s shows (?P<CARDS>\[.+\])" % subst, re.MULTILINE)
+            self.re_ShowdownAction = re.compile(r"^{PLYR} shows (?P<CARDS>\[.+\])".format(**subst), re.MULTILINE)
             self.re_CollectPot = re.compile(
-                r"^%(PLYR)s (ties( side pot \#\d)?, and )?(ties|wins) %(CUR)s(?P<POT>[%(NUM)s]+)" % subst, re.MULTILINE
+                r"^{PLYR} (ties( side pot \#\d)?, and )?(ties|wins) {CUR}(?P<POT>[{NUM}]+)".format(**subst), re.MULTILINE
             )
-            self.re_sitsOut = re.compile("^%s sits out" % player_re, re.MULTILINE)
+            self.re_sitsOut = re.compile("^{} sits out".format(player_re), re.MULTILINE)
             self.re_ShownCards = re.compile(
-                "^Seat (?P<SEAT>[0-9]+): %s (\\(.*\\) )?(?P<SHOWED>showed|mucked) (?P<CARDS>\\[.+\\])" % player_re,
+                "^Seat (?P<SEAT>[0-9]+): {} (\\(.*\\) )?(?P<SHOWED>showed|mucked) (?P<CARDS>\\[.+\\])".format(player_re),
                 re.MULTILINE,
             )
 
@@ -193,7 +190,7 @@ class Pkr(HandHistoryConverter):
             m2 = self.re_Partial.search(handText)
             if not m2:
                 message = "Join in hand"
-                raise FpdbHandPartial("Partial hand history: %s" % message)
+                raise FpdbHandPartial("Partial hand history: {}".format(message))
             else:
                 tmp = handText[0:200]
                 log.error(_("PkrToFpdb.determineGameType: '%s'") % tmp)
@@ -236,7 +233,7 @@ class Pkr(HandHistoryConverter):
         #        m = self.re_Button.search(hand.handText)
         #        if m: info.update(m.groupdict())
         # TODO : I rather like the idea of just having this dict as hand.info
-        log.debug("readHandInfo: %s" % info)
+        log.debug("readHandInfo: {}".format(info))
         for key in info:
             if key == "DATETIME":
                 # 11 Jun 2012 21:38:10
@@ -244,7 +241,7 @@ class Pkr(HandHistoryConverter):
                 datetimestr = "2000/01/01 00:00:00"  # default used if time not found
                 for a in m3:
                     month = self.months[a.group("M")]
-                    datetimestr = "%s/%s/%s %s:%s:%s" % (
+                    datetimestr = "{}/{}/{} {}:{}:{}".format(
                         a.group("Y"),
                         month,
                         a.group("D"),
@@ -361,7 +358,7 @@ class Pkr(HandHistoryConverter):
                 "CUR": self.sym[hand.gametype["currency"]],
                 "NUM": ".,\\d",
             }
-            if not re.search(r"^%(PLYR)s posts %(CUR)s(?P<SB>[%(NUM)s]+) dead$" % subst, hand.handText, re.MULTILINE):
+            if not re.search(r"^{PLYR} posts {CUR}(?P<SB>[{NUM}]+) dead$".format(**subst), hand.handText, re.MULTILINE):
                 hand.addBlind(a.group("PNAME"), "big blind", self.clearMoneyString(a.group("BB")))
             elif bb == 0:
                 hand.addBlind(a.group("PNAME"), "secondsb", str(Decimal(hand.gametype["bb"]) / 2))

@@ -1218,7 +1218,7 @@ def _postflop_3bet(stat_dict, player, opp_key, done_key, abbr, desc):
         pct = 100.0 * stat
         return (
             stat,
-            "%3.1f" % pct,
+            "{:3.1f}".format(pct),
             f"{abbr}=%3.1f%%" % pct,
             f"{abbr}=%3.1f%%" % pct,
             "(%d/%d)" % (done, opp),
@@ -1385,9 +1385,9 @@ def face_limpers(stat_dict, player):
         stat = total / n
         return (
             stat,
-            "%3.1f" % stat,
-            "FLmp=%3.1f" % stat,
-            "FLmp=%3.1f" % stat,
+            "{:3.1f}".format(stat),
+            "FLmp={:3.1f}".format(stat),
+            "FLmp={:3.1f}".format(stat),
             "(%d/%d)" % (total, n),
             "avg limpers faced preflop",
         )
@@ -1459,7 +1459,7 @@ def _bet_facing(stat_dict, player, cnt_key, bp_key, abbr, desc):
         pct = 100.0 * stat
         return (
             stat,
-            "%3.1f" % pct,
+            "{:3.1f}".format(pct),
             f"{abbr}=%3.1f%%" % pct,
             f"{abbr}=%3.1f%%" % pct,
             "(%d/%d)" % (bp, cnt),
@@ -1531,7 +1531,7 @@ def _avg_spr(stat_dict, player, cnt_key, val_key, abbr, desc):
         stat = (val / cnt) / 100.0
         return (
             stat,
-            "%3.1f" % stat,
+            "{:3.1f}".format(stat),
             f"{abbr}=%3.1f" % stat,
             f"{abbr}=%3.1f" % stat,
             "(%d/%d)" % (val, cnt),
@@ -1665,7 +1665,7 @@ def _avg_amount(stat_dict, player, key, abbr, desc):
         if n == 0:
             return format_no_data_stat(abbr, desc)
         stat = (total / n) / 100.0  # cents -> currency
-        return (stat, "%.2f" % stat, f"{abbr}=%.2f" % stat, f"{abbr}=%.2f" % stat, "(%d/%d)" % (total, n), desc)
+        return (stat, "{:.2f}".format(stat), f"{abbr}=%.2f" % stat, f"{abbr}=%.2f" % stat, "(%d/%d)" % (total, n), desc)
     except (KeyError, ValueError, TypeError):
         return format_no_data_stat(abbr, desc)
 
