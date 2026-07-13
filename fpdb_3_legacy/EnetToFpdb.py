@@ -24,9 +24,11 @@ from fpdb_3_legacy import L10n
 _ = L10n.get_translation()
 
 
+import datetime
+import re
 from decimal import Decimal
 
-from fpdb_3_legacy.HandHistoryConverter import *
+from fpdb_3_legacy.HandHistoryConverter import FpdbParseError, HandHistoryConverter, log
 
 # Enet HH Format
 
@@ -425,7 +427,7 @@ class Enet(HandHistoryConverter):
                     hand.hero = found.group("PNAME")
                     cards = found.group("NEWCARDS")
                     cards = [cards[i : i + 2] for i in range(len(cards)) if i % 2 == 0 and i + 2 <= len(cards)]
-                    hand.addHoleCards(street, hand.hero, closed=newcards, shown=False, mucked=False, dealt=True)
+                    hand.addHoleCards(street, hand.hero, closed=cards, shown=False, mucked=False, dealt=True)
 
     def readAction(self, hand, street):
         m = self.re_Action.finditer(hand.streets[street])
