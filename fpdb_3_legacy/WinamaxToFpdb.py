@@ -43,24 +43,28 @@ class Winamax(HandHistoryConverter):
 
     EXPECTED_SUMMARY_PARTS = 2
     MIN_PLAYERS = 2
+    compiledPlayers: set[str] = set()
     STUD_HOLE_CARDS_COUNT = 3
 
-    def Trace(self) -> Callable[..., Any]:
+    def Trace(self) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
         """Decorator that logs function entry and exit for debugging purposes.
 
         Returns:
             A wrapped function that logs entry/exit and preserves original behavior.
         """
 
-        def my_f(*args: Any, **kwds: Any) -> Any:
-            log.debug("entering %s", self.__class__.__name__)
-            result = self(*args, **kwds)
-            log.debug("exiting %s", self.__class__.__name__)
-            return result
+        def decorate(function: Callable[..., Any]) -> Callable[..., Any]:
+            def my_f(*args: Any, **kwds: Any) -> Any:
+                log.debug("entering %s", function.__name__)
+                result = function(*args, **kwds)
+                log.debug("exiting %s", function.__name__)
+                return result
 
-        my_f.__name__ = self.__class__.__name__
-        my_f.__doc__ = self.__doc__
-        return my_f
+            my_f.__name__ = function.__name__
+            my_f.__doc__ = function.__doc__
+            return my_f
+
+        return decorate
 
     filter = "Winamax"
     sitename = "Winamax"
@@ -181,7 +185,7 @@ class Winamax(HandHistoryConverter):
         r"Seat\s(?P<SEAT>[0-9]+):\s(?P<PNAME>.+?)\s".format(),
     )
 
-    def compilePlayerRegexs(self, hand: Hand) -> None:
+    def compilePlayerRegexs(self, hand: Hand) -> None:  # type: ignore[override]
         """Compile player-specific regex patterns based on players in the hand.
 
         Args:
@@ -310,7 +314,7 @@ class Winamax(HandHistoryConverter):
         elif mg.get("RING"):
             info["type"] = "ring"
             info["currency"] = "EUR" if mg.get("MONEY") else "play"
-            info["fast"] = "Go Fast" in mg.get("RING")
+            info["fast"] = "Go Fast" in (mg.get("RING") or "")
 
     def _parse_limit_info(self, mg: dict[str, str], info: dict[str, Any], hand_text: str) -> None:
         """Parses and updates the limit type information from match groups.
@@ -401,7 +405,7 @@ class Winamax(HandHistoryConverter):
         Raises:
             FpdbParseError: If hand info regex matching fails.
         """
-        info = {}
+        info: dict[str, Any] = {}
         m = self.re_hand_info.search(hand.handText)
         if m is None:
             tmp = hand.handText[:200]
@@ -429,7 +433,7 @@ class Winamax(HandHistoryConverter):
             if handler := self._get_info_handler(key):
                 handler(hand, value, info)
 
-    def _get_info_handler(self, key: str) -> callable:
+    def _get_info_handler(self, key: str) -> Callable[[Any, Any, dict[str, Any]], None] | None:
         """Returns the handler function for a given hand info key.
 
         This method provides a mapping from parsed hand info keys to their corresponding handler functions.
@@ -494,7 +498,7 @@ class Winamax(HandHistoryConverter):
         Returns:
             None
         """
-        hand.handid = f"{int(info['HID1'][:14])}{int(info['HID2'])}"
+        hand.handid = f"{int(info['HID1'][:14])}{int(info['HID2'])}"  # type: ignore[assignment]
 
     def _parse_table_info(self, hand: Hand, value: str, info: dict) -> None:
         """Parses and sets the table information for the hand.
@@ -664,7 +668,7 @@ class Winamax(HandHistoryConverter):
         relevant_text = hand.handText[header_end:] if header_end != -1 else hand.handText
 
         m = self.re_player_info.finditer(pre)
-        plist = {}
+        plist: dict[str, list[Any]] = {}
 
         for a in m:
             pname = a.group("PNAME")
@@ -737,11 +741,13 @@ class Winamax(HandHistoryConverter):
             )
 
         try:
+            if m is None:
+                raise FpdbHandPartial("Could not identify hand streets")
             hand.addStreets(m)
             log.debug("adding street %s", m.group(0))
             log.debug("---")
         except (AttributeError, TypeError):
-            log.info("Failed to add streets. handtext=%s", hand.handtext)
+            log.info("Failed to add streets. handtext=%s", hand.handText)
 
     # Needs to return a list in the format
     # ['player1name', 'player2name', ...] where player1name is the sb and player2name is bb,
@@ -785,6 +791,8 @@ class Winamax(HandHistoryConverter):
         if street in {"FLOP", "TURN", "RIVER"}:
             # a list of streets which get dealt community cards (i.e. all but PREFLOP)
             m = self.re_board.search(hand.streets[street])
+            if m is None:
+                raise FpdbHandPartial("Could not identify community cards")
             hand.setCommunityCards(street, m.group("CARDS").split(" "))
 
     def readBlinds(self, hand: Hand) -> None:
@@ -860,7 +868,7 @@ class Winamax(HandHistoryConverter):
         """
         if m := self.re_bring_in.search(hand.handText, re.DOTALL):
             log.debug("read BringIn: %s for %s", m.group("PNAME"), m.group("BRINGIN"))
-            hand.addBringIn(m.group("PNAME"), m.group("BRINGIN"))
+            hand.addBringIn(m.group("PNAME"), m.group("BRINGIN"))  # type: ignore[attr-defined]
 
     def readSTP(self, hand: Hand) -> None:
         """Parses and sets special tournament pot (STP) or bomb pot amounts.
@@ -1194,7 +1202,7 @@ class Winamax(HandHistoryConverter):
             cards = shows.group("CARDS")
             cards = cards.split(" ")
             log.debug("add Shown Cards(%s, %s)", cards, shows.group("PNAME"))
-            hand.addShownCards(cards, shows.group("PNAME"))
+            hand.addShownCards(cards, shows.group("PNAME"))  # type: ignore[attr-defined]
 
     def readCollectPot(self, hand: Hand) -> None:
         """Parses and processes all pot collection actions in the hand.
@@ -1234,7 +1242,7 @@ class Winamax(HandHistoryConverter):
                 shown = True
                 string = m.group("STRING")
                 log.debug("%s %s %s %s", m.group("PNAME"), cards, shown, mucked)
-                hand.addShownCards(
+                hand.addShownCards(  # type: ignore[attr-defined]
                     cards=cards,
                     player=m.group("PNAME"),
                     shown=shown,
