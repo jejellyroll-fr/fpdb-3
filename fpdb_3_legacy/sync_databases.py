@@ -20,21 +20,17 @@ import argparse
 import logging
 import time
 from pathlib import Path
-from datetime import datetime
 
-from sqlalchemy import create_engine, select, func
+from sqlalchemy import create_engine, func
 from sqlalchemy.orm import sessionmaker
 
 from fpdb.infrastructure.database.models.legacy_models import (
-    LegacyBase,
     LegacyHandModel,
     LegacyPlayerModel,
 )
 from fpdb.infrastructure.database.models.hand_model import HandModel
 from fpdb.infrastructure.database.models.player_model import PlayerModel
 from fpdb.infrastructure.adapters.legacy_schema_adapter import LegacySchemaAdapter
-from fpdb.infrastructure.repositories.hand_repository_impl import HandRepositoryImpl
-from fpdb.infrastructure.repositories.player_repository_impl import PlayerRepositoryImpl
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")

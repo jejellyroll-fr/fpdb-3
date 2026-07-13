@@ -20,7 +20,6 @@ from __future__ import annotations
 
 # TODO: check to keep only the needed modules
 
-import codecs
 import pprint
 import sys
 

@@ -6,7 +6,6 @@ Ce script guide l'utilisateur à travers le processus de migration
 avec des menus interactifs et des actions automatiques.
 """
 
-import os
 import subprocess
 import sys
 from pathlib import Path

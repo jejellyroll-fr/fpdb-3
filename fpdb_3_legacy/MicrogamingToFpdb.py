@@ -23,7 +23,6 @@ from fpdb_3_legacy import L10n
 
 _ = L10n.get_translation()
 
-import sys
 import datetime
 import logging
 from decimal import Decimal

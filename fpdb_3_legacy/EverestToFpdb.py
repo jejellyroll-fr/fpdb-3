@@ -24,7 +24,6 @@ from fpdb_3_legacy import L10n
 
 _ = L10n.get_translation()
 
-import sys
 from decimal import Decimal
 from fpdb_3_legacy.HandHistoryConverter import *
 

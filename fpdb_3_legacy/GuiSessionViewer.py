@@ -22,7 +22,6 @@ import matplotlib as mpl
 import numpy as np
 from matplotlib.backends.backend_qt5agg import FigureCanvas
 from matplotlib.figure import Figure
-from mplfinance.original_flavor import candlestick_ochl
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QStandardItem, QStandardItemModel
 from PySide6.QtWidgets import (
@@ -60,7 +59,6 @@ try:
     import numpy as np
     from matplotlib.backends.backend_qt5agg import FigureCanvas
     from matplotlib.figure import Figure
-    from mplfinance.original_flavor import candlestick_ochl
 
 except ImportError as inst:
     log.exception("Failed to load numpy and/or matplotlib in Session Viewer")

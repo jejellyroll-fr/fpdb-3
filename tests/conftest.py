@@ -1,6 +1,5 @@
 import os
 import sys
-from pathlib import Path
 from unittest.mock import MagicMock
 import pytest
 
@@ -10,7 +9,7 @@ sys.path.append(os.getcwd())
 
 # Mock GUI dependencies only if not installed
 try:
-    import PySide6
+    import PySide6  # noqa: F401 -- availability probe
     # PySide6 is installed, no mock needed!
 except ImportError:
     pyside_mock = MagicMock()
@@ -153,4 +152,3 @@ def pytest_terminal_summary(terminalreporter, exitstatus, config):
                 print(f"Diagnostics sent successfully: {response.status}")
         except Exception as e:
             print(f"Failed to send diagnostics: {e}", file=sys.stderr)
-

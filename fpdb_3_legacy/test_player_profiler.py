@@ -1,4 +1,3 @@
-import pytest
 from fpdb_3_legacy.PlayerProfiler import classify_player, PlayerProfile
 from fpdb_3_legacy.Stats import do_stat
 

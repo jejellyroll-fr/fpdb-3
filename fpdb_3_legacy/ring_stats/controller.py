@@ -7,7 +7,6 @@ des statistiques pour le tableau de bord, les positions et les cartes.
 """
 
 from __future__ import annotations
-from time import time
 from PySide6.QtCore import QObject, Signal, Qt
 from PySide6.QtGui import QBrush, QColor, QStandardItem, QStandardItemModel
 

@@ -1,7 +1,7 @@
 """PT4 vs FPDB comparison utilities."""
 
 from dataclasses import dataclass
-from typing import Any, Optional
+from typing import Any
 
 
 @dataclass

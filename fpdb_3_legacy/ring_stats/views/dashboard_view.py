@@ -5,8 +5,7 @@ et le graphique de profit cumulé Matplotlib.
 """
 
 from __future__ import annotations
-from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QGridLayout, QLabel
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QGridLayout, QLabel
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 import numpy as np
