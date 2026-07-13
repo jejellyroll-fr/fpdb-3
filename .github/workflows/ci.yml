@@ -57,6 +57,8 @@ jobs:
           fpdb_3_legacy/PopupIcons.py
           fpdb_3_legacy/ModernPopup.py
           fpdb_3_legacy/L10n.py
+          fpdb_3_legacy/Options.py
+          fpdb_3_legacy/RegressionFileComparator.py
       - name: Lint newly modernized modules
         run: >-
           ruff check
