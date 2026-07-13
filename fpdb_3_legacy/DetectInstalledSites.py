@@ -177,7 +177,7 @@ class PokerStarsDetector(SiteDetector):
 
         return {"detected": False, "hhpath": "", "heroname": "", "tspath": ""}
 
-    def _detect_variant(self, variant: str) -> dict[str, any]:
+    def _detect_variant(self, variant: str) -> dict[str, Any]:
         """Detect a specific PokerStars variant."""
         hhpath = None
         tspath = None
@@ -269,8 +269,7 @@ class WinamaxDetector(SiteDetector):
                 # Fallback to Wine installation
                 paths = get_linux_paths()
                 wine_users_path = Path(paths["wine_users"])
-                wine_paths = list(wine_users_path.glob("*/AppData/Roaming/Winamax/accounts"))
-                wine_paths = [str(p) for p in wine_paths]
+                wine_paths = [str(path) for path in wine_users_path.glob("*/AppData/Roaming/Winamax/accounts")]
                 if wine_paths:
                     base_path = wine_paths[0]
 
@@ -308,7 +307,7 @@ class iPokerDetector(SiteDetector):  # noqa: N801
     def __init__(self, config: Any) -> None:
         """Initialize iPoker detector."""
         super().__init__(config)
-        self.all_detected_skins = []  # Store all detected skins
+        self.all_detected_skins: list[dict[str, Any]] = []  # Store all detected skins
 
     def detect(self) -> dict[str, Any]:
         """Detect iPoker installations."""
@@ -853,7 +852,7 @@ class PartyGamingDetector(SiteDetector):
     def __init__(self, config: Any) -> None:
         """Initialize PartyGaming detector."""
         super().__init__(config)
-        self.all_detected_skins = []  # Store all detected skins
+        self.all_detected_skins: list[dict[str, Any]] = []  # Store all detected skins
 
     def detect(self) -> dict[str, Any]:
         """Detect PartyGaming installations."""
@@ -962,7 +961,7 @@ class PartyGamingDetector(SiteDetector):
                 str(Path(paths["wine_drive_c"]) / skin / "HandHistory"),
                 str(Path(paths["wine_program_files"]) / "PartyGaming" / "PartyPoker" / "HandHistory"),
                 str(Path(paths["wine_program_files_x86"]) / "PartyGaming" / "PartyPoker" / "HandHistory"),
-                wine_docs_paths[0] if wine_docs_paths else None,
+                *wine_docs_paths[:1],
             )
 
             wine_docs_ts_paths = [str(p) for p in wine_users_path.glob(f"*/Documents/{skin}/TournSummary")]
@@ -973,7 +972,7 @@ class PartyGamingDetector(SiteDetector):
                 str(Path(paths["wine_drive_c"]) / skin / "TournSummary"),
                 str(Path(paths["wine_program_files"]) / "PartyGaming" / "PartyPoker" / "TournSummary"),
                 str(Path(paths["wine_program_files_x86"]) / "PartyGaming" / "PartyPoker" / "TournSummary"),
-                wine_docs_ts_paths[0] if wine_docs_ts_paths else None,
+                *wine_docs_ts_paths[:1],
             )
 
         elif self.platform == "Darwin":  # macOS
@@ -1326,7 +1325,7 @@ class DetectInstalledSites:
             # Fallback to legacy detection for unsupported sites
             return self._legacy_detect(site_name)
 
-    def _legacy_detect(self, site_name: str) -> dict[str, any]:
+    def _legacy_detect(self, site_name: str) -> dict[str, Any]:
         """Legacy detection method for older sites."""
         # This would contain the old detection logic for sites not yet modernized
         # For now, return not detected
@@ -1337,11 +1336,11 @@ class DetectInstalledSites:
         """Get list of detected sites."""
         return [site for site, status in self.sitestatusdict.items() if status["detected"]]
 
-    def get_site_info(self, site_name: str) -> dict[str, any] | None:
+    def get_site_info(self, site_name: str) -> dict[str, Any] | None:
         """Get detection info for a specific site."""
         return self.sitestatusdict.get(site_name)
 
-    def get_all_pokerstars_variants(self) -> list[dict[str, any]]:
+    def get_all_pokerstars_variants(self) -> list[dict[str, Any]]:
         """Get all detected PokerStars variants."""
         if "PokerStars" in self.detectors:
             detector = self.detectors["PokerStars"]
@@ -1349,7 +1348,7 @@ class DetectInstalledSites:
                 return detector.all_detected_variants
         return []
 
-    def get_all_ipoker_skins(self) -> list[dict[str, any]]:
+    def get_all_ipoker_skins(self) -> list[dict[str, Any]]:
         """Get all detected iPoker skins."""
         if "iPoker" in self.detectors:
             detector = self.detectors["iPoker"]
@@ -1357,7 +1356,7 @@ class DetectInstalledSites:
                 return detector.all_detected_skins
         return []
 
-    def get_all_partypoker_skins(self) -> list[dict[str, any]]:
+    def get_all_partypoker_skins(self) -> list[dict[str, Any]]:
         """Get all detected PartyPoker skins."""
         if "PartyPoker" in self.detectors:
             detector = self.detectors["PartyPoker"]
