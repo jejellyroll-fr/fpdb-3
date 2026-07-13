@@ -20,6 +20,7 @@ from fpdb_3_legacy import Database
 def _bare_db(connection):
     db = Database.Database.__new__(Database.Database)  # bypass the heavy __init__
     db.connection = connection
+    db.backend = 3  # PostgreSQL — the only backend that calls _pg_set_isolation
     return db
 
 

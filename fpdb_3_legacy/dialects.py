@@ -48,6 +48,25 @@ class Dialect:
         """Quote a string literal for this backend (ANSI single-quote doubling)."""
         return "'" + value.replace("'", "''") + "'"
 
+    # --- transactions ------------------------------------------------------
+
+    def set_autocommit(self, connection: Any, enabled: bool) -> None:
+        """Toggle a driver connection's autocommit, committing any open tx first.
+
+        Replaces the psycopg2 idiom ``set_isolation_level(0/1)``: psycopg3 has no
+        level 0 and uses an ``autocommit`` flag instead. Both psycopg2 and
+        psycopg3 connections expose ``autocommit``; only a very old psycopg2
+        without it falls back to the legacy integer API.
+        """
+        if hasattr(connection, "autocommit"):
+            try:
+                connection.commit()  # autocommit cannot be toggled mid-transaction
+            except Exception as exc:  # noqa: BLE001 - nothing to commit is fine
+                log.debug("set_autocommit: commit before toggle failed: %s", exc)
+            connection.autocommit = enabled
+        else:  # pragma: no cover - only a very old psycopg2 would lack autocommit
+            connection.set_isolation_level(0 if enabled else 1)
+
     # --- introspection -----------------------------------------------------
 
     def list_tables(self, db: Any) -> list[str]:
