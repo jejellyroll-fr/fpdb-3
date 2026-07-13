@@ -23,6 +23,7 @@ from fpdb_3_legacy.AutoNotes import (
     set_rule_note_template,
     set_rule_set_enabled,
 )
+from fpdb_3_legacy.i18n import gettext as _
 
 
 class AutoNoteRulesDialog(QDialog):
@@ -34,16 +35,16 @@ class AutoNoteRulesDialog(QDialog):
         self.rule_set_items: dict[QTreeWidgetItem, str] = {}
         self.rule_items: dict[QTreeWidgetItem, tuple[str, str]] = {}
 
-        self.setWindowTitle("Automatic Notes")
+        self.setWindowTitle(_("Automatic Notes"))
         self.resize(760, 520)
 
         layout = QVBoxLayout(self)
 
-        intro = QLabel("Enable or disable automatic player-note rules.")
+        intro = QLabel(_("Enable or disable automatic player-note rules."))
         intro.setWordWrap(True)
         layout.addWidget(intro)
 
-        self.enabled_checkbox = QCheckBox("Generate automatic notes")
+        self.enabled_checkbox = QCheckBox(_("Generate automatic notes"))
         self.enabled_checkbox.setChecked(autonotes_enabled(config))
         layout.addWidget(self.enabled_checkbox)
 

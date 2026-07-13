@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 from __future__ import annotations
+
 # Copyright 2010-2011 Maxime Grandchamp
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -14,14 +15,9 @@ from __future__ import annotations
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 # In the "official" distribution you can find the license in agpl-3.0.txt.
 #
-
-
 # This code once was in GuiReplayer.py and was split up in this and the former by zarturo.
-
-
 # import L10n
 # _ = L10n.get_translation()
-
 from decimal import Decimal
 from functools import partial
 from io import StringIO
@@ -44,14 +40,8 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
 )
 
-from fpdb_3_legacy import Card
-from fpdb_3_legacy import Configuration
-from fpdb_3_legacy import Database
-from fpdb_3_legacy import Deck
-from fpdb_3_legacy import Filters
-from fpdb_3_legacy import GuiReplayer
-from fpdb_3_legacy import Hand
-from fpdb_3_legacy import SQL
+from fpdb_3_legacy import SQL, Card, Configuration, Database, Deck, Filters, GuiReplayer, Hand
+from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.loggingFpdb import get_logger
 
 log = get_logger("gui_hand_viewer")
@@ -183,8 +173,8 @@ class GuiHandViewer(QSplitter):
         self.page_size = 100
 
         self.pagerBox = QHBoxLayout()
-        self.prevPageButton = QPushButton("◀ Prev")
-        self.nextPageButton = QPushButton("Next ▶")
+        self.prevPageButton = QPushButton(_("◀ Prev"))
+        self.nextPageButton = QPushButton(_("Next ▶"))
         self.pageLabel = QLabel("")
         self.prevPageButton.clicked.connect(self.prev_page)
         self.nextPageButton.clicked.connect(self.next_page)
@@ -204,7 +194,7 @@ class GuiHandViewer(QSplitter):
             "CO$": "EV cashout",
         }
         for cb in (self.flagAllIn, self.flagShowdown, self.flagRunItTwice, self.flagCashout):
-            cb.setToolTip("Filter: " + _flag_tips[cb.text()])
+            cb.setToolTip(_("Filter: ") + _flag_tips[cb.text()])
             cb.stateChanged.connect(lambda _state: self.loadHands(None))
             self.pagerBox.addWidget(cb)
         self.handsVBox.addLayout(self.pagerBox)
@@ -315,8 +305,8 @@ class GuiHandViewer(QSplitter):
             self._update_pager()
             msg = QMessageBox(self)
             msg.setIcon(QMessageBox.Icon.Information)
-            msg.setWindowTitle("FPDB 3 info")
-            msg.setText("No data found for the selected filters.")
+            msg.setWindowTitle(_("FPDB 3 info"))
+            msg.setText(_("No data found for the selected filters."))
             msg.exec()
             return
         self.render_page()
@@ -614,7 +604,7 @@ class GuiHandViewer(QSplitter):
             return
         hand = self.hands[int(index.sibling(index.row(), self.colnum["HandId"]).data())]
         m = QMenu()
-        copyAction = m.addAction("Copy to clipboard")
+        copyAction = m.addAction(_("Copy to clipboard"))
         copyAction.triggered.connect(partial(self.copyHandToClipboard, hand=hand))
         m.move(event.globalPosition().toPoint())
         m.exec()

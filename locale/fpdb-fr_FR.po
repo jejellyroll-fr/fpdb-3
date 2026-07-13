@@ -4851,3 +4851,38 @@ msgstr "Trier par :"
 
 msgid "Copy to clipboard"
 msgstr "Copier dans le presse-papiers"
+
+# --- Vague 2: hand/log viewers & auto notes ---
+
+msgid "◀ Prev"
+msgstr "◀ Préc."
+
+msgid "Next ▶"
+msgstr "Suiv. ▶"
+
+msgid "Filter: "
+msgstr "Filtre : "
+
+msgid "No data found for the selected filters."
+msgstr "Aucune donnée pour les filtres sélectionnés."
+
+msgid "Log Viewer"
+msgstr "Visionneuse de journaux"
+
+msgid "Select Log File:"
+msgstr "Fichier de journal :"
+
+msgid "Filter by Module:"
+msgstr "Filtrer par module :"
+
+msgid "Copy selection to clipboard"
+msgstr "Copier la sélection dans le presse-papiers"
+
+msgid "Automatic Notes"
+msgstr "Notes automatiques"
+
+msgid "Enable or disable automatic player-note rules."
+msgstr "Activer ou désactiver les règles de notes automatiques."
+
+msgid "Generate automatic notes"
+msgstr "Générer des notes automatiques"
