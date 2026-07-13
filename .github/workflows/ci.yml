@@ -65,6 +65,8 @@ jobs:
           fpdb_3_legacy/Card.py
           fpdb_3_legacy/HandHistoryConverter.py
           fpdb_3_legacy/Deck.py
+          fpdb_3_legacy/TourneySummary.py
+          fpdb_3_legacy/PartyPokerSummary.py
       - name: Lint newly modernized modules
         run: >-
           ruff check

@@ -18,7 +18,9 @@ from __future__ import annotations
 # _ = L10n.get_translation()
 # TODO: check to keep only the needed modules
 import pprint
+import re
 import sys
+from typing import Any
 
 from fpdb_3_legacy import Database
 from fpdb_3_legacy.HandHistoryConverter import HandHistoryConverter
@@ -174,19 +176,19 @@ class TourneySummary:
         self.isLottery = False
         self.tourneyMultiplier = 1
         self.gametype = {"category": None, "limitType": None, "mix": "none"}
-        self.players = {}
+        self.players: dict[str, list[int]] = {}
         self.comment = None
         self.commentTs = None
 
         # Collections indexed by player names
-        self.playerIds = {}
-        self.tourneysPlayersIds = {}
-        self.ranks = {}
-        self.winnings = {}
-        self.winningsCurrency = {}
-        self.rebuyCounts = {}
-        self.addOnCounts = {}
-        self.koCounts = {}
+        self.playerIds: dict[str, int] = {}
+        self.tourneysPlayersIds: dict[str, int] = {}
+        self.ranks: dict[str, list[int | None]] = {}
+        self.winnings: dict[str, list[int]] = {}
+        self.winningsCurrency: dict[str, list[str | None]] = {}
+        self.rebuyCounts: dict[str, list[int | None]] = {}
+        self.addOnCounts: dict[str, list[int | None]] = {}
+        self.koCounts: dict[str, list[int | None]] = {}
 
         # currency symbol for this summary
         self.sym = None
@@ -264,8 +266,8 @@ class TourneySummary:
 
     # end def __str__
 
-    def getSplitRe(self, head) -> None:
-        pass
+    def getSplitRe(self, head: str) -> re.Pattern[str] | None:
+        return None
 
     """Function to return a re object to split the summary text into separate tourneys, based on head of file"""
 
@@ -389,14 +391,20 @@ class TourneySummary:
     def summaries_from_excel(filenameXLS, tourNoField):
         wb = xlrd.open_workbook(filenameXLS)
         sh = wb.sheet_by_index(0)
-        summaryTexts, rows, header, keys, entries = [], [], None, None, {}
+        summaryTexts: list[list[dict[str, Any]]] = []
+        rows: list[list[str]] = []
+        header: Any = None
+        keys: list[str] | None = None
+        entries: dict[str, list[dict[str, Any]]] = {}
         for rownum in range(sh.nrows):
             if rownum == 0:
                 header = sh.row_values(rownum)[0]
             elif tourNoField in sh.row_values(rownum):
-                keys = [str(c).encode("utf-8") for c in sh.row_values(rownum)]
+                keys = [str(c) for c in sh.row_values(rownum)]
             elif keys is not None:
-                rows.append([str(c).encode("utf-8") for c in sh.row_values(rownum)])
+                rows.append([str(c) for c in sh.row_values(rownum)])
+        if keys is None:
+            return summaryTexts
         for row in rows:
             data = dict(zip(keys, row, strict=False))
             data["header"] = header
