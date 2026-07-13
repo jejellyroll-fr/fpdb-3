@@ -127,6 +127,19 @@ def test_flat_block_has_no_text_items():
     assert ss.blocks[0].texts == []
 
 
+def test_positional_hud_defaults_to_current_panel():
+    ss = _ss('<ss name="f" rows="1" cols="1"><stat _rowcol="(1,1)" _stat_name="vpip"/></ss>')
+    assert ss.positional_mode == "current"
+
+
+def test_positional_hud_can_explicitly_show_all_panels():
+    ss = _ss(
+        '<ss name="f" rows="1" cols="1" positional_mode="all">'
+        '<stat _rowcol="(1,1)" _stat_name="vpip"/></ss>'
+    )
+    assert ss.positional_mode == "all"
+
+
 def test_block_parses_optional_style_attributes():
     ss = _ss('<ss name="t" rows="1" cols="1">'
              '<block label="SB 3h" position="SB" bordercolor="#d7b500" '

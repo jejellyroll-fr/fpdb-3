@@ -1455,16 +1455,15 @@ class ModernHudPreferences(QDialog):
         hud_options_bar = QHBoxLayout()
         hud_options_bar.setSpacing(10)
 
-        # Positional-panel mode for multi-block HUDs. "all" stacks SB/BB/BU
-        # together (an import-driven HUD is one hand behind the live position, so
-        # a single positional panel would be stale); "current" shows only the
-        # panel matching the last imported position.
+        # Positional-panel mode for multi-block HUDs. "current" shows the panel
+        # matching the estimated live position; "all" is an explicit diagnostic
+        # or preference that stacks SB/BB/BU together.
         self.positional_mode_label = QLabel("Positional panels:")
         self.positional_mode_label.setProperty("class", "subtitle")
         hud_options_bar.addWidget(self.positional_mode_label)
         self.positional_mode_combo = QComboBox()
-        self.positional_mode_combo.addItem("Show all (stacked)", "all")
         self.positional_mode_combo.addItem("Only current position", "current")
+        self.positional_mode_combo.addItem("Show all (stacked)", "all")
         self.positional_mode_combo.setMinimumWidth(180)
         self.positional_mode_combo.currentIndexChanged.connect(self._on_positional_mode_changed)
         hud_options_bar.addWidget(self.positional_mode_combo)
@@ -2221,8 +2220,8 @@ class ModernHudPreferences(QDialog):
                 "ypad": getattr(stat_set, "ypad", 0),
                 "multiblock": True,
                 # "all" = show every position panel stacked; "current" = only the
-                # panel matching the last imported position. Editable in the UI.
-                "positional_mode": getattr(stat_set, "positional_mode", "all") or "all",
+                # panel matching the estimated live position. Editable in the UI.
+                "positional_mode": getattr(stat_set, "positional_mode", "current") or "current",
                 # "" (default), "true" or "false": whether the hero's own stat
                 # windows are drawn. Multi-block HUDs default to hidden.
                 "show_hero_hud": getattr(stat_set, "show_hero_hud", "") or "",
@@ -2562,7 +2561,7 @@ class ModernHudPreferences(QDialog):
         name = self.profile_combo.currentText()
         profile = self.hud_profiles.get(name) if self.hud_profiles else None
         if isinstance(profile, dict):
-            profile["positional_mode"] = self.positional_mode_combo.currentData() or "all"
+            profile["positional_mode"] = self.positional_mode_combo.currentData() or "current"
 
     def _on_show_hero_changed(self, checked: bool) -> None:
         """Store the hero-HUD visibility on the current profile."""
@@ -2587,7 +2586,7 @@ class ModernHudPreferences(QDialog):
             is_multiblock = isinstance(profile, dict) and profile.get("multiblock")
             self.positional_mode_combo.setEnabled(bool(is_multiblock))
             self.positional_mode_label.setEnabled(bool(is_multiblock))
-            mode = profile.get("positional_mode", "all") if isinstance(profile, dict) else "all"
+            mode = profile.get("positional_mode", "current") if isinstance(profile, dict) else "current"
             self.positional_mode_combo.blockSignals(True)
             self.positional_mode_combo.setCurrentIndex(max(0, self.positional_mode_combo.findData(mode)))
             self.positional_mode_combo.blockSignals(False)
@@ -3996,7 +3995,7 @@ class ModernHudPreferences(QDialog):
                         # Persist the positional-panel mode for multi-block HUDs.
                         if profile_data.get("multiblock"):
                             stat_set_node.setAttribute(
-                                "positional_mode", profile_data.get("positional_mode", "all") or "all"
+                                "positional_mode", profile_data.get("positional_mode", "current") or "current"
                             )
                         # Persist hero-HUD visibility when explicitly set.
                         if profile_data.get("show_hero_hud"):
