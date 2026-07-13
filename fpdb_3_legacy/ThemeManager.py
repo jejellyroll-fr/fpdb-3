@@ -11,6 +11,7 @@ import re
 import threading
 import xml.etree.ElementTree as ET
 from pathlib import Path
+from typing import Any, ClassVar
 
 from fpdb_3_legacy.loggingFpdb import get_logger
 
@@ -31,11 +32,11 @@ class ThemeManager:
     - XML Configuration (persistence)
     """
 
-    _instance = None
+    _instance: ClassVar[ThemeManager | None] = None
     _lock = threading.RLock()
 
     # Available qt_material themes (dynamically detected)
-    AVAILABLE_QT_THEMES = None  # Will be populated on first access
+    AVAILABLE_QT_THEMES: ClassVar[list[str] | None] = None  # Will be populated on first access
 
     # Mapping qt_material to popup themes
     QT_TO_POPUP_MAPPING = {
@@ -70,7 +71,7 @@ class ThemeManager:
             self.initialized = False
             self._qt_material_theme = "dark_purple.xml"
             self._popup_theme = "material_dark"
-            self._config = None
+            self._config: Any | None = None
             self._main_window = None
             # Initialize available themes list on first instance
             if ThemeManager.AVAILABLE_QT_THEMES is None:
@@ -818,7 +819,7 @@ class ThemeManager:
             saved_popup_theme = general.get("popup_theme", "material_dark")
 
             # Validate themes
-            if saved_qt_theme in self.AVAILABLE_QT_THEMES:
+            if saved_qt_theme in (self.AVAILABLE_QT_THEMES or []):
                 self._qt_material_theme = saved_qt_theme
             else:
                 log.warning(f"Invalid qt_material theme: {saved_qt_theme}, using default")
@@ -886,7 +887,7 @@ class ThemeManager:
         Returns:
             list[str]: List of custom theme names
         """
-        custom_themes = []
+        custom_themes: list[str] = []
 
         try:
             if not CUSTOM_THEMES_DIR.exists():
@@ -1005,7 +1006,7 @@ class ThemeManager:
         Returns:
             bool: True if successful
         """
-        if theme_name not in self.AVAILABLE_QT_THEMES:
+        if theme_name not in (self.AVAILABLE_QT_THEMES or []):
             log.error(f"Unknown qt_material theme: {theme_name}")
             return False
 
@@ -1125,6 +1126,8 @@ class ThemeManager:
     def _update_xml_theme_attributes(self):
         """Update XML DOM with theme attributes."""
         try:
+            if self._config is None or not getattr(self._config, "doc", None):
+                return
             # Find the general element in the XML DOM
             general_nodes = self._config.doc.getElementsByTagName("general")
 
@@ -1144,7 +1147,7 @@ class ThemeManager:
 
     def get_available_qt_themes(self) -> list[str]:
         """Return the list of available qt_material themes."""
-        return self.AVAILABLE_QT_THEMES.copy()
+        return (self.AVAILABLE_QT_THEMES or []).copy()
 
     def get_available_popup_themes(self) -> list[str]:
         """Return the list of available popup themes."""
