@@ -18,6 +18,7 @@ import datetime
 import pprint
 import sys
 from decimal import Decimal, InvalidOperation
+from typing import Any
 
 from fpdb_3_legacy import Card, Configuration, DerivedStats
 from fpdb_3_legacy.Exceptions import FpdbHandDuplicate, FpdbHandPartial, FpdbParseError
@@ -52,6 +53,14 @@ def canonical_datetime_utc(value):
 
 
 class Hand:
+    allStreets: list[str]
+    actionStreets: list[str]
+    communityStreets: list[str]
+    holeStreets: list[str]
+    discardStreets: list[str]
+    sb: Decimal
+    bb: Decimal
+
     UPS = {
         "a": "A",
         "t": "T",
@@ -136,8 +145,8 @@ class Hand:
         self.checkForUncalled = False
         self.adjustCollected = False
         self.cashedOut = False
-        self.cashOutFees = {}  # Dict to store cash out fees per player
-        self.cashOutAmounts = {}  # Dict to store cash out amounts per player (insurance, not pot winnings)
+        self.cashOutFees: dict[str, Decimal] = {}  # Cash out fees per player
+        self.cashOutAmounts: dict[str, Decimal] = {}  # Insurance amounts per player
         self.endTime = None
         self.pot = Pot()  # Initialize the Pot instance
         self.roundPenny = False
@@ -193,28 +202,28 @@ class Hand:
 
         self.newAttribute = None
 
-        self.seating = []
-        self.players = []
+        self.seating: list[Any] = []
+        self.players: list[Any] = []
         # Cache used for checkPlayerExists.
-        self.player_exists_cache = set()
-        self.posted = []
-        self.tourneysPlayersIds = {}
-        self.tourneyRanks = {}
-        self.tourneyWinnings = {}
-        self.tourneyWinningsCurrency = {}
+        self.player_exists_cache: set[str] = set()
+        self.posted: list[Any] = []
+        self.tourneysPlayersIds: dict[str, int] = {}
+        self.tourneyRanks: dict[str, int] = {}
+        self.tourneyWinnings: dict[str, Any] = {}
+        self.tourneyWinningsCurrency: dict[str, str] = {}
 
         # Collections indexed by street names
-        self.bets = {}
-        self.lastBet = {}
-        self.streets = {}
-        self.actions = {}  # [['mct','bets','$10'],['mika','folds'],['carlg','raises','$20']]
-        self.board = {}  # dict from street names to community cards
-        self.holecards = {}
-        self.discards = {}
-        self.showdownStrings = {}
+        self.bets: dict[str, dict[str, list[Any]]] = {}
+        self.lastBet: dict[str, Any] = {}
+        self.streets: dict[str, str] = {}
+        self.actions: dict[str, list[Any]] = {}
+        self.board: dict[str, list[str]] = {}
+        self.holecards: dict[str, dict[str, Any]] = {}
+        self.discards: dict[str, dict[str, Any]] = {}
+        self.showdownStrings: dict[str, Any] = {}
         # Per-player winning 5-card hand, when the history prints it explicitly
         # (used by the replayer to highlight the cards forming the combination).
-        self.winningHand = {}
+        self.winningHand: dict[str, Any] = {}
         for street in self.allStreets:
             self.streets[street] = ""  # portions of the handText, filled by markStreets()
             self.actions[street] = []
@@ -229,19 +238,19 @@ class Hand:
                 street
             ] = {}  # dict from player names to dicts by street ... of tuples ... of discarded holecards
         # Collections indexed by player names
-        self.rakes = {}
-        self.stacks = {}
-        self.collected = []  # list of ?
-        self.collectees = {}  # dict from player names to amounts collected (?)
-        self.koCounts = {}
-        self.endBounty = {}
+        self.rakes: dict[str, Decimal] = {}
+        self.stacks: dict[str, Decimal] = {}
+        self.collected: list[Any] = []
+        self.collectees: dict[str, Decimal] = {}
+        self.koCounts: dict[str, int] = {}
+        self.endBounty: dict[str, Decimal] = {}
 
         # Sets of players
-        self.folded = set()
-        self.dealt = set()  # 'dealt to' line to be printed
-        self.shown = set()  # cards were shown
-        self.mucked = set()  # cards were mucked at showdown
-        self.sitout = set()  # players sitting out or not dealt in (usually tournament)
+        self.folded: set[str] = set()
+        self.dealt: set[str] = set()  # 'dealt to' line to be printed
+        self.shown: set[str] = set()  # cards were shown
+        self.mucked: set[str] = set()  # cards were mucked at showdown
+        self.sitout: set[str] = set()  # players sitting out or not dealt in
 
         # Things to do with money
         self.pot = Pot()
