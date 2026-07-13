@@ -22,16 +22,19 @@ if sys.platform.startswith("linux") and os.getenv("FPDB_FORCE_X11") == "1":
     os.environ.setdefault("QT_QPA_PLATFORM", "xcb")
 
 import time
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-import zmq
+import zmq as _zmq
+
+zmq: Any = _zmq
 
 # Add a cache for frequently accessed data
 from cachetools import TTLCache
 from PySide6.QtCore import QCoreApplication, QEvent, QObject, Qt, QThread, QTimer, Signal
-from PySide6.QtGui import QIcon
+from PySide6.QtGui import QCloseEvent, QIcon
 from PySide6.QtWidgets import QApplication, QLabel, QVBoxLayout, QWidget
 from qt_material import apply_stylesheet
 
@@ -137,6 +140,24 @@ class ZMQReceiver(QObject):
             self.socket.close()
         self.context.term()
         log.info("ZMQ receiver closed")
+
+
+class HudMainWindow(QWidget):
+    """Top-level HUD window with a typed close callback."""
+
+    def __init__(self, on_close: Callable[[QCloseEvent], None]) -> None:
+        """Initialize the window and retain its close callback."""
+        super().__init__(
+            None,
+            Qt.WindowType.Dialog
+            | Qt.WindowType.WindowMinimizeButtonHint
+            | Qt.WindowType.WindowCloseButtonHint,
+        )
+        self._on_close = on_close
+
+    def closeEvent(self, event: QCloseEvent) -> None:  # noqa: N802
+        """Forward the native close event to the HUD owner."""
+        self._on_close(event)
 
 
 class HudMain(QObject):
@@ -316,10 +337,10 @@ class HudMain(QObject):
 
             # Initialization ZMQ avec QThread
             log.info("Initializing ZMQ communication...")
-            self.zmq_receiver = ZMQReceiver(parent=self)
+            self.zmq_receiver: ZMQReceiver | None = ZMQReceiver(parent=self)
             log.info("ZMQ receiver created successfully")
             self.zmq_receiver.message_received.connect(self.handle_message)
-            self.zmq_worker = ZMQWorker(self.zmq_receiver)
+            self.zmq_worker: ZMQWorker | None = ZMQWorker(self.zmq_receiver)
             self.zmq_worker.error_occurred.connect(self.handle_worker_error)
             log.info("Starting ZMQ worker...")
             self.zmq_worker.start()
@@ -372,7 +393,7 @@ class HudMain(QObject):
 
     def init_main_window(self) -> None:
         """Initialize the main application window."""
-        self.main_window = QWidget(None, Qt.Dialog | Qt.WindowMinimizeButtonHint | Qt.WindowCloseButtonHint)
+        self.main_window = HudMainWindow(self.close_event_handler)
         if self.options.xloc is not None or self.options.yloc is not None:
             x = int(self.options.xloc) if self.options.xloc is not None else self.main_window.x()
             y = int(self.options.yloc) if self.options.yloc is not None else self.main_window.y()
@@ -382,7 +403,6 @@ class HudMain(QObject):
         self.vb.setContentsMargins(2, 0, 2, 0)
         self.main_window.setLayout(self.vb)
         self.label = QLabel("Closing this window will exit from the HUD.")
-        self.main_window.closeEvent = self.close_event_handler
         self.vb.addWidget(self.label)
         self.main_window.setWindowTitle("HUD Main Window")
         cards_path = Path(self.config.graphics_path) / "tribal.jpg"
@@ -395,7 +415,7 @@ class HudMain(QObject):
         self.check_tables_timer.start(800)
         self.main_window.show()
 
-    def close_event_handler(self, event: QEvent) -> None:
+    def close_event_handler(self, event: QCloseEvent) -> None:
         """Handle the close event of the main window."""
         self.destroy()
         event.accept()
@@ -652,7 +672,7 @@ class HudMain(QObject):
                     # continue checking other tables
         return False
 
-    def _handle_hud_reconfiguration(self, temp_key: str, poker_game: str) -> tuple[str, str] | None:
+    def _handle_hud_reconfiguration(self, temp_key: str, poker_game: str) -> tuple[str, int | None]:
         """Handle HUD reconfiguration for max seats and game type changes."""
         if temp_key not in self.hud_dict:
             return poker_game, None
@@ -681,11 +701,11 @@ class HudMain(QObject):
                 if should_restart:
                     log.info(f"Smart restart for max seats change: {reason}")
                     self.smart_hud_manager.record_restart(temp_key, f"Max seats: {reason}")
-                    self.kill_hud("activate", temp_key)
+                    self.kill_hud(None, temp_key)
                     while temp_key in self.hud_dict:
                         time.sleep(0.5)
                     hud.hud_params["new_max_seats"] = None
-                    return poker_game, newmax
+                    return poker_game, int(newmax)
                 log.info(f"Skipping restart for max seats change: {reason}")
 
         # Check for game type change
@@ -704,7 +724,7 @@ class HudMain(QObject):
                 log.info(f"Smart restart for game type change: {reason}")
                 self.smart_hud_manager.record_restart(temp_key, f"Game type: {reason}")
                 with contextlib.suppress(Exception):
-                    self.kill_hud("activate", temp_key)
+                    self.kill_hud(None, temp_key)
                     while temp_key in self.hud_dict:
                         time.sleep(0.5)
             else:

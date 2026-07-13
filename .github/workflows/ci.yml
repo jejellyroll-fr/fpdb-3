@@ -83,6 +83,7 @@ jobs:
           fpdb_3_legacy/GuiBulkImport.py
           fpdb_3_legacy/GuiAutoImport.py
           fpdb_3_legacy/Hud.py
+          fpdb_3_legacy/HUD_main.pyw
           fpdb_3_legacy/HudStatsPersistence.py
           fpdb_3_legacy/iPoker/__init__.py
           fpdb_3_legacy/iPoker/dispatcher.py
