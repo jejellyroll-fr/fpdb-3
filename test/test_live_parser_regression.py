@@ -21,6 +21,7 @@ from fpdb_3_legacy.MicrogamingToFpdb import Microgaming
 from fpdb_3_legacy.PacificPokerToFpdb import PacificPoker
 from fpdb_3_legacy.PartyPokerToFpdb import PartyPoker
 from fpdb_3_legacy.PokerStarsToFpdb import PokerStars
+from fpdb_3_legacy.PokerTrackerToFpdb import PokerTracker
 from fpdb_3_legacy.SealsWithClubsToFpdb import SealsWithClubs
 from fpdb_3_legacy.UnibetToFpdb import Unibet
 from fpdb_3_legacy.WinamaxToFpdb import Winamax
@@ -87,6 +88,13 @@ CASES.append(
         "microgaming/Flop/PLO-6max-EUR-5-10-201603.v5.secondsb.raised.txt",
         Microgaming,
         REGRESSION_FILES / "Microgaming" / "Flop" / "PLO-6max-EUR-5-10-201603.v5.secondsb.raised.txt",
+    )
+)
+CASES.append(
+    (
+        "pokertracker/Flop/NLHE-EUR-0.05-0.10-201111.Microgaming.txt",
+        PokerTracker,
+        REGRESSION_FILES / "PokerTracker" / "Flop" / "NLHE-EUR-0.05-0.10-201111.Microgaming.txt",
     )
 )
 CASES += [

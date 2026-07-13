@@ -45,6 +45,7 @@
   "pokerstars/mixed/horse.txt": {"hand_count": 1, "sha256": "80ecb84cd1a2071344cf39512eb78289d5719b7f168bdc260f52bcd9f1e36aaf"},
   "pokerstars/stud/7stud.txt": {"hand_count": 1, "sha256": "3d127fe5581c2487fdeff16cd4f6ba551f0d922f787be7b405fd326ff79f0893"},
   "pokerstars/stud/razz.txt": {"hand_count": 1, "sha256": "188244dde74753315d8a659f50c410ebeef24f0d1a8e7c1d1f490c36f5810491"},
+  "pokertracker/Flop/NLHE-EUR-0.05-0.10-201111.Microgaming.txt": {"hand_count": 2, "sha256": "05cf5b4dec3537281448f2a91db4c34b40d4756ca0c052274fb41366e0ce713b"},
   "swc/Flop/LHE-6max-mBTC-2.00-4.00-201305.txt": {"hand_count": 1, "sha256": "cfc861da73819c4ab2ac7dd5a89b89a107f6b2906fe42f38a7653c33fb687d87"},
   "swc/Flop/NLHE-2max-mBTC-15-30-201310.txt": {"hand_count": 1, "sha256": "fdc7a16f887f766ad0a83016519f43912c59da71bb51aba7d5a51f687addf6f1"},
   "swc/Flop/NLHE-6max-mBTC-0.50-1.00-201304.post.both.txt": {"hand_count": 1, "sha256": "25fb05d632e68f222459352cb6f835e4cab7feb47687e5ed6acb260dd64eb5fd"},
