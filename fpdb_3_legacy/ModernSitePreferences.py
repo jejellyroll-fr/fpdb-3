@@ -8,6 +8,7 @@ Modern and responsive interface for site settings in fpdb.
 
 import os
 from functools import partial
+from typing import Any
 
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QBrush, QPainter
@@ -505,10 +506,10 @@ class ModernSitePreferencesDialog(QDialog):
     def __init__(self, config, parent=None) -> None:
         super().__init__(parent)
         self.config = config
-        self.site_cards = {}
-        self.site_data = {}  # Store data without creating widgets
-        self.visible_cards = set()  # Keep track of visible cards
-        self.enabled_sites = set()  # Initialize the set of enabled sites
+        self.site_cards: dict[str, ModernSiteCard] = {}
+        self.site_data: dict[str, Any] = {}  # Store data without creating widgets
+        self.visible_cards: set[str] = set()  # Keep track of visible cards
+        self.enabled_sites: set[str] = set()  # Initialize the set of enabled sites
 
         self._init_profiles_state()
 
@@ -638,13 +639,13 @@ class ModernSitePreferencesDialog(QDialog):
 
     def _init_profiles_state(self) -> None:
         """Load a working copy of hero profiles from config (committed on save)."""
-        self._profiles_working = {}
+        self._profiles_working: dict[str, dict[str, Any]] = {}
         getter = getattr(self.config, "get_hero_profiles", None)
         profiles = getter() if callable(getter) else {}
         for name, hp in profiles.items():
             self._profiles_working[name] = {"default": bool(hp.default), "links": list(hp.links)}
-        self._profiles_deleted = set()
-        self._current_profile = None
+        self._profiles_deleted: set[str] = set()
+        self._current_profile: str | None = None
         self._loading_profile = False
 
     def _all_site_names(self) -> list[str]:
