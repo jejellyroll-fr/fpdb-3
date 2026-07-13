@@ -31,6 +31,7 @@ client has been resized, destroyed, etc.
 #    Standard Library modules
 import re
 from time import sleep
+from typing import Any
 
 #    FreePokerTools modules
 from fpdb_3_legacy import Configuration
@@ -97,19 +98,33 @@ class Table_Window:
     ) -> None:
         self.config = config
         self.site = site
-        self.hud = None  # Will be filled in later
-        self.gdkhandle = None
-        self.number = None
+        self.hud: Any = None  # Will be filled in later
+        self.gdkhandle: Any = None
+        self.number: Any = None
+        self.title = ""
+        self.name = ""
+        self.type = ""
+        self.tournament: int | None = None
+        self.table: int | None = None
+        self.search_string = ""
+        self.tableno_re = ""
+        self.width = 0
+        self.height = 0
+        self.x = 0
+        self.y = 0
+        self.oldx = 0
+        self.oldy = 0
+        self.game: tuple[str, str] | bool = False
 
         # Decode values if they are in bytes
         if isinstance(table_name, bytes):
-            log.debug(f"Decoding table_name to UTF-8: {table_name}")
+            log.debug("Decoding table_name to UTF-8: %r", table_name)
             table_name = table_name.decode("utf-8")
         if isinstance(tournament, bytes):
-            log.debug(f"Decoding tournament to UTF-8: {tournament}")
+            log.debug("Decoding tournament to UTF-8: %r", tournament)
             tournament = tournament.decode("utf-8")
         if isinstance(table_number, bytes):
-            log.debug(f"Decoding table_number to UTF-8: {table_number}")
+            log.debug("Decoding table_number to UTF-8: %r", table_number)
             table_number = table_number.decode("utf-8")
 
         # Handle tournament and table number
@@ -233,7 +248,19 @@ class Table_Window:
     #    They don't change the data in the table and are generally used
     #    by the "check" methods. Most of the get methods are in the
     #    subclass because they are specific to X, Windows, etc.
-    def get_game(self):
+    def find_table_parameters(self) -> Any:
+        """Populate platform-specific window identifiers and title."""
+        raise NotImplementedError
+
+    def get_geometry(self) -> dict[str, int] | None:
+        """Return platform-specific window geometry, or None if closed."""
+        raise NotImplementedError
+
+    def get_window_title(self) -> str | None:
+        """Return the current platform-specific window title."""
+        raise NotImplementedError
+
+    def get_game(self) -> tuple[str, str] | bool:
         #        title = self.get_window_title()
         #        if title is None:
         #            return False
