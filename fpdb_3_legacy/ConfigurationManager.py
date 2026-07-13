@@ -111,12 +111,12 @@ class ConfigurationManager:
     def __init__(self) -> None:
         if not hasattr(self, "initialized"):
             self.initialized = False
-            self._config = None
+            self._config: Configuration.Config | None = None
             self._observers: list[ConfigObserver] = []
             self._change_history: list[ConfigChange] = []
             self._pending_changes: list[ConfigChange] = []
-            self._config_file_path = None
-            self._last_saved_state = {}  # Last saved state
+            self._config_file_path: str | None = None
+            self._last_saved_state: dict[str, Any] = {}  # Last saved state
 
     def initialize(self, config_file=None) -> None:
         """Initializes the configuration manager.
@@ -147,6 +147,8 @@ class ConfigurationManager:
         if not self.initialized:
             msg = "ConfigurationManager not initialized"
             raise RuntimeError(msg)
+        if self._config is None:
+            raise RuntimeError("ConfigurationManager has no configuration")
         return self._config
 
     def register_observer(self, observer: ConfigObserver) -> None:
@@ -219,6 +221,8 @@ class ConfigurationManager:
         with self._lock:
             if not self.initialized:
                 return False, "ConfigurationManager not initialized", []
+            if self._config is None or self._config_file_path is None:
+                return False, "ConfigurationManager has no configuration", []
 
             try:
                 # Save important values from the old configuration
@@ -597,11 +601,12 @@ class ConfigurationManager:
 
     def _capture_current_state(self) -> None:
         """Captures the current configuration state for future comparison."""
+        config = self.get_config()
         self._last_saved_state = {"sites": {}, "import": {}, "database": {}, "hud_ui": {}, "general": {}}
 
         # Capture site state
-        if hasattr(self._config, "supported_sites"):
-            for site_name, site in self._config.supported_sites.items():
+        if hasattr(config, "supported_sites"):
+            for site_name, site in config.supported_sites.items():
                 self._last_saved_state["sites"][site_name] = {
                     "enabled": getattr(site, "enabled", None),
                     "screen_name": getattr(site, "screen_name", ""),
@@ -612,8 +617,8 @@ class ConfigurationManager:
                 log.debug(f"Captured state for {site_name}: {self._last_saved_state['sites'][site_name]}")
 
         # Capture import state
-        if hasattr(self._config, "imp"):
-            imp = self._config.imp
+        if hasattr(config, "imp"):
+            imp = config.imp
             self._last_saved_state["import"] = {
                 "interval": getattr(imp, "interval", None),
                 "callFpdbHud": getattr(imp, "callFpdbHud", None),
@@ -621,22 +626,22 @@ class ConfigurationManager:
 
         # Capture import filters
         try:
-            self._last_saved_state["import"]["filters"] = self._config.get_import_parameters().get("importFilters", [])
+            self._last_saved_state["import"]["filters"] = config.get_import_parameters().get("importFilters", [])
         except CONFIG_ACCESS_ERRORS as e:
             log.warning("Error loading import filters: %s", e)
 
         # Capture HUD UI state
         try:
-            if hasattr(self._config, "get_hud_ui_parameters"):
-                self._last_saved_state["hud_ui"] = copy.deepcopy(self._config.get_hud_ui_parameters())
+            if hasattr(config, "get_hud_ui_parameters"):
+                self._last_saved_state["hud_ui"] = copy.deepcopy(config.get_hud_ui_parameters())
                 log.debug(f"Captured HUD UI state: {len(self._last_saved_state['hud_ui'])} parameters")
         except CONFIG_ACCESS_ERRORS as e:
             log.warning("Error capturing HUD UI parameters: %s", e)
 
         # Capture theme state
         try:
-            if hasattr(self._config, "general"):
-                general = self._config.general
+            if hasattr(config, "general"):
+                general = config.general
                 self._last_saved_state["general"] = {
                     "qt_material_theme": general.get("qt_material_theme", "dark_purple.xml"),
                     "popup_theme": general.get("popup_theme", "material_dark"),
