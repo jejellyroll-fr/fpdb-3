@@ -53,9 +53,8 @@ class Deck:
         self.__height = height
         self.__cardspath = str(Path(config.graphics_path) / "cards" / deck_type)
         self.__backfile = str(Path(config.graphics_path) / "cards" / "backs" / f"{card_back}.svg")
-        self.__cards = {"s": None, "h": None, "d": None, "c": None}
-        self.__card_back = None
-        self.__rank_vals = {}
+        self.__cards: dict[str, dict[int, QPixmap]] = {"s": {}, "h": {}, "d": {}, "c": {}}
+        self.__rank_vals: dict[str, int] = {}
 
         for sk in self.__cards:
             self.__load_suit(sk)
@@ -124,7 +123,7 @@ class Deck:
             )
         self.__cards[suit_key] = sd
 
-    def card(self, suit: str | None = None, rank: int = 0) -> QPixmap:
+    def card(self, suit: str, rank: int = 0) -> QPixmap:
         """Get card pixmap for specified suit and rank.
 
         Args:
@@ -144,7 +143,7 @@ class Deck:
         """
         return self.__card_back
 
-    def rank(self, token: str | None = None) -> int:
+    def rank(self, token: str) -> int:
         """Convert rank token to numeric value.
 
         Args:
@@ -165,12 +164,13 @@ class Deck:
         """
         # returns a 4x13-element dictionary of every card image +
         # index-0 = card back each element is a QPixmap
-        card_images = {}
+        card_images: dict[str | int, dict[int, QPixmap] | QPixmap] = {}
 
         for suit in ("s", "h", "d", "c"):
-            card_images[suit] = {}
+            suit_images: dict[int, QPixmap] = {}
             for rank in (14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2):
-                card_images[suit][rank] = self.card(suit, rank)
+                suit_images[rank] = self.card(suit, rank)
+            card_images[suit] = suit_images
 
         # This is a nice trick. We put the card back image behind key 0,
         # which allows the old code to work. A dict[0] looks like first
