@@ -11,6 +11,7 @@ Tests all branches and edge cases of the markStreets method including:
 import unittest
 from unittest.mock import Mock, patch
 
+from fpdb_3_legacy.Exceptions import FpdbHandPartial
 from fpdb_3_legacy.PokerStarsToFpdb import PokerStars
 
 
@@ -238,8 +239,8 @@ Hero: discards 1 card
         """Test markStreets with empty hand text."""
         hand = self._create_mock_hand({"base": "hold", "split": False, "category": "holdem"}, "")
 
-        # Empty text will cause regex to return None, expect this to raise an error
-        with self.assertRaises(AttributeError):
+        # Empty text is an incomplete hand history, not an internal regex error.
+        with self.assertRaises(FpdbHandPartial):
             self.parser.markStreets(hand)
 
     def test_markstreets_unknown_game_type(self):
