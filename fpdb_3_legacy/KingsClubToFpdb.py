@@ -23,6 +23,7 @@ from __future__ import annotations
 import datetime
 import re
 from decimal import Decimal
+from typing import Any
 
 from fpdb_3_legacy.HandHistoryConverter import FpdbHandPartial, FpdbParseError, HandHistoryConverter
 from fpdb_3_legacy.loggingFpdb import get_logger
@@ -38,6 +39,7 @@ class KingsClub(HandHistoryConverter):
     filetype = "text"
     codepage = ("utf8", "cp1252", "ISO-8859-1")
     siteId = 28  # Needs to match id entry in Sites database
+    compiledPlayers: set[str] = set()
     sym = {
         "USD": r"\$",
         "CAD": r"\$",
@@ -334,7 +336,7 @@ class KingsClub(HandHistoryConverter):
         ]
 
     def determineGameType(self, handText):
-        info = {}
+        info: dict[str, Any] = {}
         m = self.re_GameInfo.search(handText)
         if not m:
             tmp = handText[0:200]
