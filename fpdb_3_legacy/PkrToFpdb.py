@@ -167,9 +167,9 @@ class Pkr(HandHistoryConverter):
             self.re_CollectPot = re.compile(
                 r"^{PLYR} (ties( side pot \#\d)?, and )?(ties|wins) {CUR}(?P<POT>[{NUM}]+)".format(**subst), re.MULTILINE
             )
-            self.re_sitsOut = re.compile("^{} sits out".format(player_re), re.MULTILINE)
+            self.re_sitsOut = re.compile(f"^{player_re} sits out", re.MULTILINE)
             self.re_ShownCards = re.compile(
-                "^Seat (?P<SEAT>[0-9]+): {} (\\(.*\\) )?(?P<SHOWED>showed|mucked) (?P<CARDS>\\[.+\\])".format(player_re),
+                f"^Seat (?P<SEAT>[0-9]+): {player_re} (\\(.*\\) )?(?P<SHOWED>showed|mucked) (?P<CARDS>\\[.+\\])",
                 re.MULTILINE,
             )
 
@@ -190,7 +190,7 @@ class Pkr(HandHistoryConverter):
             m2 = self.re_Partial.search(handText)
             if not m2:
                 message = "Join in hand"
-                raise FpdbHandPartial("Partial hand history: {}".format(message))
+                raise FpdbHandPartial(f"Partial hand history: {message}")
             else:
                 tmp = handText[0:200]
                 log.error(_("PkrToFpdb.determineGameType: '%s'") % tmp)
@@ -233,7 +233,7 @@ class Pkr(HandHistoryConverter):
         #        m = self.re_Button.search(hand.handText)
         #        if m: info.update(m.groupdict())
         # TODO : I rather like the idea of just having this dict as hand.info
-        log.debug("readHandInfo: {}".format(info))
+        log.debug(f"readHandInfo: {info}")
         for key in info:
             if key == "DATETIME":
                 # 11 Jun 2012 21:38:10

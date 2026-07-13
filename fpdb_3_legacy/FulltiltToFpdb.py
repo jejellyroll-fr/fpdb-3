@@ -281,13 +281,13 @@ class Fulltilt(HandHistoryConverter):
                 re.MULTILINE,
             )
             self.re_HeroCards = re.compile(
-                r"^Dealt to {}(?: \[(?P<OLDCARDS>.+?)\])?( \[(?P<NEWCARDS>.+?)\])".format(player_re), re.MULTILINE
+                rf"^Dealt to {player_re}(?: \[(?P<OLDCARDS>.+?)\])?( \[(?P<NEWCARDS>.+?)\])", re.MULTILINE
             )
             self.re_Action = re.compile(
                 r"^{PLAYERS}(?P<ATYPE> bets| checks| raises to| completes it to| calls| folds| discards| stands pat)( [{LS}]?(?P<BET>[{NUM}]+))?( on| cards?)?( \[(?P<CARDS>.+?)\])?".format(**self.substitutions),
                 re.MULTILINE,
             )
-            self.re_ShowdownAction = re.compile(r"^{} shows \[(?P<CARDS>.*)\]".format(player_re), re.MULTILINE)
+            self.re_ShowdownAction = re.compile(rf"^{player_re} shows \[(?P<CARDS>.*)\]", re.MULTILINE)
             self.re_CollectPot = re.compile(
                 r"^Seat (?P<SEAT>[0-9]+): {PLAYERS} (\(button\) |\(small blind\) |\(big blind\) )?(collected|showed \[.*\] and won) \([{LS}]?(?P<POT>[{NUM}]+)\)(, mucked| with.*)?".format(**self.substitutions),
                 re.MULTILINE,
@@ -300,9 +300,9 @@ class Fulltilt(HandHistoryConverter):
                 r"^Seat (?P<SEAT>[0-9]+): {PLAYERS} \s?(ties for|wins) (the (main |side )?pot|pot (1|2)) \([{LS}]?(?P<POT>[{NUM}]+)\)".format(**self.substitutions),
                 re.MULTILINE,
             )
-            self.re_SitsOut = re.compile(r"^{} sits out".format(player_re), re.MULTILINE)
+            self.re_SitsOut = re.compile(rf"^{player_re} sits out", re.MULTILINE)
             self.re_ShownCards = re.compile(
-                r"^Seat (?P<SEAT>[0-9]+): {} (\(button\) |\(small blind\) |\(big blind\) )?(?P<SHOWED>showed|mucked) \[(?P<CARDS>.*)\](( and won \(.*\) with | and lost with | \- )(?P<STRING>.*))?".format(player_re),
+                rf"^Seat (?P<SEAT>[0-9]+): {player_re} (\(button\) |\(small blind\) |\(big blind\) )?(?P<SHOWED>showed|mucked) \[(?P<CARDS>.*)\](( and won \(.*\) with | and lost with | \- )(?P<STRING>.*))?",
                 re.MULTILINE,
             )
 
@@ -384,13 +384,13 @@ class Fulltilt(HandHistoryConverter):
         else:
             stakesId = "2"
 
-        if "SB{}".format(stakesId) in mg:
-            info["sb"] = self.clearMoneyString(mg["SB{}".format(stakesId)])
-        if "BB{}".format(stakesId) in mg:
-            info["bb"] = self.clearMoneyString(mg["BB{}".format(stakesId)])
+        if f"SB{stakesId}" in mg:
+            info["sb"] = self.clearMoneyString(mg[f"SB{stakesId}"])
+        if f"BB{stakesId}" in mg:
+            info["bb"] = self.clearMoneyString(mg[f"BB{stakesId}"])
 
-        if mg["CURRENCY{}".format(stakesId)] is not None:
-            info["currency"] = currencies[mg["CURRENCY{}".format(stakesId)]]
+        if mg[f"CURRENCY{stakesId}"] is not None:
+            info["currency"] = currencies[mg[f"CURRENCY{stakesId}"]]
 
         if mg["TOURNO"] is None:
             info["type"] = "ring"
@@ -405,7 +405,7 @@ class Fulltilt(HandHistoryConverter):
         if m:
             info["mix"] = mixes[m.groupdict()["MIXED"]]
 
-        if not mg["CURRENCY{}".format(stakesId)] and info["type"] == "ring":
+        if not mg[f"CURRENCY{stakesId}"] and info["type"] == "ring":
             info["currency"] = "play"
 
         if info["limitType"] == "fl" and info["bb"] is not None:
@@ -865,9 +865,9 @@ class Fulltilt(HandHistoryConverter):
         else:
             regex = re.escape(str(table_name))
         log.info(
-            "Fulltilt.getTableTitleRe: table_name='{}' tournament='{}' table_number='{}'".format(table_name, tournament, table_number)
+            f"Fulltilt.getTableTitleRe: table_name='{table_name}' tournament='{tournament}' table_number='{table_number}'"
         )
-        log.info("Fulltilt.getTableTitleRe: returns: '{}'".format(regex))
+        log.info(f"Fulltilt.getTableTitleRe: returns: '{regex}'")
         return regex
 
     def readSTP(self, hand):
