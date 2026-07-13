@@ -104,6 +104,7 @@ Les bugs multi-backend récents (`Rank` réservé, `boolean` vs `smallint`, `set
 - ✅ **Graphe tournoi** (2026-07-13) : `GuiTourneyGraphViewer.py` rejoint le ratchet ; les courbes ChipEV et dépendances graphiques optionnelles sont explicites.
 - ✅ **Vues de mains cash/tournoi** (2026-07-13) : `GuiHandViewer.py` et `GuiTourHandViewer.py` rejoignent le ratchet ; callbacks de modèle Qt, pagination et replayer sont explicités.
 - ✅ **Informations/configuration GUI** (2026-07-13) : `GuiStatsInfo.py` et `GuiConfigObserver.py` rejoignent le ratchet ; le signal de sélection Qt accepte explicitement l’élément précédent absent.
+- ✅ **Journal GUI** (2026-07-13) : `GuiLogView.py` rejoint le ratchet ; modèle, layout et sélection de fichier nullable sont explicités.
 - **Découper les god-modules** : `SQL.py` (requêtes par domaine / fichiers `.sql`), `Database.py` (connexion / DDL / cache HUD / requêtes), `Stats.py` (par famille). Incrémental, avec tests de non-régression.
 - **Qualité outillée** : résorber la dette `ruff` (~2900) par paliers (règle par règle, `--fix`, baseline) ; introduire **mypy/pyright** en mode progressif ; convertir les 78 `TODO/FIXME` en tâches traçables ; clarifier/supprimer le dossier `fpdb/`.
 
