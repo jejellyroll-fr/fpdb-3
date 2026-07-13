@@ -9,6 +9,7 @@ Modern interface for dynamic management of favorite seats by site.
 import json
 import os
 from math import cos, sin
+from typing import Any
 
 from PySide6.QtCore import QRect, Qt, Signal
 from PySide6.QtGui import QBrush, QColor, QFont, QPainter, QPen
@@ -48,7 +49,7 @@ class SeatSelector(QWidget):
         super().__init__(parent)
         self.max_seats = max_seats
         self.current_seat = current_seat
-        self.seat_buttons = []
+        self.seat_buttons: list[QPushButton] = []
         self.setFixedSize(120, 80)  # Fixed size for uniformity
 
     def paintEvent(self, event) -> None:
@@ -101,7 +102,7 @@ class SeatSelector(QWidget):
             painter.drawEllipse(int(x - seat_size / 2), int(y - seat_size / 2), seat_size, seat_size)
 
             # Seat number
-            painter.setPen(QPen(Qt.black))
+            painter.setPen(QPen(QColor(Qt.GlobalColor.black)))
             painter.setFont(QFont("Arial", 9, QFont.Weight.Bold))
             painter.drawText(
                 int(x - seat_size / 2),
@@ -163,8 +164,8 @@ class ModernSeatCard(QFrame):
         self.site_name = site_name
         self.site_config = site_config
         self.parent_dialog = parent
-        self.seat_inputs = {}
-        self.seat_selectors = {}
+        self.seat_inputs: dict[int, QLineEdit] = {}
+        self.seat_selectors: dict[int, SeatSelector] = {}
 
         self.setFrameStyle(QFrame.Shape.Box)
         self.setStyleSheet(
@@ -341,7 +342,7 @@ class ModernSeatCard(QFrame):
             seat_input.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
             # Handle different data structures for fav_seat
-            current_fav = 0
+            current_fav: Any = 0
             try:
                 if hasattr(self.site_config, "fav_seat"):
                     if isinstance(self.site_config.fav_seat, dict):
@@ -452,7 +453,7 @@ class ModernSeatPreferencesDialog(QDialog):
     def __init__(self, config, parent=None) -> None:
         super().__init__(parent)
         self.config = config
-        self.site_cards = {}
+        self.site_cards: dict[str, ModernSeatCard] = {}
         self.changes_made = False
 
         self.setWindowTitle("Seat Preferences")
@@ -673,7 +674,7 @@ class ModernSeatPreferencesDialog(QDialog):
                 changes_made = False
                 for max_seats in range(2, 11):
                     try:
-                        current_val = 0
+                        current_val: Any = 0
                         if hasattr(card.site_config, "fav_seat"):
                             if isinstance(card.site_config.fav_seat, dict):
                                 current_val = card.site_config.fav_seat.get(
@@ -740,7 +741,7 @@ class ModernSeatPreferencesDialog(QDialog):
                 # Check if changes were made
                 for max_seats in range(2, 11):
                     try:
-                        current_val = 0
+                        current_val: Any = 0
                         if hasattr(card.site_config, "fav_seat"):
                             if isinstance(card.site_config.fav_seat, dict):
                                 current_val = card.site_config.fav_seat.get(
@@ -840,7 +841,7 @@ class ModernSeatPreferencesDialog(QDialog):
             seat_values = card.get_values()
             for max_seats in range(2, 11):
                 try:
-                    current_val = 0
+                    current_val: Any = 0
                     if hasattr(card.site_config, "fav_seat"):
                         if isinstance(card.site_config.fav_seat, dict):
                             current_val = card.site_config.fav_seat.get(
