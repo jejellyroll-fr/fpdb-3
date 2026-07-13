@@ -25,9 +25,11 @@ from fpdb_3_legacy import L10n
 _ = L10n.get_translation()
 
 # TODO: I have no idea if AP has multi-currency options, i just copied the regex out of Everleaf converter for the currency symbols.. weeeeee - Eric
+import datetime
+import re
 from decimal import Decimal
 
-from fpdb_3_legacy.HandHistoryConverter import *
+from fpdb_3_legacy.HandHistoryConverter import FpdbHandPartial, FpdbParseError, HandHistoryConverter, log
 
 # Class for converting Absolute HH format.
 

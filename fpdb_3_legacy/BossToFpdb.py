@@ -24,8 +24,11 @@ from fpdb_3_legacy import L10n
 _ = L10n.get_translation()
 
 import datetime
+import logging
+import re
+from decimal import Decimal
 
-from fpdb_3_legacy.HandHistoryConverter import *
+from fpdb_3_legacy.HandHistoryConverter import FpdbParseError, HandHistoryConverter, log
 
 # Boss HH Format
 

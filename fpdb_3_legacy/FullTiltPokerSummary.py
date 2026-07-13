@@ -24,11 +24,12 @@ from fpdb_3_legacy import L10n
 _ = L10n.get_translation()
 
 import datetime
+import re
 from decimal import Decimal
 
 from fpdb_3_legacy.Exceptions import FpdbParseError
-from fpdb_3_legacy.HandHistoryConverter import *
-from fpdb_3_legacy.TourneySummary import *
+from fpdb_3_legacy.HandHistoryConverter import HandHistoryConverter
+from fpdb_3_legacy.TourneySummary import TourneySummary, log
 
 
 class FullTiltPokerSummary(TourneySummary):

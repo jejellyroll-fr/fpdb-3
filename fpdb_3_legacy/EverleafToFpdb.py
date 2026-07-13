@@ -23,7 +23,11 @@ from fpdb_3_legacy import L10n
 
 _ = L10n.get_translation()
 
-from fpdb_3_legacy.HandHistoryConverter import *
+import datetime
+import re
+from decimal import Decimal
+
+from fpdb_3_legacy.HandHistoryConverter import FpdbParseError, HandHistoryConverter, log
 
 # Class for converting Everleaf HH format.
 
