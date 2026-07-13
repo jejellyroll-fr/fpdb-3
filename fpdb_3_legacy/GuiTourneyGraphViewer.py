@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 from __future__ import annotations
+
 # Copyright 2008-2011 Carl Gherardi
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -13,16 +14,14 @@ from __future__ import annotations
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 # In the "official" distribution you can find the license in agpl-3.0.txt.
-
-
 import os
 import sys
 from time import time
 
 from PySide6.QtWidgets import QFrame, QMessageBox, QScrollArea, QSplitter, QVBoxLayout
 
-from fpdb_3_legacy import Database
-from fpdb_3_legacy import Filters
+from fpdb_3_legacy import Database, Filters
+from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.loggingFpdb import get_logger
 
 # import Charset
@@ -87,9 +86,9 @@ class GuiTourneyGraphViewer(QSplitter):
         }
 
         self.filters = Filters.Filters(self.db, display=filters_display)
-        self.filters.registerButton1Name("Refresh Graph")
+        self.filters.registerButton1Name(_("Refresh Graph"))
         self.filters.registerButton1Callback(self.generateGraph)
-        self.filters.registerButton2Name("Export to File")
+        self.filters.registerButton2Name(_("Export to File"))
         self.filters.registerButton2Callback(self.exportGraph)
 
         scroll = QScrollArea()
@@ -190,7 +189,7 @@ class GuiTourneyGraphViewer(QSplitter):
             from PySide6.QtWidgets import QMessageBox
             msg = QMessageBox(self)
             msg.setIcon(QMessageBox.Icon.Information)
-            msg.setWindowTitle("FPDB 3 info")
+            msg.setWindowTitle(_("FPDB 3 info"))
             msg.setText("No data found for the selected filters.")
             msg.exec()
             self.db.rollback()
@@ -458,7 +457,7 @@ class GuiTourneyGraphViewer(QSplitter):
         path = path + "/graph.png"
         self.fig.savefig(path)
         msg = QMessageBox()
-        msg.setWindowTitle("FPDB 3 info")
+        msg.setWindowTitle(_("FPDB 3 info"))
         mess = "Your graph is saved in " + path
         msg.setText(mess)
         msg.exec()

@@ -64,6 +64,7 @@ from PySide6.QtWidgets import (
 )
 
 from fpdb_3_legacy import Database, Filters, LeakDetector
+from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.loggingFpdb import get_logger
 
 log = get_logger("gui_opponents_report")
@@ -415,14 +416,14 @@ class GuiOpponentsReport(QSplitter):
         }
 
         self.filters = Filters.Filters(self.db, display=filters_display)
-        self.filters.registerButton2Name("Refresh")
+        self.filters.registerButton2Name(_("Refresh"))
         self.filters.registerButton2Callback(self.refreshStats)
 
         # Minimum head-to-head hands selector.
         minhands_box = QWidget()
         minhands_layout = QHBoxLayout(minhands_box)
         minhands_layout.setContentsMargins(0, 0, 0, 0)
-        minhands_layout.addWidget(QLabel("Min hands vs hero:"))
+        minhands_layout.addWidget(QLabel(_("Min hands vs hero:")))
         self.minhands_spin = QSpinBox()
         self.minhands_spin.setRange(1, 100000)
         self.minhands_spin.setValue(20)
@@ -433,7 +434,7 @@ class GuiOpponentsReport(QSplitter):
         topn_box = QWidget()
         topn_layout = QHBoxLayout(topn_box)
         topn_layout.setContentsMargins(0, 0, 0, 0)
-        topn_layout.addWidget(QLabel("Top N opponents:"))
+        topn_layout.addWidget(QLabel(_("Top N opponents:")))
         self.maxopponents_spin = QSpinBox()
         self.maxopponents_spin.setRange(1, 100000)
         self.maxopponents_spin.setValue(50)
@@ -444,9 +445,9 @@ class GuiOpponentsReport(QSplitter):
         sort_box = QWidget()
         sort_layout = QHBoxLayout(sort_box)
         sort_layout.setContentsMargins(0, 0, 0, 0)
-        sort_layout.addWidget(QLabel("Sort by:"))
+        sort_layout.addWidget(QLabel(_("Sort by:")))
         self.sort_combo = QComboBox()
-        for label, _ in SORT_MODES:
+        for label, _unused in SORT_MODES:
             self.sort_combo.addItem(label)
         self.sort_combo.currentIndexChanged.connect(self._on_sort_changed)
         sort_layout.addWidget(self.sort_combo)
@@ -547,7 +548,7 @@ class GuiOpponentsReport(QSplitter):
 
             msg = QMessageBox(self)
             msg.setIcon(QMessageBox.Icon.Information)
-            msg.setWindowTitle("FPDB 3 info")
+            msg.setWindowTitle(_("FPDB 3 info"))
             msg.setText("No data found for the selected filters.")
             msg.exec()
             raise ValueError("No data found")
@@ -607,7 +608,7 @@ class GuiOpponentsReport(QSplitter):
         self.model.clear()
         self.model.setColumnCount(len(columns))
         self.model.setHorizontalHeaderLabels([c[0] for c in columns])
-        for idx, (_, tip) in enumerate(columns):
+        for idx, (_unused, tip) in enumerate(columns):
             self.model.setHeaderData(idx, Qt.Orientation.Horizontal, tip, Qt.ItemDataRole.ToolTipRole)
 
         for m in self._sorted_rows():

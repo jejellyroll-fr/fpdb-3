@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 from __future__ import annotations
+
 # Copyright 2010-2011 Maxime Grandchamp
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -14,14 +15,9 @@ from __future__ import annotations
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 # In the "official" distribution you can find the license in agpl-3.0.txt.
 #
-
-
 # This code once was in GuiReplayer.py and was split up in this and the former by zarturo.
-
-
 # import L10n
 # _ = L10n.get_translation()
-
 from functools import partial
 from io import StringIO
 
@@ -39,14 +35,8 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
 )
 
-from fpdb_3_legacy import Card
-from fpdb_3_legacy import Configuration
-from fpdb_3_legacy import Database
-from fpdb_3_legacy import Deck
-from fpdb_3_legacy import Filters
-from fpdb_3_legacy import GuiReplayer
-from fpdb_3_legacy import Hand
-from fpdb_3_legacy import SQL
+from fpdb_3_legacy import SQL, Card, Configuration, Database, Deck, Filters, GuiReplayer, Hand
+from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.loggingFpdb import get_logger
 
 log = get_logger("gui_tour_hand_viewer")
@@ -85,7 +75,7 @@ class TourHandViewer(QSplitter):
         }
 
         self.filters = Filters.Filters(self.db, display=filters_display)
-        self.filters.registerButton1Name("Load Hands")
+        self.filters.registerButton1Name(_("Load Hands"))
         self.filters.registerButton1Callback(self.loadHands)
         self.filters.registerCardsCallback(self.filter_cards_cb)
 
@@ -243,7 +233,7 @@ class TourHandViewer(QSplitter):
             from PySide6.QtWidgets import QMessageBox
             msg = QMessageBox(self)
             msg.setIcon(QMessageBox.Icon.Information)
-            msg.setWindowTitle("FPDB 3 info")
+            msg.setWindowTitle(_("FPDB 3 info"))
             msg.setText("No data found for the selected filters.")
             msg.exec()
             return
@@ -424,7 +414,7 @@ class TourHandViewer(QSplitter):
             return
         hand = self.hands[int(index.sibling(index.row(), self.colnum["HandId"]).data())]
         m = QMenu()
-        copyAction = m.addAction("Copy to clipboard")
+        copyAction = m.addAction(_("Copy to clipboard"))
         copyAction.triggered.connect(partial(self.copyHandToClipboard, hand=hand))
         m.move(event.globalPosition().toPoint())
         m.exec()
