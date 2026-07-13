@@ -61,6 +61,27 @@ def test_compile_produces_a_loadable_catalog(tmp_path):
     assert catalog.gettext("Bulk Import") == "Importation en Masse"
 
 
+def test_empty_translations_fall_back_to_source(tmp_path):
+    """A msgid with an empty msgstr must return the English source, not ''."""
+    (tmp_path / "fpdb-xx_XX.po").write_text(
+        'msgid ""\nmsgstr "Content-Type: text/plain; charset=UTF-8\\n"\n\n'
+        'msgid "Translated"\nmsgstr "Traduit"\n\n'
+        'msgid "Cash"\nmsgstr ""\n',  # empty translation
+        encoding="utf-8",
+    )
+    i18n_compile.compile_locale(tmp_path, "xx_XX")
+    catalog = gettext.translation("fpdb", str(tmp_path), languages=["xx_XX"])
+    assert catalog.gettext("Translated") == "Traduit"
+    assert catalog.gettext("Cash") == "Cash"  # empty msgstr -> source, not ""
+
+
+def test_parse_po_drops_empty_but_keeps_the_header(tmp_path):
+    po = tmp_path / "fpdb-xx_XX.po"
+    po.write_text('msgid ""\nmsgstr "X"\n\nmsgid "A"\nmsgstr ""\n\nmsgid "B"\nmsgstr "b"\n', encoding="utf-8")
+    messages = i18n_compile.parse_po(po)
+    assert messages == {"": "X", "B": "b"}  # empty "A" dropped, header kept
+
+
 def test_ensure_compiled_is_idempotent(tmp_path):
     (tmp_path / "fpdb-fr_FR.po").write_bytes((LOCALE_DIR / "fpdb-fr_FR.po").read_bytes())
 

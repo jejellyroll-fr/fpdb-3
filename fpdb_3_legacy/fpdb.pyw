@@ -1141,6 +1141,8 @@ class fpdb(QMainWindow):
         for code, checked in menu_layout.language_options(available, current):
             if code == menu_layout.SYSTEM_LANGUAGE:
                 label = menu_layout.translate("System default")
+            elif code == menu_layout.SOURCE_LANGUAGE:
+                label = "English"
             else:
                 label = QLocale(code).nativeLanguageName().capitalize() or code
             action = QAction(label, self, checkable=True)

@@ -44,7 +44,11 @@ def parse_po(path: Path) -> dict[str, str]:
     skip_plural = False
 
     def flush() -> None:
-        if key is not None and val is not None and not skip_plural:
+        # Skip entries with an empty translation (like GNU msgfmt) so gettext
+        # falls back to the source string instead of returning "" — an empty
+        # menu/label. The header entry (msgid "") has a non-empty msgstr carrying
+        # the charset, so it is kept (required for UTF-8 decoding). Plurals ignored.
+        if key is not None and val and not skip_plural:
             messages[key] = val
 
     with path.open(encoding="utf-8") as handle:
@@ -135,6 +139,9 @@ def ensure_compiled(locale_dir: Path, langs: list[str] | None = None) -> list[st
     locale_dir = Path(locale_dir)
     if not locale_dir.is_dir():
         return []
+    # Rebuild when the .po changed OR when this compiler changed (so a fix to the
+    # compilation itself invalidates .mo files produced by an older version).
+    compiler_mtime = Path(__file__).stat().st_mtime
     targets = langs if langs is not None else available_locales(locale_dir)
     recompiled: list[str] = []
     for lang in targets:
@@ -142,7 +149,8 @@ def ensure_compiled(locale_dir: Path, langs: list[str] | None = None) -> list[st
         if not po_path.exists():
             continue
         mo_path = locale_dir / lang / "LC_MESSAGES" / f"{DOMAIN}.mo"
-        if mo_path.exists() and mo_path.stat().st_mtime >= po_path.stat().st_mtime:
+        source_mtime = max(po_path.stat().st_mtime, compiler_mtime)
+        if mo_path.exists() and mo_path.stat().st_mtime >= source_mtime:
             continue  # already up to date
         try:
             compile_locale(locale_dir, lang)
