@@ -108,6 +108,10 @@ class ClassicStatWindow(Aux_Hud.SimpleStatWindow):
         if seat == "common" or seat == "table":
             return
 
+        if not isinstance(seat, int):
+            log.warning("Ignoring unexpected classic HUD seat identifier: %r", seat)
+            return
+
         if self.isHidden():
             return
 
