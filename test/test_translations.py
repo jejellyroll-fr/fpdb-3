@@ -82,6 +82,13 @@ def test_parse_po_drops_empty_but_keeps_the_header(tmp_path):
     assert messages == {"": "X", "B": "b"}  # empty "A" dropped, header kept
 
 
+def test_parse_po_ignores_orphan_continuation(tmp_path):
+    po = tmp_path / "fpdb-xx_XX.po"
+    po.write_text('"orphan"\nmsgid "A"\nmsgstr "a"\n', encoding="utf-8")
+
+    assert i18n_compile.parse_po(po) == {"A": "a"}
+
+
 def test_ensure_compiled_is_idempotent(tmp_path):
     (tmp_path / "fpdb-fr_FR.po").write_bytes((LOCALE_DIR / "fpdb-fr_FR.po").read_bytes())
 

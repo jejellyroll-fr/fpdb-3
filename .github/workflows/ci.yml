@@ -33,6 +33,10 @@ jobs:
           fpdb_3_legacy/http_capture_db_import.py
           fpdb_3_legacy/http_capture_ofc.py
           fpdb_3_legacy/swc_http_adapter.py
+          fpdb_3_legacy/menu_layout.py
+          fpdb_3_legacy/i18n.py
+          fpdb_3_legacy/i18n_compile.py
+          fpdb_3_legacy/ConfigInitializer.py
       - name: Lint newly modernized modules
         run: >-
           ruff check
