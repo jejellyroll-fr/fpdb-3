@@ -41,8 +41,12 @@ class Dialect:
     # --- identifiers -------------------------------------------------------
 
     def quote_identifier(self, name: str) -> str:
-        """Quote a table/column identifier for this backend."""
+        """Quote a table/column identifier for this backend (case-preserving)."""
         raise NotImplementedError
+
+    def quote_literal(self, value: str) -> str:
+        """Quote a string literal for this backend (ANSI single-quote doubling)."""
+        return "'" + value.replace("'", "''") + "'"
 
     # --- introspection -----------------------------------------------------
 
@@ -128,6 +132,10 @@ class MySQLDialect(Dialect):
     def quote_identifier(self, name: str) -> str:
         return "`" + name.replace("`", "``") + "`"
 
+    def quote_literal(self, value: str) -> str:
+        # MySQL escapes string literals with backslashes by default.
+        return "'" + value.replace("\\", "\\\\").replace("'", "\\'") + "'"
+
     def list_tables(self, db: Any) -> list[str]:
         cursor = db.get_cursor()
         cursor.execute("SHOW TABLES")
@@ -155,9 +163,7 @@ class PostgresDialect(Dialect):
     placeholder = "%s"
 
     def quote_identifier(self, name: str) -> str:
-        # fpdb creates its schema with unquoted identifiers, which PostgreSQL
-        # folds to lower case; quote to match that folded form.
-        return '"' + name.lower().replace('"', '""') + '"'
+        return '"' + name.replace('"', '""') + '"'
 
     def list_tables(self, db: Any) -> list[str]:
         cursor = db.get_cursor()
