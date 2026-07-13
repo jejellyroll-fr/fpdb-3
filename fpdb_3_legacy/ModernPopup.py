@@ -179,7 +179,7 @@ class ModernSectionWidget(QFrame):
         self.section_name = section_name
         self.theme = theme
         self.icon_provider = icon_provider
-        self.stat_rows = []
+        self.stat_rows: list[ModernStatRow] = []
 
         self.setup_ui()
         self.setup_style()
@@ -265,7 +265,7 @@ class ModernSubmenu(Popup):
         # because super().__init__() calls create() which needs these attributes
         self.theme = get_theme(self.theme_name)
         self.icon_provider = get_icon_provider(self.icon_provider_name)
-        self.sections = {}
+        self.sections: dict[str, ModernSectionWidget] = {}
 
         # Variables for making popup draggable
         self.drag_start_position = None

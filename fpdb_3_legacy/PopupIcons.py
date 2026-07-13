@@ -13,7 +13,7 @@ class IconProvider:
 
     def __init__(self, name: str) -> None:
         self.name = name
-        self.icons = {}
+        self.icons: dict[str, str] = {}
 
     def get_icon(self, stat_name: str) -> str:
         """Get icon for a specific stat."""
