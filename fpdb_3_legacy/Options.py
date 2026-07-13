@@ -205,7 +205,7 @@ def fpdb_options() -> tuple:
 
 def site_alias(alias: str) -> str | bool:
     """Function for converting various site aliases to the FPDB name."""
-    tmp = alias  # Initialize with the original alias (not really up to date)
+    tmp: str | bool = alias  # Initialize with the original alias (not really up to date)
     aliases = {
         "Absolute": "Absolute",
         "AP": "Absolute",
