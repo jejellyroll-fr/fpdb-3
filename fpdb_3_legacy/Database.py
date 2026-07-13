@@ -33,7 +33,9 @@ import sys
 import traceback
 from datetime import datetime, timedelta
 from decimal import Decimal
+from importlib import import_module
 from time import sleep, strftime, time
+from typing import Any
 
 import pytz
 
@@ -87,7 +89,7 @@ except ImportError:
     use_sqlalchemy = False
 
 try:
-    from numpy import var
+    var = getattr(import_module("numpy"), "var")
 
     use_numpy = True
 except ImportError:
@@ -102,7 +104,7 @@ DB_VERSION = 224
 
 class VARIANCE:
     def __init__(self) -> None:
-        self.store = []
+        self.store: list[Any] = []
 
     def step(self, value) -> None:
         self.store.append(value)
@@ -1370,7 +1372,13 @@ class Database:
 
     def __init__(self, c, sql=None, autoconnect=True) -> None:
         self.config = c
+        # Connection/cursor implementations differ across SQLite, PostgreSQL,
+        # MySQLdb and pymysql, so the common database facade treats them as a
+        # backend-defined runtime interface.
+        self.connection: Any = None
+        self.cursor: Any = None
         self.__connected = False
+        self.wrongDbVersion = False
         self.settings = {}
         self.settings["os"] = "linuxmac" if os.name != "nt" else "windows"
         db_params = c.get_db_parameters()
@@ -1381,7 +1389,7 @@ class Database:
         self.host = db_params["db-host"]
         self.db_path = ""
         gen = c.get_general_params()
-        self.day_start = 0
+        self.day_start = 0.0
         self._hero = None
         self._has_lock = False
         self.printdata = False
@@ -1425,10 +1433,10 @@ class Database:
                 # existing databases keep working (showdown / cashout details).
                 self.ensure_feature_tables()
 
-            self.gtcache = None  # GameTypeId cache
-            self.tcache = None  # TourneyId cache
-            self.pcache = None  # PlayerId cache
-            self.tpcache = None  # TourneysPlayersId cache
+            self.gtcache: Any = None  # GameTypeId cache
+            self.tcache: Any = None  # TourneyId cache
+            self.pcache: Any = None  # PlayerId cache
+            self.tpcache: Any = None  # TourneysPlayersId cache
 
             # if fastStoreHudCache is true then the hudcache will be build using the limited configuration which ignores date, seats, and position
             self.build_full_hudcache = not self.import_options["fastStoreHudCache"]
@@ -1443,14 +1451,15 @@ class Database:
             self.hand_1day_ago = 0  # max hand id more than 24 hrs earlier than now
             self.date_ndays_ago = "d000000"  # date N days ago ('d' + YYMMDD)
             self.h_date_ndays_ago = "d000000"  # date N days ago ('d' + YYMMDD) for hero
-            self.date_nhands_ago = {}  # dates N hands ago per player - not used yet
+            self.date_nhands_ago: dict[Any, Any] = {}  # dates N hands ago per player
 
             self.saveActions = self.import_options["saveActions"] is not False
 
             if self.is_connected():
                 if not self.wrongDbVersion:
                     self.get_sites()
-                self.connection.rollback()  # make sure any locks taken so far are released
+                if self.connection is not None:
+                    self.connection.rollback()  # release locks taken during setup
 
     # end def __init__
 
@@ -2071,7 +2080,7 @@ class Database:
         return cards
 
     def get_action_from_hand(self, hand_no):
-        action = [[], [], [], [], []]
+        action: list[list[Any]] = [[], [], [], [], []]
         c = self.connection.cursor()
         c.execute(self.sql.query["get_action_from_hand"], (hand_no,))
         for row in c.fetchall():
@@ -2184,7 +2193,7 @@ class Database:
         h_seats_cust_nums_low = hud_params["h_seats_cust_nums_low"]
         h_seats_cust_nums_high = hud_params["h_seats_cust_nums_high"]
 
-        stat_dict = {}
+        stat_dict: dict[Any, Any] = {}
 
         if seats_style == "A":
             seats_min, seats_max = 0, 10
@@ -2419,7 +2428,7 @@ class Database:
             # Otherwise return the first one
             log.info(f"Database.get_player_id: Fallback returned first player ID {rows[0][0]} of multiple matches for '{playerName}'")
             return rows[0][0]
-        return None
+        return False
 
     def get_player_site_id(self, playerId):
         c = self.connection.cursor()
@@ -2459,10 +2468,10 @@ class Database:
         return c.fetchall()
 
     def resetCache(self) -> None:
-        self.ttold = set()  # TourneyTypes old
-        self.ttnew = set()  # TourneyTypes new
-        self.wmold = set()  # WeeksMonths old
-        self.wmnew = set()  # WeeksMonths new
+        self.ttold: set[Any] = set()  # TourneyTypes old
+        self.ttnew: set[Any] = set()  # TourneyTypes new
+        self.wmold: set[Any] = set()  # WeeksMonths old
+        self.wmnew: set[Any] = set()  # WeeksMonths new
         self.gtcache = None  # GameTypeId cache
         self.tcache = None  # TourneyId cache
         self.pcache = None  # PlayerId cache
@@ -3788,7 +3797,7 @@ class Database:
         # stime = time()
         # derive list of program owner's player ids
         self.hero = {}  # name of program owner indexed by site id
-        self.hero_ids = {
+        self.hero_ids: Any = {
             "dummy": -53,
             "dummy2": -52,
         }  # playerid of owner indexed by site id
@@ -4032,7 +4041,7 @@ class Database:
             else:
                 self._has_lock = True
                 return True
-        return None
+        return False
 
     def releaseLock(self) -> None:
         if self._has_lock:
@@ -4051,24 +4060,24 @@ class Database:
     # end def lock_for_insert
 
     def resetBulkCache(self, reconnect=False) -> None:
-        self.siteHandNos = []  # cache of siteHandNo
-        self.hbulk = []  # Hands bulk inserts
-        self.bbulk = []  # Boards bulk inserts
-        self.hpbulk = []  # HandsPlayers bulk inserts
-        self.habulk = []  # HandsActions bulk inserts
-        self.hcbulk = {}  # HudCache bulk inserts
-        self.dcbulk = {}  # CardsCache bulk inserts
-        self.pcbulk = {}  # PositionsCache bulk inserts
-        self.hsbulk = []  # HandsStove bulk inserts
-        self.hsdbulk = []  # HandsShowdown bulk inserts
-        self.hcobulk = []  # HandsCashout bulk inserts
-        self.panbulk = []  # PlayerAutoNotes bulk upserts
-        self.htbulk = []  # HandsPots bulk inserts
-        self.tbulk = {}  # Tourneys bulk updates
-        self.s = {"bk": []}  # Sessions bulk updates
-        self.sc = {}  # SessionsCache bulk updates
-        self.tc = {}  # TourneysCache bulk updates
-        self.hids = []  # hand ids in order of hand bulk inserts
+        self.siteHandNos: list[Any] = []  # cache of siteHandNo
+        self.hbulk: list[Any] = []  # Hands bulk inserts
+        self.bbulk: list[Any] = []  # Boards bulk inserts
+        self.hpbulk: list[Any] = []  # HandsPlayers bulk inserts
+        self.habulk: list[Any] = []  # HandsActions bulk inserts
+        self.hcbulk: dict[Any, Any] = {}  # HudCache bulk inserts
+        self.dcbulk: dict[Any, Any] = {}  # CardsCache bulk inserts
+        self.pcbulk: dict[Any, Any] = {}  # PositionsCache bulk inserts
+        self.hsbulk: list[Any] = []  # HandsStove bulk inserts
+        self.hsdbulk: list[Any] = []  # HandsShowdown bulk inserts
+        self.hcobulk: list[Any] = []  # HandsCashout bulk inserts
+        self.panbulk: list[Any] = []  # PlayerAutoNotes bulk upserts
+        self.htbulk: list[Any] = []  # HandsPots bulk inserts
+        self.tbulk: dict[Any, Any] = {}  # Tourneys bulk updates
+        self.s: dict[str, Any] = {"bk": []}  # Sessions bulk updates
+        self.sc: dict[Any, Any] = {}  # SessionsCache bulk updates
+        self.tc: dict[Any, Any] = {}  # TourneysCache bulk updates
+        self.hids: list[Any] = []  # hand ids in order of hand bulk inserts
         # self.tids        = []         # tourney ids in order of hp bulk inserts
         if reconnect:
             self.do_connect(self.config)
