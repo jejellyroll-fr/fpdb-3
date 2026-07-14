@@ -131,6 +131,18 @@ from fpdb_3_legacy.stats_postflop import (
     face_raise_turn as face_raise_turn,
 )
 from fpdb_3_legacy.stats_postflop import (
+    ffreq1 as ffreq1,
+)
+from fpdb_3_legacy.stats_postflop import (
+    ffreq2 as ffreq2,
+)
+from fpdb_3_legacy.stats_postflop import (
+    ffreq3 as ffreq3,
+)
+from fpdb_3_legacy.stats_postflop import (
+    ffreq4 as ffreq4,
+)
+from fpdb_3_legacy.stats_postflop import (
     first_raise_flop as first_raise_flop,
 )
 from fpdb_3_legacy.stats_postflop import (
@@ -2754,173 +2766,6 @@ def cb4(stat_dict, player):
         )
     except (KeyError, ValueError, TypeError):
         return format_no_data_stat("cb4", "% continuation bet 7th street")
-
-
-def ffreq1(stat_dict, player):
-    """Calculate the fold frequency statistic for a given player on the flop/4th street.
-
-    Args:
-        stat_dict (dict): A dictionary containing player statistics.
-        player (int): The player for whom the statistic is calculated.
-
-    Returns:
-        tuple: A tuple containing various formatted strings representing the fold frequency statistic.
-
-    """
-    stat = 0.0
-    try:
-        was_raised_1 = float(
-            stat_dict[player].get("was_raised_1", 0),
-        )  # Ensure key exists and default to 0
-        f_freq_1 = float(stat_dict[player].get("f_freq_1", 0))
-
-        # No opportunities = no data available
-        if was_raised_1 == 0:
-            return format_no_data_stat("ff1", "% fold frequency flop/4th street")
-
-        # Calculate fold frequency percentage
-        stat = f_freq_1 / was_raised_1
-
-        return (
-            stat,
-            "%3.1f" % (100.0 * stat),
-            "ff1=%3.1f%%" % (100.0 * stat),
-            "ff_1=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (f_freq_1, was_raised_1),
-            "% fold frequency flop/4th street",
-        )
-    except (KeyError, ValueError, TypeError):
-        return (
-            stat,
-            "NA",
-            "ff1=NA",
-            "ff_1=NA",
-            "(0/0)",
-            "% fold frequency flop/4th street",
-        )
-
-
-def ffreq2(stat_dict, player):
-    """Calculate the fold frequency statistic for a given player on the turn/5th street.
-
-    Args:
-        stat_dict (dict): A dictionary containing player statistics.
-        player (int): The player for whom the statistic is calculated.
-
-    Returns:
-        tuple: A tuple containing various formatted strings representing the fold frequency statistic.
-
-    """
-    stat = 0.0
-    try:
-        was_raised_2 = float(
-            stat_dict[player].get("was_raised_2", 0),
-        )  # Ensure key exists and default to 0
-        f_freq_2 = float(stat_dict[player].get("f_freq_2", 0))
-
-        # No opportunities = no data available
-        if was_raised_2 == 0:
-            return format_no_data_stat("ff2", "% fold frequency turn/5th street")
-
-        # Calculate fold frequency percentage
-        stat = f_freq_2 / was_raised_2
-
-        return (
-            stat,
-            "%3.1f" % (100.0 * stat),
-            "ff2=%3.1f%%" % (100.0 * stat),
-            "ff_2=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (f_freq_2, was_raised_2),
-            "% fold frequency turn/5th street",
-        )
-    except (KeyError, ValueError, TypeError):
-        return (
-            stat,
-            "NA",
-            "ff2=NA",
-            "ff_2=NA",
-            "(0/0)",
-            "% fold frequency turn/5th street",
-        )
-
-
-def ffreq3(stat_dict, player):
-    """Calculate the fold frequency statistic for a given player on the river/6th street.
-
-    Args:
-        stat_dict (dict): A dictionary containing player statistics.
-        player (int): The player for whom the statistic is calculated.
-
-    Returns:
-        tuple: A tuple containing various formatted strings representing the fold frequency statistic.
-
-    """
-    stat = 0.0
-    try:
-        was_raised_3 = float(
-            stat_dict[player].get("was_raised_3", 0),
-        )  # Ensure key exists and default to 0
-        f_freq_3 = float(stat_dict[player].get("f_freq_3", 0))
-
-        # No opportunities = no data available
-        if was_raised_3 == 0:
-            return format_no_data_stat("ff3", "% fold frequency river/6th street")
-
-        # Calculate fold frequency percentage
-        stat = f_freq_3 / was_raised_3
-
-        return (
-            stat,
-            "%3.1f" % (100.0 * stat),
-            "ff3=%3.1f%%" % (100.0 * stat),
-            "ff_3=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (f_freq_3, was_raised_3),
-            "% fold frequency river/6th street",
-        )
-    except (KeyError, ValueError, TypeError):
-        return (
-            stat,
-            "NA",
-            "ff3=NA",
-            "ff_3=NA",
-            "(0/0)",
-            "% fold frequency river/6th street",
-        )
-
-
-def ffreq4(stat_dict, player):
-    """Calculate the fold frequency statistic for a given player on the 7th street.
-
-    Args:
-        stat_dict (dict): A dictionary containing player statistics.
-        player (int): The player for whom the statistic is calculated.
-
-    Returns:
-        tuple: A tuple containing various formatted strings representing the fold frequency statistic.
-
-    """
-    stat = 0.0
-    try:
-        was_raised_4 = float(stat_dict[player].get("was_raised_4", 0))
-        f_freq_4 = float(stat_dict[player].get("f_freq_4", 0))
-
-        # No opportunities = no data available
-        if was_raised_4 == 0:
-            return format_no_data_stat("ff4", "% fold frequency 7th street")
-
-        # Calculate fold frequency percentage
-        stat = f_freq_4 / was_raised_4
-
-        return (
-            stat,
-            "%3.1f" % (100.0 * stat),
-            "ff4=%3.1f%%" % (100.0 * stat),
-            "ff_4=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (f_freq_4, was_raised_4),
-            "% fold frequency 7th street",
-        )
-    except (KeyError, ValueError, TypeError):
-        return (stat, "NA", "ff4=NA", "ff_4=NA", "(0/0)", "% fold frequency 7th street")
 
 
 def starthands(stat_dict, player):
