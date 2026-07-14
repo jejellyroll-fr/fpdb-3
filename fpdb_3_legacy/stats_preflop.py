@@ -106,3 +106,40 @@ def squeeze_mp(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatT
     return preflop_action_by_position(stat_dict, player, "sqz", "mp", "SQZ MP")
 def squeeze_ep(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
     return preflop_action_by_position(stat_dict, player, "sqz", "ep", "SQZ EP")
+
+
+def preflop_range(
+    stat_dict: Mapping[int, Mapping[str, Any]],
+    player: int,
+    action_key: str,
+    label: str,
+    description: str,
+) -> StatTuple:
+    """Format the observed starting-hand range for a preflop action."""
+    stat = 0.0
+    try:
+        hands = float(stat_dict[player].get("n", 0))
+        actions = float(stat_dict[player].get(action_key, 0))
+        if hands == 0:
+            return format_no_data_stat(label, description)
+        stat = actions / hands
+        percent = 100.0 * stat
+        display = f"{label}={percent:3.1f}%"
+        return stat, f"{percent:3.1f}", display, display, f"({actions:.0f}/{hands:.0f})", description
+    except (AttributeError, KeyError, TypeError, ValueError):
+        return stat, "NA", f"{label}=NA", f"{label}=NA", "(0/0)", description
+
+
+def three_bet_range(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    """Return the observed percentage of dealt hands that were 3-bet."""
+    return preflop_range(stat_dict, player, "tb_0", "3BR", "3-bet range")
+
+
+def four_bet_range(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    """Return the observed percentage of dealt hands that were 4-bet."""
+    return preflop_range(stat_dict, player, "fb_0", "4BR", "4-bet range")
+
+
+def squeeze_range(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    """Return the observed percentage of dealt hands that were squeezed."""
+    return preflop_range(stat_dict, player, "sqz_0", "SQZR", "squeeze range")
