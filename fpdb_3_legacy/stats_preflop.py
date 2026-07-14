@@ -215,3 +215,48 @@ def three_bet_vs_steal(stat_dict: Mapping[int, Mapping[str, Any]], player: int) 
 def call_vs_steal(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
     """Return no data for call versus steal without cross-player context."""
     return format_no_data_stat("cvs", "% call vs steal (deprecated)")
+
+
+def cold_call(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    """Return the preflop cold-call frequency."""
+    try:
+        opportunities = float(stat_dict[player].get("CAR_opp_0", 0))
+        done = float(stat_dict[player].get("CAR_0", 0))
+        if opportunities == 0:
+            return format_no_data_stat("cc", "% cold call preflop")
+        stat = done / opportunities
+        percent = 100.0 * stat
+        display = f"cc={percent:3.1f}%"
+        return stat, f"{percent:3.1f}", display, display, f"({int(done)}/{int(opportunities)})", "% cold call preflop"
+    except (KeyError, TypeError, ValueError):
+        return format_no_data_stat("cc", "% cold call preflop")
+
+
+def limp(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    """Return the estimated limp frequency as VPIP actions minus raises."""
+    try:
+        opportunities = float(stat_dict[player].get("vpip_opp", 0))
+        done = float(stat_dict[player].get("vpip", 0)) - float(stat_dict[player].get("pfr", 0))
+        if opportunities == 0:
+            return format_no_data_stat("limp", "% limp preflop")
+        stat = done / opportunities
+        percent = 100.0 * stat
+        display = f"limp={percent:3.1f}%"
+        return stat, f"{percent:3.1f}", display, display, f"({int(done)}/{int(opportunities)})", "% limp preflop"
+    except (KeyError, TypeError, ValueError):
+        return format_no_data_stat("limp", "% limp preflop")
+
+
+def open_limp(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    """Return the frequency of being first into the pot with a limp."""
+    try:
+        opportunities = float(stat_dict[player].get("open_limp_opp", 0))
+        done = float(stat_dict[player].get("open_limp", 0))
+        if opportunities == 0:
+            return format_no_data_stat("open_limp", "% open limp preflop")
+        stat = done / opportunities
+        percent = 100.0 * stat
+        display = f"openlimp={percent:3.1f}%"
+        return stat, f"{percent:3.1f}", display, display, f"({int(done)}/{int(opportunities)})", "% open limp preflop"
+    except (KeyError, TypeError, ValueError):
+        return format_no_data_stat("open_limp", "% open limp preflop")
