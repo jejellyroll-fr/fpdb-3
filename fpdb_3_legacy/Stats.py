@@ -164,6 +164,9 @@ from fpdb_3_legacy.stats_preflop import (
     fold_to_allin as fold_to_allin,
 )
 from fpdb_3_legacy.stats_preflop import (
+    fold_vs_4bet as fold_vs_4bet,
+)
+from fpdb_3_legacy.stats_preflop import (
     four_bet_bb as four_bet_bb,
 )
 from fpdb_3_legacy.stats_preflop import (
@@ -261,6 +264,9 @@ from fpdb_3_legacy.stats_preflop import (
 )
 from fpdb_3_legacy.stats_preflop import (
     three_bet_vs_steal as three_bet_vs_steal,
+)
+from fpdb_3_legacy.stats_preflop import (
+    vpip_pfr_ratio as vpip_pfr_ratio,
 )
 from fpdb_3_legacy.stats_sizing import (
     amt_bet_f as amt_bet_f,
@@ -3347,102 +3353,6 @@ def player_note(stat_dict, player):
 
 ################################################################################################
 # NEW STATS
-
-
-def vpip_pfr_ratio(stat_dict, player):
-    """Calculate the VPIP/PFR ratio for a player.
-
-    This statistic represents the ratio between a player's VPIP (Voluntarily Put money In Pot)
-    and PFR (Pre-Flop Raise) percentages, which gives an indication of the player's preflop aggression.
-
-    Args:
-        stat_dict (dict): A dictionary containing player statistics.
-        player (int): The player for whom the statistic is calculated.
-
-    Returns:
-        tuple: A tuple containing the calculated statistic, formatted strings, and related information.
-        Returns "-" if no preflop opportunities to distinguish from actual ratio values.
-
-    """
-    try:
-        vpip_opp = float(stat_dict[player].get("vpip_opp", 0))
-        pfr_opp = float(stat_dict[player].get("pfr_opp", 0))
-        vpip_count = float(stat_dict[player].get("vpip", 0))
-        pfr_count = float(stat_dict[player].get("pfr", 0))
-
-        # No preflop opportunities = no data available
-        if vpip_opp == 0 or pfr_opp == 0:
-            return format_no_data_stat("v/p", "VPIP/PFR ratio")
-
-        # Calculate VPIP and PFR percentages
-        vpip = vpip_count / vpip_opp
-        pfr = pfr_count / pfr_opp
-
-        # Calculate ratio
-        if pfr > 0:
-            stat = vpip / pfr
-        else:
-            stat = float("inf")  # Avoid division by zero for PFR
-
-        return (
-            stat,
-            f"{stat:2.2f}",
-            f"v/p={stat:2.2f}",
-            f"vpip/pfr={stat:2.2f}",
-            "(%d/%d)/(%d/%d)"
-            % (
-                stat_dict[player]["vpip"],
-                stat_dict[player]["vpip_opp"],
-                stat_dict[player]["pfr"],
-                stat_dict[player]["pfr_opp"],
-            ),
-            "VPIP/PFR ratio",
-        )
-    except (KeyError, ValueError, TypeError):
-        return (
-            float("inf"),
-            "NA",
-            "v/p=NA",
-            "vpip/pfr=NA",
-            "(0/0)/(0/0)",
-            "VPIP/PFR ratio",
-        )
-
-
-def fold_vs_4bet(stat_dict, player):
-    """Calculate the Fold vs 4bet percentage for a player.
-
-    This measures how often a player folds when facing a 4bet.
-
-    Args:
-        stat_dict (dict): A dictionary containing player statistics.
-        player (int): The player for whom the statistic is calculated.
-
-    Returns:
-        tuple: A tuple containing the calculated statistic, formatted strings, and related information.
-        Returns "-" if no fold vs 4bet opportunities to distinguish from 0% (never faced 4bet).
-    """
-    stat = 0.0
-    try:
-        f4b_opp = float(stat_dict[player].get("F4B_opp_0", 0))
-        f4b_count = float(stat_dict[player].get("F4B_0", 0))
-
-        # No opportunities = no data available
-        if f4b_opp == 0:
-            return format_no_data_stat("f4b", "% fold vs 4bet")
-
-        # Calculate fold vs 4bet percentage
-        stat = f4b_count / f4b_opp
-        return (
-            stat,
-            "%3.1f" % (100.0 * stat),
-            "f4b=%3.1f%%" % (100.0 * stat),
-            "f4b=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (f4b_count, f4b_opp),
-            "% fold vs 4bet",
-        )
-    except (KeyError, ValueError, TypeError):
-        return format_no_data_stat("f4b", "% fold vs 4bet")
 
 
 def float_bet(stat_dict, player):
