@@ -124,6 +124,7 @@ jobs:
           fpdb_3_legacy/migrate_tests.py
           fpdb_3_legacy/migrate_to_pyside6.py
           fpdb_3_legacy/validate_pyside6_migration.py
+          fpdb_3_legacy/swc_poker_console.py
           fpdb_3_legacy/sync_databases.py
           fpdb_3_legacy/SummaryEverleaf.py
           fpdb_3_legacy/AutoNotePlo.py

@@ -1,6 +1,7 @@
 import json
 import os
 import sys
+from typing import Any
 
 from PySide6.QtCore import QFileSystemWatcher, QProcess, Qt
 from PySide6.QtGui import QFont
@@ -134,7 +135,7 @@ class SwCPokerConsoleDialog(QDialog):
         """)
 
         main_layout = QHBoxLayout(self)
-        splitter = QSplitter(Qt.Horizontal, self)
+        splitter = QSplitter(Qt.Orientation.Horizontal, self)
 
         # --- LEFT PANEL: CONTROLLER & CONSOLE ---
         left_widget = QWidget()
@@ -144,7 +145,7 @@ class SwCPokerConsoleDialog(QDialog):
         # Status & Controls
         ctrl_layout = QHBoxLayout()
         self.lbl_status = QLabel("Status: 🔴 Stopped")
-        self.lbl_status.setFont(QFont("Arial", 11, QFont.Bold))
+        self.lbl_status.setFont(QFont("Arial", 11, QFont.Weight.Bold))
         self.lbl_status.setStyleSheet("color: #ff5252;")
 
         self.lbl_count = QLabel("Hands Captured: 0")
@@ -200,7 +201,7 @@ class SwCPokerConsoleDialog(QDialog):
         right_layout = QHBoxLayout(right_widget)
         right_layout.setContentsMargins(0, 0, 0, 0)
 
-        right_splitter = QSplitter(Qt.Vertical, self)
+        right_splitter = QSplitter(Qt.Orientation.Vertical, self)
 
         # Top: Hand list
         hand_list_widget = QWidget()
@@ -220,13 +221,13 @@ class SwCPokerConsoleDialog(QDialog):
 
         # Replayer Header
         self.lbl_game_info = QLabel("Select a hand to start replay")
-        self.lbl_game_info.setFont(QFont("Arial", 11, QFont.Bold))
+        self.lbl_game_info.setFont(QFont("Arial", 11, QFont.Weight.Bold))
         self.lbl_game_info.setStyleSheet("color: #ff9800; border: none;")
-        self.lbl_game_info.setAlignment(Qt.AlignCenter)
+        self.lbl_game_info.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.rep_layout.addWidget(self.lbl_game_info)
 
         # Replayer Content Area (Split cards on left, actions log on right)
-        rep_content_splitter = QSplitter(Qt.Horizontal)
+        rep_content_splitter = QSplitter(Qt.Orientation.Horizontal)
         rep_content_splitter.setStyleSheet("QSplitter::handle { background-color: #2b2b2b; }")
 
         self.scroll_area = QScrollArea()
@@ -271,7 +272,7 @@ class SwCPokerConsoleDialog(QDialog):
 
         rep_ctrl_layout.addWidget(self.btn_first)
         rep_ctrl_layout.addWidget(self.btn_prev)
-        rep_ctrl_layout.addWidget(self.lbl_step_num, 0, Qt.AlignCenter)
+        rep_ctrl_layout.addWidget(self.lbl_step_num, 0, Qt.AlignmentFlag.AlignCenter)
         rep_ctrl_layout.addWidget(self.btn_next)
         rep_ctrl_layout.addWidget(self.btn_last)
         rep_ctrl_layout.addWidget(self.btn_open_db_replayer)
@@ -317,6 +318,8 @@ class SwCPokerConsoleDialog(QDialog):
                 self.process.kill()
 
     def on_process_output(self):
+        if self.process is None:
+            return
         data = self.process.readAllStandardOutput()
         text = bytes(data).decode('utf-8', errors='ignore')
         self.txt_log.append(text.strip())
@@ -356,9 +359,9 @@ class SwCPokerConsoleDialog(QDialog):
             return
 
         json_files = []
-        for f in os.listdir(self.output_dir):
-            if f.startswith("hand_") and f.endswith(".json"):
-                json_files.append(f)
+        for filename in os.listdir(self.output_dir):
+            if filename.startswith("hand_") and filename.endswith(".json"):
+                json_files.append(filename)
 
         # Sort by hand ID/timestamp (most recent first or reverse)
         json_files.sort(reverse=True)
@@ -368,8 +371,8 @@ class SwCPokerConsoleDialog(QDialog):
         for fn in json_files:
             filepath = os.path.join(self.output_dir, fn)
             try:
-                with open(filepath) as f:
-                    hand = json.load(f)
+                with open(filepath) as stream:
+                    hand = json.load(stream)
                 hand_id = hand.get("hand_id")
                 raw_game_type = hand.get("game_type", "OFC")
                 game_type = clean_game_name(raw_game_type)
@@ -380,7 +383,7 @@ class SwCPokerConsoleDialog(QDialog):
                 display_str = f"Hand #{hand_id} ({game_type}) - {time_str}"
 
                 item = QListWidgetItem(display_str)
-                item.setData(Qt.UserRole, hand_id)
+                item.setData(Qt.ItemDataRole.UserRole, hand_id)
                 self.lst_hands.addItem(item)
                 self.hands_data[hand_id] = hand
 
@@ -488,7 +491,7 @@ class SwCPokerConsoleDialog(QDialog):
         if not item:
             return
 
-        hand_id = item.data(Qt.UserRole)
+        hand_id = item.data(Qt.ItemDataRole.UserRole)
         self.current_hand_id = hand_id
         hand_data = self.hands_data.get(hand_id)
         if not hand_data:
@@ -522,14 +525,14 @@ class SwCPokerConsoleDialog(QDialog):
     def create_card_widget(self, card_str, is_board=True):
         card_label = QLabel(self)
         card_label.setObjectName("cardLabel")
-        card_label.setAlignment(Qt.AlignCenter)
+        card_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         card_label.setFixedSize(36, 52)
 
         if not card_str or card_str == "--" or card_str == "-1":
             if not is_board:
                 # Red card back for hidden in-hand/hole cards
                 card_label.setText("SwC")
-                card_label.setFont(QFont("Arial", 9, QFont.Bold))
+                card_label.setFont(QFont("Arial", 9, QFont.Weight.Bold))
                 card_label.setStyleSheet("""
                     background-color: #b71c1c;
                     color: #ffcdd2;
@@ -552,7 +555,7 @@ class SwCPokerConsoleDialog(QDialog):
             color = SUIT_COLORS.get(suit, "#ffffff")
 
             card_label.setText(f"{rank}\n{suit_sym}")
-            card_label.setFont(QFont("Arial", 11, QFont.Bold))
+            card_label.setFont(QFont("Arial", 11, QFont.Weight.Bold))
             card_label.setStyleSheet(f"""
                 background-color: white;
                 color: {color};
@@ -603,11 +606,11 @@ class SwCPokerConsoleDialog(QDialog):
         actions_by_step = []
 
         # Track states to infer actions
-        prev_board = []
-        prev_bets = {}
-        prev_stacks = {}
+        prev_board: list[Any] = []
+        prev_bets: dict[str, Any] = {}
+        prev_stacks: dict[str, Any] = {}
         prev_pot = 0.0
-        prev_placed_counts = {}
+        prev_placed_counts: dict[str, int] = {}
         current_round = 0
 
         for idx, step in enumerate(steps):
@@ -860,11 +863,11 @@ class SwCPokerConsoleDialog(QDialog):
             board_layout.setContentsMargins(10, 10, 10, 10)
 
             board_lbl = QLabel(f"<b>TABLE / POT: {pot_size:.2f} mBTC</b>")
-            board_lbl.setAlignment(Qt.AlignCenter)
+            board_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
             board_layout.addWidget(board_lbl)
 
             cards_row = QHBoxLayout()
-            cards_row.setAlignment(Qt.AlignCenter)
+            cards_row.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
             # Show up to 5 community cards
             for idx in range(5):
@@ -949,35 +952,35 @@ class SwCPokerConsoleDialog(QDialog):
                 # Row 1: TOP (3 cards)
                 lbl_top = QLabel("TOP :")
                 lbl_top.setStyleSheet("font-weight: bold; border: none; color: #ffb74d;")
-                grid.addWidget(lbl_top, 0, 0, Qt.AlignRight | Qt.AlignVCenter)
+                grid.addWidget(lbl_top, 0, 0, Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
                 top_cards = p_cards.get("top", ["--"]*3)
                 for idx in range(3):
                     card_str = top_cards[idx] if idx < len(top_cards) else "--"
                     grid.addWidget(self.create_card_widget(card_str, is_board=True), 0, idx + 1)
                 if sd_rows.get("top"):
-                    grid.addWidget(QLabel(f"<font color='#a0a0a0'><i>{sd_rows['top']}</i></font>"), 0, 4, 1, 3, Qt.AlignLeft | Qt.AlignVCenter)
+                    grid.addWidget(QLabel(f"<font color='#a0a0a0'><i>{sd_rows['top']}</i></font>"), 0, 4, 1, 3, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
 
                 # Row 2: MIDDLE (5 cards)
                 lbl_mid = QLabel("MIDDLE :")
                 lbl_mid.setStyleSheet("font-weight: bold; border: none; color: #ffb74d;")
-                grid.addWidget(lbl_mid, 1, 0, Qt.AlignRight | Qt.AlignVCenter)
+                grid.addWidget(lbl_mid, 1, 0, Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
                 mid_cards = p_cards.get("middle", ["--"]*5)
                 for idx in range(5):
                     card_str = mid_cards[idx] if idx < len(mid_cards) else "--"
                     grid.addWidget(self.create_card_widget(card_str, is_board=True), 1, idx + 1)
                 if sd_rows.get("mid"):
-                    grid.addWidget(QLabel(f"<font color='#a0a0a0'><i>{sd_rows['mid']}</i></font>"), 1, 6, 1, 3, Qt.AlignLeft | Qt.AlignVCenter)
+                    grid.addWidget(QLabel(f"<font color='#a0a0a0'><i>{sd_rows['mid']}</i></font>"), 1, 6, 1, 3, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
 
                 # Row 3: BOTTOM (5 cards)
                 lbl_bot = QLabel("BOTTOM :")
                 lbl_bot.setStyleSheet("font-weight: bold; border: none; color: #ffb74d;")
-                grid.addWidget(lbl_bot, 2, 0, Qt.AlignRight | Qt.AlignVCenter)
+                grid.addWidget(lbl_bot, 2, 0, Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
                 bot_cards = p_cards.get("bottom", ["--"]*5)
                 for idx in range(5):
                     card_str = bot_cards[idx] if idx < len(bot_cards) else "--"
                     grid.addWidget(self.create_card_widget(card_str, is_board=True), 2, idx + 1)
                 if sd_rows.get("bot"):
-                    grid.addWidget(QLabel(f"<font color='#a0a0a0'><i>{sd_rows['bot']}</i></font>"), 2, 6, 1, 3, Qt.AlignLeft | Qt.AlignVCenter)
+                    grid.addWidget(QLabel(f"<font color='#a0a0a0'><i>{sd_rows['bot']}</i></font>"), 2, 6, 1, 3, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
 
                 p_box.addLayout(grid)
 
@@ -998,7 +1001,7 @@ class SwCPokerConsoleDialog(QDialog):
                 active_cards = p_cards.get("active", [])
                 if active_cards:
                     active_layout = QHBoxLayout()
-                    active_layout.setAlignment(Qt.AlignLeft)
+                    active_layout.setAlignment(Qt.AlignmentFlag.AlignLeft)
                     active_layout.addWidget(QLabel("In Hand:"))
                     for card in active_cards:
                         active_layout.addWidget(self.create_card_widget(card, is_board=False))
@@ -1007,7 +1010,7 @@ class SwCPokerConsoleDialog(QDialog):
                 p_cards = placed_cards.get(p_name, {"cards": []})
                 # Traditional games: horizontal row of private cards
                 hole_layout = QHBoxLayout()
-                hole_layout.setAlignment(Qt.AlignLeft)
+                hole_layout.setAlignment(Qt.AlignmentFlag.AlignLeft)
                 hole_layout.addWidget(QLabel("Cards:"))
 
                 # If there are flat cards inside cards of places list
