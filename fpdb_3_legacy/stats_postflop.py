@@ -396,6 +396,35 @@ def fold_to_cbet_river(stat_dict: Mapping[int, Mapping[str, Any]], player: int) 
     return f_cb3(stat_dict, player)
 
 
+def check_raise_street(
+    stat_dict: Mapping[int, Mapping[str, Any]], player: int, street: int, description: str,
+) -> StatTuple:
+    """Format check-raise frequency for one street."""
+    abbreviation = f"cr{street}"
+    long_label = f"cr_{street}"
+    stat = 0.0
+    try:
+        opportunities = float(stat_dict[player].get(f"ccr_opp_{street}", 0))
+        done = float(stat_dict[player].get(long_label, 0))
+        if opportunities == 0:
+            return format_no_data_stat(abbreviation, description)
+        stat = done / opportunities
+        percent = 100.0 * stat
+        return stat, f"{percent:3.1f}", f"{abbreviation}={percent:3.1f}%", f"{long_label}={percent:3.1f}%", f"({int(done)}/{int(opportunities)})", description
+    except (KeyError, TypeError, ValueError):
+        return stat, "NA", f"{abbreviation}=NA", f"{long_label}=NA", "(0/0)", description
+
+
+def cr1(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    return check_raise_street(stat_dict, player, 1, "% check-raise flop/4th street")
+def cr2(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    return check_raise_street(stat_dict, player, 2, "% check-raise turn/5th street")
+def cr3(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    return check_raise_street(stat_dict, player, 3, "% check-raise river/6th street")
+def cr4(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    return check_raise_street(stat_dict, player, 4, "% check-raise 7th street")
+
+
 def triple_barrel(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
     """Return the historical triple-barrel estimate from street c-bet rates."""
     try:
