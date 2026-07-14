@@ -300,3 +300,18 @@ def fold_vs_4bet(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> Sta
         return stat, f"{percent:3.1f}", display, display, f"({int(done)}/{int(opportunities)})", "% fold vs 4bet"
     except (KeyError, TypeError, ValueError):
         return format_no_data_stat("f4b", "% fold vs 4bet")
+
+
+def resteal(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    """Return the historical resteal estimate from aggregate 3-bet counters."""
+    try:
+        opportunities = float(stat_dict[player].get("tb_opp_0", 0)) * 0.6
+        if opportunities == 0:
+            return format_no_data_stat("resteal", "% resteal")
+        done = float(stat_dict[player].get("tb_0", 0)) * 0.7
+        stat = done / opportunities
+        percent = 100.0 * stat
+        display = f"resteal={percent:3.1f}%"
+        return stat, f"{percent:3.1f}", display, display, f"({int(done)}/{int(opportunities)})", "% resteal"
+    except (KeyError, TypeError, ValueError):
+        return format_no_data_stat("resteal", "% resteal")
