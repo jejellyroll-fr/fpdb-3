@@ -97,6 +97,11 @@ class TestBuildDescriptor:
         with pytest.raises(sr.StatDescriptorError):
             sr.build_descriptor(self._valid(scope=["nonsense"]))
 
+    @pytest.mark.parametrize("field", ["scope", "context"])
+    def test_non_iterable_collections_raise_descriptor_error(self, field):
+        with pytest.raises(sr.StatDescriptorError):
+            sr.build_descriptor(self._valid(**{field: None}))
+
     def test_invalid_dimension_key_rejected(self):
         with pytest.raises(sr.StatDescriptorError):
             sr.build_descriptor(self._valid(dimension={"street": 1}))
