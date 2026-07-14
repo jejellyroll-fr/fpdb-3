@@ -133,6 +133,7 @@ jobs:
           fpdb_3_legacy/fetch_comments.py
           fpdb_3_legacy/fetch_reviews.py
           fpdb_3_legacy/fix_draw_starting_hands.py
+          fpdb_3_legacy/loggingFpdb.py
           fpdb_3_legacy/WinamaxSummary.py
           fpdb_3_legacy/WinamaxToFpdb.py
           fpdb_3_legacy/PokerStarsSummary.py
