@@ -146,6 +146,12 @@ from fpdb_3_legacy.stats_postflop import (
     open_turn as open_turn,
 )
 from fpdb_3_legacy.stats_postflop import (
+    raise_frequency_flop as raise_frequency_flop,
+)
+from fpdb_3_legacy.stats_postflop import (
+    raise_frequency_turn as raise_frequency_turn,
+)
+from fpdb_3_legacy.stats_postflop import (
     river_call_efficiency as river_call_efficiency,
 )
 from fpdb_3_legacy.stats_postflop import (
@@ -3552,80 +3558,6 @@ def non_sd_winrate(stat_dict, player):
         )
     except (KeyError, ValueError, TypeError):
         return format_no_data_stat("nsd_wr", "% non-showdown winrate")
-
-
-def raise_frequency_flop(stat_dict, player):
-    """Calculate the Raise Frequency on flop for a player.
-
-    This measures how often a player raises when they have the opportunity on the flop.
-    Raise Frequency = street1Raises / street1Seen
-
-    Args:
-        stat_dict (dict): A dictionary containing player statistics.
-        player (int): The player for whom the statistic is calculated.
-
-    Returns:
-        tuple: A tuple containing the calculated statistic, formatted strings, and related information.
-        Returns "-" if no flop opportunities to distinguish from 0% (never raised flop).
-    """
-    stat = 0.0
-    try:
-        saw_f = float(stat_dict[player].get("saw_f", 0))  # street1Seen
-        street1_raises = float(stat_dict[player].get("street1Raises", 0))
-
-        # No flop opportunities = no data available
-        if saw_f == 0:
-            return format_no_data_stat("raise_f", "% raise frequency flop")
-
-        # Calculate raise frequency on flop
-        stat = street1_raises / saw_f
-        return (
-            stat,
-            "%3.1f" % (100.0 * stat),
-            "raise_f=%3.1f%%" % (100.0 * stat),
-            "raise_freq_flop=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (street1_raises, saw_f),
-            "% raise frequency flop",
-        )
-    except (KeyError, ValueError, TypeError):
-        return format_no_data_stat("raise_f", "% raise frequency flop")
-
-
-def raise_frequency_turn(stat_dict, player):
-    """Calculate the Raise Frequency on turn for a player.
-
-    This measures how often a player raises when they have the opportunity on the turn.
-    Raise Frequency = street2Raises / street2Seen
-
-    Args:
-        stat_dict (dict): A dictionary containing player statistics.
-        player (int): The player for whom the statistic is calculated.
-
-    Returns:
-        tuple: A tuple containing the calculated statistic, formatted strings, and related information.
-        Returns "-" if no turn opportunities to distinguish from 0% (never raised turn).
-    """
-    stat = 0.0
-    try:
-        saw_t = float(stat_dict[player].get("saw_t", 0))  # street2Seen
-        street2_raises = float(stat_dict[player].get("street2Raises", 0))
-
-        # No turn opportunities = no data available
-        if saw_t == 0:
-            return format_no_data_stat("raise_t", "% raise frequency turn")
-
-        # Calculate raise frequency on turn
-        stat = street2_raises / saw_t
-        return (
-            stat,
-            "%3.1f" % (100.0 * stat),
-            "raise_t=%3.1f%%" % (100.0 * stat),
-            "raise_freq_turn=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (street2_raises, saw_t),
-            "% raise frequency turn",
-        )
-    except (KeyError, ValueError, TypeError):
-        return format_no_data_stat("raise_t", "% raise frequency turn")
 
 
 def cb_ip(stat_dict, player):

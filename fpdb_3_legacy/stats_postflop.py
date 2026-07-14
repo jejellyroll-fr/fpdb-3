@@ -229,3 +229,11 @@ def bet_frequency_flop(stat_dict: Mapping[int, Mapping[str, Any]], player: int) 
 
 def bet_frequency_turn(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
     return street_frequency(stat_dict, player, "saw_t", "street2Bets", "bet_t", "bet_freq_turn", "% bet frequency turn")
+
+
+def raise_frequency_flop(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    return street_frequency(stat_dict, player, "saw_f", "street1Raises", "raise_f", "raise_freq_flop", "% raise frequency flop")
+
+
+def raise_frequency_turn(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    return street_frequency(stat_dict, player, "saw_t", "street2Raises", "raise_t", "raise_freq_turn", "% raise frequency turn")
