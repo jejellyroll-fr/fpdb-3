@@ -8,6 +8,8 @@ l'architecture d'onglets asynchrones.
 
 from __future__ import annotations
 
+from typing import Any
+
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QStandardItemModel
 from PySide6.QtWidgets import (
@@ -62,7 +64,7 @@ class GuiRingPlayerStats(QSplitter):
         self.cursor = self.db.cursor
 
         # Filtres détaillés d'origine
-        self.handtests = [
+        self.handtests: list[list[Any]] = [
             ["gt.maxSeats", "Size of Table", 2, 10],
             ["h.playersVpi", "Players who VPI", 0, 10],
             ["h.playersAtStreet1", "Players at Flop", 0, 10],
@@ -76,15 +78,15 @@ class GuiRingPlayerStats(QSplitter):
             ["h.street3Raises", "Bets to See Street7", 0, 5],
             ["h.street4Raises", "Bets to See Showdown", 0, 5],
         ]
-        self.cardstests = [
+        self.cardstests: list[list[Any]] = [
             [Card.DATABASE_FILTERS["pair"], "Pocket pairs"],
             [Card.DATABASE_FILTERS["suited"], "Suited"],
             [Card.DATABASE_FILTERS["suited_connectors"], "Suited connectors"],
             [Card.DATABASE_FILTERS["offsuit"], "Offsuit"],
             [Card.DATABASE_FILTERS["offsuit_connectors"], "Offsuit connectors"],
         ]
-        self.detailFilters = []
-        self.cardsFilters = []
+        self.detailFilters: list[tuple[str, int, int]] = []
+        self.cardsFilters: list[str] = []
         self.columns = self.conf.get_gui_cash_stat_params()
 
         # 1. Barre latérale des filtres (Gauche)

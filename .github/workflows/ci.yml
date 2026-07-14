@@ -195,10 +195,7 @@ jobs:
       - name: Type-check main application window
         run: mypy fpdb_3_legacy/fpdb.pyw
       - name: Type-check ring stats controller
-        run: >-
-          mypy
-          fpdb_3_legacy/ring_stats/controller.py
-          fpdb_3_legacy/ring_stats/views/starting_hands_view.py
+        run: mypy fpdb_3_legacy/ring_stats
       - name: Lint newly modernized modules
         run: >-
           ruff check
