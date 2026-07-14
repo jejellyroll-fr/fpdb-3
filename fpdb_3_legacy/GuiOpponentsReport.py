@@ -46,6 +46,7 @@ limits in the filter sidebar to speed it up.
 # In the "official" distribution you can find the license in agpl-3.0.txt.
 from __future__ import annotations
 
+from collections.abc import Sequence
 from time import time
 
 from PySide6.QtCore import Qt
@@ -114,7 +115,7 @@ def pct(done, chance) -> float:
     return 100.0 * float(done) / float(chance)
 
 
-def percentile(values: list[float], q: float) -> float | None:
+def percentile(values: Sequence[float], q: float) -> float | None:
     """Return the ``q``-th percentile (0..100) using linear interpolation.
 
     Returns ``None`` for an empty input.
