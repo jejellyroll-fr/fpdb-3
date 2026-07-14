@@ -302,6 +302,32 @@ def probe_bet(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTu
         return format_no_data_stat("probe", "% probe bet flop")
 
 
+def probe_bet_street(
+    stat_dict: Mapping[int, Mapping[str, Any]], player: int, street: int, seen_key: str,
+    abbreviation: str, long_label: str, description: str,
+) -> StatTuple:
+    """Return the historical probe estimate for a postflop street."""
+    try:
+        player_stats = stat_dict[player]
+        opportunities = float(player_stats.get(seen_key, 0)) - float(player_stats.get(f"cb_{street}", 0))
+        if opportunities <= 0:
+            return format_no_data_stat(abbreviation, description)
+        done = min(float(player_stats.get(f"street{street}Bets", 0)), opportunities)
+        stat = done / opportunities
+        percent = 100.0 * stat
+        return stat, f"{percent:3.1f}", f"{abbreviation}={percent:3.1f}%", f"{long_label}={percent:3.1f}%", f"({int(done)}/{int(opportunities)})", description
+    except (KeyError, TypeError, ValueError):
+        return format_no_data_stat(abbreviation, description)
+
+
+def probe_bet_turn(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    return probe_bet_street(stat_dict, player, 2, "saw_t", "probe_t", "probe_turn", "% probe bet turn")
+
+
+def probe_bet_river(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    return probe_bet_street(stat_dict, player, 3, "saw_r", "probe_r", "probe_river", "% probe bet river")
+
+
 def triple_barrel(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
     """Return the historical triple-barrel estimate from street c-bet rates."""
     try:

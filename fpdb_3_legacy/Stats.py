@@ -164,6 +164,12 @@ from fpdb_3_legacy.stats_postflop import (
     probe_bet as probe_bet,
 )
 from fpdb_3_legacy.stats_postflop import (
+    probe_bet_river as probe_bet_river,
+)
+from fpdb_3_legacy.stats_postflop import (
+    probe_bet_turn as probe_bet_turn,
+)
+from fpdb_3_legacy.stats_postflop import (
     raise_frequency_flop as raise_frequency_flop,
 )
 from fpdb_3_legacy.stats_postflop import (
@@ -3404,100 +3410,6 @@ def cb_oop(stat_dict, player):
         )
     except (KeyError, ValueError, TypeError):
         return format_no_data_stat("cb_oop", "% c-bet out of position")
-
-
-def probe_bet_turn(stat_dict, player):
-    """Calculate the Probe Bet Turn percentage for a player.
-
-    This measures how often a player probe bets on the turn after the preflop aggressor checks.
-
-    Args:
-        stat_dict (dict): A dictionary containing player statistics.
-        player (int): The player for whom the statistic is calculated.
-
-    Returns:
-        tuple: A tuple containing the calculated statistic, formatted strings, and related information.
-        Returns "-" if no turn probe opportunities to distinguish from 0% (never probed turn).
-    """
-    stat = 0.0
-    try:
-        # Get turn betting data
-        street2_bets = float(stat_dict[player].get("street2Bets", 0))
-        saw_t = float(stat_dict[player].get("saw_t", 0))
-
-        # Get continuation bet data (opponent's cb opportunities and actual cbs)
-        float(stat_dict[player].get("cb_opp_2", 0))
-        cb_2 = float(stat_dict[player].get("cb_2", 0))
-
-        # Calculate turn probe opportunities: saw turn when opponent could have c-bet but didn't
-        turn_probe_opportunities = saw_t - cb_2
-
-        # No opportunities = no data available
-        if turn_probe_opportunities <= 0:
-            return format_no_data_stat("probe_t", "% probe bet turn")
-
-        # Calculate turn probe count: bets made in turn probe situations
-        turn_probe_count = min(street2_bets, turn_probe_opportunities)
-
-        # Calculate turn probe percentage
-        stat = turn_probe_count / turn_probe_opportunities
-        return (
-            stat,
-            "%3.1f" % (100.0 * stat),
-            "probe_t=%3.1f%%" % (100.0 * stat),
-            "probe_turn=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (turn_probe_count, turn_probe_opportunities),
-            "% probe bet turn",
-        )
-    except (KeyError, ValueError, TypeError):
-        return format_no_data_stat("probe_t", "% probe bet turn")
-
-
-def probe_bet_river(stat_dict, player):
-    """Calculate the Probe Bet River percentage for a player.
-
-    This measures how often a player probe bets on the river after the preflop aggressor checks.
-
-    Args:
-        stat_dict (dict): A dictionary containing player statistics.
-        player (int): The player for whom the statistic is calculated.
-
-    Returns:
-        tuple: A tuple containing the calculated statistic, formatted strings, and related information.
-        Returns "-" if no river probe opportunities to distinguish from 0% (never probed river).
-    """
-    stat = 0.0
-    try:
-        # Get river betting data
-        street3_bets = float(stat_dict[player].get("street3Bets", 0))
-        saw_r = float(stat_dict[player].get("saw_r", 0))
-
-        # Get continuation bet data (opponent's cb opportunities and actual cbs)
-        float(stat_dict[player].get("cb_opp_3", 0))
-        cb_3 = float(stat_dict[player].get("cb_3", 0))
-
-        # Calculate river probe opportunities: saw river when opponent could have c-bet but didn't
-        river_probe_opportunities = saw_r - cb_3
-
-        # No opportunities = no data available
-        if river_probe_opportunities <= 0:
-            return format_no_data_stat("probe_r", "% probe bet river")
-
-        # Calculate river probe count: bets made in river probe situations
-        river_probe_count = min(street3_bets, river_probe_opportunities)
-
-        # Calculate river probe percentage
-        stat = river_probe_count / river_probe_opportunities
-        return (
-            stat,
-            "%3.1f" % (100.0 * stat),
-            "probe_r=%3.1f%%" % (100.0 * stat),
-            "probe_river=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (river_probe_count, river_probe_opportunities),
-            "% probe bet river",
-        )
-    except (KeyError, ValueError, TypeError):
-        return format_no_data_stat("probe_r", "% probe bet river")
 
 
 #
