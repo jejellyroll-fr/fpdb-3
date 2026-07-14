@@ -55,6 +55,15 @@ import sys
 #    FreePokerTools modules
 from fpdb_3_legacy import Card, Configuration, Database, Hand, L10n
 from fpdb_3_legacy.loggingFpdb import get_logger
+from fpdb_3_legacy.stats_formatting import (
+    do_tip as do_tip,
+)
+from fpdb_3_legacy.stats_formatting import (
+    format_no_data_stat,
+)
+from fpdb_3_legacy.stats_formatting import (
+    stat_override as __stat_override,
+)
 
 if __name__ == "__main__":
     Configuration.set_logfile("fpdb-log.txt")
@@ -81,74 +90,6 @@ def _set_hand_instance(h):
 
 # Dispatch dict for stat functions (populated lazily, replaces eval)
 STAT_FUNCTIONS = None
-
-
-# Since tuples are immutable, we have to create a new one when
-# overriding any decimal placements. Copy old ones and recreate the
-# second value in tuple to specified format-
-def __stat_override(decimals, stat_vals):
-    """Returns a tuple with the first element of `stat_vals` as a float, the second element as a string
-    with `decimals` number of decimal places, and the remaining elements of `stat_vals`.
-
-    Parameters
-    ----------
-    - decimals (int): The number of decimal places to round the first element of `stat_vals`.
-    - stat_vals (tuple): A tuple of values.
-
-    Returns:
-    -------
-    - tuple: A tuple with the first element of `stat_vals` as a float, the second element as a string
-      with `decimals` number of decimal places, and the remaining elements of `stat_vals`.
-
-    """
-    s = "%.*f" % (decimals, 100.0 * stat_vals[0])
-    return stat_vals[0], s, stat_vals[2], stat_vals[3], stat_vals[4], stat_vals[5]
-
-
-def format_no_data_stat(stat_name, description, numerator=None, denominator=None):
-    """Returns a standardized tuple for stats with no data available.
-
-    This function creates a consistent format for displaying '-' when no data
-    is available, distinguishing it from actual 0 values.
-
-    Parameters
-    ----------
-    - stat_name (str): The name of the statistic (e.g., "vpip", "pfr", "3bet")
-    - description (str): Human-readable description of the statistic
-    - numerator (int, optional): The numerator value for fraction display
-    - denominator (int, optional): The denominator value for fraction display
-
-    Returns:
-    -------
-    - tuple: Standardized tuple (0.0, "-", "stat_name=-", "stat_name=-", "(-/-)", "description")
-    """
-    fraction = f"({numerator}/{denominator})" if numerator is not None and denominator is not None else "(-/-)"
-
-    return (
-        0.0,
-        "-",
-        f"{stat_name}=-",
-        f"{stat_name}=-",
-        fraction,
-        description,
-    )
-
-
-def do_tip(widget, tip) -> None:
-    """Sets the tooltip of the given widget to the UTF-8 encoded version of the tip.
-
-    Parameters
-    ----------
-    - widget: The widget to set the tooltip for.
-    - tip: The tip to encode and set as the tooltip.
-
-    Returns:
-    -------
-    - None
-
-    """
-    _tip = str(tip)
-    widget.setToolTip(_tip)
 
 
 def _descriptor_stat(stat_dict, player, statname):
