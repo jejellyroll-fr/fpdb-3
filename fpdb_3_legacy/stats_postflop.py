@@ -264,3 +264,39 @@ def non_sd_winrate(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> S
         )
     except (KeyError, TypeError, ValueError):
         return format_no_data_stat("nsd_wr", "% non-showdown winrate")
+
+
+def float_bet(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    """Return the historical float-bet estimate from aggregate counters."""
+    try:
+        player_stats = stat_dict[player]
+        opportunities = min(
+            float(player_stats.get("street1InPosition", 0)),
+            float(player_stats.get("street1Calls", 0)),
+            float(player_stats.get("saw_t", 0)),
+        )
+        if opportunities == 0:
+            return format_no_data_stat("float", "% float bet turn")
+        done = min(float(player_stats.get("street2Bets", 0)), opportunities)
+        stat = done / opportunities
+        percent = 100.0 * stat
+        display = f"float={percent:3.1f}%"
+        return stat, f"{percent:3.1f}", display, display, f"({int(done)}/{int(opportunities)})", "% float bet turn"
+    except (KeyError, TypeError, ValueError):
+        return format_no_data_stat("float", "% float bet turn")
+
+
+def probe_bet(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    """Return the historical flop probe-bet estimate from aggregate counters."""
+    try:
+        player_stats = stat_dict[player]
+        opportunities = float(player_stats.get("saw_f", 0)) - float(player_stats.get("cb_1", 0))
+        if opportunities <= 0:
+            return format_no_data_stat("probe", "% probe bet flop")
+        done = min(float(player_stats.get("street1Bets", 0)), opportunities)
+        stat = done / opportunities
+        percent = 100.0 * stat
+        display = f"probe={percent:3.1f}%"
+        return stat, f"{percent:3.1f}", display, display, f"({int(done)}/{int(opportunities)})", "% probe bet flop"
+    except (KeyError, TypeError, ValueError):
+        return format_no_data_stat("probe", "% probe bet flop")
