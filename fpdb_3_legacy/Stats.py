@@ -152,6 +152,24 @@ from fpdb_3_legacy.stats_preflop import (
     fold_to_allin as fold_to_allin,
 )
 from fpdb_3_legacy.stats_preflop import (
+    four_bet_bb as four_bet_bb,
+)
+from fpdb_3_legacy.stats_preflop import (
+    four_bet_btn as four_bet_btn,
+)
+from fpdb_3_legacy.stats_preflop import (
+    four_bet_co as four_bet_co,
+)
+from fpdb_3_legacy.stats_preflop import (
+    four_bet_ep as four_bet_ep,
+)
+from fpdb_3_legacy.stats_preflop import (
+    four_bet_mp as four_bet_mp,
+)
+from fpdb_3_legacy.stats_preflop import (
+    four_bet_sb as four_bet_sb,
+)
+from fpdb_3_legacy.stats_preflop import (
     gp_2x as gp_2x,
 )
 from fpdb_3_legacy.stats_preflop import (
@@ -161,7 +179,43 @@ from fpdb_3_legacy.stats_preflop import (
     gp_os as gp_os,
 )
 from fpdb_3_legacy.stats_preflop import (
+    squeeze_bb as squeeze_bb,
+)
+from fpdb_3_legacy.stats_preflop import (
+    squeeze_btn as squeeze_btn,
+)
+from fpdb_3_legacy.stats_preflop import (
+    squeeze_co as squeeze_co,
+)
+from fpdb_3_legacy.stats_preflop import (
+    squeeze_ep as squeeze_ep,
+)
+from fpdb_3_legacy.stats_preflop import (
+    squeeze_mp as squeeze_mp,
+)
+from fpdb_3_legacy.stats_preflop import (
+    squeeze_sb as squeeze_sb,
+)
+from fpdb_3_legacy.stats_preflop import (
     straddle as straddle,
+)
+from fpdb_3_legacy.stats_preflop import (
+    three_bet_bb as three_bet_bb,
+)
+from fpdb_3_legacy.stats_preflop import (
+    three_bet_btn as three_bet_btn,
+)
+from fpdb_3_legacy.stats_preflop import (
+    three_bet_co as three_bet_co,
+)
+from fpdb_3_legacy.stats_preflop import (
+    three_bet_ep as three_bet_ep,
+)
+from fpdb_3_legacy.stats_preflop import (
+    three_bet_mp as three_bet_mp,
+)
+from fpdb_3_legacy.stats_preflop import (
+    three_bet_sb as three_bet_sb,
 )
 from fpdb_3_legacy.stats_sizing import (
     amt_bet_f as amt_bet_f,
@@ -1842,99 +1896,6 @@ def squeeze(stat_dict, player):
         )
     except (KeyError, ValueError, TypeError):
         return (stat, "NA", "SQZ=NA", "SQZ_pf=NA", "(0/0)", "% squeeze preflop")
-
-
-def _preflop_action_by_position(stat_dict, player, prefix, position, label):
-    """Calculate a preflop action frequency in one HudCache position bucket."""
-    stat = 0.0
-    try:
-        opportunities = float(stat_dict[player].get(f"{prefix}_opp_{position}", 0))
-        done = float(stat_dict[player].get(f"{prefix}_{position}", 0))
-        if opportunities == 0:
-            return format_no_data_stat(label, f"% {label} preflop")
-        stat = done / opportunities
-        return (
-            stat,
-            f"{100.0 * stat:3.1f}",
-            f"{label}={100.0 * stat:3.1f}%",
-            f"{label}={100.0 * stat:3.1f}%",
-            f"({done:.0f}/{opportunities:.0f})",
-            f"% {label} preflop",
-        )
-    except STATS_DATA_ERRORS:
-        return (stat, "NA", f"{label}=NA", f"{label}=NA", "(0/0)", f"% {label} preflop")
-
-
-def three_bet_bb(stat_dict, player):
-    return _preflop_action_by_position(stat_dict, player, "tb", "bb", "3B BB")
-
-
-def three_bet_sb(stat_dict, player):
-    return _preflop_action_by_position(stat_dict, player, "tb", "sb", "3B SB")
-
-
-def three_bet_btn(stat_dict, player):
-    return _preflop_action_by_position(stat_dict, player, "tb", "btn", "3B BTN")
-
-
-def three_bet_co(stat_dict, player):
-    return _preflop_action_by_position(stat_dict, player, "tb", "co", "3B CO")
-
-
-def three_bet_mp(stat_dict, player):
-    return _preflop_action_by_position(stat_dict, player, "tb", "mp", "3B MP")
-
-
-def three_bet_ep(stat_dict, player):
-    return _preflop_action_by_position(stat_dict, player, "tb", "ep", "3B EP")
-
-
-def four_bet_bb(stat_dict, player):
-    return _preflop_action_by_position(stat_dict, player, "fb", "bb", "4B BB")
-
-
-def four_bet_sb(stat_dict, player):
-    return _preflop_action_by_position(stat_dict, player, "fb", "sb", "4B SB")
-
-
-def four_bet_btn(stat_dict, player):
-    return _preflop_action_by_position(stat_dict, player, "fb", "btn", "4B BTN")
-
-
-def four_bet_co(stat_dict, player):
-    return _preflop_action_by_position(stat_dict, player, "fb", "co", "4B CO")
-
-
-def four_bet_mp(stat_dict, player):
-    return _preflop_action_by_position(stat_dict, player, "fb", "mp", "4B MP")
-
-
-def four_bet_ep(stat_dict, player):
-    return _preflop_action_by_position(stat_dict, player, "fb", "ep", "4B EP")
-
-
-def squeeze_bb(stat_dict, player):
-    return _preflop_action_by_position(stat_dict, player, "sqz", "bb", "SQZ BB")
-
-
-def squeeze_sb(stat_dict, player):
-    return _preflop_action_by_position(stat_dict, player, "sqz", "sb", "SQZ SB")
-
-
-def squeeze_btn(stat_dict, player):
-    return _preflop_action_by_position(stat_dict, player, "sqz", "btn", "SQZ BTN")
-
-
-def squeeze_co(stat_dict, player):
-    return _preflop_action_by_position(stat_dict, player, "sqz", "co", "SQZ CO")
-
-
-def squeeze_mp(stat_dict, player):
-    return _preflop_action_by_position(stat_dict, player, "sqz", "mp", "SQZ MP")
-
-
-def squeeze_ep(stat_dict, player):
-    return _preflop_action_by_position(stat_dict, player, "sqz", "ep", "SQZ EP")
 
 
 def raiseToSteal(stat_dict, player):
