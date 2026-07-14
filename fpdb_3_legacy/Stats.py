@@ -86,6 +86,12 @@ from fpdb_3_legacy.stats_postflop import (
     bet_frequency_turn as bet_frequency_turn,
 )
 from fpdb_3_legacy.stats_postflop import (
+    cb_ip as cb_ip,
+)
+from fpdb_3_legacy.stats_postflop import (
+    cb_oop as cb_oop,
+)
+from fpdb_3_legacy.stats_postflop import (
     check_raise_frequency as check_raise_frequency,
 )
 from fpdb_3_legacy.stats_postflop import (
@@ -3308,108 +3314,6 @@ def cr4(stat_dict, player):
 
 ################################################################################################
 # NEW STATS
-
-
-def cb_ip(stat_dict, player):
-    """Calculate the Continuation Bet In Position percentage for a player.
-
-    This measures how often a player c-bets when they are in position on the flop.
-    CB IP = (cb_1 * estimated_IP_ratio) / (cb_opp_1 * estimated_IP_ratio)
-
-    Args:
-        stat_dict (dict): A dictionary containing player statistics.
-        player (int): The player for whom the statistic is calculated.
-
-    Returns:
-        tuple: A tuple containing the calculated statistic, formatted strings, and related information.
-        Returns "-" if no IP c-bet opportunities to distinguish from 0% (never c-bet IP).
-    """
-    stat = 0.0
-    try:
-        cb_opp_1 = float(stat_dict[player].get("cb_opp_1", 0))
-        cb_1 = float(stat_dict[player].get("cb_1", 0))
-        street1_in_position = float(stat_dict[player].get("street1InPosition", 0))
-        saw_f = float(stat_dict[player].get("saw_f", 0))
-
-        # Calculate estimated IP ratio
-        if saw_f == 0:
-            return format_no_data_stat("cb_ip", "% c-bet in position")
-
-        ip_ratio = street1_in_position / saw_f
-
-        # Calculate IP c-bet opportunities (approximation)
-        cb_ip_opportunities = cb_opp_1 * ip_ratio
-
-        # No IP c-bet opportunities = no data available
-        if cb_ip_opportunities == 0:
-            return format_no_data_stat("cb_ip", "% c-bet in position")
-
-        # Calculate IP c-bet count (approximation)
-        cb_ip_count = cb_1 * ip_ratio
-
-        # Calculate IP c-bet percentage
-        stat = cb_ip_count / cb_ip_opportunities
-        return (
-            stat,
-            "%3.1f" % (100.0 * stat),
-            "cb_ip=%3.1f%%" % (100.0 * stat),
-            "cbet_in_position=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (cb_ip_count, cb_ip_opportunities),
-            "% c-bet in position",
-        )
-    except (KeyError, ValueError, TypeError):
-        return format_no_data_stat("cb_ip", "% c-bet in position")
-
-
-def cb_oop(stat_dict, player):
-    """Calculate the Continuation Bet Out of Position percentage for a player.
-
-    This measures how often a player c-bets when they are out of position on the flop.
-    CB OOP = (cb_1 * estimated_OOP_ratio) / (cb_opp_1 * estimated_OOP_ratio)
-
-    Args:
-        stat_dict (dict): A dictionary containing player statistics.
-        player (int): The player for whom the statistic is calculated.
-
-    Returns:
-        tuple: A tuple containing the calculated statistic, formatted strings, and related information.
-        Returns "-" if no OOP c-bet opportunities to distinguish from 0% (never c-bet OOP).
-    """
-    stat = 0.0
-    try:
-        cb_opp_1 = float(stat_dict[player].get("cb_opp_1", 0))
-        cb_1 = float(stat_dict[player].get("cb_1", 0))
-        street1_in_position = float(stat_dict[player].get("street1InPosition", 0))
-        saw_f = float(stat_dict[player].get("saw_f", 0))
-
-        # Calculate estimated OOP ratio
-        if saw_f == 0:
-            return format_no_data_stat("cb_oop", "% c-bet out of position")
-
-        oop_ratio = (saw_f - street1_in_position) / saw_f
-
-        # Calculate OOP c-bet opportunities (approximation)
-        cb_oop_opportunities = cb_opp_1 * oop_ratio
-
-        # No OOP c-bet opportunities = no data available
-        if cb_oop_opportunities == 0:
-            return format_no_data_stat("cb_oop", "% c-bet out of position")
-
-        # Calculate OOP c-bet count (approximation)
-        cb_oop_count = cb_1 * oop_ratio
-
-        # Calculate OOP c-bet percentage
-        stat = cb_oop_count / cb_oop_opportunities
-        return (
-            stat,
-            "%3.1f" % (100.0 * stat),
-            "cb_oop=%3.1f%%" % (100.0 * stat),
-            "cbet_out_of_position=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (cb_oop_count, cb_oop_opportunities),
-            "% c-bet out of position",
-        )
-    except (KeyError, ValueError, TypeError):
-        return format_no_data_stat("cb_oop", "% c-bet out of position")
 
 
 #
