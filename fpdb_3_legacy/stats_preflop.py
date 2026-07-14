@@ -260,3 +260,43 @@ def open_limp(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTu
         return stat, f"{percent:3.1f}", display, display, f"({int(done)}/{int(opportunities)})", "% open limp preflop"
     except (KeyError, TypeError, ValueError):
         return format_no_data_stat("open_limp", "% open limp preflop")
+
+
+def vpip_pfr_ratio(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    """Return the ratio between VPIP and preflop-raise frequencies."""
+    try:
+        player_stats = stat_dict[player]
+        vpip_opp = float(player_stats.get("vpip_opp", 0))
+        pfr_opp = float(player_stats.get("pfr_opp", 0))
+        vpip_count = float(player_stats.get("vpip", 0))
+        pfr_count = float(player_stats.get("pfr", 0))
+        if vpip_opp == 0 or pfr_opp == 0:
+            return format_no_data_stat("v/p", "VPIP/PFR ratio")
+        vpip = vpip_count / vpip_opp
+        pfr = pfr_count / pfr_opp
+        stat = vpip / pfr if pfr > 0 else float("inf")
+        return (
+            stat,
+            f"{stat:2.2f}",
+            f"v/p={stat:2.2f}",
+            f"vpip/pfr={stat:2.2f}",
+            f"({int(vpip_count)}/{int(vpip_opp)})/({int(pfr_count)}/{int(pfr_opp)})",
+            "VPIP/PFR ratio",
+        )
+    except (KeyError, TypeError, ValueError):
+        return float("inf"), "NA", "v/p=NA", "vpip/pfr=NA", "(0/0)/(0/0)", "VPIP/PFR ratio"
+
+
+def fold_vs_4bet(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    """Return the frequency of folding when facing a preflop 4-bet."""
+    try:
+        opportunities = float(stat_dict[player].get("F4B_opp_0", 0))
+        done = float(stat_dict[player].get("F4B_0", 0))
+        if opportunities == 0:
+            return format_no_data_stat("f4b", "% fold vs 4bet")
+        stat = done / opportunities
+        percent = 100.0 * stat
+        display = f"f4b={percent:3.1f}%"
+        return stat, f"{percent:3.1f}", display, display, f"({int(done)}/{int(opportunities)})", "% fold vs 4bet"
+    except (KeyError, TypeError, ValueError):
+        return format_no_data_stat("f4b", "% fold vs 4bet")
