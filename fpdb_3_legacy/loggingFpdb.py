@@ -69,8 +69,8 @@ class LoggerRegistry:
         """
         self._loggers: dict[str, LoggerInfo] = {}
         self._auto_discovery_enabled = True
-        self._config = None
-        self._saved_config = {}
+        self._config: LogConfig | None = None
+        self._saved_config: dict[str, dict[str, Any]] = {}
         self._saving_in_progress = False  # Prevent recursive discover during save
 
         # Initialize config when first needed
@@ -90,6 +90,8 @@ class LoggerRegistry:
 
         Retrieves logger configuration from file and updates the saved configuration for later application.
         """
+        if self._config is None:
+            return
         config_data = self._config.load_config_data()
         if config_data and "loggers" in config_data:
             # Store the config data to apply after discovery
@@ -377,7 +379,8 @@ class LoggerRegistry:
             self._init_config()  # Ensure config is initialized
             self._saving_in_progress = True
             try:
-                self._config.save_config(self)
+                if self._config is not None:
+                    self._config.save_config(self)
             finally:
                 self._saving_in_progress = False
             return True
@@ -493,7 +496,7 @@ class LogConfig:
             bool: True if the configuration was saved successfully, False otherwise.
         """
         try:
-            config_data = {
+            config_data: dict[str, Any] = {
                 "version": "1.0",
                 "timestamp": time.time(),
                 "loggers": {},
@@ -577,7 +580,7 @@ class LogConfig:
             bool: True if the configuration was exported successfully, False otherwise.
         """
         try:
-            config_data = {
+            config_data: dict[str, Any] = {
                 "version": "1.0",
                 "timestamp": time.time(),
                 "exported_from": "FPDB Logger Dev Tool",
@@ -829,6 +832,8 @@ class LoggerDevTool:
 
         for i in range(self.tree.topLevelItemCount()):
             item = self.tree.topLevelItem(i)
+            if item is None:
+                continue
             logger_name = item.data(0, Qt.ItemDataRole.UserRole)
 
             # Check search filter
@@ -884,6 +889,8 @@ class LoggerDevTool:
 
         for i in range(self.tree.topLevelItemCount()):
             item = self.tree.topLevelItem(i)
+            if item is None:
+                continue
             if item.data(0, Qt.ItemDataRole.UserRole) == logger_name:
                 # Update the combo box in column 1 (not the text, since we have a widget there)
                 combo = self.tree.itemWidget(item, 1)
@@ -1030,9 +1037,7 @@ def set_default_logging() -> None:
 
     # Also update console handler if it exists
     for handler in root_logger.handlers:
-        if (
-            isinstance(handler, logging.StreamHandler) and not hasattr(handler, "stream")
-        ) or handler.stream.name == "<stderr>":
+        if isinstance(handler, logging.StreamHandler) and getattr(handler.stream, "name", None) == "<stderr>":
             handler.setLevel(logging.ERROR)
 
 
@@ -1252,8 +1257,11 @@ class TimedSizedRotatingFileHandler(TimedRotatingFileHandler):
 
         if self.max_bytes > 0:
             # If a size limit is set, check the current file size
-            self.stream.seek(0, os.SEEK_END)  # Move to the end of the file
-            if self.stream.tell() >= self.max_bytes:
+            stream = self.stream
+            if stream is None:
+                stream = self.stream = self._open()
+            stream.seek(0, os.SEEK_END)  # Move to the end of the file
+            if stream.tell() >= self.max_bytes:
                 # If current file size exceeds max_bytes
                 return True  # Indicate that a rollover is needed
 
@@ -1265,7 +1273,8 @@ class TimedSizedRotatingFileHandler(TimedRotatingFileHandler):
         This method renames the current log file, deletes old log files if necessary,
         and sets up the next rollover time.
         """
-        self.stream.close()  # Close the current log file stream
+        if self.stream is not None:
+            self.stream.close()  # Close the current log file stream
         current_time = int(time.time())  # Current time
         time_tuple = time.localtime(current_time)  # Convert time to struct_time
         date_str = time.strftime("%d-%m-%Y", time_tuple)  # Format date as DD-MM-YYYY
@@ -1510,7 +1519,7 @@ class FpdbLogger:
         """
         self.logger = logging.getLogger(name)  # Obtain a logger with the specified name
 
-    def debug(self, msg: str, *args: Any, **kwargs: Any) -> None:
+    def debug(self, msg: object, *args: Any, **kwargs: Any) -> None:
         """Log a debug message.
 
         Args:
@@ -1522,7 +1531,7 @@ class FpdbLogger:
         stacklevel = self._get_stacklevel()  # Calculate stack level for accurate information
         self.logger.debug(msg, *args, stacklevel=stacklevel, **kwargs)
 
-    def info(self, msg: str, *args: Any, **kwargs: Any) -> None:
+    def info(self, msg: object, *args: Any, **kwargs: Any) -> None:
         """Log an informational message.
 
         Args:
@@ -1534,7 +1543,7 @@ class FpdbLogger:
         stacklevel = self._get_stacklevel()
         self.logger.info(msg, *args, stacklevel=stacklevel, **kwargs)
 
-    def warning(self, msg: str, *args: Any, **kwargs: Any) -> None:
+    def warning(self, msg: object, *args: Any, **kwargs: Any) -> None:
         """Log a warning message.
 
         Args:
@@ -1546,7 +1555,7 @@ class FpdbLogger:
         stacklevel = self._get_stacklevel()
         self.logger.warning(msg, *args, stacklevel=stacklevel, **kwargs)
 
-    def error(self, msg: str, *args: Any, **kwargs: Any) -> None:
+    def error(self, msg: object, *args: Any, **kwargs: Any) -> None:
         """Log an error message.
 
         Args:
@@ -1558,7 +1567,7 @@ class FpdbLogger:
         stacklevel = self._get_stacklevel()
         self.logger.error(msg, *args, stacklevel=stacklevel, **kwargs)
 
-    def exception(self, msg: str, *args: Any, **kwargs: Any) -> None:
+    def exception(self, msg: object, *args: Any, **kwargs: Any) -> None:
         """Log an exception message with stack trace.
 
         Args:
