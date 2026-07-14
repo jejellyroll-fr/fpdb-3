@@ -204,3 +204,28 @@ def river_call_efficiency(stat_dict: Mapping[int, Mapping[str, Any]], player: in
         )
     except (KeyError, TypeError, ValueError):
         return 0.0, "NA", "RCE=NA", "RiverCallEff=NA", "(0/0)", "River Call Efficiency"
+
+
+def street_frequency(
+    stat_dict: Mapping[int, Mapping[str, Any]], player: int, opportunity_key: str, done_key: str,
+    abbreviation: str, long_label: str, description: str,
+) -> StatTuple:
+    """Format a direct action frequency for one postflop street."""
+    try:
+        opportunities = float(stat_dict[player].get(opportunity_key, 0))
+        done = float(stat_dict[player].get(done_key, 0))
+        if opportunities == 0:
+            return format_no_data_stat(abbreviation, description)
+        stat = done / opportunities
+        percent = 100.0 * stat
+        return stat, f"{percent:3.1f}", f"{abbreviation}={percent:3.1f}%", f"{long_label}={percent:3.1f}%", f"({int(done)}/{int(opportunities)})", description
+    except (KeyError, TypeError, ValueError):
+        return format_no_data_stat(abbreviation, description)
+
+
+def bet_frequency_flop(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    return street_frequency(stat_dict, player, "saw_f", "street1Bets", "bet_f", "bet_freq_flop", "% bet frequency flop")
+
+
+def bet_frequency_turn(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    return street_frequency(stat_dict, player, "saw_t", "street2Bets", "bet_t", "bet_freq_turn", "% bet frequency turn")
