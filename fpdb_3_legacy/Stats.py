@@ -71,10 +71,40 @@ from fpdb_3_legacy.stats_formatting import (
     stat_override as __stat_override,
 )
 from fpdb_3_legacy.stats_postflop import (
+    face_raise_flop as face_raise_flop,
+)
+from fpdb_3_legacy.stats_postflop import (
+    face_raise_preflop as face_raise_preflop,
+)
+from fpdb_3_legacy.stats_postflop import (
+    face_raise_river as face_raise_river,
+)
+from fpdb_3_legacy.stats_postflop import (
+    face_raise_turn as face_raise_turn,
+)
+from fpdb_3_legacy.stats_postflop import (
+    first_raise_flop as first_raise_flop,
+)
+from fpdb_3_legacy.stats_postflop import (
+    first_raise_river as first_raise_river,
+)
+from fpdb_3_legacy.stats_postflop import (
+    first_raise_turn as first_raise_turn,
+)
+from fpdb_3_legacy.stats_postflop import (
     float_river as float_river,
 )
 from fpdb_3_legacy.stats_postflop import (
     float_turn as float_turn,
+)
+from fpdb_3_legacy.stats_postflop import (
+    fold_flop as fold_flop,
+)
+from fpdb_3_legacy.stats_postflop import (
+    fold_river as fold_river,
+)
+from fpdb_3_legacy.stats_postflop import (
+    fold_to_squeeze as fold_to_squeeze,
 )
 from fpdb_3_legacy.stats_postflop import (
     fold_to_three_B_flop as fold_to_three_B_flop,
@@ -84,6 +114,9 @@ from fpdb_3_legacy.stats_postflop import (
 )
 from fpdb_3_legacy.stats_postflop import (
     fold_to_three_B_turn as fold_to_three_B_turn,
+)
+from fpdb_3_legacy.stats_postflop import (
+    fold_turn as fold_turn,
 )
 from fpdb_3_legacy.stats_postflop import (
     four_B_flop as four_B_flop,
@@ -1161,66 +1194,6 @@ def three_B(stat_dict, player):
 # simply expose them to the HUD/GUI. Adding them is purely additive: any
 # module-level function here is auto-registered into STATLIST.
 # ---------------------------------------------------------------------------
-
-
-def face_raise_preflop(stat_dict, player):
-    """Faced a raise preflop %: acted while facing a raise preflop (of hands dealt)."""
-    return _postflop_3bet(stat_dict, player, "n", "p_face_raise", "FvRp", "% face raise preflop")
-
-
-def face_raise_flop(stat_dict, player):
-    """Faced a raise on the flop %: acted while facing a raise (of flops seen)."""
-    return _postflop_3bet(stat_dict, player, "saw_1", "f_face_raise", "FvRf", "% face raise flop")
-
-
-def face_raise_turn(stat_dict, player):
-    """Faced a raise on the turn %: acted while facing a raise (of turns seen)."""
-    return _postflop_3bet(stat_dict, player, "saw_2", "t_face_raise", "FvRt", "% face raise turn")
-
-
-def face_raise_river(stat_dict, player):
-    """Faced a raise on the river %: acted while facing a raise (of rivers seen)."""
-    return _postflop_3bet(stat_dict, player, "saw_3", "r_face_raise", "FvRr", "% face raise river")
-
-
-def first_raise_flop(stat_dict, player):
-    """First-raise flop %: was the first player to raise the flop (of flops seen)."""
-    return _postflop_3bet(stat_dict, player, "saw_1", "f_first_raise", "1Rf", "% first raise flop")
-
-
-def first_raise_turn(stat_dict, player):
-    """First-raise turn %: was the first player to raise the turn (of turns seen)."""
-    return _postflop_3bet(stat_dict, player, "saw_2", "t_first_raise", "1Rt", "% first raise turn")
-
-
-def first_raise_river(stat_dict, player):
-    """First-raise river %: was the first player to raise the river (of rivers seen)."""
-    return _postflop_3bet(stat_dict, player, "saw_3", "r_first_raise", "1Rr", "% first raise river")
-
-
-def fold_flop(stat_dict, player):
-    """Fold flop %: folded on the flop (of flops seen)."""
-    return _postflop_3bet(stat_dict, player, "saw_1", "f_fold", "Fldf", "% fold flop")
-
-
-def fold_turn(stat_dict, player):
-    """Fold turn %: folded on the turn (of turns seen)."""
-    return _postflop_3bet(stat_dict, player, "saw_2", "t_fold", "Fldt", "% fold turn")
-
-
-def fold_river(stat_dict, player):
-    """Fold river %: folded on the river (of rivers seen)."""
-    return _postflop_3bet(stat_dict, player, "saw_3", "r_fold", "Fldr", "% fold river")
-
-
-def fold_to_squeeze(stat_dict, player):
-    """Fold to squeeze %: folded preflop when facing a squeeze 3-bet.
-
-    Squeeze defense opportunity is when the player had already invested preflop
-    (open-raiser or cold-caller) and someone behind made a squeeze 3-bet
-    (PT4 flg_p_squeeze_def_opp); done = folded that spot.
-    """
-    return _postflop_3bet(stat_dict, player, "sqzdef_opp", "sqzdef_fold", "FvSq", "% fold to squeeze")
 
 
 def face_limpers(stat_dict, player):
