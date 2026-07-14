@@ -114,6 +114,13 @@ jobs:
           fpdb_3_legacy/BetOnlineToFpdb.py
           fpdb_3_legacy/FulltiltToFpdb.py
           fpdb_3_legacy/BovadaToFpdb.py
+          fpdb_3_legacy/backfill_boards.py
+          fpdb_3_legacy/backfill_showdown.py
+          fpdb_3_legacy/card_path.py
+          fpdb_3_legacy/fpdb_cli.py
+          fpdb_3_legacy/legacy_launcher.py
+          fpdb_3_legacy/migration_helper.py
+          fpdb_3_legacy/sync_databases.py
           fpdb_3_legacy/WinamaxSummary.py
           fpdb_3_legacy/WinamaxToFpdb.py
           fpdb_3_legacy/PokerStarsSummary.py
