@@ -155,6 +155,9 @@ from fpdb_3_legacy.stats_preflop import (
     call_vs_steal as call_vs_steal,
 )
 from fpdb_3_legacy.stats_preflop import (
+    cold_call as cold_call,
+)
+from fpdb_3_legacy.stats_preflop import (
     face_limpers as face_limpers,
 )
 from fpdb_3_legacy.stats_preflop import (
@@ -192,6 +195,12 @@ from fpdb_3_legacy.stats_preflop import (
 )
 from fpdb_3_legacy.stats_preflop import (
     iso as iso,
+)
+from fpdb_3_legacy.stats_preflop import (
+    limp as limp,
+)
+from fpdb_3_legacy.stats_preflop import (
+    open_limp as open_limp,
 )
 from fpdb_3_legacy.stats_preflop import (
     rfi_early_position as rfi_early_position,
@@ -3398,122 +3407,6 @@ def vpip_pfr_ratio(stat_dict, player):
             "(0/0)/(0/0)",
             "VPIP/PFR ratio",
         )
-
-
-def cold_call(stat_dict, player):
-    """Calculate the Cold Call percentage for a player.
-
-    A cold call is when a player calls a raise without having previously
-    put money into the pot voluntarily (no limp, no raise, just calling a raise).
-
-    Args:
-        stat_dict (dict): A dictionary containing player statistics.
-        player (int): The player for whom the statistic is calculated.
-
-    Returns:
-        tuple: A tuple containing the calculated statistic, formatted strings, and related information.
-        Returns "-" if no cold call opportunities to distinguish from 0% (never cold called).
-    """
-    stat = 0.0
-    try:
-        car_opp = float(stat_dict[player].get("CAR_opp_0", 0))
-        car_count = float(stat_dict[player].get("CAR_0", 0))
-
-        # No opportunities = no data available
-        if car_opp == 0:
-            return format_no_data_stat("cc", "% cold call preflop")
-
-        # Calculate cold call percentage
-        stat = car_count / car_opp
-        return (
-            stat,
-            "%3.1f" % (100.0 * stat),
-            "cc=%3.1f%%" % (100.0 * stat),
-            "cc=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (car_count, car_opp),
-            "% cold call preflop",
-        )
-    except (KeyError, ValueError, TypeError):
-        return format_no_data_stat("cc", "% cold call preflop")
-
-
-def limp(stat_dict, player):
-    """Calculate the Limp percentage for a player.
-
-    A limp is when a player voluntarily enters the pot preflop without raising
-    (calls the big blind or completes the small blind).
-    Limp = VPIP - PFR (voluntary actions that are not raises)
-
-    Args:
-        stat_dict (dict): A dictionary containing player statistics.
-        player (int): The player for whom the statistic is calculated.
-
-    Returns:
-        tuple: A tuple containing the calculated statistic, formatted strings, and related information.
-        Returns "-" if no preflop opportunities to distinguish from 0% (never limped).
-    """
-    stat = 0.0
-    try:
-        vpip_opp = float(stat_dict[player].get("vpip_opp", 0))
-        vpip_count = float(stat_dict[player].get("vpip", 0))
-        pfr_count = float(stat_dict[player].get("pfr", 0))
-
-        # No opportunities = no data available
-        if vpip_opp == 0:
-            return format_no_data_stat("limp", "% limp preflop")
-
-        # Calculate limp count (vpip actions that are not raises)
-        limp_count = vpip_count - pfr_count
-
-        # Calculate limp percentage
-        stat = limp_count / vpip_opp
-        return (
-            stat,
-            "%3.1f" % (100.0 * stat),
-            "limp=%3.1f%%" % (100.0 * stat),
-            "limp=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (limp_count, vpip_opp),
-            "% limp preflop",
-        )
-    except (KeyError, ValueError, TypeError):
-        return format_no_data_stat("limp", "% limp preflop")
-
-
-def open_limp(stat_dict, player):
-    """Calculate the Open Limp percentage for a player.
-
-    An open limp is when a player is the first to enter the pot preflop with a limp
-    (no prior limpers). This stat requires the street0OpenLimp column which is now
-    tracked in HudCache.
-
-    Args:
-        stat_dict (dict): A dictionary containing player statistics.
-        player (int): The player for whom the statistic is calculated.
-
-    Returns:
-        tuple: A tuple containing the calculated statistic, formatted strings, and related information.
-        Returns "-" if no open limp data available.
-    """
-    stat = 0.0
-    try:
-        open_limp_opp = float(stat_dict[player].get("open_limp_opp", 0))
-        open_limp_count = float(stat_dict[player].get("open_limp", 0))
-
-        # No opportunities = no data available
-        if open_limp_opp == 0:
-            return format_no_data_stat("open_limp", "% open limp preflop")
-
-        stat = open_limp_count / open_limp_opp
-        return (
-            stat,
-            "%3.1f" % (100.0 * stat),
-            "openlimp=%3.1f%%" % (100.0 * stat),
-            "openlimp=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (open_limp_count, open_limp_opp),
-            "% open limp preflop",
-        )
-    except (KeyError, ValueError, TypeError):
-        return format_no_data_stat("open_limp", "% open limp preflop")
 
 
 def fold_vs_4bet(stat_dict, player):
