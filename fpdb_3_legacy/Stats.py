@@ -55,6 +55,12 @@ import sys
 #    FreePokerTools modules
 from fpdb_3_legacy import Card, Configuration, Database, Hand, L10n
 from fpdb_3_legacy.loggingFpdb import get_logger
+from fpdb_3_legacy.stats_context import (
+    get_hand_instance as _get_hand_instance,
+)
+from fpdb_3_legacy.stats_context import (
+    set_hand_instance as _set_hand_instance,
+)
 from fpdb_3_legacy.stats_formatting import (
     do_tip as do_tip,
 )
@@ -76,17 +82,6 @@ re_Places = re.compile("_[0-9]$")
 
 encoder = codecs.lookup(Configuration.LOCALE_ENCODING)
 _ = L10n.get_translation()
-
-# Thread-local storage for hand instance (replaces global variable)
-import threading
-
-_thread_local = threading.local()
-
-def _get_hand_instance():
-    return getattr(_thread_local, "hand", None)
-
-def _set_hand_instance(h):
-    _thread_local.hand = h
 
 # Dispatch dict for stat functions (populated lazily, replaces eval)
 STAT_FUNCTIONS = None
