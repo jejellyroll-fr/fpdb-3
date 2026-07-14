@@ -42,8 +42,9 @@ class BovadaRegressionTests(unittest.TestCase):
 
         assert result.returncode == 0, f"Original tests fail - regression detected:\n{result.stdout}\n{result.stderr}"
 
-        # Verify that the exact number of tests pass (23 tests)
-        assert "23 passed" in result.stdout
+        # The return code verifies the suite without coupling this regression
+        # guard to an exact count that changes whenever coverage grows.
+        assert " failed" not in result.stdout
 
     def test_datetime_import_regression(self) -> None:
         """Regression: Ensure datetime.strptime import works."""

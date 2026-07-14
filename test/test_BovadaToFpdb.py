@@ -8,6 +8,7 @@ import unittest
 from datetime import datetime, timezone
 from decimal import Decimal
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -225,6 +226,29 @@ class TestBovadaParser(unittest.TestCase):
         self.parser.readCommunityCards(hand, "TURN")
         assert hand.community_cards["FLOP"] == ["2c", "Qc", "7h"]
         assert hand.community_cards["TURN"] == ["Ac"]
+
+    def test_populate_missing_zone_board_streets(self) -> None:
+        hand = SimpleNamespace(
+            gametype={"base": "hold", "fast": True},
+            handText="*** FLOP *** [2c Qc 7h]\n*** TURN *** [2c Qc 7h] [Ac]",
+            streets={"FLOP": "", "TURN": "", "RIVER": ""},
+        )
+
+        self.parser._populate_missing_board_streets(hand)
+
+        assert hand.streets["FLOP"] == "2c Qc 7h"
+        assert hand.streets["TURN"] == "Ac"
+
+    def test_process_board_cards_keeps_only_actions_in_street(self) -> None:
+        hand = SimpleNamespace(
+            gametype={"base": "hold", "fast": False},
+            handText="",
+            streets={"FLOP": "[2c Qc 7h]\nSeat 1: checks"},
+        )
+
+        self.parser._process_board_cards(hand)
+
+        assert hand.streets["FLOP"] == "Seat 1: checks"
 
     def test_read_hand_info_datetime_and_id(self) -> None:
         hand_text, _ = load_hand_history("NLHE-6max-USD - $0.25-$0.50 - 201804.bodog.eu.txt")

@@ -21,13 +21,12 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 import datetime
 import re
 from decimal import Decimal
-from typing import TYPE_CHECKING, ClassVar
+from typing import Any, ClassVar, TypeAlias
 
 from fpdb_3_legacy.HandHistoryConverter import FpdbHandPartial, FpdbParseError, HandHistoryConverter
 from fpdb_3_legacy.loggingFpdb import get_logger
 
-if TYPE_CHECKING:
-    from fpdb_3_legacy.Hand import Hand
+Hand: TypeAlias = Any
 
 # Bovada HH Format
 log = get_logger("bovada_parser")
@@ -42,6 +41,7 @@ class Bovada(HandHistoryConverter):
     filetype = "text"
     codepage = ("utf8", "cp1252")
     site_id = 21  # Needs to match id entry in Sites database
+    compiledPlayers: set[str] = set()
     summary_in_file = True
     copy_game_header = True
     sym: ClassVar[dict[str, str]] = {"USD": r"\$", "T$": "", "play": ""}  # ADD Euro, Sterling, etc HERE
@@ -327,7 +327,7 @@ class Bovada(HandHistoryConverter):
             ["tour", "stud", "fl"],
         ]
 
-    def parseHeader(self, hand_text: str, whole_file: str) -> dict[str, str]:
+    def parseHeader(self, hand_text: str, whole_file: str) -> dict[str, Any]:
         """Parse the header of a hand history and extract game type information.
 
         This method determines the game type from the hand text and, for tournaments,
@@ -347,7 +347,7 @@ class Bovada(HandHistoryConverter):
             gametype["maxSeats"] = len(result)
         return gametype
 
-    def determineGameType(self, hand_text: str) -> dict[str, str]:
+    def determineGameType(self, hand_text: str) -> dict[str, Any]:
         """Determine the game type from the provided hand history text.
 
         This method validates the hand text, extracts game information, and builds a dictionary
@@ -407,12 +407,14 @@ class Bovada(HandHistoryConverter):
             dict[str, str]: A dictionary containing extracted game information.
         """
         m = self.re_game_info.search(hand_text)
+        if m is None:
+            raise FpdbParseError("Could not identify game information")
         mg = m.groupdict()
         if m := self.re_stakes.search(in_path):
             mg.update(m.groupdict())
         return mg
 
-    def _buildGameTypeInfo(self, mg: dict[str, str]) -> dict[str, str]:
+    def _buildGameTypeInfo(self, mg: dict[str, Any]) -> dict[str, Any]:
         """Build a dictionary describing the game type from extracted match groups.
 
         This method constructs a dictionary with limit type, game base, blinds, currency, and other
@@ -424,7 +426,7 @@ class Bovada(HandHistoryConverter):
         Returns:
             dict[str, str]: A dictionary containing structured game type information.
         """
-        info = {}
+        info: dict[str, Any] = {}
 
         # Set limit type
         if "LIMIT" in mg:
@@ -464,7 +466,7 @@ class Bovada(HandHistoryConverter):
 
         return info
 
-    def _adjustFixedLimitBlinds(self, info: dict[str, str], mg: dict[str, str], hand_text: str) -> None:
+    def _adjustFixedLimitBlinds(self, info: dict[str, Any], mg: dict[str, Any], hand_text: str) -> None:
         """Adjust small and big blinds for fixed limit games.
 
         This method updates the small and big blind values in the info dictionary for fixed limit
@@ -525,7 +527,7 @@ class Bovada(HandHistoryConverter):
         self._setHandSpeed(hand)
         self._processHandInfoKeys(hand, info)
 
-    def _extractHandInfo(self, hand: "Hand") -> dict[str, str]:
+    def _extractHandInfo(self, hand: "Hand") -> dict[str, Any]:
         """Extract detailed hand information from the hand text and file path.
 
         This method searches the hand text and file path for relevant hand information,
@@ -540,7 +542,7 @@ class Bovada(HandHistoryConverter):
         Raises:
             FpdbParseError: If required game information is not found in the hand text.
         """
-        info = {}
+        info: dict[str, Any] = {}
         m = self.re_game_info.search(hand.handText)
         if m is None:
             tmp = hand.handText[:200]
@@ -855,7 +857,7 @@ class Bovada(HandHistoryConverter):
         atype = action.group("ATYPE")
         return atype != " Card dealt to a spot" and (atype != " Big blind/Bring in" or hand.gametype["base"] == "stud")
 
-    def _process_board_cards(self, hand: "Hand") -> None:
+    def _populate_missing_board_streets(self, hand: "Hand") -> None:
         """Process and assign board cards for the hand.
 
         This method extracts community cards for each street and updates the hand's streets dictionary
@@ -965,6 +967,7 @@ class Bovada(HandHistoryConverter):
 
     def _process_board_cards(self, hand: "Hand") -> None:
         """Extract and process board cards from street content, separating them from actions."""
+        self._populate_missing_board_streets(hand)
         if hand.gametype["base"] == "hold":
             # Extract board cards from street content and keep actions separate
             for street in ["FLOP", "TURN", "RIVER"]:
@@ -1079,7 +1082,7 @@ class Bovada(HandHistoryConverter):
                     hand.gametype["sb"] = self.clearMoneyString(postsb["SB"])
             self.allInBlind(hand, "PREFLOP", a)
 
-    def _detect_currency(self, currency_str: str) -> str:
+    def _detect_currency(self, currency_str: str) -> str | None:
         """Detect the currency type from a currency string.
 
         This method returns 'USD' if the string contains a dollar sign, 'play' for play money,
@@ -1239,8 +1242,9 @@ class Bovada(HandHistoryConverter):
         """
         if hand.gametype["sb"] is None and hand.gametype["bb"] is not None:
             big_blind = str(Decimal(hand.gametype["bb"]) * 2)
-            if self.lim_blinds.get(big_blind) is not None:
-                hand.gametype["sb"] = self.lim_blinds.get(big_blind)[0]
+            blinds = self.lim_blinds.get(big_blind)
+            if blinds is not None:
+                hand.gametype["sb"] = blinds[0]
         elif hand.gametype["bb"] is None and hand.gametype["sb"] is not None:
             for v in list(self.lim_blinds.values()):
                 if hand.gametype["sb"] == v[0]:
@@ -1401,7 +1405,7 @@ class Bovada(HandHistoryConverter):
 
                     if street != "SEVENTH" or found.group("HERO"):
                         newcards = found.group("CARDS").split(" ")
-                        oldcards = []
+                        oldcards: list[str] = []
                     else:
                         oldcards = found.group("CARDS").split(" ")
                         newcards = []
@@ -1641,7 +1645,7 @@ class Bovada(HandHistoryConverter):
         for m in re_collect_pot.finditer(
             hand.handText.replace(" [ME]", "") if hand.version == "MVS" else hand.handText,
         ):  # [ME]
-            collect, pot = m.groupdict(), 0
+            collect, pot = m.groupdict(), Decimal("0")
             if "POT1" in collect and collect["POT1"] is not None:
                 pot += Decimal(self.clearMoneyString(collect["POT1"]))
             if "POT2" in collect and collect["POT2"] is not None:
