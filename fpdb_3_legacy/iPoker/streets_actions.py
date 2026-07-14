@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 from decimal import Decimal
-from typing import Any
+from typing import TYPE_CHECKING, Any, ClassVar
 
 from fpdb_3_legacy.loggingFpdb import get_logger
 
@@ -11,6 +11,20 @@ log = get_logger("ipoker_parser")
 
 class IPokerStreetsActionsMixin:
     """Street parsing, cards, blinds, actions, and pot collection for iPoker."""
+
+    re_board: ClassVar[re.Pattern[str]]
+    re_action: ClassVar[re.Pattern[str]]
+    re_hero_cards: ClassVar[re.Pattern[str]]
+    re_player_info: ClassVar[re.Pattern[str]]
+    THIRD_STREET_CARDS_COUNT: ClassVar[int]
+    SECOND_STREET_CARDS_COUNT: ClassVar[int]
+
+    if TYPE_CHECKING:
+
+        def _raise_community_cards_error(self, hand_id: str, street: str) -> None: ...
+
+        @staticmethod
+        def clearMoneyString(money: str) -> str: ...
 
     def markStreets(self, hand: Any) -> None:
         """Extracts the rounds of a hand and adds them to the Hand object.
@@ -79,7 +93,7 @@ class IPokerStreetsActionsMixin:
             None
         """
         log.debug("Entering readCommunityCards for hand: %s, street: %s", hand.handid, street)
-        cards = []
+        cards: list[str] = []
 
         try:
             # Search for the board cards in the hand's streets
@@ -492,13 +506,13 @@ class IPokerStreetsActionsMixin:
         log.debug("Players in hand: %s", player_names)
 
         # HH format doesn't actually print the actions in order!
-        m = self.re_action.finditer(hand.streets[street])
-        actions = {}
-        for a in m:
-            actions[int(a.group("ACT"))] = a.groupdict()
+        matches = self.re_action.finditer(hand.streets[street])
+        actions: dict[int, dict[str, Any]] = {}
+        for match in matches:
+            actions[int(match.group("ACT"))] = match.groupdict()
 
-        for a in sorted(actions.keys()):
-            action = actions[a]
+        for action_index in sorted(actions):
+            action = actions[action_index]
             atype = action["ATYPE"]
             player = action["PNAME"]
             bet = self.clearMoneyString(action["BET"])
