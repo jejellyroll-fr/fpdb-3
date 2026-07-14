@@ -8,6 +8,8 @@ des statistiques pour le tableau de bord, les positions et les cartes.
 
 from __future__ import annotations
 
+from typing import Any
+
 from PySide6.QtCore import QObject, Qt, Signal
 from PySide6.QtGui import QBrush, QColor, QStandardItem, QStandardItemModel
 
@@ -19,12 +21,8 @@ from fpdb_3_legacy.ring_stats.styles import get_theme_palette
 log = get_logger("ring_stats_controller")
 
 def debug_log(msg: str) -> None:
-    try:
-        import time
-        with open("/Users/jde/Documents/github/fpdb-new/debug_ring_stats.log", "a", encoding="utf-8") as f:
-            f.write(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] {msg}\n")
-    except Exception:
-        pass
+    """Route detailed diagnostics through the configured logger."""
+    log.debug(msg)
 
 colalias, colheading, colshowsumm, colshowposn, colformat, coltype, colxalign = (
     0, 1, 2, 3, 4, 5, 6
@@ -119,8 +117,8 @@ class RingStatsController(QObject):
         is_sqlite = (hasattr(db, "backend") and db.backend == 4)
         self.async_mode = (not is_sqlite) and ("pytest" not in sys.modules and "unittest" not in sys.modules)
 
-        self._last_summary_stats = None
-        self._last_profit_data = None
+        self._last_summary_stats: dict[str, Any] | None = None
+        self._last_profit_data: tuple[Any, Any, Any, Any] | None = None
 
     def refresh_all(self, filter_widget) -> None:
         """Lance l'ensemble des requêtes asynchrones en fonction des filtres appliqués."""
@@ -354,7 +352,7 @@ class RingStatsController(QObject):
         color_neutral = QColor(c_palette.get("text", "#edf2f7"))
 
         for sqlrow in range(len(result)):
-            treerow = []
+            treerow: list[QStandardItem] = []
             for col, column in enumerate(cols_to_show):
                 value = None
                 sortValue = -1e9
@@ -621,4 +619,3 @@ class RingStatsController(QObject):
         tmp = tmp.replace("<currency_test>", currencytest)
         tmp = tmp.replace(",)", ")")
         return tmp
-
