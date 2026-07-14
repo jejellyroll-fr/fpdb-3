@@ -101,6 +101,9 @@ from fpdb_3_legacy.stats_postflop import (
     first_raise_turn as first_raise_turn,
 )
 from fpdb_3_legacy.stats_postflop import (
+    float_bet as float_bet,
+)
+from fpdb_3_legacy.stats_postflop import (
     float_river as float_river,
 )
 from fpdb_3_legacy.stats_postflop import (
@@ -147,6 +150,9 @@ from fpdb_3_legacy.stats_postflop import (
 )
 from fpdb_3_legacy.stats_postflop import (
     open_turn as open_turn,
+)
+from fpdb_3_legacy.stats_postflop import (
+    probe_bet as probe_bet,
 )
 from fpdb_3_legacy.stats_postflop import (
     raise_frequency_flop as raise_frequency_flop,
@@ -3371,114 +3377,6 @@ def player_note(stat_dict, player):
 
 ################################################################################################
 # NEW STATS
-
-
-def float_bet(stat_dict, player):
-    """Calculate the Float Bet percentage for a player.
-
-    A float bet is when a player calls a flop bet in position with the intention
-    of taking the pot away on a later street (usually the turn) if the opponent
-    shows weakness by checking.
-
-    Float = Call flop in position + Bet turn (when opponent checks)
-
-    Args:
-        stat_dict (dict): A dictionary containing player statistics.
-        player (int): The player for whom the statistic is calculated.
-
-    Returns:
-        tuple: A tuple containing the calculated statistic, formatted strings, and related information.
-        Returns "-" if no float opportunities to distinguish from 0% (never floated).
-    """
-    stat = 0.0
-    try:
-        # Get flop position and calls
-        street1_in_position = float(stat_dict[player].get("street1InPosition", 0))
-        street1_calls = float(stat_dict[player].get("street1Calls", 0))
-
-        # Get turn bets and first to act
-        street2_bets = float(stat_dict[player].get("street2Bets", 0))
-        float(stat_dict[player].get("street2FirstToAct", 0))
-
-        # Get opportunities to see flop and turn
-        float(stat_dict[player].get("saw_f", 0))
-        saw_turn = float(stat_dict[player].get("saw_t", 0))
-
-        # Calculate float opportunities: called flop in position and saw turn
-        float_opportunities = min(street1_in_position, street1_calls, saw_turn)
-
-        # No opportunities = no data available
-        if float_opportunities == 0:
-            return format_no_data_stat("float", "% float bet turn")
-
-        # Calculate float count: bet turn after calling flop in position
-        # This is a simplified calculation as we don't have exact sequence data
-        float_count = min(street2_bets, float_opportunities)
-
-        # Calculate float percentage
-        stat = float_count / float_opportunities
-        return (
-            stat,
-            "%3.1f" % (100.0 * stat),
-            "float=%3.1f%%" % (100.0 * stat),
-            "float=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (float_count, float_opportunities),
-            "% float bet turn",
-        )
-    except (KeyError, ValueError, TypeError):
-        return format_no_data_stat("float", "% float bet turn")
-
-
-def probe_bet(stat_dict, player):
-    """Calculate the Probe Bet percentage for a player.
-
-    A probe bet is when a player bets after the preflop aggressor checks,
-    testing the strength of the opponent's hand.
-
-    Probe = Bet after preflop aggressor checks
-
-    Args:
-        stat_dict (dict): A dictionary containing player statistics.
-        player (int): The player for whom the statistic is calculated.
-
-    Returns:
-        tuple: A tuple containing the calculated statistic, formatted strings, and related information.
-        Returns "-" if no probe opportunities to distinguish from 0% (never probed).
-    """
-    stat = 0.0
-    try:
-        # Get flop betting data
-        street1_bets = float(stat_dict[player].get("street1Bets", 0))
-        saw_flop = float(stat_dict[player].get("saw_f", 0))
-
-        # Get continuation bet data (opponent's cb opportunities and actual cbs)
-        float(stat_dict[player].get("cb_opp_1", 0))
-        cb_1 = float(stat_dict[player].get("cb_1", 0))
-
-        # Calculate probe opportunities: saw flop when opponent could have c-bet but didn't
-        # This is approximated as flops seen where opponent had cb opportunity but didn't c-bet
-        probe_opportunities = saw_flop - cb_1
-
-        # No opportunities = no data available
-        if probe_opportunities <= 0:
-            return format_no_data_stat("probe", "% probe bet flop")
-
-        # Calculate probe count: bets made in probe situations
-        # This is a simplified calculation as exact sequence data isn't available
-        probe_count = min(street1_bets, probe_opportunities)
-
-        # Calculate probe percentage
-        stat = probe_count / probe_opportunities
-        return (
-            stat,
-            "%3.1f" % (100.0 * stat),
-            "probe=%3.1f%%" % (100.0 * stat),
-            "probe=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (probe_count, probe_opportunities),
-            "% probe bet flop",
-        )
-    except (KeyError, ValueError, TypeError):
-        return format_no_data_stat("probe", "% probe bet flop")
 
 
 def cb_ip(stat_dict, player):
