@@ -61,6 +61,7 @@ jobs:
           fpdb_3_legacy/stat_adapters.py
           fpdb_3_legacy/stats_context.py
           fpdb_3_legacy/stats_formatting.py
+          fpdb_3_legacy/stats_postflop.py
           fpdb_3_legacy/stats_table.py
           fpdb_3_legacy/AutoNoteRules.py
           fpdb_3_legacy/AutoNotes.py

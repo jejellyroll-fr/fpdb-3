@@ -70,6 +70,27 @@ from fpdb_3_legacy.stats_formatting import (
 from fpdb_3_legacy.stats_formatting import (
     stat_override as __stat_override,
 )
+from fpdb_3_legacy.stats_postflop import (
+    fold_to_three_B_flop as fold_to_three_B_flop,
+)
+from fpdb_3_legacy.stats_postflop import (
+    fold_to_three_B_river as fold_to_three_B_river,
+)
+from fpdb_3_legacy.stats_postflop import (
+    fold_to_three_B_turn as fold_to_three_B_turn,
+)
+from fpdb_3_legacy.stats_postflop import (
+    postflop_ratio as _postflop_3bet,
+)
+from fpdb_3_legacy.stats_postflop import (
+    three_B_flop as three_B_flop,
+)
+from fpdb_3_legacy.stats_postflop import (
+    three_B_river as three_B_river,
+)
+from fpdb_3_legacy.stats_postflop import (
+    three_B_turn as three_B_turn,
+)
 from fpdb_3_legacy.stats_table import (
     TABLE_STAT_FUNCTIONS as _TABLE_STAT_FUNCTIONS,  # noqa: F401 -- compatibility export
 )
@@ -1105,58 +1126,6 @@ def three_B(stat_dict, player):
         )
     except (KeyError, ValueError, TypeError):
         return (stat, "NA", "3B=NA", "3B_pf=NA", "(0/0)", "% 3 bet preflop/3rd street")
-
-
-def _postflop_3bet(stat_dict, player, opp_key, done_key, abbr, desc):
-    """Shared helper for per-street postflop 3-bet (re-raise) percentage."""
-    stat = 0.0
-    try:
-        opp = float(stat_dict[player].get(opp_key, 0))
-        done = float(stat_dict[player].get(done_key, 0))
-        if opp == 0:
-            return format_no_data_stat(abbr, desc)
-        stat = done / opp
-        pct = 100.0 * stat
-        return (
-            stat,
-            f"{pct:3.1f}",
-            f"{abbr}=%3.1f%%" % pct,
-            f"{abbr}=%3.1f%%" % pct,
-            "(%d/%d)" % (done, opp),
-            desc,
-        )
-    except (KeyError, ValueError, TypeError):
-        return (stat, "NA", f"{abbr}=NA", f"{abbr}=NA", "(0/0)", desc)
-
-
-def three_B_flop(stat_dict, player):
-    """Flop 3-bet %: re-raised after a bet-and-raise on the flop."""
-    return _postflop_3bet(stat_dict, player, "fl3b_opp", "fl3b", "F3B", "% 3 bet flop")
-
-
-def three_B_turn(stat_dict, player):
-    """Turn 3-bet %: re-raised after a bet-and-raise on the turn."""
-    return _postflop_3bet(stat_dict, player, "tn3b_opp", "tn3b", "T3B", "% 3 bet turn")
-
-
-def three_B_river(stat_dict, player):
-    """River 3-bet %: re-raised after a bet-and-raise on the river."""
-    return _postflop_3bet(stat_dict, player, "rv3b_opp", "rv3b", "R3B", "% 3 bet river")
-
-
-def fold_to_three_B_flop(stat_dict, player):
-    """Fold to flop 3-bet %: folded the flop raise when re-raised."""
-    return _postflop_3bet(stat_dict, player, "ff3b_opp", "ff3b", "FF3B", "% fold to flop 3bet")
-
-
-def fold_to_three_B_turn(stat_dict, player):
-    """Fold to turn 3-bet %: folded the turn raise when re-raised."""
-    return _postflop_3bet(stat_dict, player, "ft3b_opp", "ft3b", "FT3B", "% fold to turn 3bet")
-
-
-def fold_to_three_B_river(stat_dict, player):
-    """Fold to river 3-bet %: folded the river raise when re-raised."""
-    return _postflop_3bet(stat_dict, player, "fr3b_opp", "fr3b", "FR3B", "% fold to river 3bet")
 
 
 # ---------------------------------------------------------------------------
