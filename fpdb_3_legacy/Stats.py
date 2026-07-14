@@ -185,6 +185,15 @@ from fpdb_3_legacy.stats_sizing import (
     average_bet_percentage as _bet_facing,
 )
 from fpdb_3_legacy.stats_sizing import (
+    f_2bet_facing as f_2bet_facing,
+)
+from fpdb_3_legacy.stats_sizing import (
+    f_3bet_facing as f_3bet_facing,
+)
+from fpdb_3_legacy.stats_sizing import (
+    f_4bet_facing as f_4bet_facing,
+)
+from fpdb_3_legacy.stats_sizing import (
     f_bet_facing as f_bet_facing,
 )
 from fpdb_3_legacy.stats_sizing import (
@@ -215,6 +224,15 @@ from fpdb_3_legacy.stats_sizing import (
     p_raise_made as p_raise_made,
 )
 from fpdb_3_legacy.stats_sizing import (
+    r_2bet_facing as r_2bet_facing,
+)
+from fpdb_3_legacy.stats_sizing import (
+    r_3bet_facing as r_3bet_facing,
+)
+from fpdb_3_legacy.stats_sizing import (
+    r_4bet_facing as r_4bet_facing,
+)
+from fpdb_3_legacy.stats_sizing import (
     r_bet_facing as r_bet_facing,
 )
 from fpdb_3_legacy.stats_sizing import (
@@ -228,6 +246,15 @@ from fpdb_3_legacy.stats_sizing import (
 )
 from fpdb_3_legacy.stats_sizing import (
     r_spr as r_spr,
+)
+from fpdb_3_legacy.stats_sizing import (
+    t_2bet_facing as t_2bet_facing,
+)
+from fpdb_3_legacy.stats_sizing import (
+    t_3bet_facing as t_3bet_facing,
+)
+from fpdb_3_legacy.stats_sizing import (
+    t_4bet_facing as t_4bet_facing,
 )
 from fpdb_3_legacy.stats_sizing import (
     t_bet_facing as t_bet_facing,
@@ -1290,51 +1317,6 @@ def three_B(stat_dict, player):
 # simply expose them to the HUD/GUI. Adding them is purely additive: any
 # module-level function here is auto-registered into STATLIST.
 # ---------------------------------------------------------------------------
-
-
-def f_2bet_facing(stat_dict, player):
-    """Average size of the flop raise (2-bet) faced, as % of pot (PT4 val_f_2bet_facing_pct)."""
-    return _bet_facing(stat_dict, player, "f_2bet_facing_cnt", "f_2bet_facing_bp", "F2vs", "avg flop 2bet faced (% pot)")
-
-
-def f_3bet_facing(stat_dict, player):
-    """Average size of the flop re-raise (3-bet) faced, as % of pot (PT4 val_f_3bet_facing_pct)."""
-    return _bet_facing(stat_dict, player, "f_3bet_facing_cnt", "f_3bet_facing_bp", "F3vs", "avg flop 3bet faced (% pot)")
-
-
-def f_4bet_facing(stat_dict, player):
-    """Average size of the flop 4-bet faced, as % of pot (PT4 val_f_4bet_facing_pct)."""
-    return _bet_facing(stat_dict, player, "f_4bet_facing_cnt", "f_4bet_facing_bp", "F4vs", "avg flop 4bet faced (% pot)")
-
-
-def t_2bet_facing(stat_dict, player):
-    """Average size of the turn raise (2-bet) faced, as % of pot (PT4 val_t_2bet_facing_pct)."""
-    return _bet_facing(stat_dict, player, "t_2bet_facing_cnt", "t_2bet_facing_bp", "T2vs", "avg turn 2bet faced (% pot)")
-
-
-def t_3bet_facing(stat_dict, player):
-    """Average size of the turn re-raise (3-bet) faced, as % of pot (PT4 val_t_3bet_facing_pct)."""
-    return _bet_facing(stat_dict, player, "t_3bet_facing_cnt", "t_3bet_facing_bp", "T3vs", "avg turn 3bet faced (% pot)")
-
-
-def t_4bet_facing(stat_dict, player):
-    """Average size of the turn 4-bet faced, as % of pot (PT4 val_t_4bet_facing_pct)."""
-    return _bet_facing(stat_dict, player, "t_4bet_facing_cnt", "t_4bet_facing_bp", "T4vs", "avg turn 4bet faced (% pot)")
-
-
-def r_2bet_facing(stat_dict, player):
-    """Average size of the river raise (2-bet) faced, as % of pot (PT4 val_r_2bet_facing_pct)."""
-    return _bet_facing(stat_dict, player, "r_2bet_facing_cnt", "r_2bet_facing_bp", "R2vs", "avg river 2bet faced (% pot)")
-
-
-def r_3bet_facing(stat_dict, player):
-    """Average size of the river re-raise (3-bet) faced, as % of pot (PT4 val_r_3bet_facing_pct)."""
-    return _bet_facing(stat_dict, player, "r_3bet_facing_cnt", "r_3bet_facing_bp", "R3vs", "avg river 3bet faced (% pot)")
-
-
-def r_4bet_facing(stat_dict, player):
-    """Average size of the river 4-bet faced, as % of pot (PT4 val_r_4bet_facing_pct)."""
-    return _bet_facing(stat_dict, player, "r_4bet_facing_cnt", "r_4bet_facing_bp", "R4vs", "avg river 4bet faced (% pot)")
 
 
 # --- Bet-sizing completion: generic raise faced, 2nd raise made, 5-bet faced ---

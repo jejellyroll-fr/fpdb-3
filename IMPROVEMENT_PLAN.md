@@ -179,6 +179,7 @@ Les bugs multi-backend récents (`Rank` réservé, `boolean` vs `smallint`, `set
 - ✅ **Montants et SPR de `Stats.py`** (2026-07-14) : six montants moyens investis et les SPR flop/turn/river extraits dans `stats_sizing.py`, avec leurs deux helpers typés et leurs exports historiques préservés.
 - ✅ **Tailles de mises de `Stats.py`** (2026-07-14) : tailles moyennes des mises affrontées flop/turn/river, des 2/3/4-bets affrontés préflop et des mises produites postflop déplacées dans `stats_sizing.py`. Le helper en points de base est typé et réexporté pour les familles restantes.
 - ✅ **Tailles de relances génériques de `Stats.py`** (2026-07-14) : relances produites et relances affrontées préflop/flop/turn/river déplacées dans `stats_sizing.py`, avec conservation des huit entrées publiques du catalogue HUD.
+- ✅ **Matrice des relances affrontées de `Stats.py`** (2026-07-14) : tailles des 2/3/4-bets affrontés au flop, turn et river extraites dans `stats_sizing.py`, en conservant les neuf noms et formats historiques.
 - **Découper les god-modules** : `SQL.py` (requêtes par domaine / fichiers `.sql`), `Database.py` (connexion / DDL / cache HUD / requêtes), `Stats.py` (par famille). Incrémental, avec tests de non-régression.
 - **Qualité outillée restante** : Ruff est vert sur tout le dépôt et mypy couvre tout le package legacy ; convertir les 73 `TODO/FIXME` actuels en tâches traçables, évaluer l'intérêt d'un second checker (`pyright`) et clarifier/supprimer le dossier `fpdb/`.
 
