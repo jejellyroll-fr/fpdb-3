@@ -8,6 +8,64 @@ from typing import Any
 from fpdb_3_legacy.stats_formatting import StatTuple, format_no_data_stat
 
 
+def average_bet_percentage(
+    stat_dict: Mapping[int, Mapping[str, Any]],
+    player: int,
+    count_key: str,
+    basis_points_key: str,
+    abbreviation: str,
+    description: str,
+) -> StatTuple:
+    """Format the mean size of a bet as a percentage of the pot."""
+    try:
+        count = float(stat_dict[player].get(count_key, 0))
+        basis_points = float(stat_dict[player].get(basis_points_key, 0))
+        if count == 0:
+            return format_no_data_stat(abbreviation, description)
+        stat = (basis_points / count) / 10000.0
+        percent = 100.0 * stat
+        display = f"{abbreviation}={percent:3.1f}%"
+        return stat, f"{percent:3.1f}", display, display, f"({int(basis_points)}/{int(count)})", description
+    except (KeyError, TypeError, ValueError):
+        return format_no_data_stat(abbreviation, description)
+
+
+def f_bet_facing(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    return average_bet_percentage(stat_dict, player, "f_bet_facing_cnt", "f_bet_facing_bp", "FBvs", "avg flop bet faced (% pot)")
+
+
+def t_bet_facing(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    return average_bet_percentage(stat_dict, player, "t_bet_facing_cnt", "t_bet_facing_bp", "TBvs", "avg turn bet faced (% pot)")
+
+
+def r_bet_facing(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    return average_bet_percentage(stat_dict, player, "r_bet_facing_cnt", "r_bet_facing_bp", "RBvs", "avg river bet faced (% pot)")
+
+
+def p_2bet_facing(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    return average_bet_percentage(stat_dict, player, "p_2bet_facing_cnt", "p_2bet_facing_bp", "2Bvs", "avg 2bet faced (% pot)")
+
+
+def p_3bet_facing(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    return average_bet_percentage(stat_dict, player, "p_3bet_facing_cnt", "p_3bet_facing_bp", "3Bvs", "avg 3bet faced (% pot)")
+
+
+def p_4bet_facing(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    return average_bet_percentage(stat_dict, player, "p_4bet_facing_cnt", "p_4bet_facing_bp", "4Bvs", "avg 4bet faced (% pot)")
+
+
+def f_bet_made(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    return average_bet_percentage(stat_dict, player, "f_bet_made_cnt", "f_bet_made_bp", "FBet", "avg flop bet made (% pot)")
+
+
+def t_bet_made(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    return average_bet_percentage(stat_dict, player, "t_bet_made_cnt", "t_bet_made_bp", "TBet", "avg turn bet made (% pot)")
+
+
+def r_bet_made(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    return average_bet_percentage(stat_dict, player, "r_bet_made_cnt", "r_bet_made_bp", "RBet", "avg river bet made (% pot)")
+
+
 def average_spr(
     stat_dict: Mapping[int, Mapping[str, Any]],
     player: int,
