@@ -191,6 +191,12 @@ from fpdb_3_legacy.stats_sizing import (
     f_bet_made as f_bet_made,
 )
 from fpdb_3_legacy.stats_sizing import (
+    f_raise_facing as f_raise_facing,
+)
+from fpdb_3_legacy.stats_sizing import (
+    f_raise_made as f_raise_made,
+)
+from fpdb_3_legacy.stats_sizing import (
     f_spr as f_spr,
 )
 from fpdb_3_legacy.stats_sizing import (
@@ -203,10 +209,22 @@ from fpdb_3_legacy.stats_sizing import (
     p_4bet_facing as p_4bet_facing,
 )
 from fpdb_3_legacy.stats_sizing import (
+    p_raise_facing as p_raise_facing,
+)
+from fpdb_3_legacy.stats_sizing import (
+    p_raise_made as p_raise_made,
+)
+from fpdb_3_legacy.stats_sizing import (
     r_bet_facing as r_bet_facing,
 )
 from fpdb_3_legacy.stats_sizing import (
     r_bet_made as r_bet_made,
+)
+from fpdb_3_legacy.stats_sizing import (
+    r_raise_facing as r_raise_facing,
+)
+from fpdb_3_legacy.stats_sizing import (
+    r_raise_made as r_raise_made,
 )
 from fpdb_3_legacy.stats_sizing import (
     r_spr as r_spr,
@@ -216,6 +234,12 @@ from fpdb_3_legacy.stats_sizing import (
 )
 from fpdb_3_legacy.stats_sizing import (
     t_bet_made as t_bet_made,
+)
+from fpdb_3_legacy.stats_sizing import (
+    t_raise_facing as t_raise_facing,
+)
+from fpdb_3_legacy.stats_sizing import (
+    t_raise_made as t_raise_made,
 )
 from fpdb_3_legacy.stats_sizing import (
     t_spr as t_spr,
@@ -1268,26 +1292,6 @@ def three_B(stat_dict, player):
 # ---------------------------------------------------------------------------
 
 
-def p_raise_made(stat_dict, player):
-    """Average size of the player's own preflop raise, as % of pot (PT4 val_p_raise_made_pct)."""
-    return _bet_facing(stat_dict, player, "p_raise_made_cnt", "p_raise_made_bp", "PRz", "avg preflop raise made (% pot)")
-
-
-def f_raise_made(stat_dict, player):
-    """Average size of the player's own flop raise, as % of pot (PT4 val_f_raise_made_pct)."""
-    return _bet_facing(stat_dict, player, "f_raise_made_cnt", "f_raise_made_bp", "FRz", "avg flop raise made (% pot)")
-
-
-def t_raise_made(stat_dict, player):
-    """Average size of the player's own turn raise, as % of pot (PT4 val_t_raise_made_pct)."""
-    return _bet_facing(stat_dict, player, "t_raise_made_cnt", "t_raise_made_bp", "TRz", "avg turn raise made (% pot)")
-
-
-def r_raise_made(stat_dict, player):
-    """Average size of the player's own river raise, as % of pot (PT4 val_r_raise_made_pct)."""
-    return _bet_facing(stat_dict, player, "r_raise_made_cnt", "r_raise_made_bp", "RRz", "avg river raise made (% pot)")
-
-
 def f_2bet_facing(stat_dict, player):
     """Average size of the flop raise (2-bet) faced, as % of pot (PT4 val_f_2bet_facing_pct)."""
     return _bet_facing(stat_dict, player, "f_2bet_facing_cnt", "f_2bet_facing_bp", "F2vs", "avg flop 2bet faced (% pot)")
@@ -1334,26 +1338,6 @@ def r_4bet_facing(stat_dict, player):
 
 
 # --- Bet-sizing completion: generic raise faced, 2nd raise made, 5-bet faced ---
-def p_raise_facing(stat_dict, player):
-    """Average size of the preflop raise faced (any level), as % of pot (PT4 val_p_raise_facing_pct)."""
-    return _bet_facing(stat_dict, player, "p_raise_facing_cnt", "p_raise_facing_bp", "PRvs", "avg preflop raise faced (% pot)")
-
-
-def f_raise_facing(stat_dict, player):
-    """Average size of the flop raise faced (any level), as % of pot (PT4 val_f_raise_facing_pct)."""
-    return _bet_facing(stat_dict, player, "f_raise_facing_cnt", "f_raise_facing_bp", "FRvs", "avg flop raise faced (% pot)")
-
-
-def t_raise_facing(stat_dict, player):
-    """Average size of the turn raise faced (any level), as % of pot (PT4 val_t_raise_facing_pct)."""
-    return _bet_facing(stat_dict, player, "t_raise_facing_cnt", "t_raise_facing_bp", "TRvs", "avg turn raise faced (% pot)")
-
-
-def r_raise_facing(stat_dict, player):
-    """Average size of the river raise faced (any level), as % of pot (PT4 val_r_raise_facing_pct)."""
-    return _bet_facing(stat_dict, player, "r_raise_facing_cnt", "r_raise_facing_bp", "RRvs", "avg river raise faced (% pot)")
-
-
 def p_raise_made_2(stat_dict, player):
     """Average size of the player's second preflop raise, as % of pot (PT4 val_p_raise_made_2_pct)."""
     return _bet_facing(stat_dict, player, "p_raise_made_2_cnt", "p_raise_made_2_bp", "PRz2", "avg 2nd preflop raise made (% pot)")
