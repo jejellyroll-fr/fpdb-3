@@ -116,6 +116,7 @@ jobs:
           fpdb_3_legacy/BovadaToFpdb.py
           fpdb_3_legacy/backfill_boards.py
           fpdb_3_legacy/backfill_showdown.py
+          fpdb_3_legacy/backfill_autonotes.py
           fpdb_3_legacy/card_path.py
           fpdb_3_legacy/fpdb_cli.py
           fpdb_3_legacy/legacy_launcher.py

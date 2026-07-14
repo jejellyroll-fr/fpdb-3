@@ -15,6 +15,7 @@ import argparse
 import json
 import os
 from decimal import Decimal
+from typing import Any
 
 from fpdb_3_legacy import Configuration, Database, IdentifySite, Importer
 from fpdb_3_legacy.AutoNotes import (
@@ -106,7 +107,7 @@ class DatabaseAutoNoteHand:
             }
 
         self.actionStreets = ["BLINDSANTES", "PREFLOP", "FLOP", "TURN", "RIVER", "SHOWDOWN"]
-        self.actions = {street: [] for street in self.actionStreets}
+        self.actions: dict[str, list[Any]] = {street: [] for street in self.actionStreets}
         for row in action_rows:
             street = STREET_BY_ID.get(row.get("street"), "PREFLOP")
             action = _action_tuple(row)
@@ -357,7 +358,7 @@ def _prepare_hand_for_autonotes(hand, db_hand_id, player_ids, config=None, rule_
 def parse_id_filter(values) -> set[str] | None:
     if not values:
         return None
-    selected = set()
+    selected: set[str] = set()
     for value in values:
         selected.update(part.strip() for part in value.split(",") if part.strip())
     return selected or None
@@ -543,7 +544,7 @@ def backfill_preview(
         db.ensure_feature_tables()
 
     idsite = IdentifySite.IdentifySite(config)
-    stats = {
+    stats: dict[str, Any] = {
         "files": 0,
         "files_skipped": 0,
         "hands": 0,
@@ -650,7 +651,7 @@ def backfill_raw_preview(paths, config_file="HUD_config.xml", rule_set_ids=None,
     """Generate a read-only preview directly from hand-history files, without DB matching."""
     config = Configuration.Config(file=config_file)
     idsite = IdentifySite.IdentifySite(config)
-    stats = {
+    stats: dict[str, Any] = {
         "files": 0,
         "files_skipped": 0,
         "hands": 0,
@@ -717,7 +718,7 @@ def backfill_database_preview(
     if hasattr(db, "ensure_feature_tables"):
         db.ensure_feature_tables()
 
-    stats = {
+    stats: dict[str, Any] = {
         "files": 0,
         "files_skipped": 0,
         "hands": 0,
