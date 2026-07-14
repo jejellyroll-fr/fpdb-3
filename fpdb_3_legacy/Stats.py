@@ -137,9 +137,6 @@ from fpdb_3_legacy.stats_postflop import (
     open_turn as open_turn,
 )
 from fpdb_3_legacy.stats_postflop import (
-    postflop_ratio as _postflop_3bet,
-)
-from fpdb_3_legacy.stats_postflop import (
     three_B_flop as three_B_flop,
 )
 from fpdb_3_legacy.stats_postflop import (
@@ -147,6 +144,24 @@ from fpdb_3_legacy.stats_postflop import (
 )
 from fpdb_3_legacy.stats_postflop import (
     three_B_turn as three_B_turn,
+)
+from fpdb_3_legacy.stats_preflop import (
+    face_limpers as face_limpers,
+)
+from fpdb_3_legacy.stats_preflop import (
+    fold_to_allin as fold_to_allin,
+)
+from fpdb_3_legacy.stats_preflop import (
+    gp_2x as gp_2x,
+)
+from fpdb_3_legacy.stats_preflop import (
+    gp_limp as gp_limp,
+)
+from fpdb_3_legacy.stats_preflop import (
+    gp_os as gp_os,
+)
+from fpdb_3_legacy.stats_preflop import (
+    straddle as straddle,
 )
 from fpdb_3_legacy.stats_table import (
     TABLE_STAT_FUNCTIONS as _TABLE_STAT_FUNCTIONS,  # noqa: F401 -- compatibility export
@@ -1194,78 +1209,6 @@ def three_B(stat_dict, player):
 # simply expose them to the HUD/GUI. Adding them is purely additive: any
 # module-level function here is auto-registered into STATLIST.
 # ---------------------------------------------------------------------------
-
-
-def face_limpers(stat_dict, player):
-    """Average number of limpers faced before the player's first preflop action.
-
-    PT4 cnt_p_face_limpers. Not a percentage: the value is the mean count of
-    limpers per hand (sum of limpers faced / hands), so "-" is shown when the
-    player has no hands rather than 0.0.
-    """
-    stat = 0.0
-    try:
-        n = float(stat_dict[player].get("n", 0))
-        total = float(stat_dict[player].get("face_limpers", 0))
-        if n == 0:
-            return format_no_data_stat("FLmp", "avg limpers faced preflop")
-        stat = total / n
-        return (
-            stat,
-            f"{stat:3.1f}",
-            f"FLmp={stat:3.1f}",
-            f"FLmp={stat:3.1f}",
-            "(%d/%d)" % (total, n),
-            "avg limpers faced preflop",
-        )
-    except (KeyError, ValueError, TypeError):
-        return format_no_data_stat("FLmp", "avg limpers faced preflop")
-
-
-def straddle(stat_dict, player):
-    """Straddle %: how often the player voluntarily posts a straddle (kill blind).
-
-    PT4 flg_blind_k, over hands dealt (n). Distinct from the forced dead-blind
-    flags (blind_ds/blind_db), which are table artifacts rather than player
-    tendencies and are persisted for parity but not surfaced as a HUD stat.
-    """
-    return _postflop_3bet(stat_dict, player, "n", "straddle_done", "Str", "% straddle")
-
-
-def gp_2x(stat_dict, player):
-    """Open-raise % (normal sizing): opened for less than 40% of own stack.
-
-    PT4 "GenerationPoker" GP 2X = cnt_gp_2x / cnt_gp_open_opp. The companion of
-    open-shove (:func:`gp_os`); together they split all first-in raises.
-    """
-    return _postflop_3bet(stat_dict, player, "gp_open_opp", "gp_2x", "2X", "% open-raise (<40% stack)")
-
-
-def gp_os(stat_dict, player):
-    """Open-shove %: opened committing >= 40% of own stack (PT4 GP OS).
-
-    cnt_gp_os / cnt_gp_open_opp. The key push/fold stat for short stacks in a
-    tournament/Spin & Go HUD.
-    """
-    return _postflop_3bet(stat_dict, player, "gp_open_opp", "gp_os", "OS", "% open-shove (>=40% stack)")
-
-
-def gp_limp(stat_dict, player):
-    """Limp %: first voluntary preflop action was a call in an unraised pot.
-
-    PT4 "GenerationPoker" GP LIMP = cnt_gp_limp / cnt_gp_open_opp (PT4 flg_p_limp
-    over open opportunities).
-    """
-    return _postflop_3bet(stat_dict, player, "gp_open_opp", "gp_limp", "Limp", "% open-limp")
-
-
-def fold_to_allin(stat_dict, player):
-    """Fold to all-in %: folded when facing an opponent's all-in bet/raise.
-
-    PT4 enum_face_allin, modelled as folded / faced. "-" when the player never
-    faced an all-in (distinct from 0% = faced one and never folded).
-    """
-    return _postflop_3bet(stat_dict, player, "faced_allin", "fold_allin", "FvAI", "% fold to all-in")
 
 
 def _bet_facing(stat_dict, player, cnt_key, bp_key, abbr, desc):
