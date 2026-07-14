@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import unittest
+from typing import cast
 from unittest.mock import MagicMock, patch
 
 from PySide6.QtWidgets import QApplication
@@ -94,14 +95,14 @@ class TestEmptyDataPopups(unittest.TestCase):
         viewer.filters.getGraphOps.return_value = ["$"]
 
         # Mock getRingProfitGraph to return empty/None
-        viewer.getRingProfitGraph = MagicMock(return_value=(None, None, None, None))
+        viewer.getRingProfitGraph = MagicMock(return_value=(None, None, None, None))  # type: ignore[method-assign]
 
         # Run generateGraph
         viewer.generateGraph(None)
 
         # Assert QMessageBox was shown
         mock_exec.assert_called_once()
-        viewer.db.rollback.assert_called()
+        cast(MagicMock, viewer.db.rollback).assert_called()
 
     @patch("PySide6.QtWidgets.QMessageBox.exec")
     def test_gui_tourney_graph_viewer_empty(self, mock_exec):
@@ -116,14 +117,14 @@ class TestEmptyDataPopups(unittest.TestCase):
         viewer.filters.getGames.return_value = []
 
         # Mock getData to return None (empty data)
-        viewer.getData = MagicMock(return_value=None)
+        viewer.getData = MagicMock(return_value=None)  # type: ignore[method-assign]
 
         # Run generateGraph
         viewer.generateGraph(None)
 
         # Assert QMessageBox was shown
         mock_exec.assert_called_once()
-        viewer.db.rollback.assert_called()
+        cast(MagicMock, viewer.db.rollback).assert_called()
 
     @patch("PySide6.QtWidgets.QMessageBox.exec")
     def test_gui_session_viewer_empty(self, mock_exec):
@@ -141,10 +142,10 @@ class TestEmptyDataPopups(unittest.TestCase):
         viewer.filters.getSeats.return_value = None
 
         # Mock generateDatasets to return empty lists
-        viewer.generateDatasets = MagicMock(return_value=([], []))
+        viewer.generateDatasets = MagicMock(return_value=([], []))  # type: ignore[method-assign]
 
         # Mock clearGraphData
-        viewer.clearGraphData = MagicMock()
+        viewer.clearGraphData = MagicMock()  # type: ignore[method-assign]
 
         # Run createStatsPane
         viewer.createStatsPane(
@@ -160,7 +161,7 @@ class TestEmptyDataPopups(unittest.TestCase):
         # Assert QMessageBox was shown and graph cleared
         mock_exec.assert_called_once()
         viewer.clearGraphData.assert_called_once()
-        viewer.db.rollback.assert_called()
+        cast(MagicMock, viewer.db.rollback).assert_called()
 
     @patch("PySide6.QtWidgets.QMessageBox.exec")
     def test_gui_ring_player_stats_empty(self, mock_exec):
@@ -234,7 +235,7 @@ class TestEmptyDataPopups(unittest.TestCase):
         viewer.filters.getDates.return_value = ("2000-01-01", "2030-01-01")
 
         # Mock get_hand_ids_from_date_range to return empty
-        viewer.get_hand_ids_from_date_range = MagicMock(return_value=[])
+        viewer.get_hand_ids_from_date_range = MagicMock(return_value=[])  # type: ignore[method-assign]
 
         viewer.loadHands(None)
         mock_exec.assert_called_once()
@@ -248,7 +249,7 @@ class TestEmptyDataPopups(unittest.TestCase):
         viewer.filters.getDates.return_value = ("2000-01-01", "2030-01-01")
 
         # Mock get_hand_ids_from_date_range to return empty
-        viewer.get_hand_ids_from_date_range = MagicMock(return_value=[])
+        viewer.get_hand_ids_from_date_range = MagicMock(return_value=[])  # type: ignore[method-assign]
 
         viewer.loadHands(None)
         mock_exec.assert_called_once()
@@ -306,7 +307,9 @@ class TestEmptyDataPopups(unittest.TestCase):
         filters = Filters(self.mock_db)
 
         # Mock getHeroes return value
-        filters.getHeroes = MagicMock(return_value={"PokerStars": "jeje_sat", "Unibet Poker": "jejesat"})
+        filters.getHeroes = MagicMock(  # type: ignore[method-assign]
+            return_value={"PokerStars": "jeje_sat", "Unibet Poker": "jejesat"},
+        )
 
         # Test exact match
         self.assertEqual(filters.get_hero_for_site("PokerStars"), "jeje_sat")
@@ -316,7 +319,7 @@ class TestEmptyDataPopups(unittest.TestCase):
         # Test parent matching variant
         self.assertEqual(filters.get_hero_for_site("Unibet"), "jejesat")
         # Test non-existent site returns None
-        filters.getHeroes = MagicMock(return_value={"PokerStars": "jeje_sat"})
+        filters.getHeroes = MagicMock(return_value={"PokerStars": "jeje_sat"})  # type: ignore[method-assign]
         self.assertEqual(filters.get_hero_for_site("Winamax"), "jeje_sat")  # Since only one hero is configured, returns it as fallback
 
     def test_filters_update_sites_for_hero(self):
@@ -438,6 +441,7 @@ class TestHudImportExport(unittest.TestCase):
         self.assertTrue(os.path.exists(temp_path))
         exported_doc = xml.dom.minidom.parse(temp_path)
         root = exported_doc.documentElement
+        assert root is not None
 
         self.assertEqual(root.tagName, "fpdb_hud_package")
 
@@ -501,9 +505,9 @@ class TestHudImportExport(unittest.TestCase):
         prefs.hud_profiles = {}
 
         # Mock load methods and reload parent config
-        prefs.load_profiles = MagicMock()
-        prefs.load_popup_windows = MagicMock()
-        prefs.reload_parent_config = MagicMock()
+        prefs.load_profiles = MagicMock()  # type: ignore[method-assign]
+        prefs.load_popup_windows = MagicMock()  # type: ignore[method-assign]
+        prefs.reload_parent_config = MagicMock()  # type: ignore[method-assign]
 
         # Run import
         prefs.import_profile()
@@ -555,9 +559,9 @@ class TestHudImportExport(unittest.TestCase):
         self.assertTrue(prefs.has_unsaved_changes())
 
         # Mock load methods to avoid exceptions during accept
-        prefs.load_profiles = MagicMock()
-        prefs.load_popup_windows = MagicMock()
-        prefs.accept = MagicMock()
+        prefs.load_profiles = MagicMock()  # type: ignore[method-assign]
+        prefs.load_popup_windows = MagicMock()  # type: ignore[method-assign]
+        prefs.accept = MagicMock()  # type: ignore[method-assign]
 
         # Run save_changes
         prefs.save_changes()

@@ -137,6 +137,7 @@ jobs:
           fpdb_3_legacy/debug_partypoker_parser.py
           fpdb_3_legacy/test_fpdb_api.py
           fpdb_3_legacy/test_draw_starting_hand.py
+          fpdb_3_legacy/test_empty_data_popups.py
           fpdb_3_legacy/test_ftp_detection.py
           fpdb_3_legacy/test_leak_detector.py
           fpdb_3_legacy/test_opponents_report.py
