@@ -71,6 +71,12 @@ from fpdb_3_legacy.stats_formatting import (
     stat_override as __stat_override,
 )
 from fpdb_3_legacy.stats_postflop import (
+    float_river as float_river,
+)
+from fpdb_3_legacy.stats_postflop import (
+    float_turn as float_turn,
+)
+from fpdb_3_legacy.stats_postflop import (
     fold_to_three_B_flop as fold_to_three_B_flop,
 )
 from fpdb_3_legacy.stats_postflop import (
@@ -78,6 +84,24 @@ from fpdb_3_legacy.stats_postflop import (
 )
 from fpdb_3_legacy.stats_postflop import (
     fold_to_three_B_turn as fold_to_three_B_turn,
+)
+from fpdb_3_legacy.stats_postflop import (
+    four_B_flop as four_B_flop,
+)
+from fpdb_3_legacy.stats_postflop import (
+    four_B_river as four_B_river,
+)
+from fpdb_3_legacy.stats_postflop import (
+    four_B_turn as four_B_turn,
+)
+from fpdb_3_legacy.stats_postflop import (
+    open_flop as open_flop,
+)
+from fpdb_3_legacy.stats_postflop import (
+    open_river as open_river,
+)
+from fpdb_3_legacy.stats_postflop import (
+    open_turn as open_turn,
 )
 from fpdb_3_legacy.stats_postflop import (
     postflop_ratio as _postflop_3bet,
@@ -1137,46 +1161,6 @@ def three_B(stat_dict, player):
 # simply expose them to the HUD/GUI. Adding them is purely additive: any
 # module-level function here is auto-registered into STATLIST.
 # ---------------------------------------------------------------------------
-
-
-def four_B_flop(stat_dict, player):
-    """Flop 4-bet %: re-raised a flop 3-bet."""
-    return _postflop_3bet(stat_dict, player, "fl4b_opp", "fl4b", "F4B", "% 4 bet flop")
-
-
-def four_B_turn(stat_dict, player):
-    """Turn 4-bet %: re-raised a turn 3-bet."""
-    return _postflop_3bet(stat_dict, player, "tn4b_opp", "tn4b", "T4B", "% 4 bet turn")
-
-
-def four_B_river(stat_dict, player):
-    """River 4-bet %: re-raised a river 3-bet."""
-    return _postflop_3bet(stat_dict, player, "rv4b_opp", "rv4b", "R4B", "% 4 bet river")
-
-
-def open_flop(stat_dict, player):
-    """Open flop %: made the first voluntary bet into an unopened flop."""
-    return _postflop_3bet(stat_dict, player, "flopen_opp", "flopen", "OPf", "% open flop")
-
-
-def open_turn(stat_dict, player):
-    """Open turn %: made the first voluntary bet into an unopened turn."""
-    return _postflop_3bet(stat_dict, player, "tnopen_opp", "tnopen", "OPt", "% open turn")
-
-
-def open_river(stat_dict, player):
-    """Open river %: made the first voluntary bet into an unopened river."""
-    return _postflop_3bet(stat_dict, player, "rvopen_opp", "rvopen", "OPr", "% open river")
-
-
-def float_turn(stat_dict, player):
-    """Float turn %: continued (bet/raise) the turn after floating the flop."""
-    return _postflop_3bet(stat_dict, player, "float_turn_chance", "float_turn_done", "FltT", "% float turn")
-
-
-def float_river(stat_dict, player):
-    """Float river %: continued (bet/raise) the river after floating the turn."""
-    return _postflop_3bet(stat_dict, player, "float_river_chance", "float_river_done", "FltR", "% float river")
 
 
 def face_raise_preflop(stat_dict, player):
