@@ -90,7 +90,7 @@ class SummaryParser(_CompatHTMLParser):  # derive new HTML parser
         self.TourneyRebuys = None
         self.parseResultsA = False
         self.parseResultsB = False
-        self.TempResultStore = [0, 0, 0, 0]
+        self.TempResultStore: list[int | str] = [0, 0, 0, 0]
         self.TempResultPos = 0
         self.Results = {}
 
