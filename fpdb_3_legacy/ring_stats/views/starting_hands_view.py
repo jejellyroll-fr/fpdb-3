@@ -8,6 +8,7 @@ Affiche l'onglet 'Analyse des Mains' :
 from __future__ import annotations
 
 import re
+from typing import Any
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
@@ -210,8 +211,8 @@ class StartingHandsTab(QWidget):
         self.omaha_canvas = OmahaChartsCanvas(self.omaha_widget)
         omaha_layout.addWidget(self.omaha_canvas)
 
-        self.active_mode = None  # 'holdem' ou 'omaha'
-        self.holdem_hand_stats = {}
+        self.active_mode: str | None = None  # 'holdem' ou 'omaha'
+        self.holdem_hand_stats: dict[str, dict[str, Any]] = {}
         self.holdem_color_by = "profit"
 
     def _build_holdem_grid(self) -> None:
@@ -295,7 +296,7 @@ class StartingHandsTab(QWidget):
             match = re.match(r"^([AKQJT98765432]+)", hand_str)
             if match:
                 ranks_part = match.group(1)
-                counts = {}
+                counts: dict[str, int] = {}
                 for char in ranks_part:
                     counts[char] = counts.get(char, 0) + 1
 
