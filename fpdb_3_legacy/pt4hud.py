@@ -399,8 +399,8 @@ def _visual_records(data: bytes) -> list[dict]:
         if first_s is None:
             continue
         strings = [str(v) for t, v, _o in sub if t == "s"]
-        ints = [int(v) for t, v, _o in sub if t == "i"]
-        colors = [int(v) for t, v, _o in sub if t == "l"]
+        ints = [v for t, v, _o in sub if t == "i" and isinstance(v, int)]
+        colors = [v for t, v, _o in sub if t == "l" and isinstance(v, int)]
         kind = ints[0] if ints else None
         if kind not in (1, 2, 4):
             continue
@@ -646,7 +646,7 @@ def extract_charts(source: str | bytes) -> list[Chart]:
     charts: dict[str, Chart] = {}
     current: str | None = None
     for k, (typ, val, _off) in enumerate(toks):
-        if typ != "s":
+        if typ != "s" or not isinstance(val, str):
             continue
         if val in _CHART_NAMES:
             current = val
@@ -657,7 +657,7 @@ def extract_charts(source: str | bytes) -> list[Chart]:
         # collect the next two colour tokens before the cell closes / next card
         colours: list[int] = []
         for typ2, val2, _o2 in toks[k + 1 : k + 8]:
-            if typ2 == "l":
+            if typ2 == "l" and isinstance(val2, int):
                 colours.append(val2)
                 if len(colours) == 2:
                     break
@@ -851,9 +851,12 @@ def to_stat_set(layout: Layout, name: str | None = None, cols: int = 4) -> str:
     placements, rows = grouped_placements(layout.supported, cols)
     lines = [f'    <ss name={quoteattr(name)} rows="{rows}" cols="{cols}">']
     for c, r, col in placements:
+        stat_name = c.fpdb_stat
+        if stat_name is None:
+            continue
         tip = _tip(c)
         lines.append(
-            f'        <stat _rowcol="({r + 1},{col + 1})" _stat_name={quoteattr(c.fpdb_stat)} '
+            f'        <stat _rowcol="({r + 1},{col + 1})" _stat_name={quoteattr(stat_name)} '
             f"click=\"\" popup=\"default\" tip={quoteattr(tip)} hudprefix=\"\" hudsuffix=\"\" hudcolor=\"\"/>",
         )
     lines.append("    </ss>")

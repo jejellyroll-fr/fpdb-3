@@ -126,6 +126,7 @@ jobs:
           fpdb_3_legacy/MergeStructures.py
           fpdb_3_legacy/stat_registry.py
           fpdb_3_legacy/pt4_import.py
+          fpdb_3_legacy/pt4hud.py
           fpdb_3_legacy/WinamaxSummary.py
           fpdb_3_legacy/WinamaxToFpdb.py
           fpdb_3_legacy/PokerStarsSummary.py
