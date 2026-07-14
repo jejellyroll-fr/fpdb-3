@@ -59,6 +59,7 @@ jobs:
           fpdb_3_legacy/http_capture_analyze.py
           fpdb_3_legacy/swc_http_capture.py
           fpdb_3_legacy/stat_adapters.py
+          fpdb_3_legacy/stats_context.py
           fpdb_3_legacy/stats_formatting.py
           fpdb_3_legacy/AutoNoteRules.py
           fpdb_3_legacy/AutoNotes.py
