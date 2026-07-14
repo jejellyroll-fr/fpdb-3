@@ -47,7 +47,7 @@ class APITester:
 
     def __init__(self, base_url: str):
         self.base_url = base_url.rstrip("/")
-        self.token = None
+        self.token: str | None = None
         self.tests_passed = 0
         self.tests_failed = 0
 
@@ -211,7 +211,7 @@ class APITester:
     def test_get_players(self):
         """Test get players endpoint"""
         self.print_test("Get Players", "GET", "/api/v1/players")
-        headers = {}
+        headers: dict[str, str] = {}
         if self.token:
             headers["Authorization"] = f"Bearer {self.token}"
 
@@ -241,7 +241,7 @@ class APITester:
     def test_get_tournaments(self):
         """Test get tournaments endpoint"""
         self.print_test("Get Tournaments", "GET", "/api/v1/tournaments")
-        headers = {}
+        headers: dict[str, str] = {}
         if self.token:
             headers["Authorization"] = f"Bearer {self.token}"
 
@@ -268,7 +268,7 @@ class APITester:
     def test_get_hud_presets(self):
         """Test get HUD presets endpoint"""
         self.print_test("Get HUD Presets", "GET", "/api/v1/hud/presets")
-        headers = {}
+        headers: dict[str, str] = {}
         if self.token:
             headers["Authorization"] = f"Bearer {self.token}"
 

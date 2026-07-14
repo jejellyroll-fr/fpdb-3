@@ -99,6 +99,7 @@ def test_partypoker_parser():
             print("\n2️⃣  Testing HoldemOmahaHand creation...")
             signal.alarm(10)  # 10 second timeout for full parsing
 
+            legacy_hand: LegacyHandModule.Hand
             if gametype["base"] == "hold":
                 legacy_hand = LegacyHandModule.HoldemOmahaHand(
                     config, converter, "PartyPoker", gametype, hand_text, builtFrom="HHC"
