@@ -95,6 +95,18 @@ from fpdb_3_legacy.stats_postflop import (
     check_raise_frequency as check_raise_frequency,
 )
 from fpdb_3_legacy.stats_postflop import (
+    f_cb1 as f_cb1,
+)
+from fpdb_3_legacy.stats_postflop import (
+    f_cb2 as f_cb2,
+)
+from fpdb_3_legacy.stats_postflop import (
+    f_cb3 as f_cb3,
+)
+from fpdb_3_legacy.stats_postflop import (
+    f_cb4 as f_cb4,
+)
+from fpdb_3_legacy.stats_postflop import (
     face_raise_flop as face_raise_flop,
 )
 from fpdb_3_legacy.stats_postflop import (
@@ -129,6 +141,15 @@ from fpdb_3_legacy.stats_postflop import (
 )
 from fpdb_3_legacy.stats_postflop import (
     fold_river as fold_river,
+)
+from fpdb_3_legacy.stats_postflop import (
+    fold_to_cbet_flop as fold_to_cbet_flop,
+)
+from fpdb_3_legacy.stats_postflop import (
+    fold_to_cbet_river as fold_to_cbet_river,
+)
+from fpdb_3_legacy.stats_postflop import (
+    fold_to_cbet_turn as fold_to_cbet_turn,
 )
 from fpdb_3_legacy.stats_postflop import (
     fold_to_squeeze as fold_to_squeeze,
@@ -2888,222 +2909,6 @@ def ffreq4(stat_dict, player):
         )
     except (KeyError, ValueError, TypeError):
         return (stat, "NA", "ff4=NA", "ff_4=NA", "(0/0)", "% fold frequency 7th street")
-
-
-def f_cb1(stat_dict, player):
-    """Calculate the fold to continuation bet statistic for a given player on the flop/4th street.
-
-    Args:
-        stat_dict (dict): A dictionary containing player statistics.
-        player (int): The player for whom the statistic is calculated.
-
-    Returns:
-        tuple: A tuple containing various formatted strings representing the fold to continuation bet statistic.
-              The tuple contains the following elements:
-              - stat (float): The calculated statistic value.
-              - percent (str): The calculated statistic value formatted as a percentage.
-              - f_cb1 (str): The calculated statistic value formatted as a percentage with a specific format.
-              - f_cb_1 (str): The calculated statistic value formatted as a percentage with a specific format.
-              - count (str): The count of occurrences divided by the count of opponent's continuation bets.
-              - description (str): A description of the statistic.
-
-    """
-    stat = 0.0
-    try:
-        f_cb_opp_1 = float(
-            stat_dict[player].get("f_cb_opp_1", 0),
-        )  # Ensure key exists and default to 0
-        f_cb_1 = float(stat_dict[player].get("f_cb_1", 0))
-
-        # No opportunities = no data available
-        if f_cb_opp_1 == 0:
-            return format_no_data_stat("f_cb1", "% fold to continuation bet flop/4th street")
-
-        # Calculate fold to continuation bet percentage
-        stat = f_cb_1 / f_cb_opp_1
-
-        return (
-            stat,
-            "%3.1f" % (100.0 * stat),
-            "f_cb1=%3.1f%%" % (100.0 * stat),
-            "f_cb_1=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (f_cb_1, f_cb_opp_1),
-            "% fold to continuation bet flop/4th street",
-        )
-    except (KeyError, ValueError, TypeError):
-        return (
-            stat,
-            "NA",
-            "f_cb1=NA",
-            "f_cb_1=NA",
-            "(0/0)",
-            "% fold to continuation bet flop/4th street",
-        )
-
-
-def f_cb2(stat_dict, player):
-    """Calculate the fold to continuation bet statistic for a given player on the turn/5th street.
-
-    Args:
-        stat_dict (dict): A dictionary containing player statistics.
-        player (int): The player for whom the statistic is calculated.
-
-    Returns:
-        tuple: A tuple containing various formatted strings representing the fold to continuation bet statistic.
-              The tuple contains the following elements:
-              - stat (float): The calculated statistic value.
-              - percent (str): The calculated statistic value formatted as a percentage.
-              - f_cb2 (str): The calculated statistic value formatted as a percentage with a specific format.
-              - f_cb_2 (str): The calculated statistic value formatted as a percentage with a specific format.
-              - count (str): The count of occurrences divided by the count of opponent's continuation bets.
-              - description (str): A description of the statistic.
-
-    """
-    stat = 0.0
-    try:
-        f_cb_opp_2 = float(stat_dict[player].get("f_cb_opp_2", 0))
-        f_cb_2 = float(stat_dict[player].get("f_cb_2", 0))
-
-        # No opportunities = no data available
-        if f_cb_opp_2 == 0:
-            return format_no_data_stat("f_cb2", "% fold to continuation bet turn/5th street")
-
-        # Calculate fold to continuation bet percentage
-        stat = f_cb_2 / f_cb_opp_2
-
-        return (
-            stat,
-            "%3.1f" % (100.0 * stat),
-            "f_cb2=%3.1f%%" % (100.0 * stat),
-            "f_cb_2=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (f_cb_2, f_cb_opp_2),
-            "% fold to continuation bet turn/5th street",
-        )
-    except (KeyError, ValueError, TypeError):
-        return (
-            stat,
-            "NA",
-            "f_cb2=NA",
-            "f_cb_2=NA",
-            "(0/0)",
-            "% fold to continuation bet turn/5th street",
-        )
-
-
-def f_cb3(stat_dict, player):
-    """Calculate the fold to continuation bet statistic for a given player on the river/6th street.
-
-    Args:
-        stat_dict (dict): A dictionary containing player statistics.
-        player (int): The player for whom the statistic is calculated.
-
-    Returns:
-        tuple: A tuple containing various formatted strings representing the fold to continuation bet statistic.
-              The tuple contains the following elements:
-              - stat (float): The calculated statistic value.
-              - percent (str): The calculated statistic value formatted as a percentage.
-              - f_cb3 (str): The calculated statistic value formatted as a percentage with a specific format.
-              - f_cb_3 (str): The calculated statistic value formatted as a percentage with a specific format.
-              - count (str): The count of occurrences divided by the count of opponent's continuation bets.
-              - description (str): A description of the statistic.
-
-    """
-    stat = 0.0
-    try:
-        f_cb_opp_3 = float(stat_dict[player].get("f_cb_opp_3", 0))
-        f_cb_3 = float(stat_dict[player].get("f_cb_3", 0))
-
-        # No opportunities = no data available
-        if f_cb_opp_3 == 0:
-            return format_no_data_stat("f_cb3", "% fold to continuation bet river/6th street")
-
-        # Calculate fold to continuation bet percentage
-        stat = f_cb_3 / f_cb_opp_3
-
-        return (
-            stat,
-            "%3.1f" % (100.0 * stat),
-            "f_cb3=%3.1f%%" % (100.0 * stat),
-            "f_cb_3=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (f_cb_3, f_cb_opp_3),
-            "% fold to continuation bet river/6th street",
-        )
-    except (KeyError, ValueError, TypeError):
-        return (
-            stat,
-            "NA",
-            "f_cb3=NA",
-            "f_cb_3=NA",
-            "(0/0)",
-            "% fold to continuation bet river/6th street",
-        )
-
-
-def fold_to_cbet_flop(stat_dict, player):
-    """Return fold-to-cbet on the flop using the modern stat name."""
-    return f_cb1(stat_dict, player)
-
-
-def fold_to_cbet_turn(stat_dict, player):
-    """Return fold-to-cbet on the turn using the modern stat name."""
-    return f_cb2(stat_dict, player)
-
-
-def fold_to_cbet_river(stat_dict, player):
-    """Return fold-to-cbet on the river using the modern stat name."""
-    return f_cb3(stat_dict, player)
-
-
-def f_cb4(stat_dict, player):
-    """Calculate the fold to continuation bet statistic for a given player on the 7th street.
-
-    Args:
-        stat_dict (dict): A dictionary containing player statistics.
-        player (int): The player for whom the statistic is calculated.
-
-    Returns:
-        tuple: A tuple containing various formatted strings representing the fold to continuation bet statistic.
-              The tuple contains the following elements:
-              - stat (float): The calculated statistic value.
-              - percent (str): The calculated statistic value formatted as a percentage.
-              - f_cb4 (str): The calculated statistic value formatted as a percentage with a specific format.
-              - f_cb_4 (str): The calculated statistic value formatted as a percentage with a specific format.
-              - count (str): The count of occurrences divided by the count of opponent's continuation bets.
-              - description (str): A description of the statistic.
-
-    Raises:
-        None
-
-    """
-    stat = 0.0
-    try:
-        f_cb_opp_4 = float(stat_dict[player].get("f_cb_opp_4", 0))
-        f_cb_4 = float(stat_dict[player].get("f_cb_4", 0))
-
-        # No opportunities = no data available
-        if f_cb_opp_4 == 0:
-            return format_no_data_stat("f_cb4", "% fold to continuation bet 7th street")
-
-        # Calculate fold to continuation bet percentage
-        stat = f_cb_4 / f_cb_opp_4
-
-        return (
-            stat,
-            "%3.1f" % (100.0 * stat),
-            "f_cb4=%3.1f%%" % (100.0 * stat),
-            "f_cb_4=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (f_cb_4, f_cb_opp_4),
-            "% fold to continuation bet 7th street",
-        )
-    except (KeyError, ValueError, TypeError):
-        return (
-            stat,
-            "NA",
-            "f_cb4=NA",
-            "f_cb_4=NA",
-            "(0/0)",
-            "% fold to continuation bet 7th street",
-        )
 
 
 def cr1(stat_dict, player):
