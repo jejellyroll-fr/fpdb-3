@@ -237,3 +237,30 @@ def raise_frequency_flop(stat_dict: Mapping[int, Mapping[str, Any]], player: int
 
 def raise_frequency_turn(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
     return street_frequency(stat_dict, player, "saw_t", "street2Raises", "raise_t", "raise_freq_turn", "% raise frequency turn")
+
+
+def sd_winrate(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    """Return the frequency of winning after reaching showdown."""
+    return street_frequency(stat_dict, player, "sd", "wmsd", "sd_wr", "showdown_winrate", "% showdown winrate")
+
+
+def non_sd_winrate(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    """Return the historical derived non-showdown winrate."""
+    try:
+        player_stats = stat_dict[player]
+        opportunities = float(player_stats.get("saw_f", 0)) - float(player_stats.get("sd", 0))
+        wins = float(player_stats.get("w_w_s_1", 0)) - float(player_stats.get("wmsd", 0))
+        if opportunities == 0:
+            return format_no_data_stat("nsd_wr", "% non-showdown winrate")
+        stat = wins / opportunities
+        percent = 100.0 * stat
+        return (
+            stat,
+            f"{percent:3.1f}",
+            f"nsd_wr={percent:3.1f}%",
+            f"non_showdown_winrate={percent:3.1f}%",
+            f"({int(wins)}/{int(opportunities)})",
+            "% non-showdown winrate",
+        )
+    except (KeyError, TypeError, ValueError):
+        return format_no_data_stat("nsd_wr", "% non-showdown winrate")
