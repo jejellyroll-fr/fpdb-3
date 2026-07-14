@@ -182,9 +182,6 @@ from fpdb_3_legacy.stats_sizing import (
     amt_blind as amt_blind,
 )
 from fpdb_3_legacy.stats_sizing import (
-    average_bet_percentage as _bet_facing,
-)
-from fpdb_3_legacy.stats_sizing import (
     f_2bet_facing as f_2bet_facing,
 )
 from fpdb_3_legacy.stats_sizing import (
@@ -206,6 +203,9 @@ from fpdb_3_legacy.stats_sizing import (
     f_raise_made as f_raise_made,
 )
 from fpdb_3_legacy.stats_sizing import (
+    f_raise_made_2 as f_raise_made_2,
+)
+from fpdb_3_legacy.stats_sizing import (
     f_spr as f_spr,
 )
 from fpdb_3_legacy.stats_sizing import (
@@ -218,10 +218,16 @@ from fpdb_3_legacy.stats_sizing import (
     p_4bet_facing as p_4bet_facing,
 )
 from fpdb_3_legacy.stats_sizing import (
+    p_5bet_facing as p_5bet_facing,
+)
+from fpdb_3_legacy.stats_sizing import (
     p_raise_facing as p_raise_facing,
 )
 from fpdb_3_legacy.stats_sizing import (
     p_raise_made as p_raise_made,
+)
+from fpdb_3_legacy.stats_sizing import (
+    p_raise_made_2 as p_raise_made_2,
 )
 from fpdb_3_legacy.stats_sizing import (
     r_2bet_facing as r_2bet_facing,
@@ -243,6 +249,9 @@ from fpdb_3_legacy.stats_sizing import (
 )
 from fpdb_3_legacy.stats_sizing import (
     r_raise_made as r_raise_made,
+)
+from fpdb_3_legacy.stats_sizing import (
+    r_raise_made_2 as r_raise_made_2,
 )
 from fpdb_3_legacy.stats_sizing import (
     r_spr as r_spr,
@@ -267,6 +276,9 @@ from fpdb_3_legacy.stats_sizing import (
 )
 from fpdb_3_legacy.stats_sizing import (
     t_raise_made as t_raise_made,
+)
+from fpdb_3_legacy.stats_sizing import (
+    t_raise_made_2 as t_raise_made_2,
 )
 from fpdb_3_legacy.stats_sizing import (
     t_spr as t_spr,
@@ -1317,32 +1329,6 @@ def three_B(stat_dict, player):
 # simply expose them to the HUD/GUI. Adding them is purely additive: any
 # module-level function here is auto-registered into STATLIST.
 # ---------------------------------------------------------------------------
-
-
-# --- Bet-sizing completion: generic raise faced, 2nd raise made, 5-bet faced ---
-def p_raise_made_2(stat_dict, player):
-    """Average size of the player's second preflop raise, as % of pot (PT4 val_p_raise_made_2_pct)."""
-    return _bet_facing(stat_dict, player, "p_raise_made_2_cnt", "p_raise_made_2_bp", "PRz2", "avg 2nd preflop raise made (% pot)")
-
-
-def f_raise_made_2(stat_dict, player):
-    """Average size of the player's second flop raise, as % of pot (PT4 val_f_raise_made_2_pct)."""
-    return _bet_facing(stat_dict, player, "f_raise_made_2_cnt", "f_raise_made_2_bp", "FRz2", "avg 2nd flop raise made (% pot)")
-
-
-def t_raise_made_2(stat_dict, player):
-    """Average size of the player's second turn raise, as % of pot (PT4 val_t_raise_made_2_pct)."""
-    return _bet_facing(stat_dict, player, "t_raise_made_2_cnt", "t_raise_made_2_bp", "TRz2", "avg 2nd turn raise made (% pot)")
-
-
-def r_raise_made_2(stat_dict, player):
-    """Average size of the player's second river raise, as % of pot (PT4 val_r_raise_made_2_pct)."""
-    return _bet_facing(stat_dict, player, "r_raise_made_2_cnt", "r_raise_made_2_bp", "RRz2", "avg 2nd river raise made (% pot)")
-
-
-def p_5bet_facing(stat_dict, player):
-    """Average size of the preflop 5-bet faced, as % of pot (PT4 val_p_5bet_facing_pct)."""
-    return _bet_facing(stat_dict, player, "p_5bet_facing_cnt", "p_5bet_facing_bp", "5Bvs", "avg 5bet faced (% pot)")
 
 
 def four_B(stat_dict, player):
