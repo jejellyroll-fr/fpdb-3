@@ -61,6 +61,12 @@ from fpdb_3_legacy.stats_context import (
 from fpdb_3_legacy.stats_context import (
     set_hand_instance as _set_hand_instance,
 )
+from fpdb_3_legacy.stats_display import (
+    blank as blank,
+)
+from fpdb_3_legacy.stats_display import (
+    player_note as player_note,
+)
 from fpdb_3_legacy.stats_formatting import (
     do_tip as do_tip,
 )
@@ -3344,35 +3350,6 @@ def game_abbr(stat_dict, player):
         )
     except (KeyError, ValueError, TypeError):
         return ("NA", "NA", "game=NA", "game_abbr=NA", "(NA)", "Game abbreviation")
-
-
-def blank(stat_dict, player):
-    # blank space on the grid
-    # stat = " "
-    return ("", "", "", "", "", "<blank>")
-
-
-def player_note(stat_dict, player):
-    """Display a note icon that changes color based on whether the player has notes."""
-    try:
-        # Try to get player_id from stat_dict
-        player_id = None
-        for pid, data in stat_dict.items():
-            if data.get("screen_name") == player:
-                player_id = pid
-                break
-
-        if player_id is None:
-            # Default gray icon if no player found
-            return ("📝", "📝", "📝", "📝", "📝", "Player note icon")
-
-        # Check if player has notes using database query
-        # This will be handled by the HUD display logic that checks has_comment()
-        # Return a note icon - color will be determined by the HUD
-        return ("📝", "📝", "📝", "📝", "📝", "Player note icon")
-
-    except STATS_DATA_ERRORS:
-        return ("📝", "📝", "📝", "📝", "📝", "Player note icon")
 
 
 ################################################################################################
