@@ -200,3 +200,18 @@ def rfi_middle_position(stat_dict: Mapping[int, Mapping[str, Any]], player: int)
 
 def rfi_late_position(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
     return rfi_position(stat_dict, player, "lp", "rfi_late_pos", "% RFI late position")
+
+
+def iso(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    """Return no data for isolation raises, which HudCache cannot aggregate."""
+    return format_no_data_stat("iso", "% isolation raise (deprecated)")
+
+
+def three_bet_vs_steal(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    """Return no data for 3-bet versus steal without cross-player context."""
+    return format_no_data_stat("3bvs", "% 3bet vs steal (deprecated)")
+
+
+def call_vs_steal(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    """Return no data for call versus steal without cross-player context."""
+    return format_no_data_stat("cvs", "% call vs steal (deprecated)")
