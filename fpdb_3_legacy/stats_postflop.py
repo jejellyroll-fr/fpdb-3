@@ -300,3 +300,29 @@ def probe_bet(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTu
         return stat, f"{percent:3.1f}", display, display, f"({int(done)}/{int(opportunities)})", "% probe bet flop"
     except (KeyError, TypeError, ValueError):
         return format_no_data_stat("probe", "% probe bet flop")
+
+
+def triple_barrel(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    """Return the historical triple-barrel estimate from street c-bet rates."""
+    try:
+        player_stats = stat_dict[player]
+        opportunities = [float(player_stats.get(f"cb_opp_{street}", 0)) for street in (1, 2, 3)]
+        done = [float(player_stats.get(f"cb_{street}", 0)) for street in (1, 2, 3)]
+        total_opportunities = min(opportunities)
+        if total_opportunities == 0:
+            return format_no_data_stat("3barrel", "% triple barrel")
+        estimated_count = total_opportunities
+        for count, opportunity in zip(done, opportunities, strict=True):
+            estimated_count *= count / opportunity
+        stat = estimated_count / total_opportunities
+        percent = 100.0 * stat
+        return (
+            stat,
+            f"{percent:3.1f}",
+            f"3barrel={percent:3.1f}%",
+            f"triple_barrel={percent:3.1f}%",
+            f"({int(estimated_count)}/{int(total_opportunities)})",
+            "% triple barrel",
+        )
+    except (KeyError, TypeError, ValueError):
+        return format_no_data_stat("3barrel", "% triple barrel")
