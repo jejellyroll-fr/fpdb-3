@@ -263,6 +263,15 @@ from fpdb_3_legacy.stats_sizing import (
     amt_blind as amt_blind,
 )
 from fpdb_3_legacy.stats_sizing import (
+    avg_bet_size_flop as avg_bet_size_flop,
+)
+from fpdb_3_legacy.stats_sizing import (
+    avg_bet_size_river as avg_bet_size_river,
+)
+from fpdb_3_legacy.stats_sizing import (
+    avg_bet_size_turn as avg_bet_size_turn,
+)
+from fpdb_3_legacy.stats_sizing import (
     f_2bet_facing as f_2bet_facing,
 )
 from fpdb_3_legacy.stats_sizing import (
@@ -288,6 +297,9 @@ from fpdb_3_legacy.stats_sizing import (
 )
 from fpdb_3_legacy.stats_sizing import (
     f_spr as f_spr,
+)
+from fpdb_3_legacy.stats_sizing import (
+    overbet_frequency as overbet_frequency,
 )
 from fpdb_3_legacy.stats_sizing import (
     p_2bet_facing as p_2bet_facing,
@@ -4197,81 +4209,6 @@ def probe_bet_river(stat_dict, player):
         )
     except (KeyError, ValueError, TypeError):
         return format_no_data_stat("probe_r", "% probe bet river")
-
-
-def avg_bet_size_flop(stat_dict, player):
-    """Average bet size flop — DEPRECATED.
-
-    This stat requires exact bet sizes to be stored in HudCache. No such column
-    exists and PT4 itself does not track this aggregated stat.
-
-    Tracked in: markdown/legacy/plan/STABILIZATION_PLAN.md (§6.2)
-    """
-    return format_no_data_stat("avg_bet_f", "avg bet size flop (deprecated)")
-
-
-def avg_bet_size_turn(stat_dict, player):
-    """Average bet size turn — DEPRECATED.
-
-    This stat requires exact bet sizes to be stored in HudCache. No such column
-    exists and PT4 itself does not track this aggregated stat.
-
-    Tracked in: markdown/legacy/plan/STABILIZATION_PLAN.md (§6.2)
-    """
-    return format_no_data_stat("avg_bet_t", "avg bet size turn (deprecated)")
-
-
-def avg_bet_size_river(stat_dict, player):
-    """Average bet size river — DEPRECATED.
-
-    This stat requires exact bet sizes to be stored in HudCache. No such column
-    exists and PT4 itself does not track this aggregated stat.
-
-    Tracked in: markdown/legacy/plan/STABILIZATION_PLAN.md (§6.2)
-    """
-    return format_no_data_stat("avg_bet_r", "avg bet size river (deprecated)")
-
-
-def overbet_frequency(stat_dict, player):
-    """Calculate the overbet frequency for a player.
-
-    This is an approximation as exact bet sizes are not available in aggregated stats.
-    Estimates how often a player makes overbets (bets > pot size).
-
-    Args:
-        stat_dict (dict): A dictionary containing player statistics.
-        player (int): The player for whom the statistic is calculated.
-
-    Returns:
-        tuple: A tuple containing the calculated statistic, formatted strings, and related information.
-        Returns "-" if no betting data to distinguish from 0% (never overbets).
-    """
-    try:
-        street1_bets = float(stat_dict[player].get("street1Bets", 0))
-        street2_bets = float(stat_dict[player].get("street2Bets", 0))
-        street3_bets = float(stat_dict[player].get("street3Bets", 0))
-
-        total_bets = street1_bets + street2_bets + street3_bets
-
-        # No betting data = no data available
-        if total_bets == 0:
-            return format_no_data_stat("overbet", "% overbet frequency")
-
-        # Estimate overbet frequency (approximation: 15% of all bets are overbets)
-        # This is based on typical aggressive poker patterns
-        estimated_overbet_frequency = 15.0
-        estimated_overbet_count = total_bets * (estimated_overbet_frequency / 100.0)
-
-        return (
-            estimated_overbet_frequency / 100.0,
-            f"{estimated_overbet_frequency:3.1f}",
-            f"overbet={estimated_overbet_frequency:3.1f}%",
-            f"overbet_freq={estimated_overbet_frequency:3.1f}%",
-            "(%d/%d)" % (estimated_overbet_count, total_bets),
-            "% overbet frequency",
-        )
-    except (KeyError, ValueError, TypeError):
-        return format_no_data_stat("overbet", "% overbet frequency")
 
 
 #

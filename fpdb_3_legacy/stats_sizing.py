@@ -229,3 +229,40 @@ def t_spr(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
 
 def r_spr(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
     return average_spr(stat_dict, player, "r_spr_cnt", "r_spr_val", "rSPR", "avg river SPR")
+
+
+def avg_bet_size_flop(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    """Return no data for the deprecated aggregate flop bet-size stat."""
+    return format_no_data_stat("avg_bet_f", "avg bet size flop (deprecated)")
+
+
+def avg_bet_size_turn(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    """Return no data for the deprecated aggregate turn bet-size stat."""
+    return format_no_data_stat("avg_bet_t", "avg bet size turn (deprecated)")
+
+
+def avg_bet_size_river(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    """Return no data for the deprecated aggregate river bet-size stat."""
+    return format_no_data_stat("avg_bet_r", "avg bet size river (deprecated)")
+
+
+def overbet_frequency(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    """Return the historical estimated overbet frequency when betting data exists."""
+    try:
+        total_bets = sum(
+            float(stat_dict[player].get(key, 0)) for key in ("street1Bets", "street2Bets", "street3Bets")
+        )
+        if total_bets == 0:
+            return format_no_data_stat("overbet", "% overbet frequency")
+        percent = 15.0
+        estimated_count = total_bets * percent / 100.0
+        return (
+            percent / 100.0,
+            f"{percent:3.1f}",
+            f"overbet={percent:3.1f}%",
+            f"overbet_freq={percent:3.1f}%",
+            f"({int(estimated_count)}/{int(total_bets)})",
+            "% overbet frequency",
+        )
+    except (KeyError, TypeError, ValueError):
+        return format_no_data_stat("overbet", "% overbet frequency")
