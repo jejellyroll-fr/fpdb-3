@@ -66,3 +66,43 @@ def fold_to_three_B_turn(stat_dict: Mapping[int, Mapping[str, Any]], player: int
 def fold_to_three_B_river(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
     """Return the fold-to-river-3-bet percentage."""
     return postflop_ratio(stat_dict, player, "fr3b_opp", "fr3b", "FR3B", "% fold to river 3bet")
+
+
+def four_B_flop(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    """Return the flop 4-bet percentage."""
+    return postflop_ratio(stat_dict, player, "fl4b_opp", "fl4b", "F4B", "% 4 bet flop")
+
+
+def four_B_turn(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    """Return the turn 4-bet percentage."""
+    return postflop_ratio(stat_dict, player, "tn4b_opp", "tn4b", "T4B", "% 4 bet turn")
+
+
+def four_B_river(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    """Return the river 4-bet percentage."""
+    return postflop_ratio(stat_dict, player, "rv4b_opp", "rv4b", "R4B", "% 4 bet river")
+
+
+def open_flop(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    """Return the frequency of opening an unopened flop."""
+    return postflop_ratio(stat_dict, player, "flopen_opp", "flopen", "OPf", "% open flop")
+
+
+def open_turn(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    """Return the frequency of opening an unopened turn."""
+    return postflop_ratio(stat_dict, player, "tnopen_opp", "tnopen", "OPt", "% open turn")
+
+
+def open_river(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    """Return the frequency of opening an unopened river."""
+    return postflop_ratio(stat_dict, player, "rvopen_opp", "rvopen", "OPr", "% open river")
+
+
+def float_turn(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    """Return the turn continuation frequency after floating the flop."""
+    return postflop_ratio(stat_dict, player, "float_turn_chance", "float_turn_done", "FltT", "% float turn")
+
+
+def float_river(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    """Return the river continuation frequency after floating the turn."""
+    return postflop_ratio(stat_dict, player, "float_river_chance", "float_river_done", "FltR", "% float river")
