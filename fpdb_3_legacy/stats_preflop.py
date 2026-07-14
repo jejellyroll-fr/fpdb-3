@@ -143,3 +143,60 @@ def four_bet_range(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> S
 def squeeze_range(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
     """Return the observed percentage of dealt hands that were squeezed."""
     return preflop_range(stat_dict, player, "sqz_0", "SQZR", "squeeze range")
+
+
+def rfi_total(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    """Return the estimated total raise-first-in frequency."""
+    try:
+        opportunities = float(stat_dict[player].get("pfr_opp", 0))
+        raises = float(stat_dict[player].get("pfr", 0))
+        three_bets = float(stat_dict[player].get("3bet", 0))
+        if opportunities == 0:
+            return format_no_data_stat("rfi", "% raise first in")
+        done = max(0.0, raises - three_bets)
+        stat = done / opportunities
+        percent = 100.0 * stat
+        display = f"rfi={percent:3.1f}%"
+        return stat, f"{percent:3.1f}", display, display, f"({int(done)}/{int(opportunities)})", "% raise first in"
+    except (KeyError, TypeError, ValueError):
+        return format_no_data_stat("rfi", "% raise first in")
+
+
+def rfi_position(
+    stat_dict: Mapping[int, Mapping[str, Any]],
+    player: int,
+    position: str,
+    long_name: str,
+    description: str,
+) -> StatTuple:
+    """Format raise-first-in frequency for an aggregated position bucket."""
+    label = f"rfi_{position}"
+    try:
+        opportunities = float(stat_dict[player].get(f"rfi_opp_{position}", 0))
+        done = float(stat_dict[player].get(label, 0))
+        if opportunities == 0:
+            return format_no_data_stat(label, description)
+        stat = done / opportunities
+        percent = 100.0 * stat
+        return (
+            stat,
+            f"{percent:3.1f}",
+            f"{label}={percent:3.1f}%",
+            f"{long_name}={percent:3.1f}%",
+            f"({int(done)}/{int(opportunities)})",
+            description,
+        )
+    except (KeyError, TypeError, ValueError):
+        return format_no_data_stat(label, description)
+
+
+def rfi_early_position(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    return rfi_position(stat_dict, player, "ep", "rfi_early_pos", "% RFI early position")
+
+
+def rfi_middle_position(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    return rfi_position(stat_dict, player, "mp", "rfi_middle_pos", "% RFI middle position")
+
+
+def rfi_late_position(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    return rfi_position(stat_dict, player, "lp", "rfi_late_pos", "% RFI late position")
