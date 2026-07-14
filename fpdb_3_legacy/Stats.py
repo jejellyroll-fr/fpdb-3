@@ -188,6 +188,18 @@ from fpdb_3_legacy.stats_preflop import (
     gp_os as gp_os,
 )
 from fpdb_3_legacy.stats_preflop import (
+    rfi_early_position as rfi_early_position,
+)
+from fpdb_3_legacy.stats_preflop import (
+    rfi_late_position as rfi_late_position,
+)
+from fpdb_3_legacy.stats_preflop import (
+    rfi_middle_position as rfi_middle_position,
+)
+from fpdb_3_legacy.stats_preflop import (
+    rfi_total as rfi_total,
+)
+from fpdb_3_legacy.stats_preflop import (
     squeeze_bb as squeeze_bb,
 )
 from fpdb_3_legacy.stats_preflop import (
@@ -3494,51 +3506,6 @@ def iso(stat_dict, player):
     return format_no_data_stat("iso", "% isolation raise (deprecated)")
 
 
-def rfi_total(stat_dict, player):
-    """Calculate the Raise First In (RFI) percentage for a player.
-
-    RFI is when a player is the first to voluntarily put money in the pot preflop with a raise.
-    This is approximated as PFR minus 3bets, 4bets, and calls after raises.
-
-    Args:
-        stat_dict (dict): A dictionary containing player statistics.
-        player (int): The player for whom the statistic is calculated.
-
-    Returns:
-        tuple: A tuple containing the calculated statistic, formatted strings, and related information.
-        Returns "-" if no RFI opportunities to distinguish from 0% (never raised first in).
-    """
-    stat = 0.0
-    try:
-        pfr_opp = float(stat_dict[player].get("pfr_opp", 0))
-        pfr_count = float(stat_dict[player].get("pfr", 0))
-        three_bet_count = float(stat_dict[player].get("3bet", 0))
-
-        # No opportunities = no data available
-        if pfr_opp == 0:
-            return format_no_data_stat("rfi", "% raise first in")
-
-        # Calculate RFI count (raises that are not 3bets/4bets)
-        # This is a simplified calculation
-        rfi_count = pfr_count - three_bet_count
-
-        # Ensure non-negative values
-        rfi_count = max(0, rfi_count)
-
-        # Calculate RFI percentage
-        stat = rfi_count / pfr_opp
-        return (
-            stat,
-            "%3.1f" % (100.0 * stat),
-            "rfi=%3.1f%%" % (100.0 * stat),
-            "rfi=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (rfi_count, pfr_opp),
-            "% raise first in",
-        )
-    except (KeyError, ValueError, TypeError):
-        return format_no_data_stat("rfi", "% raise first in")
-
-
 def three_bet_vs_steal(stat_dict, player):
     """3-bet vs Steal — DEPRECATED.
 
@@ -4230,75 +4197,6 @@ def probe_bet_river(stat_dict, player):
         )
     except (KeyError, ValueError, TypeError):
         return format_no_data_stat("probe_r", "% probe bet river")
-
-
-def rfi_early_position(stat_dict, player):
-    """RFI from early position (UTG, UTG+1, UTG+2) — derived from HudCache positional aggregation."""
-    stat = 0.0
-    try:
-        rfi_opp = float(stat_dict[player].get("rfi_opp_ep", 0))
-        rfi = float(stat_dict[player].get("rfi_ep", 0))
-
-        if rfi_opp == 0:
-            return format_no_data_stat("rfi_ep", "% RFI early position")
-
-        stat = rfi / rfi_opp
-        return (
-            stat,
-            "%3.1f" % (100.0 * stat),
-            "rfi_ep=%3.1f%%" % (100.0 * stat),
-            "rfi_early_pos=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (rfi, rfi_opp),
-            "% RFI early position",
-        )
-    except (KeyError, ValueError, TypeError):
-        return format_no_data_stat("rfi_ep", "% RFI early position")
-
-
-def rfi_middle_position(stat_dict, player):
-    """RFI from middle position (MP, MP+1, MP+2) — derived from HudCache positional aggregation."""
-    stat = 0.0
-    try:
-        rfi_opp = float(stat_dict[player].get("rfi_opp_mp", 0))
-        rfi = float(stat_dict[player].get("rfi_mp", 0))
-
-        if rfi_opp == 0:
-            return format_no_data_stat("rfi_mp", "% RFI middle position")
-
-        stat = rfi / rfi_opp
-        return (
-            stat,
-            "%3.1f" % (100.0 * stat),
-            "rfi_mp=%3.1f%%" % (100.0 * stat),
-            "rfi_middle_pos=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (rfi, rfi_opp),
-            "% RFI middle position",
-        )
-    except (KeyError, ValueError, TypeError):
-        return format_no_data_stat("rfi_mp", "% RFI middle position")
-
-
-def rfi_late_position(stat_dict, player):
-    """RFI from late position (CO, BTN) — derived from HudCache positional aggregation."""
-    stat = 0.0
-    try:
-        rfi_opp = float(stat_dict[player].get("rfi_opp_lp", 0))
-        rfi = float(stat_dict[player].get("rfi_lp", 0))
-
-        if rfi_opp == 0:
-            return format_no_data_stat("rfi_lp", "% RFI late position")
-
-        stat = rfi / rfi_opp
-        return (
-            stat,
-            "%3.1f" % (100.0 * stat),
-            "rfi_lp=%3.1f%%" % (100.0 * stat),
-            "rfi_late_pos=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (rfi, rfi_opp),
-            "% RFI late position",
-        )
-    except (KeyError, ValueError, TypeError):
-        return format_no_data_stat("rfi_lp", "% RFI late position")
 
 
 def avg_bet_size_flop(stat_dict, player):
