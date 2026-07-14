@@ -242,6 +242,9 @@ from fpdb_3_legacy.stats_preflop import (
     open_limp as open_limp,
 )
 from fpdb_3_legacy.stats_preflop import (
+    resteal as resteal,
+)
+from fpdb_3_legacy.stats_preflop import (
     rfi_early_position as rfi_early_position,
 )
 from fpdb_3_legacy.stats_preflop import (
@@ -3401,49 +3404,6 @@ def cb_oop(stat_dict, player):
         )
     except (KeyError, ValueError, TypeError):
         return format_no_data_stat("cb_oop", "% c-bet out of position")
-
-
-def resteal(stat_dict, player):
-    """Calculate the Resteal percentage for a player.
-
-    This measures how often a player re-raises against a steal attempt.
-    Resteal is approximated as a portion of 3-bets against steal positions.
-
-    Args:
-        stat_dict (dict): A dictionary containing player statistics.
-        player (int): The player for whom the statistic is calculated.
-
-    Returns:
-        tuple: A tuple containing the calculated statistic, formatted strings, and related information.
-        Returns "-" if no resteal opportunities to distinguish from 0% (never restealed).
-    """
-    stat = 0.0
-    try:
-        three_bet_opp = float(stat_dict[player].get("tb_opp_0", 0))
-        three_bet = float(stat_dict[player].get("tb_0", 0))
-
-        # Estimate resteal opportunities (approximately 60% of 3-bet opportunities are vs steal)
-        resteal_opportunities = three_bet_opp * 0.6
-
-        # No resteal opportunities = no data available
-        if resteal_opportunities == 0:
-            return format_no_data_stat("resteal", "% resteal")
-
-        # Calculate resteal count (approximation - 70% of 3-bets are resteals)
-        resteal_count = three_bet * 0.7
-
-        # Calculate resteal percentage
-        stat = resteal_count / resteal_opportunities
-        return (
-            stat,
-            "%3.1f" % (100.0 * stat),
-            "resteal=%3.1f%%" % (100.0 * stat),
-            "resteal=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (resteal_count, resteal_opportunities),
-            "% resteal",
-        )
-    except (KeyError, ValueError, TypeError):
-        return format_no_data_stat("resteal", "% resteal")
 
 
 def probe_bet_turn(stat_dict, player):
