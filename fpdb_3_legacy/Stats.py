@@ -137,6 +137,9 @@ from fpdb_3_legacy.stats_postflop import (
     four_B_turn as four_B_turn,
 )
 from fpdb_3_legacy.stats_postflop import (
+    non_sd_winrate as non_sd_winrate,
+)
+from fpdb_3_legacy.stats_postflop import (
     open_flop as open_flop,
 )
 from fpdb_3_legacy.stats_postflop import (
@@ -153,6 +156,9 @@ from fpdb_3_legacy.stats_postflop import (
 )
 from fpdb_3_legacy.stats_postflop import (
     river_call_efficiency as river_call_efficiency,
+)
+from fpdb_3_legacy.stats_postflop import (
+    sd_winrate as sd_winrate,
 )
 from fpdb_3_legacy.stats_postflop import (
     three_B_flop as three_B_flop,
@@ -3473,91 +3479,6 @@ def probe_bet(stat_dict, player):
         )
     except (KeyError, ValueError, TypeError):
         return format_no_data_stat("probe", "% probe bet flop")
-
-
-def sd_winrate(stat_dict, player):
-    """Calculate the Showdown Winrate for a player.
-
-    This measures the percentage of hands won when going to showdown.
-    SD Winrate = wonAtSD / sawShowdown
-
-    Args:
-        stat_dict (dict): A dictionary containing player statistics.
-        player (int): The player for whom the statistic is calculated.
-
-    Returns:
-        tuple: A tuple containing the calculated statistic, formatted strings, and related information.
-        Returns "-" if no showdown opportunities to distinguish from 0% (never won at showdown).
-    """
-    stat = 0.0
-    try:
-        sd = float(stat_dict[player].get("sd", 0))  # sawShowdown
-        wmsd = float(stat_dict[player].get("wmsd", 0))  # wonAtSD
-
-        # No showdown opportunities = no data available
-        if sd == 0:
-            return format_no_data_stat("sd_wr", "% showdown winrate")
-
-        # Calculate showdown winrate
-        stat = wmsd / sd
-        return (
-            stat,
-            "%3.1f" % (100.0 * stat),
-            "sd_wr=%3.1f%%" % (100.0 * stat),
-            "showdown_winrate=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (wmsd, sd),
-            "% showdown winrate",
-        )
-    except (KeyError, ValueError, TypeError):
-        return format_no_data_stat("sd_wr", "% showdown winrate")
-
-
-def non_sd_winrate(stat_dict, player):
-    """Calculate the Non-Showdown Winrate for a player.
-
-    This measures the percentage of hands won without going to showdown.
-    This is an approximation based on overall winrate vs showdown winrate.
-
-    Args:
-        stat_dict (dict): A dictionary containing player statistics.
-        player (int): The player for whom the statistic is calculated.
-
-    Returns:
-        tuple: A tuple containing the calculated statistic, formatted strings, and related information.
-        Returns "-" if no non-showdown opportunities to distinguish from 0% (never won non-showdown).
-    """
-    stat = 0.0
-    try:
-        saw_f = float(stat_dict[player].get("saw_f", 0))  # street1Seen
-        sd = float(stat_dict[player].get("sd", 0))  # sawShowdown
-        wmsd = float(stat_dict[player].get("wmsd", 0))  # wonAtSD
-
-        # Get total wins by street
-        w_w_s_1 = float(stat_dict[player].get("w_w_s_1", 0))  # wonWhenSeenStreet1
-
-        # Calculate non-showdown opportunities
-        non_sd_opportunities = saw_f - sd
-
-        # No non-showdown opportunities = no data available
-        if non_sd_opportunities == 0:
-            return format_no_data_stat("nsd_wr", "% non-showdown winrate")
-
-        # Calculate non-showdown wins (approximation)
-        # Total wins when seen flop minus showdown wins
-        non_sd_wins = w_w_s_1 - wmsd
-
-        # Calculate non-showdown winrate
-        stat = non_sd_wins / non_sd_opportunities
-        return (
-            stat,
-            "%3.1f" % (100.0 * stat),
-            "nsd_wr=%3.1f%%" % (100.0 * stat),
-            "non_showdown_winrate=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (non_sd_wins, non_sd_opportunities),
-            "% non-showdown winrate",
-        )
-    except (KeyError, ValueError, TypeError):
-        return format_no_data_stat("nsd_wr", "% non-showdown winrate")
 
 
 def cb_ip(stat_dict, player):
