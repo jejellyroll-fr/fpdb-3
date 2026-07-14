@@ -163,6 +163,33 @@ from fpdb_3_legacy.stats_preflop import (
 from fpdb_3_legacy.stats_preflop import (
     straddle as straddle,
 )
+from fpdb_3_legacy.stats_sizing import (
+    amt_bet_f as amt_bet_f,
+)
+from fpdb_3_legacy.stats_sizing import (
+    amt_bet_p as amt_bet_p,
+)
+from fpdb_3_legacy.stats_sizing import (
+    amt_bet_r as amt_bet_r,
+)
+from fpdb_3_legacy.stats_sizing import (
+    amt_bet_t as amt_bet_t,
+)
+from fpdb_3_legacy.stats_sizing import (
+    amt_bet_ttl as amt_bet_ttl,
+)
+from fpdb_3_legacy.stats_sizing import (
+    amt_blind as amt_blind,
+)
+from fpdb_3_legacy.stats_sizing import (
+    f_spr as f_spr,
+)
+from fpdb_3_legacy.stats_sizing import (
+    r_spr as r_spr,
+)
+from fpdb_3_legacy.stats_sizing import (
+    t_spr as t_spr,
+)
 from fpdb_3_legacy.stats_table import (
     TABLE_STAT_FUNCTIONS as _TABLE_STAT_FUNCTIONS,  # noqa: F401 -- compatibility export
 )
@@ -1284,33 +1311,6 @@ def r_bet_made(stat_dict, player):
     return _bet_facing(stat_dict, player, "r_bet_made_cnt", "r_bet_made_bp", "RBet", "avg river bet made (% pot)")
 
 
-def _avg_spr(stat_dict, player, cnt_key, val_key, abbr, desc):
-    """Shared helper: mean stack-to-pot ratio at a street start.
-
-    Values are stored as SPR*100 summed over a count of streets seen; the mean
-    SPR is (val_sum / cnt) / 100. SPR is a ratio (not a percentage), so it is
-    formatted as a plain number. Returns the no-data sentinel when the player
-    never reached that street with a measurable pot.
-    """
-    stat = 0.0
-    try:
-        cnt = float(stat_dict[player].get(cnt_key, 0))
-        val = float(stat_dict[player].get(val_key, 0))
-        if cnt == 0:
-            return format_no_data_stat(abbr, desc)
-        stat = (val / cnt) / 100.0
-        return (
-            stat,
-            f"{stat:3.1f}",
-            f"{abbr}=%3.1f" % stat,
-            f"{abbr}=%3.1f" % stat,
-            "(%d/%d)" % (val, cnt),
-            desc,
-        )
-    except (KeyError, ValueError, TypeError):
-        return format_no_data_stat(abbr, desc)
-
-
 def p_raise_made(stat_dict, player):
     """Average size of the player's own preflop raise, as % of pot (PT4 val_p_raise_made_pct)."""
     return _bet_facing(stat_dict, player, "p_raise_made_cnt", "p_raise_made_bp", "PRz", "avg preflop raise made (% pot)")
@@ -1420,69 +1420,6 @@ def r_raise_made_2(stat_dict, player):
 def p_5bet_facing(stat_dict, player):
     """Average size of the preflop 5-bet faced, as % of pot (PT4 val_p_5bet_facing_pct)."""
     return _bet_facing(stat_dict, player, "p_5bet_facing_cnt", "p_5bet_facing_bp", "5Bvs", "avg 5bet faced (% pot)")
-
-
-def _avg_amount(stat_dict, player, key, abbr, desc):
-    """Shared helper: mean amount (cents) per hand, shown in big-blind-agnostic units.
-
-    PT4 amt_* columns are raw chip totals (stake-dependent); the HUD shows the
-    per-hand average (sum / n) in currency units. "-" when the player has no hands.
-    """
-    stat = 0.0
-    try:
-        n = float(stat_dict[player].get("n", 0))
-        total = float(stat_dict[player].get(key, 0))
-        if n == 0:
-            return format_no_data_stat(abbr, desc)
-        stat = (total / n) / 100.0  # cents -> currency
-        return (stat, f"{stat:.2f}", f"{abbr}=%.2f" % stat, f"{abbr}=%.2f" % stat, "(%d/%d)" % (total, n), desc)
-    except (KeyError, ValueError, TypeError):
-        return format_no_data_stat(abbr, desc)
-
-
-def amt_blind(stat_dict, player):
-    """Average blinds/antes posted per hand (PT4 amt_blind)."""
-    return _avg_amount(stat_dict, player, "amt_blind", "Blind", "avg blinds posted")
-
-
-def amt_bet_p(stat_dict, player):
-    """Average chips invested preflop per hand (PT4 amt_bet_p)."""
-    return _avg_amount(stat_dict, player, "amt_bet_p", "BetP", "avg preflop invested")
-
-
-def amt_bet_f(stat_dict, player):
-    """Average chips invested on the flop per hand (PT4 amt_bet_f)."""
-    return _avg_amount(stat_dict, player, "amt_bet_f", "BetF", "avg flop invested")
-
-
-def amt_bet_t(stat_dict, player):
-    """Average chips invested on the turn per hand (PT4 amt_bet_t)."""
-    return _avg_amount(stat_dict, player, "amt_bet_t", "BetT", "avg turn invested")
-
-
-def amt_bet_r(stat_dict, player):
-    """Average chips invested on the river per hand (PT4 amt_bet_r)."""
-    return _avg_amount(stat_dict, player, "amt_bet_r", "BetR", "avg river invested")
-
-
-def amt_bet_ttl(stat_dict, player):
-    """Average total chips invested per hand (PT4 amt_bet_ttl)."""
-    return _avg_amount(stat_dict, player, "amt_bet_ttl", "BetTtl", "avg total invested")
-
-
-def f_spr(stat_dict, player):
-    """Average stack-to-pot ratio entering the flop (effective stack / pot)."""
-    return _avg_spr(stat_dict, player, "f_spr_cnt", "f_spr_val", "fSPR", "avg flop SPR")
-
-
-def t_spr(stat_dict, player):
-    """Average stack-to-pot ratio entering the turn (effective stack / pot)."""
-    return _avg_spr(stat_dict, player, "t_spr_cnt", "t_spr_val", "tSPR", "avg turn SPR")
-
-
-def r_spr(stat_dict, player):
-    """Average stack-to-pot ratio entering the river (effective stack / pot)."""
-    return _avg_spr(stat_dict, player, "r_spr_cnt", "r_spr_val", "rSPR", "avg river SPR")
 
 
 def four_B(stat_dict, player):
