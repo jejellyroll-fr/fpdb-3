@@ -152,6 +152,9 @@ from fpdb_3_legacy.stats_postflop import (
     three_B_turn as three_B_turn,
 )
 from fpdb_3_legacy.stats_preflop import (
+    call_vs_steal as call_vs_steal,
+)
+from fpdb_3_legacy.stats_preflop import (
     face_limpers as face_limpers,
 )
 from fpdb_3_legacy.stats_preflop import (
@@ -186,6 +189,9 @@ from fpdb_3_legacy.stats_preflop import (
 )
 from fpdb_3_legacy.stats_preflop import (
     gp_os as gp_os,
+)
+from fpdb_3_legacy.stats_preflop import (
+    iso as iso,
 )
 from fpdb_3_legacy.stats_preflop import (
     rfi_early_position as rfi_early_position,
@@ -243,6 +249,9 @@ from fpdb_3_legacy.stats_preflop import (
 )
 from fpdb_3_legacy.stats_preflop import (
     three_bet_sb as three_bet_sb,
+)
+from fpdb_3_legacy.stats_preflop import (
+    three_bet_vs_steal as three_bet_vs_steal,
 )
 from fpdb_3_legacy.stats_sizing import (
     amt_bet_f as amt_bet_f,
@@ -3505,39 +3514,6 @@ def open_limp(stat_dict, player):
         )
     except (KeyError, ValueError, TypeError):
         return format_no_data_stat("open_limp", "% open limp preflop")
-
-
-def iso(stat_dict, player):
-    """Isolation raise — DEPRECATED.
-
-    This stat requires hand-level tracking of (raise after limper) which is not
-    aggregated in HudCache. Returns no-data marker.
-
-    Tracked in: markdown/legacy/plan/STABILIZATION_PLAN.md (§6.2)
-    """
-    return format_no_data_stat("iso", "% isolation raise (deprecated)")
-
-
-def three_bet_vs_steal(stat_dict, player):
-    """3-bet vs Steal — DEPRECATED.
-
-    This stat requires cross-player context on the same hand (whether another player
-    attempted a steal). This is not trackable from aggregated HudCache data.
-
-    Tracked in: markdown/legacy/plan/STABILIZATION_PLAN.md (§6.2)
-    """
-    return format_no_data_stat("3bvs", "% 3bet vs steal (deprecated)")
-
-
-def call_vs_steal(stat_dict, player):
-    """Call vs Steal — DEPRECATED.
-
-    This stat requires cross-player context on the same hand (whether another player
-    attempted a steal). This is not trackable from aggregated HudCache data.
-
-    Tracked in: markdown/legacy/plan/STABILIZATION_PLAN.md (§6.2)
-    """
-    return format_no_data_stat("cvs", "% call vs steal (deprecated)")
 
 
 def fold_vs_4bet(stat_dict, player):
