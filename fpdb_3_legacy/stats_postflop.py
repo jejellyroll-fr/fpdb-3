@@ -106,3 +106,58 @@ def float_turn(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatT
 def float_river(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
     """Return the river continuation frequency after floating the turn."""
     return postflop_ratio(stat_dict, player, "float_river_chance", "float_river_done", "FltR", "% float river")
+
+
+def face_raise_preflop(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    """Return the frequency of facing a preflop raise."""
+    return postflop_ratio(stat_dict, player, "n", "p_face_raise", "FvRp", "% face raise preflop")
+
+
+def face_raise_flop(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    """Return the frequency of facing a flop raise."""
+    return postflop_ratio(stat_dict, player, "saw_1", "f_face_raise", "FvRf", "% face raise flop")
+
+
+def face_raise_turn(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    """Return the frequency of facing a turn raise."""
+    return postflop_ratio(stat_dict, player, "saw_2", "t_face_raise", "FvRt", "% face raise turn")
+
+
+def face_raise_river(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    """Return the frequency of facing a river raise."""
+    return postflop_ratio(stat_dict, player, "saw_3", "r_face_raise", "FvRr", "% face raise river")
+
+
+def first_raise_flop(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    """Return the frequency of making the first flop raise."""
+    return postflop_ratio(stat_dict, player, "saw_1", "f_first_raise", "1Rf", "% first raise flop")
+
+
+def first_raise_turn(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    """Return the frequency of making the first turn raise."""
+    return postflop_ratio(stat_dict, player, "saw_2", "t_first_raise", "1Rt", "% first raise turn")
+
+
+def first_raise_river(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    """Return the frequency of making the first river raise."""
+    return postflop_ratio(stat_dict, player, "saw_3", "r_first_raise", "1Rr", "% first raise river")
+
+
+def fold_flop(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    """Return the frequency of folding on the flop."""
+    return postflop_ratio(stat_dict, player, "saw_1", "f_fold", "Fldf", "% fold flop")
+
+
+def fold_turn(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    """Return the frequency of folding on the turn."""
+    return postflop_ratio(stat_dict, player, "saw_2", "t_fold", "Fldt", "% fold turn")
+
+
+def fold_river(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    """Return the frequency of folding on the river."""
+    return postflop_ratio(stat_dict, player, "saw_3", "r_fold", "Fldr", "% fold river")
+
+
+def fold_to_squeeze(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    """Return the frequency of folding when facing a preflop squeeze."""
+    return postflop_ratio(stat_dict, player, "sqzdef_opp", "sqzdef_fold", "FvSq", "% fold to squeeze")
