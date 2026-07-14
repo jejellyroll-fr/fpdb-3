@@ -182,6 +182,7 @@ jobs:
           fpdb_3_legacy/iPoker/__init__.py
           fpdb_3_legacy/iPoker/dispatcher.py
           fpdb_3_legacy/iPoker/base.py
+          fpdb_3_legacy/iPoker/xml_format.py
           fpdb_3_legacy/iPokerToFpdb.py
           fpdb_3_legacy/iPoker/skins
           fpdb_3_legacy/iPoker/tournament_results.py
