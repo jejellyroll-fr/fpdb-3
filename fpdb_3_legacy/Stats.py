@@ -167,6 +167,9 @@ from fpdb_3_legacy.stats_preflop import (
     four_bet_mp as four_bet_mp,
 )
 from fpdb_3_legacy.stats_preflop import (
+    four_bet_range as four_bet_range,
+)
+from fpdb_3_legacy.stats_preflop import (
     four_bet_sb as four_bet_sb,
 )
 from fpdb_3_legacy.stats_preflop import (
@@ -194,6 +197,9 @@ from fpdb_3_legacy.stats_preflop import (
     squeeze_mp as squeeze_mp,
 )
 from fpdb_3_legacy.stats_preflop import (
+    squeeze_range as squeeze_range,
+)
+from fpdb_3_legacy.stats_preflop import (
     squeeze_sb as squeeze_sb,
 )
 from fpdb_3_legacy.stats_preflop import (
@@ -213,6 +219,9 @@ from fpdb_3_legacy.stats_preflop import (
 )
 from fpdb_3_legacy.stats_preflop import (
     three_bet_mp as three_bet_mp,
+)
+from fpdb_3_legacy.stats_preflop import (
+    three_bet_range as three_bet_range,
 )
 from fpdb_3_legacy.stats_preflop import (
     three_bet_sb as three_bet_sb,
@@ -4359,42 +4368,6 @@ def overbet_frequency(stat_dict, player):
         )
     except (KeyError, ValueError, TypeError):
         return format_no_data_stat("overbet", "% overbet frequency")
-
-
-def _preflop_range(stat_dict, player, action_key, label, description):
-    """Return the observed starting-hand range for a preflop action."""
-    stat = 0.0
-    try:
-        hands = float(stat_dict[player].get("n", 0))
-        actions = float(stat_dict[player].get(action_key, 0))
-        if hands == 0:
-            return format_no_data_stat(label, description)
-        stat = actions / hands
-        return (
-            stat,
-            f"{100.0 * stat:3.1f}",
-            f"{label}={100.0 * stat:3.1f}%",
-            f"{label}={100.0 * stat:3.1f}%",
-            f"({actions:.0f}/{hands:.0f})",
-            description,
-        )
-    except STATS_DATA_ERRORS:
-        return (stat, "NA", f"{label}=NA", f"{label}=NA", "(0/0)", description)
-
-
-def three_bet_range(stat_dict, player):
-    """Observed percentage of all dealt hands that were 3-bet."""
-    return _preflop_range(stat_dict, player, "tb_0", "3BR", "3-bet range")
-
-
-def four_bet_range(stat_dict, player):
-    """Observed percentage of all dealt hands that were 4-bet."""
-    return _preflop_range(stat_dict, player, "fb_0", "4BR", "4-bet range")
-
-
-def squeeze_range(stat_dict, player):
-    """Observed percentage of all dealt hands that were squeezed."""
-    return _preflop_range(stat_dict, player, "sqz_0", "SQZR", "squeeze range")
 
 
 def check_raise_frequency(stat_dict, player):
