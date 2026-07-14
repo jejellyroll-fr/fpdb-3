@@ -328,6 +328,39 @@ def probe_bet_river(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> 
     return probe_bet_street(stat_dict, player, 3, "saw_r", "probe_r", "probe_river", "% probe bet river")
 
 
+def cbet_by_position(
+    stat_dict: Mapping[int, Mapping[str, Any]], player: int, *, in_position: bool,
+) -> StatTuple:
+    """Return the historical flop c-bet estimate for IP or OOP hands."""
+    abbreviation = "cb_ip" if in_position else "cb_oop"
+    long_label = "cbet_in_position" if in_position else "cbet_out_of_position"
+    description = "% c-bet in position" if in_position else "% c-bet out of position"
+    try:
+        player_stats = stat_dict[player]
+        seen = float(player_stats.get("saw_f", 0))
+        if seen == 0:
+            return format_no_data_stat(abbreviation, description)
+        ip_hands = float(player_stats.get("street1InPosition", 0))
+        ratio = ip_hands / seen if in_position else (seen - ip_hands) / seen
+        opportunities = float(player_stats.get("cb_opp_1", 0)) * ratio
+        if opportunities == 0:
+            return format_no_data_stat(abbreviation, description)
+        done = float(player_stats.get("cb_1", 0)) * ratio
+        stat = done / opportunities
+        percent = 100.0 * stat
+        return stat, f"{percent:3.1f}", f"{abbreviation}={percent:3.1f}%", f"{long_label}={percent:3.1f}%", f"({int(done)}/{int(opportunities)})", description
+    except (KeyError, TypeError, ValueError):
+        return format_no_data_stat(abbreviation, description)
+
+
+def cb_ip(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    return cbet_by_position(stat_dict, player, in_position=True)
+
+
+def cb_oop(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    return cbet_by_position(stat_dict, player, in_position=False)
+
+
 def triple_barrel(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
     """Return the historical triple-barrel estimate from street c-bet rates."""
     try:
