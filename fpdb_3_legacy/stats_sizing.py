@@ -66,6 +66,38 @@ def r_bet_made(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatT
     return average_bet_percentage(stat_dict, player, "r_bet_made_cnt", "r_bet_made_bp", "RBet", "avg river bet made (% pot)")
 
 
+def p_raise_made(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    return average_bet_percentage(stat_dict, player, "p_raise_made_cnt", "p_raise_made_bp", "PRz", "avg preflop raise made (% pot)")
+
+
+def f_raise_made(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    return average_bet_percentage(stat_dict, player, "f_raise_made_cnt", "f_raise_made_bp", "FRz", "avg flop raise made (% pot)")
+
+
+def t_raise_made(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    return average_bet_percentage(stat_dict, player, "t_raise_made_cnt", "t_raise_made_bp", "TRz", "avg turn raise made (% pot)")
+
+
+def r_raise_made(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    return average_bet_percentage(stat_dict, player, "r_raise_made_cnt", "r_raise_made_bp", "RRz", "avg river raise made (% pot)")
+
+
+def p_raise_facing(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    return average_bet_percentage(stat_dict, player, "p_raise_facing_cnt", "p_raise_facing_bp", "PRvs", "avg preflop raise faced (% pot)")
+
+
+def f_raise_facing(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    return average_bet_percentage(stat_dict, player, "f_raise_facing_cnt", "f_raise_facing_bp", "FRvs", "avg flop raise faced (% pot)")
+
+
+def t_raise_facing(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    return average_bet_percentage(stat_dict, player, "t_raise_facing_cnt", "t_raise_facing_bp", "TRvs", "avg turn raise faced (% pot)")
+
+
+def r_raise_facing(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    return average_bet_percentage(stat_dict, player, "r_raise_facing_cnt", "r_raise_facing_bp", "RRvs", "avg river raise faced (% pot)")
+
+
 def average_spr(
     stat_dict: Mapping[int, Mapping[str, Any]],
     player: int,
