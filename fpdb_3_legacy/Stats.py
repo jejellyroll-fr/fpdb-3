@@ -184,6 +184,9 @@ from fpdb_3_legacy.stats_postflop import (
 from fpdb_3_legacy.stats_postflop import (
     three_B_turn as three_B_turn,
 )
+from fpdb_3_legacy.stats_postflop import (
+    triple_barrel as triple_barrel,
+)
 from fpdb_3_legacy.stats_preflop import (
     call_vs_steal as call_vs_steal,
 )
@@ -3398,61 +3401,6 @@ def cb_oop(stat_dict, player):
         )
     except (KeyError, ValueError, TypeError):
         return format_no_data_stat("cb_oop", "% c-bet out of position")
-
-
-def triple_barrel(stat_dict, player):
-    """Calculate the Triple Barrel percentage for a player.
-
-    This measures how often a player bets all three streets (flop, turn, river).
-    Triple Barrel = (cb_1 * cb_2 * cb_3) / (cb_opp_1 * cb_opp_2 * cb_opp_3)
-
-    Args:
-        stat_dict (dict): A dictionary containing player statistics.
-        player (int): The player for whom the statistic is calculated.
-
-    Returns:
-        tuple: A tuple containing the calculated statistic, formatted strings, and related information.
-        Returns "-" if no triple barrel opportunities to distinguish from 0% (never triple barreled).
-    """
-    stat = 0.0
-    try:
-        cb_opp_1 = float(stat_dict[player].get("cb_opp_1", 0))
-        cb_1 = float(stat_dict[player].get("cb_1", 0))
-        cb_opp_2 = float(stat_dict[player].get("cb_opp_2", 0))
-        cb_2 = float(stat_dict[player].get("cb_2", 0))
-        cb_opp_3 = float(stat_dict[player].get("cb_opp_3", 0))
-        cb_3 = float(stat_dict[player].get("cb_3", 0))
-
-        # Calculate triple barrel opportunities (minimum of all three streets)
-        triple_barrel_opportunities = min(cb_opp_1, cb_opp_2, cb_opp_3)
-
-        # No triple barrel opportunities = no data available
-        if triple_barrel_opportunities == 0:
-            return format_no_data_stat("3barrel", "% triple barrel")
-
-        # Calculate triple barrel count (approximation based on c-bet ratios)
-        if cb_opp_1 > 0 and cb_opp_2 > 0 and cb_opp_3 > 0:
-            cb_rate_1 = cb_1 / cb_opp_1
-            cb_rate_2 = cb_2 / cb_opp_2
-            cb_rate_3 = cb_3 / cb_opp_3
-
-            # Estimate triple barrel count
-            triple_barrel_count = triple_barrel_opportunities * cb_rate_1 * cb_rate_2 * cb_rate_3
-        else:
-            triple_barrel_count = 0
-
-        # Calculate triple barrel percentage
-        stat = triple_barrel_count / triple_barrel_opportunities
-        return (
-            stat,
-            "%3.1f" % (100.0 * stat),
-            "3barrel=%3.1f%%" % (100.0 * stat),
-            "triple_barrel=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (triple_barrel_count, triple_barrel_opportunities),
-            "% triple barrel",
-        )
-    except (KeyError, ValueError, TypeError):
-        return format_no_data_stat("3barrel", "% triple barrel")
 
 
 def resteal(stat_dict, player):
