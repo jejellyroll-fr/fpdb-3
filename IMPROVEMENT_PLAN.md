@@ -189,6 +189,7 @@ Les bugs multi-backend récents (`Rank` réservé, `boolean` vs `smallint`, `set
 - ✅ **Marqueurs préflop dépréciés de `Stats.py`** (2026-07-14) : isolation raise, 3-bet vs steal et call vs steal déplacés dans `stats_preflop.py`. Ils restent compatibles avec les anciennes configurations sans inventer de données absentes du HudCache.
 - ✅ **Entrées passives préflop de `Stats.py`** (2026-07-14) : cold call, limp estimé et open limp déplacés dans `stats_preflop.py`, avec dénominateurs, sentinelles sans opportunité et libellés historiques conservés.
 - ✅ **Indicateurs préflop dérivés de `Stats.py`** (2026-07-14) : ratio VPIP/PFR et fold face à 4-bet déplacés dans `stats_preflop.py`, y compris ratio infini à PFR nul et sentinelles historiques.
+- ✅ **Fréquences de mise directes de `Stats.py`** (2026-07-14) : fréquences de bet flop et turn déplacées dans `stats_postflop.py`, avec un helper typé qui distingue libellé court HUD et libellé long popup.
 - **Découper les god-modules** : `SQL.py` (requêtes par domaine / fichiers `.sql`), `Database.py` (connexion / DDL / cache HUD / requêtes), `Stats.py` (par famille). Incrémental, avec tests de non-régression.
 - **Qualité outillée restante** : Ruff est vert sur tout le dépôt et mypy couvre tout le package legacy ; convertir les 73 `TODO/FIXME` actuels en tâches traçables, évaluer l'intérêt d'un second checker (`pyright`) et clarifier/supprimer le dossier `fpdb/`.
 

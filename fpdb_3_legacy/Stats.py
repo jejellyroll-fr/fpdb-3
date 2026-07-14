@@ -71,6 +71,12 @@ from fpdb_3_legacy.stats_formatting import (
     stat_override as __stat_override,
 )
 from fpdb_3_legacy.stats_postflop import (
+    bet_frequency_flop as bet_frequency_flop,
+)
+from fpdb_3_legacy.stats_postflop import (
+    bet_frequency_turn as bet_frequency_turn,
+)
+from fpdb_3_legacy.stats_postflop import (
     check_raise_frequency as check_raise_frequency,
 )
 from fpdb_3_legacy.stats_postflop import (
@@ -3546,80 +3552,6 @@ def non_sd_winrate(stat_dict, player):
         )
     except (KeyError, ValueError, TypeError):
         return format_no_data_stat("nsd_wr", "% non-showdown winrate")
-
-
-def bet_frequency_flop(stat_dict, player):
-    """Calculate the Bet Frequency on flop for a player.
-
-    This measures how often a player bets when they have the opportunity on the flop.
-    Bet Frequency = street1Bets / street1Seen
-
-    Args:
-        stat_dict (dict): A dictionary containing player statistics.
-        player (int): The player for whom the statistic is calculated.
-
-    Returns:
-        tuple: A tuple containing the calculated statistic, formatted strings, and related information.
-        Returns "-" if no flop opportunities to distinguish from 0% (never bet flop).
-    """
-    stat = 0.0
-    try:
-        saw_f = float(stat_dict[player].get("saw_f", 0))  # street1Seen
-        street1_bets = float(stat_dict[player].get("street1Bets", 0))
-
-        # No flop opportunities = no data available
-        if saw_f == 0:
-            return format_no_data_stat("bet_f", "% bet frequency flop")
-
-        # Calculate bet frequency on flop
-        stat = street1_bets / saw_f
-        return (
-            stat,
-            "%3.1f" % (100.0 * stat),
-            "bet_f=%3.1f%%" % (100.0 * stat),
-            "bet_freq_flop=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (street1_bets, saw_f),
-            "% bet frequency flop",
-        )
-    except (KeyError, ValueError, TypeError):
-        return format_no_data_stat("bet_f", "% bet frequency flop")
-
-
-def bet_frequency_turn(stat_dict, player):
-    """Calculate the Bet Frequency on turn for a player.
-
-    This measures how often a player bets when they have the opportunity on the turn.
-    Bet Frequency = street2Bets / street2Seen
-
-    Args:
-        stat_dict (dict): A dictionary containing player statistics.
-        player (int): The player for whom the statistic is calculated.
-
-    Returns:
-        tuple: A tuple containing the calculated statistic, formatted strings, and related information.
-        Returns "-" if no turn opportunities to distinguish from 0% (never bet turn).
-    """
-    stat = 0.0
-    try:
-        saw_t = float(stat_dict[player].get("saw_t", 0))  # street2Seen
-        street2_bets = float(stat_dict[player].get("street2Bets", 0))
-
-        # No turn opportunities = no data available
-        if saw_t == 0:
-            return format_no_data_stat("bet_t", "% bet frequency turn")
-
-        # Calculate bet frequency on turn
-        stat = street2_bets / saw_t
-        return (
-            stat,
-            "%3.1f" % (100.0 * stat),
-            "bet_t=%3.1f%%" % (100.0 * stat),
-            "bet_freq_turn=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (street2_bets, saw_t),
-            "% bet frequency turn",
-        )
-    except (KeyError, ValueError, TypeError):
-        return format_no_data_stat("bet_t", "% bet frequency turn")
 
 
 def raise_frequency_flop(stat_dict, player):
