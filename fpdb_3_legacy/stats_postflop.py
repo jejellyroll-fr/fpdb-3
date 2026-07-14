@@ -161,3 +161,46 @@ def fold_river(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatT
 def fold_to_squeeze(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
     """Return the frequency of folding when facing a preflop squeeze."""
     return postflop_ratio(stat_dict, player, "sqzdef_opp", "sqzdef_fold", "FvSq", "% fold to squeeze")
+
+
+def check_raise_frequency(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    """Return the combined check-raise frequency across postflop streets."""
+    try:
+        player_stats = stat_dict[player]
+        total = float(player_stats.get("cr_1", 0) + player_stats.get("cr_2", 0) + player_stats.get("cr_3", 0))
+        opportunities = float(
+            player_stats.get("ccr_opp_1", 0)
+            + player_stats.get("ccr_opp_2", 0)
+            + player_stats.get("ccr_opp_3", 0)
+        )
+        stat = total / opportunities if opportunities else 0.0
+        percent = 100.0 * stat
+        return (
+            stat,
+            f"{percent:3.1f}",
+            f"CRF={percent:3.1f}%",
+            f"CheckRaiseFreq={percent:3.1f}%",
+            f"({int(total)}/{int(opportunities)})",
+            "Check-Raise Frequency",
+        )
+    except (KeyError, TypeError, ValueError):
+        return 0.0, "NA", "CRF=NA", "CheckRaiseFreq=NA", "(0/0)", "Check-Raise Frequency"
+
+
+def river_call_efficiency(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    """Return showdowns won per river call."""
+    try:
+        river_calls = float(stat_dict[player].get("call_3", 0))
+        showdowns_won = float(stat_dict[player].get("wmsd", 0))
+        stat = showdowns_won / river_calls if river_calls > 0 else 0.0
+        percent = 100.0 * stat
+        return (
+            stat,
+            f"{percent:3.1f}",
+            f"RCE={percent:3.1f}%",
+            f"RiverCallEff={percent:3.1f}%",
+            f"({int(showdowns_won)}/{int(river_calls)})",
+            "River Call Efficiency",
+        )
+    except (KeyError, TypeError, ValueError):
+        return 0.0, "NA", "RCE=NA", "RiverCallEff=NA", "(0/0)", "River Call Efficiency"

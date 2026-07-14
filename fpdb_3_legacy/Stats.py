@@ -71,6 +71,9 @@ from fpdb_3_legacy.stats_formatting import (
     stat_override as __stat_override,
 )
 from fpdb_3_legacy.stats_postflop import (
+    check_raise_frequency as check_raise_frequency,
+)
+from fpdb_3_legacy.stats_postflop import (
     face_raise_flop as face_raise_flop,
 )
 from fpdb_3_legacy.stats_postflop import (
@@ -135,6 +138,9 @@ from fpdb_3_legacy.stats_postflop import (
 )
 from fpdb_3_legacy.stats_postflop import (
     open_turn as open_turn,
+)
+from fpdb_3_legacy.stats_postflop import (
+    river_call_efficiency as river_call_efficiency,
 )
 from fpdb_3_legacy.stats_postflop import (
     three_B_flop as three_B_flop,
@@ -4368,69 +4374,6 @@ def overbet_frequency(stat_dict, player):
         )
     except (KeyError, ValueError, TypeError):
         return format_no_data_stat("overbet", "% overbet frequency")
-
-
-def check_raise_frequency(stat_dict, player):
-    try:
-        # Sum the total check-raises and opportunities
-        total_cr = (
-            stat_dict[player].get("cr_1", 0) + stat_dict[player].get("cr_2", 0) + stat_dict[player].get("cr_3", 0)
-        )
-        total_opp = (
-            stat_dict[player].get("ccr_opp_1", 0)
-            + stat_dict[player].get("ccr_opp_2", 0)
-            + stat_dict[player].get("ccr_opp_3", 0)
-        )
-
-        # Check to avoid division by zero
-        if total_opp != 0:
-            stat = float(total_cr) / float(total_opp)
-        else:
-            stat = 0  # Avoid division by zero
-
-        return (
-            stat,
-            "%3.1f" % (100.0 * stat),
-            "CRF=%3.1f%%" % (100.0 * stat),
-            "CheckRaiseFreq=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (total_cr, total_opp),
-            "Check-Raise Frequency",
-        )
-    except (KeyError, ValueError, TypeError):
-        return (
-            0,
-            "NA",
-            "CRF=NA",
-            "CheckRaiseFreq=NA",
-            "(0/0)",
-            "Check-Raise Frequency",
-        )
-
-
-def river_call_efficiency(stat_dict, player):
-    try:
-        river_calls = stat_dict[player].get(
-            "call_3",
-            0,
-        )  # Safely get river calls, defaulting to 0
-        showdowns_won = stat_dict[player].get(
-            "wmsd",
-            0,
-        )  # Safely get showdowns won, defaulting to 0
-
-        # Calculate the efficiency, ensuring no division by zero
-        stat = float(showdowns_won) / float(river_calls) if river_calls > 0 else 0
-
-        return (
-            stat,
-            "%3.1f" % (100.0 * stat),
-            "RCE=%3.1f%%" % (100.0 * stat),
-            "RiverCallEff=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (showdowns_won, river_calls),
-            "River Call Efficiency",
-        )
-    except (KeyError, ValueError, TypeError):
-        return (0, "NA", "RCE=NA", "RiverCallEff=NA", "(0/0)", "River Call Efficiency")
 
 
 #
