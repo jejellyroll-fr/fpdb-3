@@ -411,12 +411,13 @@ class Merge(HandHistoryConverter):
             tid_table = m.group("TDATA").split("-")
             tid = tid_table[0]
             table = tid_table[1] if len(tid_table) > 1 else "0"
-            self.info["tablename"] = m.group("TABLENAME").replace("  - ", " - ").strip()
+            table_name = m.group("TABLENAME").replace("  - ", " - ").strip()
+            self.info["tablename"] = table_name
             self.info["tourNo"] = hand.tourNo
             hand.tourNo = tid
             hand.tablename = table
             structure = self.Structures.lookupSnG(
-                self.info["tablename"],
+                table_name,
                 hand.startTime,
             )
             if structure is not None:

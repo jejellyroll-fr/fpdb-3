@@ -122,6 +122,8 @@ jobs:
           fpdb_3_legacy/migration_helper.py
           fpdb_3_legacy/sync_databases.py
           fpdb_3_legacy/SummaryEverleaf.py
+          fpdb_3_legacy/AutoNotePlo.py
+          fpdb_3_legacy/MergeStructures.py
           fpdb_3_legacy/WinamaxSummary.py
           fpdb_3_legacy/WinamaxToFpdb.py
           fpdb_3_legacy/PokerStarsSummary.py
