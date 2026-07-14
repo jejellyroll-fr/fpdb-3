@@ -3,6 +3,7 @@ from __future__ import annotations
 import decimal
 import re
 from decimal import Decimal
+from typing import TYPE_CHECKING, Any
 
 from fpdb_3_legacy.loggingFpdb import get_logger
 
@@ -11,6 +12,16 @@ log = get_logger("ipoker_parser")
 
 class IPokerXMLFormatMixin:
     """XML-format game type parsing for iPoker hand histories."""
+
+    whole_file: str
+    info: dict[str, Any]
+    tinfo: dict[str, Any]
+    tablename: str
+    hero: str
+
+    if TYPE_CHECKING:
+
+        def _filename_game_info_source(self) -> str: ...
 
     def _parse_xml_format(self, hand_text: str) -> dict | None:  # noqa: ARG002, PLR0912, PLR0915, C901
         """Parse XML format by combining session and game level information."""
@@ -24,7 +35,7 @@ class IPokerXMLFormatMixin:
             "nickname": r"<nickname>([^<]*)</nickname>",
         }
 
-        session_info = {}
+        session_info: dict[str, str] = {}
         for key, pattern in session_patterns.items():
             match = re.search(pattern, self.whole_file)
             if match:
@@ -274,7 +285,7 @@ class IPokerXMLFormatMixin:
             "tablename": r"<tablename>([^<]*)</tablename>",
         }
 
-        tourney_info = {}
+        tourney_info: dict[str, str] = {}
         for key, pattern in tourney_patterns.items():
             match = re.search(pattern, self.whole_file)
             if match:
