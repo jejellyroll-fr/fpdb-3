@@ -95,6 +95,18 @@ from fpdb_3_legacy.stats_postflop import (
     check_raise_frequency as check_raise_frequency,
 )
 from fpdb_3_legacy.stats_postflop import (
+    cr1 as cr1,
+)
+from fpdb_3_legacy.stats_postflop import (
+    cr2 as cr2,
+)
+from fpdb_3_legacy.stats_postflop import (
+    cr3 as cr3,
+)
+from fpdb_3_legacy.stats_postflop import (
+    cr4 as cr4,
+)
+from fpdb_3_legacy.stats_postflop import (
     f_cb1 as f_cb1,
 )
 from fpdb_3_legacy.stats_postflop import (
@@ -2909,222 +2921,6 @@ def ffreq4(stat_dict, player):
         )
     except (KeyError, ValueError, TypeError):
         return (stat, "NA", "ff4=NA", "ff_4=NA", "(0/0)", "% fold frequency 7th street")
-
-
-def cr1(stat_dict, player):
-    """Calculate the check-raise flop/4th street statistic for a given player.
-
-    Args:
-        stat_dict (dict): A dictionary containing player statistics.
-        player (int): The player for whom the statistic is calculated.
-
-    Returns:
-        tuple: A tuple containing various formatted strings representing the check-raise flop/4th street statistic.
-              The tuple contains the following elements:
-              - stat (float): The calculated statistic value.
-              - percent (str): The calculated statistic value formatted as a percentage.
-              - cr1 (str): The calculated statistic value formatted with a specific format.
-              - cr_1 (str): The calculated statistic value formatted with a specific format.
-              - count (str): The count of occurrences divided by the count of opponent's check-raises.
-              - description (str): A description of the statistic.
-
-    Raises:
-        None
-
-    """
-    stat = 0.0
-    try:
-        ccr_opp_1 = float(
-            stat_dict[player].get("ccr_opp_1", 0),
-        )  # Ensure key exists and default to 0
-        cr_1 = float(stat_dict[player].get("cr_1", 0))
-
-        # No opportunities = no data available
-        if ccr_opp_1 == 0:
-            return format_no_data_stat("cr1", "% check-raise flop/4th street")
-
-        # Calculate check-raise percentage
-        stat = cr_1 / ccr_opp_1
-
-        return (
-            stat,
-            "%3.1f" % (100.0 * stat),
-            "cr1=%3.1f%%" % (100.0 * stat),
-            "cr_1=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (cr_1, ccr_opp_1),
-            "% check-raise flop/4th street",
-        )
-    except (KeyError, ValueError, TypeError):
-        return (
-            stat,
-            "NA",
-            "cr1=NA",
-            "cr_1=NA",
-            "(0/0)",
-            "% check-raise flop/4th street",
-        )
-
-
-def cr2(stat_dict, player):
-    """Calculates the check-raise turn/5th street for a given player.
-
-    Args:
-        stat_dict (dict): A dictionary containing player statistics.
-        player (int): The player for whom the statistic is calculated.
-
-    Returns:
-        tuple: A tuple containing various formatted strings representing the check-raise to fold ratio.
-              The tuple contains the following elements:
-              - stat (float): The calculated statistic value.
-              - percent (str): The calculated statistic value formatted as a percentage.
-              - cr2 (str): The calculated statistic value formatted with a specific format.
-              - cr_2 (str): The calculated statistic value formatted with a specific format.
-              - count (str): The count of occurrences divided by the count of opponent's check-raises.
-              - description (str): A description of the statistic.
-
-    """
-    stat = 0.0
-    try:
-        ccr_opp_2 = float(
-            stat_dict[player].get("ccr_opp_2", 0),
-        )  # Ensure key exists and default to 0
-        cr_2 = float(stat_dict[player].get("cr_2", 0))
-
-        # No opportunities = no data available
-        if ccr_opp_2 == 0:
-            return format_no_data_stat("cr2", "% check-raise turn/5th street")
-
-        # Calculate check-raise percentage
-        stat = cr_2 / ccr_opp_2
-
-        return (
-            stat,
-            "%3.1f" % (100.0 * stat),
-            "cr2=%3.1f%%" % (100.0 * stat),
-            "cr_2=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (cr_2, ccr_opp_2),
-            "% check-raise turn/5th street",
-        )
-    except (KeyError, ValueError, TypeError):
-        return (
-            stat,
-            "NA",
-            "cr2=NA",
-            "cr_2=NA",
-            "(0/0)",
-            "% check-raise turn/5th street",
-        )
-
-
-def cr3(stat_dict, player):
-    """Calculate the river/6th street check-raise statistic for a given player.
-
-    Args:
-        stat_dict (dict): A dictionary containing player statistics.
-        player (int): The player for whom the statistic is calculated.
-
-    Returns:
-        tuple: A tuple containing various formatted strings representing the check-raise to fold ratio.
-              The tuple contains the following elements:
-              - stat (float): The calculated statistic value.
-              - percent (str): The calculated statistic value formatted as a percentage.
-              - cr3 (str): The calculated statistic value formatted with a specific format.
-              - cr_3 (str): The calculated statistic value formatted with a specific format.
-              - count (str): The count of occurrences divided by the count of opponent's check-raises.
-              - description (str): A description of the statistic.
-
-    Raises:
-        None
-
-    """
-    stat = 0.0
-    try:
-        ccr_opp_3 = float(
-            stat_dict[player].get("ccr_opp_3", 0),
-        )  # Ensure key exists and default to 0
-        cr_3 = float(stat_dict[player].get("cr_3", 0))
-
-        # No opportunities = no data available
-        if ccr_opp_3 == 0:
-            return format_no_data_stat("cr3", "% check-raise river/6th street")
-
-        # Calculate check-raise percentage
-        stat = cr_3 / ccr_opp_3
-
-        return (
-            stat,
-            "%3.1f" % (100.0 * stat),
-            "cr3=%3.1f%%" % (100.0 * stat),
-            "cr_3=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (cr_3, ccr_opp_3),
-            "% check-raise river/6th street",
-        )
-    except (KeyError, ValueError, TypeError):
-        return (
-            stat,
-            "NA",
-            "cr3=NA",
-            "cr_3=NA",
-            "(0/0)",
-            "% check-raise river/6th street",
-        )
-
-
-def cr4(stat_dict, player):
-    """Calculate the 7th street check-raise statistics for a given player on the 7th street.
-
-    Args:
-        stat_dict (dict): A dictionary containing player statistics.
-        player (int): The player for whom the statistic is calculated.
-
-    Returns:
-        tuple: A tuple containing various formatted strings representing the check-raise to fold ratio.
-              The tuple contains the following elements:
-              - stat (float): The calculated statistic value.
-              - percent (str): The calculated statistic value formatted as a percentage.
-              - cr4 (str): The calculated statistic value formatted with a specific format.
-              - cr_4 (str): The calculated statistic value formatted with a specific format.
-              - count (str): The count of occurrences divided by the count of opponent's check-raises.
-              - description (str): A description of the statistic.
-
-    Raises:
-        None
-
-    """
-    stat = 0.0
-    try:
-        ccr_opp_4 = float(
-            stat_dict[player].get("ccr_opp_4", 0),
-        )  # Ensure key exists and default to 0
-        cr_4 = float(stat_dict[player].get("cr_4", 0))
-
-        # No opportunities = no data available
-        if ccr_opp_4 == 0:
-            return format_no_data_stat("cr4", "% check-raise 7th street")
-
-        # Calculate check-raise percentage
-        stat = cr_4 / ccr_opp_4
-
-        return (
-            stat,
-            "%3.1f" % (100.0 * stat),
-            "cr4=%3.1f%%" % (100.0 * stat),
-            "cr_4=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (cr_4, ccr_opp_4),
-            "% check-raise 7th street",
-        )
-    except (KeyError, ValueError, TypeError):
-        return (stat, "NA", "cr4=NA", "cr_4=NA", "(0/0)", "% check-raise 7th street")
-
-
-################################################################################################
-# NEW STATS
-
-
-#
-#
-#
-#################################################################################################
 
 
 def starthands(stat_dict, player):

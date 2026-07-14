@@ -200,6 +200,7 @@ Les bugs multi-backend récents (`Rank` réservé, `boolean` vs `smallint`, `set
 - ✅ **Probe turn/river de `Stats.py`** (2026-07-14) : estimations probe turn et river déplacées dans `stats_postflop.py` derrière un helper typé par rue, avec sentinelles et libellés historiques conservés.
 - ✅ **C-bet IP/OOP de `Stats.py`** (2026-07-14) : estimations flop en position et hors position déplacées dans `stats_postflop.py` derrière un helper typé, avec pondération historique par mains en position conservée.
 - ✅ **Fold-to-cbet de `Stats.py`** (2026-07-14) : `f_cb1…4` et alias modernes flop/turn/river déplacés dans `stats_postflop.py`, remplaçant quatre implémentations répétées par un helper typé par rue.
+- ✅ **Check-raise par rue de `Stats.py`** (2026-07-14) : `cr1…4` déplacés dans `stats_postflop.py`, remplaçant quatre implémentations répétées par un helper typé et conservant les contrats flop/turn/river/7th street.
 - **Découper les god-modules** : `SQL.py` (requêtes par domaine / fichiers `.sql`), `Database.py` (connexion / DDL / cache HUD / requêtes), `Stats.py` (par famille). Incrémental, avec tests de non-régression.
 - **Qualité outillée restante** : Ruff est vert sur tout le dépôt et mypy couvre tout le package legacy ; convertir les 73 `TODO/FIXME` actuels en tâches traçables, évaluer l'intérêt d'un second checker (`pyright`) et clarifier/supprimer le dossier `fpdb/`.
 
