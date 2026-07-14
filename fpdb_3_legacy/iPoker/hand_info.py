@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 import datetime
+import re
 from decimal import Decimal
-from typing import Any
+from typing import TYPE_CHECKING, Any, ClassVar
 from zoneinfo import ZoneInfo
 
 from fpdb_3_legacy.HandHistoryConverter import FpdbHandPartial, FpdbParseError
@@ -13,6 +14,29 @@ log = get_logger("ipoker_parser")
 
 class IPokerHandInfoMixin:
     """Hand metadata and player stack parsing for iPoker hand histories."""
+
+    re_hand_info: ClassVar[re.Pattern[str]]
+    re_date_time1: ClassVar[re.Pattern[str]]
+    re_date_time2: ClassVar[re.Pattern[str]]
+    re_date_time3: ClassVar[re.Pattern[str]]
+    re_player_info: ClassVar[re.Pattern[str]]
+    months: ClassVar[dict[str, int]]
+    info: dict[str, Any]
+    tinfo: dict[str, Any]
+    tablename: str
+    hero: str
+    maxseats: int
+    playerWinnings: dict[str, str]
+    seat_mapping: dict[int, int]
+
+    if TYPE_CHECKING:
+
+        def getFileCreationTime(self) -> datetime.datetime: ...
+
+        def guessMaxSeats(self, hand: Any) -> int: ...
+
+        @staticmethod
+        def clearMoneyString(money: str) -> str: ...
 
     def readHandInfo(self, hand: Any) -> None:
         """Parses the hand text and extracts relevant information about the hand.
@@ -42,7 +66,7 @@ class IPokerHandInfoMixin:
 
         log.debug("Exiting readHandInfo.")
 
-    def _parse_hand_info_regex(self, hand_text: str) -> Any:
+    def _parse_hand_info_regex(self, hand_text: str) -> re.Match[str]:
         """Parse hand info regex and return match object."""
         match = self.re_hand_info.search(hand_text)
         if match is None:
@@ -54,7 +78,7 @@ class IPokerHandInfoMixin:
         log.debug("Extracted groupdict: %s", match.groupdict())
         return match
 
-    def _set_basic_hand_info(self, hand: Any, match: Any) -> None:
+    def _set_basic_hand_info(self, hand: Any, match: re.Match[str]) -> None:
         """Set basic hand information from match object."""
         # Set the table name and maximum number of seats for the hand
         hand.tablename = self.tablename
@@ -69,7 +93,7 @@ class IPokerHandInfoMixin:
         hand.handid = match.group("HID")
         log.debug("Set hand.handid: %s", hand.handid)
 
-    def _parse_start_time(self, hand: Any, match: Any) -> None:
+    def _parse_start_time(self, hand: Any, match: re.Match[str]) -> None:
         """Parse and set the start time for the hand."""
         datetime_str = match.group("DATETIME")
         if datetime_str is None:
@@ -158,19 +182,22 @@ class IPokerHandInfoMixin:
                 hand.tablename,
             )
 
-    def _initialize_player_data(self, hand: Any) -> tuple[dict, dict, dict]:
+    def _initialize_player_data(
+        self,
+        hand: Any,
+    ) -> tuple[dict[str, str], dict[str, list[Any]], dict[int, int]]:
         """Initialize player data structures."""
         self.playerWinnings = {}
-        plist = {}
+        plist: dict[str, list[Any]] = {}
         self.seat_mapping = {}  # Store seat mapping for tournaments
         hand.rake = Decimal("0.00")  # Initialize the total rake
         log.debug("Initialized playerWinnings, plist dictionaries, and hand.rake.")
         return self.playerWinnings, plist, self.seat_mapping
 
-    def _extract_player_info(self, hand: Any) -> tuple[dict, list]:
+    def _extract_player_info(self, hand: Any) -> tuple[dict[str, list[Any]], list[int]]:
         """Extract player information from hand text."""
-        plist = {}
-        original_seats = []
+        plist: dict[str, list[Any]] = {}
+        original_seats: list[int] = []
 
         m = self.re_player_info.finditer(hand.handText)
         log.debug("Running regex to find player information in hand text.")
