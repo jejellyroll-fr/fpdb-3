@@ -65,6 +65,9 @@ from fpdb_3_legacy.stats_display import (
     blank as blank,
 )
 from fpdb_3_legacy.stats_display import (
+    game_abbr as game_abbr,
+)
+from fpdb_3_legacy.stats_display import (
     player_note as player_note,
 )
 from fpdb_3_legacy.stats_formatting import (
@@ -3289,67 +3292,6 @@ def cr4(stat_dict, player):
         )
     except (KeyError, ValueError, TypeError):
         return (stat, "NA", "cr4=NA", "cr_4=NA", "(0/0)", "% check-raise 7th street")
-
-
-def game_abbr(stat_dict, player):
-    """Function to retrieve the abbreviation for a specific poker game based on the game category and limit type.
-
-    Parameters
-    ----------
-    - stat_dict: Dictionary containing statistics related to the game.
-    - player: Integer representing the player number.
-
-    Returns:
-    -------
-    - Tuple containing various representations of the game abbreviation.
-
-    """
-    hand_instance = _get_hand_instance()
-    stat = ""
-    try:
-        if hand_instance is None or "gametype" not in hand_instance:
-            # If hand_instance is None, return default empty values
-            return ("NA", "NA", "game=NA", "game_abbr=NA", "(NA)", "Game abbreviation")
-
-        cat_plus_limit = hand_instance.gametype["category"] + "." + hand_instance.gametype["limitType"]
-        stat = {
-            # ftp's 10-game with official abbreviations
-            "holdem.fl": "H",
-            "studhilo.fl": "E",
-            "omahahi.pl": "P",
-            "27_3draw.fl": "T",
-            "razz.fl": "R",
-            "holdem.nl": "N",
-            "omahahilo.fl": "O",
-            "studhi.fl": "S",
-            "27_1draw.nl": "K",
-            "badugi.fl": "B",
-            # other common games with dubious abbreviations
-            "fivedraw.fl": "F",
-            "fivedraw.pl": "Fp",
-            "fivedraw.nl": "Fn",
-            "27_3draw.pl": "Tp",
-            "27_3draw.nl": "Tn",
-            "badugi.pl": "Bp",
-            "badugi.hp": "Bh",
-            "omahahilo.pl": "Op",
-            "omahahilo.nl": "On",
-            "holdem.pl": "Hp",
-            "studhi.nl": "Sn",
-        }.get(
-            cat_plus_limit,
-            "Unknown",
-        )  # Default to "Unknown" if not found
-        return (
-            stat,
-            f"{stat}",
-            f"game={stat}",
-            f"game_abbr={stat}",
-            f"({stat})",
-            "Game abbreviation",
-        )
-    except (KeyError, ValueError, TypeError):
-        return ("NA", "NA", "game=NA", "game_abbr=NA", "(NA)", "Game abbreviation")
 
 
 ################################################################################################
