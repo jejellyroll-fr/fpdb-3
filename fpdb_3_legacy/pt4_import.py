@@ -525,9 +525,10 @@ def import_files(paths: list[str | Path], dest_file: str | Path) -> ImportReport
     merged = _load_existing_descriptors(dest_file)
     for path in sorted(Path(p) for p in paths):
         translated = translate(decode_pt4stat(path))
-        if translated.supported:
-            merged[translated.descriptor["name"]] = translated.descriptor
-            report.imported.append(translated.descriptor["name"])
+        descriptor = translated.descriptor
+        if descriptor is not None:
+            merged[descriptor["name"]] = descriptor
+            report.imported.append(descriptor["name"])
         else:
             report.skipped[path.name] = translated.warnings or ["unsupported"]
 
