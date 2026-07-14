@@ -31,7 +31,7 @@ import operator
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 try:  # Python 3.11+
     import tomllib as _toml
@@ -263,9 +263,11 @@ def build_descriptor(data: Mapping[str, Any]) -> StatDescriptor:
     """
     name = data.get("name")
     _require(isinstance(name, str) and name.isidentifier(), f"name must be an identifier, got {name!r}")
+    name = cast(str, name)
 
     label = data.get("label", name)
     _require(isinstance(label, str), "label must be a string")
+    label = cast(str, label)
 
     inputs = data.get("inputs")
     _require(
@@ -274,10 +276,11 @@ def build_descriptor(data: Mapping[str, Any]) -> StatDescriptor:
         and all(isinstance(c, str) and c.isidentifier() for c in inputs),
         "inputs must be a non-empty list of column identifiers",
     )
-    inputs = tuple(inputs)
+    inputs = tuple(cast(list[str] | tuple[str, ...], inputs))
 
     value = data.get("value")
     _require(isinstance(value, str) and value.strip() != "", "value expression is required")
+    value = cast(str, value)
 
     # Compile + sandbox-check the expression against the declared inputs. This
     # is where an expression referencing a non-existent column is rejected.
@@ -286,7 +289,9 @@ def build_descriptor(data: Mapping[str, Any]) -> StatDescriptor:
     if unused:
         log.warning("descriptor %s declares unused inputs: %s", name, sorted(unused))
 
-    scope = tuple(data.get("scope", ("ring", "tour")))
+    raw_scope = data.get("scope", ("ring", "tour"))
+    _require(isinstance(raw_scope, (list, tuple)), "scope must be a list of game types")
+    scope = tuple(cast(list[str] | tuple[str, ...], raw_scope))
     _require(
         len(scope) > 0 and all(s in VALID_SCOPES for s in scope),
         f"scope must be a subset of {sorted(VALID_SCOPES)}",
@@ -309,7 +314,9 @@ def build_descriptor(data: Mapping[str, Any]) -> StatDescriptor:
             _require(isinstance(dimension["position"], (int, str)), "dimension.position must be int or str")
         dimension = dict(dimension)
 
-    context = tuple(data.get("context", ()))
+    raw_context = data.get("context", ())
+    _require(isinstance(raw_context, (list, tuple)), "context must be a list of input names")
+    context = tuple(cast(list[str] | tuple[str, ...], raw_context))
     _require(
         all(isinstance(c, str) for c in context) and set(context) <= set(inputs),
         "context must be a subset of inputs",
@@ -317,6 +324,7 @@ def build_descriptor(data: Mapping[str, Any]) -> StatDescriptor:
 
     fmt = data.get("format", "%s")
     _require(isinstance(fmt, str), "format must be a string")
+    fmt = cast(str, fmt)
 
     return StatDescriptor(
         name=name,
