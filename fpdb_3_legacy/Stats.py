@@ -86,6 +86,18 @@ from fpdb_3_legacy.stats_postflop import (
     bet_frequency_turn as bet_frequency_turn,
 )
 from fpdb_3_legacy.stats_postflop import (
+    cb1 as cb1,
+)
+from fpdb_3_legacy.stats_postflop import (
+    cb2 as cb2,
+)
+from fpdb_3_legacy.stats_postflop import (
+    cb3 as cb3,
+)
+from fpdb_3_legacy.stats_postflop import (
+    cb4 as cb4,
+)
+from fpdb_3_legacy.stats_postflop import (
     cb_ip as cb_ip,
 )
 from fpdb_3_legacy.stats_postflop import (
@@ -2630,142 +2642,6 @@ def cbet(stat_dict, player):
         )
     except (KeyError, ValueError, TypeError):
         return (stat, "NA", "cbet=NA", "cbet=NA", "(0/0)", "% continuation bet")
-
-
-def cb1(stat_dict, player):
-    """Calculate the continuation bet statistic for a given player on flop/4th street.
-
-    Args:
-        stat_dict (dict): A dictionary containing player statistics.
-        player (int): The player for whom the statistic is calculated.
-
-    Returns:
-        tuple: A tuple containing various formatted strings representing the continuation bet statistic.
-
-    """
-    stat = 0.0
-    try:
-        cb_opp_1 = float(stat_dict[player].get("cb_opp_1", 0))
-        cb_1 = float(stat_dict[player].get("cb_1", 0))
-
-        # No opportunities = no data available
-        if cb_opp_1 == 0:
-            return format_no_data_stat("cb1", "% continuation bet flop/4th street")
-
-        # Calculate continuation bet percentage
-        stat = cb_1 / cb_opp_1
-        return (
-            stat,
-            "%3.1f" % (100.0 * stat),
-            "cb1=%3.1f%%" % (100.0 * stat),
-            "cb_1=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (cb_1, cb_opp_1),
-            "% continuation bet flop/4th street",
-        )
-    except (KeyError, ValueError, TypeError):
-        return format_no_data_stat("cb1", "% continuation bet flop/4th street")
-
-
-def cb2(stat_dict, player):
-    """Calculate the continuation bet statistic for a given player on turn/5th street.
-
-    Args:
-        stat_dict (dict): A dictionary containing player statistics.
-        player (int): The player for whom the statistic is calculated.
-
-    Returns:
-        tuple: A tuple containing various formatted strings representing the continuation bet statistic.
-
-    """
-    stat = 0.0
-    try:
-        cb_opp_2 = float(stat_dict[player].get("cb_opp_2", 0))
-        cb_2 = float(stat_dict[player].get("cb_2", 0))
-
-        # No opportunities = no data available
-        if cb_opp_2 == 0:
-            return format_no_data_stat("cb2", "% continuation bet turn/5th street")
-
-        # Calculate continuation bet percentage
-        stat = cb_2 / cb_opp_2
-        return (
-            stat,
-            "%3.1f" % (100.0 * stat),
-            "cb2=%3.1f%%" % (100.0 * stat),
-            "cb_2=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (cb_2, cb_opp_2),
-            "% continuation bet turn/5th street",
-        )
-    except (KeyError, ValueError, TypeError):
-        return format_no_data_stat("cb2", "% continuation bet turn/5th street")
-
-
-def cb3(stat_dict, player):
-    """Calculate the continuation bet statistic for a given player on river/6th street.
-
-    Args:
-        stat_dict (dict): A dictionary containing player statistics.
-        player (int): The player for whom the statistic is calculated.
-
-    Returns:
-        tuple: A tuple containing various formatted strings representing the continuation bet statistic.
-
-    """
-    stat = 0.0
-    try:
-        cb_opp_3 = float(stat_dict[player].get("cb_opp_3", 0))
-        cb_3 = float(stat_dict[player].get("cb_3", 0))
-
-        # No opportunities = no data available
-        if cb_opp_3 == 0:
-            return format_no_data_stat("cb3", "% continuation bet river/6th street")
-
-        # Calculate continuation bet percentage
-        stat = cb_3 / cb_opp_3
-        return (
-            stat,
-            "%3.1f" % (100.0 * stat),
-            "cb3=%3.1f%%" % (100.0 * stat),
-            "cb_3=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (cb_3, cb_opp_3),
-            "% continuation bet river/6th street",
-        )
-    except (KeyError, ValueError, TypeError):
-        return format_no_data_stat("cb3", "% continuation bet river/6th street")
-
-
-def cb4(stat_dict, player):
-    """Calculate the continuation bet statistic for a given player on 7th street.
-
-    Args:
-        stat_dict (dict): A dictionary containing player statistics.
-        player (int): The player for whom the statistic is calculated.
-
-    Returns:
-        tuple: A tuple containing various formatted strings representing the continuation bet statistic.
-
-    """
-    stat = 0.0
-    try:
-        cb_opp_4 = float(stat_dict[player].get("cb_opp_4", 0))
-        cb_4 = float(stat_dict[player].get("cb_4", 0))
-
-        # No opportunities = no data available
-        if cb_opp_4 == 0:
-            return format_no_data_stat("cb4", "% continuation bet 7th street")
-
-        # Calculate continuation bet percentage
-        stat = cb_4 / cb_opp_4
-        return (
-            stat,
-            "%3.1f" % (100.0 * stat),
-            "cb4=%3.1f%%" % (100.0 * stat),
-            "cb_4=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (cb_4, cb_opp_4),
-            "% continuation bet 7th street",
-        )
-    except (KeyError, ValueError, TypeError):
-        return format_no_data_stat("cb4", "% continuation bet 7th street")
 
 
 def starthands(stat_dict, player):
