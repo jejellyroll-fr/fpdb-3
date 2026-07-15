@@ -21,3 +21,17 @@ def test_boards_ddl_keeps_backend_specific_hand_relation() -> None:
     assert "FOREIGN KEY (handId) REFERENCES Hands(id)" in mysql
     assert "FOREIGN KEY (handId) REFERENCES Hands(id)" in postgresql
     assert "FOREIGN KEY" not in sqlite
+
+
+def test_hands_cashout_ddl_keeps_money_and_player_relations() -> None:
+    mysql = hand_schema_queries("mysql")["createHandsCashoutTable"]
+    postgresql = hand_schema_queries("postgresql")["createHandsCashoutTable"]
+    sqlite = hand_schema_queries("sqlite")["createHandsCashoutTable"]
+
+    assert "amount NUMERIC" in mysql
+    assert "fee NUMERIC" in postgresql
+    assert "amount decimal" in sqlite
+    for ddl in (mysql, postgresql):
+        assert "REFERENCES Hands(id)" in ddl
+        assert "REFERENCES Players(id)" in ddl
+    assert "FOREIGN KEY" not in sqlite
