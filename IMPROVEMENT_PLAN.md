@@ -253,6 +253,7 @@ Les bugs multi-backend récents (`Rank` réservé, `boolean` vs `smallint`, `set
 - ✅ **HudCache/CardsCache de `SQL.py`** (2026-07-15) : caches HUD principal et par cartes de départ extraits mécaniquement, avec clés positionnelles, périodes et colonnes delayed-cbet/probe turn protégées explicitement.
 - ✅ **DDL de `SQL.py` entièrement extrait** (2026-07-15) : plus aucun `CREATE TABLE` ne demeure dans la façade ; une garde architecturale impose désormais l'installation exclusive des catalogues de schéma dédiés.
 - ✅ **Index structurels de `SQL.py`** (2026-07-15) : les 30 index et migrations de colonnes indexées sont regroupés dans `sql_indexes.py`, avec syntaxes MySQL/PostgreSQL/SQLite testées exactement.
+- ✅ **Lookups cœur de `SQL.py`** (2026-07-15) : bornes temporelles, résolution joueur et informations de partie déplacées dans `sql_queries_core.py`, avec paramètres et jointures protégés.
 - **Qualité outillée restante** : Ruff est vert sur tout le dépôt et mypy couvre tout le package legacy ; convertir les 73 `TODO/FIXME` actuels en tâches traçables, évaluer l'intérêt d'un second checker (`pyright`) et clarifier/supprimer le dossier `fpdb/`.
 
 **Effort** continu · **Impact** moyen.
