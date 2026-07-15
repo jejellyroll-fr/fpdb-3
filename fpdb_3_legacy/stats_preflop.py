@@ -386,3 +386,18 @@ def squeeze(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTupl
 def raiseToSteal(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
     """Return raise-to-steal frequency."""
     return _preflop_opportunity_frequency(stat_dict, player, "rts_opp", "rts", "RST", "RST_pf", "% raise to steal")
+
+
+def three_B(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    """Return 3-bet frequency preflop or on third street."""
+    return _preflop_opportunity_frequency(stat_dict, player, "tb_opp_0", "tb_0", "3B", "3B_pf", "% 3 bet preflop/3rd street")
+
+
+def four_B(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    """Return 4-bet frequency preflop or on third street."""
+    return _preflop_opportunity_frequency(stat_dict, player, "fb_opp_0", "fb_0", "4B", "4B", "% 4 bet preflop/3rd street")
+
+
+def cfour_B(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    """Return cold-4-bet frequency preflop or on third street."""
+    return _preflop_opportunity_frequency(stat_dict, player, "cfb_opp_0", "cfb_0", "C4B", "C4B_pf", "% cold 4 bet preflop/3rd street")

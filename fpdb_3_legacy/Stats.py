@@ -311,6 +311,9 @@ from fpdb_3_legacy.stats_preflop import (
     car0 as car0,
 )
 from fpdb_3_legacy.stats_preflop import (
+    cfour_B as cfour_B,
+)
+from fpdb_3_legacy.stats_preflop import (
     cold_call as cold_call,
 )
 from fpdb_3_legacy.stats_preflop import (
@@ -327,6 +330,9 @@ from fpdb_3_legacy.stats_preflop import (
 )
 from fpdb_3_legacy.stats_preflop import (
     fold_vs_4bet as fold_vs_4bet,
+)
+from fpdb_3_legacy.stats_preflop import (
+    four_B as four_B,
 )
 from fpdb_3_legacy.stats_preflop import (
     four_bet_bb as four_bet_bb,
@@ -411,6 +417,9 @@ from fpdb_3_legacy.stats_preflop import (
 )
 from fpdb_3_legacy.stats_preflop import (
     straddle as straddle,
+)
+from fpdb_3_legacy.stats_preflop import (
+    three_B as three_B,
 )
 from fpdb_3_legacy.stats_preflop import (
     three_bet_bb as three_bet_bb,
@@ -1565,156 +1574,6 @@ def f_steal(stat_dict, player):
         return (stat, "NA", "fB=NA", "fB_s=NA", "(0/0)", "% folded blind to steal")
 
 
-def three_B(stat_dict, player):
-    """Calculate the three bet statistics for a player.
-
-    Args:
-        stat_dict (dict): A dictionary containing player statistics.
-        player (int): The player for whom the statistics are calculated.
-
-    Returns:
-        tuple: A tuple containing the calculated statistics in different formats:
-            - Float: The calculated statistic.
-            - String: The statistic formatted as a percentage with one decimal place.
-            - String: A formatted string representing the statistic.
-            - String: A formatted string representing the statistic with a suffix.
-            - String: A formatted string showing the count of three bets made and opponent's three bets.
-            - String: A description of the statistic.
-
-    If an exception occurs during the calculation, returns default values for the statistics.
-
-    """
-    stat = 0.0
-    try:
-        tb_opp_0 = float(stat_dict[player].get("tb_opp_0", 0))  # Ensure key exists
-        tb_0 = float(stat_dict[player].get("tb_0", 0))
-
-        # No opportunities = no data available
-        if tb_opp_0 == 0:
-            return format_no_data_stat("3B", "% 3 bet preflop/3rd street")
-
-        # Calculate 3bet percentage
-        stat = tb_0 / tb_opp_0
-
-        return (
-            stat,
-            "%3.1f" % (100.0 * stat),
-            "3B=%3.1f%%" % (100.0 * stat),
-            "3B_pf=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (tb_0, tb_opp_0),
-            "% 3 bet preflop/3rd street",
-        )
-    except (KeyError, ValueError, TypeError):
-        return (stat, "NA", "3B=NA", "3B_pf=NA", "(0/0)", "% 3 bet preflop/3rd street")
-
-
-# ---------------------------------------------------------------------------
-# Per-street postflop display stats (HUD).
-#
-# These reuse the generic done/opp ratio formatter ``_postflop_3bet``. The
-# numerators and opportunity denominators are already persisted in the cache
-# and aliased by ``get_stats_from_hand`` (see SQL.py); the functions below
-# simply expose them to the HUD/GUI. Adding them is purely additive: any
-# module-level function here is auto-registered into STATLIST.
-# ---------------------------------------------------------------------------
-
-
-def four_B(stat_dict, player):
-    """Calculate the four bet statistics for a player.
-
-    Args:
-        stat_dict (dict): A dictionary containing player statistics.
-        player (int): The player for whom the statistics are calculated.
-
-    Returns:
-        tuple: A tuple containing the calculated statistics in different formats:
-            - Float: The calculated statistic.
-            - String: The statistic formatted as a percentage with one decimal place.
-            - String: A formatted string representing the statistic.
-            - String: A formatted string representing the statistic with a suffix.
-            - String: A formatted string showing the count of four bets made and opponent's four bets.
-            - String: A description of the statistic.
-        Returns "-" if no opportunities available to distinguish from 0% (never 4bet).
-
-    If an exception occurs during the calculation, returns default values for the statistics.
-
-    """
-    stat = 0.0
-    try:
-        fb_opp_0 = float(stat_dict[player].get("fb_opp_0", 0))  # Ensure key exists
-        fb_0 = float(stat_dict[player].get("fb_0", 0))
-
-        # No opportunities = no data available
-        if fb_opp_0 == 0:
-            return format_no_data_stat("4B", "% 4 bet preflop/3rd street")
-
-        # Calculate 4bet percentage
-        stat = fb_0 / fb_opp_0
-
-        return (
-            stat,
-            "%3.1f" % (100.0 * stat),
-            "4B=%3.1f%%" % (100.0 * stat),
-            "4B=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (fb_0, fb_opp_0),
-            "% 4 bet preflop/3rd street",
-        )
-    except (KeyError, ValueError, TypeError):
-        return (stat, "NA", "4B=NA", "4B=NA", "(0/0)", "% 4 bet preflop/3rd street")
-
-
-def cfour_B(stat_dict, player):
-    """Calculate the cold 4 bet statistics for a player.
-
-    Args:
-        stat_dict (dict): A dictionary containing player statistics.
-        player (int): The player for whom the statistics are calculated.
-
-    Returns:
-        tuple: A tuple containing the calculated statistics in different formats:
-            - Float: The calculated statistic.
-            - String: The statistic formatted as a percentage with one decimal place.
-            - String: A formatted string representing the statistic.
-            - String: A formatted string representing the statistic with a suffix.
-            - String: A formatted string showing the count of cold 4 bets made and opponent's cold 4 bets.
-            - String: A description of the statistic.
-        Returns "-" if no opportunities available to distinguish from 0% (never cold 4bet).
-
-    If an exception occurs during the calculation, returns default values for the statistics.
-
-    """
-    stat = 0.0
-    try:
-        cfb_opp_0 = float(stat_dict[player].get("cfb_opp_0", 0))
-        cfb_0 = float(stat_dict[player].get("cfb_0", 0))
-
-        # No opportunities = no data available
-        if cfb_opp_0 == 0:
-            return format_no_data_stat("C4B", "% cold 4 bet preflop/3rd street")
-
-        # Calculate cold 4bet percentage
-        stat = cfb_0 / cfb_opp_0
-
-        return (
-            stat,
-            "%3.1f" % (100.0 * stat),
-            "C4B=%3.1f%%" % (100.0 * stat),
-            "C4B_pf=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (cfb_0, cfb_opp_0),
-            "% cold 4 bet preflop/3rd street",
-        )
-    except (KeyError, ValueError, TypeError):
-        return (
-            stat,
-            "NA",
-            "C4B=NA",
-            "C4B_pf=NA",
-            "(0/0)",
-            "% cold 4 bet preflop/3rd street",
-        )
-
-
-# Four Bet Range
 def fbr(stat_dict, player):
     """A function to calculate the four bet range statistics for a player.
 
