@@ -2809,38 +2809,6 @@ street1Discards INT,
                         """
 
         ################################
-        # Create Sessions
-        ################################
-
-        if db_server == "mysql":
-            self.query["createSessionsTable"] = """CREATE TABLE Sessions (
-                        id INT UNSIGNED AUTO_INCREMENT NOT NULL, PRIMARY KEY (id),
-                        weekId INT UNSIGNED, FOREIGN KEY (weekId) REFERENCES Weeks(id),
-                        monthId INT UNSIGNED, FOREIGN KEY (monthId) REFERENCES Months(id),
-                        sessionStart DATETIME NOT NULL,
-                        sessionEnd DATETIME NOT NULL)
-                        ENGINE=INNODB
-                        """
-
-        elif db_server == "postgresql":
-            self.query["createSessionsTable"] = """CREATE TABLE Sessions (
-                        id SERIAL, PRIMARY KEY (id),
-                        weekId INT, FOREIGN KEY (weekId) REFERENCES Weeks(id),
-                        monthId INT, FOREIGN KEY (monthId) REFERENCES Months(id),
-                        sessionStart timestamp without time zone NOT NULL,
-                        sessionEnd timestamp without time zone NOT NULL)
-                        """
-
-        elif db_server == "sqlite":
-            self.query["createSessionsTable"] = """CREATE TABLE Sessions (
-                        id INTEGER PRIMARY KEY,
-                        weekId INT,
-                        monthId INT,
-                        sessionStart timestamp NOT NULL,
-                        sessionEnd timestamp NOT NULL)
-                        """
-
-        ################################
         # Create SessionsCache
         ################################
 
