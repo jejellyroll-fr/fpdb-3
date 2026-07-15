@@ -464,6 +464,23 @@ def cb4(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
     return street_frequency(stat_dict, player, "cb_opp_4", "cb_4", "cb4", "cb_4", "% continuation bet 7th street")
 
 
+def cbet(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    """Return aggregate continuation-bet frequency across all four streets."""
+    stat = 0.0
+    try:
+        player_stats = stat_dict[player]
+        done = sum(float(player_stats.get(f"cb_{street}", 0)) for street in range(1, 5))
+        opportunities = sum(float(player_stats.get(f"cb_opp_{street}", 0)) for street in range(1, 5))
+        if opportunities == 0:
+            return format_no_data_stat("cbet", "% continuation bet")
+        stat = done / opportunities
+        percent = 100.0 * stat
+        display = f"cbet={percent:3.1f}%"
+        return stat, f"{percent:3.1f}", display, display, f"({int(done)}/{int(opportunities)})", "% continuation bet"
+    except (KeyError, TypeError, ValueError):
+        return stat, "NA", "cbet=NA", "cbet=NA", "(0/0)", "% continuation bet"
+
+
 def triple_barrel(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
     """Return the historical triple-barrel estimate from street c-bet rates."""
     try:

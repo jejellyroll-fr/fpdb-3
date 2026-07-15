@@ -104,6 +104,9 @@ from fpdb_3_legacy.stats_postflop import (
     cb_oop as cb_oop,
 )
 from fpdb_3_legacy.stats_postflop import (
+    cbet as cbet,
+)
+from fpdb_3_legacy.stats_postflop import (
     check_raise_frequency as check_raise_frequency,
 )
 from fpdb_3_legacy.stats_postflop import (
@@ -2593,55 +2596,6 @@ def agg_fact_pct(stat_dict, player):
             "(0/0)",
             "Aggression factor pct",
         )
-
-
-def cbet(stat_dict, player):
-    """Calculate the continuation bet (cbet) percentage for a player.
-
-    Args:
-        stat_dict (dict): A dictionary containing statistics for the player.
-        player (int): The player for whom the cbet percentage is calculated.
-
-    Returns:
-        tuple: A tuple containing the cbet percentage, formatted strings, and stats.
-
-    Raises:
-        Exception: If there is an issue with calculating the cbet percentage.
-
-    """
-    stat = 0.0
-    try:
-        # Safely retrieve cbet and opportunity values, defaulting to 0 if keys don't exist
-        cbets = (
-            stat_dict[player].get("cb_1", 0)
-            + stat_dict[player].get("cb_2", 0)
-            + stat_dict[player].get("cb_3", 0)
-            + stat_dict[player].get("cb_4", 0)
-        )
-        oppt = (
-            stat_dict[player].get("cb_opp_1", 0)
-            + stat_dict[player].get("cb_opp_2", 0)
-            + stat_dict[player].get("cb_opp_3", 0)
-            + stat_dict[player].get("cb_opp_4", 0)
-        )
-
-        # No opportunities = no data available
-        if oppt == 0:
-            return format_no_data_stat("cbet", "% continuation bet")
-
-        # Calculate cbet percentage
-        stat = float(cbets) / float(oppt)
-
-        return (
-            stat,
-            "%3.1f" % (100.0 * stat),
-            "cbet=%3.1f%%" % (100.0 * stat),
-            "cbet=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (cbets, oppt),
-            "% continuation bet",
-        )
-    except (KeyError, ValueError, TypeError):
-        return (stat, "NA", "cbet=NA", "cbet=NA", "(0/0)", "% continuation bet")
 
 
 def starthands(stat_dict, player):
