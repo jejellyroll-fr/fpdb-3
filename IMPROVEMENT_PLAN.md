@@ -241,6 +241,7 @@ Les bugs multi-backend récents (`Rank` réservé, `boolean` vs `smallint`, `set
 - ✅ **HandsActions de `SQL.py`** (2026-07-15) : DDL des actions de main déplacé dans `sql_schema_hand.py`, avec montants 64 bits, cartes défaussées et références Actions préservés.
 - ✅ **PlayerAutoNotes de `SQL.py`** (2026-07-15) : DDL des notes générées regroupé dans `sql_schema_player.py`, avec unicité règle/main/joueur et horodatages multi-backend conservés.
 - ✅ **HandsPots de `SQL.py`** (2026-07-15) : DDL des pots distribués déplacé dans `sql_schema_hand.py`, avec montants, boards hi/lo et relations Hands/Players conservés.
+- ✅ **Files de `SQL.py`** (2026-07-15) : démarrage du domaine import dans `sql_schema_import.py`, avec suivi des compteurs, horodatages et états de fichier protégé sur les trois backends.
 - **Qualité outillée restante** : Ruff est vert sur tout le dépôt et mypy couvre tout le package legacy ; convertir les 73 `TODO/FIXME` actuels en tâches traçables, évaluer l'intérêt d'un second checker (`pyright`) et clarifier/supprimer le dossier `fpdb/`.
 
 **Effort** continu · **Impact** moyen.
