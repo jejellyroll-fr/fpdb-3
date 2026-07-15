@@ -315,3 +315,41 @@ def resteal(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTupl
         return stat, f"{percent:3.1f}", display, display, f"({int(done)}/{int(opportunities)})", "% resteal"
     except (KeyError, TypeError, ValueError):
         return format_no_data_stat("resteal", "% resteal")
+
+
+def _preflop_response(
+    stat_dict: Mapping[int, Mapping[str, Any]],
+    player: int,
+    opportunity_key: str,
+    action_key: str,
+    abbreviation: str,
+    long_label: str,
+    description: str,
+) -> StatTuple:
+    """Format a historical preflop response action and opportunity pair."""
+    stat = 0.0
+    try:
+        player_stats = stat_dict[player]
+        opportunities = float(player_stats.get(opportunity_key, 0))
+        action = player_stats[action_key]
+        if opportunities != 0:
+            stat = float(action) / opportunities
+        percent = 100.0 * stat
+        return stat, f"{percent:3.1f}", f"{abbreviation}={percent:3.1f}%", f"{long_label}={percent:3.1f}%", f"({int(action)}/{int(opportunities)})", description
+    except (KeyError, TypeError, ValueError):
+        return stat, "NA", f"{abbreviation}=NA", f"{long_label}=NA", "(0/0)", description
+
+
+def car0(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    """Return the frequency of calling a preflop raise."""
+    return _preflop_response(stat_dict, player, "car_opp_0", "car_0", "CAR0", "CAR_pf", "% called a raise preflop")
+
+
+def f_3bet(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    """Return fold-to-3-bet frequency preflop or on third street."""
+    return _preflop_response(stat_dict, player, "f3b_opp_0", "f3b_0", "F3B", "F3B_pf", "% fold to 3 bet preflop/3rd street")
+
+
+def f_4bet(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    """Return fold-to-4-bet frequency preflop or on third street."""
+    return _preflop_response(stat_dict, player, "f4b_opp_0", "f4b_0", "F4B", "F4B_pf", "% fold to 4 bet preflop/3rd street")
