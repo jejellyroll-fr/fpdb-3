@@ -10,6 +10,7 @@ from fpdb_3_legacy.sql_indexes import index_queries
 from fpdb_3_legacy.sql_metadata import metadata_queries
 from fpdb_3_legacy.sql_queries_core import core_lookup_queries
 from fpdb_3_legacy.sql_queries_hand_detail import hand_detail_queries
+from fpdb_3_legacy.sql_queries_history import history_window_queries
 from fpdb_3_legacy.sql_schema_cards_cache import cards_cache_schema_queries
 from fpdb_3_legacy.sql_schema_core import core_schema_queries
 from fpdb_3_legacy.sql_schema_game import game_schema_queries
@@ -81,6 +82,7 @@ class Sql:
         self.query.update(index_queries(db_server))
         self.query.update(core_lookup_queries())
         self.query.update(hand_detail_queries())
+        self.query.update(history_window_queries(db_server))
         ###############################################################################3
         #    Support for the Free Poker DataBase = fpdb   http://fpdb.sourceforge.net/
         #
@@ -1125,61 +1127,6 @@ sum(hc.street0Limp)                 AS limp,
                     /* order rows by handstart descending so that we can stop reading rows when
                        there's a gap over X minutes between hands (ie. when we get back to start of
                        the session */
-                """
-
-        if db_server == "mysql":
-            self.query["get_hand_1day_ago"] = """
-                select coalesce(max(id),0)
-                from Hands
-                where startTime < date_sub(utc_timestamp(), interval '1' day)"""
-        elif db_server == "postgresql":
-            self.query["get_hand_1day_ago"] = """
-                select coalesce(max(id),0)
-                from Hands
-                where startTime < now() at time zone 'UTC' - interval '1 day'"""
-        elif db_server == "sqlite":
-            self.query["get_hand_1day_ago"] = """
-                select coalesce(max(id),0)
-                from Hands
-                where startTime < datetime(strftime('%J', 'now') - 1)"""
-
-        # not used yet ...
-        # gets a date, would need to use handsplayers (not hudcache) to get exact hand Id
-        if db_server == "mysql":
-            self.query["get_date_nhands_ago"] = """
-                select concat( 'd', date_format(max(h.startTime), '%Y%m%d') )
-                from (select hp.playerId
-                            ,coalesce(greatest(max(hp.handId)-%s,1),1) as maxminusx
-                      from HandsPlayers hp
-                      where hp.playerId = %s
-                      group by hp.playerId) hp2
-                inner join HandsPlayers hp3 on (    hp3.handId <= hp2.maxminusx
-                                                and hp3.playerId = hp2.playerId)
-                inner join Hands h          on (h.id = hp3.handId)
-                """
-        elif db_server == "postgresql":
-            self.query["get_date_nhands_ago"] = """
-                select 'd' || to_char(max(h3.startTime), 'YYMMDD')
-                from (select hp.playerId
-                            ,coalesce(greatest(max(hp.handId)-%s,1),1) as maxminusx
-                      from HandsPlayers hp
-                      where hp.playerId = %s
-                      group by hp.playerId) hp2
-                inner join HandsPlayers hp3 on (    hp3.handId <= hp2.maxminusx
-                                                and hp3.playerId = hp2.playerId)
-                inner join Hands h          on (h.id = hp3.handId)
-                """
-        elif db_server == "sqlite":  # untested guess at query:
-            self.query["get_date_nhands_ago"] = """
-                select 'd' || strftime(max(h3.startTime), 'YYMMDD')
-                from (select hp.playerId
-                            ,coalesce(greatest(max(hp.handId)-%s,1),1) as maxminusx
-                      from HandsPlayers hp
-                      where hp.playerId = %s
-                      group by hp.playerId) hp2
-                inner join HandsPlayers hp3 on (    hp3.handId <= hp2.maxminusx
-                                                and hp3.playerId = hp2.playerId)
-                inner join Hands h          on (h.id = hp3.handId)
                 """
 
         # Used in *Filters:
