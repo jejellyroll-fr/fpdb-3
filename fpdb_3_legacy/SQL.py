@@ -8,6 +8,7 @@ import sys
 
 from fpdb_3_legacy.sql_indexes import index_queries
 from fpdb_3_legacy.sql_metadata import metadata_queries
+from fpdb_3_legacy.sql_queries_core import core_lookup_queries
 from fpdb_3_legacy.sql_schema_cards_cache import cards_cache_schema_queries
 from fpdb_3_legacy.sql_schema_core import core_schema_queries
 from fpdb_3_legacy.sql_schema_game import game_schema_queries
@@ -77,60 +78,10 @@ class Sql:
         self.query.update(tournament_cache_schema_queries(db_server))
         self.query.update(time_schema_queries(db_server))
         self.query.update(index_queries(db_server))
+        self.query.update(core_lookup_queries())
         ###############################################################################3
         #    Support for the Free Poker DataBase = fpdb   http://fpdb.sourceforge.net/
         #
-
-        self.query["get_last_hand"] = "select max(id) from Hands"
-
-        self.query["get_last_date"] = "SELECT MAX(startTime) FROM Hands"
-
-        self.query["get_first_date"] = "SELECT MIN(startTime) FROM Hands"
-
-        self.query["get_player_id"] = """
-                select Players.id AS player_id
-                from Players, Sites
-                where Players.name = %s
-                and Sites.name = %s
-                and Players.siteId = Sites.id
-            """
-
-        self.query["get_player_names"] = """
-                select p.name
-                from Players p
-                where lower(p.name) like lower(%s)
-                and   (p.siteId = %s or %s = -1)
-            """
-
-        self.query["get_gameinfo_from_hid"] = """
-                SELECT
-                        s.name,
-                        g.category,
-                        g.base,
-                        g.type,
-                        g.limitType,
-                        g.hilo,
-                        round(g.smallBlind / 100.0,2),
-                        round(g.bigBlind / 100.0,2),
-                        round(g.smallBet / 100.0,2),
-                        round(g.bigBet / 100.0,2),
-                        g.currency,
-                        h.gametypeId,
-                        g.split
-                    FROM
-                        Hands as h,
-                        Sites as s,
-                        Gametypes as g,
-                        HandsPlayers as hp,
-                        Players as p
-                    WHERE
-                        h.id = %s
-                    and g.id = h.gametypeId
-                    and hp.handId = h.id
-                    and p.id = hp.playerId
-                    and s.id = p.siteId
-                    limit 1
-            """
 
         self.query["get_stats_from_hand"] = """
                 SELECT hc.playerId                      AS player_id,
