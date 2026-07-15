@@ -1,10 +1,13 @@
 """Non-numeric HUD display entries extracted from the legacy stat catalogue."""
 
+# ruff: noqa: UP031 - starthands preserves the legacy SQL interpolation text.
+
 from __future__ import annotations
 
 from collections.abc import Mapping
 from typing import Any
 
+from fpdb_3_legacy import Card, Configuration, Database
 from fpdb_3_legacy.stats_context import get_hand_instance
 from fpdb_3_legacy.stats_formatting import StatTuple
 
@@ -95,3 +98,137 @@ def playerprofile(stat_dict: Mapping[int, Mapping[str, Any]] | None, player: int
         return profile, icon, f"p={profile}", f"playerprofile={profile}", profile, "Player Profile"
     except Exception:  # intentional broad catch: the profile is optional display data
         return "unknown", "❓", "p=unknown", "playerprofile=unknown", "unknown", "Player Profile"
+
+
+def starthands(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> DisplayTuple:
+    """Retrieves the starting hands and their positions for a specific player in a hand.
+
+    Args:
+        stat_dict (dict): A dictionary containing the statistics.
+        player (int): The ID of the player.
+
+    Returns:
+        tuple: A tuple containing the following:
+            - A string representing the starting hands and their positions.
+            - A string representing the starting hands and their positions.
+            - A string representing the starting hands and their positions.
+            - A string representing the starting hands and their positions.
+            - A string representing the starting hands and their positions.
+            - A string representing the title of the statistic.
+
+    Raises:
+        None.
+
+    Notes:
+        - This function retrieves the starting hands and their positions for a specific player in a hand.
+        - The starting hands and their positions are displayed in a specific format.
+        - The function uses a global variable `get_hand_instance()` to get the hand instance.
+        - The function executes a SQL query to retrieve the starting hands and their positions from the database.
+        - The function formats the retrieved data and returns it as a tuple.
+
+    """
+    hand_instance = get_hand_instance()
+    if not hand_instance:
+        return ("", "", "", "", "", "Hands seen at this table")
+
+    # summary of known starting hands+position
+    # data volumes could get crazy here,so info is limited to hands
+    # in the current HH file only
+
+    # this info is NOT read from the cache, so does not obey aggregation
+    # parameters for other stats
+
+    # display shows 5 categories
+    # PFcall - limp or coldcall preflop
+    # PFaggr - raise preflop
+    # PFdefend - defended in BB
+    # PFcar
+
+    # hand is shown, followed by position indicator
+    # (b=SB/BB. l=Button/cutoff m=previous 3 seats to that, e=remainder)
+
+    # due to screen space required for this stat, it should only
+    # be used in the popup section i.e.
+    # <pu_stat pu_stat_name="starthands"> </pu_stat>
+    handid = int(hand_instance.handid_selected)
+    PFlimp = "Limped:"
+    PFaggr = "Raised:"
+    PFcar = "Called raise:"
+    PFdefendBB = "Defend BB:"
+    count_pfl = count_pfa = count_pfc = count_pfd = 5
+
+    c = Configuration.Config()
+    db_connection = Database.Database(c)
+    sc = db_connection.get_cursor()
+
+    query = (
+        "SELECT distinct startCards, street0Aggr, street0CalledRaiseDone, "
+        "case when HandsPlayers.position = 'B' then 'b' "
+        "when HandsPlayers.position = 'S' then 'b' "
+        "when HandsPlayers.position = '0' then 'l' "
+        "when HandsPlayers.position = '1' then 'l' "
+        "when HandsPlayers.position = '2' then 'm' "
+        "when HandsPlayers.position = '3' then 'm' "
+        "when HandsPlayers.position = '4' then 'm' "
+        "when HandsPlayers.position = '5' then 'e' "
+        "when HandsPlayers.position = '6' then 'e' "
+        "when HandsPlayers.position = '7' then 'e' "
+        "when HandsPlayers.position = '8' then 'e' "
+        "when HandsPlayers.position = '9' then 'e' "
+        "else 'X' end "
+        "FROM Hands, HandsPlayers, Gametypes "
+        "WHERE HandsPlayers.handId = Hands.id "
+        " AND Gametypes.id = Hands.gametypeid "
+        " AND Gametypes.type = "
+        "   (SELECT Gametypes.type FROM Gametypes, Hands   "
+        "  WHERE Hands.gametypeid = Gametypes.id and Hands.id = %d) "
+        " AND Gametypes.Limittype =  "
+        "   (SELECT Gametypes.limitType FROM Gametypes, Hands  "
+        " WHERE Hands.gametypeid = Gametypes.id and Hands.id = %d) "
+        "AND Gametypes.category = 'holdem' "
+        "AND fileId = (SELECT fileId FROM Hands "
+        " WHERE Hands.id = %d) "
+        "AND HandsPlayers.playerId = %d "
+        "AND street0VPI "
+        "AND startCards > 0 AND startCards <> 170 "
+        "ORDER BY startCards DESC "
+        ";"
+    ) % (int(handid), int(handid), int(handid), int(player))
+
+    # print query
+    sc.execute(query)
+    for qstartcards, qstreet0Aggr, qstreet0CalledRaiseDone, qposition in sc.fetchall():
+        humancards = Card.decodeStartHandValue("holdem", qstartcards)
+        # print humancards, qstreet0Aggr, qstreet0CalledRaiseDone, qposition
+        if qposition == "b" and qstreet0CalledRaiseDone:
+            PFdefendBB = PFdefendBB + "/" + humancards
+            count_pfd += 1
+            if count_pfd / 8.0 == int(count_pfd / 8.0):
+                PFdefendBB = PFdefendBB + "\n"
+        elif qstreet0Aggr is True:
+            PFaggr = PFaggr + "/" + humancards + "." + qposition
+            count_pfa += 1
+            if count_pfa / 8.0 == int(count_pfa / 8.0):
+                PFaggr = PFaggr + "\n"
+        elif qstreet0CalledRaiseDone:
+            PFcar = PFcar + "/" + humancards + "." + qposition
+            count_pfc += 1
+            if count_pfc / 8.0 == int(count_pfc / 8.0):
+                PFcar = PFcar + "\n"
+        else:
+            PFlimp = PFlimp + "/" + humancards + "." + qposition
+            count_pfl += 1
+            if count_pfl / 8.0 == int(count_pfl / 8.0):
+                PFlimp = PFlimp + "\n"
+    sc.close()
+
+    returnstring = PFlimp + "\n" + PFaggr + "\n" + PFcar + "\n" + PFdefendBB  # + "\n" + str(handid)
+
+    return (
+        (returnstring),
+        (returnstring),
+        (returnstring),
+        (returnstring),
+        (returnstring),
+        "Hands seen at this table\n",
+    )
