@@ -8,6 +8,7 @@ import sys
 
 from fpdb_3_legacy.sql_metadata import metadata_queries
 from fpdb_3_legacy.sql_schema_core import core_schema_queries
+from fpdb_3_legacy.sql_schema_lookup import lookup_schema_queries
 from fpdb_3_legacy.sql_schema_raw import raw_schema_queries
 
 #    Copyright 2008-2011, Ray E. Barker
@@ -46,50 +47,11 @@ class Sql:
         self.query = {}
         self.query.update(metadata_queries(db_server))
         self.query.update(core_schema_queries(db_server))
+        self.query.update(lookup_schema_queries(db_server))
         self.query.update(raw_schema_queries(db_server))
         ###############################################################################3
         #    Support for the Free Poker DataBase = fpdb   http://fpdb.sourceforge.net/
         #
-
-        ################################
-        # Create Actions
-        ################################
-
-        if db_server == "mysql":
-            self.query["createActionsTable"] = """CREATE TABLE Actions (
-                        id SMALLINT UNSIGNED AUTO_INCREMENT NOT NULL, PRIMARY KEY (id),
-                        name varchar(32) NOT NULL,
-                        code char(4) NOT NULL)
-                        ENGINE=INNODB"""
-        elif db_server == "postgresql":
-            self.query["createActionsTable"] = """CREATE TABLE Actions (
-                        id SERIAL, PRIMARY KEY (id),
-                        name varchar(32),
-                        code char(4))"""
-        elif db_server == "sqlite":
-            self.query["createActionsTable"] = """CREATE TABLE Actions (
-                        id INTEGER PRIMARY KEY,
-                        name TEXT NOT NULL,
-                        code TEXT NOT NULL)"""
-
-        ################################
-        # Create Rank
-        ################################
-
-        if db_server == "mysql":
-            self.query["createRankTable"] = """CREATE TABLE Rank (
-                        id SMALLINT UNSIGNED AUTO_INCREMENT NOT NULL, PRIMARY KEY (id),
-                        name varchar(8) NOT NULL)
-                        ENGINE=INNODB"""
-
-        elif db_server == "postgresql":
-            self.query["createRankTable"] = """CREATE TABLE Rank (
-                        id SERIAL, PRIMARY KEY (id),
-                        name varchar(8))"""
-        elif db_server == "sqlite":
-            self.query["createRankTable"] = """CREATE TABLE Rank (
-                        id INTEGER PRIMARY KEY,
-                        name TEXT NOT NULL)"""
 
         ################################
         # Create StartCards
