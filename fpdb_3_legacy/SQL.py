@@ -10,6 +10,7 @@ from fpdb_3_legacy.sql_metadata import metadata_queries
 from fpdb_3_legacy.sql_schema_core import core_schema_queries
 from fpdb_3_legacy.sql_schema_game import game_schema_queries
 from fpdb_3_legacy.sql_schema_hand import hand_schema_queries
+from fpdb_3_legacy.sql_schema_import import import_schema_queries
 from fpdb_3_legacy.sql_schema_lookup import lookup_schema_queries
 from fpdb_3_legacy.sql_schema_player import player_schema_queries
 from fpdb_3_legacy.sql_schema_raw import raw_schema_queries
@@ -53,6 +54,7 @@ class Sql:
         self.query.update(core_schema_queries(db_server))
         self.query.update(game_schema_queries(db_server))
         self.query.update(hand_schema_queries(db_server))
+        self.query.update(import_schema_queries(db_server))
         self.query.update(lookup_schema_queries(db_server))
         self.query.update(player_schema_queries(db_server))
         self.query.update(raw_schema_queries(db_server))
@@ -1224,64 +1226,6 @@ street4Raises INT,
                         commentTs timestamp,
                         FOREIGN KEY (tourneyId) REFERENCES Tourneys(id),
                         FOREIGN KEY (playerId) REFERENCES Players(id)
-                        )"""
-
-        ################################
-        # Create Files
-        ################################
-
-        if db_server == "mysql":
-            self.query["createFilesTable"] = """CREATE TABLE Files (
-                        id INT(10) UNSIGNED AUTO_INCREMENT NOT NULL, PRIMARY KEY (id),
-                        file text NOT NULL,
-                        site VARCHAR(32),
-                        type VARCHAR(7),
-                        startTime DATETIME NOT NULL,
-                        lastUpdate DATETIME NOT NULL,
-                        endTime DATETIME,
-                        hands INT,
-                        storedHands INT,
-                        dups INT,
-                        partial INT,
-                        skipped INT,
-                        errs INT,
-                        ttime100 INT,
-                        finished BOOLEAN)
-                        ENGINE=INNODB"""
-        elif db_server == "postgresql":
-            self.query["createFilesTable"] = """CREATE TABLE Files (
-                        id BIGSERIAL, PRIMARY KEY (id),
-                        file TEXT NOT NULL,
-                        site VARCHAR(32),
-                        type VARCHAR(7),
-                        startTime timestamp without time zone NOT NULL,
-                        lastUpdate timestamp without time zone NOT NULL,
-                        endTime timestamp without time zone,
-                        hands INT,
-                        storedHands INT,
-                        dups INT,
-                        partial INT,
-                        skipped INT,
-                        errs INT,
-                        ttime100 INT,
-                        finished BOOLEAN)"""
-        elif db_server == "sqlite":
-            self.query["createFilesTable"] = """CREATE TABLE Files (
-                        id INTEGER PRIMARY KEY,
-                        file TEXT NOT NULL,
-                        site VARCHAR(32),
-                        type VARCHAR(7),
-                        startTime timestamp NOT NULL,
-                        lastUpdate timestamp NOT NULL,
-                        endTime timestamp,
-                        hands INT,
-                        storedHands INT,
-                        dups INT,
-                        partial INT,
-                        skipped INT,
-                        errs INT,
-                        ttime100 INT,
-                        finished BOOLEAN
                         )"""
 
         ################################
