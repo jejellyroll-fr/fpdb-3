@@ -70,6 +70,15 @@ from fpdb_3_legacy.stats_display import (
 from fpdb_3_legacy.stats_display import (
     player_note as player_note,
 )
+from fpdb_3_legacy.stats_financial import (
+    BBper100 as BBper100,
+)
+from fpdb_3_legacy.stats_financial import (
+    bbper100 as bbper100,
+)
+from fpdb_3_legacy.stats_financial import (
+    profit100 as profit100,
+)
 from fpdb_3_legacy.stats_formatting import (
     do_tip as do_tip,
 )
@@ -991,138 +1000,6 @@ def playerprofile(stat_dict, player):
         return (profile, icon, f"p={profile}", f"playerprofile={profile}", f"{profile}", "Player Profile")
     except Exception:  # intentional broad catch
         return ("unknown", "❓", "p=unknown", "playerprofile=unknown", "unknown", "Player Profile")
-
-
-def profit100(stat_dict, player):
-    """Calculate the profit per 100 hands for a given player.
-
-    Args:
-        stat_dict (dict): A dictionary containing player statistics.
-        player (int): The player for whom the profit per 100 hands is calculated.
-
-    Returns:
-        tuple: A tuple containing the profit per 100 hands value, formatted profit percentages, and related information.
-
-    Notes:
-        - The profit per 100 hands is calculated by dividing the net winnings by the number of hands played.
-        - If an exception occurs during the calculation, the function returns a tuple with default values.
-
-    """
-    stat = 0.0
-    try:
-        # Check if player exists in stat_dict first
-        if player not in stat_dict:
-            return (stat, "NA", "p=NA", "p/100=NA", "(0/0)", "Profit per 100 hands")
-
-        n = float(stat_dict[player].get("n", 0))  # Ensure key exists
-        if n != 0:  # Check if 'n' (number of hands) is non-zero
-            stat = float(stat_dict[player]["net"]) / n
-        else:
-            stat = 0  # Default to 0 if 'n' is zero
-
-        return (
-            stat / 100.0,
-            f"{stat:.2f}",
-            f"p={stat:.2f}",
-            f"p/100={stat:.2f}",
-            "%d/%d" % (stat_dict[player]["net"], n),
-            "Profit per 100 hands",
-        )
-
-    except (KeyError, ValueError, TypeError):
-        if stat_dict:
-            log.exception(
-                f"exception calculating profit100: player {player} not found in stat_dict or missing data",
-            )
-        return (stat, "NA", "p=NA", "p/100=NA", "(0/0)", "Profit per 100 hands")
-
-
-def bbper100(stat_dict, player):
-    """Calculate the number of big blinds won per 100 hands for a given player.
-
-    Args:
-        stat_dict (dict): A dictionary containing player statistics.
-        player (int): The player for whom the number of big blinds won per 100 hands is calculated.
-
-    Returns:
-        tuple: A tuple containing the number of big blinds won per 100 hands value, formatted values, and related information.
-
-    """
-    stat = 0.0
-    try:
-        bigblind = float(stat_dict[player].get("bigblind", 0))  # Ensure key exists
-        if bigblind != 0:  # Check if 'bigblind' is non-zero
-            stat = 100.0 * float(stat_dict[player]["net"]) / bigblind
-        else:
-            stat = 0  # Default to 0 if 'bigblind' is zero
-
-        return (
-            stat / 100.0,
-            f"{stat:5.3f}",
-            f"bb100={stat:5.3f}",
-            f"bb100={stat:5.3f}",
-            "(%d,%d)" % (100 * stat_dict[player]["net"], bigblind),
-            "Big blinds won per 100 hands",
-        )
-
-    except (KeyError, ValueError, TypeError):
-        if stat_dict and player in stat_dict:
-            log.info(
-                f"exception calculating bbper100: {stat_dict[player].get('net', 'N/A')} / {stat_dict[player].get('bigblind', 'N/A')}",
-            )
-        return (
-            stat,
-            "NA",
-            "bb100=NA",
-            "bb100=NA",
-            "(--)",
-            "Big blinds won per 100 hands",
-        )
-
-
-def BBper100(stat_dict, player):
-    """Calculate the number of big bets won per 100 hands for a given player.
-
-    Args:
-        stat_dict (dict): A dictionary containing player statistics.
-        player (int): The player for whom the number of big bets won per 100 hands is calculated.
-
-    Returns:
-        tuple: A tuple containing the number of big bets won per 100 hands value, formatted values, and related information.
-
-    Notes:
-        - The number of big bets won per 100 hands is calculated by dividing the net winnings by the big blind value, multiplied by 50.
-        - If an exception occurs during the calculation, the function returns a tuple with default values.
-
-    """
-    stat = 0.0
-    try:
-        bigblind = float(stat_dict[player].get("bigblind", 0))  # Ensure key exists
-        if bigblind != 0:  # Check if 'bigblind' is non-zero
-            stat = 50 * float(stat_dict[player]["net"]) / bigblind
-        else:
-            stat = 0  # Default to 0 if 'bigblind' is zero
-
-        return (
-            stat / 100.0,
-            f"{stat:5.3f}",
-            f"BB100={stat:5.3f}",
-            f"BB100={stat:5.3f}",
-            "(%d,%d)" % (100 * stat_dict[player]["net"], 2 * bigblind),
-            "Big bets won per 100 hands",
-        )
-
-    except (KeyError, ValueError, TypeError):
-        if stat_dict:
-            log.info(f"exception calculating BBper100: {stat_dict[player]}")
-        return (
-            stat,
-            "NA",
-            "BB100=NA",
-            "BB100=NA",
-            "(--)",
-            "Big bets won per 100 hands",
-        )
 
 
 def n(stat_dict, player):
