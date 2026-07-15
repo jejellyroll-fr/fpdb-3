@@ -8,6 +8,7 @@ import sys
 
 from fpdb_3_legacy.sql_indexes import index_queries
 from fpdb_3_legacy.sql_metadata import metadata_queries
+from fpdb_3_legacy.sql_queries_cache_maintenance import cache_maintenance_queries
 from fpdb_3_legacy.sql_queries_cash_profit import cash_profit_queries
 from fpdb_3_legacy.sql_queries_core import core_lookup_queries
 from fpdb_3_legacy.sql_queries_filters import filter_queries
@@ -92,6 +93,7 @@ class Sql:
         self.query.update(index_queries(db_server))
         self.query.update(core_lookup_queries())
         self.query.update(cash_profit_queries())
+        self.query.update(cache_maintenance_queries())
         self.query.update(filter_queries(db_server))
         self.query.update(hand_detail_queries())
         self.query.update(history_window_queries(db_server))
@@ -1148,55 +1150,6 @@ sum(hc.street0Limp)                 AS limp,
                        there's a gap over X minutes between hands (ie. when we get back to start of
                        the session */
                 """
-
-        self.query["clearHudCache"] = """DELETE FROM HudCache"""
-        self.query["clearCardsCache"] = """DELETE FROM CardsCache"""
-        self.query["clearPositionsCache"] = """DELETE FROM PositionsCache"""
-
-        self.query["clearHudCacheTourneyType"] = """DELETE FROM HudCache WHERE tourneyTypeId = %s"""
-        self.query["clearCardsCacheTourneyType"] = """DELETE FROM CardsCache WHERE tourneyTypeId = %s"""
-        self.query["clearPositionsCacheTourneyType"] = """DELETE FROM PositionsCache WHERE tourneyTypeId = %s"""
-
-        self.query["fetchNewHudCacheTourneyTypeIds"] = """SELECT TT.id
-                                                    FROM TourneyTypes TT
-                                                    LEFT OUTER JOIN HudCache HC ON (TT.id = HC.tourneyTypeId)
-                                                    WHERE HC.tourneyTypeId is NULL
-                """
-
-        self.query["fetchNewCardsCacheTourneyTypeIds"] = """SELECT TT.id
-                                                    FROM TourneyTypes TT
-                                                    LEFT OUTER JOIN CardsCache CC ON (TT.id = CC.tourneyTypeId)
-                                                    WHERE CC.tourneyTypeId is NULL
-                """
-
-        self.query["fetchNewPositionsCacheTourneyTypeIds"] = """SELECT TT.id
-                                                    FROM TourneyTypes TT
-                                                    LEFT OUTER JOIN PositionsCache PC ON (TT.id = PC.tourneyTypeId)
-                                                    WHERE PC.tourneyTypeId is NULL
-                """
-
-        self.query["clearCardsCacheWeeksMonths"] = """DELETE FROM CardsCache WHERE weekId = %s AND monthId = %s"""
-        self.query["clearPositionsCacheWeeksMonths"] = (
-            """DELETE FROM PositionsCache WHERE weekId = %s AND monthId = %s"""
-        )
-
-        self.query["selectSessionWithWeekId"] = """SELECT id FROM Sessions WHERE weekId = %s"""
-        self.query["selectSessionWithMonthId"] = """SELECT id FROM Sessions WHERE monthId = %s"""
-
-        self.query["deleteWeekId"] = """DELETE FROM Weeks WHERE id = %s"""
-        self.query["deleteMonthId"] = """DELETE FROM Months WHERE id = %s"""
-
-        self.query["fetchNewCardsCacheWeeksMonths"] = """SELECT SCG.weekId, SCG.monthId
-                                            FROM (SELECT DISTINCT weekId, monthId FROM Sessions) SCG
-                                            LEFT OUTER JOIN CardsCache CC ON (SCG.weekId = CC.weekId AND SCG.monthId = CC.monthId)
-                                            WHERE CC.weekId is NULL OR CC.monthId is NULL
-        """
-
-        self.query["fetchNewPositionsCacheWeeksMonths"] = """SELECT SCG.weekId, SCG.monthId
-                                            FROM (SELECT DISTINCT weekId, monthId FROM Sessions) SCG
-                                            LEFT OUTER JOIN PositionsCache PC ON (SCG.weekId = PC.weekId AND SCG.monthId = PC.monthId)
-                                            WHERE PC.weekId is NULL OR PC.monthId is NULL
-        """
 
         if db_server == "mysql":
             self.query["rebuildCache"] = """insert into <insert>
