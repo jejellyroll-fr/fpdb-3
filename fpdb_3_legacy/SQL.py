@@ -1180,57 +1180,6 @@ street4Raises INT,
                         """
 
         ################################
-        # Create TourneysPlayers
-        ################################
-
-        if db_server == "mysql":
-            self.query["createTourneysPlayersTable"] = """CREATE TABLE TourneysPlayers (
-                        id BIGINT UNSIGNED AUTO_INCREMENT NOT NULL, PRIMARY KEY (id),
-                        tourneyId INT UNSIGNED NOT NULL, FOREIGN KEY (tourneyId) REFERENCES Tourneys(id),
-                        playerId INT UNSIGNED NOT NULL, FOREIGN KEY (playerId) REFERENCES Players(id),
-                        entryId INT,
-                        rank INT,
-                        winnings BIGINT,
-                        winningsCurrency VARCHAR(4),
-                        rebuyCount INT,
-                        addOnCount INT,
-                        koCount NUMERIC,
-                        comment TEXT,
-                        commentTs DATETIME)
-                        ENGINE=INNODB"""
-        elif db_server == "postgresql":
-            self.query["createTourneysPlayersTable"] = """CREATE TABLE TourneysPlayers (
-                        id BIGSERIAL, PRIMARY KEY (id),
-                        tourneyId INT, FOREIGN KEY (tourneyId) REFERENCES Tourneys(id),
-                        playerId INT, FOREIGN KEY (playerId) REFERENCES Players(id),
-                        entryId INT,
-                        rank INT,
-                        winnings BIGINT,
-                        winningsCurrency VARCHAR(4),
-                        rebuyCount INT,
-                        addOnCount INT,
-                        koCount NUMERIC,
-                        comment TEXT,
-                        commentTs timestamp without time zone)"""
-        elif db_server == "sqlite":
-            self.query["createTourneysPlayersTable"] = """CREATE TABLE TourneysPlayers (
-                        id INTEGER PRIMARY KEY,
-                        tourneyId INT,
-                        playerId INT,
-                        entryId INT,
-                        rank INT,
-                        winnings INT,
-                        winningsCurrency VARCHAR(4),
-                        rebuyCount INT,
-                        addOnCount INT,
-                        koCount decimal,
-                        comment TEXT,
-                        commentTs timestamp,
-                        FOREIGN KEY (tourneyId) REFERENCES Tourneys(id),
-                        FOREIGN KEY (playerId) REFERENCES Players(id)
-                        )"""
-
-        ################################
         # Create HudCache
         ################################
 

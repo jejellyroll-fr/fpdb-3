@@ -47,3 +47,18 @@ def test_tourney_types_ddl_keeps_backend_specific_money_and_site_link() -> None:
     assert "REFERENCES Sites(id)" in mysql
     assert "REFERENCES Sites(id)" in postgresql
     assert "FOREIGN KEY" not in sqlite
+
+
+def test_tourneys_players_ddl_keeps_winnings_and_relations() -> None:
+    mysql = tournament_schema_queries("mysql")["createTourneysPlayersTable"]
+    postgresql = tournament_schema_queries("postgresql")["createTourneysPlayersTable"]
+    sqlite = tournament_schema_queries("sqlite")["createTourneysPlayersTable"]
+
+    assert "winnings BIGINT" in mysql
+    assert "winnings BIGINT" in postgresql
+    assert "winnings INT" in sqlite
+    assert "koCount NUMERIC" in mysql
+    assert "koCount decimal" in sqlite
+    for ddl in (mysql, postgresql, sqlite):
+        assert "REFERENCES Tourneys(id)" in ddl
+        assert "REFERENCES Players(id)" in ddl

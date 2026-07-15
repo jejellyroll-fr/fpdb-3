@@ -74,6 +74,20 @@ def tournament_schema_queries(db_server: str) -> dict[str, str]:
                         comment TEXT,
                         commentTs DATETIME)
                         ENGINE=INNODB""",
+            "createTourneysPlayersTable": """CREATE TABLE TourneysPlayers (
+                        id BIGINT UNSIGNED AUTO_INCREMENT NOT NULL, PRIMARY KEY (id),
+                        tourneyId INT UNSIGNED NOT NULL, FOREIGN KEY (tourneyId) REFERENCES Tourneys(id),
+                        playerId INT UNSIGNED NOT NULL, FOREIGN KEY (playerId) REFERENCES Players(id),
+                        entryId INT,
+                        rank INT,
+                        winnings BIGINT,
+                        winningsCurrency VARCHAR(4),
+                        rebuyCount INT,
+                        addOnCount INT,
+                        koCount NUMERIC,
+                        comment TEXT,
+                        commentTs DATETIME)
+                        ENGINE=INNODB""",
         }
     if db_server == "postgresql":
         return {
@@ -140,6 +154,19 @@ def tournament_schema_queries(db_server: str) -> dict[str, str]:
                         totalAddOnCount INT,
                         added BIGINT,
                         addedCurrency VARCHAR(4),
+                        comment TEXT,
+                        commentTs timestamp without time zone)""",
+            "createTourneysPlayersTable": """CREATE TABLE TourneysPlayers (
+                        id BIGSERIAL, PRIMARY KEY (id),
+                        tourneyId INT, FOREIGN KEY (tourneyId) REFERENCES Tourneys(id),
+                        playerId INT, FOREIGN KEY (playerId) REFERENCES Players(id),
+                        entryId INT,
+                        rank INT,
+                        winnings BIGINT,
+                        winningsCurrency VARCHAR(4),
+                        rebuyCount INT,
+                        addOnCount INT,
+                        koCount NUMERIC,
                         comment TEXT,
                         commentTs timestamp without time zone)""",
         }
@@ -210,5 +237,21 @@ def tournament_schema_queries(db_server: str) -> dict[str, str]:
                         addedCurrency VARCHAR(4),
                         comment TEXT,
                         commentTs timestamp)""",
+            "createTourneysPlayersTable": """CREATE TABLE TourneysPlayers (
+                        id INTEGER PRIMARY KEY,
+                        tourneyId INT,
+                        playerId INT,
+                        entryId INT,
+                        rank INT,
+                        winnings INT,
+                        winningsCurrency VARCHAR(4),
+                        rebuyCount INT,
+                        addOnCount INT,
+                        koCount decimal,
+                        comment TEXT,
+                        commentTs timestamp,
+                        FOREIGN KEY (tourneyId) REFERENCES Tourneys(id),
+                        FOREIGN KEY (playerId) REFERENCES Players(id)
+                        )""",
         }
     return {}
