@@ -233,6 +233,7 @@ Les bugs multi-backend récents (`Rank` réservé, `boolean` vs `smallint`, `set
 - ✅ **Players de `SQL.py`** (2026-07-15) : DDL des identités joueur extrait dans `sql_schema_player.py`, avec séquences PostgreSQL, références Sites et cascade SQLite explicitement protégées.
 - ✅ **Autorates de `SQL.py`** (2026-07-15) : DDL des évaluations automatiques regroupé avec le domaine joueur, avec relations Players/Gametypes et absence historique de contraintes SQLite testées.
 - ✅ **Boards de `SQL.py`** (2026-07-15) : démarrage du domaine main dans `sql_schema_hand.py`, avec encodage des cartes, identités 64 bits et relation Hands protégés sur chaque backend.
+- ✅ **Tourneys de `SQL.py`** (2026-07-15) : DDL des tournois regroupé dans `sql_schema_tournament.py`, avec références TourneyTypes/Sessions et représentations temporelles multi-backend conservées.
 - **Qualité outillée restante** : Ruff est vert sur tout le dépôt et mypy couvre tout le package legacy ; convertir les 73 `TODO/FIXME` actuels en tâches traçables, évaluer l'intérêt d'un second checker (`pyright`) et clarifier/supprimer le dossier `fpdb/`.
 
 **Effort** continu · **Impact** moyen.
