@@ -244,6 +244,7 @@ Les bugs multi-backend récents (`Rank` réservé, `boolean` vs `smallint`, `set
 - ✅ **Files de `SQL.py`** (2026-07-15) : démarrage du domaine import dans `sql_schema_import.py`, avec suivi des compteurs, horodatages et états de fichier protégé sur les trois backends.
 - ✅ **Weeks/Months de `SQL.py`** (2026-07-15) : DDL des périodes calendaires extrait dans `sql_schema_time.py` et généré par un helper commun conservant identités et timestamps multi-backend.
 - ✅ **Sessions de `SQL.py`** (2026-07-15) : DDL des sessions déplacé dans `sql_schema_time.py`, avec bornes temporelles et relations Weeks/Months conservées sur les backends concernés.
+- ✅ **TourneysPlayers de `SQL.py`** (2026-07-15) : DDL des résultats joueur/tournoi déplacé dans `sql_schema_tournament.py`, avec gains, KO, rebuys/add-ons et relations conservés.
 - **Qualité outillée restante** : Ruff est vert sur tout le dépôt et mypy couvre tout le package legacy ; convertir les 73 `TODO/FIXME` actuels en tâches traçables, évaluer l'intérêt d'un second checker (`pyright`) et clarifier/supprimer le dossier `fpdb/`.
 
 **Effort** continu · **Impact** moyen.
