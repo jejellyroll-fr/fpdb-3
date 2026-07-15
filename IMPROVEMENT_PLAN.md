@@ -255,6 +255,7 @@ Les bugs multi-backend récents (`Rank` réservé, `boolean` vs `smallint`, `set
 - ✅ **Index structurels de `SQL.py`** (2026-07-15) : les 30 index et migrations de colonnes indexées sont regroupés dans `sql_indexes.py`, avec syntaxes MySQL/PostgreSQL/SQLite testées exactement.
 - ✅ **Lookups cœur de `SQL.py`** (2026-07-15) : bornes temporelles, résolution joueur et informations de partie déplacées dans `sql_queries_core.py`, avec paramètres et jointures protégés.
 - ✅ **Détail d'une main de `SQL.py`** (2026-07-15) : joueurs, gagnants, table, sièges et cartes déplacés dans `sql_queries_hand_detail.py`, avec reconstruction draw et placeholders SQLite protégés.
+- ✅ **Fenêtres d'historique de `SQL.py`** (2026-07-15) : bornes une journée/N mains déplacées dans `sql_queries_history.py`, avec fonctions de dates et placeholders propres aux trois backends conservés.
 - **Qualité outillée restante** : Ruff est vert sur tout le dépôt et mypy couvre tout le package legacy ; convertir les 73 `TODO/FIXME` actuels en tâches traçables, évaluer l'intérêt d'un second checker (`pyright`) et clarifier/supprimer le dossier `fpdb/`.
 
 **Effort** continu · **Impact** moyen.
