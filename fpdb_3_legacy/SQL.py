@@ -54,56 +54,6 @@ class Sql:
         #
 
         ################################
-        # Create StartCards
-        ################################
-
-        if db_server == "mysql":
-            self.query["createStartCardsTable"] = """CREATE TABLE StartCards (
-                        id SMALLINT UNSIGNED AUTO_INCREMENT NOT NULL, PRIMARY KEY (id),
-                        category varchar(9) NOT NULL,
-                        name varchar(32) NOT NULL,
-                        rank SMALLINT NOT NULL,
-                        combinations SMALLINT NOT NULL)
-                        ENGINE=INNODB"""
-
-        elif db_server == "postgresql":
-            self.query["createStartCardsTable"] = """CREATE TABLE StartCards (
-                        id SERIAL, PRIMARY KEY (id),
-                        category varchar(9) NOT NULL,
-                        name varchar(32),
-                        rank SMALLINT NOT NULL,
-                        combinations SMALLINT NOT NULL)"""
-
-        elif db_server == "sqlite":
-            self.query["createStartCardsTable"] = """CREATE TABLE StartCards (
-                        id INTEGER PRIMARY KEY,
-                        category TEXT NOT NULL,
-                        name TEXT NOT NULL,
-                        rank SMALLINT NOT NULL,
-                        combinations SMALLINT NOT NULL)"""
-
-        ################################
-        # Create Sites
-        ################################
-
-        if db_server == "mysql":
-            self.query["createSitesTable"] = """CREATE TABLE Sites (
-                        id SMALLINT UNSIGNED AUTO_INCREMENT NOT NULL, PRIMARY KEY (id),
-                        name varchar(32) NOT NULL,
-                        code char(2) NOT NULL)
-                        ENGINE=INNODB"""
-        elif db_server == "postgresql":
-            self.query["createSitesTable"] = """CREATE TABLE Sites (
-                        id SERIAL, PRIMARY KEY (id),
-                        name varchar(32),
-                        code char(2))"""
-        elif db_server == "sqlite":
-            self.query["createSitesTable"] = """CREATE TABLE Sites (
-                        id INTEGER PRIMARY KEY,
-                        name TEXT NOT NULL,
-                        code TEXT NOT NULL)"""
-
-        ################################
         # Create Backings
         ################################
 
