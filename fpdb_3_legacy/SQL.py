@@ -14,6 +14,7 @@ from fpdb_3_legacy.sql_queries_hand_detail import hand_detail_queries
 from fpdb_3_legacy.sql_queries_history import history_window_queries
 from fpdb_3_legacy.sql_queries_opponents import opponent_report_queries
 from fpdb_3_legacy.sql_queries_player_detailed import player_detailed_report_queries
+from fpdb_3_legacy.sql_queries_tournament_player import tournament_player_detailed_queries
 from fpdb_3_legacy.sql_schema_cards_cache import cards_cache_schema_queries
 from fpdb_3_legacy.sql_schema_core import core_schema_queries
 from fpdb_3_legacy.sql_schema_game import game_schema_queries
@@ -89,6 +90,7 @@ class Sql:
         self.query.update(history_window_queries(db_server))
         self.query.update(opponent_report_queries(db_server))
         self.query.update(player_detailed_report_queries(db_server))
+        self.query.update(tournament_player_detailed_queries(db_server))
         ###############################################################################3
         #    Support for the Free Poker DataBase = fpdb   http://fpdb.sourceforge.net/
         #
@@ -1134,146 +1136,6 @@ sum(hc.street0Limp)                 AS limp,
                        there's a gap over X minutes between hands (ie. when we get back to start of
                        the session */
                 """
-
-        if db_server == "mysql":
-            self.query["tourneyPlayerDetailedStats"] = """
-                      select s.name                                                                 AS siteName
-                            ,tt.currency                                                            AS currency
-                            ,(CASE
-                                WHEN tt.currency = 'play' THEN tt.buyIn
-                                ELSE tt.buyIn/100.0
-                              END)                                                                  AS buyIn
-                            ,tt.fee/100.0                                                           AS fee
-                            ,tt.category                                                            AS category
-                            ,tt.limitType                                                           AS limitType
-                            ,tt.speed                                                                AS speed
-                            ,tt.maxSeats                                                            AS maxSeats
-							,tt.knockout                                                            AS knockout
-							,tt.reEntry                                                             AS reEntry
-                            ,p.name                                                                 AS playerName
-                            ,t.tourneyTypeId                                                        AS tourneyTypeId
-                            ,MAX(tp.playerId)                                                       AS playerId
-                            ,COUNT(1)                                                               AS tourneyCount
-                            ,SUM(CASE WHEN tp.rank > 0 THEN 0 ELSE 1 END)                           AS unknownRank
-                            ,(CAST(SUM(CASE WHEN winnings > 0 THEN 1 ELSE 0 END) AS SIGNED)/CAST(COUNT(1) AS SIGNED))*100                 AS itm
-                            ,SUM(CASE WHEN rank = 1 THEN 1 ELSE 0 END)                              AS _1st
-                            ,SUM(CASE WHEN rank = 2 THEN 1 ELSE 0 END)                              AS _2nd
-                            ,SUM(CASE WHEN rank = 3 THEN 1 ELSE 0 END)                              AS _3rd
-                            ,SUM(tp.winnings+COALESCE(tp.koCount*tt.koBounty,0))/100.0              AS won
-                            ,SUM(CASE
-                                   WHEN tt.currency = 'play' THEN tt.buyIn
-                                   ELSE (tt.buyIn+tt.fee)/100.0
-                                 END)                                                               AS spent
-                            ,SUM(tp.winnings+COALESCE(tp.koCount*tt.koBounty,0)-tt.buyIn-tt.fee)/100.0	 								AS net
-                            ,(CAST(SUM(tp.winnings+COALESCE(tp.koCount*tt.koBounty,0) - tt.buyin - tt.fee) AS SIGNED)/
-                                CAST(SUM(tt.buyin+tt.fee) AS SIGNED))* 100.0                                                                    AS roi
-                            ,SUM(tp.winnings+COALESCE(tp.koCount*tt.koBounty,0)-(tt.buyin+tt.fee))/100.0/(COUNT(1)-SUM(CASE WHEN tp.rank > 0 THEN 0 ELSE 1 END)) AS profitPerTourney
-                      from TourneysPlayers tp
-                           inner join Tourneys t        on  (t.id = tp.tourneyId)
-                           inner join TourneyTypes tt   on  (tt.Id = t.tourneyTypeId)
-                           inner join Sites s           on  (s.Id = tt.siteId)
-                           inner join Players p         on  (p.Id = tp.playerId)
-                      where tp.playerId in <nametest> <sitetest>
-                      AND   ((t.startTime > '<startdate_test>' AND t.startTime < '<enddate_test>')
-                                        OR t.startTime is NULL)
-                      group by tourneyTypeId, playerName
-                      order by tourneyTypeId
-                              ,playerName
-                              ,siteName"""
-        elif db_server == "postgresql":
-            # sc: itm and profitPerTourney changed to "ELSE 0" to avoid divide by zero error as temp fix
-            # proper fix should use coalesce() or case ... when ... to work in all circumstances
-            self.query["tourneyPlayerDetailedStats"] = """
-                      select s.name                                                                 AS "siteName"
-                            ,tt.currency                                                            AS "currency"
-                            ,(CASE
-                                WHEN tt.currency = 'play' THEN tt.buyIn
-                                ELSE tt.buyIn/100.0
-                              END)                                                                  AS "buyIn"
-                            ,tt.fee/100.0                                                           AS "fee"
-                            ,tt.category                                                            AS "category"
-                            ,tt.limitType                                                           AS "limitType"
-                            ,tt.speed                                                                AS "speed"
-                            ,tt.maxSeats                                                            AS "maxSeats"
-							,tt.knockout                                                            AS "knockout"
-							,tt.reEntry                                                             AS "reEntry"
-                            ,p.name                                                                 AS "playerName"
-                            ,t.tourneyTypeId                                                        AS "tourneyTypeId"
-                            ,MAX(tp.playerId)                                                       AS "playerId"
-                            ,COUNT(1)                                                               AS "tourneyCount"
-                            ,SUM(CASE WHEN tp.rank > 0 THEN 0 ELSE 1 END)                           AS "unknownRank"
-                            ,(CAST(SUM(CASE WHEN winnings > 0 THEN 1 ELSE 0 END) AS BIGINT)/CAST(COUNT(1) AS BIGINT))*100                 AS itm
-                            ,SUM(CASE WHEN rank = 1 THEN 1 ELSE 0 END)                              AS "_1st"
-                            ,SUM(CASE WHEN rank = 2 THEN 1 ELSE 0 END)                              AS "_2nd"
-                            ,SUM(CASE WHEN rank = 3 THEN 1 ELSE 0 END)                              AS "_3rd"
-                            ,SUM(tp.winnings+COALESCE(tp.koCount*tt.koBounty,0))/100.0              AS "won"
-                            ,SUM(CASE
-                                   WHEN tt.currency = 'play' THEN tt.buyIn
-                                   ELSE (tt.buyIn+tt.fee)/100.0
-                                 END)                                                               AS "spent"
-                            ,SUM(tp.winnings+COALESCE(tp.koCount*tt.koBounty,0)-tt.buyIn-tt.fee)/100.0	 								AS "net"
-                            ,(CAST(SUM(tp.winnings+COALESCE(tp.koCount*tt.koBounty,0) - tt.buyin - tt.fee) AS BIGINT)/
-                                CAST(SUM(tt.buyin+tt.fee) AS BIGINT))* 100.0                                                                    AS "roi"
-                            ,SUM(tp.winnings+COALESCE(tp.koCount*tt.koBounty,0)-(tt.buyin+tt.fee))/100.0
-                             /(COUNT(1)-SUM(CASE WHEN tp.rank > 0 THEN 0 ELSE 0 END))               AS "profitPerTourney"
-                      from TourneysPlayers tp
-                           inner join Tourneys t        on  (t.id = tp.tourneyId)
-                           inner join TourneyTypes tt   on  (tt.Id = t.tourneyTypeId)
-                           inner join Sites s           on  (s.Id = tt.siteId)
-                           inner join Players p         on  (p.Id = tp.playerId)
-                      where tp.playerId in <nametest> <sitetest>
-                      AND   ((t.startTime > '<startdate_test>' AND t.startTime < '<enddate_test>')
-                                        OR t.startTime is NULL)
-                      group by t.tourneyTypeId, s.name, p.name, tt.currency, tt.buyin, tt.fee
-                             , tt.category, tt.limitType, tt.speed, tt.maxSeats, tt.knockout, tt.reEntry
-                      order by t.tourneyTypeId
-                              ,p.name
-                              ,s.name"""
-        elif db_server == "sqlite":
-            self.query["tourneyPlayerDetailedStats"] = """
-                      select s.name                                                                 AS siteName
-                            ,tt.currency                                                            AS currency
-                            ,(CASE
-                                WHEN tt.currency = 'play' THEN tt.buyIn
-                                ELSE tt.buyIn/100.0
-                              END)                                                                  AS buyIn
-                            ,tt.fee/100.0                                                           AS fee
-                            ,tt.category                                                            AS category
-                            ,tt.limitType                                                           AS limitType
-                            ,tt.speed                                                                AS speed
-                            ,tt.maxSeats                                                            AS maxSeats
-							,tt.knockout                                                            AS knockout
-							,tt.reEntry                                                             AS reEntry
-                            ,p.name                                                                 AS playerName
-                            ,t.tourneyTypeId                                                        AS tourneyTypeId
-                            ,MAX(tp.playerId)                                                       AS playerId
-                            ,COUNT(1)                                                               AS tourneyCount
-                            ,SUM(CASE WHEN tp.rank > 0 THEN 0 ELSE 1 END)                           AS unknownRank
-                            ,(CAST(SUM(CASE WHEN winnings > 0 THEN 1 ELSE 0 END) AS REAL)/CAST(COUNT(1) AS REAL))*100                 AS itm
-                            ,SUM(CASE WHEN rank = 1 THEN 1 ELSE 0 END)                              AS _1st
-                            ,SUM(CASE WHEN rank = 2 THEN 1 ELSE 0 END)                              AS _2nd
-                            ,SUM(CASE WHEN rank = 3 THEN 1 ELSE 0 END)                              AS _3rd
-                            ,SUM(tp.winnings+COALESCE(tp.koCount*tt.koBounty,0))/100.0              AS won
-                            ,SUM(CASE
-                                   WHEN tt.currency = 'play' THEN tt.buyIn
-                                   ELSE (tt.buyIn+tt.fee)/100.0
-                                 END)                                                               AS spent
-                            ,SUM(tp.winnings+COALESCE(tp.koCount*tt.koBounty,0)-tt.buyIn-tt.fee)/100.0	 								AS net
-                            ,(CAST(SUM(tp.winnings+COALESCE(tp.koCount*tt.koBounty,0) - tt.buyin - tt.fee) AS REAL)/
-                                CAST(SUM(tt.buyin+tt.fee) AS REAL))* 100.0                                                                    AS roi
-                            ,SUM(tp.winnings+COALESCE(tp.koCount*tt.koBounty,0)-(tt.buyin+tt.fee))/100.0/(COUNT(1)-SUM(CASE WHEN tp.rank > 0 THEN 0 ELSE 1 END)) AS profitPerTourney
-                      from TourneysPlayers tp
-                           inner join Tourneys t        on  (t.id = tp.tourneyId)
-                           inner join TourneyTypes tt   on  (tt.Id = t.tourneyTypeId)
-                           inner join Sites s           on  (s.Id = tt.siteId)
-                           inner join Players p         on  (p.Id = tp.playerId)
-                      where tp.playerId in <nametest> <sitetest>
-                      AND   ((t.startTime > '<startdate_test>' AND t.startTime < '<enddate_test>')
-                                        OR t.startTime is NULL)
-                      group by tourneyTypeId, playerName
-                      order by tourneyTypeId
-                              ,playerName
-                              ,siteName"""
 
         if db_server == "mysql":
             self.query["playerStats"] = """
