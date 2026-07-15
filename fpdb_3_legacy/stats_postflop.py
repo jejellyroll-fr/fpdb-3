@@ -481,6 +481,42 @@ def cbet(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
         return stat, "NA", "cbet=NA", "cbet=NA", "(0/0)", "% continuation bet"
 
 
+def aggression_frequency_street(
+    stat_dict: Mapping[int, Mapping[str, Any]], player: int, street: int, description: str,
+) -> StatTuple:
+    """Format aggression frequency for one postflop street."""
+    abbreviation = f"a{street}"
+    long_label = f"a_fq_{street}"
+    stat = 0.0
+    try:
+        seen_key = "saw_f" if street == 1 else f"saw_{street}"
+        opportunities = float(stat_dict[player].get(seen_key, 0))
+        done = float(stat_dict[player].get(f"aggr_{street}", 0))
+        if opportunities == 0:
+            return format_no_data_stat(abbreviation, description)
+        stat = done / opportunities
+        percent = 100.0 * stat
+        return stat, f"{percent:3.1f}", f"{abbreviation}={percent:3.1f}%", f"{long_label}={percent:3.1f}%", f"({int(done)}/{int(opportunities)})", description
+    except (KeyError, TypeError, ValueError):
+        return stat, "NA", f"{abbreviation}=NA", f"{long_label}=NA", "(0/0)", description
+
+
+def a_freq1(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    return aggression_frequency_street(stat_dict, player, 1, "Aggression frequency flop/4th street")
+
+
+def a_freq2(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    return aggression_frequency_street(stat_dict, player, 2, "Aggression frequency turn/5th street")
+
+
+def a_freq3(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    return aggression_frequency_street(stat_dict, player, 3, "Aggression frequency river/6th street")
+
+
+def a_freq4(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    return aggression_frequency_street(stat_dict, player, 4, "Aggression frequency 7th street")
+
+
 def triple_barrel(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
     """Return the historical triple-barrel estimate from street c-bet rates."""
     try:
