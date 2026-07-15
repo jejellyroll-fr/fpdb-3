@@ -28,6 +28,7 @@ from fpdb_3_legacy.sql_queries_replayer import replayer_queries
 from fpdb_3_legacy.sql_queries_session_cache_write import session_cache_write_queries
 from fpdb_3_legacy.sql_queries_session_stats import session_stats_queries
 from fpdb_3_legacy.sql_queries_tournament_graph import tournament_graph_queries
+from fpdb_3_legacy.sql_queries_tournament_persistence import tournament_persistence_queries
 from fpdb_3_legacy.sql_queries_tournament_player import tournament_player_detailed_queries
 from fpdb_3_legacy.sql_schema_cards_cache import cards_cache_schema_queries
 from fpdb_3_legacy.sql_schema_core import core_schema_queries
@@ -119,6 +120,7 @@ class Sql:
         self.query.update(session_stats_queries(db_server))
         self.query.update(tournament_player_detailed_queries(db_server))
         self.query.update(tournament_graph_queries())
+        self.query.update(tournament_persistence_queries())
         ###############################################################################3
         #    Support for the Free Poker DataBase = fpdb   http://fpdb.sourceforge.net/
         #
@@ -1191,131 +1193,6 @@ sum(hc.street0Limp)                 AS limp,
 
 
 
-        self.query["getTourneyByTourneyNo"] = """SELECT t.*
-                                        FROM Tourneys t
-                                        INNER JOIN TourneyTypes tt ON (t.tourneyTypeId = tt.id)
-                                        WHERE tt.siteId=%s AND t.siteTourneyNo=%s
-        """
-
-        self.query["getTourneyInfo"] = """SELECT tt.*, t.*
-                                        FROM Tourneys t
-                                        INNER JOIN TourneyTypes tt ON (t.tourneyTypeId = tt.id)
-                                        INNER JOIN Sites s ON (tt.siteId = s.id)
-                                        WHERE s.name=%s AND t.siteTourneyNo=%s
-        """
-
-        self.query["getSiteTourneyNos"] = """SELECT t.siteTourneyNo
-                                        FROM Tourneys t
-                                        INNER JOIN TourneyTypes tt ON (t.tourneyTypeId = tt.id)
-                                        INNER JOIN Sites s ON (tt.siteId = s.id)
-                                        WHERE tt.siteId=%s
-        """
-
-        self.query["getTourneyPlayerInfo"] = """SELECT tp.*
-                                        FROM Tourneys t
-                                        INNER JOIN TourneyTypes tt ON (t.tourneyTypeId = tt.id)
-                                        INNER JOIN Sites s ON (tt.siteId = s.id)
-                                        INNER JOIN TourneysPlayers tp ON (tp.tourneyId = t.id)
-                                        INNER JOIN Players p ON (p.id = tp.playerId)
-                                        WHERE s.name=%s AND t.siteTourneyNo=%s AND p.name=%s
-        """
-
-        self.query["insertTourney"] = """insert into Tourneys (
-                                             tourneyTypeId, sessionId, siteTourneyNo, entries, prizepool,
-                                             startTime, endTime, tourneyName, totalRebuyCount, totalAddOnCount,
-                                             comment, commentTs, added, addedCurrency)
-                                        values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-        """
-
-        self.query["updateTourney"] = """UPDATE Tourneys
-                                             SET entries = %s,
-                                                 prizepool = %s,
-                                                 startTime = %s,
-                                                 endTime = %s,
-                                                 tourneyName = %s,
-                                                 totalRebuyCount = %s,
-                                                 totalAddOnCount = %s,
-                                                 comment = %s,
-                                                 commentTs = %s,
-                                                 added = %s,
-                                                 addedCurrency = %s
-                                        WHERE id=%s
-        """
-
-        self.query["updateTourneyStart"] = """UPDATE Tourneys
-                                             SET startTime = %s
-                                        WHERE id=%s
-        """
-
-        self.query["updateTourneyEnd"] = """UPDATE Tourneys
-                                             SET endTime = %s
-                                        WHERE id=%s
-        """
-
-        self.query["getTourneysPlayersByIds"] = """SELECT *
-                                                FROM TourneysPlayers
-                                                WHERE tourneyId=%s AND playerId=%s AND entryId=%s
-        """
-
-        self.query["getTourneysPlayersByTourney"] = """SELECT playerId, entryId
-                                                       FROM TourneysPlayers
-                                                       WHERE tourneyId=%s
-        """
-
-        self.query["updateTourneysPlayer"] = """UPDATE TourneysPlayers
-                                                 SET rank = %s,
-                                                     winnings = %s,
-                                                     winningsCurrency = %s,
-                                                     rebuyCount = %s,
-                                                     addOnCount = %s,
-                                                     koCount = %s
-                                                 WHERE id=%s
-        """
-
-        self.query["updateTourneysPlayerBounties"] = """UPDATE TourneysPlayers
-                                                 SET koCount = case when koCount is null then %s else koCount+%s end
-                                                 WHERE id=%s
-        """
-
-        self.query["updateTourneysPlayerResults"] = """UPDATE TourneysPlayers
-                                                 SET rank = CASE WHEN %s IS NULL THEN rank ELSE %s END,
-                                                     winnings = CASE WHEN %s IS NULL THEN winnings ELSE %s END,
-                                                     winningsCurrency = CASE WHEN %s IS NULL THEN winningsCurrency ELSE %s END
-                                                 WHERE id=%s
-        """
-
-        self.query["insertTourneysPlayer"] = """insert into TourneysPlayers (
-                                                    tourneyId,
-                                                    playerId,
-                                                    entryId,
-                                                    rank,
-                                                    winnings,
-                                                    winningsCurrency,
-                                                    rebuyCount,
-                                                    addOnCount,
-                                                    koCount
-                                                )
-                                                values (%s, %s, %s, %s, %s,
-                                                        %s, %s, %s, %s)
-        """
-
-        self.query["selectHandsPlayersWithWrongTTypeId"] = """SELECT id
-                                                              FROM HandsPlayers
-                                                              WHERE tourneyTypeId <> %s AND (TourneysPlayersId+0=%s)
-        """
-
-        #            self.query['updateHandsPlayersForTTypeId2'] = """UPDATE HandsPlayers
-        #                                                            SET tourneyTypeId= %s
-        #                                                            WHERE (TourneysPlayersId+0=%s)
-        #            """
-
-        self.query["updateHandsPlayersForTTypeId"] = """UPDATE HandsPlayers
-                                                         SET tourneyTypeId= %s
-                                                         WHERE (id=%s)
-        """
-
-        self.query["handsPlayersTTypeId_joiner"] = " OR TourneysPlayersId+0="
-        self.query["handsPlayersTTypeId_joiner_id"] = " OR id="
 
         self.query["store_hand"] = """insert into Hands (
                                             tablename,

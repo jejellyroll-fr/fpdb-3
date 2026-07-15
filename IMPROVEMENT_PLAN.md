@@ -274,6 +274,7 @@ Les bugs multi-backend récents (`Rank` réservé, `boolean` vs `smallint`, `set
 - ✅ **Maintenance SessionsCache/TourneysCache de `SQL.py`** (2026-07-15) : 34 requêtes de nettoyage, sélection, insertion, agrégation et rattachement déplacées dans `sql_queries_session_cache_write.py`, avec liens session et agrégats financiers protégés.
 - ✅ **Administration DB de `SQL.py`** (2026-07-15) : commandes analyze/vacuum et verrous d'import déplacés dans `sql_queries_database_admin.py`, avec contrats MySQL/PostgreSQL/SQLite protégés.
 - ✅ **Types de parties et tournois de `SQL.py`** (2026-07-15) : lookups, insertions et remappage `Gametypes`/`TourneyTypes` déplacés dans `sql_queries_game_types.py`, avec variantes SQLite/PostgreSQL/MySQL et dimensions modernes protégées.
+- ✅ **Persistance des tournois de `SQL.py`** (2026-07-16) : lectures et écritures `Tourneys`/`TourneysPlayers`, résultats, bounties et réparation des références `HandsPlayers` déplacés dans `sql_queries_tournament_persistence.py`.
 - **Qualité outillée restante** : Ruff est vert sur tout le dépôt et mypy couvre tout le package legacy ; convertir les 73 `TODO/FIXME` actuels en tâches traçables, évaluer l'intérêt d'un second checker (`pyright`) et clarifier/supprimer le dossier `fpdb/`.
 
 **Effort** continu · **Impact** moyen.
