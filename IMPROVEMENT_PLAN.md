@@ -223,6 +223,7 @@ Les bugs multi-backend récents (`Rank` réservé, `boolean` vs `smallint`, `set
 - ✅ **Piles tournoi de `Stats.py`** (2026-07-15) : reconstruction de pile finale, `m_ratio` et `bbstack` déplacés dans le nouveau module typé `stats_tournament.py`, ajouté au ratchet CI avec retours historiques conservés.
 - ✅ **Popup des mains de départ de `Stats.py`** (2026-07-15) : `starthands`, sa requête limitée au fichier courant et son formatage positionnel déplacés dans `stats_display.py`, clôturant l'extraction des fonctions statistiques métier du catalogue central.
 - **Découper les god-modules** : ✅ `Stats.py` est désormais une façade de compatibilité dont les fonctions métier sont réparties par famille et l'architecture protégée par un test ; restent `SQL.py` (requêtes par domaine / fichiers `.sql`) et `Database.py` (connexion / DDL / cache HUD / requêtes). Incrémental, avec tests de non-régression.
+- ✅ **Métadonnées de `SQL.py`** (2026-07-15) : introspection tables/index, transaction et sélections de référence extraites dans `sql_metadata.py`, avec catalogue multi-backend typé et tests d'installation exacte dans `Sql.query`.
 - **Qualité outillée restante** : Ruff est vert sur tout le dépôt et mypy couvre tout le package legacy ; convertir les 73 `TODO/FIXME` actuels en tâches traçables, évaluer l'intérêt d'un second checker (`pyright`) et clarifier/supprimer le dossier `fpdb/`.
 
 **Effort** continu · **Impact** moyen.

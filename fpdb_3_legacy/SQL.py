@@ -6,6 +6,8 @@ from __future__ import annotations
 import re
 import sys
 
+from fpdb_3_legacy.sql_metadata import metadata_queries
+
 #    Copyright 2008-2011, Ray E. Barker
 #
 #    This program is free software; you can redistribute it and/or modify
@@ -40,69 +42,10 @@ import sys
 class Sql:
     def __init__(self, game="holdem", db_server="mysql") -> None:
         self.query = {}
+        self.query.update(metadata_queries(db_server))
         ###############################################################################3
         #    Support for the Free Poker DataBase = fpdb   http://fpdb.sourceforge.net/
         #
-
-        ################################
-        # List tables
-        ################################
-        if db_server == "mysql":
-            self.query["list_tables"] = """SHOW TABLES"""
-        elif db_server == "postgresql":
-            self.query["list_tables"] = (
-                """SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'"""
-            )
-        elif db_server == "sqlite":
-            self.query["list_tables"] = """SELECT name FROM sqlite_master
-            WHERE type='table'
-            ORDER BY name;"""
-
-        ################################
-        # List indexes
-        ################################
-        if db_server == "mysql":
-            self.query["list_indexes"] = """SHOW INDEXES"""
-        elif db_server == "postgresql":
-            self.query["list_indexes"] = """SELECT tablename, indexname FROM PG_INDEXES"""
-        elif db_server == "sqlite":
-            self.query["list_indexes"] = """SELECT name FROM sqlite_master
-                                            WHERE type='index'
-                                            ORDER BY name;"""
-
-        ##################################################################
-        # Drop Tables - MySQL, PostgreSQL and SQLite all share same syntax
-        ##################################################################
-
-        self.query["drop_table"] = """DROP TABLE IF EXISTS """
-
-        ##################################################################
-        # Set transaction isolation level
-        ##################################################################
-
-        if db_server in ("mysql", "postgresql"):
-            self.query["set tx level"] = """SET SESSION TRANSACTION
-            ISOLATION LEVEL READ COMMITTED"""
-        elif db_server == "sqlite":
-            self.query["set tx level"] = """ """
-
-        ################################
-        # Select basic info
-        ################################
-
-        self.query["getSiteId"] = """SELECT id from Sites where name = %s"""
-
-        self.query["getGames"] = """SELECT DISTINCT category from Gametypes"""
-
-        self.query["getCurrencies"] = """SELECT DISTINCT currency from Gametypes ORDER BY currency"""
-
-        self.query["getLimits"] = """SELECT DISTINCT bigBlind from Gametypes ORDER by bigBlind DESC"""
-
-        self.query["getTourneyTypesIds"] = "SELECT id FROM TourneyTypes"
-
-        self.query["getTourneyTypes"] = "SELECT DISTINCT tourneyName FROM Tourneys"
-
-        self.query["getTourneyNames"] = "SELECT tourneyName FROM Tourneys"
 
         ################################
         # Create Settings
