@@ -212,6 +212,7 @@ Les bugs multi-backend récents (`Rank` réservé, `boolean` vs `smallint`, `set
 - ✅ **Donk-bet-and-raise par rue de `Stats.py`** (2026-07-15) : `dbr1…3` et `f_dbr1…3` déplacés dans `stats_postflop.py` derrière un helper de compteurs ajustés, avec les contrats historiques distincts de zéro et d'erreur conservés.
 - ✅ **3-bet et 4-bet préflop de `Stats.py`** (2026-07-15) : `three_B`, `four_B` et `cfour_B` déplacés dans `stats_preflop.py` en réutilisant le helper typé action/opportunité et leurs libellés HUD historiques.
 - ✅ **Dérivées 4-bet-range/call-3-bet de `Stats.py`** (2026-07-15) : `fbr` et `ctb` déplacés dans `stats_preflop.py`, avec leurs formules composées et compteurs d'affichage historiques conservés.
+- ✅ **Fold-to-steal des blindes de `Stats.py`** (2026-07-15) : `f_SB_steal`, `f_BB_steal` et `f_steal` déplacés dans `stats_preflop.py`, avec calculs individuels et agrégés ainsi que sentinelles historiques conservés.
 - **Découper les god-modules** : `SQL.py` (requêtes par domaine / fichiers `.sql`), `Database.py` (connexion / DDL / cache HUD / requêtes), `Stats.py` (par famille). Incrémental, avec tests de non-régression.
 - **Qualité outillée restante** : Ruff est vert sur tout le dépôt et mypy couvre tout le package legacy ; convertir les 73 `TODO/FIXME` actuels en tâches traçables, évaluer l'intérêt d'un second checker (`pyright`) et clarifier/supprimer le dossier `fpdb/`.
 
