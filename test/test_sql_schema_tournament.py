@@ -31,3 +31,19 @@ def test_tourneys_ddl_keeps_backend_specific_relations_and_times() -> None:
     assert "startTime DATETIME" in mysql
     assert "startTime timestamp without time zone" in postgresql
     assert "FOREIGN KEY" not in sqlite
+
+
+def test_tourney_types_ddl_keeps_backend_specific_money_and_site_link() -> None:
+    mysql = tournament_schema_queries("mysql")["createTourneyTypesTable"]
+    postgresql = tournament_schema_queries("postgresql")["createTourneyTypesTable"]
+    sqlite = tournament_schema_queries("sqlite")["createTourneyTypesTable"]
+
+    assert "SMALLINT UNSIGNED AUTO_INCREMENT" in mysql
+    assert "id SERIAL" in postgresql
+    assert "id INTEGER PRIMARY KEY" in sqlite
+    assert "guaranteeAmt BIGINT" in mysql
+    assert "guaranteeAmt BIGINT" in postgresql
+    assert "guaranteeAmt INT" in sqlite
+    assert "REFERENCES Sites(id)" in mysql
+    assert "REFERENCES Sites(id)" in postgresql
+    assert "FOREIGN KEY" not in sqlite
