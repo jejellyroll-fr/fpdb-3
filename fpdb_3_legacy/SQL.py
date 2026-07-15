@@ -60,39 +60,6 @@ class Sql:
         #
 
         ################################
-        # Create Autorates
-        ################################
-
-        if db_server == "mysql":
-            self.query["createAutoratesTable"] = """CREATE TABLE Autorates (
-                            id BIGINT UNSIGNED AUTO_INCREMENT NOT NULL, PRIMARY KEY (id),
-                            playerId INT UNSIGNED NOT NULL, FOREIGN KEY (playerId) REFERENCES Players(id),
-                            gametypeId SMALLINT UNSIGNED NOT NULL, FOREIGN KEY (gametypeId) REFERENCES Gametypes(id),
-                            description varchar(50) NOT NULL,
-                            shortDesc char(8) NOT NULL,
-                            ratingTime DATETIME NOT NULL,
-                            handCount int NOT NULL)
-                        ENGINE=INNODB"""
-        elif db_server == "postgresql":
-            self.query["createAutoratesTable"] = """CREATE TABLE Autorates (
-                            id BIGSERIAL, PRIMARY KEY (id),
-                            playerId INT, FOREIGN KEY (playerId) REFERENCES Players(id),
-                            gametypeId INT, FOREIGN KEY (gametypeId) REFERENCES Gametypes(id),
-                            description varchar(50),
-                            shortDesc char(8),
-                            ratingTime timestamp without time zone,
-                            handCount int)"""
-        elif db_server == "sqlite":
-            self.query["createAutoratesTable"] = """CREATE TABLE Autorates (
-                            id INTEGER PRIMARY KEY,
-                            playerId INT,
-                            gametypeId INT,
-                            description TEXT,
-                            shortDesc TEXT,
-                            ratingTime timestamp,
-                            handCount int)"""
-
-        ################################
         # Create Hands
         ################################
 

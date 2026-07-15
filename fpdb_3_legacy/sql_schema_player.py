@@ -4,7 +4,7 @@ from __future__ import annotations
 
 
 def player_schema_queries(db_server: str) -> dict[str, str]:
-    """Return backend-specific DDL for players."""
+    """Return backend-specific DDL for players and their ratings."""
     if db_server == "mysql":
         return {
             "createPlayersTable": """CREATE TABLE Players (
@@ -20,6 +20,15 @@ def player_schema_queries(db_server: str) -> dict[str, str]:
                         symbol VARCHAR(10) DEFAULT '★'
                         )
                         ENGINE=INNODB""",
+            "createAutoratesTable": """CREATE TABLE Autorates (
+                            id BIGINT UNSIGNED AUTO_INCREMENT NOT NULL, PRIMARY KEY (id),
+                            playerId INT UNSIGNED NOT NULL, FOREIGN KEY (playerId) REFERENCES Players(id),
+                            gametypeId SMALLINT UNSIGNED NOT NULL, FOREIGN KEY (gametypeId) REFERENCES Gametypes(id),
+                            description varchar(50) NOT NULL,
+                            shortDesc char(8) NOT NULL,
+                            ratingTime DATETIME NOT NULL,
+                            handCount int NOT NULL)
+                        ENGINE=INNODB""",
         }
     if db_server == "postgresql":
         return {
@@ -34,6 +43,14 @@ def player_schema_queries(db_server: str) -> dict[str, str]:
                         profil text,
                         color_code VARCHAR(7) DEFAULT '#FFFFFF',
                         symbol VARCHAR(10) DEFAULT '★' )""",
+            "createAutoratesTable": """CREATE TABLE Autorates (
+                            id BIGSERIAL, PRIMARY KEY (id),
+                            playerId INT, FOREIGN KEY (playerId) REFERENCES Players(id),
+                            gametypeId INT, FOREIGN KEY (gametypeId) REFERENCES Gametypes(id),
+                            description varchar(50),
+                            shortDesc char(8),
+                            ratingTime timestamp without time zone,
+                            handCount int)""",
         }
     if db_server == "sqlite":
         return {
@@ -49,5 +66,13 @@ def player_schema_queries(db_server: str) -> dict[str, str]:
                         color_code TEXT DEFAULT '#FFFFFF',
                         symbol TEXT DEFAULT '★',
                         FOREIGN KEY(siteId) REFERENCES Sites(id) ON DELETE CASCADE)""",
+            "createAutoratesTable": """CREATE TABLE Autorates (
+                            id INTEGER PRIMARY KEY,
+                            playerId INT,
+                            gametypeId INT,
+                            description TEXT,
+                            shortDesc TEXT,
+                            ratingTime timestamp,
+                            handCount int)""",
         }
     return {}

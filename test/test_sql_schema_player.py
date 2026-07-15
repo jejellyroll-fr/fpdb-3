@@ -21,3 +21,16 @@ def test_players_ddl_keeps_backend_specific_identity_and_site_link() -> None:
     assert "REFERENCES Sites(id)" in mysql
     assert "REFERENCES Sites(id)" in postgresql
     assert "REFERENCES Sites(id) ON DELETE CASCADE" in sqlite
+
+
+def test_autorates_ddl_keeps_backend_specific_relations() -> None:
+    mysql = player_schema_queries("mysql")["createAutoratesTable"]
+    postgresql = player_schema_queries("postgresql")["createAutoratesTable"]
+    sqlite = player_schema_queries("sqlite")["createAutoratesTable"]
+
+    assert "BIGINT UNSIGNED AUTO_INCREMENT" in mysql
+    assert "BIGSERIAL" in postgresql
+    assert "FOREIGN KEY" not in sqlite
+    for ddl in (mysql, postgresql):
+        assert "REFERENCES Players(id)" in ddl
+        assert "REFERENCES Gametypes(id)" in ddl
