@@ -643,6 +643,50 @@ def f_dbr3(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple
     return _adjusted_street_frequency(stat_dict, player, 3, ("f_freq_3", "f_cb_3"), ("was_raised_3", "f_cb_opp_3"), "f_dbr3", "% Fold to DonkBetAndRaise river", error_description="% Fold DonkBetAndRaise river")
 
 
+def wtsd(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    """Return went-to-showdown frequency after seeing flop or fourth street."""
+    stat = 0.0
+    description = "% went to showdown when seen flop/4th street"
+    try:
+        opportunities = float(stat_dict[player].get("saw_f", 0))
+        showdowns = float(stat_dict[player].get("sd", 0))
+        if opportunities == 0:
+            return format_no_data_stat("wtsd", description)
+        stat = showdowns / opportunities
+        percent = 100.0 * stat
+        return stat, f"{percent:3.1f}", f"w={percent:3.1f}%", f"wtsd={percent:3.1f}%", f"({int(showdowns)}/{int(opportunities)})", description
+    except (KeyError, TypeError, ValueError):
+        return stat, "NA", "w=NA", "wtsd=NA", "(0/0)", description
+
+
+def wmsd(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    """Return won-money-at-showdown frequency."""
+    stat = 0.0
+    description = "% won some money at showdown"
+    try:
+        showdowns = float(stat_dict[player].get("sd", 0))
+        won = float(stat_dict[player].get("wmsd", 0))
+        if showdowns == 0:
+            return format_no_data_stat("wmsd", description)
+        stat = won / showdowns
+        percent = 100.0 * stat
+        return stat, f"{percent:3.1f}", f"w={percent:3.1f}%", f"wmsd={percent:3.1f}%", f"({won:5.1f}/{int(showdowns)})", description
+    except (KeyError, TypeError, ValueError):
+        return stat, "NA", "w=NA", "wmsd=NA", "(0/0)", description
+
+
+def saw_f(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    """Return the frequency of seeing the flop or fourth street."""
+    try:
+        seen = float(stat_dict[player]["saw_f"])
+        hands = float(stat_dict[player]["n"])
+        stat = seen / hands
+        percent = 100.0 * stat
+        return stat, f"{percent:3.1f}", f"sf={percent:3.1f}%", f"saw_f={percent:3.1f}%", f"({int(stat_dict[player]['saw_f'])}/{int(stat_dict[player]['n'])})", "Flop/4th street seen %"
+    except (KeyError, TypeError, ValueError):
+        return 0.0, "NA", "sf=NA", "saw_f=NA", "(0/0)", "Flop/4th street seen %"
+
+
 def triple_barrel(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
     """Return the historical triple-barrel estimate from street c-bet rates."""
     try:
