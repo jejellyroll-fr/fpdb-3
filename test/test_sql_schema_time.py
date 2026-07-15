@@ -25,3 +25,17 @@ def test_week_and_month_tables_share_backend_identity_and_time_types() -> None:
         assert f"{column} timestamp without time zone NOT NULL" in postgresql
         assert "id INTEGER PRIMARY KEY" in sqlite
         assert f"{column} timestamp NOT NULL" in sqlite
+
+
+def test_sessions_ddl_keeps_period_relations_and_time_types() -> None:
+    mysql = time_schema_queries("mysql")["createSessionsTable"]
+    postgresql = time_schema_queries("postgresql")["createSessionsTable"]
+    sqlite = time_schema_queries("sqlite")["createSessionsTable"]
+
+    assert "sessionStart DATETIME NOT NULL" in mysql
+    assert "sessionEnd timestamp without time zone NOT NULL" in postgresql
+    assert "sessionStart timestamp NOT NULL" in sqlite
+    for ddl in (mysql, postgresql):
+        assert "REFERENCES Weeks(id)" in ddl
+        assert "REFERENCES Months(id)" in ddl
+    assert "FOREIGN KEY" not in sqlite
