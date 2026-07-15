@@ -257,6 +257,7 @@ Les bugs multi-backend récents (`Rank` réservé, `boolean` vs `smallint`, `set
 - ✅ **Détail d'une main de `SQL.py`** (2026-07-15) : joueurs, gagnants, table, sièges et cartes déplacés dans `sql_queries_hand_detail.py`, avec reconstruction draw et placeholders SQLite protégés.
 - ✅ **Fenêtres d'historique de `SQL.py`** (2026-07-15) : bornes une journée/N mains déplacées dans `sql_queries_history.py`, avec fonctions de dates et placeholders propres aux trois backends conservés.
 - ✅ **Filtres de rapports de `SQL.py`** (2026-07-15) : catégories, positions, devises et limites déplacées dans `sql_queries_filters.py`, avec contraintes room/joueur et placeholders multi-backend protégés.
+- ✅ **Rapport adversaires de `SQL.py`** (2026-07-15) : agrégation head-to-head déplacée dans `sql_queries_opponents.py`, avec indicateurs HUD, filtres dynamiques et fonctions temporelles multi-backend conservés.
 - **Qualité outillée restante** : Ruff est vert sur tout le dépôt et mypy couvre tout le package legacy ; convertir les 73 `TODO/FIXME` actuels en tâches traçables, évaluer l'intérêt d'un second checker (`pyright`) et clarifier/supprimer le dossier `fpdb/`.
 
 **Effort** continu · **Impact** moyen.
