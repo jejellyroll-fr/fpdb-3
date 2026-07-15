@@ -401,3 +401,34 @@ def four_B(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple
 def cfour_B(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
     """Return cold-4-bet frequency preflop or on third street."""
     return _preflop_opportunity_frequency(stat_dict, player, "cfb_opp_0", "cfb_0", "C4B", "C4B_pf", "% cold 4 bet preflop/3rd street")
+
+
+def fbr(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    """Return the historical four-bet range estimate."""
+    stat = 0.0
+    try:
+        player_stats = stat_dict[player]
+        four_bet_opportunities = float(player_stats.get("fb_opp_0", 0))
+        pfr_opportunities = float(player_stats.get("n", 0))
+        if four_bet_opportunities != 0 and pfr_opportunities != 0:
+            stat = (float(player_stats["fb_0"]) / four_bet_opportunities) * (float(player_stats["pfr"]) / pfr_opportunities)
+        percent = 100.0 * stat
+        return stat, f"{percent:3.1f}", f"fbr={percent:3.1f}%", f"4Brange={percent:3.1f}%", "(pfr*four_B)", "4 bet range"
+    except (KeyError, TypeError, ValueError):
+        return stat, "NA", "fbr=NA", "fbr=NA", "(pfr*four_B)", "4 bet range"
+
+
+def ctb(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    """Return the historical call-three-bet estimate."""
+    stat = 0.0
+    try:
+        player_stats = stat_dict[player]
+        opportunities = float(player_stats.get("f3b_opp_0", 0))
+        if opportunities != 0:
+            stat = (float(player_stats["f3b_opp_0"]) - float(player_stats["f3b_0"]) - float(player_stats["fb_0"])) / opportunities
+        calls = float(player_stats["f3b_opp_0"]) - player_stats["fb_0"] - player_stats["f3b_0"]
+        displayed_opportunities = player_stats["fb_opp_0"]
+        percent = 100.0 * stat
+        return stat, f"{percent:3.1f}", f"ctb={percent:3.1f}%", f"call3B={percent:3.1f}%", f"({int(calls)}/{int(displayed_opportunities)})", "% call 3 bet"
+    except (KeyError, TypeError, ValueError):
+        return stat, "NA", "ctb=NA", "ctb=NA", "(0/0)", "% call 3 bet"

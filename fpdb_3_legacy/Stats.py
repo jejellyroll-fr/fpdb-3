@@ -317,6 +317,9 @@ from fpdb_3_legacy.stats_preflop import (
     cold_call as cold_call,
 )
 from fpdb_3_legacy.stats_preflop import (
+    ctb as ctb,
+)
+from fpdb_3_legacy.stats_preflop import (
     f_3bet as f_3bet,
 )
 from fpdb_3_legacy.stats_preflop import (
@@ -324,6 +327,9 @@ from fpdb_3_legacy.stats_preflop import (
 )
 from fpdb_3_legacy.stats_preflop import (
     face_limpers as face_limpers,
+)
+from fpdb_3_legacy.stats_preflop import (
+    fbr as fbr,
 )
 from fpdb_3_legacy.stats_preflop import (
     fold_to_allin as fold_to_allin,
@@ -1572,96 +1578,6 @@ def f_steal(stat_dict, player):
         )
     except (KeyError, ValueError, TypeError):
         return (stat, "NA", "fB=NA", "fB_s=NA", "(0/0)", "% folded blind to steal")
-
-
-def fbr(stat_dict, player):
-    """A function to calculate the four bet range statistics for a player.
-
-    Args:
-        stat_dict (dict): A dictionary containing player statistics.
-        player (int): The player for whom the statistics are calculated.
-
-    Returns:
-        tuple: A tuple containing the calculated statistics in different formats:
-            - Float: The calculated statistic.
-            - String: The statistic formatted as a percentage with one decimal place.
-            - String: A formatted string representing the statistic.
-            - String: A formatted string representing the statistic with a suffix.
-            - String: A formatted string showing the product of 'pfr' and 'four_B'.
-            - String: A description of the statistic.
-
-    If an exception occurs during the calculation, returns default values for the statistics.
-
-    """
-    stat = 0.0
-    try:
-        fb_opp_0 = float(stat_dict[player].get("fb_opp_0", 0))  # Ensure key exists
-        pfr_opp = float(stat_dict[player].get("n", 0))  # Ensure key exists
-
-        if fb_opp_0 != 0 and pfr_opp != 0:  # Check both values to avoid division by zero
-            stat = (float(stat_dict[player]["fb_0"]) / fb_opp_0) * (float(stat_dict[player]["pfr"]) / pfr_opp)
-        else:
-            stat = 0  # Default to 0 if any of the values is zero
-
-        return (
-            stat,
-            "%3.1f" % (100.0 * stat),
-            "fbr=%3.1f%%" % (100.0 * stat),
-            "4Brange=%3.1f%%" % (100.0 * stat),
-            "(pfr*four_B)",
-            "4 bet range",
-        )
-    except (KeyError, ValueError, TypeError):
-        return (stat, "NA", "fbr=NA", "fbr=NA", "(pfr*four_B)", "4 bet range")
-
-
-# Call 3 Bet
-def ctb(stat_dict, player):
-    """A function to calculate the call three bet statistics for a player.
-
-    Args:
-        stat_dict (dict): A dictionary containing player statistics.
-        player (int): The player for whom the statistics are calculated.
-
-    Returns:
-        tuple: A tuple containing the calculated statistics in different formats:
-            - Float: The calculated statistic.
-            - String: The statistic formatted as a percentage with one decimal place.
-            - String: A formatted string representing the statistic.
-            - String: A formatted string representing the statistic with a suffix.
-            - String: A formatted string showing the product of 'f3b_opp_0', 'f3b_0', and 'fb_0'.
-            - String: A description of the statistic.
-
-    If an exception occurs during the calculation, returns default values for the statistics.
-
-    """
-    stat = 0.0
-    try:
-        f3b_opp_0 = float(stat_dict[player].get("f3b_opp_0", 0))  # Ensure key exists
-
-        if f3b_opp_0 != 0:  # Check if f3b_opp_0 is non-zero to avoid division by zero
-            stat = (
-                float(stat_dict[player]["f3b_opp_0"])
-                - float(stat_dict[player]["f3b_0"])
-                - float(stat_dict[player]["fb_0"])
-            ) / f3b_opp_0
-        else:
-            stat = 0  # Default to 0 if f3b_opp_0 is zero
-
-        return (
-            stat,
-            "%3.1f" % (100.0 * stat),
-            "ctb=%3.1f%%" % (100.0 * stat),
-            "call3B=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)"
-            % (
-                float(stat_dict[player]["f3b_opp_0"]) - stat_dict[player]["fb_0"] - stat_dict[player]["f3b_0"],
-                stat_dict[player]["fb_opp_0"],
-            ),
-            "% call 3 bet",
-        )
-    except (KeyError, ValueError, TypeError):
-        return (stat, "NA", "ctb=NA", "ctb=NA", "(0/0)", "% call 3 bet")
 
 
 def starthands(stat_dict, player):
