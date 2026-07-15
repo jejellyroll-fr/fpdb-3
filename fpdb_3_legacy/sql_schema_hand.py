@@ -31,6 +31,18 @@ def hand_schema_queries(db_server: str) -> dict[str, str]:
                         combo VARCHAR(255),
                         cards VARCHAR(64))
                         ENGINE=INNODB""",
+            "createHandsStoveTable": """CREATE TABLE HandsStove (
+                        id BIGINT UNSIGNED AUTO_INCREMENT NOT NULL, PRIMARY KEY (id),
+                        handId BIGINT UNSIGNED NOT NULL, FOREIGN KEY (handId) REFERENCES Hands(id),
+                        playerId INT UNSIGNED NOT NULL, FOREIGN KEY (playerId) REFERENCES Players(id),
+                        streetId SMALLINT,
+                        boardId SMALLINT,
+                        hiLo char(1) NOT NULL,
+                        rankId SMALLINT UNSIGNED NOT NULL, FOREIGN KEY (rankId) REFERENCES `Rank`(id),
+                        value BIGINT,
+                        cards VARCHAR(5),
+                        ev NUMERIC)
+                        ENGINE=INNODB""",
         }
     if db_server == "postgresql":
         return {
@@ -55,6 +67,17 @@ def hand_schema_queries(db_server: str) -> dict[str, str]:
                         playerId INT NOT NULL, FOREIGN KEY (playerId) REFERENCES Players(id),
                         combo VARCHAR(255),
                         cards VARCHAR(64))""",
+            "createHandsStoveTable": """CREATE TABLE HandsStove (
+                        id BIGSERIAL, PRIMARY KEY (id),
+                        handId BIGINT NOT NULL, FOREIGN KEY (handId) REFERENCES Hands(id),
+                        playerId INT NOT NULL, FOREIGN KEY (playerId) REFERENCES Players(id),
+                        streetId SMALLINT,
+                        boardId SMALLINT,
+                        hiLo char(1) NOT NULL,
+                        rankId SMALLINT NOT NULL, FOREIGN KEY (rankId) REFERENCES Rank(id),
+                        value BIGINT,
+                        cards VARCHAR(5),
+                        ev NUMERIC)""",
         }
     if db_server == "sqlite":
         return {
@@ -80,6 +103,18 @@ def hand_schema_queries(db_server: str) -> dict[str, str]:
                         playerId INT NOT NULL,
                         combo TEXT,
                         cards TEXT
+                        )""",
+            "createHandsStoveTable": """CREATE TABLE HandsStove (
+                        id INTEGER PRIMARY KEY,
+                        handId INT NOT NULL,
+                        playerId INT NOT NULL,
+                        streetId INT,
+                        boardId INT,
+                        hiLo TEXT NOT NULL,
+                        rankId INT,
+                        value INT,
+                        cards TEXT,
+                        ev decimal
                         )""",
         }
     return {}

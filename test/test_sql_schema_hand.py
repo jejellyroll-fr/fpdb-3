@@ -49,3 +49,16 @@ def test_hands_showdown_ddl_keeps_card_text_and_relations() -> None:
         assert "REFERENCES Hands(id)" in ddl
         assert "REFERENCES Players(id)" in ddl
     assert "FOREIGN KEY" not in sqlite
+
+
+def test_hands_stove_ddl_keeps_equity_and_rank_relations() -> None:
+    mysql = hand_schema_queries("mysql")["createHandsStoveTable"]
+    postgresql = hand_schema_queries("postgresql")["createHandsStoveTable"]
+    sqlite = hand_schema_queries("sqlite")["createHandsStoveTable"]
+
+    assert "ev NUMERIC" in mysql
+    assert "ev NUMERIC" in postgresql
+    assert "ev decimal" in sqlite
+    assert "REFERENCES `Rank`(id)" in mysql
+    assert "REFERENCES Rank(id)" in postgresql
+    assert "FOREIGN KEY" not in sqlite
