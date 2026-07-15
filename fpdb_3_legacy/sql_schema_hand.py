@@ -58,6 +58,17 @@ def hand_schema_queries(db_server: str) -> dict[str, str]:
                         cards VARCHAR(5),
                         ev NUMERIC)
                         ENGINE=INNODB""",
+            "createHandsPotsTable": """CREATE TABLE HandsPots (
+                        id BIGINT UNSIGNED AUTO_INCREMENT NOT NULL, PRIMARY KEY (id),
+                        handId BIGINT UNSIGNED NOT NULL, FOREIGN KEY (handId) REFERENCES Hands(id),
+                        potId SMALLINT,
+                        boardId SMALLINT,
+                        hiLo char(1) NOT NULL,
+                        playerId INT UNSIGNED NOT NULL, FOREIGN KEY (playerId) REFERENCES Players(id),
+                        pot BIGINT,
+                        collected BIGINT,
+                        rake INT)
+                        ENGINE=INNODB""",
         }
     if db_server == "postgresql":
         return {
@@ -107,6 +118,16 @@ def hand_schema_queries(db_server: str) -> dict[str, str]:
                         value BIGINT,
                         cards VARCHAR(5),
                         ev NUMERIC)""",
+            "createHandsPotsTable": """CREATE TABLE HandsPots (
+                        id BIGSERIAL, PRIMARY KEY (id),
+                        handId BIGINT NOT NULL, FOREIGN KEY (handId) REFERENCES Hands(id),
+                        potId SMALLINT,
+                        boardId SMALLINT,
+                        hiLo char(1) NOT NULL,
+                        playerId INT NOT NULL, FOREIGN KEY (playerId) REFERENCES Players(id),
+                        pot BIGINT,
+                        collected BIGINT,
+                        rake INT)""",
         }
     if db_server == "sqlite":
         return {
@@ -159,6 +180,17 @@ def hand_schema_queries(db_server: str) -> dict[str, str]:
                         value INT,
                         cards TEXT,
                         ev decimal
+                        )""",
+            "createHandsPotsTable": """CREATE TABLE HandsPots (
+                        id INTEGER PRIMARY KEY,
+                        handId INT NOT NULL,
+                        potId INT,
+                        boardId INT,
+                        hiLo TEXT NOT NULL,
+                        playerId INT NOT NULL,
+                        pot INT,
+                        collected INT,
+                        rake INT
                         )""",
         }
     return {}
