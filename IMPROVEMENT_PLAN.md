@@ -221,6 +221,7 @@ Les bugs multi-backend récents (`Rank` réservé, `boolean` vs `smallint`, `set
 - ✅ **Identité joueur de `Stats.py`** (2026-07-15) : `playername`, `playershort` et `playerprofile` déplacés dans `stats_display.py`, avec troncature historique, repli optionnel et chargement différé du profileur conservés.
 - ✅ **Profit total de `Stats.py`** (2026-07-15) : `totalprofit` rejoint `stats_financial.py`, avec conversion historique depuis les centimes, valeur interne et tuple de repli conservés.
 - ✅ **Piles tournoi de `Stats.py`** (2026-07-15) : reconstruction de pile finale, `m_ratio` et `bbstack` déplacés dans le nouveau module typé `stats_tournament.py`, ajouté au ratchet CI avec retours historiques conservés.
+- ✅ **Popup des mains de départ de `Stats.py`** (2026-07-15) : `starthands`, sa requête limitée au fichier courant et son formatage positionnel déplacés dans `stats_display.py`, clôturant l'extraction des fonctions statistiques métier du catalogue central.
 - **Découper les god-modules** : `SQL.py` (requêtes par domaine / fichiers `.sql`), `Database.py` (connexion / DDL / cache HUD / requêtes), `Stats.py` (par famille). Incrémental, avec tests de non-régression.
 - **Qualité outillée restante** : Ruff est vert sur tout le dépôt et mypy couvre tout le package legacy ; convertir les 73 `TODO/FIXME` actuels en tâches traçables, évaluer l'intérêt d'un second checker (`pyright`) et clarifier/supprimer le dossier `fpdb/`.
 
