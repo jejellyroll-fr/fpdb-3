@@ -10,6 +10,7 @@ from fpdb_3_legacy.sql_metadata import metadata_queries
 from fpdb_3_legacy.sql_schema_core import core_schema_queries
 from fpdb_3_legacy.sql_schema_game import game_schema_queries
 from fpdb_3_legacy.sql_schema_lookup import lookup_schema_queries
+from fpdb_3_legacy.sql_schema_player import player_schema_queries
 from fpdb_3_legacy.sql_schema_raw import raw_schema_queries
 from fpdb_3_legacy.sql_schema_tournament import tournament_schema_queries
 
@@ -51,55 +52,12 @@ class Sql:
         self.query.update(core_schema_queries(db_server))
         self.query.update(game_schema_queries(db_server))
         self.query.update(lookup_schema_queries(db_server))
+        self.query.update(player_schema_queries(db_server))
         self.query.update(raw_schema_queries(db_server))
         self.query.update(tournament_schema_queries(db_server))
         ###############################################################################3
         #    Support for the Free Poker DataBase = fpdb   http://fpdb.sourceforge.net/
         #
-
-        ################################
-        # Create Players
-        ################################
-
-        if db_server == "mysql":
-            self.query["createPlayersTable"] = """CREATE TABLE Players (
-                        id INT UNSIGNED AUTO_INCREMENT NOT NULL, PRIMARY KEY (id),
-                        name VARCHAR(32) NOT NULL,
-                        siteId SMALLINT UNSIGNED NOT NULL, FOREIGN KEY (siteId) REFERENCES Sites(id),
-                        hero BOOLEAN,
-                        chars char(3),
-                        comment text,
-                        commentTs DATETIME,
-                        profil text,
-                        color_code VARCHAR(7) DEFAULT '#FFFFFF',
-                        symbol VARCHAR(10) DEFAULT '★'
-                        )
-                        ENGINE=INNODB"""
-        elif db_server == "postgresql":
-            self.query["createPlayersTable"] = """CREATE TABLE Players (
-                        id SERIAL, PRIMARY KEY (id),
-                        name VARCHAR(32),
-                        siteId INTEGER, FOREIGN KEY (siteId) REFERENCES Sites(id),
-                        hero BOOLEAN,
-                        chars char(3),
-                        comment text,
-                        commentTs timestamp without time zone,
-                        profil text,
-                        color_code VARCHAR(7) DEFAULT '#FFFFFF',
-                        symbol VARCHAR(10) DEFAULT '★' )"""
-        elif db_server == "sqlite":
-            self.query["createPlayersTable"] = """CREATE TABLE Players (
-                        id INTEGER PRIMARY KEY,
-                        name TEXT,
-                        siteId INTEGER,
-                        hero BOOLEAN,
-                        chars TEXT,
-                        comment TEXT,
-                        commentTs timestamp,
-                        profil TEXT,
-                        color_code TEXT DEFAULT '#FFFFFF',
-                        symbol TEXT DEFAULT '★',
-                        FOREIGN KEY(siteId) REFERENCES Sites(id) ON DELETE CASCADE)"""
 
         ################################
         # Create Autorates
