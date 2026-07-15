@@ -389,6 +389,9 @@ from fpdb_3_legacy.stats_preflop import (
     open_limp as open_limp,
 )
 from fpdb_3_legacy.stats_preflop import (
+    pfr as pfr,
+)
+from fpdb_3_legacy.stats_preflop import (
     raiseToSteal as raiseToSteal,
 )
 from fpdb_3_legacy.stats_preflop import (
@@ -465,6 +468,9 @@ from fpdb_3_legacy.stats_preflop import (
 )
 from fpdb_3_legacy.stats_preflop import (
     three_bet_vs_steal as three_bet_vs_steal,
+)
+from fpdb_3_legacy.stats_preflop import (
+    vpip as vpip,
 )
 from fpdb_3_legacy.stats_preflop import (
     vpip_pfr_ratio as vpip_pfr_ratio,
@@ -976,92 +982,6 @@ def playerprofile(stat_dict, player):
         return (profile, icon, f"p={profile}", f"playerprofile={profile}", f"{profile}", "Player Profile")
     except Exception:  # intentional broad catch
         return ("unknown", "❓", "p=unknown", "playerprofile=unknown", "unknown", "Player Profile")
-
-
-def vpip(stat_dict, player):
-    """A function to calculate and return VPIP (Voluntarily Put In Pot) percentage.
-
-    Args:
-        stat_dict (dict): A dictionary containing player statistics.
-        player (str): The player for whom to calculate the VPIP.
-
-    Returns:
-        tuple: A tuple containing:
-            - VPIP percentage (float)
-            - VPIP percentage formatted as a string or "-" if no data
-            - 'v=' followed by VPIP percentage formatted as a percentage string
-            - 'vpip=' followed by VPIP percentage formatted as a percentage string
-            - '(x/y)' where x is the VPIP and y is VPIP opportunities
-            - 'Voluntarily put in preflop/3rd street %'
-
-        If no opportunities available, returns "-" to distinguish from 0% (tight player).
-
-    """
-    stat = 0.0
-    try:
-        vpip_opp = float(stat_dict[player].get("vpip_opp", 0))
-        vpip_count = float(stat_dict[player].get("vpip", 0))
-
-        # No opportunities = no data available
-        if vpip_opp == 0:
-            return format_no_data_stat("vpip", "Voluntarily put in preflop/3rd street %")
-
-        # Calculate VPIP percentage
-        stat = vpip_count / vpip_opp
-
-        return (
-            stat,
-            "%3.1f" % (100.0 * stat),
-            "v=%3.1f%%" % (100.0 * stat),
-            "vpip=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (vpip_count, vpip_opp),
-            "Voluntarily put in preflop/3rd street %",
-        )
-    except (KeyError, ValueError, TypeError):
-        return (
-            stat,
-            "NA",
-            "v=NA",
-            "vpip=NA",
-            "(0/0)",
-            "Voluntarily put in preflop/3rd street %",
-        )
-
-
-def pfr(stat_dict, player):
-    """Calculate and return the preflop raise percentage (pfr) for a player.
-
-    Args:
-        stat_dict (dict): A dictionary containing player statistics.
-        player (int): The player for whom the pfr is calculated.
-
-    Returns:
-        tuple: A tuple containing the pfr value, formatted pfr percentages, and related information.
-        Returns "-" if no opportunities available to distinguish from 0% (passive player).
-
-    """
-    stat = 0.0
-    try:
-        pfr_opp = float(stat_dict[player].get("pfr_opp", 0))
-        pfr_count = float(stat_dict[player].get("pfr", 0))
-
-        # No opportunities = no data available
-        if pfr_opp == 0:
-            return format_no_data_stat("pfr", "Preflop/3rd street raise %")
-
-        # Calculate PFR percentage
-        stat = pfr_count / pfr_opp
-
-        return (
-            stat,
-            "%3.1f" % (100.0 * stat),
-            "p=%3.1f%%" % (100.0 * stat),
-            "pfr=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (pfr_count, pfr_opp),
-            "Preflop/3rd street raise %",
-        )
-    except (KeyError, ValueError, TypeError):
-        return (stat, "NA", "p=NA", "pfr=NA", "(0/0)", "Preflop/3rd street raise %")
 
 
 def wtsd(stat_dict, player):

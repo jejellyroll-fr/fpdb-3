@@ -460,7 +460,7 @@ def f_steal(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTupl
         return stat, "NA", "fB=NA", "fB_s=NA", "(0/0)", "% folded blind to steal"
 
 
-def _steal_frequency(
+def _labeled_preflop_frequency(
     stat_dict: Mapping[int, Mapping[str, Any]],
     player: int,
     opportunity_key: str,
@@ -470,7 +470,7 @@ def _steal_frequency(
     long_label: str,
     description: str,
 ) -> StatTuple:
-    """Format a steal frequency while preserving its historical no-data label."""
+    """Format a frequency while preserving its historical no-data label."""
     stat = 0.0
     try:
         opportunities = float(stat_dict[player].get(opportunity_key, 0))
@@ -486,9 +486,19 @@ def _steal_frequency(
 
 def steal(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
     """Return attempted-steal frequency."""
-    return _steal_frequency(stat_dict, player, "steal_opp", "steal", "steal", "st", "steal", "% steal attempted")
+    return _labeled_preflop_frequency(stat_dict, player, "steal_opp", "steal", "steal", "st", "steal", "% steal attempted")
 
 
 def s_steal(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
     """Return successful-steal frequency."""
-    return _steal_frequency(stat_dict, player, "steal", "suc_st", "s_st", "s_st", "s_steal", "% steal success")
+    return _labeled_preflop_frequency(stat_dict, player, "steal", "suc_st", "s_st", "s_st", "s_steal", "% steal success")
+
+
+def vpip(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    """Return voluntarily-put-money-in-pot frequency."""
+    return _labeled_preflop_frequency(stat_dict, player, "vpip_opp", "vpip", "vpip", "v", "vpip", "Voluntarily put in preflop/3rd street %")
+
+
+def pfr(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    """Return preflop or third-street raise frequency."""
+    return _labeled_preflop_frequency(stat_dict, player, "pfr_opp", "pfr", "pfr", "p", "pfr", "Preflop/3rd street raise %")
