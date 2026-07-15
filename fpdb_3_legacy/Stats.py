@@ -350,6 +350,9 @@ from fpdb_3_legacy.stats_preflop import (
     open_limp as open_limp,
 )
 from fpdb_3_legacy.stats_preflop import (
+    raiseToSteal as raiseToSteal,
+)
+from fpdb_3_legacy.stats_preflop import (
     resteal as resteal,
 )
 from fpdb_3_legacy.stats_preflop import (
@@ -363,6 +366,9 @@ from fpdb_3_legacy.stats_preflop import (
 )
 from fpdb_3_legacy.stats_preflop import (
     rfi_total as rfi_total,
+)
+from fpdb_3_legacy.stats_preflop import (
+    squeeze as squeeze,
 )
 from fpdb_3_legacy.stats_preflop import (
     squeeze_bb as squeeze_bb,
@@ -2070,78 +2076,6 @@ def f_dbr3(stat_dict, player):
             "(0/0)",
             "% Fold DonkBetAndRaise river",
         )
-
-
-def squeeze(stat_dict, player):
-    """Calculate the squeeze statistic for a player.
-
-    Args:
-        stat_dict (dict): A dictionary containing player statistics.
-        player (int): The player for whom the statistic is calculated.
-
-    Returns:
-        tuple: A tuple containing the calculated statistic, percentage values, and formatted strings.
-        Returns "-" if no opportunities available to distinguish from 0% (never squeezed).
-
-    """
-    stat = 0.0
-    try:
-        sqz_opp_0 = float(stat_dict[player].get("sqz_opp_0", 0))
-        sqz_0 = float(stat_dict[player].get("sqz_0", 0))
-
-        # No opportunities = no data available
-        if sqz_opp_0 == 0:
-            return format_no_data_stat("SQZ", "% squeeze preflop")
-
-        # Calculate squeeze percentage
-        stat = sqz_0 / sqz_opp_0
-
-        return (
-            stat,
-            "%3.1f" % (100.0 * stat),
-            "SQZ=%3.1f%%" % (100.0 * stat),
-            "SQZ_pf=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (sqz_0, sqz_opp_0),
-            "% squeeze preflop",
-        )
-    except (KeyError, ValueError, TypeError):
-        return (stat, "NA", "SQZ=NA", "SQZ_pf=NA", "(0/0)", "% squeeze preflop")
-
-
-def raiseToSteal(stat_dict, player):
-    """Calculate the raise to steal stat for a player.
-
-    Args:
-        stat_dict (dict): A dictionary containing stats for each player.
-        player (int): The player for whom the stat is calculated.
-
-    Returns:
-        tuple: A tuple containing the raise to steal stat, formatted percentages, and additional information.
-        Returns "-" if no opportunities to distinguish from 0% (never raised to steal).
-
-    """
-    stat = 0.0
-    try:
-        rts_opp = float(stat_dict[player].get("rts_opp", 0))
-        rts = float(stat_dict[player].get("rts", 0))
-
-        # No opportunities = no data available
-        if rts_opp == 0:
-            return format_no_data_stat("RST", "% raise to steal")
-
-        # Calculate raise to steal percentage
-        stat = rts / rts_opp
-
-        return (
-            stat,
-            "%3.1f" % (100.0 * stat),
-            "RST=%3.1f%%" % (100.0 * stat),
-            "RST_pf=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (rts, rts_opp),
-            "% raise to steal",
-        )
-    except (KeyError, ValueError, TypeError):
-        return (stat, "NA", "RST=NA", "RST_pf=NA", "(0/0)", "% raise to steal")
 
 
 def starthands(stat_dict, player):

@@ -353,3 +353,36 @@ def f_3bet(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple
 def f_4bet(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
     """Return fold-to-4-bet frequency preflop or on third street."""
     return _preflop_response(stat_dict, player, "f4b_opp_0", "f4b_0", "F4B", "F4B_pf", "% fold to 4 bet preflop/3rd street")
+
+
+def _preflop_opportunity_frequency(
+    stat_dict: Mapping[int, Mapping[str, Any]],
+    player: int,
+    opportunity_key: str,
+    action_key: str,
+    abbreviation: str,
+    long_label: str,
+    description: str,
+) -> StatTuple:
+    """Format a preflop frequency whose zero-opportunity state means no data."""
+    stat = 0.0
+    try:
+        opportunities = float(stat_dict[player].get(opportunity_key, 0))
+        action = float(stat_dict[player].get(action_key, 0))
+        if opportunities == 0:
+            return format_no_data_stat(abbreviation, description)
+        stat = action / opportunities
+        percent = 100.0 * stat
+        return stat, f"{percent:3.1f}", f"{abbreviation}={percent:3.1f}%", f"{long_label}={percent:3.1f}%", f"({int(action)}/{int(opportunities)})", description
+    except (KeyError, TypeError, ValueError):
+        return stat, "NA", f"{abbreviation}=NA", f"{long_label}=NA", "(0/0)", description
+
+
+def squeeze(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    """Return preflop squeeze frequency."""
+    return _preflop_opportunity_frequency(stat_dict, player, "sqz_opp_0", "sqz_0", "SQZ", "SQZ_pf", "% squeeze preflop")
+
+
+def raiseToSteal(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    """Return raise-to-steal frequency."""
+    return _preflop_opportunity_frequency(stat_dict, player, "rts_opp", "rts", "RST", "RST_pf", "% raise to steal")
