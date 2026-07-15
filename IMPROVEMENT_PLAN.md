@@ -270,6 +270,7 @@ Les bugs multi-backend récents (`Rank` réservé, `boolean` vs `smallint`, `set
 - ✅ **Reconstruction des caches HUD de `SQL.py`** (2026-07-15) : `rebuildCache` extrait mécaniquement dans `sql_queries_cache_rebuild.py`, avec agrégats statistiques et placeholders de composition conservés.
 - ✅ **Écritures HudCache de `SQL.py`** (2026-07-15) : insert/update, lookups ring/tournoi et borne hero déplacés dans `sql_queries_hud_cache_write.py`, avec position et extensions turn protégées.
 - ✅ **Écritures CardsCache de `SQL.py`** (2026-07-15) : insert/update et lookups ring/tournoi déplacés dans `sql_queries_cards_cache_write.py`, avec cartes de départ et ordre des paramètres protégés.
+- ✅ **Écritures PositionsCache de `SQL.py`** (2026-07-15) : insert/update et lookups ring/tournoi déplacés dans `sql_queries_positions_cache_write.py`, avec sièges, position maximale et position courante protégés.
 - **Qualité outillée restante** : Ruff est vert sur tout le dépôt et mypy couvre tout le package legacy ; convertir les 73 `TODO/FIXME` actuels en tâches traçables, évaluer l'intérêt d'un second checker (`pyright`) et clarifier/supprimer le dossier `fpdb/`.
 
 **Effort** continu · **Impact** moyen.
