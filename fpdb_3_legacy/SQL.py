@@ -7,6 +7,7 @@ import re
 import sys
 
 from fpdb_3_legacy.sql_metadata import metadata_queries
+from fpdb_3_legacy.sql_schema_core import core_schema_queries
 
 #    Copyright 2008-2011, Ray E. Barker
 #
@@ -43,32 +44,10 @@ class Sql:
     def __init__(self, game="holdem", db_server="mysql") -> None:
         self.query = {}
         self.query.update(metadata_queries(db_server))
+        self.query.update(core_schema_queries(db_server))
         ###############################################################################3
         #    Support for the Free Poker DataBase = fpdb   http://fpdb.sourceforge.net/
         #
-
-        ################################
-        # Create Settings
-        ################################
-        if db_server == "mysql":
-            self.query["createSettingsTable"] = """CREATE TABLE Settings (
-                                        version SMALLINT NOT NULL)
-                                ENGINE=INNODB"""
-        elif db_server == "postgresql":
-            self.query["createSettingsTable"] = """CREATE TABLE Settings (version SMALLINT NOT NULL)"""
-
-        elif db_server == "sqlite":
-            self.query["createSettingsTable"] = """CREATE TABLE Settings
-            (version INTEGER NOT NULL) """
-
-        ################################
-        # Create InsertLock
-        ################################
-        if db_server == "mysql":
-            self.query["createLockTable"] = """CREATE TABLE InsertLock (
-                        id BIGINT UNSIGNED AUTO_INCREMENT NOT NULL, PRIMARY KEY (id),
-                        locked BOOLEAN NOT NULL DEFAULT FALSE)
-                        ENGINE=INNODB"""
 
         ################################
         # Create RawHands (this table is all but identical with RawTourneys)
