@@ -20,4 +20,7 @@ def test_sql_facade_installs_schema_catalogues_before_queries() -> None:
 
     assert len(schema_updates) >= 10
     assert "metadata_queries" in schema_updates[0]
-    assert all("schema" in line for line in schema_updates[1:])
+    assert sum("index_queries" in line for line in schema_updates) == 1
+    assert all(
+        "schema" in line or "index_queries" in line for line in schema_updates[1:]
+    )
