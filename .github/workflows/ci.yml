@@ -69,11 +69,13 @@ jobs:
           fpdb_3_legacy/stats_table.py
           fpdb_3_legacy/stats_tournament.py
           fpdb_3_legacy/sql_metadata.py
+          fpdb_3_legacy/sql_schema_cards_cache.py
           fpdb_3_legacy/sql_schema_core.py
           fpdb_3_legacy/sql_schema_game.py
           fpdb_3_legacy/sql_schema_hand.py
           fpdb_3_legacy/sql_schema_hand_player.py
           fpdb_3_legacy/sql_schema_hand_root.py
+          fpdb_3_legacy/sql_schema_hud_cache.py
           fpdb_3_legacy/sql_schema_import.py
           fpdb_3_legacy/sql_schema_lookup.py
           fpdb_3_legacy/sql_schema_player.py
