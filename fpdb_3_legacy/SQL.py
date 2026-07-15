@@ -1322,36 +1322,6 @@ street4Raises INT,
                         )"""
 
         ################################
-        # Create HandsShowdown
-        # Stores the showdown combination text parsed from the hand history
-        # (e.g. "two pair, Aces and Sixes") plus the winning cards when the
-        # history prints them, so the replayer can label/highlight them.
-        ################################
-        if db_server == "mysql":
-            self.query["createHandsShowdownTable"] = """CREATE TABLE HandsShowdown (
-                        id BIGINT UNSIGNED AUTO_INCREMENT NOT NULL, PRIMARY KEY (id),
-                        handId BIGINT UNSIGNED NOT NULL, FOREIGN KEY (handId) REFERENCES Hands(id),
-                        playerId INT UNSIGNED NOT NULL, FOREIGN KEY (playerId) REFERENCES Players(id),
-                        combo VARCHAR(255),
-                        cards VARCHAR(64))
-                        ENGINE=INNODB"""
-        elif db_server == "postgresql":
-            self.query["createHandsShowdownTable"] = """CREATE TABLE HandsShowdown (
-                        id BIGSERIAL, PRIMARY KEY (id),
-                        handId BIGINT NOT NULL, FOREIGN KEY (handId) REFERENCES Hands(id),
-                        playerId INT NOT NULL, FOREIGN KEY (playerId) REFERENCES Players(id),
-                        combo VARCHAR(255),
-                        cards VARCHAR(64))"""
-        elif db_server == "sqlite":
-            self.query["createHandsShowdownTable"] = """CREATE TABLE HandsShowdown (
-                        id INTEGER PRIMARY KEY,
-                        handId INT NOT NULL,
-                        playerId INT NOT NULL,
-                        combo TEXT,
-                        cards TEXT
-                        )"""
-
-        ################################
         # Create PlayerAutoNotes
         # Generated player notes, kept separate from manual Players.comment.
         ################################
