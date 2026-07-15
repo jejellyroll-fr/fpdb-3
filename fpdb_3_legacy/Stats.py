@@ -73,6 +73,15 @@ from fpdb_3_legacy.stats_display import (
 from fpdb_3_legacy.stats_display import (
     player_note as player_note,
 )
+from fpdb_3_legacy.stats_display import (
+    playername as playername,
+)
+from fpdb_3_legacy.stats_display import (
+    playerprofile as playerprofile,
+)
+from fpdb_3_legacy.stats_display import (
+    playershort as playershort,
+)
 from fpdb_3_legacy.stats_financial import (
     BBper100 as BBper100,
 )
@@ -793,30 +802,6 @@ def totalprofit(stat_dict, player):
         return ("0", "$0.00", "tp=0", "totalprofit=0", "0", "Total Profit")
 
 
-def playername(stat_dict, player):
-    """Retrieves the player's screen name from the stat dictionary.
-
-    Args:
-        stat_dict (dict): A dictionary containing player statistics.
-        player (int): The player for whom to retrieve the screen name.
-
-    Returns:
-        tuple: A tuple containing the player's screen name repeated five times and a constant 'Player name' at the end. If the player's screen name is not found, it returns an empty string five times followed by 'Player name'.
-
-    """
-    try:
-        return (
-            stat_dict[player]["screen_name"],
-            stat_dict[player]["screen_name"],
-            stat_dict[player]["screen_name"],
-            stat_dict[player]["screen_name"],
-            stat_dict[player]["screen_name"],
-            "Player name",
-        )
-    except (KeyError, ValueError, TypeError):
-        return ("", "", "", "", "", "Player name")
-
-
 def _calculate_end_stack(stat_dict, player, hand_instance):
     """Calculate the end stack size for a given player in a hand instance.
 
@@ -963,46 +948,6 @@ def bbstack(stat_dict, player):
         "(%d)" % (int(stat)),
         "bb stack",
     )
-
-
-def playershort(stat_dict, player):
-    """Retrieves the shortened screen name of a player from the given stat_dict.
-
-    Args:
-        stat_dict (dict): A dictionary containing player statistics.
-        player (int): The player for whom to retrieve the shortened screen name.
-
-    Returns:
-        tuple: A tuple containing the shortened screen name and related information.
-
-    Raises:
-        KeyError: If the player's screen name is not found in the stat_dict.
-
-    Note:
-        If the length of the screen name is greater than 6, it is truncated to 5 characters and a dot is appended.
-        The returned tuple contains the shortened screen name repeated 5 times and the player's full screen name.
-
-    """
-    try:
-        r = stat_dict[player]["screen_name"]
-    except (KeyError, ValueError, TypeError):
-        return ("", "", "", "", "", ("Player Name") + " 1-5")
-
-    if len(r) > 6:
-        r = r[:5] + "."
-    return (r, r, r, r, stat_dict[player]["screen_name"], ("Player Name") + " 1-5")
-
-
-def playerprofile(stat_dict, player):
-    """Calculates the player profile and returns the emoji or text."""
-    try:
-        if stat_dict is None or player is None:
-            raise TypeError("None parameter")
-        from fpdb_3_legacy.PlayerProfiler import classify_player
-        profile, icon, color = classify_player(stat_dict, player)
-        return (profile, icon, f"p={profile}", f"playerprofile={profile}", f"{profile}", "Player Profile")
-    except Exception:  # intentional broad catch
-        return ("unknown", "❓", "p=unknown", "playerprofile=unknown", "unknown", "Player Profile")
 
 
 def starthands(stat_dict, player):

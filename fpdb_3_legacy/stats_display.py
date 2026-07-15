@@ -63,3 +63,35 @@ def n(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
         return hands, display, f"n={int(hands)}", f"n={int(hands)}", f"({int(hands)})", "Number of hands seen"
     except (KeyError, TypeError, ValueError):
         return 0, "0", "n=0", "n=0", "(0)", "Number of hands seen"
+
+
+def playername(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> DisplayTuple:
+    """Return the player's full screen name."""
+    try:
+        name = str(stat_dict[player]["screen_name"])
+        return name, name, name, name, name, "Player name"
+    except (KeyError, TypeError, ValueError):
+        return "", "", "", "", "", "Player name"
+
+
+def playershort(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> DisplayTuple:
+    """Return the screen name truncated to the historical six-character cell width."""
+    try:
+        full_name = str(stat_dict[player]["screen_name"])
+    except (KeyError, TypeError, ValueError):
+        return "", "", "", "", "", "Player Name 1-5"
+    short_name = full_name[:5] + "." if len(full_name) > 6 else full_name
+    return short_name, short_name, short_name, short_name, full_name, "Player Name 1-5"
+
+
+def playerprofile(stat_dict: Mapping[int, Mapping[str, Any]] | None, player: int | None) -> DisplayTuple:
+    """Return the dynamically classified player profile."""
+    try:
+        if stat_dict is None or player is None:
+            raise TypeError("None parameter")
+        from fpdb_3_legacy.PlayerProfiler import classify_player
+
+        profile, icon, _color = classify_player(stat_dict, player)
+        return profile, icon, f"p={profile}", f"playerprofile={profile}", profile, "Player Profile"
+    except Exception:  # intentional broad catch: the profile is optional display data
+        return "unknown", "❓", "p=unknown", "playerprofile=unknown", "unknown", "Player Profile"
