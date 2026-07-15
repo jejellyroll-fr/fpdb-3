@@ -14,6 +14,7 @@ from fpdb_3_legacy.sql_schema_import import import_schema_queries
 from fpdb_3_legacy.sql_schema_lookup import lookup_schema_queries
 from fpdb_3_legacy.sql_schema_player import player_schema_queries
 from fpdb_3_legacy.sql_schema_raw import raw_schema_queries
+from fpdb_3_legacy.sql_schema_time import time_schema_queries
 from fpdb_3_legacy.sql_schema_tournament import tournament_schema_queries
 
 #    Copyright 2008-2011, Ray E. Barker
@@ -59,6 +60,7 @@ class Sql:
         self.query.update(player_schema_queries(db_server))
         self.query.update(raw_schema_queries(db_server))
         self.query.update(tournament_schema_queries(db_server))
+        self.query.update(time_schema_queries(db_server))
         ###############################################################################3
         #    Support for the Free Poker DataBase = fpdb   http://fpdb.sourceforge.net/
         #
@@ -2804,52 +2806,6 @@ street1Discards INT,
                         street1Discards INT,
                         street2Discards INT,
                         street3Discards INT)
-                        """
-
-        ################################
-        # Create Weeks
-        ################################
-
-        if db_server == "mysql":
-            self.query["createWeeksTable"] = """CREATE TABLE Weeks (
-                        id INT UNSIGNED AUTO_INCREMENT NOT NULL, PRIMARY KEY (id),
-                        weekStart DATETIME NOT NULL)
-                        ENGINE=INNODB
-                        """
-
-        elif db_server == "postgresql":
-            self.query["createWeeksTable"] = """CREATE TABLE Weeks (
-                        id SERIAL, PRIMARY KEY (id),
-                        weekStart timestamp without time zone NOT NULL)
-                        """
-
-        elif db_server == "sqlite":
-            self.query["createWeeksTable"] = """CREATE TABLE Weeks (
-                        id INTEGER PRIMARY KEY,
-                        weekStart timestamp NOT NULL)
-                        """
-
-        ################################
-        # Create Months
-        ################################
-
-        if db_server == "mysql":
-            self.query["createMonthsTable"] = """CREATE TABLE Months (
-                        id INT UNSIGNED AUTO_INCREMENT NOT NULL, PRIMARY KEY (id),
-                        monthStart DATETIME NOT NULL)
-                        ENGINE=INNODB
-                        """
-
-        elif db_server == "postgresql":
-            self.query["createMonthsTable"] = """CREATE TABLE Months (
-                        id SERIAL, PRIMARY KEY (id),
-                        monthStart timestamp without time zone NOT NULL)
-                        """
-
-        elif db_server == "sqlite":
-            self.query["createMonthsTable"] = """CREATE TABLE Months (
-                        id INTEGER PRIMARY KEY,
-                        monthStart timestamp NOT NULL)
                         """
 
         ################################
