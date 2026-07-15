@@ -80,6 +80,9 @@ from fpdb_3_legacy.stats_formatting import (
     stat_override as __stat_override,
 )
 from fpdb_3_legacy.stats_postflop import (
+    WMsF as WMsF,
+)
+from fpdb_3_legacy.stats_postflop import (
     a_freq1 as a_freq1,
 )
 from fpdb_3_legacy.stats_postflop import (
@@ -279,6 +282,9 @@ from fpdb_3_legacy.stats_postflop import (
 )
 from fpdb_3_legacy.stats_postflop import (
     triple_barrel as triple_barrel,
+)
+from fpdb_3_legacy.stats_postflop import (
+    wwsf as wwsf,
 )
 from fpdb_3_legacy.stats_preflop import (
     call_vs_steal as call_vs_steal,
@@ -2243,59 +2249,6 @@ def f_4bet(stat_dict, player):
             "(0/0)",
             "% fold to 4 bet preflop/3rd street",
         )
-
-
-def WMsF(stat_dict, player):
-    """Calculate the win money percentage when seeing the flop or 4th street.
-
-    Args:
-        stat_dict (dict): A dictionary containing player statistics.
-        player (int): The player for whom the statistics are calculated.
-
-    Returns:
-        tuple: A tuple containing various win money percentage statistics and descriptions.
-        Returns "-" if no flops seen to distinguish from 0% (never won money seeing flop).
-
-    """
-    stat = 0.0
-    try:
-        saw_1 = float(stat_dict[player].get("saw_1", 0))
-        saw_f = float(stat_dict[player].get("saw_f", 0))
-        w_w_s_1 = float(stat_dict[player].get("w_w_s_1", 0))
-
-        # No flops seen = no data available
-        if saw_f == 0:
-            return format_no_data_stat("WMsF", "% won money when seen flop/4th street")
-
-        # Calculate win money seeing flop percentage
-        stat = w_w_s_1 / saw_1 if saw_1 != 0 else 0
-
-        return (
-            stat,
-            "%3.1f" % (100.0 * stat),
-            "wf=%3.1f%%" % (100.0 * stat),
-            "w_w_f=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (w_w_s_1, saw_f),
-            "% won money when seen flop/4th street",
-        )
-    except (KeyError, ValueError, TypeError):
-        return (
-            stat,
-            "NA",
-            "wf=NA",
-            "w_w_f=NA",
-            "(0/0)",
-            "% won money when seen flop/4th street",
-        )
-
-
-def wwsf(stat_dict, player):
-    """Return the standard Won When Saw Flop statistic.
-
-    ``WMsF`` is fpdb's historical name for WWSF.  Keep the legacy entry point
-    for existing HUD layouts while exposing the name used by modern trackers.
-    """
-    return WMsF(stat_dict, player)
 
 
 def starthands(stat_dict, player):
