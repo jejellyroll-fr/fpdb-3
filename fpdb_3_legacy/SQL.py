@@ -1352,35 +1352,6 @@ street4Raises INT,
                         )"""
 
         ################################
-        # Create HandsCashout
-        # Per-player cashout amount (and fee) when a player took an EV cashout,
-        # so the hand viewer / replayer can flag and display it.
-        ################################
-        if db_server == "mysql":
-            self.query["createHandsCashoutTable"] = """CREATE TABLE HandsCashout (
-                        id BIGINT UNSIGNED AUTO_INCREMENT NOT NULL, PRIMARY KEY (id),
-                        handId BIGINT UNSIGNED NOT NULL, FOREIGN KEY (handId) REFERENCES Hands(id),
-                        playerId INT UNSIGNED NOT NULL, FOREIGN KEY (playerId) REFERENCES Players(id),
-                        amount NUMERIC,
-                        fee NUMERIC)
-                        ENGINE=INNODB"""
-        elif db_server == "postgresql":
-            self.query["createHandsCashoutTable"] = """CREATE TABLE HandsCashout (
-                        id BIGSERIAL, PRIMARY KEY (id),
-                        handId BIGINT NOT NULL, FOREIGN KEY (handId) REFERENCES Hands(id),
-                        playerId INT NOT NULL, FOREIGN KEY (playerId) REFERENCES Players(id),
-                        amount NUMERIC,
-                        fee NUMERIC)"""
-        elif db_server == "sqlite":
-            self.query["createHandsCashoutTable"] = """CREATE TABLE HandsCashout (
-                        id INTEGER PRIMARY KEY,
-                        handId INT NOT NULL,
-                        playerId INT NOT NULL,
-                        amount decimal,
-                        fee decimal
-                        )"""
-
-        ################################
         # Create PlayerAutoNotes
         # Generated player notes, kept separate from manual Players.comment.
         ################################

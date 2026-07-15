@@ -17,6 +17,13 @@ def hand_schema_queries(db_server: str) -> dict[str, str]:
                             boardcard4 smallint,
                             boardcard5 smallint)
                         ENGINE=INNODB""",
+            "createHandsCashoutTable": """CREATE TABLE HandsCashout (
+                        id BIGINT UNSIGNED AUTO_INCREMENT NOT NULL, PRIMARY KEY (id),
+                        handId BIGINT UNSIGNED NOT NULL, FOREIGN KEY (handId) REFERENCES Hands(id),
+                        playerId INT UNSIGNED NOT NULL, FOREIGN KEY (playerId) REFERENCES Players(id),
+                        amount NUMERIC,
+                        fee NUMERIC)
+                        ENGINE=INNODB""",
         }
     if db_server == "postgresql":
         return {
@@ -29,6 +36,12 @@ def hand_schema_queries(db_server: str) -> dict[str, str]:
                             boardcard3 smallint,
                             boardcard4 smallint,
                             boardcard5 smallint)""",
+            "createHandsCashoutTable": """CREATE TABLE HandsCashout (
+                        id BIGSERIAL, PRIMARY KEY (id),
+                        handId BIGINT NOT NULL, FOREIGN KEY (handId) REFERENCES Hands(id),
+                        playerId INT NOT NULL, FOREIGN KEY (playerId) REFERENCES Players(id),
+                        amount NUMERIC,
+                        fee NUMERIC)""",
         }
     if db_server == "sqlite":
         return {
@@ -41,5 +54,12 @@ def hand_schema_queries(db_server: str) -> dict[str, str]:
                             boardcard3 INT,
                             boardcard4 INT,
                             boardcard5 INT)""",
+            "createHandsCashoutTable": """CREATE TABLE HandsCashout (
+                        id INTEGER PRIMARY KEY,
+                        handId INT NOT NULL,
+                        playerId INT NOT NULL,
+                        amount decimal,
+                        fee decimal
+                        )""",
         }
     return {}
