@@ -13,6 +13,7 @@ from fpdb_3_legacy.sql_queries_cache_rebuild import cache_rebuild_queries
 from fpdb_3_legacy.sql_queries_cards_cache_write import cards_cache_write_queries
 from fpdb_3_legacy.sql_queries_cash_profit import cash_profit_queries
 from fpdb_3_legacy.sql_queries_core import core_lookup_queries
+from fpdb_3_legacy.sql_queries_database_admin import database_admin_queries
 from fpdb_3_legacy.sql_queries_filters import filter_queries
 from fpdb_3_legacy.sql_queries_hand_detail import hand_detail_queries
 from fpdb_3_legacy.sql_queries_history import history_window_queries
@@ -97,6 +98,7 @@ class Sql:
         self.query.update(time_schema_queries(db_server))
         self.query.update(index_queries(db_server))
         self.query.update(core_lookup_queries())
+        self.query.update(database_admin_queries(db_server))
         self.query.update(cash_profit_queries())
         self.query.update(cache_maintenance_queries())
         self.query.update(cache_rebuild_queries(db_server))
@@ -1185,46 +1187,6 @@ sum(hc.street0Limp)                 AS limp,
         # Database management queries
         ####################################
 
-        if db_server == "mysql":
-            self.query["analyze"] = """
-            analyze table Actions, Autorates, Backings, Boards, Files, Gametypes, Hands, HandsActions, HandsPlayers,
-                          HandsStove, HudCache, Players, RawHands, RawTourneys, Sessions, Settings, Sites,
-                          Tourneys, TourneysPlayers, TourneyTypes
-            """
-        elif db_server in ("postgresql", "sqlite"):
-            self.query["analyze"] = "analyze"
-
-        if db_server == "mysql":
-            self.query["vacuum"] = """
-            optimize table Actions, Autorates, Backings, Boards, Files, Gametypes, Hands, HandsActions, HandsPlayers,
-                           HandsStove, HudCache, Players, RawHands, RawTourneys, Sessions, Settings, Sites,
-                           Tourneys, TourneysPlayers, TourneyTypes
-            """
-        elif db_server in ("postgresql", "sqlite"):
-            self.query["vacuum"] = """ vacuum """
-
-        if db_server == "mysql":
-            self.query["switchLockOn"] = """
-                        UPDATE InsertLock k1,
-                        (SELECT count(locked) as locks FROM InsertLock WHERE locked=True) as k2 SET
-                        k1.locked=%s
-                        WHERE k1.id=%s
-                        AND k2.locks = 0"""
-
-        if db_server == "mysql":
-            self.query["switchLockOff"] = """
-                        UPDATE InsertLock SET
-                        locked=%s
-                        WHERE id=%s"""
-
-        if db_server == "mysql":
-            self.query["lockForInsert"] = """
-                lock tables Hands write, HandsPlayers write, HandsActions write, Players write
-                          , HudCache write, Gametypes write, Sites write, Tourneys write
-                          , TourneysPlayers write, TourneyTypes write, Autorates write
-                """
-        elif db_server in ("postgresql", "sqlite"):
-            self.query["lockForInsert"] = ""
 
         self.query["getGametypeFL"] = """SELECT id
                                            FROM Gametypes
