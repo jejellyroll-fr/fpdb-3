@@ -250,6 +250,7 @@ Les bugs multi-backend récents (`Rank` réservé, `boolean` vs `smallint`, `set
 - ✅ **PositionsCache de `SQL.py`** (2026-07-15) : cache HUD positionnel extrait mécaniquement dans `sql_schema_position_cache.py`, avec clés de contexte et compteurs statistiques conservés à l'identique.
 - ✅ **SessionsCache de `SQL.py`** (2026-07-15) : agrégats statistiques par session extraits mécaniquement dans `sql_schema_session_cache.py`, avec contexte, résultats financiers et compteurs conservés à l'identique.
 - ✅ **TourneysCache de `SQL.py`** (2026-07-15) : agrégats statistiques par tournoi extraits mécaniquement dans `sql_schema_tournament_cache.py`, avec contexte session/tournoi et résultats financiers conservés à l'identique.
+- ✅ **HudCache/CardsCache de `SQL.py`** (2026-07-15) : caches HUD principal et par cartes de départ extraits mécaniquement, avec clés positionnelles, périodes et colonnes delayed-cbet/probe turn protégées explicitement.
 - **Qualité outillée restante** : Ruff est vert sur tout le dépôt et mypy couvre tout le package legacy ; convertir les 73 `TODO/FIXME` actuels en tâches traçables, évaluer l'intérêt d'un second checker (`pyright`) et clarifier/supprimer le dossier `fpdb/`.
 
 **Effort** continu · **Impact** moyen.
