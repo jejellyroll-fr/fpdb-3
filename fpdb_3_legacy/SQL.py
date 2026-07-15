@@ -1279,49 +1279,6 @@ street4Raises INT,
                         )"""
 
         ################################
-        # Create HandsStove
-        ################################
-
-        if db_server == "mysql":
-            self.query["createHandsStoveTable"] = """CREATE TABLE HandsStove (
-                        id BIGINT UNSIGNED AUTO_INCREMENT NOT NULL, PRIMARY KEY (id),
-                        handId BIGINT UNSIGNED NOT NULL, FOREIGN KEY (handId) REFERENCES Hands(id),
-                        playerId INT UNSIGNED NOT NULL, FOREIGN KEY (playerId) REFERENCES Players(id),
-                        streetId SMALLINT,
-                        boardId SMALLINT,
-                        hiLo char(1) NOT NULL,
-                        rankId SMALLINT UNSIGNED NOT NULL, FOREIGN KEY (rankId) REFERENCES `Rank`(id),
-                        value BIGINT,
-                        cards VARCHAR(5),
-                        ev NUMERIC)
-                        ENGINE=INNODB"""
-        elif db_server == "postgresql":
-            self.query["createHandsStoveTable"] = """CREATE TABLE HandsStove (
-                        id BIGSERIAL, PRIMARY KEY (id),
-                        handId BIGINT NOT NULL, FOREIGN KEY (handId) REFERENCES Hands(id),
-                        playerId INT NOT NULL, FOREIGN KEY (playerId) REFERENCES Players(id),
-                        streetId SMALLINT,
-                        boardId SMALLINT,
-                        hiLo char(1) NOT NULL,
-                        rankId SMALLINT NOT NULL, FOREIGN KEY (rankId) REFERENCES Rank(id),
-                        value BIGINT,
-                        cards VARCHAR(5),
-                        ev NUMERIC)"""
-        elif db_server == "sqlite":
-            self.query["createHandsStoveTable"] = """CREATE TABLE HandsStove (
-                        id INTEGER PRIMARY KEY,
-                        handId INT NOT NULL,
-                        playerId INT NOT NULL,
-                        streetId INT,
-                        boardId INT,
-                        hiLo TEXT NOT NULL,
-                        rankId INT,
-                        value INT,
-                        cards TEXT,
-                        ev decimal
-                        )"""
-
-        ################################
         # Create PlayerAutoNotes
         # Generated player notes, kept separate from manual Players.comment.
         ################################

@@ -237,6 +237,7 @@ Les bugs multi-backend récents (`Rank` réservé, `boolean` vs `smallint`, `set
 - ✅ **TourneyTypes de `SQL.py`** (2026-07-15) : catalogue complet des formats tournoi déplacé dans `sql_schema_tournament.py`, avec montants 64 bits, options modernes et relation Sites préservés.
 - ✅ **HandsCashout de `SQL.py`** (2026-07-15) : DDL des cashouts EV déplacé dans `sql_schema_hand.py`, avec montants décimaux et relations Hands/Players conservés sur les backends concernés.
 - ✅ **HandsShowdown de `SQL.py`** (2026-07-15) : DDL des combinaisons d'abattage déplacé dans `sql_schema_hand.py`, avec tailles des textes et relations Hands/Players protégées par backend.
+- ✅ **HandsStove de `SQL.py`** (2026-07-15) : DDL des résultats d'équité déplacé dans `sql_schema_hand.py`, avec valeurs décimales et références Rank spécifiques à MySQL/PostgreSQL conservées.
 - **Qualité outillée restante** : Ruff est vert sur tout le dépôt et mypy couvre tout le package legacy ; convertir les 73 `TODO/FIXME` actuels en tâches traçables, évaluer l'intérêt d'un second checker (`pyright`) et clarifier/supprimer le dossier `fpdb/`.
 
 **Effort** continu · **Impact** moyen.
