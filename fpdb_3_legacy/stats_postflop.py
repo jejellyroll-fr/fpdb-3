@@ -454,6 +454,16 @@ def ffreq4(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple
     return fold_frequency_street(stat_dict, player, 4, "% fold frequency 7th street")
 
 
+def cb1(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    return street_frequency(stat_dict, player, "cb_opp_1", "cb_1", "cb1", "cb_1", "% continuation bet flop/4th street")
+def cb2(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    return street_frequency(stat_dict, player, "cb_opp_2", "cb_2", "cb2", "cb_2", "% continuation bet turn/5th street")
+def cb3(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    return street_frequency(stat_dict, player, "cb_opp_3", "cb_3", "cb3", "cb_3", "% continuation bet river/6th street")
+def cb4(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    return street_frequency(stat_dict, player, "cb_opp_4", "cb_4", "cb4", "cb_4", "% continuation bet 7th street")
+
+
 def triple_barrel(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
     """Return the historical triple-barrel estimate from street c-bet rates."""
     try:
