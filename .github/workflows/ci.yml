@@ -69,6 +69,7 @@ jobs:
           fpdb_3_legacy/stats_table.py
           fpdb_3_legacy/stats_tournament.py
           fpdb_3_legacy/sql_metadata.py
+          fpdb_3_legacy/sql_schema_core.py
           fpdb_3_legacy/AutoNoteRules.py
           fpdb_3_legacy/AutoNotes.py
           fpdb_3_legacy/PlayerProfiler.py
