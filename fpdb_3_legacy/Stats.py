@@ -80,6 +80,18 @@ from fpdb_3_legacy.stats_formatting import (
     stat_override as __stat_override,
 )
 from fpdb_3_legacy.stats_postflop import (
+    a_freq1 as a_freq1,
+)
+from fpdb_3_legacy.stats_postflop import (
+    a_freq2 as a_freq2,
+)
+from fpdb_3_legacy.stats_postflop import (
+    a_freq3 as a_freq3,
+)
+from fpdb_3_legacy.stats_postflop import (
+    a_freq4 as a_freq4,
+)
+from fpdb_3_legacy.stats_postflop import (
     bet_frequency_flop as bet_frequency_flop,
 )
 from fpdb_3_legacy.stats_postflop import (
@@ -2275,178 +2287,6 @@ def wwsf(stat_dict, player):
     for existing HUD layouts while exposing the name used by modern trackers.
     """
     return WMsF(stat_dict, player)
-
-
-def a_freq1(stat_dict, player):
-    """Calculate aggression frequency for a specific player based on their stats on flop/4th street.
-
-    Args:
-        stat_dict (dict): A dictionary containing player statistics.
-        player (int): The player for whom the aggression frequency is calculated.
-
-    Returns:
-        tuple: A tuple containing the calculated aggression frequency, formatted strings, and related information.
-        Returns "-" if no opportunities available to distinguish from 0% (passive player).
-
-    """
-    stat = 0.0
-    try:
-        saw_f = float(stat_dict[player].get("saw_f", 0))
-        aggr_1 = float(stat_dict[player].get("aggr_1", 0))
-
-        # No opportunities = no data available
-        if saw_f == 0:
-            return format_no_data_stat("a1", "Aggression frequency flop/4th street")
-
-        # Calculate aggression frequency
-        stat = aggr_1 / saw_f
-
-        return (
-            stat,
-            "%3.1f" % (100.0 * stat),
-            "a1=%3.1f%%" % (100.0 * stat),
-            "a_fq_1=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (aggr_1, saw_f),
-            "Aggression frequency flop/4th street",
-        )
-    except (KeyError, ValueError, TypeError):
-        return (
-            stat,
-            "NA",
-            "a1=NA",
-            "a_fq_1=NA",
-            "(0/0)",
-            "Aggression frequency flop/4th street",
-        )
-
-
-def a_freq2(stat_dict, player):
-    """Calculate aggression frequency for a specific player based on their stats on turn/5th street.
-
-    Args:
-        stat_dict (dict): A dictionary containing player statistics.
-        player (int): The player for whom the aggression frequency is calculated.
-
-    Returns:
-        tuple: A tuple containing the calculated aggression frequency, formatted strings, and related information.
-        Returns "-" if no opportunities available to distinguish from 0% (passive player).
-
-    """
-    stat = 0.0
-    try:
-        saw_2 = float(stat_dict[player].get("saw_2", 0))
-        aggr_2 = float(stat_dict[player].get("aggr_2", 0))
-
-        # No opportunities = no data available
-        if saw_2 == 0:
-            return format_no_data_stat("a2", "Aggression frequency turn/5th street")
-
-        # Calculate aggression frequency
-        stat = aggr_2 / saw_2
-
-        return (
-            stat,
-            "%3.1f" % (100.0 * stat),
-            "a2=%3.1f%%" % (100.0 * stat),
-            "a_fq_2=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (aggr_2, saw_2),
-            "Aggression frequency turn/5th street",
-        )
-    except (KeyError, ValueError, TypeError):
-        return (
-            stat,
-            "NA",
-            "a2=NA",
-            "a_fq_2=NA",
-            "(0/0)",
-            "Aggression frequency turn/5th street",
-        )
-
-
-def a_freq3(stat_dict, player):
-    """Calculate aggression frequency for a specific player based on their stats on river/6th street.
-
-    Args:
-        stat_dict (dict): A dictionary containing player statistics.
-        player (int): The player for whom the aggression frequency is calculated.
-
-    Returns:
-        tuple: A tuple containing the calculated aggression frequency, formatted strings, and related information.
-        Returns "-" if no opportunities available to distinguish from 0% (passive player).
-
-    """
-    stat = 0.0
-    try:
-        saw_3 = float(stat_dict[player].get("saw_3", 0))
-        aggr_3 = float(stat_dict[player].get("aggr_3", 0))
-
-        # No opportunities = no data available
-        if saw_3 == 0:
-            return format_no_data_stat("a3", "Aggression frequency river/6th street")
-
-        # Calculate aggression frequency
-        stat = aggr_3 / saw_3
-
-        return (
-            stat,
-            "%3.1f" % (100.0 * stat),
-            "a3=%3.1f%%" % (100.0 * stat),
-            "a_fq_3=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (aggr_3, saw_3),
-            "Aggression frequency river/6th street",
-        )
-    except (KeyError, ValueError, TypeError):
-        return (
-            stat,
-            "NA",
-            "a3=NA",
-            "a_fq_3=NA",
-            "(0/0)",
-            "Aggression frequency river/6th street",
-        )
-
-
-def a_freq4(stat_dict, player):
-    """Calculate aggression frequency for a specific player based on their stats on 7th street.
-
-    Args:
-        stat_dict (dict): A dictionary containing player statistics.
-        player (int): The player for whom the aggression frequency is calculated.
-
-    Returns:
-        tuple: A tuple containing the calculated aggression frequency, formatted strings, and related information.
-        Returns "-" if no opportunities available to distinguish from 0% (passive player).
-
-    """
-    stat = 0.0
-    try:
-        saw_4 = float(stat_dict[player].get("saw_4", 0))
-        aggr_4 = float(stat_dict[player].get("aggr_4", 0))
-
-        # No opportunities = no data available
-        if saw_4 == 0:
-            return format_no_data_stat("a4", "Aggression frequency 7th street")
-
-        # Calculate aggression frequency
-        stat = aggr_4 / saw_4
-
-        return (
-            stat,
-            "%3.1f" % (100.0 * stat),
-            "a4=%3.1f%%" % (100.0 * stat),
-            "a_fq_4=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (aggr_4, saw_4),
-            "Aggression frequency 7th street",
-        )
-    except (KeyError, ValueError, TypeError):
-        return (
-            stat,
-            "NA",
-            "a4=NA",
-            "a_fq_4=NA",
-            "(0/0)",
-            "Aggression frequency 7th street",
-        )
 
 
 def a_freq_123(stat_dict, player):
