@@ -265,6 +265,7 @@ Les bugs multi-backend récents (`Rank` réservé, `boolean` vs `smallint`, `set
 - ✅ **Courbes de profit cash de `SQL.py`** (2026-07-15) : requêtes en unités natives, big blinds et dollars déplacées dans `sql_queries_cash_profit.py`, avec all-in EV et filtres temporels conservés.
 - ✅ **Graphes tournoi de `SQL.py`** (2026-07-15) : résultats, courbes par type et requêtes ChipEV positionnelles déplacés dans `sql_queries_tournament_graph.py`, avec placeholders de visualisation conservés.
 - ✅ **Chronologie des sessions de `SQL.py`** (2026-07-15) : `sessionStats` extrait dans `sql_queries_session_stats.py`, avec conversions epoch/strftime et filtres cash multi-backend conservés.
+- ✅ **Navigation/replayer de `SQL.py`** (2026-07-15) : plages de mains, session, boards, joueurs et actions déplacés dans `sql_queries_replayer.py`, avec ordre des actions et placeholders SQLite protégés.
 - **Qualité outillée restante** : Ruff est vert sur tout le dépôt et mypy couvre tout le package legacy ; convertir les 73 `TODO/FIXME` actuels en tâches traçables, évaluer l'intérêt d'un second checker (`pyright`) et clarifier/supprimer le dossier `fpdb/`.
 
 **Effort** continu · **Impact** moyen.
