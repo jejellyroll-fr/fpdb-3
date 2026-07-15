@@ -74,7 +74,7 @@ from fpdb_3_legacy.stats_formatting import (
     do_tip as do_tip,
 )
 from fpdb_3_legacy.stats_formatting import (
-    format_no_data_stat,
+    format_no_data_stat as format_no_data_stat,
 )
 from fpdb_3_legacy.stats_formatting import (
     stat_override as __stat_override,
@@ -287,6 +287,9 @@ from fpdb_3_legacy.stats_postflop import (
     river_call_efficiency as river_call_efficiency,
 )
 from fpdb_3_legacy.stats_postflop import (
+    saw_f as saw_f,
+)
+from fpdb_3_legacy.stats_postflop import (
     sd_winrate as sd_winrate,
 )
 from fpdb_3_legacy.stats_postflop import (
@@ -300,6 +303,12 @@ from fpdb_3_legacy.stats_postflop import (
 )
 from fpdb_3_legacy.stats_postflop import (
     triple_barrel as triple_barrel,
+)
+from fpdb_3_legacy.stats_postflop import (
+    wmsd as wmsd,
+)
+from fpdb_3_legacy.stats_postflop import (
+    wtsd as wtsd,
 )
 from fpdb_3_legacy.stats_postflop import (
     wwsf as wwsf,
@@ -984,87 +993,6 @@ def playerprofile(stat_dict, player):
         return ("unknown", "❓", "p=unknown", "playerprofile=unknown", "unknown", "Player Profile")
 
 
-def wtsd(stat_dict, player):
-    """Calculate and return the percentage of hands where a player went to showdown when seen flop/4th street.
-
-    Args:
-        stat_dict (dict): A dictionary containing player statistics.
-        player (int): The player for whom the percentage is calculated.
-
-    Returns:
-        tuple: A tuple containing the percentage value, formatted percentage percentages, and related information.
-        Returns "-" if no opportunities available to distinguish from 0% (never went to showdown).
-
-    """
-    stat = 0.0
-    try:
-        saw_f = float(stat_dict[player].get("saw_f", 0))  # Ensure key exists
-        sd = float(stat_dict[player].get("sd", 0))
-
-        # No opportunities = no data available
-        if saw_f == 0:
-            return format_no_data_stat("wtsd", "% went to showdown when seen flop/4th street")
-
-        # Calculate WTSD percentage
-        stat = sd / saw_f
-
-        return (
-            stat,
-            "%3.1f" % (100.0 * stat),
-            "w=%3.1f%%" % (100.0 * stat),
-            "wtsd=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (sd, saw_f),
-            "% went to showdown when seen flop/4th street",
-        )
-    except (KeyError, ValueError, TypeError):
-        return (
-            stat,
-            "NA",
-            "w=NA",
-            "wtsd=NA",
-            "(0/0)",
-            "% went to showdown when seen flop/4th street",
-        )
-
-
-def wmsd(stat_dict, player):
-    """Calculate and return the win money at showdown (wmsd) statistics for a player.
-
-    Args:
-        stat_dict (dict): A dictionary containing player statistics.
-        player (int): The player for whom the wmsd is calculated.
-
-    Returns:
-        tuple: A tuple containing the wmsd value, formatted wmsd percentages, and related information.
-        Returns "-" if no showdowns to distinguish from 0% (never won at showdown).
-
-    """
-    stat = 0.0
-    try:
-        sd = float(stat_dict[player].get("sd", 0))  # Ensure key exists
-        wmsd_value = float(stat_dict[player].get("wmsd", 0))
-
-        # No showdowns = no data available
-        if sd == 0:
-            return format_no_data_stat("wmsd", "% won some money at showdown")
-
-        # Calculate WMSD percentage
-        stat = wmsd_value / sd
-
-        return (
-            stat,
-            "%3.1f" % (100.0 * stat),
-            "w=%3.1f%%" % (100.0 * stat),
-            "wmsd=%3.1f%%" % (100.0 * stat),
-            "(%5.1f/%d)" % (wmsd_value, sd),
-            "% won some money at showdown",
-        )
-    except (KeyError, ValueError, TypeError):
-        return (stat, "NA", "w=NA", "wmsd=NA", "(0/0)", "% won some money at showdown")
-
-
-# Money is stored as pennies, so there is an implicit 100-multiplier
-# already in place
 def profit100(stat_dict, player):
     """Calculate the profit per 100 hands for a given player.
 
@@ -1195,43 +1123,6 @@ def BBper100(stat_dict, player):
             "(--)",
             "Big bets won per 100 hands",
         )
-
-
-def saw_f(stat_dict, player):
-    """Calculate the saw flop percentage for a given player.
-
-    Args:
-        stat_dict (dict): A dictionary containing player statistics.
-        player (int): The player for whom the saw flop percentage is calculated.
-
-    Returns:
-        tuple: A tuple containing the saw flop percentage in various formats.
-            - The saw flop percentage as a float.
-            - The saw flop percentage formatted to one decimal place.
-            - The saw flop percentage with a label.
-            - The saw flop percentage with a different label.
-            - The count of times saw flop divided by total count.
-            - A description of the statistic.
-
-    If an error occurs during calculation, default values are returned.
-
-    """
-    try:
-        num = float(stat_dict[player]["saw_f"])
-        den = float(stat_dict[player]["n"])
-        stat = num / den
-        return (
-            stat,
-            "%3.1f" % (100.0 * stat),
-            "sf=%3.1f%%" % (100.0 * stat),
-            "saw_f=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (stat_dict[player]["saw_f"], stat_dict[player]["n"]),
-            "Flop/4th street seen %",
-        )
-
-    except (KeyError, ValueError, TypeError):
-        stat = 0.0
-        return (stat, "NA", "sf=NA", "saw_f=NA", "(0/0)", "Flop/4th street seen %")
 
 
 def n(stat_dict, player):
