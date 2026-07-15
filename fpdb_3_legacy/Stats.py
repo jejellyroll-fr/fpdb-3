@@ -68,6 +68,9 @@ from fpdb_3_legacy.stats_display import (
     game_abbr as game_abbr,
 )
 from fpdb_3_legacy.stats_display import (
+    n as n,
+)
+from fpdb_3_legacy.stats_display import (
     player_note as player_note,
 )
 from fpdb_3_legacy.stats_financial import (
@@ -1000,51 +1003,6 @@ def playerprofile(stat_dict, player):
         return (profile, icon, f"p={profile}", f"playerprofile={profile}", f"{profile}", "Player Profile")
     except Exception:  # intentional broad catch
         return ("unknown", "❓", "p=unknown", "playerprofile=unknown", "unknown", "Player Profile")
-
-
-def n(stat_dict, player):
-    """Calculate and format the number of hands seen for a player.
-
-    Args:
-        stat_dict (dict): A dictionary containing player statistics.
-        player (int): The player for whom the number of hands seen is calculated.
-
-    Returns:
-        tuple: A tuple containing formatted strings representing the number of hands seen in different ways.
-
-    """
-    try:
-        # If sample is large enough, use X.Yk notation instead
-        _n = stat_dict[player]["n"]
-        fmt = "%d" % _n
-        if _n >= 10000:
-            k = _n / 1000
-            c = _n % 1000
-            _c = float(c) / 100.0
-            d = round(_c)
-            if d == 10:
-                k += 1
-                d = 0
-            fmt = "%d.%dk" % (k, d)
-        return (
-            stat_dict[player]["n"],
-            f"{fmt}",
-            "n=%d" % (stat_dict[player]["n"]),
-            "n=%d" % (stat_dict[player]["n"]),
-            "(%d)" % (stat_dict[player]["n"]),
-            "Number of hands seen",
-        )
-
-    except (KeyError, ValueError, TypeError):
-        # Number of hands shouldn't ever be "NA"; zeroes are better here
-        return (
-            0,
-            "%d" % (0),
-            "n=%d" % (0),
-            "n=%d" % (0),
-            "(%d)" % (0),
-            "Number of hands seen",
-        )
 
 
 def starthands(stat_dict, player):

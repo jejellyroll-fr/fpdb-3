@@ -6,6 +6,7 @@ from collections.abc import Mapping
 from typing import Any
 
 from fpdb_3_legacy.stats_context import get_hand_instance
+from fpdb_3_legacy.stats_formatting import StatTuple
 
 DisplayTuple = tuple[str, str, str, str, str, str]
 
@@ -44,3 +45,21 @@ def game_abbr(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> Displa
         return value, value, f"game={value}", f"game_abbr={value}", f"({value})", "Game abbreviation"
     except (KeyError, TypeError, ValueError):
         return "NA", "NA", "game=NA", "game_abbr=NA", "(NA)", "Game abbreviation"
+
+
+def n(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    """Format the number of observed hands, using compact notation for large samples."""
+    try:
+        hands = stat_dict[player]["n"]
+        display = f"{int(hands)}"
+        if hands >= 10000:
+            thousands = hands / 1000
+            remainder = hands % 1000
+            decimal = round(float(remainder) / 100.0)
+            if decimal == 10:
+                thousands += 1
+                decimal = 0
+            display = f"{int(thousands)}.{decimal}k"
+        return hands, display, f"n={int(hands)}", f"n={int(hands)}", f"({int(hands)})", "Number of hands seen"
+    except (KeyError, TypeError, ValueError):
+        return 0, "0", "n=0", "n=0", "(0)", "Number of hands seen"
