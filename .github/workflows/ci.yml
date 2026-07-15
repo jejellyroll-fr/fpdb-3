@@ -72,6 +72,7 @@ jobs:
           fpdb_3_legacy/sql_schema_core.py
           fpdb_3_legacy/sql_schema_game.py
           fpdb_3_legacy/sql_schema_hand.py
+          fpdb_3_legacy/sql_schema_hand_player.py
           fpdb_3_legacy/sql_schema_hand_root.py
           fpdb_3_legacy/sql_schema_import.py
           fpdb_3_legacy/sql_schema_lookup.py
