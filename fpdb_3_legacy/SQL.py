@@ -10,6 +10,7 @@ from fpdb_3_legacy.sql_metadata import metadata_queries
 from fpdb_3_legacy.sql_schema_core import core_schema_queries
 from fpdb_3_legacy.sql_schema_lookup import lookup_schema_queries
 from fpdb_3_legacy.sql_schema_raw import raw_schema_queries
+from fpdb_3_legacy.sql_schema_tournament import tournament_schema_queries
 
 #    Copyright 2008-2011, Ray E. Barker
 #
@@ -49,35 +50,10 @@ class Sql:
         self.query.update(core_schema_queries(db_server))
         self.query.update(lookup_schema_queries(db_server))
         self.query.update(raw_schema_queries(db_server))
+        self.query.update(tournament_schema_queries(db_server))
         ###############################################################################3
         #    Support for the Free Poker DataBase = fpdb   http://fpdb.sourceforge.net/
         #
-
-        ################################
-        # Create Backings
-        ################################
-
-        if db_server == "mysql":
-            self.query["createBackingsTable"] = """CREATE TABLE Backings (
-                        id SMALLINT UNSIGNED AUTO_INCREMENT NOT NULL, PRIMARY KEY (id),
-                        tourneysPlayersId BIGINT UNSIGNED NOT NULL, FOREIGN KEY (tourneysPlayersId) REFERENCES TourneysPlayers(id),
-                        playerId INT UNSIGNED NOT NULL, FOREIGN KEY (playerId) REFERENCES Players(id),
-                        buyInPercentage FLOAT UNSIGNED NOT NULL,
-                        payOffPercentage FLOAT UNSIGNED NOT NULL) ENGINE=INNODB"""
-        elif db_server == "postgresql":
-            self.query["createBackingsTable"] = """CREATE TABLE Backings (
-                        id BIGSERIAL, PRIMARY KEY (id),
-                        tourneysPlayersId INT NOT NULL, FOREIGN KEY (tourneysPlayersId) REFERENCES TourneysPlayers(id),
-                        playerId INT NOT NULL, FOREIGN KEY (playerId) REFERENCES Players(id),
-                        buyInPercentage FLOAT NOT NULL,
-                        payOffPercentage FLOAT NOT NULL)"""
-        elif db_server == "sqlite":
-            self.query["createBackingsTable"] = """CREATE TABLE Backings (
-                        id INTEGER PRIMARY KEY,
-                        tourneysPlayersId INT NOT NULL,
-                        playerId INT NOT NULL,
-                        buyInPercentage REAL UNSIGNED NOT NULL,
-                        payOffPercentage REAL UNSIGNED NOT NULL)"""
 
         ################################
         # Create Gametypes
