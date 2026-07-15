@@ -73,6 +73,7 @@ jobs:
           fpdb_3_legacy/sql_queries_filters.py
           fpdb_3_legacy/sql_queries_hand_detail.py
           fpdb_3_legacy/sql_queries_history.py
+          fpdb_3_legacy/sql_queries_opponents.py
           fpdb_3_legacy/sql_metadata.py
           fpdb_3_legacy/sql_schema_cards_cache.py
           fpdb_3_legacy/sql_schema_core.py
