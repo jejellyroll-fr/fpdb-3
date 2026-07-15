@@ -517,6 +517,55 @@ def a_freq4(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTupl
     return aggression_frequency_street(stat_dict, player, 4, "Aggression frequency 7th street")
 
 
+def _postflop_action_totals(player_stats: Mapping[str, Any]) -> tuple[Any, Any]:
+    """Return the historical aggregate aggression and call counters."""
+    aggression = sum(player_stats.get(f"aggr_{street}", 0) for street in range(1, 5))
+    calls = sum(player_stats.get(f"call_{street}", 0) for street in range(1, 5))
+    return aggression, calls
+
+
+def a_freq_123(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    """Return aggregate aggression frequency over the first three postflop streets."""
+    stat = 0.0
+    try:
+        player_stats = stat_dict[player]
+        total_aggression = sum(player_stats.get(f"aggr_{street}", 0) for street in range(1, 4))
+        total_seen = sum(player_stats.get(f"saw_{street}", 0) for street in range(1, 4))
+        if total_seen != 0:
+            stat = float(total_aggression) / float(total_seen)
+        percent = 100.0 * stat
+        return stat, f"{percent:3.1f}", f"afq={percent:3.1f}%", f"post_a_fq={percent:3.1f}%", f"({int(total_aggression)}/{int(total_seen)})", "Post-flop aggression frequency"
+    except (KeyError, TypeError, ValueError):
+        return stat, "NA", "afq=NA", "post_a_fq=NA", "(0/0)", "Post-flop aggression frequency"
+
+
+def agg_fact(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    """Return the historical postflop aggression factor."""
+    stat = 0.0
+    try:
+        aggression, calls = _postflop_action_totals(stat_dict[player])
+        if aggression == 0 and calls == 0:
+            return format_no_data_stat("afa", "Aggression factor", aggression, calls)
+        stat = float(aggression) / float(calls) if calls > 0 else float(aggression)
+        return stat / 100.0, f"{stat:2.2f}", f"afa={stat:2.2f}", f"agg_fa={stat:2.2f}", f"({int(aggression)}/{int(calls)})", "Aggression factor"
+    except (KeyError, TypeError, ValueError):
+        return stat, "NA", "afa=NA", "agg_fa=NA", "(0/0)", "Aggression factor"
+
+
+def agg_fact_pct(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    """Return the historical percentage-style postflop aggression factor."""
+    stat = 0.0
+    try:
+        aggression, calls = _postflop_action_totals(stat_dict[player])
+        if aggression == 0 and calls == 0:
+            return format_no_data_stat("afap", "Aggression factor pct", aggression, calls)
+        if float(calls + aggression) > 0.0:
+            stat = float(aggression) / float(calls + aggression)
+        return stat / 100.0, f"{stat:2.2f}", f"afap={stat:2.2f}", f"agg_fa_pct={stat:2.2f}", f"({int(aggression)}/{int(calls)})", "Aggression factor pct"
+    except (KeyError, TypeError, ValueError):
+        return stat, "NA", "afap=NA", "agg_fa_pct=NA", "(0/0)", "Aggression factor pct"
+
+
 def triple_barrel(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
     """Return the historical triple-barrel estimate from street c-bet rates."""
     try:
