@@ -1227,49 +1227,6 @@ street4Raises INT,
                         )"""
 
         ################################
-        # Create PlayerAutoNotes
-        # Generated player notes, kept separate from manual Players.comment.
-        ################################
-        if db_server == "mysql":
-            self.query["createPlayerAutoNotesTable"] = """CREATE TABLE PlayerAutoNotes (
-                        id BIGINT UNSIGNED AUTO_INCREMENT NOT NULL, PRIMARY KEY (id),
-                        playerId INT UNSIGNED NOT NULL, FOREIGN KEY (playerId) REFERENCES Players(id),
-                        handId BIGINT UNSIGNED NOT NULL, FOREIGN KEY (handId) REFERENCES Hands(id),
-                        ruleId VARCHAR(80) NOT NULL,
-                        ruleVersion INT NOT NULL DEFAULT 1,
-                        noteText TEXT NOT NULL,
-                        evidence TEXT NOT NULL,
-                        createdTs DATETIME DEFAULT CURRENT_TIMESTAMP,
-                        updatedTs DATETIME DEFAULT CURRENT_TIMESTAMP,
-                        UNIQUE KEY player_auto_note_rule_hit (playerId, handId, ruleId, ruleVersion))
-                        ENGINE=INNODB"""
-        elif db_server == "postgresql":
-            self.query["createPlayerAutoNotesTable"] = """CREATE TABLE PlayerAutoNotes (
-                        id BIGSERIAL, PRIMARY KEY (id),
-                        playerId INT NOT NULL, FOREIGN KEY (playerId) REFERENCES Players(id),
-                        handId BIGINT NOT NULL, FOREIGN KEY (handId) REFERENCES Hands(id),
-                        ruleId VARCHAR(80) NOT NULL,
-                        ruleVersion INT NOT NULL DEFAULT 1,
-                        noteText TEXT NOT NULL,
-                        evidence TEXT NOT NULL,
-                        createdTs timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
-                        updatedTs timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
-                        UNIQUE (playerId, handId, ruleId, ruleVersion))"""
-        elif db_server == "sqlite":
-            self.query["createPlayerAutoNotesTable"] = """CREATE TABLE PlayerAutoNotes (
-                        id INTEGER PRIMARY KEY,
-                        playerId INT NOT NULL,
-                        handId INT NOT NULL,
-                        ruleId TEXT NOT NULL,
-                        ruleVersion INT NOT NULL DEFAULT 1,
-                        noteText TEXT NOT NULL,
-                        evidence TEXT NOT NULL,
-                        createdTs timestamp DEFAULT CURRENT_TIMESTAMP,
-                        updatedTs timestamp DEFAULT CURRENT_TIMESTAMP,
-                        UNIQUE (playerId, handId, ruleId, ruleVersion)
-                        )"""
-
-        ################################
         # Create HandsPots
         ################################
 
