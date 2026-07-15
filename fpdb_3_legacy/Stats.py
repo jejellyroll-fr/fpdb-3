@@ -649,6 +649,12 @@ from fpdb_3_legacy.stats_table import (
 from fpdb_3_legacy.stats_table import (
     live_min_stack_bb as live_min_stack_bb,
 )
+from fpdb_3_legacy.stats_tournament import (
+    bbstack as bbstack,
+)
+from fpdb_3_legacy.stats_tournament import (
+    m_ratio as m_ratio,
+)
 
 if __name__ == "__main__":
     Configuration.set_logfile("fpdb-log.txt")
@@ -767,154 +773,6 @@ def do_stat(stat_dict, player=24, stat="vpip", hand_instance=None):
 
 ###########################################
 #    functions that return individual stats
-
-
-def _calculate_end_stack(stat_dict, player, hand_instance):
-    """Calculate the end stack size for a given player in a hand instance.
-
-    Args:
-        stat_dict (dict): A dictionary containing player statistics.
-        player (int): The player for whom to calculate the end stack size.
-        hand_instance (Hand): An instance of the Hand class representing the current hand.
-
-    Returns:
-        float: The end stack size for the given player.
-
-    Note:
-        This function is currently located in Stats.py but it should be moved to Hands.py since it belongs there.
-
-    Todo:
-        - Find a better way to calculate the end stack size from the hand_instance.
-        - Add a hand_instance "end_of_hand_stack" attribute.
-
-    """
-    # fixme - move this code into Hands.py - it really belongs there
-
-    # To reflect the end-of-hand position, we need a end-stack calculation
-    # fixme, is there an easier way to do this from the hand_instance???
-    # can't seem to find a hand_instance "end_of_hand_stack" attribute
-
-    # First, find player stack size at the start of the hand
-    stack = 0.0
-    for item in hand_instance.players:
-        if item[1] == stat_dict[player]["screen_name"]:
-            stack = float(item[2])
-
-    # Next, deduct all action from this player
-    for street in hand_instance.bets:
-        for item in hand_instance.bets[street]:
-            if item == stat_dict[player]["screen_name"]:
-                for amount in hand_instance.bets[street][stat_dict[player]["screen_name"]]:
-                    stack -= float(amount)
-
-    # Next, add back any money returned
-    for p in hand_instance.pot.returned:
-        if p == stat_dict[player]["screen_name"]:
-            stack += float(hand_instance.pot.returned[p])
-
-    # Finally, add back any winnings
-    for item in hand_instance.collectees:
-        if item == stat_dict[player]["screen_name"]:
-            stack += float(hand_instance.collectees[item])
-    return stack
-
-
-def m_ratio(stat_dict, player):
-    """Calculate the M-ratio for a player in a tournament.
-
-    Args:
-        stat_dict (dict): A dictionary containing player statistics.
-        player (int): The player for whom to calculate the M-ratio.
-
-    Returns:
-        tuple: A tuple containing the M-ratio value and formatted strings.
-
-    Note:
-        This function calculates the M-ratio using the end-of-hand stack count versus the hand's antes/blinds.
-
-    """
-    # Tournament M-ratio calculation
-    # Using the end-of-hand stack count vs. that hand's antes/blinds
-
-    # sum all blinds/antes
-    stat = 0.0
-    compulsory_bets = 0.0
-    hand_instance = _get_hand_instance()
-
-    if not hand_instance:
-        return (
-            (stat / 100.0),
-            "%d" % (int(stat)),
-            "M=%d" % (int(stat)),
-            "M=%d" % (int(stat)),
-            "(%d)" % (int(stat)),
-            "M ratio",
-        )
-
-    for p in hand_instance.bets["BLINDSANTES"]:
-        for i in hand_instance.bets["BLINDSANTES"][p]:
-            compulsory_bets += float(i)
-    compulsory_bets += float(
-        hand_instance.gametype.get("sb", 0),
-    )  # Ensure "sb" key exists
-    compulsory_bets += float(
-        hand_instance.gametype.get("bb", 0),
-    )  # Ensure "bb" key exists
-
-    stack = _calculate_end_stack(stat_dict, player, hand_instance)
-
-    if compulsory_bets != 0:  # Check if compulsory_bets is non-zero to avoid division by zero
-        stat = stack / compulsory_bets
-    else:
-        stat = 0  # Default to 0 if compulsory_bets is zero
-
-    return (
-        (int(stat)),
-        "%d" % (int(stat)),
-        "M=%d" % (int(stat)),
-        "M=%d" % (int(stat)),
-        "(%d)" % (int(stat)),
-        "M ratio",
-    )
-
-
-def bbstack(stat_dict, player):
-    """Calculate the tournament stack size in Big Blinds.
-
-    Args:
-        stat_dict (dict): A dictionary containing player statistics.
-        player (int): The player for whom to calculate the stack size.
-
-    Returns:
-        tuple: A tuple containing the stack size in Big Blinds and related information.
-
-    Note:
-        This function calculates the stack size in Big Blinds based on the end of hand stack count and the current Big Blind limit.
-
-    """
-    # Tournament Stack calculation in Big Blinds
-    # Result is end of hand stack count / Current Big Blind limit
-    stat = 0.0
-    hand_instance = _get_hand_instance()
-    if not (hand_instance):
-        return (stat, "NA", "v=NA", "vpip=NA", "(0/0)", "bb stack")
-
-    # current big blind limit
-
-    current_bigblindlimit = float(hand_instance.gametype.get("bb", 0))
-
-    stack = _calculate_end_stack(stat_dict, player, hand_instance)
-
-    stat = stack / current_bigblindlimit if current_bigblindlimit != 0 else 0
-
-    return (
-        (stat / 100.0),
-        "%d" % (int(stat)),
-        "bb's=%d" % (int(stat)),
-        "#bb's=%d" % (int(stat)),
-        "(%d)" % (int(stat)),
-        "bb stack",
-    )
 
 
 def starthands(stat_dict, player):
