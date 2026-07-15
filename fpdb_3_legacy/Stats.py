@@ -407,6 +407,9 @@ from fpdb_3_legacy.stats_preflop import (
     rfi_total as rfi_total,
 )
 from fpdb_3_legacy.stats_preflop import (
+    s_steal as s_steal,
+)
+from fpdb_3_legacy.stats_preflop import (
     squeeze as squeeze,
 )
 from fpdb_3_legacy.stats_preflop import (
@@ -429,6 +432,9 @@ from fpdb_3_legacy.stats_preflop import (
 )
 from fpdb_3_legacy.stats_preflop import (
     squeeze_sb as squeeze_sb,
+)
+from fpdb_3_legacy.stats_preflop import (
+    steal as steal,
 )
 from fpdb_3_legacy.stats_preflop import (
     straddle as straddle,
@@ -1351,103 +1357,6 @@ def n(stat_dict, player):
             "(%d)" % (0),
             "Number of hands seen",
         )
-
-
-def steal(stat_dict, player):
-    """Calculate and format the steal percentage for a player.
-
-    Args:
-        stat_dict (dict): A dictionary containing player statistics.
-        player (int): The player for whom the steal percentage is calculated.
-
-    Returns:
-        tuple: A tuple containing formatted strings representing the steal percentage in different ways.
-            - stat (float): The steal percentage.
-            - '%3.1f' (str): The steal percentage formatted as a string with 3 decimal places.
-            - 'st=%3.1f%%' (str): The steal percentage formatted as a string with 3 decimal places and a percentage sign.
-            - 'steal=%3.1f%%' (str): The steal percentage formatted as a string with 3 decimal places and a percentage sign.
-            - '(%d/%d)' (str): The steal count and steal opponent count formatted as a string.
-            - '% steal attempted' (str): The description of the steal percentage.
-
-        If no opportunities available, returns "-" to distinguish from 0% (passive player).
-
-    Raises:
-        None
-
-    Notes:
-        - The steal percentage is calculated by dividing the steal count by the steal opponent count.
-        - If any of the required statistics are missing, the function returns default values.
-
-    """
-    stat = 0.0
-    try:
-        steal_opp = float(stat_dict[player].get("steal_opp", 0))  # Ensure key exists
-        steal_count = float(stat_dict[player].get("steal", 0))
-
-        # No opportunities = no data available
-        if steal_opp == 0:
-            return format_no_data_stat("steal", "% steal attempted")
-
-        # Calculate steal percentage
-        stat = steal_count / steal_opp
-
-        return (
-            stat,
-            "%3.1f" % (100.0 * stat),
-            "st=%3.1f%%" % (100.0 * stat),
-            "steal=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (steal_count, steal_opp),
-            "% steal attempted",
-        )
-
-    except (KeyError, ValueError, TypeError):
-        return (stat, "NA", "st=NA", "steal=NA", "(0/0)", "% steal attempted")
-
-
-def s_steal(stat_dict, player):
-    """Calculate and format the steal success percentage for a player.
-
-    Args:
-        stat_dict (dict): A dictionary containing player statistics.
-        player (int): The player for whom the steal success percentage is calculated.
-
-    Returns:
-        tuple: A tuple containing formatted strings representing the steal success percentage in different ways.
-            - stat (float): The steal success percentage.
-            - '%3.1f' (str): The steal success percentage formatted as a string with 3 decimal places.
-            - 's_st=%3.1f%%' (str): The steal success percentage formatted with a specific label.
-            - 's_steal=%3.1f%%' (str): The steal success percentage formatted with a specific label.
-            - '(%d/%d)' (str): The steal success count and total steal count formatted as a string.
-            - '% steal success' (str): The description of the steal success percentage.
-        Returns "-" if no steal attempts to distinguish from 0% (never successful steal).
-
-    Raises:
-        None
-
-    """
-    stat = 0.0
-    try:
-        steal_attempts = float(stat_dict[player].get("steal", 0))
-        successful_steals = float(stat_dict[player].get("suc_st", 0))
-
-        # No steal attempts = no data available
-        if steal_attempts == 0:
-            return format_no_data_stat("s_st", "% steal success")
-
-        # Calculate steal success percentage
-        stat = successful_steals / steal_attempts
-
-        return (
-            stat,
-            "%3.1f" % (100.0 * stat),
-            "s_st=%3.1f%%" % (100.0 * stat),
-            "s_steal=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (successful_steals, steal_attempts),
-            "% steal success",
-        )
-
-    except (KeyError, ValueError, TypeError):
-        return (stat, "NA", "s_st=NA", "s_steal=NA", "(0/0)", "% steal success")
 
 
 def starthands(stat_dict, player):

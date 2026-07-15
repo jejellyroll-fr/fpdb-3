@@ -458,3 +458,37 @@ def f_steal(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTupl
         return stat, f"{percent:3.1f}", f"fB={percent:3.1f}%", f"fB_s={percent:3.1f}%", f"({int(folded)}/{int(opportunities)})", "% folded blind to steal"
     except (KeyError, TypeError, ValueError):
         return stat, "NA", "fB=NA", "fB_s=NA", "(0/0)", "% folded blind to steal"
+
+
+def _steal_frequency(
+    stat_dict: Mapping[int, Mapping[str, Any]],
+    player: int,
+    opportunity_key: str,
+    action_key: str,
+    no_data_label: str,
+    abbreviation: str,
+    long_label: str,
+    description: str,
+) -> StatTuple:
+    """Format a steal frequency while preserving its historical no-data label."""
+    stat = 0.0
+    try:
+        opportunities = float(stat_dict[player].get(opportunity_key, 0))
+        action = float(stat_dict[player].get(action_key, 0))
+        if opportunities == 0:
+            return format_no_data_stat(no_data_label, description)
+        stat = action / opportunities
+        percent = 100.0 * stat
+        return stat, f"{percent:3.1f}", f"{abbreviation}={percent:3.1f}%", f"{long_label}={percent:3.1f}%", f"({int(action)}/{int(opportunities)})", description
+    except (KeyError, TypeError, ValueError):
+        return stat, "NA", f"{abbreviation}=NA", f"{long_label}=NA", "(0/0)", description
+
+
+def steal(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    """Return attempted-steal frequency."""
+    return _steal_frequency(stat_dict, player, "steal_opp", "steal", "steal", "st", "steal", "% steal attempted")
+
+
+def s_steal(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    """Return successful-steal frequency."""
+    return _steal_frequency(stat_dict, player, "steal", "suc_st", "s_st", "s_st", "s_steal", "% steal success")
