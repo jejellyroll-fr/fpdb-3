@@ -9,6 +9,7 @@ import sys
 from fpdb_3_legacy.sql_metadata import metadata_queries
 from fpdb_3_legacy.sql_schema_core import core_schema_queries
 from fpdb_3_legacy.sql_schema_game import game_schema_queries
+from fpdb_3_legacy.sql_schema_hand import hand_schema_queries
 from fpdb_3_legacy.sql_schema_lookup import lookup_schema_queries
 from fpdb_3_legacy.sql_schema_player import player_schema_queries
 from fpdb_3_legacy.sql_schema_raw import raw_schema_queries
@@ -51,6 +52,7 @@ class Sql:
         self.query.update(metadata_queries(db_server))
         self.query.update(core_schema_queries(db_server))
         self.query.update(game_schema_queries(db_server))
+        self.query.update(hand_schema_queries(db_server))
         self.query.update(lookup_schema_queries(db_server))
         self.query.update(player_schema_queries(db_server))
         self.query.update(raw_schema_queries(db_server))
@@ -187,42 +189,6 @@ class Sql:
                             bombPot INT,                    /* bomb pot amount (0 = no bomb pot) */
                             comment TEXT,
                             commentTs timestamp)"""
-
-        ################################
-        # Create Boards
-        ################################
-
-        if db_server == "mysql":
-            self.query["createBoardsTable"] = """CREATE TABLE Boards (
-                            id BIGINT UNSIGNED AUTO_INCREMENT NOT NULL, PRIMARY KEY (id),
-                            handId BIGINT UNSIGNED NOT NULL, FOREIGN KEY (handId) REFERENCES Hands(id),
-                            boardId smallint,
-                            boardcard1 smallint,  /* 0=none, 1-13=2-Ah 14-26=2-Ad 27-39=2-Ac 40-52=2-As */
-                            boardcard2 smallint,
-                            boardcard3 smallint,
-                            boardcard4 smallint,
-                            boardcard5 smallint)
-                        ENGINE=INNODB"""
-        elif db_server == "postgresql":
-            self.query["createBoardsTable"] = """CREATE TABLE Boards (
-                            id BIGSERIAL, PRIMARY KEY (id),
-                            handId BIGINT NOT NULL, FOREIGN KEY (handId) REFERENCES Hands(id),
-                            boardId smallint,
-                            boardcard1 smallint,  /* 0=none, 1-13=2-Ah 14-26=2-Ad 27-39=2-Ac 40-52=2-As */
-                            boardcard2 smallint,
-                            boardcard3 smallint,
-                            boardcard4 smallint,
-                            boardcard5 smallint)"""
-        elif db_server == "sqlite":
-            self.query["createBoardsTable"] = """CREATE TABLE Boards (
-                            id INTEGER PRIMARY KEY,
-                            handId INT NOT NULL,
-                            boardId INT,
-                            boardcard1 INT,  /* 0=none, 1-13=2-Ah 14-26=2-Ad 27-39=2-Ac 40-52=2-As */
-                            boardcard2 INT,
-                            boardcard3 INT,
-                            boardcard4 INT,
-                            boardcard5 INT)"""
 
         ################################
         # Create TourneyTypes
