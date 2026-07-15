@@ -260,6 +260,7 @@ Les bugs multi-backend récents (`Rank` réservé, `boolean` vs `smallint`, `set
 - ✅ **Rapport adversaires de `SQL.py`** (2026-07-15) : agrégation head-to-head déplacée dans `sql_queries_opponents.py`, avec indicateurs HUD, filtres dynamiques et fonctions temporelles multi-backend conservés.
 - ✅ **Rapport cash détaillé de `SQL.py`** (2026-07-15) : `playerDetailedStats` extrait mécaniquement dans `sql_queries_player_detailed.py`, avec positions, agrégats et filtres dynamiques multi-backend conservés.
 - ✅ **Rapport tournoi détaillé de `SQL.py`** (2026-07-15) : `tourneyPlayerDetailedStats` extrait dans `sql_queries_tournament_player.py`, avec buy-ins, gains, KO, classements et filtres conservés.
+- ✅ **Statistiques joueur agrégées de `SQL.py`** (2026-07-15) : `playerStats` extrait dans `sql_queries_player_stats.py`, avec fréquences, profits, filtres dynamiques et formats numériques multi-backend conservés.
 - **Qualité outillée restante** : Ruff est vert sur tout le dépôt et mypy couvre tout le package legacy ; convertir les 73 `TODO/FIXME` actuels en tâches traçables, évaluer l'intérêt d'un second checker (`pyright`) et clarifier/supprimer le dossier `fpdb/`.
 
 **Effort** continu · **Impact** moyen.
