@@ -18,3 +18,16 @@ def test_backings_ddl_keeps_backend_specific_constraints() -> None:
     assert "BIGINT UNSIGNED" in mysql
     assert "BIGSERIAL" in postgresql
     assert "FOREIGN KEY" not in sqlite
+
+
+def test_tourneys_ddl_keeps_backend_specific_relations_and_times() -> None:
+    mysql = tournament_schema_queries("mysql")["createTourneysTable"]
+    postgresql = tournament_schema_queries("postgresql")["createTourneysTable"]
+    sqlite = tournament_schema_queries("sqlite")["createTourneysTable"]
+
+    assert "INT UNSIGNED AUTO_INCREMENT" in mysql
+    assert "id SERIAL" in postgresql
+    assert "id INTEGER PRIMARY KEY" in sqlite
+    assert "startTime DATETIME" in mysql
+    assert "startTime timestamp without time zone" in postgresql
+    assert "FOREIGN KEY" not in sqlite
