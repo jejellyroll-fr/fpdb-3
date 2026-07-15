@@ -35,3 +35,17 @@ def test_hands_cashout_ddl_keeps_money_and_player_relations() -> None:
         assert "REFERENCES Hands(id)" in ddl
         assert "REFERENCES Players(id)" in ddl
     assert "FOREIGN KEY" not in sqlite
+
+
+def test_hands_showdown_ddl_keeps_card_text_and_relations() -> None:
+    mysql = hand_schema_queries("mysql")["createHandsShowdownTable"]
+    postgresql = hand_schema_queries("postgresql")["createHandsShowdownTable"]
+    sqlite = hand_schema_queries("sqlite")["createHandsShowdownTable"]
+
+    assert "combo VARCHAR(255)" in mysql
+    assert "cards VARCHAR(64)" in postgresql
+    assert "combo TEXT" in sqlite
+    for ddl in (mysql, postgresql):
+        assert "REFERENCES Hands(id)" in ddl
+        assert "REFERENCES Players(id)" in ddl
+    assert "FOREIGN KEY" not in sqlite

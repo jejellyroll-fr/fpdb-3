@@ -24,6 +24,13 @@ def hand_schema_queries(db_server: str) -> dict[str, str]:
                         amount NUMERIC,
                         fee NUMERIC)
                         ENGINE=INNODB""",
+            "createHandsShowdownTable": """CREATE TABLE HandsShowdown (
+                        id BIGINT UNSIGNED AUTO_INCREMENT NOT NULL, PRIMARY KEY (id),
+                        handId BIGINT UNSIGNED NOT NULL, FOREIGN KEY (handId) REFERENCES Hands(id),
+                        playerId INT UNSIGNED NOT NULL, FOREIGN KEY (playerId) REFERENCES Players(id),
+                        combo VARCHAR(255),
+                        cards VARCHAR(64))
+                        ENGINE=INNODB""",
         }
     if db_server == "postgresql":
         return {
@@ -42,6 +49,12 @@ def hand_schema_queries(db_server: str) -> dict[str, str]:
                         playerId INT NOT NULL, FOREIGN KEY (playerId) REFERENCES Players(id),
                         amount NUMERIC,
                         fee NUMERIC)""",
+            "createHandsShowdownTable": """CREATE TABLE HandsShowdown (
+                        id BIGSERIAL, PRIMARY KEY (id),
+                        handId BIGINT NOT NULL, FOREIGN KEY (handId) REFERENCES Hands(id),
+                        playerId INT NOT NULL, FOREIGN KEY (playerId) REFERENCES Players(id),
+                        combo VARCHAR(255),
+                        cards VARCHAR(64))""",
         }
     if db_server == "sqlite":
         return {
@@ -60,6 +73,13 @@ def hand_schema_queries(db_server: str) -> dict[str, str]:
                         playerId INT NOT NULL,
                         amount decimal,
                         fee decimal
+                        )""",
+            "createHandsShowdownTable": """CREATE TABLE HandsShowdown (
+                        id INTEGER PRIMARY KEY,
+                        handId INT NOT NULL,
+                        playerId INT NOT NULL,
+                        combo TEXT,
+                        cards TEXT
                         )""",
         }
     return {}
