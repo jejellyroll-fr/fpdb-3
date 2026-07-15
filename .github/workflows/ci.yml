@@ -81,6 +81,7 @@ jobs:
           fpdb_3_legacy/sql_schema_raw.py
           fpdb_3_legacy/sql_schema_session_cache.py
           fpdb_3_legacy/sql_schema_tournament.py
+          fpdb_3_legacy/sql_schema_tournament_cache.py
           fpdb_3_legacy/sql_schema_time.py
           fpdb_3_legacy/AutoNoteRules.py
           fpdb_3_legacy/AutoNotes.py
