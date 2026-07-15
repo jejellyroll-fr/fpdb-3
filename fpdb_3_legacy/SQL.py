@@ -17,6 +17,7 @@ from fpdb_3_legacy.sql_queries_opponents import opponent_report_queries
 from fpdb_3_legacy.sql_queries_player_detailed import player_detailed_report_queries
 from fpdb_3_legacy.sql_queries_player_position import player_position_stats_queries
 from fpdb_3_legacy.sql_queries_player_stats import player_stats_queries
+from fpdb_3_legacy.sql_queries_session_stats import session_stats_queries
 from fpdb_3_legacy.sql_queries_tournament_graph import tournament_graph_queries
 from fpdb_3_legacy.sql_queries_tournament_player import tournament_player_detailed_queries
 from fpdb_3_legacy.sql_schema_cards_cache import cards_cache_schema_queries
@@ -97,6 +98,7 @@ class Sql:
         self.query.update(player_detailed_report_queries(db_server))
         self.query.update(player_position_stats_queries(db_server))
         self.query.update(player_stats_queries(db_server))
+        self.query.update(session_stats_queries(db_server))
         self.query.update(tournament_player_detailed_queries(db_server))
         self.query.update(tournament_graph_queries())
         ###############################################################################3
@@ -1144,55 +1146,6 @@ sum(hc.street0Limp)                 AS limp,
                        there's a gap over X minutes between hands (ie. when we get back to start of
                        the session */
                 """
-
-        if db_server == "mysql":
-            self.query["sessionStats"] = """
-                SELECT UNIX_TIMESTAMP(h.startTime) as time, hp.totalProfit
-                FROM HandsPlayers hp
-                 INNER JOIN Hands h       on  (h.id = hp.handId)
-                 INNER JOIN Gametypes gt  on  (gt.Id = h.gametypeId)
-                 INNER JOIN Sites s       on  (s.Id = gt.siteId)
-                 INNER JOIN Players p     on  (p.Id = hp.playerId)
-                WHERE hp.playerId in <player_test>
-                 AND  date_format(h.startTime, '%Y-%m-%d') <datestest>
-                 AND  gt.type LIKE 'ring'
-                 <limit_test>
-                 <game_test>
-                 <seats_test>
-                 <currency_test>
-                ORDER by time"""
-        elif db_server == "postgresql":
-            self.query["sessionStats"] = """
-                SELECT EXTRACT(epoch from h.startTime) as time, hp.totalProfit
-                FROM HandsPlayers hp
-                 INNER JOIN Hands h       on  (h.id = hp.handId)
-                 INNER JOIN Gametypes gt  on  (gt.Id = h.gametypeId)
-                 INNER JOIN Sites s       on  (s.Id = gt.siteId)
-                 INNER JOIN Players p     on  (p.Id = hp.playerId)
-                WHERE hp.playerId in <player_test>
-                 AND  h.startTime <datestest>
-                 AND  gt.type LIKE 'ring'
-                 <limit_test>
-                 <game_test>
-                 <seats_test>
-                 <currency_test>
-                ORDER by time"""
-        elif db_server == "sqlite":
-            self.query["sessionStats"] = """
-                SELECT STRFTIME('<ampersand_s>', h.startTime) as time, hp.totalProfit
-                FROM HandsPlayers hp
-                 INNER JOIN Hands h       on  (h.id = hp.handId)
-                 INNER JOIN Gametypes gt  on  (gt.Id = h.gametypeId)
-                 INNER JOIN Sites s       on  (s.Id = gt.siteId)
-                 INNER JOIN Players p     on  (p.Id = hp.playerId)
-                WHERE hp.playerId in <player_test>
-                 AND  h.startTime <datestest>
-                 AND  gt.type is 'ring'
-                 <limit_test>
-                 <game_test>
-                 <seats_test>
-                 <currency_test>
-                ORDER by time"""
 
         ####################################
         # Querry to get all hands in a date range
