@@ -8,6 +8,7 @@ import sys
 
 from fpdb_3_legacy.sql_indexes import index_queries
 from fpdb_3_legacy.sql_metadata import metadata_queries
+from fpdb_3_legacy.sql_queries_cash_profit import cash_profit_queries
 from fpdb_3_legacy.sql_queries_core import core_lookup_queries
 from fpdb_3_legacy.sql_queries_filters import filter_queries
 from fpdb_3_legacy.sql_queries_hand_detail import hand_detail_queries
@@ -87,6 +88,7 @@ class Sql:
         self.query.update(time_schema_queries(db_server))
         self.query.update(index_queries(db_server))
         self.query.update(core_lookup_queries())
+        self.query.update(cash_profit_queries())
         self.query.update(filter_queries(db_server))
         self.query.update(hand_detail_queries())
         self.query.update(history_window_queries(db_server))
@@ -1140,56 +1142,6 @@ sum(hc.street0Limp)                 AS limp,
                        there's a gap over X minutes between hands (ie. when we get back to start of
                        the session */
                 """
-
-        self.query["getRingProfitAllHandsPlayerIdSite"] = """
-            SELECT hp.handId, hp.totalProfit, hp.sawShowdown
-            FROM HandsPlayers hp
-            INNER JOIN Players pl      ON  (pl.id = hp.playerId)
-            INNER JOIN Hands h         ON  (h.id  = hp.handId)
-            INNER JOIN Gametypes gt    ON  (gt.id = h.gametypeId)
-            WHERE pl.id in <player_test>
-            AND   tt.siteId in <site_test>
-            AND   h.startTime > '<startdate_test>'
-            AND   h.startTime < '<enddate_test>'
-            <limit_test>
-            <game_test>
-            AND   gt.type = 'ring'
-            GROUP BY h.startTime, hp.handId, hp.sawShowdown, hp.totalProfit
-            ORDER BY h.startTime"""
-
-        self.query["getRingProfitAllHandsPlayerIdSiteInBB"] = """
-            SELECT hp.handId, ( hp.totalProfit / ( gt.bigBlind  * 2.0 ) ) * 100 , hp.sawShowdown, ( hp.allInEV / ( gt.bigBlind * 2.0 ) ) * 100
-            FROM HandsPlayers hp
-            INNER JOIN Players pl      ON  (pl.id = hp.playerId)
-            INNER JOIN Hands h         ON  (h.id  = hp.handId)
-            INNER JOIN Gametypes gt    ON  (gt.id = h.gametypeId)
-            WHERE pl.id in <player_test>
-            AND   pl.siteId in <site_test>
-            AND   h.startTime > '<startdate_test>'
-            AND   h.startTime < '<enddate_test>'
-            <limit_test>
-            <game_test>
-            <currency_test>
-            AND   hp.tourneysPlayersId IS NULL
-            GROUP BY h.startTime, hp.handId, hp.sawShowdown, hp.totalProfit, hp.allInEV, gt.bigBlind
-            ORDER BY h.startTime"""
-
-        self.query["getRingProfitAllHandsPlayerIdSiteInDollars"] = """
-            SELECT hp.handId, hp.totalProfit, hp.sawShowdown, hp.allInEV
-            FROM HandsPlayers hp
-            INNER JOIN Players pl      ON  (pl.id = hp.playerId)
-            INNER JOIN Hands h         ON  (h.id  = hp.handId)
-            INNER JOIN Gametypes gt    ON  (gt.id = h.gametypeId)
-            WHERE pl.id in <player_test>
-            AND   pl.siteId in <site_test>
-            AND   h.startTime > '<startdate_test>'
-            AND   h.startTime < '<enddate_test>'
-            <limit_test>
-            <game_test>
-            <currency_test>
-            AND   hp.tourneysPlayersId IS NULL
-            GROUP BY h.startTime, hp.handId, hp.sawShowdown, hp.totalProfit, hp.allInEV
-            ORDER BY h.startTime"""
 
         ####################################
         # Tourney Results query
