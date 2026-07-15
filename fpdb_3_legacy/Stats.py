@@ -92,6 +92,15 @@ from fpdb_3_legacy.stats_postflop import (
     a_freq4 as a_freq4,
 )
 from fpdb_3_legacy.stats_postflop import (
+    a_freq_123 as a_freq_123,
+)
+from fpdb_3_legacy.stats_postflop import (
+    agg_fact as agg_fact,
+)
+from fpdb_3_legacy.stats_postflop import (
+    agg_fact_pct as agg_fact_pct,
+)
+from fpdb_3_legacy.stats_postflop import (
     bet_frequency_flop as bet_frequency_flop,
 )
 from fpdb_3_legacy.stats_postflop import (
@@ -2287,155 +2296,6 @@ def wwsf(stat_dict, player):
     for existing HUD layouts while exposing the name used by modern trackers.
     """
     return WMsF(stat_dict, player)
-
-
-def a_freq_123(stat_dict, player):
-    """Calculate aggression frequency for a specific player based on their stats post-flop.
-
-    Args:
-        stat_dict (dict): A dictionary containing player statistics.
-        player (int): The player for whom the aggression frequency is calculated.
-
-    Returns:
-        tuple: A tuple containing the calculated aggression frequency, formatted strings, and related information.
-
-    """
-    stat = 0.0
-    try:
-        # Sum up aggression and seen stats
-        total_aggr = (
-            stat_dict[player].get("aggr_1", 0) + stat_dict[player].get("aggr_2", 0) + stat_dict[player].get("aggr_3", 0)
-        )
-        total_saw = (
-            stat_dict[player].get("saw_1", 0) + stat_dict[player].get("saw_2", 0) + stat_dict[player].get("saw_3", 0)
-        )
-
-        # Check to avoid division by zero
-        if total_saw != 0:
-            stat = float(total_aggr) / float(total_saw)
-        else:
-            stat = 0  # Default to 0 if total_saw is zero
-
-        return (
-            stat,
-            "%3.1f" % (100.0 * stat),
-            "afq=%3.1f%%" % (100.0 * stat),
-            "post_a_fq=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (total_aggr, total_saw),
-            "Post-flop aggression frequency",
-        )
-    except (KeyError, ValueError, TypeError):
-        return (
-            stat,
-            "NA",
-            "afq=NA",
-            "post_a_fq=NA",
-            "(0/0)",
-            "Post-flop aggression frequency",
-        )
-
-
-def agg_fact(stat_dict, player):
-    """Calculate the aggression factor based on the given player's statistics.
-
-    Args:
-        stat_dict (dict): A dictionary containing the player's statistics.
-        player (str): The player for whom the aggression factor is calculated.
-
-    Returns:
-        tuple: A tuple containing the calculated aggression factor in different formats.
-            The formats include percentage, float, and string representations.
-            Returns "-" if no post-flop actions available to distinguish from 0.0 (passive player).
-
-    """
-    stat = 0.0
-    try:
-        # Sum of all bet/raise and call actions
-        bet_raise = (
-            stat_dict[player].get("aggr_1", 0)
-            + stat_dict[player].get("aggr_2", 0)
-            + stat_dict[player].get("aggr_3", 0)
-            + stat_dict[player].get("aggr_4", 0)
-        )
-        post_call = (
-            stat_dict[player].get("call_1", 0)
-            + stat_dict[player].get("call_2", 0)
-            + stat_dict[player].get("call_3", 0)
-            + stat_dict[player].get("call_4", 0)
-        )
-
-        # No post-flop actions = no data available
-        if bet_raise == 0 and post_call == 0:
-            return format_no_data_stat("afa", "Aggression factor", bet_raise, post_call)
-
-        # Calculate aggression factor (bet+raise) / call
-        stat = float(bet_raise) / float(post_call) if post_call > 0 else float(bet_raise)
-
-        return (
-            stat / 100.0,
-            f"{stat:2.2f}",
-            f"afa={stat:2.2f}",
-            f"agg_fa={stat:2.2f}",
-            "(%d/%d)" % (bet_raise, post_call),
-            "Aggression factor",
-        )
-    except (KeyError, ValueError, TypeError):
-        return (stat, "NA", "afa=NA", "agg_fa=NA", "(0/0)", "Aggression factor")
-
-
-def agg_fact_pct(stat_dict, player):
-    """Calculate the aggression factor percentage based on the given player's stats.
-
-    Args:
-        stat_dict (dict): A dictionary containing the player's statistics.
-        player (int): The player for whom the aggression factor percentage is calculated.
-
-    Returns:
-        tuple: A tuple containing the aggression factor percentage, formatted strings, and related information.
-            Returns "-" if no post-flop actions available to distinguish from 0.0% (passive player).
-
-    """
-    stat = 0.0
-    try:
-        # Safely retrieve the values, defaulting to 0 if the keys are missing
-        bet_raise = (
-            stat_dict[player].get("aggr_1", 0)
-            + stat_dict[player].get("aggr_2", 0)
-            + stat_dict[player].get("aggr_3", 0)
-            + stat_dict[player].get("aggr_4", 0)
-        )
-        post_call = (
-            stat_dict[player].get("call_1", 0)
-            + stat_dict[player].get("call_2", 0)
-            + stat_dict[player].get("call_3", 0)
-            + stat_dict[player].get("call_4", 0)
-        )
-
-        # No post-flop actions = no data available
-        if bet_raise == 0 and post_call == 0:
-            return format_no_data_stat("afap", "Aggression factor pct", bet_raise, post_call)
-
-        # Calculate aggression factor percentage (bet+raise) / (bet+raise+call)
-        if float(post_call + bet_raise) > 0.0:
-            stat = float(bet_raise) / float(post_call + bet_raise)
-
-        return (
-            stat / 100.0,
-            f"{stat:2.2f}",
-            f"afap={stat:2.2f}",
-            f"agg_fa_pct={stat:2.2f}",
-            "(%d/%d)" % (bet_raise, post_call),
-            "Aggression factor pct",
-        )
-    except (KeyError, ValueError, TypeError):
-        return (
-            stat,
-            "NA",
-            "afap=NA",
-            "agg_fa_pct=NA",
-            "(0/0)",
-            "Aggression factor pct",
-        )
 
 
 def starthands(stat_dict, player):
