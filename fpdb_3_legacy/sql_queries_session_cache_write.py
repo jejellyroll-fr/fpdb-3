@@ -1,0 +1,814 @@
+"""Session and tournament cache maintenance queries."""
+
+from __future__ import annotations
+
+
+def session_cache_write_queries() -> dict[str, str]:
+    """Return session/cache rebuild, write, and linkage queries."""
+    query: dict[str, str] = {}
+    query["clear_S_H"] = "UPDATE Hands SET sessionId = NULL"
+    query["clear_S_T"] = "UPDATE Tourneys SET sessionId = NULL"
+    query["clear_S_SC"] = "UPDATE SessionsCache SET sessionId = NULL"
+    query["clear_S_TC"] = "UPDATE TourneysCache SET sessionId = NULL"
+    query["clear_W_S"] = "UPDATE Sessions SET weekId = NULL"
+    query["clear_M_S"] = "UPDATE Sessions SET monthId = NULL"
+    query["clearSessionsCache"] = "DELETE FROM SessionsCache WHERE 1"
+    query["clearTourneysCache"] = "DELETE FROM TourneysCache WHERE 1"
+    query["clearSessions"] = "DELETE FROM Sessions WHERE 1"
+    query["clearWeeks"] = "DELETE FROM Weeks WHERE 1"
+    query["clearMonths"] = "DELETE FROM Months WHERE 1"
+    query["update_RSC_H"] = "UPDATE Hands SET sessionId = %s WHERE id = %s"
+
+    ####################################
+    # select
+    ####################################
+
+    query["select_S_all"] = """
+                SELECT SC.id as id,
+                sessionStart,
+                weekStart,
+                monthStart,
+                weekId,
+                monthId
+                FROM Sessions SC
+                INNER JOIN Weeks WC ON (SC.weekId = WC.id)
+                INNER JOIN Months MC ON (SC.monthId = MC.id)
+                WHERE sessionEnd>=%s
+                AND sessionStart<=%s"""
+
+    query["select_S"] = """
+                SELECT SC.id as id,
+                sessionStart,
+                sessionEnd,
+                weekStart,
+                monthStart,
+                weekId,
+                monthId
+                FROM Sessions SC
+                INNER JOIN Weeks WC ON (SC.weekId = WC.id)
+                INNER JOIN Months MC ON (SC.monthId = MC.id)
+                WHERE (sessionEnd>=%s AND sessionStart<=%s)
+                <TOURSELECT>"""
+
+    query["select_W"] = """
+                SELECT id
+                FROM Weeks
+                WHERE weekStart = %s"""
+
+    query["select_M"] = """
+                SELECT id
+                FROM Months
+                WHERE monthStart = %s"""
+
+    query["select_SC"] = """
+                SELECT id,
+                sessionId,
+                startTime,
+                endTime,
+                n,
+                street0VPIChance,
+                street0VPI,
+                street0AggrChance,
+                street0Aggr,
+                street0CalledRaiseChance,
+                street0CalledRaiseDone,
+                street0_2BChance,
+                street0_2BDone,
+                street0_3BChance,
+                street0_3BDone,
+                street0_4BChance,
+                street0_4BDone,
+                street0_C4BChance,
+                street0_C4BDone,
+                street0_FoldTo2BChance,
+                street0_FoldTo2BDone,
+                street0_FoldTo3BChance,
+                street0_FoldTo3BDone,
+                street0_FoldTo4BChance,
+                street0_FoldTo4BDone,
+                street0_SqueezeChance,
+                street0_SqueezeDone,
+                raiseToStealChance,
+                raiseToStealDone,
+                stealChance,
+                stealDone,
+                success_Steal,
+                street1Seen,
+                street2Seen,
+                street3Seen,
+                street4Seen,
+                sawShowdown,
+                street1Aggr,
+                street2Aggr,
+                street3Aggr,
+                street4Aggr,
+                otherRaisedStreet0,
+                otherRaisedStreet1,
+                otherRaisedStreet2,
+                otherRaisedStreet3,
+                otherRaisedStreet4,
+                foldToOtherRaisedStreet0,
+                foldToOtherRaisedStreet1,
+                foldToOtherRaisedStreet2,
+                foldToOtherRaisedStreet3,
+                foldToOtherRaisedStreet4,
+                wonWhenSeenStreet1,
+                wonWhenSeenStreet2,
+                wonWhenSeenStreet3,
+                wonWhenSeenStreet4,
+                wonAtSD,
+                raiseFirstInChance,
+                raisedFirstIn,
+                foldBbToStealChance,
+                foldedBbToSteal,
+                foldSbToStealChance,
+                foldedSbToSteal,
+                street1CBChance,
+                street1CBDone,
+                street2CBChance,
+                street2CBDone,
+                street3CBChance,
+                street3CBDone,
+                street4CBChance,
+                street4CBDone,
+                foldToStreet1CBChance,
+                foldToStreet1CBDone,
+                foldToStreet2CBChance,
+                foldToStreet2CBDone,
+                foldToStreet3CBChance,
+                foldToStreet3CBDone,
+                foldToStreet4CBChance,
+                foldToStreet4CBDone,
+                common,
+                committed,
+                winnings,
+                rake,
+                rakeDealt,
+                rakeContributed,
+                rakeWeighted,
+                totalProfit,
+                allInEV,
+                showdownWinnings,
+                nonShowdownWinnings,
+                street1CheckCallRaiseChance,
+                street1CheckCallDone,
+                street1CheckRaiseDone,
+                street2CheckCallRaiseChance,
+                street2CheckCallDone,
+                street2CheckRaiseDone,
+                street3CheckCallRaiseChance,
+                street3CheckCallDone,
+                street3CheckRaiseDone,
+                street4CheckCallRaiseChance,
+                street4CheckCallDone,
+                street4CheckRaiseDone,
+                street0Calls,
+                street1Calls,
+                street2Calls,
+                street3Calls,
+                street4Calls,
+                street0Bets,
+                street1Bets,
+                street2Bets,
+                street3Bets,
+                street4Bets,
+                street0Raises,
+                street1Raises,
+                street2Raises,
+                street3Raises,
+                street4Raises,
+                street1Discards,
+                street2Discards,
+                street3Discards
+                FROM SessionsCache
+                WHERE endTime>=%s
+                AND startTime<=%s
+                AND gametypeId=%s
+                AND playerId=%s"""
+
+    query["select_TC"] = """
+                SELECT id, startTime, endTime
+                FROM TourneysCache TC
+                WHERE tourneyId=%s
+                AND playerId=%s"""
+
+    ####################################
+    # insert
+    ####################################
+
+    query["insert_W"] = """insert into Weeks (
+                weekStart)
+                values (%s)"""
+
+    query["insert_M"] = """insert into Months (
+                monthStart)
+                values (%s)"""
+
+    query["insert_S"] = """insert into Sessions (
+                weekId,
+                monthId,
+                sessionStart,
+                sessionEnd)
+                values (%s, %s, %s, %s)"""
+
+    query["insert_SC"] = """insert into SessionsCache (
+                sessionId,
+                startTime,
+                endTime,
+                gametypeId,
+                playerId,
+                n,
+                street0VPIChance,
+                street0VPI,
+                street0AggrChance,
+                street0Aggr,
+                street0CalledRaiseChance,
+                street0CalledRaiseDone,
+                street0_2BChance,
+                street0_2BDone,
+                street0_3BChance,
+                street0_3BDone,
+                street0_4BChance,
+                street0_4BDone,
+                street0_C4BChance,
+                street0_C4BDone,
+                street0_FoldTo2BChance,
+                street0_FoldTo2BDone,
+                street0_FoldTo3BChance,
+                street0_FoldTo3BDone,
+                street0_FoldTo4BChance,
+                street0_FoldTo4BDone,
+                street0_SqueezeChance,
+                street0_SqueezeDone,
+                raiseToStealChance,
+                raiseToStealDone,
+                stealChance,
+                stealDone,
+                success_Steal,
+                street1Seen,
+                street2Seen,
+                street3Seen,
+                street4Seen,
+                sawShowdown,
+                street1Aggr,
+                street2Aggr,
+                street3Aggr,
+                street4Aggr,
+                otherRaisedStreet0,
+                otherRaisedStreet1,
+                otherRaisedStreet2,
+                otherRaisedStreet3,
+                otherRaisedStreet4,
+                foldToOtherRaisedStreet0,
+                foldToOtherRaisedStreet1,
+                foldToOtherRaisedStreet2,
+                foldToOtherRaisedStreet3,
+                foldToOtherRaisedStreet4,
+                wonWhenSeenStreet1,
+                wonWhenSeenStreet2,
+                wonWhenSeenStreet3,
+                wonWhenSeenStreet4,
+                wonAtSD,
+                raiseFirstInChance,
+                raisedFirstIn,
+                foldBbToStealChance,
+                foldedBbToSteal,
+                foldSbToStealChance,
+                foldedSbToSteal,
+                street1CBChance,
+                street1CBDone,
+                street2CBChance,
+                street2CBDone,
+                street3CBChance,
+                street3CBDone,
+                street4CBChance,
+                street4CBDone,
+                foldToStreet1CBChance,
+                foldToStreet1CBDone,
+                foldToStreet2CBChance,
+                foldToStreet2CBDone,
+                foldToStreet3CBChance,
+                foldToStreet3CBDone,
+                foldToStreet4CBChance,
+                foldToStreet4CBDone,
+                common,
+                committed,
+                winnings,
+                rake,
+                rakeDealt,
+                rakeContributed,
+                rakeWeighted,
+                totalProfit,
+                allInEV,
+                showdownWinnings,
+                nonShowdownWinnings,
+                street1CheckCallRaiseChance,
+                street1CheckCallDone,
+                street1CheckRaiseDone,
+                street2CheckCallRaiseChance,
+                street2CheckCallDone,
+                street2CheckRaiseDone,
+                street3CheckCallRaiseChance,
+                street3CheckCallDone,
+                street3CheckRaiseDone,
+                street4CheckCallRaiseChance,
+                street4CheckCallDone,
+                street4CheckRaiseDone,
+                street0Calls,
+                street1Calls,
+                street2Calls,
+                street3Calls,
+                street4Calls,
+                street0Bets,
+                street1Bets,
+                street2Bets,
+                street3Bets,
+                street4Bets,
+                street0Raises,
+                street1Raises,
+                street2Raises,
+                street3Raises,
+                street4Raises,
+                street1Discards,
+                street2Discards,
+                street3Discards
+                )
+                values (%s, %s, %s, %s, %s,
+                        %s, %s, %s, %s, %s,
+                        %s, %s, %s, %s, %s,
+                        %s, %s, %s, %s, %s,
+                        %s, %s, %s, %s, %s,
+                        %s, %s, %s, %s, %s,
+                        %s, %s, %s, %s, %s,
+                        %s, %s, %s, %s, %s,
+                        %s, %s, %s, %s, %s,
+                        %s, %s, %s, %s, %s,
+                        %s, %s, %s, %s, %s,
+                        %s, %s, %s, %s, %s,
+                        %s, %s, %s, %s, %s,
+                        %s, %s, %s, %s, %s,
+                        %s, %s, %s, %s, %s,
+                        %s, %s, %s, %s, %s,
+                        %s, %s, %s, %s, %s,
+                        %s, %s, %s, %s, %s,
+                        %s, %s, %s, %s, %s,
+                        %s, %s, %s, %s, %s,
+                        %s, %s, %s, %s, %s,
+                        %s, %s, %s, %s, %s,
+                        %s, %s, %s, %s, %s,
+                        %s, %s, %s, %s, %s)"""
+
+    query["insert_TC"] = """insert into TourneysCache (
+                sessionId,
+                startTime,
+                endTime,
+                tourneyId,
+                playerId,
+                n,
+                street0VPIChance,
+                street0VPI,
+                street0AggrChance,
+                street0Aggr,
+                street0CalledRaiseChance,
+                street0CalledRaiseDone,
+                street0_2BChance,
+                street0_2BDone,
+                street0_3BChance,
+                street0_3BDone,
+                street0_4BChance,
+                street0_4BDone,
+                street0_C4BChance,
+                street0_C4BDone,
+                street0_FoldTo2BChance,
+                street0_FoldTo2BDone,
+                street0_FoldTo3BChance,
+                street0_FoldTo3BDone,
+                street0_FoldTo4BChance,
+                street0_FoldTo4BDone,
+                street0_SqueezeChance,
+                street0_SqueezeDone,
+                raiseToStealChance,
+                raiseToStealDone,
+                stealChance,
+                stealDone,
+                success_Steal,
+                street1Seen,
+                street2Seen,
+                street3Seen,
+                street4Seen,
+                sawShowdown,
+                street1Aggr,
+                street2Aggr,
+                street3Aggr,
+                street4Aggr,
+                otherRaisedStreet0,
+                otherRaisedStreet1,
+                otherRaisedStreet2,
+                otherRaisedStreet3,
+                otherRaisedStreet4,
+                foldToOtherRaisedStreet0,
+                foldToOtherRaisedStreet1,
+                foldToOtherRaisedStreet2,
+                foldToOtherRaisedStreet3,
+                foldToOtherRaisedStreet4,
+                wonWhenSeenStreet1,
+                wonWhenSeenStreet2,
+                wonWhenSeenStreet3,
+                wonWhenSeenStreet4,
+                wonAtSD,
+                raiseFirstInChance,
+                raisedFirstIn,
+                foldBbToStealChance,
+                foldedBbToSteal,
+                foldSbToStealChance,
+                foldedSbToSteal,
+                street1CBChance,
+                street1CBDone,
+                street2CBChance,
+                street2CBDone,
+                street3CBChance,
+                street3CBDone,
+                street4CBChance,
+                street4CBDone,
+                foldToStreet1CBChance,
+                foldToStreet1CBDone,
+                foldToStreet2CBChance,
+                foldToStreet2CBDone,
+                foldToStreet3CBChance,
+                foldToStreet3CBDone,
+                foldToStreet4CBChance,
+                foldToStreet4CBDone,
+                common,
+                committed,
+                winnings,
+                rake,
+                rakeDealt,
+                rakeContributed,
+                rakeWeighted,
+                totalProfit,
+                allInEV,
+                showdownWinnings,
+                nonShowdownWinnings,
+                street1CheckCallRaiseChance,
+                street1CheckCallDone,
+                street1CheckRaiseDone,
+                street2CheckCallRaiseChance,
+                street2CheckCallDone,
+                street2CheckRaiseDone,
+                street3CheckCallRaiseChance,
+                street3CheckCallDone,
+                street3CheckRaiseDone,
+                street4CheckCallRaiseChance,
+                street4CheckCallDone,
+                street4CheckRaiseDone,
+                street0Calls,
+                street1Calls,
+                street2Calls,
+                street3Calls,
+                street4Calls,
+                street0Bets,
+                street1Bets,
+                street2Bets,
+                street3Bets,
+                street4Bets,
+                street0Raises,
+                street1Raises,
+                street2Raises,
+                street3Raises,
+                street4Raises,
+                street1Discards,
+                street2Discards,
+                street3Discards
+                )
+                values (%s, %s, %s, %s, %s,
+                        %s, %s, %s, %s, %s,
+                        %s, %s, %s, %s, %s,
+                        %s, %s, %s, %s, %s,
+                        %s, %s, %s, %s, %s,
+                        %s, %s, %s, %s, %s,
+                        %s, %s, %s, %s, %s,
+                        %s, %s, %s, %s, %s,
+                        %s, %s, %s, %s, %s,
+                        %s, %s, %s, %s, %s,
+                        %s, %s, %s, %s, %s,
+                        %s, %s, %s, %s, %s,
+                        %s, %s, %s, %s, %s,
+                        %s, %s, %s, %s, %s,
+                        %s, %s, %s, %s, %s,
+                        %s, %s, %s, %s, %s,
+                        %s, %s, %s, %s, %s,
+                        %s, %s, %s, %s, %s,
+                        %s, %s, %s, %s, %s,
+                        %s, %s, %s, %s, %s,
+                        %s, %s, %s, %s, %s,
+                        %s, %s, %s, %s, %s,
+                        %s, %s, %s, %s, %s,
+                        %s, %s, %s, %s, %s)"""
+
+    ####################################
+    # update
+    ####################################
+
+    query["update_WM_S"] = """
+                UPDATE Sessions SET
+                weekId=%s,
+                monthId=%s
+                WHERE id=%s"""
+
+    query["update_S"] = """
+                UPDATE Sessions SET
+                weekId=%s,
+                monthId=%s,
+                sessionStart=%s,
+                sessionEnd=%s
+                WHERE id=%s"""
+
+    query["update_SC"] = """
+                UPDATE SessionsCache SET
+                startTime=%s,
+                endTime=%s,
+                n=n+%s,
+                street0VPIChance=street0VPIChance+%s,
+                street0VPI=street0VPI+%s,
+                street0AggrChance=street0AggrChance+%s,
+                street0Aggr=street0Aggr+%s,
+                street0CalledRaiseChance=street0CalledRaiseChance+%s,
+                street0CalledRaiseDone=street0CalledRaiseDone+%s,
+                street0_2BChance=street0_2BChance+%s,
+                street0_2BDone=street0_2BDone+%s,
+                street0_3BChance=street0_3BChance+%s,
+                street0_3BDone=street0_3BDone+%s,
+                street0_4BChance=street0_4BChance+%s,
+                street0_4BDone=street0_4BDone+%s,
+                street0_C4BChance=street0_C4BChance+%s,
+                street0_C4BDone=street0_C4BDone+%s,
+                street0_FoldTo2BChance=street0_FoldTo2BChance+%s,
+                street0_FoldTo2BDone=street0_FoldTo2BDone+%s,
+                street0_FoldTo3BChance=street0_FoldTo3BChance+%s,
+                street0_FoldTo3BDone=street0_FoldTo3BDone+%s,
+                street0_FoldTo4BChance=street0_FoldTo4BChance+%s,
+                street0_FoldTo4BDone=street0_FoldTo4BDone+%s,
+                street0_SqueezeChance=street0_SqueezeChance+%s,
+                street0_SqueezeDone=street0_SqueezeDone+%s,
+                raiseToStealChance=raiseToStealChance+%s,
+                raiseToStealDone=raiseToStealDone+%s,
+                stealChance=stealChance+%s,
+                stealDone=stealDone+%s,
+                success_Steal=success_Steal+%s,
+                street1Seen=street1Seen+%s,
+                street2Seen=street2Seen+%s,
+                street3Seen=street3Seen+%s,
+                street4Seen=street4Seen+%s,
+                sawShowdown=sawShowdown+%s,
+                street1Aggr=street1Aggr+%s,
+                street2Aggr=street2Aggr+%s,
+                street3Aggr=street3Aggr+%s,
+                street4Aggr=street4Aggr+%s,
+                otherRaisedStreet0=otherRaisedStreet0+%s,
+                otherRaisedStreet1=otherRaisedStreet1+%s,
+                otherRaisedStreet2=otherRaisedStreet2+%s,
+                otherRaisedStreet3=otherRaisedStreet3+%s,
+                otherRaisedStreet4=otherRaisedStreet4+%s,
+                foldToOtherRaisedStreet0=foldToOtherRaisedStreet0+%s,
+                foldToOtherRaisedStreet1=foldToOtherRaisedStreet1+%s,
+                foldToOtherRaisedStreet2=foldToOtherRaisedStreet2+%s,
+                foldToOtherRaisedStreet3=foldToOtherRaisedStreet3+%s,
+                foldToOtherRaisedStreet4=foldToOtherRaisedStreet4+%s,
+                wonWhenSeenStreet1=wonWhenSeenStreet1+%s,
+                wonWhenSeenStreet2=wonWhenSeenStreet2+%s,
+                wonWhenSeenStreet3=wonWhenSeenStreet3+%s,
+                wonWhenSeenStreet4=wonWhenSeenStreet4+%s,
+                wonAtSD=wonAtSD+%s,
+                raiseFirstInChance=raiseFirstInChance+%s,
+                raisedFirstIn=raisedFirstIn+%s,
+                foldBbToStealChance=foldBbToStealChance+%s,
+                foldedBbToSteal=foldedBbToSteal+%s,
+                foldSbToStealChance=foldSbToStealChance+%s,
+                foldedSbToSteal=foldedSbToSteal+%s,
+                street1CBChance=street1CBChance+%s,
+                street1CBDone=street1CBDone+%s,
+                street2CBChance=street2CBChance+%s,
+                street2CBDone=street2CBDone+%s,
+                street3CBChance=street3CBChance+%s,
+                street3CBDone=street3CBDone+%s,
+                street4CBChance=street4CBChance+%s,
+                street4CBDone=street4CBDone+%s,
+                foldToStreet1CBChance=foldToStreet1CBChance+%s,
+                foldToStreet1CBDone=foldToStreet1CBDone+%s,
+                foldToStreet2CBChance=foldToStreet2CBChance+%s,
+                foldToStreet2CBDone=foldToStreet2CBDone+%s,
+                foldToStreet3CBChance=foldToStreet3CBChance+%s,
+                foldToStreet3CBDone=foldToStreet3CBDone+%s,
+                foldToStreet4CBChance=foldToStreet4CBChance+%s,
+                foldToStreet4CBDone=foldToStreet4CBDone+%s,
+                common=common+%s,
+                committed=committed+%s,
+                winnings=winnings+%s,
+                rake=rake+%s,
+                rakeDealt=rakeDealt+%s,
+                rakeContributed=rakeContributed+%s,
+                rakeWeighted=rakeWeighted+%s,
+                totalProfit=totalProfit+%s,
+                allInEV=allInEV+%s,
+                showdownWinnings=showdownWinnings+%s,
+                nonShowdownWinnings=nonShowdownWinnings+%s,
+                street1CheckCallRaiseChance=street1CheckCallRaiseChance+%s,
+                street1CheckCallDone=street1CheckCallDone+%s,
+                street1CheckRaiseDone=street1CheckRaiseDone+%s,
+                street2CheckCallRaiseChance=street2CheckCallRaiseChance+%s,
+                street2CheckCallDone=street2CheckCallDone+%s,
+                street2CheckRaiseDone=street2CheckRaiseDone+%s,
+                street3CheckCallRaiseChance=street3CheckCallRaiseChance+%s,
+                street3CheckCallDone=street3CheckCallDone+%s,
+                street3CheckRaiseDone=street3CheckRaiseDone+%s,
+                street4CheckCallRaiseChance=street4CheckCallRaiseChance+%s,
+                street4CheckCallDone=street4CheckCallDone+%s,
+                street4CheckRaiseDone=street4CheckRaiseDone+%s,
+                street0Calls=street0Calls+%s,
+                street1Calls=street1Calls+%s,
+                street2Calls=street2Calls+%s,
+                street3Calls=street3Calls+%s,
+                street4Calls=street4Calls+%s,
+                street0Bets=street0Bets+%s,
+                street1Bets=street1Bets+%s,
+                street2Bets=street2Bets+%s,
+                street3Bets=street3Bets+%s,
+                street4Bets=street4Bets+%s,
+                street0Raises=street0Raises+%s,
+                street1Raises=street1Raises+%s,
+                street2Raises=street2Raises+%s,
+                street3Raises=street3Raises+%s,
+                street4Raises=street4Raises+%s,
+                street1Discards=street1Discards+%s,
+                street2Discards=street2Discards+%s,
+                street3Discards=street3Discards+%s
+                WHERE id=%s"""
+
+    query["update_TC"] = """
+                UPDATE TourneysCache SET
+                <UPDATE>
+                n=n+%s,
+                street0VPIChance=street0VPIChance+%s,
+                street0VPI=street0VPI+%s,
+                street0AggrChance=street0AggrChance+%s,
+                street0Aggr=street0Aggr+%s,
+                street0CalledRaiseChance=street0CalledRaiseChance+%s,
+                street0CalledRaiseDone=street0CalledRaiseDone+%s,
+                street0_2BChance=street0_2BChance+%s,
+                street0_2BDone=street0_2BDone+%s,
+                street0_3BChance=street0_3BChance+%s,
+                street0_3BDone=street0_3BDone+%s,
+                street0_4BChance=street0_4BChance+%s,
+                street0_4BDone=street0_4BDone+%s,
+                street0_C4BChance=street0_C4BChance+%s,
+                street0_C4BDone=street0_C4BDone+%s,
+                street0_FoldTo2BChance=street0_FoldTo2BChance+%s,
+                street0_FoldTo2BDone=street0_FoldTo2BDone+%s,
+                street0_FoldTo3BChance=street0_FoldTo3BChance+%s,
+                street0_FoldTo3BDone=street0_FoldTo3BDone+%s,
+                street0_FoldTo4BChance=street0_FoldTo4BChance+%s,
+                street0_FoldTo4BDone=street0_FoldTo4BDone+%s,
+                street0_SqueezeChance=street0_SqueezeChance+%s,
+                street0_SqueezeDone=street0_SqueezeDone+%s,
+                raiseToStealChance=raiseToStealChance+%s,
+                raiseToStealDone=raiseToStealDone+%s,
+                stealChance=stealChance+%s,
+                stealDone=stealDone+%s,
+                success_Steal=success_Steal+%s,
+                street1Seen=street1Seen+%s,
+                street2Seen=street2Seen+%s,
+                street3Seen=street3Seen+%s,
+                street4Seen=street4Seen+%s,
+                sawShowdown=sawShowdown+%s,
+                street1Aggr=street1Aggr+%s,
+                street2Aggr=street2Aggr+%s,
+                street3Aggr=street3Aggr+%s,
+                street4Aggr=street4Aggr+%s,
+                otherRaisedStreet0=otherRaisedStreet0+%s,
+                otherRaisedStreet1=otherRaisedStreet1+%s,
+                otherRaisedStreet2=otherRaisedStreet2+%s,
+                otherRaisedStreet3=otherRaisedStreet3+%s,
+                otherRaisedStreet4=otherRaisedStreet4+%s,
+                foldToOtherRaisedStreet0=foldToOtherRaisedStreet0+%s,
+                foldToOtherRaisedStreet1=foldToOtherRaisedStreet1+%s,
+                foldToOtherRaisedStreet2=foldToOtherRaisedStreet2+%s,
+                foldToOtherRaisedStreet3=foldToOtherRaisedStreet3+%s,
+                foldToOtherRaisedStreet4=foldToOtherRaisedStreet4+%s,
+                wonWhenSeenStreet1=wonWhenSeenStreet1+%s,
+                wonWhenSeenStreet2=wonWhenSeenStreet2+%s,
+                wonWhenSeenStreet3=wonWhenSeenStreet3+%s,
+                wonWhenSeenStreet4=wonWhenSeenStreet4+%s,
+                wonAtSD=wonAtSD+%s,
+                raiseFirstInChance=raiseFirstInChance+%s,
+                raisedFirstIn=raisedFirstIn+%s,
+                foldBbToStealChance=foldBbToStealChance+%s,
+                foldedBbToSteal=foldedBbToSteal+%s,
+                foldSbToStealChance=foldSbToStealChance+%s,
+                foldedSbToSteal=foldedSbToSteal+%s,
+                street1CBChance=street1CBChance+%s,
+                street1CBDone=street1CBDone+%s,
+                street2CBChance=street2CBChance+%s,
+                street2CBDone=street2CBDone+%s,
+                street3CBChance=street3CBChance+%s,
+                street3CBDone=street3CBDone+%s,
+                street4CBChance=street4CBChance+%s,
+                street4CBDone=street4CBDone+%s,
+                foldToStreet1CBChance=foldToStreet1CBChance+%s,
+                foldToStreet1CBDone=foldToStreet1CBDone+%s,
+                foldToStreet2CBChance=foldToStreet2CBChance+%s,
+                foldToStreet2CBDone=foldToStreet2CBDone+%s,
+                foldToStreet3CBChance=foldToStreet3CBChance+%s,
+                foldToStreet3CBDone=foldToStreet3CBDone+%s,
+                foldToStreet4CBChance=foldToStreet4CBChance+%s,
+                foldToStreet4CBDone=foldToStreet4CBDone+%s,
+                common=common+%s,
+                committed=committed+%s,
+                winnings=winnings+%s,
+                rake=rake+%s,
+                rakeDealt=rakeDealt+%s,
+                rakeContributed=rakeContributed+%s,
+                rakeWeighted=rakeWeighted+%s,
+                totalProfit=totalProfit+%s,
+                allInEV=allInEV+%s,
+                showdownWinnings=showdownWinnings+%s,
+                nonShowdownWinnings=nonShowdownWinnings+%s,
+                street1CheckCallRaiseChance=street1CheckCallRaiseChance+%s,
+                street1CheckCallDone=street1CheckCallDone+%s,
+                street1CheckRaiseDone=street1CheckRaiseDone+%s,
+                street2CheckCallRaiseChance=street2CheckCallRaiseChance+%s,
+                street2CheckCallDone=street2CheckCallDone+%s,
+                street2CheckRaiseDone=street2CheckRaiseDone+%s,
+                street3CheckCallRaiseChance=street3CheckCallRaiseChance+%s,
+                street3CheckCallDone=street3CheckCallDone+%s,
+                street3CheckRaiseDone=street3CheckRaiseDone+%s,
+                street4CheckCallRaiseChance=street4CheckCallRaiseChance+%s,
+                street4CheckCallDone=street4CheckCallDone+%s,
+                street4CheckRaiseDone=street4CheckRaiseDone+%s,
+                street0Calls=street0Calls+%s,
+                street1Calls=street1Calls+%s,
+                street2Calls=street2Calls+%s,
+                street3Calls=street3Calls+%s,
+                street4Calls=street4Calls+%s,
+                street0Bets=street0Bets+%s,
+                street1Bets=street1Bets+%s,
+                street2Bets=street2Bets+%s,
+                street3Bets=street3Bets+%s,
+                street4Bets=street4Bets+%s,
+                street0Raises=street0Raises+%s,
+                street1Raises=street1Raises+%s,
+                street2Raises=street2Raises+%s,
+                street3Raises=street3Raises+%s,
+                street4Raises=street4Raises+%s,
+                street1Discards=street1Discards+%s,
+                street2Discards=street2Discards+%s,
+                street3Discards=street3Discards+%s
+                WHERE tourneyId=%s
+                AND playerId=%s"""
+
+    ####################################
+    # delete
+    ####################################
+
+    query["delete_S"] = """
+                DELETE FROM Sessions
+                WHERE id=%s"""
+
+    query["delete_SC"] = """
+                DELETE FROM SessionsCache
+                WHERE id=%s"""
+
+    ####################################
+    # update SessionsCache, Hands, Tourneys
+    ####################################
+
+    query["update_S_SC"] = """
+                UPDATE SessionsCache SET
+                sessionId=%s
+                WHERE sessionId=%s"""
+
+    query["update_S_TC"] = """
+                UPDATE TourneysCache SET
+                sessionId=%s
+                WHERE sessionId=%s"""
+
+    query["update_S_T"] = """
+                UPDATE Tourneys SET
+                sessionId=%s
+                WHERE sessionId=%s"""
+
+    query["update_S_H"] = """
+                UPDATE Hands SET
+                sessionId=%s
+                WHERE sessionId=%s"""
+
+    ####################################
+    # update Tourneys w. sessionIds, hands, start/end
+    ####################################
+
+    query["updateTourneysSessions"] = """
+                UPDATE Tourneys SET
+                sessionId=%s
+                WHERE id=%s"""
+
+    return query
+
