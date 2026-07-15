@@ -34,3 +34,17 @@ def test_autorates_ddl_keeps_backend_specific_relations() -> None:
     for ddl in (mysql, postgresql):
         assert "REFERENCES Players(id)" in ddl
         assert "REFERENCES Gametypes(id)" in ddl
+
+
+def test_player_auto_notes_ddl_keeps_unique_rule_hits_and_times() -> None:
+    mysql = player_schema_queries("mysql")["createPlayerAutoNotesTable"]
+    postgresql = player_schema_queries("postgresql")["createPlayerAutoNotesTable"]
+    sqlite = player_schema_queries("sqlite")["createPlayerAutoNotesTable"]
+
+    columns = "(playerId, handId, ruleId, ruleVersion)"
+    assert f"UNIQUE KEY player_auto_note_rule_hit {columns}" in mysql
+    assert f"UNIQUE {columns}" in postgresql
+    assert f"UNIQUE {columns}" in sqlite
+    assert "createdTs DATETIME DEFAULT CURRENT_TIMESTAMP" in mysql
+    assert "timestamp without time zone DEFAULT CURRENT_TIMESTAMP" in postgresql
+    assert "FOREIGN KEY" not in sqlite
