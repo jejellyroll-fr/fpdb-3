@@ -146,6 +146,15 @@ from fpdb_3_legacy.stats_postflop import (
     cr4 as cr4,
 )
 from fpdb_3_legacy.stats_postflop import (
+    dbr1 as dbr1,
+)
+from fpdb_3_legacy.stats_postflop import (
+    dbr2 as dbr2,
+)
+from fpdb_3_legacy.stats_postflop import (
+    dbr3 as dbr3,
+)
+from fpdb_3_legacy.stats_postflop import (
     f_cb1 as f_cb1,
 )
 from fpdb_3_legacy.stats_postflop import (
@@ -156,6 +165,15 @@ from fpdb_3_legacy.stats_postflop import (
 )
 from fpdb_3_legacy.stats_postflop import (
     f_cb4 as f_cb4,
+)
+from fpdb_3_legacy.stats_postflop import (
+    f_dbr1 as f_dbr1,
+)
+from fpdb_3_legacy.stats_postflop import (
+    f_dbr2 as f_dbr2,
+)
+from fpdb_3_legacy.stats_postflop import (
+    f_dbr3 as f_dbr3,
 )
 from fpdb_3_legacy.stats_postflop import (
     face_raise_flop as face_raise_flop,
@@ -1785,297 +1803,6 @@ def ctb(stat_dict, player):
         )
     except (KeyError, ValueError, TypeError):
         return (stat, "NA", "ctb=NA", "ctb=NA", "(0/0)", "% call 3 bet")
-
-
-def dbr1(stat_dict, player):
-    """Calculate and return the Donk Bet and Raise statistic for a given player on flop/4th street.
-
-    Args:
-        stat_dict (dict): A dictionary containing player statistics.
-        player (int): The player for whom the statistic is calculated.
-
-    Returns:
-        tuple: A tuple containing the calculated statistic, percentage representation, formatted strings, and additional information.
-
-    Example:
-        dbr1(stat_dict, player)
-
-    """
-    stat = 0.0
-    try:
-        aggr_1 = float(stat_dict[player].get("aggr_1", 0))
-        cb_1 = float(stat_dict[player].get("cb_1", 0))
-        saw_f = float(stat_dict[player].get("saw_f", 0))
-        cb_opp_1 = float(stat_dict[player].get("cb_opp_1", 0))
-
-        # Calculate donk opportunities (saw flop but no cbet opportunity)
-        donk_opp = saw_f - cb_opp_1
-        donk_bets = aggr_1 - cb_1
-
-        # No opportunities = no data available
-        if donk_opp == 0:
-            return format_no_data_stat("dbr1", "% DonkBetAndRaise flop/4th street")
-
-        # Calculate donk bet and raise percentage
-        stat = donk_bets / donk_opp
-        return (
-            stat,
-            "%3.1f" % (100.0 * stat),
-            "dbr1=%3.1f%%" % (100.0 * stat),
-            "dbr1=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (donk_bets, donk_opp),
-            "% DonkBetAndRaise flop/4th street",
-        )
-    except (KeyError, ValueError, TypeError):
-        return format_no_data_stat("dbr1", "% DonkBetAndRaise flop/4th street")
-
-
-def dbr2(stat_dict, player):
-    """Calculate and return the Donk Bet and Raise statistic for a given player on turn/5th street.
-
-    Args:
-        stat_dict (dict): A dictionary containing player statistics.
-        player (int): The player for whom the statistic is calculated.
-
-    Returns:
-        tuple: A tuple containing the calculated statistic, percentage representation, formatted strings, and additional information.
-
-    Example:
-        dbr2(stat_dict, player)
-
-    """
-    stat = 0.0
-    try:
-        aggr_2 = float(stat_dict[player].get("aggr_2", 0))
-        cb_2 = float(stat_dict[player].get("cb_2", 0))
-        saw_2 = float(stat_dict[player].get("saw_2", 0))
-        cb_opp_2 = float(stat_dict[player].get("cb_opp_2", 0))
-
-        # Calculate donk opportunities (saw turn but no cbet opportunity)
-        donk_opp = saw_2 - cb_opp_2
-        donk_bets = aggr_2 - cb_2
-
-        # No opportunities = no data available
-        if donk_opp == 0:
-            return format_no_data_stat("dbr2", "% DonkBetAndRaise turn/5th street")
-
-        # Calculate donk bet and raise percentage
-        stat = donk_bets / donk_opp
-        return (
-            stat,
-            "%3.1f" % (100.0 * stat),
-            "dbr2=%3.1f%%" % (100.0 * stat),
-            "dbr2=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (donk_bets, donk_opp),
-            "% DonkBetAndRaise turn/5th street",
-        )
-    except (KeyError, ValueError, TypeError):
-        return format_no_data_stat("dbr2", "% DonkBetAndRaise turn/5th street")
-
-
-def dbr3(stat_dict, player):
-    """Calculate and return the Donk Bet and Raise statistic for a given player on river/6th street.
-
-    Args:
-        stat_dict (dict): A dictionary containing player statistics.
-        player (int): The player for whom the statistic is calculated.
-
-    Returns:
-        tuple: A tuple containing the calculated statistic, percentage representation, formatted strings, and additional information.
-
-    Example:
-        dbr3(stat_dict, player)
-
-    """
-    stat = 0.0
-    try:
-        aggr_3 = float(stat_dict[player].get("aggr_3", 0))
-        cb_3 = float(stat_dict[player].get("cb_3", 0))
-        saw_3 = float(stat_dict[player].get("saw_3", 0))
-        cb_opp_3 = float(stat_dict[player].get("cb_opp_3", 0))
-
-        if (saw_3 - cb_opp_3) != 0:  # Check to avoid division by zero
-            stat = (aggr_3 - cb_3) / (saw_3 - cb_opp_3)
-        else:
-            stat = 0  # Default to 0 if the denominator is zero
-
-        return (
-            stat,
-            "%3.1f" % (100.0 * stat),
-            "dbr3=%3.1f%%" % (100.0 * stat),
-            "dbr3=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)"
-            % (
-                aggr_3 - cb_3,
-                saw_3 - cb_opp_3,
-            ),
-            "% DonkBetAndRaise river/6th street",
-        )
-    except (KeyError, ValueError, TypeError):
-        return (
-            stat,
-            "NA",
-            "dbr3=NA",
-            "dbr3=NA",
-            "(0/0)",
-            "% DonkBetAndRaise river/6th street",
-        )
-
-
-def f_dbr1(stat_dict, player):
-    """Calculate and return the fold to DonkBetAndRaise statistic for a given player on flop/4th street.
-
-    Args:
-        stat_dict (dict): A dictionary containing player statistics.
-        player (int): The player for whom the statistic is calculated.
-
-    Returns:
-        tuple: A tuple containing the calculated statistic, formatted strings, and additional information.
-
-    Example:
-        f_dbr1(stat_dict, player)
-
-    Note:
-        If an exception occurs during calculation, 'NA' values are returned.
-
-    """
-    stat = 0.0
-    try:
-        f_freq_1 = float(stat_dict[player].get("f_freq_1", 0))
-        f_cb_1 = float(stat_dict[player].get("f_cb_1", 0))
-        was_raised_1 = float(stat_dict[player].get("was_raised_1", 0))
-        f_cb_opp_1 = float(stat_dict[player].get("f_cb_opp_1", 0))
-
-        if (was_raised_1 - f_cb_opp_1) != 0:  # Check to avoid division by zero
-            stat = (f_freq_1 - f_cb_1) / (was_raised_1 - f_cb_opp_1)
-        else:
-            stat = 0  # Default to 0 if the denominator is zero
-
-        return (
-            stat,
-            "%3.1f" % (100.0 * stat),
-            "f_dbr1=%3.1f%%" % (100.0 * stat),
-            "f_dbr1=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)"
-            % (
-                f_freq_1 - f_cb_1,
-                was_raised_1 - f_cb_opp_1,
-            ),
-            "% Fold to DonkBetAndRaise flop/4th street",
-        )
-    except (KeyError, ValueError, TypeError):
-        return (
-            stat,
-            "NA",
-            "f_dbr1=NA",
-            "f_dbr1=NA",
-            "(0/0)",
-            "% Fold DonkBetAndRaise flop/4th street",
-        )
-
-
-def f_dbr2(stat_dict, player):
-    """Calculate and return the fold to DonkBetAndRaise statistic for a given player on turn/5th street.
-
-    Args:
-        stat_dict (dict): A dictionary containing player statistics.
-        player (int): The player for whom the statistic is calculated.
-
-    Returns:
-        tuple: A tuple containing the calculated statistic, formatted strings, and additional information.
-
-    Example:
-        f_dbr2(stat_dict, player)
-
-    Note:
-        If an exception occurs during calculation, 'NA' values are returned.
-
-    """
-    stat = 0.0
-    try:
-        f_freq_2 = float(stat_dict[player].get("f_freq_2", 0))
-        f_cb_2 = float(stat_dict[player].get("f_cb_2", 0))
-        was_raised_2 = float(stat_dict[player].get("was_raised_2", 0))
-        f_cb_opp_2 = float(stat_dict[player].get("f_cb_opp_2", 0))
-
-        if (was_raised_2 - f_cb_opp_2) != 0:  # Check to avoid division by zero
-            stat = (f_freq_2 - f_cb_2) / (was_raised_2 - f_cb_opp_2)
-        else:
-            stat = 0  # Default to 0 if the denominator is zero
-
-        return (
-            stat,
-            "%3.1f" % (100.0 * stat),
-            "f_dbr2=%3.1f%%" % (100.0 * stat),
-            "f_dbr2=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)"
-            % (
-                f_freq_2 - f_cb_2,
-                was_raised_2 - f_cb_opp_2,
-            ),
-            "% Fold to DonkBetAndRaise turn",
-        )
-    except (KeyError, ValueError, TypeError):
-        return (
-            stat,
-            "NA",
-            "f_dbr2=NA",
-            "f_dbr2=NA",
-            "(0/0)",
-            "% Fold DonkBetAndRaise turn",
-        )
-
-
-def f_dbr3(stat_dict, player):
-    """Calculate and return the fold to DonkBetAndRaise statistic for a given player on river/6th street.
-
-    Args:
-        stat_dict (dict): A dictionary containing player statistics.
-        player (int): The player for whom the statistic is calculated.
-
-    Returns:
-        tuple: A tuple containing the calculated statistic, formatted strings, and additional information.
-
-    Example:
-        f_dbr3(stat_dict, player)
-
-    Note:
-        If an exception occurs during calculation, 'NA' values are returned.
-
-    """
-    stat = 0.0
-    try:
-        f_freq_3 = float(stat_dict[player].get("f_freq_3", 0))
-        f_cb_3 = float(stat_dict[player].get("f_cb_3", 0))
-        was_raised_3 = float(stat_dict[player].get("was_raised_3", 0))
-        f_cb_opp_3 = float(stat_dict[player].get("f_cb_opp_3", 0))
-
-        if (was_raised_3 - f_cb_opp_3) != 0:  # Check to avoid division by zero
-            stat = (f_freq_3 - f_cb_3) / (was_raised_3 - f_cb_opp_3)
-        else:
-            stat = 0  # Default to 0 if the denominator is zero
-
-        return (
-            stat,
-            "%3.1f" % (100.0 * stat),
-            "f_dbr3=%3.1f%%" % (100.0 * stat),
-            "f_dbr3=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)"
-            % (
-                f_freq_3 - f_cb_3,
-                was_raised_3 - f_cb_opp_3,
-            ),
-            "% Fold to DonkBetAndRaise river",
-        )
-    except (KeyError, ValueError, TypeError):
-        return (
-            stat,
-            "NA",
-            "f_dbr3=NA",
-            "f_dbr3=NA",
-            "(0/0)",
-            "% Fold DonkBetAndRaise river",
-        )
 
 
 def starthands(stat_dict, player):

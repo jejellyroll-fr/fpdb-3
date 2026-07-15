@@ -209,6 +209,7 @@ Les bugs multi-backend récents (`Rank` réservé, `boolean` vs `smallint`, `set
 - ✅ **Won when saw flop de `Stats.py`** (2026-07-15) : `WMsF` et son alias moderne `wwsf` déplacés dans `stats_postflop.py`, avec sentinelle sans flop et dénominateurs historiques conservés.
 - ✅ **Réponses préflop de `Stats.py`** (2026-07-15) : `car0`, `f_3bet` et `f_4bet` déplacés dans `stats_preflop.py` derrière un helper typé commun, avec distinction historique entre zéro opportunité et compteur absent conservée.
 - ✅ **Squeeze et raise-to-steal de `Stats.py`** (2026-07-15) : `squeeze` et `raiseToSteal` déplacés dans `stats_preflop.py` derrière un helper typé commun, avec leurs sentinelles historiques sans opportunité conservées.
+- ✅ **Donk-bet-and-raise par rue de `Stats.py`** (2026-07-15) : `dbr1…3` et `f_dbr1…3` déplacés dans `stats_postflop.py` derrière un helper de compteurs ajustés, avec les contrats historiques distincts de zéro et d'erreur conservés.
 - **Découper les god-modules** : `SQL.py` (requêtes par domaine / fichiers `.sql`), `Database.py` (connexion / DDL / cache HUD / requêtes), `Stats.py` (par famille). Incrémental, avec tests de non-régression.
 - **Qualité outillée restante** : Ruff est vert sur tout le dépôt et mypy couvre tout le package legacy ; convertir les 73 `TODO/FIXME` actuels en tâches traçables, évaluer l'intérêt d'un second checker (`pyright`) et clarifier/supprimer le dossier `fpdb/`.
 

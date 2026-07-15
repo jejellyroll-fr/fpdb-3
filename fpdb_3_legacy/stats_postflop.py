@@ -588,6 +588,61 @@ def wwsf(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
     return WMsF(stat_dict, player)
 
 
+def _adjusted_street_frequency(
+    stat_dict: Mapping[int, Mapping[str, Any]],
+    player: int,
+    street: int,
+    numerator_keys: tuple[str, str],
+    denominator_keys: tuple[str, str],
+    abbreviation: str,
+    description: str,
+    *,
+    zero_is_no_data: bool = False,
+    error_is_no_data: bool = False,
+    error_description: str | None = None,
+) -> StatTuple:
+    """Format a street frequency built from differences of two counter pairs."""
+    stat = 0.0
+    try:
+        player_stats = stat_dict[player]
+        numerator = float(player_stats.get(numerator_keys[0], 0)) - float(player_stats.get(numerator_keys[1], 0))
+        denominator = float(player_stats.get(denominator_keys[0], 0)) - float(player_stats.get(denominator_keys[1], 0))
+        if denominator == 0 and zero_is_no_data:
+            return format_no_data_stat(abbreviation, description)
+        if denominator != 0:
+            stat = numerator / denominator
+        percent = 100.0 * stat
+        return stat, f"{percent:3.1f}", f"{abbreviation}={percent:3.1f}%", f"{abbreviation}={percent:3.1f}%", f"({int(numerator)}/{int(denominator)})", description
+    except (KeyError, TypeError, ValueError):
+        if error_is_no_data:
+            return format_no_data_stat(abbreviation, description)
+        return stat, "NA", f"{abbreviation}=NA", f"{abbreviation}=NA", "(0/0)", error_description or description
+
+
+def dbr1(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    return _adjusted_street_frequency(stat_dict, player, 1, ("aggr_1", "cb_1"), ("saw_f", "cb_opp_1"), "dbr1", "% DonkBetAndRaise flop/4th street", zero_is_no_data=True, error_is_no_data=True)
+
+
+def dbr2(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    return _adjusted_street_frequency(stat_dict, player, 2, ("aggr_2", "cb_2"), ("saw_2", "cb_opp_2"), "dbr2", "% DonkBetAndRaise turn/5th street", zero_is_no_data=True, error_is_no_data=True)
+
+
+def dbr3(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    return _adjusted_street_frequency(stat_dict, player, 3, ("aggr_3", "cb_3"), ("saw_3", "cb_opp_3"), "dbr3", "% DonkBetAndRaise river/6th street")
+
+
+def f_dbr1(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    return _adjusted_street_frequency(stat_dict, player, 1, ("f_freq_1", "f_cb_1"), ("was_raised_1", "f_cb_opp_1"), "f_dbr1", "% Fold to DonkBetAndRaise flop/4th street", error_description="% Fold DonkBetAndRaise flop/4th street")
+
+
+def f_dbr2(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    return _adjusted_street_frequency(stat_dict, player, 2, ("f_freq_2", "f_cb_2"), ("was_raised_2", "f_cb_opp_2"), "f_dbr2", "% Fold to DonkBetAndRaise turn", error_description="% Fold DonkBetAndRaise turn")
+
+
+def f_dbr3(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    return _adjusted_street_frequency(stat_dict, player, 3, ("f_freq_3", "f_cb_3"), ("was_raised_3", "f_cb_opp_3"), "f_dbr3", "% Fold to DonkBetAndRaise river", error_description="% Fold DonkBetAndRaise river")
+
+
 def triple_barrel(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
     """Return the historical triple-barrel estimate from street c-bet rates."""
     try:
