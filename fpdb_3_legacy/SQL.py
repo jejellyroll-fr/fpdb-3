@@ -8,6 +8,7 @@ import sys
 
 from fpdb_3_legacy.sql_metadata import metadata_queries
 from fpdb_3_legacy.sql_schema_core import core_schema_queries
+from fpdb_3_legacy.sql_schema_game import game_schema_queries
 from fpdb_3_legacy.sql_schema_lookup import lookup_schema_queries
 from fpdb_3_legacy.sql_schema_raw import raw_schema_queries
 from fpdb_3_legacy.sql_schema_tournament import tournament_schema_queries
@@ -48,85 +49,13 @@ class Sql:
         self.query = {}
         self.query.update(metadata_queries(db_server))
         self.query.update(core_schema_queries(db_server))
+        self.query.update(game_schema_queries(db_server))
         self.query.update(lookup_schema_queries(db_server))
         self.query.update(raw_schema_queries(db_server))
         self.query.update(tournament_schema_queries(db_server))
         ###############################################################################3
         #    Support for the Free Poker DataBase = fpdb   http://fpdb.sourceforge.net/
         #
-
-        ################################
-        # Create Gametypes
-        ################################
-
-        if db_server == "mysql":
-            self.query["createGametypesTable"] = """CREATE TABLE Gametypes (
-                        id SMALLINT UNSIGNED AUTO_INCREMENT NOT NULL, PRIMARY KEY (id),
-                        siteId SMALLINT UNSIGNED NOT NULL, FOREIGN KEY (siteId) REFERENCES Sites(id),
-                        currency varchar(4) NOT NULL,
-                        type char(4) NOT NULL,
-                        base char(4) NOT NULL,
-                        category varchar(9) NOT NULL,
-                        limitType char(2) NOT NULL,
-                        hiLo char(1) NOT NULL,
-                        mix varchar(9) NOT NULL,
-                        smallBlind bigint,
-                        bigBlind bigint,
-                        smallBet bigint NOT NULL,
-                        bigBet bigint NOT NULL,
-                        maxSeats TINYINT NOT NULL,
-                        ante INT NOT NULL,
-                        buyinType varchar(9) NOT NULL,
-                        fast BOOLEAN,
-                        newToGame BOOLEAN,
-                        homeGame BOOLEAN,
-                        split BOOLEAN)
-                        ENGINE=INNODB"""
-        elif db_server == "postgresql":
-            self.query["createGametypesTable"] = """CREATE TABLE Gametypes (
-                        id SERIAL NOT NULL, PRIMARY KEY (id),
-                        siteId INTEGER NOT NULL, FOREIGN KEY (siteId) REFERENCES Sites(id),
-                        currency varchar(4) NOT NULL,
-                        type char(4) NOT NULL,
-                        base char(4) NOT NULL,
-                        category varchar(9) NOT NULL,
-                        limitType char(2) NOT NULL,
-                        hiLo char(1) NOT NULL,
-                        mix varchar(9) NOT NULL,
-                        smallBlind bigint,
-                        bigBlind bigint,
-                        smallBet bigint NOT NULL,
-                        bigBet bigint NOT NULL,
-                        maxSeats SMALLINT NOT NULL,
-                        ante INT NOT NULL,
-                        buyinType varchar(9) NOT NULL,
-                        fast BOOLEAN,
-                        newToGame BOOLEAN,
-                        homeGame BOOLEAN,
-                        split BOOLEAN)"""
-        elif db_server == "sqlite":
-            self.query["createGametypesTable"] = """CREATE TABLE Gametypes (
-                        id INTEGER PRIMARY KEY NOT NULL,
-                        siteId INTEGER NOT NULL,
-                        currency TEXT NOT NULL,
-                        type TEXT NOT NULL,
-                        base TEXT NOT NULL,
-                        category TEXT NOT NULL,
-                        limitType TEXT NOT NULL,
-                        hiLo TEXT NOT NULL,
-                        mix TEXT NOT NULL,
-                        smallBlind INTEGER,
-                        bigBlind INTEGER,
-                        smallBet INTEGER NOT NULL,
-                        bigBet INTEGER NOT NULL,
-                        maxSeats INT NOT NULL,
-                        ante INT NOT NULL,
-                        buyinType TEXT NOT NULL,
-                        fast INT,
-                        newToGame INT,
-                        homeGame INT,
-                        split INT,
-                        FOREIGN KEY(siteId) REFERENCES Sites(id) ON DELETE CASCADE)"""
 
         ################################
         # Create Players
