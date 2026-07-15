@@ -62,3 +62,18 @@ def test_hands_stove_ddl_keeps_equity_and_rank_relations() -> None:
     assert "REFERENCES `Rank`(id)" in mysql
     assert "REFERENCES Rank(id)" in postgresql
     assert "FOREIGN KEY" not in sqlite
+
+
+def test_hands_actions_ddl_keeps_amounts_and_action_relations() -> None:
+    mysql = hand_schema_queries("mysql")["createHandsActionsTable"]
+    postgresql = hand_schema_queries("postgresql")["createHandsActionsTable"]
+    sqlite = hand_schema_queries("sqlite")["createHandsActionsTable"]
+
+    assert "amount BIGINT NOT NULL" in mysql
+    assert "amount BIGINT" in postgresql
+    assert "amount INT" in sqlite
+    assert "cardsDiscarded varchar(14)" in mysql
+    assert "cardsDiscarded TEXT" in sqlite
+    for ddl in (mysql, postgresql):
+        assert "REFERENCES Actions(id)" in ddl
+    assert "FOREIGN KEY" not in sqlite

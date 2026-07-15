@@ -1227,58 +1227,6 @@ street4Raises INT,
                         )"""
 
         ################################
-        # Create HandsActions
-        ################################
-
-        if db_server == "mysql":
-            self.query["createHandsActionsTable"] = """CREATE TABLE HandsActions (
-                        id BIGINT UNSIGNED AUTO_INCREMENT NOT NULL, PRIMARY KEY (id),
-                        handId BIGINT UNSIGNED NOT NULL, FOREIGN KEY (handId) REFERENCES Hands(id),
-                        playerId INT UNSIGNED NOT NULL, FOREIGN KEY (playerId) REFERENCES Players(id),
-                        street SMALLINT NOT NULL,
-                        actionNo SMALLINT NOT NULL,
-                        streetActionNo SMALLINT NOT NULL,
-                        actionId SMALLINT UNSIGNED NOT NULL, FOREIGN KEY (actionId) REFERENCES Actions(id),
-                        amount BIGINT NOT NULL,
-                        raiseTo BIGINT NOT NULL,
-                        amountCalled BIGINT NOT NULL,
-                        numDiscarded SMALLINT NOT NULL,
-                        cardsDiscarded varchar(14),
-                        allIn BOOLEAN NOT NULL)
-                        ENGINE=INNODB"""
-        elif db_server == "postgresql":
-            self.query["createHandsActionsTable"] = """CREATE TABLE HandsActions (
-                        id BIGSERIAL, PRIMARY KEY (id),
-                        handId BIGINT NOT NULL, FOREIGN KEY (handId) REFERENCES Hands(id),
-                        playerId INT NOT NULL, FOREIGN KEY (playerId) REFERENCES Players(id),
-                        street SMALLINT,
-                        actionNo SMALLINT,
-                        streetActionNo SMALLINT,
-                        actionId SMALLINT, FOREIGN KEY (actionId) REFERENCES Actions(id),
-                        amount BIGINT,
-                        raiseTo BIGINT,
-                        amountCalled BIGINT,
-                        numDiscarded SMALLINT,
-                        cardsDiscarded varchar(14),
-                        allIn BOOLEAN)"""
-        elif db_server == "sqlite":
-            self.query["createHandsActionsTable"] = """CREATE TABLE HandsActions (
-                        id INTEGER PRIMARY KEY,
-                        handId INT NOT NULL,
-                        playerId INT NOT NULL,
-                        street SMALLINT,
-                        actionNo SMALLINT,
-                        streetActionNo SMALLINT,
-                        actionId SMALLINT,
-                        amount INT,
-                        raiseTo INT,
-                        amountCalled INT,
-                        numDiscarded SMALLINT,
-                        cardsDiscarded TEXT,
-                        allIn BOOLEAN
-                        )"""
-
-        ################################
         # Create PlayerAutoNotes
         # Generated player notes, kept separate from manual Players.comment.
         ################################
