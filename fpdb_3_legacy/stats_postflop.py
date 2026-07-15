@@ -566,6 +566,28 @@ def agg_fact_pct(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> Sta
         return stat, "NA", "afap=NA", "agg_fa_pct=NA", "(0/0)", "Aggression factor pct"
 
 
+def WMsF(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    """Return the historical won-money-when-seeing-flop statistic."""
+    stat = 0.0
+    description = "% won money when seen flop/4th street"
+    try:
+        saw_street = float(stat_dict[player].get("saw_1", 0))
+        saw_flop = float(stat_dict[player].get("saw_f", 0))
+        won = float(stat_dict[player].get("w_w_s_1", 0))
+        if saw_flop == 0:
+            return format_no_data_stat("WMsF", description)
+        stat = won / saw_street if saw_street != 0 else 0
+        percent = 100.0 * stat
+        return stat, f"{percent:3.1f}", f"wf={percent:3.1f}%", f"w_w_f={percent:3.1f}%", f"({int(won)}/{int(saw_flop)})", description
+    except (KeyError, TypeError, ValueError):
+        return stat, "NA", "wf=NA", "w_w_f=NA", "(0/0)", description
+
+
+def wwsf(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    """Expose WMsF under the standard tracker name."""
+    return WMsF(stat_dict, player)
+
+
 def triple_barrel(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
     """Return the historical triple-barrel estimate from street c-bet rates."""
     try:
