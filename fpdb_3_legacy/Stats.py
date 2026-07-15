@@ -91,6 +91,9 @@ from fpdb_3_legacy.stats_financial import (
 from fpdb_3_legacy.stats_financial import (
     profit100 as profit100,
 )
+from fpdb_3_legacy.stats_financial import (
+    totalprofit as totalprofit,
+)
 from fpdb_3_legacy.stats_formatting import (
     do_tip as do_tip,
 )
@@ -764,42 +767,6 @@ def do_stat(stat_dict, player=24, stat="vpip", hand_instance=None):
 
 ###########################################
 #    functions that return individual stats
-
-
-def totalprofit(stat_dict, player):
-    """Calculates the total profit for a given player.
-
-    Args:
-        stat_dict (dict): A dictionary containing player statistics.
-        player (int): The player for whom to calculate the total profit.
-
-    Returns:
-        tuple: A tuple containing the following values:
-            - stat (float): The total profit divided by 100.
-            - formatted_stat (str): The formatted total profit with two decimal places.
-            - tp_formatted_stat (str): The formatted total profit with two decimal places and a hint.
-            - tot_prof_formatted_stat (str): The formatted total profit with two decimal places and a hint.
-            - str_stat (str): The total profit as a string.
-            - stat_name (str): The name of the statistic.
-
-    If the 'net' key is not present in the stat_dict for the given player, or if the value cannot be converted to a float,
-    the function returns a tuple with default values:
-
-        - ('0', '$0.00', 'tp=0', 'totalprofit=0', '0', 'Total Profit')
-
-    """
-    try:
-        stat = float(stat_dict[player]["net"]) / 100
-        return (
-            stat / 100.0,
-            f"${stat:.2f}",
-            f"tp=${stat:.2f}",
-            f"tot_prof=${stat:.2f}",
-            str(stat),
-            "Total Profit",
-        )
-    except (KeyError, ValueError, TypeError):
-        return ("0", "$0.00", "tp=0", "totalprofit=0", "0", "Total Profit")
 
 
 def _calculate_end_stack(stat_dict, player, hand_instance):
