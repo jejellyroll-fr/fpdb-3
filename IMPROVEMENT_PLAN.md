@@ -227,6 +227,7 @@ Les bugs multi-backend récents (`Rank` réservé, `boolean` vs `smallint`, `set
 - ✅ **Schéma cœur de `SQL.py`** (2026-07-15) : DDL `Settings` et verrou `InsertLock` extraits dans `sql_schema_core.py`, avec variantes exactes par backend et verrou MySQL-only explicitement testé.
 - ✅ **Archives brutes de `SQL.py`** (2026-07-15) : DDL jumeaux `RawHands`/`RawTourneys` extraits dans `sql_schema_raw.py`, générés par un helper backend commun et protégés par des tests d'équivalence structurelle.
 - ✅ **Lookups Actions/Rank de `SQL.py`** (2026-07-15) : DDL des tables de référence extraits dans `sql_schema_lookup.py`, avec identités backend spécifiques et cas PostgreSQL du nom `Rank` protégés par régression exacte.
+- ✅ **Lookups StartCards/Sites de `SQL.py`** (2026-07-15) : DDL des cartes de départ et rooms regroupés dans `sql_schema_lookup.py`, avec chaînes historiques et identités propres aux trois backends conservées.
 - **Qualité outillée restante** : Ruff est vert sur tout le dépôt et mypy couvre tout le package legacy ; convertir les 73 `TODO/FIXME` actuels en tâches traçables, évaluer l'intérêt d'un second checker (`pyright`) et clarifier/supprimer le dossier `fpdb/`.
 
 **Effort** continu · **Impact** moyen.
