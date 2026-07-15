@@ -267,6 +267,7 @@ Les bugs multi-backend récents (`Rank` réservé, `boolean` vs `smallint`, `set
 - ✅ **Chronologie des sessions de `SQL.py`** (2026-07-15) : `sessionStats` extrait dans `sql_queries_session_stats.py`, avec conversions epoch/strftime et filtres cash multi-backend conservés.
 - ✅ **Navigation/replayer de `SQL.py`** (2026-07-15) : plages de mains, session, boards, joueurs et actions déplacés dans `sql_queries_replayer.py`, avec ordre des actions et placeholders SQLite protégés.
 - ✅ **Maintenance des caches HUD de `SQL.py`** (2026-07-15) : vidages, contextes tournoi manquants et périodes week/month déplacés dans `sql_queries_cache_maintenance.py`, avec placeholders SQLite protégés.
+- ✅ **Reconstruction des caches HUD de `SQL.py`** (2026-07-15) : `rebuildCache` extrait mécaniquement dans `sql_queries_cache_rebuild.py`, avec agrégats statistiques et placeholders de composition conservés.
 - **Qualité outillée restante** : Ruff est vert sur tout le dépôt et mypy couvre tout le package legacy ; convertir les 73 `TODO/FIXME` actuels en tâches traçables, évaluer l'intérêt d'un second checker (`pyright`) et clarifier/supprimer le dossier `fpdb/`.
 
 **Effort** continu · **Impact** moyen.
