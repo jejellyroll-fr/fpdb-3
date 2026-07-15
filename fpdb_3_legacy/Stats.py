@@ -290,7 +290,16 @@ from fpdb_3_legacy.stats_preflop import (
     call_vs_steal as call_vs_steal,
 )
 from fpdb_3_legacy.stats_preflop import (
+    car0 as car0,
+)
+from fpdb_3_legacy.stats_preflop import (
     cold_call as cold_call,
+)
+from fpdb_3_legacy.stats_preflop import (
+    f_3bet as f_3bet,
+)
+from fpdb_3_legacy.stats_preflop import (
+    f_4bet as f_4bet,
 )
 from fpdb_3_legacy.stats_preflop import (
     face_limpers as face_limpers,
@@ -2133,122 +2142,6 @@ def raiseToSteal(stat_dict, player):
         )
     except (KeyError, ValueError, TypeError):
         return (stat, "NA", "RST=NA", "RST_pf=NA", "(0/0)", "% raise to steal")
-
-
-def car0(stat_dict, player):
-    """Calculate the percentage of called a raise preflop stat for a player based on the provided stat dictionary.
-
-    Args:
-        stat_dict (dict): A dictionary containing stats for each player.
-        player (int): The player for whom the CAR0 stat is calculated.
-
-    Returns:
-        tuple: A tuple containing various formatted strings representing the CAR0 stat.
-            If an exception occurs during calculation, returns default 'NA' values.
-
-    """
-    stat = 0.0
-    try:
-        car_opp_0 = float(
-            stat_dict[player].get("car_opp_0", 0),
-        )  # Ensure key exists and default to 0
-        if car_opp_0 != 0:  # Check to avoid division by zero
-            stat = float(stat_dict[player]["car_0"]) / car_opp_0
-        else:
-            stat = 0  # Default to 0 if car_opp_0 is zero
-
-        return (
-            stat,
-            "%3.1f" % (100.0 * stat),
-            "CAR0=%3.1f%%" % (100.0 * stat),
-            "CAR_pf=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (stat_dict[player]["car_0"], car_opp_0),
-            "% called a raise preflop",
-        )
-    except (KeyError, ValueError, TypeError):
-        return (stat, "NA", "CAR0=NA", "CAR_pf=NA", "(0/0)", "% called a raise preflop")
-
-
-def f_3bet(stat_dict, player):
-    """Calculate the Fold to 3-Bet statistic for a player.
-
-    Args:
-        stat_dict (dict): A dictionary containing player statistics.
-        player (int): The player for whom the statistic is calculated.
-
-    Returns:
-        tuple: A tuple containing various representations of the Fold to 3-Bet statistic.
-            The tuple includes the statistic value, percentage, labels, and counts.
-            If an error occurs during calculation, returns 'NA' values.
-
-    """
-    stat = 0.0
-    try:
-        f3b_opp_0 = float(
-            stat_dict[player].get("f3b_opp_0", 0),
-        )  # Ensure key exists and default to 0
-        if f3b_opp_0 != 0:  # Check to avoid division by zero
-            stat = float(stat_dict[player]["f3b_0"]) / f3b_opp_0
-        else:
-            stat = 0  # Default to 0 if f3b_opp_0 is zero
-
-        return (
-            stat,
-            "%3.1f" % (100.0 * stat),
-            "F3B=%3.1f%%" % (100.0 * stat),
-            "F3B_pf=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (stat_dict[player]["f3b_0"], f3b_opp_0),
-            "% fold to 3 bet preflop/3rd street",
-        )
-    except (KeyError, ValueError, TypeError):
-        return (
-            stat,
-            "NA",
-            "F3B=NA",
-            "F3B_pf=NA",
-            "(0/0)",
-            "% fold to 3 bet preflop/3rd street",
-        )
-
-
-def f_4bet(stat_dict, player):
-    """Calculate and return fold to 4-bet statistics for a player.
-
-    Args:
-        stat_dict (dict): Dictionary containing player statistics.
-        player (int): Player identifier.
-
-    Returns:
-        tuple: Tuple containing various statistics related to fold to 4-bet.
-
-    """
-    stat = 0.0
-    try:
-        f4b_opp_0 = float(
-            stat_dict[player].get("f4b_opp_0", 0),
-        )  # Ensure key exists and default to 0
-        if f4b_opp_0 != 0:  # Check to avoid division by zero
-            stat = float(stat_dict[player]["f4b_0"]) / f4b_opp_0
-        else:
-            stat = 0  # Default to 0 if f4b_opp_0 is zero
-
-        return (
-            stat,
-            "%3.1f" % (100.0 * stat),
-            "F4B=%3.1f%%" % (100.0 * stat),
-            "F4B_pf=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (stat_dict[player]["f4b_0"], f4b_opp_0),
-            "% fold to 4 bet preflop/3rd street",
-        )
-    except (KeyError, ValueError, TypeError):
-        return (
-            stat,
-            "NA",
-            "F4B=NA",
-            "F4B_pf=NA",
-            "(0/0)",
-            "% fold to 4 bet preflop/3rd street",
-        )
 
 
 def starthands(stat_dict, player):

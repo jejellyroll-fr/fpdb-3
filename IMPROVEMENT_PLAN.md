@@ -207,6 +207,7 @@ Les bugs multi-backend récents (`Rank` réservé, `boolean` vs `smallint`, `set
 - ✅ **Fréquences d'agression par rue de `Stats.py`** (2026-07-15) : `a_freq1…4` déplacés dans `stats_postflop.py`, avec helper typé commun et particularité historique `saw_f` au flop conservée.
 - ✅ **Agression postflop agrégée de `Stats.py`** (2026-07-15) : `a_freq_123`, `agg_fact` et `agg_fact_pct` déplacés dans `stats_postflop.py`, avec agrégation typée commune des actions et conventions numériques historiques conservées.
 - ✅ **Won when saw flop de `Stats.py`** (2026-07-15) : `WMsF` et son alias moderne `wwsf` déplacés dans `stats_postflop.py`, avec sentinelle sans flop et dénominateurs historiques conservés.
+- ✅ **Réponses préflop de `Stats.py`** (2026-07-15) : `car0`, `f_3bet` et `f_4bet` déplacés dans `stats_preflop.py` derrière un helper typé commun, avec distinction historique entre zéro opportunité et compteur absent conservée.
 - **Découper les god-modules** : `SQL.py` (requêtes par domaine / fichiers `.sql`), `Database.py` (connexion / DDL / cache HUD / requêtes), `Stats.py` (par famille). Incrémental, avec tests de non-régression.
 - **Qualité outillée restante** : Ruff est vert sur tout le dépôt et mypy couvre tout le package legacy ; convertir les 73 `TODO/FIXME` actuels en tâches traçables, évaluer l'intérêt d'un second checker (`pyright`) et clarifier/supprimer le dossier `fpdb/`.
 
