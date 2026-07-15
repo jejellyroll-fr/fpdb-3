@@ -1227,46 +1227,6 @@ street4Raises INT,
                         )"""
 
         ################################
-        # Create HandsPots
-        ################################
-
-        if db_server == "mysql":
-            self.query["createHandsPotsTable"] = """CREATE TABLE HandsPots (
-                        id BIGINT UNSIGNED AUTO_INCREMENT NOT NULL, PRIMARY KEY (id),
-                        handId BIGINT UNSIGNED NOT NULL, FOREIGN KEY (handId) REFERENCES Hands(id),
-                        potId SMALLINT,
-                        boardId SMALLINT,
-                        hiLo char(1) NOT NULL,
-                        playerId INT UNSIGNED NOT NULL, FOREIGN KEY (playerId) REFERENCES Players(id),
-                        pot BIGINT,
-                        collected BIGINT,
-                        rake INT)
-                        ENGINE=INNODB"""
-        elif db_server == "postgresql":
-            self.query["createHandsPotsTable"] = """CREATE TABLE HandsPots (
-                        id BIGSERIAL, PRIMARY KEY (id),
-                        handId BIGINT NOT NULL, FOREIGN KEY (handId) REFERENCES Hands(id),
-                        potId SMALLINT,
-                        boardId SMALLINT,
-                        hiLo char(1) NOT NULL,
-                        playerId INT NOT NULL, FOREIGN KEY (playerId) REFERENCES Players(id),
-                        pot BIGINT,
-                        collected BIGINT,
-                        rake INT)"""
-        elif db_server == "sqlite":
-            self.query["createHandsPotsTable"] = """CREATE TABLE HandsPots (
-                        id INTEGER PRIMARY KEY,
-                        handId INT NOT NULL,
-                        potId INT,
-                        boardId INT,
-                        hiLo TEXT NOT NULL,
-                        playerId INT NOT NULL,
-                        pot INT,
-                        collected INT,
-                        rake INT
-                        )"""
-
-        ################################
         # Create Files
         ################################
 

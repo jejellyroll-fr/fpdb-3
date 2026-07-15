@@ -77,3 +77,19 @@ def test_hands_actions_ddl_keeps_amounts_and_action_relations() -> None:
     for ddl in (mysql, postgresql):
         assert "REFERENCES Actions(id)" in ddl
     assert "FOREIGN KEY" not in sqlite
+
+
+def test_hands_pots_ddl_keeps_amounts_and_player_relations() -> None:
+    mysql = hand_schema_queries("mysql")["createHandsPotsTable"]
+    postgresql = hand_schema_queries("postgresql")["createHandsPotsTable"]
+    sqlite = hand_schema_queries("sqlite")["createHandsPotsTable"]
+
+    assert "pot BIGINT" in mysql
+    assert "collected BIGINT" in postgresql
+    assert "pot INT" in sqlite
+    assert "hiLo char(1) NOT NULL" in mysql
+    assert "hiLo TEXT NOT NULL" in sqlite
+    for ddl in (mysql, postgresql):
+        assert "REFERENCES Hands(id)" in ddl
+        assert "REFERENCES Players(id)" in ddl
+    assert "FOREIGN KEY" not in sqlite
