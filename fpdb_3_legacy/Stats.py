@@ -326,6 +326,15 @@ from fpdb_3_legacy.stats_preflop import (
     f_4bet as f_4bet,
 )
 from fpdb_3_legacy.stats_preflop import (
+    f_BB_steal as f_BB_steal,
+)
+from fpdb_3_legacy.stats_preflop import (
+    f_SB_steal as f_SB_steal,
+)
+from fpdb_3_legacy.stats_preflop import (
+    f_steal as f_steal,
+)
+from fpdb_3_legacy.stats_preflop import (
     face_limpers as face_limpers,
 )
 from fpdb_3_legacy.stats_preflop import (
@@ -1439,145 +1448,6 @@ def s_steal(stat_dict, player):
 
     except (KeyError, ValueError, TypeError):
         return (stat, "NA", "s_st=NA", "s_steal=NA", "(0/0)", "% steal success")
-
-
-def f_SB_steal(stat_dict, player):
-    """Calculate the folded Small Blind (SB) to steal statistics for a player.
-
-    Args:
-        stat_dict (dict): A dictionary containing player statistics.
-        player (int): The player for whom the statistics are calculated.
-
-    Returns:
-        tuple: A tuple containing the folded SB to steal statistics.
-            - stat (float): The folded SB to steal percentage.
-            - '%3.1f' (str): The folded SB to steal percentage formatted as a string with 3 decimal places.
-            - 'fSB=%3.1f%%' (str): The folded SB to steal percentage formatted with a specific label.
-            - 'fSB_s=%3.1f%%' (str): The folded SB to steal percentage formatted with a specific label.
-            - '(%d/%d)' (str): The number of folded SB to steal and the total number of folded SB formatted as a string.
-            - '% folded SB to steal' (str): The description of the folded SB to steal percentage.
-        Returns "-" if no steal attempts to distinguish from 0% (never folded SB to steal).
-
-    Raises:
-        None
-
-    """
-    stat = 0.0
-    try:
-        sbstolen = float(stat_dict[player].get("sbstolen", 0))
-        sbnotdef = float(stat_dict[player].get("sbnotdef", 0))
-
-        # No steal attempts = no data available
-        if sbstolen == 0:
-            return format_no_data_stat("fSB", "% folded SB to steal")
-
-        # Calculate fold SB to steal percentage
-        stat = sbnotdef / sbstolen
-
-        return (
-            stat,
-            "%3.1f" % (100.0 * stat),
-            "fSB=%3.1f%%" % (100.0 * stat),
-            "fSB_s=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (sbnotdef, sbstolen),
-            "% folded SB to steal",
-        )
-    except (KeyError, ValueError, TypeError):
-        return (stat, "NA", "fSB=NA", "fSB_s=NA", "(0/0)", "% folded SB to steal")
-
-
-def f_BB_steal(stat_dict, player):
-    """Calculate the folded Big Blind (BB) to steal statistics for a player.
-
-    Args:
-        stat_dict (dict): A dictionary containing player statistics.
-        player (int): The player for whom the statistics are calculated.
-
-    Returns:
-        tuple: A tuple containing the calculated statistics in different formats:
-            - Float: The calculated statistic.
-            - String: The statistic formatted as a percentage with one decimal place.
-            - String: A formatted string representing the statistic.
-            - String: A formatted string representing the statistic with a suffix.
-            - String: A formatted string showing the count of BB not defended and BB stolen.
-            - String: A description of the statistic.
-        Returns "-" if no steal attempts to distinguish from 0% (never folded BB to steal).
-
-    If an exception occurs during the calculation, returns default values for the statistics.
-
-    """
-    stat = 0.0
-    try:
-        bbstolen = float(stat_dict[player].get("bbstolen", 0))
-        bbnotdef = float(stat_dict[player].get("bbnotdef", 0))
-
-        # No steal attempts = no data available
-        if bbstolen == 0:
-            return format_no_data_stat("fBB", "% folded BB to steal")
-
-        # Calculate fold BB to steal percentage
-        stat = bbnotdef / bbstolen
-
-        return (
-            stat,
-            "%3.1f" % (100.0 * stat),
-            "fBB=%3.1f%%" % (100.0 * stat),
-            "fBB_s=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (bbnotdef, bbstolen),
-            "% folded BB to steal",
-        )
-    except (KeyError, ValueError, TypeError):
-        return (stat, "NA", "fBB=NA", "fBB_s=NA", "(0/0)", "% folded BB to steal")
-
-
-def f_steal(stat_dict, player):
-    """Calculate the folded blind to steal statistics for a player.
-
-    Args:
-        stat_dict (dict): A dictionary containing player statistics.
-        player (int): The player for whom the statistics are calculated.
-
-    Returns:
-        tuple: A tuple containing the calculated statistics in different formats:
-            - Float: The calculated statistic.
-            - String: The statistic formatted as a percentage with one decimal place.
-            - String: A formatted string representing the statistic.
-            - String: A formatted string representing the statistic with a suffix.
-            - String: A formatted string showing the count of folded blind not defended and blind stolen.
-            - String: A description of the statistic.
-        Returns "-" if no steal attempts to distinguish from 0% (never folded to steal).
-
-    If an exception occurs during the calculation, returns default values for the statistics.
-
-    """
-    stat = 0.0
-    try:
-        folded_blind = stat_dict[player].get("sbnotdef", 0) + stat_dict[player].get(
-            "bbnotdef",
-            0,
-        )
-        blind_stolen = stat_dict[player].get("sbstolen", 0) + stat_dict[player].get(
-            "bbstolen",
-            0,
-        )
-
-        # No steal attempts = no data available
-        if blind_stolen == 0:
-            return format_no_data_stat("fB", "% folded blind to steal")
-
-        # Calculate fold to steal percentage
-        stat = float(folded_blind) / float(blind_stolen)
-
-        return (
-            stat,
-            "%3.1f" % (100.0 * stat),
-            "fB=%3.1f%%" % (100.0 * stat),
-            "fB_s=%3.1f%%" % (100.0 * stat),
-            "(%d/%d)" % (folded_blind, blind_stolen),
-            "% folded blind to steal",
-        )
-    except (KeyError, ValueError, TypeError):
-        return (stat, "NA", "fB=NA", "fB_s=NA", "(0/0)", "% folded blind to steal")
 
 
 def starthands(stat_dict, player):

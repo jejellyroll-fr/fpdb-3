@@ -432,3 +432,29 @@ def ctb(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
         return stat, f"{percent:3.1f}", f"ctb={percent:3.1f}%", f"call3B={percent:3.1f}%", f"({int(calls)}/{int(displayed_opportunities)})", "% call 3 bet"
     except (KeyError, TypeError, ValueError):
         return stat, "NA", "ctb=NA", "ctb=NA", "(0/0)", "% call 3 bet"
+
+
+def f_SB_steal(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    """Return small-blind fold-to-steal frequency."""
+    return _preflop_opportunity_frequency(stat_dict, player, "sbstolen", "sbnotdef", "fSB", "fSB_s", "% folded SB to steal")
+
+
+def f_BB_steal(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    """Return big-blind fold-to-steal frequency."""
+    return _preflop_opportunity_frequency(stat_dict, player, "bbstolen", "bbnotdef", "fBB", "fBB_s", "% folded BB to steal")
+
+
+def f_steal(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:
+    """Return aggregate blind fold-to-steal frequency."""
+    stat = 0.0
+    try:
+        player_stats = stat_dict[player]
+        folded = player_stats.get("sbnotdef", 0) + player_stats.get("bbnotdef", 0)
+        opportunities = player_stats.get("sbstolen", 0) + player_stats.get("bbstolen", 0)
+        if opportunities == 0:
+            return format_no_data_stat("fB", "% folded blind to steal")
+        stat = float(folded) / float(opportunities)
+        percent = 100.0 * stat
+        return stat, f"{percent:3.1f}", f"fB={percent:3.1f}%", f"fB_s={percent:3.1f}%", f"({int(folded)}/{int(opportunities)})", "% folded blind to steal"
+    except (KeyError, TypeError, ValueError):
+        return stat, "NA", "fB=NA", "fB_s=NA", "(0/0)", "% folded blind to steal"
