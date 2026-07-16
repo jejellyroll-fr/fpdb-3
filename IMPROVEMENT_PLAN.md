@@ -288,7 +288,8 @@ Les bugs multi-backend récents (`Rank` réservé, `boolean` vs `smallint`, `set
 - ✅ **Dossier moderne `fpdb/` clarifié** (2026-07-16) : package conservé pour l'abstraction active des fenêtres HUD multi-OS, frontière documentée, API `Platform` exportée, factory/singleton/géométrie testés et package complet ajouté au ratchet mypy.
 - ✅ **Traductions compilées dans les builds** (2026-07-16) : CI et PyInstaller compilent tous les catalogues `.po`; Briefcase fusionne une source générée `.briefcase-resources/locale` qui conserve l'arborescence gettext, validée par chargement réel de `.mo`.
 - ✅ **Dette source traçable** (2026-07-16) : les 73 `TODO/FIXME/HACK` sont inventoriés dans `TECHNICAL_DEBT.md`, avec identifiants stables, catégories et liens source ; la CI interdit que le registre diverge du code.
-- **Qualité outillée restante** : Ruff est vert sur tout le dépôt et mypy couvre tout le package legacy ; traiter progressivement le registre de dette et évaluer l'intérêt d'un second checker (`pyright`).
+- ✅ **Second checker évalué et adopté** (2026-07-16) : Pyright contrôle en mode `basic` le package moderne et les outils typés, en complément de mypy ; seuls les imports natifs optionnels propres à chaque OS sont ignorés.
+- **Qualité outillée restante** : Ruff, mypy et le ratchet Pyright sont verts ; traiter progressivement le registre de dette et élargir Pyright lorsque les annotations gagnent de nouveaux domaines.
 
 **Effort** continu · **Impact** moyen.
 

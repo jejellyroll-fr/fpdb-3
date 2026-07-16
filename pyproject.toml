@@ -105,6 +105,17 @@ follow_imports = "skip"
 ignore_missing_imports = true
 warn_unused_configs = true
 
+[tool.pyright]
+include = [
+    "fpdb",
+    "tools/prepare_briefcase_resources.py",
+    "tools/todo_inventory.py",
+]
+pythonVersion = "3.11"
+typeCheckingMode = "basic"
+# Platform adapters deliberately import native modules only available on their OS.
+reportMissingImports = false
+
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["fpdb_3_legacy", "fpdb_3_legacy.*", "fpdb", "fpdb.*"]
