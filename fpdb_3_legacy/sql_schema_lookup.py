@@ -20,7 +20,7 @@ def lookup_schema_queries(db_server: str) -> dict[str, str]:
                         id SMALLINT UNSIGNED AUTO_INCREMENT NOT NULL, PRIMARY KEY (id),
                         category varchar(9) NOT NULL,
                         name varchar(32) NOT NULL,
-                        rank SMALLINT NOT NULL,
+                        `rank` SMALLINT NOT NULL,
                         combinations SMALLINT NOT NULL)
                         ENGINE=INNODB""",
             "createSitesTable": """CREATE TABLE Sites (

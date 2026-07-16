@@ -27,3 +27,4 @@ def test_mysql_quotes_reserved_rank_table_name() -> None:
     mysql = lookup_schema_queries("mysql")["createRankTable"]
     assert "CREATE TABLE `Rank`" in mysql
     assert "CREATE TABLE Rank" not in mysql
+    assert "`rank` SMALLINT" in lookup_schema_queries("mysql")["createStartCardsTable"]

@@ -84,7 +84,7 @@ def tournament_schema_queries(db_server: str) -> dict[str, str]:
                         tourneyId INT UNSIGNED NOT NULL, FOREIGN KEY (tourneyId) REFERENCES Tourneys(id),
                         playerId INT UNSIGNED NOT NULL, FOREIGN KEY (playerId) REFERENCES Players(id),
                         entryId INT,
-                        rank INT,
+                        `rank` INT,
                         winnings BIGINT,
                         winningsCurrency VARCHAR(4),
                         rebuyCount INT,

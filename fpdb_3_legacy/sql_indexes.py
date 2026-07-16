@@ -58,7 +58,7 @@ def index_queries(db_server: str) -> dict[str, str]:
         )
 
     if db_server == "mysql":
-        query["addStartCardsIndex"] = """ALTER TABLE StartCards ADD UNIQUE INDEX cards_idx (category, rank)"""
+        query["addStartCardsIndex"] = """ALTER TABLE StartCards ADD UNIQUE INDEX cards_idx (category, `rank`)"""
     elif db_server in ("postgresql", "sqlite"):
         query["addStartCardsIndex"] = """CREATE UNIQUE INDEX cards_idx ON StartCards (category, rank)"""
 
@@ -163,4 +163,3 @@ def index_queries(db_server: str) -> dict[str, str]:
     query["addPlayerHeroesIndex"] = """CREATE INDEX player_heroes ON Players (hero)"""
 
     return query
-

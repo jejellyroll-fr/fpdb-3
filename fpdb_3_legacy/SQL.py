@@ -137,7 +137,7 @@ class Sql:
         self.query.update(session_stats_queries(db_server))
         self.query.update(tournament_player_detailed_queries(db_server))
         self.query.update(tournament_graph_queries())
-        self.query.update(tournament_persistence_queries())
+        self.query.update(tournament_persistence_queries(db_server))
         self.query.update(utility_queries())
         self.query = finalize_query_placeholders(self.query, db_server)
 

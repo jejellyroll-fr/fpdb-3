@@ -20,6 +20,7 @@ def test_index_queries_keep_backend_specific_syntax() -> None:
     assert postgresql["addTourneyIndex"].startswith("CREATE UNIQUE INDEX")
     assert sqlite["addFilesIndex"].endswith("(file)")
     assert mysql["addFilesIndex"].endswith("(file(255))")
+    assert "(category, `rank`)" in mysql["addStartCardsIndex"]
     for queries in (mysql, postgresql, sqlite):
         assert "position" in queries["addHudCacheCompundIndex"]
         assert "startCards" in queries["addCardsCacheCompundIndex"]
