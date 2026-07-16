@@ -2196,6 +2196,14 @@ class Hand:
 
 
 class HoldemOmahaHand(Hand):
+    @staticmethod
+    def _is_community_street(street: str) -> bool:
+        """Return whether *street* names a board street, including multi-run boards."""
+        return any(
+            street == base or (street.startswith(base) and street.removeprefix(base).isdigit())
+            for base in ("FLOP", "TURN", "RIVER")
+        )
+
     def __init__(
         self,
         config,
@@ -2262,9 +2270,7 @@ class HoldemOmahaHand(Hand):
             hhc.readShowdownActions(self)
             # Read actions in street order
             for street, text in list(self.streets.items()):
-                if (
-                    text and (street != "PREFLOP")
-                ):  # TODO: the except PREFLOP shouldn't be necessary, but regression-test-files/cash/Everleaf/Flop/NLHE-10max-USD-0.01-0.02-201008.2Way.All-in.pre.txt fails without it
+                if text and self._is_community_street(street):
                     hhc.readCommunityCards(self, street)
 
             # Update actionStreets if runItTimes was set during readCommunityCards
