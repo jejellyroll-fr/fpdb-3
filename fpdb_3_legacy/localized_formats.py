@@ -19,6 +19,9 @@ _CURRENCY_SYMBOLS = {
     "GBP": "£",
     "INR": "₹",
     "JPY": "¥",
+    "MBTC": "ⓑ",
+    "RSD": "РСД",
+    "SEK": "kr.",
     "USD": "$",
 }
 

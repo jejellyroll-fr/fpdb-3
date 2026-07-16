@@ -43,6 +43,7 @@ from fpdb_3_legacy import SQL, Card, Configuration, Database, Deck, Hand
 from fpdb_3_legacy.equity import EquityUnavailableError, calculate_equity
 from fpdb_3_legacy.http_capture_ofc import OFCHand, build_ofc_hand, load_ofc_hand
 from fpdb_3_legacy.i18n import gettext as _
+from fpdb_3_legacy.localized_formats import format_currency, format_number
 from fpdb_3_legacy.loggingFpdb import get_logger
 
 # import L10n
@@ -71,6 +72,13 @@ _RANK_VALUE = {r: i for i, r in enumerate("23456789TJQKA", start=2)}
 
 def _is_real_card(card: str) -> bool:
     return bool(card) and card not in {"0", "0x"} and len(card) == 2 and card[0] in _RANK_VALUE
+
+
+def format_replay_amount(value: Decimal | int | float, currency: str) -> str:
+    """Format real money with its currency and tournament/play chips as numbers."""
+    if currency in {"", "T$", "play"}:
+        return format_number(value)
+    return format_currency(value, currency)
 
 
 def replay_hero_equity(frame, hero_name: str, game: str, *, backend=None, iterations: int = 20_000) -> Decimal | None:
@@ -1138,7 +1146,8 @@ class GuiReplayer(QWidget):
         painter.drawText(
             panel.adjusted(10, 26, -10, -6),
             Qt.AlignmentFlag.AlignLeft,
-            f"Seat {player.seat_idx}  ·  {player.points} pts  ·  {self.currency}{player.collected}",
+            f"Seat {format_number(player.seat_idx, 0)}  ·  {format_number(player.points, 0)} pts  ·  "
+            f"{format_replay_amount(player.collected, self.currency_code)}",
         )
 
     def _draw_ofc_board(self, painter: QPainter, center: QPointF, rows: dict[str, list[str]], highlight: set[str]) -> None:
@@ -1237,9 +1246,9 @@ class GuiReplayer(QWidget):
         painter.setFont(QFont("Helvetica", 9, QFont.Weight.DemiBold))
         y = panel.y() + 42
         for player in sorted(ofc_hand.players, key=lambda item: item.points, reverse=True):
-            line = f"{player.name}: {player.points} pts"
+            line = f"{player.name}: {format_number(player.points, 0)} pts"
             if player.collected:
-                line += f" · collected {self.currency}{player.collected}"
+                line += f" · collected {format_replay_amount(player.collected, self.currency_code)}"
             painter.setPen(QColor("#9ee6a7") if player.points > 0 else QColor("#f0a0a0") if player.points < 0 else QColor("#c4cdd4"))
             painter.drawText(QRectF(panel.x() + 18, y, panel.width() - 36, 20), Qt.AlignmentFlag.AlignLeft, line)
             y += 21
@@ -1809,9 +1818,9 @@ class GuiReplayer(QWidget):
             # Pot already collected (hand conclusion): nothing to display.
             return
         if len(pots) <= 1:
-            pot_text = f"Pot: {self.currency}{pot_total:.2f}"
+            pot_text = f"Pot: {format_replay_amount(pot_total, self.currency_code)}"
         else:
-            pot_text = "\n".join(f"{label}: {self.currency}{amount:.2f}" for label, amount in pots)
+            pot_text = "\n".join(f"{label}: {format_replay_amount(amount, self.currency_code)}" for label, amount in pots)
 
         pot_rect = layout.pot_rect
         if not board_cards:
@@ -1899,7 +1908,7 @@ class GuiReplayer(QWidget):
 
         painter.setPen(text)
         painter.setFont(QFont("Helvetica", name_font_size, QFont.Weight.Bold))
-        stack_text = f"{player.name}  {self.currency}{player.stack:.2f}"
+        stack_text = f"{player.name}  {format_replay_amount(player.stack, self.currency_code)}"
         name_rect = QRectF(
             seat.panel_rect.x() + 6,
             seat.panel_rect.y() + 2,
@@ -1910,11 +1919,11 @@ class GuiReplayer(QWidget):
 
         action_text = player.action or ""
         if player.justacted and player.action == "collected" and player.chips:
-            action_text = f"collected {self.currency}{player.chips:.2f}"
+            action_text = f"collected {format_replay_amount(player.chips, self.currency_code)}"
         elif player.allin and player.action not in (None, "collected", "folds"):
             action_text = f"{action_text} all-in".strip()
         if is_final_frame and player.cashout is not None:
-            action_text = f"cashout {self.currency}{player.cashout:.2f}"
+            action_text = f"cashout {format_replay_amount(player.cashout, self.currency_code)}"
         painter.setPen(accent if player.justacted else QColor("#9aa5ad"))
         painter.setFont(QFont("Helvetica", action_font_size, QFont.Weight.DemiBold))
         action_rect = QRectF(
@@ -1969,7 +1978,11 @@ class GuiReplayer(QWidget):
             painter.drawRoundedRect(seat.bet_rect, 8, 8)
             painter.setPen(QColor("#ffe769"))
             painter.setFont(QFont("Helvetica", name_font_size, QFont.Weight.Bold))
-            painter.drawText(seat.bet_rect, Qt.AlignmentFlag.AlignCenter, f"{self.currency}{player.chips:.2f}")
+            painter.drawText(
+                seat.bet_rect,
+                Qt.AlignmentFlag.AlignCenter,
+                format_replay_amount(player.chips, self.currency_code),
+            )
 
         if getattr(self.replay_model.hand, "buttonpos", 0) == player.seat and not self.dealer.isNull():
             dealer_size = max(24, int(DEALER_BUTTON_BASE_SIZE * card_scale))
@@ -1992,9 +2005,9 @@ class GuiReplayer(QWidget):
                 if player.justacted and player.action:
                     allin_suffix = " (all-in)" if player.allin and player.action != "collected" else ""
                     if player.action == "collected" and player.chips:
-                        entries.append(f"{player.name}: collected {self.currency}{player.chips:.2f}")
+                        entries.append(f"{player.name}: collected {format_replay_amount(player.chips, self.currency_code)}")
                     elif player.chips and player.action not in {"folds", "checks"}:
-                        amount = f"{self.currency}{player.chips:.2f}"
+                        amount = format_replay_amount(player.chips, self.currency_code)
                         entries.append(f"{player.name}: {player.action} {amount}{allin_suffix}")
                     else:
                         entries.append(f"{player.name}: {player.action}{allin_suffix}")
@@ -2009,7 +2022,7 @@ class GuiReplayer(QWidget):
                 suffix = " (wins)" if name in collectees else ""
                 entries.append(f"{name}: {combo}{suffix}")
             for name, amount in (getattr(hand, "cashOutAmounts", {}) or {}).items():
-                entries.append(f"{name}: cashout {self.currency}{amount:.2f}")
+                entries.append(f"{name}: cashout {format_replay_amount(amount, self.currency_code)}")
         return entries[-max_entries:]
 
     def _current_action_summary(self, frame: ReplayFrame) -> str:
@@ -2019,9 +2032,10 @@ class GuiReplayer(QWidget):
         player = acted[-1]
         allin_suffix = " (all-in)" if player.allin and player.action != "collected" else ""
         if player.action == "collected" and player.chips:
-            return f"{player.name} collected {self.currency}{player.chips:.2f}"
+            return f"{player.name} collected {format_replay_amount(player.chips, self.currency_code)}"
         if player.chips and player.action not in {"folds", "checks"}:
-            return f"{player.name} {player.action} {self.currency}{player.chips:.2f}{allin_suffix}"
+            amount = format_replay_amount(player.chips, self.currency_code)
+            return f"{player.name} {player.action} {amount}{allin_suffix}"
         return f"{player.name} {player.action}{allin_suffix}"
 
     def _next_actor_name(self, current_index: int) -> str | None:
@@ -2044,7 +2058,10 @@ class GuiReplayer(QWidget):
         if pot_after_call <= 0:
             return ""
         equity_needed = (call_amount / pot_after_call) * Decimal(100)
-        summary = f"Hero call {self.currency}{call_amount:.2f} · pot odds {equity_needed:.1f}%"
+        summary = (
+            f"Hero call {format_replay_amount(call_amount, self.currency_code)} · "
+            f"pot odds {format_number(equity_needed, 1)}%"
+        )
         hand = self.replay_model.hand
         category = hand.gametype.get("category", "")
         game_info = Card.games.get(category)
@@ -2065,7 +2082,10 @@ class GuiReplayer(QWidget):
         if equity is not None:
             equity_pct = equity * Decimal(100)
             edge = equity_pct - equity_needed
-            summary += f" · equity {equity_pct:.1f}% · edge {edge:+.1f} pts"
+            summary += (
+                f" · equity {format_number(equity_pct, 1)}% · "
+                f"edge {format_number(edge, 1, show_plus=True)} pts"
+            )
         return summary
 
     def _draw_summary(self, painter: QPainter, frame: ReplayFrame, layout: ReplayLayout, current_index: int) -> None:
@@ -2168,11 +2188,13 @@ class GuiReplayer(QWidget):
         if is_ofc:
             ofc_hand = self._load_ofc_replay_entry(entry)
             self.currency = ""
+            self.currency_code = "play"
             self.Heroes = ""
             self.replay_model = self._build_ofc_replay_model(ofc_hand)
         else:
             hand = Hand.hand_factory(entry, self.conf, self.db)
             self.currency = hand.sym
+            self.currency_code = str(hand.gametype.get("currency", "USD"))
             self.Heroes = hand.hero or self._resolve_hero(hand.sitename)
             self.replay_model = self._build_replay_model(hand)
         self.info = self.replay_model.info
