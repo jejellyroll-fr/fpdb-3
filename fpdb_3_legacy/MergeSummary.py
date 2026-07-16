@@ -137,6 +137,7 @@ class MergeSummary(TourneySummary):
     # re_HTMLDetails = re.compile("""<p class="text">(?P<LABEL>.+?) : (?P<VALUE>.+?)</p>""")
     re_HTMLPrizepool = re.compile("""(Freeroll|Total) Prizepool\\s+?</th>\\s+?<td>(?P<PRIZEPOOL>[0-9,.]+)\\s+?</td>""")
     re_HTMLStartTime = re.compile("Start Time\\s+?</th>\\s+?<td>(?P<STARTTIME>.+?)\\s+?</td>")
+    re_HTMLFinished = re.compile(r"\bStatus\s*:?\s*Finished\b", re.IGNORECASE)
     re_HTMLDateTime = re.compile(
         "\\w+?\\s+?(?P<D>\\d+)\\w+?\\s+(?P<M>\\w+)\\s+(?P<Y>\\d+),?\\s+(?P<H>\\d+):(?P<MIN>\\d+):(?P<S>\\d+)"
     )
@@ -353,16 +354,19 @@ class MergeSummary(TourneySummary):
 
     def parseSummaryFile(self):
         self.buyinCurrency = "USD"
-        soup = BeautifulSoup(self.summaryText)
+        soup = BeautifulSoup(self.summaryText, "html.parser")
         tables = soup.findAll("table")
         if len(tables) > 1:
-            table1 = BeautifulSoup(str(tables[0])).findAll("tr")
-            table2 = BeautifulSoup(str(tables[1])).findAll("tr")
-            # FIXME: Searching every line for all regexes is pretty horrible
-            # FIXME: Need to search for 'Status:  Finished'
-            # print self.in_path
+            table1 = BeautifulSoup(str(tables[0]), "html.parser").findAll("tr")
+            table2 = BeautifulSoup(str(tables[1]), "html.parser").findAll("tr")
+            details_text = tables[0].get_text(" ", strip=True)
+            if self.re_HTMLFinished.search(details_text) is None:
+                raise FpdbParseError("Merge tournament summary is not finished")
+
             for p in table1:
-                m = self.re_HTMLGameType.search(str(p))
+                row_html = str(p)
+                row_text = p.get_text(" ", strip=True)
+                m = self.re_HTMLGameType.search(row_html) if "Game Type" in row_text else None
                 if m:
                     # print "DEBUG: re_HTMLGameType: '%s' '%s'" %(m.group('LIMIT'), m.group('GAME'))
                     if m.group("GAME").strip() in self.mixes:
@@ -370,11 +374,11 @@ class MergeSummary(TourneySummary):
                     else:
                         self.gametype["category"] = self.games_html[m.group("GAME").strip()][1]
                     self.gametype["limitType"] = self.limits[m.group("LIMIT").strip()]
-                m = self.re_HTMLTourNo.search(str(p))
+                m = self.re_HTMLTourNo.search(row_html) if "Game ID" in row_text else None
                 if m:
                     # print "DEBUG: re_HTMLTourNo: '%s'" % m.group('TOURNO')
                     self.tourNo = m.group("TOURNO").strip()
-                m = self.re_HTMLName.search(str(p))
+                m = self.re_HTMLName.search(row_html) if "Name" in row_text else None
                 if m:
                     # print "DEBUG: re_HTMLName: '%s'" % m.group('NAME')
                     self.tourneyName = m.group("NAME").strip()[:40]
@@ -382,39 +386,39 @@ class MergeSummary(TourneySummary):
                         self.buyinCurrency = "USD"
                     elif m.group("NAME").find("€") != -1:
                         self.buyinCurrency = "EUR"
-                m = self.re_HTMLPrizepool.search(str(p))
+                m = self.re_HTMLPrizepool.search(row_html) if "Prizepool" in row_text else None
                 if m:
                     # print "DEBUG: re_HTMLPrizepool: '%s'" % m.group('PRIZEPOOL')
                     self.prizepool = int(self.convert_to_decimal(m.group("PRIZEPOOL").strip()))
-                m = self.re_HTMLBuyIn.search(str(p))
+                m = self.re_HTMLBuyIn.search(row_html) if "Buy In" in row_text else None
                 if m:
                     # print "DEBUG: re_HTMLBuyIn: '%s'" % m.group('BUYIN')
                     self.buyin = int(100 * self.convert_to_decimal(m.group("BUYIN").strip()))
                     if self.buyin == 0:
                         self.buyinCurrency = "FREE"
-                m = self.re_HTMLFee.search(str(p))
+                m = self.re_HTMLFee.search(row_html) if "Entry Fee" in row_text else None
                 if m:
                     # print "DEBUG: re_HTMLFee: '%s'" % m.group('FEE')
                     self.fee = int(100 * self.convert_to_decimal(m.group("FEE").strip()))
-                m = self.re_HTMLBounty.search(str(p))
+                m = self.re_HTMLBounty.search(row_html) if "Bounty" in row_text else None
                 if m:
                     # print "DEBUG: re_HTMLBounty: '%s'" % m.group('KOBOUNTY')
                     if m.group("KOBOUNTY").strip() != "0.00":
                         self.isKO = True
                         self.koBounty = int(100 * self.convert_to_decimal(m.group("KOBOUNTY").strip()))
-                m = self.re_HTMLAddons.search(str(p))
+                m = self.re_HTMLAddons.search(row_html) if "Addons" in row_text else None
                 if m:
                     # print "DEBUG: re_HTMLAddons: '%s'" % m.group('ADDON')
                     if m.group("ADDON").strip() != "0":
                         self.isAddOn = True
                         self.addOnCost = self.buyin
-                m = self.re_HTMLRebuy.search(str(p))
+                m = self.re_HTMLRebuy.search(row_html) if "Rebuys" in row_text else None
                 if m:
                     # print "DEBUG: re_HTMLRebuy: '%s'" % m.group('REBUY')
                     if m.group("REBUY").strip() != "0":
                         self.isRebuy = True
                         self.rebuyCost = self.buyin
-                m = self.re_HTMLStartTime.search(str(p))
+                m = self.re_HTMLStartTime.search(row_html) if "Start Time" in row_text else None
                 if m:
                     m2 = self.re_HTMLDateTime.search(m.group("STARTTIME"))
                     if m2:
