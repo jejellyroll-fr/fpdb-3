@@ -117,6 +117,7 @@ ignore = [
 "fpdb_3_legacy/ConfigurationManager.py" = ["C901", "PLR0912", "PLR0915"]
 "fpdb_3_legacy/database_caches.py" = ["C901", "PLR0912", "PLR0915"]
 "fpdb_3_legacy/Database.py" = ["C901", "PLR0912", "PLR0915", "UP031"]
+"fpdb_3_legacy/database_tournaments.py" = ["C901", "PLR0912"]
 "fpdb_3_legacy/DerivedStats.py" = ["C901", "PLR0912", "PLR0915", "UP031"]
 "fpdb_3_legacy/DetectInstalledSites.py" = ["C901", "PLR0912", "PLR0915"]
 "fpdb_3_legacy/EnetToFpdb.py" = ["C901", "PLR0912"]
