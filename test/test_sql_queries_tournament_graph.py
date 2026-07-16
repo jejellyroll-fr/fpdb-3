@@ -25,3 +25,14 @@ def test_tournament_graph_queries_keep_profit_and_chipev_contracts() -> None:
     assert "<tourney_lim>" in queries["tourneyGraphType"]
     for key in ("tourneyChipEVByPosition", "tourneyChipEVByPositionGrid"):
         assert "<chipev_columns>" in queries[key]
+
+
+def test_only_graph_queries_require_tournaments_in_the_selected_date_window() -> None:
+    queries = tournament_graph_queries()
+
+    assert "OR t.startTime is NULL" in queries["tourneyResults"]
+    for key in ("tourneyGraph", "tourneyGraphType"):
+        query = queries[key]
+        assert "OR t.startTime is NULL" not in query
+        assert "t.startTime > '<startdate_test>'" in query
+        assert "t.startTime < '<enddate_test>'" in query
