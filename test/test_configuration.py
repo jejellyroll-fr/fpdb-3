@@ -12,6 +12,7 @@ from fpdb_3_legacy.Configuration import Config, RawHands, RawTourneys
 def test_increment_position_valid() -> None:
     config = Config()
     assert config.increment_position("(0,0)") == "(1,1)"
+    assert config.increment_position("( 0 , 0 )") == "(1,1)"
     assert config.increment_position("(2,3)") == "(3,4)"
     assert config.increment_position("(5,5)") == "(6,6)"
 
@@ -24,6 +25,8 @@ def test_increment_position_invalid_format() -> None:
         config.increment_position("(0,0")
     with pytest.raises(AssertionError):
         config.increment_position("0,0)")
+    with pytest.raises(AssertionError):
+        config.increment_position("(one,0)")
 
 
 def test_increment_position_negative_values() -> None:
