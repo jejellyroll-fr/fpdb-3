@@ -48,3 +48,21 @@ def test_fix_tour_blinds_ignores_ring_games() -> None:
 
     assert not hasattr(hand, "sb")
     hand.addBlind.assert_not_called()
+
+
+def test_merge_metadata_accepts_play_money_seconds_and_explicit_seats() -> None:
+    hand_text = """
+    <description type="Holdem" stakes="No Limit ($10/$20)"/>
+    <game id="46154255-645" starttime="20111230232051" numholecards="2" gametype="1" seats="9" realmoney="false" data="20111230|Play Money|46154255|46154255-645|false">
+    """
+    parser = Merge.__new__(Merge)
+
+    game_type = parser.determineGameType(hand_text)
+    hand_info = parser.re_HandInfo.search(hand_text)
+
+    assert game_type is not None
+    assert game_type["currency"] == "play"
+    assert hand_info is not None
+    assert hand_info.group("REALMONEY") == "false"
+    assert hand_info.group("DATETIME") == "20111230232051"
+    assert hand_info.group("SEATS") == "9"
