@@ -194,9 +194,6 @@ class Winamax(HandHistoryConverter):
         players = {player[1] for player in hand.players}
         if not players <= self.compiledPlayers:  # x <= y means 'x is subset of y'
             # we need to recompile the player regexs.
-            # TODO(fpdb): should probably rename re_hero_cards and corresponding method,
-            #    since they are used to find all cards on lines starting with "Dealt to:"
-            #    They still identify the hero.
             self.compiledPlayers = players
             # ANTES/BLINDS
             # helander2222 posts blind ($0.25), lopllopl posts blind ($0.50).
@@ -230,7 +227,9 @@ class Winamax(HandHistoryConverter):
                 r"{PLYR} posts small blind ({CUR})?(?P<SB>[\.0-9]+)({CUR})? out of position".format(**subst),
                 re.MULTILINE,
             )
-            self.re_hero_cards = re.compile(
+            # Matches the "Dealt to" line of any player, not only the hero: later
+            # streets state every player's cards in the same shape.
+            self.re_dealt_cards = re.compile(
                 r"Dealt\sto\s{PLYR}(?: \[(?P<OLDCARDS>.+?)\])?( \[(?P<NEWCARDS>.+?)\])".format(**subst),
             )
 
@@ -915,7 +914,7 @@ class Winamax(HandHistoryConverter):
         """
         for street in ("PREFLOP", "DEAL", "BLINDSANTES"):
             if street in hand.streets:
-                m = self.re_hero_cards.finditer(hand.streets[street])
+                m = self.re_dealt_cards.finditer(hand.streets[street])
                 for found in m:
                     if newcards := [c for c in found.group("NEWCARDS").split(" ") if c != "X"]:
                         hand.hero = found.group("PNAME")
@@ -966,7 +965,7 @@ class Winamax(HandHistoryConverter):
         for street, text in list(hand.streets.items()):
             if not text or street in ("PREFLOP", "DEAL", "BLINDSANTES"):
                 continue  # already done these
-            m = self.re_hero_cards.finditer(hand.streets[street])
+            m = self.re_dealt_cards.finditer(hand.streets[street])
             for found in m:
                 self._process_player_cards(hand, street, found)
 
