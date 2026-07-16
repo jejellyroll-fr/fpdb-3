@@ -23,11 +23,15 @@ from PySide6.QtWidgets import (
 # import Charset
 from fpdb_3_legacy import Filters, GuiTourHandViewer
 from fpdb_3_legacy.i18n import gettext as _
+from fpdb_3_legacy.localized_formats import format_currency, format_datetime, format_number
 from fpdb_3_legacy.loggingFpdb import get_logger
 
 log = get_logger("gui_tourney_player_stats")
 
 colalias, colshow, colheading, colxalign, colformat, coltype = 0, 1, 2, 3, 4, 5
+_MONEY_COLUMNS = {"buyIn", "fee", "spent", "won", "net", "profitPerTourney"}
+_PERCENT_COLUMNS = {"itm", "roi"}
+_COUNT_COLUMNS = {"tourneyCount", "_1st", "_2nd", "_3rd", "unknownRank"}
 
 
 class GuiTourneyPlayerStats(QSplitter):
@@ -162,6 +166,7 @@ class GuiTourneyPlayerStats(QSplitter):
 
         view = QTableView()
         model = QStandardItemModel(0, len(self.columns))
+        model.setSortRole(Qt.ItemDataRole.UserRole)
         view.setModel(model)
         view.verticalHeader().hide()
         vbox.addWidget(view)
@@ -191,7 +196,9 @@ class GuiTourneyPlayerStats(QSplitter):
                     value = "Yes" if row_data[colnames.index(column[colalias])] == 1 else "No"
                 item = QStandardItem("")
                 if value is not None and value != -999:
-                    item = QStandardItem(column[colformat] % value)
+                    currency = str(row_data[colnames.index("currency")]) if "currency" in colnames else "USD"
+                    item = QStandardItem(self._format_grid_value(str(column[colalias]), value, currency, str(column[colformat])))
+                    item.setData(value, Qt.ItemDataRole.UserRole)
                 item.setEditable(False)
                 item.setTextAlignment(Qt.AlignmentFlag.AlignRight)
                 treerow.append(item)
@@ -200,19 +207,30 @@ class GuiTourneyPlayerStats(QSplitter):
             if treerow and "tourneyTypeId" in colnames and "playerId" in colnames:
                 ttid = row_data[colnames.index("tourneyTypeId")]
                 pid = row_data[colnames.index("playerId")]
-                treerow[0].setData((ttid, pid), Qt.ItemDataRole.UserRole)
+                treerow[0].setData((ttid, pid), Qt.ItemDataRole.UserRole + 1)
             model.appendRow(treerow)
 
         view.resizeColumnsToContents()
         view.setSortingEnabled(True)
         view.doubleClicked.connect(self._on_stats_double_clicked)
 
+    @staticmethod
+    def _format_grid_value(alias: str, value: Any, currency: str, fallback_format: str) -> str:
+        """Format a tournament-stat cell while leaving its raw sort value separate."""
+        if alias in _MONEY_COLUMNS:
+            return format_currency(value, currency)
+        if alias in _PERCENT_COLUMNS:
+            return f"{format_number(value)}%"
+        if alias in _COUNT_COLUMNS:
+            return format_number(value, 0)
+        return fallback_format % value
+
     # ------------------------------------------------------------------ #
     # Drill-down: stats row -> tournaments -> hands in a Tourney Viewer    #
     # ------------------------------------------------------------------ #
     def _on_stats_double_clicked(self, index) -> None:
         """Drill down from an aggregated stats row to its individual tournaments."""
-        keys = index.sibling(index.row(), 0).data(Qt.ItemDataRole.UserRole)
+        keys = index.sibling(index.row(), 0).data(Qt.ItemDataRole.UserRole + 1)
         if not keys:
             return
         tourney_type_id, player_id = keys
@@ -229,14 +247,15 @@ class GuiTourneyPlayerStats(QSplitter):
     def _fetch_tournaments(self, tourney_type_id, player_id):
         """Return the hero's tournaments for a tourney type, with hand counts.
 
-        Each row: (tourneyId, siteTourneyNo, startTime, rank, winnings, handCount).
+        Each row: (tourneyId, siteTourneyNo, startTime, rank, winnings, handCount, currency).
         """
         ph = self.sql.query.get("placeholder", "%s")
         q = (
             "SELECT t.id, t.siteTourneyNo, t.startTime, tp.rank, tp.winnings/100.0, "
-            "(SELECT COUNT(*) FROM Hands h WHERE h.tourneyId = t.id) "
+            "(SELECT COUNT(*) FROM Hands h WHERE h.tourneyId = t.id), COALESCE(tp.winningsCurrency, tt.currency) "
             "FROM TourneysPlayers tp "
             "JOIN Tourneys t ON t.id = tp.tourneyId "
+            "JOIN TourneyTypes tt ON tt.id = t.tourneyTypeId "
             "WHERE t.tourneyTypeId = ? AND tp.playerId = ? "
             "ORDER BY t.startTime, t.siteTourneyNo"
         ).replace("?", ph)
@@ -257,13 +276,14 @@ class GuiTourneyPlayerStats(QSplitter):
         table.verticalHeader().hide()
         table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
-        for r, (tid, tno, start, rank, winnings, hands) in enumerate(tournaments):
+        for r, (tid, tno, start, rank, winnings, hands, currency) in enumerate(tournaments):
+            display_start = format_datetime(start) if hasattr(start, "year") else str(start or "")
             cells = [
                 str(tno) if tno is not None else "",
-                str(start) if start is not None else "",
-                str(rank) if rank not in (None, 0) else "",
-                f"{winnings:.2f}" if winnings is not None else "",
-                str(hands),
+                display_start,
+                format_number(rank, 0) if rank not in (None, 0) else "",
+                format_currency(winnings, str(currency or "USD")) if winnings is not None else "",
+                format_number(hands, 0),
             ]
             for col, text in enumerate(cells):
                 item = QTableWidgetItem(text)
