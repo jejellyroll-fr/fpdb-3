@@ -29,14 +29,11 @@ from fpdb_3_legacy.loggingFpdb import get_logger
 # import L10n
 # _ = L10n.get_translation()
 
-# TODO:
-#
-# -- Assumes that the currency of ring games is USD
-# -- Only accepts 'realmoney="true"'
-# -- A hand's time-stamp does not record seconds past the minute (a limitation of the history format)
-# -- hand.maxseats can only be guessed at
-# -- Cannot parse tables that run it twice
-# -- Cannot parse hands in which someone is all in in one of the blinds.
+# Source-format constraints: Merge real-money histories expose no currency
+# code, so those ring games use the network's historical USD default. The
+# format also has no known multi-board markers; one community board is parsed.
+# Play-money metadata, timestamp seconds, explicit seat capacity and all-in
+# blinds are supported below.
 
 
 # Merge HH Format
