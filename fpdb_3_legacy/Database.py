@@ -5625,14 +5625,14 @@ class Database:
 
         key = (_name, site_id, hero, char.upper())
 
-        # NOTE/FIXME?: MySQL has ON DUPLICATE KEY UPDATE
-        # Usage:
-        #        INSERT INTO `tags` (`tag`, `count`)
-        #         VALUES ($tag, 1)
-        #           ON DUPLICATE KEY UPDATE `count`=`count`+1;
-
-        # print "DEBUG: name: %s site: %s" %(name, site_id)
         c = self.get_cursor()
+        if self.backend == self.MYSQL_INNODB:
+            # LAST_INSERT_ID(id) makes connection.insert_id() return the
+            # existing row id as well as the id of a newly inserted player.
+            upsert_player = insert_player + " ON DUPLICATE KEY UPDATE hero=hero OR VALUES(hero), id=LAST_INSERT_ID(id)"
+            c.execute(upsert_player, key)
+            return self.get_last_insert_id(c)
+
         q = "SELECT id, name, hero FROM Players WHERE name=%s and siteid=%s"
         q = q.replace("%s", self.sql.query["placeholder"])
         return self.insertOrUpdate("players", c, key, q, insert_player)

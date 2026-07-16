@@ -136,3 +136,29 @@ def test_database_cli_exposes_index_rebuild_and_vacuum(monkeypatch, capsys):
     output = capsys.readouterr().out
     assert "Index rebuild complete" in output
     assert "Database vacuum complete" in output
+
+
+def test_mysql_player_insert_is_an_atomic_upsert():
+    class Cursor:
+        def __init__(self):
+            self.calls = []
+
+        def execute(self, query, params):
+            self.calls.append((query, params))
+
+    cursor = Cursor()
+    db = Database.Database.__new__(Database.Database)
+    db.backend = db.MYSQL_INNODB
+    db.sql = SimpleNamespace(query={"placeholder": "%s"})
+    db.get_cursor = lambda: cursor
+    db.get_last_insert_id = lambda _cursor: 42
+
+    player_id = db.insertPlayer("Hero", 7, True)
+
+    assert player_id == 42
+    assert len(cursor.calls) == 1
+    query, params = cursor.calls[0]
+    assert "ON DUPLICATE KEY UPDATE" in query
+    assert "hero=hero OR VALUES(hero)" in query
+    assert "id=LAST_INSERT_ID(id)" in query
+    assert params == ("Hero", 7, True, "HE")
