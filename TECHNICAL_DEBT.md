@@ -4,18 +4,17 @@ Ce fichier est généré par `python tools/todo_inventory.py`. Chaque marqueur
 `TODO`, `FIXME` ou `HACK` du code possède ainsi un identifiant stable et une
 catégorie. Modifier le code source, puis régénérer ce registre.
 
-**Total : 12 tâches ouvertes.**
+**Total : 11 tâches ouvertes.**
 
 | Catégorie | Nombre |
 |---|---:|
-| parser | 9 |
+| parser | 8 |
 | poker-domain | 3 |
 
 ## Tâches
 
 | ID | Catégorie | Type | Emplacement | Description |
 |---|---|---|---|---|
-| `TD-31EFD5A8` | parser | FIXME | [fpdb_3_legacy/PokerTrackerToFpdb.py:918](fpdb_3_legacy/PokerTrackerToFpdb.py#L918) | Description à préciser |
 | `TD-40764682` | parser | TODO | [fpdb_3_legacy/SummaryEverleaf.py:120](fpdb_3_legacy/SummaryEverleaf.py#L120) | Can we get attrs in the END tag too? Would be useful to make SURE we're closing the right div .. |
 | `TD-7B179274` | parser | TODO | [fpdb_3_legacy/SummaryEverleaf.py:122](fpdb_3_legacy/SummaryEverleaf.py#L122) | Should probably just make sure everything is false at this point |
 | `TD-08077AA4` | parser | TODO | [fpdb_3_legacy/SummaryEverleaf.py:158](fpdb_3_legacy/SummaryEverleaf.py#L158) | Further parse the fee from this |

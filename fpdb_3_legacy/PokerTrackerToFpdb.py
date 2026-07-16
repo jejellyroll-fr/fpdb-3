@@ -915,9 +915,15 @@ class PokerTracker(HandHistoryConverter):
                         self.clearMoneyString(a.group("SBBB")),
                     )
 
-        # FIXME
-        # The following should only trigger when a small blind is missing in a tournament, or the sb/bb is ALL_IN
-        # see http://sourceforge.net/apps/mantisbt/fpdb/view.php?id=115
+        # Merge and iPoker tournament hands state no blind level, so the level
+        # can only be inferred from what was posted. A player left short by the
+        # ante posts less than the blind ("Post SB $5.00" against a $400 big
+        # blind), which would otherwise be recorded as the level itself.
+        #
+        # Rebuilding the level assumes it is 2:1. A single hand cannot tell a
+        # short post apart from a genuinely uneven level, so a structure such as
+        # 10/25 would be squared up to 12/25. No such structure is known on
+        # either site, whereas short posts occur in the corpus.
         if hand.gametype["type"] == "tour" and (self.sitename == "Merge" or self.is_ipoker_skin()):
             if hand.gametype["sb"] is None and hand.gametype["bb"] is None:
                 hand.gametype["sb"] = "1"
