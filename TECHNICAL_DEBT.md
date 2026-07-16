@@ -4,7 +4,7 @@ Ce fichier est généré par `python tools/todo_inventory.py`. Chaque marqueur
 `TODO`, `FIXME` ou `HACK` du code possède ainsi un identifiant stable et une
 catégorie. Modifier le code source, puis régénérer ce registre.
 
-**Total : 57 tâches ouvertes.**
+**Total : 56 tâches ouvertes.**
 
 | Catégorie | Nombre |
 |---|---:|
@@ -12,7 +12,7 @@ catégorie. Modifier le code source, puis régénérer ce registre.
 | database | 7 |
 | parser | 40 |
 | poker-domain | 3 |
-| ui | 2 |
+| ui | 1 |
 
 ## Tâches
 
@@ -74,4 +74,3 @@ catégorie. Modifier le code source, puis régénérer ce registre.
 | `TD-405847C6` | poker-domain | TODO | [fpdb_3_legacy/DerivedStats.py:482](fpdb_3_legacy/DerivedStats.py#L482) | future: REFACTOR - This method is too complex (C901: 25 > 10, PLR0912: 30 > 12, PLR0915: 144 > 50 |
 | `TD-27406CEB` | poker-domain | TODO | [fpdb_3_legacy/DerivedStats.py:728](fpdb_3_legacy/DerivedStats.py#L728) | future: REFACTOR - This method is too complex (C901: 25 > 10, PLR0912: 28 > 12 |
 | `TD-56A53357` | ui | TODO | [fpdb_3_legacy/GuiAutoImport.py:574](fpdb_3_legacy/GuiAutoImport.py#L574) | Allow for importing from multiple dirs - REB 29AUG2008 |
-| `TD-D998D6EA` | ui | FIXME | [fpdb_3_legacy/Mucked.py:368](fpdb_3_legacy/Mucked.py#L368) | if "show one and fold" ever becomes an option, |

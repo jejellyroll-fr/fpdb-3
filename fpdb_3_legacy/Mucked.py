@@ -45,8 +45,13 @@ from fpdb_3_legacy.loggingFpdb import get_logger
 log = get_logger("mucked_hud")
 
 
+def visible_cards(cards):
+    """Return known card identifiers, preserving their display order."""
+    return [card for card in cards if card not in (None, 0)]
+
+
 def valid_cards(ct):
-    return sum(c != 0 for c in ct)
+    return len(visible_cards(ct))
 
 
 class Stud_mucked(Aux_Base.AuxWindow):
@@ -351,25 +356,19 @@ class Flop_Mucked(Aux_Base.AuxSeats, QObject):
         if hist_seat not in self.hud.cards:
             return
 
-        cards = self.hud.cards[hist_seat]
+        cards = visible_cards(self.hud.cards[hist_seat])
         # Here we want to know how many cards the given seat showed;
         # board is considered a seat, and has the id 'common'
         # 'cards' on the other hand is a tuple. The format is:
         # (card_num, card_num, ...)
         n_cards = valid_cards(cards)
-        if n_cards > 1:
+        if n_cards:
             # scratch is a working pixmap, used to assemble the image
             scratch = QPixmap(int(self.card_width) * n_cards, int(self.card_height))
             painter = QPainter(scratch)
             x = 0  # x coord where the next card starts in scratch
             for card in cards:
                 # concatenate each card image to scratch
-                # flop game never(?) has unknown cards.
-                # FIXME: if "show one and fold" ever becomes an option,
-                # this needs to be changed
-                if card is None or card == 0:
-                    break
-
                 # This gives us the card symbol again
                 card_symbol = Card.valueSuitFromCard(card)
                 rank, suit = card_symbol[0], card_symbol[1]
