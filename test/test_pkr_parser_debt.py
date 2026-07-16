@@ -55,6 +55,27 @@ def test_money_type_decides_the_currency(filename: Path, currency: str) -> None:
     assert game_type["currency"] == currency
 
 
+def test_hand_histories_state_no_buyin_or_level() -> None:
+    # The header stops at the tournament number, so readHandInfo has no buy-in
+    # or level to read. Both regexes together define the fields it can see.
+    available = set(Pkr.re_GameInfo.groupindex) | set(Pkr.re_HandInfo.groupindex)
+
+    assert "TOURNO" in available
+    assert not {"BUYIN", "FEE", "LEVEL"} & available
+
+
+def test_tournament_buyin_is_recorded_as_unknown(parser_config: Config) -> None:
+    hands = _hands(parser_config, TOUR / "NLHE-USD-MTT-201205.txt")
+
+    assert hands
+    for hand in hands:
+        assert hand.tourNo == "25826986"
+        # Unknown, not free: the history simply does not carry the buy-in.
+        assert hand.buyinCurrency == "NA"
+        assert hand.buyin == 0
+        assert hand.fee == 0
+
+
 def test_lone_post_is_the_big_blind_of_an_entering_player(parser_config: Config) -> None:
     # "Player3 posts $0.04" carries no dead post: it is the big blind, written
     # in the short form instead of "posts big blind ($0.04)".
