@@ -571,15 +571,7 @@ class GuiAutoImport(QWidget):
         # bufsize = 1 means unbuffered
         # We need to close this file handle sometime.
 
-        # TODO:  Allow for importing from multiple dirs - REB 29AUG2008
-        # As presently written this function does nothing if there is already a pipe open.
-        # That is not correct.  It should open another dir for importing while piping the
-        # results to the same pipe.  This means that self.path should be a a list of dirs
-        # to watch.
-
         if self.startButton.isChecked():
-            # - Does the lock acquisition need to be more sophisticated for multiple dirs?
-            # (see comment above about what to do if pipe already open)
             # - Ideally we want to release the lock if the auto-import is killed by some
             # kind of exception - is this possible?
             if self.settings["global_lock"].acquire(wait=False, source="AutoImport"):

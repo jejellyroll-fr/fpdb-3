@@ -599,10 +599,9 @@ class Importer:
                 log.warning(f"Skipping invalid file: {inputPath}")
                 return False
 
-    # Add a directory of files to filelist
-    # Only one import directory per site supported.
-    # dirlist is a hash of lists:
-    # dirlist{ 'PokerStars' => ["/path/to/import/", "filtername"] }
+    # Add a directory of files to filelist. Each (site, content type) key owns
+    # one path, so all enabled sites and both hand-history/tournament-summary
+    # directories can be monitored concurrently.
     def addImportDirectory(
         self,
         dir,
