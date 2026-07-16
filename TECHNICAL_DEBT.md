@@ -4,19 +4,17 @@ Ce fichier est généré par `python tools/todo_inventory.py`. Chaque marqueur
 `TODO`, `FIXME` ou `HACK` du code possède ainsi un identifiant stable et une
 catégorie. Modifier le code source, puis régénérer ce registre.
 
-**Total : 15 tâches ouvertes.**
+**Total : 13 tâches ouvertes.**
 
 | Catégorie | Nombre |
 |---|---:|
-| parser | 12 |
+| parser | 10 |
 | poker-domain | 3 |
 
 ## Tâches
 
 | ID | Catégorie | Type | Emplacement | Description |
 |---|---|---|---|---|
-| `TD-BC41779F` | parser | TODO | [fpdb_3_legacy/PkrToFpdb.py:238](fpdb_3_legacy/PkrToFpdb.py#L238) | I rather like the idea of just having this dict as hand.info |
-| `TD-7217B4BD` | parser | TODO | [fpdb_3_legacy/PkrToFpdb.py:407](fpdb_3_legacy/PkrToFpdb.py#L407) | Going to have to write an addCallStoopid |
 | `TD-D43264BE` | parser | FIXME | [fpdb_3_legacy/PokerTrackerToFpdb.py:689](fpdb_3_legacy/PokerTrackerToFpdb.py#L689) | handle other currencies, play money |
 | `TD-31EFD5A8` | parser | FIXME | [fpdb_3_legacy/PokerTrackerToFpdb.py:916](fpdb_3_legacy/PokerTrackerToFpdb.py#L916) | Description à préciser |
 | `TD-40764682` | parser | TODO | [fpdb_3_legacy/SummaryEverleaf.py:120](fpdb_3_legacy/SummaryEverleaf.py#L120) | Can we get attrs in the END tag too? Would be useful to make SURE we're closing the right div .. |
