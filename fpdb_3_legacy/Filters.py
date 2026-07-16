@@ -39,6 +39,7 @@ from PySide6.QtWidgets import (
 
 from fpdb_3_legacy import SQL, Card, Configuration, Database
 from fpdb_3_legacy.i18n import gettext as _
+from fpdb_3_legacy.localized_formats import format_currency
 from fpdb_3_legacy.loggingFpdb import get_logger
 
 if __name__ == "__main__":
@@ -98,6 +99,17 @@ ROOM_ICON_FILES = {
     "winamax": "wina.svg",
     "winningpoker": "winning.png",
 }
+
+
+def tourney_buyin_key(buyin: int, fee: int, currency: str | None) -> str:
+    """Encode a tournament buy-in identity without losing its currency."""
+    return f"{buyin},{fee},{currency or ''}"
+
+
+def parse_tourney_buyin_key(value: str) -> tuple[int, int, str]:
+    """Decode a tournament buy-in key, accepting the historical two-part form."""
+    buyin, fee, *currency = value.split(",")
+    return int(buyin), int(fee), currency[0] if currency else ""
 ROOM_ICON_NETWORK_HINTS = (
     (("pokerstars",), "ps.svg"),
     (("party", "bwin", "borgata", "empire", "gamebookers", "intertops", "pokerroom", "wptpoker", "wpt"), "party.png"),
@@ -1120,18 +1132,18 @@ class Filters(QWidget):
         vbox1 = QVBoxLayout()
         frame.setLayout(vbox1)
 
-        self.db_cursor.execute("SELECT DISTINCT buyin, fee FROM TourneyTypes")
+        self.db_cursor.execute("SELECT DISTINCT buyin, fee, currency FROM TourneyTypes")
         result = self.db_cursor.fetchall()
 
         if len(result) >= 1:
-            for _count, (buyin, fee) in enumerate(result):
+            for _count, (buyin, fee, currency) in enumerate(result):
                 if buyin is None and fee is None:
                     display_text = "None"
                     value = "None"
                 else:
-                    total = (buyin + fee) / 100  # Convert to dollars
-                    display_text = f"${total:.2f}"
-                    value = f"{buyin},{fee}"
+                    total = (buyin + fee) / 100
+                    display_text = format_currency(total, str(currency or "USD"))
+                    value = tourney_buyin_key(buyin, fee, currency)
 
                 self.cbTourneyBuyin[value] = QCheckBox(display_text)
                 self.cbTourneyBuyin[value].setChecked(True)
@@ -1823,7 +1835,7 @@ class Filters(QWidget):
         selected_buyins = []
         for value, checkbox in self.cbTourneyBuyin.items():
             if checkbox.isChecked() and value != "None":
-                buyin, fee = map(int, value.split(","))
+                buyin, fee, _currency = parse_tourney_buyin_key(value)
                 total = buyin + fee
                 selected_buyins.append(total)
         return selected_buyins
@@ -1843,7 +1855,7 @@ class Filters(QWidget):
 
         marks = ",".join(["?"] * len(pids))
         query = f"""
-            SELECT DISTINCT t.tourneyName, tt.category, tt.limitType, tt.buyin, tt.fee
+            SELECT DISTINCT t.tourneyName, tt.category, tt.limitType, tt.buyin, tt.fee, tt.currency
             FROM TourneysPlayers tp
             JOIN Tourneys t ON t.id = tp.tourneyId
             JOIN TourneyTypes tt ON tt.id = t.tourneyTypeId
@@ -1860,7 +1872,11 @@ class Filters(QWidget):
         names = {row[0] for row in rows}
         categories = {row[1] for row in rows}
         limits = {row[2] for row in rows}
-        buyins = {f"{row[3]},{row[4]}" for row in rows if row[3] is not None and row[4] is not None}
+        buyins = {
+            tourney_buyin_key(row[3], row[4], row[5])
+            for row in rows
+            if row[3] is not None and row[4] is not None
+        }
 
         self._update_checkbox_set(self.cbTourney, names)
         self._update_checkbox_set(self.cbTourneyCat, categories)

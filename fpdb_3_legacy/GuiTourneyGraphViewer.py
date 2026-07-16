@@ -23,6 +23,7 @@ from typing import Any
 from PySide6.QtWidgets import QFrame, QMessageBox, QScrollArea, QSplitter, QVBoxLayout
 
 from fpdb_3_legacy import Database, Filters
+from fpdb_3_legacy.Filters import parse_tourney_buyin_key
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.localized_formats import currency_symbol, format_currency, format_number
 from fpdb_3_legacy.loggingFpdb import get_logger
@@ -351,11 +352,7 @@ class GuiTourneyGraphViewer(QSplitter):
         log.warning(f"GuiTourneyGraphViewer.getData: names: {names}, sites: {sites}, Tourneys: {Tourneys}")
         log.warning(f"GuiTourneyGraphViewer.getData filters: start_date: {start_date}, end_date: {end_date}, tourneys: {tourneys}, tourneysCat: {tourneysCat}, tourneysLim: {tourneysLim}, tourneysBuyin: {tourneysBuyin}")
 
-        currencies = {"EUR": "EUR", "USD": "USD", "NA": "NA", "": "T$"}
-        currencytest = str(tuple(currencies.values()))
-        currencytest = currencytest.replace(",)", ")")
-        currencytest = currencytest.replace("u'", "'")
-        currencytest = f"AND tt.currency in {currencytest}"
+        currencies = self.filters.getCurrencies()
 
         nametest = str(tuple(names))
         sitetest = str(tuple(sites))
@@ -373,12 +370,19 @@ class GuiTourneyGraphViewer(QSplitter):
                 return str(tuple(values))
             return str(tuple(int(v) for v in values))
 
-        currencytest = f"AND tt.currency in {make_in_clause_sql(currencies.values(), 'str')}"
+        currency_values = make_in_clause_sql(currencies, "str")
+        currencytest = f"AND tt.currency in {currency_values}" if currency_values else ""
         tourneysCattest = make_in_clause_sql(tourneysCat, "str")
         tourneysLimtest = make_in_clause_sql(tourneysLim, "str")
 
-        buyins = [int(b.split(",")[0]) for b in tourneysBuyin if b != "None"]
-        tourneysBuyintest = make_in_clause_sql(buyins, "int")
+        buyin_conditions = []
+        for buyin_value in tourneysBuyin:
+            if buyin_value == "None":
+                continue
+            buyin, fee, currency = parse_tourney_buyin_key(buyin_value)
+            escaped_currency = currency.replace("'", "''")
+            buyin_conditions.append(f"(tt.buyin = {buyin} AND tt.fee = {fee} AND tt.currency = '{escaped_currency}')")
+        tourneysBuyintest = f"AND ({' OR '.join(buyin_conditions)})" if buyin_conditions else ""
 
         tourneystest = tourneystest.replace("None", '"None"')
 
@@ -391,7 +395,7 @@ class GuiTourneyGraphViewer(QSplitter):
             query = query.replace("<currency_test>", currencytest)
             query = query.replace("AND tt.category in <tourney_cat>", f"AND tt.category in {tourneysCattest}" if tourneysCattest else "")
             query = query.replace("AND tt.limitType in <tourney_lim>", f"AND tt.limitType in {tourneysLimtest}" if tourneysLimtest else "")
-            query = query.replace("AND tt.buyin in <tourney_buyin>", f"AND tt.buyin in {tourneysBuyintest}" if tourneysBuyintest else "")
+            query = query.replace("AND tt.buyin in <tourney_buyin>", tourneysBuyintest)
             query = query.replace("<tourney_test>", tourneystest)
             return query.replace(",)", ")")
 
