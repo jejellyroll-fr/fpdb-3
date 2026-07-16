@@ -1853,22 +1853,21 @@ class Config:
 
     # end def
 
-    def increment_position(self, position: str) -> str:
-        # Adapt defined logic for hus stats form config file
-        # TODO: Probably adapt hud logic instead
-        """>>> self.increment_position('(0,0)')
+    @staticmethod
+    def increment_position(position: str) -> str:
+        """Convert a zero-based HUD grid position to the one-based XML format.
+
+        >>> Config.increment_position('(0,0)')
         "(1,1)"
-        >>> self.increment_position('(0, 0)')
+        >>> Config.increment_position('(0, 0)')
         "(1,1)"
-        >>> self.increment_position('(2,3)')
+        >>> Config.increment_position('(2,3)')
         "(3,4)".
         """
-        assert position.startswith("(") and position.endswith(")"), position.__repr__()
-        # Remove parentheses and split by comma
-        row, col = map(int, position[1:-1].split(","))
-        # Check that row and collar are not negative
-        assert row >= 0 and col >= 0, f"Negative values detected: row={row}, col={col}"
-        # Increment both row and column by 1
+        match = re.fullmatch(r"\(\s*(\d+)\s*,\s*(\d+)\s*\)", position)
+        if match is None:
+            raise AssertionError(f"Invalid HUD grid position: {position!r}")
+        row, col = map(int, match.groups())
         return f"({row + 1},{col + 1})"
 
     def edit_hud(
