@@ -129,7 +129,7 @@ version = "3.0.0-alpha2"
 [tool.briefcase.app.fpdb]
 formal_name = "FPDB"
 description = "Free Poker Database 3 - Legacy Edition"
-sources = ["fpdb_3_legacy", "fpdb"]
+sources = ["fpdb_3_legacy", "fpdb", ".briefcase-resources"]
 requires = [
     "PySide6>=6.8.1",
     "matplotlib>=3.10.7",

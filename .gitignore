@@ -55,6 +55,7 @@ cover/
 # Translations
 *.mo
 *.pot
+.briefcase-resources/
 
 # Django stuff:
 *.log
