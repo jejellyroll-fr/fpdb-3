@@ -77,6 +77,7 @@ jobs:
           fpdb_3_legacy/sql_queries_database_admin.py
           fpdb_3_legacy/sql_queries_filters.py
           fpdb_3_legacy/sql_queries_game_types.py
+          fpdb_3_legacy/sql_queries_hand_artifacts.py
           fpdb_3_legacy/sql_queries_hand_detail.py
           fpdb_3_legacy/sql_queries_history.py
           fpdb_3_legacy/sql_queries_hud_cache_write.py
