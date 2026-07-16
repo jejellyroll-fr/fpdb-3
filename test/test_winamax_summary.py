@@ -1055,6 +1055,47 @@ You finished in 50th place
             assert summary.isLottery is False
             assert summary.tourneyMultiplier == 1
 
+    def _classify(self, mode: str | None, entries: str) -> bool:
+        """Run the format classification in isolation."""
+        summary = WinamaxSummary.__new__(WinamaxSummary)
+        summary.isSng = False
+        summary.speed = "Normal"
+        summary.entries = entries
+        summary._parse_tournament_type({"MODE": mode, "SPEED": None})
+        return summary.isSng
+
+    @pytest.mark.parametrize(
+        ("mode", "entries", "is_sng"),
+        [
+            # The summary states the format from 2012 on; it settles the question.
+            ("sng", "3", True),
+            ("sngType : sitngo", "2", True),
+            ("sngType : freeroll100k", "10", True),
+            ("tt", "1743", False),
+            ("ttType : flight", "1097", False),
+            # A tournament that drew a small field is still a tournament: the
+            # stated format must win over the size of the field.
+            ("tt", "8", False),
+        ],
+    )
+    def test_stated_mode_decides_the_format(self, mode: str, entries: str, is_sng: bool) -> None:
+        assert self._classify(mode, entries) is is_sng
+
+    @pytest.mark.parametrize(
+        ("entries", "is_sng"),
+        [
+            # Older summaries state no format, so a field that fits one table is
+            # the only evidence of a sit & go.
+            ("10", True),
+            ("5000", False),
+            # Known limitation: a multi-table sit & go is indistinguishable from
+            # a tournament once the format is unstated.
+            ("18", False),
+        ],
+    )
+    def test_field_size_is_the_only_evidence_without_a_stated_mode(self, entries: str, is_sng: bool) -> None:
+        assert self._classify(None, entries) is is_sng
+
     def test_html_helpers_keep_gametype_and_money_units(self) -> None:
         """HTML parsing uses its dedicated gametype path and stores cents."""
         with patch("fpdb_3_legacy.TourneySummary.TourneySummary.__init__", return_value=None):
