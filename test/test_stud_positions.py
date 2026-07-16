@@ -239,12 +239,15 @@ class TestStudPositions:
         for player in hand.players:
             stats.handsplayers[player[1]] = _INIT_STATS.copy()
 
-        # Set positions - should not crash
+        stats.hands = {"maxPosition": 99}
+
         stats.setPositions(hand)
 
-        # Both players should have default positions
-        assert "position" in stats.handsplayers["Player1"]
-        assert "position" in stats.handsplayers["Player2"]
+        assert stats.handsplayers["Player1"]["position"] == 9
+        assert stats.handsplayers["Player2"]["position"] == 9
+        assert stats.handsplayers["Player1"]["street0FirstToAct"] is False
+        assert stats.handsplayers["Player2"]["street0InPosition"] is False
+        assert stats.hands["maxPosition"] == -1
 
 
 if __name__ == "__main__":
