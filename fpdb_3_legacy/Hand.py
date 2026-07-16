@@ -3013,13 +3013,8 @@ class StudHand(Hand):
         self.checkPlayerExists(player, "addPlayerCards")
         self.holecards[street][player] = (open, closed)
 
-    # TODO: def addComplete(self, player, amount):
     def addComplete(self, street, player, amountTo) -> None:
-        # assert street=='THIRD'
-        #     This needs to be called instead of addRaiseTo, and it needs to take account of self.lastBet['THIRD'] to determine the raise-by size
-        """\
-        Add a complete on [street] by [player] to [amountTo].
-        """
+        """Add a stud completion on *street* by *player* to *amountTo*."""
         log.debug(f"{street} {player} completes {amountTo}")
         amountTo = amountTo.replace(",", "")  # some sites have commas
         self.checkPlayerExists(player, "addComplete")
@@ -3027,7 +3022,7 @@ class StudHand(Hand):
         Bc = sum(self.bets[street][player])
         Rt = Decimal(amountTo)
         C = Bp - Bc
-        Rb = Rt - C
+        Rb = Rt - C - Bc
         self._addRaise(street, player, C, Rb, Rt, "completes")
 
     def addBringIn(self, player, bringin) -> None:
