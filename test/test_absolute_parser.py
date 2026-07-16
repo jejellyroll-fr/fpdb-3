@@ -76,3 +76,24 @@ def test_absolute_heads_up_header_sets_two_max_seats() -> None:
 
     assert hand.maxseats == 2
     assert hand.tourNo == "99"
+
+
+@pytest.mark.parametrize(
+    ("seat_lines", "expected_maxseats"),
+    [
+        ("Seat 1 - Alice ($1.00 in chips)\nSeat 2 - Bob ($1.00 in chips)", 6),
+        ("Seat 1 - Alice ($1.00 in chips)\nSeat 7 - Bob ($1.00 in chips)", 9),
+    ],
+)
+def test_absolute_observed_seats_only_promote_proven_nine_max(seat_lines, expected_maxseats) -> None:
+    players = []
+    hand = SimpleNamespace(
+        handText=seat_lines,
+        maxseats=6,
+        addPlayer=lambda *args: players.append(args),
+    )
+
+    Absolute.__new__(Absolute).readPlayerStacks(hand)
+
+    assert len(players) == 2
+    assert hand.maxseats == expected_maxseats
