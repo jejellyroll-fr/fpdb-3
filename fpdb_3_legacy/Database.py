@@ -2171,7 +2171,10 @@ class Database(DatabaseAutoNotesMixin, DatabaseCachesMixin, DatabaseTournamentsM
             # Otherwise return the first one
             log.info(f"Database.get_player_id: Fallback returned first player ID {rows[0][0]} of multiple matches for '{playerName}'")
             return rows[0][0]
-        return False
+        # None, not False: every caller tests `is not None`, and a bool would slip
+        # through as a player id -- int(False) == 0 in the GUI viewers, and a
+        # `playerId != %s` bind that PostgreSQL rejects outright in the HUD.
+        return None
 
     def get_player_site_id(self, playerId):
         c = self.connection.cursor()
