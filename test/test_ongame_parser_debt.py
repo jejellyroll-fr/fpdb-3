@@ -1,8 +1,10 @@
+import datetime
 from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
 
+from fpdb_3_legacy.Configuration import Config
 from fpdb_3_legacy.OnGameToFpdb import OnGame
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -46,3 +48,33 @@ def test_dealt_cards_regex_identifies_each_player_and_draw_replacement() -> None
         ("Villain", "-, -, Ks"),
         ("Hero", "Ah, Ad, Qc"),
     ]
+
+
+@pytest.mark.parametrize(
+    ("filename", "expected_utc"),
+    [
+        (
+            "LHE-9max-USD-0.50-1.00-201008.All-in.with.showdown.txt",
+            datetime.datetime(2010, 8, 18, 18, 32, 32, tzinfo=datetime.timezone.utc),
+        ),
+        (
+            "NLHE-6max-play-0.25-0.50-201204.txt",
+            datetime.datetime(2012, 4, 13, 13, 12, 34, tzinfo=datetime.timezone.utc),
+        ),
+        (
+            "NLHE-5max-USD-0.05-0.10-201302.Strobe.txt",
+            datetime.datetime(2013, 2, 28, 6, 30, 49, tzinfo=datetime.timezone.utc),
+        ),
+        (
+            "PLO8-USD-0.50-0.50-201111.txt",
+            datetime.datetime(2011, 9, 11, 14, 58, 25, tzinfo=datetime.timezone.utc),
+        ),
+    ],
+)
+def test_hand_start_time_honors_ongame_timezone(
+    filename: str,
+    expected_utc: datetime.datetime,
+) -> None:
+    parser = OnGame(Config(), str(ONGAME / filename), autostart=True)
+
+    assert parser.getProcessedHands()[0].startTime == expected_utc
