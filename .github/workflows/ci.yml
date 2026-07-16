@@ -368,7 +368,7 @@ jobs:
       - name: Exercise live PostgreSQL and MySQL schemas
         env:
           FPDB_TEST_DATABASES: postgresql,mysql
-        run: python -m pytest -q test/test_database_backend_integration.py
+        run: python -m pytest -q -p no:pytest-qt test/test_database_backend_integration.py
 
   build:
     runs-on: ${{ matrix.os }}
