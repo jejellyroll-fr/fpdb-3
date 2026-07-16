@@ -192,7 +192,8 @@ class PacificPoker(HandHistoryConverter):
         r"^{PLYR} posts (the\s)?ante \[({CUR})?\s?(?P<ANTE>[{NUM}]+)\s?({CUR})?\]".format(**substitutions),
         re.MULTILINE,
     )
-    # TODO: unknown in available hand histories for pacificpoker:
+    # Required by the converter interface. Pacific's supported catalog below
+    # contains community-card games only, so no bring-in is expected there.
     re_BringIn = re.compile(
         r"^{PLYR}: brings[- ]in( low|) for ({CUR})?\s?(?P<BRINGIN>[{NUM}]+)\s?({CUR})?".format(**substitutions),
         re.MULTILINE,
