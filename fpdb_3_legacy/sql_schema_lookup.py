@@ -12,7 +12,7 @@ def lookup_schema_queries(db_server: str) -> dict[str, str]:
                         name varchar(32) NOT NULL,
                         code char(4) NOT NULL)
                         ENGINE=INNODB""",
-            "createRankTable": """CREATE TABLE Rank (
+            "createRankTable": """CREATE TABLE `Rank` (
                         id SMALLINT UNSIGNED AUTO_INCREMENT NOT NULL, PRIMARY KEY (id),
                         name varchar(8) NOT NULL)
                         ENGINE=INNODB""",

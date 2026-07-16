@@ -299,7 +299,7 @@ Les bugs multi-backend récents (`Rank` réservé, `boolean` vs `smallint`, `set
 ## CI / packaging (transversal)
 
 - **CI** : matrice OS + lint + mypy + tests non-Qt sur Linux/macOS/Windows ; suite Qt complète exécutée hors-écran sous Linux ; **compilation `.mo`** dans le build (Briefcase), et embarquer `locale/**/*.mo` dans les bundles.
-- ✅ **Schémas DB réels en CI** (2026-07-16) : services PostgreSQL 16 et MySQL 8.4, exécution du catalogue DDL complet et vérification d'une contrainte étrangère réelle sur chaque backend.
+- ✅ **Schémas DB réels en CI** (2026-07-16) : services PostgreSQL 16 et MySQL 8.4, exécution du catalogue DDL complet et vérification d'une contrainte étrangère réelle sur chaque backend ; le test a immédiatement corrigé la création MySQL de la table réservée `Rank`.
 - **Migration DB** : étendre ces services aux migrations de données aller-retour ; la création du schéma n'est plus simulée.
 
 ---
