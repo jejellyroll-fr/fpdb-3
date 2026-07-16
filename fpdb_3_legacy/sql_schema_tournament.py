@@ -56,7 +56,12 @@ def tournament_schema_queries(db_server: str) -> dict[str, str]:
                         lottery BOOLEAN DEFAULT FALSE,
                         multiplier INT DEFAULT 1)
                         ENGINE=INNODB""",
-            "createBackingsTable": "CREATE TABLE Backings (\n                        id SMALLINT UNSIGNED AUTO_INCREMENT NOT NULL, PRIMARY KEY (id),\n                        tourneysPlayersId BIGINT UNSIGNED NOT NULL, FOREIGN KEY (tourneysPlayersId) REFERENCES TourneysPlayers(id),\n                        playerId INT UNSIGNED NOT NULL, FOREIGN KEY (playerId) REFERENCES Players(id),\n                        buyInPercentage FLOAT UNSIGNED NOT NULL,\n                        payOffPercentage FLOAT UNSIGNED NOT NULL) ENGINE=INNODB",
+            "createBackingsTable": """CREATE TABLE Backings (
+                        id SMALLINT UNSIGNED AUTO_INCREMENT NOT NULL, PRIMARY KEY (id),
+                        tourneysPlayersId BIGINT UNSIGNED NOT NULL, FOREIGN KEY (tourneysPlayersId) REFERENCES TourneysPlayers(id),
+                        playerId INT UNSIGNED NOT NULL, FOREIGN KEY (playerId) REFERENCES Players(id),
+                        buyInPercentage FLOAT UNSIGNED NOT NULL,
+                        payOffPercentage FLOAT UNSIGNED NOT NULL) ENGINE=INNODB""",
             "createTourneysTable": """CREATE TABLE Tourneys (
                         id INT UNSIGNED AUTO_INCREMENT NOT NULL, PRIMARY KEY (id),
                         tourneyTypeId SMALLINT UNSIGNED NOT NULL, FOREIGN KEY (tourneyTypeId) REFERENCES TourneyTypes(id),
@@ -139,7 +144,12 @@ def tournament_schema_queries(db_server: str) -> dict[str, str]:
                         guaranteeAmt BIGINT,
                         lottery BOOLEAN DEFAULT FALSE,
                         multiplier INT DEFAULT 1)""",
-            "createBackingsTable": "CREATE TABLE Backings (\n                        id BIGSERIAL, PRIMARY KEY (id),\n                        tourneysPlayersId INT NOT NULL, FOREIGN KEY (tourneysPlayersId) REFERENCES TourneysPlayers(id),\n                        playerId INT NOT NULL, FOREIGN KEY (playerId) REFERENCES Players(id),\n                        buyInPercentage FLOAT NOT NULL,\n                        payOffPercentage FLOAT NOT NULL)",
+            "createBackingsTable": """CREATE TABLE Backings (
+                        id BIGSERIAL, PRIMARY KEY (id),
+                        tourneysPlayersId INT NOT NULL, FOREIGN KEY (tourneysPlayersId) REFERENCES TourneysPlayers(id),
+                        playerId INT NOT NULL, FOREIGN KEY (playerId) REFERENCES Players(id),
+                        buyInPercentage FLOAT NOT NULL,
+                        payOffPercentage FLOAT NOT NULL)""",
             "createTourneysTable": """CREATE TABLE Tourneys (
                         id SERIAL, PRIMARY KEY (id),
                         tourneyTypeId INT, FOREIGN KEY (tourneyTypeId) REFERENCES TourneyTypes(id),
@@ -220,7 +230,12 @@ def tournament_schema_queries(db_server: str) -> dict[str, str]:
                         guaranteeAmt INT,
                         lottery BOOLEAN DEFAULT FALSE,
                         multiplier INT DEFAULT 1)""",
-            "createBackingsTable": "CREATE TABLE Backings (\n                        id INTEGER PRIMARY KEY,\n                        tourneysPlayersId INT NOT NULL,\n                        playerId INT NOT NULL,\n                        buyInPercentage REAL UNSIGNED NOT NULL,\n                        payOffPercentage REAL UNSIGNED NOT NULL)",
+            "createBackingsTable": """CREATE TABLE Backings (
+                        id INTEGER PRIMARY KEY,
+                        tourneysPlayersId INT NOT NULL,
+                        playerId INT NOT NULL,
+                        buyInPercentage REAL UNSIGNED NOT NULL,
+                        payOffPercentage REAL UNSIGNED NOT NULL)""",
             "createTourneysTable": """CREATE TABLE Tourneys (
                         id INTEGER PRIMARY KEY,
                         tourneyTypeId INT,

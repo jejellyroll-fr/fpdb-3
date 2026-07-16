@@ -5,11 +5,24 @@ from __future__ import annotations
 
 def _raw_table_ddl(db_server: str, table: str, foreign_column: str, raw_column: str) -> str:
     if db_server == "mysql":
-        return f"CREATE TABLE {table} (\n                        id BIGINT UNSIGNED AUTO_INCREMENT NOT NULL, PRIMARY KEY (id),\n                        {foreign_column} BIGINT NOT NULL,\n                        {raw_column} TEXT NOT NULL,\n                        complain BOOLEAN NOT NULL DEFAULT FALSE)\n                        ENGINE=INNODB"
+        return f"""CREATE TABLE {table} (
+                        id BIGINT UNSIGNED AUTO_INCREMENT NOT NULL, PRIMARY KEY (id),
+                        {foreign_column} BIGINT NOT NULL,
+                        {raw_column} TEXT NOT NULL,
+                        complain BOOLEAN NOT NULL DEFAULT FALSE)
+                        ENGINE=INNODB"""
     if db_server == "postgresql":
-        return f"CREATE TABLE {table} (\n                        id BIGSERIAL, PRIMARY KEY (id),\n                        {foreign_column} BIGINT NOT NULL,\n                        {raw_column} TEXT NOT NULL,\n                        complain BOOLEAN NOT NULL DEFAULT FALSE)"
+        return f"""CREATE TABLE {table} (
+                        id BIGSERIAL, PRIMARY KEY (id),
+                        {foreign_column} BIGINT NOT NULL,
+                        {raw_column} TEXT NOT NULL,
+                        complain BOOLEAN NOT NULL DEFAULT FALSE)"""
     if db_server == "sqlite":
-        return f"CREATE TABLE {table} (\n                        id INTEGER PRIMARY KEY,\n                        {foreign_column} BIGINT NOT NULL,\n                        {raw_column} TEXT NOT NULL,\n                        complain BOOLEAN NOT NULL DEFAULT FALSE)"
+        return f"""CREATE TABLE {table} (
+                        id INTEGER PRIMARY KEY,
+                        {foreign_column} BIGINT NOT NULL,
+                        {raw_column} TEXT NOT NULL,
+                        complain BOOLEAN NOT NULL DEFAULT FALSE)"""
     raise ValueError(f"Unsupported database backend: {db_server}")
 
 
