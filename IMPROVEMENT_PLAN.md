@@ -298,6 +298,7 @@ Les bugs multi-backend récents (`Rank` réservé, `boolean` vs `smallint`, `set
 - ✅ **Tables heads-up Absolute/Cereus** (2026-07-16) : l'indication `(1 on 1)` de l'en-tête fixe désormais `maxseats=2` au lieu d'être écrasée par le défaut 6-max, y compris avant le traitement particulier HORSE ; le registre est ramené à 39 entrées.
 - ✅ **Capacité des tables Absolute/Cereus** (2026-07-16) : l'occupation ne réduit jamais arbitrairement une table 6-max en 4-max, tandis qu'un siège 7–9 prouve et active le layout 9-max ; cette inférence conservatrice est testée et ramène le registre à 38 entrées.
 - ✅ **Structures Fixed Limit Absolute/Cereus** (2026-07-16) : le montant unique d'un en-tête est interprété comme l'unité de mise haute et traduit via `Lim_Blinds`; la structure connue `$2.00` produit ainsi correctement des blindes `$0.50/$1.00`, ramenant le registre à 37 entrées.
+- ✅ **Rues stud Absolute/Cereus** (2026-07-16) : le découpage existant des antes puis 3e, 4e, 5e, 6e et 7e rues est maintenant couvert de bout en bout ; l'ancien marqueur « non implémenté » était périmé et sa suppression ramène le registre à 36 entrées.
 - ✅ **Second checker évalué et adopté** (2026-07-16) : Pyright contrôle en mode `basic` le package moderne et les outils typés, en complément de mypy ; seuls les imports natifs optionnels propres à chaque OS sont ignorés.
 - **Qualité outillée restante** : Ruff, mypy et le ratchet Pyright sont verts ; traiter progressivement le registre de dette et élargir Pyright lorsque les annotations gagnent de nouveaux domaines.
 

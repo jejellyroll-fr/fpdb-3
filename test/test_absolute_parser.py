@@ -107,3 +107,30 @@ def test_absolute_observed_seats_only_promote_proven_nine_max(seat_lines, expect
 
     assert len(players) == 2
     assert hand.maxseats == expected_maxseats
+
+
+def test_absolute_stud_streets_are_segmented() -> None:
+    matches = []
+    hand = SimpleNamespace(
+        gametype={"base": "stud"},
+        handText=(
+            "Alice - Ante $0.10\n"
+            "*** 3rd STREET ***\nthird actions\n"
+            "*** 4TH STREET ***\nfourth actions\n"
+            "*** 5TH STREET ***\nfifth actions\n"
+            "*** 6TH STREET ***\nsixth actions\n"
+            "*** RIVER ***\nseventh actions"
+        ),
+        addStreets=lambda match: matches.append(match),
+    )
+
+    Absolute.__new__(Absolute).markStreets(hand)
+
+    assert len(matches) == 1
+    streets = matches[0].groupdict()
+    assert "Ante" in streets["ANTES"]
+    assert "third actions" in streets["THIRD"]
+    assert "fourth actions" in streets["FOURTH"]
+    assert "fifth actions" in streets["FIFTH"]
+    assert "sixth actions" in streets["SIXTH"]
+    assert "seventh actions" in streets["SEVENTH"]
