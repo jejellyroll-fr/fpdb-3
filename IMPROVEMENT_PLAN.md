@@ -48,7 +48,7 @@ Tests ajoutés : `test/test_menu_layout.py`, `test/test_translations.py`.
 **Reste à faire (hors dev / séparable)**
 - Traduire les chaînes dans les 13 autres langues (travail traducteurs ; `.pot` prêt, workflow Weblate/Crowdin).
 - Re-valider en masse les `.po` de 2011 (qualité).
-- Formats localisés : nombres / devises / dates dans stats et graphes (€/$/BB selon locale — feature distincte).
+- 🟡 **Formats localisés** (2026-07-16) : socle central nombres/devises/dates piloté par `ui_language`, branché sur les overrides HUD et le profit total ; étendre progressivement aux axes et tableaux des graphes.
 
 **Effort restant** ~2-3j · **Impact** élevé.
 
