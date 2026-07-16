@@ -316,9 +316,10 @@ class Absolute(HandHistoryConverter):
             seatnum = int(a.group("SEAT"))
             hand.addPlayer(seatnum, a.group("PNAME"), a.group("CASH"))
             if seatnum > 6:
-                hand.maxseats = 9  # absolute does 2/4/6/9 games
-                # TODO: implement lookup list by table-name to determine maxes,
-                # then fall back to 6 default/10 here, if there's no entry in the list?
+                # Absolute uses 2/4/6/9-seat tables. Occupancy cannot safely
+                # distinguish 4-max from a short-handed 6-max table, but a
+                # seat above 6 proves that the table uses the 9-max layout.
+                hand.maxseats = 9
 
     def markStreets(self, hand):
         # PREFLOP = ** Dealing down cards **
