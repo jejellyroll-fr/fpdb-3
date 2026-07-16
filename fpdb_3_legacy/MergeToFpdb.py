@@ -644,37 +644,28 @@ class Merge(HandHistoryConverter):
             self.fixTourBlinds(hand, allinBlinds)
 
     def fixTourBlinds(self, hand, allinBlinds) -> None:
-        # FIXME
-        # The following should only trigger when a small blind is missing in a tournament, or the sb/bb is ALL_IN
-        # see http://sourceforge.net/apps/mantisbt/fpdb/view.php?id=115
-        if hand.gametype["type"] == "tour" or hand.gametype["secondGame"]:
-            if hand.gametype["sb"] is None and hand.gametype["bb"] is None:
-                hand.gametype["sb"] = "1"
-                hand.gametype["bb"] = "2"
-            elif hand.gametype["sb"] is None:
-                hand.gametype["sb"] = str(int(Decimal(hand.gametype["bb"])) // 2)
-            elif hand.gametype["bb"] is None:
-                hand.gametype["bb"] = str(int(Decimal(hand.gametype["sb"])) * 2)
-            if int(Decimal(hand.gametype["bb"])) // 2 != int(
-                Decimal(hand.gametype["sb"]),
-            ):
-                if int(Decimal(hand.gametype["bb"])) // 2 < int(
-                    Decimal(hand.gametype["sb"]),
-                ):
-                    hand.gametype["bb"] = str(int(Decimal(hand.gametype["sb"])) * 2)
-                else:
-                    hand.gametype["sb"] = str(
-                        int(Decimal(hand.gametype["bb"])) // 2,
-                    )
-            hand.sb = hand.gametype["sb"]
-            hand.bb = hand.gametype["bb"]
-            for player, blindtype in list(allinBlinds.items()):
-                if blindtype == "big blind":
-                    self.adjustMergeTourneyStack(hand, player, hand.bb)
-                    hand.addBlind(player, "big blind", hand.bb)
-                else:
-                    self.adjustMergeTourneyStack(hand, player, hand.sb)
-                    hand.addBlind(player, "small blind", hand.sb)
+        if hand.gametype["type"] != "tour" and not hand.gametype["secondGame"]:
+            return
+
+        if hand.gametype["sb"] is None and hand.gametype["bb"] is None:
+            hand.gametype["sb"] = "1"
+            hand.gametype["bb"] = "2"
+        elif hand.gametype["sb"] is None:
+            hand.gametype["sb"] = str(int(Decimal(hand.gametype["bb"])) // 2)
+        elif hand.gametype["bb"] is None:
+            hand.gametype["bb"] = str(int(Decimal(hand.gametype["sb"])) * 2)
+
+        # Complete structures are authoritative. Some tournament levels use a
+        # non-2:1 ratio (for example 10/25), so they must not be normalized.
+        hand.sb = hand.gametype["sb"]
+        hand.bb = hand.gametype["bb"]
+        for player, blindtype in allinBlinds.items():
+            if blindtype == "big blind":
+                self.adjustMergeTourneyStack(hand, player, hand.bb)
+                hand.addBlind(player, "big blind", hand.bb)
+            else:
+                self.adjustMergeTourneyStack(hand, player, hand.sb)
+                hand.addBlind(player, "small blind", hand.sb)
 
     def mergeMultigametypes(self, handText) -> None:
         m2 = self.re_HandInfo.search(handText)
