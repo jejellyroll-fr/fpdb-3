@@ -655,19 +655,21 @@ class TestModernPopupImport(unittest.TestCase):
     """Test modern popup import handling."""
 
     def test_modern_popup_import_success(self) -> None:
-        """Test successful import of modern popup classes."""
-        # This test verifies that the import handling works
-        # The actual classes are mocked, so we just check the structure
-        with patch("fpdb_3_legacy.Popup.log"):
-            # Re-import to test import handling
-            import importlib
+        """Popup.py re-executes cleanly and still exposes its popup classes."""
+        # Execute a throwaway copy rather than importlib.reload(fpdb_3_legacy.Popup):
+        # reload re-runs the module in place, so Popup.Popup becomes a new class object
+        # while modules that already subclassed it (RangeChartPopup, BlockPopup) keep
+        # the old one. issubclass() then fails for every later test in the session.
+        import importlib.util
 
-            import fpdb_3_legacy.Popup as Popup
+        import fpdb_3_legacy.Popup as Popup
 
-            importlib.reload(Popup)
+        spec = importlib.util.spec_from_file_location("_popup_reimport_probe", Popup.__file__)
+        probe = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(probe)
 
-            # Should not log warning if import succeeds (mocked)
-            # In real scenario with missing ModernPopup, it would log warning
+        assert isinstance(probe.Popup, type)
+        assert callable(probe.popup_factory)
 
 
 if __name__ == "__main__":
