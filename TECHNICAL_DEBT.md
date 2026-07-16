@@ -4,14 +4,14 @@ Ce fichier est généré par `python tools/todo_inventory.py`. Chaque marqueur
 `TODO`, `FIXME` ou `HACK` du code possède ainsi un identifiant stable et une
 catégorie. Modifier le code source, puis régénérer ce registre.
 
-**Total : 63 tâches ouvertes.**
+**Total : 61 tâches ouvertes.**
 
 | Catégorie | Nombre |
 |---|---:|
 | core | 5 |
 | database | 7 |
 | parser | 40 |
-| poker-domain | 9 |
+| poker-domain | 7 |
 | ui | 2 |
 
 ## Tâches
@@ -76,8 +76,6 @@ catégorie. Modifier le code source, puis régénérer ce registre.
 | `TD-3CCE0D2B` | poker-domain | TODO | [fpdb_3_legacy/DerivedStats.py:1583](fpdb_3_legacy/DerivedStats.py#L1583) | future: fix: if ante all and no actions and no bring in |
 | `TD-4AF6ADF0` | poker-domain | TODO | [fpdb_3_legacy/Hand.py:30](fpdb_3_legacy/Hand.py#L30) | get writehand() encoding correct |
 | `TD-93FC79A6` | poker-domain | TODO | [fpdb_3_legacy/Hand.py:2264](fpdb_3_legacy/Hand.py#L2264) | the except PREFLOP shouldn't be necessary, but regression-test-files/cash/Everleaf/Flop/NLHE-10max-USD-0.01-0.02-201008.2Way.All-in.pre.txt fails without it |
-| `TD-D79627F3` | poker-domain | TODO | [fpdb_3_legacy/Hand.py:2495](fpdb_3_legacy/Hand.py#L2495) | legacy importer can't handle only one holecard here, make sure there are 2 for holdem, 4 for omaha |
-| `TD-62C9A8B2` | poker-domain | TODO | [fpdb_3_legacy/Hand.py:2496](fpdb_3_legacy/Hand.py#L2496) | If HoldHand subclass supports more than omahahi, omahahilo, holdem, add them here |
-| `TD-3434B435` | poker-domain | TODO | [fpdb_3_legacy/Hand.py:3018](fpdb_3_legacy/Hand.py#L3018) | def addComplete(self, player, amount |
+| `TD-3434B435` | poker-domain | TODO | [fpdb_3_legacy/Hand.py:3016](fpdb_3_legacy/Hand.py#L3016) | def addComplete(self, player, amount |
 | `TD-56A53357` | ui | TODO | [fpdb_3_legacy/GuiAutoImport.py:574](fpdb_3_legacy/GuiAutoImport.py#L574) | Allow for importing from multiple dirs - REB 29AUG2008 |
 | `TD-D998D6EA` | ui | FIXME | [fpdb_3_legacy/Mucked.py:368](fpdb_3_legacy/Mucked.py#L368) | if "show one and fold" ever becomes an option, |
