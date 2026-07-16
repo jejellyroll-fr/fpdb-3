@@ -511,203 +511,189 @@ class DerivedStats:
             elif action_type in ("bets", "raises"):
                 break
 
-    def assembleHands(self, hand: Any) -> None:  # noqa: C901, PLR0912, PLR0915
-        """Assemble basic hand statistics.
+    def _assembleHandIdentity(self, hand: Any) -> None:
+        """Record the table, ids, seat count and hero seat."""
+        # Initialize basic hand details
+        self.hands["tableName"] = hand.tablename
+        log.debug("Set tableName: %s", hand.tablename)
 
-        TODO @future: REFACTOR - This method is too complex (C901: 25 > 10, PLR0912: 30 > 12, PLR0915: 144 > 50)
-        Consider breaking into smaller methods:
-        - _assembleBasicHandInfo()
-        - _assembleBoardCards()
-        - _assembleStreetTotals()
-        - _assemblePlayerStats()
-        """
-        try:
-            log.debug("Starting assembleHands for hand ID: %s", hand.handid)
+        self.hands["siteHandNo"] = hand.handid
+        log.debug("Set siteHandNo: %s", hand.handid)
 
-            # Initialize basic hand details
-            self.hands["tableName"] = hand.tablename
-            log.debug("Set tableName: %s", hand.tablename)
+        self.hands["gametypeId"] = None  # Handled later after checking DB
+        self.hands["sessionId"] = None  # Added later if caching sessions
+        self.hands["gameId"] = None  # Added later if caching sessions
+        self.hands["startTime"] = hand.startTime  # Ensure proper formatting
+        log.debug("Set startTime: %s", hand.startTime)
 
-            self.hands["siteHandNo"] = hand.handid
-            log.debug("Set siteHandNo: %s", hand.handid)
+        self.hands["importTime"] = None
+        self.hands["seats"] = self.countPlayers(hand)
+        log.debug("Set seats: %s", self.hands["seats"])
 
-            self.hands["gametypeId"] = None  # Handled later after checking DB
-            self.hands["sessionId"] = None  # Added later if caching sessions
-            self.hands["gameId"] = None  # Added later if caching sessions
-            self.hands["startTime"] = hand.startTime  # Ensure proper formatting
-            log.debug("Set startTime: %s", hand.startTime)
+        self.hands["maxPosition"] = -1
+        self.hands["texture"] = None  # No calculation done yet
+        self.hands["tourneyId"] = hand.tourneyId
+        log.debug("Set tourneyId: %s", hand.tourneyId)
 
-            self.hands["importTime"] = None
-            self.hands["seats"] = self.countPlayers(hand)
-            log.debug("Set seats: %s", self.hands["seats"])
+        # Determine hero seat
+        self.hands["heroSeat"] = 0
+        for player in hand.players:
+            if hand.hero == player[1]:
+                self.hands["heroSeat"] = player[0]
+                log.debug("Hero found: %s at seat %s", player[1], player[0])
+                break
+        else:
+            log.warning("No hero found in the hand.")
 
-            self.hands["maxPosition"] = -1
-            self.hands["texture"] = None  # No calculation done yet
-            self.hands["tourneyId"] = hand.tourneyId
-            log.debug("Set tourneyId: %s", hand.tourneyId)
 
-            # Determine hero seat
-            self.hands["heroSeat"] = 0
-            for player in hand.players:
-                if hand.hero == player[1]:
-                    self.hands["heroSeat"] = player[0]
-                    log.debug("Hero found: %s at seat %s", player[1], player[0])
-                    break
-            else:
-                log.warning("No hero found in the hand.")
-
-            # Assemble board cards
-            boardcards = []
-            if hand.board.get("FLOPET") is not None:
-                try:
-                    flopet_cards = hand.board.get("FLOPET")
-                    if flopet_cards and hasattr(flopet_cards, "__iter__") and not isinstance(flopet_cards, str):
-                        boardcards += list(flopet_cards)
-                        log.debug("Added FLOPET cards: %s", flopet_cards)
-                    else:
-                        log.warning("FLOPET cards not iterable: %s", flopet_cards)
-                except TypeError:
-                    log.exception("Error processing FLOPET cards")
-
+    def _assembleBoardCards(self, hand: Any) -> None:
+        """Encode the five community cards of the single board."""
+        # Assemble board cards
+        boardcards = []
+        if hand.board.get("FLOPET") is not None:
             try:
-                for street in hand.communityStreets:
-                    if street in hand.board:
-                        street_cards = hand.board[street]
-                        if (
-                            street_cards
-                            and hasattr(street_cards, "__iter__")
-                            and not isinstance(street_cards, str)
-                            and len(street_cards) > 0
-                        ):
-                            boardcards += list(street_cards)
-                            log.debug("Added %s cards: %s", street, street_cards)
-                        elif street_cards:  # Only warn if there are actual cards but they're not iterable
-                            log.warning("Street %s cards not iterable: %s", street, street_cards)
-                        # Silently ignore empty lists - this is normal for PREFLOP-only hands
-                    else:
-                        log.debug("Street %s not found in hand.board - normal for preflop-only hands.", street)
+                flopet_cards = hand.board.get("FLOPET")
+                if flopet_cards and hasattr(flopet_cards, "__iter__") and not isinstance(flopet_cards, str):
+                    boardcards += list(flopet_cards)
+                    log.debug("Added FLOPET cards: %s", flopet_cards)
+                else:
+                    log.warning("FLOPET cards not iterable: %s", flopet_cards)
             except TypeError:
-                log.exception("Error iterating over communityStreets")
+                log.exception("Error processing FLOPET cards")
 
-            # Fill remaining board slots with placeholders
-            boardcards += ["0x", "0x", "0x", "0x", "0x"]
-            log.debug("Completed boardcards with placeholders: %s", boardcards)
-
-            # Encode first five board cards
-            try:
-                cards = [Card.encodeCard(c) for c in boardcards[0:5]]
-                self.hands["boardcard1"] = cards[0]
-                self.hands["boardcard2"] = cards[1]
-                self.hands["boardcard3"] = cards[2]
-                self.hands["boardcard4"] = cards[3]
-                self.hands["boardcard5"] = cards[4]
-                log.debug("Encoded board cards: %s", cards)
-            except IndexError:
-                log.exception("Error encoding board cards")
-                # Set default values
-                self.hands["boardcard1"] = 0
-                self.hands["boardcard2"] = 0
-                self.hands["boardcard3"] = 0
-                self.hands["boardcard4"] = 0
-                self.hands["boardcard5"] = 0
-
-            # Initialize boards list
-            self.hands["boards"] = []
-            self.hands["runItTwice"] = False
-
-            try:
-                run_it_times = int(hand.runItTimes) if hasattr(hand.runItTimes, "__int__") else 0
-            except (TypeError, ValueError):
-                run_it_times = 0
-
-            for i in range(run_it_times):
-                boardcards = []
-                for street in hand.communityStreets:
-                    board_id = i + 1
-                    street_i = f"{street}{board_id}"
-                    if street_i in hand.board and hand.board[street_i]:
-                        boardcards += hand.board[street_i]
-                        log.debug(
-                            "Run %s: Added %s cards: %s",
-                            i + 1,
-                            street_i,
-                            hand.board[street_i],
-                        )
-                    elif street in hand.board and hand.board[street]:
-                        # Shared street: when players go all-in after the flop, the
-                        # flop is dealt once and only the turn/river are run multiple
-                        # times (no FLOP1/FLOP2). Reuse the common street so each run
-                        # board stays complete (also covers the Courchevel flopet).
-                        boardcards += hand.board[street]
-                        log.debug(
-                            "Run %s: Reused shared street %s cards: %s",
-                            i + 1,
-                            street,
-                            hand.board[street],
-                        )
-                    else:
-                        log.warning(
-                            "Run %s: Street %s not found in hand.board.",
-                            i + 1,
-                            street_i,
-                        )
-
-                if hand.gametype.get("split"):
-                    boardcards += ["0x", "0x", "0x", "0x", "0x"]
-                    log.debug("Run %s: Split game, added placeholders.", i + 1)
-                    try:
-                        cards = [Card.encodeCard(c) for c in boardcards[:5]]
-                    except IndexError:
-                        log.exception("Run %s: Error encoding split board cards", i + 1)
-                        cards = [0] * 5
+        try:
+            for street in hand.communityStreets:
+                if street in hand.board:
+                    street_cards = hand.board[street]
+                    if (
+                        street_cards
+                        and hasattr(street_cards, "__iter__")
+                        and not isinstance(street_cards, str)
+                        and len(street_cards) > 0
+                    ):
+                        boardcards += list(street_cards)
+                        log.debug("Added %s cards: %s", street, street_cards)
+                    elif street_cards:  # Only warn if there are actual cards but they're not iterable
+                        log.warning("Street %s cards not iterable: %s", street, street_cards)
+                    # Silently ignore empty lists - this is normal for PREFLOP-only hands
                 else:
-                    self.hands["runItTwice"] = True
-                    # Pad trailing slots (keep flop/turn/river in order) so an
-                    # incomplete run board does not shift the cards.
-                    boardcards = [*boardcards, "0x", "0x", "0x", "0x", "0x"]
-                    log.debug("Run %s: Non-split game, padded trailing placeholders.", i + 1)
-                    try:
-                        cards = [Card.encodeCard(c) for c in boardcards[:5]]
-                    except IndexError:
-                        log.exception("Run %s: Error encoding board cards", i + 1)
-                        cards = [0] * 5
+                    log.debug("Street %s not found in hand.board - normal for preflop-only hands.", street)
+        except TypeError:
+            log.exception("Error iterating over communityStreets")
 
-                self.hands["boards"].append([board_id, *cards])
-                log.debug("Run %s: Appended to boards: %s", i + 1, [board_id, *cards])
+        # Fill remaining board slots with placeholders
+        boardcards += ["0x", "0x", "0x", "0x", "0x"]
+        log.debug("Completed boardcards with placeholders: %s", boardcards)
 
-            # Calculate street totals
-            try:
-                totals = hand.getStreetTotals()
-                # Check if totals is a Mock object
-                from unittest.mock import Mock
+        # Encode first five board cards
+        try:
+            cards = [Card.encodeCard(c) for c in boardcards[0:5]]
+            self.hands["boardcard1"] = cards[0]
+            self.hands["boardcard2"] = cards[1]
+            self.hands["boardcard3"] = cards[2]
+            self.hands["boardcard4"] = cards[3]
+            self.hands["boardcard5"] = cards[4]
+            log.debug("Encoded board cards: %s", cards)
+        except IndexError:
+            log.exception("Error encoding board cards")
+            # Set default values
+            self.hands["boardcard1"] = 0
+            self.hands["boardcard2"] = 0
+            self.hands["boardcard3"] = 0
+            self.hands["boardcard4"] = 0
+            self.hands["boardcard5"] = 0
 
-                if isinstance(totals, Mock):
-                    totals = [0, 0, 0, 0, 0, 0]
-                if totals and hasattr(totals, "__iter__") and not isinstance(totals, str):
-                    totals = [int(CENTS_MULTIPLIER * i) for i in totals]
-                    self.hands["street0Pot"] = totals[STREET0_IDX] if len(totals) > STREET0_IDX else 0
-                    self.hands["street1Pot"] = totals[STREET1_IDX] if len(totals) > STREET1_IDX else 0
-                    self.hands["street2Pot"] = totals[STREET2_IDX] if len(totals) > STREET2_IDX else 0
-                    self.hands["street3Pot"] = totals[STREET3_IDX] if len(totals) > STREET3_IDX else 0
-                    self.hands["street4Pot"] = totals[STREET4_IDX] if len(totals) > STREET4_IDX else 0
-                    self.hands["finalPot"] = totals[FINAL_POT_IDX] if len(totals) > FINAL_POT_IDX else 0
-                    # Add bomb pot amount from hand object
-                    self.hands["bombPot"] = getattr(hand, "bombPot", 0)
-                    log.debug("Street totals: %s", totals)
+
+    def _assembleRunItTwiceBoards(self, hand: Any) -> None:
+        """Encode one board per run when the hand was run several times."""
+        # Initialize boards list
+        self.hands["boards"] = []
+        self.hands["runItTwice"] = False
+
+        try:
+            run_it_times = int(hand.runItTimes) if hasattr(hand.runItTimes, "__int__") else 0
+        except (TypeError, ValueError):
+            run_it_times = 0
+
+        for i in range(run_it_times):
+            boardcards = []
+            for street in hand.communityStreets:
+                board_id = i + 1
+                street_i = f"{street}{board_id}"
+                if street_i in hand.board and hand.board[street_i]:
+                    boardcards += hand.board[street_i]
+                    log.debug(
+                        "Run %s: Added %s cards: %s",
+                        i + 1,
+                        street_i,
+                        hand.board[street_i],
+                    )
+                elif street in hand.board and hand.board[street]:
+                    # Shared street: when players go all-in after the flop, the
+                    # flop is dealt once and only the turn/river are run multiple
+                    # times (no FLOP1/FLOP2). Reuse the common street so each run
+                    # board stays complete (also covers the Courchevel flopet).
+                    boardcards += hand.board[street]
+                    log.debug(
+                        "Run %s: Reused shared street %s cards: %s",
+                        i + 1,
+                        street,
+                        hand.board[street],
+                    )
                 else:
-                    # Default values if totals is not iterable
-                    self.hands["street0Pot"] = 0
-                    self.hands["street1Pot"] = 0
-                    self.hands["street2Pot"] = 0
-                    self.hands["street3Pot"] = 0
-                    self.hands["street4Pot"] = 0
-                    self.hands["finalPot"] = 0
-                    # Add bomb pot amount from hand object
-                    self.hands["bombPot"] = getattr(hand, "bombPot", 0)
-                    log.warning("Street totals not iterable: %s", totals)
-            except (ArithmeticError, TypeError, ValueError):
-                log.exception("Error calculating street totals")
-                # Set default values on error
+                    log.warning(
+                        "Run %s: Street %s not found in hand.board.",
+                        i + 1,
+                        street_i,
+                    )
+
+            if hand.gametype.get("split"):
+                boardcards += ["0x", "0x", "0x", "0x", "0x"]
+                log.debug("Run %s: Split game, added placeholders.", i + 1)
+                try:
+                    cards = [Card.encodeCard(c) for c in boardcards[:5]]
+                except IndexError:
+                    log.exception("Run %s: Error encoding split board cards", i + 1)
+                    cards = [0] * 5
+            else:
+                self.hands["runItTwice"] = True
+                # Pad trailing slots (keep flop/turn/river in order) so an
+                # incomplete run board does not shift the cards.
+                boardcards = [*boardcards, "0x", "0x", "0x", "0x", "0x"]
+                log.debug("Run %s: Non-split game, padded trailing placeholders.", i + 1)
+                try:
+                    cards = [Card.encodeCard(c) for c in boardcards[:5]]
+                except IndexError:
+                    log.exception("Run %s: Error encoding board cards", i + 1)
+                    cards = [0] * 5
+
+            self.hands["boards"].append([board_id, *cards])
+            log.debug("Run %s: Appended to boards: %s", i + 1, [board_id, *cards])
+
+
+    def _assembleStreetTotals(self, hand: Any) -> None:
+        """Record the pot size entering each street, in cents."""
+        # Calculate street totals
+        try:
+            totals = hand.getStreetTotals()
+            # Check if totals is a Mock object
+            from unittest.mock import Mock
+
+            if isinstance(totals, Mock):
+                totals = [0, 0, 0, 0, 0, 0]
+            if totals and hasattr(totals, "__iter__") and not isinstance(totals, str):
+                totals = [int(CENTS_MULTIPLIER * i) for i in totals]
+                self.hands["street0Pot"] = totals[STREET0_IDX] if len(totals) > STREET0_IDX else 0
+                self.hands["street1Pot"] = totals[STREET1_IDX] if len(totals) > STREET1_IDX else 0
+                self.hands["street2Pot"] = totals[STREET2_IDX] if len(totals) > STREET2_IDX else 0
+                self.hands["street3Pot"] = totals[STREET3_IDX] if len(totals) > STREET3_IDX else 0
+                self.hands["street4Pot"] = totals[STREET4_IDX] if len(totals) > STREET4_IDX else 0
+                self.hands["finalPot"] = totals[FINAL_POT_IDX] if len(totals) > FINAL_POT_IDX else 0
+                # Add bomb pot amount from hand object
+                self.hands["bombPot"] = getattr(hand, "bombPot", 0)
+                log.debug("Street totals: %s", totals)
+            else:
+                # Default values if totals is not iterable
                 self.hands["street0Pot"] = 0
                 self.hands["street1Pot"] = 0
                 self.hands["street2Pot"] = 0
@@ -716,43 +702,68 @@ class DerivedStats:
                 self.hands["finalPot"] = 0
                 # Add bomb pot amount from hand object
                 self.hands["bombPot"] = getattr(hand, "bombPot", 0)
+                log.warning("Street totals not iterable: %s", totals)
+        except (ArithmeticError, TypeError, ValueError):
+            log.exception("Error calculating street totals")
+            # Set default values on error
+            self.hands["street0Pot"] = 0
+            self.hands["street1Pot"] = 0
+            self.hands["street2Pot"] = 0
+            self.hands["street3Pot"] = 0
+            self.hands["street4Pot"] = 0
+            self.hands["finalPot"] = 0
+            # Add bomb pot amount from hand object
+            self.hands["bombPot"] = getattr(hand, "bombPot", 0)
 
-            # VPIP will be calculated in assembleHandsPlayers after player initialization
+        # VPIP will be calculated in assembleHandsPlayers after player initialization
 
-            # Determine players at each street
-            try:
-                self.playersAtStreetX(hand)
-                log.debug(
-                    "Players at streets: 1=%s, 2=%s, 3=%s, 4=%s, Showdown=%s",
-                    self.hands.get("playersAtStreet1"),
-                    self.hands.get("playersAtStreet2"),
-                    self.hands.get("playersAtStreet3"),
-                    self.hands.get("playersAtStreet4"),
-                    self.hands.get("playersAtShowdown"),
-                )
-            except (AttributeError, KeyError, TypeError, ValueError):
-                log.exception("Error determining players at streets")
-                raise
 
-            # Calculate raises per street
-            try:
-                self.streetXRaises(hand)
-                log.debug(
-                    "Raises per street: street0Raises=%s, street1Raises=%s, street2Raises=%s, "
-                    "street3Raises=%s, street4Raises=%s",
-                    self.hands.get("street0Raises"),
-                    self.hands.get("street1Raises"),
-                    self.hands.get("street2Raises"),
-                    self.hands.get("street3Raises"),
-                    self.hands.get("street4Raises"),
-                )
-            except (AttributeError, KeyError, TypeError, ValueError):
-                log.exception("Error calculating raises per street")
-                raise
+    def _assembleStreetSummaries(self, hand: Any) -> None:
+        """Count players and raises per street."""
+        # Determine players at each street
+        try:
+            self.playersAtStreetX(hand)
+            log.debug(
+                "Players at streets: 1=%s, 2=%s, 3=%s, 4=%s, Showdown=%s",
+                self.hands.get("playersAtStreet1"),
+                self.hands.get("playersAtStreet2"),
+                self.hands.get("playersAtStreet3"),
+                self.hands.get("playersAtStreet4"),
+                self.hands.get("playersAtShowdown"),
+            )
+        except (AttributeError, KeyError, TypeError, ValueError):
+            log.exception("Error determining players at streets")
+            raise
 
+        # Calculate raises per street
+        try:
+            self.streetXRaises(hand)
+            log.debug(
+                "Raises per street: street0Raises=%s, street1Raises=%s, street2Raises=%s, "
+                "street3Raises=%s, street4Raises=%s",
+                self.hands.get("street0Raises"),
+                self.hands.get("street1Raises"),
+                self.hands.get("street2Raises"),
+                self.hands.get("street3Raises"),
+                self.hands.get("street4Raises"),
+            )
+        except (AttributeError, KeyError, TypeError, ValueError):
+            log.exception("Error calculating raises per street")
+            raise
+
+        # Log hand details at debug level
+
+    def assembleHands(self, hand: Any) -> None:
+        """Assemble basic hand statistics."""
+        try:
+            log.debug("Starting assembleHands for hand ID: %s", hand.handid)
+            self._assembleHandIdentity(hand)
+            self._assembleBoardCards(hand)
+            self._assembleRunItTwiceBoards(hand)
+            self._assembleStreetTotals(hand)
+            self._assembleStreetSummaries(hand)
             # Log hand details at debug level
             log.debug("Hand detail: %s", hand)
-
         except Exception:  # intentional broad catch: top-level hand assembly context logs hand id before reraising.
             log.exception("Error in assembleHands for hand ID %s", hand.handid)
             raise
