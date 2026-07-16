@@ -4,18 +4,17 @@ Ce fichier est généré par `python tools/todo_inventory.py`. Chaque marqueur
 `TODO`, `FIXME` ou `HACK` du code possède ainsi un identifiant stable et une
 catégorie. Modifier le code source, puis régénérer ce registre.
 
-**Total : 33 tâches ouvertes.**
+**Total : 32 tâches ouvertes.**
 
 | Catégorie | Nombre |
 |---|---:|
-| parser | 30 |
+| parser | 29 |
 | poker-domain | 3 |
 
 ## Tâches
 
 | ID | Catégorie | Type | Emplacement | Description |
 |---|---|---|---|---|
-| `TD-187C8208` | parser | FIXME | [fpdb_3_legacy/EnetToFpdb.py:318](fpdb_3_legacy/EnetToFpdb.py#L318) | handle other currencies, play money |
 | `TD-3FB18AD8` | parser | FIXME | [fpdb_3_legacy/EntractionToFpdb.py:265](fpdb_3_legacy/EntractionToFpdb.py#L265) | handle other currencies, play money |
 | `TD-30783EBC` | parser | HACK | [fpdb_3_legacy/EverestToFpdb.py:174](fpdb_3_legacy/EverestToFpdb.py#L174) | tablename not in every hand. |
 | `TD-9F6C9348` | parser | FIXME | [fpdb_3_legacy/EverestToFpdb.py:214](fpdb_3_legacy/EverestToFpdb.py#L214) | u'DATETIME': u'1291155932' |
