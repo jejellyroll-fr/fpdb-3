@@ -24,7 +24,6 @@ from fpdb_3_legacy import L10n
 
 _ = L10n.get_translation()
 
-# TODO: I have no idea if AP has multi-currency options, i just copied the regex out of Everleaf converter for the currency symbols.. weeeeee - Eric
 import datetime
 import re
 from decimal import Decimal
@@ -108,7 +107,7 @@ class Absolute(HandHistoryConverter):
               (?P<GAME>Holdem|HOLDEM|Seven\ Card\ Hi\/Lo|HORSE|Omaha|Omaha\ Hi\/Lo|OMAHA)\s+
               (?P<TRNY_TYPE>\(1\son\s1\)|\(1\sON\s1\)|Single\ Tournament|SINGLE\ TOURNAMENT|Multi\ Normal\ Tournament|MULTI\ NORMAL\ TOURNAMENT|)\s*
               (?P<LIMIT>No\ Limit|NO\ LIMIT|Pot\ Limit|POT\ LIMIT|Normal|NORMAL|)\s?
-              (?P<CURRENCY>\$|\s€|)
+              (?P<CURRENCY>\$|€|)
               (?P<SB>[.,0-9]+)(/(?:\$|\s€|)(?P<BB>[.,0-9]+))?
               (,\s(?:\$|\s€|)(?P<ANTE>[.,0-9]+)\sante)?
               \s+
@@ -226,7 +225,7 @@ class Absolute(HandHistoryConverter):
             "Seven Card Hi/Lo": ("stud", "studhilo"),
             "7 Card Stud": ("stud", "studhi"),
         }
-        currencies = {" €": "EUR", "$": "USD", "": "T$"}
+        currencies = {"€": "EUR", "$": "USD", "": "T$"}
         if "GAME" in mg and mg["GAME"] == "HORSE":  # if we're a HORSE game, the game type is on the next line
             self.HORSEHand = True
             m = self.re_HorseGameInfo.search(handText)
@@ -244,7 +243,7 @@ class Absolute(HandHistoryConverter):
         if "LIMIT" in mg:
             info["limitType"] = limits[mg["LIMIT"]]
         if "CURRENCY" in mg:
-            info["currency"] = currencies[mg["CURRENCY"]]
+            info["currency"] = currencies[mg["CURRENCY"].strip()]
             if info["currency"] == "T$":
                 info["type"] = "tour"
         if "SB" in mg:
