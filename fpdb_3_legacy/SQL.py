@@ -35,6 +35,7 @@ from fpdb_3_legacy.sql_queries_session_stats import session_stats_queries
 from fpdb_3_legacy.sql_queries_tournament_graph import tournament_graph_queries
 from fpdb_3_legacy.sql_queries_tournament_persistence import tournament_persistence_queries
 from fpdb_3_legacy.sql_queries_tournament_player import tournament_player_detailed_queries
+from fpdb_3_legacy.sql_queries_utility import utility_queries
 from fpdb_3_legacy.sql_schema_cards_cache import cards_cache_schema_queries
 from fpdb_3_legacy.sql_schema_core import core_schema_queries
 from fpdb_3_legacy.sql_schema_game import game_schema_queries
@@ -131,6 +132,7 @@ class Sql:
         self.query.update(tournament_player_detailed_queries(db_server))
         self.query.update(tournament_graph_queries())
         self.query.update(tournament_persistence_queries())
+        self.query.update(utility_queries())
         ###############################################################################3
         #    Support for the Free Poker DataBase = fpdb   http://fpdb.sourceforge.net/
         #
@@ -1178,15 +1180,6 @@ sum(hc.street0Limp)                 AS limp,
                 """
 
 
-        self.query["get_player_comment"] = """
-            SELECT comment FROM Players WHERE id=%s
-        """
-
-        self.query["update_player_comment"] = """
-            UPDATE Players SET comment=%s, commentTs=CURRENT_TIMESTAMP WHERE id=%s
-        """
-        self.query["get_player_name"] = "SELECT name FROM Players WHERE id=%s"
-
         ####################################
 
         ####################################
@@ -1212,32 +1205,6 @@ sum(hc.street0Limp)                 AS limp,
         ################################
         # Counts for DB stats window
         ################################
-        self.query["getHandCount"] = "SELECT COUNT(*) FROM Hands"
-        self.query["getTourneyCount"] = "SELECT COUNT(*) FROM Tourneys"
-        self.query["getTourneyTypeCount"] = "SELECT COUNT(*) FROM TourneyTypes"
-
-        ################################
-        # queries for dumpDatabase
-        ################################
-        for table in (
-            "Autorates",
-            "Backings",
-            "Gametypes",
-            "Hands",
-            "HandsActions",
-            "HandsPlayers",
-            "HudCache",
-            "Players",
-            "RawHands",
-            "RawTourneys",
-            "Settings",
-            "Sites",
-            "TourneyTypes",
-            "Tourneys",
-            "TourneysPlayers",
-        ):
-            self.query["get" + table] = "SELECT * FROM " + table
-
         ################################
         # placeholders and substitution stuff
         ################################
