@@ -15,6 +15,7 @@ from matplotlib.figure import Figure
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QComboBox, QFrame, QGridLayout, QHBoxLayout, QLabel, QScrollArea, QVBoxLayout, QWidget
 
+from fpdb_3_legacy.localized_formats import format_currency, format_number
 from fpdb_3_legacy.ring_stats.styles import get_theme_palette
 
 
@@ -46,9 +47,9 @@ class HoldemGridCell(QFrame):
         """Met à jour les statistiques de la cellule et son infobulle."""
         self.setToolTip(
             f"<b>Main : {self.hand_text}</b><br/>"
-            f"Nombre de mains : {n:,}<br/>"
-            f"VPIP : {vpip:.1f}%<br/>"
-            f"Profit : {profit:+.2f} €"
+            f"Nombre de mains : {format_number(n, 0)}<br/>"
+            f"VPIP : {format_number(vpip, 1)}%<br/>"
+            f"Profit : {format_currency(profit, 'EUR', show_plus=profit > 0)}"
         )
 
         c = get_theme_palette()

@@ -27,6 +27,7 @@ from typing import Any
 np = import_module("numpy")
 FigureCanvas = getattr(import_module("matplotlib.backends.backend_qt5agg"), "FigureCanvas")
 Figure = getattr(import_module("matplotlib.figure"), "Figure")
+FuncFormatter = getattr(import_module("matplotlib.ticker"), "FuncFormatter")
 from PySide6.QtWidgets import (
     QFrame,
     QMessageBox,
@@ -38,6 +39,7 @@ from PySide6.QtWidgets import (
 
 from fpdb_3_legacy import Database, Filters
 from fpdb_3_legacy.i18n import gettext as _
+from fpdb_3_legacy.localized_formats import currency_symbol, format_number
 from fpdb_3_legacy.loggingFpdb import get_logger
 
 # import L10n
@@ -131,7 +133,8 @@ class GuiGraphViewer(QSplitter):
         games = self.filters.getGames()
         currencies = self.filters.getCurrencies()
         graphops = self.filters.getGraphOps()
-        display_in = "$" if "$" in graphops else "BB"
+        display_currency = currencies[0] if currencies else "USD"
+        display_in = currency_symbol(display_currency) if "$" in graphops else "BB"
         names = ""
 
         log.warning(f"GuiGraphViewer.generateGraph called. Sites selected: {sites}, Heroes config: {heroes}, siteids: {siteids}, limits: {limits}, games: {games}, currencies: {currencies}, graphops: {graphops}")
@@ -251,6 +254,7 @@ class GuiGraphViewer(QSplitter):
         # Labels
         self.ax.set_xlabel("Hands", color=fg_color, labelpad=8, fontsize=10, fontweight="semibold")
         self.ax.set_ylabel(display_in, color=fg_color, labelpad=8, fontsize=10, fontweight="semibold")
+        self.ax.yaxis.set_major_formatter(FuncFormatter(lambda value, _position: format_number(value)))
 
         # Title
         title_color = "#ffffff" if is_dark else "#0f172a"

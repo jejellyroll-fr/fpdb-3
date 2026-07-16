@@ -315,6 +315,7 @@ class RingStatsController(QObject):
         vpip_idx = colnames.index("vpip") if "vpip" in colnames else -1
         pfr_idx = colnames.index("pfr") if "pfr" in colnames else -1
         net_idx = colnames.index("net") if "net" in colnames else -1
+        currency_idx = colnames.index("currency") if "currency" in colnames else -1
         pos_idx = colnames.index("plposition") if "plposition" in colnames else -1
 
         for row in result:
@@ -337,7 +338,8 @@ class RingStatsController(QObject):
                 position_stats[pos_label] = {
                     "vpip": vpip,
                     "pfr": pfr,
-                    "net": net
+                    "net": net,
+                    "currency": str(row[currency_idx]) if currency_idx != -1 and row[currency_idx] else "EUR",
                 }
 
         debug_log(f"_on_positions_query_finished: resolved {len(position_stats)} positions: {list(position_stats.keys())}")
@@ -451,6 +453,7 @@ class RingStatsController(QObject):
         pfr_idx = colnames.index("pfr") if "pfr" in colnames else -1
         pf3_idx = colnames.index("pf3") if "pf3" in colnames else -1
         agg_idx = colnames.index("aggfac") if "aggfac" in colnames else -1
+        currency_idx = colnames.index("currency") if "currency" in colnames else -1
 
         total_hands = 0
         total_net = 0.0
@@ -458,6 +461,7 @@ class RingStatsController(QObject):
         weighted_pfr = 0.0
         weighted_pf3 = 0.0
         weighted_agg = 0.0
+        currencies: set[str] = set()
 
         for row in result:
             h = int(row[hands_idx]) if hands_idx != -1 and row[hands_idx] is not None else 0
@@ -465,6 +469,8 @@ class RingStatsController(QObject):
                 continue
             total_hands += h
             total_net += float(row[net_idx]) if net_idx != -1 and row[net_idx] is not None else 0.0
+            if currency_idx != -1 and row[currency_idx]:
+                currencies.add(str(row[currency_idx]))
 
             # Agrégation pondérée par le nombre de mains
             weighted_vpip += (float(row[vpip_idx]) if vpip_idx != -1 and row[vpip_idx] is not None and row[vpip_idx] != -999 else 0.0) * h
@@ -478,7 +484,8 @@ class RingStatsController(QObject):
             "vpip": (weighted_vpip / total_hands) if total_hands > 0 else 0.0,
             "pfr": (weighted_pfr / total_hands) if total_hands > 0 else 0.0,
             "pf3": (weighted_pf3 / total_hands) if total_hands > 0 else 0.0,
-            "aggfac": (weighted_agg / total_hands) if total_hands > 0 else 0.0
+            "aggfac": (weighted_agg / total_hands) if total_hands > 0 else 0.0,
+            "currency": next(iter(currencies)) if len(currencies) == 1 else "EUR",
         }
 
     def _get_refined_sql(self, query: str, holecards: bool, filter_widget, playerids, sitenos, limits, seats, groups, dates, games, currencies, num_hands, force_position: bool = False) -> str:

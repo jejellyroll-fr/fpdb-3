@@ -14,6 +14,7 @@ from PySide6.QtCore import QRectF, Qt
 from PySide6.QtGui import QBrush, QColor, QFont, QPainter, QPen
 from PySide6.QtWidgets import QSplitter, QVBoxLayout, QWidget
 
+from fpdb_3_legacy.localized_formats import format_currency, format_number
 from fpdb_3_legacy.ring_stats.styles import get_theme_palette
 
 
@@ -150,11 +151,12 @@ class PokerTableWidget(QWidget):
                 font.setBold(False)
                 painter.setFont(font)
                 painter.setPen(muted_color)
-                painter.drawText(QRectF(sx - seat_w / 2.0, sy - seat_h / 2.0 + 16, seat_w, 12), Qt.AlignmentFlag.AlignCenter, f"{vpip:.0f}/{pfr:.0f}")
+                stat_text = f"{format_number(vpip, 0)}/{format_number(pfr, 0)}"
+                painter.drawText(QRectF(sx - seat_w / 2.0, sy - seat_h / 2.0 + 16, seat_w, 12), Qt.AlignmentFlag.AlignCenter, stat_text)
 
                 # Profit
                 profit = stats.get("net", 0.0)
-                profit_text = f"{profit:+.2f}€" if profit != 0 else "0.00€"
+                profit_text = format_currency(profit, str(stats.get("currency", "EUR")), show_plus=profit > 0)
                 painter.setPen(color_up if profit > 0 else color_down if profit < 0 else text_color)
                 font.setBold(True)
                 painter.setFont(font)

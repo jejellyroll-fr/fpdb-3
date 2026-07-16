@@ -9,8 +9,10 @@ from __future__ import annotations
 import numpy as np
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
+from matplotlib.ticker import FuncFormatter
 from PySide6.QtWidgets import QGridLayout, QLabel, QVBoxLayout, QWidget
 
+from fpdb_3_legacy.localized_formats import format_currency, format_number
 from fpdb_3_legacy.ring_stats.styles import get_theme_palette
 from fpdb_3_legacy.ring_stats.views.widgets import GapMeter, KpiCard
 
@@ -44,6 +46,7 @@ class ProfitGraphCanvas(FigureCanvas):
         self.axes.spines['left'].set_color(grid_color)
 
         self.axes.tick_params(colors=text_color, labelsize=8)
+        self.axes.yaxis.set_major_formatter(FuncFormatter(lambda value, _position: format_number(value)))
         self.axes.yaxis.grid(True, color=grid_color, linestyle='--', alpha=0.5)
         self.axes.xaxis.grid(True, color=grid_color, linestyle='--', alpha=0.3)
         self.axes.set_title("Évolution du Profit", color=text_color, fontsize=10, fontweight='bold')
@@ -164,24 +167,25 @@ class DashboardTab(QWidget):
         """Met à jour les KPI cards, la jauge de gap, et redessine le graphique."""
         # 1. Mise à jour des cartes KPI
         hands = summary_stats.get("hands", 0)
-        self.card_hands.set_value(f"{hands:,}")
+        self.card_hands.set_value(format_number(hands, 0))
 
         net_profit = summary_stats.get("net", 0.0)
-        net_val_str = f"{net_profit:+.2f} €" if net_profit != 0 else "0.00 €"
+        currency = str(summary_stats.get("currency", "EUR"))
+        net_val_str = format_currency(net_profit, currency, show_plus=net_profit > 0)
         value_type = "green" if net_profit > 0 else "red" if net_profit < 0 else "normal"
         self.card_net.set_value(net_val_str, value_type=value_type)
 
         vpip = summary_stats.get("vpip", 0.0)
-        self.card_vpip.set_value(f"{vpip:.1f}%")
+        self.card_vpip.set_value(f"{format_number(vpip, 1)}%")
 
         pfr = summary_stats.get("pfr", 0.0)
-        self.card_pfr.set_value(f"{pfr:.1f}%")
+        self.card_pfr.set_value(f"{format_number(pfr, 1)}%")
 
         pf3 = summary_stats.get("pf3", 0.0)
-        self.card_3bet.set_value(f"{pf3:.1f}%")
+        self.card_3bet.set_value(f"{format_number(pf3, 1)}%")
 
         agg = summary_stats.get("aggfac", 0.0)
-        self.card_agg.set_value(f"{agg:.2f}")
+        self.card_agg.set_value(format_number(agg, 2))
 
         # 2. Mise à jour du GapMeter
         self.gap_meter.set_values(vpip, pfr)

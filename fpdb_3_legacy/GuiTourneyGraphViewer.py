@@ -24,6 +24,7 @@ from PySide6.QtWidgets import QFrame, QMessageBox, QScrollArea, QSplitter, QVBox
 
 from fpdb_3_legacy import Database, Filters
 from fpdb_3_legacy.i18n import gettext as _
+from fpdb_3_legacy.localized_formats import currency_symbol, format_currency, format_number
 from fpdb_3_legacy.loggingFpdb import get_logger
 
 # import Charset
@@ -42,6 +43,7 @@ try:
             log.exception(f"Matplotlib use error: {e}")
     FigureCanvas = getattr(import_module("matplotlib.backends.backend_qt5agg"), "FigureCanvas")
     Figure = getattr(import_module("matplotlib.figure"), "Figure")
+    FuncFormatter = getattr(import_module("matplotlib.ticker"), "FuncFormatter")
     cumsum = getattr(import_module("numpy"), "cumsum")
 except ImportError as inst:
     log.exception(
@@ -143,6 +145,7 @@ class GuiTourneyGraphViewer(QSplitter):
         siteids = self.filters.getSiteIds()
 
         games = self.filters.getGames()
+        currencies = self.filters.getCurrencies()
         names = ""
 
         log.warning(f"GuiTourneyGraphViewer.generateGraph called. Sites selected: {sites}, Heroes config: {heroes}, siteids: {siteids}, games: {games}")
@@ -247,7 +250,9 @@ class GuiTourneyGraphViewer(QSplitter):
 
         # Labels
         self.ax.set_xlabel("Tournaments", color=fg_color, labelpad=8, fontsize=10, fontweight="semibold")
-        self.ax.set_ylabel("$", color=fg_color, labelpad=8, fontsize=10, fontweight="semibold")
+        display_currency = currencies[0] if currencies else "USD"
+        self.ax.set_ylabel(currency_symbol(display_currency), color=fg_color, labelpad=8, fontsize=10, fontweight="semibold")
+        self.ax.yaxis.set_major_formatter(FuncFormatter(lambda value, _position: format_number(value)))
 
         # Title
         title_color = "#ffffff" if is_dark else "#0f172a"
@@ -282,7 +287,7 @@ class GuiTourneyGraphViewer(QSplitter):
             green,
             color=line_hands_color,
             linewidth=2.5,
-            label="Tournaments: %d\nProfit: $%.2f" % (len(green), green[-1]),
+            label=f"Tournaments: {format_number(len(green), 0)}\nProfit: {format_currency(green[-1], display_currency)}",
         )
 
         # ChipEV-by-position curves (declarative; see stat_registry.py).
