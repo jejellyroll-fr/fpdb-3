@@ -366,7 +366,7 @@ jobs:
       - uses: astral-sh/setup-uv@v3
       - name: Install database test dependencies
         run: uv pip install --system -e ".[test-no-gui]"
-      - name: Exercise live PostgreSQL and MySQL schemas
+      - name: Exercise live schemas and cross-backend migration
         env:
           FPDB_TEST_DATABASES: postgresql,mysql
         run: python -m pytest -q -p no:pytest-qt test/test_database_backend_integration.py
