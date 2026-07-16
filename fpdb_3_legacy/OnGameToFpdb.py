@@ -155,9 +155,6 @@ class OnGame(HandHistoryConverter):
         players = set([player[1] for player in hand.players])
         if not players <= self.compiledPlayers:  # x <= y means 'x is subset of y'
             # we need to recompile the player regexs.
-            # TODO: should probably rename re_HeroCards and corresponding method,
-            #    since they are used to find all cards on lines starting with "Dealt to:"
-            #    They still identify the hero.
             self.compiledPlayers = players
 
             # ANTES/BLINDS
@@ -182,7 +179,7 @@ class OnGame(HandHistoryConverter):
             self.re_PostDead = re.compile(
                 "{PLYR} posts dead blind \\(({CUR})?(?P<DEAD>[{NUM}]+)\\)".format(**self.substitutions), re.MULTILINE
             )
-            self.re_HeroCards = re.compile(
+            self.re_DealtCards = re.compile(
                 "(New\\shand\\sfor|Dealing\\sto)\\s{PLYR}:\\s\\[(?P<CARDS>.*)\\]".format(**self.substitutions)
             )
 
@@ -482,7 +479,7 @@ class OnGame(HandHistoryConverter):
         # we need to grab hero's cards
         for street in ("PREFLOP", "DEAL"):
             if street in hand.streets.keys():
-                m = self.re_HeroCards.finditer(hand.streets[street])
+                m = self.re_DealtCards.finditer(hand.streets[street])
                 for found in m:
                     hand.hero = found.group("PNAME")
                     newcards = found.group("CARDS").split(", ")
@@ -492,7 +489,7 @@ class OnGame(HandHistoryConverter):
             if street in hand.streets:
                 if not hand.streets[street] or street in ("PREFLOP", "DEAL") or hand.gametype["base"] == "hold":
                     continue  # already done these
-                m = self.re_HeroCards.finditer(hand.streets[street])
+                m = self.re_DealtCards.finditer(hand.streets[street])
                 for found in m:
                     player = found.group("PNAME")
                     newcards = [c for c in found.group("CARDS").split(", ") if c != "-"]
