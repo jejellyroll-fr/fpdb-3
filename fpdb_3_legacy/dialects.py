@@ -237,15 +237,18 @@ class PostgresDialect(Dialect):
     def reset_sequences(self, db: Any, tables: list[str]) -> None:
         cursor = db.get_cursor()
         for table in tables:
-            try:
-                cursor.execute("SELECT pg_get_serial_sequence(%s, 'id')", (table,))
-                row = cursor.fetchone()
-                sequence = row[0] if row else None
-                if not sequence:
-                    continue
-                cursor.execute(f"SELECT setval(%s, COALESCE((SELECT MAX(id) FROM {table}), 0) + 1, false)", (sequence,))
-            except Exception as exc:  # noqa: BLE001 - a table may have no id sequence
-                log.debug("No sequence reset for %s: %s", table, exc)
+            physical_table = table.lower()
+            cursor.execute(
+                """SELECT 1
+                   FROM information_schema.columns
+                   WHERE table_schema = current_schema()
+                     AND table_name = %s
+                     AND column_name = 'id'
+                     AND column_default LIKE 'nextval(%'""",
+                (physical_table,),
+            )
+            if cursor.fetchone():
+                self.repair_sequence(db, physical_table)
 
     def repair_sequence(self, db: Any, table: str) -> None:
         """Repair a stale serial sequence without racing normal table inserts.
