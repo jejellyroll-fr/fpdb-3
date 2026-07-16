@@ -236,6 +236,9 @@ class PokerTracker(HandHistoryConverter):
     )
     re_SplitHands = re.compile("\n\n\n+?")
     re_TailSplitHands = re.compile("(\n\n\n+)")
+    # A Merge table name announces a freeroll with the whole word: matching on
+    # "Free" alone also catches names like "Freezeout" or "$5 Free PLO".
+    re_FreerollName = re.compile(r"\bFreeroll\b", re.IGNORECASE)
     re_Button = re.compile(r"The button is in seat #(?P<BUTTON>\d+)", re.MULTILINE)
     re_Board1 = re.compile(r"\[(?P<CARDS>.+)\]")
     re_Board2 = re.compile(r":\s(?P<CARDS>.+)\n")
@@ -672,7 +675,7 @@ class PokerTracker(HandHistoryConverter):
                         hand.maxseats = None
                         hand.gametype["maxSeats"] = None
                 if self.sitename != "Merge" or hand.buyin == 0:
-                    if info[key] == "Freeroll" or "Free" in tourneyname:
+                    if info[key] == "Freeroll" or self.re_FreerollName.search(tourneyname):
                         hand.buyin = 0
                         hand.fee = 0
                         hand.buyinCurrency = "FREE"
@@ -686,7 +689,6 @@ class PokerTracker(HandHistoryConverter):
                         elif re.match("^[0-9+]*$", info[key]):
                             hand.buyinCurrency = "play"
                         else:
-                            # FIXME: handle other currencies, play money
                             log.error(
                                 f"Failed to detect currency. Hand ID: {hand.handid}: '{info[key]}'",
                             )
