@@ -4,20 +4,19 @@ Ce fichier est généré par `python tools/todo_inventory.py`. Chaque marqueur
 `TODO`, `FIXME` ou `HACK` du code possède ainsi un identifiant stable et une
 catégorie. Modifier le code source, puis régénérer ce registre.
 
-**Total : 38 tâches ouvertes.**
+**Total : 37 tâches ouvertes.**
 
 | Catégorie | Nombre |
 |---|---:|
-| parser | 35 |
+| parser | 34 |
 | poker-domain | 3 |
 
 ## Tâches
 
 | ID | Catégorie | Type | Emplacement | Description |
 |---|---|---|---|---|
-| `TD-E7B1E72B` | parser | TODO | [fpdb_3_legacy/AbsoluteToFpdb.py:260](fpdb_3_legacy/AbsoluteToFpdb.py#L260) | AP does provide Small BET for Limit .. I think? at least 1-on-1 limit they do.. sigh |
-| `TD-EB5B8ECA` | parser | TODO | [fpdb_3_legacy/AbsoluteToFpdb.py:338](fpdb_3_legacy/AbsoluteToFpdb.py#L338) | Not implemented yet |
-| `TD-9EF696E5` | parser | TODO | [fpdb_3_legacy/AbsoluteToFpdb.py:484](fpdb_3_legacy/AbsoluteToFpdb.py#L484) | not supported yet ? |
+| `TD-EB5B8ECA` | parser | TODO | [fpdb_3_legacy/AbsoluteToFpdb.py:339](fpdb_3_legacy/AbsoluteToFpdb.py#L339) | Not implemented yet |
+| `TD-9EF696E5` | parser | TODO | [fpdb_3_legacy/AbsoluteToFpdb.py:485](fpdb_3_legacy/AbsoluteToFpdb.py#L485) | not supported yet ? |
 | `TD-FA54F1A1` | parser | TODO | [fpdb_3_legacy/BetOnlineToFpdb.py:457](fpdb_3_legacy/BetOnlineToFpdb.py#L457) | fpdb): handle other currencies, play money |
 | `TD-C53C12F4` | parser | TODO | [fpdb_3_legacy/BetOnlineToFpdb.py:770](fpdb_3_legacy/BetOnlineToFpdb.py#L770) | fpdb): The following should only trigger when a small blind is missing |
 | `TD-187C8208` | parser | FIXME | [fpdb_3_legacy/EnetToFpdb.py:318](fpdb_3_legacy/EnetToFpdb.py#L318) | handle other currencies, play money |

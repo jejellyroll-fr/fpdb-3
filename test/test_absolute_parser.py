@@ -28,6 +28,16 @@ def test_absolute_header_currency_is_explicit(stakes, expected_currency, expecte
     assert Decimal(game["bb"]) == Decimal("0.02")
 
 
+def test_absolute_fixed_limit_stake_uses_known_blind_structure() -> None:
+    hand_text = "Stage #1571362962: Holdem Normal $2.00 - 2009-08-05 15:24:06 (ET)"
+
+    game = Absolute.__new__(Absolute).determineGameType(hand_text)
+
+    assert game["limitType"] == "fl"
+    assert game["sb"] == "0.50"
+    assert game["bb"] == "1.00"
+
+
 @pytest.mark.parametrize("dealer_text", ["Seat #6 is the dealer", "Seat #6 is the dead dealer"])
 def test_absolute_button_accepts_live_and_dead_dealer(dealer_text) -> None:
     hand = SimpleNamespace(handText=dealer_text, buttonpos=None)
