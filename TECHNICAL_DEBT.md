@@ -4,18 +4,17 @@ Ce fichier est généré par `python tools/todo_inventory.py`. Chaque marqueur
 `TODO`, `FIXME` ou `HACK` du code possède ainsi un identifiant stable et une
 catégorie. Modifier le code source, puis régénérer ce registre.
 
-**Total : 37 tâches ouvertes.**
+**Total : 36 tâches ouvertes.**
 
 | Catégorie | Nombre |
 |---|---:|
-| parser | 34 |
+| parser | 33 |
 | poker-domain | 3 |
 
 ## Tâches
 
 | ID | Catégorie | Type | Emplacement | Description |
 |---|---|---|---|---|
-| `TD-EB5B8ECA` | parser | TODO | [fpdb_3_legacy/AbsoluteToFpdb.py:339](fpdb_3_legacy/AbsoluteToFpdb.py#L339) | Not implemented yet |
 | `TD-9EF696E5` | parser | TODO | [fpdb_3_legacy/AbsoluteToFpdb.py:485](fpdb_3_legacy/AbsoluteToFpdb.py#L485) | not supported yet ? |
 | `TD-FA54F1A1` | parser | TODO | [fpdb_3_legacy/BetOnlineToFpdb.py:457](fpdb_3_legacy/BetOnlineToFpdb.py#L457) | fpdb): handle other currencies, play money |
 | `TD-C53C12F4` | parser | TODO | [fpdb_3_legacy/BetOnlineToFpdb.py:770](fpdb_3_legacy/BetOnlineToFpdb.py#L770) | fpdb): The following should only trigger when a small blind is missing |

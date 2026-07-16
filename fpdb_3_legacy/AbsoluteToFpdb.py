@@ -336,7 +336,7 @@ class Absolute(HandHistoryConverter):
                 re.DOTALL,
             )
 
-        elif hand.gametype["base"] == "stud":  # TODO: Not implemented yet
+        elif hand.gametype["base"] == "stud":
             m = re.search(
                 r"(?P<ANTES>.+(?=\*\*\* 3rd STREET \*\*\*)|.+)"
                 r"(\*\*\* 3rd STREET \*\*\*(?P<THIRD>.+(?=\*\*\* 4TH STREET \*\*\*)|.+))?"
