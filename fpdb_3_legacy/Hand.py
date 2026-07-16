@@ -2715,6 +2715,26 @@ class DrawHand(Hand):
             result = holecards[base : base + handsize]
         return result if asList else " ".join(result)
 
+    def _write_showdown(self, fh) -> None:
+        """Write known draw showdown cards in stable seat order."""
+        if not self.shown and not self.mucked:
+            return
+        fh.write("*** SHOW DOWN ***\n")
+        for player in (seat[1] for seat in self.players):
+            if player in self.shown:
+                final_street = next(
+                    (street for street in reversed(self.holeStreets) if player in self.holecards[street]),
+                    None,
+                )
+                if final_street is None:
+                    continue
+                cards = self.join_holecards(player, street=final_street)
+                description = self.showdownStrings.get(player, "")
+                suffix = f" ({description})" if description else ""
+                fh.write(f"{player}: shows [{cards}]{suffix}\n")
+            elif player in self.mucked:
+                fh.write(f"{player}: mucks hand\n")
+
     def writeHand(self, fh=sys.__stdout__) -> None:
         # PokerStars format.
         # HH output should not be translated
@@ -2773,9 +2793,7 @@ class DrawHand(Hand):
                     kc = oc - dc
                     fh.write(f"Dealt to {act[0]} [{' '.join(kc)}] [{' '.join(nc)}]\n")
 
-        if "SHOWDOWN" in self.actions:
-            fh.write("*** SHOW DOWN ***\n")
-            # TODO: Complete SHOWDOWN
+        self._write_showdown(fh)
 
         for name in self.pot.returned:
             fh.write(
