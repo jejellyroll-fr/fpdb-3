@@ -260,20 +260,14 @@ class Pkr(HandHistoryConverter):
                 hand.handid = info[key]
             if key == "TOURNO" and info[key] is not None:
                 hand.tourNo = info[key]
+                # A PKR hand history never states the buy-in or the level: the
+                # header stops at the tournament number. Record the buy-in as
+                # unknown rather than inventing one; a tourney summary import
+                # can still supply it, as "NA" is the placeholder the database
+                # lets a better source override.
                 hand.buyin = 0
                 hand.fee = 0
                 hand.buyinCurrency = "NA"
-            if key == "BUYIN":
-                if info[key] == "Freeroll":
-                    hand.buyin = 0
-                    hand.fee = 0
-                    hand.buyinCurrency = "FREE"
-                else:
-                    # FIXME: The key looks like: '€0.82+€0.18 EUR'
-                    #       This should be parsed properly and used
-                    hand.buyin = int(100 * Decimal(info[key]))
-            if key == "LEVEL":
-                hand.level = info[key]
             if key == "TABLE":
                 if info[key] is None:
                     hand.tablename = "1"
