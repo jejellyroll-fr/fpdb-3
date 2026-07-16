@@ -4,25 +4,24 @@ Ce fichier est généré par `python tools/todo_inventory.py`. Chaque marqueur
 `TODO`, `FIXME` ou `HACK` du code possède ainsi un identifiant stable et une
 catégorie. Modifier le code source, puis régénérer ce registre.
 
-**Total : 43 tâches ouvertes.**
+**Total : 42 tâches ouvertes.**
 
 | Catégorie | Nombre |
 |---|---:|
-| parser | 40 |
+| parser | 39 |
 | poker-domain | 3 |
 
 ## Tâches
 
 | ID | Catégorie | Type | Emplacement | Description |
 |---|---|---|---|---|
-| `TD-D14B2924` | parser | TODO | [fpdb_3_legacy/AbsoluteToFpdb.py:27](fpdb_3_legacy/AbsoluteToFpdb.py#L27) | I have no idea if AP has multi-currency options, i just copied the regex out of Everleaf converter for the currency symbols.. weeeeee - Eric |
-| `TD-8999E04A` | parser | TODO | [fpdb_3_legacy/AbsoluteToFpdb.py:129](fpdb_3_legacy/AbsoluteToFpdb.py#L129) | that's not the right way to match for "dead" dealer is it? |
-| `TD-C4001A69` | parser | TODO | [fpdb_3_legacy/AbsoluteToFpdb.py:152](fpdb_3_legacy/AbsoluteToFpdb.py#L152) | Absolute posting when coming in new: %s - Posts $0.02 .. should that be a new Post line? where do we need to add support for that? *confused* |
-| `TD-E7B1E72B` | parser | TODO | [fpdb_3_legacy/AbsoluteToFpdb.py:261](fpdb_3_legacy/AbsoluteToFpdb.py#L261) | AP does provide Small BET for Limit .. I think? at least 1-on-1 limit they do.. sigh |
-| `TD-CAD4A4C1` | parser | TODO | [fpdb_3_legacy/AbsoluteToFpdb.py:307](fpdb_3_legacy/AbsoluteToFpdb.py#L307) | 1-on-1) does have that info in the game type line |
-| `TD-6DEBDDEA` | parser | TODO | [fpdb_3_legacy/AbsoluteToFpdb.py:321](fpdb_3_legacy/AbsoluteToFpdb.py#L321) | implement lookup list by table-name to determine maxes, |
-| `TD-EB5B8ECA` | parser | TODO | [fpdb_3_legacy/AbsoluteToFpdb.py:338](fpdb_3_legacy/AbsoluteToFpdb.py#L338) | Not implemented yet |
-| `TD-9EF696E5` | parser | TODO | [fpdb_3_legacy/AbsoluteToFpdb.py:484](fpdb_3_legacy/AbsoluteToFpdb.py#L484) | not supported yet ? |
+| `TD-8999E04A` | parser | TODO | [fpdb_3_legacy/AbsoluteToFpdb.py:128](fpdb_3_legacy/AbsoluteToFpdb.py#L128) | that's not the right way to match for "dead" dealer is it? |
+| `TD-C4001A69` | parser | TODO | [fpdb_3_legacy/AbsoluteToFpdb.py:151](fpdb_3_legacy/AbsoluteToFpdb.py#L151) | Absolute posting when coming in new: %s - Posts $0.02 .. should that be a new Post line? where do we need to add support for that? *confused* |
+| `TD-E7B1E72B` | parser | TODO | [fpdb_3_legacy/AbsoluteToFpdb.py:260](fpdb_3_legacy/AbsoluteToFpdb.py#L260) | AP does provide Small BET for Limit .. I think? at least 1-on-1 limit they do.. sigh |
+| `TD-CAD4A4C1` | parser | TODO | [fpdb_3_legacy/AbsoluteToFpdb.py:306](fpdb_3_legacy/AbsoluteToFpdb.py#L306) | 1-on-1) does have that info in the game type line |
+| `TD-6DEBDDEA` | parser | TODO | [fpdb_3_legacy/AbsoluteToFpdb.py:320](fpdb_3_legacy/AbsoluteToFpdb.py#L320) | implement lookup list by table-name to determine maxes, |
+| `TD-EB5B8ECA` | parser | TODO | [fpdb_3_legacy/AbsoluteToFpdb.py:337](fpdb_3_legacy/AbsoluteToFpdb.py#L337) | Not implemented yet |
+| `TD-9EF696E5` | parser | TODO | [fpdb_3_legacy/AbsoluteToFpdb.py:483](fpdb_3_legacy/AbsoluteToFpdb.py#L483) | not supported yet ? |
 | `TD-FA54F1A1` | parser | TODO | [fpdb_3_legacy/BetOnlineToFpdb.py:457](fpdb_3_legacy/BetOnlineToFpdb.py#L457) | fpdb): handle other currencies, play money |
 | `TD-C53C12F4` | parser | TODO | [fpdb_3_legacy/BetOnlineToFpdb.py:770](fpdb_3_legacy/BetOnlineToFpdb.py#L770) | fpdb): The following should only trigger when a small blind is missing |
 | `TD-187C8208` | parser | FIXME | [fpdb_3_legacy/EnetToFpdb.py:318](fpdb_3_legacy/EnetToFpdb.py#L318) | handle other currencies, play money |
