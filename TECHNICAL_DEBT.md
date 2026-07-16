@@ -4,19 +4,17 @@ Ce fichier est généré par `python tools/todo_inventory.py`. Chaque marqueur
 `TODO`, `FIXME` ou `HACK` du code possède ainsi un identifiant stable et une
 catégorie. Modifier le code source, puis régénérer ce registre.
 
-**Total : 27 tâches ouvertes.**
+**Total : 25 tâches ouvertes.**
 
 | Catégorie | Nombre |
 |---|---:|
-| parser | 24 |
+| parser | 22 |
 | poker-domain | 3 |
 
 ## Tâches
 
 | ID | Catégorie | Type | Emplacement | Description |
 |---|---|---|---|---|
-| `TD-C3B2EB7C` | parser | FIXME | [fpdb_3_legacy/MergeSummary.py:361](fpdb_3_legacy/MergeSummary.py#L361) | Searching every line for all regexes is pretty horrible |
-| `TD-6EB9E7A5` | parser | FIXME | [fpdb_3_legacy/MergeSummary.py:362](fpdb_3_legacy/MergeSummary.py#L362) | Need to search for 'Status:  Finished' |
 | `TD-2D58B08E` | parser | TODO | [fpdb_3_legacy/MergeToFpdb.py:32](fpdb_3_legacy/MergeToFpdb.py#L32) | Description à préciser |
 | `TD-853C86CD` | parser | FIXME | [fpdb_3_legacy/MergeToFpdb.py:647](fpdb_3_legacy/MergeToFpdb.py#L647) | Description à préciser |
 | `TD-AF7CB899` | parser | TODO | [fpdb_3_legacy/OnGameToFpdb.py:112](fpdb_3_legacy/OnGameToFpdb.py#L112) | detect play money |
