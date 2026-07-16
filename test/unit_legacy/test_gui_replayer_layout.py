@@ -10,12 +10,14 @@ from fpdb_3_legacy.GuiReplayer import (
     TableState,
     action_colors,
     build_replay_layout,
+    format_replay_amount,
     hidden_card_count,
     order_players_clockwise,
     replay_hero_equity,
     seat_anchors,
     visible_hole_card_count,
 )
+from fpdb_3_legacy.localized_formats import get_format_locale, set_format_locale
 
 
 class _FakeEquityBackend:
@@ -28,6 +30,17 @@ class _FakeEquityBackend:
                 {"ev": 250, "winhi": 200, "tiehi": 100, "losehi": 700},
             ],
         }
+
+
+def test_replay_amount_distinguishes_money_and_chips() -> None:
+    previous = get_format_locale()
+    try:
+        set_format_locale("fr_FR")
+        assert format_replay_amount(Decimal("12.50"), "EUR") == "12,50\u00a0€"
+        assert format_replay_amount(Decimal("12.50"), "mBTC") == "12,50\u00a0ⓑ"
+        assert format_replay_amount(Decimal("1250"), "T$") == "1\u202f250,00"
+    finally:
+        set_format_locale(previous)
 
 
 def test_replay_equity_uses_visible_board_and_known_live_pockets():
