@@ -89,6 +89,21 @@ class Entraction(HandHistoryConverter):
         "Texas Hold'em": ("hold", "holdem"),
         "5-Card Omaha High": ("hold", "5_omahahi"),
     }
+    tournament_currencies = {"EUR": "EUR", "Fun": "play"}
+
+    @classmethod
+    def tournamentCurrency(cls, info):
+        """Return the tournament currency declared by the header or buy-in."""
+        header_currency = info.get("CURRENCY")
+        if header_currency in cls.tournament_currencies:
+            return cls.tournament_currencies[header_currency]
+        buyin = info["BUYIN"]
+        for symbol, currency in (("$", "USD"), ("€", "EUR"), ("£", "GBP")):
+            if symbol in buyin:
+                return currency
+        if re.fullmatch(r"[0-9.,+]+", buyin):
+            return "play"
+        return None
 
     # Static regexes
     re_GameInfo = re.compile(
@@ -253,16 +268,8 @@ class Entraction(HandHistoryConverter):
                         hand.fee = 0
                         hand.buyinCurrency = "FREE"
                     else:
-                        if info[key].find("$") != -1:
-                            hand.buyinCurrency = "USD"
-                        elif info[key].find("£") != -1:
-                            hand.buyinCurrency = "GBP"
-                        elif info[key].find("€") != -1:
-                            hand.buyinCurrency = "EUR"
-                        elif re.match("^[0-9+]*$", info[key]):
-                            hand.buyinCurrency = "play"
-                        else:
-                            # FIXME: handle other currencies, play money
+                        hand.buyinCurrency = self.tournamentCurrency(info)
+                        if hand.buyinCurrency is None:
                             log.error(
                                 _("EntractionToFpdb.readHandInfo: Failed to detect currency.")
                                 + f" Hand ID: {hand.handid}: '{info[key]}'"
