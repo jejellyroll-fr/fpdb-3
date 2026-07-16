@@ -16,14 +16,16 @@ from __future__ import annotations
 # In the "official" distribution you can find the license in agpl-3.0.txt.
 import sys
 import traceback
+from datetime import datetime
 from importlib import import_module
-from time import gmtime, localtime, strftime, time
+from time import gmtime, strftime, time
 from typing import Any
 
 mpl = import_module("matplotlib")
 np = import_module("numpy")
 FigureCanvas = getattr(import_module("matplotlib.backends.backend_qt5agg"), "FigureCanvas")
 Figure = getattr(import_module("matplotlib.figure"), "Figure")
+FuncFormatter = getattr(import_module("matplotlib.ticker"), "FuncFormatter")
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QStandardItem, QStandardItemModel
 from PySide6.QtWidgets import (
@@ -37,6 +39,7 @@ from PySide6.QtWidgets import (
 
 from fpdb_3_legacy import Database, Filters, GuiHandViewer
 from fpdb_3_legacy.i18n import gettext as _
+from fpdb_3_legacy.localized_formats import currency_symbol, format_currency, format_datetime, format_number
 from fpdb_3_legacy.loggingFpdb import get_logger
 
 # import L10n
@@ -266,7 +269,7 @@ class GuiSessionViewer(QSplitter):
             for x in quotes:
                 log.debug(f"start {x[1]}\tend {x[2]}\thigh {x[3]}\tlow {x[4]}")
 
-        self.generateGraph(quotes)
+        self.generateGraph(quotes, currencies)
 
         self.addTable(frame, results)
 
@@ -405,8 +408,8 @@ class GuiSessionViewer(QSplitter):
             last_idx = index[0][i]
             hds = last_idx - first_idx + 1
             if hds > 0:
-                stime = strftime("%d/%m/%Y %H:%M", localtime(times[first_idx]))
-                etime = strftime("%d/%m/%Y %H:%M", localtime(times[last_idx]))
+                stime = format_datetime(datetime.fromtimestamp(times[first_idx]))
+                etime = format_datetime(datetime.fromtimestamp(times[last_idx]))
                 self.times.append(
                     (times[first_idx] - PADDING * 60, times[last_idx] + PADDING * 60),
                 )
@@ -439,12 +442,12 @@ class GuiSessionViewer(QSplitter):
                         stime,
                         etime,
                         hph,
-                        f"{open:.2f}",
-                        f"{close:.2f}",
-                        f"{lwm:.2f}",
-                        f"{hwm:.2f}",
-                        "%.2f" % (hwm - lwm),
-                        f"{won:.2f}",
+                        format_number(open),
+                        format_number(close),
+                        format_number(lwm),
+                        format_number(hwm),
+                        format_number(hwm - lwm),
+                        format_number(won),
                     ],
                 )
                 quotes.append((sid, open, close, hwm, lwm))
@@ -496,7 +499,7 @@ class GuiSessionViewer(QSplitter):
             log.exception(f"Error: {err[2]}({err[1]}): {e}")
             raise
 
-    def generateGraph(self, quotes) -> None:
+    def generateGraph(self, quotes, currencies: list[str] | None = None) -> None:
         self.clearGraphData()
         sitenos = []
         playerids = []
@@ -571,6 +574,7 @@ class GuiSessionViewer(QSplitter):
         highs = np.array([float(q[3]) for q in quotes])
         lows = np.array([float(q[4]) for q in quotes])
         profits = closes - opens
+        display_currency = currencies[0] if currencies else "USD"
 
         session_colors = [gain if value >= 0 else loss for value in profits]
         self.ax.vlines(session_ids, lows, highs, color=grid, linewidth=1.0, alpha=0.38, zorder=1)
@@ -587,7 +591,7 @@ class GuiSessionViewer(QSplitter):
             if best_idx == worst_idx and label == "Worst":
                 continue
             self.ax.annotate(
-                f"{label} {closes[idx]:+.2f}",
+                f"{label} {format_currency(closes[idx], display_currency)}",
                 (session_ids[idx], closes[idx]),
                 textcoords="offset points",
                 xytext=(8, offset),
@@ -598,7 +602,7 @@ class GuiSessionViewer(QSplitter):
 
         for sid, close, profit in zip(session_ids, closes, profits, strict=False):
             self.ax.annotate(
-                f"{profit:+.2f}",
+                format_currency(profit, display_currency),
                 (sid, close),
                 textcoords="offset points",
                 xytext=(0, 10 if profit >= 0 else -16),
@@ -611,14 +615,15 @@ class GuiSessionViewer(QSplitter):
 
         total = closes[-1] if len(closes) else 0
         self.ax.set_title(
-            (f"Session profit: {total:+.2f}") + names,
+            f"Session profit: {format_currency(total, display_currency)}{names}",
             color=fg,
             fontsize=13,
             fontweight="bold",
             pad=10,
         )
         self.ax.set_xlabel(_("Session"), fontsize=10, color=fg, labelpad=8)
-        self.ax.set_ylabel("$", color=fg, labelpad=8)
+        self.ax.set_ylabel(currency_symbol(display_currency), color=fg, labelpad=8)
+        self.ax.yaxis.set_major_formatter(FuncFormatter(lambda value, _position: format_number(value)))
         self.ax.tick_params(axis="x", colors=fg, labelsize=9)
         self.ax.tick_params(axis="y", colors=fg, labelsize=9)
         self.ax.grid(True, color=grid, linestyle=":", linewidth=0.6, alpha=0.6)

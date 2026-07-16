@@ -6,7 +6,7 @@ from datetime import date, datetime
 from decimal import Decimal
 from threading import RLock
 
-from PySide6.QtCore import QDate, QLocale
+from PySide6.QtCore import QDate, QDateTime, QLocale, QTime
 
 Number = int | float | Decimal
 
@@ -53,11 +53,18 @@ def format_number(value: Number, decimals: int = 2, *, grouping: bool = True) ->
     return _locale_copy(grouping).toString(float(value), "f", decimals)
 
 
-def format_currency(value: Number, currency: str = "USD", decimals: int = 2) -> str:
+def format_currency(value: Number, currency: str = "USD", decimals: int = 2, *, show_plus: bool = False) -> str:
     """Format money using locale placement and the requested ISO currency symbol."""
     code = currency.upper()
     symbol = _CURRENCY_SYMBOLS.get(code, code)
-    return _locale_copy().toCurrencyString(float(value), symbol, decimals)
+    formatted = _locale_copy().toCurrencyString(float(value), symbol, decimals)
+    return f"+{formatted}" if show_plus and value > 0 else formatted
+
+
+def currency_symbol(currency: str = "USD") -> str:
+    """Return the compact symbol used for an ISO currency code."""
+    code = currency.upper()
+    return _CURRENCY_SYMBOLS.get(code, code)
 
 
 def format_date(value: date | datetime, *, long: bool = False) -> str:
@@ -65,3 +72,13 @@ def format_date(value: date | datetime, *, long: bool = False) -> str:
     qdate = QDate(value.year, value.month, value.day)
     format_type = QLocale.FormatType.LongFormat if long else QLocale.FormatType.ShortFormat
     return _locale_copy().toString(qdate, format_type)
+
+
+def format_datetime(value: datetime, *, long: bool = False) -> str:
+    """Format a local date and time using the active locale's display pattern."""
+    qdatetime = QDateTime(
+        QDate(value.year, value.month, value.day),
+        QTime(value.hour, value.minute, value.second),
+    )
+    format_type = QLocale.FormatType.LongFormat if long else QLocale.FormatType.ShortFormat
+    return _locale_copy().toString(qdatetime, format_type)
