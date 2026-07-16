@@ -165,10 +165,10 @@ HandHistoryConverter: '{sitename}'
         lastParsed = None
         handsList = self.allHandsAsList()
         log.debug(f"Hands list is: {handsList}")
-        log.info(f"Parsing {len(list(handsList))} hands")
+        log.info(f"Parsing {len(handsList)} hands")
         # Determine if we're dealing with a HH file or a Summary file
         # quick fix : empty files make the handsList[0] fail ==> If empty file, go on with HH parsing
-        if len(list(handsList)) == 0 or self.isSummary(handsList[0]) is False:
+        if not handsList or self.isSummary(handsList[0]) is False:
             self.parsedObjectType = "HH"
             for handText in handsList:
                 try:
@@ -233,7 +233,7 @@ HandHistoryConverter: '{sitename}'
                     log.info("Removing problematic hand & resetting index due to permanent error")
                 else:
                     log.info(f"Keeping file position despite {lastParsed} error - classified as temporary/recoverable")
-            self.numHands = len(list(handsList))
+            self.numHands = len(handsList)
             endtime = time.time()
             log.info(
                 f"Read {self.numHands} hands ({self.numErrors + self.numPartial} failed) in {endtime - starttime:.3f} seconds",
@@ -254,9 +254,15 @@ HandHistoryConverter: '{sitename}'
     def setAutoPop(self, value) -> None:
         self.autoPop = value
 
-    def allHandsAsList(self):
-        """Return a list of handtexts in the file at self.in_path."""
-        # TODO : any need for this to be generator? e.g. stars support can email one huge file of all hands in a year. Better to read bit by bit than all at once.
+    def allHandsAsList(self) -> list[str]:
+        """Return the hand-text snapshot from ``in_path``.
+
+        The list and ``whole_file`` are intentionally retained together:
+        converters with session-level headers derive game/tournament metadata
+        from the complete source, and room-specific overrides post-process the
+        complete split. Incremental auto-import still limits work through
+        ``index`` by exposing only newly appended text in ``obs``.
+        """
         self.readFile()
         lenobs = len(self.obs)
         self.obs = self.obs.rstrip()
