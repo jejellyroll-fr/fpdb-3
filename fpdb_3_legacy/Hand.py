@@ -1519,7 +1519,9 @@ class Hand:
         self.stacks[player] -= C + Rb
         act = (player, action, Rb, Rt, C, self.stacks[player] == 0)
         self.actions[street].append(act)
-        self.lastBet[street] = Rt  # TODO check this is correct
+        # ``lastBet`` is the total amount to match on this street.  Keeping the
+        # raise-to value here is required for the next player's call/raise math.
+        self.lastBet[street] = Rt
         self.pot.addMoney(player, C + Rb)
 
     def addWonPot(self, player, amount, pot_type="main", is_cashout=False) -> None:

@@ -4,14 +4,14 @@ Ce fichier est généré par `python tools/todo_inventory.py`. Chaque marqueur
 `TODO`, `FIXME` ou `HACK` du code possède ainsi un identifiant stable et une
 catégorie. Modifier le code source, puis régénérer ce registre.
 
-**Total : 65 tâches ouvertes.**
+**Total : 64 tâches ouvertes.**
 
 | Catégorie | Nombre |
 |---|---:|
 | core | 5 |
 | database | 7 |
 | parser | 40 |
-| poker-domain | 11 |
+| poker-domain | 10 |
 | ui | 2 |
 
 ## Tâches
@@ -75,11 +75,10 @@ catégorie. Modifier le code source, puis régénérer ce registre.
 | `TD-27406CEB` | poker-domain | TODO | [fpdb_3_legacy/DerivedStats.py:728](fpdb_3_legacy/DerivedStats.py#L728) | future: REFACTOR - This method is too complex (C901: 25 > 10, PLR0912: 28 > 12 |
 | `TD-3CCE0D2B` | poker-domain | TODO | [fpdb_3_legacy/DerivedStats.py:1583](fpdb_3_legacy/DerivedStats.py#L1583) | future: fix: if ante all and no actions and no bring in |
 | `TD-4AF6ADF0` | poker-domain | TODO | [fpdb_3_legacy/Hand.py:30](fpdb_3_legacy/Hand.py#L30) | get writehand() encoding correct |
-| `TD-57FF3AC5` | poker-domain | TODO | [fpdb_3_legacy/Hand.py:1522](fpdb_3_legacy/Hand.py#L1522) | check this is correct |
-| `TD-93FC79A6` | poker-domain | TODO | [fpdb_3_legacy/Hand.py:2262](fpdb_3_legacy/Hand.py#L2262) | the except PREFLOP shouldn't be necessary, but regression-test-files/cash/Everleaf/Flop/NLHE-10max-USD-0.01-0.02-201008.2Way.All-in.pre.txt fails without it |
-| `TD-D79627F3` | poker-domain | TODO | [fpdb_3_legacy/Hand.py:2493](fpdb_3_legacy/Hand.py#L2493) | legacy importer can't handle only one holecard here, make sure there are 2 for holdem, 4 for omaha |
-| `TD-62C9A8B2` | poker-domain | TODO | [fpdb_3_legacy/Hand.py:2494](fpdb_3_legacy/Hand.py#L2494) | If HoldHand subclass supports more than omahahi, omahahilo, holdem, add them here |
-| `TD-9863F1C2` | poker-domain | TODO | [fpdb_3_legacy/Hand.py:2776](fpdb_3_legacy/Hand.py#L2776) | Complete SHOWDOWN |
-| `TD-3434B435` | poker-domain | TODO | [fpdb_3_legacy/Hand.py:2998](fpdb_3_legacy/Hand.py#L2998) | def addComplete(self, player, amount |
+| `TD-93FC79A6` | poker-domain | TODO | [fpdb_3_legacy/Hand.py:2264](fpdb_3_legacy/Hand.py#L2264) | the except PREFLOP shouldn't be necessary, but regression-test-files/cash/Everleaf/Flop/NLHE-10max-USD-0.01-0.02-201008.2Way.All-in.pre.txt fails without it |
+| `TD-D79627F3` | poker-domain | TODO | [fpdb_3_legacy/Hand.py:2495](fpdb_3_legacy/Hand.py#L2495) | legacy importer can't handle only one holecard here, make sure there are 2 for holdem, 4 for omaha |
+| `TD-62C9A8B2` | poker-domain | TODO | [fpdb_3_legacy/Hand.py:2496](fpdb_3_legacy/Hand.py#L2496) | If HoldHand subclass supports more than omahahi, omahahilo, holdem, add them here |
+| `TD-9863F1C2` | poker-domain | TODO | [fpdb_3_legacy/Hand.py:2778](fpdb_3_legacy/Hand.py#L2778) | Complete SHOWDOWN |
+| `TD-3434B435` | poker-domain | TODO | [fpdb_3_legacy/Hand.py:3000](fpdb_3_legacy/Hand.py#L3000) | def addComplete(self, player, amount |
 | `TD-56A53357` | ui | TODO | [fpdb_3_legacy/GuiAutoImport.py:574](fpdb_3_legacy/GuiAutoImport.py#L574) | Allow for importing from multiple dirs - REB 29AUG2008 |
 | `TD-D998D6EA` | ui | FIXME | [fpdb_3_legacy/Mucked.py:368](fpdb_3_legacy/Mucked.py#L368) | if "show one and fold" ever becomes an option, |
