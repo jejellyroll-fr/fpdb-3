@@ -25,3 +25,14 @@ def test_player_detailed_query_keeps_position_and_dynamic_filters() -> None:
     assert "cast(hp.street0VPIChance as SIGNED)" in mysql
     assert "'Z'||<position>" in postgresql
     assert "'Z'||<position>" in sqlite
+
+
+def test_player_detailed_bet_stats_include_tournament_linked_hands() -> None:
+    aliases = ("pf3", "fl3", "tn3", "rv3", "pf4", "fl4", "tn4", "rv4", "pff3", "pff4")
+    for backend in ("mysql", "postgresql", "sqlite"):
+        query = player_detailed_report_queries(backend)["playerDetailedStats"]
+        normalized = query.lower()
+
+        assert "tourneysplayersid is null" not in normalized
+        for alias in aliases:
+            assert f"as {alias}" in normalized

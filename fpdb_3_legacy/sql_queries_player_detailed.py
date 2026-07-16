@@ -158,7 +158,6 @@ def player_detailed_report_queries(db_server: str) -> dict[str, str]:
                   <game_test>
                   <site_test>
                   <currency_test>
-                  /*and   hp.tourneysPlayersId IS NULL*/
                   and   h.seats <seats_test>
                   <flagtest>
                   <cardstest>
@@ -351,7 +350,6 @@ def player_detailed_report_queries(db_server: str) -> dict[str, str]:
                   <game_test>
                   <site_test>
                   <currency_test>
-                  /*and   hp.tourneysPlayersId IS NULL*/
                   and   h.seats <seats_test>
                   <flagtest>
                   <cardstest>
@@ -535,7 +533,6 @@ def player_detailed_report_queries(db_server: str) -> dict[str, str]:
                   <game_test>
                   <site_test>
                   <currency_test>
-                  /*and   hp.tourneysPlayersId IS NULL*/
                   and   h.seats <seats_test>
                   <flagtest>
                   <cardstest>
@@ -567,6 +564,4 @@ def player_detailed_report_queries(db_server: str) -> dict[str, str]:
                           ,s.name
                   """
 
-    # FIXME: 3/4bet and foldTo don't added four tournaments yet
     return query
-
