@@ -326,6 +326,50 @@ jobs:
         run: |
           python -m pytest -m qt --tb=short
 
+  database-integration:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: fpdb
+          POSTGRES_USER: fpdb
+          POSTGRES_PASSWORD: fpdb
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U fpdb -d fpdb"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_DATABASE: fpdb
+          MYSQL_USER: fpdb
+          MYSQL_PASSWORD: fpdb
+          MYSQL_ROOT_PASSWORD: fpdb-root
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd "mysqladmin ping -h 127.0.0.1 -ufpdb -pfpdb"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - uses: astral-sh/setup-uv@v3
+      - name: Install database test dependencies
+        run: uv pip install --system -e ".[test-no-gui]"
+      - name: Exercise live PostgreSQL and MySQL schemas
+        env:
+          FPDB_TEST_DATABASES: postgresql,mysql
+        run: python -m pytest -q test/test_database_backend_integration.py
+
   build:
     runs-on: ${{ matrix.os }}
     strategy:
