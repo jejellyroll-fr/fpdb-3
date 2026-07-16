@@ -404,10 +404,11 @@ class PacificPoker(HandHistoryConverter):
                         hand.buyinCurrency = "USD"
                     elif info["BUYIN"].find("€") != -1:
                         hand.buyinCurrency = "EUR"
-                    elif "PLAY" in info and info["PLAY"] != "Practice Play" and info["PLAY"] != "Play Money":
-                        hand.buyinCurrency = "FREE"
+                    elif info.get("PLAY") is not None:
+                        # Practice Play / Play Money tables state a buy-in without
+                        # any symbol; the amount is play chips, not real money.
+                        hand.buyinCurrency = "play"
                     else:
-                        # FIXME: handle other currencies, FPP, play money
                         log.error(
                             f"Failed to detect currency. Hand ID: {hand.handid}: '{info[key]}'",
                         )
