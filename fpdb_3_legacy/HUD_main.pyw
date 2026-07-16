@@ -425,8 +425,29 @@ class HudMain(QObject):
         """Handle an incoming message from the ZMQ receiver."""
         # This method will be called in the main thread
         log.info("HUD RECEIVED MESSAGE - hand_id: %s", hand_id)
-        self.read_stdin(hand_id)
-        log.debug("Message processing completed for hand_id: %s", hand_id)
+
+        # Defensive rollback: ensure the PostgreSQL connection is not stuck in
+        # an aborted transaction state from a previous error.  Under PostgreSQL,
+        # any single failed query permanently blocks every subsequent query on
+        # the same connection until an explicit ROLLBACK is issued.  Issuing a
+        # rollback on a clean connection is a harmless no-op.
+        try:
+            if getattr(self, "db_connection", None):
+                self.db_connection.connection.rollback()
+        except Exception:
+            log.debug("Pre-message rollback failed (connection may be closed)")
+
+        try:
+            self.read_stdin(hand_id)
+            log.debug("Message processing completed for hand_id: %s", hand_id)
+        except Exception as e:
+            log.exception("Error handling message for hand_id %s: %s", hand_id, e)
+            try:
+                if getattr(self, "db_connection", None):
+                    self.db_connection.connection.rollback()
+                    log.info("Successfully rolled back database transaction after error")
+            except Exception as roll_err:
+                log.exception("Failed to rollback transaction after error: %s", roll_err)
 
     def destroy(self) -> None:
         """Destroy the application and clean up resources."""
@@ -634,6 +655,10 @@ class HudMain(QObject):
             table_info = self.db_connection.get_table_info(hand_id)
         except Exception:
             log.exception("Database error while processing hand %s", hand_id)
+            try:
+                self.db_connection.connection.rollback()
+            except Exception:
+                pass
             return None
         else:
             # Don't cache a missing result: the hand may simply not be committed
@@ -779,7 +804,7 @@ class HudMain(QObject):
         hud_site_name: str | None = None,
     ) -> None:
         """Create a new HUD for a table."""
-        (table_name, max_seats, poker_game, game_type, _, _, site_name, _, tour_number, tab_number) = table_info
+        (table_name, max_seats, poker_game, game_type, _, _, site_name, _, tour_number, tab_number, tourney_name) = table_info
         hud_site_name = hud_site_name or site_name
         hud_poker_game = self._resolve_hud_poker_game(poker_game)
         if self.config.get_supported_games_parameters(hud_poker_game, game_type) is None:
@@ -818,7 +843,7 @@ class HudMain(QObject):
             return
 
         cards = self.get_cards(new_hand_id, poker_game)
-        table_kwargs = {"table_name": table_name, "tournament": tour_number, "table_number": tab_number}
+        table_kwargs = {"table_name": table_name, "tournament": tour_number, "table_number": tab_number, "tourney_name": tourney_name}
         tablewindow = self.Tables.Table(self.config, hud_site_name, **table_kwargs)
 
         if tablewindow.number is None:
@@ -878,7 +903,7 @@ class HudMain(QObject):
         if not table_info:
             return
 
-        (table_name, max_seats, poker_game, game_type, fast, site_id, site_name, num_seats, tour_number, tab_number) = (
+        (table_name, max_seats, poker_game, game_type, fast, site_id, site_name, num_seats, tour_number, tab_number, tourney_name) = (
             table_info
         )
 

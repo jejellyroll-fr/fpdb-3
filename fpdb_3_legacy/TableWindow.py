@@ -95,9 +95,11 @@ class Table_Window:
         table_name=None,
         tournament=None,
         table_number=None,
+        tourney_name=None,
     ) -> None:
         self.config = config
         self.site = site
+        self.tourney_name = tourney_name
         self.hud: Any = None  # Will be filled in later
         self.gdkhandle: Any = None
         self.number: Any = None
@@ -155,7 +157,11 @@ class Table_Window:
             self.name = f"{self.tournament} - {self.table}"
 
             self.type = "tour"
-            table_kwargs = {"tournament": self.tournament, "table_number": self.table}
+            table_kwargs = {
+                "tournament": self.tournament,
+                "table_number": self.table,
+                "tourney_name": self.tourney_name,
+            }
             self.tableno_re = getTableNoRe(
                 self.config,
                 self.site,

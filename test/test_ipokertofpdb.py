@@ -371,3 +371,45 @@ def test_re_action_with_attributes_order() -> None:
     assert match.group("PNAME") == "Player10"
     assert match.group("ATYPE") == "5"
     assert match.group("BET") == "50.00"
+
+
+def test_getTableTitleRe() -> None:
+    from fpdb_3_legacy.iPoker.base import iPoker
+
+    # Test cases for cash games with comma
+    res1 = iPoker.getTableTitleRe("ring", "100BB Feldkirch 10, 488784806")
+    assert "Feldkirch" in res1
+    assert "10" in res1
+
+    res2 = iPoker.getTableTitleRe("ring", "50BB Strasbourg 04, 123456")
+    assert "Strasbourg" in res2
+    assert "04" in res2
+
+    res3 = iPoker.getTableTitleRe("ring", "Deep Strasbourg 05, 123456")
+    assert "Strasbourg" in res3
+    assert "05" in res3
+
+    res4 = iPoker.getTableTitleRe("ring", "20-50BB Paris, 123456")
+    assert "Paris" in res4
+
+    # Test cases for cash games without comma
+    res5 = iPoker.getTableTitleRe("ring", "100BB Feldkirch 10")
+    assert "Feldkirch" in res5
+
+    res6 = iPoker.getTableTitleRe("ring", "Strasbourg 04")
+    assert "Strasbourg" in res6
+
+    # Test cases for tournaments (standard)
+    res_tour = iPoker.getTableTitleRe("tour", "Sit’n’Go Bounty 0.20€", table_number=1)
+    assert "1" in res_tour
+
+    # Test cases for Twister SNGs
+    res_twister1 = iPoker.getTableTitleRe("tour", "Sit’n’Go Twister 0.20€", table_number=1)
+    assert res_twister1 == "(?:Twister|Spins)"
+
+    res_twister2 = iPoker.getTableTitleRe("tour", "Twister $1 SNG", table_number=1)
+    assert res_twister2 == "(?:Twister|Spins)"
+
+    res_twister3 = iPoker.getTableTitleRe("tour", "Table 123", table_number=10005)
+    assert res_twister3 == "(?:Twister|Spins)"
+

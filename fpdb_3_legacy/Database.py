@@ -1589,11 +1589,27 @@ class Database(DatabaseAutoNotesMixin, DatabaseCachesMixin, DatabaseTournamentsM
         if row[3] == "ring":  # cash game
             table_info.append(None)
             table_info.append(None)
+            table_info.append(None)
             return table_info
         # tournament
         tour_no, tab_no = re.split(" ", row[0], 1)
         table_info.append(tour_no)
         table_info.append(tab_no)
+
+        # Query tournament name
+        tourney_name = None
+        try:
+            ph = self.sql.query.get("placeholder", "%s")
+            q = f"SELECT tourneyName FROM Tourneys WHERE siteTourneyNo = {ph}"
+            c.execute(q, (int(tour_no),))
+            trow = c.fetchone()
+            if trow:
+                tourney_name = trow[0]
+        except Exception:
+            log.exception("Error querying tourneyName for siteTourneyNo=%s", tour_no)
+            self._rollback_after_failed_read()
+
+        table_info.append(tourney_name)
         return table_info
 
     def get_last_hand(self):
@@ -1700,6 +1716,18 @@ class Database(DatabaseAutoNotesMixin, DatabaseCachesMixin, DatabaseTournamentsM
             cards[row[0]] = row[1:]
         return cards
 
+    def _rollback_after_failed_read(self) -> None:
+        """Clear an aborted transaction left by a best-effort HUD read.
+
+        Under PostgreSQL a single failed statement blocks every later query on
+        the connection until an explicit ROLLBACK, so a swallowed read error
+        would otherwise resurface as InFailedSqlTransaction in unrelated code.
+        """
+        try:
+            self.connection.rollback()
+        except Exception:
+            log.debug("rollback after failed read did not succeed")
+
     def get_hand_positions(self, hand):
         """Return {playerId: position} for a hand, for position-conditional HUD panels.
 
@@ -1717,6 +1745,7 @@ class Database(DatabaseAutoNotesMixin, DatabaseCachesMixin, DatabaseTournamentsM
                 positions[row[0]] = row[1]
         except Exception:
             log.exception("get_hand_positions failed for hand %s", hand)
+            self._rollback_after_failed_read()
         return positions
 
     def get_seat_players(self, hand_id: str) -> dict[int, dict[str, object]]:
@@ -1741,6 +1770,7 @@ class Database(DatabaseAutoNotesMixin, DatabaseCachesMixin, DatabaseTournamentsM
                 players[int(row[0])] = {"player_id": int(row[1]), "screen_name": row[2]}
         except Exception:
             log.exception("get_seat_players failed for hand %s", hand_id)
+            self._rollback_after_failed_read()
         return players
 
     def get_table_min_stack_bb(self, hand_id: str) -> float | None:
@@ -1774,7 +1804,7 @@ class Database(DatabaseAutoNotesMixin, DatabaseCachesMixin, DatabaseTournamentsM
             c.execute(
                 (
                     "SELECT startCash, committed, winnings FROM HandsPlayers "
-                    "WHERE handId = %s AND sitout = 0"
+                    "WHERE handId = %s AND sitout = FALSE"
                 ).replace("%s", ph),
                 (hand_id,),
             )
@@ -1788,6 +1818,7 @@ class Database(DatabaseAutoNotesMixin, DatabaseCachesMixin, DatabaseTournamentsM
             return min(stacks) / big_blind
         except Exception:
             log.exception("get_table_min_stack_bb failed for hand %s", hand_id)
+            self._rollback_after_failed_read()
             return None
 
     def get_common_cards(self, hand):
@@ -2130,9 +2161,9 @@ class Database(DatabaseAutoNotesMixin, DatabaseCachesMixin, DatabaseTournamentsM
                 FROM Players p
                 JOIN Sites s ON p.siteId = s.id
                 WHERE p.name = %s
-                AND (s.name LIKE %s OR %s LIKE s.name || '%')
+                AND (s.name LIKE %s OR %s LIKE s.name || %s)
             """.replace("%s", ph)
-            c.execute(q2, (playerName, siteName + "%", siteName))
+            c.execute(q2, (playerName, siteName + "%", siteName, "%"))
             match_rows = c.fetchall()
             if match_rows:
                 log.info(f"Database.get_player_id: Fallback matched site prefix player ID {match_rows[0][0]} for '{playerName}' on site '{siteName}' variant")

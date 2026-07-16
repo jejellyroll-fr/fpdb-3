@@ -88,6 +88,12 @@ class Table(Table_Window):
 
         if self.number is None:
             log.warning("Window detection failed: no match found for search string '%s'", self.search_string)
+            try:
+                all_tables = self._detector.find_tables("")
+                titles = [t.title for t in all_tables if t.title]
+                log.warning("Currently open windows: %s", titles)
+            except Exception as e:
+                log.warning("Could not list open windows: %s", e)
             return None
 
         return None

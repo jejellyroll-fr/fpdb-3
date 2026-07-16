@@ -1046,7 +1046,17 @@ or None if we fail to get the info """
 
 def getTableTitleRe(config, sitename, *args, **kwargs):
     """Returns string to search in windows titles for current site."""
-    return getSiteHhc(config, sitename).getTableTitleRe(*args, **kwargs)
+    hhc = getSiteHhc(config, sitename)
+    import inspect
+    func = hhc.getTableTitleRe
+    sig = inspect.signature(func)
+    # Filter kwargs to only pass those accepted by the signature
+    has_kwargs = any(p.kind == p.VAR_KEYWORD for p in sig.parameters.values())
+    if has_kwargs:
+        filtered_kwargs = kwargs
+    else:
+        filtered_kwargs = {k: v for k, v in kwargs.items() if k in sig.parameters}
+    return func(*args, **filtered_kwargs)
 
 
 def getTableNoRe(config, sitename, *args, **kwargs):

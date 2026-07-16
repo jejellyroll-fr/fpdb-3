@@ -1274,6 +1274,7 @@ class iPoker(IPokerStreetsActionsMixin, IPokerHandInfoMixin, IPokerTournamentRes
         table_name: str | None = None,
         tournament: str | None = None,
         table_number: int | None = None,
+        tourney_name: str | None = None,
     ) -> str:
         """Generate a regular expression pattern for table title.
 
@@ -1282,27 +1283,64 @@ class iPoker(IPokerStreetsActionsMixin, IPokerHandInfoMixin, IPokerTournamentRes
             table_name: A string value representing the table name.
             tournament: A string value representing the tournament.
             table_number: An integer value representing the table number.
+            tourney_name: A string value representing the tournament name.
 
         Returns:
             A string value representing the regular expression pattern for table title.
         """
         # Log the input parameters
-        log.info("iPoker table_name='%s' tournament='%s' table_number='%s'", table_name, tournament, table_number)
+        log.info(
+            "iPoker table_name='%s' tournament='%s' table_number='%s' tourney_name='%s'",
+            table_name,
+            tournament,
+            table_number,
+            tourney_name,
+        )
 
         # Generate the regex pattern based on the input parameters
         normalized_table_name = table_name or ""
-        regex = normalized_table_name
+        
+        # Clean common iPoker prefixes (like "100BB", "50BB", "20-50BB", etc.)
+        # that are present in the XML hand history but missing from the window title
+        import re
+        clean_table_name = re.sub(
+            r'^(?:\d+(?:-\d+)?\s*BB|Deep|Speed|Turbo|Ante|Shallow|Cap|DoublePay|No DP)\s+',
+            '',
+            normalized_table_name,
+            flags=re.IGNORECASE
+        )
 
         if game_type == "tour":
+            is_twister = False
+            # Check if this is a Twister tournament
+            if tourney_name and "twister" in tourney_name.lower():
+                is_twister = True
+            elif table_name and "twister" in table_name.lower():
+                is_twister = True
+            elif tournament and "twister" in str(tournament).lower():
+                is_twister = True
+            elif table_number and table_number > 10000:
+                is_twister = True
+
+            if is_twister:
+                # Twister tables don't have table numbers in the window title, they are named "Twister" or "Spins"
+                # We return a regex matching either Twister or Spins (branded on some French skins like Bwin.fr/PMU)
+                regex = r"(?:Twister|Spins)"
+                log.debug("Generated regex for Twister/Spins SNG: %s", regex)
+                return regex
+
             regex = rf"([^\(]+)\s{table_number}"
             log.debug("Generated regex for 'tour': %s", regex)
             return regex
-        if normalized_table_name.find("(No DP),") != -1:
-            regex = normalized_table_name.split("(No DP),")[0]
-        elif normalized_table_name.find(",") != -1:
-            regex = normalized_table_name.split(",")[0]
+        if clean_table_name.find("(No DP),") != -1:
+            regex = clean_table_name.split("(No DP),")[0]
+        elif clean_table_name.find(",") != -1:
+            regex = clean_table_name.split(",")[0]
         else:
-            regex = normalized_table_name.split(" ")[0]
+            regex = clean_table_name.split(" ")[0]
+
+        # Escape to ensure it is treated as a literal pattern
+        regex = re.escape(regex)
 
         # Log the generated regex pattern and return it
         log.info("iPoker returns: '%s'", regex)
