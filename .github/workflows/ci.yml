@@ -22,6 +22,7 @@ jobs:
       - name: Type-check modernized core
         run: >-
           mypy
+          fpdb
           fpdb_3_legacy/__init__.py
           fpdb_3_legacy/equity.py
           fpdb_3_legacy/fpdb_api.py

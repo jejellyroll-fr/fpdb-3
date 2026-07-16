@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import logging
 import re
+from typing import Any
 
 from .protocol import Platform, TableGeometry, TableInfo
 
@@ -33,17 +34,18 @@ class WindowsTableDetector:
             import ctypes
             from ctypes import wintypes
 
-            self._ctypes = ctypes
+            ctypes_api: Any = ctypes
+            self._ctypes = ctypes_api
             self._wintypes = wintypes
 
             # Windows API functions
-            self._EnumWindows = ctypes.windll.user32.EnumWindows
-            self._GetWindowText = ctypes.windll.user32.GetWindowTextW
-            self._GetWindowTextLength = ctypes.windll.user32.GetWindowTextLengthW
-            self._IsWindowVisible = ctypes.windll.user32.IsWindowVisible
-            self._GetWindowRect = ctypes.windll.user32.GetWindowRect
-            self._SetForegroundWindow = ctypes.windll.user32.SetForegroundWindow
-            self._MoveWindow = ctypes.windll.user32.MoveWindow
+            self._EnumWindows = ctypes_api.windll.user32.EnumWindows
+            self._GetWindowText = ctypes_api.windll.user32.GetWindowTextW
+            self._GetWindowTextLength = ctypes_api.windll.user32.GetWindowTextLengthW
+            self._IsWindowVisible = ctypes_api.windll.user32.IsWindowVisible
+            self._GetWindowRect = ctypes_api.windll.user32.GetWindowRect
+            self._SetForegroundWindow = ctypes_api.windll.user32.SetForegroundWindow
+            self._MoveWindow = ctypes_api.windll.user32.MoveWindow
 
             logger.info("Windows table detector initialized")
 
