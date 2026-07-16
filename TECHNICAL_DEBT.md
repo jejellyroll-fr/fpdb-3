@@ -4,14 +4,14 @@ Ce fichier est généré par `python tools/todo_inventory.py`. Chaque marqueur
 `TODO`, `FIXME` ou `HACK` du code possède ainsi un identifiant stable et une
 catégorie. Modifier le code source, puis régénérer ce registre.
 
-**Total : 59 tâches ouvertes.**
+**Total : 58 tâches ouvertes.**
 
 | Catégorie | Nombre |
 |---|---:|
 | core | 5 |
 | database | 7 |
 | parser | 40 |
-| poker-domain | 5 |
+| poker-domain | 4 |
 | ui | 2 |
 
 ## Tâches
@@ -74,6 +74,5 @@ catégorie. Modifier le code source, puis régénérer ce registre.
 | `TD-405847C6` | poker-domain | TODO | [fpdb_3_legacy/DerivedStats.py:482](fpdb_3_legacy/DerivedStats.py#L482) | future: REFACTOR - This method is too complex (C901: 25 > 10, PLR0912: 30 > 12, PLR0915: 144 > 50 |
 | `TD-27406CEB` | poker-domain | TODO | [fpdb_3_legacy/DerivedStats.py:728](fpdb_3_legacy/DerivedStats.py#L728) | future: REFACTOR - This method is too complex (C901: 25 > 10, PLR0912: 28 > 12 |
 | `TD-3CCE0D2B` | poker-domain | TODO | [fpdb_3_legacy/DerivedStats.py:1583](fpdb_3_legacy/DerivedStats.py#L1583) | future: fix: if ante all and no actions and no bring in |
-| `TD-93FC79A6` | poker-domain | TODO | [fpdb_3_legacy/Hand.py:2267](fpdb_3_legacy/Hand.py#L2267) | the except PREFLOP shouldn't be necessary, but regression-test-files/cash/Everleaf/Flop/NLHE-10max-USD-0.01-0.02-201008.2Way.All-in.pre.txt fails without it |
 | `TD-56A53357` | ui | TODO | [fpdb_3_legacy/GuiAutoImport.py:574](fpdb_3_legacy/GuiAutoImport.py#L574) | Allow for importing from multiple dirs - REB 29AUG2008 |
 | `TD-D998D6EA` | ui | FIXME | [fpdb_3_legacy/Mucked.py:368](fpdb_3_legacy/Mucked.py#L368) | if "show one and fold" ever becomes an option, |
