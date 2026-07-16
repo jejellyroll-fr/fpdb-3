@@ -31,6 +31,33 @@ def _compiled_parser(players: list[str]) -> Winamax:
     return parser
 
 
+def test_tournament_table_is_named_by_its_number(parser_config: Config) -> None:
+    # "Table: 'No Limit Hold'em(1853325)#0'" names the tournament, not the table,
+    # so the table number identifies the table. Hand then prefixes the tournament
+    # number, giving the "<tourNo> <tableNo>" form tournaments use throughout.
+    # The generic game name must not survive into the table name.
+    hands = Winamax(
+        config=parser_config,
+        in_path=str(TOUR / "NLHE-EUR-STT-FullHist.txt"),
+        autostart=True,
+    ).getProcessedHands()
+
+    assert hands
+    assert {h.tablename for h in hands} == {"1853325 0"}
+    assert {h.tourNo for h in hands} == {"1853325"}
+
+
+def test_cash_table_keeps_the_name_the_site_gives_it(parser_config: Config) -> None:
+    hands = Winamax(
+        config=parser_config,
+        in_path=str(ROOT / "regression-test-files" / "cash" / "Winamax" / "Flop" / "LHE-2max-EUR-0.05-0.10-201204.txt"),
+        autostart=True,
+    ).getProcessedHands()
+
+    assert hands
+    assert all(h.tablename and not h.tablename.isdigit() for h in hands)
+
+
 @pytest.mark.parametrize(
     ("filename", "currency", "buyin", "fee"),
     [

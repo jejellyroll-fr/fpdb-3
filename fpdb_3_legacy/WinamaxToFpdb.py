@@ -515,9 +515,15 @@ class Winamax(HandHistoryConverter):
         """
         hand.tablename = value
         if hand.gametype["type"] == "tour":
+            # A tournament's table line names the tournament, not the table
+            # ("Table: 'No Limit Hold'em(1853325)#0'"), so the table number is
+            # what identifies the table. getTableTitleRe matches tournaments on
+            # that number rather than on the name.
             hand.tablename = info["TABLENO"]
             hand.roundPenny = True
-        # TODO(maintainer): long-term solution for table naming on Winamax.
+        # Cash tables are named after a town, so this only shortens a table the
+        # site named after its own game. It cannot apply to a tournament: the
+        # name has been replaced by the table number above.
         if hand.tablename.endswith("No Limit Hold'em"):
             hand.tablename = hand.tablename[: -len("No Limit Hold'em")] + "NLHE"
 
