@@ -768,18 +768,8 @@ class DerivedStats:
             log.exception("Error in assembleHands for hand ID %s", hand.handid)
             raise
 
-    def assembleHandsPlayers(self, hand: Any) -> None:  # noqa: C901, PLR0912, PLR0915
-        """Assemble statistics for each player in the hand.
-
-        TODO @future: REFACTOR - This method is too complex (C901: 25 > 10, PLR0912: 28 > 12)
-        Consider breaking into smaller methods:
-        - _assemblePlayerBasicStats()
-        - _assemblePlayerPositions()
-        - _assemblePlayerActions()
-        """
-        # street0VPI/vpip already called in Hand
-        # sawShowdown is calculated in playersAtStreetX, as that calculation gives us a convenient list of names
-
+    def _assemblePlayerSeats(self, hand: Any) -> None:
+        """Seat, stack, bounty, sit-out and tournament identity per player."""
         # Set seat and cnt_players for all players
         total_players = len(hand.players)
         for player in hand.players:
@@ -815,6 +805,8 @@ class DerivedStats:
                 player_stats["cashOutFee"] = 0
                 player_stats["isCashOut"] = False
 
+    def _assemblePlayerActionCounts(self, hand: Any) -> None:
+        """Count each player's actions on every street after preflop."""
         #### seen now processed in playersAtStreetX()
 
         for i, _street in enumerate(hand.actionStreets[1:]):
@@ -825,6 +817,8 @@ class DerivedStats:
             if i > 0:
                 self.folds(hand, i)
 
+    def _assemblePlayerWinnings(self, hand: Any) -> None:
+        """Money collected from the pot, and the rake taken out of it."""
         # Winnings is a non-negative value of money collected from the pot, which already includes the
         # rake taken out. hand.collectees is Decimal, database requires cents
         num_collectees, i = len(hand.collectees), 0
@@ -860,6 +854,8 @@ class DerivedStats:
                 collectee_stats["wonAtSD"] = True
             i += 1
 
+    def _assemblePlayerContributions(self, hand: Any) -> None:
+        """Money put in, resulting profit and rake attribution."""
         contributed, i = [], 0
         for player, money_committed in hand.pot.committed.items():
             committed_player_stats = self.handsplayers[player]
@@ -886,6 +882,8 @@ class DerivedStats:
         for _i, player in enumerate(contributed):
             self.handsplayers[player]["rakeContributed"] = 100 * hand.rake / len(contributed)
 
+    def _assemblePlayerCashOuts(self, hand: Any) -> None:
+        """Insurance payouts, kept apart from pot winnings."""
         # Cash Out handling - store amounts separately from winnings
         # Cash out is an insurance payout, not pot winnings
         if hasattr(hand, "cashOutAmounts") and hand.cashOutAmounts:
@@ -898,9 +896,8 @@ class DerivedStats:
                 if player in self.handsplayers:
                     self.handsplayers[player]["cashOutFee"] = int(100 * fee)
 
-        self.calcCBets(hand)
-        self.calcLimpStreet0(hand)
-
+    def _assemblePlayerHoleCards(self, hand: Any) -> None:
+        """Encode each player's holding and split showdown winnings."""
         # More inner-loop speed hackery.
         encode_card = Card.encodeCard
         calc_start_cards = Card.calcStartCards
@@ -920,6 +917,8 @@ class DerivedStats:
             except IndexError:
                 log.exception("IndexError: string index out of range %s %s", hand.handid, hand.in_path)
 
+    def _calcDerivedPlayerStats(self, hand: Any) -> None:
+        """Run the per-player calculators, whose order is significant."""
         self.setPositions(hand)
         self.calcSpecialBlinds(hand)
         self.calcFacedAllin(hand)
@@ -949,6 +948,20 @@ class DerivedStats:
         # Additional stats
         # 3betSB, 3betBB
         # Squeeze, Ratchet?
+
+    def assembleHandsPlayers(self, hand: Any) -> None:
+        """Assemble statistics for each player in the hand."""
+        # street0VPI/vpip already called in Hand
+        # sawShowdown is calculated in playersAtStreetX, as that calculation gives us a convenient list of names
+        self._assemblePlayerSeats(hand)
+        self._assemblePlayerActionCounts(hand)
+        self._assemblePlayerWinnings(hand)
+        self._assemblePlayerContributions(hand)
+        self._assemblePlayerCashOuts(hand)
+        self.calcCBets(hand)
+        self.calcLimpStreet0(hand)
+        self._assemblePlayerHoleCards(hand)
+        self._calcDerivedPlayerStats(hand)
 
     def assembleHandsActions(self, hand: Any) -> None:  # noqa: C901, PLR0912, PLR0915
         """Assemble and record all actions taken during the hand.
