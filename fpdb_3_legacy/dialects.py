@@ -244,7 +244,7 @@ class PostgresDialect(Dialect):
                    WHERE table_schema = current_schema()
                      AND table_name = %s
                      AND column_name = 'id'
-                     AND column_default LIKE 'nextval(%'""",
+                     AND column_default LIKE 'nextval(%%'""",
                 (physical_table,),
             )
             if cursor.fetchone():
@@ -280,7 +280,7 @@ class PostgresDialect(Dialect):
                FROM information_schema.columns
                WHERE table_schema = current_schema()
                  AND column_name = 'id'
-                 AND column_default LIKE 'nextval(%'
+                 AND column_default LIKE 'nextval(%%'
                ORDER BY table_name""",
         )
         for (table,) in cursor.fetchall():
