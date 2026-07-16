@@ -16,6 +16,7 @@ from fpdb_3_legacy.sql_queries_core import core_lookup_queries
 from fpdb_3_legacy.sql_queries_database_admin import database_admin_queries
 from fpdb_3_legacy.sql_queries_filters import filter_queries
 from fpdb_3_legacy.sql_queries_game_types import game_type_queries
+from fpdb_3_legacy.sql_queries_hand_artifacts import hand_artifact_queries
 from fpdb_3_legacy.sql_queries_hand_detail import hand_detail_queries
 from fpdb_3_legacy.sql_queries_history import history_window_queries
 from fpdb_3_legacy.sql_queries_hud_cache_write import hud_cache_write_queries
@@ -107,6 +108,7 @@ class Sql:
         self.query.update(cards_cache_write_queries())
         self.query.update(filter_queries(db_server))
         self.query.update(game_type_queries(db_server))
+        self.query.update(hand_artifact_queries())
         self.query.update(hand_detail_queries())
         self.query.update(history_window_queries(db_server))
         self.query.update(hud_cache_write_queries())
@@ -1604,69 +1606,6 @@ street1Discards,
                 %s, %s, %s, %s
                 )"""
 
-        self.query["store_hands_actions"] = """insert into HandsActions (
-                        handId,
-                        playerId,
-                        street,
-                        actionNo,
-                        streetActionNo,
-                        actionId,
-                        amount,
-                        raiseTo,
-                        amountCalled,
-                        numDiscarded,
-                        cardsDiscarded,
-                        allIn
-               )
-               values (
-                    %s, %s, %s, %s, %s,
-                    %s, %s, %s, %s, %s,
-                    %s, %s
-                )"""
-
-        self.query["store_hands_stove"] = """insert into HandsStove (
-                        handId,
-                        playerId,
-                        streetId,
-                        boardId,
-                        hiLo,
-                        rankId,
-                        value,
-                        cards,
-                        ev
-               )
-               values (
-                    %s, %s, %s, %s, %s,
-                    %s, %s, %s, %s
-               )"""
-
-        self.query["store_hands_showdown"] = """insert into HandsShowdown (
-                        handId,
-                        playerId,
-                        combo,
-                        cards
-               )
-               values (
-                    %s, %s, %s, %s
-               )"""
-
-        self.query["get_hands_showdown"] = """select p.name, hs.combo, hs.cards
-                from HandsShowdown hs, Players p
-                where hs.handId=%s and hs.playerId=p.id"""
-
-        self.query["store_hands_cashout"] = """insert into HandsCashout (
-                        handId,
-                        playerId,
-                        amount,
-                        fee
-               )
-               values (
-                    %s, %s, %s, %s
-               )"""
-
-        self.query["get_hands_cashout"] = """select p.name, hc.amount, hc.fee
-                from HandsCashout hc, Players p
-                where hc.handId=%s and hc.playerId=p.id"""
 
         self.query["find_player_auto_note"] = """select id
                 from PlayerAutoNotes
