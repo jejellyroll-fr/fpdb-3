@@ -113,6 +113,40 @@ def test_run_headless_survives_a_failing_cycle():
     lock.release.assert_called_once()  # lock still released
 
 
+def test_update_paths_monitors_multiple_sites_and_content_types(tmp_path):
+    config = _make_config()
+    sites = ["PokerStars", "Winamax"]
+    config.get_supported_sites.return_value = sites
+    config.get_site_parameters.side_effect = lambda site: {"enabled": site in sites}
+
+    paths = {}
+    for site in sites:
+        hh_path = tmp_path / site / "hands"
+        ts_path = tmp_path / site / "summaries"
+        hh_path.mkdir(parents=True)
+        ts_path.mkdir()
+        paths[site] = {
+            "hud-defaultPath": str(hh_path),
+            "hud-defaultTSPath": str(ts_path),
+        }
+    config.get_default_paths.side_effect = paths.__getitem__
+
+    gui = _make_gui(_make_settings(MagicMock()), config)
+    gui.importer.dirlist = {}
+    gui.addText = MagicMock()
+
+    gui.updatePaths()
+
+    expected = {
+        (site, content_type): site_paths[path_key]
+        for site, site_paths in paths.items()
+        for content_type, path_key in (("hh", "hud-defaultPath"), ("ts", "hud-defaultTSPath"))
+    }
+    assert gui.importer.addImportDirectory.call_count == 4
+    for site_key, path in expected.items():
+        gui.importer.addImportDirectory.assert_any_call(path, monitor=True, site=site_key)
+
+
 def test_hud_base_path_is_module_dir_and_holds_hud_main():
     """The HUD base path must resolve next to the module (holds HUD_main.pyw),
     independent of sys.path[0]/CWD."""

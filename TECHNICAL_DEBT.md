@@ -4,7 +4,7 @@ Ce fichier est généré par `python tools/todo_inventory.py`. Chaque marqueur
 `TODO`, `FIXME` ou `HACK` du code possède ainsi un identifiant stable et une
 catégorie. Modifier le code source, puis régénérer ce registre.
 
-**Total : 56 tâches ouvertes.**
+**Total : 55 tâches ouvertes.**
 
 | Catégorie | Nombre |
 |---|---:|
@@ -12,7 +12,6 @@ catégorie. Modifier le code source, puis régénérer ce registre.
 | database | 7 |
 | parser | 40 |
 | poker-domain | 3 |
-| ui | 1 |
 
 ## Tâches
 
@@ -22,7 +21,7 @@ catégorie. Modifier le code source, puis régénérer ce registre.
 | `TD-1941D118` | core | TODO | [fpdb_3_legacy/HandHistoryConverter.py:329](fpdb_3_legacy/HandHistoryConverter.py#L329) | not ideal, just trying to not error. Throw ParseException? |
 | `TD-F2E9F3D4` | core | TODO | [fpdb_3_legacy/HandHistoryConverter.py:430](fpdb_3_legacy/HandHistoryConverter.py#L430) | which parts are optional/required? |
 | `TD-43C2ECFA` | core | TODO | [fpdb_3_legacy/HandHistoryConverter.py:456](fpdb_3_legacy/HandHistoryConverter.py#L456) | which parts are optional/required? |
-| `TD-325B1319` | core | TODO | [fpdb_3_legacy/Importer.py:1048](fpdb_3_legacy/Importer.py#L1048) | Again, what error happens here? fix when we find out .. |
+| `TD-325B1319` | core | TODO | [fpdb_3_legacy/Importer.py:1047](fpdb_3_legacy/Importer.py#L1047) | Again, what error happens here? fix when we find out .. |
 | `TD-54311606` | database | FIXME | [fpdb_3_legacy/Configuration.py:151](fpdb_3_legacy/Configuration.py#L151) | Description à préciser |
 | `TD-3203C950` | database | TODO | [fpdb_3_legacy/Configuration.py:1882](fpdb_3_legacy/Configuration.py#L1882) | Probably adapt hud logic instead |
 | `TD-2D711D74` | database | TODO | [fpdb_3_legacy/Database.py:57](fpdb_3_legacy/Database.py#L57) | rebuild indexes / vacuum option |
@@ -73,4 +72,3 @@ catégorie. Modifier le code source, puis régénérer ce registre.
 | `TD-8B5FAEB2` | poker-domain | TODO | [fpdb_3_legacy/DerivedStats.py:93](fpdb_3_legacy/DerivedStats.py#L93) | future: REFACTOR - This function is too long (79 statements > 50 |
 | `TD-405847C6` | poker-domain | TODO | [fpdb_3_legacy/DerivedStats.py:482](fpdb_3_legacy/DerivedStats.py#L482) | future: REFACTOR - This method is too complex (C901: 25 > 10, PLR0912: 30 > 12, PLR0915: 144 > 50 |
 | `TD-27406CEB` | poker-domain | TODO | [fpdb_3_legacy/DerivedStats.py:728](fpdb_3_legacy/DerivedStats.py#L728) | future: REFACTOR - This method is too complex (C901: 25 > 10, PLR0912: 28 > 12 |
-| `TD-56A53357` | ui | TODO | [fpdb_3_legacy/GuiAutoImport.py:574](fpdb_3_legacy/GuiAutoImport.py#L574) | Allow for importing from multiple dirs - REB 29AUG2008 |
