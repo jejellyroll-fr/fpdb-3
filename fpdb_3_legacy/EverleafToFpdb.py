@@ -41,7 +41,11 @@ class Everleaf(HandHistoryConverter):
 
     substitutions = {
         "LEGAL_ISO": "USD|EUR|GBP|CAD|FPP",  # legal ISO currency codes
-        "LS": "\\$|\u20ac|\xe2\x82\xac|\x80|\u02c6|",  # legal currency symbols - Euro(cp1252, utf-8) #TODO change \x80 to \x20\x80, update all regexes accordingly
+        # The hand history is decoded before these regexes run, so both UTF-8
+        # and cp1252 euro bytes arrive here as the same Unicode character.
+        # This value is interpolated inside regex character classes: keeping
+        # alternation pipes here would incorrectly accept ``|`` as currency.
+        "LS": "\\$\u20ac\u02c6",
         "PLAYERS": r"(?P<PNAME>.+?)",
         "TAB": "-\u2013'\\s\\da-zA-Z#_()",  # legal characters for tablename
         "NUM": ".,\\d",  # legal characters in number format
