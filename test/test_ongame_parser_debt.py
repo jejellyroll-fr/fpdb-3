@@ -1,4 +1,5 @@
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -25,3 +26,23 @@ def test_determine_game_type_distinguishes_real_and_play_money(
     game_type = OnGame.determineGameType(OnGame.__new__(OnGame), hand_history)
 
     assert game_type["currency"] == currency
+
+
+def test_dealt_cards_regex_identifies_each_player_and_draw_replacement() -> None:
+    parser = OnGame.__new__(OnGame)
+    parser.compiledPlayers = set()
+    hand = SimpleNamespace(players=[(1, "Hero"), (2, "Villain")])
+    parser.compilePlayerRegexs(hand)
+    street = """
+    Dealing to Hero: [Ah, Ad, 7c]
+    Dealing to Villain: [-, -, Ks]
+    New hand for Hero: [Ah, Ad, Qc]
+    """
+
+    matches = [match.groupdict() for match in parser.re_DealtCards.finditer(street)]
+
+    assert [(match["PNAME"], match["CARDS"]) for match in matches] == [
+        ("Hero", "Ah, Ad, 7c"),
+        ("Villain", "-, -, Ks"),
+        ("Hero", "Ah, Ad, Qc"),
+    ]
