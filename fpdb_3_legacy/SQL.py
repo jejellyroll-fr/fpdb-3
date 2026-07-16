@@ -20,6 +20,7 @@ from fpdb_3_legacy.sql_queries_hand_artifacts import hand_artifact_queries
 from fpdb_3_legacy.sql_queries_hand_detail import hand_detail_queries
 from fpdb_3_legacy.sql_queries_history import history_window_queries
 from fpdb_3_legacy.sql_queries_hud_cache_write import hud_cache_write_queries
+from fpdb_3_legacy.sql_queries_import_auxiliary import import_auxiliary_queries
 from fpdb_3_legacy.sql_queries_opponents import opponent_report_queries
 from fpdb_3_legacy.sql_queries_player_auto_notes import player_auto_note_queries
 from fpdb_3_legacy.sql_queries_player_detailed import player_detailed_report_queries
@@ -113,6 +114,7 @@ class Sql:
         self.query.update(hand_detail_queries())
         self.query.update(history_window_queries(db_server))
         self.query.update(hud_cache_write_queries())
+        self.query.update(import_auxiliary_queries())
         self.query.update(opponent_report_queries(db_server))
         self.query.update(player_detailed_report_queries(db_server))
         self.query.update(player_position_stats_queries(db_server))
@@ -1610,77 +1612,6 @@ street1Discards,
 
 
 
-        self.query["store_boards"] = """insert into Boards (
-                        handId,
-                        boardId,
-                        boardcard1,
-                        boardcard2,
-                        boardcard3,
-                        boardcard4,
-                        boardcard5
-               )
-               values (
-                    %s, %s, %s, %s, %s,
-                    %s, %s
-                )"""
-
-        self.query["store_hands_pots"] = """insert into HandsPots (
-                        handId,
-                        potId,
-                        boardId,
-                        hiLo,
-                        playerId,
-                        pot,
-                        collected,
-                        rake
-               )
-               values (
-                    %s, %s, %s, %s,
-                    %s, %s, %s, %s
-               )"""
-
-        ################################
-        # queries for Files Table
-        ################################
-
-        self.query["get_id"] = """
-                        SELECT id
-                        FROM Files
-                        WHERE file=%s"""
-
-        self.query["store_file"] = """  insert into Files (
-                        file,
-                        site,
-                        startTime,
-                        lastUpdate,
-                        hands,
-                        storedHands,
-                        dups,
-                        partial,
-                        skipped,
-                        errs,
-                        ttime100,
-                        finished)
-               values (
-                    %s, %s, %s, %s, %s,
-                    %s, %s, %s, %s, %s,
-                    %s, %s
-                )"""
-
-        self.query["update_file"] = """
-                    UPDATE Files SET
-                    type=%s,
-                    lastUpdate=%s,
-                    endTime=%s,
-                    hands=hands+%s,
-                    storedHands=storedHands+%s,
-                    dups=dups+%s,
-                    partial=partial+%s,
-                    skipped=skipped+%s,
-                    errs=errs+%s,
-                    ttime100=ttime100+%s,
-                    finished=%s
-                    WHERE id=%s"""
 
         ################################
         # Counts for DB stats window
