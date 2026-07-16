@@ -319,7 +319,8 @@ class OnGame(HandHistoryConverter):
                     log.error("OnGameToFpdb.readHandInfo: " + _("DATETIME not matched: '%s'") % info[key])
                     raise FpdbParseError
                     # print (_("DEBUG:") + " readHandInfo: " + _("DATETIME not matched: '%s'") % info[key])
-                # TODO: Manually adjust time against OFFSET
+                # changeTimezone handles both named zones (CET/CEST/EEST) and
+                # explicit OnGame offsets such as GMT+0100.
                 hand.startTime = datetime.datetime.strptime(
                     datetimestr, "%Y/%b/%d %H:%M:%S"
                 )  # also timezone at end, e.g. " ET"
