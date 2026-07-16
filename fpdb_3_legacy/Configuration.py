@@ -146,54 +146,30 @@ PYTHON_VERSION = sys.version[:3]
 log = get_logger("configuration")
 
 
-def get_config(file_name, fallback=True):
-    """Looks in cwd and in self.default_config_path for a config file.
-    -- FIXME --
-    This function has become difficult to understand, plus it no-longer
-    just looks for a config file, it actually does file copying.
-    """
-    # look for example file even if not used here, path is returned to caller
-    config_found, example_copy = False, False
-    config_path, example_path = None, None
-    if sysPlatform == "Windows":
-        # print('-> windows')
-        if platform.release() != "XP":
-            pass  # Vista and win7
-        #    print('-> windows Win7')
-    else:
-        pass
-        # print('-> windows XP')
-    if True:
-        #    print('-> windows XP or Win7')
-        config_path = os.path.join(CONFIG_PATH, file_name)
-        config_path = config_path.replace("\\", "/")
-    else:
-        config_path = os.path.join(CONFIG_PATH, file_name)
-    if os.path.exists(config_path):  # there is a file in the cwd
-        config_found = True
-        fallback = False
-    else:  # no file in the cwd, look where it should be in the first place
-        config_path = os.path.join(CONFIG_PATH, file_name)
-        config_path = config_path.replace("\\", "/")
-        if os.path.exists(config_path):
-            config_found = True
-            fallback = False
+def _find_example_config(file_name: str) -> str:
+    """Return the first existing example config, or its user-config fallback."""
+    example_name = f"{file_name}.example"
+    candidates = [
+        os.path.join("/usr/share/python-fpdb", example_name),
+        example_name,
+        os.path.join(str(SOURCE_ROOT_PATH), example_name),
+        os.path.join(str(SOURCE_DIR), example_name),
+        os.path.join(FPDB_ROOT_PATH, example_name),
+        os.path.join(PYFPDB_PATH, example_name),
+    ]
+    for candidate in candidates:
+        normalized = candidate.replace("\\", "/")
+        if os.path.exists(normalized):
+            return normalized
+    return os.path.join(CONFIG_PATH, example_name).replace("\\", "/")
 
-    # Find candidate paths for the example file, looking in the source tree as well as configuration dir
-    example_path = "/usr/share/python-fpdb/" + file_name + ".example"
-    if not os.path.exists(example_path):
-        if os.path.exists(file_name + ".example"):
-            example_path = file_name + ".example"
-        elif os.path.exists(os.path.join(str(SOURCE_ROOT_PATH), file_name + ".example").replace("\\", "/")):
-            example_path = os.path.join(str(SOURCE_ROOT_PATH), file_name + ".example").replace("\\", "/")
-        elif os.path.exists(os.path.join(str(SOURCE_DIR), file_name + ".example").replace("\\", "/")):
-            example_path = os.path.join(str(SOURCE_DIR), file_name + ".example").replace("\\", "/")
-        elif os.path.exists(os.path.join(FPDB_ROOT_PATH, file_name + ".example")):
-            example_path = os.path.join(FPDB_ROOT_PATH, file_name + ".example")
-        elif os.path.exists(os.path.join(PYFPDB_PATH, file_name + ".example")):
-            example_path = os.path.join(PYFPDB_PATH, file_name + ".example")
-        else:
-            example_path = os.path.join(CONFIG_PATH, file_name + ".example").replace("\\", "/")
+
+def get_config(file_name, fallback=True):
+    """Resolve a user config and optionally bootstrap it from an example file."""
+    config_path = os.path.join(CONFIG_PATH, file_name).replace("\\", "/")
+    config_found = os.path.exists(config_path)
+    example_copy = False
+    example_path = _find_example_config(file_name)
 
     if not config_found and fallback:
         if os.path.exists(example_path):

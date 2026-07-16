@@ -4,11 +4,11 @@ Ce fichier est généré par `python tools/todo_inventory.py`. Chaque marqueur
 `TODO`, `FIXME` ou `HACK` du code possède ainsi un identifiant stable et une
 catégorie. Modifier le code source, puis régénérer ce registre.
 
-**Total : 50 tâches ouvertes.**
+**Total : 49 tâches ouvertes.**
 
 | Catégorie | Nombre |
 |---|---:|
-| database | 7 |
+| database | 6 |
 | parser | 40 |
 | poker-domain | 3 |
 
@@ -16,8 +16,7 @@ catégorie. Modifier le code source, puis régénérer ce registre.
 
 | ID | Catégorie | Type | Emplacement | Description |
 |---|---|---|---|---|
-| `TD-54311606` | database | FIXME | [fpdb_3_legacy/Configuration.py:151](fpdb_3_legacy/Configuration.py#L151) | Description à préciser |
-| `TD-3203C950` | database | TODO | [fpdb_3_legacy/Configuration.py:1882](fpdb_3_legacy/Configuration.py#L1882) | Probably adapt hud logic instead |
+| `TD-3203C950` | database | TODO | [fpdb_3_legacy/Configuration.py:1858](fpdb_3_legacy/Configuration.py#L1858) | Probably adapt hud logic instead |
 | `TD-2D711D74` | database | TODO | [fpdb_3_legacy/Database.py:57](fpdb_3_legacy/Database.py#L57) | rebuild indexes / vacuum option |
 | `TD-C0DFD934` | database | FIXME | [fpdb_3_legacy/Database.py:5630](fpdb_3_legacy/Database.py#L5630) | ?: MySQL has ON DUPLICATE KEY UPDATE |
 | `TD-F140803E` | database | FIXME | [fpdb_3_legacy/sql_queries_player_detailed.py:570](fpdb_3_legacy/sql_queries_player_detailed.py#L570) | 3/4bet and foldTo don't added four tournaments yet |
