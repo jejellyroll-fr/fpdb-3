@@ -1340,7 +1340,7 @@ class RawTourneys:
 
 
 class Config:
-    def __init__(self, file=None, dbname="", custom_log_dir="", lvl="INFO") -> None:
+    def __init__(self, file=None, dbname: str | None = None, custom_log_dir="", lvl="INFO") -> None:
         self.install_method = INSTALL_METHOD
         self.fpdb_root_path = FPDB_ROOT_PATH
         self.appdata_path = APPDATA_PATH
@@ -1496,9 +1496,10 @@ class Config:
                     self.db_selected = db.db_name
                     db_node.setAttribute("default", "True")
                 self.supported_databases[db.db_name] = db
-        # TODO: if the user may passes '' (empty string) as database name via command line, his choice is ignored
-        #           ..when we parse the xml we allow for ''. there has to be a decission if to allow '' or not
-        if dbname and dbname in self.supported_databases:
+        # ``None`` means that the CLI did not request an override.  An empty
+        # string remains a valid explicit key because the XML format has always
+        # allowed it as a database name.
+        if dbname is not None and dbname in self.supported_databases:
             self.db_selected = dbname
         # NOTE: fpdb can not handle the case when no database is defined in xml, so we throw an exception for now
         if self.db_selected is None:

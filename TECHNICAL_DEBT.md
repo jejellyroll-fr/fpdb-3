@@ -4,12 +4,12 @@ Ce fichier est généré par `python tools/todo_inventory.py`. Chaque marqueur
 `TODO`, `FIXME` ou `HACK` du code possède ainsi un identifiant stable et une
 catégorie. Modifier le code source, puis régénérer ce registre.
 
-**Total : 73 tâches ouvertes.**
+**Total : 72 tâches ouvertes.**
 
 | Catégorie | Nombre |
 |---|---:|
 | core | 7 |
-| database | 11 |
+| database | 10 |
 | parser | 42 |
 | poker-domain | 11 |
 | ui | 2 |
@@ -26,8 +26,7 @@ catégorie. Modifier le code source, puis régénérer ce registre.
 | `TD-2CCEEE24` | core | FIXME | [fpdb_3_legacy/IdentifySite.py:87](fpdb_3_legacy/IdentifySite.py#L87) | rename filter_name to hhc_type |
 | `TD-325B1319` | core | TODO | [fpdb_3_legacy/Importer.py:1048](fpdb_3_legacy/Importer.py#L1048) | Again, what error happens here? fix when we find out .. |
 | `TD-54311606` | database | FIXME | [fpdb_3_legacy/Configuration.py:151](fpdb_3_legacy/Configuration.py#L151) | Description à préciser |
-| `TD-C478B2F8` | database | TODO | [fpdb_3_legacy/Configuration.py:1499](fpdb_3_legacy/Configuration.py#L1499) | if the user may passes '' (empty string) as database name via command line, his choice is ignored |
-| `TD-3203C950` | database | TODO | [fpdb_3_legacy/Configuration.py:1881](fpdb_3_legacy/Configuration.py#L1881) | Probably adapt hud logic instead |
+| `TD-3203C950` | database | TODO | [fpdb_3_legacy/Configuration.py:1882](fpdb_3_legacy/Configuration.py#L1882) | Probably adapt hud logic instead |
 | `TD-2D711D74` | database | TODO | [fpdb_3_legacy/Database.py:57](fpdb_3_legacy/Database.py#L57) | rebuild indexes / vacuum option |
 | `TD-F2762937` | database | TODO | [fpdb_3_legacy/Database.py:2387](fpdb_3_legacy/Database.py#L2387) | don't think this is needed so set nice and high |
 | `TD-C0DFD934` | database | FIXME | [fpdb_3_legacy/Database.py:5638](fpdb_3_legacy/Database.py#L5638) | ?: MySQL has ON DUPLICATE KEY UPDATE |
