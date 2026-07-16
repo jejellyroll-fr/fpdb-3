@@ -4,18 +4,17 @@ Ce fichier est généré par `python tools/todo_inventory.py`. Chaque marqueur
 `TODO`, `FIXME` ou `HACK` du code possède ainsi un identifiant stable et une
 catégorie. Modifier le code source, puis régénérer ce registre.
 
-**Total : 8 tâches ouvertes.**
+**Total : 7 tâches ouvertes.**
 
 | Catégorie | Nombre |
 |---|---:|
-| parser | 5 |
+| parser | 4 |
 | poker-domain | 3 |
 
 ## Tâches
 
 | ID | Catégorie | Type | Emplacement | Description |
 |---|---|---|---|---|
-| `TD-C38D627C` | parser | FIXME | [fpdb_3_legacy/UnibetToFpdb.py:708](fpdb_3_legacy/UnibetToFpdb.py#L708) | handle other currencies, play money |
 | `TD-BF4B4B2B` | parser | TODO | [fpdb_3_legacy/WinamaxSummary.py:516](fpdb_3_legacy/WinamaxSummary.py#L516) | dev): obv not a great metric |
 | `TD-AF613862` | parser | TODO | [fpdb_3_legacy/WinamaxToFpdb.py:197](fpdb_3_legacy/WinamaxToFpdb.py#L197) | fpdb): should probably rename re_hero_cards and corresponding method, |
 | `TD-1C729FFE` | parser | TODO | [fpdb_3_legacy/WinamaxToFpdb.py:521](fpdb_3_legacy/WinamaxToFpdb.py#L521) | maintainer): long-term solution for table naming on Winamax. |

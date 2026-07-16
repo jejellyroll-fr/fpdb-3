@@ -622,6 +622,8 @@ class Unibet(HandHistoryConverter):
         info.update(m2.groupdict())
 
         # 2026 tournament buy-in/fee (chips elsewhere, but the buy-in is real money).
+        # This is the only place a Unibet buy-in is read: no pattern above states
+        # one anywhere else, so the header's own fields are the whole contract.
         if info.get("TBUYIN") is not None:
             hand.buyinCurrency = self._CURRENCY_SYMBOLS.get(str(info.get("TCURRENCY") or ""), "EUR")
             hand.buyin = int(round(100 * Decimal(info["TBUYIN"])))
@@ -652,100 +654,6 @@ class Unibet(HandHistoryConverter):
                 hand.handid = info[key]
             if key == "TOURNO":
                 hand.tourNo = info[key]
-            if key == "BUYIN" and hand.tourNo is not None:
-                log.debug(f"info['BUYIN']: {info['BUYIN']}")
-                log.debug(f"info['BIAMT']: {info['BIAMT']}")
-                log.debug(f"info['BIRAKE']: {info['BIRAKE']}")
-                log.debug(f"info['BOUNTY']: {info['BOUNTY']}")
-
-                if info[key].strip() == "Freeroll":
-                    hand.buyin = 0
-                    hand.fee = 0
-                    hand.buyinCurrency = "FREE"
-                elif info[key].strip() == "":
-                    hand.buyin = 0
-                    hand.fee = 0
-                    hand.buyinCurrency = "NA"
-                else:
-                    if info[key].find("Play") != -1 or info[key].find("play") != -1:
-                        hand.buyinCurrency = "play"
-                    elif info[key].find("C$") != -1 or info[key].find("CAD") != -1:
-                        hand.buyinCurrency = "CAD"
-                    elif info[key].find("A$") != -1 or info[key].find("AUD") != -1:
-                        hand.buyinCurrency = "AUD"
-                    elif info[key].find("$") != -1:
-                        hand.buyinCurrency = "USD"
-                    elif info[key].find("£") != -1:
-                        hand.buyinCurrency = "GBP"
-                    elif info[key].find("€") != -1:
-                        hand.buyinCurrency = "EUR"
-                    elif info[key].find("₹") != -1:
-                        hand.buyinCurrency = "INR"
-                    elif info[key].find("¥") != -1:
-                        hand.buyinCurrency = "CNY"
-                    elif info[key].find("kr") != -1:
-                        if info[key].find("DKK") != -1:
-                            hand.buyinCurrency = "DKK"
-                        elif info[key].find("NOK") != -1:
-                            hand.buyinCurrency = "NOK"
-                        else:
-                            hand.buyinCurrency = "SEK"
-                    elif info[key].find("DKK") != -1:
-                        hand.buyinCurrency = "DKK"
-                    elif info[key].find("NOK") != -1:
-                        hand.buyinCurrency = "NOK"
-                    elif info[key].find("SEK") != -1:
-                        hand.buyinCurrency = "SEK"
-                    elif info[key].find("zł") != -1 or info[key].find("PLN") != -1:
-                        hand.buyinCurrency = "PLN"
-                    elif info[key].find("HUF") != -1 or info[key].find("Ft") != -1:
-                        hand.buyinCurrency = "HUF"
-                    elif info[key].find("FPP") != -1 or info[key].find("SC") != -1:
-                        hand.buyinCurrency = "PSFP"
-                    elif re.match("^[0-9+]*$", info[key].strip()):
-                        hand.buyinCurrency = "play"
-                    else:
-                        # FIXME: handle other currencies, play money
-                        log.error(
-                            f"Failed to detect currency. Hand ID: {hand.handid}: '{info[key]}'",
-                        )
-                        raise FpdbParseError
-
-                    info["BIAMT"] = info["BIAMT"].strip("$€£FPPSC₹¥C A kr DKK NOK SEK zł PLN HUF Ft Play play")
-
-                    if hand.buyinCurrency != "PSFP":
-                        if info["BOUNTY"] is not None:
-                            # There is a bounty, Which means we need to switch BOUNTY and BIRAKE values
-                            tmp = info["BOUNTY"]
-                            info["BOUNTY"] = info["BIRAKE"]
-                            info["BIRAKE"] = tmp
-                            info["BOUNTY"] = info["BOUNTY"].strip(
-                                "$€£₹¥C A kr DKK NOK SEK zł PLN HUF Ft Play play",
-                            )  # Strip here where it isn't 'None'
-                            hand.koBounty = int(100 * Decimal(info["BOUNTY"]))
-                            hand.isKO = True
-                        else:
-                            hand.isKO = False
-
-                        info["BIRAKE"] = info["BIRAKE"].strip("$€£₹¥C A kr DKK NOK SEK zł PLN HUF Ft Play play")
-
-                        hand.buyin = int(100 * Decimal(info["BIAMT"])) + hand.koBounty
-                        hand.fee = int(100 * Decimal(info["BIRAKE"]))
-                    else:
-                        hand.buyin = int(100 * Decimal(info["BIAMT"]))
-                        hand.fee = 0
-                if "Zoom" in info["TITLE"] or "Rush" in info["TITLE"]:
-                    hand.isFast = True
-                else:
-                    hand.isFast = False
-                if "Home" in info["TITLE"]:
-                    hand.isHomeGame = True
-                else:
-                    hand.isHomeGame = False
-            if key == "LEVEL":
-                hand.level = info[key]
-            if key == "SHOOTOUT" and info[key] is not None:
-                hand.isShootout = True
             if key == "TABLE":
                 hand.tablename = info[key]
                 # if info['TOURNO'] is not None and info['HIVETABLE'] is not None:

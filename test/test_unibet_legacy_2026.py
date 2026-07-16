@@ -17,6 +17,7 @@ legacy one.
 
 from __future__ import annotations
 
+import re
 import tempfile
 from decimal import Decimal
 from pathlib import Path
@@ -247,6 +248,21 @@ Total pot 300
 Seat 1: evymm: bet 150 and won 0, net result: -150
 Seat 5: hero[Unibet_28204e083c0fb55a]: bet 150 and won 300, net result: 150
 """
+
+
+def test_buyin_is_read_only_from_the_tournament_header() -> None:
+    # readHandInfo reads the buy-in from the TBUYIN/TFEE/TCURRENCY fields of the
+    # tournament header, and nowhere else: no Unibet pattern states a buy-in in
+    # any other shape. This guards against reviving a dispatch branch keyed on
+    # fields the parser cannot produce.
+    produced = set()
+    for name in dir(Unibet):
+        attr = getattr(Unibet, name)
+        if isinstance(attr, re.Pattern):
+            produced |= set(attr.groupindex)
+
+    assert {"TBUYIN", "TFEE", "TCURRENCY"} <= produced
+    assert not {"BUYIN", "BIAMT", "BIRAKE", "BOUNTY"} & produced
 
 
 def test_determine_game_type_tournament() -> None:
