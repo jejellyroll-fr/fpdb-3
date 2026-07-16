@@ -1,10 +1,11 @@
 """Regression tests for the legacy Absolute/Cereus parser."""
 
 from decimal import Decimal
+from types import SimpleNamespace
 
 import pytest
 
-from fpdb_3_legacy.AbsoluteToFpdb import Absolute
+from fpdb_3_legacy.AbsoluteToFpdb import Absolute, FpdbParseError
 
 
 @pytest.mark.parametrize(
@@ -25,3 +26,20 @@ def test_absolute_header_currency_is_explicit(stakes, expected_currency, expecte
     assert game["type"] == expected_type
     assert Decimal(game["sb"]) == Decimal("0.01")
     assert Decimal(game["bb"]) == Decimal("0.02")
+
+
+@pytest.mark.parametrize("dealer_text", ["Seat #6 is the dealer", "Seat #6 is the dead dealer"])
+def test_absolute_button_accepts_live_and_dead_dealer(dealer_text) -> None:
+    hand = SimpleNamespace(handText=dealer_text, buttonpos=None)
+
+    Absolute.__new__(Absolute).readButton(hand)
+
+    assert hand.buttonpos == 6
+
+
+@pytest.mark.parametrize("dealer_text", ["Seat #6 is the d dealer", "Seat #6 is the added dealer"])
+def test_absolute_button_rejects_partial_dead_words(dealer_text) -> None:
+    hand = SimpleNamespace(handText=dealer_text, buttonpos=None)
+
+    with pytest.raises(FpdbParseError, match="button position"):
+        Absolute.__new__(Absolute).readButton(hand)

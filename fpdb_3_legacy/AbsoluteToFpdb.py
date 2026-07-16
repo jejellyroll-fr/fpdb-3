@@ -125,8 +125,7 @@ class Absolute(HandHistoryConverter):
 
     re_HandInfo = re_GameInfo
 
-    # TODO: that's not the right way to match for "dead" dealer is it?
-    re_Button = re.compile(r"Seat #(?P<BUTTON>[0-9]) is the ?[dead]* dealer$", re.MULTILINE)
+    re_Button = re.compile(r"^Seat #(?P<BUTTON>\d+) is the (?:dead )?dealer$", re.MULTILINE)
 
     re_PlayerInfo = re.compile(
         r"^Seat (?P<SEAT>[0-9]) - (?P<PNAME>.*) "
