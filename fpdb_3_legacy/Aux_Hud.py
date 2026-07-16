@@ -20,6 +20,7 @@ from __future__ import annotations
 ########################################################################
 
 #    Standard Library modules
+import contextlib
 from functools import partial
 from pathlib import Path
 from typing import Any
@@ -1218,6 +1219,9 @@ class SimpleTableMW(Aux_Base.SeatWindow):
         self.hud = hud
         self.aw = aw
         self.menu_is_popped = False
+        # The popup is a parentless top-level window, so Qt will not take it down
+        # with this one. Hold it here to close it from destroy().
+        self.popup_menu: SimpleTablePopupMenu | None = None
 
         # self.connect("configure_event", self.configure_event_cb, "auxmenu") base class will deal with this
 
@@ -1256,7 +1260,24 @@ class SimpleTableMW(Aux_Base.SeatWindow):
         """
         if not self.menu_is_popped:
             self.menu_is_popped = True
-            SimpleTablePopupMenu(self)
+            self.popup_menu = SimpleTablePopupMenu(self)
+
+    def destroy(self) -> None:
+        """Take the config popup down with this menu window.
+
+        Aux_Base.destroy() destroys/deleteLater()s the windows it manages when the
+        table closes, but the popup is a parentless top-level window it knows
+        nothing about. Left alone it stays on screen over a dead HUD, and the
+        rebuilt HUD opens a second one on top of it, so closing the front menu
+        just reveals the stale one behind.
+        """
+        popup, self.popup_menu = self.popup_menu, None
+        if popup is not None:
+            with contextlib.suppress(RuntimeError):  # popup's C++ side may already be gone
+                popup.close()
+                popup.destroy()
+        self.menu_is_popped = False
+        super().destroy()
 
     def move_windows(self) -> None:
         """Move the table menu window to its correct position relative to the table.
@@ -1525,7 +1546,12 @@ class SimpleTablePopupMenu(QWidget):
 
         This method resets the menu state in the parent window and destroys the popup menu instance.
         """
-        self.parentwin.menu_is_popped = False
+        # The parent window may already be gone (table closed while the menu was
+        # open), so drop the menu either way.
+        with contextlib.suppress(RuntimeError):
+            self.parentwin.menu_is_popped = False
+            self.parentwin.popup_menu = None
+        self.close()
         self.destroy()
 
     def callback(self, _check_state: Any, data: str | None = None) -> None:
