@@ -2352,8 +2352,6 @@ class Database:
         # print "sess_stats: subs =", subs, "subs[0] =", subs[0]
         c.execute(query, subs)
         colnames = [desc[0] for desc in c.description]
-        n = 0
-
         row = c.fetchone()
         if colnames[0].lower() == "player_id":
             # Loop through stats adding them to appropriate stat_dict:
@@ -2382,15 +2380,9 @@ class Database:
                             "seats",
                         ):
                             stat_dict[playerid][name.lower()] += val
-                    n += 1
-                    if n >= 10000:
-                        break  # TODO: don't think this is needed so set nice and high
-                        # prevents infinite loop so leave for now - comment out or remove?
                 row = c.fetchone()
         else:
             log.error(f"query {query} result does not have player_id as first column")
-
-        # print "   %d rows fetched, len(stat_dict) = %d" % (n, len(stat_dict))
 
         # print "session stat_dict =", stat_dict
         # return stat_dict

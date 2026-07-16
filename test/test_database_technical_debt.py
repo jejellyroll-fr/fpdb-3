@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import inspect
 from datetime import datetime
+from types import SimpleNamespace
 
 import fpdb_3_legacy.Database as Database
 
@@ -51,6 +52,42 @@ def test_get_stats_from_hand_no_longer_exposes_builtin_type_parameter():
     signature = inspect.signature(Database.Database.get_stats_from_hand)
     assert "type" not in signature.parameters
     assert "game_type" in signature.parameters
+
+
+def test_session_stats_are_not_truncated_after_ten_thousand_rows():
+    class Cursor:
+        description = [("player_id",), ("vpip",)]
+
+        def __init__(self):
+            self.rows = iter([(1, 1)] * 10_001)
+
+        def execute(self, _query, _subs):
+            return None
+
+        def fetchone(self):
+            return next(self.rows, None)
+
+    cursor = Cursor()
+    db = Database.Database.__new__(Database.Database)
+    db.sql = SimpleNamespace(query={"get_stats_from_hand_session": "SELECT session stats"})
+    db.db_server = "sqlite"
+    db.hand_1day_ago = "2026-07-15"
+    db.get_cursor = lambda: cursor
+    stat_dict = {}
+
+    db.get_stats_from_hand_session(
+        hand=123,
+        stat_dict=stat_dict,
+        hero_id=None,
+        stat_range="S",
+        seats_min=2,
+        seats_max=10,
+        h_stat_range="S",
+        h_seats_min=2,
+        h_seats_max=10,
+    )
+
+    assert stat_dict[1]["vpip"] == 10_001
 
 
 def test_cleanup_connections_ignores_already_closed_cursor(monkeypatch):
