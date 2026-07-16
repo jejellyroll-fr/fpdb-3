@@ -4,11 +4,11 @@ Ce fichier est généré par `python tools/todo_inventory.py`. Chaque marqueur
 `TODO`, `FIXME` ou `HACK` du code possède ainsi un identifiant stable et une
 catégorie. Modifier le code source, puis régénérer ce registre.
 
-**Total : 72 tâches ouvertes.**
+**Total : 70 tâches ouvertes.**
 
 | Catégorie | Nombre |
 |---|---:|
-| core | 7 |
+| core | 5 |
 | database | 10 |
 | parser | 42 |
 | poker-domain | 11 |
@@ -22,8 +22,6 @@ catégorie. Modifier le code source, puis régénérer ce registre.
 | `TD-1941D118` | core | TODO | [fpdb_3_legacy/HandHistoryConverter.py:329](fpdb_3_legacy/HandHistoryConverter.py#L329) | not ideal, just trying to not error. Throw ParseException? |
 | `TD-F2E9F3D4` | core | TODO | [fpdb_3_legacy/HandHistoryConverter.py:430](fpdb_3_legacy/HandHistoryConverter.py#L430) | which parts are optional/required? |
 | `TD-43C2ECFA` | core | TODO | [fpdb_3_legacy/HandHistoryConverter.py:456](fpdb_3_legacy/HandHistoryConverter.py#L456) | which parts are optional/required? |
-| `TD-34590159` | core | FIXME | [fpdb_3_legacy/IdentifySite.py:85](fpdb_3_legacy/IdentifySite.py#L85) | rename filter to hhc_fname |
-| `TD-2CCEEE24` | core | FIXME | [fpdb_3_legacy/IdentifySite.py:87](fpdb_3_legacy/IdentifySite.py#L87) | rename filter_name to hhc_type |
 | `TD-325B1319` | core | TODO | [fpdb_3_legacy/Importer.py:1048](fpdb_3_legacy/Importer.py#L1048) | Again, what error happens here? fix when we find out .. |
 | `TD-54311606` | database | FIXME | [fpdb_3_legacy/Configuration.py:151](fpdb_3_legacy/Configuration.py#L151) | Description à préciser |
 | `TD-3203C950` | database | TODO | [fpdb_3_legacy/Configuration.py:1882](fpdb_3_legacy/Configuration.py#L1882) | Probably adapt hud logic instead |

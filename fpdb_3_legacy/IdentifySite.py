@@ -77,15 +77,13 @@ class Site:
         self,
         name: str,
         hhc_fname: str,
-        filter_name: str,
+        hhc_type: str,
         summary: str | None,
         obj: type[HandHistoryConverter],
     ) -> None:
         self.name = name
-        # FIXME: rename filter to hhc_fname
         self.hhc_fname = hhc_fname
-        # FIXME: rename filter_name to hhc_type
-        self.filter_name = filter_name
+        self.hhc_type = hhc_type
         self.re_SplitHands = getattr(obj, "re_split_hands", getattr(obj, "re_SplitHands", None))
         self.codepage = obj.codepage
         self.copyGameHeader = obj.copyGameHeader
@@ -102,10 +100,20 @@ class Site:
             self.re_SumIdentify = (
                 getattr(sum_class, "re_identify", getattr(sum_class, "re_Identify", None)) if sum_class else None
             )
-        self.line_delimiter = self.getDelimiter(filter_name)
-        self.line_addendum = self.getAddendum(filter_name)
-        self.spaces = filter_name == "Entraction"
-        self.getHeroRegex(obj, filter_name)
+        self.line_delimiter = self.getDelimiter(hhc_type)
+        self.line_addendum = self.getAddendum(hhc_type)
+        self.spaces = hhc_type == "Entraction"
+        self.getHeroRegex(obj, hhc_type)
+
+    @property
+    def filter_name(self) -> str:
+        """Return the legacy parser-type attribute used by older callers."""
+        return self.hhc_type
+
+    @filter_name.setter
+    def filter_name(self, value: str) -> None:
+        """Keep legacy assignments synchronized with the canonical field."""
+        self.hhc_type = value
 
     def getDelimiter(self, filter_name: str) -> str | None:
         line_delimiter = None
