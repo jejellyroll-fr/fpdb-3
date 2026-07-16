@@ -513,9 +513,16 @@ class WinamaxSummary(TourneySummary):
 
         """
         sng_threshold = 10
-        if int(self.entries) <= sng_threshold:  # TODO(@dev): obv not a great metric
-            self.isSng = True
-        if "MODE" in mg and mg["MODE"] is not None and "sng" in mg["MODE"]:
+        mode = mg.get("MODE")
+        if mode is not None:
+            # Summaries from 2012 on state the format ("sng", "sngType : sitngo",
+            # "tt", "ttType : flight"). Take it: a tournament that drew a small
+            # field is still a tournament.
+            self.isSng = "sng" in mode
+        elif int(self.entries) <= sng_threshold:
+            # Older summaries state no format at all, leaving the size of the
+            # field as the only evidence. This misses multi-table sit & gos,
+            # which are indistinguishable from a tournament in that format.
             self.isSng = True
         if "SPEED" in mg and mg["SPEED"] is not None:
             if mg["SPEED"] == "turbo":
