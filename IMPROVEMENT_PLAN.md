@@ -279,6 +279,7 @@ Les bugs multi-backend récents (`Rank` réservé, `boolean` vs `smallint`, `set
 - ✅ **Notes automatiques joueur de `SQL.py`** (2026-07-16) : écritures, recherches et agrégats `PlayerAutoNotes` déplacés dans `sql_queries_player_auto_notes.py`, avec identité règle/version et crochet de filtres dynamiques protégés.
 - ✅ **Écritures auxiliaires d'import de `SQL.py`** (2026-07-16) : boards multi-run, pots et suivi des fichiers déplacés dans `sql_queries_import_auxiliary.py`, avec dimensions et compteurs d'import protégés.
 - ✅ **Insertion racine des mains de `SQL.py`** (2026-07-16) : `store_hand` déplacé dans `sql_queries_hand_root_persistence.py`, avec alignement des 36 colonnes/paramètres, boards, pots par rue et bomb-pot protégés.
+- ✅ **Insertion `HandsPlayers` de `SQL.py`** (2026-07-16) : l'insert pleine largeur déplacé dans `sql_queries_hand_player_persistence.py`, avec alignement `HANDS_PLAYERS_KEYS`, insert SQLite réel et colonnes EV/delayed-cbet/probe/cashout protégés.
 - **Qualité outillée restante** : Ruff est vert sur tout le dépôt et mypy couvre tout le package legacy ; convertir les 73 `TODO/FIXME` actuels en tâches traçables, évaluer l'intérêt d'un second checker (`pyright`) et clarifier/supprimer le dossier `fpdb/`.
 
 **Effort** continu · **Impact** moyen.
