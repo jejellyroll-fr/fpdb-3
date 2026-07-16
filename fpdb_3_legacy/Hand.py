@@ -2429,6 +2429,25 @@ class HoldemOmahaHand(Hand):
             return hcs
         return " ".join(hcs)
 
+    def _write_showdown(self, fh) -> None:
+        """Write complete shown hands and mucked players in seat order."""
+        lines = []
+        for player_data in self.players:
+            player = player_data[1]
+            if player in self.shown:
+                cards = self.join_holecards(player, asList=True)
+                if "0x" in cards:
+                    continue
+                description = self.showdownStrings.get(player, "")
+                suffix = f" ({description})" if description else ""
+                lines.append(f"{player}: shows [{' '.join(cards)}]{suffix}\n")
+            elif player in self.mucked:
+                lines.append(f"{player}: mucks hand\n")
+
+        if lines:
+            fh.write("*** SHOW DOWN ***\n")
+            fh.writelines(lines)
+
     def writeHand(self, fh=sys.__stdout__) -> None:
         # PokerStars format.
         super().writeHand(fh)
@@ -2486,28 +2505,7 @@ class HoldemOmahaHand(Hand):
             for act in self.actions["RIVER"]:
                 fh.write(f"{self.actionString(act)}\n")
 
-        # Some sites don't have a showdown section so we have to figure out if there should be one
-        # The logic for a showdown is: at the end of river action there are at least two players in the hand
-        # we probably don't need a showdown section in pseudo stars format for our filtering purposes
-        if self.shown:
-            fh.write("*** SHOW DOWN ***\n")
-            for name in self.shown:
-                # TODO: legacy importer can't handle only one holecard here, make sure there are 2 for holdem, 4 for omaha
-                # TODO: If HoldHand subclass supports more than omahahi, omahahilo, holdem, add them here
-                numOfHoleCardsNeeded = None
-                if self.gametype["category"] in ("omahahi", "omahahilo"):
-                    numOfHoleCardsNeeded = 4
-                elif self.gametype["category"] == "5_omahahi":
-                    numOfHoleCardsNeeded = 5
-                elif self.gametype["category"] == "6_omahahi":
-                    numOfHoleCardsNeeded = 6
-                elif self.gametype["category"] in ("holdem"):
-                    numOfHoleCardsNeeded = 2
-
-                if len(self.holecards["PREFLOP"][name]) == numOfHoleCardsNeeded:
-                    fh.write(
-                        f"{name} shows [{' '.join(self.holecards['PREFLOP'][name][1])}] (a hand...)\n",
-                    )
+        self._write_showdown(fh)
 
         # Current PS format has the lines:
         # Uncalled bet ($111.25) returned to s0rrow
