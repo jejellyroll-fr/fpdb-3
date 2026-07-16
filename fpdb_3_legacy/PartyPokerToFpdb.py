@@ -202,7 +202,7 @@ class PartyPoker(HandHistoryConverter):
             Table\s(?P<TABLE>[^\n]+?)?\s+
             ((?: \#|\(|)(?P<TABLENO>\d+)\)?\s+)?
             (\(No\sDP\)\s)?
-            \(\s?(?P<PLAY>Real|Play)\s+Money\s?\)\s+(--\s*)? # FIXME: check if play money is correct
+            \(\s?(?P<PLAY>Real|Play)\s+Money\s?\)\s+(--\s*)?
             Seat\s+(?P<BUTTON>\d+)\sis\sthe\sbutton
             (\s+Total\s+number\s+of\s+players\s+\:\s+(?P<PLYRS>\d+)/?(?P<MAX>\d+)?)?
             """,
@@ -306,6 +306,12 @@ class PartyPoker(HandHistoryConverter):
     re_NoSmallBlind = re.compile(
         "^There is no Small Blind in this hand as the Big Blind of the previous hand left the table",
         re.MULTILINE,
+    )
+    # The table marker states whether the amounts are real or play money. It is
+    # the only currency evidence on exports whose stake line carries no symbol.
+    re_MoneyType = re.compile(r"\(\s?(?P<PLAY>Real|Play)\s+Money\s?\)")
+    re_StackCurrency = re.compile(
+        r"(?:S|s)eat\s?\d+:\s[^\n]+?\s\(\s*(?P<SYMBOL>[$€])",
     )
     re_20BBmin = re.compile(r"Table 20BB Min")
     re_Cancelled = re.compile(r"Table\sClosed\s?", re.MULTILINE)
@@ -491,6 +497,29 @@ class PartyPoker(HandHistoryConverter):
             f"STP functionality not implemented hand_id: {hand.handid}, method: readSTP",
         )
 
+    def _determineCurrency(self, stakeSymbol: str, handText: str) -> str:
+        """Resolve the currency a ring game's amounts are expressed in.
+
+        Tournament hands overwrite this with tournament chips once the game
+        format is known, so only ring games depend on the result.
+        """
+        if stakeSymbol:
+            return self.currencies[stakeSymbol]
+
+        # Several exports state bare amounts on the stake line. The table marker
+        # then decides whether they are play chips, and the player stacks are
+        # the remaining evidence of which real currency is in use.
+        moneyType = self.re_MoneyType.search(handText)
+        if moneyType is not None and moneyType.group("PLAY") == "Play":
+            return "play"
+
+        stack = self.re_StackCurrency.search(handText)
+        if stack is not None:
+            return self.currencies[stack.group("SYMBOL")]
+
+        # Matches the pipeline's own default for an unstated currency.
+        return "USD"
+
     def determineGameType(self, handText):
         log.debug("Starting game type determination")
 
@@ -650,7 +679,7 @@ class PartyPoker(HandHistoryConverter):
             )
 
         # Set currency
-        info["currency"] = self.currencies.get(str(mg.get("CURRENCY") or ""), "EUR")
+        info["currency"] = self._determineCurrency(str(mg.get("CURRENCY") or ""), handText)
         log.debug(f"Currency set currency: {info['currency']}")
 
         # Set mixed game type if present
