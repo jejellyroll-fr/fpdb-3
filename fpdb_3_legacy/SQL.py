@@ -18,6 +18,7 @@ from fpdb_3_legacy.sql_queries_filters import filter_queries
 from fpdb_3_legacy.sql_queries_game_types import game_type_queries
 from fpdb_3_legacy.sql_queries_hand_artifacts import hand_artifact_queries
 from fpdb_3_legacy.sql_queries_hand_detail import hand_detail_queries
+from fpdb_3_legacy.sql_queries_hand_root_persistence import hand_root_persistence_queries
 from fpdb_3_legacy.sql_queries_history import history_window_queries
 from fpdb_3_legacy.sql_queries_hud_cache_write import hud_cache_write_queries
 from fpdb_3_legacy.sql_queries_import_auxiliary import import_auxiliary_queries
@@ -112,6 +113,7 @@ class Sql:
         self.query.update(game_type_queries(db_server))
         self.query.update(hand_artifact_queries())
         self.query.update(hand_detail_queries())
+        self.query.update(hand_root_persistence_queries())
         self.query.update(history_window_queries(db_server))
         self.query.update(hud_cache_write_queries())
         self.query.update(import_auxiliary_queries())
@@ -1200,49 +1202,6 @@ sum(hc.street0Limp)                 AS limp,
 
 
 
-        self.query["store_hand"] = """insert into Hands (
-                                            tablename,
-                                            sitehandno,
-                                            tourneyId,
-                                            gametypeid,
-                                            sessionId,
-                                            fileId,
-                                            startTime,
-                                            importtime,
-                                            seats,
-                                            heroSeat,
-                                            maxPosition,
-                                            texture,
-                                            playersVpi,
-                                            boardcard1,
-                                            boardcard2,
-                                            boardcard3,
-                                            boardcard4,
-                                            boardcard5,
-                                            runItTwice,
-                                            playersAtStreet1,
-                                            playersAtStreet2,
-                                            playersAtStreet3,
-                                            playersAtStreet4,
-                                            playersAtShowdown,
-                                            street0Raises,
-                                            street1Raises,
-                                            street2Raises,
-                                            street3Raises,
-                                            street4Raises,
-                                            street0Pot,
-                                            street1Pot,
-                                            street2Pot,
-                                            street3Pot,
-                                            street4Pot,
-                                            finalPot,
-                                            bombPot
-                                             )
-                                             values
-                                              (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
-                                               %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
-                                               %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
-                                               %s, %s, %s)"""
 
         self.query["store_hands_players"] = """insert into HandsPlayers (
                 handId,
