@@ -34,6 +34,43 @@ def _derived(tmp_path: Path, source: Path, replacements: dict[str, str]) -> Path
     return target
 
 
+def _hand(config: Config, path: Path, handid: str):
+    hands = PokerTracker(config=config, in_path=str(path), autostart=True).getProcessedHands()
+    return next(h for h in hands if h.handid == handid)
+
+
+IPOKER_SNG = "NLHE-USD-SNG-2-201106.iPoker.txt"
+
+
+@pytest.mark.parametrize(
+    ("handid", "posted_sb", "level"),
+    [
+        # Player32 holds $55, the $50 ante leaves $5, and the $5 small blind is
+        # all he can post against a $400 big blind: the level is 200/400.
+        ("3616780470", "5.00", ("200", "400.00")),
+        ("3616781403", "285.00", ("500", "1000.00")),
+    ],
+)
+def test_short_blind_post_does_not_become_the_level(
+    parser_config: Config,
+    handid: str,
+    posted_sb: str,
+    level: tuple[str, str],
+) -> None:
+    hand = _hand(parser_config, TOUR / IPOKER_SNG, handid)
+
+    posted = next(e for e in hand.actions["BLINDSANTES"] if e[1] == "small blind")
+    assert str(posted[2]) == posted_sb
+    # What the player could post is kept; the level is rebuilt from the big blind.
+    assert (hand.gametype["sb"], hand.gametype["bb"]) == level
+
+
+def test_full_blind_posts_are_left_alone(parser_config: Config) -> None:
+    hand = _hand(parser_config, TOUR / IPOKER_SNG, "3616780194")
+
+    assert (hand.gametype["sb"], hand.gametype["bb"]) == ("200.00", "400.00")
+
+
 def test_named_free_tournament_keeps_its_stated_buyin(parser_config: Config) -> None:
     # "$5 Free PLO Hero Arena" states "Buy-In: $5+$0.50": the word Free in the
     # table name does not make it a freeroll.
