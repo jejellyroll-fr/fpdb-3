@@ -48,7 +48,7 @@ Tests ajoutés : `test/test_menu_layout.py`, `test/test_translations.py`.
 **Reste à faire (hors dev / séparable)**
 - Traduire les chaînes dans les 13 autres langues (travail traducteurs ; `.pot` prêt, workflow Weblate/Crowdin).
 - Re-valider en masse les `.po` de 2011 (qualité).
-- 🟡 **Formats localisés** (2026-07-16) : socle central nombres/devises/dates piloté par `ui_language`, branché sur les overrides HUD, le profit total, les axes/légendes cash-tournoi-session et leurs totaux, les vues ring (KPI, positions, mains de départ), les historiques cash/tournoi/journaux, les rapports joueurs tournoi/adversaires, les filtres de buy-in multidevises et le replayer (argent, jetons, équité) ; restent quelques écrans utilitaires.
+- ✅ **Formats localisés** (2026-07-16) : socle central nombres/devises/dates piloté par `ui_language`, branché sur les overrides HUD, le profit total, les axes/légendes cash-tournoi-session et leurs totaux, les vues ring (KPI, positions, mains de départ), les historiques cash/tournoi/journaux, les rapports joueurs tournoi/adversaires, les filtres de buy-in multidevises, le replayer (argent, jetons, équité) et les résumés d'import GUI/CLI. Les formats techniques SQL, historiques de mains et logs restent volontairement invariants.
 
 **Effort restant** ~2-3j · **Impact** élevé.
 

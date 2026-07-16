@@ -43,6 +43,7 @@ from PySide6.QtWidgets import (
 
 from fpdb_3_legacy import Configuration, Database, Importer, interlocks
 from fpdb_3_legacy.i18n import gettext as _
+from fpdb_3_legacy.localized_formats import format_number
 from fpdb_3_legacy.loggingFpdb import get_logger
 from fpdb_3_legacy.RegressionFileComparator import compare_importer_sidecars
 
@@ -227,15 +228,15 @@ class GuiBulkImport(QWidget):
                     "Partial: {partial}\n"
                     "Skipped: {skipped}\n"
                     "Errors: {errs}\n"
-                    "Time: {elapsed:.2f}s",
+                    "Time: {elapsed}s",
                 ).format(
-                    files=file_count,
-                    stored=stored,
-                    dups=dups,
-                    partial=partial,
-                    skipped=skipped,
-                    errs=errs,
-                    elapsed=elapsed,
+                    files=format_number(file_count, 0),
+                    stored=format_number(stored, 0),
+                    dups=format_number(dups, 0),
+                    partial=format_number(partial, 0),
+                    skipped=format_number(skipped, 0),
+                    errs=format_number(errs, 0),
+                    elapsed=format_number(elapsed),
                 ),
             )
 
@@ -472,10 +473,11 @@ def main(argv=None) -> int:
     importer.clearFileList()
 
     print(
-        f"Bulk import done: Stored: {stored}, Duplicates: {dups}, "
-        f"Partial: {partial}, Skipped: {skipped}, Errors: {errs}, "
-        f"Regression mismatches: {comparison_errors}, "
-        f"Time: {elapsed:.3f}s, Stored/second: {stored / elapsed:.0f}",
+        f"Bulk import done: Stored: {format_number(stored, 0)}, "
+        f"Duplicates: {format_number(dups, 0)}, Partial: {format_number(partial, 0)}, "
+        f"Skipped: {format_number(skipped, 0)}, Errors: {format_number(errs, 0)}, "
+        f"Regression mismatches: {format_number(comparison_errors, 0)}, "
+        f"Time: {format_number(elapsed, 3)}s, Stored/second: {format_number(stored / elapsed, 0)}",
     )
     return 0 if errs == 0 and comparison_errors == 0 else 1
 
