@@ -12,6 +12,7 @@ from __future__ import annotations
 import os
 import shutil
 import sys
+from pathlib import Path
 
 import pytest
 
@@ -90,6 +91,30 @@ def test_changes_persist_after_save_and_reload(config, tmp_path):
     reloaded = Configuration.Config(file=config.file)
     assert "persisted" in reloaded.supported_databases
     assert reloaded.supported_databases["persisted"].db_server == "postgresql"
+
+
+def test_explicit_empty_database_name_overrides_xml_default(tmp_path):
+    cfg_path = tmp_path / "HUD_config.xml"
+    config_text = Path(CONFIG_TEMPLATE).read_text(encoding="utf-8")
+    default_database = (
+        '<database db_server="sqlite" db_name="fpdb.db3" db_ip="localhost" '
+        'db_user="fpdb" db_pass="fpdb" db_path="" default="True"/>'
+    )
+    empty_database = (
+        '<database db_server="sqlite" db_name="" db_ip="localhost" '
+        'db_user="fpdb" db_pass="fpdb" db_path="" default="False"/>'
+    )
+    config_text = config_text.replace(
+        default_database,
+        f"{default_database}\n        {empty_database}",
+        1,
+    )
+    cfg_path.write_text(config_text, encoding="utf-8")
+
+    selected = Configuration.Config(file=str(cfg_path), dbname="")
+
+    assert "" in selected.supported_databases
+    assert selected.db_selected == ""
 
 
 if __name__ == "__main__":
