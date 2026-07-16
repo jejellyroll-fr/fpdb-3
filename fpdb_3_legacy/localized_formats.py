@@ -48,9 +48,10 @@ def _locale_copy(grouping: bool = True) -> QLocale:
     return selected
 
 
-def format_number(value: Number, decimals: int = 2, *, grouping: bool = True) -> str:
+def format_number(value: Number, decimals: int = 2, *, grouping: bool = True, show_plus: bool = False) -> str:
     """Format a numeric UI value using the active decimal and grouping marks."""
-    return _locale_copy(grouping).toString(float(value), "f", decimals)
+    formatted = _locale_copy(grouping).toString(float(value), "f", decimals)
+    return f"+{formatted}" if show_plus and value > 0 else formatted
 
 
 def format_currency(value: Number, currency: str = "USD", decimals: int = 2, *, show_plus: bool = False) -> str:

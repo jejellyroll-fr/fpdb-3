@@ -66,6 +66,7 @@ from PySide6.QtWidgets import (
 
 from fpdb_3_legacy import Database, Filters, LeakDetector
 from fpdb_3_legacy.i18n import gettext as _
+from fpdb_3_legacy.localized_formats import format_number
 from fpdb_3_legacy.loggingFpdb import get_logger
 
 log = get_logger("gui_opponents_report")
@@ -113,6 +114,11 @@ def pct(done, chance) -> float:
     if chance <= 0:
         return 0.0
     return 100.0 * float(done) / float(chance)
+
+
+def format_preflop_rates(vpip: float, pfr: float, three_bet: float) -> str:
+    """Format the compact VPIP/PFR/3-bet triplet using the active locale."""
+    return "/".join(format_number(value, 0) for value in (vpip, pfr, three_bet))
 
 
 def percentile(values: Sequence[float], q: float) -> float | None:
@@ -620,25 +626,25 @@ class GuiOpponentsReport(QSplitter):
             name_item = self._make_item(m["pname"], m["pname"], align_left=True)
             row_items.append(name_item)
 
-            row_items.append(self._make_item(f"{m['hds']}", m["hds"]))
+            row_items.append(self._make_item(format_number(m["hds"], 0), m["hds"]))
 
             net = m["hero_net_bb"]
-            net_item = self._make_item(f"{net:+.0f}", net)
+            net_item = self._make_item(format_number(net, 0, show_plus=True), net)
             net_item.setForeground(QBrush(QColor("#2e7d32") if net >= 0 else QColor("#c62828")))
             row_items.append(net_item)
 
             bb100 = m["hero_bb_per_100"]
-            bb100_item = self._make_item(f"{bb100:+.1f}", bb100)
+            bb100_item = self._make_item(format_number(bb100, 1, show_plus=True), bb100)
             bb100_item.setForeground(QBrush(QColor("#2e7d32") if bb100 >= 0 else QColor("#c62828")))
             row_items.append(bb100_item)
 
-            vpr = f"{m['vpip']:.0f}/{m['pfr']:.0f}/{m['three_bet']:.0f}"
+            vpr = format_preflop_rates(m["vpip"], m["pfr"], m["three_bet"])
             row_items.append(self._make_item(vpr, m["vpip"]))
 
             row_items.append(self._make_item(m["profile"], m["profile"], align_left=True))
 
             danger = m["danger"]
-            danger_item = self._make_item(f"{danger:.0f}/10", danger)
+            danger_item = self._make_item(f"{format_number(danger, 0)}/10", danger)
             row_items.append(danger_item)
 
             row_items.append(self._make_item(m["exploit"], m["exploit_score"], align_left=True))
