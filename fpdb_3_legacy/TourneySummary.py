@@ -16,7 +16,6 @@ from __future__ import annotations
 # In the "official" distribution you can find the license in agpl-3.0.txt.
 # import L10n
 # _ = L10n.get_translation()
-# TODO: check to keep only the needed modules
 import datetime
 import pprint
 import re
@@ -202,7 +201,6 @@ class TourneySummary:
     # end def __init__
 
     def __str__(self) -> str:
-        # TODO : Update
         vars = (
             (("SITE"), self.siteName),
             (("START TIME"), self.startTime),
@@ -224,8 +222,22 @@ class TourneySummary:
             (("REBUY"), self.isRebuy),
             (("ADDON"), self.isAddOn),
             (("KO"), self.isKO),
+            (("PROGRESSIVE"), self.isProgressive),
             (("MATRIX"), self.isMatrix),
             (("SHOOTOUT"), self.isShootout),
+            (("FAST"), self.isFast),
+            (("MULTI ENTRY"), self.isMultiEntry),
+            (("RE-ENTRY"), self.isReEntry),
+            (("NEW TO GAME"), self.isNewToGame),
+            (("HOME GAME"), self.isHomeGame),
+            (("SPLIT"), self.isSplit),
+            (("FIFTY50"), self.isFifty50),
+            (("TIME"), self.isTime),
+            (("TIME AMOUNT"), self.timeAmt),
+            (("STEP"), self.isStep),
+            (("STEP NUMBER"), self.stepNo),
+            (("CHANCE"), self.isChance),
+            (("CHANCE COUNT"), self.chanceCount),
             (("REBUY CHIPS"), self.rebuyChips),
             (("ADDON CHIPS"), self.addOnChips),
             (("REBUY COST"), self.rebuyCost),
@@ -236,7 +248,13 @@ class TourneySummary:
             (("SNG"), self.isSng),
             (("SATELLITE"), self.isSatellite),
             (("DOUBLE OR NOTHING"), self.isDoubleOrNothing),
-            (("GUARANTEEAMT"), self.guaranteeAmt),
+            (("CASH OUT"), self.isCashOut),
+            (("ON DEMAND"), self.isOnDemand),
+            (("FLIGHTED"), self.isFlighted),
+            (("GUARANTEE"), self.isGuarantee),
+            (("GUARANTEE AMOUNT"), self.guaranteeAmt),
+            (("LOTTERY"), self.isLottery),
+            (("TOURNEY MULTIPLIER"), self.tourneyMultiplier),
             (("ADDED"), self.added),
             (("ADDED CURRENCY"), self.addedCurrency),
             (("COMMENT"), self.comment),

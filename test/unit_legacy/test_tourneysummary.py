@@ -279,6 +279,22 @@ class TestStr:
         assert "PLAYERS" in s
         assert "alice" in s
 
+    def test_str_contains_modern_tournament_flags(self) -> None:
+        ts = _make_summary()
+        ts.isProgressive = True
+        ts.isReEntry = True
+        ts.isFlighted = True
+        ts.isLottery = True
+        ts.tourneyMultiplier = 5
+
+        rendered = str(ts)
+
+        assert "PROGRESSIVE = True" in rendered
+        assert "RE-ENTRY = True" in rendered
+        assert "FLIGHTED = True" in rendered
+        assert "LOTTERY = True" in rendered
+        assert "TOURNEY MULTIPLIER = 5" in rendered
+
 
 class TestWriteAndPrint:
     def test_write_summary_default_override_message(self) -> None:
