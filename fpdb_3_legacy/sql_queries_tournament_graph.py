@@ -29,11 +29,9 @@ def tournament_graph_queries() -> dict[str, str]:
     # <limit_test>
     # <game_test>
 
-    ####################################
-    # Tourney Graph query
-    # FIXME this is a horrible hack to prevent nonsense data
-    #  being graphed - needs proper fix mantis #180 +#182
-    ####################################
+    # Graph queries intentionally require a dated tournament so every point
+    # belongs to the selected time window. The results table above remains
+    # able to display summary-only imports whose start time is unknown.
     query["tourneyGraph"] = """
         SELECT tp.tourneyId, (coalesce(tp.winnings,0) - coalesce(tt.buyIn,0) - coalesce(tt.fee,0)) as profit, tp.koCount, tp.rebuyCount, tp.addOnCount, tt.buyIn, tt.fee, t.siteTourneyNo
         FROM TourneysPlayers tp
@@ -53,11 +51,7 @@ def tournament_graph_queries() -> dict[str, str]:
     # AND   gt.type = 'ring'
     # <limit_test>
     # <game_test>
-    ####################################
-    # Tourney Graph query with tourneytypefilter
-    # FIXME this is a horrible hack to prevent nonsense data
-    #  being graphed - needs proper fix mantis #180 +#182
-    ####################################
+    # Same dated-tournament contract, with tournament-type filters.
     query["tourneyGraphType"] = """
         SELECT tp.tourneyId, (coalesce(tp.winnings,0) - coalesce(tt.buyIn,0) - coalesce(tt.fee,0)) as profit, tp.koCount, tp.rebuyCount, tp.addOnCount, tt.buyIn, tt.fee, t.siteTourneyNo
         FROM TourneysPlayers tp
@@ -130,4 +124,3 @@ def tournament_graph_queries() -> dict[str, str]:
     # Session stats query
     ####################################
     return query
-

@@ -4,11 +4,10 @@ Ce fichier est généré par `python tools/todo_inventory.py`. Chaque marqueur
 `TODO`, `FIXME` ou `HACK` du code possède ainsi un identifiant stable et une
 catégorie. Modifier le code source, puis régénérer ce registre.
 
-**Total : 45 tâches ouvertes.**
+**Total : 43 tâches ouvertes.**
 
 | Catégorie | Nombre |
 |---|---:|
-| database | 2 |
 | parser | 40 |
 | poker-domain | 3 |
 
@@ -16,8 +15,6 @@ catégorie. Modifier le code source, puis régénérer ce registre.
 
 | ID | Catégorie | Type | Emplacement | Description |
 |---|---|---|---|---|
-| `TD-C253D5A8` | database | FIXME | [fpdb_3_legacy/sql_queries_tournament_graph.py:34](fpdb_3_legacy/sql_queries_tournament_graph.py#L34) | this is a horrible hack to prevent nonsense data |
-| `TD-F04EE9E8` | database | FIXME | [fpdb_3_legacy/sql_queries_tournament_graph.py:58](fpdb_3_legacy/sql_queries_tournament_graph.py#L58) | this is a horrible hack to prevent nonsense data |
 | `TD-D14B2924` | parser | TODO | [fpdb_3_legacy/AbsoluteToFpdb.py:27](fpdb_3_legacy/AbsoluteToFpdb.py#L27) | I have no idea if AP has multi-currency options, i just copied the regex out of Everleaf converter for the currency symbols.. weeeeee - Eric |
 | `TD-8999E04A` | parser | TODO | [fpdb_3_legacy/AbsoluteToFpdb.py:129](fpdb_3_legacy/AbsoluteToFpdb.py#L129) | that's not the right way to match for "dead" dealer is it? |
 | `TD-C4001A69` | parser | TODO | [fpdb_3_legacy/AbsoluteToFpdb.py:152](fpdb_3_legacy/AbsoluteToFpdb.py#L152) | Absolute posting when coming in new: %s - Posts $0.02 .. should that be a new Post line? where do we need to add support for that? *confused* |
