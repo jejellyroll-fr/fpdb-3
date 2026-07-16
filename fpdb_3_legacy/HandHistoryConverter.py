@@ -429,10 +429,15 @@ HandHistoryConverter: '{sitename}'
     'currency'  in ('USD', 'EUR', 'T$', <countrycode>)
 or None if we fail to get the info """
 
-    # TODO: which parts are optional/required?
     @abstractmethod
     def readHandInfo(self, hand):
-        pass
+        """Populate the hand metadata.
+
+        Accepted hands require ``handid``, ``startTime`` and ``tablename``;
+        tournament hands additionally require ``tourNo``. Button position,
+        seat count, mixed-game name and tournament financial metadata are
+        optional when the source history does not expose them.
+        """
 
     """Read and set information about the hand being dealt, and set the correct
     variables in the Hand object 'hand
@@ -455,10 +460,14 @@ or None if we fail to get the info """
     * hand.level
     """
 
-    # TODO: which parts are optional/required?
     @abstractmethod
     def readPlayerStacks(self, hand):
-        pass
+        """Add every parsed seat through ``hand.addPlayer``.
+
+        Seat number, player name and numeric stack are required for each
+        player. A zero stack is valid; sitting-out state is optional. A
+        non-cancelled hand is expected to contain at least two players.
+        """
 
     """This function is for identifying players at the table, and to pass the
     information on to 'hand' via Hand.addPlayer(seat, name, chips)
@@ -653,6 +662,12 @@ or None if we fail to get the info """
             bb = Decimal(str(gametype.get("bb", "0") or "0"))
             actions = getattr(hand, "actions", {}) or {}
             action_streets = getattr(hand, "actionStreets", []) or []
+
+            for field in ("handid", "startTime", "tablename"):
+                if not getattr(hand, field, None):
+                    issues.append(f"missing required {field}")
+            if gametype.get("type") == "tour" and not getattr(hand, "tourNo", None):
+                issues.append("missing required tourNo")
 
             if len(getattr(hand, "players", []) or []) < 2:
                 issues.append("fewer than two players")
