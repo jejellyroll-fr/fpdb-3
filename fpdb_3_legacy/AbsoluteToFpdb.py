@@ -146,8 +146,9 @@ class Absolute(HandHistoryConverter):
             # (?P<CURRENCY>\$| €|)(?P<BB>[0-9]*[.0-9]+)
             self.re_PostSB = re.compile(rf"^{player_re} - Posts small blind (?:\$| €|)(?P<SB>[,.0-9]+)", re.MULTILINE)
             self.re_PostBB = re.compile(rf"^{player_re} - Posts big blind (?:\$| €|)(?P<BB>[.,0-9]+)", re.MULTILINE)
-            self.re_Post = re.compile(rf"^{player_re} - Posts (?:\$| €|)(?P<BB>[.,0-9]+)$", re.MULTILINE)
-            # TODO: Absolute posting when coming in new: %s - Posts $0.02 .. should that be a new Post line? where do we need to add support for that? *confused*
+            self.re_PostIncoming = re.compile(
+                rf"^{player_re} - Posts (?:\$| €|)(?P<BB>[.,0-9]+)$", re.MULTILINE
+            )
             self.re_PostBoth = re.compile(
                 rf"^{player_re} - Posts (dead )?(?:\$| €|)(?P<BB>[,.0-9]+) (dead )?(?:\$| €|)(?P<SB>[,.0-9]+)",
                 re.MULTILINE,
@@ -388,7 +389,7 @@ class Absolute(HandHistoryConverter):
             hand.addBlind(a.group("PNAME"), "big blind", a.group("BB"))
             hand.setUncalledBets(True)
             found_big = True
-        for a in self.re_Post.finditer(hand.handText):
+        for a in self.re_PostIncoming.finditer(hand.handText):
             hand.addBlind(a.group("PNAME"), "big blind", a.group("BB"))
             found_big = True
 

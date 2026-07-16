@@ -43,3 +43,21 @@ def test_absolute_button_rejects_partial_dead_words(dealer_text) -> None:
 
     with pytest.raises(FpdbParseError, match="button position"):
         Absolute.__new__(Absolute).readButton(hand)
+
+
+def test_absolute_incoming_player_post_is_one_big_blind() -> None:
+    calls = []
+    hand = SimpleNamespace(
+        handText="New Player - Posts $0.02\n*** POCKET CARDS ***",
+        handid="123",
+        players=[(3, "New Player", "1.00")],
+        addBlind=lambda *args: calls.append(args),
+        setUncalledBets=lambda _value: None,
+    )
+    parser = Absolute.__new__(Absolute)
+    parser.compiledPlayers = set()
+    parser.compilePlayerRegexs(hand)
+
+    parser.readBlinds(hand)
+
+    assert calls == [(None, None, None), ("New Player", "big blind", "0.02")]
