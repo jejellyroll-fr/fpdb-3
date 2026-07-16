@@ -295,6 +295,7 @@ Les bugs multi-backend récents (`Rank` réservé, `boolean` vs `smallint`, `set
 - ✅ **Devises Absolute/Cereus** (2026-07-16) : les en-têtes distinguent explicitement USD (`$`), EUR (`€`) et jetons de tournoi sans symbole, sans espace encodé dans la devise ; trois cas de parsing protègent le contrat et ramènent le registre à 42 entrées.
 - ✅ **Bouton Absolute/Cereus** (2026-07-16) : le parseur accepte exactement `dealer` et `dead dealer`, prend en charge les numéros de siège multi-chiffres et rejette les fragments auparavant admis par erreur par `[dead]*` ; le registre est ramené à 41 entrées.
 - ✅ **Blindes d'entrée Absolute/Cereus** (2026-07-16) : une ligne générique `Player - Posts $amount` est explicitement traitée comme une unique grosse blinde d'arrivée, distincte des lignes nommées small/big blind ; le registre est ramené à 40 entrées.
+- ✅ **Tables heads-up Absolute/Cereus** (2026-07-16) : l'indication `(1 on 1)` de l'en-tête fixe désormais `maxseats=2` au lieu d'être écrasée par le défaut 6-max, y compris avant le traitement particulier HORSE ; le registre est ramené à 39 entrées.
 - ✅ **Second checker évalué et adopté** (2026-07-16) : Pyright contrôle en mode `basic` le package moderne et les outils typés, en complément de mypy ; seuls les imports natifs optionnels propres à chaque OS sont ignorés.
 - **Qualité outillée restante** : Ruff, mypy et le ratchet Pyright sont verts ; traiter progressivement le registre de dette et élargir Pyright lorsque les annotations gagnent de nouveaux domaines.
 

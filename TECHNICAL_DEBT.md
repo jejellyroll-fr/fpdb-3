@@ -4,11 +4,11 @@ Ce fichier est généré par `python tools/todo_inventory.py`. Chaque marqueur
 `TODO`, `FIXME` ou `HACK` du code possède ainsi un identifiant stable et une
 catégorie. Modifier le code source, puis régénérer ce registre.
 
-**Total : 40 tâches ouvertes.**
+**Total : 39 tâches ouvertes.**
 
 | Catégorie | Nombre |
 |---|---:|
-| parser | 37 |
+| parser | 36 |
 | poker-domain | 3 |
 
 ## Tâches
@@ -16,7 +16,6 @@ catégorie. Modifier le code source, puis régénérer ce registre.
 | ID | Catégorie | Type | Emplacement | Description |
 |---|---|---|---|---|
 | `TD-E7B1E72B` | parser | TODO | [fpdb_3_legacy/AbsoluteToFpdb.py:260](fpdb_3_legacy/AbsoluteToFpdb.py#L260) | AP does provide Small BET for Limit .. I think? at least 1-on-1 limit they do.. sigh |
-| `TD-CAD4A4C1` | parser | TODO | [fpdb_3_legacy/AbsoluteToFpdb.py:306](fpdb_3_legacy/AbsoluteToFpdb.py#L306) | 1-on-1) does have that info in the game type line |
 | `TD-6DEBDDEA` | parser | TODO | [fpdb_3_legacy/AbsoluteToFpdb.py:320](fpdb_3_legacy/AbsoluteToFpdb.py#L320) | implement lookup list by table-name to determine maxes, |
 | `TD-EB5B8ECA` | parser | TODO | [fpdb_3_legacy/AbsoluteToFpdb.py:337](fpdb_3_legacy/AbsoluteToFpdb.py#L337) | Not implemented yet |
 | `TD-9EF696E5` | parser | TODO | [fpdb_3_legacy/AbsoluteToFpdb.py:483](fpdb_3_legacy/AbsoluteToFpdb.py#L483) | not supported yet ? |
