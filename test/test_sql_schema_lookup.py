@@ -21,3 +21,9 @@ def test_lookup_ddl_keeps_backend_specific_identity_types() -> None:
         assert "AUTO_INCREMENT" in lookup_schema_queries("mysql")[key]
         assert "SERIAL" in lookup_schema_queries("postgresql")[key]
         assert "INTEGER PRIMARY KEY" in lookup_schema_queries("sqlite")[key]
+
+
+def test_mysql_quotes_reserved_rank_table_name() -> None:
+    mysql = lookup_schema_queries("mysql")["createRankTable"]
+    assert "CREATE TABLE `Rank`" in mysql
+    assert "CREATE TABLE Rank" not in mysql
