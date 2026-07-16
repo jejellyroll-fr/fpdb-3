@@ -9,6 +9,7 @@ from typing import Any
 
 import pytest
 
+from fpdb_3_legacy import db_migrate, dialects
 from fpdb_3_legacy.SQL import Sql
 
 SCHEMA_KEYS = (
@@ -94,6 +95,32 @@ def _reset_schema(connection: Any, backend: str) -> None:
     connection.commit()
 
 
+class _LiveDatabase:
+    """Minimal Database-compatible wrapper around a live driver connection."""
+
+    def __init__(self, connection: Any, backend: str) -> None:
+        self.connection = connection
+        self.backend = dialects.dialect_for_server(backend).backend_id
+
+    def get_cursor(self) -> Any:
+        return self.connection.cursor()
+
+    def commit(self) -> None:
+        self.connection.commit()
+
+    def rollback(self) -> None:
+        self.connection.rollback()
+
+
+def _create_schema(connection: Any, backend: str) -> None:
+    _reset_schema(connection, backend)
+    sql = Sql(db_server=backend)
+    with connection.cursor() as cursor:
+        for key in SCHEMA_KEYS:
+            cursor.execute(sql.query[key])
+    connection.commit()
+
+
 @pytest.mark.integration
 @pytest.mark.parametrize("backend", ["postgresql", "mysql"])
 def test_full_schema_executes_and_enforces_player_site_fk(backend: str) -> None:
@@ -101,12 +128,7 @@ def test_full_schema_executes_and_enforces_player_site_fk(backend: str) -> None:
         pytest.skip(f"live {backend} service not requested")
 
     with _connection(backend) as connection:
-        _reset_schema(connection, backend)
-        sql = Sql(db_server=backend)
-        with connection.cursor() as cursor:
-            for key in SCHEMA_KEYS:
-                cursor.execute(sql.query[key])
-        connection.commit()
+        _create_schema(connection, backend)
 
         with connection.cursor() as cursor:
             if backend == "postgresql":
@@ -118,3 +140,50 @@ def test_full_schema_executes_and_enforces_player_site_fk(backend: str) -> None:
             with pytest.raises(Exception):
                 cursor.execute("INSERT INTO Players(name, siteId) VALUES (%s, %s)", ("orphan", 999999))
         connection.rollback()
+
+
+@pytest.mark.integration
+def test_data_round_trip_between_mysql_and_postgresql_repairs_sequences() -> None:
+    if not {"postgresql", "mysql"}.issubset(_enabled_backends()):
+        pytest.skip("live PostgreSQL and MySQL services not requested")
+
+    with _connection("mysql") as mysql_connection, _connection("postgresql") as postgres_connection:
+        _create_schema(mysql_connection, "mysql")
+        _create_schema(postgres_connection, "postgresql")
+
+        with mysql_connection.cursor() as cursor:
+            cursor.execute("INSERT INTO Sites(id, name, code) VALUES (%s, %s, %s)", (7, "Migration Room", "MR"))
+            cursor.execute(
+                "INSERT INTO Players(id, name, siteId, hero) VALUES (%s, %s, %s, %s)",
+                (12, "roundtrip", 7, 1),
+            )
+            cursor.execute("INSERT INTO `Rank`(id, name) VALUES (%s, %s)", (3, "queen"))
+        mysql_connection.commit()
+
+        mysql_db = _LiveDatabase(mysql_connection, "mysql")
+        postgres_db = _LiveDatabase(postgres_connection, "postgresql")
+        to_postgres = db_migrate.migrate(mysql_db, postgres_db)
+
+        assert to_postgres.ok, to_postgres.error
+        assert to_postgres.tables["Sites"] == 1
+        with postgres_connection.cursor() as cursor:
+            cursor.execute("SELECT name, siteId, hero FROM Players WHERE id = %s", (12,))
+            assert cursor.fetchone() == ("roundtrip", 7, True)
+            cursor.execute("SELECT name FROM Rank WHERE id = %s", (3,))
+            assert cursor.fetchone() == ("queen",)
+            cursor.execute("INSERT INTO Sites(name, code) VALUES (%s, %s) RETURNING id", ("Sequence Room", "SR"))
+            assert cursor.fetchone()[0] == 8
+        postgres_connection.commit()
+
+        to_mysql = db_migrate.migrate(postgres_db, mysql_db)
+
+        assert to_mysql.ok, to_mysql.error
+        assert to_mysql.tables["sites"] == 2
+        with mysql_connection.cursor() as cursor:
+            cursor.execute("SELECT name, siteId, hero FROM Players WHERE id = %s", (12,))
+            assert cursor.fetchone() == ("roundtrip", 7, 1)
+            cursor.execute("SELECT name FROM `Rank` WHERE id = %s", (3,))
+            assert cursor.fetchone() == ("queen",)
+            cursor.execute("INSERT INTO Sites(name, code) VALUES (%s, %s)", ("MySQL Sequence", "MS"))
+            assert cursor.lastrowid == 9
+        mysql_connection.rollback()

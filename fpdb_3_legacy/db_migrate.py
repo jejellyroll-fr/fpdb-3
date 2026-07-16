@@ -94,29 +94,41 @@ def _coerce_booleans(row: Any, indices: tuple[int, ...]) -> tuple:
     return dialects.Dialect.coerce_row(row, indices)
 
 
-def _copy_table(source: Any, dest: Any, table: str) -> int:
+def _copy_table(source: Any, dest: Any, table: str, dest_table: str | None = None) -> int:
     """Replace the destination table's rows with the source's, preserving ids.
 
-    Identifiers are used unquoted, matching how fpdb creates its schema and runs
-    its own queries. That keeps them case-consistent across backends (PostgreSQL
-    folds unquoted names to lower case, as it did when the tables were created).
+    ``dest_table`` may differ only in physical case: PostgreSQL folds fpdb's
+    legacy mixed-case names while Linux MySQL preserves them. Every identifier
+    is quoted through its dialect so reserved names such as ``Rank`` remain safe.
     """
+    source_dialect = dialects.dialect_for_backend(source.backend)
     dest_dialect = dialects.dialect_for_backend(dest.backend)
+    dest_table = dest_table or table
 
     src_cursor = source.get_cursor()
-    src_cursor.execute(f"SELECT * FROM {table}")
+    src_cursor.execute(f"SELECT * FROM {source_dialect.quote_identifier(table)}")
     columns = [desc[0] for desc in src_cursor.description]
 
     dest_cursor = dest.get_cursor()
-    dest_cursor.execute(f"DELETE FROM {table}")
+    quoted_dest_table = dest_dialect.quote_identifier(dest_table)
+    dest_cursor.execute(f"SELECT * FROM {quoted_dest_table} WHERE 1 = 0")
+    destination_columns = {desc[0].lower(): desc[0] for desc in dest_cursor.description}
+    mapped_columns = []
+    for column in columns:
+        mapped = destination_columns.get(column.lower())
+        if mapped is None:
+            msg = f"Destination column matching {dest_table}.{column} does not exist"
+            raise RuntimeError(msg)
+        mapped_columns.append(mapped)
+    dest_cursor.execute(f"DELETE FROM {quoted_dest_table}")
 
     # PostgreSQL needs integer 0/1 turned into real booleans for boolean columns.
-    bool_indices = dest_dialect.boolean_columns(dest, table, columns)
+    bool_indices = dest_dialect.boolean_columns(dest, dest_table, columns)
 
     placeholder = dest_dialect.placeholder
-    column_list = ", ".join(columns)
+    column_list = ", ".join(dest_dialect.quote_identifier(column) for column in mapped_columns)
     placeholders = ", ".join([placeholder] * len(columns))
-    insert = f"INSERT INTO {table} ({column_list}) VALUES ({placeholders})"
+    insert = f"INSERT INTO {quoted_dest_table} ({column_list}) VALUES ({placeholders})"
 
     copied = 0
     while True:
@@ -156,10 +168,15 @@ def migrate(source: Any, dest: Any, *, progress: ProgressCallback | None = None)
         return report
 
     try:
+        destination_tables = {table.lower(): table for table in list_data_tables(dest)}
         for index, table in enumerate(tables):
             if progress is not None:
                 progress(index, len(tables), table)
-            count = _copy_table(source, dest, table)
+            dest_table = destination_tables.get(table.lower())
+            if dest_table is None:
+                msg = f"Destination table matching {table!r} does not exist"
+                raise RuntimeError(msg)
+            count = _copy_table(source, dest, table, dest_table)
             report.tables[table] = count
             report.total_rows += count
         dest.commit()
