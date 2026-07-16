@@ -7,6 +7,7 @@ from pathlib import Path
 from fpdb_3_legacy.SQL import Sql
 
 SQL_SOURCE = Path(__file__).parents[1] / "fpdb_3_legacy" / "SQL.py"
+SQL_MODULES = tuple(SQL_SOURCE.parent.glob("sql_*.py"))
 
 
 def test_sql_facade_contains_no_inline_create_table_ddl() -> None:
@@ -38,3 +39,12 @@ def test_installed_queries_contain_no_literal_newline_typos() -> None:
                 continue
             assert "/n" not in query, f"{backend}:{name} contains /n"
             assert r"\n" not in query, f"{backend}:{name} contains a literal \\n"
+
+
+def test_extracted_sql_sources_use_real_multiline_strings() -> None:
+    offenders = [
+        module.name
+        for module in SQL_MODULES
+        if r"\n" in module.read_text(encoding="utf-8")
+    ]
+    assert offenders == []
