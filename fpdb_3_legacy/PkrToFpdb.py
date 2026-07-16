@@ -222,8 +222,23 @@ class Pkr(HandHistoryConverter):
 
         return info
 
+    def _parseDateTime(self, text):
+        """Read a header timestamp, written as "11 Jun 2012 21:38:10"."""
+        datetimestr = "2000/01/01 00:00:00"  # default used if time not found
+        for a in self.re_DateTime.finditer(text):
+            month = self.months[a.group("M")]
+            datetimestr = "{}/{}/{} {}:{}:{}".format(
+                a.group("Y"),
+                month,
+                a.group("D"),
+                a.group("H"),
+                a.group("MIN"),
+                a.group("S"),
+            )
+        # PKR headers carry no TZ marker; treat as UTC explicitly.
+        return datetime.datetime.strptime(datetimestr, "%Y/%m/%d %H:%M:%S").replace(tzinfo=datetime.timezone.utc)
+
     def readHandInfo(self, hand):
-        info = {}
         m1 = self.re_HandInfo.search(hand.handText, re.DOTALL)
         m2 = self.re_GameInfo.search(hand.handText)
         if m1 is None or m2 is None:
@@ -231,52 +246,26 @@ class Pkr(HandHistoryConverter):
             log.error(_("PkrToFpdb.readHandInfo: '%s'") % tmp)
             raise FpdbParseError
 
-        info.update(m1.groupdict())
-        info.update(m2.groupdict())
-        #        m = self.re_Button.search(hand.handText)
-        #        if m: info.update(m.groupdict())
-        # TODO : I rather like the idea of just having this dict as hand.info
+        # Both patterns must match, so every field below is present.
+        info = {**m1.groupdict(), **m2.groupdict()}
         log.debug(f"readHandInfo: {info}")
-        for key in info:
-            if key == "DATETIME":
-                # 11 Jun 2012 21:38:10
-                m3 = self.re_DateTime.finditer(info[key])
-                datetimestr = "2000/01/01 00:00:00"  # default used if time not found
-                for a in m3:
-                    month = self.months[a.group("M")]
-                    datetimestr = "{}/{}/{} {}:{}:{}".format(
-                        a.group("Y"),
-                        month,
-                        a.group("D"),
-                        a.group("H"),
-                        a.group("MIN"),
-                        a.group("S"),
-                    )
-                # PKR headers carry no TZ marker; treat as UTC explicitly.
-                hand.startTime = datetime.datetime.strptime(
-                    datetimestr, "%Y/%m/%d %H:%M:%S"
-                ).replace(tzinfo=datetime.timezone.utc)
-            if key == "HID":
-                hand.handid = info[key]
-            if key == "TOURNO" and info[key] is not None:
-                hand.tourNo = info[key]
-                # A PKR hand history never states the buy-in or the level: the
-                # header stops at the tournament number. Record the buy-in as
-                # unknown rather than inventing one; a tourney summary import
-                # can still supply it, as "NA" is the placeholder the database
-                # lets a better source override.
-                hand.buyin = 0
-                hand.fee = 0
-                hand.buyinCurrency = "NA"
-            if key == "TABLE":
-                if info[key] is None:
-                    hand.tablename = "1"
-                else:
-                    hand.tablename = info[key]
-            if key == "BUTTON":
-                hand.buttonpos = int(info[key])
-            if key == "MAX" and info[key] is not None:
-                hand.maxseats = int(info[key])
+
+        hand.handid = info["HID"]
+        hand.startTime = self._parseDateTime(info["DATETIME"])
+        hand.tablename = "1" if info["TABLE"] is None else info["TABLE"]
+        hand.buttonpos = int(info["BUTTON"])
+        if info["MAX"] is not None:
+            hand.maxseats = int(info["MAX"])
+        if info["TOURNO"] is not None:
+            hand.tourNo = info["TOURNO"]
+            # A PKR hand history never states the buy-in or the level: the
+            # header stops at the tournament number. Record the buy-in as
+            # unknown rather than inventing one; a tourney summary import can
+            # still supply it, as "NA" is the placeholder the database lets a
+            # better source override.
+            hand.buyin = 0
+            hand.fee = 0
+            hand.buyinCurrency = "NA"
 
     def readButton(self, hand):
         if hand.buttonpos == 0:
@@ -400,12 +389,10 @@ class Pkr(HandHistoryConverter):
             elif action.group("ATYPE") == " checks":
                 hand.addCheck(street, action.group("PNAME"))
             elif action.group("ATYPE") == " calls":
-                # Amount in hand history is not cumulative
-                # ie. Player3 calls 0.08
-                #     Player5 raises to 0.16
-                #     Player3 calls 0.16 (Doh! he's only calling 0.08
-                # TODO: Going to have to write an addCallStoopid()
-                # print "DEBUG: addCall( %s, %s, None)" %(street,action.group('PNAME'))
+                # PKR states the total a player calls to, not what the call adds:
+                # after "Player3 calls 0.08" and "Player5 raises to 0.16", the
+                # line "Player3 calls 0.16" only puts 0.08 more in. addCallTo
+                # subtracts what the player already has in on this street.
                 hand.addCallTo(street, action.group("PNAME"), self.clearMoneyString(action.group("BET")))
             elif action.group("ATYPE") == " raises":
                 hand.addRaiseTo(street, action.group("PNAME"), self.clearMoneyString(action.group("BET")))

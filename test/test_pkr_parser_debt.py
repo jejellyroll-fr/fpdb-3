@@ -76,6 +76,20 @@ def test_tournament_buyin_is_recorded_as_unknown(parser_config: Config) -> None:
         assert hand.fee == 0
 
 
+def test_calling_a_raise_only_adds_the_difference(parser_config: Config) -> None:
+    # Hand 2083044128: "Player1 calls 3,000", then "Player8 raises to 4,600",
+    # then "Player1 calls 4,600" -- which puts only 1,600 more in the pot.
+    hands = _hands(parser_config, TOUR / "NLHE-USD-MTT-201205.txt")
+    hand = next(h for h in hands if h.handid == "2083044128")
+
+    # Raise entries carry extra fields, so index rather than unpack.
+    calls = [(entry[0], entry[2]) for entry in hand.actions["PREFLOP"] if entry[1] == "calls"]
+
+    assert ("Player1", Decimal("3000")) in calls
+    assert calls.count(("Player1", Decimal("4600"))) == 0
+    assert calls[-1] == ("Player1", Decimal("1600"))
+
+
 def test_lone_post_is_the_big_blind_of_an_entering_player(parser_config: Config) -> None:
     # "Player3 posts $0.04" carries no dead post: it is the big blind, written
     # in the short form instead of "posts big blind ($0.04)".
