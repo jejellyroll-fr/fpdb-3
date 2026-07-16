@@ -176,3 +176,25 @@ def test_module_get_config_helper(tmp_path) -> None:
     # get_config returns a path string (and a flag) for an existing file.
     result = Configuration.get_config(CONFIG_FILE, fallback=True)
     assert result is not None
+
+
+def test_get_config_bootstraps_user_file_from_source_example(tmp_path, monkeypatch) -> None:
+    config_dir = tmp_path / "config"
+    source_dir = tmp_path / "source"
+    config_dir.mkdir()
+    source_dir.mkdir()
+    example = source_dir / "isolated-config.xml.example"
+    example.write_text("<config/>", encoding="utf-8")
+
+    monkeypatch.setattr(Configuration, "CONFIG_PATH", str(config_dir))
+    monkeypatch.setattr(Configuration, "SOURCE_ROOT_PATH", source_dir)
+    monkeypatch.setattr(Configuration, "SOURCE_DIR", tmp_path / "missing-source")
+    monkeypatch.setattr(Configuration, "FPDB_ROOT_PATH", str(tmp_path / "missing-root"))
+    monkeypatch.setattr(Configuration, "PYFPDB_PATH", str(tmp_path / "missing-pyfpdb"))
+
+    config_path, example_copy, example_path = Configuration.get_config("isolated-config.xml", fallback=True)
+
+    assert config_path == f"{config_dir}/isolated-config.xml"
+    assert example_path == str(example)
+    assert example_copy is True
+    assert (config_dir / "isolated-config.xml").read_text(encoding="utf-8") == "<config/>"
