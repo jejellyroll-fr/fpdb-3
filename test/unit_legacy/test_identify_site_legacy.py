@@ -4,8 +4,21 @@ import re
 from types import SimpleNamespace
 from unittest.mock import patch
 
-from fpdb_3_legacy.IdentifySite import IdentifySite
+from fpdb_3_legacy.IdentifySite import IdentifySite, Site
 from fpdb_3_legacy.PokerStarsSummary import PokerStarsSummary
+from fpdb_3_legacy.PokerStarsToFpdb import PokerStars
+
+
+def test_site_exposes_canonical_hhc_names_and_legacy_filter_alias() -> None:
+    site = Site("PokerStars", "PokerStarsToFpdb", "PokerStars", "PokerStarsSummary", PokerStars)
+
+    assert site.hhc_fname == "PokerStarsToFpdb"
+    assert site.hhc_type == "PokerStars"
+    assert site.filter_name == site.hhc_type
+
+    site.filter_name = "PokerTracker"
+
+    assert site.hhc_type == "PokerTracker"
 
 
 def test_pokerstars_summary_detection_uses_skin_site() -> None:
