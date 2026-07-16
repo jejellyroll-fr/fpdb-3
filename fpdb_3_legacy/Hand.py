@@ -18,7 +18,7 @@ import datetime
 import pprint
 import sys
 from decimal import Decimal, InvalidOperation
-from typing import Any
+from typing import Any, TextIO
 
 from fpdb_3_legacy import Card, Configuration, DerivedStats
 from fpdb_3_legacy.Exceptions import FpdbHandDuplicate, FpdbHandPartial, FpdbParseError
@@ -26,9 +26,6 @@ from fpdb_3_legacy.loggingFpdb import get_logger
 
 # import L10n
 # _ = L10n.get_translation()
-
-# TODO: get writehand() encoding correct
-
 
 Configuration.set_logfile("fpdb-log.txt")
 
@@ -2184,8 +2181,14 @@ class Hand:
             table_string = table_string + f" Seat #{self.buttonpos} is the button"
         return table_string
 
-    def writeHand(self, fh=sys.__stdout__) -> None:
+    @staticmethod
+    def _output_stream(fh: TextIO | None) -> TextIO:
+        """Return the requested text stream or the current redirected stdout."""
+        return sys.stdout if fh is None else fh
+
+    def writeHand(self, fh: TextIO | None = None) -> None:
         # Format PokerStars.
+        fh = self._output_stream(fh)
         log.info(f"Writing game line: {self.writeGameLine()}")
         log.info(f"Writing table line: {self.writeTableLine()}")
         fh.write(f"{self.writeGameLine()}\n")
@@ -2448,8 +2451,9 @@ class HoldemOmahaHand(Hand):
             fh.write("*** SHOW DOWN ***\n")
             fh.writelines(lines)
 
-    def writeHand(self, fh=sys.__stdout__) -> None:
+    def writeHand(self, fh: TextIO | None = None) -> None:
         # PokerStars format.
+        fh = self._output_stream(fh)
         super().writeHand(fh)
 
         players_who_act_preflop = set(
@@ -2733,9 +2737,10 @@ class DrawHand(Hand):
             elif player in self.mucked:
                 fh.write(f"{player}: mucks hand\n")
 
-    def writeHand(self, fh=sys.__stdout__) -> None:
+    def writeHand(self, fh: TextIO | None = None) -> None:
         # PokerStars format.
         # HH output should not be translated
+        fh = self._output_stream(fh)
         super().writeHand(fh)
 
         players_who_act_ondeal = set(
@@ -3039,9 +3044,10 @@ class StudHand(Hand):
             self.lastBet[street] = bringin
             self.pot.addMoney(player, bringin)
 
-    def writeHand(self, fh=sys.__stdout__) -> None:
+    def writeHand(self, fh: TextIO | None = None) -> None:
         # PokerStars format.
         # HH output should not be translated
+        fh = self._output_stream(fh)
         super().writeHand(fh)
 
         players_who_post_antes = {x[0] for x in self.actions["BLINDSANTES"]}

@@ -94,6 +94,18 @@ class TestCopyToClipboardFix:
         assert mock_game_line.call_count >= 1
         assert mock_table_line.call_count >= 1
 
+    @patch.object(Hand, "writeGameLine", return_value="Partie à 1 €")
+    @patch.object(Hand, "writeTableLine", return_value="Table 'Étoile'")
+    def test_hand_writehand_uses_current_unicode_stdout(self, _mock_table_line, _mock_game_line):
+        """The default output follows redirected stdout and preserves Unicode text."""
+        hand = Hand.__new__(Hand)
+        output = StringIO()
+
+        with patch("sys.stdout", output):
+            hand.writeHand()
+
+        assert output.getvalue() == "Partie à 1 €\nTable 'Étoile'\n"
+
     def test_inheritance_chain_complete(self):
         """
         Test that the inheritance chain is complete for writeHand.
