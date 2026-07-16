@@ -61,3 +61,18 @@ def test_absolute_incoming_player_post_is_one_big_blind() -> None:
     parser.readBlinds(hand)
 
     assert calls == [(None, None, None), ("New Player", "big blind", "0.02")]
+
+
+def test_absolute_heads_up_header_sets_two_max_seats() -> None:
+    hand_text = (
+        "Stage #1571362962: Tourney ID 99 Holdem (1 on 1) No Limit 10 "
+        "- 2009-08-05 15:24:06 (ET)"
+    )
+    parser = Absolute.__new__(Absolute)
+    parser.HORSEHand = False
+    hand = SimpleNamespace(handText=hand_text, gametype=parser.determineGameType(hand_text))
+
+    parser.readHandInfo(hand)
+
+    assert hand.maxseats == 2
+    assert hand.tourNo == "99"

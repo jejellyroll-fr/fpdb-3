@@ -301,13 +301,13 @@ class Absolute(HandHistoryConverter):
             hand.maxseats = None
             hand.tourNo = m.group("TRNY_ID")
 
-        # assume 6-max unless we have proof it's a larger/smaller game,
-        # since absolute doesn't give seat max info
-        # TODO: (1-on-1) does have that info in the game type line
-        hand.maxseats = 6
+        # Absolute only exposes the table size explicitly for heads-up games;
+        # other sizes are refined later from the occupied seat numbers.
+        heads_up = (m.group("TRNY_TYPE") or "").lower() == "(1 on 1)"
+        hand.maxseats = 2 if heads_up else 6
 
-        if self.HORSEHand:
-            hand.maxseats = 8  # todo : unless it's heads up!!?
+        if self.HORSEHand and not heads_up:
+            hand.maxseats = 8
         return
 
     def readPlayerStacks(self, hand):
