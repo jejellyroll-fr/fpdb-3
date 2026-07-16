@@ -188,8 +188,25 @@ def test_reset_sequences_postgresql_sets_each_sequence():
     cursor.fetchone.return_value = ("hands_id_seq",)
     dialects.dialect_for_server("postgresql").reset_sequences(db, ["Hands"])
     statements = [c.args[0] for c in cursor.execute.call_args_list if c.args]
+    assert "information_schema.columns" in statements[0]
+    assert cursor.execute.call_args_list[0].args[1] == ("hands",)
+    assert 'LOCK TABLE "hands"' in statements[1]
     assert any("pg_get_serial_sequence" in s for s in statements)
     assert any("setval" in s for s in statements)
+
+
+def test_reset_sequences_postgresql_skips_tables_without_serial_id():
+    db = _db(dialects.PGSQL)
+    cursor = db.get_cursor.return_value
+    cursor.fetchone.side_effect = [None, (1,), ("sites_id_seq",)]
+
+    dialects.dialect_for_server("postgresql").reset_sequences(db, ["Settings", "Sites"])
+
+    statements = [call.args[0] for call in cursor.execute.call_args_list]
+    assert sum("information_schema.columns" in statement for statement in statements) == 2
+    assert not any('LOCK TABLE "settings"' in statement for statement in statements)
+    assert any('LOCK TABLE "sites"' in statement for statement in statements)
+    assert any("setval" in statement for statement in statements)
 
 
 def test_repair_sequence_postgresql_locks_and_sets_next_unused_id():
