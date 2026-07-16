@@ -171,7 +171,8 @@ class Everest(HandHistoryConverter):
         elif not mg["CURRENCY"]:
             self.info["currency"] = "play"
 
-        # HACK - tablename not in every hand.
+        # Per-hand fragments inherit the enclosing SESSION metadata through
+        # parseHeader(..., whole_file), because the table is session-scoped.
         self.info["TABLENAME"] = mg["TABLE"]
 
         return self.info
@@ -211,7 +212,6 @@ class Everest(HandHistoryConverter):
                 hand.maxseats = maxseats
             else:
                 hand.maxseats = None
-        # FIXME: u'DATETIME': u'1291155932'
         # Everest stores a Unix epoch (absolute UTC); interpret it as UTC rather
         # than the machine-local timezone that bare fromtimestamp() would assume.
         hand.startTime = datetime.datetime.fromtimestamp(
