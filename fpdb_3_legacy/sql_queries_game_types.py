@@ -4,7 +4,12 @@ from __future__ import annotations
 
 
 def game_type_queries(db_server: str) -> dict[str, str]:
-    """Return game/tournament type lookup and persistence queries."""
+    """Return game/tournament type lookup and persistence queries.
+
+    ``limitType`` is deliberately part of both game lookups.  It is a required
+    dimension of ``Gametypes`` and distinguishes variants that otherwise share
+    the same site, category, stakes and table size.
+    """
     query: dict[str, str] = {}
     query["getGametypeFL"] = """SELECT id
                                        FROM Gametypes
@@ -16,7 +21,7 @@ def game_type_queries(db_server: str) -> dict[str, str]:
                                        AND   bigBet=%s
                                        AND   maxSeats=%s
                                        AND   ante=%s
-    """  # TODO: seems odd to have limitType variable in this query
+    """
 
     query["getGametypeNL"] = """SELECT id
                                        FROM Gametypes
@@ -35,7 +40,7 @@ def game_type_queries(db_server: str) -> dict[str, str]:
                                        AND   newToGame=%s
                                        AND   homeGame=%s
                                        AND   split=%s
-    """  # TODO: seems odd to have limitType variable in this query
+    """
 
     query[
         "insertGameTypes"
@@ -181,4 +186,3 @@ def game_type_queries(db_server: str) -> dict[str, str]:
     query["deleteTourneyTypeId"] = """DELETE FROM TourneyTypes WHERE id = %s
     """
     return query
-

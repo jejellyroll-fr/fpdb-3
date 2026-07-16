@@ -34,3 +34,10 @@ def test_game_type_queries_keep_full_type_dimensions() -> None:
     for column in ("progressive", "multiEntry", "reEntry", "flighted", "guarantee", "lottery", "multiplier"):
         assert column in queries["getTourneyTypeId"]
         assert column in queries["insertTourneyType"]
+
+
+def test_game_type_lookups_distinguish_limit_variants() -> None:
+    queries = game_type_queries("postgresql")
+
+    assert queries["getGametypeFL"].count("limitType=%s") == 1
+    assert queries["getGametypeNL"].count("limitType=%s") == 1
