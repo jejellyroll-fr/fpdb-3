@@ -114,7 +114,13 @@ class Table(Table_Window):
                 log.exception("Unexpected error processing window: %s", e)
 
         if self.number is None:
-            log.error("Window '%s' not found", self.search_string)
+            log.warning("Window '%s' not found.", self.search_string)
+            try:
+                all_tables = self._detector.find_tables("")
+                titles = [t.title for t in all_tables if t.title]
+                log.warning("Currently open windows: %s", titles)
+            except Exception as e:
+                log.warning("Could not list open windows: %s", e)
 
     def get_geometry(self):
         """Get the window geometry using platform abstraction."""

@@ -56,7 +56,7 @@ class IPokerXMLFormatMixin:
 
         # Parse gametype string - handle both formats
         gametype_pattern_with_blinds = (
-            r"(\w+(?:\s+\w+)*)\s+" r"(NL|PL|L|SL|БЛ|LP|No\s+limit|Pot\s+limit|Limit)\s*" r"\$?([0-9.,]+)/\$?([0-9.,]+)"
+            r"(\w+(?:\s+\w+)*)\s+" r"(NL|PL|L|SL|БЛ|LP|No\s+limit|Pot\s+limit|Limit)\s*" r"[^\d]*([0-9.,]+)/[^\d]*([0-9.,]+)"
         )
         gametype_pattern_no_blinds = r"(\w+(?:\s+\w+)*)\s+" r"(NL|PL|L|SL|БЛ|LP|No\s+limit|Pot\s+limit|Limit)\s*$"
 
