@@ -4,21 +4,20 @@ Ce fichier est généré par `python tools/todo_inventory.py`. Chaque marqueur
 `TODO`, `FIXME` ou `HACK` du code possède ainsi un identifiant stable et une
 catégorie. Modifier le code source, puis régénérer ce registre.
 
-**Total : 17 tâches ouvertes.**
+**Total : 16 tâches ouvertes.**
 
 | Catégorie | Nombre |
 |---|---:|
-| parser | 14 |
+| parser | 13 |
 | poker-domain | 3 |
 
 ## Tâches
 
 | ID | Catégorie | Type | Emplacement | Description |
 |---|---|---|---|---|
-| `TD-E2BB62B2` | parser | FIXME | [fpdb_3_legacy/PkrToFpdb.py:148](fpdb_3_legacy/PkrToFpdb.py#L148) | Sionel posts $0.04 is a second big blind in a different format. |
-| `TD-BC41779F` | parser | TODO | [fpdb_3_legacy/PkrToFpdb.py:236](fpdb_3_legacy/PkrToFpdb.py#L236) | I rather like the idea of just having this dict as hand.info |
-| `TD-7B9F56EC` | parser | FIXME | [fpdb_3_legacy/PkrToFpdb.py:270](fpdb_3_legacy/PkrToFpdb.py#L270) | The key looks like: '€0.82+€0.18 EUR' |
-| `TD-7217B4BD` | parser | TODO | [fpdb_3_legacy/PkrToFpdb.py:403](fpdb_3_legacy/PkrToFpdb.py#L403) | Going to have to write an addCallStoopid |
+| `TD-BC41779F` | parser | TODO | [fpdb_3_legacy/PkrToFpdb.py:237](fpdb_3_legacy/PkrToFpdb.py#L237) | I rather like the idea of just having this dict as hand.info |
+| `TD-7B9F56EC` | parser | FIXME | [fpdb_3_legacy/PkrToFpdb.py:271](fpdb_3_legacy/PkrToFpdb.py#L271) | The key looks like: '€0.82+€0.18 EUR' |
+| `TD-7217B4BD` | parser | TODO | [fpdb_3_legacy/PkrToFpdb.py:412](fpdb_3_legacy/PkrToFpdb.py#L412) | Going to have to write an addCallStoopid |
 | `TD-D43264BE` | parser | FIXME | [fpdb_3_legacy/PokerTrackerToFpdb.py:689](fpdb_3_legacy/PokerTrackerToFpdb.py#L689) | handle other currencies, play money |
 | `TD-31EFD5A8` | parser | FIXME | [fpdb_3_legacy/PokerTrackerToFpdb.py:916](fpdb_3_legacy/PokerTrackerToFpdb.py#L916) | Description à préciser |
 | `TD-40764682` | parser | TODO | [fpdb_3_legacy/SummaryEverleaf.py:120](fpdb_3_legacy/SummaryEverleaf.py#L120) | Can we get attrs in the END tag too? Would be useful to make SURE we're closing the right div .. |

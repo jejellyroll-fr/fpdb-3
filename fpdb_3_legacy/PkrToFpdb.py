@@ -145,7 +145,6 @@ class Pkr(HandHistoryConverter):
             self.re_PostSB = re.compile(
                 r"^{PLYR} posts small blind \({CUR}(?P<SB>[{NUM}]+)\)".format(**subst), re.MULTILINE
             )
-            # FIXME: Sionel posts $0.04 is a second big blind in a different format.
             self.re_PostBB = re.compile(
                 r"^{PLYR} posts big blind \({CUR}(?P<BB>[{NUM}]+)\)".format(**subst), re.MULTILINE
             )
@@ -153,6 +152,8 @@ class Pkr(HandHistoryConverter):
             self.re_BringIn = re.compile(
                 r"^{PLYR} brings[- ]in( low|) for {CUR}(?P<BRINGIN>[{NUM}]+)".format(**subst), re.MULTILINE
             )
+            # A player entering the game posts a bare amount instead of the
+            # "posts big blind (...)" line, optionally with a separate dead post.
             self.re_Post = re.compile(r"^{PLYR} posts {CUR}(?P<BB>[{NUM}]+)$".format(**subst), re.MULTILINE)
             self.re_HeroCards = re.compile(
                 r"^Dealing( (?P<OLDCARDS>\[.+\]))?( (?P<NEWCARDS>\[.+\])) to {PLYR}".format(**subst), re.MULTILINE
@@ -355,18 +356,26 @@ class Pkr(HandHistoryConverter):
         for a in self.re_PostBB.finditer(hand.handText):
             hand.addBlind(a.group("PNAME"), "big blind", self.clearMoneyString(a.group("BB")))
         for a in self.re_Post.finditer(hand.handText):
-            bb = Decimal(self.clearMoneyString(a.group("BB")))
+            posted = Decimal(self.clearMoneyString(a.group("BB")))
             subst = {
                 "PLYR": "(?P<PNAME>" + re.escape(a.group("PNAME")) + ")",
                 "CUR": self.sym[hand.gametype["currency"]],
                 "NUM": ".,\\d",
             }
-            if not re.search(r"^{PLYR} posts {CUR}(?P<SB>[{NUM}]+) dead$".format(**subst), hand.handText, re.MULTILINE):
+            dead = re.search(
+                r"^{PLYR} posts {CUR}(?P<DEAD>[{NUM}]+) dead$".format(**subst), hand.handText, re.MULTILINE
+            )
+            if dead is None:
                 hand.addBlind(a.group("PNAME"), "big blind", self.clearMoneyString(a.group("BB")))
-            elif bb == 0:
-                hand.addBlind(a.group("PNAME"), "secondsb", str(Decimal(hand.gametype["bb"]) / 2))
+                continue
+
+            # The site states the dead amount, so take it rather than halving the
+            # big blind: that only holds for a 2:1 structure.
+            deadAmount = Decimal(self.clearMoneyString(dead.group("DEAD")))
+            if posted == 0:
+                hand.addBlind(a.group("PNAME"), "secondsb", str(deadAmount))
             else:
-                hand.addBlind(a.group("PNAME"), "both", str(bb + bb / 2))
+                hand.addBlind(a.group("PNAME"), "both", str(posted + deadAmount))
 
     def readHoleCards(self, hand):
         #    streets PREFLOP, PREDRAW, and THIRD are special cases beacause
