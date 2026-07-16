@@ -230,6 +230,7 @@ def test_read_stdin_cached(hud_main) -> None:
         9,
         "tour_number",
         "tab_number",
+        None,  # tourney_name: unset for a cash table
     )
     temp_key = "table_name"
     hud_main.hud_dict[temp_key] = MagicMock()
@@ -286,6 +287,7 @@ def test_read_stdin_not_cached(hud_main) -> None:
         9,
         123456,
         "Table 789",
+        "tourney_name",
     )
 
     with (
