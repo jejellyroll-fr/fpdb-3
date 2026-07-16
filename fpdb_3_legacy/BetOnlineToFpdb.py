@@ -764,9 +764,7 @@ class BetOnline(HandHistoryConverter):
         self.fixBlinds(hand)
 
     def fixBlinds(self, hand: Any) -> None:
-        """Fix blind information for specific skins."""
-        # TODO(fpdb): The following should only trigger when a small blind is missing
-        # in ActionPoker hands, or the sb/bb is ALL_IN
+        """Fill only a missing ActionPoker/GearPoker blind from known structures."""
         if self.skin in ("ActionPoker", "GearPoker"):
             if hand.gametype["sb"] is None and hand.gametype["bb"] is not None:
                 bb_doubled = str(Decimal(hand.gametype["bb"]) * 2)
