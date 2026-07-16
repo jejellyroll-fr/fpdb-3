@@ -4,11 +4,11 @@ Ce fichier est généré par `python tools/todo_inventory.py`. Chaque marqueur
 `TODO`, `FIXME` ou `HACK` du code possède ainsi un identifiant stable et une
 catégorie. Modifier le code source, puis régénérer ce registre.
 
-**Total : 25 tâches ouvertes.**
+**Total : 24 tâches ouvertes.**
 
 | Catégorie | Nombre |
 |---|---:|
-| parser | 22 |
+| parser | 21 |
 | poker-domain | 3 |
 
 ## Tâches
@@ -16,7 +16,6 @@ catégorie. Modifier le code source, puis régénérer ce registre.
 | ID | Catégorie | Type | Emplacement | Description |
 |---|---|---|---|---|
 | `TD-2D58B08E` | parser | TODO | [fpdb_3_legacy/MergeToFpdb.py:32](fpdb_3_legacy/MergeToFpdb.py#L32) | Description à préciser |
-| `TD-853C86CD` | parser | FIXME | [fpdb_3_legacy/MergeToFpdb.py:647](fpdb_3_legacy/MergeToFpdb.py#L647) | Description à préciser |
 | `TD-AF7CB899` | parser | TODO | [fpdb_3_legacy/OnGameToFpdb.py:112](fpdb_3_legacy/OnGameToFpdb.py#L112) | detect play money |
 | `TD-83283D95` | parser | TODO | [fpdb_3_legacy/OnGameToFpdb.py:160](fpdb_3_legacy/OnGameToFpdb.py#L160) | should probably rename re_HeroCards and corresponding method, |
 | `TD-5B027A09` | parser | TODO | [fpdb_3_legacy/OnGameToFpdb.py:327](fpdb_3_legacy/OnGameToFpdb.py#L327) | Manually adjust time against OFFSET |
