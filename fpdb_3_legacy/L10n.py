@@ -195,6 +195,11 @@ def set_locale_translation(config_path: str | None = None) -> None:
     ui_language = general_element.attrib.get("ui_language") if general_element is not None else None
     log.info("UI Language: %s", ui_language)
 
+    from fpdb_3_legacy.localized_formats import set_format_locale
+
+    resolved_locale = set_format_locale(ui_language)
+    log.info("Display format locale: %s", resolved_locale)
+
     try:
         fr_translation = gettext.translation(
             "fpdb",

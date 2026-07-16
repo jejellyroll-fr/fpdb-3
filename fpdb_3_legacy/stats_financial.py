@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any
 
+from fpdb_3_legacy.localized_formats import format_currency
 from fpdb_3_legacy.loggingFpdb import get_logger
 from fpdb_3_legacy.stats_formatting import StatTuple
 
@@ -15,9 +16,12 @@ def totalprofit(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> Stat
     """Return total profit from the cent-denominated net counter."""
     try:
         display_value = float(stat_dict[player]["net"]) / 100
-        return display_value / 100.0, f"${display_value:.2f}", f"tp=${display_value:.2f}", f"tot_prof=${display_value:.2f}", str(display_value), "Total Profit"
+        currency = str(stat_dict[player].get("currency", "USD"))
+        display = format_currency(display_value, currency)
+        return display_value / 100.0, display, f"tp={display}", f"tot_prof={display}", str(display_value), "Total Profit"
     except (KeyError, TypeError, ValueError):
-        return "0", "$0.00", "tp=0", "totalprofit=0", "0", "Total Profit"
+        display = format_currency(0, "USD")
+        return "0", display, "tp=0", "totalprofit=0", "0", "Total Profit"
 
 
 def profit100(stat_dict: Mapping[int, Mapping[str, Any]], player: int) -> StatTuple:

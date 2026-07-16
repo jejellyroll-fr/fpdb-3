@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import Any, Protocol
 
+from fpdb_3_legacy.localized_formats import format_number
+
 StatTuple = tuple[Any, Any, Any, Any, Any, Any]
 
 
@@ -15,7 +17,7 @@ class TooltipWidget(Protocol):
 
 def stat_override(decimals: int, stat_vals: StatTuple) -> StatTuple:
     """Return a stat tuple whose display value uses ``decimals`` places."""
-    display = f"{100.0 * stat_vals[0]:.{decimals}f}"
+    display = format_number(100.0 * stat_vals[0], decimals, grouping=False)
     return stat_vals[0], display, stat_vals[2], stat_vals[3], stat_vals[4], stat_vals[5]
 
 
