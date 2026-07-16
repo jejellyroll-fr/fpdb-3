@@ -59,6 +59,8 @@ def test_tourneys_players_ddl_keeps_winnings_and_relations() -> None:
     assert "winnings INT" in sqlite
     assert "koCount NUMERIC" in mysql
     assert "koCount decimal" in sqlite
+    assert "`rank` INT" in mysql
+    assert "rank INT" in postgresql
     for ddl in (mysql, postgresql, sqlite):
         assert "REFERENCES Tourneys(id)" in ddl
         assert "REFERENCES Players(id)" in ddl

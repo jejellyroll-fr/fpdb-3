@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 
-def tournament_persistence_queries() -> dict[str, str]:
+def tournament_persistence_queries(db_server: str = "") -> dict[str, str]:
     """Return tournament lookup, write, result, and repair queries."""
     query: dict[str, str] = {}
+    rank = "`rank`" if db_server == "mysql" else "rank"
     query["getTourneyByTourneyNo"] = """SELECT t.*
                                     FROM Tourneys t
                                     INNER JOIN TourneyTypes tt ON (t.tourneyTypeId = tt.id)
@@ -77,8 +78,8 @@ def tournament_persistence_queries() -> dict[str, str]:
                                                    WHERE tourneyId=%s
     """
 
-    query["updateTourneysPlayer"] = """UPDATE TourneysPlayers
-                                             SET rank = %s,
+    query["updateTourneysPlayer"] = f"""UPDATE TourneysPlayers
+                                             SET {rank} = %s,
                                                  winnings = %s,
                                                  winningsCurrency = %s,
                                                  rebuyCount = %s,
@@ -92,18 +93,18 @@ def tournament_persistence_queries() -> dict[str, str]:
                                              WHERE id=%s
     """
 
-    query["updateTourneysPlayerResults"] = """UPDATE TourneysPlayers
-                                             SET rank = CASE WHEN %s IS NULL THEN rank ELSE %s END,
+    query["updateTourneysPlayerResults"] = f"""UPDATE TourneysPlayers
+                                             SET {rank} = CASE WHEN %s IS NULL THEN {rank} ELSE %s END,
                                                  winnings = CASE WHEN %s IS NULL THEN winnings ELSE %s END,
                                                  winningsCurrency = CASE WHEN %s IS NULL THEN winningsCurrency ELSE %s END
                                              WHERE id=%s
     """
 
-    query["insertTourneysPlayer"] = """insert into TourneysPlayers (
+    query["insertTourneysPlayer"] = f"""insert into TourneysPlayers (
                                                 tourneyId,
                                                 playerId,
                                                 entryId,
-                                                rank,
+                                                {rank},
                                                 winnings,
                                                 winningsCurrency,
                                                 rebuyCount,
@@ -132,4 +133,3 @@ def tournament_persistence_queries() -> dict[str, str]:
     query["handsPlayersTTypeId_joiner"] = " OR TourneysPlayersId+0="
     query["handsPlayersTTypeId_joiner_id"] = " OR id="
     return query
-

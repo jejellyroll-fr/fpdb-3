@@ -26,3 +26,9 @@ def test_tournament_player_query_keeps_results_and_filters() -> None:
         assert "<sitetest>" in query
         assert "<startdate_test>" in query
         assert "<enddate_test>" in query
+
+
+def test_mysql_quotes_rank_in_tournament_report() -> None:
+    query = tournament_player_detailed_queries("mysql")["tourneyPlayerDetailedStats"]
+    assert "tp.`rank`" in query
+    assert "tp.rank" not in query
