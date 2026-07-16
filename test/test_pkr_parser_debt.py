@@ -12,6 +12,7 @@ from fpdb_3_legacy.PkrToFpdb import Pkr
 
 ROOT = Path(__file__).resolve().parents[1]
 CASH = ROOT / "regression-test-files" / "cash" / "PKR" / "Flop"
+TOUR = ROOT / "regression-test-files" / "tour" / "PKR" / "Flop"
 
 
 @pytest.fixture(scope="module")
@@ -33,6 +34,25 @@ def _hand_with_blind(hands: list, kind: str):
             return hand
     msg = f"no hand posts a {kind!r} blind"
     raise AssertionError(msg)
+
+
+@pytest.mark.parametrize(
+    ("filename", "currency"),
+    [
+        # "Money Type: PLAY MONEY", yet the blinds are written "$5 / $10": the
+        # symbol alone cannot tell a play money table from a real one.
+        (CASH / "NLHE-10max-play-5-10-201108.txt", "play"),
+        (CASH / "NLHE-10max-USD-0.02-0.04-201206.txt", "USD"),
+        (CASH / "NLHE-6max-EUR-0.25-0.50-201303.txt", "EUR"),
+        (TOUR / "NLHE-USD-MTT-201205.txt", "T$"),
+    ],
+)
+def test_money_type_decides_the_currency(filename: Path, currency: str) -> None:
+    hand_history = filename.read_text(encoding="utf-8", errors="replace")
+
+    game_type = Pkr.determineGameType(Pkr.__new__(Pkr), hand_history)
+
+    assert game_type["currency"] == currency
 
 
 def test_lone_post_is_the_big_blind_of_an_entering_player(parser_config: Config) -> None:

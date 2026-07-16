@@ -209,11 +209,12 @@ class Pkr(HandHistoryConverter):
             info["sb"] = self.clearMoneyString(mg["SB"])
         if "BB" in mg:
             info["bb"] = self.clearMoneyString(mg["BB"])
-        if "CURRENCY" in mg:
-            if "MONEY" != "PLAY MONEY":
-                info["currency"] = self.currencies[mg["CURRENCY"]]
-            else:
-                info["currency"] = "play"
+        if mg.get("MONEY", "").upper() == "PLAY MONEY":
+            # Play money tables state a currency symbol like real money ones,
+            # so the money type is the only thing that tells them apart.
+            info["currency"] = "play"
+        elif "CURRENCY" in mg:
+            info["currency"] = self.currencies[mg["CURRENCY"]]
         if "TOURNO" in mg and mg["TOURNO"] is not None:
             info["type"] = "tour"
         else:
