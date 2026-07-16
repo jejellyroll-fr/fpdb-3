@@ -48,7 +48,7 @@ class BetOnline(HandHistoryConverter):
         "play": "",
     }  # ADD Euro, Sterling, etc HERE
     substitutions: ClassVar[dict[str, str]] = {
-        "LS": r"\$|€|",  # legal currency symbols - Euro(cp1252, utf-8)
+        "LS": r"\$|€|£|",
         "PLYR": r"(?P<PNAME>.+?)",
         "NUM": r".,\d",
     }
@@ -117,7 +117,7 @@ class BetOnline(HandHistoryConverter):
         "Mixed Hold'em": "mholdem",
         "Triple Stud": "3stud",
     }  # Legal mixed games
-    currencies: ClassVar[dict[str, str]] = {"€": "EUR", "$": "USD", "": "T$"}
+    currencies: ClassVar[dict[str, str]] = {"€": "EUR", "$": "USD", "£": "GBP", "": "T$"}
 
     skins: ClassVar[dict[str, str]] = {
         "BetOnline Poker": "BetOnline",
@@ -447,31 +447,29 @@ class BetOnline(HandHistoryConverter):
     def _detect_buyin_currency(self, hand: Any, info: dict[str, Any]) -> None:
         """Detect buy-in currency from buyin string."""
         buyin_str = info["BUYIN"]
-        if "$" in buyin_str:
-            hand.buyinCurrency = "USD"
-        elif "€" in buyin_str:
-            hand.buyinCurrency = "EUR"
-        elif re.match("^[0-9+]*$", buyin_str):
+        symbol = next((candidate for candidate in ("$", "€", "£") if candidate in buyin_str), None)
+        if symbol is not None:
+            hand.buyinCurrency = self.currencies[symbol]
+        elif re.fullmatch(r"[0-9.,+]+", buyin_str):
             hand.buyinCurrency = "play"
         else:
-            # TODO(fpdb): handle other currencies, play money
             msg = f"BetOnlineToFpdb.readHandInfo: Failed to detect currency. Hand ID: {hand.handid}: '{buyin_str}'"
             raise FpdbParseError(msg)
 
     def _process_buyin_amounts(self, hand: Any, info: dict[str, Any]) -> None:
         """Process buy-in amounts and fees."""
-        info["BIAMT"] = info["BIAMT"].strip("$€")
+        info["BIAMT"] = info["BIAMT"].strip("$€£")
 
         if info["BOUNTY"] is not None:
             # There is a bounty, switch BOUNTY and BIRAKE values
             info["BOUNTY"], info["BIRAKE"] = info["BIRAKE"], info["BOUNTY"]
-            info["BOUNTY"] = info["BOUNTY"].strip("$€")
+            info["BOUNTY"] = info["BOUNTY"].strip("$€£")
             hand.koBounty = int(100 * Decimal(info["BOUNTY"]))
             hand.isKO = True
         else:
             hand.isKO = False
 
-        info["BIRAKE"] = info["BIRAKE"].strip("$€")
+        info["BIRAKE"] = info["BIRAKE"].strip("$€£")
         hand.buyin = int(100 * Decimal(info["BIAMT"]))
         hand.fee = int(100 * Decimal(info["BIRAKE"]))
 

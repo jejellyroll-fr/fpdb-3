@@ -4,19 +4,18 @@ Ce fichier est généré par `python tools/todo_inventory.py`. Chaque marqueur
 `TODO`, `FIXME` ou `HACK` du code possède ainsi un identifiant stable et une
 catégorie. Modifier le code source, puis régénérer ce registre.
 
-**Total : 35 tâches ouvertes.**
+**Total : 34 tâches ouvertes.**
 
 | Catégorie | Nombre |
 |---|---:|
-| parser | 32 |
+| parser | 31 |
 | poker-domain | 3 |
 
 ## Tâches
 
 | ID | Catégorie | Type | Emplacement | Description |
 |---|---|---|---|---|
-| `TD-FA54F1A1` | parser | TODO | [fpdb_3_legacy/BetOnlineToFpdb.py:457](fpdb_3_legacy/BetOnlineToFpdb.py#L457) | fpdb): handle other currencies, play money |
-| `TD-C53C12F4` | parser | TODO | [fpdb_3_legacy/BetOnlineToFpdb.py:770](fpdb_3_legacy/BetOnlineToFpdb.py#L770) | fpdb): The following should only trigger when a small blind is missing |
+| `TD-C53C12F4` | parser | TODO | [fpdb_3_legacy/BetOnlineToFpdb.py:768](fpdb_3_legacy/BetOnlineToFpdb.py#L768) | fpdb): The following should only trigger when a small blind is missing |
 | `TD-187C8208` | parser | FIXME | [fpdb_3_legacy/EnetToFpdb.py:318](fpdb_3_legacy/EnetToFpdb.py#L318) | handle other currencies, play money |
 | `TD-3FB18AD8` | parser | FIXME | [fpdb_3_legacy/EntractionToFpdb.py:265](fpdb_3_legacy/EntractionToFpdb.py#L265) | handle other currencies, play money |
 | `TD-30783EBC` | parser | HACK | [fpdb_3_legacy/EverestToFpdb.py:174](fpdb_3_legacy/EverestToFpdb.py#L174) | tablename not in every hand. |
