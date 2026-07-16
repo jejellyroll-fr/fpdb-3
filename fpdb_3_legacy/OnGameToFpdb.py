@@ -109,8 +109,6 @@ class OnGame(HandHistoryConverter):
     re_Identify = re.compile("\\*{5}\\sHistory\\sfor\\shand\\s[A-Z0-9\\-]+\\s")
     re_SplitHands = re.compile("\\*\\*\\*\\*\\*\\sEnd\\sof\\shand\\s[-A-Z\\d]+.*\n+(?=\\*)")
 
-    # TODO: detect play money
-    # "Play money" rather than "Real money" and set currency accordingly
     # Table:\s(\[SPEED\]\s)?(?P<TABLE>[-\'\w\#\s\.]+)\s\[\d+\]\s\(
     re_HandInfo = re.compile(
         """
