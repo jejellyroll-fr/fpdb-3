@@ -48,6 +48,7 @@ from PySide6.QtWidgets import (
 
 from fpdb_3_legacy import Configuration
 from fpdb_3_legacy.i18n import gettext as _
+from fpdb_3_legacy.localized_formats import format_datetime
 from fpdb_3_legacy.loggingFpdb import get_logger
 
 if __name__ == "__main__":
@@ -287,7 +288,7 @@ class GuiLogView(QWidget):
         for index, logfile in enumerate(log_files):
             # Format display name with date
             mod_time = datetime.fromtimestamp(os.path.getmtime(logfile))
-            display_name = f"{os.path.basename(logfile)} ({mod_time.strftime('%Y-%m-%d %H:%M:%S')})"
+            display_name = f"{os.path.basename(logfile)} ({format_datetime(mod_time)})"
             self.logfile_combo.addItem(display_name)
             self.logfile_paths.append(logfile)
             if display_name == current_selection:

@@ -38,6 +38,7 @@ from PySide6.QtWidgets import (
 
 from fpdb_3_legacy import SQL, Card, Configuration, Database, Deck, Filters, GuiReplayer, Hand
 from fpdb_3_legacy.i18n import gettext as _
+from fpdb_3_legacy.localized_formats import format_number
 from fpdb_3_legacy.loggingFpdb import get_logger
 
 log = get_logger("gui_tour_hand_viewer")
@@ -328,13 +329,13 @@ class TourHandViewer(QSplitter):
                 pre_actions,
                 " ".join(board),
                 post_actions,
-                f"{won:.2f}",
-                f"{bet:.2f}",
-                f"{net:.2f}",
+                format_number(won),
+                format_number(bet),
+                format_number(net),
                 gt,
                 str(handid),
-                f"{totalpot:.2f}",
-                f"{rake:.2f}",
+                format_number(totalpot),
+                format_number(rake),
                 str(sitehandid),
             ]
         elif hand.gametype["base"] == "stud":
@@ -368,13 +369,13 @@ class TourHandViewer(QSplitter):
                 pre_actions,
                 " ".join(later_streets),
                 post_actions,
-                f"{won:.2f}",
-                f"{bet:.2f}",
-                f"{net:.2f}",
+                format_number(won),
+                format_number(bet),
+                format_number(net),
                 gt,
                 str(handid),
-                f"{totalpot:.2f}",
-                f"{rake:.2f}",
+                format_number(totalpot),
+                format_number(rake),
             ]
         elif hand.gametype["base"] == "draw":
             row = [
@@ -385,13 +386,13 @@ class TourHandViewer(QSplitter):
                 hand.get_actions_short(hero, "DEAL"),
                 None,
                 None,
-                f"{won:.2f}",
-                f"{bet:.2f}",
-                f"{net:.2f}",
+                format_number(won),
+                format_number(bet),
+                format_number(net),
                 gt,
                 str(handid),
-                f"{totalpot:.2f}",
-                f"{rake:.2f}",
+                format_number(totalpot),
+                format_number(rake),
             ]
 
         modelrow = [QStandardItem(str(r)) for r in row]

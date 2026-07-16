@@ -5,6 +5,7 @@ from datetime import date, datetime
 
 import pytest
 
+from fpdb_3_legacy.GuiHandViewer import GuiHandViewer
 from fpdb_3_legacy.localized_formats import (
     currency_symbol,
     format_currency,
@@ -51,3 +52,10 @@ def test_financial_stat_and_override_follow_active_locale() -> None:
     assert profit[1] == "1\u202f234,50\u00a0€"
     assert profit[2] == "tp=1\u202f234,50\u00a0€"
     assert overridden[1] == "12,5"
+
+
+def test_hand_history_datetime_follows_active_locale() -> None:
+    set_format_locale("fr_FR")
+    hand = type("Hand", (), {"startTime": datetime(2026, 7, 16, 14, 30)})()
+
+    assert GuiHandViewer._format_datetime(object(), hand) == "16/07/2026 14:30"
