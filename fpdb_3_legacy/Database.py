@@ -54,10 +54,8 @@ from fpdb_3_legacy.loggingFpdb import get_logger
 
 ########################################################################
 
-# TODO:  - rebuild indexes / vacuum option
-#        - check speed of get_stats_from_hand() - add log info
-#        - check size of db, seems big? (mysql)
-######### investigate size of mysql db (200K for just 7K hands? 2GB for 140K hands?)
+# Database maintenance is available through ``rebuild_indexes()``,
+# ``analyzeDB()`` and ``vacuumDB()`` as well as the command-line utility below.
 
 # postmaster -D /var/lib/pgsql/data
 
@@ -6505,6 +6503,7 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description="FPDB Database utility")
     parser.add_argument("--test-connection", action="store_true", help="Test database connection")
     parser.add_argument("--rebuild-indexes", action="store_true", help="Drop and recreate all database indexes")
+    parser.add_argument("--vacuum", action="store_true", help="Reclaim space and optimize database storage")
     parser.add_argument("--show-stats", action="store_true", help="Show statistics for last hand")
     parser.add_argument("--show-info", action="store_true", help="Show database information")
     parser.add_argument("--interactive", action="store_true", help="Run original interactive test")
@@ -6537,11 +6536,14 @@ def main(argv=None):
         print(f"Host: {db_connection.host}")
 
     if args.rebuild_indexes:
-        print("Dropping all indexes...")
-        db_connection.dropAllIndexes()
-        print("Recreating all indexes...")
-        db_connection.createAllIndexes()
+        print("Rebuilding indexes and foreign keys...")
+        db_connection.rebuild_indexes()
         print("Index rebuild complete ✓")
+
+    if args.vacuum:
+        print("Vacuuming database...")
+        db_connection.vacuumDB()
+        print("Database vacuum complete ✓")
 
     if args.show_stats:
         try:

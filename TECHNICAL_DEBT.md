@@ -4,11 +4,11 @@ Ce fichier est généré par `python tools/todo_inventory.py`. Chaque marqueur
 `TODO`, `FIXME` ou `HACK` du code possède ainsi un identifiant stable et une
 catégorie. Modifier le code source, puis régénérer ce registre.
 
-**Total : 48 tâches ouvertes.**
+**Total : 47 tâches ouvertes.**
 
 | Catégorie | Nombre |
 |---|---:|
-| database | 5 |
+| database | 4 |
 | parser | 40 |
 | poker-domain | 3 |
 
@@ -16,8 +16,7 @@ catégorie. Modifier le code source, puis régénérer ce registre.
 
 | ID | Catégorie | Type | Emplacement | Description |
 |---|---|---|---|---|
-| `TD-2D711D74` | database | TODO | [fpdb_3_legacy/Database.py:57](fpdb_3_legacy/Database.py#L57) | rebuild indexes / vacuum option |
-| `TD-C0DFD934` | database | FIXME | [fpdb_3_legacy/Database.py:5630](fpdb_3_legacy/Database.py#L5630) | ?: MySQL has ON DUPLICATE KEY UPDATE |
+| `TD-C0DFD934` | database | FIXME | [fpdb_3_legacy/Database.py:5628](fpdb_3_legacy/Database.py#L5628) | ?: MySQL has ON DUPLICATE KEY UPDATE |
 | `TD-F140803E` | database | FIXME | [fpdb_3_legacy/sql_queries_player_detailed.py:570](fpdb_3_legacy/sql_queries_player_detailed.py#L570) | 3/4bet and foldTo don't added four tournaments yet |
 | `TD-C253D5A8` | database | FIXME | [fpdb_3_legacy/sql_queries_tournament_graph.py:34](fpdb_3_legacy/sql_queries_tournament_graph.py#L34) | this is a horrible hack to prevent nonsense data |
 | `TD-F04EE9E8` | database | FIXME | [fpdb_3_legacy/sql_queries_tournament_graph.py:58](fpdb_3_legacy/sql_queries_tournament_graph.py#L58) | this is a horrible hack to prevent nonsense data |

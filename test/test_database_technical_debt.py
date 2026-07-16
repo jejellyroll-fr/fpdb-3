@@ -116,3 +116,23 @@ def test_cleanup_connections_ignores_already_closed_cursor(monkeypatch):
     assert db.cursor is None
     assert db.connection is None
     assert db.is_connected() is False
+
+
+def test_database_cli_exposes_index_rebuild_and_vacuum(monkeypatch, capsys):
+    calls = []
+    fake_db = SimpleNamespace(
+        rebuild_indexes=lambda: calls.append("rebuild"),
+        vacuumDB=lambda: calls.append("vacuum"),
+    )
+    monkeypatch.setattr(Database.Configuration, "set_logfile", lambda _path: None)
+    monkeypatch.setattr(Database.Configuration, "Config", lambda: object())
+    monkeypatch.setattr(Database.SQL, "Sql", lambda **_kwargs: object())
+    monkeypatch.setattr(Database, "Database", lambda _config: fake_db)
+
+    result = Database.main(["--rebuild-indexes", "--vacuum"])
+
+    assert result == 0
+    assert calls == ["rebuild", "vacuum"]
+    output = capsys.readouterr().out
+    assert "Index rebuild complete" in output
+    assert "Database vacuum complete" in output
