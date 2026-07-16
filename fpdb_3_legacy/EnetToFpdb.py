@@ -109,6 +109,21 @@ class Enet(HandHistoryConverter):
         "Omaha": ("hold", "omahahi"),
     }
     currencies = {"€": "EUR", "$": "USD", "": "T$", "£": "GBP"}
+    tournament_currencies = {"USD": "USD", "EUR": "EUR", "GBP": "GBP", "CAD": "CAD", "FPP": "play"}
+
+    @classmethod
+    def tournamentCurrency(cls, info):
+        """Return the tournament currency declared by ISO code or buy-in symbol."""
+        iso_code = info.get("TOUR_ISO")
+        if iso_code in cls.tournament_currencies:
+            return cls.tournament_currencies[iso_code]
+        buyin = info["BUYIN"]
+        for symbol in ("$", "€", "£"):
+            if symbol in buyin:
+                return cls.currencies[symbol]
+        if re.fullmatch(r"[0-9.,+]+", buyin):
+            return "play"
+        return None
 
     # Static regexes
     re_GameInfo = re.compile(
@@ -306,16 +321,8 @@ class Enet(HandHistoryConverter):
                         hand.fee = 0
                         hand.buyinCurrency = "FREE"
                     else:
-                        if info[key].find("$") != -1:
-                            hand.buyinCurrency = "USD"
-                        elif info[key].find("£") != -1:
-                            hand.buyinCurrency = "GBP"
-                        elif info[key].find("€") != -1:
-                            hand.buyinCurrency = "EUR"
-                        elif re.match("^[0-9+]*$", info[key]):
-                            hand.buyinCurrency = "play"
-                        else:
-                            # FIXME: handle other currencies, play money
+                        hand.buyinCurrency = self.tournamentCurrency(info)
+                        if hand.buyinCurrency is None:
                             log.error(
                                 _("EnetToFpdb.readHandInfo: Failed to detect currency.")
                                 + f" Hand ID: {hand.handid}: '{info[key]}'"
