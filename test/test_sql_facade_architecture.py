@@ -10,6 +10,7 @@ SQL_SOURCE = Path(__file__).parents[1] / "fpdb_3_legacy" / "SQL.py"
 def test_sql_facade_contains_no_inline_create_table_ddl() -> None:
     source = SQL_SOURCE.read_text(encoding="utf-8")
     assert "CREATE TABLE" not in source
+    assert 'self.query["' not in source
 
 
 def test_sql_facade_installs_schema_catalogues_before_queries() -> None:
@@ -24,3 +25,4 @@ def test_sql_facade_installs_schema_catalogues_before_queries() -> None:
     assert all(
         "schema" in line or "_queries" in line for line in schema_updates[1:]
     )
+    assert "self.query = finalize_query_placeholders(self.query, db_server)" in source

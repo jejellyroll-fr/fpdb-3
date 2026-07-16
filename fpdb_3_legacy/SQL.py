@@ -3,7 +3,6 @@ from __future__ import annotations
 
 """Returns a dict of SQL statements used in fpdb."""
 
-import re
 import sys
 
 from fpdb_3_legacy.sql_indexes import index_queries
@@ -39,6 +38,7 @@ from fpdb_3_legacy.sql_queries_tournament_graph import tournament_graph_queries
 from fpdb_3_legacy.sql_queries_tournament_persistence import tournament_persistence_queries
 from fpdb_3_legacy.sql_queries_tournament_player import tournament_player_detailed_queries
 from fpdb_3_legacy.sql_queries_utility import utility_queries
+from fpdb_3_legacy.sql_query_placeholders import finalize_query_placeholders
 from fpdb_3_legacy.sql_schema_cards_cache import cards_cache_schema_queries
 from fpdb_3_legacy.sql_schema_core import core_schema_queries
 from fpdb_3_legacy.sql_schema_game import game_schema_queries
@@ -139,52 +139,7 @@ class Sql:
         self.query.update(tournament_graph_queries())
         self.query.update(tournament_persistence_queries())
         self.query.update(utility_queries())
-        ###############################################################################3
-        #    Support for the Free Poker DataBase = fpdb   http://fpdb.sourceforge.net/
-        #
-
-
-        #    same as above except stats are aggregated for all blind/limit levels
-
-
-
-        ####################################
-
-        ####################################
-        # Queries to insert/update positionscache
-        ####################################
-
-        ####################################
-        # Queries to rebuild/modify sessionscache
-        ####################################
-
-        ####################################
-        # Database management queries
-        ####################################
-
-
-
-
-
-
-
-
-
-        ################################
-        # Counts for DB stats window
-        ################################
-        ################################
-        # placeholders and substitution stuff
-        ################################
-        if db_server in ("mysql", "postgresql"):
-            self.query["placeholder"] = "%s"
-        elif db_server == "sqlite":
-            self.query["placeholder"] = "?"
-
-        # If using sqlite, use the ? placeholder instead of %s
-        if db_server == "sqlite":
-            for k, q in list(self.query.items()):
-                self.query[k] = re.sub("%s", "?", q)
+        self.query = finalize_query_placeholders(self.query, db_server)
 
 
 def main(argv=None):
