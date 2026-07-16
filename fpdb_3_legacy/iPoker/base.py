@@ -1299,10 +1299,9 @@ class iPoker(IPokerStreetsActionsMixin, IPokerHandInfoMixin, IPokerTournamentRes
 
         # Generate the regex pattern based on the input parameters
         normalized_table_name = table_name or ""
-        
+
         # Clean common iPoker prefixes (like "100BB", "50BB", "20-50BB", etc.)
         # that are present in the XML hand history but missing from the window title
-        import re
         clean_table_name = re.sub(
             r'^(?:\d+(?:-\d+)?\s*BB|Deep|Speed|Turbo|Ante|Shallow|Cap|DoublePay|No DP)\s+',
             '',
@@ -1319,14 +1318,22 @@ class iPoker(IPokerStreetsActionsMixin, IPokerHandInfoMixin, IPokerTournamentRes
                 is_twister = True
             elif tournament and "twister" in str(tournament).lower():
                 is_twister = True
-            elif table_number and table_number > 10000:
-                is_twister = True
 
             if is_twister:
                 # Twister tables don't have table numbers in the window title, they are named "Twister" or "Spins"
                 # We return a regex matching either Twister or Spins (branded on some French skins like Bwin.fr/PMU)
                 regex = r"(?:Twister|Spins)"
                 log.debug("Generated regex for Twister/Spins SNG: %s", regex)
+                return regex
+
+            # A hand history only carries a table number when the tableName ends
+            # in one ("<no> <name>, <tableNo>"); without it TableWindow falls back
+            # to the tournament number, which never appears in the window title.
+            # Match on the tournament name instead, as it does.
+            if table_number is None or str(table_number) == str(tournament):
+                title_name = tourney_name or clean_table_name
+                regex = re.escape(title_name) if title_name else ""
+                log.debug("Generated name regex for 'tour' without table number: %s", regex)
                 return regex
 
             regex = rf"([^\(]+)\s{table_number}"
