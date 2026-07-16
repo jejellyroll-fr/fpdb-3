@@ -154,7 +154,7 @@ class Absolute(HandHistoryConverter):
                 re.MULTILINE,
             )
             self.re_Action = re.compile(
-                rf"^{player_re} - (?P<ATYPE>Bets |Raises |All-In |All-In\(Raise\) |Calls |Folds|Checks)?\$?(?P<BET>[,.0-9]+)?",
+                rf"^{player_re} - (?P<ATYPE>Bets |Raises |All-In |All-In\(Raise\) |Calls |Completes to |Folds|Checks)?\$?(?P<BET>[,.0-9]+)?",
                 re.MULTILINE,
             )
             self.re_ShowdownAction = re.compile(
@@ -482,7 +482,7 @@ class Absolute(HandHistoryConverter):
                 bet = action.group("BET").replace(",", "")
                 hand.setUncalledBets(None)
                 hand.addCallandRaise(street, action.group("PNAME"), bet)
-            elif action.group("ATYPE") == " complete to":  # TODO: not supported yet ?
+            elif action.group("ATYPE") == "Completes to ":
                 bet = action.group("BET").replace(",", "")
                 hand.setUncalledBets(None)
                 hand.addComplete(street, action.group("PNAME"), bet)

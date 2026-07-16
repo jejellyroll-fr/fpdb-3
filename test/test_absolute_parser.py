@@ -134,3 +134,20 @@ def test_absolute_stud_streets_are_segmented() -> None:
     assert "fifth actions" in streets["FIFTH"]
     assert "sixth actions" in streets["SIXTH"]
     assert "seventh actions" in streets["SEVENTH"]
+
+
+def test_absolute_stud_completion_is_recorded() -> None:
+    completions = []
+    hand = SimpleNamespace(
+        players=[(1, "Alice", "10.00")],
+        streets={"THIRD": "Alice - Completes to $0.20"},
+        setUncalledBets=lambda _value: None,
+        addComplete=lambda *args: completions.append(args),
+    )
+    parser = Absolute.__new__(Absolute)
+    parser.compiledPlayers = set()
+    parser.compilePlayerRegexs(hand)
+
+    parser.readAction(hand, "THIRD")
+
+    assert completions == [("THIRD", "Alice", "0.20")]
