@@ -43,6 +43,7 @@ from PySide6.QtWidgets import (
 
 from fpdb_3_legacy import SQL, Card, Configuration, Database, Deck, Filters, GuiReplayer, Hand
 from fpdb_3_legacy.i18n import gettext as _
+from fpdb_3_legacy.localized_formats import format_currency, format_datetime, format_number
 from fpdb_3_legacy.loggingFpdb import get_logger
 
 log = get_logger("gui_hand_viewer")
@@ -370,7 +371,6 @@ class GuiHandViewer(QSplitter):
             log.warning(f"Hero not found for site: {hand.sitename}")
             return
 
-        sym = getattr(hand, "sym", "") or ""
         won = hand.collectees.get(hero, 0)
         if not hasattr(hand, "net_collected") or not hand.net_collected:
             hand.calculate_net_collected()
@@ -435,13 +435,13 @@ class GuiHandViewer(QSplitter):
             "Street1-4": "",
             "Action1-4": post_actions,
             "Combo": combo,
-            "Won": f"{won:.2f}",
-            "Bet": f"{bet:.2f}",
-            "Net": f"{net:.2f}",
+            "Won": format_number(won),
+            "Bet": format_number(bet),
+            "Net": format_number(net),
             "Game": self._format_game(hand),
             "HandId": str(handid),
-            "Total Pot": f"{totalpot:.2f}",
-            "Rake": f"{rake:.2f}",
+            "Total Pot": format_number(totalpot),
+            "Rake": format_number(rake),
             "SiteHandNo": str(sitehandid),
         }
 
@@ -474,7 +474,8 @@ class GuiHandViewer(QSplitter):
             if name in ("Won", "Net"):
                 try:
                     v = float(values[name])
-                    item.setData(f"{sym}{v:.2f}", Qt.ItemDataRole.DisplayRole)
+                    currency = str(hand.gametype.get("currency", "USD"))
+                    item.setData(format_currency(v, currency), Qt.ItemDataRole.DisplayRole)
                     item.setForeground(QBrush(win_color if v > 0 else lose_color if v < 0 else neutral))
                 except (TypeError, ValueError):
                     pass
@@ -534,8 +535,8 @@ class GuiHandViewer(QSplitter):
         if not st:
             return ""
         try:
-            return st.strftime("%Y-%m-%d %H:%M")
-        except (AttributeError, ValueError):
+            return format_datetime(st)
+        except (AttributeError, TypeError, ValueError):
             return str(st)
 
     def _hand_flags(self, hand) -> str:
@@ -590,9 +591,9 @@ class GuiHandViewer(QSplitter):
         combo = (getattr(hand, "showdownStrings", {}) or {}).get(hero)
         if combo:
             lines.append(f"Hero: {combo}")
-        sym = getattr(hand, "sym", "") or ""
+        currency = str(hand.gametype.get("currency", "USD"))
         try:
-            lines.append(f"Won {sym}{float(won):.2f}  ·  Net {sym}{float(net):.2f}")
+            lines.append(f"Won {format_currency(won, currency)}  ·  Net {format_currency(net, currency)}")
         except (TypeError, ValueError):
             pass
         return "\n".join(lines)
