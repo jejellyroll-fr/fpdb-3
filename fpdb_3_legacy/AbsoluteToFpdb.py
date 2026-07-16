@@ -254,10 +254,11 @@ class Absolute(HandHistoryConverter):
         # NB: SB, BB must be interpreted as blinds or bets depending on limit type.
         if info["bb"] is None:
             mg["SB"] = mg["SB"].replace(",", "")
+            # A single stakes value is the upper betting unit. Ring fixed-limit
+            # games are translated through Lim_Blinds below; other formats use
+            # the conventional half-stake lower unit.
             info["bb"] = mg["SB"]
-            info["sb"] = str(
-                Decimal(mg["SB"]) * Decimal("0.5")
-            )  # TODO: AP does provide Small BET for Limit .. I think? at least 1-on-1 limit they do.. sigh
+            info["sb"] = str(Decimal(mg["SB"]) * Decimal("0.5"))
 
         if info["limitType"] == "fl" and info["bb"] is not None:
             if info["type"] == "ring":
