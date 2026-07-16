@@ -89,10 +89,8 @@ def _chip_increment(factor: int) -> Decimal:
     return Decimal(1) / Decimal(factor)
 
 
-def _buildStatsInitializer() -> dict:  # noqa: PLR0915
-    # TODO @future: REFACTOR - This function is too long (79 statements > 50)
-    # Consider breaking into smaller functions for different stat categories
-    init: dict[str, Any] = {}
+def _initMoneyAndResults(init: dict[str, Any]) -> None:
+    """Stacks, money committed, winnings and rake attribution."""
     # Init vars that may not be used, but still need to be inserted.
     # All stud street4 need this when importing holdem
     init["effStack"] = 0
@@ -111,6 +109,9 @@ def _buildStatsInitializer() -> dict:  # noqa: PLR0915
     init["nonShowdownWinnings"] = 0
     init["cashOutAmount"] = 0  # Insurance payout (not pot winnings)
     init["cashOutFee"] = 0  # Fee deducted from cash out
+
+def _initHandOutcome(init: dict[str, Any]) -> None:
+    """Showdown participation, holdings and seating context."""
     init["sawShowdown"] = False
     init["showed"] = False
     init["wonAtSD"] = False
@@ -129,6 +130,9 @@ def _buildStatsInitializer() -> dict:  # noqa: PLR0915
     init["flg_blind_ds"] = False  # Player posted a dead small blind
     init["flg_blind_db"] = False  # Player posted a dead big blind (see note)
     init["flg_blind_k"] = False  # Player straddled (voluntary kill blind)
+
+def _initPreflop(init: dict[str, Any]) -> None:
+    """Preflop actions, raise levels, limps and the sizing faced."""
     init["street0CalledRaiseChance"] = 0
     init["street0CalledRaiseDone"] = 0
     init["street0FaceRaise"] = False
@@ -179,8 +183,11 @@ def _buildStatsInitializer() -> dict:  # noqa: PLR0915
     init["val_p_3bet_facing_bp"] = 0
     init["cnt_p_4bet_facing"] = 0
     init["val_p_4bet_facing_bp"] = 0
-    # Postflop per-street re-raise stats. street1 = flop, street2 = turn,
-    # street3 = river.
+
+def _initPostflopRaiseLevels(init: dict[str, Any]) -> None:
+    """Postflop per-street re-raise stats. street1 = flop, street2 = turn,
+    street3 = river.
+    """
     for _s in (1, 2, 3):
         init[f"street{_s}_3BChance"] = False
         init[f"street{_s}_3BDone"] = False
@@ -194,6 +201,9 @@ def _buildStatsInitializer() -> dict:  # noqa: PLR0915
         init[f"street{_s}OpenDone"] = False
         init[f"street{_s}FirstRaise"] = False
         init[f"street{_s}FaceRaise"] = False
+
+def _initStealAndBlindDefence(init: dict[str, Any]) -> None:
+    """Steal attempts and blind defence."""
     init["stealChance"] = False
     init["stealDone"] = False
     init["success_Steal"] = False
@@ -205,6 +215,9 @@ def _buildStatsInitializer() -> dict:  # noqa: PLR0915
     init["foldSbToStealChance"] = False
     init["foldedSbToSteal"] = False
     init["foldedBbToSteal"] = False
+
+def _initStreetsSeenAndAllIn(init: dict[str, Any]) -> None:
+    """Streets reached, aggression faced preflop and all-in exposure."""
     init["tourneyTypeId"] = None
     init["street1Seen"] = False
     init["street2Seen"] = False
@@ -219,6 +232,9 @@ def _buildStatsInitializer() -> dict:  # noqa: PLR0915
     init["flg_faced_allin"] = False
     init["flg_fold_to_allin"] = False
 
+
+def _initPerStreetCounters(init: dict[str, Any]) -> None:
+    """Action counters, continuation bets and check-raises, per street."""
     for i in range(5):
         init["street%dCalls" % i] = 0
         init["street%dBets" % i] = 0
@@ -257,6 +273,9 @@ def _buildStatsInitializer() -> dict:  # noqa: PLR0915
     init["cashOutFee"] = 0
     init["isCashOut"] = False
 
+
+def _initPostflopStreetStats(init: dict[str, Any]) -> None:
+    """Per-street donk/float/position flags and bet sizing, flop to river."""
     # Flop statistics
     init["flg_f_donk"] = False
     init["flg_f_donk_opp"] = False
@@ -316,6 +335,9 @@ def _buildStatsInitializer() -> dict:  # noqa: PLR0915
     # Bet-sizing: river SPR.
     init["cnt_r_spr"] = 0
     init["val_r_spr"] = 0
+
+def _initRaiseSizing(init: dict[str, Any]) -> None:
+    """Sizing of raises made and faced, per street and level."""
     # Bet-sizing: size of the first raise the player makes per street, as basis
     # points of the pot before the raise (PT4 amt_*_raise_made / val_*_pct).
     init["cnt_p_raise_made"] = 0
@@ -352,6 +374,19 @@ def _buildStatsInitializer() -> dict:  # noqa: PLR0915
     init["cnt_p_5bet_facing"] = 0
     init["val_p_5bet_facing_bp"] = 0
 
+
+def _buildStatsInitializer() -> dict:
+    """Build the per-player stat row every hand starts from."""
+    init: dict[str, Any] = {}
+    _initMoneyAndResults(init)
+    _initHandOutcome(init)
+    _initPreflop(init)
+    _initPostflopRaiseLevels(init)
+    _initStealAndBlindDefence(init)
+    _initStreetsSeenAndAllIn(init)
+    _initPerStreetCounters(init)
+    _initPostflopStreetStats(init)
+    _initRaiseSizing(init)
     return init
 
 
