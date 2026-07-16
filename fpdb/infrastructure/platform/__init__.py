@@ -5,12 +5,13 @@ across different operating systems (Linux, Windows, macOS).
 """
 
 from .factory import TableDetectorFactory, get_table_detector, reset_detector
-from .protocol import TableDetector, TableGeometry, TableInfo
+from .protocol import Platform, TableDetector, TableGeometry, TableInfo
 
 __all__ = [
     "TableDetector",
     "TableGeometry",
     "TableInfo",
+    "Platform",
     "TableDetectorFactory",
     "get_table_detector",
     "reset_detector",
