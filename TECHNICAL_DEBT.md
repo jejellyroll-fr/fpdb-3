@@ -4,11 +4,11 @@ Ce fichier est généré par `python tools/todo_inventory.py`. Chaque marqueur
 `TODO`, `FIXME` ou `HACK` du code possède ainsi un identifiant stable et une
 catégorie. Modifier le code source, puis régénérer ce registre.
 
-**Total : 54 tâches ouvertes.**
+**Total : 53 tâches ouvertes.**
 
 | Catégorie | Nombre |
 |---|---:|
-| core | 4 |
+| core | 3 |
 | database | 7 |
 | parser | 40 |
 | poker-domain | 3 |
@@ -18,9 +18,8 @@ catégorie. Modifier le code source, puis régénérer ce registre.
 | ID | Catégorie | Type | Emplacement | Description |
 |---|---|---|---|---|
 | `TD-03D8D75F` | core | TODO | [fpdb_3_legacy/HandHistoryConverter.py:259](fpdb_3_legacy/HandHistoryConverter.py#L259) | any need for this to be generator? e.g. stars support can email one huge file of all hands in a year. Better to read bit by bit than all at once. |
-| `TD-1941D118` | core | TODO | [fpdb_3_legacy/HandHistoryConverter.py:329](fpdb_3_legacy/HandHistoryConverter.py#L329) | not ideal, just trying to not error. Throw ParseException? |
-| `TD-F2E9F3D4` | core | TODO | [fpdb_3_legacy/HandHistoryConverter.py:430](fpdb_3_legacy/HandHistoryConverter.py#L430) | which parts are optional/required? |
-| `TD-43C2ECFA` | core | TODO | [fpdb_3_legacy/HandHistoryConverter.py:456](fpdb_3_legacy/HandHistoryConverter.py#L456) | which parts are optional/required? |
+| `TD-F2E9F3D4` | core | TODO | [fpdb_3_legacy/HandHistoryConverter.py:432](fpdb_3_legacy/HandHistoryConverter.py#L432) | which parts are optional/required? |
+| `TD-43C2ECFA` | core | TODO | [fpdb_3_legacy/HandHistoryConverter.py:458](fpdb_3_legacy/HandHistoryConverter.py#L458) | which parts are optional/required? |
 | `TD-54311606` | database | FIXME | [fpdb_3_legacy/Configuration.py:151](fpdb_3_legacy/Configuration.py#L151) | Description à préciser |
 | `TD-3203C950` | database | TODO | [fpdb_3_legacy/Configuration.py:1882](fpdb_3_legacy/Configuration.py#L1882) | Probably adapt hud logic instead |
 | `TD-2D711D74` | database | TODO | [fpdb_3_legacy/Database.py:57](fpdb_3_legacy/Database.py#L57) | rebuild indexes / vacuum option |
