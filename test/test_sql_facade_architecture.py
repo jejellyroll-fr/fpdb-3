@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from fpdb_3_legacy.SQL import Sql
+
 SQL_SOURCE = Path(__file__).parents[1] / "fpdb_3_legacy" / "SQL.py"
 
 
@@ -26,3 +28,13 @@ def test_sql_facade_installs_schema_catalogues_before_queries() -> None:
         "schema" in line or "_queries" in line for line in schema_updates[1:]
     )
     assert "self.query = finalize_query_placeholders(self.query, db_server)" in source
+
+
+def test_installed_queries_contain_no_literal_newline_typos() -> None:
+    for backend in ("sqlite", "postgresql", "mysql"):
+        queries = Sql(db_server=backend).query
+        for name, query in queries.items():
+            if not isinstance(query, str):
+                continue
+            assert "/n" not in query, f"{backend}:{name} contains /n"
+            assert r"\n" not in query, f"{backend}:{name} contains a literal \\n"

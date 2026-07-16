@@ -307,7 +307,7 @@ def hud_aggregated_stats_queries() -> dict[str, str]:
                               WHERE  gt1.siteid = gt2.siteid  /* find gametypes where these match: */
                               AND    gt1.type = gt2.type               /* ring/tourney */
                               AND    gt1.category = gt2.category       /* holdem/stud*/
-                              AND    gt1.limittype = gt2.limittype     /* fl/nl */
+                              AND    gt1.limittype = gt2.limittype     /* fixed limit or no limit */
                               AND    gt1.bigblind <= gt2.bigblind * %s  /* bigblind similar size */
                               AND    gt1.bigblind >= gt2.bigblind / %s
                               AND    gt2.id = %s)
@@ -321,7 +321,7 @@ def hud_aggregated_stats_queries() -> dict[str, str]:
                               WHERE  gt1.siteid = gt2.siteid  /* find gametypes where these match: */
                               AND    gt1.type = gt2.type               /* ring/tourney */
                               AND    gt1.category = gt2.category       /* holdem/stud*/
-                              AND    gt1.limittype = gt2.limittype     /* fl/nl */
+                              AND    gt1.limittype = gt2.limittype     /* fixed limit or no limit */
                               AND    gt1.bigblind <= gt2.bigblind * %s  /* bigblind similar size */
                               AND    gt1.bigblind >= gt2.bigblind / %s
                               AND    gt2.id = %s)
@@ -342,4 +342,3 @@ def hud_aggregated_stats_queries() -> dict[str, str]:
     #  where %s is the number of active players at the current table (and
     #  1.25 would be a config value so user could change it)
     return query
-
