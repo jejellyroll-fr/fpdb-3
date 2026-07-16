@@ -310,7 +310,7 @@ class GuiTourneyGraphViewer(QSplitter):
                     linewidth=1.5,
                     linestyle="-",
                     alpha=0.9,
-                    label=f"{label}: {values[-1]:.0f}",
+                    label=f"{label}: {format_number(values[-1], 0)}",
                 )
             # Merge the secondary-axis legend entries into the main legend.
             ev_handles, ev_labels = ax_ev.get_legend_handles_labels()

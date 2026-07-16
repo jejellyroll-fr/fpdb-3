@@ -301,7 +301,7 @@ class GuiGraphViewer(QSplitter):
                 blue,
                 color=get_modern_color("line_showdown", "b"),
                 linewidth=1.8,
-                label=_("Showdown") + f" ({display_in}): {blue[-1]:.2f}",
+                label=_("Showdown") + f" ({display_in}): {format_number(blue[-1])}",
             )
 
         if "nonshowdown" in graphops:
@@ -309,7 +309,7 @@ class GuiGraphViewer(QSplitter):
                 red,
                 color=get_modern_color("line_nonshowdown", "m"),
                 linewidth=1.8,
-                label=_("Non-showdown") + f" ({display_in}): {red[-1]:.2f}",
+                label=_("Non-showdown") + f" ({display_in}): {format_number(red[-1])}",
             )
         if "ev" in graphops:
             self.ax.plot(
@@ -317,13 +317,16 @@ class GuiGraphViewer(QSplitter):
                 color=get_modern_color("line_ev", "orange"),
                 linewidth=1.8,
                 linestyle="-.",
-                label=("All-in EV") + f" ({display_in}): {orange[-1]:.2f}",
+                label=("All-in EV") + f" ({display_in}): {format_number(orange[-1])}",
             )
         self.ax.plot(
             green,
             color=get_modern_color("line_hands", "c"),
             linewidth=2.5,
-            label=_("Hands") + ": %d\n" % len(green) + _("Profit") + f": ({display_in}): {green[-1]:.2f}",
+            label=_("Hands")
+            + f": {format_number(len(green), 0)}\n"
+            + _("Profit")
+            + f": ({display_in}): {format_number(green[-1])}",
         )
 
         handles, labels = self.ax.get_legend_handles_labels()
@@ -416,7 +419,7 @@ class GuiGraphViewer(QSplitter):
             green,
             color=self.colors["line_hands"],
             linewidth=0.5,
-            label=_("Hands") + ": %d\n" % len(green) + _("Profit") + f": {green[-1]:.2f}",
+            label=_("Hands") + f": {format_number(len(green), 0)}\n" + _("Profit") + f": {format_number(green[-1])}",
         )
 
     def getRingProfitGraph(self, names, sites, limits, games, currencies, units):

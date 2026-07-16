@@ -437,11 +437,11 @@ class GuiSessionViewer(QSplitter):
 
                 results.append(
                     [
-                        sid,
-                        hds,
+                        format_number(sid, 0),
+                        format_number(hds, 0),
                         stime,
                         etime,
-                        hph,
+                        format_number(hph, 0),
                         format_number(open),
                         format_number(close),
                         format_number(lwm),
@@ -461,16 +461,16 @@ class GuiSessionViewer(QSplitter):
         results.append(
             [
                 ("all"),
-                total_hands,
+                format_number(total_hands, 0),
                 global_stime,
                 global_etime,
-                total_hands * 60 // total_time,
-                f"{global_open:.2f}",
-                f"{global_close:.2f}",
-                f"{global_lwm:.2f}",
-                f"{global_hwm:.2f}",
-                "%.2f" % (global_hwm - global_lwm),
-                "%.2f" % (global_close - global_open),
+                format_number(total_hands * 60 // total_time, 0),
+                format_number(global_open),
+                format_number(global_close),
+                format_number(global_lwm),
+                format_number(global_hwm),
+                format_number(global_hwm - global_lwm),
+                format_number(global_close - global_open),
             ],
         )
 
