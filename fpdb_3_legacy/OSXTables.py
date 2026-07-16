@@ -87,13 +87,17 @@ class Table(Table_Window):
             return self.title
 
         if self.number is None:
-            log.warning("Window detection failed: no match found for search string '%s'", self.search_string)
+            # At ERROR level: HUD_main reports the same failure as an error, and the
+            # osx_tables logger is commonly persisted at ERROR, which would drop the
+            # very window list needed to tell a wrong search string from an absent
+            # table.
+            log.error("Window detection failed: no match found for search string '%s'", self.search_string)
             try:
                 all_tables = self._detector.find_tables("")
                 titles = [t.title for t in all_tables if t.title]
-                log.warning("Currently open windows: %s", titles)
+                log.error("Currently open windows: %s", titles)
             except Exception as e:
-                log.warning("Could not list open windows: %s", e)
+                log.error("Could not list open windows: %s", e)
             return None
 
         return None

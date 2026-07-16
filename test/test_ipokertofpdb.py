@@ -410,6 +410,20 @@ def test_getTableTitleRe() -> None:
     res_twister2 = iPoker.getTableTitleRe("tour", "Twister $1 SNG", table_number=1)
     assert res_twister2 == "(?:Twister|Spins)"
 
-    res_twister3 = iPoker.getTableTitleRe("tour", "Table 123", table_number=10005)
-    assert res_twister3 == "(?:Twister|Spins)"
+    # A large table number is not evidence of a Twister: every iPoker table id is
+    # a 10-digit number, so only the name may decide.
+    res_not_twister = iPoker.getTableTitleRe("tour", "Table 123", table_number=1192582023)
+    assert res_not_twister == r"([^\(]+)\s1192582023"
+
+    # A La Carte SNG whose hand history carries no table number: TableWindow passes
+    # the tournament number back as the table, so match the tourney name instead.
+    res_no_tableno = iPoker.getTableTitleRe(
+        "tour",
+        "A La Carte 0.10€",
+        tournament=1192573436,
+        table_number=1192573436,
+        tourney_name="A La Carte 0.10€",
+    )
+    assert res_no_tableno == re.escape("A La Carte 0.10€")
+    assert re.search(res_no_tableno, "A La Carte 0.10€ - Table 4")
 
