@@ -1,8 +1,11 @@
 from __future__ import annotations
 
+import pytest
+
 from fpdb_3_legacy.ring_stats.views.starting_hands_view import StartingHandsTab
 
 
+@pytest.mark.qt
 def test_holdem_grid_updates_known_hand(qtbot) -> None:
     tab = StartingHandsTab()
     qtbot.addWidget(tab)
