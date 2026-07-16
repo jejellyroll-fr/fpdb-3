@@ -604,10 +604,8 @@ class Winamax(HandHistoryConverter):
                 self._process_bounty_info(hand, info)
                 info["BIRAKE"] = info["BIRAKE"].strip("$€")
 
-                # TODO(maintainer): Is this correct? Old code tried to
-                # conditionally multiply by 100, but we
-                # want hand.buyin in 100ths of
-                # dollars/euros (so hand.buyin = 90 for $0.90 BI).
+                # Buy-in and fee are stored in cents, as every converter does:
+                # "buyIn: 0.93-0.07" is recorded as 93 and 7.
                 hand.buyin = int(100 * Decimal(info["BIAMT"]))
                 hand.fee = int(100 * Decimal(info["BIRAKE"]))
             else:
