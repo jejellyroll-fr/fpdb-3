@@ -29,6 +29,7 @@ def restore_format_locale() -> Iterator[None]:
 def test_french_formats_numbers_money_and_dates() -> None:
     assert set_format_locale("fr_FR") == "fr_FR"
     assert format_number(1234.5) == "1\u202f234,50"
+    assert format_number(12.5, 1, show_plus=True) == "+12,5"
     assert format_currency(1234.5, "EUR") == "1\u202f234,50\u00a0€"
     assert format_currency(12.5, "EUR", show_plus=True) == "+12,50\u00a0€"
     assert format_date(date(2026, 7, 16)) == "16/07/2026"
