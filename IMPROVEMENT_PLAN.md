@@ -284,6 +284,7 @@ Les bugs multi-backend récents (`Rank` réservé, `boolean` vs `smallint`, `set
 - ✅ **HUD de la main courante de `SQL.py`** (2026-07-16) : `get_stats_from_hand` déplacé dans `sql_queries_hud_current_stats.py`, avec jointures joueur/gametype, borne `styleKey` et alias HUD principaux protégés.
 - ✅ **HUD agrégé par niveaux de `SQL.py`** (2026-07-16) : `get_stats_from_hand_aggregated` déplacé dans `sql_queries_hud_aggregated_stats.py`, avec siège courant, bandes de blindes et scopes héros/adversaires protégés.
 - ✅ **HUD de session de `SQL.py`** (2026-07-16) : variantes MySQL/PostgreSQL/SQLite de `get_stats_from_hand_session` déplacées dans `sql_queries_hud_session_stats.py`, avec casts, ordre des champs, table courante et scopes de sièges protégés.
+- ✅ **Façade `SQL.py` sans SQL inline** (2026-07-16) : normalisation finale des placeholders déplacée dans `sql_query_placeholders.py`, commentaires orphelins supprimés et garde architecturale renforcée pour interdire tout retour de requête inline.
 - **Qualité outillée restante** : Ruff est vert sur tout le dépôt et mypy couvre tout le package legacy ; convertir les 73 `TODO/FIXME` actuels en tâches traçables, évaluer l'intérêt d'un second checker (`pyright`) et clarifier/supprimer le dossier `fpdb/`.
 
 **Effort** continu · **Impact** moyen.
