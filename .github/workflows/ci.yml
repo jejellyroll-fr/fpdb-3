@@ -21,11 +21,14 @@ jobs:
         run: ruff check fpdb_3_legacy fpdb test tests tools
       - name: Prepare compiled translation resources
         run: python tools/prepare_briefcase_resources.py
+      - name: Verify technical-debt inventory
+        run: python tools/todo_inventory.py --check
       - name: Type-check modernized core
         run: >-
           mypy
           fpdb
           tools/prepare_briefcase_resources.py
+          tools/todo_inventory.py
           fpdb_3_legacy/__init__.py
           fpdb_3_legacy/equity.py
           fpdb_3_legacy/fpdb_api.py
