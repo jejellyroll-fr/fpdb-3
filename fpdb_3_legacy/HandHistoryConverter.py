@@ -326,8 +326,10 @@ HandHistoryConverter: '{sitename}'
         game_details = None
 
         if gametype is None:
-            # TODO: not ideal, just trying to not error. Throw ParseException?
-            self.numErrors += 1
+            preview = "\n".join(handText.splitlines()[:5])
+            log.error("%s could not determine a game type. Hand text preview:\n%s", self.sitename, preview)
+            msg = f"Could not determine game type for {self.sitename} hand"
+            raise FpdbParseError(msg)
         else:
             log.debug(f"game type {gametype}")
             log.debug(f"gametypecategory {gametype['category']}")
