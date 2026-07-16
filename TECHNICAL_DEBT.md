@@ -4,18 +4,17 @@ Ce fichier est généré par `python tools/todo_inventory.py`. Chaque marqueur
 `TODO`, `FIXME` ou `HACK` du code possède ainsi un identifiant stable et une
 catégorie. Modifier le code source, puis régénérer ce registre.
 
-**Total : 28 tâches ouvertes.**
+**Total : 27 tâches ouvertes.**
 
 | Catégorie | Nombre |
 |---|---:|
-| parser | 25 |
+| parser | 24 |
 | poker-domain | 3 |
 
 ## Tâches
 
 | ID | Catégorie | Type | Emplacement | Description |
 |---|---|---|---|---|
-| `TD-D6DF417F` | parser | TODO | [fpdb_3_legacy/EverleafToFpdb.py:263](fpdb_3_legacy/EverleafToFpdb.py#L263) | we should fetch info including buyincurrency, buyin and fee from URL |
 | `TD-C3B2EB7C` | parser | FIXME | [fpdb_3_legacy/MergeSummary.py:361](fpdb_3_legacy/MergeSummary.py#L361) | Searching every line for all regexes is pretty horrible |
 | `TD-6EB9E7A5` | parser | FIXME | [fpdb_3_legacy/MergeSummary.py:362](fpdb_3_legacy/MergeSummary.py#L362) | Need to search for 'Status:  Finished' |
 | `TD-2D58B08E` | parser | TODO | [fpdb_3_legacy/MergeToFpdb.py:32](fpdb_3_legacy/MergeToFpdb.py#L32) | Description à préciser |

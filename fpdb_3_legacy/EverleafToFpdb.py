@@ -87,6 +87,20 @@ class Everleaf(HandHistoryConverter):
     re_TourneyInfoFromFilename = re.compile(r".*TID_(?P<TOURNO>[0-9]+)-(?P<TABLE>[0-9]+).*\.txt")
     re_TourneyFromHH = re.compile("Tournament\\s\\#(?P<TOURNO>[0-9]+)")
 
+    @staticmethod
+    def _set_tournament_identity(hand, tournament_number, table_name):
+        """Store the tournament metadata available in an Everleaf history.
+
+        Everleaf hand histories contain no buy-in or fee. Import therefore
+        remains deterministic and offline, and explicitly records those
+        unavailable values instead of consulting an external service.
+        """
+        hand.tourNo = tournament_number
+        hand.tablename = table_name
+        hand.buyin = 0
+        hand.fee = 0
+        hand.buyinCurrency = "NA"
+
     def compilePlayerRegexs(self, hand):
         players = set([player[1] for player in hand.players])
         if not players <= self.compiledPlayers:  # x <= y means 'x is subset of y'
@@ -246,22 +260,11 @@ class Everleaf(HandHistoryConverter):
 
         t = self.re_TourneyInfoFromFilename.search(self.in_path)
         if t:
-            tourno = t.group("TOURNO")
-            hand.tourNo = tourno
-            hand.tablename = t.group("TABLE")
-            hand.buyin = 0
-            hand.fee = 0
-            hand.buyinCurrency = "NA"
+            self._set_tournament_identity(hand, t.group("TOURNO"), t.group("TABLE"))
         else:
             t1 = self.re_TourneyFromHH.search(hand.handText)
             if t1:
-                hand.tourNo = t1.group("TOURNO")
-                hand.tablename = m.group("TABLE")
-                hand.buyin = 0
-                hand.fee = 0
-                hand.buyinCurrency = "NA"
-            # TODO we should fetch info including buyincurrency, buyin and fee from URL:
-            #           https://www.poker4ever.com/tourney/%TOURNEY_NUMBER%
+                self._set_tournament_identity(hand, t1.group("TOURNO"), m.group("TABLE"))
 
         # Everleaf time is GMT/UTC; make the value explicitly UTC-aware.
         hand.startTime = datetime.datetime.strptime(
