@@ -303,10 +303,16 @@ class GuiSessionViewer(QSplitter):
         limittest = self.filters.get_limits_where_clause(limits)
         q = q.replace("<limit_test>", limittest)
 
-        currencytest = str(tuple(currencies))
-        currencytest = currencytest.replace(",)", ")")
-        currencytest = currencytest.replace("u'", "'")
-        currencytest = f"AND gt.currency in {currencytest}"
+        # Guard against an empty currency selection producing "gt.currency in
+        # ()", which is invalid SQL: the failed query aborts the transaction and
+        # blanks every later session graph. Match no rows instead.
+        if currencies:
+            currencytest = str(tuple(currencies))
+            currencytest = currencytest.replace(",)", ")")
+            currencytest = currencytest.replace("u'", "'")
+            currencytest = f"AND gt.currency in {currencytest}"
+        else:
+            currencytest = "AND 1=0"
         q = q.replace("<currency_test>", currencytest)
 
         if seats:

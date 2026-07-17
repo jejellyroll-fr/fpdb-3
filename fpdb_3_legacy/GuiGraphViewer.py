@@ -456,10 +456,16 @@ class GuiGraphViewer(QSplitter):
 
         limittest = self.filters.get_limits_where_clause(limits)
 
-        currencytest = str(tuple(currencies))
-        currencytest = currencytest.replace(",)", ")")
-        currencytest = currencytest.replace("u'", "'")
-        currencytest = f"AND gt.currency in {currencytest}"
+        # An empty currency selection would build "gt.currency in ()", which is
+        # invalid SQL: the failed execute aborts the transaction and every later
+        # query fails until restart. Match no rows instead (handled as no data).
+        if currencies:
+            currencytest = str(tuple(currencies))
+            currencytest = currencytest.replace(",)", ")")
+            currencytest = currencytest.replace("u'", "'")
+            currencytest = f"AND gt.currency in {currencytest}"
+        else:
+            currencytest = "AND 1=0"
 
         game_type = self.filters.getType()
 
@@ -478,8 +484,15 @@ class GuiGraphViewer(QSplitter):
 
         log.warning(f"GuiGraphViewer.getRingProfitGraph: Executing SQL query:\n{tmp}")
 
-        self.db.cursor.execute(tmp)
-        winnings = self.db.cursor.fetchall()
+        try:
+            self.db.cursor.execute(tmp)
+            winnings = self.db.cursor.fetchall()
+        except Exception:
+            # Roll back so a single malformed query can't leave the connection
+            # in an aborted transaction that blanks every subsequent graph.
+            log.exception("getRingProfitGraph: query failed; rolling back")
+            self.db.rollback()
+            return (None, None, None, None)
         self.db.rollback()
 
         log.warning(f"GuiGraphViewer.getRingProfitGraph: SQL query returned {len(winnings)} records.")
