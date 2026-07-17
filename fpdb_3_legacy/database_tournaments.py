@@ -559,10 +559,7 @@ class DatabaseTournamentsMixin:
                     result_query,
                     (
                         rank,
-                        rank,
                         winnings,
-                        winnings,
-                        winnings_currency,
                         winnings_currency,
                         tourneysPlayersId,
                     ),
