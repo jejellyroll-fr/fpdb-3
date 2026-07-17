@@ -274,7 +274,13 @@ class Unibet(HandHistoryConverter):
                         \s*(and\sis\sall.in)?
                         (and\shas\sreached\sthe\s[{LSC}\d\.,]+\scap)?
                         (\son|\scards?)?
-                        (\s\(disconnect\))?
+                        # Unibet appends why the site acted for the player:
+                        # "jejesat[...] folds  (timed out)", and "(disconnect)".
+                        # Only the latter was allowed for, so a timed-out fold went
+                        # unread: the player stayed in the hand, was counted at a
+                        # showdown he never reached, and could be handed the pot.
+                        # Any parenthesised note is skipped rather than listing them.
+                        (\s+\([^)]*\))?
                         (\s\[(?P<CARDS>.+?)\])?\s*$""".format(**substitutions),
         re.MULTILINE | re.VERBOSE,
     )
