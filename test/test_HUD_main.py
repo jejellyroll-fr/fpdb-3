@@ -620,12 +620,17 @@ def test_idle_kill_widget_removal(hud_main) -> None:
     mock_hud = MagicMock()
     hud_main.hud_dict["test_table"] = mock_hud
     hud_main.vb = MagicMock()
+    # Grab the label now: idle_kill clears the attribute once the label is gone.
+    label = mock_hud.tablehudlabel
 
     # Call idle_kill
     hud_main.idle_kill("test_table")
 
-    # Assert widget was removed from layout
-    hud_main.vb.removeWidget.assert_called_once_with(mock_hud.tablehudlabel)
+    # Assert widget was removed from layout, then destroyed rather than detached
+    hud_main.vb.removeWidget.assert_called_once_with(label)
+    label.deleteLater.assert_called_once()
+    label.setParent.assert_not_called()
+    assert mock_hud.tablehudlabel is None
 
     # Assert kill method on HUD was called
     mock_hud.kill.assert_called_once()
