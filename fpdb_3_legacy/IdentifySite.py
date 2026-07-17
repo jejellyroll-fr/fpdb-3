@@ -257,6 +257,52 @@ class IdentifySite:
             return skin_site
         return fallback_site
 
+    def _select_winning_skin_site(self, path, fallback_site):
+        """Return the configured WinningPoker (WPN) skin site for this file.
+
+        All WPN skins (Americas Cardroom, ACR Poker, WinningPoker,
+        BlackChipPoker, TruePoker, Ya Poker) share the same parser class and
+        ``siteId = 24``, so only one survives keyed by ``site_id`` in
+        ``self.sitelist``. The hand-history content carries no skin marker, so
+        the skin is resolved from the configured HH/TS paths, falling back to
+        whichever single WPN skin the user has enabled.
+        """
+        supported = getattr(self.config, "supported_sites", None)
+        if not supported:
+            return fallback_site
+        wpn_sites = [s for s in supported.values() if getattr(s, "network", "") == "WinningPoker"]
+        if not wpn_sites:
+            return fallback_site
+
+        norm_path = os.path.normcase(os.path.abspath(path))
+        best_site, best_score = None, None
+        for site in wpn_sites:
+            path_len = -1
+            for cfg_path in (site.HH_path, site.TS_path):
+                if not cfg_path:
+                    continue
+                cfg_abs = os.path.normcase(os.path.abspath(os.path.expanduser(cfg_path)))
+                if norm_path.startswith(cfg_abs):
+                    path_len = max(path_len, len(cfg_abs))
+            # Rank candidates: a file under a configured path beats non-matches,
+            # an enabled skin beats a disabled one, and a longer (more specific)
+            # configured path breaks remaining ties.
+            score = (path_len >= 0, bool(site.enabled), path_len)
+            if best_score is None or score > best_score:
+                best_site, best_score = site, score
+
+        matched_by_path, is_enabled, _ = best_score
+        # Nothing matched by path and nothing is enabled: keep the fallback
+        # rather than silently renaming to an arbitrary skin.
+        if not matched_by_path and not is_enabled:
+            return fallback_site
+        if best_site.site_name == fallback_site.name:
+            return fallback_site
+
+        skin_site = copy.copy(fallback_site)
+        skin_site.name = best_site.site_name
+        return skin_site
+
     def scan(self, path) -> None:
         if os.path.isdir(path):
             self.walkDirectory(path, self.sitelist)
@@ -426,9 +472,11 @@ class IdentifySite:
                 f.archive = True
                 f.archiveHead = True
             if m:
-                # For PokerStars, we need to determine the specific skin
+                # For PokerStars and WPN, we need to determine the specific skin
                 if filter_name == "PokerStars":
                     selected_site = self._select_pokerstars_skin_site(path, whole_file, site)
+                elif filter_name == "Winning":
+                    selected_site = self._select_winning_skin_site(path, site)
                 else:
                     selected_site = site
                 f.site = selected_site
@@ -457,6 +505,8 @@ class IdentifySite:
                     if m3:
                         if site.filter_name == "PokerStars":
                             f.site = self._select_pokerstars_skin_site(path, whole_file, site)
+                        elif site.filter_name == "Winning":
+                            f.site = self._select_winning_skin_site(path, site)
                         else:
                             f.site = site
                         f.ftype = "summary"
