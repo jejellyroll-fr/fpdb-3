@@ -194,7 +194,10 @@ def test_get_config_bootstraps_user_file_from_source_example(tmp_path, monkeypat
 
     config_path, example_copy, example_path = Configuration.get_config("isolated-config.xml", fallback=True)
 
-    assert config_path == f"{config_dir}/isolated-config.xml"
-    assert example_path == str(example)
+    # get_config normalises separators to "/" on every platform, so compare against
+    # posix paths: str(Path) is backslash-separated on Windows, and interpolating it
+    # into an f-string with a "/" would expect a mix the code never produces.
+    assert config_path == (config_dir / "isolated-config.xml").as_posix()
+    assert example_path == example.as_posix()
     assert example_copy is True
     assert (config_dir / "isolated-config.xml").read_text(encoding="utf-8") == "<config/>"
