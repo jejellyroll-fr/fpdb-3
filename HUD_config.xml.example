@@ -526,7 +526,7 @@
             <game_stat_set game_type="tour" stat_set="holdem_tour"/>
             <game_stat_set game_type="ring" stat_set="holdem_ring"/>
         </game>
-        <game game_name="razz" aux="stud_mucked, ClassicHud">
+        <game game_name="razz" aux="mucked, ClassicHud">
             <game_stat_set game_type="all" stat_set="stud_default"/>
         </game>
         <game game_name="omahahi" aux="ClassicHud, mucked">
@@ -547,13 +547,13 @@
         <game game_name="cour_hilo" aux="ClassicHud, mucked">
             <game_stat_set game_type="all" stat_set="omaha_default"/>
         </game>
-        <game game_name="studhi" aux="stud_mucked, ClassicHud">
+        <game game_name="studhi" aux="mucked, ClassicHud">
             <game_stat_set game_type="all" stat_set="stud_default"/>
         </game>
-        <game game_name="5_studhi" aux="stud_mucked, ClassicHud">
+        <game game_name="5_studhi" aux="mucked, ClassicHud">
             <game_stat_set game_type="all" stat_set="stud_default"/>
         </game>
-        <game game_name="studhilo" aux="stud_mucked, ClassicHud">
+        <game game_name="studhilo" aux="mucked, ClassicHud">
             <game_stat_set game_type="all" stat_set="stud_default"/>
         </game>
         <game game_name="27_3draw" aux="ClassicHud, mucked">
