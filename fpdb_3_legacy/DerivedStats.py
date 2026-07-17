@@ -3700,7 +3700,14 @@ class DerivedStats:
         raise ValueError(msg)
 
     def getBoardsList(self, hand: Any) -> list:
-        """Get boards list for hand."""
+        """Return the complete board(s) dealt in this hand, one entry per run.
+
+        An entry is a whole board, not a street: callers evaluate each one against
+        the players' holecards and split the pot across the runs. Returning the
+        streets separately handed the evaluator a one-card "board" for the turn and
+        the river ("wrong # of board cards"), and divided the pot by the number of
+        streets instead of the number of runs.
+        """
         try:
             log.debug("Getting boards list for hand %s", hand.handid)
 
@@ -3711,7 +3718,14 @@ class DerivedStats:
             if hasattr(hand, "runItTimes") and not isinstance(hand.runItTimes, int):
                 self._raise_invalid_run_it_times_error(hand.runItTimes)
 
-            return [hand.board[street] for street in hand.communityStreets if street in hand.board]
+            if hand.runItTimes >= MIN_RUN_IT_TIMES:
+                # Each run is dealt onto its own streets: FLOP1/TURN1/RIVER1, FLOP2...
+                return [
+                    [card for street in hand.communityStreets for card in hand.board.get(f"{street}{run}", [])]
+                    for run in range(1, hand.runItTimes + 1)
+                ]
+
+            return [[card for street in hand.communityStreets for card in hand.board.get(street, [])]]
 
         except (AttributeError, KeyError, TypeError, ValueError):
             log.exception("Error in getBoardsList for hand %s", hand.handid)
