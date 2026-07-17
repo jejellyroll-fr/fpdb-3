@@ -174,6 +174,7 @@ HandHistoryConverter: '{sitename}'
         # quick fix : empty files make the handsList[0] fail ==> If empty file, go on with HH parsing
         if not handsList or self.isSummary(handsList[0]) is False:
             self.parsedObjectType = "HH"
+            last_error_info = None
             for handText in handsList:
                 try:
                     self.processedHands.append(self.processHand(handText))
@@ -181,21 +182,21 @@ HandHistoryConverter: '{sitename}'
                 except FpdbHandPartial as e:
                     self.numPartial += 1
                     lastParsed = "partial"
-                    error_info = self.error_handler.record_error(
+                    last_error_info = self.error_handler.record_error(
                         self.in_path,
                         "partial",
                         str(e),
                         handText,
                     )
                     self.parsing_issues.append(f"[PARTIAL] Hand starting with '{handText[:30]}...': {e}")
-                    log.warning(f"partial {e}")
+                    log.info(f"partial {e}")
                 except FpdbHandSkipped:
                     self.numSkipped += 1
                     lastParsed = "skipped"
                 except FpdbParseError as e:
                     self.numErrors += 1
                     lastParsed = "error"
-                    error_info = self.error_handler.record_error(
+                    last_error_info = self.error_handler.record_error(
                         self.in_path,
                         "error",
                         str(e),
@@ -208,22 +209,8 @@ HandHistoryConverter: '{sitename}'
             if lastParsed in ("partial", "error") and self.autoPop:
                 # Use improved error handler to decide whether to reset file position
                 should_reset = False
-                if lastParsed == "partial":
-                    error_info = self.error_handler.record_error(
-                        self.in_path,
-                        "partial",
-                        "Partial hand detected",
-                        handsList[-1],
-                    )
-                    should_reset = self.error_handler.should_reset_file_position(self.in_path, error_info)
-                elif lastParsed == "error":
-                    error_info = self.error_handler.record_error(
-                        self.in_path,
-                        "error",
-                        "Parse error detected",
-                        handsList[-1],
-                    )
-                    should_reset = self.error_handler.should_reset_file_position(self.in_path, error_info)
+                if last_error_info is not None:
+                    should_reset = self.error_handler.should_reset_file_position(self.in_path, last_error_info)
 
                 if should_reset:
                     self.index -= len(handsList[-1])
@@ -234,9 +221,9 @@ HandHistoryConverter: '{sitename}'
                         self.numPartial -= 1
                     else:
                         self.numErrors -= 1
-                    log.info("Removing problematic hand & resetting index due to permanent error")
+                    log.info("Removing problematic hand & resetting index to retry later (temporary/recoverable error)")
                 else:
-                    log.info(f"Keeping file position despite {lastParsed} error - classified as temporary/recoverable")
+                    log.info(f"Keeping file position despite {lastParsed} error - skipping as permanent error")
             self.numHands = len(handsList)
             endtime = time.time()
             log.info(
