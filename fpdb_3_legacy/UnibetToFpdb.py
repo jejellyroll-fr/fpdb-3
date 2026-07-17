@@ -336,8 +336,13 @@ class Unibet(HandHistoryConverter):
         re.MULTILINE,
     )
     re_Cancelled = re.compile(r"Hand\scancelled", re.MULTILINE)
+    # "Uncalled bet returned to venomjr: €0.10", and no currency on chip counts.
+    # The pattern used to expect PokerStars' shape, "Uncalled bet (€0.10) returned
+    # to venomjr", which matches none of Unibet's hands -- and nothing called it
+    # either, so the returned money stayed in the pot: a hand whose "Total pot" is
+    # €0.35 was assembled as €0.45, and the winner's rake came out negative.
     re_Uncalled = re.compile(
-        r"Uncalled\sbet\s\({CUR}(?P<BET>[,.\d]+)\)\sreturned\sto".format(**substitutions),
+        r"^Uncalled\sbet\sreturned\sto\s(?P<PNAME>.+?):\s(€|\$|£)?(?P<BET>[\d.,]+)\s*$",
         re.MULTILINE,
     )
     # APTEM-89 wins the $0.27 bounty for eliminating Hero
@@ -910,6 +915,11 @@ class Unibet(HandHistoryConverter):
         s = street + "2" if hand.gametype["split"] and street in hand.communityStreets else street
         if not hand.streets[s]:
             return
+        for uncalled in self.re_Uncalled.finditer(hand.streets[s]):
+            # Give the bet nobody called back to its owner and take it out of the
+            # pot, as PokerStars, Winning and BetOnline already do. Without this the
+            # pot keeps money that was never contested.
+            hand.addUncalled(street, uncalled.group("PNAME"), self.clearMoneyString(uncalled.group("BET")))
         m = self.re_Action.finditer(hand.streets[s])
         for action in m:
             acts = action.groupdict()
