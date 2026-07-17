@@ -54,7 +54,7 @@
   "swc/Flop/NLHE-6max-mBTC-1.00-2.00-201304.txt": {"hand_count": 1, "sha256": "5010a7c522e0e7a716e7c0be64b64dd0ffb3759419e395804804939f33475564"},
   "swc/Flop/NLHE-9max-mBTC-1.00-1.00-201304.side.pot.txt": {"hand_count": 1, "sha256": "fd1327a6341047c698ec065358d054a358a8e41b3a94038dee44eac6e5211b28"},
   "swc/Flop/PLO-9max-mBTC-1.00-1.00-201304.txt": {"hand_count": 1, "sha256": "34220ca06981ece42e67f62aae80713211d7ed803fca7b2bc14a07baa5ff5912"},
-  "unibet/banzai.txt": {"hand_count": 1, "sha256": "c490eed3d1e02e6561377fd0b4fdbdf13414d5894eeeb50f8c63a3c6a5b8fbf0"},
+  "unibet/banzai.txt": {"hand_count": 1, "sha256": "4a46ad4a0cde22fe2cac2dcb0264b85fae8e3351b65e9673480379805d56ad7e"},
   "winamax/nlhe_cash.txt": {"hand_count": 1, "sha256": "7567b14fbf6f000eff68721181848e3da2b052ad816bbfe9b14aea748a7aa9cf"},
   "winning/modern_cash.txt": {"hand_count": 1, "sha256": "5c3575eec4c082691bf8f66a0de83770d7593ca5a458d2d7b930f7062b22d414"}
 }
