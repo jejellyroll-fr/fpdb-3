@@ -18,7 +18,7 @@
   "entraction/Flop/LHE-HU-EUR-10-20-201103.txt": {"hand_count": 1, "sha256": "d4b76bbf860b2719e9a6ce6f82fa48fe1c6737bb8aca319a124f9e50166914d8"},
   "everleaf/Stud/7-Stud-EUR-0.05-0.10.201108-new-format.txt": {"hand_count": 6, "sha256": "a0af8d8bb9ebe560f2056c541dcf17b765e902bc66fd9964d4715202e0c587be"},
   "fulltilt/Draw/3-Draw-Limit-USD-1500-3000-201101.FTP.Archive.sample.txt": {"hand_count": 1, "sha256": "28e56babd6e869c13622d7298a848a6cd3f7b8ccbdea1adf001840fb76b420ed"},
-  "ggpoker/plo_cash.txt": {"hand_count": 13, "sha256": "6bb40ce803cc2eb1c1432f1f001b7a3059ec4b2a12d67cb288a597f6f623701d"},
+  "ggpoker/plo_cash.txt": {"hand_count": 13, "sha256": "f630d4d8d0debdfd3aa57607b4c9d2fc068ea955aa8874e8adb67b467f4ccb56"},
   "ipoker/Flop/6+Holdem-EUR-0.25-0.50-201702.txt": {"hand_count": 1, "sha256": "c001d667ad5a1859d9f8bebc2046d0cb837046ead5605b71f558aa6367a17ab2"},
   "kingclub/5card_plo.txt": {"hand_count": 1, "sha256": "d2cf7c00bdfe2b6a339f5138cdb46c3850237da212d465fbff5c79cf2317c468"},
   "kingclub/nlhe.txt": {"hand_count": 1, "sha256": "0f2b0815aa7b0d1aaaaa8db751dc88e069b52a587cbcb79aa685f29783b6b408"},
