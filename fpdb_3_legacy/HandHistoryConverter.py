@@ -45,6 +45,10 @@ log = get_logger("hand_history_converter")
 HHC_SITE_ID_ERRORS = (AttributeError, KeyError, TypeError, ValueError)
 HHC_XML_PARSE_ERRORS = (OSError, TypeError, xml.parsers.expat.ExpatError)
 
+# Position of the all-in flag in a blind action, as built by Hand.addBlind():
+# (player, blindtype, amount, stack_is_now_empty).
+BLIND_ALL_IN_INDEX = 3
+
 
 class HandHistoryConverter(ABC):
     READ_CHUNK_SIZE = 10000  # bytes to read at a time from file in tail mode
@@ -711,7 +715,14 @@ or None if we fail to get the info """
                 for street in action_streets
                 if street != "BLINDSANTES"
             )
-            if base in ("hold", "draw", "stud") and non_blind_action_count == 0:
+            # A blind posted all-in ends the betting there: with the short stack
+            # already covered, nobody has anything left to act on and the board
+            # simply runs out. Such a hand really does hold no betting action, so
+            # flagging it reports a parser failure that did not happen.
+            # addBlind() sets the fourth element of a blind action when the post
+            # leaves the player with an empty stack.
+            blind_all_in = any(len(act) > BLIND_ALL_IN_INDEX and act[BLIND_ALL_IN_INDEX] for act in blind_actions)
+            if base in ("hold", "draw", "stud") and non_blind_action_count == 0 and not blind_all_in:
                 issues.append("no betting actions")
 
             hand_text = getattr(hand, "handText", "") or ""
