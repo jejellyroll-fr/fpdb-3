@@ -108,6 +108,22 @@ elif sysPlatform == "Windows":
 else:
     OS_FAMILY = ""
 
+# Where each client actually writes its hand histories, per platform.System().
+# Used by Config.detect_hh_path() when the configured HH_path does not exist:
+# the shipped defaults are Windows-only, and a config moved between machines
+# keeps the previous home directory. Paths are tried in order; "~" is expanded.
+HH_PATH_CANDIDATES: dict[str, dict[str, tuple[str, ...]]] = {
+    "SealsWithClubs": {
+        # The client's own setting, "Hand History Folder", defaults to Documents.
+        "Darwin": ("~/Documents/SwC Poker/Hand History",),
+        "Linux": ("~/Documents/SwC Poker/Hand History",),
+        "Windows": (
+            "~/Documents/SwC Poker/Hand History",
+            "C:/Program Files/SealsWithClubs/handhistories",
+        ),
+    },
+}
+
 
 if OS_FAMILY in ["XP", "Win7"]:
     APPDATA_PATH = winpaths_appdata
@@ -2947,18 +2963,48 @@ class Config:
     def set_timezone(self, timezone) -> None:
         self.imp.timezone = timezone
 
+    def detect_hh_path(self, site: str) -> str | None:
+        """Return an existing hand-history directory for a site, or None.
+
+        A configured HH_path can point nowhere: the shipped defaults are Windows
+        paths, and a config copied between machines keeps the other machine's home
+        directory. Fall back to where the client actually writes on this platform.
+        """
+        candidates = HH_PATH_CANDIDATES.get(site, {}).get(sysPlatform, ())
+        screen_name = getattr(self.supported_sites.get(site), "screen_name", "")
+        for candidate in candidates:
+            base = Path(candidate).expanduser()
+            # Clients write under a per-account folder; prefer the hero's own.
+            if screen_name and (base / screen_name).is_dir():
+                return str(base / screen_name)
+            if base.is_dir():
+                return str(base)
+        return None
+
     def get_default_paths(self, site=None):
         if site is None:
             site = self.getDefaultSite()
         paths = {}
         try:
             path = os.path.expanduser(self.supported_sites[site].HH_path)
-            assert os.path.isdir(path) or os.path.isfile(path)  # maybe it should try another site?
+            if not (os.path.isdir(path) or os.path.isfile(path)):
+                detected = self.detect_hh_path(site)
+                if detected is None:
+                    raise AssertionError(path)  # noqa: TRY301 - keep the existing error path
+                log.info(
+                    "Hand-history path for %s does not exist (%s); using detected path %s",
+                    site,
+                    path,
+                    detected,
+                )
+                path = detected
             paths["hud-defaultPath"] = paths["bulkImport-defaultPath"] = path
             if self.imp.hhBulkPath:
                 paths["bulkImport-defaultPath"] = self.imp.hhBulkPath
             if self.supported_sites[site].TS_path != "":
                 tspath = os.path.expanduser(self.supported_sites[site].TS_path)
+                if not (os.path.isdir(tspath) or os.path.isfile(tspath)):
+                    tspath = self.detect_hh_path(site) or tspath
                 paths["hud-defaultTSPath"] = tspath
         except AssertionError:
             paths["hud-defaultPath"] = paths["bulkImport-defaultPath"] = (
