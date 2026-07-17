@@ -468,11 +468,19 @@ class SealsWithClubs(HandHistoryConverter):
         if self._is_old_format(hand.handText):
             return self._readPlayerStacksOld(hand)
         handsplit = hand.handText.split("*** SUMMARY ***")
-        if len(handsplit) != 2:
-            msg = f"Hand is not cleanly split into pre and post Summary {hand.handid}."
-            raise FpdbHandPartial(
-                msg,
+        if len(handsplit) < 2:
+            # The client writes a hand as it is dealt, so the last one in a file is
+            # routinely still in progress; it also stops mid-hand when the hero
+            # leaves the table, and that hand never gets its summary. Either way the
+            # hand has no result yet and cannot be stored. Auto-import rewinds and
+            # retries, which picks it up once the client has written the rest.
+            msg = f"Hand {hand.handid} is unfinished: no '*** SUMMARY ***' section, the hand has no result yet."
+            raise FpdbHandPartial(msg)
+        if len(handsplit) > 2:
+            msg = (
+                f"Hand {hand.handid} is malformed: {len(handsplit) - 1} '*** SUMMARY ***' sections, expected one."
             )
+            raise FpdbHandPartial(msg)
         pre, post = handsplit
         m = self.re_PlayerInfo.finditer(pre)
         plist: dict[str, list[int | str]] = {}
