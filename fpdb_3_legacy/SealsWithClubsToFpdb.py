@@ -385,6 +385,7 @@ class SealsWithClubs(HandHistoryConverter):
             info["TABLE"] = f"{m2['TABLE2']} {new_string}"
             log.debug(f"Table name updated to: {info['TABLE']}")
             hand.tablename = f"{info['TABLE']}"
+            hand.tourneyName = m2["TABLE2"]
         else:
             # for cash game
             info["TABLE"] = m["TABLE"]

@@ -341,8 +341,15 @@ class DatabaseTournamentsMixin:
             resultDict = dict(list(zip(columnNames, tmp, strict=False)))
             if self.backend == self.PGSQL:
                 startTime, endTime = resultDict["starttime"], resultDict["endtime"]
+                tourneyName = resultDict.get("tourneyname")
             else:
                 startTime, endTime = resultDict["startTime"], resultDict["endTime"]
+                tourneyName = resultDict.get("tourneyName")
+
+            if not tourneyName and hand.tourneyName:
+                q_update = """UPDATE Tourneys SET tourneyName = %s WHERE id = %s"""
+                q_update = q_update.replace("%s", self.sql.query["placeholder"])
+                c.execute(q_update, (hand.tourneyName, result))
 
             if startTime is None or t < startTime:
                 q = self.sql.query["updateTourneyStart"].replace(
