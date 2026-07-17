@@ -570,8 +570,7 @@ class GGPoker(HandHistoryConverter):
     def _validate_hand_summary(self, hand: Hand) -> None:
         """Validate that hand has proper summary structure."""
         if hand.handText.count("*** SUMMARY ***") != 1:
-            msg = "Hand is not cleanly split into pre and post Summary"
-            raise FpdbHandPartial(msg)
+            self.raise_summary_partial(hand, "*** SUMMARY ***")
 
     def _extract_hand_info(self, hand: Hand) -> dict[str, str]:
         """Extract hand information using regex patterns."""

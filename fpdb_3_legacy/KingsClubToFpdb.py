@@ -405,8 +405,7 @@ class KingsClub(HandHistoryConverter):
     def readHandInfo(self, hand) -> None:
         # First check if partial
         if hand.handText.count("*** SUMMARY *") != 1:
-            msg = "Hand is not cleanly split into pre and post Summary"
-            raise FpdbHandPartial(msg)
+            self.raise_summary_partial(hand, "*** SUMMARY *")
 
         info = {}
         m = self.re_HandInfo.search(hand.handText, re.DOTALL)

@@ -633,9 +633,7 @@ class Winning(HandHistoryConverter):
 
         # Check if the hand is cleanly split into pre and post-summary
         if hand.handText.count("------ Summary ------") != 1:
-            log.error("Hand is not cleanly split into pre and post Summary")
-            msg = "Hand is not cleanly split into pre and post Summary"
-            raise FpdbHandPartial(msg)
+            self.raise_summary_partial(hand, "------ Summary ------")
 
         info = {}
         log.debug("Attempting to match game and datetime regex")
@@ -803,9 +801,7 @@ class Winning(HandHistoryConverter):
 
         # Check if the hand is cleanly split into pre and post-summary
         if hand.handText.count("*** SUMMARY ***") != 1:
-            log.error("Hand is not cleanly split into pre and post Summary")
-            msg = "Hand is not cleanly split into pre and post Summary"
-            raise FpdbHandPartial(msg)
+            self.raise_summary_partial(hand, "*** SUMMARY ***")
 
         info = {}
         log.debug("Attempting to match game and hand info regex patterns")
