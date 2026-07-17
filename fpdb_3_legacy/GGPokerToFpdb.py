@@ -575,7 +575,10 @@ class GGPoker(HandHistoryConverter):
     def _extract_hand_info(self, hand: Hand) -> dict[str, str]:
         """Extract hand information using regex patterns."""
         info = {}
-        m = self.re_hand_info.search(hand.handText, re.DOTALL)
+        # search()'s second positional argument is pos, not flags: passing re.DOTALL
+        # started the scan 16 characters in. Harmless so far -- the table line sits
+        # further down -- but it silently skips the head of every hand.
+        m = self.re_hand_info.search(hand.handText)
         m2 = self.re_game_info.search(hand.handText)
         if m is None or m2 is None:
             tmp = hand.handText[0:200]
@@ -595,6 +598,12 @@ class GGPoker(HandHistoryConverter):
                 hand.handid = info[key]
             elif key == "TOURNO":
                 hand.tourNo = info[key]
+            elif key == "TABLE":
+                # re_hand_info has always captured the name off "Table 'PLOWhite4'
+                # 6-max", but nothing read it, so every hand was stored with the
+                # empty default. Tournament hands showed the damage: Hand prefixes
+                # the tournament number, which left a bare "249773363 ".
+                hand.tablename = info[key]
             elif key == "BUYIN" and hand.tourNo is not None:
                 self._process_buyin_info(hand, info)
             elif key == "LEVEL":
