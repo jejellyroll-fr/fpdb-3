@@ -94,9 +94,9 @@ def tournament_persistence_queries(db_server: str = "") -> dict[str, str]:
     """
 
     query["updateTourneysPlayerResults"] = f"""UPDATE TourneysPlayers
-                                             SET {rank} = CASE WHEN %s IS NULL THEN {rank} ELSE %s END,
-                                                 winnings = CASE WHEN %s IS NULL THEN winnings ELSE %s END,
-                                                 winningsCurrency = CASE WHEN %s IS NULL THEN winningsCurrency ELSE %s END
+                                             SET {rank} = COALESCE(%s, {rank}),
+                                                 winnings = COALESCE(%s, winnings),
+                                                 winningsCurrency = COALESCE(%s, winningsCurrency)
                                              WHERE id=%s
     """
 

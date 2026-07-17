@@ -21,7 +21,7 @@ def test_tournament_persistence_keeps_results_and_bounties() -> None:
         assert column in queries["updateTourneysPlayer"]
         assert column in queries["insertTourneysPlayer"]
     assert "koCount = case when koCount is null" in queries["updateTourneysPlayerBounties"]
-    assert "CASE WHEN %s IS NULL THEN rank ELSE %s END" in queries["updateTourneysPlayerResults"]
+    assert "COALESCE(%s, rank)" in queries["updateTourneysPlayerResults"]
 
 
 def test_tournament_persistence_keeps_hand_player_type_repair() -> None:
@@ -36,5 +36,5 @@ def test_tournament_persistence_keeps_hand_player_type_repair() -> None:
 def test_mysql_quotes_reserved_tournament_rank_column() -> None:
     queries = tournament_persistence_queries("mysql")
     assert "SET `rank` = %s" in queries["updateTourneysPlayer"]
-    assert "SET `rank` = CASE" in queries["updateTourneysPlayerResults"]
+    assert "SET `rank` = COALESCE" in queries["updateTourneysPlayerResults"]
     assert "`rank`," in queries["insertTourneysPlayer"]
