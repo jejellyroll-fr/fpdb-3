@@ -20,6 +20,7 @@ from __future__ import annotations
 ########################################################################
 #    Standard Library modules
 import codecs
+import json
 import inspect
 import locale
 import os
@@ -122,6 +123,61 @@ HH_PATH_CANDIDATES: dict[str, dict[str, tuple[str, ...]]] = {
             "C:/Program Files/SealsWithClubs/handhistories",
         ),
     },
+    # All WinningPoker Network skins share the same ACR client / paths.
+    "Americas Cardroom": {
+        "Darwin": ("~/Downloads/AmericasCardroom/handHistory",),
+        "Windows": (
+            "C:/ACR Poker/handHistory",
+            "~/Documents/AmericasCardroom/handHistory",
+        ),
+    },
+    "ACR Poker": {
+        "Darwin": ("~/Downloads/AmericasCardroom/handHistory",),
+        "Windows": (
+            "C:/ACR Poker/handHistory",
+            "~/Documents/AmericasCardroom/handHistory",
+        ),
+    },
+    "WinningPoker": {
+        "Darwin": ("~/Downloads/AmericasCardroom/handHistory",),
+        "Windows": (
+            "C:/ACR Poker/handHistory",
+            "~/Documents/AmericasCardroom/handHistory",
+        ),
+    },
+    "BlackChipPoker": {
+        "Darwin": ("~/Downloads/AmericasCardroom/handHistory",),
+        "Windows": (
+            "C:/ACR Poker/handHistory",
+            "~/Documents/AmericasCardroom/handHistory",
+        ),
+    },
+    "TruePoker": {
+        "Darwin": ("~/Downloads/AmericasCardroom/handHistory",),
+        "Windows": (
+            "C:/ACR Poker/handHistory",
+            "~/Documents/AmericasCardroom/handHistory",
+        ),
+    },
+    "Ya Poker": {
+        "Darwin": ("~/Downloads/AmericasCardroom/handHistory",),
+        "Windows": (
+            "C:/ACR Poker/handHistory",
+            "~/Documents/AmericasCardroom/handHistory",
+        ),
+    },
+}
+
+# Sites whose HH/TS paths can be read from the ACR macOS Electron client's
+# local storage.  Maps site name -> JSON config key used in the filename
+# ``~/Library/Application Support/Loading/storage/hhDirPath_{key}.json``.
+_ACR_JSON_CONFIG_SITES: dict[str, str] = {
+    "Americas Cardroom": "AmericasCardroom",
+    "ACR Poker": "AmericasCardroom",
+    "WinningPoker": "AmericasCardroom",
+    "BlackChipPoker": "AmericasCardroom",
+    "TruePoker": "AmericasCardroom",
+    "Ya Poker": "AmericasCardroom",
 }
 
 
@@ -2969,9 +3025,25 @@ class Config:
         A configured HH_path can point nowhere: the shipped defaults are Windows
         paths, and a config copied between machines keeps the other machine's home
         directory. Fall back to where the client actually writes on this platform.
+
+        On macOS, Americas Cardroom (WPN) stores its configured HH path in a
+        JSON file written by the Electron client under
+        ``~/Library/Application Support/Loading/storage/``.
+        We read that first for an authoritative answer, then fall back to the
+        static HH_PATH_CANDIDATES list.
         """
-        candidates = HH_PATH_CANDIDATES.get(site, {}).get(sysPlatform, ())
         screen_name = getattr(self.supported_sites.get(site), "screen_name", "")
+
+        # --- ACR / WPN: read the Electron client's own JSON config on macOS ---
+        if sysPlatform == "Darwin":
+            acr_key = _ACR_JSON_CONFIG_SITES.get(site)
+            if acr_key:
+                detected = self._read_acr_json_path(acr_key, "hh", screen_name)
+                if detected:
+                    return detected
+
+        # --- Static candidate list ---
+        candidates = HH_PATH_CANDIDATES.get(site, {}).get(sysPlatform, ())
         for candidate in candidates:
             base = Path(candidate).expanduser()
             # Clients write under a per-account folder; prefer the hero's own.
@@ -2979,6 +3051,51 @@ class Config:
                 return str(base / screen_name)
             if base.is_dir():
                 return str(base)
+        return None
+
+    def detect_ts_path(self, site: str) -> str | None:
+        """Return an existing tournament-summary directory for a site, or None.
+
+        On macOS, the ACR client stores its TS path in
+        ``~/Library/Application Support/Loading/storage/tsDirPath_{key}.json``.
+        """
+        if sysPlatform == "Darwin":
+            acr_key = _ACR_JSON_CONFIG_SITES.get(site)
+            if acr_key:
+                screen_name = getattr(self.supported_sites.get(site), "screen_name", "")
+                detected = self._read_acr_json_path(acr_key, "ts", screen_name)
+                if detected:
+                    return detected
+        return None
+
+    @staticmethod
+    def _read_acr_json_path(acr_key: str, kind: str, screen_name: str) -> str | None:
+        """Read a path from the ACR Electron client's local-storage JSON.
+
+        Args:
+            acr_key: The config key (e.g. ``"AmericasCardroom"``).
+            kind: ``"hh"`` for hand histories or ``"ts"`` for tournament summaries.
+            screen_name: The player's screen name for per-account sub-folders.
+
+        Returns:
+            The resolved directory path, or ``None`` if the file is missing or
+            the directory does not exist.
+        """
+        prefix = "hhDirPath" if kind == "hh" else "tsDirPath"
+        json_path = Path(
+            f"~/Library/Application Support/Loading/storage/{prefix}_{acr_key}.json"
+        ).expanduser()
+        if not json_path.is_file():
+            return None
+        try:
+            data = json.loads(json_path.read_text(encoding="utf-8"))
+            base = Path(data["path"])
+            if screen_name and (base / screen_name).is_dir():
+                return str(base / screen_name)
+            if base.is_dir():
+                return str(base)
+        except (json.JSONDecodeError, KeyError, OSError):
+            log.debug("Could not read ACR config from %s", json_path)
         return None
 
     def get_default_paths(self, site=None):
@@ -3004,7 +3121,7 @@ class Config:
             if self.supported_sites[site].TS_path != "":
                 tspath = os.path.expanduser(self.supported_sites[site].TS_path)
                 if not (os.path.isdir(tspath) or os.path.isfile(tspath)):
-                    tspath = self.detect_hh_path(site) or tspath
+                    tspath = self.detect_ts_path(site) or self.detect_hh_path(site) or tspath
                 paths["hud-defaultTSPath"] = tspath
         except AssertionError:
             paths["hud-defaultPath"] = paths["bulkImport-defaultPath"] = (
