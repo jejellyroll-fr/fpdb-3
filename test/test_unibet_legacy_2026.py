@@ -295,8 +295,10 @@ def test_full_import_tournament() -> None:
         assert hand.hero == "hero"
         # Chip stacks (no currency symbol) parse.
         assert dict((p[1], p[2]) for p in hand.players)["hero"] == "770"
-        # Only the winner is collected (losers' negative net result excluded).
-        assert hand.collected == [["hero", "150"]]
+        # The pot taken, not the net result: the sample reads "bet 150 and won 300",
+        # so hero collects 300 and profits 150. Only the winner is collected --
+        # the other seats won 0.
+        assert hand.collected == [["hero", "300"]]
         assert hand.actions["BLINDSANTES"] == [
             ("hero", "small blind", Decimal("25"), False),
             ("evymm", "big blind", Decimal("50"), False),

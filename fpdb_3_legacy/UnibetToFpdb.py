@@ -294,10 +294,17 @@ class Unibet(HandHistoryConverter):
     )
     # re_ShownCards       = re.compile("^Seat (?P<SEAT>[0-9]+): %(PLYR)s %(BRKTS)s(?P<SHOWED>showed|mucked) \[(?P<CARDS>.*)\]( and (lost|(won|collected) \(%(CUR)s(?P<POT>[.\d]+)\)) with (?P<STRING>.+?)(,\sand\s(won\s\(%(CUR)s[.\d]+\)|lost)\swith\s(?P<STRING2>.*))?)?$" % substitutions, re.MULTILINE)
     # re_CollectPot       = re.compile(r"Seat (?P<SEAT>[0-9]+): %(PLYR)s %(BRKTS)s(collected|showed \[.*\] and (won|collected)) \(?%(CUR)s(?P<POT>[,.\d]+)\)?(, mucked| with.*|)" %  substitutions, re.MULTILINE)
+    # Unibet reports both figures on one line, e.g.
+    # "Seat 2: cla17: bet €0.15 and won €0.33, net result: €0.18".
+    # POT is what the seat took out of the pot, so capture the amount won: the net
+    # result is profit, and using it charged the bet twice -- once by the site, once
+    # again by fpdb -- which understated winnings and inflated rake. It also let the
+    # line go unmatched whenever the net was negative (leading "-"), losing the
+    # collect of anyone who won a pot smaller than their own bet.
     # Currency symbols are optional: tournament summaries use chip counts, e.g.
     # "Seat 5: jejesat: bet 150 and won 300, net result: 150".
     re_CollectPot = re.compile(
-        r"Seat (?P<SEAT>[0-9]+):\s{PLYR}:\sbet\s(€|\$|£)?(?P<BET>[,.\d]+)\sand\swon\s(€|\$|£)?[\.0-9]+\W\snet\sresult:\s(€|\$|£)?(?P<POT>[,.\d]+)".format(
+        r"Seat (?P<SEAT>[0-9]+):\s{PLYR}:\sbet\s(€|\$|£)?(?P<BET>[,.\d\s]+?)\sand\swon\s(€|\$|£)?(?P<POT>[,.\d\s]+?),\snet\sresult:".format(
             **substitutions
         ),
         re.MULTILINE,
@@ -957,12 +964,17 @@ class Unibet(HandHistoryConverter):
     def readCollectPot(self, hand) -> None:
         hand.setUncalledBets(True)
         for m in self.re_CollectPot.finditer(hand.handText):
+            pot = Decimal(self.clearMoneyString(m.group("POT")))
+            if not pot:
+                # "and won €0": the seat reached the summary without taking a pot.
+                # Registering it would put a zero collectee on the hand.
+                continue
             hand.addCollectPot(
                 player=m.group("PNAME"),
-                pot=str(Decimal(m.group("POT"))),
+                pot=str(pot),
             )
             log.info(
-                f"read Collect Pot: '{m.group('PNAME')}' for '{Decimal(m.group('POT'))!s}'",
+                f"read Collect Pot: '{m.group('PNAME')}' for '{pot!s}'",
             )
 
     def readShownCards(self, hand) -> None:
