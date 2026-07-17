@@ -3564,6 +3564,14 @@ class DerivedStats:
                         pot_board += mod_board
                     holeplayers, holecards = [], []
                     for p in players:
+                        # A pot lists everyone who paid into it, including players who
+                        # folded later. They cannot win it, so evaluating their cards
+                        # awards the pot to a folder whenever his hand happens to be
+                        # the best -- which happens as soon as those cards are known,
+                        # the hero's always being. The real winner is then credited
+                        # with less than he collected, and his rake comes out negative.
+                        if not self.handsplayers[p]["sawShowdown"]:
+                            continue
                         hcs = hand.join_holecards(p, asList=True)
                         holes = [
                             str(c)
