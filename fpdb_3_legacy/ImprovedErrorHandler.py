@@ -19,9 +19,9 @@ log = get_logger("improved_error_handler")
 class ErrorSeverity(Enum):
     """Classification of error severity levels."""
 
-    TEMPORARY = "temporary"  # Retry possible, don't reset file position
-    RECOVERABLE = "recoverable"  # Minor adjustment needed
-    PERMANENT = "permanent"  # File position reset required
+    TEMPORARY = "temporary"  # Retry possible, resets file position (rollback)
+    RECOVERABLE = "recoverable"  # Minor adjustment/retry needed
+    PERMANENT = "permanent"  # Skip/discard hand, maintains file position (no rollback)
 
 
 @dataclass
@@ -53,6 +53,8 @@ class ImprovedErrorHandler:
             "temporary",
             "lock",
             "busy",
+            "unfinished",
+            "no summary",
         ]
 
         self.permanent_error_patterns = [
@@ -118,7 +120,12 @@ class ImprovedErrorHandler:
         if file_path not in self.error_history:
             self.error_history[file_path] = []
 
-        recent_errors = [e for e in self.error_history[file_path] if time.time() - e.timestamp < 300]  # Last 5 minutes
+        # Only count recent RECOVERABLE errors towards the skip threshold.
+        # TEMPORARY errors do not count towards the threshold.
+        recent_errors = [
+            e for e in self.error_history[file_path]
+            if time.time() - e.timestamp < 300 and e.severity == ErrorSeverity.RECOVERABLE
+        ]
 
         if len(recent_errors) >= self.temporary_error_threshold:
             log.warning(f"Too many recent errors for {file_path}, treating as permanent (skipping)")

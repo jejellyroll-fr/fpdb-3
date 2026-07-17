@@ -1124,28 +1124,28 @@
                 <location seat="7" x="-4" y="100"/>
                 <location common="1" x="323" y="232"/>
             </layout>
-            <layout max="8" height="103" width="336">
-                <location seat="1" x="1225" y="737"/>
-                <location seat="2" x="1055" y="318"/>
-                <location seat="3" x="1156" y="445"/>
-                <location seat="4" x="974" y="540"/>
-                <location seat="5" x="731" y="525"/>
-                <location seat="6" x="521" y="450"/>
-                <location seat="7" x="616" y="303"/>
-                <location seat="8" x="711" y="195"/>
-                <location common="1" x="137" y="41"/>
+            <layout max="8" height="546" width="792">
+                <location seat="1" x="573" y="41"/>
+                <location seat="2" x="681" y="221"/>
+                <location seat="3" x="686" y="338"/>
+                <location seat="4" x="512" y="411"/>
+                <location seat="5" x="162" y="413"/>
+                <location seat="6" x="3" y="339"/>
+                <location seat="7" x="2" y="221"/>
+                <location seat="8" x="112" y="41"/>
+                <location common="1" x="323" y="232"/>
             </layout>
-            <layout max="9" height="103" width="336">
-                <location seat="1" x="281" y="6"/>
-                <location seat="2" x="294" y="37"/>
-                <location seat="3" x="289" y="59"/>
-                <location seat="4" x="1079" y="633"/>
-                <location seat="5" x="860" y="670"/>
-                <location seat="6" x="98" y="71"/>
-                <location seat="7" x="413" y="511"/>
-                <location seat="8" x="394" y="208"/>
-                <location seat="9" x="4" y="6"/>
-                <location common="1" x="137" y="41"/>
+            <layout max="9" height="546" width="792">
+                <location seat="1" x="663" y="48"/>
+                <location seat="2" x="694" y="205"/>
+                <location seat="3" x="682" y="325"/>
+                <location seat="4" x="630" y="393"/>
+                <location seat="5" x="429" y="410"/>
+                <location seat="6" x="231" y="392"/>
+                <location seat="7" x="8" y="332"/>
+                <location seat="8" x="10" y="204"/>
+                <location seat="9" x="10" y="48"/>
+                <location common="1" x="323" y="232"/>
             </layout>
             <layout max="10" height="546" width="792">
                 <location seat="1" x="531" y="14"/>

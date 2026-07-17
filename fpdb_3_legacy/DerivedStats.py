@@ -1780,7 +1780,7 @@ class DerivedStats:
         VPIP Opportunity: Player had a chance to act preflop (not all-in blind, didn't fold blinds)
         VPIP Done: Player voluntarily put money in pot (call/raise/bet/complete)
         """
-        log.warning("Starting VPIP calculation for hand ID: %s", hand.handid)
+        log.debug("Starting VPIP calculation for hand ID: %s", hand.handid)
         if not hasattr(self, "handsplayers"):
             log.warning("vpip: handsplayers not available, returning")
             return
@@ -1797,9 +1797,9 @@ class DerivedStats:
             return
 
         preflop_actions = hand.actions.get(hand.actionStreets[1], [])
-        log.warning("vpip: Preflop actions: %s", preflop_actions)
-        log.warning("vpip: actionStreets: %s", hand.actionStreets)
-        log.warning("vpip: hand.actions keys: %s", list(hand.actions.keys()))
+        log.debug("vpip: Preflop actions: %s", preflop_actions)
+        log.debug("vpip: actionStreets: %s", hand.actionStreets)
+        log.debug("vpip: hand.actions keys: %s", list(hand.actions.keys()))
         vpip_count = 0
 
         # Get players who were all-in blind (should not get VPIP opportunity)
@@ -3769,7 +3769,7 @@ class DerivedStats:
             ]
 
             if len(valid_players) < MIN_PLAYERS_FOR_GAME:
-                log.warning("Not enough valid players for EV calculation: %s", valid_players)
+                log.debug("Not enough valid players for EV calculation: %s", valid_players)
                 return None
 
             # Initialize stove data if not exists

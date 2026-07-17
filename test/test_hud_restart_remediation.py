@@ -165,6 +165,33 @@ class TestImprovedErrorHandler:
         temp_error = error_handler.record_error(file_path, "error", "connection timeout", "valid data")
         assert error_handler.should_reset_file_position(file_path, temp_error) is True
 
+    def test_classify_unfinished_hand_error(self, error_handler) -> None:
+        """Test that unfinished hand errors are classified as TEMPORARY."""
+        error_message = "Hand 123456 is unfinished: no '*** SUMMARY ***' section, the hand has no result yet."
+        hand_text = "valid hand text..."
+        severity = error_handler.classify_error(error_message, hand_text)
+        assert severity == ErrorSeverity.TEMPORARY
+
+        # It should always reset the file position
+        error = error_handler.record_error("/test/unfinished.txt", "partial", error_message, hand_text)
+        assert error_handler.should_reset_file_position("/test/unfinished.txt", error) is True
+
+    def test_temporary_errors_ignored_in_threshold(self, error_handler) -> None:
+        """Test that TEMPORARY errors do not count towards the threshold for RECOVERABLE errors."""
+        file_path = "/test/threshold.txt"
+
+        # Record multiple temporary/unfinished hand errors
+        for i in range(10):
+            error_msg = f"Hand {i} is unfinished: no '*** SUMMARY ***' section"
+            error = error_handler.record_error(file_path, "partial", error_msg, "valid hand text...")
+            # Temporary errors should always say reset is True
+            assert error_handler.should_reset_file_position(file_path, error) is True
+
+        # Now record a recoverable error. Since temporary errors are ignored in the threshold check,
+        # the recoverable error should still return True (retry) instead of False (skip).
+        rec_error = error_handler.record_error(file_path, "error", "Unknown parsing issue", "Hand #123456: ...")
+        assert error_handler.should_reset_file_position(file_path, rec_error) is True
+
     def test_error_history_cleanup(self, error_handler) -> None:
         """Test automatic cleanup of old errors."""
         file_path = "/test/cleanup.txt"

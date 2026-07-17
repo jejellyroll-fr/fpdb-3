@@ -91,7 +91,7 @@ class SealsWithClubs(HandHistoryConverter):
     )
     re_Board = re.compile(r"\[(?P<CARDS>.+)\]")
     re_DateTime = re.compile(
-        r"""(?P<Y>\d{4})-(?P<M>\d{2})-(?P<D>\d{2})[\-\s]+(?P<H>\d+):(?P<MIN>\d+):(?P<S>\d+)""",
+        r"""(?P<Y>\d{4})[-/](?P<M>\d{2})[-/](?P<D>\d{2})[\-\s]+(?P<H>\d+):(?P<MIN>\d+):(?P<S>\d+)""",
         re.MULTILINE,
     )
 
