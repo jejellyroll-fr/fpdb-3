@@ -1075,9 +1075,17 @@ class HudMain(QObject):
                 else:
                     log.warning(f"Failed to save HUD stats for table: {table}")
 
-                # Original kill logic
-                self.vb.removeWidget(self.hud_dict[table].tablehudlabel)
-                self.hud_dict[table].tablehudlabel.setParent(None)
+                # Take the label out of the main window and destroy it. setParent(None)
+                # only detached it, which turns a QLabel into a top-level widget --
+                # its own window, captioned with its text ("SealsWithClubs - <tourney>
+                # Table 3"). Killing a HUD must leave nothing of it behind: in a
+                # tournament the hero is moved from table to table, and each move left
+                # one more of these behind.
+                label = self.hud_dict[table].tablehudlabel
+                self.vb.removeWidget(label)
+                label.hide()
+                label.deleteLater()
+                self.hud_dict[table].tablehudlabel = None
                 self.hud_dict[table].kill()
                 del self.hud_dict[table]
             self.main_window.resize(1, 1)
