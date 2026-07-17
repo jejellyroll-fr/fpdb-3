@@ -727,14 +727,26 @@ class SealsWithClubs(HandHistoryConverter):
             hand.rakes["rake"] = rake
 
     @staticmethod
-    def getTableTitleRe(type, table_name=None, tournament=None, table_number=None):
+    def getTableTitleRe(
+        type,
+        table_name=None,
+        tournament=None,
+        table_number=None,
+        tourney_name=None,
+        **kwargs,
+    ):
         log.debug(
-            f"Seals.getTableTitleRe: table_name='{table_name}' tournament='{tournament}' table_number='{table_number}'",
+            f"Seals.getTableTitleRe: table_name='{table_name}' tournament='{tournament}' table_number='{table_number}' tourney_name='{tourney_name}'",
         )
 
         if not table_name:
-            log.debug("Seals.getTableTitleRe: no valid input provided")
-            return ""
+            if tourney_name:
+                table_name = f"{tourney_name} {table_number}"
+            elif tournament is not None and table_number is not None:
+                table_name = f"{tournament} {table_number}"
+            else:
+                log.debug("Seals.getTableTitleRe: no valid input provided")
+                return ""
 
         log.debug(f"Initial table_name: {table_name}")
 
@@ -745,19 +757,13 @@ class SealsWithClubs(HandHistoryConverter):
             if len(words) > 2:
                 regex = " ".join(words[1:-1])
             log.debug(f"Seals.getTableTitleRe: regex after processing='{regex}'")
-            return regex
-
-        if type == "tour":
-            match = re.match(r"(\d+)\s(.+)\s(\[\d+\sChips\])\s(\d+)", table_name)
-            if match:
-                tournament_id, game_type, chips_info, table_number = match.groups()
-                regex = f"{tournament_id} {game_type} {chips_info} {table_number}"
-                log.debug(f"Seals.getTableTitleRe: regex for tour='{regex}'")
-                return regex
+            import re
+            return re.escape(regex)
 
         regex = f"{table_name}"
         log.debug(f"Seals.getTableTitleRe: regex='{regex}'")
-        return regex
+        import re
+        return re.escape(regex)
 
     def readOther(self, hand: Hand) -> None:
         """Read other information from hand that doesn't fit standard categories.

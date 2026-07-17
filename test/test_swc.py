@@ -374,3 +374,33 @@ def test_re_DateTime() -> None:
     assert match2.group("MIN") == "34"
     assert match2.group("S") == "17"
 
+
+def test_getTableTitleRe_tour() -> None:
+    from fpdb_3_legacy.SealsWithClubsToFpdb import SealsWithClubs
+
+    # Case 1: called with tournament, table_number, and tourney_name (which is what TableWindow does)
+    regex = SealsWithClubs.getTableTitleRe(
+        "tour",
+        table_name=None,
+        tournament="298243657",
+        table_number="4",
+        tourney_name="Hourly Freeroll - NLH [10 Chips]",
+    )
+    import re
+    assert regex == re.escape("Freeroll - NLH [10 Chips]")
+
+    # Case 2: check that it matches the actual window title
+    window_title = " Hourly Freeroll - NLH [10 Chips]  -   Level 15/30  (6);   Next Level 20/40  (8)"
+    assert re.search(regex, window_title) is not None
+
+    # Case 3: fallback when tourney_name is not provided
+    regex_fallback = SealsWithClubs.getTableTitleRe(
+        "tour",
+        table_name=None,
+        tournament="298243657",
+        table_number="4",
+        tourney_name=None,
+    )
+    assert regex_fallback == re.escape("298243657 4")
+
+
