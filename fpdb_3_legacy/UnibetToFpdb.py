@@ -294,19 +294,25 @@ class Unibet(HandHistoryConverter):
     )
     # re_ShownCards       = re.compile("^Seat (?P<SEAT>[0-9]+): %(PLYR)s %(BRKTS)s(?P<SHOWED>showed|mucked) \[(?P<CARDS>.*)\]( and (lost|(won|collected) \(%(CUR)s(?P<POT>[.\d]+)\)) with (?P<STRING>.+?)(,\sand\s(won\s\(%(CUR)s[.\d]+\)|lost)\swith\s(?P<STRING2>.*))?)?$" % substitutions, re.MULTILINE)
     # re_CollectPot       = re.compile(r"Seat (?P<SEAT>[0-9]+): %(PLYR)s %(BRKTS)s(collected|showed \[.*\] and (won|collected)) \(?%(CUR)s(?P<POT>[,.\d]+)\)?(, mucked| with.*|)" %  substitutions, re.MULTILINE)
-    # Unibet reports both figures on one line, e.g.
-    # "Seat 2: cla17: bet €0.15 and won €0.33, net result: €0.18".
-    # POT is what the seat took out of the pot, so capture the amount won: the net
-    # result is profit, and using it charged the bet twice -- once by the site, once
-    # again by fpdb -- which understated winnings and inflated rake. It also let the
-    # line go unmatched whenever the net was negative (leading "-"), losing the
-    # collect of anyone who won a pot smaller than their own bet.
-    # Currency symbols are optional: tournament summaries use chip counts, e.g.
-    # "Seat 5: jejesat: bet 150 and won 300, net result: 150".
+    # What a player takes out of the pot is the "wins" line, not the summary.
+    # The summary states two figures, neither of them the pot:
+    #   "Seat 3: venomjr: bet €0.20 and won €0.43, net result: €0.23"
+    # while the hand itself says "venomjr wins €0.33" over a "Total pot €0.35
+    # Rake €0.02". The net result is profit; and "won" counts the player's own
+    # uncalled bet back in (0.33 + 0.10 returned = 0.43), so it can exceed the pot
+    # and drive the computed rake negative. The "wins" lines add up to the pot.
+    # Three shapes occur, and currency is absent from tournament chip counts:
+    #   "ASC2 wins €0.23"                          / "DrikC79 wins 380"
+    #   "cla17 wins €0.07 from main pot"           (split pots)
+    #   "jejesat[...] wins side pot #1, 660"       (tournaments)
+    # Anchored at both ends so "X wins the tournament and receives €4" and
+    # "X wins $19.90 for eliminating Y" -- which are not pots -- stay out.
     re_CollectPot = re.compile(
-        r"Seat (?P<SEAT>[0-9]+):\s{PLYR}:\sbet\s(€|\$|£)?(?P<BET>[,.\d\s]+?)\sand\swon\s(€|\$|£)?(?P<POT>[,.\d\s]+?),\snet\sresult:".format(
-            **substitutions
-        ),
+        r"^{PLYR}\swins\s"
+        r"(?:(?:main|side)\spot(?:\s#\d+)?,\s)?"
+        r"(€|\$|£)?(?P<POT>[\d.,]+)"
+        r"(?:\sfrom\s(?:main|side)\spot(?:\s#\d+)?)?"
+        r"\s*$".format(**substitutions),
         re.MULTILINE,
     )
     # Vinsand88 cashed out the hand for $2.19 | Cash Out Fee $0.02
@@ -964,11 +970,11 @@ class Unibet(HandHistoryConverter):
     def readCollectPot(self, hand) -> None:
         hand.setUncalledBets(True)
         for m in self.re_CollectPot.finditer(hand.handText):
+            # A "wins" line is only written for a pot actually taken, so unlike the
+            # summary there is no zero-amount row to filter out here. A player who
+            # wins both a main and a side pot gets one line each; addCollectPot()
+            # sums them.
             pot = Decimal(self.clearMoneyString(m.group("POT")))
-            if not pot:
-                # "and won €0": the seat reached the summary without taking a pot.
-                # Registering it would put a zero collectee on the hand.
-                continue
             hand.addCollectPot(
                 player=m.group("PNAME"),
                 pot=str(pot),
