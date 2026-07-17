@@ -424,10 +424,15 @@ class GuiGraphViewer(QSplitter):
 
     def getRingProfitGraph(self, names, sites, limits, games, currencies, units):
         log.warning(f"GuiGraphViewer.getRingProfitGraph: names: {names}, sites: {sites}, limits: {limits}, games: {games}, currencies: {currencies}, units: {units}")
-        if units == "$":
-            tmp = self.sql.query["getRingProfitAllHandsPlayerIdSiteInDollars"]
-        elif units == "BB":
+        # ``units`` is the display symbol: "BB" for big-blind mode, otherwise a
+        # (possibly localized) currency symbol like "$", "€" or "£". Selecting
+        # the query on the literal "$" broke every non-USD currency, so decide
+        # on BB-vs-currency instead: the "InDollars" query returns raw monetary
+        # amounts regardless of currency, and ``units`` only labels the axis.
+        if units == "BB":
             tmp = self.sql.query["getRingProfitAllHandsPlayerIdSiteInBB"]
+        else:
+            tmp = self.sql.query["getRingProfitAllHandsPlayerIdSiteInDollars"]
 
         start_date, end_date = self.filters.getDates()
 
