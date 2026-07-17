@@ -216,26 +216,29 @@ class Stud_cards:
             self.tips.append(temp)
 
     def update_gui(self, new_hand_id) -> None:
+        # clear() blanks every row so seats with no player stay empty instead of
+        # showing a phantom row of seven card backs (only seats present in
+        # hud.cards were dealt in).
         self.clear()
         for c, cards in list(self.parent.hud.cards.items()):
             if c == "common":
                 continue
-            self.grid_contents[(1, c - 1)].setText(self.get_screen_name(c))
-            for i in (
-                (0, cards[0]),
-                (1, cards[1]),
-                (2, cards[2]),
-                (3, cards[3]),
-                (4, cards[4]),
-                (5, cards[5]),
-                (6, cards[6]),
-            ):
-                if i[1] != 0:
+            row = c - 1
+            if not (0 <= row < self.rows):
+                # Seat numbers outside the fixed 8-row grid have no cell to fill.
+                continue
+            self.grid_contents[(1, row)].setText(self.get_screen_name(c))
+            for idx in range(self.cols):
+                card = cards[idx] if idx < len(cards) else 0
+                if card != 0:
                     # Pixmaps are stored in dict with rank+suit keys
-                    card_symbol = Card.valueSuitFromCard(i[1])
+                    card_symbol = Card.valueSuitFromCard(card)
                     rank, suit = card_symbol[0], card_symbol[1]
                     rank_index = Card.card_map[rank]
-                    self.eb[(i[0], c - 1)].setPixmap(self.card_images[suit][rank_index])
+                    self.eb[(idx, row)].setPixmap(self.card_images[suit][rank_index])
+                else:
+                    # Dealt-in seat, hidden card: show a card back (not blank).
+                    self.eb[(idx, row)].setPixmap(self.card_images[0])
         #    action in tools tips for later streets
         # round_to_col = (0, 3, 4, 5, 6)
         # for round in range(1, len(self.tips)):
@@ -256,9 +259,10 @@ class Stud_cards:
     def clear(self) -> None:
         for r in range(self.rows):
             self.grid_contents[(1, r)].setText("             ")
-            for c in range(7):
-                # Start by creating a box of nothing but card backs
-                self.eb[(c, r)].setPixmap(self.card_images[0])
+            for c in range(self.cols):
+                # Blank the cell: empty seats must not show phantom card backs.
+                # update_gui() repaints backs only for seats that were dealt in.
+                self.eb[(c, r)].clear()
 
 
 class Flop_Mucked(Aux_Base.AuxSeats, QObject):
