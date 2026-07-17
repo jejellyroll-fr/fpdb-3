@@ -347,6 +347,21 @@ class iPoker(IPokerStreetsActionsMixin, IPokerHandInfoMixin, IPokerTournamentRes
         # Finally use the standard clearMoneyString
         return self.clearMoneyString(cleaned)
 
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        """Build the converter and pin its skin identity to the input path.
+
+        The skin follows from the path, so resolve it now instead of waiting for
+        determineGameType(): that is the only other caller, and it never runs on a
+        pass that parses no hands. The converter kept the site name the Importer
+        passed in -- the one that owns the watched directory in the config -- so an
+        import of a PMU file was reported as "Redbet Poker" whenever it turned up
+        no new hands. A path that identifies no skin keeps the configured name.
+        """
+        super().__init__(*args, **kwargs)
+        skin_path = self._skin_detection_path()
+        if skin_path and self.detectSkin(skin_path) != "iPoker":
+            self._apply_skin_from_input_path()
+
     def detectSkin(self, path: str) -> str:
         """Detect the iPoker skin from the file path."""
         return detect_skin(path)
