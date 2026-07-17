@@ -657,10 +657,7 @@ class Winamax(HandHistoryConverter):
         # Going to parse both and only add players in the summary.
         handsplit = hand.handText.split("*** SUMMARY ***")
         if len(handsplit) != self.EXPECTED_SUMMARY_PARTS:
-            msg = f"Hand is not cleanly split into pre and post Summary {hand.handid}."
-            raise FpdbHandPartial(
-                msg,
-            )
+            self.raise_summary_partial(hand, "*** SUMMARY ***")
         pre = handsplit[0]
         # Extract all player names mentioned in the action part (blinds + streets + summary)
         # to identify participating players.

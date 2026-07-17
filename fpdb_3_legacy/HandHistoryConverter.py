@@ -315,6 +315,30 @@ HandHistoryConverter: '{sitename}'
         """Parse a shared game header for converters that enable ``copyGameHeader``."""
         raise NotImplementedError
 
+    def raise_summary_partial(self, hand: object, marker: str) -> None:
+        """Reject a hand whose summary sections do not number exactly one.
+
+        Two unrelated situations land here, and reporting both as "not cleanly
+        split into pre and post Summary" made either look like a parser bug. A
+        hand with no summary is simply unfinished: clients write a hand as it is
+        dealt, so the last one in a file is routinely still in progress, and a
+        client also stops mid-hand when the hero leaves the table. Auto-import
+        rewinds and retries, which picks the hand up once the rest is written.
+        Several summaries in one hand, on the other hand, is malformed.
+
+        Args:
+            hand: the hand being read; its handid is used when already parsed.
+            marker: the summary marker this site writes, quoted back to the user.
+        """
+        count = hand.handText.count(marker)
+        # readHandInfo() runs this check before the id is parsed, leaving it at 0.
+        handid = getattr(hand, "handid", 0) or "?"
+        if count == 0:
+            msg = f"Hand {handid} is unfinished: no '{marker}' section, the hand has no result yet."
+        else:
+            msg = f"Hand {handid} is malformed: {count} '{marker}' sections, expected one."
+        raise FpdbHandPartial(msg)
+
     def processHand(self, handText):
         if self.isPartial(handText):
             msg = f"Could not identify as a {self.sitename} hand"
