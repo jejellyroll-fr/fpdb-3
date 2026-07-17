@@ -253,7 +253,7 @@
             <game_stat_set game_type="tour" stat_set="mtt_holdem_nl"/>
             <game_stat_set game_type="ring" stat_set="holdem_cg_expert"/>
         </game>
-        <game game_name="razz" aux="stud_mucked, ClassicHud">
+        <game game_name="razz" aux="mucked, ClassicHud">
             <game_stat_set game_type="ring" stat_set="razz_cg_expert"/>
             <game_stat_set game_type="tour" stat_set="mtt_razz"/>
         </game>
@@ -281,15 +281,15 @@
             <game_stat_set game_type="ring" stat_set="omaha_cg_expert"/>
             <game_stat_set game_type="tour" stat_set="mtt_omaha"/>
         </game>
-        <game game_name="studhi" aux="stud_mucked, ClassicHud">
+        <game game_name="studhi" aux="mucked, ClassicHud">
             <game_stat_set game_type="ring" stat_set="stud_cg_expert"/>
             <game_stat_set game_type="tour" stat_set="mtt_stud"/>
         </game>
-        <game game_name="5_studhi" aux="stud_mucked, ClassicHud">
+        <game game_name="5_studhi" aux="mucked, ClassicHud">
             <game_stat_set game_type="ring" stat_set="stud_cg_expert"/>
             <game_stat_set game_type="tour" stat_set="mtt_stud"/>
         </game>
-        <game game_name="studhilo" aux="stud_mucked, ClassicHud">
+        <game game_name="studhilo" aux="mucked, ClassicHud">
             <game_stat_set game_type="ring" stat_set="stud_cg_expert"/>
             <game_stat_set game_type="tour" stat_set="mtt_stud"/>
         </game>
