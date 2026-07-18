@@ -11,7 +11,13 @@ configured fpdb database so the existing HUD can read it.
 
 Modes
 -----
-Live (needs root)::
+Live, recommended (only tcpdump runs as root; the importer keeps your $HOME and
+DB config)::
+
+    sudo tcpdump -i any -l -n -x 'tcp port 9000 or tcp port 7002' \
+        | python -m fpdb_3_legacy.coinpoker_live_capture --stdin
+
+Live, self-spawned tcpdump (needs to run the whole process as root)::
 
     sudo -E python -m fpdb_3_legacy.coinpoker_live_capture --live
 
@@ -202,14 +208,17 @@ def run(lines: Iterable[str], *, dry_run: bool, table_category: str) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser(description="CoinPoker live HUD capture feed")
     src = parser.add_mutually_exclusive_group(required=True)
-    src.add_argument("--live", action="store_true", help="Sniff live traffic (requires root/sudo).")
+    src.add_argument("--live", action="store_true", help="Sniff live traffic (runs tcpdump itself; whole process needs root).")
+    src.add_argument("--stdin", action="store_true", help="Read tcpdump -x output from stdin (pipe a root tcpdump into this).")
     src.add_argument("--replay", metavar="PCAP", help="Replay a saved pcap instead of sniffing.")
     parser.add_argument("--dry-run", action="store_true", help="Build/validate hands without DB insert.")
     parser.add_argument("--game", default="PLO4", help="Table category hint (PLO4, NLHE, ...).")
     args = parser.parse_args()
 
     if args.live:
-        lines = _iter_tcpdump_lines_live()
+        lines: Iterable[str] = _iter_tcpdump_lines_live()
+    elif args.stdin:
+        lines = sys.stdin
     else:
         lines = _iter_tcpdump_lines_replay(args.replay)
 
