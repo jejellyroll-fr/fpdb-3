@@ -4167,5 +4167,6 @@
         <hhc site="Microgaming" converter="MicrogamingToFpdb"/>
         <hhc site="PKR" converter="PkrToFpdb"/>
         <hhc site="Full Tilt Poker" converter="FulltiltToFpdb" summaryImporter="FullTiltPokerSummary"/>
+        <hhc site="CoinPoker" converter="CoinPokerToFpdb"/>
     </hhcs>
 </FreePokerToolsConfig>

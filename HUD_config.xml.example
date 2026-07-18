@@ -2195,6 +2195,7 @@
         <hhc site="GGPoker" converter="GGPokerToFpdb"/>
         <hhc site="KingsClub" converter="KingsClubToFpdb"/>
         <hhc site="Unibet" converter="UnibetToFpdb" summaryImporter="UnibetSummary"/>
+        <hhc site="CoinPoker" converter="CoinPokerToFpdb"/>
     </hhcs>
 
 
