@@ -50,6 +50,8 @@ class MacOSTableDetector:
         "pokerstars.pt",
         "pokerstars.de",
         "Winamax",
+        "CoinPoker",
+        "coinpoker",
         "Full Tilt",
         "Party",
         "888",
