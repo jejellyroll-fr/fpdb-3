@@ -232,6 +232,7 @@ def _build_one(hid: str, evs: list[tuple], table_category: str) -> dict[str, Any
     return {
         "site": "CoinPoker",
         "hand_id": str(hid),
+        "hero": hero,
         "table_id": str(info.get("tableId", "")),
         "timestamp": None,
         "buttonpos": info.get("dealerSeatId"),
