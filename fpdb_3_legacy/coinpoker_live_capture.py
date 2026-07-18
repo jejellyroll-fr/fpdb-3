@@ -304,6 +304,9 @@ class HandPump:
                 print(f"[DRY-RUN] hand #{hid} built ({len(hand.players)} players) — not inserted")
                 continue
             try:
+                # Each hand is flushed immediately (doinsert=True); reset the
+                # shared bulk buffers first so we don't re-insert prior hands.
+                self.db.resetBulkCache()
                 import_fpdb_hand(hand, self.db, file_id=self.file_id, doinsert=True)
                 self.db.commit()
                 print(f"[IMPORTED] hand #{hid}")
