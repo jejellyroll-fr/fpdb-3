@@ -134,8 +134,12 @@ class GuiCoinPokerCapture(QWidget):
     # -- start / stop --------------------------------------------------------
 
     def _base_args(self) -> list[str]:
-        """Common importer args (source flag and --log-file added per platform)."""
-        args = [sys.executable, "-m", _MODULE, "--game", self.game_combo.currentText(), "--stop-file", str(self.stop_file)]
+        """Common importer args (source flag and --log-file added per platform).
+
+        ``-u`` keeps stdout unbuffered so progress shows immediately in the log
+        the tab tails (a long-running redirect to a file is block-buffered).
+        """
+        args = [sys.executable, "-u", "-m", _MODULE, "--game", self.game_combo.currentText(), "--stop-file", str(self.stop_file)]
         cfg = getattr(self.config, "file", None)
         if cfg:
             args += ["--config-file", str(cfg)]
