@@ -3786,7 +3786,12 @@ class DerivedStats:
                             for player in valid_players:
                                 if player in holecards:
                                     hole = holecards[player].get("hole", [])
-                                    if hole and hole != ["0x", "0x"]:
+                                    # Skip fully-unknown hands regardless of card
+                                    # count: Omaha's unrevealed hand is
+                                    # ["0x","0x","0x","0x"], which the old
+                                    # two-card check let through, feeding
+                                    # duplicate "0x" cards to the equity engine.
+                                    if hole and not all(str(c) in ("0x", "0", "") for c in hole):
                                         player_hands.append(hole)
                                         evaluated_players.append(player)
 
