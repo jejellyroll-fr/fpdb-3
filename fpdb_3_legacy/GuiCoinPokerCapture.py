@@ -269,9 +269,14 @@ class GuiCoinPokerCapture(QWidget):
             ],
         )
 
-        tcpdump = (
-            "/usr/sbin/tcpdump -i {iface} -l -n -S -x 'tcp port 9000 or tcp port 7002' > {fifo} 2>> {log} &"
-        ).format(iface=shlex.quote(iface), fifo=shlex.quote(fifo), log=log)
+        from fpdb_3_legacy.coinpoker_live_capture import BPF_FILTER
+
+        tcpdump = "/usr/sbin/tcpdump -i {iface} -l -n -S -x {filt} > {fifo} 2>> {log} &".format(
+            iface=shlex.quote(iface),
+            filt=shlex.quote(BPF_FILTER),
+            fifo=shlex.quote(fifo),
+            log=log,
+        )
         applescript = 'do shell script "{}" with administrator privileges'.format(
             tcpdump.replace("\\", "\\\\").replace('"', '\\"'),
         )

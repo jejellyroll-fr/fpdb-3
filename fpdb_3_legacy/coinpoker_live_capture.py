@@ -51,7 +51,14 @@ from fpdb_3_legacy.http_capture_hand_builder import (
 )
 
 COINPOKER_SITE_ID = 140
-GAME_PORTS = ("9000", "7002")
+# CoinPoker game servers: TCP 9000 (poker cluster) plus a per-table 70xx range
+# (7001, 7002, ... vary by table), so match the whole range rather than fixed ports.
+GAME_PORTS = ("9000", "7002")  # kept for reference; see _is_game_port / BPF_FILTER
+_GAME_PORT_RANGE = range(7000, 7101)
+
+
+def _is_game_port(port: int) -> bool:
+    return port == 9000 or port in _GAME_PORT_RANGE
 # Header line carries seq (absolute, since capture starts mid-connection) and length.
 _HDR_RE = re.compile(
     r"\.(?P<sport>\d+) > \S+?\.(?P<dport>\d+):.*?\bseq (?P<seq>\d+)(?::\d+)?.*\blength (?P<len>\d+)$",
@@ -215,7 +222,7 @@ class StreamReassembler:
         if line and not line[0].isspace():
             events = self._flush()
             m = _HDR_RE.search(line)
-            if m and m.group("sport") in GAME_PORTS:
+            if m and _is_game_port(int(m.group("sport"))):
                 self._cur_key = f"{m.group('sport')}->{m.group('dport')}"
                 self._cur_seq = int(m.group("seq")) % _SEQ_MOD
                 self._cur_len = int(m.group("len"))
@@ -229,15 +236,14 @@ class StreamReassembler:
         return []
 
 
-BPF_FILTER = f"tcp port {GAME_PORTS[0]} or tcp port {GAME_PORTS[1]}"
-_GAME_PORT_INTS = frozenset(int(p) for p in GAME_PORTS)
+BPF_FILTER = "tcp portrange 7000-7100 or tcp port 9000"
 
 
 def _events_from_segments(segments: Iterable[tuple[int, int, int, bytes]]) -> Iterator[tuple]:
     """Turn (src_port, dst_port, seq, payload) tuples into decoded game events."""
     reassembler = StreamReassembler()
     for src_port, dst_port, seq, payload in segments:
-        if src_port in _GAME_PORT_INTS and payload:
+        if _is_game_port(src_port) and payload:
             yield from reassembler.add_segment(f"{src_port}->{dst_port}", seq, payload)
 
 
