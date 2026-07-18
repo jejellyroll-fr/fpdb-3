@@ -111,14 +111,6 @@ def _collect_players(evs: list[tuple]) -> dict[str, dict]:
     return players
 
 
-_ACT_RE = [
-    (re.compile(r"^(?P<p>.+?) Raises To (?P<a>[\d.]+)"), "raise"),
-    (re.compile(r"^(?P<p>.+?) Bets (?P<a>[\d.]+)"), "bet"),
-    (re.compile(r"^(?P<p>.+?) Calls (?P<a>[\d.]+)"), "call"),
-    (re.compile(r"^(?P<p>.+?) Checks"), "check"),
-    (re.compile(r"^(?P<p>.+?) Folds"), "fold"),
-]
-
 
 def _build_one(hid: str, evs: list[tuple], table_category: str) -> dict[str, Any] | None:
     info = _first(evs, "game.pre_hand_start_info")
@@ -170,39 +162,54 @@ def _build_one(hid: str, evs: list[tuple], table_category: str) -> dict[str, Any
             "dealt": True, "shown": False, "mucked": False,
         })
 
-    # Street tracking + action parsing from the dealer chat narrative.
+    # Reconstruct actions from game.seat events (interleaved with the dealer-chat
+    # street markers). betAmout is the player's authoritative total commitment on
+    # the current street, which reconciles pot math for every action type,
+    # including all-ins and side pots, unlike parsing the chat narrative.
     street = "PREFLOP"
     street_has_bet = {"PREFLOP": True, "FLOP": False, "TURN": False, "RIVER": False}
+    committed: dict[str, Decimal] = {}  # player -> chips already in this street
+    if sb_name:
+        committed[sb_name] = sb
+    if bb_name:
+        committed[bb_name] = bb
+    non_actions = {None, "", "Inuse", "SB", "BB", "Waiting", "SitOut", "Muck"}
     for name, _h, d in evs:
-        if name != "game.dealer_chat" or not isinstance(d, dict):
+        if not isinstance(d, dict):
             continue
-        msg = (d.get("dealerMessage") or "").strip()
-        if msg == "PREFLOP":
-            street = "PREFLOP"
+        if name == "game.dealer_chat":
+            msg = (d.get("dealerMessage") or "").strip()
+            if msg == "PREFLOP":
+                street = "PREFLOP"
+            else:
+                m = re.match(r"^(FLOP|TURN|RIVER) \[", msg)
+                if m:
+                    street = m.group(1)
+                    committed.clear()  # new street: reset per-street commitments
             continue
-        m = re.match(r"^(FLOP|TURN|RIVER) \[", msg)
-        if m:
-            street = m.group(1)
+        if name != "game.seat":
             continue
-        for rx, kind in _ACT_RE:
-            mm = rx.match(msg)
-            if not mm:
-                continue
-            player = mm.group("p")
-            if kind == "fold":
-                actions.append({"type": "folds", "player": player, "street": street})
-            elif kind == "check":
-                actions.append({"type": "checks", "player": player, "street": street})
-            elif kind == "call":
-                actions.append({"type": "calls", "player": player, "street": street, "amount": mm.group("a")})
-            elif kind in ("bet", "raise"):
-                amt = mm.group("a")
-                if street_has_bet[street]:
-                    actions.append({"type": "raises", "player": player, "street": street, "to": amt})
-                else:
-                    actions.append({"type": "bets", "player": player, "street": street, "amount": amt})
-                street_has_bet[street] = True
-            break
+        # Use caption (current state) not lastAction: end-of-hand/return-chips
+        # updates keep a stale lastAction like "Raise" while caption is "Inuse".
+        action = d.get("caption")
+        player = d.get("userName")
+        if not player or action in non_actions:
+            continue
+        bet = Decimal(str(d.get("betAmout", 0) or 0))
+        if action == "Fold":
+            actions.append({"type": "folds", "player": player, "street": street})
+        elif action == "Check":
+            actions.append({"type": "checks", "player": player, "street": street})
+        elif action == "Call":
+            actions.append({"type": "calls", "player": player, "street": street, "amount": str(bet - committed.get(player, Decimal(0)))})
+            committed[player] = bet
+        else:  # Raise / Bet / Pot / Allin / Straddle -> aggressive: bet to `bet`
+            if street_has_bet[street]:
+                actions.append({"type": "raises", "player": player, "street": street, "to": str(bet)})
+            else:
+                actions.append({"type": "bets", "player": player, "street": street, "amount": str(bet)})
+            street_has_bet[street] = True
+            committed[player] = bet
 
     # Winners -> collections (use post-rake amount actually paid out).
     collections: list[dict] = []
