@@ -1935,13 +1935,6 @@
 }
 ],
 [
-"game.reset_data",
-"91426500343",
-{
-"initTimeStamp": "1784332545813"
-}
-],
-[
 "game.game_ready",
 "91426500343",
 {
@@ -3270,6 +3263,938 @@
 {
 "dealerMessage": "Hero Turn (16 secs)",
 "initTimeStamp": "1784332571468"
+}
+],
+[
+"game.seat",
+"91426500344",
+{
+"seatId": 6,
+"caption": "Check",
+"newCaption": "Check",
+"playerStatus": null,
+"userChips": 4.17,
+"betAmout": 0,
+"userName": "Hero",
+"userId": 166755,
+"lastAction": "Check",
+"isAutoAction": false,
+"isPlaying": true,
+"optedForEVChop": false,
+"avatarId": 5,
+"isDealActivated": false,
+"vpipPercentage": 14.29,
+"sessionHandsPlayed": 7,
+"timerStarted": false,
+"callTimeSecs": 0,
+"selfBountyAmt": null,
+"initTimeStamp": "1784332572744"
+}
+],
+[
+"game.dealer_chat_action",
+"91426500344",
+{
+"gameActionMessagesHistory": [
+{
+"username": "Hero",
+"userId": 166755,
+"action": "CHECK",
+"actionAmount": 0,
+"roundTotalPot": 0.07,
+"playerPosition": "UTG",
+"initTimestamp": 1784332572,
+"handId": 91426500344,
+"newPlayerAction": "CHECK",
+"avatarId": 5,
+"type": "playerAction",
+"roundName": "FLOP",
+"initTimeStamp": "1784332572745"
+}
+],
+"initTimeStamp": "1784332572745"
+}
+],
+[
+"game.dealer_chat",
+"91426500344",
+{
+"dealerMessage": "Hero Checks ",
+"initTimeStamp": "1784332572745"
+}
+],
+[
+"game.advance_player_action",
+"91426500344",
+{
+"advanceActionId": null,
+"userTurnOptions": {
+"3": null,
+"8": null,
+"9": null,
+"10": null
+},
+"initTimeStamp": "1784332572746"
+}
+],
+[
+"game.user_turn",
+"91426500344",
+{
+"whoseTurn": "Villain3",
+"turnTime": 16,
+"timerName": "playerHandTimer",
+"initTimeStamp": "1784332572746"
+}
+],
+[
+"game.dealer_chat",
+"91426500344",
+{
+"dealerMessage": "Villain3 Turn (16 secs)",
+"initTimeStamp": "1784332572746"
+}
+],
+[
+"game.seatInfo",
+"91426500344",
+{
+"seatResponseDataList": [
+{
+"seatId": 2,
+"caption": "Inuse",
+"newCaption": "Inuse",
+"playerStatus": null,
+"userChips": 2.41,
+"betAmout": 0,
+"userName": "Villain3",
+"userId": 324665,
+"lastAction": "Call",
+"isAutoAction": false,
+"isPlaying": true,
+"optedForEVChop": false,
+"avatarId": 10,
+"isDealActivated": false,
+"vpipPercentage": 54.79,
+"sessionHandsPlayed": 74,
+"timerStarted": false,
+"callTimeSecs": 0,
+"selfBountyAmt": null,
+"initTimeStamp": "1784332573639"
+},
+{
+"seatId": 3,
+"caption": "Inuse",
+"newCaption": "Inuse",
+"playerStatus": null,
+"userChips": 2.18,
+"betAmout": 0,
+"userName": "Villain4",
+"userId": 182797,
+"lastAction": "Fold",
+"isAutoAction": false,
+"isPlaying": false,
+"optedForEVChop": false,
+"avatarId": 1,
+"isDealActivated": false,
+"vpipPercentage": 25.0,
+"sessionHandsPlayed": 8,
+"timerStarted": false,
+"callTimeSecs": 0,
+"selfBountyAmt": null,
+"initTimeStamp": "1784332573640"
+},
+{
+"seatId": 4,
+"caption": "Inuse",
+"newCaption": "Inuse",
+"playerStatus": null,
+"userChips": 2.12,
+"betAmout": 0,
+"userName": "Villain1",
+"userId": 1725793,
+"lastAction": "Fold",
+"isAutoAction": false,
+"isPlaying": false,
+"optedForEVChop": false,
+"avatarId": 15,
+"isDealActivated": false,
+"vpipPercentage": 30.0,
+"sessionHandsPlayed": 30,
+"timerStarted": false,
+"callTimeSecs": 0,
+"selfBountyAmt": null,
+"initTimeStamp": "1784332573641"
+},
+{
+"seatId": 5,
+"caption": "Inuse",
+"newCaption": "Inuse",
+"playerStatus": null,
+"userChips": 4.6,
+"betAmout": 0,
+"userName": "Villain2",
+"userId": 673996,
+"lastAction": "Check",
+"isAutoAction": false,
+"isPlaying": true,
+"optedForEVChop": false,
+"avatarId": 15,
+"isDealActivated": false,
+"vpipPercentage": 55.32,
+"sessionHandsPlayed": 49,
+"timerStarted": false,
+"callTimeSecs": 0,
+"selfBountyAmt": null,
+"initTimeStamp": "1784332573641"
+},
+{
+"seatId": 6,
+"caption": "Inuse",
+"newCaption": "Inuse",
+"playerStatus": null,
+"userChips": 4.17,
+"betAmout": 0,
+"userName": "Hero",
+"userId": 166755,
+"lastAction": "Check",
+"isAutoAction": false,
+"isPlaying": true,
+"optedForEVChop": false,
+"avatarId": 5,
+"isDealActivated": false,
+"vpipPercentage": 14.29,
+"sessionHandsPlayed": 7,
+"timerStarted": false,
+"callTimeSecs": 0,
+"selfBountyAmt": null,
+"initTimeStamp": "1784332573642"
+}
+],
+"isGameStarted": true,
+"initTimeStamp": "1784332573639"
+}
+],
+[
+"game.seat",
+"91426500344",
+{
+"seatId": 2,
+"caption": "Raise",
+"newCaption": "Bet",
+"playerStatus": null,
+"userChips": 2.36,
+"betAmout": 0.05,
+"userName": "Villain3",
+"userId": 324665,
+"lastAction": "Raise",
+"isAutoAction": false,
+"isPlaying": true,
+"optedForEVChop": false,
+"avatarId": 10,
+"isDealActivated": false,
+"vpipPercentage": 54.79,
+"sessionHandsPlayed": 74,
+"timerStarted": false,
+"callTimeSecs": 0,
+"selfBountyAmt": null,
+"initTimeStamp": "1784332575113"
+}
+],
+[
+"game.potInfo",
+"91426500344",
+{
+"totalPotAmount": 0.12,
+"splashPotDropAmount": 0,
+"isMegaSplash": false,
+"potAmountList": [
+0.07
+],
+"potAmountListRit": null,
+"potAmountListRit2": null,
+"isRoundEnd": false,
+"potAmountListDoubleBoard": null,
+"roundName": "FLOP",
+"initTimeStamp": "1784332575114"
+}
+],
+[
+"game.dealer_chat_action",
+"91426500344",
+{
+"gameActionMessagesHistory": [
+{
+"username": "Villain3",
+"userId": 324665,
+"action": "RAISE",
+"actionAmount": 0.05,
+"roundTotalPot": 0.12,
+"playerPosition": "UTG_1",
+"initTimestamp": 1784332575,
+"handId": 91426500344,
+"newPlayerAction": "BET",
+"avatarId": 10,
+"type": "playerAction",
+"roundName": "FLOP",
+"initTimeStamp": "1784332575114"
+}
+],
+"initTimeStamp": "1784332575114"
+}
+],
+[
+"game.dealer_chat",
+"91426500344",
+{
+"dealerMessage": "Villain3 Raises To 0.05 (by 0.05) => TotalPot: 0.12",
+"initTimeStamp": "1784332575114"
+}
+],
+[
+"game.advance_player_action",
+"91426500344",
+{
+"advanceActionId": null,
+"userTurnOptions": {
+"4": 0.05,
+"7": null,
+"9": null,
+"10": null
+},
+"initTimeStamp": "1784332575115"
+}
+],
+[
+"game.user_turn",
+"91426500344",
+{
+"whoseTurn": "Villain2",
+"turnTime": 16,
+"timerName": "playerHandTimer",
+"initTimeStamp": "1784332575115"
+}
+],
+[
+"game.dealer_chat",
+"91426500344",
+{
+"dealerMessage": "Villain2 Turn (16 secs)",
+"initTimeStamp": "1784332575115"
+}
+],
+[
+"game.seat",
+"91426500344",
+{
+"seatId": 5,
+"caption": "Fold",
+"newCaption": "Fold",
+"playerStatus": null,
+"userChips": 4.6,
+"betAmout": 0,
+"userName": "Villain2",
+"userId": 673996,
+"lastAction": "Fold",
+"isAutoAction": false,
+"isPlaying": true,
+"optedForEVChop": false,
+"avatarId": 15,
+"isDealActivated": false,
+"vpipPercentage": 55.32,
+"sessionHandsPlayed": 49,
+"timerStarted": false,
+"callTimeSecs": 0,
+"selfBountyAmt": null,
+"initTimeStamp": "1784332577881"
+}
+],
+[
+"game.dealer_chat_action",
+"91426500344",
+{
+"gameActionMessagesHistory": [
+{
+"username": "Villain2",
+"userId": 673996,
+"action": "FOLD",
+"actionAmount": 0,
+"roundTotalPot": 0.12,
+"playerPosition": "BB",
+"initTimestamp": 1784332577,
+"handId": 91426500344,
+"newPlayerAction": "FOLD",
+"avatarId": 15,
+"type": "playerAction",
+"roundName": "FLOP",
+"initTimeStamp": "1784332577882"
+}
+],
+"initTimeStamp": "1784332577882"
+}
+],
+[
+"game.dealer_chat",
+"91426500344",
+{
+"dealerMessage": "Villain2 Folds ",
+"initTimeStamp": "1784332577882"
+}
+],
+[
+"game.advance_player_action",
+"91426500344",
+{
+"advanceActionId": null,
+"userTurnOptions": {
+"4": 0.05,
+"7": null,
+"9": null,
+"10": null
+},
+"initTimeStamp": "1784332577882"
+}
+],
+[
+"game.user_turn",
+"91426500344",
+{
+"userTurnOptions": {
+"4": [
+0.05
+],
+"5": [
+0.1,
+0.22
+],
+"7": null
+},
+"extraTurnTime": 30,
+"extraTimePreflop": 0,
+"extraTimerEnabled": false,
+"roundMaxBet": 0.05,
+"totalPot": 0.12,
+"showOpeningBetSizeOptions": false,
+"showBetTag": false,
+"potRaiseValue": 0.22,
+"potAmount": 0.12,
+"callAmount": 0.05,
+"valueAmount": 0.05,
+"noLimpForcedAction": false,
+"noLimpAllIn": false,
+"whoseTurn": "Hero",
+"turnTime": 16,
+"timerName": "playerHandTimer",
+"initTimeStamp": "1784332577882"
+}
+],
+[
+"game.dealer_chat",
+"91426500344",
+{
+"dealerMessage": "Hero Turn (16 secs)",
+"initTimeStamp": "1784332577882"
+}
+],
+[
+"game.seat",
+"91426500344",
+{
+"seatId": 6,
+"caption": "Fold",
+"newCaption": "Fold",
+"playerStatus": null,
+"userChips": 4.17,
+"betAmout": 0,
+"userName": "Hero",
+"userId": 166755,
+"lastAction": "Fold",
+"isAutoAction": false,
+"isPlaying": true,
+"optedForEVChop": false,
+"avatarId": 5,
+"isDealActivated": false,
+"vpipPercentage": 14.29,
+"sessionHandsPlayed": 7,
+"timerStarted": false,
+"callTimeSecs": 0,
+"selfBountyAmt": null,
+"initTimeStamp": "1784332579698"
+}
+],
+[
+"game.dealer_chat_action",
+"91426500344",
+{
+"gameActionMessagesHistory": [
+{
+"username": "Hero",
+"userId": 166755,
+"action": "FOLD",
+"actionAmount": 0,
+"roundTotalPot": 0.12,
+"playerPosition": "UTG",
+"initTimestamp": 1784332579,
+"handId": 91426500344,
+"newPlayerAction": "FOLD",
+"avatarId": 5,
+"type": "playerAction",
+"roundName": "FLOP",
+"initTimeStamp": "1784332579699"
+}
+],
+"initTimeStamp": "1784332579699"
+}
+],
+[
+"game.dealer_chat",
+"91426500344",
+{
+"dealerMessage": "Hero Folds ",
+"initTimeStamp": "1784332579699"
+}
+],
+[
+"game.potInfo",
+"91426500344",
+{
+"totalPotAmount": 0.07,
+"splashPotDropAmount": 0,
+"isMegaSplash": false,
+"potAmountList": [
+0.07
+],
+"potAmountListRit": null,
+"potAmountListRit2": null,
+"isRoundEnd": true,
+"potAmountListDoubleBoard": null,
+"roundName": "FLOP",
+"initTimeStamp": "1784332579874"
+}
+],
+[
+"game.dealer_chat",
+"91426500344",
+{
+"dealerMessage": "Villain3 Return-Chips: 0.05 => TotalPot: 0.07",
+"initTimeStamp": "1784332579875"
+}
+],
+[
+"game.return_chips",
+"91426500344",
+{
+"userName": "Villain3",
+"chipsToReturn": 0.05,
+"seatId": 2,
+"initTimeStamp": "1784332579874"
+}
+],
+[
+"game.seat",
+"91426500344",
+{
+"seatId": 2,
+"caption": "Inuse",
+"newCaption": "Inuse",
+"playerStatus": null,
+"userChips": 2.41,
+"betAmout": 0,
+"userName": "Villain3",
+"userId": 324665,
+"lastAction": "Raise",
+"isAutoAction": true,
+"isPlaying": true,
+"optedForEVChop": false,
+"avatarId": 10,
+"isDealActivated": false,
+"vpipPercentage": 54.79,
+"sessionHandsPlayed": 74,
+"timerStarted": false,
+"callTimeSecs": 0,
+"selfBountyAmt": null,
+"initTimeStamp": "1784332580575"
+}
+],
+[
+"game.seatInfo",
+"91426500344",
+{
+"seatResponseDataList": [
+{
+"seatId": 2,
+"caption": "Inuse",
+"newCaption": "Inuse",
+"playerStatus": null,
+"userChips": 2.41,
+"betAmout": 0,
+"userName": "Villain3",
+"userId": 324665,
+"lastAction": "Raise",
+"isAutoAction": true,
+"isPlaying": true,
+"optedForEVChop": false,
+"avatarId": 10,
+"isDealActivated": false,
+"vpipPercentage": 54.79,
+"sessionHandsPlayed": 74,
+"timerStarted": false,
+"callTimeSecs": 0,
+"selfBountyAmt": null,
+"initTimeStamp": "1784332580577"
+},
+{
+"seatId": 3,
+"caption": "Inuse",
+"newCaption": "Inuse",
+"playerStatus": null,
+"userChips": 2.18,
+"betAmout": 0,
+"userName": "Villain4",
+"userId": 182797,
+"lastAction": "Fold",
+"isAutoAction": false,
+"isPlaying": false,
+"optedForEVChop": false,
+"avatarId": 1,
+"isDealActivated": false,
+"vpipPercentage": 25.0,
+"sessionHandsPlayed": 8,
+"timerStarted": false,
+"callTimeSecs": 0,
+"selfBountyAmt": null,
+"initTimeStamp": "1784332580578"
+},
+{
+"seatId": 4,
+"caption": "Inuse",
+"newCaption": "Inuse",
+"playerStatus": null,
+"userChips": 2.12,
+"betAmout": 0,
+"userName": "Villain1",
+"userId": 1725793,
+"lastAction": "Fold",
+"isAutoAction": false,
+"isPlaying": false,
+"optedForEVChop": false,
+"avatarId": 15,
+"isDealActivated": false,
+"vpipPercentage": 30.0,
+"sessionHandsPlayed": 30,
+"timerStarted": false,
+"callTimeSecs": 0,
+"selfBountyAmt": null,
+"initTimeStamp": "1784332580579"
+},
+{
+"seatId": 5,
+"caption": "Inuse",
+"newCaption": "Inuse",
+"playerStatus": null,
+"userChips": 4.6,
+"betAmout": 0,
+"userName": "Villain2",
+"userId": 673996,
+"lastAction": "Fold",
+"isAutoAction": false,
+"isPlaying": false,
+"optedForEVChop": false,
+"avatarId": 15,
+"isDealActivated": false,
+"vpipPercentage": 55.32,
+"sessionHandsPlayed": 49,
+"timerStarted": false,
+"callTimeSecs": 0,
+"selfBountyAmt": null,
+"initTimeStamp": "1784332580579"
+},
+{
+"seatId": 6,
+"caption": "Inuse",
+"newCaption": "Inuse",
+"playerStatus": null,
+"userChips": 4.17,
+"betAmout": 0,
+"userName": "Hero",
+"userId": 166755,
+"lastAction": "Fold",
+"isAutoAction": false,
+"isPlaying": false,
+"optedForEVChop": false,
+"avatarId": 5,
+"isDealActivated": false,
+"vpipPercentage": 14.29,
+"sessionHandsPlayed": 7,
+"timerStarted": false,
+"callTimeSecs": 0,
+"selfBountyAmt": null,
+"initTimeStamp": "1784332580580"
+}
+],
+"isGameStarted": true,
+"initTimeStamp": "1784332580595"
+}
+],
+[
+"game.show_hole_cards",
+"91426500344",
+{
+"userCardListMap": {},
+"initTimeStamp": "1784332580592"
+}
+],
+[
+"game.reveal_cards",
+"91426500344",
+{
+"userCardListMap": {},
+"initTimeStamp": "1784332580592"
+}
+],
+[
+"game.rabbit_run",
+"91426500344",
+{
+"dealerCards": null,
+"dealerCardsRit": null,
+"dealerCardsRit2": null,
+"dealerCardsDoubleBoard": null,
+"rabbitRunCards": {
+"TURN": [
+{
+"suit": "SPADES",
+"value": "TEN"
+}
+],
+"RIVER": [
+{
+"suit": "DIAMONDS",
+"value": "JACK"
+}
+]
+},
+"rabbitRunCardsDoubleBoard": null,
+"initTimeStamp": "1784332580659"
+}
+],
+[
+"game.winnerInfo",
+"91426500344",
+{
+"rit": false,
+"doubleBoard": false,
+"handType": "DEFAULT",
+"runId": -1,
+"winnerDataList": [
+{
+"potId": 0,
+"potAmount": 0.07,
+"potAmountAfterRake": 0.07,
+"winnerDetails": {
+"winnerList": [
+{
+"playerName": "Villain3",
+"userBestHand": null,
+"index": 0,
+"winAmountFromPot": 0.07,
+"actualWinAmount": 0.05,
+"seatId": 2,
+"isInsured": false
+}
+],
+"kickerCards": [],
+"winnersHandInfo": null
+}
+}
+],
+"initTimeStamp": "1784332580596"
+}
+],
+[
+"game.dealer_chat",
+"91426500344",
+{
+"dealerMessage": "Winner-Info: Villain3 Actual: 0.05 From Pot: 0.07",
+"initTimeStamp": "1784332580661"
+}
+],
+[
+"game.cumulativeWinnerInfo",
+"91426500344",
+{
+"cumulativePotAmount": 0.07,
+"cumulativePotAmountWithoutRake": 0.07,
+"splashPotAmount": 0,
+"isMegaSplash": false,
+"totalPotAmount": 0,
+"winnersData": [
+{
+"userName": "Villain3",
+"seatId": 2,
+"cumulativeProfitLoss": 0.05,
+"winType": null,
+"winTypeRit": null,
+"winTypeRit2": null,
+"winTypeDoubleBoard": null,
+"isEVChopWinner": false,
+"isSplashPotWinner": false
+}
+],
+"playersData": [
+{
+"playerName": "Villain3",
+"handStrength": null,
+"handStrengthRit": null,
+"handStrengthRit2": null,
+"handStrengthDoubleBoard": null
+}
+],
+"initTimeStamp": "1784332580596"
+}
+],
+[
+"game.seatInfo",
+"91426500344",
+{
+"seatResponseDataList": [
+{
+"seatId": 2,
+"caption": "Inuse",
+"newCaption": "Inuse",
+"playerStatus": null,
+"userChips": 2.48,
+"betAmout": 0,
+"userName": "Villain3",
+"userId": 324665,
+"lastAction": "Raise",
+"isAutoAction": true,
+"isPlaying": true,
+"optedForEVChop": false,
+"avatarId": 10,
+"isDealActivated": false,
+"vpipPercentage": 54.79,
+"sessionHandsPlayed": 74,
+"timerStarted": false,
+"callTimeSecs": 0,
+"selfBountyAmt": null,
+"initTimeStamp": "1784332580661"
+},
+{
+"seatId": 3,
+"caption": "Inuse",
+"newCaption": "Inuse",
+"playerStatus": null,
+"userChips": 2.18,
+"betAmout": 0,
+"userName": "Villain4",
+"userId": 182797,
+"lastAction": "Fold",
+"isAutoAction": false,
+"isPlaying": false,
+"optedForEVChop": false,
+"avatarId": 1,
+"isDealActivated": false,
+"vpipPercentage": 25.0,
+"sessionHandsPlayed": 8,
+"timerStarted": false,
+"callTimeSecs": 0,
+"selfBountyAmt": null,
+"initTimeStamp": "1784332580662"
+},
+{
+"seatId": 4,
+"caption": "Inuse",
+"newCaption": "Inuse",
+"playerStatus": null,
+"userChips": 2.12,
+"betAmout": 0,
+"userName": "Villain1",
+"userId": 1725793,
+"lastAction": "Fold",
+"isAutoAction": false,
+"isPlaying": false,
+"optedForEVChop": false,
+"avatarId": 15,
+"isDealActivated": false,
+"vpipPercentage": 30.0,
+"sessionHandsPlayed": 30,
+"timerStarted": false,
+"callTimeSecs": 0,
+"selfBountyAmt": null,
+"initTimeStamp": "1784332580663"
+},
+{
+"seatId": 5,
+"caption": "Inuse",
+"newCaption": "Inuse",
+"playerStatus": null,
+"userChips": 4.6,
+"betAmout": 0,
+"userName": "Villain2",
+"userId": 673996,
+"lastAction": "Fold",
+"isAutoAction": false,
+"isPlaying": false,
+"optedForEVChop": false,
+"avatarId": 15,
+"isDealActivated": false,
+"vpipPercentage": 55.32,
+"sessionHandsPlayed": 49,
+"timerStarted": false,
+"callTimeSecs": 0,
+"selfBountyAmt": null,
+"initTimeStamp": "1784332580663"
+},
+{
+"seatId": 6,
+"caption": "Inuse",
+"newCaption": "Inuse",
+"playerStatus": null,
+"userChips": 4.17,
+"betAmout": 0,
+"userName": "Hero",
+"userId": 166755,
+"lastAction": "Fold",
+"isAutoAction": false,
+"isPlaying": false,
+"optedForEVChop": false,
+"avatarId": 5,
+"isDealActivated": false,
+"vpipPercentage": 14.29,
+"sessionHandsPlayed": 7,
+"timerStarted": false,
+"callTimeSecs": 0,
+"selfBountyAmt": null,
+"initTimeStamp": "1784332580664"
+}
+],
+"isGameStarted": true,
+"initTimeStamp": "1784332580661"
+}
+],
+[
+"game.transaction_winnings",
+"91426500344",
+{
+"isTransactionWinnings": false,
+"currentChips": 4.17,
+"initTimeStamp": "1784332584887"
+}
+],
+[
+"game.reset_data",
+"91426500344",
+{
+"initTimeStamp": "1784332584891"
+}
+],
+[
+"game.game_ready",
+"91426500344",
+{
+"timeToStartGameInSec": 0,
+"initTimeStamp": "1784332585430"
 }
 ]
 ]

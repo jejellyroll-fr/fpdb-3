@@ -120,6 +120,26 @@ def iter_messages(stream: bytes) -> Iterator[Any]:
             yield obj
 
 
+def game_event_from_object(obj: Any) -> tuple[str, str | None, Any] | None:
+    """Return (event_name, game_hand_id, parsed_data) for a decoded ``game.*``
+    envelope object, or None if it is not a game event."""
+    if not (isinstance(obj, dict) and isinstance(obj.get("p"), dict)):
+        return None
+    inner = obj["p"]
+    name = inner.get("c")
+    if not (isinstance(name, str) and name.startswith("game.")):
+        return None
+    detail = inner.get("p", {})
+    hand_id = detail.get("gameHandId") if isinstance(detail, dict) else None
+    data: Any = detail.get("data") if isinstance(detail, dict) else None
+    if isinstance(data, str):
+        try:
+            data = json.loads(data)
+        except (ValueError, TypeError):
+            pass
+    return name, hand_id, data
+
+
 def iter_game_events(stream: bytes) -> Iterator[tuple[str, str | None, Any]]:
     """Yield (event_name, game_hand_id, parsed_data) for each ``game.*`` event.
 
@@ -127,18 +147,6 @@ def iter_game_events(stream: bytes) -> Iterator[tuple[str, str | None, Any]]:
     inner payload dict.
     """
     for obj in iter_messages(stream):
-        if not (isinstance(obj, dict) and isinstance(obj.get("p"), dict)):
-            continue
-        inner = obj["p"]
-        name = inner.get("c")
-        if not (isinstance(name, str) and name.startswith("game.")):
-            continue
-        detail = inner.get("p", {})
-        hand_id = detail.get("gameHandId") if isinstance(detail, dict) else None
-        data: Any = detail.get("data") if isinstance(detail, dict) else None
-        if isinstance(data, str):
-            try:
-                data = json.loads(data)
-            except (ValueError, TypeError):
-                pass
-        yield name, hand_id, data
+        event = game_event_from_object(obj)
+        if event is not None:
+            yield event

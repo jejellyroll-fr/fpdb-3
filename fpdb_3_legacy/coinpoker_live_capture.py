@@ -14,7 +14,7 @@ Modes
 Live, recommended (only tcpdump runs as root; the importer keeps your $HOME and
 DB config)::
 
-    sudo tcpdump -i any -l -n -x 'tcp port 9000 or tcp port 7002' \
+    sudo tcpdump -i any -l -n -S -x 'tcp port 9000 or tcp port 7002' \
         | python -m fpdb_3_legacy.coinpoker_live_capture --stdin
 
 Live, self-spawned tcpdump (needs to run the whole process as root)::
@@ -37,7 +37,7 @@ import sys
 from typing import Iterable, Iterator
 
 from fpdb_3_legacy.coinpoker_hand_builder import build_hands
-from fpdb_3_legacy.coinpoker_protocol import iter_game_events
+from fpdb_3_legacy.coinpoker_protocol import decode_frame
 from fpdb_3_legacy.http_capture_hand_builder import (
     CaptureNotImportableError,
     HttpCaptureHandConfig,
@@ -47,67 +47,161 @@ from fpdb_3_legacy.http_capture_hand_builder import (
 
 COINPOKER_SITE_ID = 140
 GAME_PORTS = ("9000", "7002")
-_HDR_RE = re.compile(r"\.(?P<sport>\d+) > \S+?\.(?P<dport>\d+):.* length (?P<len>\d+)$")
+# Header line carries seq (absolute, since capture starts mid-connection) and length.
+_HDR_RE = re.compile(
+    r"\.(?P<sport>\d+) > \S+?\.(?P<dport>\d+):.*?\bseq (?P<seq>\d+)(?::\d+)?.*\blength (?P<len>\d+)$",
+)
 _HEX_RE = re.compile(r"\s+0x[0-9a-f]+:\s+((?:[0-9a-f]{2,4}\s?)+)")
+
+_FRAME_FLAGS = frozenset({0x80, 0xA0})  # uncompressed / zlib frame start markers
+_SEQ_MOD = 1 << 32
+_MAX_PENDING = 512  # out-of-order segments before we force a resync
+_MAX_TAIL = 1 << 20  # cap the undecoded tail buffer (guards against runaway)
+
+
+def _seq_lt(a: int, b: int) -> bool:
+    """Serial-number (RFC 1982) less-than for 32-bit TCP sequence numbers."""
+    return 0 < (b - a) % _SEQ_MOD < (_SEQ_MOD >> 1)
+
+
+class _Conn:
+    """Per-connection sequenced reassembly + incremental frame decoding."""
+
+    def __init__(self) -> None:
+        self.next_seq: int | None = None
+        self.pending: dict[int, bytes] = {}
+        self.buf = bytearray()  # contiguous, not-yet-decoded application bytes
+
+    def add(self, seq: int, payload: bytes) -> None:
+        if not payload:
+            return
+        if self.next_seq is None:
+            self.next_seq = seq
+        if seq == self.next_seq:
+            self._append(payload)
+        elif _seq_lt(seq, self.next_seq):
+            # Retransmission / overlap: keep only bytes past next_seq.
+            overlap = (self.next_seq - seq) % _SEQ_MOD
+            if overlap < len(payload):
+                self._append(payload[overlap:])
+            # else: a pure duplicate — drop it.
+        else:
+            # Ahead of next_seq: buffer until the gap fills.
+            self.pending[seq] = payload
+            if len(self.pending) > _MAX_PENDING:
+                self._resync()
+
+    def _append(self, payload: bytes) -> None:
+        self.buf.extend(payload)
+        self.next_seq = (self.next_seq + len(payload)) % _SEQ_MOD
+        self._drain()
+        if len(self.buf) > _MAX_TAIL:
+            # A frame never completed (corruption/gap): drop to the next marker.
+            self._realign()
+
+    def _drain(self) -> None:
+        while self.next_seq in self.pending:
+            seg = self.pending.pop(self.next_seq)
+            self.buf.extend(seg)
+            self.next_seq = (self.next_seq + len(seg)) % _SEQ_MOD
+
+    def _resync(self) -> None:
+        # A segment was lost (never captured). Skip ahead to the earliest pending
+        # segment and let frame realignment recover the stream.
+        lo = min(self.pending, key=lambda s: (s - (self.next_seq or 0)) % _SEQ_MOD)
+        self.next_seq = lo
+        self._drain()
+        self._realign()
+
+    def _realign(self) -> None:
+        # After a gap we cannot know frame boundaries; scan to the next frame
+        # start marker and drop the garbage before it.
+        for i in range(len(self.buf)):
+            if self.buf[i] in _FRAME_FLAGS:
+                del self.buf[:i]
+                return
+        self.buf.clear()
+
+    def pop_frames(self) -> list[tuple[int, bytes]]:
+        """Extract all complete frames now available; self-heals misalignment."""
+        frames: list[tuple[int, bytes]] = []
+        while len(self.buf) >= 3:
+            if self.buf[0] not in _FRAME_FLAGS:
+                self._realign()
+                if len(self.buf) < 3 or self.buf[0] not in _FRAME_FLAGS:
+                    break
+            flags = self.buf[0]
+            length = (self.buf[1] << 8) | self.buf[2]
+            if 3 + length > len(self.buf):
+                break
+            frames.append((flags, bytes(self.buf[3 : 3 + length])))
+            del self.buf[: 3 + length]
+        return frames
 
 
 class StreamReassembler:
-    """Reassemble server->client TCP payloads from ``tcpdump -x`` text lines.
+    """Reassemble server->client TCP streams from ``tcpdump -x`` text lines.
 
-    We only need the server->client direction (game state pushes). Payload is the
-    trailing ``length`` bytes of each packet (tcpdump prints from the IP header,
-    so the app payload is the tail). Buffers are keyed per connection so a
-    reconnect starts a fresh stream.
+    Sequence numbers order the payloads, drop retransmissions, and buffer
+    out-of-order segments; frames are decoded incrementally (so the buffer stays
+    bounded) and misalignment self-heals on the frame markers. ``feed_line``
+    returns any newly decoded ``game.*`` events.
     """
 
     def __init__(self) -> None:
-        self.buffers: dict[str, bytearray] = {}
+        from fpdb_3_legacy.coinpoker_protocol import game_event_from_object
+
+        self._game_event = game_event_from_object
+        self.conns: dict[str, _Conn] = {}
         self._cur_key: str | None = None
+        self._cur_seq = 0
         self._cur_len = 0
         self._hex: list[str] = []
 
-    def _flush(self) -> bytes | None:
+    def _flush(self) -> list[tuple]:
         if self._cur_key is None:
-            return None
+            return []
         allb = bytes.fromhex("".join(self._hex))
         payload = allb[-self._cur_len :] if 0 < self._cur_len <= len(allb) else b""
-        key = self._cur_key
+        key, seq = self._cur_key, self._cur_seq
         self._cur_key, self._cur_len, self._hex = None, 0, []
-        if payload:
-            self.buffers.setdefault(key, bytearray()).extend(payload)
-            return payload
-        return None
+        if not payload:
+            return []
+        conn = self.conns.setdefault(key, _Conn())
+        conn.add(seq, payload)
+        events = []
+        for flags, body in conn.pop_frames():
+            try:
+                obj = decode_frame(flags, body)
+            except Exception:  # noqa: BLE001 - best-effort decode; skip malformed frames
+                continue
+            ev = self._game_event(obj) if obj is not None else None
+            if ev is not None:
+                events.append(ev)
+        return events
 
-    def feed_line(self, line: str) -> str | None:
-        """Feed one tcpdump text line. Returns the connection key that grew, if any."""
+    def feed_line(self, line: str) -> list[tuple]:
+        """Feed one tcpdump text line; return newly decoded game events."""
         if line and not line[0].isspace():
-            grew = self._flush()
+            events = self._flush()
             m = _HDR_RE.search(line)
-            grown_key = self._cur_key if grew else None
             if m and m.group("sport") in GAME_PORTS:
                 self._cur_key = f"{m.group('sport')}->{m.group('dport')}"
+                self._cur_seq = int(m.group("seq")) % _SEQ_MOD
                 self._cur_len = int(m.group("len"))
                 self._hex = []
             else:
                 self._cur_key = None
-            return grown_key
+            return events
         m = _HEX_RE.match(line)
         if m and self._cur_key is not None:
             self._hex.append(m.group(1).replace(" ", ""))
-        return None
-
-
-def _events_from_buffers(reassembler: StreamReassembler) -> list[tuple]:
-    """Decode all game events currently present across every connection buffer."""
-    events: list[tuple] = []
-    for buf in reassembler.buffers.values():
-        events.extend(iter_game_events(bytes(buf)))
-    return events
+        return []
 
 
 def _iter_tcpdump_lines_live() -> Iterator[str]:
     cmd = [
-        "tcpdump", "-i", "any", "-l", "-n", "-x",
+        "tcpdump", "-i", "any", "-l", "-n", "-S", "-x",
         f"tcp port {GAME_PORTS[0]} or tcp port {GAME_PORTS[1]}",
     ]
     print(f"[INFO] Starting: {' '.join(cmd)}")
@@ -118,7 +212,7 @@ def _iter_tcpdump_lines_live() -> Iterator[str]:
 
 
 def _iter_tcpdump_lines_replay(pcap: str) -> Iterator[str]:
-    cmd = ["tcpdump", "-r", pcap, "-n", "-x", f"tcp port {GAME_PORTS[0]} or tcp port {GAME_PORTS[1]}"]
+    cmd = ["tcpdump", "-r", pcap, "-n", "-S", "-x", f"tcp port {GAME_PORTS[0]} or tcp port {GAME_PORTS[1]}"]
     out = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True, check=False)  # noqa: S603
     yield from out.stdout.splitlines()
 
@@ -173,6 +267,10 @@ class HandPump:
                 print(f"[ERROR] import of #{hid} failed: {exc}")
         return new
 
+    def prune(self, events: list[tuple]) -> list[tuple]:
+        """Drop events belonging to already-imported hands to bound memory."""
+        return [e for e in events if e[1] not in self.imported]
+
 
 def _open_db():
     from fpdb_3_legacy import Configuration, Database
@@ -192,16 +290,21 @@ def run(lines: Iterable[str], *, dry_run: bool, table_category: str) -> None:
     reassembler = StreamReassembler()
     pump = HandPump(db, config, table_category=table_category, dry_run=dry_run)
     print("[INFO] === CoinPoker live feed active ===")
+    events: list[tuple] = []
     since_check = 0
     for line in lines:
-        grew = reassembler.feed_line(line.rstrip("\n"))
-        since_check += 1
-        # Re-evaluate hands periodically (server pushes many small frames).
-        if grew and since_check >= 20:
+        new_events = reassembler.feed_line(line.rstrip("\n"))
+        if not new_events:
+            continue
+        events.extend(new_events)
+        since_check += len(new_events)
+        # Re-evaluate hands periodically (server pushes many small events).
+        if since_check >= 20:
             since_check = 0
-            pump.process(_events_from_buffers(reassembler))
+            if pump.process(events):
+                events = pump.prune(events)
     # Final sweep (covers replay mode / shutdown).
-    pump.process(_events_from_buffers(reassembler))
+    pump.process(events)
     print(f"[INFO] Done. Hands imported/built this run: {len(pump.imported)}")
 
 
