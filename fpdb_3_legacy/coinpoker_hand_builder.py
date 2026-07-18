@@ -140,12 +140,16 @@ def _build_one(hid: str, evs: list[tuple], table_category: str) -> dict[str, Any
 
     # Board from the last cumulative dealer_cards snapshot.
     community: dict[str, list[str]] = {}
+    # Cap each street to its real size: run-it-twice can put extra cards under a
+    # street key, which would make an invalid 6+ card board (and duplicate-card
+    # equity errors). We keep the primary run only.
+    street_len = {"FLOP": 3, "TURN": 1, "RIVER": 1}
     for name, _h, d in evs:
         if name == "game.dealer_cards" and isinstance(d, dict):
             dealer = d.get("dealerCards") or {}
             for street in ("FLOP", "TURN", "RIVER"):
                 if dealer.get(street):
-                    community[street] = _cards(dealer[street])
+                    community[street] = _cards(dealer[street])[: street_len[street]]
 
     # Hero hole cards.
     holecards: list[dict] = []
