@@ -376,7 +376,9 @@ def main() -> None:
     args = parser.parse_args()
 
     if args.log_file:
-        sys.stdout = _Tee(sys.__stdout__, open(args.log_file, "a", buffering=1, encoding="utf-8"))  # noqa: SIM115
+        _logf = open(args.log_file, "a", buffering=1, encoding="utf-8")  # noqa: SIM115
+        sys.stdout = _Tee(sys.__stdout__, _logf)
+        sys.stderr = _Tee(sys.__stderr__, _logf)
 
     if args.list_ifaces:
         _print_devices()
@@ -400,6 +402,16 @@ def main() -> None:
     except KeyboardInterrupt:
         print("\n[INFO] Stopped.")
         sys.exit(0)
+    except OSError as exc:
+        print(f"[ERROR] Capture failed: {exc}")
+        print("[HINT] Live capture needs root/Administrator privileges (and Npcap on Windows).")
+        sys.exit(1)
+    except Exception as exc:  # noqa: BLE001 - surface any startup error into the log
+        import traceback
+
+        print(f"[ERROR] {exc}")
+        traceback.print_exc()
+        sys.exit(1)
 
 
 if __name__ == "__main__":
