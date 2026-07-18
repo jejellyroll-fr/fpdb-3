@@ -240,11 +240,20 @@ def _build_one(hid: str, evs: list[tuple], table_category: str) -> dict[str, Any
         for n, p in sorted(players.items(), key=lambda kv: kv[1]["seat"] or 0)
     ]
 
+    # The table id is the hand id without its trailing 5-digit hand counter
+    # (gameId 91426500343 -> table 914265), which also matches the number shown
+    # in the CoinPoker window title ("PLO4 914265 ..."). This gives each table a
+    # distinct, stable name so the HUD creates one window per table.
+    try:
+        table_id = str(int(hid) // 100000)
+    except (ValueError, TypeError):
+        table_id = str(info.get("tableId", "") or hid)
+
     return {
         "site": "CoinPoker",
         "hand_id": str(hid),
         "hero": hero,
-        "table_id": str(info.get("tableId", "")),
+        "table_id": table_id,
         "timestamp": None,
         "buttonpos": info.get("dealerSeatId"),
         "game": {"base": base, "category": category, "fpdb_supported": True},
