@@ -298,6 +298,10 @@ class HandPump:
                 self.failed.add(hid)
                 print(f"[WARN] skipped hand #{hid}: {exc}")
                 continue
+            # Tell fpdb who the hero is (needed for hero stats and the HUD).
+            hero = hand_data.get("hero")
+            if hero and any(p[1] == hero for p in hand.players):
+                hand.hero = hero
             self.imported.add(hid)
             new += 1
             if self.dry_run or self.db is None:
