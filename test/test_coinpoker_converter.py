@@ -13,7 +13,7 @@ from pathlib import Path
 
 import pytest
 
-from fpdb_3_legacy.coinpoker_hand_builder import build_hands
+from fpdb_3_legacy.coinpoker_hand_builder import _collect_players, build_hands
 from fpdb_3_legacy.coinpoker_protocol import decode_frame, split_frames
 from fpdb_3_legacy.http_capture_hand_builder import (
     CaptureNotImportableError,
@@ -85,6 +85,20 @@ def test_hole_cards_and_board_are_mapped() -> None:
     assert hero["closed"] == ["Js", "8s", "7s", "4d"]
     assert h["community"]["FLOP"] == ["Qc", "9s", "6c"]
     assert h["community"]["TURN"] == ["5s"]
+
+
+def test_seat_reuse_keeps_one_player_per_seat() -> None:
+    # A seat's occupant changes within the captured window: fpdb must never get
+    # two players in the same seat (previously raised FpdbHandPartial).
+    evs = [
+        ("game.seat", "H", {"seatId": 3, "userName": "Alice", "userChips": 2.0, "betAmout": 0}),
+        ("game.seat", "H", {"seatId": 3, "userName": "Bob", "userChips": 1.0, "betAmout": 0}),
+        ("game.seat", "H", {"seatId": 4, "userName": "Carol", "userChips": 3.0, "betAmout": 0}),
+    ]
+    players = _collect_players(evs)
+    assert set(players) == {"Alice", "Carol"}
+    seats = [p["seat"] for p in players.values()]
+    assert len(seats) == len(set(seats))
 
 
 def test_incomplete_hand_is_rejected() -> None:

@@ -280,17 +280,22 @@ class HandPump:
         self.table_category = table_category
         self.dry_run = dry_run
         self.imported: set[str] = set()
+        self.failed: set[str] = set()
 
     def process(self, events: list[tuple]) -> int:
         new = 0
         for hand_data in build_hands(events, self.table_category):
             hid = hand_data["hand_id"]
-            if hid in self.imported:
+            if hid in self.imported or hid in self.failed:
                 continue
             try:
                 hand = build_fpdb_hand(hand_data, config=self.config)
             except CaptureNotImportableError:
-                continue  # hand not complete yet (no winner/collection)
+                continue  # hand not complete yet (no winner/collection); retry later
+            except Exception as exc:  # noqa: BLE001 - one malformed hand must not kill the feed
+                self.failed.add(hid)
+                print(f"[WARN] skipped hand #{hid}: {exc}")
+                continue
             self.imported.add(hid)
             new += 1
             if self.dry_run or self.db is None:
@@ -305,8 +310,9 @@ class HandPump:
         return new
 
     def prune(self, events: list[tuple]) -> list[tuple]:
-        """Drop events belonging to already-imported hands to bound memory."""
-        return [e for e in events if e[1] not in self.imported]
+        """Drop events of already-handled (imported or failed) hands to bound memory."""
+        done = self.imported | self.failed
+        return [e for e in events if e[1] not in done]
 
 
 def _resolve_config_file() -> str | None:
@@ -352,8 +358,8 @@ def run(events: Iterable[tuple], *, dry_run: bool, table_category: str, config_f
         # Re-evaluate hands periodically (the server pushes many small events).
         if since_check >= 20:
             since_check = 0
-            if pump.process(accumulated):
-                accumulated = pump.prune(accumulated)
+            pump.process(accumulated)
+            accumulated = pump.prune(accumulated)
     pump.process(accumulated)  # final sweep (covers replay / shutdown)
     print(f"[INFO] Done. Hands imported/built this run: {len(pump.imported)}")
 
