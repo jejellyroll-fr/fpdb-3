@@ -3,27 +3,33 @@
 
 CoinPoker's poker protocol is a plaintext binary stream on raw TCP
 (poker-nlb:9000 and :7002), opened by the Electron main process. This module
-sniffs that traffic with ``tcpdump`` (root required, like DriveHUD's capture),
-reassembles the server->client byte stream, decodes game events
-(``coinpoker_protocol``), builds fpdb hands (``coinpoker_hand_builder`` ->
-``http_capture_hand_builder``) and imports each completed hand into the
-configured fpdb database so the existing HUD can read it.
+captures that traffic natively (``coinpoker_pcap``, libpcap on Linux/macOS,
+Npcap on Windows -- no external Python dependency), reassembles the
+server->client byte stream, decodes game events (``coinpoker_protocol``), builds
+fpdb hands (``coinpoker_hand_builder`` -> ``http_capture_hand_builder``) and
+imports each completed hand into the fpdb database so the existing HUD reads it.
 
 Modes
 -----
-Live, recommended (only tcpdump runs as root; the importer keeps your $HOME and
-DB config)::
+Live capture (needs root / Administrator, like any sniffer)::
+
+    sudo python -m fpdb_3_legacy.coinpoker_live_capture --live
+    # Windows (elevated shell, Npcap installed):
+    python -m fpdb_3_legacy.coinpoker_live_capture --live --iface "\\Device\\NPF_{...}"
+
+List capture devices::
+
+    python -m fpdb_3_legacy.coinpoker_live_capture --list-ifaces
+
+Replay a saved pcap/pcapng file (no privileges; for testing)::
+
+    python -m fpdb_3_legacy.coinpoker_live_capture --replay capture.pcap --dry-run
+
+Portable fallback if native capture is unavailable, pipe any sniffer's
+``-S -x`` text (tcpdump/tshark) into stdin::
 
     sudo tcpdump -i any -l -n -S -x 'tcp port 9000 or tcp port 7002' \
         | python -m fpdb_3_legacy.coinpoker_live_capture --stdin
-
-Live, self-spawned tcpdump (needs to run the whole process as root)::
-
-    sudo -E python -m fpdb_3_legacy.coinpoker_live_capture --live
-
-Replay a saved pcap (no root; for testing the decode/build/import path)::
-
-    python -m fpdb_3_legacy.coinpoker_live_capture --replay /tmp/cp9000.pcap --dry-run
 
 ``--dry-run`` builds and validates hands without writing to the database.
 """
@@ -32,7 +38,6 @@ from __future__ import annotations
 
 import argparse
 import re
-import subprocess
 import sys
 from typing import Iterable, Iterator
 
@@ -158,17 +163,16 @@ class StreamReassembler:
         self._cur_len = 0
         self._hex: list[str] = []
 
-    def _flush(self) -> list[tuple]:
-        if self._cur_key is None:
-            return []
-        allb = bytes.fromhex("".join(self._hex))
-        payload = allb[-self._cur_len :] if 0 < self._cur_len <= len(allb) else b""
-        key, seq = self._cur_key, self._cur_seq
-        self._cur_key, self._cur_len, self._hex = None, 0, []
+    def add_segment(self, key: str, seq: int, payload: bytes) -> list[tuple]:
+        """Add one server->client TCP segment and return newly decoded events.
+
+        This is the transport-agnostic entry point shared by the text (tcpdump)
+        and native libpcap sources.
+        """
         if not payload:
             return []
         conn = self.conns.setdefault(key, _Conn())
-        conn.add(seq, payload)
+        conn.add(seq % _SEQ_MOD, payload)
         events = []
         for flags, body in conn.pop_frames():
             try:
@@ -179,6 +183,15 @@ class StreamReassembler:
             if ev is not None:
                 events.append(ev)
         return events
+
+    def _flush(self) -> list[tuple]:
+        if self._cur_key is None:
+            return []
+        allb = bytes.fromhex("".join(self._hex))
+        payload = allb[-self._cur_len :] if 0 < self._cur_len <= len(allb) else b""
+        key, seq = self._cur_key, self._cur_seq
+        self._cur_key, self._cur_len, self._hex = None, 0, []
+        return self.add_segment(key, seq, payload)
 
     def feed_line(self, line: str) -> list[tuple]:
         """Feed one tcpdump text line; return newly decoded game events."""
@@ -199,22 +212,23 @@ class StreamReassembler:
         return []
 
 
-def _iter_tcpdump_lines_live() -> Iterator[str]:
-    cmd = [
-        "tcpdump", "-i", "any", "-l", "-n", "-S", "-x",
-        f"tcp port {GAME_PORTS[0]} or tcp port {GAME_PORTS[1]}",
-    ]
-    print(f"[INFO] Starting: {' '.join(cmd)}")
-    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True)  # noqa: S603
-    if proc.stdout is None:
-        raise RuntimeError("tcpdump produced no stdout (is it installed / are you root?)")
-    yield from proc.stdout
+BPF_FILTER = f"tcp port {GAME_PORTS[0]} or tcp port {GAME_PORTS[1]}"
+_GAME_PORT_INTS = frozenset(int(p) for p in GAME_PORTS)
 
 
-def _iter_tcpdump_lines_replay(pcap: str) -> Iterator[str]:
-    cmd = ["tcpdump", "-r", pcap, "-n", "-S", "-x", f"tcp port {GAME_PORTS[0]} or tcp port {GAME_PORTS[1]}"]
-    out = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True, check=False)  # noqa: S603
-    yield from out.stdout.splitlines()
+def _events_from_segments(segments: Iterable[tuple[int, int, int, bytes]]) -> Iterator[tuple]:
+    """Turn (src_port, dst_port, seq, payload) tuples into decoded game events."""
+    reassembler = StreamReassembler()
+    for src_port, dst_port, seq, payload in segments:
+        if src_port in _GAME_PORT_INTS and payload:
+            yield from reassembler.add_segment(f"{src_port}->{dst_port}", seq, payload)
+
+
+def _events_from_lines(lines: Iterable[str]) -> Iterator[tuple]:
+    """Turn tcpdump ``-x`` text lines (stdin fallback) into decoded game events."""
+    reassembler = StreamReassembler()
+    for line in lines:
+        yield from reassembler.feed_line(line.rstrip("\n"))
 
 
 def ensure_coinpoker_site(db) -> None:
@@ -272,61 +286,90 @@ class HandPump:
         return [e for e in events if e[1] not in self.imported]
 
 
+def _resolve_config_file() -> str | None:
+    """Find HUD_config.xml even when running elevated (sudo resets $HOME)."""
+    import os
+
+    sudo_user = os.environ.get("SUDO_USER")
+    if sudo_user and hasattr(os, "geteuid") and os.geteuid() == 0:
+        try:
+            import pwd
+
+            home = pwd.getpwnam(sudo_user).pw_dir
+        except (ImportError, KeyError):
+            return None
+        candidate = os.path.join(home, ".fpdb", "HUD_config.xml")
+        if os.path.exists(candidate):
+            return candidate
+    return None
+
+
 def _open_db():
     from fpdb_3_legacy import Configuration, Database
 
-    config = Configuration.Config()
+    config = Configuration.Config(file=_resolve_config_file())
     db = Database.Database(config)
     ensure_coinpoker_site(db)
     return db, config
 
 
-def run(lines: Iterable[str], *, dry_run: bool, table_category: str) -> None:
+def run(events: Iterable[tuple], *, dry_run: bool, table_category: str) -> None:
     if dry_run:
         db, config = None, HttpCaptureHandConfig(site_ids={"CoinPoker": COINPOKER_SITE_ID, "default": COINPOKER_SITE_ID})
     else:
         db, config = _open_db()
 
-    reassembler = StreamReassembler()
     pump = HandPump(db, config, table_category=table_category, dry_run=dry_run)
     print("[INFO] === CoinPoker live feed active ===")
-    events: list[tuple] = []
+    accumulated: list[tuple] = []
     since_check = 0
-    for line in lines:
-        new_events = reassembler.feed_line(line.rstrip("\n"))
-        if not new_events:
-            continue
-        events.extend(new_events)
-        since_check += len(new_events)
-        # Re-evaluate hands periodically (server pushes many small events).
+    for event in events:
+        accumulated.append(event)
+        since_check += 1
+        # Re-evaluate hands periodically (the server pushes many small events).
         if since_check >= 20:
             since_check = 0
-            if pump.process(events):
-                events = pump.prune(events)
-    # Final sweep (covers replay mode / shutdown).
-    pump.process(events)
+            if pump.process(accumulated):
+                accumulated = pump.prune(accumulated)
+    pump.process(accumulated)  # final sweep (covers replay / shutdown)
     print(f"[INFO] Done. Hands imported/built this run: {len(pump.imported)}")
 
 
+def _print_devices() -> None:
+    from fpdb_3_legacy.coinpoker_pcap import list_devices
+
+    print("Available capture devices:")
+    for name, desc, flags in list_devices():
+        print(f"  {name:20} {desc}  (flags=0x{flags:x})")
+
+
 def main() -> None:
-    parser = argparse.ArgumentParser(description="CoinPoker live HUD capture feed")
+    parser = argparse.ArgumentParser(description="CoinPoker live HUD capture feed (native libpcap/Npcap)")
     src = parser.add_mutually_exclusive_group(required=True)
-    src.add_argument("--live", action="store_true", help="Sniff live traffic (runs tcpdump itself; whole process needs root).")
-    src.add_argument("--stdin", action="store_true", help="Read tcpdump -x output from stdin (pipe a root tcpdump into this).")
-    src.add_argument("--replay", metavar="PCAP", help="Replay a saved pcap instead of sniffing.")
+    src.add_argument("--live", action="store_true", help="Capture live traffic (needs root/Administrator).")
+    src.add_argument("--replay", metavar="PCAP", help="Read a saved pcap/pcapng file (no privileges needed).")
+    src.add_argument("--stdin", action="store_true", help="Read tcpdump -S -x text from stdin (portable fallback).")
+    src.add_argument("--list-ifaces", action="store_true", help="List capture devices and exit.")
+    parser.add_argument("--iface", help="Capture device (default: auto; 'any' on Linux).")
     parser.add_argument("--dry-run", action="store_true", help="Build/validate hands without DB insert.")
     parser.add_argument("--game", default="PLO4", help="Table category hint (PLO4, NLHE, ...).")
     args = parser.parse_args()
 
+    if args.list_ifaces:
+        _print_devices()
+        return
+
+    from fpdb_3_legacy.coinpoker_pcap import capture_live, open_offline
+
     if args.live:
-        lines: Iterable[str] = _iter_tcpdump_lines_live()
-    elif args.stdin:
-        lines = sys.stdin
+        events = _events_from_segments(capture_live(args.iface, BPF_FILTER))
+    elif args.replay:
+        events = _events_from_segments(open_offline(args.replay, BPF_FILTER))
     else:
-        lines = _iter_tcpdump_lines_replay(args.replay)
+        events = _events_from_lines(sys.stdin)
 
     try:
-        run(lines, dry_run=args.dry_run, table_category=args.game)
+        run(events, dry_run=args.dry_run, table_category=args.game)
     except KeyboardInterrupt:
         print("\n[INFO] Stopped.")
         sys.exit(0)
