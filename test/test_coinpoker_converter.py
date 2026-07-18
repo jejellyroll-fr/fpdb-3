@@ -57,6 +57,7 @@ def test_split_frames_reads_length_prefixed_frames() -> None:
 def test_builds_two_hands_from_fixture() -> None:
     hands = build_hands(_load_events(), "PLO4")
     assert {h["hand_id"] for h in hands} == {"91426500343", "91426500344"}
+    assert all(h["collections"] for h in hands)  # both captured hands are complete
 
 
 def test_complete_hand_maps_to_fpdb_hand() -> None:
@@ -87,6 +88,14 @@ def test_hole_cards_and_board_are_mapped() -> None:
 
 
 def test_incomplete_hand_is_rejected() -> None:
-    # Capture ended mid-hand: no winner -> no collections -> not importable.
+    # Drop the winner events of a hand (as if capture stopped before showdown):
+    # no collection -> the hand must be rejected, not imported truncated.
+    events = [
+        e
+        for e in _load_events()
+        if not (e[1] == "91426500343" and e[0] in ("game.winnerInfo", "game.cumulativeWinnerInfo"))
+    ]
+    hand_data = next(h for h in build_hands(events, "PLO4") if h["hand_id"] == "91426500343")
+    assert not hand_data["collections"]
     with pytest.raises(CaptureNotImportableError):
-        build_fpdb_hand(_hand("91426500344"))
+        build_fpdb_hand(hand_data)
