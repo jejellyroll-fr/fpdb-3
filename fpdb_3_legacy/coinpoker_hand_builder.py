@@ -78,16 +78,24 @@ def build_hands(events: list[tuple[str, str | None, Any]], table_category: str =
 
 
 def _collect_players(evs: list[tuple]) -> dict[str, dict]:
-    """Return {name: {seat, stack}}, stack = chips before the player acted."""
+    """Return {name: {seat, stack}}, stack = chips before the player acted.
+
+    Each seat maps to exactly one player: if a seat changes occupants within the
+    captured window (a player leaves, another sits down), the first occupant seen
+    wins, so fpdb never receives two players in the same seat.
+    """
     players: dict[str, dict] = {}
+    used_seats: set = set()
 
     def note(entry: dict) -> None:
         name = entry.get("userName")
-        if not name or name in players:
+        seat = entry.get("seatId")
+        if not name or name in players or seat is None or seat in used_seats:
             return
         chips = Decimal(str(entry.get("userChips", 0) or 0))
         bet = Decimal(str(entry.get("betAmout", 0) or 0))
-        players[name] = {"seat": entry.get("seatId"), "stack": chips + bet}
+        players[name] = {"seat": seat, "stack": chips + bet}
+        used_seats.add(seat)
 
     info = _first(evs, "game.seatInfo")
     if info:
