@@ -69,6 +69,23 @@ def _seq_lt(a: int, b: int) -> bool:
     return 0 < (b - a) % _SEQ_MOD < (_SEQ_MOD >> 1)
 
 
+class _Tee:
+    """Write to several streams at once (used to mirror output to a log file)."""
+
+    def __init__(self, *streams) -> None:
+        self._streams = streams
+
+    def write(self, text: str) -> int:
+        for stream in self._streams:
+            stream.write(text)
+            stream.flush()
+        return len(text)
+
+    def flush(self) -> None:
+        for stream in self._streams:
+            stream.flush()
+
+
 class _Conn:
     """Per-connection sequenced reassembly + incremental frame decoding."""
 
@@ -304,20 +321,20 @@ def _resolve_config_file() -> str | None:
     return None
 
 
-def _open_db():
+def _open_db(config_file: str | None = None):
     from fpdb_3_legacy import Configuration, Database
 
-    config = Configuration.Config(file=_resolve_config_file())
+    config = Configuration.Config(file=config_file or _resolve_config_file())
     db = Database.Database(config)
     ensure_coinpoker_site(db)
     return db, config
 
 
-def run(events: Iterable[tuple], *, dry_run: bool, table_category: str) -> None:
+def run(events: Iterable[tuple], *, dry_run: bool, table_category: str, config_file: str | None = None) -> None:
     if dry_run:
         db, config = None, HttpCaptureHandConfig(site_ids={"CoinPoker": COINPOKER_SITE_ID, "default": COINPOKER_SITE_ID})
     else:
-        db, config = _open_db()
+        db, config = _open_db(config_file)
 
     pump = HandPump(db, config, table_category=table_category, dry_run=dry_run)
     print("[INFO] === CoinPoker live feed active ===")
@@ -353,23 +370,33 @@ def main() -> None:
     parser.add_argument("--iface", help="Capture device (default: auto; 'any' on Linux).")
     parser.add_argument("--dry-run", action="store_true", help="Build/validate hands without DB insert.")
     parser.add_argument("--game", default="PLO4", help="Table category hint (PLO4, NLHE, ...).")
+    parser.add_argument("--log-file", help="Tee all output to this file (used by the GUI tab).")
+    parser.add_argument("--stop-file", help="Exit cleanly once this file exists (GUI stop signal).")
+    parser.add_argument("--config-file", help="Explicit HUD_config.xml path (needed when launched elevated).")
     args = parser.parse_args()
+
+    if args.log_file:
+        sys.stdout = _Tee(sys.__stdout__, open(args.log_file, "a", buffering=1, encoding="utf-8"))  # noqa: SIM115
 
     if args.list_ifaces:
         _print_devices()
         return
 
+    import os
+
     from fpdb_3_legacy.coinpoker_pcap import capture_live, open_offline
 
+    stop = (lambda: bool(args.stop_file) and os.path.exists(args.stop_file)) if args.stop_file else None
+
     if args.live:
-        events = _events_from_segments(capture_live(args.iface, BPF_FILTER))
+        events = _events_from_segments(capture_live(args.iface, BPF_FILTER, stop=stop))
     elif args.replay:
         events = _events_from_segments(open_offline(args.replay, BPF_FILTER))
     else:
         events = _events_from_lines(sys.stdin)
 
     try:
-        run(events, dry_run=args.dry_run, table_category=args.game)
+        run(events, dry_run=args.dry_run, table_category=args.game, config_file=args.config_file)
     except KeyboardInterrupt:
         print("\n[INFO] Stopped.")
         sys.exit(0)

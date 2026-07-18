@@ -64,6 +64,7 @@ from fpdb_3_legacy import (
     GuiAutoNoteRules,
     GuiAutoNotesWorkbench,
     GuiBulkImport,
+    GuiCoinPokerCapture,
     GuiDatabase,
     GuiGraphViewer,
     GuiHandViewer,
@@ -1546,6 +1547,12 @@ class fpdb(QMainWindow):
         new_import_thread = GuiBulkImport.GuiBulkImport(self.settings, self.config, self.sql, self)
         self.threads.append(new_import_thread)
         self.add_and_display_tab(new_import_thread, "Bulk Import")
+
+    def tab_coinpoker_capture(self, widget, data=None) -> None:
+        """Open the CoinPoker live packet-capture tab."""
+        new_thread = GuiCoinPokerCapture.GuiCoinPokerCapture(self.config, self)
+        self.threads.append(new_thread)
+        self.add_and_display_tab(new_thread, "CoinPoker Capture")
 
     def tab_auto_notes_workbench(self, widget, data=None) -> None:
         """Open the automatic notes workbench tab."""

@@ -113,6 +113,7 @@ def menu_layout() -> tuple[Menu, ...]:
             (
                 MenuItem(N_("Bulk Import"), "tab_bulk_import", "Ctrl+B"),
                 MenuItem(N_("HUD and Auto Import"), "tab_auto_import", "Ctrl+A"),
+                MenuItem(N_("CoinPoker Live Capture"), "tab_coinpoker_capture"),
             ),
         ),
         Menu(
