@@ -176,20 +176,39 @@ def list_devices() -> list[tuple[str, str, int]]:
     return devices
 
 
+# Interface name prefixes that are virtual/secondary (VPN, AirDrop, bridges,
+# hotspot, container) and almost never carry the real internet route.
+_VIRTUAL_PREFIXES = (
+    "lo", "ap", "awdl", "llw", "utun", "bridge", "p2p", "gif", "stf", "xhc",
+    "vmnet", "vnic", "tun", "tap", "docker", "veth", "ppp", "anpi",
+)
+
+
 def default_device() -> str:
-    """Pick a sensible capture device for the current platform."""
+    """Pick a sensible capture device for the current platform.
+
+    Prefers a physical, up-and-running interface (e.g. en0 / Ethernet / Wi-Fi)
+    and skips virtual ones (VPN, AirDrop, hotspot, bridges) that would sniff no
+    game traffic. The GUI lets the user override this.
+    """
     if sys.platform.startswith("linux"):
         return "any"  # DLT_LINUX_SLL; captures every interface
     running_or_up = _PCAP_IF_RUNNING | _PCAP_IF_UP
-    for name, _desc, flags in list_devices():
-        if flags & _PCAP_IF_LOOPBACK:
-            continue
+    candidates = [(name, flags) for name, _desc, flags in list_devices() if not (flags & _PCAP_IF_LOOPBACK)]
+
+    def _is_virtual(name: str) -> bool:
+        low = name.lower()
+        return any(low.startswith(prefix) for prefix in _VIRTUAL_PREFIXES)
+
+    for name, flags in candidates:
+        if flags & running_or_up and not _is_virtual(name):
+            return name
+    for name, flags in candidates:
         if flags & running_or_up:
             return name
-    devices = list_devices()
-    if not devices:
+    if not candidates:
         raise OSError("No capture devices found (need privileges / Npcap on Windows).")
-    return devices[0][0]
+    return candidates[0][0]
 
 
 # --- capture loops ------------------------------------------------------------
