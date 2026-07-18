@@ -232,8 +232,11 @@ class GuiCoinPokerCapture(QWidget):
         if cfg:
             command += ["-c", str(cfg)]
         try:
-            self.hud_proc = subprocess.Popen(command)  # noqa: S603
-            self.output.appendPlainText("[info] HUD_main started (ZMQ 5555). Keep one CoinPoker table open.")
+            # Capture HUD_main's console output so its table-detection decisions
+            # are visible (~/.fpdb/coinpoker-hud.log).
+            self._hud_log = (Path(os.path.expanduser("~/.fpdb")) / "coinpoker-hud.log").open("w", encoding="utf-8")
+            self.hud_proc = subprocess.Popen(command, stdout=self._hud_log, stderr=subprocess.STDOUT)  # noqa: S603
+            self.output.appendPlainText("[info] HUD_main started (ZMQ 5555); log -> ~/.fpdb/coinpoker-hud.log")
         except Exception as exc:  # noqa: BLE001
             self.output.appendPlainText(f"[warn] could not launch HUD_main: {exc}")
 

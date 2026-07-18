@@ -38,6 +38,7 @@ from fpdb_3_legacy.PokerStarsSummary import PokerStarsSummary
 from fpdb_3_legacy.PokerStarsToFpdb import PokerStars
 from fpdb_3_legacy.PokerTrackerSummary import PokerTrackerSummary
 from fpdb_3_legacy.PokerTrackerToFpdb import PokerTracker
+from fpdb_3_legacy.CoinPokerToFpdb import CoinPoker
 from fpdb_3_legacy.SealsWithClubsToFpdb import SealsWithClubs
 from fpdb_3_legacy.TourneySummary import TourneySummary
 from fpdb_3_legacy.UnibetSummary import UnibetSummary
@@ -55,6 +56,7 @@ LEGACY_MODULE_REGISTRY: dict[str, str] = {
     "BovadaSummary": "fpdb_3_legacy.BovadaSummary",
     "BovadaToFpdb": "fpdb_3_legacy.BovadaToFpdb",
     "CakeToFpdb": "fpdb_3_legacy.CakeToFpdb",
+    "CoinPokerToFpdb": "fpdb_3_legacy.CoinPokerToFpdb",
     "EnetToFpdb": "fpdb_3_legacy.EnetToFpdb",
     "EntractionToFpdb": "fpdb_3_legacy.EntractionToFpdb",
     "EverestToFpdb": "fpdb_3_legacy.EverestToFpdb",
@@ -94,6 +96,7 @@ PARSER_CLASS_REGISTRY: dict[str, type[HandHistoryConverter]] = {
     "Boss": Boss,
     "Bovada": Bovada,
     "Cake": Cake,
+    "CoinPoker": CoinPoker,
     "Enet": Enet,
     "Entraction": Entraction,
     "Everest": Everest,
