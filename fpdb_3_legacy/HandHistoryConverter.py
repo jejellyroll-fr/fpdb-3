@@ -1068,7 +1068,15 @@ or None if we fail to get the info """
 
 def getTableTitleRe(config, sitename, *args, **kwargs):
     """Returns string to search in windows titles for current site."""
-    hhc = getSiteHhc(config, sitename)
+    try:
+        hhc = getSiteHhc(config, sitename)
+    except (KeyError, ImportError, AttributeError):
+        # Site enabled without a usable <hhc> converter (e.g. live-capture-only
+        # sites like CoinPoker, or name-mismatched sites). Fall back to searching
+        # the window title for the table name instead of aborting HUD creation.
+        import re as _re
+
+        return _re.escape(str(kwargs.get("table_name") or (args[0] if args else "")))
     import inspect
     func = hhc.getTableTitleRe
     sig = inspect.signature(func)
