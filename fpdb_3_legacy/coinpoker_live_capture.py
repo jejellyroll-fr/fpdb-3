@@ -275,12 +275,13 @@ def ensure_coinpoker_site(db) -> None:
 class HandPump:
     """Turns a growing event list into imported hands, once per completed hand."""
 
-    def __init__(self, db, config, *, table_category: str = "PLO4", dry_run: bool = False, file_id: int = 0) -> None:
+    def __init__(self, db, config, *, table_category: str = "PLO4", dry_run: bool = False, file_id: int = 0, notify=None) -> None:
         self.db = db
         self.config = config
         self.table_category = table_category
         self.dry_run = dry_run
         self.file_id = file_id
+        self.notify = notify  # ZMQSender to ping HUD_main after each import
         self.imported: set[str] = set()
         self.failed: set[str] = set()
 
@@ -314,6 +315,11 @@ class HandPump:
                 import_fpdb_hand(hand, self.db, file_id=self.file_id, doinsert=True)
                 self.db.commit()
                 print(f"[IMPORTED] hand #{hid}")
+                # Ping HUD_main (if running) with the DB hand id so it can pop
+                # or refresh the HUD for this table.
+                if self.notify is not None:
+                    with contextlib.suppress(Exception):
+                        self.notify.send_hand_id(hand.dbid_hands)
             except Exception as exc:  # noqa: BLE001
                 # Roll back so an aborted transaction doesn't block later hands.
                 with contextlib.suppress(Exception):
@@ -365,6 +371,17 @@ def _ensure_capture_file(db) -> int:
         return 0
 
 
+def _make_hud_notifier():
+    """Return a ZMQSender that pings a running HUD_main, or None if unavailable."""
+    try:
+        from fpdb_3_legacy.Importer import ZMQSender
+
+        return ZMQSender()  # PUSH to 127.0.0.1:5555 (HUD_main's port)
+    except Exception as exc:  # noqa: BLE001
+        print(f"[WARN] HUD notifier unavailable: {exc}")
+        return None
+
+
 def _open_db(config_file: str | None = None):
     from fpdb_3_legacy import Configuration, Database
 
@@ -385,13 +402,15 @@ def _open_db(config_file: str | None = None):
 
 def run(events: Iterable[tuple], *, dry_run: bool, table_category: str, config_file: str | None = None) -> None:
     file_id = 0
+    notify = None
     if dry_run:
         db, config = None, HttpCaptureHandConfig(site_ids={"CoinPoker": COINPOKER_SITE_ID, "default": COINPOKER_SITE_ID})
     else:
         db, config = _open_db(config_file)
         file_id = _ensure_capture_file(db)
+        notify = _make_hud_notifier()
 
-    pump = HandPump(db, config, table_category=table_category, dry_run=dry_run, file_id=file_id)
+    pump = HandPump(db, config, table_category=table_category, dry_run=dry_run, file_id=file_id, notify=notify)
     print("[INFO] === CoinPoker live feed active ===")
     accumulated: list[tuple] = []
     since_check = 0
