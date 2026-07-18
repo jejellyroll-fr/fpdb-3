@@ -54,6 +54,7 @@ class GuiCoinPokerCapture(QWidget):
         super().__init__(parent)
         self.config = config
         self.proc: subprocess.Popen | None = None
+        self.hud_proc: subprocess.Popen | None = None
         self._log_pos = 0
 
         state_dir = Path(os.path.expanduser("~/.fpdb"))
@@ -92,6 +93,11 @@ class GuiCoinPokerCapture(QWidget):
 
         self.dry_run = QCheckBox("Dry run (no DB insert)")
         controls.addWidget(self.dry_run)
+
+        self.launch_hud = QCheckBox("Launch HUD")
+        self.launch_hud.setChecked(True)
+        self.launch_hud.setToolTip("Also start HUD_main (uncheck if HUD/Auto Import is already running).")
+        controls.addWidget(self.launch_hud)
         self.mainVBox.addLayout(controls)
 
         buttons = QHBoxLayout()
@@ -163,6 +169,9 @@ class GuiCoinPokerCapture(QWidget):
             log.exception("CoinPoker capture launch failed")
             return
 
+        if self.launch_hud.isChecked() and not self.dry_run.isChecked():
+            self._launch_hud_main()
+
         self.status.setText("Requesting privileges… accept the prompt, then play in CoinPoker.")
         self.start_button.setEnabled(False)
         self.stop_button.setEnabled(True)
@@ -201,10 +210,32 @@ class GuiCoinPokerCapture(QWidget):
         if self.proc is not None and self.proc.poll() is None:
             with contextlib.suppress(Exception):
                 self.proc.terminate()
+        if self.hud_proc is not None and self.hud_proc.poll() is None:
+            with contextlib.suppress(Exception):
+                self.hud_proc.terminate()
+        self.hud_proc = None
         self.stop_file.unlink(missing_ok=True)
         self.proc = None
         self.status.setText("Idle.")
         self.start_button.setEnabled(True)
+
+    def _launch_hud_main(self) -> None:
+        """Spawn HUD_main (listens on ZMQ 5555) using the same interpreter."""
+        if self.hud_proc is not None and self.hud_proc.poll() is None:
+            return
+        hud_main = Path(__file__).resolve().parent / "HUD_main.pyw"
+        if not hud_main.is_file():
+            self.output.appendPlainText(f"[warn] HUD_main not found at {hud_main}")
+            return
+        command = [sys.executable, str(hud_main), "-x"]
+        cfg = getattr(self.config, "file", None)
+        if cfg:
+            command += ["-c", str(cfg)]
+        try:
+            self.hud_proc = subprocess.Popen(command)  # noqa: S603
+            self.output.appendPlainText("[info] HUD_main started (ZMQ 5555). Keep one CoinPoker table open.")
+        except Exception as exc:  # noqa: BLE001
+            self.output.appendPlainText(f"[warn] could not launch HUD_main: {exc}")
 
     def _launch_elevated(self) -> subprocess.Popen:
         system = platform.system()
