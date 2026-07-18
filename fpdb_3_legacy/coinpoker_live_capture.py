@@ -37,6 +37,7 @@ Portable fallback if native capture is unavailable, pipe any sniffer's
 from __future__ import annotations
 
 import argparse
+import contextlib
 import re
 import sys
 from typing import Iterable, Iterator
@@ -274,11 +275,12 @@ def ensure_coinpoker_site(db) -> None:
 class HandPump:
     """Turns a growing event list into imported hands, once per completed hand."""
 
-    def __init__(self, db, config, *, table_category: str = "PLO4", dry_run: bool = False) -> None:
+    def __init__(self, db, config, *, table_category: str = "PLO4", dry_run: bool = False, file_id: int = 0) -> None:
         self.db = db
         self.config = config
         self.table_category = table_category
         self.dry_run = dry_run
+        self.file_id = file_id
         self.imported: set[str] = set()
         self.failed: set[str] = set()
 
@@ -302,10 +304,14 @@ class HandPump:
                 print(f"[DRY-RUN] hand #{hid} built ({len(hand.players)} players) — not inserted")
                 continue
             try:
-                import_fpdb_hand(hand, self.db, file_id=0, doinsert=True)
+                import_fpdb_hand(hand, self.db, file_id=self.file_id, doinsert=True)
                 self.db.commit()
                 print(f"[IMPORTED] hand #{hid}")
             except Exception as exc:  # noqa: BLE001
+                # Roll back so an aborted transaction doesn't block later hands.
+                with contextlib.suppress(Exception):
+                    self.db.rollback()
+                self.failed.add(hid)
                 print(f"[ERROR] import of #{hid} failed: {exc}")
         return new
 
@@ -333,6 +339,25 @@ def _resolve_config_file() -> str | None:
     return None
 
 
+def _ensure_capture_file(db) -> int:
+    """Return a valid Files row id to attach imported hands to (FK requirement)."""
+    name = "coinpoker-live-capture"
+    try:
+        file_id = db.get_id(name)
+        if not file_id:
+            import datetime
+
+            now = datetime.datetime.utcnow()
+            file_id = db.storeFile([name, "CoinPoker", now, now, 0, 0, 0, 0, 0, 0, 0, False])
+            db.commit()
+        return int(file_id)
+    except Exception as exc:  # noqa: BLE001
+        print(f"[WARN] Could not create capture Files row: {exc}")
+        with contextlib.suppress(Exception):
+            db.rollback()
+        return 0
+
+
 def _open_db(config_file: str | None = None):
     from fpdb_3_legacy import Configuration, Database
 
@@ -343,12 +368,14 @@ def _open_db(config_file: str | None = None):
 
 
 def run(events: Iterable[tuple], *, dry_run: bool, table_category: str, config_file: str | None = None) -> None:
+    file_id = 0
     if dry_run:
         db, config = None, HttpCaptureHandConfig(site_ids={"CoinPoker": COINPOKER_SITE_ID, "default": COINPOKER_SITE_ID})
     else:
         db, config = _open_db(config_file)
+        file_id = _ensure_capture_file(db)
 
-    pump = HandPump(db, config, table_category=table_category, dry_run=dry_run)
+    pump = HandPump(db, config, table_category=table_category, dry_run=dry_run, file_id=file_id)
     print("[INFO] === CoinPoker live feed active ===")
     accumulated: list[tuple] = []
     since_check = 0
