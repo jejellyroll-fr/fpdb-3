@@ -208,9 +208,10 @@ class GuiCoinPokerCapture(QWidget):
         log = shlex.quote(str(self.log_file))
         system = platform.system()
         if system == "Darwin":
-            # nohup + shell redirect: detach and capture stdout AND stderr (so
-            # startup errors land in the log the tab tails).
-            inner = "cd {r} && PYTHONPATH={r} nohup {cmd} >> {log} 2>&1 &".format(
+            # Background the process (survives osascript's shell exiting) and
+            # capture stdout AND stderr into the log the tab tails. No nohup:
+            # osascript has no controlling TTY, so nohup fails there.
+            inner = "cd {r} && PYTHONPATH={r} {cmd} >> {log} 2>&1 </dev/null &".format(
                 r=shlex.quote(str(root)),
                 cmd=" ".join(shlex.quote(a) for a in command),
                 log=log,
