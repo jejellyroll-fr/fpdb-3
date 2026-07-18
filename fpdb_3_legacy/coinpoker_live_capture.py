@@ -347,7 +347,7 @@ def _ensure_capture_file(db) -> int:
         if not file_id:
             import datetime
 
-            now = datetime.datetime.utcnow()
+            now = datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)
             file_id = db.storeFile([name, "CoinPoker", now, now, 0, 0, 0, 0, 0, 0, 0, False])
             db.commit()
         return int(file_id)
@@ -364,6 +364,15 @@ def _open_db(config_file: str | None = None):
     config = Configuration.Config(file=config_file or _resolve_config_file())
     db = Database.Database(config)
     ensure_coinpoker_site(db)
+    # nextHandId() computes max(id)+1, but store_hand lets the serial assign the
+    # id. If the sequence is out of sync with max(id) the two disagree and the
+    # HandsPlayers FK fails, so realign every id sequence with its table first.
+    try:
+        db.repair_sequences()
+    except Exception as exc:  # noqa: BLE001
+        print(f"[WARN] repair_sequences failed: {exc}")
+        with contextlib.suppress(Exception):
+            db.rollback()
     return db, config
 
 
