@@ -134,12 +134,13 @@ class GuiCoinPokerCapture(QWidget):
     # -- start / stop --------------------------------------------------------
 
     def _build_command(self) -> list[str]:
+        # Note: --log-file is added per-platform in _launch_elevated (Unix uses a
+        # shell redirect so even startup errors are captured).
         args = [sys.executable, "-m", _MODULE, "--live"]
         iface = self.iface_combo.currentData()
         if iface:
             args += ["--iface", iface]
-        args += ["--game", self.game_combo.currentText()]
-        args += ["--log-file", str(self.log_file), "--stop-file", str(self.stop_file)]
+        args += ["--game", self.game_combo.currentText(), "--stop-file", str(self.stop_file)]
         cfg = getattr(self.config, "file", None)
         if cfg:
             args += ["--config-file", str(cfg)]
@@ -164,10 +165,24 @@ class GuiCoinPokerCapture(QWidget):
             log.exception("CoinPoker capture launch failed")
             return
 
-        self.status.setText("Capture running (elevated). Play hands in CoinPoker.")
+        self.status.setText("Requesting privileges… accept the prompt, then play in CoinPoker.")
         self.start_button.setEnabled(False)
         self.stop_button.setEnabled(True)
         self.tail_timer.start()
+        # If nothing shows up shortly, the elevation prompt was likely declined.
+        QTimer.singleShot(6000, self._check_started)
+
+    def _check_started(self) -> None:
+        if not self.stop_button.isEnabled():
+            return  # already stopped
+        try:
+            started = self.log_file.stat().st_size > 0
+        except OSError:
+            started = False
+        if not started:
+            self.status.setText(
+                "No output yet — the admin prompt may have been declined, or capture failed to start.",
+            )
 
     def _stop(self) -> None:
         # Signal the elevated process to exit; it polls for this file.
@@ -190,12 +205,15 @@ class GuiCoinPokerCapture(QWidget):
 
     def _launch_elevated(self, command: list[str]) -> subprocess.Popen:
         root = _repo_root()
+        log = shlex.quote(str(self.log_file))
         system = platform.system()
         if system == "Darwin":
-            inner = "cd {} && PYTHONPATH={} {} >/dev/null 2>&1 &".format(
-                shlex.quote(str(root)),
-                shlex.quote(str(root)),
-                " ".join(shlex.quote(a) for a in command),
+            # nohup + shell redirect: detach and capture stdout AND stderr (so
+            # startup errors land in the log the tab tails).
+            inner = "cd {r} && PYTHONPATH={r} nohup {cmd} >> {log} 2>&1 &".format(
+                r=shlex.quote(str(root)),
+                cmd=" ".join(shlex.quote(a) for a in command),
+                log=log,
             )
             applescript = 'do shell script "{}" with administrator privileges'.format(
                 inner.replace("\\", "\\\\").replace('"', '\\"'),
@@ -204,14 +222,20 @@ class GuiCoinPokerCapture(QWidget):
         if system == "Windows":
             import ctypes
 
-            params = " ".join(f'"{a}"' if " " in a else a for a in command[1:])
+            # ShellExecute can't redirect, so the process tees to --log-file itself.
+            params = " ".join(f'"{a}"' if " " in a else a for a in [*command[1:], "--log-file", str(self.log_file)])
             rc = ctypes.windll.shell32.ShellExecuteW(None, "runas", command[0], params, str(root), 1)
             if int(rc) <= 32:
                 raise OSError(f"UAC elevation was declined or failed (code {rc})")
-            return subprocess.Popen(["cmd", "/c", "exit"])  # placeholder handle; real proc is elevated
-        # Linux and other Unix: polkit prompt.
-        env_arg = f"PYTHONPATH={root}"
-        return subprocess.Popen(["pkexec", "env", env_arg, *command], cwd=str(root))  # noqa: S603, S607
+            return subprocess.Popen(["cmd", "/c", "exit"])  # placeholder; real process is elevated
+        # Linux and other Unix: polkit prompt; funnel child output into the log.
+        log_handle = self.log_file.open("a", encoding="utf-8")
+        return subprocess.Popen(  # noqa: S603, S607
+            ["pkexec", "env", f"PYTHONPATH={root}", *command],
+            cwd=str(root),
+            stdout=log_handle,
+            stderr=subprocess.STDOUT,
+        )
 
     # -- log tailing ---------------------------------------------------------
 
