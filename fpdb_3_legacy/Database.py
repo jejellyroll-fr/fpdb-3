@@ -3094,6 +3094,7 @@ class Database(DatabaseAutoNotesMixin, DatabaseCachesMixin, DatabaseTournamentsM
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('57', 'FDJ Poker', 'IP')")
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('58', 'Poker770', 'IP')")
         c.execute("INSERT INTO Sites (id,name,code) VALUES ('131', 'Betclic Poker', 'IP')")
+        c.execute("INSERT INTO Sites (id,name,code) VALUES ('140', 'CoinPoker', 'CP')")
         c.execute(
             "INSERT INTO Sites (id,name,code) VALUES ('59', 'NetBet Poker', 'IP')",
         )
