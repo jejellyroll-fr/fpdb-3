@@ -13,12 +13,12 @@ tab tails) and to stop when a sentinel stop-file appears (which Stop creates).
 
 from __future__ import annotations
 
+import contextlib
 import os
 import platform
 import shlex
 import subprocess
 import sys
-import time
 from pathlib import Path
 
 from PySide6.QtCore import QTimer
@@ -133,14 +133,9 @@ class GuiCoinPokerCapture(QWidget):
 
     # -- start / stop --------------------------------------------------------
 
-    def _build_command(self) -> list[str]:
-        # Note: --log-file is added per-platform in _launch_elevated (Unix uses a
-        # shell redirect so even startup errors are captured).
-        args = [sys.executable, "-m", _MODULE, "--live"]
-        iface = self.iface_combo.currentData()
-        if iface:
-            args += ["--iface", iface]
-        args += ["--game", self.game_combo.currentText(), "--stop-file", str(self.stop_file)]
+    def _base_args(self) -> list[str]:
+        """Common importer args (source flag and --log-file added per platform)."""
+        args = [sys.executable, "-m", _MODULE, "--game", self.game_combo.currentText(), "--stop-file", str(self.stop_file)]
         cfg = getattr(self.config, "file", None)
         if cfg:
             args += ["--config-file", str(cfg)]
@@ -157,9 +152,8 @@ class GuiCoinPokerCapture(QWidget):
         self._log_pos = 0
         self.output.clear()
 
-        command = self._build_command()
         try:
-            self.proc = self._launch_elevated(command)
+            self.proc = self._launch_elevated()
         except Exception as exc:  # noqa: BLE001
             self.status.setText(f"Failed to launch capture: {exc}")
             log.exception("CoinPoker capture launch failed")
@@ -198,38 +192,31 @@ class GuiCoinPokerCapture(QWidget):
     def _finish_stop(self) -> None:
         self.tail_timer.stop()
         self._tail_log()
+        # Terminate the process we own (macOS FIFO reader / Linux pkexec child).
+        # On macOS this closes the FIFO so the elevated tcpdump exits via SIGPIPE.
+        if self.proc is not None and self.proc.poll() is None:
+            with contextlib.suppress(Exception):
+                self.proc.terminate()
         self.stop_file.unlink(missing_ok=True)
         self.proc = None
         self.status.setText("Idle.")
         self.start_button.setEnabled(True)
 
-    def _launch_elevated(self, command: list[str]) -> subprocess.Popen:
-        root = _repo_root()
-        log = shlex.quote(str(self.log_file))
+    def _launch_elevated(self) -> subprocess.Popen:
         system = platform.system()
         if system == "Darwin":
-            # Background the process (survives osascript's shell exiting) and
-            # capture stdout AND stderr into the log the tab tails. No nohup:
-            # osascript has no controlling TTY, so nohup fails there.
-            inner = "cd {r} && PYTHONPATH={r} {cmd} >> {log} 2>&1 </dev/null &".format(
-                r=shlex.quote(str(root)),
-                cmd=" ".join(shlex.quote(a) for a in command),
-                log=log,
-            )
-            applescript = 'do shell script "{}" with administrator privileges'.format(
-                inner.replace("\\", "\\\\").replace('"', '\\"'),
-            )
-            return subprocess.Popen(["osascript", "-e", applescript])  # noqa: S603, S607
+            return self._launch_macos()
         if system == "Windows":
-            import ctypes
+            return self._launch_windows()
+        return self._launch_linux()
 
-            # ShellExecute can't redirect, so the process tees to --log-file itself.
-            params = " ".join(f'"{a}"' if " " in a else a for a in [*command[1:], "--log-file", str(self.log_file)])
-            rc = ctypes.windll.shell32.ShellExecuteW(None, "runas", command[0], params, str(root), 1)
-            if int(rc) <= 32:
-                raise OSError(f"UAC elevation was declined or failed (code {rc})")
-            return subprocess.Popen(["cmd", "/c", "exit"])  # placeholder; real process is elevated
-        # Linux and other Unix: polkit prompt; funnel child output into the log.
+    def _launch_linux(self) -> subprocess.Popen:
+        # No TCC on Linux: run the venv importer directly as root via polkit.
+        root = _repo_root()
+        command = [*self._base_args(), "--live"]
+        iface = self.iface_combo.currentData()
+        if iface:
+            command += ["--iface", iface]
         log_handle = self.log_file.open("a", encoding="utf-8")
         return subprocess.Popen(  # noqa: S603, S607
             ["pkexec", "env", f"PYTHONPATH={root}", *command],
@@ -237,6 +224,56 @@ class GuiCoinPokerCapture(QWidget):
             stdout=log_handle,
             stderr=subprocess.STDOUT,
         )
+
+    def _launch_windows(self) -> subprocess.Popen:
+        import ctypes
+
+        root = _repo_root()
+        command = [*self._base_args(), "--live", "--log-file", str(self.log_file)]
+        iface = self.iface_combo.currentData()
+        if iface:
+            command += ["--iface", iface]
+        params = " ".join(f'"{a}"' if " " in a else a for a in command[1:])
+        rc = ctypes.windll.shell32.ShellExecuteW(None, "runas", command[0], params, str(root), 1)
+        if int(rc) <= 32:
+            raise OSError(f"UAC elevation was declined or failed (code {rc})")
+        return subprocess.Popen(["cmd", "/c", "exit"])  # placeholder; real process is elevated
+
+    def _launch_macos(self) -> subprocess.Popen:
+        # macOS TCC blocks a root process from reading the venv under ~/Documents,
+        # so we cannot run the importer elevated. Instead only the system tcpdump
+        # (which touches only /dev/bpf, not Documents) runs elevated and pipes
+        # packets through a FIFO to the unprivileged importer, which keeps the
+        # user's Documents/venv access.
+        from fpdb_3_legacy.coinpoker_pcap import default_device
+
+        root = _repo_root()
+        log = shlex.quote(str(self.log_file))
+        iface = self.iface_combo.currentData() or default_device()
+        fifo = "/tmp/coinpoker-capture.fifo"  # noqa: S108 - transient IPC pipe
+        with contextlib.suppress(OSError):
+            os.remove(fifo)
+        os.mkfifo(fifo)
+
+        importer = " ".join(shlex.quote(a) for a in [*self._base_args(), "--stdin"])
+        reader = subprocess.Popen(  # noqa: S603
+            [
+                "/bin/sh", "-c",
+                "cd {r} && PYTHONPATH={r} exec {imp} < {fifo} >> {log} 2>&1".format(
+                    r=shlex.quote(str(root)), imp=importer, fifo=shlex.quote(fifo), log=log,
+                ),
+            ],
+        )
+
+        tcpdump = (
+            "/usr/sbin/tcpdump -i {iface} -l -n -S -x 'tcp port 9000 or tcp port 7002' > {fifo} 2>> {log} &"
+        ).format(iface=shlex.quote(iface), fifo=shlex.quote(fifo), log=log)
+        applescript = 'do shell script "{}" with administrator privileges'.format(
+            tcpdump.replace("\\", "\\\\").replace('"', '\\"'),
+        )
+        subprocess.Popen(["osascript", "-e", applescript])  # noqa: S603, S607
+        # Terminating the reader closes the FIFO -> tcpdump gets SIGPIPE and exits.
+        return reader
 
     # -- log tailing ---------------------------------------------------------
 
