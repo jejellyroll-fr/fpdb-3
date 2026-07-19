@@ -390,3 +390,18 @@ draw games, on the dealer-announced draw rounds (first/second/final at native
 rounds 2/4/6); settlement is the last round and showdown the one before it.
 Hold'em/Omaha keep their existing family profile and the community-card
 round-before-reveal shift; stud and draw never take that shift.
+
+## Stud up cards
+
+Stud up cards are visible to the whole table and are stored in each player
+record as a `<total-cards> 0xFF 0xFF <board slots>` block: `total-cards` counts
+the two hole cards plus the shown board, and the slots run from the third-street
+door card onward (`0xFF` marks a hidden card — an opponent's hole card or an
+un-revealed seventh street). `extract_native_stud_upcards` reads the snapshot
+that exposes the most up cards and maps the slots to `THIRD, FOURTH, FIFTH,
+SIXTH, SEVENTH`, leaving hidden slots `null`, into `native_stud_cards`. A decode
+is rejected outright if any card repeats across players, guarding against a
+false block match. On `test4.raw` this recovers 52 up cards across the ten stud
+hands (studhi/studhilo/razz), each street's door and later up cards in order.
+Third-street hole cards and hidden seventh-street cards are not claimed, and no
+seat is resolved.
