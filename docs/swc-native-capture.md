@@ -278,7 +278,21 @@ uv run python fpdb_3_legacy/swc_native_capture.py \
 ```
 
 Each line includes table/hand ids, resolved variant, hand scores, totals,
-fantasy land, payouts, and session start/completion markers.
+fantasy land, payouts, session start/completion markers, and the evaluated
+showdown rows described below.
+
+The OFC settlement snapshot reveals each shown board as evaluated rows shaped
+`<X>.<card;ids>.<Y>.<Z>` (for example `H.42;19;16;14;13.M.H` decodes to
+`Qh 6s 6c 5h 5d`). The richest such snapshot is decoded into `ofc_showdown_rows`:
+each row keeps its exact cards and card count, and a three-card row is labelled
+`row: top` because an OFC top row is always three cards. Five-card rows keep
+`row: null` — middle and bottom are not distinguished, and rows are not grouped
+into per-player boards, because the token order does not reliably match player
+identity (grouping a captured example sequentially produces fouled boards and
+dealer descriptions that contradict the assignment). The decode is rejected
+outright if any card id repeats across rows, guarding against false-positive
+byte matches. These rows are showdown-card evidence only; OFC stays
+`capture_only` and no seat or per-round placement is claimed.
 
 Final OFC lines shaped `player wins 82.56` are stored in `ofc_payouts` with
 their exact two-decimal cash value and 100-unit scale. They remain separate
@@ -291,8 +305,9 @@ the name alone does not identify the variant. Attard nevertheless has a repeated
 five-card initial deal followed by three-card deals in rounds 1–4, proving
 `ofc_variant: pineapple`. Scimitar remains `unresolved` because its capture
 begins at the end. Type-1 events are labelled `ofc_card_deal` and native action
-code 21 is retained as OFC `turn_commit` evidence; card placement rows and the
-discarded card are not decoded.
+code 21 is retained as OFC `turn_commit` evidence; the final placed rows are
+decoded at settlement (see `ofc_showdown_rows` below), but the per-round
+placement sequence and the discarded Pineapple card are not.
 
 An explicit `Game complete, n hands played` marker is stored as
 `ofc_game_complete` on the final captured hand, preserving the session hand

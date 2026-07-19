@@ -304,6 +304,62 @@ def parse_native_card_mnemonic(value: str) -> tuple[str, ...]:
     return tuple(card_id_to_str(card_id) for card_id in card_ids)
 
 
+# OFC settlement snapshots reveal each shown board as evaluated rows shaped
+# ``<X>.<card;ids>.<Y>.<Z>``, e.g. ``H.42;19;16;14;13.M.H``. The prefix/suffix
+# letters vary across hands and are not interpreted; only the card ids and the
+# row size (3 = top row, 5 = middle/bottom) are decoded. Grouping rows into
+# per-player top/middle/bottom boards is deliberately not attempted: the token
+# order does not reliably match player identity (a captured example produces
+# fouled boards and mismatched dealer descriptions when grouped sequentially).
+_NATIVE_OFC_SHOWDOWN_ROW = re.compile(rb"[A-Z]\.((?:\d{1,2};){2,4}\d{1,2})\.[A-Z]\.[A-Z]")
+_OFC_ROW_SIZES = (3, 5)
+
+
+def parse_native_ofc_showdown_row(card_ids: str) -> tuple[str, ...]:
+    """Decode one OFC settlement row's ``;``-separated card ids into cards.
+
+    Returns ``()`` unless the row has a valid OFC size (3 or 5), every id is a
+    distinct card in ``0..51``.
+    """
+    ids = [int(card_id) for card_id in card_ids.split(";")]
+    if len(ids) not in _OFC_ROW_SIZES:
+        return ()
+    if any(card_id < 0 or card_id > 51 for card_id in ids):
+        return ()
+    if len(set(ids)) != len(ids):
+        return ()
+    return tuple(card_id_to_str(card_id) for card_id in ids)
+
+
+def extract_native_ofc_showdown_rows(snapshots: list[NativeGameStateSnapshot]) -> list[dict]:
+    """Return the evaluated OFC rows revealed at settlement, as capture evidence.
+
+    Reads the snapshot that exposes the most rows (the completed settlement view)
+    and decodes each row's cards in payload order. A three-card row is labelled
+    ``top`` (an OFC top row is always three cards); five-card rows are left
+    ``row: null`` because middle and bottom cannot be told apart without proven
+    player attribution. Returns ``[]`` when nothing decodes cleanly or the same
+    card appears twice (a sign of a false-positive match).
+    """
+    best: list[tuple[str, ...]] = []
+    for snapshot in snapshots:
+        rows: list[tuple[str, ...]] = []
+        for match in _NATIVE_OFC_SHOWDOWN_ROW.finditer(snapshot.raw_payload):
+            cards = parse_native_ofc_showdown_row(match.group(1).decode())
+            if cards:
+                rows.append(cards)
+        if len(rows) > len(best):
+            best = rows
+
+    all_cards = [card for row in best for card in row]
+    if len(set(all_cards)) != len(all_cards):
+        return []
+    return [
+        {"cards": list(row), "card_count": len(row), "row": "top" if len(row) == 3 else None}
+        for row in best
+    ]
+
+
 def derive_native_used_hole_cards(evaluated_cards: tuple[str, ...], board: tuple[str, ...]) -> tuple[str, ...]:
     """Subtract community cards from a five-card evaluated combination."""
     remaining_board = Counter(board)
@@ -1591,6 +1647,7 @@ def normalize_native_hands(messages: list[NativeProtocolMessage], *, raw_ref: st
                 "ofc_fantasy_land": ofc_fantasy_land,
                 "ofc_game_complete": ofc_game_complete,
                 "ofc_game_start": ofc_game_starts_by_hand.get((table_id, hand_id)) if family == "ofc" else None,
+                "ofc_showdown_rows": extract_native_ofc_showdown_rows(snapshots) if family == "ofc" else [],
                 "showdown": showdown,
                 "raw_refs": [raw_ref],
                 "metadata": {
@@ -1867,6 +1924,7 @@ def build_native_ofc_summary(hands: list[dict]) -> list[dict]:
             "payouts": hand["ofc_payouts"],
             "game_start": hand["ofc_game_start"],
             "game_complete": hand["ofc_game_complete"],
+            "showdown_rows": hand["ofc_showdown_rows"],
         }
         for hand in hands
         if hand["game"]["category"] == "ofc"
