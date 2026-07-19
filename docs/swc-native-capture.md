@@ -331,10 +331,31 @@ generic word `draw` no longer misclassifies them as 2-7 Single Draw.
 Observed Drawmaha native rounds map as `0` blinds, `1` deal/first action round,
 `2` `DRAWONE`, `3` `DRAWTWO`, `4` `DRAWTHREE`, `6` showdown, and `7`
 settlement. Three complete captured hands end during round 1; the only round
-3/4 hand starts mid-hand. Street placement is therefore available, while draw
-counts, discards, and replacement cards remain undecoded.
+3/4 hand starts mid-hand. Street placement is therefore available; per-player
+draw counts are decoded from the dealer draw lines (see below) when present,
+while the specific discarded and replacement cards remain undecoded.
 
 The five-card deal count plus a unique no-show survivor identifies five
 Drawmaha actions across the three complete hands: FoxPoker at native index 3,
 and Rekegutt at native index 1. The partial round-3/4 hand receives no player
 attribution.
+
+## Draw-game discards
+
+The dealer announces every draw exactly — `First draw: <player> draws 2`,
+`Second draw: <player> stands pat`, `Final draw: <player> draws 1` — so the
+per-player discard count is decoded from that text (never from action bytes)
+into `native_draws`. Each entry keeps the dealer's own round ordinal
+(`first`/`second`/`final`), the exact `cards_drawn` (zero for `stands pat`), and
+`seat_idx: null`. A single-draw game shows only `final`; triple-draw games
+(2-7 Triple Draw, Badugi, Badeucy, Badacey) show all three. The specific
+discarded and replacement cards are still not decoded — only how many each
+player drew.
+
+The `Sunday Mini 12-Game Mix` MTT rotates game families per hand and its native
+table name never states the current game, so those hands remain `family=unknown`
+and `capture_only`. The reusable `SWC_GAME_DEFINITIONS` table (game code ->
+FPDB base/category, shared with the HTTP adapter) is the intended classifier,
+but the native game-type code is not carried at a fixed offset in the class-22
+snapshot or the class-34 table header, so per-hand game identification is not
+claimed yet.
