@@ -172,6 +172,7 @@ class MacOSTableDetector:
         total_windows = 0
         titled_windows = 0
         blank_target_windows = []
+        target_table_windows = []
         try:
             # Get list of all on-screen windows
             options = self._kCGWindowListOptionOnScreenOnly
@@ -197,19 +198,22 @@ class MacOSTableDetector:
 
                 if (
                     search_string
-                    and not window_title
                     and self._is_target_process(owner_name)
                     and self._looks_like_table_window(geometry)
                 ):
-                    blank_target_windows.append(
-                        TableInfo(
-                            window_id=window_number,
-                            title=window_title,
-                            geometry=geometry,
-                            process_name=owner_name,
-                            process_id=pid,
-                        ),
+                    candidate = TableInfo(
+                        window_id=window_number,
+                        title=window_title,
+                        geometry=geometry,
+                        process_name=owner_name,
+                        process_id=pid,
                     )
+                    # Every target poker table window, whatever its title. Used to
+                    # resolve the real table id from the owning process's argv
+                    # (CoinPoker) when the title doesn't carry it.
+                    target_table_windows.append(candidate)
+                    if not window_title:
+                        blank_target_windows.append(candidate)
 
                 # Check if matches search using regex
                 if not search_string or pattern.search(window_title):
@@ -242,6 +246,24 @@ class MacOSTableDetector:
         # Screen Recording permission / Electron client).
         has_only_empty_titles = len(tables) > 0 and all(t.title == "" for t in tables)
         if len(tables) == 0 or has_only_empty_titles:
+            # CoinPoker renders each table in its own Unity process whose window
+            # carries no useful title and no accessibility text, so the tables are
+            # indistinguishable to every macOS window API. The owning process's
+            # argv, however, contains the table id (window -> kCGWindowOwnerPID ->
+            # argv -> table id). This is deterministic and needs no Screen
+            # Recording, so try it before the AppleScript fallback.
+            if search_string and target_table_windows:
+                pid_match = self._match_target_window_by_pid(search_string, target_table_windows)
+                if pid_match is not None:
+                    logger.debug(
+                        "DIAGNOSTIC: argv matched %s window %s (pid %s) for search %r",
+                        pid_match.process_name,
+                        pid_match.window_id,
+                        pid_match.process_id,
+                        search_string,
+                    )
+                    return [pid_match]
+
             if total_windows > 0 and titled_windows == 0:
                 # No Quartz title for any window almost always means Screen
                 # Recording is off. Emit the precise, actionable diagnosis once.
@@ -275,6 +297,46 @@ class MacOSTableDetector:
 
     def _looks_like_table_window(self, geometry: TableGeometry) -> bool:
         return geometry.width >= 300 and geometry.height >= 250
+
+    def _match_target_window_by_pid(
+        self,
+        search_string: str,
+        windows: list[TableInfo],
+    ) -> TableInfo | None:
+        """Return the table window whose owning process argv carries ``search_string``.
+
+        CoinPoker table windows are owned by per-table Unity processes that pass
+        the table id on their command line, so the window's ``kCGWindowOwnerPID``
+        resolves to that id without reading pixels or a window title. Matching is
+        digit/whitespace-insensitive so a table id like ``922564`` matches the
+        escaped search string. Returns ``None`` when unavailable or no match.
+        """
+        try:
+            from .macos_process import table_id_for_pid
+        except ImportError:
+            return None
+
+        target = "".join(ch for ch in search_string if ch.isalnum()).lower()
+        if not target:
+            return None
+
+        for window in windows:
+            if not window.process_id:
+                continue
+            try:
+                table_id = table_id_for_pid(window.process_id)
+            except Exception as exc:  # pragma: no cover - platform dependent
+                logger.debug("argv lookup failed for pid %s: %s", window.process_id, exc)
+                continue
+            if not table_id:
+                continue
+            resolved = "".join(ch for ch in table_id if ch.isalnum()).lower()
+            # Exact match only: both the window's argv id and the imported hand's
+            # table id are the same derivation (game hand id // 100000), so a
+            # substring match would risk cross-assigning two similar table ids.
+            if resolved and resolved == target:
+                return window
+        return None
 
     def _run_applescript_scan(self) -> None:
         """Execute the full AppleScript scan and populate the cache.
