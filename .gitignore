@@ -243,3 +243,8 @@ scratch/
 /tests/perf/results/
 /tests/perf/__pycache__/
 tests/fixtures/expected/
+
+# Local Claude Code config and worktrees
+.claude/
+# Vendored pypoker-eval checkout (built locally, not part of this repo)
+/pypoker-eval/
