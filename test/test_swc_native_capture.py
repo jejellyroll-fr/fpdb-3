@@ -23,6 +23,7 @@ from fpdb_3_legacy.swc_native_capture import (
     extract_native_animation_events,
     extract_native_board,
     extract_native_collections,
+    extract_native_ofc_showdown_rows,
     extract_table_info,
     follow_dealer_history,
     infer_native_seat_evidence,
@@ -41,6 +42,7 @@ from fpdb_3_legacy.swc_native_capture import (
     parse_native_ofc_game_start,
     parse_native_ofc_payout,
     parse_native_ofc_scores,
+    parse_native_ofc_showdown_row,
     summarize_native_hands,
 )
 
@@ -448,6 +450,48 @@ def test_parse_native_card_mnemonic_uses_swc_card_ids():
     assert parse_native_card_mnemonic("invalid") == ()
 
 
+def test_parse_native_ofc_showdown_row_decodes_valid_rows():
+    assert parse_native_ofc_showdown_row("43;40;37") == ("Qs", "Qc", "Jd")
+    assert parse_native_ofc_showdown_row("42;19;16;14;13") == ("Qh", "6s", "6c", "5h", "5d")
+
+
+def test_parse_native_ofc_showdown_row_rejects_invalid_rows():
+    assert parse_native_ofc_showdown_row("1;2") == ()  # only 3- or 5-card rows
+    assert parse_native_ofc_showdown_row("1;2;3;4") == ()
+    assert parse_native_ofc_showdown_row("1;2;52") == ()  # id out of range
+    assert parse_native_ofc_showdown_row("5;5;6") == ()  # duplicate card
+
+
+def _ofc_snapshot(payload: bytes, round_number: int = 6):
+    return NativeGameStateSnapshot(
+        datetime.now(UTC), 297862828, 298330169, round_number, (), payload
+    )
+
+
+def test_extract_native_ofc_showdown_rows_labels_top_only():
+    payload = b"..H.42;19;16;14;13.M.H..I.43;40;37.M.H.."
+    rows = extract_native_ofc_showdown_rows([_ofc_snapshot(payload)])
+
+    assert rows == [
+        {"cards": ["Qh", "6s", "6c", "5h", "5d"], "card_count": 5, "row": None},
+        {"cards": ["Qs", "Qc", "Jd"], "card_count": 3, "row": "top"},
+    ]
+
+
+def test_extract_native_ofc_showdown_rows_picks_richest_snapshot():
+    partial = _ofc_snapshot(b"..I.43;40;37.M.H..", round_number=5)
+    full = _ofc_snapshot(b"..H.42;19;16;14;13.M.H..I.43;40;37.M.H..", round_number=6)
+    rows = extract_native_ofc_showdown_rows([partial, full])
+
+    assert len(rows) == 2
+
+
+def test_extract_native_ofc_showdown_rows_rejects_duplicate_cards():
+    # The same card in two rows means a false-positive match, so nothing decodes.
+    payload = b"..I.43;40;37.M.H..H.43;19;16;14;13.M.H.."
+    assert extract_native_ofc_showdown_rows([_ofc_snapshot(payload)]) == []
+
+
 def test_derive_native_used_hole_cards_subtracts_board_multiset():
     evaluated = ("Ks", "Kh", "Kd", "8h", "8c")
     board = ("9h", "8c", "5h", "Ks", "Kh")
@@ -774,6 +818,7 @@ def test_build_native_ofc_summary_excludes_non_ofc_hands():
             "ofc_payouts": [],
             "ofc_game_start": None,
             "ofc_game_complete": None,
+            "ofc_showdown_rows": [],
         },
         {"game": {"category": "holdem"}},
     ]
