@@ -187,6 +187,74 @@ _STREET_PROFILES = {
     "ofc": ["DEAL", "ROUND1", "ROUND2", "ROUND3", "ROUND4"],
 }
 
+# Once the exact game is known (mixed-game tables), streets are resolved per FPDB
+# category rather than per family. Round->street maps below are anchored on the
+# observed native round span and, for draw games, on the dealer-announced draw
+# rounds (2/4/6); settlement is the last round and showdown the one before it.
+_STUD_ROUND_STREETS = {
+    0: "BLINDSANTES",
+    1: "THIRD",
+    2: "FOURTH",
+    3: "FIFTH",
+    4: "SIXTH",
+    5: "SEVENTH",
+    6: "SHOWDOWN",
+    7: "SETTLEMENT",
+}
+_SINGLE_DRAW_ROUND_STREETS = {
+    0: "BLINDSANTES",
+    1: "DEAL",
+    2: "DRAWONE",
+    3: "DRAWONE",
+    4: "DRAWONE",
+    5: "SHOWDOWN",
+    6: "SETTLEMENT",
+}
+_TRIPLE_DRAW_ROUND_STREETS = {
+    0: "BLINDSANTES",
+    1: "DEAL",
+    2: "DRAWONE",
+    3: "DRAWONE",
+    4: "DRAWTWO",
+    5: "DRAWTWO",
+    6: "DRAWTHREE",
+    7: "DRAWTHREE",
+    8: "SHOWDOWN",
+    9: "SETTLEMENT",
+}
+_STUD_STREETS = ["BLINDSANTES", "THIRD", "FOURTH", "FIFTH", "SIXTH", "SEVENTH"]
+_SINGLE_DRAW_STREETS = ["BLINDSANTES", "DEAL", "DRAWONE"]
+_TRIPLE_DRAW_STREETS = ["BLINDSANTES", "DEAL", "DRAWONE", "DRAWTWO", "DRAWTHREE"]
+
+_CATEGORY_ROUND_STREETS = {
+    "studhi": _STUD_ROUND_STREETS,
+    "studhilo": _STUD_ROUND_STREETS,
+    "razz": _STUD_ROUND_STREETS,
+    "27_1draw": _SINGLE_DRAW_ROUND_STREETS,
+    "27_3draw": _TRIPLE_DRAW_ROUND_STREETS,
+    "badugi": _TRIPLE_DRAW_ROUND_STREETS,
+    "badeucey": _TRIPLE_DRAW_ROUND_STREETS,
+    "badacey": _TRIPLE_DRAW_ROUND_STREETS,
+}
+_CATEGORY_STREET_PROFILES = {
+    "studhi": _STUD_STREETS,
+    "studhilo": _STUD_STREETS,
+    "razz": _STUD_STREETS,
+    "27_1draw": _SINGLE_DRAW_STREETS,
+    "27_3draw": _TRIPLE_DRAW_STREETS,
+    "badugi": _TRIPLE_DRAW_STREETS,
+    "badeucey": _TRIPLE_DRAW_STREETS,
+    "badacey": _TRIPLE_DRAW_STREETS,
+}
+
+
+def _native_round_street_map(family: str, category: str) -> dict[int, str]:
+    return _CATEGORY_ROUND_STREETS.get(category) or _ROUND_STREETS.get(family, {})
+
+
+def _native_street_profile(family: str, category: str) -> list[str]:
+    return _CATEGORY_STREET_PROFILES.get(category) or _STREET_PROFILES.get(family, [])
+
 
 def _native_family_gametype(family: str) -> tuple[str, str, str]:
     return {
@@ -198,10 +266,20 @@ def _native_family_gametype(family: str) -> tuple[str, str, str]:
     }.get(family, ("unknown", "unknown", "unknown"))
 
 
-def native_action_street(family: str, round_number: int, event_types: tuple[int, ...]) -> str:
-    """Place an action before a board transition carried by the same snapshot."""
-    action_round = round_number - 1 if round_number in {2, 3, 4} and 2 in event_types else round_number
-    return _ROUND_STREETS.get(family, {}).get(action_round, "UNKNOWN")
+def native_action_street(
+    family: str, round_number: int, event_types: tuple[int, ...], category: str = ""
+) -> str:
+    """Place an action on its street, resolving per category when known.
+
+    The round-before-board-reveal shift only applies to community-card games
+    (Hold'em/Omaha/Drawmaha), where a type-2 board animation rides on the
+    pre-transition snapshot; stud and draw games never trigger it.
+    """
+    board_game = family in {"holdem", "omaha", "drawmaha"}
+    action_round = (
+        round_number - 1 if board_game and round_number in {2, 3, 4} and 2 in event_types else round_number
+    )
+    return _native_round_street_map(family, category).get(action_round, "UNKNOWN")
 
 
 class NativeProtocolDecoder:
@@ -1590,7 +1668,7 @@ def normalize_native_hands(messages: list[NativeProtocolMessage], *, raw_ref: st
             event_types = tuple(event.type_code for event in native_events)
             step = {
                 "step_num": step_num,
-                "street": _ROUND_STREETS.get(family, {}).get(snapshot.round_number, "UNKNOWN"),
+                "street": _native_round_street_map(family, category).get(snapshot.round_number, "UNKNOWN"),
                 "native_round": snapshot.round_number,
                 "stacks": stacks,
                 "bets": {},
@@ -1614,7 +1692,11 @@ def normalize_native_hands(messages: list[NativeProtocolMessage], *, raw_ref: st
                             else {}
                         ),
                         **(
-                            {"action_street_evidence": native_action_street(family, snapshot.round_number, event_types)}
+                            {
+                                "action_street_evidence": native_action_street(
+                                    family, snapshot.round_number, event_types, category
+                                )
+                            }
                             if event.type_code == 9
                             else {}
                         ),
@@ -1740,7 +1822,7 @@ def normalize_native_hands(messages: list[NativeProtocolMessage], *, raw_ref: st
                     "mix": "none",
                     "maxSeats": len(player_order),
                 },
-                "streets": {"allStreets": _STREET_PROFILES.get(family, [])},
+                "streets": {"allStreets": _native_street_profile(family, category)},
                 "players": [
                     {
                         "player_id": player.player_id,

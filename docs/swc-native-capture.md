@@ -373,3 +373,20 @@ Badacey — and each classification is corroborated by the observed round span
 Hands captured before the first announcement keep the name-based family. The
 hands stay `capture_only`: identification does not by itself decode every action
 or resolve seats.
+
+## Per-game streets
+
+Once the exact game is known, `streets.allStreets` and each step's `street` are
+resolved by FPDB category instead of family, so stud and the two draw depths no
+longer share one profile:
+
+- stud / stud H/L / razz: `BLINDSANTES, THIRD, FOURTH, FIFTH, SIXTH, SEVENTH`;
+- 2-7 Single Draw: `BLINDSANTES, DEAL, DRAWONE`;
+- 2-7 Triple Draw / Badugi / Badeucy / Badacey: `BLINDSANTES, DEAL, DRAWONE,
+  DRAWTWO, DRAWTHREE`.
+
+The native round -> street maps are anchored on the observed round span and, for
+draw games, on the dealer-announced draw rounds (first/second/final at native
+rounds 2/4/6); settlement is the last round and showdown the one before it.
+Hold'em/Omaha keep their existing family profile and the community-card
+round-before-reveal shift; stud and draw never take that shift.
