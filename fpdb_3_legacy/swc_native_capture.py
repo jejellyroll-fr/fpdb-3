@@ -442,6 +442,78 @@ def extract_native_ofc_showdown_rows(snapshots: list[NativeGameStateSnapshot]) -
     ]
 
 
+# Stud up cards are visible to the whole table and stored per player record as a
+# "<total-cards> 0xFF 0xFF <board slots>" block, where the board runs from the
+# third-street door card onward; a 0xFF slot is a hidden card (the opponents'
+# down cards / an un-revealed seventh street).
+_STUD_UPCARD_STREETS = ("THIRD", "FOURTH", "FIFTH", "SIXTH", "SEVENTH")
+
+
+def _stud_player_upcard_slots(payload: bytes, start: int, end: int) -> bytes | None:
+    """Return the up-card board slots for one stud player record, or ``None``."""
+    best: bytes | None = None
+    cursor = start
+    while True:
+        marker = payload.find(b"\xff\xff", cursor, end)
+        if marker < 0:
+            break
+        cursor = marker + 1
+        if marker - 1 < start:
+            continue
+        total_cards = payload[marker - 1]  # two hole cards plus the shown board
+        if not 3 <= total_cards <= 8:
+            continue
+        slots = payload[marker + 2 : marker + 2 + (total_cards - 2)]
+        if len(slots) != total_cards - 2 or not slots or slots[0] > 51:
+            continue
+        if all(byte <= 51 or byte == 0xFF for byte in slots):
+            best = slots  # keep the most complete (latest) block in the record
+    return best
+
+
+def _stud_snapshot_upcards(snapshot: NativeGameStateSnapshot) -> list[dict]:
+    payload = snapshot.raw_payload
+    positions = sorted(
+        (payload.find(player.name.encode()), player.name)
+        for player in snapshot.players
+        if payload.find(player.name.encode()) >= 0
+    )
+    rows = []
+    for index, (start, name) in enumerate(positions):
+        end = positions[index + 1][0] if index + 1 < len(positions) else len(payload)
+        slots = _stud_player_upcard_slots(payload, start, end)
+        if not slots:
+            continue
+        up_cards = {
+            street: (card_id_to_str(byte) if byte <= 51 else None)
+            for street, byte in zip(_STUD_UPCARD_STREETS, slots)
+        }
+        rows.append({"player": name, "seat_idx": None, "up_cards": up_cards})
+    return rows
+
+
+def extract_native_stud_upcards(snapshots: list[NativeGameStateSnapshot]) -> list[dict]:
+    """Return each stud player's per-street up cards from the richest snapshot.
+
+    Reads the visible third-through-seventh street board from the player records
+    (hidden slots become ``null``), picking the snapshot that exposes the most up
+    cards. Rejects any decode where a card repeats across players (a false
+    match). Third-street hole cards and hidden seventh-street cards are not
+    claimed.
+    """
+    best_rows: list[dict] = []
+    best_count = -1
+    for snapshot in snapshots:
+        rows = _stud_snapshot_upcards(snapshot)
+        cards = [card for row in rows for card in row["up_cards"].values() if card]
+        if len(cards) != len(set(cards)):
+            continue
+        if len(cards) > best_count:
+            best_count = len(cards)
+            best_rows = rows
+    return best_rows
+
+
 def derive_native_used_hole_cards(evaluated_cards: tuple[str, ...], board: tuple[str, ...]) -> tuple[str, ...]:
     """Subtract community cards from a five-card evaluated combination."""
     remaining_board = Counter(board)
@@ -1770,6 +1842,7 @@ def normalize_native_hands(messages: list[NativeProtocolMessage], *, raw_ref: st
         # Draw-game discards are announced exactly by the dealer, so decode them
         # for every family (non-draw hands simply have none).
         native_draws = [parsed for event in dealer_events if (parsed := parse_native_dealer_draw(event["text"]))]
+        native_stud_cards = extract_native_stud_upcards(snapshots) if family == "stud" else []
         ofc_payouts = (
             [parsed for event in dealer_events if (parsed := parse_native_ofc_payout(event["text"]))]
             if family == "ofc"
@@ -1855,6 +1928,7 @@ def normalize_native_hands(messages: list[NativeProtocolMessage], *, raw_ref: st
                 "ofc_game_start": ofc_game_starts_by_hand.get((table_id, hand_id)) if family == "ofc" else None,
                 "ofc_showdown_rows": extract_native_ofc_showdown_rows(snapshots) if family == "ofc" else [],
                 "native_draws": native_draws,
+                "native_stud_cards": native_stud_cards,
                 "native_game": native_game,
                 "showdown": showdown,
                 "raw_refs": [raw_ref],

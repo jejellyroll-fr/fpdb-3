@@ -26,6 +26,7 @@ from fpdb_3_legacy.swc_native_capture import (
     extract_native_board,
     extract_native_collections,
     extract_native_ofc_showdown_rows,
+    extract_native_stud_upcards,
     extract_table_info,
     follow_dealer_history,
     infer_native_seat_evidence,
@@ -552,6 +553,44 @@ def test_collect_native_game_changes_binds_latest_change_to_hand():
 
     assert changes[(table_id, 1001)]["game_label"] == "Razz"
     assert changes[(table_id, 1002)]["game_label"] == "Hold'em"
+
+
+def _stud_snapshot(records):
+    """Build a stud snapshot from [(name, [slot bytes]), ...] player records."""
+    body = b"start"
+    players = []
+    for index, (name, slots) in enumerate(records):
+        total = len(slots) + 2  # two hole cards plus the shown board slots
+        body += name.encode() + b"\x00\x00\xf0\xbf" + bytes([total]) + b"\xff\xff" + bytes(slots) + b"\x00\x00"
+        players.append(NativePlayerIdentity(index + 1, name, None, False, None))
+    return NativeGameStateSnapshot(datetime.now(UTC), 1, 1, 5, tuple(players), body)
+
+
+def test_extract_native_stud_upcards_maps_streets_and_hidden_slots():
+    snap = _stud_snapshot([("BingoBob", [37, 40, 43, 0xFF])])
+    rows = extract_native_stud_upcards([snap])
+
+    assert len(rows) == 1
+    row = rows[0]
+    assert row["player"] == "BingoBob"
+    assert row["seat_idx"] is None
+    assert list(row["up_cards"]) == ["THIRD", "FOURTH", "FIFTH", "SIXTH"]
+    assert all(isinstance(row["up_cards"][s], str) for s in ("THIRD", "FOURTH", "FIFTH"))
+    assert row["up_cards"]["SIXTH"] is None  # 0xFF is a hidden card
+
+
+def test_extract_native_stud_upcards_picks_richest_snapshot():
+    early = _stud_snapshot([("BingoBob", [37])])
+    late = _stud_snapshot([("BingoBob", [37, 40, 43])])
+    rows = extract_native_stud_upcards([early, late])
+
+    assert list(rows[0]["up_cards"]) == ["THIRD", "FOURTH", "FIFTH"]
+
+
+def test_extract_native_stud_upcards_rejects_duplicate_cards():
+    # The same card id in two players means a false match, so nothing decodes.
+    snap = _stud_snapshot([("BingoBob", [37, 40]), ("Allinred", [37, 44])])
+    assert extract_native_stud_upcards([snap]) == []
 
 
 def test_parse_native_dealer_draw_decodes_counts_and_stands_pat():
