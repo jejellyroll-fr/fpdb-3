@@ -13,6 +13,7 @@ from fpdb_3_legacy.swc_native_capture import (
     NativeProtocolMessage,
     NativeSeatEvidence,
     _collect_native_game_changes,
+    _native_street_profile,
     _retain_bijective_native_seat_evidence,
     audit_native_hand,
     build_native_ofc_summary,
@@ -257,6 +258,29 @@ def test_native_action_street_maps_observed_drawmaha_rounds():
     assert native_action_street("drawmaha", 1, (9, 1)) == "DEAL"
     assert native_action_street("drawmaha", 3, (9,)) == "DRAWTWO"
     assert native_action_street("drawmaha", 4, (9,)) == "DRAWTHREE"
+
+
+def test_native_action_street_resolves_stud_and_draw_by_category():
+    assert native_action_street("stud", 1, (), "razz") == "THIRD"
+    assert native_action_street("stud", 5, (), "studhi") == "SEVENTH"
+    # Draw games never take the community-card round shift, even with a type-2 event.
+    assert native_action_street("draw", 2, (2,), "27_3draw") == "DRAWONE"
+    assert native_action_street("draw", 6, (), "27_3draw") == "DRAWTHREE"
+    assert native_action_street("draw", 2, (), "27_1draw") == "DRAWONE"
+
+
+def test_native_street_profile_is_category_specific():
+    assert _native_street_profile("stud", "razz") == ["BLINDSANTES", "THIRD", "FOURTH", "FIFTH", "SIXTH", "SEVENTH"]
+    assert _native_street_profile("draw", "27_1draw") == ["BLINDSANTES", "DEAL", "DRAWONE"]
+    assert _native_street_profile("draw", "badugi") == [
+        "BLINDSANTES",
+        "DEAL",
+        "DRAWONE",
+        "DRAWTWO",
+        "DRAWTHREE",
+    ]
+    # Unknown category falls back to the family profile.
+    assert _native_street_profile("holdem", "holdem") == ["BLINDSANTES", "PREFLOP", "FLOP", "TURN", "RIVER"]
 
 
 def test_extract_game_state_preserves_confirmed_ids_players_and_raw_payload():
