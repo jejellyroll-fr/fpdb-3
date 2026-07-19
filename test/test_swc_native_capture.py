@@ -12,6 +12,7 @@ from fpdb_3_legacy.swc_native_capture import (
     NativePlayerIdentity,
     NativeProtocolMessage,
     NativeSeatEvidence,
+    _collect_native_game_changes,
     _retain_bijective_native_seat_evidence,
     audit_native_hand,
     build_native_ofc_summary,
@@ -38,6 +39,7 @@ from fpdb_3_legacy.swc_native_capture import (
     parse_native_dealer_draw,
     parse_native_dealer_return,
     parse_native_dealer_win,
+    parse_native_game_change,
     parse_native_ofc_fantasy_land,
     parse_native_ofc_game_complete,
     parse_native_ofc_game_start,
@@ -449,6 +451,83 @@ def test_extract_native_animation_events_reads_variable_showdown_mnemonic_and_tr
 def test_parse_native_card_mnemonic_uses_swc_card_ids():
     assert parse_native_card_mnemonic("D.47;46;45;26;24.O.H") == ("Ks", "Kh", "Kd", "8h", "8c")
     assert parse_native_card_mnemonic("invalid") == ()
+
+
+def _game_change_msg(table_id: int, text: str) -> NativeProtocolMessage:
+    body = text.encode()
+    payload = (
+        b"\x1a\x00"  # class 26
+        + b"\x00\x00\x00\x00"  # sequence
+        + table_id.to_bytes(4, "little")
+        + b"\x00\x11"
+        + len(body).to_bytes(2, "little")
+        + body
+    )
+    return NativeProtocolMessage(datetime.now(UTC), payload)
+
+
+def test_parse_native_game_change_resolves_shared_definitions():
+    msg = _game_change_msg(298377427, "Game changes to FL 2-7 Triple Draw 40/80")
+    parsed = parse_native_game_change(msg.payload)
+
+    assert parsed["table_id"] == 298377427
+    assert parsed["game_label"] == "2-7 Triple Draw"
+    assert parsed["base"] == "draw"
+    assert parsed["category"] == "27_3draw"
+    assert parsed["limit_type"] == "fl"
+    assert parsed["small_bet"] == "40"
+    assert parsed["big_bet"] == "80"
+
+
+def test_parse_native_game_change_maps_each_family():
+    cases = {
+        "Game changes to NL Hold'em 25/50": ("holdem" not in "", "hold", "holdem", "nl"),
+        "Game changes to PL Omaha 15/30": (True, "hold", "omahahi", "pl"),
+        "Game changes to FL Razz 25/50": (True, "stud", "razz", "fl"),
+        "Game changes to FL Badugi 75/150": (True, "draw", "badugi", "fl"),
+    }
+    for text, (_flag, base, category, limit) in cases.items():
+        parsed = parse_native_game_change(_game_change_msg(1, text).payload)
+        assert (parsed["base"], parsed["category"], parsed["limit_type"]) == (base, category, limit)
+
+
+def test_parse_native_game_change_ignores_other_messages():
+    assert parse_native_game_change(_game_change_msg(1, "Dealer says hi").payload) is None
+    assert parse_native_game_change(b"\x00\x00not-a-change") is None
+
+
+def test_collect_native_game_changes_binds_latest_change_to_hand():
+    table_id = 298377427
+    name = b"Sunday Mini 12-Game Mix"
+    info_payload = (
+        b"\x22\x00"
+        + (0).to_bytes(4, "little")
+        + table_id.to_bytes(4, "little")
+        + b"\x01"
+        + (0).to_bytes(4, "little")
+        + b"F"
+        + len(name).to_bytes(2, "little")
+        + name
+    )
+    info_msg = NativeProtocolMessage(datetime.now(UTC), info_payload)
+    table_infos = {table_id: extract_table_info(info_msg)}
+
+    def snapshot(hand_id):
+        payload = b"\x16\x00state" + hand_id.to_bytes(4, "little") + table_id.to_bytes(4, "little") + b"\x00" * 6
+        return NativeProtocolMessage(datetime.now(UTC), payload)
+
+    messages = [
+        info_msg,
+        _game_change_msg(table_id, "Game changes to FL Razz 25/50"),
+        snapshot(1001),
+        _game_change_msg(table_id, "Game changes to NL Hold'em 25/50"),
+        snapshot(1002),
+    ]
+
+    changes = _collect_native_game_changes(messages, table_infos)
+
+    assert changes[(table_id, 1001)]["game_label"] == "Razz"
+    assert changes[(table_id, 1002)]["game_label"] == "Hold'em"
 
 
 def test_parse_native_dealer_draw_decodes_counts_and_stands_pat():

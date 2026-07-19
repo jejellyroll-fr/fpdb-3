@@ -23,6 +23,7 @@ from pathlib import Path
 from typing import BinaryIO
 
 from fpdb_3_legacy.http_capture_diff import diff_snapshot_steps
+from fpdb_3_legacy.http_capture_models import SWC_GAME_DEFINITIONS
 from fpdb_3_legacy.swc_http_adapter import card_id_to_str
 
 SWC_APP = Path("/Applications/SwC Poker.app")
@@ -520,6 +521,98 @@ def parse_native_dealer_draw(text: str) -> dict | None:
         "source": "swc_native_dealer_chat",
         "text": text,
     }
+
+
+# A mixed-game table announces each rotation with a class-26 message shaped
+# "Game changes to <NL|PL|FL> <game label> <small>/<big>". The game label matches
+# a SWC_GAME_DEFINITIONS label exactly, so the shared HTTP-adapter table resolves
+# the FPDB base/category without decoding the opaque native game-type code.
+_GAME_CHANGE_TEXT = re.compile(
+    r"^Game changes to (?P<limit>NL|PL|FL) (?P<game>.+?) (?P<sb>\d+)/(?P<bb>\d+)$"
+)
+_NATIVE_LIMIT_TYPES = {"NL": "nl", "PL": "pl", "FL": "fl"}
+_SWC_LABEL_TO_DEFINITION = {}
+for _swc_code, _swc_definition in SWC_GAME_DEFINITIONS.items():
+    _SWC_LABEL_TO_DEFINITION.setdefault(_swc_definition.label, _swc_definition)
+
+
+def _native_family_from_definition(base: str, category: str) -> str:
+    """Map an FPDB base/category to the native decoder's family label."""
+    if base == "hold":
+        return "omaha" if "omaha" in category else "holdem"
+    if base in {"stud", "draw", "ofc"}:
+        return base
+    return "unknown"
+
+
+def _resolve_native_hand_game(
+    native_game: dict | None, table: NativeTableInfo, table_id: int, ofc_table_ids: set[int]
+) -> tuple[str, str, str, str]:
+    """Return ``(family, base, category, limit_type)`` for a hand.
+
+    A per-hand game-change announcement (mixed-game tables) is authoritative over
+    the static table-name heuristic and the OFC deal-pattern detector.
+    """
+    if native_game is not None:
+        return native_game["family"], native_game["base"], native_game["category"], native_game["limit_type"]
+    family = "ofc" if table_id in ofc_table_ids else table.family
+    base, category, limit_type = _native_family_gametype(family)
+    return family, base, category, limit_type
+
+
+def parse_native_game_change(payload: bytes) -> dict | None:
+    """Parse a class-26 'Game changes to ...' mixed-game rotation announcement.
+
+    Resolves the announced game label through the shared SWC_GAME_DEFINITIONS
+    table. Returns ``None`` for any other message or an unrecognised label.
+    """
+    if len(payload) < 14 or int.from_bytes(payload[:2], "little") != 26:
+        return None
+    text = payload[14:].split(b"\x00", 1)[0].decode("utf-8", "replace")
+    match = _GAME_CHANGE_TEXT.match(text)
+    if match is None:
+        return None
+    definition = _SWC_LABEL_TO_DEFINITION.get(match.group("game"))
+    if definition is None:
+        return None
+    return {
+        "table_id": int.from_bytes(payload[6:10], "little"),
+        "game_label": match.group("game"),
+        "base": definition.base,
+        "category": definition.category,
+        "family": _native_family_from_definition(definition.base, definition.category),
+        "limit_type": _NATIVE_LIMIT_TYPES.get(match.group("limit"), "unknown"),
+        "small_bet": match.group("sb"),
+        "big_bet": match.group("bb"),
+        "fpdb_supported": definition.fpdb_supported,
+        "text": text,
+    }
+
+
+def _collect_native_game_changes(
+    messages: list[NativeProtocolMessage], table_infos: dict[int, NativeTableInfo]
+) -> dict[tuple[int, int], dict]:
+    """Map (table_id, hand_id) to the game the latest class-26 change announced.
+
+    Walks the stream in order, remembering the current game per table, and binds
+    it to each hand at that hand's first snapshot. Hands captured before any game
+    change (or on tables that never announce one) are left unmapped.
+    """
+    result: dict[tuple[int, int], dict] = {}
+    current: dict[int, dict] = {}
+    table_ids = set(table_infos)
+    for message in messages:
+        change = parse_native_game_change(message.payload)
+        if change is not None:
+            current[change["table_id"]] = change
+            continue
+        snapshot = extract_game_state(message, table_ids)
+        if snapshot is None:
+            continue
+        key = (snapshot.table_id, snapshot.hand_id)
+        if key not in result and snapshot.table_id in current:
+            result[key] = current[snapshot.table_id]
+    return result
 
 
 def parse_native_dealer_return(text: str, *, tournament: bool) -> dict | None:
@@ -1448,6 +1541,7 @@ def normalize_native_hands(messages: list[NativeProtocolMessage], *, raw_ref: st
     dealer_collections_by_hand = _collect_native_dealer_wins(messages, table_infos)
     dealer_returns_by_hand = _collect_native_dealer_returns(messages, table_infos)
     dealer_events_by_hand = _collect_native_dealer_events(messages, table_infos)
+    game_changes_by_hand = _collect_native_game_changes(messages, table_infos)
     ofc_game_starts_by_hand = _collect_native_ofc_game_starts(messages, table_infos)
     evaluated_cards_by_hand: dict[tuple[int, int], set[tuple[str, ...]]] = {}
     for message in messages:
@@ -1469,7 +1563,10 @@ def normalize_native_hands(messages: list[NativeProtocolMessage], *, raw_ref: st
     hands = []
     for (table_id, hand_id), snapshots in grouped.items():
         table = table_infos[table_id]
-        family = "ofc" if table_id in ofc_table_ids else table.family
+        native_game = game_changes_by_hand.get((table_id, hand_id))
+        family, base, category, limit_type = _resolve_native_hand_game(
+            native_game, table, table_id, ofc_table_ids
+        )
         player_order: dict[int, NativePlayerIdentity] = {}
         for snapshot in snapshots:
             for player in snapshot.players:
@@ -1579,7 +1676,6 @@ def normalize_native_hands(messages: list[NativeProtocolMessage], *, raw_ref: st
             steps.append(step)
             previous_step = step
 
-        base, category, limit_type = _native_family_gametype(family)
         collections = _merge_native_collections(
             collections_by_hand.get((table_id, hand_id), []),
             dealer_collections_by_hand.get((table_id, hand_id), []),
@@ -1625,7 +1721,7 @@ def normalize_native_hands(messages: list[NativeProtocolMessage], *, raw_ref: st
                 "tournament_id": table.tournament_id,
                 "timestamp": snapshots[0].captured_at.isoformat(),
                 "game": {
-                    "label": table.name,
+                    "label": native_game["game_label"] if native_game else table.name,
                     "base": base,
                     "category": category,
                     "limit_type": limit_type,
@@ -1677,6 +1773,7 @@ def normalize_native_hands(messages: list[NativeProtocolMessage], *, raw_ref: st
                 "ofc_game_start": ofc_game_starts_by_hand.get((table_id, hand_id)) if family == "ofc" else None,
                 "ofc_showdown_rows": extract_native_ofc_showdown_rows(snapshots) if family == "ofc" else [],
                 "native_draws": native_draws,
+                "native_game": native_game,
                 "showdown": showdown,
                 "raw_refs": [raw_ref],
                 "metadata": {

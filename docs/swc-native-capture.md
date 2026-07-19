@@ -352,10 +352,24 @@ into `native_draws`. Each entry keeps the dealer's own round ordinal
 discarded and replacement cards are still not decoded — only how many each
 player drew.
 
-The `Sunday Mini 12-Game Mix` MTT rotates game families per hand and its native
-table name never states the current game, so those hands remain `family=unknown`
-and `capture_only`. The reusable `SWC_GAME_DEFINITIONS` table (game code ->
-FPDB base/category, shared with the HTTP adapter) is the intended classifier,
-but the native game-type code is not carried at a fixed offset in the class-22
-snapshot or the class-34 table header, so per-hand game identification is not
-claimed yet.
+## Mixed-game per-hand identification
+
+A mixed-game table name never states the current game, and the native
+game-type code is not carried at a fixed offset in the class-22 snapshot or the
+class-34 table header. The rotation is instead announced in a class-26 message
+shaped `Game changes to <NL|PL|FL> <game> <small>/<big>` (e.g. `Game changes to
+FL 2-7 Triple Draw 40/80`). The game label matches a `SWC_GAME_DEFINITIONS`
+label exactly, so `parse_native_game_change` resolves the FPDB base/category
+through that shared HTTP-adapter table and the `NL`/`PL`/`FL` prefix gives the
+limit type.
+
+Each hand is bound to the most recent announced game at its first snapshot
+(`native_game`), which then drives `family`, `base`, `category` and `limit_type`
+instead of the table-name heuristic. On the captured `Sunday Mini 12-Game Mix`
+this identifies 42 hands across all twelve games — Hold'em, Omaha, Omaha H/L,
+Stud, Stud H/L, Razz, 2-7 Single Draw, 2-7 Triple Draw, Badugi, Badeucy and
+Badacey — and each classification is corroborated by the observed round span
+(max round 6 for flop games, 7 for stud, 9 for triple draw, 5 for single draw).
+Hands captured before the first announcement keep the name-based family. The
+hands stay `capture_only`: identification does not by itself decode every action
+or resolve seats.
