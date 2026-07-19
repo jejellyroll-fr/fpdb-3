@@ -54,6 +54,28 @@ def test_get_stats_from_hand_no_longer_exposes_builtin_type_parameter():
     assert "game_type" in signature.parameters
 
 
+def test_next_hand_id_serializes_postgresql_allocations():
+    class Cursor:
+        def __init__(self):
+            self.calls = []
+
+        def execute(self, query):
+            self.calls.append(query)
+
+        def fetchone(self):
+            return (41,)
+
+    cursor = Cursor()
+    db = Database.Database.__new__(Database.Database)
+    db.backend = db.PGSQL
+    db.hand_inc = 1
+    db.get_cursor = lambda _connect=False: cursor
+
+    assert db.nextHandId() == 42
+    assert "pg_advisory_xact_lock" in cursor.calls[0]
+    assert cursor.calls[1] == "SELECT max(id) FROM Hands"
+
+
 def test_session_stats_are_not_truncated_after_ten_thousand_rows():
     class Cursor:
         description = [("player_id",), ("vpip",)]

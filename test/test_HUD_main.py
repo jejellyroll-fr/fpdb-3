@@ -308,6 +308,35 @@ def test_read_stdin_not_cached(hud_main) -> None:
         assert mock_create_hud.called, "create_HUD n'a pas été appelé"
 
 
+@pytest.mark.parametrize("table_name", ["", "   ", None])
+def test_read_stdin_skips_hands_without_table_name(hud_main, table_name) -> None:
+    table_info = (
+        table_name,
+        9,
+        "holdem",
+        "ring",
+        False,
+        1,
+        "CoinPoker",
+        6,
+        None,
+        None,
+        None,
+    )
+
+    with (
+        patch.object(hud_main, "_initialize_hero_data"),
+        patch.object(hud_main, "_get_table_info", return_value=table_info),
+        patch.object(hud_main, "_create_new_hud") as create_hud,
+        patch.object(hud_main, "_update_existing_hud") as update_hud,
+    ):
+        hud_main.read_stdin("27827")
+
+    create_hud.assert_not_called()
+    update_hud.assert_not_called()
+    assert "" not in hud_main.hud_dict
+
+
 # Ensures that get_cards retrieves both player and community cards correctly.
 def test_get_cards(hud_main) -> None:
     mock_db = MagicMock()

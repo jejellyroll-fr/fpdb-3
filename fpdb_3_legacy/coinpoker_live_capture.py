@@ -44,6 +44,7 @@ from typing import Iterable, Iterator
 
 from fpdb_3_legacy.coinpoker_hand_builder import build_hands
 from fpdb_3_legacy.coinpoker_protocol import decode_frame
+from fpdb_3_legacy.Exceptions import FpdbHandDuplicate
 from fpdb_3_legacy.http_capture_hand_builder import (
     CaptureNotImportableError,
     HttpCaptureHandConfig,
@@ -320,6 +321,12 @@ class HandPump:
                 if self.notify is not None:
                     with contextlib.suppress(Exception):
                         self.notify.send_hand_id(hand.dbid_hands)
+            except FpdbHandDuplicate:
+                # Replayed packets or a capture restart can legitimately expose
+                # a hand already committed by this or another importer.
+                with contextlib.suppress(Exception):
+                    self.db.rollback()
+                print(f"[DUPLICATE] hand #{hid} already imported — skipped")
             except Exception as exc:  # noqa: BLE001
                 # Roll back so an aborted transaction doesn't block later hands.
                 with contextlib.suppress(Exception):
@@ -434,6 +441,32 @@ def _print_devices() -> None:
         print(f"  {name:20} {desc}  (flags=0x{flags:x})")
 
 
+def _acquire_instance_lock(path: str | None = None):
+    """Hold a non-blocking process lock so only one live importer can run."""
+    import os
+
+    lock_path = path or os.path.expanduser("~/.fpdb/coinpoker-capture.lock")
+    os.makedirs(os.path.dirname(lock_path), exist_ok=True)
+    handle = open(lock_path, "a+b")  # noqa: SIM115 - caller retains the lock for process lifetime
+    try:
+        if os.name == "nt":
+            import msvcrt
+
+            if os.path.getsize(lock_path) == 0:
+                handle.write(b"0")
+                handle.flush()
+            handle.seek(0)
+            msvcrt.locking(handle.fileno(), msvcrt.LK_NBLCK, 1)
+        else:
+            import fcntl
+
+            fcntl.flock(handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except (OSError, BlockingIOError):
+        handle.close()
+        raise RuntimeError("another CoinPoker live capture is already running") from None
+    return handle
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="CoinPoker live HUD capture feed (native libpcap/Npcap)")
     src = parser.add_mutually_exclusive_group(required=True)
@@ -463,6 +496,12 @@ def main() -> None:
     from fpdb_3_legacy.coinpoker_pcap import capture_live, open_offline
 
     stop = (lambda: bool(args.stop_file) and os.path.exists(args.stop_file)) if args.stop_file else None
+
+    # Keep the handle alive for the whole capture.  The OS releases the lock on
+    # normal exit and crashes, so stale lock files do not block future starts.
+    _instance_lock = None
+    if not args.dry_run and (args.live or args.stdin):
+        _instance_lock = _acquire_instance_lock()
 
     if args.live:
         events = _events_from_segments(capture_live(args.iface, BPF_FILTER, stop=stop))

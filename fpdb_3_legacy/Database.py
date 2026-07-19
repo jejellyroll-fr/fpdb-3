@@ -3880,6 +3880,7 @@ class Database(DatabaseAutoNotesMixin, DatabaseCachesMixin, DatabaseTournamentsM
         self.hids.append(hdata["id"])
         self.hbulk.append(
             [
+                hdata["id"],
                 hdata["tableName"],
                 hdata["siteHandNo"],
                 hdata["tourneyId"],
@@ -4257,6 +4258,12 @@ class Database(DatabaseAutoNotesMixin, DatabaseCachesMixin, DatabaseTournamentsM
 
     def nextHandId(self):
         c = self.get_cursor(True)
+        if self.backend == self.PGSQL:
+            # Hand ids are assigned before the root and child rows are built.
+            # Serialize max(id)+1 across importer processes until their current
+            # transaction commits, otherwise two live feeds can reserve the
+            # same explicit Hands.id.
+            c.execute("SELECT pg_advisory_xact_lock(hashtext('fpdb_hands_id_allocator'))")
         c.execute("SELECT max(id) FROM Hands")
         id = c.fetchone()[0]
         if not id:
