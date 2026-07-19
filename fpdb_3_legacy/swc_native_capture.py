@@ -256,6 +256,9 @@ _TIMESTAMP = re.compile(r"^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$")
 _TAG = re.compile(r"<[^>]+>")
 _DEALER_WIN_TEXT = re.compile(r"^(?P<name>.+?) wins \((?P<amount>[\d,.]+)\)(?:\s|:|$)")
 _DEALER_RETURN_TEXT = re.compile(r"^Uncalled bet \((?P<amount>[\d,.]+)\) returned to (?P<name>.+)$")
+_DEALER_DRAW_TEXT = re.compile(
+    r"^(?P<ordinal>First|Second|Final) draw: (?P<name>.+?) (?:draws (?P<count>\d+)|stands pat)$"
+)
 _OFC_HAND_RESULT = re.compile(r"^Hand #(?P<number>\d+) finished - (?P<scores>.+)$")
 _OFC_TOTAL_RESULT = re.compile(r"^TOTAL - (?P<scores>.+)$")
 _OFC_PAYOUT = re.compile(r"^(?P<name>.+?) wins (?P<amount>\d+\.\d{2})$")
@@ -492,6 +495,28 @@ def parse_native_dealer_win(text: str, *, tournament: bool) -> dict | None:
         "amount_displayed": amount_displayed,
         "money_type": money_type,
         "native_units_per_display_unit": scale,
+        "source": "swc_native_dealer_chat",
+        "text": text,
+    }
+
+
+def parse_native_dealer_draw(text: str) -> dict | None:
+    """Parse a draw-game Dealer line into an exact per-player draw count.
+
+    Handles ``First/Second/Final draw: <player> draws N`` and ``... stands pat``.
+    The draw round is kept as the dealer's own ordinal (``first``/``second``/
+    ``final``); ``stands_pat`` means zero cards drawn. No seat is claimed.
+    """
+    match = _DEALER_DRAW_TEXT.match(text)
+    if match is None:
+        return None
+    count = match.group("count")
+    return {
+        "draw": match.group("ordinal").lower(),
+        "player": match.group("name"),
+        "seat_idx": None,
+        "cards_drawn": int(count) if count is not None else 0,
+        "stands_pat": count is None,
         "source": "swc_native_dealer_chat",
         "text": text,
     }
@@ -1564,6 +1589,9 @@ def normalize_native_hands(messages: list[NativeProtocolMessage], *, raw_ref: st
         showdown = _build_native_showdown(collections, evaluated_hands, final_board)
         dealer_events = dealer_events_by_hand.get((table_id, hand_id), [])
         ofc_scores = [parsed for event in dealer_events if (parsed := parse_native_ofc_scores(event["text"]))]
+        # Draw-game discards are announced exactly by the dealer, so decode them
+        # for every family (non-draw hands simply have none).
+        native_draws = [parsed for event in dealer_events if (parsed := parse_native_dealer_draw(event["text"]))]
         ofc_payouts = (
             [parsed for event in dealer_events if (parsed := parse_native_ofc_payout(event["text"]))]
             if family == "ofc"
@@ -1648,6 +1676,7 @@ def normalize_native_hands(messages: list[NativeProtocolMessage], *, raw_ref: st
                 "ofc_game_complete": ofc_game_complete,
                 "ofc_game_start": ofc_game_starts_by_hand.get((table_id, hand_id)) if family == "ofc" else None,
                 "ofc_showdown_rows": extract_native_ofc_showdown_rows(snapshots) if family == "ofc" else [],
+                "native_draws": native_draws,
                 "showdown": showdown,
                 "raw_refs": [raw_ref],
                 "metadata": {

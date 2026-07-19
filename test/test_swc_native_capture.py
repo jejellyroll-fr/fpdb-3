@@ -35,6 +35,7 @@ from fpdb_3_legacy.swc_native_capture import (
     native_client_environment,
     normalize_native_hands,
     parse_native_card_mnemonic,
+    parse_native_dealer_draw,
     parse_native_dealer_return,
     parse_native_dealer_win,
     parse_native_ofc_fantasy_land,
@@ -448,6 +449,32 @@ def test_extract_native_animation_events_reads_variable_showdown_mnemonic_and_tr
 def test_parse_native_card_mnemonic_uses_swc_card_ids():
     assert parse_native_card_mnemonic("D.47;46;45;26;24.O.H") == ("Ks", "Kh", "Kd", "8h", "8c")
     assert parse_native_card_mnemonic("invalid") == ()
+
+
+def test_parse_native_dealer_draw_decodes_counts_and_stands_pat():
+    assert parse_native_dealer_draw("First draw: BingoBob draws 3") == {
+        "draw": "first",
+        "player": "BingoBob",
+        "seat_idx": None,
+        "cards_drawn": 3,
+        "stands_pat": False,
+        "source": "swc_native_dealer_chat",
+        "text": "First draw: BingoBob draws 3",
+    }
+    pat = parse_native_dealer_draw("Final draw: Yx2kolm stands pat")
+    assert pat["draw"] == "final"
+    assert pat["player"] == "Yx2kolm"
+    assert pat["cards_drawn"] == 0
+    assert pat["stands_pat"] is True
+
+
+def test_parse_native_dealer_draw_keeps_each_ordinal():
+    assert parse_native_dealer_draw("Second draw: Tw4rriorz draws 2")["draw"] == "second"
+
+
+def test_parse_native_dealer_draw_ignores_non_draw_lines():
+    assert parse_native_dealer_draw("New hand started") is None
+    assert parse_native_dealer_draw("BingoBob wins (1.20)") is None
 
 
 def test_parse_native_ofc_showdown_row_decodes_valid_rows():
