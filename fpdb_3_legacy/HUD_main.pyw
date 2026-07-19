@@ -907,6 +907,17 @@ class HudMain(QObject):
             table_info
         )
 
+        # A cash-table HUD is keyed directly by table_name.  Legacy/corrupt
+        # rows may have an empty name; accepting one creates a ghost HUD shown
+        # as "<site> -" and can also make unrelated blank rows share a HUD.
+        if not isinstance(table_name, str) or not table_name.strip():
+            log.warning(
+                "HUD creation skipped for hand %s: missing table name (site=%s)",
+                new_hand_id,
+                site_name,
+            )
+            return
+
         enabled_sites = self.config.get_supported_sites()
         hud_site_name = self._resolve_hud_config_site(site_name, enabled_sites)
         aux_disabled_sites = [

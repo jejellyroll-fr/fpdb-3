@@ -7,6 +7,7 @@ def hand_root_persistence_queries() -> dict[str, str]:
     """Return the root Hands insert query."""
     query: dict[str, str] = {}
     query["store_hand"] = """insert into Hands (
+                                        id,
                                         tablename,
                                         sitehandno,
                                         tourneyId,
@@ -48,6 +49,5 @@ def hand_root_persistence_queries() -> dict[str, str]:
                                           (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
                                            %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
                                            %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
-                                           %s, %s, %s)"""
+                                           %s, %s, %s, %s)"""
     return query
-

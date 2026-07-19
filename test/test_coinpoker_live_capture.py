@@ -10,11 +10,15 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
+
+from fpdb_3_legacy.Exceptions import FpdbHandDuplicate
 from fpdb_3_legacy.coinpoker_live_capture import (
     COINPOKER_SITE_ID,
     HandPump,
     StreamReassembler,
     _Conn,
+    _acquire_instance_lock,
 )
 from fpdb_3_legacy.http_capture_hand_builder import HttpCaptureHandConfig
 
@@ -100,3 +104,36 @@ def test_hand_pump_imports_complete_hands_and_dedupes() -> None:
 
     assert pump.process(events) == 0  # no re-import
     assert pump.prune(events) == []  # imported hands' events pruned
+
+
+def test_live_capture_instance_lock_rejects_second_process(tmp_path) -> None:
+    lock_path = str(tmp_path / "coinpoker-capture.lock")
+    first = _acquire_instance_lock(lock_path)
+    try:
+        with pytest.raises(RuntimeError, match="already running"):
+            _acquire_instance_lock(lock_path)
+    finally:
+        first.close()
+
+    replacement = _acquire_instance_lock(lock_path)
+    replacement.close()
+
+
+def test_hand_pump_treats_database_duplicate_as_skipped(monkeypatch, capsys) -> None:
+    class Database:
+        def resetBulkCache(self):
+            return None
+
+        def rollback(self):
+            return None
+
+    def duplicate(*_args, **_kwargs):
+        raise FpdbHandDuplicate("140-existing")
+
+    monkeypatch.setattr("fpdb_3_legacy.coinpoker_live_capture.import_fpdb_hand", duplicate)
+    config = HttpCaptureHandConfig(site_ids={"CoinPoker": COINPOKER_SITE_ID, "default": COINPOKER_SITE_ID})
+    pump = HandPump(db=Database(), config=config, table_category="PLO4")
+
+    assert pump.process(_events()) == 2
+    assert pump.failed == set()
+    assert capsys.readouterr().out.count("[DUPLICATE]") == 2

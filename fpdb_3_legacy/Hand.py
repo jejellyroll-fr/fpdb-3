@@ -2326,6 +2326,10 @@ class HoldemOmahaHand(Hand):
             # Creator expected to call hhc.select(hid) to fill out object
             log.debug("HoldemOmaha hand initialised for select()")
             self.maxseats = 10
+        elif builtFrom == "HTTP_CAPTURE":
+            # The room adapter fills players, actions, pots and results after
+            # construction through execute_hand_operations().
+            log.debug("HoldemOmaha hand initialised from HTTP capture")
         else:
             log.warning("Neither HHC nor DB+handID provided")
 
