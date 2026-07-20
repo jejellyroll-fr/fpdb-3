@@ -776,10 +776,31 @@ class AuxSeats(AuxWindow):
             if isinstance(i, int):
                 self.hud.layout.location[self.adj[i]] = new_position  # update the hud-level dict,
                 # so other aux can be told
+                self._propagate_to_shared_layout(self.adj[i], new_position)
             elif i == "common":
                 self.hud.layout.common = new_position
+                self._propagate_to_shared_layout("common", new_position)
             else:
                 log.warning("Ignoring unexpected HUD seat identifier while saving position: %r", i)
+
+    def _propagate_to_shared_layout(self, seat: Any, position: tuple[int, int]) -> None:
+        """Mirror a dragged position onto the site's shared layout set.
+
+        A HUD deep-copies its layout when it is created, so a drag that only
+        updates this HUD's copy is lost on the next table: a table opened later
+        with the same layout would fall back to the un-dragged positions. Writing
+        through to the shared layout_set makes those new tables inherit the drag
+        (permanent persistence still happens via the "Save Layout" menu).
+        """
+        layout_set = getattr(self.hud, "layout_set", None)
+        shared = getattr(layout_set, "layout", {}).get(self.hud.max) if layout_set is not None else None
+        if shared is None:
+            return
+        with contextlib.suppress(Exception):
+            if seat == "common":
+                shared.common = position
+            else:
+                shared.location[seat] = position
 
     def adj_seats(self) -> list[int]:
         """Determine how to adjust seating arrangements.
