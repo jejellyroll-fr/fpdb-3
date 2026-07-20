@@ -126,15 +126,37 @@ class Table(Table_Window):
                 log.debug("argv lookup failed for pid %s: %s", pid, exc)
         return None
 
+    def _coinpoker_table_candidates(self, tables):
+        """The CoinPoker table windows (Unity), excluding the lobby and bad-word windows."""
+        return [t for t in tables if t.title and not self.check_bad_words(t.title) and self._is_coinpoker_table(t)]
+
+    def _select_coinpoker_window(self, tables):
+        """Pick this CoinPoker table's window, or None if it can't be told apart.
+
+        The process argv carries the exact table id, so it disambiguates several
+        open tables. When argv is unavailable (psutil missing / access denied) the
+        window class only separates a table from the lobby, not one table from
+        another, so fall back to it only when a single table is open -- otherwise
+        a HUD could attach to the wrong table.
+        """
+        argv_match = self._match_coinpoker_by_argv(tables)
+        if argv_match is not None:
+            return argv_match
+        candidates = self._coinpoker_table_candidates(tables)
+        if len(candidates) == 1:
+            return candidates[0]
+        if candidates:
+            log.warning(
+                "%d CoinPoker tables open but the table id could not be read from any process; "
+                "not guessing which window to attach to.",
+                len(candidates),
+            )
+        return None
+
     def _select_window(self, tables, search_str):
         """Pick the table window from candidates, or None if none qualifies."""
-        is_coinpoker = getattr(self, "site", "") == "CoinPoker"
-        if is_coinpoker:
-            # Prefer the exact table by process argv (multi-table safe); the
-            # class heuristic below is the single-table fallback.
-            argv_match = self._match_coinpoker_by_argv(tables)
-            if argv_match is not None:
-                return argv_match
+        if getattr(self, "site", "") == "CoinPoker":
+            return self._select_coinpoker_window(tables)
 
         for table_info in tables:
             try:
@@ -146,9 +168,6 @@ class Table(Table_Window):
                     continue
                 if search_str == "Winamax" and not self._matches_winamax_tournament(title):
                     log.debug("Winamax window rejected for current tournament/table: %s", title)
-                    continue
-                if is_coinpoker and not self._is_coinpoker_table(table_info):
-                    log.debug("CoinPoker window rejected (not the Unity table window): %s", title)
                     continue
                 return table_info
             except Exception as e:  # intentional broad catch: OS window enumeration boundary, log and keep scanning
