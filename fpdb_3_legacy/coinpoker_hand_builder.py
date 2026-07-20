@@ -47,6 +47,15 @@ _HOLE_COUNT_CATEGORY = {
     6: ("hold", "6_omahahi"),
 }
 
+
+def _decimal_or_none(value: Any) -> Decimal | None:
+    """Return a finite protocol money value, or None for blank/invalid fields."""
+    try:
+        amount = Decimal(str(value))
+    except (ValueError, ArithmeticError):
+        return None
+    return amount if amount.is_finite() else None
+
 # Card ranks removed from a short deck (6+ Hold'em uses 6..A only). Seeing any of
 # them proves a full 52-card deck, i.e. regular Hold'em.
 _LOW_RANKS = frozenset({"TWO", "THREE", "FOUR", "FIVE"})
@@ -272,8 +281,14 @@ def _extract_cashout(evs: list[tuple]) -> list[dict[str, str]]:
                 player = det.get("playerName")
                 if not player:
                     continue
-                pot = Decimal(str(det.get("winAmountFromPot", 0) or 0))
-                paid = Decimal(str(det.get("actualWinAmount", pot) or 0))
+                paid = _decimal_or_none(det.get("actualWinAmount"))
+                pot = _decimal_or_none(det.get("winAmountFromPot"))
+                if paid is None:
+                    continue
+                # Some insured results omit the theoretical pot entitlement.
+                # Keep the exact payout and leave the unknown fee at zero.
+                if pot is None:
+                    pot = paid
                 fee = pot - paid
                 cashout.append({
                     "player": player,
@@ -387,8 +402,13 @@ def _build_one(hid: str, evs: list[tuple], table_category: str) -> dict[str, Any
             winner_list = (w.get("winnerDetails") or {}).get("winnerList") or []
             for det in winner_list:
                 nm = det.get("playerName")
-                amt = det.get("winAmountFromPot", w.get("potAmountAfterRake", 0))
-                if nm:
+                # For EV cashout CoinPoker may leave winAmountFromPot blank;
+                # actualWinAmount is the amount really paid to the player.
+                preferred = det.get("actualWinAmount") if det.get("isInsured") else det.get("winAmountFromPot")
+                amt = _decimal_or_none(preferred)
+                if amt is None:
+                    amt = _decimal_or_none(w.get("potAmountAfterRake"))
+                if nm and amt is not None:
                     collections.append({"player": nm, "pot": str(amt)})
     if not collections:
         cum = _first(evs, "game.cumulativeWinnerInfo")

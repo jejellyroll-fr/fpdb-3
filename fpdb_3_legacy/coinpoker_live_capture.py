@@ -39,6 +39,8 @@ from __future__ import annotations
 import argparse
 import contextlib
 import datetime
+import json
+import os
 import re
 import sys
 from collections.abc import Iterable, Iterator
@@ -319,6 +321,7 @@ class HandPump:
             except Exception as exc:  # noqa: BLE001 - one malformed hand must not kill the feed
                 self.failed.add(hid)
                 print(f"[WARN] skipped hand #{hid}: {exc}")
+                self._log_failed_hand(hand_data, exc)
                 continue
             # Tell fpdb who the hero is (needed for hero stats and the HUD).
             hero = hand_data.get("hero")
@@ -354,6 +357,17 @@ class HandPump:
                 self.failed.add(hid)
                 print(f"[ERROR] import of #{hid} failed: {exc}")
         return new
+
+    @staticmethod
+    def _log_failed_hand(hand_data: dict, exc: Exception) -> None:
+        """Persist rejected normalized data so live-only protocol cases are diagnosable."""
+        path = os.path.expanduser("~/.fpdb/coinpoker-failed-hands.jsonl")
+        record = {"error": f"{type(exc).__name__}: {exc}", "hand": hand_data}
+        try:
+            with open(path, "a", encoding="utf-8") as handle:
+                handle.write(json.dumps(record, default=str, ensure_ascii=False) + "\n")
+        except OSError as log_exc:
+            print(f"[WARN] could not write failed-hand diagnostic: {log_exc}")
 
     def prune(self, events: list[tuple]) -> list[tuple]:
         """Drop events of already-handled (imported or failed) hands to bound memory."""
