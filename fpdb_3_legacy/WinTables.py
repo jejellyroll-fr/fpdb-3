@@ -39,6 +39,11 @@ if sys.platform == "win32":
 b_width = 3
 tb_height = 29
 
+# CoinPoker renders each table in a Unity window whose title is just "CoinPoker"
+# (no table number), while the lobby is a Chromium window with the *same* title.
+# The table is told apart by its native window class, not the title.
+COINPOKER_TABLE_CLASS = "UnityWndClass"
+
 
 class Table(Table_Window):
     """Windows-specific table window implementation.
@@ -66,6 +71,90 @@ class Table(Table_Window):
         # optional leading zeros when matching table "3" against "#03".
         return bool(re.search(rf"(?:#|Table\s*)0*{re.escape(table)}\b", title, re.IGNORECASE))
 
+    def _detection_search_string(self) -> str:
+        """Broaden the title search for clients whose title omits the table id.
+
+        Winamax's title does not always match the precise getTableTitleRe regex,
+        and CoinPoker titles every window just "CoinPoker"; in both cases we
+        search on the client name and filter the matches afterwards.
+        """
+        search_str = self.search_string
+        if "Winamax" in search_str:
+            log.debug("Winamax detected, adjusted search string to: Winamax")
+            return "Winamax"
+        if getattr(self, "site", "") == "CoinPoker":
+            log.debug("CoinPoker detected, adjusted search string to: CoinPoker")
+            return "CoinPoker"
+        return search_str
+
+    def _is_coinpoker_table(self, table_info) -> bool:
+        """True for the CoinPoker Unity table window, False for its Chromium lobby.
+
+        Both are titled "CoinPoker"; only the native window class tells them
+        apart. If the detector could not report a class (non-Windows, or an
+        older detector), accept the window rather than hide the HUD.
+        """
+        window_class = getattr(table_info, "window_class", None)
+        if window_class is None:
+            return True
+        return window_class == COINPOKER_TABLE_CLASS
+
+    def _match_coinpoker_by_argv(self, tables):
+        """Return the CoinPoker window owning the requested table id, or None.
+
+        Each CoinPoker table is a separate Unity process whose command line
+        carries the table id (window -> PID -> argv -> id), so this tells several
+        open tables apart -- the window-class heuristic alone cannot. Returns
+        None when argv is unavailable (psutil missing / access denied), so the
+        caller falls back to the class heuristic for the single-table case.
+        """
+        try:
+            from fpdb.infrastructure.platform.windows_process import table_id_for_pid
+        except ImportError:
+            return None
+        target = "".join(ch for ch in str(self.search_string) if ch.isdigit())
+        if not target:
+            return None
+        for table_info in tables:
+            pid = getattr(table_info, "process_id", None)
+            if not pid:
+                continue
+            try:
+                if table_id_for_pid(pid) == target:
+                    return table_info
+            except Exception as exc:  # pragma: no cover - psutil/platform dependent
+                log.debug("argv lookup failed for pid %s: %s", pid, exc)
+        return None
+
+    def _select_window(self, tables, search_str):
+        """Pick the table window from candidates, or None if none qualifies."""
+        is_coinpoker = getattr(self, "site", "") == "CoinPoker"
+        if is_coinpoker:
+            # Prefer the exact table by process argv (multi-table safe); the
+            # class heuristic below is the single-table fallback.
+            argv_match = self._match_coinpoker_by_argv(tables)
+            if argv_match is not None:
+                return argv_match
+
+        for table_info in tables:
+            try:
+                title = table_info.title
+                if not title:
+                    continue
+                if self.check_bad_words(title):
+                    log.debug("Window rejected due to bad words: %s", title)
+                    continue
+                if search_str == "Winamax" and not self._matches_winamax_tournament(title):
+                    log.debug("Winamax window rejected for current tournament/table: %s", title)
+                    continue
+                if is_coinpoker and not self._is_coinpoker_table(table_info):
+                    log.debug("CoinPoker window rejected (not the Unity table window): %s", title)
+                    continue
+                return table_info
+            except Exception as e:  # intentional broad catch: OS window enumeration boundary, log and keep scanning
+                log.exception("Unexpected error processing window: %s", e)
+        return None
+
     def find_table_parameters(self) -> None:
         """Find a poker client window with the given table name.
 
@@ -73,54 +162,25 @@ class Table(Table_Window):
         """
         log.debug("Starting window detection for search string: %s", self.search_string)
 
-        # Winamax special handling: the exact window-title format of the Winamax
-        # client does not always match the precise regex from getTableTitleRe, so
-        # we broaden the search to any "Winamax" window and then filter it below
-        # with _matches_winamax_tournament. (The previous code did
-        # search_string.split(" ")[0], which kept the leading "^" regex anchor and
-        # produced "^Winamax" — a pattern no window title ever contains.)
-        search_str = self.search_string
-        if "Winamax" in search_str:
-            search_str = "Winamax"
-            log.debug("Winamax detected, adjusted search string to: %s", search_str)
-
-        # Use platform abstraction layer to find tables
+        search_str = self._detection_search_string()
         tables = self._detector.find_tables(search_str)
         log.debug("Found %d matching windows", len(tables))
 
-        for table_info in tables:
-            try:
-                title = table_info.title
-                if not title:
-                    continue
+        match = self._select_window(tables, search_str)
+        if match is not None:
+            self.number = match.window_id
+            self.title = match.title
+            self._table_geometry = match.geometry
+            log.debug("Found table - HWND: %s, Title: %s", self.number, self.title)
+            return
 
-                # Check bad words
-                if self.check_bad_words(title):
-                    log.debug("Window rejected due to bad words: %s", title)
-                    continue
-
-                if search_str == "Winamax" and not self._matches_winamax_tournament(title):
-                    log.debug("Winamax window rejected for current tournament/table: %s", title)
-                    continue
-
-                # Found matching table
-                self.number = table_info.window_id
-                self.title = title
-                self._table_geometry = table_info.geometry
-                log.debug("Found table - HWND: %s, Title: %s", self.number, self.title)
-                break
-
-            except Exception as e:  # intentional broad catch: OS window enumeration boundary, log and keep scanning
-                log.exception("Unexpected error processing window: %s", e)
-
-        if self.number is None:
-            log.warning("Window '%s' not found.", self.search_string)
-            try:
-                all_tables = self._detector.find_tables("")
-                titles = [t.title for t in all_tables if t.title]
-                log.warning("Currently open windows: %s", titles)
-            except Exception as e:
-                log.warning("Could not list open windows: %s", e)
+        log.warning("Window '%s' not found.", self.search_string)
+        try:
+            all_tables = self._detector.find_tables("")
+            titles = [t.title for t in all_tables if t.title]
+            log.warning("Currently open windows: %s", titles)
+        except Exception as e:
+            log.warning("Could not list open windows: %s", e)
 
     def get_geometry(self):
         """Get the window geometry using platform abstraction."""

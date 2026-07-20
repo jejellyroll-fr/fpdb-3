@@ -22,6 +22,10 @@ def test_geometry_and_table_matching_contracts() -> None:
     assert not geometry.intersects(TableGeometry(x=110, y=100, width=20, height=20))
     table = TableInfo(window_id=1, title="Winamax Table Alpha", geometry=geometry)
     assert table.matches_search("winamax")
+    # window_class is optional metadata, absent unless the platform reports it.
+    assert table.window_class is None
+    classed = TableInfo(window_id=2, title="CoinPoker", geometry=geometry, window_class="UnityWndClass")
+    assert classed.window_class == "UnityWndClass"
 
 
 def test_factory_detects_supported_platforms() -> None:
