@@ -16,7 +16,6 @@ from PySide6.QtWidgets import QLabel
 from fpdb_3_legacy import Card
 from fpdb_3_legacy.Mucked import Flop_Mucked
 
-
 CARD_W, CARD_H = 30, 42
 
 
