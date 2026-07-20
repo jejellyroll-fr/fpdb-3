@@ -30,8 +30,6 @@ if sys.platform == "win32":
     GetSystemMetrics = ctypes.windll.user32.GetSystemMetrics
     IsWindow = ctypes.windll.user32.IsWindow
     MoveWindow = ctypes.windll.user32.MoveWindow
-    GetWindowThreadProcessId = ctypes.windll.user32.GetWindowThreadProcessId
-
     # Windows API constants
     SM_CXSIZEFRAME = 32
     SM_CYCAPTION = 4
@@ -42,8 +40,10 @@ def _window_pid(hwnd: int | None) -> int | None:
     if sys.platform != "win32" or not hwnd:
         return None
     try:
+        import ctypes  # local import: ctypes.windll is Windows-only
+
         pid = ctypes.c_ulong()
-        GetWindowThreadProcessId(int(hwnd), ctypes.byref(pid))
+        ctypes.windll.user32.GetWindowThreadProcessId(int(hwnd), ctypes.byref(pid))
         return pid.value or None
     except Exception:  # noqa: BLE001 - defensive: never break the geometry poll
         return None
