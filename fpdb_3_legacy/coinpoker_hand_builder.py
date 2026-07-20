@@ -9,6 +9,7 @@ holecards / collections). Currently targets ring Hold'em and Omaha (PLO).
 
 from __future__ import annotations
 
+import datetime
 import re
 from collections import defaultdict
 from decimal import Decimal
@@ -23,14 +24,32 @@ _VALUE = {
 _SUIT = {"SPADES": "s", "HEARTS": "h", "DIAMONDS": "d", "CLUBS": "c"}
 _NUM_RANK = {10: "T", 11: "J", 12: "Q", 13: "K", 14: "A"}
 
-# CoinPoker categories -> (fpdb base, category). PLO4 == 4-card Omaha high.
+# CoinPoker game hints (the GUI dropdown) -> (fpdb base, category). Used as a
+# fallback when the variant can't be read from the hand itself. SHORTDECK == 6+
+# Hold'em (fpdb category 6_holdem).
 _CATEGORY = {
     "PLO4": ("hold", "omahahi"),
     "PLO5": ("hold", "5_omahahi"),
     "PLO6": ("hold", "6_omahahi"),
     "NLH": ("hold", "holdem"),
     "NLHE": ("hold", "holdem"),
+    "SHORTDECK": ("hold", "6_holdem"),
 }
+
+# Hole-card count -> (fpdb base, category), for the counts that are unambiguous.
+# CoinPoker's hand events carry no explicit game variant, but the number of cards
+# dealt to the hero identifies the Omaha family, so it is detected per hand: a
+# PLO5 hand keeps its 5th card even when the session hint says PLO4. Two-card
+# games (Hold'em vs short-deck) are handled separately since the count is equal.
+_HOLE_COUNT_CATEGORY = {
+    4: ("hold", "omahahi"),
+    5: ("hold", "5_omahahi"),
+    6: ("hold", "6_omahahi"),
+}
+
+# Card ranks removed from a short deck (6+ Hold'em uses 6..A only). Seeing any of
+# them proves a full 52-card deck, i.e. regular Hold'em.
+_LOW_RANKS = frozenset({"TWO", "THREE", "FOUR", "FIVE"})
 
 
 def _card(c: dict) -> str:
@@ -112,12 +131,68 @@ def _collect_players(evs: list[tuple]) -> dict[str, dict]:
 
 
 
+def _hero_hole_count(evs: list[tuple]) -> int:
+    """Number of cards dealt to the hero, or 0 if they weren't captured."""
+    for name in ("game.hole_cards", "game.player_info"):
+        ev = _first(evs, name)
+        if isinstance(ev, dict):
+            cards = ev.get("holeCards") or ev.get("playerCards")
+            if cards:
+                return len(cards)
+    return 0
+
+
+def _all_dealt_cards(evs: list[tuple]) -> list[dict]:
+    """Every card visible in the hand: the hero's hole cards plus the board."""
+    hole = _first(evs, "game.hole_cards")
+    cards = list(hole.get("holeCards") or []) if isinstance(hole, dict) else []
+    for name, _h, d in evs:
+        if name == "game.dealer_cards" and isinstance(d, dict):
+            for street_cards in (d.get("dealerCards") or {}).values():
+                cards.extend(street_cards or [])
+    return [c for c in cards if isinstance(c, dict)]
+
+
+def _detect_category(evs: list[tuple], table_category: str) -> tuple[str, str]:
+    """Pick (base, category) from the hand itself, else the GUI hint.
+
+    The hero's hole-card count identifies the Omaha family unambiguously (4/5/6),
+    so it wins. Hold'em and short-deck both deal two cards, so the count can't
+    tell them apart: trust the session hint, but a 2-5 rank anywhere proves a full
+    deck and rules out short-deck even under a wrong hint. The ``table_category``
+    dropdown is the fallback when the hero's cards aren't captured (e.g. observing).
+    """
+    count = _hero_hole_count(evs)
+    if count in _HOLE_COUNT_CATEGORY:
+        return _HOLE_COUNT_CATEGORY[count]
+    if count == 2:
+        _, hinted = _CATEGORY.get(table_category.upper(), ("hold", "holdem"))
+        low_card_seen = any(c.get("value") in _LOW_RANKS for c in _all_dealt_cards(evs))
+        if hinted == "6_holdem" and not low_card_seen:
+            return ("hold", "6_holdem")
+        return ("hold", "holdem")
+    return _CATEGORY.get(table_category.upper(), ("hold", "omahahi"))
+
+
+def _hand_start_time(info: dict) -> datetime.datetime | None:
+    """Convert the event's initTimeStamp (epoch ms) to a UTC-naive datetime.
+
+    Preferring the protocol's own clock over the import wall-clock keeps replayed
+    or backlogged captures on their real dates in the GUI graphs/filters.
+    """
+    raw = info.get("initTimeStamp")
+    try:
+        return datetime.datetime.fromtimestamp(int(raw) / 1000, tz=datetime.timezone.utc).replace(tzinfo=None)
+    except (TypeError, ValueError, OverflowError, OSError):
+        return None
+
+
 def _build_one(hid: str, evs: list[tuple], table_category: str) -> dict[str, Any] | None:
     info = _first(evs, "game.pre_hand_start_info")
     if not info:
         return None
 
-    base, category = _CATEGORY.get(table_category.upper(), ("hold", "omahahi"))
+    base, category = _detect_category(evs, table_category)
     sb = Decimal(str(info.get("sbAmount", 0)))
     bb = Decimal(str(info.get("bbAmount", 0)))
     ante = Decimal(str(info.get("anteAmount", 0)))
@@ -254,7 +329,7 @@ def _build_one(hid: str, evs: list[tuple], table_category: str) -> dict[str, Any
         "hand_id": str(hid),
         "hero": hero,
         "table_id": table_id,
-        "timestamp": None,
+        "timestamp": _hand_start_time(info),
         "buttonpos": info.get("dealerSeatId"),
         "game": {"base": base, "category": category, "fpdb_supported": True},
         "gametype": {
