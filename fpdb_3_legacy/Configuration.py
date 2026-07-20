@@ -20,8 +20,8 @@ from __future__ import annotations
 ########################################################################
 #    Standard Library modules
 import codecs
-import json
 import inspect
+import json
 import locale
 import os
 import platform

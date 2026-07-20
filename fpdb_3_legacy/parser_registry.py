@@ -15,6 +15,7 @@ from fpdb_3_legacy.BossToFpdb import Boss
 from fpdb_3_legacy.BovadaSummary import BovadaSummary
 from fpdb_3_legacy.BovadaToFpdb import Bovada
 from fpdb_3_legacy.CakeToFpdb import Cake
+from fpdb_3_legacy.CoinPokerToFpdb import CoinPoker
 from fpdb_3_legacy.EnetToFpdb import Enet
 from fpdb_3_legacy.EntractionToFpdb import Entraction
 from fpdb_3_legacy.EverestToFpdb import Everest
@@ -38,7 +39,6 @@ from fpdb_3_legacy.PokerStarsSummary import PokerStarsSummary
 from fpdb_3_legacy.PokerStarsToFpdb import PokerStars
 from fpdb_3_legacy.PokerTrackerSummary import PokerTrackerSummary
 from fpdb_3_legacy.PokerTrackerToFpdb import PokerTracker
-from fpdb_3_legacy.CoinPokerToFpdb import CoinPoker
 from fpdb_3_legacy.SealsWithClubsToFpdb import SealsWithClubs
 from fpdb_3_legacy.TourneySummary import TourneySummary
 from fpdb_3_legacy.UnibetSummary import UnibetSummary
