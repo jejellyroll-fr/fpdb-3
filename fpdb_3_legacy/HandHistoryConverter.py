@@ -306,7 +306,7 @@ HandHistoryConverter: '{sitename}'
         """Parse a shared game header for converters that enable ``copyGameHeader``."""
         raise NotImplementedError
 
-    def raise_summary_partial(self, hand: object, marker: str) -> None:
+    def raise_summary_partial(self, hand: Hand.Hand, marker: str) -> None:
         """Reject a hand whose summary sections do not number exactly one.
 
         Two unrelated situations land here, and reporting both as "not cleanly
