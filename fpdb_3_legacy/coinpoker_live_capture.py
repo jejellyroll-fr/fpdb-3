@@ -481,7 +481,18 @@ def _acquire_instance_lock(path: str | None = None):
             fcntl.flock(handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
     except (OSError, BlockingIOError):
         handle.close()
-        raise RuntimeError("another CoinPoker live capture is already running") from None
+        holder = ""
+        try:
+            holder_pid = open(lock_path, encoding="ascii").read().strip()  # noqa: SIM115
+            if holder_pid.isdigit():
+                holder = f" (PID {holder_pid})"
+        except OSError:
+            pass
+        raise RuntimeError(f"another CoinPoker live capture is already running{holder}") from None
+    handle.seek(0)
+    handle.truncate()
+    handle.write(str(os.getpid()).encode("ascii"))
+    handle.flush()
     return handle
 
 
@@ -519,7 +530,11 @@ def main() -> None:
     # normal exit and crashes, so stale lock files do not block future starts.
     _instance_lock = None
     if not args.dry_run and (args.live or args.stdin):
-        _instance_lock = _acquire_instance_lock()
+        try:
+            _instance_lock = _acquire_instance_lock()
+        except RuntimeError as exc:
+            print(f"[ERROR] {exc}")
+            sys.exit(1)
 
     if args.live:
         events = _events_from_segments(capture_live(args.iface, BPF_FILTER, stop=stop))
