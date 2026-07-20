@@ -457,5 +457,31 @@ class TestClampToScreen(unittest.TestCase):
         assert x >= 1920
 
 
+def test_drag_propagates_to_shared_layout_so_new_tables_inherit() -> None:
+    # A HUD deep-copies its layout at creation, so a drag that only touched this
+    # HUD's copy was lost on the next table. The drag must write through to the
+    # shared layout_set that later tables copy from.
+    from types import SimpleNamespace
+
+    shared = SimpleNamespace(location=[None] * 11, common=(0, 0))
+    hud = SimpleNamespace(max=6, layout_set=SimpleNamespace(layout={6: shared}))
+    aux = object.__new__(Aux_Base.AuxSeats)
+    aux.hud = hud
+
+    aux._propagate_to_shared_layout(3, (100, 200))
+    aux._propagate_to_shared_layout("common", (50, 60))
+
+    assert shared.location[3] == (100, 200)
+    assert shared.common == (50, 60)
+
+
+def test_propagate_is_a_noop_without_a_shared_layout() -> None:
+    from types import SimpleNamespace
+
+    aux = object.__new__(Aux_Base.AuxSeats)
+    aux.hud = SimpleNamespace(max=6, layout_set=None)
+    aux._propagate_to_shared_layout(2, (1, 2))  # must not raise
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -30,10 +30,24 @@ if sys.platform == "win32":
     GetSystemMetrics = ctypes.windll.user32.GetSystemMetrics
     IsWindow = ctypes.windll.user32.IsWindow
     MoveWindow = ctypes.windll.user32.MoveWindow
+    GetWindowThreadProcessId = ctypes.windll.user32.GetWindowThreadProcessId
 
     # Windows API constants
     SM_CXSIZEFRAME = 32
     SM_CYCAPTION = 4
+
+
+def _window_pid(hwnd: int | None) -> int | None:
+    """Return the process id owning ``hwnd`` on Windows, or None."""
+    if sys.platform != "win32" or not hwnd:
+        return None
+    try:
+        pid = ctypes.c_ulong()
+        GetWindowThreadProcessId(int(hwnd), ctypes.byref(pid))
+        return pid.value or None
+    except Exception:  # noqa: BLE001 - defensive: never break the geometry poll
+        return None
+
 
 # Global variables for window borders
 b_width = 3
@@ -201,6 +215,30 @@ class Table(Table_Window):
         except Exception as e:
             log.warning("Could not list open windows: %s", e)
 
+    def _coinpoker_window_reassigned(self) -> bool:
+        """True only if our CoinPoker window now serves a *different* table id.
+
+        Fail-safe: returns False whenever the site isn't CoinPoker, or the table
+        id can't be read (no PID / psutil unavailable / no id in argv), so it can
+        only ever add a close signal, never cause a premature kill.
+        """
+        if getattr(self, "site", "") != "CoinPoker":
+            return False
+        expected = "".join(ch for ch in str(getattr(self, "search_string", "")) if ch.isdigit())
+        if not expected:
+            return False
+        pid = _window_pid(self.number)
+        if not pid:
+            return False
+        try:
+            from fpdb.infrastructure.platform.windows_process import table_id_for_pid
+
+            current = table_id_for_pid(pid)
+        except Exception as exc:  # noqa: BLE001 - never break the geometry poll
+            log.debug("CoinPoker argv re-check failed for pid %s: %s", pid, exc)
+            return False
+        return bool(current) and current != expected
+
     def get_geometry(self):
         """Get the window geometry using platform abstraction."""
         if self._table_geometry is not None:
@@ -217,6 +255,13 @@ class Table(Table_Window):
             # Check if window is still valid
             if not self._detector.is_window_visible(self.number):
                 log.error("The window %s is not valid or visible", self.number)
+                return None
+
+            # CoinPoker recycles a table's Unity window for the next table, so the
+            # HWND can stay "visible" after this table closed while now rendering a
+            # different table. Treat that as destroyed (the HUD must move on).
+            if self._coinpoker_window_reassigned():
+                log.info("CoinPoker window %s now serves a different table; treating as closed", self.number)
                 return None
 
             # Get geometry using platform abstraction

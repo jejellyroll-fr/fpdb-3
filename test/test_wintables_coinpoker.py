@@ -40,6 +40,29 @@ def _make_table() -> WinTables.Table:
     return t
 
 
+def test_window_reassigned_only_when_argv_shows_a_different_table() -> None:
+    # CoinPoker recycles a table's Unity window; the HUD must treat "my window now
+    # serves another table id" as closed, but never guess when it can't read the id.
+    t = _make_table()
+    t.site = "CoinPoker"
+    t.search_string = "930357"
+    t.number = 111
+
+    with patch("fpdb_3_legacy.WinTables._window_pid", return_value=4672):
+        with patch("fpdb.infrastructure.platform.windows_process.table_id_for_pid", return_value="928730"):
+            assert t._coinpoker_window_reassigned() is True  # different table -> reassigned
+        with patch("fpdb.infrastructure.platform.windows_process.table_id_for_pid", return_value="930357"):
+            assert t._coinpoker_window_reassigned() is False  # still our table
+        with patch("fpdb.infrastructure.platform.windows_process.table_id_for_pid", return_value=None):
+            assert t._coinpoker_window_reassigned() is False  # can't tell -> keep
+
+    # Fail-safe: no PID, or a non-CoinPoker site, never reports reassigned.
+    with patch("fpdb_3_legacy.WinTables._window_pid", return_value=None):
+        assert t._coinpoker_window_reassigned() is False
+    t.site = "PokerStars"
+    assert t._coinpoker_window_reassigned() is False
+
+
 def test_coinpoker_picks_unity_table_over_lobby() -> None:
     # No argv resolution available -> class heuristic picks the Unity window.
     lobby = TableInfo(window_id=222, title="CoinPoker", geometry=_GEOM, window_class="Chrome_WidgetWin_1")
