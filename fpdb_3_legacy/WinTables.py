@@ -3,6 +3,7 @@ from __future__ import annotations
 Now uses the Platform Abstraction Layer (Feature 1.5) for table detection.
 """
 
+import contextlib
 import re
 import sys
 
@@ -215,29 +216,47 @@ class Table(Table_Window):
         except Exception as e:
             log.warning("Could not list open windows: %s", e)
 
-    def _coinpoker_window_reassigned(self) -> bool:
-        """True only if our CoinPoker window now serves a *different* table id.
-
-        Fail-safe: returns False whenever the site isn't CoinPoker, or the table
-        id can't be read (no PID / psutil unavailable / no id in argv), so it can
-        only ever add a close signal, never cause a premature kill.
-        """
-        if getattr(self, "site", "") != "CoinPoker":
-            return False
-        expected = "".join(ch for ch in str(getattr(self, "search_string", "")) if ch.isdigit())
-        if not expected:
-            return False
-        pid = _window_pid(self.number)
-        if not pid:
-            return False
+    def _coinpoker_argv_usable(self, tables) -> bool:
+        """True if a table id could be read from any open CoinPoker window (psutil works)."""
         try:
             from fpdb.infrastructure.platform.windows_process import table_id_for_pid
-
-            current = table_id_for_pid(pid)
-        except Exception as exc:  # noqa: BLE001 - never break the geometry poll
-            log.debug("CoinPoker argv re-check failed for pid %s: %s", pid, exc)
+        except ImportError:
             return False
-        return bool(current) and current != expected
+        for table_info in tables:
+            pid = getattr(table_info, "process_id", None)
+            if pid:
+                with contextlib.suppress(Exception):
+                    if table_id_for_pid(pid):
+                        return True
+        return False
+
+    def _coinpoker_live_geometry(self):
+        """Geometry for THIS CoinPoker table, re-resolving its window every poll.
+
+        CoinPoker's Unity table window stays *visible* after the table is closed
+        (so is_window_visible() never reports the close) and its HWND can also be
+        recycled or recreated. Tracking a fixed HWND is therefore unreliable.
+        Instead, re-resolve the window by this table's id each poll: if no open
+        CoinPoker window's process argv carries our id, the table has closed
+        (return None). Fall back to the tracked HWND's visibility only when the id
+        can't be read (psutil unavailable), so a missing dep never forces a kill.
+        """
+        tables = self._detector.find_tables("CoinPoker")
+        match = self._match_coinpoker_by_argv(tables)
+        if match is not None:
+            self.number = match.window_id  # the window may have been recreated
+            return self._detector.get_window_geometry(self.number)
+        if self._coinpoker_argv_usable(tables):
+            log.warning(
+                "CoinPoker table %s: no open window carries this table id among %d CoinPoker window(s); closing HUD",
+                self.search_string,
+                len(tables),
+            )
+            return None
+        # argv unavailable (psutil): keep the old HWND-visibility behaviour.
+        if self._detector.is_window_visible(self.number):
+            return self._detector.get_window_geometry(self.number)
+        return None
 
     def get_geometry(self):
         """Get the window geometry using platform abstraction."""
@@ -251,17 +270,15 @@ class Table(Table_Window):
             table_geom = self._table_geometry
             self._table_geometry = None
             log.debug("Using geometry captured during table detection for window: %s", self.number)
+        elif getattr(self, "site", "") == "CoinPoker":
+            # CoinPoker needs id-based re-resolution, not fixed-HWND visibility.
+            table_geom = self._coinpoker_live_geometry()
+            if table_geom is None:
+                return None
         else:
             # Check if window is still valid
             if not self._detector.is_window_visible(self.number):
                 log.error("The window %s is not valid or visible", self.number)
-                return None
-
-            # CoinPoker recycles a table's Unity window for the next table, so the
-            # HWND can stay "visible" after this table closed while now rendering a
-            # different table. Treat that as destroyed (the HUD must move on).
-            if self._coinpoker_window_reassigned():
-                log.info("CoinPoker window %s now serves a different table; treating as closed", self.number)
                 return None
 
             # Get geometry using platform abstraction

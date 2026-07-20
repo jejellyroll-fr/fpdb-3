@@ -40,27 +40,45 @@ def _make_table() -> WinTables.Table:
     return t
 
 
-def test_window_reassigned_only_when_argv_shows_a_different_table() -> None:
-    # CoinPoker recycles a table's Unity window; the HUD must treat "my window now
-    # serves another table id" as closed, but never guess when it can't read the id.
+def _windows(*ids_by_pid: tuple[int, str]) -> list[TableInfo]:
+    return [
+        TableInfo(window_id=100 + pid, title="CoinPoker", geometry=_GEOM, process_id=pid, window_class="UnityWndClass")
+        for pid, _tid in ids_by_pid
+    ]
+
+
+def test_live_geometry_reresolves_and_closes_when_table_id_is_gone() -> None:
+    # The window stays "visible" after the table closes, so detection must be by
+    # table id: our id present -> alive (and HWND re-bound); absent -> closed.
     t = _make_table()
-    t.site = "CoinPoker"
     t.search_string = "930357"
     t.number = 111
+    t._detector.get_window_geometry.return_value = _GEOM
 
-    with patch("fpdb_3_legacy.WinTables._window_pid", return_value=4672):
-        with patch("fpdb.infrastructure.platform.windows_process.table_id_for_pid", return_value="928730"):
-            assert t._coinpoker_window_reassigned() is True  # different table -> reassigned
-        with patch("fpdb.infrastructure.platform.windows_process.table_id_for_pid", return_value="930357"):
-            assert t._coinpoker_window_reassigned() is False  # still our table
-        with patch("fpdb.infrastructure.platform.windows_process.table_id_for_pid", return_value=None):
-            assert t._coinpoker_window_reassigned() is False  # can't tell -> keep
+    # Two CoinPoker tables open; ours (930357) lives on pid 957 / window 1057.
+    t._detector.find_tables.return_value = _windows((956, "166755"), (957, "930357"))
+    pid_to_id = {956: "166755", 957: "930357"}
+    with patch("fpdb.infrastructure.platform.windows_process.table_id_for_pid", side_effect=pid_to_id.get):
+        assert t._coinpoker_live_geometry() is _GEOM
+        assert t.number == 1057  # re-bound to the window actually serving our id
 
-    # Fail-safe: no PID, or a non-CoinPoker site, never reports reassigned.
-    with patch("fpdb_3_legacy.WinTables._window_pid", return_value=None):
-        assert t._coinpoker_window_reassigned() is False
-    t.site = "PokerStars"
-    assert t._coinpoker_window_reassigned() is False
+    # Our table closed: only the other table remains -> no window carries our id.
+    t._detector.find_tables.return_value = _windows((956, "166755"))
+    with patch("fpdb.infrastructure.platform.windows_process.table_id_for_pid", side_effect={956: "166755"}.get):
+        assert t._coinpoker_live_geometry() is None  # closed
+
+
+def test_live_geometry_falls_back_to_visibility_when_argv_unavailable() -> None:
+    # If psutil can't read any table id, don't guess "closed" -- keep the old
+    # HWND-visibility behaviour so a missing dependency never kills a live HUD.
+    t = _make_table()
+    t.search_string = "930357"
+    t.number = 111
+    t._detector.find_tables.return_value = _windows((956, "x"))
+    t._detector.is_window_visible.return_value = True
+    t._detector.get_window_geometry.return_value = _GEOM
+    with patch("fpdb.infrastructure.platform.windows_process.table_id_for_pid", return_value=None):
+        assert t._coinpoker_live_geometry() is _GEOM  # argv unusable -> fall back, stay alive
 
 
 def test_coinpoker_picks_unity_table_over_lobby() -> None:
