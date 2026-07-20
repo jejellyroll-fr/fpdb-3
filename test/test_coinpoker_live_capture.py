@@ -131,6 +131,29 @@ def test_hand_pump_imports_complete_hands_and_dedupes() -> None:
     assert pump.prune(events) == []  # imported hands' events pruned
 
 
+def test_pump_stamps_capture_time_instead_of_epoch(monkeypatch) -> None:
+    # The stream carries no per-hand clock; an unstamped hand would default to
+    # 1970 and vanish from the GUI's date-filtered graphs. The pump must stamp it.
+    import datetime
+
+    from fpdb_3_legacy.http_capture_hand_builder import CaptureNotImportableError
+
+    seen: dict = {}
+
+    def spy(hand_data, config):  # noqa: ANN001, ANN202 - test double
+        seen["timestamp"] = hand_data.get("timestamp")
+        raise CaptureNotImportableError  # stop after capturing the stamped value
+
+    monkeypatch.setattr("fpdb_3_legacy.coinpoker_live_capture.build_fpdb_hand", spy)
+    config = HttpCaptureHandConfig(site_ids={"CoinPoker": COINPOKER_SITE_ID, "default": COINPOKER_SITE_ID})
+    pump = HandPump(db=None, config=config, table_category="PLO4", dry_run=True)
+
+    pump.process(_events())
+
+    assert isinstance(seen["timestamp"], datetime.datetime)
+    assert seen["timestamp"].year >= 2020  # capture time, not the 1970 epoch
+
+
 def test_live_capture_instance_lock_rejects_second_process(tmp_path) -> None:
     lock_path = str(tmp_path / "coinpoker-capture.lock")
     first = _acquire_instance_lock(lock_path)

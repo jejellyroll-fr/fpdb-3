@@ -38,6 +38,7 @@ from __future__ import annotations
 
 import argparse
 import contextlib
+import datetime
 import re
 import sys
 from collections.abc import Iterable, Iterator
@@ -292,12 +293,25 @@ class HandPump:
         self.imported: set[str] = set()
         self.failed: set[str] = set()
 
+    @staticmethod
+    def _stamp_capture_time(hand_data: dict) -> None:
+        """Give an unstamped hand the capture time (UTC-naive) instead of 1970.
+
+        The CoinPoker stream carries no per-hand clock, so an unstamped hand would
+        default to 1970-01-01 and fall outside the GUI's date filters (empty
+        graphs / hand viewer). This is a live feed, so "now" is the hand time, and
+        UTC-naive matches how every other site stores startTime.
+        """
+        if not hand_data.get("timestamp"):
+            hand_data["timestamp"] = datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)
+
     def process(self, events: list[tuple]) -> int:
         new = 0
         for hand_data in build_hands(events, self.table_category):
             hid = hand_data["hand_id"]
             if hid in self.imported or hid in self.failed:
                 continue
+            self._stamp_capture_time(hand_data)
             try:
                 hand = build_fpdb_hand(hand_data, config=self.config)
             except CaptureNotImportableError:
@@ -371,8 +385,6 @@ def _ensure_capture_file(db) -> int:
     try:
         file_id = db.get_id(name)
         if not file_id:
-            import datetime
-
             now = datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)
             file_id = db.storeFile([name, "CoinPoker", now, now, 0, 0, 0, 0, 0, 0, 0, False])
             db.commit()
