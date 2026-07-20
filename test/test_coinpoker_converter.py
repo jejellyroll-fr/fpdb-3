@@ -13,7 +13,7 @@ from pathlib import Path
 
 import pytest
 
-from fpdb_3_legacy.coinpoker_hand_builder import _collect_players, build_hands
+from fpdb_3_legacy.coinpoker_hand_builder import _collect_players, _detect_category, build_hands
 from fpdb_3_legacy.coinpoker_protocol import decode_frame, split_frames
 from fpdb_3_legacy.http_capture_hand_builder import (
     CaptureNotImportableError,
@@ -85,6 +85,76 @@ def test_hole_cards_and_board_are_mapped() -> None:
     assert hero["closed"] == ["Js", "8s", "7s", "4d"]
     assert h["community"]["FLOP"] == ["Qc", "9s", "6c"]
     assert h["community"]["TURN"] == ["5s"]
+
+
+def _hole_cards_event(count: int) -> list[tuple]:
+    values = ["ACE", "KING", "QUEEN", "JACK", "TEN", "NINE"]
+    cards = [{"suit": "SPADES", "value": values[i]} for i in range(count)]
+    return [("game.hole_cards", "H", {"holeCards": cards})]
+
+
+def test_variant_detected_from_hero_hole_card_count() -> None:
+    # The number of cards dealt to the hero identifies the Omaha variant; the
+    # session-wide hint is ignored when the hero's cards are present.
+    assert _detect_category(_hole_cards_event(2), "PLO4") == ("hold", "holdem")
+    assert _detect_category(_hole_cards_event(4), "PLO5") == ("hold", "omahahi")
+    assert _detect_category(_hole_cards_event(5), "PLO4") == ("hold", "5_omahahi")
+    assert _detect_category(_hole_cards_event(6), "PLO4") == ("hold", "6_omahahi")
+
+
+def test_variant_falls_back_to_hint_when_hero_cards_absent() -> None:
+    # Observing a table (no hero hole cards captured): trust the GUI hint.
+    assert _detect_category([("game.pre_hand_start_info", "H", {})], "PLO5") == ("hold", "5_omahahi")
+    assert _detect_category([], "NLHE") == ("hold", "holdem")
+    assert _detect_category([], "Shortdeck") == ("hold", "6_holdem")
+
+
+def _two_card_hand(hole: list[tuple[str, str]], board: list[tuple[str, str]]) -> list[tuple]:
+    def cards(pairs):
+        return [{"value": v, "suit": s} for v, s in pairs]
+
+    return [
+        ("game.hole_cards", "H", {"holeCards": cards(hole)}),
+        ("game.dealer_cards", "H", {"dealerCards": {"FLOP": cards(board)}}),
+    ]
+
+
+def test_shortdeck_detected_from_hint_when_no_low_cards() -> None:
+    # Hold'em and short-deck both deal two cards, so the hint decides -- but only
+    # when nothing in the hand contradicts a 36-card deck.
+    hand = _two_card_hand([("ACE", "SPADES"), ("KING", "HEARTS")], [("TEN", "SPADES"), ("NINE", "CLUBS"), ("SEVEN", "HEARTS")])
+    assert _detect_category(hand, "Shortdeck") == ("hold", "6_holdem")
+    assert _detect_category(hand, "NLHE") == ("hold", "holdem")
+
+
+def test_low_card_overrides_a_wrong_shortdeck_hint() -> None:
+    # A 2-5 anywhere proves a full deck: it is regular Hold'em, hint notwithstanding.
+    hand = _two_card_hand([("ACE", "SPADES"), ("KING", "HEARTS")], [("FOUR", "CLUBS"), ("TEN", "SPADES"), ("ACE", "DIAMONDS")])
+    assert _detect_category(hand, "Shortdeck") == ("hold", "holdem")
+
+
+def test_hand_start_time_uses_event_init_timestamp() -> None:
+    # The protocol's own clock (epoch ms) must win over import wall-clock so
+    # replayed captures keep their real dates.
+    hand = _hand("91426500343")
+    assert hand["timestamp"] is not None
+    assert hand["timestamp"].year == 2026  # from the fixture's initTimeStamp, not 1970/now
+
+
+def test_plo5_hand_keeps_its_fifth_card() -> None:
+    # A 5-card hand imported under a stale "PLO4" hint must not be truncated.
+    events = _load_events()
+    patched = []
+    for name, hid, data in events:
+        if name == "game.hole_cards" and isinstance(data, dict) and data.get("holeCards"):
+            cards = list(data["holeCards"])
+            cards.append({"suit": "HEARTS", "value": "TWO"})  # 5th card
+            data = {**data, "holeCards": cards}
+        patched.append((name, hid, data))
+    hand = next(h for h in build_hands(patched, "PLO4") if h["holecards"])
+    assert hand["gametype"]["category"] == "5_omahahi"
+    hero = next(hc for hc in hand["holecards"] if hc["player"] == "Hero")
+    assert len(hero["closed"]) == 5
 
 
 def test_seat_reuse_keeps_one_player_per_seat() -> None:
