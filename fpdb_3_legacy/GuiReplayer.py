@@ -911,10 +911,23 @@ class GuiReplayer(QWidget):
         }
         category = game_names.get(hand.gametype.get("category"), str(hand.gametype.get("category", "unknown")))
         limit = limit_names.get(hand.gametype.get("limitType"), str(hand.gametype.get("limitType", "unknown")))
-        return (
+        info = (
             f"{limit} {category} {hand.gametype['bb']}{hand.gametype['currency']} "
             f"hand n° {hand.handid} played on {hand.sitename}"
         )
+        return info + self._special_pot_suffix(hand)
+
+    @staticmethod
+    def _special_pot_suffix(hand) -> str:
+        """Header markers for bomb pots and splash pots (amounts stored in cents)."""
+        currency = hand.gametype.get("currency", "")
+        markers = []
+        if getattr(hand, "bombPot", 0):
+            markers.append("Bomb pot")
+        splash = getattr(hand, "splashPot", 0)
+        if splash:
+            markers.append(f"Splash pot: {Decimal(splash) / 100:.2f}{currency}")
+        return ("  ·  " + "  ·  ".join(markers)) if markers else ""
 
     _RUN_IT_STREETS = frozenset(
         f"{s}{n}" for s in ("FLOP", "TURN", "RIVER") for n in (1, 2, 3)

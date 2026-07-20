@@ -44,6 +44,7 @@ def root_hand_schema_queries(db_server: str) -> dict[str, str]:
                                     street4Pot BIGINT,                  /* pot size at sd/street7 */
                                     finalPot   BIGINT,                  /* final pot size */
                                     bombPot    BIGINT,                  /* bomb pot amount (0 = no bomb pot) */
+                                    splashPot  BIGINT,                  /* splash pot amount (0 = no splash pot) */
                                     comment TEXT,
                                     commentTs DATETIME)
                                 ENGINE=INNODB"""
@@ -86,6 +87,7 @@ def root_hand_schema_queries(db_server: str) -> dict[str, str]:
                                     street4Pot BIGINT,                 /* pot size at sd/street7 */
                                     finalPot   BIGINT,                 /* final pot size */
                                     bombPot    BIGINT,                 /* bomb pot amount (0 = no bomb pot) */
+                                    splashPot  BIGINT,                 /* splash pot amount (0 = no splash pot) */
                                     comment TEXT,
                                     commentTs timestamp without time zone)"""
     elif db_server == "sqlite":
@@ -127,6 +129,7 @@ def root_hand_schema_queries(db_server: str) -> dict[str, str]:
                                     street4Pot INT,                 /* pot size at sd/street7 */
                                     finalPot INT,                   /* final pot size */
                                     bombPot INT,                    /* bomb pot amount (0 = no bomb pot) */
+                                    splashPot INT,                  /* splash pot amount (0 = no splash pot) */
                                     comment TEXT,
                                     commentTs timestamp)"""
     else:

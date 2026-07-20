@@ -127,6 +127,16 @@ def index_queries(db_server: str) -> dict[str, str]:
         query["addBombPotIndex"] = """ALTER TABLE Hands ADD INDEX bomb_pot_idx (bombPot)"""
     elif db_server in ("postgresql", "sqlite"):
         query["addBombPotIndex"] = """CREATE INDEX bomb_pot_idx ON Hands (bombPot)"""
+    # Add splashPot column to existing Hands tables
+    if db_server in {"mysql", "postgresql"}:
+        query["addSplashPotColumn"] = """ALTER TABLE Hands ADD COLUMN splashPot BIGINT DEFAULT 0"""
+    elif db_server == "sqlite":
+        query["addSplashPotColumn"] = """ALTER TABLE Hands ADD COLUMN splashPot INT DEFAULT 0"""
+    # Add index for splashPot queries
+    if db_server == "mysql":
+        query["addSplashPotIndex"] = """ALTER TABLE Hands ADD INDEX splash_pot_idx (splashPot)"""
+    elif db_server in ("postgresql", "sqlite"):
+        query["addSplashPotIndex"] = """CREATE INDEX splash_pot_idx ON Hands (splashPot)"""
 
     if db_server == "mysql":
         query["addStreetIndex"] = """ALTER TABLE HandsStove ADD INDEX street_idx (streetId, boardId)"""

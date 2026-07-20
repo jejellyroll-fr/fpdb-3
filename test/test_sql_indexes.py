@@ -8,7 +8,7 @@ def test_index_queries_are_installed_exactly() -> None:
     for backend in ("mysql", "postgresql", "sqlite"):
         expected = index_queries(backend)
         assert expected.items() <= Sql(db_server=backend).query.items()
-        assert len(expected) == 30
+        assert len(expected) == 32
 
 
 def test_index_queries_keep_backend_specific_syntax() -> None:
@@ -25,3 +25,4 @@ def test_index_queries_keep_backend_specific_syntax() -> None:
         assert "position" in queries["addHudCacheCompundIndex"]
         assert "startCards" in queries["addCardsCacheCompundIndex"]
         assert "bombPot" in queries["addBombPotIndex"]
+        assert "splashPot" in queries["addSplashPotIndex"]

@@ -691,6 +691,7 @@ class DerivedStats:
                 self.hands["finalPot"] = totals[FINAL_POT_IDX] if len(totals) > FINAL_POT_IDX else 0
                 # Add bomb pot amount from hand object
                 self.hands["bombPot"] = getattr(hand, "bombPot", 0)
+                self.hands["splashPot"] = getattr(hand, "splashPot", 0)
                 log.debug("Street totals: %s", totals)
             else:
                 # Default values if totals is not iterable
@@ -702,6 +703,7 @@ class DerivedStats:
                 self.hands["finalPot"] = 0
                 # Add bomb pot amount from hand object
                 self.hands["bombPot"] = getattr(hand, "bombPot", 0)
+                self.hands["splashPot"] = getattr(hand, "splashPot", 0)
                 log.warning("Street totals not iterable: %s", totals)
         except (ArithmeticError, TypeError, ValueError):
             log.exception("Error calculating street totals")

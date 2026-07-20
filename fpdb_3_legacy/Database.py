@@ -2564,6 +2564,7 @@ class Database(DatabaseAutoNotesMixin, DatabaseCachesMixin, DatabaseTournamentsM
 
         self.ensure_hudcache_columns()
         self.ensure_handsplayers_columns()
+        self.ensure_hands_columns()
 
     def _get_table_columns(self, table: str) -> set[str]:
         c = self.get_cursor()
@@ -2595,6 +2596,14 @@ class Database(DatabaseAutoNotesMixin, DatabaseCachesMixin, DatabaseTournamentsM
         definitions["cashOutFee"] = "INT DEFAULT 0"
         definitions["isCashOut"] = "BOOLEAN DEFAULT 0"
         self._ensure_table_columns("HandsPlayers", definitions)
+
+    def ensure_hands_columns(self) -> None:
+        """Add missing additive Hands columns for databases created by older code."""
+        definitions = {
+            "bombPot": "INT DEFAULT 0",
+            "splashPot": "INT DEFAULT 0",
+        }
+        self._ensure_table_columns("Hands", definitions)
 
     def _ensure_table_columns(self, table: str, definitions: dict[str, str]) -> None:
         try:
@@ -3917,6 +3926,7 @@ class Database(DatabaseAutoNotesMixin, DatabaseCachesMixin, DatabaseTournamentsM
                 hdata["street4Pot"],
                 hdata["finalPot"],
                 hdata.get("bombPot", 0),
+                hdata.get("splashPot", 0),
             ],
         )
 
