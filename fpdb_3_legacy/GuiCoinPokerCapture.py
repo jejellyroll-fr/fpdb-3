@@ -86,9 +86,16 @@ class GuiCoinPokerCapture(QWidget):
         self.iface_combo = QComboBox()
         controls.addWidget(self.iface_combo, 1)
 
-        controls.addWidget(QLabel("Game:"))
+        game_label = QLabel("Default game:")
         self.game_combo = QComboBox()
         self.game_combo.addItems(_GAMES)
+        # The variant is detected per hand from the number of cards dealt to the
+        # hero, so this only applies to hands where the hero's cards are not
+        # captured (e.g. observing a table).
+        game_tip = "Fallback game type. Each hand's variant is auto-detected from your hole cards; this is only used when they aren't captured (e.g. observing)."
+        game_label.setToolTip(game_tip)
+        self.game_combo.setToolTip(game_tip)
+        controls.addWidget(game_label)
         controls.addWidget(self.game_combo)
 
         self.dry_run = QCheckBox("Dry run (no DB insert)")
@@ -305,12 +312,7 @@ class GuiCoinPokerCapture(QWidget):
 
         from fpdb_3_legacy.coinpoker_live_capture import BPF_FILTER
 
-        tcpdump = "/usr/sbin/tcpdump -i {iface} -l -n -S -x {filt} > {fifo} 2>> {log} &".format(
-            iface=shlex.quote(iface),
-            filt=shlex.quote(BPF_FILTER),
-            fifo=shlex.quote(fifo),
-            log=log,
-        )
+        tcpdump = f"/usr/sbin/tcpdump -i {shlex.quote(iface)} -l -n -S -x {shlex.quote(BPF_FILTER)} > {shlex.quote(fifo)} 2>> {log} &"
         applescript = 'do shell script "{}" with administrator privileges'.format(
             tcpdump.replace("\\", "\\\\").replace('"', '\\"'),
         )

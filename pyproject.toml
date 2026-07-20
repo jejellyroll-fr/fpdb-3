@@ -173,6 +173,7 @@ ignore = [
 "fpdb_3_legacy/backfill_autonotes.py" = ["C901", "PLR0912", "PLR0915"]
 "fpdb_3_legacy/backfill_boards.py" = ["C901", "PLR0912"]
 "fpdb_3_legacy/backfill_showdown.py" = ["C901", "PLR0912", "PLR0915"]
+"fpdb_3_legacy/coinpoker_hand_builder.py" = ["C901", "PLR0912", "PLR0915"]
 "fpdb_3_legacy/fpdb.pyw" = ["C901", "PLR0912", "PLR0915"]
 "fpdb_3_legacy/http_capture_actions.py" = ["C901", "PLR0912", "PLR0915"]
 "fpdb_3_legacy/http_capture_diff.py" = ["C901"]
