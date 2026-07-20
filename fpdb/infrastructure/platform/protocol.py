@@ -75,6 +75,10 @@ class TableInfo:
         geometry: Window position and size
         process_name: Name of the owning process (e.g., "PokerStars")
         process_id: Platform-specific process identifier
+        window_class: Native window class name, when the platform exposes it
+            (Win32 GetClassName). Used to disambiguate clients that give every
+            window the same title -- e.g. CoinPoker, whose Unity table window
+            and Chromium lobby are both titled "CoinPoker". None elsewhere.
     """
 
     window_id: int | str
@@ -82,6 +86,7 @@ class TableInfo:
     geometry: TableGeometry
     process_name: str | None = None
     process_id: int | None = None
+    window_class: str | None = None
 
     def matches_search(self, search_string: str) -> bool:
         """Check if this table matches a search string
