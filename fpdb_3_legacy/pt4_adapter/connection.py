@@ -1,9 +1,13 @@
 """PT4 PostgreSQL connection utilities."""
 
+from __future__ import annotations
+
 import os
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
-import psycopg
+if TYPE_CHECKING:
+    import psycopg
 
 
 @dataclass
@@ -17,7 +21,7 @@ class Pt4Config:
     database: str = "PT4 DB"  # PT4 default name with space
 
     @classmethod
-    def from_env(cls) -> "Pt4Config":
+    def from_env(cls) -> Pt4Config:
         """Load configuration from environment variables."""
         return cls(
             host=os.environ.get("PT4_HOST", "localhost"),
@@ -30,6 +34,8 @@ class Pt4Config:
 
 def connect_pt4(config: Pt4Config) -> psycopg.Connection:
     """Read-only connection to PT4 PostgreSQL database."""
+    import psycopg  # deferred: only needed to actually connect, not to import the adapter
+
     return psycopg.connect(
         host=config.host,
         port=config.port,

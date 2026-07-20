@@ -17,7 +17,7 @@ import threading
 from collections import Counter
 from collections.abc import Iterator
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from decimal import Decimal
 from pathlib import Path
 from typing import BinaryIO
@@ -2913,7 +2913,7 @@ def iter_capture_records(stream: BinaryIO) -> Iterator[NativeCaptureRecord]:
         if len(payload) != size:
             raise ValueError("truncated SwC native capture payload")
         yield NativeCaptureRecord(
-            captured_at=datetime.fromtimestamp(timestamp_us / 1_000_000, tz=UTC),
+            captured_at=datetime.fromtimestamp(timestamp_us / 1_000_000, tz=timezone.utc),
             direction="received" if direction == 0 else "sent",
             peer_port=peer_port,
             payload=payload,
