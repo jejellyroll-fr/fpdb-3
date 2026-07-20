@@ -20,9 +20,11 @@ can fall back to OCR or the existing heuristics.
 from __future__ import annotations
 
 import logging
-import re
 import subprocess
 import time
+
+# extract_table_id is re-exported for callers and tests that import it here.
+from .coinpoker_process import extract_table_id
 
 logger = logging.getLogger(__name__)
 
@@ -30,11 +32,6 @@ logger = logging.getLogger(__name__)
 # every HUD poll.
 _TTL = 5.0
 _cache: dict[int, tuple[float, str | None]] = {}
-
-# ``-logFile .../table_<id>.log`` is the least ambiguous anchor; the trailing
-# number of ``roomName=`` / ``pipeName=`` is the fallback.
-_LOGFILE_RE = re.compile(r"table_(\d+)\.log")
-_ROOMNAME_RE = re.compile(r"(?:room|pipe)Name=.*?(\d{4,})(?:\s|$)")
 
 
 def _argv_for_pid(pid: int) -> str:
@@ -66,18 +63,9 @@ def table_id_for_pid(pid: int, *, force: bool = False) -> str | None:
 
     table_id: str | None = None
     try:
-        argv = _argv_for_pid(pid)
-        match = _LOGFILE_RE.search(argv) or _ROOMNAME_RE.search(argv)
-        if match:
-            table_id = match.group(1)
+        table_id = extract_table_id(_argv_for_pid(pid))
     except Exception as exc:  # pragma: no cover - platform dependent
         logger.debug("Could not read argv for pid %s: %s", pid, exc)
 
     _cache[pid] = (now, table_id)
     return table_id
-
-
-def extract_table_id(argv: str) -> str | None:
-    """Extract a CoinPoker table id from a command line (pure, for testing)."""
-    match = _LOGFILE_RE.search(argv) or _ROOMNAME_RE.search(argv)
-    return match.group(1) if match else None
