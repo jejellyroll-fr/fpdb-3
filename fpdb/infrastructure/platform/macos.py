@@ -241,53 +241,78 @@ class MacOSTableDetector:
             search_string,
         )
 
-        # Fallback to AppleScript when Quartz produced no usable match: either no
-        # window matched, or none of the windows exposed a title at all (missing
-        # Screen Recording permission / Electron client).
+        # Fallback to AppleScript / argv when Quartz produced no usable match:
+        # either no window matched, or none exposed a title at all (missing Screen
+        # Recording permission / Electron client).
         has_only_empty_titles = len(tables) > 0 and all(t.title == "" for t in tables)
         if len(tables) == 0 or has_only_empty_titles:
-            # CoinPoker renders each table in its own Unity process whose window
-            # carries no useful title and no accessibility text, so the tables are
-            # indistinguishable to every macOS window API. The owning process's
-            # argv, however, contains the table id (window -> kCGWindowOwnerPID ->
-            # argv -> table id). This is deterministic and needs no Screen
-            # Recording, so try it before the AppleScript fallback.
-            if search_string and target_table_windows:
-                pid_match = self._match_target_window_by_pid(search_string, target_table_windows)
-                if pid_match is not None:
-                    logger.debug(
-                        "DIAGNOSTIC: argv matched %s window %s (pid %s) for search %r",
-                        pid_match.process_name,
-                        pid_match.window_id,
-                        pid_match.process_id,
-                        search_string,
-                    )
-                    return [pid_match]
-
-            if total_windows > 0 and titled_windows == 0:
-                # No Quartz title for any window almost always means Screen
-                # Recording is off. Emit the precise, actionable diagnosis once.
-                self._check_permissions_once()
-            else:
-                logger.debug("DIAGNOSTIC: No Quartz window matched the search string. Trying AppleScript fallback...")
-            applescript_tables = self.find_tables_applescript(search_string)
-            if applescript_tables:
-                logger.debug(f"DIAGNOSTIC: AppleScript fallback found {len(applescript_tables)} matching tables")
-                return applescript_tables
-            if len(blank_target_windows) == 1:
-                fallback = blank_target_windows[0]
-                logger.warning(
-                    "Using the only visible %s window as a fallback for table search %r "
-                    "because macOS did not expose a window title and AppleScript did not "
-                    "return a match. Grant Screen Recording/Accessibility permissions for "
-                    "reliable multi-table detection.",
-                    fallback.process_name,
-                    search_string,
-                )
-                return [fallback]
+            fallback = self._find_tables_without_titles(
+                search_string,
+                target_table_windows,
+                blank_target_windows,
+                total_windows,
+                titled_windows,
+            )
+            if fallback is not None:
+                return fallback
 
         logger.debug(f"DIAGNOSTIC: Found {len(tables)} matching tables via Quartz")
         return tables
+
+    def _find_tables_without_titles(
+        self,
+        search_string: str,
+        target_table_windows: list[TableInfo],
+        blank_target_windows: list[TableInfo],
+        total_windows: int,
+        titled_windows: int,
+    ) -> list[TableInfo] | None:
+        """Resolve tables when Quartz exposed no usable title, else return None.
+
+        Tried in order: the owning process's argv (deterministic, no Screen
+        Recording), then AppleScript, then the sole blank target window.
+        """
+        # CoinPoker renders each table in its own Unity process whose window
+        # carries no useful title and no accessibility text, so the tables are
+        # indistinguishable to every macOS window API. The owning process's argv,
+        # however, contains the table id (window -> kCGWindowOwnerPID -> argv ->
+        # table id). This is deterministic, so try it before AppleScript.
+        if search_string and target_table_windows:
+            pid_match = self._match_target_window_by_pid(search_string, target_table_windows)
+            if pid_match is not None:
+                logger.debug(
+                    "DIAGNOSTIC: argv matched %s window %s (pid %s) for search %r",
+                    pid_match.process_name,
+                    pid_match.window_id,
+                    pid_match.process_id,
+                    search_string,
+                )
+                return [pid_match]
+
+        if total_windows > 0 and titled_windows == 0:
+            # No Quartz title for any window almost always means Screen Recording
+            # is off. Emit the precise, actionable diagnosis once.
+            self._check_permissions_once()
+        else:
+            logger.debug("DIAGNOSTIC: No Quartz window matched the search string. Trying AppleScript fallback...")
+        applescript_tables = self.find_tables_applescript(search_string)
+        if applescript_tables:
+            logger.debug(f"DIAGNOSTIC: AppleScript fallback found {len(applescript_tables)} matching tables")
+            return applescript_tables
+
+        if len(blank_target_windows) == 1:
+            fallback = blank_target_windows[0]
+            logger.warning(
+                "Using the only visible %s window as a fallback for table search %r "
+                "because macOS did not expose a window title and AppleScript did not "
+                "return a match. Grant Screen Recording/Accessibility permissions for "
+                "reliable multi-table detection.",
+                fallback.process_name,
+                search_string,
+            )
+            return [fallback]
+
+        return None
 
     def _is_target_process(self, process_name: str | None) -> bool:
         if not process_name:
