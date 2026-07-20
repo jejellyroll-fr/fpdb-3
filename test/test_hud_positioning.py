@@ -463,8 +463,11 @@ def test_drag_propagates_to_shared_layout_so_new_tables_inherit() -> None:
     # shared layout_set that later tables copy from.
     from types import SimpleNamespace
 
-    shared = SimpleNamespace(location=[None] * 11, common=(0, 0))
-    hud = SimpleNamespace(max=6, layout_set=SimpleNamespace(layout={6: shared}))
+    # Same dimensions: no scaling, positions stored as dropped.
+    shared = SimpleNamespace(location=[None] * 11, common=(0, 0), width=800, height=600)
+    hud = SimpleNamespace(
+        max=6, layout_set=SimpleNamespace(layout={6: shared}), table=SimpleNamespace(width=800, height=600)
+    )
     aux = object.__new__(Aux_Base.AuxSeats)
     aux.hud = hud
 
@@ -473,6 +476,23 @@ def test_drag_propagates_to_shared_layout_so_new_tables_inherit() -> None:
 
     assert shared.location[3] == (100, 200)
     assert shared.common == (50, 60)
+
+
+def test_drag_is_converted_into_the_shared_layout_scale() -> None:
+    # The table is twice the shared layout's reference size, so the dropped pixel
+    # position must be halved before storing, or a new HUD would scale it up twice.
+    from types import SimpleNamespace
+
+    shared = SimpleNamespace(location=[None] * 11, common=(0, 0), width=400, height=300)
+    hud = SimpleNamespace(
+        max=6, layout_set=SimpleNamespace(layout={6: shared}), table=SimpleNamespace(width=800, height=600)
+    )
+    aux = object.__new__(Aux_Base.AuxSeats)
+    aux.hud = hud
+
+    aux._propagate_to_shared_layout(2, (200, 200))
+
+    assert shared.location[2] == (100, 100)  # 200 * 400/800, 200 * 300/600
 
 
 def test_propagate_is_a_noop_without_a_shared_layout() -> None:
