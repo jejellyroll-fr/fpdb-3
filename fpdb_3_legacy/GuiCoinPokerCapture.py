@@ -38,7 +38,7 @@ from fpdb_3_legacy.loggingFpdb import get_logger
 log = get_logger("coinpoker_capture_gui")
 
 _MODULE = "fpdb_3_legacy.coinpoker_live_capture"
-_GAMES = ["PLO4", "PLO5", "PLO6", "NLHE"]
+_GAMES = ["PLO4", "PLO5", "PLO6", "NLHE", "Shortdeck"]
 
 
 def _repo_root() -> Path:

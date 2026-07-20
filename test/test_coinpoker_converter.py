@@ -106,6 +106,39 @@ def test_variant_falls_back_to_hint_when_hero_cards_absent() -> None:
     # Observing a table (no hero hole cards captured): trust the GUI hint.
     assert _detect_category([("game.pre_hand_start_info", "H", {})], "PLO5") == ("hold", "5_omahahi")
     assert _detect_category([], "NLHE") == ("hold", "holdem")
+    assert _detect_category([], "Shortdeck") == ("hold", "6_holdem")
+
+
+def _two_card_hand(hole: list[tuple[str, str]], board: list[tuple[str, str]]) -> list[tuple]:
+    def cards(pairs):
+        return [{"value": v, "suit": s} for v, s in pairs]
+
+    return [
+        ("game.hole_cards", "H", {"holeCards": cards(hole)}),
+        ("game.dealer_cards", "H", {"dealerCards": {"FLOP": cards(board)}}),
+    ]
+
+
+def test_shortdeck_detected_from_hint_when_no_low_cards() -> None:
+    # Hold'em and short-deck both deal two cards, so the hint decides -- but only
+    # when nothing in the hand contradicts a 36-card deck.
+    hand = _two_card_hand([("ACE", "SPADES"), ("KING", "HEARTS")], [("TEN", "SPADES"), ("NINE", "CLUBS"), ("SEVEN", "HEARTS")])
+    assert _detect_category(hand, "Shortdeck") == ("hold", "6_holdem")
+    assert _detect_category(hand, "NLHE") == ("hold", "holdem")
+
+
+def test_low_card_overrides_a_wrong_shortdeck_hint() -> None:
+    # A 2-5 anywhere proves a full deck: it is regular Hold'em, hint notwithstanding.
+    hand = _two_card_hand([("ACE", "SPADES"), ("KING", "HEARTS")], [("FOUR", "CLUBS"), ("TEN", "SPADES"), ("ACE", "DIAMONDS")])
+    assert _detect_category(hand, "Shortdeck") == ("hold", "holdem")
+
+
+def test_hand_start_time_uses_event_init_timestamp() -> None:
+    # The protocol's own clock (epoch ms) must win over import wall-clock so
+    # replayed captures keep their real dates.
+    hand = _hand("91426500343")
+    assert hand["timestamp"] is not None
+    assert hand["timestamp"].year == 2026  # from the fixture's initTimeStamp, not 1970/now
 
 
 def test_plo5_hand_keeps_its_fifth_card() -> None:
