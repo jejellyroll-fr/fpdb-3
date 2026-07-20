@@ -13,10 +13,18 @@ from pathlib import Path
 
 import pytest
 
-from fpdb_3_legacy.coinpoker_hand_builder import _collect_players, _detect_category, build_hands
+from fpdb_3_legacy.coinpoker_hand_builder import (
+    _collect_players,
+    _detect_category,
+    _extract_boards,
+    _extract_cashout,
+    _extract_splash,
+    build_hands,
+)
 from fpdb_3_legacy.coinpoker_protocol import decode_frame, split_frames
 from fpdb_3_legacy.http_capture_hand_builder import (
     CaptureNotImportableError,
+    _board_streets,
     build_fpdb_hand,
     render_fpdb_hand,
 )
@@ -169,6 +177,197 @@ def test_seat_reuse_keeps_one_player_per_seat() -> None:
     assert set(players) == {"Alice", "Carol"}
     seats = [p["seat"] for p in players.values()]
     assert len(seats) == len(set(seats))
+
+
+# --- special hands: run-it-twice / double board / splash / cashout ------------
+
+_VALUE_TO_WORD = {
+    "2": "TWO", "3": "THREE", "4": "FOUR", "5": "FIVE", "6": "SIX", "7": "SEVEN",
+    "8": "EIGHT", "9": "NINE", "T": "TEN", "J": "JACK", "Q": "QUEEN", "K": "KING", "A": "ACE",
+}
+_SUIT_TO_WORD = {"s": "SPADES", "h": "HEARTS", "d": "DIAMONDS", "c": "CLUBS"}
+
+
+def _proto_cards(cards: str) -> list[dict]:
+    """"3c 4s Qd" -> the protocol's list-of-dict card encoding."""
+    return [{"value": _VALUE_TO_WORD[c[0]], "suit": _SUIT_TO_WORD[c[1]]} for c in cards.split()]
+
+
+def _dealer_event(dealer=None, rit=None, rit2=None, dbl=None) -> tuple:
+    def board(streets):
+        return {street: _proto_cards(cards) for street, cards in (streets or {}).items()}
+
+    return (
+        "game.dealer_cards",
+        "H",
+        {
+            "dealerCards": board(dealer),
+            "dealerCardsRit": board(rit),
+            "dealerCardsRit2": board(rit2),
+            "dealerCardsDoubleBoard": board(dbl),
+        },
+    )
+
+
+def test_run_it_twice_boards_share_the_flop() -> None:
+    # RIT: only the turn/river are re-dealt after an all-in, so both run boards
+    # carry the single flop that was dealt once.
+    evs = [
+        _dealer_event(dealer={"FLOP": "3c 4s Qd", "TURN": "Qs", "RIVER": "6d"}, rit={"TURN": "9h", "RIVER": "5s"}),
+        ("game.winnerInfo", "H", {"rit": True, "doubleBoard": False, "winnerDataList": []}),
+    ]
+    boards, run_it_times, double_board = _extract_boards(evs)
+    assert run_it_times == 2
+    assert double_board is False
+    assert boards[0] == {"FLOP": ["3c", "4s", "Qd"], "TURN": ["Qs"], "RIVER": ["6d"]}
+    assert boards[1] == {"FLOP": ["3c", "4s", "Qd"], "TURN": ["9h"], "RIVER": ["5s"]}
+
+
+def test_double_board_is_two_independent_boards() -> None:
+    # Bomb pot: two full boards dealt from their own flops, not a re-run.
+    evs = [
+        _dealer_event(
+            dealer={"FLOP": "7s 2c 7c", "TURN": "5s", "RIVER": "Qh"},
+            dbl={"FLOP": "5h Qs 4s", "TURN": "2h", "RIVER": "6c"},
+        ),
+        ("game.winnerInfo", "H", {"rit": False, "doubleBoard": True, "winnerDataList": []}),
+    ]
+    boards, run_it_times, double_board = _extract_boards(evs)
+    assert run_it_times == 1  # a double board is not "run it twice"
+    assert double_board is True
+    assert boards[0]["FLOP"] == ["7s", "2c", "7c"]
+    assert boards[1]["FLOP"] == ["5h", "Qs", "4s"]  # independent flop
+
+
+def test_extract_splash_and_mega_splash() -> None:
+    plain = [("game.cumulativeWinnerInfo", "H", {"splashPotAmount": 0.04, "isMegaSplash": False})]
+    assert _extract_splash(plain) == (4, False)
+    mega = [("game.cumulativeWinnerInfo", "H", {"splashPotAmount": 1, "isMegaSplash": True})]
+    assert _extract_splash(mega) == (100, True)
+    assert _extract_splash([]) == (0, False)
+
+
+def test_extract_cashout_records_insured_winner_fee() -> None:
+    evs = [
+        (
+            "game.winnerInfo",
+            "H",
+            {
+                "winnerDataList": [
+                    {
+                        "winnerDetails": {
+                            "winnerList": [
+                                {"playerName": "Hero", "winAmountFromPot": 0.30, "actualWinAmount": 0.20, "isInsured": True},
+                                {"playerName": "Villain", "winAmountFromPot": 0.10, "actualWinAmount": 0.10, "isInsured": False},
+                            ],
+                        },
+                    },
+                ],
+            },
+        ),
+    ]
+    cashout = _extract_cashout(evs)
+    assert cashout == [{"player": "Hero", "amount": "0.2", "fee": "0.1"}]
+
+
+def test_board_streets_suffixes_extra_boards() -> None:
+    # The first board keeps the base street names; extra boards get numbered
+    # streets that DerivedStats encodes into the Boards table.
+    hand_data = {
+        "boards": [
+            {"FLOP": ["3c", "4s", "Qd"], "TURN": ["Qs"], "RIVER": ["6d"]},
+            {"FLOP": ["3c", "4s", "Qd"], "TURN": ["9h"], "RIVER": ["5s"]},
+        ],
+    }
+    streets = _board_streets(hand_data)
+    assert streets["FLOP"] == ["3c", "4s", "Qd"]
+    assert streets["TURN"] == ["Qs"]
+    assert streets["TURN2"] == ["9h"]
+    assert streets["RIVER2"] == ["5s"]
+
+
+def test_single_board_uses_plain_street_names() -> None:
+    hand_data = {"boards": [{"FLOP": ["3c", "4s", "Qd"]}], "community": {"FLOP": ["3c", "4s", "Qd"]}}
+    assert set(_board_streets(hand_data)) == {"FLOP"}
+
+
+def _hand_with(**overrides) -> dict:
+    hand = dict(_hand("91426500343"))
+    hand.update(overrides)
+    return hand
+
+
+def test_run_it_twice_maps_to_hand_boards_and_run_count() -> None:
+    hand = build_fpdb_hand(
+        _hand_with(
+            boards=[
+                {"FLOP": ["3c", "4s", "Qd"], "TURN": ["Qs"], "RIVER": ["6d"]},
+                {"FLOP": ["3c", "4s", "Qd"], "TURN": ["9h"], "RIVER": ["5s"]},
+            ],
+            run_it_times=2,
+        ),
+    )
+    assert hand.runItTimes == 2
+    assert hand.board["FLOP"] == ["3c", "4s", "Qd"]
+    assert hand.board["TURN2"] == ["9h"]
+    assert hand.board["RIVER2"] == ["5s"]
+
+
+def test_bomb_pot_and_splash_map_to_hand_fields() -> None:
+    hand = build_fpdb_hand(_hand_with(bomb_pot=30, splash_pot=4))
+    assert hand.bombPot == 30
+    assert hand.splashPot == 4
+
+
+def test_cashout_maps_to_hand_cashout_fields() -> None:
+    from decimal import Decimal
+
+    hand = build_fpdb_hand(_hand_with(cashout=[{"player": "Hero", "amount": "0.20", "fee": "0.10"}]))
+    assert hand.cashedOut is True
+    assert hand.isCashOut is True
+    assert hand.cashOutAmounts["Hero"] == Decimal("0.20")
+    assert hand.cashOutFees["Hero"] == Decimal("0.10")
+
+
+def test_derived_stats_encode_multiple_boards_and_pot_flags() -> None:
+    # End-to-end through DerivedStats: a run-it-twice hand with a bomb/splash pot
+    # must yield one encoded board per run plus the scalar pot flags that the
+    # Hand Viewer filters query.
+    hand = build_fpdb_hand(
+        _hand_with(
+            boards=[
+                {"FLOP": ["3c", "4s", "Qd"], "TURN": ["Qs"], "RIVER": ["6d"]},
+                {"FLOP": ["3c", "4s", "Qd"], "TURN": ["9h"], "RIVER": ["5s"]},
+            ],
+            run_it_times=2,
+            bomb_pot=30,
+            splash_pot=4,
+        ),
+    )
+    hand.totalPot()
+    hand.assembleHand()
+    assert hand.hands["runItTwice"] is True
+    assert len(hand.hands["boards"]) == 2
+    assert {b[0] for b in hand.hands["boards"]} == {1, 2}
+    assert hand.hands["bombPot"] == 30
+    assert hand.hands["splashPot"] == 4
+
+
+def test_replayer_header_marks_bomb_and_splash_pots() -> None:
+    from types import SimpleNamespace
+
+    from fpdb_3_legacy.GuiReplayer import GuiReplayer
+
+    def _hand(**kw):
+        data = {"gametype": {"currency": "USD"}, "bombPot": 0, "splashPot": 0}
+        data.update(kw)
+        return SimpleNamespace(**data)
+
+    assert GuiReplayer._special_pot_suffix(_hand()) == ""
+    assert "Bomb pot" in GuiReplayer._special_pot_suffix(_hand(bombPot=30))
+    assert "Splash pot: 0.04USD" in GuiReplayer._special_pot_suffix(_hand(splashPot=4))
+    both = GuiReplayer._special_pot_suffix(_hand(bombPot=30, splashPot=125))
+    assert "Bomb pot" in both and "Splash pot: 1.25USD" in both
 
 
 def test_incomplete_hand_is_rejected() -> None:

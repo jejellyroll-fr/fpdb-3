@@ -258,7 +258,7 @@ def _build_card_operations(hand_data: dict[str, Any]) -> list[dict[str, Any]]:
     game = hand_data.get("game", {})
     base = game.get("base") or hand_data.get("gametype", {}).get("base")
 
-    for street, cards in _community_cards_by_street(hand_data).items():
+    for street, cards in _board_streets(hand_data).items():
         operations.append({"method": "setCommunityCards", "args": [street, cards], "source": "community"})
 
     for entry in _iter_hole_cards(hand_data):
@@ -295,6 +295,32 @@ def _build_card_operations(hand_data: dict[str, Any]) -> list[dict[str, Any]]:
             )
 
     return operations
+
+
+def _board_streets(hand_data: dict[str, Any]) -> dict[str, list[str]]:
+    """Board streets for Hand.setCommunityCards, including run-it/double boards.
+
+    A single board keeps the plain ``FLOP``/``TURN``/``RIVER`` streets. When the
+    capture carries several boards (run-it-twice or a bomb-pot double board), the
+    first board stays on the base streets (so ``Hands.boardcard1..5`` and single
+    board rendering are unchanged) and each extra board is stored on suffixed
+    streets ``FLOP2``/``TURN2``/``RIVER2`` ... which ``DerivedStats`` encodes into
+    the ``Boards`` table.
+    """
+    boards = hand_data.get("boards")
+    if not isinstance(boards, list) or len(boards) <= 1:
+        return _community_cards_by_street(hand_data)
+
+    streets: dict[str, list[str]] = {}
+    for index, board in enumerate(boards):
+        if not isinstance(board, dict):
+            continue
+        suffix = "" if index == 0 else str(index + 1)
+        for street in ("FLOP", "TURN", "RIVER"):
+            cards = board.get(street)
+            if cards:
+                streets[f"{street}{suffix}"] = list(cards)
+    return streets
 
 
 def _community_cards_by_street(hand_data: dict[str, Any]) -> dict[str, list[str]]:
@@ -466,7 +492,42 @@ def build_fpdb_hand(
     if hand_data.get("buttonpos") is not None:
         hand.buttonpos = hand_data["buttonpos"]
     execute_hand_operations(hand, build_input["operations"])
+    _apply_special_hand_fields(hand, hand_data)
     return hand
+
+
+def _apply_special_hand_fields(hand: Any, hand_data: dict[str, Any]) -> None:
+    """Copy run-it-twice / bomb-pot / splash / cashout data onto the Hand object.
+
+    The board *cards* are already placed by the operation plan; here we set the
+    scalar flags DerivedStats reads at store time. ``runItTimes`` must reflect the
+    real number of boards so every board is encoded into the ``Boards`` table,
+    whether they come from running it twice or from a bomb-pot double board.
+    """
+    boards = hand_data.get("boards")
+    board_count = len(boards) if isinstance(boards, list) else 0
+    if board_count > 1:
+        hand.runItTimes = max(int(hand_data.get("run_it_times", 1) or 1), board_count)
+
+    bomb_pot = hand_data.get("bomb_pot")
+    if bomb_pot:
+        hand.bombPot = int(bomb_pot)
+
+    splash_pot = hand_data.get("splash_pot")
+    if splash_pot:
+        hand.splashPot = int(splash_pot)
+
+    for entry in hand_data.get("cashout", []) or []:
+        player = entry.get("player")
+        if not player:
+            continue
+        try:
+            hand.cashOutAmounts[player] = Decimal(str(entry.get("amount", "0")))
+            hand.cashOutFees[player] = Decimal(str(entry.get("fee", "0")))
+        except (ValueError, ArithmeticError):
+            continue
+        hand.cashedOut = True
+        hand.isCashOut = True
 
 
 def render_fpdb_hand(hand: Any) -> str:

@@ -16,11 +16,11 @@ def test_hand_root_persistence_query_is_installed_with_sqlite_placeholders() -> 
 def test_hand_root_persistence_keeps_column_and_placeholder_alignment() -> None:
     store = hand_root_persistence_queries()["store_hand"]
 
-    assert store.count("%s") == 37
+    assert store.count("%s") == 38
     for ordered_columns in (
         ("id", "tablename", "sitehandno", "tourneyId", "gametypeid", "sessionId", "fileId"),
         ("boardcard1", "boardcard2", "boardcard3", "boardcard4", "boardcard5", "runItTwice"),
-        ("street0Pot", "street1Pot", "street2Pot", "street3Pot", "street4Pot", "finalPot", "bombPot"),
+        ("street0Pot", "street1Pot", "street2Pot", "street3Pot", "street4Pot", "finalPot", "bombPot", "splashPot"),
     ):
         indexes = [store.index(column) for column in ordered_columns]
         assert indexes == sorted(indexes)

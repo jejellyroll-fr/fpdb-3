@@ -256,6 +256,7 @@ class Hand:
         self.totalcollected: Decimal = Decimal("0.00")
         self.rake: Decimal | int | None = None
         self.bombPot = 0  # Bomb pot amount in cents (0 = no bomb pot)
+        self.splashPot = 0  # Splash pot amount in cents (0 = no splash pot)
         self.roundPenny = False
         self.fastFold = False
         # currency symbol for this hand
@@ -1055,6 +1056,10 @@ class Hand:
 
         self.tablename = hand_info["tablename"]
         self.handid = hand_info["sitehandno"]
+        # Bomb/splash pot markers (cents) for the replayer overlay; older DBs
+        # created before these columns simply return nothing, keeping the 0 default.
+        self.bombPot = hand_info.get("bombpot", 0) or 0
+        self.splashPot = hand_info.get("splashpot", 0) or 0
         # self.startTime currently unused in the replayer and commented out.
         # However a startTime is needed for a valid output by writeHand:
         if isinstance(hand_info["starttime"], datetime.datetime):

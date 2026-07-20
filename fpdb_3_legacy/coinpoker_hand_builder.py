@@ -51,6 +51,11 @@ _HOLE_COUNT_CATEGORY = {
 # them proves a full 52-card deck, i.e. regular Hold'em.
 _LOW_RANKS = frozenset({"TWO", "THREE", "FOUR", "FIVE"})
 
+# Real size of each community street. Run-it-twice can stack extra cards under a
+# street key; capping keeps every board at five cards (and avoids duplicate-card
+# equity errors downstream).
+_STREET_LEN = {"FLOP": 3, "TURN": 1, "RIVER": 1}
+
 
 def _card(c: dict) -> str:
     return _VALUE[c["value"]] + _SUIT[c["suit"]]
@@ -187,6 +192,97 @@ def _hand_start_time(info: dict) -> datetime.datetime | None:
         return None
 
 
+def _board_from_dealer(dealer: dict) -> dict[str, list[str]]:
+    """Turn a ``dealerCards`` street->cards map into a capped board dict."""
+    board: dict[str, list[str]] = {}
+    for street in ("FLOP", "TURN", "RIVER"):
+        if dealer.get(street):
+            board[street] = _cards(dealer[street])[: _STREET_LEN[street]]
+    return board
+
+
+def _extract_boards(evs: list[tuple]) -> tuple[list[dict[str, list[str]]], int, bool]:
+    """Return ``(boards, run_it_times, double_board)`` from the dealer snapshots.
+
+    ``boards[0]`` is the primary run. Run-it-twice adds ``dealerCardsRit`` /
+    ``dealerCardsRit2`` boards, which share the primary flop (only the turn/river
+    are re-dealt after an all-in). A bomb pot's ``dealerCardsDoubleBoard`` is an
+    independent second board dealt from its own flop. ``run_it_times`` counts the
+    RIT runs only (1 when not run multiple times); a double board is not RIT.
+    """
+    primary: dict[str, list[str]] = {}
+    rit1: dict[str, list[str]] = {}
+    rit2: dict[str, list[str]] = {}
+    dbl: dict[str, list[str]] = {}
+    for name, _h, d in evs:
+        if name != "game.dealer_cards" or not isinstance(d, dict):
+            continue
+        if d.get("dealerCards"):
+            primary = _board_from_dealer(d["dealerCards"])
+        if d.get("dealerCardsRit"):
+            rit1 = _board_from_dealer(d["dealerCardsRit"])
+        if d.get("dealerCardsRit2"):
+            rit2 = _board_from_dealer(d["dealerCardsRit2"])
+        if d.get("dealerCardsDoubleBoard"):
+            dbl = _board_from_dealer(d["dealerCardsDoubleBoard"])
+
+    win = _first(evs, "game.winnerInfo") or {}
+    rit_flag = bool(win.get("rit")) or bool(rit1) or bool(rit2)
+    double_flag = bool(win.get("doubleBoard")) or bool(dbl)
+
+    boards: list[dict[str, list[str]]] = [primary] if primary else []
+    for run in (rit1, rit2):
+        if run:
+            merged = dict(run)
+            if not merged.get("FLOP") and primary.get("FLOP"):
+                merged["FLOP"] = list(primary["FLOP"])  # RIT runs share the flop
+            boards.append(merged)
+    if dbl:
+        boards.append(dbl)
+
+    run_it_times = len([b for b in (primary, rit1, rit2) if b]) if rit_flag else 1
+    return boards, run_it_times, double_flag
+
+
+def _extract_splash(evs: list[tuple]) -> tuple[int, bool]:
+    """Return ``(splash_pot_cents, is_mega_splash)`` from cumulativeWinnerInfo."""
+    cum = _first(evs, "game.cumulativeWinnerInfo") or {}
+    try:
+        amount = int(round(float(cum.get("splashPotAmount", 0) or 0) * 100))
+    except (TypeError, ValueError):
+        amount = 0
+    return amount, bool(cum.get("isMegaSplash"))
+
+
+def _extract_cashout(evs: list[tuple]) -> list[dict[str, str]]:
+    """Return per-player EV cashout (insurance) entries from winnerInfo.
+
+    A winner who took insurance is flagged ``isInsured``: ``actualWinAmount`` is
+    what they were actually paid, ``winAmountFromPot`` what the pot owed them, so
+    the difference is the insurance fee they gave up.
+    """
+    cashout: list[dict[str, str]] = []
+    for name, _h, d in evs:
+        if name != "game.winnerInfo" or not isinstance(d, dict):
+            continue
+        for w in d.get("winnerDataList", []) or []:
+            for det in (w.get("winnerDetails") or {}).get("winnerList") or []:
+                if not det.get("isInsured"):
+                    continue
+                player = det.get("playerName")
+                if not player:
+                    continue
+                pot = Decimal(str(det.get("winAmountFromPot", 0) or 0))
+                paid = Decimal(str(det.get("actualWinAmount", pot) or 0))
+                fee = pot - paid
+                cashout.append({
+                    "player": player,
+                    "amount": str(paid),
+                    "fee": str(fee if fee > 0 else Decimal(0)),
+                })
+    return cashout
+
+
 def _build_one(hid: str, evs: list[tuple], table_category: str) -> dict[str, Any] | None:
     info = _first(evs, "game.pre_hand_start_info")
     if not info:
@@ -213,18 +309,11 @@ def _build_one(hid: str, evs: list[tuple], table_category: str) -> dict[str, Any
     if bb_name:
         actions.append({"type": "big blind", "player": bb_name, "amount": str(bb)})
 
-    # Board from the last cumulative dealer_cards snapshot.
-    community: dict[str, list[str]] = {}
-    # Cap each street to its real size: run-it-twice can put extra cards under a
-    # street key, which would make an invalid 6+ card board (and duplicate-card
-    # equity errors). We keep the primary run only.
-    street_len = {"FLOP": 3, "TURN": 1, "RIVER": 1}
-    for name, _h, d in evs:
-        if name == "game.dealer_cards" and isinstance(d, dict):
-            dealer = d.get("dealerCards") or {}
-            for street in ("FLOP", "TURN", "RIVER"):
-                if dealer.get(street):
-                    community[street] = _cards(dealer[street])[: street_len[street]]
+    # Boards from the last cumulative dealer_cards snapshot. ``boards[0]`` is the
+    # primary run, kept as ``community`` so single-board hands are unchanged; the
+    # full list carries run-it-twice runs and bomb-pot double boards.
+    boards, run_it_times, double_board = _extract_boards(evs)
+    community: dict[str, list[str]] = dict(boards[0]) if boards else {}
 
     # Hero hole cards.
     holecards: list[dict] = []
@@ -315,6 +404,14 @@ def _build_one(hid: str, evs: list[tuple], table_category: str) -> dict[str, Any
         for n, p in sorted(players.items(), key=lambda kv: kv[1]["seat"] or 0)
     ]
 
+    # Bomb pot: every player is forced to ante and the deal jumps straight to a
+    # (typically double) board. CoinPoker's bomb pots are always dealt two boards,
+    # so an ante paired with a double board is the reliable signal. The stored
+    # amount is the total forced antes, in cents.
+    splash_pot, mega_splash = _extract_splash(evs)
+    cashout = _extract_cashout(evs)
+    bomb_pot = int(ante * 100 * len(players)) if ante > 0 and double_board else 0
+
     # The table id is the hand id without its trailing 5-digit hand counter
     # (gameId 91426500343 -> table 914265), which also matches the number shown
     # in the CoinPoker window title ("PLO4 914265 ..."). This gives each table a
@@ -341,6 +438,13 @@ def _build_one(hid: str, evs: list[tuple], table_category: str) -> dict[str, Any
         "players": players_list,
         "actions": actions,
         "community": community,
+        "boards": boards,
+        "run_it_times": run_it_times,
+        "double_board": double_board,
+        "bomb_pot": bomb_pot,
+        "splash_pot": splash_pot,
+        "mega_splash": mega_splash,
+        "cashout": cashout,
         "holecards": holecards,
         "collections": collections,
     }

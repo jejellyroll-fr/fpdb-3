@@ -192,13 +192,27 @@ class GuiHandViewer(QSplitter):
         self.flagShowdown = QCheckBox("SD")
         self.flagRunItTwice = QCheckBox("RIT")
         self.flagCashout = QCheckBox("CO$")
+        self.flagBombPot = QCheckBox("Bomb")
+        self.flagDoubleBoard = QCheckBox("2xB")
+        self.flagSplashPot = QCheckBox("Splash")
         _flag_tips = {
             "AI": "went all-in",
             "SD": "saw showdown",
             "RIT": "run it twice/three",
             "CO$": "EV cashout",
+            "Bomb": "bomb pot",
+            "2xB": "double board",
+            "Splash": "splash pot",
         }
-        for cb in (self.flagAllIn, self.flagShowdown, self.flagRunItTwice, self.flagCashout):
+        for cb in (
+            self.flagAllIn,
+            self.flagShowdown,
+            self.flagRunItTwice,
+            self.flagCashout,
+            self.flagBombPot,
+            self.flagDoubleBoard,
+            self.flagSplashPot,
+        ):
             cb.setToolTip(_("Filter: ") + _flag_tips[cb.text()])
             cb.stateChanged.connect(lambda _state: self.loadHands(None))
             self.pagerBox.addWidget(cb)
@@ -240,13 +254,21 @@ class GuiHandViewer(QSplitter):
         # Flag filters (AI / SD / RIT) appended as extra WHERE conditions.
         extra = []
         if getattr(self, "flagRunItTwice", None) and self.flagRunItTwice.isChecked():
-            extra.append("h.runItTwice = 1")
+            # RIT only: a bomb-pot double board also stores multiple boards but is
+            # not "run it twice", so exclude it here.
+            extra.append("h.runItTwice = 1 AND h.bombPot = 0")
         if getattr(self, "flagAllIn", None) and self.flagAllIn.isChecked():
             extra.append("hp.wentAllIn = 1")
         if getattr(self, "flagShowdown", None) and self.flagShowdown.isChecked():
             extra.append("hp.sawShowdown = 1")
         if getattr(self, "flagCashout", None) and self.flagCashout.isChecked():
             extra.append("EXISTS (SELECT 1 FROM HandsCashout hco WHERE hco.handId = h.id)")
+        if getattr(self, "flagBombPot", None) and self.flagBombPot.isChecked():
+            extra.append("h.bombPot > 0")
+        if getattr(self, "flagDoubleBoard", None) and self.flagDoubleBoard.isChecked():
+            extra.append("(SELECT COUNT(*) FROM Boards b WHERE b.handId = h.id) >= 2")
+        if getattr(self, "flagSplashPot", None) and self.flagSplashPot.isChecked():
+            extra.append("h.splashPot > 0")
         if extra:
             q = q + " AND " + " AND ".join(extra)
 
