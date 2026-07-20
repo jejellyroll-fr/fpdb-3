@@ -162,7 +162,8 @@ def test_acr_detect_hh_path_reads_json_config(acr_json_tree):
     result = cfg.detect_hh_path("ACR Poker")
     assert result is not None
     assert result.endswith("edinapoker")
-    assert "AmericasCardroom/handHistory" in result
+    # str(Path) uses the OS separator, so build the expected fragment the same way.
+    assert os.path.join("AmericasCardroom", "handHistory") in result
 
 
 def test_acr_detect_hh_path_falls_back_to_base_if_no_account_folder(acr_json_tree):
