@@ -291,6 +291,10 @@ class IdentifySite:
             if best_score is None or score > best_score:
                 best_site, best_score = site, score
 
+        if best_site is None or best_score is None:
+            # wpn_sites is non-empty (guarded above), so the loop always fills
+            # these; the check keeps the types non-optional for the rest.
+            return fallback_site
         matched_by_path, is_enabled, _ = best_score
         # Nothing matched by path and nothing is enabled: keep the fallback
         # rather than silently renaming to an arbitrary skin.
