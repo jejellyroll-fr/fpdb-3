@@ -270,6 +270,18 @@ def test_extract_cashout_records_insured_winner_fee() -> None:
     assert cashout == [{"player": "Hero", "amount": "0.2", "fee": "0.1"}]
 
 
+def test_insured_winner_uses_actual_payout_when_pot_amount_is_blank() -> None:
+    details = {
+        "playerName": "Hero",
+        "winAmountFromPot": "",
+        "actualWinAmount": "0.20",
+        "isInsured": True,
+    }
+    evs = [("game.winnerInfo", "H", {"winnerDataList": [{"potAmountAfterRake": "", "winnerDetails": {"winnerList": [details]}}]})]
+
+    assert _extract_cashout(evs) == [{"player": "Hero", "amount": "0.20", "fee": "0"}]
+
+
 def test_board_streets_suffixes_extra_boards() -> None:
     # The first board keeps the base street names; extra boards get numbered
     # streets that DerivedStats encodes into the Boards table.
