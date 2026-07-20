@@ -71,6 +71,21 @@ def test_coinpoker_picks_the_right_table_by_argv_among_several() -> None:
     assert t.number == 222  # the window whose process argv carries 930357
 
 
+def test_multiple_tables_without_argv_are_not_guessed() -> None:
+    # argv can't read the table ids and the class only separates tables from the
+    # lobby, so with >1 table open the HUD must not attach to a guessed window.
+    t1 = TableInfo(window_id=111, title="CoinPoker", geometry=_GEOM, process_id=956, window_class="UnityWndClass")
+    t2 = TableInfo(window_id=222, title="CoinPoker", geometry=_GEOM, process_id=957, window_class="UnityWndClass")
+    lobby = TableInfo(window_id=333, title="CoinPoker", geometry=_GEOM, process_id=17736, window_class="Chrome_WidgetWin_1")
+    t = _make_table()
+    t._detector.find_tables.return_value = [t1, t2, lobby]
+
+    with patch("fpdb.infrastructure.platform.windows_process.table_id_for_pid", return_value=None):
+        t.find_table_parameters()
+
+    assert t.number is None
+
+
 def test_coinpoker_not_found_when_only_lobby_open() -> None:
     lobby = TableInfo(window_id=222, title="CoinPoker", geometry=_GEOM, window_class="Chrome_WidgetWin_1")
     t = _make_table()
