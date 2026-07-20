@@ -32,6 +32,17 @@ _CATEGORY = {
     "NLHE": ("hold", "holdem"),
 }
 
+# Hole-card count -> (fpdb base, category). CoinPoker's hand events carry no
+# explicit game variant, so the number of cards dealt to the hero identifies it.
+# This is detected per hand, so a PLO5 hand keeps its 5th card even when the
+# session-wide game hint says PLO4.
+_HOLE_COUNT_CATEGORY = {
+    2: ("hold", "holdem"),
+    4: ("hold", "omahahi"),
+    5: ("hold", "5_omahahi"),
+    6: ("hold", "6_omahahi"),
+}
+
 
 def _card(c: dict) -> str:
     return _VALUE[c["value"]] + _SUIT[c["suit"]]
@@ -112,12 +123,37 @@ def _collect_players(evs: list[tuple]) -> dict[str, dict]:
 
 
 
+def _hero_hole_count(evs: list[tuple]) -> int:
+    """Number of cards dealt to the hero, or 0 if they weren't captured."""
+    for name in ("game.hole_cards", "game.player_info"):
+        ev = _first(evs, name)
+        if isinstance(ev, dict):
+            cards = ev.get("holeCards") or ev.get("playerCards")
+            if cards:
+                return len(cards)
+    return 0
+
+
+def _detect_category(evs: list[tuple], table_category: str) -> tuple[str, str]:
+    """Pick (base, category) from the hero's hole-card count, else the GUI hint.
+
+    The number of hole cards is the only reliable per-hand signal of the variant
+    (the events carry no game type), so it wins. The session-wide ``table_category``
+    dropdown is a fallback for hands where the hero's cards are absent from the
+    capture (e.g. observing a table).
+    """
+    count = _hero_hole_count(evs)
+    if count in _HOLE_COUNT_CATEGORY:
+        return _HOLE_COUNT_CATEGORY[count]
+    return _CATEGORY.get(table_category.upper(), ("hold", "omahahi"))
+
+
 def _build_one(hid: str, evs: list[tuple], table_category: str) -> dict[str, Any] | None:
     info = _first(evs, "game.pre_hand_start_info")
     if not info:
         return None
 
-    base, category = _CATEGORY.get(table_category.upper(), ("hold", "omahahi"))
+    base, category = _detect_category(evs, table_category)
     sb = Decimal(str(info.get("sbAmount", 0)))
     bb = Decimal(str(info.get("bbAmount", 0)))
     ante = Decimal(str(info.get("anteAmount", 0)))
