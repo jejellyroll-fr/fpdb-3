@@ -17,6 +17,7 @@ import contextlib
 import os
 import platform
 import shlex
+import signal
 import subprocess
 import sys
 from pathlib import Path
@@ -173,6 +174,20 @@ class GuiCoinPokerCapture(QWidget):
             try:
                 probe = _acquire_instance_lock()
             except RuntimeError as exc:
+                if platform.system() == "Darwin" and self.stop_file.exists():
+                    # A reader inherited by launchd (for example after fpdb was
+                    # restarted) can be blocked on the FIFO and never observe
+                    # the stop sentinel. The lock contains the verified holder
+                    # PID, so terminate that exact unprivileged reader and retry.
+                    try:
+                        holder_pid = int(Path(os.path.expanduser("~/.fpdb/coinpoker-capture.lock")).read_text().strip())
+                        os.kill(holder_pid, signal.SIGTERM)
+                    except (OSError, ValueError):
+                        self.status.setText(f"Capture already active: {exc}")
+                        return
+                    self.status.setText("Finishing previous capture…")
+                    QTimer.singleShot(500, self._start)
+                    return
                 self.status.setText(f"Capture already active: {exc}")
                 return
             else:
