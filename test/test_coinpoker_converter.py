@@ -18,6 +18,7 @@ from fpdb_3_legacy.coinpoker_hand_builder import (
     _detect_category,
     _extract_boards,
     _extract_cashout,
+    _extract_collections,
     _extract_splash,
     build_hands,
 )
@@ -280,6 +281,30 @@ def test_insured_winner_uses_actual_payout_when_pot_amount_is_blank() -> None:
     evs = [("game.winnerInfo", "H", {"winnerDataList": [{"potAmountAfterRake": "", "winnerDetails": {"winnerList": [details]}}]})]
 
     assert _extract_cashout(evs) == [{"player": "Hero", "amount": "0.20", "fee": "0"}]
+
+
+def test_insurance_payout_is_not_counted_as_poker_pot_winnings() -> None:
+    evs = [
+        (
+            "game.winnerInfo",
+            "H",
+            {
+                "winnerDataList": [
+                    {"winnerDetails": {"winnerList": [
+                        {"playerName": "Hero", "actualWinAmount": 0.37, "winAmountFromPot": "", "isInsured": True},
+                        {"playerName": "Villain", "winAmountFromPot": 2.15, "isInsured": False},
+                    ]}},
+                    # CoinPoker repeats the same winner snapshot after EV chop.
+                    {"winnerDetails": {"winnerList": [
+                        {"playerName": "Hero", "actualWinAmount": 0.37, "winAmountFromPot": "", "isInsured": True},
+                        {"playerName": "Villain", "winAmountFromPot": 2.15, "isInsured": False},
+                    ]}},
+                ],
+            },
+        ),
+    ]
+
+    assert _extract_collections(evs) == [{"player": "Villain", "pot": "2.15"}]
 
 
 def test_board_streets_suffixes_extra_boards() -> None:

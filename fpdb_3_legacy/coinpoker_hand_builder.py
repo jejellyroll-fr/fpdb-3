@@ -298,6 +298,41 @@ def _extract_cashout(evs: list[tuple]) -> list[dict[str, str]]:
     return cashout
 
 
+def _extract_collections(evs: list[tuple]) -> list[dict[str, str]]:
+    """Return poker-pot collections, excluding separate insurance payouts."""
+    collections: list[dict[str, str]] = []
+    seen: set[tuple[str, Decimal]] = set()
+    win = _first(evs, "game.winnerInfo")
+    if win:
+        for winner in win.get("winnerDataList", []) or []:
+            winner_list = (winner.get("winnerDetails") or {}).get("winnerList") or []
+            for detail in winner_list:
+                # EV cashout/insurance is external to the poker pot and is
+                # stored in HandsCashout. Adding it here inflates winnings and
+                # can count the same payout once per winner snapshot.
+                if detail.get("isInsured"):
+                    continue
+                player = detail.get("playerName")
+                amount = _decimal_or_none(detail.get("winAmountFromPot"))
+                if amount is None:
+                    amount = _decimal_or_none(winner.get("potAmountAfterRake"))
+                key = (player, amount) if player and amount is not None else None
+                if key is not None and key not in seen:
+                    seen.add(key)
+                    collections.append({"player": player, "pot": str(amount)})
+    if collections:
+        return collections
+
+    cumulative = _first(evs, "game.cumulativeWinnerInfo")
+    if cumulative:
+        for winner in cumulative.get("winnersData", []) or []:
+            player = winner.get("userName")
+            amount = _decimal_or_none(winner.get("amount", winner.get("winAmount")))
+            if player and amount is not None:
+                collections.append({"player": player, "pot": str(amount)})
+    return collections
+
+
 def _build_one(hid: str, evs: list[tuple], table_category: str) -> dict[str, Any] | None:
     info = _first(evs, "game.pre_hand_start_info")
     if not info:
@@ -395,29 +430,7 @@ def _build_one(hid: str, evs: list[tuple], table_category: str) -> dict[str, Any
             committed[player] = bet
 
     # Winners -> collections (use post-rake amount actually paid out).
-    collections: list[dict] = []
-    win = _first(evs, "game.winnerInfo")
-    if win:
-        for w in win.get("winnerDataList", []) or []:
-            winner_list = (w.get("winnerDetails") or {}).get("winnerList") or []
-            for det in winner_list:
-                nm = det.get("playerName")
-                # For EV cashout CoinPoker may leave winAmountFromPot blank;
-                # actualWinAmount is the amount really paid to the player.
-                preferred = det.get("actualWinAmount") if det.get("isInsured") else det.get("winAmountFromPot")
-                amt = _decimal_or_none(preferred)
-                if amt is None:
-                    amt = _decimal_or_none(w.get("potAmountAfterRake"))
-                if nm and amt is not None:
-                    collections.append({"player": nm, "pot": str(amt)})
-    if not collections:
-        cum = _first(evs, "game.cumulativeWinnerInfo")
-        if cum:
-            for w in cum.get("winnersData", []) or []:
-                nm = w.get("userName")
-                amt = w.get("amount", w.get("winAmount", 0))
-                if nm:
-                    collections.append({"player": nm, "pot": str(amt)})
+    collections = _extract_collections(evs)
 
     players_list = [
         {"seat_idx": p["seat"], "name": n, "starting_stack": str(p["stack"])}
