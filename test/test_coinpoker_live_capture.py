@@ -8,6 +8,7 @@ without needing root or a live client.
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 
 import pytest
@@ -158,7 +159,8 @@ def test_live_capture_instance_lock_rejects_second_process(tmp_path) -> None:
     lock_path = str(tmp_path / "coinpoker-capture.lock")
     first = _acquire_instance_lock(lock_path)
     try:
-        with pytest.raises(RuntimeError, match="already running"):
+        assert Path(lock_path).read_text() == str(os.getpid())
+        with pytest.raises(RuntimeError, match=r"already running \(PID \d+\)"):
             _acquire_instance_lock(lock_path)
     finally:
         first.close()

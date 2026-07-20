@@ -55,6 +55,7 @@ class GuiCoinPokerCapture(QWidget):
         self.config = config
         self.proc: subprocess.Popen | None = None
         self.hud_proc: subprocess.Popen | None = None
+        self._hud_log = None
         self._log_pos = 0
 
         state_dir = Path(os.path.expanduser("~/.fpdb"))
@@ -163,6 +164,19 @@ class GuiCoinPokerCapture(QWidget):
     def _start(self) -> None:
         if self.proc is not None and self.proc.poll() is None:
             return
+        # Check before starting tcpdump or HUD.  On macOS the importer only gets
+        # a chance to take this lock after tcpdump opens the FIFO; without this
+        # preflight a duplicate click/session starts unnecessary helper processes.
+        if not self.dry_run.isChecked():
+            from fpdb_3_legacy.coinpoker_live_capture import _acquire_instance_lock
+
+            try:
+                probe = _acquire_instance_lock()
+            except RuntimeError as exc:
+                self.status.setText(f"Capture already active: {exc}")
+                return
+            else:
+                probe.close()
         # Fresh log + clear any stale stop signal.
         self.stop_file.unlink(missing_ok=True)
         self.log_file.write_text("", encoding="utf-8")
@@ -189,6 +203,15 @@ class GuiCoinPokerCapture(QWidget):
     def _check_started(self) -> None:
         if not self.stop_button.isEnabled():
             return  # already stopped
+        if self.proc is not None and self.proc.poll() is not None:
+            self._tail_log()
+            self._terminate_children()
+            self.proc = None
+            self.status.setText("Capture failed to start — see the log above.")
+            self.start_button.setEnabled(True)
+            self.stop_button.setEnabled(False)
+            self.tail_timer.stop()
+            return
         try:
             started = self.log_file.stat().st_size > 0
         except OSError:
@@ -212,19 +235,32 @@ class GuiCoinPokerCapture(QWidget):
     def _finish_stop(self) -> None:
         self.tail_timer.stop()
         self._tail_log()
-        # Terminate the process we own (macOS FIFO reader / Linux pkexec child).
-        # On macOS this closes the FIFO so the elevated tcpdump exits via SIGPIPE.
-        if self.proc is not None and self.proc.poll() is None:
-            with contextlib.suppress(Exception):
-                self.proc.terminate()
-        if self.hud_proc is not None and self.hud_proc.poll() is None:
-            with contextlib.suppress(Exception):
-                self.hud_proc.terminate()
-        self.hud_proc = None
+        self._terminate_children()
         self.stop_file.unlink(missing_ok=True)
         self.proc = None
         self.status.setText("Idle.")
         self.start_button.setEnabled(True)
+
+    def _terminate_children(self) -> None:
+        """Terminate capture/HUD children and close their owned resources."""
+        # On macOS terminating the FIFO reader closes the pipe, so tcpdump gets
+        # SIGPIPE.  This is essential on widget close because --stdin can be
+        # blocked waiting for input and cannot observe the stop sentinel.
+        for child in (self.proc, self.hud_proc):
+            if child is None or child.poll() is not None:
+                continue
+            with contextlib.suppress(Exception):
+                child.terminate()
+                try:
+                    child.wait(timeout=2)
+                except subprocess.TimeoutExpired:
+                    child.kill()
+                    child.wait(timeout=1)
+        self.hud_proc = None
+        if self._hud_log is not None:
+            with contextlib.suppress(Exception):
+                self._hud_log.close()
+            self._hud_log = None
 
     def _launch_hud_main(self) -> None:
         """Spawn HUD_main (listens on ZMQ 5555) using the same interpreter."""
@@ -341,6 +377,8 @@ class GuiCoinPokerCapture(QWidget):
                 self.stop_file.write_text("stop", encoding="utf-8")
             except OSError:
                 pass
+        self.tail_timer.stop()
+        self._terminate_children()
         super().closeEvent(event)
 
     def get_vbox(self):
