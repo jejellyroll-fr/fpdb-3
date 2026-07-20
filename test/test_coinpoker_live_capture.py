@@ -12,14 +12,15 @@ from pathlib import Path
 
 import pytest
 
-from fpdb_3_legacy.Exceptions import FpdbHandDuplicate
 from fpdb_3_legacy.coinpoker_live_capture import (
     COINPOKER_SITE_ID,
     HandPump,
     StreamReassembler,
-    _Conn,
     _acquire_instance_lock,
+    _Conn,
+    _Tee,
 )
+from fpdb_3_legacy.Exceptions import FpdbHandDuplicate
 from fpdb_3_legacy.http_capture_hand_builder import HttpCaptureHandConfig
 
 FIXTURE = Path(__file__).parent / "data" / "coinpoker_hand_events.json"
@@ -88,6 +89,30 @@ def test_reassembler_routes_game_port_payload_into_conn() -> None:
     r.feed_line("\t0x0000:  aabb" + FRAME_B.hex())  # 2 junk + FRAME_B (5) = 7; last 6 keeps FRAME_B
     r.feed_line("01:00:00.1 IP6 next")  # boundary flush
     assert "9000->55291" in r.conns
+
+
+# --- output tee (pythonw / no-console safety) --------------------------------
+
+
+def test_tee_ignores_none_streams(tmp_path) -> None:
+    # Under pythonw.exe (Windows GUI launch) sys.__stdout__ is None; the log
+    # file must still receive output instead of the capture dying on write.
+    log_path = tmp_path / "capture.log"
+    with log_path.open("w", encoding="utf-8") as handle:
+        tee = _Tee(None, handle)
+        assert tee.write("hello\n") == len("hello\n")
+        tee.flush()
+    assert log_path.read_text(encoding="utf-8") == "hello\n"
+
+
+def test_tee_writes_to_all_present_streams() -> None:
+    import io
+
+    a, b = io.StringIO(), io.StringIO()
+    tee = _Tee(a, None, b)
+    tee.write("x")
+    assert a.getvalue() == "x"
+    assert b.getvalue() == "x"
 
 
 # --- import pump --------------------------------------------------------------

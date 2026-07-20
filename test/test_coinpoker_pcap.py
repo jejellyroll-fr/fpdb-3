@@ -8,7 +8,16 @@ from __future__ import annotations
 
 import struct
 
-from fpdb_3_legacy.coinpoker_pcap import _l3_offset, parse_segment
+from fpdb_3_legacy.coinpoker_pcap import (
+    _PCAP_IF_LOOPBACK,
+    _PCAP_IF_RUNNING,
+    _PCAP_IF_UP,
+    _is_virtual_device,
+    _l3_offset,
+    _windows_route_device_name,
+    default_device,
+    parse_segment,
+)
 
 _DLT_EN10MB = 1
 _DLT_LINUX_SLL = 113
@@ -68,3 +77,61 @@ def test_l3_offset_for_known_dlts() -> None:
     assert _l3_offset(b"\x00" * 20, _DLT_LINUX_SLL) == 16
     assert _l3_offset(b"\x00" * 8, _DLT_NULL) == 4
     assert _l3_offset(_eth(0x86DD, b""), _DLT_EN10MB) == 14
+
+
+# --- interface auto-detect ----------------------------------------------------
+
+# 0x16 = UP | RUNNING | CONNECTION_STATUS_CONNECTED, as Npcap reports for a live
+# adapter. Unix names are opaque GUIDs on Windows, so only the description
+# distinguishes the real NIC from the WAN miniports / hypervisor / VPN pseudo
+# adapters -- matching the real device list observed on Windows.
+_CONNECTED = _PCAP_IF_UP | _PCAP_IF_RUNNING | 0x10
+
+
+_WINDOWS_DEVICES = [
+    (r"\Device\NPF_{AAA}", "WAN Miniport (Network Monitor)", _CONNECTED),
+    (r"\Device\NPF_{BBB}", "WAN Miniport (IPv6)", _CONNECTED),
+    (r"\Device\NPF_{CCC}", "Hyper-V Virtual Ethernet Adapter", _CONNECTED),
+    (r"\Device\NPF_{DDD}", "Realtek PCIe GbE Family Controller", _CONNECTED),
+    (r"\Device\NPF_{EEE}", "WireGuard Tunnel", _CONNECTED),
+    (r"\Device\NPF_Loopback", "Adapter for loopback traffic capture", _PCAP_IF_LOOPBACK | _CONNECTED),
+    (r"\Device\NPF_{FFF}", "OpenVPN Data Channel Offload", _PCAP_IF_UP | _PCAP_IF_RUNNING | 0x20),
+]
+
+
+def test_windows_auto_detect_skips_virtual_adapters(monkeypatch) -> None:
+    # No route resolution available -> heuristic must pick the physical NIC.
+    monkeypatch.setattr("sys.platform", "win32")
+    monkeypatch.setattr("fpdb_3_legacy.coinpoker_pcap.list_devices", lambda: _WINDOWS_DEVICES)
+    monkeypatch.setattr("fpdb_3_legacy.coinpoker_pcap._windows_route_device_name", lambda: None)
+    assert default_device() == r"\Device\NPF_{DDD}"  # the physical Realtek NIC
+
+
+def test_windows_prefers_route_device_over_heuristic(monkeypatch) -> None:
+    # Behind a VPN full-tunnel the internet route is on the WireGuard adapter,
+    # which the description heuristic would (wrongly) skip. Route wins.
+    monkeypatch.setattr("sys.platform", "win32")
+    monkeypatch.setattr("fpdb_3_legacy.coinpoker_pcap.list_devices", lambda: _WINDOWS_DEVICES)
+    monkeypatch.setattr(
+        "fpdb_3_legacy.coinpoker_pcap._windows_route_device_name",
+        lambda: r"\Device\NPF_{EEE}",  # the WireGuard tunnel carries the route
+    )
+    assert default_device() == r"\Device\NPF_{EEE}"
+
+
+def test_route_device_name_is_none_off_windows(monkeypatch) -> None:
+    monkeypatch.setattr("sys.platform", "linux")
+    assert _windows_route_device_name() is None
+
+
+def test_is_virtual_device_by_description() -> None:
+    assert _is_virtual_device(r"\Device\NPF_{X}", "WAN Miniport (IP)")
+    assert _is_virtual_device(r"\Device\NPF_{X}", "Hyper-V Virtual Ethernet Adapter")
+    assert _is_virtual_device(r"\Device\NPF_{X}", "WireGuard Tunnel")
+    assert not _is_virtual_device(r"\Device\NPF_{X}", "Realtek PCIe GbE Family Controller")
+
+
+def test_is_virtual_device_by_unix_name_prefix() -> None:
+    assert _is_virtual_device("docker0", "")
+    assert _is_virtual_device("utun3", "")
+    assert not _is_virtual_device("en0", "Ethernet")

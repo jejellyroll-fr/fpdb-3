@@ -40,7 +40,7 @@ import argparse
 import contextlib
 import re
 import sys
-from typing import Iterable, Iterator
+from collections.abc import Iterable, Iterator
 
 from fpdb_3_legacy.coinpoker_hand_builder import build_hands
 from fpdb_3_legacy.coinpoker_protocol import decode_frame
@@ -79,10 +79,16 @@ def _seq_lt(a: int, b: int) -> bool:
 
 
 class _Tee:
-    """Write to several streams at once (used to mirror output to a log file)."""
+    """Write to several streams at once (used to mirror output to a log file).
+
+    ``None`` streams are dropped: under ``pythonw.exe`` (how the Windows GUI
+    launches the elevated capture) there is no console, so ``sys.__stdout__`` and
+    ``sys.__stderr__`` are ``None``. Writing to them would raise on the first
+    ``print`` and kill the capture silently, so the log file must survive alone.
+    """
 
     def __init__(self, *streams) -> None:
-        self._streams = streams
+        self._streams = [s for s in streams if s is not None]
 
     def write(self, text: str) -> int:
         for stream in self._streams:
