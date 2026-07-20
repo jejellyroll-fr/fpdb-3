@@ -1903,25 +1903,22 @@ class Config:
         site_node = self.get_site_node(site_name)
         site_node.setAttribute("enabled", enabled)
 
-        for fav_seat in site_node.getElementsByTagName("fav"):
-            if fav_seat.getAttribute("max") == "2":
-                fav_seat.setAttribute("fav_seat", seat2_dict)
-            elif fav_seat.getAttribute("max") == "3":
-                fav_seat.setAttribute("fav_seat", seat3_dict)
-            elif fav_seat.getAttribute("max") == "4":
-                fav_seat.setAttribute("fav_seat", seat4_dict)
-            elif fav_seat.getAttribute("max") == "5":
-                fav_seat.setAttribute("fav_seat", seat5_dict)
-            elif fav_seat.getAttribute("max") == "6":
-                fav_seat.setAttribute("fav_seat", seat6_dict)
-            elif fav_seat.getAttribute("max") == "7":
-                fav_seat.setAttribute("fav_seat", seat7_dict)
-            elif fav_seat.getAttribute("max") == "8":
-                fav_seat.setAttribute("fav_seat", seat8_dict)
-            elif fav_seat.getAttribute("max") == "9":
-                fav_seat.setAttribute("fav_seat", seat9_dict)
-            elif fav_seat.getAttribute("max") == "10":
-                fav_seat.setAttribute("fav_seat", seat10_dict)
+        values = {
+            "2": seat2_dict, "3": seat3_dict, "4": seat4_dict, "5": seat5_dict,
+            "6": seat6_dict, "7": seat7_dict, "8": seat8_dict, "9": seat9_dict, "10": seat10_dict,
+        }
+        existing = {fav.getAttribute("max"): fav for fav in site_node.getElementsByTagName("fav")}
+        for max_seats, value in values.items():
+            fav_seat = existing.get(max_seats)
+            if fav_seat is None:
+                # A site's config may ship without a <fav> node for every table
+                # size (e.g. CoinPoker only had 2/6/9/10). Without this, editing a
+                # preferred seat for a missing size (a 5-max table) was silently
+                # dropped -- create the node so the choice is actually persisted.
+                fav_seat = self.doc.createElement("fav")
+                fav_seat.setAttribute("max", max_seats)
+                site_node.appendChild(fav_seat)
+            fav_seat.setAttribute("fav_seat", value)
 
     # end def
 
