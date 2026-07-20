@@ -3,7 +3,6 @@ from __future__ import annotations
 Now uses the Platform Abstraction Layer (Feature 1.5) for table detection.
 """
 
-import contextlib
 import re
 import sys
 
@@ -34,6 +33,30 @@ if sys.platform == "win32":
     # Windows API constants
     SM_CXSIZEFRAME = 32
     SM_CYCAPTION = 4
+
+
+_argv_readable: bool | None = None
+
+
+def _argv_reading_works() -> bool:
+    """True if psutil can read a process's command line in this environment.
+
+    Tests our own process once and caches the result: whether argv is readable is
+    a property of the environment (psutil installed / permitted), not of any table,
+    so a single-table close can still be detected without another table open.
+    """
+    global _argv_readable
+    if _argv_readable is None:
+        try:
+            import os
+
+            import psutil
+
+            psutil.Process(os.getpid()).cmdline()
+            _argv_readable = True
+        except Exception:  # noqa: BLE001 - any failure means argv is not usable here
+            _argv_readable = False
+    return _argv_readable
 
 
 def _window_pid(hwnd: int | None) -> int | None:
@@ -216,20 +239,6 @@ class Table(Table_Window):
         except Exception as e:
             log.warning("Could not list open windows: %s", e)
 
-    def _coinpoker_argv_usable(self, tables) -> bool:
-        """True if a table id could be read from any open CoinPoker window (psutil works)."""
-        try:
-            from fpdb.infrastructure.platform.windows_process import table_id_for_pid
-        except ImportError:
-            return False
-        for table_info in tables:
-            pid = getattr(table_info, "process_id", None)
-            if pid:
-                with contextlib.suppress(Exception):
-                    if table_id_for_pid(pid):
-                        return True
-        return False
-
     def _coinpoker_live_geometry(self):
         """Geometry for THIS CoinPoker table, re-resolving its window every poll.
 
@@ -238,22 +247,29 @@ class Table(Table_Window):
         recycled or recreated. Tracking a fixed HWND is therefore unreliable.
         Instead, re-resolve the window by this table's id each poll: if no open
         CoinPoker window's process argv carries our id, the table has closed
-        (return None). Fall back to the tracked HWND's visibility only when the id
-        can't be read (psutil unavailable), so a missing dep never forces a kill.
+        (return None) -- this holds even when ours was the only table, because the
+        "closed" decision is gated on argv being *functional* (see
+        _argv_reading_works), not on another table being open. Fall back to the
+        tracked HWND's visibility only when argv can't be read at all, so a missing
+        dependency never forces a kill.
         """
         tables = self._detector.find_tables("CoinPoker")
         match = self._match_coinpoker_by_argv(tables)
         if match is not None:
-            self.number = match.window_id  # the window may have been recreated
+            if match.window_id != self.number:
+                # The window was recreated with a new HWND; drop the cached parent
+                # handle so topify() re-parents HUD windows to the new window.
+                self.number = match.window_id
+                self.gdkhandle = None
             return self._detector.get_window_geometry(self.number)
-        if self._coinpoker_argv_usable(tables):
+        if _argv_reading_works():
             log.warning(
                 "CoinPoker table %s: no open window carries this table id among %d CoinPoker window(s); closing HUD",
                 self.search_string,
                 len(tables),
             )
             return None
-        # argv unavailable (psutil): keep the old HWND-visibility behaviour.
+        # argv unreadable (psutil unavailable): keep the old HWND-visibility path.
         if self._detector.is_window_visible(self.number):
             return self._detector.get_window_geometry(self.number)
         return None
