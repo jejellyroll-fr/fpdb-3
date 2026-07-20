@@ -10,6 +10,7 @@ from __future__ import annotations
 import json
 import os
 from pathlib import Path
+from unittest.mock import Mock
 
 import pytest
 
@@ -19,6 +20,8 @@ from fpdb_3_legacy.coinpoker_live_capture import (
     StreamReassembler,
     _acquire_instance_lock,
     _Conn,
+    _ensure_capture_file,
+    _open_db,
     _Tee,
 )
 from fpdb_3_legacy.Exceptions import FpdbHandDuplicate
@@ -167,6 +170,26 @@ def test_live_capture_instance_lock_rejects_second_process(tmp_path) -> None:
 
     replacement = _acquire_instance_lock(lock_path)
     replacement.close()
+
+
+def test_existing_capture_file_transaction_is_committed() -> None:
+    db = Mock()
+    db.get_id.return_value = 42
+
+    assert _ensure_capture_file(db) == 42
+    db.commit.assert_called_once_with()
+
+
+def test_open_db_commits_sequence_repairs(monkeypatch) -> None:
+    db = Mock()
+    config = Mock()
+    monkeypatch.setattr("fpdb_3_legacy.Configuration.Config", Mock(return_value=config))
+    monkeypatch.setattr("fpdb_3_legacy.Database.Database", Mock(return_value=db))
+    monkeypatch.setattr("fpdb_3_legacy.coinpoker_live_capture.ensure_coinpoker_site", Mock())
+
+    assert _open_db() == (db, config)
+    db.repair_sequences.assert_called_once_with()
+    db.commit.assert_called_once_with()
 
 
 def test_hand_pump_treats_database_duplicate_as_skipped(monkeypatch, capsys) -> None:

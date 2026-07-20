@@ -387,7 +387,9 @@ def _ensure_capture_file(db) -> int:
         if not file_id:
             now = datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)
             file_id = db.storeFile([name, "CoinPoker", now, now, 0, 0, 0, 0, 0, 0, 0, False])
-            db.commit()
+        # get_id() also opens a PostgreSQL transaction.  Never leave it idle
+        # while the capture waits indefinitely for network traffic.
+        db.commit()
         return int(file_id)
     except Exception as exc:  # noqa: BLE001
         print(f"[WARN] Could not create capture Files row: {exc}")
@@ -418,6 +420,10 @@ def _open_db(config_file: str | None = None):
     # HandsPlayers FK fails, so realign every id sequence with its table first.
     try:
         db.repair_sequences()
+        # PostgreSQL sequence repair takes ShareRowExclusive locks across the
+        # schema.  The live capture may then wait for hours, so release those
+        # locks before opening the packet stream.
+        db.commit()
     except Exception as exc:  # noqa: BLE001
         print(f"[WARN] repair_sequences failed: {exc}")
         with contextlib.suppress(Exception):
