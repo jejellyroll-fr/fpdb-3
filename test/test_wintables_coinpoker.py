@@ -8,7 +8,7 @@ search to the client name and keep only the Unity render window.
 
 import os
 import sys
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 import pytest
 
@@ -41,16 +41,34 @@ def _make_table() -> WinTables.Table:
 
 
 def test_coinpoker_picks_unity_table_over_lobby() -> None:
+    # No argv resolution available -> class heuristic picks the Unity window.
     lobby = TableInfo(window_id=222, title="CoinPoker", geometry=_GEOM, window_class="Chrome_WidgetWin_1")
     table = TableInfo(window_id=111, title="CoinPoker", geometry=_GEOM, window_class="UnityWndClass")
     t = _make_table()
     t._detector.find_tables.return_value = [lobby, table]
 
-    t.find_table_parameters()
+    with patch("fpdb.infrastructure.platform.windows_process.table_id_for_pid", return_value=None):
+        t.find_table_parameters()
 
     # Search was broadened to the client name; the Unity window was selected.
     t._detector.find_tables.assert_called_once_with("CoinPoker")
     assert t.number == 111
+
+
+def test_coinpoker_picks_the_right_table_by_argv_among_several() -> None:
+    # Two Unity tables open: argv disambiguates by the requested table id.
+    other = TableInfo(window_id=111, title="CoinPoker", geometry=_GEOM, process_id=956, window_class="UnityWndClass")
+    wanted = TableInfo(window_id=222, title="CoinPoker", geometry=_GEOM, process_id=957, window_class="UnityWndClass")
+    lobby = TableInfo(window_id=333, title="CoinPoker", geometry=_GEOM, process_id=17736, window_class="Chrome_WidgetWin_1")
+    t = _make_table()
+    t.search_string = "930357"  # the table we want
+    t._detector.find_tables.return_value = [other, wanted, lobby]
+
+    pid_to_id = {956: "166755", 957: "930357", 17736: None}
+    with patch("fpdb.infrastructure.platform.windows_process.table_id_for_pid", side_effect=pid_to_id.get):
+        t.find_table_parameters()
+
+    assert t.number == 222  # the window whose process argv carries 930357
 
 
 def test_coinpoker_not_found_when_only_lobby_open() -> None:
