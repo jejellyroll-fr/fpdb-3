@@ -1,6 +1,7 @@
 import io
 import struct
 import threading
+from dataclasses import replace
 from datetime import UTC, datetime
 
 import pytest
@@ -12,31 +13,47 @@ from fpdb_3_legacy.swc_native_capture import (
     NativePlayerIdentity,
     NativeProtocolMessage,
     NativeSeatEvidence,
+    _build_native_action_evidence,
     _collect_native_game_changes,
     _native_street_profile,
     _retain_bijective_native_seat_evidence,
+    add_native_funds_byte_amounts_if_conserved,
     audit_native_hand,
+    audit_native_stud_accounting,
+    build_native_canonical_actions,
     build_native_ofc_summary,
+    card_id_to_str,
     classify_native_ofc_deal_pattern,
+    derive_native_stud_betting_structure,
     derive_native_used_hole_cards,
     diff_game_states,
     extract_dealer_message,
     extract_game_state,
     extract_native_animation_events,
+    extract_native_blind_structure,
     extract_native_board,
     extract_native_collections,
+    extract_native_hero_hole_cards,
     extract_native_ofc_showdown_rows,
+    extract_native_outbound_login_name,
+    extract_native_stud_forced_bets,
     extract_native_stud_upcards,
+    extract_native_table_player_stacks,
     extract_table_info,
     follow_dealer_history,
     infer_native_seat_evidence,
     iter_capture_records,
     iter_protocol_messages,
+    match_native_departed_active_action,
     match_native_foldout_winner_seat_evidence,
+    match_native_local_player_action,
+    match_native_outbound_seat_evidence,
+    match_native_previous_active_action,
     match_native_return_seat_evidence,
     native_action_street,
     native_client_environment,
     normalize_native_hands,
+    parse_args,
     parse_native_card_mnemonic,
     parse_native_dealer_draw,
     parse_native_dealer_return,
@@ -48,6 +65,8 @@ from fpdb_3_legacy.swc_native_capture import (
     parse_native_ofc_payout,
     parse_native_ofc_scores,
     parse_native_ofc_showdown_row,
+    parse_native_outbound_action,
+    parse_native_outbound_seat_request,
     summarize_native_hands,
 )
 
@@ -93,6 +112,11 @@ def test_native_client_environment_removes_terminal_locale(monkeypatch, tmp_path
     assert env["SWC_CAPTURE_OUTBOUND"] == "0"
 
 
+def test_parse_args_enables_bidirectional_capture_by_default():
+    assert parse_args([]).include_outbound is True
+    assert parse_args(["--no-include-outbound"]).include_outbound is False
+
+
 def test_protocol_decoder_reassembles_header_and_split_body():
     framed = struct.pack("<I", 5) + b"hello"
     captured_at = datetime.now(UTC)
@@ -125,6 +149,60 @@ def test_protocol_decoder_keeps_concurrent_ports_separate():
     messages = list(iter_protocol_messages(records))
 
     assert [(message.peer_port, message.payload) for message in messages] == [(20013, b"one"), (20020, b"two")]
+
+
+def test_protocol_decoder_can_reassemble_outbound_separately():
+    captured_at = datetime.now(UTC)
+    incoming = struct.pack("<I", 2) + b"in"
+    outgoing = struct.pack("<I", 3) + b"out"
+    records = iter(
+        [
+            NativeCaptureRecord(captured_at, "received", 20013, incoming),
+            NativeCaptureRecord(captured_at, "sent", 20013, outgoing),
+        ]
+    )
+
+    messages = list(iter_protocol_messages(records, include_outbound=True))
+
+    assert [(message.direction, message.payload) for message in messages] == [
+        ("received", b"in"),
+        ("sent", b"out"),
+    ]
+
+
+def test_extract_native_outbound_login_name_does_not_expose_credentials():
+    payload = b"\x04\x00\x01\x00\x00\x00\x05\x00HeroX" + b"secret-token"
+    message = NativeProtocolMessage(datetime.now(UTC), payload, direction="sent")
+
+    assert extract_native_outbound_login_name(message) == "HeroX"
+    assert extract_native_outbound_login_name(replace(message, direction="received")) is None
+
+
+def test_parse_native_outbound_action_preserves_opaque_argument():
+    payload = b"\x33\x01\x01\x00\x00\x00" + struct.pack("<I", 24812) + b"\x09\x08" + b"\0" * 6
+    message = NativeProtocolMessage(datetime.now(UTC), payload, direction="sent")
+
+    assert parse_native_outbound_action(message) == {
+        "timestamp": message.captured_at.isoformat(),
+        "table_id": 24812,
+        "action_code": 9,
+        "action": "raise",
+        "native_argument": 8,
+        "raw_hex": payload.hex(),
+        "source": "swc_native_outbound_type_307",
+    }
+
+
+def test_match_native_outbound_seat_evidence_anchors_echoed_local_index():
+    players = (NativePlayerIdentity(7, "Hero"), NativePlayerIdentity(8, "Villain"))
+    actions = [
+        {"player": "Hero", "server_native_index": 4},
+        {"player": "Hero", "server_native_index": 4},
+    ]
+
+    evidence = match_native_outbound_seat_evidence(10, 20, actions, players)
+
+    assert evidence == {(10, 20, 4): NativeSeatEvidence(10, 20, 4, 7, "Hero", "confirmed_outbound_action_echo")}
 
 
 def test_extract_dealer_message_strips_native_rich_text():
@@ -268,6 +346,21 @@ def test_native_action_street_resolves_stud_and_draw_by_category():
     assert native_action_street("draw", 2, (2,), "27_3draw") == "DRAWONE"
     assert native_action_street("draw", 6, (), "27_3draw") == "DRAWTHREE"
     assert native_action_street("draw", 2, (), "27_1draw") == "DRAWONE"
+
+
+def test_native_action_street_keeps_closing_stud_action_on_previous_street():
+    assert (
+        native_action_street(
+            "stud",
+            2,
+            (9, 6, 3, 1),
+            "studhi",
+            event_index=0,
+            transition_indexes=(2, 3),
+        )
+        == "THIRD"
+    )
+    assert native_action_street("stud", 6, (9,), "razz", event_index=0) == "SEVENTH"
 
 
 def test_native_street_profile_is_category_specific():
@@ -447,6 +540,7 @@ def test_native_action_street_uses_previous_street_before_board_reveal():
     assert native_action_street("holdem", 2, (4, 9, 6, 3, 2, 2, 2)) == "PREFLOP"
     assert native_action_street("holdem", 2, (4, 9, 6)) == "FLOP"
     assert native_action_street("omaha", 4, (9, 6, 3, 2)) == "TURN"
+    assert native_action_street("omaha", 5, (9, 6, 3)) == "RIVER"
 
 
 def test_extract_native_animation_events_reads_variable_showdown_mnemonic_and_trailing_empty_list():
@@ -593,6 +687,251 @@ def test_extract_native_stud_upcards_rejects_duplicate_cards():
     assert extract_native_stud_upcards([snap]) == []
 
 
+def test_extract_native_stud_upcards_adds_only_proven_revealed_down_cards():
+    hidden = _stud_snapshot([("BingoBob", [37, 40, 43, 44, 0xFF])])
+    revealed = _stud_snapshot([("BingoBob", [37, 40, 43, 44, 0xFF])])
+    marker = revealed.raw_payload.find(b"\x07\xff\xff\x25\x28\x2b\x2c\xff")
+    payload = bytearray(revealed.raw_payload)
+    payload[marker + 1 : marker + 3] = bytes([1, 12])
+    payload[marker + 7] = 31
+    revealed = replace(revealed, raw_payload=bytes(payload))
+
+    rows = extract_native_stud_upcards([hidden, revealed])
+
+    assert rows[0]["down_cards"] == {"THIRD": [card_id_to_str(1), card_id_to_str(12)], "SEVENTH": card_id_to_str(31)}
+
+
+def test_extract_native_stud_upcards_does_not_guess_unanchored_card_block():
+    snap = _stud_snapshot([("BingoBob", [37, 40])])
+    payload = snap.raw_payload + b"BingoBob\x05\x01\x02\x03\x04\x05"
+    snap = replace(snap, raw_payload=payload)
+
+    rows = extract_native_stud_upcards([snap])
+
+    assert "down_cards" not in rows[0]
+
+
+def test_extract_native_stud_forced_bets_preserves_indexes_and_exact_amounts():
+    steps = [
+        {
+            "native_events": [
+                {
+                    "type_code": 9,
+                    "action_code": 4,
+                    "funds_byte": 24,
+                    "native_index": index,
+                    "action_street_evidence": "BLINDSANTES",
+                }
+                for index in (0, 1, 3, 4)
+            ]
+        },
+        {
+            "native_events": [
+                {
+                    "type_code": 9,
+                    "action_code": 5,
+                    "funds_byte": 80,
+                    "native_index": 3,
+                    "action_street_evidence": "THIRD",
+                }
+            ]
+        },
+    ]
+
+    forced = extract_native_stud_forced_bets(steps)
+
+    assert [ante["amount_native"] for ante in forced["antes"]] == [24, 24, 24, 24]
+    assert [ante["native_index"] for ante in forced["antes"]] == [0, 1, 3, 4]
+    assert forced["bring_in"]["native_index"] == 3
+    assert forced["bring_in"]["amount_native"] == 60
+
+
+def test_extract_native_stud_forced_bets_rejects_inconsistent_antes():
+    steps = [
+        {
+            "native_events": [
+                {
+                    "type_code": 9,
+                    "action_code": 4,
+                    "funds_byte": amount,
+                    "native_index": index,
+                    "action_street_evidence": "BLINDSANTES",
+                }
+                for index, amount in enumerate((12, 16))
+            ]
+        }
+    ]
+
+    assert extract_native_stud_forced_bets(steps) == {"antes": [], "bring_in": None}
+
+
+def test_derive_native_stud_betting_structure_and_deterministic_action_amounts():
+    forced = {
+        "antes": [{"amount_native": 16}, {"amount_native": 16}],
+        "bring_in": None,
+    }
+    structure = derive_native_stud_betting_structure(forced)
+    steps = [
+        {
+            "step_num": 1,
+            "native_events": [
+                {
+                    "event_index": event_index,
+                    "action_name_evidence": action,
+                    "player_name_evidence": "BingoBob",
+                    "action_street_evidence": street,
+                    "native_index": 4,
+                    "funds_byte": 99,
+                    "player_evidence_source": "previous_unique_active_player",
+                    "raw_hex": "raw",
+                }
+                for event_index, (action, street) in enumerate(
+                    (("bet", "FIFTH"), ("raise", "FOURTH"), ("call", "FOURTH"))
+                )
+            ],
+        }
+    ]
+
+    actions = _build_native_action_evidence(steps, structure)
+
+    assert structure == {
+        "ante": 16,
+        "bring_in": 40,
+        "small_bet": 80,
+        "big_bet": 160,
+        "source": "swc_observed_fixed_limit_stud_ante_ratios",
+    }
+    assert actions[0]["amount_native"] == 160
+    assert actions[1]["raise_increment_native"] == 80
+    assert actions[1]["amount_native_minimum"] == 80
+    assert "amount_native" not in actions[2]
+    assert actions[2]["amount_native_minimum"] == 80
+
+
+def test_native_stud_stateful_amounts_resolve_complete_bring_in_call_prefix():
+    structure = {
+        "ante": 12,
+        "bring_in": 30,
+        "small_bet": 60,
+        "big_bet": 120,
+        "source": "test",
+    }
+
+    def step(step_num, player, action):
+        return {
+            "step_num": step_num,
+            "native_events": [
+                {
+                    "event_index": 0,
+                    "action_name_evidence": action,
+                    "player_name_evidence": player,
+                    "action_street_evidence": "THIRD",
+                    "native_index": step_num,
+                    "funds_byte": 0,
+                    "player_evidence_source": "previous_unique_active_player",
+                    "raw_hex": "raw",
+                }
+            ],
+        }
+
+    actions = _build_native_action_evidence(
+        [step(1, "Allinred", "bring_in"), step(2, "BingoBob", "call"), step(3, "Tw4rriorz", "call")],
+        structure,
+    )
+
+    assert [action["amount_native"] for action in actions] == [30, 30, 30]
+    assert actions[1]["amount_evidence_source"] == "complete_named_native_betting_prefix"
+
+
+def test_native_stud_stateful_amounts_advance_through_anonymous_fixed_raise():
+    structure = {
+        "ante": 12,
+        "bring_in": 30,
+        "small_bet": 60,
+        "big_bet": 120,
+        "source": "test",
+    }
+
+    def event(step_num, action, player=None):
+        item = {
+            "event_index": 0,
+            "action_name_evidence": action,
+            "action_street_evidence": "THIRD",
+            "native_index": step_num,
+            "funds_byte": 0,
+            "raw_hex": "raw",
+        }
+        if player:
+            item.update(
+                player_name_evidence=player,
+                player_evidence_source="previous_unique_active_player",
+            )
+        return {"step_num": step_num, "native_events": [item]}
+
+    steps = [
+        event(1, "bring_in", "Allinred"),
+        event(2, "call", "BingoBob"),
+        event(3, "raise"),
+        event(4, "call", "BingoBob"),
+    ]
+    actions = _build_native_action_evidence(steps, structure)
+
+    assert [action["amount_native"] for action in actions if action["action"] == "call"] == [30, 30]
+
+
+def test_match_native_previous_active_action_uses_actor_before_transition():
+    active = NativePlayerIdentity(7, "Allinred", None, True, 64)
+    waiting = NativePlayerIdentity(8, "BingoBob", None, False, 0)
+    previous = NativeGameStateSnapshot(datetime.now(UTC), 1, 2, 1, (active, waiting), b"")
+    event = NativeAnimationEvent(1, 2, 1, 4, 9, 1, 0, 8, b"fold")
+
+    matched = match_native_previous_active_action(previous, (event,))
+
+    assert matched == (4, active)
+
+
+def test_match_native_previous_active_action_rejects_ambiguous_actor():
+    players = (
+        NativePlayerIdentity(7, "Allinred", None, True, 64),
+        NativePlayerIdentity(8, "BingoBob", None, True, 64),
+    )
+    previous = NativeGameStateSnapshot(datetime.now(UTC), 1, 2, 1, players, b"")
+    event = NativeAnimationEvent(1, 2, 1, 0, 9, 2, 0, 8, b"check")
+
+    assert match_native_previous_active_action(previous, (event,)) is None
+
+
+def test_match_native_local_player_action_requires_empty_active_flag():
+    local = NativePlayerIdentity(9, "Hero")
+    event = NativeAnimationEvent(1, 2, 1, 0, 9, 2, 0, 8, b"check")
+    previous = NativeGameStateSnapshot(
+        datetime.now(UTC),
+        1,
+        2,
+        1,
+        (NativePlayerIdentity(7, "Villain"), local),
+        b"",
+    )
+
+    assert match_native_local_player_action(previous, (event,), local) == (0, local)
+    active_previous = replace(
+        previous,
+        players=(NativePlayerIdentity(7, "Villain", is_active=True), local),
+    )
+    assert match_native_local_player_action(active_previous, (event,), local) is None
+
+
+def test_match_native_departed_active_action_uses_unique_active_set_difference():
+    alice = NativePlayerIdentity(7, "Alice", is_active=True)
+    bob = NativePlayerIdentity(8, "Bob", is_active=True)
+    previous = NativeGameStateSnapshot(datetime.now(UTC), 1, 2, 2, (alice, bob), b"")
+    current = replace(previous, players=(replace(alice, is_active=False), bob))
+    event = NativeAnimationEvent(1, 2, 2, 0, 9, 2, 0, 8, b"check")
+
+    assert match_native_departed_active_action(previous, current, (event,)) == (0, alice)
+    assert match_native_departed_active_action(previous, previous, (event,)) is None
+
+
 def test_parse_native_dealer_draw_decodes_counts_and_stands_pat():
     assert parse_native_dealer_draw("First draw: BingoBob draws 3") == {
         "draw": "first",
@@ -632,9 +971,7 @@ def test_parse_native_ofc_showdown_row_rejects_invalid_rows():
 
 
 def _ofc_snapshot(payload: bytes, round_number: int = 6):
-    return NativeGameStateSnapshot(
-        datetime.now(UTC), 297862828, 298330169, round_number, (), payload
-    )
+    return NativeGameStateSnapshot(datetime.now(UTC), 297862828, 298330169, round_number, (), payload)
 
 
 def test_extract_native_ofc_showdown_rows_labels_top_only():
@@ -789,7 +1126,8 @@ def test_normalize_native_hands_builds_capture_only_snapshot_envelope():
     hand = hands[0]
     assert hand["gametype"]["base"] == "hold"
     assert hand["gametype"]["currency"] == "room_native"
-    assert hand["players"][0]["starting_stack"] == 584
+    assert hand["players"][0]["starting_stack"] is None
+    assert hand["players"][0]["native_opaque_funds_value"] == 584
     assert hand["players"][0]["seat_idx"] is None
     assert hand["players"][0]["roster_index"] == 0
     assert hand["players"][0]["native_status_values"] == [0]
@@ -815,11 +1153,26 @@ def test_audit_native_hand_reports_unresolved_actions_and_missing_settlement():
         }
     ]
 
-    audit = audit_native_hand(steps, [])
+    audit = audit_native_hand(
+        steps,
+        [],
+        action_evidence=[
+            {"action": "small_blind", "amount_native": 5},
+            {"action": "big_blind", "amount_native": 10},
+        ],
+    )
 
     assert audit["resolved_poker_event_count"] == 2
     assert audit["unresolved_poker_event_count"] == 1
     assert audit["unresolved_by_action"] == {"fold": 1}
+    assert audit["unresolved_forced_bet_event_count"] == 0
+    assert audit["unresolved_betting_event_count"] == 1
+    assert audit["unresolved_betting_by_street"] == {"UNKNOWN": 1}
+    assert audit["captured_action_players_complete"] is False
+    assert audit["settlement_conservation_complete"] is False
+    assert audit["resolved_action_amount_count"] == 2
+    assert audit["resolved_action_amount_total"] == 2
+    assert audit["bounded_action_amount_count"] == 0
     assert audit["has_small_blind"] is True
     assert audit["has_big_blind"] is True
     assert audit["has_collection"] is False
@@ -828,6 +1181,155 @@ def test_audit_native_hand_reports_unresolved_actions_and_missing_settlement():
     assert audit["importable"] is False
     assert audit["resolved_native_type_9_player_count"] == 1
     assert audit["native_type_9_event_count"] == 2
+
+
+def test_audit_native_stud_accounting_exposes_unobserved_contributions():
+    accounting = audit_native_stud_accounting(
+        [
+            {"action": "bring_in", "amount_native": 30},
+            {"action": "call", "amount_native_minimum": 60},
+        ],
+        {"antes": [{"amount_native": 12}, {"amount_native": 12}]},
+        [{"amount_native": 300}],
+        [{"amount_native": 30}],
+    )
+
+    assert accounting["required_contribution_total_native"] == 330
+    assert accounting["decoded_contribution_minimum_native"] == 114
+    assert accounting["unexplained_contribution_minimum_native"] == 216
+    assert accounting["complete"] is False
+
+
+def test_add_native_funds_byte_amounts_requires_exact_settlement_conservation():
+    actions = [
+        {"action": "small_blind", "funds_byte": 2},
+        {"action": "big_blind", "funds_byte": 4},
+        {"action": "call", "funds_byte": 2},
+        {"action": "check", "funds_byte": 0, "amount_native": 0},
+    ]
+
+    assert add_native_funds_byte_amounts_if_conserved(actions, [{"amount_native": 8}], []) is True
+    assert [action.get("amount_native") for action in actions] == [2, 4, 2, 0]
+    assert (
+        add_native_funds_byte_amounts_if_conserved(
+            [{"action": "bet", "funds_byte": 8}],
+            [{"amount_native": 9}],
+            [],
+        )
+        is False
+    )
+
+
+def test_extract_native_blind_structure_requires_both_exact_blinds():
+    assert extract_native_blind_structure(
+        [
+            {"action": "small_blind", "amount_native": 2},
+            {"action": "big_blind", "amount_native": 4},
+        ]
+    ) == {"sb": 2, "bb": 4}
+    assert extract_native_blind_structure([{"action": "small_blind", "amount_native": 2}]) == {
+        "sb": 0,
+        "bb": 0,
+    }
+
+
+def test_build_native_canonical_actions_converts_incremental_raise_to_total():
+    evidence = [
+        {"action": "small_blind", "player": "Villain", "street": "BLINDSANTES", "amount_native": 2},
+        {"action": "big_blind", "player": "Hero", "street": "PREFLOP", "amount_native": 4},
+        {"action": "call", "player": "Villain", "street": "PREFLOP", "amount_native": 2},
+        {"action": "raise", "player": "Hero", "street": "PREFLOP", "amount_native": 8},
+        {"action": "call", "player": "Villain", "street": "PREFLOP", "amount_native": 8},
+        {"action": "bet", "player": "Hero", "street": "FLOP", "amount_native": 24},
+        {"action": "fold", "player": "Villain", "street": "FLOP", "amount_native": 0},
+    ]
+
+    actions = build_native_canonical_actions(evidence, [{"player": "Hero", "amount_native": 24}])
+
+    assert actions[3] == {"type": "raises", "player": "Hero", "street": "PREFLOP", "amount": 8, "to": 12}
+    assert actions[-1] == {"type": "uncalled", "player": "Hero", "street": "FLOP", "amount": 24}
+
+
+def test_build_native_canonical_actions_rejects_unproven_amounts():
+    assert (
+        build_native_canonical_actions(
+            [{"action": "call", "player": "Hero", "street": "PREFLOP"}],
+            [],
+        )
+        == []
+    )
+
+
+def test_parse_native_outbound_seat_request_decodes_exact_requested_stack():
+    payload = (
+        b"\x0b\x00"
+        + b"\x33\x00\x00\x00"
+        + (24812).to_bytes(4, "little")
+        + (4).to_bytes(4, "little")
+        + (856).to_bytes(4, "little")
+        + (b"\0" * 25)
+    )
+    message = NativeProtocolMessage(datetime.now(UTC), payload, direction="sent")
+
+    assert parse_native_outbound_seat_request(message) == {
+        "timestamp": message.captured_at.isoformat(),
+        "table_id": 24812,
+        "seat_idx": 4,
+        "requested_stack_native": 856,
+        "source": "swc_native_outbound_type_11_seat_request",
+    }
+
+
+def test_extract_native_table_player_stacks_decodes_type_23_roster():
+    def player_record(player_id, name, stack, suffix=b""):
+        encoded = name.encode()
+        return (
+            player_id.to_bytes(4, "little")
+            + len(encoded).to_bytes(2, "little")
+            + encoded
+            + b"\0\0"
+            + stack.to_bytes(3, "little")
+            + suffix
+        )
+
+    payload = (
+        b"\x17\x00"
+        + b"\0" * 8
+        + (24812).to_bytes(4, "little")
+        + (2).to_bytes(2, "little")
+        + player_record(1, "Villain", 1608, b"flags")
+        + player_record(2, "Hero", 856)
+    )
+    message = NativeProtocolMessage(datetime.now(UTC), payload, direction="received")
+
+    assert extract_native_table_player_stacks(message) == {
+        "timestamp": message.captured_at.isoformat(),
+        "table_id": 24812,
+        "players": [
+            {"player_id": 1, "name": "Villain", "starting_stack": 1608},
+            {"player_id": 2, "name": "Hero", "starting_stack": 856},
+        ],
+        "source": "swc_native_received_type_23_table_roster",
+    }
+
+
+def test_extract_native_hero_hole_cards_uses_block_before_local_record():
+    payload = b"prefix" + b"Villain" + b"\0\0flags\x04\x2f\x03\x08\x0dtrail" + b"\x01\0\0\0\x04\0" + b"Hero" + b"suffix"
+    snapshot = NativeGameStateSnapshot(
+        datetime.now(UTC),
+        1,
+        2,
+        1,
+        (NativePlayerIdentity(1, "Villain"), NativePlayerIdentity(4, "Hero")),
+        payload,
+    )
+
+    assert extract_native_hero_hole_cards([snapshot], "Hero", 4) == {
+        "player": "Hero",
+        "cards": ["Ks", "2s", "4c", "5d"],
+        "street": "PREFLOP",
+        "source": "native_private_deal_before_local_player_record",
+    }
 
 
 def test_native_seat_evidence_rejects_player_assigned_to_multiple_seats():

@@ -55,6 +55,7 @@ class NativeProtocolMessage:
     payload: bytes
     peer_port: int = 0
     connection_id: int = 0
+    direction: str = "received"
 
 
 @dataclass(frozen=True)
@@ -267,30 +268,46 @@ def _native_family_gametype(family: str) -> tuple[str, str, str]:
 
 
 def native_action_street(
-    family: str, round_number: int, event_types: tuple[int, ...], category: str = ""
+    family: str,
+    round_number: int,
+    event_types: tuple[int, ...],
+    category: str = "",
+    *,
+    event_index: int | None = None,
+    transition_indexes: tuple[int, ...] = (),
 ) -> str:
     """Place an action on its street, resolving per category when known.
 
     The round-before-board-reveal shift only applies to community-card games
     (Hold'em/Omaha/Drawmaha), where a type-2 board animation rides on the
-    pre-transition snapshot; stud and draw games never trigger it.
+    pre-transition snapshot. Stud snapshots can likewise contain the closing
+    action before later deal/transition events; native round 6 actions are the
+    seventh-street betting round, not showdown actions.
     """
     board_game = family in {"holdem", "omaha", "drawmaha"}
-    action_round = (
-        round_number - 1 if board_game and round_number in {2, 3, 4} and 2 in event_types else round_number
+    board_transition = (round_number in {2, 3, 4} and 2 in event_types) or (round_number == 5 and 3 in event_types)
+    action_round = round_number - 1 if board_game and board_transition else round_number
+    stud_transition_after_action = (
+        family == "stud"
+        and event_index is not None
+        and round_number in {2, 3, 4, 5}
+        and any(index > event_index for index in transition_indexes)
     )
+    if stud_transition_after_action or (family == "stud" and round_number == 6):
+        action_round = round_number - 1
     return _native_round_street_map(family, category).get(action_round, "UNKNOWN")
 
 
 class NativeProtocolDecoder:
     """Reassemble SwC's uint32-le length-prefixed messages across SSL reads."""
 
-    def __init__(self) -> None:
+    def __init__(self, direction: str = "received") -> None:
         self.buffer = bytearray()
         self.message_timestamp: datetime | None = None
+        self.direction = direction
 
     def feed(self, record: NativeCaptureRecord) -> list[NativeProtocolMessage]:
-        if record.direction != "received":
+        if record.direction != self.direction:
             return []
         if not self.buffer:
             self.message_timestamp = record.captured_at
@@ -310,6 +327,7 @@ class NativeProtocolDecoder:
                     payload=payload,
                     peer_port=record.peer_port,
                     connection_id=record.connection_id,
+                    direction=record.direction,
                 )
             )
             self.message_timestamp = record.captured_at if self.buffer else None
@@ -320,14 +338,164 @@ class NativeProtocolDecoder:
             raise ValueError("truncated SwC native protocol message")
 
 
-def iter_protocol_messages(records: Iterator[NativeCaptureRecord]) -> Iterator[NativeProtocolMessage]:
-    decoders: dict[tuple[int, int], NativeProtocolDecoder] = {}
+def iter_protocol_messages(
+    records: Iterator[NativeCaptureRecord], *, include_outbound: bool = False
+) -> Iterator[NativeProtocolMessage]:
+    decoders: dict[tuple[int, int, str], NativeProtocolDecoder] = {}
     for record in records:
-        key = (record.peer_port, record.connection_id)
-        decoder = decoders.setdefault(key, NativeProtocolDecoder())
+        if record.direction == "sent" and not include_outbound:
+            continue
+        key = (record.peer_port, record.connection_id, record.direction)
+        decoder = decoders.setdefault(key, NativeProtocolDecoder(record.direction))
         yield from decoder.feed(record)
     for decoder in decoders.values():
         decoder.finish()
+
+
+def extract_native_outbound_login_name(message: NativeProtocolMessage) -> str | None:
+    """Read only the username from an outbound login message, never credentials."""
+    payload = message.payload
+    if message.direction != "sent" or len(payload) < 8 or int.from_bytes(payload[:2], "little") != 4:
+        return None
+    name_size = int.from_bytes(payload[6:8], "little")
+    if not 1 <= name_size <= 32 or 8 + name_size > len(payload):
+        return None
+    try:
+        name = payload[8 : 8 + name_size].decode("utf-8")
+    except UnicodeDecodeError:
+        return None
+    return name if name.isprintable() and not any(character.isspace() for character in name) else None
+
+
+def parse_native_outbound_action(message: NativeProtocolMessage) -> dict | None:
+    """Decode the fixed-width client action command while preserving its opaque argument."""
+    payload = message.payload
+    if (
+        message.direction != "sent"
+        or len(payload) != 18
+        or int.from_bytes(payload[:2], "little") != 307
+        or payload[12:] != b"\0" * 6
+        or payload[10] not in _NATIVE_ACTION_LABELS
+    ):
+        return None
+    return {
+        "timestamp": message.captured_at.isoformat(),
+        "table_id": int.from_bytes(payload[6:10], "little"),
+        "action_code": payload[10],
+        "action": _NATIVE_ACTION_LABELS[payload[10]],
+        "native_argument": payload[11],
+        "raw_hex": payload.hex(),
+        "source": "swc_native_outbound_type_307",
+    }
+
+
+def parse_native_outbound_seat_request(message: NativeProtocolMessage) -> dict | None:
+    """Decode the table, seat and requested stack from an outbound type-11 join."""
+    payload = message.payload
+    if message.direction != "sent" or len(payload) != 43 or int.from_bytes(payload[:2], "little") != 11:
+        return None
+    table_id = int.from_bytes(payload[6:10], "little")
+    seat_idx = int.from_bytes(payload[10:14], "little")
+    requested_stack = int.from_bytes(payload[14:18], "little")
+    if table_id == 0 or seat_idx > 9 or requested_stack == 0:
+        return None
+    return {
+        "timestamp": message.captured_at.isoformat(),
+        "table_id": table_id,
+        "seat_idx": seat_idx,
+        "requested_stack_native": requested_stack,
+        "source": "swc_native_outbound_type_11_seat_request",
+    }
+
+
+def extract_native_table_player_stacks(message: NativeProtocolMessage) -> dict | None:  # noqa: C901
+    """Decode the exact player stacks from a received type-23 table roster."""
+    payload = message.payload
+    if message.direction != "received" or len(payload) < 24 or int.from_bytes(payload[:2], "little") != 23:
+        return None
+    table_id = int.from_bytes(payload[10:14], "little")
+    expected_count = int.from_bytes(payload[14:16], "little")
+    if table_id == 0 or not 1 <= expected_count <= 10:
+        return None
+    players = []
+    cursor = 16
+    for _ in range(expected_count):
+        if cursor + 6 > len(payload):
+            return None
+        player_id = int.from_bytes(payload[cursor : cursor + 4], "little")
+        name_size = int.from_bytes(payload[cursor + 4 : cursor + 6], "little")
+        name_start = cursor + 6
+        name_end = name_start + name_size
+        if not 2 <= name_size <= 32 or name_end + 5 > len(payload):
+            return None
+        try:
+            name = payload[name_start:name_end].decode("utf-8")
+        except UnicodeDecodeError:
+            return None
+        if payload[name_end : name_end + 2] != b"\0\0" or not name.isprintable():
+            return None
+        stack = int.from_bytes(payload[name_end + 2 : name_end + 5], "little")
+        players.append({"player_id": player_id, "name": name, "starting_stack": stack})
+        next_name = None
+        for offset in range(name_end + 5, len(payload) - 5):
+            candidate_size = int.from_bytes(payload[offset + 4 : offset + 6], "little")
+            if not 2 <= candidate_size <= 32 or offset + 6 + candidate_size + 5 > len(payload):
+                continue
+            candidate_end = offset + 6 + candidate_size
+            if payload[candidate_end : candidate_end + 2] != b"\0\0":
+                continue
+            try:
+                candidate = payload[offset + 6 : candidate_end].decode("utf-8")
+            except UnicodeDecodeError:
+                continue
+            if candidate.isprintable() and not any(character.isspace() for character in candidate):
+                next_name = offset
+                break
+        cursor = next_name if next_name is not None else len(payload)
+    return {
+        "timestamp": message.captured_at.isoformat(),
+        "table_id": table_id,
+        "players": players,
+        "source": "swc_native_received_type_23_table_roster",
+    }
+
+
+def _collect_native_outbound_actions(messages: list[NativeProtocolMessage]) -> dict[tuple[int, int], list[dict]]:
+    login_names = {name for message in messages if (name := extract_native_outbound_login_name(message)) is not None}
+    local_player = next(iter(login_names)) if len(login_names) == 1 else None
+    result: dict[tuple[int, int], list[dict]] = {}
+    table_ids = {
+        action["table_id"] for message in messages if (action := parse_native_outbound_action(message)) is not None
+    }
+    for index, message in enumerate(messages):
+        action = parse_native_outbound_action(message)
+        if action is None:
+            continue
+        for following in messages[index + 1 :]:
+            delay = (following.captured_at - message.captured_at).total_seconds()
+            if delay > 2:
+                break
+            snapshot = extract_game_state(following, table_ids)
+            if snapshot is None or snapshot.table_id != action["table_id"]:
+                continue
+            matching = [
+                event
+                for event in extract_native_animation_events(following, table_ids)
+                if event.type_code == 9 and event.action_code == action["action_code"]
+            ]
+            if len(matching) != 1:
+                continue
+            action.update(
+                hand_id=snapshot.hand_id,
+                native_round=snapshot.round_number,
+                server_native_index=matching[0].seat_idx,
+                server_funds_byte=matching[0].funds,
+                round_trip_ms=round(delay * 1000),
+                player=local_player,
+            )
+            result.setdefault((snapshot.table_id, snapshot.hand_id), []).append(action)
+            break
+    return result
 
 
 _PRINTABLE = re.compile(rb"[\x20-\x7e]{4,}")
@@ -367,6 +535,7 @@ _NATIVE_ACTION_LABELS = {
     2: "check",
     3: "call",
     4: "ante",
+    5: "bring_in",
     6: "small_blind",
     7: "big_blind",
     8: "bet",
@@ -436,16 +605,13 @@ def extract_native_ofc_showdown_rows(snapshots: list[NativeGameStateSnapshot]) -
     all_cards = [card for row in best for card in row]
     if len(set(all_cards)) != len(all_cards):
         return []
-    return [
-        {"cards": list(row), "card_count": len(row), "row": "top" if len(row) == 3 else None}
-        for row in best
-    ]
+    return [{"cards": list(row), "card_count": len(row), "row": "top" if len(row) == 3 else None} for row in best]
 
 
-# Stud up cards are visible to the whole table and stored per player record as a
-# "<total-cards> 0xFF 0xFF <board slots>" block, where the board runs from the
-# third-street door card onward; a 0xFF slot is a hidden card (the opponents'
-# down cards / an un-revealed seventh street).
+# Stud cards are stored per player record as ``<total-cards> <card slots>``.
+# Slots are [hole1, hole2, door, fourth, fifth, sixth, seventh].  Hidden cards
+# are 0xFF, which gives the usual opponent form ``N FF FF <up cards>``.  At a
+# reveal the first two slots (and possibly seventh) contain real card ids.
 _STUD_UPCARD_STREETS = ("THIRD", "FOURTH", "FIFTH", "SIXTH", "SEVENTH")
 
 
@@ -471,6 +637,68 @@ def _stud_player_upcard_slots(payload: bytes, start: int, end: int) -> bytes | N
     return best
 
 
+def _stud_player_revealed_card_blocks(payload: bytes, start: int, end: int) -> list[bytes]:
+    """Return syntactically valid stud blocks whose first two cards are visible."""
+    blocks = []
+    for marker in range(start, end):
+        total_cards = payload[marker]
+        if not 3 <= total_cards <= 7 or marker + 1 + total_cards > end:
+            continue
+        cards = payload[marker + 1 : marker + 1 + total_cards]
+        if not all(card <= 51 or card == 0xFF for card in cards):
+            continue
+        if cards[0] <= 51 and cards[1] <= 51 and cards[2] <= 51:
+            blocks.append(cards)
+    return blocks
+
+
+def _stud_block_matches_known_upcards(cards: bytes, known: dict[str, str | None]) -> bool:
+    matched = 0
+    for street, card_id in zip(_STUD_UPCARD_STREETS, cards[2:]):
+        expected = known.get(street)
+        if expected is None:
+            continue
+        matched += 1
+        if card_id > 51 or card_id_to_str(card_id) != expected:
+            return False
+    return matched > 0
+
+
+def _add_revealed_stud_down_cards(snapshots: list[NativeGameStateSnapshot], rows: list[dict]) -> None:
+    """Attach down cards only when a visible block matches proven public cards."""
+    rows_by_player = {row["player"]: row for row in rows}
+    best_blocks: dict[str, bytes] = {}
+    for snapshot in snapshots:
+        payload = snapshot.raw_payload
+        positions = sorted(
+            (payload.find(player.name.encode()), player.name)
+            for player in snapshot.players
+            if player.name in rows_by_player and payload.find(player.name.encode()) >= 0
+        )
+        for index, (start, name) in enumerate(positions):
+            end = positions[index + 1][0] if index + 1 < len(positions) else len(payload)
+            known = rows_by_player[name]["up_cards"]
+            for cards in _stud_player_revealed_card_blocks(payload, start, end):
+                if _stud_block_matches_known_upcards(cards, known) and len(cards) > len(best_blocks.get(name, b"")):
+                    best_blocks[name] = cards
+
+    public_cards = {card for row in rows for card in row["up_cards"].values() if card}
+    claimed_down_cards: set[str] = set()
+    for name, cards in best_blocks.items():
+        third_down = [card_id_to_str(cards[0]), card_id_to_str(cards[1])]
+        seventh_down = card_id_to_str(cards[6]) if len(cards) == 7 and cards[6] <= 51 else None
+        down_cards = set(third_down)
+        if seventh_down:
+            down_cards.add(seventh_down)
+        if len(down_cards) != len(third_down) + bool(seventh_down):
+            continue
+        own_public = {card for card in rows_by_player[name]["up_cards"].values() if card}
+        if down_cards & ((public_cards - own_public) | claimed_down_cards):
+            continue
+        rows_by_player[name]["down_cards"] = {"THIRD": third_down, "SEVENTH": seventh_down}
+        claimed_down_cards.update(down_cards)
+
+
 def _stud_snapshot_upcards(snapshot: NativeGameStateSnapshot) -> list[dict]:
     payload = snapshot.raw_payload
     positions = sorted(
@@ -485,21 +713,21 @@ def _stud_snapshot_upcards(snapshot: NativeGameStateSnapshot) -> list[dict]:
         if not slots:
             continue
         up_cards = {
-            street: (card_id_to_str(byte) if byte <= 51 else None)
-            for street, byte in zip(_STUD_UPCARD_STREETS, slots)
+            street: (card_id_to_str(byte) if byte <= 51 else None) for street, byte in zip(_STUD_UPCARD_STREETS, slots)
         }
         rows.append({"player": name, "seat_idx": None, "up_cards": up_cards})
     return rows
 
 
 def extract_native_stud_upcards(snapshots: list[NativeGameStateSnapshot]) -> list[dict]:
-    """Return each stud player's per-street up cards from the richest snapshot.
+    """Return each stud player's proven up cards and any revealed down cards.
 
     Reads the visible third-through-seventh street board from the player records
     (hidden slots become ``null``), picking the snapshot that exposes the most up
     cards. Rejects any decode where a card repeats across players (a false
-    match). Third-street hole cards and hidden seventh-street cards are not
-    claimed.
+    match). Down cards are attached only when a fully visible candidate agrees
+    with that player's already-proven public cards; this may be a showdown reveal
+    and is deliberately not labelled as hero evidence.
     """
     best_rows: list[dict] = []
     best_count = -1
@@ -511,6 +739,7 @@ def extract_native_stud_upcards(snapshots: list[NativeGameStateSnapshot]) -> lis
         if len(cards) > best_count:
             best_count = len(cards)
             best_rows = rows
+    _add_revealed_stud_down_cards(snapshots, best_rows)
     return best_rows
 
 
@@ -544,33 +773,464 @@ def _build_native_showdown(
     }
 
 
-def _build_native_action_evidence(steps: list[dict]) -> list[dict]:
+def _native_stud_action_amount_evidence(action: str, street: str, structure: dict | None) -> dict:
+    if action in {"fold", "check"}:
+        return {"amount_native": 0, "amount_evidence_source": "zero_amount_action"}
+    if not structure:
+        return {}
+    if action == "ante":
+        return {"amount_native": structure["ante"], "amount_evidence_source": structure["source"]}
+    if action == "bring_in":
+        return {"amount_native": structure["bring_in"], "amount_evidence_source": structure["source"]}
+    fixed_bet = structure["small_bet"] if street in {"THIRD", "FOURTH"} else structure["big_bet"]
+    if action == "bet" and street in {"THIRD", "FOURTH", "FIFTH", "SIXTH", "SEVENTH"}:
+        return {"amount_native": fixed_bet, "amount_evidence_source": structure["source"]}
+    if action == "raise" and street in {"THIRD", "FOURTH", "FIFTH", "SIXTH", "SEVENTH"}:
+        return {"raise_increment_native": fixed_bet, "amount_evidence_source": structure["source"]}
+    return {}
+
+
+def _advance_anonymous_stud_action(state: dict, action: str, street: str, structure: dict) -> bool:
+    if not state["valid"]:
+        return False
+    fixed_bet = structure["small_bet"] if street in {"THIRD", "FOURTH"} else structure["big_bet"]
+    if action == "bring_in":
+        state["current"] = structure["bring_in"]
+    elif action == "bet":
+        state["current"] = fixed_bet
+    elif action == "raise" and state["current"] > 0:
+        state["current"] = (
+            structure["small_bet"]
+            if street == "THIRD" and state["current"] == structure["bring_in"]
+            else state["current"] + fixed_bet
+        )
+    else:
+        return False
+    return True
+
+
+def _add_native_stud_stateful_amounts(actions: list[dict], steps: list[dict], structure: dict) -> None:
+    named = {(action["step_num"], action["event_index"]): action for action in actions}
+    states: dict[str, dict] = {}
+    monetary = {"bring_in", "call", "bet", "raise"}
+    for step in steps:
+        for event in step["native_events"]:
+            action_name = event.get("action_name_evidence")
+            street = event.get("action_street_evidence")
+            if action_name not in monetary or street not in {"THIRD", "FOURTH", "FIFTH", "SIXTH", "SEVENTH"}:
+                continue
+            state = states.setdefault(street, {"valid": True, "current": 0, "committed": {}})
+            action = named.get((step["step_num"], event.get("event_index", 0)))
+            if action is None:
+                if not _advance_anonymous_stud_action(state, action_name, street, structure):
+                    state["valid"] = False
+                continue
+            player = action["player"]
+            committed = state["committed"].get(player, 0)
+            if action_name == "bring_in":
+                state["committed"][player] = structure["bring_in"]
+                state["current"] = structure["bring_in"]
+            elif action_name == "bet":
+                amount = action["amount_native"]
+                state["committed"][player] = committed + amount
+                state["current"] = committed + amount
+            elif action_name == "call" and state["valid"] and state["current"] > committed:
+                amount = state["current"] - committed
+                action.update(
+                    amount_native=amount,
+                    amount_evidence_source="complete_named_native_betting_prefix",
+                )
+                state["committed"][player] = state["current"]
+            elif action_name == "raise" and state["valid"] and state["current"] > 0:
+                fixed_bet = structure["small_bet"] if street in {"THIRD", "FOURTH"} else structure["big_bet"]
+                raise_to = (
+                    structure["small_bet"]
+                    if street == "THIRD" and state["current"] == structure["bring_in"]
+                    else state["current"] + fixed_bet
+                )
+                action.update(
+                    amount_native=raise_to - committed,
+                    raise_to_native=raise_to,
+                    amount_evidence_source="complete_named_native_betting_prefix",
+                )
+                state["committed"][player] = raise_to
+                state["current"] = raise_to
+            else:
+                state["valid"] = False
+
+
+def _add_native_stud_amount_minimums(actions: list[dict], structure: dict) -> None:
+    """Record fixed-limit lower bounds without presenting them as exact amounts."""
+    committed: dict[tuple[str, str], int] = {}
+    for action in actions:
+        key = (action["street"], action["player"])
+        player_committed = committed.get(key, 0)
+        if "amount_native" in action and action["action"] in {"bring_in", "call", "bet", "raise"}:
+            committed[key] = player_committed + action["amount_native"]
+            continue
+        if action["action"] not in {"call", "raise"}:
+            continue
+        street = action["street"]
+        if street == "THIRD":
+            target = (
+                structure["bring_in"]
+                if action["action"] == "call" and player_committed == 0
+                else structure["small_bet"]
+            )
+            minimum = max(0, target - player_committed)
+        else:
+            minimum = structure["small_bet"] if street == "FOURTH" else structure["big_bet"]
+        action.update(
+            amount_native_minimum=minimum,
+            amount_minimum_evidence_source="fixed_limit_action_without_complete_betting_prefix",
+        )
+
+
+def _build_native_action_evidence(steps: list[dict], stud_betting_structure: dict | None = None) -> list[dict]:
     actions = []
     for step in steps:
         for event in step["native_events"]:
             if "action_name_evidence" not in event or "player_name_evidence" not in event:
                 continue
-            actions.append(
-                {
-                    "sequence": len(actions) + 1,
-                    "step_num": step["step_num"],
-                    "street": event["action_street_evidence"],
-                    "player": event["player_name_evidence"],
-                    "action": event["action_name_evidence"],
-                    "seat_idx": None,
-                    "native_index": event["native_index"],
-                    "funds_byte": event["funds_byte"],
-                    "source": event["player_evidence_source"],
-                    "raw_hex": event["raw_hex"],
-                }
+            action = {
+                "sequence": len(actions) + 1,
+                "step_num": step["step_num"],
+                "event_index": event.get("event_index", 0),
+                "street": event["action_street_evidence"],
+                "player": event["player_name_evidence"],
+                "action": event["action_name_evidence"],
+                "seat_idx": None,
+                "native_index": event["native_index"],
+                "funds_byte": event["funds_byte"],
+                "source": event["player_evidence_source"],
+                "raw_hex": event["raw_hex"],
+            }
+            action.update(
+                _native_stud_action_amount_evidence(action["action"], action["street"], stud_betting_structure)
             )
+            actions.append(action)
+    if stud_betting_structure:
+        _add_native_stud_stateful_amounts(actions, steps, stud_betting_structure)
+        _add_native_stud_amount_minimums(actions, stud_betting_structure)
     return actions
+
+
+def _build_native_stud_action_context(steps: list[dict], family: str) -> tuple[dict | None, dict | None, list[dict]]:
+    forced_bets = extract_native_stud_forced_bets(steps) if family == "stud" else None
+    betting_structure = derive_native_stud_betting_structure(forced_bets) if forced_bets else None
+    return forced_bets, betting_structure, _build_native_action_evidence(steps, betting_structure)
+
+
+def audit_native_stud_accounting(
+    action_evidence: list[dict],
+    forced_bets: dict | None,
+    collections: list[dict],
+    returned: list[dict],
+) -> dict:
+    """Compare decoded Stud contributions with the final settlement identity."""
+    ante_total = sum(item["amount_native"] for item in (forced_bets or {}).get("antes", []))
+    exact_action_total = sum(
+        action["amount_native"]
+        for action in action_evidence
+        if action["action"] != "ante" and "amount_native" in action
+    )
+    minimum_action_total = sum(action.get("amount_native_minimum", 0) for action in action_evidence)
+    collection_total = sum(item["amount_native"] for item in collections)
+    returned_total = sum(item["amount_native"] for item in returned)
+    required_contribution_total = collection_total + returned_total
+    decoded_minimum_total = ante_total + exact_action_total + minimum_action_total
+    unexplained_minimum = max(0, required_contribution_total - decoded_minimum_total)
+    return {
+        "ante_total_native": ante_total,
+        "exact_action_total_native": exact_action_total,
+        "bounded_action_minimum_total_native": minimum_action_total,
+        "collection_total_native": collection_total,
+        "returned_total_native": returned_total,
+        "required_contribution_total_native": required_contribution_total,
+        "decoded_contribution_minimum_native": decoded_minimum_total,
+        "unexplained_contribution_minimum_native": unexplained_minimum,
+        "complete": unexplained_minimum == 0 and not minimum_action_total,
+    }
+
+
+def add_native_funds_byte_amounts_if_conserved(
+    actions: list[dict], collections: list[dict], returned: list[dict]
+) -> bool:
+    """Promote one-byte action amounts only when they exactly conserve settlement."""
+    monetary = {"small_blind", "big_blind", "bring_in", "call", "bet", "raise"}
+    target = sum(item["amount_native"] for item in collections) + sum(item["amount_native"] for item in returned)
+    candidate_total = sum(action["funds_byte"] for action in actions if action["action"] in monetary)
+    if not target or candidate_total != target:
+        return False
+    for action in actions:
+        if action["action"] in monetary:
+            action.update(
+                amount_native=action["funds_byte"],
+                amount_evidence_source="native_funds_byte_exact_settlement_conservation",
+            )
+    return True
+
+
+def extract_native_blind_structure(actions: list[dict]) -> dict:
+    """Return exact blinds only when both forced actions have proven amounts."""
+    small = next(
+        (
+            action["amount_native"]
+            for action in actions
+            if action["action"] == "small_blind" and "amount_native" in action
+        ),
+        0,
+    )
+    big = next(
+        (
+            action["amount_native"]
+            for action in actions
+            if action["action"] == "big_blind" and "amount_native" in action
+        ),
+        0,
+    )
+    return {"sb": small, "bb": big} if small and big else {"sb": 0, "bb": 0}
+
+
+_NATIVE_CANONICAL_ACTION_TYPES = {
+    "small_blind": "small blind",
+    "big_blind": "big blind",
+    "call": "calls",
+    "bet": "bets",
+    "raise": "raises",
+    "fold": "folds",
+    "check": "checks",
+}
+
+
+def build_native_canonical_actions(action_evidence: list[dict], returned: list[dict]) -> list[dict]:
+    """Convert exact native increments to Hand.py action semantics.
+
+    Native raise amounts are additional chips committed by the player. Hand.py's
+    ``addRaiseTo`` instead expects that player's total contribution on the
+    street, including a blind already posted on PREFLOP.
+    """
+    if any(action.get("player") is None or action.get("amount_native") is None for action in action_evidence):
+        return []
+
+    actions = []
+    contributed: dict[tuple[str, str], int] = {}
+    last_street_by_player: dict[str, str] = {}
+    for evidence in action_evidence:
+        native_type = evidence.get("action")
+        action_type = _NATIVE_CANONICAL_ACTION_TYPES.get(native_type)
+        if action_type is None:
+            return []
+        player = evidence["player"]
+        street = evidence["street"]
+        amount = evidence["amount_native"]
+        contribution_street = "PREFLOP" if native_type in {"small_blind", "big_blind"} else street
+        key = (contribution_street, player)
+        contributed[key] = contributed.get(key, 0) + amount
+        action = {"type": action_type, "player": player, "street": street, "amount": amount}
+        if native_type == "raise":
+            action["to"] = contributed[key]
+        actions.append(action)
+        last_street_by_player[player] = contribution_street
+
+    for item in returned:
+        player = item.get("player")
+        amount = item.get("amount_native")
+        street = last_street_by_player.get(player)
+        if player is None or amount is None or street is None:
+            return []
+        actions.append({"type": "uncalled", "player": player, "street": street, "amount": amount})
+    return actions
+
+
+def extract_native_hero_hole_cards(
+    snapshots: list[NativeGameStateSnapshot], local_player: str | None, expected_count: int
+) -> dict | None:
+    """Extract the private deal block immediately preceding the local-player record."""
+    if local_player is None or expected_count < 1:
+        return None
+    for snapshot in snapshots:
+        if snapshot.round_number != 1:
+            continue
+        payload = snapshot.raw_payload
+        positions = sorted(
+            (payload.find(player.name.encode()), player.name)
+            for player in snapshot.players
+            if payload.find(player.name.encode()) >= 0
+        )
+        local_index = next((index for index, item in enumerate(positions) if item[1] == local_player), None)
+        if local_index is None or local_index == 0:
+            continue
+        previous_start, previous_name = positions[local_index - 1]
+        record = payload[previous_start + len(previous_name) : positions[local_index][0] - 6]
+        candidates = []
+        for offset, byte in enumerate(record):
+            if byte != expected_count or offset + expected_count >= len(record):
+                continue
+            card_ids = tuple(record[offset + 1 : offset + 1 + expected_count])
+            if len(set(card_ids)) == expected_count and all(card_id <= 51 for card_id in card_ids):
+                candidates.append(card_ids)
+        if len(candidates) == 1:
+            return {
+                "player": local_player,
+                "cards": [card_id_to_str(card_id) for card_id in candidates[0]],
+                "street": "PREFLOP",
+                "source": "native_private_deal_before_local_player_record",
+            }
+    return None
+
+
+def match_native_previous_active_action(
+    previous: NativeGameStateSnapshot | None, events: tuple[NativeAnimationEvent, ...]
+) -> tuple[int, NativePlayerIdentity] | None:
+    """Match one action to the sole player active in the preceding snapshot."""
+    if previous is None:
+        return None
+    active_players = [player for player in previous.players if player.is_active]
+    action_events = [event for event in events if event.type_code == 9 and event.action_code in _NATIVE_ACTION_LABELS]
+    if len(active_players) != 1 or len(action_events) != 1:
+        return None
+    return action_events[0].event_index, active_players[0]
+
+
+def match_native_local_player_action(
+    previous: NativeGameStateSnapshot | None,
+    events: tuple[NativeAnimationEvent, ...],
+    local_player: NativePlayerIdentity | None,
+) -> tuple[int, NativePlayerIdentity] | None:
+    """Match the local action when its preceding snapshot omits an active flag."""
+    if previous is None or local_player is None or any(player.is_active for player in previous.players):
+        return None
+    action_events = [event for event in events if event.type_code == 9 and event.action_code in _NATIVE_ACTION_LABELS]
+    if len(action_events) != 1:
+        return None
+    return action_events[0].event_index, local_player
+
+
+def match_native_departed_active_action(
+    previous: NativeGameStateSnapshot | None,
+    current: NativeGameStateSnapshot,
+    events: tuple[NativeAnimationEvent, ...],
+) -> tuple[int, NativePlayerIdentity] | None:
+    """Match the sole previously-active player absent from the current active set."""
+    if previous is None:
+        return None
+    action_events = [event for event in events if event.type_code == 9 and event.action_code in _NATIVE_ACTION_LABELS]
+    if len(action_events) != 1:
+        return None
+    current_active_ids = {player.player_id for player in current.players if player.is_active}
+    departed = [
+        player for player in previous.players if player.is_active and player.player_id not in current_active_ids
+    ]
+    if len(departed) != 1:
+        return None
+    return action_events[0].event_index, departed[0]
+
+
+def _native_local_players_by_hand(
+    grouped: dict[tuple[int, int], list[NativeGameStateSnapshot]],
+) -> dict[tuple[int, int], NativePlayerIdentity]:
+    """Find the sole player in each hand never marked active anywhere at its table."""
+    players_by_table: dict[int, dict[str, NativePlayerIdentity]] = {}
+    active_names_by_table: dict[int, set[str]] = {}
+    for (table_id, _hand_id), snapshots in grouped.items():
+        table_players = players_by_table.setdefault(table_id, {})
+        table_active = active_names_by_table.setdefault(table_id, set())
+        for snapshot in snapshots:
+            for player in snapshot.players:
+                table_players[player.name] = player
+                if player.is_active:
+                    table_active.add(player.name)
+    result = {}
+    for key, snapshots in grouped.items():
+        inactive_names = set(players_by_table[key[0]]) - active_names_by_table[key[0]]
+        hand_names = {player.name for snapshot in snapshots for player in snapshot.players}
+        candidates = inactive_names & hand_names
+        if len(candidates) == 1:
+            name = next(iter(candidates))
+            result[key] = players_by_table[key[0]][name]
+    return result
+
+
+def extract_native_stud_forced_bets(steps: list[dict]) -> dict:
+    """Return exact native Stud antes and a conservatively derived bring-in.
+
+    In the observed Stud/Stud H/L/Razz tournament states, type-9 action 4
+    carries the exact ante in native tournament chips.  Action 5 identifies the
+    bring-in index; its amount is the room's consistently observed 5/2 ante.
+    Player and seat attribution remain unresolved.
+    """
+    ante_events = [
+        event
+        for step in steps
+        for event in step["native_events"]
+        if event["type_code"] == 9
+        and event["action_code"] == 4
+        and event.get("action_street_evidence") == "BLINDSANTES"
+    ]
+    ante_amounts = {event["funds_byte"] for event in ante_events if event["funds_byte"] > 0}
+    native_indexes = [event["native_index"] for event in ante_events]
+    if len(ante_amounts) != 1 or len(native_indexes) != len(set(native_indexes)):
+        return {"antes": [], "bring_in": None}
+
+    ante_amount = next(iter(ante_amounts))
+    antes = []
+    for event in ante_events:
+        ante = {
+            "native_index": event["native_index"],
+            "seat_idx": None,
+            "amount_native": ante_amount,
+            "source": "swc_native_action_4",
+        }
+        if "player_name_evidence" in event:
+            ante["player"] = event["player_name_evidence"]
+            ante["player_evidence_source"] = event["player_evidence_source"]
+        antes.append(ante)
+    bring_in_events = [
+        event
+        for step in steps
+        for event in step["native_events"]
+        if event["type_code"] == 9 and event["action_code"] == 5 and event.get("action_street_evidence") == "THIRD"
+    ]
+    bring_in = None
+    if len(bring_in_events) == 1 and ante_amount * 5 % 2 == 0:
+        event = bring_in_events[0]
+        bring_in = {
+            "native_index": event["native_index"],
+            "seat_idx": None,
+            "amount_native": ante_amount * 5 // 2,
+            "source": "swc_native_action_5_and_observed_ante_ratio",
+        }
+        if "player_name_evidence" in event:
+            bring_in["player"] = event["player_name_evidence"]
+            bring_in["player_evidence_source"] = event["player_evidence_source"]
+    return {"antes": antes, "bring_in": bring_in}
+
+
+def derive_native_stud_betting_structure(forced_bets: dict) -> dict | None:
+    """Derive the observed SwC fixed-limit Stud structure from exact antes."""
+    ante_amounts = {ante["amount_native"] for ante in forced_bets["antes"]}
+    if len(ante_amounts) != 1:
+        return None
+    ante = next(iter(ante_amounts))
+    return {
+        "ante": ante,
+        "bring_in": ante * 5 // 2,
+        "small_bet": ante * 5,
+        "big_bet": ante * 10,
+        "source": "swc_observed_fixed_limit_stud_ante_ratios",
+    }
 
 
 def audit_native_hand(
     steps: list[dict],
     collections: list[dict],
     *,
+    action_evidence: list[dict] | None = None,
+    stud_accounting: dict | None = None,
+    settlement_conservation_complete: bool = False,
+    private_cards_complete: bool = False,
+    initial_stacks_complete: bool = False,
     dealer_hand_started: bool = False,
     dealer_hand_complete: bool = False,
 ) -> dict:
@@ -579,6 +1239,16 @@ def audit_native_hand(
     poker_events = [event for step in steps for event in step["native_events"] if "action_name_evidence" in event]
     unresolved = [event for event in poker_events if "player_name_evidence" not in event]
     unresolved_by_action = dict(sorted(Counter(event["action_name_evidence"] for event in unresolved).items()))
+    unresolved_forced = [
+        event for event in unresolved if event["action_name_evidence"] in {"ante", "small_blind", "big_blind"}
+    ]
+    unresolved_betting = [event for event in unresolved if event not in unresolved_forced]
+    unresolved_betting_by_street = dict(
+        sorted(Counter(event.get("action_street_evidence", "UNKNOWN") for event in unresolved_betting).items())
+    )
+    action_evidence = action_evidence or []
+    exact_amount_actions = [action for action in action_evidence if "amount_native" in action]
+    minimum_amount_actions = [action for action in action_evidence if "amount_native_minimum" in action]
     observed_actions = {event["action_name_evidence"] for event in poker_events}
     reasons = []
     if unresolved:
@@ -587,7 +1257,17 @@ def audit_native_hand(
         reasons.append("hand start is not fully observed (small and big blinds required)")
     if not collections:
         reasons.append("settlement/collection is not observed")
-    reasons.append("complete private cards and full-width action-amount encoding are not decoded")
+    if stud_accounting and stud_accounting["unexplained_contribution_minimum_native"]:
+        reasons.append(
+            f"at least {stud_accounting['unexplained_contribution_minimum_native']} native contribution units "
+            "are absent from captured actions"
+        )
+    if not private_cards_complete:
+        reasons.append("required private cards are not decoded")
+    if not settlement_conservation_complete:
+        reasons.append("exact action amounts are not proven by settlement conservation")
+    if not initial_stacks_complete:
+        reasons.append("exact starting stacks are not decoded")
     return {
         "importable": False,
         "status": "capture_only",
@@ -597,7 +1277,16 @@ def audit_native_hand(
         "resolved_poker_event_count": len(poker_events) - len(unresolved),
         "unresolved_poker_event_count": len(unresolved),
         "unresolved_by_action": unresolved_by_action,
+        "unresolved_forced_bet_event_count": len(unresolved_forced),
+        "unresolved_betting_event_count": len(unresolved_betting),
+        "unresolved_betting_by_street": unresolved_betting_by_street,
+        "resolved_action_amount_count": len(exact_amount_actions),
+        "resolved_action_amount_total": len(action_evidence),
+        "bounded_action_amount_count": len(minimum_amount_actions),
+        "captured_action_players_complete": not unresolved_betting,
         "complete_action_players": not unresolved,
+        "settlement_conservation_complete": settlement_conservation_complete
+        or bool(stud_accounting and stud_accounting["complete"]),
         "has_small_blind": "small_blind" in observed_actions,
         "has_big_blind": "big_blind" in observed_actions,
         "has_collection": bool(collections),
@@ -677,9 +1366,7 @@ def parse_native_dealer_draw(text: str) -> dict | None:
 # "Game changes to <NL|PL|FL> <game label> <small>/<big>". The game label matches
 # a SWC_GAME_DEFINITIONS label exactly, so the shared HTTP-adapter table resolves
 # the FPDB base/category without decoding the opaque native game-type code.
-_GAME_CHANGE_TEXT = re.compile(
-    r"^Game changes to (?P<limit>NL|PL|FL) (?P<game>.+?) (?P<sb>\d+)/(?P<bb>\d+)$"
-)
+_GAME_CHANGE_TEXT = re.compile(r"^Game changes to (?P<limit>NL|PL|FL) (?P<game>.+?) (?P<sb>\d+)/(?P<bb>\d+)$")
 _NATIVE_LIMIT_TYPES = {"NL": "nl", "PL": "pl", "FL": "fl"}
 _SWC_LABEL_TO_DEFINITION = {}
 for _swc_code, _swc_definition in SWC_GAME_DEFINITIONS.items():
@@ -1442,15 +2129,52 @@ def match_native_foldout_winner_seat_evidence(
     }
 
 
+def match_native_outbound_seat_evidence(
+    table_id: int,
+    hand_id: int,
+    actions: list[dict],
+    players: tuple[NativePlayerIdentity, ...],
+) -> dict[tuple[int, int, int], NativeSeatEvidence]:
+    """Anchor the local player to the server index echoed for a confirmed command."""
+    players_by_name = {player.name: player for player in players}
+    result = {}
+    for action in actions:
+        player = players_by_name.get(action.get("player"))
+        seat_idx = action.get("server_native_index")
+        if player is None or seat_idx is None:
+            continue
+        key = (table_id, hand_id, seat_idx)
+        candidate = NativeSeatEvidence(
+            table_id,
+            hand_id,
+            seat_idx,
+            player.player_id,
+            player.name,
+            "confirmed_outbound_action_echo",
+        )
+        existing = result.get(key)
+        if existing is None or existing.player_id == candidate.player_id:
+            result[key] = candidate
+        else:
+            result.pop(key)
+    return _retain_bijective_native_seat_evidence(result)
+
+
 def _build_normalized_native_seat_evidence(
     grouped: dict[tuple[int, int], list[NativeGameStateSnapshot]],
     table_infos: dict[int, NativeTableInfo],
+    game_changes_by_hand: dict[tuple[int, int], dict],
     type_15_by_hand: dict[tuple[int, int], list[NativeCollectionEvent]],
     dealer_collections_by_hand: dict[tuple[int, int], list[dict]],
     dealer_returns_by_hand: dict[tuple[int, int], list[dict]],
+    outbound_actions_by_hand: dict[tuple[int, int], list[dict]],
 ) -> dict[tuple[int, int, int], NativeSeatEvidence]:
     evidence = {}
     table_ids = set(table_infos)
+    rosters: dict[tuple[int, int], set[int]] = {}
+    player_names: dict[tuple[int, int], dict[int, str]] = {}
+    dealt_seats: dict[tuple[int, int], set[int]] = {}
+    hand_order: dict[int, list[int]] = {}
     for (table_id, hand_id), snapshots in grouped.items():
         events = [
             event
@@ -1460,16 +2184,31 @@ def _build_normalized_native_seat_evidence(
             )
         ]
         players = tuple({player.player_id: player for snapshot in snapshots for player in snapshot.players}.values())
+        rosters[(table_id, hand_id)] = {player.player_id for player in players}
+        player_names[(table_id, hand_id)] = {player.player_id: player.name for player in players}
+        dealt_seats[(table_id, hand_id)] = {event.seat_idx for event in events if event.type_code == 1}
+        hand_order.setdefault(table_id, []).append(hand_id)
         collections = _merge_native_collections(
             type_15_by_hand.get((table_id, hand_id), []),
             dealer_collections_by_hand.get((table_id, hand_id), []),
         )
         candidate_groups = (
+            match_native_outbound_seat_evidence(
+                table_id,
+                hand_id,
+                outbound_actions_by_hand.get((table_id, hand_id), []),
+                players,
+            ),
             match_native_return_seat_evidence(
                 table_id, hand_id, events, players, dealer_returns_by_hand.get((table_id, hand_id), [])
             ),
             match_native_foldout_winner_seat_evidence(
-                table_id, hand_id, table_infos[table_id].family, events, players, collections
+                table_id,
+                hand_id,
+                game_changes_by_hand.get((table_id, hand_id), {}).get("family", table_infos[table_id].family),
+                events,
+                players,
+                collections,
             ),
         )
         for candidates in candidate_groups:
@@ -1479,7 +2218,11 @@ def _build_normalized_native_seat_evidence(
                     evidence[key] = candidate
                 else:
                     evidence.pop(key)
-    return _retain_bijective_native_seat_evidence(evidence)
+    evidence = _retain_bijective_native_seat_evidence(evidence)
+    propagated = _propagate_native_seat_evidence(evidence, rosters, dealt_seats, hand_order)
+    propagated = _retain_bijective_native_seat_evidence(propagated)
+    eliminated = _eliminate_unique_native_dealt_seats(propagated, rosters, player_names, dealt_seats)
+    return _retain_bijective_native_seat_evidence(eliminated)
 
 
 def _infer_native_seat_evidence_from_opaque_funds(
@@ -1681,9 +2424,106 @@ def summarize_native_hands(messages: list[NativeProtocolMessage]) -> list[Native
     ]
 
 
-def normalize_native_hands(messages: list[NativeProtocolMessage], *, raw_ref: str) -> list[dict]:
+def add_native_starting_stacks(  # noqa: C901
+    hands: list[dict], messages: list[NativeProtocolMessage]
+) -> None:
+    """Anchor table stacks on the first roster and roll them through exact settlements."""
+    login_names = {name for message in messages if (name := extract_native_outbound_login_name(message)) is not None}
+    local_player = next(iter(login_names)) if len(login_names) == 1 else None
+    requests = {}
+    rosters = {}
+    for message in messages:
+        request = parse_native_outbound_seat_request(message)
+        if request is not None:
+            requests[request["table_id"]] = request
+        roster = extract_native_table_player_stacks(message)
+        if roster is not None:
+            usable_players = [player for player in roster["players"] if player["name"] != "RESERVED"]
+            existing = rosters.get(roster["table_id"])
+            existing_count = len(existing["players"]) if existing is not None else 0
+            if len(usable_players) > existing_count:
+                rosters[roster["table_id"]] = {**roster, "players": usable_players}
+
+    for table_id, roster in rosters.items():
+        running_stacks = {player["name"]: player["starting_stack"] for player in roster["players"]}
+        started = False
+        for hand in (item for item in hands if item["table_id"] == table_id):
+            actions = hand.get("actions") or []
+            if not actions:
+                continue
+            if any(player["name"] not in running_stacks for player in hand["players"]):
+                continue
+            request = requests.get(table_id)
+            for player in hand["players"]:
+                name = player["name"]
+                player["starting_stack"] = running_stacks[name]
+                source = roster["source"] if not started else "exact_prior_hand_ledger"
+                if (
+                    not started
+                    and request is not None
+                    and name == local_player
+                    and player.get("seat_idx") == request["seat_idx"]
+                    and running_stacks[name] == request["requested_stack_native"]
+                ):
+                    source = "corroborated_native_type_11_and_type_23"
+                player["starting_stack_source"] = source
+            started = True
+            for name in running_stacks:
+                contributions = sum(
+                    action.get("amount", 0)
+                    for action in actions
+                    if action.get("player") == name and action.get("type") not in {"folds", "checks", "uncalled"}
+                )
+                returned = sum(
+                    action.get("amount", 0)
+                    for action in actions
+                    if action.get("player") == name and action.get("type") == "uncalled"
+                )
+                collected = sum(
+                    item["amount_native"] for item in hand.get("collections", []) if item.get("player") == name
+                )
+                running_stacks[name] += collected + returned - contributions
+
+
+def promote_native_omaha_importability(hands: list[dict]) -> None:
+    """Enable only heads-up Omaha hands proven complete by native evidence."""
+    for hand in hands:
+        if hand["game"]["category"] != "omahahi" or len(hand["players"]) != 2:
+            continue
+        audit = hand["metadata"]["importability"]
+        small_blind = next((action for action in hand["actions"] if action["type"] == "small blind"), None)
+        button_player = small_blind and next(
+            (player for player in hand["players"] if player["name"] == small_blind["player"]), None
+        )
+        complete = (
+            bool(hand["actions"])
+            and hand["native_hero_hole_cards"] is not None
+            and all(player.get("seat_idx") is not None for player in hand["players"])
+            and all(player.get("starting_stack") is not None for player in hand["players"])
+            and audit["dealer_hand_started"]
+            and audit["dealer_hand_complete"]
+            and audit["settlement_conservation_complete"]
+            and audit["has_small_blind"]
+            and audit["has_big_blind"]
+            and audit["has_collection"]
+            and button_player is not None
+        )
+        if not complete:
+            continue
+        hand["buttonpos"] = button_player["seat_idx"]
+        hand["metadata"]["button_source"] = "heads_up_small_blind_is_button"
+        hand["game"]["fpdb_supported"] = True
+        audit.update(importable=True, status="importable", reasons=[])
+
+
+def normalize_native_hands(  # noqa: PLR0915 - protocol normalization is intentionally linear
+    messages: list[NativeProtocolMessage], *, raw_ref: str
+) -> list[dict]:
     """Build capture-only FPDB-aligned envelopes from confirmed native fields."""
     table_infos = {info.table_id: info for message in messages if (info := extract_table_info(message)) is not None}
+    outbound_actions_by_hand = _collect_native_outbound_actions(messages)
+    login_names = {name for message in messages if (name := extract_native_outbound_login_name(message)) is not None}
+    local_player = next(iter(login_names)) if len(login_names) == 1 else None
     ofc_table_ids = _observed_ofc_table_ids(messages)
     ofc_variants = _observed_ofc_variants(messages, set(table_infos), ofc_table_ids)
     grouped: dict[tuple[int, int], list[NativeGameStateSnapshot]] = {}
@@ -1705,18 +2545,19 @@ def normalize_native_hands(messages: list[NativeProtocolMessage], *, raw_ref: st
     seat_evidence = _build_normalized_native_seat_evidence(
         grouped,
         table_infos,
+        game_changes_by_hand,
         collections_by_hand,
         dealer_collections_by_hand,
         dealer_returns_by_hand,
+        outbound_actions_by_hand,
     )
+    local_players_by_hand = _native_local_players_by_hand(grouped)
 
     hands = []
     for (table_id, hand_id), snapshots in grouped.items():
         table = table_infos[table_id]
         native_game = game_changes_by_hand.get((table_id, hand_id))
-        family, base, category, limit_type = _resolve_native_hand_game(
-            native_game, table, table_id, ofc_table_ids
-        )
+        family, base, category, limit_type = _resolve_native_hand_game(native_game, table, table_id, ofc_table_ids)
         player_order: dict[int, NativePlayerIdentity] = {}
         for snapshot in snapshots:
             for player in snapshot.players:
@@ -1737,7 +2578,29 @@ def normalize_native_hands(messages: list[NativeProtocolMessage], *, raw_ref: st
                 ),
                 {table_id},
             )
-            event_types = tuple(event.type_code for event in native_events)
+            active_action_evidence = (
+                match_native_previous_active_action(snapshots[step_num - 2] if step_num > 1 else None, native_events)
+                if family == "stud"
+                else None
+            )
+            departed_action_evidence = (
+                match_native_departed_active_action(
+                    snapshots[step_num - 2] if step_num > 1 else None,
+                    snapshot,
+                    native_events,
+                )
+                if family == "stud" and active_action_evidence is None
+                else None
+            )
+            local_action_evidence = (
+                match_native_local_player_action(
+                    snapshots[step_num - 2] if step_num > 1 else None,
+                    native_events,
+                    local_players_by_hand.get((table_id, hand_id)),
+                )
+                if family == "stud" and active_action_evidence is None and departed_action_evidence is None
+                else None
+            )
             step = {
                 "step_num": step_num,
                 "street": _native_round_street_map(family, category).get(snapshot.round_number, "UNKNOWN"),
@@ -1766,7 +2629,16 @@ def normalize_native_hands(messages: list[NativeProtocolMessage], *, raw_ref: st
                         **(
                             {
                                 "action_street_evidence": native_action_street(
-                                    family, snapshot.round_number, event_types, category
+                                    family,
+                                    snapshot.round_number,
+                                    tuple(native_event.type_code for native_event in native_events),
+                                    category,
+                                    event_index=event.event_index,
+                                    transition_indexes=tuple(
+                                        native_event.event_index
+                                        for native_event in native_events
+                                        if native_event.type_code in {1, 3}
+                                    ),
                                 )
                             }
                             if event.type_code == 9
@@ -1815,6 +2687,33 @@ def normalize_native_hands(messages: list[NativeProtocolMessage], *, raw_ref: st
                             if (resolved := seat_evidence.get((event.table_id, event.hand_id, event.seat_idx)))
                             else {}
                         ),
+                        **(
+                            {
+                                "player_id_evidence": active_action_evidence[1].player_id,
+                                "player_name_evidence": active_action_evidence[1].name,
+                                "player_evidence_source": "previous_unique_active_player",
+                            }
+                            if active_action_evidence and event.event_index == active_action_evidence[0]
+                            else {}
+                        ),
+                        **(
+                            {
+                                "player_id_evidence": departed_action_evidence[1].player_id,
+                                "player_name_evidence": departed_action_evidence[1].name,
+                                "player_evidence_source": "unique_departed_active_player",
+                            }
+                            if departed_action_evidence and event.event_index == departed_action_evidence[0]
+                            else {}
+                        ),
+                        **(
+                            {
+                                "player_id_evidence": local_action_evidence[1].player_id,
+                                "player_name_evidence": local_action_evidence[1].name,
+                                "player_evidence_source": "table_unique_never_active_local_player",
+                            }
+                            if local_action_evidence and event.event_index == local_action_evidence[0]
+                            else {}
+                        ),
                         **({"table_message": event.table_message} if event.table_message is not None else {}),
                         **({"card_mnemonic": event.card_mnemonic} if event.card_mnemonic is not None else {}),
                         **(
@@ -1861,9 +2760,32 @@ def normalize_native_hands(messages: list[NativeProtocolMessage], *, raw_ref: st
             if family == "ofc"
             else None
         )
+        native_stud_forced_bets, native_stud_betting_structure, action_evidence = _build_native_stud_action_context(
+            steps, family
+        )
+        returned = dealer_returns_by_hand.get((table_id, hand_id), [])
+        native_funds_byte_conserved = family in {"holdem", "omaha"} and add_native_funds_byte_amounts_if_conserved(
+            action_evidence, collections, returned
+        )
+        native_blinds = extract_native_blind_structure(action_evidence)
+        native_stud_accounting = (
+            audit_native_stud_accounting(action_evidence, native_stud_forced_bets, collections, returned)
+            if family == "stud"
+            else None
+        )
+        native_hero_hole_cards = (
+            extract_native_hero_hole_cards(snapshots, local_player, 4) if family == "omaha" else None
+        )
+        canonical_actions = (
+            build_native_canonical_actions(action_evidence, returned) if native_funds_byte_conserved else []
+        )
         importability = audit_native_hand(
             steps,
             collections,
+            action_evidence=action_evidence,
+            stud_accounting=native_stud_accounting,
+            settlement_conservation_complete=native_funds_byte_conserved,
+            private_cards_complete=native_hero_hole_cards is not None,
             dealer_hand_started=any(event["text"] == "New hand started" for event in dealer_events),
             dealer_hand_complete=any(event["text"] == "Hand complete" for event in dealer_events),
         )
@@ -1889,8 +2811,8 @@ def normalize_native_hands(messages: list[NativeProtocolMessage], *, raw_ref: st
                     "category": category,
                     "limitType": limit_type,
                     "currency": "room_native",
-                    "sb": 0,
-                    "bb": 0,
+                    "sb": native_blinds["sb"],
+                    "bb": native_blinds["bb"],
                     "ante": 0,
                     "mix": "none",
                     "maxSeats": len(player_order),
@@ -1900,9 +2822,19 @@ def normalize_native_hands(messages: list[NativeProtocolMessage], *, raw_ref: st
                     {
                         "player_id": player.player_id,
                         "name": player.name,
-                        "seat_idx": None,
+                        "seat_idx": next(
+                            (
+                                seat_idx
+                                for (evidence_table, evidence_hand, seat_idx), item in seat_evidence.items()
+                                if evidence_table == table_id
+                                and evidence_hand == hand_id
+                                and item.player_id == player.player_id
+                            ),
+                            None,
+                        ),
                         "roster_index": roster_index,
-                        "starting_stack": player.stack_units,
+                        "starting_stack": None,
+                        "native_opaque_funds_value": player.stack_units,
                         "native_status_values": sorted(
                             {
                                 observed.native_status
@@ -1915,10 +2847,18 @@ def normalize_native_hands(messages: list[NativeProtocolMessage], *, raw_ref: st
                     for roster_index, player in enumerate(player_order.values())
                 ],
                 "steps": steps,
-                "action_evidence": _build_native_action_evidence(steps),
-                "actions": [],
+                "board": list(final_board),
+                "community": {
+                    **({"FLOP": list(final_board[:3])} if len(final_board) >= 3 else {}),
+                    **({"TURN": [final_board[3]]} if len(final_board) >= 4 else {}),
+                    **({"RIVER": [final_board[4]]} if len(final_board) >= 5 else {}),
+                },
+                "holecards": [native_hero_hole_cards] if native_hero_hole_cards else [],
+                "action_evidence": action_evidence,
+                "outbound_action_evidence": outbound_actions_by_hand.get((table_id, hand_id), []),
+                "actions": canonical_actions,
                 "collections": collections,
-                "returned": dealer_returns_by_hand.get((table_id, hand_id), []),
+                "returned": returned,
                 "dealer_events": dealer_events,
                 "ofc_result": next((result for result in ofc_scores if result["kind"] == "hand"), None),
                 "ofc_total": next((result for result in ofc_scores if result["kind"] == "total"), None),
@@ -1929,6 +2869,10 @@ def normalize_native_hands(messages: list[NativeProtocolMessage], *, raw_ref: st
                 "ofc_showdown_rows": extract_native_ofc_showdown_rows(snapshots) if family == "ofc" else [],
                 "native_draws": native_draws,
                 "native_stud_cards": native_stud_cards,
+                "native_stud_forced_bets": native_stud_forced_bets,
+                "native_stud_betting_structure": native_stud_betting_structure,
+                "native_stud_accounting": native_stud_accounting,
+                "native_hero_hole_cards": native_hero_hole_cards,
                 "native_game": native_game,
                 "showdown": showdown,
                 "raw_refs": [raw_ref],
@@ -1937,10 +2881,16 @@ def normalize_native_hands(messages: list[NativeProtocolMessage], *, raw_ref: st
                     "state_model": "snapshot",
                     "money_unit": "room_native_integer",
                     "player_funds_field": "opaque_native_value_not_money",
+                    "action_reconstruction": {
+                        "status": "complete" if canonical_actions else "incomplete",
+                        "source": "swc_native_exact_settlement_conservation",
+                    },
                     "importability": importability,
                 },
             }
         )
+    add_native_starting_stacks(hands, messages)
+    promote_native_omaha_importability(hands)
     return hands
 
 
@@ -2057,15 +3007,19 @@ def launch_client(archive: Path, *, port: int = 0, include_outbound: bool = Fals
 def inspect_archive(path: Path) -> int:
     count = 0
     total = 0
+    directions = Counter()
     with path.open("rb") as stream:
         for record in iter_capture_records(stream):
             count += 1
             total += len(record.payload)
+            directions[record.direction] += 1
             print(
                 f"{record.captured_at.isoformat()} {record.direction:<8} "
                 f"port={record.peer_port} bytes={len(record.payload)}"
             )
-    print(f"records={count} plaintext_bytes={total}")
+    print(f"records={count} plaintext_bytes={total} received={directions['received']} sent={directions['sent']}")
+    if not directions["sent"]:
+        print("warning=no outbound plaintext; client actions may be absent from this archive")
     return count
 
 
@@ -2090,6 +3044,27 @@ def print_session_summary(path: Path) -> int:
         )
     print(f"native_messages={len(messages)} hands={len(hands)}")
     return len(hands)
+
+
+def print_outbound_summary(path: Path) -> int:
+    """Summarize outbound protocol coverage without printing credential payloads."""
+    with path.open("rb") as stream:
+        messages = list(iter_protocol_messages(iter_capture_records(stream), include_outbound=True))
+    outbound = [message for message in messages if message.direction == "sent"]
+    incoming = [message for message in messages if message.direction == "received"]
+    login_names = {name for message in outbound if (name := extract_native_outbound_login_name(message)) is not None}
+    hands = normalize_native_hands(incoming, raw_ref=str(path.expanduser().resolve()))
+    roster_names = {player["name"] for hand in hands for player in hand["players"]}
+    seated_names = sorted(login_names & roster_names)
+    type_counts = Counter(
+        int.from_bytes(message.payload[:2], "little") for message in outbound if len(message.payload) >= 2
+    )
+    print(
+        f"outbound_messages={len(outbound)} login_names={','.join(sorted(login_names)) or 'unknown'} "
+        f"seated_names={','.join(seated_names) or 'none'} hands={len(hands)}"
+    )
+    print("outbound_types=" + (",".join(f"{code}:{count}" for code, count in sorted(type_counts.items())) or "none"))
+    return len(outbound)
 
 
 def print_stack_history(path: Path) -> int:
@@ -2166,7 +3141,7 @@ def print_animation_events(path: Path) -> int:
 
 def print_normalized_hands(path: Path) -> int:
     with path.open("rb") as stream:
-        messages = list(iter_protocol_messages(iter_capture_records(stream)))
+        messages = list(iter_protocol_messages(iter_capture_records(stream), include_outbound=True))
     hands = normalize_native_hands(messages, raw_ref=str(path.expanduser().resolve()))
     print(json.dumps(hands, indent=2, sort_keys=True))
     return len(hands)
@@ -2175,18 +3150,26 @@ def print_normalized_hands(path: Path) -> int:
 def print_importability_audit(path: Path) -> int:
     """Print one compact evidence-completeness record per captured hand."""
     with path.open("rb") as stream:
-        messages = list(iter_protocol_messages(iter_capture_records(stream)))
+        messages = list(iter_protocol_messages(iter_capture_records(stream), include_outbound=True))
     hands = normalize_native_hands(messages, raw_ref=str(path.expanduser().resolve()))
     for hand in hands:
         audit = hand["metadata"]["importability"]
         unresolved = ",".join(f"{name}:{count}" for name, count in audit["unresolved_by_action"].items()) or "none"
+        unresolved_streets = (
+            ",".join(f"{name}:{count}" for name, count in audit["unresolved_betting_by_street"].items()) or "none"
+        )
         print(
             f"table={hand['table_id']} hand={hand['hand_id']} game={hand['game']['category']} "
             f"native_players={audit['resolved_native_type_9_player_count']}/{audit['native_type_9_event_count']} "
             f"actions={audit['resolved_poker_event_count']}/{audit['poker_event_count']} "
-            f"unresolved={unresolved} blinds={int(audit['has_small_blind'])}/{int(audit['has_big_blind'])} "
+            f"amounts={audit['resolved_action_amount_count']}/{audit['resolved_action_amount_total']} "
+            f"bounded={audit['bounded_action_amount_count']} "
+            f"unresolved={unresolved} forced={audit['unresolved_forced_bet_event_count']} "
+            f"betting={audit['unresolved_betting_event_count']} streets={unresolved_streets} "
+            f"blinds={int(audit['has_small_blind'])}/{int(audit['has_big_blind'])} "
             f"collection={int(audit['has_collection'])} started={int(audit['dealer_hand_started'])} "
             f"complete={int(audit['dealer_hand_complete'])} "
+            f"conserved={int(audit['settlement_conservation_complete'])} "
             f"status={audit['status']}"
         )
     return len(hands)
@@ -2258,6 +3241,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--inspect", type=Path, help="validate and summarize an existing raw archive")
     parser.add_argument("--dealer-history", type=Path, help="print dealer messages from a raw archive")
     parser.add_argument("--session-summary", type=Path, help="list native tables, hand ids, and snapshot counts")
+    parser.add_argument("--outbound-summary", type=Path, help="summarize outbound coverage without credentials")
     parser.add_argument(
         "--stack-history", type=Path, help="list opaque native player-funds changes without inferring amounts"
     )
@@ -2276,8 +3260,9 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     )
     parser.add_argument(
         "--include-outbound",
-        action="store_true",
-        help="also capture client-to-server plaintext; may contain sensitive session data",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="capture client-to-server plaintext (default: enabled; use --no-include-outbound to disable)",
     )
     return parser.parse_args(argv)
 
@@ -2287,6 +3272,7 @@ def _run_native_report(args: argparse.Namespace) -> bool:
         ("inspect", inspect_archive),
         ("dealer_history", print_dealer_history),
         ("session_summary", print_session_summary),
+        ("outbound_summary", print_outbound_summary),
         ("stack_history", print_stack_history),
         ("animation_events", print_animation_events),
         ("normalized_json", print_normalized_hands),
@@ -2312,7 +3298,11 @@ def main(argv: list[str] | None = None) -> int:
     except (FileNotFoundError, RuntimeError, ValueError) as error:
         print(f"error: {error}", file=sys.stderr)
         return 2
-    print(f"SwC launched with passive capture: pid={process.pid} archive={args.archive.expanduser().resolve()}")
+    direction_mode = "bidirectional" if args.include_outbound else "inbound-only"
+    print(
+        f"SwC launched with passive capture: pid={process.pid} "
+        f"archive={args.archive.expanduser().resolve()} mode={direction_mode}"
+    )
     print("Dealer messages will appear with the [SWC] prefix. Close SwC normally to stop capture.")
     stop_follower = threading.Event()
     follower = threading.Thread(

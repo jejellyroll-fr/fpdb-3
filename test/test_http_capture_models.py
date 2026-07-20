@@ -200,7 +200,10 @@ def test_swc_socketio_frame_extracts_game_state():
 
     frame = _socketio_frame(state)
     assert extract_socketio_proxy_message(frame)["t"] == "GameState"
-    assert extract_socketio_proxy_message(_socketio_proxy_frame({"t": "Action", "a": "call"})) == {"t": "Action", "a": "call"}
+    assert extract_socketio_proxy_message(_socketio_proxy_frame({"t": "Action", "a": "call"})) == {
+        "t": "Action",
+        "a": "call",
+    }
     assert describe_socketio_frame(frame)["message_type"] == "GameState"
     assert describe_socketio_frame('42/poker/,["client-action",{"a":"call"}]') == {
         "message_type": "socketio:client-action",
@@ -365,7 +368,15 @@ def test_swc_adapter_normalizes_ofc_rounds_and_result_without_hand_py_import():
     result = adapter.process_socketio_frame(
         _socketio_frame_with_events(
             final_state,
-            [{"type": 15, "action": 0, "amount": 0, "seat-idx": 0, "table-msg": '<nick s="0">alice</nick> wins <money a="500" mt="R">5</money>'}],
+            [
+                {
+                    "type": 15,
+                    "action": 0,
+                    "amount": 0,
+                    "seat-idx": 0,
+                    "table-msg": '<nick s="0">alice</nick> wins <money a="500" mt="R">5</money>',
+                }
+            ],
         ),
         raw_ref="raw:2",
     )
@@ -382,7 +393,10 @@ def test_swc_adapter_normalizes_ofc_rounds_and_result_without_hand_py_import():
     }
     assert hand["ofc_rounds"][0]["player"] == "alice"
     assert hand["ofc_rounds"][0]["placed"] == {"top": ["2c"], "middle": ["2d", "2h"], "bottom": ["2s", "3c"]}
-    assert any(round_info["player"] == "alice" and round_info["placed"]["top"] == ["2d", "2h"] for round_info in hand["ofc_rounds"])
+    assert any(
+        round_info["player"] == "alice" and round_info["placed"]["top"] == ["2d", "2h"]
+        for round_info in hand["ofc_rounds"]
+    )
     assert hand["ofc_result"]["points_settled"] == {"alice": 5, "bob": -5}
     assert hand["ofc_result"]["rows"]["alice"]["top"] == "Pair"
     assert hand["ofc_result"]["points_breakdown"]["alice"]["total"] == 10
@@ -446,7 +460,15 @@ def _normalized_complete_ofc_hand():
     return adapter.process_socketio_frame(
         _socketio_frame_with_events(
             final_state,
-            [{"type": 15, "action": 0, "amount": 0, "seat-idx": 0, "table-msg": '<nick s="0">alice</nick> wins <money a="500" mt="R">5</money>'}],
+            [
+                {
+                    "type": 15,
+                    "action": 0,
+                    "amount": 0,
+                    "seat-idx": 0,
+                    "table-msg": '<nick s="0">alice</nick> wins <money a="500" mt="R">5</money>',
+                }
+            ],
         ),
         raw_ref="raw:2",
     ).current_hand
@@ -714,7 +736,11 @@ def test_gui_replayer_models_ofcp_public_initial_five_then_private_three():
                 "middle": [{"index": 0, "card": "Kd"}],
                 "bottom": [{"index": 0, "card": "Qh"}, {"index": 1, "card": "Jh"}, {"index": 2, "card": "10h"}],
             },
-            "layout": {"top": ["--", "As", "--"], "middle": ["Kd", "--", "--", "--", "--"], "bottom": ["Qh", "Jh", "10h", "--", "--"]},
+            "layout": {
+                "top": ["--", "As", "--"],
+                "middle": ["Kd", "--", "--", "--", "--"],
+                "bottom": ["Qh", "Jh", "10h", "--", "--"],
+            },
             "discarded": [],
             "active": [],
             "source": "test",
@@ -726,7 +752,11 @@ def test_gui_replayer_models_ofcp_public_initial_five_then_private_three():
             "dealt": [],
             "placed": {"middle": ["2c"], "bottom": ["3d"]},
             "placed_slots": {"middle": [{"index": 1, "card": "2c"}], "bottom": [{"index": 3, "card": "3d"}]},
-            "layout": {"top": ["--", "As", "--"], "middle": ["Kd", "2c", "--", "--", "--"], "bottom": ["Qh", "Jh", "10h", "3d", "--"]},
+            "layout": {
+                "top": ["--", "As", "--"],
+                "middle": ["Kd", "2c", "--", "--", "--"],
+                "bottom": ["Qh", "Jh", "10h", "3d", "--"],
+            },
             "discarded": [],
             "active": [],
             "source": "test",
@@ -762,7 +792,7 @@ def test_swc_adapter_extracts_collections_from_event_table_messages():
                     "action": 0,
                     "amount": 0,
                     "seat-idx": 2,
-                    "table-msg": "<nick s=\"2\">carol</nick> wins (<money a=\"300\" mt=\"R\">3</money>): doesn't show cards",
+                    "table-msg": '<nick s="2">carol</nick> wins (<money a="300" mt="R">3</money>): doesn\'t show cards',
                 },
             ],
         ),
@@ -882,18 +912,18 @@ def test_snapshot_diff_records_explicit_fold_delta():
     previous = {"folded": [], "bets": {"alice": 1}, "stacks": {"alice": 99}, "placed": {}, "board": [], "ts": 0}
     current = {"folded": ["alice"], "bets": {"alice": 1}, "stacks": {"alice": 99}, "placed": {}, "board": [], "ts": 0}
 
-    assert {"type": "fold_delta", "player": "alice", "from": False, "to": True} in diff_snapshot_steps(previous, current)[
-        "candidates"
-    ]
+    assert {"type": "fold_delta", "player": "alice", "from": False, "to": True} in diff_snapshot_steps(
+        previous, current
+    )["candidates"]
 
 
 def test_snapshot_diff_records_pot_delta():
     previous = {"pot": 10, "bets": {}, "stacks": {}, "placed": {}, "board": [], "ts": 2}
     current = {"pot": 0, "bets": {}, "stacks": {}, "placed": {}, "board": [], "ts": 3}
 
-    assert {"type": "pot_delta", "amount_delta": "-10", "from": "10", "to": "0"} in diff_snapshot_steps(previous, current)[
-        "candidates"
-    ]
+    assert {"type": "pot_delta", "amount_delta": "-10", "from": "10", "to": "0"} in diff_snapshot_steps(
+        previous, current
+    )["candidates"]
 
 
 def test_swc_adapter_reconstructs_single_call_from_snapshot_delta():
@@ -941,8 +971,14 @@ def test_swc_adapter_reconstructs_single_call_from_snapshot_delta():
     ]
     assert result.current_hand["gametype"]["sb"] == Decimal("1")
     assert result.current_hand["gametype"]["bb"] == Decimal("2")
-    assert not any(item.get("type") == "committed_delta" and item.get("player") == "carol" for item in result.current_hand["action_evidence"])
-    assert not any(item.get("type") == "stack_delta" and item.get("player") == "carol" for item in result.current_hand["action_evidence"])
+    assert not any(
+        item.get("type") == "committed_delta" and item.get("player") == "carol"
+        for item in result.current_hand["action_evidence"]
+    )
+    assert not any(
+        item.get("type") == "stack_delta" and item.get("player") == "carol"
+        for item in result.current_hand["action_evidence"]
+    )
 
 
 def test_swc_adapter_keeps_commit_delta_as_evidence_when_board_changes():
@@ -962,8 +998,13 @@ def test_swc_adapter_keeps_commit_delta_as_evidence_when_board_changes():
         captured_at="2026-06-28T10:00:01Z",
     )
 
-    assert not any(action.get("player") == "carol" and action.get("type") == "calls" for action in result.current_hand["actions"])
-    assert any(item.get("type") == "committed_delta" and item.get("player") == "carol" for item in result.current_hand["action_evidence"])
+    assert not any(
+        action.get("player") == "carol" and action.get("type") == "calls" for action in result.current_hand["actions"]
+    )
+    assert any(
+        item.get("type") == "committed_delta" and item.get("player") == "carol"
+        for item in result.current_hand["action_evidence"]
+    )
 
 
 def test_swc_adapter_reconstructs_single_raise_from_snapshot_delta():
@@ -1066,7 +1107,10 @@ def test_swc_adapter_reconstructs_call_hidden_in_street_transition():
         "source": "snapshot_street_transition_call",
         "fpdb_action": True,
     } in result.current_hand["actions"]
-    assert not any(item.get("type") == "stack_delta" and item.get("player") == "alice" for item in result.current_hand["action_evidence"])
+    assert not any(
+        item.get("type") == "stack_delta" and item.get("player") == "alice"
+        for item in result.current_hand["action_evidence"]
+    )
 
 
 def test_swc_adapter_reconstructs_check_from_turn_delta_without_commit():
@@ -1227,7 +1271,14 @@ def test_refresh_normalized_hand_remaps_observed_swc_game_type():
     hand_data = {
         "game_type": "Poker (Type 50)",
         "game": {"base": "unknown", "category": "unknown", "fpdb_supported": False},
-        "gametype": {"type": "ring", "base": "unknown", "category": "unknown", "currency": "mBTC", "sb": "3", "bb": "6"},
+        "gametype": {
+            "type": "ring",
+            "base": "unknown",
+            "category": "unknown",
+            "currency": "mBTC",
+            "sb": "3",
+            "bb": "6",
+        },
         "metadata": {"state_model": "snapshot"},
         "players": [{"seat_idx": 0, "name": "alice"}],
         "actions": [],
@@ -1271,7 +1322,9 @@ def test_swc_adapter_does_not_infer_check_when_player_faces_bet():
         captured_at="2026-06-28T10:00:01Z",
     )
 
-    assert not any(action.get("player") == "alice" and action.get("type") == "checks" for action in result.current_hand["actions"])
+    assert not any(
+        action.get("player") == "alice" and action.get("type") == "checks" for action in result.current_hand["actions"]
+    )
     assert any(item.get("type") == "turn_delta" for item in result.current_hand["action_evidence"])
 
 
@@ -1404,6 +1457,7 @@ def test_hand_operation_plan_maps_supported_actions_to_hand_methods():
             {"street": "BLINDSANTES", "player": "bob", "type": "big blind", "amount": "2"},
             {"street": "PREFLOP", "player": "alice", "type": "calls", "amount": "1"},
             {"street": "PREFLOP", "player": "bob", "type": "raises", "amount": "4", "to": "6"},
+            {"street": "PREFLOP", "player": "bob", "type": "uncalled", "amount": "4"},
         ],
     }
 
@@ -1414,6 +1468,7 @@ def test_hand_operation_plan_maps_supported_actions_to_hand_methods():
         {"method": "addBlind", "args": ["bob", "big blind", "2"], "source": "actions"},
         {"method": "addCall", "args": ["PREFLOP", "alice", "1"], "source": "actions"},
         {"method": "addRaiseTo", "args": ["PREFLOP", "bob", "6"], "source": "actions"},
+        {"method": "addUncalled", "args": ["PREFLOP", "bob", "4"], "source": "actions"},
     ]
     assert validate_hand_operations(build_hand_operations(hand_data)) == []
 
@@ -1422,7 +1477,7 @@ def test_hand_operation_plan_maps_pot_collections_to_hand_method():
     hand_data = {
         "players": [{"seat_idx": 0, "name": "alice", "starting_stack": 100}],
         "actions": [{"player": "alice", "type": "collects", "amount": "3"}],
-        "collections": [{"player": "alice", "pot": "2"}],
+        "collections": [{"player": "alice", "pot": "2"}, {"player": "alice", "amount_native": "4"}],
         "showdown": {"collections": [{"name": "alice", "collected": "1"}]},
     }
 
@@ -1430,6 +1485,7 @@ def test_hand_operation_plan_maps_pot_collections_to_hand_method():
         {"method": "addPlayer", "args": [0, "alice", "100"], "source": "players"},
         {"method": "addCollectPot", "args": ["alice", "3"], "source": "actions"},
         {"method": "addCollectPot", "args": ["alice", "2"], "source": "collections"},
+        {"method": "addCollectPot", "args": ["alice", "4"], "source": "collections"},
         {"method": "addCollectPot", "args": ["alice", "1"], "source": "showdown.collections"},
     ]
 
