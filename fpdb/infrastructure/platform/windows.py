@@ -42,6 +42,8 @@ class WindowsTableDetector:
             self._EnumWindows = ctypes_api.windll.user32.EnumWindows
             self._GetWindowText = ctypes_api.windll.user32.GetWindowTextW
             self._GetWindowTextLength = ctypes_api.windll.user32.GetWindowTextLengthW
+            self._GetClassName = ctypes_api.windll.user32.GetClassNameW
+            self._GetWindowThreadProcessId = ctypes_api.windll.user32.GetWindowThreadProcessId
             self._IsWindowVisible = ctypes_api.windll.user32.IsWindowVisible
             self._GetWindowRect = ctypes_api.windll.user32.GetWindowRect
             self._SetForegroundWindow = ctypes_api.windll.user32.SetForegroundWindow
@@ -94,10 +96,16 @@ class WindowsTableDetector:
                 if pattern is None or pattern.search(title):
                     geometry = self.get_window_geometry(hwnd)
                     if geometry:
+                        cls_buff = self._ctypes.create_unicode_buffer(256)
+                        self._GetClassName(hwnd, cls_buff, 256)
+                        pid = self._wintypes.DWORD()
+                        self._GetWindowThreadProcessId(hwnd, self._ctypes.byref(pid))
                         table_info = TableInfo(
                             window_id=hwnd,
                             title=title,
                             geometry=geometry,
+                            process_id=pid.value or None,
+                            window_class=cls_buff.value or None,
                         )
                         tables.append(table_info)
             return True
