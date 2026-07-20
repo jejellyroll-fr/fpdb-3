@@ -135,8 +135,8 @@ def acr_json_tree(tmp_path, monkeypatch):
     # Patch _read_acr_json_path to use our tmp storage instead of ~/Library/...
     def patched_read(acr_key, kind, screen_name):
         prefix = "hhDirPath" if kind == "hh" else "tsDirPath"
-        from pathlib import Path
         import json as _json
+        from pathlib import Path
 
         json_path = storage / f"{prefix}_{acr_key}.json"
         if not json_path.is_file():
