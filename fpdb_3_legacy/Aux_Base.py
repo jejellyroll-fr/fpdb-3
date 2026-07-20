@@ -796,11 +796,26 @@ class AuxSeats(AuxWindow):
         shared = getattr(layout_set, "layout", {}).get(self.hud.max) if layout_set is not None else None
         if shared is None:
             return
+        # ``position`` is in the current table's pixel space, but the shared layout
+        # keeps its own reference width/height and create_scale_position() re-scales
+        # from those when the next HUD is built. Convert back into the shared
+        # layout's space so the drop point round-trips instead of being scaled a
+        # second time by stale dimensions.
+        ref = self._to_shared_layout_space(position, shared)
         with contextlib.suppress(Exception):
             if seat == "common":
-                shared.common = position
+                shared.common = ref
             else:
-                shared.location[seat] = position
+                shared.location[seat] = ref
+
+    def _to_shared_layout_space(self, position: tuple[int, int], shared: Any) -> tuple[int, int]:
+        table_w = getattr(self.hud.table, "width", 0) or 0
+        table_h = getattr(self.hud.table, "height", 0) or 0
+        shared_w = getattr(shared, "width", 0) or 0
+        shared_h = getattr(shared, "height", 0) or 0
+        if not (table_w and table_h and shared_w and shared_h):
+            return position  # dimensions unknown: store as-is
+        return (int(position[0] * shared_w / table_w), int(position[1] * shared_h / table_h))
 
     def adj_seats(self) -> list[int]:
         """Determine how to adjust seating arrangements.
