@@ -77,6 +77,25 @@ def test_single_table_close_is_detected_even_with_no_other_table() -> None:
     assert t._coinpoker_live_geometry() is None  # closed
 
 
+def test_fallback_attached_hud_closes_when_tracked_window_is_another_table() -> None:
+    # Codex case: attached via the class fallback (never confirmed). A later poll
+    # can read argv and the tracked HWND now belongs to a *different* table, so the
+    # window we hold is provably not ours -> close, don't cling via is_window_visible.
+    t = _make_table()
+    t.number = 111
+    t._coinpoker_argv_confirmed = False
+    t.search_string = "930357"
+    # No open window carries our id (another table occupies things).
+    t._detector.find_tables.return_value = _windows((956, "928730"))
+    t._detector.is_window_visible.return_value = True  # stale window still "visible"
+    t._detector.get_window_geometry.return_value = _GEOM
+
+    with patch("fpdb_3_legacy.WinTables._window_pid", return_value=956):
+        # Our tracked HWND's process now serves table 928730, not 930357.
+        with patch("fpdb.infrastructure.platform.windows_process.table_id_for_pid", return_value="928730"):
+            assert t._coinpoker_live_geometry() is None  # closed despite visibility
+
+
 def test_unreadable_coinpoker_processes_do_not_kill_a_live_hud() -> None:
     # Codex case: fpdb's own argv is readable but the CoinPoker Unity processes are
     # access-denied (e.g. elevated), so our id was never confirmed. A no-match must
