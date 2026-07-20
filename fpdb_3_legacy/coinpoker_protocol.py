@@ -56,46 +56,54 @@ def split_frames(buf: bytes) -> list[tuple[int, bytes]]:
     return frames
 
 
+# Fixed-width scalar TLV types -> struct format (0x02 is a bare byte).
+_SCALAR_FMT = {0x03: ">H", 0x04: ">I", 0x05: ">Q"}
+# Length-prefixed string TLV types -> format of the length prefix.
+_STRLEN_FMT = {0x08: ">H", 0x0A: ">I"}
+
+
+def _read_map(b: bytes, off: int) -> tuple[dict[str, Any], int]:
+    count = struct.unpack_from(">H", b, off)[0]
+    off += 2
+    out: dict[str, Any] = {}
+    for _ in range(count):
+        klen = struct.unpack_from(">H", b, off)[0]
+        off += 2
+        key = b[off : off + klen].decode("latin1")
+        off += klen
+        vtyp = b[off]
+        off += 1
+        out[key], off = _read_value(b, off, vtyp)
+    return out, off
+
+
+def _read_array(b: bytes, off: int) -> tuple[list[Any], int]:
+    count = struct.unpack_from(">H", b, off)[0]
+    off += 2
+    etyp = b[off]
+    off += 1
+    arr = []
+    for _ in range(count):
+        val, off = _read_value(b, off, etyp)
+        arr.append(val)
+    return arr, off
+
+
 def _read_value(b: bytes, off: int, typ: int) -> tuple[Any, int]:
     if typ == 0x12:  # map
-        count = struct.unpack_from(">H", b, off)[0]
-        off += 2
-        out: dict[str, Any] = {}
-        for _ in range(count):
-            klen = struct.unpack_from(">H", b, off)[0]
-            off += 2
-            key = b[off : off + klen].decode("latin1")
-            off += klen
-            vtyp = b[off]
-            off += 1
-            val, off = _read_value(b, off, vtyp)
-            out[key] = val
-        return out, off
+        return _read_map(b, off)
     if typ == 0x13:  # array
-        count = struct.unpack_from(">H", b, off)[0]
-        off += 2
-        etyp = b[off]
-        off += 1
-        arr = []
-        for _ in range(count):
-            val, off = _read_value(b, off, etyp)
-            arr.append(val)
-        return arr, off
-    if typ == 0x02:
+        return _read_array(b, off)
+    if typ == 0x02:  # single byte
         return b[off], off + 1
-    if typ == 0x03:
-        return struct.unpack_from(">H", b, off)[0], off + 2
-    if typ == 0x04:
-        return struct.unpack_from(">I", b, off)[0], off + 4
-    if typ == 0x05:
-        return struct.unpack_from(">Q", b, off)[0], off + 8
-    if typ == 0x08:
-        ln = struct.unpack_from(">H", b, off)[0]
-        off += 2
-        return b[off : off + ln].decode("latin1"), off + ln
-    if typ == 0x0a:
-        ln = struct.unpack_from(">I", b, off)[0]
-        off += 4
+    if typ in _SCALAR_FMT:
+        fmt = _SCALAR_FMT[typ]
+        return struct.unpack_from(fmt, b, off)[0], off + struct.calcsize(fmt)
+    if typ in _STRLEN_FMT:
+        fmt = _STRLEN_FMT[typ]
+        prefix = struct.calcsize(fmt)
+        ln = struct.unpack_from(fmt, b, off)[0]
+        off += prefix
         return b[off : off + ln].decode("latin1"), off + ln
     raise ValueError(f"unknown TLV type 0x{typ:02x} at offset {off}")
 

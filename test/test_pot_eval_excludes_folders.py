@@ -16,9 +16,19 @@ import sys
 from decimal import Decimal
 from unittest.mock import MagicMock
 
+import pytest
+
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
+import fpdb_3_legacy.DerivedStats as _derived_stats
 from fpdb_3_legacy.DerivedStats import DerivedStats
+
+# assembleHandsPots is a no-op without the native poker-eval engine (pypoker-eval),
+# which isn't built in every environment, so these pot-award checks can't run there.
+pytestmark = pytest.mark.skipif(
+    _derived_stats.pokereval is None,
+    reason="requires the native poker-eval engine (pypoker-eval)",
+)
 
 # Unibet hand 1615946806, Pot Limit Omaha. jejesat folds on the flop holding the
 # best hand at the river; ASC2 wins €0.23 of a €0.25 pot, rake €0.02.
