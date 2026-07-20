@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import ctypes
 import ctypes.util
+import subprocess
 import sys
 from collections.abc import Callable, Iterator
 
@@ -203,9 +204,10 @@ def default_device() -> str:
     a VPN full-tunnel is up (WireGuard/OpenVPN, common for poker) the plaintext
     game stream appears on the tunnel adapter and the physical NIC carries only
     encrypted packets. Route resolution beats any name/description guess. If it
-    fails, or on macOS, fall back to preferring a physical up-and-running
-    interface and skipping obviously virtual ones. The GUI lets the user
-    override this.
+    fails, fall back to preferring a physical up-and-running interface and
+    skipping obviously virtual ones. On macOS the route device is also resolved
+    first because a full-tunnel VPN carries the plaintext game stream on utun;
+    the physical interface only sees encrypted VPN packets.
     """
     if sys.platform.startswith("linux"):
         return "any"  # DLT_LINUX_SLL; captures every interface
@@ -214,7 +216,32 @@ def default_device() -> str:
         route_dev = _windows_capture_device(devices)
         if route_dev:
             return route_dev
+    elif sys.platform == "darwin":
+        route_dev = _macos_route_device_name()
+        if route_dev and any(name == route_dev for name, _desc, _flags in devices):
+            return route_dev
     return _heuristic_device(devices)
+
+
+def _macos_route_device_name() -> str | None:
+    """Return the interface owning macOS's current default IPv4 route."""
+    if sys.platform != "darwin":
+        return None
+    try:
+        result = subprocess.run(  # noqa: S603 - fixed system utility and arguments
+            ["/sbin/route", "-n", "get", "default"],
+            check=True,
+            capture_output=True,
+            text=True,
+            timeout=2,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return None
+    for line in result.stdout.splitlines():
+        key, separator, value = line.partition(":")
+        if separator and key.strip() == "interface":
+            return value.strip() or None
+    return None
 
 
 def _windows_capture_device(devices: list[tuple[str, str, int]]) -> str | None:
