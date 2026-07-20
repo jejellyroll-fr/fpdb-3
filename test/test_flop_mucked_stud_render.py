@@ -10,8 +10,13 @@ from __future__ import annotations
 
 from types import SimpleNamespace
 
+import pytest
 from PySide6.QtGui import QPixmap
 from PySide6.QtWidgets import QLabel
+
+# Uses the pytest-qt `qapp` fixture; group with the other Qt UI tests so it is
+# deselected in the default (non-qt) run instead of erroring on a missing fixture.
+pytestmark = pytest.mark.qt
 
 from fpdb_3_legacy import Card
 from fpdb_3_legacy.Mucked import Flop_Mucked
