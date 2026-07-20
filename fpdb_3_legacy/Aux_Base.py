@@ -776,10 +776,46 @@ class AuxSeats(AuxWindow):
             if isinstance(i, int):
                 self.hud.layout.location[self.adj[i]] = new_position  # update the hud-level dict,
                 # so other aux can be told
+                self._propagate_to_shared_layout(self.adj[i], new_position)
             elif i == "common":
                 self.hud.layout.common = new_position
+                self._propagate_to_shared_layout("common", new_position)
             else:
                 log.warning("Ignoring unexpected HUD seat identifier while saving position: %r", i)
+
+    def _propagate_to_shared_layout(self, seat: Any, position: tuple[int, int]) -> None:
+        """Mirror a dragged position onto the site's shared layout set.
+
+        A HUD deep-copies its layout when it is created, so a drag that only
+        updates this HUD's copy is lost on the next table: a table opened later
+        with the same layout would fall back to the un-dragged positions. Writing
+        through to the shared layout_set makes those new tables inherit the drag
+        (permanent persistence still happens via the "Save Layout" menu).
+        """
+        layout_set = getattr(self.hud, "layout_set", None)
+        shared = getattr(layout_set, "layout", {}).get(self.hud.max) if layout_set is not None else None
+        if shared is None:
+            return
+        # ``position`` is in the current table's pixel space, but the shared layout
+        # keeps its own reference width/height and create_scale_position() re-scales
+        # from those when the next HUD is built. Convert back into the shared
+        # layout's space so the drop point round-trips instead of being scaled a
+        # second time by stale dimensions.
+        ref = self._to_shared_layout_space(position, shared)
+        with contextlib.suppress(Exception):
+            if seat == "common":
+                shared.common = ref
+            else:
+                shared.location[seat] = ref
+
+    def _to_shared_layout_space(self, position: tuple[int, int], shared: Any) -> tuple[int, int]:
+        table_w = getattr(self.hud.table, "width", 0) or 0
+        table_h = getattr(self.hud.table, "height", 0) or 0
+        shared_w = getattr(shared, "width", 0) or 0
+        shared_h = getattr(shared, "height", 0) or 0
+        if not (table_w and table_h and shared_w and shared_h):
+            return position  # dimensions unknown: store as-is
+        return (int(position[0] * shared_w / table_w), int(position[1] * shared_h / table_h))
 
     def adj_seats(self) -> list[int]:
         """Determine how to adjust seating arrangements.
