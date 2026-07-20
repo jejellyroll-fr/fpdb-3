@@ -35,6 +35,20 @@ if sys.platform == "win32":
     SM_CYCAPTION = 4
 
 
+def _window_pid(hwnd: int | None) -> int | None:
+    """Return the process id owning ``hwnd`` on Windows, or None."""
+    if sys.platform != "win32" or not hwnd:
+        return None
+    try:
+        import ctypes  # local import: ctypes.windll is Windows-only
+
+        pid = ctypes.c_ulong()
+        ctypes.windll.user32.GetWindowThreadProcessId(int(hwnd), ctypes.byref(pid))
+        return pid.value or None
+    except Exception:  # noqa: BLE001 - defensive: never break the geometry poll
+        return None
+
+
 # Global variables for window borders
 b_width = 3
 tb_height = 29
@@ -233,18 +247,47 @@ class Table(Table_Window):
                 self.number = match.window_id
                 self.gdkhandle = None
             return self._detector.get_window_geometry(self.number)
-        if self._coinpoker_argv_confirmed:
+        # No open CoinPoker window carries our id. Close if we can be sure this is
+        # not our table anymore: either our id was readable before and is now gone
+        # (confirmed), or the very window we track positively resolves to a
+        # *different* table id (reused/stale window -- catches HUDs first attached
+        # via the class fallback, where confirmed is still False).
+        if self._coinpoker_argv_confirmed or self._tracked_window_belongs_elsewhere():
             log.warning(
                 "CoinPoker table %s: no open window carries this table id among %d CoinPoker window(s); closing HUD",
                 self.search_string,
                 len(tables),
             )
             return None
-        # This table's id was never readable from its process: don't guess a
-        # close, keep the tracked HWND's visibility path.
+        # Can't tell (our id was never readable and the tracked window's argv is
+        # unreadable too): keep the tracked HWND's visibility path so a permission
+        # mismatch never kills a live HUD.
         if self._detector.is_window_visible(self.number):
             return self._detector.get_window_geometry(self.number)
         return None
+
+    def _tracked_window_belongs_elsewhere(self) -> bool:
+        """True if the tracked HWND's process argv resolves to a *different* table id.
+
+        Proves the window we hold is no longer ours (recycled for another table),
+        which is a reliable close signal even when this HUD was attached via the
+        class fallback and never had its id confirmed. Returns False whenever the
+        id can't be read, so it never causes a premature kill.
+        """
+        target = "".join(ch for ch in str(getattr(self, "search_string", "")) if ch.isdigit())
+        if not target:
+            return False
+        pid = _window_pid(self.number)
+        if not pid:
+            return False
+        try:
+            from fpdb.infrastructure.platform.windows_process import table_id_for_pid
+
+            current = table_id_for_pid(pid)
+        except Exception as exc:  # noqa: BLE001 - never break the geometry poll
+            log.debug("CoinPoker tracked-window argv check failed for pid %s: %s", pid, exc)
+            return False
+        return bool(current) and current != target
 
     def get_geometry(self):
         """Get the window geometry using platform abstraction."""
