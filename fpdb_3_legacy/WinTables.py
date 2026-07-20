@@ -35,30 +35,6 @@ if sys.platform == "win32":
     SM_CYCAPTION = 4
 
 
-_argv_readable: bool | None = None
-
-
-def _argv_reading_works() -> bool:
-    """True if psutil can read a process's command line in this environment.
-
-    Tests our own process once and caches the result: whether argv is readable is
-    a property of the environment (psutil installed / permitted), not of any table,
-    so a single-table close can still be detected without another table open.
-    """
-    global _argv_readable
-    if _argv_readable is None:
-        try:
-            import os
-
-            import psutil
-
-            psutil.Process(os.getpid()).cmdline()
-            _argv_readable = True
-        except Exception:  # noqa: BLE001 - any failure means argv is not usable here
-            _argv_readable = False
-    return _argv_readable
-
-
 def _window_pid(hwnd: int | None) -> int | None:
     """Return the process id owning ``hwnd`` on Windows, or None."""
     if sys.platform != "win32" or not hwnd:
@@ -94,6 +70,11 @@ class Table(Table_Window):
         self._detector = get_table_detector()
         self._table_geometry = None
         self.gdkhandle: QWindow | None = None
+        # Set once this table's id has actually been read from a CoinPoker Unity
+        # process argv. Only then can a later "no window carries our id" be trusted
+        # to mean the table closed (rather than psutil being unable to read those
+        # processes, e.g. an elevated client).
+        self._coinpoker_argv_confirmed = False
         super().__init__(*args, **kwargs)
 
     def _matches_winamax_tournament(self, title: str) -> bool:
@@ -159,6 +140,9 @@ class Table(Table_Window):
                 continue
             try:
                 if table_id_for_pid(pid) == target:
+                    # We could read this table's id from its process, so a later
+                    # absence can be trusted to mean the table was closed.
+                    self._coinpoker_argv_confirmed = True
                     return table_info
             except Exception as exc:  # pragma: no cover - psutil/platform dependent
                 log.debug("argv lookup failed for pid %s: %s", pid, exc)
@@ -247,11 +231,12 @@ class Table(Table_Window):
         recycled or recreated. Tracking a fixed HWND is therefore unreliable.
         Instead, re-resolve the window by this table's id each poll: if no open
         CoinPoker window's process argv carries our id, the table has closed
-        (return None) -- this holds even when ours was the only table, because the
-        "closed" decision is gated on argv being *functional* (see
-        _argv_reading_works), not on another table being open. Fall back to the
-        tracked HWND's visibility only when argv can't be read at all, so a missing
-        dependency never forces a kill.
+        (return None) -- this holds even when ours was the only table. The "closed"
+        decision is gated on having *ever* read this table's id from its process
+        (_coinpoker_argv_confirmed): if we never could (psutil missing, or the
+        CoinPoker processes are access-denied/elevated), we can't tell a close from
+        an unreadable process, so we fall back to the tracked HWND's visibility and
+        never kill a live HUD.
         """
         tables = self._detector.find_tables("CoinPoker")
         match = self._match_coinpoker_by_argv(tables)
@@ -262,17 +247,47 @@ class Table(Table_Window):
                 self.number = match.window_id
                 self.gdkhandle = None
             return self._detector.get_window_geometry(self.number)
-        if _argv_reading_works():
+        # No open CoinPoker window carries our id. Close if we can be sure this is
+        # not our table anymore: either our id was readable before and is now gone
+        # (confirmed), or the very window we track positively resolves to a
+        # *different* table id (reused/stale window -- catches HUDs first attached
+        # via the class fallback, where confirmed is still False).
+        if self._coinpoker_argv_confirmed or self._tracked_window_belongs_elsewhere():
             log.warning(
                 "CoinPoker table %s: no open window carries this table id among %d CoinPoker window(s); closing HUD",
                 self.search_string,
                 len(tables),
             )
             return None
-        # argv unreadable (psutil unavailable): keep the old HWND-visibility path.
+        # Can't tell (our id was never readable and the tracked window's argv is
+        # unreadable too): keep the tracked HWND's visibility path so a permission
+        # mismatch never kills a live HUD.
         if self._detector.is_window_visible(self.number):
             return self._detector.get_window_geometry(self.number)
         return None
+
+    def _tracked_window_belongs_elsewhere(self) -> bool:
+        """True if the tracked HWND's process argv resolves to a *different* table id.
+
+        Proves the window we hold is no longer ours (recycled for another table),
+        which is a reliable close signal even when this HUD was attached via the
+        class fallback and never had its id confirmed. Returns False whenever the
+        id can't be read, so it never causes a premature kill.
+        """
+        target = "".join(ch for ch in str(getattr(self, "search_string", "")) if ch.isdigit())
+        if not target:
+            return False
+        pid = _window_pid(self.number)
+        if not pid:
+            return False
+        try:
+            from fpdb.infrastructure.platform.windows_process import table_id_for_pid
+
+            current = table_id_for_pid(pid)
+        except Exception as exc:  # noqa: BLE001 - never break the geometry poll
+            log.debug("CoinPoker tracked-window argv check failed for pid %s: %s", pid, exc)
+            return False
+        return bool(current) and current != target
 
     def get_geometry(self):
         """Get the window geometry using platform abstraction."""

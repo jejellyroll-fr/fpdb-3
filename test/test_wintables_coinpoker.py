@@ -37,6 +37,7 @@ def _make_table() -> WinTables.Table:
     t.title = ""
     t.gdkhandle = None
     t._table_geometry = None
+    t._coinpoker_argv_confirmed = False
     t._detector = Mock()
     return t
 
@@ -49,8 +50,8 @@ def _windows(*ids_by_pid: tuple[int, str]) -> list[TableInfo]:
 
 
 def test_live_geometry_reresolves_and_rebinds_hwnd() -> None:
-    # The window stays "visible" after the table closes, so detection is by table
-    # id: our id present -> alive, HWND re-bound, and the cached parent handle reset.
+    # Detection is by table id: our id present -> alive, HWND re-bound, the cached
+    # parent handle reset, and _coinpoker_argv_confirmed latched by the match.
     t = _make_table()
     t.number = 111
     t.gdkhandle = "STALE"
@@ -58,36 +59,56 @@ def test_live_geometry_reresolves_and_rebinds_hwnd() -> None:
     t._detector.find_tables.return_value = _windows((956, "166755"), (957, "930357"))
     pid_to_id = {956: "166755", 957: "930357"}
 
-    with patch("fpdb_3_legacy.WinTables._argv_reading_works", return_value=True):
-        with patch("fpdb.infrastructure.platform.windows_process.table_id_for_pid", side_effect=pid_to_id.get):
-            assert t._coinpoker_live_geometry() is _GEOM
+    with patch("fpdb.infrastructure.platform.windows_process.table_id_for_pid", side_effect=pid_to_id.get):
+        assert t._coinpoker_live_geometry() is _GEOM
     assert t.number == 1057  # re-bound to the window actually serving our id
     assert t.gdkhandle is None  # stale parent handle dropped so topify re-parents
+    assert t._coinpoker_argv_confirmed is True  # reading our id latched it
 
 
 def test_single_table_close_is_detected_even_with_no_other_table() -> None:
-    # The whole point: ours was the only table. No window carries our id and argv
-    # is functional -> the table is gone, even though nothing else is open.
+    # Ours was the only table and its id was read before (confirmed). No window
+    # carries our id now -> closed, even though nothing else is open.
     t = _make_table()
     t.number = 111
+    t._coinpoker_argv_confirmed = True  # our id was readable while the table lived
     t._detector.find_tables.return_value = []  # our window vanished; nothing left
 
-    with patch("fpdb_3_legacy.WinTables._argv_reading_works", return_value=True):
-        assert t._coinpoker_live_geometry() is None  # closed
+    assert t._coinpoker_live_geometry() is None  # closed
 
 
-def test_live_geometry_falls_back_to_visibility_when_argv_unreadable() -> None:
-    # psutil not usable at all -> don't guess "closed"; keep the HWND-visibility
-    # path so a missing dependency never kills a live HUD.
+def test_fallback_attached_hud_closes_when_tracked_window_is_another_table() -> None:
+    # Codex case: attached via the class fallback (never confirmed). A later poll
+    # can read argv and the tracked HWND now belongs to a *different* table, so the
+    # window we hold is provably not ours -> close, don't cling via is_window_visible.
     t = _make_table()
     t.number = 111
-    t._detector.find_tables.return_value = _windows((956, "x"))
+    t._coinpoker_argv_confirmed = False
+    t.search_string = "930357"
+    # No open window carries our id (another table occupies things).
+    t._detector.find_tables.return_value = _windows((956, "928730"))
+    t._detector.is_window_visible.return_value = True  # stale window still "visible"
+    t._detector.get_window_geometry.return_value = _GEOM
+
+    with patch("fpdb_3_legacy.WinTables._window_pid", return_value=956):
+        # Our tracked HWND's process now serves table 928730, not 930357.
+        with patch("fpdb.infrastructure.platform.windows_process.table_id_for_pid", return_value="928730"):
+            assert t._coinpoker_live_geometry() is None  # closed despite visibility
+
+
+def test_unreadable_coinpoker_processes_do_not_kill_a_live_hud() -> None:
+    # Codex case: fpdb's own argv is readable but the CoinPoker Unity processes are
+    # access-denied (e.g. elevated), so our id was never confirmed. A no-match must
+    # NOT be read as closed -- fall back to the tracked window's visibility.
+    t = _make_table()
+    t.number = 111
+    t._coinpoker_argv_confirmed = False  # never managed to read a CoinPoker id
+    t._detector.find_tables.return_value = _windows((956, "denied"))
     t._detector.is_window_visible.return_value = True
     t._detector.get_window_geometry.return_value = _GEOM
 
-    with patch("fpdb_3_legacy.WinTables._argv_reading_works", return_value=False):
-        with patch("fpdb.infrastructure.platform.windows_process.table_id_for_pid", return_value=None):
-            assert t._coinpoker_live_geometry() is _GEOM  # stay alive
+    with patch("fpdb.infrastructure.platform.windows_process.table_id_for_pid", return_value=None):
+        assert t._coinpoker_live_geometry() is _GEOM  # stay alive
 
 
 def test_coinpoker_picks_unity_table_over_lobby() -> None:
