@@ -82,6 +82,7 @@ ACTION_METHOD_BY_TYPE = {
     "bringin": "addBringIn",
     "bring-in": "addBringIn",
     "discards": "addDiscard",
+    "uncalled": "addUncalled",
 }
 
 HAND_CLASS_IMPORTS = {
@@ -155,7 +156,9 @@ def build_hand_operations(hand_data: dict[str, Any]) -> list[dict[str, Any]]:
         action_type = action.get("type")
         method = ACTION_METHOD_BY_TYPE.get(action_type)
         if not method:
-            operations.append({"method": None, "source": "actions", "action": action, "reason": "unsupported action type"})
+            operations.append(
+                {"method": None, "source": "actions", "action": action, "reason": "unsupported action type"}
+            )
             continue
 
         if method == "addBlind":
@@ -178,7 +181,11 @@ def build_hand_operations(hand_data: dict[str, Any]) -> list[dict[str, Any]]:
             operations.append(
                 {
                     "method": method,
-                    "args": [action.get("street"), action.get("player"), str(action.get("to", action.get("amount", "0")))],
+                    "args": [
+                        action.get("street"),
+                        action.get("player"),
+                        str(action.get("to", action.get("amount", "0"))),
+                    ],
                     "source": "actions",
                 }
             )
@@ -220,6 +227,14 @@ def build_hand_operations(hand_data: dict[str, Any]) -> list[dict[str, Any]]:
                 {
                     "method": method,
                     "args": [action.get("street"), action.get("player"), str(action.get("num", len(cards))), cards],
+                    "source": "actions",
+                }
+            )
+        elif method == "addUncalled":
+            operations.append(
+                {
+                    "method": method,
+                    "args": [action.get("street"), action.get("player"), str(action.get("amount", "0"))],
                     "source": "actions",
                 }
             )
@@ -343,7 +358,10 @@ def _iter_collections(hand_data: dict[str, Any]) -> list[dict[str, Any]]:
         collections.append(
             {
                 "player": collection.get("player") or collection.get("name"),
-                "pot": collection.get("pot", collection.get("amount", collection.get("collected", "0"))),
+                "pot": collection.get(
+                    "pot",
+                    collection.get("amount", collection.get("amount_native", collection.get("collected", "0"))),
+                ),
                 "source": "collections",
             }
         )
@@ -353,7 +371,10 @@ def _iter_collections(hand_data: dict[str, Any]) -> list[dict[str, Any]]:
         collections.append(
             {
                 "player": collection.get("player") or collection.get("name"),
-                "pot": collection.get("pot", collection.get("amount", collection.get("collected", "0"))),
+                "pot": collection.get(
+                    "pot",
+                    collection.get("amount", collection.get("amount_native", collection.get("collected", "0"))),
+                ),
                 "source": "showdown.collections",
             }
         )
