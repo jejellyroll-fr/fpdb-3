@@ -48,6 +48,18 @@ class WindowsTableDetector:
             self._GetWindowRect = ctypes_api.windll.user32.GetWindowRect
             self._SetForegroundWindow = ctypes_api.windll.user32.SetForegroundWindow
             self._MoveWindow = ctypes_api.windll.user32.MoveWindow
+            try:
+                self._DwmGetWindowAttribute = ctypes_api.windll.dwmapi.DwmGetWindowAttribute
+                self._DwmGetWindowAttribute.argtypes = [
+                    wintypes.HWND,
+                    wintypes.DWORD,
+                    ctypes_api.c_void_p,
+                    wintypes.DWORD,
+                ]
+                self._DwmGetWindowAttribute.restype = ctypes_api.c_long
+            except (AttributeError, OSError):
+                # DWM is unavailable on very old/minimal Windows environments.
+                self._DwmGetWindowAttribute = None
 
             logger.info("Windows table detector initialized")
 
@@ -87,7 +99,7 @@ class WindowsTableDetector:
 
         def enum_callback(hwnd, lParam):
             length = self._GetWindowTextLength(hwnd)
-            if length > 0 and self._IsWindowVisible(hwnd):
+            if length > 0 and self._window_is_actually_visible(hwnd):
                 buff = self._ctypes.create_unicode_buffer(length + 1)
                 self._GetWindowText(hwnd, buff, length + 1)
                 title = buff.value
@@ -156,9 +168,32 @@ class WindowsTableDetector:
         """
         try:
             window_id = int(window_id)
-            return bool(self._IsWindowVisible(window_id))
+            return self._window_is_actually_visible(window_id)
         except Exception:
             return False
+
+    def _window_is_actually_visible(self, window_id: int) -> bool:
+        """True only when Win32 and DWM both consider the window visible.
+
+        CoinPoker's Unity host can remain ``IsWindowVisible`` after a table is
+        closed while DWM cloaks it. Such a window is not displayed but used to
+        keep the HUD alive forever because its PID/argv still carried the table
+        id. Treat DWM-cloaked windows as closed. If DWM is unavailable or the
+        query fails, preserve the legacy Win32 result.
+        """
+        if not self._IsWindowVisible(window_id):
+            return False
+        if self._DwmGetWindowAttribute is None:
+            return True
+        cloaked = self._wintypes.DWORD()
+        # DWMWA_CLOAKED = 14; HRESULT 0 means the value is valid.
+        result = self._DwmGetWindowAttribute(
+            window_id,
+            14,
+            self._ctypes.byref(cloaked),
+            self._ctypes.sizeof(cloaked),
+        )
+        return result != 0 or not bool(cloaked.value)
 
     def get_window_title(self, window_id: int | str) -> str | None:
         """Get window title
