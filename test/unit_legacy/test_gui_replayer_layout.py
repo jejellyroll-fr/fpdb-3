@@ -13,7 +13,9 @@ from fpdb_3_legacy.GuiReplayer import (
     format_replay_amount,
     hidden_card_count,
     order_players_clockwise,
+    replay_button_streets,
     replay_hero_equity,
+    replay_street_groups,
     seat_anchors,
     visible_hole_card_count,
 )
@@ -187,6 +189,52 @@ def test_layout_scales_cards_down_for_compact_windows():
 
     assert compact.card_width < full.card_width
     assert compact.card_width >= int(70 * MIN_CARD_SCALE)
+
+
+def test_bomb_pot_groups_parallel_boards_by_street() -> None:
+    hand = SimpleNamespace(
+        bombPot=24,
+        allStreets=[
+            "BLINDSANTES", "PREFLOP",
+            "FLOP1", "TURN1", "RIVER1",
+            "FLOP2", "TURN2", "RIVER2",
+        ],
+    )
+
+    assert replay_street_groups(hand) == [
+        ("BLINDSANTES",),
+        ("PREFLOP",),
+        ("FLOP1", "FLOP2"),
+        ("TURN1", "TURN2"),
+        ("RIVER1", "RIVER2"),
+    ]
+
+
+def test_true_rit_keeps_sequential_runout_order() -> None:
+    streets = ["PREFLOP", "FLOP1", "TURN1", "RIVER1", "FLOP2", "TURN2", "RIVER2"]
+    hand = SimpleNamespace(bombPot=0, allStreets=streets)
+
+    assert replay_street_groups(hand) == [(street,) for street in streets]
+
+
+def test_bomb_pot_navigation_uses_parallel_board_phases() -> None:
+    hand = SimpleNamespace(
+        bombPot=24,
+        allStreets=[
+            "BLINDSANTES", "PREFLOP",
+            "FLOP1", "TURN1", "RIVER1",
+            "FLOP2", "TURN2", "RIVER2",
+        ],
+    )
+
+    assert replay_button_streets(hand) == ["PREFLOP", "FLOP", "TURN", "RIVER"]
+
+
+def test_true_rit_navigation_keeps_numbered_runout_streets() -> None:
+    streets = ["PREFLOP", "FLOP1", "TURN1", "RIVER1", "FLOP2", "TURN2", "RIVER2"]
+    hand = SimpleNamespace(bombPot=0, allStreets=streets)
+
+    assert replay_button_streets(hand) == streets[1:]
 
 
 def test_timeline_appears_only_when_width_allows_readability():
