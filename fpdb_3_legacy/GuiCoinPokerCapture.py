@@ -21,6 +21,7 @@ import signal
 import subprocess
 import sys
 from pathlib import Path
+from typing import TextIO
 
 from PySide6.QtCore import QTimer
 from PySide6.QtWidgets import (
@@ -56,7 +57,7 @@ class GuiCoinPokerCapture(QWidget):
         self.config = config
         self.proc: subprocess.Popen | None = None
         self.hud_proc: subprocess.Popen | None = None
-        self._hud_log = None
+        self._hud_log: TextIO | None = None
         self._log_pos = 0
 
         state_dir = Path(os.path.expanduser("~/.fpdb"))
@@ -298,12 +299,20 @@ class GuiCoinPokerCapture(QWidget):
         except Exception as exc:  # noqa: BLE001
             self.output.appendPlainText(f"[warn] could not launch HUD_main: {exc}")
 
-    def _launch_elevated(self) -> subprocess.Popen:
+    def _launch_elevated(self) -> subprocess.Popen | None:
+        """Launch capture and return a child only when this GUI owns it.
+
+        Windows ``ShellExecuteW(..., runas, ...)`` starts a detached elevated
+        process and exposes no usable ``Popen`` handle.  Returning ``None`` is
+        intentional: a short-lived placeholder must never be treated as the
+        real capture or as evidence that startup failed.
+        """
         system = platform.system()
         if system == "Darwin":
             return self._launch_macos()
         if system == "Windows":
-            return self._launch_windows()
+            self._launch_windows()
+            return None
         return self._launch_linux()
 
     def _launch_linux(self) -> subprocess.Popen:
@@ -321,7 +330,7 @@ class GuiCoinPokerCapture(QWidget):
             stderr=subprocess.STDOUT,
         )
 
-    def _launch_windows(self) -> subprocess.Popen:
+    def _launch_windows(self) -> None:
         import ctypes
 
         root = _repo_root()
@@ -330,10 +339,21 @@ class GuiCoinPokerCapture(QWidget):
         if iface:
             command += ["--iface", iface]
         params = " ".join(f'"{a}"' if " " in a else a for a in command[1:])
-        rc = ctypes.windll.shell32.ShellExecuteW(None, "runas", command[0], params, str(root), 1)
+        rc = ctypes.windll.shell32.ShellExecuteW(  # type: ignore[attr-defined]
+            None,
+            "runas",
+            command[0],
+            params,
+            str(root),
+            1,
+        )
         if int(rc) <= 32:
             raise OSError(f"UAC elevation was declined or failed (code {rc})")
-        return subprocess.Popen(["cmd", "/c", "exit"])  # placeholder; real process is elevated
+        # ShellExecuteW does not return a process handle here. The elevated
+        # importer reports readiness through --log-file and stops via the
+        # sentinel; do not manufacture an exited placeholder process because
+        # _check_started would interpret it as a crash and terminate HUD_main.
+        return None
 
     def _launch_macos(self) -> subprocess.Popen:
         # macOS TCC blocks a root process from reading the venv under ~/Documents,
