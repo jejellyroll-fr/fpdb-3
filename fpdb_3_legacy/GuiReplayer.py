@@ -287,6 +287,9 @@ class ReplayFrame:
     pots: list[tuple[str, Decimal]] = field(default_factory=list)
     # Run-it boards: one dict per run with color/board_highlight/winner/combo.
     runs: list[dict[str, Any]] = field(default_factory=list)
+    # ``double`` reveals parallel boards street-by-street; ``run`` reveals
+    # sequential runouts. Both reuse the same Boards storage representation.
+    board_mode: str = "single"
     # Game category (e.g. "cour_hi"); used to expose the Courchevel flopet pre-flop.
     category: str = ""
 
@@ -297,6 +300,37 @@ class ReplayModel:
     info: str
     states: list[Any]
     seen_streets: set[str]
+
+
+def replay_street_groups(hand: Any) -> list[tuple[str, ...]]:
+    """Return replay phases, grouping bomb-pot boards by poker street.
+
+    Database reconstruction represents every multiboard hand as numbered
+    streets. A true RIT is sequential (run 1, then run 2), while a double-board
+    bomb pot deals both flops, both turns and both rivers in parallel.
+    """
+    streets = list(getattr(hand, "allStreets", []) or [])
+    if not getattr(hand, "bombPot", 0):
+        return [(street,) for street in streets]
+    numbered = {street for street in streets if street in GuiReplayer._RUN_IT_STREETS}
+    if not numbered:
+        return [(street,) for street in streets]
+    first = min(streets.index(street) for street in numbered)
+    prefix = [(street,) for street in streets[:first] if street not in numbered]
+    groups = [
+        tuple(f"{phase}{run}" for run in (1, 2, 3) if f"{phase}{run}" in numbered)
+        for phase in ("FLOP", "TURN", "RIVER")
+    ]
+    suffix = [(street,) for street in streets[first:] if street not in numbered]
+    return prefix + [group for group in groups if group] + suffix
+
+
+def replay_button_streets(hand: Any) -> list[str]:
+    """Return navigation phases matching the replay model's visible states."""
+    groups = replay_street_groups(hand)[1:]
+    if not getattr(hand, "bombPot", 0):
+        return [group[0] for group in groups]
+    return [group[0].rstrip("123") if len(group) > 1 else group[0] for group in groups]
 
 
 @dataclass
@@ -1324,7 +1358,7 @@ class GuiReplayer(QWidget):
 
     def _build_replay_model(self, hand) -> ReplayModel:
         states = []
-        seen_streets = []
+        seen_streets: list[str] = []
         state = TableState(hand)
         # Index of the last street worth showing: one that carries actions OR has
         # board cards dealt. Keep showing up to this street even if an intermediate
@@ -1334,10 +1368,12 @@ class GuiReplayer(QWidget):
         # turn/river even though the showdown is evaluated on the full board.
         board = getattr(hand, "board", {}) or {}
         last_shown_idx = -1
-        for idx, street in enumerate(hand.allStreets):
-            if hand.actions.get(street) or board.get(street):
+        street_groups = replay_street_groups(hand)
+        for idx, group in enumerate(street_groups):
+            if any(hand.actions.get(street) or board.get(street) for street in group):
                 last_shown_idx = idx
-        for idx, street in enumerate(hand.allStreets):
+        for idx, group in enumerate(street_groups):
+            street = group[0]
             if state.called > 0:
                 for player in list(state.players.values()):
                     if player.stack == 0:
@@ -1346,17 +1382,22 @@ class GuiReplayer(QWidget):
             # Run-it streets (FLOP1/TURN1/.../RIVER3) carry no betting but must
             # always be shown, even when the all-in could not be inferred from
             # the reconstructed stacks.
-            is_run_it = street in self._RUN_IT_STREETS
+            is_run_it = any(item in self._RUN_IT_STREETS for item in group)
             # .get() guards a DB-reconstructed hand that lists a street in
             # allStreets without an actions entry.
-            street_actions = hand.actions.get(street, [])
+            street_actions = [action for item in group for action in hand.actions.get(item, [])]
             # Stop only once we are past the last street worth showing (and not
             # all-in / run-it), not at the first empty intermediate street.
             if not street_actions and not state.allin and not is_run_it and idx > last_shown_idx:
                 break
-            seen_streets.append(street)
+            seen_streets.extend(group)
             state = copy.deepcopy(state)
             state.startPhase(street)
+            for parallel_street in group[1:]:
+                state.renderBoard.add(parallel_street)
+            if getattr(hand, "bombPot", 0) and is_run_it:
+                state.street = street.rstrip("123")
+                seen_streets.append(state.street)
             states.append(state)
             for action in street_actions:
                 state = copy.deepcopy(state)
@@ -1452,6 +1493,7 @@ class GuiReplayer(QWidget):
             players=players,
             pots=state.computePots(),
             runs=runs_info,
+            board_mode="double" if getattr(hand, "bombPot", 0) and len(board_runs) > 1 else "run" if len(board_runs) > 1 else "single",
             category=category,
         )
 
@@ -1805,10 +1847,11 @@ class GuiReplayer(QWidget):
                     highlight_color=run_color,
                     lift_highlight=False,
                 )
-                # Run label to the left: "Run N · winner · Combination".
+                # A double-board bomb pot is simultaneous, not a second runout.
                 n_cards = sum(1 for c in run if c not in ("0", "0x", None)) or len(run)
                 strip_w = card_w + (card_w + 4) * (n_cards - 1)
-                parts = [f"Run {i + 1}"]
+                label_kind = "Board" if frame.board_mode == "double" else "Run"
+                parts = [f"{label_kind} {i + 1}"]
                 if info.get("winner"):
                     parts.append(info["winner"])
                     if info.get("combo"):
@@ -2224,7 +2267,7 @@ class GuiReplayer(QWidget):
         if is_ofc:
             button_names = [f"ROUND{index + 1}" for index in range(len(self.states))]
         else:
-            button_names = list(hand.allStreets[1:])
+            button_names = replay_button_streets(hand)
         for street in button_names:
             if is_ofc:
                 try:
@@ -2402,7 +2445,7 @@ class ICM:
 class TableState:
     def __init__(self, hand) -> None:
         self.pot = Decimal(0)
-        self.street = None
+        self.street: str | None = None
         self.board = hand.board
         self.renderBoard: set[str] = set()
         self.bet = Decimal(0)
