@@ -56,6 +56,7 @@ def test_live_geometry_reresolves_and_rebinds_hwnd() -> None:
     t.number = 111
     t.gdkhandle = "STALE"
     t._detector.get_window_geometry.return_value = _GEOM
+    t._detector.is_window_visible.return_value = True
     t._detector.find_tables.return_value = _windows((956, "166755"), (957, "930357"))
     pid_to_id = {956: "166755", 957: "930357"}
 
@@ -64,6 +65,19 @@ def test_live_geometry_reresolves_and_rebinds_hwnd() -> None:
     assert t.number == 1057  # re-bound to the window actually serving our id
     assert t.gdkhandle is None  # stale parent handle dropped so topify re-parents
     assert t._coinpoker_argv_confirmed is True  # reading our id latched it
+
+
+def test_matching_argv_does_not_keep_a_hidden_unity_window_alive() -> None:
+    # Windows can retain the Unity HWND/process/argv after closing the table but
+    # DWM cloaks it. PID matching must not override the detector's live state.
+    t = _make_table()
+    t.number = 111
+    t._coinpoker_argv_confirmed = True
+    t._detector.find_tables.return_value = _windows((956, "930357"))
+    t._detector.is_window_visible.return_value = False
+
+    with patch("fpdb.infrastructure.platform.windows_process.table_id_for_pid", return_value="930357"):
+        assert t._coinpoker_live_geometry() is None
 
 
 def test_single_table_close_is_detected_even_with_no_other_table() -> None:

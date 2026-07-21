@@ -241,6 +241,16 @@ class Table(Table_Window):
         tables = self._detector.find_tables("CoinPoker")
         match = self._match_coinpoker_by_argv(tables)
         if match is not None:
+            # Do not trust PID/argv alone: Unity can keep its process and HWND
+            # after closing a table while DWM cloaks the window. The Windows
+            # detector folds Win32 visibility and DWM cloaking into this check.
+            if not self._detector.is_window_visible(match.window_id):
+                log.warning(
+                    "CoinPoker table %s window %s is hidden/cloaked; closing HUD",
+                    self.search_string,
+                    match.window_id,
+                )
+                return None
             if match.window_id != self.number:
                 # The window was recreated with a new HWND; drop the cached parent
                 # handle so topify() re-parents HUD windows to the new window.
