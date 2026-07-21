@@ -489,6 +489,7 @@ def build_fpdb_hand(
     hand.tablename = str(build_input["table_id"] or "")
     hand.maxseats = gametype.get("maxSeats")
     hand.startTime = _parse_capture_start_time(hand_data.get("timestamp"))
+    hand.hero = hand_data.get("hero") or ""
     if hand_data.get("buttonpos") is not None:
         hand.buttonpos = hand_data["buttonpos"]
     execute_hand_operations(hand, build_input["operations"])
