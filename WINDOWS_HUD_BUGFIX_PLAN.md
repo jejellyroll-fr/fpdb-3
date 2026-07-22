@@ -190,7 +190,21 @@ avec HH_path bwin configuré → site « Bwin.fr Poker » ; import bout-en-bout 
 
 ---
 
-## Bug 4 — ACR : cash OK, Spinz importé mais table non détectée / HUD absent
+## Bug 4 — ACR : cash OK, Spinz importé mais table non détectée / HUD absent — ✅ FAIT (2026-07-22)
+
+Cause plus profonde que prévu : les fichiers `SPINZID` n'étaient pas reconnus comme un type
+de tournoi (absents de `re_File2` et du bloc nom-de-tournoi de `_readHandInfo2`) →
+`Tourneys.tourneyName` restait NULL → impossible de distinguer un Spinz d'un MTT au moment
+de construire la regex de titre. Livré :
+1. `WinningToFpdb` : prise en charge de SPINZID (isSng, isLottery, tourneyName depuis le
+   nom de fichier avec décodage `{FULLSTOP}`/`{BACKSLASH}`, buy-in) ; la couche DB backfille
+   `tourneyName` sur les tournois existants au prochain import.
+2. `getTableTitleRe` accepte `tourney_name` ; pour un nom contenant Spinz/Jackpot, regex en
+   alternance : format MTT classique | marque (Spinz|Jackpot)+numéro de tournoi |
+   marque+montant du buy-in (séparateur `.` ou `,`). Les MTT/cash gardent la regex actuelle
+   à l'identique (y compris les anciens tournois avec tourneyName NULL).
+À affiner si besoin avec les titres réels capturés par le logging de l'étape 0.
+Tests : `test/test_winning_spinz.py` (14 tests).
 
 **Cause racine (prouvée par HUD-errors.txt)**
 ```
