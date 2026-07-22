@@ -782,6 +782,32 @@ class AuxSeats(AuxWindow):
                 self._propagate_to_shared_layout("common", new_position)
             else:
                 log.warning("Ignoring unexpected HUD seat identifier while saving position: %r", i)
+                return
+            # configure_event_cb only fires on a genuine drag-release (see
+            # SeatWindow.button_release_left, gated on moved==True), so this
+            # writes the config at most once per drag. Block-window HUDs already
+            # auto-persist to the positions store; this makes the classic
+            # one-window-per-seat HUD persist too, instead of keeping drags in
+            # memory only until the "Save HUD Layout" menu is used.
+            self._persist_layout_after_drag()
+
+    def _persist_layout_after_drag(self) -> None:
+        """Write the just-dragged layout to HUD_config.xml immediately.
+
+        Reuses the exact path the "Save HUD Layout" menu uses (each aux writes
+        its positions into the config DOM, then the file is flushed), so the
+        round-trip and the hist_seat ring are preserved. Failures are swallowed:
+        a config-save hiccup must never break the drag or the HUD.
+        """
+        hud = getattr(self, "hud", None)
+        save_layout = getattr(hud, "save_layout", None)
+        if not callable(save_layout):
+            return
+        try:
+            save_layout()
+            log.info("HUD layout auto-saved after drag (%s-max, site=%s)", getattr(hud, "max", "?"), getattr(hud, "site", "?"))
+        except Exception:
+            log.exception("Auto-save of HUD layout after drag failed; use the Save HUD Layout menu")
 
     def _propagate_to_shared_layout(self, seat: Any, position: tuple[int, int]) -> None:
         """Mirror a dragged position onto the site's shared layout set.
