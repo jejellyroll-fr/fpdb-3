@@ -275,3 +275,67 @@ cash (inchangé) ; session live Spinz pour valider le titre réel.
 
 Chaque fix = commit séparé avec test de non-régression ; validation finale = une session live
 par room (Stars cash+tournoi, PMU cash+twister, bwin.fr cash, ACR cash+Spinz).
+
+---
+
+## Bilan de validation live (2026-07-22 soir)
+
+- ✅ Bug 2 PMU maxseats — validé par l'utilisateur.
+- ✅ Bug 3 bwin.fr — validé (log : `HUD attach: table='Sea Lake, 560237915' site=Bwin.fr Poker`).
+- 🟡 Bug 1 Stars cash — durci ; le log du 22/07 montre un attach réussi
+  (`HUD attach: table='Gyas' site=PokerStars.FR`, titre réel
+  `Poker Time Left: 166h:52m Gyas - Pot Limit Omaha €0.01/€0.02 EUR - Logged In as jeje_sat`).
+- ✅ Bug 4 ACR Spinz — itération 2 (`0b965769`) après capture du titre réel ; à revalider
+  au prochain spin.
+
+---
+
+## À FAIRE — chantiers découverts pendant le diagnostic
+
+### A. iPoker (PMU/bwin) : joueurs anonymisés « Player N », héros compris
+
+Constat (log du 22/07, table PMU « Sasolburg ») :
+```
+HUD not created for hand 599..602: hero 'tripsfountain99' (site_id=56)
+not among players ['Player 10', 'Player 3', 'Player 5', 'Player 6', 'Player 8']
+```
+Le nouveau client iPoker écrit TOUS les joueurs en « Player N » dans les XML, héros compris.
+Le héros n'est identifiable que par recoupement : `<nickname>` dans l'en-tête de session +
+le seul joueur dont les cartes `type="Pocket"` sont révélées (les autres sont `X X X X`).
+
+Conséquences :
+- le check « hero is not seated » de HUD_main saute des mains → HUD attaché en retard
+  (4 mains perdues sur Sasolburg) voire jamais si le héros n'est pas résolu ;
+- les stats sont accumulées sur des pseudo-joueurs « Player N » dont le numéro change
+  d'une session/table à l'autre → base polluée, stats adverses sans aucune valeur,
+  et le « Player N » du héros disperse SES stats.
+
+Piste d'implémentation :
+1. Au parsing (`fpdb_3_legacy/iPoker/`), remapper le joueur héros : celui dont les
+   pocket cards sont révélées (ou, à défaut, croiser bet/win avec `<bets>/<wins>` de la
+   session) → remplacer son nom « Player N » par le `<nickname>` de la session, dans
+   players/actions/cards/collectees.
+2. Décider du sort des adversaires anonymes : les garder en « Player N » par table/session
+   (stats intra-session seulement) ou les préfixer (`anon_<sessioncode>_<seat>`) pour ne
+   pas agréger des joueurs différents sous le même « Player 3 » global. Vérifier ce que
+   fait la base aujourd'hui (un seul joueur « Player 3 » pour tout le site ?).
+3. Adapter le check « hero is not seated » (HUD_main) : pour les sites anonymes, tolérer
+   l'absence du héros au lieu de sauter la main ?
+
+### B. Système de sièges iPoker pas au point (numérotation clairsemée 1..10)
+
+Le client iPoker numérote les sièges d'une 6-max sur une grille 10-max (sièges observés :
+1, 3, 5, 6, 8, 10 — c'est l'origine du `hist_seat` dans le layout `max="6"` de
+HUD_config, et c'était le déclencheur du bug maxseats). Points à traiter :
+1. Mapping siège XML → position HUD : vérifier que `hist_seat` est bien appliqué partout
+   (Aux_Base `self.adj`, fav_seat, création des stat windows) pour les tables 6-max ET
+   les autres formats (2-max/3-max Twister, 5-max…) ; aujourd'hui seuls max=6 et max=9
+   ont des `hist_seat` dans `ipoker_default`.
+2. `heroSeat=0` observé sur plusieurs mains ring PMU en base (21/07, « Sea Lake ») alors
+   que le héros jouait → probablement le même problème d'anonymisation (A), mais vérifier
+   aussi le chemin qui renseigne `Hands.heroSeat` pour iPoker.
+3. Ajouter des tests de mapping siège→position pour `ipoker_default` (2/3/5/6/9/10 max)
+   avec les numérotations clairsemées réelles du client.
+
+Ordre suggéré : A d'abord (bloque le HUD et pollue la base), B ensuite (qualité du
+positionnement), avec une session live PMU/bwin pour valider les deux.
