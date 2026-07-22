@@ -50,7 +50,29 @@ Tests : test unitaire de rotation du handler (simuler 2 process) ; test que chaq
 
 ---
 
-## Bug 1 — PokerStars : cash game non détecté, tournoi OK
+## Bug 1 — PokerStars : cash game non détecté, tournoi OK — 🟡 DURCI, CONFIRMATION EN SESSION LIVE (2026-07-22)
+
+Diagnostic hors ligne effectué en rejouant le chemin exact de read_stdin/_create_new_hud
+sur les 2 mains « Isabella II » stockées en base :
+- table_info OK, profil de jeu omahahi/ring OK, héros `jeje_sat` assis → True, stats OK
+  (identique au contrôle ACR/Arimo qui fonctionne) → le pipeline données est SAIN ;
+- aucune erreur « Can't find table » ni « HUD create: not found » dans les logs de la
+  session (alors que ces chemins loggent en ERROR et l'ont fait pour CoinPoker/ACR le même
+  jour) → la fenêtre a très probablement été TROUVÉE et le HUD créé, puis tué par le check
+  de visibilité ou rendu invisible/mal placé. La ligne isolée « The window 984794 is not
+  valid or visible » dans HUD-errors est compatible avec un kill précoce.
+Suspect identifié : le commit cf615fdf (21/07 12:25, AVANT la session) a étendu le check
+DWM-cloak à TOUS les sites — une fenêtre cloaked (autre bureau virtuel, transitions DWM)
+tuait le HUD de n'importe quelle room.
+
+Durcissements livrés :
+1. `is_window_visible` (détecteur Windows) revient à la sémantique Win32 pure pour le poll
+   générique ; le check cloak est isolé dans `is_window_displayed`, utilisé uniquement par
+   les chemins CoinPoker (intention de cf615fdf préservée) et le filtre d'attache.
+2. Trace WARNING « HUD attach: table/hwnd/title/geometry » à chaque création de HUD.
+3. L'erreur « window not valid or visible » inclut désormais la table et la search string.
+Avec l'étape 0, la prochaine session Stars cash produira soit un HUD fonctionnel, soit un
+diagnostic complet (fenêtre matchée + raison du kill) dans HUD-log.txt.
 
 **Faits établis**
 - Mains importées (DB : `Isabella II`, ring omahahi, 21/07 12:38, heroSeat=2, fast=0,

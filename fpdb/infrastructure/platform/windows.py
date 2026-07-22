@@ -158,13 +158,38 @@ class WindowsTableDetector:
         return None
 
     def is_window_visible(self, window_id: int | str) -> bool:
-        """Check if window is visible
+        """Check if window is alive and Win32-visible (legacy semantics).
+
+        Deliberately ignores DWM cloaking: a cloaked window (for example a
+        table moved to another virtual desktop) is still alive, and the
+        generic per-site geometry poll uses this check to decide whether to
+        close the HUD — treating "cloaked" as "gone" would kill live HUDs.
+        Use is_window_displayed() when cloaking must count as hidden.
 
         Args:
             window_id: Window handle
 
         Returns:
             True if window exists and is visible
+        """
+        try:
+            window_id = int(window_id)
+            return bool(self._IsWindowVisible(window_id))
+        except Exception:
+            return False
+
+    def is_window_displayed(self, window_id: int | str) -> bool:
+        """Check if window is actually shown on screen right now.
+
+        Win32-visible AND not DWM-cloaked. CoinPoker keeps its Unity window
+        "visible" but cloaked after a table closes, so its close detection
+        needs the stricter test.
+
+        Args:
+            window_id: Window handle
+
+        Returns:
+            True if window is visible and not cloaked
         """
         try:
             window_id = int(window_id)

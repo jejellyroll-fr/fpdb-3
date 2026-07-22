@@ -904,6 +904,21 @@ class HudMain(QObject):
             )
             return
 
+        # One WARNING per HUD creation so the log always records WHICH window
+        # was matched: user reports of "table not detected" are impossible to
+        # diagnose without the matched hwnd/title (or their absence).
+        log.warning(
+            "HUD attach: table=%r site=%s hwnd=%s title=%r geometry=(%s,%s %sx%s)",
+            temp_key,
+            hud_site_name,
+            tablewindow.number,
+            getattr(tablewindow, "title", ""),
+            tablewindow.x,
+            tablewindow.y,
+            tablewindow.width,
+            tablewindow.height,
+        )
+
         tablewindow.key = temp_key
         tablewindow.max = max_seats
         tablewindow.site = hud_site_name

@@ -56,7 +56,7 @@ def test_live_geometry_reresolves_and_rebinds_hwnd() -> None:
     t.number = 111
     t.gdkhandle = "STALE"
     t._detector.get_window_geometry.return_value = _GEOM
-    t._detector.is_window_visible.return_value = True
+    t._detector.is_window_displayed.return_value = True
     t._detector.find_tables.return_value = _windows((956, "166755"), (957, "930357"))
     pid_to_id = {956: "166755", 957: "930357"}
 
@@ -74,7 +74,7 @@ def test_matching_argv_does_not_keep_a_hidden_unity_window_alive() -> None:
     t.number = 111
     t._coinpoker_argv_confirmed = True
     t._detector.find_tables.return_value = _windows((956, "930357"))
-    t._detector.is_window_visible.return_value = False
+    t._detector.is_window_displayed.return_value = False
 
     with patch("fpdb.infrastructure.platform.windows_process.table_id_for_pid", return_value="930357"):
         assert t._coinpoker_live_geometry() is None
@@ -101,7 +101,7 @@ def test_fallback_attached_hud_closes_when_tracked_window_is_another_table() -> 
     t.search_string = "930357"
     # No open window carries our id (another table occupies things).
     t._detector.find_tables.return_value = _windows((956, "928730"))
-    t._detector.is_window_visible.return_value = True  # stale window still "visible"
+    t._detector.is_window_displayed.return_value = True  # stale window still "visible"
     t._detector.get_window_geometry.return_value = _GEOM
 
     with patch("fpdb_3_legacy.WinTables._window_pid", return_value=956):
@@ -118,7 +118,7 @@ def test_unreadable_coinpoker_processes_do_not_kill_a_live_hud() -> None:
     t.number = 111
     t._coinpoker_argv_confirmed = False  # never managed to read a CoinPoker id
     t._detector.find_tables.return_value = _windows((956, "denied"))
-    t._detector.is_window_visible.return_value = True
+    t._detector.is_window_displayed.return_value = True
     t._detector.get_window_geometry.return_value = _GEOM
 
     with patch("fpdb.infrastructure.platform.windows_process.table_id_for_pid", return_value=None):
