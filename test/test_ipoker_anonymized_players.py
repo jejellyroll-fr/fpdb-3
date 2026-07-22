@@ -1,14 +1,15 @@
-"""The recent iPoker client anonymises every seat as "Player N", hero included.
+"""iPoker anonymises a hand ("Player N") only when the hero is not dealt in.
 
-Regression for the PMU/bwin HUD blocker (log 2026-07-22, table "Sasolburg"):
+Confirmed on real bwin files (session 5870214435, 2026-07-22): hands the hero
+did not play list only "Player 3/5/6/8/10" (== seat numbers), while the hands
+the hero played carry real names (jejesat76 @ seat 1, CR7012 @ 3, Moula42 @ 5,
+TheDarkRaise @ 8, confusius5 @ 10). No pocket cards are revealed in either.
 
-    HUD not created for hand 599..602: hero 'tripsfountain99' (site_id=56)
-    not among players ['Player 10', 'Player 3', 'Player 5', 'Player 6', 'Player 8']
-
-The hero is only recoverable by cross-referencing the session <nickname> with
-the one seat whose pocket cards are dealt (opponents show "X X X X"). The parser
-must rename that seat to the nickname, and scope the remaining anonymous seats to
-the session so a global "Player 3" no longer merges unrelated opponents.
+So there is never an anonymous hero to recover: the anonymous hands are exactly
+the hands the hero skipped. Their opponents are recovered instead from the
+seat -> real name map learned from the session's named hands; unknown seats are
+scoped to anon_<sessioncode>_<seat> so a global "Player 3" never merges
+unrelated opponents.
 """
 
 from __future__ import annotations
@@ -20,72 +21,69 @@ import pytest
 from fpdb_3_legacy.Configuration import Config
 from fpdb_3_legacy.iPoker.base import iPoker
 
-NICK = "tripsfountain99"
-SESSION_CODE = "5869851690"
+NICK = "jejesat76"
+SESSION_CODE = "5870214435"
 
-# Game 1: no showdown -> only the hero (seat 6) shows real pocket cards.
-GAME_1 = """ <game gamecode="9025178751">
+# Anonymous hand: hero not dealt -> every seat is "Player <seat>".
+ANON_GAME = """ <game gamecode="9026868234">
   <general>
-   <startdate>2026-07-21 14:45:39</startdate>
+   <startdate>2026-07-22 23:27:00</startdate>
    <players>
     <player seat="3" name="Player 3" chips="2,63€" dealer="0" win="0€" bet="0,04€"/>
     <player seat="5" name="Player 5" chips="2,47€" dealer="1" win="0€" bet="0€"/>
-    <player seat="6" name="Player 6" chips="3,42€" dealer="0" win="0,15€" bet="0,06€"/>
-    <player seat="10" name="Player 10" chips="1,67€" dealer="0" win="0€" bet="0,06€"/>
+    <player seat="6" name="Player 6" chips="3,42€" dealer="0" win="0€" bet="0,06€"/>
+    <player seat="8" name="Player 8" chips="1,67€" dealer="0" win="0,15€" bet="0,06€"/>
+    <player seat="10" name="Player 10" chips="1,90€" dealer="0" win="0€" bet="0,02€"/>
    </players>
   </general>
   <round no="0">
-   <action no="1" player="Player 6" sum="0,01€" type="1"/>
+   <action no="1" player="Player 8" sum="0,01€" type="1"/>
    <action no="2" player="Player 10" sum="0,02€" type="2"/>
   </round>
   <round no="1">
-   <cards type="Pocket" player="Player 3">X X X X</cards>
-   <cards type="Pocket" player="Player 5">X X X X</cards>
-   <cards type="Pocket" player="Player 6">CA HQ SD 2C</cards>
-   <cards type="Pocket" player="Player 10">X X X X</cards>
    <action no="3" player="Player 3" sum="0€" type="0"/>
   </round>
  </game>"""
 
-# Game 2: showdown -> hero (seat 6) AND an opponent (seat 3) both reveal.
-GAME_2 = """ <game gamecode="9025178752">
+# Named hand: hero dealt in -> real names for everyone.
+NAMED_GAME = """ <game gamecode="9026877611">
   <general>
-   <startdate>2026-07-21 14:46:41</startdate>
+   <startdate>2026-07-22 23:30:58</startdate>
    <players>
-    <player seat="3" name="Player 3" chips="2,63€" dealer="0" win="1,20€" bet="0,40€"/>
-    <player seat="5" name="Player 5" chips="2,47€" dealer="1" win="0€" bet="0€"/>
-    <player seat="6" name="Player 6" chips="3,42€" dealer="0" win="0€" bet="0,40€"/>
-    <player seat="10" name="Player 10" chips="1,67€" dealer="0" win="0€" bet="0€"/>
+    <player seat="1" name="jejesat76" chips="1,90€" dealer="0" win="0€" bet="0,02€"/>
+    <player seat="3" name="CR7012" chips="2,23€" dealer="0" win="0€" bet="0€"/>
+    <player seat="5" name="Moula42" chips="2,00€" dealer="1" win="0€" bet="0€"/>
+    <player seat="8" name="TheDarkRaise" chips="1,42€" dealer="0" win="0€" bet="0,04€"/>
+    <player seat="10" name="confusius5" chips="1,79€" dealer="0" win="0€" bet="0€"/>
    </players>
   </general>
-  <round no="1">
-   <cards type="Pocket" player="Player 3">CK DK HK SA</cards>
-   <cards type="Pocket" player="Player 5">X X X X</cards>
-   <cards type="Pocket" player="Player 6">CA HQ SD 2C</cards>
-   <cards type="Pocket" player="Player 10">X X X X</cards>
+  <round no="0">
+   <action no="1" player="jejesat76" sum="0,01€" type="1"/>
+   <action no="2" player="CR7012" sum="0,02€" type="2"/>
   </round>
  </game>"""
 
 HEADER = f"""<?xml version="1.0" encoding="utf-8"?>
 <session sessioncode="{SESSION_CODE}">
  <general>
-  <client_version>26.1.1.23</client_version>
+  <client_version>26.1.1.31</client_version>
   <mode>real</mode>
   <gametype>Omaha PL 0,01€/0,02€</gametype>
-  <tablename>Sasolburg, 560237915</tablename>
+  <tablename>Scone, 560235983</tablename>
   <tablecurrency>EUR</tablecurrency>
   <smallblind>0,01€</smallblind>
   <bigblind>0,02€</bigblind>
   <duration>00:05:34</duration>
   <gamecount>2</gamecount>
-  <startdate>2026-07-21 14:45:39</startdate>
+  <startdate>2026-07-22 23:27:00</startdate>
   <currency>EUR</currency>
   <nickname>{NICK}</nickname>
   <tablesize>6</tablesize>
  </general>
 """
 
-ANON_FILE = HEADER + GAME_1 + "\n" + GAME_2 + "\n</session>"
+# Whole session file: anonymous hands first (hero waiting), then named hands.
+SESSION_FILE = HEADER + ANON_GAME + "\n" + NAMED_GAME + "\n</session>"
 
 
 @pytest.fixture(scope="module")
@@ -100,83 +98,88 @@ def _parser(config: Config, whole_file: str, hero: str = NICK) -> iPoker:
     return parser
 
 
-def test_resolve_hero_prefers_the_seat_dealt_in_every_hand(config: Config) -> None:
-    """Seat 6 shows cards in both hands; seat 3 only at its lone showdown."""
-    parser = _parser(config, ANON_FILE)
-    assert parser._resolve_anonymized_hero() == "Player 6"
+def test_session_seat_names_learned_from_named_hands(config: Config) -> None:
+    parser = _parser(config, SESSION_FILE)
+    assert parser._session_seat_names() == {
+        1: "jejesat76",
+        3: "CR7012",
+        5: "Moula42",
+        8: "TheDarkRaise",
+        10: "confusius5",
+    }
 
 
-def test_hero_renamed_to_nickname_in_players_actions_and_cards(config: Config) -> None:
-    parser = _parser(config, ANON_FILE)
-    hand = SimpleNamespace(handText=GAME_1, handid="9025178751")
-
-    parser._deanonymize_players(hand)
-
-    # Hero recovered everywhere the anonymous name appeared.
-    assert 'name="Player 6"' not in hand.handText
-    assert 'player="Player 6"' not in hand.handText
-    assert f'name="{NICK}"' in hand.handText
-    assert f'player="{NICK}"' in hand.handText  # blind action + pocket cards
-
-
-def test_opponents_scoped_to_the_session(config: Config) -> None:
-    parser = _parser(config, ANON_FILE)
-    hand = SimpleNamespace(handText=GAME_1, handid="9025178751")
+def test_named_hand_is_left_untouched(config: Config) -> None:
+    parser = _parser(config, SESSION_FILE)
+    hand = SimpleNamespace(handText=NAMED_GAME, handid="9026877611")
 
     parser._deanonymize_players(hand)
 
-    assert f'name="anon_{SESSION_CODE}_3"' in hand.handText
-    assert f'name="anon_{SESSION_CODE}_5"' in hand.handText
-    assert f'name="anon_{SESSION_CODE}_10"' in hand.handText
-    # A fold by the seat-3 opponent must follow the rename.
-    assert f'player="anon_{SESSION_CODE}_3"' in hand.handText
-    # No bare "Player N" survives.
+    assert hand.handText == NAMED_GAME  # real names already, nothing rewritten
+
+
+def test_anonymous_opponents_recovered_from_seat_map(config: Config) -> None:
+    parser = _parser(config, SESSION_FILE)
+    hand = SimpleNamespace(handText=ANON_GAME, handid="9026868234")
+
+    parser._deanonymize_players(hand)
+
+    # Seats known from the named hand -> real names, in players and actions.
+    assert 'name="CR7012"' in hand.handText          # seat 3
+    assert 'name="Moula42"' in hand.handText          # seat 5
+    assert 'name="TheDarkRaise"' in hand.handText     # seat 8
+    assert 'player="TheDarkRaise"' in hand.handText   # small-blind action rewritten
+    assert 'name="confusius5"' in hand.handText       # seat 10
+    # Seat 6 never carried a real name in the session -> scoped, not guessed.
+    assert f'name="anon_{SESSION_CODE}_6"' in hand.handText
     assert "Player 3" not in hand.handText
-    assert "Player 10" not in hand.handText
+    assert "Player 6" not in hand.handText
 
 
-def test_real_hero_kept_while_anon_opponents_are_scoped(config: Config) -> None:
-    """A seated real hero name is preserved; anonymous opponents are still scoped."""
-    real = ANON_FILE.replace('name="Player 6"', 'name="tripsfountain99"').replace(
-        'player="Player 6"',
-        'player="tripsfountain99"',
+def test_hero_seat_never_resurrected_in_anonymous_hand(config: Config) -> None:
+    # An anonymous hand that (defensively) has a Player 1 at the hero's seat must
+    # be scoped, not renamed back to the hero -- the hero did not play this hand.
+    anon_with_seat1 = ANON_GAME.replace(
+        '<player seat="3" name="Player 3"',
+        '<player seat="1" name="Player 1" chips="1,90€" dealer="0" win="0€" bet="0€"/>\n'
+        '    <player seat="3" name="Player 3"',
     )
-    game_1_real = GAME_1.replace('name="Player 6"', 'name="tripsfountain99"').replace(
-        'player="Player 6"',
-        'player="tripsfountain99"',
-    )
-    parser = _parser(config, real)
-    hand = SimpleNamespace(handText=game_1_real, handid="9025178751")
+    parser = _parser(config, SESSION_FILE)
+    hand = SimpleNamespace(handText=anon_with_seat1, handid="9026868234")
 
     parser._deanonymize_players(hand)
 
-    # Real opponents ("Player N" no longer, they keep their own names here) —
-    # but the seat-3/5/10 opponents are still anonymous, so they get scoped;
-    # the hero name is preserved as-is.
-    assert 'name="tripsfountain99"' in hand.handText
+    assert f'name="{NICK}"' not in hand.handText
+    assert f'name="anon_{SESSION_CODE}_1"' in hand.handText
+
+
+def test_anonymous_hand_without_named_hand_scopes_all(config: Config) -> None:
+    # Live import order: the anonymous hands arrive before the hero ever plays,
+    # so no seat map exists yet -> everything is scoped (no pollution), and later
+    # hands recover once the hero has played.
+    only_anon = HEADER + ANON_GAME + "\n</session>"
+    parser = _parser(config, only_anon)
+    hand = SimpleNamespace(handText=ANON_GAME, handid="9026868234")
+
+    parser._deanonymize_players(hand)
+
+    for seat in (3, 5, 6, 8, 10):
+        assert f'name="anon_{SESSION_CODE}_{seat}"' in hand.handText
+    assert "Player" not in hand.handText.replace("PLAY", "")  # no bare "Player N"
+
+
+def test_ambiguous_seat_occupant_is_scoped_not_guessed(config: Config) -> None:
+    # If a seat shows two different real names across the session, it's dropped
+    # from the map (occupant changed) and anonymous hands scope that seat.
+    second_named = NAMED_GAME.replace('name="CR7012"', 'name="SomeoneElse"').replace(
+        'gamecode="9026877611"',
+        'gamecode="9026877999"',
+    )
+    session = HEADER + ANON_GAME + "\n" + NAMED_GAME + "\n" + second_named + "\n</session>"
+    parser = _parser(config, session)
+
+    assert 3 not in parser._session_seat_names()  # CR7012 vs SomeoneElse -> ambiguous
+
+    hand = SimpleNamespace(handText=ANON_GAME, handid="9026868234")
+    parser._deanonymize_players(hand)
     assert f'name="anon_{SESSION_CODE}_3"' in hand.handText
-
-
-def test_unresolvable_hero_leaves_hand_anonymous(config: Config) -> None:
-    """A single showdown hand (tie) must not guess or strip the hero."""
-    single = HEADER + GAME_2 + "\n</session>"
-    parser = _parser(config, single)
-    hand = SimpleNamespace(handText=GAME_2, handid="9025178752")
-
-    parser._deanonymize_players(hand)
-
-    # Seat 3 and seat 6 both reveal once -> tie -> untouched.
-    assert 'name="Player 6"' in hand.handText
-    assert 'name="Player 3"' in hand.handText
-    assert f"anon_{SESSION_CODE}" not in hand.handText
-
-
-def test_incremental_hand_still_deanonymizes(config: Config) -> None:
-    """A bare <game> block (live auto-import) resolves via the session whole_file."""
-    parser = _parser(config, ANON_FILE)
-    hand = SimpleNamespace(handText=GAME_2, handid="9025178752")
-
-    parser._deanonymize_players(hand)
-
-    assert f'name="{NICK}"' in hand.handText  # seat 6 -> hero
-    assert f'name="anon_{SESSION_CODE}_3"' in hand.handText  # showdown opponent scoped
