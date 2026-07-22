@@ -1874,10 +1874,14 @@ class Winning(HandHistoryConverter):
         """Window-title regex for Spinz/Jackpot lottery SnGs, or None otherwise.
 
         Spinz tables do not use the scheduled-MTT title format the classic
-        regex expects (", Table N - ... (tourno)"), so accept any title that
-        carries the Spinz/Jackpot branding together with the tournament number
-        or the buy-in amount. The classic format is kept as an alternative in
-        case a client version still uses it.
+        regex expects (", Table N - ... (tourno)"). The current ACR client
+        titles them "$0.25 - No Limit - 10 / 20 Hold'em (35548425)" (captured
+        live on 2026-07-22): no branding, but the tournament number sits in
+        parentheses, so match on that. The Spinz/Jackpot-branding alternatives
+        and the classic format are kept for other client versions. A Spinz has
+        a single table and no separate tournament-lobby window, so the bare
+        parenthesised number cannot pick the wrong window (unlike MTTs, which
+        must keep the stricter classic format).
         """
         name = str(tourney_name or "")
         if not any(marker in name.lower() for marker in ("spinz", "jackpot")):
@@ -1886,14 +1890,16 @@ class Winning(HandHistoryConverter):
         brand = r"(?=.*(?:Spinz|Jackpot))"
         alternatives = [classic_regex]
         if tournament:
-            alternatives.append(f"{brand}(?=.*{re.escape(str(tournament))})")
+            tourno = re.escape(str(tournament))
+            alternatives.append(rf"\({tourno}\)")
+            alternatives.append(f"{brand}(?=.*{tourno})")
         amount_match = re.search(r"\d+(?:[.,]\d+)?", name)
         if amount_match:
             # Tolerate either decimal separator in the title.
             amount = re.sub(r"[.,]", "[.,]", amount_match.group(0))
             alternatives.append(f"{brand}(?=.*{amount})")
-        else:
-            # No number to anchor on: fall back to the branding alone.
+        elif not tournament:
+            # No number to anchor on at all: fall back to the branding alone.
             alternatives.append(brand)
         return "|".join(f"(?:{alt})" for alt in alternatives)
 

@@ -110,12 +110,23 @@ class TestSpinzTableTitle:
     @pytest.mark.parametrize(
         "title",
         [
+            # Real title captured live on 2026-07-22 (no branding at all; the
+            # blinds part changes with the level, the number does not).
+            "$0.25 - No Limit - 10 / 20 Hold'em (35539941)",
+            "$0.25 - No Limit - 15 / 30 Hold'em (35539941)",
             "$0.25 Spinz Holdem - Table 1 (35539941)",  # branding + tournament number
             "Spinz $0.25 - Table 1",  # branding + amount, dot separator
             "Jackpot Poker $0,25 - Table 1",  # branding + amount, comma separator
             "$0.25 Spinz Holdem, Table 1 - No Limit Holdem - (35539941)",  # classic MTT format
         ],
-        ids=["brand-and-number", "brand-and-dot-amount", "brand-and-comma-amount", "classic-format"],
+        ids=[
+            "real-title-level1",
+            "real-title-level2",
+            "brand-and-number",
+            "brand-and-dot-amount",
+            "brand-and-comma-amount",
+            "classic-format",
+        ],
     )
     def test_spinz_titles_match(self, title: str) -> None:
         assert re.search(self._regex(), title, re.IGNORECASE) is not None
@@ -124,10 +135,12 @@ class TestSpinzTableTitle:
         "title",
         [
             "Lightning PKO - $6 GTD, Table 3 - No Limit Holdem - (35528538)",  # another tournament
+            "$0.25 - No Limit - 10 / 20 Hold'em (35548425)",  # another Spinz, same stake
             "ACR Poker",  # client main window
+            "ACR Poker Lobby Logged in as edinapoker",  # real lobby title
             "Arimo - Omaha PL - $0.01/$0.02",  # cash table
         ],
-        ids=["other-tournament", "client-window", "cash-table"],
+        ids=["other-tournament", "other-spinz-same-stake", "client-window", "lobby", "cash-table"],
     )
     def test_unrelated_titles_do_not_match(self, title: str) -> None:
         assert re.search(self._regex(), title, re.IGNORECASE) is None
