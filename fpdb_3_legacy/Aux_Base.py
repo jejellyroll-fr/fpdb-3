@@ -817,47 +817,141 @@ class AuxSeats(AuxWindow):
             return position  # dimensions unknown: store as-is
         return (int(position[0] * shared_w / table_w), int(position[1] * shared_h / table_h))
 
-    def adj_seats(self) -> list[int]:
-        """Determine how to adjust seating arrangements.
+    def _config_ring(self) -> list[Any]:
+        """The site-configured available-seat ring (visual slot -> physical seat).
 
-        If a "preferred seat" is set in the hud layout configuration.
-        Need range here, not xrange -> need the actual list.
+        Snapshotted the first time it is read, before any per-hand synthesis
+        overwrites ``layout.hh_seats``, so later hands always rebuild from the
+        original config rather than from a previous synthesis.
         """
-        adj = list(range(self.hud.max + 1))  # default seat adjustments = no adjustment
+        layout = self.hud.layout
+        ring = getattr(layout, "config_hh_seats", None)
+        if ring is None:
+            ring = list(layout.hh_seats)
+            layout.config_hh_seats = ring
+        return ring
 
-        #   does the user have a fav_seat? if so, just get out now
-        if self.hud.site_parameters["fav_seat"][self.hud.max] == 0:
+    def _occupied_seats(self) -> list[int]:
+        """Physical seat numbers actually in play this hand, sorted ascending."""
+        seats = set()
+        for data in self.hud.stat_dict.values():
+            seat = data.get("seat")
+            if seat:
+                seats.add(int(seat))
+        return sorted(seats)
+
+    def _effective_hh_seats(self) -> list[Any]:
+        """Map visual slot (1..max) -> physical HH seat, robust to sparse numbering.
+
+        Prefer the site-configured ring when it already covers every occupied
+        seat -- iPoker 6/9-max (1,3,5,6,8,10) and every standard site (1..N).
+        Otherwise synthesise a ring from the occupied seats sorted ascending, so
+        table sizes that have no hist_seat table in the config (iPoker Twister
+        2/3-max, 5-max, ...) still assign players to slots instead of erroring
+        out and dropping the whole HUD onto the wrong seats.
+        """
+        max_seats = self.hud.max
+        ring = self._config_ring()
+        occupied = self._occupied_seats()
+        covered = {ring[i] for i in range(1, max_seats + 1) if i < len(ring) and ring[i] is not None}
+        if occupied and set(occupied) <= covered:
+            return list(ring)
+
+        synth: list[Any] = [None] * (max_seats + 1)
+        for idx, seat in enumerate(occupied[:max_seats], start=1):
+            synth[idx] = seat
+        if occupied:
+            log.info(
+                "HUD seat mapping: configured ring %s does not cover occupied seats %s; synthesised %s",
+                ring,
+                occupied,
+                synth,
+            )
+        return synth
+
+    def _bottom_center_slot(self) -> int:
+        """Layout slot rendered at the bottom-centre (max y, nearest to centre-x).
+
+        This is the anchor every poker client rotates the hero to, computed from
+        the layout geometry rather than a hand-maintained per-size integer.
+        """
+        layout = self.hud.layout
+        center_x = (getattr(layout, "width", 0) or 0) / 2
+        best = self.hud.max
+        best_key: tuple[int, float] | None = None
+        for i in range(1, self.hud.max + 1):
+            loc = layout.location[i] if i < len(layout.location) else None
+            if loc is None:
+                continue
+            key = (loc[1], -abs(loc[0] - center_x))
+            if best_key is None or key > best_key:
+                best_key, best = key, i
+        return best
+
+    def _anchor_slot(self) -> int:
+        """Layout slot the hero's block is pinned to.
+
+        An explicit non-zero ``fav_seat`` for this table size wins (user
+        override); otherwise the hero is anchored to the bottom-centre slot.
+        Note the behaviour change from the legacy default: ``fav_seat=0`` used to
+        mean "no rotation" (hero left wherever its raw seat mapped, so the hero
+        was only at the bottom by coincidence). It now means "auto = bottom-
+        centre", matching how the client renders the hero.
+        """
+        try:
+            fav = self.hud.site_parameters["fav_seat"][self.hud.max]
+        except (KeyError, TypeError):
+            fav = 0
+        return fav if fav else self._bottom_center_slot()
+
+    def adj_seats(self) -> list[int]:
+        """Map visual seats to layout positions with the hero anchored bottom-centre.
+
+        The hero is always rotated to the anchor slot (bottom-centre by default),
+        and the other seats follow clockwise, preserving their order around the
+        table -- matching how clients render the hero at the bottom. This no
+        longer depends on a per-size ``fav_seat`` integer being set, nor on a
+        complete ``hist_seat`` table, both of which were routinely missing for
+        iPoker table sizes and left the HUD unrotated or mis-seated.
+        """
+        max_seats = self.hud.max
+        adj = list(range(max_seats + 1))  # identity default
+
+        # Refresh visual-slot -> physical-seat so player lookups
+        # (get_id_from_seat) and this position rotation agree, even when the
+        # site numbers seats sparsely on a larger grid.
+        hh_seats = self._effective_hh_seats()
+        self.hud.layout.hh_seats = hh_seats
+
+        anchor = self._anchor_slot()
+        if not anchor:
             return adj
 
-        # find the hero's actual seat
-
+        # Find the hero's visual slot: the slot whose physical seat is the hero's.
         actual_seat = None
-        for key in self.hud.stat_dict:
-            if self.config.is_hero_name(self.hud.site, self.hud.stat_dict[key]["screen_name"]):
-                # Seat from stat_dict is the seat num recorded in the hand history and database
-                # For tables <10-max, some sites omit some seat nums (e.g. iPoker 6-max uses 1,3,5,6,8,10)
-                # The seat nums in the hh from the site are recorded in config file for each layout, and available
-                # here as the self.layout.hh_seats list
-                #    (e.g. for iPoker - [None,1,3,5,6,8,10];
-                #      for most sites-  [None, 1,2,3,4,5,6]
-                # we need to match 'seat' from hand history with the postion in the list, as the hud
-                #  always numbers its stat_windows using consecutive numbers (e.g. 1-6)
-
-                for i in range(1, self.hud.max + 1):
-                    if self.hud.layout.hh_seats[i] == self.hud.stat_dict[key]["seat"]:
+        for data in self.hud.stat_dict.values():
+            if self.config.is_hero_name(self.hud.site, data["screen_name"]):
+                hero_phys = data.get("seat")
+                for i in range(1, max_seats + 1):
+                    if i < len(hh_seats) and hh_seats[i] == hero_phys:
                         actual_seat = i
                         break
+                break
 
-        if not actual_seat:  # this shouldn't happen because we don't create huds if the hero isn't seated.
-            log.error("Error finding hero seat.")
+        if not actual_seat:  # shouldn't happen: HUDs aren't created when the hero isn't seated.
+            log.error(
+                "HUD seat mapping: hero seat not found (hh_seats=%s, occupied=%s)",
+                hh_seats,
+                self._occupied_seats(),
+            )
             return adj
 
-        for i in range(self.hud.max):
+        for i in range(max_seats):
             j = actual_seat + i
-            if j > self.hud.max:
-                j = j - self.hud.max
-            adj[j] = self.hud.site_parameters["fav_seat"][self.hud.max] + i
-            if adj[j] > self.hud.max:
-                adj[j] = adj[j] - self.hud.max
+            if j > max_seats:
+                j -= max_seats
+            adj[j] = anchor + i
+            if adj[j] > max_seats:
+                adj[j] -= max_seats
 
         return adj

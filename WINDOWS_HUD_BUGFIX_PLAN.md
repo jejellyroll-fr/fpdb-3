@@ -338,20 +338,41 @@ Note (hors chantier, à traiter séparément) : `re_hand_info` (`code="(?P<HID>�
 prend le **code de session** comme hand id au lieu de son `gamecode`. Bug pré-existant,
 indépendant de l'anonymisation.
 
-### B. Système de sièges iPoker pas au point (numérotation clairsemée 1..10)
+### B. Système de sièges iPoker pas au point (numérotation clairsemée 1..10) — ✅ FAIT (2026-07-22, chemin « milieu »)
 
-Le client iPoker numérote les sièges d'une 6-max sur une grille 10-max (sièges observés :
-1, 3, 5, 6, 8, 10 — c'est l'origine du `hist_seat` dans le layout `max="6"` de
-HUD_config, et c'était le déclencheur du bug maxseats). Points à traiter :
-1. Mapping siège XML → position HUD : vérifier que `hist_seat` est bien appliqué partout
-   (Aux_Base `self.adj`, fav_seat, création des stat windows) pour les tables 6-max ET
-   les autres formats (2-max/3-max Twister, 5-max…) ; aujourd'hui seuls max=6 et max=9
-   ont des `hist_seat` dans `ipoker_default`.
-2. `heroSeat=0` observé sur plusieurs mains ring PMU en base (21/07, « Sea Lake ») alors
-   que le héros jouait → probablement le même problème d'anonymisation (A), mais vérifier
-   aussi le chemin qui renseigne `Hands.heroSeat` pour iPoker.
-3. Ajouter des tests de mapping siège→position pour `ipoker_default` (2/3/5/6/9/10 max)
-   avec les numérotations clairsemées réelles du client.
+Le client iPoker numérote les sièges d'une 6-max sur une grille 10-max (1,3,5,6,8,10) et le
+config ne portait de `hist_seat` que pour max=6 et max=9. Combiné à `fav_seat=0` par défaut
+(aucune rotation), le héros n'était en bas que par coïncidence, et les tailles sans
+`hist_seat` (Twister 2/3-max, 5-max…) plantaient (`Error finding hero seat`) → HUD posé sur
+les mauvais sièges.
 
-Ordre suggéré : A d'abord (bloque le HUD et pollue la base), B ensuite (qualité du
-positionnement), avec une session live PMU/bwin pour valider les deux.
+Refonte livrée dans [`Aux_Base.AuxSeats.adj_seats`](fpdb_3_legacy/Aux_Base.py:820) (rotation
+ordre-based, ancrage héros toujours actif) :
+1. **Ancrage héros = bas-centre par défaut.** Le slot bas-centre est calculé sur la géométrie
+   du layout (`_bottom_center_slot` : y max, x le plus proche du centre) au lieu d'un entier
+   `fav_seat` à saisir par taille. Un `fav_seat` explicite non nul reste prioritaire (override
+   utilisateur). **Changement de comportement** : `fav_seat=0` ne signifie plus « pas de
+   rotation » mais « auto = bas-centre » — le héros est désormais toujours en bas, sur tous
+   les sites (comme le rend le client).
+2. **Ring siège→slot robuste** (`_effective_hh_seats`). On garde le ring configuré quand il
+   couvre les sièges occupés (iPoker 6/9-max, tous les sites standards). Sinon on **synthétise**
+   un ring à partir des sièges occupés triés → les tailles sans `hist_seat` mappent les joueurs
+   au lieu de planter. `layout.hh_seats` est réécrit par main pour que `get_id_from_seat`
+   (choix du joueur) et la rotation des positions restent cohérents.
+3. **heroSeat=0** : résolu par le chantier A. [`heroSeat`](fpdb_3_legacy/DerivedStats.py:539)
+   se remplit via `hand.hero == player[1]` ; le héros portant maintenant son vrai nickname,
+   le siège est renseigné.
+
+Tests : `test/test_hud_seat_mapping.py` (7 tests) — bas-centre géométrique, héros ancré quel
+que soit son siège (iPoker 6-max, héros siège 10), rotation sur site standard `fav_seat=0`,
+override `fav_seat` explicite, taille clairsemée sans `hist_seat` synthétisée, ring configuré
+préféré quand il couvre, héros absent → identité sans exception. Suite complète : 3989 OK.
+
+À valider en session live PMU/bwin (6-max) + un Twister (2/3-max), là où la synthèse de ring
+et l'ancrage bas-centre n'ont pas de couverture hors-ligne.
+
+Reste hors périmètre (non retenu ici, voir proposition « refonte complète ») : coordonnées
+normalisées 0..1 + offset décoration par OS (Win/X11/Cocoa) + round-trip GUI↔XML sans
+double-scaling. Le placement reste en pixels re-scalés par ratio ; l'ancrage héros et la
+synthèse de ring corrigent la fiabilité inter-room et le « héros pas en bas », pas la
+distorsion d'aspect-ratio ni la dérive GUI↔XML.
