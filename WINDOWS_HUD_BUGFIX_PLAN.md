@@ -225,8 +225,13 @@ de construire la regex de titre. Livré :
    alternance : format MTT classique | marque (Spinz|Jackpot)+numéro de tournoi |
    marque+montant du buy-in (séparateur `.` ou `,`). Les MTT/cash gardent la regex actuelle
    à l'identique (y compris les anciens tournois avec tourneyName NULL).
-À affiner si besoin avec les titres réels capturés par le logging de l'étape 0.
-Tests : `test/test_winning_spinz.py` (14 tests).
+Itération 2 (2026-07-22 soir) : titre réel capturé par le logging étape 0 —
+`$0.25 - No Limit - 10 / 20 Hold'em (35548425)` — aucune marque « Spinz » dans le titre.
+Ajout de l'alternative décisive : numéro de tournoi entre parenthèses `\(tourno\)`
+(sûr pour un Spinz : table unique, pas de fenêtre lobby de tournoi ; les MTT gardent le
+format strict). Vérifié contre les titres réels de la session du 22/07 (table matchée,
+lobby ACR/fenêtres HUD non matchés).
+Tests : `test/test_winning_spinz.py` (18 tests).
 
 **Cause racine (prouvée par HUD-errors.txt)**
 ```
