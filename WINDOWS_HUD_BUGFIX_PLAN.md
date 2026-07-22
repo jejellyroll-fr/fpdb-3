@@ -292,46 +292,43 @@ par room (Stars cash+tournoi, PMU cash+twister, bwin.fr cash, ACR cash+Spinz).
 
 ## À FAIRE — chantiers découverts pendant le diagnostic
 
-### A. iPoker (PMU/bwin) : joueurs anonymisés « Player N », héros compris — ✅ FAIT (2026-07-22)
+### A. iPoker (PMU/bwin) : mains anonymisées « Player N » quand le héros ne joue pas — ✅ FAIT (2026-07-22, modèle corrigé)
 
-Constat (log du 22/07, table PMU « Sasolburg ») :
+**Modèle réel (prouvé sur le fichier bwin `5870214435.xml`, table « Scone ») :** une main
+iPoker est anonymisée (`Player N` partout) **uniquement quand le héros n'est PAS distribué**.
+Dès qu'il joue la main, tous les noms sont réels. « Player N » = « Player \<siège\> »
+exactement, et **aucune carte n'est jamais révélée** :
 ```
-HUD not created for hand 599..602: hero 'tripsfountain99' (site_id=56)
-not among players ['Player 10', 'Player 3', 'Player 5', 'Player 6', 'Player 8']
+main 9026868234  héros absent  -> 3=Player 3, 5=Player 5, 6=Player 6, 8=Player 8, 10=Player 10
+main 9026877611  héros présent -> 1=jejesat76, 3=CR7012, 5=Moula42, 8=TheDarkRaise, 10=confusius5
 ```
-Le nouveau client iPoker écrit TOUS les joueurs en « Player N » dans les XML, héros compris.
-Le héros n'est identifiable que par recoupement : `<nickname>` dans l'en-tête de session +
-le seul joueur dont les cartes `type="Pocket"` sont révélées (les autres sont `X X X X`).
+Il n'y a donc **jamais de héros anonyme à récupérer** : les mains anonymes sont exactement
+celles que le héros a sautées. (La 1ʳᵉ approche « retrouver le héros par ses cartes » était
+fondée sur une hypothèse fausse — abandonnée.)
 
 Livré (`fpdb_3_legacy/iPoker/hand_info.py`, passe de dé-anonymisation en tête de
 `readHandInfo`, avant que `markStreets`/`readBlinds`/`readAction`/`readHoleCards`/
-`readCollectPot` ne relisent les noms) :
-1. **Héros** — `_resolve_anonymized_hero()` compte, sur tout le fichier de session
-   (`whole_file`), les mains où chaque siège montre de vraies cartes `type="Pocket"`
-   (non-« X »). Le héros voit ses cartes distribuées à CHAQUE main, un adversaire
-   seulement au showdown → le héros ressort en maximum net. Son nom « Player N » est
-   remplacé par le `<nickname>` de la session dans `name="…"` et `player="…"`
-   (players, actions, cards, collectees — une réécriture unique de `hand.handText`).
-2. **Adversaires** — réécrits en `anon_<sessioncode>_<N>` (le n° de « Player N » = le
-   siège). Les stats s'accumulent donc au sein d'une session mais ne fusionnent plus
-   un « Player 3 » d'une table/session avec un autre « Player 3 » ailleurs (la base
-   indexe par (site_id, name) → sinon un seul « Player 3 » global pour tout le site,
-   base polluée). Les fichiers non-anonymes (héros au vrai nom déjà assis) ne sont pas
-   touchés.
-3. **Ambiguïté** — si le héros ne peut être tranché (ex. une seule main, un showdown,
-   égalité entre deux sièges), la main est laissée intacte plutôt que de risquer un
-   mauvais étiquetage ; les mains suivantes de la session la résolvent.
-4. **Check « hero is not seated » (HUD_main) — inchangé volontairement** : puisque le
-   héros porte désormais son vrai `<nickname>` dès le parsing, il est présent dans le
-   stat_dict et le check passe normalement. On ne l'affaiblit PAS (créer un HUD sans
-   héros identifié placerait les stats n'importe où) ; le seul skip résiduel est le cas
-   d'ambiguïté ci-dessus, qui DOIT effectivement être sauté.
+`readCollectPot` ne relisent les noms — une réécriture unique de `hand.handText`) :
+1. **Table siège→vrai nom de session** (`_session_seat_names`) apprise depuis les mains
+   nommées du fichier (`whole_file`). Un siège qui montre deux noms différents dans la
+   session (occupant changé) est écarté comme ambigu plutôt que deviné.
+2. **Mains anonymes** : chaque « Player \<siège\> » est remappé sur le vrai nom du siège
+   (CR7012, Moula42…) → les stats adverses **fusionnent** avec les mains nommées. Siège
+   inconnu/ambigu → `anon_<sessioncode>_<siège>` (pas de pollution inter-session ; la base
+   indexe par (site_id, name)). **Aucun héros injecté** dans une main anonyme (un siège qui
+   était celui du héros dans une main nommée est scopé, jamais renommé en héros).
+3. **Mains nommées** (héros distribué) : intactes — vrais noms déjà présents, héros présent,
+   HUD et check « hero is not seated » fonctionnent nativement.
+4. **Ordre live** : les mains anonymes qui arrivent AVANT la 1ʳᵉ main du héros n'ont pas
+   encore de table de sièges → tout est scopé (sans pollution) ; une fois le héros passé,
+   les mains anonymes suivantes récupèrent les vrais noms. En ré-import batch (fichier
+   complet), tout est résolu d'un coup.
 
-Tests : `test/test_ipoker_anonymized_players.py` (6 tests) — résolution du héros par
-fréquence de révélation, renommage héros + adversaires, non-régression fichier non-anonyme,
-égalité non résolue laissée intacte, main incrémentale (bloc `<game>` nu) résolue via
-`whole_file`. Validé bout-en-bout : les 2 mains d'un fichier anonyme donnent
-`hero=tripsfountain99`, adversaires `anon_<sessioncode>_<N>`.
+Tests : `test/test_ipoker_anonymized_players.py` (6 tests) — table de sièges apprise, main
+nommée intacte, opposants anonymes récupérés (siège inconnu scopé), héros jamais ressuscité,
+tout scopé sans table de sièges, siège ambigu scopé. Validé bout-en-bout sur le fichier bwin
+réel : mains anonymes → CR7012/Moula42/TheDarkRaise/confusius5 (+ `anon_..._6`), mains
+nommées → `hero=jejesat76`.
 
 Note (hors chantier, à traiter séparément) : `re_hand_info` (`code="(?P<HID>…)"`) matche
 `sessioncode="…"` → la 1ʳᵉ main de chaque fichier de session (celle qui contient l'en-tête)

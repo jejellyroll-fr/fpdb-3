@@ -11,18 +11,15 @@ from fpdb_3_legacy.loggingFpdb import get_logger
 
 log = get_logger("ipoker_parser")
 
-# The recent iPoker client anonymises every seat as "Player <N>", the hero
-# included. These patterns drive the de-anonymisation pass in readHandInfo:
-# the hero is recovered by cross-referencing the session <nickname> with the
-# only seat whose pocket cards are actually dealt (opponents show "X X"), and
-# the remaining anonymous seats are scoped to the session so a global
-# "Player 3" no longer aggregates unrelated opponents across tables/sessions.
+# The recent iPoker client (PMU/bwin) anonymises a hand as "Player <N>" only
+# when the hero is NOT dealt into it; every hand the hero plays carries real
+# names. The anonymous name equals the seat number ("Player 3" sits at seat 3),
+# and seats are stable within a session, so the hands the hero played give us a
+# seat -> real name map that recovers the opponents of the anonymous hands.
+# These patterns drive the de-anonymisation pass in readHandInfo.
 _ANON_NAME_RE = re.compile(r"^Player\s+\d+$")
 _PLAYER_TAG_RE = re.compile(
     r'<player\b(?=[^>]*\bname="(?P<PNAME>[^"]*)")(?=[^>]*\bseat="(?P<SEAT>\d+)")[^>]*>',
-)
-_POCKET_CARDS_RE = re.compile(
-    r'<cards\b(?=[^>]*\btype="Pocket")(?=[^>]*\bplayer="(?P<PNAME>[^"]*)")[^>]*>(?P<CARDS>[^<]*)</cards>',
 )
 _SESSION_CODE_RE = re.compile(r'sessioncode="(?P<CODE>\d+)"')
 
@@ -43,8 +40,8 @@ class IPokerHandInfoMixin:
     maxseats: int
     playerWinnings: dict[str, str]
     seat_mapping: dict[int, int]
-    _deanon_hero: str | None
-    _deanon_hero_src: str
+    _seat_names: dict[int, str]
+    _seat_names_src: str
 
     if TYPE_CHECKING:
 
@@ -55,103 +52,88 @@ class IPokerHandInfoMixin:
         @staticmethod
         def clearMoneyString(money: str) -> str: ...
 
-    def _resolve_anonymized_hero(self) -> str | None:
-        """Identify which anonymous "Player N" seat is the hero.
-
-        The hero's own pocket cards are dealt in every hand; opponents only
-        reveal theirs at showdown. Counting, over the whole session file, the
-        hands in which each seat shows real (non-"X") pocket cards therefore
-        singles the hero out as the clear maximum. A tie (e.g. a lone showdown
-        hand with no fold-only hand yet) is left unresolved: better to skip the
-        hand than to mislabel a seat.
-        """
-        whole = getattr(self, "whole_file", "") or ""
-        if getattr(self, "_deanon_hero_src", None) is whole:
-            return self._deanon_hero
-
-        counts: dict[str, int] = {}
-        for chunk in whole.split("</game>"):
-            if "<game" not in chunk:
-                continue
-            revealed = set()
-            for m in _POCKET_CARDS_RE.finditer(chunk):
-                cards = m.group("CARDS").split()
-                if any(card and card.upper() != "X" for card in cards):
-                    revealed.add(m.group("PNAME"))
-            for pname in revealed:
-                counts[pname] = counts.get(pname, 0) + 1
-
-        hero: str | None = None
-        if counts:
-            top = max(counts.values())
-            leaders = [pname for pname, count in counts.items() if count == top]
-            if len(leaders) == 1:
-                hero = leaders[0]
-            else:
-                log.warning("iPoker de-anonymisation: hero unresolved, tied candidates %s", leaders)
-
-        self._deanon_hero_src = whole
-        self._deanon_hero = hero
-        return hero
-
     def _session_code(self) -> str:
-        """Return the session code used to scope anonymous opponent names."""
+        """Return the session code used to scope unresolved anonymous names."""
         whole = getattr(self, "whole_file", "") or ""
         m = _SESSION_CODE_RE.search(whole)
         return m.group("CODE") if m else "0"
 
+    def _session_seat_names(self) -> dict[int, str]:
+        """Map physical seat -> real name, learned from the session's named hands.
+
+        iPoker only anonymises a hand ("Player N") when the hero is not dealt in;
+        the hands the hero plays carry real names. Scanning the whole session
+        file for those real names, keyed by seat, lets the anonymous hands'
+        opponents be recovered. A seat that shows more than one real name across
+        the session (the occupant changed) is dropped as ambiguous rather than
+        guessed. Cached per whole_file (re-read as the file grows during live
+        auto-import) so later anonymous hands pick up names once the hero plays.
+        """
+        whole = getattr(self, "whole_file", "") or ""
+        if getattr(self, "_seat_names_src", None) is whole:
+            return self._seat_names
+
+        seen: dict[int, set[str]] = {}
+        for chunk in whole.split("</game>"):
+            if "<game" not in chunk:
+                continue
+            for m in _PLAYER_TAG_RE.finditer(chunk):
+                name = m.group("PNAME")
+                if _ANON_NAME_RE.match(name):
+                    continue
+                seen.setdefault(int(m.group("SEAT")), set()).add(name)
+
+        resolved = {seat: next(iter(names)) for seat, names in seen.items() if len(names) == 1}
+        self._seat_names_src = whole
+        self._seat_names = resolved
+        return resolved
+
     def _deanonymize_players(self, hand: Any) -> None:
-        """Rewrite anonymous "Player N" names in place on hand.handText.
+        """Recover anonymous "Player N" opponents in place on hand.handText.
 
-        Two independent things can be anonymous:
-          - the hero, recovered from the session <nickname> plus the seat whose
-            pocket cards are dealt (see _resolve_anonymized_hero);
-          - the opponents, rewritten to ``anon_<sessioncode>_<N>`` so stats
-            accumulate within a session but never merge a "Player 3" from one
-            table/session with a different "Player 3" elsewhere.
+        Only hands where the hero is not dealt are anonymous. There is therefore
+        no hero to inject here; each "Player N" (== seat N) is remapped to the
+        real name that seat carried in a named hand of the same session, or, when
+        that seat's occupant is unknown/ambiguous, scoped to
+        ``anon_<sessioncode>_<seat>`` so stats never merge a "Player 3" across
+        unrelated sessions. Named hands (real names already seated) are left
+        untouched, so normal files and fixtures are unaffected.
 
-        Non-anonymous files (the hero's real name is already seated) are left
-        untouched, so existing sites and fixtures are unaffected.
+        markStreets/readBlinds/readAction/readHoleCards/readCollectPot all
+        re-parse hand.handText, so rewriting it once here keeps players, actions,
+        cards and collectees consistent under the recovered names.
         """
         hero_nick = getattr(self, "hero", "") or ""
 
-        players = [(m.group("PNAME"), m.group("SEAT")) for m in _PLAYER_TAG_RE.finditer(hand.handText)]
-        anon_players = [(pname, seat) for pname, seat in players if _ANON_NAME_RE.match(pname)]
+        anon_players = [
+            (m.group("PNAME"), int(m.group("SEAT")))
+            for m in _PLAYER_TAG_RE.finditer(hand.handText)
+            if _ANON_NAME_RE.match(m.group("PNAME"))
+        ]
         if not anon_players:
-            return
-
-        names = {pname for pname, _ in players}
-        hero_is_anon = bool(hero_nick) and hero_nick not in names
-        hero_anon: str | None = None
-        if hero_is_anon:
-            hero_anon = self._resolve_anonymized_hero()
-            if not hero_anon:
-                # Cannot tell which seat is the hero yet; renaming opponents now
-                # would strip the hero's only chance of being recognised. Leave
-                # the hand untouched — later hands in the session will resolve it.
-                log.warning(
-                    "iPoker de-anonymisation: hero %r not seated and unresolved for hand %s; leaving anonymous",
-                    hero_nick,
-                    getattr(hand, "handid", "?"),
-                )
-                return
+            return  # named hand (hero dealt in): real names already present.
 
         session = self._session_code()
+        seat_names = self._session_seat_names()
         rename: dict[str, str] = {}
-        for pname, _seat in anon_players:
-            if hero_anon and pname == hero_anon:
-                rename[pname] = hero_nick
+        for pname, seat in anon_players:
+            real = seat_names.get(seat)
+            # Never resurrect the hero: an anonymous hand is by definition one the
+            # hero did not play, so a seat that was the hero's in a named hand
+            # must be scoped, not renamed back to the hero.
+            if real and real != hero_nick:
+                rename[pname] = real
             else:
-                num = pname.rsplit(None, 1)[-1]
-                rename[pname] = f"anon_{session}_{num}"
+                rename[pname] = f"anon_{session}_{seat}"
 
         text = hand.handText
         for old, new in rename.items():
             text = text.replace(f'name="{old}"', f'name="{new}"').replace(f'player="{old}"', f'player="{new}"')
         hand.handText = text
 
-        if hero_anon:
-            log.info("iPoker de-anonymisation: hero %r recovered from anonymous seat %r", hero_nick, hero_anon)
+        recovered = {old: new for old, new in rename.items() if not new.startswith("anon_")}
+        if recovered:
+            log.info("iPoker de-anonymisation: recovered opponents from session seat map: %s", recovered)
         log.debug("iPoker de-anonymisation rename map: %s", rename)
 
     def readHandInfo(self, hand: Any) -> None:
@@ -168,10 +150,8 @@ class IPokerHandInfoMixin:
         """
         log.debug("Entering readHandInfo.")
 
-        # Recover the hero and scope anonymous opponents before anything else
-        # reads player names: markStreets/readBlinds/readAction/readHoleCards/
-        # readCollectPot all re-parse hand.handText, so rewriting it here keeps
-        # players, actions, cards and collectees consistent under the new names.
+        # Recover anonymous "Player N" opponents before anything else reads
+        # player names (see _deanonymize_players).
         self._deanonymize_players(hand)
 
         # Parse hand info from regex
