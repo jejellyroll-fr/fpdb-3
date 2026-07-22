@@ -267,10 +267,26 @@ class IdentifySite:
         the skin is resolved from the configured HH/TS paths, falling back to
         whichever single WPN skin the user has enabled.
         """
+        return self._select_network_skin_site(path, fallback_site, "WinningPoker")
+
+    def _select_ipoker_skin_site(self, path, fallback_site):
+        """Return the configured iPoker skin site for this file.
+
+        All iPoker skins share the iPoker parser class, so only one survives
+        keyed by ``site_id`` in ``self.sitelist`` and the surviving name is
+        arbitrary (whichever <hhc> came last in the config). The XML content
+        carries no skin marker either, so resolve the skin from the
+        configured HH/TS paths (PMU Poker, Bwin.fr Poker, ... each watch
+        their own client directory).
+        """
+        return self._select_network_skin_site(path, fallback_site, "iPoker")
+
+    def _select_network_skin_site(self, path, fallback_site, network):
+        """Resolve the skin site of a multi-skin network from the file path."""
         supported = getattr(self.config, "supported_sites", None)
         if not supported:
             return fallback_site
-        wpn_sites = [s for s in supported.values() if getattr(s, "network", "") == "WinningPoker"]
+        wpn_sites = [s for s in supported.values() if getattr(s, "network", "") == network]
         if not wpn_sites:
             return fallback_site
 
@@ -476,11 +492,13 @@ class IdentifySite:
                 f.archive = True
                 f.archiveHead = True
             if m:
-                # For PokerStars and WPN, we need to determine the specific skin
+                # For PokerStars, WPN and iPoker, we need to determine the specific skin
                 if filter_name == "PokerStars":
                     selected_site = self._select_pokerstars_skin_site(path, whole_file, site)
                 elif filter_name == "Winning":
                     selected_site = self._select_winning_skin_site(path, site)
+                elif filter_name == "iPoker":
+                    selected_site = self._select_ipoker_skin_site(path, site)
                 else:
                     selected_site = site
                 f.site = selected_site
@@ -511,6 +529,8 @@ class IdentifySite:
                             f.site = self._select_pokerstars_skin_site(path, whole_file, site)
                         elif site.filter_name == "Winning":
                             f.site = self._select_winning_skin_site(path, site)
+                        elif site.filter_name == "iPoker":
+                            f.site = self._select_ipoker_skin_site(path, site)
                         else:
                             f.site = site
                         f.ftype = "summary"

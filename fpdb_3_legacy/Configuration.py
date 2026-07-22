@@ -1387,6 +1387,18 @@ class RawTourneys:
 # end class RawTourneys
 
 
+# Entain France skins that left the PartyPoker network for iPoker in 2026.
+# Old user configs still declare them with network="PartyPoker" and the
+# PartyPoker converter; Config.__init__ migrates such entries in place.
+ENTAIN_FR_IPOKER_SITES = ("Bwin.fr Poker", "PartyPoker.fr")
+
+# Windows data directories of the new Entain France iPoker clients, used to
+# repoint HH_path/TS_path during the migration (client/data/<account>/History).
+ENTAIN_FR_WINDOWS_DATA_DIRS: dict[str, tuple[str, ...]] = {
+    "Bwin.fr Poker": ("bwin Poker France",),
+}
+
+
 class Config:
     def __init__(self, file=None, dbname: str | None = None, custom_log_dir="", lvl="INFO") -> None:
         self.install_method = INSTALL_METHOD
@@ -1492,6 +1504,16 @@ class Config:
             self.gui_tour_stats.get_defaults()
         for gcs_node in doc.getElementsByTagName("gui_tour_stats"):
             self.gui_tour_stats.add_elements(node=gcs_node)  # add/overwrite elements in self.gui_cash_stats
+
+        # One-time migration of stale user configs: bwin.fr and partypoker.fr
+        # moved from the PartyPoker network to iPoker (Entain France, 2026).
+        # Configs written before that migration still carry network="PartyPoker"
+        # and converter="PartyPokerToFpdb" for those skins, so their iPoker XML
+        # hand histories are never parsed and no HUD ever appears. Runs before
+        # the <site>/<hhc> nodes are turned into objects so the migrated values
+        # take effect in this very session.
+        if self._migrate_entain_fr_sites_to_ipoker(doc):
+            self.save()  # keeps a .backup of the pre-migration config
 
         #        s_sites = doc.getElementsByTagName("supported_sites")
         for site_node in doc.getElementsByTagName("site"):
@@ -1615,6 +1637,85 @@ class Config:
         # print ""
 
     # end def __init__
+
+    def _migrate_entain_fr_sites_to_ipoker(self, doc) -> bool:
+        """Rewrite pre-2026 Entain France skins from PartyPoker to iPoker.
+
+        Returns True when the DOM was modified and the config needs saving.
+        Idempotent: entries already on the iPoker network are left untouched.
+        """
+        changed = False
+        has_ipoker_layout = any(
+            ls_node.getAttribute("name") == "ipoker_default" for ls_node in doc.getElementsByTagName("ls")
+        )
+        for site_node in doc.getElementsByTagName("site"):
+            name = site_node.getAttribute("site_name")
+            if name not in ENTAIN_FR_IPOKER_SITES:
+                continue
+            if site_node.getAttribute("network") == "PartyPoker":
+                site_node.setAttribute("network", "iPoker")
+                changed = True
+                detected = self._detect_entain_fr_data_dir(name)
+                if detected:
+                    hh_path, ts_path, hero = detected
+                    site_node.setAttribute("HH_path", hh_path)
+                    site_node.setAttribute("TS_path", ts_path)
+                    if hero and site_node.getAttribute("screen_name") != hero:
+                        site_node.setAttribute("screen_name", hero)
+                    log.warning(
+                        "Migrated site %r from the PartyPoker network to iPoker (hand histories: %s)",
+                        name,
+                        hh_path,
+                    )
+                else:
+                    log.warning(
+                        "Migrated site %r from the PartyPoker network to iPoker "
+                        "(client data directory not found; HH_path left unchanged)",
+                        name,
+                    )
+            # Independent of the network attribute (repairs half-migrated
+            # configs too): a migrated skin must not keep the PartyPoker HUD
+            # layout, or the stat windows are placed for the wrong table
+            # geometry. Only rewrite when the target layout set exists.
+            if site_node.getAttribute("network") == "iPoker" and has_ipoker_layout:
+                for ls_node in site_node.getElementsByTagName("layout_set"):
+                    if ls_node.getAttribute("ls") == "party_default":
+                        ls_node.setAttribute("ls", "ipoker_default")
+                        changed = True
+                        log.warning("Switched site %r HUD layout from party_default to ipoker_default", name)
+        for hhc_node in doc.getElementsByTagName("hhc"):
+            if hhc_node.getAttribute("site") not in ENTAIN_FR_IPOKER_SITES:
+                continue
+            if hhc_node.getAttribute("converter") != "PartyPokerToFpdb":
+                continue
+            hhc_node.setAttribute("converter", "iPokerToFpdb")
+            hhc_node.setAttribute("summaryImporter", "iPokerSummary")
+            changed = True
+        return changed
+
+    @staticmethod
+    def _detect_entain_fr_data_dir(site_name: str) -> tuple[str, str, str] | None:
+        """Locate <client>/data/<account>/History/Data on Windows.
+
+        Returns (HH_path, TS_path, account name) for the first account
+        directory that has a History/Data tree, or None when the client is
+        not installed (or on other platforms).
+        """
+        local_appdata = os.getenv("LOCALAPPDATA", "")
+        if not local_appdata:
+            return None
+        for folder in ENTAIN_FR_WINDOWS_DATA_DIRS.get(site_name, ()):
+            data_dir = Path(local_appdata) / folder / "data"
+            if not data_dir.is_dir():
+                continue
+            try:
+                accounts = sorted(p for p in data_dir.iterdir() if (p / "History" / "Data").is_dir())
+            except OSError:
+                continue
+            for account in accounts:
+                history = account / "History" / "Data"
+                return (str(history / "Tables"), str(history / "Tournaments"), account.name)
+        return None
 
     def add_missing_elements(self, doc, example_file):
         """Look through example config file and add any elements that are not in the config

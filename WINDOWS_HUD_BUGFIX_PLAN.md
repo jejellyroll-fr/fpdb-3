@@ -133,7 +133,23 @@ vérifier le codepage de lecture des XML iPoker).
 
 ---
 
-## Bug 3 — bwin.fr (migré iPoker) : aucune détection de main ni de table
+## Bug 3 — bwin.fr (migré iPoker) : aucune détection de main ni de table — ✅ FAIT (2026-07-22)
+
+Livré :
+1. Migration idempotente dans `Config.__init__` (`_migrate_entain_fr_sites_to_ipoker`) :
+   network PartyPoker→iPoker, hhc → iPokerToFpdb/iPokerSummary, HH_path/TS_path repointés
+   vers `%LOCALAPPDATA%\bwin Poker France\data\<compte>\History\Data`, screen_name corrigé
+   depuis le nom du dossier compte, layout_set party_default → ipoker_default (répare aussi
+   les configs semi-migrées). Sauvegarde `.backup` avant réécriture.
+2. Dispatcher iPoker : indicateurs de chemin « bwin poker france » / « bwinfr » ajoutés au
+   skin BwinFrIPoker (sinon les mains tombaient sur le site générique « iPoker »).
+3. DetectInstalledSites : alias de dossier Windows (`WINDOWS_IPOKER_DATA_DIR_ALIASES`).
+4. IdentifySite : résolution de skin iPoker par chemin (`_select_ipoker_skin_site`,
+   généralisation du helper WPN).
+La config réelle de l'utilisateur a été migrée (original conservé :
+`HUD_config.xml.bak-premigration-bwin-20260722`). Vérifié sur les fichiers bwin réels du
+21/07 : skin « Bwin.fr Poker », site_id 40, ring omahahi 6-max sur les 6 mains.
+Tests : `test/test_bwin_fr_ipoker_migration.py` (13 tests).
 
 **Cause racine (prouvée par la config)** — la config utilisateur est antérieure à la migration :
 ```xml
