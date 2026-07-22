@@ -32,7 +32,16 @@ IPOKER_SKINS: tuple[IPokerSkin, ...] = (
     IPokerSkin(("pmu",), "PMU Poker", "pmu", 56, "PMUIPoker"),
     IPokerSkin(("fdj", "en ligne"), "FDJ Poker", "fdj", 57, "FDJIPoker"),
     IPokerSkin(("betclic",), "Betclic Poker", "betclic", 131, "BetclicIPoker"),
-    IPokerSkin(("bwinpokerfr", "bwin.fr", "bwin.fr online poker"), "Bwin.fr Poker", "bwin_fr", 40, "BwinFrIPoker"),
+    IPokerSkin(
+        # "bwin poker france" is the Windows client's data directory
+        # (%LOCALAPPDATA%\bwin Poker France\data\<account>\History\...),
+        # "bwinfr" its install/roaming directory name.
+        ("bwinpokerfr", "bwin.fr", "bwin.fr online poker", "bwin poker france", "bwinfr"),
+        "Bwin.fr Poker",
+        "bwin_fr",
+        40,
+        "BwinFrIPoker",
+    ),
     IPokerSkin(("partypokerfr", "partypoker.fr", "partypoker.fr online poker"), "PartyPoker.fr", "partypoker_fr", 44, "PartyPokerFrIPoker"),
     IPokerSkin(("netbet",), "NetBet Poker", "netbet", 59),
     IPokerSkin(("poker770",), "Poker770", "poker770", 58),

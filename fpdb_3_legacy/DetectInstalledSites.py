@@ -301,6 +301,15 @@ class WinamaxDetector(SiteDetector):
         return {"detected": False, "hhpath": "", "heroname": "", "tspath": ""}
 
 
+# Skins whose Windows data directory is not named after the skin itself.
+# Detection probes %LOCALAPPDATA%/<skin>/data by default; these are the extra
+# directory names to try for a given skin.
+WINDOWS_IPOKER_DATA_DIR_ALIASES: dict[str, tuple[str, ...]] = {
+    # New Entain France client (iPoker network since the 2026 migration).
+    "Bwin.fr Poker": ("bwin Poker France",),
+}
+
+
 class iPokerDetector(SiteDetector):  # noqa: N801
     """iPoker network detector supporting all major skins including French, Italian, Spanish."""
 
@@ -439,10 +448,11 @@ class iPokerDetector(SiteDetector):  # noqa: N801
 
         if self.platform == "Windows":
             paths = get_windows_paths()
-            base_path = self._check_path_exists(
-                str(Path(paths["local_appdata"]) / skin / "data"),
-                str(Path(paths["appdata"]) / skin / "data"),
-            )
+            candidates = []
+            for folder in (skin, *WINDOWS_IPOKER_DATA_DIR_ALIASES.get(skin, ())):
+                candidates.append(str(Path(paths["local_appdata"]) / folder / "data"))
+                candidates.append(str(Path(paths["appdata"]) / folder / "data"))
+            base_path = self._check_path_exists(*candidates)
 
         elif self.platform == "Linux":
             paths = get_linux_paths()
