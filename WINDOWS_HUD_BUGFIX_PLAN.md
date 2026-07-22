@@ -292,7 +292,7 @@ par room (Stars cash+tournoi, PMU cash+twister, bwin.fr cash, ACR cash+Spinz).
 
 ## À FAIRE — chantiers découverts pendant le diagnostic
 
-### A. iPoker (PMU/bwin) : joueurs anonymisés « Player N », héros compris
+### A. iPoker (PMU/bwin) : joueurs anonymisés « Player N », héros compris — ✅ FAIT (2026-07-22)
 
 Constat (log du 22/07, table PMU « Sasolburg ») :
 ```
@@ -303,24 +303,40 @@ Le nouveau client iPoker écrit TOUS les joueurs en « Player N » dans les XML,
 Le héros n'est identifiable que par recoupement : `<nickname>` dans l'en-tête de session +
 le seul joueur dont les cartes `type="Pocket"` sont révélées (les autres sont `X X X X`).
 
-Conséquences :
-- le check « hero is not seated » de HUD_main saute des mains → HUD attaché en retard
-  (4 mains perdues sur Sasolburg) voire jamais si le héros n'est pas résolu ;
-- les stats sont accumulées sur des pseudo-joueurs « Player N » dont le numéro change
-  d'une session/table à l'autre → base polluée, stats adverses sans aucune valeur,
-  et le « Player N » du héros disperse SES stats.
+Livré (`fpdb_3_legacy/iPoker/hand_info.py`, passe de dé-anonymisation en tête de
+`readHandInfo`, avant que `markStreets`/`readBlinds`/`readAction`/`readHoleCards`/
+`readCollectPot` ne relisent les noms) :
+1. **Héros** — `_resolve_anonymized_hero()` compte, sur tout le fichier de session
+   (`whole_file`), les mains où chaque siège montre de vraies cartes `type="Pocket"`
+   (non-« X »). Le héros voit ses cartes distribuées à CHAQUE main, un adversaire
+   seulement au showdown → le héros ressort en maximum net. Son nom « Player N » est
+   remplacé par le `<nickname>` de la session dans `name="…"` et `player="…"`
+   (players, actions, cards, collectees — une réécriture unique de `hand.handText`).
+2. **Adversaires** — réécrits en `anon_<sessioncode>_<N>` (le n° de « Player N » = le
+   siège). Les stats s'accumulent donc au sein d'une session mais ne fusionnent plus
+   un « Player 3 » d'une table/session avec un autre « Player 3 » ailleurs (la base
+   indexe par (site_id, name) → sinon un seul « Player 3 » global pour tout le site,
+   base polluée). Les fichiers non-anonymes (héros au vrai nom déjà assis) ne sont pas
+   touchés.
+3. **Ambiguïté** — si le héros ne peut être tranché (ex. une seule main, un showdown,
+   égalité entre deux sièges), la main est laissée intacte plutôt que de risquer un
+   mauvais étiquetage ; les mains suivantes de la session la résolvent.
+4. **Check « hero is not seated » (HUD_main) — inchangé volontairement** : puisque le
+   héros porte désormais son vrai `<nickname>` dès le parsing, il est présent dans le
+   stat_dict et le check passe normalement. On ne l'affaiblit PAS (créer un HUD sans
+   héros identifié placerait les stats n'importe où) ; le seul skip résiduel est le cas
+   d'ambiguïté ci-dessus, qui DOIT effectivement être sauté.
 
-Piste d'implémentation :
-1. Au parsing (`fpdb_3_legacy/iPoker/`), remapper le joueur héros : celui dont les
-   pocket cards sont révélées (ou, à défaut, croiser bet/win avec `<bets>/<wins>` de la
-   session) → remplacer son nom « Player N » par le `<nickname>` de la session, dans
-   players/actions/cards/collectees.
-2. Décider du sort des adversaires anonymes : les garder en « Player N » par table/session
-   (stats intra-session seulement) ou les préfixer (`anon_<sessioncode>_<seat>`) pour ne
-   pas agréger des joueurs différents sous le même « Player 3 » global. Vérifier ce que
-   fait la base aujourd'hui (un seul joueur « Player 3 » pour tout le site ?).
-3. Adapter le check « hero is not seated » (HUD_main) : pour les sites anonymes, tolérer
-   l'absence du héros au lieu de sauter la main ?
+Tests : `test/test_ipoker_anonymized_players.py` (6 tests) — résolution du héros par
+fréquence de révélation, renommage héros + adversaires, non-régression fichier non-anonyme,
+égalité non résolue laissée intacte, main incrémentale (bloc `<game>` nu) résolue via
+`whole_file`. Validé bout-en-bout : les 2 mains d'un fichier anonyme donnent
+`hero=tripsfountain99`, adversaires `anon_<sessioncode>_<N>`.
+
+Note (hors chantier, à traiter séparément) : `re_hand_info` (`code="(?P<HID>…)"`) matche
+`sessioncode="…"` → la 1ʳᵉ main de chaque fichier de session (celle qui contient l'en-tête)
+prend le **code de session** comme hand id au lieu de son `gamecode`. Bug pré-existant,
+indépendant de l'anonymisation.
 
 ### B. Système de sièges iPoker pas au point (numérotation clairsemée 1..10)
 
