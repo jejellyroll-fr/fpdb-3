@@ -178,10 +178,16 @@ class HudMain(QObject):
 
         try:
             # Import LoggerRegistry to get the current logger configuration
-            from fpdb_3_legacy.loggingFpdb import LoggerRegistry
+            from fpdb_3_legacy.loggingFpdb import DIAGNOSTIC_LEVEL_CAP, LoggerRegistry
 
-            # Create HUD-specific log directory and file
-            hud_log_dir = Path.home() / ".fpdb" / "log"
+            # Create HUD-specific log directory and file. Use the fpdb config
+            # directory (%APPDATA%/fpdb on Windows, ~/.fpdb elsewhere) so
+            # HUD-log.txt sits next to fpdb-log.txt and HUD-errors.txt instead
+            # of a second, easily-missed ~/.fpdb tree.
+            if Configuration.CONFIG_PATH:
+                hud_log_dir = Path(Configuration.CONFIG_PATH) / "log"
+            else:
+                hud_log_dir = Path.home() / ".fpdb" / "log"
             hud_log_dir.mkdir(parents=True, exist_ok=True)
             hud_log_file = hud_log_dir / "HUD-log.txt"
 
@@ -202,7 +208,12 @@ class HudMain(QObject):
                 configured_level = logging.ERROR
                 log.info("Using default ERROR level for HUD logger")
 
-            hud_logger.setLevel(configured_level)
+            # The file log is the diagnostic record: it must never sit above
+            # WARNING, or the skip reasons and table-detection traces needed to
+            # debug "HUD did not appear" reports are lost. The console keeps
+            # the configured (usually ERROR) level below.
+            file_level = min(configured_level, DIAGNOSTIC_LEVEL_CAP)
+            hud_logger.setLevel(file_level)
 
             # Remove existing handlers to avoid duplicates
             for handler in hud_logger.handlers[:]:
@@ -217,8 +228,7 @@ class HudMain(QObject):
                 max_bytes=10 * 1024 * 1024,  # 10 MB
                 encoding="utf-8",
             )
-            # File handler should respect the logger level
-            file_handler.setLevel(configured_level)
+            file_handler.setLevel(file_level)
 
             # Use our JSON formatter
             json_formatter = JsonFormatter()
@@ -253,6 +263,28 @@ class HudMain(QObject):
             hud_logger.addHandler(console_handler)
 
             hud_logger.propagate = False  # Use our own handlers instead of propagating
+
+            # The HUD process is more than the "hud_main" logger: table
+            # detection logs through "win_tables"/"table_window", positioning
+            # through "hud"/aux loggers. Those all propagate to the root
+            # logger, which had no file handler here, so their WARNINGs (e.g.
+            # "Currently open windows: [...]" after a failed table search)
+            # vanished. Share the file handler with the root logger so every
+            # module's WARNING+ lands in HUD-log.txt. hud_main does not
+            # propagate, so its records are not duplicated.
+            root_logger = logging.getLogger()
+            root_logger.addHandler(file_handler)
+            if root_logger.level > file_level:
+                root_logger.setLevel(file_level)
+            # Keep ERROR+ from those propagated loggers on stderr too: before
+            # the root logger had a handler, Python's lastResort handler sent
+            # them to *current* sys.stderr, which the HUD-errors.txt
+            # redirection below captures. A plain StreamHandler would bind the
+            # original stderr now, before the redirection, so resolve
+            # sys.stderr at emit time exactly like lastResort does.
+            root_console_handler = logging._StderrHandler(logging.ERROR)  # noqa: SLF001
+            root_console_handler.setFormatter(console_formatter)
+            root_logger.addHandler(root_console_handler)
 
             log.info(f"HUD logging configured to: {hud_log_file}")
             log.info("HUD_main starting up - logging initialized successfully")
@@ -839,7 +871,14 @@ class HudMain(QObject):
 
         self._merge_positions(stat_dict, new_hand_id)
         if not any(stat_dict[key]["screen_name"] == self.hero[site_id] for key in stat_dict):
-            log.info("HUD not created yet, because hero is not seated for this hand")
+            log.warning(
+                "HUD not created for hand %s table=%s: hero %r (site_id=%s) not among players %s",
+                new_hand_id,
+                table_name,
+                self.hero.get(site_id),
+                site_id,
+                sorted(stat_dict[key]["screen_name"] for key in stat_dict),
+            )
             return
 
         cards = self.get_cards(new_hand_id, poker_game)
@@ -857,6 +896,12 @@ class HudMain(QObject):
             )
             return
         if tablewindow.number in self.blacklist:
+            log.warning(
+                "HUD skipped for hand %s table=%s: window %s is blacklisted",
+                new_hand_id,
+                table_name,
+                tablewindow.number,
+            )
             return
 
         tablewindow.key = temp_key
@@ -901,6 +946,10 @@ class HudMain(QObject):
 
         table_info = self._get_table_info(new_hand_id)
         if not table_info:
+            log.warning(
+                "HUD skipped for hand %s: table info not found in DB (hand not committed yet?)",
+                new_hand_id,
+            )
             return
 
         (table_name, max_seats, poker_game, game_type, fast, site_id, site_name, num_seats, tour_number, tab_number, tourney_name) = (
