@@ -33,6 +33,7 @@ class IPokerXMLFormatMixin:
             "tablename": r"<tablename>([^<]*)</tablename>",
             "currency": r"<currency>([^<]*)</currency>",
             "nickname": r"<nickname>([^<]*)</nickname>",
+            "tablesize": r"<tablesize>([^<]*)</tablesize>",
         }
 
         session_info: dict[str, str] = {}
@@ -182,6 +183,16 @@ class IPokerXMLFormatMixin:
             self.info["type"] = "ring"
             self.info["currency"] = session_info.get("currency", "USD")
         self.tablename = session_info.get("tablename", "Unknown")
+
+        # <tablesize> only exists in the session header, never in a <game>
+        # block. Hands parsed through this path (every hand after the first in
+        # a file, i.e. all live auto-import updates) used to leave "seats"
+        # unset, so readHandInfo fell back to guessMaxSeats(); iPoker numbers
+        # 6-max seats up to 10, so that guess returned 10 and the HUD applied a
+        # 10-max layout to a 6-max table (stats placed off the seats).
+        tablesize = session_info.get("tablesize", "")
+        if tablesize.isdigit() and int(tablesize) > 0:
+            self.info["seats"] = tablesize
 
         # Set hero from nickname
         if "nickname" in session_info:
