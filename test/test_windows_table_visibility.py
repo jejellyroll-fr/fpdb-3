@@ -31,3 +31,23 @@ def test_uncloaked_window_remains_visible() -> None:
 def test_failed_dwm_query_preserves_win32_visibility() -> None:
     detector = _detector(win32_visible=True, cloaked=True, dwm_result=-1)
     assert detector._window_is_actually_visible(123) is True
+
+
+def test_is_window_visible_ignores_cloaking() -> None:
+    """Generic site polls must not close the HUD of a cloaked-but-alive window
+    (e.g. a table moved to another virtual desktop)."""
+    detector = _detector(win32_visible=True, cloaked=True)
+    assert detector.is_window_visible(123) is True
+
+
+def test_is_window_visible_false_when_win32_hidden() -> None:
+    detector = _detector(win32_visible=False, cloaked=False)
+    assert detector.is_window_visible(123) is False
+
+
+def test_is_window_displayed_honours_cloaking() -> None:
+    """CoinPoker close detection needs cloaked windows reported as hidden."""
+    detector = _detector(win32_visible=True, cloaked=True)
+    assert detector.is_window_displayed(123) is False
+    detector = _detector(win32_visible=True, cloaked=False)
+    assert detector.is_window_displayed(123) is True

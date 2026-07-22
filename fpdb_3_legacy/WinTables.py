@@ -243,8 +243,10 @@ class Table(Table_Window):
         if match is not None:
             # Do not trust PID/argv alone: Unity can keep its process and HWND
             # after closing a table while DWM cloaks the window. The Windows
-            # detector folds Win32 visibility and DWM cloaking into this check.
-            if not self._detector.is_window_visible(match.window_id):
+            # detector folds Win32 visibility and DWM cloaking into
+            # is_window_displayed (CoinPoker-only: other sites' cloaked
+            # windows, e.g. on another virtual desktop, must keep their HUD).
+            if not self._detector.is_window_displayed(match.window_id):
                 log.warning(
                     "CoinPoker table %s window %s is hidden/cloaked; closing HUD",
                     self.search_string,
@@ -272,7 +274,7 @@ class Table(Table_Window):
         # Can't tell (our id was never readable and the tracked window's argv is
         # unreadable too): keep the tracked HWND's visibility path so a permission
         # mismatch never kills a live HUD.
-        if self._detector.is_window_visible(self.number):
+        if self._detector.is_window_displayed(self.number):
             return self._detector.get_window_geometry(self.number)
         return None
 
@@ -317,9 +319,16 @@ class Table(Table_Window):
             if table_geom is None:
                 return None
         else:
-            # Check if window is still valid
+            # Check if window is still valid. is_window_visible ignores DWM
+            # cloaking on purpose: a table on another virtual desktop is
+            # cloaked but alive, and must not have its HUD closed.
             if not self._detector.is_window_visible(self.number):
-                log.error("The window %s is not valid or visible", self.number)
+                log.error(
+                    "The window %s (table %r, search %r) is not valid or visible",
+                    self.number,
+                    getattr(self, "name", ""),
+                    getattr(self, "search_string", ""),
+                )
                 return None
 
             # Get geometry using platform abstraction
