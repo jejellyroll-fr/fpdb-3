@@ -268,7 +268,7 @@ class Winning(HandHistoryConverter):
     re_Board = re.compile(r"\[(?P<CARDS>.+)\]")
     re_TourNo = re.compile(r"\sT(?P<TOURNO>\d+)\-")
     re_File1 = re.compile(r"HH\d{8}\s(T\d+\-)?G\d+")
-    re_File2 = re.compile("(?P<TYPE>CASHID|SITGOID|RUSHID|SCHEDULEDID)")
+    re_File2 = re.compile("(?P<TYPE>CASHID|SITGOID|RUSHID|SCHEDULEDID|SPINZID)")
 
     re_PostSB1 = re.compile(
         r"^Player {PLYR} has small blind \((?P<SB>[{NUM}]+)\)".format(**substitutions),
@@ -871,9 +871,9 @@ class Winning(HandHistoryConverter):
         # Process tournament-specific information
         if "SCHEDULEDID" in self.in_path:
             log.debug("Detected SCHEDULEDID in path")
-            m3 = self.re_TourneyName2.search(self.in_path)
-            if m3:
-                hand.tourneyName = m3.group("TOURNAME").replace("{BACKSLASH}", "\\")
+            tourney_name = self._tourney_name_from_path()
+            if tourney_name:
+                hand.tourneyName = tourney_name
                 log.debug(f"Tournament name: {hand.tourneyName}")
                 m4 = self.re_GTD.search(hand.tourneyName)
                 if m4:
@@ -892,9 +892,9 @@ class Winning(HandHistoryConverter):
         elif "SITGOID" in self.in_path:
             log.debug("Detected SITGOID in path")
             hand.isSng = True
-            m3 = self.re_TourneyName2.search(self.in_path)
-            if m3:
-                hand.tourneyName = m3.group("TOURNAME").replace("{BACKSLASH}", "\\")
+            tourney_name = self._tourney_name_from_path()
+            if tourney_name:
+                hand.tourneyName = tourney_name
                 log.debug(f"Tournament name: {hand.tourneyName}")
 
                 if " Hyper Turbo " in hand.tourneyName:
@@ -925,6 +925,27 @@ class Winning(HandHistoryConverter):
                     hand.isStep = True
                     hand.stepNo = int(m5.group("STEPNO"))
                     log.debug(f"Step number: {hand.stepNo}")
+
+        elif "SPINZID" in self.in_path:
+            # Spinz are the WPN lottery SnGs (ex "Jackpot Poker"). Their file
+            # type was not recognised at all, so hand.tourneyName stayed None:
+            # the HUD then had no way to tell a Spinz from a scheduled MTT and
+            # searched for the MTT window-title format, which Spinz tables do
+            # not use ("table not found", no HUD).
+            log.debug("Detected SPINZID in path")
+            hand.isSng = True
+            hand.isLottery = True
+            tourney_name = self._tourney_name_from_path()
+            if tourney_name:
+                hand.tourneyName = tourney_name
+                log.debug(f"Tournament name: {hand.tourneyName}")
+                m4 = self.re_buyin.match(hand.tourneyName)
+                if m4:
+                    hand.buyinCurrency = "USD"
+                    hand.buyin = int(
+                        100 * Decimal(self.clearMoneyString(m4.group("BUYIN"))),
+                    )
+                    log.debug(f"Buyin: {hand.buyin} {hand.buyinCurrency}")
 
         elif "RUSHID" in self.in_path:
             log.debug("Detected RUSHID in path")
@@ -1814,24 +1835,67 @@ class Winning(HandHistoryConverter):
         log.debug("Method readSummaryInfo not implemented.")
         return True
 
+    def _tourney_name_from_path(self) -> str | None:
+        """Extract the tournament name encoded in the hand-history filename.
+
+        WPN filenames carry it as ``TN-<name> GAMETYPE-...`` with ``\\`` and
+        ``.`` escaped as ``{BACKSLASH}`` and ``{FULLSTOP}``.
+        """
+        m = self.re_TourneyName2.search(self.in_path)
+        if not m:
+            return None
+        return m.group("TOURNAME").replace("{BACKSLASH}", "\\").replace("{FULLSTOP}", ".")
+
     @staticmethod
-    def getTableTitleRe(type, table_name=None, tournament=None, table_number=None):
+    def getTableTitleRe(type, table_name=None, tournament=None, table_number=None, tourney_name=None):
         """Returns string to search in windows titles."""
         log.debug("Executing getTableTitleRe")
         log.debug(
             f"Parameters received: type='{type}', table_name='{table_name}', "
-            f"tournament='{tournament}', table_number='{table_number}'",
+            f"tournament='{tournament}', table_number='{table_number}', tourney_name='{tourney_name}'",
         )
 
         regex = re.escape(str(table_name))
         if type == "tour":
             regex = ", Table " + re.escape(str(table_number)) + r"\s\-.*\s\(" + re.escape(str(tournament)) + r"\)"
+            spin_regex = Winning._spin_table_title_re(regex, tournament, tourney_name)
+            if spin_regex is not None:
+                log.info(f"Generated Spinz Table Title regex: '{spin_regex}'")
+                return spin_regex
             log.debug(f"Constructed regex for tournament: '{regex}'")
         else:
             log.debug(f"Constructed regex for non-tournament table: '{regex}'")
 
         log.info(f"Generated Table Title regex: '{regex}'")
         return regex
+
+    @staticmethod
+    def _spin_table_title_re(classic_regex: str, tournament, tourney_name) -> str | None:
+        """Window-title regex for Spinz/Jackpot lottery SnGs, or None otherwise.
+
+        Spinz tables do not use the scheduled-MTT title format the classic
+        regex expects (", Table N - ... (tourno)"), so accept any title that
+        carries the Spinz/Jackpot branding together with the tournament number
+        or the buy-in amount. The classic format is kept as an alternative in
+        case a client version still uses it.
+        """
+        name = str(tourney_name or "")
+        if not any(marker in name.lower() for marker in ("spinz", "jackpot")):
+            return None
+
+        brand = r"(?=.*(?:Spinz|Jackpot))"
+        alternatives = [classic_regex]
+        if tournament:
+            alternatives.append(f"{brand}(?=.*{re.escape(str(tournament))})")
+        amount_match = re.search(r"\d+(?:[.,]\d+)?", name)
+        if amount_match:
+            # Tolerate either decimal separator in the title.
+            amount = re.sub(r"[.,]", "[.,]", amount_match.group(0))
+            alternatives.append(f"{brand}(?=.*{amount})")
+        else:
+            # No number to anchor on: fall back to the branding alone.
+            alternatives.append(brand)
+        return "|".join(f"(?:{alt})" for alt in alternatives)
 
     def readOther(self, hand: Hand) -> None:
         """Read other information from hand that doesn't fit standard categories.
