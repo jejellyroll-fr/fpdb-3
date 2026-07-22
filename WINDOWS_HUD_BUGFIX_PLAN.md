@@ -83,7 +83,18 @@ Test : session live Stars cash + tournoi (non-régression kickoff).
 
 ---
 
-## Bug 2 — PMU (iPoker) : cash détecté mais HUD placé n'importe où ; twister OK
+## Bug 2 — PMU (iPoker) : cash détecté mais HUD placé n'importe où ; twister OK — ✅ FAIT (2026-07-22)
+
+Cause exacte trouvée : seul le 1er "hand split" d'un fichier contient l'en-tête de session,
+donc seul lui passe par le chemin regex standard (qui lit `<tablesize>`). Toutes les mains
+suivantes (blocs `<game>` nus — c.-à-d. TOUTES les mains de l'auto-import live) passent par
+`_parse_xml_format`, qui ne lisait pas `<tablesize>` → `guessMaxSeats()` → 10 (iPoker numérote
+les sièges d'une 6-max jusqu'à 10). Fix : `_parse_xml_format` lit `<tablesize>` depuis le
+header de session et renseigne `info["seats"]` (même contrat que le chemin standard).
+Validé sur les fichiers réels du 21/07 : Sea Lake → 6 sur les 5 mains ; Twister → 3 sur les
+9 mains. Tests : `test/test_ipoker_maxseats_incremental.py` (5 tests).
+Note : les `€` corrompus (`Twister 0.25�`) viennent du client PMU lui-même (le fichier
+contient U+FFFD) — rien à corriger côté fpdb ; le client bwin plus récent écrit des `€` valides.
 
 **Cause racine (prouvée par la DB)**
 - Table « Sea Lake » = 6-max, or les Gametypes des mains importées oscillent :
