@@ -47,6 +47,21 @@ LOG_CONFIG_APPLY_ERRORS = (
 
 # Define default logging and debugging modes
 
+# Diagnostics at WARNING and above must always reach the log files. Persisted
+# registry levels (logger_config.json) and the historical defaults sit at
+# ERROR, which silently dropped the WARNING lines needed to diagnose HUD
+# failures ("Currently open windows", HUD skip reasons). Levels applied through
+# the registry are therefore capped: a logger may be made more verbose than
+# WARNING (DEBUG/INFO), never quieter.
+DIAGNOSTIC_LEVEL_CAP = logging.WARNING
+
+
+def cap_logger_level(level: int) -> int:
+    """Clamp a logger level so WARNING+ diagnostics are never suppressed."""
+    if level > DIAGNOSTIC_LEVEL_CAP:
+        return DIAGNOSTIC_LEVEL_CAP
+    return level
+
 
 @dataclass
 class LoggerInfo:
@@ -113,14 +128,14 @@ class LoggerRegistry:
 
         # Always check if we have saved configuration for this logger
         if name in self._saved_config:
-            saved_level = self._saved_config[name]["level"]
+            saved_level = cap_logger_level(self._saved_config[name]["level"])
             saved_enabled = self._saved_config[name]["enabled"]
             # Apply saved configuration
             logger.setLevel(saved_level)
             current_level = saved_level
             enabled = saved_enabled
         else:
-            current_level = logger.level
+            current_level = cap_logger_level(logger.level)
             enabled = logger.level != logging.NOTSET
 
         self._loggers[name] = LoggerInfo(
@@ -1285,20 +1300,33 @@ class TimedSizedRotatingFileHandler(TimedRotatingFileHandler):
         # Increment the part number for the next rollover
         self.part += 1
 
-        # Perform the file rotation
-        if os.path.exists(dfn):  # noqa: PTH110
-            os.remove(
+        # Perform the file rotation. On Windows the rename fails with
+        # PermissionError whenever another fpdb process (fpdb + HUD_main share
+        # log files) still holds the file open. If that exception escaped,
+        # rolloverAt stayed in the past, so *every* subsequent emit() re-tried
+        # the rollover, failed again, and no log line was ever written --
+        # logging died silently until the other process exited. Skip the
+        # rotation instead and keep appending to the current file.
+        try:
+            if os.path.exists(dfn):  # noqa: PTH110
+                os.remove(
+                    dfn,
+                )  # Remove the file if it already exists to avoid conflicts
+            os.rename(
+                self.baseFilename,
                 dfn,
-            )  # Remove the file if it already exists to avoid conflicts
-        os.rename(
-            self.baseFilename,
-            dfn,
-        )  # Rename the current log file to the new name
+            )  # Rename the current log file to the new name
+        except OSError:
+            self.part -= 1  # The part number was not consumed
 
-        # Delete old log files if necessary
+        # Delete old log files if necessary; a locked/undeletable old file must
+        # not abort the rollover.
         if self.backupCount > 0:
             for s in self.getFilesToDelete():
-                os.remove(s)  # Remove files exceeding the backup count  # noqa: PTH107
+                try:
+                    os.remove(s)  # Remove files exceeding the backup count  # noqa: PTH107
+                except OSError:
+                    pass
 
         # Reopen the log file stream if delay is not enabled
         if not self.delay:
@@ -1434,9 +1462,13 @@ def setup_logging(log_dir: str | None = None, *, console_only: bool = False) -> 
         console_handler.setFormatter(formatter)  # Apply the colored formatter
         console_handler.setLevel(logging.ERROR)  # Console shows only errors by default
 
-        # Configure the root logger
+        # Configure the root logger. WARNING (not ERROR): the file handler below
+        # is the diagnostic record, and gating the root at ERROR silently dropped
+        # every WARNING (table-detection failures, HUD skip reasons) from the log
+        # files. The console handler above stays at ERROR, so console output is
+        # unchanged.
         logger = logging.getLogger()
-        logger.setLevel(logging.ERROR)  # Default level set to ERROR for production
+        logger.setLevel(DIAGNOSTIC_LEVEL_CAP)
 
         # Remove existing handlers to prevent duplicate logs
         logger.handlers = []
