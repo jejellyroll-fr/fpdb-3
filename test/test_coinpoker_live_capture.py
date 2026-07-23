@@ -172,6 +172,42 @@ def test_live_capture_instance_lock_rejects_second_process(tmp_path) -> None:
     replacement.close()
 
 
+def test_instance_lock_never_locks_the_pid_bytes_on_windows(tmp_path, monkeypatch) -> None:
+    """The Windows branch must lock a byte past the PID payload.
+
+    Windows byte-range locks deny the range to every *other* handle, so locking
+    byte 0 made the PID unreadable: reading the lock file raised PermissionError
+    and the "already running (PID n)" diagnostic could never name the holder.
+    Forced here with a fake msvcrt so the regression is caught on any platform.
+    """
+    import sys
+    import types
+
+    locked_offsets: list[int] = []
+
+    fake_msvcrt = types.ModuleType("msvcrt")
+    fake_msvcrt.LK_NBLCK = 2
+
+    def _locking(fd: int, _mode: int, _nbytes: int) -> None:
+        locked_offsets.append(os.lseek(fd, 0, os.SEEK_CUR))
+
+    fake_msvcrt.locking = _locking
+    monkeypatch.setitem(sys.modules, "msvcrt", fake_msvcrt)
+    monkeypatch.setattr(os, "name", "nt")
+
+    lock_path = str(tmp_path / "coinpoker-capture.lock")
+    handle = _acquire_instance_lock(lock_path)
+    try:
+        # Plain open(): pathlib would reinterpret the POSIX path under os.name="nt".
+        with open(lock_path, encoding="ascii") as holder_file:
+            pid = holder_file.read()
+        assert pid == str(os.getpid())  # payload stays plainly readable
+        assert locked_offsets, "the Windows branch must take a byte-range lock"
+        assert locked_offsets[0] >= len(pid), "locked byte overlaps the PID payload"
+    finally:
+        handle.close()
+
+
 def test_existing_capture_file_transaction_is_committed() -> None:
     db = Mock()
     db.get_id.return_value = 42
