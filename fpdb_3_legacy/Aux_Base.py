@@ -773,16 +773,26 @@ class AuxSeats(AuxWindow):
                 new_position[1],
             )
             self.positions[i] = new_position  # write this back to our map
+            slot: int | str
             if isinstance(i, int):
-                self.hud.layout.location[self.adj[i]] = new_position  # update the hud-level dict,
+                slot = self.adj[i]
+                self.hud.layout.location[slot] = new_position  # update the hud-level dict,
                 # so other aux can be told
-                self._propagate_to_shared_layout(self.adj[i], new_position)
+                self._propagate_to_shared_layout(slot, new_position)
             elif i == "common":
+                slot = "common"
                 self.hud.layout.common = new_position
                 self._propagate_to_shared_layout("common", new_position)
             else:
                 log.warning("Ignoring unexpected HUD seat identifier while saving position: %r", i)
                 return
+            # Hud.resize_windows() rebuilds layout.location from the frozen
+            # reference positions, so a drag that only touched layout.location
+            # was undone by the next table move/resize.
+            table_w = getattr(self.hud.table, "width", 0) or 0
+            table_h = getattr(self.hud.table, "height", 0) or 0
+            self._update_reference_position(self.hud, slot, new_position, table_w, table_h)
+            self._propagate_to_open_huds(slot, new_position)
             # configure_event_cb only fires on a genuine drag-release (see
             # SeatWindow.button_release_left, gated on moved==True), so this
             # writes the config at most once per drag. Block-window HUDs already
@@ -833,6 +843,104 @@ class AuxSeats(AuxWindow):
                 shared.common = ref
             else:
                 shared.location[seat] = ref
+
+    def _update_reference_position(
+        self,
+        hud: Any,
+        seat: Any,
+        position: tuple[int, int],
+        table_w: int,
+        table_h: int,
+    ) -> None:
+        """Store ``position`` in ``hud``'s frozen reference space.
+
+        Hud.resize_windows() rebuilds layout.location from ref_layout_locations
+        scaled by table/ref, so a dragged position that is not mirrored here is
+        silently reverted the next time the table moves or is resized.
+        """
+        ref_w = getattr(hud, "ref_layout_width", 0) or 0
+        ref_h = getattr(hud, "ref_layout_height", 0) or 0
+        if not (ref_w and ref_h and table_w and table_h):
+            return  # reference not frozen yet: nothing to keep in sync
+        ref = (int(position[0] * ref_w / table_w), int(position[1] * ref_h / table_h))
+
+        if seat == "common":
+            if getattr(hud, "ref_layout_common", None) is not None:
+                hud.ref_layout_common = ref
+            return
+        ref_locations = getattr(hud, "ref_layout_locations", None)
+        if ref_locations and isinstance(seat, int) and 0 <= seat < len(ref_locations):
+            ref_locations[seat] = ref
+
+    def _propagate_to_open_huds(self, seat: Any, position: tuple[int, int]) -> None:
+        """Apply a drag to the other tables already showing this layout.
+
+        Every HUD deep-copies its layout when it is created, so writing through
+        to the shared layout_set only reaches tables opened *later*. Tables
+        already on screen keep their own copy and used to ignore the drag until
+        they were restarted -- exactly the multi-tabling case where adjusting one
+        table is expected to line the others up too.
+
+        Positions are stored per layout slot (hero-anchored), which means the
+        same slot is the same place on every table even when the hero sits in a
+        different seat, so the value transfers directly; only a table-size
+        difference needs scaling.
+        """
+        parent = getattr(self.hud, "parent", None)
+        hud_dict = getattr(parent, "hud_dict", None)
+        if not hud_dict:
+            return
+
+        src_w = getattr(self.hud.table, "width", 0) or 0
+        src_h = getattr(self.hud.table, "height", 0) or 0
+        layout_set = getattr(self.hud, "layout_set", None)
+
+        for other in list(hud_dict.values()):
+            if other is self.hud:
+                continue
+            # Same layout set and seat count, or the slot means something else.
+            if getattr(other, "layout_set", None) is not layout_set:
+                continue
+            if getattr(other, "max", None) != getattr(self.hud, "max", None):
+                continue
+            try:
+                self._apply_position_to_hud(other, seat, position, src_w, src_h)
+            except Exception:  # intentional broad catch: never break the drag
+                log.exception("Could not apply the drag to table %r", getattr(other, "table_name", "?"))
+
+    def _apply_position_to_hud(
+        self,
+        other: Any,
+        seat: Any,
+        position: tuple[int, int],
+        src_w: int,
+        src_h: int,
+    ) -> None:
+        """Place ``seat`` at ``position`` on ``other`` and re-lay its windows."""
+        dst_w = getattr(other.table, "width", 0) or src_w
+        dst_h = getattr(other.table, "height", 0) or src_h
+        if src_w and src_h and dst_w and dst_h and (src_w, src_h) != (dst_w, dst_h):
+            dst = (int(position[0] * dst_w / src_w), int(position[1] * dst_h / src_h))
+        else:
+            dst = position
+
+        if seat == "common":
+            other.layout.common = dst
+        else:
+            other.layout.location[seat] = dst
+        self._update_reference_position(other, seat, dst, dst_w, dst_h)
+
+        # Re-place through the aux (not Hud.resize_windows, which would rebuild
+        # layout.location from the reference and undo what we just set).
+        for aux in getattr(other, "aux_windows", []):
+            with contextlib.suppress(Exception):
+                aux.resize_windows()
+        log.info(
+            "HUD drag mirrored to table %r: slot %s -> %s",
+            getattr(other, "table_name", "?"),
+            seat,
+            dst,
+        )
 
     def _to_shared_layout_space(self, position: tuple[int, int], shared: Any) -> tuple[int, int]:
         table_w = getattr(self.hud.table, "width", 0) or 0
