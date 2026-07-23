@@ -300,7 +300,7 @@ class GGPoker(HandHistoryConverter):
     )
     re_cancelled = re.compile(r"Hand\scancelled", re.MULTILINE)
     re_uncalled = re.compile(
-        r"Uncalled bet \({CUR}(?P<BET>[,.\d]+)\) returned to".format(**substitutions),
+        r"Uncalled bet \({CUR}(?P<BET>[,.\d]+)\) returned to {PLYR}$".format(**substitutions),
         re.MULTILINE,
     )
     # APTEM-89 wins the $0.27 bounty for eliminating Hero
@@ -772,7 +772,13 @@ class GGPoker(HandHistoryConverter):
 
         live_blind = True
 
-        for _a in self.re_post_bb.finditer(hand.handText):
+        for a in self.re_post_bb.finditer(hand.handText):
+            # The post was only ever used to clear live_blind for the button-blind
+            # branch below; the blind itself was never added to the hand. Every
+            # GGPoker hand was therefore stored one big blind short, which made
+            # totalcollected exceed the pot and pushed Hand.totalPot() to book an
+            # uncalled bet as a collectable pot (and the surplus as phantom rake).
+            hand.addBlind(a.group("PNAME"), "big blind", self.clearMoneyString(a.group("BB")))
             live_blind = False
 
         for a in self.re_post_bub.finditer(hand.handText):
@@ -921,6 +927,14 @@ class GGPoker(HandHistoryConverter):
                     mucked=False,
                     string=action.group("STRING"),
                 )
+
+        # Give an uncalled bet back. re_uncalled was declared but never used, so
+        # the money a player bet and nobody called stayed in pot.committed: their
+        # winning hand was booked as a loss. Hand.totalPot() cannot repair it here
+        # either, since readHandInfo sets hand.totalpot from the summary line and
+        # totalPot() then trusts it and skips its own uncalled-bet detection.
+        if uncalled := self.re_uncalled.search(hand.streets[s]):
+            hand.addUncalled(street, uncalled.group("PNAME").strip(), self.clearMoneyString(uncalled.group("BET")))
 
         log.debug(f"readAction: hand.actions[{street}] after processing: {len(hand.actions.get(street, []))} actions")
         street_actions = hand.actions.get(street, [])
