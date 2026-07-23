@@ -395,6 +395,14 @@ class TourHandViewer(QSplitter):
                 format_number(rake),
             ]
 
+        numeric_sort_values = {
+            self.colnum["Won"]: won,
+            self.colnum["Bet"]: bet,
+            self.colnum["Net"]: net,
+            self.colnum["Total Pot"]: totalpot,
+            self.colnum["Rake"]: rake,
+        }
+
         modelrow = [QStandardItem(str(r)) for r in row]
         for index, item in enumerate(modelrow):
             item.setEditable(False)
@@ -403,8 +411,8 @@ class TourHandViewer(QSplitter):
                 item.setData(self.render_cards(cards), Qt.ItemDataRole.DecorationRole)
                 item.setData("", Qt.ItemDataRole.DisplayRole)
                 item.setData(cards, Qt.ItemDataRole.UserRole + 1)
-            if index in (self.colnum["Bet"], self.colnum["Net"], self.colnum["Won"]):
-                item.setData(float(item.data(Qt.ItemDataRole.DisplayRole)), Qt.ItemDataRole.UserRole)
+            if index in numeric_sort_values:
+                item.setData(float(numeric_sort_values[index]), Qt.ItemDataRole.UserRole)
         log.debug(f"Row added to model: {row}")
         self.model.appendRow(modelrow)
 
@@ -433,6 +441,10 @@ class TourHandViewer(QSplitter):
         """Returns true if the cards of the given row are in the card filter."""
         # Does work but all cards that should NOT be displayed have to be clicked.
         card_filter = self.filters.getCards()
+
+        if not card_filter:
+            return True
+
         hcs = self.model.data(
             self.model.index(rownum, self.colnum["Street0"]),
             Qt.ItemDataRole.UserRole + 1,
@@ -452,11 +464,7 @@ class TourHandViewer(QSplitter):
         idx = Card.twoStartCards(value1, hcs[0][1], value2, hcs[1][1])
         abbr = Card.twoStartCardString(idx)
 
-        # Debug output to trace unexpected keys
-        if abbr not in card_filter:
-            log.warning(f"Unexpected key in card filter: {abbr}")
-
-        return card_filter.get(abbr, True)  # Default to True if key is not found
+        return card_filter.get(abbr, False)
 
     def row_activated(self, index) -> None:
         try:
