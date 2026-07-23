@@ -658,6 +658,86 @@ class ThemeManager:
             QSpinBox::up-button:hover, QSpinBox::down-button:hover {{
                 background-color: {card_hover};
             }}
+            /* Styling the buttons above makes Qt drop the native arrows, which
+               then render as a misaligned default indicator. Draw them with
+               borders so no image asset is needed. */
+            QDateEdit::up-arrow, QSpinBox::up-arrow {{
+                width: 0px;
+                height: 0px;
+                border-left: 4px solid transparent;
+                border-right: 4px solid transparent;
+                border-bottom: 5px solid {muted};
+            }}
+            QDateEdit::down-arrow, QSpinBox::down-arrow {{
+                width: 0px;
+                height: 0px;
+                border-left: 4px solid transparent;
+                border-right: 4px solid transparent;
+                border-top: 5px solid {muted};
+            }}
+            QDateEdit::up-arrow:hover, QSpinBox::up-arrow:hover {{
+                border-bottom-color: {text};
+            }}
+            QDateEdit::down-arrow:hover, QSpinBox::down-arrow:hover {{
+                border-top-color: {text};
+            }}
+            QDateEdit::up-arrow:disabled, QDateEdit::down-arrow:disabled,
+            QSpinBox::up-arrow:disabled, QSpinBox::down-arrow:disabled {{
+                border-bottom-color: {border_rgba};
+                border-top-color: {border_rgba};
+            }}
+
+            /* Calendar popup. QCalendarWidget keeps its own light palette on
+               its inner views unless each part is styled explicitly, so under
+               the dark theme the grid and navigation bar were unreadable. */
+            QCalendarWidget QWidget {{
+                alternate-background-color: {card};
+                background-color: {sidebar};
+                color: {text};
+            }}
+            QCalendarWidget QToolButton {{
+                background-color: transparent;
+                color: {text};
+                font-weight: bold;
+                border: none;
+                border-radius: 4px;
+                padding: 4px 8px;
+                margin: 2px;
+            }}
+            QCalendarWidget QToolButton:hover {{
+                background-color: {card_hover};
+            }}
+            QCalendarWidget QToolButton::menu-indicator {{
+                image: none;
+            }}
+            QCalendarWidget QMenu {{
+                background-color: {card};
+                color: {text};
+                border: 1px solid {border_rgba};
+            }}
+            QCalendarWidget QSpinBox {{
+                background-color: {input_bg};
+                color: {text};
+                border: 1px solid {border_rgba};
+                border-radius: 4px;
+            }}
+            /* Navigation bar */
+            QCalendarWidget QWidget#qt_calendar_navigationbar {{
+                background-color: {card};
+                border-top-left-radius: 8px;
+                border-top-right-radius: 8px;
+            }}
+            /* Day grid */
+            QCalendarWidget QAbstractItemView:enabled {{
+                background-color: {sidebar};
+                color: {text};
+                selection-background-color: {accent};
+                selection-color: {sidebar};
+                outline: none;
+            }}
+            QCalendarWidget QAbstractItemView:disabled {{
+                color: {muted};
+            }}
 
             /* Scrollbars */
             QScrollBar:vertical {{

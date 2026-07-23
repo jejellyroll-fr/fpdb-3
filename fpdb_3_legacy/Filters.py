@@ -1634,7 +1634,10 @@ class Filters(QWidget):
 
     def __calendar_dialog(self, *_args: object, date_edit: QDateEdit) -> None:
         """Open calendar dialog for date selection."""
-        d = QDialog()
+        # Parented so the dialog inherits this widget's stylesheet: a top-level
+        # QDialog() only picks up the application sheet, which left the calendar
+        # with its default light palette on top of the dark filter panel.
+        d = QDialog(self)
         d.setWindowTitle(_("Pick a date"))
 
         vb = QVBoxLayout()
