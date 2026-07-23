@@ -2984,7 +2984,17 @@ class StudHand(Hand):
                     shown=shown,
                     mucked=mucked,
                 )
-            if len(cards) > 6:
+            # Six cards is enough to place a seven-stud hand: they are the two
+            # down cards followed by the four up cards, and the seventh-street
+            # card is only added when the room actually lists it. Requiring all
+            # seven silently dropped every showdown from rooms that print six
+            # (ACR shows "[7h 6s 8h 4c 5c 5s]" and leaves the last card to the
+            # deal line). The player's down cards were then never recorded, so
+            # join_holecards handed back his up cards twice over -- an
+            # impossible hand that made the hi/lo evaluation fail, leaving
+            # assembleHandsPots with no pot rows to write after it had already
+            # zeroed the rake.
+            if len(cards) > 5:
                 self.addHoleCards(
                     "THIRD",
                     player,
@@ -3017,14 +3027,42 @@ class StudHand(Hand):
                     shown=shown,
                     mucked=mucked,
                 )
-                self.addHoleCards(
-                    "SEVENTH",
-                    player,
-                    open=[],
-                    closed=[cards[6]],
-                    shown=shown,
-                    mucked=mucked,
-                )
+                if len(cards) > 6:
+                    self.addHoleCards(
+                        "SEVENTH",
+                        player,
+                        open=[],
+                        closed=[cards[6]],
+                        shown=shown,
+                        mucked=mucked,
+                    )
+                else:
+                    # Six cards listed: the seventh is only in the deal line,
+                    # which recorded it as an up card. join_holecards reads a
+                    # non-hero's seventh street from the *closed* slot, where the
+                    # deal line leaves its running list of earlier up cards --
+                    # returning them a second time and building an impossible
+                    # hand. Keep just the seventh card, in the slot that is read.
+                    # Idempotent: this runs once from readShowdownActions and
+                    # again from readShownCards. The deal line leaves the card
+                    # open with the earlier up cards closed beside it; once
+                    # normalised the closed slot holds that single card, and a
+                    # second pass must keep it rather than clear it.
+                    seventh = self.holecards.get("SEVENTH", {}).get(player)
+                    last_card = None
+                    if seventh:
+                        if seventh[0]:
+                            last_card = seventh[0][0]
+                        elif len(seventh[1]) == 1:
+                            last_card = seventh[1][0]
+                    self.addHoleCards(
+                        "SEVENTH",
+                        player,
+                        open=[],
+                        closed=[last_card] if last_card else [],
+                        shown=shown,
+                        mucked=mucked,
+                    )
         if string is not None:
             self.showdownStrings[player] = string
 
