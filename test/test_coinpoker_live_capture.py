@@ -14,13 +14,16 @@ from unittest.mock import Mock
 
 import pytest
 
+from fpdb_3_legacy.coinpoker_hand_builder import _build_one
 from fpdb_3_legacy.coinpoker_live_capture import (
     COINPOKER_SITE_ID,
     HandPump,
+    RawEventArchive,
     StreamReassembler,
     _acquire_instance_lock,
     _Conn,
     _ensure_capture_file,
+    _is_game_port,
     _open_db,
     _Tee,
 )
@@ -44,6 +47,87 @@ def _isolate_hand_archive(tmp_path, monkeypatch):
 
 def _events() -> list[tuple]:
     return [tuple(e) for e in json.loads(FIXTURE.read_text())]
+
+
+def test_ante_seat_refresh_is_not_imported_as_negative_raise() -> None:
+    """A stale Raise caption on the ante snapshot is protocol state, not action."""
+    info = {
+        "gameId": 1234500001,
+        "sbAmount": 1000,
+        "bbAmount": 2000,
+        "anteAmount": 250,
+        "sbSeatId": 1,
+        "bbSeatId": 2,
+        "initTimeStamp": 1_700_000_000_000,
+    }
+    seats = {
+        "seatResponseDataList": [
+            {"seatId": 1, "userName": "sb", "userChips": 10000, "betAmout": 0},
+            {"seatId": 2, "userName": "bb", "userChips": 10000, "betAmout": 0},
+            {"seatId": 3, "userName": "raiser", "userChips": 10000, "betAmout": 0},
+        ],
+    }
+    events = [
+        ("game.pre_hand_start_info", 0, info),
+        ("game.seatInfo", 0, seats),
+        ("game.seat", 0, {"seatId": 1, "userName": "sb", "caption": "Raise", "betAmout": 250}),
+        ("game.seat", 0, {"seatId": 2, "userName": "bb", "caption": "Raise", "betAmout": 250}),
+        ("game.seat", 0, {"seatId": 3, "userName": "raiser", "caption": "Raise", "betAmout": 250}),
+        ("game.seat", 0, {"seatId": 3, "userName": "raiser", "caption": "Raise", "betAmout": 5000}),
+        ("game.seat", 0, {"seatId": 2, "userName": "bb", "caption": "Allin", "betAmout": 5000}),
+    ]
+
+    hand = _build_one("1234500001", events, "holdem")
+
+    assert hand is not None
+    assert [a for a in hand["actions"] if a["type"] == "raises"] == [
+        {"type": "raises", "player": "raiser", "street": "PREFLOP", "to": "5000"},
+    ]
+    assert [a for a in hand["actions"] if a["type"] == "calls"] == [
+        {"type": "calls", "player": "bb", "street": "PREFLOP", "amount": "2750"},
+    ]
+
+
+def test_raw_event_archive_preserves_event_payload(tmp_path) -> None:
+    archive = RawEventArchive(str(tmp_path))
+    event = ("tournament.result", "123", {"rank": 90, "winnings": 0})
+
+    archive.append(event)
+
+    files = list(tmp_path.glob("coinpoker-raw-*.jsonl"))
+    assert len(files) == 1
+    record = json.loads(files[0].read_text())
+    assert record["event"] == "tournament.result"
+    assert record["hand_id"] == "123"
+    assert record["payload"] == {"rank": 90, "winnings": 0}
+    assert record["captured_at"]
+
+
+def test_reassembler_keeps_non_game_tournament_envelope(monkeypatch) -> None:
+    monkeypatch.setattr(
+        "fpdb_3_legacy.coinpoker_live_capture.decode_frame",
+        lambda _flags, _body: {"decoded": True},
+    )
+    reassembler = StreamReassembler()
+    reassembler._protocol_event = lambda _obj: (  # noqa: SLF001
+        "tournament.result",
+        None,
+        {"rank": 535, "winnings": 0},
+    )
+    reassembler.conns["3001->50000"] = Mock(
+        add=Mock(),
+        pop_frames=Mock(return_value=[(0x80, b"\x00")]),
+    )
+
+    events = reassembler.add_segment("3001->50000", 1, b"x")
+
+    assert events == [
+        (
+            "tournament.result",
+            None,
+            {"rank": 535, "winnings": 0, "_coinpokerServerPort": 3001},
+        ),
+    ]
 
 
 # --- sequence-tracked reassembly ---------------------------------------------
@@ -102,6 +186,30 @@ def test_reassembler_routes_game_port_payload_into_conn() -> None:
     r.feed_line("\t0x0000:  aabb" + FRAME_B.hex())  # 2 junk + FRAME_B (5) = 7; last 6 keeps FRAME_B
     r.feed_line("01:00:00.1 IP6 next")  # boundary flush
     assert "9000->55291" in r.conns
+
+
+def test_tournament_ports_are_captured() -> None:
+    assert _is_game_port(3000)
+    assert _is_game_port(3001)
+
+    r = StreamReassembler()
+    r.feed_line("01:00:00.0 IP6 2606::1.3001 > 2a01::2.55291: Flags [P.], seq 1000:1006, length 6")
+    r.feed_line("\t0x0000:  aabb" + FRAME_B.hex())
+    r.feed_line("01:00:00.1 IP6 next")
+    assert "3001->55291" in r.conns
+
+
+def test_tournament_port_is_attached_to_decoded_event(monkeypatch) -> None:
+    monkeypatch.setattr(
+        "fpdb_3_legacy.coinpoker_live_capture.decode_frame",
+        lambda _flags, _body: {"decoded": True},
+    )
+    reassembler = StreamReassembler()
+    reassembler._protocol_event = lambda _obj: ("game.pre_hand_start_info", "H", {"sbAmount": 10})
+
+    events = reassembler.add_segment("3001->55291", 1000, FRAME_A)
+
+    assert events[0][2]["_coinpokerServerPort"] == 3001
 
 
 # --- output tee (pythonw / no-console safety) --------------------------------

@@ -24,7 +24,8 @@ import subprocess
 import time
 
 # extract_table_id is re-exported for callers and tests that import it here.
-from .coinpoker_process import extract_table_id
+from .coinpoker_process import extract_table_id as extract_table_id
+from .coinpoker_process import resolve_current_table_id
 
 logger = logging.getLogger(__name__)
 
@@ -63,7 +64,7 @@ def table_id_for_pid(pid: int, *, force: bool = False) -> str | None:
 
     table_id: str | None = None
     try:
-        table_id = extract_table_id(_argv_for_pid(pid))
+        table_id = resolve_current_table_id(_argv_for_pid(pid))
     except Exception as exc:  # pragma: no cover - platform dependent
         logger.debug("Could not read argv for pid %s: %s", pid, exc)
 

@@ -41,7 +41,10 @@ class CoinPoker(HandHistoryConverter):
         detector falls back to matching the CoinPoker process for any non-empty
         search string, which this still provides.
         """
-        return re.escape(str(table_name or tournament or "CoinPoker"))
+        # Tournament rows use FPDB's required ``<tourNo> <tableNo>`` storage
+        # format.  CoinPoker's Unity process argv/log carries only the physical
+        # table number, so prefer ``table_number`` for window matching.
+        return re.escape(str(table_number or table_name or tournament or "CoinPoker"))
 
     @staticmethod
     def getTableNoRe(tournament=None) -> str:

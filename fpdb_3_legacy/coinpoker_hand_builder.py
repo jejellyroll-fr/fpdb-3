@@ -4,7 +4,7 @@
 Consumes the ``game.*`` event stream produced by ``coinpoker_protocol`` and
 emits the normalized ``hand_data`` dicts consumed by
 ``http_capture_hand_builder.build_fpdb_hand`` (players / actions / community /
-holecards / collections). Currently targets ring Hold'em and Omaha (PLO).
+holecards / collections). Supports ring and tournament Hold'em/Omaha hands.
 """
 
 from __future__ import annotations
@@ -85,6 +85,78 @@ def _first(evs: list[tuple], name: str) -> Any:
     return next((d for n, _h, d in evs if n == name and isinstance(d, dict)), None)
 
 
+def _iter_dicts(value: Any):
+    """Yield nested protocol objects without assuming one server response shape."""
+    if isinstance(value, dict):
+        yield value
+        for nested in value.values():
+            yield from _iter_dicts(nested)
+    elif isinstance(value, list):
+        for nested in value:
+            yield from _iter_dicts(nested)
+
+
+def _protocol_value(evs: list[tuple], *keys: str) -> Any:
+    """Return the first non-blank value for any spelling in nested event data."""
+    wanted = {key.casefold() for key in keys}
+    for _name, _hid, data in evs:
+        for obj in _iter_dicts(data):
+            for key, value in obj.items():
+                if key.casefold() in wanted and value not in (None, ""):
+                    return value
+    return None
+
+
+def _tournament_info(evs: list[tuple]) -> dict[str, Any] | None:
+    """Extract stable MTT metadata from CoinPoker's tournament event variants."""
+    server_port = _protocol_value(evs, "_coinpokerServerPort")
+    tournament_transport = server_port in (3000, 3001, "3000", "3001")
+    tour_no = _protocol_value(
+        evs,
+        "tournamentId",
+        "tourneyId",
+        "tournament_id",
+        "tourney_id",
+        "parentTournamentId",
+    )
+    tournament_event = any(
+        "tournament" in name.casefold() or "tourney" in name.casefold()
+        for name, _hid, _data in evs
+    )
+    explicit_flag = _protocol_value(evs, "isTournament", "tournamentTable")
+    if (
+        tour_no is None
+        and not tournament_event
+        and not tournament_transport
+        and explicit_flag not in (True, 1, "1", "true", "True")
+    ):
+        return None
+
+    name = _protocol_value(
+        evs,
+        "tournamentName",
+        "tourneyName",
+        "tournament_name",
+        "tournamentShortName",
+    )
+    table_id = _protocol_value(evs, "tableId", "table_id", "gameTableId")
+    max_seats = _protocol_value(evs, "maxSeats", "maxPlayers", "tableSize")
+    buyin = _protocol_value(evs, "buyIn", "buyin", "buyInAmount", "entryFee")
+    fee = _protocol_value(evs, "fee", "rake", "tournamentFee")
+    bounty = _protocol_value(evs, "bounty", "bountyAmount", "knockoutBounty")
+    level = _protocol_value(evs, "level", "blindLevel", "tournamentLevel")
+    return {
+        "tour_no": str(tour_no) if tour_no is not None else None,
+        "name": str(name) if name is not None else None,
+        "table_id": str(table_id) if table_id is not None else None,
+        "max_seats": int(max_seats) if str(max_seats or "").isdigit() else None,
+        "buyin": str(buyin) if buyin is not None else None,
+        "fee": str(fee) if fee is not None else None,
+        "bounty": str(bounty) if bounty is not None else None,
+        "level": str(level) if level is not None else None,
+    }
+
+
 def build_hands_from_stream(s2c: bytes, table_category: str = "PLO4") -> list[dict[str, Any]]:
     return build_hands(list(iter_game_events(s2c)), table_category)
 
@@ -93,13 +165,21 @@ def build_hands(events: list[tuple[str, str | None, Any]], table_category: str =
     """Group decoded events by hand id and build a normalized dict per hand."""
     order: list[str] = []
     groups: dict[str, list[tuple]] = defaultdict(list)
+    session_context: list[tuple] = []
     for name, hid, data in events:
         if hid is None:
             if order:
                 groups[order[-1]].append((name, hid, data))
+            if (
+                "tournament" in name.casefold()
+                or "tourney" in name.casefold()
+                or _protocol_value([(name, hid, data)], "tournamentId", "tourneyId", "isTournament") is not None
+            ):
+                session_context.append((name, hid, data))
             continue
         if hid not in groups:
             order.append(hid)
+            groups[hid].extend(session_context)
         groups[hid].append((name, hid, data))
 
     hands = []
@@ -333,12 +413,103 @@ def _extract_collections(evs: list[tuple]) -> list[dict[str, str]]:
     return collections
 
 
+def _explicit_betting_actions(
+    evs: list[tuple],
+    *,
+    sb: Decimal,
+    bb: Decimal,
+    sb_name: str | None,
+    bb_name: str | None,
+) -> list[dict] | None:
+    """Translate CoinPoker's authoritative dealer action stream when present."""
+    records: list[dict] = []
+    seen: set[tuple] = set()
+    for name, _hid, payload in evs:
+        if name != "game.dealer_chat_action" or not isinstance(payload, dict):
+            continue
+        for record in payload.get("gameActionMessagesHistory") or []:
+            if not isinstance(record, dict):
+                continue
+            key = (
+                record.get("initTimestamp"),
+                record.get("username"),
+                record.get("action"),
+                record.get("roundName"),
+                record.get("actionAmount"),
+            )
+            if key not in seen:
+                seen.add(key)
+                records.append(record)
+    if not records:
+        return None
+
+    actions: list[dict] = []
+    committed: dict[str, Decimal] = {}
+    if sb_name:
+        committed[sb_name] = sb
+    if bb_name:
+        committed[bb_name] = bb
+    street_to = bb
+    street = "PREFLOP"
+    for record in records:
+        player = record.get("username")
+        raw_action = str(record.get("action") or "").upper()
+        action = str(record.get("newPlayerAction") or raw_action).upper()
+        round_name = str(record.get("roundName") or "").upper()
+        amount = Decimal(str(record.get("actionAmount", 0) or 0))
+        if not player or not action:
+            continue
+        if action == "ANTE":
+            actions.append({"type": "ante", "player": player, "amount": str(amount)})
+            continue
+        if action == "SB":
+            actions.append({"type": "small blind", "player": player, "amount": str(amount)})
+            committed[player] = amount
+            continue
+        if action == "BB":
+            actions.append({"type": "big blind", "player": player, "amount": str(amount)})
+            committed[player] = amount
+            street_to = amount
+            continue
+        if round_name in {"PREFLOP", "FLOP", "TURN", "RIVER"} and round_name != street:
+            street = round_name
+            committed.clear()
+            street_to = Decimal(0)
+        if action == "FOLD":
+            actions.append({"type": "folds", "player": player, "street": street})
+        elif action == "CHECK":
+            actions.append({"type": "checks", "player": player, "street": street})
+        elif action == "CALL":
+            actions.append({"type": "calls", "player": player, "street": street, "amount": str(amount)})
+            committed[player] = committed.get(player, Decimal(0)) + amount
+        elif raw_action == "RAISE":
+            if action == "BET" or not street_to:
+                actions.append({"type": "bets", "player": player, "street": street, "amount": str(amount)})
+            else:
+                actions.append({"type": "raises", "player": player, "street": street, "to": str(amount)})
+            committed[player] = amount
+            street_to = amount
+        elif action in {"ALLIN", "ALL_IN"} or raw_action in {"ALLIN", "ALL_IN"}:
+            total = committed.get(player, Decimal(0)) + amount
+            if total <= street_to:
+                actions.append({"type": "calls", "player": player, "street": street, "amount": str(amount)})
+            elif street_to:
+                actions.append({"type": "raises", "player": player, "street": street, "to": str(total)})
+                street_to = total
+            else:
+                actions.append({"type": "bets", "player": player, "street": street, "amount": str(amount)})
+                street_to = total
+            committed[player] = total
+    return actions
+
+
 def _build_one(hid: str, evs: list[tuple], table_category: str) -> dict[str, Any] | None:
     info = _first(evs, "game.pre_hand_start_info")
     if not info:
         return None
 
     base, category = _detect_category(evs, table_category)
+    tournament = _tournament_info(evs)
     sb = Decimal(str(info.get("sbAmount", 0)))
     bb = Decimal(str(info.get("bbAmount", 0)))
     ante = Decimal(str(info.get("anteAmount", 0)))
@@ -380,19 +551,37 @@ def _build_one(hid: str, evs: list[tuple], table_category: str) -> dict[str, Any
             "dealt": True, "shown": False, "mucked": False,
         })
 
-    # Reconstruct actions from game.seat events (interleaved with the dealer-chat
+    explicit_actions = _explicit_betting_actions(
+        evs,
+        sb=sb,
+        bb=bb,
+        sb_name=sb_name,
+        bb_name=bb_name,
+    )
+    if explicit_actions is not None:
+        # This stream also identifies exactly who posted antes/blinds, avoiding
+        # forced bets for seated players who are sitting out.
+        actions = explicit_actions
+
+    # Otherwise reconstruct actions from game.seat events (interleaved with the dealer-chat
     # street markers). betAmout is the player's authoritative total commitment on
     # the current street, which reconciles pot math for every action type,
     # including all-ins and side pots, unlike parsing the chat narrative.
     street = "PREFLOP"
     street_has_bet = {"PREFLOP": True, "FLOP": False, "TURN": False, "RIVER": False}
-    committed: dict[str, Decimal] = {}  # player -> chips already in this street
+    street_to = {"PREFLOP": ante + bb, "FLOP": Decimal(0), "TURN": Decimal(0), "RIVER": Decimal(0)}
+    # CoinPoker includes the ante in ``betAmout`` snapshots.  Seed it here so
+    # the post-ante seat refresh (whose stale caption is commonly ``Raise``)
+    # is not imported as a zero/negative raise.
+    committed: dict[str, Decimal] = {
+        name: ante for name in players
+    }  # player -> chips already in this street snapshot
     if sb_name:
-        committed[sb_name] = sb
+        committed[sb_name] += sb
     if bb_name:
-        committed[bb_name] = bb
+        committed[bb_name] += bb
     non_actions = {None, "", "Inuse", "SB", "BB", "Waiting", "SitOut", "Muck"}
-    for name, _h, d in evs:
+    for name, _h, d in evs if explicit_actions is None else ():
         if not isinstance(d, dict):
             continue
         if name == "game.dealer_chat":
@@ -419,14 +608,28 @@ def _build_one(hid: str, evs: list[tuple], table_category: str) -> dict[str, Any
         elif action == "Check":
             actions.append({"type": "checks", "player": player, "street": street})
         elif action == "Call":
-            actions.append({"type": "calls", "player": player, "street": street, "amount": str(bet - committed.get(player, Decimal(0)))})
+            amount = bet - committed.get(player, Decimal(0))
+            if amount <= 0:
+                continue
+            actions.append({"type": "calls", "player": player, "street": street, "amount": str(amount)})
             committed[player] = bet
         else:  # Raise / Bet / Pot / Allin / Straddle -> aggressive: bet to `bet`
+            if bet <= committed.get(player, Decimal(0)):
+                continue
+            # ``Allin`` describes the player's state, not necessarily an
+            # aggressive action.  At or below the current price it is a call
+            # (possibly a short all-in), not a zero-sized raise.
+            if bet <= street_to[street]:
+                amount = bet - committed.get(player, Decimal(0))
+                actions.append({"type": "calls", "player": player, "street": street, "amount": str(amount)})
+                committed[player] = bet
+                continue
             if street_has_bet[street]:
                 actions.append({"type": "raises", "player": player, "street": street, "to": str(bet)})
             else:
                 actions.append({"type": "bets", "player": player, "street": street, "amount": str(bet)})
             street_has_bet[street] = True
+            street_to[street] = bet
             committed[player] = bet
 
     # Winners -> collections (use post-rake amount actually paid out).
@@ -449,25 +652,52 @@ def _build_one(hid: str, evs: list[tuple], table_category: str) -> dict[str, Any
     # (gameId 91426500343 -> table 914265), which also matches the number shown
     # in the CoinPoker window title ("PLO4 914265 ..."). This gives each table a
     # distinct, stable name so the HUD creates one window per table.
-    try:
-        table_id = str(int(hid) // 100000)
-    except (ValueError, TypeError):
-        table_id = str(info.get("tableId", "") or hid)
+    protocol_table_id = (info.get("tableId") or (tournament or {}).get("table_id")) if tournament else None
+    if protocol_table_id is not None:
+        table_id = str(protocol_table_id)
+    else:
+        try:
+            table_id = str(int(hid) // 100000)
+        except (ValueError, TypeError):
+            table_id = str(hid)
+
+    if tournament and tournament.get("tour_no") is None:
+        # CoinPoker's MTT hand stream identifies itself by transport port but
+        # does not always repeat lobby metadata inside each hand.  The table
+        # prefix is stable for the captured table and keeps the hand on FPDB's
+        # tournament path instead of silently storing tournament chips as USD.
+        tournament["tour_no"] = table_id
+    if tournament and tournament.get("table_id") is None:
+        tournament["table_id"] = table_id
+    if tournament and tournament.get("name") is None:
+        tournament["name"] = f"CoinPoker MTT {tournament['tour_no']}"
+    stored_table_id = f"{tournament['tour_no']} {table_id}" if tournament else table_id
+
+    max_seats = (tournament or {}).get("max_seats")
+    if max_seats is None:
+        configured_max = info.get("maxSeats") or info.get("tableSize")
+        if str(configured_max or "").isdigit():
+            max_seats = int(configured_max)
+        else:
+            max_seats = max(len(players), 2) if tournament else 6
+    game_type = "tour" if tournament else "ring"
 
     return {
         "site": "CoinPoker",
         "hand_id": str(hid),
         "hero": hero,
-        "table_id": table_id,
+        "table_id": stored_table_id,
         "timestamp": _hand_start_time(info),
         "buttonpos": info.get("dealerSeatId"),
         "game": {"base": base, "category": category, "fpdb_supported": True},
         "gametype": {
-            "base": base, "category": category, "type": "ring",
+            "base": base, "category": category, "type": game_type,
             "limitType": "pl" if base == "hold" and "omaha" in category else "nl",
-            "currency": "USD", "sb": str(sb), "bb": str(bb), "ante": str(ante),
-            "maxSeats": 6,
+            "currency": "T$" if tournament else "USD",
+            "sb": str(sb), "bb": str(bb), "ante": str(ante),
+            "maxSeats": max_seats,
         },
+        "tournament": tournament,
         "players": players_list,
         "actions": actions,
         "community": community,
