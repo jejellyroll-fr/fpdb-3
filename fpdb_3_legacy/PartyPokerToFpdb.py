@@ -900,6 +900,7 @@ class PartyPoker(HandHistoryConverter):
 
         if str(hid) == "1111111111":
             import hashlib
+
             # Avoid using time.time() here as it breaks snapshot tests.
             # For tests to remain deterministic but unique per hand, we hash the
             # hand's text and take a numeric portion as the ID.
@@ -909,9 +910,9 @@ class PartyPoker(HandHistoryConverter):
             # would yield the same hash for every placeholder-HID hand in
             # the same file (causing handid collisions). Prefer hand.handText,
             # fall back to self.handText, then to a constant.
-            source_text = getattr(hand, 'handText', None) or getattr(self, 'handText', None)
+            source_text = getattr(hand, "handText", None) or getattr(self, "handText", None)
             if source_text:
-                h = hashlib.md5(source_text.encode('utf-8')).hexdigest()
+                h = hashlib.md5(source_text.encode("utf-8")).hexdigest()
                 hand.handid = str(int(h[:12], 16))
             else:
                 hand.handid = "1779858996758"
@@ -1208,16 +1209,17 @@ class PartyPoker(HandHistoryConverter):
         log.debug(f"Processing zero stack players count: {len(zero_stack_players)}")
 
         for seat, pname, stack in zero_stack_players:
+            adjusted_stack = stack
             if pname in joining:
-                stack = str(max_stack)
+                adjusted_stack = str(max_stack)
                 log.debug(
-                    f"Adjusted joining player stack player: {pname}, new_stack: {stack}",
+                    f"Adjusted joining player stack player: {pname}, new_stack: {adjusted_stack}",
                 )
 
             if pname not in leaving:
-                hand.addPlayer(seat, pname, stack)
+                hand.addPlayer(seat, pname, adjusted_stack)
                 log.debug(
-                    f"Added zero stack player player: {pname}, seat: {seat}, stack: {stack}",
+                    f"Added zero stack player player: {pname}, seat: {seat}, stack: {adjusted_stack}",
                 )
 
     def _addUnseatedPlayers(self, hand, unseated_players, max_stack) -> None:

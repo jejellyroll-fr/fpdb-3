@@ -43,20 +43,27 @@ def _make_db():
     return db, con
 
 
-def test_min_stack_excludes_eliminated_and_sitout():
-    db, _ = _make_db()
+@pytest.fixture
+def db_and_connection():
+    db, con = _make_db()
+    yield db, con
+    con.close()
+
+
+def test_min_stack_excludes_eliminated_and_sitout(db_and_connection):
+    db, _ = db_and_connection
     val = db.get_table_min_stack_bb(100)
     assert val == pytest.approx(400 / 30)  # min surviving stack / big blind
 
 
-def test_min_stack_none_when_no_survivors():
-    db, con = _make_db()
+def test_min_stack_none_when_no_survivors(db_and_connection):
+    db, con = db_and_connection
     con.execute("UPDATE HandsPlayers SET sitout=1")
     assert db.get_table_min_stack_bb(100) is None
 
 
-def test_min_stack_none_for_unknown_hand():
-    db, _ = _make_db()
+def test_min_stack_none_for_unknown_hand(db_and_connection):
+    db, _ = db_and_connection
     assert db.get_table_min_stack_bb(999) is None
 
 

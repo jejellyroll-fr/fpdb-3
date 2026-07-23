@@ -18,8 +18,19 @@ from typing import Any
 from fpdb_3_legacy.coinpoker_protocol import iter_game_events
 
 _VALUE = {
-    "TWO": "2", "THREE": "3", "FOUR": "4", "FIVE": "5", "SIX": "6", "SEVEN": "7",
-    "EIGHT": "8", "NINE": "9", "TEN": "T", "JACK": "J", "QUEEN": "Q", "KING": "K", "ACE": "A",
+    "TWO": "2",
+    "THREE": "3",
+    "FOUR": "4",
+    "FIVE": "5",
+    "SIX": "6",
+    "SEVEN": "7",
+    "EIGHT": "8",
+    "NINE": "9",
+    "TEN": "T",
+    "JACK": "J",
+    "QUEEN": "Q",
+    "KING": "K",
+    "ACE": "A",
 }
 _SUIT = {"SPADES": "s", "HEARTS": "h", "DIAMONDS": "d", "CLUBS": "c"}
 _NUM_RANK = {10: "T", 11: "J", 12: "Q", 13: "K", 14: "A"}
@@ -55,6 +66,7 @@ def _decimal_or_none(value: Any) -> Decimal | None:
     except (ValueError, ArithmeticError):
         return None
     return amount if amount.is_finite() else None
+
 
 # Card ranks removed from a short deck (6+ Hold'em uses 6..A only). Seeing any of
 # them proves a full 52-card deck, i.e. regular Hold'em.
@@ -119,10 +131,7 @@ def _tournament_info(evs: list[tuple]) -> dict[str, Any] | None:
         "tourney_id",
         "parentTournamentId",
     )
-    tournament_event = any(
-        "tournament" in name.casefold() or "tourney" in name.casefold()
-        for name, _hid, _data in evs
-    )
+    tournament_event = any("tournament" in name.casefold() or "tourney" in name.casefold() for name, _hid, _data in evs)
     explicit_flag = _protocol_value(evs, "isTournament", "tournamentTable")
     if (
         tour_no is None
@@ -224,7 +233,6 @@ def _collect_players(evs: list[tuple]) -> dict[str, dict]:
     return players
 
 
-
 def _hero_hole_count(evs: list[tuple]) -> int:
     """Number of cards dealt to the hero, or 0 if they weren't captured."""
     for name in ("game.hole_cards", "game.player_info"):
@@ -275,6 +283,8 @@ def _hand_start_time(info: dict) -> datetime.datetime | None:
     or backlogged captures on their real dates in the GUI graphs/filters.
     """
     raw = info.get("initTimeStamp")
+    if raw is None:
+        return None
     try:
         return datetime.datetime.fromtimestamp(int(raw) / 1000, tz=datetime.timezone.utc).replace(tzinfo=None)
     except (TypeError, ValueError, OverflowError, OSError):
@@ -370,11 +380,13 @@ def _extract_cashout(evs: list[tuple]) -> list[dict[str, str]]:
                 if pot is None:
                     pot = paid
                 fee = pot - paid
-                cashout.append({
-                    "player": player,
-                    "amount": str(paid),
-                    "fee": str(fee if fee > 0 else Decimal(0)),
-                })
+                cashout.append(
+                    {
+                        "player": player,
+                        "amount": str(paid),
+                        "fee": str(fee if fee > 0 else Decimal(0)),
+                    }
+                )
     return cashout
 
 
@@ -546,10 +558,15 @@ def _build_one(hid: str, evs: list[tuple], table_category: str) -> dict[str, Any
                 hero = m.group("p")
     hole = _first(evs, "game.hole_cards")
     if hero and hole and hole.get("holeCards"):
-        holecards.append({
-            "player": hero, "closed": _cards(hole["holeCards"]),
-            "dealt": True, "shown": False, "mucked": False,
-        })
+        holecards.append(
+            {
+                "player": hero,
+                "closed": _cards(hole["holeCards"]),
+                "dealt": True,
+                "shown": False,
+                "mucked": False,
+            }
+        )
 
     explicit_actions = _explicit_betting_actions(
         evs,
@@ -573,9 +590,7 @@ def _build_one(hid: str, evs: list[tuple], table_category: str) -> dict[str, Any
     # CoinPoker includes the ante in ``betAmout`` snapshots.  Seed it here so
     # the post-ante seat refresh (whose stale caption is commonly ``Raise``)
     # is not imported as a zero/negative raise.
-    committed: dict[str, Decimal] = {
-        name: ante for name in players
-    }  # player -> chips already in this street snapshot
+    committed: dict[str, Decimal] = {name: ante for name in players}  # player -> chips already in this street snapshot
     if sb_name:
         committed[sb_name] += sb
     if bb_name:
@@ -691,10 +706,14 @@ def _build_one(hid: str, evs: list[tuple], table_category: str) -> dict[str, Any
         "buttonpos": info.get("dealerSeatId"),
         "game": {"base": base, "category": category, "fpdb_supported": True},
         "gametype": {
-            "base": base, "category": category, "type": game_type,
+            "base": base,
+            "category": category,
+            "type": game_type,
             "limitType": "pl" if base == "hold" and "omaha" in category else "nl",
             "currency": "T$" if tournament else "USD",
-            "sb": str(sb), "bb": str(bb), "ante": str(ante),
+            "sb": str(sb),
+            "bb": str(bb),
+            "ante": str(ante),
             "maxSeats": max_seats,
         },
         "tournament": tournament,

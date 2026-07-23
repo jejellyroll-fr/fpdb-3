@@ -125,6 +125,7 @@ def test_destroy(hud_main) -> None:
         patch("HUD_main.QCoreApplication.quit") as mock_quit,
     ):
         hud_main.destroy()
+        hud_main.destroy()
         mock_close.assert_called_once()
         mock_stop.assert_called_once()
         mock_quit.assert_called_once()
@@ -160,8 +161,10 @@ def test_check_tables_skipped_during_drag(hud_main) -> None:
 
     Aux_Base.set_drag_active(True)
     try:
-        with patch.object(hud_main, "_handle_table_status") as mock_status, \
-             patch.object(hud_main, "_topify_mac_windows") as mock_topify:
+        with (
+            patch.object(hud_main, "_handle_table_status") as mock_status,
+            patch.object(hud_main, "_topify_mac_windows") as mock_topify,
+        ):
             hud_main.check_tables()
             mock_status.assert_not_called()
             mock_topify.assert_not_called()
@@ -767,6 +770,7 @@ def test_process_message_closed_socket() -> None:
 # Ensures that ENOTSOCK ZMQErrors are handled gracefully without raising traceback exceptions.
 def test_process_message_enotsock_handling() -> None:
     import zmq
+
     with patch("zmq.Context"), patch("zmq.Poller") as mock_poller_cls:
         receiver = HUD_main.ZMQReceiver()
         receiver.socket.closed = False
@@ -785,7 +789,6 @@ def test_process_message_enotsock_handling() -> None:
             mock_log.exception.assert_not_called()
 
 
-
 def test_advance_live_positions_rotates_button(hud_main) -> None:
     """Positional panels need the CURRENT hand's position; _advance_live_positions
     moves the button one seat from the last imported hand (works even when a
@@ -793,7 +796,9 @@ def test_advance_live_positions_rotates_button(hud_main) -> None:
     # 3 seated players; last hand seat1=BTN, seat2=SB, seat3=BB (seat3 could be
     # an absent hero -- still seated, still in the rotation).
     hud_main.db_connection.get_seat_players.return_value = {
-        1: {"player_id": 11}, 2: {"player_id": 12}, 3: {"player_id": 13},
+        1: {"player_id": 11},
+        2: {"player_id": 12},
+        3: {"player_id": 13},
     }
     stat_dict = {
         11: {"position": "0"},  # BTN last hand
@@ -811,7 +816,8 @@ def test_advance_live_positions_no_button_is_noop(hud_main) -> None:
     """If no button can be identified, leave live_position unset so callers fall
     back to the imported position."""
     hud_main.db_connection.get_seat_players.return_value = {
-        1: {"player_id": 11}, 2: {"player_id": 12},
+        1: {"player_id": 11},
+        2: {"player_id": 12},
     }
     stat_dict = {11: {"position": "S"}, 12: {"position": "B"}}
     hud_main._advance_live_positions(stat_dict, "H1")

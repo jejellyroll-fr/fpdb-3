@@ -4,6 +4,10 @@ from __future__ import annotations
 
 from collections import Counter
 
+from fpdb_3_legacy.loggingFpdb import get_logger
+
+log = get_logger("autonotes")
+
 
 def normalize_cards(cards) -> list[str]:
     """Return non-empty two-character-ish card strings."""
@@ -23,7 +27,8 @@ def is_plo4(hand) -> bool:
 def player_hole_cards(hand, player_name: str) -> list[str]:
     try:
         return normalize_cards(hand.join_holecards(player_name, asList=True))
-    except Exception:
+    except (AttributeError, KeyError, TypeError, ValueError):
+        log.debug("Unable to read PLO hole cards for %s", player_name, exc_info=True)
         return []
 
 

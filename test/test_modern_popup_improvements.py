@@ -18,45 +18,31 @@ def _setup_popup_components() -> bool:
     return True
 
 
-def test_stat_name_extraction() -> bool | None:
+def test_stat_name_extraction() -> None:
     """Test that stat name extraction works correctly."""
-    try:
-        _setup_popup_components()
+    _setup_popup_components()
 
-        # Test with different stat_data formats
-        test_cases = [
-            # Format: (stat_name, stat_data, expected_clean_name)
-            ("vpip", (0.25, "25%", "vpip=25%", "vpip=25%", "(1/4)", "Description"), "vpip"),
-            ("pfr", (0.15, "15%", "pfr=15%", "pfr=15%", "(3/20)", "Description"), "pfr"),
-            ("three_B", (0.05, "5%", "three_B=5%", "three_B=5%", "(1/20)", "Description"), "three_B"),
-            ("test_stat", None, "test_stat"),  # Case without data
-        ]
+    # Test with different stat_data formats
+    test_cases = [
+        # Format: (stat_name, stat_data, expected_clean_name)
+        ("vpip", (0.25, "25%", "vpip=25%", "vpip=25%", "(1/4)", "Description"), "vpip"),
+        ("pfr", (0.15, "15%", "pfr=15%", "pfr=15%", "(3/20)", "Description"), "pfr"),
+        ("three_B", (0.05, "5%", "three_B=5%", "three_B=5%", "(1/20)", "Description"), "three_B"),
+        ("test_stat", None, "test_stat"),  # Case without data
+    ]
 
-        for test_case in test_cases:
-            if len(test_case) == 3:
-                stat_name, stat_data, expected = test_case
-            else:
-                continue
+    for stat_name, stat_data, expected in test_cases:
+        # Simulate extraction as in the code
+        if stat_data:
+            full_name = stat_data[3]
+            clean_name = full_name.split("=")[0] if "=" in full_name else full_name
+        else:
+            clean_name = stat_name
 
-            # Simulate extraction as in the code
-            if stat_data:
-                full_name = stat_data[3]
-                clean_name = full_name.split("=")[0] if "=" in full_name else full_name
-            else:
-                clean_name = stat_name
-
-            assert clean_name == expected, f"Expected {expected}, got {clean_name}"
-
-        return True
-
-    except Exception:
-        import traceback
-
-        traceback.print_exc()
-        return False
+        assert clean_name == expected, f"Expected {expected}, got {clean_name}"
 
 
-def test_progress_bar_calculation() -> bool:
+def test_progress_bar_calculation() -> None:
     """Test that progress bar calculation works."""
     # Test cases: (value, expected_percentage, description)
     test_cases = [
@@ -84,10 +70,8 @@ def test_progress_bar_calculation() -> bool:
 
         assert len(progress_bar) == 10, "Progress bar should always be 10 characters"
 
-    return True
 
-
-def test_partial_progress_characters() -> bool:
+def test_partial_progress_characters() -> None:
     """Test partial characters for better precision."""
     # Test cases with values that give remainders
     test_cases = [
@@ -120,18 +104,3 @@ def test_partial_progress_characters() -> bool:
 
         # Verify correct length
         assert len(progress_bar) == 10, f"Bar should be 10 chars, got {len(progress_bar)}"
-
-    return True
-
-
-def test_drag_and_drop_attributes() -> bool | None:
-    """Test that drag and drop attributes are initialized."""
-    try:
-        # Test that necessary attributes are defined
-
-        # Verify that attributes would be initialized
-
-        return True
-
-    except Exception:
-        return False

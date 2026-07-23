@@ -569,11 +569,7 @@ class IdentifySite:
                 if m3:
                     f.hero = m3.group("PNAME")
                 else:
-                    m4 = (
-                        pt_site.re_HeroCards2.search(whole_file[:5000])
-                        if pt_site.re_HeroCards2 is not None
-                        else None
-                    )
+                    m4 = pt_site.re_HeroCards2.search(whole_file[:5000]) if pt_site.re_HeroCards2 is not None else None
                     if m4:
                         f.hero = m4.group("PNAME")
             else:
@@ -590,17 +586,18 @@ class IdentifySite:
         return files_for_site
 
     def fetchGameTypes(self) -> None:
-        for name, f in list(self.filelist.items()):
+        for raw_file_name, f in list(self.filelist.items()):
             if f.ftype is not None and f.ftype == "hh":
                 # Filenames are str on Python 3; decode only if a bytes path slips in.
-                if isinstance(name, bytes):
-                    name = name.decode("utf8", "replace")
+                file_name = (
+                    raw_file_name.decode("utf8", "replace") if isinstance(raw_file_name, bytes) else raw_file_name
+                )
                 if f.site is None:
                     continue
                 obj = get_parser_class(f.site.filter_name)
                 hhc = obj(
                     self.config,
-                    in_path=name,
+                    in_path=file_name,
                     sitename=f.site.hhc_fname,
                     autostart=False,
                 )

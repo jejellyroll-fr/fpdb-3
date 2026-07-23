@@ -461,15 +461,13 @@ HANDS_PLAYERS_KEYS = [
 HANDS_PLAYERS_KEYS.reverse()
 
 
-
-
-
 class DatabaseTransaction:
     """Context manager for grouping database operations into a single transaction.
 
     Nested context managers increment the transaction depth, and only the outermost
     context manager executes the commit or rollback.
     """
+
     def __init__(self, db) -> None:
         self.db = db
 
@@ -488,19 +486,25 @@ class DatabaseTransaction:
                 # never be reused by the next auto-import cycle.
                 self.db.resetCache()
                 self.db.resetBulkCache()
-            except Exception as e:  # intentional broad catch: transaction rollback during teardown is best-effort, just log
+            except (
+                Exception
+            ) as e:  # intentional broad catch: transaction rollback during teardown is best-effort, just log
                 log.exception(f"Rollback failed: {e}")
         else:
             if self.db._in_transaction == 0:
                 try:
                     self.db.commit(force=True)
-                except Exception as e:  # intentional broad catch: transaction commit during teardown; rolls back then re-raises
+                except (
+                    Exception
+                ) as e:  # intentional broad catch: transaction commit during teardown; rolls back then re-raises
                     log.exception(f"Commit failed: {e}")
                     try:
                         self.db.rollback(force=True)
                         self.db.resetCache()
                         self.db.resetBulkCache()
-                    except Exception as roll_err:  # intentional broad catch: rollback after a failed commit is best-effort, just log
+                    except (
+                        Exception
+                    ) as roll_err:  # intentional broad catch: rollback after a failed commit is best-effort, just log
                         log.exception(f"Rollback after failed commit also failed: {roll_err}")
                     raise e
 
@@ -1592,7 +1596,7 @@ class Database(DatabaseAutoNotesMixin, DatabaseCachesMixin, DatabaseTournamentsM
             table_info.append(None)
             return table_info
         # tournament
-        table_parts = re.split(" ", row[0], 1)
+        table_parts = re.split(" ", row[0], maxsplit=1)
         if len(table_parts) == 2:
             tour_no, tab_no = table_parts
         else:
@@ -1803,9 +1807,7 @@ class Database(DatabaseAutoNotesMixin, DatabaseCachesMixin, DatabaseTournamentsM
             c = self.get_cursor()
             c.execute(
                 (
-                    "SELECT gt.bigBlind FROM Hands h "
-                    "INNER JOIN Gametypes gt ON h.gametypeId = gt.id "
-                    "WHERE h.id = %s"
+                    "SELECT gt.bigBlind FROM Hands h INNER JOIN Gametypes gt ON h.gametypeId = gt.id WHERE h.id = %s"
                 ).replace("%s", ph),
                 (hand_id,),
             )
@@ -1817,8 +1819,7 @@ class Database(DatabaseAutoNotesMixin, DatabaseCachesMixin, DatabaseTournamentsM
                 return None
             c.execute(
                 (
-                    "SELECT startCash, committed, winnings FROM HandsPlayers "
-                    "WHERE handId = %s AND sitout = FALSE"
+                    "SELECT startCash, committed, winnings FROM HandsPlayers WHERE handId = %s AND sitout = FALSE"
                 ).replace("%s", ph),
                 (hand_id,),
             )
@@ -2166,7 +2167,9 @@ class Database(DatabaseAutoNotesMixin, DatabaseCachesMixin, DatabaseTournamentsM
         c.execute(q1, (playerName,))
         rows = c.fetchall()
         if len(rows) == 1:
-            log.info(f"Database.get_player_id: Fallback found unique player ID {rows[0][0]} for '{playerName}' (searched across all sites)")
+            log.info(
+                f"Database.get_player_id: Fallback found unique player ID {rows[0][0]} for '{playerName}' (searched across all sites)"
+            )
             return rows[0][0]
         elif len(rows) > 1:
             # If there are multiple players with this name, let's try to match siteName prefix or sub-network
@@ -2180,10 +2183,14 @@ class Database(DatabaseAutoNotesMixin, DatabaseCachesMixin, DatabaseTournamentsM
             c.execute(q2, (playerName, siteName + "%", siteName, "%"))
             match_rows = c.fetchall()
             if match_rows:
-                log.info(f"Database.get_player_id: Fallback matched site prefix player ID {match_rows[0][0]} for '{playerName}' on site '{siteName}' variant")
+                log.info(
+                    f"Database.get_player_id: Fallback matched site prefix player ID {match_rows[0][0]} for '{playerName}' on site '{siteName}' variant"
+                )
                 return match_rows[0][0]
             # Otherwise return the first one
-            log.info(f"Database.get_player_id: Fallback returned first player ID {rows[0][0]} of multiple matches for '{playerName}'")
+            log.info(
+                f"Database.get_player_id: Fallback returned first player ID {rows[0][0]} of multiple matches for '{playerName}'"
+            )
             return rows[0][0]
         # None, not False: every caller tests `is not None`, and a bool would slip
         # through as a player id -- int(False) == 0 in the GUI viewers, and a
@@ -2314,7 +2321,9 @@ class Database(DatabaseAutoNotesMixin, DatabaseCachesMixin, DatabaseTournamentsM
                             c.execute(
                                 "alter table " + fk["fktab"] + " drop foreign key " + cons[0],
                             )
-                        except Exception:  # intentional broad catch: cross-backend FK drop (MySQL) best-effort, continue
+                        except (
+                            Exception
+                        ):  # intentional broad catch: cross-backend FK drop (MySQL) best-effort, continue
                             log.exception(f"    drop failed: {sys.exc_info()}")
                 elif self.backend == self.PGSQL:
                     #    DON'T FORGET TO RECREATE THEM!!
@@ -2337,13 +2346,17 @@ class Database(DatabaseAutoNotesMixin, DatabaseCachesMixin, DatabaseTournamentsM
                                 ),
                             )
                             log.debug(f"dropping pg fk {fk['fktab']} {fk['fkcol']}")
-                        except Exception:  # intentional broad catch: cross-backend FK drop (PG) ignores 'does not exist'
+                        except (
+                            Exception
+                        ):  # intentional broad catch: cross-backend FK drop (PG) ignores 'does not exist'
                             if "does not exist" not in str(sys.exc_info()[1]):
                                 log.exception(
                                     f"warning: drop pg fk {fk['fktab']}_{fk['fkcol']}_fkey failed: {str(sys.exc_info()[1]).rstrip()}, continuing ...",
                                 )
                         c.execute("END TRANSACTION")
-                    except Exception:  # intentional broad catch: cross-backend FK drop (PG lock/txn) best-effort, continue
+                    except (
+                        Exception
+                    ):  # intentional broad catch: cross-backend FK drop (PG lock/txn) best-effort, continue
                         log.exception(
                             rf"warning: constraint {fk['fktab']}_{fk['fkcol']}_fkey not dropped: {str(sys.exc_info()[1]).rstrip('')}, continuing ...",
                         )
@@ -2382,13 +2395,17 @@ class Database(DatabaseAutoNotesMixin, DatabaseCachesMixin, DatabaseTournamentsM
                                 "drop index if exists {}_{}_idx".format(idx["tab"], idx["col"]),
                             )
                             # print "dropped  pg index ", idx['tab'], idx['col']
-                        except Exception:  # intentional broad catch: cross-backend index drop (PG) ignores 'does not exist'
+                        except (
+                            Exception
+                        ):  # intentional broad catch: cross-backend index drop (PG) ignores 'does not exist'
                             if "does not exist" not in str(sys.exc_info()[1]):
                                 log.exception(
                                     f"drop index {idx['tab']}_{idx['col']}_idx failed: {str(sys.exc_info()[1]).rstrip('')}, continuing ...",
                                 )
                         c.execute("END TRANSACTION")
-                    except Exception:  # intentional broad catch: cross-backend index drop (PG lock/txn) best-effort, continue
+                    except (
+                        Exception
+                    ):  # intentional broad catch: cross-backend index drop (PG lock/txn) best-effort, continue
                         log.exception(
                             f"index {idx['tab']}_{idx['col']}_idx not dropped {str(sys.exc_info()[1]).rstrip('')}, continuing ...",
                         )
@@ -2451,7 +2468,9 @@ class Database(DatabaseAutoNotesMixin, DatabaseCachesMixin, DatabaseTournamentsM
                                 + fk["rcol"]
                                 + ")",
                             )
-                        except Exception:  # intentional broad catch: cross-backend FK create (MySQL) best-effort, continue
+                        except (
+                            Exception
+                        ):  # intentional broad catch: cross-backend FK create (MySQL) best-effort, continue
                             log.exception(f"Create foreign key failed: {sys.exc_info()}")
                 elif self.backend == self.PGSQL:
                     log.debug(
@@ -2490,7 +2509,9 @@ class Database(DatabaseAutoNotesMixin, DatabaseCachesMixin, DatabaseTournamentsM
                             idx["col"],
                         )
                         c.execute(s)
-                    except Exception:  # intentional broad catch: cross-backend index create (MySQL) best-effort, continue
+                    except (
+                        Exception
+                    ):  # intentional broad catch: cross-backend index create (MySQL) best-effort, continue
                         log.exception(f"Create foreign key failed: {sys.exc_info()}")
                 elif self.backend == self.PGSQL:
                     #                pass
@@ -2590,8 +2611,7 @@ class Database(DatabaseAutoNotesMixin, DatabaseCachesMixin, DatabaseTournamentsM
             return {row[0] for row in c.fetchall()}
 
         c.execute(
-            "SELECT column_name FROM information_schema.columns "
-            "WHERE table_name = %s OR table_name = %s",
+            "SELECT column_name FROM information_schema.columns WHERE table_name = %s OR table_name = %s",
             (table, table.lower()),
         )
         return {row[0] for row in c.fetchall()}
@@ -4116,22 +4136,6 @@ class Database(DatabaseAutoNotesMixin, DatabaseCachesMixin, DatabaseTournamentsM
             return {}
         return result
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     def get_id(self, file):
         q = self.sql.query["get_id"]
         q = q.replace("%s", self.sql.query["placeholder"])
@@ -4464,15 +4468,9 @@ class Database(DatabaseAutoNotesMixin, DatabaseCachesMixin, DatabaseTournamentsM
             result = tmp[0]
         return result
 
-
     # end def getTourneyInfo
 
-
     # end def getTourneyTypesIds
-
-
-
-
 
     def cleanUpWeeksMonths(self) -> None:
         if self.cacheSessions and self.wmold:
@@ -4567,16 +4565,9 @@ class Database(DatabaseAutoNotesMixin, DatabaseCachesMixin, DatabaseTournamentsM
     def cleanRequired(self) -> bool:
         return bool(self.ttold or self.wmold)
 
-
-
     # end def createOrUpdateTourney
 
-
     # end def getTourneyPlayerInfo
-
-
-
-
 
     def cleanup_connections(self) -> None:
         """Clean up database connections to prevent timeouts and pool exhaustion."""
@@ -4600,8 +4591,8 @@ class Database(DatabaseAutoNotesMixin, DatabaseCachesMixin, DatabaseTournamentsM
         """Ensure connections are cleaned up when Database object is destroyed."""
         try:
             self.cleanup_connections()
-        except Exception:  # intentional broad catch: destructor cleanup ignores errors
-            pass  # Ignore errors during cleanup in destructor
+        except Exception:  # intentional broad catch: destructor cleanup must not raise
+            log.debug("Database cleanup failed during object destruction", exc_info=True)
 
 
 # end class Database
@@ -4706,7 +4697,7 @@ def main(argv=None):
             log.debug(f"{p}  {stat_dict[p]}")
 
         log.debug(f"cards = {db_connection.get_cards('1')}")
-        db_connection.close_connection
+        db_connection.close_connection()
 
         log.debug(f"get_stats took: {t1 - t0:4.3f} seconds")
 

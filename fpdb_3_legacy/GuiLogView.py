@@ -23,7 +23,6 @@ from typing import Any
 
 from PySide6.QtCore import (
     QAbstractTableModel,
-    QModelIndex,
     QSortFilterProxyModel,
     Qt,
     QThread,
@@ -71,10 +70,10 @@ class LogTableModel(QAbstractTableModel):
         self.headers = ["Level", "Date/Time", "Module", "Function", "Message"]
         self.log_entries: list[Any] = []
 
-    def rowCount(self, parent=QModelIndex()):
+    def rowCount(self, parent=None):
         return len(self.log_entries)
 
-    def columnCount(self, parent=QModelIndex()):
+    def columnCount(self, parent=None):
         return len(self.headers)
 
     def data(self, index, role=Qt.ItemDataRole.DisplayRole):
@@ -163,8 +162,8 @@ class LogLoaderThread(QThread):
         if os.path.exists(self.logfile):
             with open(self.logfile, encoding="utf-8") as log_file:
                 lines = deque(log_file, maxlen=self.max_entries)
-                for line in lines:
-                    line = line.strip()
+                for raw_line in lines:
+                    line = raw_line.strip()
                     if not line:
                         continue
                     try:

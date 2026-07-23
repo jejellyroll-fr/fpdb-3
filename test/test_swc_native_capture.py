@@ -603,12 +603,12 @@ def test_parse_native_game_change_resolves_shared_definitions():
 
 def test_parse_native_game_change_maps_each_family():
     cases = {
-        "Game changes to NL Hold'em 25/50": ("holdem" not in "", "hold", "holdem", "nl"),
-        "Game changes to PL Omaha 15/30": (True, "hold", "omahahi", "pl"),
-        "Game changes to FL Razz 25/50": (True, "stud", "razz", "fl"),
-        "Game changes to FL Badugi 75/150": (True, "draw", "badugi", "fl"),
+        "Game changes to NL Hold'em 25/50": ("hold", "holdem", "nl"),
+        "Game changes to PL Omaha 15/30": ("hold", "omahahi", "pl"),
+        "Game changes to FL Razz 25/50": ("stud", "razz", "fl"),
+        "Game changes to FL Badugi 75/150": ("draw", "badugi", "fl"),
     }
-    for text, (_flag, base, category, limit) in cases.items():
+    for text, (base, category, limit) in cases.items():
         parsed = parse_native_game_change(_game_change_msg(1, text).payload)
         assert (parsed["base"], parsed["category"], parsed["limit_type"]) == (base, category, limit)
 

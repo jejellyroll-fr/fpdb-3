@@ -39,9 +39,7 @@ from fpdb_3_legacy.ring_stats.views.table_view import StatsTableView
 
 log = get_logger("ring_stats_main")
 
-colalias, colheading, colshowsumm, colshowposn, colformat, coltype, colxalign = (
-    0, 1, 2, 3, 4, 5, 6
-)
+colalias, colheading, colshowsumm, colshowposn, colformat, coltype, colxalign = (0, 1, 2, 3, 4, 5, 6)
 
 
 class GuiRingPlayerStats(QSplitter):
@@ -91,10 +89,22 @@ class GuiRingPlayerStats(QSplitter):
 
         # 1. Barre latérale des filtres (Gauche)
         filters_display = {
-            "Heroes": True, "Sites": True, "Games": True, "Currencies": True,
-            "Limits": True, "LimitSep": True, "LimitType": True, "Type": True,
-            "UseType": "ring", "Seats": True, "SeatSep": True, "Dates": True,
-            "Groups": True, "GroupsAll": True, "Button1": True, "Button2": True,
+            "Heroes": True,
+            "Sites": True,
+            "Games": True,
+            "Currencies": True,
+            "Limits": True,
+            "LimitSep": True,
+            "LimitType": True,
+            "Type": True,
+            "UseType": "ring",
+            "Seats": True,
+            "SeatSep": True,
+            "Dates": True,
+            "Groups": True,
+            "GroupsAll": True,
+            "Button1": True,
+            "Button2": True,
         }
         self.filters = Filters.Filters(self.db, display=filters_display)
         self.filters.registerButton1Name("Filters")
@@ -104,7 +114,10 @@ class GuiRingPlayerStats(QSplitter):
 
         self.columns_button = QPushButton("Columns")
         self.columns_button.clicked.connect(self.showColumnConfig)
-        self.filters.layout().addWidget(self.columns_button)
+        filters_layout = self.filters.layout()
+        if filters_layout is None:
+            raise RuntimeError("ring-stat filters were created without a layout")
+        filters_layout.addWidget(self.columns_button)
 
         sidebar_scroll = QScrollArea()
         sidebar_scroll.setObjectName("filterSidebar")
@@ -148,6 +161,7 @@ class GuiRingPlayerStats(QSplitter):
     def handle_no_data_found(self) -> None:
         """Affiche une boîte de message si aucun résultat n'est trouvé."""
         from PySide6.QtWidgets import QMessageBox
+
         msg = QMessageBox(self)
         msg.setIcon(QMessageBox.Icon.Information)
         msg.setWindowTitle("FPDB 3 info")
@@ -204,7 +218,8 @@ class GuiRingPlayerStats(QSplitter):
                 if header_item and header_item.text() == hand_heading:
                     hand_col_idx = col
                     break
-        except Exception:
+        except (AttributeError, IndexError, StopIteration, TypeError, ValueError):
+            log.debug("Unable to resolve starting-hand column", exc_info=True)
             hand_col_idx = 0
 
         categories = model.property("categories") or []
@@ -243,8 +258,12 @@ class GuiRingPlayerStats(QSplitter):
                 # Extraction des valeurs
                 try:
                     n = float(model.item(row, 1).text()) if model.item(row, 1) else 0
-                    vpip = float(model.item(row, 2).text().replace('%', '')) if model.item(row, 2) else 0.0
-                    net = float(model.item(row, model.columnCount() - 2).text().replace('€', '').replace(' ', '')) if model.item(row, model.columnCount() - 2) else 0.0
+                    vpip = float(model.item(row, 2).text().replace("%", "")) if model.item(row, 2) else 0.0
+                    net = (
+                        float(model.item(row, model.columnCount() - 2).text().replace("€", "").replace(" ", ""))
+                        if model.item(row, model.columnCount() - 2)
+                        else 0.0
+                    )
                 except (ValueError, TypeError, AttributeError):
                     n = 0
                     vpip = 0.0
@@ -302,8 +321,12 @@ class GuiRingPlayerStats(QSplitter):
 
         if dialog.exec() == QDialog.DialogCode.Accepted:
             for row in range(len(self.columns)):
-                self.columns[row][colshowsumm] = table.item(row, 1).checkState() == Qt.CheckState.Checked
-                self.columns[row][colshowposn] = table.item(row, 2).checkState() == Qt.CheckState.Checked
+                summary_item = table.item(row, 1)
+                position_item = table.item(row, 2)
+                if summary_item is None or position_item is None:
+                    raise RuntimeError(f"column configuration row {row} is incomplete")
+                self.columns[row][colshowsumm] = summary_item.checkState() == Qt.CheckState.Checked
+                self.columns[row][colshowposn] = position_item.checkState() == Qt.CheckState.Checked
 
             self.conf.save_gui_cash_stats()
             self.conf.save()

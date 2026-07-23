@@ -5,6 +5,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
+from fpdb_3_legacy.loggingFpdb import get_logger
+
+log = get_logger("autonotes")
+
 FORCED_ACTIONS = {
     "ante",
     "small blind",
@@ -124,8 +128,7 @@ class PreflopContext:
         if not self.player_made_raise_number(player, 1) or not self.second_raise:
             return False
         return any(
-            action.index > self.second_raise.index and action.is_fold
-            for action in self.player_actions.get(player, [])
+            action.index > self.second_raise.index and action.is_fold for action in self.player_actions.get(player, [])
         )
 
     def first_raise_is_late_steal(self) -> bool:
@@ -139,7 +142,8 @@ class PreflopContext:
 def _player_hole_cards(hand, player_name: str) -> list[str]:
     try:
         return [card for card in hand.join_holecards(player_name, asList=True) if card and card != "0x"]
-    except Exception:
+    except (AttributeError, KeyError, TypeError, ValueError):
+        log.debug("Unable to read hole cards for %s while building an autonote", player_name, exc_info=True)
         return []
 
 

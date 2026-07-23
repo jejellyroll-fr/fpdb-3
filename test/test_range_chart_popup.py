@@ -58,12 +58,13 @@ def test_contrast_text():
 # ---------------------------------------------------------------------------
 # widget rendering from the real fixture
 # ---------------------------------------------------------------------------
+@pytest.fixture(scope="class")
+def charts():
+    return pt4hud.extract_charts(FIXTURE)
+
+
 @pytest.mark.skipif(not os.path.exists(FIXTURE), reason="pt4hud fixture missing")
 class TestGridWidget:
-    @pytest.fixture(scope="class")
-    def charts(self):
-        return pt4hud.extract_charts(FIXTURE)
-
     def test_build_grid_widget_has_169_cells(self, charts):
         push = next(c for c in charts if c.name == "Push Nash")
         w = R.build_grid_widget(push)

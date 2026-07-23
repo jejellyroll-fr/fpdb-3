@@ -25,7 +25,7 @@ class Pt4Config:
         """Load configuration from environment variables."""
         return cls(
             host=os.environ.get("PT4_HOST", "localhost"),
-            port=int(os.environ.get("PT4_PORT", 5432)),
+            port=int(os.environ.get("PT4_PORT", "5432")),
             user=os.environ.get("PT4_USER", "postgres"),
             password=os.environ.get("PT4_PASSWORD", "dbpass"),
             database=os.environ.get("PT4_DATABASE", "PT4 DB"),

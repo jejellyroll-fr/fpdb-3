@@ -20,6 +20,7 @@ from fpdb_3_legacy.Stats import (
 class MockWidget:
     def __init__(self):
         self.tooltip = None
+
     def setToolTip(self, tip):
         self.tooltip = tip
 
@@ -44,6 +45,7 @@ def test_game_abbr_with_gametype():
 
     class HandWithGametype:
         gametype = {"category": "holdem", "limitType": "fl"}
+
         def __contains__(self, item):
             return item == "gametype"
 
@@ -500,11 +502,12 @@ def test_f_4bet():
 # Tests for hand instance dependent stats (lines 319-340, 375-392)
 class MockHandInstance:
     """Mock hand instance for testing stats that need hand data."""
+
     def __init__(self):
         self.players = [["p1", "Player1", 100.0], ["p2", "Player2", 200.0]]
         self.gametype = {"category": "holdem", "limitType": "nl", "sb": 0.5, "bb": 1.0}
         self.bets = {"BLINDSANTES": {"Player1": [0.5, 1.0]}}
-        self.pot = type('obj', (object,), {'returned': {}})()
+        self.pot = type("obj", (object,), {"returned": {}})()
         self.collectees = {}
 
 
@@ -830,6 +833,7 @@ def test_wmsd_exception():
 def test_main_list_stats(capsys):
     """Test main() with --list-stats."""
     from fpdb_3_legacy.Stats import main
+
     result = main(["--list-stats"])
     assert result == 0
 
@@ -837,6 +841,7 @@ def test_main_list_stats(capsys):
 def test_main_no_args():
     """Test main() with no arguments."""
     from fpdb_3_legacy.Stats import main
+
     result = main([])
     assert result == 0
 
@@ -937,6 +942,7 @@ def test_profit100_player_not_in_dict():
 def test_stat_functions_initialization():
     """Test that STAT_FUNCTIONS dict is initialized lazily."""
     import fpdb_3_legacy.Stats as stats_module
+
     # Reset to ensure lazy init works
     stats_module.STAT_FUNCTIONS = None
     assert stats_module.STAT_FUNCTIONS is None
@@ -1258,11 +1264,12 @@ def test_cb4_stat():
 # Tests for _calculate_end_stack branches (lines 333-334, 338-339)
 def test_m_ratio_with_returned_money():
     """Test m_ratio with money returned."""
+
     class MockHandWithReturn:
         players = [["p1", "Player1", 100.0], ["p2", "Player2", 200.0]]
         gametype = {"category": "holdem", "limitType": "nl", "sb": 0.5, "bb": 1.0}
         bets = {"BLINDSANTES": {}}
-        pot = type('obj', (object,), {'returned': {"Player1": 5.0}})()
+        pot = type("obj", (object,), {"returned": {"Player1": 5.0}})()
         collectees = {}
 
     hand = MockHandWithReturn()
@@ -1273,11 +1280,12 @@ def test_m_ratio_with_returned_money():
 
 def test_m_ratio_with_collectees():
     """Test m_ratio with collectees."""
+
     class MockHandWithCollectees:
         players = [["p1", "Player1", 100.0], ["p2", "Player2", 200.0]]
         gametype = {"category": "holdem", "limitType": "nl", "sb": 0.5, "bb": 1.0}
         bets = {"BLINDSANTES": {}}
-        pot = type('obj', (object,), {'returned': {}})()
+        pot = type("obj", (object,), {"returned": {}})()
         collectees = {"Player1": 10.0}
 
     hand = MockHandWithCollectees()
@@ -1342,8 +1350,14 @@ def test_stat_override_three_decimals():
 def test_deprecated_stats_all_return_dash():
     """Verify all deprecated stats return '-'."""
     stat_dict = {1: {}}
-    deprecated_stats = ["iso", "three_bet_vs_steal", "call_vs_steal",
-                        "avg_bet_size_flop", "avg_bet_size_turn", "avg_bet_size_river"]
+    deprecated_stats = [
+        "iso",
+        "three_bet_vs_steal",
+        "call_vs_steal",
+        "avg_bet_size_flop",
+        "avg_bet_size_turn",
+        "avg_bet_size_river",
+    ]
     for stat_name in deprecated_stats:
         result = do_stat(stat_dict, stat=stat_name, player=1)
         assert result[1] == "-", f"{stat_name} should return '-'"
@@ -1518,11 +1532,12 @@ def test_bbper100_bigblind_exception():
 # Test for m_ratio without compulsory bets (line 390)
 def test_m_ratio_no_compulsory_bets():
     """Test m_ratio when compulsory bets is 0."""
+
     class MockHandNoBets:
         players = [["p1", "Player1", 100.0]]
         gametype = {"category": "holdem", "limitType": "nl", "sb": 0, "bb": 0}
         bets = {"BLINDSANTES": {}}
-        pot = type('obj', (object,), {'returned': {}})()
+        pot = type("obj", (object,), {"returned": {}})()
         collectees = {}
 
     hand = MockHandNoBets()
@@ -1552,6 +1567,7 @@ def test_main_with_show_stats_no_db(monkeypatch):
     """Test main with --show-stats without DB."""
     from fpdb_3_legacy.Database import Database
     from fpdb_3_legacy.Stats import main
+
     monkeypatch.setattr(Database, "__init__", lambda *args, **kwargs: None)
     monkeypatch.setattr(Database, "get_last_hand", lambda *args: None)
     result = main(["--show-stats"])
@@ -1562,6 +1578,7 @@ def test_main_interactive_no_db(monkeypatch):
     """Test main with --interactive without DB."""
     from fpdb_3_legacy.Database import Database
     from fpdb_3_legacy.Stats import main
+
     monkeypatch.setattr(Database, "__init__", lambda *args, **kwargs: None)
     monkeypatch.setattr(Database, "get_last_hand", lambda *args: None)
     result = main(["--interactive"])
@@ -1644,11 +1661,9 @@ def test_n_stat_zero_again():
 def test_get_valid_stats():
     """Test get_valid_stats function."""
     from fpdb_3_legacy.Stats import get_valid_stats
-    try:
-        result = get_valid_stats()
-        assert result is not None
-    except Exception:
-        pass  # May fail without DB
+
+    result = get_valid_stats()
+    assert result is not None
 
 
 # Test for main with validate-stats
@@ -1656,6 +1671,7 @@ def test_main_validate_stats_no_db(monkeypatch):
     """Test main with --validate-stats."""
     from fpdb_3_legacy.Database import Database
     from fpdb_3_legacy.Stats import main
+
     monkeypatch.setattr(Database, "__init__", lambda *args, **kwargs: None)
     monkeypatch.setattr(Database, "get_last_hand", lambda *args: None)
     result = main(["--validate-stats"])
@@ -1696,8 +1712,10 @@ def test_main_show_stats_exception(monkeypatch):
     """Test main with --show-stats when DB fails."""
     from fpdb_3_legacy.Database import Database
     from fpdb_3_legacy.Stats import main
+
     def raise_err(*args, **kwargs):
         raise Exception("DB Error")
+
     monkeypatch.setattr(Database, "__init__", raise_err)
     result = main(["--show-stats"])
     assert result == 1
@@ -1755,8 +1773,10 @@ def test_main_validate_stats_with_exception(monkeypatch):
     """Test main validate-stats with exception."""
     from fpdb_3_legacy.Database import Database
     from fpdb_3_legacy.Stats import main
+
     def raise_err(*args, **kwargs):
         raise Exception("DB Error")
+
     monkeypatch.setattr(Database, "__init__", raise_err)
     result = main(["--validate-stats"])
     assert result == 1
@@ -1765,11 +1785,12 @@ def test_main_validate_stats_with_exception(monkeypatch):
 # Test for bbstack with hand instance
 def test_bbstack_with_bb():
     """Test bbstack with bb in gametype."""
+
     class MockHandWithBB:
         players = [["p1", "Player1", 100.0]]
         gametype = {"category": "holdem", "limitType": "nl", "bb": 1.0}
         bets = {"BLINDSANTES": {}}
-        pot = type('obj', (object,), {'returned': {}})()
+        pot = type("obj", (object,), {"returned": {}})()
         collectees = {}
 
     hand = MockHandWithBB()
@@ -1781,11 +1802,12 @@ def test_bbstack_with_bb():
 # Test for bbstack with missing bb (tests the fix)
 def test_bbstack_missing_bb():
     """Test bbstack with missing bb key - tests the bug fix."""
+
     class MockHandMissingBB:
         players = [["p1", "Player1", 100.0]]
         gametype = {"category": "holdem", "limitType": "nl", "sb": 0.5}
         bets = {"BLINDSANTES": {}}
-        pot = type('obj', (object,), {'returned': {}})()
+        pot = type("obj", (object,), {"returned": {}})()
         collectees = {}
 
     hand = MockHandMissingBB()
@@ -1797,11 +1819,12 @@ def test_bbstack_missing_bb():
 # Test for m_ratio with missing sb/bb
 def test_m_ratio_missing_sb():
     """Test m_ratio with missing sb."""
+
     class MockHandNoSB:
         players = [["p1", "Player1", 100.0]]
         gametype = {"category": "holdem", "limitType": "nl", "bb": 1.0}
         bets = {"BLINDSANTES": {}}
-        pot = type('obj', (object,), {'returned': {}})()
+        pot = type("obj", (object,), {"returned": {}})()
         collectees = {}
 
     hand = MockHandNoSB()
@@ -2382,6 +2405,7 @@ def test_main_show_stats_path(monkeypatch):
     """Test main --show-stats path with exception."""
     from fpdb_3_legacy.Database import Database
     from fpdb_3_legacy.Stats import main
+
     monkeypatch.setattr(Database, "__init__", lambda *args, **kwargs: None)
     monkeypatch.setattr(Database, "get_last_hand", lambda *args: None)
     result = main(["--show-stats"])
@@ -2553,6 +2577,7 @@ def test_ffreq4_exception_variant_3():
     stat_dict = {1: {"saw_3": "invalid"}}
     result = do_stat(stat_dict, stat="ffreq4", player=1)
     assert result is not None
+
 
 def test_n_with_large_hands_edge_case():
     """Test n() with n >= 10000 where rounding edge case d=10 occurs."""

@@ -16,6 +16,7 @@ class TestAddCollectPotWithAdjustment(unittest.TestCase):
     def setUp(self):
         """Set up test fixtures."""
         self.config = Mock()
+        self.config.get_import_parameters.return_value = {"saveStarsHH": False}
         self.parser = PokerStars(self.config, "PokerStars", "USD")
 
     def _create_mock_hand(self, pot_stp=0):
@@ -51,7 +52,12 @@ class TestAddCollectPotWithAdjustment(unittest.TestCase):
         """Test Bovada uncalled v1 adjustment when conditions are met."""
         hand = self._create_mock_hand(pot_stp=Decimal("5.0"))  # hand.pot.stp = 5.0
         match = self._create_mock_match("$15.00", "Player2")
-        adjustments = (True, False, Decimal("10.0"), Decimal("2.0"))  # bovada_uncalled_v1=True, blindsantes=10.0, adjustment=2.0
+        adjustments = (
+            True,
+            False,
+            Decimal("10.0"),
+            Decimal("2.0"),
+        )  # bovada_uncalled_v1=True, blindsantes=10.0, adjustment=2.0
 
         # Mock clearMoneyString to return clean amount
         self.parser.clearMoneyString = Mock(return_value="15.00")

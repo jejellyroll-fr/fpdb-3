@@ -83,8 +83,8 @@ class HoldemGridCell(QFrame):
     def _interpolate_color(self, hex1: str, hex2: str, factor: float) -> str:
         """Calcule une couleur interpolée entre deux couleurs hexa."""
         try:
-            h1 = hex1.lstrip('#')
-            h2 = hex2.lstrip('#')
+            h1 = hex1.lstrip("#")
+            h2 = hex2.lstrip("#")
             r1, g1, b1 = int(h1[0:2], 16), int(h1[2:4], 16), int(h1[4:6], 16)
             r2, g2, b2 = int(h2[0:2], 16), int(h2[2:4], 16), int(h2[4:6], 16)
 
@@ -93,7 +93,7 @@ class HoldemGridCell(QFrame):
             b = int(b1 + factor * (b2 - b1))
 
             return f"#{r:02x}{g:02x}{b:02x}"
-        except Exception:
+        except (AttributeError, IndexError, TypeError, ValueError):
             return hex2
 
 
@@ -136,24 +136,25 @@ class OmahaChartsCanvas(FigureCanvas):
         if suitedness:
             labels = list(suitedness.keys())
             values = list(suitedness.values())
-            colors = [accent, accent_soft, orange, color_down][:len(labels)]
-            ax1.pie(values, labels=labels, autopct='%1.1f%%', colors=colors,
-                    textprops={'color': text_color, 'fontsize': 8})
-            ax1.set_title(f"Couleurs ({variant_title})", color=text_color, fontsize=9, fontweight='bold')
+            colors = [accent, accent_soft, orange, color_down][: len(labels)]
+            ax1.pie(
+                values, labels=labels, autopct="%1.1f%%", colors=colors, textprops={"color": text_color, "fontsize": 8}
+            )
+            ax1.set_title(f"Couleurs ({variant_title})", color=text_color, fontsize=9, fontweight="bold")
         else:
-            ax1.text(0.5, 0.5, "Aucune donnée", color=text_color, ha='center')
+            ax1.text(0.5, 0.5, "Aucune donnée", color=text_color, ha="center")
 
         # 2. Graphe des Paires
         if pairs:
             labels = list(pairs.keys())
             values = list(pairs.values())
-            colors = [accent, accent_soft, orange, color_down, c.get("graph_purple", "#9f7aea")][:len(labels)]
+            colors = [accent, accent_soft, orange, color_down, c.get("graph_purple", "#9f7aea")][: len(labels)]
             ax2.bar(labels, values, color=colors, alpha=0.85)
-            ax2.set_title(f"Configuration ({variant_title})", color=text_color, fontsize=9, fontweight='bold')
+            ax2.set_title(f"Configuration ({variant_title})", color=text_color, fontsize=9, fontweight="bold")
             ax2.set_ylabel("Mains", color=text_color, fontsize=8)
-            ax2.tick_params(axis='x', rotation=30)
+            ax2.tick_params(axis="x", rotation=30)
         else:
-            ax2.text(0.5, 0.5, "Aucune donnée", color=text_color, ha='center')
+            ax2.text(0.5, 0.5, "Aucune donnée", color=text_color, ha="center")
 
         self.fig.tight_layout()
         self.draw()
@@ -164,20 +165,22 @@ class StartingHandsTab(QWidget):
 
     def __init__(self, parent=None) -> None:
         super().__init__(parent)
-        self.layout = QVBoxLayout(self)
-        self.layout.setContentsMargins(12, 12, 12, 12)
+        self.main_layout = QVBoxLayout(self)
+        self.main_layout.setContentsMargins(12, 12, 12, 12)
 
         # Titre dynamique de l'onglet
         self.title_label = QLabel("Analyse des Mains de Départ")
         c = get_theme_palette()
-        self.title_label.setStyleSheet(f"font-size: 12px; font-weight: bold; text-transform: uppercase; color: {c.get('muted_text', '#a0aec0')};")
-        self.layout.addWidget(self.title_label)
+        self.title_label.setStyleSheet(
+            f"font-size: 12px; font-weight: bold; text-transform: uppercase; color: {c.get('muted_text', '#a0aec0')};"
+        )
+        self.main_layout.addWidget(self.title_label)
 
         # Conteneur principal qui changera dynamiquement selon le jeu
         self.container = QWidget()
         self.container_layout = QVBoxLayout(self.container)
         self.container_layout.setContentsMargins(0, 0, 0, 0)
-        self.layout.addWidget(self.container, 1)
+        self.main_layout.addWidget(self.container, 1)
 
         # Composants pré-créés pour Hold'em et Omaha
         self.holdem_grid_widget = QWidget()
@@ -218,7 +221,7 @@ class StartingHandsTab(QWidget):
 
     def _build_holdem_grid(self) -> None:
         """Construit statiquement la grille 13x13 pour le Texas Hold'em."""
-        ranks = ['A', 'K', 'Q', 'J', 'T', '9', '8', '7', '6', '5', '4', '3', '2']
+        ranks = ["A", "K", "Q", "J", "T", "9", "8", "7", "6", "5", "4", "3", "2"]
         for row in range(13):
             for col in range(13):
                 c1 = ranks[row]

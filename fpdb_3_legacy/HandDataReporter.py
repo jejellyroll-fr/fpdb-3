@@ -1,4 +1,5 @@
 """Hand Data Reporter for analyzing hand parsing quality."""
+
 from __future__ import annotations
 
 import contextlib
@@ -260,8 +261,8 @@ class HandDataReporter:
                                         )
 
                             analysis["attributes"][attr_name] = attr_info
-                    except Exception:
-                        analysis["attributes"][attr_name] = {"error": "Could not access"}
+                    except Exception as exc:  # noqa: BLE001 - diagnostic reporter must continue across arbitrary properties.
+                        analysis["attributes"][attr_name] = {"error": f"Could not access: {type(exc).__name__}"}
 
         return analysis
 

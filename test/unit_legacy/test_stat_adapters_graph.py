@@ -1,8 +1,10 @@
 """Unit tests for the GraphAdapter (cumulative ChipEV-by-position curves)."""
+
 from __future__ import annotations
 
 import os
 import sys
+from decimal import Decimal
 
 import pytest
 
@@ -24,7 +26,7 @@ class TestSelectFragments:
         adapter = GraphAdapter()
         frags = adapter.select_fragments(registry.get("chipev_3h_sb"))
         assert frags == [
-            'CASE WHEN h.seats = 3 AND hp.position = \'S\' THEN hp.allInEV ELSE 0 END AS "chipev_3h_sb__allInEV"',
+            "CASE WHEN h.seats = 3 AND hp.position = 'S' THEN hp.allInEV ELSE 0 END AS \"chipev_3h_sb__allInEV\"",
         ]
         assert "SUM(" not in frags[0]
 
@@ -40,11 +42,20 @@ class TestSeriesValues:
         d = registry.get("chipev_3h_sb")
         # Three SB hands at the 3-handed table: allInEV stored x100.
         rows = [
-            {"chipev_3h_sb__allInEV": 10000},   # +100 chips
-            {"chipev_3h_sb__allInEV": -5000},   # -50 chips
-            {"chipev_3h_sb__allInEV": 2500},    # +25 chips
+            {"chipev_3h_sb__allInEV": 10000},  # +100 chips
+            {"chipev_3h_sb__allInEV": -5000},  # -50 chips
+            {"chipev_3h_sb__allInEV": 2500},  # +25 chips
         ]
         assert adapter.series_values(d, rows) == pytest.approx([100.0, 50.0, 75.0])
+
+    def test_decimal_rows_from_database(self, registry):
+        adapter = GraphAdapter()
+        d = registry.get("chipev_3h_sb")
+        rows = [
+            {"chipev_3h_sb__allInEV": Decimal("10000")},
+            {"chipev_3h_sb__allInEV": Decimal("-2500")},
+        ]
+        assert adapter.series_values(d, rows) == pytest.approx([100.0, 75.0])
 
     def test_non_matching_event_contributes_zero(self, registry):
         adapter = GraphAdapter()

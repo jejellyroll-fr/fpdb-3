@@ -82,10 +82,7 @@ def test_each_site_parameters(cfg: Config) -> None:
             continue
         params = cfg.get_site_parameters(site)
         assert isinstance(params, dict)
-        try:
-            cfg.get_site_id(site)
-        except Exception:  # noqa: BLE001 - id lookup needs a populated DB
-            pass
+        cfg.get_site_id(site)
 
 
 def test_get_site_parameters_without_hhc_returns_none_converter(cfg: Config) -> None:

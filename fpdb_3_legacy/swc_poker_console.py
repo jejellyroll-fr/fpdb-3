@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 import sys
 from typing import Any
@@ -25,13 +26,15 @@ from PySide6.QtWidgets import (
 from fpdb_3_legacy import SQL, Database, GuiReplayer
 from fpdb_3_legacy.http_capture_db_import import import_http_capture_directory, import_http_capture_hand
 
+log = logging.getLogger(__name__)
+
 # 4-color suit map
 SUIT_SYMBOLS = {"s": "♠", "h": "♥", "d": "♦", "c": "♣"}
 SUIT_COLORS = {
     "s": "#212121",  # Spades: Dark Grey/Black
     "h": "#d32f2f",  # Hearts: Red
     "d": "#1976d2",  # Diamonds: Blue
-    "c": "#388e3c"   # Clubs: Green
+    "c": "#388e3c",  # Clubs: Green
 }
 
 GAME_NAME_MAPPING = {
@@ -42,14 +45,16 @@ GAME_NAME_MAPPING = {
     "poker (type 75)": "OFC/P Progressive",
     "poker (type 74)": "OFC/P",
     "poker (type 73)": "Turbo OFC",
-    "poker (type 70)": "OFC"
+    "poker (type 70)": "OFC",
 }
+
 
 def clean_game_name(game_type_str):
     if not game_type_str:
         return "Poker"
     key = game_type_str.lower().strip()
     return GAME_NAME_MAPPING.get(key, game_type_str)
+
 
 class SwCPokerConsoleDialog(QDialog):
     def __init__(self, config=None, parent=None):
@@ -321,7 +326,7 @@ class SwCPokerConsoleDialog(QDialog):
         if self.process is None:
             return
         data = self.process.readAllStandardOutput()
-        text = bytes(data).decode('utf-8', errors='ignore')
+        text = bytes(data).decode("utf-8", errors="ignore")
         self.txt_log.append(text.strip())
 
         # Check if a new hand was successfully saved
@@ -338,12 +343,13 @@ class SwCPokerConsoleDialog(QDialog):
 
     def open_hands_folder(self):
         import subprocess
-        if sys.platform == 'win32':
+
+        if sys.platform == "win32":
             os.startfile(self.output_dir)
-        elif sys.platform == 'darwin':
-            subprocess.Popen(['open', self.output_dir])
+        elif sys.platform == "darwin":
+            subprocess.Popen(["open", self.output_dir])
         else:
-            subprocess.Popen(['xdg-open', self.output_dir])
+            subprocess.Popen(["xdg-open", self.output_dir])
 
     # --- HAND LIST POPULATION ---
     def populate_hand_list(self):
@@ -390,8 +396,8 @@ class SwCPokerConsoleDialog(QDialog):
                 # Restore selection if it existed
                 if selected_text and display_str == selected_text:
                     self.lst_hands.setCurrentItem(item)
-            except Exception:
-                pass
+            except (AttributeError, json.JSONDecodeError, OSError, RuntimeError, TypeError):
+                log.warning("Unable to read captured hand file %s", filepath, exc_info=True)
 
         # If nothing was selected previously, select the first hand
         if not self.lst_hands.currentItem() and self.lst_hands.count() > 0:
@@ -413,8 +419,8 @@ class SwCPokerConsoleDialog(QDialog):
         finally:
             try:
                 db.connection.close()
-            except Exception:
-                pass
+            except Exception:  # noqa: BLE001 - cleanup supports multiple DB drivers.
+                log.debug("Unable to close SwC import database connection", exc_info=True)
 
     def import_selected_hand_to_db(self):
         hand_data = self.hands_data.get(self.current_hand_id)
@@ -423,14 +429,16 @@ class SwCPokerConsoleDialog(QDialog):
             return
         try:
             result = self._import_hand_data_to_db(hand_data)
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001 - GUI boundary surfaces import errors to the user.
             QMessageBox.critical(self, "Import OFC", f"Database import failed:\n{exc}")
             return
         if result.replay_ref:
             self.txt_log.append(f"[DB] Imported hand #{result.site_hand_no} as {result.replay_ref}")
             QMessageBox.information(self, "Import OFC", f"Imported hand #{result.site_hand_no} into DB.")
         else:
-            QMessageBox.information(self, "Import OFC", result.message or f"Hand #{result.site_hand_no} was not imported.")
+            QMessageBox.information(
+                self, "Import OFC", result.message or f"Hand #{result.site_hand_no} was not imported."
+            )
 
     def import_all_hands_to_db(self, silent=False):
         try:
@@ -440,9 +448,9 @@ class SwCPokerConsoleDialog(QDialog):
             finally:
                 try:
                     db.connection.close()
-                except Exception:
-                    pass
-        except Exception as exc:
+                except Exception:  # noqa: BLE001 - cleanup supports multiple DB drivers.
+                    log.debug("Unable to close SwC bulk-import database connection", exc_info=True)
+        except Exception as exc:  # noqa: BLE001 - GUI boundary surfaces import errors to the user.
             if not silent:
                 QMessageBox.critical(self, "Import OFC", f"Database import failed:\n{exc}")
             return
@@ -465,7 +473,7 @@ class SwCPokerConsoleDialog(QDialog):
         if replay_ref is None:
             try:
                 result = self._import_hand_data_to_db(hand_data)
-            except Exception as exc:
+            except Exception as exc:  # noqa: BLE001 - GUI boundary surfaces import errors to the user.
                 QMessageBox.critical(self, "DB Replayer", f"Database import failed:\n{exc}")
                 return
             replay_ref = result.replay_ref
@@ -476,13 +484,13 @@ class SwCPokerConsoleDialog(QDialog):
             db, sql = self._db()
             try:
                 db.connection.close()
-            except Exception:
-                pass
+            except Exception:  # noqa: BLE001 - cleanup supports multiple DB drivers.
+                log.debug("Unable to close SwC replayer database connection", exc_info=True)
             replayer = GuiReplayer.GuiReplayer(self.config, sql, self, [replay_ref])
             replayer.play_hand(0)
             self.gui_replayers.append(replayer)
             self.txt_log.append(f"[DB] Opened replayer for {replay_ref}")
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001 - GUI boundary surfaces replay errors to the user.
             QMessageBox.critical(self, "DB Replayer", f"Unable to open DB replayer:\n{exc}")
 
     # --- REPLAYER LOGIC ---
@@ -498,7 +506,7 @@ class SwCPokerConsoleDialog(QDialog):
             return
 
         self.inferred_actions = self.infer_hand_actions(hand_data)
-        self.current_step = len(hand_data.get("steps", [])) # Set to final step by default
+        self.current_step = len(hand_data.get("steps", []))  # Set to final step by default
         self.render_replayer_step()
 
     def go_first_step(self):
@@ -636,9 +644,9 @@ class SwCPokerConsoleDialog(QDialog):
                     name = player["name"]
                     p_cards = placed.get(name, {})
                     curr_placed_counts[name] = (
-                        sum(1 for c in p_cards.get("top", []) if c and c != "--" and c != "-1") +
-                        sum(1 for c in p_cards.get("middle", []) if c and c != "--" and c != "-1") +
-                        sum(1 for c in p_cards.get("bottom", []) if c and c != "--" and c != "-1")
+                        sum(1 for c in p_cards.get("top", []) if c and c != "--" and c != "-1")
+                        + sum(1 for c in p_cards.get("middle", []) if c and c != "--" and c != "-1")
+                        + sum(1 for c in p_cards.get("bottom", []) if c and c != "--" and c != "-1")
                     )
 
                 max_placed = max(curr_placed_counts.values()) if curr_placed_counts else 0
@@ -662,6 +670,7 @@ class SwCPokerConsoleDialog(QDialog):
                     step_actions.append("\n=== [FANTASY LAND / MID-HAND] ===")
                     current_round = 5
                 else:
+
                     def get_ofc_round(count):
                         if count == 0:
                             return 0
@@ -696,7 +705,7 @@ class SwCPokerConsoleDialog(QDialog):
                     stack_diff = curr_stack - prev_stack
 
                     if is_ofc:
-                        prev_player_cards = steps[idx-1].get("placed", {}).get(name, {})
+                        prev_player_cards = steps[idx - 1].get("placed", {}).get(name, {})
 
                         # Check for active cards dealt
                         prev_active = prev_player_cards.get("active", [])
@@ -704,7 +713,9 @@ class SwCPokerConsoleDialog(QDialog):
                         if len(prev_active) == 0 and len(curr_active) > 0:
                             visible_active = [c for c in curr_active if c and c != "--" and c != "-1"]
                             if visible_active:
-                                step_actions.append(f"• {name} receives {len(curr_active)} private cards: {', '.join(visible_active)}")
+                                step_actions.append(
+                                    f"• {name} receives {len(curr_active)} private cards: {', '.join(visible_active)}"
+                                )
                             else:
                                 step_actions.append(f"• {name} receives {len(curr_active)} private cards")
 
@@ -716,7 +727,9 @@ class SwCPokerConsoleDialog(QDialog):
                     else:
                         if bet_diff > 0:
                             # Max bet among all other players in the previous step
-                            other_bets = [prev_bets.get(p["name"], 0.0) for p in hand_data["players"] if p["name"] != name]
+                            other_bets = [
+                                prev_bets.get(p["name"], 0.0) for p in hand_data["players"] if p["name"] != name
+                            ]
                             prev_max_bet = max(other_bets) if other_bets else 0.0
 
                             # Check if it's blinds posting or normal action
@@ -743,7 +756,7 @@ class SwCPokerConsoleDialog(QDialog):
                             step_actions.append(f"• {name} blind/ante of {ante_val:.2f} mBTC")
 
                         # Fold detection
-                        prev_cards = steps[idx-1].get("placed", {}).get(name, {}).get("cards", [])
+                        prev_cards = steps[idx - 1].get("placed", {}).get(name, {}).get("cards", [])
                         curr_cards = curr_player_cards.get("cards", [])
                         if len(prev_cards) > 0 and len(curr_cards) == 0 and idx < len(steps) - 1:
                             step_actions.append(f"• {name} folds")
@@ -780,9 +793,11 @@ class SwCPokerConsoleDialog(QDialog):
                 sd_actions.append("Combinations:")
                 for p, rows in showdown["rows"].items():
                     if is_ofc:
-                        sd_actions.append(f"  • {p} : TOP: {rows.get('top','--')} | MID: {rows.get('mid','--')} | BOT: {rows.get('bot','--')}")
+                        sd_actions.append(
+                            f"  • {p} : TOP: {rows.get('top', '--')} | MID: {rows.get('mid', '--')} | BOT: {rows.get('bot', '--')}"
+                        )
                     else:
-                        sd_actions.append(f"  • {p} : {rows.get('top','--')}")
+                        sd_actions.append(f"  • {p} : {rows.get('top', '--')}")
 
             sd_actions.append("\nScores:")
             for p, pts in showdown["points_settled"].items():
@@ -826,11 +841,15 @@ class SwCPokerConsoleDialog(QDialog):
 
         # Display title info (cleaned game name)
         game_name = clean_game_name(hand_data.get("game_type", "OFC"))
-        self.lbl_game_info.setText(f"Replay: {game_name} | Table: {hand_data.get('table_id', '--')} | Hand #{hand_data['hand_id']}")
+        self.lbl_game_info.setText(
+            f"Replay: {game_name} | Table: {hand_data.get('table_id', '--')} | Hand #{hand_data['hand_id']}"
+        )
 
         # Step counter
-        is_showdown = (self.current_step >= total_steps)
-        self.lbl_step_num.setText("Showdown" if (is_showdown and total_steps > 0) else f"Step {self.current_step} / {total_steps}")
+        is_showdown = self.current_step >= total_steps
+        self.lbl_step_num.setText(
+            "Showdown" if (is_showdown and total_steps > 0) else f"Step {self.current_step} / {total_steps}"
+        )
 
         # Render action history up to current step
         actions_text = ""
@@ -858,7 +877,9 @@ class SwCPokerConsoleDialog(QDialog):
         # --- RENDER BOARD IF TRADITIONAL POKER ---
         if not is_ofc:
             board_frame = QFrame()
-            board_frame.setStyleSheet("background-color: #242424; border: 1px solid #333333; border-radius: 8px; margin-bottom: 12px; border: none;")
+            board_frame.setStyleSheet(
+                "background-color: #242424; border: 1px solid #333333; border-radius: 8px; margin-bottom: 12px; border: none;"
+            )
             board_layout = QVBoxLayout(board_frame)
             board_layout.setContentsMargins(10, 10, 10, 10)
 
@@ -883,7 +904,7 @@ class SwCPokerConsoleDialog(QDialog):
             p_bet = step_bets.get(p_name, 0.0)
 
             p_seat = player.get("seat_idx", hand_data.get("players").index(player))
-            is_dealer = (hand_data.get("dealer_idx") == p_seat)
+            is_dealer = hand_data.get("dealer_idx") == p_seat
 
             player_frame = QFrame()
             player_frame.setStyleSheet("""
@@ -917,11 +938,23 @@ class SwCPokerConsoleDialog(QDialog):
                 unit = "mBTC" if not is_ofc else "pts"
 
                 if diff > 0:
-                    points_text = f" <font color='#4caf50'>+{val:.2f} {unit}</font>" if not is_ofc else f" <font color='#4caf50'>+{val:g} {unit}</font>"
+                    points_text = (
+                        f" <font color='#4caf50'>+{val:.2f} {unit}</font>"
+                        if not is_ofc
+                        else f" <font color='#4caf50'>+{val:g} {unit}</font>"
+                    )
                 elif diff < 0:
-                    points_text = f" <font color='#f44336'>{val:.2f} {unit}</font>" if not is_ofc else f" <font color='#f44336'>{val:g} {unit}</font>"
+                    points_text = (
+                        f" <font color='#f44336'>{val:.2f} {unit}</font>"
+                        if not is_ofc
+                        else f" <font color='#f44336'>{val:g} {unit}</font>"
+                    )
                 else:
-                    points_text = f" <font color='#9e9e9e'>+0.00 {unit}</font>" if not is_ofc else f" <font color='#9e9e9e'>+0 {unit}</font>"
+                    points_text = (
+                        f" <font color='#9e9e9e'>+0.00 {unit}</font>"
+                        if not is_ofc
+                        else f" <font color='#9e9e9e'>+0 {unit}</font>"
+                    )
 
                 # Check for breakdown
                 breakdown = hand_data["showdown"].get("points_breakdown", {}).get(p_name)
@@ -953,34 +986,55 @@ class SwCPokerConsoleDialog(QDialog):
                 lbl_top = QLabel("TOP :")
                 lbl_top.setStyleSheet("font-weight: bold; border: none; color: #ffb74d;")
                 grid.addWidget(lbl_top, 0, 0, Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
-                top_cards = p_cards.get("top", ["--"]*3)
+                top_cards = p_cards.get("top", ["--"] * 3)
                 for idx in range(3):
                     card_str = top_cards[idx] if idx < len(top_cards) else "--"
                     grid.addWidget(self.create_card_widget(card_str, is_board=True), 0, idx + 1)
                 if sd_rows.get("top"):
-                    grid.addWidget(QLabel(f"<font color='#a0a0a0'><i>{sd_rows['top']}</i></font>"), 0, 4, 1, 3, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
+                    grid.addWidget(
+                        QLabel(f"<font color='#a0a0a0'><i>{sd_rows['top']}</i></font>"),
+                        0,
+                        4,
+                        1,
+                        3,
+                        Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter,
+                    )
 
                 # Row 2: MIDDLE (5 cards)
                 lbl_mid = QLabel("MIDDLE :")
                 lbl_mid.setStyleSheet("font-weight: bold; border: none; color: #ffb74d;")
                 grid.addWidget(lbl_mid, 1, 0, Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
-                mid_cards = p_cards.get("middle", ["--"]*5)
+                mid_cards = p_cards.get("middle", ["--"] * 5)
                 for idx in range(5):
                     card_str = mid_cards[idx] if idx < len(mid_cards) else "--"
                     grid.addWidget(self.create_card_widget(card_str, is_board=True), 1, idx + 1)
                 if sd_rows.get("mid"):
-                    grid.addWidget(QLabel(f"<font color='#a0a0a0'><i>{sd_rows['mid']}</i></font>"), 1, 6, 1, 3, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
+                    grid.addWidget(
+                        QLabel(f"<font color='#a0a0a0'><i>{sd_rows['mid']}</i></font>"),
+                        1,
+                        6,
+                        1,
+                        3,
+                        Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter,
+                    )
 
                 # Row 3: BOTTOM (5 cards)
                 lbl_bot = QLabel("BOTTOM :")
                 lbl_bot.setStyleSheet("font-weight: bold; border: none; color: #ffb74d;")
                 grid.addWidget(lbl_bot, 2, 0, Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
-                bot_cards = p_cards.get("bottom", ["--"]*5)
+                bot_cards = p_cards.get("bottom", ["--"] * 5)
                 for idx in range(5):
                     card_str = bot_cards[idx] if idx < len(bot_cards) else "--"
                     grid.addWidget(self.create_card_widget(card_str, is_board=True), 2, idx + 1)
                 if sd_rows.get("bot"):
-                    grid.addWidget(QLabel(f"<font color='#a0a0a0'><i>{sd_rows['bot']}</i></font>"), 2, 6, 1, 3, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
+                    grid.addWidget(
+                        QLabel(f"<font color='#a0a0a0'><i>{sd_rows['bot']}</i></font>"),
+                        2,
+                        6,
+                        1,
+                        3,
+                        Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter,
+                    )
 
                 p_box.addLayout(grid)
 

@@ -8,16 +8,36 @@ from collections.abc import Mapping
 from typing import Any
 
 from fpdb_3_legacy import Card, Configuration, Database
+from fpdb_3_legacy.loggingFpdb import get_logger
 from fpdb_3_legacy.stats_context import get_hand_instance
 from fpdb_3_legacy.stats_formatting import StatTuple
+
+log = get_logger("stats")
 
 DisplayTuple = tuple[str, str, str, str, str, str]
 
 GAME_ABBREVIATIONS = {
-    "holdem.fl": "H", "studhilo.fl": "E", "omahahi.pl": "P", "27_3draw.fl": "T", "razz.fl": "R",
-    "holdem.nl": "N", "omahahilo.fl": "O", "studhi.fl": "S", "27_1draw.nl": "K", "badugi.fl": "B",
-    "fivedraw.fl": "F", "fivedraw.pl": "Fp", "fivedraw.nl": "Fn", "27_3draw.pl": "Tp", "27_3draw.nl": "Tn",
-    "badugi.pl": "Bp", "badugi.hp": "Bh", "omahahilo.pl": "Op", "omahahilo.nl": "On", "holdem.pl": "Hp", "studhi.nl": "Sn",
+    "holdem.fl": "H",
+    "studhilo.fl": "E",
+    "omahahi.pl": "P",
+    "27_3draw.fl": "T",
+    "razz.fl": "R",
+    "holdem.nl": "N",
+    "omahahilo.fl": "O",
+    "studhi.fl": "S",
+    "27_1draw.nl": "K",
+    "badugi.fl": "B",
+    "fivedraw.fl": "F",
+    "fivedraw.pl": "Fp",
+    "fivedraw.nl": "Fn",
+    "27_3draw.pl": "Tp",
+    "27_3draw.nl": "Tn",
+    "badugi.pl": "Bp",
+    "badugi.hp": "Bh",
+    "omahahilo.pl": "Op",
+    "omahahilo.nl": "On",
+    "holdem.pl": "Hp",
+    "studhi.nl": "Sn",
 }
 
 
@@ -97,6 +117,7 @@ def playerprofile(stat_dict: Mapping[int, Mapping[str, Any]] | None, player: int
         profile, icon, _color = classify_player(stat_dict, player)
         return profile, icon, f"p={profile}", f"playerprofile={profile}", profile, "Player Profile"
     except Exception:  # intentional broad catch: the profile is optional display data
+        log.debug("Unable to classify player %s", player, exc_info=True)
         return "unknown", "❓", "p=unknown", "playerprofile=unknown", "unknown", "Player Profile"
 
 

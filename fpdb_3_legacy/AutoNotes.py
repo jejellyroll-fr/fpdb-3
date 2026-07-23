@@ -126,11 +126,7 @@ def available_rule_ids() -> set[str]:
 
 
 def available_rule_id_to_rule_set_id() -> dict[str, str]:
-    return {
-        rule.rule_id: rule_set.rule_set_id
-        for rule_set in available_rule_sets()
-        for rule in rule_set.rules
-    }
+    return {rule.rule_id: rule_set.rule_set_id for rule_set in available_rule_sets() for rule in rule_set.rules}
 
 
 def configured_rule_summary(
@@ -168,8 +164,7 @@ def configured_rule_summary(
                             rule_set.rule_set_id,
                             rule.note_template,
                         ),
-                        "enabled": rule_set_enabled_value
-                        and rule_enabled(config, rule.rule_id, rule_set.rule_set_id),
+                        "enabled": rule_set_enabled_value and rule_enabled(config, rule.rule_id, rule_set.rule_set_id),
                     }
                     for rule in rules
                 ],
@@ -405,7 +400,7 @@ def _apply_note_template_override(
         return note
     try:
         return replace(note, note_text=template.format(player=player_name))
-    except Exception:
+    except (IndexError, KeyError, ValueError):
         return note
 
 
@@ -828,11 +823,7 @@ def _flop_texture(hand) -> dict[str, Any] | None:
     values = sorted({RANK_VALUES.get(rank, 0) for rank in ranks if RANK_VALUES.get(rank, 0)})
     wheel_values = sorted({1 if value == 14 else value for value in values})
     connected = bool(
-        len(values) >= 3
-        and (
-            max(values) - min(values) <= 4
-            or max(wheel_values) - min(wheel_values) <= 4
-        ),
+        len(values) >= 3 and (max(values) - min(values) <= 4 or max(wheel_values) - min(wheel_values) <= 4),
     )
     paired = max(rank_counts.values()) >= 2
     monotone = max(suit_counts.values()) == 3
@@ -1271,8 +1262,7 @@ def _villain_folds_to_hero_three_bet_match(hand, player: str, context: PreflopCo
         if ctx.first_raise.player != villain or ctx.second_raise.player != hero:
             return None
         if any(
-            action.index > ctx.second_raise.index and action.is_fold
-            for action in ctx.player_actions.get(villain, [])
+            action.index > ctx.second_raise.index and action.is_fold for action in ctx.player_actions.get(villain, [])
         ):
             return {
                 "hero": hero,
@@ -1292,8 +1282,7 @@ def _villain_folds_to_hero_four_bet_match(hand, player: str, context: PreflopCon
         if ctx.second_raise.player != villain or ctx.third_raise.player != hero:
             return None
         if any(
-            action.index > ctx.third_raise.index and action.is_fold
-            for action in ctx.player_actions.get(villain, [])
+            action.index > ctx.third_raise.index and action.is_fold for action in ctx.player_actions.get(villain, [])
         ):
             return {
                 "hero": hero,
@@ -1489,7 +1478,7 @@ def _call_vs_raise_range_evidence(hand, player: str, context: PreflopContext) ->
 def _visible_player_cards(hand, player: str, limit: int | None = None) -> list[str]:
     try:
         cards = [card for card in hand.join_holecards(player, asList=True) if card and card != "0x"]
-    except Exception:
+    except (AttributeError, KeyError, TypeError, ValueError):
         cards = []
     return cards[:limit] if limit is not None else cards
 
@@ -1638,8 +1627,7 @@ def _limp_calls_preflop_raise(hand, player: str, context: PreflopContext) -> boo
         and first_raise
         and first_raise.index > limp_action.index
         and any(
-            action.is_call and action.index > first_raise.index
-            for action in context.player_actions.get(player, [])
+            action.is_call and action.index > first_raise.index for action in context.player_actions.get(player, [])
         )
     )
 
@@ -1678,9 +1666,7 @@ def _three_bet_shoves_short_stack_vs_steal(hand, player: str, context: PreflopCo
 def _short_stack_open_raises_then_folds_to_3bet(hand, player: str, context: PreflopContext) -> bool:
     stack_bb = _player_stack_bb(hand, player, context)
     return bool(
-        stack_bb is not None
-        and stack_bb <= Decimal("15")
-        and context.player_open_raised_then_folded_to_3bet(player)
+        stack_bb is not None and stack_bb <= Decimal("15") and context.player_open_raised_then_folded_to_3bet(player)
     )
 
 

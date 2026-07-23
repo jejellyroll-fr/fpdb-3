@@ -1,4 +1,5 @@
 """Manage collecting and formatting of stats and tooltips."""
+
 from __future__ import annotations
 
 #    Copyright 2008-2011, Ray E. Barker
@@ -786,6 +787,7 @@ def get_valid_stats():
 
     """
     import sys
+
     stat_descriptions = {}
     for function in STATLIST:
         function_instance = getattr(sys.modules[__name__], function)
@@ -794,8 +796,8 @@ def get_valid_stats():
                 res = function_instance(None, None)
                 if isinstance(res, tuple) and len(res) > 5:
                     stat_descriptions[function] = res[5]
-            except Exception:  # intentional broad catch: calling stats with None, None can raise exceptions
-                pass
+            except Exception:  # intentional broad catch: probe every registered stat
+                log.debug("Stat %s cannot provide metadata without data", function, exc_info=True)
 
     return stat_descriptions
 

@@ -55,6 +55,9 @@ from fpdb_3_legacy.http_capture_hand_builder import (
     import_fpdb_hand,
     render_fpdb_hand,
 )
+from fpdb_3_legacy.loggingFpdb import get_logger
+
+log = get_logger("coinpoker_live_capture")
 
 
 def _default_archive_dir() -> str:
@@ -101,6 +104,8 @@ _GAME_PORT_RANGE = range(7000, 7101)
 
 def _is_game_port(port: int) -> bool:
     return port == 9000 or port in _TOURNAMENT_PORT_RANGE or port in _GAME_PORT_RANGE
+
+
 # Header line carries seq (absolute, since capture starts mid-connection) and length.
 _HDR_RE = re.compile(
     r"\.(?P<sport>\d+) > \S+?\.(?P<dport>\d+):.*?\bseq (?P<seq>\d+)(?::\d+)?.*\blength (?P<len>\d+)$",
@@ -169,6 +174,8 @@ class _Conn:
                 self._resync()
 
     def _append(self, payload: bytes) -> None:
+        if self.next_seq is None:
+            raise RuntimeError("cannot append TCP payload before sequence initialization")
         self.buf.extend(payload)
         self.next_seq = (self.next_seq + len(payload)) % _SEQ_MOD
         self._drain()
@@ -256,6 +263,7 @@ class StreamReassembler:
             try:
                 obj = decode_frame(flags, body)
             except Exception:  # noqa: BLE001 - best-effort decode; skip malformed frames
+                log.debug("Skipping malformed CoinPoker frame", exc_info=True)
                 continue
             ev = self._protocol_event(obj) if obj is not None else None
             if ev is not None:
@@ -530,7 +538,10 @@ def run(events: Iterable[tuple], *, dry_run: bool, table_category: str, config_f
     file_id = 0
     notify = None
     if dry_run:
-        db, config = None, HttpCaptureHandConfig(site_ids={"CoinPoker": COINPOKER_SITE_ID, "default": COINPOKER_SITE_ID})
+        db, config = (
+            None,
+            HttpCaptureHandConfig(site_ids={"CoinPoker": COINPOKER_SITE_ID, "default": COINPOKER_SITE_ID}),
+        )
     else:
         db, config = _open_db(config_file)
         file_id = _ensure_capture_file(db)
@@ -590,7 +601,7 @@ def _acquire_instance_lock(path: str | None = None):
             # dedicated byte well past the payload instead; Windows explicitly
             # allows locking a range beyond end-of-file.
             handle.seek(_LOCK_BYTE_OFFSET)
-            msvcrt.locking(handle.fileno(), msvcrt.LK_NBLCK, 1)
+            msvcrt.locking(handle.fileno(), msvcrt.LK_NBLCK, 1)  # type: ignore[attr-defined]
         else:
             import fcntl
 

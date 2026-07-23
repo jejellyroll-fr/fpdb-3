@@ -15,8 +15,8 @@ from fpdb_3_legacy.http_capture_registry import get_http_capture_adapter
 def _read_jsonl(path: Path) -> list[dict[str, Any]]:
     records = []
     with path.expanduser().open("r", encoding="utf-8") as handle:
-        for line in handle:
-            line = line.strip()
+        for raw_line in handle:
+            line = raw_line.strip()
             if line:
                 records.append(json.loads(line))
     return records

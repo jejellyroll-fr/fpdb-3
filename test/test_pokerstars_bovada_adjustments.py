@@ -15,6 +15,7 @@ class TestCalculateBovadaAdjustments(unittest.TestCase):
     def setUp(self):
         """Set up test fixtures."""
         self.config = Mock()
+        self.config.get_import_parameters.return_value = {"saveStarsHH": False}
         self.parser = PokerStars(self.config, "PokerStars", "USD")
 
         # Mock the regex pattern

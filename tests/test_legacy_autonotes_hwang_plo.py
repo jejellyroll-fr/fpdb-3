@@ -5,6 +5,8 @@ import sqlite3
 from dataclasses import dataclass, field
 from xml.dom import minidom
 
+import pytest
+
 from fpdb_3_legacy.AutoNotePlo import (
     is_aaxx,
     is_rainbow,
@@ -493,8 +495,7 @@ def test_generate_for_hand_filter_can_select_opt_in_rule_set():
 
     assert generate_for_hand(legacy_hand, config=config, rule_set_ids={"hwang_plo_preflop"}) == []
     generated = {
-        note.rule_id
-        for note in generate_for_hand(legacy_hand, config=config, rule_set_ids={"holdem_cash_preflop"})
+        note.rule_id for note in generate_for_hand(legacy_hand, config=config, rule_set_ids={"holdem_cash_preflop"})
     }
     assert generated == {"holdem_cash_001", "holdem_cash_002"}
 
@@ -662,11 +663,7 @@ def test_format_rule_summary_for_cli():
         ],
     )
 
-    assert text == (
-        "demo [enabled, default off]\n"
-        "  - demo_001 v2 [on] Demo rule\n"
-        "  - demo_002 v1 [off] Disabled rule"
-    )
+    assert text == ("demo [enabled, default off]\n  - demo_001 v2 [on] Demo rule\n  - demo_002 v1 [off] Disabled rule")
 
 
 def test_format_rule_summary_json_for_automation():
@@ -1399,6 +1396,7 @@ def test_generate_for_hand_still_accepts_custom_rules():
     assert generate_for_hand(legacy_hand, rules=(custom_rule,), rule_ids={"other_rule"}) == []
 
 
+@pytest.fixture
 def sqlite_autonote_db():
     conn = sqlite3.connect(":memory:")
     sql = Sql(db_server="sqlite")
@@ -1462,7 +1460,8 @@ def sqlite_autonote_db():
     db.get_cursor = conn.cursor
     db.commit = conn.commit
     db.rollback = conn.rollback
-    return db
+    yield db
+    conn.close()
 
 
 def test_sqlite_drop_tables_ignores_internal_sequence_table():
@@ -1483,6 +1482,7 @@ def test_sqlite_drop_tables_ignores_internal_sequence_table():
     db.drop_tables()
 
     assert conn.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='Example'").fetchone() is None
+    conn.close()
 
 
 def encode_cards(*cards):
@@ -1523,8 +1523,8 @@ def insert_hands_player(conn, hand_id, player_id, seat_no, position, cards):
     )
 
 
-def test_database_stores_and_reads_autonotes_idempotently():
-    db = sqlite_autonote_db()
+def test_database_stores_and_reads_autonotes_idempotently(sqlite_autonote_db):
+    db = sqlite_autonote_db
     note = GeneratedAutoNote(
         player_id=1,
         hand_id=100,
@@ -1557,8 +1557,8 @@ def test_database_stores_and_reads_autonotes_idempotently():
     assert db.getPlayerAutoNotes(1, rule_ids={"hwang_plo_081"})[0]["ruleSet"] == "hwang_plo_preflop"
 
 
-def test_database_summarizes_autonotes_for_workbench():
-    db = sqlite_autonote_db()
+def test_database_summarizes_autonotes_for_workbench(sqlite_autonote_db):
+    db = sqlite_autonote_db
     db.storePlayerAutoNotes(
         [
             GeneratedAutoNote(1, 100, "hwang_plo_081", 1, "single pair 3bet", {"hole_cards": "Ks Kh Qd 7c"}),
@@ -1598,8 +1598,8 @@ def test_database_summarizes_autonotes_for_workbench():
     assert all(row["ruleSet"] == "hwang_plo_preflop" for row in rule_summary)
 
 
-def test_backfill_database_preview_generates_notes_from_imported_hands():
-    db = sqlite_autonote_db()
+def test_backfill_database_preview_generates_notes_from_imported_hands(sqlite_autonote_db):
+    db = sqlite_autonote_db
     conn = db.conn
     conn.execute("INSERT INTO Players (id, name, siteId, comment) VALUES (2, 'BTN', 2, '')")
     conn.execute("INSERT INTO Players (id, name, siteId, comment) VALUES (3, 'BB', 2, '')")
@@ -1637,8 +1637,8 @@ def test_backfill_database_preview_generates_notes_from_imported_hands():
     assert any(row["playerName"] == "Villain" and row["ruleId"] == "hwang_plo_081" for row in stats["preview"])
 
 
-def test_file_backfill_lookup_falls_back_to_site_hand_number_when_site_id_differs():
-    db = sqlite_autonote_db()
+def test_file_backfill_lookup_falls_back_to_site_hand_number_when_site_id_differs(sqlite_autonote_db):
+    db = sqlite_autonote_db
     stats = {}
 
     assert _lookup_hand_ids(db, 12345, 99, stats=stats) == [100]
@@ -1704,9 +1704,7 @@ def test_filter_generated_notes_preserves_order_and_supports_rule_set_fallback()
     ]
 
     assert [note["noteText"] for note in filter_generated_notes(notes)] == ["first", "second", "third"]
-    assert [
-        note["noteText"] for note in filter_generated_notes(notes, rule_set_ids={"hwang_plo_preflop"})
-    ] == ["first"]
+    assert [note["noteText"] for note in filter_generated_notes(notes, rule_set_ids={"hwang_plo_preflop"})] == ["first"]
     assert [note["noteText"] for note in filter_generated_notes(notes, rule_ids={"holdem_cash_001"})] == ["third"]
 
 
@@ -1870,7 +1868,6 @@ def test_rule_manifest_exposes_legacy_parity_surface():
     assert "hwang_plo_preflop" in rule_sets
     assert any(rule["id"] == "hwang_plo_081" for rule in rule_sets["hwang_plo_preflop"]["rules"])
     assert any(rule_set["id"] == "stud_draw_first_street" for rule_set in manifest["ruleSets"])
-
 
 
 def test_backfill_cli_can_print_parity_manifest(capsys):

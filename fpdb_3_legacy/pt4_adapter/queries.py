@@ -46,4 +46,4 @@ def get_pt4_stats_for_hand(conn, pt4_hand_id: int) -> list[dict[str, Any]]:
     with conn.cursor() as cur:
         cur.execute(PT4_STATS_PER_HAND, (pt4_hand_id,))
         columns = [c.name for c in cur.description]
-        return [dict(zip(columns, row)) for row in cur.fetchall()]
+        return [dict(zip(columns, row, strict=True)) for row in cur.fetchall()]
