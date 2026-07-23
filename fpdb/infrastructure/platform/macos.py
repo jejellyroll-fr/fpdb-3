@@ -560,6 +560,20 @@ class MacOSTableDetector:
         except Exception:
             return False
 
+    def is_window_displayed(self, window_id: int | str) -> bool:
+        """Check if window is actually shown on screen right now
+
+        macOS has no equivalent of DWM cloaking, and is_window_visible()
+        already queries the on-screen window list, so this mirrors it.
+
+        Args:
+            window_id: Window number
+
+        Returns:
+            True if window exists and is on screen
+        """
+        return self.is_window_visible(window_id)
+
     def get_window_title(self, window_id: int | str) -> str | None:
         """Get window title
 

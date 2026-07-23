@@ -146,6 +146,27 @@ class TableDetector(Protocol):
         """
         ...
 
+    def is_window_displayed(self, window_id: int | str) -> bool:
+        """Check if a window is actually shown on screen right now
+
+        Stricter than is_window_visible(): a window the compositor hides while
+        the platform still reports it as visible must return False here. On
+        Windows that is DWM cloaking (a closed CoinPoker Unity host stays
+        "visible" but cloaked); platforms with no such concept simply mirror
+        is_window_visible().
+
+        Use is_window_visible() for the generic geometry poll -- treating a
+        merely cloaked window (e.g. a table on another virtual desktop) as gone
+        would kill live HUDs.
+
+        Args:
+            window_id: Platform-specific window identifier
+
+        Returns:
+            True if the window exists and is really shown on screen
+        """
+        ...
+
     def get_window_title(self, window_id: int | str) -> str | None:
         """Get title of a specific window
 
