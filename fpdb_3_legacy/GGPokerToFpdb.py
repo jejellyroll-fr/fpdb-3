@@ -723,10 +723,17 @@ class GGPoker(HandHistoryConverter):
                 # streets, so every post-flop bet of such a hand was dropped and
                 # its players were recorded as having paid their pre-flop chips
                 # and nothing more -- one hand showed 0.71 put in for a 9.71 pot.
+                # The betting moves to the plain street, where the street stats
+                # expect it; the FIRST street keeps its board line, which
+                # readCommunityCards needs to build the first run's board. It
+                # must not keep the betting too: a hand run twice turns
+                # FLOP1/TURN1/RIVER1 into action streets of their own, and the
+                # bets would then be counted on both.
                 for street in ("FLOP", "TURN", "RIVER"):
                     run_first = hand.streets.get(street + "1")
-                    if run_first and len(run_first) > len(hand.streets.get(street) or ""):
+                    if run_first and not (hand.streets.get(street) or "").strip():
                         hand.streets[street] = run_first
+                        hand.streets[street + "1"] = run_first.split("\n", 1)[0]
                 log.debug(f"markStreets: hand.streets now has keys {list(hand.streets.keys())}")
             else:
                 log.debug("markStreets: regex did not match")
@@ -743,7 +750,13 @@ class GGPoker(HandHistoryConverter):
 
             # Detect run-it-twice / run-it-three from the FIRST/SECOND/THIRD
             # board streets so the extra boards get stored and replayed.
-            runs = sum(1 for k in ("FLOP1", "FLOP2", "FLOP3") if hand.streets.get(k))
+            # A hand run twice from the turn shares its flop, so counting FLOPn
+            # alone missed it: every street the run reaches has to be looked at.
+            runs = sum(
+                1
+                for run in ("1", "2", "3")
+                if any(hand.streets.get(street + run) for street in ("FLOP", "TURN", "RIVER"))
+            )
             if runs >= 2:
                 hand.runItTimes = runs
 

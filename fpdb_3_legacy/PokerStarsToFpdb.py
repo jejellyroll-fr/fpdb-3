@@ -1870,65 +1870,6 @@ class PokerStars(HandHistoryConverter):
             uncalled_player = uncalled_match.group("PNAME").strip()  # Remove leading/trailing spaces
             uncalled_amount = uncalled_match.group("BET")
             log.info("Processing uncalled bet: %s -> %s", uncalled_player, uncalled_amount)
-
-            # Check if this could be a walk scenario by looking for collection by same player
-            # A walk is when everyone folds preflop and BB wins without seeing a flop.
-            # Key indicators:
-            # - uncalled == collection OR uncalled > collection
-            # - No postflop streets played (hand ends preflop)
-            pre, post = hand.handText.split("*** SUMMARY ***")
-            collection_match = self.re_collect_pot2.search(pre)
-
-            # Check if we have postflop action - if so, this can't be a walk
-            has_postflop = any(
-                hand.streets.get(street) and "Uncalled bet" not in hand.streets.get(street, "")
-                for street in ["FLOP", "TURN", "RIVER", "FLOP1", "FLOP2"]
-            )
-
-            if collection_match and collection_match.group("PNAME") == uncalled_player and not has_postflop:
-                collection_amount = Decimal(collection_match.group("POT").replace(",", ""))
-                uncalled_decimal = Decimal(uncalled_amount.replace(",", ""))
-
-                # Walk scenario detection:
-                # 1. Same player has uncalled bet and collection
-                # 2. Either: uncalled == collection (rare case, e.g., heads-up)
-                #    Or: uncalled > collection (typical walk: BB gets SB, BB returned)
-                # 3. No postflop action (checked above)
-                if uncalled_decimal == collection_amount:
-                    log.info(
-                        "True walk scenario detected (equal): %s uncalled=%s collected=%s",
-                        uncalled_player,
-                        uncalled_amount,
-                        collection_amount,
-                    )
-                    if not hasattr(hand, "walk_adjustments"):
-                        hand.walk_adjustments = {}  # type: ignore[attr-defined]
-                    hand.walk_adjustments[uncalled_player] = uncalled_decimal  # type: ignore[attr-defined]
-                elif uncalled_decimal > collection_amount:
-                    # This is likely a BB walk: BB gets only SB contribution, BB bet returned
-                    log.info(
-                        "True walk scenario detected (BB walk): %s uncalled=%s collected=%s",
-                        uncalled_player,
-                        uncalled_amount,
-                        collection_amount,
-                    )
-                    if not hasattr(hand, "walk_adjustments"):
-                        hand.walk_adjustments = {}  # type: ignore[attr-defined]
-                    hand.walk_adjustments[uncalled_player] = uncalled_decimal  # type: ignore[attr-defined]
-                else:
-                    log.info(
-                        "Not a walk - uncalled bet (%s) < collection (%s) for %s",
-                        uncalled_amount,
-                        collection_amount,
-                        uncalled_player,
-                    )
-            elif has_postflop:
-                log.info(
-                    "Not a walk - postflop action detected for %s (uncalled=%s)",
-                    uncalled_player,
-                    uncalled_amount,
-                )
-
             hand.addUncalled(street, uncalled_player, uncalled_amount)
 
     def readShowdownActions(self, hand: Hand) -> None:
@@ -2245,11 +2186,6 @@ class PokerStars(HandHistoryConverter):
                 player = m.group("PNAME")
                 pot_amount = Decimal(m.group("POT").replace(",", ""))
                 log.info("Found collection: %s -> %s", player, pot_amount)
-
-                # Check if this is a walk scenario (already detected in readAction)
-                if hasattr(hand, "walk_adjustments") and player in hand.walk_adjustments:
-                    log.info("Walk scenario confirmed for %s", player)
-
                 self._addCollectPotWithAdjustment(hand, m, adjustments)
                 i += 1
 

@@ -1657,20 +1657,7 @@ class Hand:
         amount = Decimal(amount)
         self.checkPlayerExists(player, "addUncalled")
         self.stacks[player] += amount
-
-        # Check if this is part of a walk scenario
-        is_walk = (
-            hasattr(self, "walk_adjustments")
-            and player in self.walk_adjustments
-            and self.walk_adjustments[player] == amount
-        )
-
-        if is_walk:
-            log.info(f"Walk detected: not removing uncalled bet from pot for {player}")
-            # In a walk, the pot calculation is already correct in the collection
-            # Don't remove the uncalled bet from pot to avoid double-counting
-        else:
-            self.pot.removeMoney(player, amount)
+        self.pot.removeMoney(player, amount)
 
     def sittingOut(self) -> None:
         dealtIn = set()
