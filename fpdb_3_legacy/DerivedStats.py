@@ -3557,7 +3557,13 @@ class DerivedStats:
             for pot_id, (pot, players) in enumerate(hand.pot.pots):
                 if pot_id == 0:
                     pot += sum(hand.pot.common.values()) + hand.pot.stp  # noqa: PLW2901
-                boards, board_id = self.getBoardsList(hand), 0
+                # Stud and draw deal no community cards, so getBoardsList returns
+                # nothing and this loop used to run zero times: the pots were
+                # never built and no HandsPots row was written -- yet the rake had
+                # just been zeroed a few lines above, so it stayed at zero and the
+                # hand no longer balanced. A boardless game still has exactly one
+                # board; it is simply empty.
+                boards, board_id = self.getBoardsList(hand) or [[]], 0
                 for b in boards:
                     board_id += hand.runItTimes >= MIN_RUN_IT_TIMES
                     pot_board = Decimal(int(pot / len(boards) * factor)) / factor
