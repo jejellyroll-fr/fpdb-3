@@ -620,8 +620,12 @@ class SealsWithClubs(HandHistoryConverter):
         # nets it out, which is why readCollectPot could ignore it, but the
         # player's committed money is what totalProfit is built from: leaving
         # the bet in it booked the winner as having paid it.
-        for m in self.re_Uncalled.finditer(hand.streets[street]):
-            hand.addUncalled(street, m.group("PNAME"), m.group("BET"))
+        for uncalled_match in self.re_Uncalled.finditer(hand.streets[street]):
+            hand.addUncalled(
+                street,
+                uncalled_match.group("PNAME"),
+                uncalled_match.group("BET"),
+            )
 
     def readShownCards(self, hand) -> None:
         log.info("Reading shown cards")
