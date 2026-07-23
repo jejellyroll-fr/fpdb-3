@@ -67,3 +67,35 @@ def test_every_hand_conserves_money(parsed_hands) -> None:
         paid = sum(hand.pot.committed.values()) + sum(hand.pot.common.values())
         out = sum(hand.collectees.values()) + Decimal(str(hand.rake or 0))
         assert paid == out, f"hand {hand.handid}: {paid} in, {out} out"
+
+
+def test_extra_pot_drops_are_counted_as_rake() -> None:
+    """GGPoker skims a jackpot/bingo/fortune/tax drop on top of the rake.
+
+        Total pot $9.87 | Rake $0.29 | Jackpot $0.02 | Bingo $0 | Fortune $0 | Tax $0
+
+    Only the rake was parsed, so the jackpot left the pot without being recorded
+    anywhere: money in no longer matched money out. Over the 26 428-hand corpus
+    those drops accounted for 83% of the hands that still failed to balance.
+    """
+    from fpdb_3_legacy.GGPokerToFpdb import GGPoker as _GG
+
+    summary = "Total pot $9.87 | Rake $0.29 | Jackpot $0.02 | Bingo $0 | Fortune $0 | Tax $0"
+    m = _GG.re_rake.search(summary)
+
+    assert m is not None
+    assert m.group("POT") == "9.87"
+    assert m.group("RAKE") == "0.29"
+    assert m.group("JACKPOT") == "0.02"
+    assert m.group("BINGO") == "0"
+
+
+def test_rake_only_summary_still_parses() -> None:
+    # Older/other GGPoker summaries carry no extra drops at all.
+    from fpdb_3_legacy.GGPokerToFpdb import GGPoker as _GG
+
+    m = _GG.re_rake.search("Total pot $7.5 | Rake $0")
+
+    assert m is not None
+    assert m.group("POT") == "7.5"
+    assert m.group("JACKPOT") is None

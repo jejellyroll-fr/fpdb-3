@@ -324,8 +324,16 @@ class GGPoker(HandHistoryConverter):
         ),
         re.MULTILINE | re.VERBOSE,
     )
+    # GGPoker skims more than the rake off a pot; the summary reads
+    #   Total pot $9.87 | Rake $0.29 | Jackpot $0.02 | Bingo $0 | Fortune $0 | Tax $0
+    # Every one of those is money that leaves the pot, so all of them have to be
+    # accounted for or the hand stops balancing.
     re_rake = re.compile(
-        r"""Total\s+pot\s+{CUR}(?P<POT>[,\.0-9]+)(\s+\|\s+Rake\s+{CUR}(?P<RAKE>[,\.0-9]+))?""".format(**substitutions),
+        r"""Total\s+pot\s+{CUR}(?P<POT>[,\.0-9]+)(\s+\|\s+Rake\s+{CUR}(?P<RAKE>[,\.0-9]+))?"""
+        r"""(\s+\|\s+Jackpot\s+{CUR}(?P<JACKPOT>[,\.0-9]+))?"""
+        r"""(\s+\|\s+Bingo\s+{CUR}(?P<BINGO>[,\.0-9]+))?"""
+        r"""(\s+\|\s+Fortune\s+{CUR}(?P<FORTUNE>[,\.0-9]+))?"""
+        r"""(\s+\|\s+Tax\s+{CUR}(?P<TAX>[,\.0-9]+))?""".format(**substitutions),
         re.MULTILINE | re.VERBOSE,
     )
 
@@ -625,9 +633,18 @@ class GGPoker(HandHistoryConverter):
             pot_total = self.clearMoneyString(rake_match.group("POT"))
             rake_amount = rake_match.group("RAKE")
 
-            # Set rake if found in hand history (rake group is optional)
+            # Set rake if found in hand history (rake group is optional).
+            # The jackpot/bingo/fortune/tax drops leave the pot just like the
+            # rake does; leaving them out made that money vanish from the hand
+            # (money in no longer matched money out), which is what pushed
+            # Hand.totalPot() into miscounting pots elsewhere.
             if rake_amount:
-                hand.rake = Decimal(self.clearMoneyString(rake_amount))
+                total_taken = Decimal(self.clearMoneyString(rake_amount))
+                for extra in ("JACKPOT", "BINGO", "FORTUNE", "TAX"):
+                    amount = rake_match.group(extra)
+                    if amount:
+                        total_taken += Decimal(self.clearMoneyString(amount))
+                hand.rake = total_taken
 
             # Store total pot for validation (this helps with pot calculation)
             if pot_total:
