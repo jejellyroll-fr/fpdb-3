@@ -28,11 +28,13 @@ from PySide6.QtWidgets import (
     QGridLayout,
     QGroupBox,
     QHBoxLayout,
+    QHeaderView,
     QLabel,
     QLineEdit,
     QPushButton,
     QRadioButton,
     QSpinBox,
+    QTableView,
     QVBoxLayout,
     QWidget,
 )
@@ -1632,6 +1634,22 @@ class Filters(QWidget):
                     hero_ids.append(int(result))
         return hero_ids
 
+    @staticmethod
+    def _stretch_calendar_cells(cal: QCalendarWidget) -> None:
+        """Make the day grid fill the widget instead of eliding its labels.
+
+        QCalendarWidget sizes the grid from the font metrics it has when it is
+        built. The dialog then inherits this widget's stylesheet, which changes
+        the font afterwards, and the columns are never recomputed: every day
+        number and weekday name was elided to "...". Stretching both header
+        sections makes the cells follow the widget width whatever the font.
+        """
+        view = cal.findChild(QTableView)
+        if view is None:
+            return
+        view.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        view.verticalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+
     def __calendar_dialog(self, *_args: object, date_edit: QDateEdit) -> None:
         """Open calendar dialog for date selection."""
         # Parented so the dialog inherits this widget's stylesheet: a top-level
@@ -1643,6 +1661,8 @@ class Filters(QWidget):
         vb = QVBoxLayout()
         d.setLayout(vb)
         cal = QCalendarWidget()
+        self._stretch_calendar_cells(cal)
+        d.setMinimumWidth(430)
         vb.addWidget(cal)
 
         btn = QPushButton(_("Done"))
