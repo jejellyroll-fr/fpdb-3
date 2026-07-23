@@ -717,6 +717,16 @@ class GGPoker(HandHistoryConverter):
             if m:
                 log.debug(f"markStreets: regex matched, updating hand.streets with {list(m.groupdict().keys())}")
                 hand.streets.update(m.groupdict())
+                # A hand run twice has its shared streets labelled FIRST, so the
+                # betting lands in FLOP1/TURN1/RIVER1 while FLOP/TURN/RIVER keep
+                # at most the board. readAction only ever visits the plain
+                # streets, so every post-flop bet of such a hand was dropped and
+                # its players were recorded as having paid their pre-flop chips
+                # and nothing more -- one hand showed 0.71 put in for a 9.71 pot.
+                for street in ("FLOP", "TURN", "RIVER"):
+                    run_first = hand.streets.get(street + "1")
+                    if run_first and len(run_first) > len(hand.streets.get(street) or ""):
+                        hand.streets[street] = run_first
                 log.debug(f"markStreets: hand.streets now has keys {list(hand.streets.keys())}")
             else:
                 log.debug("markStreets: regex did not match")
