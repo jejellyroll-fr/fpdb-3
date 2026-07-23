@@ -1842,6 +1842,16 @@ class Hand:
                 return []
             # Surplus must be returned to the player as uncalled bet
             player = calls[0][1]
+            # Take it out of pot.committed too, exactly as the parser path does
+            # (Hand.addUncalled -> Pot.removeMoney). DerivedStats derives
+            # totalProfit from committed and documents that the uncalled bet has
+            # already been removed from it, so recording the return here without
+            # touching committed left the player paying for a bet nobody called:
+            # a hand won without showdown was reported as a loss.
+            # Sites whose history prints an "Uncalled bet returned" line have
+            # already removed it before totalPot() runs, so no leftover is found
+            # here and this stays idempotent.
+            self.pot.committed[player] -= leftover_sum
             self.pot.returned[player] = self.pot.returned.get(player, Decimal("0.00")) + leftover_sum
             log.debug(f"Uncalled bet returned to {player}: {leftover_sum}")
             return []
