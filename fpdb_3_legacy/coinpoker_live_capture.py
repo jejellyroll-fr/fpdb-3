@@ -62,15 +62,45 @@ def _default_archive_dir() -> str:
     return os.path.join(os.path.expanduser("~"), ".fpdb", "coinpoker-capture")
 
 
+class RawEventArchive:
+    """Append decoded protocol events verbatim enough for later replay/audit."""
+
+    def __init__(self, archive_dir: str | None = None) -> None:
+        self.archive_dir = archive_dir if archive_dir is not None else _default_archive_dir()
+        self._warned = False
+
+    def append(self, event: tuple) -> None:
+        if not self.archive_dir:
+            return
+        try:
+            now = datetime.datetime.now(datetime.timezone.utc)
+            name, hand_id, payload = event
+            record = {
+                "captured_at": now.isoformat(),
+                "event": name,
+                "hand_id": hand_id,
+                "payload": payload,
+            }
+            os.makedirs(self.archive_dir, exist_ok=True)
+            path = os.path.join(self.archive_dir, f"coinpoker-raw-{now:%Y-%m-%d}.jsonl")
+            with open(path, "a", encoding="utf-8") as archive:
+                archive.write(json.dumps(record, default=str, ensure_ascii=False) + "\n")
+        except Exception as exc:  # noqa: BLE001 - diagnostics must never break capture
+            if not self._warned:
+                self._warned = True
+                print(f"[WARN] could not archive raw CoinPoker events: {exc}")
+
+
 COINPOKER_SITE_ID = 140
 # CoinPoker game servers: TCP 9000 (poker cluster) plus a per-table 70xx range
 # (7001, 7002, ... vary by table), so match the whole range rather than fixed ports.
-GAME_PORTS = ("9000", "7002")  # kept for reference; see _is_game_port / BPF_FILTER
+GAME_PORTS = ("3000", "3001", "9000", "7002")  # see _is_game_port / BPF_FILTER
+_TOURNAMENT_PORT_RANGE = range(3000, 3002)
 _GAME_PORT_RANGE = range(7000, 7101)
 
 
 def _is_game_port(port: int) -> bool:
-    return port == 9000 or port in _GAME_PORT_RANGE
+    return port == 9000 or port in _TOURNAMENT_PORT_RANGE or port in _GAME_PORT_RANGE
 # Header line carries seq (absolute, since capture starts mid-connection) and length.
 _HDR_RE = re.compile(
     r"\.(?P<sport>\d+) > \S+?\.(?P<dport>\d+):.*?\bseq (?P<seq>\d+)(?::\d+)?.*\blength (?P<len>\d+)$",
@@ -196,9 +226,11 @@ class StreamReassembler:
     """
 
     def __init__(self) -> None:
-        from fpdb_3_legacy.coinpoker_protocol import game_event_from_object
+        from fpdb_3_legacy.coinpoker_protocol import protocol_event_from_object
 
-        self._game_event = game_event_from_object
+        # Preserve tournament/result envelopes as well as game actions. Hand
+        # construction naturally ignores unrelated event names.
+        self._protocol_event = protocol_event_from_object
         self.conns: dict[str, _Conn] = {}
         self._cur_key: str | None = None
         self._cur_seq = 0
@@ -216,13 +248,21 @@ class StreamReassembler:
         conn = self.conns.setdefault(key, _Conn())
         conn.add(seq % _SEQ_MOD, payload)
         events = []
+        try:
+            server_port = int(key.partition("->")[0])
+        except ValueError:
+            server_port = 0
         for flags, body in conn.pop_frames():
             try:
                 obj = decode_frame(flags, body)
             except Exception:  # noqa: BLE001 - best-effort decode; skip malformed frames
                 continue
-            ev = self._game_event(obj) if obj is not None else None
+            ev = self._protocol_event(obj) if obj is not None else None
             if ev is not None:
+                name, hand_id, data = ev
+                if server_port in _TOURNAMENT_PORT_RANGE and isinstance(data, dict):
+                    data = {**data, "_coinpokerServerPort": server_port}
+                    ev = (name, hand_id, data)
                 events.append(ev)
         return events
 
@@ -254,7 +294,7 @@ class StreamReassembler:
         return []
 
 
-BPF_FILTER = "tcp portrange 7000-7100 or tcp port 9000"
+BPF_FILTER = "tcp portrange 3000-3001 or tcp portrange 7000-7100 or tcp port 9000"
 
 
 def _events_from_segments(segments: Iterable[tuple[int, int, int, bytes]]) -> Iterator[tuple]:
@@ -497,10 +537,12 @@ def run(events: Iterable[tuple], *, dry_run: bool, table_category: str, config_f
         notify = _make_hud_notifier()
 
     pump = HandPump(db, config, table_category=table_category, dry_run=dry_run, file_id=file_id, notify=notify)
+    raw_archive = RawEventArchive()
     print("[INFO] === CoinPoker live feed active ===")
     accumulated: list[tuple] = []
     since_check = 0
     for event in events:
+        raw_archive.append(event)
         accumulated.append(event)
         since_check += 1
         # Re-evaluate hands periodically (the server pushes many small events).

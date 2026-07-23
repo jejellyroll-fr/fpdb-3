@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -20,15 +21,20 @@ from fpdb_3_legacy.coinpoker_hand_builder import (
     _extract_cashout,
     _extract_collections,
     _extract_splash,
+    _tournament_info,
     build_hands,
 )
 from fpdb_3_legacy.coinpoker_protocol import decode_frame, split_frames
+from fpdb_3_legacy.Database import Database
 from fpdb_3_legacy.http_capture_hand_builder import (
     CaptureNotImportableError,
+    HttpCaptureHandConfig,
     _board_streets,
     build_fpdb_hand,
+    import_fpdb_hand,
     render_fpdb_hand,
 )
+from fpdb_3_legacy.SQL import Sql
 
 FIXTURE = Path(__file__).parent / "data" / "coinpoker_hand_events.json"
 
@@ -75,6 +81,123 @@ def test_complete_hand_maps_to_fpdb_hand() -> None:
     assert hand.gametype["base"] == "hold"
     assert hand.gametype["category"] == "omahahi"
     assert len(hand.players) == 5
+
+
+def test_tournament_hand_maps_mtt_metadata_to_fpdb_hand() -> None:
+    events = _load_events()
+    patched = []
+    for name, hid, data in events:
+        if name == "game.pre_hand_start_info" and isinstance(data, dict):
+            data = {
+                **data,
+                "tableId": 1117675,
+                "tableSize": 7,
+                "isTournament": True,
+                "tournamentId": 424242,
+                "tournamentName": "Level Up Freeroll",
+                "blindLevel": 12,
+            }
+        patched.append((name, hid, data))
+
+    normalized = build_hands(patched, "NLHE")[0]
+    assert normalized["gametype"]["type"] == "tour"
+    assert normalized["gametype"]["currency"] == "T$"
+    assert normalized["gametype"]["maxSeats"] == 7
+    assert normalized["table_id"] == "424242 1117675"
+    assert normalized["tournament"]["tour_no"] == "424242"
+
+    hand = build_fpdb_hand(normalized)
+    assert hand.gametype["type"] == "tour"
+    assert hand.tourNo == "424242"
+    assert hand.tourneyName == "Level Up Freeroll"
+    assert hand.level == "12"
+
+
+def test_tournament_hand_imports_into_sqlite() -> None:
+    events = [
+        (
+            "game.tournament_message",
+            None,
+            {"commonTournamentResponseData": {"TournamentId": 77, "TournamentName": "Sunday MTT"}},
+        ),
+        *_load_events(),
+    ]
+    normalized = build_hands(events, "PLO4")[0]
+    hand = build_fpdb_hand(
+        normalized,
+        config=HttpCaptureHandConfig(site_ids={"CoinPoker": 30, "default": 30}),
+    )
+
+    config = MagicMock()
+    config.get_db_parameters.return_value = {
+        "db-backend": 4,
+        "db-server": "sqlite",
+        "db-databaseName": ":memory:",
+        "db-user": "",
+        "db-password": "",
+        "db-host": "",
+        "db-port": "",
+        "db-path": "",
+    }
+    config.get_import_parameters.return_value = {
+        "saveActions": True,
+        "callFpdbHud": False,
+        "cacheSessions": False,
+        "publicDB": False,
+        "fastStoreHudCache": False,
+        "sessionTimeout": 30,
+    }
+    config.get_general_params.return_value = {}
+    config.get_site_id.return_value = 30
+    db = Database(config, Sql(db_server="sqlite"))
+
+    import_fpdb_hand(hand, db, file_id=1, doinsert=True, printtest=False, starting_hand_id=1)
+    db.commit()
+    cursor = db.get_cursor()
+    cursor.execute("select count(*) from Hands")
+    assert cursor.fetchone()[0] == 1
+    cursor.execute("select count(*) from Tourneys")
+    assert cursor.fetchone()[0] == 1
+
+
+def test_nested_tournament_event_is_detected() -> None:
+    events = [
+        (
+            "game.tournament_message",
+            "H",
+            {"commonTournamentResponseData": {"TournamentId": 77, "TournamentName": "Sunday MTT"}},
+        ),
+    ]
+    assert _tournament_info(events)["tour_no"] == "77"
+
+
+def test_tournament_context_before_first_hand_is_preserved() -> None:
+    events = [
+        (
+            "game.tournament_message",
+            None,
+            {"commonTournamentResponseData": {"TournamentId": 77, "TournamentName": "Sunday MTT"}},
+        ),
+        *_load_events(),
+    ]
+    hands = build_hands(events, "PLO4")
+    assert hands
+    assert all(hand["gametype"]["type"] == "tour" for hand in hands)
+    assert all(hand["tournament"]["tour_no"] == "77" for hand in hands)
+
+
+def test_tournament_transport_classifies_hand_without_lobby_metadata() -> None:
+    events = []
+    for name, hid, data in _load_events():
+        if isinstance(data, dict):
+            data = {**data, "_coinpokerServerPort": 3001}
+        events.append((name, hid, data))
+
+    hand = build_hands(events, "PLO4")[0]
+
+    assert hand["gametype"]["type"] == "tour"
+    assert hand["gametype"]["currency"] == "T$"
+    assert hand["table_id"] == f"{hand['tournament']['tour_no']} {hand['tournament']['table_id']}"
 
 
 def test_complete_hand_renders_expected_narrative() -> None:

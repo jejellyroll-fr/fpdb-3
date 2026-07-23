@@ -128,14 +128,13 @@ def iter_messages(stream: bytes) -> Iterator[Any]:
             yield obj
 
 
-def game_event_from_object(obj: Any) -> tuple[str, str | None, Any] | None:
-    """Return (event_name, game_hand_id, parsed_data) for a decoded ``game.*``
-    envelope object, or None if it is not a game event."""
+def protocol_event_from_object(obj: Any) -> tuple[str, str | None, Any] | None:
+    """Return any named CoinPoker protocol envelope as an event tuple."""
     if not (isinstance(obj, dict) and isinstance(obj.get("p"), dict)):
         return None
     inner = obj["p"]
     name = inner.get("c")
-    if not (isinstance(name, str) and name.startswith("game.")):
+    if not isinstance(name, str):
         return None
     detail = inner.get("p", {})
     hand_id = detail.get("gameHandId") if isinstance(detail, dict) else None
@@ -146,6 +145,14 @@ def game_event_from_object(obj: Any) -> tuple[str, str | None, Any] | None:
         except (ValueError, TypeError):
             pass
     return name, hand_id, data
+
+
+def game_event_from_object(obj: Any) -> tuple[str, str | None, Any] | None:
+    """Return a decoded ``game.*`` envelope, excluding other protocol events."""
+    event = protocol_event_from_object(obj)
+    if event is None or not event[0].startswith("game."):
+        return None
+    return event
 
 
 def iter_game_events(stream: bytes) -> Iterator[tuple[str, str | None, Any]]:

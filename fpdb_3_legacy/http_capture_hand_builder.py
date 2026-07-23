@@ -521,9 +521,27 @@ def build_fpdb_hand(
     hand.hero = hand_data.get("hero") or ""
     if hand_data.get("buttonpos") is not None:
         hand.buttonpos = hand_data["buttonpos"]
+    _apply_tournament_fields(hand, hand_data)
     execute_hand_operations(hand, build_input["operations"])
     _apply_special_hand_fields(hand, hand_data)
     return hand
+
+
+def _apply_tournament_fields(hand: Any, hand_data: dict[str, Any]) -> None:
+    """Copy normalized tournament metadata onto the legacy Hand model."""
+    tournament = hand_data.get("tournament")
+    if hand.gametype.get("type") != "tour" or not isinstance(tournament, dict):
+        return
+    hand.tourNo = tournament.get("tour_no")
+    hand.tourneyName = tournament.get("name")
+    hand.buyin = tournament.get("buyin")
+    hand.fee = tournament.get("fee")
+    hand.level = tournament.get("level")
+    hand.buyinCurrency = tournament.get("buyin_currency") or "USD"
+    bounty = tournament.get("bounty")
+    if bounty not in (None, "", "0", 0):
+        hand.isKO = True
+        hand.koBounty = bounty
 
 
 def _apply_special_hand_fields(hand: Any, hand_data: dict[str, Any]) -> None:

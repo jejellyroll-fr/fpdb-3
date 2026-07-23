@@ -1592,7 +1592,21 @@ class Database(DatabaseAutoNotesMixin, DatabaseCachesMixin, DatabaseTournamentsM
             table_info.append(None)
             return table_info
         # tournament
-        tour_no, tab_no = re.split(" ", row[0], 1)
+        table_parts = re.split(" ", row[0], 1)
+        if len(table_parts) == 2:
+            tour_no, tab_no = table_parts
+        else:
+            # Native/HTTP captures can know that a hand is a tournament before
+            # the lobby metadata arrives.  In that case the physical table id
+            # is also the best stable tournament key; keep the HUD operational
+            # instead of raising while parsing the legacy "<tour> <table>"
+            # storage convention.
+            tour_no = tab_no = str(row[0])
+            log.warning(
+                "Tournament hand %s has unqualified tableName %r; using it for both tour and table ids",
+                hand_id,
+                row[0],
+            )
         table_info.append(tour_no)
         table_info.append(tab_no)
 
