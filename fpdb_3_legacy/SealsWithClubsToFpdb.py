@@ -604,13 +604,24 @@ class SealsWithClubs(HandHistoryConverter):
             elif action.group("ATYPE") == " calls":
                 hand.addCall(street, action.group("PNAME"), action.group("BET"))
             elif action.group("ATYPE") == " raises":
-                hand.addRaiseTo(street, action.group("PNAME"), action.group("BET"))
+                # "raises 0.06 to 0.08": the first figure is what the raise adds,
+                # the second is what the player is now in for. addRaiseTo wants
+                # the second -- fed the first, the raiser was recorded as having
+                # put in less than he called with.
+                hand.addRaiseTo(street, action.group("PNAME"), action.group("POT") or action.group("BET"))
             elif action.group("ATYPE") == " bets":
                 hand.addBet(street, action.group("PNAME"), action.group("BET"))
             else:
                 log.debug(
                     f"DEBUG: Unimplemented {action.group('ATYPE')}: '{action.group('PNAME')}'",
                 )
+
+        # A bet nobody called goes back to its owner. The summary pot already
+        # nets it out, which is why readCollectPot could ignore it, but the
+        # player's committed money is what totalProfit is built from: leaving
+        # the bet in it booked the winner as having paid it.
+        for m in self.re_Uncalled.finditer(hand.streets[street]):
+            hand.addUncalled(street, m.group("PNAME"), m.group("BET"))
 
     def readShownCards(self, hand) -> None:
         log.info("Reading shown cards")
@@ -711,13 +722,10 @@ class SealsWithClubs(HandHistoryConverter):
             elif m.group("POT2") is not None:
                 hand.addCollectPot(player=m.group("PNAME"), pot=m.group("POT2").replace(",", ""))
 
-        # Check for uncalled bets
+        # The uncalled bets themselves are returned to their owner in
+        # readAction; the summary pot above already excludes them.
         if self.re_Uncalled.search(hand.handText) is not None:
             hand.setUncalledBets(True)
-            for m in self.re_Uncalled.finditer(hand.handText):
-                # Process uncalled bets but don't add them to totalpot
-                # They are already included in the summary total
-                pass
 
         # Set rake
         if hand.rake is None:
