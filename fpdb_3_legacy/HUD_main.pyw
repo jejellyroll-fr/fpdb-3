@@ -282,7 +282,7 @@ class HudMain(QObject):
             # redirection below captures. A plain StreamHandler would bind the
             # original stderr now, before the redirection, so resolve
             # sys.stderr at emit time exactly like lastResort does.
-            root_console_handler = logging._StderrHandler(logging.ERROR)  # noqa: SLF001
+            root_console_handler = logging._StderrHandler(logging.ERROR)  # type: ignore[attr-defined]  # noqa: SLF001
             root_console_handler.setFormatter(console_formatter)
             root_logger.addHandler(root_console_handler)
 
