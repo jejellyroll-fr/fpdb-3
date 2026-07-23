@@ -479,8 +479,18 @@ def _print_devices() -> None:
         print(f"  {name:20} {desc}  (flags=0x{flags:x})")
 
 
+# Byte locked to claim the instance lock on Windows. Kept far past the PID
+# payload so readers (and the holder diagnostic) never touch a locked range.
+_LOCK_BYTE_OFFSET = 4096
+
+
 def _acquire_instance_lock(path: str | None = None):
-    """Hold a non-blocking process lock so only one live importer can run."""
+    """Hold a non-blocking process lock so only one live importer can run.
+
+    The returned handle owns the lock: keep it alive for the process lifetime.
+    The file itself holds the holder's PID in plain text, readable at any time
+    on every platform, so a rejected second instance can name the holder.
+    """
     import os
 
     lock_path = path or os.path.expanduser("~/.fpdb/coinpoker-capture.lock")
@@ -490,10 +500,13 @@ def _acquire_instance_lock(path: str | None = None):
         if os.name == "nt":
             import msvcrt
 
-            if os.path.getsize(lock_path) == 0:
-                handle.write(b"0")
-                handle.flush()
-            handle.seek(0)
+            # Windows byte-range locks deny the range to every other handle, so
+            # locking byte 0 would make the PID written below unreadable -- the
+            # "already running (PID n)" diagnostic could never report a holder,
+            # and any inspection of the file failed with PermissionError. Lock a
+            # dedicated byte well past the payload instead; Windows explicitly
+            # allows locking a range beyond end-of-file.
+            handle.seek(_LOCK_BYTE_OFFSET)
             msvcrt.locking(handle.fileno(), msvcrt.LK_NBLCK, 1)
         else:
             import fcntl
@@ -503,7 +516,8 @@ def _acquire_instance_lock(path: str | None = None):
         handle.close()
         holder = ""
         try:
-            holder_pid = open(lock_path, encoding="ascii").read().strip()  # noqa: SIM115
+            with open(lock_path, encoding="ascii") as holder_file:
+                holder_pid = holder_file.read().strip()
             if holder_pid.isdigit():
                 holder = f" (PID {holder_pid})"
         except OSError:
