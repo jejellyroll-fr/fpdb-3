@@ -180,6 +180,21 @@ class IPokerStreetsActionsMixin:
             log.debug("Small blind and big blind not set. Default values assigned: sb=1, bb=2.")
         log.debug("Exiting readBringIn for hand: %s", hand.handid)
 
+    def _hand_big_blind(self, hand: Any) -> Decimal:
+        """The big blind of *this* hand, not of the table's opening level.
+
+        iPoker writes <bigblind> inside each <game> block, so a tournament hand
+        carries the level it was actually dealt at. gametype only ever holds the
+        first level, which made every later level look like an oversized blind.
+        """
+        m = re.search(r"<bigblind>([^<]+)</bigblind>", hand.handText)
+        if m:
+            try:
+                return Decimal(self.clearMoneyString(m.group(1)))
+            except (ArithmeticError, ValueError):
+                pass
+        return Decimal(hand.gametype["bb"])
+
     def readBlinds(self, hand: Any) -> None:
         """Parses hand history to extract blind information for each player in the hand.
 
@@ -235,7 +250,14 @@ class IPokerStreetsActionsMixin:
                 hand.gametype["bb"] = bet_amount
                 log.debug("Big blind amount set in gametype: %s", bet_amount)
             elif hand.gametype["sb"]:
-                bb = Decimal(hand.gametype["bb"])
+                # Compare against this hand's own big blind, not the gametype's.
+                # gametype keeps the level the table opened at, but a tournament
+                # raises its blinds: at level 15/30 a plain 30 big blind looked
+                # bigger than the gametype's 20 and was taken for a player
+                # posting blind *and* dead money, which pushed part of a normal
+                # blind into the dead-money pile and unbalanced the hand.
+                # gametype is deliberately left alone: it keys the Gametypes row.
+                bb = self._hand_big_blind(hand)
                 amount = Decimal(bet_amount)
                 if amount > bb:
                     blind_type = "both"
@@ -598,9 +620,15 @@ class IPokerStreetsActionsMixin:
         # Add the rake to the total pot
         total_pot += hand.rake or Decimal("0.00")
 
-        # Update total pot in hand object
-        hand.totalpot = total_pot
-        log.debug("Total pot calculated: %s, Total rake: %s", hand.totalpot, hand.rake)
+        # hand.totalpot is deliberately NOT set from this figure. It sums the
+        # <player win=...> attributes, i.e. the money that came *out* of the pot,
+        # and Hand.totalPot() trusts a pre-set total and skips its own pot
+        # building -- including the step that hands an uncalled bet back. iPoker
+        # writes no "uncalled bet returned" line, so that step is the only thing
+        # that returns it: a player who bet with nobody calling kept paying for
+        # it, and the hand no longer balanced. Letting totalPot() work it out
+        # from what players committed fixes both.
+        log.debug("Collected total: %s, Total rake: %s", total_pot, hand.rake)
 
         log.info("Exiting readCollectPot method")
 
