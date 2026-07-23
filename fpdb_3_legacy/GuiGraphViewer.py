@@ -137,7 +137,7 @@ class GuiGraphViewer(QSplitter):
         display_in = currency_symbol(display_currency) if "$" in graphops else "BB"
         names = ""
 
-        log.warning(
+        log.debug(
             f"GuiGraphViewer.generateGraph called. Sites selected: {sites}, Heroes config: {heroes}, siteids: {siteids}, limits: {limits}, games: {games}, currencies: {currencies}, graphops: {graphops}"
         )
 
@@ -160,13 +160,11 @@ class GuiGraphViewer(QSplitter):
                     actual_site_id = self.db.get_player_site_id(pid)
                     if actual_site_id is not None:
                         sitenos.append(actual_site_id)
-                        log.warning(f"GuiGraphViewer: Using resolved actual siteId {actual_site_id} for hero '{pname}'")
+                        log.debug(f"GuiGraphViewer: Using resolved actual siteId {actual_site_id} for hero '{pname}'")
                     else:
                         sitenos.append(siteids[site])
 
-        log.warning(
-            f"GuiGraphViewer.generateGraph resolved sitenos: {sitenos}, playerids: {playerids}, names: {names!r}"
-        )
+        log.debug(f"GuiGraphViewer.generateGraph resolved sitenos: {sitenos}, playerids: {playerids}, names: {names!r}")
 
         if not sitenos:
             log.warning("GuiGraphViewer.generateGraph: No sites selected - defaulting to PokerStars")
@@ -257,8 +255,8 @@ class GuiGraphViewer(QSplitter):
         self.ax.tick_params(axis="y", colors=fg_color, labelsize=9)
 
         # Labels
-        self.ax.set_xlabel("Hands", color=fg_color, labelpad=8, fontsize=10, fontweight="semibold")
-        self.ax.set_ylabel(display_in, color=fg_color, labelpad=8, fontsize=10, fontweight="semibold")
+        self.ax.set_xlabel("Hands", color=fg_color, labelpad=8, fontsize=10, fontweight="bold")
+        self.ax.set_ylabel(display_in, color=fg_color, labelpad=8, fontsize=10, fontweight="bold")
         self.ax.yaxis.set_major_formatter(FuncFormatter(lambda value, _position: format_number(value)))
 
         # Title
@@ -359,7 +357,7 @@ class GuiGraphViewer(QSplitter):
         legend.set_draggable(state=1)
         for text in legend.get_texts():
             text.set_fontsize(8.5)
-            text.set_fontweight("semibold")
+            text.set_fontweight("bold")
 
         self.graphBox.addWidget(self.canvas)
         self.canvas.draw()

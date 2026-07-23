@@ -211,6 +211,9 @@ class StatDescriptor:
             rather than aggregated from the dimensioned fact rows. A subset of
             ``inputs``; the grid adapter does not emit ``SUM(CASE WHEN ...)`` for
             these.
+        boolean_inputs: Fact inputs stored as SQL booleans. Grid adapters count
+            their true values with a portable ``CASE`` expression instead of
+            applying ``SUM`` directly (which PostgreSQL rejects).
         fmt: printf-style format string for display.
         description: Optional long description (tooltip / docs).
     """
@@ -225,6 +228,7 @@ class StatDescriptor:
     aggregate: str = "ratio"
     series: str | None = None
     context: tuple[str, ...] = ()
+    boolean_inputs: tuple[str, ...] = ()
     fmt: str = "%s"
     description: str = ""
     expression: SafeExpression = field(repr=False, compare=False, default=None)  # type: ignore[assignment]
@@ -329,6 +333,14 @@ def build_descriptor(data: Mapping[str, Any]) -> StatDescriptor:
         "context must be a subset of inputs",
     )
 
+    raw_boolean_inputs = data.get("boolean_inputs", ())
+    _require(isinstance(raw_boolean_inputs, (list, tuple)), "boolean_inputs must be a list of input names")
+    boolean_inputs = tuple(cast(list[str] | tuple[str, ...], raw_boolean_inputs))
+    _require(
+        all(isinstance(c, str) for c in boolean_inputs) and set(boolean_inputs) <= set(inputs),
+        "boolean_inputs must be a subset of inputs",
+    )
+
     fmt = data.get("format", "%s")
     _require(isinstance(fmt, str), "format must be a string")
     fmt = cast(str, fmt)
@@ -344,6 +356,7 @@ def build_descriptor(data: Mapping[str, Any]) -> StatDescriptor:
         aggregate=aggregate,
         series=series,
         context=context,
+        boolean_inputs=boolean_inputs,
         fmt=fmt,
         description=str(data.get("description", "")),
         expression=expression,

@@ -149,7 +149,7 @@ class GuiTourneyGraphViewer(QSplitter):
         currencies = self.filters.getCurrencies()
         names = ""
 
-        log.warning(
+        log.debug(
             f"GuiTourneyGraphViewer.generateGraph called. Sites selected: {sites}, Heroes config: {heroes}, siteids: {siteids}, games: {games}"
         )
 
@@ -172,13 +172,13 @@ class GuiTourneyGraphViewer(QSplitter):
                     actual_site_id = self.db.get_player_site_id(pid)
                     if actual_site_id is not None:
                         sitenos.append(actual_site_id)
-                        log.warning(
+                        log.debug(
                             f"GuiTourneyGraphViewer: Using resolved actual siteId {actual_site_id} for hero '{pname}'"
                         )
                     else:
                         sitenos.append(siteids[site])
 
-        log.warning(
+        log.debug(
             f"GuiTourneyGraphViewer.generateGraph resolved sitenos: {sitenos}, playerids: {playerids}, names: {names!r}"
         )
 
@@ -257,10 +257,10 @@ class GuiTourneyGraphViewer(QSplitter):
         self.ax.tick_params(axis="y", colors=fg_color, labelsize=9)
 
         # Labels
-        self.ax.set_xlabel("Tournaments", color=fg_color, labelpad=8, fontsize=10, fontweight="semibold")
+        self.ax.set_xlabel("Tournaments", color=fg_color, labelpad=8, fontsize=10, fontweight="bold")
         display_currency = currencies[0] if currencies else "USD"
         self.ax.set_ylabel(
-            currency_symbol(display_currency), color=fg_color, labelpad=8, fontsize=10, fontweight="semibold"
+            currency_symbol(display_currency), color=fg_color, labelpad=8, fontsize=10, fontweight="bold"
         )
         self.ax.yaxis.set_major_formatter(FuncFormatter(lambda value, _position: format_number(value)))
 
@@ -345,7 +345,7 @@ class GuiTourneyGraphViewer(QSplitter):
             legend = self.ax.legend(**legend_args)
         for text in legend.get_texts():
             text.set_fontsize(8.5)
-            text.set_fontweight("semibold")
+            text.set_fontweight("bold")
 
         self.graphBox.addWidget(self.canvas)
         self.canvas.draw()
@@ -358,8 +358,8 @@ class GuiTourneyGraphViewer(QSplitter):
         tourneysLim = self.filters.getTourneyLim()
         tourneysBuyin = self.filters.getTourneyBuyin()
 
-        log.warning(f"GuiTourneyGraphViewer.getData: names: {names}, sites: {sites}, Tourneys: {Tourneys}")
-        log.warning(
+        log.debug(f"GuiTourneyGraphViewer.getData: names: {names}, sites: {sites}, Tourneys: {Tourneys}")
+        log.debug(
             f"GuiTourneyGraphViewer.getData filters: start_date: {start_date}, end_date: {end_date}, tourneys: {tourneys}, tourneysCat: {tourneysCat}, tourneysLim: {tourneysLim}, tourneysBuyin: {tourneysBuyin}"
         )
 
@@ -416,13 +416,13 @@ class GuiTourneyGraphViewer(QSplitter):
 
         tmp = apply_filters(tmp)
 
-        log.warning(f"GuiTourneyGraphViewer.getData: Executing SQL query:\n{tmp}")
+        log.debug(f"GuiTourneyGraphViewer.getData: Executing SQL query:\n{tmp}")
 
         self.db.cursor.execute(tmp)
         winnings = self.db.cursor.fetchall()
         self.db.rollback()
 
-        log.warning(f"GuiTourneyGraphViewer.getData: SQL query returned {len(winnings)} records.")
+        log.debug(f"GuiTourneyGraphViewer.getData: SQL query returned {len(winnings)} records.")
 
         # Declarative ChipEV-by-position curves (best-effort: never break the
         # main profit line if anything goes wrong here).
