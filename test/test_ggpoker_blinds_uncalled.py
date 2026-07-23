@@ -99,3 +99,74 @@ def test_rake_only_summary_still_parses() -> None:
     assert m is not None
     assert m.group("POT") == "7.5"
     assert m.group("JACKPOT") is None
+
+
+# --- straddles ---------------------------------------------------------------
+#
+# GGPoker restates a straddler's running total on every line rather than the
+# increment, and prints their blind alongside it. Charging both, and every rung
+# of a re-straddle ladder, made those players pay several times over.
+
+
+def _hand_from_text(text: str):
+    import tempfile
+    from pathlib import Path as _P
+
+    tmp = _P(tempfile.mkdtemp()) / "hand.txt"
+    tmp.write_text(text, encoding="utf-8")
+    return GGPoker(config=Config(), in_path=str(tmp), autostart=True).getProcessedHands()[0]
+
+
+_STRADDLE_HAND = """Poker Hand #OM313718456: PLO ($0.01/$0.02) - 2022/07/10 21:30:00
+Table 'PLOWhite1' 6-max Seat #5 is the button
+Seat 1: sb_str ($10 in chips)
+Seat 2: bb_p ($10 in chips)
+Seat 3: caller ($10 in chips)
+sb_str: posts small blind $0.01
+bb_p: posts big blind $0.02
+sb_str: straddle $0.04
+sb_str: straddle $0.08
+sb_str: straddle $0.16
+*** HOLE CARDS ***
+Dealt to sb_str [7s Jd Qs Qh]
+caller: folds
+bb_p: calls $0.14
+*** FLOP *** [Tc 9h 3h]
+bb_p: checks
+sb_str: checks
+*** TURN *** [Tc 9h 3h] [4d]
+bb_p: checks
+sb_str: checks
+*** RIVER *** [Tc 9h 3h 4d] [6s]
+bb_p: checks
+sb_str: checks
+*** SHOWDOWN ***
+sb_str collected $0.31 from pot
+*** SUMMARY ***
+Total pot $0.32 | Rake $0.01 | Jackpot $0 | Bingo $0
+Board [Tc 9h 3h 4d 6s]
+"""
+
+
+def test_restraddle_counts_only_the_final_total() -> None:
+    # $0.04 -> $0.08 -> $0.16 by one seat: the ladder is not cumulative.
+    hand = _hand_from_text(_STRADDLE_HAND)
+
+    assert hand.pot.committed["sb_str"] == Decimal("0.16")
+
+
+def test_a_straddler_is_not_charged_their_blind_twice(parsed_hands=None) -> None:
+    # sb_str posts the small blind and then straddles: the straddle is the total.
+    hand = _hand_from_text(_STRADDLE_HAND)
+    small_blinds = [a for a in hand.actions["BLINDSANTES"] if a[1] == "small blind"]
+
+    assert small_blinds == [], "the straddle already covers the straddler's blind"
+
+
+def test_straddled_hand_conserves_money() -> None:
+    hand = _hand_from_text(_STRADDLE_HAND)
+    hand.totalPot()
+    paid = sum(hand.pot.committed.values()) + sum(hand.pot.common.values())
+    out = sum(hand.collectees.values()) + Decimal(str(hand.rake or 0))
+
+    assert paid == out

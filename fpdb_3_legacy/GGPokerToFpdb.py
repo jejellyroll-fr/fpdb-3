@@ -771,9 +771,18 @@ class GGPoker(HandHistoryConverter):
 
     def readBlinds(self, hand: Hand) -> None:
         """Read and add blind information from hand text."""
-        live_blind, straddles = True, {}
+        live_blind = True
+        # Collected up front: the straddle loop below only fills this after the
+        # blind loops have run, so their "did this player straddle?" test could
+        # never fire. A straddler's blind was therefore charged twice -- once as
+        # the blind, once inside the straddle, which is the total they put up.
+        straddles = {a.group("PNAME"): True for a in self.re_post_straddle.finditer(hand.handText)}
+
         for a in self.re_post_sb.finditer(hand.handText):
-            if live_blind and a.group("PNAME") not in straddles:
+            if a.group("PNAME") in straddles:
+                live_blind = False
+                continue
+            if live_blind:
                 hand.addBlind(a.group("PNAME"), "small blind", self.clearMoneyString(a.group("SB")))
                 live_blind = False
             else:
@@ -783,9 +792,16 @@ class GGPoker(HandHistoryConverter):
         for a in self.re_post_missed.finditer(hand.handText):
             hand.addBlind(a.group("PNAME"), "secondsb", self.clearMoneyString(a.group("SBBB")))
 
+        # A re-straddle prints one line per step for the same seat -- $0.04, then
+        # $0.08, then $0.16 -- and each states that player's running total, not
+        # an increment. Adding every line charged them the whole ladder (0.28
+        # instead of 0.16), so keep only the last figure per player.
+        last_straddle: dict[str, str] = {}
         for a in self.re_post_straddle.finditer(hand.handText):
-            hand.addBlind(a.group("PNAME"), "straddle", self.clearMoneyString(a.group("STRADDLE")))
-            straddles[a.group("PNAME")] = True
+            last_straddle[a.group("PNAME")] = self.clearMoneyString(a.group("STRADDLE"))
+        for pname, amount in last_straddle.items():
+            hand.addBlind(pname, "straddle", amount)
+            straddles[pname] = True
 
         live_blind = True
 
@@ -795,6 +811,13 @@ class GGPoker(HandHistoryConverter):
             # GGPoker hand was therefore stored one big blind short, which made
             # totalcollected exceed the pot and pushed Hand.totalPot() to book an
             # uncalled bet as a collectable pot (and the surplus as phantom rake).
+            if a.group("PNAME") in straddles:
+                # A straddler's blind is already covered: GGPoker prints both
+                # "posts big blind $0.02" and "straddle $0.04" for them, and the
+                # straddle is the total they put up, not an increment on top.
+                # Adding both charged them one big blind twice.
+                live_blind = False
+                continue
             # NB: a hand can carry several "posts big blind" lines (a player
             # joining the table posts one too). Recording the extra ones as dead
             # blinds ("secondsb", as the small-blind loop does) was measured on
