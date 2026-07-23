@@ -132,12 +132,41 @@ def build_hand_input(hand_data: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _players_involved(hand_data: dict[str, Any]) -> set[str]:
+    """Names that actually took part in the hand.
+
+    The capture lists every *seated* player, dealt or not (it reads the table's
+    seat snapshot), so someone sitting out a hand was still recorded as having
+    played it: their hand count was inflated and every per-hand stat was diluted
+    by hands they were never in. A player took part when they were dealt cards,
+    acted (a fold counts), or collected a pot.
+    """
+    involved: set[str] = set()
+    for entry in _iter_hole_cards(hand_data):
+        if entry.get("cards") and entry.get("player"):
+            involved.add(entry["player"])
+    for action in hand_data.get("actions", []):
+        if action.get("player"):
+            involved.add(action["player"])
+    for collection in _iter_collections(hand_data):
+        if collection.get("player"):
+            involved.add(collection["player"])
+    return involved
+
+
 def build_hand_operations(hand_data: dict[str, Any]) -> list[dict[str, Any]]:
     """Translate normalized capture data into an ordered Hand.py operation plan."""
 
     operations: list[dict[str, Any]] = []
 
+    # Seat every player who was actually in the hand. When nothing at all could
+    # be attributed (a capture with no cards, actions or collections), keep the
+    # previous behaviour rather than emitting a hand with no players.
+    involved = _players_involved(hand_data)
     for player in hand_data.get("players", []):
+        name = player.get("name")
+        if involved and name and name not in involved:
+            continue
         operations.append(
             {
                 "method": "addPlayer",
