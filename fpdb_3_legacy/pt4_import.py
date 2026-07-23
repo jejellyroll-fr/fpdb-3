@@ -342,11 +342,14 @@ def _translate_arithmetic(decoded: DecodedStat, expr: str) -> TranslatedStat:
 
     rewritten = expr
     inputs: list[str] = []
+    boolean_inputs: list[str] = []
     col_sqls: list[str] = []
     for col, (fpdb_col, _dim, scale) in facts.items():
         token = f"({fpdb_col} / {scale:g})" if scale != 1.0 else fpdb_col
         rewritten = re.sub(rf"\b{re.escape(col)}\b", token, rewritten)
         inputs.append(fpdb_col)
+        if _SUM_IF_FLAG_RE.search(decoded.columns[col]):
+            boolean_inputs.append(fpdb_col)
         col_sqls.append(decoded.columns[col])
     context_list: list[str] = []
     for col, ctx_input in context_inputs.items():
@@ -369,6 +372,8 @@ def _translate_arithmetic(decoded: DecodedStat, expr: str) -> TranslatedStat:
     }
     if context_list:
         descriptor["context"] = context_list
+    if boolean_inputs:
+        descriptor["boolean_inputs"] = boolean_inputs
     if decoded.description:
         descriptor["description"] = decoded.description
     result.descriptor = descriptor
@@ -440,6 +445,8 @@ def translate(decoded: DecodedStat) -> TranslatedStat:
         descriptor["series"] = "cumulative"
     if context_input:
         descriptor["context"] = [context_input]
+    if _SUM_IF_FLAG_RE.search(col_sql):
+        descriptor["boolean_inputs"] = [fpdb_col]
     if decoded.description:
         descriptor["description"] = decoded.description
 
@@ -474,6 +481,7 @@ def emit_toml(descriptor: dict[str, Any]) -> str:
         "category",
         "scope",
         "inputs",
+        "boolean_inputs",
         "dimension",
         "context",
         "value",

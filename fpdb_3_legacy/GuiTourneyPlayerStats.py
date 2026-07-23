@@ -150,6 +150,7 @@ class GuiTourneyPlayerStats(QSplitter):
         log.info(f"addGrid (Tourney): fetched {len(result)} rows from database")
         if len(result) == 0:
             from PySide6.QtWidgets import QMessageBox
+
             msg = QMessageBox(self)
             msg.setIcon(QMessageBox.Icon.Information)
             msg.setWindowTitle(_("FPDB 3 info"))
@@ -161,7 +162,14 @@ class GuiTourneyPlayerStats(QSplitter):
         # Merge declarative ChipEV-by-position values into the rows, keyed by
         # (tourneyTypeId, playerId). Best-effort: never break the base grid.
         result, colnames = self._merge_chipev_columns(
-            query_name, result, colnames, numTourneys, tourneyTypes, playerids, sitenos, seats,
+            query_name,
+            result,
+            colnames,
+            numTourneys,
+            tourneyTypes,
+            playerids,
+            sitenos,
+            seats,
         )
 
         view = QTableView()
@@ -197,7 +205,9 @@ class GuiTourneyPlayerStats(QSplitter):
                 item = QStandardItem("")
                 if value is not None and value != -999:
                     currency = str(row_data[colnames.index("currency")]) if "currency" in colnames else "USD"
-                    item = QStandardItem(self._format_grid_value(str(column[colalias]), value, currency, str(column[colformat])))
+                    item = QStandardItem(
+                        self._format_grid_value(str(column[colalias]), value, currency, str(column[colformat]))
+                    )
                     item.setData(value, Qt.ItemDataRole.UserRole)
                 item.setEditable(False)
                 item.setTextAlignment(Qt.AlignmentFlag.AlignRight)
@@ -372,7 +382,9 @@ class GuiTourneyPlayerStats(QSplitter):
         sitenos = []
         playerids = []
 
-        log.info(f"fillStatsFrame (Tourney): sites={sites}, heroes={heroes}, tourneyTypes={tourneyTypes}, seats={seats}")
+        log.info(
+            f"fillStatsFrame (Tourney): sites={sites}, heroes={heroes}, tourneyTypes={tourneyTypes}, seats={seats}"
+        )
 
         # Selected site
         for site in sites:
@@ -392,7 +404,9 @@ class GuiTourneyPlayerStats(QSplitter):
                     actual_site_id = self.db.get_player_site_id(pid)
                     if actual_site_id is not None:
                         sitenos.append(actual_site_id)
-                        log.info(f"fillStatsFrame (Tourney): Using resolved actual siteId {actual_site_id} for player ID {pid}")
+                        log.info(
+                            f"fillStatsFrame (Tourney): Using resolved actual siteId {actual_site_id} for player ID {pid}"
+                        )
                     else:
                         sitenos.append(siteids[site])
 
@@ -465,7 +479,8 @@ class GuiTourneyPlayerStats(QSplitter):
         descriptors = getattr(self, "_grid_descriptors", [])
         if query_name != "tourneyPlayerDetailedStats" or not descriptors:
             return result, colnames
-        if "tourneyTypeId" not in colnames or "playerId" not in colnames:
+        column_indices = {str(name).casefold(): index for index, name in enumerate(colnames)}
+        if "tourneytypeid" not in column_indices or "playerid" not in column_indices:
             return result, colnames
 
         try:
@@ -481,10 +496,11 @@ class GuiTourneyPlayerStats(QSplitter):
             lookup = {}
             for row in self.cursor.fetchall():
                 rd = dict(zip(ev_cols, row, strict=False))
-                lookup[(rd["tourneyTypeId"], rd["playerId"])] = rd
+                normalized = {str(name).casefold(): value for name, value in rd.items()}
+                lookup[(normalized["tourneytypeid"], normalized["playerid"])] = rd
 
-            tt_idx = colnames.index("tourneyTypeId")
-            pid_idx = colnames.index("playerId")
+            tt_idx = column_indices["tourneytypeid"]
+            pid_idx = column_indices["playerid"]
             augmented = []
             for row_data in result:
                 key = (row_data[tt_idx], row_data[pid_idx])
@@ -536,7 +552,6 @@ def main(argv=None):
     settings.update(config.get_db_parameters())
     settings.update(config.get_import_parameters())
     settings.update(config.get_default_paths())
-
 
     from fpdb_3_legacy import SQL, Database
 

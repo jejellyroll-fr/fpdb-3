@@ -4,6 +4,7 @@ The translator and TOML round-trip are tested with hand-built DecodedStat
 objects (deterministic, no external files). Decoding of the real binary files
 is tested only when the sample directory is present.
 """
+
 from __future__ import annotations
 
 import os
@@ -242,6 +243,7 @@ class TestStandardRatioStat:
         assert d.supported, d.warnings
         assert d.descriptor["value"] == "(street0_3BDone / street0_3BChance) * 100"
         assert set(d.descriptor["inputs"]) == {"street0_3BDone", "street0_3BChance"}
+        assert set(d.descriptor["boolean_inputs"]) == {"street0_3BDone", "street0_3BChance"}
 
 
 class TestRoundTripThroughRegistry:

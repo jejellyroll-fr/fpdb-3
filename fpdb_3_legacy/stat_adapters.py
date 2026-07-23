@@ -88,13 +88,17 @@ class GridAdapter:
         """``SUM(CASE WHEN <dim> THEN hp.<input> ELSE 0 END) AS "name__input"``.
 
         One fragment per *fact* input. With no dimension it degrades to a plain
-        ``SUM(hp.<input>)``.
+        ``SUM(hp.<input>)``. Boolean inputs use ``SUM(CASE WHEN <input> THEN 1
+        ELSE 0 END)`` because PostgreSQL has no ``SUM(boolean)`` overload.
         """
         predicate = dimension_predicate(descriptor, self.dim_aliases)
         fragments: list[str] = []
         for input_name in descriptor.fact_inputs():
             col = f"{self.alias}.{input_name}"
-            if predicate:
+            if input_name in descriptor.boolean_inputs:
+                condition = f"{predicate} AND {col}" if predicate else col
+                expr = f"SUM(CASE WHEN {condition} THEN 1 ELSE 0 END)"
+            elif predicate:
                 expr = f"SUM(CASE WHEN {predicate} THEN {col} ELSE 0 END)"
             else:
                 expr = f"SUM({col})"
@@ -123,16 +127,18 @@ class GridAdapter:
     def compute(self, descriptor: StatDescriptor, row: Mapping[str, Any]) -> float | None:
         """Evaluate the descriptor's raw value from a fetched result ``row``.
 
-        ``row`` is a mapping of column alias -> value (case-insensitive lookups
-        are the caller's responsibility). Fact inputs are read from their
-        ``name__input`` aggregate alias; context inputs from their own name.
+        ``row`` is a mapping of column alias -> value. Lookups are
+        case-insensitive because database drivers may fold unquoted result
+        aliases. Fact inputs are read from their ``name__input`` aggregate
+        alias; context inputs from their own name.
         """
+        lowered = {str(key).casefold(): value for key, value in row.items()}
         variables: dict[str, Any] = {}
         for input_name in descriptor.inputs:
             if input_name in descriptor.context:
-                variables[input_name] = row.get(input_name, 0)
+                variables[input_name] = lowered.get(input_name.casefold(), 0)
             else:
-                variables[input_name] = row.get(_column_alias(descriptor, input_name), 0)
+                variables[input_name] = lowered.get(_column_alias(descriptor, input_name).casefold(), 0)
         return descriptor.compute(variables)
 
     def augment_row(
@@ -207,11 +213,11 @@ class GraphAdapter:
 # D=button, C=cutoff, M=middle, E=early, B/S=blinds. Logical descriptor
 # positions map onto those buckets here.
 HUDCACHE_POSITION_BUCKET: dict[Any, str] = {
-    0: "D",    # Button
+    0: "D",  # Button
     "S": "S",  # Small blind
     "B": "B",  # Big blind
-    1: "C",    # Cutoff
-    2: "M",    # Middle
+    1: "C",  # Cutoff
+    2: "M",  # Middle
     3: "M",
 }
 

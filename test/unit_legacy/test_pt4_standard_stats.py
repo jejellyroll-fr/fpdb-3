@@ -1,4 +1,5 @@
 """The curated standard-stats descriptor library (stats.d/pt4_standard.toml)."""
+
 from __future__ import annotations
 
 import os
@@ -19,8 +20,18 @@ def registry():
 
 
 STANDARD = [
-    "vpip", "pfr", "rfi", "three_bet", "four_bet", "steal",
-    "fold_bb_to_steal", "cbet_flop", "cbet_turn", "fold_to_cbet_flop", "wtsd", "wsd",
+    "vpip",
+    "pfr",
+    "rfi",
+    "three_bet",
+    "four_bet",
+    "steal",
+    "fold_bb_to_steal",
+    "cbet_flop",
+    "cbet_turn",
+    "fold_to_cbet_flop",
+    "wtsd",
+    "wsd",
 ]
 
 
@@ -38,10 +49,19 @@ class TestStandardLibraryLoads:
         d = registry.get("vpip")
         assert d.applies_to("ring") and d.applies_to("tour")
 
+    def test_standard_fact_inputs_are_declared_boolean(self, registry):
+        for name in STANDARD:
+            descriptor = registry.get(name)
+            assert descriptor.boolean_inputs == descriptor.inputs
+
     def test_series_still_only_chipev(self, registry):
         # Adding the standard library must not change the cumulative curve set.
         assert {d.name for d in registry.series_for_scope("tour")} == {
-            "chipev_3h_btn", "chipev_3h_sb", "chipev_3h_bb", "chipev_hu_sb", "chipev_hu_bb",
+            "chipev_3h_btn",
+            "chipev_3h_sb",
+            "chipev_3h_bb",
+            "chipev_hu_sb",
+            "chipev_hu_bb",
         }
 
 
@@ -71,7 +91,8 @@ class TestAdvancedStats:
         assert registry.get("float_turn").inputs == ("flg_t_float", "flg_t_float_opp")
         assert registry.get("float_river").inputs == ("flg_r_float", "flg_r_float_opp")
         assert registry.get("fold_to_squeeze").inputs == (
-            "street0_FoldToSqueezeDone", "street0_FoldToSqueezeChance",
+            "street0_FoldToSqueezeDone",
+            "street0_FoldToSqueezeChance",
         )
 
     def test_float_turn_ratio(self, registry):

@@ -26,7 +26,8 @@ def tournament_player_detailed_queries(db_server: str) -> dict[str, str]:
                         ,MAX(tp.playerId)                                                       AS playerId
                         ,COUNT(1)                                                               AS tourneyCount
                         ,SUM(CASE WHEN tp.`rank` > 0 THEN 0 ELSE 1 END)                         AS unknownRank
-                        ,(CAST(SUM(CASE WHEN winnings > 0 THEN 1 ELSE 0 END) AS SIGNED)/CAST(COUNT(1) AS SIGNED))*100                 AS itm
+                        ,100.0 * SUM(CASE WHEN winnings > 0 THEN 1 ELSE 0 END)
+                         / NULLIF(COUNT(1), 0)                                               AS itm
                         ,SUM(CASE WHEN tp.`rank` = 1 THEN 1 ELSE 0 END)                         AS _1st
                         ,SUM(CASE WHEN tp.`rank` = 2 THEN 1 ELSE 0 END)                         AS _2nd
                         ,SUM(CASE WHEN tp.`rank` = 3 THEN 1 ELSE 0 END)                         AS _3rd
@@ -36,9 +37,10 @@ def tournament_player_detailed_queries(db_server: str) -> dict[str, str]:
                                ELSE (tt.buyIn+tt.fee)/100.0
                              END)                                                               AS spent
                         ,SUM(tp.winnings+COALESCE(tp.koCount*tt.koBounty,0)-tt.buyIn-tt.fee)/100.0	 								AS net
-                        ,(CAST(SUM(tp.winnings+COALESCE(tp.koCount*tt.koBounty,0) - tt.buyin - tt.fee) AS SIGNED)/
-                            CAST(SUM(tt.buyin+tt.fee) AS SIGNED))* 100.0                                                                    AS roi
-                        ,SUM(tp.winnings+COALESCE(tp.koCount*tt.koBounty,0)-(tt.buyin+tt.fee))/100.0/(COUNT(1)-SUM(CASE WHEN tp.`rank` > 0 THEN 0 ELSE 1 END)) AS profitPerTourney
+                        ,100.0 * SUM(tp.winnings+COALESCE(tp.koCount*tt.koBounty,0) - tt.buyin - tt.fee)
+                         / NULLIF(SUM(tt.buyin+tt.fee), 0)                                  AS roi
+                        ,SUM(tp.winnings+COALESCE(tp.koCount*tt.koBounty,0)-(tt.buyin+tt.fee))/100.0
+                         / NULLIF(COUNT(1)-SUM(CASE WHEN tp.`rank` > 0 THEN 0 ELSE 1 END), 0) AS profitPerTourney
                   from TourneysPlayers tp
                        inner join Tourneys t        on  (t.id = tp.tourneyId)
                        inner join TourneyTypes tt   on  (tt.Id = t.tourneyTypeId)
@@ -52,8 +54,6 @@ def tournament_player_detailed_queries(db_server: str) -> dict[str, str]:
                           ,playerName
                           ,siteName"""
     elif db_server == "postgresql":
-        # sc: itm and profitPerTourney changed to "ELSE 0" to avoid divide by zero error as temp fix
-        # proper fix should use coalesce() or case ... when ... to work in all circumstances
         query["tourneyPlayerDetailedStats"] = """
                   select s.name                                                                 AS "siteName"
                         ,tt.currency                                                            AS "currency"
@@ -73,7 +73,8 @@ def tournament_player_detailed_queries(db_server: str) -> dict[str, str]:
                         ,MAX(tp.playerId)                                                       AS "playerId"
                         ,COUNT(1)                                                               AS "tourneyCount"
                         ,SUM(CASE WHEN tp.rank > 0 THEN 0 ELSE 1 END)                           AS "unknownRank"
-                        ,(CAST(SUM(CASE WHEN winnings > 0 THEN 1 ELSE 0 END) AS BIGINT)/CAST(COUNT(1) AS BIGINT))*100                 AS itm
+                        ,100.0 * SUM(CASE WHEN winnings > 0 THEN 1 ELSE 0 END)
+                         / NULLIF(COUNT(1), 0)                                               AS itm
                         ,SUM(CASE WHEN rank = 1 THEN 1 ELSE 0 END)                              AS "_1st"
                         ,SUM(CASE WHEN rank = 2 THEN 1 ELSE 0 END)                              AS "_2nd"
                         ,SUM(CASE WHEN rank = 3 THEN 1 ELSE 0 END)                              AS "_3rd"
@@ -83,10 +84,10 @@ def tournament_player_detailed_queries(db_server: str) -> dict[str, str]:
                                ELSE (tt.buyIn+tt.fee)/100.0
                              END)                                                               AS "spent"
                         ,SUM(tp.winnings+COALESCE(tp.koCount*tt.koBounty,0)-tt.buyIn-tt.fee)/100.0	 								AS "net"
-                        ,(CAST(SUM(tp.winnings+COALESCE(tp.koCount*tt.koBounty,0) - tt.buyin - tt.fee) AS BIGINT)/
-                            CAST(SUM(tt.buyin+tt.fee) AS BIGINT))* 100.0                                                                    AS "roi"
+                        ,100.0 * SUM(tp.winnings+COALESCE(tp.koCount*tt.koBounty,0) - tt.buyin - tt.fee)
+                         / NULLIF(SUM(tt.buyin+tt.fee), 0)                                  AS "roi"
                         ,SUM(tp.winnings+COALESCE(tp.koCount*tt.koBounty,0)-(tt.buyin+tt.fee))/100.0
-                         /(COUNT(1)-SUM(CASE WHEN tp.rank > 0 THEN 0 ELSE 0 END))               AS "profitPerTourney"
+                         / NULLIF(COUNT(1)-SUM(CASE WHEN tp.rank > 0 THEN 0 ELSE 1 END), 0)  AS "profitPerTourney"
                   from TourneysPlayers tp
                        inner join Tourneys t        on  (t.id = tp.tourneyId)
                        inner join TourneyTypes tt   on  (tt.Id = t.tourneyTypeId)
@@ -120,7 +121,8 @@ def tournament_player_detailed_queries(db_server: str) -> dict[str, str]:
                         ,MAX(tp.playerId)                                                       AS playerId
                         ,COUNT(1)                                                               AS tourneyCount
                         ,SUM(CASE WHEN tp.rank > 0 THEN 0 ELSE 1 END)                           AS unknownRank
-                        ,(CAST(SUM(CASE WHEN winnings > 0 THEN 1 ELSE 0 END) AS REAL)/CAST(COUNT(1) AS REAL))*100                 AS itm
+                        ,100.0 * SUM(CASE WHEN winnings > 0 THEN 1 ELSE 0 END)
+                         / NULLIF(COUNT(1), 0)                                               AS itm
                         ,SUM(CASE WHEN rank = 1 THEN 1 ELSE 0 END)                              AS _1st
                         ,SUM(CASE WHEN rank = 2 THEN 1 ELSE 0 END)                              AS _2nd
                         ,SUM(CASE WHEN rank = 3 THEN 1 ELSE 0 END)                              AS _3rd
@@ -130,9 +132,10 @@ def tournament_player_detailed_queries(db_server: str) -> dict[str, str]:
                                ELSE (tt.buyIn+tt.fee)/100.0
                              END)                                                               AS spent
                         ,SUM(tp.winnings+COALESCE(tp.koCount*tt.koBounty,0)-tt.buyIn-tt.fee)/100.0	 								AS net
-                        ,(CAST(SUM(tp.winnings+COALESCE(tp.koCount*tt.koBounty,0) - tt.buyin - tt.fee) AS REAL)/
-                            CAST(SUM(tt.buyin+tt.fee) AS REAL))* 100.0                                                                    AS roi
-                        ,SUM(tp.winnings+COALESCE(tp.koCount*tt.koBounty,0)-(tt.buyin+tt.fee))/100.0/(COUNT(1)-SUM(CASE WHEN tp.rank > 0 THEN 0 ELSE 1 END)) AS profitPerTourney
+                        ,100.0 * SUM(tp.winnings+COALESCE(tp.koCount*tt.koBounty,0) - tt.buyin - tt.fee)
+                         / NULLIF(SUM(tt.buyin+tt.fee), 0)                                  AS roi
+                        ,SUM(tp.winnings+COALESCE(tp.koCount*tt.koBounty,0)-(tt.buyin+tt.fee))/100.0
+                         / NULLIF(COUNT(1)-SUM(CASE WHEN tp.rank > 0 THEN 0 ELSE 1 END), 0)  AS profitPerTourney
                   from TourneysPlayers tp
                        inner join Tourneys t        on  (t.id = tp.tourneyId)
                        inner join TourneyTypes tt   on  (tt.Id = t.tourneyTypeId)

@@ -118,6 +118,14 @@ class TestBuildDescriptor:
         )
         assert d.dimension == {"seats": 3, "position": "S"}
 
+    def test_boolean_inputs_accepted(self):
+        d = sr.build_descriptor(self._valid(boolean_inputs=["street0VPI", "street0VPIChance"]))
+        assert d.boolean_inputs == ("street0VPI", "street0VPIChance")
+
+    def test_boolean_inputs_must_be_inputs(self):
+        with pytest.raises(sr.StatDescriptorError):
+            sr.build_descriptor(self._valid(boolean_inputs=["not_declared"]))
+
 
 class TestRegistryLoadsBundledChipEV:
     @pytest.fixture()

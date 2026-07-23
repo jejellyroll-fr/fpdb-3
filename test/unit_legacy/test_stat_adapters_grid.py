@@ -3,6 +3,7 @@
 Pure tests: they check the generated SQL fragments, column specs, and the
 derived-value computation from a fetched row, without touching a database.
 """
+
 from __future__ import annotations
 
 import os
@@ -43,7 +44,7 @@ class TestSelectFragments:
         adapter = GridAdapter()
         frags = adapter.select_fragments(registry.get("chipev_hu_bb"))
         assert frags == [
-            'SUM(CASE WHEN h.seats = 2 AND hp.position = \'B\' THEN hp.allInEV ELSE 0 END) AS "chipev_hu_bb__allInEV"',
+            "SUM(CASE WHEN h.seats = 2 AND hp.position = 'B' THEN hp.allInEV ELSE 0 END) AS \"chipev_hu_bb__allInEV\"",
         ]
 
     def test_context_input_not_aggregated(self, registry):
@@ -53,6 +54,15 @@ class TestSelectFragments:
         assert len(frags) == 1
         assert "allInEV" in frags[0]
         assert "cnt_tourneys" not in frags[0]
+
+    def test_boolean_inputs_use_portable_true_count(self, registry):
+        adapter = GridAdapter()
+        frags = adapter.select_fragments(registry.get("cbet_flop"))
+        assert frags == [
+            'SUM(CASE WHEN hp.street1CBDone THEN 1 ELSE 0 END) AS "cbet_flop__street1CBDone"',
+            'SUM(CASE WHEN hp.street1CBChance THEN 1 ELSE 0 END) AS "cbet_flop__street1CBChance"',
+        ]
+        assert all("SUM(hp." not in fragment for fragment in frags)
 
     def test_select_clause_has_leading_comma(self, registry):
         adapter = GridAdapter()

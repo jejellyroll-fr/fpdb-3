@@ -8,7 +8,13 @@ listed 9, and earlier 20 against 19 in the database.
 
 from __future__ import annotations
 
+import inspect
+
 import numpy as np
+import pytest
+
+from fpdb_3_legacy.GuiGraphViewer import GuiGraphViewer
+from fpdb_3_legacy.GuiTourneyGraphViewer import GuiTourneyGraphViewer
 
 
 def _series(winnings: list[float]) -> np.ndarray:
@@ -37,3 +43,9 @@ def test_single_hand_is_not_reported_as_two() -> None:
 def test_empty_series_reports_no_hands() -> None:
     # Only the origin point: no hand should be claimed, and no negative count.
     assert _reported_hand_count(_series([])) == 0
+
+
+@pytest.mark.parametrize("viewer", [GuiGraphViewer, GuiTourneyGraphViewer])
+def test_graph_fonts_only_request_available_standard_weights(viewer: type) -> None:
+    source = inspect.getsource(viewer.generateGraph)
+    assert "semibold" not in source
