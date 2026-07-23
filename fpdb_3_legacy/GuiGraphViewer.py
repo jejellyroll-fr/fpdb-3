@@ -319,12 +319,16 @@ class GuiGraphViewer(QSplitter):
                 linestyle="-.",
                 label=("All-in EV") + f" ({display_in}): {format_number(orange[-1])}",
             )
+        # getRingProfitGraph prepends a 0 so the curve starts at the origin, so the
+        # series holds one point *more* than there are hands: counting the points
+        # reported one hand too many (10 for the 9 the hand viewer lists).
+        hand_count = max(len(green) - 1, 0)
         self.ax.plot(
             green,
             color=get_modern_color("line_hands", "c"),
             linewidth=2.5,
             label=_("Hands")
-            + f": {format_number(len(green), 0)}\n"
+            + f": {format_number(hand_count, 0)}\n"
             + _("Profit")
             + f": ({display_in}): {format_number(green[-1])}",
         )
