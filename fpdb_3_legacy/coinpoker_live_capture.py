@@ -53,7 +53,14 @@ from fpdb_3_legacy.http_capture_hand_builder import (
     HttpCaptureHandConfig,
     build_fpdb_hand,
     import_fpdb_hand,
+    render_fpdb_hand,
 )
+
+
+def _default_archive_dir() -> str:
+    """Directory holding the text archive of captured hands."""
+    return os.path.join(os.path.expanduser("~"), ".fpdb", "coinpoker-capture")
+
 
 COINPOKER_SITE_ID = 140
 # CoinPoker game servers: TCP 9000 (poker cluster) plus a per-table 70xx range
@@ -285,7 +292,17 @@ def ensure_coinpoker_site(db) -> None:
 class HandPump:
     """Turns a growing event list into imported hands, once per completed hand."""
 
-    def __init__(self, db, config, *, table_category: str = "PLO4", dry_run: bool = False, file_id: int = 0, notify=None) -> None:
+    def __init__(
+        self,
+        db,
+        config,
+        *,
+        table_category: str = "PLO4",
+        dry_run: bool = False,
+        file_id: int = 0,
+        notify=None,
+        archive_dir: str | None = None,
+    ) -> None:
         self.db = db
         self.config = config
         self.table_category = table_category
@@ -294,6 +311,29 @@ class HandPump:
         self.notify = notify  # ZMQSender to ping HUD_main after each import
         self.imported: set[str] = set()
         self.failed: set[str] = set()
+        # A live capture has no source file: once a hand is imported the packets
+        # are gone, so nothing could be checked against the room afterwards (the
+        # hand text is not stored in the database either -- Hands has no text
+        # column and RawHands is never written). Render every built hand to a
+        # dated archive so winnings stay auditable and re-importable.
+        self.archive_dir = archive_dir if archive_dir is not None else _default_archive_dir()
+        self._archive_warned = False
+
+    def _archive_hand(self, hand) -> None:
+        """Append the built hand's text rendering to the dated archive."""
+        if not self.archive_dir:
+            return
+        try:
+            os.makedirs(self.archive_dir, exist_ok=True)
+            day = getattr(hand, "startTime", None) or datetime.datetime.now(datetime.timezone.utc)
+            path = os.path.join(self.archive_dir, f"coinpoker-{day:%Y-%m-%d}.txt")
+            text = render_fpdb_hand(hand)
+            with open(path, "a", encoding="utf-8") as archive:
+                archive.write(text.rstrip("\n") + "\n\n\n")
+        except Exception as exc:  # noqa: BLE001 - archiving must never break the feed
+            if not self._archive_warned:
+                self._archive_warned = True
+                print(f"[WARN] could not archive captured hands to {self.archive_dir}: {exc}")
 
     @staticmethod
     def _stamp_capture_time(hand_data: dict) -> None:
@@ -323,6 +363,7 @@ class HandPump:
                 print(f"[WARN] skipped hand #{hid}: {exc}")
                 self._log_failed_hand(hand_data, exc)
                 continue
+            self._archive_hand(hand)
             # Tell fpdb who the hero is (needed for hero stats and the HUD).
             hero = hand_data.get("hero")
             if hero and any(p[1] == hero for p in hand.players):

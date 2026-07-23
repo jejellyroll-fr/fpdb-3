@@ -33,6 +33,15 @@ FRAME_A = b"\x80\x00\x03\x12\x00\x00"  # flags 0x80, len 3, body "\x12\x00\x00"
 FRAME_B = b"\x80\x00\x02\xaa\xbb"  # flags 0x80, len 2, body "\xaa\xbb"
 
 
+@pytest.fixture(autouse=True)
+def _isolate_hand_archive(tmp_path, monkeypatch):
+    """Keep the captured-hand archive out of the real ~/.fpdb during tests."""
+    monkeypatch.setattr(
+        "fpdb_3_legacy.coinpoker_live_capture._default_archive_dir",
+        lambda: str(tmp_path / "capture-archive"),
+    )
+
+
 def _events() -> list[tuple]:
     return [tuple(e) for e in json.loads(FIXTURE.read_text())]
 
@@ -122,9 +131,9 @@ def test_tee_writes_to_all_present_streams() -> None:
 # --- import pump --------------------------------------------------------------
 
 
-def test_hand_pump_imports_complete_hands_and_dedupes() -> None:
+def test_hand_pump_imports_complete_hands_and_dedupes(tmp_path) -> None:
     config = HttpCaptureHandConfig(site_ids={"CoinPoker": COINPOKER_SITE_ID, "default": COINPOKER_SITE_ID})
-    pump = HandPump(db=None, config=config, table_category="PLO4", dry_run=True)
+    pump = HandPump(db=None, config=config, table_category="PLO4", dry_run=True, archive_dir=str(tmp_path))
     events = _events()
 
     first = pump.process(events)
@@ -135,7 +144,7 @@ def test_hand_pump_imports_complete_hands_and_dedupes() -> None:
     assert pump.prune(events) == []  # imported hands' events pruned
 
 
-def test_pump_stamps_capture_time_instead_of_epoch(monkeypatch) -> None:
+def test_pump_stamps_capture_time_instead_of_epoch(monkeypatch, tmp_path) -> None:
     # The stream carries no per-hand clock; an unstamped hand would default to
     # 1970 and vanish from the GUI's date-filtered graphs. The pump must stamp it.
     import datetime
@@ -150,7 +159,7 @@ def test_pump_stamps_capture_time_instead_of_epoch(monkeypatch) -> None:
 
     monkeypatch.setattr("fpdb_3_legacy.coinpoker_live_capture.build_fpdb_hand", spy)
     config = HttpCaptureHandConfig(site_ids={"CoinPoker": COINPOKER_SITE_ID, "default": COINPOKER_SITE_ID})
-    pump = HandPump(db=None, config=config, table_category="PLO4", dry_run=True)
+    pump = HandPump(db=None, config=config, table_category="PLO4", dry_run=True, archive_dir=str(tmp_path))
 
     pump.process(_events())
 
@@ -246,3 +255,39 @@ def test_hand_pump_treats_database_duplicate_as_skipped(monkeypatch, capsys) -> 
     assert pump.process(_events()) == 2
     assert pump.failed == set()
     assert capsys.readouterr().out.count("[DUPLICATE]") == 2
+
+
+def test_captured_hands_are_archived_as_text(tmp_path) -> None:
+    """A live capture has no source file, so the built hand must be archived.
+
+    Once the packets are consumed nothing remains to check winnings against the
+    room: the hand text is not stored in the database either (Hands has no text
+    column and RawHands is never written). Each built hand is therefore rendered
+    to a dated file so it stays auditable and re-importable.
+    """
+    config = HttpCaptureHandConfig(site_ids={"CoinPoker": COINPOKER_SITE_ID, "default": COINPOKER_SITE_ID})
+    pump = HandPump(
+        db=None,
+        config=config,
+        table_category="PLO4",
+        dry_run=True,
+        archive_dir=str(tmp_path),
+    )
+
+    assert pump.process(_events()) == 2
+
+    archives = sorted(tmp_path.glob("coinpoker-*.txt"))
+    assert archives, "the built hands must be written to a dated archive"
+    text = archives[0].read_text(encoding="utf-8")
+    assert "91426500343" in text and "91426500344" in text  # both hands
+    assert "*** SUMMARY ***" in text                        # full rendering
+    assert "collected" in text                              # winnings are auditable
+
+
+def test_archive_failure_never_breaks_the_feed(tmp_path) -> None:
+    config = HttpCaptureHandConfig(site_ids={"CoinPoker": COINPOKER_SITE_ID, "default": COINPOKER_SITE_ID})
+    blocked = tmp_path / "not-a-dir"
+    blocked.write_text("", encoding="utf-8")  # a file where a directory is needed
+    pump = HandPump(db=None, config=config, table_category="PLO4", dry_run=True, archive_dir=str(blocked))
+
+    assert pump.process(_events()) == 2  # hands still processed
