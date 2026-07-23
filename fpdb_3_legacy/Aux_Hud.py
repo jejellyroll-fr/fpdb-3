@@ -1262,7 +1262,7 @@ class SimpleTableMW(Aux_Base.SeatWindow):
             self.menu_is_popped = True
             self.popup_menu = SimpleTablePopupMenu(self)
 
-    def destroy(self) -> None:
+    def destroy(self, destroyWindow: bool = True, destroySubWindows: bool = True) -> None:
         """Take the config popup down with this menu window.
 
         Aux_Base.destroy() destroys/deleteLater()s the windows it manages when the
@@ -1270,6 +1270,9 @@ class SimpleTableMW(Aux_Base.SeatWindow):
         nothing about. Left alone it stays on screen over a dead HUD, and the
         rebuilt HUD opens a second one on top of it, so closing the front menu
         just reveals the stale one behind.
+
+        The two flags mirror QWidget.destroy() (both default to true in Qt) and
+        are forwarded untouched; callers here invoke destroy() with no arguments.
         """
         popup, self.popup_menu = self.popup_menu, None
         if popup is not None:
@@ -1277,7 +1280,7 @@ class SimpleTableMW(Aux_Base.SeatWindow):
                 popup.close()
                 popup.destroy()
         self.menu_is_popped = False
-        super().destroy()
+        super().destroy(destroyWindow, destroySubWindows)
 
     def move_windows(self) -> None:
         """Move the table menu window to its correct position relative to the table.
