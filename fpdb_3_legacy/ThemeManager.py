@@ -738,6 +738,17 @@ class ThemeManager:
             QCalendarWidget QAbstractItemView:disabled {{
                 color: {muted};
             }}
+            /* The weekday names and week numbers are plain items (the headers
+               are hidden), so the theme's generic QTableView::item padding and
+               min-height applied to every day cell and squeezed the label area
+               until Qt elided "30" and "lun." to "...". Reset it here. */
+            QCalendarWidget QAbstractItemView::item {{
+                padding: 0px;
+                margin: 0px;
+                min-width: 0px;
+                min-height: 0px;
+                text-transform: none;
+            }}
 
             /* Scrollbars */
             QScrollBar:vertical {{
