@@ -4,6 +4,7 @@ The constructor calls ``parseSummary`` (a no-op in the base class). A fake db
 object is supplied so the real Database is never instantiated, and a fake
 config provides ``get_import_parameters``.
 """
+
 from __future__ import annotations
 
 import io
@@ -88,6 +89,7 @@ class TestClearMoneyString:
             ("$1 200", "1200"),
             ("2,000", "2000"),
             ("€5.50", "5.50"),
+            ("&euro;5.50", "5.50"),
             ("$ 10", "10"),
         ],
     )

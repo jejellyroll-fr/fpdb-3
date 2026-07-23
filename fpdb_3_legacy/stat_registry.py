@@ -30,6 +30,7 @@ import json
 import operator
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field
+from decimal import Decimal
 from pathlib import Path
 from typing import Any, cast
 
@@ -173,7 +174,13 @@ class SafeExpression:
             if node.id in _ALLOWED_FUNCS:
                 return _ALLOWED_FUNCS[node.id]
             value = variables.get(node.id, 0)
-            return value if value is not None else 0
+            if value is None:
+                return 0
+            # PostgreSQL/MySQL numeric columns can arrive as Decimal, while
+            # descriptor literals are parsed as float. Normalize at the
+            # expression boundary so operations such as Decimal / 100.0 do
+            # not fail before adapters can convert the computed result.
+            return float(value) if isinstance(value, Decimal) else value
         if isinstance(node, ast.Call):
             func = _ALLOWED_FUNCS[node.func.id]  # type: ignore[attr-defined]
             return func(*[self._eval(a, variables) for a in node.args])

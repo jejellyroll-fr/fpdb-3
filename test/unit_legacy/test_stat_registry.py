@@ -4,10 +4,12 @@ These cover the three pieces of the plug-and-play stat foundation:
 the sandboxed expression evaluator, descriptor validation, and the registry
 that loads descriptor files (including the bundled ChipEV-by-position stats).
 """
+
 from __future__ import annotations
 
 import os
 import sys
+from decimal import Decimal
 
 import pytest
 
@@ -20,6 +22,10 @@ class TestSafeExpression:
     def test_basic_arithmetic(self):
         expr = sr.SafeExpression("100 * a / b", frozenset({"a", "b"}))
         assert expr.evaluate({"a": 3, "b": 4}) == 75.0
+
+    def test_decimal_variable_compatible_with_float_literal(self):
+        expr = sr.SafeExpression("a / 100.0", frozenset({"a"}))
+        assert expr.evaluate({"a": Decimal("2500")}) == 25.0
 
     def test_referenced_names_subset(self):
         expr = sr.SafeExpression("a + 1", frozenset({"a", "b"}))

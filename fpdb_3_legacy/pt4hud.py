@@ -146,21 +146,50 @@ _FORMULA_TO_FPDB: list[tuple[str, str]] = [
 _CARD_RE = re.compile(r"^[2-9TJQKA]{2}[so]?$")
 _FORMAT_RE = re.compile(r"%[.\d]*[dfn%]")
 _FONTS = {"Tahoma", "Calibri", "Verdana", "Go Master", "Arial"}
-_NOISE = {"New Line", "Sum", "Avg", "Tournament Player", "win", "PUSH", "CALL",
-          "Raises", "Preflop", "POST FLOP", "Note Editor", "Horizontal Line",
-          "Spin", " ", ""}
+_NOISE = {
+    "New Line",
+    "Sum",
+    "Avg",
+    "Tournament Player",
+    "win",
+    "PUSH",
+    "CALL",
+    "Raises",
+    "Preflop",
+    "POST FLOP",
+    "Note Editor",
+    "Horizontal Line",
+    "Spin",
+    " ",
+    "",
+}
 
 
 _CHART_NAMES = {
-    "DEF Explain", "Push Nash", "Call Nash", "Spin & Go Master",
-    "Spin & Go Master Basic", "Flat call + 3Bet vs SB open",
+    "DEF Explain",
+    "Push Nash",
+    "Call Nash",
+    "Spin & Go Master",
+    "Spin & Go Master Basic",
+    "Flat call + 3Bet vs SB open",
 }
 _GRID_CARD_RE = re.compile(r"[2-9TJQKA]{2}[so]?")
 _DECORATIVE_CONTAINER_TITLES = {"Horizontal Line", "New Line", "Note Editor"}
 _SEAT_PANEL_TITLES = {"BTN", "BU", "SB", "BB", "Hero"}
 _KNOWN_VISUAL_PANEL_TITLES = {
-    "3BP IP", "3BP OOP", "BB Preflop", "Main Panel", "Main Panel2", "Misc",
-    "Player Stack", "Post Flop", "Pre Flop", "RFI", "SB Preflop", "SRP IP", "SRP OOP",
+    "3BP IP",
+    "3BP OOP",
+    "BB Preflop",
+    "Main Panel",
+    "Main Panel2",
+    "Misc",
+    "Player Stack",
+    "Post Flop",
+    "Pre Flop",
+    "RFI",
+    "SB Preflop",
+    "SRP IP",
+    "SRP OOP",
 }
 
 PT4_PANEL_STYLES: dict[str, dict[str, str]] = {
@@ -499,13 +528,9 @@ def extract_hud_groups(data: bytes) -> list[Group]:
     recs = sorted(_visual_records(data), key=lambda r: r["offset"])
 
     def _is_named_container(r) -> bool:
-        return (r["kind"] == 2 and bool(r["text"].strip())
-                and r["text"].strip() not in _DECORATIVE_CONTAINER_TITLES)
+        return r["kind"] == 2 and bool(r["text"].strip()) and r["text"].strip() not in _DECORATIVE_CONTAINER_TITLES
 
-    boundaries = sorted({
-        i for i, r in enumerate(recs)
-        if _is_named_container(r) or r["text"].strip() in _CHART_NAMES
-    })
+    boundaries = sorted({i for i, r in enumerate(recs) if _is_named_container(r) or r["text"].strip() in _CHART_NAMES})
 
     groups: list[Group] = []
     for si in boundaries:
@@ -545,18 +570,32 @@ def extract_hud_groups(data: bytes) -> list[Group]:
                 elif t == "Note Editor":
                     cells.append(
                         Cell(
-                            pt4_name="Note Editor", label="", section=name, street=street,
-                            fpdb_stat="player_note", kind="stat", hudcolor=r["fg"], hudbgcolor=r["bg"],
-                            row=row, col=col
+                            pt4_name="Note Editor",
+                            label="",
+                            section=name,
+                            street=street,
+                            fpdb_stat="player_note",
+                            kind="stat",
+                            hudcolor=r["fg"],
+                            hudbgcolor=r["bg"],
+                            row=row,
+                            col=col,
                         )
                     )
                     col += 1
                 elif t == "Horizontal Line":
                     cells.append(
                         Cell(
-                            pt4_name="Horizontal Line", label="", section=name, street=street,
-                            fpdb_stat=None, kind="hline", hudcolor=r["fg"], hudbgcolor=r["bg"],
-                            row=row, col=col
+                            pt4_name="Horizontal Line",
+                            label="",
+                            section=name,
+                            street=street,
+                            fpdb_stat=None,
+                            kind="hline",
+                            hudcolor=r["fg"],
+                            hudbgcolor=r["bg"],
+                            row=row,
+                            col=col,
                         )
                     )
                     col += 1
@@ -567,9 +606,16 @@ def extract_hud_groups(data: bytes) -> list[Group]:
                 is_section = bool(_STREET_RE.match(txt))
                 cells.append(
                     Cell(
-                        pt4_name=txt, label=txt, section=name, street=street,
-                        kind="text", full_width=is_section, hudcolor=r["fg"], hudbgcolor=r["bg"],
-                        row=row, col=col
+                        pt4_name=txt,
+                        label=txt,
+                        section=name,
+                        street=street,
+                        kind="text",
+                        full_width=is_section,
+                        hudcolor=r["fg"],
+                        hudbgcolor=r["bg"],
+                        row=row,
+                        col=col,
                     )
                 )
                 col += 1
@@ -591,17 +637,30 @@ def extract_hud_groups(data: bytes) -> list[Group]:
                 if mapped_stat:
                     cells.append(
                         Cell(
-                            pt4_name=stat_name, label="", section=name, street=street,
-                            fpdb_stat=mapped_stat, kind="stat", hudcolor=r["fg"], hudbgcolor=r["bg"],
-                            row=row, col=col
+                            pt4_name=stat_name,
+                            label="",
+                            section=name,
+                            street=street,
+                            fpdb_stat=mapped_stat,
+                            kind="stat",
+                            hudcolor=r["fg"],
+                            hudbgcolor=r["bg"],
+                            row=row,
+                            col=col,
                         )
                     )
                 else:
                     cells.append(
                         Cell(
-                            pt4_name="", label="", section=name, street=street,
-                            kind="text", hudcolor=r["fg"], hudbgcolor=r["bg"],
-                            row=row, col=col
+                            pt4_name="",
+                            label="",
+                            section=name,
+                            street=street,
+                            kind="text",
+                            hudcolor=r["fg"],
+                            hudbgcolor=r["bg"],
+                            row=row,
+                            col=col,
                         )
                     )
                 col += 1
@@ -634,6 +693,14 @@ def _map_visual_records(data: bytes) -> list[Cell]:
     return cells
 
 
+def _read_source(source: str | bytes) -> bytes:
+    """Return raw layout bytes while closing path-backed input promptly."""
+    if isinstance(source, bytes):
+        return source
+    with open(source, "rb") as source_file:
+        return source_file.read()
+
+
 def extract_charts(source: str | bytes) -> list[Chart]:
     """Extract the 13x13 range-chart popups (push/fold Nash grids) from a file.
 
@@ -641,7 +708,7 @@ def extract_charts(source: str | bytes) -> list[Chart]:
     (text colour, then the decision fill colour). Cells are grouped under the
     most recent chart-popup name; only populated grids are returned.
     """
-    data = source if isinstance(source, bytes) else open(source, "rb").read()
+    data = _read_source(source)
     toks = _tokenize(data)
     charts: dict[str, Chart] = {}
     current: str | None = None
@@ -683,8 +750,9 @@ def extract_popup_groups(source: str | bytes) -> list[PopupGroup]:
     records delimiting rows. Returns one :class:`PopupGroup` per named,
     non-decorative, non-HUD-panel group that carries at least one cell.
     """
-    data = source if isinstance(source, bytes) else open(source, "rb").read()
+    data = _read_source(source)
     recs = sorted(_visual_records(data), key=lambda r: r["offset"])
+
     # A group's content ends at the next *named container* (popup group OR table
     # panel) OR at the next record whose text is a known popup/chart name — the
     # latter catches a following popup that is rendered as a bare text marker
@@ -692,13 +760,9 @@ def extract_popup_groups(source: str | bytes) -> list[PopupGroup]:
     # which would otherwise be absorbed into the preceding chart. Decorative
     # New Line / Horizontal Line records only delimit rows within a group.
     def _is_named_container(r) -> bool:
-        return (r["kind"] == 2 and bool(r["text"].strip())
-                and r["text"].strip() not in _DECORATIVE_CONTAINER_TITLES)
+        return r["kind"] == 2 and bool(r["text"].strip()) and r["text"].strip() not in _DECORATIVE_CONTAINER_TITLES
 
-    boundaries = sorted({
-        i for i, r in enumerate(recs)
-        if _is_named_container(r) or r["text"].strip() in _CHART_NAMES
-    })
+    boundaries = sorted({i for i, r in enumerate(recs) if _is_named_container(r) or r["text"].strip() in _CHART_NAMES})
     groups: list[PopupGroup] = []
     for si in boundaries:
         r0 = recs[si]
@@ -739,7 +803,7 @@ def extract_popup_groups(source: str | bytes) -> list[PopupGroup]:
 
 def parse(source: str | bytes) -> Layout:
     """Parse a ``.pt4hud`` file path or raw bytes into a :class:`Layout`."""
-    data = source if isinstance(source, bytes) else open(source, "rb").read()
+    data = _read_source(source)
     strings = read_strings(data)
     if not strings or strings[0] != MAGIC:
         msg = "not a PT4 HUD layout export (missing magic header)"
@@ -787,7 +851,9 @@ def parse(source: str | bytes) -> Layout:
                 key = (panel, s)
                 if key not in seen_stats:
                     seen_stats.add(key)
-                    layout.cells.append(Cell(pt4_name=s, label=pending_label, section=panel, street=street, fpdb_stat=PT4_TO_FPDB[s]))
+                    layout.cells.append(
+                        Cell(pt4_name=s, label=pending_label, section=panel, street=street, fpdb_stat=PT4_TO_FPDB[s])
+                    )
             pending_label = ""
             continue
         # ... a user-defined formula / custom column ...
@@ -798,7 +864,9 @@ def parse(source: str | bytes) -> Layout:
                 mapped = next((fp for sub, fp in _FORMULA_TO_FPDB if sub in s), None)
                 if mapped and not any(c.fpdb_stat == mapped for c in layout.cells):
                     layout.cells.append(
-                        Cell(pt4_name=s, label=pending_label, section=panel, street=street, fpdb_stat=mapped, formula=s),
+                        Cell(
+                            pt4_name=s, label=pending_label, section=panel, street=street, fpdb_stat=mapped, formula=s
+                        ),
                     )
                 elif not mapped:
                     layout.cells.append(Cell(pt4_name=s, label=pending_label, section=panel, street=street, formula=s))
@@ -857,7 +925,7 @@ def to_stat_set(layout: Layout, name: str | None = None, cols: int = 4) -> str:
         tip = _tip(c)
         lines.append(
             f'        <stat _rowcol="({r + 1},{col + 1})" _stat_name={quoteattr(stat_name)} '
-            f"click=\"\" popup=\"default\" tip={quoteattr(tip)} hudprefix=\"\" hudsuffix=\"\" hudcolor=\"\"/>",
+            f'click="" popup="default" tip={quoteattr(tip)} hudprefix="" hudsuffix="" hudcolor=""/>',
         )
     lines.append("    </ss>")
     return "\n".join(lines)
@@ -895,19 +963,33 @@ def to_dict(layout: Layout) -> dict:
     return {
         "name": layout.name,
         "stats": [
-            {"pt4_name": c.pt4_name, "label": c.label, "section": c.section,
-             "fpdb_stat": c.fpdb_stat, "formula": c.formula}
+            {
+                "pt4_name": c.pt4_name,
+                "label": c.label,
+                "section": c.section,
+                "fpdb_stat": c.fpdb_stat,
+                "formula": c.formula,
+            }
             for c in layout.cells
         ],
         "charts": [
-            {"name": ch.name, "legend": ch.legend(),
-             "cells": [{"hand": x.hand, "fill": x.fill, "text": x.text} for x in ch.cells]}
+            {
+                "name": ch.name,
+                "legend": ch.legend(),
+                "cells": [{"hand": x.hand, "fill": x.fill, "text": x.text} for x in ch.cells],
+            }
             for ch in layout.charts
         ],
         "popup_groups": [
-            {"name": g.name, "rows": g.rows, "cols": g.cols,
-             "cells": [{"kind": c.kind, "text": c.text, "row": c.row, "col": c.col,
-                        "fg": c.fg, "bg": c.bg} for c in g.cells]}
+            {
+                "name": g.name,
+                "rows": g.rows,
+                "cols": g.cols,
+                "cells": [
+                    {"kind": c.kind, "text": c.text, "row": c.row, "col": c.col, "fg": c.fg, "bg": c.bg}
+                    for c in g.cells
+                ],
+            }
             for g in layout.popup_groups
         ],
     }
@@ -919,8 +1001,16 @@ def panel_position(label: str) -> str:
     Returns "" for general/info panels, which are always shown.
     """
     m = label.strip().upper()
-    for prefix, code in (("SB", "SB"), ("BB", "BB"), ("BTN", "BTN"), ("BU", "BTN"),
-                         ("CO", "CO"), ("MP", "MP"), ("EP", "EP"), ("UTG", "EP")):
+    for prefix, code in (
+        ("SB", "SB"),
+        ("BB", "BB"),
+        ("BTN", "BTN"),
+        ("BU", "BTN"),
+        ("CO", "CO"),
+        ("MP", "MP"),
+        ("EP", "EP"),
+        ("UTG", "EP"),
+    ):
         if m.startswith(prefix):
             return code
     return ""
@@ -1031,7 +1121,11 @@ def _flow_items(items: list[Cell], cols: int):
 
 
 def import_to_config(
-    source: str | bytes, config, name: str | None = None, charts_path: str | None = None, multiblock: bool = True,
+    source: str | bytes,
+    config,
+    name: str | None = None,
+    charts_path: str | None = None,
+    multiblock: bool = True,
 ) -> dict:
     """Insert a parsed ``.pt4hud`` layout into an fpdb ``Configuration`` document.
 

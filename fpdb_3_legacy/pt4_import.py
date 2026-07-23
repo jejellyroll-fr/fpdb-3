@@ -85,7 +85,7 @@ PT4_CONTEXT_MAP: dict[str, str] = {
 
 # PT4 numeric position code -> FPDB logical position (HandsPlayers encoding).
 PT4_POSITION_MAP: dict[int, Any] = {
-    0: 0,    # Button
+    0: 0,  # Button
     8: "B",  # Big blind
     9: "S",  # Small blind
 }
@@ -175,7 +175,7 @@ def decode_pt4stat(path: str | Path) -> DecodedStat:
     decoded = DecodedStat(path=path, strings=strings)
 
     # Referenced columns: an identifier immediately followed by its SQL.
-    for first, second in zip(strings, strings[1:]):
+    for first, second in zip(strings, strings[1:], strict=False):
         if _is_identifier(first) and _looks_like_sql(second):
             decoded.columns.setdefault(first, second)
 
@@ -469,8 +469,18 @@ def _toml_value(value: Any) -> str:
 def emit_toml(descriptor: dict[str, Any]) -> str:
     """Serialise a descriptor data dict to a ``[[stat]]`` TOML fragment."""
     order = [
-        "name", "label", "category", "scope", "inputs", "dimension",
-        "context", "value", "aggregate", "series", "format", "description",
+        "name",
+        "label",
+        "category",
+        "scope",
+        "inputs",
+        "dimension",
+        "context",
+        "value",
+        "aggregate",
+        "series",
+        "format",
+        "description",
     ]
     lines = ["[[stat]]"]
     for key in order:

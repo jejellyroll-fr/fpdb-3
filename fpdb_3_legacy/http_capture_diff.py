@@ -2,14 +2,14 @@
 
 from __future__ import annotations
 
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 from typing import Any
 
 
 def _decimal(value: Any) -> Decimal:
     try:
         return Decimal(str(value))
-    except Exception:
+    except (InvalidOperation, TypeError, ValueError):
         return Decimal("0")
 
 
@@ -71,7 +71,9 @@ def diff_snapshot_steps(previous: dict[str, Any] | None, current: dict[str, Any]
                 "type": "board_delta",
                 "from": previous_board,
                 "to": current_board,
-                "added": current_board[len(previous_board) :] if current_board[: len(previous_board)] == previous_board else [],
+                "added": current_board[len(previous_board) :]
+                if current_board[: len(previous_board)] == previous_board
+                else [],
             }
         )
 

@@ -2,14 +2,14 @@
 
 from __future__ import annotations
 
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 from typing import Any
 
 
 def _decimal(value: Any) -> Decimal:
     try:
         return Decimal(str(value))
-    except Exception:
+    except (InvalidOperation, TypeError, ValueError):
         return Decimal("0")
 
 
@@ -44,7 +44,9 @@ def infer_snapshot_street(hand_data: dict[str, Any], step: dict[str, Any]) -> st
     return "UNKNOWN"
 
 
-def _classify_single_commit(previous_step: dict[str, Any], step: dict[str, Any], candidate: dict[str, Any]) -> dict[str, Any] | None:
+def _classify_single_commit(
+    previous_step: dict[str, Any], step: dict[str, Any], candidate: dict[str, Any]
+) -> dict[str, Any] | None:
     previous_bets = previous_step.get("bets", {})
     player = candidate.get("player")
     if not player:
@@ -75,9 +77,13 @@ def _classify_single_commit(previous_step: dict[str, Any], step: dict[str, Any],
     return None
 
 
-def _reconstruct_single_commit_action(previous_step: dict[str, Any], step: dict[str, Any]) -> tuple[dict[str, Any] | None, set[int]]:
+def _reconstruct_single_commit_action(
+    previous_step: dict[str, Any], step: dict[str, Any]
+) -> tuple[dict[str, Any] | None, set[int]]:
     candidates = step.get("diff", {}).get("candidates", [])
-    committed = [(idx, candidate) for idx, candidate in enumerate(candidates) if candidate.get("type") == "committed_delta"]
+    committed = [
+        (idx, candidate) for idx, candidate in enumerate(candidates) if candidate.get("type") == "committed_delta"
+    ]
     structural = [candidate for candidate in candidates if candidate.get("type") in {"board_delta", "cards_delta"}]
     if len(committed) != 1 or structural:
         return None, set()
@@ -87,11 +93,15 @@ def _reconstruct_single_commit_action(previous_step: dict[str, Any], step: dict[
     if not action:
         return None, set()
     consumed = {idx}
-    consumed.update(_matching_stack_delta_indexes(candidates, candidate.get("player"), -_decimal(candidate.get("amount_delta", 0))))
+    consumed.update(
+        _matching_stack_delta_indexes(candidates, candidate.get("player"), -_decimal(candidate.get("amount_delta", 0)))
+    )
     return action, consumed
 
 
-def _matching_stack_delta_indexes(candidates: list[dict[str, Any]], player: str | None, amount_delta: Decimal) -> set[int]:
+def _matching_stack_delta_indexes(
+    candidates: list[dict[str, Any]], player: str | None, amount_delta: Decimal
+) -> set[int]:
     consumed: set[int] = set()
     if not player:
         return consumed
@@ -140,9 +150,13 @@ def _reconstruct_check_action(
     )
 
 
-def _reconstruct_fold_action(previous_step: dict[str, Any], step: dict[str, Any]) -> tuple[dict[str, Any] | None, set[int]]:
+def _reconstruct_fold_action(
+    previous_step: dict[str, Any], step: dict[str, Any]
+) -> tuple[dict[str, Any] | None, set[int]]:
     candidates = step.get("diff", {}).get("candidates", [])
-    fold_candidates = [(idx, candidate) for idx, candidate in enumerate(candidates) if candidate.get("type") == "fold_delta"]
+    fold_candidates = [
+        (idx, candidate) for idx, candidate in enumerate(candidates) if candidate.get("type") == "fold_delta"
+    ]
     structural = [candidate for candidate in candidates if candidate.get("type") in {"board_delta", "cards_delta"}]
     committed = [candidate for candidate in candidates if candidate.get("type") == "committed_delta"]
     if len(fold_candidates) != 1 or structural or committed:
@@ -166,11 +180,19 @@ def _reconstruct_fold_action(previous_step: dict[str, Any], step: dict[str, Any]
     )
 
 
-def _reconstruct_street_transition_call(previous_step: dict[str, Any], step: dict[str, Any]) -> tuple[dict[str, Any] | None, set[int]]:
+def _reconstruct_street_transition_call(
+    previous_step: dict[str, Any], step: dict[str, Any]
+) -> tuple[dict[str, Any] | None, set[int]]:
     candidates = step.get("diff", {}).get("candidates", [])
-    board_candidates = [(idx, candidate) for idx, candidate in enumerate(candidates) if candidate.get("type") == "board_delta"]
-    pot_candidates = [(idx, candidate) for idx, candidate in enumerate(candidates) if candidate.get("type") == "pot_delta"]
-    stack_candidates = [(idx, candidate) for idx, candidate in enumerate(candidates) if candidate.get("type") == "stack_delta"]
+    board_candidates = [
+        (idx, candidate) for idx, candidate in enumerate(candidates) if candidate.get("type") == "board_delta"
+    ]
+    pot_candidates = [
+        (idx, candidate) for idx, candidate in enumerate(candidates) if candidate.get("type") == "pot_delta"
+    ]
+    stack_candidates = [
+        (idx, candidate) for idx, candidate in enumerate(candidates) if candidate.get("type") == "stack_delta"
+    ]
     committed = [candidate for candidate in candidates if candidate.get("type") == "committed_delta"]
     if committed or len(board_candidates) != 1 or len(pot_candidates) != 1 or len(stack_candidates) != 1:
         return None, set()
@@ -205,10 +227,16 @@ def _reconstruct_street_transition_call(previous_step: dict[str, Any], step: dic
     )
 
 
-def _reconstruct_collections(previous_step: dict[str, Any], step: dict[str, Any]) -> tuple[list[dict[str, Any]], set[int]]:
+def _reconstruct_collections(
+    previous_step: dict[str, Any], step: dict[str, Any]
+) -> tuple[list[dict[str, Any]], set[int]]:
     candidates = step.get("diff", {}).get("candidates", [])
-    pot_candidates = [(idx, candidate) for idx, candidate in enumerate(candidates) if candidate.get("type") == "pot_delta"]
-    stack_candidates = [(idx, candidate) for idx, candidate in enumerate(candidates) if candidate.get("type") == "stack_delta"]
+    pot_candidates = [
+        (idx, candidate) for idx, candidate in enumerate(candidates) if candidate.get("type") == "pot_delta"
+    ]
+    stack_candidates = [
+        (idx, candidate) for idx, candidate in enumerate(candidates) if candidate.get("type") == "stack_delta"
+    ]
     if len(pot_candidates) != 1:
         return [], set()
 
@@ -238,12 +266,15 @@ def _reconstruct_collections(previous_step: dict[str, Any], step: dict[str, Any]
         consumed.update(
             idx
             for idx, candidate in enumerate(candidates)
-            if candidate.get("type") == "turn_delta" and _decimal(candidate.get("to", 0)) > _decimal(candidate.get("from", 0))
+            if candidate.get("type") == "turn_delta"
+            and _decimal(candidate.get("to", 0)) > _decimal(candidate.get("from", 0))
         )
     return collections, consumed
 
 
-def _is_action_evidence(candidate: dict[str, Any], previous_step: dict[str, Any], players_by_seat: dict[int, str]) -> bool:
+def _is_action_evidence(
+    candidate: dict[str, Any], previous_step: dict[str, Any], players_by_seat: dict[int, str]
+) -> bool:
     candidate_type = candidate.get("type")
     if candidate_type in {"committed_delta", "fold_delta", "unclassified_initial_commit"}:
         return True
@@ -305,14 +336,14 @@ def reconstruct_snapshot_actions(hand_data: dict[str, Any]) -> None:
                 blind_players.add(player)
 
         for player, amount in bets.items():
-            amount = _decimal(amount)
-            if amount > 0 and player not in blind_players:
+            normalized_amount = _decimal(amount)
+            if normalized_amount > 0 and player not in blind_players:
                 evidence.append(
                     {
                         "type": "unclassified_initial_commit",
                         "street": first_step.get("street", "UNKNOWN"),
                         "player": player,
-                        "amount": _money(amount),
+                        "amount": _money(normalized_amount),
                         "step_num": first_step.get("step_num"),
                     }
                 )
@@ -336,7 +367,15 @@ def reconstruct_snapshot_actions(hand_data: dict[str, Any]) -> None:
         for candidate_index, candidate in enumerate(step.get("diff", {}).get("candidates", [])):
             if candidate_index in consumed_candidate_indexes:
                 continue
-            if candidate.get("type") in {"committed_delta", "stack_delta", "turn_delta", "board_delta", "cards_delta", "fold_delta", "pot_delta"}:
+            if candidate.get("type") in {
+                "committed_delta",
+                "stack_delta",
+                "turn_delta",
+                "board_delta",
+                "cards_delta",
+                "fold_delta",
+                "pot_delta",
+            }:
                 item = {"step_num": step.get("step_num"), "street": step.get("street", "UNKNOWN"), **candidate}
                 if _is_action_evidence(candidate, previous_step, players_by_seat):
                     evidence.append(item)

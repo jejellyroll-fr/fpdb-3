@@ -184,7 +184,9 @@ class OnGame(HandHistoryConverter):
             )
 
             self.re_Action = re.compile(
-                "(, )?{PLYR}(?P<ATYPE> bets| checks| raises| calls| folds| changed)( ({CUR})?(?P<BET>[{NUM}]+))?( to ({CUR})?(?P<BET2>[{NUM}]+))?( and is all-in)?".format(**self.substitutions)
+                "(, )?{PLYR}(?P<ATYPE> bets| checks| raises| calls| folds| changed)( ({CUR})?(?P<BET>[{NUM}]+))?( to ({CUR})?(?P<BET2>[{NUM}]+))?( and is all-in)?".format(
+                    **self.substitutions
+                )
             )
             # self.re_Board = re.compile(r"\[board cards (?P<CARDS>.+) \]")
 
@@ -396,7 +398,7 @@ class OnGame(HandHistoryConverter):
             )
         elif hand.gametype["base"] in ("draw"):
             # isolate the first discard/stand pat line
-            discard_split = re.split(r"(?:(.+(?: changed).+))", hand.handText, re.DOTALL)
+            discard_split = re.split(r"(?:(.+(?: changed).+))", hand.handText, flags=re.DOTALL)
             if len(hand.handText) == len(discard_split[0]):
                 # handText was not split, no DRAW street occurred
                 pass
@@ -547,9 +549,12 @@ class OnGame(HandHistoryConverter):
             hand.addShownCards(cards, shows.group("PNAME"))
 
     def readCollectPot(self, hand):
-        for m in self.re_Pot.finditer(hand.handText):
-            for m in self.re_CollectPot.finditer(m.group("POT")):
-                hand.addCollectPot(player=m.group("PNAME"), pot=self.clearMoneyString(m.group("POT")))
+        for pot_section in self.re_Pot.finditer(hand.handText):
+            for pot_match in self.re_CollectPot.finditer(pot_section.group("POT")):
+                hand.addCollectPot(
+                    player=pot_match.group("PNAME"),
+                    pot=self.clearMoneyString(pot_match.group("POT")),
+                )
 
     def readShownCards(self, hand):
         for m in self.re_ShownCards.finditer(hand.handText):

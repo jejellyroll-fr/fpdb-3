@@ -496,7 +496,7 @@ class KingsClub(HandHistoryConverter):
             discard_split = re.split(
                 r"(?:(.+(?: stands pat| discards| draws).+))",
                 hand.handText,
-                re.DOTALL,
+                flags=re.DOTALL,
             )
             if len(hand.handText) == len(discard_split[0]):
                 # handText was not split, no DRAW street occurred

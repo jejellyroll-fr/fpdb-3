@@ -79,17 +79,30 @@ class HUDLayoutPositionsStore:
         except Exception:
             log.exception("Error saving HUD layout positions JSON")
 
-    def get_position(self, site: str, layout: str, stat_set: str, max_seats: int, seat: str | int, block_id: str | int) -> tuple[int, int] | None:
+    def get_position(
+        self, site: str, layout: str, stat_set: str, max_seats: int, seat: str | int, block_id: str | int
+    ) -> tuple[int, int] | None:
         key = f"{site}/{layout}/{stat_set}/{max_seats}/{seat}/{block_id}"
         pos = self.data.setdefault("positions", {}).get(key)
         if pos:
             return int(pos.get("x", 0)), int(pos.get("y", 0))
         return None
 
-    def set_position(self, site: str, layout: str, stat_set: str, max_seats: int, seat: str | int, block_id: str | int, x: int, y: int) -> None:
+    def set_position(
+        self,
+        site: str,
+        layout: str,
+        stat_set: str,
+        max_seats: int,
+        seat: str | int,
+        block_id: str | int,
+        x: int,
+        y: int,
+    ) -> None:
         key = f"{site}/{layout}/{stat_set}/{max_seats}/{seat}/{block_id}"
         self.data.setdefault("positions", {})[key] = {"x": x, "y": y}
         self.save()
+
 
 _positions_store: HUDLayoutPositionsStore | None = None
 
@@ -99,6 +112,7 @@ def get_positions_store() -> HUDLayoutPositionsStore:
     if _positions_store is None:
         _positions_store = HUDLayoutPositionsStore()
     return _positions_store
+
 
 # PT4-style item alignment names -> Qt flags.
 _ALIGN = {
@@ -271,7 +285,9 @@ class SimpleHUD(Aux_Base.AuxSeats):
         self.block_layouts = []
         blocks = getattr(self.game_params, "blocks", None)
         if not blocks:  # very old config object without blocks -> single grid
-            blocks = [type("B", (), {"label": "", "rows": self.nrows, "cols": self.ncols, "stats": self.game_params.stats})()]
+            blocks = [
+                type("B", (), {"label": "", "rows": self.nrows, "cols": self.ncols, "stats": self.game_params.stats})()
+            ]
         for blk in blocks:
             nr, nc = blk.rows, blk.cols
             stats = [[None] * nc for _ in range(nr)]
@@ -293,26 +309,42 @@ class SimpleHUD(Aux_Base.AuxSeats):
                     aligns[r][c] = getattr(st, "align", "") or ""
                     loth, hith = getattr(st, "stat_loth", ""), getattr(st, "stat_hith", "")
                     if loth and hith:
-                        colorranges[r][c] = {"loth": loth, "hith": hith,
-                                             "locolor": getattr(st, "stat_locolor", ""),
-                                             "midcolor": getattr(st, "stat_midcolor", ""),
-                                             "hicolor": getattr(st, "stat_hicolor", "")}
+                        colorranges[r][c] = {
+                            "loth": loth,
+                            "hith": hith,
+                            "locolor": getattr(st, "stat_locolor", ""),
+                            "midcolor": getattr(st, "stat_midcolor", ""),
+                            "hicolor": getattr(st, "stat_hicolor", ""),
+                        }
             self.block_layouts.append(
-                {"label": blk.label, "position": getattr(blk, "position", ""),
-                 # scope/audience/id drive create() (a table block gets one window,
-                 # not one per seat) and visibility; they MUST be carried through.
-                 "scope": getattr(blk, "scope", "player"),
-                 "audience": getattr(blk, "audience", "everyone"),
-                 "id": getattr(blk, "id", ""),
-                 "bgcolor": getattr(blk, "bgcolor", ""), "fgcolor": getattr(blk, "fgcolor", ""),
-                 "bordercolor": getattr(blk, "bordercolor", ""),
-                 "title_bgcolor": getattr(blk, "title_bgcolor", ""),
-                 "title_fgcolor": getattr(blk, "title_fgcolor", ""),
-                 "x": getattr(blk, "x", 0), "y": getattr(blk, "y", 0),
-                 "nrows": nr, "ncols": nc, "stats": stats, "popups": popups, "tips": tips,
-                 "hudcolors": hudcolors, "hudbgcolors": hudbgcolors, "colorranges": colorranges,
-                 "colspans": colspans, "aligns": aligns,
-                 "texts": list(getattr(blk, "texts", [])), "hlines": list(getattr(blk, "hlines", []))},
+                {
+                    "label": blk.label,
+                    "position": getattr(blk, "position", ""),
+                    # scope/audience/id drive create() (a table block gets one window,
+                    # not one per seat) and visibility; they MUST be carried through.
+                    "scope": getattr(blk, "scope", "player"),
+                    "audience": getattr(blk, "audience", "everyone"),
+                    "id": getattr(blk, "id", ""),
+                    "bgcolor": getattr(blk, "bgcolor", ""),
+                    "fgcolor": getattr(blk, "fgcolor", ""),
+                    "bordercolor": getattr(blk, "bordercolor", ""),
+                    "title_bgcolor": getattr(blk, "title_bgcolor", ""),
+                    "title_fgcolor": getattr(blk, "title_fgcolor", ""),
+                    "x": getattr(blk, "x", 0),
+                    "y": getattr(blk, "y", 0),
+                    "nrows": nr,
+                    "ncols": nc,
+                    "stats": stats,
+                    "popups": popups,
+                    "tips": tips,
+                    "hudcolors": hudcolors,
+                    "hudbgcolors": hudbgcolors,
+                    "colorranges": colorranges,
+                    "colspans": colspans,
+                    "aligns": aligns,
+                    "texts": list(getattr(blk, "texts", [])),
+                    "hlines": list(getattr(blk, "hlines", [])),
+                },
             )
 
     def refresh_stats_layout(self) -> None:
@@ -456,7 +488,8 @@ class SimpleHUD(Aux_Base.AuxSeats):
             return None, "", ""
         try:
             player_id = self.get_id_from_seat(seat)
-        except Exception:
+        except (AttributeError, IndexError, KeyError, TypeError):
+            log.debug("Unable to resolve HUD player data for seat %s", seat, exc_info=True)
             return None, "", ""
         pdata = self.hud.stat_dict.get(player_id, {}) if player_id is not None and self.hud.stat_dict else {}
         return player_id, str(pdata.get("screen_name", "") or ""), pdata.get("position", "")
@@ -765,7 +798,9 @@ class SimpleHUD(Aux_Base.AuxSeats):
         )
 
         self.block_positions[(seat, block_index)] = (canonical_x, canonical_y)
-        self._log_block_window_position("drag-save", seat, block_index, (canonical_x, canonical_y), (new_abs_position.x(), new_abs_position.y()))
+        self._log_block_window_position(
+            "drag-save", seat, block_index, (canonical_x, canonical_y), (new_abs_position.x(), new_abs_position.y())
+        )
 
     def save_layout(self, *_args: Any) -> None:
         """Save the current HUD layout configuration.
@@ -869,11 +904,22 @@ class SimpleStatWindow(Aux_Base.SeatWindow):
         self.setLayout(outer)
 
         all_blocks = getattr(self.aw, "block_layouts", None) or [
-            {"label": "", "position": "", "nrows": self.aw.nrows, "ncols": self.aw.ncols,
-             "bgcolor": "", "fgcolor": "", "bordercolor": "", "title_bgcolor": "", "title_fgcolor": "",
-             "hudcolors": [[""] * self.aw.ncols for _ in range(self.aw.nrows)],
-             "hudbgcolors": [[""] * self.aw.ncols for _ in range(self.aw.nrows)],
-             "stats": self.aw.stats, "popups": self.aw.popups, "tips": self.aw.tips},
+            {
+                "label": "",
+                "position": "",
+                "nrows": self.aw.nrows,
+                "ncols": self.aw.ncols,
+                "bgcolor": "",
+                "fgcolor": "",
+                "bordercolor": "",
+                "title_bgcolor": "",
+                "title_fgcolor": "",
+                "hudcolors": [[""] * self.aw.ncols for _ in range(self.aw.nrows)],
+                "hudbgcolors": [[""] * self.aw.ncols for _ in range(self.aw.nrows)],
+                "stats": self.aw.stats,
+                "popups": self.aw.popups,
+                "tips": self.aw.tips,
+            },
         ]
         multi = len(all_blocks) > 1
         block_index = getattr(self, "block_index", None)
@@ -910,20 +956,14 @@ class SimpleStatWindow(Aux_Base.SeatWindow):
                 title_bg = blk.get("title_bgcolor") or blk.get("bordercolor") or panel_fg
                 title_fg = blk.get("title_fgcolor") or self.aw.bgcolor
                 title.setStyleSheet(
-                    f"background: {title_bg};"
-                    f"color: {title_fg};"
-                    "font-weight: 700;"
-                    "padding: 1px 4px;"
-                    "border: 0;"
+                    f"background: {title_bg};color: {title_fg};font-weight: 700;padding: 1px 4px;border: 0;"
                 )
                 cl.addWidget(title)
             grid = QGridLayout()
             grid.setHorizontalSpacing(2 if multi else 4)
             grid.setVerticalSpacing(1)
             grid.setContentsMargins(1 if multi else 0, 1 if multi else 0, 1 if multi else 0, 0)
-            box: list[list[SimpleStat | EmptyStat | None]] = [
-                [None] * blk["ncols"] for _ in range(blk["nrows"])
-            ]
+            box: list[list[SimpleStat | EmptyStat | None]] = [[None] * blk["ncols"] for _ in range(blk["nrows"])]
             btexts = blk.get("texts", [])
             # When the panel carries explicit PT4 text items (column/row headers,
             # captions) render them at their grid positions; otherwise fall back to
@@ -958,7 +998,11 @@ class SimpleStatWindow(Aux_Base.SeatWindow):
                         cranges = blk.get("colorranges")
                         cr = cranges[r][c] if cranges else None
                         stat_widget = self.aw.aw_class_stat(
-                            stat_name, seat=self.seat, popup=blk["popups"][r][c], aw=self.aw, colors=cr,
+                            stat_name,
+                            seat=self.seat,
+                            popup=blk["popups"][r][c],
+                            aw=self.aw,
+                            colors=cr,
                         )
                         box[r][c] = stat_widget
                         if blk["hudcolors"][r][c] or blk["hudbgcolors"][r][c]:

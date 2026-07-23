@@ -23,7 +23,7 @@ from pathlib import Path
 from typing import BinaryIO
 
 from fpdb_3_legacy.http_capture_diff import diff_snapshot_steps
-from fpdb_3_legacy.http_capture_models import SWC_GAME_DEFINITIONS
+from fpdb_3_legacy.http_capture_models import SWC_GAME_DEFINITIONS, CapturedGameDefinition
 from fpdb_3_legacy.swc_http_adapter import card_id_to_str
 
 SWC_APP = Path("/Applications/SwC Poker.app")
@@ -654,7 +654,7 @@ def _stud_player_revealed_card_blocks(payload: bytes, start: int, end: int) -> l
 
 def _stud_block_matches_known_upcards(cards: bytes, known: dict[str, str | None]) -> bool:
     matched = 0
-    for street, card_id in zip(_STUD_UPCARD_STREETS, cards[2:]):
+    for street, card_id in zip(_STUD_UPCARD_STREETS, cards[2:], strict=False):
         expected = known.get(street)
         if expected is None:
             continue
@@ -713,7 +713,8 @@ def _stud_snapshot_upcards(snapshot: NativeGameStateSnapshot) -> list[dict]:
         if not slots:
             continue
         up_cards = {
-            street: (card_id_to_str(byte) if byte <= 51 else None) for street, byte in zip(_STUD_UPCARD_STREETS, slots)
+            street: (card_id_to_str(byte) if byte <= 51 else None)
+            for street, byte in zip(_STUD_UPCARD_STREETS, slots, strict=False)
         }
         rows.append({"player": name, "seat_idx": None, "up_cards": up_cards})
     return rows
@@ -887,7 +888,7 @@ def _add_native_stud_amount_minimums(actions: list[dict], structure: dict) -> No
 
 
 def _build_native_action_evidence(steps: list[dict], stud_betting_structure: dict | None = None) -> list[dict]:
-    actions = []
+    actions: list[dict] = []
     for step in steps:
         for event in step["native_events"]:
             if "action_name_evidence" not in event or "player_name_evidence" not in event:
@@ -1013,11 +1014,13 @@ def build_native_canonical_actions(action_evidence: list[dict], returned: list[d
     if any(action.get("player") is None or action.get("amount_native") is None for action in action_evidence):
         return []
 
-    actions = []
+    actions: list[dict] = []
     contributed: dict[tuple[str, str], int] = {}
     last_street_by_player: dict[str, str] = {}
     for evidence in action_evidence:
         native_type = evidence.get("action")
+        if not isinstance(native_type, str):
+            return []
         action_type = _NATIVE_CANONICAL_ACTION_TYPES.get(native_type)
         if action_type is None:
             return []
@@ -1036,8 +1039,10 @@ def build_native_canonical_actions(action_evidence: list[dict], returned: list[d
     for item in returned:
         player = item.get("player")
         amount = item.get("amount_native")
+        if not isinstance(player, str) or amount is None:
+            return []
         street = last_street_by_player.get(player)
-        if player is None or amount is None or street is None:
+        if street is None:
             return []
         actions.append({"type": "uncalled", "player": player, "street": street, "amount": amount})
     return actions
@@ -1368,8 +1373,8 @@ def parse_native_dealer_draw(text: str) -> dict | None:
 # the FPDB base/category without decoding the opaque native game-type code.
 _GAME_CHANGE_TEXT = re.compile(r"^Game changes to (?P<limit>NL|PL|FL) (?P<game>.+?) (?P<sb>\d+)/(?P<bb>\d+)$")
 _NATIVE_LIMIT_TYPES = {"NL": "nl", "PL": "pl", "FL": "fl"}
-_SWC_LABEL_TO_DEFINITION = {}
-for _swc_code, _swc_definition in SWC_GAME_DEFINITIONS.items():
+_SWC_LABEL_TO_DEFINITION: dict[str, CapturedGameDefinition] = {}
+for _swc_definition in SWC_GAME_DEFINITIONS.values():
     _SWC_LABEL_TO_DEFINITION.setdefault(_swc_definition.label, _swc_definition)
 
 
@@ -2137,9 +2142,12 @@ def match_native_outbound_seat_evidence(
 ) -> dict[tuple[int, int, int], NativeSeatEvidence]:
     """Anchor the local player to the server index echoed for a confirmed command."""
     players_by_name = {player.name: player for player in players}
-    result = {}
+    result: dict[tuple[int, int, int], NativeSeatEvidence] = {}
     for action in actions:
-        player = players_by_name.get(action.get("player"))
+        player_name = action.get("player")
+        if not isinstance(player_name, str):
+            continue
+        player = players_by_name.get(player_name)
         seat_idx = action.get("server_native_index")
         if player is None or seat_idx is None:
             continue
@@ -2169,7 +2177,7 @@ def _build_normalized_native_seat_evidence(
     dealer_returns_by_hand: dict[tuple[int, int], list[dict]],
     outbound_actions_by_hand: dict[tuple[int, int], list[dict]],
 ) -> dict[tuple[int, int, int], NativeSeatEvidence]:
-    evidence = {}
+    evidence: dict[tuple[int, int, int], NativeSeatEvidence] = {}
     table_ids = set(table_infos)
     rosters: dict[tuple[int, int], set[int]] = {}
     player_names: dict[tuple[int, int], dict[int, str]] = {}
@@ -2383,7 +2391,7 @@ def _propagate_native_roster_segment(
 def summarize_native_hands(messages: list[NativeProtocolMessage]) -> list[NativeHandSummary]:
     """Identify stable table/hand ids without pretending native fields are decoded."""
     table_infos: dict[int, NativeTableInfo] = {}
-    table_names = {}
+    table_names: dict[int, str | None] = {}
     for message in messages:
         payload = message.payload
         message_type = int.from_bytes(payload[:2], "little") if len(payload) >= 2 else -1
@@ -2415,7 +2423,7 @@ def summarize_native_hands(messages: list[NativeProtocolMessage]) -> list[Native
             "ofc"
             if table_id in ofc_table_ids
             else table_infos.get(table_id, NativeTableInfo(0, "", None, "unknown")).family,
-            table_infos.get(table_id).tournament_id if table_id in table_infos else None,
+            table_infos[table_id].tournament_id if table_id in table_infos else None,
             tuple(dict.fromkeys(round_number for round_number in rounds if round_number >= 0)),
             tuple(hand_players.get((table_id, hand_id), {}).values()),
         )
@@ -2431,7 +2439,7 @@ def add_native_starting_stacks(  # noqa: C901
     login_names = {name for message in messages if (name := extract_native_outbound_login_name(message)) is not None}
     local_player = next(iter(login_names)) if len(login_names) == 1 else None
     requests = {}
-    rosters = {}
+    rosters: dict[int, dict] = {}
     for message in messages:
         request = parse_native_outbound_seat_request(message)
         if request is not None:
@@ -2510,6 +2518,7 @@ def promote_native_omaha_importability(hands: list[dict]) -> None:
         )
         if not complete:
             continue
+        assert button_player is not None
         hand["buttonpos"] = button_player["seat_idx"]
         hand["metadata"]["button_source"] = "heads_up_small_blind_is_button"
         hand["game"]["fpdb_supported"] = True
@@ -3007,7 +3016,7 @@ def launch_client(archive: Path, *, port: int = 0, include_outbound: bool = Fals
 def inspect_archive(path: Path) -> int:
     count = 0
     total = 0
-    directions = Counter()
+    directions: Counter[str] = Counter()
     with path.open("rb") as stream:
         for record in iter_capture_records(stream):
             count += 1

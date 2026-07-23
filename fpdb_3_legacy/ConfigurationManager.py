@@ -310,7 +310,9 @@ class ConfigurationManager:
                     [],
                 )
 
-            except Exception as e:  # intentional broad catch: reload combines file I/O, legacy Config parsing, and observers.
+            except (
+                Exception
+            ) as e:  # intentional broad catch: reload combines file I/O, legacy Config parsing, and observers.
                 log.exception(f"Error during reload: {e}")
                 import traceback
 
@@ -532,7 +534,9 @@ class ConfigurationManager:
         observed_parts = observed_path.split(".")
         if len(change_parts) != len(observed_parts):
             return False
-        return all(pattern == "*" or pattern == part for part, pattern in zip(change_parts, observed_parts))
+        return all(
+            pattern == "*" or pattern == part for part, pattern in zip(change_parts, observed_parts, strict=True)
+        )
 
     def _apply_dynamic_changes(self, changes: list[ConfigChange], new_config: Configuration.Config) -> bool:
         """Applies changes that can be made dynamically.

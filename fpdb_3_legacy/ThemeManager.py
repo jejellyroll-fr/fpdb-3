@@ -797,7 +797,7 @@ class ThemeManager:
             try:
                 widgets = list(app.allWidgets())
             except Exception:  # intentional broad catch: allWidgets might be a Mock in tests
-                pass
+                log.debug("Unable to enumerate widgets during theme refresh", exc_info=True)
 
             for widget in widgets:
                 if isinstance(widget, QScrollArea) and widget.widget().__class__.__name__ == "Filters":
@@ -838,7 +838,7 @@ class ThemeManager:
                     widget.style().polish(widget)
                     widget.update()
                 except Exception:  # intentional broad catch: style method might be mocked in tests
-                    pass
+                    log.debug("Unable to repolish widget %r", widget, exc_info=True)
             app.processEvents()
             return True
         except (ImportError, RuntimeError, AttributeError) as e:
@@ -968,7 +968,7 @@ class ThemeManager:
         except ImportError:
             log.warning("qt_material not available, using fallback theme list")
             return self._get_fallback_themes()
-        except (ImportError, RuntimeError, OSError, AttributeError) as e:
+        except (RuntimeError, OSError, AttributeError) as e:
             log.warning(f"Error detecting qt_material themes: {e}, using fallback")
             return self._get_fallback_themes()
 

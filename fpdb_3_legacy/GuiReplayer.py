@@ -963,9 +963,7 @@ class GuiReplayer(QWidget):
             markers.append(f"Splash pot: {Decimal(splash) / 100:.2f}{currency}")
         return ("  ·  " + "  ·  ".join(markers)) if markers else ""
 
-    _RUN_IT_STREETS = frozenset(
-        f"{s}{n}" for s in ("FLOP", "TURN", "RIVER") for n in (1, 2, 3)
-    )
+    _RUN_IT_STREETS = frozenset(f"{s}{n}" for s in ("FLOP", "TURN", "RIVER") for n in (1, 2, 3))
 
     def _is_ofc_replay_entry(self, entry) -> bool:
         if isinstance(entry, OFCHand):
@@ -991,8 +989,7 @@ class GuiReplayer(QWidget):
         states = []
         row_limits = {"top": 3, "middle": 5, "bottom": 5}
         visible_rows = {
-            player.name: {row: ["--"] * limit for row, limit in row_limits.items()}
-            for player in ofc_hand.players
+            player.name: {row: ["--"] * limit for row, limit in row_limits.items()} for player in ofc_hand.players
         }
         if ofc_hand.rounds:
             for index in range(len(ofc_hand.rounds)):
@@ -1012,7 +1009,12 @@ class GuiReplayer(QWidget):
                 elif not captured_pending and len(round_placed_cards) == 5 and not has_actor_board:
                     pending_cards = list(round_placed_cards)
                     private_pending = False
-                elif not captured_pending and len(round_placed_cards) == 2 and has_actor_board and ofc_hand.variant.get("pineapple"):
+                elif (
+                    not captured_pending
+                    and len(round_placed_cards) == 2
+                    and has_actor_board
+                    and ofc_hand.variant.get("pineapple")
+                ):
                     pending_cards = ["0", "0", "0"]
                     private_pending = True
                 discarded_cards = list(current_round.get("discarded") or [])
@@ -1058,10 +1060,10 @@ class GuiReplayer(QWidget):
                             if not card or card in row_cards:
                                 continue
                             try:
-                                index = row_cards.index("--")
+                                slot_index = row_cards.index("--")
                             except ValueError:
                                 continue
-                            row_cards[index] = card
+                            row_cards[slot_index] = card
                             placed_cards.append(card)
                 states.append(
                     OFCReplayState(
@@ -1091,7 +1093,9 @@ class GuiReplayer(QWidget):
                 )
             )
         else:
-            states.append(OFCReplayState(round_index=0, phase="result", rounds=[], current_round=None, visible_rows=visible_rows))
+            states.append(
+                OFCReplayState(round_index=0, phase="result", rounds=[], current_round=None, visible_rows=visible_rows)
+            )
         return ReplayModel(
             hand=ofc_hand,
             info=self._format_ofc_info(ofc_hand),
@@ -1197,7 +1201,9 @@ class GuiReplayer(QWidget):
             f"{format_replay_amount(player.collected, self.currency_code)}",
         )
 
-    def _draw_ofc_board(self, painter: QPainter, center: QPointF, rows: dict[str, list[str]], highlight: set[str]) -> None:
+    def _draw_ofc_board(
+        self, painter: QPainter, center: QPointF, rows: dict[str, list[str]], highlight: set[str]
+    ) -> None:
         row_defs = [("top", "Top", 3), ("middle", "Middle", 5), ("bottom", "Bottom", 5)]
         card_w = max(28, min(46, int(self._ofc_table_rect().width() / 30), int(self._ofc_table_rect().height() / 8)))
         card_h = int(card_w * CARD_HEIGHT / CARD_WIDTH)
@@ -1261,7 +1267,9 @@ class GuiReplayer(QWidget):
         painter.drawRoundedRect(tray, 10, 10)
         painter.setFont(QFont("Helvetica", 10, QFont.Weight.Bold))
         painter.setPen(QColor("#eef3f7"))
-        painter.drawText(tray.adjusted(14, 8, -14, -tray.height() + 32), Qt.AlignmentFlag.AlignLeft, f"{state.actor} receives")
+        painter.drawText(
+            tray.adjusted(14, 8, -14, -tray.height() + 32), Qt.AlignmentFlag.AlignLeft, f"{state.actor} receives"
+        )
 
         self.render_card_width = card_w
         self.render_card_height = card_h
@@ -1279,7 +1287,9 @@ class GuiReplayer(QWidget):
                 lift_highlight=False,
             )
 
-    def _draw_ofc_result_summary(self, painter: QPainter, table_rect: QRectF, ofc_hand: OFCHand, state: OFCReplayState) -> None:
+    def _draw_ofc_result_summary(
+        self, painter: QPainter, table_rect: QRectF, ofc_hand: OFCHand, state: OFCReplayState
+    ) -> None:
         if state.phase != "result":
             return
         panel = QRectF(table_rect.center().x() - 180, table_rect.center().y() - 62, 360, 124)
@@ -1296,7 +1306,13 @@ class GuiReplayer(QWidget):
             line = f"{player.name}: {format_number(player.points, 0)} pts"
             if player.collected:
                 line += f" · collected {format_replay_amount(player.collected, self.currency_code)}"
-            painter.setPen(QColor("#9ee6a7") if player.points > 0 else QColor("#f0a0a0") if player.points < 0 else QColor("#c4cdd4"))
+            painter.setPen(
+                QColor("#9ee6a7")
+                if player.points > 0
+                else QColor("#f0a0a0")
+                if player.points < 0
+                else QColor("#c4cdd4")
+            )
             painter.drawText(QRectF(panel.x() + 18, y, panel.width() - 36, 20), Qt.AlignmentFlag.AlignLeft, line)
             y += 21
 
@@ -1324,7 +1340,12 @@ class GuiReplayer(QWidget):
 
     def _draw_ofc_timeline(self, painter: QPainter, state: OFCReplayState) -> None:
         width = 280
-        rect = QRectF(self.width() - width - 28, HEADER_HEIGHT, width, self.height() - HEADER_HEIGHT - CONTROL_RESERVED_HEIGHT - 18)
+        rect = QRectF(
+            self.width() - width - 28,
+            HEADER_HEIGHT,
+            width,
+            self.height() - HEADER_HEIGHT - CONTROL_RESERVED_HEIGHT - 18,
+        )
         if rect.x() < 680:
             return
         painter.setPen(QPen(QColor("#46505a"), 1))
@@ -1346,7 +1367,9 @@ class GuiReplayer(QWidget):
             painter.setBrush(QColor("#20272d"))
             painter.drawRoundedRect(entry_rect, 4, 4)
             painter.setPen(QColor("#c4cdd4"))
-            painter.drawText(entry_rect.adjusted(8, 2, -8, -2), Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter, entry)
+            painter.drawText(
+                entry_rect.adjusted(8, 2, -8, -2), Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter, entry
+            )
             y += row_h
 
     def _paint_ofc_replay(self, painter: QPainter) -> None:
@@ -1493,7 +1516,11 @@ class GuiReplayer(QWidget):
             players=players,
             pots=state.computePots(),
             runs=runs_info,
-            board_mode="double" if getattr(hand, "bombPot", 0) and len(board_runs) > 1 else "run" if len(board_runs) > 1 else "single",
+            board_mode="double"
+            if getattr(hand, "bombPot", 0) and len(board_runs) > 1
+            else "run"
+            if len(board_runs) > 1
+            else "single",
             category=category,
         )
 
@@ -1502,9 +1529,7 @@ class GuiReplayer(QWidget):
         board/hole highlight colours. Mutates each winner's hole_run_colors so
         a hole card used in N runs gets N nested outlines."""
         contesting = [
-            p
-            for p in players
-            if p.action != "folds" and any(c not in ("0", "0x", None) for c in (p.holecards or []))
+            p for p in players if p.action != "folds" and any(c not in ("0", "0x", None) for c in (p.holecards or []))
         ]
         runs_info = []
         for i, run in enumerate(board_runs):
@@ -1525,7 +1550,9 @@ class GuiReplayer(QWidget):
                     # in the run's colour.
                     info["board_highlight"] = frozenset(c for c in (winner_cards or frozenset()) if c in run)
                     # The hole cards the winner uses, for nested outlines.
-                    hole_used = frozenset(winner_cards or frozenset()) & frozenset(self._normalized_cards(list(winner.holecards or [])))
+                    hole_used = frozenset(winner_cards or frozenset()) & frozenset(
+                        self._normalized_cards(list(winner.holecards or []))
+                    )
                     for card in hole_used:
                         winner.hole_run_colors.setdefault(card, []).append(color)
             runs_info.append(info)
@@ -1804,11 +1831,7 @@ class GuiReplayer(QWidget):
         # pre-flop, before any board street is rendered. Show it on its own only
         # while no street/run board is on screen yet; once the flop (or a run
         # board) appears, the flopet is already part of that board.
-        if (
-            not runs
-            and (frame.category or "").lower().startswith("cour")
-            and frame.board.get("FLOP")
-        ):
+        if not runs and (frame.category or "").lower().startswith("cour") and frame.board.get("FLOP"):
             runs.append(list(frame.board["FLOP"][:1]))
         board_cards = [c for run in runs for c in run]
 
@@ -1876,7 +1899,9 @@ class GuiReplayer(QWidget):
         if len(pots) <= 1:
             pot_text = f"Pot: {format_replay_amount(pot_total, self.currency_code)}"
         else:
-            pot_text = "\n".join(f"{label}: {format_replay_amount(amount, self.currency_code)}" for label, amount in pots)
+            pot_text = "\n".join(
+                f"{label}: {format_replay_amount(amount, self.currency_code)}" for label, amount in pots
+            )
 
         pot_rect = layout.pot_rect
         if not board_cards:
@@ -1969,7 +1994,7 @@ class GuiReplayer(QWidget):
             seat.panel_rect.x() + 6,
             seat.panel_rect.y() + 2,
             seat.panel_rect.width() - 12,
-            seat.panel_rect.height() * 0.48
+            seat.panel_rect.height() * 0.48,
         )
         painter.drawText(name_rect, Qt.AlignmentFlag.AlignCenter, stack_text)
 
@@ -1986,7 +2011,7 @@ class GuiReplayer(QWidget):
             seat.panel_rect.x() + 6,
             seat.panel_rect.y() + seat.panel_rect.height() * 0.48,
             seat.panel_rect.width() - 12,
-            seat.panel_rect.height() * 0.48
+            seat.panel_rect.height() * 0.48,
         )
         painter.drawText(action_rect, Qt.AlignmentFlag.AlignCenter, action_text)
 
@@ -2061,7 +2086,9 @@ class GuiReplayer(QWidget):
                 if player.justacted and player.action:
                     allin_suffix = " (all-in)" if player.allin and player.action != "collected" else ""
                     if player.action == "collected" and player.chips:
-                        entries.append(f"{player.name}: collected {format_replay_amount(player.chips, self.currency_code)}")
+                        entries.append(
+                            f"{player.name}: collected {format_replay_amount(player.chips, self.currency_code)}"
+                        )
                     elif player.chips and player.action not in {"folds", "checks"}:
                         amount = format_replay_amount(player.chips, self.currency_code)
                         entries.append(f"{player.name}: {player.action} {amount}{allin_suffix}")
@@ -2138,10 +2165,7 @@ class GuiReplayer(QWidget):
         if equity is not None:
             equity_pct = equity * Decimal(100)
             edge = equity_pct - equity_needed
-            summary += (
-                f" · equity {format_number(equity_pct, 1)}% · "
-                f"edge {format_number(edge, 1, show_plus=True)} pts"
-            )
+            summary += f" · equity {format_number(equity_pct, 1)}% · edge {format_number(edge, 1, show_plus=True)} pts"
         return summary
 
     def _draw_summary(self, painter: QPainter, frame: ReplayFrame, layout: ReplayLayout, current_index: int) -> None:
@@ -2386,9 +2410,6 @@ class GuiReplayer(QWidget):
         else:
             QWidget.keyPressEvent(self, event)
 
-
-
-
     def start_clicked(self, checkState) -> None:
         self.stateSlider.setValue(0)
 
@@ -2412,6 +2433,8 @@ class GuiReplayer(QWidget):
             if self._button_street_name(state.street) == self._button_street_name(street):
                 self.stateSlider.setValue(i)
                 break
+
+
 # ICM code originally grabbed from http://svn.gna.org/svn/pokersource/trunk/icm-calculator/icm-webservice.py
 # Copyright (c) 2008 Thomas Johnson <tomfmason@gmail.com>
 
@@ -2623,9 +2646,7 @@ class TableState:
         for level in boundaries:
             contributors = [c for c in contributions.values() if c > prev]
             amount = sum(min(c, level) - prev for c in contributors)
-            eligible = frozenset(
-                n for n, c in contributions.items() if c > prev and n not in folded
-            )
+            eligible = frozenset(n for n, c in contributions.items() if c > prev and n not in folded)
             prev = level
             if len(contributors) <= 1:
                 # Only one player committed into this layer: uncalled bet, returned.

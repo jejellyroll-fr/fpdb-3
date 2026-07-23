@@ -1,7 +1,6 @@
 """Test script for site identification with PokerTracker4 iPoker hands."""
 
 import sys
-import traceback
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
@@ -53,7 +52,7 @@ louisaf55: Shows [S8 CQ C5 C8] Flush, Ace High
 louisaf55: wins €0.56"""
 
 
-def test_site_identification() -> bool:
+def test_site_identification() -> None:
     """Test site identification for PokerTracker4 iPoker hands."""
     # Create a minimal config
     config = Config()
@@ -61,23 +60,11 @@ def test_site_identification() -> bool:
     # Create IdentifySite instance
     identifier = IdentifySite(config)
 
-    try:
-        # Test site identification
-        fpdb_file = identifier.idSite("test_file.txt", sample_hand, "utf8")
+    fpdb_file = identifier.idSite("test_file.txt", sample_hand, "utf8")
 
-        if fpdb_file and fpdb_file.site:
-            # Verify we have the expected attributes
-            if not fpdb_file.site.name:
-                msg = "Site name not identified"
-                raise ValueError(msg)
-            return True
-
-        msg = "Failed to identify site"
-        raise ValueError(msg)
-
-    except (ValueError, ImportError, AttributeError):
-        traceback.print_exc()
-        return False
+    assert fpdb_file is not None
+    assert fpdb_file.site is not None
+    assert fpdb_file.site.name
 
 
 if __name__ == "__main__":

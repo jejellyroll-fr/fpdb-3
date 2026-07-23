@@ -168,7 +168,7 @@ class LinuxTableDetector:
             attrs = self._xconn.core.GetWindowAttributes(window=window_id).reply()
             return attrs.map_state != 0
 
-        except Exception:
+        except (AttributeError, OSError, TypeError, ValueError):
             return False
 
     def is_window_displayed(self, window_id: int | str) -> bool:

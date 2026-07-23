@@ -194,6 +194,7 @@ class ModernSeatCard(QFrame):
         to layout seat index.
         """
         import math
+
         # Default mapping is identity
         default_mapping = {i: i for i in range(1, max_seats + 1)}
 
@@ -203,7 +204,9 @@ class ModernSeatCard(QFrame):
             layout_set_name = None
             if hasattr(self.site_config, "layout_set"):
                 if isinstance(self.site_config.layout_set, dict):
-                    layout_set_name = self.site_config.layout_set.get("all") or next(iter(self.site_config.layout_set.values()), None)
+                    layout_set_name = self.site_config.layout_set.get("all") or next(
+                        iter(self.site_config.layout_set.values()), None
+                    )
 
             if not layout_set_name:
                 return default_mapping
@@ -331,7 +334,10 @@ class ModernSeatCard(QFrame):
             players_label.setMinimumHeight(80)  # Same height as table
             players_label.setMaximumHeight(80)
             seats_layout.addWidget(
-                players_label, row, col, Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignHCenter,
+                players_label,
+                row,
+                col,
+                Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignHCenter,
             )
 
             # Input for favorite seat
@@ -383,7 +389,10 @@ class ModernSeatCard(QFrame):
             seat_selector.seatChanged.connect(lambda seat, ms=max_seats: self.on_visual_seat_changed(ms, seat))
             self.seat_selectors[max_seats] = seat_selector
             seats_layout.addWidget(
-                seat_selector, row, col + 2, Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignHCenter,
+                seat_selector,
+                row,
+                col + 2,
+                Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignHCenter,
             )
 
             # Add vertical spacing between rows
@@ -727,8 +736,7 @@ class ModernSeatPreferencesDialog(QDialog):
                 self.status_bar.showMessage(f"✔️ Auto-saved seats for {site_name}", 2000)
 
         except Exception:  # intentional broad catch: auto-save must not interrupt live UI editing.
-            # On error, do not interrupt the user
-            pass
+            log.exception("Unable to auto-save seat preferences")
 
     def save_changes(self) -> None:
         """Save changes."""
@@ -831,7 +839,7 @@ class ModernSeatPreferencesDialog(QDialog):
                 pass
 
         except Exception:  # intentional broad catch: parent/config reload callbacks are optional runtime hooks.
-            pass
+            log.debug("Unable to reload parent configuration", exc_info=True)
 
     def closeEvent(self, event) -> None:
         """Handle window close event."""
@@ -974,6 +982,6 @@ def show_modern_seat_preferences(config, parent=None):
             elif hasattr(parent, "refresh_tables"):
                 parent.refresh_tables()
         except Exception:  # intentional broad catch: parent notification callbacks are optional runtime hooks.
-            pass
+            log.debug("Unable to notify parent about seat preference changes", exc_info=True)
 
     return result

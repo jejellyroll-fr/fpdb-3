@@ -134,8 +134,7 @@ class MacOSTableDetector:
             # Titles missing despite permissions looking granted (e.g. an
             # Electron client like Winamax): the AppleScript fallback handles it.
             logger.debug(
-                "Quartz exposed no window titles but permissions look granted; "
-                "relying on the AppleScript fallback.",
+                "Quartz exposed no window titles but permissions look granted; relying on the AppleScript fallback.",
             )
             return
 
@@ -196,11 +195,7 @@ class MacOSTableDetector:
                     height=int(bounds.get("Height", 0)),
                 )
 
-                if (
-                    search_string
-                    and self._is_target_process(owner_name)
-                    and self._looks_like_table_window(geometry)
-                ):
+                if search_string and self._is_target_process(owner_name) and self._looks_like_table_window(geometry):
                     candidate = TableInfo(
                         window_id=window_number,
                         title=window_title,
@@ -381,38 +376,44 @@ class MacOSTableDetector:
             # Script AppleScript pour lister toutes les fenêtres de ces processus
             script_lines = [
                 'tell application "System Events"',
-                '    set windowList to {}',
-                '    repeat with proc in (every process whose visible is true)',
-                '        set procName to name of proc',
-                '        set isTarget to false',
-                '        -- Check against target poker apps',
+                "    set windowList to {}",
+                "    repeat with proc in (every process whose visible is true)",
+                "        set procName to name of proc",
+                "        set isTarget to false",
+                "        -- Check against target poker apps",
             ]
             for proc in self._TARGET_PROCESSES:
                 script_lines.append(f'        if procName contains "{proc}" then')
-                script_lines.append('            set isTarget to true')
-                script_lines.append('        end if')
+                script_lines.append("            set isTarget to true")
+                script_lines.append("        end if")
 
-            script_lines.extend([
-                '        if isTarget then',
-                '            repeat with win in (every window of proc)',
-                '                try',
-                '                    set winName to name of win',
-                '                    set winPos to position of win',
-                '                    set winSize to size of win',
-                '                    set end of windowList to procName & "|" & winName & "|" & (item 1 of winPos) & "|" & (item 2 of winPos) & "|" & (item 1 of winSize) & "|" & (item 2 of winSize)',
-                '                end try',
-                '            end repeat',
-                '        end if',
-                '    end repeat',
-                '    return windowList',
-                'end tell'
-            ])
+            script_lines.extend(
+                [
+                    "        if isTarget then",
+                    "            repeat with win in (every window of proc)",
+                    "                try",
+                    "                    set winName to name of win",
+                    "                    set winPos to position of win",
+                    "                    set winSize to size of win",
+                    '                    set end of windowList to procName & "|" & winName & "|" & (item 1 of winPos) & "|" & (item 2 of winPos) & "|" & (item 1 of winSize) & "|" & (item 2 of winSize)',
+                    "                end try",
+                    "            end repeat",
+                    "        end if",
+                    "    end repeat",
+                    "    return windowList",
+                    "end tell",
+                ]
+            )
 
             script = "\n".join(script_lines)
             result = subprocess.run(["osascript", "-e", script], capture_output=True, text=True, timeout=5)
 
-            logger.debug("DIAGNOSTIC: AppleScript exited with code %d. Output len: %d. Error: '%s'",
-                           result.returncode, len(result.stdout), result.stderr.strip())
+            logger.debug(
+                "DIAGNOSTIC: AppleScript exited with code %d. Output len: %d. Error: '%s'",
+                result.returncode,
+                len(result.stdout),
+                result.stderr.strip(),
+            )
 
             if result.returncode != 0 and not self._automation_warned:
                 stderr = result.stderr.strip()
@@ -446,7 +447,9 @@ class MacOSTableDetector:
                             continue
 
                         # Si la fenêtre a des dimensions valides
-                        if title and not any(bad in title for bad in ["History for table:", "HUD:", "Chat:", "FPDBHUD", "Lobby"]):
+                        if title and not any(
+                            bad in title for bad in ["History for table:", "HUD:", "Chat:", "FPDBHUD", "Lobby"]
+                        ):
                             geometry = TableGeometry(x=x, y=y, width=width, height=height)
                             # Deterministic synthetic ID derived from the title
                             window_id = self._FAKE_ID_BASE + (zlib.crc32(title.encode("utf-8")) % 1_000_000)
@@ -486,8 +489,12 @@ class MacOSTableDetector:
         tables = []
         for table_info in self._applescript_last_result:
             matches_pattern = not search_string or pattern.search(table_info.title)
-            logger.debug("DIAGNOSTIC: AppleScript candidate window '%s' (process: %s). Matches pattern? %s",
-                           table_info.title, table_info.process_name, matches_pattern)
+            logger.debug(
+                "DIAGNOSTIC: AppleScript candidate window '%s' (process: %s). Matches pattern? %s",
+                table_info.title,
+                table_info.process_name,
+                matches_pattern,
+            )
             if matches_pattern:
                 tables.append(table_info)
 
@@ -557,7 +564,7 @@ class MacOSTableDetector:
 
             return False
 
-        except Exception:
+        except (AttributeError, OSError, TypeError, ValueError):
             return False
 
     def is_window_displayed(self, window_id: int | str) -> bool:

@@ -39,12 +39,12 @@ def get_modern_qss() -> str:
     # Détection dynamique du mode sombre/clair
     dark = True
     try:
-        h = bg_window.lstrip('#')
+        h = bg_window.lstrip("#")
         r, g, b = int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16)
         yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000
         dark = yiq < 128
-    except Exception:
-        pass
+    except (AttributeError, ValueError):
+        dark = True
 
     # Variables translucides pour adapter automatiquement aux fonds
     border_rgba = "rgba(255, 255, 255, 0.08)" if dark else "rgba(0, 0, 0, 0.08)"

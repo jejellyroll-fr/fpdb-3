@@ -7,6 +7,7 @@ Dialog for creating custom themes within fpdb.
 Provides a user-friendly interface to create and install custom qt_material themes.
 """
 
+from functools import partial
 from pathlib import Path
 
 from PySide6.QtCore import Qt, Signal
@@ -181,8 +182,9 @@ class ThemeCreatorDialog(QDialog):
         for name, default, tooltip in color_definitions:
             picker = ColorPickerWidget(name, default)
             picker.setToolTip(tooltip)
-            picker.colorChanged.connect(lambda color, n=name.lower().replace(" ", "_"): self.on_color_changed(n, color))
-            self.color_pickers[name.lower().replace(" ", "_")] = picker
+            color_name = name.lower().replace(" ", "_")
+            picker.colorChanged.connect(partial(self.on_color_changed, color_name))
+            self.color_pickers[color_name] = picker
             colors_layout.addWidget(picker)
 
         form_layout.addWidget(colors_group)

@@ -777,8 +777,8 @@ class Merge(HandHistoryConverter):
                                     dealt=False,
                                 )
                             elif len(cards) == 7:
-                                for street in hand.holeStreets:
-                                    hand.holecards[street][player] = [[], []]
+                                for hole_street in hand.holeStreets:
+                                    hand.holecards[hole_street][player] = [[], []]
                                 hand.addHoleCards(
                                     street,
                                     player,

@@ -31,7 +31,7 @@ class TestNumPyMigration(unittest.TestCase):
         """Test cumsum() - utilisé dans GuiGraphViewer et GuiSessionViewer."""
         # Test simple
         arr = [1, 2, 3, 4, 5]
-        result = cumsum(arr)
+        result: np.ndarray = cumsum(arr)
         expected = np.array([1, 3, 6, 10, 15])
 
         np.testing.assert_array_equal(result, expected)
@@ -39,7 +39,7 @@ class TestNumPyMigration(unittest.TestCase):
 
         # Test avec floats (comme dans le code réel)
         profits = [10.5, 20.3, -5.2, 15.7]
-        cumulative = cumsum(profits)
+        cumulative: np.ndarray = cumsum(profits)
         self.assertEqual(len(cumulative), len(profits))
         self.assertAlmostEqual(cumulative[-1], sum(profits))
         print("✅ cumsum() avec floats : OK")
@@ -75,7 +75,7 @@ class TestNumPyMigration(unittest.TestCase):
         arr = np.array([1, 2, 3])
         value = 4
 
-        result = append(arr, value)
+        result: np.ndarray = append(arr, value)
         expected = np.array([1, 2, 3, 4])
 
         np.testing.assert_array_equal(result, expected)
@@ -158,9 +158,9 @@ class TestNumPyMigration(unittest.TestCase):
         orange = [0] + [float(x[3]) for x in winnings]
 
         # Calculs cumulatifs
-        greenline = cumsum(green)
-        blueline = cumsum(blue)
-        redline = cumsum(red)
+        greenline: np.ndarray = cumsum(green)
+        blueline: np.ndarray = cumsum(blue)
+        redline: np.ndarray = cumsum(red)
         cumsum(orange)
 
         self.assertEqual(len(greenline), len(winnings) + 1)

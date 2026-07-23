@@ -229,7 +229,9 @@ class Fulltilt(HandHistoryConverter):
     )
     re_Button = re.compile("^The button is in seat #(?P<BUTTON>\\d+)", re.MULTILINE)
     re_PlayerInfo = re.compile(
-        "Seat (?P<SEAT>[0-9]+): (?P<PNAME>.{{2,15}}) \\([{LS}]?(?P<CASH>[{NUM}]+)\\)(?P<SITOUT>, is sitting out)?$".format(**substitutions),
+        "Seat (?P<SEAT>[0-9]+): (?P<PNAME>.{{2,15}}) \\([{LS}]?(?P<CASH>[{NUM}]+)\\)(?P<SITOUT>, is sitting out)?$".format(
+            **substitutions
+        ),
         re.MULTILINE,
     )
     re_SummarySitout = re.compile(
@@ -255,50 +257,58 @@ class Fulltilt(HandHistoryConverter):
             # we need to recompile the player regexs.
             self.compiledPlayers = players
             player_re = "(?P<PNAME>" + "|".join(map(re.escape, players)) + ")"
-            self.substitutions["PLAYERS"] = player_re
+            substitutions = {**self.substitutions, "PLAYERS": player_re}
 
             # log.debug("player_re: " + player_re)
             self.re_PostSB = re.compile(
-                r"^{PLAYERS} posts the small blind of [{LS}]?(?P<SB>[{NUM}]+)".format(**self.substitutions), re.MULTILINE
+                r"^{PLAYERS} posts the small blind of [{LS}]?(?P<SB>[{NUM}]+)".format(**substitutions), re.MULTILINE
             )
             self.re_PostDead = re.compile(
-                r"^{PLAYERS} posts a dead small blind of [{LS}]?(?P<SB>[{NUM}]+)".format(**self.substitutions),
+                r"^{PLAYERS} posts a dead small blind of [{LS}]?(?P<SB>[{NUM}]+)".format(**substitutions),
                 re.MULTILINE,
             )
             self.re_PostBB = re.compile(
-                r"^{PLAYERS} posts (the big blind of )?[{LS}]?(?P<BB>[{NUM}]+)".format(**self.substitutions), re.MULTILINE
+                r"^{PLAYERS} posts (the big blind of )?[{LS}]?(?P<BB>[{NUM}]+)".format(**substitutions), re.MULTILINE
             )
             self.re_Antes = re.compile(
-                r"^{PLAYERS} antes [{LS}]?(?P<ANTE>[{NUM}]+)".format(**self.substitutions), re.MULTILINE
+                r"^{PLAYERS} antes [{LS}]?(?P<ANTE>[{NUM}]+)".format(**substitutions), re.MULTILINE
             )
             self.re_ReturnsAnte = re.compile(
-                r"^Ante of [{LS}]?[{NUM}]+ returned to {PLAYERS}".format(**self.substitutions), re.MULTILINE
+                r"^Ante of [{LS}]?[{NUM}]+ returned to {PLAYERS}".format(**substitutions), re.MULTILINE
             )
             self.re_BringIn = re.compile(
-                r"^{PLAYERS} brings in for [{LS}]?(?P<BRINGIN>[{NUM}]+)".format(**self.substitutions), re.MULTILINE
+                r"^{PLAYERS} brings in for [{LS}]?(?P<BRINGIN>[{NUM}]+)".format(**substitutions), re.MULTILINE
             )
             self.re_PostBoth = re.compile(
-                r"^{PLAYERS} posts small \& big blinds \[[{LS}]? (?P<SBBB>[{NUM}]+)".format(**self.substitutions),
+                r"^{PLAYERS} posts small \& big blinds \[[{LS}]? (?P<SBBB>[{NUM}]+)".format(**substitutions),
                 re.MULTILINE,
             )
             self.re_HeroCards = re.compile(
                 rf"^Dealt to {player_re}(?: \[(?P<OLDCARDS>.+?)\])?( \[(?P<NEWCARDS>.+?)\])", re.MULTILINE
             )
             self.re_Action = re.compile(
-                r"^{PLAYERS}(?P<ATYPE> bets| checks| raises to| completes it to| calls| folds| discards| stands pat)( [{LS}]?(?P<BET>[{NUM}]+))?( on| cards?)?( \[(?P<CARDS>.+?)\])?".format(**self.substitutions),
+                r"^{PLAYERS}(?P<ATYPE> bets| checks| raises to| completes it to| calls| folds| discards| stands pat)( [{LS}]?(?P<BET>[{NUM}]+))?( on| cards?)?( \[(?P<CARDS>.+?)\])?".format(
+                    **substitutions
+                ),
                 re.MULTILINE,
             )
             self.re_ShowdownAction = re.compile(rf"^{player_re} shows \[(?P<CARDS>.*)\]", re.MULTILINE)
             self.re_CollectPot = re.compile(
-                r"^Seat (?P<SEAT>[0-9]+): {PLAYERS} (\(button\) |\(small blind\) |\(big blind\) )?(collected|showed \[.*\] and won) \([{LS}]?(?P<POT>[{NUM}]+)\)(, mucked| with.*)?".format(**self.substitutions),
+                r"^Seat (?P<SEAT>[0-9]+): {PLAYERS} (\(button\) |\(small blind\) |\(big blind\) )?(collected|showed \[.*\] and won) \([{LS}]?(?P<POT>[{NUM}]+)\)(, mucked| with.*)?".format(
+                    **substitutions
+                ),
                 re.MULTILINE,
             )
             self.re_CollectPot2 = re.compile(
-                r"^{PLAYERS} (ties for|wins) (the (main |side )?pot|pot (1|2)) \([{LS}]?(?P<POT>[{NUM}]+)\)".format(**self.substitutions),
+                r"^{PLAYERS} (ties for|wins) (the (main |side )?pot|pot (1|2)) \([{LS}]?(?P<POT>[{NUM}]+)\)".format(
+                    **substitutions
+                ),
                 re.MULTILINE,
             )
             self.re_CollectSidePot = re.compile(
-                r"^Seat (?P<SEAT>[0-9]+): {PLAYERS} \s?(ties for|wins) (the (main |side )?pot|pot (1|2)) \([{LS}]?(?P<POT>[{NUM}]+)\)".format(**self.substitutions),
+                r"^Seat (?P<SEAT>[0-9]+): {PLAYERS} \s?(ties for|wins) (the (main |side )?pot|pot (1|2)) \([{LS}]?(?P<POT>[{NUM}]+)\)".format(
+                    **substitutions
+                ),
                 re.MULTILINE,
             )
             self.re_SitsOut = re.compile(rf"^{player_re} sits out", re.MULTILINE)

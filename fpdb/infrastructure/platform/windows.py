@@ -175,7 +175,7 @@ class WindowsTableDetector:
         try:
             window_id = int(window_id)
             return bool(self._IsWindowVisible(window_id))
-        except Exception:
+        except (AttributeError, OSError, TypeError, ValueError):
             return False
 
     def is_window_displayed(self, window_id: int | str) -> bool:
@@ -194,7 +194,7 @@ class WindowsTableDetector:
         try:
             window_id = int(window_id)
             return self._window_is_actually_visible(window_id)
-        except Exception:
+        except (AttributeError, OSError, TypeError, ValueError):
             return False
 
     def _window_is_actually_visible(self, window_id: int) -> bool:

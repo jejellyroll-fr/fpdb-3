@@ -3,9 +3,11 @@
 must stay aligned. A mismatch silently breaks every hand import, so this is a
 cheap canary whenever someone adds a persisted HandsPlayers column.
 """
+
 import os
 import sqlite3
 import sys
+from contextlib import closing
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
@@ -30,16 +32,16 @@ def test_insert_columns_match_keys_plus_two():
 
 def test_delayed_cbet_columns_persisted_and_insertable():
     sql = SQL.Sql(db_server="sqlite")
-    con = sqlite3.connect(":memory:")
-    cur = con.cursor()
-    cur.execute(sql.query["createHandsPlayersTable"])
-    cols = {r[1] for r in cur.execute("PRAGMA table_info(HandsPlayers)")}
-    assert "street2DelayedCBChance" in cols
-    assert "street2DelayedCBDone" in cols
-    # A full-width row inserts without a column/placeholder mismatch.
-    row = [1, 1] + [0] * len(HANDS_PLAYERS_KEYS)
-    cur.execute(sql.query["store_hands_players"], row)
-    assert cur.execute("SELECT COUNT(*) FROM HandsPlayers").fetchone()[0] == 1
+    with closing(sqlite3.connect(":memory:")) as con:
+        cur = con.cursor()
+        cur.execute(sql.query["createHandsPlayersTable"])
+        cols = {r[1] for r in cur.execute("PRAGMA table_info(HandsPlayers)")}
+        assert "street2DelayedCBChance" in cols
+        assert "street2DelayedCBDone" in cols
+        # A full-width row inserts without a column/placeholder mismatch.
+        row = [1, 1] + [0] * len(HANDS_PLAYERS_KEYS)
+        cur.execute(sql.query["store_hands_players"], row)
+        assert cur.execute("SELECT COUNT(*) FROM HandsPlayers").fetchone()[0] == 1
 
 
 def test_keys_have_delayed_cbet():
@@ -67,13 +69,12 @@ def test_hudcache_extra_not_in_shared_cache_keys():
 
 
 def test_hudcache_create_has_delayed_and_inserts():
-    import sqlite3
-
     sql = SQL.Sql(db_server="sqlite")
-    cur = sqlite3.connect(":memory:").cursor()
-    cur.execute(sql.query["createHudCacheTable"])
-    cols = {r[1] for r in cur.execute("PRAGMA table_info(HudCache)")}
-    assert "street2DelayedCBChance" in cols and "street2DelayedCBDone" in cols
-    row = [1, 1, 6, "D", 0, "A000000"] + [0] * (len(CACHE_KEYS) + len(HUDCACHE_EXTRA_KEYS))
-    cur.execute(sql.query["insert_hudcache"], row)
-    assert cur.execute("SELECT COUNT(*) FROM HudCache").fetchone()[0] == 1
+    with closing(sqlite3.connect(":memory:")) as con:
+        cur = con.cursor()
+        cur.execute(sql.query["createHudCacheTable"])
+        cols = {r[1] for r in cur.execute("PRAGMA table_info(HudCache)")}
+        assert "street2DelayedCBChance" in cols and "street2DelayedCBDone" in cols
+        row = [1, 1, 6, "D", 0, "A000000"] + [0] * (len(CACHE_KEYS) + len(HUDCACHE_EXTRA_KEYS))
+        cur.execute(sql.query["insert_hudcache"], row)
+        assert cur.execute("SELECT COUNT(*) FROM HudCache").fetchone()[0] == 1

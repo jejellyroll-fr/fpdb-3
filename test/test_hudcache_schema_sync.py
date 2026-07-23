@@ -15,6 +15,7 @@ import os
 import re
 import sqlite3
 import sys
+from contextlib import closing
 
 import pytest
 
@@ -173,67 +174,67 @@ class TestHudCacheQuerySync:
 
     def test_store_hands_players_sqlite_insert_executes(self) -> None:
         """The generated SQLite insert must be syntactically valid, not just count-aligned."""
-        conn = sqlite3.connect(":memory:")
-        conn.execute(self.sql.query["createHandsPlayersTable"])
-        values = [0] * (len(Database.HANDS_PLAYERS_KEYS) + 2)
+        with closing(sqlite3.connect(":memory:")) as conn:
+            conn.execute(self.sql.query["createHandsPlayersTable"])
+            values = [0] * (len(Database.HANDS_PLAYERS_KEYS) + 2)
 
-        conn.execute(self.sql.query["store_hands_players"], values)
+            conn.execute(self.sql.query["store_hands_players"], values)
 
-        assert conn.execute("SELECT COUNT(*) FROM HandsPlayers").fetchone()[0] == 1
+            assert conn.execute("SELECT COUNT(*) FROM HandsPlayers").fetchone()[0] == 1
 
     def test_ensure_hudcache_columns_repairs_old_sqlite_schema(self) -> None:
         """Older databases must be upgraded in place when CACHE_KEYS gains columns."""
-        conn = sqlite3.connect(":memory:")
-        conn.execute(
-            """
-            CREATE TABLE HudCache (
-                id INTEGER PRIMARY KEY,
-                gametypeId INT,
-                playerId INT,
-                seats INT,
-                position TEXT,
-                tourneyTypeId INT,
-                styleKey TEXT,
-                n INT DEFAULT 0
+        with closing(sqlite3.connect(":memory:")) as conn:
+            conn.execute(
+                """
+                CREATE TABLE HudCache (
+                    id INTEGER PRIMARY KEY,
+                    gametypeId INT,
+                    playerId INT,
+                    seats INT,
+                    position TEXT,
+                    tourneyTypeId INT,
+                    styleKey TEXT,
+                    n INT DEFAULT 0
+                )
+                """,
             )
-            """,
-        )
 
-        db = Database.Database.__new__(Database.Database)
-        db.backend = Database.Database.SQLITE
-        db.connection = conn
-        db._in_transaction = 0
+            db = Database.Database.__new__(Database.Database)
+            db.backend = Database.Database.SQLITE
+            db.connection = conn
+            db._in_transaction = 0
 
-        db.ensure_hudcache_columns()
+            db.ensure_hudcache_columns()
 
-        columns = {row[1] for row in conn.execute("PRAGMA table_info(HudCache)")}
-        missing = [column for column in Database.CACHE_KEYS if column not in columns]
-        assert not missing
+            columns = {row[1] for row in conn.execute("PRAGMA table_info(HudCache)")}
+            missing = [column for column in Database.CACHE_KEYS if column not in columns]
+            assert not missing
 
     def test_ensure_handsplayers_columns_repairs_old_sqlite_schema(self) -> None:
         """Older databases must gain new HandsPlayers stat columns before inserts run."""
-        conn = sqlite3.connect(":memory:")
-        conn.execute(
-            """
-            CREATE TABLE HandsPlayers (
-                id INTEGER PRIMARY KEY,
-                handId INT,
-                playerId INT,
-                startCash INT DEFAULT 0
+        with closing(sqlite3.connect(":memory:")) as conn:
+            conn.execute(
+                """
+                CREATE TABLE HandsPlayers (
+                    id INTEGER PRIMARY KEY,
+                    handId INT,
+                    playerId INT,
+                    startCash INT DEFAULT 0
+                )
+                """,
             )
-            """,
-        )
 
-        db = Database.Database.__new__(Database.Database)
-        db.backend = Database.Database.SQLITE
-        db.connection = conn
-        db._in_transaction = 0
+            db = Database.Database.__new__(Database.Database)
+            db.backend = Database.Database.SQLITE
+            db.connection = conn
+            db._in_transaction = 0
 
-        db.ensure_handsplayers_columns()
+            db.ensure_handsplayers_columns()
 
-        columns = {row[1] for row in conn.execute("PRAGMA table_info(HandsPlayers)")}
-        missing = [column for column in Database.HANDS_PLAYERS_KEYS if column not in columns]
-        assert not missing
+            columns = {row[1] for row in conn.execute("PRAGMA table_info(HandsPlayers)")}
+            missing = [column for column in Database.HANDS_PLAYERS_KEYS if column not in columns]
+            assert not missing
 
 
 if __name__ == "__main__":

@@ -73,7 +73,6 @@ def check_imports() -> bool:
 
     # NumPy
     try:
-
         print("✅ NumPy imports       OK (max/min/sum removed as expected)")
 
         # Test que max/min/sum ne sont plus importés directement
@@ -89,7 +88,6 @@ def check_imports() -> bool:
 
     # SQLAlchemy
     try:
-
         print("✅ SQLAlchemy pool     OK")
     except VALIDATION_IMPORT_ERRORS as e:
         print(f"❌ SQLAlchemy pool     FAILED: {e}")
@@ -97,7 +95,6 @@ def check_imports() -> bool:
 
     # matplotlib
     try:
-
         print("✅ matplotlib QtAgg    OK")
     except VALIDATION_IMPORT_ERRORS as e:
         print(f"❌ matplotlib QtAgg    FAILED: {e}")
@@ -105,7 +102,6 @@ def check_imports() -> bool:
 
     # mplfinance
     try:
-
         print("✅ mplfinance          OK")
     except VALIDATION_IMPORT_ERRORS as e:
         print(f"❌ mplfinance          FAILED: {e}")
@@ -113,7 +109,6 @@ def check_imports() -> bool:
 
     # PySide6
     try:
-
         print("✅ PySide6             OK")
     except VALIDATION_IMPORT_ERRORS as e:
         print(f"❌ PySide6             FAILED: {e}")
@@ -121,7 +116,6 @@ def check_imports() -> bool:
 
     # FastAPI (optionnel)
     try:
-
         print("✅ FastAPI/Pydantic    OK")
     except VALIDATION_IMPORT_ERRORS as e:
         print(f"⚠️  FastAPI/Pydantic    OPTIONAL: {e}")
@@ -139,7 +133,7 @@ def check_numpy_functionality() -> bool:
 
         # Test cumsum (compatible)
         arr = [1, 2, 3, 4, 5]
-        result = cumsum(arr)
+        result: np.ndarray = cumsum(arr)
         expected = np.array([1, 3, 6, 10, 15])
         assert np.array_equal(result, expected), "cumsum failed"
         print(f"✅ cumsum()            OK: {list(result)}")

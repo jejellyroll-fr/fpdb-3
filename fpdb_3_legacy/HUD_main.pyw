@@ -150,9 +150,7 @@ class HudMainWindow(QWidget):
         """Initialize the window and retain its close callback."""
         super().__init__(
             None,
-            Qt.WindowType.Dialog
-            | Qt.WindowType.WindowMinimizeButtonHint
-            | Qt.WindowType.WindowCloseButtonHint,
+            Qt.WindowType.Dialog | Qt.WindowType.WindowMinimizeButtonHint | Qt.WindowType.WindowCloseButtonHint,
         )
         self._on_close = on_close
 
@@ -169,6 +167,7 @@ class HudMain(QObject):
         self.options = options
         QObject.__init__(self)
         self.db_name = db_name
+        self._shutdown_started = False
 
         # Ensure HUD logging is properly initialized
         import logging
@@ -483,6 +482,10 @@ class HudMain(QObject):
 
     def destroy(self) -> None:
         """Destroy the application and clean up resources."""
+        if self._shutdown_started:
+            return
+        self._shutdown_started = True
+
         zmq_worker = getattr(self, "zmq_worker", None)
         if zmq_worker is not None:
             with contextlib.suppress(RuntimeError):
@@ -690,7 +693,7 @@ class HudMain(QObject):
             try:
                 self.db_connection.connection.rollback()
             except Exception:
-                pass
+                log.debug("Rollback failed after table-info lookup error", exc_info=True)
             return None
         else:
             # Don't cache a missing result: the hand may simply not be committed
@@ -836,7 +839,9 @@ class HudMain(QObject):
         hud_site_name: str | None = None,
     ) -> None:
         """Create a new HUD for a table."""
-        (table_name, max_seats, poker_game, game_type, _, _, site_name, _, tour_number, tab_number, tourney_name) = table_info
+        (table_name, max_seats, poker_game, game_type, _, _, site_name, _, tour_number, tab_number, tourney_name) = (
+            table_info
+        )
         hud_site_name = hud_site_name or site_name
         hud_poker_game = self._resolve_hud_poker_game(poker_game)
         if self.config.get_supported_games_parameters(hud_poker_game, game_type) is None:
@@ -882,7 +887,12 @@ class HudMain(QObject):
             return
 
         cards = self.get_cards(new_hand_id, poker_game)
-        table_kwargs = {"table_name": table_name, "tournament": tour_number, "table_number": tab_number, "tourney_name": tourney_name}
+        table_kwargs = {
+            "table_name": table_name,
+            "tournament": tour_number,
+            "table_number": tab_number,
+            "tourney_name": tourney_name,
+        }
         tablewindow = self.Tables.Table(self.config, hud_site_name, **table_kwargs)
 
         if tablewindow.number is None:
@@ -967,9 +977,19 @@ class HudMain(QObject):
             )
             return
 
-        (table_name, max_seats, poker_game, game_type, fast, site_id, site_name, num_seats, tour_number, tab_number, tourney_name) = (
-            table_info
-        )
+        (
+            table_name,
+            max_seats,
+            poker_game,
+            game_type,
+            fast,
+            site_id,
+            site_name,
+            num_seats,
+            tour_number,
+            tab_number,
+            tourney_name,
+        ) = table_info
 
         # A cash-table HUD is keyed directly by table_name.  Legacy/corrupt
         # rows may have an empty name; accepting one creates a ghost HUD shown
@@ -1221,6 +1241,7 @@ class HudMain(QObject):
 if __name__ == "__main__":
     if os.getenv("FPDB_HUD_TRACE") == "1":
         import logging
+
         trace_log = logging.getLogger("hud_trace")
         trace_log.setLevel(logging.DEBUG)
         if not trace_log.handlers:
@@ -1228,7 +1249,7 @@ if __name__ == "__main__":
             os.makedirs(log_dir, exist_ok=True)
             log_path = os.path.join(log_dir, "HUD_trace.log")
             handler = logging.FileHandler(log_path, encoding="utf-8")
-            handler.setFormatter(logging.Formatter('%(asctime)s - %(message)s'))
+            handler.setFormatter(logging.Formatter("%(asctime)s - %(message)s"))
             trace_log.addHandler(handler)
             trace_log.propagate = False
             trace_log.info("HUD Trace Log Initialized")

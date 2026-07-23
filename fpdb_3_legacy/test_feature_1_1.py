@@ -35,7 +35,7 @@ def test_numpy_2x_array_methods():
     print(f"  ✓ diff: {diffs}")
 
     # Test append
-    diffs2 = np.append(diffs, 2000)
+    diffs2: np.ndarray = np.append(diffs, 2000)
     assert len(diffs2) == 4, "append failed"
     print(f"  ✓ append: {diffs2}")
 

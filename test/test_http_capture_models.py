@@ -713,6 +713,7 @@ def test_gui_replayer_uses_private_ofc_deal_phase_only_when_capture_has_dealt_ca
         for card in model.states[0].visible_rows["alice"][row]
     )
     assert model.states[2].placed_cards == ["2c", "2d", "2h"]
+    assert model.states[2].round_index == 1
     assert model.states[2].visible_rows["alice"] == {
         "top": ["2c", "--", "--"],
         "middle": ["2d", "--", "--", "--", "--"],

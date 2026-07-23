@@ -149,7 +149,9 @@ class GuiTourneyGraphViewer(QSplitter):
         currencies = self.filters.getCurrencies()
         names = ""
 
-        log.warning(f"GuiTourneyGraphViewer.generateGraph called. Sites selected: {sites}, Heroes config: {heroes}, siteids: {siteids}, games: {games}")
+        log.warning(
+            f"GuiTourneyGraphViewer.generateGraph called. Sites selected: {sites}, Heroes config: {heroes}, siteids: {siteids}, games: {games}"
+        )
 
         for site in sites:
             _hname = heroes.get(site, "")
@@ -170,11 +172,15 @@ class GuiTourneyGraphViewer(QSplitter):
                     actual_site_id = self.db.get_player_site_id(pid)
                     if actual_site_id is not None:
                         sitenos.append(actual_site_id)
-                        log.warning(f"GuiTourneyGraphViewer: Using resolved actual siteId {actual_site_id} for hero '{pname}'")
+                        log.warning(
+                            f"GuiTourneyGraphViewer: Using resolved actual siteId {actual_site_id} for hero '{pname}'"
+                        )
                     else:
                         sitenos.append(siteids[site])
 
-        log.warning(f"GuiTourneyGraphViewer.generateGraph resolved sitenos: {sitenos}, playerids: {playerids}, names: {names!r}")
+        log.warning(
+            f"GuiTourneyGraphViewer.generateGraph resolved sitenos: {sitenos}, playerids: {playerids}, names: {names!r}"
+        )
 
         if not sitenos:
             log.warning("GuiTourneyGraphViewer.generateGraph: No sites selected")
@@ -192,6 +198,7 @@ class GuiTourneyGraphViewer(QSplitter):
 
         if green is None or len(green) == 0:
             from PySide6.QtWidgets import QMessageBox
+
             msg = QMessageBox(self)
             msg.setIcon(QMessageBox.Icon.Information)
             msg.setWindowTitle(_("FPDB 3 info"))
@@ -208,15 +215,15 @@ class GuiTourneyGraphViewer(QSplitter):
 
         # Helper to determine if theme is dark
         def is_dark_color(hex_color: str) -> bool:
-            hex_color = hex_color.lstrip('#')
+            hex_color = hex_color.lstrip("#")
             if len(hex_color) == 3:
-                hex_color = ''.join(c*2 for c in hex_color)
+                hex_color = "".join(c * 2 for c in hex_color)
             try:
                 r = int(hex_color[0:2], 16)
                 g = int(hex_color[2:4], 16)
                 b = int(hex_color[4:6], 16)
                 return (0.299 * r + 0.587 * g + 0.114 * b) < 128
-            except Exception:
+            except (AttributeError, TypeError, ValueError):
                 return True
 
         is_dark = is_dark_color(bg_color)
@@ -252,7 +259,9 @@ class GuiTourneyGraphViewer(QSplitter):
         # Labels
         self.ax.set_xlabel("Tournaments", color=fg_color, labelpad=8, fontsize=10, fontweight="semibold")
         display_currency = currencies[0] if currencies else "USD"
-        self.ax.set_ylabel(currency_symbol(display_currency), color=fg_color, labelpad=8, fontsize=10, fontweight="semibold")
+        self.ax.set_ylabel(
+            currency_symbol(display_currency), color=fg_color, labelpad=8, fontsize=10, fontweight="semibold"
+        )
         self.ax.yaxis.set_major_formatter(FuncFormatter(lambda value, _position: format_number(value)))
 
         # Title
@@ -350,7 +359,9 @@ class GuiTourneyGraphViewer(QSplitter):
         tourneysBuyin = self.filters.getTourneyBuyin()
 
         log.warning(f"GuiTourneyGraphViewer.getData: names: {names}, sites: {sites}, Tourneys: {Tourneys}")
-        log.warning(f"GuiTourneyGraphViewer.getData filters: start_date: {start_date}, end_date: {end_date}, tourneys: {tourneys}, tourneysCat: {tourneysCat}, tourneysLim: {tourneysLim}, tourneysBuyin: {tourneysBuyin}")
+        log.warning(
+            f"GuiTourneyGraphViewer.getData filters: start_date: {start_date}, end_date: {end_date}, tourneys: {tourneys}, tourneysCat: {tourneysCat}, tourneysLim: {tourneysLim}, tourneysBuyin: {tourneysBuyin}"
+        )
 
         currencies = self.filters.getCurrencies()
 
@@ -393,8 +404,12 @@ class GuiTourneyGraphViewer(QSplitter):
             query = query.replace("<startdate_test>", start_date)
             query = query.replace("<enddate_test>", end_date)
             query = query.replace("<currency_test>", currencytest)
-            query = query.replace("AND tt.category in <tourney_cat>", f"AND tt.category in {tourneysCattest}" if tourneysCattest else "")
-            query = query.replace("AND tt.limitType in <tourney_lim>", f"AND tt.limitType in {tourneysLimtest}" if tourneysLimtest else "")
+            query = query.replace(
+                "AND tt.category in <tourney_cat>", f"AND tt.category in {tourneysCattest}" if tourneysCattest else ""
+            )
+            query = query.replace(
+                "AND tt.limitType in <tourney_lim>", f"AND tt.limitType in {tourneysLimtest}" if tourneysLimtest else ""
+            )
             query = query.replace("AND tt.buyin in <tourney_buyin>", tourneysBuyintest)
             query = query.replace("<tourney_test>", tourneystest)
             return query.replace(",)", ")")

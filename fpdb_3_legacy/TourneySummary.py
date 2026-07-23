@@ -1,4 +1,5 @@
 """parses and stores summary sections from e.g. eMail or summary files."""
+
 from __future__ import annotations
 
 # Copyright 2009-2011 Stephane Alessio
@@ -104,7 +105,9 @@ class TourneySummary:
                 if site_id_result and len(site_id_result) > 0:
                     self.siteId = site_id_result[0][0]
                     log.debug(f"Got siteId {self.siteId} from database for {siteName}")
-            except Exception as e:  # intentional broad catch: DB site-id lookup best-effort, falls back to hardcoded SITEIDS
+            except (
+                Exception
+            ) as e:  # intentional broad catch: DB site-id lookup best-effort, falls back to hardcoded SITEIDS
                 log.exception(f"Error getting site ID from database: {e}")
 
         # Fallback to hardcoded SITEIDS if database lookup fails
@@ -298,7 +301,7 @@ class TourneySummary:
     @staticmethod
     def clearMoneyString(money):
         """Renders 'numbers' like '1 200' and '2,000'."""
-        money = money.strip("€&euro;\u20ac$ ")
+        money = money.replace("&euro;", "").strip("€$ ")
         return HandHistoryConverter.clearMoneyString(money)
 
     def insertOrUpdate(self, printtest=False):
@@ -431,7 +434,7 @@ class TourneySummary:
                 if entries.get(tour_no) is None:
                     entries[tour_no] = []
                 entries[tour_no].append(data)
-        for _k, item in entries.items():  # iteritems() was Python 2 only
+        for item in entries.values():  # itervalues() was Python 2 only
             summaryTexts.append(item)
         return summaryTexts
 

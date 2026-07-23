@@ -54,12 +54,13 @@ def test_parse_rejects_non_pt4hud():
 # ---------------------------------------------------------------------------
 # real-fixture parsing
 # ---------------------------------------------------------------------------
+@pytest.fixture(scope="class")
+def layout():
+    return pt4hud.parse(FIXTURE)
+
+
 @pytest.mark.skipif(not os.path.exists(FIXTURE), reason="pt4hud fixture missing")
 class TestRealLayout:
-    @pytest.fixture(scope="class")
-    def layout(self):
-        return pt4hud.parse(FIXTURE)
-
     def test_name_and_magic(self, layout):
         assert "GenerationPoker" in layout.name
 
@@ -272,7 +273,7 @@ def test_extract_popup_groups_returns_structured_grids():
     assert push is not None
     assert push.rows >= 13 and push.cols >= 13
     texts = {c.text for c in push.cells if c.kind == "text"}
-    assert {"AA", "AKs", "72o"} <= texts                    # 13x13 hand-grid labels
+    assert {"AA", "AKs", "72o"} <= texts  # 13x13 hand-grid labels
     # cells carry grid positions
     assert all(0 <= c.row < push.rows and 0 <= c.col < push.cols for c in push.cells)
 
@@ -284,7 +285,7 @@ def test_popup_group_does_not_absorb_following_panels():
     groups = {g.name: g for g in pt4hud.extract_popup_groups(FIXTURE)}
     cn = groups["Call Nash"]
     texts = {c.text for c in cn.cells}
-    assert {"AA", "AKs"} <= texts                          # its own hand grid
+    assert {"AA", "AKs"} <= texts  # its own hand grid
     # none of the main-HUD panel labels, nor the following popup's promo, leaked in
     assert not ({"GP 2X", "GP OS", "GP LIMP", "POST FLOP", "TOTAL"} & texts)
     assert not any("Spin" in t or "snghud" in t for t in texts)

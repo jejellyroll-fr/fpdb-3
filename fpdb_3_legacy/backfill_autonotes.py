@@ -14,7 +14,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 from typing import Any
 
 from fpdb_3_legacy import Configuration, Database, IdentifySite, Importer
@@ -85,9 +85,7 @@ class DatabaseAutoNoteHand:
             self.players.append((row.get("seatNo"), player, _chips_to_units(row.get("startCash"))))
             self.playerIds[player] = row["playerId"]
             self._holecards[player] = [
-                card
-                for card in (_decode_card(row.get(f"card{index}")) for index in range(1, 21))
-                if card
+                card for card in (_decode_card(row.get(f"card{index}")) for index in range(1, 21)) if card
             ]
             self.handsplayers[player] = {
                 "position": _normalise_position(row.get("position")),
@@ -158,7 +156,8 @@ def _chips_to_units(value):
         return None
     try:
         decimal_value = Decimal(str(value))
-    except Exception:
+    except (InvalidOperation, TypeError, ValueError):
+        log.debug("Unable to convert chip value %r to Decimal units", value, exc_info=True)
         return value
     return decimal_value / CENTS_MULTIPLIER
 
@@ -834,8 +833,7 @@ def import_missing_paths(paths, config_file="HUD_config.xml", status_callback=No
         imported_files_seen += 1
         if status_callback:
             status_callback(
-                f"Importing {imported_files_seen}/{file_count}: "
-                f"{os.path.basename(filename)} ({hand_count} DB hands)",
+                f"Importing {imported_files_seen}/{file_count}: {os.path.basename(filename)} ({hand_count} DB hands)",
             )
 
     def import_finished():

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -46,6 +47,18 @@ ROOMS = {
     "winamax": (Winamax, [FIXTURES / "winamax" / "nlhe_cash.txt"]),
     "winning": (Winning, sorted((FIXTURES / "winning").rglob("*.txt"))),
 }
+
+
+def test_fulltilt_player_regex_compilation_does_not_mutate_class_metadata() -> None:
+    parser = Fulltilt.__new__(Fulltilt)
+    parser.compiledPlayers = set()
+    original_substitutions = dict(Fulltilt.substitutions)
+
+    parser.compilePlayerRegexs(SimpleNamespace(players=[(1, "Alice", 100), (2, "Bob", 100)]))
+
+    assert Fulltilt.substitutions == original_substitutions
+    assert "PLAYERS" not in Fulltilt.substitutions
+
 
 CASES = [
     (f"{room}/{path.relative_to(FIXTURES / room).as_posix()}", parser_class, path)

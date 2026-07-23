@@ -318,7 +318,5 @@ if __name__ == "__main__":
                 fresh_stats = test_instance.stats()
                 method = getattr(test_instance, method_name)
                 method(fresh_stats)
-            except AssertionError:
-                pass
-            except Exception:
-                pass
+            except Exception as exc:
+                print(f"{method_name} failed: {exc}")

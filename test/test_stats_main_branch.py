@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Tests for main() and module-level code coverage."""
 
+import logging
 import os
 import subprocess
 import sys
@@ -38,7 +39,7 @@ def test_main_validate_stats():
         [sys.executable, "-m", "fpdb_3_legacy.Stats", "--validate-stats"],
         capture_output=True,
         text=True,
-        cwd=os.getcwd()
+        cwd=os.getcwd(),
     )
     # Should either succeed or fail gracefully with no hands message
     assert result.returncode in (0, 1)
@@ -61,6 +62,7 @@ def test_do_stat_all_exception_paths():
 def test_format_no_data_stat_with_numerator_only():
     """Test format_no_data_stat with only numerator."""
     from fpdb_3_legacy.Stats import format_no_data_stat
+
     result = format_no_data_stat("test", "desc", 5, None)
     assert result[4] == "(-/-)"
 
@@ -68,6 +70,7 @@ def test_format_no_data_stat_with_numerator_only():
 def test_format_no_data_stat_with_denominator_only():
     """Test format_no_data_stat with only denominator."""
     from fpdb_3_legacy.Stats import format_no_data_stat
+
     result = format_no_data_stat("test", "desc", None, 10)
     assert result[4] == "(-/-)"
 
@@ -77,26 +80,60 @@ def test_all_stats_via_do_stat():
     from fpdb_3_legacy.Stats import STATLIST, do_stat
 
     base_dict = {
-        "p": {k: 10 for k in ["vpip", "vpip_opp", "street0Aggr", "street0AggrChance",
-                              "street1Seen", "street1CBChance", "street1CBDone",
-                              "street1Calls", "street1Bets", "street1Raises",
-                              "street2Seen", "street2CBChance", "street2CBDone",
-                              "street2Calls", "street2Bets", "street2Raises",
-                              "street3Seen", "street3CBChance", "street3CBDone",
-                              "street3Calls", "street3Bets", "street3Raises",
-                              "sawShowdown", "showed", "wonAtSD", "n",
-                              "totalProfit", "allInEV", "rake", "stealChance",
-                              "stealDone", "raiseToStealChance", "raiseToStealDone",
-                              "street0Limp", "street0OpenLimpChance", "street0OpenLimp",
-                              "street1Discards", "street2Discards", "street3Discards",
-                              "street0Calls", "street0Raises", "street0Bets"]}
+        "p": {
+            k: 10
+            for k in [
+                "vpip",
+                "vpip_opp",
+                "street0Aggr",
+                "street0AggrChance",
+                "street1Seen",
+                "street1CBChance",
+                "street1CBDone",
+                "street1Calls",
+                "street1Bets",
+                "street1Raises",
+                "street2Seen",
+                "street2CBChance",
+                "street2CBDone",
+                "street2Calls",
+                "street2Bets",
+                "street2Raises",
+                "street3Seen",
+                "street3CBChance",
+                "street3CBDone",
+                "street3Calls",
+                "street3Bets",
+                "street3Raises",
+                "sawShowdown",
+                "showed",
+                "wonAtSD",
+                "n",
+                "totalProfit",
+                "allInEV",
+                "rake",
+                "stealChance",
+                "stealDone",
+                "raiseToStealChance",
+                "raiseToStealDone",
+                "street0Limp",
+                "street0OpenLimpChance",
+                "street0OpenLimp",
+                "street1Discards",
+                "street2Discards",
+                "street3Discards",
+                "street0Calls",
+                "street0Raises",
+                "street0Bets",
+            ]
+        }
     }
 
     for stat in STATLIST:
         try:
             do_stat(base_dict, stat=stat, player="p")
         except Exception:
-            pass  # Some stats need more specific data
+            logging.getLogger(__name__).debug("Stat %s requires more specific data", stat, exc_info=True)
 
 
 if __name__ == "__main__":

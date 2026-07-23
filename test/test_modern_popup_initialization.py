@@ -62,17 +62,9 @@ def _run_theme_and_provider_tests() -> None:
     _test_theme_values(theme)
 
 
-def test_modern_submenu_attributes() -> bool | None:
+def test_modern_submenu_attributes() -> None:
     """Test que ModernSubmenu a tous les attributs requis après init."""
-    try:
-        _run_theme_and_provider_tests()
-        return True
-
-    except Exception:
-        import traceback
-
-        traceback.print_exc()
-        return False
+    _run_theme_and_provider_tests()
 
 
 def test_initialization_order() -> None:

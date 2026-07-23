@@ -83,7 +83,8 @@ class UnibetSummary(TourneySummary):
         """Configured screen name for the hero, used to de-tokenise the winner."""
         try:
             return self.config.get_site_parameters(self.siteName).get("screen_name") or None
-        except Exception:  # best-effort: config may not expose the site
+        except (AttributeError, KeyError, TypeError):
+            log.debug("Unable to resolve configured Unibet hero name", exc_info=True)
             return None
 
     def parseSummary(self) -> None:

@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import logging
 import os
 import sys
 import time
@@ -17,6 +18,7 @@ from fpdb_3_legacy.swc_http_adapter import (
 )
 
 try:
+    from playwright.sync_api import Error as PlaywrightError
     from playwright.sync_api import sync_playwright
 except ImportError:
     print("[ERROR] Playwright library is not installed.")
@@ -28,6 +30,7 @@ output_dir = os.path.expanduser("~/Documents/SwC Poker/Capture/")
 raw_archive = JsonlRawCaptureArchive(output_dir)
 hand_archive = JsonHandArchive(output_dir)
 adapter = SwCHttpAdapter()
+log = logging.getLogger(__name__)
 
 print(f"[INFO] Capture artifacts will be saved in: {output_dir}")
 
@@ -51,8 +54,8 @@ def update_ui_status_bar() -> None:
             }}
         """
         )
-    except Exception:
-        pass
+    except PlaywrightError:
+        log.debug("Unable to update the SwC capture status bar", exc_info=True)
 
 
 def save_finalized_hands(hands: list[dict]) -> None:
@@ -62,7 +65,7 @@ def save_finalized_hands(hands: list[dict]) -> None:
             filepath = hand_archive.write_hand(hand_data)
             captured_hands_count += 1
             print(f"[SUCCESS] Hand #{hand_data['hand_id']} ({hand_data['game_type']}) saved to {filepath}")
-        except Exception as exc:
+        except (KeyError, OSError, TypeError, ValueError) as exc:
             print(f"[ERROR] Error saving hand #{hand_data.get('hand_id')}: {exc}")
 
 
@@ -103,7 +106,7 @@ def run() -> None:
         try:
             print("[INFO] Launching Chromium browser...")
             browser = p.chromium.launch(headless=False)
-        except Exception as e:
+        except PlaywrightError as e:
             err_str = str(e)
             if "Executable doesn't exist" in err_str or "playwright install" in err_str:
                 print("[INFO] Chromium not found. Downloading Chromium automatically through Playwright...")
@@ -151,8 +154,8 @@ def run() -> None:
                     }
                 """
                 )
-            except Exception:
-                pass
+            except PlaywrightError:
+                log.debug("Unable to inject the SwC capture status bar", exc_info=True)
 
         page.on("domcontentloaded", lambda _: inject_gui_status_bar())
 
@@ -164,15 +167,15 @@ def run() -> None:
                     try:
                         inject_gui_status_bar()
                         process_websocket_payload(payload, ws.url, direction="received")
-                    except Exception:
-                        pass
+                    except Exception:  # noqa: BLE001 - callback boundary: log malformed/capture failures and keep listening.
+                        log.exception("Failed to process an incoming SwC WebSocket frame")
 
             def on_sent(payload) -> None:
                 if isinstance(payload, str):
                     try:
                         process_websocket_payload(payload, ws.url, direction="sent")
-                    except Exception:
-                        pass
+                    except Exception:  # noqa: BLE001 - callback boundary: log malformed/capture failures and keep listening.
+                        log.exception("Failed to process an outgoing SwC WebSocket frame")
 
             ws.on("framereceived", on_received)
             ws.on("framesent", on_sent)
@@ -188,7 +191,8 @@ def run() -> None:
                 inject_gui_status_bar()
                 update_ui_status_bar()
                 time.sleep(1)
-            except Exception:
+            except PlaywrightError:
+                log.info("SwC browser page closed while capture was active", exc_info=True)
                 break
         browser.close()
 

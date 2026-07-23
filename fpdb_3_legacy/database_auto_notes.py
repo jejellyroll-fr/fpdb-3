@@ -63,9 +63,10 @@ class DatabaseAutoNotesMixin:
                         ),
                     )
             self.panbulk = []
-        except Exception:
+        except Exception:  # noqa: BLE001 - DB-API drivers expose different exception hierarchies.
             log.exception("Error storing generated player auto notes")
             raise
+
     def getPlayerAutoNoteCount(self, player_id: int) -> int:
         """Return the number of generated notes for a player."""
         try:
@@ -74,9 +75,11 @@ class DatabaseAutoNotesMixin:
             c.execute(q, (player_id,))
             result = c.fetchone()
             return int(result[0]) if result else 0
-        except Exception:
+        except Exception:  # noqa: BLE001 - legacy DBs may not have the autonote table yet.
+            log.warning("Unable to count auto notes for player %s", player_id, exc_info=True)
             self.rollback()
             return 0
+
     def getPlayerAutoNotes(
         self,
         player_id: int,
@@ -97,7 +100,8 @@ class DatabaseAutoNotesMixin:
             c = self.get_cursor()
             c.execute(q, (player_id,))
             rows = c.fetchall()
-        except Exception:
+        except Exception:  # noqa: BLE001 - legacy DBs may not have the autonote table yet.
+            log.warning("Unable to load auto notes for player %s", player_id, exc_info=True)
             self.rollback()
             return []
 
@@ -106,7 +110,8 @@ class DatabaseAutoNotesMixin:
             evidence = row[5] or "{}"
             try:
                 evidence = json.loads(evidence)
-            except Exception:
+            except (json.JSONDecodeError, TypeError):
+                log.warning("Invalid auto-note evidence JSON for note %s", row[0], exc_info=True)
                 evidence = {}
             notes.append(
                 {
@@ -128,6 +133,7 @@ class DatabaseAutoNotesMixin:
         if limit is not None:
             return notes[: max(0, int(limit))]
         return notes
+
     def searchPlayersWithAutoNotes(self, name_filter: str = "") -> list[dict]:
         """Return players with generated notes matching a name fragment."""
         try:
@@ -135,9 +141,11 @@ class DatabaseAutoNotesMixin:
             c = self.get_cursor()
             c.execute(q, (f"%{name_filter or ''}%",))
             return [{"playerId": row[0], "playerName": row[1], "siteId": row[2]} for row in c.fetchall()]
-        except Exception:
+        except Exception:  # noqa: BLE001 - legacy DBs may not have the autonote table yet.
+            log.warning("Unable to search players with auto notes", exc_info=True)
             self.rollback()
             return []
+
     def getRecentPlayerAutoNotes(
         self,
         limit: int = 200,
@@ -165,7 +173,8 @@ class DatabaseAutoNotesMixin:
             c = self.get_cursor()
             c.execute(q, tuple(params))
             rows = c.fetchall()
-        except Exception:
+        except Exception:  # noqa: BLE001 - legacy DBs may not have the autonote table yet.
+            log.warning("Unable to load recent player auto notes", exc_info=True)
             self.rollback()
             return []
 
@@ -174,7 +183,8 @@ class DatabaseAutoNotesMixin:
             evidence = row[8] or "{}"
             try:
                 evidence = json.loads(evidence)
-            except Exception:
+            except (json.JSONDecodeError, TypeError):
+                log.warning("Invalid auto-note evidence JSON for note %s", row[0], exc_info=True)
                 evidence = {}
             notes.append(
                 {
@@ -195,6 +205,7 @@ class DatabaseAutoNotesMixin:
                 },
             )
         return notes
+
     def getAutoNotePlayerSummary(
         self,
         limit: int = 50,
@@ -227,9 +238,11 @@ class DatabaseAutoNotesMixin:
                 }
                 for row in c.fetchall()
             ]
-        except Exception:
+        except Exception:  # noqa: BLE001 - legacy DBs may not have the autonote table yet.
+            log.warning("Unable to summarize auto notes by player", exc_info=True)
             self.rollback()
             return []
+
     def getAutoNoteRuleSummary(
         self,
         limit: int = 50,
@@ -264,9 +277,11 @@ class DatabaseAutoNotesMixin:
                 }
                 for row in c.fetchall()
             ]
-        except Exception:
+        except Exception:  # noqa: BLE001 - legacy DBs may not have the autonote table yet.
+            log.warning("Unable to summarize auto notes by rule", exc_info=True)
             self.rollback()
             return []
+
     def _auto_note_filter_query(
         self,
         query: str,
@@ -297,6 +312,7 @@ class DatabaseAutoNotesMixin:
         if not filters:
             return query, params
         return query.replace("/*AUTONOTE_FILTERS*/", " where " + " and ".join(filters)), params
+
     def playerHasNotes(self, player_id: int) -> bool:
         """Return true when a player has manual or generated notes."""
         try:
@@ -305,7 +321,8 @@ class DatabaseAutoNotesMixin:
             c.execute(q, (player_id, player_id))
             result = c.fetchone()
             return bool(result and result[0])
-        except Exception:
+        except Exception:  # noqa: BLE001 - fall back to manual comments on legacy DBs.
+            log.debug("Generated auto-note lookup failed for player %s", player_id, exc_info=True)
             self.rollback()
             try:
                 q = self.sql.query["get_player_comment"].replace("%s", self.sql.query["placeholder"])
@@ -313,6 +330,7 @@ class DatabaseAutoNotesMixin:
                 c.execute(q, (player_id,))
                 result = c.fetchone()
                 return bool(result and result[0])
-            except Exception:
+            except Exception:  # noqa: BLE001 - DB-API drivers expose different exception hierarchies.
+                log.warning("Unable to check manual notes for player %s", player_id, exc_info=True)
                 self.rollback()
                 return False

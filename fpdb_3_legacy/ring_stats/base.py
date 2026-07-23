@@ -35,7 +35,7 @@ class DbWorker(QThread):
             results = self.cursor.fetchall()
             colnames = [desc[0].lower() for desc in self.cursor.description] if self.cursor.description else []
             self.finished.emit(self.query_name, results, colnames)
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001 - Qt worker boundary reports DB-driver errors through its signal.
             self.error.emit(str(e))
 
 
@@ -93,7 +93,7 @@ class ModernStatsWidget(QTabWidget):
         QMessageBox.critical(
             self,
             "Erreur Base de Données",
-            f"Une erreur est survenue lors du chargement des statistiques :\n\n{error_message}"
+            f"Une erreur est survenue lors du chargement des statistiques :\n\n{error_message}",
         )
 
     def closeEvent(self, event) -> None:

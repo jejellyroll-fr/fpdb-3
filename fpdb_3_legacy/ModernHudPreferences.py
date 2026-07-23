@@ -295,8 +295,12 @@ class HudPreviewWidget(QWidget):
         grid = QGridLayout(host)
         grid.setHorizontalSpacing(round(4 * self.preview_scale))
         grid.setVerticalSpacing(max(1, round(self.preview_scale)))
-        grid.setContentsMargins(round(2 * self.preview_scale), round(2 * self.preview_scale),
-                                round(2 * self.preview_scale), round(2 * self.preview_scale))
+        grid.setContentsMargins(
+            round(2 * self.preview_scale),
+            round(2 * self.preview_scale),
+            round(2 * self.preview_scale),
+            round(2 * self.preview_scale),
+        )
         stat_by_pos = {
             (s.get("row", 0), s.get("col", 0)): s
             for s in self.stats
@@ -338,10 +342,12 @@ class HudPreviewWidget(QWidget):
         grid.setContentsMargins(2, 2, 2, 2)
         bstats = block.get("stats", [])
         btexts = block.get("texts", [])
-        nrows = block.get("rows") or (max([s.get("row", 0) for s in bstats]
-                                          + [t["rowcol"][0] for t in btexts], default=-1) + 1)
-        ncols = block.get("cols") or (max([s.get("col", 0) for s in bstats]
-                                          + [t["rowcol"][1] for t in btexts], default=-1) + 1)
+        nrows = block.get("rows") or (
+            max([s.get("row", 0) for s in bstats] + [t["rowcol"][0] for t in btexts], default=-1) + 1
+        )
+        ncols = block.get("cols") or (
+            max([s.get("col", 0) for s in bstats] + [t["rowcol"][1] for t in btexts], default=-1) + 1
+        )
         # Text-label items first (column/row headers, captions) at their position.
         for t in btexts:
             r, c = t["rowcol"]
@@ -529,8 +535,9 @@ class PopupPreviewWidget(QWidget):
         self.popup_frame.setMinimumSize(0, 0)  # reset before the next popup sizes it
         self.popup_frame.resize(0, 0)
 
-    def set_popup(self, popup_name: str, popup_class: str, stats: list[dict],
-                  source: str = "", group: str = "") -> None:
+    def set_popup(
+        self, popup_name: str, popup_class: str, stats: list[dict], source: str = "", group: str = ""
+    ) -> None:
         self.clear_preview()
         self.popup_frame.setStyleSheet("""
             QFrame#popupPreviewFrame{
@@ -728,15 +735,15 @@ class HudDesignCanvas(QScrollArea):
     bottom-left design area of PokerTracker 4's Hud Profile Editor.
     """
 
-    item_selected = Signal(object)   # (block_index, kind, item_ref)
-    add_to_row = Signal(int)         # row index
-    remove_from_row = Signal(int)    # row index
+    item_selected = Signal(object)  # (block_index, kind, item_ref)
+    add_to_row = Signal(int)  # row index
+    remove_from_row = Signal(int)  # row index
 
     # kind -> (icon letter, icon colour, chip background). Chip backgrounds are
     # dark theme tints; the type is conveyed by the coloured icon, not a light fill.
     TYPE = {
-        "stat":  ("S", "#3b6fd4", "#20303c"),
-        "text":  ("T", "#d79a2e", "#2e2a20"),
+        "stat": ("S", "#3b6fd4", "#20303c"),
+        "text": ("T", "#d79a2e", "#2e2a20"),
         "hline": ("H", "#d7b500", "#2e2a20"),
         "notes": ("N", "#3a9a3a", "#1f2d20"),
     }
@@ -780,8 +787,16 @@ class HudDesignCanvas(QScrollArea):
         rows = max(1, int(block.get("rows", 1)))
         items = []  # (row, col, span, kind, ref, label)
         for s in block.get("stats", []):
-            items.append((s.get("row", 0), s.get("col", 0), int(s.get("colspan", 1) or 1),
-                          "stat", s, s.get("stat", "") or "(stat)"))
+            items.append(
+                (
+                    s.get("row", 0),
+                    s.get("col", 0),
+                    int(s.get("colspan", 1) or 1),
+                    "stat",
+                    s,
+                    s.get("stat", "") or "(stat)",
+                )
+            )
         for t in block.get("texts", []):
             if not (t.get("label", "") or "").strip():
                 continue  # empty placeholder cell -> leave blank like PT4
@@ -1320,6 +1335,7 @@ class AddStatDialog(QDialog):
 # --- Layout Selection Dialog for Exporting ---
 class LayoutSelectionDialog(QDialog):
     """Dialog to select which layout sets to include in the HUD export."""
+
     def __init__(self, layout_sets, parent=None) -> None:
         super().__init__(parent)
         self.setWindowTitle("Export Layout Coordinates")
@@ -1336,6 +1352,7 @@ class LayoutSelectionDialog(QDialog):
 
         self.list_widget = QListWidget()
         from PySide6.QtWidgets import QListWidgetItem
+
         for ls_name in sorted(layout_sets):
             item = QListWidgetItem(ls_name)
             item.setFlags(item.flags() | Qt.ItemFlag.ItemIsUserCheckable)
@@ -1360,9 +1377,7 @@ class LayoutSelectionDialog(QDialog):
         layout.addLayout(btn_layout)
 
         # OK/Cancel buttons
-        self.button_box = QDialogButtonBox(
-            QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel
-        )
+        self.button_box = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
         self.button_box.accepted.connect(self.accept)
         self.button_box.rejected.connect(self.reject)
         layout.addWidget(self.button_box)
@@ -1922,7 +1937,7 @@ class ModernHudPreferences(QDialog):
         popup_top_splitter.addWidget(popup_info_group)
 
         # PT4-style Item Properties for the selected popup item/cell.
-        self._popup_group = None          # loaded BlockPopup group (editable cells)
+        self._popup_group = None  # loaded BlockPopup group (editable cells)
         self._popup_item_cell: dict[str, Any] | None = None  # the selected cell dict
         self._popup_item_mode: str | None = None
         self.pi_props_box = QGroupBox("Item Properties")
@@ -2017,12 +2032,16 @@ class ModernHudPreferences(QDialog):
 
         # 1. Profiling checkbox
         self.profiling_checkbox = QCheckBox("Enable Player Profiling (Categorization)")
-        self.profiling_checkbox.setToolTip("Enable auto-classification of players into Nit, Calling Station, Fish, Maniac, LAG, Reg, TAG.")
+        self.profiling_checkbox.setToolTip(
+            "Enable auto-classification of players into Nit, Calling Station, Fish, Maniac, LAG, Reg, TAG."
+        )
         general_card_layout.addWidget(self.profiling_checkbox)
 
         # 2. Profile in name checkbox
         self.profile_in_name_checkbox = QCheckBox("Show profile emoji and color code directly on player name labels")
-        self.profile_in_name_checkbox.setToolTip("Append the profile emoji (e.g. 🐟, 🐌, 🎯) and color the player's name in the HUD.")
+        self.profile_in_name_checkbox.setToolTip(
+            "Append the profile emoji (e.g. 🐟, 🐌, 🎯) and color the player's name in the HUD."
+        )
         general_card_layout.addWidget(self.profile_in_name_checkbox)
 
         # 3. Min hands setting (SpinBox)
@@ -2125,11 +2144,15 @@ class ModernHudPreferences(QDialog):
     def has_unsaved_changes(self):
         """Check if there are unsaved changes."""
         profiling_changed = (
-            self.profiling_checkbox.isChecked() != self.original_player_profiling or
-            self.profile_in_name_checkbox.isChecked() != self.original_profile_in_name or
-            self.profile_min_hands_spin.value() != self.original_profile_min_hands
+            self.profiling_checkbox.isChecked() != self.original_player_profiling
+            or self.profile_in_name_checkbox.isChecked() != self.original_profile_in_name
+            or self.profile_min_hands_spin.value() != self.original_profile_min_hands
         )
-        return self.hud_profiles != self.original_profiles or self.popup_windows != self.original_popups or profiling_changed
+        return (
+            self.hud_profiles != self.original_profiles
+            or self.popup_windows != self.original_popups
+            or profiling_changed
+        )
 
     def _hud_preview_params(self) -> dict[str, str]:
         ui = getattr(self.config, "ui", None)
@@ -2175,8 +2198,18 @@ class ModernHudPreferences(QDialog):
         }
         if panel:
             d["panel"] = panel
-        for attr in ("stat_loth", "stat_hith", "stat_locolor", "stat_hicolor",
-                     "stat_midcolor", "hudcolor", "hudbgcolor", "hudprefix", "hudsuffix", "tip"):
+        for attr in (
+            "stat_loth",
+            "stat_hith",
+            "stat_locolor",
+            "stat_hicolor",
+            "stat_midcolor",
+            "hudcolor",
+            "hudbgcolor",
+            "hudprefix",
+            "hudsuffix",
+            "tip",
+        ):
             if hasattr(stat, attr):
                 d[attr] = getattr(stat, attr, "")
         # PT4 cell layout (kept only when non-default to avoid noisy XML).
@@ -2199,25 +2232,27 @@ class ModernHudPreferences(QDialog):
                 for pos, stat in blk.stats.items():
                     stats.append(self._stat_to_dict(stat, pos[0] + row_offset, pos[1], blk.label))
                     bstats.append(self._stat_to_dict(stat, pos[0], pos[1], blk.label))
-                block_meta.append({
-                    "label": blk.label,
-                    "id": getattr(blk, "id", ""),
-                    "scope": getattr(blk, "scope", "player"),
-                    "audience": getattr(blk, "audience", "everyone"),
-                    "position": getattr(blk, "position", ""),
-                    "rows": blk.rows,
-                    "cols": blk.cols,
-                    "title_bgcolor": getattr(blk, "title_bgcolor", ""),
-                    "title_fgcolor": getattr(blk, "title_fgcolor", ""),
-                    "bordercolor": getattr(blk, "bordercolor", ""),
-                    "x": getattr(blk, "x", 0),
-                    "y": getattr(blk, "y", 0),
-                    "stats": bstats,
-                    # PT4-style text-label items (column/row headers, captions).
-                    "texts": [dict(t) for t in getattr(blk, "texts", [])],
-                    # PT4 "Horz Line" separators.
-                    "hlines": [dict(h) for h in getattr(blk, "hlines", [])],
-                })
+                block_meta.append(
+                    {
+                        "label": blk.label,
+                        "id": getattr(blk, "id", ""),
+                        "scope": getattr(blk, "scope", "player"),
+                        "audience": getattr(blk, "audience", "everyone"),
+                        "position": getattr(blk, "position", ""),
+                        "rows": blk.rows,
+                        "cols": blk.cols,
+                        "title_bgcolor": getattr(blk, "title_bgcolor", ""),
+                        "title_fgcolor": getattr(blk, "title_fgcolor", ""),
+                        "bordercolor": getattr(blk, "bordercolor", ""),
+                        "x": getattr(blk, "x", 0),
+                        "y": getattr(blk, "y", 0),
+                        "stats": bstats,
+                        # PT4-style text-label items (column/row headers, captions).
+                        "texts": [dict(t) for t in getattr(blk, "texts", [])],
+                        # PT4 "Horz Line" separators.
+                        "hlines": [dict(h) for h in getattr(blk, "hlines", [])],
+                    }
+                )
                 row_offset += blk.rows
                 total_cols = max(total_cols, blk.cols)
             return {
@@ -2285,8 +2320,13 @@ class ModernHudPreferences(QDialog):
         if hasattr(self.config, "popup_windows") and self.config.popup_windows:
             for popup_name, popup_obj in self.config.popup_windows.items():
                 _params = getattr(popup_obj, "pu_class_params", {}) or {}
-                popup_data = {"name": popup_name, "class": popup_obj.pu_class, "stats": [],
-                              "source": _params.get("source", ""), "group": _params.get("group", "")}
+                popup_data = {
+                    "name": popup_name,
+                    "class": popup_obj.pu_class,
+                    "stats": [],
+                    "source": _params.get("source", ""),
+                    "group": _params.get("group", ""),
+                }
 
                 # Extract stats and submenus
                 for i, stat_name in enumerate(popup_obj.pu_stats):
@@ -2367,21 +2407,45 @@ class ModernHudPreferences(QDialog):
 
             try:
                 group = load_block_popup(popup_data["source"], popup_data["group"])
-            except Exception:
+            except (KeyError, OSError, TypeError, ValueError):
+                log.warning(
+                    "Unable to load block popup %s/%s", popup_data["source"], popup_data["group"], exc_info=True
+                )
                 group = None
             if group:
                 # Keep the loaded group + its source so Item Properties edits the
                 # real cells and can be saved back to the JSON sidecar.
                 self._popup_group = group
                 self._popup_group_source = popup_data["source"]
-                block = {"label": "", "rows": max(1, int(group.get("rows", 1))),
-                         "cols": max(1, int(group.get("cols", 1))), "hlines": [],
-                         "stats": [{"row": c["row"], "col": c["col"], "stat": c["text"],
-                                    "hudcolor": c.get("fg", ""), "hudbgcolor": c.get("bg", "")}
-                                   for c in group.get("cells", []) if c["kind"] == "stat"],
-                         "texts": [{"rowcol": (c["row"], c["col"]), "label": c["text"], "colspan": 1,
-                                    "align": "center", "fgcolor": c.get("fg", ""), "bgcolor": c.get("bg", "")}
-                                   for c in group.get("cells", []) if c["kind"] == "text"]}
+                block = {
+                    "label": "",
+                    "rows": max(1, int(group.get("rows", 1))),
+                    "cols": max(1, int(group.get("cols", 1))),
+                    "hlines": [],
+                    "stats": [
+                        {
+                            "row": c["row"],
+                            "col": c["col"],
+                            "stat": c["text"],
+                            "hudcolor": c.get("fg", ""),
+                            "hudbgcolor": c.get("bg", ""),
+                        }
+                        for c in group.get("cells", [])
+                        if c["kind"] == "stat"
+                    ],
+                    "texts": [
+                        {
+                            "rowcol": (c["row"], c["col"]),
+                            "label": c["text"],
+                            "colspan": 1,
+                            "align": "center",
+                            "fgcolor": c.get("fg", ""),
+                            "bgcolor": c.get("bg", ""),
+                        }
+                        for c in group.get("cells", [])
+                        if c["kind"] == "text"
+                    ],
+                }
                 # Keep the imported grid editor aligned with the Statistics tab:
                 # full chips plus per-row +/- controls, even for dense PT4 grids.
                 self.popup_canvas.compact = False
@@ -2394,10 +2458,14 @@ class ModernHudPreferences(QDialog):
             name = s.get("stat_name", "")
             return f"{name}  →  {s['submenu']}" if s.get("submenu") else name
 
-        block = {"label": "", "rows": max(1, len(stats)), "cols": 1,
-                 "stats": [{"row": i, "col": 0, "stat": _label(s), "_popup_stat": s}
-                           for i, s in enumerate(stats)],
-                 "texts": [], "hlines": []}
+        block = {
+            "label": "",
+            "rows": max(1, len(stats)),
+            "cols": 1,
+            "stats": [{"row": i, "col": 0, "stat": _label(s), "_popup_stat": s} for i, s in enumerate(stats)],
+            "texts": [],
+            "hlines": [],
+        }
         self.popup_canvas.compact = False
         self.popup_canvas.set_block(0, block)
 
@@ -2413,8 +2481,7 @@ class ModernHudPreferences(QDialog):
             self.popup_stats_list.setCurrentRow(row)
         # BlockPopup: edit the real grid cell at (row, col).
         if self._popup_group is not None and row is not None and col is not None:
-            cell = next((c for c in self._popup_group.get("cells", [])
-                         if c["row"] == row and c["col"] == col), None)
+            cell = next((c for c in self._popup_group.get("cells", []) if c["row"] == row and c["col"] == col), None)
             self._load_popup_item(cell)
             return
         stat = ref.get("_popup_stat") if isinstance(ref, dict) else None
@@ -2645,12 +2712,20 @@ class ModernHudPreferences(QDialog):
                 for s in blk.get("stats", []):
                     entries.append((s.get("row", 0) + row_offset, s.get("col", 0), s, bi, "stat", s))
                 for t in blk.get("texts", []):
-                    disp = {"row": t["rowcol"][0] + row_offset, "col": t["rowcol"][1],
-                            "stat": f"🔤 {t['label']}" if t["label"] else "🔤 (label)", "is_text": True}
+                    disp = {
+                        "row": t["rowcol"][0] + row_offset,
+                        "col": t["rowcol"][1],
+                        "stat": f"🔤 {t['label']}" if t["label"] else "🔤 (label)",
+                        "is_text": True,
+                    }
                     entries.append((t["rowcol"][0] + row_offset, t["rowcol"][1], disp, bi, "text", t))
                 for h in blk.get("hlines", []):
-                    disp = {"row": h["rowcol"][0] + row_offset, "col": h["rowcol"][1],
-                            "stat": "──── (line)", "is_text": True}
+                    disp = {
+                        "row": h["rowcol"][0] + row_offset,
+                        "col": h["rowcol"][1],
+                        "stat": "──── (line)",
+                        "is_text": True,
+                    }
                     entries.append((h["rowcol"][0] + row_offset, h["rowcol"][1], disp, bi, "hline", h))
                 row_offset += blk.get("rows", 1)
             entries.sort(key=lambda x: (x[0], x[1]))
@@ -2752,10 +2827,14 @@ class ModernHudPreferences(QDialog):
             block = blocks[bi]
             canvas_index = bi
         else:
-            block = {"label": "", "rows": profile.get("rows", 1) if isinstance(profile, dict) else 1,
-                     "cols": profile.get("cols", 1) if isinstance(profile, dict) else 1,
-                     "stats": profile.get("stats", []) if isinstance(profile, dict) else profile,
-                     "texts": [], "hlines": []}
+            block = {
+                "label": "",
+                "rows": profile.get("rows", 1) if isinstance(profile, dict) else 1,
+                "cols": profile.get("cols", 1) if isinstance(profile, dict) else 1,
+                "stats": profile.get("stats", []) if isinstance(profile, dict) else profile,
+                "texts": [],
+                "hlines": [],
+            }
             canvas_index = 0
         # Keep the section header in sync with the selected panel.
         if hasattr(self, "design_label"):
@@ -2786,10 +2865,15 @@ class ModernHudPreferences(QDialog):
             return
         container = self._item_container(profile, block_index)
         cols = max(1, int(container.get("cols", 4)))
-        used = {c for (r, c) in
-                ([(s.get("row", 0), s.get("col", 0)) for s in container.get("stats", [])]
-                 + [tuple(t["rowcol"]) for t in container.get("texts", [])]
-                 + [tuple(h["rowcol"]) for h in container.get("hlines", [])]) if r == row}
+        used = {
+            c
+            for (r, c) in (
+                [(s.get("row", 0), s.get("col", 0)) for s in container.get("stats", [])]
+                + [tuple(t["rowcol"]) for t in container.get("texts", [])]
+                + [tuple(h["rowcol"]) for h in container.get("hlines", [])]
+            )
+            if r == row
+        }
         col = next((c for c in range(cols) if c not in used), cols - 1)
         dlg = AddStatDialog(max_rows=max(cols, row + 1), max_cols=cols, parent=self)
         dlg.row_input.setCurrentText(str(row))
@@ -2838,7 +2922,7 @@ class ModernHudPreferences(QDialog):
     def _rgb_of(colour: str) -> tuple[int, int, int]:
         c = (colour or "").strip()
         if c.startswith("rgba") or c.startswith("rgb"):
-            nums = [int(float(x)) for x in c[c.find("(") + 1:c.find(")")].split(",")[:3]]
+            nums = [int(float(x)) for x in c[c.find("(") + 1 : c.find(")")].split(",")[:3]]
             if len(nums) == 3:
                 return tuple(nums)  # type: ignore[return-value]
         if c.startswith("#") and len(c) >= 7:
@@ -2849,7 +2933,7 @@ class ModernHudPreferences(QDialog):
     def _opacity_of(colour: str):
         c = (colour or "").strip()
         if c.startswith("rgba"):
-            parts = c[c.find("(") + 1:c.find(")")].split(",")
+            parts = c[c.find("(") + 1 : c.find(")")].split(",")
             if len(parts) == 4:
                 try:
                     return int(float(parts[3]))
@@ -2885,8 +2969,7 @@ class ModernHudPreferences(QDialog):
             self._populate_group_items(blocks[row])
         else:
             self.group_props_box.setEnabled(False)
-            flat = {"stats": profile.get("stats", []) if isinstance(profile, dict) else [],
-                    "texts": [], "hlines": []}
+            flat = {"stats": profile.get("stats", []) if isinstance(profile, dict) else [], "texts": [], "hlines": []}
             self._populate_group_items(flat)
         # Show the selected panel's grid on the design canvas + preview (box-by-box).
         if profile is not None:
@@ -3010,8 +3093,13 @@ class ModernHudPreferences(QDialog):
     @staticmethod
     def _item_color_key(kind: str, role: str):
         if kind == "stat":
-            return {"fg": "hudcolor", "bg": "hudbgcolor", "lo": "stat_locolor",
-                    "mid": "stat_midcolor", "hi": "stat_hicolor"}.get(role)
+            return {
+                "fg": "hudcolor",
+                "bg": "hudbgcolor",
+                "lo": "stat_locolor",
+                "mid": "stat_midcolor",
+                "hi": "stat_hicolor",
+            }.get(role)
         if kind == "text":
             return {"fg": "fgcolor", "bg": "bgcolor"}.get(role)
         if kind == "hline":
@@ -3265,6 +3353,7 @@ class ModernHudPreferences(QDialog):
 
         try:
             import xml.dom.minidom
+
             impl = xml.dom.minidom.getDOMImplementation()
             pkg_doc = impl.createDocument(None, "fpdb_hud_package", None)
             root = pkg_doc.documentElement
@@ -3283,7 +3372,7 @@ class ModernHudPreferences(QDialog):
                 QMessageBox.warning(
                     self,
                     "Export Warning",
-                    "The current profile is not saved to the configuration yet. Please save your changes before exporting."
+                    "The current profile is not saved to the configuration yet. Please save your changes before exporting.",
                 )
                 return
 
@@ -3328,7 +3417,7 @@ class ModernHudPreferences(QDialog):
                     self,
                     "Export Layout Coordinates",
                     "Do you want to include custom table coordinates (Layout Sets) in this HUD package?",
-                    QMessageBox.Yes | QMessageBox.No
+                    QMessageBox.Yes | QMessageBox.No,
                 )
                 if reply == QMessageBox.Yes:
                     dlg = LayoutSelectionDialog(layout_sets, self)
@@ -3347,16 +3436,10 @@ class ModernHudPreferences(QDialog):
                 f.write(pkg_doc.toprettyxml(indent="    "))
 
             QMessageBox.information(
-                self,
-                "Export Successful",
-                f"HUD profile '{profile_name}' exported successfully to:\n{filename}"
+                self, "Export Successful", f"HUD profile '{profile_name}' exported successfully to:\n{filename}"
             )
         except Exception as e:  # intentional broad catch
-            QMessageBox.critical(
-                self,
-                "Export Error",
-                f"An error occurred while exporting HUD profile:\n{e}"
-            )
+            QMessageBox.critical(self, "Export Error", f"An error occurred while exporting HUD profile:\n{e}")
 
     def import_profile(self) -> None:
         import os
@@ -3386,30 +3469,20 @@ class ModernHudPreferences(QDialog):
             assert root is not None
             if root.tagName != "fpdb_hud_package":
                 QMessageBox.critical(
-                    self,
-                    "Import Error",
-                    "Invalid package file. The root element must be <fpdb_hud_package>."
+                    self, "Import Error", "Invalid package file. The root element must be <fpdb_hud_package>."
                 )
                 return
 
             # 1. Process ss (Stat Set)
             ss_nodes = root.getElementsByTagName("ss")
             if not ss_nodes:
-                QMessageBox.critical(
-                    self,
-                    "Import Error",
-                    "No HUD profile (stat set) found in the package."
-                )
+                QMessageBox.critical(self, "Import Error", "No HUD profile (stat set) found in the package.")
                 return
 
             ss_node = ss_nodes[0]
             imported_name = ss_node.getAttribute("name")
             if not imported_name:
-                QMessageBox.critical(
-                    self,
-                    "Import Error",
-                    "Imported HUD profile has no name."
-                )
+                QMessageBox.critical(self, "Import Error", "Imported HUD profile has no name.")
                 return
 
             overwrite_profile = False
@@ -3436,7 +3509,7 @@ class ModernHudPreferences(QDialog):
                         self,
                         "Rename Imported Profile",
                         f"Enter new name for imported profile '{imported_name}':",
-                        text=f"{imported_name}_imported"
+                        text=f"{imported_name}_imported",
                     )
                     if not ok or not new_name:
                         return
@@ -3445,7 +3518,7 @@ class ModernHudPreferences(QDialog):
                             self,
                             "Rename Imported Profile",
                             f"Name '{new_name}' already exists. Enter another name:",
-                            text=f"{new_name}_1"
+                            text=f"{new_name}_1",
                         )
                         if not ok or not new_name:
                             return
@@ -3455,7 +3528,7 @@ class ModernHudPreferences(QDialog):
 
             # 2. Process pu (Popup Windows)
             pu_nodes = root.getElementsByTagName("pu")
-            overwrite_popups = {} # pu_name -> bool
+            overwrite_popups = {}  # pu_name -> bool
             overwrite_all_popups = False
             skip_all_popups = False
 
@@ -3500,7 +3573,7 @@ class ModernHudPreferences(QDialog):
 
             # 3. Process ls (Layout Sets)
             ls_nodes = root.getElementsByTagName("ls")
-            overwrite_layouts = {} # ls_name -> bool
+            overwrite_layouts = {}  # ls_name -> bool
             overwrite_all_layouts = False
             skip_all_layouts = False
 
@@ -3517,7 +3590,9 @@ class ModernHudPreferences(QDialog):
                         msg_box = QMessageBox(self)
                         msg_box.setWindowTitle("Layout Conflict")
                         msg_box.setText(f"Layout coordinates for site layout '{ls_name}' already exist.")
-                        msg_box.setInformativeText("Do you want to overwrite your existing layout coordinates for this site with the imported ones?")
+                        msg_box.setInformativeText(
+                            "Do you want to overwrite your existing layout coordinates for this site with the imported ones?"
+                        )
 
                         yes_btn = msg_box.addButton(QMessageBox.StandardButton.Yes)
                         yes_to_all_btn = msg_box.addButton(QMessageBox.StandardButton.YesToAll)
@@ -3627,17 +3702,11 @@ class ModernHudPreferences(QDialog):
             self.reload_parent_config()
 
             QMessageBox.information(
-                self,
-                "Import Successful",
-                f"HUD profile '{new_profile_name}' successfully imported!"
+                self, "Import Successful", f"HUD profile '{new_profile_name}' successfully imported!"
             )
 
         except Exception as e:  # intentional broad catch
-            QMessageBox.critical(
-                self,
-                "Import Error",
-                f"An error occurred while importing HUD profile:\n{e}"
-            )
+            QMessageBox.critical(self, "Import Error", f"An error occurred while importing HUD profile:\n{e}")
 
     def _import_pt4hud(self, filename: str) -> None:
         """Import a PokerTracker 4 .pt4hud layout into the config and refresh the UI."""
@@ -3669,8 +3738,10 @@ class ModernHudPreferences(QDialog):
             + (f" across {summary['blocks']} position panels." if summary.get("blocks") else "."),
         ]
         if summary["charts"]:
-            lines.append(f"• {len(summary['charts'])} range chart(s) "
-                         f"({', '.join(summary['charts'])}) → popup '{summary['popup']}'.")
+            lines.append(
+                f"• {len(summary['charts'])} range chart(s) "
+                f"({', '.join(summary['charts'])}) → popup '{summary['popup']}'."
+            )
         if summary["unmapped"]:
             lines.append(f"• {len(summary['unmapped'])} custom formula stat(s) could not be mapped.")
         QMessageBox.information(self, "PT4 HUD imported", "\n".join(lines))
@@ -3840,12 +3911,36 @@ class ModernHudPreferences(QDialog):
         if not blocks:
             # Promote the existing flat grid to the first block so the profile
             # becomes a genuine multi-panel set.
-            blocks.append({"label": "Main", "position": "", "rows": int(profile.get("rows", 1)), "cols": cols,
-                           "title_bgcolor": "", "title_fgcolor": "", "bordercolor": "", "x": 0, "y": 0,
-                           "stats": [dict(s) for s in profile.get("stats", [])], "texts": []})
-        blocks.append({"label": label.strip() or f"Block {len(blocks) + 1}", "position": "", "rows": 1, "cols": cols,
-                       "title_bgcolor": "", "title_fgcolor": "", "bordercolor": "", "x": 0, "y": 0,
-                       "stats": [], "texts": []})
+            blocks.append(
+                {
+                    "label": "Main",
+                    "position": "",
+                    "rows": int(profile.get("rows", 1)),
+                    "cols": cols,
+                    "title_bgcolor": "",
+                    "title_fgcolor": "",
+                    "bordercolor": "",
+                    "x": 0,
+                    "y": 0,
+                    "stats": [dict(s) for s in profile.get("stats", [])],
+                    "texts": [],
+                }
+            )
+        blocks.append(
+            {
+                "label": label.strip() or f"Block {len(blocks) + 1}",
+                "position": "",
+                "rows": 1,
+                "cols": cols,
+                "title_bgcolor": "",
+                "title_fgcolor": "",
+                "bordercolor": "",
+                "x": 0,
+                "y": 0,
+                "stats": [],
+                "texts": [],
+            }
+        )
         profile["multiblock"] = True
         self.on_profile_selected(self.profile_combo.currentIndex())
 
@@ -3929,7 +4024,16 @@ class ModernHudPreferences(QDialog):
             for block in blocks:
                 stat_set_node.appendChild(self.config.doc.createTextNode("\n            "))
                 block_node = self.config.doc.createElement("block")
-                for attr in ("label", "id", "scope", "audience", "position", "title_bgcolor", "title_fgcolor", "bordercolor"):
+                for attr in (
+                    "label",
+                    "id",
+                    "scope",
+                    "audience",
+                    "position",
+                    "title_bgcolor",
+                    "title_fgcolor",
+                    "bordercolor",
+                ):
                     if block.get(attr) is not None:
                         block_node.setAttribute(attr, str(block.get(attr, "")))
                 block_node.setAttribute("rows", str(block.get("rows", 1)))
@@ -4094,7 +4198,7 @@ class ModernHudPreferences(QDialog):
             hud_params = {
                 "player_profiling": "True" if self.profiling_checkbox.isChecked() else "False",
                 "profile_in_name": "True" if self.profile_in_name_checkbox.isChecked() else "False",
-                "profile_min_hands": str(self.profile_min_hands_spin.value())
+                "profile_min_hands": str(self.profile_min_hands_spin.value()),
             }
             if hasattr(self.config, "set_hud_ui_parameters"):
                 self.config.set_hud_ui_parameters(hud_params)

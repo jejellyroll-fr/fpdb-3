@@ -433,7 +433,7 @@ You finished in 10th place
             summary.summaryText = malformed_summary
             summary.hhtype = "summary"
 
-            with pytest.raises(FpdbParseError, match=".*"):
+            with pytest.raises(FpdbParseError):
                 summary.parseSummary()
 
     def test_identify_pattern(self) -> None:

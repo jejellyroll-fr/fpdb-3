@@ -39,7 +39,7 @@ class TestEmptyDataPopups(unittest.TestCase):
             "db-user": "",
             "db-password": "",
             "db-host": "",
-            "db-port": ""
+            "db-port": "",
         }
         self.mock_conf.get_import_parameters.return_value = {}
         self.mock_conf.get_default_paths.return_value = {}
@@ -187,10 +187,10 @@ class TestEmptyDataPopups(unittest.TestCase):
 
         # Assert QMessageBox was shown
         mock_exec.assert_called_once()
-        viewer.db.rollback.assert_called()
+        cast(MagicMock, viewer.db.rollback).assert_called()
 
     @patch("PySide6.QtWidgets.QDialog.exec", return_value=0)
-    def test_gui_ring_player_stats_detail_filters(self, mock_exec):
+    def test_gui_ring_player_stats_detail_filters(self, mock_exec: MagicMock):
         """Test showDetailFilter runs and doesn't raise NameError."""
         viewer = GuiRingPlayerStats(self.mock_conf, self.mock_sql, None)
         viewer.showDetailFilter(None)
@@ -230,6 +230,7 @@ class TestEmptyDataPopups(unittest.TestCase):
     def test_gui_hand_viewer_empty(self, mock_exec):
         """Test GuiHandViewer shows QMessageBox when no hands found."""
         from fpdb_3_legacy.GuiHandViewer import GuiHandViewer
+
         viewer = GuiHandViewer(self.mock_conf, self.mock_sql, None)
         viewer.filters = MagicMock()
         viewer.filters.getDates.return_value = ("2000-01-01", "2030-01-01")
@@ -244,6 +245,7 @@ class TestEmptyDataPopups(unittest.TestCase):
     def test_gui_tour_hand_viewer_empty(self, mock_exec):
         """Test TourHandViewer shows QMessageBox when no hands found."""
         from fpdb_3_legacy.GuiTourHandViewer import TourHandViewer
+
         viewer = TourHandViewer(self.mock_conf, self.mock_sql, None)
         viewer.filters = MagicMock()
         viewer.filters.getDates.return_value = ("2000-01-01", "2030-01-01")
@@ -279,6 +281,7 @@ class TestEmptyDataPopups(unittest.TestCase):
     def test_filters_get_hero_ids_variant(self):
         """Test that get_hero_ids correctly maps site variant to player ID."""
         from fpdb_3_legacy.Filters import Filters
+
         filters = Filters(self.mock_db)
 
         # Mock site variants
@@ -294,6 +297,7 @@ class TestEmptyDataPopups(unittest.TestCase):
     def test_filters_get_actual_site_id(self):
         """Test that get_actual_site_id resolves variant site ID correctly."""
         from fpdb_3_legacy.Filters import Filters
+
         filters = Filters(self.mock_db)
         filters.siteid = {"PokerStars": 2}
 
@@ -304,6 +308,7 @@ class TestEmptyDataPopups(unittest.TestCase):
     def test_filters_get_hero_for_site(self):
         """Test that get_hero_for_site robustly maps site variants to configured heroes."""
         from fpdb_3_legacy.Filters import Filters
+
         filters = Filters(self.mock_db)
 
         # Mock getHeroes return value
@@ -320,13 +325,16 @@ class TestEmptyDataPopups(unittest.TestCase):
         self.assertEqual(filters.get_hero_for_site("Unibet"), "jejesat")
         # Test non-existent site returns None
         filters.getHeroes = MagicMock(return_value={"PokerStars": "jeje_sat"})  # type: ignore[method-assign]
-        self.assertEqual(filters.get_hero_for_site("Winamax"), "jeje_sat")  # Since only one hero is configured, returns it as fallback
+        self.assertEqual(
+            filters.get_hero_for_site("Winamax"), "jeje_sat"
+        )  # Since only one hero is configured, returns it as fallback
 
     def test_filters_update_sites_for_hero(self):
         """Test that update_sites_for_hero correctly checks parent site for variant."""
         from PySide6.QtWidgets import QCheckBox
 
         from fpdb_3_legacy.Filters import Filters
+
         filters = Filters(self.mock_db)
 
         # Mock cbSites
@@ -344,6 +352,7 @@ class TestEmptyDataPopups(unittest.TestCase):
 class TestHudImportExport(unittest.TestCase):
     def setUp(self):
         import xml.dom.minidom
+
         self.temp_files = []
 
         # Create a mock configuration with a valid DOM tree
@@ -383,6 +392,7 @@ class TestHudImportExport(unittest.TestCase):
 
     def tearDown(self):
         import os
+
         for f in self.temp_files:
             if os.path.exists(f):
                 os.remove(f)
@@ -419,8 +429,8 @@ class TestHudImportExport(unittest.TestCase):
                 "cols": 2,
                 "stats": [
                     {"row": 0, "col": 0, "stat": "vpip", "popup": "test_popup"},
-                    {"row": 0, "col": 1, "stat": "pfr", "popup": "default"}
-                ]
+                    {"row": 0, "col": 1, "stat": "pfr", "popup": "default"},
+                ],
             }
         }
         # Mock profile combo box
@@ -539,7 +549,7 @@ class TestHudImportExport(unittest.TestCase):
         self.mock_config.get_hud_ui_parameters.return_value = {
             "player_profiling": "True",
             "profile_in_name": "False",
-            "profile_min_hands": "25"
+            "profile_min_hands": "25",
         }
 
         # Instantiate preferences
@@ -567,13 +577,10 @@ class TestHudImportExport(unittest.TestCase):
         prefs.save_changes()
 
         # Verify set_hud_ui_parameters was called with new values
-        self.mock_config.set_hud_ui_parameters.assert_called_once_with({
-            "player_profiling": "False",
-            "profile_in_name": "True",
-            "profile_min_hands": "40"
-        })
+        self.mock_config.set_hud_ui_parameters.assert_called_once_with(
+            {"player_profiling": "False", "profile_in_name": "True", "profile_min_hands": "40"}
+        )
         self.mock_config.save.assert_called_once()
-
 
 
 if __name__ == "__main__":

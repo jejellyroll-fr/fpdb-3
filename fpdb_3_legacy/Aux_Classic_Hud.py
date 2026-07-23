@@ -144,7 +144,11 @@ class ClassicStatWindow(Aux_Hud.SimpleStatWindow):
                 pos_x, pos_y = self.aw._canonical_to_screen(canon)
                 log.debug(
                     "MULTIBLOCK HUD - seat %s block %s: canonical %s -> screen (%d,%d)",
-                    seat, block_key, canon, pos_x, pos_y,
+                    seat,
+                    block_key,
+                    canon,
+                    pos_x,
+                    pos_y,
                 )
             else:
                 table_x = self._nz(self.aw.hud.table.x)
@@ -153,7 +157,9 @@ class ClassicStatWindow(Aux_Hud.SimpleStatWindow):
                 pos_y = max(0, self.aw.positions[seat][1] + table_y)
                 log.info(
                     "CLASSIC HUD - Moving seat %d stat window to (%d,%d)",
-                    seat, pos_x, pos_y,
+                    seat,
+                    pos_x,
+                    pos_y,
                 )
             self.move(pos_x, pos_y)
             self._pos_gen = gen
@@ -306,7 +312,8 @@ class ClassicStat(Aux_Hud.SimpleStat):
             int | None: The player ID if found, otherwise None.
         """
         return next(
-            (player_id_ for player_id_, data in (self.stat_dict or {}).items() if data["seat"] == self.lab.aw_seat), None
+            (player_id_ for player_id_, data in (self.stat_dict or {}).items() if data["seat"] == self.lab.aw_seat),
+            None,
         )
 
     def get_player_name(self, player_id: int) -> str:
@@ -461,6 +468,7 @@ class ClassicStat(Aux_Hud.SimpleStat):
         if self.stat == "playerprofile":
             try:
                 from fpdb_3_legacy.PlayerProfiler import classify_player
+
                 profile, icon, color = classify_player(stat_dict, player_id)
                 fg = color
                 statstring = f"{self.hudprefix}{icon}{self.hudsuffix}"
@@ -474,7 +482,8 @@ class ClassicStat(Aux_Hud.SimpleStat):
                 player_profiling = hud_params.get("player_profiling", "True") == "True"
                 profile_in_name = hud_params.get("profile_in_name", "True") == "True"
                 min_hands = int(hud_params.get("profile_min_hands", 10))
-            except Exception:  # intentional broad catch
+            except (AttributeError, TypeError, ValueError):
+                log.warning("Invalid player-profile HUD configuration; using defaults", exc_info=True)
                 player_profiling = True
                 profile_in_name = True
                 min_hands = 10
@@ -482,6 +491,7 @@ class ClassicStat(Aux_Hud.SimpleStat):
             if player_profiling and profile_in_name:
                 try:
                     from fpdb_3_legacy.PlayerProfiler import classify_player
+
                     profile, icon, color = classify_player(stat_dict, player_id, min_hands)
                     if profile != "unknown":
                         fg = color
@@ -505,11 +515,12 @@ class ClassicStat(Aux_Hud.SimpleStat):
         tip = f"{screen_name}\n{self.number[5]}\n{self.number[3]}, {self.number[4]}"
         try:
             from fpdb_3_legacy.PlayerProfiler import classify_player
+
             profile, icon, color = classify_player(stat_dict, player_id)
             if profile != "unknown":
                 tip += f"\nProfile: {profile.upper()} {icon}"
         except Exception:  # intentional broad catch
-            pass
+            log.debug("Unable to add player profile to HUD tooltip", exc_info=True)
 
         Stats.do_tip(self.lab, tip)
         return None

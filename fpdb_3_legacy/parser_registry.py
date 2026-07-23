@@ -96,7 +96,7 @@ PARSER_CLASS_REGISTRY: dict[str, type[HandHistoryConverter]] = {
     "Boss": Boss,
     "Bovada": Bovada,
     "Cake": Cake,
-    "CoinPoker": CoinPoker,
+    "CoinPoker": cast(type[HandHistoryConverter], CoinPoker),
     "Enet": Enet,
     "Entraction": Entraction,
     "Everest": Everest,

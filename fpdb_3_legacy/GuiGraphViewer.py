@@ -137,7 +137,9 @@ class GuiGraphViewer(QSplitter):
         display_in = currency_symbol(display_currency) if "$" in graphops else "BB"
         names = ""
 
-        log.warning(f"GuiGraphViewer.generateGraph called. Sites selected: {sites}, Heroes config: {heroes}, siteids: {siteids}, limits: {limits}, games: {games}, currencies: {currencies}, graphops: {graphops}")
+        log.warning(
+            f"GuiGraphViewer.generateGraph called. Sites selected: {sites}, Heroes config: {heroes}, siteids: {siteids}, limits: {limits}, games: {games}, currencies: {currencies}, graphops: {graphops}"
+        )
 
         for site in sites:
             _hname = heroes.get(site, "")
@@ -162,7 +164,9 @@ class GuiGraphViewer(QSplitter):
                     else:
                         sitenos.append(siteids[site])
 
-        log.warning(f"GuiGraphViewer.generateGraph resolved sitenos: {sitenos}, playerids: {playerids}, names: {names!r}")
+        log.warning(
+            f"GuiGraphViewer.generateGraph resolved sitenos: {sitenos}, playerids: {playerids}, names: {names!r}"
+        )
 
         if not sitenos:
             log.warning("GuiGraphViewer.generateGraph: No sites selected - defaulting to PokerStars")
@@ -194,6 +198,7 @@ class GuiGraphViewer(QSplitter):
 
         if green is None or len(green) == 0:
             from PySide6.QtWidgets import QMessageBox
+
             msg = QMessageBox(self)
             msg.setIcon(QMessageBox.Icon.Information)
             msg.setWindowTitle(_("FPDB 3 info"))
@@ -210,15 +215,15 @@ class GuiGraphViewer(QSplitter):
 
         # Helper to determine if theme is dark
         def is_dark_color(hex_color: str) -> bool:
-            hex_color = hex_color.lstrip('#')
+            hex_color = hex_color.lstrip("#")
             if len(hex_color) == 3:
-                hex_color = ''.join(c*2 for c in hex_color)
+                hex_color = "".join(c * 2 for c in hex_color)
             try:
                 r = int(hex_color[0:2], 16)
                 g = int(hex_color[2:4], 16)
                 b = int(hex_color[4:6], 16)
                 return (0.299 * r + 0.587 * g + 0.114 * b) < 128
-            except Exception:
+            except (AttributeError, TypeError, ValueError):
                 return True
 
         is_dark = is_dark_color(bg_color)
@@ -274,21 +279,21 @@ class GuiGraphViewer(QSplitter):
         # Color mapping to modern, vibrant colors based on theme contrast
         if is_dark:
             color_map = {
-                "c": "#22c55e",           # Green net winnings
-                "b": "#00a2ff",           # Modern Sleek Blue (Showdown)
-                "m": "#f43f5e",           # Modern Soft Red (Non-showdown)
-                "g": "#22c55e",           # Green
-                "r": "#f43f5e",           # Soft Red
-                "orange": "#ff9f43",      # Modern Soft Orange (EV)
+                "c": "#22c55e",  # Green net winnings
+                "b": "#00a2ff",  # Modern Sleek Blue (Showdown)
+                "m": "#f43f5e",  # Modern Soft Red (Non-showdown)
+                "g": "#22c55e",  # Green
+                "r": "#f43f5e",  # Soft Red
+                "orange": "#ff9f43",  # Modern Soft Orange (EV)
             }
         else:
             color_map = {
-                "c": "#15803d",           # Darker Green
-                "b": "#1d4ed8",           # Darker Blue
-                "m": "#be123c",           # Darker Red
-                "g": "#15803d",           # Darker Green
-                "r": "#be123c",           # Darker Red
-                "orange": "#d97706",      # Darker Amber/Orange
+                "c": "#15803d",  # Darker Green
+                "b": "#1d4ed8",  # Darker Blue
+                "m": "#be123c",  # Darker Red
+                "g": "#15803d",  # Darker Green
+                "r": "#be123c",  # Darker Red
+                "orange": "#d97706",  # Darker Amber/Orange
             }
 
         def get_modern_color(key: str, fallback: str) -> str:
@@ -427,7 +432,9 @@ class GuiGraphViewer(QSplitter):
         )
 
     def getRingProfitGraph(self, names, sites, limits, games, currencies, units):
-        log.warning(f"GuiGraphViewer.getRingProfitGraph: names: {names}, sites: {sites}, limits: {limits}, games: {games}, currencies: {currencies}, units: {units}")
+        log.warning(
+            f"GuiGraphViewer.getRingProfitGraph: names: {names}, sites: {sites}, limits: {limits}, games: {games}, currencies: {currencies}, units: {units}"
+        )
         # ``units`` is the display symbol: "BB" for big-blind mode, otherwise a
         # (possibly localized) currency symbol like "$", "€" or "£". Selecting
         # the query on the literal "$" broke every non-USD currency, so decide

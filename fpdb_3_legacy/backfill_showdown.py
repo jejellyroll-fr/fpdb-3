@@ -50,8 +50,8 @@ def _ensure_table(db) -> None:
         c = db.get_cursor()
         c.execute(db.sql.query["createHandsShowdownTable"])
         db.commit()
-    except Exception:  # noqa: BLE001 - table already exists: nothing to do.
-        pass
+    except Exception:  # noqa: BLE001 - table may already exist on legacy schemas.
+        log.debug("HandsShowdown table creation skipped", exc_info=True)
 
 
 def _lookup_hand_ids(db, site_hand_no, site_id):
