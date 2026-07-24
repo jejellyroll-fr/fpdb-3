@@ -424,3 +424,65 @@ jobs:
         with:
           name: fpdb-build-${{ matrix.os }}
           path: fpdb-build.tar.gz
+
+  build-pyoxidizer-macos:
+    name: Build with PyOxidizer (macOS ARM64)
+    runs-on: macos-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Cache PyOxidizer build dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/git
+            ~/.cargo/registry
+            ~/Library/Caches/pyoxidizer
+          key: pyoxidizer-${{ runner.os }}-${{ runner.arch }}-0.24.0-${{ hashFiles('pyoxidizer.bzl', 'pyproject.toml') }}
+          restore-keys: |
+            pyoxidizer-${{ runner.os }}-${{ runner.arch }}-0.24.0-
+      - name: Install PyOxidizer
+        shell: bash
+        run: |
+          pyoxidizer_archive="$RUNNER_TEMP/pyoxidizer.tar.gz"
+          pyoxidizer_dir="$RUNNER_TEMP/pyoxidizer"
+          curl --fail --location --retry 3 \
+            --output "$pyoxidizer_archive" \
+            "https://github.com/indygreg/PyOxidizer/releases/download/pyoxidizer/0.24.0/pyoxidizer-0.24.0-aarch64-apple-darwin.tar.gz"
+          echo "65976b0b505857f7f43ea30de35ef6305383e54ddfae90086fd641ca14d0487f  $pyoxidizer_archive" \
+            | shasum -a 256 --check
+          mkdir -p "$pyoxidizer_dir"
+          tar -xzf "$pyoxidizer_archive" --strip-components=1 -C "$pyoxidizer_dir"
+          echo "$pyoxidizer_dir" >> "$GITHUB_PATH"
+      - name: Compile translation catalogs
+        run: python tools/compile_translations.py
+      - name: Build with PyOxidizer
+        shell: bash
+        run: |
+          if ! pyoxidizer --system-rust build --release > pyoxidizer-build.log 2>&1; then
+            tail -n 500 pyoxidizer-build.log
+            exit 1
+          fi
+          tail -n 100 pyoxidizer-build.log
+      - name: Verify PyOxidizer bundle
+        shell: bash
+        run: |
+          install_dir="build/aarch64-apple-darwin/release/install"
+          test -x "$install_dir/fpdb"
+          test -f "$install_dir/gfx/tribal.jpg"
+          test -f "$install_dir/locale/fr_FR/LC_MESSAGES/fpdb.mo"
+      - name: Package PyOxidizer artifact
+        shell: bash
+        run: |
+          tar -czf fpdb-pyoxidizer-macos-arm64.tar.gz \
+            -C build/aarch64-apple-darwin/release/install .
+      - name: Upload PyOxidizer artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: fpdb-pyoxidizer-macos-arm64
+          path: fpdb-pyoxidizer-macos-arm64.tar.gz
+          compression-level: 0
