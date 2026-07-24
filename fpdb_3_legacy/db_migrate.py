@@ -53,10 +53,10 @@ def list_data_tables(db: Any) -> list[str]:
 def drop_all_tables(db: Any) -> None:
     """Drop every user table on ``db``, regardless of foreign keys or order.
 
-    Used to rebuild a destination schema from scratch before a migration; this
-    deliberately bypasses ``Database.drop_tables`` (whose MySQL path swallows
-    errors and can leave tables behind). The per-backend mechanics live in the
-    Dialect (FK checks off for MySQL, CASCADE for PostgreSQL, plain for SQLite).
+    Used to rebuild a destination schema from scratch before a migration. The
+    per-backend mechanics live in the Dialect (FK checks off for MySQL/SQLite,
+    CASCADE for PostgreSQL); ``Database.drop_tables`` now goes through the same
+    Dialect, so both entry points behave identically.
     """
     dialects.dialect_for_backend(db.backend).drop_all_tables(db)
 
