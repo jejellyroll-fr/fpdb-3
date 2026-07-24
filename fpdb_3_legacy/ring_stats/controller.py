@@ -13,7 +13,7 @@ from typing import Any
 from PySide6.QtCore import QObject, Qt, Signal
 from PySide6.QtGui import QBrush, QColor, QStandardItem, QStandardItemModel
 
-from fpdb_3_legacy import Card
+from fpdb_3_legacy import Card, gui_empty_state
 from fpdb_3_legacy.loggingFpdb import get_logger
 from fpdb_3_legacy.ring_stats.base import DbWorker
 from fpdb_3_legacy.ring_stats.styles import get_theme_palette
@@ -100,7 +100,8 @@ class RingStatsController(QObject):
     hand_model_ready = Signal(QStandardItemModel)
     dashboard_data_ready = Signal(dict, object)
     position_data_ready = Signal(dict)
-    no_data_found = Signal()
+    # Carries a NoDataReason value so the view can explain *why* it is empty.
+    no_data_found = Signal(str)
 
     def __init__(self, db, config, sql) -> None:
         super().__init__()
@@ -161,9 +162,12 @@ class RingStatsController(QObject):
 
         debug_log(f"Resolved playerids: {playerids}, sitenos: {sitenos}")
 
-        if not sitenos or not playerids or not limits:
-            log.warning("ring_stats_controller: Filtres incomplets ou invalides.")
-            debug_log("Filtres incomplets ou invalides: sitenos/playerids/limits vide.")
+        missing = gui_empty_state.missing_filter_reason(sites=sites, playerids=playerids, limits=limits)
+        if missing is not None:
+            # Report which filter is empty instead of returning silently: the
+            # tab used to keep its previous content with no explanation.
+            debug_log(f"Filtres incomplets ou invalides: {missing.value}")
+            self.no_data_found.emit(missing.value)
             return
 
         # Paramètres pour affiner les requêtes
@@ -214,7 +218,7 @@ class RingStatsController(QObject):
         if not result:
             self._last_summary_stats = {}
             self._last_profit_data = ([], [], [], [])
-            self.no_data_found.emit()
+            self.no_data_found.emit(gui_empty_state.NoDataReason.NO_ROWS.value)
             return
 
         # Créer le modèle standard de données

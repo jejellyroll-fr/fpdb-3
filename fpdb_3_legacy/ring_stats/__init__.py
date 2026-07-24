@@ -28,7 +28,7 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
 )
 
-from fpdb_3_legacy import Card, Database, Filters
+from fpdb_3_legacy import Card, Database, Filters, gui_empty_state
 from fpdb_3_legacy.loggingFpdb import get_logger
 from fpdb_3_legacy.ring_stats.base import ModernStatsWidget
 from fpdb_3_legacy.ring_stats.controller import RingStatsController
@@ -158,15 +158,13 @@ class GuiRingPlayerStats(QSplitter):
         self.controller.position_data_ready.connect(self.position_tab.update_position_data)
         self.controller.no_data_found.connect(self.handle_no_data_found)
 
-    def handle_no_data_found(self) -> None:
-        """Affiche une boîte de message si aucun résultat n'est trouvé."""
-        from PySide6.QtWidgets import QMessageBox
-
-        msg = QMessageBox(self)
-        msg.setIcon(QMessageBox.Icon.Information)
-        msg.setWindowTitle("FPDB 3 info")
-        msg.setText("No data found for the selected filters.")
-        msg.exec()
+    def handle_no_data_found(self, reason: str = "") -> None:
+        """Explique pourquoi l'onglet est vide (filtre incomplet, base vide, ...)."""
+        try:
+            no_data_reason = gui_empty_state.NoDataReason(reason)
+        except ValueError:
+            no_data_reason = gui_empty_state.NoDataReason.NO_ROWS
+        gui_empty_state.show_no_data(self, no_data_reason, context="Ring player stats", db=self.db)
         self.db.rollback()
 
     def refreshStats(self, checkState=None) -> None:

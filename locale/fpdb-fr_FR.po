@@ -5016,3 +5016,48 @@ msgstr "HUD - stats"
 
 msgid "Stat Set (HUD):"
 msgstr "Jeu de stats (HUD) :"
+
+msgid "No data to display"
+msgstr "Aucune donnée à afficher"
+
+msgid "Your database contains no hands yet."
+msgstr "Votre base de données ne contient encore aucune main."
+
+msgid "Nothing has been imported into this database — that is normal right after creating or recreating the tables.\n\nImport hand histories first (Import > Bulk Import, or start the auto-import), then refresh this tab."
+msgstr "Rien n'a encore été importé dans cette base — c'est normal juste après avoir créé ou recréé les tables.\n\nImportez d'abord des historiques de mains (Import > Bulk Import, ou lancez l'import automatique), puis rafraîchissez cet onglet."
+
+msgid "No site is selected in the filters."
+msgstr "Aucun site n'est sélectionné dans les filtres."
+
+msgid "Tick at least one site in the Sites section on the left, then refresh."
+msgstr "Cochez au moins un site dans la section Sites à gauche, puis rafraîchissez."
+
+msgid "No player matches the selected site and hero."
+msgstr "Aucun joueur ne correspond au site et au héros sélectionnés."
+
+msgid "Check the hero selected in the Heroes filter and make sure hands for that player were imported for the selected site."
+msgstr "Vérifiez le héros choisi dans le filtre Heroes et assurez-vous que des mains de ce joueur ont été importées pour le site sélectionné."
+
+msgid "No limit is selected in the filters."
+msgstr "Aucune limite n'est sélectionnée dans les filtres."
+
+msgid "Tick at least one limit (stake) on the left, then refresh."
+msgstr "Cochez au moins une limite (stake) à gauche, puis rafraîchissez."
+
+msgid "No game type is selected in the filters."
+msgstr "Aucun type de jeu n'est sélectionné dans les filtres."
+
+msgid "Tick at least one game on the left, then refresh."
+msgstr "Cochez au moins un jeu à gauche, puis rafraîchissez."
+
+msgid "No currency is selected in the filters."
+msgstr "Aucune devise n'est sélectionnée dans les filtres."
+
+msgid "Tick at least one currency on the left, then refresh."
+msgstr "Cochez au moins une devise à gauche, puis rafraîchissez."
+
+msgid "No hand matches the selected filters."
+msgstr "Aucune main ne correspond aux filtres sélectionnés."
+
+msgid "The database holds hands, but none of them match this selection.\n\nWiden the filters (dates, limits, games, seats) and refresh."
+msgstr "La base contient des mains, mais aucune ne correspond à cette sélection.\n\nÉlargissez les filtres (dates, limites, jeux, sièges) puis rafraîchissez."

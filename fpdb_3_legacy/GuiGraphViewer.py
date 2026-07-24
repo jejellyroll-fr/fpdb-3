@@ -37,7 +37,7 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
 )
 
-from fpdb_3_legacy import Database, Filters
+from fpdb_3_legacy import Database, Filters, gui_empty_state
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.localized_formats import currency_symbol, format_number
 from fpdb_3_legacy.loggingFpdb import get_logger
@@ -166,18 +166,9 @@ class GuiGraphViewer(QSplitter):
 
         log.debug(f"GuiGraphViewer.generateGraph resolved sitenos: {sitenos}, playerids: {playerids}, names: {names!r}")
 
-        if not sitenos:
-            log.warning("GuiGraphViewer.generateGraph: No sites selected - defaulting to PokerStars")
-            self.db.rollback()
-            return
-
-        if not playerids:
-            log.warning("GuiGraphViewer.generateGraph: No player ids found")
-            self.db.rollback()
-            return
-
-        if not limits:
-            log.warning("GuiGraphViewer.generateGraph: No limits found")
+        missing = gui_empty_state.missing_filter_reason(sites=sites, playerids=playerids, limits=limits)
+        if missing is not None:
+            gui_empty_state.show_no_data(self, missing, context="Ring profit graph", db=self.db)
             self.db.rollback()
             return
         # debug
@@ -195,13 +186,7 @@ class GuiGraphViewer(QSplitter):
         log.debug(f"Graph generated in: {time() - starttime}")
 
         if green is None or len(green) == 0:
-            from PySide6.QtWidgets import QMessageBox
-
-            msg = QMessageBox(self)
-            msg.setIcon(QMessageBox.Icon.Information)
-            msg.setWindowTitle(_("FPDB 3 info"))
-            msg.setText("No data found for the selected filters.")
-            msg.exec()
+            gui_empty_state.show_no_data(self, context="Ring profit graph", db=self.db)
             self.db.rollback()
             return
 
