@@ -286,6 +286,27 @@ class TestCustomThemes(unittest.TestCase):
 
     @patch("qt_material.apply_stylesheet")
     @patch("PySide6.QtWidgets.QApplication")
+    def test_apply_custom_theme_uses_absolute_path(self, mock_qapp_class, mock_apply_stylesheet):
+        """Custom themes are applied from their own directory, never copied into qt_material."""
+        import qt_material
+
+        mock_app = Mock()
+        mock_qapp_class.instance.return_value = mock_app
+        qt_material_themes_dir = Path(qt_material.__file__).parent / "themes"
+
+        with (
+            patch("fpdb_3_legacy.ThemeManager.CUSTOM_THEMES_DIR", self.temp_dir),
+            patch.object(self.theme_manager, "is_custom_theme", return_value=True),
+            patch.object(self.theme_manager, "apply_legacy_polish"),
+        ):
+            result = self.theme_manager._apply_theme_to_application("test_theme.xml")
+
+        self.assertTrue(result)
+        mock_apply_stylesheet.assert_called_once_with(mock_app, theme=str(self.test_theme_file))
+        self.assertFalse((qt_material_themes_dir / "test_theme.xml").exists())
+
+    @patch("qt_material.apply_stylesheet")
+    @patch("PySide6.QtWidgets.QApplication")
     def test_apply_builtin_theme_to_application(self, mock_qapp_class, mock_apply_stylesheet):
         """Test applying built-in theme to application."""
         # Mock QApplication instance

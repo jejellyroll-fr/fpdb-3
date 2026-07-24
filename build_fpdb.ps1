@@ -31,7 +31,9 @@ $MAIN_SCRIPT = "$LEGACY_PACKAGE_DIR/fpdb.pyw"
 $SECOND_SCRIPT = "$LEGACY_PACKAGE_DIR/HUD_main.pyw"
 
 # Options of pyinstaller
-$PYINSTALLER_OPTIONS = "--noconfirm --onedir --windowed --log-level=DEBUG --paths=fpdb_3_legacy --paths=."
+# numpy is only imported through import_module() in Database.py; PyInstaller
+# cannot follow that, and the HUD build would otherwise ship without it.
+$PYINSTALLER_OPTIONS = "--noconfirm --onedir --windowed --log-level=DEBUG --paths=fpdb_3_legacy --paths=. --hidden-import=numpy"
 
 # List of all files
 
