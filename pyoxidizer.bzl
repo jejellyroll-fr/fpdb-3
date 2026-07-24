@@ -103,6 +103,7 @@ def make_install(exe):
             CWD + "/icons/**/*.icns",
             CWD + "/fonts/**/*.ttf",
             CWD + "/locale/**/*.po",
+            CWD + "/locale/**/*.mo",
             CWD + "/HUD_config.xml",
         ],
         exclude=[
