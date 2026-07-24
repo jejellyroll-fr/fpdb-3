@@ -387,6 +387,28 @@ class GuiBulkImport(QWidget):
         self.importer.setMoveFailedFiles(self.moveFailedCheck.isChecked(), self.moveFailedDir.text())
 
 
+def _compare_regression_sidecars(filename: str, importer, *, quiet: bool) -> int:
+    """Compare each imported file with its THP sidecars; return the mismatch count."""
+    paths = [Path(filename)]
+    if paths[0].is_dir():
+        paths = [p for p in paths[0].rglob("*") if p.suffix.lower() in {".txt", ".xml"}]
+    mismatches = 0
+    for path in paths:
+        try:
+            report = compare_importer_sidecars(path, importer)
+        except (OSError, ValueError) as exc:
+            # An unreadable sidecar is a problem with that file, not a reason to
+            # abandon the rest of the comparison.
+            mismatches += 1
+            log.warning("Regression compare %s: could not read sidecars: %s", path, exc)
+            continue
+        mismatches += len(report.issues)
+        if not quiet and report.compared:
+            status = "ok" if report.passed else f"{len(report.issues)} mismatch(es)"
+            print(f"Regression compare {path}: {status}")
+    return mismatches
+
+
 def main(argv=None) -> int:
     """CLI entry point for headless bulk import.
 
@@ -452,6 +474,10 @@ def main(argv=None) -> int:
     importer = Importer.Importer(caller=None, settings=settings, config=config)
     importer.setThreads(-1)
     importer.setCallHud(False)
+    if args.compare_regression:
+        # The comparison reads the parsed hands back off the converter, which the
+        # importer only keeps when this is on; without it the flag crashed.
+        importer.setFakeCacheHHC(True)
     importer.addBulkImportImportFileOrDir(args.filename, site=args.site)
 
     starttime = time()
@@ -460,15 +486,7 @@ def main(argv=None) -> int:
 
     comparison_errors = 0
     if args.compare_regression:
-        paths = [Path(args.filename)]
-        if paths[0].is_dir():
-            paths = [p for p in paths[0].rglob("*") if p.suffix.lower() in {".txt", ".xml"}]
-        for path in paths:
-            report = compare_importer_sidecars(path, importer)
-            comparison_errors += len(report.issues)
-            if not args.quiet:
-                status = "ok" if report.passed else f"{len(report.issues)} mismatch(es)"
-                print(f"Regression compare {path}: {status}")
+        comparison_errors = _compare_regression_sidecars(args.filename, importer, quiet=args.quiet)
 
     importer.clearFileList()
 
