@@ -66,6 +66,35 @@ def test_run_it_twice_yields_one_board_per_run():
     ]
 
 
+def test_run_it_twice_after_the_flop_reuses_the_shared_flop():
+    """FTP archive hands agree to run it twice once the flop is out.
+
+    Only the streets dealt twice are numbered, so FLOP1/FLOP2 stay empty and the
+    flop lives in FLOP. Ignoring it left each run a two-card board that poker-eval
+    rejected (error 1005), so the pot split was lost for the whole hand.
+    """
+    # FTP hand 26063988000 (PLO-6max-USD-25-50.201012.Run.it.Twice.Archive.Shallow).
+    hand = _hand(
+        {
+            "FLOP": ["6c", "Qh", "3c"],
+            "TURN": [],
+            "RIVER": [],
+            "FLOP1": [],
+            "TURN1": ["3d"],
+            "RIVER1": ["Th"],
+            "FLOP2": [],
+            "TURN2": ["9h"],
+            "RIVER2": ["6h"],
+        },
+        run_it_times=2,
+    )
+
+    assert _boards(hand) == [
+        ["6c", "Qh", "3c", "3d", "Th"],
+        ["6c", "Qh", "3c", "9h", "6h"],
+    ]
+
+
 def test_non_hold_games_have_no_board():
     assert _boards(_hand({}, base="stud")) == []
 
