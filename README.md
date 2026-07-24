@@ -48,6 +48,15 @@ python fpdb_3_legacy/HUD_main.pyw
 python fpdb_3_legacy/fpdb_cli.py --help
 ```
 
+### macOS prebuilt builds
+
+The CI builds are unsigned, so macOS blocks their Qt libraries until the
+quarantine attribute is cleared — see [docs/macos-gatekeeper.md](docs/macos-gatekeeper.md).
+
+```bash
+xattr -dr com.apple.quarantine ~/Downloads/fpdb-pyoxidizer-macos-arm64
+```
+
 ### Linux / Wayland
 
 ```bash

@@ -90,11 +90,14 @@ except ImportError:
     use_sqlalchemy = False
 
 try:
+    # AttributeError guards against a partially bundled numpy: in a frozen
+    # build "numpy" can resolve to a namespace package holding only the
+    # compiled sub-packages, with none of the top-level functions.
     var = getattr(import_module("numpy"), "var")
 
     use_numpy = True
-except ImportError:
-    log.exception("Not using numpy to define variance in sqlite.")
+except (ImportError, AttributeError):
+    log.warning("Not using numpy to define variance in sqlite.", exc_info=True)
     use_numpy = False
 
 

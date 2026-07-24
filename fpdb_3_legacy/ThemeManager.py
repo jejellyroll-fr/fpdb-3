@@ -1376,7 +1376,10 @@ class ThemeManager:
             from PySide6.QtWidgets import QApplication
 
             if self.is_custom_theme(theme_name):
-                # For custom themes, copy to qt_material directory temporarily and use qt_material
+                # Custom themes live in the user directory and are handed to
+                # qt_material as an absolute path: it loads any existing file
+                # directly, so we never write inside its package directory
+                # (read-only in frozen/translocated bundles).
                 theme_path = CUSTOM_THEMES_DIR / theme_name
 
                 app = QApplication.instance()
@@ -1384,30 +1387,16 @@ class ThemeManager:
                     log.warning("No QApplication instance found")
                     return False
 
-                try:
-                    import shutil
+                if not theme_path.is_file():
+                    log.error(f"Custom theme file not found: {theme_path}")
+                    return False
 
+                try:
                     import qt_material
 
-                    # Get qt_material themes directory
-                    qt_material_themes_dir = Path(qt_material.__file__).parent / "themes"
-
-                    # Create a temporary copy in qt_material themes directory
-                    temp_theme_path = qt_material_themes_dir / theme_name
-
-                    # Copy our custom theme to qt_material directory
-                    shutil.copy2(theme_path, temp_theme_path)
-
-                    try:
-                        # Now apply using qt_material
-                        qt_material.apply_stylesheet(app, theme=theme_name)
-                        self.apply_legacy_polish()
-                        log.info(f"Applied custom theme via qt_material: {theme_name}")
-                    finally:
-                        # Clean up - remove the temporary file
-                        if temp_theme_path.exists():
-                            temp_theme_path.unlink()
-
+                    qt_material.apply_stylesheet(app, theme=str(theme_path))
+                    self.apply_legacy_polish()
+                    log.info(f"Applied custom theme via qt_material: {theme_name}")
                 except (ImportError, OSError, RuntimeError, AttributeError) as e:
                     log.error(f"Error applying custom theme {theme_name}: {e}")
                     return False
