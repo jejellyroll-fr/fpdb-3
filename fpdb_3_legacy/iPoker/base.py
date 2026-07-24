@@ -304,6 +304,9 @@ class iPoker(IPokerStreetsActionsMixin, IPokerHandInfoMixin, IPokerTournamentRes
     re_max_seats = re.compile(r"<tablesize>(?P<SEATS>[0-9]+)</tablesize>", re.MULTILINE)
     re_tablename_mtt = re.compile(r"<tablename>(?P<TABLET>.+?)</tablename>", re.MULTILINE)
     re_tour_no = re.compile(r"(?P<TOURNO>\d+)$", re.MULTILINE)
+    # Newer exports name the table "Hyper Turbo (500 Chips) (#16727068)" instead
+    # of ending it with ", 16727068".
+    re_tour_no_hash = re.compile(r"\(#(?P<TOURNO>\d+)\)")
     re_non_decimal = re.compile(r"[^\d.,]+")
     re_partial = re.compile("<startdate>", re.MULTILINE)
     re_uncalled_bets = re.compile(r"<uncalled_bet_enabled>true<\/uncalled_bet_enabled>")
@@ -831,20 +834,32 @@ class iPoker(IPokerStreetsActionsMixin, IPokerHandInfoMixin, IPokerTournamentRes
 
     def _extract_tournament_number(self, mg: dict) -> bool:
         """Extract tournament number from game info."""
-        mt = self.re_tour_no.search(mg.get("TABLE", ""))
+        table = mg.get("TABLE", "") or ""
+        mt = self.re_tour_no.search(table)
         if mt:
             self.tinfo["tourNo"] = mt.group("TOURNO")
             log.debug("Set tourNo from re_tour_no: %s", self.tinfo["tourNo"])
-        else:
-            # fallback if re_tour_no not matched
-            tour_no = mg.get("TABLE", "").split(",")[-1].strip().split(" ")[0]
-            if tour_no.isdigit():
-                self.tinfo["tourNo"] = tour_no
-                log.debug("Set tourNo from split TABLE: %s", tour_no)
-            else:
-                log.error("Failed to parse tourNo from TABLE.")
-                return False
-        return True
+            return True
+
+        # fallback if re_tour_no not matched
+        tour_no = table.split(",")[-1].strip().split(" ")[0]
+        if tour_no.isdigit():
+            self.tinfo["tourNo"] = tour_no
+            log.debug("Set tourNo from split TABLE: %s", tour_no)
+            return True
+
+        # Newer format, where the number is parenthesised inside the name.
+        # Without this the number was never found, _process_tournament_info gave
+        # up, and the hand fell through to the ring-game path: a sit'n'go
+        # imported as a cash hand.
+        hashed = self.re_tour_no_hash.search(table)
+        if hashed:
+            self.tinfo["tourNo"] = hashed.group("TOURNO")
+            log.debug("Set tourNo from parenthesised TABLE number: %s", self.tinfo["tourNo"])
+            return True
+
+        log.error("Failed to parse tourNo from TABLE.")
+        return False
 
     def _set_buyin_currency(self, mg: dict) -> None:
         """Set buy-in currency."""
