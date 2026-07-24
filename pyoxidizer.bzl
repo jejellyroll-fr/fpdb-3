@@ -3,11 +3,29 @@
 
 def make_dist():
     # PyOxidizer 0.24 cannot read the latest python-build-standalone v8
-    # archives. This 2024 distribution is still v7-compatible and avoids
+    # archives. These 2024 distributions are still v7-compatible and avoid
     # depending on PyOxidizer's much older bundled 2022 Python.
+    distributions = {
+        "aarch64-apple-darwin": [
+            "https://github.com/astral-sh/python-build-standalone/releases/download/20240713/cpython-3.10.14%2B20240713-aarch64-apple-darwin-pgo%2Blto-full.tar.zst",
+            "4558c58bd03309d0c7131d4b5c2cbce9843d385fbcc7d75e575b4bf887bf5f68",
+        ],
+        "x86_64-pc-windows-msvc": [
+            "https://github.com/astral-sh/python-build-standalone/releases/download/20240713/cpython-3.10.14%2B20240713-x86_64-pc-windows-msvc-shared-pgo-full.tar.zst",
+            "1003c93f92fdcca57308076995b224b888a7ee556763759e69d36e198b5bef14",
+        ],
+        "x86_64-unknown-linux-gnu": [
+            "https://github.com/astral-sh/python-build-standalone/releases/download/20240713/cpython-3.10.14%2B20240713-x86_64-unknown-linux-gnu-pgo%2Blto-full.tar.zst",
+            "01c1038755944cbd7017a4e13e53237e68cd6bbfcff34ca8c9f53a71653e5c9a",
+        ],
+    }
+    if BUILD_TARGET_TRIPLE not in distributions:
+        fail("unsupported PyOxidizer build target: " + BUILD_TARGET_TRIPLE)
+
+    distribution = distributions[BUILD_TARGET_TRIPLE]
     return PythonDistribution(
-        url="https://github.com/astral-sh/python-build-standalone/releases/download/20240713/cpython-3.10.14%2B20240713-aarch64-apple-darwin-pgo%2Blto-full.tar.zst",
-        sha256="4558c58bd03309d0c7131d4b5c2cbce9843d385fbcc7d75e575b4bf887bf5f68",
+        url=distribution[0],
+        sha256=distribution[1],
     )
 
 def has_prefix(value, prefix):
@@ -59,6 +77,9 @@ def make_exe(dist):
         packaging_policy=policy,
         config=config,
     )
+    if BUILD_TARGET_TRIPLE == "x86_64-pc-windows-msvc":
+        exe.windows_subsystem = "windows"
+        exe.windows_runtime_dlls_mode = "when-present"
     
     # Read resources from python packages and include them
     pip_resources = []

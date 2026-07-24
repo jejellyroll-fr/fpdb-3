@@ -63,7 +63,7 @@ case "$BUILDER" in
         echo "Running PyOxidizer build..."
         pyoxidizer --system-rust build --release
         
-        echo "PyOxidizer build finished! Check build/aarch64-apple-darwin/release/install/"
+        echo "PyOxidizer build finished! Check build/<target-triple>/release/install/"
         ;;
         
     *)
