@@ -22,7 +22,7 @@ from typing import Any
 
 from PySide6.QtWidgets import QFrame, QMessageBox, QScrollArea, QSplitter, QVBoxLayout
 
-from fpdb_3_legacy import Database, Filters
+from fpdb_3_legacy import Database, Filters, gui_empty_state
 from fpdb_3_legacy.Filters import parse_tourney_buyin_key
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.localized_formats import currency_symbol, format_currency, format_number
@@ -32,6 +32,10 @@ from fpdb_3_legacy.loggingFpdb import get_logger
 
 
 log = get_logger("gui_tourney_graph_viewer")
+
+# A tournament tab still has something to show when only summaries were
+# imported, so "empty database" means no hands *and* no tournaments.
+_TOURNEY_TABLES = ("Hands", "Tourneys")
 
 try:
     calluse = "matplotlib" not in sys.modules
@@ -182,13 +186,15 @@ class GuiTourneyGraphViewer(QSplitter):
             f"GuiTourneyGraphViewer.generateGraph resolved sitenos: {sitenos}, playerids: {playerids}, names: {names!r}"
         )
 
-        if not sitenos:
-            log.warning("GuiTourneyGraphViewer.generateGraph: No sites selected")
-            self.db.rollback()
-            return
-
-        if not playerids:
-            log.warning("GuiTourneyGraphViewer.generateGraph: No player ids found")
+        missing = gui_empty_state.missing_filter_reason(sites=sites, playerids=playerids)
+        if missing is not None:
+            gui_empty_state.show_no_data(
+                self,
+                missing,
+                context="Tournament graph",
+                db=self.db,
+                tables=_TOURNEY_TABLES,
+            )
             self.db.rollback()
             return
 
@@ -197,13 +203,7 @@ class GuiTourneyGraphViewer(QSplitter):
         log.info(f"Graph generated in: {time() - starttime}")
 
         if green is None or len(green) == 0:
-            from PySide6.QtWidgets import QMessageBox
-
-            msg = QMessageBox(self)
-            msg.setIcon(QMessageBox.Icon.Information)
-            msg.setWindowTitle(_("FPDB 3 info"))
-            msg.setText("No data found for the selected filters.")
-            msg.exec()
+            gui_empty_state.show_no_data(self, context="Tournament graph", db=self.db, tables=_TOURNEY_TABLES)
             self.db.rollback()
             return
 

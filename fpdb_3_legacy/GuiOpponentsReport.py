@@ -64,7 +64,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from fpdb_3_legacy import Database, Filters, LeakDetector
+from fpdb_3_legacy import Database, Filters, LeakDetector, gui_empty_state
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.localized_formats import format_number
 from fpdb_3_legacy.loggingFpdb import get_logger
@@ -527,14 +527,10 @@ class GuiOpponentsReport(QSplitter):
                     else:
                         sitenos.append(siteids[site])
 
-        if not sitenos:
-            log.warning("fillStatsFrame: No sites selected")
-            sitenos = [2]
-        if not playerids:
-            log.warning("fillStatsFrame: No hero player ids found")
-            return
-        if not limits:
-            log.warning("fillStatsFrame: No limits found")
+        missing = gui_empty_state.missing_filter_reason(sites=sites, playerids=playerids, limits=limits)
+        if missing is not None:
+            gui_empty_state.show_no_data(self, missing, context="Opponents report", db=self.db)
+            self.db.rollback()
             return
 
         query = self.refineQuery(
@@ -553,13 +549,7 @@ class GuiOpponentsReport(QSplitter):
         log.info(f"OpponentsReport: fetched {len(result)} opponents")
 
         if len(result) == 0:
-            from PySide6.QtWidgets import QMessageBox
-
-            msg = QMessageBox(self)
-            msg.setIcon(QMessageBox.Icon.Information)
-            msg.setWindowTitle(_("FPDB 3 info"))
-            msg.setText("No data found for the selected filters.")
-            msg.exec()
+            gui_empty_state.show_no_data(self, context="Opponents report", db=self.db)
             raise ValueError("No data found")
 
         # Build per-opponent metrics + run the Leak Buster rule engine (static

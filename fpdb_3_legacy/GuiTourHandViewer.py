@@ -36,7 +36,7 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
 )
 
-from fpdb_3_legacy import SQL, Card, Configuration, Database, Deck, Filters, GuiReplayer, Hand
+from fpdb_3_legacy import SQL, Card, Configuration, Database, Deck, Filters, GuiReplayer, Hand, gui_empty_state
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.localized_formats import format_number
 from fpdb_3_legacy.loggingFpdb import get_logger
@@ -235,12 +235,12 @@ class TourHandViewer(QSplitter):
         self.hands = {}
         self.model.removeRows(0, self.model.rowCount())
         if len(handids) == 0:
-            from PySide6.QtWidgets import QMessageBox
-            msg = QMessageBox(self)
-            msg.setIcon(QMessageBox.Icon.Information)
-            msg.setWindowTitle(_("FPDB 3 info"))
-            msg.setText("No data found for the selected filters.")
-            msg.exec()
+            gui_empty_state.show_no_data(
+                self,
+                context="Tournament hand viewer",
+                db=self.db,
+                tables=("Hands", "Tourneys"),
+            )
             return
         progress = QProgressDialog("Loading hands", "Abort", 0, len(handids), self)
         progress.setValue(0)

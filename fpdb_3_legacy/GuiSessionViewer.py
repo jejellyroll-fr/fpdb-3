@@ -37,7 +37,7 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
 )
 
-from fpdb_3_legacy import Database, Filters, GuiHandViewer
+from fpdb_3_legacy import Database, Filters, GuiHandViewer, gui_empty_state
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.localized_formats import currency_symbol, format_currency, format_datetime, format_number
 from fpdb_3_legacy.loggingFpdb import get_logger
@@ -204,20 +204,16 @@ class GuiSessionViewer(QSplitter):
 
         log.warning(f"GuiSessionViewer.fillStatsFrame resolved sitenos: {sitenos}, playerids: {playerids}")
 
-        if not sitenos:
-            log.warning("GuiSessionViewer.fillStatsFrame: No sites selected - defaulting to PokerStars (2)")
-            sitenos = [2]
-        if not games:
-            log.warning("GuiSessionViewer.fillStatsFrame: No games found")
-            return
-        if not currencies:
-            log.warning("GuiSessionViewer.fillStatsFrame: No currencies found")
-            return
-        if not playerids:
-            log.warning("GuiSessionViewer.fillStatsFrame: No player ids found")
-            return
-        if not limits:
-            log.warning("GuiSessionViewer.fillStatsFrame: No limits found")
+        missing = gui_empty_state.missing_filter_reason(
+            sites=sites,
+            playerids=playerids,
+            limits=limits,
+            games=games,
+            currencies=currencies,
+        )
+        if missing is not None:
+            gui_empty_state.show_no_data(self, missing, context="Session viewer", db=self.db)
+            self.db.rollback()
             return
 
         self.createStatsPane(
@@ -256,12 +252,7 @@ class GuiSessionViewer(QSplitter):
             if self.canvas:
                 self.canvas.setParent(None)
                 self.canvas = None
-            from PySide6.QtWidgets import QMessageBox
-            msg = QMessageBox(self)
-            msg.setIcon(QMessageBox.Icon.Information)
-            msg.setWindowTitle(_("FPDB 3 info"))
-            msg.setText("No data found for the selected filters.")
-            msg.exec()
+            gui_empty_state.show_no_data(self, context="Session viewer", db=self.db)
             self.db.rollback()
             return
 

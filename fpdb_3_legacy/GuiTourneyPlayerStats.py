@@ -21,12 +21,15 @@ from PySide6.QtWidgets import (
 )
 
 # import Charset
-from fpdb_3_legacy import Filters, GuiTourHandViewer
+from fpdb_3_legacy import Filters, GuiTourHandViewer, gui_empty_state
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.localized_formats import format_currency, format_datetime, format_number
 from fpdb_3_legacy.loggingFpdb import get_logger
 
 log = get_logger("gui_tourney_player_stats")
+
+# Tournament tabs still have data when only summaries were imported.
+_TOURNEY_TABLES = ("Hands", "Tourneys")
 
 colalias, colshow, colheading, colxalign, colformat, coltype = 0, 1, 2, 3, 4, 5
 _MONEY_COLUMNS = {"buyIn", "fee", "spent", "won", "net", "profitPerTourney"}
@@ -149,13 +152,12 @@ class GuiTourneyPlayerStats(QSplitter):
         result = self.cursor.fetchall()
         log.info(f"addGrid (Tourney): fetched {len(result)} rows from database")
         if len(result) == 0:
-            from PySide6.QtWidgets import QMessageBox
-
-            msg = QMessageBox(self)
-            msg.setIcon(QMessageBox.Icon.Information)
-            msg.setWindowTitle(_("FPDB 3 info"))
-            msg.setText("No data found for the selected filters.")
-            msg.exec()
+            gui_empty_state.show_no_data(
+                self,
+                context="Tournament stats",
+                db=self.db,
+                tables=_TOURNEY_TABLES,
+            )
             raise ValueError("No data found")
         colnames = [desc[0] for desc in self.cursor.description]
 
@@ -410,11 +412,15 @@ class GuiTourneyPlayerStats(QSplitter):
                     else:
                         sitenos.append(siteids[site])
 
-        if not sitenos:
-            log.warning("fillStatsFrame (Tourney): No sites selected")
-            sitenos = [2]
-        if not playerids:
-            log.warning("fillStatsFrame (Tourney): No player ids found")
+        missing = gui_empty_state.missing_filter_reason(sites=sites, playerids=playerids)
+        if missing is not None:
+            gui_empty_state.show_no_data(
+                self,
+                missing,
+                context="Tournament stats",
+                db=self.db,
+                tables=_TOURNEY_TABLES,
+            )
             return
 
         self.createStatsTable(vbox, tourneyTypes, playerids, sitenos, seats)
