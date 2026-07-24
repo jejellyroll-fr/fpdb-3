@@ -47,6 +47,26 @@ def test_absolute_button_accepts_live_and_dead_dealer(dealer_text) -> None:
     assert hand.buttonpos == 6
 
 
+def test_absolute_button_is_read_from_the_table_line() -> None:
+    """The real layout keeps the dealer marker at the end of the table line.
+
+    Anchoring the pattern at the start of a line matched none of it, so every
+    Absolute/UltimateBet hand died with "Could not identify button position".
+    """
+    hand = SimpleNamespace(
+        handText=(
+            "Stage #1483940000: Holdem  No Limit $0.02 - 2009-06-10 03:10:00 (ET)\n"
+            "Table: CHILE HWY (Real Money) Seat #7 is the dealer\n"
+            "Seat 7 - PLAYER7 ($2.13 in chips)\n"
+        ),
+        buttonpos=None,
+    )
+
+    Absolute.__new__(Absolute).readButton(hand)
+
+    assert hand.buttonpos == 7
+
+
 @pytest.mark.parametrize("dealer_text", ["Seat #6 is the d dealer", "Seat #6 is the added dealer"])
 def test_absolute_button_rejects_partial_dead_words(dealer_text) -> None:
     hand = SimpleNamespace(handText=dealer_text, buttonpos=None)
