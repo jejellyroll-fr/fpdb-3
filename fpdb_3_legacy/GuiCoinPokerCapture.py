@@ -19,7 +19,6 @@ import platform
 import shlex
 import signal
 import subprocess
-import sys
 from pathlib import Path
 from typing import TextIO
 
@@ -36,6 +35,7 @@ from PySide6.QtWidgets import (
 )
 
 from fpdb_3_legacy.loggingFpdb import get_logger
+from fpdb_3_legacy.subprocess_launch import hud_main_command, python_module_command
 
 log = get_logger("coinpoker_capture_gui")
 
@@ -152,10 +152,18 @@ class GuiCoinPokerCapture(QWidget):
     def _base_args(self) -> list[str]:
         """Common importer args (source flag and --log-file added per platform).
 
-        ``-u`` keeps stdout unbuffered so progress shows immediately in the log
-        the tab tails (a long-running redirect to a file is block-buffered).
+        The command is built for the current install method: frozen builds have
+        no ``python -m``, and stdout stays unbuffered either way so progress
+        shows immediately in the log the tab tails (a long-running redirect to a
+        file is block-buffered).
         """
-        args = [sys.executable, "-u", "-m", _MODULE, "--game", self.game_combo.currentText(), "--stop-file", str(self.stop_file)]
+        args = [
+            *python_module_command(_MODULE),
+            "--game",
+            self.game_combo.currentText(),
+            "--stop-file",
+            str(self.stop_file),
+        ]
         cfg = getattr(self.config, "file", None)
         if cfg:
             args += ["--config-file", str(cfg)]
@@ -279,14 +287,14 @@ class GuiCoinPokerCapture(QWidget):
             self._hud_log = None
 
     def _launch_hud_main(self) -> None:
-        """Spawn HUD_main (listens on ZMQ 5555) using the same interpreter."""
+        """Spawn HUD_main (listens on ZMQ 5555) for the current install method."""
         if self.hud_proc is not None and self.hud_proc.poll() is None:
             return
-        hud_main = Path(__file__).resolve().parent / "HUD_main.pyw"
-        if not hud_main.is_file():
-            self.output.appendPlainText(f"[warn] HUD_main not found at {hud_main}")
+        try:
+            command = hud_main_command("-x")
+        except FileNotFoundError as exc:
+            self.output.appendPlainText(f"[warn] {exc}")
             return
-        command = [sys.executable, str(hud_main), "-x"]
         cfg = getattr(self.config, "file", None)
         if cfg:
             command += ["-c", str(cfg)]

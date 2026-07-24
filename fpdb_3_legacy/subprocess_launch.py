@@ -1,0 +1,72 @@
+#!/usr/bin/env python3
+"""Build argv for the helper processes fpdb spawns (HUD, live capture).
+
+A source install can simply run ``sys.executable -m some.module``. Frozen
+builds cannot: ``sys.executable`` is the fpdb launcher itself, so ``-m`` reaches
+fpdb's own option parser and the child dies with ``no such option: -m``. Frozen
+launchers instead accept a ``--run-module`` escape hatch, dispatched by
+:func:`dispatch_run_module` before the GUI is imported.
+"""
+
+from __future__ import annotations
+
+import os
+import runpy
+import sys
+from pathlib import Path
+
+RUN_MODULE_FLAG = "--run-module"
+
+
+def python_module_command(module: str, *args: str, unbuffered: bool = True) -> list[str]:
+    """Return the argv that runs ``module`` as ``__main__`` in this install.
+
+    ``unbuffered`` keeps a child's stdout unbuffered so progress shows up
+    immediately in a log the GUI tails; frozen launchers are always unbuffered
+    through :func:`dispatch_run_module`.
+    """
+    if getattr(sys, "frozen", False):
+        return [sys.executable, RUN_MODULE_FLAG, module, *args]
+    interpreter = [sys.executable, "-u"] if unbuffered else [sys.executable]
+    return [*interpreter, "-m", module, *args]
+
+
+def hud_main_command(*args: str) -> list[str]:
+    """Return the argv that starts HUD_main, whatever the install method.
+
+    Raises:
+        FileNotFoundError: when a packaged build has no HUD_main next to it.
+    """
+    frozen = getattr(sys, "frozen", False)
+    if frozen == "pyoxidizer":
+        # A single binary hosts both entry points; --hud selects HUD_main.
+        return [sys.executable, "--hud", *args]
+    if frozen:
+        # PyInstaller ships HUD_main as a sibling executable of fpdb.
+        name = "HUD_main.exe" if os.name == "nt" else "HUD_main"
+        executable = Path(sys.executable).resolve().parent / name
+        if not executable.is_file():
+            msg = f"HUD_main not found at {executable}"
+            raise FileNotFoundError(msg)
+        return [str(executable), *args]
+    hud_main = Path(__file__).resolve().parent / "HUD_main.pyw"
+    if not hud_main.is_file():
+        msg = f"HUD_main not found at {hud_main}"
+        raise FileNotFoundError(msg)
+    return [sys.executable, str(hud_main), *args]
+
+
+def dispatch_run_module(argv: list[str] | None = None) -> bool:
+    """Run the module named by ``--run-module`` and report whether it ran.
+
+    Frozen entry points call this before importing anything heavy, so a helper
+    process does not drag the GUI stack in. Returns False when the command line
+    is a normal launch, leaving argv untouched.
+    """
+    argv = sys.argv if argv is None else argv
+    if len(argv) < 3 or argv[1] != RUN_MODULE_FLAG:
+        return False
+    module = argv[2]
+    sys.argv = [module, *argv[3:]]
+    runpy.run_module(module, run_name="__main__", alter_sys=True)
+    return True
