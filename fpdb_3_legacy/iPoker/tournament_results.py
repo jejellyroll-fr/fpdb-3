@@ -76,8 +76,13 @@ class IPokerTournamentResultsMixin:
                 tourney_info[key] = match.group(1)
                 log.debug("Found tournament %s: %s", key, match.group(1))
 
-        # Extract tournament data
-        tournament_data["tourno"] = tourney_info.get("tournamentcode")
+        # Extract tournament data. Older iPoker exports carry no <tournamentcode>
+        # element and name the tournament in <tablename> ("SPF $100 Daily
+        # Tournament, 611669111"); determineGameType already digs the number out
+        # of there, so fall back to it rather than reporting no tournament.
+        tournament_data["tourno"] = tourney_info.get("tournamentcode") or (getattr(self, "tinfo", None) or {}).get(
+            "tourNo",
+        )
         tournament_data["tournament_name"] = tourney_info.get("tournamentname")
         tournament_data["rank"] = tourney_info.get("place")
         tournament_data["currency_symbol"] = tourney_info.get("currency", "EUR")
@@ -244,7 +249,9 @@ class IPokerTournamentResultsMixin:
 
     def _set_tournament_attributes(self, tournament_data: dict[str, Any], hand: Any) -> None:
         """Set tournament attributes from parsed data."""
-        hand.tourNo = tournament_data["tourno"]
+        # readHandInfo may already have resolved the number; never replace it
+        # with nothing, or the hand is stored with no tournament at all.
+        hand.tourNo = tournament_data["tourno"] or getattr(hand, "tourNo", None)
         hand.buyin = int(tournament_data["buyin_amount"] * 100)
         hand.fee = int(tournament_data["fee_amount"] * 100)
         hand.buyinCurrency = tournament_data["currency_symbol"]
