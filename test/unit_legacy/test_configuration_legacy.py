@@ -175,6 +175,22 @@ def test_module_get_config_helper(tmp_path) -> None:
     assert result is not None
 
 
+def test_frozen_resource_root_prefers_pyinstaller_bundle(tmp_path, monkeypatch) -> None:
+    bundle_dir = tmp_path / "bundle"
+    monkeypatch.setattr(Configuration.sys, "_MEIPASS", str(bundle_dir), raising=False)
+    monkeypatch.setattr(Configuration.sys, "executable", str(tmp_path / "fpdb"))
+
+    assert Configuration._frozen_resource_root() == str(bundle_dir)
+
+
+def test_frozen_resource_root_falls_back_to_executable(tmp_path, monkeypatch) -> None:
+    executable = tmp_path / "bin" / "fpdb"
+    monkeypatch.delattr(Configuration.sys, "_MEIPASS", raising=False)
+    monkeypatch.setattr(Configuration.sys, "executable", str(executable))
+
+    assert Configuration._frozen_resource_root() == str(executable.parent)
+
+
 def test_get_config_bootstraps_user_file_from_source_example(tmp_path, monkeypatch) -> None:
     config_dir = tmp_path / "config"
     source_dir = tmp_path / "source"

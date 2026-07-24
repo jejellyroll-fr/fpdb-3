@@ -190,6 +190,8 @@ def test_launch_hud_uses_bundled_sibling_executable(monkeypatch, tmp_path, platf
 
     command = mock_popen.call_args.args[0]
     assert command == [str(hud_executable), "--config", "bundled.xml"]
+    popen_kwargs = mock_popen.call_args.kwargs
+    assert popen_kwargs["env"]["PYINSTALLER_RESET_ENVIRONMENT"] == "1"
 
 
 def test_launch_hud_pyoxidizer_reuses_main_executable(monkeypatch, tmp_path):
@@ -208,6 +210,21 @@ def test_launch_hud_pyoxidizer_reuses_main_executable(monkeypatch, tmp_path):
 
     command = mock_popen.call_args.args[0]
     assert command == [str(fpdb_executable), "--hud", "--config", "bundled.xml"]
+    assert "env" not in mock_popen.call_args.kwargs
+
+
+def test_check_hud_process_started_clears_terminated_process():
+    """A helper that exits during startup is reported and can be relaunched."""
+    gui = _make_gui(_make_settings(MagicMock()), _make_config())
+    process = MagicMock(pid=1234)
+    process.poll.return_value = 7
+    gui.pipe_to_hud = process
+    gui.addText = MagicMock()
+
+    gui._check_hud_process_started()
+
+    gui.addText.assert_called_once_with("\n*** HUD_main exited during startup with code 7", "error")
+    assert gui.pipe_to_hud is None
 
 
 @pytest.mark.skipif(sys.platform == "win32", reason="exercises the POSIX/source HUD-launch branch")

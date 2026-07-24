@@ -547,8 +547,17 @@ class GuiAutoImport(QWidget):
         # ------------------------------------------------------------------
         env = None  # default
 
-        if sys.platform.startswith("linux") and os.getenv("FPDB_FORCE_X11") == "1":
+        # Since PyInstaller 6.9, a frozen executable launched from another
+        # frozen executable is assumed to be a worker process unless the
+        # bootloader environment is explicitly reset. HUD_main is an
+        # independent application and must initialize its own bootloader state.
+        if getattr(sys, "frozen", False) and getattr(sys, "frozen", False) != "pyoxidizer":
             env = os.environ.copy()
+            env["PYINSTALLER_RESET_ENVIRONMENT"] = "1"
+
+        if sys.platform.startswith("linux") and os.getenv("FPDB_FORCE_X11") == "1":
+            if env is None:
+                env = os.environ.copy()
             env.setdefault("QT_QPA_PLATFORM", "xcb")
             env.setdefault("FPDB_FORCE_X11", "1")
 
@@ -563,16 +572,33 @@ class GuiAutoImport(QWidget):
             "stdin": subprocess.PIPE,
             "universal_newlines": True,
         }
-        # Capture stdout/err for windows « exe »
+        # A windowed Windows process has no console. Do not leave unread PIPEs
+        # that can fill up and block the HUD; HUD_main writes diagnostics to its
+        # own rotating log.
         if self.config.install_method == "exe" or (
             os.name == "nt" and win32console is not None and win32console.GetConsoleWindow() == 0
         ):
-            popen_kwargs.update(stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            popen_kwargs.update(stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
         if env is not None:
             popen_kwargs["env"] = env
 
         self.pipe_to_hud = subprocess.Popen(command, **popen_kwargs)
+        log.info("HUD process spawned with pid=%s", self.pipe_to_hud.pid)
+
+    def _check_hud_process_started(self) -> None:
+        """Report a HUD process that exited during its startup window."""
+        process = self.pipe_to_hud
+        if process is None:
+            return
+        return_code = process.poll()
+        if return_code is None:
+            log.info("HUD process %s is running", process.pid)
+            return
+        msg = f"HUD_main exited during startup with code {return_code}"
+        log.error(msg)
+        self.addText(f"\n*** {msg}", "error")
+        self.pipe_to_hud = None
 
     def startClicked(self) -> None:
         """Runs when user clicks start on auto import tab."""
@@ -599,6 +625,7 @@ class GuiAutoImport(QWidget):
                         log.warning(error_msg)
                         self.addText(f"\n*** {error_msg}", "error")
                     else:
+                        QTimer.singleShot(1500, self._check_hud_process_started)
                         # ------------------------------------------------------------------
                         # path config, timer, etc.
                         # ------------------------------------------------------------------

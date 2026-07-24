@@ -66,6 +66,14 @@ SOURCE_ROOT_PATH = SOURCE_DIR.parent
 # POSIX (True=Linux or Mac platform, False=Windows platform)
 
 
+def _frozen_resource_root() -> str:
+    """Return the directory containing data bundled with a frozen executable."""
+    bundle_dir = getattr(sys, "_MEIPASS", None)
+    if bundle_dir:
+        return os.path.abspath(os.fspath(bundle_dir))
+    return os.path.dirname(os.path.abspath(sys.executable))
+
+
 if hasattr(sys, "frozen"):
     if platform.system() == "Windows":
         INSTALL_METHOD = "exe"
@@ -79,12 +87,12 @@ else:
     INSTALL_METHOD = "source"
 
 if INSTALL_METHOD == "exe":
-    FPDB_ROOT_PATH = os.path.dirname(sys.executable)
+    FPDB_ROOT_PATH = _frozen_resource_root()
 
     FPDB_ROOT_PATH = FPDB_ROOT_PATH.replace("\\", "/")
 # should be exe path to \fpdbroot\pyfpdb
 elif INSTALL_METHOD == "app":
-    FPDB_ROOT_PATH = os.path.dirname(sys.executable)
+    FPDB_ROOT_PATH = _frozen_resource_root()
 elif INSTALL_METHOD == "appimage":
     FPDB_ROOT_PATH = os.environ["APPDIR"]
 elif sys.path[0] == "":  # we are probably running directly (>>>import Configuration)
@@ -185,13 +193,12 @@ if OS_FAMILY in ["XP", "Win7"]:
     APPDATA_PATH = winpaths_appdata
     CONFIG_PATH = os.path.join(APPDATA_PATH, "fpdb")
     CONFIG_PATH = CONFIG_PATH.replace("\\", "/")
-    FPDB_ROOT_PATH = os.path.dirname(sys.executable)
-    FPDB_ROOT_PATH = FPDB_ROOT_PATH.replace("\\", "/")
     if INSTALL_METHOD == "source":
         # gfx/ lives at the repository root (SOURCE_ROOT_PATH), i.e. the parent
         # of this module's fpdb_3_legacy/ directory — not next to this file.
         GRAPHICS_PATH = (str(SOURCE_ROOT_PATH) + "/gfx").replace("\\", "/")
     else:
+        FPDB_ROOT_PATH = _frozen_resource_root().replace("\\", "/")
         GRAPHICS_PATH = os.path.join(FPDB_ROOT_PATH, "gfx")
         GRAPHICS_PATH = GRAPHICS_PATH.replace("\\", "/")
     PYFPDB_PATH = os.path.join(FPDB_ROOT_PATH, "pyfpdb")
