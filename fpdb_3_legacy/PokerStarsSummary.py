@@ -23,7 +23,12 @@ from decimal import Decimal
 from typing import Any, ClassVar, NoReturn
 
 from fpdb_3_legacy import PokerStarsStructures
-from fpdb_3_legacy.HandHistoryConverter import FpdbHandPartial, FpdbParseError, HandHistoryConverter
+from fpdb_3_legacy.HandHistoryConverter import (
+    FpdbHandPartial,
+    FpdbParseError,
+    FpdbSummaryNotFound,
+    HandHistoryConverter,
+)
 from fpdb_3_legacy.loggingFpdb import get_logger
 from fpdb_3_legacy.TourneySummary import TourneySummary
 
@@ -227,9 +232,13 @@ class PokerStarsSummary(TourneySummary):
         r"""(?P<Y>[0-9]{4})\/(?P<M>[0-9]{2})\/(?P<D>[0-9]{2})[\- ]+(?P<H>[0-9]+):(?P<MIN>[0-9]+):(?P<S>[0-9]+)""",
         re.MULTILINE,
     )
+    # One line, and no re.VERBOSE: written across two source lines without that
+    # flag, the newline and its indentation were part of the pattern, so it
+    # matched no archive row at all ("1/1/2012 11:45:57 PM") and every tournament
+    # of an archive page fell back to the placeholder date 2000-01-01.
     re_html_date_time = re.compile(
-        r"""(?P<M>[0-9]+)\/(?P<D>[0-9]+)\/(?P<Y>[0-9]{4})[\- ]+
-        (?P<H>[0-9]+):(?P<MIN>[0-9]+):(?P<S>[0-9]+) (?P<AMPM>(AM|PM))""",
+        r"(?P<M>[0-9]+)\/(?P<D>[0-9]+)\/(?P<Y>[0-9]{4})[\- ]+"
+        r"(?P<H>[0-9]+):(?P<MIN>[0-9]+):(?P<S>[0-9]+) (?P<AMPM>(AM|PM))",
         re.MULTILINE,
     )
     re_html_tourney_extra_info = re.compile(
@@ -390,7 +399,9 @@ class PokerStarsSummary(TourneySummary):
             if self.re_html_player1.search(
                 self.summaryText,
             ) or self.re_html_player2.search(self.summaryText):
-                raise FpdbHandPartial
+                # The head of the archive page, before the first tournament.
+                msg = "no tournament summary in this chunk"
+                raise FpdbSummaryNotFound(msg)
             tmp1 = self.header[0:200] if m1 is None else "NA"
             tmp2 = self.summaryText if m2 is None else "NA"
             log.error("Summary HTML not found: '%s' '%s'", tmp1, tmp2)
@@ -498,6 +509,12 @@ class PokerStarsSummary(TourneySummary):
                 "ET",
                 "UTC",
             )
+
+        # The archive page gives one timestamp per row and it was only kept as
+        # the end time, so a tournament imported from an archive was stored with
+        # no start time at all: it could be neither dated, filtered nor plotted.
+        if self.startTime is None:
+            self.startTime = self.endTime
 
         if "CURRENCY" in info and info["CURRENCY"] is not None:
             self.currency = info["CURRENCY"]
@@ -650,10 +667,10 @@ class PokerStarsSummary(TourneySummary):
         if m is None:
             if self.re_header.match(self.summaryText):
                 error_msg = "Tournament history request header found"
-                raise FpdbHandPartial(error_msg)
+                raise FpdbSummaryNotFound(error_msg)
             if self.re_email_header.match(self.summaryText):
                 error_msg = "Email header found"
-                raise FpdbHandPartial(error_msg)
+                raise FpdbSummaryNotFound(error_msg)
 
             # Check if this contains multiple summaries (email format)
             tournament_count = len(re.findall(r"PokerStars(?:\sKick-Off)? Tournament #\d+", self.summaryText))
