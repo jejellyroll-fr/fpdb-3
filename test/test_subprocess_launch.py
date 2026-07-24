@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
+import os
 import sys
 from pathlib import Path
 
 import pytest
 
-from fpdb_3_legacy import subprocess_launch
 from fpdb_3_legacy.subprocess_launch import (
     RUN_MODULE_FLAG,
     dispatch_run_module,
@@ -42,11 +42,13 @@ def test_hud_command_uses_pyoxidizer_subcommand(monkeypatch) -> None:
 def test_hud_command_uses_sibling_executable_when_frozen(monkeypatch, tmp_path) -> None:
     monkeypatch.setattr(sys, "frozen", True, raising=False)
     monkeypatch.setattr(sys, "executable", str(tmp_path / "fpdb"))
-    monkeypatch.setattr(subprocess_launch.os, "name", "posix")
-    hud = tmp_path / "HUD_main"
+    hud = tmp_path / ("HUD_main.exe" if os.name == "nt" else "HUD_main")
     hud.write_text("")
 
-    assert hud_main_command("-x") == [str(hud), "-x"]
+    command = hud_main_command("-x")
+
+    assert Path(command[0]) == hud.resolve()
+    assert command[1:] == ["-x"]
 
 
 def test_hud_command_reports_missing_packaged_executable(monkeypatch, tmp_path) -> None:

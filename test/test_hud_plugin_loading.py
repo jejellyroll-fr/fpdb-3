@@ -26,9 +26,15 @@ def aux_package(tmp_path, monkeypatch):
     (package / "Aux_Probe.py").write_text("class ProbeHud:\n    pass\n")
     monkeypatch.syspath_prepend(str(tmp_path))
     monkeypatch.setattr(Hud, "LEGACY_PACKAGE", "auxpkg")
-    for name in [n for n in sys.modules if n.startswith("auxpkg")]:
+    _forget_probe_modules()
+    yield package
+    # The modules point at a tmp_path that is about to disappear.
+    _forget_probe_modules()
+
+
+def _forget_probe_modules() -> None:
+    for name in [n for n in sys.modules if n == "auxpkg" or n.startswith("auxpkg.")]:
         del sys.modules[name]
-    return package
 
 
 def test_aux_module_resolves_through_the_package(aux_package) -> None:
