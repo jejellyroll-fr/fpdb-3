@@ -17,15 +17,9 @@ writes next to the executable.
 
 ## Fix: clear the quarantine attribute
 
-### PyOxidizer build (`fpdb-pyoxidizer-macos-arm64`)
-
-```bash
-xattr -dr com.apple.quarantine ~/Downloads/fpdb-pyoxidizer-macos-arm64
-```
-
-Then start `./fpdb` from that directory.
-
-### PyInstaller build (`fpdb-build-macos-latest`, `fpdb.app`)
+Both artifacts (`fpdb-pyoxidizer-macos-arm64` and `fpdb-build-macos-latest`) ship
+an ad-hoc signed `fpdb.app`. Gatekeeper assesses a bundle as a unit, so the app
+is approved once instead of once per bundled library:
 
 ```bash
 mv ~/Downloads/fpdb.app /Applications/

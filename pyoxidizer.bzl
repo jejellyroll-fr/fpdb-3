@@ -54,6 +54,12 @@ def make_exe(dist):
         "$ORIGIN/lib",
         "$ORIGIN",
         "$ORIGIN/fpdb_3_legacy",
+        # macOS .app layout: only the launcher may live in Contents/MacOS
+        # (codesign refuses to seal a bundle whose MacOS directory holds
+        # non-code), so the payload sits in Contents/Resources next to it.
+        "$ORIGIN/../Resources/lib",
+        "$ORIGIN/../Resources",
+        "$ORIGIN/../Resources/fpdb_3_legacy",
     ]
     config.run_command = "\n".join([
         "import os",
@@ -61,6 +67,9 @@ def make_exe(dist):
         "import sys",
         "sys.frozen = 'pyoxidizer'",
         "root = os.path.dirname(sys.executable)",
+        "bundle_resources = os.path.join(os.path.dirname(root), 'Resources')",
+        "if os.path.isdir(os.path.join(bundle_resources, 'fpdb_3_legacy')):",
+        "    root = bundle_resources",
         "legacy_dir = os.path.join(root, 'fpdb_3_legacy')",
         "sys.path.insert(0, root)",
         "sys.path.insert(0, legacy_dir)",

@@ -68,5 +68,21 @@ def dispatch_run_module(argv: list[str] | None = None) -> bool:
         return False
     module = argv[2]
     sys.argv = [module, *argv[3:]]
+    unbuffer_streams()
     runpy.run_module(module, run_name="__main__", alter_sys=True)
     return True
+
+
+def unbuffer_streams() -> None:
+    """Make stdout/stderr line buffered, the way ``python -u`` would.
+
+    A helper redirected to a file (the capture log the GUI tails) is otherwise
+    block buffered: progress appears minutes late, and whatever is still in the
+    buffer is lost when the process is terminated.
+    """
+    for stream in (sys.stdout, sys.stderr):
+        try:
+            stream.reconfigure(line_buffering=True)
+        except (AttributeError, ValueError):
+            # No console at all (windowed build), or an already-closed stream.
+            continue
