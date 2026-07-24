@@ -2540,23 +2540,23 @@ class Database(DatabaseAutoNotesMixin, DatabaseCachesMixin, DatabaseTournamentsM
     # end def afterBulkImport
 
     def drop_referential_integrity(self) -> None:
-        """Update all tables to remove foreign keys."""
+        """Update all tables to remove foreign keys (MySQL/MariaDB).
+
+        Reads the constraint names from information_schema instead of guessing
+        them from ``SHOW CREATE TABLE``: the old regex only matched the default
+        ``<table>_ibfk_N`` names, so any explicitly named constraint survived
+        and the subsequent DROP TABLE failed with errno 1451.
+        """
         c = self.get_cursor()
-        c.execute(self.sql.query["list_tables"])
-        result = c.fetchall()
-
-        for i in range(len(result)):
-            c.execute("SHOW CREATE TABLE " + result[i][0])
-            inner = c.fetchall()
-
-            for j in range(len(inner)):
-                # result[i][0] - Table name
-                # result[i][1] - CREATE TABLE parameters
-                # Searching for CONSTRAINT `tablename_ibfk_1`
-                for m in re.finditer("(ibfk_[0-9]+)", inner[j][1]):
-                    key = "`" + inner[j][0] + "_" + m.group() + "`"
-                    c.execute("ALTER TABLE " + inner[j][0] + " DROP FOREIGN KEY " + key)
-                self.commit()
+        c.execute(
+            "SELECT DISTINCT table_name, constraint_name "
+            "FROM information_schema.table_constraints "
+            "WHERE constraint_type = 'FOREIGN KEY' AND table_schema = DATABASE()",
+        )
+        constraints = c.fetchall()
+        for table, constraint in constraints:
+            c.execute(f"ALTER TABLE `{table}` DROP FOREIGN KEY `{constraint}`")
+        self.commit()
 
     # end drop_referential_inegrity
 
@@ -2741,46 +2741,20 @@ class Database(DatabaseAutoNotesMixin, DatabaseCachesMixin, DatabaseTournamentsM
         self.commit()
 
     def drop_tables(self) -> None:
-        """Drops the fpdb tables from the current db."""
-        c = self.get_cursor()
+        """Drops the fpdb tables from the current db.
 
-        backend = self.get_backend_name()
-        if backend == "MySQL InnoDB":  # what happens if someone is using MyISAM?
-            try:
-                self.drop_referential_integrity()  # needed to drop tables with foreign keys
-                c.execute(self.sql.query["list_tables"])
-                tables = c.fetchall()
-                for table in tables:
-                    c.execute(self.sql.query["drop_table"] + table[0])
-                c.execute("SET FOREIGN_KEY_CHECKS=1")
-            except Exception:  # intentional broad catch: drop all tables (MySQL) best-effort, rollback on failure
-                err = traceback.extract_tb(sys.exc_info()[2])[-1]
-                log.exception(
-                    f"Error dropping tables: {err[2]}({err[1]}): {sys.exc_info()[1]}",
-                )
-                self.rollback()
-        elif backend == "PostgreSQL":
-            try:
-                self.commit()
-                c.execute(self.sql.query["list_tables"])
-                tables = c.fetchall()
-                for table in tables:
-                    c.execute(self.sql.query["drop_table"] + table[0] + " cascade")
-            except Exception:  # intentional broad catch: drop all tables (PG) best-effort, rollback on failure
-                err = traceback.extract_tb(sys.exc_info()[2])[-1]
-                log.exception(
-                    f"Error dropping tables: {err[2]} ({err[1]}): {sys.exc_info()[1]}",
-                )
-                self.rollback()
-        elif backend == "SQLite":
-            c.execute(self.sql.query["list_tables"])
-            for table in c.fetchall():
-                table_name = table[0]
-                if table_name.startswith("sqlite_"):
-                    continue
-                log.info(f"{self.sql.query['drop_table']} '{table_name}'")
-                c.execute(self.sql.query["drop_table"] + table_name)
-        self.commit()
+        Delegates to the backend Dialect, which drops every table whatever the
+        foreign-key order is (FK checks off on MySQL/SQLite, CASCADE on
+        PostgreSQL). The previous MySQL path relied on
+        ``drop_referential_integrity`` removing the constraints one by one and
+        failed with "Cannot delete or update a parent row: a foreign key
+        constraint fails" (errno 1451) as soon as one constraint was not named
+        ``<table>_ibfk_N``; the error was then swallowed, leaving tables behind
+        and making the following ``create_tables`` fail in turn.
+        """
+        from fpdb_3_legacy import dialects
+
+        dialects.dialect_for_backend(self.backend).drop_all_tables(self)
 
     # end def drop_tables
 

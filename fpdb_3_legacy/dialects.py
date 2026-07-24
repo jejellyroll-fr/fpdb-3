@@ -138,9 +138,13 @@ class SqliteDialect(Dialect):
 
     def drop_all_tables(self, db: Any) -> None:
         cursor = db.get_cursor()
-        for table in self.list_tables(db):
-            cursor.execute(f"DROP TABLE IF EXISTS {table}")
-        db.commit()
+        cursor.execute("PRAGMA foreign_keys = OFF")
+        try:
+            for table in self.list_tables(db):
+                cursor.execute(f"DROP TABLE IF EXISTS {self.quote_identifier(table)}")
+        finally:
+            cursor.execute("PRAGMA foreign_keys = ON")
+            db.commit()
 
     def suspend_foreign_keys(self, db: Any) -> Any:
         db.get_cursor().execute("PRAGMA foreign_keys = OFF")
@@ -170,10 +174,16 @@ class MySQLDialect(Dialect):
     def drop_all_tables(self, db: Any) -> None:
         cursor = db.get_cursor()
         cursor.execute("SET FOREIGN_KEY_CHECKS = 0")
-        for table in self.list_tables(db):
-            cursor.execute(f"DROP TABLE IF EXISTS {table}")
-        cursor.execute("SET FOREIGN_KEY_CHECKS = 1")
-        db.commit()
+        try:
+            for table in self.list_tables(db):
+                # Quoted: fpdb has tables whose names are reserved words in
+                # MySQL 8 (Rank, Actions, Sites, Files...).
+                cursor.execute(f"DROP TABLE IF EXISTS {self.quote_identifier(table)}")
+        finally:
+            # Session-scoped flag, but leaving it off would silently disable FK
+            # enforcement for every later statement on this connection.
+            cursor.execute("SET FOREIGN_KEY_CHECKS = 1")
+            db.commit()
 
     def suspend_foreign_keys(self, db: Any) -> Any:
         db.get_cursor().execute("SET FOREIGN_KEY_CHECKS = 0")
@@ -208,8 +218,9 @@ class PostgresDialect(Dialect):
 
     def drop_all_tables(self, db: Any) -> None:
         cursor = db.get_cursor()
+        db.commit()  # a failed statement would poison an open transaction
         for table in self.list_tables(db):
-            cursor.execute(f"DROP TABLE IF EXISTS {table} CASCADE")
+            cursor.execute(f"DROP TABLE IF EXISTS {self.quote_identifier(table)} CASCADE")
         db.commit()
 
     def suspend_foreign_keys(self, db: Any) -> Any:
