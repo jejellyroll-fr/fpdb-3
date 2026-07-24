@@ -23,7 +23,7 @@ and convert them to FPDB format.
 
 import datetime
 import re
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 from re import Match
 from typing import TYPE_CHECKING, Any, ClassVar
 
@@ -464,6 +464,38 @@ class Cake(HandHistoryConverter):
             # extract table number
             if key == "TABLENO":
                 hand.tablename = info[key]
+
+            # extract the tournament this hand belongs to. determineGameType
+            # already reads "T9541472" out of the header, but nothing carried it
+            # onto the hand, so every Cake tournament hand was stored attached to
+            # no tournament at all.
+            if key == "TOURNO" and info[key]:
+                hand.tourNo = info[key]
+
+        if hand.gametype.get("type") == "tour":
+            self._read_tournament_buyin(hand, info)
+
+    def _read_tournament_buyin(self, hand: "Hand", info: dict[str, Any]) -> None:
+        """Carry the header's buy-in and fee onto a tournament hand.
+
+        The full header states them explicitly ("-- $15 + $1.5 --"); the simple
+        one only names the prize ("$1 NLH Short Stack"), which determineGameType
+        already dug out into the gametype.
+        """
+        currency = hand.gametype.get("currency", "USD")
+        hand.buyinCurrency = "play" if currency == "play" else currency
+        hand.buyin = self._money_to_cents(info.get("BUYIN") or hand.gametype.get("buyin"), hand)
+        hand.fee = self._money_to_cents(info.get("FEE") or hand.gametype.get("fee"), hand)
+
+    def _money_to_cents(self, amount: Any, hand: "Hand") -> int:
+        """Return ``amount`` in cents, or 0 when it cannot be read."""
+        if not amount:
+            return 0
+        try:
+            return int(100 * Decimal(self.clearMoneyString(str(amount).lstrip("$€£"))))
+        except (InvalidOperation, ValueError):
+            log.warning("readHandInfo: could not read %r as money (tournament %s)", amount, hand.tourNo)
+            return 0
 
     def readButton(self, hand: "Hand") -> None:
         """Parses a hand for the button position and updates the hand object.
