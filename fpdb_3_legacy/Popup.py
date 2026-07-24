@@ -4,6 +4,7 @@ Popup windows for the HUD.
 """
 
 import ctypes
+import sys
 from typing import Any
 
 from fpdb_3_legacy.loggingFpdb import get_logger
@@ -369,6 +370,48 @@ class Multicol(Popup):
             self.grid.addWidget(contentlab, 0, int(i))
 
 
+def resolve_popup_class(pu_class: str) -> type | None:
+    """Find the class named ``pu_class`` across the popup modules, or None."""
+    # sys.modules, not __import__(__name__): imported as "fpdb_3_legacy.Popup"
+    # the latter hands back the top-level package, which holds no popup class,
+    # so every classic popup would silently degrade to the default one.
+    class_to_return = getattr(sys.modules[__name__], pu_class, None)
+
+    # If class not found in Popup module, try ModernPopup module
+    if class_to_return is None:
+        try:
+            import fpdb_3_legacy.ModernPopup as ModernPopup
+
+            # Try direct attribute access
+            class_to_return = getattr(ModernPopup, pu_class, None)
+            if class_to_return is None:
+                # Try from MODERN_POPUP_CLASSES dict
+                if hasattr(ModernPopup, "MODERN_POPUP_CLASSES"):
+                    class_to_return = ModernPopup.MODERN_POPUP_CLASSES.get(pu_class)
+        except (ImportError, AttributeError) as e:
+            log.debug(f"Could not import ModernPopup classes: {e}")
+
+    # If still not found, try the range-chart popup module (PT4 Nash grids).
+    if class_to_return is None:
+        try:
+            import fpdb_3_legacy.RangeChartPopup as RangeChartPopup
+
+            class_to_return = getattr(RangeChartPopup, pu_class, None)
+        except (ImportError, AttributeError) as e:
+            log.debug(f"Could not import RangeChartPopup classes: {e}")
+
+    # Or the block-popup module (PT4 popup groups: info popups / text-grid charts).
+    if class_to_return is None:
+        try:
+            import fpdb_3_legacy.BlockPopup as BlockPopup
+
+            class_to_return = getattr(BlockPopup, pu_class, None)
+        except (ImportError, AttributeError) as e:
+            log.debug(f"Could not import BlockPopup classes: {e}")
+
+    return class_to_return
+
+
 def popup_factory(
     seat=None,
     stat_dict=None,
@@ -381,41 +424,7 @@ def popup_factory(
 ):
     # a factory function to discover the base type of the popup
     # and to return a class instance of the correct popup
-    # getattr looksup the class reference in this module
-
-    class_to_return = getattr(__import__(__name__), pop.pu_class, None)
-
-    # If class not found in Popup module, try ModernPopup module
-    if class_to_return is None:
-        try:
-            import fpdb_3_legacy.ModernPopup as ModernPopup
-
-            # Try direct attribute access
-            class_to_return = getattr(ModernPopup, pop.pu_class, None)
-            if class_to_return is None:
-                # Try from MODERN_POPUP_CLASSES dict
-                if hasattr(ModernPopup, "MODERN_POPUP_CLASSES"):
-                    class_to_return = ModernPopup.MODERN_POPUP_CLASSES.get(pop.pu_class)
-        except (ImportError, AttributeError) as e:
-            log.debug(f"Could not import ModernPopup classes: {e}")
-
-    # If still not found, try the range-chart popup module (PT4 Nash grids).
-    if class_to_return is None:
-        try:
-            import fpdb_3_legacy.RangeChartPopup as RangeChartPopup
-
-            class_to_return = getattr(RangeChartPopup, pop.pu_class, None)
-        except (ImportError, AttributeError) as e:
-            log.debug(f"Could not import RangeChartPopup classes: {e}")
-
-    # Or the block-popup module (PT4 popup groups: info popups / text-grid charts).
-    if class_to_return is None:
-        try:
-            import fpdb_3_legacy.BlockPopup as BlockPopup
-
-            class_to_return = getattr(BlockPopup, pop.pu_class, None)
-        except (ImportError, AttributeError) as e:
-            log.debug(f"Could not import BlockPopup classes: {e}")
+    class_to_return = resolve_popup_class(pop.pu_class)
 
     # Fallback to default popup if class still not found
     if class_to_return is None:

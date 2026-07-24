@@ -35,22 +35,43 @@ from fpdb_3_legacy.loggingFpdb import get_logger
 # logging has been set up in fpdb.py or HUD_main.py, use their settings:
 log = get_logger("hud")
 
+# Package that holds the aux modules the config refers to by bare name.
+LEGACY_PACKAGE = "fpdb_3_legacy"
+
 
 def importName(module_name: str, name: str) -> Any:
     """Import a named object 'name' from module 'module_name'."""
     #    Recipe 16.3 in the Python Cookbook, 2nd ed.  Thanks!!!!
 
-    try:
-        module = __import__(module_name, globals(), locals(), [name])
-    except Exception:  # intentional broad catch: HUD aux modules are runtime plugins.
-        log.exception("Could not load hud module %s", module_name)
-        return None
+    # The config names aux modules without a package ("Aux_Classic_Hud"). A
+    # source install resolves that from the legacy directory on sys.path, but a
+    # packaged build only exposes the package, so fall back to the qualified
+    # name rather than losing the HUD overlay.
+    candidates = [module_name]
+    if "." not in module_name:
+        candidates.append(f"{LEGACY_PACKAGE}.{module_name}")
 
-    try:
-        return getattr(module, name)
-    except AttributeError:
-        log.exception("Could not find attribute %s in module %s", name, module_name)
-        return None
+    last_error: Exception | None = None
+    for candidate in candidates:
+        try:
+            module = __import__(candidate, globals(), locals(), [name])
+        except Exception as exc:  # intentional broad catch: HUD aux modules are runtime plugins.
+            last_error = exc
+            continue
+
+        try:
+            return getattr(module, name)
+        except AttributeError:
+            log.exception("Could not find attribute %s in module %s", name, candidate)
+            return None
+
+    log.error(
+        "Could not load hud module %s (tried %s)",
+        module_name,
+        ", ".join(candidates),
+        exc_info=last_error,
+    )
+    return None
 
 
 class Hud:
