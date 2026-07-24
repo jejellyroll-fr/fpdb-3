@@ -472,14 +472,14 @@ class GuiAutoImport(QWidget):
     def _hud_base_path() -> str:
         """Return the directory that contains HUD_main(.pyw), resolved robustly.
 
-        Frozen builds unpack their resources next to ``sys._MEIPASS``. Otherwise
-        HUD_main lives next to this module (both in ``fpdb_3_legacy``), so resolve
-        it relative to ``__file__`` rather than ``sys.path[0]``/CWD, which depend
-        on how the process was launched (e.g. ``python -m ...`` vs the installed
-        entry point).
+        PyInstaller's ``sys._MEIPASS`` is the resource directory (``_internal``
+        on Windows/Linux and ``Contents/Frameworks`` on macOS), not the directory
+        containing sibling executables. Packaged builds therefore resolve from
+        ``sys.executable``. Source installs resolve next to this module rather
+        than from ``sys.path[0]``/CWD, which depend on how fpdb was launched.
         """
         if getattr(sys, "frozen", False):
-            return str(getattr(sys, "_MEIPASS"))
+            return os.path.dirname(os.path.abspath(sys.executable))
         return os.path.dirname(os.path.abspath(__file__))
 
     def _launch_hud(self) -> None:
@@ -496,6 +496,15 @@ class GuiAutoImport(QWidget):
         if getattr(sys, "frozen", False) == "pyoxidizer":
             command = [sys.executable, "--hud", *self.settings["cl_options"].split()]
             bs = 1
+
+        elif getattr(sys, "frozen", False):
+            executable = "HUD_main.exe" if os.name == "nt" else "HUD_main"
+            command = os.path.join(self._hud_base_path(), executable)
+            if not os.path.isfile(command):
+                msg = f"HUD_main not found at {command}"
+                raise FileNotFoundError(msg)
+            command = [command, *self.settings["cl_options"].split()]
+            bs = 0 if os.name == "nt" else 1
 
         elif self.config.install_method == "exe":
             command = "HUD_main.exe"

@@ -157,6 +157,59 @@ def test_hud_base_path_is_module_dir_and_holds_hud_main():
     assert os.path.isfile(os.path.join(base, "HUD_main.pyw"))
 
 
+@pytest.mark.parametrize(
+    ("platform_name", "os_name", "executable_name"),
+    [
+        ("darwin", "posix", "HUD_main"),
+        ("linux", "posix", "HUD_main"),
+        ("win32", "nt", "HUD_main.exe"),
+    ],
+)
+def test_launch_hud_uses_bundled_sibling_executable(monkeypatch, tmp_path, platform_name, os_name, executable_name):
+    """Frozen builds launch the HUD next to fpdb, never from sys._MEIPASS."""
+    settings = _make_settings(MagicMock())
+    settings["cl_options"] = "--config bundled.xml"
+    config = _make_config()
+    config.install_method = "app" if platform_name == "darwin" else "exe"
+    gui = _make_gui(settings, config)
+
+    gui_mod = sys.modules["fpdb_3_legacy.GuiAutoImport"]
+    fpdb_executable = tmp_path / ("fpdb.exe" if os_name == "nt" else "fpdb")
+    hud_executable = tmp_path / executable_name
+    fpdb_executable.touch()
+    hud_executable.touch()
+
+    monkeypatch.setattr(gui_mod.sys, "frozen", True, raising=False)
+    monkeypatch.setattr(gui_mod.sys, "executable", str(fpdb_executable))
+    monkeypatch.setattr(gui_mod.sys, "platform", platform_name)
+    monkeypatch.setattr(gui_mod.os, "name", os_name)
+    monkeypatch.setattr(gui_mod.sys, "_MEIPASS", str(tmp_path / "wrong-resource-directory"), raising=False)
+
+    with patch.object(gui_mod.subprocess, "Popen", return_value=MagicMock()) as mock_popen:
+        gui._launch_hud()
+
+    command = mock_popen.call_args.args[0]
+    assert command == [str(hud_executable), "--config", "bundled.xml"]
+
+
+def test_launch_hud_pyoxidizer_reuses_main_executable(monkeypatch, tmp_path):
+    """PyOxidizer dispatches HUD mode through its single embedded executable."""
+    settings = _make_settings(MagicMock())
+    settings["cl_options"] = "--config bundled.xml"
+    gui = _make_gui(settings, _make_config())
+
+    gui_mod = sys.modules["fpdb_3_legacy.GuiAutoImport"]
+    fpdb_executable = tmp_path / "fpdb"
+    monkeypatch.setattr(gui_mod.sys, "frozen", "pyoxidizer", raising=False)
+    monkeypatch.setattr(gui_mod.sys, "executable", str(fpdb_executable))
+
+    with patch.object(gui_mod.subprocess, "Popen", return_value=MagicMock()) as mock_popen:
+        gui._launch_hud()
+
+    command = mock_popen.call_args.args[0]
+    assert command == [str(fpdb_executable), "--hud", "--config", "bundled.xml"]
+
+
 @pytest.mark.skipif(sys.platform == "win32", reason="exercises the POSIX/source HUD-launch branch")
 def test_launch_hud_uses_module_relative_path(monkeypatch, tmp_path):
     """_launch_hud must find HUD_main.pyw even when sys.path[0]/CWD are unrelated."""

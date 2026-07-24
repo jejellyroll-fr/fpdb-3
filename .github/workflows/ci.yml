@@ -406,8 +406,21 @@ jobs:
             python -m PyInstaller --noconfirm --onedir --windowed --log-level=DEBUG --paths=fpdb_3_legacy --paths=. --icon="gfx/tribal.jpg" --add-data "fpdb_3_legacy:fpdb_3_legacy" --add-data "gfx:gfx" --add-data "icons:icons" --add-data "fonts:fonts" --add-data "locale:locale" --add-data "HUD_config.xml:." "fpdb_3_legacy/fpdb.pyw"
             python -m PyInstaller --noconfirm --onedir --windowed --log-level=DEBUG --paths=fpdb_3_legacy --paths=. --icon="gfx/tribal.jpg" --add-data "fpdb_3_legacy:fpdb_3_legacy" --add-data "gfx:gfx" --add-data "icons:icons" --add-data "fonts:fonts" --add-data "locale:locale" --add-data "HUD_config.xml:." "fpdb_3_legacy/HUD_main.pyw"
           fi
+      - name: Bundle HUD inside fpdb
+        run: python tools/bundle_pyinstaller_hud.py dist
+      - name: Re-sign assembled macOS application
+        if: runner.os == 'macOS'
+        run: codesign --force --deep --sign - dist/fpdb.app
+      - name: Package build artifact
+        shell: bash
+        run: |
+          if [ "${{ runner.os }}" = "macOS" ]; then
+            tar -czf fpdb-build.tar.gz -C dist fpdb.app
+          else
+            tar -czf fpdb-build.tar.gz -C dist fpdb
+          fi
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: fpdb-build-${{ matrix.os }}
-          path: dist/
+          path: fpdb-build.tar.gz
