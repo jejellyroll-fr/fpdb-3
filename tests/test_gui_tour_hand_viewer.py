@@ -9,7 +9,12 @@ from fpdb_3_legacy.GuiTourHandViewer import TourHandViewer
 from fpdb_3_legacy.localized_formats import format_number
 
 
-def test_add_hand_row_sorts_using_raw_numeric_values(qapp) -> None:
+def test_add_hand_row_sorts_using_raw_numeric_values() -> None:
+    """No QApplication needed: this only fills a model, it opens no widget.
+
+    Asking for pytest-qt's ``qapp`` made the test error out in CI, which runs
+    with ``-p no:pytest-qt`` and so has no such fixture.
+    """
     colnum = {
         "Stakes": 0,
         "Players": 1,
