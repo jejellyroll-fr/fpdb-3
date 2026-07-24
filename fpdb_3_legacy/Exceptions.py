@@ -154,6 +154,17 @@ class FpdbHandSkippedError(FpdbParseError):
     """Exception for skipped hand errors."""
 
 
+class FpdbSummaryNotFoundError(FpdbHandPartialError):
+    """The text holds no tournament summary at all.
+
+    A summary file is split into chunks and several of them are page furniture -
+    an HTML head, a mail header, a totals row. They are not partially imported
+    tournaments, so the import report must not count them as such. Subclasses
+    FpdbHandPartialError so callers that only know about partial summaries keep
+    behaving as before.
+    """
+
+
 class FpdbEndOfFileError(FpdbHandError):
     """Exception for end of file errors."""
 
@@ -166,4 +177,5 @@ FpdbPostgresqlNoDatabase = FpdbPostgresqlNoDatabaseError
 FpdbHandDuplicate = FpdbHandDuplicateError
 FpdbHandPartial = FpdbHandPartialError
 FpdbHandSkipped = FpdbHandSkippedError
+FpdbSummaryNotFound = FpdbSummaryNotFoundError
 FpdbEndOfFile = FpdbEndOfFileError

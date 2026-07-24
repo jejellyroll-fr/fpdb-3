@@ -20,7 +20,11 @@ import re
 from decimal import Decimal
 from typing import Any, ClassVar
 
-from fpdb_3_legacy.HandHistoryConverter import FpdbHandPartial, FpdbParseError, HandHistoryConverter
+from fpdb_3_legacy.HandHistoryConverter import (
+    FpdbParseError,
+    FpdbSummaryNotFound,
+    HandHistoryConverter,
+)
 from fpdb_3_legacy.loggingFpdb import get_logger
 from fpdb_3_legacy.TourneySummary import TourneySummary
 
@@ -126,7 +130,11 @@ class WinningSummary(TourneySummary):
                 tmp2 = self.summaryText[0:200] if m2 is None else "NA"
                 log.error("parse Summary Html failed: '%s' '%s'", tmp1, tmp2)
                 raise FpdbParseError
-            raise FpdbHandPartial
+            # Splitting the page yields its furniture too (search console,
+            # column headers, totals row, footer): those chunks hold no
+            # tournament, they are not half-imported ones.
+            msg = "no tournament row in this chunk"
+            raise FpdbSummaryNotFound(msg)
         info.update(m1.groupdict())
         info.update(m2.groupdict())
         self.parseSummaryArchive(info)

@@ -31,7 +31,12 @@ import pytz
 from pytz import timezone
 
 from fpdb_3_legacy import Hand
-from fpdb_3_legacy.Exceptions import FpdbHandPartial, FpdbHandSkipped, FpdbParseError
+from fpdb_3_legacy.Exceptions import (
+    FpdbHandPartial,
+    FpdbHandSkipped,
+    FpdbParseError,
+    FpdbSummaryNotFound,  # noqa: F401 - re-exported for the summary parsers
+)
 from fpdb_3_legacy.ImprovedErrorHandler import get_improved_error_handler
 from fpdb_3_legacy.loggingFpdb import get_logger
 
