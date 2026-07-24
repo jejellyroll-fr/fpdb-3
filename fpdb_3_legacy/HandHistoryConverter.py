@@ -16,16 +16,19 @@ from __future__ import annotations
 # In the "official" distribution you can find the license in agpl-3.0.txt.
 #
 import codecs
+import contextlib
 import datetime
 import os
 import os.path
 import re
+import sqlite3
 import sys
 import time
 import xml.dom.minidom
 import xml.parsers.expat
 from abc import ABC, abstractmethod
 from decimal import Decimal
+from pathlib import Path
 
 import pytz
 from pytz import timezone
@@ -53,6 +56,40 @@ HHC_XML_PARSE_ERRORS = (OSError, TypeError, xml.parsers.expat.ExpatError)
 # Position of the all-in flag in a blind action, as built by Hand.addBlind():
 # (player, blindtype, amount, stack_is_now_empty).
 BLIND_ALL_IN_INDEX = 3
+
+SQLITE_MAGIC = b"SQLite format 3\x00"
+# The Microgaming text export separates its hands with this line, so rebuilding
+# it lets the existing parser read the database form unchanged.
+MICROGAMING_HAND_SEPARATOR = "----PRIMA.DAT----"
+
+
+def unpack_sqlite_hand_history(in_path: str, raw_data: bytes) -> str | None:
+    """Return the hand histories stored inside a SQLite hand-history file.
+
+    The Microgaming client keeps its history in ``GameHistory.dat``, a SQLite
+    database whose ``HandHistory.XMLDump`` column holds exactly the ``<Game>``
+    XML of its text export. fpdb only reads text, so the file was rejected whole
+    ("Unable to read file with any codec in list") even though the parser
+    understands every hand in it.
+
+    Returns None for anything that is not such a database, so every text history
+    takes the normal path.
+    """
+    if not raw_data.startswith(SQLITE_MAGIC):
+        return None
+    try:
+        uri = f"{Path(in_path).absolute().as_uri()}?mode=ro"
+        with contextlib.closing(sqlite3.connect(uri, uri=True)) as connection:
+            dumps = [row[0] for row in connection.execute("SELECT XMLDump FROM HandHistory ORDER BY HandDate")]
+    except sqlite3.Error as exc:
+        log.debug("Not a hand-history database (%s): %s", in_path, exc)
+        return None
+    texts = [dump for dump in dumps if dump]
+    if not texts:
+        log.debug("Hand-history database %s holds no hand", in_path)
+        return None
+    log.info("Read %d hands out of the hand-history database %s", len(texts), in_path)
+    return "".join(f"{MICROGAMING_HAND_SEPARATOR}\n{text}\n" for text in texts)
 
 
 class HandHistoryConverter(ABC):
@@ -779,6 +816,14 @@ or None if we fail to get the info """
                 log.error(f"Unable to open file {self.in_path}: {e}")
                 self.obs = ""
                 return False
+
+            unpacked = unpack_sqlite_hand_history(self.in_path, raw_data)
+            if unpacked is not None:
+                self.whole_file = unpacked
+                self.obs = self.whole_file[self.index :]
+                self.index = len(self.whole_file)
+                self.kodec = "utf-8"
+                return True
 
             # A UTF-16 byte-order mark is unambiguous: decode it directly. Without
             # this, cp1252 (which accepts almost any byte) decodes the UTF-16 bytes
