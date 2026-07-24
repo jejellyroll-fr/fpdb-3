@@ -56,7 +56,8 @@ class TestImportName(unittest.TestCase):
         with patch("fpdb_3_legacy.Hud.log") as mock_log:
             result = importName("nonexistent_module", "some_class")
             assert result is None
-            mock_log.exception.assert_called_once()
+            # Reported once, after both the bare and the package-qualified name fail.
+            mock_log.error.assert_called_once()
 
 
 class TestHudBasics(unittest.TestCase):
