@@ -68,6 +68,13 @@ def make_exe(dist):
         "if len(sys.argv) > 1 and sys.argv[1] == '--hud':",
         "    sys.argv.pop(1)",
         "    runpy.run_path(os.path.join(legacy_dir, 'HUD_main.pyw'), run_name='__main__')",
+        # Helper processes cannot use "python -m" here: this binary is their
+        # interpreter. --run-module is fpdb_3_legacy.subprocess_launch's escape
+        # hatch, handled before the GUI entry point is loaded.
+        "elif len(sys.argv) > 2 and sys.argv[1] == '--run-module':",
+        "    module = sys.argv[2]",
+        "    sys.argv = [module] + sys.argv[3:]",
+        "    runpy.run_module(module, run_name='__main__', alter_sys=True)",
         "else:",
         "    runpy.run_path(os.path.join(legacy_dir, 'fpdb.pyw'), run_name='__main__')",
     ])

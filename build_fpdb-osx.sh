@@ -36,7 +36,7 @@ SECOND_SCRIPT="$LEGACY_PACKAGE_DIR/HUD_main.pyw"
 # Options of pyinstaller
 # numpy is only imported through import_module() in Database.py; PyInstaller
 # cannot follow that, and the HUD build would otherwise ship without it.
-PYINSTALLER_OPTIONS="--noconfirm --onedir --windowed --log-level=DEBUG --paths=fpdb_3_legacy --paths=. --hidden-import=numpy"
+PYINSTALLER_OPTIONS="--noconfirm --onedir --windowed --log-level=DEBUG --paths=fpdb_3_legacy --paths=. --hidden-import=numpy --hidden-import=fpdb_3_legacy.coinpoker_live_capture"
 
 # List of all files for fpdb
 FILES=(

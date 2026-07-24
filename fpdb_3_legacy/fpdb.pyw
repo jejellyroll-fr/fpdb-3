@@ -14,6 +14,15 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 # In the "official" distribution you can find the license in agpl-3.0.txt.
 
+import sys
+
+from fpdb_3_legacy.subprocess_launch import dispatch_run_module
+
+# Frozen builds have no "python -m": helper processes re-invoke this executable
+# with --run-module. Dispatch before pulling in the GUI stack below.
+if __name__ == "__main__" and dispatch_run_module():
+    sys.exit(0)
+
 import atexit
 import codecs
 import contextlib
@@ -24,7 +33,6 @@ import os
 import pstats
 import queue
 import sqlite3
-import sys
 from functools import partial
 from importlib import import_module
 from typing import Any
