@@ -40,7 +40,12 @@ class Pkr(HandHistoryConverter):
     siteId = 13  # Needs to match id entry in Sites database
 
     mixes = {"HORSE": "horse", "8-Game": "8game", "HOSE": "hose"}  # Legal mixed games
-    sym = {"USD": "\\$", "T$": "", "EUR": "\u20ac", "GBP": "\\£"}  # ADD Euro, Sterling, etc HERE
+    # ADD Euro, Sterling, etc HERE. "play" belongs here too: determineGameType
+    # reports a play-money table as such, and PKR still writes its amounts with a
+    # dollar sign, so the action regexes need the same symbol as USD. Without the
+    # entry compilePlayerRegexs raised KeyError('play') and no hand of a
+    # play-money file could be read at all.
+    sym = {"USD": "\\$", "T$": "", "EUR": "\u20ac", "GBP": "\\£", "play": "\\$"}
     substitutions = {
         "LEGAL_ISO": "USD|EUR|GBP",  # legal ISO currency codes
         "LS": "\\$|\xe2\x82\xac|\u20ac|\\£|",  # legal currency symbols - Euro(cp1252, utf-8)
