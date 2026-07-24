@@ -23,7 +23,7 @@ from time import time
 from typing import Any
 
 from fpdb_3_legacy import Configuration
-from fpdb_3_legacy.HandHistoryConverter import HandHistoryConverter
+from fpdb_3_legacy.HandHistoryConverter import HandHistoryConverter, unpack_sqlite_hand_history
 from fpdb_3_legacy.loggingFpdb import get_logger
 from fpdb_3_legacy.parser_registry import (
     LEGACY_MODULE_REGISTRY as LEGACY_MODULE_REGISTRY,
@@ -425,6 +425,10 @@ class IdentifySite:
         try:
             with open(in_path, "rb") as infile:
                 raw_data = infile.read()
+
+            unpacked = unpack_sqlite_hand_history(in_path, raw_data)
+            if unpacked is not None:
+                return unpacked, "utf-8"
 
             # If the file begins with a UTF-16 BOM (little endian or big endian)
             if raw_data.startswith((b"\xff\xfe", b"\xfe\xff")):
