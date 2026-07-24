@@ -48,6 +48,7 @@ and convert them to FPDB format, including support for multiple skins.
 
 from __future__ import annotations
 
+import contextlib
 import datetime
 import decimal
 import re
@@ -556,6 +557,7 @@ class iPoker(IPokerStreetsActionsMixin, IPokerHandInfoMixin, IPokerTournamentRes
 
     def _create_tournament_summary_with_all_players(self, hand: Any, tournament_data: dict) -> None:  # noqa: C901, PLR0912, PLR0915
         """Create a TourneySummary with all players parsed from XML."""
+        db = None
         try:
             from decimal import Decimal
 
@@ -584,6 +586,23 @@ class iPoker(IPokerStreetsActionsMixin, IPokerHandInfoMixin, IPokerTournamentRes
             summary.fee = int(tournament_data.get("fee_amount", Decimal(0)) * 100)
             summary.buyinCurrency = tournament_data.get("currency_symbol", "EUR")
             summary.currency = summary.buyinCurrency
+
+            # TourneyTypes.category/limitType are NOT NULL. Left at the
+            # TourneySummary defaults (None) the insert failed with
+            # "Column 'category' cannot be null" on MySQL/PostgreSQL, and the
+            # error escaped this method and killed the parse of the hand itself,
+            # so iPoker tournament hands could not be imported at all. The hand
+            # being parsed already carries both.
+            summary.gametype["category"] = hand.gametype.get("category")
+            summary.gametype["limitType"] = hand.gametype.get("limitType")
+            summary.gametype["mix"] = hand.gametype.get("mix") or "none"
+            if not summary.gametype["category"] or not summary.gametype["limitType"]:
+                log.warning(
+                    "Not storing the tournament summary of %s: unknown game category/limit (%s)",
+                    summary.tourNo,
+                    hand.gametype,
+                )
+                return
 
             # Parse tournament data from session/general (not game/players)
             xml_source = getattr(self, "whole_file", hand.handText)
@@ -666,8 +685,17 @@ class iPoker(IPokerStreetsActionsMixin, IPokerHandInfoMixin, IPokerTournamentRes
 
             log.info("TourneySummary successfully inserted into database")
 
-        except (ValueError, TypeError, AttributeError, ImportError):
+        except Exception:  # noqa: BLE001 - storing the summary must never fail the hand
+            # Anything the database rejects (constraint, connection, schema) is a
+            # problem with the summary alone: the hand itself parsed fine and
+            # still has to be importable.
             log.exception("Error creating TourneySummary")
+        finally:
+            # Opened above just for this write; without closing, every imported
+            # tournament file left a connection behind.
+            if db is not None:
+                with contextlib.suppress(Exception):
+                    db.close_connection()
 
     def _process_lh_game_type(self, mg: dict) -> dict:
         """Process LH game type."""

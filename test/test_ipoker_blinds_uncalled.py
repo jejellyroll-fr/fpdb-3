@@ -7,12 +7,14 @@ conservation was 16% and is 100% with these two fixes.
 
 from __future__ import annotations
 
+import tempfile
 from decimal import Decimal
 from pathlib import Path
 
 import pytest
 
 from fpdb_3_legacy.Configuration import Config
+from fpdb_3_legacy.Database import Database
 from fpdb_3_legacy.iPoker.base import iPoker
 
 # Level 15/30, while the session header (and so the gametype) opened at 10/20.
@@ -63,11 +65,41 @@ WALK_AT_A_RAISED_LEVEL = """<?xml version="1.0" encoding="utf-8"?>
 </session>"""
 
 
+@pytest.fixture(scope="module")
+def isolated_config():
+    """A config whose database is a throwaway SQLite file.
+
+    Parsing an iPoker *tournament* hand stores its TourneySummary, so a bare
+    ``Config()`` made these tests write into whatever database the user has
+    configured - their real one.
+    """
+    config = Config()
+    db_file = tempfile.NamedTemporaryFile(suffix=".sqlite3", delete=False)
+    db_file.close()
+    params = config.get_db_parameters().copy()
+    params.update(
+        {
+            "db-backend": Database.SQLITE,
+            "db-server": "sqlite",
+            "db-databaseName": db_file.name,
+            "db-host": "",
+            "db-user": "",
+            "db-password": "",
+        },
+    )
+    config.get_db_parameters = lambda: params
+    database = Database(config)
+    database.recreate_tables()
+    database.close_connection()
+    yield config
+    Path(db_file.name).unlink(missing_ok=True)
+
+
 @pytest.fixture
-def walk_hand(tmp_path):
+def walk_hand(isolated_config, tmp_path):
     path = tmp_path / "5867402179.xml"
     path.write_text(WALK_AT_A_RAISED_LEVEL, encoding="utf-8")
-    return iPoker(config=Config(), in_path=str(path), autostart=True).getProcessedHands()[0]
+    return iPoker(config=isolated_config, in_path=str(path), autostart=True).getProcessedHands()[0]
 
 
 def test_a_raised_blind_level_is_not_dead_money(walk_hand) -> None:
@@ -100,14 +132,32 @@ def test_the_hand_balances(walk_hand) -> None:
     assert paid == out == Decimal("30")
 
 
-def test_ring_hand_rake_is_the_money_the_room_kept() -> None:
+def test_the_tournament_summary_is_stored_with_its_game_category(isolated_config, walk_hand) -> None:
+    """TourneyTypes.category/limitType are NOT NULL.
+
+    The summary was built with the TourneySummary defaults (None), so the insert
+    died with "Column 'category' cannot be null" on MySQL/PostgreSQL - and the
+    error propagated out of the summary code into the parse, making iPoker
+    tournament hands unimportable on those backends.
+    """
+    database = Database(isolated_config)  # kept alive: dropping it closes the connection
+    cursor = database.get_cursor()
+    cursor.execute("SELECT category, limitType FROM TourneyTypes")
+    categories = cursor.fetchall()
+    database.close_connection()
+
+    assert (walk_hand.gametype["category"], walk_hand.gametype["limitType"]) in [tuple(row) for row in categories]
+    assert all(row[0] and row[1] for row in categories)
+
+
+def test_ring_hand_rake_is_the_money_the_room_kept(isolated_config) -> None:
     """A ring hand with no rakeamount attribute still has its rake derived.
 
     The regression file puts 13.50 in and pays 13.10 out; the 0.40 difference is
     the rake. Pre-setting totalpot from the winnings hid it and reported 0.
     """
     hand_file = Path("regression-test-files/cash/iPoker/Flop/6+Holdem-EUR-0.25-0.50-201702.txt")
-    hand = iPoker(config=Config(), in_path=str(hand_file), autostart=True).getProcessedHands()[0]
+    hand = iPoker(config=isolated_config, in_path=str(hand_file), autostart=True).getProcessedHands()[0]
     hand.totalPot()
 
     assert hand.rake == Decimal("0.40")
