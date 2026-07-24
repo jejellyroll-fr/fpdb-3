@@ -167,6 +167,9 @@ class Importer:
         self.settings.setdefault("ftpArchive", False)
         self.settings.setdefault("testData", False)
         self.settings.setdefault("cacheHHC", False)
+        # Populated only when cacheHHC is on (see runImport).
+        self.handhistoryconverter: Any = None
+        self.cached_hhcs: dict[str, Any] = {}
 
         self.writeq = None
         self.database = Database.Database(self.config, sql=self.sql)
@@ -344,14 +347,20 @@ class Importer:
         """
         self.settings["cacheHHC"] = value
 
-    def getCachedHHC(self):
-        """Retrieve the cached hand history converter.
+    def getCachedHHC(self, path: str | None = None):
+        """Retrieve a cached hand history converter (``None`` when there is none).
 
-        Returns the hand history converter instance currently cached by the importer.
+        Args:
+            path: return the converter for that file; defaults to the last one
+                imported. Caching only happens when ``cacheHHC`` is enabled, so
+                this used to raise AttributeError instead of answering "nothing
+                cached".
 
         Returns:
-            The cached hand history converter instance.
+            The cached hand history converter instance, or None.
         """
+        if path is not None:
+            return self.cached_hhcs.get(path, None)
         return self.handhistoryconverter
 
     #   def setWatchTime(self):
@@ -1332,6 +1341,9 @@ class Importer:
                     # Cache HHC if enabled
                     if self.settings.get("cacheHHC", False):
                         self.handhistoryconverter = hhc
+                        # Keyed too, so a caller comparing a whole directory gets
+                        # each file's own converter instead of the last one.
+                        self.cached_hhcs[fpdbfile.path] = hhc
         elif self.mode == "auto":
             return (0, 0, partial, skipped, errors, time() - ttime, detected_sitename)
 
@@ -1354,11 +1366,23 @@ class Importer:
                 fpdbfile.ftype = "both"
                 log.info(f"File {fpdbfile.path} marked as 'both' for summary processing")
             else:
-                log.warning(f"File {fpdbfile.path} NOT marked for summary processing")
-                log.warning(f"   - type is '{gametype.get('type')}' (expected 'tour')")
-                log.warning(f"   - summaryInFile is '{getattr(hhc, 'summaryInFile', False)}' (expected True)")
+                # Not an anomaly: a cash file has no tournament summary to grab, and
+                # plenty of tournament histories are stored without one. This used to
+                # log three WARNING lines per imported file - including the nonsense
+                # "type is 'tour' (expected 'tour')" whenever only the summary was
+                # missing - which buried the warnings that do matter.
+                reasons = []
+                if gametype.get("type") != "tour":
+                    reasons.append(f"type is {gametype.get('type')!r}, not 'tour'")
+                if not getattr(hhc, "summaryInFile", False):
+                    reasons.append("the file holds no tournament summary")
+                log.debug(
+                    "File %s not marked for summary processing: %s",
+                    fpdbfile.path,
+                    "; ".join(reasons),
+                )
         else:
-            log.warning("No phands available for summary checking")
+            log.debug("No hands parsed from %s, nothing to check for a summary", fpdbfile.path)
 
         ttime = time() - ttime
 
@@ -1512,19 +1536,17 @@ class Importer:
                 return summaryTexts
             # The summary files tend to have a header
             # Remove the first entry if it has < 150 characters
+            # Dropping the header/footer is the normal path for a summary file, not
+            # a problem worth a warning on every import.
             if len(summaryTexts) > 1 and len(summaryTexts[0]) <= 150:
                 del summaryTexts[0]
-                log.warning(
-                    ("TourneyImport: Removing text < 150 characters from start of file"),
-                )
+                log.debug("TourneyImport: removed header (< 150 characters) from start of %s", filename)
 
             # Sometimes the summary files also have a footer
             # Remove the last entry if it has < 100 characters
             if len(summaryTexts) > 1 and len(summaryTexts[-1]) <= 100:
                 summaryTexts.pop()
-                log.warning(
-                    ("TourneyImport: Removing text < 100 characters from end of file"),
-                )
+                log.debug("TourneyImport: removed footer (< 100 characters) from end of %s", filename)
         return summaryTexts
 
     def get_hand_data_report(self, file_path: str | None = None) -> str:

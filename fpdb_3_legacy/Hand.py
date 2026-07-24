@@ -1854,34 +1854,21 @@ class Hand:
                 if len(commitsall) == 1:
                     commitsall = handle_leftover(commitsall)
                     break
+                # Cut the next pot at the smallest remaining commitment: everyone
+                # still in matches it, and whoever committed exactly that much is
+                # all in, so the players above him form the next side pot.
+                # A fractional amount used to be sliced into one 1.00 pot per whole
+                # unit plus the remainder. Every slice has the same participants,
+                # so the totals came out identical while the pot count grew with the
+                # stakes: a $1,860.50 all-in produced 1,861 pots, each one costing a
+                # board evaluation and a HandsPots row (a $500k play-money hand was
+                # far worse). Cutting once is equivalent and bounded by the number
+                # of distinct commitment levels.
                 v1 = commitsall[0][0]
-                whole_units = int(v1)
-                remainder = v1 - whole_units
-
-                if remainder == 0:
-                    # If we have a whole number, form a pot with that exact amount
-                    commitsall = create_pot_from_value(v1, commitsall)
-                    if len(commitsall) == 1:
-                        # Only one player left => handle leftover
-                        commitsall = handle_leftover(commitsall)
-                    if not commitsall:
-                        break
-                else:
-                    # Fractional value: handle the whole units first, then the remainder
-                    for _ in range(whole_units):
-                        commitsall = create_pot_from_value(Decimal("1.00"), commitsall)
-                        if len(commitsall) == 1:
-                            commitsall = handle_leftover(commitsall)
-                            break
-                        if not commitsall:
-                            break
-                    else:
-                        # Handle the remainder part
-                        if remainder > 0 and commitsall:
-                            commitsall = create_pot_from_value(remainder, commitsall)
-                            if len(commitsall) == 1:
-                                commitsall = handle_leftover(commitsall)
-
+                commitsall = create_pot_from_value(v1, commitsall)
+                if len(commitsall) == 1:
+                    # Only one player left => handle leftover
+                    commitsall = handle_leftover(commitsall)
                 if not commitsall:
                     break
 

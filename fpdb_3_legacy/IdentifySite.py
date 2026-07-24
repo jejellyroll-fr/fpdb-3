@@ -428,6 +428,14 @@ class IdentifySite:
 
             # If the file begins with a UTF-16 BOM (little endian or big endian)
             if raw_data.startswith((b"\xff\xfe", b"\xfe\xff")):
+                if len(raw_data) % 2:
+                    # A UTF-16 code unit is two bytes, so an odd length means a
+                    # stray byte was appended (typically a lone "\n" added by a
+                    # tool that treated the file as 8-bit). Dropping it is
+                    # lossless and avoids a scary decode warning on files that
+                    # are otherwise perfectly readable.
+                    log.debug("Dropping stray trailing byte of UTF-16 file %s", in_path)
+                    raw_data = raw_data[:-1]
                 try:
                     whole_file = raw_data.decode("utf-16")
                     return whole_file, "utf-16"

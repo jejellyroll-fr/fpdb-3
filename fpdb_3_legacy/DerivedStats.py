@@ -543,7 +543,9 @@ class DerivedStats:
                 log.debug("Hero found: %s at seat %s", player[1], player[0])
                 break
         else:
-            log.warning("No hero found in the hand.")
+            # Observed hands (the hero was not dealt in) legitimately have no
+            # hero seat, so this is routine, not a problem to report.
+            log.debug("No hero seated in hand %s", getattr(hand, "handid", "unknown"))
 
 
     def _assembleBoardCards(self, hand: Any) -> None:
@@ -3736,8 +3738,18 @@ class DerivedStats:
 
             if hand.runItTimes >= MIN_RUN_IT_TIMES:
                 # Each run is dealt onto its own streets: FLOP1/TURN1/RIVER1, FLOP2...
+                # but only the streets actually dealt twice are numbered. Older FTP
+                # archives agree to run it twice *after* the flop, so the flop is
+                # shared (FLOP + TURN1/RIVER1 + TURN2/RIVER2) and FLOP1/FLOP2 stay
+                # empty; without the fallback to the shared street each run was just
+                # [turn, river] and the evaluator rejected the two-card board
+                # ("pyenum returned error code 1005"), losing the pot split.
                 return [
-                    [card for street in hand.communityStreets for card in hand.board.get(f"{street}{run}", [])]
+                    [
+                        card
+                        for street in hand.communityStreets
+                        for card in (hand.board.get(f"{street}{run}") or hand.board.get(street) or [])
+                    ]
                     for run in range(1, hand.runItTimes + 1)
                 ]
 
