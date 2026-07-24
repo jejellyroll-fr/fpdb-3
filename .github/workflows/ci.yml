@@ -529,16 +529,26 @@ jobs:
           fi
           test -f "$install_dir/gfx/tribal.jpg"
           test -f "$install_dir/locale/fr_FR/LC_MESSAGES/fpdb.mo"
+          # The launcher is the interpreter of every helper process, so a
+          # broken payload layout or search path must fail the build here.
+          "$install_dir/${{ matrix.executable }}" --run-module fpdb_3_legacy.subprocess_launch
       - name: Package PyOxidizer artifact
         shell: bash
         run: |
           install_dir="build/${{ matrix.target }}/release/install"
           if [[ "${{ runner.os }}" == "macOS" ]]; then
-            # The build is unsigned: Gatekeeper blocks the bundled Qt dylibs
-            # until the download quarantine is cleared.
-            cp docs/macos-gatekeeper.md "$install_dir/READ-ME-FIRST-macos.md"
+            # A loose directory means one quarantined download per dylib, and
+            # Gatekeeper prompts for each of them. Ship a signed bundle: it is
+            # assessed as a unit, so the user approves the app once.
+            mkdir -p dist
+            python -m tools.package_pyoxidizer_macos "$install_dir" dist/fpdb.app --icon gfx/tribal.icns
+            codesign --verify --deep --strict dist/fpdb.app
+            dist/fpdb.app/Contents/MacOS/fpdb --run-module fpdb_3_legacy.subprocess_launch
+            cp docs/macos-gatekeeper.md dist/READ-ME-FIRST-macos.md
+            tar -czf "${{ matrix.artifact }}.tar.gz" -C dist fpdb.app READ-ME-FIRST-macos.md
+          else
+            tar -czf "${{ matrix.artifact }}.tar.gz" -C "$install_dir" .
           fi
-          tar -czf "${{ matrix.artifact }}.tar.gz" -C "$install_dir" .
       - name: Upload PyOxidizer artifact
         uses: actions/upload-artifact@v4
         with:

@@ -76,6 +76,23 @@ def test_dispatch_ignores_a_normal_launch(monkeypatch) -> None:
     assert sys.argv == ["fpdb", "-c", "HUD_config.xml"]
 
 
+def test_dispatch_makes_output_line_buffered(monkeypatch, tmp_path) -> None:
+    """Without this a helper's log stays empty until its buffer fills."""
+    module_dir = tmp_path / "buffered"
+    module_dir.mkdir()
+    (module_dir / "__init__.py").write_text("")
+    (module_dir / "mod.py").write_text(
+        "import sys, pathlib\npathlib.Path(sys.argv[1]).write_text(str(sys.stdout.line_buffering))\n",
+    )
+    monkeypatch.syspath_prepend(str(tmp_path))
+    marker = tmp_path / "buffering.txt"
+    monkeypatch.setattr(sys, "argv", ["fpdb", RUN_MODULE_FLAG, "buffered.mod", str(marker)])
+
+    dispatch_run_module()
+
+    assert marker.read_text() == "True"
+
+
 def test_dispatch_runs_the_requested_module(monkeypatch, tmp_path) -> None:
     module_dir = tmp_path / "pkg"
     module_dir.mkdir()
