@@ -125,7 +125,9 @@ class Absolute(HandHistoryConverter):
 
     re_HandInfo = re_GameInfo
 
-    re_Button = re.compile(r"^Seat #(?P<BUTTON>\d+) is the (?:dead )?dealer$", re.MULTILINE)
+    # No start-of-line anchor: the marker closes the table line,
+    # "Table: CHILE HWY (Real Money) Seat #7 is the dealer".
+    re_Button = re.compile(r"Seat #(?P<BUTTON>\d+) is the (?:dead )?dealer$", re.MULTILINE)
 
     re_PlayerInfo = re.compile(
         r"^Seat (?P<SEAT>[0-9]) - (?P<PNAME>.*) "
