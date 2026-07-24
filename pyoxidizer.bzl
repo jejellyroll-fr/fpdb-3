@@ -15,8 +15,8 @@ def make_dist():
             "1003c93f92fdcca57308076995b224b888a7ee556763759e69d36e198b5bef14",
         ],
         "x86_64-unknown-linux-gnu": [
-            "https://github.com/astral-sh/python-build-standalone/releases/download/20240713/cpython-3.10.14%2B20240713-x86_64-unknown-linux-gnu-pgo%2Blto-full.tar.zst",
-            "01c1038755944cbd7017a4e13e53237e68cd6bbfcff34ca8c9f53a71653e5c9a",
+            "https://github.com/astral-sh/python-build-standalone/releases/download/20240713/cpython-3.10.14%2B20240713-x86_64-unknown-linux-gnu-pgo-full.tar.zst",
+            "f15c2b569f3bf8ba01737c5f46cf71e8bc07129ecc7304de9ba47b220acee47e",
         ],
     }
     if BUILD_TARGET_TRIPLE not in distributions:
