@@ -154,7 +154,7 @@ def test_drop_all_tables_disables_fk_checks_on_mysql():
     statements = [c.args[0] for c in cursor.execute.call_args_list if c.args]
     assert statements[0] == "SET FOREIGN_KEY_CHECKS = 0"
     assert "SET FOREIGN_KEY_CHECKS = 1" in statements
-    assert any(s.startswith("DROP TABLE IF EXISTS HandsStove") for s in statements)
+    assert "DROP TABLE IF EXISTS `HandsStove`" in statements
     assert not any("CASCADE" in s for s in statements)  # CASCADE is PostgreSQL-only
 
 

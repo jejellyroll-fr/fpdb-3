@@ -98,7 +98,9 @@ def test_drop_all_tables_mysql_brackets_fk_checks():
     statements = [c.args[0] for c in cursor.execute.call_args_list if c.args]
     assert statements[0] == "SET FOREIGN_KEY_CHECKS = 0"
     assert "SET FOREIGN_KEY_CHECKS = 1" in statements
-    assert any(s.startswith("DROP TABLE IF EXISTS HandsStove") for s in statements)
+    assert "DROP TABLE IF EXISTS `HandsStove`" in statements
+    # Rank is a reserved word in MySQL 8/MariaDB, so the name must be quoted.
+    assert "DROP TABLE IF EXISTS `Rank`" in statements
     assert not any("CASCADE" in s for s in statements)
 
 
@@ -108,7 +110,7 @@ def test_drop_all_tables_postgresql_uses_cascade():
     cursor.fetchall.return_value = [("hands",)]
     dialects.dialect_for_server("postgresql").drop_all_tables(db)
     statements = [c.args[0] for c in cursor.execute.call_args_list if c.args]
-    assert any("DROP TABLE IF EXISTS hands CASCADE" in s for s in statements)
+    assert any('DROP TABLE IF EXISTS "hands" CASCADE' in s for s in statements)
 
 
 # --- foreign keys ----------------------------------------------------------
