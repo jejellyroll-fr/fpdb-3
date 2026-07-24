@@ -30,7 +30,12 @@ from PySide6.QtCore import QCoreApplication
 from PySide6.QtWidgets import QDialog, QLabel, QProgressBar, QVBoxLayout
 
 from fpdb_3_legacy import Configuration, Database, IdentifySite
-from fpdb_3_legacy.Exceptions import FpdbHandDuplicate, FpdbHandPartial, FpdbParseError
+from fpdb_3_legacy.Exceptions import (
+    FpdbHandDuplicate,
+    FpdbHandPartial,
+    FpdbParseError,
+    FpdbSummaryNotFound,
+)
 from fpdb_3_legacy.iPoker.dispatcher import get_parser_class_for_path as get_ipoker_parser_class_for_path
 from fpdb_3_legacy.loggingFpdb import get_logger
 from fpdb_3_legacy.parser_registry import get_parser_class, get_summary_class
@@ -1438,6 +1443,7 @@ class Importer:
         log.debug(f"Site: {fpdbfile.site.name}, Summary module: {fpdbfile.site.summary}")
 
         (stored, duplicates, partial, skipped, errors, ttime) = (0, 0, 0, 0, 0, time())
+        not_a_summary = 0  # chunks of the file that hold no tournament at all
 
         try:
             obj = get_summary_class(fpdbfile.site.summary)
@@ -1479,6 +1485,14 @@ class Importer:
                         )
                         self.database.resetBulkCache(False)
                         conv.insertOrUpdate(printtest=self.settings["testData"])
+                    except FpdbSummaryNotFound as exc:
+                        # Page furniture, not a half-imported tournament: an
+                        # archive page splits into its head, its column headers
+                        # and its totals row as well as its summaries. Counting
+                        # those as partial told the user 15 summaries had failed
+                        # in a file holding 5 tournaments, all of them imported.
+                        not_a_summary += 1
+                        log.debug("Not a tournament summary in %s: %s", fpdbfile.path, exc)
                     except FpdbHandPartial:
                         partial += 1
                         self.import_issues.append(
@@ -1495,11 +1509,13 @@ class Importer:
                             f"Finished importing {j}/{len(summaryTexts)} tournament summaries",
                         )
                     stored = j
+        stored -= errors + partial + not_a_summary
         ttime = time() - ttime
         log.debug(
-            f"Import summary completed: {stored} stored, {duplicates} duplicates, {partial} partial, {skipped} skipped, {errors} errors in {ttime:.3f} seconds",
+            f"Import summary completed: {stored} stored, {duplicates} duplicates, {partial} partial, "
+            f"{skipped} skipped, {errors} errors, {not_a_summary} non-summary chunks in {ttime:.3f} seconds",
         )
-        return (stored - errors - partial, duplicates, partial, skipped, errors, ttime)
+        return (stored, duplicates, partial, skipped, errors, ttime)
 
     def progressNotify(self) -> None:
         """Notify the application to process pending GUI events.
