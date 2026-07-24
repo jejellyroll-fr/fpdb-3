@@ -429,6 +429,10 @@ jobs:
     name: Build with PyOxidizer (${{ matrix.label }})
     runs-on: ${{ matrix.os }}
     timeout-minutes: 60
+    # PyOxidizer 0.24's cargo_toml parser cannot read the Rust 2024 edition
+    # emitted by `cargo init` since Rust 1.85.
+    env:
+      RUSTUP_TOOLCHAIN: "1.83.0"
     strategy:
       fail-fast: false
       matrix:
@@ -463,6 +467,12 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+      - name: Set up Rust compatible with PyOxidizer
+        shell: bash
+        run: |
+          rustup toolchain install "$RUSTUP_TOOLCHAIN" --profile minimal --no-self-update
+          rustc --version
+          cargo --version
       - name: Cache PyOxidizer build dependencies
         uses: actions/cache@v4
         with:
@@ -472,9 +482,9 @@ jobs:
             ~/.cache/pyoxidizer
             ~/Library/Caches/pyoxidizer
             ~/AppData/Local/pyoxidizer
-          key: pyoxidizer-${{ runner.os }}-${{ runner.arch }}-0.24.0-${{ hashFiles('pyoxidizer.bzl', 'pyproject.toml') }}
+          key: pyoxidizer-${{ runner.os }}-${{ runner.arch }}-0.24.0-rust-1.83.0-${{ hashFiles('pyoxidizer.bzl', 'pyproject.toml') }}
           restore-keys: |
-            pyoxidizer-${{ runner.os }}-${{ runner.arch }}-0.24.0-
+            pyoxidizer-${{ runner.os }}-${{ runner.arch }}-0.24.0-rust-1.83.0-
       - name: Install PyOxidizer
         shell: bash
         run: |
