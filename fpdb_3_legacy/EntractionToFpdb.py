@@ -163,10 +163,14 @@ class Entraction(HandHistoryConverter):
         r"^{PLYR}: brings[- ]in( low|) for {CUR}(?P<BRINGIN>[{NUM}]+)".format(**substitutions), re.MULTILINE
     )
     re_HeroCards = re.compile(r"^{PLYR} was dealt:\s+(?P<CARDS>.+)".format(**substitutions), re.MULTILINE)
+    # The amount is optional and so is the run of spaces before it: a fold or a
+    # check ends the line right after the verb ("akilim<spaces>Fold"). Requiring
+    # whitespace there (\s+?) matched neither, so every fold and check in the
+    # history was dropped and the hands were stored with no betting action at all.
     re_Action = re.compile(
         r"""
-                        ^{PLYR}\s+(?P<ATYPE>Fold|Check|Call|Bet|Raise|All\-In)\s+?
-                        (\((?P<BET>[{NUM}]+)\))?$""".format(**substitutions),
+                        ^{PLYR}\s+(?P<ATYPE>Fold|Check|Call|Bet|Raise|All\-In)\s*
+                        (\((?P<BET>[{NUM}]+)\))?\s*$""".format(**substitutions),
         re.MULTILINE | re.VERBOSE,
     )
     re_ShowdownAction = re.compile(r"^{PLYR}\sdidn\'t\sshow\shand\s\((?P<CARDS>.+)\)".format(**substitutions), re.MULTILINE)
