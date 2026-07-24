@@ -9,7 +9,7 @@ class FakeImporter:
     def __init__(self, hands):
         self._hands = hands
 
-    def getCachedHHC(self):
+    def getCachedHHC(self, path=None):
         return SimpleNamespace(getProcessedHands=lambda: self._hands)
 
 
