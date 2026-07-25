@@ -362,12 +362,30 @@ des lignes de JSON** :
   joueur anonymisé qui agit sans figurer dans le préambule des sièges, d'où un
   `FpdbHandPartialError` explicite plutôt qu'un siège inventé. Un fichier qui se met à
   produire — ou cesse de produire — des mains échoue désormais par son nom.
-- `POT_EQUATION_EXCEPTIONS` (17 fichiers) — l'équation `encaissé + rake == pot` est
-  vérifiée **main par main sur les 2 850 autres**. Les exceptions se répartissent en
-  mains cash-out (le joueur encaisse une assurance, pas une part du pot), ré-exports
-  tiers (HM1, « converted ») dont la ligne de résumé est déjà dégradée, et **cinq cas
-  inexpliqués** : deux fichiers BetOnline et trois fixtures PokerStars synthétiques.
-  Ces cinq-là sont de vrais suspects, à instruire séparément.
+- `POT_EQUATION_EXCEPTIONS` — l'équation `encaissé + rake == pot` est vérifiée **main
+  par main** sur tout le reste du corpus. Les exceptions sont les mains cash-out (le
+  joueur encaisse une assurance, pas une part du pot) et les ré-exports tiers
+  (HM1, « converted ») dont la ligne de résumé est déjà dégradée.
+
+  **Les cinq cas inexpliqués ont été instruits (2026-07-25)** — deux corrigés, un
+  reclassé, deux démontrés irréductibles :
+  - **`5card_draw.txt` et `7stud.txt` : fixtures mal écrites, ✅ corrigées.** Elles
+    inscrivaient le pot **net** dans le champ « Total pot ». Vérifié sur des mains
+    PokerStars authentiques : la room y met le pot **brut**, et `collecté + rake ==
+    Total pot` y tient exactement. Les deux fixtures sont désormais cohérentes avec
+    leurs propres actions (6,00 et 16,05).
+  - **`cashed_out.txt` : reclassé.** Ce n'était pas un cas inexpliqué mais un cash-out
+    ordinaire — 19,00 + 1,00 = 20,00 sur la ligne de collecte, le joueur encaissant
+    ensuite une assurance de 18,80.
+  - **Les deux BetOnline : pas corrigeables, et j'ai essayé.** BetOnline imprime
+    plusieurs lignes « Total pot » pour une même main ; le corpus en contient
+    **22 exemplaires**. Dans **20**, ce sont des doublons ou des totaux courants et la
+    **dernière** ligne est le pot ; dans **2**, ce sont de vrais pots annexes qu'il faut
+    **additionner**. Ni les valeurs ni le nombre de gagnants ne séparent les deux cas.
+    J'ai implémenté la somme : elle **doublait le pot des 20 autres**, détecté par le
+    harnais golden, et je l'ai annulée. Le convertisseur garde la dernière ligne —
+    juste 20 fois sur 22 — et ces deux mains restent déséquilibrées. La caractérisation
+    complète est dans le commentaire de `POT_EQUATION_EXCEPTIONS`.
 
 **Point 4 non réalisé, et le plan était mal fondé sur ce point.** Il visait
 `iPokerSummary`, `PokerTrackerSummary` et `WinningSummary` d'après leur couverture, sans
