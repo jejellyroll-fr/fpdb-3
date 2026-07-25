@@ -1,0 +1,37 @@
+{
+  "_comment": "Coverage floors enforced by tools/coverage_ratchet.py. Branch-aware percentages, as reported by coverage.py. Regenerate with python tools/coverage_ratchet.py --update coverage.json after a change that genuinely raises coverage.",
+  "total": 53.6,
+  "domains": {
+    "poker-domain": 74.7,
+    "database": 54.1,
+    "import": 53.2,
+    "parsers": 64.0,
+    "tourney-summaries": 53.3,
+    "hud": 65.3,
+    "live-capture": 66.5,
+    "gui": 32.1,
+    "maintenance-scripts": 17.8,
+    "platform-pkg": 17.1,
+    "other": 55.2
+  },
+  "modules": {
+    "fpdb_3_legacy/Configuration.py": 58.6,
+    "fpdb_3_legacy/Database.py": 42.0,
+    "fpdb_3_legacy/DerivedStats.py": 81.1,
+    "fpdb_3_legacy/Hand.py": 54.1,
+    "fpdb_3_legacy/Importer.py": 48.2,
+    "fpdb_3_legacy/database_auto_notes.py": 74.8,
+    "fpdb_3_legacy/database_caches.py": 12.9,
+    "fpdb_3_legacy/database_lambda_dict.py": 100.0,
+    "fpdb_3_legacy/database_tournaments.py": 57.7,
+    "fpdb_3_legacy/stats_context.py": 100.0,
+    "fpdb_3_legacy/stats_display.py": 57.6,
+    "fpdb_3_legacy/stats_financial.py": 100.0,
+    "fpdb_3_legacy/stats_formatting.py": 100.0,
+    "fpdb_3_legacy/stats_postflop.py": 99.7,
+    "fpdb_3_legacy/stats_preflop.py": 99.4,
+    "fpdb_3_legacy/stats_sizing.py": 100.0,
+    "fpdb_3_legacy/stats_table.py": 100.0,
+    "fpdb_3_legacy/stats_tournament.py": 96.2
+  }
+}

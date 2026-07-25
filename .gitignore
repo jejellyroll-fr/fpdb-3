@@ -46,6 +46,9 @@ htmlcov/
 .cache
 nosetests.xml
 coverage.xml
+# Generated report read by tools/coverage_ratchet.py; the tracked floors live
+# in coverage-baseline.json, which must stay versioned.
+coverage.json
 *.cover
 *.py.cover
 .hypothesis/
