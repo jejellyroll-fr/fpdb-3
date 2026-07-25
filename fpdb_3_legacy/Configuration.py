@@ -448,9 +448,7 @@ class Site:
         # elements. Backward compatible: no <hero_alias> => [screen_name].
         self.hero_aliases = []
         _seen_aliases = set()
-        for _alias in [self.screen_name] + [
-            n.getAttribute("name") for n in node.getElementsByTagName("hero_alias")
-        ]:
+        for _alias in [self.screen_name] + [n.getAttribute("name") for n in node.getElementsByTagName("hero_alias")]:
             if _alias and _alias not in _seen_aliases:
                 _seen_aliases.add(_alias)
                 self.hero_aliases.append(_alias)
@@ -657,9 +655,14 @@ class StatBlock:
         if not self.rows:
             self.rows = max((rc[0] for rc in all_rc), default=-1) + 1
         if not self.cols:
-            self.cols = max((rc[1] + t_colspan for rc, t_colspan in
-                             [(rc, 1) for rc in self.stats] + [(t["rowcol"], t["colspan"]) for t in self.texts]),
-                            default=0)
+            self.cols = max(
+                (
+                    rc[1] + t_colspan
+                    for rc, t_colspan in [(rc, 1) for rc in self.stats]
+                    + [(t["rowcol"], t["colspan"]) for t in self.texts]
+                ),
+                default=0,
+            )
         self.rows = max(self.rows, 1)
         self.cols = max(self.cols, 1)
 
@@ -1744,7 +1747,10 @@ class Config:
                 if example_cnode.localName == "FreePokerToolsConfig":
                     for example_node in example_cnode.childNodes:
                         # print "nodetype", example_node.nodeType, "name", example_node.localName, "found", len(doc.getElementsByTagName(example_node.localName))
-                        if example_node.nodeType == example_node.ELEMENT_NODE and doc.getElementsByTagName(example_node.localName) == []:
+                        if (
+                            example_node.nodeType == example_node.ELEMENT_NODE
+                            and doc.getElementsByTagName(example_node.localName) == []
+                        ):
                             new = doc.importNode(example_node, True)  # True means do deep copy
                             t_node = self.doc.createTextNode("    ")
                             cnode.appendChild(t_node)
@@ -1863,89 +1869,119 @@ class Config:
         return None
 
     def reload(self) -> bool | None:
-        """Reload configuration from file without creating a new object."""
+        """Reload configuration from file without creating a new object.
+
+        Everything is parsed into structures of its own first and only put on
+        the object once every section has been read. A section that will not
+        parse therefore leaves the configuration already in use untouched,
+        rather than emptying it and stopping partway through refilling it --
+        none of the callers check the return value, so what they carry on with
+        has to be whole either way.
+        """
         log.info(f"Reloading configuration from {self.file}")
 
         try:
             # Parse the XML file again
             doc = xml.dom.minidom.parse(self.file)
-            self.doc = doc
 
-            # Clear existing data structures
-            self.supported_sites = {}
-            self.supported_games = {}
-            self.supported_databases = {}
-            self.aux_windows = {}
-            self.layout_sets = {}
-            self.stat_sets = {}
-            self.hhcs = {}
-            self.popup_windows = {}
+            supported_sites = {}
+            supported_games = {}
+            supported_databases = {}
+            aux_windows = {}
+            layout_sets = {}
+            stat_sets = {}
+            hhcs = {}
+            popup_windows = {}
 
             # Re-parse all sections
-            # General section
+            # General section. It carries over what the previous load held,
+            # which is what reloading onto the live object used to do.
+            general = General()
+            general.update(self.general)
             if doc.getElementsByTagName("general") == []:
-                self.general.get_defaults()
+                general.get_defaults()
             for gen_node in doc.getElementsByTagName("general"):
-                self.general.add_elements(node=gen_node)
+                general.add_elements(node=gen_node)
 
             # Sites
             for site_node in doc.getElementsByTagName("site"):
                 site = Site(node=site_node)
-                self.supported_sites[site.site_name] = site
+                supported_sites[site.site_name] = site
 
             # Games
             for supported_game_node in doc.getElementsByTagName("game"):
                 supported_game = Supported_games(supported_game_node)
-                self.supported_games[supported_game.game_name] = supported_game
+                supported_games[supported_game.game_name] = supported_game
 
             # Databases
+            db_selected = self.db_selected
             for db_node in doc.getElementsByTagName("database"):
                 db = Database(node=db_node)
-                if self.db_selected is None or db.db_selected:
-                    self.db_selected = db.db_name
-                self.supported_databases[db.db_name] = db
+                if db_selected is None or db.db_selected:
+                    db_selected = db.db_name
+                supported_databases[db.db_name] = db
 
             # Aux windows
             for aw_node in doc.getElementsByTagName("aw"):
                 aw = Aux_window(node=aw_node)
-                self.aux_windows[aw.name] = aw
+                aux_windows[aw.name] = aw
 
             # Layout sets
             for ls_node in doc.getElementsByTagName("ls"):
                 ls = Layout_set(node=ls_node)
-                self.layout_sets[ls.name] = ls
+                layout_sets[ls.name] = ls
 
             # Stat sets
             for ss_node in doc.getElementsByTagName("ss"):
                 ss = Stat_sets(node=ss_node)
-                self.stat_sets[ss.name] = ss
+                stat_sets[ss.name] = ss
 
             # HHCs
             for hhc_node in doc.getElementsByTagName("hhc"):
                 hhc = HHC(node=hhc_node)
-                self.hhcs[hhc.site] = hhc
+                hhcs[hhc.site] = hhc
 
             # Popup windows
             for pu_node in doc.getElementsByTagName("pu"):
                 pu = Popup(node=pu_node)
-                self.popup_windows[pu.name] = pu
+                popup_windows[pu.name] = pu
 
-            # Import settings
+            # Import settings. These two are the only sections Config does not
+            # always carry -- it grows the attribute when the file has the
+            # section -- so a file without one leaves whatever is in use alone
+            # rather than replacing it with an empty stand-in.
+            imp: Import | None = None
             for imp_node in doc.getElementsByTagName("import"):
                 imp = Import(node=imp_node)
-                self.imp = imp
 
             # HUD UI settings - this is the important part for HUD preferences
+            ui: HudUI | None = None
             for hui_node in doc.getElementsByTagName("hud_ui"):
-                hui = HudUI(node=hui_node)
-                self.ui = hui
-
-            log.info("Configuration reloaded successfully")
-            return True
+                ui = HudUI(node=hui_node)
 
         except Exception as e:  # intentional broad catch: full XML config reload boundary, return False on any failure
             log.exception(f"Error reloading configuration: {e}")
             return False
+
+        # Every section parsed: swap the lot in.
+        self.doc = doc
+        self.general = general
+        self.supported_sites = supported_sites
+        self.supported_games = supported_games
+        self.supported_databases = supported_databases
+        self.db_selected = db_selected
+        self.aux_windows = aux_windows
+        self.layout_sets = layout_sets
+        self.stat_sets = stat_sets
+        self.hhcs = hhcs
+        self.popup_windows = popup_windows
+        if imp is not None:
+            self.imp = imp
+        if ui is not None:
+            self.ui = ui
+
+        log.info("Configuration reloaded successfully")
+        return True
 
     def save(self, file=None) -> None:
         if file is None:
@@ -2012,8 +2048,15 @@ class Config:
         site_node.setAttribute("enabled", enabled)
 
         values = {
-            "2": seat2_dict, "3": seat3_dict, "4": seat4_dict, "5": seat5_dict,
-            "6": seat6_dict, "7": seat7_dict, "8": seat8_dict, "9": seat9_dict, "10": seat10_dict,
+            "2": seat2_dict,
+            "3": seat3_dict,
+            "4": seat4_dict,
+            "5": seat5_dict,
+            "6": seat6_dict,
+            "7": seat7_dict,
+            "8": seat8_dict,
+            "9": seat9_dict,
+            "10": seat10_dict,
         }
         existing = {fav.getAttribute("max"): fav for fav in site_node.getElementsByTagName("fav")}
         for max_seats, value in values.items():
@@ -3187,9 +3230,7 @@ class Config:
             the directory does not exist.
         """
         prefix = "hhDirPath" if kind == "hh" else "tsDirPath"
-        json_path = Path(
-            f"~/Library/Application Support/Loading/storage/{prefix}_{acr_key}.json"
-        ).expanduser()
+        json_path = Path(f"~/Library/Application Support/Loading/storage/{prefix}_{acr_key}.json").expanduser()
         if not json_path.is_file():
             return None
         try:
