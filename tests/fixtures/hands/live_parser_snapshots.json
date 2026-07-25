@@ -747,6 +747,70 @@
     "hand_count": 1,
     "sha256": "634d37134312d42271dad8ae1e33054a9f16040276993b47b7c00bc49362fdd8"
   },
+  "regression/GGPoker/Flop/NL-ShortDeck-5max-USD-0.2-202103.txt": {
+    "hand_count": 4,
+    "sha256": "58a64a611e124360b14cdf01da7dfa214e217a49bac8c08310c25a8e5bb3f448"
+  },
+  "regression/GGPoker/Flop/NL-ShortDeck-5max-USD-100-202104.internal.txt": {
+    "hand_count": 1,
+    "sha256": "03354cebcd79853181f8b6e272ff17116fbc2e557802f7fd5a075d719f09a95b"
+  },
+  "regression/GGPoker/Flop/PLO-6max-USD-0.01-0.02-202104.STP.txt": {
+    "hand_count": 1,
+    "sha256": "b4ec9948c65e94af0da7a3ea080769d92030f0090ac656092b27138c3208c5ed"
+  },
+  "regression/GGPoker/Flop/PLO-6max-USD-0.5-1.00-202006.txt": {
+    "hand_count": 13,
+    "sha256": "da786ff423e1263ecf166d42c6c85d3da5d43bd52ed5f0e01c49774c0740e17b"
+  },
+  "regression/GGPoker/Flop/PLO-6max-USD-0.50-1.00-202004.txt": {
+    "hand_count": 41,
+    "sha256": "0ae681b0dccac3f31ca87542b96c7e9459df188cbf9578d3090b06122db6171a"
+  },
+  "regression/GGPoker/Flop/PLO-6max-USD-2-5-202101.RIT.txt": {
+    "hand_count": 1,
+    "sha256": "d30e4ef4ff3343e12fc841fb98762dc7721fb8ebe7c80f9e4f8668afa7d79153"
+  },
+  "regression/GGPoker/Flop/PLO-6max-USD-2-5-202106.run.it.thrice.txt": {
+    "hand_count": 1,
+    "sha256": "566d6f7aec4388c3226def4dcac9d6a100b9763d07cc78703c07ec1e4db52133"
+  },
+  "regression/GGPoker/Flop/PLO-6max-USD-5-10-202101.missed.txt": {
+    "hand_count": 1,
+    "sha256": "068dca2f413fa524c6ddc0f1d783dabf50076bc68fb647ed34e657debfbba5ea"
+  },
+  "regression/GGPoker/Flop/PLO5-6max-USD-0.1-0.25-202104.over.straddle.txt": {
+    "hand_count": 1,
+    "sha256": "9b91d9f03e961bff0ba7958380ad9aa5b56ad4ea037072ee59393bddc2a23758"
+  },
+  "regression/GGPoker/Flop/PLO5-6max-USD-0.1-0.25-202104.straddle.walk.txt": {
+    "hand_count": 0,
+    "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+  },
+  "regression/GGPoker/Flop/PLO5-6max-USD-2-5-202104.Jackpot.txt": {
+    "hand_count": 1,
+    "sha256": "c94fd7d64c660559bc5b81ffc4680883f2d2d16a68411df8b16297ffc4dffd9a"
+  },
+  "regression/GGPoker/Flop/PLO5-6max-USD-2-5-202104.missed.txt": {
+    "hand_count": 1,
+    "sha256": "c6404c859ad96e82458e5588c06f1d3f3a0d07c130e03a70b0607682792dbbfd"
+  },
+  "regression/GGPoker/Flop/PLO5-6max-USD-25-50-202104.RIT.txt": {
+    "hand_count": 1,
+    "sha256": "3d24d2a060a29f31c3e0df0b5ec824ba3f3790be3fe44bc170fe00a8f1ac05fd"
+  },
+  "regression/GGPoker/Flop/PLO5-6max-USD-25-50-202104.straddle.txt": {
+    "hand_count": 1,
+    "sha256": "07b7da8e261666b2eac48a09e32a392e5d2a08b515c1deecec09d89a9ad74f1a"
+  },
+  "regression/GGPoker/Flop/PLO5-6max-USD-25-50-20210411.txt": {
+    "hand_count": 1,
+    "sha256": "9758d94e8e4a95349816e58a73cf7551b4ecf301dc056be9baeba0747311ed7c"
+  },
+  "regression/GGPoker/Flop/PLO5-6max-USD-5-10-202104.straddle.txt": {
+    "hand_count": 1,
+    "sha256": "bdb5794881d7d1ec262d29208e70354dc08e257258fd0d28102caf70bb7627bc"
+  },
   "regression/KingsClub/Draw/2-7 Drawmaha-FL-USD-60-120-202108.showdown.txt": {
     "hand_count": 1,
     "sha256": "14226feaaac09f73e5b51e4953cb7f9919840d6c2f257c2c12e7a84523d4eca6"
@@ -1954,6 +2018,10 @@
   "regression/Stars/Stud/Razz-USD-0.04-0.08-200911.txt": {
     "hand_count": 9,
     "sha256": "8cea5a8bdf7e5e43abb5587a2d4dd9cf3370d5b6568fbad6bfa8ac29781aad9a"
+  },
+  "regression/UltimateBet/Flop/IHH20101106 Baseline Rd - Hold'em No Limit $0.02(Real Money) Table 25932774.txt": {
+    "hand_count": 1,
+    "sha256": "fe688145689d791fd7c6807eab3651c9ad4d33327fdbe5815b96b47b052dc6ef"
   },
   "regression/Unibet/Flop/NLHE-EUR-0.05-0.10-202104.Banzi.txt": {
     "hand_count": 1,
