@@ -244,8 +244,11 @@ class iPoker(IPokerStreetsActionsMixin, IPokerHandInfoMixin, IPokerTournamentRes
         ),
         re.VERBOSE,
     )
+    # Anchored on gamecode: a bare code="..." also matches the enclosing
+    # <session sessioncode="..."> tag, so the first hand of every file took the
+    # session code as its hand id instead of its own gamecode.
     re_hand_info = re.compile(
-        r'code="(?P<HID>[0-9]+)".*?<general>(.*?<startdate>(?P<DATETIME>[\.a-zA-Z-/: 0-9]+)</startdate>)?',
+        r'gamecode="(?P<HID>[0-9]+)".*?<general>(.*?<startdate>(?P<DATETIME>[\.a-zA-Z-/: 0-9]+)</startdate>)?',
         re.MULTILINE | re.DOTALL,
     )
     re_player_info = re.compile(

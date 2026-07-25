@@ -81,3 +81,29 @@ def test_pmu_poker_tablesize() -> None:
     parser.readHandInfo(hand)
     # The maxseats should be correctly parsed as 6
     assert hand.maxseats == 6
+
+
+def test_first_hand_of_a_session_takes_its_own_gamecode_as_hand_id() -> None:
+    """The bare ``code="..."`` pattern also matched ``<session sessioncode>``.
+
+    Every iPoker file opens with a session tag, so the first hand of each file
+    was stored under the session code instead of its own gamecode -- all nine
+    corpus files were affected.
+    """
+    import re
+    from pathlib import Path
+
+    from fpdb_3_legacy.iPoker.base import iPoker
+
+    path = Path(__file__).resolve().parents[1] / (
+        "regression-test-files/cash/iPoker/Flop/LHE-10max-USD-0.10-0.20-201107.player.sitting.out.xml"
+    )
+    text = path.read_text(encoding="utf-8", errors="ignore")
+    first_fragment = iPoker.re_split_hands.split(text)[0]
+
+    session_code = re.search(r'sessioncode="(\d+)"', first_fragment).group(1)
+    game_code = re.search(r'gamecode="(\d+)"', first_fragment).group(1)
+    parsed = iPoker.re_hand_info.search(first_fragment).group("HID")
+
+    assert parsed == game_code
+    assert parsed != session_code
