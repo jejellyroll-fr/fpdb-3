@@ -227,7 +227,7 @@ where = ["."]
 include = ["fpdb_3_legacy", "fpdb_3_legacy.*", "fpdb", "fpdb.*"]
 
 [tool.coverage.run]
-source = ["fpdb_3_legacy"]
+source = ["fpdb_3_legacy", "fpdb"]
 branch = true
 omit = [
     "*/test/*",

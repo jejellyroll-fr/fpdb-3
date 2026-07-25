@@ -31,6 +31,7 @@ jobs:
           fpdb
           tools/prepare_briefcase_resources.py
           tools/todo_inventory.py
+          tools/coverage_ratchet.py
           fpdb_3_legacy/__init__.py
           fpdb_3_legacy/equity.py
           fpdb_3_legacy/fpdb_api.py
@@ -325,6 +326,50 @@ jobs:
           QT_QPA_PLATFORM: offscreen
         run: |
           python -m pytest -m qt --tb=short
+
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - uses: astral-sh/setup-uv@v3
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libegl1 libgl1 libglib2.0-0 libdbus-1-3 libxkbcommon0
+      - name: Install dependencies
+        run: |
+          uv pip install --system -e ".[test]"
+      # Both selections feed one combined report: the Qt suite covers the views,
+      # and the floors of coverage-baseline.json are seeded from the union.
+      - name: Measure coverage (no GUI)
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: |
+          python -m pytest -p no:pytest-qt -m "not qt and not perf" --cov --cov-report= --tb=short
+      - name: Measure coverage (Qt offscreen)
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: |
+          python -m pytest -m qt --cov --cov-append --cov-report= --tb=short
+      - name: Render coverage reports
+        run: |
+          python -m coverage json -o coverage.json
+          python -m coverage html -d htmlcov
+          python -m coverage report --skip-covered
+      - name: Enforce coverage ratchet
+        run: python tools/coverage_ratchet.py --check coverage.json
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: |
+            coverage.json
+            htmlcov
 
   database-integration:
     runs-on: ubuntu-latest
