@@ -486,28 +486,54 @@ eux. Un test vérifie qu'ils restent supprimés, pour que leur retour soit déli
 Le domaine `maintenance-scripts` passe de 29,8 % à 37,7 % : retirer du code mort à 0 %
 compte autant qu'en tester.
 
-### Étape 5 — Reprendre le découpage de `Database.py` (4/N → N/N) · ~3-4 j
+### Étape 5 — Découpage de `Database.py` — 🟡 palier 4/N fait (2026-07-25)
 
-À faire **après** l'étape 3, pour la même raison que les paliers précédents ont réussi :
-déplacer du code non testé est un pari.
+**4/N — DDL & données de référence : `fpdb_3_legacy/database_schema.py`.**
+`Database.py` **4 688 → 3 030 lignes** (−35 %), **116 → 100 méthodes**. Depuis le début
+du découpage : 6 621 → 3 030, soit **−54 %**.
 
-Ordre proposé, du moins couplé au plus couplé :
+Déplacé : les 16 méthodes du domaine, qui formaient un bloc contigu (L2545-3352) —
+`create_tables`, `drop_tables`, `create/dropAllIndexes`, `create/dropAllForeignKeys`,
+`drop_referential_integrity`, `rebuild_indexes`, `recreate_tables`,
+`ensure_feature_tables`, les trois `ensure_*_columns` et leurs deux aides, et
+`fillDefaultData`. Avec elles, les données qu'elles appliquent : les catalogues
+par-backend `INDEXES` (91 l.) et `FOREIGN_KEYS` (429 l.), `DB_VERSION` et
+`HANDS_PLAYERS_KEYS` (326 l.). `Database` réexporte ces deux derniers, quatre modules
+de test les important depuis lui.
 
-1. **4/N — DDL & données de référence** (`fillDefaultData`, `create_tables`,
-   `create/dropAllForeignKeys`, `create/dropAllIndexes`, `ensure_feature_tables`) → ~750 lignes.
-   Domaine autonome, s'appuie sur les catalogues `sql_schema_*` déjà extraits.
-2. **5/N — import en masse** (`prepareBulkImport`, `afterBulkImport`, `storeHand`,
-   `storeHandsPlayers`, `storeHandsActions`, `resetBulkCache`) → ~400 lignes.
-3. **6/N — lecture HUD** (`get_stats_from_hand*`, `init_hud_stat_vars`) → ~280 lignes.
-4. **7/N — connexion** (`connect`, `do_connect`, `check_version`) → ~270 lignes.
+Méthode tenue : **16/16 méthodes identiques à l'AST près** face à `HEAD`, catalogues
+identiques en valeur, 7 méthodes et 8 attributs empruntés à l'hôte déclarés
+explicitement dans le mixin.
 
-Méthode inchangée, elle a fait ses preuves : déplacement **au mot près** vérifié par
-comparaison d'AST, emprunts à l'hôte déclarés explicitement dans le mixin, annotations
-reflétant ce que l'hôte déclare réellement.
+**Dette de complexité relocalisée sans varier : 26 = 22 + 4.** Le nouveau module
+n'enfreint que `C901` et `PLR0915`, il est donc gardé contre `PLR0912` et `UP031` dès sa
+naissance — mais **l'objectif que je m'étais fixé n'est pas atteint** : `Database.py`
+enfreint toujours ses quatre règles et ne sort d'aucune. Sortir une entrée du cliquet
+demande de découper les fonctions elles-mêmes, pas de déplacer des blocs.
 
-**Objectif** : `Database.py` sous 2 500 lignes, et surtout **sortir des entrées du
-cliquet de complexité** au lieu de les relocaliser — ce que les paliers 1 à 3 n'ont
-pas fait.
+Deux enseignements de méthode :
+
+- **L'analyse des emprunts doit couvrir les noms de module, pas seulement `self.X`.**
+  N'avoir listé que les attributs d'instance a laissé six noms indéfinis
+  (`sys`, `Card`, `CACHE_KEYS`, `HUDCACHE_EXTRA_KEYS`, `DB_VERSION`,
+  `HANDS_PLAYERS_KEYS`), dont deux créaient un cycle d'import qu'il a fallu trancher en
+  déplaçant les constantes de schéma avec le schéma.
+- **Une extraction fait légitimement baisser le plancher de couverture du module
+  source** : le DDL était bien couvert (`fresh_db` l'exécute à chaque test de base), donc
+  le reste de `Database.py` est proportionnellement moins couvert — 43,1 % → 37,2 %.
+  Vérifié avant de re-semer : 1 149 → 1 168 unités couvertes, le combiné passe de 43,1 %
+  à 43,5 %. Rien n'a été perdu, seule la répartition a changé. Le cas est désormais
+  documenté dans le cliquet.
+
+**Reste à faire** — même méthode, ordre inchangé :
+
+1. **5/N — import en masse** (`prepareBulkImport`, `afterBulkImport`, `storeHand`,
+   `storeHandsPlayers`, `storeHandsActions`, `resetBulkCache`) → ~400 lignes. Lit
+   `indexes`/`foreignKeys` via le MRO depuis `database_schema`.
+2. **6/N — lecture HUD** (`get_stats_from_hand*`, `init_hud_stat_vars`) → ~280 lignes.
+3. **7/N — connexion** (`connect`, `do_connect`, `check_version`) → ~270 lignes.
+4. **Puis seulement** : découper les fonctions trop complexes pour sortir réellement
+   `Database.py` du cliquet.
 
 ### Étape 6 — Fermer les bugs connus · ~0,5 j
 
@@ -552,14 +578,14 @@ pas fait.
 | 3 | ✅ Tests des caches statistiques | fait | +59 pts sur le module | **Chiffres HUD faux** |
 | 3bis | ✅ Corriger les écrivains de cache | fait | — | **4 caches impeuplables** |
 | 4 | ✅ Scripts d'exploitation | fait | domaine +12 pts | **Corruption de base** |
-| 5 | `Database.py` 4/N → N/N | 3-4 j | — | Dette de complexité |
+| 5 | 🟡 `Database.py` 4/N fait, 5-7/N restants | ~2 j | — | Dette de complexité |
 | 6 | Bugs connus + clôture des plans | 0,5 j | — | Hand id iPoker faux |
 | 7 | i18n des modules récents | 1,5 j | — | UI bilingue |
 | 8 | Continu (`ModernHudPreferences`, cliquets) | — | — | — |
 
 **Chemin critique recommandé : 1 → 3 → 2 → 4 → 5**, l'étape 1 protégeant tout le reste
 et l'étape 3 précédant l'étape 5 parce qu'on ne déplace pas du code non testé.
-Les étapes 1, 2, 3, 3bis et 4 sont faites. Restent 2bis et 5, indépendantes entre elles.
+Les étapes 1, 2, 3, 3bis et 4 sont faites, l'étape 5 est à son palier 4/N. Restent 2bis et les paliers 5-7/N.
 
 ---
 
