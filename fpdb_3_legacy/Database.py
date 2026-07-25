@@ -20,14 +20,11 @@ Create and manage the database objects.
 """
 
 import contextlib
-import csv
 import math
 
 #    Standard Library modules
 import os
-import random
 import re
-import string
 import sys
 import traceback
 from datetime import datetime, timedelta
@@ -40,6 +37,7 @@ import pytz
 
 from fpdb_3_legacy import SQL, Card, Configuration
 from fpdb_3_legacy.database_auto_notes import DatabaseAutoNotesMixin
+from fpdb_3_legacy.database_bulk_import import DatabaseBulkImportMixin
 
 # CACHE_KEYS and HUDCACHE_EXTRA_KEYS moved to database_caches with the code that
 # writes those columns; re-exported here because tests and callers still import
@@ -47,12 +45,13 @@ from fpdb_3_legacy.database_auto_notes import DatabaseAutoNotesMixin
 from fpdb_3_legacy.database_caches import CACHE_KEYS as CACHE_KEYS
 from fpdb_3_legacy.database_caches import HUDCACHE_EXTRA_KEYS as HUDCACHE_EXTRA_KEYS
 from fpdb_3_legacy.database_caches import DatabaseCachesMixin
+from fpdb_3_legacy.database_hud_stats import DatabaseHudStatsMixin
 from fpdb_3_legacy.database_lambda_dict import LambdaDict
-from fpdb_3_legacy.database_schema import (
-    DB_VERSION,
-    HANDS_PLAYERS_KEYS,
-    DatabaseSchemaMixin,
-)
+from fpdb_3_legacy.database_schema import DB_VERSION, DatabaseSchemaMixin
+
+# HANDS_PLAYERS_KEYS moved to database_schema with the DDL that checks those
+# columns; re-exported because four test modules import it from Database.
+from fpdb_3_legacy.database_schema import HANDS_PLAYERS_KEYS as HANDS_PLAYERS_KEYS
 from fpdb_3_legacy.database_tournaments import DatabaseTournamentsMixin
 from fpdb_3_legacy.Exceptions import (
     FpdbError,
@@ -75,10 +74,6 @@ from fpdb_3_legacy.loggingFpdb import get_logger
 
 
 re_char = re.compile("[^a-zA-Z]")
-re_insert = re.compile(
-    r"insert\sinto\s(?P<TABLENAME>[A-Za-z]+)\s(?P<COLUMNS>\(.+?\))\s+values",
-    re.DOTALL,
-)
 
 #    FreePokerTools modules
 
@@ -192,7 +187,14 @@ class DatabaseTransaction:
                     raise e
 
 
-class Database(DatabaseAutoNotesMixin, DatabaseCachesMixin, DatabaseSchemaMixin, DatabaseTournamentsMixin):
+class Database(
+    DatabaseAutoNotesMixin,
+    DatabaseBulkImportMixin,
+    DatabaseCachesMixin,
+    DatabaseHudStatsMixin,
+    DatabaseSchemaMixin,
+    DatabaseTournamentsMixin,
+):
     MYSQL_INNODB = 2
     PGSQL = 3
     SQLITE = 4
@@ -919,75 +921,7 @@ class Database(DatabaseAutoNotesMixin, DatabaseCachesMixin, DatabaseSchemaMixin,
             self._rollback_after_failed_read()
         return positions
 
-    def get_seat_players(self, hand_id: str) -> dict[int, dict[str, object]]:
-        """Return seatNo -> {player_id, screen_name} dict for a hand.
 
-        player_id is a native int to match the keys of the stat_dict built by
-        get_stats_from_hand; get_id_from_seat() feeds it straight into
-        stat_dict[player_id] lookups.
-        """
-        players = {}
-        try:
-            ph = self.sql.query.get("placeholder", "%s")
-            q = (
-                "SELECT hp.seatNo, hp.playerId, p.name "
-                "FROM HandsPlayers hp "
-                "INNER JOIN Players p ON hp.playerId = p.id "
-                "WHERE hp.handId = %s"
-            ).replace("%s", ph)
-            c = self.connection.cursor()
-            c.execute(q, (hand_id,))
-            for row in c.fetchall():
-                players[int(row[0])] = {"player_id": int(row[1]), "screen_name": row[2]}
-        except Exception:
-            log.exception("get_seat_players failed for hand %s", hand_id)
-            self._rollback_after_failed_read()
-        return players
-
-    def get_table_min_stack_bb(self, hand_id: str) -> float | None:
-        """Smallest end-of-hand stack at the table, in big blinds (PT4 live stat).
-
-        From the given (most recently imported) hand, take each seated player's
-        end-of-hand stack (startCash - committed + winnings), drop eliminated
-        players (stack <= 0), and divide the minimum by the big blind. Returns
-        None when it cannot be computed.
-
-        Note: the big blind comes from Gametypes, so for multi-level tournaments
-        this is the gametype's blind, not necessarily the current level's.
-        """
-        try:
-            ph = self.sql.query.get("placeholder", "%s")
-            c = self.get_cursor()
-            c.execute(
-                (
-                    "SELECT gt.bigBlind FROM Hands h INNER JOIN Gametypes gt ON h.gametypeId = gt.id WHERE h.id = %s"
-                ).replace("%s", ph),
-                (hand_id,),
-            )
-            row = c.fetchone()
-            if not row or not row[0]:
-                return None
-            big_blind = float(row[0])
-            if big_blind <= 0:
-                return None
-            c.execute(
-                (
-                    "SELECT startCash, committed, winnings FROM HandsPlayers WHERE handId = %s AND sitout = FALSE"
-                ).replace("%s", ph),
-                (hand_id,),
-            )
-            stacks = []
-            for start_cash, committed, winnings in c.fetchall():
-                end_cash = float(start_cash) - float(committed) + float(winnings)
-                if end_cash > 0:
-                    stacks.append(end_cash)
-            if not stacks:
-                return None
-            return min(stacks) / big_blind
-        except Exception:
-            log.exception("get_table_min_stack_bb failed for hand %s", hand_id)
-            self._rollback_after_failed_read()
-            return None
 
     def get_common_cards(self, hand):
         """Get and return the community cards for the specified hand."""
@@ -1020,53 +954,7 @@ class Database(DatabaseAutoNotesMixin, DatabaseCachesMixin, DatabaseSchemaMixin,
     def set_printdata(self, val) -> None:
         self.printdata = val
 
-    def _inject_hud_chipev_columns(self, sql_text):
-        """Replace the <chipev_columns> placeholder in the HUD aggregation query.
 
-        Substitutes bucket-encoded ChipEV-by-position SUM(CASE...) columns from
-        the declarative stat registry so descriptor stats become stat_dict keys.
-        The compiled clause is cached (the HUD calls this once per hand) and the
-        substitution is best-effort: on any error the placeholder is removed and
-        the base query runs unchanged.
-        """
-        if "<chipev_columns>" not in sql_text:
-            return sql_text
-        if not hasattr(self, "_hud_chipev_clause"):
-            try:
-                from fpdb_3_legacy.stat_adapters import HudAdapter
-                from fpdb_3_legacy.stat_registry import get_registry
-
-                descriptors = [d for d in get_registry().series_for_scope("tour") if d.dimension]
-                self._hud_chipev_clause = HudAdapter().select_clause(descriptors)
-            except Exception:
-                log.exception("failed to build HUD ChipEV columns; disabling")
-                self._hud_chipev_clause = ""
-        return sql_text.replace("<chipev_columns>", self._hud_chipev_clause)
-
-    def init_hud_stat_vars(self, hud_days, h_hud_days) -> None:
-        """Initialise variables used by Hud to fetch stats:
-        self.hand_1day_ago     handId of latest hand played more than a day ago
-        self.date_ndays_ago    date n days ago
-        self.h_date_ndays_ago  date n days ago for hero (different n).
-        """
-        self.hand_1day_ago = 1
-        c = self.get_cursor()
-        c.execute(self.sql.query["get_hand_1day_ago"])
-        row = c.fetchone()
-        if row and row[0]:
-            self.hand_1day_ago = int(row[0])
-
-        tz = datetime.utcnow() - datetime.today()
-        tz_offset = (tz.seconds) // (3600)
-        tz_day_start_offset = self.day_start + tz_offset
-
-        d = timedelta(days=hud_days, hours=tz_day_start_offset)
-        now = datetime.utcnow() - d
-        self.date_ndays_ago = "d%02d%02d%02d" % (now.year - 2000, now.month, now.day)
-
-        d = timedelta(days=h_hud_days, hours=tz_day_start_offset)
-        now = datetime.utcnow() - d
-        self.h_date_ndays_ago = "d%02d%02d%02d" % (now.year - 2000, now.month, now.day)
 
     # is get_stats_from_hand slow?
     # Gimick - yes  - reason being that the gametypeid join on hands
@@ -1074,234 +962,8 @@ class Database(DatabaseAutoNotesMixin, DatabaseCachesMixin, DatabaseSchemaMixin,
     # method below changed to lookup hand.gametypeid and pass that as
     # a constant to the underlying query.
 
-    def get_stats_from_hand(
-        self,
-        hand,
-        game_type=None,  # "ring" or "tour"; currently inferred from hand metadata
-        hud_params=None,
-        hero_id=-1,
-        num_seats=6,
-        **kwargs,
-    ):
-        if game_type is None and "type" in kwargs:
-            game_type = kwargs.pop("type")
-        if kwargs:
-            log.warning("Ignoring unknown get_stats_from_hand arguments: %s", ", ".join(sorted(kwargs)))
-
-        if hud_params is None:
-            hud_params = {
-                "stat_range": "A",
-                "agg_bb_mult": 1000,
-                "seats_style": "A",
-                "seats_cust_nums_low": 1,
-                "seats_cust_nums_high": 10,
-                "h_stat_range": "S",
-                "h_agg_bb_mult": 1000,
-                "h_seats_style": "A",
-                "h_seats_cust_nums_low": 1,
-                "h_seats_cust_nums_high": 10,
-            }
-        stat_range = hud_params["stat_range"]
-        agg_bb_mult = hud_params["agg_bb_mult"]
-        seats_style = hud_params["seats_style"]
-        seats_cust_nums_low = hud_params["seats_cust_nums_low"]
-        seats_cust_nums_high = hud_params["seats_cust_nums_high"]
-        h_stat_range = hud_params["h_stat_range"]
-        h_agg_bb_mult = hud_params["h_agg_bb_mult"]
-        h_seats_style = hud_params["h_seats_style"]
-        h_seats_cust_nums_low = hud_params["h_seats_cust_nums_low"]
-        h_seats_cust_nums_high = hud_params["h_seats_cust_nums_high"]
-
-        stat_dict: dict[Any, Any] = {}
-
-        if seats_style == "A":
-            seats_min, seats_max = 0, 10
-        elif seats_style == "C":
-            seats_min, seats_max = seats_cust_nums_low, seats_cust_nums_high
-        elif seats_style == "E":
-            seats_min, seats_max = num_seats, num_seats
-        else:
-            seats_min, seats_max = 0, 10
-            log.warning(f"bad seats_style value: {seats_style}")
-
-        if h_seats_style == "A":
-            h_seats_min, h_seats_max = 0, 10
-        elif h_seats_style == "C":
-            h_seats_min, h_seats_max = h_seats_cust_nums_low, h_seats_cust_nums_high
-        elif h_seats_style == "E":
-            h_seats_min, h_seats_max = num_seats, num_seats
-        else:
-            h_seats_min, h_seats_max = 0, 10
-            log.warning(f"bad h_seats_style value: {h_seats_style}")
-
-        if stat_range == "S" or h_stat_range == "S":
-            self.get_stats_from_hand_session(
-                hand,
-                stat_dict,
-                hero_id,
-                stat_range,
-                seats_min,
-                seats_max,
-                h_stat_range,
-                h_seats_min,
-                h_seats_max,
-            )
-
-            if stat_range == "S" and h_stat_range == "S":
-                return stat_dict
-
-        if stat_range == "T":
-            stylekey = self.date_ndays_ago
-        elif stat_range == "A":
-            stylekey = "0000000"  # all stylekey values should be higher than this
-        elif stat_range == "S":
-            stylekey = "zzzzzzz"  # all stylekey values should be lower than this
-        else:
-            stylekey = "0000000"
-            log.info(f"stat_range: {stat_range}")
-
-        if h_stat_range == "T":
-            h_stylekey = self.h_date_ndays_ago
-        elif h_stat_range == "A":
-            h_stylekey = "0000000"  # all stylekey values should be higher than this
-        elif h_stat_range == "S":
-            h_stylekey = "zzzzzzz"  # all stylekey values should be lower than this
-        else:
-            h_stylekey = "00000000"
-            log.info(f"h_stat_range: {h_stat_range}")
-
-        # lookup gametypeId from hand
-        handinfo = self.get_gameinfo_from_hid(hand)
-        if handinfo is None:
-            log.warning(f"No game info found for hand ID {hand}")
-            return stat_dict  # Return an empty stat_dict if no game info is found
-
-        gametypeId = handinfo["gametypeId"]
-
-        query = "get_stats_from_hand_aggregated"
-        subs = (
-            hand,
-            hero_id,
-            stylekey,
-            agg_bb_mult,
-            agg_bb_mult,
-            gametypeId,
-            seats_min,
-            seats_max,  # hero params
-            hero_id,
-            h_stylekey,
-            h_agg_bb_mult,
-            h_agg_bb_mult,
-            gametypeId,
-            h_seats_min,
-            h_seats_max,
-        )  # villain params
-
-        stime = time()
-        c = self.connection.cursor()
-
-        # Inject declarative ChipEV-by-position columns (stat_registry.py) into
-        # the HUD aggregation. These are bucket-encoded SUM(CASE...) columns that
-        # become stat_dict keys, so descriptor stats render live in the HUD.
-        sql_text = self._inject_hud_chipev_columns(self.sql.query[query])
-
-        # Now get the stats
-        c.execute(sql_text, subs)
-        ptime = time() - stime
-        log.info(
-            f"HudCache query get_stats_from_hand_aggregated took {ptime:.3f} seconds",
-        )
-        colnames = [desc[0] for desc in c.description]
-        for row in c.fetchall():
-            # Keep player ids as native DB integers: do_stat() coerces the player
-            # to int and every stat function indexes stat_dict[int]. Coercing keys
-            # to str here silently makes all stat lookups miss. String ids only
-            # appear at the JSON persistence boundary (see merge_stats).
-            playerid = row[0]
-            is_hero = False
-            if hero_id is not None:
-                try:
-                    is_hero = int(playerid) == int(hero_id)
-                except (ValueError, TypeError):
-                    is_hero = str(playerid) == str(hero_id)
-            if (is_hero and h_stat_range != "S") or (not is_hero and stat_range != "S"):
-                t_dict = {}
-                for name, val in zip(colnames, row, strict=False):
-                    t_dict[name.lower()] = val
-                stat_dict[t_dict["player_id"]] = t_dict
-
-        return stat_dict
 
     # uses query on handsplayers instead of hudcache to get stats on just this session
-    def get_stats_from_hand_session(
-        self,
-        hand,
-        stat_dict,
-        hero_id,
-        stat_range,
-        seats_min,
-        seats_max,
-        h_stat_range,
-        h_seats_min,
-        h_seats_max,
-    ) -> None:
-        """Get stats for just this session (currently defined as any play in the last 24 hours - to
-        be improved at some point ...)
-        h_stat_range and stat_range params indicate whether to get stats for hero and/or others
-        - only fetch heroes stats if h_stat_range == 'S',
-        and only fetch others stats if stat_range == 'S'
-        seats_min/max params give seats limits, only include stats if between these values.
-        """
-        query = self.sql.query["get_stats_from_hand_session"]
-        query = query.replace("<signed>", "signed ") if self.db_server == "mysql" else query.replace("<signed>", "")
-
-        subs = (
-            self.hand_1day_ago,
-            hand,
-            hero_id,
-            seats_min,
-            seats_max,
-            hero_id,
-            h_seats_min,
-            h_seats_max,
-        )
-        c = self.get_cursor()
-
-        # now get the stats
-        # print "sess_stats: subs =", subs, "subs[0] =", subs[0]
-        c.execute(query, subs)
-        colnames = [desc[0] for desc in c.description]
-        row = c.fetchone()
-        if colnames[0].lower() == "player_id":
-            # Loop through stats adding them to appropriate stat_dict:
-            while row:
-                # Native int keys, matching do_stat()/stat functions. See the
-                # aggregated loop above for why str coercion breaks stat lookups.
-                playerid = row[0]
-                is_hero = False
-                if hero_id is not None:
-                    try:
-                        is_hero = int(playerid) == int(hero_id)
-                    except (ValueError, TypeError):
-                        is_hero = str(playerid) == str(hero_id)
-                if (is_hero and h_stat_range == "S") or (not is_hero and stat_range == "S"):
-                    for name, val in zip(colnames, row, strict=False):
-                        if playerid not in stat_dict:
-                            stat_dict[playerid] = {}
-                            stat_dict[playerid][name.lower()] = val
-                        elif name.lower() not in stat_dict[playerid]:
-                            stat_dict[playerid][name.lower()] = val
-                        elif name.lower() not in (
-                            "hand_id",
-                            "player_id",
-                            "seat",
-                            "screen_name",
-                            "seats",
-                        ):
-                            stat_dict[playerid][name.lower()] += val
-                row = c.fetchone()
-        else:
-            log.error(f"query {query} result does not have player_id as first column")
 
         # print "session stat_dict =", stat_dict
         # return stat_dict
@@ -1436,261 +1098,7 @@ class Database(DatabaseAutoNotesMixin, DatabaseCachesMixin, DatabaseSchemaMixin,
             raise
         return ret
 
-    def prepareBulkImport(self) -> int | None:
-        """Drop some indexes/foreign keys to prepare for bulk import.
-        Currently keeping the standalone indexes as needed to import quickly.
-        """
-        stime = time()
-        c = self.get_cursor()
-        # sc: don't think autocommit=0 is needed, should already be in that mode
-        if self.backend == self.MYSQL_INNODB:
-            c.execute("SET foreign_key_checks=0")
-            c.execute("SET autocommit=0")
-            return None
-        if self.backend == self.PGSQL:
-            self._pg_set_isolation(
-                0,
-            )  # allow table/index operations to work
-        for fk in self.foreignKeys[self.backend]:
-            if fk["drop"] == 1:
-                if self.backend == self.MYSQL_INNODB:
-                    c.execute(
-                        "SELECT constraint_name "
-                        "FROM information_schema.KEY_COLUMN_USAGE "
-                        # "WHERE REFERENCED_TABLE_SCHEMA = 'fpdb'
-                        "WHERE 1=1 "
-                        "AND table_name = %s AND column_name = %s "
-                        "AND referenced_table_name = %s "
-                        "AND referenced_column_name = %s ",
-                        (fk["fktab"], fk["fkcol"], fk["rtab"], fk["rcol"]),
-                    )
-                    cons = c.fetchone()
-                    # print "preparebulk find fk: cons=", cons
-                    if cons:
-                        log.debug(
-                            f"dropping mysql fk {cons[0]} {fk['fktab']} {fk['fkcol']}",
-                        )
-                        try:
-                            c.execute(
-                                "alter table " + fk["fktab"] + " drop foreign key " + cons[0],
-                            )
-                        except (
-                            Exception
-                        ):  # intentional broad catch: cross-backend FK drop (MySQL) best-effort, continue
-                            log.exception(f"    drop failed: {sys.exc_info()}")
-                elif self.backend == self.PGSQL:
-                    #    DON'T FORGET TO RECREATE THEM!!
-                    log.debug(f"dropping pg fk {fk['fktab']} {fk['fkcol']}")
-                    try:
-                        # try to lock table to see if index drop will work:
-                        # hmmm, tested by commenting out rollback in grapher. lock seems to work but
-                        # then drop still hangs :-(  does work in some tests though??
-                        # will leave code here for now pending further tests/enhancement ...
-                        c.execute("BEGIN TRANSACTION")
-                        c.execute(
-                            "lock table {} in exclusive mode nowait".format(fk["fktab"]),
-                        )
-                        # print "after lock, status:", c.statusmessage
-                        # print "alter table %s drop constraint %s_%s_fkey" % (fk['fktab'], fk['fktab'], fk['fkcol'])
-                        try:
-                            c.execute(
-                                "alter table {} drop constraint {}_{}_fkey".format(
-                                    fk["fktab"], fk["fktab"], fk["fkcol"]
-                                ),
-                            )
-                            log.debug(f"dropping pg fk {fk['fktab']} {fk['fkcol']}")
-                        except (
-                            Exception
-                        ):  # intentional broad catch: cross-backend FK drop (PG) ignores 'does not exist'
-                            if "does not exist" not in str(sys.exc_info()[1]):
-                                log.exception(
-                                    f"warning: drop pg fk {fk['fktab']}_{fk['fkcol']}_fkey failed: {str(sys.exc_info()[1]).rstrip()}, continuing ...",
-                                )
-                        c.execute("END TRANSACTION")
-                    except (
-                        Exception
-                    ):  # intentional broad catch: cross-backend FK drop (PG lock/txn) best-effort, continue
-                        log.exception(
-                            rf"warning: constraint {fk['fktab']}_{fk['fkcol']}_fkey not dropped: {str(sys.exc_info()[1]).rstrip('')}, continuing ...",
-                        )
-                else:
-                    return -1
 
-        for idx in self.indexes[self.backend]:
-            if idx["drop"] == 1:
-                if self.backend == self.MYSQL_INNODB:
-                    log.info(f"dropping mysql index {idx['tab']} {idx['col']}")
-                    try:
-                        # apparently nowait is not implemented in mysql so this just hangs if there are locks
-                        # preventing the index drop :-(
-                        c.execute(
-                            "alter table %s drop index %s;",
-                            (idx["tab"], idx["col"]),
-                        )
-                    except Exception:  # intentional broad catch: cross-backend index drop (MySQL) best-effort, continue
-                        log.exception(f"    drop index failed: {sys.exc_info()}")
-                        # ALTER TABLE `fpdb`.`handsplayers` DROP INDEX `playerId`;
-                        # using: 'HandsPlayers' drop index 'playerId'
-                elif self.backend == self.PGSQL:
-                    #    DON'T FORGET TO RECREATE THEM!!
-                    log.info(f"dropping pg index {idx['tab']} {idx['col']}")
-                    try:
-                        # try to lock table to see if index drop will work:
-                        c.execute("BEGIN TRANSACTION")
-                        c.execute(
-                            "lock table {} in exclusive mode nowait".format(idx["tab"]),
-                        )
-                        # print "after lock, status:", c.statusmessage
-                        try:
-                            # table locked ok so index drop should work:
-                            # print "drop index %s_%s_idx" % (idx['tab'],idx['col'])
-                            c.execute(
-                                "drop index if exists {}_{}_idx".format(idx["tab"], idx["col"]),
-                            )
-                            # print "dropped  pg index ", idx['tab'], idx['col']
-                        except (
-                            Exception
-                        ):  # intentional broad catch: cross-backend index drop (PG) ignores 'does not exist'
-                            if "does not exist" not in str(sys.exc_info()[1]):
-                                log.exception(
-                                    f"drop index {idx['tab']}_{idx['col']}_idx failed: {str(sys.exc_info()[1]).rstrip('')}, continuing ...",
-                                )
-                        c.execute("END TRANSACTION")
-                    except (
-                        Exception
-                    ):  # intentional broad catch: cross-backend index drop (PG lock/txn) best-effort, continue
-                        log.exception(
-                            f"index {idx['tab']}_{idx['col']}_idx not dropped {str(sys.exc_info()[1]).rstrip('')}, continuing ...",
-                        )
-                else:
-                    return -1
-
-        if self.backend == self.PGSQL:
-            self._pg_set_isolation(1)  # go back to normal isolation level
-        self.commit()  # seems to clear up errors if there were any in postgres
-        ptime = time() - stime
-        log.debug(f"prepare import took {ptime} seconds")
-        return None
-
-    # end def prepareBulkImport
-
-    def afterBulkImport(self) -> int | None:
-        """Re-create any dropped indexes/foreign keys after bulk import."""
-        stime = time()
-
-        c = self.get_cursor()
-        if self.backend == self.MYSQL_INNODB:
-            c.execute("SET foreign_key_checks=1")
-            c.execute("SET autocommit=1")
-            return None
-
-        if self.backend == self.PGSQL:
-            self._pg_set_isolation(
-                0,
-            )  # allow table/index operations to work
-        for fk in self.foreignKeys[self.backend]:
-            if fk["drop"] == 1:
-                if self.backend == self.MYSQL_INNODB:
-                    c.execute(
-                        "SELECT constraint_name "
-                        "FROM information_schema.KEY_COLUMN_USAGE "
-                        # "WHERE REFERENCED_TABLE_SCHEMA = 'fpdb'
-                        "WHERE 1=1 "
-                        "AND table_name = %s AND column_name = %s "
-                        "AND referenced_table_name = %s "
-                        "AND referenced_column_name = %s ",
-                        (fk["fktab"], fk["fkcol"], fk["rtab"], fk["rcol"]),
-                    )
-                    cons = c.fetchone()
-                    # print "afterbulk: cons=", cons
-                    if cons:
-                        pass
-                    else:
-                        log.debug(
-                            f"Creating foreign key {fk['fktab']}.{fk['fkcol']} -> {fk['rtab']}.{fk['rcol']}",
-                        )
-                        try:
-                            c.execute(
-                                "alter table "
-                                + fk["fktab"]
-                                + " add foreign key ("
-                                + fk["fkcol"]
-                                + ") references "
-                                + fk["rtab"]
-                                + "("
-                                + fk["rcol"]
-                                + ")",
-                            )
-                        except (
-                            Exception
-                        ):  # intentional broad catch: cross-backend FK create (MySQL) best-effort, continue
-                            log.exception(f"Create foreign key failed: {sys.exc_info()}")
-                elif self.backend == self.PGSQL:
-                    log.debug(
-                        f"Creating foreign key {fk['fktab']}.{fk['fkcol']} -> {fk['rtab']}.{fk['rcol']}",
-                    )
-                    try:
-                        c.execute(
-                            "alter table "
-                            + fk["fktab"]
-                            + " add constraint "
-                            + fk["fktab"]
-                            + "_"
-                            + fk["fkcol"]
-                            + "_fkey"
-                            + " foreign key ("
-                            + fk["fkcol"]
-                            + ") references "
-                            + fk["rtab"]
-                            + "("
-                            + fk["rcol"]
-                            + ")",
-                        )
-                    except Exception:  # intentional broad catch: cross-backend FK create (PG) best-effort, continue
-                        log.exception(f"Create foreign key failed: {sys.exc_info()}")
-                else:
-                    return -1
-
-        for idx in self.indexes[self.backend]:
-            if idx["drop"] == 1:
-                if self.backend == self.MYSQL_INNODB:
-                    log.debug(f"Creating MySQL index {idx['tab']} {idx['col']}")
-                    try:
-                        s = "alter table {} add index {}({})".format(
-                            idx["tab"],
-                            idx["col"],
-                            idx["col"],
-                        )
-                        c.execute(s)
-                    except (
-                        Exception
-                    ):  # intentional broad catch: cross-backend index create (MySQL) best-effort, continue
-                        log.exception(f"Create foreign key failed: {sys.exc_info()}")
-                elif self.backend == self.PGSQL:
-                    #                pass
-                    # mod to use tab_col for index name?
-                    log.debug(f"Creating PostgreSQL index {idx['tab']} {idx['col']}")
-                    try:
-                        s = "create index {}_{}_idx on {}({})".format(
-                            idx["tab"],
-                            idx["col"],
-                            idx["tab"],
-                            idx["col"],
-                        )
-                        c.execute(s)
-                    except Exception:  # intentional broad catch: cross-backend index create (PG) best-effort, continue
-                        log.exception(f"Create index failed: {sys.exc_info()}")
-                else:
-                    return -1
-
-        if self.backend == self.PGSQL:
-            self._pg_set_isolation(1)  # go back to normal isolation level
-        self.commit()  # seems to clear up errors if there were any in postgres
-        atime = time() - stime
-        log.debug(f"After import took {atime} seconds")
-        return None
-
-    # end def afterBulkImport
 
 
     def replace_statscache(self, type, table, query):
@@ -2053,41 +1461,6 @@ class Database(DatabaseAutoNotesMixin, DatabaseCachesMixin, DatabaseSchemaMixin,
         self.commit()
         self.cleanUpWeeksMonths()
 
-    def get_hero_hudcache_start(self):
-        """Fetches earliest stylekey from hudcache for one of hero's player ids."""
-        try:
-            # derive list of program owner's player ids
-            self.hero = {}  # name of program owner indexed by site id
-            self.hero_ids = {
-                "dummy": -53,
-                "dummy2": -52,
-            }  # playerid of owner indexed by site id
-            # make sure at least two values in list
-            # so that tuple generation creates doesn't use
-            # () or (1,) style
-            for site in self.config.get_supported_sites():
-                result = self.get_site_id(site)
-                if result:
-                    site_id = result[0][0]
-                    self.hero[site_id] = self.config.supported_sites[site].screen_name
-                    for idx, p_id in enumerate(self.get_hero_player_ids(site)):
-                        self.hero_ids[f"{site_id}_{idx}"] = int(p_id)
-
-            q = self.sql.query["get_hero_hudcache_start"].replace(
-                "<playerid_list>",
-                str(tuple(self.hero_ids.values())),
-            )
-            c = self.get_cursor()
-            c.execute(q)
-            tmp = c.fetchone()
-            if tmp == (None,):
-                return self.hero_hudstart_def
-            return "20" + tmp[0][1:3] + "-" + tmp[0][3:5] + "-" + tmp[0][5:7]
-        except Exception:  # intentional broad catch: hero hudcache start query/parse best-effort, log only
-            err = traceback.extract_tb(sys.exc_info()[2])[-1]
-            log.exception(f"Error rebuilding hudcache: {sys.exc_info()[1]!s}\n{err}")
-
-    # end def get_hero_hudcache_start
 
     def analyzeDB(self) -> None:
         """Do whatever the DB can offer to update index/table statistics."""
@@ -2168,139 +1541,9 @@ class Database(DatabaseAutoNotesMixin, DatabaseCachesMixin, DatabaseSchemaMixin,
 
     # end def lock_for_insert
 
-    def resetBulkCache(self, reconnect=False) -> None:
-        self.siteHandNos: list[Any] = []  # cache of siteHandNo
-        self.hbulk: list[Any] = []  # Hands bulk inserts
-        self.bbulk: list[Any] = []  # Boards bulk inserts
-        self.hpbulk: list[Any] = []  # HandsPlayers bulk inserts
-        self.habulk: list[Any] = []  # HandsActions bulk inserts
-        self.hcbulk: dict[Any, Any] = {}  # HudCache bulk inserts
-        self.dcbulk: dict[Any, Any] = {}  # CardsCache bulk inserts
-        self.pcbulk: dict[Any, Any] = {}  # PositionsCache bulk inserts
-        self.hsbulk: list[Any] = []  # HandsStove bulk inserts
-        self.hsdbulk: list[Any] = []  # HandsShowdown bulk inserts
-        self.hcobulk: list[Any] = []  # HandsCashout bulk inserts
-        self.panbulk: list[Any] = []  # PlayerAutoNotes bulk upserts
-        self.htbulk: list[Any] = []  # HandsPots bulk inserts
-        self.tbulk: dict[Any, Any] = {}  # Tourneys bulk updates
-        self.s: dict[str, Any] = {"bk": []}  # Sessions bulk updates
-        self.sc: dict[Any, Any] = {}  # SessionsCache bulk updates
-        self.tc: dict[Any, Any] = {}  # TourneysCache bulk updates
-        self.hids: list[Any] = []  # hand ids in order of hand bulk inserts
-        # self.tids        = []         # tourney ids in order of hp bulk inserts
-        if reconnect:
-            self.do_connect(self.config)
 
-    def executemany(self, c, q, values) -> None:
-        if self.backend == self.PGSQL and self.import_options["hhBulkPath"] != "":
-            # COPY much faster under postgres. Requires superuser privileges
-            m = re_insert.match(q)
-            if m is None:
-                raise FpdbError(f"Unable to derive a COPY statement from query: {q}")
-            rand = "".join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(5))
-            bulk_file = os.path.join(
-                self.import_options["hhBulkPath"],
-                m.group("TABLENAME") + "_" + rand,
-            )
-            with open(bulk_file, "w", encoding="utf-8", newline="") as csvfile:
-                writer = csv.writer(
-                    csvfile,
-                    delimiter="\t",
-                    quotechar='"',
-                    quoting=csv.QUOTE_MINIMAL,
-                )
-                writer.writerows(w for w in values)
-            q_insert = (
-                "COPY " + m.group("TABLENAME") + m.group("COLUMNS") + " FROM '" + bulk_file + "' DELIMITER '\t' CSV"
-            )
-            c.execute(q_insert)
-            os.remove(bulk_file)
-        else:
-            batch_size = 20000  # experiment to find optimal batch_size for your data
-            while values:  # repeat until all records in values have been inserted ''
-                batch, values = (
-                    values[:batch_size],
-                    values[batch_size:],
-                )  # split values into the current batch and the remaining records
-                c.executemany(q, batch)  # insert current batch ''
 
-    def storeHand(self, hdata, doinsert=False, printdata=False) -> None:
-        if printdata:
-            log.debug("######## Hands ##########")
-            import pprint
 
-            pp = pprint.PrettyPrinter(indent=4)
-            pp.pprint(hdata)
-            log.debug("###### End Hands ########")
-
-        # Tablename can have odd charachers
-        # hdata["tableName"] = Charset.to_db_utf8(hdata["tableName"])[:50]
-        table_name = hdata.get("tableName", "")
-        table_name_safe = table_name.encode("utf-8", "replace").decode("utf-8")
-        hdata["tableName"] = table_name_safe[:50]
-
-        self.hids.append(hdata["id"])
-        self.hbulk.append(
-            [
-                hdata["id"],
-                hdata["tableName"],
-                hdata["siteHandNo"],
-                hdata["tourneyId"],
-                hdata["gametypeId"],
-                hdata["sessionId"],
-                hdata["fileId"],
-                hdata["startTime"].replace(tzinfo=None),
-                datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),  # importtime
-                hdata["seats"],
-                hdata["heroSeat"],
-                hdata["maxPosition"],
-                hdata["texture"],
-                hdata["playersVpi"],
-                hdata["boardcard1"],
-                hdata["boardcard2"],
-                hdata["boardcard3"],
-                hdata["boardcard4"],
-                hdata["boardcard5"],
-                hdata["runItTwice"],
-                hdata["playersAtStreet1"],
-                hdata["playersAtStreet2"],
-                hdata["playersAtStreet3"],
-                hdata["playersAtStreet4"],
-                hdata["playersAtShowdown"],
-                hdata["street0Raises"],
-                hdata["street1Raises"],
-                hdata["street2Raises"],
-                hdata["street3Raises"],
-                hdata["street4Raises"],
-                hdata["street0Pot"],
-                hdata["street1Pot"],
-                hdata["street2Pot"],
-                hdata["street3Pot"],
-                hdata["street4Pot"],
-                hdata["finalPot"],
-                hdata.get("bombPot", 0),
-                hdata.get("splashPot", 0),
-            ],
-        )
-
-        if doinsert:
-            self.appendHandsSessionIds()
-            self.updateTourneysSessions()
-            q = self.sql.query["store_hand"]
-            q = q.replace("%s", self.sql.query["placeholder"])
-            c = self.get_cursor()
-            c.executemany(q, self.hbulk)
-            self.commit()
-
-    def storeBoards(self, id, boards, doinsert) -> None:
-        if boards:
-            for b in boards:
-                self.bbulk += [[id, *b]]
-        if doinsert and self.bbulk:
-            q = self.sql.query["store_boards"]
-            q = q.replace("%s", self.sql.query["placeholder"])
-            c = self.get_cursor()
-            self.executemany(c, q, self.bbulk)  # c.executemany(q, self.bbulk)
 
     def updateTourneysSessions(self) -> None:
         if self.tbulk:
@@ -2313,111 +1556,10 @@ class Database(DatabaseAutoNotesMixin, DatabaseCachesMixin, DatabaseSchemaMixin,
                 c.execute(q_update_sessions, (sid, t))
                 self.commit()
 
-    def storeHandsPlayers(self, hid, pids, pdata, doinsert=False, printdata=False) -> None:
-        log.info(
-            f"Entering storeHandsPlayers: hid={hid}, doinsert={doinsert}, printdata={printdata}",
-        )
 
-        if printdata:
-            import pprint
 
-            pp = pprint.PrettyPrinter(indent=4)
-            log.debug("Printing pdata for debugging:")
-            pp.pprint(pdata)
 
-        hpbulk = self.hpbulk
-        log.debug(f"Initialized hpbulk with current size: {len(hpbulk)}")
 
-        for p, pvalue in pdata.items():
-            log.debug(f"Processing player: {p}")
-            try:
-                bulk_data = [pvalue[key] for key in HANDS_PLAYERS_KEYS]
-                bulk_data.append(pids[p])
-                bulk_data.append(hid)
-                bulk_data.reverse()
-                hpbulk.append(bulk_data)
-                log.debug(f"Appended data for player {p}: {bulk_data}")
-            except KeyError as e:
-                log.exception(f"Key error when processing player {p}. Missing key: {e}")
-                raise
-
-        log.debug(f"Final hpbulk size after processing: {len(hpbulk)}")
-
-        if doinsert:
-            log.info("Performing database insertion for hands_players data.")
-            try:
-                q = self.sql.query["store_hands_players"]
-                q = q.replace("%s", self.sql.query["placeholder"])
-                c = self.get_cursor(True)
-                self.executemany(c, q, self.hpbulk)
-                log.info(
-                    f"Successfully inserted {len(self.hpbulk)} rows into hands_players.",
-                )
-            except Exception as e:  # intentional broad catch: hands_players bulk insert logs then re-raises
-                log.exception(f"Error during database insertion in storeHandsPlayers: {e}")
-                raise
-        else:
-            log.info("Skipping database insertion as doinsert=False.")
-
-        log.info("Exiting storeHandsPlayers.")
-
-    def storeHandsPots(self, tdata, doinsert) -> None:
-        self.htbulk += tdata
-        if doinsert and self.htbulk:
-            q = self.sql.query["store_hands_pots"]
-            q = q.replace("%s", self.sql.query["placeholder"])
-            c = self.get_cursor()
-            self.executemany(c, q, self.htbulk)  # c.executemany(q, self.hsbulk)
-
-    def storeHandsActions(self, hid, pids, adata, doinsert=False, printdata=False) -> None:
-        # print "DEBUG: %s %s %s" %(hid, pids, adata)
-
-        # This can be used to generate test data. Currently unused
-        # if printdata:
-        #    import pprint
-        #    pp = pprint.PrettyPrinter(indent=4)
-        #    pp.pprint(adata)
-
-        for a in adata:
-            self.habulk.append(
-                (
-                    hid,
-                    pids[adata[a]["player"]],
-                    adata[a]["street"],
-                    adata[a]["actionNo"],
-                    adata[a]["streetActionNo"],
-                    adata[a]["actionId"],
-                    adata[a]["amount"],
-                    adata[a]["raiseTo"],
-                    adata[a]["amountCalled"],
-                    adata[a]["numDiscarded"],
-                    adata[a]["cardsDiscarded"],
-                    adata[a]["allIn"],
-                ),
-            )
-
-        if doinsert:
-            q = self.sql.query["store_hands_actions"]
-            q = q.replace("%s", self.sql.query["placeholder"])
-            c = self.get_cursor()
-            self.executemany(c, q, self.habulk)  # c.executemany(q, self.habulk)
-
-    def storeHandsStove(self, sdata, doinsert) -> None:
-        self.hsbulk += sdata
-        if doinsert and self.hsbulk:
-            q = self.sql.query["store_hands_stove"]
-            q = q.replace("%s", self.sql.query["placeholder"])
-            c = self.get_cursor()
-            self.executemany(c, q, self.hsbulk)  # c.executemany(q, self.hsbulk)
-
-    def storeHandsShowdown(self, sdata, doinsert) -> None:
-        """Persist parsed showdown combinations (and winning cards) per player."""
-        self.hsdbulk += sdata
-        if doinsert and self.hsdbulk:
-            q = self.sql.query["store_hands_showdown"]
-            q = q.replace("%s", self.sql.query["placeholder"])
-            c = self.get_cursor()
-            self.executemany(c, q, self.hsdbulk)
 
     def get_hands_showdown(self, hand_id) -> dict:
         """Return {player_name: (combo, cards)} for a hand, or {} if none/absent.
@@ -2434,14 +1576,6 @@ class Database(DatabaseAutoNotesMixin, DatabaseCachesMixin, DatabaseSchemaMixin,
             return {}
         return result
 
-    def storeHandsCashout(self, sdata, doinsert) -> None:
-        """Persist per-player cashout amounts/fees."""
-        self.hcobulk += sdata
-        if doinsert and self.hcobulk:
-            q = self.sql.query["store_hands_cashout"]
-            q = q.replace("%s", self.sql.query["placeholder"])
-            c = self.get_cursor()
-            self.executemany(c, q, self.hcobulk)
 
     def get_hands_cashout(self, hand_id) -> dict:
         """Return {player_name: (amount, fee)} for a hand, or {} if none/absent."""
@@ -2465,12 +1599,6 @@ class Database(DatabaseAutoNotesMixin, DatabaseCachesMixin, DatabaseSchemaMixin,
             return 0
         return id[0]
 
-    def storeFile(self, fdata):
-        q = self.sql.query["store_file"]
-        q = q.replace("%s", self.sql.query["placeholder"])
-        c = self.get_cursor()
-        c.execute(q, fdata)
-        return self.get_last_insert_id(c)
 
     def repair_sequence(self, table: str) -> None:
         """Synchronize a backend identity sequence with the stored row ids."""

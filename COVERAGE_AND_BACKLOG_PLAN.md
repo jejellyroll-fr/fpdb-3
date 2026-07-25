@@ -525,15 +525,36 @@ Deux enseignements de méthode :
   à 43,5 %. Rien n'a été perdu, seule la répartition a changé. Le cas est désormais
   documenté dans le cliquet.
 
-**Reste à faire** — même méthode, ordre inchangé :
+**Paliers 5/N et 6/N faits (2026-07-25).** `Database.py` **3 030 → 2 159 lignes**,
+100 → 80 méthodes. Depuis le début du découpage : **6 621 → 2 159, soit −67 %**, et
+l'objectif « sous 2 500 lignes » est atteint.
 
-1. **5/N — import en masse** (`prepareBulkImport`, `afterBulkImport`, `storeHand`,
-   `storeHandsPlayers`, `storeHandsActions`, `resetBulkCache`) → ~400 lignes. Lit
-   `indexes`/`foreignKeys` via le MRO depuis `database_schema`.
-2. **6/N — lecture HUD** (`get_stats_from_hand*`, `init_hud_stat_vars`) → ~280 lignes.
-3. **7/N — connexion** (`connect`, `do_connect`, `check_version`) → ~270 lignes.
-4. **Puis seulement** : découper les fonctions trop complexes pour sortir réellement
-   `Database.py` du cliquet.
+- **5/N — import en masse** : `database_bulk_import.py`, 13 méthodes / 499 lignes. Le
+  mixin **possède** les tampons, puisque `resetBulkCache` les crée tous. `re_insert` et
+  les imports `csv`/`random`/`string`, qui ne servaient qu'à `executemany`, partent avec
+  lui. 13/13 identiques à l'AST près.
+- **6/N — lecture HUD** : `database_hud_stats.py`, 7 méthodes / 375 lignes.
+  `_rollback_after_failed_read` reste dans l'hôte, quatre autres méthodes l'appelant.
+  7/7 identiques à l'AST près.
+
+**Première entrée réellement retirée du cliquet** : les deux violations `UP031` de
+`Database.py` sont parties avec la lecture HUD, `Database.py` sort donc de cette règle.
+La dette de complexité totale reste à 26, répartie 14 + 5 + 4 + 3 sur les quatre
+modules — relocalisée, jamais accrue, sur les trois paliers.
+
+**Le palier 7/N ne doit pas être fait tel qu'il était prévu.** Mesuré :
+`self.__connected` est écrit en 12 endroits et **46 des 80 méthodes restantes** touchent
+l'état de connexion (`connection`, `cursor`, `__connected`, `_in_transaction`,
+`backend`, `db_server`). Ce n'est pas un domaine, c'est l'identité de l'objet : l'extraire
+inverserait la relation, l'hôte dépendant du mixin pour son propre état. S'y ajoute un
+piège de langage — `self.__connected` déplacé dans un mixin se mange en
+`_DatabaseConnectionMixin__connected` et **casse à l'exécution**, ce qui interdit le
+déplacement au mot près qui a rendu les six paliers sûrs.
+
+**Ce qui reste, et c'est un travail d'une autre nature** : découper les fonctions
+elles-mêmes pour sortir `Database.py` de `C901`/`PLR0912`/`PLR0915` (14 violations, dont
+`connect` à 22 de complexité et `get_stats_from_hand` déjà isolé dans son module). Le
+découpage par domaines a donné ce qu'il pouvait donner.
 
 ### Étape 6 — Fermer les bugs connus · ~0,5 j
 
@@ -578,14 +599,14 @@ Deux enseignements de méthode :
 | 3 | ✅ Tests des caches statistiques | fait | +59 pts sur le module | **Chiffres HUD faux** |
 | 3bis | ✅ Corriger les écrivains de cache | fait | — | **4 caches impeuplables** |
 | 4 | ✅ Scripts d'exploitation | fait | domaine +12 pts | **Corruption de base** |
-| 5 | 🟡 `Database.py` 4/N fait, 5-7/N restants | ~2 j | — | Dette de complexité |
+| 5 | ✅ `Database.py` 4-6/N ; 7/N écarté | fait | −67 % de lignes | Dette de complexité |
 | 6 | Bugs connus + clôture des plans | 0,5 j | — | Hand id iPoker faux |
 | 7 | i18n des modules récents | 1,5 j | — | UI bilingue |
 | 8 | Continu (`ModernHudPreferences`, cliquets) | — | — | — |
 
 **Chemin critique recommandé : 1 → 3 → 2 → 4 → 5**, l'étape 1 protégeant tout le reste
 et l'étape 3 précédant l'étape 5 parce qu'on ne déplace pas du code non testé.
-Les étapes 1, 2, 3, 3bis et 4 sont faites, l'étape 5 est à son palier 4/N. Restent 2bis et les paliers 5-7/N.
+Les étapes 1 à 5 sont faites (7/N écarté, motivé). Reste 2bis, plus le découpage des fonctions trop complexes.
 
 ---
 
