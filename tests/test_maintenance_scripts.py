@@ -403,25 +403,18 @@ MAINTENANCE_SCRIPTS = [
     "backfill_boards",
     "backfill_showdown",
     "fix_draw_starting_hands",
-    "migration_helper",
-    "sync_databases",
 ]
 
-# sync_databases imports fpdb.infrastructure.adapters.legacy_schema_adapter and
-# fpdb.infrastructure.database.models, neither of which has ever existed in this
-# repository -- the module arrived dead with the initial legacy import and
-# raises ModuleNotFoundError. mypy does not catch it because missing imports are
-# ignored. Listed rather than skipped so the day it is repaired or removed, this
-# test says so.
-UNIMPORTABLE = {"sync_databases"}
 
-
-@pytest.mark.parametrize("name", [s for s in MAINTENANCE_SCRIPTS if s not in UNIMPORTABLE])
+@pytest.mark.parametrize("name", MAINTENANCE_SCRIPTS)
 def test_every_maintenance_script_can_be_imported(name) -> None:
     assert importlib.import_module(f"fpdb_3_legacy.{name}") is not None
 
 
-@pytest.mark.parametrize("name", sorted(UNIMPORTABLE))
-def test_the_broken_script_is_still_broken(name) -> None:
+@pytest.mark.parametrize("name", ["sync_databases", "migration_helper"])
+def test_the_deleted_scripts_stay_deleted(name) -> None:
+    # sync_databases needed fpdb.infrastructure packages that never existed here
+    # and could not be imported at all; migration_helper drove the Python
+    # 3.13/3.14 migration, which is done. Both were removed rather than tested.
     with pytest.raises(ModuleNotFoundError):
         importlib.import_module(f"fpdb_3_legacy.{name}")

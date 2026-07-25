@@ -184,7 +184,6 @@ ignore = [
 "fpdb_3_legacy/interlocks.py" = ["C901", "PLR0912", "PLR0915"]
 "fpdb_3_legacy/loggingFpdb.py" = ["C901", "PLR0912", "PLR0915"]
 "fpdb_3_legacy/migrate_to_pyside6.py" = ["C901"]
-"fpdb_3_legacy/migration_helper.py" = ["C901", "PLR0912"]
 "fpdb_3_legacy/pt4_import.py" = ["C901"]
 "fpdb_3_legacy/pt4hud.py" = ["C901", "PLR0912", "PLR0915"]
 "fpdb_3_legacy/ring_stats/__init__.py" = ["C901", "PLR0912", "PLR0915"]

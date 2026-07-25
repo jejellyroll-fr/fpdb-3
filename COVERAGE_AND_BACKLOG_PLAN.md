@@ -480,7 +480,11 @@ le processus. Passé aux imports du paquet, comme les trois autres backfills.
   Python 3.13/3.14 : menus, `subprocess`, aucune base de données. Obsolète si la
   migration est faite.
 
-Ces deux-là relèvent d'une décision (réparer ou supprimer), pas d'un test.
+**Décision prise : les deux sont supprimés** (2026-07-25). Aucune référence à
+l'exécution ne les visait — seulement les listes de lint et de typage, retirées avec
+eux. Un test vérifie qu'ils restent supprimés, pour que leur retour soit délibéré.
+Le domaine `maintenance-scripts` passe de 29,8 % à 37,7 % : retirer du code mort à 0 %
+compte autant qu'en tester.
 
 ### Étape 5 — Reprendre le découpage de `Database.py` (4/N → N/N) · ~3-4 j
 

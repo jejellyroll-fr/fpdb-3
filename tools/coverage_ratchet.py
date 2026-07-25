@@ -119,8 +119,6 @@ DOMAINS: tuple[tuple[str, tuple[str, ...]], ...] = (
         (
             "fpdb_3_legacy/backfill_*.py",
             "fpdb_3_legacy/fix_*.py",
-            "fpdb_3_legacy/migration_helper.py",
-            "fpdb_3_legacy/sync_databases.py",
         ),
     ),
     ("platform-pkg", ("fpdb/*.py", "fpdb/**/*.py")),
