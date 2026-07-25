@@ -377,16 +377,52 @@ ailleurs ce n'est pas « le même patron » : les résumés se construisent en n
 `TourneySummary.__init__` et en amorçant ses défauts, classe par classe, donc ils
 demandent leur propre harnais. Reporté en étape 2bis avec une portée exacte.
 
-### Étape 2bis — Harnais golden pour les résumés de tournoi · ~1,5 j
+### Étape 2bis — Harnais golden pour les résumés de tournoi — ✅ FAIT (2026-07-25)
 
-Corpus réellement disponible : FTP 43, Stars 36, Winamax 12, PokerTracker 11,
-PacificPoker 9, Winning 1 — soit 112 fichiers pour 6 sites. Gains atteignables :
-`FullTiltPokerSummary` (47 %), `PokerStarsSummary` (57 %), `PokerTrackerSummary` (11 %),
-`WinningSummary` (19 %). `iPokerSummary` (9,9 %) restera bas faute de corpus : il
-faudrait d'abord en capturer.
+**Domaine `tourney-summaries` 53,3 % → 59,5 %**, total 57,6 % → 57,9 %.
+`test/test_summary_regression.py` — **325 tests** sur les 112 fichiers des 6 sites,
+dont **106 empreints** (136 090 lignes joueur au total), en 3,7 s.
 
-Empreinte à définir (différente de celle des mains) : identifiant du tournoi, buy-in,
-fee, prize pool, nombre d'entrants, et par joueur le rang, les gains et les rebuys.
+Harnais séparé, comme annoncé : `tests/helpers/summary_regression.py` neutralise
+`TourneySummary.__init__`, amorce ses 50 attributs par défaut et appelle `parseSummary`.
+L'empreinte porte 37 champs de tournoi (numéro, buy-in, fee, prize pool, entrants,
+options rebuy/KO/satellite, horodatages) et chaque appel à `addPlayer` — rang, nom,
+gains, devise, rebuys, add-ons, KO.
+
+| Module | Avant | Après |
+|---|---:|---:|
+| `PokerTrackerSummary` | 11,1 % | **85,2 %** |
+| `FullTiltPokerSummary` | 47,3 % | 54,1 % |
+| `PokerStarsSummary` | 57,5 % | 59,1 % |
+| `WinningSummary` | 19,3 % | 22,2 % |
+| `WinamaxSummary` | 80,1 % | 80,4 % |
+| `iPokerSummary` | 9,9 % | 9,9 % — aucun corpus, comme prévu |
+
+**Un défaut du harnais découvert en route, pas du code** : la moitié du corpus Full Tilt
+est en **UTF-16-LE**. Ma première lecture retombait sur cp1252 et produisait du charabia
+qu'aucun regex d'en-tête ne pouvait reconnaître — 20 fichiers sur 43 « échouaient ».
+`TourneySummary.readFile` honore le BOM explicitement ; le harnais l'imite désormais.
+
+Deux ensembles nommés, plutôt que des digests muets :
+
+- `KNOWN_UNPARSED` (6 fichiers) — aucun n'est un défaut de convertisseur : les trois
+  archives PokerStars `.htm` et la page Winning portent **plusieurs tournois sur une
+  page**, que l'importateur découpe en morceaux avant de parser ; le `.xls` Full Tilt
+  est un classeur binaire ouvert par xlrd ; le ticket freeroll Winamax n'annonce aucune
+  valeur et est refusé.
+- **`HERO_RESULT_NOT_CAPTURED` (3 fichiers) — un vrai trou.** Ces résumés annoncent le
+  classement en prose (« You finished the tournament in 2nd place », avec un gain de
+  0,90 € pour le premier) sans table de classement, donc `addPlayer` n'est jamais appelé
+  et **le résultat du héros est perdu à l'import**. Trois convertisseurs concernés
+  (PokerStars, Winamax ×2). Épinglé, pas corrigé : c'est un chantier de parseur.
+
+Le reste du corpus est activement vérifié, pas seulement empreint : chaque résumé doit
+nommer son tournoi, n'avoir aucun montant négatif, et enregistrer au moins un joueur.
+
+Deux écarts examinés et écartés : les rangs `None` correspondent aux joueurs « still
+playing », et le « 1804 joueurs pour 1803 entrants » d'un tournoi à ré-entrée vient du
+fichier lui-même, qui annonce 1803 et liste 1804 lignes — le parseur rapporte les deux
+fidèlement.
 
 ### Étape 3 — Tester les caches statistiques — ✅ FAIT (2026-07-25)
 
@@ -621,7 +657,7 @@ l'indentation interne du SQL, sans effet), et un essai de la CLI reconstruite.
 |---|---|---:|---:|---|
 | 1 | ✅ Cliquet de couverture en CI | fait | — | Empêche la dérive |
 | 2 | ✅ Corpus → harnais golden | fait | parseurs +13,8 pts | Régressions parseurs |
-| 2bis | Harnais résumés de tournoi | 1,5 j | — | Régressions résumés |
+| 2bis | ✅ Harnais résumés de tournoi | fait | domaine +6,2 pts | Régressions résumés |
 | 3 | ✅ Tests des caches statistiques | fait | +59 pts sur le module | **Chiffres HUD faux** |
 | 3bis | ✅ Corriger les écrivains de cache | fait | — | **4 caches impeuplables** |
 | 4 | ✅ Scripts d'exploitation | fait | domaine +12 pts | **Corruption de base** |
@@ -632,7 +668,7 @@ l'indentation interne du SQL, sans effet), et un essai de la CLI reconstruite.
 
 **Chemin critique recommandé : 1 → 3 → 2 → 4 → 5**, l'étape 1 protégeant tout le reste
 et l'étape 3 précédant l'étape 5 parce qu'on ne déplace pas du code non testé.
-Les étapes 1 à 5 sont faites (7/N écarté, motivé). Reste 2bis, plus le découpage des fonctions trop complexes.
+Toutes les étapes du plan sont faites (le palier 7/N est écarté, motivé).
 
 ---
 

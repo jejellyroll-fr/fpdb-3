@@ -1,0 +1,426 @@
+{
+  "FTP/10Game-USD-SnG-8-201404.Satellite.to.Mini.FTOPS.line.error.txt": {
+    "player_count": 4,
+    "sha256": "aad02783312a375a0f82ce1202b38d333287776da1ec18af6951591d26760cb6"
+  },
+  "FTP/27SD-USD-MTT-1-201303.txt": {
+    "player_count": 30,
+    "sha256": "e1fd83090e9e72f9afe6a251698044c3321b2289d855018f1880721f4099ea6f"
+  },
+  "FTP/27TD-USD-HUSnG-201101.Hero.wins.txt": {
+    "player_count": 2,
+    "sha256": "5a14826e04126ff0abada5e1b481b3347187de159cd2a96cba9a8a6652ee4828"
+  },
+  "FTP/3-Draw-Limit-USD-STT-2max-10-201211.Hero.loses.txt": {
+    "player_count": 2,
+    "sha256": "201045c112066992da540a574959117faf022243a7b61bacb1a1c76e8054f6c7"
+  },
+  "FTP/5-Stud-USD-MTT-100-201303.txt": {
+    "player_count": 75,
+    "sha256": "a42be58df21c4255c0add04aea13c268895244431ddffb1341d060a07ed27307"
+  },
+  "FTP/Freeroll-Satellite-MultipleWinners-20100830.txt": {
+    "player_count": 7517,
+    "sha256": "b55e0da575d351252009c869a498370b43f8860b8cdacafd05e960f6573ea44d"
+  },
+  "FTP/LHE-USD-SnG-9man-2-200910.Hero.lost.Sample.txt": {
+    "player_count": 4,
+    "sha256": "5af91e841aa90ae510ba19470663afed307a29b17ee5c500af0437ba00140de2"
+  },
+  "FTP/NLHE-2max-SnG-USD-20-201404.no.limitType.txt": {
+    "player_count": 2,
+    "sha256": "8cf319edb7b9819b447bd619e12da7c1f59ad0f03fe9aa333b891a40c8f280e6"
+  },
+  "FTP/NLHE-6max-Matrix-USD-26-201211.match1.txt": {
+    "player_count": 6,
+    "sha256": "59417d1909cb9ae0fe6b52e457341805c5b9d306d3589ddd6fcb35cbc391eeb2"
+  },
+  "FTP/NLHE-6max-Matrix-USD-26-201211.match2.txt": {
+    "player_count": 6,
+    "sha256": "27ed824a773536843a231490fcf5bcd843ade1d0a5cbd82ba0a87db868804f40"
+  },
+  "FTP/NLHE-6max-Matrix-USD-26-201211.match3.txt": {
+    "player_count": 6,
+    "sha256": "c0c48df3162670cba06dba9c7f8637a9361154a599fc124a9606ea5f03a3711b"
+  },
+  "FTP/NLHE-6max-Matrix-USD-26-201211.match4.txt": {
+    "player_count": 6,
+    "sha256": "30cd5ce099aa0c03b3733fd2695afe2fcb890e434947f3e54b8c38cf06375868"
+  },
+  "FTP/NLHE-6max-Matrix-USD-26-201211.txt": {
+    "player_count": 6,
+    "sha256": "1a8792ae6f64e06ff847834fd06148178a8cdc6bb85d90ef26cf9f3d5ffd4f02"
+  },
+  "FTP/NLHE-6max-SnG-USD-5-201305.txt": {
+    "player_count": 3,
+    "sha256": "0af1e6589c5ad550878f5870356f7993ef587d956a8ad337d63c1fbffc9a502a"
+  },
+  "FTP/NLHE-9max-MTT-USD-1-201305.deep.stack.guar.txt": {
+    "player_count": 675,
+    "sha256": "32b3b5d7fb9f123c45e8ab5023542984cae9102e001ca443bc8affa6cb04f870"
+  },
+  "FTP/NLHE-9max-MTT-USD-10-201301.rush.rebuy.10K.guar.txt": {
+    "player_count": 337,
+    "sha256": "a99075d555ccf36cf9c0c1823075001c48f7bd5eedbbd28c09ae5b7e7f0e1879"
+  },
+  "FTP/NLHE-9max-MTT-USD-10-201301.rush.rebuy.17K.guar.txt": {
+    "player_count": 435,
+    "sha256": "aad3f29e8411123b64820d08fc6c0d6939ad4e4a79c1ffd79c920d7f925f3f5a"
+  },
+  "FTP/NLHE-9max-MTT-USD-20-201301.multi-entry.txt": {
+    "player_count": 11946,
+    "sha256": "dd23437a564cd5ba440e379e2d950643f22dc24e6aa683eae3a26ed79cf9b334"
+  },
+  "FTP/NLHE-9max-MTT-USD-4-201104.rush.onDemand.txt": {
+    "player_count": 184,
+    "sha256": "a90e9d6bdb4c3432972da9c7b644cf86a4398e7e4c4e4962d0809a95d42435bb"
+  },
+  "FTP/NLHE-9max-MTT-USD-5-201304.chance.txt": {
+    "player_count": 159,
+    "sha256": "a132932bb2e7cc7804c46c9f89614358689d7e6b0debbee914b47392cc4cf7dd"
+  },
+  "FTP/NLHE-9max-MTT-USD-50-201301.turbo.rush.guar.txt": {
+    "player_count": 109,
+    "sha256": "8923817b4885ce445496bde37b77a02624666a76b05058f9b078234862d8ca2e"
+  },
+  "FTP/NLHE-9max-MTT-USD-70-2013.ko.guar.txt": {
+    "player_count": 296,
+    "sha256": "49ec082ddac14dcbfa4df8726d12e4e89dd5127bb3875afde09d11537867e842"
+  },
+  "FTP/NLHE-9max-USD-4-201104.Rush.txt": {
+    "player_count": 184,
+    "sha256": "4c917806a749b04c0b259e552ae0525f5fc287cbc6c8416cdae0c19856f9e121"
+  },
+  "FTP/NLHE-9max-play-STT-201301.hero.cashes.txt": {
+    "player_count": 9,
+    "sha256": "0b69660cfddc66ed15892ac8bcc2b01e48200ad46a6c52f0b3cfc64d8b7d9cb0"
+  },
+  "FTP/NLHE-EUR-MTT-1-201012.txt": {
+    "player_count": 209,
+    "sha256": "879bbf064c1b4cc1b15ff2b94c8a0da7e2d1b4db40851fa7633506d3bc74c2a4"
+  },
+  "FTP/NLHE-Freeroll-MTT-201212.txt": {
+    "player_count": 6216,
+    "sha256": "45a8311469dcb3deb447322f1c9c02c584b18ad1b127114e55990fae8147060a"
+  },
+  "FTP/NLHE-MTT-FPP-25-201308.Rebuys.Addons.txt": {
+    "player_count": 91,
+    "sha256": "185d7b3b4c4191a898cb91248fb40b555226e0e4293ffb60d7f7706999285ace"
+  },
+  "FTP/NLHE-MTT-USD-100-201005.cashout.txt": {
+    "player_count": 20,
+    "sha256": "9746185cbfb401eb6b9fd5d0b824c1ad1a905d7251cb88e57641759455a0df28"
+  },
+  "FTP/NLHE-MTT-USD-255-201408.KO.count.bounties.txt": {
+    "player_count": 669,
+    "sha256": "0c05aa8ad360ed0e56426cf8f2a51cdd8264d26095e3ff59414f8b05a05efff2"
+  },
+  "FTP/NLHE-USD-7Game-HUSnG-201005.Hero.loses.txt": {
+    "player_count": 2,
+    "sha256": "a4174f129b3aedb2388772e94383356bd0e8af0276bf338949a11230e1ef4a29"
+  },
+  "FTP/NLHE-USD-MTT-1-201012.No.rake.txt": {
+    "player_count": 8001,
+    "sha256": "55870d75a64d26f958fa0dd9bc5925aca8190079245a0cb2a0ac4b81f118e647"
+  },
+  "FTP/NLHE-USD-MTT-14-200912.Knockout.Bounty.txt": {
+    "player_count": 1,
+    "sha256": "e7b65de4e2fcf1cc2d0b7eeb1e22cca083fe1bdbb208ce411b170112276f4436"
+  },
+  "FTP/NLHE-USD-Rush-MTT-1-201012.No.cash.txt": {
+    "player_count": 1,
+    "sha256": "e59c3de9889423fe007f4e046b2330f96791b0fd3cada8ea06450834329b3b34"
+  },
+  "FTP/NLHE-USD-SnG-6man-201007.Hero.wins.worded.date.format.txt": {
+    "player_count": 6,
+    "sha256": "525ccaf9fbc923f6d7a915218c673809adbb4d21bcf022bea9eecb89724e662f"
+  },
+  "FTP/NLHE-USD-SnG-6man-201101.Hero.cashes.txt": {
+    "player_count": 6,
+    "sha256": "37fe8e3452a013b9b4896a9346b61a6d1bca69ee4b013148c4afd1f58b8378e4"
+  },
+  "FTP/NLHE-USD-SnG-9man-201001.Satellite.Hero.wins.token.txt": {
+    "player_count": 9,
+    "sha256": "0001cbf93601f2d1912e32884b3b9f783a26e320e9df383ddf163356baf5c803"
+  },
+  "FTP/NLHE-USD-SnG-9man-201007.Super.turbo.Hero.wins.txt": {
+    "player_count": 9,
+    "sha256": "0724ccadf880b2b3babe40d3db44b41eb415c1203cf5775d6f858d39f77a410e"
+  },
+  "FTP/NLHE-USD-SnG-9man-201101.Hero.cashes.txt": {
+    "player_count": 9,
+    "sha256": "1bdea22ee398b8fa644d7dee879c01ccbf276dd26013ac6beeed269256558e07"
+  },
+  "FTP/NLHE-play-250-MTT-201211.txt": {
+    "player_count": 31,
+    "sha256": "603cef45f7106dd92f133501511b17e097d9ea7bb82f73da77d03b6e67bdaf03"
+  },
+  "FTP/PLO8-USD-MTT-2r-201006.Hero.second.txt": {
+    "player_count": 176,
+    "sha256": "f0c3c31a21588fd959e6c77fa93c404e7cf96f5d41ba89d5b6445fe8b2a6b479"
+  },
+  "FTP/PLO8-USD-SnG-9man-201012.Satellite.to.FTOPS.txt": {
+    "player_count": 9,
+    "sha256": "6daf8f6636db232b8e82035b025cf6d0d40bbb0f2321eb843c1b8edd95bf5f8c"
+  },
+  "FTP/Razz-USD-SnG-2man-201211.super.turbo.heads.up.txt": {
+    "player_count": 2,
+    "sha256": "3cb481e81461b7fed9747e9ec497ca540a8ee585e962ff2b62e51683f4ec18fc"
+  },
+  "PacificPoker/NLHE-6max-SNG-0.10-201206.summary.txt": {
+    "player_count": 1,
+    "sha256": "7ee399eeb335b0842dfbc1b7b4ae49ba936b6838b096cc2cfbeca83700201ebc"
+  },
+  "PacificPoker/NLHE-FREE-MTT-$75Freeroll20120217-Summary.txt": {
+    "player_count": 1,
+    "sha256": "a75dd3dcbb4cc05c4df9822c527fd515857ad28206be0890ca7eec86a123b8f0"
+  },
+  "PacificPoker/NLHE-Freeroll-MTT-201205.russian.txt": {
+    "player_count": 1,
+    "sha256": "31ab7549981c09bbb725fecbea0a4c88973c048e2e60933ec20edf036ef64b03"
+  },
+  "PacificPoker/NLHE-MTT-EUR-0.01-201206.freeroll.buyin.summary.txt": {
+    "player_count": 1,
+    "sha256": "05405a58ca0d9822b70671072f783e8060b4c560677b128cb10b5445668a40c7"
+  },
+  "PacificPoker/NLHE-PM-MTT-10-20120221-Summary.txt": {
+    "player_count": 1,
+    "sha256": "cb5f048bb7f22d0fe324cd8f22d53bd8c03ba20f76bd4c47520146deabca7da4"
+  },
+  "PacificPoker/NLHE-USD-MTT-3-201111.real.money.txt": {
+    "player_count": 1,
+    "sha256": "cd4d8700b9444346107f2c33d24abbfae6ee1a5cb8d4f16d75de64dd4f2cd8f9"
+  },
+  "PacificPoker/NLHE-USD-MTT-3.15-201111.rebuys.addons.txt": {
+    "player_count": 1,
+    "sha256": "df7c530933eb69de4136af0ca5426db8c6b9a21be5f2e6d14cf6eb8bfbe0860b"
+  },
+  "PacificPoker/NLHE-USD-MTT-5-201111.cashed.txt": {
+    "player_count": 1,
+    "sha256": "2c70ee089d61ecc56433a9aa6865a955f6d8aa2c8a532e5ae007eb1753c5d6cc"
+  },
+  "PacificPoker/NLHE-USD-STT-20-201205.euro.style.txt": {
+    "player_count": 1,
+    "sha256": "33843ea0d640ec20e2a7c3fe43edd705e388a322fd518361285829d8f9cd0bf9"
+  },
+  "PokerTracker/NLHE-2max-PSFP-870-201609.PokerStars.txt": {
+    "player_count": 2,
+    "sha256": "c60e8f4147d54e3ebac308b817a6a7cf85f5bba524f55fc7b8b07b0069aed576"
+  },
+  "PokerTracker/NLHE-2max-USD-0-STT-201307.Microgaming.txt": {
+    "player_count": 2,
+    "sha256": "ce8afd96c0b739b3465b42882601209fb997285672e42dcea03506403e0192a1"
+  },
+  "PokerTracker/NLHE-3max-EUR-50.0-STT-Hyper-201903.Winamax.txt": {
+    "player_count": 3,
+    "sha256": "b64d82d1ed803f2c97c225914e3b66ca49f197f742151268c1027ff5dc583c07"
+  },
+  "PokerTracker/NLHE-USD-0-MTT-Turbo-201503.PokerStars.NA.limit.txt": {
+    "player_count": 10,
+    "sha256": "9d8d5284e2cdaa0ce9ef33bd6f49a64e3bf08fcb508f02a46edc5c5a161e9cda"
+  },
+  "PokerTracker/NLHE-USD-0.50-STT-201203.Merge.txt": {
+    "player_count": 9,
+    "sha256": "30ef6770068055020c509ab970bff8aee0e632d58a3d61936a253c18ad155895"
+  },
+  "PokerTracker/NLHE-USD-1-STT-Turbo-201204.Merge.still.playing.txt": {
+    "player_count": 6,
+    "sha256": "ef851afbbb2cb882d8f670f76eac2f7312c153bbe21f7449fd56315e96fb5f52"
+  },
+  "PokerTracker/NLHE-USD-13.77-MTT-SNG-201503.PokerStars.prizepool.txt": {
+    "player_count": 140,
+    "sha256": "612cb8fbd69639885aed98ac3c30a61e7c93b6e0e8f69d2670c3865e772a015c"
+  },
+  "PokerTracker/NLHE-USD-150-MTT-201409.PokerStars.txt": {
+    "player_count": 7,
+    "sha256": "b4d5826c03c10877e83cbb50070d417a9486b3e8fa483ce2fa1ccf82d6318186"
+  },
+  "PokerTracker/NLHE-USD-16.50-MTT-201307.Microgaming.rebuy.addon.txt": {
+    "player_count": 66,
+    "sha256": "3655894ea2d6f1edb6c8febadbfe804b0a231ebe2a40ea5d6fc4ef37364c018f"
+  },
+  "PokerTracker/NLHE-USD-22-STT-Turbo-200706.FullTilt.txt": {
+    "player_count": 9,
+    "sha256": "ec750a60b59479c88311857ec0cd785bd4db49beb82f38c6e08446ace8349cd0"
+  },
+  "PokerTracker/PLO-USD-37.5-MTT-201502.PokerStars.bounty.txt": {
+    "player_count": 8,
+    "sha256": "59698a5e702da99af773cb0c209071ec79c619811f7cd3b8bd27287908a23f68"
+  },
+  "Stars/5-Card-PLO-6max-MTT-USD-12.30-12.25-2.45-201611.progressive.txt": {
+    "player_count": 49,
+    "sha256": "b86e415e9124ed780ba16ffb9d17e551ea925fe175cbc4df7d39718a42689a81"
+  },
+  "Stars/6+Holdem-3max-STT-USD-1.00-201907.txt": {
+    "player_count": 3,
+    "sha256": "bd4b57810ca7dd1bd68ec456b6ada75ae39299614c7175dc44cdb7dbda4026a6"
+  },
+  "Stars/8-Game-2max-STT-play-100-201306.homeGame.shootout.txt": {
+    "player_count": 2,
+    "sha256": "1442696c8a807ce7bee9d6b82a1314a46eacad11ae1969ff814e8922db30c8e4"
+  },
+  "Stars/MPLO-6max-MTT-USD-27-201605.txt": {
+    "player_count": 1804,
+    "sha256": "f884f138919464d6c8ca73c26b433072aca5bfd62b96d86505de40d921ebbd3e"
+  },
+  "Stars/NLHE-4max-MTT-USD-2-201305.shootout.txt": {
+    "player_count": 348,
+    "sha256": "5843d5be65998d501747c40790a165f7d72000ecde5a9d0c312d6aedee8c8e4e"
+  },
+  "Stars/NLHE-6max-STT-play-1000-201605.FullTilt.txt": {
+    "player_count": 6,
+    "sha256": "7bdffa8879047d649e5eb9ce449865e2ecdb38b0427703fcbbc69725c27d618e"
+  },
+  "Stars/NLHE-9max-MTT-INR-136.50-13.50-201901.txt": {
+    "player_count": 82,
+    "sha256": "1d942f3dbb91b69f341380ae718c5fe615f14f84c587c3b2f75f8f8e1bce4c14"
+  },
+  "Stars/NLHE-9max-MTT-USD-2.50-201305.KO.v1.txt": {
+    "player_count": 5309,
+    "sha256": "fa8c7f89a5fe94bcc2d82a2fb147f9b9c1a21c8789aaa7c48dcbacbc57ac388c"
+  },
+  "Stars/NLHE-9max-MTT-USD-2.50-201305.KO.v2.txt": {
+    "player_count": 6643,
+    "sha256": "1e96cdf4e3f2638a520a99493302b15e2bc842b1cca3a585e5770dfc1828911e"
+  },
+  "Stars/NLHE-9max-SC-MTT-201512.txt": {
+    "player_count": 77,
+    "sha256": "aa4726547075fbc39e74179ba39bff141175d9d5cc051e068c95c06455c83766"
+  },
+  "Stars/NLHE-EUR-STT-0.42-201102.emailed.cp1252.txt": {
+    "player_count": 0,
+    "sha256": "527e545d211312bed6f38e054710a2de7825e8f3867cbafadccf6543502b6aa7"
+  },
+  "Stars/NLHE-EUR-SnG-10-201101.Sample.txt": {
+    "player_count": 9,
+    "sha256": "72d836d058d302b3c297e8834f1342f59872b29a39d7b3c415e0a54da6f62ea8"
+  },
+  "Stars/NLHE-GBP-MTT-75-201212.txt": {
+    "player_count": 43,
+    "sha256": "9bbe39fb96627541f6f620807a71eaee009a7f109f691d739f3674256514e717"
+  },
+  "Stars/NLHE-MTT-FPP-100-201309.Finished.Super.Satellite.txt": {
+    "player_count": 36,
+    "sha256": "168d353636c44fb6ed7b66f9e924ca2aece463b0f064c499696a89864c5f64a6"
+  },
+  "Stars/NLHE-MTT-FPP-100-201309.Still.Playing.Super.Satellite.txt": {
+    "player_count": 36,
+    "sha256": "8f4571c3a156ee56a10b53d5a11b689ce0f3fd6c73b26b4787a80abd8648f806"
+  },
+  "Stars/NLHE-MTT-FREE-201309.Super.Satellite.txt": {
+    "player_count": 14122,
+    "sha256": "7f49ec3a7ab549cbbbf1112013203d0f862c75f19b9cd3a629f23d36e11d96c7"
+  },
+  "Stars/NLHE-MTT-USD-250-250-30-202005.reentry.ko.txt": {
+    "player_count": 1263,
+    "sha256": "a344eff274c1dfe01bc5a937288618418dd10b8896f1f33407858515fb04f2b6"
+  },
+  "Stars/NLHE-MTT-USD-50-5-202112.double.entryid.txt": {
+    "player_count": 33557,
+    "sha256": "c61ecc3edc43d54b8a853d95aacfd27bbc6ef236094cc0985fc9e181b17bea22"
+  },
+  "Stars/NLHE-Play-STT-20110405.txt": {
+    "player_count": 9,
+    "sha256": "289cb225f601f17599e6b2772d916f0e04208ad3b8ff8edefd9dc87e889e228b"
+  },
+  "Stars/NLHE-STT-EUR-5-202104.RIO.txt": {
+    "player_count": 3,
+    "sha256": "4025fe2af2647bf46b73fdb8aa92e0a15b856d639ff44d79b687e45b6eea7985"
+  },
+  "Stars/NLHE-USD-5-201603.Sunday.Million.ticket.txt": {
+    "player_count": 3,
+    "sha256": "fe005bb190c6abb172315e06eb90f9d8dacfcf85cff85fea73142320ba88fc32"
+  },
+  "Stars/NLHE-USD-HUSnG-10-201011.s0rrow.wins.txt": {
+    "player_count": 2,
+    "sha256": "e2683b85ef5428633c08efa0a2c0a0e3343cbac4abd9cff245741311848593bb"
+  },
+  "Stars/NLHE-USD-MTT-0.50-201107.Super.Satellite.txt": {
+    "player_count": 44,
+    "sha256": "9c1eeccb73a0b3007478d0e24b648a86971116f8bed9bace3494e15c99cb93eb"
+  },
+  "Stars/NLHE-USD-MTT-0.50-201107.SuperSatellite.Complete.txt": {
+    "player_count": 44,
+    "sha256": "1b0e72e1f75a6b4eff8cd056bc7688d170100d505584872d20eb5686765338be"
+  },
+  "Stars/NLHE-USD-MTT-20-200708.s0rrow.2nd.txt": {
+    "player_count": 276,
+    "sha256": "d99d9be6d79f0f530b6f868764e3b7757c50a16c4be0c4e9d19472be84a456fe"
+  },
+  "Stars/NLHE-USD-MTT-4max-2.00-201011.Stars.local.format.txt": {
+    "player_count": 440,
+    "sha256": "60e492c2f5f45c663f7f340d3569591ba229d63c1b0fcf5270d754ee44687da8"
+  },
+  "Stars/NLHE-USD-MTT-5-201111.no.prizepool.txt": {
+    "player_count": 5058,
+    "sha256": "1945e098013e2147f6aae7ca09fe1406c897b7b41007c3d8fe7e82830b4b3675"
+  },
+  "Stars/NLHE-USD-MTT-Freeroll.201203.accent.sensitive.player.names.txt": {
+    "player_count": 28599,
+    "sha256": "02ca933d8a04f16c3bafcb5204ea54f9c73b7c117575a6f7db7de3572e4e94b6"
+  },
+  "Stars/NLO8-USD-STT-201109.Knockout.sample.txt": {
+    "player_count": 9,
+    "sha256": "f9af443e6c7bb8ca57796293275704bcccff7bb49de98ccdbc40524239c98e67"
+  },
+  "Stars/NLSD-MTT-USD-1000-50-201609.reentry.txt": {
+    "player_count": 145,
+    "sha256": "3091475adef87dc969f9c94cab693dcb4296655219626e42e676a302044e715b"
+  },
+  "Stars/PHL-PLO-USD-MTT-2-201202.txt": {
+    "player_count": 73,
+    "sha256": "aff0e146d85db8601a67fcf17cf6747ccce3f37451a3ef3ffb342435a61d9935"
+  },
+  "Stars/PLO-MTT-USD-505-25-202005.rebuy.addon.txt": {
+    "player_count": 236,
+    "sha256": "aeec15a6b4ece69b67968d0ed0c1d70e8cca01baf3cf88d7d4563ada445044c4"
+  },
+  "Stars/PokerStars Tournament History Request - Last 3 tournaments.eml": {
+    "player_count": 10,
+    "sha256": "915832f19f7a77c02725711b9b6aa294ba00b1d027a25678860f4048a17e9d1a"
+  },
+  "Winamax/20110305_Freeroll 150%80(5142226)_real_holdem_no-limit_summary.txt": {
+    "player_count": 0,
+    "sha256": "c3ea948eb0d677c7f0dc2fd39a907db738e74d789e45cf3aa7af3a08e2525dcf"
+  },
+  "Winamax/NLHE-EUR-0.46-STT-201110.hero.cashed.txt": {
+    "player_count": 1,
+    "sha256": "2fdc44c9ceb289c811985ca6a501b02f23628b7bf5e07934263c63e489df8bf0"
+  },
+  "Winamax/NLHE-EUR-9.00-MTSNG-201105.rebuy.addons.txt": {
+    "player_count": 1,
+    "sha256": "e217b6b26240e56e0acf4c20f72ccda6198f77982270ccad18239c681c829bdd"
+  },
+  "Winamax/NLHE-EUR-HUSNG-4.70-201302.semiturbo.txt": {
+    "player_count": 0,
+    "sha256": "8acd12c25f61f7e3df308917d87793a25472152a479ed265361a5e4d36ce0985"
+  },
+  "Winamax/NLHE-EUR-MTT-0.90-201302.flight.txt": {
+    "player_count": 1,
+    "sha256": "eed0de7efc233c63b5c4197402b92d22e8c05710c1ab9259421a118286691e0d"
+  },
+  "Winamax/NLHE-EUR-MTT-10-201704.rebuys.addons.txt": {
+    "player_count": 1,
+    "sha256": "f17f1604cf9c5d03cdd359db0df3ad19794537a02848d384d64bbd1bf1044f80"
+  },
+  "Winamax/NLHE-EUR-SNG-25-201704.new.format.txt": {
+    "player_count": 1,
+    "sha256": "6ae040d80d1a817abf4d8b0e7b7f8891750883a8c788a8be5b19fcaf3a336cf3"
+  },
+  "Winamax/NLHE-Freeroll-201206.new.info.txt": {
+    "player_count": 1,
+    "sha256": "b8f1413fc8d597907147e1f82fc9c7c8cac3d969e844de4f8e049bb30c7e9a90"
+  },
+  "Winamax/NLHE-Freeroll-Ticket-STT-201208.txt": {
+    "player_count": 1,
+    "sha256": "c04fadd21024b5ec5280744a9464515c9a9f7208bf1457dc72245ea1eabbbc39"
+  },
+  "Winamax/PLO-EUR-4.50-MTSNG-201111.rebuy.addons.txt": {
+    "player_count": 1,
+    "sha256": "7196233152596b36197b6debff3c204bb24179bbbe510d54ed2e560477fdc781"
+  },
+  "Winamax/PLO5-EUR-50-HUSNG-202003.txt": {
+    "player_count": 1,
+    "sha256": "ff02b8046603503c40be35f74b0435cfde75bf6b381061c22f6a87c666bf96d6"
+  }
+}
