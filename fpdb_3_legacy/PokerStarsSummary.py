@@ -246,8 +246,16 @@ class PokerStarsSummary(TourneySummary):
     )
     re_xls_date_time = re.compile("^[.0-9]+$")
     re_rank = re.compile(
-        r"^You\sfinished\sin\s(?P<RANK>[0-9]+)(st|nd|rd|th)\splace\.",
+        r"^You\sfinished\s(the\stournament\s)?in\s(?P<RANK>[0-9]+)(st|nd|rd|th)\splace\.",
         re.MULTILINE,
+    )
+
+    # An emailed summary carries no ranking table: it addresses the player by
+    # name and states their own result in prose, so the hero has to be read
+    # from the greeting and the award line or the result is lost on import.
+    re_emailed_hero = re.compile(r"^Dear\s+(?P<NAME>\S.*?),\s*$", re.MULTILINE)
+    re_emailed_award = re.compile(
+        r"A\s+(?P<CUR>[A-Z]{3})\s+(?P<WINNINGS>[.,0-9]+)\s+award\s+has\sbeen\scredited",
     )
 
     codepage: ClassVar[list[str]] = ["cp1252", "utf8", "latin1", "iso-8859-1"]
@@ -258,6 +266,25 @@ class PokerStarsSummary(TourneySummary):
     MIN_LARGE_TOURNAMENT = 6
     MAX_SMALL_TOURNAMENT = 9
     DOUBLE_OR_NOTHING_ENTRIES = 10
+
+    def _add_emailed_hero(self, hero_rank: int) -> None:
+        """Register the hero of an emailed summary, which lists no ranking table.
+
+        Such a summary names the player in its greeting and states the result in
+        prose. Without this the tournament imported with no player at all, so the
+        hero's own placing and award were lost.
+        """
+        hero = self.re_emailed_hero.search(self.summaryText)
+        if hero is None or not hero_rank:
+            return
+
+        winnings = 0
+        award = self.re_emailed_award.search(self.summaryText)
+        if award is not None:
+            self.currency = award.group("CUR")
+            winnings = self._money_to_cents(award.group("WINNINGS"))
+
+        self.addPlayer(hero_rank, hero.group("NAME"), winnings, self.currency, None, None, None)
 
     def _money_to_cents(self, value: str) -> int:
         return int(Decimal(self.clearMoneyString(value.replace(" ", ""))) * 100)
@@ -826,7 +853,9 @@ class PokerStarsSummary(TourneySummary):
         hero_rank = int(m3.group("RANK")) if m3 else 0
 
         player_matches = re_player.finditer(self.summaryText)
+        registered = 0
         for a in player_matches:
+            registered += 1
             mg = a.groupdict()
             # print "DEBUG: a.groupdict(): %s" % mg
             name = mg["NAME"]
@@ -896,6 +925,9 @@ class PokerStarsSummary(TourneySummary):
                 ko_count,
                 entry_id,
             )
+
+        if not registered:
+            self._add_emailed_hero(hero_rank)
 
         # print self
 

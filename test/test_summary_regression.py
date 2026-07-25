@@ -68,13 +68,18 @@ KNOWN_UNPARSED = {
     "Winning/PlayerTransactionHistory.html",
 }
 
-# Summaries that parse but register no player at all, losing the hero's own
-# result. Each states the placing in plain prose -- "You finished the tournament
-# in 2nd place", with a EUR 0.90 award in the first -- and no ranking table, so
-# nothing calls addPlayer. Listed rather than accepted: a real gap, in three
-# converters, worth its own fix.
-HERO_RESULT_NOT_CAPTURED = {
-    "Stars/NLHE-EUR-STT-0.42-201102.emailed.cp1252.txt",
+# Two summaries register no player, and in both cases the file itself withholds
+# what addPlayer needs, so the converter declines rather than invent it:
+#
+#  * the freeroll never names anyone -- it has no "Player :" line at all, only
+#    "You finished in 3497th place";
+#  * the semiturbo names the hero but states the placing as a literal ellipsis,
+#    "You finished in ... place", which WinamaxSummary skips explicitly.
+#
+# The third file in this set was a genuine gap and is now fixed: an emailed
+# PokerStars summary states the result in prose, and its hero is registered
+# from the greeting and the award line.
+HERO_RESULT_WITHHELD_BY_THE_FILE = {
     "Winamax/20110305_Freeroll 150%80(5142226)_real_holdem_no-limit_summary.txt",
     "Winamax/NLHE-EUR-HUSNG-4.70-201302.semiturbo.txt",
 }
@@ -118,8 +123,8 @@ def test_the_listed_files_are_still_the_ones_this_harness_cannot_drive(key) -> N
 
 @pytest.mark.parametrize(
     ("key", "site", "path"),
-    [case for case in PARSEABLE if case[0] not in HERO_RESULT_NOT_CAPTURED],
-    ids=[case[0] for case in PARSEABLE if case[0] not in HERO_RESULT_NOT_CAPTURED],
+    [case for case in PARSEABLE if case[0] not in HERO_RESULT_WITHHELD_BY_THE_FILE],
+    ids=[case[0] for case in PARSEABLE if case[0] not in HERO_RESULT_WITHHELD_BY_THE_FILE],
 )
 def test_every_summary_registers_at_least_one_player(key, site, path) -> None:
     # A summary that registers nobody imports a tournament the hero did not
@@ -127,11 +132,22 @@ def test_every_summary_registers_at_least_one_player(key, site, path) -> None:
     assert fingerprint_of(site, path)["players"]
 
 
-@pytest.mark.parametrize("key", sorted(HERO_RESULT_NOT_CAPTURED))
-def test_the_listed_summaries_still_lose_their_hero_result(key) -> None:
+@pytest.mark.parametrize("key", sorted(HERO_RESULT_WITHHELD_BY_THE_FILE))
+def test_a_file_that_names_nobody_registers_nobody(key) -> None:
     site, _, relative = key.partition("/")
 
     assert fingerprint_of(site, SUMMARIES / site / relative)["players"] == []
+
+
+def test_an_emailed_summary_registers_its_hero_from_the_prose() -> None:
+    # No ranking table: the greeting names the player and the award line states
+    # what they won. Both used to be dropped, importing a tournament nobody played.
+    fingerprint = fingerprint_of("Stars", SUMMARIES / "Stars" / "NLHE-EUR-STT-0.42-201102.emailed.cp1252.txt")
+
+    assert fingerprint["players"] == [
+        {"rank": 2, "name": "Hero", "winnings": 90, "currency": "EUR",
+         "rebuys": None, "addons": None, "ko": None},
+    ]
 
 
 @pytest.mark.parametrize(("key", "site", "path"), PARSEABLE, ids=[case[0] for case in PARSEABLE])
