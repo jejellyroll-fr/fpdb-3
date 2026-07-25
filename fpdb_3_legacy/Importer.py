@@ -1330,25 +1330,30 @@ class Importer:
                         hand.insertHandsShowdown(self.database, doinsert)
                         hand.insertHandsCashout(self.database, doinsert)
 
-                    # pipe the Hands.id out to the HUD
-                    if self.callHud:
-                        log.info(f"ZMQ DEBUG - to_hud contains {len(to_hud)} hands: {to_hud}")
-                        if self.zmq_sender is None:
-                            self.zmq_sender = ZMQSender()
-                        zmq_sender = self.zmq_sender
-                        for hid in to_hud:
-                            try:
-                                log.info(f"Sending hand ID {hid} to HUD via ZMQ socket")
-                                zmq_sender.send_hand_id(hid)
-                            except OSError as e:
-                                log.exception(f"Failed to send hand ID to HUD via socket: {e}")
-
                     # Cache HHC if enabled
                     if self.settings.get("cacheHHC", False):
                         self.handhistoryconverter = hhc
                         # Keyed too, so a caller comparing a whole directory gets
                         # each file's own converter instead of the last one.
                         self.cached_hhcs[fpdbfile.path] = hhc
+
+                # Notify the HUD only after the transaction above has committed.
+                # The HUD reads each hand on its own DB connection; sending while
+                # the write is still open lets that SELECT miss the uncommitted
+                # row, so the hand is dropped ("table info not found in DB"). The
+                # send is a non-blocking ZMQ push, so moving it out of the
+                # transaction only shortens the write lock -- it costs nothing.
+                if self.callHud:
+                    log.info(f"ZMQ DEBUG - to_hud contains {len(to_hud)} hands: {to_hud}")
+                    if self.zmq_sender is None:
+                        self.zmq_sender = ZMQSender()
+                    zmq_sender = self.zmq_sender
+                    for hid in to_hud:
+                        try:
+                            log.info(f"Sending hand ID {hid} to HUD via ZMQ socket")
+                            zmq_sender.send_hand_id(hid)
+                        except OSError as e:
+                            log.exception(f"Failed to send hand ID to HUD via socket: {e}")
         elif self.mode == "auto":
             return (0, 0, partial, skipped, errors, time() - ttime, detected_sitename)
 
