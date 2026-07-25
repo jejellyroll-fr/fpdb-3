@@ -488,3 +488,98 @@ def test_the_interactive_run_walks_every_section(stub_config, capsys) -> None:
         assert config_module.main(["--interactive"]) == 0
 
     assert "Running original interactive test" in capsys.readouterr().out
+
+
+# --------------------------------------------------------------------------
+# Re-reading the file into the object already in use
+# --------------------------------------------------------------------------
+#
+# reload() is what the preferences dialog and the auto-import window call once
+# they have written a change, so it is the step that decides whether a saved
+# setting takes effect before fpdb is restarted.
+
+
+def rewrite(config: Any, old: str, new: str) -> None:
+    """Change the file under the object's feet, the way saving does."""
+    path = Path(config.file)
+    path.write_text(path.read_text(encoding="utf-8").replace(old, new, 1), encoding="utf-8")
+
+
+def test_a_change_made_to_the_file_is_picked_up(config) -> None:
+    rewrite(config, "<hud_ui ", '<hud_ui bgcolor="#ABCDEF" ')
+
+    assert config.reload() is True
+    assert config.ui.bgcolor == "#ABCDEF"
+
+
+def test_every_section_is_read_again(config) -> None:
+    sections = ("supported_sites", "supported_games", "supported_databases", "aux_windows", "layout_sets", "stat_sets")
+    before = {name: len(getattr(config, name)) for name in sections}
+
+    config.reload()
+
+    assert {name: len(getattr(config, name)) for name in sections} == before
+    assert all(before.values())
+
+
+def test_an_entry_that_is_no_longer_in_the_file_is_dropped(config) -> None:
+    # Without the clearing step a removed site would linger for the rest of
+    # the session.
+    config.supported_sites["A Room That Was Removed"] = object()
+
+    config.reload()
+
+    assert "A Room That Was Removed" not in config.supported_sites
+
+
+def test_a_file_that_is_no_longer_valid_xml_is_refused(config) -> None:
+    Path(config.file).write_text("<this is not closed", encoding="utf-8")
+
+    assert config.reload() is False
+
+
+def test_the_settings_in_use_survive_a_refused_reload(config) -> None:
+    before = len(config.supported_sites)
+    Path(config.file).write_text("<this is not closed", encoding="utf-8")
+
+    config.reload()
+
+    assert len(config.supported_sites) == before
+
+
+def test_a_file_that_is_gone_is_refused(config) -> None:
+    Path(config.file).unlink()
+
+    assert config.reload() is False
+
+
+def test_a_failure_partway_through_leaves_the_settings_half_loaded(config) -> None:
+    # The sections are emptied first and refilled one by one, so a section
+    # that will not parse leaves the ones after it empty. reload() reports the
+    # failure, but none of its four callers look at the return value, so what
+    # they carry on with is a configuration with no popup windows.
+    assert config.popup_windows
+
+    with patch.object(config_module, "Popup", side_effect=ValueError("unreadable node")):
+        assert config.reload() is False
+
+    assert config.supported_sites
+    assert config.popup_windows == {}
+
+
+def test_a_configuration_without_a_general_section_falls_back_to_defaults(config) -> None:
+    rewrite(config, "<general", "<general_disabled")
+    rewrite(config, "</general", "</general_disabled")
+
+    assert config.reload() is True
+    assert config.general
+
+
+def test_an_appearance_setting_takes_effect_once_it_is_saved_and_read_back(config) -> None:
+    # The colours are written onto the document alone, so this is the whole
+    # round trip a user makes: change it, save it, reload it.
+    config.set_hud_ui_parameters({"bgcolor": "#654321"})
+    config.save()
+
+    assert config.reload() is True
+    assert config.get_hud_ui_parameters()["bgcolor"] == "#654321"
