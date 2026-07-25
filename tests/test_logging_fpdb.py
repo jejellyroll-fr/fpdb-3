@@ -22,6 +22,28 @@ import fpdb_3_legacy.loggingFpdb as logging_fpdb
 
 
 @pytest.fixture(autouse=True)
+def isolate_logger_config(tmp_path_factory, monkeypatch):
+    """Keep every configuration write inside the test's own directory.
+
+    A registry saves through a LogConfig that defaults to ~/fpdb_logs, and
+    several registry operations save on their own. Without this the suite
+    rewrites the configuration of whoever runs it.
+    """
+    # Deliberately not under tmp_path: the rotation tests inspect that
+    # directory and must see only the files they wrote.
+    real_log_config = logging_fpdb.LogConfig
+    sandbox = tmp_path_factory.mktemp("logger-config")
+
+    def in_sandbox(config_dir: str | None = None):
+        return real_log_config(config_dir=config_dir or str(sandbox))
+
+    monkeypatch.setattr(logging_fpdb, "LogConfig", in_sandbox)
+    monkeypatch.setattr(logging_fpdb, "_log_config", in_sandbox())
+    monkeypatch.setattr(logging_fpdb._logger_registry, "_config", in_sandbox())
+    return sandbox
+
+
+@pytest.fixture(autouse=True)
 def preserve_global_logging():
     """Snapshot and restore the logging state these tests necessarily mutate."""
     root = logging.getLogger()
