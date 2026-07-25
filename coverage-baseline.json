@@ -1,6 +1,6 @@
 {
   "_comment": "Coverage floors enforced by tools/coverage_ratchet.py. Branch-aware percentages, as reported by coverage.py. Regenerate with python tools/coverage_ratchet.py --update coverage.json after a change that genuinely raises coverage.",
-  "total": 57.3,
+  "total": 57.6,
   "domains": {
     "poker-domain": 74.9,
     "database": 62.8,
@@ -10,7 +10,7 @@
     "hud": 65.3,
     "live-capture": 66.5,
     "gui": 32.1,
-    "maintenance-scripts": 29.8,
+    "maintenance-scripts": 37.7,
     "platform-pkg": 17.1,
     "other": 55.6
   },
