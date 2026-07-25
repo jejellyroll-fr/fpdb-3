@@ -336,22 +336,57 @@ depuis l'artefact Linux (`--update coverage.json`) plutôt que baisser un planch
 **Critère de sortie atteint** : une PR qui baisse la couverture d'un module gardé ou
 d'un domaine échoue en CI, avec le nom du coupable et l'écart au plancher.
 
-### Étape 2 — Brancher le corpus existant sur le harnais golden · ~2 j
+### Étape 2 — Brancher le corpus existant sur le harnais golden — ✅ FAIT (2026-07-25)
 
-Le meilleur ratio du dépôt (~250 fixtures déjà versionnées, harnais générique déjà écrit).
+**Parseurs 64,0 % → 77,8 % (+13,8 points), total 54,2 % → 57,1 %.** Le harnais passe de
+**58 à 597 fichiers** et de 339 à **2 867 mains**, en 5,8 s.
 
-1. Ajouter au manifeste **tous** les fichiers de `regression-test-files/cash/` des rooms
-   déjà présentes dans `ROOMS`/`CASES` (Fulltilt 54, iPoker 30, PokerTracker 20,
-   Microgaming 15, Boss 14, Everleaf 11, Entraction 6) — aujourd'hui 1 fichier chacune.
-2. Ajouter les rooms absentes du harnais : Merge (34), OnGame (17), Absolute (13),
-   PKR (12), Enet (6), Everest (5), Betfair (1).
-3. Générer les snapshots, **les relire un par un** avant de les figer : un snapshot
-   faux gèle un bug. Tout écart suspect devient un test nommé, pas une ligne de JSON.
-4. Étendre le même patron aux résumés de tournoi les plus faibles (`iPokerSummary`,
-   `PokerTrackerSummary`, `WinningSummary`).
+`CASES` est désormais construit par balayage déclaratif de `regression-test-files/cash/`
+(25 rooms) au lieu d'une liste d'ajouts au cas par cas. Les 7 rooms qui n'avaient qu'un
+fichier branché (Fulltilt 54, iPoker 30, PokerTracker 20, Microgaming 15, Boss 14,
+Everleaf 11, Entraction 6) sont complètes, et les 7 rooms absentes sont entrées
+(Merge 34, OnGame 17, Absolute 13, PKR 12, Enet 6, Everest 5, Betfair 1). Les 26 entrées
+préexistantes re-clées sous `regression/` gardent une empreinte identique — vérifié — et
+les 32 entrées de `tests/fixtures/hands` sont inchangées au bit près.
 
-**Gain attendu** : parseurs 66,9 % → ~85 %, soit ~1 800 lignes, sans écrire d'assertion
-métier. **Effet de bord attendu et souhaité** : cette étape trouvera des bugs.
+**Les instantanés ont été relus avant d'être figés**, comme l'exigeait le point 3, mais
+par invariants plutôt qu'à l'œil sur 2 867 mains : aucune exception de parsing sur les
+565 fichiers, aucune carte dupliquée au board, aucune action d'un joueur non assis,
+aucun rake négatif, aucun rake supérieur au pot, aucune main sans identifiant.
+
+Deux ensembles sortent de cette relecture, et deviennent des **tests nommés plutôt que
+des lignes de JSON** :
+
+- `KNOWN_EMPTY` (23 fichiers) — les refus délibérés : mains annulées, exports tronqués,
+  main observée sans stacks. Les 8 fichiers PartyPoker partagent une seule cause, un
+  joueur anonymisé qui agit sans figurer dans le préambule des sièges, d'où un
+  `FpdbHandPartialError` explicite plutôt qu'un siège inventé. Un fichier qui se met à
+  produire — ou cesse de produire — des mains échoue désormais par son nom.
+- `POT_EQUATION_EXCEPTIONS` (17 fichiers) — l'équation `encaissé + rake == pot` est
+  vérifiée **main par main sur les 2 850 autres**. Les exceptions se répartissent en
+  mains cash-out (le joueur encaisse une assurance, pas une part du pot), ré-exports
+  tiers (HM1, « converted ») dont la ligne de résumé est déjà dégradée, et **cinq cas
+  inexpliqués** : deux fichiers BetOnline et trois fixtures PokerStars synthétiques.
+  Ces cinq-là sont de vrais suspects, à instruire séparément.
+
+**Point 4 non réalisé, et le plan était mal fondé sur ce point.** Il visait
+`iPokerSummary`, `PokerTrackerSummary` et `WinningSummary` d'après leur couverture, sans
+vérifier le corpus : **il n'existe aucun résumé iPoker** dans `regression-test-files/`,
+et Winning n'en a qu'un seul. Seul PokerTracker (11 fichiers) est atteignable. Par
+ailleurs ce n'est pas « le même patron » : les résumés se construisent en neutralisant
+`TourneySummary.__init__` et en amorçant ses défauts, classe par classe, donc ils
+demandent leur propre harnais. Reporté en étape 2bis avec une portée exacte.
+
+### Étape 2bis — Harnais golden pour les résumés de tournoi · ~1,5 j
+
+Corpus réellement disponible : FTP 43, Stars 36, Winamax 12, PokerTracker 11,
+PacificPoker 9, Winning 1 — soit 112 fichiers pour 6 sites. Gains atteignables :
+`FullTiltPokerSummary` (47 %), `PokerStarsSummary` (57 %), `PokerTrackerSummary` (11 %),
+`WinningSummary` (19 %). `iPokerSummary` (9,9 %) restera bas faute de corpus : il
+faudrait d'abord en capturer.
+
+Empreinte à définir (différente de celle des mains) : identifiant du tournoi, buy-in,
+fee, prize pool, nombre d'entrants, et par joueur le rang, les gains et les rebuys.
 
 ### Étape 3 — Tester les caches statistiques — ✅ FAIT (2026-07-25)
 
@@ -485,7 +520,8 @@ pas fait.
 | # | Étape | Effort | Gain couverture | Risque levé |
 |---|---|---:|---:|---|
 | 1 | ✅ Cliquet de couverture en CI | fait | — | Empêche la dérive |
-| 2 | Corpus → harnais golden | 2 j | ~1 800 l. | Régressions parseurs |
+| 2 | ✅ Corpus → harnais golden | fait | parseurs +13,8 pts | Régressions parseurs |
+| 2bis | Harnais résumés de tournoi | 1,5 j | — | Régressions résumés |
 | 3 | ✅ Tests des caches statistiques | fait | +59 pts sur le module | **Chiffres HUD faux** |
 | 3bis | ✅ Corriger les écrivains de cache | fait | — | **4 caches impeuplables** |
 | 4 | Scripts d'exploitation | 1 j | ~700 l. | **Corruption de base** |
@@ -496,8 +532,7 @@ pas fait.
 
 **Chemin critique recommandé : 1 → 3 → 2 → 4 → 5**, l'étape 1 protégeant tout le reste
 et l'étape 3 précédant l'étape 5 parce qu'on ne déplace pas du code non testé.
-Les étapes 1, 3 et 3bis sont faites. Les étapes 2, 4 et 5 restent, et portent sur du
-code indépendant les unes des autres.
+Les étapes 1, 2, 3 et 3bis sont faites. Restent 2bis, 4 et 5, indépendantes entre elles.
 
 ---
 
