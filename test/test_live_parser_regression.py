@@ -84,6 +84,7 @@ REGRESSION_SITES = {
     "Everest": Everest,
     "Everleaf": Everleaf,
     "FTP": Fulltilt,
+    "GGPoker": GGPoker,
     "KingsClub": KingsClub,
     "Merge": Merge,
     "Microgaming": Microgaming,
@@ -94,6 +95,7 @@ REGRESSION_SITES = {
     "PokerTracker": PokerTracker,
     "SealsWithClubs": SealsWithClubs,
     "Stars": PokerStars,
+    "UltimateBet": Absolute,
     "Unibet": Unibet,
     "Winamax": Winamax,
     "Winning": Winning,
@@ -125,6 +127,8 @@ CASES += [
 # yielding hands fails this test by name rather than quietly moving a digest.
 KNOWN_EMPTY = {
     "regression/Absolute/Flop/LHE-USD-25-50-200708.timeout.allin.txt",
+    # Zero bytes on disk, like the Everest penalty file below.
+    "regression/GGPoker/Flop/PLO5-6max-USD-0.1-0.25-202104.straddle.walk.txt",
     "regression/Bovada/Flop/NLHE-USD-5-10-201511.concatenated.partial.txt",
     "regression/Everest/Flop/NLHE-USD-0.50-1.00-201203.penalty.txt",
     "regression/FTP/Draw/3-Draw-Limit-USD-10-20-201101.Dead.hand.txt",
