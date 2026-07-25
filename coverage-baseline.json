@@ -3,7 +3,7 @@
   "total": 57.6,
   "domains": {
     "poker-domain": 74.9,
-    "database": 63.3,
+    "database": 63.7,
     "import": 53.2,
     "parsers": 77.7,
     "tourney-summaries": 53.3,
@@ -16,7 +16,7 @@
   },
   "modules": {
     "fpdb_3_legacy/Configuration.py": 58.6,
-    "fpdb_3_legacy/Database.py": 40.0,
+    "fpdb_3_legacy/Database.py": 41.6,
     "fpdb_3_legacy/DerivedStats.py": 81.1,
     "fpdb_3_legacy/Hand.py": 54.8,
     "fpdb_3_legacy/Importer.py": 48.2,

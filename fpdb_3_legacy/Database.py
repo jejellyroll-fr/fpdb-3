@@ -289,58 +289,62 @@ class Database(
             self.sql = sql
 
         if autoconnect:
-            # connect to db
-            self.do_connect(c)
-
-            if self.backend == self.PGSQL:
-                pass
-                # ISOLATION_LEVEL_AUTOCOMMIT     = 0
-                # ISOLATION_LEVEL_READ_COMMITTED = 1
-                # ISOLATION_LEVEL_SERIALIZABLE   = 2
-
-            if (
-                self.backend == self.SQLITE
-                and self.database == ":memory:"
-                and self.wrongDbVersion
-                and self.is_connected()
-            ):
-                log.info("sqlite/:memory: - creating")
-                self.recreate_tables()
-                self.wrongDbVersion = False
-            elif self.is_connected():
-                # Create feature tables added after the original schema so that
-                # existing databases keep working (showdown / cashout details).
-                self.ensure_feature_tables()
-
-            self.gtcache: Any = None  # GameTypeId cache
-            self.tcache: Any = None  # TourneyId cache
-            self.pcache: Any = None  # PlayerId cache
-            self.tpcache: Any = None  # TourneysPlayersId cache
-
-            # if fastStoreHudCache is true then the hudcache will be build using the limited configuration which ignores date, seats, and position
-            self.build_full_hudcache = not self.import_options["fastStoreHudCache"]
-            self.cacheSessions = self.import_options["cacheSessions"]
-            self.callHud = self.import_options["callFpdbHud"]
-
-            # self.hud_hero_style = 'T'  # Duplicate set of vars just for hero - not used yet.
-            # self.hud_hero_hands = 2000 # Idea is that you might want all-time stats for others
-            # self.hud_hero_days  = 30   # but last T days or last H hands for yourself
-
-            # vars for hand ids or dates fetched according to above config:
-            self.hand_1day_ago = 0  # max hand id more than 24 hrs earlier than now
-            self.date_ndays_ago = "d000000"  # date N days ago ('d' + YYMMDD)
-            self.h_date_ndays_ago = "d000000"  # date N days ago ('d' + YYMMDD) for hero
-            self.date_nhands_ago: dict[Any, Any] = {}  # dates N hands ago per player
-
-            self.saveActions = self.import_options["saveActions"] is not False
-
-            if self.is_connected():
-                if not self.wrongDbVersion:
-                    self.get_sites()
-                if self.connection is not None:
-                    self.connection.rollback()  # release locks taken during setup
+            self._connect_and_configure(c)
 
     # end def __init__
+
+    def _connect_and_configure(self, c) -> None:
+        """Open the connection, then set up what needs an open connection."""
+        # connect to db
+        self.do_connect(c)
+
+        if self.backend == self.PGSQL:
+            pass
+            # ISOLATION_LEVEL_AUTOCOMMIT     = 0
+            # ISOLATION_LEVEL_READ_COMMITTED = 1
+            # ISOLATION_LEVEL_SERIALIZABLE   = 2
+
+        if (
+            self.backend == self.SQLITE
+            and self.database == ":memory:"
+            and self.wrongDbVersion
+            and self.is_connected()
+        ):
+            log.info("sqlite/:memory: - creating")
+            self.recreate_tables()
+            self.wrongDbVersion = False
+        elif self.is_connected():
+            # Create feature tables added after the original schema so that
+            # existing databases keep working (showdown / cashout details).
+            self.ensure_feature_tables()
+
+        self.gtcache: Any = None  # GameTypeId cache
+        self.tcache: Any = None  # TourneyId cache
+        self.pcache: Any = None  # PlayerId cache
+        self.tpcache: Any = None  # TourneysPlayersId cache
+
+        # if fastStoreHudCache is true then the hudcache will be build using the limited configuration which ignores date, seats, and position
+        self.build_full_hudcache = not self.import_options["fastStoreHudCache"]
+        self.cacheSessions = self.import_options["cacheSessions"]
+        self.callHud = self.import_options["callFpdbHud"]
+
+        # self.hud_hero_style = 'T'  # Duplicate set of vars just for hero - not used yet.
+        # self.hud_hero_hands = 2000 # Idea is that you might want all-time stats for others
+        # self.hud_hero_days  = 30   # but last T days or last H hands for yourself
+
+        # vars for hand ids or dates fetched according to above config:
+        self.hand_1day_ago = 0  # max hand id more than 24 hrs earlier than now
+        self.date_ndays_ago = "d000000"  # date N days ago ('d' + YYMMDD)
+        self.h_date_ndays_ago = "d000000"  # date N days ago ('d' + YYMMDD) for hero
+        self.date_nhands_ago: dict[Any, Any] = {}  # dates N hands ago per player
+
+        self.saveActions = self.import_options["saveActions"] is not False
+
+        if self.is_connected():
+            if not self.wrongDbVersion:
+                self.get_sites()
+            if self.connection is not None:
+                self.connection.rollback()  # release locks taken during setup
 
     def dumpDatabase(self):
         result = "fpdb database dump\nDB version=" + str(DB_VERSION) + "\n\n"
@@ -448,139 +452,11 @@ class Database(
         self.hand_inc = 1
 
         if backend == Database.MYSQL_INNODB:
-            # Prefer mysqlclient (MySQLdb); fall back to the pure-Python pymysql
-            # shim so MySQL works without the system libraries mysqlclient needs.
-            try:
-                import MySQLdb
-            except ImportError:
-                import pymysql
-
-                pymysql.install_as_MySQLdb()
-                import MySQLdb
-
-            # Note: SQLAlchemy 2.0 removed pool.manage
-            # MySQLdb has its own connection pooling, so we don't need it
-            try:
-                kwargs = {
-                    "host": host,
-                    "user": user,
-                    "passwd": password,
-                    "db": database,
-                    "charset": "utf8",
-                    "use_unicode": True,
-                }
-                if port:
-                    kwargs["port"] = int(port)
-
-                self.connection = MySQLdb.connect(**kwargs)
-                self.__connected = True
-            except MySQLdb.Error as ex:
-                if ex.args[0] == 1045:
-                    raise FpdbMySQLAccessDenied(ex.args[0], ex.args[1])
-                if ex.args[0] == 2002 or ex.args[0] == 2003:  # 2002 is no unix socket, 2003 is no tcp socket
-                    raise FpdbMySQLNoDatabase(ex.args[0], ex.args[1])
-                log.exception("UNKNOWN MYSQL ERROR: {ex}")
-            c = self.get_cursor()
-            c.execute("show variables like 'auto_increment_increment'")
-            self.hand_inc = int(c.fetchone()[1])
+            self._connect_mysql(host, port, user, password, database)
         elif backend == Database.PGSQL:
-            import psycopg
-
-            # Note: SQLAlchemy 2.0 removed pool.manage
-            # psycopg has its own connection pooling, so we don't need it
-            # psycopg3 handles Unicode natively, no need for register_type(UNICODE)
-            # psycopg3 has native Decimal support, no adapter registration needed
-
-            self.__connected = False
-            if self.host in ("localhost", "127.0.0.1"):
-                try:
-                    self.connection = psycopg.connect(dbname=database)
-                    self.__connected = True
-                except psycopg.OperationalError:
-                    # direct connection failed so try user/pass/... version
-                    pass
-
-            if not self.is_connected():
-                try:
-                    self.connection = psycopg.connect(
-                        host=host,
-                        port=port,
-                        user=user,
-                        password=password,
-                        dbname=database,
-                    )
-                    self.__connected = True
-                except Exception as ex:  # intentional broad catch: psycopg connection error inspected and re-raised as a typed FpdbError
-                    if "Connection refused" in ex.args[0] or (
-                        'database "' in ex.args[0] and '" does not exist' in ex.args[0]
-                    ):
-                        raise FpdbPostgresqlNoDatabase(errmsg=ex.args[0])
-                    if "password authentication" in ex.args[0]:
-                        raise FpdbPostgresqlAccessDenied(errmsg=ex.args[0])
-                    if 'role "' in ex.args[0] and '" does not exist' in ex.args[0]:  # role "fpdb" does not exist
-                        raise FpdbPostgresqlAccessDenied(errmsg=ex.args[0])
-                    msg = ex.args[0]
-                    log.exception(f"error postgreslq: {msg}")
-                    raise FpdbError(msg)
-
+            self._connect_postgresql(host, port, user, password, database)
         elif backend == Database.SQLITE:
-            create = True
-            import sqlite3
-
-            # Note: SQLAlchemy 2.0 removed pool.manage
-            # SQLite handles concurrent connections well natively with proper settings
-            # (see check_same_thread=False and timeout settings below)
-
-            if database != ":memory:":
-                if not os.path.isdir(self.config.dir_database) and create:
-                    log.info(f"Creating directory: '{self.config.dir_database}'")
-                    os.makedirs(self.config.dir_database)
-                database = os.path.join(self.config.dir_database, database).replace(
-                    "\\",
-                    "/",
-                )
-            self.db_path = database
-            log.info(f"Connecting to SQLite: {self.db_path}")
-            if os.path.exists(database) or create:
-                self.connection = sqlite3.connect(
-                    self.db_path,
-                    detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES,
-                    timeout=60.0,  # Increased timeout to prevent connection timeouts
-                    check_same_thread=False,  # Allow multi-threaded access
-                )
-                self.__connected = True
-                sqlite3.register_converter("bool", lambda x: bool(int(x)))
-                sqlite3.register_adapter(bool, lambda x: 1 if x else 0)
-                sqlite3.register_converter("decimal", convert_decimal)
-                sqlite3.register_adapter(Decimal, adapt_decimal)
-                self.connection.create_function("floor", 1, math.floor)
-                self.connection.create_function("sqrt", 1, math.sqrt)
-                tmp = sqlitemath()
-                self.connection.create_function("mod", 2, tmp.mod)
-                if use_numpy:
-                    self.connection.create_aggregate("variance", 1, VARIANCE)
-                else:
-                    log.warning(
-                        ("Some database functions will not work without NumPy support"),
-                    )
-                self.cursor = self.connection.cursor()
-                self.cursor.execute(
-                    "PRAGMA temp_store=2",
-                )  # use memory for temp tables/indexes
-                self.cursor.execute(
-                    "PRAGMA journal_mode=WAL",
-                )  # use memory for temp tables/indexes
-                self.cursor.execute(
-                    "PRAGMA synchronous=0",
-                )  # don't wait for file writes to finish
-                self.cursor.execute(
-                    "PRAGMA busy_timeout=60000",
-                )  # wait up to 60 seconds for locks
-                self.cursor.execute(
-                    "PRAGMA cache_size=10000",
-                )  # increase cache size for better performance
-            else:
-                raise FpdbError("sqlite database " + database + " does not exist")
+            database, create = self._connect_sqlite(database, create)
         else:
             raise FpdbError("unrecognised database backend:" + str(backend))
 
@@ -589,6 +465,149 @@ class Database(
             self.cursor.execute(self.sql.query["set tx level"])
             self.check_version(database=database, create=create)
 
+    def _connect_mysql(self, host, port, user, password, database) -> None:
+        """Open a MySQL connection and read the server's auto-increment step."""
+        # Prefer mysqlclient (MySQLdb); fall back to the pure-Python pymysql
+        # shim so MySQL works without the system libraries mysqlclient needs.
+        try:
+            import MySQLdb
+        except ImportError:
+            import pymysql
+
+            pymysql.install_as_MySQLdb()
+            import MySQLdb
+
+        # Note: SQLAlchemy 2.0 removed pool.manage
+        # MySQLdb has its own connection pooling, so we don't need it
+        try:
+            kwargs = {
+                "host": host,
+                "user": user,
+                "passwd": password,
+                "db": database,
+                "charset": "utf8",
+                "use_unicode": True,
+            }
+            if port:
+                kwargs["port"] = int(port)
+
+            self.connection = MySQLdb.connect(**kwargs)
+            self.__connected = True
+        except MySQLdb.Error as ex:
+            if ex.args[0] == 1045:
+                raise FpdbMySQLAccessDenied(ex.args[0], ex.args[1])
+            if ex.args[0] == 2002 or ex.args[0] == 2003:  # 2002 is no unix socket, 2003 is no tcp socket
+                raise FpdbMySQLNoDatabase(ex.args[0], ex.args[1])
+            log.exception("UNKNOWN MYSQL ERROR: {ex}")
+        c = self.get_cursor()
+        c.execute("show variables like 'auto_increment_increment'")
+        self.hand_inc = int(c.fetchone()[1])
+
+    def _connect_postgresql(self, host, port, user, password, database) -> None:
+        """Open a PostgreSQL connection, preferring a local peer connection."""
+        import psycopg
+
+        # Note: SQLAlchemy 2.0 removed pool.manage
+        # psycopg has its own connection pooling, so we don't need it
+        # psycopg3 handles Unicode natively, no need for register_type(UNICODE)
+        # psycopg3 has native Decimal support, no adapter registration needed
+
+        self.__connected = False
+        if self.host in ("localhost", "127.0.0.1"):
+            try:
+                self.connection = psycopg.connect(dbname=database)
+                self.__connected = True
+            except psycopg.OperationalError:
+                # direct connection failed so try user/pass/... version
+                pass
+
+        if not self.is_connected():
+            try:
+                self.connection = psycopg.connect(
+                    host=host,
+                    port=port,
+                    user=user,
+                    password=password,
+                    dbname=database,
+                )
+                self.__connected = True
+            except Exception as ex:  # intentional broad catch: psycopg connection error inspected and re-raised as a typed FpdbError
+                if "Connection refused" in ex.args[0] or (
+                    'database "' in ex.args[0] and '" does not exist' in ex.args[0]
+                ):
+                    raise FpdbPostgresqlNoDatabase(errmsg=ex.args[0])
+                if "password authentication" in ex.args[0]:
+                    raise FpdbPostgresqlAccessDenied(errmsg=ex.args[0])
+                if 'role "' in ex.args[0] and '" does not exist' in ex.args[0]:  # role "fpdb" does not exist
+                    raise FpdbPostgresqlAccessDenied(errmsg=ex.args[0])
+                msg = ex.args[0]
+                log.exception(f"error postgreslq: {msg}")
+                raise FpdbError(msg)
+
+    def _connect_sqlite(self, database, create):
+        """Open a SQLite database, creating it and its directory when asked.
+
+        Returns the resolved path and create flag, both of which the caller
+        passes on to check_version.
+        """
+        create = True
+        import sqlite3
+
+        # Note: SQLAlchemy 2.0 removed pool.manage
+        # SQLite handles concurrent connections well natively with proper settings
+        # (see check_same_thread=False and timeout settings below)
+
+        if database != ":memory:":
+            if not os.path.isdir(self.config.dir_database) and create:
+                log.info(f"Creating directory: '{self.config.dir_database}'")
+                os.makedirs(self.config.dir_database)
+            database = os.path.join(self.config.dir_database, database).replace(
+                "\\",
+                "/",
+            )
+        self.db_path = database
+        log.info(f"Connecting to SQLite: {self.db_path}")
+        if os.path.exists(database) or create:
+            self.connection = sqlite3.connect(
+                self.db_path,
+                detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES,
+                timeout=60.0,  # Increased timeout to prevent connection timeouts
+                check_same_thread=False,  # Allow multi-threaded access
+            )
+            self.__connected = True
+            sqlite3.register_converter("bool", lambda x: bool(int(x)))
+            sqlite3.register_adapter(bool, lambda x: 1 if x else 0)
+            sqlite3.register_converter("decimal", convert_decimal)
+            sqlite3.register_adapter(Decimal, adapt_decimal)
+            self.connection.create_function("floor", 1, math.floor)
+            self.connection.create_function("sqrt", 1, math.sqrt)
+            tmp = sqlitemath()
+            self.connection.create_function("mod", 2, tmp.mod)
+            if use_numpy:
+                self.connection.create_aggregate("variance", 1, VARIANCE)
+            else:
+                log.warning(
+                    ("Some database functions will not work without NumPy support"),
+                )
+            self.cursor = self.connection.cursor()
+            self.cursor.execute(
+                "PRAGMA temp_store=2",
+            )  # use memory for temp tables/indexes
+            self.cursor.execute(
+                "PRAGMA journal_mode=WAL",
+            )  # use memory for temp tables/indexes
+            self.cursor.execute(
+                "PRAGMA synchronous=0",
+            )  # don't wait for file writes to finish
+            self.cursor.execute(
+                "PRAGMA busy_timeout=60000",
+            )  # wait up to 60 seconds for locks
+            self.cursor.execute(
+                "PRAGMA cache_size=10000",
+            )  # increase cache size for better performance
+        else:
+            raise FpdbError("sqlite database " + database + " does not exist")
+        return database, create
     def get_sites(self) -> None:
         self.cursor.execute("SELECT name,id FROM Sites")
         db_sites = dict(self.cursor.fetchall())
@@ -1101,216 +1120,213 @@ class Database(
 
 
 
-    def replace_statscache(self, type, table, query):
-        if table == "HudCache":
-            insert = """HudCache
-                (gametypeId
-                ,playerId
-                ,seats
-                ,position
-                <tourney_insert_clause>
-                ,styleKey"""
-
-            select = """h.gametypeId
-                      ,hp.playerId
-                      ,h.seats as seat_num
-                      <hc_position>
-                      <tourney_select_clause>
-                      <styleKey>"""
-
-            group = """h.gametypeId
-                        ,hp.playerId
-                        ,seat_num
-                        ,hc_position
-                        <tourney_group_clause>
-                        <styleKeyGroup>"""
-
-            query = query.replace("<insert>", insert)
-            query = query.replace("<select>", select)
-            query = query.replace("<group>", group)
-            query = query.replace("<sessions_join_clause>", "")
-
-            if self.build_full_hudcache:
-                query = query.replace(
-                    "<hc_position>",
-                    """,case when hp.position = 'B' then 'B'
-                            when hp.position = 'S' then 'S'
-                            when hp.position = '0' then 'D'
-                            when hp.position = '1' then 'C'
-                            when hp.position = '2' then 'M'
-                            when hp.position = '3' then 'M'
-                            when hp.position = '4' then 'M'
-                            when hp.position = '5' then 'E'
-                            when hp.position = '6' then 'E'
-                            when hp.position = '7' then 'E'
-                            when hp.position = '8' then 'E'
-                            when hp.position = '9' then 'E'
-                            else 'E'
-                       end                                            as hc_position""",
-                )
-                if self.backend == self.PGSQL:
-                    query = query.replace(
-                        "<styleKey>",
-                        ",'d' || to_char(h.startTime, 'YYMMDD')",
-                    )
-                    query = query.replace(
-                        "<styleKeyGroup>",
-                        ",to_char(h.startTime, 'YYMMDD')",
-                    )
-                elif self.backend == self.SQLITE:
-                    query = query.replace(
-                        "<styleKey>",
-                        ",'d' || substr(strftime('%Y%m%d', h.startTime),3,7)",
-                    )
-                    query = query.replace(
-                        "<styleKeyGroup>",
-                        ",substr(strftime('%Y%m%d', h.startTime),3,7)",
-                    )
-                elif self.backend == self.MYSQL_INNODB:
-                    query = query.replace(
-                        "<styleKey>",
-                        ",date_format(h.startTime, 'd%y%m%d')",
-                    )
-                    query = query.replace(
-                        "<styleKeyGroup>",
-                        ",date_format(h.startTime, 'd%y%m%d')",
-                    )
-            else:
-                query = query.replace(
-                    "<hc_position>",
-                    """,case when hp.position = 'B' then 'B'
-                            when hp.position = 'S' then 'S'
-                            when hp.position = '0' then 'D'
-                            when hp.position = '1' then 'C'
-                            when hp.position = '2' then 'M'
-                            when hp.position = '3' then 'M'
-                            when hp.position = '4' then 'M'
-                            when hp.position = '5' then 'E'
-                            when hp.position = '6' then 'E'
-                            when hp.position = '7' then 'E'
-                            when hp.position = '8' then 'E'
-                            when hp.position = '9' then 'E'
-                            else 'E'
-                       end                                            as hc_position""",
-                )
-                query = query.replace("<styleKey>", ",'A000000' as styleKey")
-                query = query.replace("<styleKeyGroup>", ",styleKey")
-
-            if type == "tour":
-                query = query.replace("<tourney_insert_clause>", ",tourneyTypeId")
-                query = query.replace("<tourney_select_clause>", ",t.tourneyTypeId")
-                query = query.replace("<tourney_group_clause>", ",t.tourneyTypeId")
-            else:
-                query = query.replace("<tourney_insert_clause>", "")
-                query = query.replace("<tourney_select_clause>", "")
-                query = query.replace("<tourney_group_clause>", "")
-
-            query = query.replace("<hero_where>", "")
-            query = query.replace("<hero_join>", "")
-
-        elif table == "CardsCache":
-            insert = """CardsCache
-                (weekId
-                ,monthId
-                ,gametypeId
-                <tourney_insert_clause>
-                ,playerId
-                ,startCards"""
-
-            select = """s.weekId
-                      ,s.monthId
-                      ,h.gametypeId
-                      <tourney_select_clause>
-                      ,hp.playerId
-                      ,hp.startCards"""
-
-            group = """s.weekId
-                        ,s.monthId
-                        ,h.gametypeId
-                        <tourney_group_clause>
-                        ,hp.playerId
-                        ,hp.startCards"""
-
-            query = query.replace("<insert>", insert)
-            query = query.replace("<select>", select)
-            query = query.replace("<group>", group)
-            query = query.replace("<hero_join>", "")
-            query = query.replace(
-                "<sessions_join_clause>",
-                """INNER JOIN Sessions s ON (s.id = h.sessionId)
-                INNER JOIN Players p ON (hp.playerId = p.id)""",
-            )
-            query = query.replace("<hero_where>", "")
-
-            if type == "tour":
-                query = query.replace("<tourney_insert_clause>", ",tourneyTypeId")
-                query = query.replace("<tourney_select_clause>", ",t.tourneyTypeId")
-                query = query.replace("<tourney_group_clause>", ",t.tourneyTypeId")
-            else:
-                query = query.replace("<tourney_insert_clause>", "")
-                query = query.replace("<tourney_select_clause>", "")
-                query = query.replace("<tourney_group_clause>", "")
-
-        elif table == "PositionsCache":
-            insert = """PositionsCache
-                (weekId
-                ,monthId
-                ,gametypeId
-                <tourney_insert_clause>
-                ,playerId
-                ,seats
-                ,maxPosition
-                ,position"""
-
-            select = """s.weekId
-                      ,s.monthId
-                      ,h.gametypeId
-                      <tourney_select_clause>
-                      ,hp.playerId
-                      ,h.seats
-                      ,h.maxPosition
-                      ,hp.position"""
-
-            group = """s.weekId
-                        ,s.monthId
-                        ,h.gametypeId
-                        <tourney_group_clause>
-                        ,hp.playerId
-                        ,h.seats
-                        ,h.maxPosition
-                        ,hp.position"""
-
-            query = query.replace("<insert>", insert)
-            query = query.replace("<select>", select)
-            query = query.replace("<group>", group)
-            query = query.replace("<hero_join>", "")
-            query = query.replace(
-                "<sessions_join_clause>",
-                """INNER JOIN Sessions s ON (s.id = h.sessionId)
-                INNER JOIN Players p ON (hp.playerId = p.id)""",
-            )
-            query = query.replace("<hero_where>", "")
-
-            if type == "tour":
-                query = query.replace("<tourney_insert_clause>", ",tourneyTypeId")
-                query = query.replace("<tourney_select_clause>", ",t.tourneyTypeId")
-                query = query.replace("<tourney_group_clause>", ",t.tourneyTypeId")
-            else:
-                query = query.replace("<tourney_insert_clause>", "")
-                query = query.replace("<tourney_select_clause>", "")
-                query = query.replace("<tourney_group_clause>", "")
-
+    @staticmethod
+    def _apply_tourney_clauses(query, type):
+        """Fill the three tourney placeholders, or blank them for ring games."""
+        if type == "tour":
+            query = query.replace("<tourney_insert_clause>", ",tourneyTypeId")
+            query = query.replace("<tourney_select_clause>", ",t.tourneyTypeId")
+            query = query.replace("<tourney_group_clause>", ",t.tourneyTypeId")
+        else:
+            query = query.replace("<tourney_insert_clause>", "")
+            query = query.replace("<tourney_select_clause>", "")
+            query = query.replace("<tourney_group_clause>", "")
         return query
 
-    def rebuild_cache(
-        self,
-        h_start=None,
-        v_start=None,
-        table="HudCache",
-        ttid=None,
-        wmid=None,
-    ) -> None:
-        """Clears hudcache and rebuilds from the individual handsplayers records."""
+    def _statscache_hudcache(self, query, type):
+        """Fill the rebuild template for HudCache, whose key carries the position."""
+        insert = """HudCache
+            (gametypeId
+            ,playerId
+            ,seats
+            ,position
+            <tourney_insert_clause>
+            ,styleKey"""
+
+        select = """h.gametypeId
+                  ,hp.playerId
+                  ,h.seats as seat_num
+                  <hc_position>
+                  <tourney_select_clause>
+                  <styleKey>"""
+
+        group = """h.gametypeId
+                    ,hp.playerId
+                    ,seat_num
+                    ,hc_position
+                    <tourney_group_clause>
+                    <styleKeyGroup>"""
+
+        query = query.replace("<insert>", insert)
+        query = query.replace("<select>", select)
+        query = query.replace("<group>", group)
+        query = query.replace("<sessions_join_clause>", "")
+
+        if self.build_full_hudcache:
+            query = query.replace(
+                "<hc_position>",
+                """,case when hp.position = 'B' then 'B'
+                        when hp.position = 'S' then 'S'
+                        when hp.position = '0' then 'D'
+                        when hp.position = '1' then 'C'
+                        when hp.position = '2' then 'M'
+                        when hp.position = '3' then 'M'
+                        when hp.position = '4' then 'M'
+                        when hp.position = '5' then 'E'
+                        when hp.position = '6' then 'E'
+                        when hp.position = '7' then 'E'
+                        when hp.position = '8' then 'E'
+                        when hp.position = '9' then 'E'
+                        else 'E'
+                   end                                            as hc_position""",
+            )
+            if self.backend == self.PGSQL:
+                query = query.replace(
+                    "<styleKey>",
+                    ",'d' || to_char(h.startTime, 'YYMMDD')",
+                )
+                query = query.replace(
+                    "<styleKeyGroup>",
+                    ",to_char(h.startTime, 'YYMMDD')",
+                )
+            elif self.backend == self.SQLITE:
+                query = query.replace(
+                    "<styleKey>",
+                    ",'d' || substr(strftime('%Y%m%d', h.startTime),3,7)",
+                )
+                query = query.replace(
+                    "<styleKeyGroup>",
+                    ",substr(strftime('%Y%m%d', h.startTime),3,7)",
+                )
+            elif self.backend == self.MYSQL_INNODB:
+                query = query.replace(
+                    "<styleKey>",
+                    ",date_format(h.startTime, 'd%y%m%d')",
+                )
+                query = query.replace(
+                    "<styleKeyGroup>",
+                    ",date_format(h.startTime, 'd%y%m%d')",
+                )
+        else:
+            query = query.replace(
+                "<hc_position>",
+                """,case when hp.position = 'B' then 'B'
+                        when hp.position = 'S' then 'S'
+                        when hp.position = '0' then 'D'
+                        when hp.position = '1' then 'C'
+                        when hp.position = '2' then 'M'
+                        when hp.position = '3' then 'M'
+                        when hp.position = '4' then 'M'
+                        when hp.position = '5' then 'E'
+                        when hp.position = '6' then 'E'
+                        when hp.position = '7' then 'E'
+                        when hp.position = '8' then 'E'
+                        when hp.position = '9' then 'E'
+                        else 'E'
+                   end                                            as hc_position""",
+            )
+            query = query.replace("<styleKey>", ",'A000000' as styleKey")
+            query = query.replace("<styleKeyGroup>", ",styleKey")
+
+        query = self._apply_tourney_clauses(query, type)
+
+        query = query.replace("<hero_where>", "")
+        query = query.replace("<hero_join>", "")
+        return query
+
+    def _statscache_cardscache(self, query, type):
+        """Fill the rebuild template for CardsCache, keyed by starting hand."""
+        insert = """CardsCache
+            (weekId
+            ,monthId
+            ,gametypeId
+            <tourney_insert_clause>
+            ,playerId
+            ,startCards"""
+
+        select = """s.weekId
+                  ,s.monthId
+                  ,h.gametypeId
+                  <tourney_select_clause>
+                  ,hp.playerId
+                  ,hp.startCards"""
+
+        group = """s.weekId
+                    ,s.monthId
+                    ,h.gametypeId
+                    <tourney_group_clause>
+                    ,hp.playerId
+                    ,hp.startCards"""
+
+        query = query.replace("<insert>", insert)
+        query = query.replace("<select>", select)
+        query = query.replace("<group>", group)
+        query = query.replace("<hero_join>", "")
+        query = query.replace(
+            "<sessions_join_clause>",
+            """INNER JOIN Sessions s ON (s.id = h.sessionId)
+            INNER JOIN Players p ON (hp.playerId = p.id)""",
+        )
+        query = query.replace("<hero_where>", "")
+
+        query = self._apply_tourney_clauses(query, type)
+        return query
+
+    def _statscache_positionscache(self, query, type):
+        """Fill the rebuild template for PositionsCache, keyed by seat and position."""
+        insert = """PositionsCache
+            (weekId
+            ,monthId
+            ,gametypeId
+            <tourney_insert_clause>
+            ,playerId
+            ,seats
+            ,maxPosition
+            ,position"""
+
+        select = """s.weekId
+                  ,s.monthId
+                  ,h.gametypeId
+                  <tourney_select_clause>
+                  ,hp.playerId
+                  ,h.seats
+                  ,h.maxPosition
+                  ,hp.position"""
+
+        group = """s.weekId
+                    ,s.monthId
+                    ,h.gametypeId
+                    <tourney_group_clause>
+                    ,hp.playerId
+                    ,h.seats
+                    ,h.maxPosition
+                    ,hp.position"""
+
+        query = query.replace("<insert>", insert)
+        query = query.replace("<select>", select)
+        query = query.replace("<group>", group)
+        query = query.replace("<hero_join>", "")
+        query = query.replace(
+            "<sessions_join_clause>",
+            """INNER JOIN Sessions s ON (s.id = h.sessionId)
+            INNER JOIN Players p ON (hp.playerId = p.id)""",
+        )
+        query = query.replace("<hero_where>", "")
+
+        query = self._apply_tourney_clauses(query, type)
+        return query
+
+    def replace_statscache(self, type, table, query):
+        if table == "HudCache":
+            return self._statscache_hudcache(query, type)
+        if table == "CardsCache":
+            return self._statscache_cardscache(query, type)
+        if table == "PositionsCache":
+            return self._statscache_positionscache(query, type)
+        return query
+
+    def _rebuild_prepare_heroes(self, h_start, v_start):
+        """Resolve the owner's player ids and the two rebuild start dates."""
         # stime = time()
         # derive list of program owner's player ids
         self.hero = {}  # name of program owner indexed by site id
@@ -1336,43 +1352,43 @@ class Database(
                 h_start = self.hero_hudstart_def
             if not v_start:
                 v_start = self.villain_hudstart_def
+        return h_start, v_start
 
-        if not ttid and not wmid:
-            self.get_cursor().execute(self.sql.query[f"clear{table}"])
-            self.commit()
-
-        if not ttid:
-            if self.hero_ids is None:
-                if wmid:
-                    where = "WHERE g.type = 'ring' AND weekId = {} and monthId = {}<hero_where>".format(*wmid)
-                else:
-                    where = "WHERE g.type = 'ring'<hero_where>"
+    def _rebuild_ring_cache(self, table, h_start, v_start, wmid) -> None:
+        """Rebuild the cash half of a statistics cache."""
+        if self.hero_ids is None:
+            if wmid:
+                where = "WHERE g.type = 'ring' AND weekId = {} and monthId = {}<hero_where>".format(*wmid)
             else:
-                where = (
-                    "where (((    hp.playerId not in "
-                    + str(tuple(self.hero_ids.values()))
-                    + "       and h.startTime > '"
-                    + v_start
-                    + "')"
-                    + "   or (    hp.playerId in "
-                    + str(tuple(self.hero_ids.values()))
-                    + "       and h.startTime > '"
-                    + h_start
-                    + "'))"
-                    + "   AND hp.tourneysPlayersId IS NULL)"
-                )
-            rebuild_sql_cash = self.sql.query["rebuildCache"].replace(
-                "%s",
-                self.sql.query["placeholder"],
+                where = "WHERE g.type = 'ring'<hero_where>"
+        else:
+            where = (
+                "where (((    hp.playerId not in "
+                + str(tuple(self.hero_ids.values()))
+                + "       and h.startTime > '"
+                + v_start
+                + "')"
+                + "   or (    hp.playerId in "
+                + str(tuple(self.hero_ids.values()))
+                + "       and h.startTime > '"
+                + h_start
+                + "'))"
+                + "   AND hp.tourneysPlayersId IS NULL)"
             )
-            rebuild_sql_cash = rebuild_sql_cash.replace("<tourney_join_clause>", "")
-            rebuild_sql_cash = rebuild_sql_cash.replace("<where_clause>", where)
-            rebuild_sql_cash = self.replace_statscache("ring", table, rebuild_sql_cash)
-            # print rebuild_sql_cash
-            self.get_cursor().execute(rebuild_sql_cash)
-            self.commit()
-            # print ("Rebuild cache(cash) took %.1f seconds") % (time() - stime,)
+        rebuild_sql_cash = self.sql.query["rebuildCache"].replace(
+            "%s",
+            self.sql.query["placeholder"],
+        )
+        rebuild_sql_cash = rebuild_sql_cash.replace("<tourney_join_clause>", "")
+        rebuild_sql_cash = rebuild_sql_cash.replace("<where_clause>", where)
+        rebuild_sql_cash = self.replace_statscache("ring", table, rebuild_sql_cash)
+        # print rebuild_sql_cash
+        self.get_cursor().execute(rebuild_sql_cash)
+        self.commit()
+        # print ("Rebuild cache(cash) took %.1f seconds") % (time() - stime,)
 
+    def _rebuild_tourney_cache(self, table, h_start, v_start, ttid, wmid) -> None:
+        """Rebuild the tournament half of a statistics cache."""
         if ttid:
             where = f"WHERE t.tourneyTypeId = {ttid}<hero_where>"
         elif self.hero_ids is None:
@@ -1412,6 +1428,26 @@ class Database(
         self.get_cursor().execute(rebuild_sql_tourney)
         self.commit()
         # print ("Rebuild hudcache took %.1f seconds") % (time() - stime,)
+
+    def rebuild_cache(
+        self,
+        h_start=None,
+        v_start=None,
+        table="HudCache",
+        ttid=None,
+        wmid=None,
+    ) -> None:
+        """Clears hudcache and rebuilds from the individual handsplayers records."""
+        h_start, v_start = self._rebuild_prepare_heroes(h_start, v_start)
+
+        if not ttid and not wmid:
+            self.get_cursor().execute(self.sql.query[f"clear{table}"])
+            self.commit()
+
+        if not ttid:
+            self._rebuild_ring_cache(table, h_start, v_start, wmid)
+
+        self._rebuild_tourney_cache(table, h_start, v_start, ttid, wmid)
 
     # end def rebuild_cache
 
@@ -1919,76 +1955,75 @@ class Database(
 
     # end def getTourneyTypesIds
 
+    def _clear_period_caches(self, cursor, wid, mid) -> None:
+        """Drop the CardsCache and PositionsCache rows of one week/month pair."""
+        for t in ("CardsCache", "PositionsCache"):
+            statement = f"clear{t}WeeksMonths"
+            clear = self.sql.query[statement].replace(
+                "%s",
+                self.sql.query["placeholder"],
+            )
+            cursor.execute(clear, (wid, mid))
+        self.commit()
+
+    def _delete_orphan_periods(self, cursor, ids, select_query, delete_query) -> None:
+        """Remove week or month rows no session points at any more."""
+        for period_id in ids:
+            cursor.execute(select_query, (period_id,))
+            if not cursor.fetchone():
+                cursor.execute(delete_query, (period_id,))
+                self.commit()
+
+    def _rebuild_period_caches(self, cursor) -> None:
+        """Rebuild the per-period caches for every pair the cleanup touched."""
+        wmids = set()
+        for t in ("CardsCache", "PositionsCache"):
+            statement = f"fetchNew{t}WeeksMonths"
+            fetch = self.sql.query[statement].replace(
+                "%s",
+                self.sql.query["placeholder"],
+            )
+            cursor.execute(fetch)
+            for wid, mid in cursor.fetchall():
+                wmids.add((wid, mid))
+        for wmid in wmids:
+            for t in ("CardsCache", "PositionsCache"):
+                self.rebuild_cache(None, None, t, None, wmid)
+
     def cleanUpWeeksMonths(self) -> None:
-        if self.cacheSessions and self.wmold:
-            selectWeekId = self.sql.query["selectSessionWithWeekId"].replace(
-                "%s",
-                self.sql.query["placeholder"],
-            )
-            selectMonthId = self.sql.query["selectSessionWithMonthId"].replace(
-                "%s",
-                self.sql.query["placeholder"],
-            )
-            deleteWeekId = self.sql.query["deleteWeekId"].replace(
-                "%s",
-                self.sql.query["placeholder"],
-            )
-            deleteMonthId = self.sql.query["deleteMonthId"].replace(
-                "%s",
-                self.sql.query["placeholder"],
-            )
-            cursor = self.get_cursor()
-            weeks, months, wmids = set(), set(), set()
-            for wid, mid in self.wmold:
-                for t in ("CardsCache", "PositionsCache"):
-                    statement = f"clear{t}WeeksMonths"
-                    clear = self.sql.query[statement].replace(
-                        "%s",
-                        self.sql.query["placeholder"],
-                    )
-                    cursor.execute(clear, (wid, mid))
-                self.commit()
-                weeks.add(wid)
-                months.add(mid)
+        if not (self.cacheSessions and self.wmold):
+            return
+        selectWeekId = self.sql.query["selectSessionWithWeekId"].replace(
+            "%s",
+            self.sql.query["placeholder"],
+        )
+        selectMonthId = self.sql.query["selectSessionWithMonthId"].replace(
+            "%s",
+            self.sql.query["placeholder"],
+        )
+        deleteWeekId = self.sql.query["deleteWeekId"].replace(
+            "%s",
+            self.sql.query["placeholder"],
+        )
+        deleteMonthId = self.sql.query["deleteMonthId"].replace(
+            "%s",
+            self.sql.query["placeholder"],
+        )
+        cursor = self.get_cursor()
+        weeks, months = set(), set()
+        for wid, mid in self.wmold:
+            self._clear_period_caches(cursor, wid, mid)
+            weeks.add(wid)
+            months.add(mid)
 
-            for wid in weeks:
-                cursor.execute(selectWeekId, (wid,))
-                result = cursor.fetchone()
-                if not result:
-                    cursor.execute(deleteWeekId, (wid,))
-                    self.commit()
+        self._delete_orphan_periods(cursor, weeks, selectWeekId, deleteWeekId)
+        self._delete_orphan_periods(cursor, months, selectMonthId, deleteMonthId)
 
-            for mid in months:
-                cursor.execute(selectMonthId, (mid,))
-                result = cursor.fetchone()
-                if not result:
-                    cursor.execute(deleteMonthId, (mid,))
-                    self.commit()
+        for wid, mid in self.wmnew:
+            self._clear_period_caches(cursor, wid, mid)
 
-            for wid, mid in self.wmnew:
-                for t in ("CardsCache", "PositionsCache"):
-                    statement = f"clear{t}WeeksMonths"
-                    clear = self.sql.query[statement].replace(
-                        "%s",
-                        self.sql.query["placeholder"],
-                    )
-                    cursor.execute(clear, (wid, mid))
-                self.commit()
-
-            if self.wmold:
-                for t in ("CardsCache", "PositionsCache"):
-                    statement = f"fetchNew{t}WeeksMonths"
-                    fetch = self.sql.query[statement].replace(
-                        "%s",
-                        self.sql.query["placeholder"],
-                    )
-                    cursor.execute(fetch)
-                    for wid, mid in cursor.fetchall():
-                        wmids.add((wid, mid))
-                for wmid in wmids:
-                    for t in ("CardsCache", "PositionsCache"):
-                        self.rebuild_cache(None, None, t, None, wmid)
-            self.commit()
+        self._rebuild_period_caches(cursor)
+        self.commit()
 
     def rebuild_caches(self) -> None:
         tables: tuple[str, ...] | set[str]
@@ -2045,10 +2080,8 @@ class Database(
 # end class Database
 
 
-def main(argv=None):
-    if argv is None:
-        argv = sys.argv[1:]
-
+def _build_cli_parser():
+    """The command-line surface of the Database utility."""
     import argparse
 
     parser = argparse.ArgumentParser(description="FPDB Database utility")
@@ -2058,7 +2091,78 @@ def main(argv=None):
     parser.add_argument("--show-stats", action="store_true", help="Show statistics for last hand")
     parser.add_argument("--show-info", action="store_true", help="Show database information")
     parser.add_argument("--interactive", action="store_true", help="Run original interactive test")
+    return parser
 
+
+def _cli_show_info(db_connection) -> None:
+    print("\n=== Database Information ===")
+    print(f"Backend type: {db_connection.backend}")
+    print(f"Database name: {db_connection.database}")
+    print(f"Host: {db_connection.host}")
+
+
+def _cli_show_stats(db_connection) -> None:
+    try:
+        h = db_connection.get_last_hand()
+        if h:
+            print(f"\n=== Statistics for Hand {h} ===")
+            t0 = time()
+            stat_dict = db_connection.get_stats_from_hand(h, "ring")
+            t1 = time()
+
+            for p in sorted(stat_dict.keys()):
+                print(f"  {p}: {stat_dict[p]}")
+
+            print(f"\nQuery took: {t1 - t0:4.3f} seconds")
+
+            cards = db_connection.get_cards("1")
+            if cards:
+                print(f"Cards for player 1: {cards}")
+        else:
+            print("No hands found in database")
+    except Exception as e:  # intentional broad catch: CLI top-level show-stats boundary
+        print(f"Error retrieving statistics: {e}")
+
+
+def _cli_interactive(db_connection, config, sql) -> None:
+    print("Running original interactive test...")
+    log.debug(f"database connection object = {db_connection.connection}")
+    db_connection.dropAllIndexes()
+    db_connection.createAllIndexes()
+
+    h = db_connection.get_last_hand()
+    log.debug(f"last hand = {h}")
+
+    hero = db_connection.get_player_id(config, "PokerStars", "nutOmatic")
+    if hero:
+        log.debug(f"nutOmatic player_id {hero}")
+
+    if db_connection.backend == 4:
+        c = db_connection.get_cursor()
+        c.execute("explain query plan " + sql.query["get_table_name"], (h,))
+        for row in c.fetchall():
+            log.debug(f"Query plan: {row}")
+
+    t0 = time()
+    stat_dict = db_connection.get_stats_from_hand(h, "ring")
+    t1 = time()
+    for p in list(stat_dict.keys()):
+        log.debug(f"{p}  {stat_dict[p]}")
+
+    log.debug(f"cards = {db_connection.get_cards('1')}")
+    db_connection.close_connection()
+
+    log.debug(f"get_stats took: {t1 - t0:4.3f} seconds")
+
+    print("Press ENTER to continue...")
+    sys.stdin.readline()
+
+
+def main(argv=None):
+    if argv is None:
+        argv = sys.argv[1:]
+
+    parser = _build_cli_parser()
     args = parser.parse_args(argv)
 
     if not any(vars(args).values()):
@@ -2076,80 +2180,28 @@ def main(argv=None):
         return 1
 
     if args.test_connection:
-        print("Database connection successful ✓")
+        print("Database connection successful \u2713")
         print(f"Backend: {db_connection.backend}")
         print(f"Connection: {db_connection.connection}")
 
     if args.show_info:
-        print("\n=== Database Information ===")
-        print(f"Backend type: {db_connection.backend}")
-        print(f"Database name: {db_connection.database}")
-        print(f"Host: {db_connection.host}")
+        _cli_show_info(db_connection)
 
     if args.rebuild_indexes:
         print("Rebuilding indexes and foreign keys...")
         db_connection.rebuild_indexes()
-        print("Index rebuild complete ✓")
+        print("Index rebuild complete \u2713")
 
     if args.vacuum:
         print("Vacuuming database...")
         db_connection.vacuumDB()
-        print("Database vacuum complete ✓")
+        print("Database vacuum complete \u2713")
 
     if args.show_stats:
-        try:
-            h = db_connection.get_last_hand()
-            if h:
-                print(f"\n=== Statistics for Hand {h} ===")
-                t0 = time()
-                stat_dict = db_connection.get_stats_from_hand(h, "ring")
-                t1 = time()
-
-                for p in sorted(stat_dict.keys()):
-                    print(f"  {p}: {stat_dict[p]}")
-
-                print(f"\nQuery took: {t1 - t0:4.3f} seconds")
-
-                cards = db_connection.get_cards("1")
-                if cards:
-                    print(f"Cards for player 1: {cards}")
-            else:
-                print("No hands found in database")
-        except Exception as e:  # intentional broad catch: CLI top-level show-stats boundary
-            print(f"Error retrieving statistics: {e}")
+        _cli_show_stats(db_connection)
 
     if args.interactive:
-        print("Running original interactive test...")
-        log.debug(f"database connection object = {db_connection.connection}")
-        db_connection.dropAllIndexes()
-        db_connection.createAllIndexes()
-
-        h = db_connection.get_last_hand()
-        log.debug(f"last hand = {h}")
-
-        hero = db_connection.get_player_id(c, "PokerStars", "nutOmatic")
-        if hero:
-            log.debug(f"nutOmatic player_id {hero}")
-
-        if db_connection.backend == 4:
-            c = db_connection.get_cursor()
-            c.execute("explain query plan " + sql.query["get_table_name"], (h,))
-            for row in c.fetchall():
-                log.debug(f"Query plan: {row}")
-
-        t0 = time()
-        stat_dict = db_connection.get_stats_from_hand(h, "ring")
-        t1 = time()
-        for p in list(stat_dict.keys()):
-            log.debug(f"{p}  {stat_dict[p]}")
-
-        log.debug(f"cards = {db_connection.get_cards('1')}")
-        db_connection.close_connection()
-
-        log.debug(f"get_stats took: {t1 - t0:4.3f} seconds")
-
-        print("Press ENTER to continue...")
-        sys.stdin.readline()
+        _cli_interactive(db_connection, c, sql)
 
     return 0
 
