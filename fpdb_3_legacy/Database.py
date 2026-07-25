@@ -720,10 +720,15 @@ class Database(
 
     def disconnect(self, due_to_error=False) -> None:
         """Disconnects the DB (rolls back if param is true, otherwise commits."""
-        if due_to_error:
-            self.connection.rollback()
-        else:
-            self.connection.commit()
+        # Guarded like close_connection and _close_cursor_quietly below: a
+        # database closed once already has no connection to commit, and calling
+        # disconnect twice -- which shutdown paths do -- should be a no-op
+        # rather than an AttributeError on the way out.
+        if self.connection is not None:
+            if due_to_error:
+                self.connection.rollback()
+            else:
+                self.connection.commit()
         self._close_cursor_quietly()
         self.close_connection()
         self.__connected = False
