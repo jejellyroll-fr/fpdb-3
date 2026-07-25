@@ -41,16 +41,9 @@ Usage
 """
 
 import argparse
-import logging
-import os
 import sys
 
-logging.disable(logging.WARNING)
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-
-import Card
-import Configuration
-import Database
+from fpdb_3_legacy import Card, Configuration, Database
 
 # Per-hand tables that reference Hands(id); delete children before the parent.
 CHILD_TABLES = [
