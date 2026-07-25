@@ -68,6 +68,37 @@ Domaines qui restent dans l'hôte, par ordre de taille des méthodes :
 a été relocalisée (`database_caches.py` et `database_tournaments.py` sont eux aussi
 inscrits au cliquet).
 
+### A2bis. 🔴 Quatre des cinq écrivains de cache ne peuvent rien écrire (découvert 2026-07-25)
+
+Mis au jour par l'étape 3. `CACHE_KEYS` porte **253** statistiques. `HudCache` a été
+élargie à 253 colonnes lors du correctif de l'issue #134 et reste protégée par
+`test_hudcache_schema_sync.py`. **Les quatre autres tables de cache ne l'ont jamais
+été** : elles ne portent que **116** de ces 253 colonnes.
+
+| Table | Colonnes `CACHE_KEYS` | Placeholders de l'INSERT | Valeurs fournies par le code |
+|---|---:|---:|---:|
+| `HudCache` | 253 | 263 | 263 ✅ |
+| `SessionsCache` | 116 | 120 | 258 ❌ |
+| `TourneysCache` | 116 | 120 | 258 ❌ |
+| `CardsCache` | 116 | 121 | 259 ❌ |
+| `PositionsCache` | 116 | 123 | 261 ❌ |
+
+Conséquence : toute insertion dans ces quatre tables lève
+`ProgrammingError: Incorrect number of bindings supplied`. Elles sont donc
+**structurellement impossibles à peupler**. `insert_positionscache` a en prime une
+incohérence interne (124 colonnes nommées pour 123 placeholders).
+
+**Portée réelle.** Ces écrivains ne sont atteints que si l'option d'import
+`cacheSessions` est active, et elle est livrée à `False` (config du dépôt, exemple, et
+défaut de `Configuration.py:942`). C'est pourquoi le défaut est resté invisible. Mais
+qui l'active perd le dernier hand de chaque lot — l'exception est avalée par le
+`except Exception` de `Importer._import_hh_file`, qui compte le hand en erreur et le
+saute, avant même `insertHands` — et n'obtient jamais de `SessionsCache`, donc le
+Session Viewer reste vide.
+
+**Ce n'est pas corrigé ici** : élargir quatre tables de 137 colonnes chacune est une
+migration de schéma, pas un test. Voir l'étape 3bis.
+
 ### A2. Deux bugs identifiés, documentés, non corrigés
 
 **(a) iPoker : le hand id de la première main de chaque fichier est le code de session.**
@@ -282,18 +313,62 @@ Le meilleur ratio du dépôt (~250 fixtures déjà versionnées, harnais génér
 **Gain attendu** : parseurs 66,9 % → ~85 %, soit ~1 800 lignes, sans écrire d'assertion
 métier. **Effet de bord attendu et souhaité** : cette étape trouvera des bugs.
 
-### Étape 3 — Tester les caches statistiques · ~2-3 j
+### Étape 3 — Tester les caches statistiques — ✅ FAIT (2026-07-25)
 
-Le trou le plus dangereux (`database_caches.py`, 12,9 %) et il est désormais isolé dans
-son propre module, donc testable sans instancier tout `Database`.
+`tests/test_database_caches.py` — **41 tests + 8 xfail stricts**.
+`database_caches.py` : **12,9 % → 71,9 %**, domaine `database` 54,1 % → 62,5 %,
+total 53,6 % → 54,1 %. Planchers du cliquet re-semés (diff : que des hausses).
 
-1. Base SQLite temporaire + jeu de mains connu → `storeSessions`, `storeSessionsCache`,
-   `storeTourneysCache`, `storeCardsCache`, `storePositionsCache`, `appendHandsSessionIds`.
-2. Vérifier les **valeurs** agrégées, pas seulement l'absence d'exception : c'est
-   exactement ce que la Vague 4 a fait pour `Stats.py`.
-3. Ces tests sont le filet de sécurité qui manque à l'étape 5 (suite du découpage).
+Deux couches, comme prévu :
 
-**Gain** : ~450 lignes, et surtout la garantie que les chiffres du HUD sont justes.
+- **Tampons** (`doinsert=False`), là où l'agrégation a réellement lieu : buckets de
+  position du HudCache et leurs lettres exactes (dont dépendent `stat_adapters` et la
+  requête de stats agrégées), sommation entre mains, coercition des booléens,
+  clé de style, exclusion des types de tournoi poubelle en import de masse ;
+  regroupement des mains en sessions (seuil, extension avant/arrière, fusion par main
+  pontante, tournoi qui traverse le seuil) ; `SessionsCache` par type de jeu et joueur ;
+  `TourneysCache` et ses bornes temporelles ; clés de `CardsCache`/`PositionsCache` ;
+  `appendHandsSessionIds`.
+- **Écriture dans un vrai schéma SQLite** (`doinsert=True`, fixture `fresh_db` — jusque-là
+  définie mais utilisée par personne) : la session écrite couvre bien ses deux mains,
+  semaine et mois liés, identifiant de session résolu pour chaque main, second import
+  qui étend au lieu de dupliquer, et HudCache dont les valeurs agrégées atterrissent
+  puis se mettent à jour au lieu de doubler le profit.
+
+**Ce que l'étape a trouvé** : les quatre écrivains autres que HudCache sont
+inutilisables (voir A2bis). Les tests qui devraient les valider existent, marqués
+`xfail(strict=True)` : le jour où les tables seront élargies, ils passeront et la CI
+exigera le retrait des marqueurs. Un test paramétré compare en plus, pour chaque
+INSERT, le nombre de placeholders au nombre de valeurs que l'écrivain fournit.
+
+Également épinglé (`xfail` non nécessaire, le test documente le comportement réel) :
+`storeHudCache` dérive son décalage horaire de `(datetime.utcnow() - datetime.today()).seconds`,
+or `timedelta.seconds` n'est jamais négatif — à l'est de UTC, et sur un runner UTC, le
+décalage revient à `24 + offset` au lieu d'un petit négatif, et la `styleKey` datée
+range les mains sous le mauvais jour. Non corrigé : le changer déplacerait les lignes
+`HudCache` existantes vers d'autres buckets.
+
+### Étape 3bis — Élargir les quatre tables de cache · ~2-3 j 🔴
+
+Conséquence directe de A2bis, et **prérequis à toute utilisation de `cacheSessions`**.
+
+1. Porter les 137 colonnes manquantes de `CACHE_KEYS` dans `sql_schema_session_cache.py`,
+   `sql_schema_tournament_cache.py`, `sql_schema_cards_cache` et
+   `sql_schema_position_cache.py`, sur les trois backends.
+2. Régénérer les INSERT/UPDATE correspondants, et corriger l'écart interne
+   124 colonnes / 123 placeholders d'`insert_positionscache`.
+3. Migration idempotente dans `db_migrate.py` (les bases existantes ont les tables
+   étroites), sur le modèle de l'élargissement de `HudCache`.
+4. Retirer les 8 marqueurs `xfail` de `tests/test_database_caches.py` : ils sont
+   `strict`, donc la CI le réclamera d'elle-même.
+5. Étendre la garde structurelle de `test_hudcache_schema_sync.py` aux quatre tables,
+   pour que la dérive ne puisse pas revenir.
+
+**Décision préalable** : élargir les tables, ou restreindre volontairement ces caches à
+un sous-ensemble de statistiques ? Les 116 colonnes actuelles ne sont pas un accident
+de troncature mais l'état d'avant la croissance de `CACHE_KEYS` ; il se peut qu'un
+sous-ensemble suffise à ce que lisent réellement le Session Viewer et les rapports.
+Trancher avant de coder.
 
 ### Étape 4 — Sécuriser les scripts d'exploitation · ~1 j
 
@@ -369,15 +444,19 @@ pas fait.
 |---|---|---:|---:|---|
 | 1 | ✅ Cliquet de couverture en CI | fait | — | Empêche la dérive |
 | 2 | Corpus → harnais golden | 2 j | ~1 800 l. | Régressions parseurs |
-| 3 | Tests des caches statistiques | 2-3 j | ~450 l. | **Chiffres HUD faux** |
+| 3 | ✅ Tests des caches statistiques | fait | +59 pts sur le module | **Chiffres HUD faux** |
+| 3bis | 🔴 Élargir les 4 tables de cache | 2-3 j | — | **4 caches impeuplables** |
 | 4 | Scripts d'exploitation | 1 j | ~700 l. | **Corruption de base** |
 | 5 | `Database.py` 4/N → N/N | 3-4 j | — | Dette de complexité |
 | 6 | Bugs connus + clôture des plans | 0,5 j | — | Hand id iPoker faux |
 | 7 | i18n des modules récents | 1,5 j | — | UI bilingue |
 | 8 | Continu (`ModernHudPreferences`, cliquets) | — | — | — |
 
-**Chemin critique recommandé : 1 → 3 → 2 → 4 → 5.** L'étape 1 protège tout le reste ;
-l'étape 3 avant l'étape 5 parce qu'on ne déplace pas du code non testé.
+**Chemin critique recommandé : 1 → 3 → 2 → 4 → 5**, l'étape 1 protégeant tout le reste
+et l'étape 3 précédant l'étape 5 parce qu'on ne déplace pas du code non testé.
+Les étapes 1 et 3 sont faites. L'étape 3bis s'insère selon la décision prise sur la
+portée des quatre caches ; elle ne bloque pas les étapes 2, 4 et 5, qui portent sur du
+code indépendant.
 
 ---
 
