@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import json
 import logging
+import time
 from typing import Any
 
 import pytest
@@ -320,3 +321,208 @@ def test_the_json_format_names_its_fields() -> None:
     assert payload["levelname"] == "INFO"
     assert payload["name"] == "fpdb.test"
     assert set(payload) >= {"asctime", "funcName", "module"}
+
+
+# --------------------------------------------------------------------------
+# The global level switches
+# --------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    ("switch", "expected"),
+    [
+        ("set_default_logging", logging.ERROR),
+        ("enable_warning_logging", logging.WARNING),
+        ("enable_debug_logging", logging.DEBUG),
+    ],
+)
+def test_each_switch_sets_the_root_level_it_promises(switch, expected, tmp_path) -> None:
+    logging_fpdb.setup_logging(log_dir=str(tmp_path))
+
+    getattr(logging_fpdb, switch)()
+
+    assert logging.getLogger().level == expected
+
+
+def test_the_console_follows_the_switch(tmp_path) -> None:
+    # A root level nobody's handler honours changes nothing on screen.
+    logging_fpdb.setup_logging(log_dir=str(tmp_path))
+    logging_fpdb.enable_debug_logging()
+
+    console = [
+        handler
+        for handler in logging.getLogger().handlers
+        if isinstance(handler, logging.StreamHandler) and not hasattr(handler, "baseFilename")
+    ]
+    assert console
+    assert all(handler.level <= logging.DEBUG for handler in console)
+
+
+def test_the_console_is_opened_up_to_what_the_loggers_need(tmp_path) -> None:
+    logging_fpdb.setup_logging(log_dir=str(tmp_path))
+    logging.getLogger().setLevel(logging.ERROR)
+
+    logging_fpdb.ensure_console_handlers_configured()
+
+    assert logging.getLogger().level <= logging.ERROR
+
+
+# --------------------------------------------------------------------------
+# Discovering a logger nobody registered
+# --------------------------------------------------------------------------
+
+
+def test_an_existing_logger_is_discovered_when_its_level_is_set(registry) -> None:
+    # The dev tool sets levels by name; a logger created by an imported module
+    # has to be found rather than ignored.
+    logging.getLogger("fpdb.test.discovered").setLevel(logging.WARNING)
+
+    assert registry.set_logger_level("fpdb.test.discovered", logging.DEBUG)
+    assert "fpdb.test.discovered" in registry.get_all_loggers()
+    assert logging.getLogger("fpdb.test.discovered").level == logging.DEBUG
+
+
+def test_a_logger_that_does_not_exist_is_not_invented(registry) -> None:
+    assert not registry.set_logger_level("fpdb.test.no.such.logger.anywhere", logging.DEBUG)
+
+
+def test_a_saved_configuration_is_applied_to_a_registry(tmp_path, registry) -> None:
+    logger = logging.getLogger("fpdb.test.applied")
+    registry.register_logger("fpdb.test.applied", logger)
+    registry.set_logger_level("fpdb.test.applied", logging.DEBUG)
+    config = logging_fpdb.LogConfig(config_dir=str(tmp_path))
+    config.save_config(registry)
+
+    other = logging_fpdb.LoggerRegistry()
+    other.register_logger("fpdb.test.applied", logger)
+
+    assert config.load_config(other)
+
+
+# --------------------------------------------------------------------------
+# Rotating on time rather than size
+# --------------------------------------------------------------------------
+
+
+def test_the_log_rotates_once_its_moment_has_passed(tmp_path) -> None:
+    target = tmp_path / "timed.log"
+    handler = logging_fpdb.TimedSizedRotatingFileHandler(str(target), when="S", interval=1, backup_count=2)
+    write_lines(handler, 1)
+    handler.rolloverAt = int(time.time()) - 1
+
+    assert handler.shouldRollover(record())
+
+    handler.doRollover()
+    write_lines(handler, 1)
+    handler.close()
+
+    assert [path for path in tmp_path.iterdir() if path.name != "timed.log"]
+
+
+def test_a_log_whose_moment_has_not_come_is_left_alone(tmp_path) -> None:
+    target = tmp_path / "timed.log"
+    handler = logging_fpdb.TimedSizedRotatingFileHandler(str(target), when="S", interval=1)
+    write_lines(handler, 1)
+    handler.rolloverAt = int(time.time()) + 3600
+
+    assert not handler.shouldRollover(record())
+
+    handler.close()
+
+
+# --------------------------------------------------------------------------
+# The HUD trace
+# --------------------------------------------------------------------------
+
+
+def test_the_hud_trace_says_nothing_until_it_is_switched_on() -> None:
+    # It is called on every hand; without a handler it must cost nothing and
+    # raise nothing.
+    saved = logging_fpdb._hud_trace_log.handlers[:]
+    logging_fpdb._hud_trace_log.handlers = []
+    try:
+        assert logging_fpdb.hud_trace("nobody hears this %s", "line") is None
+    finally:
+        logging_fpdb._hud_trace_log.handlers = saved
+
+
+def test_the_hud_trace_is_emitted_once_a_handler_is_attached(tmp_path) -> None:
+    target = tmp_path / "hud-trace.txt"
+    handler = logging.FileHandler(str(target), encoding="utf-8")
+    saved = logging_fpdb._hud_trace_log.handlers[:]
+    saved_level = logging_fpdb._hud_trace_log.level
+    logging_fpdb._hud_trace_log.handlers = [handler]
+    logging_fpdb._hud_trace_log.setLevel(logging.INFO)
+    try:
+        logging_fpdb.hud_trace("attaching %s to seat %d", "villain", 3)
+        handler.flush()
+    finally:
+        handler.close()
+        logging_fpdb._hud_trace_log.handlers = saved
+        logging_fpdb._hud_trace_log.setLevel(saved_level)
+
+    assert "attaching villain to seat 3" in target.read_text(encoding="utf-8")
+
+
+# --------------------------------------------------------------------------
+# The wrapper
+# --------------------------------------------------------------------------
+
+
+def test_the_wrapper_reports_the_level_it_was_given() -> None:
+    logger = logging_fpdb.get_logger("fpdb.test.wrapper")
+
+    logger.setLevel(logging.DEBUG)
+
+    assert logger.getEffectiveLevel() == logging.DEBUG
+
+
+def test_an_exception_is_logged_with_its_traceback(tmp_path) -> None:
+    logging_fpdb.setup_logging(log_dir=str(tmp_path))
+    logger = logging_fpdb.get_logger("fpdb.test.exception")
+    logger.setLevel(logging.ERROR)
+
+    try:
+        msg = "deliberate"
+        raise ValueError(msg)
+    except ValueError:
+        logger.exception("while importing")
+    for handler in logging.getLogger().handlers:
+        handler.flush()
+
+    written = (tmp_path / "fpdb-log.txt").read_text(encoding="utf-8", errors="replace")
+    assert "while importing" in written
+
+
+def test_the_log_file_keeps_the_message_of_an_exception_but_not_its_traceback(tmp_path) -> None:
+    """The file a user sends you carries no traceback.
+
+    The file handler formats with JsonFormatter, which builds a fixed six-field
+    record -- timestamp, logger, level, module, function, message -- and never
+    reads record.exc_info. So logger.exception() prints the traceback to the
+    console and writes only the message to disk, which is the half a diagnosis
+    cannot use. Documented behaviour, pinned here because changing the log
+    format is a product decision rather than a fix.
+    """
+    logging_fpdb.setup_logging(log_dir=str(tmp_path))
+    logger = logging_fpdb.get_logger("fpdb.test.traceback")
+    logger.setLevel(logging.ERROR)
+
+    try:
+        msg = "deliberate"
+        raise ValueError(msg)
+    except ValueError:
+        logger.exception("while importing")
+    for handler in logging.getLogger().handlers:
+        handler.flush()
+
+    written = (tmp_path / "fpdb-log.txt").read_text(encoding="utf-8", errors="replace")
+    assert "while importing" in written
+    assert "ValueError" not in written
+    assert "Traceback" not in written
+
+
+def test_the_registry_and_the_config_are_shared() -> None:
+    # The dev tool and the startup path must act on the same objects.
+    assert logging_fpdb.get_logger_registry() is logging_fpdb.get_logger_registry()
+    assert logging_fpdb.get_log_config() is logging_fpdb.get_log_config()
