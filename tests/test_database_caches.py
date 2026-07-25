@@ -16,17 +16,21 @@ Two layers:
 
 from __future__ import annotations
 
+import contextlib
 import re
+import sqlite3
 from datetime import datetime, timedelta
 from typing import Any
 
 import pytest
 
 import fpdb_3_legacy.Database as Database
+import fpdb_3_legacy.database_caches as database_caches
 import fpdb_3_legacy.SQL as SQL
 
 CACHE_KEYS = Database.CACHE_KEYS
 HUDCACHE_EXTRA_KEYS = Database.HUDCACHE_EXTRA_KEYS
+SESSION_CACHE_KEYS = database_caches.SESSION_CACHE_KEYS
 
 RING = {"type": "ring"}
 TOUR = {"type": "tour"}
@@ -475,6 +479,19 @@ def rows(db: Any, query: str) -> list[tuple]:
     return cursor.fetchall()
 
 
+@pytest.fixture(scope="module")
+def shipped_schema() -> dict[str, list[str]]:
+    """Column names per table, read from the DDL the project ships."""
+    catalogue = SQL.Sql(db_server="sqlite").query
+    connection = sqlite3.connect(":memory:")
+    for statement in catalogue.values():
+        if isinstance(statement, str) and statement.strip().lower().startswith("create table"):
+            with contextlib.suppress(sqlite3.Error):
+                connection.execute(statement)
+    tables = [row[0] for row in connection.execute("SELECT name FROM sqlite_master WHERE type='table'")]
+    return {name: [row[1] for row in connection.execute(f"PRAGMA table_info({name})")] for name in tables}
+
+
 def test_flushing_sessions_writes_one_row_spanning_the_whole_session(fresh_db) -> None:
     start = datetime(2026, 7, 20, 14, 30)
     fresh_db.storeSessions(1, {"Hero": 11}, start, None, [11], "UTC")
@@ -545,55 +562,99 @@ def test_flushing_the_hud_cache_twice_updates_the_existing_row(fresh_db) -> None
 
 
 # --------------------------------------------------------------------------
-# The CACHE_KEYS drift
+# CACHE_KEYS and the narrow caches
 #
-# CACHE_KEYS carries 253 statistics. HudCache was widened to hold them all when
-# issue #134 was fixed, and test_hudcache_schema_sync.py guards it. The four
-# other cache tables were never widened: they hold 116 of those 253 columns,
-# and their INSERT statements bind ~120 values while the writers supply ~258.
-# Every insert into them therefore raises, so SessionsCache, TourneysCache,
-# CardsCache and PositionsCache cannot be populated at all.
+# CACHE_KEYS carries 253 statistics, and HudCache holds them all since issue
+# #134. SessionsCache, TourneysCache, CardsCache and PositionsCache hold only
+# the first 116, which is what SESSION_CACHE_KEYS names. Writing all 253 into
+# them bound ~258 values into statements expecting ~120, so every insert raised
+# and the four caches stayed empty; the writers now pack the subset.
 #
-# The writers are only reached when the `cacheSessions` import option is on,
-# and it ships off, which is why this has stayed invisible.
-#
-# The xfails below are strict: widening the four tables will turn them green
-# and CI will then require the markers to go.
+# The guards below keep the two lists tied to the shipped DDL, so the drift
+# cannot come back silently.
 # --------------------------------------------------------------------------
 
 CACHE_INSERTS = {
     # query name: values the writer supplies (see database_caches.py)
     "insert_hudcache": 6 + len(CACHE_KEYS) + len(HUDCACHE_EXTRA_KEYS),
-    "insert_SC": 5 + len(CACHE_KEYS),
-    "insert_TC": 5 + len(CACHE_KEYS),
-    "insert_cardscache": 6 + len(CACHE_KEYS),
-    "insert_positionscache": 8 + len(CACHE_KEYS),
+    "insert_SC": 5 + len(SESSION_CACHE_KEYS),
+    "insert_TC": 5 + len(SESSION_CACHE_KEYS),
+    "insert_cardscache": 6 + len(SESSION_CACHE_KEYS),
+    "insert_positionscache": 8 + len(SESSION_CACHE_KEYS),
 }
 
 
-@pytest.mark.parametrize(
-    "query_name",
-    [
-        "insert_hudcache",
-        pytest.param("insert_SC", marks=pytest.mark.xfail(strict=True, reason="SessionsCache holds 116/253 CACHE_KEYS")),
-        pytest.param("insert_TC", marks=pytest.mark.xfail(strict=True, reason="TourneysCache holds 116/253 CACHE_KEYS")),
-        pytest.param(
-            "insert_cardscache",
-            marks=pytest.mark.xfail(strict=True, reason="CardsCache holds 116/253 CACHE_KEYS"),
-        ),
-        pytest.param(
-            "insert_positionscache",
-            marks=pytest.mark.xfail(strict=True, reason="PositionsCache holds 116/253 CACHE_KEYS"),
-        ),
-    ],
-)
+@pytest.mark.parametrize("query_name", sorted(CACHE_INSERTS))
 def test_every_cache_insert_binds_as_many_values_as_its_writer_supplies(query_name) -> None:
     query = SQL.Sql(db_server="sqlite").query[query_name]
 
     assert query.count("?") == CACHE_INSERTS[query_name]
 
 
-@pytest.mark.xfail(strict=True, reason="SessionsCache holds 116 of the 253 CACHE_KEYS columns")
+@pytest.mark.parametrize("table", ["SessionsCache", "TourneysCache", "CardsCache", "PositionsCache"])
+def test_the_narrow_caches_carry_exactly_the_session_cache_keys(table, shipped_schema) -> None:
+    columns = shipped_schema[table]
+
+    assert [c for c in columns if c in set(CACHE_KEYS)] == SESSION_CACHE_KEYS
+
+
+def test_the_hud_cache_carries_every_cache_key(shipped_schema) -> None:
+    columns = set(shipped_schema["HudCache"])
+
+    assert set(CACHE_KEYS) <= columns
+    assert set(HUDCACHE_EXTRA_KEYS) <= columns
+
+
+CACHE_WRITE_QUERIES = {
+    "insert_SC": "SessionsCache",
+    "update_SC": "SessionsCache",
+    "insert_TC": "TourneysCache",
+    "update_TC": "TourneysCache",
+    "insert_cardscache": "CardsCache",
+    "update_cardscache": "CardsCache",
+    "insert_positionscache": "PositionsCache",
+    "update_positionscache": "PositionsCache",
+    "insert_hudcache": "HudCache",
+    "update_hudcache": "HudCache",
+    "select_SC": "SessionsCache",
+}
+
+
+@pytest.mark.parametrize(("query_name", "table"), sorted(CACHE_WRITE_QUERIES.items()))
+def test_cache_queries_only_name_columns_their_table_has(query_name, table, shipped_schema) -> None:
+    # update_positionscache used to set street0Limp and two neighbours, which no
+    # variant of the table has, so every update raised "no such column".
+    query = SQL.Sql(db_server="sqlite").query[query_name]
+    known = set(shipped_schema[table])
+    referenced = {word for word in re.findall(r"[A-Za-z_][A-Za-z0-9_]*", query) if word in set(CACHE_KEYS)}
+
+    assert referenced <= known
+
+
+@pytest.mark.parametrize("query_name", sorted(CACHE_WRITE_QUERIES))
+def test_cache_queries_list_their_statistics_in_key_order(query_name) -> None:
+    # The writers pack a positional line; a column out of order silently files
+    # one statistic's value under another's name. CardsCache listed the 3-bet
+    # pair before the 2-bet pair.
+    query = SQL.Sql(db_server="sqlite").query[query_name]
+    expected = CACHE_KEYS if CACHE_WRITE_QUERIES[query_name] == "HudCache" else SESSION_CACHE_KEYS
+
+    if query.lower().lstrip().startswith("insert"):
+        head = query[: query.lower().index("values")]
+        names = [c.strip() for c in re.search(r"\((.*)\)", head, re.DOTALL).group(1).split(",")]
+    else:
+        names = re.findall(r"([A-Za-z_][A-Za-z0-9_]*)\s*=", query)
+    statistics = [name for name in names if name in set(expected)]
+
+    assert statistics == [key for key in expected if key in set(statistics)]
+
+
+def test_the_session_subset_is_a_prefix_of_the_full_key_list() -> None:
+    # CACHE_KEYS grew by appending; a key inserted in the middle would silently
+    # shift what the narrow caches store.
+    assert SESSION_CACHE_KEYS == CACHE_KEYS[: len(SESSION_CACHE_KEYS)]
+
+
 def test_flushing_writes_the_summed_statistics_of_a_cash_session(fresh_db) -> None:
     start = datetime(2026, 7, 20, 14, 30)
     pids = {"Hero": 11}
@@ -609,7 +670,6 @@ def test_flushing_writes_the_summed_statistics_of_a_cash_session(fresh_db) -> No
     assert row == (5, 11, 2, 2, 200)
 
 
-@pytest.mark.xfail(strict=True, reason="TourneysCache holds 116 of the 253 CACHE_KEYS columns")
 def test_flushing_writes_the_summed_statistics_of_a_tournament(fresh_db) -> None:
     start = datetime(2026, 7, 20, 14, 30)
     pids = {"Hero": 11}
@@ -620,7 +680,6 @@ def test_flushing_writes_the_summed_statistics_of_a_tournament(fresh_db) -> None
     assert row == (42, 11, 1, 700)
 
 
-@pytest.mark.xfail(strict=True, reason="CardsCache holds 116 of the 253 CACHE_KEYS columns")
 def test_flushing_writes_the_statistics_of_a_starting_hand(fresh_db) -> None:
     start = datetime(2026, 7, 20, 14, 30)
     pids = {"Hero": 11}
@@ -633,7 +692,6 @@ def test_flushing_writes_the_statistics_of_a_starting_hand(fresh_db) -> None:
     assert row == (169, 1, 300)
 
 
-@pytest.mark.xfail(strict=True, reason="PositionsCache holds 116 of the 253 CACHE_KEYS columns")
 def test_flushing_writes_the_statistics_of_a_position(fresh_db) -> None:
     start = datetime(2026, 7, 20, 14, 30)
     pids = {"Hero": 11}
@@ -647,26 +705,59 @@ def test_flushing_writes_the_statistics_of_a_position(fresh_db) -> None:
     assert row == ("0", 1, 300)
 
 
-def test_style_key_day_offset_is_computed_from_a_negative_timedelta() -> None:
-    """Pins a latent defect in storeHudCache's timezone arithmetic.
+def local_utc_offset_hours() -> int:
+    """The machine's UTC offset, derived independently of the code under test."""
+    return round((datetime.now() - datetime.utcnow()).total_seconds() / 3600)
 
-    ``datetime.utcnow() - datetime.today()`` is negative outside UTC, and
-    ``timedelta.seconds`` never is: at UTC+2 the difference is
-    ``-1 day, 21:59:59`` whose ``.seconds`` is 79199, so the code derives a
-    21-hour offset instead of -2. Even at UTC it derives 23 rather than 0.
-    The dated styleKey therefore files hands under the wrong day, and the
-    `day_start` preference is added to a bogus base.
 
-    Only reached with ``build_full_hudcache`` on. Recorded rather than fixed:
-    changing it moves existing HudCache rows to different styleKey buckets.
+def test_the_style_key_files_a_hand_under_its_local_day() -> None:
+    """Regression: the styleKey used to land a day early.
+
+    The offset came from ``(utcnow() - today()).seconds``, and
+    ``timedelta.seconds`` is unsigned: at UTC+2 the difference is
+    ``-1 day, 21:59:59`` whose ``.seconds`` is 79199, so the code derived
+    21 hours instead of -2, and even a UTC machine derived 23 rather than 0.
     """
-    delta = datetime.utcnow() - datetime.today()
-    computed = delta.seconds // 3600
-    true_hours = delta.total_seconds() / 3600
+    db = caches_host(build_full_hudcache=True)
+    start = datetime(2026, 7, 20, 12, 0)
 
-    # timedelta.seconds is never negative, so the derived offset never is either.
-    assert computed >= 0
-    if true_hours < 0:
-        # East of UTC, and on a UTC runner, the sign is lost: the offset comes
-        # back as 24 + true_hours instead of the small negative it should be.
-        assert computed > 0
+    db.storeHudCache(7, RING, {"Hero": 11}, start, {"Hero": player_stats()})
+
+    ((*_, style_key),) = db.hcbulk
+    local = start + timedelta(hours=local_utc_offset_hours())
+    assert style_key == local.strftime("d%y%m%d")
+
+
+def test_the_day_start_preference_shifts_the_style_key_backwards() -> None:
+    # A hand played at 02:00 local belongs to the previous poker day when the
+    # player's day starts at 05:00.
+    start = datetime(2026, 7, 20, 2, 0) - timedelta(hours=local_utc_offset_hours())
+    early = caches_host(build_full_hudcache=True, day_start=0)
+    late = caches_host(build_full_hudcache=True, day_start=5)
+
+    early.storeHudCache(7, RING, {"Hero": 11}, start, {"Hero": player_stats()})
+    late.storeHudCache(7, RING, {"Hero": 11}, start, {"Hero": player_stats()})
+
+    ((*_, without_day_start),) = early.hcbulk
+    ((*_, with_day_start),) = late.hcbulk
+    assert without_day_start == "d260720"
+    assert with_day_start == "d260719"
+
+
+def test_sessions_file_a_hand_in_its_local_week_and_month() -> None:
+    """Regression: weekStart and monthStart used to land a full day early.
+
+    The fallback branch computed ``(today() - utcnow()).seconds // 3600 - 24``,
+    which is about -23 at UTC+2 instead of +2. Reached in the real import path,
+    where Importer passes no timezone name.
+    """
+    db = caches_host()
+    start = datetime(2026, 7, 20, 12, 0)
+
+    db.storeSessions(1, {"Hero": 11}, start, None, [11], None)
+
+    (bucket,) = db.s["bk"]
+    local = start + timedelta(hours=local_utc_offset_hours())
+    assert bucket["monthStart"] == datetime(local.year, local.month, 1)
+    expected_week = datetime(local.year, local.month, local.day)
+    assert bucket["weekStart"] == expected_week - timedelta(days=expected_week.weekday())
