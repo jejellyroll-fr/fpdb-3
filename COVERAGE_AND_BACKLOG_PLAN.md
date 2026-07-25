@@ -410,11 +410,19 @@ Deux ensembles nommés, plutôt que des digests muets :
   page**, que l'importateur découpe en morceaux avant de parser ; le `.xls` Full Tilt
   est un classeur binaire ouvert par xlrd ; le ticket freeroll Winamax n'annonce aucune
   valeur et est refusé.
-- **`HERO_RESULT_NOT_CAPTURED` (3 fichiers) — un vrai trou.** Ces résumés annoncent le
-  classement en prose (« You finished the tournament in 2nd place », avec un gain de
-  0,90 € pour le premier) sans table de classement, donc `addPlayer` n'est jamais appelé
-  et **le résultat du héros est perdu à l'import**. Trois convertisseurs concernés
-  (PokerStars, Winamax ×2). Épinglé, pas corrigé : c'est un chantier de parseur.
+- **Résultat du héros perdu — 1 vrai trou sur 3, ✅ corrigé (2026-07-25).** J'avais
+  classé les trois fichiers comme un même défaut ; l'instruction en a démenti deux.
+  - **PokerStars, résumé envoyé par e-mail** : vrai trou. Le fichier nomme le joueur
+    dans sa formule d'appel (« Dear Hero, »), annonce « You finished **the tournament**
+    in 2nd place. » et « A EUR 0.90 award has been credited ». Le regex existant
+    n'acceptait que « You finished in Nth place », sans « the tournament », et rien ne
+    lisait la formule d'appel ni la ligne de gain : le tournoi s'importait **sans aucun
+    joueur**. Corrigé — le héros est enregistré rang 2, 90 centimes, EUR.
+  - **Winamax ×2 : refus délibérés, pas des défauts.** Le fichier freeroll ne contient
+    **aucune ligne `Player :`** — il ne nomme personne ; le semiturbo annonce
+    « You finished in **...** place », un rang littéralement absent. `WinamaxSummary`
+    décline explicitement dans les deux cas, et ne peut rien faire d'autre sans
+    inventer une donnée. L'ensemble est renommé `HERO_RESULT_WITHHELD_BY_THE_FILE`.
 
 Le reste du corpus est activement vérifié, pas seulement empreint : chaque résumé doit
 nommer son tournoi, n'avoir aucun montant négatif, et enregistrer au moins un joueur.
