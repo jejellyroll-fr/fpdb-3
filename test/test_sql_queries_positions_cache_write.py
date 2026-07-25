@@ -19,7 +19,13 @@ def test_positions_cache_write_keeps_full_positional_context() -> None:
     update = queries["update_positionscache"]
 
     assert insert.index("playerId") < insert.index("seats") < insert.index("maxPosition") < insert.index("position")
-    assert update.index("street3Discards") < update.index("street0Limp") < update.index("street0OpenLimp")
+    # The update used to set street0Limp, street0OpenLimpChance and
+    # street0OpenLimp, which no variant of PositionsCache declares, so every
+    # update raised "no such column". The statistics stop at street3Discards,
+    # the last column the table actually has.
+    assert update.index("street3Discards") < update.index("WHERE id=%s")
+    for absent in ("street0Limp", "street0OpenLimpChance", "street0OpenLimp"):
+        assert absent not in update
     assert update.rstrip().endswith("WHERE id=%s")
     for key in ("select_positionscache_ring", "select_positionscache_tour"):
         for condition in ("playerId=%s", "seats=%s", "maxPosition=%s", "position=%s"):

@@ -8,7 +8,6 @@ aggregate hands rather than record them.
 from __future__ import annotations
 
 from datetime import datetime, timedelta
-from time import strftime
 from typing import TYPE_CHECKING, Any
 
 import pytz
@@ -301,6 +300,134 @@ HUDCACHE_EXTRA_KEYS = [
 ]
 
 
+# The statistics carried by SessionsCache, TourneysCache, CardsCache and
+# PositionsCache. CACHE_KEYS grew by appending over the years and HudCache was
+# widened to follow it; these four tables were not, so they hold the first 116
+# entries only. Writing all of CACHE_KEYS into them binds ~258 values into
+# statements expecting ~120 and every insert fails, which is why the four
+# caches were unpopulated. The list is spelled out rather than sliced so that
+# inserting a key in the middle of CACHE_KEYS cannot silently redefine it;
+# test_database_caches.py checks it against the shipped DDL.
+SESSION_CACHE_KEYS = [
+    "n",
+    "street0VPIChance",
+    "street0VPI",
+    "street0AggrChance",
+    "street0Aggr",
+    "street0CalledRaiseChance",
+    "street0CalledRaiseDone",
+    "street0FaceRaise",
+    "street0_2BChance",
+    "street0_2BDone",
+    "street0_3BChance",
+    "street0_3BDone",
+    "street0_4BChance",
+    "street0_4BDone",
+    "street0_C4BChance",
+    "street0_C4BDone",
+    "street0_FoldTo2BChance",
+    "street0_FoldTo2BDone",
+    "street0_FoldTo3BChance",
+    "street0_FoldTo3BDone",
+    "street0_FoldTo4BChance",
+    "street0_FoldTo4BDone",
+    "street0_SqueezeChance",
+    "street0_SqueezeDone",
+    "raiseToStealChance",
+    "raiseToStealDone",
+    "stealChance",
+    "stealDone",
+    "success_Steal",
+    "street1Seen",
+    "street2Seen",
+    "street3Seen",
+    "street4Seen",
+    "sawShowdown",
+    "street1Aggr",
+    "street2Aggr",
+    "street3Aggr",
+    "street4Aggr",
+    "otherRaisedStreet0",
+    "otherRaisedStreet1",
+    "otherRaisedStreet2",
+    "otherRaisedStreet3",
+    "otherRaisedStreet4",
+    "foldToOtherRaisedStreet0",
+    "foldToOtherRaisedStreet1",
+    "foldToOtherRaisedStreet2",
+    "foldToOtherRaisedStreet3",
+    "foldToOtherRaisedStreet4",
+    "wonWhenSeenStreet1",
+    "wonWhenSeenStreet2",
+    "wonWhenSeenStreet3",
+    "wonWhenSeenStreet4",
+    "wonAtSD",
+    "raiseFirstInChance",
+    "raisedFirstIn",
+    "foldBbToStealChance",
+    "foldedBbToSteal",
+    "foldSbToStealChance",
+    "foldedSbToSteal",
+    "street1CBChance",
+    "street1CBDone",
+    "street2CBChance",
+    "street2CBDone",
+    "street3CBChance",
+    "street3CBDone",
+    "street4CBChance",
+    "street4CBDone",
+    "foldToStreet1CBChance",
+    "foldToStreet1CBDone",
+    "foldToStreet2CBChance",
+    "foldToStreet2CBDone",
+    "foldToStreet3CBChance",
+    "foldToStreet3CBDone",
+    "foldToStreet4CBChance",
+    "foldToStreet4CBDone",
+    "common",
+    "committed",
+    "winnings",
+    "rake",
+    "rakeDealt",
+    "rakeContributed",
+    "rakeWeighted",
+    "totalProfit",
+    "allInEV",
+    "showdownWinnings",
+    "nonShowdownWinnings",
+    "street1CheckCallRaiseChance",
+    "street1CheckCallDone",
+    "street1CheckRaiseDone",
+    "street2CheckCallRaiseChance",
+    "street2CheckCallDone",
+    "street2CheckRaiseDone",
+    "street3CheckCallRaiseChance",
+    "street3CheckCallDone",
+    "street3CheckRaiseDone",
+    "street4CheckCallRaiseChance",
+    "street4CheckCallDone",
+    "street4CheckRaiseDone",
+    "street0Calls",
+    "street1Calls",
+    "street2Calls",
+    "street3Calls",
+    "street4Calls",
+    "street0Bets",
+    "street1Bets",
+    "street2Bets",
+    "street3Bets",
+    "street4Bets",
+    "street0Raises",
+    "street1Raises",
+    "street2Raises",
+    "street3Raises",
+    "street4Raises",
+    "street1Discards",
+    "street2Discards",
+    "street3Discards",
+]
+
+
 class DatabaseCachesMixin:
     """Writes the aggregate caches the HUD and the reports read from.
 
@@ -345,8 +472,12 @@ class DatabaseCachesMixin:
     def storeHudCache(self, gid, gametype, pids, starttime, pdata, doinsert=False) -> None:
         """Update cached statistics. If update fails because no record exists, do an insert."""
         if pdata:
+            # starttime is UTC; shifting it by the machine's offset and by
+            # day_start buckets it into the player's own day. timedelta.seconds
+            # is unsigned, so east of UTC it used to report 21..23 hours instead
+            # of a small negative and filed hands under the previous day.
             tz = datetime.utcnow() - datetime.today()
-            tz_offset = (tz.seconds) // (3600)
+            tz_offset = round(tz.total_seconds() / 3600)
             tz_day_start_offset = self.day_start + tz_offset
 
             d = timedelta(hours=tz_day_start_offset)
@@ -462,14 +593,13 @@ class DatabaseCachesMixin:
             weekdate = datetime(local.year, local.month, local.day)
             weekStart = weekdate - timedelta(days=weekdate.weekday())
         else:
-            if strftime("%Z") == "UTC":
-                local = startTime
-                loc_tz = "0"
-            else:
-                tz_dt = datetime.today() - datetime.utcnow()
-                loc_tz = (tz_dt.seconds) // (3600) - 24
-                offset = timedelta(hours=int(loc_tz))
-                local = startTime + offset
+            # No named zone: fall back to the machine's own offset. Computed
+            # from the signed total because timedelta.seconds is unsigned --
+            # the previous ".seconds // 3600 - 24" landed a full day early,
+            # which put a session in the wrong week and the wrong month. A UTC
+            # machine yields 0, so the former special case is redundant.
+            tz_dt = datetime.today() - datetime.utcnow()
+            local = startTime + timedelta(hours=round(tz_dt.total_seconds() / 3600))
             monthStart = datetime(local.year, local.month, 1)
             weekdate = datetime(local.year, local.month, local.day)
             weekStart = weekdate - timedelta(days=weekdate.weekday())
@@ -720,7 +850,7 @@ class DatabaseCachesMixin:
                 hp["hid"] = hid
                 hp["ids"] = []
                 pdata[p]["n"] = 1
-                hp["line"] = [int(pdata[p][s]) if isinstance(pdata[p][s], bool) else pdata[p][s] for s in CACHE_KEYS]
+                hp["line"] = [int(pdata[p][s]) if isinstance(pdata[p][s], bool) else pdata[p][s] for s in SESSION_CACHE_KEYS]
                 session_indices: list[int] = []
                 sessionplayer: list[dict[str, Any]] | None = self.sc.get(k)
                 if sessionplayer is not None:
@@ -799,13 +929,13 @@ class DatabaseCachesMixin:
                     c.execute(select_SC, row)
                     r = self.fetchallDict(
                         c,
-                        ["id", "sessionId", "startTime", "endTime", *CACHE_KEYS],
+                        ["id", "sessionId", "startTime", "endTime", *SESSION_CACHE_KEYS],
                     )
                     num = len(r)
                     d: list[dict[str, Any]] = [{} for _ in range(num)]
                     for z in range(num):
                         d[z] = {}
-                        d[z]["line"] = [int(r[z][s]) if isinstance(r[z][s], bool) else r[z][s] for s in CACHE_KEYS]
+                        d[z]["line"] = [int(r[z][s]) if isinstance(r[z][s], bool) else r[z][s] for s in SESSION_CACHE_KEYS]
                         d[z]["id"] = r[z]["id"]
                         d[z]["sessionId"] = r[z]["sessionId"]
                         d[z]["startTime"] = r[z]["startTime"]
@@ -817,7 +947,7 @@ class DatabaseCachesMixin:
                         row = [start, end] + session["line"] + [id]
                         c.execute(update_SC, row)
                     elif num > 1:
-                        start, end, merge, line = None, None, [], [0] * len(CACHE_KEYS)
+                        start, end, merge, line = None, None, [], [0] * len(SESSION_CACHE_KEYS)
                         for n in r:
                             merge.append(n["id"])
                         merge.sort()
@@ -825,7 +955,7 @@ class DatabaseCachesMixin:
                         for n in merged_rows:
                             start = min(start, n["startTime"]) if start else n["startTime"]
                             end = max(end, n["endTime"]) if end else n["endTime"]
-                            for idx in range(len(CACHE_KEYS)):
+                            for idx in range(len(SESSION_CACHE_KEYS)):
                                 line[idx] += int(n["line"][idx]) if isinstance(n["line"][idx], bool) else n["line"][idx]
                         row = [sid, start, end, *list(k[:2]), *line]
                         c.execute(insert_SC, row)
@@ -856,7 +986,7 @@ class DatabaseCachesMixin:
             for p in pdata:
                 k = (tid, pids[p])
                 pdata[p]["n"] = 1
-                line = [int(pdata[p][s]) if isinstance(pdata[p][s], bool) else pdata[p][s] for s in CACHE_KEYS]
+                line = [int(pdata[p][s]) if isinstance(pdata[p][s], bool) else pdata[p][s] for s in SESSION_CACHE_KEYS]
                 tourplayer = self.tc.get(k)
                 # Add line to the old line in the tourcache.
                 if tourplayer is not None:
@@ -946,7 +1076,7 @@ class DatabaseCachesMixin:
         for p in pdata:
             k = (hid, gametypeId, tourneyTypeId, pids[p], pdata[p]["startCards"])
             pdata[p]["n"] = 1
-            line = [int(pdata[p][s]) if isinstance(pdata[p][s], bool) else pdata[p][s] for s in CACHE_KEYS]
+            line = [int(pdata[p][s]) if isinstance(pdata[p][s], bool) else pdata[p][s] for s in SESSION_CACHE_KEYS]
             self.dcbulk[k] = line
 
         if doinsert:
@@ -1040,7 +1170,7 @@ class DatabaseCachesMixin:
                 position,
             )
             pdata[p]["n"] = 1
-            line = [int(pdata[p][s]) if isinstance(pdata[p][s], bool) else pdata[p][s] for s in CACHE_KEYS]
+            line = [int(pdata[p][s]) if isinstance(pdata[p][s], bool) else pdata[p][s] for s in SESSION_CACHE_KEYS]
             self.pcbulk[k] = line
 
         if doinsert:

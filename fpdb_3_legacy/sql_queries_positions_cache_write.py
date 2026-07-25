@@ -155,7 +155,7 @@ def positions_cache_write_queries() -> dict[str, str]:
                 %s, %s, %s, %s, %s,
                 %s, %s, %s, %s, %s,
                 %s, %s, %s, %s, %s,
-                %s, %s, %s
+                %s, %s, %s, %s
                 )"""
 
     query["update_positionscache"] = """
@@ -167,6 +167,7 @@ def positions_cache_write_queries() -> dict[str, str]:
                 street0Aggr=street0Aggr+%s,
                 street0CalledRaiseChance=street0CalledRaiseChance+%s,
                 street0CalledRaiseDone=street0CalledRaiseDone+%s,
+                street0FaceRaise=street0FaceRaise+%s,
                 street0_2BChance=street0_2BChance+%s,
                 street0_2BDone=street0_2BDone+%s,
                 street0_3BChance=street0_3BChance+%s,
@@ -274,10 +275,7 @@ def positions_cache_write_queries() -> dict[str, str]:
                 street4Raises=street4Raises+%s,
                 street1Discards=street1Discards+%s,
                 street2Discards=street2Discards+%s,
-    street3Discards=street3Discards+%s,
-                      street0Limp=street0Limp+%s,
-                      street0OpenLimpChance=street0OpenLimpChance+%s,
-                      street0OpenLimp=street0OpenLimp+%s
+    street3Discards=street3Discards+%s
                       WHERE id=%s"""
 
     query["select_positionscache_ring"] = """

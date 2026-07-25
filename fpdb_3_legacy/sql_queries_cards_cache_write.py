@@ -20,10 +20,11 @@ def cards_cache_write_queries() -> dict[str, str]:
             street0Aggr,
             street0CalledRaiseChance,
             street0CalledRaiseDone,
-            street0_3BChance,
-            street0_3BDone,
+            street0FaceRaise,
             street0_2BChance,
             street0_2BDone,
+            street0_3BChance,
+            street0_3BDone,
             street0_4BChance,
             street0_4BDone,
             street0_C4BChance,
@@ -152,7 +153,7 @@ def cards_cache_write_queries() -> dict[str, str]:
                 %s, %s, %s, %s, %s,
                 %s, %s, %s, %s, %s,
                 %s, %s, %s, %s, %s,
-                %s)"""
+                %s, %s)"""
 
     query["update_cardscache"] = """
         UPDATE CardsCache SET
@@ -163,6 +164,7 @@ def cards_cache_write_queries() -> dict[str, str]:
                 street0Aggr=street0Aggr+%s,
                 street0CalledRaiseChance=street0CalledRaiseChance+%s,
                 street0CalledRaiseDone=street0CalledRaiseDone+%s,
+                street0FaceRaise=street0FaceRaise+%s,
                 street0_2BChance=street0_2BChance+%s,
                 street0_2BDone=street0_2BDone+%s,
                 street0_3BChance=street0_3BChance+%s,
