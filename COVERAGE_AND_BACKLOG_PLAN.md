@@ -551,10 +551,36 @@ piège de langage — `self.__connected` déplacé dans un mixin se mange en
 `_DatabaseConnectionMixin__connected` et **casse à l'exécution**, ce qui interdit le
 déplacement au mot près qui a rendu les six paliers sûrs.
 
-**Ce qui reste, et c'est un travail d'une autre nature** : découper les fonctions
-elles-mêmes pour sortir `Database.py` de `C901`/`PLR0912`/`PLR0915` (14 violations, dont
-`connect` à 22 de complexité et `get_stats_from_hand` déjà isolé dans son module). Le
-découpage par domaines a donné ce qu'il pouvait donner.
+**Découpage des fonctions — ✅ FAIT (2026-07-25). `Database.py` sort entièrement du
+cliquet de complexité**, son entrée est supprimée de `per-file-ignores`. Les six
+fonctions fautives sont découpées le long des frontières que le code marquait déjà :
+
+- `connect` (22/24/97) → un helper par backend, `_connect_mysql`,
+  `_connect_postgresql`, `_connect_sqlite` ; ce dernier renvoie le chemin résolu et le
+  drapeau `create` que l'appelant transmet à `check_version` ;
+- `main` (18/18/77) → `_build_cli_parser` et une fonction par commande ;
+- `replace_statscache` (11/14/69) → un helper par table, plus
+  `_apply_tourney_clauses` : le bloc des trois placeholders tournoi était **triplé à
+  l'identique**, vérifié caractère par caractère avant factorisation ;
+- `rebuild_cache` (14/18) → `_rebuild_prepare_heroes`, `_rebuild_ring_cache`,
+  `_rebuild_tourney_cache` ;
+- `cleanUpWeeksMonths` (15/14) → `_clear_period_caches` (la boucle de purge était
+  écrite deux fois), `_delete_orphan_periods`, `_rebuild_period_caches` ;
+- `__init__` (57 instructions) → `_connect_and_configure` pour ce qui exige une
+  connexion ouverte.
+
+**Dette réellement supprimée, pas déplacée : 26 → 12** sur les quatre modules
+(`Database.py` 0, bulk 5, schema 4, hud 3). C'est l'objectif que les paliers 4 à 6
+n'avaient pas atteint.
+
+La vérification par AST identique n'était plus disponible — on modifie l'intérieur des
+fonctions, pas leur emplacement. Remplacée par : la suite complète (5 471 + 386), une
+comparaison de `replace_statscache` avant/après sur **les 48 combinaisons**
+table × type × `build_full_hudcache` × backend (0 divergence ; 36 ne diffèrent que par
+l'indentation interne du SQL, sans effet), et un essai de la CLI reconstruite.
+
+**Reste au cliquet pour ce domaine** : `database_caches` (16), `database_tournaments`
+(6), `database_bulk_import` (5), `database_schema` (4), `database_hud_stats` (3).
 
 ### Étape 6 — Fermer les bugs connus · ~0,5 j
 
@@ -599,7 +625,7 @@ découpage par domaines a donné ce qu'il pouvait donner.
 | 3 | ✅ Tests des caches statistiques | fait | +59 pts sur le module | **Chiffres HUD faux** |
 | 3bis | ✅ Corriger les écrivains de cache | fait | — | **4 caches impeuplables** |
 | 4 | ✅ Scripts d'exploitation | fait | domaine +12 pts | **Corruption de base** |
-| 5 | ✅ `Database.py` 4-6/N ; 7/N écarté | fait | −67 % de lignes | Dette de complexité |
+| 5 | ✅ `Database.py` découpé et sorti du cliquet | fait | −67 % lignes, dette 26→12 | Dette de complexité |
 | 6 | Bugs connus + clôture des plans | 0,5 j | — | Hand id iPoker faux |
 | 7 | i18n des modules récents | 1,5 j | — | UI bilingue |
 | 8 | Continu (`ModernHudPreferences`, cliquets) | — | — | — |
