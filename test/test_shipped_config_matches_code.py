@@ -68,8 +68,12 @@ def test_every_layout_reference_resolves(config_root: ET.Element) -> None:
 
 
 def _seeded_sites() -> set[str]:
-    """The sites Database.fillDefaultData inserts into the Sites table."""
-    source = Path("fpdb_3_legacy/Database.py").read_text(encoding="utf-8")
+    """The sites fillDefaultData inserts into the Sites table.
+
+    The method lives in database_schema with the rest of the DDL and the
+    reference rows; Database mixes it in.
+    """
+    source = Path("fpdb_3_legacy/database_schema.py").read_text(encoding="utf-8")
     body = source[source.index("def fillDefaultData") : source.index("# end def fillDefaultData")]
     return {
         match.group(1)

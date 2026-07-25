@@ -9,6 +9,12 @@ baseline upwards, never downwards.
 
 Percentages are the branch-aware figures coverage.py itself reports, so the
 numbers printed here match ``pytest --cov-report=term``.
+
+One case legitimately lowers a floor: extracting a well-covered domain out of a
+guarded module leaves a less-covered remainder, so its percentage falls even
+though nothing became untested. Before re-seeding such a change, check that the
+covered units of the source and the new module together are no fewer than the
+source had on its own -- the percentage moved, the coverage did not.
 """
 
 from __future__ import annotations
