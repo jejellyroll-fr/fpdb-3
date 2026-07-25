@@ -180,9 +180,13 @@ def test_a_new_logger_inherits_warning_and_drops_its_info(tmp_path) -> None:
     handler looks broken when it is not.
     """
     logging_fpdb.setup_logging(log_dir=str(tmp_path))
+    # Set the parent here rather than relying on a saved configuration: the
+    # point is the inheritance, and the level a machine happens to have stored
+    # is not part of it.
+    logging.getLogger("fpdb").setLevel(logging.WARNING)
     logger = logging_fpdb.get_logger("fpdb.test.inherited")
+    logging.getLogger("fpdb.test.inherited").setLevel(logging.NOTSET)
 
-    assert logging.getLogger("fpdb").level == logging.WARNING
     assert logging.getLogger("fpdb.test.inherited").getEffectiveLevel() == logging.WARNING
 
     logger.info("this one is dropped")
