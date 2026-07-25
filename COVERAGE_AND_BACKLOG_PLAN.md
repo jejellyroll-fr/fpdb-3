@@ -133,11 +133,19 @@ ordre des statistiques conforme à la liste de clés.
 
 ### A2. Deux bugs identifiés, documentés, non corrigés
 
-**(a) iPoker : le hand id de la première main de chaque fichier est le code de session.**
-Décrit en note de bas de chantier dans `WINDOWS_HUD_BUGFIX_PLAN.md`, laissé « à traiter
-séparément ». **Toujours présent** : [`iPoker/base.py:247`](fpdb_3_legacy/iPoker/base.py:247)
-compile `code="(?P<HID>[0-9]+)"`, motif que la chaîne `sessioncode="…"` satisfait aussi.
-La première main d'une session porte donc un identifiant qui n'est pas le sien.
+**(a) iPoker : le hand id de la première main de chaque fichier était le code de session
+— ✅ CORRIGÉ (2026-07-25).** Décrit en note de bas de chantier dans
+`WINDOWS_HUD_BUGFIX_PLAN.md`, laissé « à traiter séparément » depuis le 22/07.
+`re_hand_info` cherchait `code="(?P<HID>[0-9]+)"`, motif que `sessioncode="…"` satisfait
+aussi — et chaque fichier iPoker s'ouvre par `<session sessioncode="…">`. Mesuré sur le
+corpus : **les 9 fichiers sur 9** étaient touchés. Le motif est désormais ancré sur
+`gamecode="…"`, seul attribut de `<game>` (356 occurrences, aucun autre).
+Régression dans `test/test_ipoker_parser.py` ; l'instantané golden de la fixture iPoker
+a été régénéré après vérification que **seul** `handid` change (`6661728946` → `7423436714`).
+
+⚠️ Sur une base déjà importée, la première main de chaque fichier iPoker porte encore
+l'ancien identifiant. Un ré-import la ré-insérera sous le bon, sans écraser l'ancienne
+ligne : une main dupliquée par fichier, à nettoyer si le sujet compte.
 
 **(b) Bug 1 PokerStars cash (Windows) — 🟡 durci, jamais confirmé.**
 `WINDOWS_HUD_BUGFIX_PLAN.md` le laisse en attente de validation live ; les trois autres
