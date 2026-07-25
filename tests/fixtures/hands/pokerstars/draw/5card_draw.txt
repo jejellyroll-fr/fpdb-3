@@ -19,6 +19,6 @@ Player1: shows [Ah Kh Qh Jh Th] (a Royal Flush)
 Player2: mucks
 Player1 collected $5.80 from pot
 *** SUMMARY ***
-Total pot $5.80 | Rake $0.20
+Total pot $6.00 | Rake $0.20
 Seat 1: Player1 (button) (small blind) showed [Ah Kh Qh Jh Th] and won ($5.80) with a Royal Flush
 Seat 2: Player2 (big blind) mucked

@@ -45,7 +45,7 @@
   },
   "pokerstars/draw/5card_draw.txt": {
     "hand_count": 1,
-    "sha256": "758047673c7ef9ac9dcc694fa68a2f0c45f18f5480028c5a4fc6fd3ec0c78583"
+    "sha256": "e9f9d48535a6e8430715b244bb72712dedbd1d22334561409ecf1e53aae709a5"
   },
   "pokerstars/draw/badugi.txt": {
     "hand_count": 1,
@@ -109,7 +109,7 @@
   },
   "pokerstars/stud/7stud.txt": {
     "hand_count": 1,
-    "sha256": "3d127fe5581c2487fdeff16cd4f6ba551f0d922f787be7b405fd326ff79f0893"
+    "sha256": "30ccbd3ae4146bb9635dbbae6d6f8300cfa2765f82aa713eecdb7ef1a5d5edb0"
   },
   "pokerstars/stud/razz.txt": {
     "hand_count": 1,

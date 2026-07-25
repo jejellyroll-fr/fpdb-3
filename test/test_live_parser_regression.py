@@ -149,22 +149,25 @@ KNOWN_EMPTY = {
     "regression/Stars/Flop/LO8-6max-USD-0.05-0.10-20090315.Hand-cancelled.txt",
 }
 
-# The pot equation -- collected + rake == total pot -- holds for 2 850 of the
-# 2 867 hands in the corpus. These files are the exceptions, in three groups:
+# The pot equation -- collected + rake == total pot -- holds everywhere except
+# these files, in three groups:
 #
 #  * cash-out hands, where a player takes an insured payout instead of the pot,
 #    so what is collected is deliberately not a share of it;
 #  * third-party re-exports (HM1, "converted") whose summary line is already a
 #    lossy rendering of the original;
-#  * two BetOnline files and three synthetic PokerStars fixtures whose totals do
-#    not reconcile and have not been explained -- genuine suspects.
+#  * two BetOnline hands the export itself renders ambiguously. BetOnline prints
+#    several "Total pot" lines for one hand, and the corpus holds 22 such hands:
+#    20 are duplicates or running totals where the last line is the pot, and 2
+#    are genuine side pots whose lines must be added. Neither the line values nor
+#    the number of winners separates the two cases, so the converter keeps the
+#    last line -- right for 20 of 22 -- and these two stay out of balance. Summing
+#    instead was tried and doubles the pot of the other twenty.
 #
 # Anything outside this list must balance, so the corpus is actively checked
 # rather than merely digested.
 POT_EQUATION_EXCEPTIONS = {
-    "pokerstars/draw/5card_draw.txt",
     "pokerstars/holdem/cashed_out.txt",
-    "pokerstars/stud/7stud.txt",
     "regression/BetOnline/Flop/NLHE-10max-USD-0.01-0.02-201605.winner.no.show.txt",
     "regression/BetOnline/Flop/PLO-10max-USD-0.05-0.10-201209.txt",
     "regression/Stars/Flop/2025-NL-6max-USD-0.05-0.10.cashout.txt",

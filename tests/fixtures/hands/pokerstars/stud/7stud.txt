@@ -44,7 +44,7 @@ Player1: shows [2h 2s 2d 4d Ad Ah As] (four of a kind, Aces)
 Player3: mucks
 Player1 collected $15.55 from pot
 *** SUMMARY ***
-Total pot $15.55 | Rake $0.50
+Total pot $16.05 | Rake $0.50
 Seat 1: Player1 (button) showed [2h 2s 2d 4d Ad Ah As] and won ($15.55) with four of a kind, Aces
 Seat 2: Player2 folded on 5th Street
 Seat 3: Player3 mucked
