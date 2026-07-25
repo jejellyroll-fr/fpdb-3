@@ -447,17 +447,40 @@ décalage revient à `24 + offset` au lieu d'un petit négatif) :
 sur `Hands`/`HandsPlayers`, il faudra élargir les quatre tables aux 253 statistiques —
 c'est le chantier qui n'a pas été fait ici, faute de consommateur.
 
-### Étape 4 — Sécuriser les scripts d'exploitation · ~1 j
+### Étape 4 — Sécuriser les scripts d'exploitation — ✅ FAIT (2026-07-25)
 
-`migration_helper` (256), `sync_databases` (132), `backfill_showdown` (149),
-`backfill_boards` (115), `fix_draw_starting_hands` (110), `backfill_autonotes` (40,5 %).
-Ils écrivent en base et sont à 0 %. Un test de bout en bout sur SQLite temporaire par
-script — pas de la couverture cosmétique, la vérification qu'ils ne corrompent rien.
+`tests/test_maintenance_scripts.py` — **34 tests**. Domaine `maintenance-scripts`
+17,8 % → 29,8 %, total 57,1 % → 57,3 %.
 
-⚠️ Contrainte connue : ces tests ne doivent **jamais** toucher le `HUD_config.xml` réel
-de l'utilisateur — copie temporaire obligatoire.
+Priorité donnée au risque réel plutôt qu'au nombre de lignes :
+`fix_draw_starting_hands` **supprime des mains**, il passe donc de 0 % à **57,8 %** et
+concentre l'effort. Les tests vérifient ce qu'il *sélectionne* (une main de hero
+incomplète est signalée, une main complète ne l'est pas, badugi est jugé sur 4 cartes et
+non 5, une main de hold'em n'est jamais scannée, seul le siège du héros décide — juger
+sur un vilain signalerait toute la base) et ce qu'il *supprime* (la main et ses enfants
+partent, les autres restent, une liste vide ne touche à rien, et l'ensemble supprimé est
+exactement l'ensemble rapporté). `backfill_boards` 0 % → 28,9 %, `backfill_showdown`
+0 % → 22,3 %.
 
-**Gain** : ~700 lignes, risque de corruption de données levé.
+Corrigé au passage : `fix_draw_starting_hands` faisait `sys.path.insert` puis
+`import Card, Configuration, Database` en absolu, ce qui chargeait une **seconde
+instance** de ces modules à côté de `fpdb_3_legacy.*` et polluait `sys.path` pour tout
+le processus. Passé aux imports du paquet, comme les trois autres backfills.
+
+**Deux modules ne sont pas des scripts d'exploitation, et le plan se trompait.**
+
+- **`sync_databases` (132 lignes) est mort depuis toujours** : il importe
+  `fpdb.infrastructure.adapters.legacy_schema_adapter` et
+  `fpdb.infrastructure.database.models`, qui n'ont **jamais existé** dans ce dépôt — il
+  est arrivé ainsi avec l'import initial du legacy. Il lève `ModuleNotFoundError` et ne
+  peut donc pas s'exécuter. mypy ne le voyait pas, les imports manquants étant ignorés,
+  et la CI le type-vérifie toujours. Un test épingle l'état actuel pour que sa
+  réparation ou sa suppression soit visible.
+- **`migration_helper` (256 lignes)** est un assistant interactif pour la migration
+  Python 3.13/3.14 : menus, `subprocess`, aucune base de données. Obsolète si la
+  migration est faite.
+
+Ces deux-là relèvent d'une décision (réparer ou supprimer), pas d'un test.
 
 ### Étape 5 — Reprendre le découpage de `Database.py` (4/N → N/N) · ~3-4 j
 
@@ -524,7 +547,7 @@ pas fait.
 | 2bis | Harnais résumés de tournoi | 1,5 j | — | Régressions résumés |
 | 3 | ✅ Tests des caches statistiques | fait | +59 pts sur le module | **Chiffres HUD faux** |
 | 3bis | ✅ Corriger les écrivains de cache | fait | — | **4 caches impeuplables** |
-| 4 | Scripts d'exploitation | 1 j | ~700 l. | **Corruption de base** |
+| 4 | ✅ Scripts d'exploitation | fait | domaine +12 pts | **Corruption de base** |
 | 5 | `Database.py` 4/N → N/N | 3-4 j | — | Dette de complexité |
 | 6 | Bugs connus + clôture des plans | 0,5 j | — | Hand id iPoker faux |
 | 7 | i18n des modules récents | 1,5 j | — | UI bilingue |
@@ -532,7 +555,7 @@ pas fait.
 
 **Chemin critique recommandé : 1 → 3 → 2 → 4 → 5**, l'étape 1 protégeant tout le reste
 et l'étape 3 précédant l'étape 5 parce qu'on ne déplace pas du code non testé.
-Les étapes 1, 2, 3 et 3bis sont faites. Restent 2bis, 4 et 5, indépendantes entre elles.
+Les étapes 1, 2, 3, 3bis et 4 sont faites. Restent 2bis et 5, indépendantes entre elles.
 
 ---
 
