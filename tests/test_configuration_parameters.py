@@ -553,18 +553,60 @@ def test_a_file_that_is_gone_is_refused(config) -> None:
     assert config.reload() is False
 
 
-def test_a_failure_partway_through_leaves_the_settings_half_loaded(config) -> None:
-    # The sections are emptied first and refilled one by one, so a section
-    # that will not parse leaves the ones after it empty. reload() reports the
-    # failure, but none of its four callers look at the return value, so what
-    # they carry on with is a configuration with no popup windows.
-    assert config.popup_windows
+def test_a_failure_partway_through_leaves_the_settings_in_use_untouched(config) -> None:
+    # Each section is parsed into a structure of its own and only put on the
+    # object once every one of them has been read. This matters because none
+    # of reload()'s four callers look at the return value: what they carry on
+    # with after a failure has to be the whole configuration they had.
+    before = {name: len(getattr(config, name)) for name in ("supported_sites", "popup_windows", "stat_sets")}
+    assert all(before.values())
 
     with patch.object(config_module, "Popup", side_effect=ValueError("unreadable node")):
         assert config.reload() is False
 
-    assert config.supported_sites
-    assert config.popup_windows == {}
+    assert {name: len(getattr(config, name)) for name in before} == before
+
+
+def test_the_document_is_not_swapped_in_by_a_failed_reload(config) -> None:
+    # A half-swapped Config would hold the new document beside the old
+    # settings, and saving would then write a mixture of the two.
+    rewrite(config, "<hud_ui ", '<hud_ui bgcolor="#ABCDEF" ')
+
+    with patch.object(config_module, "Popup", side_effect=ValueError("unreadable node")):
+        config.reload()
+
+    assert hud_ui_node(config).getAttribute("bgcolor") != "#ABCDEF"
+
+
+def test_a_reload_that_succeeds_still_replaces_everything(config) -> None:
+    config.supported_sites["A Room That Was Removed"] = object()
+    config.popup_windows["A Popup That Was Removed"] = object()
+
+    assert config.reload() is True
+
+    assert "A Room That Was Removed" not in config.supported_sites
+    assert "A Popup That Was Removed" not in config.popup_windows
+
+
+def test_a_configuration_carrying_no_hud_section_keeps_what_it_had(config) -> None:
+    # A file with no hud_ui node leaves the settings already in use alone
+    # rather than dropping them.
+    before = config.ui
+    rewrite(config, "<hud_ui", "<hud_ui_disabled")
+
+    assert config.reload() is True
+    assert config.ui is before
+
+
+def test_a_section_neither_the_object_nor_the_file_has_stays_absent(config) -> None:
+    # Config only grows these attributes when the file carries the section, so
+    # there is a difference between a section holding nothing and no section at
+    # all, and reloading must not invent one.
+    rewrite(config, "<hud_ui", "<hud_ui_disabled")
+    del config.ui
+
+    assert config.reload() is True
+    assert not hasattr(config, "ui")
 
 
 def test_a_configuration_without_a_general_section_falls_back_to_defaults(config) -> None:
