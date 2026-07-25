@@ -106,11 +106,22 @@ def test_noise_within_tolerance_does_not_fail(seeded, tmp_path):
     assert coverage_ratchet.main(["--check", str(report), "--baseline", str(baseline)]) == 0
 
 
-def test_os_dependent_domain_gets_a_wider_allowance():
-    # The CI runner is Linux while a developer may re-seed from macOS, and the
-    # platform factory does not exercise the same implementation on both.
-    assert coverage_ratchet.tolerance_for("platform-pkg") > coverage_ratchet.tolerance_for("poker-domain")
-    assert coverage_ratchet.tolerance_for("poker-domain") == coverage_ratchet.TOLERANCE
+def test_os_dependent_coverage_gets_a_wider_allowance():
+    # The CI runner is Linux while a developer may re-seed from macOS. The
+    # widest allowance goes to the platform package, whose factory does not
+    # exercise the same implementation on both; anything not measured as
+    # OS-dependent keeps the ordinary tolerance.
+    assert coverage_ratchet.tolerance_for("platform-pkg") > coverage_ratchet.tolerance_for("live-capture")
+    assert coverage_ratchet.tolerance_for("live-capture") > coverage_ratchet.TOLERANCE
+    assert coverage_ratchet.tolerance_for("parsers") == coverage_ratchet.TOLERANCE
+    assert coverage_ratchet.tolerance_for("database") == coverage_ratchet.TOLERANCE
+
+
+def test_every_widened_allowance_names_something_real():
+    # A stale entry would silently loosen a floor that no longer exists.
+    domains = {name for name, _ in coverage_ratchet.DOMAINS}
+    for label in coverage_ratchet.EXTRA_TOLERANCE:
+        assert label in domains or coverage_ratchet._matches(label, coverage_ratchet.GUARDED_MODULES), label
 
 
 def test_platform_drift_is_tolerated_while_the_same_drop_elsewhere_fails(tmp_path):
