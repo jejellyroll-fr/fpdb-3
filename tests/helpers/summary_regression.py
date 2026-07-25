@@ -45,6 +45,10 @@ FINGERPRINT_FIELDS = (
 )
 
 
+def _normalise_line_endings(text: str) -> str:
+    return text.replace("\r\n", "\n").replace("\r", "\n")
+
+
 def clean_money(value: str) -> str:
     """Strip grouping and currency marks, as TourneySummary.clearMoneyString does."""
     return value.replace(",", "").replace("$", "").replace("€", "").replace("£", "").strip()
@@ -55,15 +59,17 @@ def read_text(path: Path) -> str:
 
     A UTF-16 byte-order mark is unambiguous and must be honoured first: half of
     the Full Tilt corpus is UTF-16-LE, and falling through to cp1252 decodes it
-    into mojibake that no header regex can match.
+    into mojibake that no header regex can match. Line endings are normalised
+    for the same reason readFile normalises them, so a Windows checkout parses
+    the corpus exactly as a Unix one does.
     """
     raw = path.read_bytes()
     if raw[:2] in (b"\xff\xfe", b"\xfe\xff"):
-        return raw.decode("utf-16", errors="ignore")
+        return _normalise_line_endings(raw.decode("utf-16", errors="ignore"))
     try:
-        return raw.decode("utf-8-sig")
+        return _normalise_line_endings(raw.decode("utf-8-sig"))
     except UnicodeDecodeError:
-        return raw.decode("cp1252", errors="replace")
+        return _normalise_line_endings(raw.decode("cp1252", errors="replace"))
 
 
 HHTYPE_BY_SUFFIX = {".xls": "xls", ".xlsx": "xls", ".htm": "html", ".html": "html"}

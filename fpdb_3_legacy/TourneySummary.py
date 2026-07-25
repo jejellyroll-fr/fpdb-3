@@ -36,6 +36,17 @@ except ImportError:
 log = get_logger("tourney_summary_parser")
 
 
+def _normalise_line_endings(text: str) -> str:
+    """Strip carriage returns, as the hand-history path does on its own input.
+
+    A converter that captures a value at end of line otherwise keeps the "\r"
+    in it, and every later comparison against a plain literal fails silently.
+    Winamax read "semiturbo\r" that way and filed turbo tournaments as normal
+    ones on any machine whose files use CRLF.
+    """
+    return text.replace("\r\n", "\n").replace("\r", "\n")
+
+
 class TourneySummary:
     ################################################################
     #    Class Variables
@@ -451,11 +462,11 @@ class TourneySummary:
             return None
 
         if raw_data[:2] in (b"\xff\xfe", b"\xfe\xff"):
-            return raw_data.decode("utf-16", errors="ignore")
+            return _normalise_line_endings(raw_data.decode("utf-16", errors="ignore"))
 
         for kodec in self.codepage:
             try:
-                return raw_data.decode(kodec)
+                return _normalise_line_endings(raw_data.decode(kodec))
             except (UnicodeDecodeError, UnicodeError) as e:
                 log.warning(f"TS.readFile: '{filename}' : '{e}'")
 

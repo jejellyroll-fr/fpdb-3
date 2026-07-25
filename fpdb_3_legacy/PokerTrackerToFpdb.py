@@ -343,6 +343,12 @@ class PokerTracker(HandHistoryConverter):
         """
         result = super().readFile()
         if self.obs:
+            # Measure and rewrite on normalised text. The run-halving below counts
+            # consecutive newlines, and under CRLF every run is broken by the
+            # carriage return, so the heuristic never fires and the file stays
+            # split at every doubled blank line.
+            self.obs = self.obs.replace("\r\n", "\n")
+            self.whole_file = self.whole_file.replace("\r\n", "\n")
             runs = [len(m.group()) for m in re.finditer(r"\n+", self.obs)]
             even = sum(1 for n in runs if n % 2 == 0)
             odd = sum(1 for n in runs if n % 2 == 1)
