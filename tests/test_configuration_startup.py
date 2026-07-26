@@ -375,3 +375,51 @@ def test_a_file_choosing_nothing_still_selects_the_first_database(tmp_path, home
 
     assert config.db_selected == "first"
     assert flagged(config) == []
+
+
+# --------------------------------------------------------------------------
+# Where the databases are read from
+# --------------------------------------------------------------------------
+
+
+def sections(*bodies: str) -> str:
+    return "".join(f"<supported_databases>{body}</supported_databases>" for body in bodies)
+
+
+def named(db_name: str, *, default: bool = False) -> str:
+    flag = ' default="True"' if default else ""
+    return f'<database db_name="{db_name}" db_server="sqlite" db_ip="" db_user="" db_pass=""{flag}/>'
+
+
+def test_every_section_of_a_file_is_read(tmp_path, home) -> None:
+    # Nothing forbids a file from carrying more than one section, and dropping
+    # the databases in the later ones would lose them silently.
+    xml = config_xml(version=CONFIG_VERSION, databases="").replace(
+        "<supported_databases></supported_databases>", sections(named("a"), named("b", default=True))
+    )
+
+    config = build(tmp_path, xml)
+
+    assert sorted(config.supported_databases) == ["a", "b"]
+    assert config.db_selected == "b"
+
+
+def test_the_same_name_in_two_sections_is_refused(tmp_path, home) -> None:
+    xml = config_xml(version=CONFIG_VERSION, databases="").replace(
+        "<supported_databases></supported_databases>", sections(named("same"), named("same"))
+    )
+
+    with pytest.raises(ValueError, match="must be unique"):
+        build(tmp_path, xml)
+
+
+def test_an_empty_section_falls_back_to_the_top_level(tmp_path, home) -> None:
+    # The section wins only when it holds something; an empty one must not
+    # hide the databases beside it.
+    xml = config_xml(version=CONFIG_VERSION, databases="") + ""
+    xml = xml.replace("</FreePokerToolsConfig>", named("beside") + "</FreePokerToolsConfig>")
+
+    config = build(tmp_path, xml)
+
+    assert list(config.supported_databases) == ["beside"]
+    assert config.db_selected == "beside"
