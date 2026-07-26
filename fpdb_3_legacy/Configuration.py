@@ -1570,7 +1570,13 @@ class Config:
         # the user may select the actual database to use via commandline or by setting the selected="bool"
         # attribute of the tag. if no database is explicitely selected, we use the first one we come across
         #        s_dbs = doc.getElementsByTagName("supported_databases")
-        # Only parse databases inside <supported_databases>
+        # Only parse databases inside <supported_databases>.
+        # Reading works out which database is selected but does not write that
+        # back onto the document. It used to, and since the first database read
+        # is selected before any flagged one is reached, it flagged that first
+        # database too -- so opening a configuration whose second database is
+        # the default and saving anything at all wrote a second default into
+        # the file.
         for supported_dbs_node in doc.getElementsByTagName("supported_databases"):
             for db_node in supported_dbs_node.getElementsByTagName("database"):
                 db = Database(node=db_node)
@@ -1579,7 +1585,6 @@ class Config:
                     raise ValueError(msg)
                 if self.db_selected is None or db.db_selected:
                     self.db_selected = db.db_name
-                    db_node.setAttribute("default", "True")
                 self.supported_databases[db.db_name] = db
         if not self.supported_databases:
             root = doc.documentElement
@@ -1592,7 +1597,6 @@ class Config:
                     raise ValueError(msg)
                 if self.db_selected is None or db.db_selected:
                     self.db_selected = db.db_name
-                    db_node.setAttribute("default", "True")
                 self.supported_databases[db.db_name] = db
         # ``None`` means that the CLI did not request an override.  An empty
         # string remains a valid explicit key because the XML format has always

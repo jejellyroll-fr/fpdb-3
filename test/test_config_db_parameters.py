@@ -248,7 +248,7 @@ def test_updating_an_unloaded_node_takes_the_default_off_the_others(config_with_
     nobody's decision.
     """
     config = config_with_orphan()
-    # Config flags the database it selects while reading the file.
+    config.set_db_parameters(db_name="fpdb", default="True")
     assert config.get_db_node("fpdb").getAttribute("default") == "True"
 
     config.add_db_parameters(db_name="orphan", db_server="sqlite", default="True")
@@ -274,6 +274,7 @@ def test_at_most_one_database_is_ever_flagged(config_with_orphan):
 
 def test_creating_a_database_takes_the_default_off_the_others(config_with_orphan):
     config = config_with_orphan()
+    config.set_db_parameters(db_name="fpdb", default="True")
     assert config.get_db_node("fpdb").getAttribute("default") == "True"
 
     config.add_db_parameters(db_name="brand-new", db_server="sqlite", default="True")
