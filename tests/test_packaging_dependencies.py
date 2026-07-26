@@ -27,9 +27,6 @@ NOT_PACKAGED = {
     # A meta-package pulling in every Objective-C framework binding. The macOS
     # section names the three fpdb actually imports instead, which is smaller.
     "pyobjc": "the macOS section names the individual pyobjc frameworks",
-    # Declared here since before this test, but nothing imports it. Left in
-    # place rather than removed as part of a packaging change.
-    "chardet": "nothing imports it",
 }
 
 
