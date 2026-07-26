@@ -117,5 +117,127 @@ def test_explicit_empty_database_name_overrides_xml_default(tmp_path):
     assert selected.db_selected == ""
 
 
+# ---------------------------------------------------------------------------
+# Updating a database node the cache never picked up
+# ---------------------------------------------------------------------------
+#
+# Config loads the databases inside <supported_databases>, and only falls back
+# to the ones at the top level when that section yields nothing. A file with
+# both therefore has a <database> node that get_db_node finds but that never
+# reached supported_databases, and that is the one case where
+# add_db_parameters updates an existing node instead of creating one.
+
+ORPHANED_CONFIG = """<?xml version="1.0"?>
+<FreePokerToolsConfig>
+  <general version="{version}"/>
+  <supported_databases>
+    <database db_name="fpdb" db_server="sqlite" db_ip="" db_user="" db_pass="" db_desc="main"/>
+  </supported_databases>
+  <database db_name="orphan" db_server="sqlite" db_desc="never loaded"{extra}/>
+</FreePokerToolsConfig>
+"""
+
+
+@pytest.fixture
+def config_with_orphan(tmp_path, monkeypatch):
+    def build(extra=""):
+        monkeypatch.setattr(Configuration, "CONFIG_PATH", str(tmp_path / "cfgdir"))
+        path = tmp_path / "HUD_config.xml"
+        path.write_text(
+            ORPHANED_CONFIG.format(version=Configuration.CONFIG_VERSION, extra=extra),
+            encoding="utf-8",
+        )
+        config = Configuration.Config(file=str(path))
+        assert "orphan" not in config.supported_databases
+        assert config.get_db_node("orphan") is not None
+        return config
+
+    return build
+
+
+def test_the_description_is_stored_when_the_database_is_created(config):
+    config.add_db_parameters(db_name="described", db_server="sqlite", db_desc="my laptop")
+
+    assert config.get_db_node("described").getAttribute("db_desc") == "my laptop"
+    assert config.supported_databases["described"].db_desc == "my laptop"
+
+
+def test_an_unloaded_node_is_updated_rather_than_duplicated(config_with_orphan):
+    config = config_with_orphan()
+
+    config.add_db_parameters(
+        db_name="orphan", db_server="postgresql", db_desc="now filled in",
+        db_ip="dbhost", db_port="5432", db_user="alice", db_pass="secret",
+    )
+
+    nodes = [
+        node for node in config.doc.getElementsByTagName("database")
+        if node.getAttribute("db_name") == "orphan"
+    ]
+    assert len(nodes) == 1
+    assert nodes[0].getAttribute("db_server") == "postgresql"
+    assert nodes[0].getAttribute("db_ip") == "dbhost"
+    assert nodes[0].getAttribute("db_port") == "5432"
+    assert nodes[0].getAttribute("db_user") == "alice"
+    assert nodes[0].getAttribute("db_pass") == "secret"
+    assert nodes[0].getAttribute("db_desc") == "now filled in"
+
+
+def test_updating_an_unloaded_node_puts_it_in_the_cache(config_with_orphan):
+    config = config_with_orphan()
+
+    config.add_db_parameters(db_name="orphan", db_server="mysql")
+
+    assert config.supported_databases["orphan"].db_server == "mysql"
+
+
+def test_an_unloaded_node_can_be_made_the_default(config_with_orphan):
+    config = config_with_orphan()
+
+    config.add_db_parameters(db_name="orphan", db_server="sqlite", default="True")
+
+    assert config.get_db_node("orphan").getAttribute("default") == "True"
+    assert config.db_selected == "orphan"
+
+
+def test_the_default_flag_is_taken_off_an_unloaded_node(config_with_orphan):
+    # The file says this one is the default; adding it without asking for that
+    # has to clear the attribute, or the file would keep contradicting the
+    # selection fpdb is actually using.
+    config = config_with_orphan(extra=' default="True"')
+    assert config.db_selected != "orphan"
+
+    config.add_db_parameters(db_name="orphan", db_server="sqlite", default="False")
+
+    assert not config.get_db_node("orphan").hasAttribute("default")
+
+
+def test_the_selected_database_keeps_its_default_flag(config_with_orphan):
+    # db_selected can name the node even when it was never cached, and the
+    # flag has to follow the selection rather than the argument.
+    config = config_with_orphan()
+    config.db_selected = "orphan"
+
+    config.add_db_parameters(db_name="orphan", db_server="sqlite", default="False")
+
+    assert config.get_db_node("orphan").getAttribute("default") == "True"
+
+
+@pytest.mark.parametrize("spelling", ["True", "TRUE", "true"])
+def test_the_default_argument_is_read_whatever_its_case(config, spelling):
+    config.add_db_parameters(db_name=f"cased{spelling}", db_server="sqlite", default=spelling)
+
+    assert config.db_selected == f"cased{spelling}"
+
+
+def test_adding_a_default_takes_it_off_every_other_database(config):
+    config.add_db_parameters(db_name="first", db_server="sqlite", default="True")
+
+    config.add_db_parameters(db_name="second", db_server="sqlite", default="True")
+
+    assert not config.get_db_node("first").hasAttribute("default")
+    assert config.get_db_node("second").getAttribute("default") == "True"
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
