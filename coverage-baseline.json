@@ -1,6 +1,6 @@
 {
   "_comment": "Coverage floors enforced by tools/coverage_ratchet.py. Branch-aware percentages, as reported by coverage.py. Regenerate with python tools/coverage_ratchet.py --update coverage.json after a change that genuinely raises coverage.",
-  "total": 60.8,
+  "total": 60.9,
   "domains": {
     "poker-domain": 79.9,
     "database": 64.4,
@@ -12,10 +12,10 @@
     "gui": 32.1,
     "maintenance-scripts": 37.7,
     "platform-pkg": 17.1,
-    "other": 69.5
+    "other": 69.8
   },
   "modules": {
-    "fpdb_3_legacy/Configuration.py": 80.0,
+    "fpdb_3_legacy/Configuration.py": 81.1,
     "fpdb_3_legacy/Database.py": 43.7,
     "fpdb_3_legacy/DerivedStats.py": 81.1,
     "fpdb_3_legacy/Hand.py": 69.4,
