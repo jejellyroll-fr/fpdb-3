@@ -264,14 +264,25 @@ requires = [
     "mplfinance>=0.12.10b0",
     "xlrd==2.0.1",
     "playwright>=1.40.0",
-    "defusedxml>=0.7.1"
+    "defusedxml>=0.7.1",
+    # Read by the Merge and Winamax summary parsers.
+    "beautifulsoup4==4.12.3",
+    # Imported when the user points fpdb at a MySQL database.
+    "pymysql>=1.1.0"
 ]
 
 [tool.briefcase.app.fpdb.macOS]
 universal_build = false
 min_os_version = "12.0"
+# Cocoa alone is not enough: the HUD finds its tables through Quartz, and the
+# screen-recording and accessibility checks go through ApplicationServices.
+# Both are imported inside the functions that use them, and the ImportError is
+# swallowed into "permission granted", so a package missing them does not fail
+# loudly -- the HUD just never sees a table.
 requires = [
-    "pyobjc-framework-Cocoa==10.3.1"
+    "pyobjc-framework-Cocoa==10.3.1",
+    "pyobjc-framework-Quartz==10.3.1",
+    "pyobjc-framework-ApplicationServices==10.3.1"
 ]
 
 [tool.briefcase.app.fpdb.windows]
