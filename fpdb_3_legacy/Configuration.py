@@ -1570,34 +1570,15 @@ class Config:
         # the user may select the actual database to use via commandline or by setting the selected="bool"
         # attribute of the tag. if no database is explicitely selected, we use the first one we come across
         #        s_dbs = doc.getElementsByTagName("supported_databases")
-        # Only parse databases inside <supported_databases>.
-        # Reading works out which database is selected but does not write that
-        # back onto the document. It used to, and since the first database read
-        # is selected before any flagged one is reached, it flagged that first
-        # database too -- so opening a configuration whose second database is
-        # the default and saving anything at all wrote a second default into
-        # the file.
+        # A <supported_databases> section holds them, and older files put them
+        # beside it at the top level instead. The section wins as soon as it
+        # holds anything.
         for supported_dbs_node in doc.getElementsByTagName("supported_databases"):
-            for db_node in supported_dbs_node.getElementsByTagName("database"):
-                db = Database(node=db_node)
-                if db.db_name in self.supported_databases:
-                    msg = "Database names must be unique"
-                    raise ValueError(msg)
-                if self.db_selected is None or db.db_selected:
-                    self.db_selected = db.db_name
-                self.supported_databases[db.db_name] = db
+            self._load_databases(supported_dbs_node.getElementsByTagName("database"))
         if not self.supported_databases:
-            root = doc.documentElement
-            for db_node in root.childNodes:
-                if getattr(db_node, "tagName", None) != "database":
-                    continue
-                db = Database(node=db_node)
-                if db.db_name in self.supported_databases:
-                    msg = "Database names must be unique"
-                    raise ValueError(msg)
-                if self.db_selected is None or db.db_selected:
-                    self.db_selected = db.db_name
-                self.supported_databases[db.db_name] = db
+            self._load_databases(
+                node for node in doc.documentElement.childNodes if getattr(node, "tagName", None) == "database"
+            )
         # ``None`` means that the CLI did not request an override.  An empty
         # string remains a valid explicit key because the XML format has always
         # allowed it as a database name.
@@ -1669,6 +1650,23 @@ class Config:
         # print ""
 
     # end def __init__
+
+    def _load_databases(self, db_nodes) -> None:
+        """Turn <database> nodes into the databases fpdb can connect to.
+
+        The first one read is the selection until a node claims it, so a file
+        naming none still ends up with one. That is worked out here and not
+        written back: the attribute is for the user's choice, and the writers
+        put it there when the choice is made.
+        """
+        for db_node in db_nodes:
+            db = Database(node=db_node)
+            if db.db_name in self.supported_databases:
+                msg = "Database names must be unique"
+                raise ValueError(msg)
+            if self.db_selected is None or db.db_selected:
+                self.db_selected = db.db_name
+            self.supported_databases[db.db_name] = db
 
     def _migrate_entain_fr_sites_to_ipoker(self, doc) -> bool:
         """Rewrite pre-2026 Entain France skins from PartyPoker to iPoker.
