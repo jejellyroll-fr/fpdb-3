@@ -201,36 +201,45 @@ def test_the_new_grid_survives_being_saved_and_read_again(config) -> None:
 # --------------------------------------------------------------------------
 
 
-def test_a_grid_with_no_rows_at_all_is_refused(config) -> None:
-    # Observed, not intended: the width is read off the first row before
-    # anything checks there is one, while the very last step does check. An
-    # empty grid raises rather than emptying the set.
-    with pytest.raises(IndexError):
-        config.editStats("mine", [])
-
-
-def test_a_single_empty_row_empties_the_set(config) -> None:
-    # This is the shape that does clear it, which is worth knowing given the
-    # one above.
-    config.editStats("mine", [[]])
+@pytest.mark.parametrize(("empty", "shape"), [([], ("0", "0")), ([[]], ("1", "0"))], ids=["no row", "one empty row"])
+def test_an_empty_grid_empties_the_set(config, empty, shape) -> None:
+    # Both shapes clear it. [] used to raise IndexError instead, the width
+    # being read off a first row nobody had checked was there.
+    config.editStats("mine", empty)
 
     node = config.getStatSetNode("mine")
     assert node.getElementsByTagName("stat") == []
-    assert (node.getAttribute("rows"), node.getAttribute("cols")) == ("1", "0")
+    assert (node.getAttribute("rows"), node.getAttribute("cols")) == shape
 
 
-def test_a_stat_set_that_does_not_exist_is_not_reported_kindly(config) -> None:
-    # Observed: the lookup answers None and the caller uses it straight away.
+def test_an_emptied_set_can_be_filled_again(config) -> None:
+    config.editStats("mine", [])
+
+    config.editStats("mine", [["vpip", "pfr"]])
+
+    assert grid(config) == {"(1,1)": "vpip", "(1,2)": "pfr"}
+
+
+def test_a_stat_set_that_does_not_exist_is_named_in_the_error(config) -> None:
+    # It used to be an AttributeError on None, which reads like a bug in the
+    # caller rather than a name that is not there.
     assert config.getStatSetNode("no-such-set") is None
 
-    with pytest.raises(AttributeError):
+    with pytest.raises(ValueError, match="No stat set named 'no-such-set'"):
         config.editStats("no-such-set", [["vpip"]])
 
 
 def test_the_file_is_untouched_when_the_set_is_not_found(config) -> None:
     before = Path(config.file).read_text(encoding="utf-8")
 
-    with pytest.raises(AttributeError):
+    with pytest.raises(ValueError, match="No stat set"):
         config.editStats("no-such-set", [["vpip"]])
 
     assert Path(config.file).read_text(encoding="utf-8") == before
+
+
+def test_the_other_stat_sets_are_untouched_when_the_set_is_not_found(config) -> None:
+    with pytest.raises(ValueError, match="No stat set"):
+        config.editStats("no-such-set", [["vpip"]])
+
+    assert grid(config) == {"(1,1)": "vpip"}

@@ -2297,6 +2297,11 @@ class Config:
     def editStats(self, statsetName, statArray) -> None:
         """Replaces stat selection for the given gameName with the given statArray."""
         statsetNode = self.getStatSetNode(statsetName)
+        if statsetNode is None:
+            # Saying so beats the AttributeError on None this used to raise:
+            # replacing a whole grid must not look like a bug in the caller.
+            msg = f"No stat set named {statsetName!r}"
+            raise ValueError(msg)
         statNodes = statsetNode.getElementsByTagName("stat")
 
         # Store existing stat attributes before removing
@@ -2322,7 +2327,11 @@ class Config:
             statsetNode.removeChild(statsetNode.firstChild)
 
         statsetNode.setAttribute("rows", str(len(statArray)))
-        statsetNode.setAttribute("cols", str(len(statArray[0])))
+        # A grid with no rows at all has no width either. Reading it off the
+        # first row raised IndexError, even though the last step of this same
+        # function guards for an empty grid -- so emptying a stat set worked
+        # with [[]] and not with [].
+        statsetNode.setAttribute("cols", str(len(statArray[0]) if statArray else 0))
 
         for _idx, (rowNumber, columnNumber) in enumerate(
             [(r, c) for r in range(len(statArray)) for c in range(len(statArray[r]))],
