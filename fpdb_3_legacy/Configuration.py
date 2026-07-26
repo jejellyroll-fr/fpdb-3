@@ -2426,6 +2426,41 @@ class Config:
 
         return db
 
+    @staticmethod
+    def _write_db_attributes(db_node, **values: str | None) -> None:
+        """Put on the node every attribute that was actually given.
+
+        None means "leave whatever is there alone", which is not the same as
+        the empty string: an empty db_pass is a password that was cleared.
+        """
+        for name, value in values.items():
+            if value is not None:
+                db_node.setAttribute(name, value)
+
+    def _write_db_cache(self, db_name: str, *, selected: bool, **values: str | None) -> None:
+        """Mirror onto the loaded Database what was just written to the file."""
+        database = self.supported_databases[db_name]
+        for name, value in values.items():
+            if value is not None:
+                setattr(database, name, value)
+        database.db_selected = selected
+
+    def _mark_db_default(self, db_node, db_name: str, *, wanted: bool, clear_others: bool) -> None:
+        """Carry the default flag on the node, and off the others if asked.
+
+        clear_others is not always on because the three callers never agreed
+        about it: only the one updating a node the cache never loaded leaves
+        the other databases flagged, so a file can end up naming two defaults.
+        """
+        if wanted:
+            db_node.setAttribute("default", "True")
+            if clear_others:
+                for dbn in self.doc.getElementsByTagName("database"):
+                    if dbn.getAttribute("db_name") != db_name and dbn.hasAttribute("default"):
+                        dbn.removeAttribute("default")
+        elif db_node.hasAttribute("default"):
+            db_node.removeAttribute("default")
+
     def set_db_parameters(
         self,
         db_name="fpdb",
@@ -2438,42 +2473,34 @@ class Config:
         default="False",
     ) -> None:
         db_node = self.get_db_node(db_name)
-        default = default.lower()
-        defaultb = string_to_bool(default, False)
+        defaultb = string_to_bool(default.lower(), False)
         if db_node is not None:
-            if db_desc is not None:
-                db_node.setAttribute("db_desc", db_desc)
-            if db_ip is not None:
-                db_node.setAttribute("db_ip", db_ip)
-            if db_port is not None:
-                db_node.setAttribute("db_port", db_port)
-            if db_user is not None:
-                db_node.setAttribute("db_user", db_user)
-            if db_pass is not None:
-                db_node.setAttribute("db_pass", db_pass)
-            if db_server is not None:
-                db_node.setAttribute("db_server", db_server)
-            if defaultb or self.db_selected == db_name:
-                db_node.setAttribute("default", "True")
-                for dbn in self.doc.getElementsByTagName("database"):
-                    if dbn.getAttribute("db_name") != db_name and dbn.hasAttribute("default"):
-                        dbn.removeAttribute("default")
-            elif db_node.hasAttribute("default"):
-                db_node.removeAttribute("default")
+            self._write_db_attributes(
+                db_node,
+                db_desc=db_desc,
+                db_ip=db_ip,
+                db_port=db_port,
+                db_user=db_user,
+                db_pass=db_pass,
+                db_server=db_server,
+            )
+            self._mark_db_default(
+                db_node,
+                db_name,
+                wanted=defaultb or self.db_selected == db_name,
+                clear_others=True,
+            )
         if db_name in self.supported_databases:
-            if db_desc is not None:
-                self.supported_databases[db_name].db_desc = db_desc
-            if db_ip is not None:
-                self.supported_databases[db_name].db_ip = db_ip
-            if db_port is not None:
-                self.supported_databases[db_name].db_port = db_port
-            if db_user is not None:
-                self.supported_databases[db_name].db_user = db_user
-            if db_pass is not None:
-                self.supported_databases[db_name].db_pass = db_pass
-            if db_server is not None:
-                self.supported_databases[db_name].db_server = db_server
-            self.supported_databases[db_name].db_selected = defaultb
+            self._write_db_cache(
+                db_name,
+                selected=defaultb,
+                db_desc=db_desc,
+                db_ip=db_ip,
+                db_port=db_port,
+                db_user=db_user,
+                db_pass=db_pass,
+                db_server=db_server,
+            )
         if defaultb:
             self.db_selected = db_name
 
@@ -2488,81 +2515,51 @@ class Config:
         db_server=None,
         default="False",
     ) -> None:
-        default = default.lower()
-        defaultb = string_to_bool(default, False)
+        defaultb = string_to_bool(default.lower(), False)
         if db_name in self.supported_databases:
             msg = "Database names must be unique"
             raise ValueError(msg)
 
         db_node = self.get_db_node(db_name)
         if db_node is None:
-            for db_node in self.doc.getElementsByTagName("supported_databases"):
-                # should only be one supported_databases element, use last one if there are several
-                suppdb_node = db_node
-            t_node = self.doc.createTextNode("    ")
-            suppdb_node.appendChild(t_node)
-            db_node = self.doc.createElement("database")
-            suppdb_node.appendChild(db_node)
-            t_node = self.doc.createTextNode("\r\n    ")
-            suppdb_node.appendChild(t_node)
-            db_node.setAttribute("db_name", db_name)
-            if db_desc is not None:
-                db_node.setAttribute("db_desc", db_desc)
-            if db_ip is not None:
-                db_node.setAttribute("db_ip", db_ip)
-            if db_port is not None:
-                db_node.setAttribute("db_port", db_port)
-            if db_user is not None:
-                db_node.setAttribute("db_user", db_user)
-            if db_pass is not None:
-                db_node.setAttribute("db_pass", db_pass)
-            if db_server is not None:
-                db_node.setAttribute("db_server", db_server)
-            if defaultb:
-                db_node.setAttribute("default", "True")
-                for dbn in self.doc.getElementsByTagName("database"):
-                    if dbn.getAttribute("db_name") != db_name and dbn.hasAttribute("default"):
-                        dbn.removeAttribute("default")
-            elif db_node.hasAttribute("default"):
-                db_node.removeAttribute("default")
+            db_node = self._append_db_node(db_name)
+            wanted, clear_others = defaultb, True
         else:
-            if db_desc is not None:
-                db_node.setAttribute("db_desc", db_desc)
-            if db_ip is not None:
-                db_node.setAttribute("db_ip", db_ip)
-            if db_port is not None:
-                db_node.setAttribute("db_port", db_port)
-            if db_user is not None:
-                db_node.setAttribute("db_user", db_user)
-            if db_pass is not None:
-                db_node.setAttribute("db_pass", db_pass)
-            if db_server is not None:
-                db_node.setAttribute("db_server", db_server)
-            if defaultb or self.db_selected == db_name:
-                db_node.setAttribute("default", "True")
-            elif db_node.hasAttribute("default"):
-                db_node.removeAttribute("default")
+            # The node is in the file but never reached supported_databases,
+            # which happens when a <supported_databases> section and a
+            # top-level <database> both exist: only the section is loaded.
+            wanted, clear_others = defaultb or self.db_selected == db_name, False
 
-        if db_name in self.supported_databases:
-            if db_desc is not None:
-                self.supported_databases[db_name].db_desc = db_desc
-            if db_ip is not None:
-                self.supported_databases[db_name].db_ip = db_ip
-            if db_port is not None:
-                self.supported_databases[db_name].db_port = db_port
-            if db_user is not None:
-                self.supported_databases[db_name].db_user = db_user
-            if db_pass is not None:
-                self.supported_databases[db_name].db_pass = db_pass
-            if db_server is not None:
-                self.supported_databases[db_name].db_server = db_server
-            self.supported_databases[db_name].db_selected = defaultb
-        else:
-            db = Database(node=db_node)
-            self.supported_databases[db.db_name] = db
+        self._write_db_attributes(
+            db_node,
+            db_desc=db_desc,
+            db_ip=db_ip,
+            db_port=db_port,
+            db_user=db_user,
+            db_pass=db_pass,
+            db_server=db_server,
+        )
+        self._mark_db_default(db_node, db_name, wanted=wanted, clear_others=clear_others)
+
+        # The name is known not to be in supported_databases: the guard above
+        # raises when it is, and nothing since has touched the dictionary.
+        db = Database(node=db_node)
+        self.supported_databases[db.db_name] = db
 
         if defaultb:
             self.db_selected = db_name
+
+    def _append_db_node(self, db_name: str):
+        """Add an empty <database> to the last <supported_databases> section."""
+        for candidate in self.doc.getElementsByTagName("supported_databases"):
+            # should only be one supported_databases element, use last one if there are several
+            suppdb_node = candidate
+        suppdb_node.appendChild(self.doc.createTextNode("    "))
+        db_node = self.doc.createElement("database")
+        suppdb_node.appendChild(db_node)
+        suppdb_node.appendChild(self.doc.createTextNode("\r\n    "))
+        db_node.setAttribute("db_name", db_name)
+        return db_node
 
     def del_db_parameters(self, db_name="fpdb") -> None:
         """Remove a database from the config (both the XML node and the cache).

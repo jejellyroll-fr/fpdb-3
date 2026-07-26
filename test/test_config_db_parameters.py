@@ -239,5 +239,32 @@ def test_adding_a_default_takes_it_off_every_other_database(config):
     assert config.get_db_node("second").getAttribute("default") == "True"
 
 
+def test_updating_an_unloaded_node_leaves_the_other_defaults_alone(config_with_orphan):
+    """The three writers never agreed about clearing the flag elsewhere.
+
+    Creating a database takes the default off every other one, and so does
+    set_db_parameters, but updating a node the cache never loaded does not.
+    A file can therefore end up naming two defaults. Pinned as it stands so
+    that unifying it is a decision rather than an accident.
+    """
+    config = config_with_orphan()
+    # Config flags the database it selects while reading the file.
+    assert config.get_db_node("fpdb").getAttribute("default") == "True"
+
+    config.add_db_parameters(db_name="orphan", db_server="sqlite", default="True")
+
+    assert config.get_db_node("orphan").getAttribute("default") == "True"
+    assert config.get_db_node("fpdb").getAttribute("default") == "True"
+
+
+def test_creating_a_database_takes_the_default_off_the_others(config_with_orphan):
+    config = config_with_orphan()
+    assert config.get_db_node("fpdb").getAttribute("default") == "True"
+
+    config.add_db_parameters(db_name="brand-new", db_server="sqlite", default="True")
+
+    assert not config.get_db_node("fpdb").hasAttribute("default")
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
