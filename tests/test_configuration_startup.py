@@ -75,31 +75,38 @@ def test_the_log_and_database_directories_sit_beside_the_configuration(tmp_path,
     assert Path(config.dir_database) == home / "database"
 
 
-def test_a_log_directory_can_be_asked_for(tmp_path, home) -> None:
-    # The parameter decodes what it is given, so it takes bytes; see the test
-    # below for what a str does.
+@pytest.mark.parametrize("as_given", [str, str.encode], ids=["text", "bytes"])
+def test_a_log_directory_can_be_asked_for(tmp_path, home, as_given) -> None:
+    # Either form works. The signature asks for a str, and a path handed
+    # straight from the operating system arrives as bytes.
     chosen = tmp_path / "somewhere-else"
     chosen.mkdir()
 
-    config = build(tmp_path, config_xml(version=CONFIG_VERSION), custom_log_dir=str(chosen).encode())
+    config = build(tmp_path, config_xml(version=CONFIG_VERSION), custom_log_dir=as_given(str(chosen)))
 
     assert Path(config.dir_log) == chosen
 
 
-def test_a_log_directory_given_as_text_is_refused(tmp_path, home) -> None:
-    # Observed, not intended. The signature says custom_log_dir="" -- a str --
-    # but the value is passed through str(value, "utf8"), which only decodes
-    # bytes. Nothing in the tree passes this parameter, so the trap is set
-    # rather than sprung.
-    chosen = tmp_path / "somewhere-else"
+def test_a_log_directory_with_an_accent_survives_the_round_trip(tmp_path, home) -> None:
+    # Decoding is the whole job of that branch, and "utf8" was hard-coded
+    # where the platform's own filesystem encoding belongs.
+    chosen = tmp_path / "journaux-privés"
     chosen.mkdir()
 
-    with pytest.raises(TypeError, match="decoding str is not supported"):
-        build(tmp_path, config_xml(version=CONFIG_VERSION), custom_log_dir=str(chosen))
+    config = build(tmp_path, config_xml(version=CONFIG_VERSION), custom_log_dir=str(chosen))
+
+    assert Path(config.dir_log) == chosen
 
 
-def test_a_log_directory_that_is_not_there_is_ignored(tmp_path, home) -> None:
-    config = build(tmp_path, config_xml(version=CONFIG_VERSION), custom_log_dir=str(tmp_path / "absent").encode())
+@pytest.mark.parametrize("as_given", [str, str.encode], ids=["text", "bytes"])
+def test_a_log_directory_that_is_not_there_is_ignored(tmp_path, home, as_given) -> None:
+    config = build(tmp_path, config_xml(version=CONFIG_VERSION), custom_log_dir=as_given(str(tmp_path / "absent")))
+
+    assert Path(config.dir_log) == home / "log"
+
+
+def test_no_log_directory_asked_for_puts_it_beside_the_configuration(tmp_path, home) -> None:
+    config = build(tmp_path, config_xml(version=CONFIG_VERSION))
 
     assert Path(config.dir_log) == home / "log"
 
