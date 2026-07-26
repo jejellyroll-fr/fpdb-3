@@ -10,6 +10,7 @@ across reload.
 from __future__ import annotations
 
 import os
+import re
 import shutil
 import sys
 from pathlib import Path
@@ -278,6 +279,76 @@ def test_creating_a_database_takes_the_default_off_the_others(config_with_orphan
     config.add_db_parameters(db_name="brand-new", db_server="sqlite", default="True")
 
     assert not config.get_db_node("fpdb").hasAttribute("default")
+
+
+# ---------------------------------------------------------------------------
+# Files that keep their databases at the top level
+# ---------------------------------------------------------------------------
+
+SECTIONLESS_CONFIG = """<?xml version="1.0"?>
+<FreePokerToolsConfig>
+  <general version="{version}"/>
+  <database db_name="fpdb" db_server="sqlite" db_ip="" db_user="" db_pass="" db_desc="only one"/>
+</FreePokerToolsConfig>
+"""
+
+
+@pytest.fixture
+def sectionless_config(tmp_path, monkeypatch):
+    monkeypatch.setattr(Configuration, "CONFIG_PATH", str(tmp_path / "cfgdir"))
+    path = tmp_path / "HUD_config.xml"
+    path.write_text(
+        SECTIONLESS_CONFIG.format(version=Configuration.CONFIG_VERSION), encoding="utf-8"
+    )
+    config = Configuration.Config(file=str(path))
+    assert list(config.supported_databases) == ["fpdb"]
+    assert config.doc.getElementsByTagName("supported_databases") == []
+    return config
+
+
+def test_a_database_can_be_added_to_a_file_with_no_section(sectionless_config):
+    """It used to raise UnboundLocalError looking for a section to append to."""
+    sectionless_config.add_db_parameters(db_name="added", db_server="postgresql", db_ip="h")
+
+    assert sectionless_config.supported_databases["added"].db_server == "postgresql"
+    assert sectionless_config.get_db_node("added").getAttribute("db_ip") == "h"
+
+
+def test_the_new_database_joins_the_others_rather_than_hiding_them(sectionless_config):
+    """The section wins the moment it exists, so creating one would lose the rest.
+
+    Config reads <supported_databases> first and only falls back to the
+    top-level nodes when that yields nothing. Putting the new database in a
+    freshly made section would leave the file's own databases unread.
+    """
+    sectionless_config.add_db_parameters(db_name="added", db_server="sqlite")
+    sectionless_config.save()
+
+    reloaded = Configuration.Config(file=sectionless_config.file)
+
+    assert sorted(reloaded.supported_databases) == ["added", "fpdb"]
+
+
+def test_a_database_added_without_a_section_can_be_the_default(sectionless_config):
+    sectionless_config.add_db_parameters(db_name="added", db_server="sqlite", default="True")
+    sectionless_config.save()
+
+    # The saved file names one default. Reading it back re-flags the first
+    # database it meets before finding the real selection, so the file is what
+    # says whether the flag moved, not the freshly loaded document.
+    saved = Path(sectionless_config.file).read_text(encoding="utf-8")
+    assert re.findall(r'db_name="(\w+)"[^/]*default="True"', saved) == ["added"]
+
+    assert Configuration.Config(file=sectionless_config.file).db_selected == "added"
+
+
+def test_a_database_added_without_a_section_can_be_deleted(sectionless_config):
+    sectionless_config.add_db_parameters(db_name="added", db_server="sqlite")
+
+    sectionless_config.del_db_parameters("added")
+
+    assert list(sectionless_config.supported_databases) == ["fpdb"]
+    assert sectionless_config.get_db_node("added") is None
 
 
 if __name__ == "__main__":
