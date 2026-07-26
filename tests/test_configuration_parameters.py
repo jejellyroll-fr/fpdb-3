@@ -688,6 +688,13 @@ HUD_UI_MAPPING = {
     "update_interval": "update_interval",
     "max_seats": "max_seats",
     "debug_level": "debug_level",
+    "auto_close": "auto_close",
+    "block_click": "block_click",
+    "on_click": "on_click",
+    "disable_hud": "disable_hud",
+    "debug_hud": "debug_hud",
+    "save_layout": "save_layout",
+    "query_limit": "query_limit",
 }
 
 
@@ -724,10 +731,12 @@ def test_the_menu_label_is_read_even_when_the_file_omits_it(tmp_path) -> None:
 
 
 # --------------------------------------------------------------------------
-# Settings that are saved and then lost
+# Settings surviving the trip through the file
 # --------------------------------------------------------------------------
 
-LOST_ON_RELOAD = {
+# These seven were written onto the hud_ui node and read back by nothing, so
+# each reverted to its default the next time fpdb started.
+ROUND_TRIPPED = {
     "auto_close": "False",
     "block_click": "True",
     "debug_hud": "True",
@@ -738,24 +747,28 @@ LOST_ON_RELOAD = {
 }
 
 
-@pytest.mark.parametrize("setting", sorted(LOST_ON_RELOAD))
-def test_a_setting_written_to_the_file_but_never_read_is_lost(config, setting) -> None:
-    # Observed, not intended. set_hud_ui_parameters writes these seven onto
-    # the hud_ui node, but HudUI reads none of them back, so the value reaches
-    # the file and the next start falls back to the default. Changing one of
-    # these in the preferences reverts the moment fpdb restarts.
-    wanted = LOST_ON_RELOAD[setting]
+@pytest.mark.parametrize("setting", sorted(ROUND_TRIPPED))
+def test_a_setting_changed_in_the_preferences_is_still_there_next_time(config, setting) -> None:
+    wanted = ROUND_TRIPPED[setting]
     config.set_hud_ui_parameters({setting: wanted})
     config.save()
 
     assert setting in Path(config.file).read_text(encoding="utf-8")
     assert config.reload() is True
-    assert config.get_hud_ui_parameters()[setting] != wanted
+    assert str(config.get_hud_ui_parameters()[setting]) == wanted
 
 
-def test_a_setting_that_is_read_back_does_survive_a_reload(config) -> None:
-    # The control for the test above: the round trip itself works, so what
-    # those seven are missing is the read.
+def test_a_setting_the_file_never_carried_still_falls_back(config) -> None:
+    # Reading the value must not cost the default for a file that has none.
+    assert config.reload() is True
+
+    hui = config.get_hud_ui_parameters()
+    assert hui["disable_hud"] == "False"
+    assert hui["on_click"] == "Nothing"
+    assert hui["query_limit"] == 1000
+
+
+def test_an_appearance_setting_survives_the_same_trip(config) -> None:
     config.set_hud_ui_parameters({"font": "Courier"})
     config.save()
 
