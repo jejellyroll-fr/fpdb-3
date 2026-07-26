@@ -2545,14 +2545,25 @@ class Config:
             self.db_selected = db_name
 
     def _append_db_node(self, db_name: str):
-        """Add an empty <database> to the last <supported_databases> section."""
+        """Add an empty <database> where this file already keeps its databases.
+
+        Most files hold them in a <supported_databases> section, but the format
+        also allows them at the top level, and reading a file falls back to
+        those when the section yields nothing. Giving such a file a section to
+        put the new database in would hide the ones it already has, since the
+        section wins the moment it holds anything -- so the new node joins the
+        others where they are.
+        """
+        parent = None
         for candidate in self.doc.getElementsByTagName("supported_databases"):
             # should only be one supported_databases element, use last one if there are several
-            suppdb_node = candidate
-        suppdb_node.appendChild(self.doc.createTextNode("    "))
+            parent = candidate
+        if parent is None:
+            parent = self.doc.documentElement
+        parent.appendChild(self.doc.createTextNode("    "))
         db_node = self.doc.createElement("database")
-        suppdb_node.appendChild(db_node)
-        suppdb_node.appendChild(self.doc.createTextNode("\r\n    "))
+        parent.appendChild(db_node)
+        parent.appendChild(self.doc.createTextNode("\r\n    "))
         db_node.setAttribute("db_name", db_name)
         return db_node
 
