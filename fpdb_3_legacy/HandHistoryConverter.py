@@ -24,13 +24,14 @@ import re
 import sqlite3
 import sys
 import time
-import xml.dom.minidom
 import xml.parsers.expat
 from abc import ABC, abstractmethod
 from decimal import Decimal
 from pathlib import Path
 
+import defusedxml.minidom
 import pytz
+from defusedxml.common import DefusedXmlException
 from pytz import timezone
 
 from fpdb_3_legacy import Hand
@@ -51,7 +52,10 @@ from fpdb_3_legacy.loggingFpdb import get_logger
 log = get_logger("hand_history_converter")
 
 HHC_SITE_ID_ERRORS = (AttributeError, KeyError, TypeError, ValueError)
-HHC_XML_PARSE_ERRORS = (OSError, TypeError, xml.parsers.expat.ExpatError)
+# A hand history is whatever the poker room wrote, so the XML ones are the
+# least trusted input fpdb reads. DefusedXmlException covers the files
+# defusedxml refuses outright; it is a ValueError, not an ExpatError.
+HHC_XML_PARSE_ERRORS = (OSError, TypeError, xml.parsers.expat.ExpatError, DefusedXmlException)
 
 # Position of the all-in flag in a blind action, as built by Hand.addBlind():
 # (player, blindtype, amount, stack_is_now_empty).
@@ -864,7 +868,7 @@ or None if we fail to get the info """
         if self.filetype == "xml":
             if hasattr(self, "in_path"):  # Ensure that the file path is available
                 try:
-                    doc = xml.dom.minidom.parse(self.in_path)
+                    doc = defusedxml.minidom.parse(self.in_path)
                     self.doc = doc
                     log.debug("XML file successfully parsed.")
                     return True
