@@ -1100,6 +1100,24 @@ class HudUI:
         if node.hasAttribute("debug_level"):
             self.debug_level = node.getAttribute("debug_level")
 
+        # Behaviour settings. set_hud_ui_parameters has always written these
+        # seven onto the node, but nothing read them back, so each one reached
+        # the file and then lost to the default on the next start.
+        if node.hasAttribute("auto_close"):
+            self.auto_close = node.getAttribute("auto_close")
+        if node.hasAttribute("block_click"):
+            self.block_click = node.getAttribute("block_click")
+        if node.hasAttribute("on_click"):
+            self.on_click = node.getAttribute("on_click")
+        if node.hasAttribute("disable_hud"):
+            self.disable_hud = node.getAttribute("disable_hud")
+        if node.hasAttribute("debug_hud"):
+            self.debug_hud = node.getAttribute("debug_hud")
+        if node.hasAttribute("save_layout"):
+            self.save_layout = node.getAttribute("save_layout")
+        if node.hasAttribute("query_limit"):
+            self.query_limit = node.getAttribute("query_limit")
+
     def __str__(self) -> str:
         return f"    label = {self.label}\n"
 
