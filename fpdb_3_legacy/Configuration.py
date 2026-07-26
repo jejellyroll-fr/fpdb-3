@@ -29,10 +29,21 @@ import re
 import shutil
 import sys
 import traceback
-import xml.dom.minidom
 import xml.parsers.expat
 from pathlib import Path
 from typing import Any
+
+import defusedxml.minidom
+from defusedxml.common import DefusedXmlException
+
+# A configuration file is read from disk, so it can carry whatever an attacker
+# who reached the disk put there. defusedxml refuses the two constructs that
+# turn parsing into a weapon -- external entities, which read other files, and
+# nested entity definitions, which expand until memory runs out -- and it does
+# so by raising DefusedXmlException, which is a ValueError rather than the
+# ExpatError a malformed file raises. Both have to be caught wherever a
+# rejected file must not take fpdb down with it.
+XML_PARSE_ERRORS = (OSError, xml.parsers.expat.ExpatError, DefusedXmlException)
 
 if platform.system() == "Windows":
     import os
@@ -1478,11 +1489,11 @@ class Config:
             n = n + 1
             log.info(f"Reading configuration file {file}")
             try:
-                doc = xml.dom.minidom.parse(file)
+                doc = defusedxml.minidom.parse(file)
                 self.doc = doc  # Root of XML tree
                 self.file_error = None
 
-            except (OSError, xml.parsers.expat.ExpatError) as e:
+            except XML_PARSE_ERRORS as e:
                 log.exception(f"Error while processing XML: {traceback.format_exc()} Exception: {e}")
                 self.file_error = str(e)
                 break
@@ -1735,8 +1746,8 @@ class Config:
         nodes_added = 0
 
         try:
-            example_doc = xml.dom.minidom.parse(example_file)
-        except (OSError, xml.parsers.expat.ExpatError) as e:
+            example_doc = defusedxml.minidom.parse(example_file)
+        except XML_PARSE_ERRORS as e:
             log.exception(
                 f"Error parsing example configuration file {example_file}. See error log file. Exception: {e}",
             )
@@ -1882,7 +1893,7 @@ class Config:
 
         try:
             # Parse the XML file again
-            doc = xml.dom.minidom.parse(self.file)
+            doc = defusedxml.minidom.parse(self.file)
 
             supported_sites = {}
             supported_games = {}

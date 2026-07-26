@@ -22,10 +22,11 @@ import locale
 import platform
 import shutil
 import subprocess
-import xml.etree.ElementTree as ET
 from collections.abc import Callable
 from pathlib import Path
 
+import defusedxml.ElementTree as ET
+from defusedxml.common import DefusedXmlException
 from PySide6.QtCore import QTranslator
 
 from fpdb_3_legacy.Configuration import GRAPHICS_PATH, get_config
@@ -182,8 +183,8 @@ def set_locale_translation(config_path: str | None = None) -> None:
             return
 
     try:
-        tree = ET.parse(config_path)  # noqa: S314
-    except (FileNotFoundError, ET.ParseError):
+        tree = ET.parse(config_path)
+    except (FileNotFoundError, ET.ParseError, DefusedXmlException):
         log.warning(
             "HUD config not found or invalid at %s; skipping translation setup.",
             config_path,

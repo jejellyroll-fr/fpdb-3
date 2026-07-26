@@ -3443,8 +3443,8 @@ class ModernHudPreferences(QDialog):
 
     def import_profile(self) -> None:
         import os
-        import xml.dom.minidom
 
+        import defusedxml.minidom
         from PySide6.QtWidgets import QFileDialog, QInputDialog, QMessageBox
 
         filename, _ = QFileDialog.getOpenFileName(
@@ -3464,7 +3464,7 @@ class ModernHudPreferences(QDialog):
             return
 
         try:
-            import_doc = xml.dom.minidom.parse(filename)
+            import_doc = defusedxml.minidom.parse(filename)
             root = import_doc.documentElement
             assert root is not None
             if root.tagName != "fpdb_hud_package":

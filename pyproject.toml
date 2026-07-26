@@ -29,6 +29,7 @@ dependencies = [
     "xlrd==2.0.1",
     "playwright>=1.40.0",
     "pymysql>=1.1.0",
+    "defusedxml>=0.7.1",
 ]
 
 [project.optional-dependencies]
@@ -262,7 +263,8 @@ requires = [
     "cachetools==5.5.0",
     "mplfinance>=0.12.10b0",
     "xlrd==2.0.1",
-    "playwright>=1.40.0"
+    "playwright>=1.40.0",
+    "defusedxml>=0.7.1"
 ]
 
 [tool.briefcase.app.fpdb.macOS]

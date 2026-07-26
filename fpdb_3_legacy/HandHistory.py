@@ -6,9 +6,10 @@ from __future__ import annotations
 Parses HandHistory xml files and returns requested objects.
 """
 
-import xml.dom.minidom
 from xml.dom.minidom import Node
 from xml.parsers.expat import ExpatError
+
+import defusedxml.minidom
 
 from fpdb_3_legacy.loggingFpdb import get_logger
 
@@ -37,7 +38,7 @@ log = get_logger("hand_history")
 
 class HandHistory:
     def __init__(self, xml_string, elements=("ALL")) -> None:
-        doc = xml.dom.minidom.parseString(xml_string)
+        doc = defusedxml.minidom.parseString(xml_string)
         if elements == ("ALL"):
             elements = ("BETTING", "AWARDS", "POSTS", "PLAYERS", "GAME")
 

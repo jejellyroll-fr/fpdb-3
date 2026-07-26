@@ -19,13 +19,13 @@ import copy
 import itertools
 import os
 import time
-import xml.dom.minidom
 from collections import Counter
 from dataclasses import dataclass, field
 from decimal import Decimal
 from math import cos, hypot, pi, sin
 from typing import Any
 
+import defusedxml.minidom
 from PySide6.QtCore import QPointF, QRectF, Qt, QTimer
 from PySide6.QtGui import QColor, QFont, QFontMetrics, QImage, QLinearGradient, QPainter, QPen, QPixmap
 from PySide6.QtWidgets import (
@@ -899,7 +899,7 @@ class GuiReplayer(QWidget):
             self._hero_site_cache = {}
             path = os.path.join(Configuration.Config().config_path, "HUD_config.xml")
             try:
-                doc = xml.dom.minidom.parse(path)
+                doc = defusedxml.minidom.parse(path)
                 for site_node in doc.getElementsByTagName("site"):
                     site_name = site_node.getAttribute("site_name")
                     self._hero_site_cache[site_name] = site_node.getAttribute("screen_name")

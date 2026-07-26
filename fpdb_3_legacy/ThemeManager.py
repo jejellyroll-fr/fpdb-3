@@ -9,9 +9,11 @@ from __future__ import annotations
 
 import re
 import threading
-import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Any, ClassVar
+
+import defusedxml.ElementTree as ET
+from defusedxml.common import DefusedXmlException
 
 from fpdb_3_legacy.loggingFpdb import get_logger
 
@@ -1044,7 +1046,7 @@ class ThemeManager:
 
             return True
 
-        except (OSError, UnicodeDecodeError, ET.ParseError) as e:
+        except (OSError, UnicodeDecodeError, ET.ParseError, DefusedXmlException) as e:
             log.info(f"Custom theme validation failed for {theme_file}: {e}")
             log.info(
                 f"Theme file content preview: {content[:200] if 'content' in locals() else 'Could not read content'}"
@@ -1298,7 +1300,7 @@ class ThemeManager:
             log.info(f"Custom theme installed: {dest_filename}")
             return True
 
-        except (OSError, UnicodeDecodeError, ET.ParseError, ImportError) as e:
+        except (OSError, UnicodeDecodeError, ET.ParseError, ImportError, DefusedXmlException) as e:
             log.exception(f"Error installing custom theme: {e}")
             return False
 
