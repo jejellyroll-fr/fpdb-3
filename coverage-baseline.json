@@ -15,7 +15,7 @@
     "other": 68.0
   },
   "modules": {
-    "fpdb_3_legacy/Configuration.py": 73.6,
+    "fpdb_3_legacy/Configuration.py": 73.5,
     "fpdb_3_legacy/Database.py": 43.7,
     "fpdb_3_legacy/DerivedStats.py": 81.1,
     "fpdb_3_legacy/Hand.py": 69.4,

@@ -1421,7 +1421,13 @@ ENTAIN_FR_WINDOWS_DATA_DIRS: dict[str, tuple[str, ...]] = {
 
 
 class Config:
-    def __init__(self, file=None, dbname: str | None = None, custom_log_dir="", lvl="INFO") -> None:
+    def __init__(
+        self,
+        file=None,
+        dbname: str | None = None,
+        custom_log_dir: str | bytes = "",
+        lvl="INFO",
+    ) -> None:
         self.install_method = INSTALL_METHOD
         self.fpdb_root_path = FPDB_ROOT_PATH
         self.appdata_path = APPDATA_PATH
@@ -1436,12 +1442,13 @@ class Config:
             os.makedirs(CONFIG_PATH)
 
         if custom_log_dir and os.path.exists(custom_log_dir):
-            self.dir_log = str(custom_log_dir, "utf8")
-        elif True:
-            self.dir_log = os.path.join(CONFIG_PATH, "log")
-            self.dir_log = self.dir_log.replace("\\", "/")
+            # os.fsdecode leaves a str alone and decodes bytes the way the
+            # platform names its files. The previous str(value, "utf8") only
+            # accepted bytes, so the str the signature asks for raised
+            # TypeError and the parameter could not be used as documented.
+            self.dir_log = os.fsdecode(custom_log_dir)
         else:
-            self.dir_log = os.path.join(CONFIG_PATH, "log")
+            self.dir_log = os.path.join(CONFIG_PATH, "log").replace("\\", "/")
         self.log_file = os.path.join(self.dir_log, "fpdb-log.txt")
         log = get_logger("config")
 
