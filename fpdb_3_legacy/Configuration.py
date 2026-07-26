@@ -2445,19 +2445,18 @@ class Config:
                 setattr(database, name, value)
         database.db_selected = selected
 
-    def _mark_db_default(self, db_node, db_name: str, *, wanted: bool, clear_others: bool) -> None:
-        """Carry the default flag on the node, and off the others if asked.
+    def _mark_db_default(self, db_node, db_name: str, *, wanted: bool) -> None:
+        """Carry the default flag on the node, and off every other database.
 
-        clear_others is not always on because the three callers never agreed
-        about it: only the one updating a node the cache never loaded leaves
-        the other databases flagged, so a file can end up naming two defaults.
+        The attribute names the one database fpdb opens, so at most one node
+        may hold it. A file naming two leaves the choice to whichever comes
+        last in the document, which is not a choice anyone made.
         """
         if wanted:
             db_node.setAttribute("default", "True")
-            if clear_others:
-                for dbn in self.doc.getElementsByTagName("database"):
-                    if dbn.getAttribute("db_name") != db_name and dbn.hasAttribute("default"):
-                        dbn.removeAttribute("default")
+            for dbn in self.doc.getElementsByTagName("database"):
+                if dbn.getAttribute("db_name") != db_name and dbn.hasAttribute("default"):
+                    dbn.removeAttribute("default")
         elif db_node.hasAttribute("default"):
             db_node.removeAttribute("default")
 
@@ -2484,12 +2483,7 @@ class Config:
                 db_pass=db_pass,
                 db_server=db_server,
             )
-            self._mark_db_default(
-                db_node,
-                db_name,
-                wanted=defaultb or self.db_selected == db_name,
-                clear_others=True,
-            )
+            self._mark_db_default(db_node, db_name, wanted=defaultb or self.db_selected == db_name)
         if db_name in self.supported_databases:
             self._write_db_cache(
                 db_name,
@@ -2523,12 +2517,13 @@ class Config:
         db_node = self.get_db_node(db_name)
         if db_node is None:
             db_node = self._append_db_node(db_name)
-            wanted, clear_others = defaultb, True
+            wanted = defaultb
         else:
             # The node is in the file but never reached supported_databases,
             # which happens when a <supported_databases> section and a
             # top-level <database> both exist: only the section is loaded.
-            wanted, clear_others = defaultb or self.db_selected == db_name, False
+            # Such a node may already be the selection, which keeps the flag.
+            wanted = defaultb or self.db_selected == db_name
 
         self._write_db_attributes(
             db_node,
@@ -2539,7 +2534,7 @@ class Config:
             db_pass=db_pass,
             db_server=db_server,
         )
-        self._mark_db_default(db_node, db_name, wanted=wanted, clear_others=clear_others)
+        self._mark_db_default(db_node, db_name, wanted=wanted)
 
         # The name is known not to be in supported_databases: the guard above
         # raises when it is, and nothing since has touched the dictionary.

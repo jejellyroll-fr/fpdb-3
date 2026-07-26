@@ -239,13 +239,12 @@ def test_adding_a_default_takes_it_off_every_other_database(config):
     assert config.get_db_node("second").getAttribute("default") == "True"
 
 
-def test_updating_an_unloaded_node_leaves_the_other_defaults_alone(config_with_orphan):
-    """The three writers never agreed about clearing the flag elsewhere.
+def test_updating_an_unloaded_node_takes_the_default_off_the_others(config_with_orphan):
+    """Whichever way a database becomes the default, it becomes the only one.
 
-    Creating a database takes the default off every other one, and so does
-    set_db_parameters, but updating a node the cache never loaded does not.
-    A file can therefore end up naming two defaults. Pinned as it stands so
-    that unifying it is a decision rather than an accident.
+    The attribute names the single database fpdb opens. A file holding two of
+    them leaves the choice to whichever comes last in the document, which is
+    nobody's decision.
     """
     config = config_with_orphan()
     # Config flags the database it selects while reading the file.
@@ -254,7 +253,22 @@ def test_updating_an_unloaded_node_leaves_the_other_defaults_alone(config_with_o
     config.add_db_parameters(db_name="orphan", db_server="sqlite", default="True")
 
     assert config.get_db_node("orphan").getAttribute("default") == "True"
-    assert config.get_db_node("fpdb").getAttribute("default") == "True"
+    assert not config.get_db_node("fpdb").hasAttribute("default")
+
+
+def test_at_most_one_database_is_ever_flagged(config_with_orphan):
+    config = config_with_orphan()
+
+    config.add_db_parameters(db_name="orphan", db_server="sqlite", default="True")
+    config.add_db_parameters(db_name="third", db_server="sqlite", default="True")
+    config.set_db_parameters(db_name="fpdb", default="True")
+
+    flagged = [
+        node.getAttribute("db_name")
+        for node in config.doc.getElementsByTagName("database")
+        if node.hasAttribute("default")
+    ]
+    assert flagged == ["fpdb"]
 
 
 def test_creating_a_database_takes_the_default_off_the_others(config_with_orphan):
