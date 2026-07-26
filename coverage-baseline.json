@@ -12,10 +12,10 @@
     "gui": 32.1,
     "maintenance-scripts": 37.7,
     "platform-pkg": 17.1,
-    "other": 68.2
+    "other": 68.3
   },
   "modules": {
-    "fpdb_3_legacy/Configuration.py": 74.6,
+    "fpdb_3_legacy/Configuration.py": 75.0,
     "fpdb_3_legacy/Database.py": 43.7,
     "fpdb_3_legacy/DerivedStats.py": 81.1,
     "fpdb_3_legacy/Hand.py": 69.4,
