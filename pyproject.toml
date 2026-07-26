@@ -12,7 +12,6 @@ license-files = ["LICENSE"]
 requires-python = ">=3.10,<4.0"
 dependencies = [
     "beautifulsoup4==4.12.3",
-    "chardet==5.2.0",
     "matplotlib>=3.10.7",
     "pandas>=2.2.2",
     "psutil>=5.9.0",
