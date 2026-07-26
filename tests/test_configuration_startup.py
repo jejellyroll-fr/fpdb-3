@@ -319,3 +319,59 @@ def test_the_empty_string_is_a_name_like_any_other(tmp_path, home) -> None:
     config = build(tmp_path, config_xml(version=CONFIG_VERSION, databases=DATABASE + unnamed), dbname="")
 
     assert config.db_selected == ""
+
+
+# --------------------------------------------------------------------------
+# Reading a configuration does not rewrite it
+# --------------------------------------------------------------------------
+
+TWO_DATABASES = (
+    '<database db_name="first" db_server="sqlite" db_ip="" db_user="" db_pass="" db_desc="a"/>'
+    '<database db_name="second" db_server="sqlite" db_ip="" db_user="" db_pass="" db_desc="b" default="True"/>'
+)
+
+
+def flagged(config: Config) -> list[str]:
+    return [
+        node.getAttribute("db_name")
+        for node in config.doc.getElementsByTagName("database")
+        if node.hasAttribute("default")
+    ]
+
+
+def test_the_database_the_file_chose_is_the_one_selected(tmp_path, home) -> None:
+    config = build(tmp_path, config_xml(version=CONFIG_VERSION, databases=TWO_DATABASES))
+
+    assert config.db_selected == "second"
+
+
+def test_reading_does_not_flag_the_first_database_it_meets(tmp_path, home) -> None:
+    # Selection is worked out while reading, and the first database is
+    # selected before any flagged one is reached. Writing that back marked a
+    # database the file never chose.
+    config = build(tmp_path, config_xml(version=CONFIG_VERSION, databases=TWO_DATABASES))
+
+    assert flagged(config) == ["second"]
+
+
+def test_opening_and_saving_leaves_the_file_saying_what_it_said(tmp_path, home) -> None:
+    # This is where it was felt: changing any setting at all saves the whole
+    # document, so a flag added while reading became a flag on disk.
+    path = tmp_path / "HUD_config.xml"
+    config = build(tmp_path, config_xml(version=CONFIG_VERSION, databases=TWO_DATABASES))
+
+    config.save()
+
+    saved = path.read_text(encoding="utf-8")
+    assert saved.count('default="True"') == 1
+
+
+def test_a_file_choosing_nothing_still_selects_the_first_database(tmp_path, home) -> None:
+    # With no database flagged, the first one wins -- and it stays unflagged,
+    # so the choice is remade the same way on every load rather than being
+    # frozen into the file by the first save.
+    neither = TWO_DATABASES.replace(' default="True"', "")
+    config = build(tmp_path, config_xml(version=CONFIG_VERSION, databases=neither))
+
+    assert config.db_selected == "first"
+    assert flagged(config) == []
