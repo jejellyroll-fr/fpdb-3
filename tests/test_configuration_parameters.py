@@ -625,3 +625,139 @@ def test_an_appearance_setting_takes_effect_once_it_is_saved_and_read_back(confi
 
     assert config.reload() is True
     assert config.get_hud_ui_parameters()["bgcolor"] == "#654321"
+
+
+# --------------------------------------------------------------------------
+# Turning the hud_ui node into the settings object
+# --------------------------------------------------------------------------
+#
+# HudUI reads one attribute per setting, and the name in the file is not
+# always the name in the code. Every mapping here has to agree with what
+# set_hud_ui_parameters writes, or a saved setting never comes back.
+
+# XML attribute -> the attribute HudUI puts it on.
+HUD_UI_MAPPING = {
+    "label": "label",
+    "card_ht": "card_ht",
+    "card_wd": "card_wd",
+    "deck_type": "deck_type",
+    "card_back": "card_back",
+    "stat_range": "stat_range",
+    "stat_days": "hud_days",
+    "aggregation_level_multiplier": "agg_bb_mult",
+    "seats_style": "seats_style",
+    "seats_cust_nums_low": "seats_cust_nums_low",
+    "seats_cust_nums_high": "seats_cust_nums_high",
+    "hero_stat_range": "h_stat_range",
+    "hero_stat_days": "h_hud_days",
+    "hero_aggregation_level_multiplier": "h_agg_bb_mult",
+    "hero_seats_style": "h_seats_style",
+    "hero_seats_cust_nums_low": "h_seats_cust_nums_low",
+    "hero_seats_cust_nums_high": "h_seats_cust_nums_high",
+    "xshift": "xshift",
+    "yshift": "yshift",
+    "aggregate_ring": "aggregate_ring",
+    "aggregate_tour": "aggregate_tour",
+    "hud_style": "hud_style",
+    "hero_stat_aggregation": "hero_stat_aggregation",
+    "h_hud_style": "h_hud_style",
+    "player_profiling": "player_profiling",
+    "profile_in_name": "profile_in_name",
+    "profile_min_hands": "profile_min_hands",
+    "bgcolor": "bgcolor",
+    "fgcolor": "fgcolor",
+    "hudbgcolor": "hudbgcolor",
+    "hudfgcolor": "hudfgcolor",
+    "font": "font",
+    "font_size": "font_size",
+    "opacity": "opacity",
+    "popup_style": "popup_style",
+    "mucked_cards": "mucked_cards",
+    "mucked_cards_size": "mucked_cards_size",
+    "mucked_cards_opacity": "mucked_cards_opacity",
+    "aux_windows": "aux_windows",
+    "aux_windows_opacity": "aux_windows_opacity",
+    "hud_menu_opacity": "hud_menu_opacity",
+    "hud_menu_bgcolor": "hud_menu_bgcolor",
+    "hud_menu_fgcolor": "hud_menu_fgcolor",
+    "stat_window_opacity": "stat_window_opacity",
+    "stat_window_frame": "stat_window_frame",
+    "tooltip_delay": "tooltip_delay",
+    "tooltip_bgcolor": "tooltip_bgcolor",
+    "tooltip_fgcolor": "tooltip_fgcolor",
+    "update_interval": "update_interval",
+    "max_seats": "max_seats",
+    "debug_level": "debug_level",
+}
+
+
+def hud_ui(**attributes: str) -> Any:
+    from xml.dom.minidom import parseString
+
+    written = " ".join(f'{name}="{value}"' for name, value in attributes.items())
+    return config_module.HudUI(node=parseString(f"<hud_ui {written}/>").documentElement)
+
+
+@pytest.mark.parametrize(("in_file", "in_code"), sorted(HUD_UI_MAPPING.items()))
+def test_every_setting_the_file_can_carry_is_read(in_file, in_code) -> None:
+    settings = hud_ui(**{in_file: "written"})
+
+    assert getattr(settings, in_code) == "written"
+
+
+def test_a_setting_the_file_omits_is_left_unset(tmp_path) -> None:
+    # get_hud_ui_parameters answers with its fallback for anything absent, so
+    # HudUI must leave the attribute off rather than invent an empty one.
+    settings = hud_ui(label="menu")
+
+    assert not hasattr(settings, "card_ht")
+    assert not hasattr(settings, "bgcolor")
+
+
+def test_the_menu_label_is_read_even_when_the_file_omits_it(tmp_path) -> None:
+    # It is the one setting read without asking whether it is there, so it is
+    # always present -- as the empty string, which the reader turns into the
+    # default menu text.
+    settings = hud_ui()
+
+    assert settings.label == ""
+
+
+# --------------------------------------------------------------------------
+# Settings that are saved and then lost
+# --------------------------------------------------------------------------
+
+LOST_ON_RELOAD = {
+    "auto_close": "False",
+    "block_click": "True",
+    "debug_hud": "True",
+    "disable_hud": "True",
+    "on_click": "Popup",
+    "query_limit": "500",
+    "save_layout": "False",
+}
+
+
+@pytest.mark.parametrize("setting", sorted(LOST_ON_RELOAD))
+def test_a_setting_written_to_the_file_but_never_read_is_lost(config, setting) -> None:
+    # Observed, not intended. set_hud_ui_parameters writes these seven onto
+    # the hud_ui node, but HudUI reads none of them back, so the value reaches
+    # the file and the next start falls back to the default. Changing one of
+    # these in the preferences reverts the moment fpdb restarts.
+    wanted = LOST_ON_RELOAD[setting]
+    config.set_hud_ui_parameters({setting: wanted})
+    config.save()
+
+    assert setting in Path(config.file).read_text(encoding="utf-8")
+    assert config.reload() is True
+    assert config.get_hud_ui_parameters()[setting] != wanted
+
+
+def test_a_setting_that_is_read_back_does_survive_a_reload(config) -> None:
+    # The control for the test above: the round trip itself works, so what
+    # those seven are missing is the read.
+    config.set_hud_ui_parameters({"font": "Courier"})
+    config.save()
+
+    assert config.reload() is True
+    assert config.get_hud_ui_parameters()["font"] == "Courier"
