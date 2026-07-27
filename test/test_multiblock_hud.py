@@ -638,3 +638,504 @@ def test_colspan_align_hline_save_round_trip(tmp_path):
     assert blk.stats[(1, 0)].colspan == 2
     assert blk.stats[(1, 0)].align == "left"
     assert blk.stats[(1, 2)].colspan == 1
+
+
+# --- block positions belong to the table they were dragged on -----------------
+#
+# A multi-block HUD remembers where the player put each block in a store shared
+# by every table, keyed by site, layout, stat set and table size -- but not by
+# table. Two CoinPoker PLO4 6-max tables therefore read and write the same
+# entries, and a table that rebuilds its windows used to come back wearing
+# whatever had just been dragged on the other one.
+#
+# A classic single-window HUD has never had this problem: its positions come
+# from a layout Hud deepcopies per table. These pin the same rule for blocks.
+
+import tempfile
+from unittest.mock import MagicMock, patch
+
+
+@pytest.fixture
+def shared_store():
+    """One positions store, as the running application has."""
+    store = Aux_Hud.HUDLayoutPositionsStore.__new__(Aux_Hud.HUDLayoutPositionsStore)
+    store.path = os.path.join(tempfile.mkdtemp(), "HUD_layout_positions.json")
+    store.data = {"version": 1, "positions": {}}
+    with patch.object(Aux_Hud, "get_positions_store", return_value=store):
+        yield store
+
+
+@pytest.fixture
+def table(shared_store):
+    """One table's stat HUD, reduced to what block positions need."""
+
+    def make(stat_set: str = "plo4_6max_pro", max_seats: int = 6, layout_set: str = "coinpoker_default"):
+        aux = Aux_Hud.SimpleHUD.__new__(Aux_Hud.SimpleHUD)
+        aux.hud = MagicMock()
+        aux.hud.site = "CoinPoker"
+        aux.hud.max = max_seats
+        # As Hud builds them: the name is on the set, and the per-size Layout
+        # deepcopied out of it carries geometry and nothing else.
+        aux.hud.layout_set = types.SimpleNamespace(name=layout_set)
+        aux.hud.layout = types.SimpleNamespace(width=800, height=600, location=[], common=(0, 0))
+        aux.game_params = MagicMock()
+        aux.game_params.name = stat_set
+        aux._default_canonical = lambda _key: (100, 100)
+        aux._screen_to_canonical = lambda x, y: (x, y)
+        aux._log_block_window_position = lambda *a, **k: None
+        aux._keep_block_positions_for_this_table()
+        return aux
+
+    return make
+
+
+def _layout_set(xml):
+    """A real Layout_set, as Configuration builds it from the file."""
+    node = minidom.parseString(xml).documentElement
+    return Conf.Layout_set(node=node)
+
+
+def _rebuild(aux, keys=((1, 0),)):
+    """What create() does to the block windows."""
+    aux._keep_block_positions_for_this_table()
+    for key in keys:
+        aux.block_positions[key] = aux._canonical_for(key)
+
+
+def _drag(aux, seat, block_index, x, y):
+    widget = MagicMock()
+    widget.block_index = block_index
+    widget.seat = seat
+    widget.pos.return_value = MagicMock(x=lambda: x, y=lambda: y)
+    aux.configure_event_cb(widget, seat)
+
+
+def test_dragging_a_block_moves_it_on_that_table(table):
+    aux = table()
+    _rebuild(aux)
+
+    _drag(aux, 1, 0, 640, 480)
+
+    assert aux._canonical_for((1, 0)) == (640, 480)
+
+
+def test_dragging_a_block_leaves_another_open_table_alone(table):
+    first, second = table(), table()
+    _rebuild(first)
+    _rebuild(second)
+
+    _drag(first, 1, 0, 640, 480)
+
+    assert second._canonical_for((1, 0)) == (100, 100)
+
+
+def test_a_table_rebuilding_its_windows_keeps_its_own_blocks(table):
+    """The regression: rebuilding used to re-seed from the shared store.
+
+    Windows are rebuilt often -- twice on creation, on a seat-count change, on
+    a table-local stat-set switch -- so on a busy multi-table session the other
+    table's positions arrived within a hand or two.
+    """
+    first, second = table(), table()
+    _rebuild(first)
+    _rebuild(second)
+    _drag(first, 1, 0, 640, 480)
+
+    _rebuild(second)
+
+    assert second._canonical_for((1, 0)) == (100, 100)
+
+
+def test_a_table_keeps_the_position_it_was_given_across_a_rebuild(table):
+    aux = table()
+    _rebuild(aux)
+    _drag(aux, 1, 0, 200, 300)
+
+    _rebuild(aux)
+
+    assert aux._canonical_for((1, 0)) == (200, 300)
+
+
+def test_only_the_dragged_block_moves(table):
+    aux = table()
+    _rebuild(aux, keys=[(1, 0), (1, 1), (2, 0)])
+
+    _drag(aux, 1, 0, 640, 480)
+
+    assert aux._canonical_for((1, 1)) == (100, 100)
+    assert aux._canonical_for((2, 0)) == (100, 100)
+
+
+def test_switching_stat_set_starts_the_blocks_over(table):
+    """Block 2 of one profile is not block 2 of another."""
+    aux = table()
+    _rebuild(aux)
+    _drag(aux, 1, 0, 640, 480)
+
+    aux.game_params.name = "another_profile"
+    _rebuild(aux)
+
+    assert aux._canonical_for((1, 0)) == (100, 100)
+
+
+def test_changing_table_size_starts_the_blocks_over(table):
+    aux = table()
+    _rebuild(aux)
+    _drag(aux, 1, 0, 640, 480)
+
+    aux.hud.max = 9
+    _rebuild(aux)
+
+    assert aux._canonical_for((1, 0)) == (100, 100)
+
+
+def test_a_table_opened_later_inherits_the_last_saved_layout(table):
+    """The store's purpose, which the fix must not take away."""
+    first = table()
+    _rebuild(first)
+    _drag(first, 1, 0, 640, 480)
+
+    fresh = table()
+    _rebuild(fresh)
+
+    assert fresh._canonical_for((1, 0)) == (640, 480)
+
+
+def test_the_position_reaches_the_shared_store(table, shared_store):
+    aux = table()
+    _rebuild(aux)
+
+    _drag(aux, 1, 0, 640, 480)
+
+    assert shared_store.get_position("CoinPoker", "coinpoker_default", "plo4_6max_pro", 6, 1, 0) == (640, 480)
+
+
+def test_a_layout_carries_no_name_of_its_own():
+    """Why the name has to be read off the set.
+
+    Hud deepcopies layout_set.layout[max] into hud.layout. That object holds
+    max, width, height, locations and hh_seats -- asking it for a name gets
+    the fallback, every time, for every layout set there is.
+    """
+    layout_set = _layout_set('<ls name="coinpoker_default"><layout max="6" width="800" height="600"/></ls>')
+
+    assert layout_set.name == "coinpoker_default"
+    assert not hasattr(layout_set.layout[6], "name")
+
+
+def test_the_layout_name_is_the_one_the_set_is_called():
+    aux = Aux_Hud.SimpleHUD.__new__(Aux_Hud.SimpleHUD)
+    layout_set = _layout_set('<ls name="coinpoker_default"><layout max="6" width="800" height="600"/></ls>')
+    aux.hud = types.SimpleNamespace(layout_set=layout_set, layout=layout_set.layout[6])
+
+    assert aux._layout_name() == "coinpoker_default"
+
+
+def test_two_layout_sets_do_not_share_block_positions(table):
+    """The store is keyed by layout, and that key has to mean something.
+
+    Reading the name off the per-size Layout answered "default" for all of
+    them, so every layout set of a site wrote over the same entries.
+    """
+    six_max, nine_max = table(layout_set="coinpoker_default"), table(layout_set="coinpoker_zoom")
+    _rebuild(six_max)
+    _rebuild(nine_max)
+
+    _drag(six_max, 1, 0, 640, 480)
+    fresh = table(layout_set="coinpoker_zoom")
+    _rebuild(fresh)
+
+    assert fresh._canonical_for((1, 0)) == (100, 100)
+
+
+def test_a_table_changing_layout_starts_the_blocks_over(table):
+    aux = table(layout_set="coinpoker_default")
+    _rebuild(aux)
+    _drag(aux, 1, 0, 640, 480)
+
+    aux.hud.layout_set = types.SimpleNamespace(name="coinpoker_zoom")
+    _rebuild(aux)
+
+    assert aux._canonical_for((1, 0)) == (100, 100)
+
+
+class _DummyWindow:
+    """Stands in for a stat window through a real create() cycle."""
+
+    def __init__(self, _aw=None, seat=None):
+        self.seat = seat
+        self.position = (0, 0)
+
+    def move(self, x, y):
+        self.position = (x, y)
+
+    def setWindowOpacity(self, *_args):
+        pass
+
+    def create(self):
+        pass
+
+    def show(self):
+        pass
+
+    def hide(self):
+        pass
+
+    def destroy(self):
+        pass
+
+
+def _real_hud(shared_store, layout_set="coinpoker_default", stat_set="plo4_6max_pro"):
+    """A SimpleHUD taken far enough to run create() for real."""
+    aw = Aux_Hud.SimpleHUD.__new__(Aux_Hud.SimpleHUD)
+    aw.game_params = types.SimpleNamespace(name=stat_set, show_hero_hud="", is_multiblock=True)
+    aw.config = types.SimpleNamespace(stat_sets={})
+    aw.block_layouts = [{"x": 0, "y": 0}, {"x": 10, "y": 10}]
+    aw.positions = {}
+    aw.params = {}
+    aw.uses_timer = False
+    aw.aw_class_window = _DummyWindow
+    aw.create_common = lambda *_args: _DummyWindow(aw, "common")
+    aw.create_contents = lambda *_args: None
+    aw.update_contents = lambda *_args: None
+    aw.adj_seats = lambda: [0, 3, 1, 2]
+    aw.hud = types.SimpleNamespace(
+        max=3,
+        stat_dict={},
+        site="CoinPoker",
+        site_parameters={"fav_seat": {3: 3}},
+        layout_set=types.SimpleNamespace(name=layout_set),
+        layout=types.SimpleNamespace(
+            common=(0, 0),
+            location=[None, (100, 100), (200, 200), (300, 300)],
+            width=800,
+            height=600,
+        ),
+        table=types.SimpleNamespace(x=0, y=0, width=800, height=600, topify=lambda _w: None),
+        geometry_generation=0,
+    )
+    return aw
+
+
+def test_a_second_create_keeps_the_blocks_where_the_player_put_them(shared_store):
+    """The real cycle: idle_create runs create() twice on every HUD.
+
+    Each run used to start from an empty cache and re-seed every block from
+    the shared store, so the second run of a HUD could already be wearing
+    another table's positions.
+    """
+    aw = _real_hud(shared_store)
+    aw.create()
+    _drag(aw, 1, 0, 640, 480)
+
+    aw.create()
+
+    assert aw._canonical_for((1, 0)) == (640, 480)
+
+
+def test_a_second_table_creating_twice_keeps_its_own_blocks(shared_store):
+    first, second = _real_hud(shared_store), _real_hud(shared_store)
+    first.create()
+    second.create()
+    before = second._canonical_for((1, 0))
+
+    _drag(first, 1, 0, 640, 480)
+    second.create()
+
+    assert second._canonical_for((1, 0)) == before
+
+
+def test_creating_a_hud_takes_over_the_old_arrangement(shared_store):
+    """The migration has to be wired into the real cycle, not only callable.
+
+    Everything above calls _claim_legacy_block_positions directly, so without
+    this the call could be dropped from create() and nothing would notice.
+    """
+    _save_legacy(shared_store, 1, 0, 640, 480, max_seats=3)
+    aw = _real_hud(shared_store)
+
+    aw.create()
+
+    assert _legacy_keys(shared_store) == []
+    assert aw._stored_position(1, 0) == (640, 480)
+
+
+def test_creating_a_hud_places_its_blocks_from_the_old_arrangement(shared_store):
+    _save_legacy(shared_store, 1, 0, 640, 480, max_seats=3)
+    aw = _real_hud(shared_store)
+
+    aw.create()
+
+    assert aw._canonical_for((1, 0)) == (640, 480)
+
+
+def test_creating_again_after_a_layout_change_starts_over(shared_store):
+    aw = _real_hud(shared_store)
+    aw.create()
+    _drag(aw, 1, 0, 640, 480)
+    moved = aw._canonical_for((1, 0))
+
+    aw.hud.layout_set = types.SimpleNamespace(name="coinpoker_zoom")
+    aw.create()
+
+    assert aw._canonical_for((1, 0)) != moved
+
+
+# --- positions saved before layouts were told apart ----------------------------
+#
+# Every layout of a site used to file its blocks under the literal "default",
+# so they all read and wrote one another's. There is one such arrangement and
+# there may be several layout sets, so it is given to the first layout that
+# opens and the shared entries go -- otherwise the collision outlives the fix.
+
+
+def _save_legacy(store, seat, block_index, x, y, *, stat_set="plo4_6max_pro", max_seats=6):
+    store.set_position("CoinPoker", Aux_Hud.LEGACY_LAYOUT_NAME, stat_set, max_seats, seat, block_index, x, y)
+
+
+def _legacy_keys(store):
+    return [key for key in store.data["positions"] if f"/{Aux_Hud.LEGACY_LAYOUT_NAME}/" in key]
+
+
+def test_an_arrangement_saved_before_the_fix_is_taken_over(table, shared_store):
+    _save_legacy(shared_store, 1, 0, 640, 480)
+    aux = table(layout_set="coinpoker_default")
+
+    aux._claim_legacy_block_positions()
+
+    assert aux._stored_position(1, 0) == (640, 480)
+
+
+def test_taking_it_over_leaves_nothing_shared_behind(table, shared_store):
+    """What makes it a migration rather than a fallback."""
+    _save_legacy(shared_store, 1, 0, 640, 480)
+    aux = table(layout_set="coinpoker_default")
+
+    aux._claim_legacy_block_positions()
+
+    assert _legacy_keys(shared_store) == []
+
+
+def test_the_whole_arrangement_moves_at_once(table, shared_store):
+    for seat in (1, 2, 3):
+        for block in (0, 1):
+            _save_legacy(shared_store, seat, block, 10 * seat, 10 * block)
+    aux = table(layout_set="coinpoker_default")
+
+    aux._claim_legacy_block_positions()
+
+    assert aux._stored_position(3, 1) == (30, 10)
+    assert _legacy_keys(shared_store) == []
+
+
+def test_moving_the_arrangement_writes_the_file_once(table, shared_store):
+    # A HUD holds a block per seat; one write per block would be a file
+    # rewritten dozens of times as it starts.
+    for seat in (1, 2, 3, 4, 5, 6):
+        _save_legacy(shared_store, seat, 0, 10, 20)
+    aux = table(layout_set="coinpoker_default")
+
+    with patch.object(shared_store, "save") as saved:
+        aux._claim_legacy_block_positions()
+
+    assert saved.call_count == 1
+
+
+def test_the_second_layout_to_open_starts_from_its_own_places(table, shared_store):
+    """The policy: one old arrangement, one claimant.
+
+    What the second layout had before was never its own -- it was reading the
+    first one's by accident, which is the collision being removed.
+    """
+    _save_legacy(shared_store, 1, 0, 640, 480)
+    first, second = table(layout_set="coinpoker_default"), table(layout_set="coinpoker_zoom")
+
+    first._claim_legacy_block_positions()
+    second._claim_legacy_block_positions()
+
+    _rebuild(second)
+    assert second._canonical_for((1, 0)) == (100, 100)
+
+
+def test_a_layout_that_already_has_its_own_keeps_them(table, shared_store):
+    _save_legacy(shared_store, 1, 0, 640, 480)
+    aux = table(layout_set="coinpoker_default")
+    _rebuild(aux)
+    _drag(aux, 1, 0, 200, 300)
+
+    aux._claim_legacy_block_positions()
+
+    assert aux._stored_position(1, 0) == (200, 300)
+    assert _legacy_keys(shared_store) == []
+
+
+def test_an_old_entry_of_another_stat_set_is_left_where_it_is(table, shared_store):
+    _save_legacy(shared_store, 1, 0, 640, 480, stat_set="some_other_profile")
+    aux = table(layout_set="coinpoker_default")
+
+    aux._claim_legacy_block_positions()
+
+    assert aux._stored_position(1, 0) is None
+    assert len(_legacy_keys(shared_store)) == 1
+
+
+def test_a_layout_actually_named_default_keeps_the_arrangement(table, shared_store):
+    # The shipped configuration has a layout set called "default", so the old
+    # name and a real one can be the same string. There is nothing to move --
+    # the entries are already under its own name.
+    _save_legacy(shared_store, 1, 0, 640, 480)
+    aux = table(layout_set=Aux_Hud.LEGACY_LAYOUT_NAME)
+
+    aux._claim_legacy_block_positions()
+
+    assert aux._stored_position(1, 0) == (640, 480)
+
+
+def test_a_layout_actually_named_default_claims_the_arrangement(table, shared_store):
+    """Having nothing to move is not the same as having nothing to claim.
+
+    The claim is what stops another layout of the site taking the arrangement
+    afterwards; inferring it from entries having moved would leave this one
+    the only layout that can be robbed.
+    """
+    _save_legacy(shared_store, 1, 0, 640, 480)
+    default_named = table(layout_set=Aux_Hud.LEGACY_LAYOUT_NAME)
+    default_named._claim_legacy_block_positions()
+
+    latecomer = table(layout_set="coinpoker_zoom")
+    latecomer._claim_legacy_block_positions()
+
+    assert default_named._stored_position(1, 0) == (640, 480)
+    assert latecomer._stored_position(1, 0) is None
+
+
+def test_the_claim_is_recorded_once(table, shared_store):
+    _save_legacy(shared_store, 1, 0, 640, 480)
+    aux = table(layout_set="coinpoker_default")
+    aux._claim_legacy_block_positions()
+
+    with patch.object(shared_store, "save") as saved:
+        aux._claim_legacy_block_positions()
+
+    assert not saved.called
+
+
+def test_a_claimed_arrangement_is_not_taken_by_a_later_layout(table, shared_store):
+    _save_legacy(shared_store, 1, 0, 640, 480)
+    first = table(layout_set="coinpoker_default")
+    first._claim_legacy_block_positions()
+
+    latecomer = table(layout_set="coinpoker_zoom")
+    latecomer._claim_legacy_block_positions()
+
+    assert first._stored_position(1, 0) == (640, 480)
+    assert latecomer._stored_position(1, 0) is None
+
+
+def test_nothing_to_move_writes_nothing(table, shared_store):
+    aux = table(layout_set="coinpoker_default")
+
+    with patch.object(shared_store, "save") as saved:
+        aux._claim_legacy_block_positions()
+
+    assert not saved.called

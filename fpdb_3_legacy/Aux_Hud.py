@@ -88,6 +88,54 @@ class HUDLayoutPositionsStore:
             return int(pos.get("x", 0)), int(pos.get("y", 0))
         return None
 
+    def migrate_layout_name(
+        self,
+        site: str,
+        old_layout: str,
+        new_layout: str,
+        stat_set: str,
+        max_seats: int,
+    ) -> int:
+        """Move positions filed under an old layout name onto the current one.
+
+        Returns how many were moved. Every conversion is made in memory and
+        written once, so a HUD starting up costs one file write rather than one
+        per block.
+
+        The old entries are removed whether or not they were used, which is
+        what ends the collision they came from: they were shared by every
+        layout set of the site, so leaving them would keep handing the same
+        arrangement to whichever layout happened to have none of its own.
+
+        The claim is recorded rather than inferred from the entries having
+        moved, because a layout set genuinely called "default" has nothing to
+        move -- the old entries are already under its own name. Without the
+        record, any other layout of the site could come along afterwards and
+        take them from it.
+        """
+        scope = f"{site}/{stat_set}/{max_seats}"
+        claimed = self.data.setdefault("claimed_layouts", {})
+        if scope in claimed:
+            return 0
+
+        positions = self.data.setdefault("positions", {})
+        prefix = f"{site}/{old_layout}/{stat_set}/{max_seats}/"
+        stale = [key for key in positions if key.startswith(prefix)]
+        if not stale:
+            return 0
+
+        claimed[scope] = new_layout
+        moved = 0
+        if old_layout != new_layout:
+            for key in stale:
+                target = f"{site}/{new_layout}/{stat_set}/{max_seats}/{key[len(prefix) :]}"
+                if target not in positions:
+                    positions[target] = positions[key]
+                    moved += 1
+                del positions[key]
+        self.save()
+        return moved
+
     def set_position(
         self,
         site: str,
@@ -103,6 +151,13 @@ class HUDLayoutPositionsStore:
         self.data.setdefault("positions", {})[key] = {"x": x, "y": y}
         self.save()
 
+
+# Block positions used to be filed under this instead of the layout set's own
+# name, because the name was read off a Layout that never had one -- so every
+# layout of a site shared one arrangement. An arrangement saved back then is
+# moved onto the first layout that opens, once, by migrate_layout_name; see
+# SimpleHUD._claim_legacy_block_positions for who gets it and why.
+LEGACY_LAYOUT_NAME = "default"
 
 _positions_store: HUDLayoutPositionsStore | None = None
 
@@ -594,6 +649,52 @@ class SimpleHUD(Aux_Base.AuxSeats):
             offset += int(b.get("nrows", 1) or 1) * row_px + (title_px if b.get("label") else 0) + pad_px
         return offset
 
+    def _layout_name(self) -> str:
+        """Name of the layout set this table draws with.
+
+        It lives on the layout *set*, not on the per-size Layout that Hud
+        deepcopies out of it: that one carries max, width, height, locations
+        and nothing else. Reading it off the copy answered the literal
+        "default" for every table, which collapsed fourteen shipped layout
+        sets onto one set of stored block positions.
+        """
+        return getattr(getattr(self.hud, "layout_set", None), "name", "default")
+
+    def _block_profile(self) -> tuple[str, str, int]:
+        """What a remembered block position belongs to.
+
+        Block keys are (seat, block index), which mean different things under a
+        different stat set: block 2 of one profile is not block 2 of another.
+        """
+        return (
+            self._layout_name(),
+            getattr(self.game_params, "name", "default"),
+            self.hud.max,
+        )
+
+    def _keep_block_positions_for_this_table(self) -> None:
+        """Carry this table's own block positions across a rebuild of its windows.
+
+        The windows are rebuilt often -- twice on creation, on a seat-count
+        change, on a table-local stat-set switch -- and each rebuild used to
+        start from nothing and re-seed every block from the shared positions
+        store. That store is keyed by site, layout, stat set and table size but
+        not by table, so a second table of the same game would come back
+        wearing the positions someone had just dragged on the first one.
+
+        A classic single-window HUD does not have this problem because its
+        positions come from a layout Hud deepcopies per table. This is the same
+        rule: what the player moved on this table stays on this table, and the
+        shared store only seeds blocks this table has no position for yet.
+
+        The positions are dropped when the profile changes, since the keys no
+        longer describe the same blocks.
+        """
+        profile = self._block_profile()
+        if getattr(self, "_block_positions_profile", None) != profile or not hasattr(self, "block_positions"):
+            self.block_positions: dict[BlockKey, tuple[int, int]] = {}
+            self._block_positions_profile = profile
+
     def _canonical_for(self, key: BlockKey) -> tuple[int, int]:
         """Canonical position for a block window.
 
@@ -606,17 +707,45 @@ class SimpleHUD(Aux_Base.AuxSeats):
             return self.block_positions[key]
 
         seat, block_index = key
-        stored = get_positions_store().get_position(
+        stored = self._stored_position(seat, block_index)
+        if stored is not None:
+            return stored
+        return self._default_canonical(key)
+
+    def _stored_position(self, seat: int | str, block_index: int) -> tuple[int, int] | None:
+        """A block's saved position, if one was ever saved."""
+        return get_positions_store().get_position(
             self.hud.site,
-            getattr(self.hud.layout, "name", "default"),
+            self._layout_name(),
             getattr(self.game_params, "name", "default"),
             self.hud.max,
             seat,
             block_index,
         )
-        if stored is not None:
-            return stored
-        return self._default_canonical(key)
+
+    def _claim_legacy_block_positions(self) -> None:
+        """Take over the blocks saved before layouts were told apart.
+
+        Until the layout name was read off the layout set, every layout of a
+        site filed its blocks under the literal "default", so they all read and
+        wrote one another's. Players who arranged their HUD have their work in
+        there, and it has to reach the layout they use rather than be dropped.
+
+        There is one such arrangement and there may be several layout sets, so
+        somebody has to be given it: the first layout that opens takes it, and
+        the shared entries go. Any other layout starts from its computed places
+        -- which is the point, since what it had before was not its own.
+        """
+        layout_name = self._layout_name()
+        moved = get_positions_store().migrate_layout_name(
+            self.hud.site,
+            LEGACY_LAYOUT_NAME,
+            layout_name,
+            getattr(self.game_params, "name", "default"),
+            self.hud.max,
+        )
+        if moved:
+            log.info("Moved %d saved block position(s) onto layout %s", moved, layout_name)
 
     def create(self) -> None:
         """Create classic one-window seats or PT4-style one-window-per-block seats."""
@@ -628,7 +757,8 @@ class SimpleHUD(Aux_Base.AuxSeats):
         self.adj = self.adj_seats()
         self.hero_display_seat = self._hero_display_seat()
         self.m_windows: dict[Any, Any] = {}
-        self.block_positions: dict[BlockKey, tuple[int, int]] = {}
+        self._keep_block_positions_for_this_table()
+        self._claim_legacy_block_positions()
         # Unscaled reference seat anchors, captured once. Kept separate from the
         # live layout.location (which Hud.resize_windows rescales) so canonical
         # defaults stay stable across resizes.
@@ -794,7 +924,7 @@ class SimpleHUD(Aux_Base.AuxSeats):
         canonical_x, canonical_y = self._screen_to_canonical(new_abs_position.x(), new_abs_position.y())
 
         store = get_positions_store()
-        layout_name = getattr(self.hud.layout, "name", "default")
+        layout_name = self._layout_name()
         stat_set = getattr(self.game_params, "name", "default")
         store.set_position(
             self.hud.site, layout_name, stat_set, self.hud.max, seat, block_index, canonical_x, canonical_y
