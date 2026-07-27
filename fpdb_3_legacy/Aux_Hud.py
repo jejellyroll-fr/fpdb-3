@@ -730,6 +730,15 @@ class SimpleHUD(Aux_Base.AuxSeats):
             return self.block_layouts[key[1]].get("label", "") or f"block#{key[1]}"
         return str(key)
 
+    def refresh_stats(self, hand_id: Any) -> None:
+        """Redraw the stat windows from the statistics now on the hud.
+
+        This is the statistics HUD, so a refresh is exactly what it draws: the
+        seat windows read hud.stat_dict when they redraw and take no notice of
+        which hand asked.
+        """
+        self.update_gui(hand_id)
+
     def update_gui(self, _new_hand_id: Any) -> None:
         if not self._uses_block_windows():
             super().update_gui(_new_hand_id)

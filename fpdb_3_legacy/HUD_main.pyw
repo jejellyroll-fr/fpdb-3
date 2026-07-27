@@ -48,6 +48,12 @@ from fpdb_3_legacy.SmartHudManager import RestartReason, get_smart_hud_manager
 
 log = get_logger("hud_main")
 
+# How long an arriving hand waits for its neighbours. Twelve tables dealing at
+# once arrive as twelve separate notifications; holding them briefly turns that
+# into one batch, so each HUD is refreshed once rather than once per hand. Long
+# enough to catch the burst, short enough to stay ahead of the player acting.
+HAND_BATCH_INTERVAL_MS = 200
+
 
 @dataclass
 class HUDCreationArgs:
@@ -364,6 +370,21 @@ class HudMain(QObject):
 
             # Cache initialization
             self.cache: TTLCache = TTLCache(maxsize=1000, ttl=300)  # Cache of 1000 elements with a TTL of 5 minutes
+            # Per-hand reads of HandsPlayers. That table is written in the same
+            # transaction as the Hands row and never rewritten afterwards, and
+            # read_stdin only gets past _get_table_info for a hand whose own
+            # query already joined HandsPlayers -- so once a hand reaches here
+            # its seats and positions are settled and worth reading once.
+            self._hand_players: TTLCache = TTLCache(maxsize=200, ttl=300)
+
+            # Hands wait here for HAND_BATCH_INTERVAL_MS so a burst becomes one
+            # batch. The window starts at the first hand rather than restarting
+            # on each, so continuous traffic cannot postpone it indefinitely.
+            self._pending_hands: list[str] = []
+            self._hand_batch_timer = QTimer(self)
+            self._hand_batch_timer.setSingleShot(True)
+            self._hand_batch_timer.setInterval(HAND_BATCH_INTERVAL_MS)
+            self._hand_batch_timer.timeout.connect(self._drain_pending_hands)
 
             # Stats persistence initialization
             self.stats_persistence = get_hud_stats_persistence()
@@ -473,8 +494,8 @@ class HudMain(QObject):
             log.debug("Pre-message rollback failed (connection may be closed)")
 
         try:
-            self.read_stdin(hand_id)
-            log.debug("Message processing completed for hand_id: %s", hand_id)
+            self._enqueue_hand(hand_id)
+            log.debug("Hand %s queued for the next batch", hand_id)
         except Exception as e:
             log.exception("Error handling message for hand_id %s: %s", hand_id, e)
             try:
@@ -489,6 +510,13 @@ class HudMain(QObject):
         if self._shutdown_started:
             return
         self._shutdown_started = True
+
+        # A batch still waiting would fire against a torn-down connection.
+        batch_timer = getattr(self, "_hand_batch_timer", None)
+        if batch_timer is not None:
+            with contextlib.suppress(RuntimeError):
+                batch_timer.stop()
+        self._pending_hands = []
 
         zmq_worker = getattr(self, "zmq_worker", None)
         if zmq_worker is not None:
@@ -855,13 +883,184 @@ class HudMain(QObject):
             log.exception("hud_dict[%s] was not found", temp_key)
             return
 
-        hud.seat_players = self.db_connection.get_seat_players(new_hand_id)
+        hud.seat_players = self._seat_players(new_hand_id)
         self._set_table_stats(hud, new_hand_id)
         hud.cards = self.get_cards(new_hand_id, hud.poker_game)
         for aw in hud.aux_windows:
             aw.update_data(new_hand_id, self.db_connection)
         self.update_HUD(new_hand_id, temp_key, self.config)
         log.debug("hud updated for table %s and hand %s", temp_key, new_hand_id)
+
+    def _enqueue_hand(self, hand_id: str) -> None:
+        """Hold a hand briefly so the tables dealing alongside it join the batch."""
+        self._pending_hands.append(hand_id)
+        if not self._hand_batch_timer.isActive():
+            self._hand_batch_timer.start()
+
+    def _latest_hand_per_table(self, hand_ids: list[str]) -> tuple[dict[str, str], list[str]]:
+        """Reduce a batch to the last hand of each table.
+
+        Processing an earlier hand of a table only to overwrite it with the
+        next one is work nobody sees, and the HUD shows the latest hand either
+        way. Hands whose table cannot be resolved are handed back untouched so
+        they take the normal path and log what they normally log.
+        """
+        latest: dict[str, str] = {}
+        unresolved: list[str] = []
+        for hand_id in hand_ids:
+            table_info = self._get_table_info(hand_id)
+            if table_info is None:
+                unresolved.append(hand_id)
+                continue
+            table_name, game_type = table_info[0], table_info[3]
+            tour_number, tab_number = table_info[8], table_info[9]
+            latest[self._get_temp_key(game_type, tour_number, tab_number, table_name)] = hand_id
+        return latest, unresolved
+
+    def _drain_pending_hands(self) -> None:
+        """Process one batch of hands, then refresh every other HUD once.
+
+        The refresh is what this exists for: it used to run per hand, so a
+        round of twelve tables cost twelve refreshes of twelve HUDs. One batch
+        means one refresh each.
+        """
+        pending, self._pending_hands = self._pending_hands, []
+        if not pending:
+            return
+
+        latest, unresolved = self._latest_hand_per_table(pending)
+        log.debug("Draining %d hand(s) into %d table(s)", len(pending), len(latest))
+
+        refreshed: set[str] = set()
+        for hand_id in [*latest.values(), *unresolved]:
+            try:
+                served = self.read_stdin(hand_id)
+            except Exception:
+                log.exception("Error processing hand %s", hand_id)
+                with contextlib.suppress(Exception):
+                    self.db_connection.connection.rollback()
+            else:
+                if served is not None:
+                    refreshed.add(served)
+
+        # Only the tables actually brought up to date are left out of the
+        # statistics refresh; one that failed still needs it.
+        self._refresh_other_huds(refreshed)
+
+    def _seat_players(self, hand_id: str) -> dict:
+        """Seat players for a hand, read from the database once."""
+        key = ("seats", hand_id)
+        cached = self._hand_players.get(key)
+        if cached is None:
+            cached = self.db_connection.get_seat_players(hand_id)
+            self._hand_players[key] = cached
+        return cached
+
+    def _hand_positions(self, hand_id: str) -> dict:
+        """Each player's position in a hand, read from the database once."""
+        key = ("positions", hand_id)
+        cached = self._hand_players.get(key)
+        if cached is None:
+            cached = self.db_connection.get_hand_positions(hand_id)
+            self._hand_players[key] = cached
+        return cached
+
+    def _refresh_secondary_hud(
+        self,
+        hand_id: str,
+        temp_key: str,
+        game_type: str,
+        site_id: int,
+        num_seats: int,
+    ) -> None:
+        """Update a HUD whose own table has not dealt a new hand.
+
+        Only the aggregated statistics can have moved: the seats, the cards and
+        the table stats all describe this table's own last hand, which is the
+        hand being reused here, so re-reading them would return what the HUD
+        already holds. Skipping them matters because this runs once per open
+        table per hand dealt at any table -- the cost of the full update would
+        grow with the square of the number of tables, on the path that has to
+        finish before the player acts.
+
+        The positions are re-read because the statistics dictionary is built
+        afresh and they live inside it.
+
+        The repaint deliberately does not go through update_HUD. That path
+        calls Hud.update, which rebuilds the hand from the database through
+        hand_factory, re-reads the cards, and refreshes the aux windows a
+        second time -- all of it describing the same unchanged hand. The aux
+        windows read hud.stat_dict when they redraw, so handing them the new
+        one and asking them to redraw is the whole job.
+        """
+        hud = self.hud_dict[temp_key]
+        self.db_connection.init_hud_stat_vars(hud.hud_params["hud_days"], hud.hud_params["h_hud_days"])
+        stat_dict = self.db_connection.get_stats_from_hand(
+            hand_id,
+            game_type,
+            hud.hud_params,
+            self.hero_ids[site_id],
+            num_seats,
+        )
+        self._merge_positions(stat_dict, hand_id)
+        hud.stat_dict = stat_dict
+        for aux in hud.aux_windows:
+            try:
+                aux.refresh_stats(hand_id)
+            except Exception:
+                log.exception("Error redrawing aux window of table %s", temp_key)
+        log.debug("secondary hud redrawn for table %s using hand %s", temp_key, hand_id)
+
+    def _refresh_other_huds(self, updated_tables: set[str]) -> None:
+        """Refresh every active HUD except the tables this batch already updated.
+
+        HUD statistics are aggregated globally, but each HUD must keep using
+        its own latest hand for seats, cards, positions, and game context.
+        Reusing that table's last processed hand makes all open HUDs observe
+        the latest HudCache state without mixing table-local data.
+
+        A secondary HUD is best-effort: one stale or failing table must not
+        prevent the remaining tables from refreshing.
+        """
+        for table_name in list(self.hud_dict):
+            if table_name in updated_tables:
+                continue
+
+            last_hand_id = self._last_processed_hands.get(table_name)
+            if last_hand_id is None:
+                log.debug("Skipping global HUD refresh for %s: no last hand", table_name)
+                continue
+
+            table_info = self._get_table_info(last_hand_id)
+            if table_info is None:
+                log.warning(
+                    "Skipping global HUD refresh for table %s: no table info for hand %s",
+                    table_name,
+                    last_hand_id,
+                )
+                continue
+
+            game_type = table_info[3]
+            site_id = table_info[5]
+            num_seats = table_info[7]
+            try:
+                self._refresh_secondary_hud(
+                    last_hand_id,
+                    table_name,
+                    game_type,
+                    site_id,
+                    num_seats,
+                )
+            except Exception:
+                log.exception(
+                    "Global HUD refresh failed for table %s using hand %s",
+                    table_name,
+                    last_hand_id,
+                )
+                # PostgreSQL rejects every later query after one statement
+                # fails until the transaction is explicitly rolled back.
+                with contextlib.suppress(Exception):
+                    self.db_connection.connection.rollback()
 
     def _create_new_hud(
         self,
@@ -990,18 +1189,24 @@ class HudMain(QObject):
             )
             self.create_HUD(args)
             if args.temp_key in self.hud_dict:
-                self.hud_dict[args.temp_key].seat_players = self.db_connection.get_seat_players(new_hand_id)
+                self.hud_dict[args.temp_key].seat_players = self._seat_players(new_hand_id)
                 self._set_table_stats(self.hud_dict[args.temp_key], new_hand_id)
         else:
             log.error('Table "%s" no longer exists', table_name)
 
-    def read_stdin(self, new_hand_id: str) -> None:
-        """Read and process a new hand ID from stdin."""
+    def read_stdin(self, new_hand_id: str) -> str | None:
+        """Process one hand and return the table whose HUD now shows it.
+
+        The answer is what tells the batch which tables still need the
+        statistics-only refresh: a table that was skipped, or whose HUD was
+        killed as stale, has not been brought up to date and must not be
+        treated as though it had.
+        """
         log.debug("Processing new hand id: %s", new_hand_id)
         self._initialize_hero_data()
 
         if not new_hand_id:
-            return
+            return None
 
         table_info = self._get_table_info(new_hand_id)
         if not table_info:
@@ -1009,7 +1214,7 @@ class HudMain(QObject):
                 "HUD skipped for hand %s: table info not found in DB (hand not committed yet?)",
                 new_hand_id,
             )
-            return
+            return None
 
         (
             table_name,
@@ -1034,7 +1239,7 @@ class HudMain(QObject):
                 new_hand_id,
                 site_name,
             )
-            return
+            return None
 
         enabled_sites = self.config.get_supported_sites()
         hud_site_name = self._resolve_hud_config_site(site_name, enabled_sites)
@@ -1052,7 +1257,7 @@ class HudMain(QObject):
                 hud_site_name in aux_disabled_sites,
                 hud_site_name in enabled_sites,
             )
-            return
+            return None
 
         temp_key = self._get_temp_key(game_type, tour_number, tab_number, table_name)
         log.debug("Generated temp_key: %s for table: %s", temp_key, table_name)
@@ -1061,18 +1266,18 @@ class HudMain(QObject):
         # ZMQ delivery), so create/update runs exactly once per hand.
         if self._last_processed_hands.get(temp_key) == new_hand_id:
             log.debug("Skipping already processed hand ID %s for table %s", new_hand_id, temp_key)
-            return
+            return None
         self._last_processed_hands[temp_key] = new_hand_id
 
         if self._handle_tournament_table_changes(game_type, temp_key, tour_number):
-            return  # Stale table was handled
+            return None  # Stale table was handled
 
         poker_game, new_max_seats = self._handle_hud_reconfiguration(temp_key, poker_game)
         if new_max_seats:
             # Re-create the HUD with the new max seats
             self.kill_hud(None, temp_key)
             self._create_new_hud(new_hand_id, temp_key, table_info, site_id, num_seats, hud_site_name)
-            return
+            return temp_key
 
         if temp_key in self.hud_dict:
             log.debug("Updating existing HUD for temp_key: %s", temp_key)
@@ -1080,6 +1285,7 @@ class HudMain(QObject):
         else:
             log.debug("Creating new HUD for temp_key: %s", temp_key)
             self._create_new_hud(new_hand_id, temp_key, table_info, site_id, num_seats, hud_site_name)
+        return temp_key
 
     def _set_table_stats(self, hud: Hud.Hud, hand_id: str) -> None:
         """Compute table-scope stats once per hand and cache them on the hud.
@@ -1103,7 +1309,7 @@ class HudMain(QObject):
         logged and leave stat_dict unchanged.
         """
         try:
-            positions = self.db_connection.get_hand_positions(hand_id)
+            positions = self._hand_positions(hand_id)
         except Exception:
             log.exception("could not load positions for hand %s", hand_id)
             return
@@ -1126,7 +1332,7 @@ class HudMain(QObject):
         the button can't be found so the caller falls back to the imported one.
         """
         try:
-            seat_players = self.db_connection.get_seat_players(hand_id)
+            seat_players = self._seat_players(hand_id)
         except Exception:
             return
         if len(seat_players) < 2:
@@ -1251,25 +1457,27 @@ class HudMain(QObject):
             log.exception("Error creating HUD for hand %s.", args.new_hand_id)
 
     def idle_update(self, new_hand_id: str, table_name: str, config: Configuration.Config) -> None:
-        """Handle the idle update event."""
-        aux_index = -1
+        """Show a new hand on one table.
+
+        Hud.update owns the new-hand cycle: it rebuilds the hand, re-reads the
+        cards, and refreshes every aux window, keeping one failing window from
+        stopping the rest. This used to refresh them a second time afterwards,
+        which drew each of them twice -- and for the mucked-cards windows that
+        is not merely wasted work, since theirs appends a row to the list and
+        re-shows the cards, so every hand was replayed to the player.
+        """
         try:
             log.debug("idle_update entered for %s %s", table_name, new_hand_id)
-            self.hud_dict[table_name].update(new_hand_id, config)
-            log.debug("idle_update update_gui %s", new_hand_id)
-            for aux_index, aw in enumerate(self.hud_dict[table_name].aux_windows):
-                aw.update_gui(new_hand_id)
-            hud_trace("idle_update OK: table=%s hand=%s aux_windows=%d", table_name, new_hand_id, aux_index + 1)
-        except Exception:
-            log.exception(
-                "Error updating HUD for hand %s (table=%s, failing aux_window index=%d, class=%s).",
-                new_hand_id,
+            hud = self.hud_dict[table_name]
+            hud.update(new_hand_id, config)
+            hud_trace(
+                "idle_update OK: table=%s hand=%s aux_windows=%d",
                 table_name,
-                aux_index,
-                type(self.hud_dict[table_name].aux_windows[aux_index]).__name__
-                if 0 <= aux_index < len(self.hud_dict[table_name].aux_windows)
-                else "?",
+                new_hand_id,
+                len(hud.aux_windows),
             )
+        except Exception:
+            log.exception("Error updating HUD for hand %s (table=%s).", new_hand_id, table_name)
 
 
 if __name__ == "__main__":
