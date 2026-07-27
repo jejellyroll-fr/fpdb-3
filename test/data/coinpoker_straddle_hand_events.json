@@ -1,0 +1,252 @@
+[
+  [
+    "game.pre_hand_start_info",
+    "97900600418",
+    {
+      "gameId": 97900600418,
+      "dealerSeatId": 1,
+      "sbSeatId": 2,
+      "bbSeatId": 3,
+      "anteAmount": 0.0,
+      "sbAmount": 0.01,
+      "bbAmount": 0.02,
+      "initTimeStamp": "1785138120858"
+    }
+  ],
+  [
+    "game.seatInfo",
+    "97900600418",
+    {
+      "seatResponseDataList": [
+        {
+          "seatId": 1,
+          "userChips": 12.57,
+          "betAmout": 0,
+          "userName": "Straddler"
+        },
+        {
+          "seatId": 2,
+          "userChips": 0.78,
+          "betAmout": 0,
+          "userName": "SmallBlind"
+        },
+        {
+          "seatId": 3,
+          "userChips": 2.87,
+          "betAmout": 0,
+          "userName": "BigBlindWinner"
+        }
+      ],
+      "isGameStarted": true,
+      "initTimeStamp": "1785138120859"
+    }
+  ],
+  [
+    "game.seat",
+    "97900600418",
+    {
+      "seatId": 1,
+      "caption": "Straddle",
+      "newCaption": "Straddle",
+      "userChips": 12.53,
+      "betAmout": 0.04,
+      "userName": "Straddler",
+      "lastAction": "Straddle",
+      "isPlaying": true,
+      "initTimeStamp": "1785138121492"
+    }
+  ],
+  [
+    "game.game_start",
+    "97900600418",
+    {
+      "dealerSeatId": 1,
+      "smallBlindSeatId": 2,
+      "bigBlindSeatId": 3,
+      "straddleSeatId": 1,
+      "initTimeStamp": "1785138121794"
+    }
+  ],
+  [
+    "game.dealer_chat",
+    "97900600418",
+    {
+      "dealerMessage": "SmallBlind My Hole Cards 10S 8C 7C 2D ",
+      "initTimeStamp": "1785138121796"
+    }
+  ],
+  [
+    "game.hole_cards",
+    "97900600418",
+    {
+      "holeCards": [
+        {"suit": "SPADES", "value": "TEN"},
+        {"suit": "CLUBS", "value": "EIGHT"},
+        {"suit": "CLUBS", "value": "SEVEN"},
+        {"suit": "DIAMONDS", "value": "TWO"}
+      ],
+      "areCardsDealtAlready": false,
+      "initTimeStamp": "1785138121796"
+    }
+  ],
+  [
+    "game.dealer_chat_action",
+    "97900600418",
+    {
+      "gameActionMessagesHistory": [
+        {
+          "username": "SmallBlind",
+          "action": "SB",
+          "newPlayerAction": "SB",
+          "actionAmount": 0.01,
+          "roundName": "ANTE",
+          "initTimestamp": 1785138121
+        },
+        {
+          "username": "BigBlindWinner",
+          "action": "BB",
+          "newPlayerAction": "BB",
+          "actionAmount": 0.02,
+          "roundName": "ANTE",
+          "initTimestamp": 1785138121
+        },
+        {
+          "username": "Straddler",
+          "action": "STRADDLE",
+          "newPlayerAction": "STRADDLE",
+          "actionAmount": 0.04,
+          "roundName": "ANTE",
+          "initTimestamp": 1785138121
+        },
+        {
+          "username": "SmallBlind",
+          "action": "FOLD",
+          "newPlayerAction": "FOLD",
+          "actionAmount": 0,
+          "roundName": "PREFLOP",
+          "initTimestamp": 1785138144
+        },
+        {
+          "username": "BigBlindWinner",
+          "action": "CALL",
+          "newPlayerAction": "CALL",
+          "actionAmount": 0.02,
+          "roundName": "PREFLOP",
+          "initTimestamp": 1785138153
+        },
+        {
+          "username": "Straddler",
+          "action": "CHECK",
+          "newPlayerAction": "CHECK",
+          "actionAmount": 0,
+          "roundName": "PREFLOP",
+          "initTimestamp": 1785138155
+        },
+        {
+          "username": "BigBlindWinner",
+          "action": "RAISE",
+          "newPlayerAction": "BET",
+          "actionAmount": 0.07,
+          "roundName": "FLOP",
+          "initTimestamp": 1785138163
+        },
+        {
+          "username": "Straddler",
+          "action": "CALL",
+          "newPlayerAction": "CALL",
+          "actionAmount": 0.07,
+          "roundName": "FLOP",
+          "initTimestamp": 1785138169
+        },
+        {
+          "username": "BigBlindWinner",
+          "action": "CHECK",
+          "newPlayerAction": "CHECK",
+          "actionAmount": 0,
+          "roundName": "TURN",
+          "initTimestamp": 1785138177
+        },
+        {
+          "username": "Straddler",
+          "action": "RAISE",
+          "newPlayerAction": "BET",
+          "actionAmount": 0.17,
+          "roundName": "TURN",
+          "initTimestamp": 1785138179
+        },
+        {
+          "username": "BigBlindWinner",
+          "action": "CALL",
+          "newPlayerAction": "CALL",
+          "actionAmount": 0.17,
+          "roundName": "TURN",
+          "initTimestamp": 1785138192
+        },
+        {
+          "username": "BigBlindWinner",
+          "action": "CHECK",
+          "newPlayerAction": "CHECK",
+          "actionAmount": 0,
+          "roundName": "RIVER",
+          "initTimestamp": 1785138194
+        },
+        {
+          "username": "Straddler",
+          "action": "CHECK",
+          "newPlayerAction": "CHECK",
+          "actionAmount": 0,
+          "roundName": "RIVER",
+          "initTimestamp": 1785138195
+        }
+      ],
+      "initTimeStamp": "1785138195607"
+    }
+  ],
+  [
+    "game.dealer_cards",
+    "97900600418",
+    {
+      "dealerCards": {
+        "FLOP": [
+          {"suit": "CLUBS", "value": "KING"},
+          {"suit": "DIAMONDS", "value": "SIX"},
+          {"suit": "DIAMONDS", "value": "FOUR"}
+        ],
+        "TURN": [{"suit": "DIAMONDS", "value": "ACE"}],
+        "RIVER": [{"suit": "DIAMONDS", "value": "JACK"}]
+      },
+      "dealerCardsRit": {},
+      "dealerCardsRit2": {},
+      "dealerCardsDoubleBoard": {},
+      "initTimeStamp": "1785138192386"
+    }
+  ],
+  [
+    "game.winnerInfo",
+    "97900600418",
+    {
+      "rit": false,
+      "doubleBoard": false,
+      "handType": "DEFAULT",
+      "winnerDataList": [
+        {
+          "potId": 0,
+          "potAmount": 0.57,
+          "potAmountAfterRake": 0.54,
+          "winnerDetails": {
+            "winnerList": [
+              {
+                "playerName": "BigBlindWinner",
+                "winAmountFromPot": 0.54,
+                "actualWinAmount": 0.26,
+                "seatId": 3,
+                "isInsured": false
+              }
+            ]
+          }
+        }
+      ],
+      "initTimeStamp": "1785138196300"
+    }
+  ]
+]

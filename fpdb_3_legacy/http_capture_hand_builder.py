@@ -71,6 +71,7 @@ ACTION_METHOD_BY_TYPE = {
     "ante": "addAnte",
     "small blind": "addBlind",
     "big blind": "addBlind",
+    "straddle": "addBlind",
     "secondsb": "addBlind",
     "both": "addBlind",
     "calls": "addCall",
