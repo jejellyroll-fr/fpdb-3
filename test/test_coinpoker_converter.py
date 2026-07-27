@@ -181,7 +181,7 @@ def test_nested_tournament_event_is_detected() -> None:
             {"commonTournamentResponseData": {"TournamentId": 77, "TournamentName": "Sunday MTT"}},
         ),
     ]
-    assert _tournament_info(events)["tour_no"] == "77"
+    assert _tournament_info(events, table_id="914265")["tour_no"] == "77"
 
 
 def test_tournament_context_before_first_hand_is_preserved() -> None:
@@ -780,3 +780,318 @@ def test_a_cash_hand_still_reports_its_table_size() -> None:
     hand = _hand("91426500343")
 
     assert MIN_TABLE_SEATS <= hand["gametype"]["maxSeats"] <= MAX_TABLE_SEATS
+
+
+# --- staying on the same tournament across a table move ------------------------
+#
+# The room says which tournament a table belongs to when the table is joined,
+# and says it again when the player is moved. Nothing else identifies it: a
+# hand that has to fall back names itself after its own table, which changes
+# with the move, and the HUD then builds a second window for what it reads as
+# a second tournament.
+#
+# The shapes below are taken from a captured tournament. roomProperties.id is
+# the tournament; parentTournamentId is a level above and is the id of a
+# *different* tournament -- the parent of one step is the step below it.
+
+from fpdb_3_legacy.coinpoker_hand_builder import TOURNAMENT_JOIN_EVENT
+
+
+def _join(table: str, tournament: str, name: str = "Step [3] to 565 Main Event [1E]", parent: str = "81498") -> tuple:
+    return (
+        TOURNAMENT_JOIN_EVENT,
+        None,
+        {
+            "tableName": f"{name} {table}",
+            "previousTableName": None,
+            "roomProperties": {"id": tournament, "parentTournamentId": parent, "tournamentName": name},
+        },
+    )
+
+
+def _at_table(events: list[tuple], table: str) -> list[tuple]:
+    """The same hand, played at `table`."""
+    hid = f"{table}00001"
+    return [(name, hid if h else h, data) for name, h, data in events]
+
+
+def test_the_tournament_is_the_one_the_room_named_on_joining() -> None:
+    hands = build_hands([_join("1160391", "81499"), *_at_table(_load_straddle_events(), "1160391")], "PLO4")
+
+    assert hands[0]["tournament"]["tour_no"] == "81499"
+
+
+def test_the_parent_tournament_is_not_taken_for_the_tournament() -> None:
+    """The parent of one step is the id of the step below it.
+
+    Reading it would file two tournaments as one, and the places of the second
+    would land on the players of the first.
+    """
+    hands = build_hands([_join("1160391", "81499", parent="81498"), *_at_table(_load_straddle_events(), "1160391")], "PLO4")
+
+    assert hands[0]["tournament"]["tour_no"] != "81498"
+
+
+def test_a_table_move_keeps_the_tournament_number() -> None:
+    """The reported failure: two HUDs after being moved."""
+    events = _load_straddle_events()
+    carried: list[tuple] = []
+
+    first = build_hands([_join("1160391", "81499"), *_at_table(events, "1160391")], "PLO4", session_context=carried)
+    moved = build_hands([_join("1160377", "81499"), *_at_table(events, "1160377")], "PLO4", session_context=carried)
+
+    assert first[0]["tournament"]["tour_no"] == moved[0]["tournament"]["tour_no"] == "81499"
+    assert first[0]["table_id"] != moved[0]["table_id"]
+
+
+def test_a_batch_after_the_join_still_knows_the_tournament() -> None:
+    events = _load_straddle_events()
+    carried: list[tuple] = []
+
+    build_hands([_join("1160391", "81499")], "PLO4", session_context=carried)
+    later = build_hands(_at_table(events, "1160391"), "PLO4", session_context=carried)
+
+    assert later[0]["tournament"]["tour_no"] == "81499"
+
+
+def test_two_tournaments_played_at_once_stay_apart() -> None:
+    """A capture carries every table, so one identity for the session is wrong."""
+    events = _load_straddle_events()
+    carried: list[tuple] = []
+
+    build_hands([_join("1160391", "81499"), _join("1161142", "81498", name="Step [2] to 565 Main Event [1E]")],
+                "PLO4", session_context=carried)
+    step3 = build_hands(_at_table(events, "1160391"), "PLO4", session_context=carried)
+    step2 = build_hands(_at_table(events, "1161142"), "PLO4", session_context=carried)
+
+    assert step3[0]["tournament"]["tour_no"] == "81499"
+    assert step2[0]["tournament"]["tour_no"] == "81498"
+
+
+def test_a_table_nobody_joined_is_a_ring_game() -> None:
+    """A ring table played alongside a tournament stays a ring table.
+
+    Not merely "a different tournament number": a hand wrongly read as a
+    tournament has its chips stored as tournament chips, joins a tournament
+    that was never played, and shows up in tournament results.
+    """
+    events = _load_straddle_events()
+    carried: list[tuple] = []
+
+    build_hands([_join("1160391", "81499")], "PLO4", session_context=carried)
+    (elsewhere,) = build_hands(_at_table(events, "981279"), "PLO4", session_context=carried)
+
+    assert elsewhere["tournament"] is None
+    assert elsewhere["gametype"]["type"] == "ring"
+    assert elsewhere["gametype"]["currency"] == "USD"
+
+
+def test_the_tournament_port_does_not_make_a_ring_table_a_tournament() -> None:
+    """The lobby connection is the capture's, not the table's.
+
+    Every event off the tournament port carries it, and those events name no
+    table, so a capture watching a tournament lobby while a ring game is on
+    would otherwise read the port as proof that the ring table is a
+    tournament -- the same leak as the generic markers, through the one
+    marker that is a property of the socket rather than of the hand.
+    """
+    events = _load_straddle_events()
+    lobby = ("tournamentlobby.info", None, {"_coinpokerServerPort": 3001})
+
+    (elsewhere,) = build_hands([lobby, *_at_table(events, "981279")], "PLO4")
+
+    assert elsewhere["tournament"] is None
+    assert elsewhere["gametype"]["type"] == "ring"
+    assert elsewhere["gametype"]["currency"] == "USD"
+
+
+def test_a_carried_tournament_id_does_not_reach_another_table() -> None:
+    """The lobby says "tournament 77" without saying whose table.
+
+    It travels with every hand of the capture, so read as a number it would
+    file a ring game's hands under a tournament that was never played -- and,
+    between two tournaments, put one's hands under the other's number. Only
+    the join names a table, and a table-less marker is read only when there
+    is a single table for it to be about.
+    """
+    events = _load_straddle_events()
+    lobby = (
+        "game.tournament_message",
+        None,
+        {"commonTournamentResponseData": {"TournamentId": 77, "TournamentName": "Sunday MTT"}},
+    )
+
+    hands = build_hands(
+        [lobby, *_at_table(events, "1160391"), *_at_table(events, "981279")],
+        "PLO4",
+    )
+
+    by_table = {hand["tournament"]["table_id"] if hand["tournament"] else None: hand for hand in hands}
+    assert by_table[None]["gametype"]["type"] == "ring"
+    assert by_table[None]["gametype"]["currency"] == "USD"
+    assert "77" not in {(hand["tournament"] or {}).get("tour_no") for hand in hands}
+
+
+def test_a_lone_hand_in_a_sweep_is_not_a_lone_table() -> None:
+    """Most sweeps hold one hand, whatever is being played.
+
+    The capture re-reads its buffer every twenty events, so a batch carrying a
+    single table is the normal case, not evidence that the capture has one.
+    Deciding on the batch let a carried marker name the tournament of whatever
+    hand happened to be alone in that sweep -- a ring hand included.
+    """
+    events = _load_straddle_events()
+    lobby = (
+        "game.tournament_message",
+        None,
+        {"commonTournamentResponseData": {"TournamentId": 77, "TournamentName": "Sunday MTT"}},
+    )
+    carried: list[tuple] = []
+    tables: set[str] = set()
+
+    # Sweep one: the tournament table, and the marker arrives with it.
+    build_hands([lobby, *_at_table(events, "1160391")], "PLO4", session_context=carried, session_tables=tables)
+    # Sweep two: a ring hand, alone in its batch.
+    (elsewhere,) = build_hands(
+        _at_table(events, "981279"),
+        "PLO4",
+        session_context=carried,
+        session_tables=tables,
+    )
+
+    assert elsewhere["tournament"] is None
+    assert elsewhere["gametype"]["type"] == "ring"
+    assert elsewhere["gametype"]["currency"] == "USD"
+
+
+def test_a_carried_tournament_id_still_names_a_lone_table() -> None:
+    # The control: with one table there is nothing for the marker to be
+    # confused with, and a room that never sends a join still has its
+    # tournament recognised.
+    events = _load_straddle_events()
+    lobby = (
+        "game.tournament_message",
+        None,
+        {"commonTournamentResponseData": {"TournamentId": 77, "TournamentName": "Sunday MTT"}},
+    )
+
+    (alone,) = build_hands([lobby, *_at_table(events, "1160391")], "PLO4")
+
+    assert alone["tournament"]["tour_no"] == "77"
+
+
+def test_the_joined_table_is_still_a_tournament_alongside_it() -> None:
+    # The control: the same context must not stop the joined table being one.
+    events = _load_straddle_events()
+    carried: list[tuple] = []
+
+    build_hands([_join("1160391", "81499")], "PLO4", session_context=carried)
+    (joined,) = build_hands(_at_table(events, "1160391"), "PLO4", session_context=carried)
+
+    assert joined["tournament"]["tour_no"] == "81499"
+    assert joined["gametype"]["type"] == "tour"
+    assert joined["gametype"]["currency"] == "T$"
+
+
+def test_rejoining_a_table_replaces_what_it_was_told_before() -> None:
+    events = _load_straddle_events()
+    carried: list[tuple] = []
+
+    build_hands([_join("1160391", "81499")], "PLO4", session_context=carried)
+    build_hands([_join("1160391", "90000")], "PLO4", session_context=carried)
+    hands = build_hands(_at_table(events, "1160391"), "PLO4", session_context=carried)
+
+    assert hands[0]["tournament"]["tour_no"] == "90000"
+    assert len(carried) == 1
+
+
+def test_a_capture_given_no_list_still_reads_its_own_batch() -> None:
+    hands = build_hands([_join("1160391", "81499"), *_at_table(_load_straddle_events(), "1160391")], "PLO4")
+
+    assert hands[0]["tournament"]["tour_no"] == "81499"
+
+
+def test_naming_a_hand_after_its_table_is_logged(caplog) -> None:
+    # A tournament that never named itself: the table's number stands in, and
+    # that leaves the HUD identity unstable, so it is not silent.
+    events = _load_straddle_events()
+    hid = "116039100001"
+    nameless = [("game.tournament_state", hid, {"level": 3}), *_at_table(events, "1160391")]
+
+    with caplog.at_level(logging.WARNING):
+        hands = build_hands(nameless, "PLO4")
+
+    assert hands[0]["tournament"]["tour_no"] == "1160391"
+    assert "1160391" in caplog.text
+
+
+# --- where everyone finished ---------------------------------------------------
+#
+# The room announces the finishing places once the tournament closes, in an
+# event of its own carrying no hand id, after the last hand has been played.
+# The shapes below are taken from a captured tournament: a satellite paying 35
+# places, every one of them a seat in another tournament rather than money.
+
+from fpdb_3_legacy.coinpoker_hand_builder import TOURNAMENT_RESULT_EVENT, tournament_results
+
+
+def _winner_event(*winners: dict) -> tuple:
+    return (TOURNAMENT_RESULT_EVENT, None, {"winnerList": list(winners), "initTimeStamp": "1785155715131"})
+
+
+def _winner(rank: int, name: str, prize: str = "Ticket") -> dict:
+    return {
+        "rank": rank,
+        "name": name,
+        "prize": prize,
+        "coinTypeId": 8,
+        "playerId": 166755,
+        "dealMakingAccepted": False,
+        "isPlayerBubbleProtected": False,
+        "bountyAmount": "0",
+    }
+
+
+def test_the_finishing_places_are_read() -> None:
+    events = [_winner_event(_winner(1, "jeje1976"), _winner(2, "Alisey"))]
+
+    assert [(r["player"], r["rank"]) for r in tournament_results(events)] == [("jeje1976", 1), ("Alisey", 2)]
+
+
+def test_what_was_won_is_named_rather_than_valued() -> None:
+    """Only the place is reported, whatever the prize looks like.
+
+    fpdb stores winnings as an integer number of cents in a named currency,
+    and nothing in the capture says what a number here would be denominated
+    in. A wrong unit reads as a real result; no number reads as no number.
+    """
+    (ticket,) = tournament_results([_winner_event(_winner(1, "jeje1976", prize="Ticket"))])
+    (money,) = tournament_results([_winner_event(_winner(1, "jeje1976", prize="565.50"))])
+
+    assert ticket == {"player": "jeje1976", "rank": 1, "prize": "Ticket"}
+    assert money == {"player": "jeje1976", "rank": 1, "prize": "565.50"}
+    assert "winnings" not in ticket
+
+
+def test_an_entry_without_a_place_is_skipped() -> None:
+    events = [_winner_event({"name": "jeje1976"}, _winner(2, "Alisey"))]
+
+    assert [r["player"] for r in tournament_results(events)] == ["Alisey"]
+
+
+def test_an_entry_without_a_name_is_skipped() -> None:
+    events = [_winner_event(_winner(1, ""), _winner(2, "Alisey"))]
+
+    assert [r["player"] for r in tournament_results(events)] == ["Alisey"]
+
+
+def test_a_stream_that_never_announces_anything_reports_nothing() -> None:
+    assert tournament_results(_load_straddle_events()) == []
+
+
+def test_hands_and_places_are_read_from_the_same_stream() -> None:
+    # The announcement carries no hand id, so it must not disturb the hands.
+    events = [*_load_straddle_events(), _winner_event(_winner(1, "jeje1976"))]
+
+    assert len(build_hands(events, "PLO4")) == 1
+    assert len(tournament_results(events)) == 1

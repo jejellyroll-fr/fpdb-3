@@ -1317,3 +1317,63 @@ def test_a_table_skipped_rather_than_updated_is_still_refreshed(hud_main) -> Non
         hud_main._drain_pending_hands()
 
     secondary.assert_called_once_with("h-earlier", "table-a", "ring", 1, 6)
+
+
+# --- a tournament table the player was moved away from ------------------------
+
+
+def _tour_hud(table_key: str) -> MagicMock:
+    hud = MagicMock()
+    hud.table.key = table_key
+    return hud
+
+
+def test_the_window_of_the_table_left_behind_is_taken_down(hud_main) -> None:
+    hud_main.hud_dict = {"1160377 Table 4": _tour_hud("1160377 Table 4")}
+
+    with patch.object(hud_main, "table_is_stale") as stale:
+        hud_main._handle_tournament_table_changes("tour", "1160377 Table 9", "1160377")
+
+    stale.assert_called_once_with(hud_main.hud_dict["1160377 Table 4"])
+
+
+def test_another_tournament_is_left_where_it_is(hud_main) -> None:
+    hud_main.hud_dict = {"81498 Table 4": _tour_hud("81498 Table 4")}
+
+    with patch.object(hud_main, "table_is_stale") as stale:
+        hud_main._handle_tournament_table_changes("tour", "1160377 Table 9", "1160377")
+
+    assert not stale.called
+
+
+def test_a_tournament_whose_number_merely_starts_the_same_is_left_alone(hud_main) -> None:
+    """A prefix match made tournament 116 the same as 1160391."""
+    hud_main.hud_dict = {"1160391 Table 4": _tour_hud("1160391 Table 4")}
+
+    with patch.object(hud_main, "table_is_stale") as stale:
+        hud_main._handle_tournament_table_changes("tour", "116 Table 9", "116")
+
+    assert not stale.called
+
+
+def test_every_table_of_the_tournament_left_behind_is_taken_down(hud_main) -> None:
+    # Re-entry tournaments can leave more than one behind.
+    hud_main.hud_dict = {
+        "1160377 Table 4": _tour_hud("1160377 Table 4"),
+        "1160377 Table 7": _tour_hud("1160377 Table 7"),
+        "81498 Table 1": _tour_hud("81498 Table 1"),
+    }
+
+    with patch.object(hud_main, "table_is_stale") as stale:
+        hud_main._handle_tournament_table_changes("tour", "1160377 Table 9", "1160377")
+
+    assert stale.call_count == 2
+
+
+def test_a_ring_table_is_never_treated_as_a_move(hud_main) -> None:
+    hud_main.hud_dict = {"some table": _tour_hud("some table")}
+
+    with patch.object(hud_main, "table_is_stale") as stale:
+        assert hud_main._handle_tournament_table_changes("ring", "some other table", "") is False
+
+    assert not stale.called

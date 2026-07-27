@@ -789,7 +789,10 @@ class HudMain(QObject):
                 return True
         else:
             for k in list(self.hud_dict.keys()):
-                if k.startswith(tour_number):
+                # The key of a tournament HUD is "<tournament> Table <n>", so
+                # the tournament is compared whole. A prefix match made
+                # tournament 116 the same as 1160391.
+                if k.split(" Table ", 1)[0] == tour_number:
                     log.debug("check if the tournament number is in the hud_dict under a different table")
                     self.table_is_stale(self.hud_dict[k])
                     # continue checking other tables

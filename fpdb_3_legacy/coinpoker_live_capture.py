@@ -45,7 +45,11 @@ import re
 import sys
 from collections.abc import Iterable, Iterator
 
-from fpdb_3_legacy.coinpoker_hand_builder import build_hands
+from fpdb_3_legacy.coinpoker_hand_builder import (
+    build_hands,
+    joined_tournaments,
+    tournament_result_announcements,
+)
 from fpdb_3_legacy.coinpoker_protocol import decode_frame
 from fpdb_3_legacy.Exceptions import FpdbHandDuplicate
 from fpdb_3_legacy.http_capture_hand_builder import (
@@ -95,6 +99,20 @@ class RawEventArchive:
 
 
 COINPOKER_SITE_ID = 140
+# How many sweeps a player's place is offered before the absence of a row for
+# them is taken as final rather than as something still on its way.
+MAX_RESULT_ATTEMPTS = 3
+# What it takes for the announced players to name one tournament rather than
+# another: several of them at that tournament, and clearly more than anywhere
+# else. One shared regular says nothing, and a lead of one is not a lead.
+MIN_CORRELATED_PLAYERS = 2
+CORRELATION_MARGIN = 2
+# What has become of an announcement: waiting to be tied to a tournament, tied
+# to one, answered in full, or tied to none and closed unanswered.
+UNASSIGNED = "unassigned"
+ASSIGNED = "assigned"
+SETTLED = "settled"
+REJECTED = "rejected"
 # CoinPoker game servers: TCP 9000 (poker cluster) plus a per-table 70xx range
 # (7001, 7002, ... vary by table), so match the whole range rather than fixed ports.
 GAME_PORTS = ("3000", "3001", "9000", "7002")  # see _is_game_port / BPF_FILTER
@@ -359,6 +377,32 @@ class HandPump:
         self.notify = notify  # ZMQSender to ping HUD_main after each import
         self.imported: set[str] = set()
         self.failed: set[str] = set()
+        # The room announces the tournament once, when the table is joined.
+        # Holding the announcement here keeps every later batch on the same
+        # tournament instead of each naming itself after its own table.
+        self._session_context: list[tuple] = []
+        # Tournaments the room has said this capture is playing, by table.
+        self._tournaments_by_table: dict[str, str] = {}
+        # Who was seen playing which tournament. The closing announcement names
+        # only players, so this is what tells us which tournament it closes.
+        self._players_by_tournament: dict[str, set[str]] = {}
+        # The tables this capture has dealt hands at. Whether a marker naming
+        # no table is ambiguous is a fact about the capture, not about the
+        # twenty events of one sweep.
+        self._session_tables: set[str] = set()
+        # One entry per closing announcement, each with its own tournament and
+        # its own tally of who has been filed. They are held here rather than
+        # left in the event buffer: an announcement is answered over several
+        # sweeps, so it must outlive the events it arrived on -- and two of
+        # them left in the buffer together were read as one roll of names.
+        self._pending_results: list[dict] = []
+        # Every announcement this capture has taken, answered or not, so one
+        # already dealt with is not picked up again from a later sweep.
+        self._announcements_seen: set[frozenset] = set()
+        # How many times each player's place has been attempted, so a player
+        # with no entry to write on stops being re-queried on every sweep for
+        # the rest of the run.
+        self._result_attempts: dict[str, dict[str, int]] = {}
         # A live capture has no source file: once a hand is imported the packets
         # are gone, so nothing could be checked against the room afterwards (the
         # hand text is not stored in the database either -- Hands has no text
@@ -395,9 +439,222 @@ class HandPump:
         if not hand_data.get("timestamp"):
             hand_data["timestamp"] = datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)
 
+    def _remember_tournaments(self, events: list[tuple]) -> None:
+        """Note which tournament each joined table belongs to."""
+        for table, (tour_no, _name) in joined_tournaments(events).items():
+            self._tournaments_by_table[table] = tour_no
+
+    def _remember_tournament_players(self, hand_data: dict) -> None:
+        """Note who was seen playing which tournament.
+
+        This is what later ties a closing announcement to a tournament: the
+        announcement names players, and the players are the only thing it and
+        the tournament's hands have in common.
+        """
+        tournament = hand_data.get("tournament")
+        if not tournament:
+            return
+        seated = self._players_by_tournament.setdefault(tournament["tour_no"], set())
+        seated.update(player["name"] for player in hand_data.get("players", ()))
+
+    def _the_tournament_being_finished(self, results: list[dict]) -> str | None:
+        """The tournament a closing announcement belongs to, when it is certain.
+
+        The announcement names neither a tournament nor a table, only players,
+        so they are what identifies it: the tournament these people were
+        actually playing is the one finishing. Counting the tournaments known
+        would not do -- with one on the books the count is right whether or not
+        the announcement is that tournament's, and a capture that played two in
+        a row has two long after the first has ended. Filing a place on the
+        wrong tournament is worse than not filing it: it would land on someone
+        else's entry and read as a real result.
+
+        Sharing a player is not enough either: regulars turn up in several of
+        an evening's tournaments, and a real announcement of 35 places was
+        found to brush against three of them -- on 9, 3 and 2 shared players.
+        Nor is simply sharing the most of them, which 3 against 2 would win on
+        a single regular's whim. The tournament has to be the obvious answer:
+        it must share several of the announced players, and clearly more of
+        them than any other tournament of the capture. Anything closer is a
+        coincidence being read as a correlation, and it is not filed.
+
+        What this cannot rule out is an announcement for a tournament none of
+        whose hands were captured, whose entire table also played one that
+        was. Nothing in the announcement distinguishes that case, so a place
+        stays only as good as having seen the tournament played.
+        """
+        announced = {result["player"] for result in results}
+        overlaps = sorted(
+            ((len(announced & seated), tour_no) for tour_no, seated in self._players_by_tournament.items()),
+            reverse=True,
+        )
+        shared, best = overlaps[0] if overlaps else (0, None)
+        runner_up = overlaps[1][0] if len(overlaps) > 1 else 0
+        if shared >= MIN_CORRELATED_PLAYERS and shared >= runner_up * CORRELATION_MARGIN:
+            return best
+        if not shared:
+            print("[WARN] tournament results announced for players seen in no tournament of this capture; not filed")
+        else:
+            print(
+                f"[WARN] tournament results announced share {shared} player(s) with one tournament "
+                f"and {runner_up} with another; too close to tell them apart, not filed",
+            )
+        return None
+
+    def _write_one_place(self, tour_no: str, result: dict, given_up: set[str]) -> str | None:
+        """File one player's place in its own transaction, returning their name.
+
+        One place, one transaction. Holding a whole sweep open instead would
+        make every place hostage to the worst of them: a statement that raises
+        leaves the transaction aborted on PostgreSQL, so each later place in
+        the sweep fails too and the closing commit writes nobody -- while the
+        error names only the first player, so the log reads as one casualty.
+        Committing per player also keeps a place durable the moment it lands,
+        and marked only once its own commit has returned.
+        """
+        player = result["player"]
+        attempts = self._result_attempts.setdefault(tour_no, {})
+        attempts[player] = attempts.get(player, 0) + 1
+        try:
+            # The place only. What was won is a label ("Ticket"), and writing a
+            # number in an unproven unit or currency would read as a real
+            # result; the update coalesces, so the winnings column is left as
+            # it was.
+            found = self.db.updateTourneyPlayerResult("CoinPoker", tour_no, player, result["rank"])
+            if found:
+                self.db.commit()
+        except Exception as exc:  # noqa: BLE001 - one player must not lose the rest
+            # Undo whatever this player's statement left behind, so the next
+            # one starts on a transaction the database will still accept.
+            with contextlib.suppress(Exception):
+                self.db.rollback()
+            print(f"[WARN] could not record {player} in tournament {tour_no}: {exc}")
+            return None
+        if found:
+            return player
+        # Nothing was written, but the read opened a transaction; leaving it
+        # hanging would hold locks for the rest of the run.
+        with contextlib.suppress(Exception):
+            self.db.rollback()
+        if attempts[player] >= MAX_RESULT_ATTEMPTS:
+            # No row for this player, and the announcement only arrives once
+            # the last hand has been played -- so a player still absent after
+            # several sweeps was never dealt in at a table we captured, and no
+            # amount of retrying will conjure the row. Left in, they would be
+            # re-queried on every sweep for the rest of the run, which for a
+            # table of strangers is most of the announcement.
+            given_up.add(player)
+            print(f"[WARN] tournament {tour_no}: {player} has no entry to record a place on; giving up")
+        return None
+
+    def _take_announcements(self, events: list[tuple]) -> None:
+        """Hold each closing announcement seen, once, as its own piece of work.
+
+        Taking them out of the stream is what lets the buffer be pruned: an
+        announcement is answered over several sweeps, so it has to outlive the
+        events it arrived on -- and while it stayed among them, the next
+        tournament's announcement was read together with it as one roll of
+        names belonging to nobody.
+        """
+        for places in tournament_result_announcements(events):
+            seen = frozenset((place["player"], place["rank"]) for place in places)
+            if seen in self._announcements_seen:
+                continue
+            self._announcements_seen.add(seen)
+            self._pending_results.append(
+                {
+                    "places": places,
+                    "done": set(),
+                    "given_up": set(),
+                    "tour_no": None,
+                    "state": UNASSIGNED,
+                    "tries": 0,
+                },
+            )
+
+    def record_tournament_results(self, events: list[tuple]) -> int:
+        """Store where each paid player finished, once the room announces it.
+
+        The announcement arrives after the last hand, so it cannot ride in on
+        one: the places are written straight onto the tournament's players.
+        Each announcement is answered on its own -- an evening holds more than
+        one tournament, and the second's places are not the first's.
+        Returns how many were recorded.
+        """
+        self._remember_tournaments(events)
+        self._take_announcements(events)
+        if self.db is None or self.dry_run:
+            return 0
+        filed = sum(self._file_announcement(pending) for pending in self._pending_results)
+        # An announcement that has been answered, one way or the other, is not
+        # work any more. Dropping it keeps the sweep proportional to what is
+        # still outstanding rather than to everything the room has ever said.
+        self._pending_results = [
+            pending for pending in self._pending_results if pending["state"] not in (SETTLED, REJECTED)
+        ]
+        return filed
+
+    def _assign_tournament(self, pending: dict) -> str | None:
+        """Name the tournament this announcement closes, once and for good.
+
+        Answered once because the two wrong answers are symmetrical: an
+        announcement half filed must not move to another tournament, and one
+        that could not be placed must not be picked up later by a tournament
+        that happens to seat those players. The lobby broadcasts the results
+        of tournaments this capture never played -- a real one carried twenty
+        such places -- and left waiting they would land on the next tournament
+        to come along. A few sweeps are allowed for hands still being
+        imported; after that the refusal is the answer.
+        """
+        if pending["state"] != UNASSIGNED:
+            return pending["tour_no"]
+        pending["tries"] += 1
+        tour_no = self._the_tournament_being_finished(pending["places"])
+        if tour_no is not None:
+            pending["tour_no"], pending["state"] = tour_no, ASSIGNED
+        elif pending["tries"] >= MAX_RESULT_ATTEMPTS:
+            pending["state"] = REJECTED
+            print(f"[WARN] {len(pending['places'])} announced place(s) belong to no tournament seen here; dropped")
+        return pending["tour_no"]
+
+    def _file_announcement(self, pending: dict) -> int:
+        """Write whatever of one announcement's places can still be written."""
+        places = pending["places"]
+        tour_no = self._assign_tournament(pending)
+        if tour_no is None:
+            return 0
+
+        done, given_up = pending["done"], pending["given_up"]
+        settled = done | given_up
+        outstanding = [place for place in places if place["player"] not in settled]
+        if not outstanding:
+            pending["state"] = SETTLED
+            return 0
+
+        # Each place stands on its own transaction, so one that cannot be
+        # written costs nobody else theirs, and a player is marked as filed
+        # only once their own commit has returned. Whoever is left is offered
+        # again on the next sweep rather than being taken as filed.
+        written = (self._write_one_place(tour_no, place, given_up) for place in outstanding)
+        filed = [player for player in written if player is not None]
+
+        if filed:
+            done.update(filed)
+            print(f"[IMPORTED] tournament {tour_no}: {len(filed)} finishing place(s)")
+        missing = len(places) - len(done) - len(given_up)
+        if missing:
+            print(f"[WARN] tournament {tour_no}: {missing} place(s) still unfiled; will retry")
+        return len(filed)
+
     def process(self, events: list[tuple]) -> int:
         new = 0
-        for hand_data in build_hands(events, self.table_category):
+        self._remember_tournaments(events)
+        for hand_data in build_hands(
+            events,
+            self.table_category,
+            session_context=self._session_context,
+            session_tables=self._session_tables,
+        ):
             hid = hand_data["hand_id"]
             if hid in self.imported or hid in self.failed:
                 continue
@@ -417,6 +674,7 @@ class HandPump:
             if hero and any(p[1] == hero for p in hand.players):
                 hand.hero = hero
             self.imported.add(hid)
+            self._remember_tournament_players(hand_data)
             new += 1
             if self.dry_run or self.db is None:
                 print(f"[DRY-RUN] hand #{hid} built ({len(hand.players)} players) — not inserted")
@@ -459,9 +717,18 @@ class HandPump:
             print(f"[WARN] could not write failed-hand diagnostic: {log_exc}")
 
     def prune(self, events: list[tuple]) -> list[tuple]:
-        """Drop events of already-handled (imported or failed) hands to bound memory."""
+        """Keep only the hands still being assembled.
+
+        An event naming no hand used to stay in the buffer for the rest of the
+        run, since it belonged to no hand that could be finished. The lobby
+        sends thousands of them, so the buffer only ever grew and every sweep
+        re-read all of it -- and the announcements among them accumulated
+        until two tournaments' places were read as one. What is worth keeping
+        from them has already been taken: the joins and markers into the
+        session context, the announcements into their own pending entries.
+        """
         done = self.imported | self.failed
-        return [e for e in events if e[1] not in done]
+        return [e for e in events if e[1] is not None and e[1] not in done]
 
 
 def _resolve_config_file() -> str | None:
@@ -560,8 +827,12 @@ def run(events: Iterable[tuple], *, dry_run: bool, table_category: str, config_f
         if since_check >= 20:
             since_check = 0
             pump.process(accumulated)
+            # The closing announcement arrives after the last hand, so it is
+            # read on every sweep rather than waiting for a hand to carry it.
+            pump.record_tournament_results(accumulated)
             accumulated = pump.prune(accumulated)
     pump.process(accumulated)  # final sweep (covers replay / shutdown)
+    pump.record_tournament_results(accumulated)
     print(f"[INFO] Done. Hands imported/built this run: {len(pump.imported)}")
 
 
