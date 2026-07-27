@@ -159,6 +159,33 @@ class TestHudInitialization(unittest.TestCase):
             self.mock_config.get_supported_games_parameters.assert_called_once_with("holdem", "ring")
             self.mock_config.get_layout.assert_called_once_with("PokerStars", "ring")
 
+    def test_hud_initialization_applies_matching_table_profile_override(self) -> None:
+        """A HUD restart keeps this table's profile without changing defaults."""
+        default_stat_set = Mock(name="DefaultStatSet")
+        override_stat_set = Mock(name="OverrideStatSet")
+        self.mock_table.key = "table-42"
+        self.mock_parent._table_stat_set_overrides = {
+            "table-42": ("holdem", "ring", "OverrideStatSet"),
+        }
+        self.mock_parent.get_table_stat_set_override.return_value = "OverrideStatSet"
+        self.mock_config.stat_sets = {"OverrideStatSet": override_stat_set}
+        self.mock_config.get_supported_games_parameters.return_value = {
+            "aux": "",
+            "game_stat_set": default_stat_set,
+        }
+
+        hud = Hud(
+            parent=self.mock_parent,
+            table=self.mock_table,
+            max_players=6,
+            poker_game="holdem",
+            game_type="ring",
+            config=self.mock_config,
+        )
+
+        assert hud.supported_games_parameters["game_stat_set"] is override_stat_set
+        self.mock_parent.get_table_stat_set_override.assert_called_once_with("table-42", "holdem", "ring")
+
     def test_hud_initialization_no_supported_games(self) -> None:
         """Test HUD initialization when no supported games config exists."""
         self.mock_config.get_supported_games_parameters.return_value = None

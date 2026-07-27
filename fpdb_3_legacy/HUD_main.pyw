@@ -343,6 +343,10 @@ class HudMain(QObject):
 
             # HUD dictionary and parameters
             self.hud_dict: dict[str, Hud.Hud] = {}
+            # Session-only profile choices made from an individual table menu.
+            # Values include game identity so a recycled table key cannot leak a
+            # Hold'em/PLO choice into another game.
+            self._table_stat_set_overrides: dict[str, tuple[str, str, str]] = {}
             # Last hand id processed per table. The ZMQ producer (auto-import
             # re-scanning growing files) can deliver the same Hands.id more than
             # once; this makes read_stdin idempotent so each hand refreshes the
@@ -550,6 +554,7 @@ class HudMain(QObject):
     def client_destroyed(self, _widget: QWidget | None, hud: Hud.Hud) -> None:
         """Handle the client destroyed event."""
         log.debug("Client destroyed event")
+        self.clear_table_stat_set_override(hud.table.key)
         self.kill_hud(None, hud.table.key)
 
     def table_title_changed(self, _widget: QWidget | None, hud: Hud.Hud) -> None:
@@ -576,6 +581,7 @@ class HudMain(QObject):
     def table_is_stale(self, hud: Hud.Hud) -> None:
         """Handle a stale table by killing the HUD."""
         log.debug("Moved to a new table, killing current HUD")
+        self.clear_table_stat_set_override(hud.table.key)
         self.kill_hud(None, hud.table.key)
 
     def kill_hud(self, _event: QEvent | None, table: str) -> None:
@@ -587,7 +593,35 @@ class HudMain(QObject):
         """Blacklist a HUD and kill it."""
         log.debug("blacklist_hud event")
         self.blacklist.append(self.hud_dict[table].tablenumber)
+        self.clear_table_stat_set_override(table)
         self.idle_kill(table)
+
+    def set_table_stat_set_override(
+        self,
+        table: str,
+        poker_game: str,
+        game_type: str,
+        stat_set: str,
+    ) -> None:
+        """Remember a table-local HUD profile for this capture session."""
+        if stat_set not in self.config.stat_sets:
+            raise KeyError(f"unknown stat set: {stat_set}")
+        self._table_stat_set_overrides[table] = (poker_game, game_type, stat_set)
+        log.info("Table-local HUD profile: table=%s profile=%s", table, stat_set)
+
+    def get_table_stat_set_override(self, table: str, poker_game: str, game_type: str) -> str | None:
+        """Return a compatible table-local profile override, if one exists."""
+        override = self._table_stat_set_overrides.get(table)
+        if override is None:
+            return None
+        override_game, override_type, stat_set = override
+        if (override_game, override_type) != (poker_game, game_type):
+            return None
+        return stat_set
+
+    def clear_table_stat_set_override(self, table: str) -> None:
+        """Forget the local profile when the underlying table is gone."""
+        self._table_stat_set_overrides.pop(table, None)
 
     def create_HUD(self, args: HUDCreationArgs) -> None:
         """Create a new HUD for a table."""

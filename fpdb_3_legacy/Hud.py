@@ -120,6 +120,18 @@ class Hud:
             self.poker_game,
             self.game_type,
         )
+        overrides = getattr(parent, "_table_stat_set_overrides", None)
+        if self.supported_games_parameters is not None and isinstance(overrides, dict):
+            override_name = parent.get_table_stat_set_override(
+                self.table.key,
+                self.poker_game,
+                self.game_type,
+            )
+            override_stat_set = config.stat_sets.get(override_name) if override_name else None
+            if override_stat_set is not None:
+                self.supported_games_parameters = dict(self.supported_games_parameters)
+                self.supported_games_parameters["game_stat_set"] = override_stat_set
+                log.info("Applying table-local HUD profile %s to %s", override_name, self.table.key)
         self.layout_set = config.get_layout(self.table.site, self.game_type)
 
         # Just throw error and die if any serious config issues are discovered

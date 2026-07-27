@@ -27,6 +27,14 @@ from fpdb_3_legacy.PopupThemes import PopupTheme, get_stat_color, get_theme
 log = get_logger("modern_popup")
 
 
+def resolve_popup_stat_category(pop, index: int, stat_name: str) -> str:
+    """Return a per-popup section override, falling back to automatic grouping."""
+    overrides = getattr(pop, "pu_stats_category", [])
+    if index < len(overrides) and overrides[index]:
+        return overrides[index]
+    return get_stat_category(stat_name)
+
+
 class ModernStatRow(QWidget):
     """A modern stat row with icon, name, value and visual indicators."""
 
@@ -257,9 +265,18 @@ class ModernSubmenu(Popup):
     """Modern popup window with sectioned layout and improved styling."""
 
     def __init__(self, *args, **kwargs) -> None:
-        # Extract theme from kwargs if provided
-        self.theme_name = kwargs.pop("theme", "material_dark")
-        self.icon_provider_name = kwargs.pop("icon_provider", "emoji")
+        # Explicit constructor arguments (used by the light/classic subclasses)
+        # take precedence over per-popup XML settings.
+        pop = kwargs.get("pop")
+        if pop is None and len(args) > 3:
+            pop = args[3]
+        popup_params = getattr(pop, "pu_class_params", None) or {}
+        default_theme = kwargs.pop("_default_theme", "material_dark")
+        default_icon_provider = kwargs.pop("_default_icon_provider", "emoji")
+        self.theme_name = kwargs.pop("theme", None) or popup_params.get("theme") or default_theme
+        self.icon_provider_name = (
+            kwargs.pop("icon_provider", None) or popup_params.get("icon_provider") or default_icon_provider
+        )
 
         # Initialize theme and icon provider BEFORE calling super()
         # because super().__init__() calls create() which needs these attributes
@@ -384,7 +401,7 @@ class ModernSubmenu(Popup):
         # Group stats by category
         categorized_stats = defaultdict(list)
 
-        for stat, submenu_to_run in self.pop.pu_stats_submenu:
+        for index, (stat, submenu_to_run) in enumerate(self.pop.pu_stats_submenu):
             # Get stat data
             stat_data = Stats.do_stat(
                 self.stat_dict,
@@ -394,7 +411,7 @@ class ModernSubmenu(Popup):
             )
 
             # Categorize the stat
-            category = get_stat_category(stat)
+            category = resolve_popup_stat_category(self.pop, index, stat)
             categorized_stats[category].append((stat, stat_data, submenu_to_run))
 
         # Create sections
@@ -488,7 +505,7 @@ class ModernSubmenuLight(ModernSubmenu):
     """Light theme variant of ModernSubmenu."""
 
     def __init__(self, *args, **kwargs) -> None:
-        kwargs["theme"] = "material_light"
+        kwargs["_default_theme"] = "material_light"
         super().__init__(*args, **kwargs)
 
 
@@ -496,8 +513,8 @@ class ModernSubmenuClassic(ModernSubmenu):
     """Classic theme variant of ModernSubmenu for compatibility."""
 
     def __init__(self, *args, **kwargs) -> None:
-        kwargs["theme"] = "classic"
-        kwargs["icon_provider"] = "text"
+        kwargs["_default_theme"] = "classic"
+        kwargs["_default_icon_provider"] = "text"
         super().__init__(*args, **kwargs)
 
 

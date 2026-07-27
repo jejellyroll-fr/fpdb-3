@@ -119,6 +119,18 @@ def test_saved_position_wins_over_default(aw):
     assert aw._canonical_for((3, 0)) == (12, 34)
 
 
+def test_another_tables_saved_drag_does_not_override_local_position(aw):
+    """A drag saved by table A must not reposition an already-open table B."""
+    key = (1, 1)
+    aw.block_positions[key] = (50, 114)
+
+    # The persistent HUD/layout store is shared by both tables. Simulate table
+    # A saving a newer drag after table B established its own local position.
+    aw._saved[key] = (300, 400)
+
+    assert aw._canonical_for(key) == (50, 114)
+
+
 def test_reference_is_frozen_against_layout_mutation(aw):
     # touching scale_factors freezes the reference from the config layout
     assert aw.scale_factors == (1.0, 1.0)

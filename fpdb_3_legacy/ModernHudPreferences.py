@@ -38,6 +38,8 @@ from PySide6.QtWidgets import (
 from fpdb_3_legacy import Configuration
 from fpdb_3_legacy.Aux_Hud import SimpleLabel
 from fpdb_3_legacy.loggingFpdb import get_logger
+from fpdb_3_legacy.PopupIcons import AVAILABLE_PROVIDERS, get_icon_provider, get_stat_category
+from fpdb_3_legacy.PopupThemes import AVAILABLE_THEMES, get_theme
 
 log = get_logger("modern_hud_preferences")
 
@@ -536,7 +538,14 @@ class PopupPreviewWidget(QWidget):
         self.popup_frame.resize(0, 0)
 
     def set_popup(
-        self, popup_name: str, popup_class: str, stats: list[dict], source: str = "", group: str = ""
+        self,
+        popup_name: str,
+        popup_class: str,
+        stats: list[dict],
+        source: str = "",
+        group: str = "",
+        theme_name: str = "",
+        icon_provider_name: str = "",
     ) -> None:
         self.clear_preview()
         self.popup_frame.setStyleSheet("""
@@ -568,7 +577,13 @@ class PopupPreviewWidget(QWidget):
             self._add_empty_state(popup_name)
             return
 
-        if popup_class == "Submenu":
+        if popup_class.startswith("ModernSubmenu"):
+            if not theme_name:
+                theme_name = "material_light" if popup_class == "ModernSubmenuLight" else "classic" if popup_class == "ModernSubmenuClassic" else "material_dark"
+            if not icon_provider_name:
+                icon_provider_name = "text" if popup_class == "ModernSubmenuClassic" else "emoji"
+            self._build_modern(stats, theme_name, icon_provider_name)
+        elif popup_class == "Submenu":
             self._build_submenu(stats)
         elif popup_class == "Multicol":
             self._build_multicol(stats)
@@ -680,6 +695,40 @@ class PopupPreviewWidget(QWidget):
             header.show()
             for stat in submenu_stats:
                 self.popup_layout.addWidget(self._row_label(stat, indent=True))
+
+    def _build_modern(self, stats: list[dict], theme_name: str, icon_provider_name: str) -> None:
+        """Preview a ModernSubmenu using its selected theme, icons, and sections."""
+        theme = get_theme(theme_name)
+        icons = get_icon_provider(icon_provider_name)
+        self.popup_frame.setStyleSheet(
+            "QFrame#popupPreviewFrame{"
+            f"background:{theme.get_color('window_bg')};"
+            f"border:1px solid {theme.get_color('border')};"
+            "}"
+            "QLabel{background:transparent;border:none;}"
+        )
+        grouped: dict[str, list[dict]] = {}
+        for stat in stats:
+            category = stat.get("category") or get_stat_category(stat.get("stat_name", ""))
+            grouped.setdefault(category, []).append(stat)
+
+        section_order = ["player_info", "preflop", "flop", "turn", "river", "steal", "aggression", "general"]
+        ordered_sections = [name for name in section_order if name in grouped]
+        ordered_sections.extend(name for name in grouped if name not in ordered_sections)
+        for section_name in ordered_sections:
+            header = QLabel(f"{icons.get_section_icon(section_name)}  {section_name.replace('_', ' ').title()}")
+            header.setStyleSheet(
+                f"color:{theme.get_color('text_accent')};"
+                f"background:{theme.get_color('section_bg')};"
+                "font-weight:800;padding:5px 6px;"
+            )
+            self.popup_layout.addWidget(header)
+            for stat in grouped[section_name]:
+                stat_name = stat.get("stat_name", "")
+                value = self.sample_values.get(stat_name.lower(), "--")
+                row = QLabel(f"{icons.get_icon(stat_name)}  {stat_name:<18} {value:>7}")
+                row.setStyleSheet(f"color:{theme.get_color('text_primary')};padding:2px 8px;")
+                self.popup_layout.addWidget(row)
 
     def _build_multicol(self, stats: list[dict]) -> None:
         grid = QGridLayout()
@@ -898,10 +947,16 @@ class HudDesignCanvas(QScrollArea):
 
 # --- Add/Edit Stat Dialog ---
 class BlockPropertiesDialog(QDialog):
-    """Edit a HUD panel (block): label, villain position, title/border colours."""
+    """Edit a HUD panel's identity, sizing, position binding, and colours."""
 
     _POSITIONS = ["", "SB", "BB", "BTN", "CO", "MP", "EP"]
-    _COLOR_FIELDS = (("title_bgcolor", "Title background"), ("title_fgcolor", "Title text"), ("bordercolor", "Border"))
+    _COLOR_FIELDS = (
+        ("bgcolor", "Panel background"),
+        ("fgcolor", "Panel text"),
+        ("title_bgcolor", "Title background"),
+        ("title_fgcolor", "Title text"),
+        ("bordercolor", "Border"),
+    )
 
     def __init__(self, block: dict, parent=None) -> None:
         super().__init__(parent)
@@ -921,6 +976,14 @@ class BlockPropertiesDialog(QDialog):
         self.pos_combo.setCurrentText(cur)
         self.pos_combo.setToolTip("Show this panel only for a villain in this position (blank = always)")
         form.addRow("Show for position:", self.pos_combo)
+
+        self.cell_width_spin = QSpinBox()
+        self.cell_width_spin.setRange(0, 300)
+        self.cell_width_spin.setSpecialValueText("Automatic")
+        self.cell_width_spin.setSuffix(" px")
+        self.cell_width_spin.setValue(int(block.get("cell_width", 0) or 0))
+        self.cell_width_spin.setToolTip("Minimum width of each statistic cell; Automatic keeps the legacy default")
+        form.addRow("Cell width:", self.cell_width_spin)
 
         self._btns = {}
         for key, caption in self._COLOR_FIELDS:
@@ -951,7 +1014,12 @@ class BlockPropertiesDialog(QDialog):
         btn.setStyleSheet(f"background:{colour};" if colour else "")
 
     def get_props(self) -> dict:
-        return {"label": self.label_input.text(), "position": self.pos_combo.currentText(), **self._colors}
+        return {
+            "label": self.label_input.text(),
+            "position": self.pos_combo.currentText(),
+            "cell_width": self.cell_width_spin.value(),
+            **self._colors,
+        }
 
 
 class AddStatDialog(QDialog):
@@ -1852,7 +1920,7 @@ class ModernHudPreferences(QDialog):
 
         popup_top_splitter = QSplitter(Qt.Orientation.Horizontal)
         popup_top_splitter.setChildrenCollapsible(False)
-        popup_top_splitter.setMaximumHeight(190)
+        popup_top_splitter.setMaximumHeight(270)
         popup_top_splitter.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum)
 
         # Statistics list
@@ -1927,10 +1995,37 @@ class ModernHudPreferences(QDialog):
 
         popup_info_layout.addWidget(QLabel("Class:"), 1, 0)
         self.popup_class_combo = QComboBox()
-        self.popup_class_combo.addItems(["default", "Submenu", "Multicol", "RangeChartPopup", "BlockPopup"])
+        self.popup_class_combo.addItems(
+            [
+                "default",
+                "Submenu",
+                "Multicol",
+                "ModernSubmenu",
+                "ModernSubmenuLight",
+                "ModernSubmenuClassic",
+                "RangeChartPopup",
+                "BlockPopup",
+            ]
+        )
         self.popup_class_combo.setMinimumHeight(28)
         self.popup_class_combo.currentTextChanged.connect(self.on_popup_class_changed)
         popup_info_layout.addWidget(self.popup_class_combo, 1, 1)
+
+        popup_info_layout.addWidget(QLabel("Theme:"), 2, 0)
+        self.popup_theme_combo = QComboBox()
+        self.popup_theme_combo.addItem("Default", "")
+        for theme_name in sorted(AVAILABLE_THEMES):
+            self.popup_theme_combo.addItem(theme_name, theme_name)
+        self.popup_theme_combo.currentIndexChanged.connect(self.on_popup_theme_changed)
+        popup_info_layout.addWidget(self.popup_theme_combo, 2, 1)
+
+        popup_info_layout.addWidget(QLabel("Icons:"), 3, 0)
+        self.popup_icon_provider_combo = QComboBox()
+        self.popup_icon_provider_combo.addItem("Default", "")
+        for provider_name in sorted(AVAILABLE_PROVIDERS):
+            self.popup_icon_provider_combo.addItem(provider_name, provider_name)
+        self.popup_icon_provider_combo.currentIndexChanged.connect(self.on_popup_icon_provider_changed)
+        popup_info_layout.addWidget(self.popup_icon_provider_combo, 3, 1)
 
         popup_info_group.setLayout(popup_info_layout)
         popup_info_group.setMinimumWidth(300)
@@ -1953,6 +2048,12 @@ class ModernHudPreferences(QDialog):
         self.pi_submenu = QLineEdit()
         self.pi_submenu.editingFinished.connect(self._popup_item_changed)
         pif.addRow("Submenu:", self.pi_submenu)
+        self.pi_category = QComboBox()
+        self.pi_category.addItems(
+            ["auto", "player_info", "preflop", "flop", "turn", "river", "steal", "aggression", "general"]
+        )
+        self.pi_category.currentTextChanged.connect(self._popup_item_changed)
+        pif.addRow("Section:", self.pi_category)
         self.pi_type = QLabel("—")
         pif.addRow("Type:", self.pi_type)
         self.pi_pos = QLabel("—")
@@ -2241,9 +2342,12 @@ class ModernHudPreferences(QDialog):
                         "position": getattr(blk, "position", ""),
                         "rows": blk.rows,
                         "cols": blk.cols,
+                        "bgcolor": getattr(blk, "bgcolor", ""),
+                        "fgcolor": getattr(blk, "fgcolor", ""),
                         "title_bgcolor": getattr(blk, "title_bgcolor", ""),
                         "title_fgcolor": getattr(blk, "title_fgcolor", ""),
                         "bordercolor": getattr(blk, "bordercolor", ""),
+                        "cell_width": getattr(blk, "cell_width", 0),
                         "x": getattr(blk, "x", 0),
                         "y": getattr(blk, "y", 0),
                         "stats": bstats,
@@ -2326,6 +2430,8 @@ class ModernHudPreferences(QDialog):
                     "stats": [],
                     "source": _params.get("source", ""),
                     "group": _params.get("group", ""),
+                    "theme": _params.get("theme", ""),
+                    "icon_provider": _params.get("icon_provider", ""),
                 }
 
                 # Extract stats and submenus
@@ -2337,6 +2443,9 @@ class ModernHudPreferences(QDialog):
                         stat_tuple = popup_obj.pu_stats_submenu[i]
                         if len(stat_tuple) > 1 and stat_tuple[1]:
                             stat_info["submenu"] = stat_tuple[1]
+                    categories = getattr(popup_obj, "pu_stats_category", [])
+                    if i < len(categories) and categories[i]:
+                        stat_info["category"] = categories[i]
 
                     popup_data["stats"].append(stat_info)
 
@@ -2365,12 +2474,20 @@ class ModernHudPreferences(QDialog):
         self.popup_name_edit.setText(popup_name)
         self._loading_popup = True
         self.popup_class_combo.setCurrentText(popup_data.get("class", "default"))
+        self.popup_theme_combo.setCurrentIndex(
+            max(0, self.popup_theme_combo.findData(popup_data.get("theme", "")))
+        )
+        self.popup_icon_provider_combo.setCurrentIndex(
+            max(0, self.popup_icon_provider_combo.findData(popup_data.get("icon_provider", "")))
+        )
         self._loading_popup = False
 
         # Update stats list
         self.popup_stats_list.clear()
         for stat in popup_data.get("stats", []):
             stat_text = stat["stat_name"]
+            if stat.get("category"):
+                stat_text = f"[{stat['category']}] {stat_text}"
             if stat.get("submenu"):
                 stat_text += f" → {stat['submenu']}"
             self.popup_stats_list.addItem(stat_text)
@@ -2456,6 +2573,8 @@ class ModernHudPreferences(QDialog):
 
         def _label(s):
             name = s.get("stat_name", "")
+            if s.get("category"):
+                name = f"[{s['category']}] {name}"
             return f"{name}  →  {s['submenu']}" if s.get("submenu") else name
 
         block = {
@@ -2504,38 +2623,53 @@ class ModernHudPreferences(QDialog):
         if cell is None:
             self.pi_props_box.setEnabled(False)
             return
+        self._loading_popup_item = True
         self.pi_props_box.setEnabled(True)
         self.pi_text.setText(str(cell.get("text", "")))
         self.pi_submenu.clear()
         self.pi_submenu.setEnabled(False)
+        self.pi_category.setCurrentText("auto")
+        self.pi_category.setEnabled(False)
         self.pi_type.setText("Stat" if cell.get("kind") == "stat" else "Text")
         self.pi_pos.setText(f"row {cell.get('row', 0)}, col {cell.get('col', 0)}")
         self.pi_fg.setEnabled(True)
         self.pi_bg.setEnabled(True)
         self._style_color_btn(self.pi_fg, cell.get("fg", ""))
         self._style_color_btn(self.pi_bg, cell.get("bg", ""))
+        self._loading_popup_item = False
 
     def _load_popup_stat_item(self, stat: dict, row: int | None) -> None:
         self._popup_item_cell = stat
         self._popup_item_mode = "stat"
+        self._loading_popup_item = True
         self.pi_props_box.setEnabled(True)
         self.pi_text.setText(str(stat.get("stat_name", "")))
         self.pi_submenu.setEnabled(True)
         self.pi_submenu.setText(str(stat.get("submenu", "")))
+        self.pi_category.setEnabled(True)
+        category = str(stat.get("category", "") or "auto")
+        self.pi_category.setCurrentText(category if self.pi_category.findText(category) >= 0 else "auto")
         self.pi_type.setText("Stat")
         self.pi_pos.setText(f"row {row}, col 0" if row is not None else "row —, col 0")
         self.pi_fg.setEnabled(False)
         self.pi_bg.setEnabled(False)
         self._style_color_btn(self.pi_fg, "")
         self._style_color_btn(self.pi_bg, "")
+        self._loading_popup_item = False
 
     def _popup_item_changed(self) -> None:
+        if getattr(self, "_loading_popup_item", False):
+            return
         cell = self._popup_item_cell
         if cell is None:
             return
         if getattr(self, "_popup_item_mode", None) == "stat":
             cell["stat_name"] = self.pi_text.text()
             cell["submenu"] = self.pi_submenu.text()
+            if self.pi_category.currentText() == "auto":
+                cell.pop("category", None)
+            else:
+                cell["category"] = self.pi_category.currentText()
             self._after_popup_stat_edit()
         else:
             cell["text"] = self.pi_text.text()
@@ -2586,6 +2720,8 @@ class ModernHudPreferences(QDialog):
         self.popup_stats_list.clear()
         for stat in popup_data.get("stats", []):
             stat_text = stat.get("stat_name", "")
+            if stat.get("category"):
+                stat_text = f"[{stat['category']}] {stat_text}"
             if stat.get("submenu"):
                 stat_text += f" → {stat['submenu']}"
             self.popup_stats_list.addItem(stat_text)
@@ -2617,6 +2753,24 @@ class ModernHudPreferences(QDialog):
                 self.popup_windows[popup_name]["class"] = new_class
                 self.update_popup_preview()
 
+    def on_popup_theme_changed(self, _index: int) -> None:
+        """Store the optional per-popup theme selected in the editor."""
+        if getattr(self, "_loading_popup", False) or self.popup_combo.currentIndex() < 0:
+            return
+        popup_name = self.popup_combo.currentText()
+        if popup_name in self.popup_windows:
+            self.popup_windows[popup_name]["theme"] = self.popup_theme_combo.currentData() or ""
+            self.update_popup_preview()
+
+    def on_popup_icon_provider_changed(self, _index: int) -> None:
+        """Store the optional per-popup icon provider selected in the editor."""
+        if getattr(self, "_loading_popup", False) or self.popup_combo.currentIndex() < 0:
+            return
+        popup_name = self.popup_combo.currentText()
+        if popup_name in self.popup_windows:
+            self.popup_windows[popup_name]["icon_provider"] = self.popup_icon_provider_combo.currentData() or ""
+            self.update_popup_preview()
+
     def update_popup_preview(self) -> None:
         """Update the popup preview display."""
         if self.popup_combo.currentIndex() < 0:
@@ -2628,7 +2782,15 @@ class ModernHudPreferences(QDialog):
         stats = popup_data.get("stats", [])
         source = popup_data.get("source", "")
         group = popup_data.get("group", "")
-        self.popup_preview.set_popup(popup_name, popup_class, stats, source, group)
+        self.popup_preview.set_popup(
+            popup_name,
+            popup_class,
+            stats,
+            source,
+            group,
+            popup_data.get("theme", ""),
+            popup_data.get("icon_provider", ""),
+        )
 
     def _on_positional_mode_changed(self, _index: int) -> None:
         """Store the chosen positional-panel mode on the current profile."""
@@ -3917,9 +4079,12 @@ class ModernHudPreferences(QDialog):
                     "position": "",
                     "rows": int(profile.get("rows", 1)),
                     "cols": cols,
+                    "bgcolor": "",
+                    "fgcolor": "",
                     "title_bgcolor": "",
                     "title_fgcolor": "",
                     "bordercolor": "",
+                    "cell_width": 0,
                     "x": 0,
                     "y": 0,
                     "stats": [dict(s) for s in profile.get("stats", [])],
@@ -3932,9 +4097,12 @@ class ModernHudPreferences(QDialog):
                 "position": "",
                 "rows": 1,
                 "cols": cols,
+                "bgcolor": "",
+                "fgcolor": "",
                 "title_bgcolor": "",
                 "title_fgcolor": "",
                 "bordercolor": "",
+                "cell_width": 0,
                 "x": 0,
                 "y": 0,
                 "stats": [],
@@ -4030,6 +4198,8 @@ class ModernHudPreferences(QDialog):
                     "scope",
                     "audience",
                     "position",
+                    "bgcolor",
+                    "fgcolor",
                     "title_bgcolor",
                     "title_fgcolor",
                     "bordercolor",
@@ -4040,6 +4210,8 @@ class ModernHudPreferences(QDialog):
                 block_node.setAttribute("cols", str(block.get("cols", cols)))
                 block_node.setAttribute("x", str(block.get("x", 0)))
                 block_node.setAttribute("y", str(block.get("y", 0)))
+                if int(block.get("cell_width", 0) or 0) > 0:
+                    block_node.setAttribute("cell_width", str(int(block["cell_width"])))
 
                 for text in block.get("texts", []):
                     block_node.appendChild(self.config.doc.createTextNode("\n                "))
@@ -4169,6 +4341,10 @@ class ModernHudPreferences(QDialog):
                         pu_node.setAttribute("pu_source", popup_data["source"])
                     if popup_data.get("group"):
                         pu_node.setAttribute("pu_group", popup_data["group"])
+                    if popup_data.get("theme"):
+                        pu_node.setAttribute("pu_theme", popup_data["theme"])
+                    if popup_data.get("icon_provider"):
+                        pu_node.setAttribute("pu_icon_provider", popup_data["icon_provider"])
 
                     # Add stats
                     for stat in popup_data["stats"]:
@@ -4179,6 +4355,8 @@ class ModernHudPreferences(QDialog):
                         pu_stat_node.setAttribute("pu_stat_name", stat["stat_name"])
                         if stat.get("submenu"):
                             pu_stat_node.setAttribute("pu_stat_submenu", stat["submenu"])
+                        if stat.get("category"):
+                            pu_stat_node.setAttribute("pu_stat_category", stat["category"])
 
                         pu_node.appendChild(pu_stat_node)
 
@@ -4227,7 +4405,13 @@ class ModernHudPreferences(QDialog):
 
         name, ok = QInputDialog.getText(self, "New Popup", "Enter popup name:")
         if ok and name and name not in self.popup_windows:
-            self.popup_windows[name] = {"name": name, "class": "default", "stats": []}
+            self.popup_windows[name] = {
+                "name": name,
+                "class": "default",
+                "theme": "",
+                "icon_provider": "",
+                "stats": [],
+            }
             self.popup_combo.addItem(name)
             self.popup_combo.setCurrentText(name)
 
@@ -4367,6 +4551,15 @@ class PopupStatEditDialog(QDialog):
             self.submenu_input.setText(stat_data.get("submenu", ""))
         layout.addRow("Submenu:", self.submenu_input)
 
+        self.category_combo = QComboBox()
+        self.category_combo.addItems(
+            ["auto", "player_info", "preflop", "flop", "turn", "river", "steal", "aggression", "general"]
+        )
+        if stat_data and stat_data.get("category"):
+            self.category_combo.setCurrentText(stat_data["category"])
+        self.category_combo.setToolTip("Override the automatic section used by ModernSubmenu")
+        layout.addRow("Section:", self.category_combo)
+
         # Dialog buttons
         btn_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
         btn_box.accepted.connect(self.accept)
@@ -4375,7 +4568,13 @@ class PopupStatEditDialog(QDialog):
 
     def get_stat_data(self):
         """Get the stat data from the dialog."""
-        return {"stat_name": self.stat_name_input.text(), "submenu": self.submenu_input.text()}
+        result = {
+            "stat_name": self.stat_name_input.text(),
+            "submenu": self.submenu_input.text(),
+        }
+        if self.category_combo.currentText() != "auto":
+            result["category"] = self.category_combo.currentText()
+        return result
 
 
 # --- Popup Edit Dialog ---

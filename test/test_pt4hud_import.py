@@ -23,6 +23,7 @@ os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 FIXTURE = os.path.join(os.path.dirname(__file__), "fixtures", "generationpoker_3h.pt4hud")
 EXAMPLE = os.path.join(ROOT, "HUD_config.xml.example")
+SOURCE_CONFIG = os.path.join(ROOT, "HUD_config.xml")
 
 
 @pytest.mark.skipif(not (os.path.exists(FIXTURE) and os.path.exists(EXAMPLE)), reason="fixtures missing")
@@ -258,6 +259,88 @@ def test_save_changes_preserves_multiblock_stat_sets(tmp_path, monkeypatch):
     assert imported.is_multiblock
     assert len(imported.blocks) == summary["blocks"]
     assert sum(len(block.stats) for block in imported.blocks) == summary["stats"]
+
+
+def test_block_properties_dialog_exposes_visual_panel_settings():
+    """The GUI must expose every block-level visual setting used by PLO4."""
+    from PySide6.QtWidgets import QApplication
+
+    from fpdb_3_legacy import ModernHudPreferences as M
+
+    QApplication.instance() or QApplication([])
+    dialog = M.BlockPropertiesDialog(
+        {
+            "label": "PLO4",
+            "position": "BTN",
+            "cell_width": 44,
+            "bgcolor": "#101820",
+            "fgcolor": "#f8fafc",
+            "title_bgcolor": "#0f766e",
+            "title_fgcolor": "#ffffff",
+            "bordercolor": "#14b8a6",
+        }
+    )
+
+    assert dialog.cell_width_spin.value() == 44
+    assert dialog._colors["bgcolor"] == "#101820"
+    assert dialog._colors["fgcolor"] == "#f8fafc"
+
+    dialog.cell_width_spin.setValue(52)
+    dialog._colors["bgcolor"] = "#111827"
+    props = dialog.get_props()
+    assert props["cell_width"] == 52
+    assert props["bgcolor"] == "#111827"
+    assert props["position"] == "BTN"
+
+
+def test_hud_preferences_roundtrip_preserves_panel_and_popup_options(tmp_path, monkeypatch):
+    """GUI save must preserve panel visuals and persist modern-popup options."""
+    from PySide6.QtWidgets import QApplication, QMessageBox
+
+    from fpdb_3_legacy import Configuration as Conf
+    from fpdb_3_legacy import ModernHudPreferences as M
+
+    QApplication.instance() or QApplication([])
+    monkeypatch.setattr(QMessageBox, "information", staticmethod(lambda *a, **k: None))
+    monkeypatch.setattr(QMessageBox, "warning", staticmethod(lambda *a, **k: None))
+    monkeypatch.setattr(QMessageBox, "critical", staticmethod(lambda *a, **k: None))
+
+    cfg_path = tmp_path / "HUD_config.xml"
+    shutil.copy(SOURCE_CONFIG, cfg_path)
+    cfg = Conf.Config(file=str(cfg_path))
+    dialog = M.ModernHudPreferences(cfg)
+
+    profile = dialog.hud_profiles["plo4_6max_pro"]
+    block = profile["blocks"][0]
+    assert block["cell_width"] == 44
+    assert block["bgcolor"] == "rgba(11, 18, 32, 235)"
+    block["cell_width"] = 52
+    block["bgcolor"] = "#111827"
+    block["fgcolor"] = "#f8fafc"
+
+    popup = dialog.popup_windows["plo4_preflop"]
+    popup_index = dialog.popup_combo.findText("plo4_preflop")
+    dialog.popup_combo.setCurrentIndex(popup_index)
+    dialog.popup_theme_combo.setCurrentIndex(dialog.popup_theme_combo.findData("classic"))
+    dialog.popup_icon_provider_combo.setCurrentIndex(dialog.popup_icon_provider_combo.findData("text"))
+    dialog._load_popup_stat_item(popup["stats"][0], 0)
+    dialog.pi_category.setCurrentText("general")
+    assert popup["theme"] == "classic"
+    assert popup["icon_provider"] == "text"
+    assert popup["stats"][0]["category"] == "general"
+
+    dialog.save_changes()
+
+    reread = Conf.Config(file=str(cfg_path))
+    saved_block = reread.stat_sets["plo4_6max_pro"].blocks[0]
+    assert saved_block.cell_width == 52
+    assert saved_block.bgcolor == "#111827"
+    assert saved_block.fgcolor == "#f8fafc"
+
+    saved_popup = reread.popup_windows["plo4_preflop"]
+    assert saved_popup.pu_class_params["theme"] == "classic"
+    assert saved_popup.pu_class_params["icon_provider"] == "text"
+    assert saved_popup.pu_stats_category[0] == "general"
 
 
 @pytest.mark.skipif(not (os.path.exists(FIXTURE) and os.path.exists(EXAMPLE)), reason="fixtures missing")
