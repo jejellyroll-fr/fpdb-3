@@ -12,10 +12,21 @@ from __future__ import annotations
 import datetime
 import re
 from collections import defaultdict
+from collections.abc import Iterator
 from decimal import Decimal
 from typing import Any
 
 from fpdb_3_legacy.coinpoker_protocol import iter_game_events
+from fpdb_3_legacy.loggingFpdb import get_logger
+
+log = get_logger("coinpoker_hand_builder")
+
+# A poker table seats two to ten, so a field that names the table and answers
+# outside that range is describing something else. Storing it breaks the import
+# outright on MySQL, where Gametypes.maxSeats is a TINYINT and anything past
+# 127 is refused.
+MIN_TABLE_SEATS = 2
+MAX_TABLE_SEATS = 10
 
 _VALUE = {
     "TWO": "2",
@@ -108,14 +119,61 @@ def _iter_dicts(value: Any):
             yield from _iter_dicts(nested)
 
 
-def _protocol_value(evs: list[tuple], *keys: str) -> Any:
-    """Return the first non-blank value for any spelling in nested event data."""
+def _protocol_values(evs: list[tuple], *keys: str) -> Iterator[tuple[str, Any]]:
+    """Every (spelling, value) found for these keys, in the order they appear."""
     wanted = {key.casefold() for key in keys}
     for _name, _hid, data in evs:
         for obj in _iter_dicts(data):
             for key, value in obj.items():
                 if key.casefold() in wanted and value not in (None, ""):
-                    return value
+                    yield key, value
+
+
+def _protocol_value(evs: list[tuple], *keys: str) -> Any:
+    """Return the first non-blank value for any spelling in nested event data."""
+    for _key, value in _protocol_values(evs, *keys):
+        return value
+    return None
+
+
+def _seat_count(value: Any, *, source: str) -> int | None:
+    """A seat count, or None when the value cannot be one.
+
+    A table seats a handful of people, so a number outside that range is
+    describing something else -- and storing it breaks the import outright on
+    MySQL, where the column is a TINYINT. Callers try the next candidate, and
+    fall back to the players actually seated when none is usable.
+    """
+    if not str(value or "").isdigit():
+        return None
+    seats = int(value)
+    if MIN_TABLE_SEATS <= seats <= MAX_TABLE_SEATS:
+        return seats
+    log.warning(
+        "Ignoring implausible seat count %s from %s: a table seats %d to %d",
+        seats,
+        source,
+        MIN_TABLE_SEATS,
+        MAX_TABLE_SEATS,
+    )
+    return None
+
+
+def _table_seat_count(evs: list[tuple]) -> int | None:
+    """The first value naming this table that could be a number of chairs.
+
+    Taking the first value found and validating it afterwards would let a
+    field carrying nonsense hide a good one appearing later in the stream, so
+    every candidate is offered until one is plausible.
+
+    maxPlayers is deliberately not among the spellings: on a tournament table
+    it answers with the entrants the tournament accepts, and a small one looks
+    exactly like a table size -- no range check can tell it apart.
+    """
+    for key, value in _protocol_values(evs, "maxSeats", "tableSize"):
+        seats = _seat_count(value, source=f"the {key} field")
+        if seats is not None:
+            return seats
     return None
 
 
@@ -149,7 +207,7 @@ def _tournament_info(evs: list[tuple]) -> dict[str, Any] | None:
         "tournamentShortName",
     )
     table_id = _protocol_value(evs, "tableId", "table_id", "gameTableId")
-    max_seats = _protocol_value(evs, "maxSeats", "maxPlayers", "tableSize")
+    max_seats = _table_seat_count(evs)
     buyin = _protocol_value(evs, "buyIn", "buyin", "buyInAmount", "entryFee")
     fee = _protocol_value(evs, "fee", "rake", "tournamentFee")
     bounty = _protocol_value(evs, "bounty", "bountyAmount", "knockoutBounty")
@@ -158,7 +216,7 @@ def _tournament_info(evs: list[tuple]) -> dict[str, Any] | None:
         "tour_no": str(tour_no) if tour_no is not None else None,
         "name": str(name) if name is not None else None,
         "table_id": str(table_id) if table_id is not None else None,
-        "max_seats": int(max_seats) if str(max_seats or "").isdigit() else None,
+        "max_seats": max_seats,
         "buyin": str(buyin) if buyin is not None else None,
         "fee": str(fee) if fee is not None else None,
         "bounty": str(bounty) if bounty is not None else None,
@@ -702,11 +760,18 @@ def _build_one(hid: str, evs: list[tuple], table_category: str) -> dict[str, Any
 
     max_seats = (tournament or {}).get("max_seats")
     if max_seats is None:
-        configured_max = info.get("maxSeats") or info.get("tableSize")
-        if str(configured_max or "").isdigit():
-            max_seats = int(configured_max)
+        configured_max = next(
+            (
+                seats
+                for field in ("maxSeats", "tableSize")
+                if (seats := _seat_count(info.get(field), source=f"the table's {field}")) is not None
+            ),
+            None,
+        )
+        if configured_max is not None:
+            max_seats = configured_max
         else:
-            max_seats = max(len(players), 2) if tournament else 6
+            max_seats = max(len(players), MIN_TABLE_SEATS) if tournament else 6
     game_type = "tour" if tournament else "ring"
 
     return {
