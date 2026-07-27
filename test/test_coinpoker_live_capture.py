@@ -14,7 +14,7 @@ from unittest.mock import Mock, call
 
 import pytest
 
-from fpdb_3_legacy.coinpoker_hand_builder import _build_one
+from fpdb_3_legacy.coinpoker_hand_builder import _build_one, build_hands
 from fpdb_3_legacy.coinpoker_live_capture import (
     COINPOKER_SITE_ID,
     MAX_RESULT_ATTEMPTS,
@@ -799,6 +799,100 @@ def test_an_announcement_keeps_the_tournament_it_was_first_filed_on() -> None:
     db.updateTourneyPlayerResult.side_effect = [True]
     assert pump.record_tournament_results(announcement) == 1
     assert db.updateTourneyPlayerResult.call_args_list[-1] == call("CoinPoker", "81499", "Alisey", 2)
+
+
+def _aof_hand_at(table: str) -> tuple[list[tuple], tuple]:
+    """A real All-in or Fold hand moved to `table`, with the join naming it."""
+    raw = json.loads((Path(__file__).parent / "data" / "coinpoker_aof_hand_events.json").read_text())
+    hand = [
+        (name, str(hid).replace("123144", table) if hid else hid, data) for name, hid, data in raw["hand"]
+    ]
+    join = tuple(raw["join"])
+    return hand, join
+
+
+def test_a_hand_of_a_game_fpdb_cannot_store_leaves_the_buffer() -> None:
+    """A hand nobody ever answers for is a hand whose events are never dropped.
+
+    Not importable and not failed, it read as a hand still being dealt: the
+    sweep offered it again every time, and its sixty-six events stayed in the
+    buffer for the rest of the run.
+    """
+    hand, _join = _aof_hand_at("123144")
+    # The room says this table deals All-in or Fold Hold'em, which fpdb has no
+    # model for.
+    holdem_join = (
+        "lobby.join_game_table",
+        None,
+        {
+            "tablesToJoin": [
+                {
+                    "tableName": "17th-TX AOF 0.10-0.25 123144",
+                    "roomProperties": {"tournamentTypeId": 14, "lobbyId": 12, "miniGameTypeId": 1},
+                },
+            ],
+        },
+    )
+    db = Mock()
+    config = HttpCaptureHandConfig(site_ids={"CoinPoker": COINPOKER_SITE_ID, "default": COINPOKER_SITE_ID})
+    pump = HandPump(db=db, config=config, table_category="PLO4", dry_run=True)
+
+    accumulated = [holdem_join, *hand]
+    assert pump.process(accumulated) == 0
+    assert pump.imported == set()
+    assert pump.capture_only == {"12314400005"}
+
+    accumulated = pump.prune(accumulated)
+    assert accumulated == []
+
+    # And it is not offered to the database on a later sweep either.
+    assert pump.process(accumulated) == 0
+    assert not db.method_calls
+
+
+def test_a_hand_fpdb_can_store_is_not_set_aside() -> None:
+    # The control: the same hand at an All-in or Fold Omaha table is imported.
+    hand, join = _aof_hand_at("123144")
+    db = Mock()
+    config = HttpCaptureHandConfig(site_ids={"CoinPoker": COINPOKER_SITE_ID, "default": COINPOKER_SITE_ID})
+    pump = HandPump(db=db, config=config, table_category="PLO4", dry_run=True)
+
+    assert pump.process([join, *hand]) == 1
+    assert pump.capture_only == set()
+
+
+def test_the_all_in_or_fold_catalogue_survives_the_sweep_it_arrived_in() -> None:
+    """The room says which tables are All-in or Fold once, in a huge catalogue.
+
+    It names no hand, so pruning drops it -- and every test that handed the
+    catalogue and the hand to one call could not see that. In the live loop
+    the hands arrive over many sweeps after it: without keeping what it said,
+    the game is recognised on that one sweep and the same table is All-in or
+    Fold and then ordinary Omaha.
+    """
+    aof = json.loads((Path(__file__).parent / "data" / "coinpoker_aof_hand_events.json").read_text())
+    catalogue = tuple(aof["catalogue"])
+    at_123108 = [(name, str(hid).replace("123144", "123108") if hid else hid, data) for name, hid, data in aof["hand"]]
+    db = Mock()
+    config = HttpCaptureHandConfig(site_ids={"CoinPoker": COINPOKER_SITE_ID, "default": COINPOKER_SITE_ID})
+    pump = HandPump(db=db, config=config, table_category="PLO4", dry_run=True)
+
+    # Sweep one carries the catalogue and no hand at all.
+    accumulated = [catalogue]
+    pump.process(accumulated)
+    accumulated = pump.prune(accumulated)
+    assert accumulated == []
+
+    # The hand arrives later, long after the catalogue is gone.
+    built = build_hands(
+        at_123108,
+        "PLO4",
+        session_context=pump._session_context,
+        session_tables=pump._session_tables,
+        session_aof=pump._session_aof,
+    )
+
+    assert [hand["gametype"]["category"] for hand in built] == ["aof_omaha"]
 
 
 def test_the_buffer_keeps_only_hands_still_being_assembled() -> None:

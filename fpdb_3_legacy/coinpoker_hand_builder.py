@@ -184,8 +184,103 @@ def _table_seat_count(evs: list[tuple]) -> int | None:
 # the step below it, so reading that conflates the two.
 TOURNAMENT_JOIN_EVENT = "tournamentlobby.join_table"
 
+# Sent when a cash table is joined, naming the table and the room it belongs
+# to. That room is what says the table is All-in or Fold: the hands themselves
+# carry no variant, and the room name is a display string.
+GAME_JOIN_EVENT = "lobby.join_game_table"
+
+# The room ids CoinPoker gives its All-in or Fold lobby. Both are required:
+# separately each is an ordinary number, together they have named nothing but
+# an AOF room in the captures seen (regular cash is type 6 / lobby 1,
+# tournament steps are type 8 / lobby 2).
+AOF_TOURNAMENT_TYPE_ID = 14
+AOF_LOBBY_ID = 12
+
+# Which game a room deals, as the room itself reports it.
+MINI_GAME_HOLDEM = 1
+MINI_GAME_OMAHA = 2
+
+# Every event that names the table it is talking about. They are what a hand
+# can be told by; everything else in the stream speaks for the whole capture.
+TABLE_JOIN_EVENTS = (TOURNAMENT_JOIN_EVENT, GAME_JOIN_EVENT)
+
 # How many other tournament markers travel alongside the joins.
 MAX_SESSION_CONTEXT = 100
+
+
+def _joined_rooms(event: tuple) -> Iterator[tuple[str, dict]]:
+    """The (table, room) pairs a join event names.
+
+    The two joins are shaped differently -- a tournament join names one table
+    at the top level, a cash join carries a list of them -- so callers ask
+    here rather than reaching into either shape.
+    """
+    name, _hid, data = event
+    if not isinstance(data, dict):
+        return
+    if name == TOURNAMENT_JOIN_EVENT:
+        entries: list[Any] = [data]
+    elif name == GAME_JOIN_EVENT:
+        entries = list(data.get("tablesToJoin") or [])
+    else:
+        return
+    for entry in entries:
+        if not isinstance(entry, dict):
+            continue
+        table = _table_from_title(entry.get("tableName"))
+        room = entry.get("roomProperties")
+        if table and isinstance(room, dict):
+            yield table, room
+
+
+# The lobby's own catalogue of All-in or Fold rooms, keyed by table. It is how
+# a table played before -- or without -- its join being captured is still
+# known: the join is sent once, the catalogue is broadcast repeatedly.
+AOF_ROOM_CATALOGUE = "allinfoldRoomData"
+
+
+def _catalogued_aof_rooms(event: tuple) -> Iterator[tuple[str, Any]]:
+    """The (table, game) pairs the lobby's All-in or Fold catalogue lists.
+
+    Read by its known shape rather than searched for: the catalogue carries
+    hundreds of rooms and arrives hundreds of times, and walking all of it on
+    every hand would cost more than every other reading of the stream put
+    together.
+    """
+    data = event[2]
+    if not isinstance(data, dict):
+        return
+    catalogue = data.get(AOF_ROOM_CATALOGUE)
+    if not isinstance(catalogue, dict):
+        return
+    for menus in catalogue.values():
+        for tables in (menus or {}).values() if isinstance(menus, dict) else ():
+            for table, room in (tables or {}).items() if isinstance(tables, dict) else ():
+                if isinstance(room, dict):
+                    yield str(table), room.get("miniGameTypeId")
+
+
+def aof_tables(evs: list[tuple]) -> dict[str, Any]:
+    """The tables the room has said are All-in or Fold, and which game each is.
+
+    A different game: there is no betting before the flop, which is dealt
+    first, and the choice is the whole hand. Filed as ordinary Omaha its hands
+    land among hands played normally, and neither set of statistics means
+    anything afterwards.
+
+    The value is the room's own ``miniGameTypeId``. The variant has to come
+    from the room because the hand may not say: a hand whose hole cards were
+    not captured falls back to the game the GUI is set to, and an All-in or
+    Fold Hold'em table read through a PLO setting would otherwise be stored as
+    All-in or Fold Omaha -- a game whose streets it does not have.
+    """
+    tables: dict[str, Any] = {}
+    for event in evs:
+        tables.update(_catalogued_aof_rooms(event))
+        for table, room in _joined_rooms(event):
+            if room.get("tournamentTypeId") == AOF_TOURNAMENT_TYPE_ID and room.get("lobbyId") == AOF_LOBBY_ID:
+                tables[table] = room.get("miniGameTypeId")
+    return tables
 
 
 def joined_tournaments(evs: list[tuple]) -> dict[str, tuple[str, str | None]]:
@@ -217,7 +312,7 @@ def _joined_only_value(evs: list[tuple], *keys: str) -> Any:
     with a tournament this table has never been in -- which is how a ring game
     played alongside a tournament came to be filed as one.
     """
-    return _protocol_value([event for event in evs if event[0] != TOURNAMENT_JOIN_EVENT], *keys)
+    return _protocol_value([event for event in evs if event[0] not in TABLE_JOIN_EVENTS], *keys)
 
 
 def _table_from_hand_id(hid: str) -> str:
@@ -233,8 +328,8 @@ def _table_from_hand_id(hid: str) -> str:
 
 
 def _joins_table(event: tuple, table: str) -> bool:
-    """True when this carried event is the join of `table`."""
-    return event[0] == TOURNAMENT_JOIN_EVENT and _table_from_title((event[2] or {}).get("tableName")) == table
+    """True when this carried event is a join naming `table`."""
+    return any(joined == table for joined, _room in _joined_rooms(event))
 
 
 def _table_from_title(title: Any) -> str | None:
@@ -367,6 +462,7 @@ def build_hands(
     table_category: str = "PLO4",
     session_context: list[tuple] | None = None,
     session_tables: set[str] | None = None,
+    session_aof: dict[str, Any] | None = None,
 ) -> list[dict[str, Any]]:
     """Group decoded events by hand id and build a normalized dict per hand.
 
@@ -377,6 +473,10 @@ def build_hands(
     moment the player is moved. Two HUDs for one tournament is what that looks
     like. Pass the same list on every call to keep the announcement.
 
+    ``session_aof`` remembers which tables are All-in or Fold. The room says
+    so once, in a catalogue far too large to carry alongside the hands, so
+    what it said is kept rather than the saying of it.
+
     ``session_tables`` remembers the tables this capture has dealt hands at.
     Whether a marker naming no table is ambiguous is a fact about the capture,
     not about the twenty events in hand: a sweep holding a single hand looks
@@ -385,6 +485,8 @@ def build_hands(
     """
     order: list[str] = []
     groups: dict[str, list[tuple]] = defaultdict(list)
+    aof = session_aof if session_aof is not None else {}
+    aof.update(aof_tables(events))
     carried: list[tuple] = session_context if session_context is not None else []
     for name, hid, data in events:
         if hid is None:
@@ -392,18 +494,22 @@ def build_hands(
             # reaches it -- unless it is another table's join, which would tell
             # that hand it belongs to a tournament it has never been in.
             if order and (
-                name != TOURNAMENT_JOIN_EVENT or _joins_table((name, hid, data), _table_from_hand_id(order[-1]))
+                name not in TABLE_JOIN_EVENTS or _joins_table((name, hid, data), _table_from_hand_id(order[-1]))
             ):
                 groups[order[-1]].append((name, hid, data))
-            if name == TOURNAMENT_JOIN_EVENT:
-                # One join is kept per table, and never evicted. Keeping them
-                # all is what lets a player sit at several tournaments at once,
-                # and keeping only the newest would strand the tables joined
-                # before it; they are told apart by table, so none can claim
-                # another's hands.
-                table = _table_from_title((data or {}).get("tableName"))
-                if table:
-                    carried[:] = [event for event in carried if not _joins_table(event, table)]
+            if name in TABLE_JOIN_EVENTS:
+                # One join of each kind is kept per table, and never evicted.
+                # Keeping them all is what lets a player sit at several tables
+                # at once, and keeping only the newest would strand the tables
+                # joined before it; they are told apart by table, so none can
+                # claim another's hands.
+                joined = [table for table, _room in _joined_rooms((name, hid, data))]
+                if joined:
+                    carried[:] = [
+                        event
+                        for event in carried
+                        if event[0] != name or not any(_joins_table(event, table) for table in joined)
+                    ]
                     carried.append((name, hid, data))
             elif (
                 "tournament" in name.casefold()
@@ -415,8 +521,8 @@ def build_hands(
                 # game. Bounded, and the joins are held apart from it: the
                 # lobby sends thousands of standings that identify no table,
                 # and they used to push the joins out.
-                joins = [event for event in carried if event[0] == TOURNAMENT_JOIN_EVENT]
-                rest = [event for event in carried if event[0] != TOURNAMENT_JOIN_EVENT]
+                joins = [event for event in carried if event[0] in TABLE_JOIN_EVENTS]
+                rest = [event for event in carried if event[0] not in TABLE_JOIN_EVENTS]
                 rest.append((name, hid, data))
                 carried[:] = [*joins, *rest[-MAX_SESSION_CONTEXT:]]
             continue
@@ -428,7 +534,7 @@ def build_hands(
             # find them and answer with another table's tournament.
             table = _table_from_hand_id(hid)
             groups[hid].extend(
-                event for event in carried if event[0] != TOURNAMENT_JOIN_EVENT or _joins_table(event, table)
+                event for event in carried if event[0] not in TABLE_JOIN_EVENTS or _joins_table(event, table)
             )
         groups[hid].append((name, hid, data))
 
@@ -447,7 +553,7 @@ def build_hands(
     tables.update(_table_from_hand_id(hid) for hid in order)
     sole_table = len(tables) == 1
     for hid in order:
-        built = _build_one(hid, groups[hid], table_category, sole_table=sole_table)
+        built = _build_one(hid, groups[hid], table_category, sole_table=sole_table, aof=aof)
         if built:
             hands.append(built)
     return hands
@@ -528,6 +634,60 @@ def _detect_category(evs: list[tuple], table_category: str) -> tuple[str, str]:
             return ("hold", "6_holdem")
         return ("hold", "holdem")
     return _CATEGORY.get(table_category.upper(), ("hold", "omahahi"))
+
+
+# fpdb's own name for All-in or Fold Omaha. It models the game properly: the
+# streets are BLINDSANTES/FLOP/TURN/RIVER, with the hole cards on the flop and
+# no preflop round at all.
+AOF_OMAHA_CATEGORY = "aof_omaha"
+
+
+def _aof_category(category: str, table_id: str, tables: dict[str, Any]) -> tuple[str, bool]:
+    """Name the All-in or Fold variant of `category`, and say if fpdb has one.
+
+    fpdb models one All-in or Fold game, Omaha. Every other variant the room
+    deals -- Hold'em is the one seen -- has no category, and the choice is
+    between calling it the ordinary game of the same shape or declaring it
+    unsupported.
+
+    It is declared unsupported. Called ordinary Hold'em it would be counted as
+    hands played normally, which is the mixing this exists to stop, and it is
+    not even reliably that: the variant is read from the room precisely
+    because the hand may not say, so a hand with no hole cards captured falls
+    back to whatever the GUI is set to and an All-in or Fold Hold'em hand can
+    come out as Omaha. Declaring it keeps it out of the statistics and leaves
+    a reason on the record; the raw archive keeps the hand itself, so nothing
+    is lost that fpdb could not read anyway.
+    """
+    if table_id not in tables:
+        return category, True
+    if tables[table_id] == MINI_GAME_OMAHA:
+        return AOF_OMAHA_CATEGORY, True
+    log.info(
+        "Table %s deals All-in or Fold, which fpdb models only for Omaha; "
+        "its hands are kept in the raw archive rather than stored as %s.",
+        table_id,
+        category,
+    )
+    return category, False
+
+
+def _move_preflop_to_flop(actions: list[dict]) -> None:
+    """Put All-in or Fold action on the street the game actually has.
+
+    The room deals the flop before anyone acts and names the round on every
+    action: across seventy-eight captured hands of it, no action was ever
+    labelled preflop. So this is not about how the hand was played -- it is
+    about how much of it was captured. An action arriving without its round
+    keeps the street the reader started on, which is preflop, and preflop is a
+    street fpdb's model of this game does not have: the hand then raises on
+    the first action written and is not imported at all. A capture begun
+    mid-hand, or one lost packet, is all it takes. The first betting round is
+    the flop either way.
+    """
+    for action in actions:
+        if action.get("street") == "PREFLOP":
+            action["street"] = "FLOP"
 
 
 def _hand_start_time(info: dict) -> datetime.datetime | None:
@@ -774,7 +934,14 @@ def _explicit_betting_actions(
     return actions
 
 
-def _build_one(hid: str, evs: list[tuple], table_category: str, *, sole_table: bool = True) -> dict[str, Any] | None:
+def _build_one(
+    hid: str,
+    evs: list[tuple],
+    table_category: str,
+    *,
+    sole_table: bool = True,
+    aof: dict[str, Any] | None = None,
+) -> dict[str, Any] | None:
     info = _first(evs, "game.pre_hand_start_info")
     if not info:
         return None
@@ -783,6 +950,7 @@ def _build_one(hid: str, evs: list[tuple], table_category: str, *, sole_table: b
     # The table is worked out first: it is what tells a tournament's hands from
     # those of every other table the capture is carrying.
     table_id = str(info.get("tableId") or _table_from_hand_id(hid))
+    category, fpdb_supported = _aof_category(category, table_id, aof if aof is not None else aof_tables(evs))
     tournament = _tournament_info(evs, table_id, sole_table=sole_table)
     if tournament:
         joined = joined_tournaments(evs).get(table_id)
@@ -933,6 +1101,9 @@ def _build_one(hid: str, evs: list[tuple], table_category: str, *, sole_table: b
     # (typically double) board. CoinPoker's bomb pots are always dealt two boards,
     # so an ante paired with a double board is the reliable signal. The stored
     # amount is the total forced antes, in cents.
+    if category == AOF_OMAHA_CATEGORY:
+        _move_preflop_to_flop(actions)
+
     splash_pot, mega_splash = _extract_splash(evs)
     cashout = _extract_cashout(evs)
     bomb_pot = int(ante * 100 * len(players)) if ante > 0 and double_board else 0
@@ -982,7 +1153,12 @@ def _build_one(hid: str, evs: list[tuple], table_category: str, *, sole_table: b
         "table_id": stored_table_id,
         "timestamp": _hand_start_time(info),
         "buttonpos": info.get("dealerSeatId"),
-        "game": {"base": base, "category": category, "fpdb_supported": True},
+        "game": {"base": base, "category": category, "fpdb_supported": fpdb_supported},
+        # All-in or Fold deals the flop before anyone acts, so that is where
+        # the cards belong and where fpdb looks for them. Left on PREFLOP --
+        # a street this game does not have -- the hole cards are attached to
+        # nothing the hand will ever read.
+        **({"streets": {"holeStreets": ["FLOP"]}} if category == AOF_OMAHA_CATEGORY else {}),
         "gametype": {
             "base": base,
             "category": category,
