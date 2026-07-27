@@ -177,20 +177,107 @@ def _table_seat_count(evs: list[tuple]) -> int | None:
     return None
 
 
-def _tournament_info(evs: list[tuple]) -> dict[str, Any] | None:
-    """Extract stable MTT metadata from CoinPoker's tournament event variants."""
-    server_port = _protocol_value(evs, "_coinpokerServerPort")
+# Sent whenever a table is joined, including when the player is moved, so it is
+# the one place the tournament names itself in a way that survives a table
+# change. roomProperties.id is that name; parentTournamentId is a level above
+# and belongs to a *different* tournament -- the parent of one step is the id of
+# the step below it, so reading that conflates the two.
+TOURNAMENT_JOIN_EVENT = "tournamentlobby.join_table"
+
+# How many other tournament markers travel alongside the joins.
+MAX_SESSION_CONTEXT = 100
+
+
+def joined_tournaments(evs: list[tuple]) -> dict[str, tuple[str, str | None]]:
+    """Which tournament each joined table belongs to.
+
+    Keyed by table because a capture carries every table at once: a player
+    sitting at two tournaments and a ring game gets one stream, so a single
+    "the tournament is X" would put ring hands in a tournament and hands of one
+    tournament in another. The room names the table it is talking about, and
+    the number ending that name is the table the hands carry.
+    """
+    joined: dict[str, tuple[str, str | None]] = {}
+    for name, _hid, data in evs:
+        if name != TOURNAMENT_JOIN_EVENT or not isinstance(data, dict):
+            continue
+        room = data.get("roomProperties")
+        if not isinstance(room, dict) or room.get("id") is None:
+            continue
+        table = _table_from_title(data.get("tableName"))
+        if table:
+            joined[table] = (str(room["id"]), room.get("tournamentName") or None)
+    return joined
+
+
+def _joined_only_value(evs: list[tuple], *keys: str) -> Any:
+    """As _protocol_value, but blind to the joins of other tables.
+
+    A join describes one table. Letting a general search read one would answer
+    with a tournament this table has never been in -- which is how a ring game
+    played alongside a tournament came to be filed as one.
+    """
+    return _protocol_value([event for event in evs if event[0] != TOURNAMENT_JOIN_EVENT], *keys)
+
+
+def _table_from_hand_id(hid: str) -> str:
+    """The table a hand belongs to, read off its number.
+
+    A hand id is the table followed by a five-digit counter (91426500343 ->
+    914265), which is also the number the room shows in the window title.
+    """
+    try:
+        return str(int(hid) // 100000)
+    except (ValueError, TypeError):
+        return str(hid)
+
+
+def _joins_table(event: tuple, table: str) -> bool:
+    """True when this carried event is the join of `table`."""
+    return event[0] == TOURNAMENT_JOIN_EVENT and _table_from_title((event[2] or {}).get("tableName")) == table
+
+
+def _table_from_title(title: Any) -> str | None:
+    """The table number ending a room's table name, if it ends with one."""
+    match = re.search(r"(\d+)\s*$", str(title or ""))
+    return match.group(1) if match else None
+
+
+def _tournament_info(evs: list[tuple], table_id: str = "", *, sole_table: bool = True) -> dict[str, Any] | None:
+    """Extract stable MTT metadata from CoinPoker's tournament event variants.
+
+    ``table_id`` decides whose tournament this is. A capture carries every
+    table at once, so the join of one table says nothing about another: taking
+    it as a sign would make a ring game played alongside a tournament into a
+    tournament of its own.
+    """
+    joined_no, joined_name = joined_tournaments(evs).get(table_id, (None, None))
+    # Everything below is read from this hand's own events. A carried marker
+    # names no table, so it would say "tournament" about every table the
+    # capture is carrying -- the transport port included, which is what a
+    # capture watching a tournament and a ring game at once will always show.
+    own = [event for event in evs if event[1] is not None]
+    # What may speak for this table: its own hand's events, and the join that
+    # names it. Nothing else -- a carried marker names no table, so it answers
+    # for every table the capture is holding at once, and the lobby sends
+    # thousands of them carrying the tournament it is about. Reading a number
+    # off one is how a ring game played next to a tournament acquired that
+    # tournament's id, and how a table of one tournament could acquire
+    # another's buy-in.
+    # When the capture is holding this table alone there is nothing for a
+    # table-less marker to be confused with, so it may still speak: a room
+    # that never sends a join would otherwise leave its one tournament table
+    # looking like a ring game.
+    mine = [*(event for event in evs if _joins_table(event, table_id)), *own]
+    if sole_table:
+        mine = [*evs]
+    server_port = _protocol_value(own, "_coinpokerServerPort")
     tournament_transport = server_port in (3000, 3001, "3000", "3001")
-    tour_no = _protocol_value(
-        evs,
-        "tournamentId",
-        "tourneyId",
-        "tournament_id",
-        "tourney_id",
-        "parentTournamentId",
+    tour_no = joined_no or _joined_only_value(mine, "tournamentId", "tourneyId", "tournament_id", "tourney_id")
+    tournament_event = any(
+        "tournament" in event_name.casefold() or "tourney" in event_name.casefold() for event_name, _hid, _data in own
     )
-    tournament_event = any("tournament" in name.casefold() or "tourney" in name.casefold() for name, _hid, _data in evs)
-    explicit_flag = _protocol_value(evs, "isTournament", "tournamentTable")
+    explicit_flag = _protocol_value(own, "isTournament", "tournamentTable")
     if (
         tour_no is None
         and not tournament_event
@@ -199,19 +286,19 @@ def _tournament_info(evs: list[tuple]) -> dict[str, Any] | None:
     ):
         return None
 
-    name = _protocol_value(
-        evs,
+    name = joined_name or _joined_only_value(
+        mine,
         "tournamentName",
         "tourneyName",
         "tournament_name",
         "tournamentShortName",
     )
-    table_id = _protocol_value(evs, "tableId", "table_id", "gameTableId")
-    max_seats = _table_seat_count(evs)
-    buyin = _protocol_value(evs, "buyIn", "buyin", "buyInAmount", "entryFee")
-    fee = _protocol_value(evs, "fee", "rake", "tournamentFee")
-    bounty = _protocol_value(evs, "bounty", "bountyAmount", "knockoutBounty")
-    level = _protocol_value(evs, "level", "blindLevel", "tournamentLevel")
+    table_id = _protocol_value(mine, "tableId", "table_id", "gameTableId")
+    max_seats = _table_seat_count(mine)
+    buyin = _protocol_value(mine, "buyIn", "buyin", "buyInAmount", "entryFee")
+    fee = _protocol_value(mine, "fee", "rake", "tournamentFee")
+    bounty = _protocol_value(mine, "bounty", "bountyAmount", "knockoutBounty")
+    level = _protocol_value(mine, "level", "blindLevel", "tournamentLevel")
     return {
         "tour_no": str(tour_no) if tour_no is not None else None,
         "name": str(name) if name is not None else None,
@@ -224,34 +311,143 @@ def _tournament_info(evs: list[tuple]) -> dict[str, Any] | None:
     }
 
 
+# The room announces where everyone finished once the tournament closes, in an
+# event of its own that carries no hand id. It arrives after the last hand, so
+# it is read on its own rather than ridden in on a hand.
+TOURNAMENT_RESULT_EVENT = "tournamentlobby.tournament_winner_info"
+
+
+def tournament_results(events: list[tuple]) -> list[dict[str, Any]]:
+    """Where each paid player finished, and what they were paid.
+
+    Only the place is reported. ``prize`` is a label, not an amount -- the
+    captured tournaments pay "Ticket" -- and nothing yet says what a numeric
+    one would be denominated in: fpdb stores winnings as an integer number of
+    cents in a named currency, and the capture offers a coinTypeId whose
+    meaning has not been established. A place is worth recording on its own;
+    a number written in the wrong unit or currency is worse than no number,
+    because it reads as a real result.
+    """
+    return [place for announcement in tournament_result_announcements(events) for place in announcement]
+
+
+def tournament_result_announcements(events: list[tuple]) -> list[list[dict[str, Any]]]:
+    """The places of each closing announcement, kept apart from one another.
+
+    One list per announcement, because an evening holds more than one
+    tournament and each closes with its own. Read together they are a single
+    roll of names belonging to nobody in particular: the players no longer
+    identify a tournament, and the places of the second go to the first or
+    nowhere. They are told apart here, and answered for separately.
+    """
+    announcements: list[list[dict[str, Any]]] = []
+    for name, _hid, data in events:
+        if name != TOURNAMENT_RESULT_EVENT or not isinstance(data, dict):
+            continue
+        places: list[dict[str, Any]] = []
+        for entry in data.get("winnerList") or []:
+            if not isinstance(entry, dict):
+                continue
+            player = entry.get("name")
+            rank = str(entry.get("rank") or "")
+            if not player or not rank.isdigit():
+                continue
+            places.append({"player": str(player), "rank": int(rank), "prize": str(entry.get("prize") or "")})
+        if places:
+            announcements.append(places)
+    return announcements
+
+
 def build_hands_from_stream(s2c: bytes, table_category: str = "PLO4") -> list[dict[str, Any]]:
     return build_hands(list(iter_game_events(s2c)), table_category)
 
 
-def build_hands(events: list[tuple[str, str | None, Any]], table_category: str = "PLO4") -> list[dict[str, Any]]:
-    """Group decoded events by hand id and build a normalized dict per hand."""
+def build_hands(
+    events: list[tuple[str, str | None, Any]],
+    table_category: str = "PLO4",
+    session_context: list[tuple] | None = None,
+    session_tables: set[str] | None = None,
+) -> list[dict[str, Any]]:
+    """Group decoded events by hand id and build a normalized dict per hand.
+
+    ``session_context`` carries the tournament announcements across calls. The
+    room announces the tournament once, when the table is joined, so a batch
+    arriving later has nothing identifying it -- and a hand with no tournament
+    number falls back to naming itself after its table, which changes the
+    moment the player is moved. Two HUDs for one tournament is what that looks
+    like. Pass the same list on every call to keep the announcement.
+
+    ``session_tables`` remembers the tables this capture has dealt hands at.
+    Whether a marker naming no table is ambiguous is a fact about the capture,
+    not about the twenty events in hand: a sweep holding a single hand looks
+    unambiguous however many tables are being played, and that is most sweeps.
+    Pass the same set on every call.
+    """
     order: list[str] = []
     groups: dict[str, list[tuple]] = defaultdict(list)
-    session_context: list[tuple] = []
+    carried: list[tuple] = session_context if session_context is not None else []
     for name, hid, data in events:
         if hid is None:
-            if order:
+            # Attached to the hand in progress so a late announcement still
+            # reaches it -- unless it is another table's join, which would tell
+            # that hand it belongs to a tournament it has never been in.
+            if order and (
+                name != TOURNAMENT_JOIN_EVENT or _joins_table((name, hid, data), _table_from_hand_id(order[-1]))
+            ):
                 groups[order[-1]].append((name, hid, data))
-            if (
+            if name == TOURNAMENT_JOIN_EVENT:
+                # One join is kept per table, and never evicted. Keeping them
+                # all is what lets a player sit at several tournaments at once,
+                # and keeping only the newest would strand the tables joined
+                # before it; they are told apart by table, so none can claim
+                # another's hands.
+                table = _table_from_title((data or {}).get("tableName"))
+                if table:
+                    carried[:] = [event for event in carried if not _joins_table(event, table)]
+                    carried.append((name, hid, data))
+            elif (
                 "tournament" in name.casefold()
                 or "tourney" in name.casefold()
                 or _protocol_value([(name, hid, data)], "tournamentId", "tourneyId", "isTournament") is not None
             ):
-                session_context.append((name, hid, data))
+                # Anything else that marks a tournament still travels, so a
+                # capture whose room never sends a join is not read as a ring
+                # game. Bounded, and the joins are held apart from it: the
+                # lobby sends thousands of standings that identify no table,
+                # and they used to push the joins out.
+                joins = [event for event in carried if event[0] == TOURNAMENT_JOIN_EVENT]
+                rest = [event for event in carried if event[0] != TOURNAMENT_JOIN_EVENT]
+                rest.append((name, hid, data))
+                carried[:] = [*joins, *rest[-MAX_SESSION_CONTEXT:]]
             continue
         if hid not in groups:
             order.append(hid)
-            groups[hid].extend(session_context)
+            # Only this table's join travels with the hand. The others name
+            # other tables, and everything that reads the group -- the
+            # tournament number, the name, the seat count -- would otherwise
+            # find them and answer with another table's tournament.
+            table = _table_from_hand_id(hid)
+            groups[hid].extend(
+                event for event in carried if event[0] != TOURNAMENT_JOIN_EVENT or _joins_table(event, table)
+            )
         groups[hid].append((name, hid, data))
 
     hands = []
+    # A marker that names no table can only be read when there is one table to
+    # read it about -- one in the whole capture, not one in this batch.
+    #
+    # This only ever narrows: a second table having been seen is enough, and
+    # its closing does not restore the licence. The marker still names no
+    # table, so once two have been played there is no telling which of them it
+    # is about -- including one that has since closed, whose last hands may
+    # not be imported yet. Recovering the licence would mean reading it as
+    # whichever table is open at that moment, which is the guess this is here
+    # to prevent.
+    tables = session_tables if session_tables is not None else set()
+    tables.update(_table_from_hand_id(hid) for hid in order)
+    sole_table = len(tables) == 1
     for hid in order:
-        built = _build_one(hid, groups[hid], table_category)
+        built = _build_one(hid, groups[hid], table_category, sole_table=sole_table)
         if built:
             hands.append(built)
     return hands
@@ -578,13 +774,21 @@ def _explicit_betting_actions(
     return actions
 
 
-def _build_one(hid: str, evs: list[tuple], table_category: str) -> dict[str, Any] | None:
+def _build_one(hid: str, evs: list[tuple], table_category: str, *, sole_table: bool = True) -> dict[str, Any] | None:
     info = _first(evs, "game.pre_hand_start_info")
     if not info:
         return None
 
     base, category = _detect_category(evs, table_category)
-    tournament = _tournament_info(evs)
+    # The table is worked out first: it is what tells a tournament's hands from
+    # those of every other table the capture is carrying.
+    table_id = str(info.get("tableId") or _table_from_hand_id(hid))
+    tournament = _tournament_info(evs, table_id, sole_table=sole_table)
+    if tournament:
+        joined = joined_tournaments(evs).get(table_id)
+        if joined:
+            tournament["tour_no"], joined_name = joined[0], joined[1]
+            tournament["name"] = joined_name or tournament.get("name")
     sb = Decimal(str(info.get("sbAmount", 0)))
     bb = Decimal(str(info.get("bbAmount", 0)))
     ante = Decimal(str(info.get("anteAmount", 0)))
@@ -737,21 +941,18 @@ def _build_one(hid: str, evs: list[tuple], table_category: str) -> dict[str, Any
     # (gameId 91426500343 -> table 914265), which also matches the number shown
     # in the CoinPoker window title ("PLO4 914265 ..."). This gives each table a
     # distinct, stable name so the HUD creates one window per table.
-    protocol_table_id = (info.get("tableId") or (tournament or {}).get("table_id")) if tournament else None
-    if protocol_table_id is not None:
-        table_id = str(protocol_table_id)
-    else:
-        try:
-            table_id = str(int(hid) // 100000)
-        except (ValueError, TypeError):
-            table_id = str(hid)
-
     if tournament and tournament.get("tour_no") is None:
         # CoinPoker's MTT hand stream identifies itself by transport port but
         # does not always repeat lobby metadata inside each hand.  The table
         # prefix is stable for the captured table and keeps the hand on FPDB's
         # tournament path instead of silently storing tournament chips as USD.
         tournament["tour_no"] = table_id
+        log.warning(
+            "No tournament number for hand %s; naming it after table %s. "
+            "The HUD identity changes if the player is moved.",
+            hid,
+            table_id,
+        )
     if tournament and tournament.get("table_id") is None:
         tournament["table_id"] = table_id
     if tournament and tournament.get("name") is None:

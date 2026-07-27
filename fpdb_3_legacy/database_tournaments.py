@@ -533,6 +533,33 @@ class DatabaseTournamentsMixin:
         else:
             result = tmp[0]
         return result
+    def updateTourneyPlayerResult(
+        self,
+        site_name: str,
+        tourney_no: str,
+        player_name: str,
+        rank: int,
+        winnings=None,
+        winnings_currency: str | None = None,
+    ) -> bool:
+        """Record where a player finished a tournament. True if a row was found.
+
+        Kept apart from updateTourneyPlayerBounties, which rides on a hand: the
+        room announces the finishing places once the tournament has closed, so
+        there is no hand left to carry them.
+
+        The update coalesces, so a prize that is not money -- a seat in another
+        tournament, say -- leaves the winnings column as it was rather than
+        being written down as zero.
+        """
+        names, row = self.getTourneyPlayerInfo(site_name, tourney_no, player_name)
+        if row is None:
+            log.debug("No %s entry for %s in tournament %s", site_name, player_name, tourney_no)
+            return False
+        query = self.sql.query["updateTourneysPlayerResults"].replace("%s", self.sql.query["placeholder"])
+        self.get_cursor().execute(query, (rank, winnings, winnings_currency, row[names.index("id")]))
+        return True
+
     def updateTourneyPlayerBounties(self, hand) -> None:
         updateDb = False
         cursor = self.get_cursor()
