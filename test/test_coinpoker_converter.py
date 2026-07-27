@@ -9,6 +9,7 @@ rejected rather than imported truncated.
 from __future__ import annotations
 
 import json
+import logging
 from decimal import Decimal
 from pathlib import Path
 from unittest.mock import MagicMock
@@ -603,3 +604,179 @@ def test_incomplete_hand_is_rejected() -> None:
     assert not hand_data["collections"]
     with pytest.raises(CaptureNotImportableError):
         build_fpdb_hand(hand_data)
+
+
+# --- how many chairs are at the table -----------------------------------------
+#
+# The stream is searched for the spellings that name the table -- maxSeats and
+# tableSize -- and every one of them is offered until a plausible number comes
+# out, so a field carrying nonsense cannot hide a good one appearing later.
+#
+# maxPlayers is not among them: on a tournament table it answers with the
+# entrants the tournament accepts. A large one breaks the import outright on
+# MySQL, where Gametypes.maxSeats is a TINYINT ("Out of range value for column
+# 'maxSeats'"); a small one is worse, since it looks exactly like a table size.
+
+from fpdb_3_legacy.coinpoker_hand_builder import MAX_TABLE_SEATS, MIN_TABLE_SEATS, _seat_count
+
+
+@pytest.mark.parametrize("seats", [MIN_TABLE_SEATS, 6, 9, MAX_TABLE_SEATS])
+def test_a_plausible_seat_count_is_taken(seats) -> None:
+    assert _seat_count(seats, source="test") == seats
+    assert _seat_count(str(seats), source="test") == seats
+
+
+@pytest.mark.parametrize(
+    "entrants",
+    [128, 180, 1000, 2500],
+    ids=["just past a TINYINT", "a small MTT", "a big MTT", "a huge MTT"],
+)
+def test_a_tournament_entrant_count_is_not_a_seat_count(entrants) -> None:
+    """The reported failure: a field naming the whole tournament, not the table."""
+    assert _seat_count(entrants, source="test") is None
+
+
+@pytest.mark.parametrize("odd", [0, 1, 11, -6, None, "", "six", "6.5"])
+def test_anything_that_cannot_be_a_table_is_refused(odd) -> None:
+    assert _seat_count(odd, source="test") is None
+
+
+def test_the_refused_value_and_where_it_came_from_are_logged(caplog) -> None:
+    # So a capture says which field carried it, rather than only that the
+    # import failed.
+    with caplog.at_level(logging.WARNING):
+        _seat_count(1000, source="the tournament events")
+
+    assert "1000" in caplog.text
+    assert "the tournament events" in caplog.text
+
+
+def test_a_quiet_refusal_is_not_logged(caplog) -> None:
+    # An absent field is the normal case and says nothing.
+    with caplog.at_level(logging.WARNING):
+        _seat_count(None, source="the table events")
+
+    assert caplog.text == ""
+
+
+def _as_tournament(events: list[tuple], **fields) -> list[tuple]:
+    """The same hand, announced as a tournament table carrying `fields`.
+
+    The event goes through the real reader, so which fields it trusts is what
+    is under test rather than something stood in for it.
+    """
+    announcement = ("game.tournament_info", events[0][1], {"tournamentId": "116039100002", **fields})
+    return [announcement, *events]
+
+
+def test_a_tournament_is_recognised_from_its_own_event() -> None:
+    hand = build_hands(_as_tournament(_load_straddle_events()), "PLO4")[0]
+
+    assert hand["gametype"]["type"] == "tour"
+    assert hand["tournament"]["tour_no"] == "116039100002"
+
+
+def test_the_entrants_a_tournament_accepts_are_not_its_table_size() -> None:
+    """The reported failure, end to end through the real reader."""
+    events = _as_tournament(_load_straddle_events(), maxPlayers=1000)
+
+    hand = build_hands(events, "PLO4")[0]
+
+    assert hand["gametype"]["maxSeats"] == max(len(hand["players"]), MIN_TABLE_SEATS)
+    assert MIN_TABLE_SEATS <= hand["gametype"]["maxSeats"] <= MAX_TABLE_SEATS
+
+
+def test_a_small_entrant_count_is_not_borrowed_either() -> None:
+    """What a range check alone would have let through.
+
+    A nine-entrant tournament on a six-max table gives a number that looks
+    like a table size, so refusing it cannot be a matter of how large it is.
+    """
+    events = _as_tournament(_load_straddle_events(), maxPlayers=9)
+
+    hand = build_hands(events, "PLO4")[0]
+
+    assert hand["gametype"]["maxSeats"] != 9
+    assert hand["gametype"]["maxSeats"] == max(len(hand["players"]), MIN_TABLE_SEATS)
+
+
+@pytest.mark.parametrize("spelling", ["maxSeats", "tableSize"])
+def test_a_field_naming_the_table_is_believed(spelling) -> None:
+    events = _as_tournament(_load_straddle_events(), **{spelling: 9})
+
+    hand = build_hands(events, "PLO4")[0]
+
+    assert hand["gametype"]["maxSeats"] == 9
+
+
+def test_the_table_is_believed_over_the_tournament() -> None:
+    events = _as_tournament(_load_straddle_events(), maxSeats=6, maxPlayers=1000)
+
+    hand = build_hands(events, "PLO4")[0]
+
+    assert hand["gametype"]["maxSeats"] == 6
+
+
+def test_an_out_of_range_table_field_is_still_refused() -> None:
+    # The range check stays useful for a field that does name the table.
+    events = _as_tournament(_load_straddle_events(), maxSeats=1000)
+
+    hand = build_hands(events, "PLO4")[0]
+
+    assert MIN_TABLE_SEATS <= hand["gametype"]["maxSeats"] <= MAX_TABLE_SEATS
+
+def test_a_nonsense_field_does_not_hide_a_good_one() -> None:
+    """Validation decides which candidate is used, not where it appears.
+
+    Returning the first value found and checking it afterwards threw away a
+    perfectly good tableSize because a maxSeats earlier in the stream was
+    describing something else.
+    """
+    events = _as_tournament(_load_straddle_events(), maxSeats=1000, tableSize=6)
+
+    hand = build_hands(events, "PLO4")[0]
+
+    assert hand["gametype"]["maxSeats"] == 6
+
+
+def test_the_order_the_fields_arrive_in_does_not_matter() -> None:
+    events = _as_tournament(_load_straddle_events(), tableSize=1000, maxSeats=6)
+
+    hand = build_hands(events, "PLO4")[0]
+
+    assert hand["gametype"]["maxSeats"] == 6
+
+
+def test_two_nonsense_fields_fall_back_to_the_players_seated() -> None:
+    events = _as_tournament(_load_straddle_events(), maxSeats=1000, tableSize=2500)
+
+    hand = build_hands(events, "PLO4")[0]
+
+    assert hand["gametype"]["maxSeats"] == max(len(hand["players"]), MIN_TABLE_SEATS)
+
+
+def test_a_later_event_can_supply_the_seat_count() -> None:
+    # The bad value and the good one need not be in the same event.
+    events = _as_tournament(_load_straddle_events(), maxSeats=1000)
+    events.insert(1, ("game.table_info", events[0][1], {"tableSize": 6}))
+
+    hand = build_hands(events, "PLO4")[0]
+
+    assert hand["gametype"]["maxSeats"] == 6
+
+
+def test_the_field_that_was_refused_is_named_in_the_log(caplog) -> None:
+    events = _as_tournament(_load_straddle_events(), maxSeats=1000, tableSize=6)
+
+    with caplog.at_level(logging.WARNING):
+        build_hands(events, "PLO4")
+
+    assert "maxSeats" in caplog.text
+    assert "1000" in caplog.text
+
+
+
+def test_a_cash_hand_still_reports_its_table_size() -> None:
+    hand = _hand("91426500343")
+
+    assert MIN_TABLE_SEATS <= hand["gametype"]["maxSeats"] <= MAX_TABLE_SEATS
