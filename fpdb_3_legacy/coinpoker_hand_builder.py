@@ -483,6 +483,11 @@ def _explicit_betting_actions(
             committed[player] = amount
             street_to = amount
             continue
+        if action == "STRADDLE":
+            actions.append({"type": "straddle", "player": player, "amount": str(amount)})
+            committed[player] = amount
+            street_to = max(street_to, amount)
+            continue
         if round_name in {"PREFLOP", "FLOP", "TURN", "RIVER"} and round_name != street:
             street = round_name
             committed.clear()
@@ -618,7 +623,14 @@ def _build_one(hid: str, evs: list[tuple], table_category: str) -> dict[str, Any
         if not player or action in non_actions:
             continue
         bet = Decimal(str(d.get("betAmout", 0) or 0))
-        if action == "Fold":
+        if action == "Straddle":
+            if bet <= committed.get(player, Decimal(0)):
+                continue
+            actions.append({"type": "straddle", "player": player, "amount": str(bet)})
+            committed[player] = bet
+            street_has_bet["PREFLOP"] = True
+            street_to["PREFLOP"] = max(street_to["PREFLOP"], bet)
+        elif action == "Fold":
             actions.append({"type": "folds", "player": player, "street": street})
         elif action == "Check":
             actions.append({"type": "checks", "player": player, "street": street})

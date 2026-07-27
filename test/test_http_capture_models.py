@@ -1452,10 +1452,12 @@ def test_hand_operation_plan_maps_supported_actions_to_hand_methods():
         "players": [
             {"seat_idx": 0, "name": "alice", "starting_stack": 100},
             {"seat_idx": 1, "name": "bob", "starting_stack": 100},
+            {"seat_idx": 2, "name": "carol", "starting_stack": 100},
         ],
         "actions": [
             {"street": "BLINDSANTES", "player": "alice", "type": "small blind", "amount": "1"},
             {"street": "BLINDSANTES", "player": "bob", "type": "big blind", "amount": "2"},
+            {"street": "BLINDSANTES", "player": "carol", "type": "straddle", "amount": "4"},
             {"street": "PREFLOP", "player": "alice", "type": "calls", "amount": "1"},
             {"street": "PREFLOP", "player": "bob", "type": "raises", "amount": "4", "to": "6"},
             {"street": "PREFLOP", "player": "bob", "type": "uncalled", "amount": "4"},
@@ -1465,8 +1467,10 @@ def test_hand_operation_plan_maps_supported_actions_to_hand_methods():
     assert build_hand_operations(hand_data) == [
         {"method": "addPlayer", "args": [0, "alice", "100"], "source": "players"},
         {"method": "addPlayer", "args": [1, "bob", "100"], "source": "players"},
+        {"method": "addPlayer", "args": [2, "carol", "100"], "source": "players"},
         {"method": "addBlind", "args": ["alice", "small blind", "1"], "source": "actions"},
         {"method": "addBlind", "args": ["bob", "big blind", "2"], "source": "actions"},
+        {"method": "addBlind", "args": ["carol", "straddle", "4"], "source": "actions"},
         {"method": "addCall", "args": ["PREFLOP", "alice", "1"], "source": "actions"},
         {"method": "addRaiseTo", "args": ["PREFLOP", "bob", "6"], "source": "actions"},
         {"method": "addUncalled", "args": ["PREFLOP", "bob", "4"], "source": "actions"},

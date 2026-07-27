@@ -9,6 +9,7 @@ rejected rather than imported truncated.
 from __future__ import annotations
 
 import json
+from decimal import Decimal
 from pathlib import Path
 from unittest.mock import MagicMock
 
@@ -34,9 +35,11 @@ from fpdb_3_legacy.http_capture_hand_builder import (
     import_fpdb_hand,
     render_fpdb_hand,
 )
+from fpdb_3_legacy.PokerStarsToFpdb import PokerStars
 from fpdb_3_legacy.SQL import Sql
 
 FIXTURE = Path(__file__).parent / "data" / "coinpoker_hand_events.json"
+STRADDLE_FIXTURE = Path(__file__).parent / "data" / "coinpoker_straddle_hand_events.json"
 
 
 def _load_events() -> list[tuple]:
@@ -47,6 +50,15 @@ def _load_events() -> list[tuple]:
 def _hand(hand_id: str) -> dict:
     hands = build_hands(_load_events(), "PLO4")
     return next(h for h in hands if h["hand_id"] == hand_id)
+
+
+def _load_straddle_events() -> list[tuple]:
+    raw = json.loads(STRADDLE_FIXTURE.read_text())
+    return [tuple(e) for e in raw]
+
+
+def _straddle_hand() -> dict:
+    return build_hands(_load_straddle_events(), "PLO4")[0]
 
 
 # --- protocol decoder ---------------------------------------------------------
@@ -209,6 +221,55 @@ def test_complete_hand_renders_expected_narrative() -> None:
     assert "*** TURN *** [Qc 9s 6c] [5s]" in text
     assert "Villain4 collected $0.2" in text
     assert "Rake $0.01" in text
+
+
+def test_coinpoker_explicit_straddle_is_normalized_as_forced_blind() -> None:
+    actions = _straddle_hand()["actions"]
+
+    assert actions[:3] == [
+        {"type": "small blind", "player": "SmallBlind", "amount": "0.01"},
+        {"type": "big blind", "player": "BigBlindWinner", "amount": "0.02"},
+        {"type": "straddle", "player": "Straddler", "amount": "0.04"},
+    ]
+    assert not any(
+        action["type"] == "raises" and action["player"] == "Straddler" and action.get("street") == "PREFLOP"
+        for action in actions
+    )
+
+
+def test_coinpoker_snapshot_straddle_is_normalized_as_forced_blind() -> None:
+    events = [event for event in _load_straddle_events() if event[0] != "game.dealer_chat_action"]
+    actions = build_hands(events, "PLO4")[0]["actions"]
+
+    assert {"type": "straddle", "player": "Straddler", "amount": "0.04"} in actions
+
+
+def test_coinpoker_straddle_hand_conserves_pot_rake_and_player_results() -> None:
+    hand = build_fpdb_hand(_straddle_hand())
+
+    hand.totalPot()
+
+    assert hand.pot.committed == {
+        "Straddler": Decimal("0.28"),
+        "SmallBlind": Decimal("0.01"),
+        "BigBlindWinner": Decimal("0.28"),
+    }
+    assert hand.totalpot == Decimal("0.57")
+    assert hand.totalcollected == Decimal("0.54")
+    assert hand.rake == Decimal("0.03")
+
+    hand.assembleHand()
+    assert hand.handsplayers["Straddler"]["committed"] == 28
+    assert hand.handsplayers["Straddler"]["totalProfit"] == -28
+    assert hand.handsplayers["Straddler"]["flg_blind_k"] is True
+    assert hand.handsplayers["BigBlindWinner"]["committed"] == 28
+    assert hand.handsplayers["BigBlindWinner"]["totalProfit"] == 26
+    assert sum(player["totalProfit"] for player in hand.handsplayers.values()) == -3
+
+    text = render_fpdb_hand(hand)
+    assert "Straddler: posts straddle $0.04" in text
+    assert "Total pot $0.57 Main pot $0.03 Side pot $0.54. | Rake $0.03" in text
+    assert PokerStars.re_post_straddle.search(text)
 
 
 def test_hole_cards_and_board_are_mapped() -> None:

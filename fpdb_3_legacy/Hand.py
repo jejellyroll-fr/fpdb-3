@@ -1745,7 +1745,7 @@ class Hand:
                 " and is all-in" if act[3] else "",
             )
         if act[1] == "straddle":
-            return "{}: straddles {}{}{}".format(
+            return "{}: posts straddle {}{}{}".format(
                 act[0],
                 self.sym,
                 act[2],
