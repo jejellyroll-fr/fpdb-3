@@ -56,6 +56,9 @@ class EmojiIconProvider(IconProvider):
             "pfr": "📈",  # Preflop Raise
             "three_B": "⬆️",  # 3-Bet
             "four_B": "⏫",  # 4-Bet
+            "f_3bet": "🛡️",
+            "fold_vs_4bet": "🛡️",
+            "squeeze": "🤏",
             "limp": "🚶",  # Limp
             "cold_call": "❄️",  # Cold Call
             "rfi": "🚀",  # Raise First In
@@ -72,14 +75,26 @@ class EmojiIconProvider(IconProvider):
             "check_call_flop": "✅",
             "donk_bet": "🎲",
             "float_bet": "🎈",
+            "dbr1": "🎲",
+            "f_dbr1": "🛡️",
+            "cr1": "↗️",
+            "cb_ip": "➡️",
+            "cb_oop": "↪️",
             # Turn stats
             "cb2": "➡️",  # Continuation Bet Turn
             "f_cb2": "🛡️",  # Fold to CB Turn
+            "dbr2": "🎲",
+            "f_dbr2": "🛡️",
+            "cr2": "↗️",
             "turn_aggression": "⚔️",
             "turn_check_call": "✅",
             # River stats
             "cb3": "➡️",  # Continuation Bet River
             "f_cb3": "🛡️",  # Fold to CB River
+            "dbr3": "🎲",
+            "f_dbr3": "🛡️",
+            "cr3": "↗️",
+            "river_call_efficiency": "☎️",
             "river_aggression": "⚔️",
             "value_bet": "💎",
             "bluff": "🎭",
@@ -98,6 +113,8 @@ class EmojiIconProvider(IconProvider):
             # Showdown
             "wtsd": "👁️",  # Went to showdown
             "wmsd": "🏆",  # Won money at showdown
+            "wwsf": "✨",
+            "WMsF": "💵",
             "show_aggr": "💪",  # Showdown aggression
             # General stats
             "hands": "🤝",  # Total hands
@@ -112,7 +129,6 @@ class EmojiIconProvider(IconProvider):
             # Advanced stats
             "fold_3B": "🛡️",  # Fold to 3-bet
             "fold_4B": "🛡️",  # Fold to 4-bet
-            "squeeze": "🤏",  # Squeeze play
             "isolation": "🎯",  # Isolation
             "limped_pot": "🚶",  # Limped pot
             "multiway": "👥",  # Multiway pot
@@ -229,29 +245,45 @@ def get_icon_provider(provider_name: str = "emoji") -> IconProvider:
 def get_stat_category(stat_name: str) -> str:
     """Categorize a stat into logical groups."""
     preflop_stats = [
-        "vpip", "pfr", "three_B", "four_B", "limp", "cold_call", "rfi", "fold_3B", "fold_4B",
-        "face_raise_preflop", "fold_to_squeeze", "face_limpers", "straddle",
+        "vpip", "pfr", "vpip_pfr_ratio", "three_B", "four_B", "f_3bet", "f_4bet",
+        "fold_vs_4bet", "limp", "open_limp", "cold_call", "rfi", "rfi_total",
+        "rfi_early_position", "rfi_middle_position", "rfi_late_position",
+        "squeeze", "fold_to_squeeze", "fold_3B", "fold_4B",
+        "face_raise_preflop", "face_limpers", "straddle",
         "p_2bet_facing", "p_3bet_facing", "p_4bet_facing", "p_raise_made",
         "p_raise_facing", "p_raise_made_2", "p_5bet_facing",
     ]
     flop_stats = [
-        "cb1", "f_cb1", "raise_cb1", "donk_bet", "float_bet", "check_call_flop",
+        "cb1", "cb_ip", "cb_oop", "f_cb1", "raise_cb1", "donk_bet", "dbr1", "f_dbr1",
+        "cr1", "float_bet", "check_call_flop", "check_raise_frequency",
+        "bet_frequency_flop", "raise_frequency_flop", "avg_bet_size_flop",
         "four_B_flop", "open_flop", "face_raise_flop", "first_raise_flop", "fold_flop", "f_bet_facing", "f_bet_made", "f_spr", "f_raise_made",
         "f_2bet_facing", "f_3bet_facing", "f_4bet_facing", "f_raise_facing", "f_raise_made_2",
     ]
     turn_stats = [
-        "cb2", "f_cb2", "turn_aggression", "turn_check_call",
+        "cb2", "f_cb2", "dbr2", "f_dbr2", "cr2", "probe_bet_turn",
+        "bet_frequency_turn", "raise_frequency_turn", "avg_bet_size_turn",
+        "turn_aggression", "turn_check_call",
         "four_B_turn", "open_turn", "float_turn", "face_raise_turn", "first_raise_turn", "fold_turn", "t_bet_facing", "t_bet_made", "t_spr", "t_raise_made",
         "t_2bet_facing", "t_3bet_facing", "t_4bet_facing", "t_raise_facing", "t_raise_made_2",
     ]
     river_stats = [
-        "cb3", "f_cb3", "river_aggression", "value_bet", "bluff",
+        "cb3", "f_cb3", "dbr3", "f_dbr3", "cr3", "probe_bet_river",
+        "avg_bet_size_river", "river_call_efficiency", "river_aggression", "value_bet", "bluff",
         "four_B_river", "open_river", "float_river", "face_raise_river", "first_raise_river", "fold_river", "r_bet_facing", "r_bet_made", "r_spr", "r_raise_made",
         "r_2bet_facing", "r_3bet_facing", "r_4bet_facing", "r_raise_facing", "r_raise_made_2",
     ]
-    steal_stats = ["steal", "f_steal", "call_vs_steal", "three_B_vs_steal", "three_bet_vs_steal", "resteal"]
-    aggression_stats = ["agg_fact", "agg_freq", "agg_pct", "bet_freq", "raise_freq"]
-    general_stats = ["hands", "totalprofit", "profit100", "wtsd", "wmsd", "fold_to_allin",
+    steal_stats = [
+        "steal", "s_steal", "f_steal", "f_SB_steal", "f_BB_steal",
+        "call_vs_steal", "three_B_vs_steal", "three_bet_vs_steal", "resteal",
+    ]
+    aggression_stats = [
+        "agg_fact", "agg_fact_pct", "agg_freq", "agg_pct", "a_freq1", "a_freq2",
+        "a_freq3", "a_freq4", "a_freq_123", "bet_freq", "raise_freq",
+        "triple_barrel", "overbet_frequency",
+    ]
+    general_stats = ["hands", "saw_f", "totalprofit", "profit100", "bbper100", "BBper100",
+                     "wtsd", "wmsd", "wwsf", "WMsF", "sd_winrate", "non_sd_winrate", "fold_to_allin",
                      "amt_blind", "amt_bet_p", "amt_bet_f", "amt_bet_t", "amt_bet_r", "amt_bet_ttl"]
     player_stats = ["playername", "player_note", "n"]
 

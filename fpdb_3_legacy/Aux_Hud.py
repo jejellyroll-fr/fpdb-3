@@ -212,21 +212,7 @@ class SimpleHUD(Aux_Base.AuxSeats):
         #    retrieve the contents of the stats. popup and tips elements
         #    for future use do this here so that subclasses don't have to bother
 
-        self.stats = [[None] * self.ncols for _ in range(self.nrows)]
-        self.popups = [[None] * self.ncols for _ in range(self.nrows)]
-        self.tips = [[None] * self.ncols for _ in range(self.nrows)]
-
-        for stat in self.game_params.stats:
-            self.stats[self.game_params.stats[stat].rowcol[0]][self.game_params.stats[stat].rowcol[1]] = (
-                self.game_params.stats[stat].stat_name
-            )
-            self.popups[self.game_params.stats[stat].rowcol[0]][self.game_params.stats[stat].rowcol[1]] = (
-                self.game_params.stats[stat].popup
-            )
-            self.tips[self.game_params.stats[stat].rowcol[0]][self.game_params.stats[stat].rowcol[1]] = (
-                self.game_params.stats[stat].tip
-            )
-
+        self._build_legacy_grid_arrays()
         self._build_block_layouts()
 
     def _positional_mode(self) -> str:
@@ -275,6 +261,27 @@ class SimpleHUD(Aux_Base.AuxSeats):
 
         hand_hero = getattr(self.hud.hand_instance, "hero", None)
         return bool(hand_hero and screen_name_l == str(hand_hero).lower()) or screen_name_l == "hero"
+
+    def _build_legacy_grid_arrays(self) -> None:
+        """Build the classic grid without indexing multi-block coordinates.
+
+        A multi-block stat-set keeps a flat union in ``game_params.stats`` for
+        compatibility, but its top-level rows/cols may legitimately be zero.
+        Those coordinates belong to the individual blocks and cannot be placed
+        in the classic grid.  The block renderer consumes them separately in
+        ``_build_block_layouts``.
+        """
+        self.stats = [[None] * self.ncols for _ in range(self.nrows)]
+        self.popups = [[None] * self.ncols for _ in range(self.nrows)]
+        self.tips = [[None] * self.ncols for _ in range(self.nrows)]
+
+        for stat_config in self.game_params.stats.values():
+            row, col = stat_config.rowcol
+            if not (0 <= row < self.nrows and 0 <= col < self.ncols):
+                continue
+            self.stats[row][col] = stat_config.stat_name
+            self.popups[row][col] = stat_config.popup
+            self.tips[row][col] = stat_config.tip
 
     def _build_block_layouts(self) -> None:
         """Build per-block 2D stat/popup/tip arrays for multi-panel rendering.
@@ -330,6 +337,7 @@ class SimpleHUD(Aux_Base.AuxSeats):
                     "bordercolor": getattr(blk, "bordercolor", ""),
                     "title_bgcolor": getattr(blk, "title_bgcolor", ""),
                     "title_fgcolor": getattr(blk, "title_fgcolor", ""),
+                    "cell_width": getattr(blk, "cell_width", 0),
                     "x": getattr(blk, "x", 0),
                     "y": getattr(blk, "y", 0),
                     "nrows": nr,
@@ -359,23 +367,7 @@ class SimpleHUD(Aux_Base.AuxSeats):
         self.xpad = self.game_params.xpad
         self.ypad = self.game_params.ypad
 
-        # Reinitialize the stats arrays
-        self.stats = [[None] * self.ncols for _ in range(self.nrows)]
-        self.popups = [[None] * self.ncols for _ in range(self.nrows)]
-        self.tips = [[None] * self.ncols for _ in range(self.nrows)]
-
-        # Repopulate with new stat set configuration
-        for stat in self.game_params.stats:
-            self.stats[self.game_params.stats[stat].rowcol[0]][self.game_params.stats[stat].rowcol[1]] = (
-                self.game_params.stats[stat].stat_name
-            )
-            self.popups[self.game_params.stats[stat].rowcol[0]][self.game_params.stats[stat].rowcol[1]] = (
-                self.game_params.stats[stat].popup
-            )
-            self.tips[self.game_params.stats[stat].rowcol[0]][self.game_params.stats[stat].rowcol[1]] = (
-                self.game_params.stats[stat].tip
-            )
-
+        self._build_legacy_grid_arrays()
         self._build_block_layouts()
 
     def create_contents(self, container: Any, i: int | str) -> None:
@@ -605,10 +597,14 @@ class SimpleHUD(Aux_Base.AuxSeats):
     def _canonical_for(self, key: BlockKey) -> tuple[int, int]:
         """Canonical position for a block window.
 
-        Priority: a user drag saved to the positions store, then the value
-        computed at create time, then the layout default. A saved position for
-        one (seat, block) key can never affect another key.
+        Priority: this table's established position, then the shared persisted
+        layout default, then the computed layout default. This keeps another
+        table's later drag from repositioning an already-open multi-box HUD,
+        while fresh tables still inherit the last saved layout.
         """
+        if key in self.block_positions:
+            return self.block_positions[key]
+
         seat, block_index = key
         stored = get_positions_store().get_position(
             self.hud.site,
@@ -620,8 +616,6 @@ class SimpleHUD(Aux_Base.AuxSeats):
         )
         if stored is not None:
             return stored
-        if key in self.block_positions:
-            return self.block_positions[key]
         return self._default_canonical(key)
 
     def create(self) -> None:
@@ -1014,7 +1008,7 @@ class SimpleStatWindow(Aux_Base.SeatWindow):
                         grid.addWidget(stat_widget.widget, grid_row + 1 if show_headers else grid_row, c, 1, span)
                         stat_widget.widget.setFont(self.aw.font)
                         if multi:
-                            stat_widget.widget.setMinimumWidth(20)
+                            stat_widget.widget.setMinimumWidth(blk.get("cell_width") or 20)
                     elif not btexts:
                         # Keep empty placeholders only in the legacy (no-text) mode;
                         # with text items the empty cells are intentional spacing.
@@ -1719,11 +1713,12 @@ class SimpleTablePopupMenu(QWidget):
         return self.parentwin.aw.game_params.name
 
     def change_stat_set(self, sel: int, stat_sets_dict: dict) -> None:
-        """Change the active stat set for the HUD and refresh the display.
+        """Change the active stat set for this table and refresh the display.
 
-        This method updates the configuration to use the selected stat set, saves the configuration,
-        closes the popup menu, and attempts to refresh the HUD with the new stat set. If refreshing fails,
-        the HUD is restarted to apply the new stat set.
+        The table menu is deliberately local: changing one table must not
+        rewrite the global ``<game_stat_set>`` mapping used by every table of
+        the same game.  HUD_main retains the override across a restart of this
+        HUD for the remainder of the capture session.
 
         Args:
             sel: The index of the selected stat set in the combo box.
@@ -1731,20 +1726,18 @@ class SimpleTablePopupMenu(QWidget):
         """
         new_stat_set = stat_sets_dict[sel][1]
 
-        # Update the configuration to use the new stat set
-        self._update_stat_set_in_config(new_stat_set)
-
-        # Save the configuration
-        self.parentwin.hud.config.save()
+        try:
+            new_game_params = self._update_stat_set_in_config(new_stat_set)
+        except (KeyError, ValueError) as exc:
+            log.error("Cannot switch this HUD to stat set %r: %s", new_stat_set, exc)
+            self.delete_event()
+            return
 
         # Close the popup menu
         self.delete_event()
 
         try:
-            self.parentwin.aw.game_params = self.parentwin.hud.config.get_supported_games_parameters(
-                self.parentwin.hud.poker_game,
-                self.parentwin.hud.game_type,
-            )["game_stat_set"]
+            self.parentwin.aw.game_params = new_game_params
             self.parentwin.aw.destroy()
             self.parentwin.aw.refresh_stats_layout()
             self.parentwin.aw.create()
@@ -1755,27 +1748,41 @@ class SimpleTablePopupMenu(QWidget):
             log.info("Rebuilding HUD failed, restarting to apply stat set '%s': %s", new_stat_set, e)
             self.parentwin.hud.parent.kill_hud("kill", self.parentwin.hud.table.key)
 
-    def _update_stat_set_in_config(self, new_stat_set: str) -> None:
-        """Update the stat set in the configuration and XML for the current game.
+    def _update_stat_set_in_config(self, new_stat_set: str) -> Any:
+        """Select a stat set on this table without changing global defaults.
 
-        This method updates the stat set for the current poker game and game type in both the in-memory configuration
-        and the XML configuration file.
+        The historical implementation changed ``supported_games`` and
+        ``HUD_config.xml``.  Since that object is shared by every open HUD, one
+        table selection contaminated all tables of the same game.  Keep a local
+        copy of the supported-game parameters instead and register a
+        session-only table override with HUD_main.
 
         Args:
-            new_stat_set: The name of the new stat set to apply.
+            new_stat_set: The name of the stat set to apply to this table.
+
+        Returns:
+            The selected ``Stat_sets`` configuration object.
+
+        Raises:
+            KeyError: If the selected stat set does not exist.
         """
-        # Update the game_stat_set configuration
-        poker_game = self.parentwin.hud.poker_game
-        if poker_game in self.parentwin.hud.config.supported_games:
-            game_config = self.parentwin.hud.config.supported_games[poker_game]
+        hud = self.parentwin.hud
+        stat_set = hud.config.stat_sets.get(new_stat_set)
+        if stat_set is None:
+            raise KeyError(f"unknown stat set: {new_stat_set}")
 
-            # game_stat_set is a dictionary indexed by game_type
-            game_type = self.parentwin.hud.game_type
-            if game_type in game_config.game_stat_set:
-                game_config.game_stat_set[game_type].stat_set = new_stat_set
+        hud.supported_games_parameters = dict(hud.supported_games_parameters)
+        hud.supported_games_parameters["game_stat_set"] = stat_set
 
-            # Also update the XML directly
-            self._update_xml_stat_set(poker_game, game_type, new_stat_set)
+        overrides = getattr(hud.parent, "_table_stat_set_overrides", None)
+        if isinstance(overrides, dict):
+            hud.parent.set_table_stat_set_override(
+                hud.table.key,
+                hud.poker_game,
+                hud.game_type,
+                new_stat_set,
+            )
+        return stat_set
 
     def _update_xml_stat_set(self, poker_game: str, game_type: str, new_stat_set: str) -> None:
         """Update the stat set attribute in the XML configuration for a specific game and game type.

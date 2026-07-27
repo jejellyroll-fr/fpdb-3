@@ -28,9 +28,11 @@ class TestStatSetSwitching(unittest.TestCase):
         self.hud.poker_game = "holdem"
         self.hud.game_type = "ring"
         self.hud.parent = Mock()
+        self.hud.parent._table_stat_set_overrides = {}
         self.hud.table = Mock()
         self.hud.table.key = "test_table"
         self.hud.stat_dict = {"player1": {"vpip": 25.0, "pfr": 15.0}}
+        self.hud.supported_games_parameters = {"game_stat_set": Mock(name="DefaultStatSet")}
 
         # Mock aux window
         self.aux_window = Mock()
@@ -80,11 +82,10 @@ class TestStatSetSwitching(unittest.TestCase):
         """
         # Verify sequence of operations
         self.popup_menu._update_stat_set_in_config.assert_called_once_with(stat_set_name)
-        self.config.save.assert_called_once()
+        self.config.save.assert_not_called()
         self.popup_menu.delete_event.assert_called_once()
 
         # Verify refresh attempt
-        self.config.get_supported_games_parameters.assert_called_once_with("holdem", "ring")
         assert self.aux_window.game_params == new_game_params
 
         # Verify the rebuild sequence
@@ -112,7 +113,7 @@ class TestStatSetSwitching(unittest.TestCase):
         self.config.save = Mock()
 
         # Mock stat set update
-        self.popup_menu._update_stat_set_in_config = Mock()
+        self.popup_menu._update_stat_set_in_config = Mock(return_value=new_game_params)
 
         # Mock successful window recreation
         for window in self.aux_window.stat_windows.values():
@@ -128,12 +129,13 @@ class TestStatSetSwitching(unittest.TestCase):
 
     def test_change_stat_set_refresh_failure_restarts_hud(self) -> None:
         """Test stat set change that fails refresh and restarts HUD."""
-        # Mock config update success but refresh failure
-        self.popup_menu._update_stat_set_in_config = Mock()
+        # Mock table-local update success but refresh failure
+        new_game_params = Mock(name="NewStatSet")
+        self.popup_menu._update_stat_set_in_config = Mock(return_value=new_game_params)
         self.config.save = Mock()
 
         # Mock refresh failure
-        self.config.get_supported_games_parameters.side_effect = Exception("Config error")
+        self.aux_window.refresh_stats_layout.side_effect = Exception("Refresh error")
 
         stat_sets_dict = {0: ("NewStatSet", "NewStatSet")}
 
@@ -143,7 +145,7 @@ class TestStatSetSwitching(unittest.TestCase):
 
             # Verify config update attempted
             self.popup_menu._update_stat_set_in_config.assert_called_once_with("NewStatSet")
-            self.config.save.assert_called_once()
+            self.config.save.assert_not_called()
 
             # Should log failure and restart
             mock_log.info.assert_called_with(
@@ -214,38 +216,31 @@ class TestStatSetSwitching(unittest.TestCase):
         assert simple_hud.tips[0][0] == "tip1"
         assert simple_hud.tips[1][1] == "tip2"
 
-    def test_update_stat_set_in_config(self) -> None:
-        """Test updating stat set in configuration."""
+    def test_update_stat_set_in_config_is_table_local(self) -> None:
+        """The table selector must not rewrite shared game/XML defaults."""
         # Mock configuration structure
         game_config = Mock()
-        game_config.game_stat_set = {"ring": Mock()}
+        game_config.game_stat_set = {"ring": Mock(stat_set="OldStatSet")}
 
         self.config.supported_games = {"holdem": game_config}
+        selected = Mock(name="NewStatSet")
+        self.config.stat_sets = {"NewStatSet": selected}
 
-        # Mock XML document
-        mock_doc = Mock()
-        game_node = Mock()
-        game_node.getAttribute.return_value = "holdem"
-
-        gss_node = Mock()
-        gss_node.getAttribute.return_value = "ring"
-        gss_node.setAttribute = Mock()
-
-        game_node.getElementsByTagName.return_value = [gss_node]
-        mock_doc.getElementsByTagName.return_value = [game_node]
-        self.config.doc = mock_doc
-
-        # Mock XML update method
         self.popup_menu._update_xml_stat_set = Mock()
 
-        # Call _update_stat_set_in_config
-        self.popup_menu._update_stat_set_in_config("NewStatSet")
+        result = self.popup_menu._update_stat_set_in_config("NewStatSet")
 
-        # Verify stat_set was updated
-        game_config.game_stat_set["ring"].stat_set = "NewStatSet"
-
-        # Verify XML update was called
-        self.popup_menu._update_xml_stat_set.assert_called_once_with("holdem", "ring", "NewStatSet")
+        assert result is selected
+        assert self.hud.supported_games_parameters["game_stat_set"] is selected
+        assert game_config.game_stat_set["ring"].stat_set == "OldStatSet"
+        self.popup_menu._update_xml_stat_set.assert_not_called()
+        self.config.save.assert_not_called()
+        self.hud.parent.set_table_stat_set_override.assert_called_once_with(
+            "test_table",
+            "holdem",
+            "ring",
+            "NewStatSet",
+        )
 
     def test_update_xml_stat_set(self) -> None:
         """Test updating stat set in XML document."""
@@ -348,7 +343,7 @@ class TestStatSetSwitchingIntegration(unittest.TestCase):
         popup_menu = Aux_Hud.SimpleTablePopupMenu.__new__(Aux_Hud.SimpleTablePopupMenu)
         popup_menu.parentwin = parent_window
         popup_menu.delete_event = Mock()
-        popup_menu._update_stat_set_in_config = Mock()
+        popup_menu._update_stat_set_in_config = Mock(return_value=new_game_params)
 
         # Mock successful window recreation
         for window in aux_window.stat_windows.values():
@@ -362,9 +357,9 @@ class TestStatSetSwitchingIntegration(unittest.TestCase):
 
         # Verify complete workflow
         popup_menu._update_stat_set_in_config.assert_called_once_with("Advanced")
-        config.save.assert_called_once()
+        config.save.assert_not_called()
         popup_menu.delete_event.assert_called_once()
-        config.get_supported_games_parameters.assert_called_once()
+        config.get_supported_games_parameters.assert_not_called()
         aux_window.refresh_stats_layout.assert_called_once()
         aux_window.update_gui.assert_called_once_with(None)
 

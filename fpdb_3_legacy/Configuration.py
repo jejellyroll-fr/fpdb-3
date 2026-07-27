@@ -630,6 +630,7 @@ class StatBlock:
             self.bordercolor = node.getAttribute("bordercolor")
             self.title_bgcolor = node.getAttribute("title_bgcolor")
             self.title_fgcolor = node.getAttribute("title_fgcolor")
+            self.cell_width = int(node.getAttribute("cell_width")) if node.getAttribute("cell_width") else 0
             self.x = int(node.getAttribute("x")) if node.getAttribute("x") else 0
             self.y = int(node.getAttribute("y")) if node.getAttribute("y") else 0
             self.stats = {}
@@ -654,6 +655,7 @@ class StatBlock:
             self.bordercolor = style.get("bordercolor", "")
             self.title_bgcolor = style.get("title_bgcolor", "")
             self.title_fgcolor = style.get("title_fgcolor", "")
+            self.cell_width = int(style.get("cell_width", 0) or 0)
             self.x = int(style.get("x", 0) or 0)
             self.y = int(style.get("y", 0) or 0)
             self.stats = stats or {}
@@ -919,6 +921,7 @@ class Popup:
         self.pu_class = node.getAttribute("pu_class")
         self.pu_stats = []
         self.pu_stats_submenu = []
+        self.pu_stats_category = []
         # Optional free-form params for custom popup classes (e.g. the
         # RangeChartPopup chart source); kept generic so new popup types can
         # carry their own attributes without changing the schema.
@@ -927,9 +930,14 @@ class Popup:
             self.pu_class_params["source"] = node.getAttribute("pu_source")
         if node.getAttribute("pu_group"):
             self.pu_class_params["group"] = node.getAttribute("pu_group")
+        if node.getAttribute("pu_theme"):
+            self.pu_class_params["theme"] = node.getAttribute("pu_theme")
+        if node.getAttribute("pu_icon_provider"):
+            self.pu_class_params["icon_provider"] = node.getAttribute("pu_icon_provider")
 
         for stat_node in node.getElementsByTagName("pu_stat"):
             self.pu_stats.append(stat_node.getAttribute("pu_stat_name"))
+            self.pu_stats_category.append(stat_node.getAttribute("pu_stat_category"))
             # if stat_node.getAttribute("pu_stat_submenu"):
             self.pu_stats_submenu.append(
                 (

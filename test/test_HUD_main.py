@@ -108,6 +108,20 @@ def test_hud_main_initialization(hud_main) -> None:
     assert hasattr(hud_main, "zmq_receiver")
     assert hasattr(hud_main, "zmq_worker")
     assert hasattr(hud_main, "main_window")
+    assert hud_main._table_stat_set_overrides == {}
+
+
+def test_table_stat_set_override_is_scoped_by_table_and_game(hud_main) -> None:
+    hud_main.config.stat_sets = {"omaha_cg_expert": MagicMock()}
+
+    hud_main.set_table_stat_set_override("table-a", "omahahi", "ring", "omaha_cg_expert")
+
+    assert hud_main.get_table_stat_set_override("table-a", "omahahi", "ring") == "omaha_cg_expert"
+    assert hud_main.get_table_stat_set_override("table-b", "omahahi", "ring") is None
+    assert hud_main.get_table_stat_set_override("table-a", "holdem", "ring") is None
+
+    hud_main.clear_table_stat_set_override("table-a")
+    assert hud_main.get_table_stat_set_override("table-a", "omahahi", "ring") is None
 
 
 # Ensures that the handle_message method correctly calls read_stdin when provided with a hand ID.

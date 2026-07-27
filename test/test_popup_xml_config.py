@@ -55,6 +55,10 @@ class TestPopupXMLConfiguration(unittest.TestCase):
             "tournament_early",
             "tournament_middle",
             "tournament_bubble_late",
+            "plo4_preflop",
+            "plo4_postflop",
+            "plo4_showdown",
+            "plo4_full",
             "omaha_complete",
             "omaha_hilo_complete",
             "stud_complete",
@@ -79,6 +83,10 @@ class TestPopupXMLConfiguration(unittest.TestCase):
             "holdring_modern_light",
             "cash_6max_complete",
             "tournament_middle",
+            "plo4_preflop",
+            "plo4_postflop",
+            "plo4_showdown",
+            "plo4_full",
             "omaha_complete",
             "stud_complete",
         ]
@@ -213,6 +221,23 @@ class TestPopupXMLConfiguration(unittest.TestCase):
                         f"Stat set '{ss_name}' playershort should use popup '{expected_popup}', got '{popup}'"
                     )
 
+    def test_plo4_pro_profile_wiring(self) -> None:
+        """The Omaha-high cash game must load the dedicated PLO4 profile."""
+        game = self.root.find("./supported_games/game[@game_name='omahahi']")
+        assert game is not None
+        assert game.get("aux").split(",")[0] == "PLO4Hud"
+        assert game.find("./game_stat_set[@game_type='ring']").get("stat_set") == "plo4_6max_pro"
+
+        stat_set = self.root.find("./stat_sets/ss[@name='plo4_6max_pro']")
+        assert stat_set is not None
+        assert len(stat_set.findall("block")) == 2
+        assert {stat.get("popup") for stat in stat_set.findall(".//stat")} >= {
+            "plo4_preflop",
+            "plo4_postflop",
+            "plo4_showdown",
+            "plo4_full",
+        }
+
 
 class TestPopupStatValidation(unittest.TestCase):
     """Test individual popup stat validation."""
@@ -230,72 +255,12 @@ class TestPopupStatValidation(unittest.TestCase):
 
     def get_known_stats(self) -> set[str]:
         """Get list of known stats from Stats.py."""
-        # This would ideally import Stats.py and introspect, but for now use a known list
-        return {
-            "playername",
-            "player_note",
-            "n",
-            "vpip",
-            "pfr",
-            "three_B",
-            "four_B",
-            "f_3bet",
-            "fold_vs_4bet",
-            "limp",
-            "cold_call",
-            "iso",
-            "rfi_total",
-            "rfi_early_position",
-            "rfi_middle_position",
-            "rfi_late_position",
-            "cb1",
-            "cb2",
-            "cb3",
-            "cb4",
-            "f_cb1",
-            "f_cb2",
-            "f_cb3",
-            "f_cb4",
-            "cb_ip",
-            "cb_oop",
-            "triple_barrel",
-            "float_bet",
-            "probe_bet",
-            "probe_bet_turn",
-            "probe_bet_river",
-            "check_raise_frequency",
-            "bet_frequency_flop",
-            "bet_frequency_turn",
-            "raise_frequency_flop",
-            "raise_frequency_turn",
-            "avg_bet_size_flop",
-            "avg_bet_size_turn",
-            "avg_bet_size_river",
-            "overbet_frequency",
-            "steal",
-            "f_steal",
-            "call_vs_steal",
-            "three_bet_vs_steal",
-            "resteal",
-            "wtsd",
-            "wmsd",
-            "sd_winrate",
-            "non_sd_winrate",
-            "river_call_efficiency",
-            "totalprofit",
-            "profit100",
-            "agg_fact",
-            "agg_freq",
-            "agg_pct",
-            "a_freq_123",
-            "m_ratio",
-            "saw_f",
-            "game_abbr",
-            "hands",
-            "three_bet_range",
-            "vpip_pfr_ratio",
-            "blank",
-        }
+        from fpdb_3_legacy import Stats
+        from fpdb_3_legacy.stat_registry import get_registry
+
+        # Keep this validation tied to the same two registries used by the HUD
+        # instead of maintaining another incomplete hand-written catalogue.
+        return set(Stats.get_valid_stats()) | set(get_registry().names()) | {"playername", "blank"}
 
     def test_all_popup_stats_are_valid(self) -> None:
         """Test that all stats referenced in popups are valid."""

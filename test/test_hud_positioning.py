@@ -250,7 +250,7 @@ class TestHudStatSetSwitching(unittest.TestCase):
         """Test that change_stat_set tries hot refresh before restart."""
         # Mock successful refresh
         new_game_params = Mock()
-        self.config.get_supported_games_parameters.return_value = {"game_stat_set": new_game_params}
+        self.popup_menu._update_stat_set_in_config = Mock(return_value=new_game_params)
 
         # Mock successful update
         stat_sets_dict = {0: ("StatSet1", "StatSet1")}
@@ -272,7 +272,8 @@ class TestHudStatSetSwitching(unittest.TestCase):
     def test_change_stat_set_restarts_on_refresh_failure(self) -> None:
         """Test that change_stat_set restarts HUD when refresh fails."""
         # Mock failed refresh
-        self.config.get_supported_games_parameters.side_effect = KeyError("Refresh failed")
+        self.popup_menu._update_stat_set_in_config = Mock(return_value=Mock())
+        self.parent_window.aw.refresh_stats_layout.side_effect = KeyError("Refresh failed")
 
         stat_sets_dict = {0: ("StatSet1", "StatSet1")}
 

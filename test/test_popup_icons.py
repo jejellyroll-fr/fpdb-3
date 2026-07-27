@@ -93,6 +93,30 @@ class TestEmojiIconProvider(unittest.TestCase):
         assert self.provider.get_icon("float_bet") == "🎈"
         assert self.provider.get_icon("donk_bet") == "🎲"
 
+    def test_plo_extended_icons(self) -> None:
+        """PLO popup stats should use intentional icons, not the generic fallback."""
+        plo_stats = [
+            "f_3bet",
+            "fold_vs_4bet",
+            "squeeze",
+            "dbr1",
+            "f_dbr1",
+            "cr1",
+            "cb_ip",
+            "cb_oop",
+            "dbr2",
+            "f_dbr2",
+            "cr2",
+            "dbr3",
+            "f_dbr3",
+            "cr3",
+            "river_call_efficiency",
+            "wwsf",
+            "WMsF",
+        ]
+        for stat in plo_stats:
+            assert self.provider.get_icon(stat) != "📊", f"Stat {stat} uses the generic fallback icon"
+
     def test_aggression_icons(self) -> None:
         """Test aggression stat icons."""
         assert self.provider.get_icon("agg_fact") == "⚔️"
@@ -234,25 +258,32 @@ class TestStatCategorization(unittest.TestCase):
 
     def test_preflop_category(self) -> None:
         """Test preflop stat categorization."""
-        preflop_stats = ["vpip", "pfr", "three_B", "four_B", "limp", "cold_call", "rfi", "fold_3B", "fold_4B"]
+        preflop_stats = [
+            "vpip", "pfr", "three_B", "four_B", "f_3bet", "fold_vs_4bet",
+            "squeeze", "limp", "cold_call", "rfi", "rfi_late_position",
+            "fold_3B", "fold_4B",
+        ]
         for stat in preflop_stats:
             assert get_stat_category(stat) == "preflop", f"Stat {stat} should be categorized as preflop"
 
     def test_flop_category(self) -> None:
         """Test flop stat categorization."""
-        flop_stats = ["cb1", "f_cb1", "raise_cb1", "donk_bet", "float_bet", "check_call_flop"]
+        flop_stats = [
+            "cb1", "f_cb1", "raise_cb1", "donk_bet", "dbr1", "f_dbr1",
+            "cr1", "cb_ip", "cb_oop", "float_bet", "check_call_flop",
+        ]
         for stat in flop_stats:
             assert get_stat_category(stat) == "flop", f"Stat {stat} should be categorized as flop"
 
     def test_turn_category(self) -> None:
         """Test turn stat categorization."""
-        turn_stats = ["cb2", "f_cb2", "turn_aggression", "turn_check_call"]
+        turn_stats = ["cb2", "f_cb2", "dbr2", "f_dbr2", "cr2", "probe_bet_turn", "turn_aggression", "turn_check_call"]
         for stat in turn_stats:
             assert get_stat_category(stat) == "turn", f"Stat {stat} should be categorized as turn"
 
     def test_river_category(self) -> None:
         """Test river stat categorization."""
-        river_stats = ["cb3", "f_cb3", "river_aggression", "value_bet", "bluff"]
+        river_stats = ["cb3", "f_cb3", "dbr3", "f_dbr3", "cr3", "river_call_efficiency", "river_aggression", "value_bet", "bluff"]
         for stat in river_stats:
             assert get_stat_category(stat) == "river", f"Stat {stat} should be categorized as river"
 
@@ -264,13 +295,34 @@ class TestStatCategorization(unittest.TestCase):
 
     def test_aggression_category(self) -> None:
         """Test aggression stat categorization."""
-        aggression_stats = ["agg_fact", "agg_freq", "agg_pct", "bet_freq", "raise_freq"]
+        aggression_stats = [
+            "agg_fact",
+            "agg_fact_pct",
+            "agg_freq",
+            "agg_pct",
+            "a_freq_123",
+            "bet_freq",
+            "raise_freq",
+            "triple_barrel",
+            "overbet_frequency",
+        ]
         for stat in aggression_stats:
             assert get_stat_category(stat) == "aggression", f"Stat {stat} should be categorized as aggression"
 
     def test_general_category(self) -> None:
         """Test general stat categorization."""
-        general_stats = ["hands", "totalprofit", "profit100", "wtsd", "wmsd"]
+        general_stats = [
+            "hands",
+            "saw_f",
+            "totalprofit",
+            "profit100",
+            "bbper100",
+            "BBper100",
+            "wtsd",
+            "wmsd",
+            "wwsf",
+            "WMsF",
+        ]
         for stat in general_stats:
             assert get_stat_category(stat) == "general", f"Stat {stat} should be categorized as general"
 

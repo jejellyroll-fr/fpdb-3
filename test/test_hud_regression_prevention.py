@@ -87,10 +87,10 @@ class TestHudRestartRegression(unittest.TestCase):
         popup_menu = Aux_Hud.SimpleTablePopupMenu.__new__(Aux_Hud.SimpleTablePopupMenu)
         popup_menu.parentwin = parent_window
         popup_menu.delete_event = Mock()
-        popup_menu._update_stat_set_in_config = Mock()
+        popup_menu._update_stat_set_in_config = Mock(return_value=Mock())
 
         # Mock FAILED refresh
-        config.get_supported_games_parameters.side_effect = Exception("Refresh failed")
+        aux_window.refresh_stats_layout.side_effect = Exception("Refresh failed")
         config.save = Mock()
 
         stat_sets_dict = {0: ("NewSet", "NewSet")}
@@ -123,7 +123,6 @@ class TestHudRestartRegression(unittest.TestCase):
 
         # Simulate a condition that would cause restart
         config = Mock()
-        config.get_supported_games_parameters.side_effect = Exception("Config error")
 
         aux_window = Mock()
         parent_window = Mock()
@@ -133,7 +132,8 @@ class TestHudRestartRegression(unittest.TestCase):
         popup_menu = Aux_Hud.SimpleTablePopupMenu.__new__(Aux_Hud.SimpleTablePopupMenu)
         popup_menu.parentwin = parent_window
         popup_menu.delete_event = Mock()
-        popup_menu._update_stat_set_in_config = Mock()
+        popup_menu._update_stat_set_in_config = Mock(return_value=Mock())
+        aux_window.refresh_stats_layout.side_effect = Exception("Config error")
 
         config.save = Mock()
 
@@ -395,8 +395,9 @@ class TestEdgeCaseRegression(unittest.TestCase):
                 for key in stat_set_dict:
                     popup_menu.change_stat_set(key, stat_set_dict)
 
-        # Should handle all switches without crashing
-        assert config.save.call_count == 3
+        # Should handle all switches without rewriting the global config.
+        assert popup_menu._update_stat_set_in_config.call_count == 3
+        config.save.assert_not_called()
 
     def test_stat_set_switching_with_invalid_config(self) -> None:
         """REGRESSION: Handle invalid config gracefully during stat set switch."""
@@ -420,16 +421,16 @@ class TestEdgeCaseRegression(unittest.TestCase):
         popup_menu = Aux_Hud.SimpleTablePopupMenu.__new__(Aux_Hud.SimpleTablePopupMenu)
         popup_menu.parentwin = parent_window
         popup_menu.delete_event = Mock()
-        popup_menu._update_stat_set_in_config = Mock()
+        popup_menu._update_stat_set_in_config = Mock(side_effect=KeyError("Invalid config"))
 
         stat_sets_dict = {0: ("InvalidSet", "InvalidSet")}
 
         with patch("fpdb_3_legacy.Aux_Hud.log"):
-            # Should not crash, should fallback to restart
+            # Should not crash or restart with an invalid selection.
             popup_menu.change_stat_set(0, stat_sets_dict)
 
-        # Should attempt restart when config is invalid
-        hud.parent.kill_hud.assert_called_once()
+        hud.parent.kill_hud.assert_not_called()
+        popup_menu.delete_event.assert_called_once()
 
 
 if __name__ == "__main__":

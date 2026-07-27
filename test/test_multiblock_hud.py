@@ -58,7 +58,7 @@ def test_build_block_layouts_propagates_scope():
     table block is created once per seat instead of one table window (found live:
     Min Stack (Table) rendered as a per-seat player stat -> TypeError)."""
     ss = _ss('<ss name="t" rows="0" cols="0">'
-             '<block label="SB 3h" scope="player">'
+             '<block label="SB 3h" scope="player" cell_width="44">'
              '<stat _rowcol="(1,1)" _stat_name="vpip"/></block>'
              '<block label="Min Stack (Table)" scope="table">'
              '<stat _rowcol="(1,1)" _stat_name="live_min_stack_bb"/></block></ss>')
@@ -67,6 +67,7 @@ def test_build_block_layouts_propagates_scope():
     aw.nrows, aw.ncols = ss.rows, ss.cols
     aw._build_block_layouts()
     assert [b["scope"] for b in aw.block_layouts] == ["player", "table"]
+    assert [b["cell_width"] for b in aw.block_layouts] == [44, 0]
 
 
 def test_multiblock_stat_set_parses_panels():
@@ -144,13 +145,14 @@ def test_block_parses_optional_style_attributes():
     ss = _ss('<ss name="t" rows="1" cols="1">'
              '<block label="SB 3h" position="SB" bordercolor="#d7b500" '
              'title_bgcolor="#d7b500" title_fgcolor="#111111" bgcolor="rgba(0,0,0,178)" '
-             'x="12" y="34">'
+             'cell_width="44" x="12" y="34">'
              '<stat _rowcol="(1,1)" _stat_name="vpip"/></block></ss>')
     blk = ss.blocks[0]
     assert blk.bordercolor == "#d7b500"
     assert blk.title_bgcolor == "#d7b500"
     assert blk.title_fgcolor == "#111111"
     assert blk.bgcolor == "rgba(0,0,0,178)"
+    assert blk.cell_width == 44
     assert (blk.x, blk.y) == (12, 34)
 
 
@@ -160,6 +162,46 @@ def test_block_derives_grid_size_when_unspecified():
              '<stat _rowcol="(2,3)" _stat_name="pfr"/></block></ss>')
     blk = ss.blocks[0]
     assert blk.rows == 2 and blk.cols == 3
+
+
+def test_simplehud_accepts_zero_sized_multiblock_profile():
+    """Block coordinates must not be indexed into the empty classic grid."""
+    ss = _ss(
+        '<ss name="plo4" rows="0" cols="0">'
+        '<block label="Identity" rows="1" cols="2">'
+        '<stat _rowcol="(1,1)" _stat_name="playershort"/>'
+        '<stat _rowcol="(1,2)" _stat_name="n"/></block>'
+        '<block label="Core" rows="1" cols="2">'
+        '<stat _rowcol="(1,1)" _stat_name="vpip"/>'
+        '<stat _rowcol="(1,2)" _stat_name="pfr"/></block></ss>'
+    )
+    hud = types.SimpleNamespace(
+        poker_game="omahahi",
+        site_parameters={"hud_menu_xshift": 0, "hud_menu_yshift": 0},
+        supported_games_parameters={"game_stat_set": ss},
+        max=6,
+    )
+    aux_params = {
+        "fgcolor": "#ffffff",
+        "bgcolor": "#000000",
+        "opacity": "1.0",
+        "font": "Sans",
+        "font_size": "8",
+    }
+
+    aw = Aux_Hud.SimpleHUD(hud, types.SimpleNamespace(), aux_params)
+
+    assert aw.stats == []
+    assert aw.popups == []
+    assert aw.tips == []
+    assert [block["stats"] for block in aw.block_layouts] == [
+        [["playershort", "n"]],
+        [["vpip", "pfr"]],
+    ]
+
+    # The live profile switch calls this path too.
+    aw.refresh_stats_layout()
+    assert [block["label"] for block in aw.block_layouts] == ["Identity", "Core"]
 
 
 # ---------------------------------------------------------------------------
@@ -200,6 +242,7 @@ def _block(label, stats2d, position="", texts=None, colorranges=None):
     return {
         "label": label, "position": position, "nrows": nr, "ncols": nc, "stats": stats2d,
         "bgcolor": "", "fgcolor": "", "bordercolor": "", "title_bgcolor": "", "title_fgcolor": "",
+        "cell_width": 0,
         "hudcolors": [[""] * nc for _ in range(nr)],
         "hudbgcolors": [[""] * nc for _ in range(nr)],
         "popups": [["default"] * nc for _ in range(nr)],
@@ -244,6 +287,18 @@ def test_seat_window_renders_one_grid_per_block():
     assert len(grids) == 2
     titles = [w for w in win.findChildren(QLabel) if w.text() in ("SB 3h", "BB 3h")]
     assert {t.text() for t in titles} == {"SB 3h", "BB 3h"}
+
+
+def test_multiblock_cell_width_is_applied_and_default_is_preserved():
+    configured = _block("Wide", [["vpip"]])
+    configured["cell_width"] = 44
+    default = _block("Default", [["pfr"]])
+
+    win = Aux_Hud.SimpleStatWindow(aw=_fake_aw([configured, default]), seat=1)
+    win.create_contents(1)
+
+    assert win.stat_boxes[0][0][0].widget.minimumWidth() == 44
+    assert win.stat_boxes[1][0][0].widget.minimumWidth() == 20
 
 
 def test_single_block_has_no_title_label():
