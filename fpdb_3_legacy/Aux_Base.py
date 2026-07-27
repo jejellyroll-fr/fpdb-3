@@ -193,6 +193,18 @@ class AuxWindow:
         This method is a placeholder for updating the window's data.
         """
 
+    def refresh_stats(self, hand_id: Any) -> None:
+        """Redraw from the statistics already on the hud, without a new hand.
+
+        Called when another table dealt a hand: the aggregated statistics have
+        moved but this table's own hand has not. Only a statistics HUD has
+        anything to redo, so this does nothing by default -- an aux window that
+        reacts to a *new* hand must not act here. The mucked-cards windows are
+        why the contract is explicit rather than reusing update_gui: theirs
+        appends a row and re-shows the cards, so a statistics refresh would
+        replay a hand the player already saw.
+        """
+
     def update_gui(self, *args: Any) -> None:
         """Update the graphical user interface for the auxiliary window.
 

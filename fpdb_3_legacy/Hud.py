@@ -346,12 +346,14 @@ class Hud:
         # Get updated cards
         self.cards = self.get_cards(hand)
 
-        # Refresh every aux window with the new hand so the displayed stats update.
+        # Refresh every aux window with the new hand so the displayed stats
+        # update. This is the only place they are refreshed for a new hand, so
+        # one failing window must not cost the others theirs.
         for aux in self.aux_windows:
             try:
                 aux.update_gui(hand)
             except Exception:  # intentional broad catch: aux window callback boundary.
-                log.exception("Error updating aux window")
+                log.exception("Error updating aux window %s for hand %s", type(aux).__name__, hand)
 
     def get_cards(self, hand: int | str) -> dict[str, Any]:
         """Get the cards for a given hand."""

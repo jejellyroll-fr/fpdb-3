@@ -470,6 +470,47 @@ class TestHudMethods(unittest.TestCase):
             # Verify cards were updated
             assert self.hud.cards == {"updated": "cards"}
 
+    def test_update_rebuilds_the_hand_once(self) -> None:
+        """One new hand is one rebuild, however many aux windows watch it.
+
+        hand_factory reads the whole hand back out of the database; doing it
+        per aux window, or twice per hand, is the cost this owns.
+        """
+        self.hud.db_hud_connection = Mock()
+
+        with (
+            patch.object(self.hud, "get_cards") as mock_get_cards,
+            patch("fpdb_3_legacy.Hud.Hand.hand_factory") as mock_factory,
+        ):
+            self.hud.update(12345, self.mock_config)
+
+        mock_factory.assert_called_once()
+        mock_get_cards.assert_called_once_with(12345)
+
+    def test_one_failing_aux_window_does_not_cost_the_others_their_update(self) -> None:
+        """The isolation that makes this the only place aux windows refresh."""
+        self.mock_aux1.update_gui.side_effect = RuntimeError("aux failed")
+
+        with patch.object(self.hud, "get_cards"):
+            self.hud.update(12345, self.mock_config)
+
+        self.mock_aux1.update_gui.assert_called_once_with(12345)
+        self.mock_aux2.update_gui.assert_called_once_with(12345)
+
+    def test_a_failing_aux_window_is_named_in_the_log(self) -> None:
+        # The caller used to report which window failed; that report belongs
+        # here now, where the failure is caught.
+        self.mock_aux1.update_gui.side_effect = RuntimeError("aux failed")
+
+        with (
+            patch.object(self.hud, "get_cards"),
+            patch("fpdb_3_legacy.Hud.log") as mock_log,
+        ):
+            self.hud.update(12345, self.mock_config)
+
+        assert mock_log.exception.called
+        assert "%s" in mock_log.exception.call_args[0][0]
+
     def test_get_cards_with_database(self) -> None:
         """Test get_cards method with database connection."""
         hand_id = 12345
