@@ -23,6 +23,7 @@ from fpdb_3_legacy.coinpoker_hand_builder import (
     _extract_cashout,
     _extract_collections,
     _extract_splash,
+    _table_from_hand_id,
     _tournament_info,
     build_hands,
 )
@@ -809,6 +810,53 @@ def _join(table: str, tournament: str, name: str = "Step [3] to 565 Main Event [
     )
 
 
+AOF_FIXTURE = Path(__file__).parent / "data" / "coinpoker_aof_hand_events.json"
+
+
+def _load_aof() -> dict:
+    """A real All-in or Fold hand, with the room events that name its table.
+
+    Captured from a live PLO4 AOF table: the flop is dealt before anyone acts,
+    one player folds and two go all in. A normal PLO hand relabelled would not
+    show any of that, and would prove nothing about the game being importable.
+    """
+    raw = json.loads(AOF_FIXTURE.read_text())
+    return {
+        "hand": [tuple(e) for e in raw["hand"]],
+        "join": tuple(raw["join"]),
+        "catalogue": tuple(raw["catalogue"]),
+    }
+
+
+def _without_round_names(value):
+    """The same event with every roundName stripped, as a lossy capture leaves it."""
+    if isinstance(value, dict):
+        return {k: _without_round_names(v) for k, v in value.items() if k != "roundName"}
+    if isinstance(value, list):
+        return [_without_round_names(v) for v in value]
+    return value
+
+
+def _game_join(table: str, mini: int = 2, *, aof: bool = True) -> tuple:
+    """The room's cash-table join, shaped as the capture has it."""
+    return (
+        "lobby.join_game_table",
+        None,
+        {
+            "tablesToJoin": [
+                {
+                    "tableName": f"{'26th-PLO4 AOF' if aof else 'PLO'} 0.10-0.25 {table}",
+                    "roomProperties": {
+                        "tournamentTypeId": 14 if aof else 6,
+                        "lobbyId": 12 if aof else 1,
+                        "miniGameTypeId": mini,
+                    },
+                },
+            ],
+        },
+    )
+
+
 def _at_table(events: list[tuple], table: str) -> list[tuple]:
     """The same hand, played at `table`."""
     hid = f"{table}00001"
@@ -1095,3 +1143,137 @@ def test_hands_and_places_are_read_from_the_same_stream() -> None:
 
     assert len(build_hands(events, "PLO4")) == 1
     assert len(tournament_results(events)) == 1
+
+
+# --- All-in or Fold ------------------------------------------------------------
+
+
+def test_a_real_all_in_or_fold_hand_is_stored_as_that_game() -> None:
+    """A different game: the flop is dealt first and the choice is the hand.
+
+    Stored as ordinary Omaha its hands sit among hands played normally, and
+    neither set of statistics means anything afterwards.
+    """
+    aof = _load_aof()
+
+    (hand,) = build_hands([aof["join"], *aof["hand"]], "PLO4")
+
+    assert hand["gametype"]["category"] == "aof_omaha"
+    assert hand["game"]["fpdb_supported"] is True
+    # fpdb's model of the game has no preflop street: the cards belong to the
+    # flop, and that is where it looks for them.
+    assert hand["streets"] == {"holeStreets": ["FLOP"]}
+    # And it really is the game it says: flop dealt, then fold and two shoves.
+    assert hand["community"]["FLOP"]
+    assert {action["type"] for action in hand["actions"]} >= {"folds", "raises"}
+    assert "PREFLOP" not in {action.get("street") for action in hand["actions"]}
+
+
+def test_a_real_all_in_or_fold_hand_imports_into_sqlite() -> None:
+    aof = _load_aof()
+    normalized = build_hands([aof["join"], *aof["hand"]], "PLO4")[0]
+    hand = build_fpdb_hand(normalized, config=HttpCaptureHandConfig(site_ids={"CoinPoker": 30, "default": 30}))
+
+    config = MagicMock()
+    config.get_db_parameters.return_value = {
+        "db-backend": 4,
+        "db-server": "sqlite",
+        "db-databaseName": ":memory:",
+        "db-user": "",
+        "db-password": "",
+        "db-host": "",
+        "db-port": "",
+        "db-path": "",
+    }
+    config.get_import_parameters.return_value = {
+        "saveActions": True,
+        "callFpdbHud": False,
+        "cacheSessions": False,
+        "publicDB": False,
+        "fastStoreHudCache": False,
+        "sessionTimeout": 30,
+    }
+    config.get_general_params.return_value = {}
+    config.get_site_id.return_value = 30
+    db = Database(config, Sql(db_server="sqlite"))
+
+    import_fpdb_hand(hand, db, file_id=1, doinsert=True, printtest=False, starting_hand_id=1)
+    db.commit()
+    cursor = db.get_cursor()
+    cursor.execute("select category from Gametypes")
+    assert cursor.fetchone()[0] == "aof_omaha"
+
+
+def test_a_table_alongside_an_all_in_or_fold_one_is_untouched() -> None:
+    # The join names one table; the ordinary game next to it is not that table.
+    aof = _load_aof()
+
+    hands = build_hands([aof["join"], *aof["hand"], *_at_table(_load_straddle_events(), "981279")], "PLO4")
+
+    by_table = {_table_from_hand_id(hand["hand_id"]): hand for hand in hands}
+    assert by_table["123144"]["gametype"]["category"] == "aof_omaha"
+    assert by_table["981279"]["gametype"]["category"] == "omahahi"
+    assert "streets" not in by_table["981279"]
+
+
+def test_an_ordinary_cash_join_does_not_make_a_table_all_in_or_fold() -> None:
+    # Regular cash rooms deal Omaha too; it is the lobby they sit in that
+    # tells the games apart, not the cards.
+    events = _load_straddle_events()
+
+    (hand,) = build_hands([_game_join("979006", aof=False), *_at_table(events, "979006")], "PLO4")
+
+    assert hand["gametype"]["category"] == "omahahi"
+
+
+def test_the_lobby_catalogue_names_a_table_whose_join_was_missed() -> None:
+    """The join is sent once; the catalogue is broadcast over and over.
+
+    Fifty-nine of the seventy-five All-in or Fold hands of a real capture were
+    played at a table whose join was never captured.
+    """
+    aof = _load_aof()
+    at_123108 = [(name, str(hid).replace("123144", "123108") if hid else hid, data) for name, hid, data in aof["hand"]]
+
+    (hand,) = build_hands([aof["catalogue"], *at_123108], "PLO4")
+
+    assert hand["gametype"]["category"] == "aof_omaha"
+
+
+def test_an_all_in_or_fold_variant_fpdb_cannot_model_is_not_declared_supported() -> None:
+    """fpdb models one All-in or Fold game, Omaha.
+
+    Called ordinary Hold'em the hands would be counted as hands played
+    normally -- the mixing this exists to stop -- and not even reliably that:
+    a hand with no hole cards captured falls back to whatever the GUI is set
+    to, so one came out as Omaha.
+    """
+    aof = _load_aof()
+    blind = [event for event in aof["hand"] if event[0] != "game.hole_cards"]
+
+    (hand,) = build_hands([_game_join("123144", mini=1), *blind], "PLO4")
+
+    assert hand["game"]["fpdb_supported"] is False
+    assert hand["gametype"]["category"] != "aof_omaha"
+    assert "streets" not in hand
+
+
+def test_an_all_in_or_fold_hand_with_no_round_markers_is_still_importable() -> None:
+    """Every action of a real All-in or Fold hand names its round, and says FLOP.
+
+    An action that does not name one keeps the street the reader started on,
+    which is preflop -- a street fpdb's model of this game does not have. The
+    hand then raises on the first action written and is not imported at all.
+    A capture that began mid-hand, or lost the packet carrying the marker, is
+    all it takes. The first betting round is the flop either way.
+    """
+    aof = _load_aof()
+    unmarked = [
+        (name, hid, _without_round_names(data)) for name, hid, data in aof["hand"]
+    ]
+
+    (hand,) = build_hands([aof["join"], *unmarked], "PLO4")
+
+    assert hand["actions"]
+    assert "PREFLOP" not in {action.get("street") for action in hand["actions"]}
+    build_fpdb_hand(hand, config=HttpCaptureHandConfig(site_ids={"CoinPoker": 30, "default": 30}))

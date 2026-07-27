@@ -44,6 +44,7 @@ import os
 import re
 import sys
 from collections.abc import Iterable, Iterator
+from typing import Any
 
 from fpdb_3_legacy.coinpoker_hand_builder import (
     build_hands,
@@ -377,6 +378,10 @@ class HandPump:
         self.notify = notify  # ZMQSender to ping HUD_main after each import
         self.imported: set[str] = set()
         self.failed: set[str] = set()
+        # Hands of a game fpdb cannot store. Terminal like the other two: what
+        # is not importable now will not become so, and a hand nobody ever
+        # answers for is a hand whose events are never dropped.
+        self.capture_only: set[str] = set()
         # The room announces the tournament once, when the table is joined.
         # Holding the announcement here keeps every later batch on the same
         # tournament instead of each naming itself after its own table.
@@ -390,6 +395,12 @@ class HandPump:
         # no table is ambiguous is a fact about the capture, not about the
         # twenty events of one sweep.
         self._session_tables: set[str] = set()
+        # Which tables are All-in or Fold, as the room said. The catalogue
+        # saying so is far too large to keep among the events and is pruned
+        # with them, so what it said is kept here instead -- without this the
+        # game is recognised only on the sweeps the catalogue happens to land
+        # in, and the same table is one game and then another.
+        self._session_aof: dict[str, Any] = {}
         # One entry per closing announcement, each with its own tournament and
         # its own tally of who has been filed. They are held here rather than
         # left in the event buffer: an announcement is answered over several
@@ -646,6 +657,26 @@ class HandPump:
             print(f"[WARN] tournament {tour_no}: {missing} place(s) still unfiled; will retry")
         return len(filed)
 
+    def _answered_for(self, hid: str) -> bool:
+        """True once this hand has been imported, failed, or set aside."""
+        return hid in self.imported or hid in self.failed or hid in self.capture_only
+
+    def _is_capture_only(self, hand_data: dict) -> bool:
+        """True for a hand of a game fpdb has no model for, which is terminal.
+
+        Nothing about it will change on a later sweep, so it is finished with
+        here. Left unanswered it reads as a hand still being dealt and its
+        events are never dropped from the buffer -- one all-in-or-fold Hold'em
+        hand was enough to keep sixty-six events for the rest of the run. The
+        raw archive keeps it, to be imported if fpdb learns the game.
+        """
+        if hand_data.get("game", {}).get("fpdb_supported", True):
+            return False
+        hid = hand_data["hand_id"]
+        self.capture_only.add(hid)
+        print(f"[CAPTURE-ONLY] hand #{hid} ({hand_data['gametype']['category']}) — archived, not imported")
+        return True
+
     def process(self, events: list[tuple]) -> int:
         new = 0
         self._remember_tournaments(events)
@@ -654,9 +685,12 @@ class HandPump:
             self.table_category,
             session_context=self._session_context,
             session_tables=self._session_tables,
+            session_aof=self._session_aof,
         ):
             hid = hand_data["hand_id"]
-            if hid in self.imported or hid in self.failed:
+            if self._answered_for(hid):
+                continue
+            if self._is_capture_only(hand_data):
                 continue
             self._stamp_capture_time(hand_data)
             try:
@@ -676,34 +710,38 @@ class HandPump:
             self.imported.add(hid)
             self._remember_tournament_players(hand_data)
             new += 1
-            if self.dry_run or self.db is None:
-                print(f"[DRY-RUN] hand #{hid} built ({len(hand.players)} players) — not inserted")
-                continue
-            try:
-                # Each hand is flushed immediately (doinsert=True); reset the
-                # shared bulk buffers first so we don't re-insert prior hands.
-                self.db.resetBulkCache()
-                import_fpdb_hand(hand, self.db, file_id=self.file_id, doinsert=True)
-                self.db.commit()
-                print(f"[IMPORTED] hand #{hid}")
-                # Ping HUD_main (if running) with the DB hand id so it can pop
-                # or refresh the HUD for this table.
-                if self.notify is not None:
-                    with contextlib.suppress(Exception):
-                        self.notify.send_hand_id(hand.dbid_hands)
-            except FpdbHandDuplicate:
-                # Replayed packets or a capture restart can legitimately expose
-                # a hand already committed by this or another importer.
-                with contextlib.suppress(Exception):
-                    self.db.rollback()
-                print(f"[DUPLICATE] hand #{hid} already imported — skipped")
-            except Exception as exc:  # noqa: BLE001
-                # Roll back so an aborted transaction doesn't block later hands.
-                with contextlib.suppress(Exception):
-                    self.db.rollback()
-                self.failed.add(hid)
-                print(f"[ERROR] import of #{hid} failed: {exc}")
+            self._insert_hand(hand, hid)
         return new
+
+    def _insert_hand(self, hand: Any, hid: str) -> None:
+        """Write one built hand to the database and tell the HUD about it."""
+        if self.dry_run or self.db is None:
+            print(f"[DRY-RUN] hand #{hid} built ({len(hand.players)} players) — not inserted")
+            return
+        try:
+            # Each hand is flushed immediately (doinsert=True); reset the
+            # shared bulk buffers first so we don't re-insert prior hands.
+            self.db.resetBulkCache()
+            import_fpdb_hand(hand, self.db, file_id=self.file_id, doinsert=True)
+            self.db.commit()
+            print(f"[IMPORTED] hand #{hid}")
+            # Ping HUD_main (if running) with the DB hand id so it can pop
+            # or refresh the HUD for this table.
+            if self.notify is not None:
+                with contextlib.suppress(Exception):
+                    self.notify.send_hand_id(hand.dbid_hands)
+        except FpdbHandDuplicate:
+            # Replayed packets or a capture restart can legitimately expose
+            # a hand already committed by this or another importer.
+            with contextlib.suppress(Exception):
+                self.db.rollback()
+            print(f"[DUPLICATE] hand #{hid} already imported — skipped")
+        except Exception as exc:  # noqa: BLE001
+            # Roll back so an aborted transaction doesn't block later hands.
+            with contextlib.suppress(Exception):
+                self.db.rollback()
+            self.failed.add(hid)
+            print(f"[ERROR] import of #{hid} failed: {exc}")
 
     @staticmethod
     def _log_failed_hand(hand_data: dict, exc: Exception) -> None:
@@ -727,8 +765,7 @@ class HandPump:
         from them has already been taken: the joins and markers into the
         session context, the announcements into their own pending entries.
         """
-        done = self.imported | self.failed
-        return [e for e in events if e[1] is not None and e[1] not in done]
+        return [e for e in events if e[1] is not None and not self._answered_for(e[1])]
 
 
 def _resolve_config_file() -> str | None:
