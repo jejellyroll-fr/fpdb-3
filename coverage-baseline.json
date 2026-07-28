@@ -27,6 +27,7 @@
     "fpdb_3_legacy/database_lambda_dict.py": 100.0,
     "fpdb_3_legacy/database_schema.py": 70.0,
     "fpdb_3_legacy/database_tournaments.py": 58.2,
+    "fpdb_3_legacy/stats_aof.py": 100.0,
     "fpdb_3_legacy/stats_context.py": 100.0,
     "fpdb_3_legacy/stats_display.py": 57.6,
     "fpdb_3_legacy/stats_financial.py": 100.0,

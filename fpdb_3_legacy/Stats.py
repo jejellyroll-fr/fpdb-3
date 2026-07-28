@@ -56,6 +56,15 @@ import sys
 #    FreePokerTools modules
 from fpdb_3_legacy import Configuration, Database, Hand, L10n
 from fpdb_3_legacy.loggingFpdb import get_logger
+from fpdb_3_legacy.stats_aof import (
+    aof_allin as aof_allin,
+)
+from fpdb_3_legacy.stats_aof import (
+    aof_fold as aof_fold,
+)
+from fpdb_3_legacy.stats_aof import (
+    aof_showdowns as aof_showdowns,
+)
 from fpdb_3_legacy.stats_context import get_hand_instance
 from fpdb_3_legacy.stats_context import (
     set_hand_instance as _set_hand_instance,

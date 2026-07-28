@@ -3609,6 +3609,8 @@ class ModernHudPreferences(QDialog):
         import defusedxml.minidom
         from PySide6.QtWidgets import QFileDialog, QInputDialog, QMessageBox
 
+        from fpdb_3_legacy.hud_package import merge_package_game_bindings
+
         filename, _ = QFileDialog.getOpenFileName(
             self,
             "Import HUD Profile",
@@ -3847,6 +3849,18 @@ class ModernHudPreferences(QDialog):
                     lss_node.appendChild(indent)
                     merged_ls = self.config.doc.importNode(ls_node, True)
                     lss_node.appendChild(merged_ls)
+
+            # D. Apply game bindings carried by package version 1.1. A stat set
+            # alone is inert for a new category: without this mapping the
+            # profile appears in Preferences, but the HUD still cannot select
+            # it when the table opens. Repoint the binding when a conflicting
+            # profile was renamed during this import.
+            merge_package_game_bindings(
+                self.config.doc,
+                root,
+                profile_names={imported_name: new_profile_name},
+                overwrite=True,
+            )
 
             # Save configuration and reload
             self.config.save()

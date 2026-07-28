@@ -839,6 +839,15 @@ def _extract_collections(evs: list[tuple]) -> list[dict[str, str]]:
     return collections
 
 
+def _post_blind(actions: list[dict], posted: set[tuple[str, str]], player: str, kind: str, amount: Decimal) -> bool:
+    """Record a blind the first time it is seen, and say whether it was new."""
+    if (player, kind) in posted:
+        return False
+    posted.add((player, kind))
+    actions.append({"type": kind, "player": player, "amount": str(amount)})
+    return True
+
+
 def _explicit_betting_actions(
     evs: list[tuple],
     *,
@@ -846,6 +855,7 @@ def _explicit_betting_actions(
     bb: Decimal,
     sb_name: str | None,
     bb_name: str | None,
+    is_aof: bool = False,
 ) -> list[dict] | None:
     """Translate CoinPoker's authoritative dealer action stream when present."""
     records: list[dict] = []
@@ -877,6 +887,13 @@ def _explicit_betting_actions(
         committed[bb_name] = bb
     street_to = bb
     street = "PREFLOP"
+    # A blind is posted once, however many times the room repeats the seat
+    # snapshot that mentions it. Repeating it put the big blind in the hand
+    # twice and, because posting a blind is handled before the street can
+    # change, carried the second one onto the next street as money already in.
+    posted: set[tuple[str, str]] = set()
+    blinds: dict[str, Decimal] = {}
+    opened = False
     for record in records:
         player = record.get("username")
         raw_action = str(record.get("action") or "").upper()
@@ -889,13 +906,13 @@ def _explicit_betting_actions(
             actions.append({"type": "ante", "player": player, "amount": str(amount)})
             continue
         if action == "SB":
-            actions.append({"type": "small blind", "player": player, "amount": str(amount)})
-            committed[player] = amount
+            if _post_blind(actions, posted, player, "small blind", amount):
+                committed[player] = blinds[player] = amount
             continue
         if action == "BB":
-            actions.append({"type": "big blind", "player": player, "amount": str(amount)})
-            committed[player] = amount
-            street_to = amount
+            if _post_blind(actions, posted, player, "big blind", amount):
+                committed[player] = blinds[player] = amount
+                street_to = amount
             continue
         if action == "STRADDLE":
             actions.append({"type": "straddle", "player": player, "amount": str(amount)})
@@ -903,14 +920,34 @@ def _explicit_betting_actions(
             street_to = max(street_to, amount)
             continue
         if round_name in {"PREFLOP", "FLOP", "TURN", "RIVER"} and round_name != street:
+            first_betting_street = not opened
             street = round_name
+            opened = True
+            # In All-in or Fold the blinds are live money on the flop: the
+            # game has no preflop round of its own, so the round they were
+            # posted into *is* the one that is bet. Clearing them there
+            # charged the blind twice -- once when posted and again inside the
+            # shove total -- which left the stack negative and so never
+            # exactly zero, which is what marks an action all-in.
+            #
+            # Only in that game. Every other one has its own preflop round, so
+            # a capture of it that began at the flop must not carry blinds
+            # from a round that finished before the recording started.
             committed.clear()
-            street_to = Decimal(0)
+            if first_betting_street and is_aof:
+                committed.update(blinds)
+                street_to = max(blinds.values(), default=Decimal(0))
+            else:
+                street_to = Decimal(0)
         if action == "FOLD":
             actions.append({"type": "folds", "player": player, "street": street})
         elif action == "CHECK":
             actions.append({"type": "checks", "player": player, "street": street})
         elif action == "CALL":
+            # On a call betAmout is what this action adds, which is what
+            # Hand.py wants -- unlike the all-in record below, where it is the
+            # player's whole commitment. The two are not spelled differently;
+            # only the data says so.
             actions.append({"type": "calls", "player": player, "street": street, "amount": str(amount)})
             committed[player] = committed.get(player, Decimal(0)) + amount
         elif raw_action == "RAISE":
@@ -921,9 +958,16 @@ def _explicit_betting_actions(
             committed[player] = amount
             street_to = amount
         elif action in {"ALLIN", "ALL_IN"} or raw_action in {"ALLIN", "ALL_IN"}:
-            total = committed.get(player, Decimal(0)) + amount
+            # betAmout is what the player has put in altogether, not what this
+            # action adds -- which is how the raise branch beside this one
+            # already reads it. Adding the blind on top made a player who had
+            # posted one raise to more than they owned: an All-in or Fold hero
+            # with a 2.00 stack came out raising to 2.25, and the stack that
+            # followed it went negative.
+            total = max(amount, committed.get(player, Decimal(0)))
             if total <= street_to:
-                actions.append({"type": "calls", "player": player, "street": street, "amount": str(amount)})
+                put_in = max(total - committed.get(player, Decimal(0)), Decimal(0))
+                actions.append({"type": "calls", "player": player, "street": street, "amount": str(put_in)})
             elif street_to:
                 actions.append({"type": "raises", "player": player, "street": street, "to": str(total)})
                 street_to = total
@@ -1009,6 +1053,7 @@ def _build_one(
         bb=bb,
         sb_name=sb_name,
         bb_name=bb_name,
+        is_aof=category == AOF_OMAHA_CATEGORY,
     )
     if explicit_actions is not None:
         # This stream also identifies exactly who posted antes/blinds, avoiding

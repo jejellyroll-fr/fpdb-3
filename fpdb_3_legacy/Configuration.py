@@ -1490,6 +1490,7 @@ class Config:
                 sys.stderr.write(f"Configuration file {file} not found. Using defaults.")
                 file = None
 
+        uses_default_config = file is None
         self.example_copy, example_file = True, None
         if file is None:
             (file, self.example_copy, example_file) = get_config("HUD_config.xml", True)
@@ -1566,7 +1567,14 @@ class Config:
         # hand histories are never parsed and no HUD ever appears. Runs before
         # the <site>/<hhc> nodes are turned into objects so the migrated values
         # take effect in this very session.
-        if self._migrate_entain_fr_sites_to_ipoker(doc):
+        migrated = self._migrate_entain_fr_sites_to_ipoker(doc)
+        # HUD package migration belongs to the user's normal HUD_config.xml.
+        # Explicit files are also used for exports, tests and purpose-built
+        # minimal configurations; silently enriching those changes their
+        # contract and causes an unsolicited save/backup during construction.
+        if uses_default_config and self._migrate_aof_omaha_hud(doc):
+            migrated = True
+        if migrated:
             self.save()  # keeps a .backup of the pre-migration config
 
         #        s_sites = doc.getElementsByTagName("supported_sites")
@@ -1748,6 +1756,41 @@ class Config:
             hhc_node.setAttribute("summaryImporter", "iPokerSummary")
             changed = True
         return changed
+
+    def _migrate_aof_omaha_hud(self, doc, source_doc=None) -> bool:
+        """Install the AoF Omaha profile and game binding when they are absent.
+
+        Existing profiles and mappings are user configuration, so this
+        migration only fills gaps. It is deliberately separate from
+        ``add_missing_elements()``, which adds missing top-level sections but
+        does not merge new children into sections that already exist.
+        """
+        from fpdb_3_legacy.hud_package import install_missing_hud_package
+
+        if source_doc is None:
+            source_path = _find_example_config("HUD_config.xml")
+            try:
+                source_doc = defusedxml.minidom.parse(source_path)
+            except XML_PARSE_ERRORS as exc:
+                log.exception("Could not read the shipped AoF Omaha HUD profile from %s: %s", source_path, exc)
+                return False
+
+        source_profile = next(
+            (node for node in source_doc.getElementsByTagName("ss") if node.getAttribute("name") == "aof_default"),
+            None,
+        )
+        source_game = next(
+            (node for node in source_doc.getElementsByTagName("game") if node.getAttribute("game_name") == "aof_omaha"),
+            None,
+        )
+        if source_profile is None or source_game is None:
+            return False
+
+        package_doc = defusedxml.minidom.parseString("<fpdb_hud_package/>")
+        package_root = package_doc.documentElement
+        package_root.appendChild(package_doc.importNode(source_profile, True))
+        package_root.appendChild(package_doc.importNode(source_game, True))
+        return install_missing_hud_package(doc, package_root)
 
     @staticmethod
     def _detect_entain_fr_data_dir(site_name: str) -> tuple[str, str, str] | None:
