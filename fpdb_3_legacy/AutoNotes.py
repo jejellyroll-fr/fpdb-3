@@ -15,6 +15,12 @@ from fpdb_3_legacy.AutoNotePlo import (
     is_single_paired_non_aaxx,
 )
 from fpdb_3_legacy.AutoNoteRules import PreflopContext
+from fpdb_3_legacy.autonotes_aof import (
+    RULE_SET_AOF_OMAHA,
+    classify_all_in,
+    describe_all_in,
+    is_aof_omaha,
+)
 
 RULE_SET_HWANG_PLO_PREFLOP = "hwang_plo_preflop"
 RULE_SET_HOLDEM_CASH_PREFLOP = "holdem_cash_preflop"
@@ -2014,7 +2020,52 @@ STUD_DRAW_FIRST_STREET_RULES: tuple[AutoNoteRule, ...] = (
     ),
 )
 
+
+def _aof_all_in_shown(hand, player: str, _context: PreflopContext) -> bool:
+    return classify_all_in(hand, player) is not None
+
+
+def _aof_all_in_evidence(hand, player: str, _context: PreflopContext) -> dict[str, Any]:
+    detail = classify_all_in(hand, player) or {}
+    return {**detail, "summary": describe_all_in(detail) if detail else ""}
+
+
+class _AofAllInRule(AutoNoteRule):
+    """The note has to name the holding, which only the evidence knows.
+
+    Every other rule says the same sentence about whoever triggers it, so a
+    fixed template is enough. Here the whole value is in what was held, and
+    two shoves are only worth comparing if the note says which was which.
+    """
+
+    def evaluate(self, hand, player_name: str, context: PreflopContext) -> GeneratedAutoNote | None:
+        note = super().evaluate(hand, player_name, context)
+        if note is None:
+            return note
+        summary = note.evidence.get("summary")
+        if not summary:
+            return note
+        return replace(note, note_text=f"{player_name}: all-in with {summary}")
+
+
+AOF_OMAHA_RULES: tuple[AutoNoteRule, ...] = (
+    _AofAllInRule(
+        "aof_omaha_all_in_shown",
+        1,
+        "All-in or Fold shove (cards seen)",
+        "{player}: all-in, cards seen",
+        _aof_all_in_shown,
+        _aof_all_in_evidence,
+    ),
+)
+
+
 RULE_SET_REGISTRY: tuple[AutoNoteRuleSet, ...] = (
+    AutoNoteRuleSet(
+        rule_set_id=RULE_SET_AOF_OMAHA,
+        rules=AOF_OMAHA_RULES,
+        supports_hand=is_aof_omaha,
+    ),
     AutoNoteRuleSet(
         rule_set_id=RULE_SET_HWANG_PLO_PREFLOP,
         rules=HWANG_PLO_PREFLOP_RULES,

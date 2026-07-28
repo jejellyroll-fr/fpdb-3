@@ -620,6 +620,14 @@ def import_fpdb_hand(
     hand.assembleHand()
     next_id = starting_hand_id if starting_hand_id is not None else db.nextHandId()
     hand.getHandId(db, next_id)
+    # After the hand has its id, which a note is filed against, and before
+    # anything durable is written. A live capture had no notes at all --
+    # nothing on this path generated them -- but generating them among the
+    # inserts made the cure worse: the rule engine sits on cards and actions
+    # it has never been given in that shape before, and one exception left a
+    # Hands row with no players and no actions behind it, which the pump never
+    # revisits because it marks the hand imported before inserting it.
+    notes = _generate_auto_notes(hand, db)
     hand.updateSessionsCache(db, None, doinsert)
     hand.insertHands(db, file_id, doinsert, printtest)
     hand.updateCardsCache(db, None, doinsert)
@@ -631,7 +639,60 @@ def import_fpdb_hand(
     hand.insertHandsStove(db, doinsert)
     hand.insertHandsShowdown(db, doinsert)
     hand.insertHandsCashout(db, doinsert)
+    if doinsert:
+        # The hand is made durable on its own, before anything is attempted
+        # for its notes. Storing them inside this transaction and letting the
+        # failure through left exactly what generating them inside it did: a
+        # Hands row with no players and no actions, which the pump never comes
+        # back for. A PlayerAutoNotes table that is missing or briefly
+        # unavailable would otherwise destroy every live hand that followed.
+        db.commit()
+    _store_auto_notes(db, notes, doinsert)
     return hand
+
+
+def _store_auto_notes(db: Any, notes: list, doinsert: bool) -> None:
+    """Store the notes in their own transaction, and never at the hand's cost.
+
+    A failure here is a database fault and stays visible in the log -- and
+    repeatable, since the note can be regenerated from the hand that was
+    stored. What it must not do is take the hand down with it.
+    """
+    try:
+        db.storePlayerAutoNotes(notes, doinsert)
+        if doinsert:
+            db.commit()
+    except Exception as exc:  # noqa: BLE001 - a note must not cost the hand
+        try:
+            db.rollback()
+        except Exception as rollback_exc:  # noqa: BLE001 - report the first fault
+            print(f"[WARN] could not roll back the note transaction: {rollback_exc}")
+        # storePlayerAutoNotes buffers before writing. A permanent database
+        # failure would otherwise retry every earlier failed note with every
+        # new hand, growing both the buffer and the work quadratically. The
+        # stored hand remains the retry source for the explicit backfill.
+        pending = getattr(db, "panbulk", None)
+        if isinstance(pending, list):
+            pending.clear()
+        print(f"[WARN] automatic notes not stored: {exc}")
+
+
+def _generate_auto_notes(hand: Any, db: Any) -> list:
+    """Read the hand into notes, or into none if the rule engine fails.
+
+    What a hand is worth saying about it is not worth the hand itself. The
+    rules read cards, boards and action shapes that vary by site and by game,
+    so they are the part of this most likely to meet something unforeseen --
+    and a live capture cannot come back for a hand it has already passed.
+    A failure here costs the note and is logged; the hand is still stored.
+    """
+    from fpdb_3_legacy.AutoNotes import generate_for_hand
+
+    try:
+        return generate_for_hand(hand, config=getattr(db, "config", None))
+    except Exception as exc:  # noqa: BLE001 - a note must not cost the hand
+        print(f"[WARN] no automatic notes for hand #{getattr(hand, 'handid', '?')}: {exc}")
+        return []
 
 
 def _resolve_hand_class(hand_class_name: str) -> Any:

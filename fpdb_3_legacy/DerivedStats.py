@@ -393,6 +393,16 @@ def _buildStatsInitializer() -> dict:
 _INIT_STATS = _buildStatsInitializer()
 
 
+def _is_all_in_or_fold(hand: Any) -> bool:
+    """True for a game whose only decision is all-in or fold.
+
+    fpdb models it with the flop as street zero, so the columns filled here
+    for "preflop" are filled from that decision -- but the conventions built
+    around a preflop round do not all carry over to it.
+    """
+    return str((getattr(hand, "gametype", {}) or {}).get("category", "")).lower() == "aof_omaha"
+
+
 class DerivedStats:
     """Calculate derived statistics for poker hands."""
 
@@ -1815,13 +1825,21 @@ class DerivedStats:
                 allin_blind_players.add(act[0])
         log.debug("vpip: All-in blind players: %s", allin_blind_players)
 
-        # Get players who folded their blinds (no VPIP opportunity)
+        # Get players who folded their blinds (no VPIP opportunity).
+        #
+        # Except in All-in or Fold, where folding from a blind is not giving up
+        # a preflop the game does not have -- it is the one decision of the
+        # hand, and the commonest way of taking it. Excluded, a player who
+        # folds every blind is counted as never having been asked, and their
+        # commit frequency comes out of a denominator missing precisely the
+        # hands they declined.
         fold_blind_players = set()
-        for act in preflop_actions:
-            if act[1] == "folds" and act[0] in [
-                x[0] for x in blinds_antes_actions if x[1] in ["small blind", "big blind"]
-            ]:
-                fold_blind_players.add(act[0])
+        if not _is_all_in_or_fold(hand):
+            for act in preflop_actions:
+                if act[1] == "folds" and act[0] in [
+                    x[0] for x in blinds_antes_actions if x[1] in ["small blind", "big blind"]
+                ]:
+                    fold_blind_players.add(act[0])
         log.debug("vpip: Fold blind players: %s", fold_blind_players)
 
         log.debug("vpip: Processing VPIP for each player")
@@ -1838,6 +1856,13 @@ class DerivedStats:
             # All other players who acted get VPIP opportunity
             acted_preflop = any(act[0] == p for act in preflop_actions)
             log.debug("vpip: Player %s acted preflop: %s", p, acted_preflop)
+            if _is_all_in_or_fold(hand):
+                # Written either way, because the initializer starts everyone
+                # at True: leaving the negative case alone counts a player the
+                # decision never reached as one who declined it, which in a
+                # game whose whole record is that one decision is the
+                # difference between a read and a fiction.
+                player_stats["street0VPIChance"] = acted_preflop
             if acted_preflop:
                 player_stats["street0VPIChance"] = True
 

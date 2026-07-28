@@ -262,6 +262,12 @@
             <game_stat_set game_type="ring" stat_set="plo4_6max_pro"/>
             <game_stat_set game_type="tour" stat_set="mtt_omaha"/>
         </game>
+        <!-- All-in or Fold: one decision per hand, on the flop. The Omaha
+             profile beside this one would label that decision "preflop", a
+             street this game does not have. -->
+        <game game_name="aof_omaha" aux="ClassicHud, mucked">
+            <game_stat_set game_type="all" stat_set="aof_default"/>
+        </game>
         <game game_name="omahahilo" aux="ClassicHud, mucked">
             <game_stat_set game_type="ring" stat_set="omaha_cg_expert"/>
             <game_stat_set game_type="tour" stat_set="mtt_omaha"/>
@@ -1513,6 +1519,15 @@
             <stat _rowcol="(3,1)" _stat_name="saw_f" popup="default" tip="" click="" hudcolor="" hudprefix="" hudsuffix="" stat_hicolor="" stat_hith="" stat_locolor="" stat_loth=""/>
             <stat _rowcol="(3,2)" _stat_name="wtsd" popup="default" tip="" click="" hudcolor="" hudprefix="" hudsuffix="" stat_hicolor="" stat_hith="" stat_locolor="" stat_loth=""/>
         </ss>
+        <ss name="aof_default" rows="3" cols="2" xpad="1" ypad="0">
+            <stat  _rowcol="(1,1)" _stat_name="playershort" popup="default" tip="" click="" hudcolor="#98FFB0" hudprefix="" hudsuffix=""/>
+            <stat  _rowcol="(1,2)" _stat_name="n" popup="default" tip="" click=""/>
+            <stat  _rowcol="(2,1)" _stat_name="aof_allin" popup="default" tip="" click="" stat_loth="25" stat_locolor="#408000" stat_hith="55" stat_hicolor="#F05000"/>
+            <stat  _rowcol="(2,2)" _stat_name="aof_fold" popup="default" tip="" click=""/>
+            <stat  _rowcol="(3,1)" _stat_name="aof_showdowns" popup="default" tip="" click=""/>
+            <stat  _rowcol="(3,2)" _stat_name="player_note" popup="default" tip="" click="open_comment_dialog"/>
+        </ss>
+
         <ss name="omaha_default" rows="3" cols="2" xpad="1" ypad="0">
             <stat _rowcol="(1,1)" _stat_name="playershort" popup="omaha_complete" tip="" click="" hudcolor="#98FFB0" hudprefix="" hudsuffix=""/>
             <stat _rowcol="(1,2)" _stat_name="n" popup="default" tip="" click=""/>
