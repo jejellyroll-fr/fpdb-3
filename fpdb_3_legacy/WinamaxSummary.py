@@ -184,7 +184,7 @@ class WinamaxSummary(TourneySummary):
                     self.startTime = datetime.datetime.strptime(
                         value,
                         "%d-%m-%Y %H:%M",
-                    ).replace(tzinfo=datetime.timezone.utc)
+                    ).replace(tzinfo=datetime.UTC)
 
     def _parse_buyin(self, value: str) -> None:
         """Parses the buy-in and fee from a value string.
@@ -430,7 +430,7 @@ class WinamaxSummary(TourneySummary):
             self.startTime = datetime.datetime.strptime(
                 mg["DATETIME"],
                 "%Y/%m/%d %H:%M:%S UTC",
-            ).replace(tzinfo=datetime.timezone.utc)
+            ).replace(tzinfo=datetime.UTC)
         if "TOURNO" in mg:
             self.tourNo = mg["TOURNO"]
 

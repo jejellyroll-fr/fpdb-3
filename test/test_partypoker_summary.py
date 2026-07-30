@@ -11,7 +11,7 @@ from fpdb_3_legacy.PartyPokerToFpdb import PartyPoker
 
 
 def _hand():
-    now = datetime.datetime(2026, 7, 13, 20, 0, tzinfo=datetime.timezone.utc)
+    now = datetime.datetime(2026, 7, 13, 20, 0, tzinfo=datetime.UTC)
     return SimpleNamespace(
         handText="Player Alice finished in 1 place and received €12.50 EUR",
         in_path="party-tourney.txt",

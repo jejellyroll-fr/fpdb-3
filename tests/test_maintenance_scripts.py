@@ -399,6 +399,7 @@ def test_ensuring_the_showdown_table_is_safe_when_it_already_exists(fresh_db) ->
 # --------------------------------------------------------------------------
 
 MAINTENANCE_SCRIPTS = [
+    "backfill_aof_decisions",
     "backfill_autonotes",
     "backfill_boards",
     "backfill_showdown",

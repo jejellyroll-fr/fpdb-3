@@ -7,16 +7,16 @@ def make_dist():
     # depending on PyOxidizer's much older bundled 2022 Python.
     distributions = {
         "aarch64-apple-darwin": [
-            "https://github.com/astral-sh/python-build-standalone/releases/download/20240713/cpython-3.10.14%2B20240713-aarch64-apple-darwin-pgo%2Blto-full.tar.zst",
-            "4558c58bd03309d0c7131d4b5c2cbce9843d385fbcc7d75e575b4bf887bf5f68",
+            "https://github.com/astral-sh/python-build-standalone/releases/download/20240713/cpython-3.11.9%2B20240713-aarch64-apple-darwin-pgo%2Blto-full.tar.zst",
+            "4cb03ac8b12366038059045aa8405794b96d9b3c73919c157a98f73e21b13031",
         ],
         "x86_64-pc-windows-msvc": [
-            "https://github.com/astral-sh/python-build-standalone/releases/download/20240713/cpython-3.10.14%2B20240713-x86_64-pc-windows-msvc-shared-pgo-full.tar.zst",
-            "1003c93f92fdcca57308076995b224b888a7ee556763759e69d36e198b5bef14",
+            "https://github.com/astral-sh/python-build-standalone/releases/download/20240713/cpython-3.11.9%2B20240713-x86_64-pc-windows-msvc-shared-pgo-full.tar.zst",
+            "126ddab6d6f6fbfe2f3e73176476fdf306d3ccfac67f8542d12ce0c998142644",
         ],
         "x86_64-unknown-linux-gnu": [
-            "https://github.com/astral-sh/python-build-standalone/releases/download/20240713/cpython-3.10.14%2B20240713-x86_64-unknown-linux-gnu-pgo-full.tar.zst",
-            "f15c2b569f3bf8ba01737c5f46cf71e8bc07129ecc7304de9ba47b220acee47e",
+            "https://github.com/astral-sh/python-build-standalone/releases/download/20240713/cpython-3.11.9%2B20240713-x86_64-unknown-linux-gnu-pgo-full.tar.zst",
+            "3c60c8df9722f64138a3e5103dc7df12eacb9c16fdf4e172537f878c2425ea19",
         ],
     }
     if BUILD_TARGET_TRIPLE not in distributions:

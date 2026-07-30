@@ -32,5 +32,5 @@ def test_everest_epoch_is_read_as_utc() -> None:
 
     parser.readHandInfo(hand)
 
-    assert hand.startTime == datetime.datetime(2010, 11, 30, 22, 25, 32, tzinfo=datetime.timezone.utc)
+    assert hand.startTime == datetime.datetime(2010, 11, 30, 22, 25, 32, tzinfo=datetime.UTC)
     assert hand.tablename == "Mount Alpha"

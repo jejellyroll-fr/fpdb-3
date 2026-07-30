@@ -40,9 +40,9 @@ def canonical_datetime_utc(value):
         return ""
     if isinstance(value, datetime.datetime):
         if value.tzinfo is None or value.tzinfo.utcoffset(value) is None:
-            value = value.replace(tzinfo=datetime.timezone.utc)
+            value = value.replace(tzinfo=datetime.UTC)
         else:
-            value = value.astimezone(datetime.timezone.utc)
+            value = value.astimezone(datetime.UTC)
         return value.isoformat()
     if hasattr(value, "isoformat"):
         return value.isoformat()
@@ -257,6 +257,10 @@ class Hand:
         self.rake: Decimal | int | None = None
         self.bombPot = 0  # Bomb pot amount in cents (0 = no bomb pot)
         self.splashPot = 0  # Splash pot amount in cents (0 = no splash pot)
+        # Who actually took the splash, in currency units. The total above says
+        # what the room put on the table; this says where it went, which is the
+        # only half the replayer can attribute to a seat.
+        self.splashWinnings: dict[str, Decimal] = {}
         self.roundPenny = False
         self.fastFold = False
         # currency symbol for this hand
@@ -707,8 +711,13 @@ class Hand:
                 mucked = True
             game = Card.games[self.gametype["category"]]
             if game[0] == "hold" and cardlist[0] != "":
+                # Where this game keeps its hole cards, not where most games
+                # do. All-in or Fold deals the flop before the betting and has
+                # no preflop street at all, so rebuilding one of its hands
+                # from the database asked for a street that does not exist and
+                # every such hand was dropped by the viewer and the replayer.
                 self.addHoleCards(
-                    "PREFLOP",
+                    self.holeStreets[0] if getattr(self, "holeStreets", None) else "PREFLOP",
                     row["name"],
                     closed=cardlist[0 : game[5][0][1]],
                     shown=False,
@@ -1001,6 +1010,17 @@ class Hand:
                 continue
         if cashouts:
             self.cashedOut = True
+
+        # Restore who collected the splash (stored in cents on HandsPlayers).
+        try:
+            splash = db.get_hands_splash(handId)
+        except Exception:  # noqa: BLE001 - legacy DB without the column.
+            splash = {}
+        for name, amount in splash.items():
+            try:
+                self.splashWinnings[name] = Decimal(str(amount)) / 100
+            except (ValueError, ArithmeticError):
+                continue
 
     def addPlayer(self, seat, name, chips, position=None, sitout=False, bounty=None) -> None:
         """Adds a player to the hand, and initialises data structures indexed by player.
@@ -1793,8 +1813,12 @@ class Hand:
     def get_actions_short(self, player, street):
         """Returns a string with shortcuts for the actions of the given player and the given street
         F ... fold, X ... Check, B ...Bet, C ... Call, R ... Raise, CO ... CashOut.
+
+        A street this game does not have has no actions on it, which is not an
+        error: All-in or Fold has no preflop, and asking for one used to raise
+        and cost the caller the whole hand rather than an empty column.
         """
-        actions = self.actions[street]
+        actions = self.actions.get(street, [])
         result = []
         for action in actions:
             if player in action:

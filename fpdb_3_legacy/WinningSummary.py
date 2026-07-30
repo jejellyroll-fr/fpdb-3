@@ -221,7 +221,7 @@ class WinningSummary(TourneySummary):
                 self.startTime = datetime.datetime.strptime(
                     datetimestr,
                     "%Y/%m/%d %I:%M:%S %p",
-                ).replace(tzinfo=datetime.timezone.utc)  # also timezone at end, e.g. " ET"
+                ).replace(tzinfo=datetime.UTC)  # also timezone at end, e.g. " ET"
                 self.startTime = HandHistoryConverter.changeTimezone(
                     self.startTime,
                     self.import_parameters["timezone"],
@@ -244,7 +244,7 @@ class WinningSummary(TourneySummary):
                 self.endTime = datetime.datetime.strptime(
                     datetimestr,
                     "%Y/%m/%d %I:%M:%S %p",
-                ).replace(tzinfo=datetime.timezone.utc)  # also timezone at end, e.g. " ET"
+                ).replace(tzinfo=datetime.UTC)  # also timezone at end, e.g. " ET"
                 self.endTime = HandHistoryConverter.changeTimezone(
                     self.endTime,
                     self.import_parameters["timezone"],

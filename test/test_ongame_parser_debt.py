@@ -55,19 +55,19 @@ def test_dealt_cards_regex_identifies_each_player_and_draw_replacement() -> None
     [
         (
             "LHE-9max-USD-0.50-1.00-201008.All-in.with.showdown.txt",
-            datetime.datetime(2010, 8, 18, 18, 32, 32, tzinfo=datetime.timezone.utc),
+            datetime.datetime(2010, 8, 18, 18, 32, 32, tzinfo=datetime.UTC),
         ),
         (
             "NLHE-6max-play-0.25-0.50-201204.txt",
-            datetime.datetime(2012, 4, 13, 13, 12, 34, tzinfo=datetime.timezone.utc),
+            datetime.datetime(2012, 4, 13, 13, 12, 34, tzinfo=datetime.UTC),
         ),
         (
             "NLHE-5max-USD-0.05-0.10-201302.Strobe.txt",
-            datetime.datetime(2013, 2, 28, 6, 30, 49, tzinfo=datetime.timezone.utc),
+            datetime.datetime(2013, 2, 28, 6, 30, 49, tzinfo=datetime.UTC),
         ),
         (
             "PLO8-USD-0.50-0.50-201111.txt",
-            datetime.datetime(2011, 9, 11, 14, 58, 25, tzinfo=datetime.timezone.utc),
+            datetime.datetime(2011, 9, 11, 14, 58, 25, tzinfo=datetime.UTC),
         ),
     ],
 )

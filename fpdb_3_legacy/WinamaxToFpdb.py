@@ -483,7 +483,7 @@ class Winamax(HandHistoryConverter):
         hand.startTime = datetime.datetime.strptime(
             datetimestr,
             "%Y/%m/%d %H:%M:%S",
-        ).replace(tzinfo=datetime.timezone.utc)
+        ).replace(tzinfo=datetime.UTC)
 
     def _parse_hand_id(self, hand: Hand, info: dict) -> None:
         """Parses and sets the hand's unique identifier from parsed info.

@@ -163,7 +163,7 @@ class Betfair(HandHistoryConverter):
         hand.startTime = datetime.datetime.strptime(
             m.group("DATETIME"),
             "%A, %B %d, %H:%M:%S GMT %Y",
-        ).replace(tzinfo=datetime.timezone.utc)
+        ).replace(tzinfo=datetime.UTC)
 
     def readPlayerStacks(self, hand: Any) -> None:
         """Read player stacks from hand text."""

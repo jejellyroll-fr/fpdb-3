@@ -201,7 +201,7 @@ class BovadaSummary(TourneySummary):
         self.startTime = datetime.datetime.strptime(
             datetimestr,
             "%Y/%m/%d %H:%M:%S",
-        ).replace(tzinfo=datetime.timezone.utc)
+        ).replace(tzinfo=datetime.UTC)
         self.startTime = HandHistoryConverter.changeTimezone(
             self.startTime,
             "ET",

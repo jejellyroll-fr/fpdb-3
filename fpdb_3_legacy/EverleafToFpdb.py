@@ -269,7 +269,7 @@ class Everleaf(HandHistoryConverter):
         # Everleaf time is GMT/UTC; make the value explicitly UTC-aware.
         hand.startTime = datetime.datetime.strptime(
             m.group("DATETIME"), "%Y/%m/%d - %H:%M:%S"
-        ).replace(tzinfo=datetime.timezone.utc)
+        ).replace(tzinfo=datetime.UTC)
         return
 
     def readPlayerStacks(self, hand):

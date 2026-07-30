@@ -204,7 +204,7 @@ class PokerTrackerSummary(TourneySummary):
         self.startTime = datetime.datetime.strptime(
             datetimestr,
             "%Y/%m/%d %H:%M:%S",
-        ).replace(tzinfo=datetime.timezone.utc)  # also timezone at end, e.g. " ET"
+        ).replace(tzinfo=datetime.UTC)  # also timezone at end, e.g. " ET"
 
         if mg["CURRENCY"] == "$":
             self.buyinCurrency = "USD"

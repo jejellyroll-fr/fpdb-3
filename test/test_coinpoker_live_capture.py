@@ -25,8 +25,11 @@ from fpdb_3_legacy.coinpoker_live_capture import (
     _Conn,
     _ensure_capture_file,
     _is_game_port,
+    _known_aof_tables,
+    _make_equity_coordinator,
     _open_db,
     _Tee,
+    run,
 )
 from fpdb_3_legacy.Exceptions import FpdbHandDuplicate
 from fpdb_3_legacy.http_capture_hand_builder import HttpCaptureHandConfig
@@ -366,6 +369,78 @@ def test_hand_pump_treats_database_duplicate_as_skipped(monkeypatch, capsys) -> 
     assert capsys.readouterr().out.count("[DUPLICATE]") == 2
 
 
+def test_live_hand_is_notified_before_its_equity_job_is_queued(monkeypatch) -> None:
+    order = []
+    db = Mock()
+    db.resetBulkCache.side_effect = lambda: order.append("reset")
+    db.commit.side_effect = lambda: order.append("commit")
+    notify = Mock()
+    notify.send_hand_id.side_effect = lambda _hand_id: order.append("hand-notify")
+    coordinator = Mock()
+    coordinator.submit_hand.side_effect = lambda *_args: order.append("equity-queue")
+    hand = Mock(players=[(1, "hero", 2)])
+
+    def imported(built_hand, *_args, **_kwargs):
+        order.append("import")
+        built_hand.dbid_hands = 41
+        built_hand.aof_decisions = ("decision",)
+        built_hand.aof_decision_ids = (7,)
+
+    monkeypatch.setattr("fpdb_3_legacy.coinpoker_live_capture.import_fpdb_hand", imported)
+    pump = HandPump(
+        db,
+        Mock(),
+        notify=notify,
+        equity_coordinator=coordinator,
+    )
+
+    pump._insert_hand(hand, "site-41")
+
+    assert order == ["reset", "import", "commit", "hand-notify", "equity-queue"]
+    coordinator.submit_hand.assert_called_once_with(hand, ("decision",), (7,))
+
+
+def test_live_worker_enables_range_and_action_models_without_a_second_service(monkeypatch) -> None:
+    captured = {}
+    service = object()
+
+    def coordinator(*args, **kwargs):
+        captured["args"] = args
+        captured["kwargs"] = kwargs
+        return object()
+
+    monkeypatch.setattr(
+        "fpdb_3_legacy.coinpoker_live_capture.AsyncEquityService",
+        lambda: service,
+    )
+    monkeypatch.setattr(
+        "fpdb_3_legacy.coinpoker_live_capture.KnownCardsAnalysisCoordinator",
+        coordinator,
+    )
+    notify = Mock()
+
+    _make_equity_coordinator(Mock(), notify)
+
+    assert captured["args"][0] is service
+    assert captured["kwargs"]["notify_hand"] is notify.send_hand_id
+    assert captured["kwargs"]["population_model"].identifier == "population_observed"
+    assert captured["kwargs"]["action_model"].identifier == "population_action_frequency"
+
+
+def test_an_equity_queue_failure_never_marks_a_committed_hand_failed(monkeypatch) -> None:
+    db = Mock()
+    hand = Mock(players=[(1, "hero", 2)], dbid_hands=42, aof_decisions=(), aof_decision_ids=())
+    coordinator = Mock()
+    coordinator.submit_hand.side_effect = RuntimeError("worker unavailable")
+    monkeypatch.setattr("fpdb_3_legacy.coinpoker_live_capture.import_fpdb_hand", lambda *_args, **_kwargs: None)
+    pump = HandPump(db, Mock(), equity_coordinator=coordinator)
+
+    pump._insert_hand(hand, "site-42")
+
+    assert pump.failed == set()
+    db.rollback.assert_not_called()
+
+
 def test_captured_hands_are_archived_as_text(tmp_path) -> None:
     """A live capture has no source file, so the built hand must be archived.
 
@@ -389,8 +464,8 @@ def test_captured_hands_are_archived_as_text(tmp_path) -> None:
     assert archives, "the built hands must be written to a dated archive"
     text = archives[0].read_text(encoding="utf-8")
     assert "91426500343" in text and "91426500344" in text  # both hands
-    assert "*** SUMMARY ***" in text                        # full rendering
-    assert "collected" in text                              # winnings are auditable
+    assert "*** SUMMARY ***" in text  # full rendering
+    assert "collected" in text  # winnings are auditable
 
 
 def test_archive_failure_never_breaks_the_feed(tmp_path) -> None:
@@ -804,9 +879,7 @@ def test_an_announcement_keeps_the_tournament_it_was_first_filed_on() -> None:
 def _aof_hand_at(table: str) -> tuple[list[tuple], tuple]:
     """A real All-in or Fold hand moved to `table`, with the join naming it."""
     raw = json.loads((Path(__file__).parent / "data" / "coinpoker_aof_hand_events.json").read_text())
-    hand = [
-        (name, str(hid).replace("123144", table) if hid else hid, data) for name, hid, data in raw["hand"]
-    ]
+    hand = [(name, str(hid).replace("123144", table) if hid else hid, data) for name, hid, data in raw["hand"]]
     join = tuple(raw["join"])
     return hand, join
 
@@ -893,6 +966,63 @@ def test_the_all_in_or_fold_catalogue_survives_the_sweep_it_arrived_in() -> None
     )
 
     assert [hand["gametype"]["category"] for hand in built] == ["aof_omaha"]
+
+
+def test_a_restart_while_seated_restores_the_aof_table_from_the_database() -> None:
+    """A table already proved AoF stays AoF without a new lobby catalogue."""
+    hand, _join = _aof_hand_at("124115")
+    db = Mock()
+    db.sql.query = {"placeholder": "?"}
+    db.get_cursor.return_value.fetchall.return_value = [("124115",)]
+    config = HttpCaptureHandConfig(site_ids={"CoinPoker": COINPOKER_SITE_ID, "default": COINPOKER_SITE_ID})
+    known_aof_tables = _known_aof_tables(db)
+    pump = HandPump(
+        db=db,
+        config=config,
+        table_category="PLO4",
+        archive_dir="",
+        known_aof_tables=known_aof_tables,
+    )
+    pump._insert_hand = Mock()
+
+    assert pump.process(hand) == 1
+    imported = pump._insert_hand.call_args.args[0]
+    assert imported.gametype["category"] == "aof_omaha"
+    db.get_cursor.return_value.execute.assert_called_once()
+    assert db.get_cursor.return_value.execute.call_args.args[1] == (COINPOKER_SITE_ID, "aof_omaha")
+    db.rollback.assert_called_once()
+
+
+def test_live_run_hydrates_the_new_pump_with_known_aof_tables(monkeypatch) -> None:
+    """The durable lookup is wired into the production run, not only callable."""
+    db = Mock()
+    config = Mock()
+    coordinator = Mock()
+    captured: dict = {}
+
+    class RecordingPump:
+        imported: set[str] = set()
+
+        def __init__(self, *_args, **kwargs) -> None:
+            captured.update(kwargs)
+
+        def process(self, _events) -> int:
+            return 0
+
+        def record_tournament_results(self, _events) -> int:
+            return 0
+
+    monkeypatch.setattr("fpdb_3_legacy.coinpoker_live_capture._open_db", lambda _path: (db, config))
+    monkeypatch.setattr("fpdb_3_legacy.coinpoker_live_capture._ensure_capture_file", lambda _db: 7)
+    monkeypatch.setattr("fpdb_3_legacy.coinpoker_live_capture._known_aof_tables", lambda _db: {"124115": 2})
+    monkeypatch.setattr("fpdb_3_legacy.coinpoker_live_capture._make_hud_notifier", lambda: None)
+    monkeypatch.setattr("fpdb_3_legacy.coinpoker_live_capture._make_equity_coordinator", lambda *_args: coordinator)
+    monkeypatch.setattr("fpdb_3_legacy.coinpoker_live_capture.HandPump", RecordingPump)
+
+    run([], dry_run=False, table_category="PLO4")
+
+    assert captured["known_aof_tables"] == {"124115": 2}
+    coordinator.close.assert_called_once()
 
 
 def test_the_buffer_keeps_only_hands_still_being_assembled() -> None:

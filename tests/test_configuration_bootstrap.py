@@ -180,7 +180,7 @@ def put_example(directory: Path) -> Path:
 def test_every_place_fpdb_can_run_from_is_searched(places, constant) -> None:
     expected = put_example(places[constant])
 
-    assert config_module._find_example_config(NAME) == str(expected)
+    assert config_module._find_example_config(NAME) == str(expected).replace("\\", "/")
 
 
 def test_the_first_place_that_has_one_wins(places) -> None:
@@ -189,12 +189,12 @@ def test_the_first_place_that_has_one_wins(places) -> None:
     first = put_example(places["SOURCE_ROOT_PATH"])
     put_example(places["PYFPDB_PATH"])
 
-    assert config_module._find_example_config(NAME) == str(first)
+    assert config_module._find_example_config(NAME) == str(first).replace("\\", "/")
 
 
 def test_nowhere_having_one_answers_beside_the_configuration(places) -> None:
     # Not a path that exists: it is what get_config then reports as missing.
     answer = config_module._find_example_config(NAME)
 
-    assert answer == str(places["CONFIG_PATH"] / f"{NAME}.example")
+    assert answer == str(places["CONFIG_PATH"] / f"{NAME}.example").replace("\\", "/")
     assert not Path(answer).exists()

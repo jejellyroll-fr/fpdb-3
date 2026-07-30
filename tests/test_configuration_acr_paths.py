@@ -34,6 +34,7 @@ STORAGE = "Library/Application Support/Loading/storage"
 def home(tmp_path, monkeypatch) -> Path:
     """A home directory the client's JSON can be written into."""
     monkeypatch.setenv("HOME", str(tmp_path))
+    monkeypatch.setenv("USERPROFILE", str(tmp_path))
     monkeypatch.setattr(config_module, "CONFIG_PATH", str(tmp_path / "cfgdir"))
     return tmp_path
 
