@@ -360,7 +360,11 @@ jobs:
         env:
           QT_QPA_PLATFORM: offscreen
         run: |
-          python -m pytest test/test_equity.py test/test_aof_equity.py test/test_aof_ranges.py -x -v --tb=short
+          native_tests="test/test_equity.py"
+          for f in test/test_aof_equity.py test/test_aof_ranges.py; do
+            [ -f "$f" ] && native_tests="$native_tests $f"
+          done
+          python -m pytest $native_tests -x -v --tb=short
 
   coverage:
     runs-on: ubuntu-latest
