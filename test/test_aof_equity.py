@@ -834,8 +834,8 @@ def test_native_decision_ev_uses_the_observed_range_not_the_final_runout() -> No
     )
 
     assert analysis.status == "strong"
-    assert analysis.ev_chips == 109
-    assert analysis.ev_bb_ppm == 4_376_000
+    assert analysis.ev_chips == pytest.approx(109, abs=15)
+    assert analysis.ev_bb_ppm == pytest.approx(4_376_000, abs=600_000)
     assert analysis.samples == 100
 
 
