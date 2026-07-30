@@ -1,0 +1,31 @@
+Poker Hand #AF443780601: Omaha No Limit ($0.1/$0.2) - 2026/07/28 10:02:32
+Table 'AFORed5' 4-max Seat #4 is the button
+Seat 1: f33b42b ($1 in chips)
+Seat 2: 6ff43dce ($2.24 in chips)
+Seat 3: 56149d6d ($1 in chips)
+Seat 4: Hero ($1 in chips)
+f33b42b: posts small blind $0.1
+6ff43dce: posts big blind $0.2
+*** HOLE CARDS ***
+Dealt to f33b42b 
+Dealt to 6ff43dce 
+Dealt to 56149d6d 
+Dealt to Hero [3c Jc 4d Jd]
+*** PREFLOP ***
+56149d6d: folds
+Hero: raises $0.8 to $1 and is all-in
+f33b42b: folds
+6ff43dce: calls $0.8
+Hero: shows [3c Jc 4d Jd] (three of a kind, Jacks)
+6ff43dce: shows [6c 7h 9s 6h] (a straight, Jack to Seven)
+*** TURN *** [Jh 8h Ts] [Th]
+*** RIVER *** [Jh 8h Ts Th] [Js]
+*** SHOWDOWN ***
+Hero collected $2.1 from pot
+*** SUMMARY ***
+Total pot $2.1
+Board [Jh 8h Ts Th Js]
+Seat 1: f33b42b (small blind) folded before Flop
+Seat 2: 6ff43dce (big blind) showed [6c 7h 9s 6h] and lost with a flush Jack high
+Seat 3: 56149d6d folded before Flop (didn't bet)
+Seat 4: Hero (button) showed [3c Jc 4d Jd] and won ($2.1) with four of a kind, Jacks

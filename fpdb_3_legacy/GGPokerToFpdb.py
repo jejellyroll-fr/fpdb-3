@@ -482,6 +482,15 @@ class GGPoker(HandHistoryConverter):
         # Adjust fixed limit blinds
         self._adjust_fixed_limit_blinds(info, mg, hand_text)
 
+        # All-in or Fold detection via table name prefix
+        m_table = self.re_hand_info.search(hand_text)
+        if m_table and "AFO" in m_table.groupdict().get("TABLE", ""):
+            game = mg.get("GAME", "")
+            if game and ("Omaha" in game or "PLO" in game or game == "OM"):
+                info["category"] = "aof_omaha"
+            elif game and ("Hold" in game or "ShortDeck" in game):
+                info["category"] = "aof_holdem"
+
         return info
 
     def _parse_datetime(self, hand: Hand, datetime_str: str) -> None:
@@ -681,9 +690,15 @@ class GGPoker(HandHistoryConverter):
 
     def markStreets(self, hand: Hand) -> None:
         """Mark different streets in the hand text."""
-        # PREFLOP = ** Dealing down cards **
-        # This re fails if,  say, river is missing; then we don't get the ** that starts the river.
         log.debug(f"markStreets: gametype base = {hand.gametype.get('base')}")
+
+        # All-in or Fold format: no FLOP marker; PREFLOP contains all actions,
+        # board is in the SUMMARY line. Map PREFLOP actions to FLOP (AoF model)
+        # and populate board streets from the summary board line.
+        if hand.gametype.get("category") in ("aof_omaha", "aof_holdem"):
+            self._mark_aof_streets(hand)
+            return
+
         if hand.gametype["base"] in ("hold"):
             log.debug(f"markStreets: processing hold game, handText length = {len(hand.handText)}")
             log.debug(f"markStreets: handText preview = {hand.handText[:200]}")
@@ -759,6 +774,31 @@ class GGPoker(HandHistoryConverter):
             )
             if runs >= 2:
                 hand.runItTimes = runs
+
+    @staticmethod
+    def _mark_aof_streets(hand: Hand) -> None:
+        """Street markers for All-in or Fold hands.
+
+        GG AoF format has no FLOP marker; the PREFLOP section holds all
+        actions.  Board cards come from the SUMMARY line.  Remap PREFLOP
+        actions to the FLOP street (the AoF model has no PREFLOP) and set
+        board streets from the summary board line.
+        """
+        hand.streets["FLOP"] = ""
+        # Extract the PREFLOP section text for actions
+        m = re.search(r"\*\*\* PREFLOP \*\*\*(.+?)(?=\*\*\* TURN|\*\*\* SHOWDOWN|Hero: shows|\w+: shows)", hand.handText, re.DOTALL)
+        if m:
+            hand.streets["FLOP"] = m.group(1).strip()
+        # Board from SUMMARY line
+        board_m = re.search(r"Board\s+\[(.+?)\]", hand.handText)
+        if board_m:
+            cards = board_m.group(1).split()
+            if len(cards) >= 3:
+                hand.streets["FLOP"] += "\n[" + " ".join(cards[:3]) + "]"
+            if len(cards) >= 4:
+                hand.streets["TURN"] = "[" + cards[3] + "]"
+            if len(cards) >= 5:
+                hand.streets["RIVER"] = "[" + cards[4] + "]"
 
     def readCommunityCards(
         self,

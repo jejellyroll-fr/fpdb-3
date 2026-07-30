@@ -577,7 +577,14 @@ class Hand:
                 continue
             amount = self.cashOutAmounts.get(name)
             fee = self.cashOutFees.get(name)
-            rows.append([self.dbid_hands, pid, str(amount) if amount is not None else None, str(fee) if fee is not None else None])
+            rows.append(
+                [
+                    self.dbid_hands,
+                    pid,
+                    str(amount) if amount is not None else None,
+                    str(fee) if fee is not None else None,
+                ]
+            )
         if rows:
             db.storeHandsCashout(rows, doinsert)
         elif doinsert:
@@ -1168,7 +1175,7 @@ class Hand:
 
             street = "BLAH"
 
-            if self.gametype["category"] == "aof_omaha":
+            if self.gametype["category"] in ("aof_omaha", "aof_holdem"):
                 street = "FLOP"
             elif self.gametype["base"] == "hold":
                 street = "PREFLOP"
@@ -1480,7 +1487,9 @@ class Hand:
                     self.rake = Decimal("0.00")
                     log.debug("Tournament detected, rake set to 0.")
                     if self.totalcollected > 0 and self.totalpot != self.totalcollected:
-                        log.warning(f"Auto-balancing tournament totalpot ({self.totalpot}) to match totalcollected ({self.totalcollected})")
+                        log.warning(
+                            f"Auto-balancing tournament totalpot ({self.totalpot}) to match totalcollected ({self.totalcollected})"
+                        )
                         self.totalpot = self.totalcollected
                 elif self.totalpot > self.totalcollected:
                     self.rake = self.totalpot - self.totalcollected
@@ -1632,7 +1641,9 @@ class Hand:
                 self.rake = Decimal("0.00")
                 log.debug("Tournament detected, rake set to 0.")
                 if self.totalcollected > 0 and self.totalpot != self.totalcollected:
-                    log.warning(f"Auto-balancing tournament totalpot ({self.totalpot}) to match totalcollected ({self.totalcollected})")
+                    log.warning(
+                        f"Auto-balancing tournament totalpot ({self.totalpot}) to match totalcollected ({self.totalcollected})"
+                    )
                     self.totalpot = self.totalcollected
                 return self.totalpot
 
@@ -1969,7 +1980,7 @@ class HoldemOmahaHand(Hand):
             self.discardStreets = ["PREFLOP"]
         self.communityStreets = ["FLOP", "TURN", "RIVER"]
         self.actionStreets = ["BLINDSANTES", "PREFLOP", "FLOP", "TURN", "RIVER"]
-        if gametype["category"] == "aof_omaha":
+        if gametype["category"] in ("aof_omaha", "aof_holdem"):
             self.allStreets = ["BLINDSANTES", "FLOP", "TURN", "RIVER"]
             self.holeStreets = ["FLOP"]
             self.communityStreets = ["FLOP", "TURN", "RIVER"]
@@ -2087,7 +2098,7 @@ class HoldemOmahaHand(Hand):
                 self.shown.add(player)
             if mucked:
                 self.mucked.add(player)
-        elif self.gametype["category"] == "aof_omaha":
+        elif self.gametype["category"] in ("aof_omaha", "aof_holdem"):
             self.addHoleCards(
                 "FLOP",
                 player,
@@ -3118,9 +3129,7 @@ class Pot:
 
         if self.total is None:
             self.total = (
-                sum(self.committed.values(), Decimal(0))
-                + sum(self.common.values(), Decimal(0))
-                + Decimal(self.stp)
+                sum(self.committed.values(), Decimal(0)) + sum(self.common.values(), Decimal(0)) + Decimal(self.stp)
             )
         total = self.total
 
