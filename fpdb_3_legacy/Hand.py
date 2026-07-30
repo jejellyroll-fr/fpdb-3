@@ -1704,6 +1704,8 @@ class Hand:
             "27_3draw": "Triple Draw 2-7 Lowball",
             "5_studhi": "5 Card Stud",
             "badugi": "Badugi",
+            "aof_omaha": "All-in or Fold Omaha",
+            "aof_holdem": "All-in or Fold Hold'em",
         }
         ls = {
             "nl": "No Limit",
@@ -2217,10 +2219,14 @@ class HoldemOmahaHand(Hand):
         fh = self._output_stream(fh)
         super().writeHand(fh)
 
+        is_aof = self.gametype.get("category", "") in ("aof_omaha", "aof_holdem")
+        hole_street = "FLOP" if is_aof else "PREFLOP"
+        initial_street = "FLOP" if is_aof else "PREFLOP"
+
         players_who_act_preflop = set(
-            ([x[0] for x in self.actions["PREFLOP"]] + [x[0] for x in self.actions["BLINDSANTES"]]),
+            ([x[0] for x in self.actions[initial_street]] + [x[0] for x in self.actions["BLINDSANTES"]]),
         )
-        log.debug(self.actions["PREFLOP"])
+        log.debug(self.actions[initial_street])
         for player in [x for x in self.players if x[1] in players_who_act_preflop]:
             # Only displays the stacks of players who acted preflop.
             log.info(
@@ -2235,17 +2241,17 @@ class HoldemOmahaHand(Hand):
         fh.write("*** HOLE CARDS ***\n")
         for player in self.dealt:
             fh.write(
-                f"Dealt to {player} [{' '.join(self.holecards['PREFLOP'][player][1])}]\n",
+                f"Dealt to {player} [{' '.join(self.holecards[hole_street][player][1])}]\n",
             )
 
         if self.hero == "":
             for player in self.shown.difference(self.dealt):
                 fh.write(
-                    f"Dealt to {player} [{' '.join(self.holecards['PREFLOP'][player][1])}]\n",
+                    f"Dealt to {player} [{' '.join(self.holecards[hole_street][player][1])}]\n",
                 )
 
-        if self.actions["PREFLOP"]:
-            for act in self.actions["PREFLOP"]:
+        if self.actions[initial_street]:
+            for act in self.actions[initial_street]:
                 fh.write(f"{self.actionString(act)}\n")
 
         if self.board["FLOP"]:
@@ -2299,9 +2305,11 @@ class HoldemOmahaHand(Hand):
         for player in [x for x in self.players if x[1] in players_who_act_preflop]:
             seatnum = player[0]
             name = player[1]
+            cards = self.holecards.get(hole_street, {}).get(name, [None, []])[1]
+            cards_str = f" [{' '.join(cards)}]" if cards else ""
             if name in self.collectees and name in self.shown:
                 fh.write(
-                    f"Seat {seatnum}: {name} showed [{' '.join(self.holecards['PREFLOP'][name][1])}] "
+                    f"Seat {seatnum}: {name} showed{cards_str} "
                     f"and won ({self.sym}{self.collectees[name]})\n",
                 )
             elif name in self.collectees:
@@ -2312,12 +2320,12 @@ class HoldemOmahaHand(Hand):
                 fh.write(f"Seat {seatnum}: {name} folded\n")
             elif name in self.shown:
                 fh.write(
-                    f"Seat {seatnum}: {name} showed [{' '.join(self.holecards['PREFLOP'][name][1])}] "
+                    f"Seat {seatnum}: {name} showed{cards_str} "
                     f"and lost with...\n",
                 )
             elif name in self.mucked:
                 fh.write(
-                    f"Seat {seatnum}: {name} mucked [{' '.join(self.holecards['PREFLOP'][name][1])}]\n",
+                    f"Seat {seatnum}: {name} mucked{cards_str}\n",
                 )
             else:
                 fh.write(f"Seat {seatnum}: {name} mucked\n")

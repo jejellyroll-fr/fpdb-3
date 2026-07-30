@@ -988,6 +988,8 @@ class DatabaseSchemaMixin:
             except Exception:  # noqa: BLE001 - index/table already exists or feature table absent.
                 self.rollback()
 
+        self._ensure_gametype_category_width()
+
         self.ensure_hudcache_columns()
         self.ensure_handsplayers_columns()
         self.ensure_hands_columns()
@@ -1029,6 +1031,33 @@ class DatabaseSchemaMixin:
             "splashPot": "INT DEFAULT 0",
         }
         self._ensure_table_columns("Hands", definitions)
+
+    def _ensure_gametype_category_width(self) -> None:
+        """Widen Gametypes.category to varchar(10) for aof_holdem support.
+
+        The original schema used varchar(9), which fits aof_omaha (8 chars)
+        but not aof_holdem (10 chars). Avoided on SQLite (TEXT is unbounded)
+        and skipped when the column is already wide enough.
+        """
+        if self.backend == self.SQLITE:
+            return
+        try:
+            existing = self._get_table_columns("Gametypes")
+        except Exception:  # noqa: BLE001
+            self.rollback()
+            return
+        if not existing or "category" not in {c.lower() for c in existing}:
+            return
+        try:
+            c = self.get_cursor()
+            if self.backend == self.MYSQL_INNODB:
+                c.execute("ALTER TABLE Gametypes MODIFY category VARCHAR(10) NOT NULL")
+            else:
+                c.execute("ALTER TABLE Gametypes ALTER COLUMN category TYPE VARCHAR(10)")
+            self.commit()
+            log.info("Widened Gametypes.category to varchar(10)")
+        except Exception:  # noqa: BLE001 - column may already be wide enough or table locked.
+            self.rollback()
 
     def _ensure_table_columns(self, table: str, definitions: dict[str, str]) -> None:
         try:
