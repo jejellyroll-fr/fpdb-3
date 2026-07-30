@@ -58,6 +58,7 @@ MIN_PLAYERS_FOR_GAME = 2
 MIN_ACTIONS_FOR_CHECK_CALL_RAISE = 2
 MIN_PLAYER_TUPLE_LENGTH = 2
 
+
 def _to_decimal(value: Any) -> Decimal:
     """Best-effort Decimal conversion. Accepts numbers and numeric strings
     (parsers store blinds as strings); returns 0 for anything else (e.g. mocks)."""
@@ -110,6 +111,7 @@ def _initMoneyAndResults(init: dict[str, Any]) -> None:
     init["cashOutAmount"] = 0  # Insurance payout (not pot winnings)
     init["cashOutFee"] = 0  # Fee deducted from cash out
 
+
 def _initHandOutcome(init: dict[str, Any]) -> None:
     """Showdown participation, holdings and seating context."""
     init["sawShowdown"] = False
@@ -130,6 +132,7 @@ def _initHandOutcome(init: dict[str, Any]) -> None:
     init["flg_blind_ds"] = False  # Player posted a dead small blind
     init["flg_blind_db"] = False  # Player posted a dead big blind (see note)
     init["flg_blind_k"] = False  # Player straddled (voluntary kill blind)
+
 
 def _initPreflop(init: dict[str, Any]) -> None:
     """Preflop actions, raise levels, limps and the sizing faced."""
@@ -184,6 +187,7 @@ def _initPreflop(init: dict[str, Any]) -> None:
     init["cnt_p_4bet_facing"] = 0
     init["val_p_4bet_facing_bp"] = 0
 
+
 def _initPostflopRaiseLevels(init: dict[str, Any]) -> None:
     """Postflop per-street re-raise stats. street1 = flop, street2 = turn,
     street3 = river.
@@ -202,6 +206,7 @@ def _initPostflopRaiseLevels(init: dict[str, Any]) -> None:
         init[f"street{_s}FirstRaise"] = False
         init[f"street{_s}FaceRaise"] = False
 
+
 def _initStealAndBlindDefence(init: dict[str, Any]) -> None:
     """Steal attempts and blind defence."""
     init["stealChance"] = False
@@ -215,6 +220,7 @@ def _initStealAndBlindDefence(init: dict[str, Any]) -> None:
     init["foldSbToStealChance"] = False
     init["foldedSbToSteal"] = False
     init["foldedBbToSteal"] = False
+
 
 def _initStreetsSeenAndAllIn(init: dict[str, Any]) -> None:
     """Streets reached, aggression faced preflop and all-in exposure."""
@@ -340,6 +346,7 @@ def _initPostflopStreetStats(init: dict[str, Any]) -> None:
     init["cnt_r_spr"] = 0
     init["val_r_spr"] = 0
 
+
 def _initRaiseSizing(init: dict[str, Any]) -> None:
     """Sizing of raises made and faced, per street and level."""
     # Bet-sizing: size of the first raise the player makes per street, as basis
@@ -404,7 +411,7 @@ def _is_all_in_or_fold(hand: Any) -> bool:
     for "preflop" are filled from that decision -- but the conventions built
     around a preflop round do not all carry over to it.
     """
-    return str((getattr(hand, "gametype", {}) or {}).get("category", "")).lower() == "aof_omaha"
+    return str((getattr(hand, "gametype", {}) or {}).get("category", "")).lower() in {"aof_omaha", "aof_holdem"}
 
 
 class DerivedStats:
@@ -510,9 +517,8 @@ class DerivedStats:
                 if action_type in ("bets", "raises"):
                     log.debug("%s: Setting %s=True for player %s", log_prefix, float_done_key, player)
                     self.handsplayers[player][float_done_key] = True
-                    if (
-                        previous_aggressor in self.handsplayers
-                        and self.handsplayers[previous_aggressor].get(seen_key, False)
+                    if previous_aggressor in self.handsplayers and self.handsplayers[previous_aggressor].get(
+                        seen_key, False
                     ):
                         log.debug(
                             "%s: Setting %s=True for previous aggressor %s",
@@ -560,7 +566,6 @@ class DerivedStats:
             # Observed hands (the hero was not dealt in) legitimately have no
             # hero seat, so this is routine, not a problem to report.
             log.debug("No hero seated in hand %s", getattr(hand, "handid", "unknown"))
-
 
     def _assembleBoardCards(self, hand: Any) -> None:
         """Encode the five community cards of the single board."""
@@ -618,7 +623,6 @@ class DerivedStats:
             self.hands["boardcard3"] = 0
             self.hands["boardcard4"] = 0
             self.hands["boardcard5"] = 0
-
 
     def _assembleRunItTwiceBoards(self, hand: Any) -> None:
         """Encode one board per run when the hand was run several times."""
@@ -686,7 +690,6 @@ class DerivedStats:
             self.hands["boards"].append([board_id, *cards])
             log.debug("Run %s: Appended to boards: %s", i + 1, [board_id, *cards])
 
-
     def _assembleStreetTotals(self, hand: Any) -> None:
         """Record the pot size entering each street, in cents."""
         # Calculate street totals
@@ -734,7 +737,6 @@ class DerivedStats:
             self.hands["bombPot"] = getattr(hand, "bombPot", 0)
 
         # VPIP will be calculated in assembleHandsPlayers after player initialization
-
 
     def _assembleStreetSummaries(self, hand: Any) -> None:
         """Count players and raises per street."""
@@ -1203,9 +1205,7 @@ class DerivedStats:
                 if ps is None:
                     continue
                 is_allin = (
-                    bool(action[-1])
-                    if len(action) > MIN_ACTION_LENGTH_FOR_ALLIN and act != "discards"
-                    else False
+                    bool(action[-1]) if len(action) > MIN_ACTION_LENGTH_FOR_ALLIN and act != "discards" else False
                 )
                 if allin_aggr and pname != aggressor and pname not in recorded:
                     recorded.add(pname)
@@ -1294,7 +1294,12 @@ class DerivedStats:
                 # A short stack that calls/raises all-in for less than the full
                 # amount only faces what it can put in, and only contests the
                 # part of the pot capped at its effective total (PT4 convention).
-                if len(a) > MIN_ACTION_LENGTH_FOR_ALLIN and a[-1] is True and act in ("calls", "raises", "bets", "completes") and chips(a) < to_call:
+                if (
+                    len(a) > MIN_ACTION_LENGTH_FOR_ALLIN
+                    and a[-1] is True
+                    and act in ("calls", "raises", "bets", "completes")
+                    and chips(a) < to_call
+                ):
                     to_call = chips(a)
                     eff = inv + to_call  # the all-in player's effective total
                     pot = sum(min(iv, eff) for iv in invested.values())
@@ -1341,8 +1346,13 @@ class DerivedStats:
 
         # PT4 amt_bet_p is the full preflop investment, *including* the blind
         # (which is also counted separately in amt_blind).
-        street_key = {"BLINDSANTES": ("amt_blind", "amt_bet_p"), "PREFLOP": ("amt_bet_p",),
-                      "FLOP": ("amt_bet_f",), "TURN": ("amt_bet_t",), "RIVER": ("amt_bet_r",)}
+        street_key = {
+            "BLINDSANTES": ("amt_blind", "amt_bet_p"),
+            "PREFLOP": ("amt_bet_p",),
+            "FLOP": ("amt_bet_f",),
+            "TURN": ("amt_bet_t",),
+            "RIVER": ("amt_bet_r",),
+        }
         for street in hand.actionStreets:
             keys = street_key.get(street, ())
             for a in hand.actions.get(street, []):
@@ -1444,7 +1454,12 @@ class DerivedStats:
                     # A short stack calling/raising all-in only faces what it can
                     # put in, and contests the pot capped at its effective total.
                     a_chips = int(CENTS_MULTIPLIER * chips(a))
-                    if len(a) > MIN_ACTION_LENGTH_FOR_ALLIN and a[-1] is True and act in ("calls", "raises", "bets", "completes") and a_chips < to_call:
+                    if (
+                        len(a) > MIN_ACTION_LENGTH_FOR_ALLIN
+                        and a[-1] is True
+                        and act in ("calls", "raises", "bets", "completes")
+                        and a_chips < to_call
+                    ):
                         to_call = a_chips
                         eff = inv + to_call
                         pot = sum(min(iv, eff) for iv in invested.values())
@@ -2638,14 +2653,19 @@ class DerivedStats:
             for action in hand.actions.get(street, []):
                 pname, act = action[0], action[1]
                 ps = self.handsplayers.get(pname)
-                if ps is not None and raise_seen and act not in (
-                    "small blind",
-                    "big blind",
-                    "secondsb",
-                    "both",
-                    "button blind",
-                    "ante",
-                    "bringin",
+                if (
+                    ps is not None
+                    and raise_seen
+                    and act
+                    not in (
+                        "small blind",
+                        "big blind",
+                        "secondsb",
+                        "both",
+                        "button blind",
+                        "ante",
+                        "bringin",
+                    )
                 ):
                     ps[f"street{idx}FaceRaise"] = True
                 if act in ("raises", "completes"):
@@ -2831,7 +2851,11 @@ class DerivedStats:
                     log.debug("calcSteals: Pot OPENED by %s with %s", pname, act)
                     pot_opened = True
 
-            if first_raise_seen and posn not in steal_positions and act not in ("folds", "bringin", "small blind", "big blind", "secondsb", "both", "button blind"):
+            if (
+                first_raise_seen
+                and posn not in steal_positions
+                and act not in ("folds", "bringin", "small blind", "big blind", "secondsb", "both", "button blind")
+            ):
                 log.debug("calcSteals: Non-steal position %s with action %s after first raise, ending loop", posn, act)
                 break
 

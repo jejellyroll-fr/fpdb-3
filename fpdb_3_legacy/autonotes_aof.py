@@ -44,6 +44,43 @@ _CARDS_PER_RANK = 4
 
 
 @dataclass(frozen=True)
+class AofRuleset:
+    """Contract that any AoF ruleset must satisfy for fpdb processing.
+
+    A room can reuse an existing category (e.g. ``aof_omaha``) only when all
+    semantics — hole card count, board presence, permitted decisions, blind
+    treatment, stack structure, multiway handling, rake — are equivalent.
+    Otherwise a distinct category must be registered here.
+    """
+
+    category: str
+    hole_cards: int = _OMAHA_HOLE_CARDS
+    equal_stacks: bool = True
+    game_name: str = "omaha"
+
+
+_RULESETS: dict[str, AofRuleset] = {
+    AOF_OMAHA_CATEGORY: AofRuleset(
+        category=AOF_OMAHA_CATEGORY,
+        hole_cards=_OMAHA_HOLE_CARDS,
+        equal_stacks=True,
+        game_name="omaha",
+    ),
+    AOF_HOLDEM_CATEGORY: AofRuleset(
+        category=AOF_HOLDEM_CATEGORY,
+        hole_cards=_HOLDEM_HOLE_CARDS,
+        equal_stacks=True,
+        game_name="holdem",
+    ),
+}
+
+
+def ruleset_for(category: str) -> AofRuleset | None:
+    """Look up the registered ruleset for an AoF game category."""
+    return _RULESETS.get(category)
+
+
+@dataclass(frozen=True)
 class AofDecision:
     """One observable All-in or Fold decision, ready for persistence."""
 
@@ -270,9 +307,10 @@ def _is_run(ranks: list[str]) -> bool:
 def classify_all_in(hand: Any, player: str) -> dict[str, Any] | None:
     """What this player moved all in with, or None when it cannot be seen.
 
-    Returns None rather than a guess whenever the four cards were not
-    revealed: an unshown shove is the great majority of them, and a note built
-    on two visible cards would read exactly like one built on four.
+    Returns None rather than a guess whenever the hand's cards were not
+    revealed: an unshown shove is the great majority of them, and a note
+    built on visible cards would read exactly like one built on incomplete
+    information.
     """
     cached = getattr(hand, "aof_decisions", None)
     if cached is not None:
@@ -287,17 +325,23 @@ def classify_all_in(hand: Any, player: str) -> dict[str, Any] | None:
                     "straight_outs": decision.straight_outs,
                 }
         return None
-    return _classify_all_in_uncached(hand, player)
+    category = str((getattr(hand, "gametype", {}) or {}).get("category", "")).lower()
+    hole_count = _HOLDEM_HOLE_CARDS if category == AOF_HOLDEM_CATEGORY else _OMAHA_HOLE_CARDS
+    return _classify_all_in_uncached(hand, player, hole_count)
 
 
-def _classify_all_in_uncached(hand: Any, player: str) -> dict[str, Any] | None:
+def _classify_all_in_uncached(
+    hand: Any,
+    player: str,
+    required_hole_cards: int = _OMAHA_HOLE_CARDS,
+) -> dict[str, Any] | None:
     if not _went_all_in(hand, player):
         return None
     hole = _cards(hand, player)
     flop = _flop(hand)
-    if len(hole) < _OMAHA_HOLE_CARDS or len(flop) < _FLOP_CARDS:
+    if len(hole) < required_hole_cards or len(flop) < _FLOP_CARDS:
         return None
-    hole = hole[:_OMAHA_HOLE_CARDS]
+    hole = hole[:required_hole_cards]
     made = _made_hand(hole, flop)
     # A draw is something the hand is still missing. Reported next to the hand
     # it already holds it is at best noise and at worst nonsense: counting the
@@ -415,11 +459,15 @@ def _build_decision(
     is_fold: bool,
     is_all_in: bool,
 ) -> AofDecision:
-    detail = _classify_all_in_uncached(hand, player) if is_all_in and category == AOF_OMAHA_CATEGORY else None
-    hole = _cards(hand, player)
+    hole_cards = _cards(hand, player)
     flop = _flop(hand)
     required_hole_cards = _OMAHA_HOLE_CARDS if category == AOF_OMAHA_CATEGORY else _HOLDEM_HOLE_CARDS
-    observable = bool(is_all_in and len(hole) >= required_hole_cards and len(flop) >= _FLOP_CARDS)
+    detail = (
+        _classify_all_in_uncached(hand, player, required_hole_cards)
+        if is_all_in and len(hole_cards) >= required_hole_cards and len(flop) >= _FLOP_CARDS
+        else None
+    )
+    observable = bool(is_all_in and len(hole_cards) >= required_hole_cards and len(flop) >= _FLOP_CARDS)
     return AofDecision(
         hand_id=hand_id,
         player_id=player_id,
@@ -431,7 +479,7 @@ def _build_decision(
         amount_to_commit=amount_to_commit,
         blind_committed=blind_committed,
         cards_observable=observable,
-        hole_cards=" ".join(hole[:required_hole_cards]) if observable else None,
+        hole_cards=" ".join(hole_cards[:required_hole_cards]) if observable else None,
         flop_cards=" ".join(flop[:_FLOP_CARDS]) if observable else None,
         made_hand=detail["made"] if detail else None,
         flush_draw=detail["flush_draw"] if detail else None,

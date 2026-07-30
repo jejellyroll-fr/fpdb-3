@@ -112,6 +112,8 @@ def parse_tourney_buyin_key(value: str) -> tuple[int, int, str]:
     """Decode a tournament buy-in key, accepting the historical two-part form."""
     buyin, fee, *currency = value.split(",")
     return int(buyin), int(fee), currency[0] if currency else ""
+
+
 ROOM_ICON_NETWORK_HINTS = (
     (("pokerstars",), "ps.svg"),
     (("party", "bwin", "borgata", "empire", "gamebookers", "intertops", "pokerroom", "wptpoker", "wpt"), "party.png"),
@@ -278,6 +280,7 @@ class Filters(QWidget):
             "6_holdem": _("Hold'em"),
             "omahahi": _("Omaha"),
             "aof_omaha": _("AoF Omaha"),
+            "aof_holdem": _("AoF Hold'em"),
             "fusion": _("Fusion"),
             "omahahilo": _("Omaha Hi/Lo"),
             "razz": _("Razz"),
@@ -455,9 +458,17 @@ class Filters(QWidget):
 
         self.heroList = None
         for name in (
-            "cbSites", "cbGames", "cbLimits", "cbPositions", "cbCurrencies",
-            "cbGraphops", "cbTourney", "cbTourneyCat", "cbTourneyLim",
-            "cbTourneyBuyin", "cbGroups",
+            "cbSites",
+            "cbGames",
+            "cbLimits",
+            "cbPositions",
+            "cbCurrencies",
+            "cbGraphops",
+            "cbTourney",
+            "cbTourneyCat",
+            "cbTourneyLim",
+            "cbTourneyBuyin",
+            "cbGroups",
         ):
             setattr(self, name, {})
         self.callback = {}
@@ -513,7 +524,7 @@ class Filters(QWidget):
             "🎭 " + self.filterText["playerstitle"],
             self.fillPlayerFrame,
             "Select the poker player (hero) to analyze",
-            self.display
+            self.display,
         )
 
     def create_sites_frame(self) -> QWidget:
@@ -522,7 +533,7 @@ class Filters(QWidget):
         return self._create_card_container(
             "🌐 " + self.filterText["sitestitle"],
             self.fillSitesFrame,
-            "Filter by poker sites (PokerStars, Winamax, etc.)"
+            "Filter by poker sites (PokerStars, Winamax, etc.)",
         )
 
     def create_games_frame(self) -> QWidget:
@@ -530,7 +541,7 @@ class Filters(QWidget):
         return self._create_card_container(
             "🃏 " + self.filterText["gamestitle"],
             self.fillGamesFrame,
-            "Filter by poker game variants (Hold'em, Omaha, Stud, etc.)"
+            "Filter by poker game variants (Hold'em, Omaha, Stud, etc.)",
         )
 
     def create_tourney_frame(self) -> QWidget:
@@ -539,39 +550,30 @@ class Filters(QWidget):
         return self._create_card_container(
             "🏆 " + self.filterText["tourneytitle"],
             self.fillTourneyTypesFrame,
-            "Filter by tournament type (Ring games vs Tournaments)"
+            "Filter by tournament type (Ring games vs Tournaments)",
         )
 
     def create_tourney_cat_frame(self) -> QWidget:
         """Create the tournament category selection frame."""
         self.cbTourneyCat = {}
-        return self._create_card_container(
-            self.filterText["tourneycat"],
-            self.fillTourneyCatFrame
-        )
+        return self._create_card_container(self.filterText["tourneycat"], self.fillTourneyCatFrame)
 
     def create_tourney_lim_frame(self) -> QWidget:
         """Create the tournament limit selection frame."""
         self.cbTourneyLim = {}
-        return self._create_card_container(
-            self.filterText["tourneylim"],
-            self.fillTourneyLimFrame
-        )
+        return self._create_card_container(self.filterText["tourneylim"], self.fillTourneyLimFrame)
 
     def create_tourney_buyin_frame(self) -> QWidget:
         """Create the tournament buyin selection frame."""
         self.cbTourneyBuyin = {}
-        return self._create_card_container(
-            self.filterText["tourneybuyin"],
-            self.fillTourneyBuyinFrame
-        )
+        return self._create_card_container(self.filterText["tourneybuyin"], self.fillTourneyBuyinFrame)
 
     def create_currencies_frame(self) -> QWidget:
         """Create the currencies selection frame."""
         return self._create_card_container(
             "💱 " + self.filterText["currenciestitle"],
             self.fillCurrenciesFrame,
-            "Filter by currency (USD, EUR, Play Money, etc.)"
+            "Filter by currency (USD, EUR, Play Money, etc.)",
         )
 
     def create_limits_frame(self) -> QWidget:
@@ -580,7 +582,7 @@ class Filters(QWidget):
             "💰 " + self.filterText["limitstitle"],
             self.fillLimitsFrame,
             "Filter by betting limits and stake levels",
-            self.display
+            self.display,
         )
 
     def create_positions_frame(self) -> QWidget:
@@ -589,40 +591,27 @@ class Filters(QWidget):
             "📍 " + self.filterText["positionstitle"],
             self.fillPositionsFrame,
             "Filter by table positions (Button, Small Blind, Big Blind, etc.)",
-            self.display
+            self.display,
         )
 
     def create_graph_ops_frame(self) -> QWidget:
         """Create the graph options frame."""
         self.cbGraphops = {}
-        return self._create_card_container(
-            "Graphing Options:",
-            self.fillGraphOpsFrame
-        )
+        return self._create_card_container("Graphing Options:", self.fillGraphOpsFrame)
 
     def create_seats_frame(self) -> QWidget:
         """Create the seats selection frame."""
         self.sbSeats: dict[str, QSpinBox] = {}
-        return self._create_card_container(
-            self.filterText["seatstitle"],
-            self.fillSeatsFrame
-        )
+        return self._create_card_container(self.filterText["seatstitle"], self.fillSeatsFrame)
 
     def create_groups_frame(self) -> QWidget:
         """Create the groups selection frame."""
-        return self._create_card_container(
-            self.filterText["groupstitle"],
-            self.fillGroupsFrame,
-            "",
-            self.display
-        )
+        return self._create_card_container(self.filterText["groupstitle"], self.fillGroupsFrame, "", self.display)
 
     def create_date_frame(self) -> QWidget:
         """Create the date range selection frame."""
         return self._create_card_container(
-            "📅 " + self.filterText["datestitle"],
-            self.fillDateFrame,
-            "Filter by date range for your poker sessions"
+            "📅 " + self.filterText["datestitle"], self.fillDateFrame, "Filter by date range for your poker sessions"
         )
 
     def create_cards_frame(self) -> QWidget:
@@ -630,7 +619,7 @@ class Filters(QWidget):
         return self._create_card_container(
             "🎴 " + self.filterText["cardstitle"],
             self.fillHoleCardsFrame,
-            "Filter by starting hole cards (AA, AK, etc.)"
+            "Filter by starting hole cards (AA, AK, etc.)",
         )
 
     def create_buttons(self) -> QWidget:
@@ -768,7 +757,6 @@ class Filters(QWidget):
         if len(heroes) == 1:
             return list(heroes.values())[0]
         return None
-
 
     def getLimits(self) -> list[str]:
         """Get selected limits."""
@@ -1748,7 +1736,7 @@ class Filters(QWidget):
                     break
 
         for s, checkbox in self.cbSites.items():
-            is_match = (s == parent_site)
+            is_match = s == parent_site
             checkbox.setChecked(is_match)
             checkbox.setEnabled(is_match)
             # Hide the whole row (site icon + checkbox), not just the checkbox —
@@ -1902,9 +1890,7 @@ class Filters(QWidget):
         categories = {row[1] for row in rows}
         limits = {row[2] for row in rows}
         buyins = {
-            tourney_buyin_key(row[3], row[4], row[5])
-            for row in rows
-            if row[3] is not None and row[4] is not None
+            tourney_buyin_key(row[3], row[4], row[5]) for row in rows if row[3] is not None and row[4] is not None
         }
 
         self._update_checkbox_set(self.cbTourney, names)

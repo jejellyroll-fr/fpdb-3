@@ -675,9 +675,10 @@ def _decision_scenarios(
             None,
         ),
     ]
-    # The current ``aof_omaha`` category is the equal-stack CoinPoker format.
-    # A room with unequal stacks must supply a distinct ruleset/category (Lot
-    # 8) rather than silently inheriting this future-caller commitment.
+    # The current AoF rulesets assume equal stacks (CoinPoker format).
+    # A room with unequal stacks must register a distinct ``AofRuleset``
+    # with ``equal_stacks=False`` rather than silently inheriting this
+    # future-caller commitment.
     target_commitment = request.blind_committed + request.amount_to_commit
     for actor in future:
         next_states: list[tuple[Decimal, tuple[ModeledCaller, ...], int, int, int | None]] = []

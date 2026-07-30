@@ -892,8 +892,8 @@ def test_a_hand_of_a_game_fpdb_cannot_store_leaves_the_buffer() -> None:
     buffer for the rest of the run.
     """
     hand, _join = _aof_hand_at("123144")
-    # The room says this table deals All-in or Fold Hold'em, which fpdb has no
-    # model for.
+    # The room says this table deals an unknown All-in or Fold variant (id 3),
+    # which fpdb has no model for.
     holdem_join = (
         "lobby.join_game_table",
         None,
@@ -901,7 +901,7 @@ def test_a_hand_of_a_game_fpdb_cannot_store_leaves_the_buffer() -> None:
             "tablesToJoin": [
                 {
                     "tableName": "17th-TX AOF 0.10-0.25 123144",
-                    "roomProperties": {"tournamentTypeId": 14, "lobbyId": 12, "miniGameTypeId": 1},
+                    "roomProperties": {"tournamentTypeId": 14, "lobbyId": 12, "miniGameTypeId": 3},
                 },
             ],
         },
