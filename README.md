@@ -13,7 +13,7 @@ The original FPDB-3 Python application: hand-history parsers, PySide6 GUI, stati
 
 ## 🔧 Requirements
 
-- Python 3.10+ (3.13 supported)
+- Python 3.11+ (3.13 recommended)
 - OS: Linux, Windows, macOS
 - HUD: X11 (Linux), native window support (Windows/macOS)
 
@@ -31,6 +31,20 @@ uv pip install -e .[test]
 ```
 
 Platform/feature extras: `.[linux]`, `.[windows]`, `.[macos]`, `.[postgresql]`.
+
+### Native equity engine (optional)
+
+The equity calculations (AoF analyses, hand replayer EV) require the
+[pypoker-eval](https://github.com/jejellyroll-fr/poker-eval) C extension.
+Without it fpdb runs normally but equity features are disabled.
+
+```bash
+# install from the poker-eval repo (needs a C compiler and CMake)
+pip install "pypoker-eval @ git+https://github.com/jejellyroll-fr/poker-eval.git"
+
+# or via the optional dependency group
+pip install -e ".[native]"
+```
 
 ## ▶️ Run
 

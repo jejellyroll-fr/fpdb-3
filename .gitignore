@@ -249,5 +249,6 @@ tests/fixtures/expected/
 
 # Local Claude Code config and worktrees
 .claude/
-# Vendored pypoker-eval checkout (built locally, not part of this repo)
-/pypoker-eval/
+
+# Personal capture files (contain user-specific data)
+CoinPoker_*_Cash.txt
