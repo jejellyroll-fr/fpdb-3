@@ -579,7 +579,13 @@ class PopupPreviewWidget(QWidget):
 
         if popup_class.startswith("ModernSubmenu"):
             if not theme_name:
-                theme_name = "material_light" if popup_class == "ModernSubmenuLight" else "classic" if popup_class == "ModernSubmenuClassic" else "material_dark"
+                theme_name = (
+                    "material_light"
+                    if popup_class == "ModernSubmenuLight"
+                    else "classic"
+                    if popup_class == "ModernSubmenuClassic"
+                    else "material_dark"
+                )
             if not icon_provider_name:
                 icon_provider_name = "text" if popup_class == "ModernSubmenuClassic" else "emoji"
             self._build_modern(stats, theme_name, icon_provider_name)
@@ -2474,9 +2480,7 @@ class ModernHudPreferences(QDialog):
         self.popup_name_edit.setText(popup_name)
         self._loading_popup = True
         self.popup_class_combo.setCurrentText(popup_data.get("class", "default"))
-        self.popup_theme_combo.setCurrentIndex(
-            max(0, self.popup_theme_combo.findData(popup_data.get("theme", "")))
-        )
+        self.popup_theme_combo.setCurrentIndex(max(0, self.popup_theme_combo.findData(popup_data.get("theme", ""))))
         self.popup_icon_provider_combo.setCurrentIndex(
             max(0, self.popup_icon_provider_combo.findData(popup_data.get("icon_provider", "")))
         )
@@ -3804,11 +3808,21 @@ class ModernHudPreferences(QDialog):
             else:
                 ss_node.setAttribute("name", new_profile_name)
 
-            # Append imported ss_node
+            # Append the primary profile. Additional profiles carried by a
+            # package (for example AoF compact + advanced) are installed below
+            # when missing; an existing secondary profile is a user choice and
+            # is therefore preserved.
             indent = self.config.doc.createTextNode("\n        ")
             stat_sets_node.appendChild(indent)
             merged_ss = self.config.doc.importNode(ss_node, True)
             stat_sets_node.appendChild(merged_ss)
+            for secondary_ss in ss_nodes[1:]:
+                secondary_name = secondary_ss.getAttribute("name")
+                if not secondary_name or secondary_name in self.hud_profiles:
+                    continue
+                indent = self.config.doc.createTextNode("\n        ")
+                stat_sets_node.appendChild(indent)
+                stat_sets_node.appendChild(self.config.doc.importNode(secondary_ss, True))
 
             # B. Apply Popups
             popup_windows_nodes = self.config.doc.getElementsByTagName("popup_windows")

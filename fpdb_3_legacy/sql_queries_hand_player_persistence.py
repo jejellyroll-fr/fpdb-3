@@ -58,6 +58,7 @@ def hand_player_persistence_queries() -> dict[str, str]:
             street3AllIn,
             street4AllIn,
             wentAllIn,
+            splashWinnings,
             street0AggrChance,
             street0Aggr,
             street1Aggr,
@@ -370,6 +371,7 @@ def hand_player_persistence_queries() -> dict[str, str]:
                  %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
             %s, %s, %s, %s,
             %s, %s, %s, %s
-            )"""
+            ,
+                 %s)"""
     return query
 

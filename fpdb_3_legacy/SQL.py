@@ -7,6 +7,7 @@ import sys
 
 from fpdb_3_legacy.sql_indexes import index_queries
 from fpdb_3_legacy.sql_metadata import metadata_queries
+from fpdb_3_legacy.sql_queries_aof import aof_queries
 from fpdb_3_legacy.sql_queries_cache_maintenance import cache_maintenance_queries
 from fpdb_3_legacy.sql_queries_cache_rebuild import cache_rebuild_queries
 from fpdb_3_legacy.sql_queries_cards_cache_write import cards_cache_write_queries
@@ -39,6 +40,7 @@ from fpdb_3_legacy.sql_queries_tournament_persistence import tournament_persiste
 from fpdb_3_legacy.sql_queries_tournament_player import tournament_player_detailed_queries
 from fpdb_3_legacy.sql_queries_utility import utility_queries
 from fpdb_3_legacy.sql_query_placeholders import finalize_query_placeholders
+from fpdb_3_legacy.sql_schema_aof import aof_schema_queries
 from fpdb_3_legacy.sql_schema_cards_cache import cards_cache_schema_queries
 from fpdb_3_legacy.sql_schema_core import core_schema_queries
 from fpdb_3_legacy.sql_schema_game import game_schema_queries
@@ -91,6 +93,7 @@ class Sql:
     def __init__(self, game="holdem", db_server="mysql") -> None:
         self.query = {}
         self.query.update(metadata_queries(db_server))
+        self.query.update(aof_schema_queries(db_server))
         self.query.update(cards_cache_schema_queries(db_server))
         self.query.update(core_schema_queries(db_server))
         self.query.update(game_schema_queries(db_server))
@@ -108,6 +111,7 @@ class Sql:
         self.query.update(tournament_cache_schema_queries(db_server))
         self.query.update(time_schema_queries(db_server))
         self.query.update(index_queries(db_server))
+        self.query.update(aof_queries())
         self.query.update(core_lookup_queries())
         self.query.update(database_admin_queries(db_server))
         self.query.update(cash_profit_queries())

@@ -372,7 +372,14 @@ def test_refresh_secondary_hud_only_rereads_the_statistics(hud_main) -> None:
     ):
         hud_main._refresh_secondary_hud("hand-b", "table-b", "ring", 2, 5)
 
-    db.get_stats_from_hand.assert_called_once_with("hand-b", "ring", hud.hud_params, 7, 5)
+    db.get_stats_from_hand.assert_called_once_with(
+        "hand-b",
+        "ring",
+        hud.hud_params,
+        7,
+        5,
+        poker_game=hud.poker_game,
+    )
     assert hud.stat_dict is db.get_stats_from_hand.return_value
     merge_positions.assert_called_once_with(db.get_stats_from_hand.return_value, "hand-b")
 

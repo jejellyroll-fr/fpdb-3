@@ -8,7 +8,7 @@ def test_index_queries_are_installed_exactly() -> None:
     for backend in ("mysql", "postgresql", "sqlite"):
         expected = index_queries(backend)
         assert expected.items() <= Sql(db_server=backend).query.items()
-        assert len(expected) == 32
+        assert len(expected) == 37
 
 
 def test_index_queries_keep_backend_specific_syntax() -> None:
@@ -21,6 +21,10 @@ def test_index_queries_keep_backend_specific_syntax() -> None:
     assert sqlite["addFilesIndex"].endswith("(file)")
     assert mysql["addFilesIndex"].endswith("(file(255))")
     assert "(category, `rank`)" in mysql["addStartCardsIndex"]
+    assert mysql["addAofDecisionsPlayerIndex"].startswith("ALTER TABLE")
+    assert postgresql["addAofAnalysesDecisionIndex"].startswith("CREATE INDEX")
+    assert "(category, role, activeOpponents, handId, cardsObservable)" in mysql["addAofDecisionsRangeIndex"]
+    assert "(category, role, activeOpponents, handId, cardsObservable)" in postgresql["addAofDecisionsRangeIndex"]
     for queries in (mysql, postgresql, sqlite):
         assert "position" in queries["addHudCacheCompundIndex"]
         assert "startCards" in queries["addCardsCacheCompundIndex"]

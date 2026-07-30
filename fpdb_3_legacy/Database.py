@@ -36,6 +36,7 @@ from typing import Any
 import pytz
 
 from fpdb_3_legacy import SQL, Card, Configuration
+from fpdb_3_legacy.database_aof import DatabaseAofMixin
 from fpdb_3_legacy.database_auto_notes import DatabaseAutoNotesMixin
 from fpdb_3_legacy.database_bulk_import import DatabaseBulkImportMixin
 
@@ -188,6 +189,7 @@ class DatabaseTransaction:
 
 
 class Database(
+    DatabaseAofMixin,
     DatabaseAutoNotesMixin,
     DatabaseBulkImportMixin,
     DatabaseCachesMixin,
@@ -1627,6 +1629,19 @@ class Database(
             for name, amount, fee in c.fetchall():
                 result[name] = (amount, fee)
         except Exception:  # noqa: BLE001 - missing table / legacy DB: no cashout info.
+            return {}
+        return result
+
+    def get_hands_splash(self, hand_id) -> dict:
+        """Return {player_name: cents} of splash collected, or {} if none/absent."""
+        result = {}
+        try:
+            c = self.get_cursor()
+            c.execute(self.sql.query["get_hands_splash"], (hand_id,))
+            for name, amount in c.fetchall():
+                result[name] = amount
+        except Exception:  # noqa: BLE001 - column absent on a database predating the splash work.
+            self._rollback_after_failed_read()
             return {}
         return result
 

@@ -1,23 +1,70 @@
 <?xml version="1.0" ?>
-<fpdb_hud_package version="1.1">
-    <!-- All-in or Fold Omaha.
-
-         The game deals the flop before anyone acts and gives each player one
-         decision, once, for their whole stack. The ordinary Omaha profile
-         would label that decision "preflop", a street this game does not
-         have, and invite comparison with ranges from a game that does.
-
-         The <game> binding below is what an <ss> alone cannot carry: without
-         it the profile is installed but nothing points at it, and the HUD
-         still refuses to start for the category. -->
-    <ss name="aof_default" rows="3" cols="2" xpad="1" ypad="0">
-        <stat _rowcol="(1,1)" _stat_name="playershort" popup="default" tip="" click="" hudcolor="#98FFB0" hudprefix="" hudsuffix=""/>
-        <stat _rowcol="(1,2)" _stat_name="n" popup="default" tip="" click=""/>
-        <stat _rowcol="(2,1)" _stat_name="aof_allin" popup="default" tip="" click="" stat_loth="25" stat_locolor="#408000" stat_hith="55" stat_hicolor="#F05000"/>
-        <stat _rowcol="(2,2)" _stat_name="aof_fold" popup="default" tip="" click=""/>
-        <stat _rowcol="(3,1)" _stat_name="aof_showdowns" popup="default" tip="" click=""/>
-        <stat _rowcol="(3,2)" _stat_name="player_note" popup="default" tip="" click="open_comment_dialog"/>
+<fpdb_hud_package version="1.6">
+    <ss name="aof_default" rows="4" cols="4" xpad="1" ypad="0">
+        <stat _rowcol="(1,1)" _stat_name="playershort" popup="aof_profile" hudprefix="" hudsuffix="" tip="" click="open_comment_dialog" hudcolor="#98FFB0"/>
+        <stat _rowcol="(1,2)" _stat_name="n" popup="aof_profile" hudprefix="H " hudsuffix="" tip="" click=""/>
+        <stat _rowcol="(1,3)" _stat_name="aof_observed" popup="aof_profile" hudprefix="obs " hudsuffix="" tip="" click=""/>
+        <stat _rowcol="(1,4)" _stat_name="aof_showdowns" popup="aof_profile" hudprefix="sd " hudsuffix="" tip="" click=""/>
+        <stat _rowcol="(2,1)" _stat_name="aof_allin" popup="aof_profile" hudprefix="AI " hudsuffix="" tip="" click="" stat_loth="25" stat_locolor="#4ADE80" stat_hith="55" stat_hicolor="#F87171"/>
+        <stat _rowcol="(2,2)" _stat_name="aof_fold" popup="aof_profile" hudprefix="F " hudsuffix="" tip="" click=""/>
+        <stat _rowcol="(2,3)" _stat_name="aof_weak" popup="aof_profile" hudprefix="wk " hudsuffix="" tip="" click=""/>
+        <stat _rowcol="(2,4)" _stat_name="aof_decision_ev" popup="aof_profile" hudprefix="EV " hudsuffix="" tip="" click=""/>
+        <stat _rowcol="(3,1)" _stat_name="aof_no_made" popup="aof_profile" hudprefix="air " hudsuffix="" tip="" click=""/>
+        <stat _rowcol="(3,2)" _stat_name="aof_two_pair" popup="aof_profile" hudprefix="2p " hudsuffix="" tip="" click=""/>
+        <stat _rowcol="(3,3)" _stat_name="aof_trips" popup="aof_profile" hudprefix="3k " hudsuffix="" tip="" click=""/>
+        <stat _rowcol="(3,4)" _stat_name="aof_nfd" popup="aof_profile" hudprefix="NFD " hudsuffix="" tip="" click=""/>
+        <stat _rowcol="(4,1)" _stat_name="aof_splash_won" popup="aof_profile" hudprefix="Spl " hudsuffix="" tip="" click=""/>
+        <stat _rowcol="(4,2)" _stat_name="aof_splash_freq" popup="aof_profile" hudprefix="Spl% " hudsuffix="" tip="" click=""/>
     </ss>
+    <ss name="aof_advanced" rows="6" cols="4" xpad="1" ypad="0">
+        <stat _rowcol="(1,1)" _stat_name="playershort" popup="aof_profile" hudprefix="" hudsuffix="" tip="" click="open_comment_dialog" hudcolor="#98FFB0"/>
+        <stat _rowcol="(1,2)" _stat_name="n" popup="aof_profile" hudprefix="H " hudsuffix="" tip="" click=""/>
+        <stat _rowcol="(1,3)" _stat_name="aof_observed" popup="aof_profile" hudprefix="obs " hudsuffix="" tip="" click=""/>
+        <stat _rowcol="(1,4)" _stat_name="aof_showdowns" popup="aof_profile" hudprefix="sd " hudsuffix="" tip="" click=""/>
+        <stat _rowcol="(2,1)" _stat_name="aof_allin" popup="aof_profile" hudprefix="AI " hudsuffix="" tip="" click="" stat_loth="25" stat_locolor="#4ADE80" stat_hith="55" stat_hicolor="#F87171"/>
+        <stat _rowcol="(2,2)" _stat_name="aof_fold" popup="aof_profile" hudprefix="F " hudsuffix="" tip="" click=""/>
+        <stat _rowcol="(2,3)" _stat_name="aof_weak" popup="aof_profile" hudprefix="wk " hudsuffix="" tip="" click=""/>
+        <stat _rowcol="(2,4)" _stat_name="aof_decision_ev" popup="aof_profile" hudprefix="EV " hudsuffix="" tip="" click=""/>
+        <stat _rowcol="(3,1)" _stat_name="aof_no_made" popup="aof_profile" hudprefix="air " hudsuffix="" tip="" click=""/>
+        <stat _rowcol="(3,2)" _stat_name="aof_pair" popup="aof_profile" hudprefix="1p " hudsuffix="" tip="" click=""/>
+        <stat _rowcol="(3,3)" _stat_name="aof_two_pair" popup="aof_profile" hudprefix="2p " hudsuffix="" tip="" click=""/>
+        <stat _rowcol="(3,4)" _stat_name="aof_trips" popup="aof_profile" hudprefix="3k " hudsuffix="" tip="" click=""/>
+        <stat _rowcol="(4,1)" _stat_name="aof_straight" popup="aof_profile" hudprefix="str " hudsuffix="" tip="" click=""/>
+        <stat _rowcol="(4,2)" _stat_name="aof_nfd" popup="aof_profile" hudprefix="NFD " hudsuffix="" tip="" click=""/>
+        <stat _rowcol="(4,3)" _stat_name="aof_non_nfd" popup="aof_profile" hudprefix="fd " hudsuffix="" tip="" click=""/>
+        <stat _rowcol="(4,4)" _stat_name="aof_wrap9" popup="aof_profile" hudprefix="W9 " hudsuffix="" tip="" click=""/>
+        <stat _rowcol="(5,1)" _stat_name="aof_big_wrap13" popup="aof_profile" hudprefix="W13 " hudsuffix="" tip="" click=""/>
+        <stat _rowcol="(5,2)" _stat_name="aof_made" popup="aof_profile" hudprefix="made " hudsuffix="" tip="" click=""/>
+        <stat _rowcol="(5,3)" _stat_name="aof_known_equity" popup="aof_profile" hudprefix="EqK " hudsuffix="" tip="" click=""/>
+        <stat _rowcol="(5,4)" _stat_name="aof_range_equity" popup="aof_profile" hudprefix="EqR " hudsuffix="" tip="" click=""/>
+        <stat _rowcol="(6,1)" _stat_name="aof_splash_won" popup="aof_profile" hudprefix="Spl " hudsuffix="" tip="" click=""/>
+        <stat _rowcol="(6,2)" _stat_name="aof_splash_freq" popup="aof_profile" hudprefix="Spl% " hudsuffix="" tip="" click=""/>
+    </ss>
+    <pu pu_name="aof_profile" pu_class="default">
+        <pu_stat pu_stat_name="aof_observed"/>
+        <pu_stat pu_stat_name="aof_no_made"/>
+        <pu_stat pu_stat_name="aof_nfd"/>
+        <pu_stat pu_stat_name="aof_non_nfd"/>
+        <pu_stat pu_stat_name="aof_wrap9"/>
+        <pu_stat pu_stat_name="aof_big_wrap13"/>
+        <pu_stat pu_stat_name="aof_made"/>
+        <pu_stat pu_stat_name="aof_pair"/>
+        <pu_stat pu_stat_name="aof_two_pair"/>
+        <pu_stat pu_stat_name="aof_trips"/>
+        <pu_stat pu_stat_name="aof_straight"/>
+        <pu_stat pu_stat_name="aof_flush"/>
+        <pu_stat pu_stat_name="aof_full_house"/>
+        <pu_stat pu_stat_name="aof_quads"/>
+        <pu_stat pu_stat_name="aof_straight_flush"/>
+        <pu_stat pu_stat_name="aof_known_equity"/>
+        <pu_stat pu_stat_name="aof_known_ev"/>
+        <pu_stat pu_stat_name="aof_range_equity"/>
+        <pu_stat pu_stat_name="aof_weak"/>
+        <pu_stat pu_stat_name="aof_decision_ev"/>
+        <pu_stat pu_stat_name="aof_splash_won"/>
+        <pu_stat pu_stat_name="aof_splash_freq"/>
+        <pu_stat pu_stat_name="player_note"/>
+    </pu>
     <game game_name="aof_omaha" aux="ClassicHud, mucked">
         <game_stat_set game_type="all" stat_set="aof_default"/>
     </game>

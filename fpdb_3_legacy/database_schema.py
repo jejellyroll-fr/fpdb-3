@@ -74,6 +74,7 @@ HANDS_PLAYERS_KEYS = [
     "street3AllIn",
     "street4AllIn",
     "wentAllIn",
+    "splashWinnings",
     "street0AggrChance",
     "street0Aggr",
     "street1Aggr",
@@ -956,7 +957,13 @@ class DatabaseSchemaMixin:
         """Create tables added after the original schema if they are missing, so
         that databases created by older versions keep working (used for the
         showdown combinations, cashout details, and additive HudCache stats)."""
-        for query_name in ("createHandsShowdownTable", "createHandsCashoutTable", "createPlayerAutoNotesTable"):
+        for query_name in (
+            "createHandsShowdownTable",
+            "createHandsCashoutTable",
+            "createPlayerAutoNotesTable",
+            "createAofDecisionsTable",
+            "createAofDecisionAnalysesTable",
+        ):
             try:
                 c = self.get_cursor()
                 c.execute(self.sql.query[query_name])
@@ -968,6 +975,11 @@ class DatabaseSchemaMixin:
             "addPlayerAutoNotesPlayerIndex",
             "addPlayerAutoNotesHandIndex",
             "addPlayerAutoNotesRuleIndex",
+            "addAofDecisionsPlayerIndex",
+            "addAofDecisionsHandIndex",
+            "addAofDecisionsRangeIndex",
+            "addAofAnalysesDecisionIndex",
+            "addAofAnalysesStatusIndex",
         ):
             try:
                 c = self.get_cursor()
@@ -1072,6 +1084,8 @@ class DatabaseSchemaMixin:
         c.execute(self.sql.query["createHandsShowdownTable"])
         c.execute(self.sql.query["createHandsCashoutTable"])
         c.execute(self.sql.query["createPlayerAutoNotesTable"])
+        c.execute(self.sql.query["createAofDecisionsTable"])
+        c.execute(self.sql.query["createAofDecisionAnalysesTable"])
         c.execute(self.sql.query["createHandsPotsTable"])
         c.execute(self.sql.query["createHudCacheTable"])
         c.execute(self.sql.query["createCardsCacheTable"])
@@ -1100,6 +1114,11 @@ class DatabaseSchemaMixin:
         c.execute(self.sql.query["addPlayerAutoNotesPlayerIndex"])
         c.execute(self.sql.query["addPlayerAutoNotesHandIndex"])
         c.execute(self.sql.query["addPlayerAutoNotesRuleIndex"])
+        c.execute(self.sql.query["addAofDecisionsPlayerIndex"])
+        c.execute(self.sql.query["addAofDecisionsHandIndex"])
+        c.execute(self.sql.query["addAofDecisionsRangeIndex"])
+        c.execute(self.sql.query["addAofAnalysesDecisionIndex"])
+        c.execute(self.sql.query["addAofAnalysesStatusIndex"])
         c.execute(self.sql.query["addFilesIndex"])
         c.execute(self.sql.query["addTableNameIndex"])
         c.execute(self.sql.query["addPlayerNameIndex"])

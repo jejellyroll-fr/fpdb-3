@@ -91,6 +91,24 @@ utilisateur.
 
 ## Lot 1 — Modèle de données AoF structuré
 
+**Statut : terminé le 28 juillet 2026.**
+
+Les décisions sont produites une fois par le classificateur, puis utilisées
+pour les notes textuelles et persistées après la main dans une transaction
+indépendante. Les montants sont des centimes entiers, comme dans le schéma
+FPDB existant. Les cartes cachées restent des décisions exploitables pour
+`AI%`/`F%`, mais leurs cartes et leur classification sont nulles.
+
+Le backfill parcourt les mains par identifiant croissant, committe par lots et
+rend le dernier `handId` traité. Il peut être repris avec `--start-after` ou
+rejoué intégralement : la clé `(handId, playerId, classifierVersion)` empêche
+les doublons.
+
+Les résultats recalculables sont également sans flottants en base :
+équité/seuil/erreur en parties par million, EV brute en centimes et EV en BB en
+millionièmes. Leur clé inclut le backend, sa version, le modèle de range et les
+versions du modèle et de l’analyse.
+
 ### Table `AofDecisions`
 
 Créer une ligne par joueur et par décision contenant :
@@ -121,7 +139,9 @@ Conserver séparément les résultats recalculables :
 - le seuil d’équité nécessaire ;
 - le nombre de simulations ;
 - la marge d’erreur ;
-- le statut `weak`, `strong` ou `uncertain`.
+- le statut de disponibilité `complete`, `incomplete` ou `no_callers` pour
+  l'analyse exacte, puis `weak`, `strong` ou `uncertain` pour les modèles de
+  ranges.
 
 La classification de `fpdb_3_legacy/autonotes_aof.py` devient le producteur
 unique de données structurées. Les notes textuelles sont générées à partir de
@@ -136,6 +156,23 @@ cette structure.
 - cartes cachées enregistrées comme non observables.
 
 ## Lot 2 — Profil objectif sans équité
+
+**Statut : terminé le 28 juillet 2026.**
+
+Le HUD fusionne les agrégats de tous les joueurs assis avec une seule requête
+groupée par table. La catégorie du HUD est transmise explicitement au lecteur
+de statistiques : les jeux ordinaires n'exécutent donc aucune lecture AoF
+supplémentaire. Les pourcentages conservent tous leur numérateur et leur
+dénominateur `Obs`, et les catégories de tirages restent volontairement
+chevauchantes.
+
+`aof_default` reste compact et remplace l'ancien compteur de showdowns par le
+vrai échantillon observable. `aof_advanced` expose les mesures objectives et
+réserve les cellules `Weak` et `EV`, affichées `–` jusqu'aux lots d'équité. Le
+popup `aof_profile` porte le détail complet et la distribution des mains
+faites. Le paquet, la configuration livrée, le modèle d'exemple, l'import
+explicite et la migration idempotente installent les deux profils et le popup
+sans remplacer une personnalisation existante.
 
 Ajouter une requête groupée recevant tous les `playerId` d’une table et
 retournant :
@@ -177,6 +214,47 @@ Main faite         8/18  44,4 %
 - douze tables et une main chacune restent à douze rafraîchissements principaux.
 
 ## Lot 3 — Service d’équité `pypokereval`
+
+**Statut : terminé le 28 juillet 2026.**
+
+Les deux dépôts ont été rafraîchis avant l’implémentation. Leur branche par
+défaut `master` est exactement alignée sur `origin/master` :
+
+- `poker-eval` : `852a12dde3fb5815f014d9211cfff956e3b06f33` ;
+- `pypoker-eval` : `3a93da165a469bdfe2361995bda0f9344439c544`.
+
+Le second dépôt épingle volontairement son sous-module `poker-eval` sur
+`21d4185d06eccf9968c4a0a9a74a82ec2682acc7`. Ce pointeur est bien celui du
+dernier commit `pypoker-eval`; il n’a pas été remplacé silencieusement par le
+sommet du dépôt autonome. L’extension Python 3.11.15 a été compilée dans un
+répertoire temporaire depuis cet état exact, sans modifier les deux dépôts.
+Le wrapper encode la version Python complète dans le nom de l’extension
+(`_pokereval_3_11_15`) : une bibliothèque construite pour 3.11.10 ou 3.13.13
+ne peut donc pas être chargée par le runtime FPDB 3.11.15.
+
+Le benchmark natif PLO4 au flop, avec 20 000 échantillons, tranche le choix
+d’implémentation :
+
+| Stratégie | Heads-up | Trois joueurs |
+|---|---:|---:|
+| `poker_eval` avec poches `__` | 1,92 M éch./s | 1,29 M éch./s |
+| `poker_eval` regroupé par poche pondérée | 2,10 M éch./s | 1,41 M éch./s |
+| boucle Python avec `winners()` | 0,32 M éch./s | 0,25 M éch./s |
+
+`EquityEngine` utilise donc un appel natif pour la range uniforme et regroupe
+les mêmes combinaisons pondérées avant de les envoyer au backend. Les petits
+produits cartésiens sont répartis exactement selon leurs poids ; les grands
+sont échantillonnés avec une graine explicite et les collisions de cartes sont
+rejetées. Le cache LRU est borné et sa clé contient la version du moteur, le
+jeu, les cartes, le modèle de range, sa version, la graine et le budget.
+
+`AsyncEquityService` fournit la file bornée et dédupliquée. Le calcul, la
+persistance et la notification s’exécutent dans cet ordre sur le worker. Le
+contrat interdit de partager la connexion de l’importeur : le callback de
+persistance possède sa connexion et sa transaction. Les producteurs concrets
+`Eq known` et `Eq range` seront branchés respectivement dans les lots 4 et 5 ;
+jusque-là, aucun calcul ne part de l’importeur ni du thread Qt et les cellules
+`Weak`/`EV` restent `–`.
 
 Étendre `fpdb_3_legacy/equity.py` derrière une interface indépendante :
 
@@ -236,6 +314,48 @@ Sans `pypokereval`, les statistiques objectives restent disponibles et les
 
 ## Lot 4 — Équité et EV contre les cartes connues
 
+**Statut : terminé le 28 juillet 2026.**
+
+`fpdb_3_legacy/aof_equity.py` prend un instantané immuable de la main une fois
+la main et ses décisions committées. Il reconstruit les pots par niveaux
+d'engagement plutôt que de prendre `Hand.pot.pots` pour une liste
+d'éligibilité : cette dernière contient les contributeurs, y compris ceux qui
+se sont couchés. Les jetons des joueurs couchés restent donc dans le pot,
+leurs cartes connues deviennent des cartes mortes, mais ils ne participent
+jamais à l'équité.
+
+Chaque side pot est évalué avec son propre ensemble de joueurs éligibles. Le
+rake, que l'historique ne ventile pas par side pot, est réparti
+proportionnellement entre les couches, au centime près, avant le calcul de
+l'espérance. L'équité agrégée est la part attendue pondérée par les pots nets
+auxquels le joueur a droit. L'EV soustrait seulement le montant restant à
+engager au point de décision ; les blindes déjà posées sont un coût passé.
+
+Le turn et la river finaux ne sont jamais copiés dans la requête : le backend
+reçoit le flop et deux cartes communes inconnues. Une poche cachée d'un joueur
+encore éligible produit un résultat `incomplete`, et un tapis que personne n'a
+payé produit `no_callers`. Aucun des deux n'est maquillé en équité.
+
+Le live capture place une seule tâche par main dans `AsyncEquityService`,
+après le commit et la première notification du HUD. Le worker calcule toutes
+les décisions, ouvre sa propre connexion de base, les persiste dans une seule
+transaction puis notifie une seule fois le HUD. Une panne de préparation ou
+de file ne remet jamais une main déjà committée en échec.
+
+La lecture HUD reste groupée : le même `getAofProfileStats` retourne le nombre
+d'analyses connues, leur somme d'équité et leur somme d'EV en BB pour tous les
+joueurs assis. `EqK` est visible dans le popup ; la cellule avancée affiche
+`EVact`, explicitement « EV vs actual callers ». `Decision EV` et `Weak`
+restent à `–` jusqu'aux lots de ranges. La migration remplace uniquement
+l'ancien placeholder livré en `(4,3)` et étend le popup sans écraser ses
+couleurs, son thème ou les autres lignes utilisateur.
+
+Les sorties natives de contrôle sont épinglées : le cas PLO4 connu énumère
+820 boards et donne 71,4 %, le cas Hold'em connu en énumère 990 et donne
+91,2 %. Les tests couvrent également le heads-up, le multiway, l'argent mort,
+les side pots, le rake proportionnel, les splits, les poches partiellement
+cachées, l'ordre notification/file et la persistance groupée.
+
 Cette première version ne dépend d’aucun modèle de range.
 
 Conditions :
@@ -271,6 +391,49 @@ Il ne doit pas être présenté comme la rentabilité initiale du shove.
 - comparaison avec des sorties natives connues de poker-eval.
 
 ## Lot 5 — Modèle de ranges AoF
+
+**Statut : terminé le 28 juillet 2026.**
+
+`fpdb_3_legacy/aof_ranges.py` fournit le contrat commun et les trois
+implémentations prévues. Chaque instantané porte son identifiant, sa version,
+sa date de construction, ses conditions et ses tailles d'échantillon. Le biais
+d'observation est une donnée explicite du modèle : les folds cachés et les
+tapis non montrés sont absents de la distribution de cartes.
+
+La range population est séparée par site, catégorie, rôle et nombre
+d'adversaires actifs. Son minimum livré est de 25 observations. La sélection
+historique est doublement gardée : la requête SQL et le modèle refusent la
+main courante et les mains futures. Le cutoff est `(startTime, handId)`, et
+non le seul identifiant d'import, afin qu'une vieille main réimportée ne puisse
+pas apprendre d'une main jouée plus tard. La fenêtre est bornée aux 5 000
+observations antérieures les plus récentes par contexte : la lecture d'une
+session longue reste donc bornée au lieu de devenir quadratique. Un index
+composite couvre le chemin de lecture.
+
+La range joueur mélange sa distribution avec la population par shrinkage :
+elle exige au moins 5 observations personnelles et utilise une force de prior
+de 25. À cinq observations, la population porte donc encore cinq sixièmes du
+poids ; l'influence du joueur augmente progressivement. Cette V3 est
+construite et testée, mais n'est pas encore choisie par le HUD tant qu'une
+calibration réelle n'a pas validé son avantage sur la population.
+
+La range uniforme passe par `evaluate_uniform_unknown`; les ranges observées
+passent par `evaluate_weighted_range`. Les deux ne peuvent pas être mélangées
+silencieusement dans une même évaluation. La sortie native PLO4 observée est
+épinglée avec une graine et 20 000 simulations.
+
+Le worker du lot 4 calcule maintenant `Eq known` et `Eq range` dans le même
+job, les persiste ensemble puis ne notifie le HUD qu'une fois. `EqR` agrège
+uniquement les analyses complètes de `population_observed` et apparaît dans le
+popup avec la mention du biais et du cutoff historique. Une range insuffisante
+reste `incomplete` et n'appelle pas le backend.
+
+Le rapport de validation effectue un découpage chronologique entraînement/test
+et mesure l'équité prédite, la part réellement gagnée, l'erreur par tranche,
+le score de Brier, la stabilité entre les deux moitiés du holdout et la
+couverture des cartes observables. Il ne transforme pas à lui seul le modèle
+en modèle validé : `Weak AI%` et `Decision EV` restent volontairement
+désactivés jusqu'au lot 6.
 
 Créer une interface :
 
@@ -329,10 +492,52 @@ Utiliser un découpage chronologique entraînement/test et contrôler :
 
 ## Lot 6 — EV réelle de décision et `Weak AI%`
 
+**Statut : terminé le 28 juillet 2026.**
+
+Le montant restant à engager est maintenant dérivé du stack initial moins les
+jetons déjà posés. Cette correction est nécessaire pour les relances à tapis :
+`Hand.actions` place d'abord le montant de relance dans le tuple, pas le coût
+incrémental total. Sur la fixture réelle, la petite blinde engage donc 190
+centimes après ses 10 centimes forcés, et le call suivant voit bien un pot de
+225 centimes.
+
+Le modèle d'actions population lit les folds et les tapis, y compris lorsque
+les cartes sont cachées. Il partage les garde-fous des ranges : room,
+catégorie, rôle, nombre d'adversaires, cutoff strict `(startTime, handId)`,
+fenêtre récente de 5 000 décisions et minimum de 25 observations. Une
+priorisation de Jeffreys évite de transformer artificiellement une fréquence
+jamais observée en probabilité certaine de zéro ou un.
+
+Chaque décision est reconstruite à son point exact. Les tapis antérieurs sont
+obligatoires ; les joueurs encore à parler forment un arbre séquentiel de
+fold/call/overcall. Chaque branche reconstruit les contributions et les side
+pots, choisit la range correspondant au contexte de chaque caller et évalue
+le flop sans jamais lire le turn, la river ou les cartes réellement montrées
+plus tard. La catégorie CoinPoker AoF implique aujourd'hui des stacks égaux :
+un caller futur est donc plafonné au même engagement total que le joueur
+analysé. Le contrat multi-room du lot 8 devra rendre cette règle explicite
+avant qu'une room aux stacks inégaux puisse réutiliser la catégorie.
+
+Aucun barème de rake CoinPoker vérifié n'est disponible dans la capture. Le
+résultat livré est donc nommé et stocké sans ambiguïté
+`population_decision_ev_prerake`. Cette EV est une borne supérieure de l'EV
+après rake : exiger que sa borne supérieure à 95 % soit encore négative rend
+la classification `weak` conservatrice. Une décision positive à la borne
+inférieure est `strong`; une décision dont l'intervalle traverse zéro est
+`uncertain`. Les cartes cachées, les contextes sous le plancher et les ordres
+d'action incomplets restent `incomplete` et sortent du dénominateur.
+
+Le worker unique produit désormais `Eq known`, `Eq range` et `Decision EV`
+dans le même travail, les écrit ensemble et ne notifie le HUD qu'une fois.
+Le profil avancé affiche la moyenne `EV` pré-rake et `Weak AI%`; le popup
+conserve aussi `EVact`, qui reste l'EV conditionnelle contre les callers
+réellement observés. La migration reprend uniquement la cellule livrée
+`(4,3)` sans remplacer les couleurs ou les autres statistiques utilisateur.
+
 ### Call d’un tapis
 
 ```text
-EV(call) = équité_range × pot_après_rake − montant_à_payer
+EV(call) = équité_range × pot_net_si_barème_vérifié_sinon_pot_brut − montant_à_payer
 EV(fold) = 0 depuis le point de décision
 ```
 

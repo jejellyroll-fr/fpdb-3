@@ -69,5 +69,11 @@ def hand_artifact_queries() -> dict[str, str]:
     query["get_hands_cashout"] = """select p.name, hc.amount, hc.fee
             from HandsCashout hc, Players p
             where hc.handId=%s and hc.playerId=p.id"""
+
+    # Le splash est paye hors du pot : il a sa colonne sur HandsPlayers plutot
+    # qu'une table a lui, et se relit avec les joueurs de la main.
+    query["get_hands_splash"] = """select p.name, hp.splashWinnings
+            from HandsPlayers hp, Players p
+            where hp.handId=%s and hp.playerId=p.id and hp.splashWinnings<>0"""
     return query
 

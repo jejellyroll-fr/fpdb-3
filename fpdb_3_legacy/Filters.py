@@ -277,6 +277,7 @@ class Filters(QWidget):
             "holdem": _("Hold'em"),
             "6_holdem": _("Hold'em"),
             "omahahi": _("Omaha"),
+            "aof_omaha": _("AoF Omaha"),
             "fusion": _("Fusion"),
             "omahahilo": _("Omaha Hi/Lo"),
             "razz": _("Razz"),
@@ -1171,8 +1172,13 @@ class Filters(QWidget):
             self.gameList.insertItem(count, game)
 
         if len(result) >= 1:
-            for line in sorted(result, key=lambda game: self.gameName[game[0]]):
-                self.cbGames[line[0]] = QCheckBox(self.gameName[line[0]])
+            # A category with no display name of its own is shown under the
+            # name the database uses. It used to raise instead, and every
+            # screen that lists games -- cash statistics, the hand viewer, the
+            # session viewer -- stopped opening the moment a hand of an
+            # unlisted game reached the database.
+            for line in sorted(result, key=lambda game: self.gameName.get(game[0], game[0])):
+                self.cbGames[line[0]] = QCheckBox(self.gameName.get(line[0], line[0]))
                 self.cbGames[line[0]].setChecked(True)
                 vbox1.addWidget(self.cbGames[line[0]])
 

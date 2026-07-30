@@ -37,6 +37,8 @@ SCHEMA_KEYS = (
     "createHandsShowdownTable",
     "createHandsCashoutTable",
     "createPlayerAutoNotesTable",
+    "createAofDecisionsTable",
+    "createAofDecisionAnalysesTable",
     "createHandsPotsTable",
     "createHudCacheTable",
     "createCardsCacheTable",
