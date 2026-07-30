@@ -14,6 +14,7 @@ them.
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 from typing import Any
 from unittest.mock import MagicMock, patch
@@ -34,6 +35,15 @@ from fpdb_3_legacy.DetectInstalledSites import (
 )
 
 NOT_DETECTED = {"detected": False, "hhpath": "", "heroname": "", "tspath": ""}
+
+
+def path_ends_with(path: str, suffix: str) -> bool:
+    """Check that *path* ends with *suffix* regardless of path separator.
+
+    On Windows, Path joins produce backslashes while test literals use forward
+    slashes.  Normalising both sides makes the comparison portable.
+    """
+    return os.path.normpath(path).endswith(os.path.normpath(suffix))
 
 
 @pytest.fixture
@@ -188,7 +198,7 @@ def test_winamax_is_found_on_macos(config, tmp_path) -> None:
 
     assert found["detected"]
     assert found["heroname"] == "Hero"
-    assert found["hhpath"].endswith("accounts/Hero/history")
+    assert path_ends_with(found["hhpath"], "accounts/Hero/history")
 
 
 def test_winamax_is_found_on_windows(config, tmp_path) -> None:
@@ -262,8 +272,8 @@ def test_a_pokerstars_variant_is_found_on_macos(config, tmp_path) -> None:
 
     assert found["detected"]
     assert found["heroname"] == "Hero"
-    assert found["hhpath"].endswith("HandHistory/Hero")
-    assert found["tspath"].endswith("TournSummary/Hero")
+    assert path_ends_with(found["hhpath"], "HandHistory/Hero")
+    assert path_ends_with(found["tspath"], "TournSummary/Hero")
 
 
 def test_a_pokerstars_variant_is_found_on_windows(config, tmp_path) -> None:
@@ -485,7 +495,7 @@ def test_acr_is_found_under_wine(config, tmp_path) -> None:
 
     assert found["detected"]
     assert found["heroname"] == "Hero"
-    assert found["tspath"].endswith("TournamentSummary/Hero")
+    assert path_ends_with(found["tspath"], "TournamentSummary/Hero")
 
 
 def test_acr_is_found_on_macos(config, tmp_path) -> None:
@@ -650,7 +660,7 @@ def test_seals_with_clubs_names_the_hero_itself_when_the_hands_are_loose(config,
 
     assert found["detected"]
     assert found["heroname"] == "Hero"
-    assert found["hhpath"].endswith("Hand History")
+    assert path_ends_with(found["hhpath"], "Hand History")
 
 
 def test_a_seals_folder_holding_no_hands_is_not_reported(config, tmp_path) -> None:

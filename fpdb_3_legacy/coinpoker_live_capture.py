@@ -46,12 +46,17 @@ import sys
 from collections.abc import Iterable, Iterator
 from typing import Any
 
+from fpdb_3_legacy.aof_equity import KnownCardsAnalysisCoordinator
+from fpdb_3_legacy.aof_ranges import PopulationActionModel, PopulationObservedRange
 from fpdb_3_legacy.coinpoker_hand_builder import (
+    AOF_OMAHA_CATEGORY,
+    MINI_GAME_OMAHA,
     build_hands,
     joined_tournaments,
     tournament_result_announcements,
 )
 from fpdb_3_legacy.coinpoker_protocol import decode_frame
+from fpdb_3_legacy.equity_async import AsyncEquityService
 from fpdb_3_legacy.Exceptions import FpdbHandDuplicate
 from fpdb_3_legacy.http_capture_hand_builder import (
     CaptureNotImportableError,
@@ -81,7 +86,7 @@ class RawEventArchive:
         if not self.archive_dir:
             return
         try:
-            now = datetime.datetime.now(datetime.timezone.utc)
+            now = datetime.datetime.now(datetime.UTC)
             name, hand_id, payload = event
             record = {
                 "captured_at": now.isoformat(),
@@ -119,6 +124,43 @@ REJECTED = "rejected"
 GAME_PORTS = ("3000", "3001", "9000", "7002")  # see _is_game_port / BPF_FILTER
 _TOURNAMENT_PORT_RANGE = range(3000, 3002)
 _GAME_PORT_RANGE = range(7000, 7101)
+
+
+def _known_aof_tables(db) -> dict[str, int]:
+    """Recover AoF table identities already established by an earlier run.
+
+    CoinPoker sends the AoF catalogue through the lobby connection, not the
+    table connection. A capture restarted while the player is already seated
+    therefore sees hands but no catalogue and used to file the same table as
+    ordinary Omaha until the lobby happened to announce it again. A prior hand
+    stored under the dedicated category is durable, table-specific evidence
+    that survives that restart.
+    """
+    if db is None:
+        return {}
+    try:
+        placeholder = db.sql.query.get("placeholder", "%s")
+        cursor = db.get_cursor()
+        cursor.execute(
+            f"""
+                SELECT DISTINCT h.tableName
+                  FROM Hands h
+                  JOIN Gametypes g ON g.id = h.gametypeId
+                 WHERE g.siteId = {placeholder}
+                   AND g.category = {placeholder}
+                   AND h.tableName IS NOT NULL
+            """,
+            (COINPOKER_SITE_ID, AOF_OMAHA_CATEGORY),
+        )
+        return {str(row[0]): MINI_GAME_OMAHA for row in cursor.fetchall() if row[0] is not None}
+    except Exception:  # noqa: BLE001 - a cache read must not stop live capture
+        log.warning("Could not restore known CoinPoker AoF tables from the database", exc_info=True)
+        return {}
+    finally:
+        # The read opens a transaction on PostgreSQL. The capture can then wait
+        # indefinitely for packets, so release its snapshot and locks now.
+        with contextlib.suppress(Exception):
+            db.rollback()
 
 
 def _is_game_port(port: int) -> bool:
@@ -369,6 +411,8 @@ class HandPump:
         file_id: int = 0,
         notify=None,
         archive_dir: str | None = None,
+        equity_coordinator: KnownCardsAnalysisCoordinator | None = None,
+        known_aof_tables: dict[str, Any] | None = None,
     ) -> None:
         self.db = db
         self.config = config
@@ -376,6 +420,7 @@ class HandPump:
         self.dry_run = dry_run
         self.file_id = file_id
         self.notify = notify  # ZMQSender to ping HUD_main after each import
+        self.equity_coordinator = equity_coordinator
         self.imported: set[str] = set()
         self.failed: set[str] = set()
         # Hands of a game fpdb cannot store. Terminal like the other two: what
@@ -397,10 +442,15 @@ class HandPump:
         self._session_tables: set[str] = set()
         # Which tables are All-in or Fold, as the room said. The catalogue
         # saying so is far too large to keep among the events and is pruned
-        # with them, so what it said is kept here instead -- without this the
-        # game is recognised only on the sweeps the catalogue happens to land
-        # in, and the same table is one game and then another.
-        self._session_aof: dict[str, Any] = {}
+        # with them, so what it said is kept here instead. The database seeds
+        # the new process as well: restarting while already seated carries no
+        # lobby catalogue, but must not turn the same table into ordinary Omaha.
+        self._session_aof: dict[str, Any] = dict(known_aof_tables or {})
+        # How each table deals: flop first, or betting first. When the capture
+        # began with the client already seated it sees no lobby at all, and
+        # the order of the room's own packets is the last thing left to tell
+        # All-in or Fold apart.
+        self._session_shape: dict[str, Any] = {}
         # One entry per closing announcement, each with its own tournament and
         # its own tally of who has been filed. They are held here rather than
         # left in the event buffer: an announcement is answered over several
@@ -428,7 +478,7 @@ class HandPump:
             return
         try:
             os.makedirs(self.archive_dir, exist_ok=True)
-            day = getattr(hand, "startTime", None) or datetime.datetime.now(datetime.timezone.utc)
+            day = getattr(hand, "startTime", None) or datetime.datetime.now(datetime.UTC)
             path = os.path.join(self.archive_dir, f"coinpoker-{day:%Y-%m-%d}.txt")
             text = render_fpdb_hand(hand)
             with open(path, "a", encoding="utf-8") as archive:
@@ -448,7 +498,7 @@ class HandPump:
         UTC-naive matches how every other site stores startTime.
         """
         if not hand_data.get("timestamp"):
-            hand_data["timestamp"] = datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)
+            hand_data["timestamp"] = datetime.datetime.now(datetime.UTC).replace(tzinfo=None)
 
     def _remember_tournaments(self, events: list[tuple]) -> None:
         """Note which tournament each joined table belongs to."""
@@ -686,6 +736,7 @@ class HandPump:
             session_context=self._session_context,
             session_tables=self._session_tables,
             session_aof=self._session_aof,
+            session_shape=self._session_shape,
         ):
             hid = hand_data["hand_id"]
             if self._answered_for(hid):
@@ -730,6 +781,13 @@ class HandPump:
             if self.notify is not None:
                 with contextlib.suppress(Exception):
                     self.notify.send_hand_id(hand.dbid_hands)
+            if self.equity_coordinator is not None:
+                decisions = getattr(hand, "aof_decisions", ()) or ()
+                decision_ids = getattr(hand, "aof_decision_ids", ()) or ()
+                try:
+                    self.equity_coordinator.submit_hand(hand, decisions, decision_ids)
+                except Exception:
+                    log.exception("known-card equity was not queued for hand %s", hand.dbid_hands)
         except FpdbHandDuplicate:
             # Replayed packets or a capture restart can legitimately expose
             # a hand already committed by this or another importer.
@@ -792,7 +850,7 @@ def _ensure_capture_file(db) -> int:
     try:
         file_id = db.get_id(name)
         if not file_id:
-            now = datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)
+            now = datetime.datetime.now(datetime.UTC).replace(tzinfo=None)
             file_id = db.storeFile([name, "CoinPoker", now, now, 0, 0, 0, 0, 0, 0, 0, False])
         # get_id() also opens a PostgreSQL transaction.  Never leave it idle
         # while the capture waits indefinitely for network traffic.
@@ -838,9 +896,24 @@ def _open_db(config_file: str | None = None):
     return db, config
 
 
+def _make_equity_coordinator(config, notify) -> KnownCardsAnalysisCoordinator:
+    """Build the live worker with a fresh database connection per result."""
+    from fpdb_3_legacy import Database
+
+    notify_hand = notify.send_hand_id if notify is not None else None
+    return KnownCardsAnalysisCoordinator(
+        AsyncEquityService(),
+        lambda: Database.Database(config),
+        notify_hand=notify_hand,
+        population_model=PopulationObservedRange(),
+        action_model=PopulationActionModel(),
+    )
+
+
 def run(events: Iterable[tuple], *, dry_run: bool, table_category: str, config_file: str | None = None) -> None:
     file_id = 0
     notify = None
+    known_aof_tables: dict[str, Any] = {}
     if dry_run:
         db, config = (
             None,
@@ -849,27 +922,42 @@ def run(events: Iterable[tuple], *, dry_run: bool, table_category: str, config_f
     else:
         db, config = _open_db(config_file)
         file_id = _ensure_capture_file(db)
+        known_aof_tables = _known_aof_tables(db)
         notify = _make_hud_notifier()
 
-    pump = HandPump(db, config, table_category=table_category, dry_run=dry_run, file_id=file_id, notify=notify)
+    equity_coordinator = None if dry_run else _make_equity_coordinator(config, notify)
+    pump = HandPump(
+        db,
+        config,
+        table_category=table_category,
+        dry_run=dry_run,
+        file_id=file_id,
+        notify=notify,
+        equity_coordinator=equity_coordinator,
+        known_aof_tables=known_aof_tables,
+    )
     raw_archive = RawEventArchive()
     print("[INFO] === CoinPoker live feed active ===")
     accumulated: list[tuple] = []
     since_check = 0
-    for event in events:
-        raw_archive.append(event)
-        accumulated.append(event)
-        since_check += 1
-        # Re-evaluate hands periodically (the server pushes many small events).
-        if since_check >= 20:
-            since_check = 0
-            pump.process(accumulated)
-            # The closing announcement arrives after the last hand, so it is
-            # read on every sweep rather than waiting for a hand to carry it.
-            pump.record_tournament_results(accumulated)
-            accumulated = pump.prune(accumulated)
-    pump.process(accumulated)  # final sweep (covers replay / shutdown)
-    pump.record_tournament_results(accumulated)
+    try:
+        for event in events:
+            raw_archive.append(event)
+            accumulated.append(event)
+            since_check += 1
+            # Re-evaluate hands periodically (the server pushes many small events).
+            if since_check >= 20:
+                since_check = 0
+                pump.process(accumulated)
+                # The closing announcement arrives after the last hand, so it is
+                # read on every sweep rather than waiting for a hand to carry it.
+                pump.record_tournament_results(accumulated)
+                accumulated = pump.prune(accumulated)
+        pump.process(accumulated)  # final sweep (covers replay / shutdown)
+        pump.record_tournament_results(accumulated)
+    finally:
+        if equity_coordinator is not None:
+            equity_coordinator.close()
     print(f"[INFO] Done. Hands imported/built this run: {len(pump.imported)}")
 
 

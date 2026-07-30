@@ -204,14 +204,14 @@ class iPokerSummary(TourneySummary):  # noqa: N801
             self.startTime = datetime.datetime.strptime(
                 datetimestr,
                 "%Y/%m/%d %H:%M:%S",
-            ).replace(tzinfo=datetime.timezone.utc)
+            ).replace(tzinfo=datetime.UTC)
             log.debug("Parsed startTime with re_date_time1: %s", self.startTime)
         else:
             try:
                 self.startTime = datetime.datetime.strptime(
                     mg["DATETIME"],
                     "%Y-%m-%d %H:%M:%S",
-                ).replace(tzinfo=datetime.timezone.utc)
+                ).replace(tzinfo=datetime.UTC)
                 log.debug("Parsed startTime with default format: %s", self.startTime)
             except ValueError:
                 log.debug("Default format failed, trying alternative date formats.")
@@ -231,7 +231,7 @@ class iPokerSummary(TourneySummary):  # noqa: N801
                 self.startTime = datetime.datetime.strptime(
                     mg["DATETIME"],
                     datestr,
-                ).replace(tzinfo=datetime.timezone.utc)
+                ).replace(tzinfo=datetime.UTC)
                 log.debug("Parsed startTime with fallback format: %s", self.startTime)
 
         if not mg["CURRENCY"] or mg["CURRENCY"] == "fun":

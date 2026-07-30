@@ -215,7 +215,7 @@ class Everest(HandHistoryConverter):
         # Everest stores a Unix epoch (absolute UTC); interpret it as UTC rather
         # than the machine-local timezone that bare fromtimestamp() would assume.
         hand.startTime = datetime.datetime.fromtimestamp(
-            int(Decimal(m.group("DATETIME"))), tz=datetime.timezone.utc
+            int(Decimal(m.group("DATETIME"))), tz=datetime.UTC
         )
         # hand.startTime = datetime.datetime.strptime('201102091158', '%Y%m%d%H%M')
         # hand.startTime = datetime.datetime.strptime(m.group('DATETIME')[:12], '%Y%m%d%H%M')

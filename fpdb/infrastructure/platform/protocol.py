@@ -7,11 +7,11 @@ Uses Python's Protocol (PEP 544) for structural subtyping.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from enum import Enum
+from enum import StrEnum
 from typing import Protocol, runtime_checkable
 
 
-class Platform(str, Enum):
+class Platform(StrEnum):
     """Supported operating system platforms"""
 
     LINUX = "linux"

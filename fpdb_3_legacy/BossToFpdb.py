@@ -251,7 +251,7 @@ class Boss(HandHistoryConverter):
                 # Boss stores a Unix epoch (absolute UTC); interpret it as UTC rather
                 # than the machine-local timezone that bare fromtimestamp() would assume.
                 hand.startTime = datetime.datetime.fromtimestamp(
-                    int(info[key]), tz=datetime.timezone.utc
+                    int(info[key]), tz=datetime.UTC
                 )
             if key == "HID":
                 hand.handid = info[key]

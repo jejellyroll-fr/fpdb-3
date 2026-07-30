@@ -73,7 +73,7 @@ class TestWinamaxSummary:
             assert summary.isSng is True  # <= 10 players
 
             # Verify start time
-            expected_time = datetime.datetime(2011, 10, 31, 17, 11, 45, tzinfo=datetime.timezone.utc)
+            expected_time = datetime.datetime(2011, 10, 31, 17, 11, 45, tzinfo=datetime.UTC)
             assert summary.startTime == expected_time
 
             # Verify player was added
@@ -516,7 +516,7 @@ You finished in 50th place
             assert summary.prizepool == 15000  # Uses PRIZEPOOL2 (150€ in cents)
             assert summary.tourNo == "987654"
 
-            expected_time = datetime.datetime(2023, 12, 25, 14, 30, 45, tzinfo=datetime.timezone.utc)
+            expected_time = datetime.datetime(2023, 12, 25, 14, 30, 45, tzinfo=datetime.UTC)
             assert summary.startTime == expected_time
 
     def test_parse_buyin_info_detailed(self) -> None:

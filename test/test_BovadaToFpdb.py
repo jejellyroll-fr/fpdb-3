@@ -5,7 +5,7 @@ various game types including Hold'em, Omaha, and Stud variants.
 """
 
 import unittest
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from decimal import Decimal
 from pathlib import Path
 from types import SimpleNamespace
@@ -256,7 +256,7 @@ class TestBovadaParser(unittest.TestCase):
         hand = MockHand(hand_text, gametype)
         self.parser.readHandInfo(hand)
         assert hand.handid == "3598529418"
-        expected_utc_time = datetime(2018, 4, 29, 1, 52, 54, tzinfo=timezone.utc)
+        expected_utc_time = datetime(2018, 4, 29, 1, 52, 54, tzinfo=UTC)
         assert hand.startTime == expected_utc_time
 
     def test_read_hole_cards_hero_holdem(self) -> None:

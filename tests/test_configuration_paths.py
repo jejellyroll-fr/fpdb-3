@@ -12,6 +12,7 @@ detection, and detection is driven here rather than observed.
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 from typing import Any
 from unittest.mock import patch
@@ -116,12 +117,15 @@ def test_a_site_with_no_summary_folder_is_offered_none(build, hands) -> None:
 def test_a_home_relative_folder_is_expanded(build, monkeypatch, tmp_path) -> None:
     # Configurations are shared between machines and between users, so the
     # paths in them are written with a ~.
+    # Set both HOME and USERPROFILE so that os.path.expanduser works on every
+    # platform (Windows uses USERPROFILE; POSIX uses HOME).
     monkeypatch.setenv("HOME", str(tmp_path))
+    monkeypatch.setenv("USERPROFILE", str(tmp_path))
     (tmp_path / "hands").mkdir()
 
     paths = build("~/hands").get_default_paths()
 
-    assert paths["hud-defaultPath"] == str(tmp_path / "hands")
+    assert os.path.normpath(paths["hud-defaultPath"]) == os.path.normpath(str(tmp_path / "hands"))
 
 
 def test_the_site_is_the_default_one_unless_asked_otherwise(build, hands) -> None:

@@ -241,7 +241,7 @@ class Pkr(HandHistoryConverter):
                 a.group("S"),
             )
         # PKR headers carry no TZ marker; treat as UTC explicitly.
-        return datetime.datetime.strptime(datetimestr, "%Y/%m/%d %H:%M:%S").replace(tzinfo=datetime.timezone.utc)
+        return datetime.datetime.strptime(datetimestr, "%Y/%m/%d %H:%M:%S").replace(tzinfo=datetime.UTC)
 
     def readHandInfo(self, hand):
         m1 = self.re_HandInfo.search(hand.handText, re.DOTALL)

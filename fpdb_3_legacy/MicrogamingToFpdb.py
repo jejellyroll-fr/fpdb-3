@@ -233,7 +233,7 @@ class Microgaming(HandHistoryConverter):
                 # Microgaming/Prima headers carry no TZ marker; treat as UTC explicitly.
                 hand.startTime = datetime.datetime.strptime(
                     info[key], "%Y-%m-%d %H:%M:%S"
-                ).replace(tzinfo=datetime.timezone.utc)
+                ).replace(tzinfo=datetime.UTC)
             if key == "HID":
                 hand.handid = info[key]
                 hand.tablename = info[key]

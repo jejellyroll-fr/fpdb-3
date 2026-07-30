@@ -457,7 +457,7 @@ class IPokerXMLFormatMixin:
                 import datetime as dt
 
                 start_time = dt.datetime.strptime(tourney_info["startdate"], "%Y-%m-%d %H:%M:%S")  # noqa: DTZ007
-                self.tinfo["startTime"] = start_time.replace(tzinfo=dt.timezone.utc)
+                self.tinfo["startTime"] = start_time.replace(tzinfo=dt.UTC)
             except (ValueError, TypeError):
                 self.tinfo["startTime"] = None
 
@@ -466,7 +466,7 @@ class IPokerXMLFormatMixin:
                 import datetime as dt
 
                 end_time = dt.datetime.strptime(tourney_info["enddate"], "%Y-%m-%d %H:%M:%S")  # noqa: DTZ007
-                self.tinfo["endTime"] = end_time.replace(tzinfo=dt.timezone.utc)
+                self.tinfo["endTime"] = end_time.replace(tzinfo=dt.UTC)
             except (ValueError, TypeError):
                 self.tinfo["endTime"] = None
 

@@ -73,6 +73,8 @@ DOMAINS: tuple[tuple[str, tuple[str, ...]], ...] = (
             "fpdb_3_legacy/Stats.py",
             "fpdb_3_legacy/stats_*.py",
             "fpdb_3_legacy/equity.py",
+            "fpdb_3_legacy/aof_equity.py",
+            "fpdb_3_legacy/aof_ranges.py",
         ),
     ),
     (
@@ -152,6 +154,10 @@ GUARDED_MODULES: tuple[str, ...] = (
     "fpdb_3_legacy/database_*.py",
     "fpdb_3_legacy/Hand.py",
     "fpdb_3_legacy/DerivedStats.py",
+    "fpdb_3_legacy/aof_equity.py",
+    "fpdb_3_legacy/aof_ranges.py",
+    "fpdb_3_legacy/equity.py",
+    "fpdb_3_legacy/equity_async.py",
     "fpdb_3_legacy/stats_*.py",
     "fpdb_3_legacy/Importer.py",
     "fpdb_3_legacy/Configuration.py",
@@ -264,8 +270,7 @@ def check(files: dict[str, Measure], baseline: dict) -> tuple[list[str], list[st
         allowance = tolerance_for(label)
         if actual.percent < floor - allowance:
             failures.append(
-                f"{label}: {actual.percent:.1f}% is below the {floor:.1f}% floor "
-                f"(tolerance {allowance:.1f} point)",
+                f"{label}: {actual.percent:.1f}% is below the {floor:.1f}% floor (tolerance {allowance:.1f} point)",
             )
 
     lines.append("Domains")

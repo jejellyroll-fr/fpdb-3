@@ -53,7 +53,7 @@ class BovadaRegressionTests(unittest.TestCase):
             test_date_string = "2012-08-26 23:35:15"
             # Use timezone-aware parsing to avoid naive datetime warning
             parsed_date = datetime.datetime.strptime(test_date_string, "%Y-%m-%d %H:%M:%S").replace(
-                tzinfo=datetime.timezone.utc,
+                tzinfo=datetime.UTC,
             )
             assert isinstance(parsed_date, datetime.datetime)
 
