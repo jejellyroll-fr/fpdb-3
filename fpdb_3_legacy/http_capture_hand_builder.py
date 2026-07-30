@@ -571,12 +571,31 @@ def _apply_special_hand_fields(hand: Any, hand_data: dict[str, Any]) -> None:
         if not player:
             continue
         try:
-            hand.cashOutAmounts[player] = Decimal(str(entry.get("amount", "0")))
-            hand.cashOutFees[player] = Decimal(str(entry.get("fee", "0")))
+            amount = Decimal(str(entry.get("amount", "0")))
+            fee = Decimal(str(entry.get("fee", "0")))
         except (ValueError, ArithmeticError):
             continue
+        # Added, not replaced. A player insured in a hand with a side pot is
+        # paid once per pot, and assigning kept only the last of them -- the
+        # earlier payouts vanished from their winnings.
+        hand.cashOutAmounts[player] = hand.cashOutAmounts.get(player, Decimal(0)) + amount
+        hand.cashOutFees[player] = hand.cashOutFees.get(player, Decimal(0)) + fee
         hand.cashedOut = True
         hand.isCashOut = True
+
+    # Splash money is paid beside the pot, so it travels beside it too: not in
+    # a bet, not in a collection, and never in the rake.
+    for entry in hand_data.get("splash_winnings") or []:
+        player = entry.get("player")
+        if not player:
+            continue
+        try:
+            amount = Decimal(str(entry.get("amount", "0")))
+        except (ValueError, ArithmeticError):
+            continue
+        if not hasattr(hand, "splashWinnings"):
+            hand.splashWinnings = {}
+        hand.splashWinnings[player] = hand.splashWinnings.get(player, Decimal(0)) + amount
 
 
 def render_fpdb_hand(hand: Any) -> str:
@@ -627,6 +646,7 @@ def import_fpdb_hand(
     # it has never been given in that shape before, and one exception left a
     # Hands row with no players and no actions behind it, which the pump never
     # revisits because it marks the hand imported before inserting it.
+    decisions = _generate_aof_decisions(hand)
     notes = _generate_auto_notes(hand, db)
     hand.updateSessionsCache(db, None, doinsert)
     hand.insertHands(db, file_id, doinsert, printtest)
@@ -648,7 +668,21 @@ def import_fpdb_hand(
         # unavailable would otherwise destroy every live hand that followed.
         db.commit()
     _store_auto_notes(db, notes, doinsert)
+    hand.aof_decision_ids = _store_aof_decisions(db, decisions, doinsert)
     return hand
+
+
+def _generate_aof_decisions(hand: Any) -> list:
+    """Build durable AoF facts without ever putting the hand at risk."""
+    try:
+        from fpdb_3_legacy.autonotes_aof import extract_decisions
+
+        decisions = extract_decisions(hand)
+        hand.aof_decisions = decisions
+        return decisions
+    except Exception as exc:  # noqa: BLE001 - classification is subordinate to import
+        print(f"[WARN] structured AoF decisions not generated: {exc}")
+        return []
 
 
 def _store_auto_notes(db: Any, notes: list, doinsert: bool) -> None:
@@ -675,6 +709,24 @@ def _store_auto_notes(db: Any, notes: list, doinsert: bool) -> None:
         if isinstance(pending, list):
             pending.clear()
         print(f"[WARN] automatic notes not stored: {exc}")
+
+
+def _store_aof_decisions(db: Any, decisions: list, doinsert: bool) -> list[int]:
+    """Store AoF decisions after the hand, in an independent transaction."""
+    if not decisions:
+        return []
+    try:
+        decision_ids = db.storeAofDecisions(decisions, doinsert)
+        if doinsert:
+            db.commit()
+        return decision_ids
+    except Exception as exc:  # noqa: BLE001 - structured metadata must not cost the hand
+        try:
+            db.rollback()
+        except Exception as rollback_exc:  # noqa: BLE001 - report the first fault
+            print(f"[WARN] could not roll back the AoF decision transaction: {rollback_exc}")
+        print(f"[WARN] structured AoF decisions not stored: {exc}")
+        return []
 
 
 def _generate_auto_notes(hand: Any, db: Any) -> list:

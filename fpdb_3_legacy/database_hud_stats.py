@@ -17,6 +17,7 @@ from datetime import datetime, timedelta
 from time import time
 from typing import TYPE_CHECKING, Any
 
+from fpdb_3_legacy.autonotes_aof import AOF_CATEGORIES
 from fpdb_3_legacy.loggingFpdb import get_logger
 
 log = get_logger("db")
@@ -55,8 +56,9 @@ class DatabaseHudStatsMixin:
 
         def get_hero_player_ids(self, site_name: Any = None, profile: Any = None) -> Any: ...
 
-        def _rollback_after_failed_read(self) -> None: ...
+        def getAofProfileStats(self, player_ids: Any, category: str) -> Any: ...
 
+        def _rollback_after_failed_read(self) -> None: ...
 
     def get_seat_players(self, hand_id: str) -> dict[int, dict[str, object]]:
         """Return seatNo -> {player_id, screen_name} dict for a hand.
@@ -183,6 +185,7 @@ class DatabaseHudStatsMixin:
         hud_params=None,
         hero_id=-1,
         num_seats=6,
+        poker_game: str | None = None,
         **kwargs,
     ):
         if game_type is None and "type" in kwargs:
@@ -250,6 +253,7 @@ class DatabaseHudStatsMixin:
             )
 
             if stat_range == "S" and h_stat_range == "S":
+                self._merge_aof_profile_stats(stat_dict, poker_game)
                 return stat_dict
 
         if stat_range == "T":
@@ -332,7 +336,30 @@ class DatabaseHudStatsMixin:
                     t_dict[name.lower()] = val
                 stat_dict[t_dict["player_id"]] = t_dict
 
+        self._merge_aof_profile_stats(stat_dict, poker_game or handinfo["category"])
         return stat_dict
+
+    def _merge_aof_profile_stats(
+        self,
+        stat_dict: dict[Any, Any],
+        category: str | None,
+    ) -> None:
+        """Add one grouped objective-profile read to an AoF table's stats.
+
+        Splash is included in the same query via a pre-aggregated subquery.
+        """
+        normalized = str(category or "").lower()
+        if normalized not in AOF_CATEGORIES or not stat_dict:
+            return
+        try:
+            grouped = self.getAofProfileStats(stat_dict, normalized)
+        except Exception:
+            log.exception("AoF profile aggregation failed for %s players", len(stat_dict))
+            self._rollback_after_failed_read()
+            return
+        for player_id, aggregates in grouped.items():
+            if player_id in stat_dict:
+                stat_dict[player_id].update(aggregates)
 
     def get_stats_from_hand_session(
         self,

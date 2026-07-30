@@ -268,6 +268,9 @@ class ReplayPlayer:
     winning_cards: frozenset[str] = field(default_factory=frozenset)
     is_winner: bool = False
     cashout: Decimal | None = None
+    # Splash collected from the room, kept apart from `chips` because it is not
+    # won from the other players and does not balance against the betting.
+    splash: Decimal | None = None
     # Draw games: cards discarded on the frame the player just drew (the actual
     # cards for the hero, otherwise an empty list with discard_count set).
     discard_count: int = 0
@@ -354,12 +357,19 @@ def hidden_card_count(category: str, known_cards: list[str] | None = None) -> in
         return 2
     if normalized == "2_holdem":
         return 3
-    if normalized in {"omahahi", "omahahilo", "irish"}:
+    if normalized in {"omahahi", "omahahilo", "irish", "aof_omaha"}:
         return 4
     if normalized in {"5_omahahi", "5_omaha8", "cour_hi", "cour_hilo"}:
         return 5
     if normalized == "6_omahahi":
         return 6
+    # A game this list has never heard of still deals a known number of cards,
+    # and Card.games knows it. Falling straight through to the cards already
+    # revealed meant a game absent from the list drew none at all: All-in or
+    # Fold Omaha came up with empty seats, board and all.
+    game_def = Card.games.get(normalized)
+    if game_def:
+        return game_def[5][0][1]
     return max(0, len(known_cards or []))
 
 
@@ -1439,6 +1449,7 @@ class GuiReplayer(QWidget):
         winning_hands = getattr(hand, "winningHand", {}) or {}
         collectees = getattr(hand, "collectees", {}) or {}
         cashouts = getattr(hand, "cashOutAmounts", {}) or {}
+        splashes = getattr(hand, "splashWinnings", {}) or {}
         base = hand.gametype.get("base", "")
         category = hand.gametype.get("category", "")
         # Build the board as separate runs (run-it-twice/three keeps each board
@@ -1493,6 +1504,7 @@ class GuiReplayer(QWidget):
                     winning_cards=winning_cards,
                     is_winner=is_winner,
                     cashout=cashouts.get(player.name) if is_showdown else None,
+                    splash=splashes.get(player.name) if is_showdown else None,
                     discard_count=(
                         getattr(player, "discardCount", 0)
                         if player.justacted and (player.action or "").startswith("discards")
@@ -2005,6 +2017,12 @@ class GuiReplayer(QWidget):
             action_text = f"{action_text} all-in".strip()
         if is_final_frame and player.cashout is not None:
             action_text = f"cashout {format_replay_amount(player.cashout, self.currency_code)}"
+        if is_final_frame and player.splash:
+            # Appended rather than substituted: the seat has to show both, or
+            # the amount read off the box no longer matches what the player
+            # actually took off the table.
+            splash_text = f"+{format_replay_amount(player.splash, self.currency_code)} splash"
+            action_text = f"{action_text}  {splash_text}".strip()
         painter.setPen(accent if player.justacted else QColor("#9aa5ad"))
         painter.setFont(QFont("Helvetica", action_font_size, QFont.Weight.DemiBold))
         action_rect = QRectF(
@@ -2106,6 +2124,13 @@ class GuiReplayer(QWidget):
                 entries.append(f"{name}: {combo}{suffix}")
             for name, amount in (getattr(hand, "cashOutAmounts", {}) or {}).items():
                 entries.append(f"{name}: cashout {format_replay_amount(amount, self.currency_code)}")
+            # The splash is added by the room, not won from the other players,
+            # so it is its own line rather than part of what was collected --
+            # the collected figure balances against the bets and would stop
+            # balancing if this were folded into it.
+            for name, amount in (getattr(hand, "splashWinnings", {}) or {}).items():
+                if amount:
+                    entries.append(f"{name}: splash +{format_replay_amount(amount, self.currency_code)}")
         return entries[-max_entries:]
 
     def _current_action_summary(self, frame: ReplayFrame) -> str:

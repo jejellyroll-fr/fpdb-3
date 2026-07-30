@@ -11,23 +11,15 @@ def index_queries(db_server: str) -> dict[str, str]:
             """ALTER TABLE Tourneys ADD UNIQUE INDEX siteTourneyNo(siteTourneyNo, tourneyTypeId)"""
         )
     elif db_server in ("postgresql", "sqlite"):
-        query["addTourneyIndex"] = (
-            """CREATE UNIQUE INDEX siteTourneyNo ON Tourneys (siteTourneyNo, tourneyTypeId)"""
-        )
+        query["addTourneyIndex"] = """CREATE UNIQUE INDEX siteTourneyNo ON Tourneys (siteTourneyNo, tourneyTypeId)"""
 
     if db_server == "mysql":
-        query["addHandsIndex"] = (
-            """ALTER TABLE Hands ADD UNIQUE INDEX siteHandNo(siteHandNo, gametypeId<heroseat>)"""
-        )
+        query["addHandsIndex"] = """ALTER TABLE Hands ADD UNIQUE INDEX siteHandNo(siteHandNo, gametypeId<heroseat>)"""
     elif db_server in ("postgresql", "sqlite"):
-        query["addHandsIndex"] = (
-            """CREATE UNIQUE INDEX siteHandNo ON Hands (siteHandNo, gametypeId<heroseat>)"""
-        )
+        query["addHandsIndex"] = """CREATE UNIQUE INDEX siteHandNo ON Hands (siteHandNo, gametypeId<heroseat>)"""
 
     if db_server == "mysql":
-        query["addPlayersSeat"] = (
-            """ALTER TABLE HandsPlayers ADD UNIQUE INDEX playerSeat_idx(handId, seatNo)"""
-        )
+        query["addPlayersSeat"] = """ALTER TABLE HandsPlayers ADD UNIQUE INDEX playerSeat_idx(handId, seatNo)"""
     elif db_server in ("postgresql", "sqlite"):
         query["addPlayersSeat"] = """CREATE UNIQUE INDEX playerSeat_idx ON HandsPlayers (handId, seatNo)"""
 
@@ -86,12 +78,33 @@ def index_queries(db_server: str) -> dict[str, str]:
         query["addPlayerAutoNotesPlayerIndex"] = (
             """CREATE INDEX playerautonotes_player_idx ON PlayerAutoNotes (playerId)"""
         )
-        query["addPlayerAutoNotesHandIndex"] = (
-            """CREATE INDEX playerautonotes_hand_idx ON PlayerAutoNotes (handId)"""
-        )
+        query["addPlayerAutoNotesHandIndex"] = """CREATE INDEX playerautonotes_hand_idx ON PlayerAutoNotes (handId)"""
         query["addPlayerAutoNotesRuleIndex"] = (
             """CREATE INDEX playerautonotes_rule_idx ON PlayerAutoNotes (ruleId, ruleVersion)"""
         )
+
+    if db_server == "mysql":
+        query["addAofDecisionsPlayerIndex"] = (
+            """ALTER TABLE AofDecisions ADD INDEX aofdecisions_player_idx (playerId)"""
+        )
+        query["addAofDecisionsHandIndex"] = """ALTER TABLE AofDecisions ADD INDEX aofdecisions_hand_idx (handId)"""
+        query["addAofDecisionsRangeIndex"] = """ALTER TABLE AofDecisions ADD INDEX aofdecisions_range_idx
+               (category, role, activeOpponents, handId, cardsObservable)"""
+        query["addAofAnalysesDecisionIndex"] = (
+            """ALTER TABLE AofDecisionAnalyses ADD INDEX aofanalyses_decision_idx (decisionId)"""
+        )
+        query["addAofAnalysesStatusIndex"] = (
+            """ALTER TABLE AofDecisionAnalyses ADD INDEX aofanalyses_status_idx (status)"""
+        )
+    elif db_server in ("postgresql", "sqlite"):
+        query["addAofDecisionsPlayerIndex"] = """CREATE INDEX aofdecisions_player_idx ON AofDecisions (playerId)"""
+        query["addAofDecisionsHandIndex"] = """CREATE INDEX aofdecisions_hand_idx ON AofDecisions (handId)"""
+        query["addAofDecisionsRangeIndex"] = """CREATE INDEX aofdecisions_range_idx ON AofDecisions
+               (category, role, activeOpponents, handId, cardsObservable)"""
+        query["addAofAnalysesDecisionIndex"] = (
+            """CREATE INDEX aofanalyses_decision_idx ON AofDecisionAnalyses (decisionId)"""
+        )
+        query["addAofAnalysesStatusIndex"] = """CREATE INDEX aofanalyses_status_idx ON AofDecisionAnalyses (status)"""
 
     if db_server == "mysql":
         query["addStartCashIndex"] = """ALTER TABLE HandsPlayers ADD INDEX cash_idx (startCash)"""

@@ -2,7 +2,7 @@
 
 import sys
 from collections.abc import Callable
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from decimal import Decimal
 from pathlib import Path
 
@@ -22,7 +22,7 @@ class MockHand:
         """Initialize mock hand object with test data."""
         self.handid = "12345"
         self.tablename = "Test Table"
-        self.startTime = datetime(2024, 1, 1, 12, 0, 0, tzinfo=timezone.utc)
+        self.startTime = datetime(2024, 1, 1, 12, 0, 0, tzinfo=UTC)
         self.tourneyId = None
         self.tourneyTypeId = None
         self.hero = "Hero"

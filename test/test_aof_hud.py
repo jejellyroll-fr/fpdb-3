@@ -11,7 +11,30 @@ import pytest
 import fpdb_3_legacy.Configuration as Configuration
 from fpdb_3_legacy.AutoNotes import generate_for_hand
 from fpdb_3_legacy.autonotes_aof import classify_all_in, describe_all_in, is_aof_omaha
-from fpdb_3_legacy.stats_aof import aof_allin, aof_fold, aof_showdowns
+from fpdb_3_legacy.stats_aof import (
+    aof_allin,
+    aof_big_wrap13,
+    aof_decision_ev,
+    aof_fold,
+    aof_full_house,
+    aof_known_equity,
+    aof_known_ev,
+    aof_made,
+    aof_nfd,
+    aof_no_made,
+    aof_non_nfd,
+    aof_observed,
+    aof_pair,
+    aof_range_equity,
+    aof_showdowns,
+    aof_splash_freq,
+    aof_splash_won,
+    aof_straight,
+    aof_trips,
+    aof_two_pair,
+    aof_weak,
+    aof_wrap9,
+)
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
@@ -110,6 +133,193 @@ def test_the_showdown_count_does_not_claim_the_cards_were_read() -> None:
     value, display, short, _long, detail, _description = aof_showdowns(stats, 1)
 
     assert (value, display, short, detail) == (8.0, "8", "SD=8", "(8/26)")
+
+
+def test_the_objective_profile_keeps_the_observed_denominator_visible() -> None:
+    stats = {
+        1: {
+            "aof_obs": 18,
+            "aof_no_made": 10,
+            "aof_made": 8,
+            "aof_nfd": 6,
+            "aof_non_nfd": 2,
+            "aof_wrap9": 8,
+            "aof_big_wrap13": 3,
+        },
+    }
+
+    assert aof_observed(stats, 1)[1:4] == ("18", "Obs=18", "observed all-ins=18")
+    assert aof_no_made(stats, 1)[3:5] == ("no made hand 10/18 55.6%", "(10/18)")
+    assert aof_made(stats, 1)[3:5] == ("made hand 8/18 44.4%", "(8/18)")
+    assert aof_nfd(stats, 1)[3:5] == ("nut flush draw 6/18 33.3%", "(6/18)")
+    assert aof_non_nfd(stats, 1)[3:5] == ("non-nut flush draw 2/18 11.1%", "(2/18)")
+    assert aof_wrap9(stats, 1)[3:5] == ("wrap 9+ 8/18 44.4%", "(8/18)")
+    assert aof_big_wrap13(stats, 1)[3:5] == ("big wrap 13+ 3/18 16.7%", "(3/18)")
+
+
+def test_draw_categories_are_independent_not_a_partition() -> None:
+    stats = {
+        1: {
+            "aof_obs": 1,
+            "aof_no_made": 1,
+            "aof_nfd": 1,
+            "aof_wrap9": 1,
+            "aof_big_wrap13": 1,
+        },
+    }
+
+    assert [stat(stats, 1)[0] for stat in (aof_no_made, aof_nfd, aof_wrap9, aof_big_wrap13)] == [1.0] * 4
+
+
+@pytest.mark.parametrize(
+    ("stat", "key", "long_label"),
+    [
+        (aof_pair, "aof_pair", "pair"),
+        (aof_two_pair, "aof_two_pair", "two pair"),
+        (aof_trips, "aof_trips", "trips"),
+        (aof_straight, "aof_straight", "straight"),
+        (aof_full_house, "aof_full_house", "full house"),
+    ],
+)
+def test_made_hand_distribution_uses_the_same_observed_sample(stat, key, long_label) -> None:
+    stats = {1: {"aof_obs": 5, key: 2}}
+
+    result = stat(stats, 1)
+
+    assert result[0] == pytest.approx(0.4)
+    assert result[3] == f"{long_label} 2/5 40.0%"
+    assert result[4] == "(2/5)"
+
+
+def test_zero_observations_are_not_reported_as_zero_percent() -> None:
+    stats = {1: {"aof_obs": 0, "aof_no_made": 0}}
+
+    assert aof_observed(stats, 1)[1] == "0"
+    assert aof_no_made(stats, 1)[1] == "-"
+    assert aof_no_made(stats, 1)[4] == "(0/0)"
+
+
+def test_decision_ev_cells_stay_empty_without_a_complete_model() -> None:
+    assert aof_weak({1: {}}, 1)[1] == "-"
+    assert aof_decision_ev({1: {}}, 1)[1] == "-"
+    assert (
+        aof_weak(
+            {1: {"aof_decision_ev": 0, "aof_weak": 0}},
+            1,
+        )[1]
+        == "-"
+    )
+    assert (
+        aof_decision_ev(
+            {1: {"aof_decision_ev": 0, "aof_decision_ev_bb_ppm": 0}},
+            1,
+        )[1]
+        == "-"
+    )
+
+
+def test_weak_ai_reports_only_confidently_negative_modeled_decisions() -> None:
+    result = aof_weak(
+        {1: {"aof_decision_ev": 11, "aof_weak": 3}},
+        1,
+    )
+
+    assert result[0] == pytest.approx(3 / 11)
+    assert result[1:5] == (
+        "27.3",
+        "W=27.3%",
+        "Weak AI=27.3%",
+        "(3/11)",
+    )
+    assert "upper 95%" in result[5]
+    assert "uncertain" in result[5]
+
+
+def test_decision_ev_is_the_average_pre_rake_value_in_big_blinds() -> None:
+    result = aof_decision_ev(
+        {
+            1: {
+                "aof_decision_ev": 4,
+                "aof_decision_ev_bb_ppm": -2_000_000,
+            },
+        },
+        1,
+    )
+
+    assert result[1:5] == (
+        "-0.50",
+        "EV=-0.50bb",
+        "Decision EV=-0.50bb",
+        "(4 modeled)",
+    )
+    assert "pre-rake" in result[5]
+
+
+def test_known_card_stats_name_their_conditional_sample() -> None:
+    stats = {
+        1: {
+            "aof_known": 2,
+            "aof_known_equity_ppm": 1_100_000,
+            "aof_known_ev_bb_ppm": 500_000,
+        },
+    }
+
+    assert aof_known_equity(stats, 1)[1:5] == (
+        "55.0",
+        "EqK=55.0%",
+        "known-card equity=55.0%",
+        "(2 analyzed)",
+    )
+    assert aof_known_ev(stats, 1)[1:5] == (
+        "+0.25",
+        "EVact=+0.25bb",
+        "EV vs actual callers=+0.25bb",
+        "(2 analyzed)",
+    )
+
+
+@pytest.mark.parametrize("stat", [aof_known_equity, aof_known_ev])
+def test_known_card_stats_show_no_data_without_a_complete_sample(stat) -> None:
+    assert stat({1: {}}, 1)[1] == "-"
+    assert (
+        stat(
+            {
+                1: {
+                    "aof_known": 0,
+                    "aof_known_equity_ppm": 0,
+                    "aof_known_ev_bb_ppm": 0,
+                },
+            },
+            1,
+        )[1]
+        == "-"
+    )
+
+
+def test_population_range_equity_names_its_bias_and_historical_sample() -> None:
+    stats = {1: {"aof_range": 4, "aof_range_equity_ppm": 2_200_000}}
+
+    result = aof_range_equity(stats, 1)
+
+    assert result[1:5] == (
+        "55.0",
+        "EqR=55.0%",
+        "population-range equity=55.0%",
+        "(4 modeled)",
+    )
+    assert "showdown-biased" in result[5]
+    assert "earlier hands" in result[5]
+
+
+def test_population_range_equity_is_blank_without_a_complete_model() -> None:
+    assert aof_range_equity({1: {}}, 1)[1] == "-"
+    assert (
+        aof_range_equity(
+            {1: {"aof_range": 0, "aof_range_equity_ppm": 0}},
+            1,
+        )[1]
+        == "-"
+    )
 
 
 @pytest.mark.parametrize("stat", [aof_allin, aof_fold, aof_showdowns])
@@ -295,8 +505,18 @@ def test_the_hud_has_a_profile_for_the_game(tmp_path, monkeypatch) -> None:
 
     assert params is not None
     assert params["game_stat_set"].name == "aof_default"
-    stat_names = [stat.stat_name for stat in config.stat_sets["aof_default"].stats.values()]
-    assert {"aof_allin", "aof_fold", "aof_showdowns"} <= set(stat_names)
+    # The parsed set keys its cells by row and column across the whole
+    # profile, so a block layout -- where each block numbers its own cells
+    # from one -- is lossy there by construction, exactly as it is for the
+    # shipped PLO4 package. What the profile actually offers is asserted
+    # against the blocks themselves, in the placement test below.
+    assert config.stat_sets["aof_default"].stats
+    assert {"aof_observed", "aof_weak", "aof_decision_ev"} <= {
+        stat.stat_name for stat in config.stat_sets["aof_advanced"].stats.values()
+    }
+    assert "aof_profile" in config.popup_windows
+    assert "aof_range_equity" in config.popup_windows["aof_profile"].pu_stats
+    assert "aof_decision_ev" in config.popup_windows["aof_profile"].pu_stats
 
 
 def test_the_real_hand_reaches_player_auto_notes() -> None:
@@ -327,28 +547,38 @@ def test_the_real_hand_reaches_player_auto_notes() -> None:
     hand.dbid_hands = 1
     hand.handsplayers = {}
 
-    (note,) = generate_for_hand(hand)
+    notes = {note.note_text.split(":")[0]: note for note in generate_for_hand(hand)}
 
+    # Both players who shoved were turned face up, so both are on record.
+    assert set(notes) == {"hero", "villain1"}
+    assert notes["villain1"].note_text == "villain1: all-in with two pair, non-nut flush draw"
+    note = notes["hero"]
     assert note.rule_id == "aof_omaha_all_in_shown"
     assert note.evidence["hole"] == "As Qh 8h 7c"
     assert note.note_text == "hero: all-in with a pair, 4 straight outs"
 
 
-def test_the_note_icon_can_be_opened() -> None:
+def test_the_notes_can_still_be_opened_from_the_box() -> None:
     """An icon that lights up but does not open is a worse HUD than none.
 
-    ``player_note`` needs the click action wired, or the reader is told a note
-    exists and given no way to read it.
+    The note text moved into the popups, where there is room to read it; the
+    identity cell is what opens the dialog, so the whole name is the target
+    rather than a single character of it.
     """
     import defusedxml.minidom as minidom
 
     document = minidom.parse(str(REPO_ROOT / "HUD_config.xml.example"))
     (profile,) = [ss for ss in document.getElementsByTagName("ss") if ss.getAttribute("name") == "aof_default"]
-    (note_stat,) = [
-        stat for stat in profile.getElementsByTagName("stat") if stat.getAttribute("_stat_name") == "player_note"
+    clickable = [
+        stat.getAttribute("_stat_name")
+        for stat in profile.getElementsByTagName("stat")
+        if stat.getAttribute("click") == "open_comment_dialog"
     ]
 
-    assert note_stat.getAttribute("click") == "open_comment_dialog"
+    assert clickable == ["playershort"]
+
+    (popup,) = [pu for pu in document.getElementsByTagName("pu") if pu.getAttribute("pu_name") == "aof_profile"]
+    assert "player_note" in [s.getAttribute("pu_stat_name") for s in popup.getElementsByTagName("pu_stat")]
 
 
 def _flop_first_records(bb_player: str, bb: str, shove: str) -> list[tuple]:
@@ -506,15 +736,17 @@ def test_the_captured_hand_reaches_the_notes_table() -> None:
     )
     rows = cursor.fetchall()
 
-    assert len(rows) == 1
-    name, rule_id, rule_version, note_text, evidence = rows[0]
-    assert name == "hero"
+    # The hero's cards arrive dealt; an opponent's only at showdown, and both
+    # are on record.
+    assert {row[0] for row in rows} == {"hero", "villain1"}
+    (row,) = [r for r in rows if r[0] == "hero"]
+    name, rule_id, rule_version, note_text, evidence = row
     assert (rule_id, rule_version) == ("aof_omaha_all_in_shown", 1)
     assert note_text == "hero: all-in with a pair, 4 straight outs"
     assert json.loads(evidence)["hole"] == "As Qh 8h 7c"
 
     # The note is attached to the hand that was actually inserted.
-    cursor.execute("select handId from PlayerAutoNotes")
+    cursor.execute("select distinct handId from PlayerAutoNotes")
     cursor2 = db.get_cursor()
     cursor2.execute("select id from Hands")
     assert cursor.fetchone()[0] == cursor2.fetchone()[0]
@@ -632,3 +864,263 @@ def test_a_failing_note_store_does_not_replay_an_unbounded_backlog() -> None:
 
     assert db.attempted == [("first",), ("second",)]
     assert db.panbulk == []
+
+
+def test_an_opponents_hand_is_read_from_the_showdown_reveal() -> None:
+    """Only the hero's cards arrive dealt; everyone else's come at showdown.
+
+    Reading just ``game.hole_cards`` meant no opponent ever had a holding on
+    record. Across six hundred captured hands the hero's cards were known in
+    every one and no other player's in any, so every read that rests on what
+    someone turns up with was empty for exactly the people it describes.
+    """
+    import json
+
+    from fpdb_3_legacy.coinpoker_hand_builder import build_hands
+
+    raw = json.loads((Path(__file__).parent / "data" / "coinpoker_aof_hand_events.json").read_text())
+    (hand,) = build_hands([tuple(raw["join"]), *[tuple(e) for e in raw["hand"]]], "PLO4")
+
+    by_player = {entry["player"]: entry for entry in hand["holecards"]}
+    assert by_player["villain1"]["closed"] == ["Ks", "9s", "Td", "9d"]
+    assert by_player["villain1"]["shown"] is True
+    # The hero's own cards are not marked shown: they were dealt to us.
+    assert by_player["hero"]["shown"] is False
+
+
+def test_a_player_who_never_showed_has_no_holding_invented() -> None:
+    # villain2 folded, so nothing was revealed and nothing is recorded.
+    import json
+
+    from fpdb_3_legacy.coinpoker_hand_builder import build_hands
+
+    raw = json.loads((Path(__file__).parent / "data" / "coinpoker_aof_hand_events.json").read_text())
+    (hand,) = build_hands([tuple(raw["join"]), *[tuple(e) for e in raw["hand"]]], "PLO4")
+
+    assert "villain2" not in {entry["player"] for entry in hand["holecards"]}
+
+
+def test_the_shows_up_with_marker_reads_without_being_read() -> None:
+    """The notes' facts, in a form usable while a hand is in progress.
+
+    "all-in with two pair, non-nut flush draw" is exact and useless mid-hand:
+    one hand, in a sentence, in a window that has to be opened. The markers
+    carry a whole history instead, and the observed count travels with them --
+    four out of six is a coincidence and four out of sixty is a habit.
+    """
+    from fpdb_3_legacy.stats_aof import aof_summary
+
+    stats = {1: {"aof_obs": 54, "aof_nfd": 10, "aof_wrap9": 8, "aof_two_pair": 6, "aof_no_made": 4}}
+
+    _value, display, short, long_label, detail, _description = aof_summary(stats, 1)
+
+    assert display == "NFD×10 W9×8 2p×6 air×4"
+    assert short == "Shows NFD×10 W9×8 2p×6 air×4"
+    assert long_label.endswith("over 54 observed all-ins")
+    assert detail == "(54)"
+
+
+def test_a_marker_never_runs_into_its_count() -> None:
+    # "W9" and eight of them is not ninety-eight.
+    from fpdb_3_legacy.stats_aof import aof_summary
+
+    assert aof_summary({1: {"aof_obs": 9, "aof_wrap9": 8}}, 1)[1] == "W9×8"
+
+
+def test_nothing_observed_shows_nothing_rather_than_zeroes() -> None:
+    from fpdb_3_legacy.stats_aof import aof_summary
+
+    assert aof_summary({1: {"aof_obs": 0}}, 1)[1] == "-"
+    assert aof_summary({1: {"aof_obs": 12}}, 1)[1] == "-"
+
+
+def test_a_marker_that_cannot_be_parsed_is_skipped() -> None:
+    from fpdb_3_legacy.stats_aof import aof_summary
+
+    result = aof_summary({1: {"aof_obs": 10, "aof_nfd": "bad_value"}}, 1)
+    assert result[1] == "-"
+
+
+def test_no_splash_hands_shows_no_data() -> None:
+
+    assert aof_splash_won({1: {}}, 1)[1] == "-"
+    assert aof_splash_won({1: {"aof_splash_seen": 0}}, 1)[1] == "-"
+    assert aof_splash_freq({1: {}}, 1)[1] == "-"
+    assert aof_splash_freq({1: {"aof_splash_seen": 0}}, 1)[1] == "-"
+
+
+def test_the_profile_offers_every_cell_to_the_renderer() -> None:
+    """A flat grid, because that is the one the classic HUD actually draws.
+
+    A block layout parsed and validated, and drew nothing: blocks place
+    themselves in pixels and number their cells from their own first row, and
+    reading either as the other put the box's contents outside it. The data
+    behind those cells was correct throughout -- the query returns 118
+    observed all-ins for the hero and 54 for the largest opponent -- so the
+    only thing between them and the screen was the shape of this profile.
+    """
+    document = Configuration.Config(file=str(REPO_ROOT / "HUD_config.xml.example"))
+    profile = document.stat_sets["aof_default"]
+
+    assert {stat.stat_name for stat in profile.stats.values()} == {
+        "playershort",
+        "n",
+        "aof_observed",
+        "aof_showdowns",
+        "aof_allin",
+        "aof_fold",
+        "aof_weak",
+        "aof_decision_ev",
+        # The marker line was replaced by real cells: the renderer does not
+        # honour colspan, so a single wide cell came out split across the row
+        # and the text was fragmented into unreadable pieces.
+        "aof_no_made",
+        "aof_two_pair",
+        "aof_trips",
+        "aof_nfd",
+        "aof_splash_won",
+        "aof_splash_freq",
+    }
+    assert "aof_profile" in document.popup_windows
+
+    # The rich profile is strictly richer, which is what it is for. It used to
+    # number three of its cells on row one, colliding with its own identity
+    # row, so three statistics and the player's name overwrote each other.
+    advanced = document.stat_sets["aof_advanced"]
+    assert len(advanced.stats) > len(profile.stats)
+    assert {stat.stat_name for stat in profile.stats.values()} <= {
+        stat.stat_name for stat in advanced.stats.values()
+    } | {"aof_showdowns"}
+
+
+def test_the_deal_order_identifies_a_table_nobody_named() -> None:
+    """The last thing left when the capture saw neither join nor catalogue.
+
+    A capture that begins with the client already seated sees no lobby at all.
+    All-in or Fold deals its flop before opening the betting and no other game
+    does: measured over eighteen captured tables the two never overlap, ~98%
+    against 0-11%. It is the order of the room's own packets, not a guess
+    about how the players behaved.
+    """
+    from fpdb_3_legacy.coinpoker_hand_builder import looks_like_all_in_or_fold, note_deal_order
+
+    flop_first = [("game.dealer_cards", "1", {}), ("game.user_turn", "1", {})]
+    betting_first = [("game.user_turn", "1", {}), ("game.dealer_cards", "1", {})]
+    shape: dict = {}
+
+    for hand in range(4):
+        note_deal_order(flop_first, "124415", str(hand), shape)
+    # Four hands is not yet a table: a capture joined mid-hand looks like this.
+    assert not looks_like_all_in_or_fold("124415", shape)
+
+    note_deal_order(flop_first, "124415", "4", shape)
+    assert looks_like_all_in_or_fold("124415", shape)
+
+    for hand in range(20):
+        note_deal_order(betting_first, "982246", str(hand), shape)
+    assert not looks_like_all_in_or_fold("982246", shape)
+
+
+def test_each_hand_counts_once_however_often_it_is_rebuilt() -> None:
+    """A hand is rebuilt on every sweep until it is complete.
+
+    Counting per build weighted the long hands heavily enough to drag a real
+    All-in or Fold table from 77-against-1 down to 1007-against-378, below the
+    threshold, and it went unrecognised for seventy hands.
+    """
+    from fpdb_3_legacy.coinpoker_hand_builder import note_deal_order
+
+    flop_first = [("game.dealer_cards", "1", {}), ("game.user_turn", "1", {})]
+    shape: dict = {}
+
+    for _rebuild in range(10):
+        note_deal_order(flop_first, "124415", "same-hand", shape)
+
+    assert shape["124415"][:2] == [1, 0]
+
+
+# --- the splash, paid beside the pot ------------------------------------------
+
+
+def _splash_events(splash: float, winners: list[tuple], *, ev_cashout: bool = False) -> list[tuple]:
+    """A settlement carrying a splash, shaped as the room sends it."""
+    events: list[tuple] = [
+        (
+            "game.winnerInfo",
+            "1",
+            {
+                "winnerDataList": [
+                    {
+                        "potId": 0,
+                        "potAmountAfterRake": sum(paid for _n, paid, _m in winners),
+                        "winnerDetails": {
+                            "winnerList": [
+                                {"playerName": name, "winAmountFromPot": paid} for name, paid, _m in winners
+                            ],
+                        },
+                    },
+                ],
+            },
+        ),
+        (
+            "game.cumulativeWinnerInfo",
+            "1",
+            {
+                "splashPotAmount": splash,
+                "winnersData": [{"userName": name, "isSplashPotWinner": marked} for name, _p, marked in winners],
+            },
+        ),
+    ]
+    if ev_cashout:
+        events.insert(
+            0,
+            ("game.ev_chop_opted_action", "1", {"optedEvChopActionData": [{"optedForEVChop": True}]}),
+        )
+    return events
+
+
+def test_the_splash_is_shared_in_proportion_to_what_was_taken() -> None:
+    """Not equally, and not all to the winner of the biggest pot.
+
+    On a captured hand of 2.00 the two marked players received 1.50 and 0.50 --
+    the ratio of what they took from the settlement, 4.76 against 1.59.
+    """
+    from fpdb_3_legacy.coinpoker_hand_builder import _extract_splash_winnings
+
+    events = _splash_events(2.0, [("jeje1976", 4.76, True), ("lilOmaha", 1.59, True)])
+
+    paid = {entry["player"]: entry["amount"] for entry in _extract_splash_winnings(events)}
+
+    assert paid == {"jeje1976": "1.50", "lilOmaha": "0.50"}
+
+
+def test_a_lone_marked_player_takes_the_whole_splash() -> None:
+    from fpdb_3_legacy.coinpoker_hand_builder import _extract_splash_winnings
+
+    events = _splash_events(0.20, [("ajr4444", 0.65, True)])
+
+    assert _extract_splash_winnings(events) == [{"player": "ajr4444", "amount": "0.20"}]
+
+
+def test_an_unmarked_winner_receives_no_splash() -> None:
+    # Winning a pot and receiving splash money are different things; the room
+    # says which is which.
+    from fpdb_3_legacy.coinpoker_hand_builder import _extract_splash_winnings
+
+    events = _splash_events(0.40, [("winner", 1.00, False), ("marked", 1.00, True)])
+
+    assert _extract_splash_winnings(events) == [{"player": "marked", "amount": "0.40"}]
+
+
+def test_a_hand_with_an_accepted_ev_cashout_is_left_alone() -> None:
+    """The one settlement shape the room's own figures could not be reproduced from.
+
+    A player's equity is bought out instead of played, which moves money
+    outside both the pot and the splash. Crediting it on a rule that does not
+    describe it would put a number in the database that is known to be wrong.
+    """
+    from fpdb_3_legacy.coinpoker_hand_builder import _extract_splash_winnings
+
+    events = _splash_events(1.0, [("SH1976", 6.18, True)], ev_cashout=True)
+
+    assert _extract_splash_winnings(events) == []

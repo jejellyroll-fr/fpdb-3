@@ -423,8 +423,15 @@ class GuiHandViewer(QSplitter):
                 if rc:
                     runs.append(rc)
             board_runs = runs if runs else ([single] if single else [])
-            pre_actions = hand.get_actions_short(hero, "PREFLOP")
-            post_actions = "" if "F" in pre_actions else hand.get_actions_short_streets(hero, "FLOP", "TURN", "RIVER")
+            # The street the first decision is taken on, which is not preflop
+            # in every game: All-in or Fold deals the flop first and has no
+            # preflop at all, so its whole first round belongs in this column.
+            first_street = hand.actionStreets[1] if len(hand.actionStreets) > 1 else "PREFLOP"
+            pre_actions = hand.get_actions_short(hero, first_street)
+            later_streets = [s for s in ("FLOP", "TURN", "RIVER") if s != first_street]
+            post_actions = (
+                "" if "F" in pre_actions else hand.get_actions_short_streets(hero, *later_streets)
+            )
         elif base == "stud":
             holestr = " ".join(hand.holecards["THIRD"][hero][0]) + " " + " ".join(hand.holecards["THIRD"][hero][1])
             later = []

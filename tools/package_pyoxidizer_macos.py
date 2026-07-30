@@ -23,9 +23,8 @@ import plistlib
 import shutil
 import subprocess
 import sys
-from pathlib import Path
-
 import tomllib
+from pathlib import Path
 
 from tools.adhoc_sign_macos import find_mach_o_files
 from tools.adhoc_sign_macos import sign as adhoc_sign

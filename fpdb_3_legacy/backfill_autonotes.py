@@ -45,6 +45,13 @@ STREET_BY_ID = {
     3: "RIVER",
     4: "SHOWDOWN",
 }
+AOF_STREET_BY_ID = {
+    -1: "BLINDSANTES",
+    0: "FLOP",
+    1: "TURN",
+    2: "RIVER",
+    3: "SHOWDOWN",
+}
 CENTS_MULTIPLIER = Decimal("100")
 
 
@@ -65,6 +72,8 @@ class DatabaseAutoNoteHand:
             "siteId": hand_row.get("siteId"),
             "bigBlind": _chips_to_units(hand_row.get("bigBlind")),
             "smallBlind": _chips_to_units(hand_row.get("smallBlind")),
+            "bb": _chips_to_units(hand_row.get("bigBlind")),
+            "sb": _chips_to_units(hand_row.get("smallBlind")),
         }
         self.bb = self.gametype["bigBlind"]
         self.hands = {
@@ -104,10 +113,15 @@ class DatabaseAutoNoteHand:
                 "val_r_spr": row.get("val_r_spr"),
             }
 
-        self.actionStreets = ["BLINDSANTES", "PREFLOP", "FLOP", "TURN", "RIVER", "SHOWDOWN"]
+        if hand_row.get("category") in {"aof_omaha", "aof_holdem"}:
+            self.actionStreets = ["BLINDSANTES", "FLOP", "TURN", "RIVER", "SHOWDOWN"]
+            street_by_id = AOF_STREET_BY_ID
+        else:
+            self.actionStreets = ["BLINDSANTES", "PREFLOP", "FLOP", "TURN", "RIVER", "SHOWDOWN"]
+            street_by_id = STREET_BY_ID
         self.actions: dict[str, list[Any]] = {street: [] for street in self.actionStreets}
         for row in action_rows:
-            street = STREET_BY_ID.get(row.get("street"), "PREFLOP")
+            street = street_by_id.get(row.get("street"), self.actionStreets[1])
             action = _action_tuple(row)
             if action:
                 self.actions.setdefault(street, []).append(action)
@@ -126,6 +140,39 @@ class DatabaseAutoNoteHand:
             "RIVER": [_decode_card(hand_row.get("boardcard5"))] if _decode_card(hand_row.get("boardcard5")) else [],
         }
         self.hero = ""
+
+        self._reconstruct_pot()
+
+    def _reconstruct_pot(self) -> None:
+        committed: dict[str, Decimal] = {}
+        folded: list[str] = []
+        for street in self.actionStreets:
+            for action in self.actions[street]:
+                player = action[0]
+                name = action[1]
+                if name in ("small blind", "big blind", "post ante", "calls", "bets"):
+                    committed[player] = committed.get(player, Decimal(0)) + action[2]
+                elif name in ("raises", "completes"):
+                    _, _, amount, raise_to, amount_called, _ = action
+                    committed[player] = committed.get(player, Decimal(0)) + amount + amount_called
+                elif name == "folds":
+                    folded.append(player)
+
+        class _ReconstructedPot:
+            committed: dict[str, Decimal]
+            common: dict[str, Decimal]
+            contenders: set[str]
+            stp: Decimal
+
+        pot = _ReconstructedPot()
+        pot.committed = {p: committed.get(p, Decimal(0)) for p in (player[1] for player in self.players)}
+        pot.common = {}
+        pot.contenders = {str(player[1]) for player in self.players} - {str(f) for f in folded}
+        pot.stp = Decimal(0)
+        self.pot = pot
+        self.totalpot = self.finalPot
+        self.rake = Decimal(0)
+        self.folded = folded
 
     def assembleHand(self):
         return None

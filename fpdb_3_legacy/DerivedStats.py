@@ -226,6 +226,10 @@ def _initStreetsSeenAndAllIn(init: dict[str, Any]) -> None:
     init["otherRaisedStreet0"] = False
     init["foldToOtherRaisedStreet0"] = False
     init["wentAllIn"] = False
+    # Money the room drops on the table and pays beside the pot, in cents. It
+    # is neither a bet nor a share of the pot, so it cannot live in either
+    # column without making the rake or the winnings wrong.
+    init["splashWinnings"] = 0
     # Faced an all-in (an opponent's all-in bet/raise put the player to a
     # decision) and whether they folded to it (PT4 enum_face_allin, modelled
     # the fpdb way as a chance/done boolean pair).
@@ -904,6 +908,11 @@ class DerivedStats:
             for player, amount in hand.cashOutAmounts.items():
                 if player in self.handsplayers:
                     self.handsplayers[player]["cashOutAmount"] = int(100 * amount)
+
+        if getattr(hand, "splashWinnings", None):
+            for player, amount in hand.splashWinnings.items():
+                if player in self.handsplayers:
+                    self.handsplayers[player]["splashWinnings"] = int(100 * amount)
 
         if hasattr(hand, "cashOutFees") and hand.cashOutFees:
             for player, fee in hand.cashOutFees.items():

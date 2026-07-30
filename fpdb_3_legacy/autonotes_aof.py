@@ -20,12 +20,20 @@ leaves the judgement to whoever reads it.
 
 from __future__ import annotations
 
+from dataclasses import dataclass
+from decimal import Decimal, InvalidOperation
 from typing import Any
 
 RULE_SET_AOF_OMAHA = "aof_omaha_allin"
 
 AOF_OMAHA_CATEGORY = "aof_omaha"
+AOF_HOLDEM_CATEGORY = "aof_holdem"
+AOF_CATEGORIES = frozenset({AOF_OMAHA_CATEGORY, AOF_HOLDEM_CATEGORY})
+AOF_CLASSIFIER_VERSION = 1
+KNOWN_BACKEND = "pypoker-eval"
+KNOWN_BACKEND_VERSION: str = "engine-1"
 _OMAHA_HOLE_CARDS = 4
+_HOLDEM_HOLE_CARDS = 2
 _FLOP_CARDS = 3
 _PAIR = 2
 _TRIPS = 3
@@ -35,10 +43,73 @@ _QUADS = 4
 _CARDS_PER_RANK = 4
 
 
+@dataclass(frozen=True)
+class AofDecision:
+    """One observable All-in or Fold decision, ready for persistence."""
+
+    hand_id: int
+    player_id: int
+    category: str
+    decision: str
+    role: str
+    active_opponents: int
+    pot_before: int
+    amount_to_commit: int
+    blind_committed: int
+    cards_observable: bool
+    hole_cards: str | None
+    flop_cards: str | None
+    made_hand: str | None
+    flush_draw: str | None
+    straight_outs: int | None
+    classifier_version: int = AOF_CLASSIFIER_VERSION
+
+    @property
+    def idempotency_key(self) -> tuple[int, int, int]:
+        return (self.hand_id, self.player_id, self.classifier_version)
+
+
+@dataclass(frozen=True)
+class AofDecisionAnalysis:
+    """A recalculable equity/EV result kept separate from the decision."""
+
+    decision_id: int
+    backend: str
+    backend_version: str
+    range_model: str
+    range_version: int
+    analysis_version: int
+    equity_ppm: int | None
+    ev_chips: int | None
+    ev_bb_ppm: int | None
+    break_even_ppm: int | None
+    samples: int | None
+    stderr_ppm: int | None
+    status: str
+    error_text: str | None = None
+
+    @property
+    def idempotency_key(self) -> tuple[int, str, str, str, int, int]:
+        return (
+            self.decision_id,
+            self.backend,
+            self.backend_version,
+            self.range_model,
+            self.range_version,
+            self.analysis_version,
+        )
+
+
 def is_aof_omaha(hand: Any) -> bool:
     """True for a hand of All-in or Fold Omaha."""
     gametype = getattr(hand, "gametype", {}) or {}
     return str(gametype.get("category", "")).lower() == AOF_OMAHA_CATEGORY
+
+
+def is_aof(hand: Any) -> bool:
+    """True for an imported All-in or Fold category."""
+    gametype = getattr(hand, "gametype", {}) or {}
+    return str(gametype.get("category", "")).lower() in AOF_CATEGORIES
 
 
 def _decision_street(hand: Any) -> str:
@@ -203,6 +274,23 @@ def classify_all_in(hand: Any, player: str) -> dict[str, Any] | None:
     revealed: an unshown shove is the great majority of them, and a note built
     on two visible cards would read exactly like one built on four.
     """
+    cached = getattr(hand, "aof_decisions", None)
+    if cached is not None:
+        player_id = (getattr(hand, "playerIds", {}) or {}).get(player)
+        for decision in cached:
+            if decision.player_id == player_id and decision.decision == "allin" and decision.cards_observable:
+                return {
+                    "hole": decision.hole_cards,
+                    "flop": decision.flop_cards,
+                    "made": decision.made_hand,
+                    "flush_draw": decision.flush_draw,
+                    "straight_outs": decision.straight_outs,
+                }
+        return None
+    return _classify_all_in_uncached(hand, player)
+
+
+def _classify_all_in_uncached(hand: Any, player: str) -> dict[str, Any] | None:
     if not _went_all_in(hand, player):
         return None
     hole = _cards(hand, player)
@@ -223,6 +311,192 @@ def classify_all_in(hand: Any, player: str) -> dict[str, Any] | None:
         "flush_draw": _flush_draw(hole, flop) if _MADE_HAND_SCORES[made] < _MADE_HAND_SCORES["a flush"] else None,
         "straight_outs": _straight_outs(hole, flop) if drawing else 0,
     }
+
+
+def extract_decisions(hand: Any) -> list[AofDecision]:
+    """Extract the single decision reached by each acting AoF player.
+
+    Blind and ante money is tracked separately because it is already lost at
+    the decision point. Hidden all-ins are retained as decisions but never
+    classified; folds have no cards to observe by definition.
+    """
+    if not is_aof(hand):
+        return []
+    hand_id = getattr(hand, "dbid_hands", None)
+    player_ids = getattr(hand, "playerIds", {}) or {}
+    if hand_id is None or not player_ids:
+        return []
+
+    category = str((getattr(hand, "gametype", {}) or {}).get("category", "")).lower()
+    decision_street = _decision_street(hand)
+    actions = getattr(hand, "actions", {}) or {}
+    committed, forced = _forced_commitments(hand, decision_street, player_ids)
+    stacks = _starting_stacks(hand)
+
+    active = set(player_ids)
+    acted: set[str] = set()
+    all_ins = 0
+    decisions = []
+    for raw in actions.get(decision_street, ()):
+        player = _action_player(raw)
+        if player is None or player not in active or player not in player_ids or player in acted:
+            continue
+        action = _action_name(raw)
+        is_fold = action == "folds"
+        is_all_in = _action_is_all_in(raw)
+        if not is_fold and not is_all_in:
+            continue
+        amount_to_commit = (
+            0
+            if is_fold
+            else _remaining_stack(
+                raw,
+                committed.get(player, 0),
+                stacks.get(player),
+            )
+        )
+        decision = _build_decision(
+            hand,
+            hand_id=int(hand_id),
+            player=player,
+            player_id=int(player_ids[player]),
+            category=category,
+            role=_decision_role(all_ins),
+            active_opponents=max(0, len(active) - 1),
+            pot_before=sum(committed.values()),
+            blind_committed=forced.get(player, 0),
+            amount_to_commit=amount_to_commit,
+            is_fold=is_fold,
+            is_all_in=is_all_in,
+        )
+        decisions.append(decision)
+        acted.add(player)
+        if is_fold:
+            active.remove(player)
+        else:
+            committed[player] += decision.amount_to_commit
+            all_ins += 1
+    hand.aof_decisions = decisions
+    return decisions
+
+
+def _forced_commitments(
+    hand: Any,
+    decision_street: str,
+    player_ids: dict[str, int],
+) -> tuple[dict[str, int], dict[str, int]]:
+    actions = getattr(hand, "actions", {}) or {}
+    committed = {name: 0 for name in player_ids}
+    forced = {name: 0 for name in player_ids}
+    for street in getattr(hand, "actionStreets", ()) or ():
+        if street == decision_street:
+            break
+        for raw in actions.get(street, ()):
+            player = _action_player(raw)
+            amount = _action_amount(raw)
+            if player in committed and amount:
+                committed[player] += amount
+                forced[player] += amount
+    return committed, forced
+
+
+def _build_decision(
+    hand: Any,
+    *,
+    hand_id: int,
+    player: str,
+    player_id: int,
+    category: str,
+    role: str,
+    active_opponents: int,
+    pot_before: int,
+    blind_committed: int,
+    amount_to_commit: int,
+    is_fold: bool,
+    is_all_in: bool,
+) -> AofDecision:
+    detail = _classify_all_in_uncached(hand, player) if is_all_in and category == AOF_OMAHA_CATEGORY else None
+    hole = _cards(hand, player)
+    flop = _flop(hand)
+    required_hole_cards = _OMAHA_HOLE_CARDS if category == AOF_OMAHA_CATEGORY else _HOLDEM_HOLE_CARDS
+    observable = bool(is_all_in and len(hole) >= required_hole_cards and len(flop) >= _FLOP_CARDS)
+    return AofDecision(
+        hand_id=hand_id,
+        player_id=player_id,
+        category=category,
+        decision="fold" if is_fold else "allin",
+        role=role,
+        active_opponents=active_opponents,
+        pot_before=pot_before,
+        amount_to_commit=amount_to_commit,
+        blind_committed=blind_committed,
+        cards_observable=observable,
+        hole_cards=" ".join(hole[:required_hole_cards]) if observable else None,
+        flop_cards=" ".join(flop[:_FLOP_CARDS]) if observable else None,
+        made_hand=detail["made"] if detail else None,
+        flush_draw=detail["flush_draw"] if detail else None,
+        straight_outs=detail["straight_outs"] if detail else None,
+    )
+
+
+def _decision_role(prior_all_ins: int) -> str:
+    if prior_all_ins == 0:
+        return "open_shove"
+    if prior_all_ins == 1:
+        return "call_shove"
+    return "overcall"
+
+
+def _action_player(raw: Any) -> str | None:
+    return str(raw[0]) if isinstance(raw, (tuple, list)) and raw else None
+
+
+def _action_name(raw: Any) -> str:
+    if not isinstance(raw, (tuple, list)) or len(raw) < _PAIR:
+        return ""
+    return str(raw[1]).lower()
+
+
+def _action_is_all_in(raw: Any) -> bool:
+    if not isinstance(raw, (tuple, list)) or len(raw) < _PAIR:
+        return False
+    return _action_name(raw) in {"allin", "all-in"} or (isinstance(raw[-1], bool) and raw[-1])
+
+
+def _action_amount(raw: Any) -> int:
+    if not isinstance(raw, (tuple, list)) or len(raw) < 3 or isinstance(raw[2], bool):
+        return 0
+    try:
+        return int(Decimal(str(raw[2])) * Decimal("100"))
+    except (InvalidOperation, TypeError, ValueError):
+        return 0
+
+
+def _starting_stacks(hand: Any) -> dict[str, int]:
+    """Return the chips each player had before blinds, in integer cents."""
+    stacks = {}
+    for player in getattr(hand, "players", ()) or ():
+        if not isinstance(player, (tuple, list)) or len(player) < 3:
+            continue
+        try:
+            stacks[str(player[1])] = int(Decimal(str(player[2])) * Decimal("100"))
+        except (InvalidOperation, TypeError, ValueError):
+            continue
+    return stacks
+
+
+def _remaining_stack(raw: Any, committed: int, starting_stack: int | None) -> int:
+    """Return the actual incremental all-in cost at the decision point.
+
+    ``Hand.actions`` stores a call as an increment but a raise tuple starts
+    with the raise-by amount.  The latter is not what the player still had to
+    put in.  AoF actions are all-in, so the initial stack minus forced money
+    is the authoritative increment; the raw action remains a compatibility
+    fallback for incomplete captures.
+    """
+    if starting_stack is not None and starting_stack >= committed:
+        return starting_stack - committed
+    return _action_amount(raw)
 
 
 def describe_all_in(detail: dict[str, Any]) -> str:

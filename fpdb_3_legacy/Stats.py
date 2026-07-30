@@ -60,10 +60,79 @@ from fpdb_3_legacy.stats_aof import (
     aof_allin as aof_allin,
 )
 from fpdb_3_legacy.stats_aof import (
+    aof_big_wrap13 as aof_big_wrap13,
+)
+from fpdb_3_legacy.stats_aof import (
+    aof_decision_ev as aof_decision_ev,
+)
+from fpdb_3_legacy.stats_aof import (
+    aof_flush as aof_flush,
+)
+from fpdb_3_legacy.stats_aof import (
     aof_fold as aof_fold,
 )
 from fpdb_3_legacy.stats_aof import (
+    aof_full_house as aof_full_house,
+)
+from fpdb_3_legacy.stats_aof import (
+    aof_known_equity as aof_known_equity,
+)
+from fpdb_3_legacy.stats_aof import (
+    aof_known_ev as aof_known_ev,
+)
+from fpdb_3_legacy.stats_aof import (
+    aof_made as aof_made,
+)
+from fpdb_3_legacy.stats_aof import (
+    aof_nfd as aof_nfd,
+)
+from fpdb_3_legacy.stats_aof import (
+    aof_no_made as aof_no_made,
+)
+from fpdb_3_legacy.stats_aof import (
+    aof_non_nfd as aof_non_nfd,
+)
+from fpdb_3_legacy.stats_aof import (
+    aof_observed as aof_observed,
+)
+from fpdb_3_legacy.stats_aof import (
+    aof_pair as aof_pair,
+)
+from fpdb_3_legacy.stats_aof import (
+    aof_quads as aof_quads,
+)
+from fpdb_3_legacy.stats_aof import (
+    aof_range_equity as aof_range_equity,
+)
+from fpdb_3_legacy.stats_aof import (
     aof_showdowns as aof_showdowns,
+)
+from fpdb_3_legacy.stats_aof import (
+    aof_splash_freq as aof_splash_freq,
+)
+from fpdb_3_legacy.stats_aof import (
+    aof_splash_won as aof_splash_won,
+)
+from fpdb_3_legacy.stats_aof import (
+    aof_straight as aof_straight,
+)
+from fpdb_3_legacy.stats_aof import (
+    aof_straight_flush as aof_straight_flush,
+)
+from fpdb_3_legacy.stats_aof import (
+    aof_summary as aof_summary,
+)
+from fpdb_3_legacy.stats_aof import (
+    aof_trips as aof_trips,
+)
+from fpdb_3_legacy.stats_aof import (
+    aof_two_pair as aof_two_pair,
+)
+from fpdb_3_legacy.stats_aof import (
+    aof_weak as aof_weak,
+)
+from fpdb_3_legacy.stats_aof import (
+    aof_wrap9 as aof_wrap9,
 )
 from fpdb_3_legacy.stats_context import get_hand_instance
 from fpdb_3_legacy.stats_context import (

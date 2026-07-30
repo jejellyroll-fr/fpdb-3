@@ -102,6 +102,7 @@ def hand_player_schema_queries(db_server: str) -> dict[str, str]:
                                 street3AllIn BOOLEAN,
                                 street4AllIn BOOLEAN,
                                 wentAllIn BOOLEAN,
+                                splashWinnings INT,
 
                                 street0InPosition BOOLEAN,
                                 street1InPosition BOOLEAN,
@@ -429,6 +430,7 @@ def hand_player_schema_queries(db_server: str) -> dict[str, str]:
                                 street3AllIn BOOLEAN,
                                 street4AllIn BOOLEAN,
                                 wentAllIn BOOLEAN,
+                                splashWinnings INT,
 
                                 street0InPosition BOOLEAN,
                                 street1InPosition BOOLEAN,
@@ -755,6 +757,7 @@ def hand_player_schema_queries(db_server: str) -> dict[str, str]:
                                 street3AllIn INT,
                                 street4AllIn INT,
                                 wentAllIn INT,
+                                splashWinnings INT,
 
                                 street0InPosition INT,
                                 street1InPosition INT,

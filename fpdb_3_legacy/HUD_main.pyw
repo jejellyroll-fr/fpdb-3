@@ -876,6 +876,7 @@ class HudMain(QObject):
             hud.hud_params,
             self.hero_ids[site_id],
             num_seats,
+            poker_game=hud.poker_game,
         )
         log.debug("got stats for hand %s", new_hand_id)
 
@@ -1004,6 +1005,7 @@ class HudMain(QObject):
             hud.hud_params,
             self.hero_ids[site_id],
             num_seats,
+            poker_game=hud.poker_game,
         )
         self._merge_positions(stat_dict, hand_id)
         hud.stat_dict = stat_dict
@@ -1099,6 +1101,7 @@ class HudMain(QObject):
             self.hud_params,
             self.hero_ids[site_id],
             num_seats,
+            poker_game=hud_poker_game,
         )
         log.debug("got stats for hand %s", new_hand_id)
 

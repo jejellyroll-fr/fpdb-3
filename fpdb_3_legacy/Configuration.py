@@ -1765,7 +1765,10 @@ class Config:
         ``add_missing_elements()``, which adds missing top-level sections but
         does not merge new children into sections that already exist.
         """
-        from fpdb_3_legacy.hud_package import install_missing_hud_package
+        from fpdb_3_legacy.hud_package import (
+            install_missing_hud_package,
+            merge_missing_profile_stats,
+        )
 
         if source_doc is None:
             source_path = _find_example_config("HUD_config.xml")
@@ -1775,22 +1778,100 @@ class Config:
                 log.exception("Could not read the shipped AoF Omaha HUD profile from %s: %s", source_path, exc)
                 return False
 
-        source_profile = next(
-            (node for node in source_doc.getElementsByTagName("ss") if node.getAttribute("name") == "aof_default"),
+        source_profiles = [
+            node
+            for node in source_doc.getElementsByTagName("ss")
+            if node.getAttribute("name") in {"aof_default", "aof_advanced"}
+        ]
+        source_popup = next(
+            (node for node in source_doc.getElementsByTagName("pu") if node.getAttribute("pu_name") == "aof_profile"),
             None,
         )
         source_game = next(
             (node for node in source_doc.getElementsByTagName("game") if node.getAttribute("game_name") == "aof_omaha"),
             None,
         )
-        if source_profile is None or source_game is None:
+        if not source_profiles or source_game is None:
             return False
 
         package_doc = defusedxml.minidom.parseString("<fpdb_hud_package/>")
         package_root = package_doc.documentElement
-        package_root.appendChild(package_doc.importNode(source_profile, True))
+        for source_profile in source_profiles:
+            package_root.appendChild(package_doc.importNode(source_profile, True))
+        if source_popup is not None:
+            package_root.appendChild(package_doc.importNode(source_popup, True))
         package_root.appendChild(package_doc.importNode(source_game, True))
-        return install_missing_hud_package(doc, package_root)
+        changed = install_missing_hud_package(doc, package_root)
+        splash_stats = {"aof_splash_won", "aof_splash_freq"}
+        changed = (
+            merge_missing_profile_stats(
+                doc,
+                package_root,
+                profile_name="aof_default",
+                stat_names=splash_stats,
+                recognized_dimensions={(3, 4), (4, 4)},
+            )
+            or changed
+        )
+        changed = (
+            merge_missing_profile_stats(
+                doc,
+                package_root,
+                profile_name="aof_advanced",
+                stat_names=splash_stats,
+                recognized_dimensions={(5, 4), (6, 4)},
+            )
+            or changed
+        )
+
+        # Lot 4 temporarily replaced the Decision EV placeholder with
+        # conditional EV against actual callers. Lot 6 now owns the original
+        # cell again. Match both its name and packaged location so a user's
+        # unrelated/custom statistic is never replaced.
+        advanced = next(
+            (node for node in doc.getElementsByTagName("ss") if node.getAttribute("name") == "aof_advanced"),
+            None,
+        )
+        if advanced is not None:
+            for stat in advanced.getElementsByTagName("stat"):
+                if stat.getAttribute("_stat_name") == "aof_known_ev" and stat.getAttribute("_rowcol") == "(4,3)":
+                    stat.setAttribute("_stat_name", "aof_decision_ev")
+                    changed = True
+
+        # The named popup belongs to this feature and can be extended
+        # idempotently while its class/theme and existing rows remain intact.
+        popup = next(
+            (node for node in doc.getElementsByTagName("pu") if node.getAttribute("pu_name") == "aof_profile"),
+            None,
+        )
+        if popup is not None and source_popup is not None:
+            existing = {
+                node.getAttribute("pu_stat_name")
+                for node in popup.getElementsByTagName("pu_stat")
+            }
+            for name in (
+                "aof_known_equity",
+                "aof_known_ev",
+                "aof_range_equity",
+                "aof_weak",
+                "aof_decision_ev",
+                "aof_splash_won",
+                "aof_splash_freq",
+            ):
+                if name in existing:
+                    continue
+                source_stat = next(
+                    (
+                        node
+                        for node in source_popup.getElementsByTagName("pu_stat")
+                        if node.getAttribute("pu_stat_name") == name
+                    ),
+                    None,
+                )
+                if source_stat is not None:
+                    popup.appendChild(doc.importNode(source_stat, True))
+                    changed = True
+        return changed
 
     @staticmethod
     def _detect_entain_fr_data_dir(site_name: str) -> tuple[str, str, str] | None:

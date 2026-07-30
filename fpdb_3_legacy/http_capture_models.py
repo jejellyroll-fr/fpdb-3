@@ -193,7 +193,7 @@ class RawCaptureMessage:
     site: str
     transport: str
     payload: Any
-    captured_at: str = field(default_factory=lambda: datetime.datetime.now(datetime.timezone.utc).isoformat())
+    captured_at: str = field(default_factory=lambda: datetime.datetime.now(datetime.UTC).isoformat())
     endpoint: str | None = None
     message_type: str | None = None
     table_id: str | int | None = None

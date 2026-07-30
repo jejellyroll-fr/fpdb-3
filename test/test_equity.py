@@ -5,9 +5,12 @@ from types import SimpleNamespace
 
 import pytest
 
+import fpdb_3_legacy.equity as equity_module
 from fpdb_3_legacy.DerivedStats import DerivedStats, _chip_increment
 from fpdb_3_legacy.equity import (
+    EquityEngine,
     EquityUnavailableError,
+    WeightedPocket,
     calculate_equity,
     expected_pot_share,
     load_poker_eval,
@@ -27,6 +30,34 @@ class FakePokerEval:
                 {"ev": 825, "winhi": 1600, "tiehi": 100, "losehi": 300},
                 {"ev": 175, "winhi": 300, "tiehi": 100, "losehi": 1600},
             ],
+        }
+
+
+class RecordingPokerEval:
+    def __init__(self) -> None:
+        self.calls = []
+
+    def poker_eval(self, **kwargs) -> dict:
+        self.calls.append(kwargs)
+        samples = int(kwargs.get("iterations", 820))
+        opponent = kwargs["pockets"][1]
+        hero_ev = 800 if set(opponent) == {"Ah", "Ad", "7c", "6c"} else 600
+        if opponent[0] == "__":
+            hero_ev = 700
+        opponent_count = len(kwargs["pockets"]) - 1
+        opponent_ev = (1000 - hero_ev) // opponent_count
+
+        def item(ev: int) -> dict:
+            return {
+                "ev": ev,
+                "winhi": samples * ev // 1000,
+                "tiehi": 0,
+                "losehi": samples * (1000 - ev) // 1000,
+            }
+
+        return {
+            "info": (samples, 0, 1),
+            "eval": [item(hero_ev), *[item(opponent_ev) for _ in range(opponent_count)]],
         }
 
 
@@ -97,6 +128,269 @@ def test_native_backend_enumerates_missing_turn_and_river() -> None:
     assert result.samples == 990
     assert result.players[0].equity == Decimal("0.912")
     assert result.players[1].equity == Decimal("0.087")
+
+
+def test_equity_engine_exact_omaha_uses_only_the_decision_flop() -> None:
+    backend = RecordingPokerEval()
+    engine = EquityEngine(backend)
+
+    result = engine.evaluate_exact(
+        "omaha",
+        [
+            ["as", "Ks", "Qh", "Jh"],
+            ["Ah", "Ad", "7c", "6c"],
+        ],
+        ["Ts", "9s", "2d"],
+    )
+
+    assert result.exhaustive
+    assert result.players[0].equity == Decimal("0.8")
+    assert backend.calls == [
+        {
+            "game": "omaha",
+            "pockets": [["As", "Ks", "Qh", "Jh"], ["Ah", "Ad", "7c", "6c"]],
+            "board": ["Ts", "9s", "2d", "__", "__"],
+            "dead": [],
+        },
+    ]
+
+
+def test_equity_engine_uniform_omaha_uses_native_unknown_pockets_and_cache() -> None:
+    backend = RecordingPokerEval()
+    engine = EquityEngine(backend)
+
+    first = engine.evaluate_uniform_unknown(
+        "omaha",
+        ["As", "Ks", "Qh", "Jh"],
+        ["Ts", "9s", "2d"],
+        opponents=2,
+        iterations=5_000,
+    )
+    second = engine.evaluate_uniform_unknown(
+        "omaha",
+        ["As", "Ks", "Qh", "Jh"],
+        ["Ts", "9s", "2d"],
+        opponents=2,
+        iterations=5_000,
+    )
+
+    assert first is second
+    assert len(first.players) == 3
+    assert len(backend.calls) == 1
+    assert backend.calls[0]["pockets"] == [
+        ["As", "Ks", "Qh", "Jh"],
+        ["__", "__", "__", "__"],
+        ["__", "__", "__", "__"],
+    ]
+    assert backend.calls[0]["iterations"] == 5_000
+
+
+def test_equity_engine_cache_is_bounded() -> None:
+    backend = RecordingPokerEval()
+    engine = EquityEngine(backend, cache_size=1)
+    arguments = ("omaha", ["As", "Ks", "Qh", "Jh"], ["Ts", "9s", "2d"])
+
+    engine.evaluate_uniform_unknown(*arguments, iterations=100)
+    engine.evaluate_uniform_unknown(*arguments, iterations=200)
+    engine.evaluate_uniform_unknown(*arguments, iterations=100)
+
+    assert len(backend.calls) == 3
+
+
+def test_equity_engine_reports_a_missing_backend_only_once(monkeypatch) -> None:
+    loads = []
+    warnings = []
+    monkeypatch.setattr(equity_module, "load_poker_eval", lambda: loads.append(True))
+    monkeypatch.setattr(equity_module.log, "warning", lambda *args: warnings.append(args))
+    engine = EquityEngine()
+
+    assert engine.available is False
+    assert engine.available is False
+    assert len(loads) == 1
+    assert len(warnings) == 1
+
+
+def test_equity_engine_apportions_a_weighted_range_before_native_calls() -> None:
+    backend = RecordingPokerEval()
+    engine = EquityEngine(backend)
+    opponent_range = [
+        WeightedPocket(("Ah", "Ad", "7c", "6c"), Decimal(1)),
+        WeightedPocket(("Tc", "Td", "8c", "8d"), Decimal(3)),
+    ]
+
+    result = engine.evaluate_weighted_range(
+        "omaha",
+        ["As", "Ks", "Qh", "Jh"],
+        [opponent_range],
+        ["2c", "3d", "4h"],
+        iterations=40,
+    )
+
+    assert result.samples == 40
+    assert result.players[0].equity == Decimal("0.65")
+    assert sorted(call["iterations"] for call in backend.calls) == [10, 30]
+
+
+def test_equity_engine_removes_blocked_range_pockets_and_rejects_impossible_ranges() -> None:
+    backend = RecordingPokerEval()
+    engine = EquityEngine(backend)
+    blocked = WeightedPocket(("As", "Ad", "7c", "6c"))
+    legal = WeightedPocket(("Tc", "Td", "8c", "8d"))
+
+    result = engine.evaluate_weighted_range(
+        "omaha",
+        ["As", "Ks", "Qh", "Jh"],
+        [[blocked, legal]],
+        ["2c", "3d", "4h"],
+        iterations=20,
+    )
+
+    assert result.players[0].equity == Decimal("0.6")
+    assert backend.calls[0]["pockets"][1] == sorted(legal.cards)
+    with pytest.raises(ValueError, match="No legal range pocket"):
+        engine.evaluate_weighted_range(
+            "omaha",
+            ["As", "Ks", "Qh", "Jh"],
+            [[blocked]],
+            ["2c", "3d", "4h"],
+        )
+
+
+def test_weighted_ranges_reject_cross_opponent_card_collisions() -> None:
+    engine = EquityEngine(RecordingPokerEval())
+    same_pocket = WeightedPocket(("Ah", "Ad", "7c", "6c"))
+
+    with pytest.raises(ValueError, match="no collision-free combination"):
+        engine.evaluate_weighted_range(
+            "omaha",
+            ["As", "Ks", "Qh", "Jh"],
+            [[same_pocket], [same_pocket]],
+            ["2c", "3d", "4h"],
+            iterations=20,
+        )
+
+
+@pytest.mark.parametrize(
+    "operation",
+    [
+        lambda engine: engine.evaluate_exact(
+            "omaha",
+            [["As", "Ks", "Qh", "__"], ["Ah", "Ad", "7c", "6c"]],
+            ["2c", "3d", "4h"],
+        ),
+        lambda engine: engine.evaluate_uniform_unknown(
+            "omaha",
+            ["As", "Ks", "Qh", "Jh"],
+            opponents=0,
+        ),
+        lambda engine: engine.evaluate_uniform_unknown(
+            "bad-game",
+            ["As", "Ks", "Qh", "Jh"],
+        ),
+        lambda engine: engine.evaluate_weighted_range(
+            "omaha",
+            ["As", "Ks", "Qh", "Jh"],
+            [],
+        ),
+        lambda engine: engine.evaluate_weighted_range(
+            "omaha",
+            ["As", "Ks", "Qh", "Jh"],
+            [[WeightedPocket(("Ah", "Ad", "7c", "__"))]],
+        ),
+        lambda engine: engine.evaluate_weighted_range(
+            "omaha",
+            ["As", "Ks", "Qh", "Jh"],
+            [[WeightedPocket(("Ah", "Ad", "7c", "6c"), Decimal(0))]],
+        ),
+        lambda engine: engine.evaluate_uniform_unknown(
+            "omaha",
+            ["As", "Ks", "Qh", "Jh"],
+            opponents=1,
+            iterations=0,
+        ),
+        lambda engine: engine.evaluate_uniform_unknown(
+            "omaha",
+            ["As", "Ks", "Qh", "__"],
+        ),
+    ],
+)
+def test_equity_engine_rejects_invalid_requests(operation) -> None:
+    with pytest.raises(ValueError):
+        operation(EquityEngine(RecordingPokerEval()))
+
+
+def test_large_multiway_ranges_are_sampled_reproducibly_and_grouped() -> None:
+    first_backend = RecordingPokerEval()
+    second_backend = RecordingPokerEval()
+    first_engine = EquityEngine(first_backend, range_enumeration_limit=1)
+    second_engine = EquityEngine(second_backend, range_enumeration_limit=1)
+    ranges = [
+        [
+            WeightedPocket(("Ah", "Ad", "7c", "6c"), Decimal(1)),
+            WeightedPocket(("Tc", "Td", "8c", "8d"), Decimal(2)),
+        ],
+        [
+            WeightedPocket(("2h", "2s", "3h", "3s"), Decimal(3)),
+            WeightedPocket(("4c", "4d", "5c", "5d"), Decimal(1)),
+        ],
+    ]
+
+    first = first_engine.evaluate_weighted_range(
+        "omaha",
+        ["As", "Ks", "Qh", "Jh"],
+        ranges,
+        ["9c", "9d", "6h"],
+        iterations=200,
+        seed=81499,
+        range_model="population",
+        range_version=2,
+    )
+    second = second_engine.evaluate_weighted_range(
+        "omaha",
+        ["As", "Ks", "Qh", "Jh"],
+        ranges,
+        ["9c", "9d", "6h"],
+        iterations=200,
+        seed=81499,
+        range_model="population",
+        range_version=2,
+    )
+
+    assert len(first.players) == 3
+    assert first.players == second.players
+    assert sum(call["iterations"] for call in first_backend.calls) == 200
+    assert [(call["pockets"], call["iterations"]) for call in first_backend.calls] == [
+        (call["pockets"], call["iterations"]) for call in second_backend.calls
+    ]
+
+
+def test_native_backend_supports_uniform_unknown_omaha_pockets() -> None:
+    backend = load_poker_eval()
+    if backend is None:
+        pytest.skip("optional pypoker-eval backend is not installed")
+
+    engine = EquityEngine(backend)
+    exact = engine.evaluate_exact(
+        "omaha",
+        [
+            ["As", "Ks", "Qh", "Jh"],
+            ["Ah", "Ad", "7c", "6c"],
+        ],
+        ["Ts", "9s", "2d"],
+    )
+    result = engine.evaluate_uniform_unknown(
+        "omaha",
+        ["As", "Ks", "Qh", "Jh"],
+        ["Ts", "9s", "2d"],
+        opponents=2,
+        iterations=10_000,
+    )
+
+    assert exact.samples == 820
+    assert [player.equity for player in exact.players] == [Decimal("0.714"), Decimal("0.285")]
+    assert result.samples == 10_000
+    assert len(result.players) == 3
+    assert Decimal("0.55") < result.players[0].equity < Decimal("0.68")
 
 
 def test_derived_stats_stores_expected_all_in_profit_x100(monkeypatch) -> None:

@@ -200,6 +200,57 @@ AOF_LOBBY_ID = 12
 MINI_GAME_HOLDEM = 1
 MINI_GAME_OMAHA = 2
 
+# When neither a join nor the lobby catalogue is available -- a capture that
+# began with the client already seated sees neither -- the deal order is the
+# last thing left to go on. All-in or Fold puts the flop out before opening
+# the betting; no other game does. Measured over fifteen captured tables the
+# two do not overlap: All-in or Fold tables deal the flop first on about 98%
+# of hands, ordinary ring tables on 0 to 11% (the stray few are hands the
+# capture joined in the middle of). A table is read this way only after enough
+# hands to tell the difference, and only when nothing better has spoken.
+MIN_SHAPE_HANDS = 5
+SHAPE_THRESHOLD = 0.8
+
+FLOP_EVENT = "game.dealer_cards"
+ACTION_EVENT = "game.user_turn"
+
+
+def _flop_precedes_the_betting(evs: list[tuple]) -> bool | None:
+    """True when the flop was dealt before anyone was asked to act.
+
+    None when the hand shows neither, which says nothing either way.
+    """
+    names = [name for name, _hid, _data in evs]
+    if FLOP_EVENT not in names or ACTION_EVENT not in names:
+        return None
+    return names.index(FLOP_EVENT) < names.index(ACTION_EVENT)
+
+
+def note_deal_order(evs: list[tuple], table_id: str, hand_id: str, shape: dict[str, Any]) -> None:
+    """Record which came first at this table, the flop or the betting.
+
+    Each hand counts once. A hand is rebuilt on every sweep until it is
+    complete, so counting per build weighted the long hands heavily enough to
+    push a table below the threshold and leave it unrecognised.
+    """
+    first = _flop_precedes_the_betting(evs)
+    if first is None:
+        return
+    seen = shape.setdefault(table_id, [0, 0, set()])
+    if hand_id in seen[2]:
+        return
+    seen[2].add(hand_id)
+    seen[0 if first else 1] += 1
+
+
+def looks_like_all_in_or_fold(table_id: str, shape: dict[str, Any]) -> bool:
+    """Whether this table's deal order says All-in or Fold, with enough hands."""
+    before, after = shape.get(table_id, (0, 0, None))[:2]
+    total = before + after
+    if total < MIN_SHAPE_HANDS:
+        return False
+    return before / total >= SHAPE_THRESHOLD
+
 # Every event that names the table it is talking about. They are what a hand
 # can be told by; everything else in the stream speaks for the whole capture.
 TABLE_JOIN_EVENTS = (TOURNAMENT_JOIN_EVENT, GAME_JOIN_EVENT)
@@ -463,6 +514,7 @@ def build_hands(
     session_context: list[tuple] | None = None,
     session_tables: set[str] | None = None,
     session_aof: dict[str, Any] | None = None,
+    session_shape: dict[str, Any] | None = None,
 ) -> list[dict[str, Any]]:
     """Group decoded events by hand id and build a normalized dict per hand.
 
@@ -487,6 +539,7 @@ def build_hands(
     groups: dict[str, list[tuple]] = defaultdict(list)
     aof = session_aof if session_aof is not None else {}
     aof.update(aof_tables(events))
+    shape = session_shape if session_shape is not None else {}
     carried: list[tuple] = session_context if session_context is not None else []
     for name, hid, data in events:
         if hid is None:
@@ -553,7 +606,8 @@ def build_hands(
     tables.update(_table_from_hand_id(hid) for hid in order)
     sole_table = len(tables) == 1
     for hid in order:
-        built = _build_one(hid, groups[hid], table_category, sole_table=sole_table, aof=aof)
+        note_deal_order(groups[hid], _table_from_hand_id(hid), hid, shape)
+        built = _build_one(hid, groups[hid], table_category, sole_table=sole_table, aof=aof, shape=shape)
         if built:
             hands.append(built)
     return hands
@@ -642,7 +696,12 @@ def _detect_category(evs: list[tuple], table_category: str) -> tuple[str, str]:
 AOF_OMAHA_CATEGORY = "aof_omaha"
 
 
-def _aof_category(category: str, table_id: str, tables: dict[str, Any]) -> tuple[str, bool]:
+def _aof_category(
+    category: str,
+    table_id: str,
+    tables: dict[str, Any],
+    shape: dict[str, Any] | None = None,
+) -> tuple[str, bool]:
     """Name the All-in or Fold variant of `category`, and say if fpdb has one.
 
     fpdb models one All-in or Fold game, Omaha. Every other variant the room
@@ -660,6 +719,17 @@ def _aof_category(category: str, table_id: str, tables: dict[str, Any]) -> tuple
     is lost that fpdb could not read anyway.
     """
     if table_id not in tables:
+        # Nothing named this table. The deal order is the last thing left, and
+        # it only answers for a game whose shape fpdb can store.
+        if shape is not None and looks_like_all_in_or_fold(table_id, shape) and "omaha" in category:
+            log.info(
+                "Table %s deals its flop before the betting on %d of %d hands; "
+                "reading it as All-in or Fold, since neither a join nor the lobby catalogue was captured.",
+                table_id,
+                shape[table_id][0],
+                sum(shape[table_id][:2]),
+            )
+            return AOF_OMAHA_CATEGORY, True
         return category, True
     if tables[table_id] == MINI_GAME_OMAHA:
         return AOF_OMAHA_CATEGORY, True
@@ -700,7 +770,7 @@ def _hand_start_time(info: dict) -> datetime.datetime | None:
     if raw is None:
         return None
     try:
-        return datetime.datetime.fromtimestamp(int(raw) / 1000, tz=datetime.timezone.utc).replace(tzinfo=None)
+        return datetime.datetime.fromtimestamp(int(raw) / 1000, tz=datetime.UTC).replace(tzinfo=None)
     except (TypeError, ValueError, OverflowError, OSError):
         return None
 
@@ -767,6 +837,70 @@ def _extract_splash(evs: list[tuple]) -> tuple[int, bool]:
     return amount, bool(cum.get("isMegaSplash"))
 
 
+EV_CASHOUT_EVENT = "game.ev_chop_opted_action"
+
+
+def _ev_cashout_accepted(evs: list[tuple]) -> bool:
+    """True when a player took the EV cashout offered on this hand.
+
+    Their equity is bought out instead of played, which moves money outside
+    both the pot and the splash. It is the one settlement shape whose figures
+    could not be reproduced from the room's own account, so a hand carrying it
+    is left alone rather than credited on a rule that does not describe it.
+    """
+    for name, _hid, data in evs:
+        if name != EV_CASHOUT_EVENT or not isinstance(data, dict):
+            continue
+        for opted in data.get("optedEvChopActionData") or []:
+            if isinstance(opted, dict) and opted.get("optedForEVChop"):
+                return True
+    return False
+
+
+def _extract_splash_winnings(evs: list[tuple]) -> list[dict[str, str]]:
+    """Return the splash paid to each player, beside the pot rather than in it.
+
+    The room drops this money on the table and pays it to whoever it marks
+    ``isSplashPotWinner``, crediting their stack directly: it never appears in
+    a pot event, and a hand's winner can end up with more than the pot held.
+    It is shared in proportion to what each of them took from the settlement --
+    pot winnings and insurance payouts alike, since a player paid only through
+    insurance is marked too and would otherwise receive nothing.
+
+    Verified against the room's own ``cumulativeProfitLoss`` on 33 of the 35
+    settled results in the captures; the two it cannot account for are the one
+    hand where an EV cashout was accepted, which is excluded here.
+    """
+    cumulative = _first(evs, "game.cumulativeWinnerInfo")
+    if not cumulative or _ev_cashout_accepted(evs):
+        return []
+    splash = _decimal_or_none(cumulative.get("splashPotAmount")) or Decimal(0)
+    marked = [
+        winner.get("userName")
+        for winner in cumulative.get("winnersData") or []
+        if winner.get("isSplashPotWinner") and winner.get("userName")
+    ]
+    if splash <= 0 or not marked:
+        return []
+
+    taken: dict[str, Decimal] = defaultdict(Decimal)
+    for entry in _extract_collections(evs):
+        taken[entry["player"]] += Decimal(entry["pot"])
+    for entry in _extract_cashout(evs):
+        taken[entry["player"]] += Decimal(entry["amount"])
+    total = sum(taken.get(player, Decimal(0)) for player in marked)
+    if total <= 0:
+        return []
+
+    return [
+        {
+            "player": player,
+            "amount": str((splash * taken.get(player, Decimal(0)) / total).quantize(Decimal("0.01"))),
+        }
+        for player in marked
+    ]
+
+
 def _extract_cashout(evs: list[tuple]) -> list[dict[str, str]]:
     """Return per-player EV cashout (insurance) entries from winnerInfo.
 
@@ -775,9 +909,13 @@ def _extract_cashout(evs: list[tuple]) -> list[dict[str, str]]:
     the difference is the insurance fee they gave up.
     """
     cashout: list[dict[str, str]] = []
-    for name, _h, d in evs:
-        if name != "game.winnerInfo" or not isinstance(d, dict):
-            continue
+    seen: set[tuple] = set()
+    # Same rule as the pot collections: a repeated envelope inside one
+    # settlement is the room saying the same thing twice, while the same
+    # amount in a later settlement is another board. A player insured across a
+    # side pot is paid once per pot, and every one of those payouts counts.
+    settlements = [data for name, _hid, data in evs if name == "game.winnerInfo" and isinstance(data, dict)]
+    for index, d in enumerate(settlements):
         for w in d.get("winnerDataList", []) or []:
             for det in (w.get("winnerDetails") or {}).get("winnerList") or []:
                 if not det.get("isInsured"):
@@ -794,6 +932,10 @@ def _extract_cashout(evs: list[tuple]) -> list[dict[str, str]]:
                 if pot is None:
                     pot = paid
                 fee = pot - paid
+                key = (index, w.get("potId"), player, paid, pot)
+                if key in seen:
+                    continue
+                seen.add(key)
                 cashout.append(
                     {
                         "player": player,
@@ -807,9 +949,13 @@ def _extract_cashout(evs: list[tuple]) -> list[dict[str, str]]:
 def _extract_collections(evs: list[tuple]) -> list[dict[str, str]]:
     """Return poker-pot collections, excluding separate insurance payouts."""
     collections: list[dict[str, str]] = []
-    seen: set[tuple[str, Decimal]] = set()
-    win = _first(evs, "game.winnerInfo")
-    if win:
+    seen: set[tuple] = set()
+    # Every settlement, not just the first. A hand run twice settles once per
+    # board, and reading only the first paid the winner half of what they
+    # actually took -- 0.34 instead of 0.68 on one captured hand, 3.18 instead
+    # of 6.35 on another.
+    settlements = [data for name, _hid, data in evs if name == "game.winnerInfo" and isinstance(data, dict)]
+    for index, win in enumerate(settlements):
         for winner in win.get("winnerDataList", []) or []:
             winner_list = (winner.get("winnerDetails") or {}).get("winnerList") or []
             for detail in winner_list:
@@ -822,8 +968,13 @@ def _extract_collections(evs: list[tuple]) -> list[dict[str, str]]:
                 amount = _decimal_or_none(detail.get("winAmountFromPot"))
                 if amount is None:
                     amount = _decimal_or_none(winner.get("potAmountAfterRake"))
-                key = (player, amount) if player and amount is not None else None
-                if key is not None and key not in seen:
+                if not player or amount is None:
+                    continue
+                # Repeated envelopes inside one settlement are the room saying
+                # the same thing twice; the same amount in a *later*
+                # settlement is a different board, and must be kept.
+                key = (index, winner.get("potId"), player, amount)
+                if key not in seen:
                     seen.add(key)
                     collections.append({"player": player, "pot": str(amount)})
     if collections:
@@ -846,6 +997,47 @@ def _post_blind(actions: list[dict], posted: set[tuple[str, str]], player: str, 
     posted.add((player, kind))
     actions.append({"type": kind, "player": player, "amount": str(amount)})
     return True
+
+
+SHOWDOWN_CARD_EVENTS = ("game.show_hole_cards", "game.reveal_cards")
+
+
+def _add_revealed_holecards(evs: list[tuple], holecards: list[dict], seat2name: dict) -> None:
+    """Record the hands the room turned face up at showdown.
+
+    Only the hero's own cards arrive as ``game.hole_cards``; everyone else's
+    come at showdown, keyed by seat, in ``userCardListMap``. Reading only the
+    first meant no opponent ever had a holding on record -- across six hundred
+    captured hands, the hero's cards were known in every one of them and no
+    other player's in any, so every read that rests on what someone shows up
+    with was empty for exactly the people it is meant to describe.
+    """
+    known = {entry["player"] for entry in holecards}
+    for name, _hid, data in evs:
+        if name not in SHOWDOWN_CARD_EVENTS or not isinstance(data, dict):
+            continue
+        for seat, cards in (data.get("userCardListMap") or {}).items():
+            player = _seat_player(seat, seat2name)
+            if not player or player in known or not cards:
+                continue
+            known.add(player)
+            holecards.append(
+                {
+                    "player": player,
+                    "closed": _cards(cards),
+                    "dealt": True,
+                    "shown": True,
+                    "mucked": False,
+                },
+            )
+
+
+def _seat_player(seat: Any, seat2name: dict) -> str | None:
+    """The player sitting in this seat, whichever way the room spells it."""
+    try:
+        return seat2name.get(int(seat))
+    except (TypeError, ValueError):
+        return None
 
 
 def _explicit_betting_actions(
@@ -985,6 +1177,7 @@ def _build_one(
     *,
     sole_table: bool = True,
     aof: dict[str, Any] | None = None,
+    shape: dict[str, Any] | None = None,
 ) -> dict[str, Any] | None:
     info = _first(evs, "game.pre_hand_start_info")
     if not info:
@@ -994,7 +1187,12 @@ def _build_one(
     # The table is worked out first: it is what tells a tournament's hands from
     # those of every other table the capture is carrying.
     table_id = str(info.get("tableId") or _table_from_hand_id(hid))
-    category, fpdb_supported = _aof_category(category, table_id, aof if aof is not None else aof_tables(evs))
+    category, fpdb_supported = _aof_category(
+        category,
+        table_id,
+        aof if aof is not None else aof_tables(evs),
+        shape,
+    )
     tournament = _tournament_info(evs, table_id, sole_table=sole_table)
     if tournament:
         joined = joined_tournaments(evs).get(table_id)
@@ -1046,6 +1244,8 @@ def _build_one(
                 "mucked": False,
             }
         )
+
+    _add_revealed_holecards(evs, holecards, seat2name)
 
     explicit_actions = _explicit_betting_actions(
         evs,
@@ -1226,6 +1426,7 @@ def _build_one(
         "splash_pot": splash_pot,
         "mega_splash": mega_splash,
         "cashout": cashout,
+        "splash_winnings": _extract_splash_winnings(evs),
         "holecards": holecards,
         "collections": collections,
     }

@@ -89,7 +89,7 @@ def merge_package_game_bindings(
 
 
 def install_missing_hud_package(config_doc: Any, package_root: Any) -> bool:
-    """Install missing profiles and bindings without overwriting user choices."""
+    """Install missing profiles, popups and bindings without overwriting users."""
     changed = False
     stat_sets = _container(config_doc, "stat_sets")
 
@@ -97,6 +97,13 @@ def install_missing_hud_package(config_doc: Any, package_root: Any) -> bool:
         profile_name = source_profile.getAttribute("name")
         if profile_name and _named_node(config_doc, "ss", "name", profile_name) is None:
             _append_imported(config_doc, stat_sets, source_profile)
+            changed = True
+
+    popup_windows = _container(config_doc, "popup_windows")
+    for source_popup in _direct_children(package_root, "pu"):
+        popup_name = source_popup.getAttribute("pu_name")
+        if popup_name and _named_node(config_doc, "pu", "pu_name", popup_name) is None:
+            _append_imported(config_doc, popup_windows, source_popup)
             changed = True
 
     return (
@@ -107,3 +114,50 @@ def install_missing_hud_package(config_doc: Any, package_root: Any) -> bool:
         )
         or changed
     )
+
+
+def merge_missing_profile_stats(
+    config_doc: Any,
+    package_root: Any,
+    *,
+    profile_name: str,
+    stat_names: set[str],
+    recognized_dimensions: set[tuple[int, int]],
+) -> bool:
+    """Extend a shipped profile without overwriting a customized one.
+
+    Automatic HUD migrations normally leave existing profiles untouched. A
+    later package version may nevertheless add cells that did not exist in the
+    original shipped grid. Only profiles whose dimensions match a known
+    shipped version are extended, and an occupied cell is never replaced.
+    """
+    source = _named_node(package_root, "ss", "name", profile_name)
+    target = _named_node(config_doc, "ss", "name", profile_name)
+    if source is None or target is None:
+        return False
+    try:
+        dimensions = (int(target.getAttribute("rows")), int(target.getAttribute("cols")))
+    except ValueError:
+        return False
+    if dimensions not in recognized_dimensions:
+        return False
+
+    existing_names = {node.getAttribute("_stat_name") for node in _direct_children(target, "stat")}
+    occupied = {node.getAttribute("_rowcol") for node in _direct_children(target, "stat")}
+    changed = False
+    for source_stat in _direct_children(source, "stat"):
+        name = source_stat.getAttribute("_stat_name")
+        position = source_stat.getAttribute("_rowcol")
+        if name not in stat_names or name in existing_names or position in occupied:
+            continue
+        _append_imported(config_doc, target, source_stat)
+        existing_names.add(name)
+        occupied.add(position)
+        changed = True
+
+    if changed:
+        target.setAttribute(
+            "rows",
+            str(max(dimensions[0], int(source.getAttribute("rows")))),
+        )
+    return changed
