@@ -1045,7 +1045,7 @@ def test_aof_holdem_fixture_produces_holdem_decisions() -> None:
         assert d.made_hand is not None
 
 
-def test_aof_holdem_e2e_through_database_and_analysis() -> None:
+def test_aof_holdem_e2e_through_database_and_analysis(tmp_path: Path) -> None:
     """Full pipeline: Hold'em fixture → SQLite → AoF decisions → backfill → HUD read."""
     HOLD_EM_FIXTURE = Path(__file__).parent / "data" / "coinpoker_aof_holdem_hand_events.json"
     raw = json.loads(HOLD_EM_FIXTURE.read_text())
@@ -1058,10 +1058,8 @@ def test_aof_holdem_e2e_through_database_and_analysis() -> None:
         config=HttpCaptureHandConfig(site_ids={"CoinPoker": 30, "default": 30}),
     )
 
-    tmp = Path("/tmp/aof_holdem_test")
-    tmp.mkdir(exist_ok=True)
+    tmp = tmp_path
     db_path = str(tmp / "test.db")
-    (tmp / "test.db").unlink(missing_ok=True)
 
     cfg = _config()
     cfg.get_db_parameters.return_value = {
