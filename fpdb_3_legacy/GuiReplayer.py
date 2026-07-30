@@ -353,7 +353,7 @@ class OFCReplayState:
 def hidden_card_count(category: str, known_cards: list[str] | None = None) -> int:
     """Return the number of card backs to show for a hidden hand."""
     normalized = (category or "").lower()
-    if normalized in {"holdem", "fusion", "6_holdem"}:
+    if normalized in {"holdem", "fusion", "6_holdem", "aof_holdem"}:
         return 2
     if normalized == "2_holdem":
         return 3
