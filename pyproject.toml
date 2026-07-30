@@ -9,7 +9,7 @@ description = "Free Poker Database (FPDB-3) - Legacy Python Implementation"
 readme = "README.md"
 license = "AGPL-3.0-or-later"
 license-files = ["LICENSE"]
-requires-python = ">=3.10,<4.0"
+requires-python = ">=3.11,<4.0"
 dependencies = [
     "beautifulsoup4==4.12.3",
     "matplotlib>=3.10.7",
@@ -60,6 +60,9 @@ test-no-gui = [
 windows = ["pywin32==306", "configparser", "PySide6>=6.8.1"]
 linux = ["xcffib==1.5.0", "PySide6>=6.8.1"]
 macos = ["PySide6>=6.8.1"]
+native = [
+    "pypoker-eval @ git+https://github.com/jejellyroll-fr/poker-eval.git",
+]
 postgresql = ["psycopg[binary]>=3.1.0"]
 mysql = ["mysqlclient==2.2.4"]
 
