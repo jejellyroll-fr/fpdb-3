@@ -1787,11 +1787,12 @@ class Config:
             (node for node in source_doc.getElementsByTagName("pu") if node.getAttribute("pu_name") == "aof_profile"),
             None,
         )
-        source_game = next(
-            (node for node in source_doc.getElementsByTagName("game") if node.getAttribute("game_name") == "aof_omaha"),
-            None,
-        )
-        if not source_profiles or source_game is None:
+        source_games = [
+            node
+            for node in source_doc.getElementsByTagName("game")
+            if node.getAttribute("game_name") in {"aof_omaha", "aof_holdem"}
+        ]
+        if not source_profiles or not source_games:
             return False
 
         package_doc = defusedxml.minidom.parseString("<fpdb_hud_package/>")
@@ -1800,7 +1801,8 @@ class Config:
             package_root.appendChild(package_doc.importNode(source_profile, True))
         if source_popup is not None:
             package_root.appendChild(package_doc.importNode(source_popup, True))
-        package_root.appendChild(package_doc.importNode(source_game, True))
+        for source_game in source_games:
+            package_root.appendChild(package_doc.importNode(source_game, True))
         changed = install_missing_hud_package(doc, package_root)
         splash_stats = {"aof_splash_won", "aof_splash_freq"}
         changed = (
