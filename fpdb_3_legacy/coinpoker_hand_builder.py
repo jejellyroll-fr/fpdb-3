@@ -1360,7 +1360,7 @@ def _build_one(
     # (typically double) board. CoinPoker's bomb pots are always dealt two boards,
     # so an ante paired with a double board is the reliable signal. The stored
     # amount is the total forced antes, in cents.
-    if category in (AOF_OMAHA_CATEGORY, AOF_HOLDEM_CATEGORY):
+    if category == AOF_OMAHA_CATEGORY:
         _move_preflop_to_flop(actions)
 
     splash_pot, mega_splash = _extract_splash(evs)
@@ -1413,11 +1413,16 @@ def _build_one(
         "timestamp": _hand_start_time(info),
         "buttonpos": info.get("dealerSeatId"),
         "game": {"base": base, "category": category, "fpdb_supported": fpdb_supported},
-        # All-in or Fold deals the flop before anyone acts, so that is where
-        # the cards belong and where fpdb looks for them. Left on PREFLOP --
-        # a street this game does not have -- the hole cards are attached to
-        # nothing the hand will ever read.
-        **({"streets": {"holeStreets": ["FLOP"]}} if category in (AOF_OMAHA_CATEGORY, AOF_HOLDEM_CATEGORY) else {}),
+        # All-in or Fold Omaha deals the flop before anyone acts, so hole cards
+        # go on FLOP.  All-in or Fold Hold'em has a preflop round, so hole cards
+        # go on PREFLOP like a normal hand.
+        **(
+            {"streets": {"holeStreets": ["PREFLOP"]}}
+            if category == AOF_HOLDEM_CATEGORY
+            else {"streets": {"holeStreets": ["FLOP"]}}
+            if category == AOF_OMAHA_CATEGORY
+            else {}
+        ),
         "gametype": {
             "base": base,
             "category": category,

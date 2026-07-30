@@ -1982,11 +1982,16 @@ class HoldemOmahaHand(Hand):
             self.discardStreets = ["PREFLOP"]
         self.communityStreets = ["FLOP", "TURN", "RIVER"]
         self.actionStreets = ["BLINDSANTES", "PREFLOP", "FLOP", "TURN", "RIVER"]
-        if gametype["category"] in ("aof_omaha", "aof_holdem"):
+        if gametype["category"] == "aof_omaha":
             self.allStreets = ["BLINDSANTES", "FLOP", "TURN", "RIVER"]
             self.holeStreets = ["FLOP"]
             self.communityStreets = ["FLOP", "TURN", "RIVER"]
             self.actionStreets = ["BLINDSANTES", "FLOP", "TURN", "RIVER"]
+        if gametype["category"] == "aof_holdem":
+            self.allStreets = ["BLINDSANTES", "PREFLOP", "FLOP", "TURN", "RIVER"]
+            self.holeStreets = ["PREFLOP"]
+            self.communityStreets = ["FLOP", "TURN", "RIVER"]
+            self.actionStreets = ["BLINDSANTES", "PREFLOP", "FLOP", "TURN", "RIVER"]
 
         # Initialize the base Hand class
         Hand.__init__(self, self.config, sitename, gametype, handText, builtFrom="HHC")
@@ -2219,9 +2224,14 @@ class HoldemOmahaHand(Hand):
         fh = self._output_stream(fh)
         super().writeHand(fh)
 
-        is_aof = self.gametype.get("category", "") in ("aof_omaha", "aof_holdem")
-        hole_street = "FLOP" if is_aof else "PREFLOP"
-        initial_street = "FLOP" if is_aof else "PREFLOP"
+        is_aof = self.gametype.get("category", "")
+        hole_street = self.holeStreets[0] if self.holeStreets else "PREFLOP"
+        # First non-blind street with actions (the decision street in AoF).
+        initial_street = "FLOP"
+        for s in (getattr(self, "actionStreets", []) or []):
+            if s != "BLINDSANTES" and self.actions.get(s):
+                initial_street = s
+                break
 
         players_who_act_preflop = set(
             ([x[0] for x in self.actions[initial_street]] + [x[0] for x in self.actions["BLINDSANTES"]]),

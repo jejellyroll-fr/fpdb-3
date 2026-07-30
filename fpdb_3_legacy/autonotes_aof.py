@@ -152,11 +152,16 @@ def is_aof(hand: Any) -> bool:
 def _decision_street(hand: Any) -> str:
     """The street the single decision is taken on.
 
-    fpdb models this game with the flop as street zero, so the one round of
-    betting is the flop -- there is no preflop to look on.
+    AoF games have exactly one betting round.  The street where the
+    non-blind actions actually landed is the decision street.
     """
-    streets = list(getattr(hand, "actionStreets", []) or [])
-    return streets[1] if len(streets) > 1 else "FLOP"
+    actions = getattr(hand, "actions", {}) or {}
+    for street in (getattr(hand, "actionStreets", []) or []):
+        if street == "BLINDSANTES":
+            continue
+        if actions.get(street):
+            return street
+    return "FLOP"
 
 
 def _went_all_in(hand: Any, player: str) -> bool:
