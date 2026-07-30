@@ -1241,17 +1241,19 @@ def test_the_lobby_catalogue_names_a_table_whose_join_was_missed() -> None:
 
 
 def test_an_all_in_or_fold_variant_fpdb_cannot_model_is_not_declared_supported() -> None:
-    """fpdb models one All-in or Fold game, Omaha.
+    """fpdb models two All-in or Fold games, Omaha and Hold'em.
 
     Called ordinary Hold'em the hands would be counted as hands played
     normally -- the mixing this exists to stop -- and not even reliably that:
     a hand with no hole cards captured falls back to whatever the GUI is set
     to, so one came out as Omaha.
+
+    An unmodelled miniGameTypeId (3) is not declared supported.
     """
     aof = _load_aof()
     blind = [event for event in aof["hand"] if event[0] != "game.hole_cards"]
 
-    (hand,) = build_hands([_game_join("123144", mini=1), *blind], "PLO4")
+    (hand,) = build_hands([_game_join("123144", mini=3), *blind], "PLO4")
 
     assert hand["game"]["fpdb_supported"] is False
     assert hand["gametype"]["category"] != "aof_omaha"

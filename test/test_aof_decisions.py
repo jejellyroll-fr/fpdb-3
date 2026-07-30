@@ -22,6 +22,7 @@ from fpdb_3_legacy.backfill_aof_decisions import backfill_database
 from fpdb_3_legacy.coinpoker_hand_builder import build_hands
 from fpdb_3_legacy.Database import Database
 from fpdb_3_legacy.equity import EquityEngine
+from fpdb_3_legacy.GGPokerToFpdb import GGPoker
 from fpdb_3_legacy.http_capture_hand_builder import (
     HttpCaptureHandConfig,
     build_fpdb_hand,
@@ -32,6 +33,29 @@ from fpdb_3_legacy.sql_schema_aof import aof_schema_queries
 from fpdb_3_legacy.stats_aof import aof_splash_freq, aof_splash_won
 
 FIXTURE = Path(__file__).parent / "data" / "coinpoker_aof_hand_events.json"
+
+
+class _MockPokerEval:
+    """Mock poker evaluator returning flat 500ppm equity for every player."""
+
+    def poker_eval(self, **kwargs):
+        pockets = kwargs.get("pockets", [])
+        return {
+            "info": (1,),
+            "eval": [
+                {"ev": 500, "winhi": 0, "winlo": 0, "tiehi": 0, "tielo": 0, "losehi": 0, "loselo": 1}
+                for _ in pockets
+            ],
+        }
+
+    def best(self, *args, **kwargs):
+        return None
+
+    def card2string(self, card):
+        return str(card)
+
+    def winners(self, **kwargs):
+        return {}
 
 
 def _config() -> MagicMock:
@@ -53,6 +77,7 @@ def _config() -> MagicMock:
         "publicDB": False,
         "fastStoreHudCache": False,
         "sessionTimeout": 30,
+        "importFilters": [],
     }
     config.get_general_params.return_value = {}
     config.get_site_id.return_value = 30
@@ -139,7 +164,7 @@ def test_a_third_all_in_is_an_overcall() -> None:
     assert [item.role for item in extract_decisions(hand)] == ["open_shove", "call_shove", "overcall"]
 
 
-def test_aof_holdem_is_structured_without_omaha_classification() -> None:
+def test_aof_holdem_is_structured_and_classified() -> None:
     hand = MagicMock()
     hand.gametype = {"category": "aof_holdem"}
     hand.actionStreets = ["BLINDSANTES", "FLOP"]
@@ -155,7 +180,9 @@ def test_aof_holdem_is_structured_without_omaha_classification() -> None:
     assert decision.category == "aof_holdem"
     assert decision.cards_observable
     assert decision.hole_cards == "As Kd"
-    assert decision.made_hand is None
+    assert decision.made_hand == "no made hand"
+    assert decision.flush_draw is None
+    assert decision.straight_outs == 0
 
 
 def test_hidden_cards_are_a_decision_but_never_an_observation() -> None:
@@ -954,26 +981,6 @@ def test_backfill_aof_analyses_commit_persists_analyses(tmp_path: Path) -> None:
 
     from fpdb_3_legacy.backfill_aof_analyses import backfill_analyses
 
-    class _MockPokerEval:
-        def poker_eval(self, **kwargs):
-            pockets = kwargs.get("pockets", [])
-            return {
-                "info": (1,),
-                "eval": [
-                    {"ev": 500, "winhi": 0, "winlo": 0, "tiehi": 0, "tielo": 0, "losehi": 0, "loselo": 1}
-                    for _ in pockets
-                ],
-            }
-
-        def best(self, *args, **kwargs):
-            return None
-
-        def card2string(self, card):
-            return str(card)
-
-        def winners(self, **kwargs):
-            return {}
-
     stats = backfill_analyses(
         db=db,
         db_factory=lambda: Database(cfg, Sql(db_server="sqlite")),
@@ -1008,3 +1015,148 @@ def test_backfill_aof_analyses_commit_persists_analyses(tmp_path: Path) -> None:
         limit=10,
     )
     assert stats2["hands_submitted"] == 0
+
+
+def test_aof_holdem_fixture_produces_holdem_decisions() -> None:
+    """End-to-end: Hold'em fixture goes through build_fpdb_hand and produces AoF Hold'em decisions."""
+    HOLD_EM_FIXTURE = Path(__file__).parent / "data" / "coinpoker_aof_holdem_hand_events.json"
+    raw = json.loads(HOLD_EM_FIXTURE.read_text())
+    events = [tuple(e) for e in raw["hand"]]
+    join = tuple(raw["join"])
+
+    (hand_data,) = build_hands([join, *events], "NLHE")
+    hand = build_fpdb_hand(
+        hand_data,
+        config=HttpCaptureHandConfig(site_ids={"CoinPoker": 30, "default": 30}),
+    )
+    hand.playerIds = {player[1]: seat for seat, player in enumerate(hand.players, start=1)}
+    hand.dbid_hands = 101
+
+    decisions = extract_decisions(hand)
+    assert len(decisions) >= 1
+
+    allin_decisions = [d for d in decisions if d.decision == "allin"]
+    assert len(allin_decisions) == 2
+
+    for d in allin_decisions:
+        assert d.category == "aof_holdem"
+        assert d.cards_observable
+        assert d.hole_cards is not None
+        assert d.made_hand is not None
+
+
+def test_aof_holdem_e2e_through_database_and_analysis() -> None:
+    """Full pipeline: Hold'em fixture → SQLite → AoF decisions → backfill → HUD read."""
+    HOLD_EM_FIXTURE = Path(__file__).parent / "data" / "coinpoker_aof_holdem_hand_events.json"
+    raw = json.loads(HOLD_EM_FIXTURE.read_text())
+    events = [tuple(e) for e in raw["hand"]]
+    join = tuple(raw["join"])
+
+    (hand_data,) = build_hands([join, *events], "NLHE")
+    hand = build_fpdb_hand(
+        hand_data,
+        config=HttpCaptureHandConfig(site_ids={"CoinPoker": 30, "default": 30}),
+    )
+
+    tmp = Path("/tmp/aof_holdem_test")
+    tmp.mkdir(exist_ok=True)
+    db_path = str(tmp / "test.db")
+    (tmp / "test.db").unlink(missing_ok=True)
+
+    cfg = _config()
+    cfg.get_db_parameters.return_value = {
+        "db-backend": 4, "db-server": "sqlite",
+        "db-databaseName": db_path, "db-user": "", "db-password": "",
+        "db-host": "", "db-port": "", "db-path": str(tmp),
+    }
+    cfg.dir_database = str(tmp)
+    db = Database(cfg, Sql(db_server="sqlite"))
+
+    db.resetBulkCache()
+    import_fpdb_hand(hand, db, file_id=1, doinsert=True, printtest=False, starting_hand_id=1)
+    db.commit()
+
+    cursor = db.get_cursor()
+    cursor.execute("SELECT COUNT(*) FROM Hands WHERE id=1")
+    assert cursor.fetchone()[0] == 1
+
+    cursor.execute("SELECT COUNT(*) FROM AofDecisions WHERE handId=1")
+    assert cursor.fetchone()[0] >= 1
+
+    from fpdb_3_legacy.backfill_aof_analyses import backfill_analyses
+
+    stats = backfill_analyses(
+        db=db,
+        db_factory=lambda: Database(cfg, Sql(db_server="sqlite")),
+        commit=True,
+        batch_size=10,
+        limit=10,
+        engine=EquityEngine(_MockPokerEval()),
+    )
+    assert stats["hands_submitted"] >= 1
+    db.commit()
+
+    cursor.execute(
+        "SELECT status, equityPpm IS NOT NULL, errorText IS NULL "
+        "FROM AofDecisionAnalyses"
+    )
+    analyses = cursor.fetchall()
+    assert len(analyses) >= 1
+    for status, has_equity, no_error in analyses:
+        assert status == "complete"
+        assert has_equity
+        assert no_error
+
+
+def test_ggpoker_aof_omaha_e2e_through_database_and_analysis(tmp_path: Path) -> None:
+    """Full pipeline: GG AoF Omaha fixture → parser → SQLite → AoF decisions → backfill."""
+    GG_FIXTURE = Path(__file__).resolve().parents[1] / "tests" / "fixtures" / "hands" / "ggpoker" / "aof_omaha.txt"
+
+    cfg = _config()
+    cfg.get_db_parameters.return_value = {
+        "db-backend": 4, "db-server": "sqlite",
+        "db-databaseName": str(tmp_path / "test.db"),
+        "db-user": "", "db-password": "",
+        "db-host": "", "db-port": "", "db-path": str(tmp_path),
+    }
+    cfg.dir_database = str(tmp_path)
+
+    parser = GGPoker(config=cfg, in_path=str(GG_FIXTURE), autostart=True)
+    hands = list(parser.getProcessedHands())
+    assert len(hands) == 1
+    hand = hands[0]
+
+    assert hand.gametype["category"] == "aof_omaha"
+
+    db = Database(cfg, Sql(db_server="sqlite"))
+    db.resetBulkCache()
+    import_fpdb_hand(hand, db, file_id=1, doinsert=True, printtest=False, starting_hand_id=1)
+    db.commit()
+
+    cursor = db.get_cursor()
+    cursor.execute("SELECT COUNT(*) FROM AofDecisions WHERE handId=1")
+    assert cursor.fetchone()[0] >= 1
+
+    from fpdb_3_legacy.backfill_aof_analyses import backfill_analyses
+
+    stats = backfill_analyses(
+        db=db,
+        db_factory=lambda: Database(cfg, Sql(db_server="sqlite")),
+        commit=True,
+        batch_size=10,
+        limit=10,
+        engine=EquityEngine(_MockPokerEval()),
+    )
+    assert stats["hands_submitted"] >= 1
+    db.commit()
+
+    cursor.execute(
+        "SELECT status, equityPpm IS NOT NULL, errorText IS NULL "
+        "FROM AofDecisionAnalyses"
+    )
+    analyses = cursor.fetchall()
+    assert len(analyses) >= 1
+    for status, has_equity, no_error in analyses:
+        assert status == "complete"
+        assert has_equity
+        assert no_error

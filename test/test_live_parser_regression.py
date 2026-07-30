@@ -46,7 +46,7 @@ MANIFEST_PATH = FIXTURES / "live_parser_snapshots.json"
 ROOMS = {
     "bovada": (Bovada, sorted((FIXTURES / "bovada").rglob("*.txt"))),
     "cake": (Cake, sorted((FIXTURES / "cake").rglob("*.txt"))),
-    "ggpoker": (GGPoker, [FIXTURES / "ggpoker" / "plo_cash.txt"]),
+    "ggpoker": (GGPoker, sorted((FIXTURES / "ggpoker").rglob("*.txt"))),
     "kingclub": (KingsClub, sorted((FIXTURES / "kingclub").rglob("*.txt"))),
     "pacific": (PacificPoker, sorted((FIXTURES / "pacific").rglob("*.txt"))),
     "partypoker": (PartyPoker, sorted((FIXTURES / "partypoker").rglob("*.txt"))),

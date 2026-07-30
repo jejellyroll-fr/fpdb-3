@@ -251,6 +251,7 @@ def looks_like_all_in_or_fold(table_id: str, shape: dict[str, Any]) -> bool:
         return False
     return before / total >= SHAPE_THRESHOLD
 
+
 # Every event that names the table it is talking about. They are what a hand
 # can be told by; everything else in the stream speaks for the whole capture.
 TABLE_JOIN_EVENTS = (TOURNAMENT_JOIN_EVENT, GAME_JOIN_EVENT)
@@ -694,6 +695,7 @@ def _detect_category(evs: list[tuple], table_category: str) -> tuple[str, str]:
 # streets are BLINDSANTES/FLOP/TURN/RIVER, with the hole cards on the flop and
 # no preflop round at all.
 AOF_OMAHA_CATEGORY = "aof_omaha"
+AOF_HOLDEM_CATEGORY = "aof_holdem"
 
 
 def _aof_category(
@@ -721,20 +723,32 @@ def _aof_category(
     if table_id not in tables:
         # Nothing named this table. The deal order is the last thing left, and
         # it only answers for a game whose shape fpdb can store.
-        if shape is not None and looks_like_all_in_or_fold(table_id, shape) and "omaha" in category:
-            log.info(
-                "Table %s deals its flop before the betting on %d of %d hands; "
-                "reading it as All-in or Fold, since neither a join nor the lobby catalogue was captured.",
-                table_id,
-                shape[table_id][0],
-                sum(shape[table_id][:2]),
-            )
-            return AOF_OMAHA_CATEGORY, True
+        if shape is not None and looks_like_all_in_or_fold(table_id, shape):
+            if "omaha" in category:
+                log.info(
+                    "Table %s deals its flop before the betting on %d of %d hands; "
+                    "reading it as All-in or Fold Omaha, since neither a join nor the lobby catalogue was captured.",
+                    table_id,
+                    shape[table_id][0],
+                    sum(shape[table_id][:2]),
+                )
+                return AOF_OMAHA_CATEGORY, True
+            if "holdem" in category:
+                log.info(
+                    "Table %s deals its flop before the betting on %d of %d hands; "
+                    "reading it as All-in or Fold Hold'em, since neither a join nor the lobby catalogue was captured.",
+                    table_id,
+                    shape[table_id][0],
+                    sum(shape[table_id][:2]),
+                )
+                return AOF_HOLDEM_CATEGORY, True
         return category, True
     if tables[table_id] == MINI_GAME_OMAHA:
         return AOF_OMAHA_CATEGORY, True
+    if tables[table_id] == MINI_GAME_HOLDEM:
+        return AOF_HOLDEM_CATEGORY, True
     log.info(
-        "Table %s deals All-in or Fold, which fpdb models only for Omaha; "
+        "Table %s deals All-in or Fold, which fpdb models only for Omaha and Hold'em; "
         "its hands are kept in the raw archive rather than stored as %s.",
         table_id,
         category,
@@ -1253,7 +1267,7 @@ def _build_one(
         bb=bb,
         sb_name=sb_name,
         bb_name=bb_name,
-        is_aof=category == AOF_OMAHA_CATEGORY,
+        is_aof=category in (AOF_OMAHA_CATEGORY, AOF_HOLDEM_CATEGORY),
     )
     if explicit_actions is not None:
         # This stream also identifies exactly who posted antes/blinds, avoiding
@@ -1346,7 +1360,7 @@ def _build_one(
     # (typically double) board. CoinPoker's bomb pots are always dealt two boards,
     # so an ante paired with a double board is the reliable signal. The stored
     # amount is the total forced antes, in cents.
-    if category == AOF_OMAHA_CATEGORY:
+    if category in (AOF_OMAHA_CATEGORY, AOF_HOLDEM_CATEGORY):
         _move_preflop_to_flop(actions)
 
     splash_pot, mega_splash = _extract_splash(evs)
@@ -1403,7 +1417,7 @@ def _build_one(
         # the cards belong and where fpdb looks for them. Left on PREFLOP --
         # a street this game does not have -- the hole cards are attached to
         # nothing the hand will ever read.
-        **({"streets": {"holeStreets": ["FLOP"]}} if category == AOF_OMAHA_CATEGORY else {}),
+        **({"streets": {"holeStreets": ["FLOP"]}} if category in (AOF_OMAHA_CATEGORY, AOF_HOLDEM_CATEGORY) else {}),
         "gametype": {
             "base": base,
             "category": category,

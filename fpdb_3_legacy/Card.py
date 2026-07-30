@@ -1,4 +1,5 @@
 """Card-related utilities for poker games."""
+
 from __future__ import annotations
 
 # Copyright 2008-2011 Carl Gherardi
@@ -381,6 +382,14 @@ games = {  # base, category
         {"FLOP": 0, "TURN": 1, "RIVER": 2},
         "RIVER",
         [(0, 4)],
+    ),
+    "aof_holdem": (
+        "hold",
+        "holdem",
+        "h",
+        {"FLOP": 0, "TURN": 1, "RIVER": 2},
+        "RIVER",
+        [(0, 2)],
     ),
     "5_studhi": (
         "stud",
@@ -897,7 +906,9 @@ def _normalise_card_tuple(card: str | tuple[str, str]) -> tuple[int, str] | None
 
 def omahaSuitClass(cards: list[tuple[int, str]]) -> str:
     """Return Poker Pro Tools-style Omaha suit class: ds, ss, or r."""
-    suit_counts = sorted((sum(1 for _value, suit in cards if suit == candidate) for candidate in {s for _v, s in cards}), reverse=True)
+    suit_counts = sorted(
+        (sum(1 for _value, suit in cards if suit == candidate) for candidate in {s for _v, s in cards}), reverse=True
+    )
     if suit_counts == [2, 2]:
         return " ds"
     if len(suit_counts) == RAINBOW_SUIT_COUNT:
