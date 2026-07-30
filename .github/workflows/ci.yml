@@ -595,6 +595,14 @@ jobs:
           echo "$pyoxidizer_dir" >> "$GITHUB_PATH"
       - name: Compile translation catalogs
         run: python tools/compile_translations.py
+      - name: Relax requires-python for embedded Python 3.10
+        shell: bash
+        run: |
+          python -c "
+          import pathlib
+          p = pathlib.Path('pyproject.toml')
+          p.write_text(p.read_text().replace('>=3.11,<4.0', '>=3.10,<4.0'))
+          "
       - name: Build with PyOxidizer
         shell: bash
         run: |
