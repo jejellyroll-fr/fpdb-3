@@ -262,10 +262,13 @@
             <game_stat_set game_type="ring" stat_set="plo4_6max_pro"/>
             <game_stat_set game_type="tour" stat_set="mtt_omaha"/>
         </game>
-        <!-- All-in or Fold: one decision per hand, on the flop. The Omaha
-             profile beside this one would label that decision "preflop", a
-             street this game does not have. -->
+        <!-- All-in or Fold: one decision per hand, on the flop (Omaha) or
+             preflop (Hold'em). The shared AoF profiles behind both bindings
+             are game-agnostic. -->
         <game game_name="aof_omaha" aux="ClassicHud, mucked">
+            <game_stat_set game_type="all" stat_set="aof_default"/>
+        </game>
+        <game game_name="aof_holdem" aux="ClassicHud, mucked">
             <game_stat_set game_type="all" stat_set="aof_default"/>
         </game>
         <game game_name="omahahilo" aux="ClassicHud, mucked">

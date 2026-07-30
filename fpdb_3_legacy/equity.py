@@ -421,7 +421,7 @@ class EquityEngine:
         if self._backend is None:
             if not self._unavailable_reported:
                 log.warning(
-                    "pypoker-eval is unavailable; objective AoF statistics remain enabled but equity is disabled",
+                    "pokereval is unavailable; objective AoF statistics remain enabled but equity is disabled",
                 )
                 self._unavailable_reported = True
             msg = "pypoker-eval is not installed or its native extension cannot be loaded"

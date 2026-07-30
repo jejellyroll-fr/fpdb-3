@@ -68,4 +68,7 @@
     <game game_name="aof_omaha" aux="ClassicHud, mucked">
         <game_stat_set game_type="all" stat_set="aof_default"/>
     </game>
+    <game game_name="aof_holdem" aux="ClassicHud, mucked">
+        <game_stat_set game_type="all" stat_set="aof_default"/>
+    </game>
 </fpdb_hud_package>
