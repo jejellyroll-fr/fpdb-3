@@ -18,6 +18,7 @@ from time import time
 from typing import TYPE_CHECKING, Any
 
 from fpdb_3_legacy.autonotes_aof import AOF_CATEGORIES
+from fpdb_3_legacy.db_reconnect import reconnect_on_connection_loss
 from fpdb_3_legacy.loggingFpdb import get_logger
 
 log = get_logger("db")
@@ -34,6 +35,7 @@ class DatabaseHudStatsMixin:
     sql: Any
     config: Any
     connection: Any
+    backend: int
     db_server: str
     day_start: float
     hero: dict[Any, Any]
@@ -59,6 +61,8 @@ class DatabaseHudStatsMixin:
         def getAofProfileStats(self, player_ids: Any, category: str) -> Any: ...
 
         def _rollback_after_failed_read(self) -> None: ...
+
+        def recover_connection(self) -> bool: ...
 
     def get_seat_players(self, hand_id: str) -> dict[int, dict[str, object]]:
         """Return seatNo -> {player_id, screen_name} dict for a hand.
@@ -178,6 +182,7 @@ class DatabaseHudStatsMixin:
         now = datetime.utcnow() - d
         self.h_date_ndays_ago = "d%02d%02d%02d" % (now.year - 2000, now.month, now.day)
 
+    @reconnect_on_connection_loss
     def get_stats_from_hand(
         self,
         hand,

@@ -54,6 +54,12 @@ from fpdb_3_legacy.database_schema import DB_VERSION, DatabaseSchemaMixin
 # columns; re-exported because four test modules import it from Database.
 from fpdb_3_legacy.database_schema import HANDS_PLAYERS_KEYS as HANDS_PLAYERS_KEYS
 from fpdb_3_legacy.database_tournaments import DatabaseTournamentsMixin
+from fpdb_3_legacy.db_reconnect import (
+    MYSQL_NETWORK_KWARGS,
+    PG_NETWORK_KWARGS,
+    RECONNECT_COOLDOWN,
+    reconnect_on_connection_loss,
+)
 from fpdb_3_legacy.Exceptions import (
     FpdbError,
     FpdbMySQLAccessDenied,
@@ -277,6 +283,13 @@ class Database(
         self.resetCache()
         self.resetBulkCache()
         self._in_transaction = 0
+        # Reconnection state (see db_reconnect). The guard collapses nested
+        # decorated calls onto a single retry; the deadline throttles reconnect
+        # attempts so a database that stays unreachable costs one connect
+        # timeout per cooldown window instead of one per query.
+        self._reconnect_guard = False
+        self._reconnect_blocked_until = 0.0
+        self._connection_down_logged = False
 
         if "day_start" in gen:
             self.day_start = float(gen["day_start"])
@@ -489,6 +502,7 @@ class Database(
                 "db": database,
                 "charset": "utf8",
                 "use_unicode": True,
+                **MYSQL_NETWORK_KWARGS,
             }
             if port:
                 kwargs["port"] = int(port)
@@ -514,10 +528,17 @@ class Database(
         # psycopg3 handles Unicode natively, no need for register_type(UNICODE)
         # psycopg3 has native Decimal support, no adapter registration needed
 
+        # PG_NETWORK_KWARGS bounds the connect itself and arms TCP keepalives on
+        # the resulting socket. Without the keepalives a connection to a remote
+        # database (typically over a VPN) does not fail when the link drops --
+        # it hangs forever inside the kernel's retransmit loop, taking the HUD's
+        # event loop and the auto-import worker down with it. libpq ignores the
+        # keepalive settings on a local Unix socket, so the peer connection
+        # below is unaffected.
         self.__connected = False
         if self.host in ("localhost", "127.0.0.1"):
             try:
-                self.connection = psycopg.connect(dbname=database)
+                self.connection = psycopg.connect(dbname=database, **PG_NETWORK_KWARGS)
                 self.__connected = True
             except psycopg.OperationalError:
                 # direct connection failed so try user/pass/... version
@@ -531,6 +552,7 @@ class Database(
                     user=user,
                     password=password,
                     dbname=database,
+                    **PG_NETWORK_KWARGS,
                 )
                 self.__connected = True
             except Exception as ex:  # intentional broad catch: psycopg connection error inspected and re-raised as a typed FpdbError
@@ -737,9 +759,108 @@ class Database(
 
     def reconnect(self, due_to_error=False) -> None:
         """Reconnects the DB."""
-        # print "started reconnect"
         self.disconnect(due_to_error)
-        self.connect(self.backend, self.host, self.database, self.user, self.password)
+        # Keyword arguments on purpose: connect() takes (backend, host, port,
+        # database, user, password), so the positional call this used to make
+        # silently passed the database as the port and the user as the database.
+        self.connect(
+            backend=self.backend,
+            host=self.host,
+            port=self.port,
+            database=self.database,
+            user=self.user,
+            password=self.password,
+        )
+
+    def _force_disconnect(self) -> None:
+        """Drop the connection without touching it, for use after it has died.
+
+        ``disconnect()`` commits or rolls back on the way out, which is exactly
+        what a broken socket cannot do: the recovery path would raise inside its
+        own cleanup and never get as far as reconnecting.
+        """
+        self._close_cursor_quietly()
+        with contextlib.suppress(Exception):
+            if self.connection is not None:
+                self.connection.close()
+        self.connection = None
+        self.__connected = False
+
+    def connection_is_alive(self) -> bool:
+        """Check the connection with a round trip to the server.
+
+        Cheap, but not free -- it is a real query, so callers should use it to
+        check once per work cycle rather than once per statement. Query paths
+        detect a dead connection reactively instead, via
+        ``reconnect_on_connection_loss``.
+        """
+        if not self.is_connected() or self.connection is None:
+            return False
+        if self.backend == self.SQLITE:
+            return True
+        try:
+            c = self.connection.cursor()
+            c.execute("SELECT 1")
+            c.fetchone()
+            c.close()
+        except Exception as exc:  # intentional broad catch: any failure here means the connection is unusable
+            log.debug("Connection liveness check failed: %s", exc)
+            return False
+        return True
+
+    def recover_connection(self) -> bool:
+        """Re-open a connection that has been lost, at most once per cooldown.
+
+        Returns:
+            True when a usable connection is available afterwards.
+
+        A database that stays unreachable -- the VPN is still down -- must stay
+        cheap to ask about: without the cooldown every HUD hand would pay a full
+        connect timeout, recreating the stall this whole mechanism exists to
+        remove. Recovery happens on the first query after the link returns.
+        """
+        if self.backend == self.SQLITE:
+            return self.is_connected()
+
+        now = time()
+        if now < self._reconnect_blocked_until:
+            log.debug(
+                "Skipping reconnect attempt, still in cooldown for %.1fs",
+                self._reconnect_blocked_until - now,
+            )
+            return False
+
+        self._force_disconnect()
+        try:
+            self.reconnect(due_to_error=True)
+        except Exception as exc:  # intentional broad catch: any connect failure means we stay offline and retry later
+            self._reconnect_blocked_until = time() + RECONNECT_COOLDOWN
+            if not self._connection_down_logged:
+                # Log the outage once, then stay quiet: the auto-import retries
+                # every few seconds and would otherwise flood the log.
+                log.error("Database is unreachable, will keep retrying: %s", exc)
+                self._connection_down_logged = True
+            else:
+                log.debug("Reconnect attempt failed: %s", exc)
+            return False
+
+        self._reconnect_blocked_until = 0.0
+        if self._connection_down_logged:
+            log.info("Database connection re-established.")
+            self._connection_down_logged = False
+        return self.is_connected()
+
+    def ensure_connection(self) -> bool:
+        """Make sure the connection is usable before starting a unit of work.
+
+        Returns:
+            True when the caller may proceed to query the database.
+        """
+        if self.connection_is_alive():
+            return True
+        if not self._connection_down_logged:
+            log.warning("Database connection is not usable; attempting to reconnect.")
+        return self.recover_connection()
 
     def get_backend_name(self) -> str:
         """Returns the name of the currently used backend."""
@@ -755,11 +876,13 @@ class Database(
     def get_db_info(self):
         return (self.host, self.database, self.user, self.password)
 
+    @reconnect_on_connection_loss
     def get_table_name(self, hand_id):
         c = self.connection.cursor()
         c.execute(self.sql.query["get_table_name"], (hand_id,))
         return c.fetchone()
 
+    @reconnect_on_connection_loss
     def get_table_info(self, hand_id):
         c = self.connection.cursor()
         c.execute(self.sql.query["get_table_name"], (hand_id,))
@@ -904,6 +1027,7 @@ class Database(
         row = c.fetchone()
         return row[0]
 
+    @reconnect_on_connection_loss
     def get_cards(self, hand):
         """Get and return the cards for each player in the hand."""
         cards = {}  # dict of cards, the key is the seat number,
@@ -949,6 +1073,7 @@ class Database(
 
 
 
+    @reconnect_on_connection_loss
     def get_common_cards(self, hand):
         """Get and return the community cards for the specified hand."""
         cards = {}
