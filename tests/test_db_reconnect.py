@@ -93,9 +93,13 @@ def test_postgresql_connect_arms_keepalives_and_bounds_the_connect(monkeypatch) 
 
     assert captured["connect_timeout"] == 10
     assert captured["keepalives"] == 1
-    assert captured["keepalives_idle"] == 30
-    assert captured["keepalives_interval"] == 10
+    assert captured["keepalives_idle"] == 10
+    assert captured["keepalives_interval"] == 5
     assert captured["keepalives_count"] == 3
+    # Detection window, which is how long the HUD can stall on a dead link.
+    idle = captured["keepalives_idle"]
+    probes = captured["keepalives_interval"] * captured["keepalives_count"]
+    assert idle + probes <= 30
 
 
 def test_local_peer_connection_also_bounded(monkeypatch) -> None:
