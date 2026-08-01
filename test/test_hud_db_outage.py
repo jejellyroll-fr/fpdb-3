@@ -75,6 +75,9 @@ def make_hud_main(**attrs):
     hud._db_available = True
     hud._db_recovery_worker = None
     hud._pending_hands = []
+    hud._deferred_hands = []
+    hud._hand_batch_timer = MagicMock()
+    hud._hand_batch_timer.isActive.return_value = False
     hud.hud_dict = {}
     hud.cache = {}
     hud.started_recovery = 0
@@ -124,30 +127,87 @@ def test_table_info_reports_the_outage_instead_of_swallowing_it() -> None:
     hud.db_connection.connection.rollback.assert_not_called()
 
 
-def test_hands_arriving_during_an_outage_are_dropped_not_queried() -> None:
+def test_hands_arriving_during_an_outage_are_deferred_not_queried() -> None:
     hud = make_hud_main(_db_available=False)
 
     hud.handle_message("456")
 
     assert hud._pending_hands == []
+    assert hud._deferred_hands == ["456"]
     hud.db_connection.connection.rollback.assert_not_called()
 
 
-def test_a_pending_batch_is_dropped_rather_than_run_against_a_dead_link() -> None:
+def test_a_pending_batch_is_deferred_rather_than_run_against_a_dead_link() -> None:
     hud = make_hud_main(_db_available=False, _pending_hands=["1", "2", "3"])
 
     hud._drain_pending_hands()
 
     assert hud._pending_hands == []
+    assert hud._deferred_hands == ["1", "2", "3"]
     hud.db_connection.get_table_info.assert_not_called()
 
 
 def test_recovery_closes_the_breaker() -> None:
-    hud = make_hud_main(_db_available=False)
+    hud = make_hud_main(_db_available=False, _deferred_hands=["41", "42"])
 
     hud._on_db_recovered()
 
     assert hud._db_available is True
+    assert hud._deferred_hands == []
+    assert hud._pending_hands == ["41", "42"]
+    hud._hand_batch_timer.start.assert_called_once_with()
+
+
+def test_deferred_hands_are_deduplicated_and_bounded() -> None:
+    hud = make_hud_main(_deferred_hands=["1", "2", "3"])
+
+    saved = HUD_main.MAX_DEFERRED_HANDS
+    HUD_main.MAX_DEFERRED_HANDS = 3
+    try:
+        hud._defer_hands(["2", "4"])
+    finally:
+        HUD_main.MAX_DEFERRED_HANDS = saved
+
+    assert hud._deferred_hands == ["3", "2", "4"]
+
+
+def test_a_successful_read_batch_ends_its_transaction() -> None:
+    hud = make_hud_main(_pending_hands=["1"])
+    hud._get_table_info = MagicMock(
+        return_value=("table", 6, "holdem", "ring", False, 1, "Site", 6, None, None, None),
+    )
+    hud.read_stdin = MagicMock(return_value="table")
+    hud._refresh_other_huds = MagicMock()
+
+    hud._drain_pending_hands()
+
+    hud.db_connection.connection.rollback.assert_called_once_with()
+
+
+def test_a_connection_lost_during_lookup_defers_the_batch_without_racing_recovery() -> None:
+    hud = make_hud_main(_pending_hands=["1", "2"])
+    hud.db_connection.get_table_info.side_effect = lost_connection_error()
+
+    hud._drain_pending_hands()
+
+    assert hud._db_available is False
+    assert hud._deferred_hands == ["1", "2"]
+    # Once the breaker opens, the recovery worker owns the connection.
+    hud.db_connection.connection.rollback.assert_not_called()
+
+
+def test_a_connection_lost_during_refresh_defers_the_batch() -> None:
+    hud = make_hud_main(_pending_hands=["1"])
+    hud._get_table_info = MagicMock(
+        return_value=("table", 6, "holdem", "ring", False, 1, "Site", 6, None, None, None),
+    )
+    hud.read_stdin = MagicMock(return_value="table")
+    hud._refresh_other_huds = MagicMock(side_effect=lambda _refreshed: setattr(hud, "_db_available", False))
+
+    hud._drain_pending_hands()
+
+    assert hud._deferred_hands == ["1"]
+    hud.db_connection.connection.rollback.assert_not_called()
 
 
 def test_recovery_worker_stops_at_the_first_success() -> None:

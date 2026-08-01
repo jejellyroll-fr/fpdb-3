@@ -61,6 +61,12 @@ HAND_BATCH_INTERVAL_MS = 200
 # this only decides how often we ask.
 DB_RECOVERY_INTERVAL_S = 5.0
 
+# A long outage must not grow memory without bound, but dropping every hand
+# means a recovered HUD stays invisible until another hand happens to arrive.
+# Keep a generous tail and reduce it to the latest hand per table once the
+# database is available again and table identities can be queried safely.
+MAX_DEFERRED_HANDS = 1000
+
 
 @dataclass
 class HUDCreationArgs:
@@ -440,6 +446,7 @@ class HudMain(QObject):
             # batch. The window starts at the first hand rather than restarting
             # on each, so continuous traffic cannot postpone it indefinitely.
             self._pending_hands: list[str] = []
+            self._deferred_hands: list[str] = []
             self._hand_batch_timer = QTimer(self)
             self._hand_batch_timer.setSingleShot(True)
             self._hand_batch_timer.setInterval(HAND_BATCH_INTERVAL_MS)
@@ -540,10 +547,13 @@ class HudMain(QObject):
         # Runs on the UI thread (queued signal), and the worker has already
         # returned from run(), so the connection is unowned at this point.
         self._db_available = True
-        # Table info cached against the old connection is still valid -- it
-        # describes hands, not the connection -- but hands that arrived during
-        # the outage are gone, and the HUDs are repainted from the next hand.
         log.info("Database available again; HUD updates resumed")
+        deferred, self._deferred_hands = self._deferred_hands, []
+        if deferred:
+            log.info("Replaying %d hand notification(s) deferred during the outage", len(deferred))
+            self._pending_hands.extend(deferred)
+            if not self._hand_batch_timer.isActive():
+                self._hand_batch_timer.start()
 
     def _stop_db_recovery(self) -> None:
         """Stop the recovery thread, if one is running."""
@@ -591,7 +601,8 @@ class HudMain(QObject):
         if not self._db_available:
             # The recovery thread owns the connection while the breaker is open;
             # touching it here would both race with it and block the UI thread.
-            log.debug("Dropping hand %s: database unavailable", hand_id)
+            self._defer_hands([hand_id])
+            log.debug("Deferring hand %s: database unavailable", hand_id)
             return
 
         # Defensive rollback: ensure the PostgreSQL connection is not stuck in
@@ -629,6 +640,7 @@ class HudMain(QObject):
             with contextlib.suppress(RuntimeError):
                 batch_timer.stop()
         self._pending_hands = []
+        self._deferred_hands = []
 
         self._stop_db_recovery()
 
@@ -1023,6 +1035,31 @@ class HudMain(QObject):
         if not self._hand_batch_timer.isActive():
             self._hand_batch_timer.start()
 
+    def _defer_hands(self, hand_ids: list[str]) -> None:
+        """Keep recent hand notifications until the recovery worker succeeds."""
+        for hand_id in hand_ids:
+            if not hand_id:
+                continue
+            # A duplicate notification should move to the end rather than use
+            # two slots in the bounded outage queue.
+            with contextlib.suppress(ValueError):
+                self._deferred_hands.remove(hand_id)
+            self._deferred_hands.append(hand_id)
+        overflow = len(self._deferred_hands) - MAX_DEFERRED_HANDS
+        if overflow > 0:
+            del self._deferred_hands[:overflow]
+
+    def _finish_read_batch(self) -> None:
+        """Release the successful HUD read transaction and any pooled server slot."""
+        if not self._db_available:
+            # Recovery owns the connection as soon as the breaker opens.
+            return
+        try:
+            self.db_connection.connection.rollback()
+        except Exception as exc:
+            if not self.note_db_error(exc):
+                log.exception("Could not finish the HUD read transaction")
+
     def _latest_hand_per_table(self, hand_ids: list[str]) -> tuple[dict[str, str], list[str]]:
         """Reduce a batch to the last hand of each table.
 
@@ -1033,10 +1070,13 @@ class HudMain(QObject):
         """
         latest: dict[str, str] = {}
         unresolved: list[str] = []
-        for hand_id in hand_ids:
+        for index, hand_id in enumerate(hand_ids):
             table_info = self._get_table_info(hand_id)
             if table_info is None:
                 unresolved.append(hand_id)
+                if not self._db_available:
+                    unresolved.extend(hand_ids[index + 1 :])
+                    break
                 continue
             table_name, game_type = table_info[0], table_info[3]
             tour_number, tab_number = table_info[8], table_info[9]
@@ -1054,32 +1094,45 @@ class HudMain(QObject):
         if not pending:
             return
         if not self._db_available:
-            log.debug("Dropping %d pending hand(s): database unavailable", len(pending))
+            self._defer_hands(pending)
+            log.debug("Deferring %d pending hand(s): database unavailable", len(pending))
             return
 
-        with db_profile.scope("batch"):
-            latest, unresolved = self._latest_hand_per_table(pending)
-            log.debug("Draining %d hand(s) into %d table(s)", len(pending), len(latest))
+        try:
+            with db_profile.scope("batch"):
+                latest, unresolved = self._latest_hand_per_table(pending)
+                if not self._db_available:
+                    self._defer_hands(pending)
+                    log.warning("Deferring this batch: database went away during table lookup")
+                    return
+                log.debug("Draining %d hand(s) into %d table(s)", len(pending), len(latest))
 
-            refreshed: set[str] = set()
-            for hand_id in [*latest.values(), *unresolved]:
-                try:
-                    with db_profile.scope("hand"):
-                        served = self.read_stdin(hand_id)
-                except Exception as exc:
-                    if self.note_db_error(exc):
-                        log.warning("Abandoning this batch: database went away while processing hand %s", hand_id)
-                        return
-                    log.exception("Error processing hand %s", hand_id)
-                    with contextlib.suppress(Exception):
-                        self.db_connection.connection.rollback()
-                else:
-                    if served is not None:
-                        refreshed.add(served)
+                refreshed: set[str] = set()
+                for hand_id in [*latest.values(), *unresolved]:
+                    try:
+                        with db_profile.scope("hand"):
+                            served = self.read_stdin(hand_id)
+                    except Exception as exc:
+                        if self.note_db_error(exc):
+                            self._defer_hands(pending)
+                            log.warning("Deferring this batch: database went away while processing hand %s", hand_id)
+                            return
+                        log.exception("Error processing hand %s", hand_id)
+                        with contextlib.suppress(Exception):
+                            self.db_connection.connection.rollback()
+                    else:
+                        if served is not None:
+                            refreshed.add(served)
 
-            # Only the tables actually brought up to date are left out of the
-            # statistics refresh; one that failed still needs it.
-            self._refresh_other_huds(refreshed)
+                # Only the tables actually brought up to date are left out of the
+                # statistics refresh; one that failed still needs it.
+                self._refresh_other_huds(refreshed)
+                if not self._db_available:
+                    self._defer_hands(pending)
+                    log.warning("Deferring this batch: database went away during the HUD refresh")
+                    return
+        finally:
+            self._finish_read_batch()
 
         self._report_batch_round_trips(len(pending), len(self.hud_dict))
 
