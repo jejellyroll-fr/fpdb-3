@@ -63,6 +63,10 @@ def imported_db():
         db = Database(cfg)
         db.recreate_tables()
         importer = Importer(None, {"threads": 1}, cfg, sql=db.sql)
+        # Importer creates its own connection before the fixture replaces it.
+        # POSIX lets TemporaryDirectory unlink that still-open SQLite file, but
+        # Windows keeps it locked, so close the superseded connection first.
+        importer.database.disconnect()
         importer.database = db
         importer.setCallHud(False)
         importer.setMode("bulk")
@@ -70,9 +74,10 @@ def imported_db():
         importer.runImport()
         db.connection.commit()
 
-        # importer stays referenced: its __del__ disconnects importer.database,
-        # which is this database.
+        # Keep importer referenced while the tests run: its __del__ would
+        # otherwise disconnect the shared database early.
         yield db, importer
+        importer.database = None
         db.disconnect()
 
 
