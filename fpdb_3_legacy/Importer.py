@@ -962,6 +962,15 @@ class Importer:
 
         Scans the tracked directories and files, imports any files that have changed, updates their state, and performs post-import cleanup.
         """
+        # Importing a file is a multi-statement transaction, so there is no safe
+        # way to replay it after the connection dies half way through -- the
+        # connection is checked here instead, between cycles. Skipping the cycle
+        # (rather than raising) leaves the files untracked and un-timestamped,
+        # so they are picked up by the next cycle once the database is back.
+        if not self.database.ensure_connection():
+            log.warning("Auto-import cycle skipped: database unreachable.")
+            return
+
         for site, type in self.dirlist:
             self.addImportDirectory(
                 self.dirlist[(site, type)][0],
