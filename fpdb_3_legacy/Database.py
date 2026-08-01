@@ -35,7 +35,7 @@ from typing import Any
 
 import pytz
 
-from fpdb_3_legacy import SQL, Card, Configuration
+from fpdb_3_legacy import SQL, Card, Configuration, db_profile
 from fpdb_3_legacy.database_aof import DatabaseAofMixin
 from fpdb_3_legacy.database_auto_notes import DatabaseAutoNotesMixin
 from fpdb_3_legacy.database_bulk_import import DatabaseBulkImportMixin
@@ -474,6 +474,11 @@ class Database(
             database, create = self._connect_sqlite(database, create)
         else:
             raise FpdbError("unrecognised database backend:" + str(backend))
+
+        # Off unless FPDB_DB_PROFILE=1, in which case every statement issued
+        # through this connection is counted and attributed (see db_profile).
+        # Done here so it survives a reconnect, which comes back through connect().
+        self.connection = db_profile.wrap_connection(self.connection, getattr(self.sql, "query", None))
 
         if self.is_connected():
             self.cursor = self.connection.cursor()

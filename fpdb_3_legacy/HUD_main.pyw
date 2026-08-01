@@ -40,7 +40,7 @@ from PySide6.QtGui import QCloseEvent, QIcon
 from PySide6.QtWidgets import QApplication, QLabel, QVBoxLayout, QWidget
 from qt_material import apply_stylesheet
 
-from fpdb_3_legacy import Aux_Base, Configuration, Database, Deck, Hud, Options
+from fpdb_3_legacy import Aux_Base, Configuration, Database, Deck, Hud, Options, db_profile
 from fpdb_3_legacy.db_reconnect import is_connection_lost
 from fpdb_3_legacy.HudStatsPersistence import get_hud_stats_persistence
 from fpdb_3_legacy.loggingFpdb import get_logger, hud_trace
@@ -415,6 +415,9 @@ class HudMain(QObject):
             # connection to DbRecoveryWorker until it reports the link is back.
             self._db_available = True
             self._db_recovery_worker: DbRecoveryWorker | None = None
+            # Statements counted at the end of the previous batch, so each batch
+            # can report its own cost rather than the running total.
+            self._last_batch_queries = 0
             self.hud_params = self.config.get_hud_ui_parameters()
             self.deck = Deck.Deck(
                 self.config,
@@ -640,6 +643,8 @@ class HudMain(QObject):
             with contextlib.suppress(RuntimeError):
                 zmq_receiver.close()
             self.zmq_receiver = None
+
+        db_profile.get_profile().log_report("HUD database round-trip profile:")
 
         log.info("Quitting normally")
         QCoreApplication.quit()
@@ -974,6 +979,7 @@ class HudMain(QObject):
 
         return hud_poker_game, None
 
+    @db_profile.scoped("update_hud")
     def _update_existing_hud(
         self,
         new_hand_id: str,
@@ -1051,27 +1057,56 @@ class HudMain(QObject):
             log.debug("Dropping %d pending hand(s): database unavailable", len(pending))
             return
 
-        latest, unresolved = self._latest_hand_per_table(pending)
-        log.debug("Draining %d hand(s) into %d table(s)", len(pending), len(latest))
+        with db_profile.scope("batch"):
+            latest, unresolved = self._latest_hand_per_table(pending)
+            log.debug("Draining %d hand(s) into %d table(s)", len(pending), len(latest))
 
-        refreshed: set[str] = set()
-        for hand_id in [*latest.values(), *unresolved]:
-            try:
-                served = self.read_stdin(hand_id)
-            except Exception as exc:
-                if self.note_db_error(exc):
-                    log.warning("Abandoning this batch: database went away while processing hand %s", hand_id)
-                    return
-                log.exception("Error processing hand %s", hand_id)
-                with contextlib.suppress(Exception):
-                    self.db_connection.connection.rollback()
-            else:
-                if served is not None:
-                    refreshed.add(served)
+            refreshed: set[str] = set()
+            for hand_id in [*latest.values(), *unresolved]:
+                try:
+                    with db_profile.scope("hand"):
+                        served = self.read_stdin(hand_id)
+                except Exception as exc:
+                    if self.note_db_error(exc):
+                        log.warning("Abandoning this batch: database went away while processing hand %s", hand_id)
+                        return
+                    log.exception("Error processing hand %s", hand_id)
+                    with contextlib.suppress(Exception):
+                        self.db_connection.connection.rollback()
+                else:
+                    if served is not None:
+                        refreshed.add(served)
 
-        # Only the tables actually brought up to date are left out of the
-        # statistics refresh; one that failed still needs it.
-        self._refresh_other_huds(refreshed)
+            # Only the tables actually brought up to date are left out of the
+            # statistics refresh; one that failed still needs it.
+            self._refresh_other_huds(refreshed)
+
+        self._report_batch_round_trips(len(pending), len(self.hud_dict))
+
+    def _report_batch_round_trips(self, hands: int, tables: int) -> None:
+        """Log what this batch cost in statements, when profiling is on.
+
+        Per batch rather than per process: what decides how the HUD feels is the
+        cost of one round of hands with the tables the player actually has open,
+        and that is the number a cumulative total hides.
+        """
+        if not db_profile.is_enabled():
+            return
+        profile = db_profile.get_profile()
+        batch = profile.by_scope.get("batch")
+        hand_scope = profile.by_scope.get("hand")
+        if batch is None:
+            return
+        log.info(
+            "Round trips: batch of %d hand(s) over %d table(s) -- %d statements in this run "
+            "(running average %.1f per batch, %.1f per hand)",
+            hands,
+            tables,
+            batch.queries - getattr(self, "_last_batch_queries", 0),
+            batch.queries_per_entry,
+            hand_scope.queries_per_entry if hand_scope else 0.0,
+        )
+        self._last_batch_queries = batch.queries
 
     def _seat_players(self, hand_id: str) -> dict:
         """Seat players for a hand, read from the database once."""
@@ -1091,6 +1126,7 @@ class HudMain(QObject):
             self._hand_players[key] = cached
         return cached
 
+    @db_profile.scoped("secondary_refresh")
     def _refresh_secondary_hud(
         self,
         hand_id: str,
@@ -1195,6 +1231,7 @@ class HudMain(QObject):
                 with contextlib.suppress(Exception):
                     self.db_connection.connection.rollback()
 
+    @db_profile.scoped("create_hud")
     def _create_new_hud(
         self,
         new_hand_id: str,
