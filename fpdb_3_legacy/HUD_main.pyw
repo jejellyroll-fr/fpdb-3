@@ -1259,6 +1259,12 @@ class HudMain(QObject):
             except Exception as exc:
                 if self.note_db_error(exc):
                     return stats_by_hand
+                # PostgreSQL leaves the transaction aborted after a statement
+                # error. Clear it before the caller falls back to per-table
+                # queries, otherwise the first fallback necessarily fails with
+                # InFailedSqlTransaction and that table remains stale.
+                with contextlib.suppress(Exception):
+                    self.db_connection.connection.rollback()
                 log.exception("Batched statistics failed for %d table(s); each will ask for its own", len(hand_ids))
         return stats_by_hand
 

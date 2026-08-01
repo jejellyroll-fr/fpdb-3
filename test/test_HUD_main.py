@@ -349,6 +349,24 @@ def test_refresh_other_huds_isolates_secondary_table_failure(hud_main) -> None:
     hud_main.db_connection.connection.rollback.assert_called_once_with()
 
 
+def test_batched_stats_failure_rolls_back_before_per_table_fallback(hud_main) -> None:
+    """PostgreSQL must leave the connection usable for the promised fallback."""
+    hud = MagicMock()
+    hud.hud_params = {"hud_days": 30, "h_hud_days": 90}
+    hud.poker_game = "holdem"
+    hud_main.hud_dict = {"table": hud}
+    hud_main.hero_ids = {1: 42}
+    hud_main.db_connection.get_stats_from_hands.side_effect = RuntimeError("bad batched query")
+    hud_main.db_connection.connection.rollback.reset_mock()
+    pending = [("table", "hand", "ring", 1, 6)]
+
+    with patch.object(hud_main, "note_db_error", return_value=False):
+        result = hud_main._batch_secondary_stats(pending)
+
+    assert result == {}
+    hud_main.db_connection.connection.rollback.assert_called_once_with()
+
+
 def test_refresh_secondary_hud_only_rereads_the_statistics(hud_main) -> None:
     """A table with no new hand of its own is refreshed with one query, not six.
 
