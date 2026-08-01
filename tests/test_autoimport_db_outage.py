@@ -181,3 +181,40 @@ def test_stop_is_immediate_when_no_cycle_is_running() -> None:
     assert gui._stop_import_worker() is True
     gui.import_thread.wait.assert_not_called()
     gui.addText.assert_not_called()
+
+
+def test_stop_defers_cleanup_while_the_worker_is_still_running() -> None:
+    """The Importer and global lock stay owned until the worker really exits."""
+    from fpdb_3_legacy import GuiAutoImport
+
+    gui = _make_gui()
+    gui.startButton = MagicMock()
+    gui.startButton.isChecked.return_value = False
+    gui.intervalEntry = MagicMock()
+    gui.import_thread = MagicMock()
+    gui.import_thread.isRunning.return_value = True
+
+    with (
+        patch.object(gui, "_stop_import_worker", return_value=False),
+        patch.object(gui, "_finalize_auto_import_stop") as finalize,
+        patch.object(GuiAutoImport.QTimer, "singleShot") as single_shot,
+    ):
+        gui.startClicked()
+
+    assert gui._stop_cleanup_pending is True
+    gui.importer.autoSummaryGrab.assert_not_called()
+    gui.settings["global_lock"].release.assert_not_called()
+    finalize.assert_not_called()
+    single_shot.assert_called_once_with(250, gui._wait_for_import_worker_stop)
+
+
+def test_deferred_stop_finishes_after_the_worker_exits() -> None:
+    gui = _make_gui()
+    gui._stop_cleanup_pending = True
+    gui.import_thread = MagicMock()
+    gui.import_thread.isRunning.return_value = False
+
+    with patch.object(gui, "_finalize_auto_import_stop") as finalize:
+        gui._wait_for_import_worker_stop()
+
+    finalize.assert_called_once_with()

@@ -204,9 +204,10 @@ def main() -> int:
         if any("hudcache" in f for f in all_findings):
             print(
                 "\nHudCache showing up is expected to be the interesting one: the aggregate\n"
-                "joins it on playerId, but HudCache_Compound_idx leads with gametypeId, and\n"
-                "the query's `hc.gametypeId+0` (a MySQL hint to avoid an index) stops\n"
-                "PostgreSQL using an index on that column at all.",
+                "already uses hudcache_playerid_idx for the join. If rows are then removed\n"
+                "by the gametype filter, inspect the hashed SubPlan: resolving the similar\n"
+                "gametype ids in the application can turn that filter into an index condition.\n"
+                "Measured plans show that removing `hc.gametypeId+0` alone does not fix it.",
             )
     finally:
         db.disconnect()

@@ -112,6 +112,10 @@ class GuiAutoImport(QWidget):
         # than once per interval, and its return is reported too.
         self._deferred_cycles = 0
         self._db_offline = False
+        # When Stop's bounded wait expires, cleanup is deferred until the
+        # worker really exits. The importer, its database connection and the
+        # global lock must remain exclusively owned by that worker meanwhile.
+        self._stop_cleanup_pending = False
         self.settings = settings
         self.config = config
         self.sql = sql
@@ -386,7 +390,8 @@ class GuiAutoImport(QWidget):
         if self._db_offline:
             self._db_offline = False
             self.addText(_("\nDatabase is back. Auto Import resumed."), "info")
-        self.statusLabel.setText(_("Ready"))
+        status = _("Stopping Auto Import...") if self._stop_cleanup_pending else _("Ready")
+        self.statusLabel.setText(status)
         log.debug("AutoImport: background import cycle finished successfully")
 
     def import_db_offline(self) -> None:
@@ -420,6 +425,33 @@ class GuiAutoImport(QWidget):
             "warning",
         )
         return False
+
+    def _wait_for_import_worker_stop(self) -> None:
+        """Finish a pending Stop once the import worker has really exited."""
+        if not self._stop_cleanup_pending:
+            return
+        if self.import_thread is not None and self.import_thread.isRunning():
+            QTimer.singleShot(250, self._wait_for_import_worker_stop)
+            return
+        self._finalize_auto_import_stop()
+
+    def _finalize_auto_import_stop(self) -> None:
+        """Release importer resources after no worker can still be using them."""
+        self._stop_cleanup_pending = False
+        self.importer.autoSummaryGrab(True)
+        self.settings["global_lock"].release()
+        self.addText("\nStopping Auto Import. Global lock released.", "unlock")
+        self.progressBar.setVisible(False)
+        self.statusLabel.setText(_("Ready"))
+        if self.pipe_to_hud and self.pipe_to_hud.poll() is not None:
+            self.addText("\n * Stop Auto Import: HUD already terminated.", "hud")
+        else:
+            if self.pipe_to_hud:
+                self.pipe_to_hud.terminate()
+                log.debug(f"pipe_to_hud stdin: {self.pipe_to_hud.stdin}")
+            self.pipe_to_hud = None
+        self.intervalEntry.setEnabled(True)
+        self.startButton.setEnabled(True)
 
     def import_error(self, error_msg: str) -> None:
         """Called when auto import cycle fails in the background."""
@@ -718,20 +750,17 @@ class GuiAutoImport(QWidget):
             if self.importtimer:
                 self.importtimer.stop()
                 self.importtimer = None
-            self._stop_import_worker()
-            self.importer.autoSummaryGrab(True)
-            self.settings["global_lock"].release()
-            self.addText("\nStopping Auto Import. Global lock released.", "unlock")
-            self.progressBar.setVisible(False)
-            self.statusLabel.setText(_("Ready"))
-            if self.pipe_to_hud and self.pipe_to_hud.poll() is not None:
-                self.addText("\n * Stop Auto Import: HUD already terminated.", "hud")
-            else:
-                if self.pipe_to_hud:
-                    self.pipe_to_hud.terminate()
-                    log.debug(f"pipe_to_hud stdin: {self.pipe_to_hud.stdin}")
-                self.pipe_to_hud = None
-            self.intervalEntry.setEnabled(True)
+            if self._stop_cleanup_pending:
+                return
+            if not self._stop_import_worker():
+                # Do not touch the Importer, its connection, the HUD process or
+                # the global lock while runUpdated() can still be using them.
+                self._stop_cleanup_pending = True
+                self.startButton.setEnabled(False)
+                self.statusLabel.setText(_("Stopping Auto Import..."))
+                QTimer.singleShot(250, self._wait_for_import_worker_stop)
+                return
+            self._finalize_auto_import_stop()
 
     # end def GuiAutoImport.startClicked
 
