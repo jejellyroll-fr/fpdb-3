@@ -1455,6 +1455,7 @@ def sqlite_autonote_db():
 
     db = Database.__new__(Database)
     db.sql = sql
+    db.backend = Database.SQLITE
     db.conn = conn
     db.panbulk = []
     db.get_cursor = conn.cursor

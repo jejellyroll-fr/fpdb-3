@@ -46,6 +46,12 @@ def briefcase_app(pyproject) -> dict:
     return pyproject["tool"]["briefcase"]["app"]["fpdb"]
 
 
+@pytest.fixture(scope="module")
+def pyoxidizer_requirements() -> set[str]:
+    lines = (ROOT / "pyoxidizer-requirements.txt").read_text().splitlines()
+    return {line.strip() for line in lines if line.strip() and not line.lstrip().startswith("#")}
+
+
 def declared_to_briefcase(app: dict) -> set[str]:
     sections = (app, app.get("macOS", {}), app.get("windows", {}), app.get("linux", {}))
     return {requirement_name(spec) for section in sections for spec in section.get("requires", [])}
@@ -68,6 +74,18 @@ def test_a_deliberate_omission_is_still_a_real_dependency(pyproject) -> None:
     wanted = {requirement_name(spec) for spec in pyproject["project"]["dependencies"]}
 
     assert set(NOT_PACKAGED) <= wanted
+
+
+def test_pyoxidizer_dependency_file_matches_project(pyproject, pyoxidizer_requirements) -> None:
+    # pypoker-eval is installed separately with the Python-version exception
+    # needed by PyOxidizer's embedded Python 3.10.
+    wanted = {
+        spec
+        for spec in pyproject["project"]["dependencies"]
+        if requirement_name(spec) != "pypoker-eval"
+    }
+
+    assert pyoxidizer_requirements == wanted
 
 
 @pytest.mark.parametrize("package", ["beautifulsoup4", "pymysql", "defusedxml"])
