@@ -18,9 +18,31 @@ from time import time
 from typing import TYPE_CHECKING, Any
 
 from fpdb_3_legacy.autonotes_aof import AOF_CATEGORIES
+from fpdb_3_legacy.db_reconnect import reconnect_on_connection_loss
 from fpdb_3_legacy.loggingFpdb import get_logger
 
 log = get_logger("db")
+
+# How long the 24-hour boundary hand id is reused before being re-read. It is a
+# sliding boundary, so any value here is a compromise; five minutes of drift on
+# a 24-hour window is invisible, and it turns one query per table per hand into
+# one query per five minutes.
+HAND_1DAY_AGO_TTL = 300.0
+
+# What a caller gets when it asks for statistics without saying how. Kept here
+# so the per-hand and batched paths cannot disagree about it.
+_DEFAULT_HUD_PARAMS = {
+    "stat_range": "A",
+    "agg_bb_mult": 1000,
+    "seats_style": "A",
+    "seats_cust_nums_low": 1,
+    "seats_cust_nums_high": 10,
+    "h_stat_range": "A",
+    "h_agg_bb_mult": 1000,
+    "h_seats_style": "A",
+    "h_seats_cust_nums_low": 1,
+    "h_seats_cust_nums_high": 10,
+}
 
 
 class DatabaseHudStatsMixin:
@@ -34,6 +56,7 @@ class DatabaseHudStatsMixin:
     sql: Any
     config: Any
     connection: Any
+    backend: int
     db_server: str
     day_start: float
     hero: dict[Any, Any]
@@ -45,6 +68,9 @@ class DatabaseHudStatsMixin:
 
     # Set by _inject_hud_chipev_columns, below.
     _hud_chipev_clause: str
+
+    # Provided by Database; reset by its resetCache.
+    _hand_1day_ago_read_at: float
 
     if TYPE_CHECKING:
 
@@ -59,6 +85,8 @@ class DatabaseHudStatsMixin:
         def getAofProfileStats(self, player_ids: Any, category: str) -> Any: ...
 
         def _rollback_after_failed_read(self) -> None: ...
+
+        def recover_connection(self) -> bool: ...
 
     def get_seat_players(self, hand_id: str) -> dict[int, dict[str, object]]:
         """Return seatNo -> {player_id, screen_name} dict for a hand.
@@ -153,18 +181,35 @@ class DatabaseHudStatsMixin:
                 self._hud_chipev_clause = ""
         return sql_text.replace("<chipev_columns>", self._hud_chipev_clause)
 
-    def init_hud_stat_vars(self, hud_days, h_hud_days) -> None:
-        """Initialise variables used by Hud to fetch stats:
-        self.hand_1day_ago     handId of latest hand played more than a day ago
-        self.date_ndays_ago    date n days ago
-        self.h_date_ndays_ago  date n days ago for hero (different n).
+    def _refresh_hand_1day_ago(self) -> None:
+        """Re-read the 24-hour boundary hand id, at most once per TTL.
+
+        It is a sliding boundary on a 24-hour window, so it is always a little
+        stale by construction and a few minutes more changes nothing about
+        which hands count as "this session". The HUD asks for it once per open
+        table per hand dealt, which measurably made it one of the three largest
+        sources of round trips (tools/measure_hud_round_trips.py) -- for a
+        value that moves once a day.
         """
+        now = time()
+        if self._hand_1day_ago_read_at and now - self._hand_1day_ago_read_at < HAND_1DAY_AGO_TTL:
+            return
+
         self.hand_1day_ago = 1
         c = self.get_cursor()
         c.execute(self.sql.query["get_hand_1day_ago"])
         row = c.fetchone()
         if row and row[0]:
             self.hand_1day_ago = int(row[0])
+        self._hand_1day_ago_read_at = now
+
+    def init_hud_stat_vars(self, hud_days, h_hud_days) -> None:
+        """Initialise variables used by Hud to fetch stats:
+        self.hand_1day_ago     handId of latest hand played more than a day ago
+        self.date_ndays_ago    date n days ago
+        self.h_date_ndays_ago  date n days ago for hero (different n).
+        """
+        self._refresh_hand_1day_ago()
 
         tz = datetime.utcnow() - datetime.today()
         tz_offset = (tz.seconds) // (3600)
@@ -178,6 +223,42 @@ class DatabaseHudStatsMixin:
         now = datetime.utcnow() - d
         self.h_date_ndays_ago = "d%02d%02d%02d" % (now.year - 2000, now.month, now.day)
 
+    @staticmethod
+    def _seat_bounds(style, cust_low, cust_high, num_seats) -> tuple[int, int]:
+        """The seat range a stat window covers, from its configured style.
+
+        'A' means every seat count, 'C' a configured range, 'E' exactly this
+        table's. Anything else is a configuration error and is treated as 'A',
+        because showing stats over all seat counts is a great deal less wrong
+        than showing none.
+        """
+        if style == "A":
+            return 0, 10
+        if style == "C":
+            return cust_low, cust_high
+        if style == "E":
+            return num_seats, num_seats
+        log.warning("bad seats_style value: %s", style)
+        return 0, 10
+
+    def _style_key(self, stat_range, *, hero: bool) -> str:
+        """The styleKey floor for a stat range.
+
+        styleKey is 'd' followed by yyyymmdd, so a floor below every real key
+        ('0000000') means all of history and one above every real key
+        ('zzzzzzz') means none of it -- the session range reads its numbers
+        from a different query entirely.
+        """
+        if stat_range == "T":
+            return self.h_date_ndays_ago if hero else self.date_ndays_ago
+        if stat_range == "A":
+            return "0000000"
+        if stat_range == "S":
+            return "zzzzzzz"
+        log.info("unknown stat_range %r, reading all of history", stat_range)
+        return "0000000"
+
+    @reconnect_on_connection_loss
     def get_stats_from_hand(
         self,
         hand,
@@ -194,50 +275,28 @@ class DatabaseHudStatsMixin:
             log.warning("Ignoring unknown get_stats_from_hand arguments: %s", ", ".join(sorted(kwargs)))
 
         if hud_params is None:
-            hud_params = {
-                "stat_range": "A",
-                "agg_bb_mult": 1000,
-                "seats_style": "A",
-                "seats_cust_nums_low": 1,
-                "seats_cust_nums_high": 10,
-                "h_stat_range": "S",
-                "h_agg_bb_mult": 1000,
-                "h_seats_style": "A",
-                "h_seats_cust_nums_low": 1,
-                "h_seats_cust_nums_high": 10,
-            }
+            hud_params = dict(_DEFAULT_HUD_PARAMS, h_stat_range="S")
         stat_range = hud_params["stat_range"]
         agg_bb_mult = hud_params["agg_bb_mult"]
-        seats_style = hud_params["seats_style"]
-        seats_cust_nums_low = hud_params["seats_cust_nums_low"]
-        seats_cust_nums_high = hud_params["seats_cust_nums_high"]
         h_stat_range = hud_params["h_stat_range"]
         h_agg_bb_mult = hud_params["h_agg_bb_mult"]
-        h_seats_style = hud_params["h_seats_style"]
-        h_seats_cust_nums_low = hud_params["h_seats_cust_nums_low"]
-        h_seats_cust_nums_high = hud_params["h_seats_cust_nums_high"]
 
         stat_dict: dict[Any, Any] = {}
 
-        if seats_style == "A":
-            seats_min, seats_max = 0, 10
-        elif seats_style == "C":
-            seats_min, seats_max = seats_cust_nums_low, seats_cust_nums_high
-        elif seats_style == "E":
-            seats_min, seats_max = num_seats, num_seats
-        else:
-            seats_min, seats_max = 0, 10
-            log.warning(f"bad seats_style value: {seats_style}")
-
-        if h_seats_style == "A":
-            h_seats_min, h_seats_max = 0, 10
-        elif h_seats_style == "C":
-            h_seats_min, h_seats_max = h_seats_cust_nums_low, h_seats_cust_nums_high
-        elif h_seats_style == "E":
-            h_seats_min, h_seats_max = num_seats, num_seats
-        else:
-            h_seats_min, h_seats_max = 0, 10
-            log.warning(f"bad h_seats_style value: {h_seats_style}")
+        # Shared with the batched path (get_stats_from_hands): two ways of
+        # deriving these would mean two answers for the same table.
+        seats_min, seats_max = self._seat_bounds(
+            hud_params["seats_style"],
+            hud_params["seats_cust_nums_low"],
+            hud_params["seats_cust_nums_high"],
+            num_seats,
+        )
+        h_seats_min, h_seats_max = self._seat_bounds(
+            hud_params["h_seats_style"],
+            hud_params["h_seats_cust_nums_low"],
+            hud_params["h_seats_cust_nums_high"],
+            num_seats,
+        )
 
         if stat_range == "S" or h_stat_range == "S":
             self.get_stats_from_hand_session(
@@ -256,25 +315,8 @@ class DatabaseHudStatsMixin:
                 self._merge_aof_profile_stats(stat_dict, poker_game)
                 return stat_dict
 
-        if stat_range == "T":
-            stylekey = self.date_ndays_ago
-        elif stat_range == "A":
-            stylekey = "0000000"  # all stylekey values should be higher than this
-        elif stat_range == "S":
-            stylekey = "zzzzzzz"  # all stylekey values should be lower than this
-        else:
-            stylekey = "0000000"
-            log.info(f"stat_range: {stat_range}")
-
-        if h_stat_range == "T":
-            h_stylekey = self.h_date_ndays_ago
-        elif h_stat_range == "A":
-            h_stylekey = "0000000"  # all stylekey values should be higher than this
-        elif h_stat_range == "S":
-            h_stylekey = "zzzzzzz"  # all stylekey values should be lower than this
-        else:
-            h_stylekey = "00000000"
-            log.info(f"h_stat_range: {h_stat_range}")
+        stylekey = self._style_key(stat_range, hero=False)
+        h_stylekey = self._style_key(h_stat_range, hero=True)
 
         # lookup gametypeId from hand
         handinfo = self.get_gameinfo_from_hid(hand)
@@ -338,6 +380,191 @@ class DatabaseHudStatsMixin:
 
         self._merge_aof_profile_stats(stat_dict, poker_game or handinfo["category"])
         return stat_dict
+
+    def _batch_rewrites(self, placeholder: str):
+        """The edits that turn the per-hand aggregate into a per-batch one.
+
+        Expressed as substitutions on the single source query rather than as a
+        second copy of it: the aggregate is 300 lines of stat columns, and two
+        copies would drift, which would show up as the HUD reporting different
+        numbers depending on which path happened to serve a table.
+
+        The bind placeholder has to be passed in: the catalogue is rewritten
+        per backend on load (``finalize_query_placeholders``), so the query
+        says ``= ?`` under SQLite and ``= %s`` under PostgreSQL.
+        """
+        return (
+            # Appended at the end of the select list rather than the start, so
+            # the query still opens with the text the round-trip profiler
+            # matches it against and its report can still name it.
+            ("FROM Hands h", ", h.id AS batch_hand_id FROM Hands h"),
+            (f"WHERE h.id = {placeholder}", "WHERE h.id IN (<hand_ids>)"),
+            ("GROUP BY hc.PlayerId, p.name", "GROUP BY h.id, hc.PlayerId, p.name"),
+            ("ORDER BY hc.PlayerId, p.name", "ORDER BY h.id, hc.PlayerId, p.name"),
+        )
+
+    def _batched_aggregated_sql(self, sql_text: str, hand_count: int) -> str | None:
+        """Rewrite the aggregate to answer for several hands in one round trip.
+
+        Returns None if the query has changed shape such that any of the
+        rewrites no longer applies -- the caller then falls back to asking per
+        hand, which is slower but cannot be subtly wrong.
+        """
+        placeholder = self.sql.query.get("placeholder", "%s")
+        for original, replacement in self._batch_rewrites(placeholder):
+            if original not in sql_text:
+                log.warning(
+                    "Cannot batch the HUD aggregate: %r is no longer in the query; asking per hand instead.",
+                    original,
+                )
+                return None
+            sql_text = sql_text.replace(original, replacement, 1)
+
+        return sql_text.replace("<hand_ids>", ", ".join([placeholder] * hand_count))
+
+    @reconnect_on_connection_loss
+    def get_stats_from_hands(
+        self,
+        hands,
+        game_type=None,
+        hud_params=None,
+        hero_id=-1,
+        num_seats=6,
+        poker_game: str | None = None,
+    ) -> dict[Any, dict[Any, Any]]:
+        """Return ``{hand_id: stat_dict}`` for several hands at once.
+
+        Every open table refreshes its statistics on every hand dealt at any
+        table, so this path runs once per table per hand -- one round trip each,
+        which over a VPN is the single largest cost the HUD imposes. The hands
+        given must share their HUD parameters; they are split internally by
+        gametype, which is the one parameter that varies per hand rather than
+        per table.
+
+        Falls back to asking per hand for the session stat range, which reads a
+        different query per hand and has nothing to batch.
+        """
+        hands = list(dict.fromkeys(hands))
+        if not hands:
+            return {}
+
+        params = hud_params if hud_params is not None else _DEFAULT_HUD_PARAMS
+        if params["stat_range"] == "S" or params["h_stat_range"] == "S":
+            return self._stats_per_hand(hands, game_type, params, hero_id, num_seats, poker_game)
+
+        by_gametype: dict[Any, list[Any]] = {}
+        categories: dict[Any, Any] = {}
+        for hand in hands:
+            handinfo = self.get_gameinfo_from_hid(hand)
+            if handinfo is None:
+                log.warning("No game info found for hand ID %s", hand)
+                continue
+            by_gametype.setdefault(handinfo["gametypeId"], []).append(hand)
+            categories[hand] = handinfo["category"]
+
+        results: dict[Any, dict[Any, Any]] = {}
+        for gametype_id, group in by_gametype.items():
+            batched = self._run_batched_aggregate(group, gametype_id, params, hero_id, num_seats)
+            if batched is None:
+                results.update(self._stats_per_hand(group, game_type, params, hero_id, num_seats, poker_game))
+                continue
+            for hand in group:
+                stat_dict = batched.get(hand, {})
+                self._merge_aof_profile_stats(stat_dict, poker_game or categories.get(hand))
+                results[hand] = stat_dict
+        return results
+
+    def _stats_per_hand(self, hands, game_type, hud_params, hero_id, num_seats, poker_game):
+        """The unbatched path, kept as the answer of record."""
+        return {
+            hand: self.get_stats_from_hand(
+                hand,
+                game_type,
+                hud_params,
+                hero_id,
+                num_seats,
+                poker_game=poker_game,
+            )
+            for hand in hands
+        }
+
+    def _run_batched_aggregate(self, hands, gametype_id, hud_params, hero_id, num_seats):
+        """One aggregate covering ``hands``, or None if it could not be built."""
+        seats_min, seats_max = self._seat_bounds(
+            hud_params["seats_style"],
+            hud_params["seats_cust_nums_low"],
+            hud_params["seats_cust_nums_high"],
+            num_seats,
+        )
+        h_seats_min, h_seats_max = self._seat_bounds(
+            hud_params["h_seats_style"],
+            hud_params["h_seats_cust_nums_low"],
+            hud_params["h_seats_cust_nums_high"],
+            num_seats,
+        )
+        stylekey = self._style_key(hud_params["stat_range"], hero=False)
+        h_stylekey = self._style_key(hud_params["h_stat_range"], hero=True)
+
+        sql_text = self._inject_hud_chipev_columns(self.sql.query["get_stats_from_hand_aggregated"])
+        batched = self._batched_aggregated_sql(sql_text, len(hands))
+        if batched is None:
+            return None
+
+        subs = (
+            *hands,
+            hero_id,
+            stylekey,
+            hud_params["agg_bb_mult"],
+            hud_params["agg_bb_mult"],
+            gametype_id,
+            seats_min,
+            seats_max,  # villain params
+            hero_id,
+            h_stylekey,
+            hud_params["h_agg_bb_mult"],
+            hud_params["h_agg_bb_mult"],
+            gametype_id,
+            h_seats_min,
+            h_seats_max,  # hero params
+        )
+
+        stime = time()
+        c = self.connection.cursor()
+        c.execute(batched, subs)
+        log.info(
+            "HudCache batched aggregate covered %d hand(s) in %.3f seconds",
+            len(hands),
+            time() - stime,
+        )
+        colnames = [desc[0].lower() for desc in c.description]
+        # ZMQ supplies hand ids as strings while every SQL backend returns the
+        # selected Hands.id as an integer. Preserve the caller's key type in the
+        # public result while using a canonical representation to match rows.
+        hand_key_by_id = {str(hand): hand for hand in hands}
+        results: dict[Any, dict[Any, Any]] = {hand: {} for hand in hands}
+        for row in c.fetchall():
+            t_dict = dict(zip(colnames, row, strict=False))
+            # Not a statistic: it only says which table's row this is, and
+            # leaving it in stat_dict would offer it to the stat renderer.
+            returned_hand = t_dict.pop("batch_hand_id")
+            hand = hand_key_by_id.get(str(returned_hand), returned_hand)
+            if not self._row_is_wanted(t_dict["player_id"], hero_id, hud_params):
+                continue
+            results.setdefault(hand, {})[t_dict["player_id"]] = t_dict
+        return results
+
+    @staticmethod
+    def _row_is_wanted(playerid, hero_id, hud_params) -> bool:
+        """Apply the same hero/villain stat-range filter the per-hand path does."""
+        is_hero = False
+        if hero_id is not None:
+            try:
+                is_hero = int(playerid) == int(hero_id)
+            except (ValueError, TypeError):
+                is_hero = str(playerid) == str(hero_id)
+        if is_hero:
+            return hud_params["h_stat_range"] != "S"
+        return hud_params["stat_range"] != "S"
 
     def _merge_aof_profile_stats(
         self,

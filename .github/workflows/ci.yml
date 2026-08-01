@@ -572,7 +572,7 @@ jobs:
             ~/.cache/pyoxidizer
             ~/Library/Caches/pyoxidizer
             ~/AppData/Local/pyoxidizer
-          key: pyoxidizer-${{ runner.os }}-${{ runner.arch }}-0.24.0-rust-1.83.0-${{ hashFiles('pyoxidizer.bzl', 'pyproject.toml') }}
+          key: pyoxidizer-${{ runner.os }}-${{ runner.arch }}-0.24.0-rust-1.83.0-${{ hashFiles('pyoxidizer.bzl', 'pyoxidizer-requirements.txt', 'pyproject.toml') }}
           restore-keys: |
             pyoxidizer-${{ runner.os }}-${{ runner.arch }}-0.24.0-rust-1.83.0-
       - name: Install PyOxidizer
@@ -595,14 +595,6 @@ jobs:
           echo "$pyoxidizer_dir" >> "$GITHUB_PATH"
       - name: Compile translation catalogs
         run: python tools/compile_translations.py
-      - name: Relax requires-python for embedded Python 3.10
-        shell: bash
-        run: |
-          python -c "
-          import pathlib
-          p = pathlib.Path('pyproject.toml')
-          p.write_text(p.read_text().replace('>=3.11,<4.0', '>=3.10,<4.0'))
-          "
       - name: Build with PyOxidizer
         shell: bash
         run: |

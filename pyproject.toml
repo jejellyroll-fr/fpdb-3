@@ -268,7 +268,9 @@ requires = [
     # Read by the Merge and Winamax summary parsers.
     "beautifulsoup4==4.12.3",
     # Imported when the user points fpdb at a MySQL database.
-    "pymysql>=1.1.0"
+    "pymysql>=1.1.0",
+    # Native equity backend used by the equity calculator and AoF tools.
+    "pypoker-eval @ git+https://github.com/jejellyroll-fr/poker-eval.git@v1.1.0"
 ]
 
 [tool.briefcase.app.fpdb.macOS]
