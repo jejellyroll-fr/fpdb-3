@@ -1134,8 +1134,14 @@ class HudMain(QObject):
         game_type: str,
         site_id: int,
         num_seats: int,
+        stat_dict: dict | None = None,
     ) -> None:
         """Update a HUD whose own table has not dealt a new hand.
+
+        ``stat_dict`` is the statistics this table's caller already fetched, in
+        one query covering every table being refreshed; passing None makes this
+        fetch its own, which is the fallback when the tables cannot share a
+        query (see _refresh_other_huds).
 
         Only the aggregated statistics can have moved: the seats, the cards and
         the table stats all describe this table's own last hand, which is the
@@ -1156,15 +1162,16 @@ class HudMain(QObject):
         one and asking them to redraw is the whole job.
         """
         hud = self.hud_dict[temp_key]
-        self.db_connection.init_hud_stat_vars(hud.hud_params["hud_days"], hud.hud_params["h_hud_days"])
-        stat_dict = self.db_connection.get_stats_from_hand(
-            hand_id,
-            game_type,
-            hud.hud_params,
-            self.hero_ids[site_id],
-            num_seats,
-            poker_game=hud.poker_game,
-        )
+        if stat_dict is None:
+            self.db_connection.init_hud_stat_vars(hud.hud_params["hud_days"], hud.hud_params["h_hud_days"])
+            stat_dict = self.db_connection.get_stats_from_hand(
+                hand_id,
+                game_type,
+                hud.hud_params,
+                self.hero_ids[site_id],
+                num_seats,
+                poker_game=hud.poker_game,
+            )
         self._merge_positions(stat_dict, hand_id)
         hud.stat_dict = stat_dict
         for aux in hud.aux_windows:
@@ -1174,22 +1181,10 @@ class HudMain(QObject):
                 log.exception("Error redrawing aux window of table %s", temp_key)
         log.debug("secondary hud redrawn for table %s using hand %s", temp_key, hand_id)
 
-    def _refresh_other_huds(self, updated_tables: set[str]) -> None:
-        """Refresh every active HUD except the tables this batch already updated.
-
-        HUD statistics are aggregated globally, but each HUD must keep using
-        its own latest hand for seats, cards, positions, and game context.
-        Reusing that table's last processed hand makes all open HUDs observe
-        the latest HudCache state without mixing table-local data.
-
-        A secondary HUD is best-effort: one stale or failing table must not
-        prevent the remaining tables from refreshing.
-        """
+    def _tables_to_refresh(self, updated_tables: set[str]) -> list[tuple]:
+        """The tables owed a statistics refresh, with what each one needs."""
+        pending = []
         for table_name in list(self.hud_dict):
-            if not self._db_available:
-                # Opened by an earlier table in this same loop.
-                log.debug("Stopping the HUD refresh round: database unavailable")
-                return
             if table_name in updated_tables:
                 continue
 
@@ -1207,9 +1202,87 @@ class HudMain(QObject):
                 )
                 continue
 
-            game_type = table_info[3]
-            site_id = table_info[5]
-            num_seats = table_info[7]
+            pending.append((table_name, last_hand_id, table_info[3], table_info[5], table_info[7]))
+        return pending
+
+    def _batch_secondary_stats(self, pending: list[tuple]) -> dict:
+        """Fetch every refreshing table's statistics in as few queries as possible.
+
+        Tables can share a query only when every parameter of that query
+        matches, so they are grouped by the whole set: the stat-window
+        configuration, the hero, the seat count and the game. Multi-tabling one
+        site at one stake -- which is what makes this path expensive in the
+        first place -- collapses to a single group, and so to a single round
+        trip in place of one per table.
+
+        Best-effort by design: a group that fails leaves its tables without a
+        precomputed answer, and each falls back to fetching its own.
+        """
+        # The hero is only known once a hand has been processed. Before that
+        # there is nothing to group by, and each table falls back to fetching
+        # its own -- which is what this path did before it batched at all.
+        hero_ids = getattr(self, "hero_ids", None)
+        if not hero_ids:
+            return {}
+
+        groups: dict[str, tuple] = {}
+        for table_name, last_hand_id, game_type, site_id, num_seats in pending:
+            hud = self.hud_dict.get(table_name)
+            if hud is None:
+                continue
+            hero_id = hero_ids.get(site_id)
+            if hero_id is None:
+                continue
+            # repr rather than a tuple of the items: hud_params comes from
+            # user-edited configuration, and one unhashable value in it would
+            # otherwise take down the refresh round rather than merely stop it
+            # batching.
+            key = repr((sorted(hud.hud_params.items(), key=str), hero_id, num_seats, hud.poker_game, game_type))
+            if key not in groups:
+                groups[key] = (hud.hud_params, hero_id, num_seats, hud.poker_game, game_type, [])
+            groups[key][5].append(last_hand_id)
+
+        stats_by_hand: dict = {}
+        for hud_params, hero_id, num_seats, poker_game, game_type, hand_ids in groups.values():
+            try:
+                self.db_connection.init_hud_stat_vars(hud_params["hud_days"], hud_params["h_hud_days"])
+                stats_by_hand.update(
+                    self.db_connection.get_stats_from_hands(
+                        hand_ids,
+                        game_type,
+                        hud_params,
+                        hero_id,
+                        num_seats,
+                        poker_game=poker_game,
+                    ),
+                )
+            except Exception as exc:
+                if self.note_db_error(exc):
+                    return stats_by_hand
+                log.exception("Batched statistics failed for %d table(s); each will ask for its own", len(hand_ids))
+        return stats_by_hand
+
+    def _refresh_other_huds(self, updated_tables: set[str]) -> None:
+        """Refresh every active HUD except the tables this batch already updated.
+
+        HUD statistics are aggregated globally, but each HUD must keep using
+        its own latest hand for seats, cards, positions, and game context.
+        Reusing that table's last processed hand makes all open HUDs observe
+        the latest HudCache state without mixing table-local data.
+
+        A secondary HUD is best-effort: one stale or failing table must not
+        prevent the remaining tables from refreshing.
+        """
+        pending = self._tables_to_refresh(updated_tables)
+        if not pending:
+            return
+        stats_by_hand = self._batch_secondary_stats(pending)
+
+        for table_name, last_hand_id, game_type, site_id, num_seats in pending:
+            if not self._db_available:
+                # Opened by an earlier table in this same loop.
+                log.debug("Stopping the HUD refresh round: database unavailable")
+                return
             try:
                 self._refresh_secondary_hud(
                     last_hand_id,
@@ -1217,6 +1290,7 @@ class HudMain(QObject):
                     game_type,
                     site_id,
                     num_seats,
+                    stat_dict=stats_by_hand.get(last_hand_id),
                 )
             except Exception as exc:
                 if self.note_db_error(exc):
