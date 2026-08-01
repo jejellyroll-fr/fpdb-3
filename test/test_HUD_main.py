@@ -345,6 +345,37 @@ def test_loading_hud_builds_empty_creation_args_without_querying_stats(hud_main)
     assert args.cards == {}
 
 
+def test_complete_snapshot_recreates_loading_hud_with_player_seat_mapping(hud_main) -> None:
+    """An identity-only HUD cannot be upgraded in place after seats arrive."""
+    hand_id = "101"
+    table_info = ("table-a", 6, "holdem", "ring", False, 1, "site", 6, None, None, None)
+    hud_main.cache[hand_id] = table_info
+    hud_main.hud_dict["table-a"] = MagicMock(is_loading=True)
+    hud_main.config.get_supported_sites.return_value = ["site"]
+    hud_main.config.get_site_parameters.return_value = {"aux_enabled": True}
+
+    def kill_loading_hud(_event, temp_key):
+        del hud_main.hud_dict[temp_key]
+
+    def create_complete_hud(_hand_id, temp_key, *_args, **_kwargs):
+        hud_main.hud_dict[temp_key] = MagicMock(is_loading=False)
+
+    with (
+        patch.object(hud_main, "_initialize_hero_data"),
+        patch.object(hud_main, "_handle_tournament_table_changes", return_value=False),
+        patch.object(hud_main, "_handle_hud_reconfiguration", return_value=("holdem", None)),
+        patch.object(hud_main, "kill_hud", side_effect=kill_loading_hud) as kill_hud,
+        patch.object(hud_main, "_create_new_hud", side_effect=create_complete_hud) as create_hud,
+        patch.object(hud_main, "_update_existing_hud") as update_hud,
+    ):
+        assert hud_main.read_stdin(hand_id) == "table-a"
+
+    kill_hud.assert_called_once_with(None, "table-a")
+    create_hud.assert_called_once_with(hand_id, "table-a", table_info, 1, 6, "site")
+    update_hud.assert_not_called()
+    assert hud_main._last_processed_hands["table-a"] == hand_id
+
+
 def test_runtime_replay_error_cannot_start_the_legacy_recovery_worker(hud_main) -> None:
     hud_main._db_worker = MagicMock()
 

@@ -299,6 +299,34 @@ class HudReadService:
             self._handle_read_error(exc)
             return None
 
+    def _mucked_data(self, hand_id: str, needed: bool) -> tuple[dict, list]:
+        """Best-effort aux data that must never suppress the primary HUD."""
+        if not needed:
+            return {}, []
+
+        winners = {}
+        try:
+            winners = self.database.get_winners_from_hand(hand_id)
+        except Exception as exc:
+            self._handle_read_error(exc)
+            log.warning("Could not preload HUD winners for hand %s: %s", hand_id, exc)
+
+        # Mucked.py deliberately leaves action rendering disabled until this
+        # query exists.  Calling Database.get_action_from_hand unconditionally
+        # raises KeyError on every current backend and used to invalidate the
+        # complete prepared hand, leaving only an invisible loading HUD.
+        queries = getattr(getattr(self.database, "sql", None), "query", {})
+        if "get_action_from_hand" not in queries:
+            return winners, []
+
+        try:
+            actions = self.database.get_action_from_hand(hand_id)
+        except Exception as exc:
+            self._handle_read_error(exc)
+            log.warning("Could not preload HUD actions for hand %s: %s", hand_id, exc)
+            actions = []
+        return winners, actions
+
     def _read_hand(
         self,
         hand_id: str,
@@ -318,8 +346,7 @@ class HudReadService:
             num_seats,
             poker_game=poker_game,
         )
-        winners = self.database.get_winners_from_hand(hand_id) if needs_mucked_data else {}
-        actions = self.database.get_action_from_hand(hand_id) if needs_mucked_data else []
+        winners, actions = self._mucked_data(hand_id, needs_mucked_data)
         loaded_fields = {
             "table_info",
             "stat_dict",
@@ -372,6 +399,7 @@ class HudReadService:
                 table_info = self.database.get_table_info(hand_id)
             except Exception as exc:
                 self._handle_read_error(exc)
+                log.exception("HUD primary preload failed for hand %s", hand_id)
                 failed.append(hand_id)
                 continue
             if table_info is None:
