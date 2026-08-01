@@ -103,16 +103,22 @@ def make_exe(dist):
     # Read resources from python packages and include them
     pip_resources = []
     pip_install_commands = [
-        ["-r", CWD + "/pyoxidizer-requirements.txt"],
+        [["-r", CWD + "/pyoxidizer-requirements.txt"], {}],
         [
-            "--ignore-requires-python",
-            "--no-deps",
-            CWD,
-            "pypoker-eval @ git+https://github.com/jejellyroll-fr/poker-eval.git@v1.1.0",
+            [
+                "--ignore-requires-python",
+                "--no-deps",
+                CWD,
+                "pypoker-eval @ git+https://github.com/jejellyroll-fr/poker-eval.git@v1.1.0",
+            ],
+            # A release artifact must not inherit the runner CPU. In
+            # particular, newer GitHub hosts expose AVX10 features that make
+            # Clang reject poker-eval's -march=native under -Werror.
+            {"CMAKE_ARGS": "-DENABLE_NATIVE_ARCH=OFF"},
         ],
     ]
     for command in pip_install_commands:
-        for resource in exe.pip_install(command):
+        for resource in exe.pip_install(command[0], extra_envs=command[1]):
             if keep_pip_resource(resource):
                 pip_resources.append(resource)
     exe.add_python_resources(pip_resources)
