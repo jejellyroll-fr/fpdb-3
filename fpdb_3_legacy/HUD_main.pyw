@@ -27,6 +27,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from optparse import Values
 from pathlib import Path
+from queue import Empty, Queue
 from typing import Any
 
 import zmq as _zmq
@@ -42,6 +43,13 @@ from qt_material import apply_stylesheet
 
 from fpdb_3_legacy import Aux_Base, Configuration, Database, Deck, Hud, Options, db_profile
 from fpdb_3_legacy.db_reconnect import is_connection_lost
+from fpdb_3_legacy.hud_read_service import (
+    HudBatchReadRequest,
+    HudBatchSnapshot,
+    HudReadService,
+    HudReplayDatabase,
+    HudTableReadContext,
+)
 from fpdb_3_legacy.HudStatsPersistence import get_hud_stats_persistence
 from fpdb_3_legacy.loggingFpdb import get_logger, hud_trace
 from fpdb_3_legacy.SmartHudManager import RestartReason, get_smart_hud_manager
@@ -61,6 +69,16 @@ HAND_BATCH_INTERVAL_MS = 200
 # this only decides how often we ask.
 DB_RECOVERY_INTERVAL_S = 5.0
 
+# A long outage must not grow memory without bound, but dropping every hand
+# means a recovered HUD stays invisible until another hand happens to arrive.
+# Keep a generous tail and reduce it to the latest hand per table once the
+# database is available again and table identities can be queried safely.
+MAX_DEFERRED_HANDS = 1000
+MAX_PENDING_HANDS = 1000
+DB_BATCH_RETRY_MS = 5000
+DB_BATCH_RETRY_BACKOFF_MS = 30000
+DB_BATCH_RETRY_BACKOFF_AFTER = 5
+
 
 @dataclass
 class HUDCreationArgs:
@@ -74,6 +92,7 @@ class HUDCreationArgs:
     game_type: str
     stat_dict: dict[str, Any]
     cards: dict[str, Any]
+    hand_instance: Any = None
 
 
 class ZMQWorker(QThread):
@@ -144,6 +163,112 @@ class DbRecoveryWorker(QThread):
         # connect timeout, but shutdown must not hang on it either.
         if not self.wait(15000):
             log.warning("Database recovery worker did not stop in time")
+
+
+class HudReadWorker(QThread):
+    """Own the HUD database connection and execute read batches off the UI thread."""
+
+    ready = Signal(int)
+    snapshot_ready = Signal(object)
+    unavailable = Signal(str)
+    batch_failed = Signal(object, str)
+
+    def __init__(
+        self,
+        config: Configuration.Config,
+        parent: QObject | None = None,
+        db_factory: Callable[..., Any] = Database.Database,
+    ) -> None:
+        super().__init__(parent)
+        self.config = config
+        self.db_factory = db_factory
+        self._requests: Queue[HudBatchReadRequest | None] = Queue()
+        self._stopping = threading.Event()
+
+    def submit(self, request: HudBatchReadRequest) -> None:
+        """Queue one immutable request from the Qt thread."""
+        self._requests.put(request)
+
+    @staticmethod
+    def _configure_session(database: Database.Database) -> None:
+        """Bound only the worker's PostgreSQL statements, never the importer."""
+        if database.backend != Database.Database.PGSQL:
+            return
+        with contextlib.suppress(Exception):
+            database.connection.rollback()
+        cursor = database.connection.cursor()
+        try:
+            cursor.execute("SET statement_timeout = 10000")
+            cursor.execute("SET lock_timeout = 2000")
+            cursor.execute("SET idle_in_transaction_session_timeout = 30000")
+            database.connection.commit()
+        finally:
+            cursor.close()
+
+    @staticmethod
+    def _close_database(database: Database.Database | None) -> None:
+        if database is None:
+            return
+        with contextlib.suppress(Exception):
+            database.close_connection()
+
+    def run(self) -> None:
+        """Connect, process one request at a time, and reconnect in this thread."""
+        database: Database.Database | None = None
+        service: HudReadService | None = None
+        pending: HudBatchReadRequest | None = None
+        unavailable_announced = False
+        while not self._stopping.is_set():
+            if database is None:
+                try:
+                    database = self.db_factory(self.config)
+                    self._configure_session(database)
+                    service = HudReadService(self.config, database)
+                except Exception as exc:
+                    self._close_database(database)
+                    database = None
+                    service = None
+                    if not unavailable_announced:
+                        self.unavailable.emit(str(exc))
+                        unavailable_announced = True
+                    self._stopping.wait(DB_RECOVERY_INTERVAL_S)
+                    continue
+                unavailable_announced = False
+                self.ready.emit(database.backend)
+
+            if pending is None:
+                try:
+                    pending = self._requests.get(timeout=0.2)
+                except Empty:
+                    continue
+                if pending is None:
+                    break
+
+            assert service is not None
+            try:
+                snapshot = service.read_batch(pending, progress_callback=self.snapshot_ready.emit)
+            except Exception as exc:
+                if database is not None and is_connection_lost(database.backend, exc):
+                    if not unavailable_announced:
+                        self.unavailable.emit(str(exc))
+                        unavailable_announced = True
+                    self._close_database(database)
+                    database = None
+                    service = None
+                    continue
+                self.batch_failed.emit(pending, str(exc))
+            else:
+                self.snapshot_ready.emit(snapshot)
+            pending = None
+
+        self._close_database(database)
+
+    def stop(self) -> None:
+        """Wake the queue and wait for the bounded statement timeout."""
+        self._stopping.set()
+        self._requests.put(None)
+        if not self.wait(15000):
+            log.warning("HUD read worker did not stop in time")
 
 
 class ZMQReceiver(QObject):
@@ -391,11 +516,6 @@ class HudMain(QObject):
             getattr(options, "logging_level", "Not set"),
         )
         try:
-            # Connecting to the database
-            log.info("Connecting to database...")
-            self.db_connection = Database.Database(self.config)
-            log.info("Database connection successful")
-
             # HUD dictionary and parameters
             self.hud_dict: dict[str, Hud.Hud] = {}
             # Session-only profile choices made from an individual table menu.
@@ -408,12 +528,20 @@ class HudMain(QObject):
             # HUD exactly once, without re-running create/update on a duplicate.
             self._last_processed_hands: dict[str, str] = {}
             self.blacklist: list[Any] = []
-            # Circuit breaker around the database. Every read below runs on the
-            # UI thread, so one unreachable database would otherwise freeze the
-            # HUD once per hand for as long as the outage lasts. Once a read
-            # fails on a lost connection we stop querying entirely and hand the
-            # connection to DbRecoveryWorker until it reports the link is back.
-            self._db_available = True
+            # The real connection is created and owned by HudReadWorker.  The
+            # UI only ever sees an in-memory replay facade for completed reads.
+            empty_snapshot = HudBatchSnapshot(0, (), (), {}, {}, {}, {}, {})
+            self.db_connection = HudReplayDatabase(empty_snapshot, 0)
+            self._db_backend = 0
+            self._db_available = False
+            self._db_batch_inflight = False
+            self._db_batch_sequence = 0
+            self._last_applied_sequence = 0
+            self._last_applied_revision = -1
+            self._db_progress_refreshed: set[str] = set()
+            self._db_consecutive_failures = 0
+            self._prepared_hands: dict[str, Any] = {}
+            self._last_table_info: dict[str, tuple] = {}
             self._db_recovery_worker: DbRecoveryWorker | None = None
             # Statements counted at the end of the previous batch, so each batch
             # can report its own cost rather than the running total.
@@ -440,10 +568,18 @@ class HudMain(QObject):
             # batch. The window starts at the first hand rather than restarting
             # on each, so continuous traffic cannot postpone it indefinitely.
             self._pending_hands: list[str] = []
+            self._deferred_hands: list[str] = []
             self._hand_batch_timer = QTimer(self)
             self._hand_batch_timer.setSingleShot(True)
             self._hand_batch_timer.setInterval(HAND_BATCH_INTERVAL_MS)
             self._hand_batch_timer.timeout.connect(self._drain_pending_hands)
+
+            self._db_worker: HudReadWorker | None = HudReadWorker(self.config, parent=self)
+            self._db_worker.ready.connect(self._on_db_worker_ready)
+            self._db_worker.snapshot_ready.connect(self._on_db_snapshot)
+            self._db_worker.unavailable.connect(self._on_db_worker_unavailable)
+            self._db_worker.batch_failed.connect(self._on_db_batch_failed)
+            self._db_worker.start()
 
             # Stats persistence initialization
             self.stats_persistence = get_hud_stats_persistence()
@@ -520,6 +656,12 @@ class HudMain(QObject):
         """
         if not is_connection_lost(self.db_connection.backend, exc):
             return False
+        if getattr(self, "_db_worker", None) is not None:
+            # Runtime SQL recovery belongs exclusively to HudReadWorker. The
+            # Qt side holds only HudReplayDatabase, which cannot and must not
+            # be handed to the legacy DbRecoveryWorker.
+            log.error("Unexpected connection-style error from HUD replay data: %s", exc)
+            return False
         if self._db_available:
             log.error("Database unreachable; HUD updates are paused until it returns (%s)", exc)
             self._db_available = False
@@ -527,7 +669,10 @@ class HudMain(QObject):
         return True
 
     def _start_db_recovery(self) -> None:
-        """Hand the connection to the recovery thread for the outage."""
+        """Legacy synchronous-test recovery; runtime uses HudReadWorker."""
+        if not hasattr(self.db_connection, "recover_connection"):
+            log.error("Refusing legacy DB recovery for an in-memory HUD replay facade")
+            return
         if self._db_recovery_worker is not None and self._db_recovery_worker.isRunning():
             return
         worker = DbRecoveryWorker(self.db_connection, parent=self)
@@ -540,10 +685,224 @@ class HudMain(QObject):
         # Runs on the UI thread (queued signal), and the worker has already
         # returned from run(), so the connection is unowned at this point.
         self._db_available = True
-        # Table info cached against the old connection is still valid -- it
-        # describes hands, not the connection -- but hands that arrived during
-        # the outage are gone, and the HUDs are repainted from the next hand.
         log.info("Database available again; HUD updates resumed")
+        deferred, self._deferred_hands = self._deferred_hands, []
+        if deferred:
+            log.info("Replaying %d hand notification(s) deferred during the outage", len(deferred))
+            self._pending_hands.extend(deferred)
+            if not self._hand_batch_timer.isActive():
+                self._hand_batch_timer.start()
+
+    def _on_db_worker_ready(self, backend: int) -> None:
+        """Resume submissions after the worker connected or reconnected."""
+        recovered = not self._db_available
+        self._db_backend = backend
+        self._db_available = True
+        if recovered:
+            log.info("HUD database worker is ready; updates resumed")
+        deferred, self._deferred_hands = self._deferred_hands, []
+        if deferred:
+            self._pending_hands.extend(deferred)
+        if self._pending_hands and not self._db_batch_inflight and not self._hand_batch_timer.isActive():
+            self._hand_batch_timer.start()
+
+    def _on_db_worker_unavailable(self, message: str) -> None:
+        """Open the UI-side breaker without touching the worker's connection."""
+        if self._db_available:
+            log.error("HUD database unavailable; updates remain responsive (%s)", message)
+        else:
+            log.debug("HUD database still unavailable: %s", message)
+        self._db_available = False
+
+    def _retry_hands(self, hand_ids: tuple[str, ...]) -> None:
+        if self._shutdown_started:
+            return
+        for hand_id in hand_ids:
+            with contextlib.suppress(ValueError):
+                self._pending_hands.remove(hand_id)
+            self._pending_hands.append(hand_id)
+        if self._db_available and not self._db_batch_inflight and not self._hand_batch_timer.isActive():
+            self._hand_batch_timer.start()
+
+    def _on_db_batch_failed(self, request: HudBatchReadRequest, message: str) -> None:
+        """Retry an ordinary timeout later while the Qt loop stays available."""
+        self._db_batch_inflight = False
+        self._db_consecutive_failures += 1
+        retry_ms = (
+            DB_BATCH_RETRY_BACKOFF_MS
+            if self._db_consecutive_failures > DB_BATCH_RETRY_BACKOFF_AFTER
+            else DB_BATCH_RETRY_MS
+        )
+        log.warning(
+            "HUD database batch %d failed (%d consecutive failure(s)); "
+            "the loading HUD stays visible and stats will retry in %d seconds: %s",
+            request.sequence,
+            self._db_consecutive_failures,
+            retry_ms // 1000,
+            message,
+        )
+        if self._db_consecutive_failures == DB_BATCH_RETRY_BACKOFF_AFTER + 1:
+            log.error(
+                "HUD database remains too slow after %d batches; reducing retries to every %d seconds",
+                self._db_consecutive_failures,
+                retry_ms // 1000,
+            )
+        QTimer.singleShot(retry_ms, lambda hands=request.hand_ids: self._retry_hands(hands))
+
+    def _table_read_contexts(self) -> tuple[HudTableReadContext, ...]:
+        contexts = []
+        for temp_key, hud in list(self.hud_dict.items()):
+            last_hand_id = self._last_processed_hands.get(temp_key)
+            if not last_hand_id:
+                continue
+            table_info = self._last_table_info.get(temp_key) or self.cache.get(last_hand_id)
+            if table_info is None:
+                continue
+            needs_mucked = any(type(aux).__module__.rsplit(".", 1)[-1] == "Mucked" for aux in hud.aux_windows)
+            contexts.append(
+                HudTableReadContext(
+                    temp_key=temp_key,
+                    last_hand_id=last_hand_id,
+                    hud_params=dict(hud.hud_params),
+                    poker_game=hud.poker_game,
+                    game_type=table_info[3],
+                    site_id=table_info[5],
+                    num_seats=table_info[7],
+                    needs_mucked_data=needs_mucked,
+                ),
+            )
+        return tuple(contexts)
+
+    def _build_batch_request(self, hand_ids: list[str]) -> HudBatchReadRequest:
+        self._db_batch_sequence += 1
+        return HudBatchReadRequest(
+            sequence=self._db_batch_sequence,
+            hand_ids=tuple(hand_ids),
+            hud_params=dict(self.hud_params),
+            tables=self._table_read_contexts(),
+        )
+
+    def _show_loading_hud(self, hand_id: str) -> str | None:
+        """Create an empty-but-visible HUD as soon as table identity is known."""
+        prepared = self._prepared_hands.get(str(hand_id))
+        if prepared is None or prepared.table_info is None:
+            return None
+        table_info = prepared.table_info
+        (
+            table_name,
+            _max_seats,
+            poker_game,
+            game_type,
+            fast,
+            site_id,
+            site_name,
+            num_seats,
+            tour_number,
+            tab_number,
+            _tourney_name,
+        ) = table_info
+        if not isinstance(table_name, str) or not table_name.strip():
+            return None
+
+        enabled_sites = self.config.get_supported_sites()
+        hud_site_name = self._resolve_hud_config_site(site_name, enabled_sites)
+        aux_disabled_sites = [
+            site for site in enabled_sites if not self.config.get_site_parameters(site)["aux_enabled"]
+        ]
+        if fast or hud_site_name in aux_disabled_sites or hud_site_name not in enabled_sites:
+            return None
+
+        temp_key = self._get_temp_key(game_type, tour_number, tab_number, table_name)
+        if temp_key in self.hud_dict:
+            return temp_key
+        if self._handle_tournament_table_changes(game_type, temp_key, tour_number):
+            return None
+        self._create_new_hud(
+            hand_id,
+            temp_key,
+            table_info,
+            site_id,
+            num_seats,
+            hud_site_name,
+            loading=True,
+        )
+        if temp_key in self.hud_dict:
+            self._last_table_info[temp_key] = table_info
+            return temp_key
+        return None
+
+    def _on_db_snapshot(self, snapshot: HudBatchSnapshot) -> None:
+        """Apply a database-free snapshot on the Qt thread."""
+        if self._shutdown_started:
+            return
+        if snapshot.sequence < self._last_applied_sequence:
+            return
+        if snapshot.sequence == self._last_applied_sequence and snapshot.revision <= self._last_applied_revision:
+            return
+        if snapshot.sequence > self._last_applied_sequence:
+            self._last_applied_sequence = snapshot.sequence
+            self._last_applied_revision = -1
+            self._db_progress_refreshed = set()
+        self._last_applied_revision = snapshot.revision
+        self.db_connection = HudReplayDatabase(snapshot, self._db_backend)
+        self._prepared_hands = snapshot.hands
+        if not snapshot.identity_only:
+            self.hero = dict(snapshot.hero)
+            self.hero_ids = dict(snapshot.hero_ids)
+
+        for prepared in snapshot.hands.values():
+            if prepared.table_info is None:
+                continue
+            self.cache[prepared.hand_id] = prepared.table_info
+            self._hand_players[("seats", prepared.hand_id)] = prepared.seat_players
+            self._hand_players[("positions", prepared.hand_id)] = prepared.positions
+
+        if snapshot.identity_only:
+            for hand_id in snapshot.primary_order:
+                self._show_loading_hud(hand_id)
+            return
+
+        refreshed = set(self._db_progress_refreshed)
+        apply_failed: list[str] = []
+        failed = set(snapshot.failed_hand_ids)
+        for hand_id in snapshot.primary_order:
+            if hand_id in failed:
+                continue
+            try:
+                served = self.read_stdin(hand_id)
+            except Exception:
+                log.exception("Error applying prepared HUD hand %s", hand_id)
+                apply_failed.append(hand_id)
+            else:
+                if served is not None:
+                    refreshed.add(served)
+                    self._db_progress_refreshed.add(served)
+                    prepared = snapshot.hands.get(str(hand_id))
+                    if prepared is not None and prepared.table_info is not None:
+                        self._last_table_info[served] = prepared.table_info
+
+        if not snapshot.final:
+            return
+
+        self._db_batch_inflight = False
+        self._db_consecutive_failures = 0
+        # A secondary read that failed must leave that HUD's previous stats on
+        # screen. Excluding it from the replay refresh prevents a missing
+        # snapshot entry from looking like a legitimate empty result.
+        unavailable_secondary = {
+            context.temp_key
+            for context in self._table_read_contexts()
+            if str(context.last_hand_id) not in snapshot.hands
+        }
+        self._refresh_other_huds(refreshed | unavailable_secondary)
+        self._report_batch_round_trips(len(snapshot.requested_hand_ids), len(self.hud_dict))
+
+        retry_hands = tuple(dict.fromkeys((*snapshot.failed_hand_ids, *apply_failed)))
+        if retry_hands:
+            QTimer.singleShot(5000, lambda hands=retry_hands: self._retry_hands(hands))
+        if self._pending_hands and self._db_available and not self._hand_batch_timer.isActive():
+            self._hand_batch_timer.start()
+        self._db_progress_refreshed = set()
 
     def _stop_db_recovery(self) -> None:
         """Stop the recovery thread, if one is running."""
@@ -589,33 +948,17 @@ class HudMain(QObject):
         log.info("HUD RECEIVED MESSAGE - hand_id: %s", hand_id)
 
         if not self._db_available:
-            # The recovery thread owns the connection while the breaker is open;
-            # touching it here would both race with it and block the UI thread.
-            log.debug("Dropping hand %s: database unavailable", hand_id)
+            # The read worker owns the real connection. Keep the notification
+            # bounded here until that worker reports a successful reconnect.
+            self._defer_hands([hand_id])
+            log.debug("Deferring hand %s: database unavailable", hand_id)
             return
-
-        # Defensive rollback: ensure the PostgreSQL connection is not stuck in
-        # an aborted transaction state from a previous error.  Under PostgreSQL,
-        # any single failed query permanently blocks every subsequent query on
-        # the same connection until an explicit ROLLBACK is issued.  Issuing a
-        # rollback on a clean connection is a harmless no-op.
-        try:
-            if getattr(self, "db_connection", None):
-                self.db_connection.connection.rollback()
-        except Exception:
-            log.debug("Pre-message rollback failed (connection may be closed)")
 
         try:
             self._enqueue_hand(hand_id)
             log.debug("Hand %s queued for the next batch", hand_id)
         except Exception as e:
             log.exception("Error handling message for hand_id %s: %s", hand_id, e)
-            try:
-                if getattr(self, "db_connection", None):
-                    self.db_connection.connection.rollback()
-                    log.info("Successfully rolled back database transaction after error")
-            except Exception as roll_err:
-                log.exception("Failed to rollback transaction after error: %s", roll_err)
 
     def destroy(self) -> None:
         """Destroy the application and clean up resources."""
@@ -629,6 +972,13 @@ class HudMain(QObject):
             with contextlib.suppress(RuntimeError):
                 batch_timer.stop()
         self._pending_hands = []
+        self._deferred_hands = []
+
+        db_worker = getattr(self, "_db_worker", None)
+        if db_worker is not None:
+            with contextlib.suppress(RuntimeError):
+                db_worker.stop()
+            self._db_worker = None
 
         self._stop_db_recovery()
 
@@ -793,15 +1143,32 @@ class HudMain(QObject):
         self.idle_create(args)
         log.debug("HUD for table %s created successfully.", args.temp_key)
 
-    def update_HUD(self, new_hand_id: str, table_name: str, config: Configuration.Config) -> None:
+    def update_HUD(
+        self,
+        new_hand_id: str,
+        table_name: str,
+        config: Configuration.Config,
+        *,
+        cards: dict[str, Any] | None = None,
+        hand_instance: Any = None,
+    ) -> None:
         """Update an existing HUD."""
         log.debug("Updating HUD for table %s and hand %s", table_name, new_hand_id)
-        self.idle_update(new_hand_id, table_name, config)
+        if cards is None and hand_instance is None:
+            self.idle_update(new_hand_id, table_name, config)
+        else:
+            self.idle_update(
+                new_hand_id,
+                table_name,
+                config,
+                cards=cards,
+                hand_instance=hand_instance,
+            )
 
     def _initialize_hero_data(self) -> None:
         """Initialize hero data from the configuration."""
-        self.hero: dict[int, str] = {}
-        self.hero_ids: dict[int, int] = {}
+        self.hero = {}
+        self.hero_ids = {}
         enabled_sites = self.config.get_supported_sites()
         if not enabled_sites:
             log.error("No enabled sites found")
@@ -987,10 +1354,11 @@ class HudMain(QObject):
         game_type: str,
         site_id: int,
         num_seats: int,
-    ) -> None:
+    ) -> bool:
         """Update an existing HUD with new hand data."""
         log.debug("update hud for hand %s", new_hand_id)
         hud = self.hud_dict[temp_key]
+        was_loading = bool(getattr(hud, "is_loading", False))
         self.db_connection.init_hud_stat_vars(hud.hud_params["hud_days"], hud.hud_params["h_hud_days"])
         stat_dict = self.db_connection.get_stats_from_hand(
             new_hand_id,
@@ -1002,26 +1370,85 @@ class HudMain(QObject):
         )
         log.debug("got stats for hand %s", new_hand_id)
 
+        if was_loading and not any(
+            values.get("screen_name") == self.hero.get(site_id)
+            for values in stat_dict.values()
+        ):
+            log.warning(
+                "Removing loading HUD for hand %s table=%s: hero %r is not seated",
+                new_hand_id,
+                temp_key,
+                self.hero.get(site_id),
+            )
+            self.kill_hud(None, temp_key)
+            return False
+
+        if was_loading:
+            cached_stats = self.stats_persistence.load_hud_stats(temp_key)
+            if cached_stats:
+                merged = self.stats_persistence.merge_stats(cached_stats, {"stat_dict": stat_dict})
+                stat_dict = merged.get("stat_dict", stat_dict)
+
         self._merge_positions(stat_dict, new_hand_id)
         try:
             hud.stat_dict = stat_dict
         except KeyError:
             log.exception("hud_dict[%s] was not found", temp_key)
-            return
+            return False
 
         hud.seat_players = self._seat_players(new_hand_id)
         self._set_table_stats(hud, new_hand_id)
         hud.cards = self.get_cards(new_hand_id, hud.poker_game)
         for aw in hud.aux_windows:
             aw.update_data(new_hand_id, self.db_connection)
-        self.update_HUD(new_hand_id, temp_key, self.config)
+        prepared = self._prepared_hands.get(str(new_hand_id))
+        self.update_HUD(
+            new_hand_id,
+            temp_key,
+            self.config,
+            cards=hud.cards,
+            hand_instance=prepared.hand_instance if prepared is not None else None,
+        )
+        hud.is_loading = False
         log.debug("hud updated for table %s and hand %s", temp_key, new_hand_id)
+        return True
 
     def _enqueue_hand(self, hand_id: str) -> None:
         """Hold a hand briefly so the tables dealing alongside it join the batch."""
+        with contextlib.suppress(ValueError):
+            self._pending_hands.remove(hand_id)
         self._pending_hands.append(hand_id)
+        overflow = len(self._pending_hands) - MAX_PENDING_HANDS
+        if overflow > 0:
+            del self._pending_hands[:overflow]
+            log.warning("HUD pending-hand queue reached %d; oldest notification(s) were dropped", MAX_PENDING_HANDS)
         if not self._hand_batch_timer.isActive():
             self._hand_batch_timer.start()
+
+    def _defer_hands(self, hand_ids: list[str]) -> None:
+        """Keep recent hand notifications until the recovery worker succeeds."""
+        for hand_id in hand_ids:
+            if not hand_id:
+                continue
+            # A duplicate notification should move to the end rather than use
+            # two slots in the bounded outage queue.
+            with contextlib.suppress(ValueError):
+                self._deferred_hands.remove(hand_id)
+            self._deferred_hands.append(hand_id)
+        overflow = len(self._deferred_hands) - MAX_DEFERRED_HANDS
+        if overflow > 0:
+            del self._deferred_hands[:overflow]
+
+    def _finish_read_batch(self) -> None:
+        """Release the successful HUD read transaction and any pooled server slot."""
+        if not self._db_available:
+            # Recovery owns the connection as soon as the breaker opens.
+            return
+        try:
+            self.db_connection.connection.rollback()
+        except Exception as exc:
+            if not self.note_db_error(exc):
+                log.exception("Could not finish the HUD read transaction")
 
     def _latest_hand_per_table(self, hand_ids: list[str]) -> tuple[dict[str, str], list[str]]:
         """Reduce a batch to the last hand of each table.
@@ -1033,10 +1460,13 @@ class HudMain(QObject):
         """
         latest: dict[str, str] = {}
         unresolved: list[str] = []
-        for hand_id in hand_ids:
+        for index, hand_id in enumerate(hand_ids):
             table_info = self._get_table_info(hand_id)
             if table_info is None:
                 unresolved.append(hand_id)
+                if not self._db_available:
+                    unresolved.extend(hand_ids[index + 1 :])
+                    break
                 continue
             table_name, game_type = table_info[0], table_info[3]
             tour_number, tab_number = table_info[8], table_info[9]
@@ -1044,6 +1474,26 @@ class HudMain(QObject):
         return latest, unresolved
 
     def _drain_pending_hands(self) -> None:
+        """Submit one batch without running a database call on the Qt thread."""
+        worker = getattr(self, "_db_worker", None)
+        if worker is None:
+            # Narrow compatibility seam for focused legacy unit tests. Runtime
+            # construction always installs HudReadWorker.
+            self._drain_pending_hands_sync()
+            return
+        if self._db_batch_inflight:
+            return
+        pending, self._pending_hands = self._pending_hands, []
+        if not pending:
+            return
+        if not self._db_available:
+            self._defer_hands(pending)
+            return
+        request = self._build_batch_request(pending)
+        self._db_batch_inflight = True
+        worker.submit(request)
+
+    def _drain_pending_hands_sync(self) -> None:
         """Process one batch of hands, then refresh every other HUD once.
 
         The refresh is what this exists for: it used to run per hand, so a
@@ -1054,32 +1504,45 @@ class HudMain(QObject):
         if not pending:
             return
         if not self._db_available:
-            log.debug("Dropping %d pending hand(s): database unavailable", len(pending))
+            self._defer_hands(pending)
+            log.debug("Deferring %d pending hand(s): database unavailable", len(pending))
             return
 
-        with db_profile.scope("batch"):
-            latest, unresolved = self._latest_hand_per_table(pending)
-            log.debug("Draining %d hand(s) into %d table(s)", len(pending), len(latest))
+        try:
+            with db_profile.scope("batch"):
+                latest, unresolved = self._latest_hand_per_table(pending)
+                if not self._db_available:
+                    self._defer_hands(pending)
+                    log.warning("Deferring this batch: database went away during table lookup")
+                    return
+                log.debug("Draining %d hand(s) into %d table(s)", len(pending), len(latest))
 
-            refreshed: set[str] = set()
-            for hand_id in [*latest.values(), *unresolved]:
-                try:
-                    with db_profile.scope("hand"):
-                        served = self.read_stdin(hand_id)
-                except Exception as exc:
-                    if self.note_db_error(exc):
-                        log.warning("Abandoning this batch: database went away while processing hand %s", hand_id)
-                        return
-                    log.exception("Error processing hand %s", hand_id)
-                    with contextlib.suppress(Exception):
-                        self.db_connection.connection.rollback()
-                else:
-                    if served is not None:
-                        refreshed.add(served)
+                refreshed: set[str] = set()
+                for hand_id in [*latest.values(), *unresolved]:
+                    try:
+                        with db_profile.scope("hand"):
+                            served = self.read_stdin(hand_id)
+                    except Exception as exc:
+                        if self.note_db_error(exc):
+                            self._defer_hands(pending)
+                            log.warning("Deferring this batch: database went away while processing hand %s", hand_id)
+                            return
+                        log.exception("Error processing hand %s", hand_id)
+                        with contextlib.suppress(Exception):
+                            self.db_connection.connection.rollback()
+                    else:
+                        if served is not None:
+                            refreshed.add(served)
 
-            # Only the tables actually brought up to date are left out of the
-            # statistics refresh; one that failed still needs it.
-            self._refresh_other_huds(refreshed)
+                # Only the tables actually brought up to date are left out of the
+                # statistics refresh; one that failed still needs it.
+                self._refresh_other_huds(refreshed)
+                if not self._db_available:
+                    self._defer_hands(pending)
+                    log.warning("Deferring this batch: database went away during the HUD refresh")
+                    return
+        finally:
+            self._finish_read_batch()
 
         self._report_batch_round_trips(len(pending), len(self.hud_dict))
 
@@ -1320,6 +1783,8 @@ class HudMain(QObject):
         site_id: int,
         num_seats: int,
         hud_site_name: str | None = None,
+        *,
+        loading: bool = False,
     ) -> None:
         """Create a new HUD for a table."""
         (table_name, max_seats, poker_game, game_type, _, _, site_name, _, tour_number, tab_number, tourney_name) = (
@@ -1339,19 +1804,22 @@ class HudMain(QObject):
             return
 
         log.debug("create new hud for hand %s", new_hand_id)
-        self.db_connection.init_hud_stat_vars(self.hud_params["hud_days"], self.hud_params["h_hud_days"])
-        stat_dict = self.db_connection.get_stats_from_hand(
-            new_hand_id,
-            game_type,
-            self.hud_params,
-            self.hero_ids[site_id],
-            num_seats,
-            poker_game=hud_poker_game,
-        )
-        log.debug("got stats for hand %s", new_hand_id)
+        if loading:
+            stat_dict = {}
+        else:
+            self.db_connection.init_hud_stat_vars(self.hud_params["hud_days"], self.hud_params["h_hud_days"])
+            stat_dict = self.db_connection.get_stats_from_hand(
+                new_hand_id,
+                game_type,
+                self.hud_params,
+                self.hero_ids[site_id],
+                num_seats,
+                poker_game=hud_poker_game,
+            )
+            log.debug("got stats for hand %s", new_hand_id)
 
         # Try to load cached stats to preserve data across restarts
-        cached_stats = self.stats_persistence.load_hud_stats(temp_key)
+        cached_stats = None if loading else self.stats_persistence.load_hud_stats(temp_key)
         if cached_stats:
             log.info(f"Found cached HUD stats for table {temp_key}, merging with current data")
             merged_data = self.stats_persistence.merge_stats(cached_stats, {"stat_dict": stat_dict})
@@ -1359,7 +1827,7 @@ class HudMain(QObject):
             log.debug("Merged cached stats with fresh database stats")
 
         self._merge_positions(stat_dict, new_hand_id)
-        if not any(stat_dict[key]["screen_name"] == self.hero[site_id] for key in stat_dict):
+        if not loading and not any(stat_dict[key]["screen_name"] == self.hero[site_id] for key in stat_dict):
             log.warning(
                 "HUD not created for hand %s table=%s: hero %r (site_id=%s) not among players %s",
                 new_hand_id,
@@ -1370,7 +1838,8 @@ class HudMain(QObject):
             )
             return
 
-        cards = self.get_cards(new_hand_id, poker_game)
+        prepared = self._prepared_hands.get(str(new_hand_id))
+        cards = prepared.cards if prepared is not None else self.get_cards(new_hand_id, poker_game)
         table_kwargs = {
             "table_name": table_name,
             "tournament": tour_number,
@@ -1437,9 +1906,11 @@ class HudMain(QObject):
                 game_type=game_type,
                 stat_dict=stat_dict,
                 cards=cards,
+                hand_instance=prepared.hand_instance if prepared is not None else None,
             )
             self.create_HUD(args)
             if args.temp_key in self.hud_dict:
+                self.hud_dict[args.temp_key].is_loading = loading
                 self.hud_dict[args.temp_key].seat_players = self._seat_players(new_hand_id)
                 self._set_table_stats(self.hud_dict[args.temp_key], new_hand_id)
         else:
@@ -1518,7 +1989,6 @@ class HudMain(QObject):
         if self._last_processed_hands.get(temp_key) == new_hand_id:
             log.debug("Skipping already processed hand ID %s for table %s", new_hand_id, temp_key)
             return None
-        self._last_processed_hands[temp_key] = new_hand_id
 
         if self._handle_tournament_table_changes(game_type, temp_key, tour_number):
             return None  # Stale table was handled
@@ -1528,14 +1998,21 @@ class HudMain(QObject):
             # Re-create the HUD with the new max seats
             self.kill_hud(None, temp_key)
             self._create_new_hud(new_hand_id, temp_key, table_info, site_id, num_seats, hud_site_name)
-            return temp_key
+            if temp_key in self.hud_dict:
+                self._last_processed_hands[temp_key] = new_hand_id
+                return temp_key
+            return None
 
         if temp_key in self.hud_dict:
             log.debug("Updating existing HUD for temp_key: %s", temp_key)
-            self._update_existing_hud(new_hand_id, temp_key, game_type, site_id, num_seats)
+            if not self._update_existing_hud(new_hand_id, temp_key, game_type, site_id, num_seats):
+                return None
         else:
             log.debug("Creating new HUD for temp_key: %s", temp_key)
             self._create_new_hud(new_hand_id, temp_key, table_info, site_id, num_seats, hud_site_name)
+        if temp_key not in self.hud_dict:
+            return None
+        self._last_processed_hands[temp_key] = new_hand_id
         return temp_key
 
     def _set_table_stats(self, hud: Hud.Hud, hand_id: str) -> None:
@@ -1646,20 +2123,21 @@ class HudMain(QObject):
             if table in self.hud_dict:
                 # Save HUD stats before killing to prevent data loss
                 hud = self.hud_dict[table]
-                hud_data = {
-                    "stat_dict": getattr(hud, "stat_dict", {}),
-                    "cards": getattr(hud, "cards", {}),
-                    "poker_game": getattr(hud, "poker_game", ""),
-                    "game_type": getattr(hud, "game_type", ""),
-                    "max_seats": getattr(hud, "max", 0),
-                    "hud_params": getattr(hud, "hud_params", {}),
-                    "last_hand_id": getattr(hud, "last_hand_id", ""),
-                }
+                if not getattr(hud, "is_loading", False):
+                    hud_data = {
+                        "stat_dict": getattr(hud, "stat_dict", {}),
+                        "cards": getattr(hud, "cards", {}),
+                        "poker_game": getattr(hud, "poker_game", ""),
+                        "game_type": getattr(hud, "game_type", ""),
+                        "max_seats": getattr(hud, "max", 0),
+                        "hud_params": getattr(hud, "hud_params", {}),
+                        "last_hand_id": getattr(hud, "last_hand_id", ""),
+                    }
 
-                if self.stats_persistence.save_hud_stats(table, hud_data):
-                    log.info(f"HUD stats saved before restart for table: {table}")
-                else:
-                    log.warning(f"Failed to save HUD stats for table: {table}")
+                    if self.stats_persistence.save_hud_stats(table, hud_data):
+                        log.info(f"HUD stats saved before restart for table: {table}")
+                    else:
+                        log.warning(f"Failed to save HUD stats for table: {table}")
 
                 # Take the label out of the main window and destroy it. setParent(None)
                 # only detached it, which turns a QLabel into a top-level widget --
@@ -1687,7 +2165,14 @@ class HudMain(QObject):
 
             self.hud_dict[args.temp_key].tablehudlabel = newlabel
             self.hud_dict[args.temp_key].tablenumber = args.table.number
-            self.hud_dict[args.temp_key].create(args.new_hand_id, self.config, args.stat_dict)
+            self.hud_dict[args.temp_key].create(
+                args.new_hand_id,
+                self.config,
+                args.stat_dict,
+                prepared=str(args.new_hand_id) in self._prepared_hands,
+                cards=args.cards,
+                hand_instance=args.hand_instance,
+            )
             for aux_index, m in enumerate(self.hud_dict[args.temp_key].aux_windows):
                 try:
                     m.create()
@@ -1707,7 +2192,15 @@ class HudMain(QObject):
         except Exception:
             log.exception("Error creating HUD for hand %s.", args.new_hand_id)
 
-    def idle_update(self, new_hand_id: str, table_name: str, config: Configuration.Config) -> None:
+    def idle_update(
+        self,
+        new_hand_id: str,
+        table_name: str,
+        config: Configuration.Config,
+        *,
+        cards: dict[str, Any] | None = None,
+        hand_instance: Any = None,
+    ) -> None:
         """Show a new hand on one table.
 
         Hud.update owns the new-hand cycle: it rebuilds the hand, re-reads the
@@ -1720,7 +2213,16 @@ class HudMain(QObject):
         try:
             log.debug("idle_update entered for %s %s", table_name, new_hand_id)
             hud = self.hud_dict[table_name]
-            hud.update(new_hand_id, config)
+            if str(new_hand_id) in self._prepared_hands:
+                hud.update(
+                    new_hand_id,
+                    config,
+                    prepared=True,
+                    cards=cards,
+                    hand_instance=hand_instance,
+                )
+            else:
+                hud.update(new_hand_id, config)
             hud_trace(
                 "idle_update OK: table=%s hand=%s aux_windows=%d",
                 table_name,

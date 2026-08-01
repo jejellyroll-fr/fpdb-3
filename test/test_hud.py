@@ -149,6 +149,7 @@ class TestHudInitialization(unittest.TestCase):
             assert hud.game_type == "ring"
             assert hud.max == 6
             assert hud.site == "PokerStars"
+            assert hud.is_loading is False
 
             # Check that hud_params is a copy, not reference
             assert hud.hud_params == self.mock_parent.hud_params
