@@ -23,6 +23,12 @@ from fpdb_3_legacy.loggingFpdb import get_logger
 
 log = get_logger("db")
 
+# How long the 24-hour boundary hand id is reused before being re-read. It is a
+# sliding boundary, so any value here is a compromise; five minutes of drift on
+# a 24-hour window is invisible, and it turns one query per table per hand into
+# one query per five minutes.
+HAND_1DAY_AGO_TTL = 300.0
+
 
 class DatabaseHudStatsMixin:
     """Reads the aggregates the HUD displays.
@@ -47,6 +53,9 @@ class DatabaseHudStatsMixin:
 
     # Set by _inject_hud_chipev_columns, below.
     _hud_chipev_clause: str
+
+    # Provided by Database; reset by its resetCache.
+    _hand_1day_ago_read_at: float
 
     if TYPE_CHECKING:
 
@@ -157,18 +166,35 @@ class DatabaseHudStatsMixin:
                 self._hud_chipev_clause = ""
         return sql_text.replace("<chipev_columns>", self._hud_chipev_clause)
 
-    def init_hud_stat_vars(self, hud_days, h_hud_days) -> None:
-        """Initialise variables used by Hud to fetch stats:
-        self.hand_1day_ago     handId of latest hand played more than a day ago
-        self.date_ndays_ago    date n days ago
-        self.h_date_ndays_ago  date n days ago for hero (different n).
+    def _refresh_hand_1day_ago(self) -> None:
+        """Re-read the 24-hour boundary hand id, at most once per TTL.
+
+        It is a sliding boundary on a 24-hour window, so it is always a little
+        stale by construction and a few minutes more changes nothing about
+        which hands count as "this session". The HUD asks for it once per open
+        table per hand dealt, which measurably made it one of the three largest
+        sources of round trips (tools/measure_hud_round_trips.py) -- for a
+        value that moves once a day.
         """
+        now = time()
+        if self._hand_1day_ago_read_at and now - self._hand_1day_ago_read_at < HAND_1DAY_AGO_TTL:
+            return
+
         self.hand_1day_ago = 1
         c = self.get_cursor()
         c.execute(self.sql.query["get_hand_1day_ago"])
         row = c.fetchone()
         if row and row[0]:
             self.hand_1day_ago = int(row[0])
+        self._hand_1day_ago_read_at = now
+
+    def init_hud_stat_vars(self, hud_days, h_hud_days) -> None:
+        """Initialise variables used by Hud to fetch stats:
+        self.hand_1day_ago     handId of latest hand played more than a day ago
+        self.date_ndays_ago    date n days ago
+        self.h_date_ndays_ago  date n days ago for hero (different n).
+        """
+        self._refresh_hand_1day_ago()
 
         tz = datetime.utcnow() - datetime.today()
         tz_offset = (tz.seconds) // (3600)
