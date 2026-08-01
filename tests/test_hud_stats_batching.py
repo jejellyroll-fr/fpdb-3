@@ -13,8 +13,10 @@ it is first identical.
 
 from __future__ import annotations
 
+import sqlite3
 import tempfile
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 
@@ -47,6 +49,14 @@ def imported_db():
         pytest.skip(f"no hand histories at {HANDS_DIR}")
 
     with tempfile.TemporaryDirectory() as tmpdir:
+        sqlite_connections = []
+        sqlite_connect = sqlite3.connect
+
+        def tracked_sqlite_connect(*args, **kwargs):
+            connection = sqlite_connect(*args, **kwargs)
+            sqlite_connections.append(connection)
+            return connection
+
         cfg = Config(file=str(REPO / "HUD_config.xml"))
         params = cfg.get_db_parameters()
         params.update(
@@ -60,37 +70,44 @@ def imported_db():
         )
         cfg.get_db_parameters = lambda: params
 
-        db = Database(cfg)
-        db.recreate_tables()
-        importer = Importer(None, {"threads": 1}, cfg, sql=db.sql)
-        # Importer creates its own connection before the fixture replaces it.
-        # POSIX lets TemporaryDirectory unlink that still-open SQLite file, but
-        # Windows keeps it locked, so close the superseded connection first.
-        importer.database.disconnect()
-        importer.database = db
-        try:
-            importer.setCallHud(False)
-            importer.setMode("bulk")
-            importer.addBulkImportImportFileOrDir(str(HANDS_DIR), site=SITE)
-            importer.runImport()
-            db.connection.commit()
+        with patch("sqlite3.connect", side_effect=tracked_sqlite_connect):
+            db = Database(cfg)
+            db.recreate_tables()
+            importer = Importer(None, {"threads": 1}, cfg, sql=db.sql)
+            # Importer creates its own connection before the fixture replaces it.
+            # POSIX lets TemporaryDirectory unlink that still-open SQLite file, but
+            # Windows keeps it locked, so close the superseded connection first.
+            importer.database.disconnect()
+            importer.database = db
+            try:
+                importer.setCallHud(False)
+                importer.setMode("bulk")
+                importer.addBulkImportImportFileOrDir(str(HANDS_DIR), site=SITE)
+                importer.runImport()
+                db.connection.commit()
 
-            # The worker connections are no longer needed after runImport and
-            # would keep the SQLite file locked through fixture teardown on
-            # Windows.
-            for writer_db in importer.writerdbs:
-                writer_db.disconnect()
-            importer.writerdbs.clear()
+                # The worker connections are no longer needed after runImport and
+                # would keep the SQLite file locked through fixture teardown on
+                # Windows.
+                for writer_db in importer.writerdbs:
+                    writer_db.disconnect()
+                importer.writerdbs.clear()
 
-            # Keep importer referenced while the tests run: its __del__ would
-            # otherwise disconnect the shared database early.
-            yield db, importer
-        finally:
-            importer.database = None
-            for writer_db in importer.writerdbs:
-                writer_db.disconnect()
-            importer.writerdbs.clear()
-            db.disconnect()
+                # Keep importer referenced while the tests run: its __del__ would
+                # otherwise disconnect the shared database early.
+                yield db, importer
+            finally:
+                importer.database = None
+                for writer_db in importer.writerdbs:
+                    writer_db.disconnect()
+                importer.writerdbs.clear()
+                db.disconnect()
+
+                # Some import paths create short-lived Database objects outside
+                # Importer's public connection lists. Closing every connection
+                # opened by this fixture makes Windows teardown deterministic.
+                for connection in reversed(sqlite_connections):
+                    connection.close()
 
 
 def some_hands(db, count):
