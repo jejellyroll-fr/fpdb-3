@@ -34,8 +34,9 @@ from time import sleep, time
 from typing import Any
 
 import pytz
+from cachetools import TTLCache
 
-from fpdb_3_legacy import SQL, Card, Configuration
+from fpdb_3_legacy import SQL, Card, Configuration, db_profile
 from fpdb_3_legacy.database_aof import DatabaseAofMixin
 from fpdb_3_legacy.database_auto_notes import DatabaseAutoNotesMixin
 from fpdb_3_legacy.database_bulk_import import DatabaseBulkImportMixin
@@ -54,6 +55,12 @@ from fpdb_3_legacy.database_schema import DB_VERSION, DatabaseSchemaMixin
 # columns; re-exported because four test modules import it from Database.
 from fpdb_3_legacy.database_schema import HANDS_PLAYERS_KEYS as HANDS_PLAYERS_KEYS
 from fpdb_3_legacy.database_tournaments import DatabaseTournamentsMixin
+from fpdb_3_legacy.db_reconnect import (
+    MYSQL_NETWORK_KWARGS,
+    PG_NETWORK_KWARGS,
+    RECONNECT_COOLDOWN,
+    reconnect_on_connection_loss,
+)
 from fpdb_3_legacy.Exceptions import (
     FpdbError,
     FpdbMySQLAccessDenied,
@@ -75,6 +82,12 @@ from fpdb_3_legacy.loggingFpdb import get_logger
 
 
 re_char = re.compile("[^a-zA-Z]")
+
+# Gametype-per-hand cache. A hand's game is fixed when the hand is written, so
+# the TTL is only there to bound how long a re-imported hand could be served
+# from a stale entry; the size bounds a long multi-tabling session.
+GAMEINFO_CACHE_SIZE = 2000
+GAMEINFO_CACHE_TTL = 3600
 
 #    FreePokerTools modules
 
@@ -274,9 +287,22 @@ class Database(
         self._hero = None
         self._has_lock = False
         self.printdata = False
+        # Read caches for values the HUD asks for once per open table per hand
+        # dealt, but which cannot have changed in between; see
+        # get_gameinfo_from_hid and database_hud_stats._refresh_hand_1day_ago.
+        # Created before resetCache, which is what empties them.
+        self._gameinfo_cache: TTLCache = TTLCache(maxsize=GAMEINFO_CACHE_SIZE, ttl=GAMEINFO_CACHE_TTL)
+        self._hand_1day_ago_read_at = 0.0
         self.resetCache()
         self.resetBulkCache()
         self._in_transaction = 0
+        # Reconnection state (see db_reconnect). The guard collapses nested
+        # decorated calls onto a single retry; the deadline throttles reconnect
+        # attempts so a database that stays unreachable costs one connect
+        # timeout per cooldown window instead of one per query.
+        self._reconnect_guard = False
+        self._reconnect_blocked_until = 0.0
+        self._connection_down_logged = False
 
         if "day_start" in gen:
             self.day_start = float(gen["day_start"])
@@ -462,6 +488,11 @@ class Database(
         else:
             raise FpdbError("unrecognised database backend:" + str(backend))
 
+        # Off unless FPDB_DB_PROFILE=1, in which case every statement issued
+        # through this connection is counted and attributed (see db_profile).
+        # Done here so it survives a reconnect, which comes back through connect().
+        self.connection = db_profile.wrap_connection(self.connection, getattr(self.sql, "query", None))
+
         if self.is_connected():
             self.cursor = self.connection.cursor()
             self.cursor.execute(self.sql.query["set tx level"])
@@ -489,6 +520,7 @@ class Database(
                 "db": database,
                 "charset": "utf8",
                 "use_unicode": True,
+                **MYSQL_NETWORK_KWARGS,
             }
             if port:
                 kwargs["port"] = int(port)
@@ -514,10 +546,17 @@ class Database(
         # psycopg3 handles Unicode natively, no need for register_type(UNICODE)
         # psycopg3 has native Decimal support, no adapter registration needed
 
+        # PG_NETWORK_KWARGS bounds the connect itself and arms TCP keepalives on
+        # the resulting socket. Without the keepalives a connection to a remote
+        # database (typically over a VPN) does not fail when the link drops --
+        # it hangs forever inside the kernel's retransmit loop, taking the HUD's
+        # event loop and the auto-import worker down with it. libpq ignores the
+        # keepalive settings on a local Unix socket, so the peer connection
+        # below is unaffected.
         self.__connected = False
         if self.host in ("localhost", "127.0.0.1"):
             try:
-                self.connection = psycopg.connect(dbname=database)
+                self.connection = psycopg.connect(dbname=database, **PG_NETWORK_KWARGS)
                 self.__connected = True
             except psycopg.OperationalError:
                 # direct connection failed so try user/pass/... version
@@ -531,6 +570,7 @@ class Database(
                     user=user,
                     password=password,
                     dbname=database,
+                    **PG_NETWORK_KWARGS,
                 )
                 self.__connected = True
             except Exception as ex:  # intentional broad catch: psycopg connection error inspected and re-raised as a typed FpdbError
@@ -737,9 +777,108 @@ class Database(
 
     def reconnect(self, due_to_error=False) -> None:
         """Reconnects the DB."""
-        # print "started reconnect"
         self.disconnect(due_to_error)
-        self.connect(self.backend, self.host, self.database, self.user, self.password)
+        # Keyword arguments on purpose: connect() takes (backend, host, port,
+        # database, user, password), so the positional call this used to make
+        # silently passed the database as the port and the user as the database.
+        self.connect(
+            backend=self.backend,
+            host=self.host,
+            port=self.port,
+            database=self.database,
+            user=self.user,
+            password=self.password,
+        )
+
+    def _force_disconnect(self) -> None:
+        """Drop the connection without touching it, for use after it has died.
+
+        ``disconnect()`` commits or rolls back on the way out, which is exactly
+        what a broken socket cannot do: the recovery path would raise inside its
+        own cleanup and never get as far as reconnecting.
+        """
+        self._close_cursor_quietly()
+        with contextlib.suppress(Exception):
+            if self.connection is not None:
+                self.connection.close()
+        self.connection = None
+        self.__connected = False
+
+    def connection_is_alive(self) -> bool:
+        """Check the connection with a round trip to the server.
+
+        Cheap, but not free -- it is a real query, so callers should use it to
+        check once per work cycle rather than once per statement. Query paths
+        detect a dead connection reactively instead, via
+        ``reconnect_on_connection_loss``.
+        """
+        if not self.is_connected() or self.connection is None:
+            return False
+        if self.backend == self.SQLITE:
+            return True
+        try:
+            c = self.connection.cursor()
+            c.execute("SELECT 1")
+            c.fetchone()
+            c.close()
+        except Exception as exc:  # intentional broad catch: any failure here means the connection is unusable
+            log.debug("Connection liveness check failed: %s", exc)
+            return False
+        return True
+
+    def recover_connection(self) -> bool:
+        """Re-open a connection that has been lost, at most once per cooldown.
+
+        Returns:
+            True when a usable connection is available afterwards.
+
+        A database that stays unreachable -- the VPN is still down -- must stay
+        cheap to ask about: without the cooldown every HUD hand would pay a full
+        connect timeout, recreating the stall this whole mechanism exists to
+        remove. Recovery happens on the first query after the link returns.
+        """
+        if self.backend == self.SQLITE:
+            return self.is_connected()
+
+        now = time()
+        if now < self._reconnect_blocked_until:
+            log.debug(
+                "Skipping reconnect attempt, still in cooldown for %.1fs",
+                self._reconnect_blocked_until - now,
+            )
+            return False
+
+        self._force_disconnect()
+        try:
+            self.reconnect(due_to_error=True)
+        except Exception as exc:  # intentional broad catch: any connect failure means we stay offline and retry later
+            self._reconnect_blocked_until = time() + RECONNECT_COOLDOWN
+            if not self._connection_down_logged:
+                # Log the outage once, then stay quiet: the auto-import retries
+                # every few seconds and would otherwise flood the log.
+                log.error("Database is unreachable, will keep retrying: %s", exc)
+                self._connection_down_logged = True
+            else:
+                log.debug("Reconnect attempt failed: %s", exc)
+            return False
+
+        self._reconnect_blocked_until = 0.0
+        if self._connection_down_logged:
+            log.info("Database connection re-established.")
+            self._connection_down_logged = False
+        return self.is_connected()
+
+    def ensure_connection(self) -> bool:
+        """Make sure the connection is usable before starting a unit of work.
+
+        Returns:
+            True when the caller may proceed to query the database.
+        """
+        if self.connection_is_alive():
+            return True
+        if not self._connection_down_logged:
+            log.warning("Database connection is not usable; attempting to reconnect.")
+        return self.recover_connection()
 
     def get_backend_name(self) -> str:
         """Returns the name of the currently used backend."""
@@ -755,11 +894,13 @@ class Database(
     def get_db_info(self):
         return (self.host, self.database, self.user, self.password)
 
+    @reconnect_on_connection_loss
     def get_table_name(self, hand_id):
         c = self.connection.cursor()
         c.execute(self.sql.query["get_table_name"], (hand_id,))
         return c.fetchone()
 
+    @reconnect_on_connection_loss
     def get_table_info(self, hand_id):
         c = self.connection.cursor()
         c.execute(self.sql.query["get_table_name"], (hand_id,))
@@ -829,6 +970,18 @@ class Database(
         return c.fetchall()
 
     def get_gameinfo_from_hid(self, hand_id):
+        """Return the gametype of a hand, as Hand.hand_factory wants it.
+
+        Cached: a hand's game is settled when the hand is written and never
+        changes afterwards, while the HUD asks for it once per open table per
+        hand dealt -- measurably the joint second-largest source of round trips
+        (see tools/measure_hud_round_trips.py), which over a VPN is pure
+        latency for an answer that cannot have moved.
+        """
+        cached = self._gameinfo_cache.get(hand_id)
+        if cached is not None:
+            return cached
+
         # returns a gameinfo (gametype) dictionary suitable for passing
         # to Hand.hand_factory
         c = self.connection.cursor()
@@ -838,10 +991,12 @@ class Database(
         row = c.fetchone()
 
         if row is None:
+            # Not cached: the hand may simply not be committed yet, and caching
+            # the miss would keep answering "no such hand" after it arrives.
             log.warning(f"No game info found for hand ID {hand_id}")
             return None
 
-        return {
+        gameinfo = {
             "sitename": row[0],
             "category": row[1],
             "base": row[2],
@@ -856,6 +1011,8 @@ class Database(
             "gametypeId": row[11],
             "split": row[12],
         }
+        self._gameinfo_cache[hand_id] = gameinfo
+        return gameinfo
 
     #   Query 'get_hand_info' does not exist, so it seems
     #    def get_hand_info(self, new_hand_id):
@@ -904,6 +1061,7 @@ class Database(
         row = c.fetchone()
         return row[0]
 
+    @reconnect_on_connection_loss
     def get_cards(self, hand):
         """Get and return the cards for each player in the hand."""
         cards = {}  # dict of cards, the key is the seat number,
@@ -949,6 +1107,7 @@ class Database(
 
 
 
+    @reconnect_on_connection_loss
     def get_common_cards(self, hand):
         """Get and return the community cards for the specified hand."""
         cards = {}
@@ -1084,6 +1243,15 @@ class Database(
         self.tcache = None  # TourneyId cache
         self.pcache = None  # PlayerId cache
         self.tpcache = None  # TourneysPlayersId cache
+        # Read caches keyed by hand id. recreate_tables() comes through here,
+        # and it restarts hand ids from 1 -- an entry kept across that would be
+        # served for a different hand entirely. Read defensively: resetCache
+        # also runs on the transaction-rollback path, and clearing a cache must
+        # never be the thing that makes a rollback fail.
+        gameinfo_cache = getattr(self, "_gameinfo_cache", None)
+        if gameinfo_cache is not None:
+            gameinfo_cache.clear()
+        self._hand_1day_ago_read_at = 0.0
 
     def get_last_insert_id(self, cursor=None):
         ret = None

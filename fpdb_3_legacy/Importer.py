@@ -29,7 +29,7 @@ import zmq as _zmq
 from PySide6.QtCore import QCoreApplication
 from PySide6.QtWidgets import QDialog, QLabel, QProgressBar, QVBoxLayout
 
-from fpdb_3_legacy import Configuration, Database, IdentifySite
+from fpdb_3_legacy import Configuration, Database, IdentifySite, db_profile
 from fpdb_3_legacy.Exceptions import (
     FpdbHandDuplicate,
     FpdbHandPartial,
@@ -70,6 +70,11 @@ log = get_logger("importer")
 
 IMPORTER_FILE_READ_ERRORS = (OSError, UnicodeDecodeError)
 ZMQ_CLOSE_ERRORS = (RuntimeError, zmq.ZMQError)
+
+# Round-trip profiling (off unless FPDB_DB_PROFILE=1). Module-level rather than
+# per-Importer: the profile it reports is process-wide anyway, and a profiling
+# hook must not be something the import path can trip over.
+_profile_reporter = db_profile.DeltaReporter("Auto-import round-trip profile:")
 
 
 class ZMQSender:
@@ -962,6 +967,21 @@ class Importer:
 
         Scans the tracked directories and files, imports any files that have changed, updates their state, and performs post-import cleanup.
         """
+        # Importing a file is a multi-statement transaction, so there is no safe
+        # way to replay it after the connection dies half way through -- the
+        # connection is checked here instead, between cycles. Skipping the cycle
+        # (rather than raising) leaves the files untracked and un-timestamped,
+        # so they are picked up by the next cycle once the database is back.
+        if not self.database.ensure_connection():
+            log.warning("Auto-import cycle skipped: database unreachable.")
+            return
+
+        with db_profile.scope("import_cycle"):
+            self._run_updated_cycle()
+        _profile_reporter.maybe_log()
+
+    def _run_updated_cycle(self) -> None:
+        """One pass over the tracked directories and files."""
         for site, type in self.dirlist:
             self.addImportDirectory(
                 self.dirlist[(site, type)][0],

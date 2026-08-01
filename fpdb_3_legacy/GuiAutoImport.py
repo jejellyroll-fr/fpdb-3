@@ -60,14 +60,25 @@ if os.name == "nt":
         win32console = None
 
 
+# Import cycles overrunning their interval back to back. One or two is a large
+# batch; this many means the worker is wedged and the user deserves to be told.
+DEFERRED_CYCLES_BEFORE_WARNING = 6
+
+# How long "Stop Auto Import" waits for the worker before giving up on it. Long
+# enough for an ordinary cycle to land, short enough not to read as a freeze.
+STOP_WAIT_MS = 5000
+
+
 def to_raw(string) -> str:
     return rf"{string}"
 
 
 class AutoImportThread(QThread):
     """Worker thread to run auto-import cycle off the main GUI thread."""
+
     finished = Signal()
     error = Signal(str)
+    db_offline = Signal()
 
     def __init__(self, importer) -> None:
         super().__init__()
@@ -75,6 +86,12 @@ class AutoImportThread(QThread):
 
     def run(self) -> None:
         try:
+            # Checked here rather than left to fail mid-cycle so the GUI can say
+            # the database is away, instead of reporting a raw driver error once
+            # every interval for as long as the outage lasts.
+            if not self.importer.database.ensure_connection():
+                self.db_offline.emit()
+                return
             self.importer.autoSummaryGrab()
             self.importer.runUpdated()
             self.finished.emit()
@@ -91,6 +108,14 @@ class GuiAutoImport(QWidget):
             self.log_message.connect(self._addText_slot)
         self.importtimer: QTimer | None = None
         self.import_thread: AutoImportThread | None = None
+        # Outage bookkeeping, so the database going away is reported once rather
+        # than once per interval, and its return is reported too.
+        self._deferred_cycles = 0
+        self._db_offline = False
+        # When Stop's bounded wait expires, cleanup is deferred until the
+        # worker really exits. The importer, its database connection and the
+        # global lock must remain exclusively owned by that worker meanwhile.
+        self._stop_cleanup_pending = False
         self.settings = settings
         self.config = config
         self.sql = sql
@@ -330,15 +355,31 @@ class GuiAutoImport(QWidget):
         """Callback for timer to do an import iteration asynchronously."""
         if self.doAutoImportBool:
             if self.import_thread is not None and self.import_thread.isRunning():
-                log.debug("AutoImport: previous import thread is still running, deferring this iteration.")
+                # A cycle that overruns one interval is normal on a big batch;
+                # one that overruns many means the worker is wedged -- most
+                # often on a database that stopped answering. Say so once,
+                # because silence here is what made this look like the importer
+                # had simply decided to stop working.
+                self._deferred_cycles += 1
+                if self._deferred_cycles == DEFERRED_CYCLES_BEFORE_WARNING:
+                    log.warning(
+                        "AutoImport: no import cycle has completed in %d intervals; "
+                        "the worker is still busy (slow import, or an unresponsive database).",
+                        self._deferred_cycles,
+                    )
+                    self.statusLabel.setText(_("Import cycle is taking longer than usual..."))
+                else:
+                    log.debug("AutoImport: previous import thread is still running, deferring this iteration.")
                 return True
 
+            self._deferred_cycles = 0
             self.progressBar.setVisible(True)
             self.progressBar.setMaximum(0)  # Indeterminate progress
 
             self.import_thread = AutoImportThread(self.importer)
             self.import_thread.finished.connect(self.import_finished)
             self.import_thread.error.connect(self.import_error)
+            self.import_thread.db_offline.connect(self.import_db_offline)
             self.import_thread.start()
             return True
         return False
@@ -346,7 +387,71 @@ class GuiAutoImport(QWidget):
     def import_finished(self) -> None:
         """Called when auto import cycle finishes in the background."""
         self.progressBar.setVisible(False)
+        if self._db_offline:
+            self._db_offline = False
+            self.addText(_("\nDatabase is back. Auto Import resumed."), "info")
+        status = _("Stopping Auto Import...") if self._stop_cleanup_pending else _("Ready")
+        self.statusLabel.setText(status)
         log.debug("AutoImport: background import cycle finished successfully")
+
+    def import_db_offline(self) -> None:
+        """Called when a cycle was skipped because the database is unreachable."""
+        self.progressBar.setVisible(False)
+        self.statusLabel.setText(_("Database unreachable - retrying"))
+        if not self._db_offline:
+            # Once per outage, not once per interval.
+            self._db_offline = True
+            log.warning("AutoImport: database unreachable, cycles are paused until it returns.")
+            self.addText(_("\nDatabase unreachable. Auto Import paused, retrying..."), "error")
+
+    def _stop_import_worker(self) -> bool:
+        """Wait, briefly, for the running import cycle to finish.
+
+        Returns:
+            True when there is no longer a cycle running.
+
+        The wait is bounded on purpose. It runs on the UI thread, so waiting
+        without a timeout on a worker stuck against an unresponsive database
+        froze the window and left force-quit as the only way out. An overrunning
+        worker is left to finish on its own instead.
+        """
+        if self.import_thread is None or not self.import_thread.isRunning():
+            return True
+        if self.import_thread.wait(STOP_WAIT_MS):
+            return True
+        log.warning("AutoImport: import worker did not stop in time; leaving it to finish.")
+        self.addText(
+            _("\nStop requested while an import was still running; it will finish in the background."),
+            "warning",
+        )
+        return False
+
+    def _wait_for_import_worker_stop(self) -> None:
+        """Finish a pending Stop once the import worker has really exited."""
+        if not self._stop_cleanup_pending:
+            return
+        if self.import_thread is not None and self.import_thread.isRunning():
+            QTimer.singleShot(250, self._wait_for_import_worker_stop)
+            return
+        self._finalize_auto_import_stop()
+
+    def _finalize_auto_import_stop(self) -> None:
+        """Release importer resources after no worker can still be using them."""
+        self._stop_cleanup_pending = False
+        self.importer.autoSummaryGrab(True)
+        self.settings["global_lock"].release()
+        self.addText("\nStopping Auto Import. Global lock released.", "unlock")
+        self.progressBar.setVisible(False)
+        self.statusLabel.setText(_("Ready"))
+        if self.pipe_to_hud and self.pipe_to_hud.poll() is not None:
+            self.addText("\n * Stop Auto Import: HUD already terminated.", "hud")
+        else:
+            if self.pipe_to_hud:
+                self.pipe_to_hud.terminate()
+                log.debug(f"pipe_to_hud stdin: {self.pipe_to_hud.stdin}")
+            self.pipe_to_hud = None
+        self.intervalEntry.setEnabled(True)
+        self.startButton.setEnabled(True)
 
     def import_error(self, error_msg: str) -> None:
         """Called when auto import cycle fails in the background."""
@@ -645,21 +750,17 @@ class GuiAutoImport(QWidget):
             if self.importtimer:
                 self.importtimer.stop()
                 self.importtimer = None
-            if self.import_thread is not None and self.import_thread.isRunning():
-                self.import_thread.wait()
-            self.importer.autoSummaryGrab(True)
-            self.settings["global_lock"].release()
-            self.addText("\nStopping Auto Import. Global lock released.", "unlock")
-            self.progressBar.setVisible(False)
-            self.statusLabel.setText(_("Ready"))
-            if self.pipe_to_hud and self.pipe_to_hud.poll() is not None:
-                self.addText("\n * Stop Auto Import: HUD already terminated.", "hud")
-            else:
-                if self.pipe_to_hud:
-                    self.pipe_to_hud.terminate()
-                    log.debug(f"pipe_to_hud stdin: {self.pipe_to_hud.stdin}")
-                self.pipe_to_hud = None
-            self.intervalEntry.setEnabled(True)
+            if self._stop_cleanup_pending:
+                return
+            if not self._stop_import_worker():
+                # Do not touch the Importer, its connection, the HUD process or
+                # the global lock while runUpdated() can still be using them.
+                self._stop_cleanup_pending = True
+                self.startButton.setEnabled(False)
+                self.statusLabel.setText(_("Stopping Auto Import..."))
+                QTimer.singleShot(250, self._wait_for_import_worker_stop)
+                return
+            self._finalize_auto_import_stop()
 
     # end def GuiAutoImport.startClicked
 

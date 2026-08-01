@@ -21,6 +21,7 @@ if _repo_root not in sys.path:
 if sys.platform.startswith("linux") and os.getenv("FPDB_FORCE_X11") == "1":
     os.environ.setdefault("QT_QPA_PLATFORM", "xcb")
 
+import threading
 import time
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -39,7 +40,8 @@ from PySide6.QtGui import QCloseEvent, QIcon
 from PySide6.QtWidgets import QApplication, QLabel, QVBoxLayout, QWidget
 from qt_material import apply_stylesheet
 
-from fpdb_3_legacy import Aux_Base, Configuration, Database, Deck, Hud, Options
+from fpdb_3_legacy import Aux_Base, Configuration, Database, Deck, Hud, Options, db_profile
+from fpdb_3_legacy.db_reconnect import is_connection_lost
 from fpdb_3_legacy.HudStatsPersistence import get_hud_stats_persistence
 from fpdb_3_legacy.loggingFpdb import get_logger, hud_trace
 from fpdb_3_legacy.SmartHudManager import RestartReason, get_smart_hud_manager
@@ -53,6 +55,11 @@ log = get_logger("hud_main")
 # into one batch, so each HUD is refreshed once rather than once per hand. Long
 # enough to catch the burst, short enough to stay ahead of the player acting.
 HAND_BATCH_INTERVAL_MS = 200
+
+# How long the recovery worker waits between attempts to re-open a database
+# connection that has dropped. Database.recover_connection has its own cooldown;
+# this only decides how often we ask.
+DB_RECOVERY_INTERVAL_S = 5.0
 
 
 @dataclass
@@ -95,6 +102,48 @@ class ZMQWorker(QThread):
         """Stop the worker thread."""
         self.is_running = False
         self.wait()
+
+
+class DbRecoveryWorker(QThread):
+    """Re-opens a dropped database connection away from the UI thread.
+
+    Reconnecting costs a full connect timeout when the database is unreachable,
+    which is exactly the stall the HUD must not take on the thread that repaints
+    it. This thread owns the connection for the duration of the outage: it is
+    started only once HudMain has stopped querying (the breaker is open) and it
+    stops before HudMain resumes, so the connection still has a single user at
+    any moment despite being touched from two threads.
+    """
+
+    recovered = Signal()
+
+    def __init__(self, db_connection, parent: QObject | None = None) -> None:
+        """Initialize the recovery worker."""
+        super().__init__(parent)
+        self.db_connection = db_connection
+        # An Event rather than a sleep plus a flag, so closing the HUD during an
+        # outage does not wait out the retry interval before shutting down.
+        self._stopping = threading.Event()
+
+    def run(self) -> None:
+        """Retry the connection until it comes back or shutdown is requested."""
+        log.info("Database recovery worker started")
+        while not self._stopping.wait(DB_RECOVERY_INTERVAL_S):
+            try:
+                if self.db_connection.recover_connection():
+                    log.info("Database connection recovered; resuming HUD updates")
+                    self.recovered.emit()
+                    return
+            except Exception:
+                log.exception("Database recovery attempt failed unexpectedly")
+
+    def stop(self) -> None:
+        """Stop the worker thread."""
+        self._stopping.set()
+        # Bounded: an attempt already inside connect() has to run out its own
+        # connect timeout, but shutdown must not hang on it either.
+        if not self.wait(15000):
+            log.warning("Database recovery worker did not stop in time")
 
 
 class ZMQReceiver(QObject):
@@ -359,6 +408,16 @@ class HudMain(QObject):
             # HUD exactly once, without re-running create/update on a duplicate.
             self._last_processed_hands: dict[str, str] = {}
             self.blacklist: list[Any] = []
+            # Circuit breaker around the database. Every read below runs on the
+            # UI thread, so one unreachable database would otherwise freeze the
+            # HUD once per hand for as long as the outage lasts. Once a read
+            # fails on a lost connection we stop querying entirely and hand the
+            # connection to DbRecoveryWorker until it reports the link is back.
+            self._db_available = True
+            self._db_recovery_worker: DbRecoveryWorker | None = None
+            # Statements counted at the end of the previous batch, so each batch
+            # can report its own cost rather than the running total.
+            self._last_batch_queries = 0
             self.hud_params = self.config.get_hud_ui_parameters()
             self.deck = Deck.Deck(
                 self.config,
@@ -448,6 +507,53 @@ class HudMain(QObject):
         """Handle errors from the ZMQ worker."""
         log.error("ZMQWorker encountered an error: %s", error_message)
 
+    def note_db_error(self, exc: BaseException) -> bool:
+        """Open the breaker if ``exc`` means the connection is gone.
+
+        Returns:
+            True when the database is now considered unavailable, so the caller
+            can stop working on a hand it has no way of finishing.
+
+        Database already reconnects and replays a query transparently; an error
+        still reaching here means that failed too, and the link is genuinely
+        down rather than merely interrupted.
+        """
+        if not is_connection_lost(self.db_connection.backend, exc):
+            return False
+        if self._db_available:
+            log.error("Database unreachable; HUD updates are paused until it returns (%s)", exc)
+            self._db_available = False
+            self._start_db_recovery()
+        return True
+
+    def _start_db_recovery(self) -> None:
+        """Hand the connection to the recovery thread for the outage."""
+        if self._db_recovery_worker is not None and self._db_recovery_worker.isRunning():
+            return
+        worker = DbRecoveryWorker(self.db_connection, parent=self)
+        worker.recovered.connect(self._on_db_recovered)
+        self._db_recovery_worker = worker
+        worker.start()
+
+    def _on_db_recovered(self) -> None:
+        """Resume querying once the recovery thread has restored the link."""
+        # Runs on the UI thread (queued signal), and the worker has already
+        # returned from run(), so the connection is unowned at this point.
+        self._db_available = True
+        # Table info cached against the old connection is still valid -- it
+        # describes hands, not the connection -- but hands that arrived during
+        # the outage are gone, and the HUDs are repainted from the next hand.
+        log.info("Database available again; HUD updates resumed")
+
+    def _stop_db_recovery(self) -> None:
+        """Stop the recovery thread, if one is running."""
+        worker = getattr(self, "_db_recovery_worker", None)
+        if worker is None:
+            return
+        self._db_recovery_worker = None
+        with contextlib.suppress(RuntimeError):
+            worker.stop()
+
     def init_main_window(self) -> None:
         """Initialize the main application window."""
         self.main_window = HudMainWindow(self.close_event_handler)
@@ -481,6 +587,12 @@ class HudMain(QObject):
         """Handle an incoming message from the ZMQ receiver."""
         # This method will be called in the main thread
         log.info("HUD RECEIVED MESSAGE - hand_id: %s", hand_id)
+
+        if not self._db_available:
+            # The recovery thread owns the connection while the breaker is open;
+            # touching it here would both race with it and block the UI thread.
+            log.debug("Dropping hand %s: database unavailable", hand_id)
+            return
 
         # Defensive rollback: ensure the PostgreSQL connection is not stuck in
         # an aborted transaction state from a previous error.  Under PostgreSQL,
@@ -518,6 +630,8 @@ class HudMain(QObject):
                 batch_timer.stop()
         self._pending_hands = []
 
+        self._stop_db_recovery()
+
         zmq_worker = getattr(self, "zmq_worker", None)
         if zmq_worker is not None:
             with contextlib.suppress(RuntimeError):
@@ -529,6 +643,8 @@ class HudMain(QObject):
             with contextlib.suppress(RuntimeError):
                 zmq_receiver.close()
             self.zmq_receiver = None
+
+        db_profile.get_profile().log_report("HUD database round-trip profile:")
 
         log.info("Quitting normally")
         QCoreApplication.quit()
@@ -750,7 +866,12 @@ class HudMain(QObject):
         log.debug("Data not found in cache for hand_id: %s", hand_id)
         try:
             table_info = self.db_connection.get_table_info(hand_id)
-        except Exception:
+        except Exception as exc:
+            if self.note_db_error(exc):
+                # Swallowing this one would make every hand of the outage look
+                # like a hand that is merely not committed yet, which is how the
+                # HUD used to die silently and stay dead.
+                return None
             log.exception("Database error while processing hand %s", hand_id)
             try:
                 self.db_connection.connection.rollback()
@@ -858,6 +979,7 @@ class HudMain(QObject):
 
         return hud_poker_game, None
 
+    @db_profile.scoped("update_hud")
     def _update_existing_hud(
         self,
         new_hand_id: str,
@@ -931,25 +1053,60 @@ class HudMain(QObject):
         pending, self._pending_hands = self._pending_hands, []
         if not pending:
             return
+        if not self._db_available:
+            log.debug("Dropping %d pending hand(s): database unavailable", len(pending))
+            return
 
-        latest, unresolved = self._latest_hand_per_table(pending)
-        log.debug("Draining %d hand(s) into %d table(s)", len(pending), len(latest))
+        with db_profile.scope("batch"):
+            latest, unresolved = self._latest_hand_per_table(pending)
+            log.debug("Draining %d hand(s) into %d table(s)", len(pending), len(latest))
 
-        refreshed: set[str] = set()
-        for hand_id in [*latest.values(), *unresolved]:
-            try:
-                served = self.read_stdin(hand_id)
-            except Exception:
-                log.exception("Error processing hand %s", hand_id)
-                with contextlib.suppress(Exception):
-                    self.db_connection.connection.rollback()
-            else:
-                if served is not None:
-                    refreshed.add(served)
+            refreshed: set[str] = set()
+            for hand_id in [*latest.values(), *unresolved]:
+                try:
+                    with db_profile.scope("hand"):
+                        served = self.read_stdin(hand_id)
+                except Exception as exc:
+                    if self.note_db_error(exc):
+                        log.warning("Abandoning this batch: database went away while processing hand %s", hand_id)
+                        return
+                    log.exception("Error processing hand %s", hand_id)
+                    with contextlib.suppress(Exception):
+                        self.db_connection.connection.rollback()
+                else:
+                    if served is not None:
+                        refreshed.add(served)
 
-        # Only the tables actually brought up to date are left out of the
-        # statistics refresh; one that failed still needs it.
-        self._refresh_other_huds(refreshed)
+            # Only the tables actually brought up to date are left out of the
+            # statistics refresh; one that failed still needs it.
+            self._refresh_other_huds(refreshed)
+
+        self._report_batch_round_trips(len(pending), len(self.hud_dict))
+
+    def _report_batch_round_trips(self, hands: int, tables: int) -> None:
+        """Log what this batch cost in statements, when profiling is on.
+
+        Per batch rather than per process: what decides how the HUD feels is the
+        cost of one round of hands with the tables the player actually has open,
+        and that is the number a cumulative total hides.
+        """
+        if not db_profile.is_enabled():
+            return
+        profile = db_profile.get_profile()
+        batch = profile.by_scope.get("batch")
+        hand_scope = profile.by_scope.get("hand")
+        if batch is None:
+            return
+        log.info(
+            "Round trips: batch of %d hand(s) over %d table(s) -- %d statements in this run "
+            "(running average %.1f per batch, %.1f per hand)",
+            hands,
+            tables,
+            batch.queries - getattr(self, "_last_batch_queries", 0),
+            batch.queries_per_entry,
+            hand_scope.queries_per_entry if hand_scope else 0.0,
+        )
+        self._last_batch_queries = batch.queries
 
     def _seat_players(self, hand_id: str) -> dict:
         """Seat players for a hand, read from the database once."""
@@ -969,6 +1126,7 @@ class HudMain(QObject):
             self._hand_players[key] = cached
         return cached
 
+    @db_profile.scoped("secondary_refresh")
     def _refresh_secondary_hud(
         self,
         hand_id: str,
@@ -976,8 +1134,14 @@ class HudMain(QObject):
         game_type: str,
         site_id: int,
         num_seats: int,
+        stat_dict: dict | None = None,
     ) -> None:
         """Update a HUD whose own table has not dealt a new hand.
+
+        ``stat_dict`` is the statistics this table's caller already fetched, in
+        one query covering every table being refreshed; passing None makes this
+        fetch its own, which is the fallback when the tables cannot share a
+        query (see _refresh_other_huds).
 
         Only the aggregated statistics can have moved: the seats, the cards and
         the table stats all describe this table's own last hand, which is the
@@ -998,15 +1162,16 @@ class HudMain(QObject):
         one and asking them to redraw is the whole job.
         """
         hud = self.hud_dict[temp_key]
-        self.db_connection.init_hud_stat_vars(hud.hud_params["hud_days"], hud.hud_params["h_hud_days"])
-        stat_dict = self.db_connection.get_stats_from_hand(
-            hand_id,
-            game_type,
-            hud.hud_params,
-            self.hero_ids[site_id],
-            num_seats,
-            poker_game=hud.poker_game,
-        )
+        if stat_dict is None:
+            self.db_connection.init_hud_stat_vars(hud.hud_params["hud_days"], hud.hud_params["h_hud_days"])
+            stat_dict = self.db_connection.get_stats_from_hand(
+                hand_id,
+                game_type,
+                hud.hud_params,
+                self.hero_ids[site_id],
+                num_seats,
+                poker_game=hud.poker_game,
+            )
         self._merge_positions(stat_dict, hand_id)
         hud.stat_dict = stat_dict
         for aux in hud.aux_windows:
@@ -1016,17 +1181,9 @@ class HudMain(QObject):
                 log.exception("Error redrawing aux window of table %s", temp_key)
         log.debug("secondary hud redrawn for table %s using hand %s", temp_key, hand_id)
 
-    def _refresh_other_huds(self, updated_tables: set[str]) -> None:
-        """Refresh every active HUD except the tables this batch already updated.
-
-        HUD statistics are aggregated globally, but each HUD must keep using
-        its own latest hand for seats, cards, positions, and game context.
-        Reusing that table's last processed hand makes all open HUDs observe
-        the latest HudCache state without mixing table-local data.
-
-        A secondary HUD is best-effort: one stale or failing table must not
-        prevent the remaining tables from refreshing.
-        """
+    def _tables_to_refresh(self, updated_tables: set[str]) -> list[tuple]:
+        """The tables owed a statistics refresh, with what each one needs."""
+        pending = []
         for table_name in list(self.hud_dict):
             if table_name in updated_tables:
                 continue
@@ -1045,9 +1202,93 @@ class HudMain(QObject):
                 )
                 continue
 
-            game_type = table_info[3]
-            site_id = table_info[5]
-            num_seats = table_info[7]
+            pending.append((table_name, last_hand_id, table_info[3], table_info[5], table_info[7]))
+        return pending
+
+    def _batch_secondary_stats(self, pending: list[tuple]) -> dict:
+        """Fetch every refreshing table's statistics in as few queries as possible.
+
+        Tables can share a query only when every parameter of that query
+        matches, so they are grouped by the whole set: the stat-window
+        configuration, the hero, the seat count and the game. Multi-tabling one
+        site at one stake -- which is what makes this path expensive in the
+        first place -- collapses to a single group, and so to a single round
+        trip in place of one per table.
+
+        Best-effort by design: a group that fails leaves its tables without a
+        precomputed answer, and each falls back to fetching its own.
+        """
+        # The hero is only known once a hand has been processed. Before that
+        # there is nothing to group by, and each table falls back to fetching
+        # its own -- which is what this path did before it batched at all.
+        hero_ids = getattr(self, "hero_ids", None)
+        if not hero_ids:
+            return {}
+
+        groups: dict[str, tuple] = {}
+        for table_name, last_hand_id, game_type, site_id, num_seats in pending:
+            hud = self.hud_dict.get(table_name)
+            if hud is None:
+                continue
+            hero_id = hero_ids.get(site_id)
+            if hero_id is None:
+                continue
+            # repr rather than a tuple of the items: hud_params comes from
+            # user-edited configuration, and one unhashable value in it would
+            # otherwise take down the refresh round rather than merely stop it
+            # batching.
+            key = repr((sorted(hud.hud_params.items(), key=str), hero_id, num_seats, hud.poker_game, game_type))
+            if key not in groups:
+                groups[key] = (hud.hud_params, hero_id, num_seats, hud.poker_game, game_type, [])
+            groups[key][5].append(last_hand_id)
+
+        stats_by_hand: dict = {}
+        for hud_params, hero_id, num_seats, poker_game, game_type, hand_ids in groups.values():
+            try:
+                self.db_connection.init_hud_stat_vars(hud_params["hud_days"], hud_params["h_hud_days"])
+                stats_by_hand.update(
+                    self.db_connection.get_stats_from_hands(
+                        hand_ids,
+                        game_type,
+                        hud_params,
+                        hero_id,
+                        num_seats,
+                        poker_game=poker_game,
+                    ),
+                )
+            except Exception as exc:
+                if self.note_db_error(exc):
+                    return stats_by_hand
+                # PostgreSQL leaves the transaction aborted after a statement
+                # error. Clear it before the caller falls back to per-table
+                # queries, otherwise the first fallback necessarily fails with
+                # InFailedSqlTransaction and that table remains stale.
+                with contextlib.suppress(Exception):
+                    self.db_connection.connection.rollback()
+                log.exception("Batched statistics failed for %d table(s); each will ask for its own", len(hand_ids))
+        return stats_by_hand
+
+    def _refresh_other_huds(self, updated_tables: set[str]) -> None:
+        """Refresh every active HUD except the tables this batch already updated.
+
+        HUD statistics are aggregated globally, but each HUD must keep using
+        its own latest hand for seats, cards, positions, and game context.
+        Reusing that table's last processed hand makes all open HUDs observe
+        the latest HudCache state without mixing table-local data.
+
+        A secondary HUD is best-effort: one stale or failing table must not
+        prevent the remaining tables from refreshing.
+        """
+        pending = self._tables_to_refresh(updated_tables)
+        if not pending:
+            return
+        stats_by_hand = self._batch_secondary_stats(pending)
+
+        for table_name, last_hand_id, game_type, site_id, num_seats in pending:
+            if not self._db_available:
+                # Opened by an earlier table in this same loop.
+                log.debug("Stopping the HUD refresh round: database unavailable")
+                return
             try:
                 self._refresh_secondary_hud(
                     last_hand_id,
@@ -1055,8 +1296,11 @@ class HudMain(QObject):
                     game_type,
                     site_id,
                     num_seats,
+                    stat_dict=stats_by_hand.get(last_hand_id),
                 )
-            except Exception:
+            except Exception as exc:
+                if self.note_db_error(exc):
+                    return
                 log.exception(
                     "Global HUD refresh failed for table %s using hand %s",
                     table_name,
@@ -1067,6 +1311,7 @@ class HudMain(QObject):
                 with contextlib.suppress(Exception):
                     self.db_connection.connection.rollback()
 
+    @db_profile.scoped("create_hud")
     def _create_new_hud(
         self,
         new_hand_id: str,
