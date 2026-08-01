@@ -6,8 +6,9 @@ def make_dist():
     # archives. These 2024 distributions are still v7-compatible and avoid
     # depending on PyOxidizer's much older bundled 2022 Python.
     # PyOxidizer 0.24 cannot link CPython 3.11+ (missing _Py_Deepfreeze_*
-    # symbols). Stay on 3.10.14 for embedding; the CI workflow relaxes
-    # requires-python before building so pip_install succeeds.
+    # symbols). Stay on 3.10.14 for embedding. The package installation below
+    # limits the Python-version exception to the still-compatible fpdb and
+    # pypoker-eval sources; normal dependencies keep their metadata checks.
     distributions = {
         "aarch64-apple-darwin": [
             "https://github.com/astral-sh/python-build-standalone/releases/download/20240713/cpython-3.10.14%2B20240713-aarch64-apple-darwin-pgo%2Blto-full.tar.zst",
@@ -101,9 +102,19 @@ def make_exe(dist):
     
     # Read resources from python packages and include them
     pip_resources = []
-    for resource in exe.pip_install([CWD]):
-        if keep_pip_resource(resource):
-            pip_resources.append(resource)
+    pip_install_commands = [
+        ["-r", CWD + "/pyoxidizer-requirements.txt"],
+        [
+            "--ignore-requires-python",
+            "--no-deps",
+            CWD,
+            "pypoker-eval @ git+https://github.com/jejellyroll-fr/poker-eval.git@v1.1.0",
+        ],
+    ]
+    for command in pip_install_commands:
+        for resource in exe.pip_install(command):
+            if keep_pip_resource(resource):
+                pip_resources.append(resource)
     exe.add_python_resources(pip_resources)
     exe.add_python_resources(exe.read_package_root(
         path=CWD,

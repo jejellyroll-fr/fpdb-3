@@ -2224,7 +2224,6 @@ class HoldemOmahaHand(Hand):
         fh = self._output_stream(fh)
         super().writeHand(fh)
 
-        is_aof = self.gametype.get("category", "")
         hole_street = self.holeStreets[0] if self.holeStreets else "PREFLOP"
         # First non-blind street with actions (the decision street in AoF).
         initial_street = "FLOP"
