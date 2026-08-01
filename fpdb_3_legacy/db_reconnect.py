@@ -62,12 +62,20 @@ RECONNECT_COOLDOWN = 10.0
 # MySQL server error codes that mean the connection itself is gone.
 _MYSQL_LOST_CONNECTION_CODES = frozenset({2006, 2013, 2055, 4031})
 
+# PostgreSQL SQLSTATE class 08 is "connection exception". These class-57
+# conditions also terminate an established server session rather than merely
+# cancelling its current statement. In particular, 57014 (query cancelled,
+# including statement_timeout) is deliberately absent: that connection remains
+# usable and the caller explicitly asked for the query to stop.
+_PG_LOST_CONNECTION_SQLSTATES = frozenset({"57P01", "57P02", "57P04", "57P05"})
+
 # Fallback for drivers/wrappers that report a dead socket through a plain
 # exception type. Matched case-insensitively against ``str(exc)``.
 _LOST_CONNECTION_MARKERS = (
     "server closed the connection",
     "connection already closed",
     "the connection is closed",
+    "connection is bad",
     "connection not open",
     "consuming input failed",
     "ssl connection has been closed",
@@ -88,9 +96,13 @@ def _psycopg_lost(exc: BaseException) -> bool:
         import psycopg
     except ImportError:  # backend not installed in this process
         return False
-    # psycopg3 raises OperationalError for anything the network did to us and
-    # InterfaceError for using a connection that is already gone.
-    return isinstance(exc, (psycopg.OperationalError, psycopg.InterfaceError))
+    if not isinstance(exc, (psycopg.OperationalError, psycopg.InterfaceError)):
+        return False
+    sqlstate = getattr(exc, "sqlstate", None)
+    return bool(
+        sqlstate
+        and (sqlstate.startswith("08") or sqlstate in _PG_LOST_CONNECTION_SQLSTATES)
+    )
 
 
 def _mysql_lost(exc: BaseException) -> bool:
