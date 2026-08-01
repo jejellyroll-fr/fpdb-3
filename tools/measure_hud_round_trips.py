@@ -122,10 +122,15 @@ class HudReplay:
                 self.db.get_cards(active_hand)
                 self.db.get_common_cards(active_hand)
 
-            for other_hand in self.table_hands[1:]:
+            # Every other open table, whose statistics HUD_main now fetches for
+            # all of them at once (_batch_secondary_stats).
+            others = self.table_hands[1:]
+            with db_profile.scope("batched_stats"):
+                self.db.init_hud_stat_vars(self.hud_params["hud_days"], self.hud_params["h_hud_days"])
+                self.db.get_stats_from_hands(others, "ring", self.hud_params, -1, 6)
+            for other_hand in others:
                 with db_profile.scope("secondary_refresh"):
                     self._table_info_for(other_hand)
-                    self._stats_for(other_hand)
                     self._positions_for(other_hand)
 
 
@@ -144,11 +149,22 @@ def main() -> int:
         db, importer = populate(cfg)  # importer kept alive: see populate()
 
         c = db.connection.cursor()
-        # Each open table shows its own last hand, so give every table one.
-        c.execute("SELECT id FROM Hands ORDER BY id DESC LIMIT ?", (tables,))
+        # Each open table shows its own last hand, so give every table one --
+        # all at the same stake, because that is what multi-tabling is, and
+        # because gametype is what decides whether tables can share a
+        # statistics query. Drawing from the regression corpus at large would
+        # give twelve different games, which no session ever looks like.
+        c.execute(
+            "SELECT gametypeId FROM Hands GROUP BY gametypeId ORDER BY COUNT(*) DESC LIMIT 1",
+        )
+        row = c.fetchone()
+        if row is None:
+            print("no hands imported")
+            return 1
+        c.execute("SELECT id FROM Hands WHERE gametypeId = ? ORDER BY id DESC LIMIT ?", (row[0], tables))
         table_hands = [r[0] for r in c.fetchall()]
         if len(table_hands) < tables:
-            print(f"only {len(table_hands)} hands imported, need {tables}")
+            print(f"only {len(table_hands)} hands at the busiest stake, need {tables}")
             return 1
 
         db.get_hero_player_ids()

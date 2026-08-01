@@ -307,8 +307,10 @@ def test_refresh_other_huds_uses_each_tables_last_hand(hud_main) -> None:
 
     assert get_table_info.call_args_list == [call("hand-b"), call("hand-c"), call("hand-missing")]
     assert update_existing_hud.call_args_list == [
-        call("hand-b", "table-b", "ring", 2, 5),
-        call("hand-c", "table-c", "tour", 3, 8),
+        # stat_dict=None: with no hero known yet there is nothing to batch, so
+        # each table fetches its own statistics, as this path always did.
+        call("hand-b", "table-b", "ring", 2, 5, stat_dict=None),
+        call("hand-c", "table-c", "tour", 3, 8, stat_dict=None),
     ]
 
 
@@ -341,8 +343,8 @@ def test_refresh_other_huds_isolates_secondary_table_failure(hud_main) -> None:
         hud_main._refresh_other_huds("source")
 
     assert update_existing_hud.call_args_list == [
-        call("hand-broken", "broken", "ring", 1, 6),
-        call("hand-healthy", "healthy", "ring", 1, 6),
+        call("hand-broken", "broken", "ring", 1, 6, stat_dict=None),
+        call("hand-healthy", "healthy", "ring", 1, 6, stat_dict=None),
     ]
     hud_main.db_connection.connection.rollback.assert_called_once_with()
 
@@ -1208,7 +1210,7 @@ def test_a_table_that_missed_the_round_is_refreshed_once(hud_main) -> None:
     ):
         hud_main._drain_pending_hands()
 
-    secondary.assert_called_once_with("h-idle", "table-idle", "ring", 1, 6)
+    secondary.assert_called_once_with("h-idle", "table-idle", "ring", 1, 6, stat_dict=None)
 
 
 # --- the two aux families -----------------------------------------------------
@@ -1303,7 +1305,7 @@ def test_a_table_whose_hand_failed_is_still_refreshed(hud_main) -> None:
     ):
         hud_main._drain_pending_hands()
 
-    secondary.assert_called_once_with("h-earlier", "table-bad", "ring", 1, 6)
+    secondary.assert_called_once_with("h-earlier", "table-bad", "ring", 1, 6, stat_dict=None)
 
 
 def test_a_table_skipped_rather_than_updated_is_still_refreshed(hud_main) -> None:
@@ -1323,7 +1325,7 @@ def test_a_table_skipped_rather_than_updated_is_still_refreshed(hud_main) -> Non
     ):
         hud_main._drain_pending_hands()
 
-    secondary.assert_called_once_with("h-earlier", "table-a", "ring", 1, 6)
+    secondary.assert_called_once_with("h-earlier", "table-a", "ring", 1, 6, stat_dict=None)
 
 
 # --- a tournament table the player was moved away from ------------------------
