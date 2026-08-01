@@ -32,15 +32,19 @@ log = get_logger("database")
 
 
 # libpq connection parameters. ``keepalives_idle``/``interval``/``count`` mean a
-# silently dead peer is detected after roughly 30 + 3*10 = 60 seconds, even in
-# the middle of a query that is waiting for a result. ``connect_timeout`` bounds
-# the reconnect attempts themselves, which is what keeps the recovery path from
-# becoming the new place where everything hangs.
+# silently dead peer is detected after roughly 10 + 3*5 = 25 seconds, even in the
+# middle of a query that is waiting for a result -- that window is how long the
+# HUD can still stall once, before the breaker in HUD_main takes over. Probing
+# this often costs a handful of packets a minute on an idle connection, which is
+# cheap next to a 25-second freeze; going lower starts to risk declaring a merely
+# slow link dead. ``connect_timeout`` bounds the reconnect attempts themselves,
+# which is what keeps the recovery path from becoming the new place where
+# everything hangs.
 PG_NETWORK_KWARGS: dict[str, Any] = {
     "connect_timeout": 10,
     "keepalives": 1,
-    "keepalives_idle": 30,
-    "keepalives_interval": 10,
+    "keepalives_idle": 10,
+    "keepalives_interval": 5,
     "keepalives_count": 3,
 }
 
