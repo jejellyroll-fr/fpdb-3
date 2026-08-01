@@ -34,6 +34,7 @@ from time import sleep, time
 from typing import Any
 
 import pytz
+from cachetools import TTLCache
 
 from fpdb_3_legacy import SQL, Card, Configuration, db_profile
 from fpdb_3_legacy.database_aof import DatabaseAofMixin
@@ -81,6 +82,12 @@ from fpdb_3_legacy.loggingFpdb import get_logger
 
 
 re_char = re.compile("[^a-zA-Z]")
+
+# Gametype-per-hand cache. A hand's game is fixed when the hand is written, so
+# the TTL is only there to bound how long a re-imported hand could be served
+# from a stale entry; the size bounds a long multi-tabling session.
+GAMEINFO_CACHE_SIZE = 2000
+GAMEINFO_CACHE_TTL = 3600
 
 #    FreePokerTools modules
 
@@ -280,6 +287,12 @@ class Database(
         self._hero = None
         self._has_lock = False
         self.printdata = False
+        # Read caches for values the HUD asks for once per open table per hand
+        # dealt, but which cannot have changed in between; see
+        # get_gameinfo_from_hid and database_hud_stats._refresh_hand_1day_ago.
+        # Created before resetCache, which is what empties them.
+        self._gameinfo_cache: TTLCache = TTLCache(maxsize=GAMEINFO_CACHE_SIZE, ttl=GAMEINFO_CACHE_TTL)
+        self._hand_1day_ago_read_at = 0.0
         self.resetCache()
         self.resetBulkCache()
         self._in_transaction = 0
@@ -957,6 +970,18 @@ class Database(
         return c.fetchall()
 
     def get_gameinfo_from_hid(self, hand_id):
+        """Return the gametype of a hand, as Hand.hand_factory wants it.
+
+        Cached: a hand's game is settled when the hand is written and never
+        changes afterwards, while the HUD asks for it once per open table per
+        hand dealt -- measurably the joint second-largest source of round trips
+        (see tools/measure_hud_round_trips.py), which over a VPN is pure
+        latency for an answer that cannot have moved.
+        """
+        cached = self._gameinfo_cache.get(hand_id)
+        if cached is not None:
+            return cached
+
         # returns a gameinfo (gametype) dictionary suitable for passing
         # to Hand.hand_factory
         c = self.connection.cursor()
@@ -966,10 +991,12 @@ class Database(
         row = c.fetchone()
 
         if row is None:
+            # Not cached: the hand may simply not be committed yet, and caching
+            # the miss would keep answering "no such hand" after it arrives.
             log.warning(f"No game info found for hand ID {hand_id}")
             return None
 
-        return {
+        gameinfo = {
             "sitename": row[0],
             "category": row[1],
             "base": row[2],
@@ -984,6 +1011,8 @@ class Database(
             "gametypeId": row[11],
             "split": row[12],
         }
+        self._gameinfo_cache[hand_id] = gameinfo
+        return gameinfo
 
     #   Query 'get_hand_info' does not exist, so it seems
     #    def get_hand_info(self, new_hand_id):
@@ -1214,6 +1243,15 @@ class Database(
         self.tcache = None  # TourneyId cache
         self.pcache = None  # PlayerId cache
         self.tpcache = None  # TourneysPlayersId cache
+        # Read caches keyed by hand id. recreate_tables() comes through here,
+        # and it restarts hand ids from 1 -- an entry kept across that would be
+        # served for a different hand entirely. Read defensively: resetCache
+        # also runs on the transaction-rollback path, and clearing a cache must
+        # never be the thing that makes a rollback fail.
+        gameinfo_cache = getattr(self, "_gameinfo_cache", None)
+        if gameinfo_cache is not None:
+            gameinfo_cache.clear()
+        self._hand_1day_ago_read_at = 0.0
 
     def get_last_insert_id(self, cursor=None):
         ret = None
