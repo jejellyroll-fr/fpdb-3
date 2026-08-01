@@ -1165,7 +1165,9 @@ def test_one_failing_hand_does_not_stop_the_batch(hud_main) -> None:
         hud_main._drain_pending_hands()
 
     assert read_stdin.call_args_list == [call("h-bad"), call("h-good")]
-    hud_main.db_connection.connection.rollback.assert_called_once_with()
+    # Once to clear the ordinary statement error before continuing, then once
+    # to release the successful read transaction at the end of the batch.
+    assert hud_main.db_connection.connection.rollback.call_count == 2
     # The table that failed is *not* excluded: it never got its new hand, so
     # it still needs the statistics refresh.
     refresh_other.assert_called_once_with({"table-b"})
