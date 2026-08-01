@@ -244,6 +244,7 @@ class HudReadWorker(QThread):
                 if pending is None:
                     break
 
+            assert service is not None
             try:
                 snapshot = service.read_batch(pending, progress_callback=self.snapshot_ready.emit)
             except Exception as exc:
@@ -1166,8 +1167,8 @@ class HudMain(QObject):
 
     def _initialize_hero_data(self) -> None:
         """Initialize hero data from the configuration."""
-        self.hero: dict[int, str] = {}
-        self.hero_ids: dict[int, int] = {}
+        self.hero = {}
+        self.hero_ids = {}
         enabled_sites = self.config.get_supported_sites()
         if not enabled_sites:
             log.error("No enabled sites found")
