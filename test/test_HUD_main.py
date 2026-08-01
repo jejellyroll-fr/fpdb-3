@@ -2,6 +2,8 @@ import contextlib
 import importlib.machinery
 import importlib.util
 import sys
+import threading
+import time
 import types
 from pathlib import Path
 from unittest.mock import MagicMock, call, patch
@@ -9,6 +11,7 @@ from unittest.mock import MagicMock, call, patch
 import pytest
 
 pytestmark = pytest.mark.qt
+from PySide6.QtCore import QTimer
 from PySide6.QtWidgets import QApplication
 
 # import zmq
@@ -61,7 +64,7 @@ def hud_main(app):
     with (
         patch("HUD_main.Configuration.Config") as mock_config,
         patch("HUD_main.Configuration.set_logfile"),
-        patch("HUD_main.Database.Database"),
+        patch("HUD_main.Database.Database") as mock_database,
         patch("HUD_main.Deck.Deck"),
         patch("HUD_main.ZMQReceiver"),
         patch("HUD_main.ZMQWorker"),
@@ -90,6 +93,14 @@ def hud_main(app):
         mock_config_instance.get_layout.return_value = "some_layout"
 
         hm = HUD_main.HudMain(options, db_name=options.dbname)
+        # The focused HudMain tests exercise the legacy synchronous seam with a
+        # controllable Database mock. Runtime construction uses HudReadWorker,
+        # whose connection intentionally lives on its own thread.
+        hm._db_worker.stop()
+        app.processEvents()
+        hm._db_worker = None
+        hm.db_connection = mock_database.return_value
+        hm._db_available = True
         yield hm
 
         hm.main_window.close()
@@ -133,6 +144,254 @@ def test_handle_message(hud_main) -> None:
     assert not mock_read_stdin.called
     assert hud_main._pending_hands == ["test_hand_id"]
     assert hud_main._hand_batch_timer.isActive()
+
+
+def test_async_drain_only_submits_work_to_the_database_thread(hud_main) -> None:
+    worker = MagicMock()
+    hud_main._db_worker = worker
+    hud_main._pending_hands = ["101", "102"]
+
+    with patch.object(hud_main, "_build_batch_request") as build_request:
+        request = HUD_main.HudBatchReadRequest(1, ("101", "102"), {})
+        build_request.return_value = request
+        hud_main._drain_pending_hands()
+
+    worker.submit.assert_called_once_with(request)
+    assert hud_main._pending_hands == []
+    assert hud_main._db_batch_inflight is True
+    assert not hud_main.db_connection.get_table_info.called
+
+
+def test_slow_database_worker_does_not_block_the_qt_event_loop(qtbot) -> None:
+    main_thread = threading.get_ident()
+    factory_threads: list[int] = []
+    database = MagicMock(backend=0)
+
+    def database_factory(_config):
+        factory_threads.append(threading.get_ident())
+        return database
+
+    class SlowService:
+        def __init__(self, _config, _database) -> None:
+            pass
+
+        def read_batch(self, request, progress_callback=None):
+            time.sleep(0.35)
+            return HUD_main.HudBatchSnapshot(
+                request.sequence,
+                request.hand_ids,
+                (),
+                {},
+                {},
+                {},
+                {},
+                {},
+            )
+
+    worker = HUD_main.HudReadWorker(MagicMock(), db_factory=database_factory)
+    ticks: list[float] = []
+    heartbeat = QTimer()
+    heartbeat.setInterval(10)
+    heartbeat.timeout.connect(lambda: ticks.append(time.monotonic()))
+
+    try:
+        with patch("HUD_main.HudReadService", SlowService):
+            with qtbot.waitSignal(worker.ready, timeout=1000):
+                worker.start()
+            heartbeat.start()
+            started = time.monotonic()
+            with qtbot.waitSignal(worker.snapshot_ready, timeout=1500):
+                worker.submit(HUD_main.HudBatchReadRequest(1, ("101",), {}))
+            elapsed = time.monotonic() - started
+    finally:
+        heartbeat.stop()
+        worker.stop()
+
+    assert factory_threads and factory_threads[0] != main_thread
+    assert elapsed >= 0.3
+    assert len(ticks) >= 15
+    assert max(b - a for a, b in zip(ticks, ticks[1:], strict=False)) < 0.15
+
+
+def test_postgresql_worker_bounds_its_own_session_queries() -> None:
+    database = MagicMock(backend=HUD_main.Database.Database.PGSQL)
+    cursor = database.connection.cursor.return_value
+
+    HUD_main.HudReadWorker._configure_session(database)
+
+    assert cursor.execute.call_args_list == [
+        call("SET statement_timeout = 10000"),
+        call("SET lock_timeout = 2000"),
+        call("SET idle_in_transaction_session_timeout = 30000"),
+    ]
+    database.connection.commit.assert_called_once_with()
+    cursor.close.assert_called_once_with()
+
+
+def test_partial_snapshot_keeps_batch_inflight_until_final_snapshot(hud_main) -> None:
+    hud_main._db_worker = MagicMock()
+    hud_main._db_batch_inflight = True
+    partial = HUD_main.HudBatchSnapshot(
+        5,
+        ("101",),
+        ("101",),
+        {},
+        {},
+        {},
+        {},
+        {},
+        revision=1,
+        final=False,
+    )
+    final = HUD_main.HudBatchSnapshot(
+        5,
+        ("101",),
+        (),
+        {},
+        {},
+        {},
+        {},
+        {},
+        revision=2,
+    )
+
+    with (
+        patch.object(hud_main, "read_stdin", return_value="table-a"),
+        patch.object(hud_main, "_refresh_other_huds") as refresh_other,
+    ):
+        hud_main._on_db_snapshot(partial)
+        assert hud_main._db_batch_inflight is True
+        refresh_other.assert_not_called()
+
+        hud_main._on_db_snapshot(final)
+
+    assert hud_main._db_batch_inflight is False
+    refresh_other.assert_called_once()
+
+
+def test_identity_snapshot_requests_a_loading_hud_before_stats_arrive(hud_main) -> None:
+    prepared = MagicMock()
+    prepared.hand_id = "101"
+    prepared.table_info = ("table-a", 6, "holdem", "ring", False, 1, "site", 6, None, None, None)
+    prepared.positions = {}
+    prepared.seat_players = {}
+    snapshot = HUD_main.HudBatchSnapshot(
+        6,
+        ("101",),
+        ("101",),
+        {"101": prepared},
+        {},
+        {},
+        {},
+        {},
+        revision=1,
+        final=False,
+        identity_only=True,
+    )
+    hud_main._db_worker = MagicMock()
+    hud_main._db_batch_inflight = True
+
+    with patch.object(hud_main, "_show_loading_hud") as show_loading:
+        hud_main._on_db_snapshot(snapshot)
+
+    show_loading.assert_called_once_with("101")
+    assert hud_main._db_batch_inflight is True
+
+
+def test_loading_hud_creation_does_not_require_statistics(hud_main) -> None:
+    table_info = ("table-a", 6, "holdem", "ring", False, 1, "site", 6, None, None, None)
+    hud_main._prepared_hands = {"101": MagicMock(table_info=table_info)}
+    hud_main.config.get_supported_sites.return_value = ["site"]
+    hud_main.config.get_site_parameters.return_value = {"aux_enabled": True}
+
+    with patch.object(hud_main, "_create_new_hud") as create_new_hud:
+        hud_main._show_loading_hud("101")
+
+    create_new_hud.assert_called_once_with(
+        "101",
+        "table-a",
+        table_info,
+        1,
+        6,
+        "site",
+        loading=True,
+    )
+
+
+def test_loading_hud_builds_empty_creation_args_without_querying_stats(hud_main) -> None:
+    table_info = ("table-a", 6, "holdem", "ring", False, 1, "site", 6, None, None, None)
+    prepared = MagicMock(cards={}, hand_instance=None)
+    hud_main._prepared_hands = {"101": prepared}
+    hud_main.config.get_supported_games_parameters.return_value = {"aux": ""}
+    hud_main.Tables = MagicMock()
+    hud_main.Tables.Table.return_value = MagicMock(
+        number=12,
+        title="table-a",
+        x=0,
+        y=0,
+        width=800,
+        height=600,
+    )
+
+    with (
+        patch.object(hud_main.db_connection, "get_stats_from_hand") as get_stats,
+        patch.object(hud_main, "create_HUD") as create_hud,
+    ):
+        hud_main._create_new_hud("101", "table-a", table_info, 1, 6, "site", loading=True)
+
+    get_stats.assert_not_called()
+    args = create_hud.call_args.args[0]
+    assert args.stat_dict == {}
+    assert args.cards == {}
+
+
+def test_runtime_replay_error_cannot_start_the_legacy_recovery_worker(hud_main) -> None:
+    hud_main._db_worker = MagicMock()
+
+    with patch.object(hud_main, "_start_db_recovery") as start_recovery:
+        assert hud_main.note_db_error(RuntimeError("connection reset by peer")) is False
+
+    start_recovery.assert_not_called()
+
+
+def test_pending_hand_queue_keeps_only_its_bounded_latest_tail(hud_main) -> None:
+    saved = HUD_main.MAX_PENDING_HANDS
+    HUD_main.MAX_PENDING_HANDS = 3
+    try:
+        for hand_id in ("1", "2", "3", "4"):
+            hud_main._enqueue_hand(hand_id)
+    finally:
+        HUD_main.MAX_PENDING_HANDS = saved
+
+    assert hud_main._pending_hands == ["2", "3", "4"]
+
+
+def test_repeated_batch_timeouts_are_counted_and_reported(hud_main) -> None:
+    request = HUD_main.HudBatchReadRequest(7, ("101",), {})
+
+    with (
+        patch("HUD_main.QTimer.singleShot"),
+        patch("HUD_main.log.warning") as warning,
+    ):
+        hud_main._on_db_batch_failed(request, "statement timeout")
+        hud_main._on_db_batch_failed(request, "statement timeout")
+
+    assert hud_main._db_consecutive_failures == 2
+    assert warning.call_args_list[-1].args[2] == 2
+
+
+def test_batch_retry_backs_off_once_after_five_consecutive_failures(hud_main) -> None:
+    request = HUD_main.HudBatchReadRequest(8, ("101",), {})
+
+    with (
+        patch("HUD_main.QTimer.singleShot") as single_shot,
+        patch("HUD_main.log.error") as error,
+    ):
+        for _ in range(7):
+            hud_main._on_db_batch_failed(request, "statement timeout")
+
+    assert [item.args[0] for item in single_shot.call_args_list] == [5000] * 5 + [30000] * 2
+    error.assert_called_once()
 
 
 # Checks that the destroy method properly closes connections and stops processes.
@@ -906,6 +1165,17 @@ def test_idle_kill_widget_removal(hud_main) -> None:
     assert "test_table" not in hud_main.hud_dict
 
 
+def test_loading_hud_does_not_overwrite_persisted_stats_when_killed(hud_main) -> None:
+    mock_hud = MagicMock(is_loading=True)
+    hud_main.hud_dict["test_table"] = mock_hud
+    hud_main.vb = MagicMock()
+
+    with patch.object(hud_main.stats_persistence, "save_hud_stats") as save_stats:
+        hud_main.idle_kill("test_table")
+
+    save_stats.assert_not_called()
+
+
 # Ensures that check_tables calls the correct methods for different table statuses.
 @pytest.mark.parametrize(
     "status",
@@ -1165,7 +1435,9 @@ def test_one_failing_hand_does_not_stop_the_batch(hud_main) -> None:
         hud_main._drain_pending_hands()
 
     assert read_stdin.call_args_list == [call("h-bad"), call("h-good")]
-    hud_main.db_connection.connection.rollback.assert_called_once_with()
+    # Once to clear the ordinary statement error before continuing, then once
+    # to release the successful read transaction at the end of the batch.
+    assert hud_main.db_connection.connection.rollback.call_count == 2
     # The table that failed is *not* excluded: it never got its new hand, so
     # it still needs the statistics refresh.
     refresh_other.assert_called_once_with({"table-b"})

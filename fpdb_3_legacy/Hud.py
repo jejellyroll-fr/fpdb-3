@@ -111,6 +111,7 @@ class Hud:
         self.stat_dict: dict[Any, Any] = {}
         self.seat_players: dict[Any, Any] = {}
         self.hand_instance: Any = None
+        self.is_loading = False
         self.table_name = ""
         self.tablenumber: Any = None
         self.tablehudlabel: Any = None
@@ -210,6 +211,12 @@ class Hud:
             except Exception:  # intentional broad catch: aux window callback boundary.
                 log.exception("Error killing aux window")
         self.aux_windows = []
+        if self.db_hud_connection is not None:
+            try:
+                self.db_hud_connection.close_connection()
+            except Exception:
+                log.exception("Error closing the legacy HUD database connection")
+            self.db_hud_connection = None
 
     def resize_windows(self) -> None:
         """Resize the windows based on the table size."""
@@ -301,24 +308,37 @@ class Hud:
         #    write the layouts back to the HUD_config
         self.config.save()
 
-    def create(self, hand: int | str, config: Any, stat_dict: dict[Any, Any]) -> None:
+    def create(
+        self,
+        hand: int | str,
+        config: Any,
+        stat_dict: dict[Any, Any],
+        *,
+        prepared: bool = False,
+        cards: dict[str, Any] | None = None,
+        hand_instance: Any = None,
+    ) -> None:
         """Update this hud, to the stats and players as of "hand".
 
         hand is the hand id of the most recent hand played at this table.
         """
         self.stat_dict = stat_dict  # stat_dict from HUD_main.read_stdin is mapped here
+        if prepared:
+            self.cards = cards or {}
+            self.hand_instance = hand_instance
         # the db_connection created in HUD_Main is NOT available to the
         #  hud.py and aux handlers, so create a fresh connection in this class
         # if the db connection is made in __init__, then the sqlite db threading will fail
         #  so the db connection is made here instead.
-        if self.db_hud_connection is None:
+        elif self.db_hud_connection is None:
             try:
                 self.db_hud_connection = Database.Database(self.config)
             except Exception:  # intentional broad catch: HUD DB drivers vary by backend.
                 log.exception("Unable to initialize HUD database connection")
                 self.db_hud_connection = None
-        self.cards = self.get_cards(hand)
-        if self.db_hud_connection is not None:
+        if not prepared:
+            self.cards = self.get_cards(hand)
+        if not prepared and self.db_hud_connection is not None:
             try:
                 self.hand_instance = Hand.hand_factory(hand, config, self.db_hud_connection)
                 self.db_hud_connection.connection.rollback()
@@ -335,16 +355,28 @@ class Hud:
             except Exception:  # intentional broad catch: aux window callback boundary.
                 log.exception("Error creating aux window")
 
-    def update(self, hand: int | str, config: Any) -> None:
+    def update(
+        self,
+        hand: int | str,
+        config: Any,
+        *,
+        prepared: bool = False,
+        cards: dict[str, Any] | None = None,
+        hand_instance: Any = None,
+    ) -> None:
         """Re-load a hand instance and refresh the aux windows for ``hand``."""
+        if prepared:
+            self.hand_instance = hand_instance
+            self.cards = cards or {}
         # re-load a hand instance (factory will load correct type for this hand)
-        if self.db_hud_connection is not None:
+        elif self.db_hud_connection is not None:
             self.hand_instance = Hand.hand_factory(hand, config, self.db_hud_connection)
             log.info("hud update after hand_factory")
             self.db_hud_connection.connection.rollback()
 
         # Get updated cards
-        self.cards = self.get_cards(hand)
+        if not prepared:
+            self.cards = self.get_cards(hand)
 
         # Refresh every aux window with the new hand so the displayed stats
         # update. This is the only place they are refreshed for a new hand, so
