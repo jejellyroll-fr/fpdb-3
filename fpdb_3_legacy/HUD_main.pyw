@@ -21,6 +21,7 @@ if _repo_root not in sys.path:
 if sys.platform.startswith("linux") and os.getenv("FPDB_FORCE_X11") == "1":
     os.environ.setdefault("QT_QPA_PLATFORM", "xcb")
 
+import threading
 import time
 from collections.abc import Callable
 from dataclasses import dataclass
@@ -40,6 +41,7 @@ from PySide6.QtWidgets import QApplication, QLabel, QVBoxLayout, QWidget
 from qt_material import apply_stylesheet
 
 from fpdb_3_legacy import Aux_Base, Configuration, Database, Deck, Hud, Options
+from fpdb_3_legacy.db_reconnect import is_connection_lost
 from fpdb_3_legacy.HudStatsPersistence import get_hud_stats_persistence
 from fpdb_3_legacy.loggingFpdb import get_logger, hud_trace
 from fpdb_3_legacy.SmartHudManager import RestartReason, get_smart_hud_manager
@@ -53,6 +55,11 @@ log = get_logger("hud_main")
 # into one batch, so each HUD is refreshed once rather than once per hand. Long
 # enough to catch the burst, short enough to stay ahead of the player acting.
 HAND_BATCH_INTERVAL_MS = 200
+
+# How long the recovery worker waits between attempts to re-open a database
+# connection that has dropped. Database.recover_connection has its own cooldown;
+# this only decides how often we ask.
+DB_RECOVERY_INTERVAL_S = 5.0
 
 
 @dataclass
@@ -95,6 +102,48 @@ class ZMQWorker(QThread):
         """Stop the worker thread."""
         self.is_running = False
         self.wait()
+
+
+class DbRecoveryWorker(QThread):
+    """Re-opens a dropped database connection away from the UI thread.
+
+    Reconnecting costs a full connect timeout when the database is unreachable,
+    which is exactly the stall the HUD must not take on the thread that repaints
+    it. This thread owns the connection for the duration of the outage: it is
+    started only once HudMain has stopped querying (the breaker is open) and it
+    stops before HudMain resumes, so the connection still has a single user at
+    any moment despite being touched from two threads.
+    """
+
+    recovered = Signal()
+
+    def __init__(self, db_connection, parent: QObject | None = None) -> None:
+        """Initialize the recovery worker."""
+        super().__init__(parent)
+        self.db_connection = db_connection
+        # An Event rather than a sleep plus a flag, so closing the HUD during an
+        # outage does not wait out the retry interval before shutting down.
+        self._stopping = threading.Event()
+
+    def run(self) -> None:
+        """Retry the connection until it comes back or shutdown is requested."""
+        log.info("Database recovery worker started")
+        while not self._stopping.wait(DB_RECOVERY_INTERVAL_S):
+            try:
+                if self.db_connection.recover_connection():
+                    log.info("Database connection recovered; resuming HUD updates")
+                    self.recovered.emit()
+                    return
+            except Exception:
+                log.exception("Database recovery attempt failed unexpectedly")
+
+    def stop(self) -> None:
+        """Stop the worker thread."""
+        self._stopping.set()
+        # Bounded: an attempt already inside connect() has to run out its own
+        # connect timeout, but shutdown must not hang on it either.
+        if not self.wait(15000):
+            log.warning("Database recovery worker did not stop in time")
 
 
 class ZMQReceiver(QObject):
@@ -359,6 +408,13 @@ class HudMain(QObject):
             # HUD exactly once, without re-running create/update on a duplicate.
             self._last_processed_hands: dict[str, str] = {}
             self.blacklist: list[Any] = []
+            # Circuit breaker around the database. Every read below runs on the
+            # UI thread, so one unreachable database would otherwise freeze the
+            # HUD once per hand for as long as the outage lasts. Once a read
+            # fails on a lost connection we stop querying entirely and hand the
+            # connection to DbRecoveryWorker until it reports the link is back.
+            self._db_available = True
+            self._db_recovery_worker: DbRecoveryWorker | None = None
             self.hud_params = self.config.get_hud_ui_parameters()
             self.deck = Deck.Deck(
                 self.config,
@@ -448,6 +504,53 @@ class HudMain(QObject):
         """Handle errors from the ZMQ worker."""
         log.error("ZMQWorker encountered an error: %s", error_message)
 
+    def note_db_error(self, exc: BaseException) -> bool:
+        """Open the breaker if ``exc`` means the connection is gone.
+
+        Returns:
+            True when the database is now considered unavailable, so the caller
+            can stop working on a hand it has no way of finishing.
+
+        Database already reconnects and replays a query transparently; an error
+        still reaching here means that failed too, and the link is genuinely
+        down rather than merely interrupted.
+        """
+        if not is_connection_lost(self.db_connection.backend, exc):
+            return False
+        if self._db_available:
+            log.error("Database unreachable; HUD updates are paused until it returns (%s)", exc)
+            self._db_available = False
+            self._start_db_recovery()
+        return True
+
+    def _start_db_recovery(self) -> None:
+        """Hand the connection to the recovery thread for the outage."""
+        if self._db_recovery_worker is not None and self._db_recovery_worker.isRunning():
+            return
+        worker = DbRecoveryWorker(self.db_connection, parent=self)
+        worker.recovered.connect(self._on_db_recovered)
+        self._db_recovery_worker = worker
+        worker.start()
+
+    def _on_db_recovered(self) -> None:
+        """Resume querying once the recovery thread has restored the link."""
+        # Runs on the UI thread (queued signal), and the worker has already
+        # returned from run(), so the connection is unowned at this point.
+        self._db_available = True
+        # Table info cached against the old connection is still valid -- it
+        # describes hands, not the connection -- but hands that arrived during
+        # the outage are gone, and the HUDs are repainted from the next hand.
+        log.info("Database available again; HUD updates resumed")
+
+    def _stop_db_recovery(self) -> None:
+        """Stop the recovery thread, if one is running."""
+        worker = getattr(self, "_db_recovery_worker", None)
+        if worker is None:
+            return
+        self._db_recovery_worker = None
+        with contextlib.suppress(RuntimeError):
+            worker.stop()
+
     def init_main_window(self) -> None:
         """Initialize the main application window."""
         self.main_window = HudMainWindow(self.close_event_handler)
@@ -481,6 +584,12 @@ class HudMain(QObject):
         """Handle an incoming message from the ZMQ receiver."""
         # This method will be called in the main thread
         log.info("HUD RECEIVED MESSAGE - hand_id: %s", hand_id)
+
+        if not self._db_available:
+            # The recovery thread owns the connection while the breaker is open;
+            # touching it here would both race with it and block the UI thread.
+            log.debug("Dropping hand %s: database unavailable", hand_id)
+            return
 
         # Defensive rollback: ensure the PostgreSQL connection is not stuck in
         # an aborted transaction state from a previous error.  Under PostgreSQL,
@@ -517,6 +626,8 @@ class HudMain(QObject):
             with contextlib.suppress(RuntimeError):
                 batch_timer.stop()
         self._pending_hands = []
+
+        self._stop_db_recovery()
 
         zmq_worker = getattr(self, "zmq_worker", None)
         if zmq_worker is not None:
@@ -750,7 +861,12 @@ class HudMain(QObject):
         log.debug("Data not found in cache for hand_id: %s", hand_id)
         try:
             table_info = self.db_connection.get_table_info(hand_id)
-        except Exception:
+        except Exception as exc:
+            if self.note_db_error(exc):
+                # Swallowing this one would make every hand of the outage look
+                # like a hand that is merely not committed yet, which is how the
+                # HUD used to die silently and stay dead.
+                return None
             log.exception("Database error while processing hand %s", hand_id)
             try:
                 self.db_connection.connection.rollback()
@@ -931,6 +1047,9 @@ class HudMain(QObject):
         pending, self._pending_hands = self._pending_hands, []
         if not pending:
             return
+        if not self._db_available:
+            log.debug("Dropping %d pending hand(s): database unavailable", len(pending))
+            return
 
         latest, unresolved = self._latest_hand_per_table(pending)
         log.debug("Draining %d hand(s) into %d table(s)", len(pending), len(latest))
@@ -939,7 +1058,10 @@ class HudMain(QObject):
         for hand_id in [*latest.values(), *unresolved]:
             try:
                 served = self.read_stdin(hand_id)
-            except Exception:
+            except Exception as exc:
+                if self.note_db_error(exc):
+                    log.warning("Abandoning this batch: database went away while processing hand %s", hand_id)
+                    return
                 log.exception("Error processing hand %s", hand_id)
                 with contextlib.suppress(Exception):
                     self.db_connection.connection.rollback()
@@ -1028,6 +1150,10 @@ class HudMain(QObject):
         prevent the remaining tables from refreshing.
         """
         for table_name in list(self.hud_dict):
+            if not self._db_available:
+                # Opened by an earlier table in this same loop.
+                log.debug("Stopping the HUD refresh round: database unavailable")
+                return
             if table_name in updated_tables:
                 continue
 
@@ -1056,7 +1182,9 @@ class HudMain(QObject):
                     site_id,
                     num_seats,
                 )
-            except Exception:
+            except Exception as exc:
+                if self.note_db_error(exc):
+                    return
                 log.exception(
                     "Global HUD refresh failed for table %s using hand %s",
                     table_name,
