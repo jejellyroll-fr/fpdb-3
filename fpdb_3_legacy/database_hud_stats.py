@@ -537,12 +537,17 @@ class DatabaseHudStatsMixin:
             time() - stime,
         )
         colnames = [desc[0].lower() for desc in c.description]
+        # ZMQ supplies hand ids as strings while every SQL backend returns the
+        # selected Hands.id as an integer. Preserve the caller's key type in the
+        # public result while using a canonical representation to match rows.
+        hand_key_by_id = {str(hand): hand for hand in hands}
         results: dict[Any, dict[Any, Any]] = {hand: {} for hand in hands}
         for row in c.fetchall():
             t_dict = dict(zip(colnames, row, strict=False))
             # Not a statistic: it only says which table's row this is, and
             # leaving it in stat_dict would offer it to the stat renderer.
-            hand = t_dict.pop("batch_hand_id")
+            returned_hand = t_dict.pop("batch_hand_id")
+            hand = hand_key_by_id.get(str(returned_hand), returned_hand)
             if not self._row_is_wanted(t_dict["player_id"], hero_id, hud_params):
                 continue
             results.setdefault(hand, {})[t_dict["player_id"]] = t_dict

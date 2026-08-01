@@ -105,6 +105,20 @@ def test_batched_stats_equal_per_hand_stats(imported_db) -> None:
         assert batched[hand] == one_at_a_time[hand], f"hand {hand} differs between the two paths"
 
 
+def test_batched_stats_preserve_string_hand_ids_from_zmq(imported_db) -> None:
+    """SQL returns integer ids, but HUD_main indexes results with ZMQ strings."""
+    db, _ = imported_db
+    hands = [str(hand) for hand in some_hands(db, 12)]
+
+    batched = db.get_stats_from_hands(hands, "ring", HUD_PARAMS, -1, 6)
+
+    assert set(batched) == set(hands)
+    for hand in hands:
+        expected = db.get_stats_from_hand(hand, "ring", HUD_PARAMS, -1, 6)
+        assert expected
+        assert batched[hand] == expected
+
+
 def test_the_seat_of_each_player_survives_batching(imported_db) -> None:
     """Seat is the one column that is per-hand rather than per-player.
 

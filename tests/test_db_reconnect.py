@@ -192,6 +192,26 @@ def test_ordinary_sql_error_is_reported_not_retried() -> None:
     assert db.recoveries == 0
 
 
+def test_postgresql_query_cancellation_keeps_the_healthy_connection() -> None:
+    """statement_timeout must not reconnect and replay the cancelled query."""
+    err = psycopg.errors.QueryCanceled("canceling statement due to statement timeout")
+
+    assert db_reconnect.is_connection_lost(Database.PGSQL, err) is False
+
+
+@pytest.mark.parametrize(
+    "error",
+    [
+        psycopg.errors.ConnectionFailure("transport unavailable"),
+        psycopg.errors.AdminShutdown("server is shutting down"),
+        psycopg.errors.DatabaseDropped("database was dropped"),
+        psycopg.errors.IdleSessionTimeout("idle session timed out"),
+    ],
+)
+def test_postgresql_session_termination_is_a_lost_connection(error) -> None:
+    assert db_reconnect.is_connection_lost(Database.PGSQL, error) is True
+
+
 def test_failed_recovery_lets_the_original_error_through() -> None:
     class Db:
         backend = Database.PGSQL
