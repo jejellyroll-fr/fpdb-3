@@ -113,6 +113,33 @@ def test_worker_can_publish_each_primary_table_before_the_batch_is_complete() ->
     assert database.connection.rollback.call_count == 5
 
 
+def test_missing_mucked_action_query_does_not_fail_the_primary_hud() -> None:
+    database = _database()
+    database.get_table_info.return_value = _table_info("table-a")
+    database.get_winners_from_hand.return_value = {"hero": 100}
+    database.sql.query = {}
+    config = _config()
+    config.get_supported_games_parameters.return_value = {"aux": "Mucked"}
+    config.get_aux_parameters.return_value = {"module": "Mucked"}
+    service = HudReadService(config, database, hand_factory=lambda *_args: None)
+
+    snapshot = service.read_batch(
+        HudBatchReadRequest(
+            sequence=12,
+            hand_ids=("801",),
+            hud_params={"hud_days": 30, "h_hud_days": 90},
+        ),
+    )
+
+    prepared = snapshot.hands["801"]
+    assert snapshot.failed_hand_ids == ()
+    assert prepared.stat_dict == {"hand": "801"}
+    assert prepared.seat_players == {"seat": "801"}
+    assert prepared.winners == {"hero": 100}
+    assert prepared.actions == []
+    database.get_action_from_hand.assert_not_called()
+
+
 def test_table_identity_is_emitted_before_hero_or_statistics_queries() -> None:
     order: list[str] = []
     database = _database()
