@@ -68,17 +68,29 @@ def imported_db():
         # Windows keeps it locked, so close the superseded connection first.
         importer.database.disconnect()
         importer.database = db
-        importer.setCallHud(False)
-        importer.setMode("bulk")
-        importer.addBulkImportImportFileOrDir(str(HANDS_DIR), site=SITE)
-        importer.runImport()
-        db.connection.commit()
+        try:
+            importer.setCallHud(False)
+            importer.setMode("bulk")
+            importer.addBulkImportImportFileOrDir(str(HANDS_DIR), site=SITE)
+            importer.runImport()
+            db.connection.commit()
 
-        # Keep importer referenced while the tests run: its __del__ would
-        # otherwise disconnect the shared database early.
-        yield db, importer
-        importer.database = None
-        db.disconnect()
+            # The worker connections are no longer needed after runImport and
+            # would keep the SQLite file locked through fixture teardown on
+            # Windows.
+            for writer_db in importer.writerdbs:
+                writer_db.disconnect()
+            importer.writerdbs.clear()
+
+            # Keep importer referenced while the tests run: its __del__ would
+            # otherwise disconnect the shared database early.
+            yield db, importer
+        finally:
+            importer.database = None
+            for writer_db in importer.writerdbs:
+                writer_db.disconnect()
+            importer.writerdbs.clear()
+            db.disconnect()
 
 
 def some_hands(db, count):
