@@ -2004,9 +2004,35 @@ class HudMain(QObject):
             return None
 
         if temp_key in self.hud_dict:
-            log.debug("Updating existing HUD for temp_key: %s", temp_key)
-            if not self._update_existing_hud(new_hand_id, temp_key, game_type, site_id, num_seats):
-                return None
+            hud = self.hud_dict[temp_key]
+            if getattr(hud, "is_loading", False) is True:
+                # The identity-only snapshot deliberately creates the HUD before
+                # player seats and statistics are available.  Aux windows derive
+                # their visual-to-physical seat map in create(), so updating that
+                # empty HUD in place leaves every slot mapped to None and every
+                # player block hidden.  Recreate it once with the complete
+                # snapshot so seat rotation, player lookup, and visibility are
+                # all initialized from the same hand data.
+                log.info(
+                    "Replacing loading HUD with complete HUD for table %s and hand %s",
+                    temp_key,
+                    new_hand_id,
+                )
+                self.kill_hud(None, temp_key)
+                self._create_new_hud(
+                    new_hand_id,
+                    temp_key,
+                    table_info,
+                    site_id,
+                    num_seats,
+                    hud_site_name,
+                )
+                if temp_key not in self.hud_dict:
+                    return None
+            else:
+                log.debug("Updating existing HUD for temp_key: %s", temp_key)
+                if not self._update_existing_hud(new_hand_id, temp_key, game_type, site_id, num_seats):
+                    return None
         else:
             log.debug("Creating new HUD for temp_key: %s", temp_key)
             self._create_new_hud(new_hand_id, temp_key, table_info, site_id, num_seats, hud_site_name)
