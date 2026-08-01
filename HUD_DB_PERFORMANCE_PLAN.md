@@ -1,8 +1,9 @@
 # HUD database performance — done, and what is left
 
 Status: 2026-08-01. Branch `fix/db-vpn-reconnect`.
-Open item: **run `tools/explain_hud_queries.py` against the real PostgreSQL
-database.** Everything else below is landed and measured.
+Open item: **resolve the aggregate's gametype set in the application** — see
+"What EXPLAIN actually said" below, which corrects the hypothesis this document
+first carried.
 
 ## Why round trips, not query time
 
@@ -55,64 +56,120 @@ rewrite is checked; any that no longer applies drops back to asking per hand.
 `tests/test_hud_stats_batching.py` compares the two paths stat by stat over the
 imported corpus.
 
-## Open: run EXPLAIN against the real database
+## What EXPLAIN actually said
 
-Counting round trips says nothing about what each one costs once it arrives.
-Only a database with real volume and real planner statistics can say that, so
-this has to run against the PostgreSQL instance the HUD actually uses.
+Run locally against PostgreSQL 16 in a container, with `HudCache` grown to
+1.07M rows / 1.5GB and each seated player carrying ~365 rows, which is the size
+at which the question stops being hypothetical. See "Reproducing the fixture"
+below.
+
+**The hypothesis this document first carried was wrong.** It said the aggregate's
+`hc.gametypeId+0` — an old MySQL idiom for discouraging index use — was
+stopping PostgreSQL using an index, and that removing it was the thing to try.
+Measured, that changes nothing:
+
+| variant | median | rows discarded per player |
+|---|---:|---:|
+| current (`gametypeId+0`, subquery) | 1.42ms | 378 |
+| without `+0` | 1.09ms | 378 |
+| without `+0`, plus index `(playerId, gametypeId)` | 1.06ms | 378 |
+| with `+0`, plus index `(playerId, gametypeId)` | 1.03ms | 378 |
+
+`Rows Removed by Filter: 378` is identical in all four. There is no sequential
+scan either: the join already uses `hudcache_playerid_idx`. The `+0` is a red
+herring on PostgreSQL — **do not spend a risky change on it.**
+
+The real blocker is that the "gametypes similar to this one" set is an
+uncorrelatable subquery, so PostgreSQL evaluates it into a hashed SubPlan and
+applies it as a **filter after fetching each row from the heap**. No index on
+`gametypeId`, compound or otherwise, can be used for something the planner only
+knows at run time.
+
+That set depends only on the gametype and the blind multiplier, so the
+application can resolve it once and pass the ids as an array. Then it becomes
+an index condition:
+
+```
+Index Cond: ((playerid = p.id) AND (gametypeid = ANY ('{3,4,7,...,60}'::smallint[])))
+```
+
+| | median | HudCache buffers | rows discarded |
+|---|---:|---:|---:|
+| current | 1.07ms | 2414 | 378 |
+| gametype set passed as an array | 0.78ms | **502** | **0** |
+
+4.8x less of `HudCache` touched, nothing fetched only to be thrown away. And it
+uses the **existing** `HudCache_Compound_idx` — no new index needed, because
+with the gametype ids known the leading column is finally usable.
+
+### What to do with that
+
+- Resolve the set in `database_hud_stats`, cache it per
+  `(gametypeId, agg_bb_mult)` — it changes only when a new gametype appears —
+  and pass it as an array. Both the per-hand and the batched path go through
+  the same query, so this is one change.
+- Keep it PostgreSQL-shaped: `sql_queries_hud_aggregated_stats.py` can branch on
+  `db_server` as other queries already do, leaving MySQL's `+0` alone.
+- `tests/test_hud_stats_batching.py` already compares stat dicts between two
+  query paths; the same harness answers whether this one is equivalent.
+
+### Keep the magnitude in perspective
+
+0.3ms per query on a warm cache, and after batching there is now one aggregate
+per hand rather than twelve — so this is worth far less than the round-trip
+work above, and nothing like it on a fast local link. It matters where I/O
+does: a database larger than RAM, or a cold cache, where 4.8x fewer buffers is
+4.8x less to read. Confirm on the real database before deciding it is worth the
+change:
 
 ```bash
 python tools/explain_hud_queries.py --plans
 ```
 
-It runs `EXPLAIN (ANALYZE, BUFFERS)` over the HUD's statements with parameters
-taken from real rows, inside a transaction it rolls back, and flags:
-
-- sequential scans over `HudCache`, `HandsPlayers`, `Hands`, `Players`
-- row estimates off by more than 10x — what makes the planner choose a nested
-  loop over a hash join and lose an order of magnitude
-- blocks read from disk rather than served from cache
-
-### The hypothesis to test first
-
-The aggregate reaches `HudCache` like this:
-
-```sql
-INNER JOIN HudCache hc ON (hc.playerId = hp.playerId)
-...
-AND hc.gametypeId+0 in (SELECT ...)
-```
-
-and the compound index is:
-
-```sql
-CREATE UNIQUE INDEX HudCache_Compound_idx
-    ON HudCache(gametypeId, playerId, seats, position, tourneyTypeId, styleKey)
-```
-
-Two things follow. The join is on `playerId`, which is not the leading column,
-so the compound index cannot serve it and the join falls back to the plain
-`HudCache(playerId)` index. And `gametypeId+0` is an old MySQL idiom for
-*discouraging* the optimiser from using an index — on PostgreSQL it buys
-nothing and stops any index on `gametypeId` being used at all, turning what
-could be an index condition into a filter applied after the fact.
-
-**Do not remove the `+0` blind.** It may have earned its place on MySQL, and
-how much it costs depends entirely on how large `HudCache` has grown. Decide
-from the plan:
-
-- If `HudCache` is scanned sequentially, or the filter on `gametypeId` discards
-  most of what the join produced, dropping `+0` on the PostgreSQL variant of
-  the query is the first thing to try. `sql_queries_hud_aggregated_stats.py`
-  can branch on `db_server`, as several other queries already do.
-- If the plan already uses `HudCache(playerId)` and discards little, `+0` is
-  not the problem and the next candidate is an index leading with `playerId`
-  and covering `styleKey`/`seats`.
-- If row estimates are far out, `ANALYZE HudCache` (or raising its statistics
-  target) may be all that is needed.
-
 Re-run `tools/measure_hud_round_trips.py` after any change: it is the same
 harness that produced the table above.
+
+## Reproducing the fixture
+
+```bash
+docker run -d --name fpdb-explain -e POSTGRES_PASSWORD=fpdb -e POSTGRES_USER=fpdb \
+    -e POSTGRES_DB=fpdb -p 55432:5432 postgres:16
+```
+
+Point a config at `127.0.0.1:55432` with `db-server=postgresql` / `db-backend=3`,
+run `Database.recreate_tables()`, bulk-import
+`regression-test-files/cash/Stars/Flop`, then grow the cache — a plan over the
+955 rows the import produces says only that PostgreSQL prefers a sequential
+scan on a tiny table, which is true and useless:
+
+```sql
+-- 40k opponents with ~25 cache rows each, cloned from imported rows so every
+-- NOT NULL column and foreign key is satisfied without enumerating 200 columns
+INSERT INTO Players (name, siteId, hero)
+SELECT 'synth_' || g, 1, FALSE FROM generate_series(1, 40000) g;
+
+INSERT INTO HudCache (<every column except id>)
+SELECT <playerid := p.id, gametypeid := gt.id, rest from src>
+FROM (SELECT * FROM HudCache ORDER BY id LIMIT 25) src
+CROSS JOIN LATERAL (SELECT id FROM Players WHERE name LIKE 'synth_%' ORDER BY id LIMIT 40000) p
+CROSS JOIN LATERAL (SELECT id FROM Gametypes ORDER BY random() LIMIT 1) gt;
+
+-- and give the players who are actually seated a real history, which is what
+-- makes the gametype filter discard work rather than be free
+INSERT INTO HudCache (playerid, gametypeid, seats, position, tourneytypeid,
+                      stylekey, n, street0vpichance, street0vpi,
+                      street0aggrchance, street0aggr)
+SELECT hp.playerid, gt.id, s.seats, pos.p, NULL, '0000000', 50, 50, 20, 50, 15
+FROM (SELECT DISTINCT playerid FROM HandsPlayers) hp
+CROSS JOIN (SELECT id FROM Gametypes ORDER BY id LIMIT 20) gt
+CROSS JOIN (SELECT unnest(ARRAY[6,9,10]) AS seats) s
+CROSS JOIN (SELECT unnest(ARRAY['B','S','D','C','M','E']) AS p) pos;
+
+ANALYZE HudCache;
+```
+
+`TourneyTypes` is empty in a cash-only fixture, so `tourneytypeid` must be NULL
+or the foreign key rejects the insert.
 
 ## Not pursued
 
