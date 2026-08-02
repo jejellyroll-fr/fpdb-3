@@ -29,6 +29,7 @@ from PySide6.QtWidgets import (
 )
 
 from fpdb_3_legacy import Card, Database, Filters, gui_empty_state
+from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.loggingFpdb import get_logger
 from fpdb_3_legacy.ring_stats.base import ModernStatsWidget
 from fpdb_3_legacy.ring_stats.controller import RingStatsController
@@ -112,7 +113,7 @@ class GuiRingPlayerStats(QSplitter):
         self.filters.registerButton2Name("Refresh Stats")
         self.filters.registerButton2Callback(self.refreshStats)
 
-        self.columns_button = QPushButton("Columns")
+        self.columns_button = QPushButton(_("Columns"))
         self.columns_button.clicked.connect(self.showColumnConfig)
         filters_layout = self.filters.layout()
         if filters_layout is None:
@@ -129,19 +130,19 @@ class GuiRingPlayerStats(QSplitter):
 
         # Onglet 1 : Tableau de Bord
         self.dashboard_tab = DashboardTab(self.stats_tabs)
-        self.stats_tabs.addTab(self.dashboard_tab, "Tableau de Bord")
+        self.stats_tabs.addTab(self.dashboard_tab, _("Dashboard"))
 
         # Onglet 2 : Tableaux détaillés
         self.table_tab = StatsTableView(self.stats_tabs)
-        self.stats_tabs.addTab(self.table_tab, "Tableaux de Stats")
+        self.stats_tabs.addTab(self.table_tab, _("Stats Tables"))
 
         # Onglet 3 : Heatmap des Positions
         self.position_tab = PositionalTab(self.stats_tabs)
-        self.stats_tabs.addTab(self.position_tab, "Heatmap Position")
+        self.stats_tabs.addTab(self.position_tab, _("Position Heatmap"))
 
         # Onglet 4 : Starting Hands
         self.hands_tab = StartingHandsTab(self.stats_tabs)
-        self.stats_tabs.addTab(self.hands_tab, "Starting Hands")
+        self.stats_tabs.addTab(self.hands_tab, _("Starting Hands"))
 
         self.addWidget(self.stats_tabs)
 
@@ -285,7 +286,7 @@ class GuiRingPlayerStats(QSplitter):
     def showColumnConfig(self) -> None:
         """Affiche la boîte de dialogue de configuration des colonnes."""
         dialog = QDialog(self.main_window)
-        dialog.setWindowTitle("Column Configuration")
+        dialog.setWindowTitle(_("Column Configuration"))
         layout = QVBoxLayout(dialog)
 
         table = QTableWidget()
@@ -333,12 +334,12 @@ class GuiRingPlayerStats(QSplitter):
     def showDetailFilter(self, checkState) -> None:
         """Affiche les filtres avancés (Pocket Pairs, Suited Connectors, etc.)."""
         detailDialog = QDialog(self.main_window)
-        detailDialog.setWindowTitle("Detailed Filters")
+        detailDialog.setWindowTitle(_("Detailed Filters"))
 
         handbox = QVBoxLayout()
         detailDialog.setLayout(handbox)
 
-        label = QLabel("Hand Filters:")
+        label = QLabel(_("Hand Filters:"))
         handbox.addWidget(label)
         label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
@@ -347,8 +348,8 @@ class GuiRingPlayerStats(QSplitter):
         for row, htest in enumerate(self.handtests):
             cb = QCheckBox()
             lbl_from = QLabel(htest[1])
-            lbl_tween = QLabel("between")
-            lbl_to = QLabel("and")
+            lbl_tween = QLabel(_("between"))
+            lbl_to = QLabel(_("and"))
             sb1 = QSpinBox()
             sb1.setRange(0, 10)
             sb1.setValue(htest[2])
@@ -370,7 +371,7 @@ class GuiRingPlayerStats(QSplitter):
 
             htest[4:7] = [cb, sb1, sb2]
 
-        label = QLabel("Restrict to hand types:")
+        label = QLabel(_("Restrict to hand types:"))
         handbox.addWidget(label)
         for ctest in self.cardstests:
             hbox = QHBoxLayout()

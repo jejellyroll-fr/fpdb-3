@@ -4,13 +4,15 @@ Widget to display configuration reload status in the status bar.
 """
 
 from __future__ import annotations
+
 from typing import Any
-from fpdb_3_legacy.Translations import _
+
 from PySide6.QtCore import Qt, QTimer, Signal
 from PySide6.QtGui import QColor, QPainter, QPixmap
 from PySide6.QtWidgets import QHBoxLayout, QLabel, QProgressBar, QPushButton, QWidget
 
 from fpdb_3_legacy.ConfigurationManager import ConfigurationManager
+from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.loggingFpdb import get_logger
 
 log = get_logger("config_reload_widget")

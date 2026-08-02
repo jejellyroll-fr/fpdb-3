@@ -25,7 +25,7 @@ from PySide6.QtWidgets import (
 
 from fpdb_3_legacy import SQL, Database, GuiReplayer
 from fpdb_3_legacy.http_capture_db_import import import_http_capture_directory, import_http_capture_hand
-from fpdb_3_legacy.Translations import _
+from fpdb_3_legacy.i18n import gettext as _
 
 log = logging.getLogger(__name__)
 

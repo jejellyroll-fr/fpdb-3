@@ -5,7 +5,6 @@ import unittest
 from fpdb.infrastructure.platform.winamax_title_parser import (
     WinamaxTableType,
     WinamaxTitleParser,
-    WinamaxWindowInfo,
     is_winamax_window,
     parse_winamax_title,
 )

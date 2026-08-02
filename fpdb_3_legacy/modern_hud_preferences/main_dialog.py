@@ -36,6 +36,7 @@ from PySide6.QtWidgets import (
 )
 
 from fpdb_3_legacy import Configuration
+from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.loggingFpdb import get_logger
 from fpdb_3_legacy.modern_hud_preferences.design_canvas import HudDesignCanvas
 from fpdb_3_legacy.modern_hud_preferences.dialogs import (
@@ -50,7 +51,6 @@ from fpdb_3_legacy.modern_hud_preferences.preview_widgets import (
 )
 from fpdb_3_legacy.PopupIcons import AVAILABLE_PROVIDERS
 from fpdb_3_legacy.PopupThemes import AVAILABLE_THEMES
-from fpdb_3_legacy.Translations import _
 
 log = get_logger("modern_hud_preferences.main_dialog")
 
@@ -421,8 +421,10 @@ class ModernHudPreferences(QDialog):
 
         # Preview info
         info_label = QLabel(
-            "The preview uses the same compact label grid as the in-game HUD.\n"
-            "Spacing, font, colors and HUD cell values come from the selected profile.",
+            _(
+                "The preview uses the same compact label grid as the in-game HUD.\n"
+                "Spacing, font, colors and HUD cell values come from the selected profile.",
+            ),
         )
         info_label.setProperty("class", "caption")
         info_label.setWordWrap(True)
