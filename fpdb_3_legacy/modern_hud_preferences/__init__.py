@@ -1,19 +1,19 @@
-#!/usr/bin/env python
 from __future__ import annotations
 
-from fpdb_3_legacy.modern_hud_preferences import (
-    _PREVIEW_ALIGN,
+from fpdb_3_legacy.modern_hud_preferences.design_canvas import HudDesignCanvas, _CanvasChip
+from fpdb_3_legacy.modern_hud_preferences.dialogs import (
     AddStatDialog,
     BlockPropertiesDialog,
-    ColorPreviewWidget,
-    HudDesignCanvas,
-    HudPreviewWidget,
     LayoutSelectionDialog,
-    ModernHudPreferences,
     PopupEditDialog,
-    PopupPreviewWidget,
     PopupStatEditDialog,
-    _CanvasChip,
+)
+from fpdb_3_legacy.modern_hud_preferences.main_dialog import ModernHudPreferences
+from fpdb_3_legacy.modern_hud_preferences.preview_widgets import (
+    _PREVIEW_ALIGN,
+    ColorPreviewWidget,
+    HudPreviewWidget,
+    PopupPreviewWidget,
 )
 
 __all__ = [

@@ -690,7 +690,7 @@ l'indentation interne du SQL, sans effet), et un essai de la CLI reconstruite.
 | 5 | ✅ `Database.py` découpé et sorti du cliquet | fait | −67 % lignes, dette 26→12 | Dette de complexité |
 | 6 | Bugs connus + clôture des plans | 0,5 j | — | Hand id iPoker faux |
 | 7 | i18n des modules récents | 1,5 j | — | UI bilingue |
-| 8 | Continu (`ModernHudPreferences`, cliquets) | — | — | — |
+| 8 | ✅ Continu (`ModernHudPreferences`, `winamax_title_parser`, cliquets) | fait | +9 tests, monolithe découpé | Dette de complexité & cliquet mis à jour |
 
 **Chemin critique recommandé : 1 → 3 → 2 → 4 → 5**, l'étape 1 protégeant tout le reste
 et l'étape 3 précédant l'étape 5 parce qu'on ne déplace pas du code non testé.
