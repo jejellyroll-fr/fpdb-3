@@ -10,9 +10,11 @@ from __future__ import annotations
 import re
 from typing import Any
 
+from fpdb_3_legacy.Translations import _
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, Signal
+from PySide6.QtGui import QColor, QPainter, QPixmap
 from PySide6.QtWidgets import QComboBox, QFrame, QGridLayout, QHBoxLayout, QLabel, QScrollArea, QVBoxLayout, QWidget
 
 from fpdb_3_legacy.localized_formats import format_currency, format_number
@@ -35,7 +37,7 @@ class HoldemGridCell(QFrame):
         self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(self.label)
 
-        self.setToolTip(f"Main : {hand_text}\nAucune statistique disponible")
+        self.setToolTip(_("Hand: {0}\nNo statistics available").format(hand_text))
         c = get_theme_palette()
         self.set_color(c.get("window", "#2d3748"))  # Couleur du thème par défaut
 
@@ -46,10 +48,12 @@ class HoldemGridCell(QFrame):
     def update_stats(self, n: int, profit: float, vpip: float, color_by: str = "profit") -> None:
         """Met à jour les statistiques de la cellule et son infobulle."""
         self.setToolTip(
-            f"<b>Main : {self.hand_text}</b><br/>"
-            f"Nombre de mains : {format_number(n, 0)}<br/>"
-            f"VPIP : {format_number(vpip, 1)}%<br/>"
-            f"Profit : {format_currency(profit, 'EUR', show_plus=profit > 0)}"
+            _("<b>Hand: {0}</b><br/>Hands: {1}<br/>VPIP: {2}%<br/>Profit: {3}").format(
+                self.hand_text,
+                format_number(n, 0),
+                format_number(vpip, 1),
+                format_currency(profit, 'EUR', show_plus=profit > 0)
+            )
         )
 
         c = get_theme_palette()

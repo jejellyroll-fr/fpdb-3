@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 from __future__ import annotations
 
+from fpdb_3_legacy.Translations import _
+
 """ModernSitePreferences.py.
 
 Modern and responsive interface for site settings in fpdb.
@@ -117,17 +119,17 @@ class ModernSiteCard(QFrame):
 
         # Screen name
         name_layout = QHBoxLayout()
-        name_icon = QLabel("👤")
+        name_icon = QLabel(_("👤"))
         name_icon.setProperty("emoji", "true")
         name_layout.addWidget(name_icon)
 
-        name_label = QLabel("Screen Name:")
+        name_label = QLabel(_("Screen Name:"))
         name_label.setMinimumWidth(120)
         name_layout.addWidget(name_label)
 
         self.screen_name_input = QLineEdit()
         self.screen_name_input.setText(getattr(self.site_config, "screen_name", ""))
-        self.screen_name_input.setPlaceholderText("Enter your username")
+        self.screen_name_input.setPlaceholderText(_("Enter your username"))
         # Let qt_material handle the style
         self.screen_name_input.setProperty("class", "outlined")
         name_layout.addWidget(self.screen_name_input)
@@ -136,11 +138,11 @@ class ModernSiteCard(QFrame):
 
         # Additional hero aliases (nickname changes / extra accounts on this room).
         alias_layout = QHBoxLayout()
-        alias_icon = QLabel("🎭")
+        alias_icon = QLabel(_("🎭"))
         alias_icon.setProperty("emoji", "true")
         alias_layout.addWidget(alias_icon)
 
-        alias_label = QLabel("Other Aliases:")
+        alias_label = QLabel(_("Other Aliases:"))
         alias_label.setMinimumWidth(120)
         alias_layout.addWidget(alias_label)
 
@@ -148,7 +150,7 @@ class ModernSiteCard(QFrame):
         # All aliases except the primary screen_name, comma separated.
         extra_aliases = [a for a in getattr(self.site_config, "hero_aliases", []) if a != getattr(self.site_config, "screen_name", "")]
         self.aliases_input.setText(", ".join(extra_aliases))
-        self.aliases_input.setPlaceholderText("Old nicknames / extra accounts, comma separated")
+        self.aliases_input.setPlaceholderText(_("Old nicknames / extra accounts, comma separated"))
         self.aliases_input.setProperty("class", "outlined")
         alias_layout.addWidget(self.aliases_input)
 
@@ -156,22 +158,22 @@ class ModernSiteCard(QFrame):
 
         # Hand History Path
         hh_layout = QHBoxLayout()
-        hh_icon = QLabel("📁")
+        hh_icon = QLabel(_("📁"))
         hh_icon.setProperty("emoji", "true")
         hh_layout.addWidget(hh_icon)
 
-        hh_label = QLabel("Hand History:")
+        hh_label = QLabel(_("Hand History:"))
         hh_label.setMinimumWidth(120)
         hh_layout.addWidget(hh_label)
 
         self.hh_path_input = QLineEdit()
         self.hh_path_input.setText(getattr(self.site_config, "HH_path", ""))
-        self.hh_path_input.setPlaceholderText("Path to hand history files")
+        self.hh_path_input.setPlaceholderText(_("Path to hand history files"))
         # Let qt_material handle the style
         self.hh_path_input.setProperty("class", "outlined")
         hh_layout.addWidget(self.hh_path_input)
 
-        self.hh_browse_btn = QPushButton("Browse")
+        self.hh_browse_btn = QPushButton(_("Browse"))
         # Style that adapts automatically to the theme
         self.hh_browse_btn.setStyleSheet("")  # Let qt_material handle the style
         self.hh_browse_btn.clicked.connect(partial(self.browse_clicked, self.hh_path_input))
@@ -181,22 +183,22 @@ class ModernSiteCard(QFrame):
 
         # Tournament Summary Path
         ts_layout = QHBoxLayout()
-        ts_icon = QLabel("🏆")
+        ts_icon = QLabel(_("🏆"))
         ts_icon.setProperty("emoji", "true")
         ts_layout.addWidget(ts_icon)
 
-        ts_label = QLabel("Tournament:")
+        ts_label = QLabel(_("Tournament:"))
         ts_label.setMinimumWidth(120)
         ts_layout.addWidget(ts_label)
 
         self.ts_path_input = QLineEdit()
         self.ts_path_input.setText(getattr(self.site_config, "TS_path", ""))
-        self.ts_path_input.setPlaceholderText("Path to tournament summaries")
+        self.ts_path_input.setPlaceholderText(_("Path to tournament summaries"))
         # Let qt_material handle the style
         self.ts_path_input.setProperty("class", "outlined")
         ts_layout.addWidget(self.ts_path_input)
 
-        self.ts_browse_btn = QPushButton("Browse")
+        self.ts_browse_btn = QPushButton(_("Browse"))
         # Style that adapts automatically to the theme
         self.ts_browse_btn.setStyleSheet("")  # Let qt_material manage the style
         self.ts_browse_btn.clicked.connect(partial(self.browse_clicked, self.ts_path_input))
@@ -209,7 +211,7 @@ class ModernSiteCard(QFrame):
             detect_layout = QHBoxLayout()
             detect_layout.addStretch()
 
-            self.detect_btn = QPushButton("🔍 Auto-Detect Paths")
+            self.detect_btn = QPushButton(_("🔍 Auto-Detect Paths"))
             # Use the primary style from qt_material
             self.detect_btn.setProperty("class", "primary")
             self.detect_btn.setStyleSheet("")  # Let qt_material manage the style
@@ -513,7 +515,7 @@ class ModernSitePreferencesDialog(QDialog):
 
         self._init_profiles_state()
 
-        self.setWindowTitle("Site Preferences")
+        self.setWindowTitle(_("Site Preferences"))
         self.setMinimumSize(900, 600)
         self.resize(1000, 700)
 
@@ -555,11 +557,11 @@ class ModernSitePreferencesDialog(QDialog):
         # Header
         header_layout = QVBoxLayout()
 
-        title = QLabel("Site Preferences")
+        title = QLabel(_("Site Preferences"))
         title.setProperty("class", "h1")
         header_layout.addWidget(title)
 
-        subtitle = QLabel("Configure your poker sites and usernames")
+        subtitle = QLabel(_("Configure your poker sites and usernames"))
         subtitle.setProperty("class", "subtitle")
         header_layout.addWidget(subtitle)
 
@@ -567,15 +569,15 @@ class ModernSitePreferencesDialog(QDialog):
 
         # Tabs: Sites + Hero Profiles
         self.tabs = QTabWidget()
-        self.tabs.addTab(self.setup_sites_tab(), "Sites")
-        self.tabs.addTab(self.setup_profiles_tab(), "Hero Profiles")
+        self.tabs.addTab(self.setup_sites_tab(), _("Sites"))
+        self.tabs.addTab(self.setup_profiles_tab(), _("Hero Profiles"))
         main_layout.addWidget(self.tabs)
 
         # Action buttons
         button_layout = QHBoxLayout()
 
         # Auto-detect button
-        detect_all_btn = QPushButton("🔍 Auto-Detect All Visible Sites")
+        detect_all_btn = QPushButton(_("🔍 Auto-Detect All Visible Sites"))
         detect_all_btn.clicked.connect(self.detect_all_sites)
         detect_all_btn.setProperty("class", "primary")
         button_layout.addWidget(detect_all_btn)
@@ -583,11 +585,11 @@ class ModernSitePreferencesDialog(QDialog):
         button_layout.addStretch()
 
         # Save/Cancel buttons
-        save_btn = QPushButton("Save Changes")
+        save_btn = QPushButton(_("Save Changes"))
         save_btn.clicked.connect(self.accept)
         save_btn.setProperty("class", "primary")
 
-        cancel_btn = QPushButton("Cancel")
+        cancel_btn = QPushButton(_("Cancel"))
         cancel_btn.clicked.connect(self.reject)
 
         button_layout.addWidget(cancel_btn)
@@ -603,18 +605,18 @@ class ModernSitePreferencesDialog(QDialog):
 
         # Search bar
         filter_layout = QHBoxLayout()
-        search_icon = QLabel("🔍")
+        search_icon = QLabel(_("🔍"))
         search_icon.setProperty("emoji", "true")
         filter_layout.addWidget(search_icon)
 
         self.search_input = QLineEdit()
-        self.search_input.setPlaceholderText("Search sites...")
+        self.search_input.setPlaceholderText(_("Search sites..."))
         self.search_input.setProperty("class", "search")
         self.search_input.textChanged.connect(self.filter_sites)
         filter_layout.addWidget(self.search_input)
 
         filter_layout.addSpacing(20)
-        search_note = QLabel("(search in enabled sites only)")
+        search_note = QLabel(_("(search in enabled sites only)"))
         search_note.setProperty("class", "caption")
         filter_layout.addWidget(search_note)
         filter_layout.addStretch()
@@ -681,9 +683,9 @@ class ModernSitePreferencesDialog(QDialog):
         left.addWidget(self.profile_list)
 
         list_btns = QHBoxLayout()
-        new_btn = QPushButton("New")
+        new_btn = QPushButton(_("New"))
         new_btn.clicked.connect(self.add_profile)
-        del_btn = QPushButton("Delete")
+        del_btn = QPushButton(_("Delete"))
         del_btn.clicked.connect(self.delete_profile)
         list_btns.addWidget(new_btn)
         list_btns.addWidget(del_btn)
@@ -694,11 +696,11 @@ class ModernSitePreferencesDialog(QDialog):
         right = QVBoxLayout()
 
         name_row = QHBoxLayout()
-        name_row.addWidget(QLabel("Name:"))
+        name_row.addWidget(QLabel(_("Name:")))
         self.profile_name_input = QLineEdit()
-        self.profile_name_input.setPlaceholderText("Profile name")
+        self.profile_name_input.setPlaceholderText(_("Profile name"))
         name_row.addWidget(self.profile_name_input)
-        self.profile_default_cb = QCheckBox("Default profile")
+        self.profile_default_cb = QCheckBox(_("Default profile"))
         name_row.addWidget(self.profile_default_cb)
         right.addLayout(name_row)
 
@@ -709,9 +711,9 @@ class ModernSitePreferencesDialog(QDialog):
         right.addWidget(self.links_table)
 
         link_btns = QHBoxLayout()
-        add_link_btn = QPushButton("Add link")
+        add_link_btn = QPushButton(_("Add link"))
         add_link_btn.clicked.connect(lambda: self.add_link_row())
-        rm_link_btn = QPushButton("Remove link")
+        rm_link_btn = QPushButton(_("Remove link"))
         rm_link_btn.clicked.connect(self.remove_link_row)
         link_btns.addWidget(add_link_btn)
         link_btns.addWidget(rm_link_btn)

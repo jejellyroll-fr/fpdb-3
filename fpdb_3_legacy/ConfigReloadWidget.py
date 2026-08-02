@@ -1,10 +1,11 @@
 """ConfigReloadWidget.py.
-from __future__ import annotations
+
 Widget to display configuration reload status in the status bar.
 """
 
+from __future__ import annotations
 from typing import Any
-
+from fpdb_3_legacy.Translations import _
 from PySide6.QtCore import Qt, QTimer, Signal
 from PySide6.QtGui import QColor, QPainter, QPixmap
 from PySide6.QtWidgets import QHBoxLayout, QLabel, QProgressBar, QPushButton, QWidget
@@ -40,7 +41,7 @@ class ConfigReloadWidget(QWidget):
         layout.addWidget(self.status_icon)
 
         # Status label
-        self.status_label = QLabel("Configuration up to date")
+        self.status_label = QLabel(_("Configuration up to date"))
         layout.addWidget(self.status_label)
 
         # Progress bar (hidden by default)
@@ -51,8 +52,8 @@ class ConfigReloadWidget(QWidget):
         layout.addWidget(self.progress_bar)
 
         # Reload button
-        self.reload_button = QPushButton("↻")
-        self.reload_button.setToolTip("Reload configuration")
+        self.reload_button = QPushButton(_("↻"))
+        self.reload_button.setToolTip(_("Reload configuration"))
         self.reload_button.setMaximumSize(20, 20)
         self.reload_button.clicked.connect(self.on_reload_clicked)
         layout.addWidget(self.reload_button)
@@ -91,7 +92,7 @@ class ConfigReloadWidget(QWidget):
     def start_reload(self) -> None:
         """Start reload animation."""
         self.update_status_icon("loading")
-        self.status_label.setText("Reloading...")
+        self.status_label.setText(_("Reloading..."))
         self.progress_bar.show()
         self.progress_bar.setRange(0, 0)  # Indeterminate mode
         self.reload_button.setEnabled(False)
@@ -104,18 +105,18 @@ class ConfigReloadWidget(QWidget):
         if success:
             if restart_required:
                 self.update_status_icon("warning")
-                self.status_label.setText("Restart required")
+                self.status_label.setText(_("Restart required"))
                 self.status_label.setToolTip(message)
             else:
                 self.update_status_icon("idle")
-                self.status_label.setText("Configuration up to date")
+                self.status_label.setText(_("Configuration up to date"))
                 self.status_label.setToolTip(message)
 
                 # Success animation
                 self.flash_success()
         else:
             self.update_status_icon("error")
-            self.status_label.setText("Reload error")
+            self.status_label.setText(_("Reload error"))
             self.status_label.setToolTip(message)
 
     def flash_success(self) -> None:
@@ -126,12 +127,12 @@ class ConfigReloadWidget(QWidget):
     def set_config_modified(self, *, modified: bool = True) -> None:
         """Indicates if configuration has been modified."""
         if modified:
-            self.status_label.setText("Configuration modified*")
+            self.status_label.setText(_("Configuration modified*"))
             self.status_label.setToolTip(
                 "Unsaved changes are present",
             )
         else:
-            self.status_label.setText("Configuration up to date")
+            self.status_label.setText(_("Configuration up to date"))
             self.status_label.setToolTip("")
 
 

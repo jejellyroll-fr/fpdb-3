@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 from __future__ import annotations
 
+from fpdb_3_legacy.Translations import _
+
 """ThemeCreatorDialog.py
 
 Dialog for creating custom themes within fpdb.
@@ -110,7 +112,7 @@ class ThemeCreatorDialog(QDialog):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("Create Custom Theme")
+        self.setWindowTitle(_("Create Custom Theme"))
         self.setModal(True)
         self.resize(600, 700)
 
@@ -140,15 +142,15 @@ class ThemeCreatorDialog(QDialog):
         info_layout = QFormLayout(info_group)
 
         self.name_input = QLineEdit()
-        self.name_input.setPlaceholderText("e.g., my_custom_theme")
+        self.name_input.setPlaceholderText(_("e.g., my_custom_theme"))
         info_layout.addRow("Theme Name:", self.name_input)
 
         self.description_input = QLineEdit()
-        self.description_input.setPlaceholderText("Brief description of your theme")
+        self.description_input.setPlaceholderText(_("Brief description of your theme"))
         info_layout.addRow("Description:", self.description_input)
 
         self.author_input = QLineEdit()
-        self.author_input.setPlaceholderText("Your name")
+        self.author_input.setPlaceholderText(_("Your name"))
         info_layout.addRow("Author:", self.author_input)
 
         form_layout.addWidget(info_group)
@@ -206,17 +208,17 @@ class ThemeCreatorDialog(QDialog):
         # Buttons
         button_layout = QHBoxLayout()
 
-        self.preview_button = QPushButton("Update Preview")
+        self.preview_button = QPushButton(_("Update Preview"))
         self.preview_button.clicked.connect(self.update_preview)
         button_layout.addWidget(self.preview_button)
 
         button_layout.addStretch()
 
-        self.cancel_button = QPushButton("Cancel")
+        self.cancel_button = QPushButton(_("Cancel"))
         self.cancel_button.clicked.connect(self.reject)
         button_layout.addWidget(self.cancel_button)
 
-        self.create_button = QPushButton("Create Theme")
+        self.create_button = QPushButton(_("Create Theme"))
         self.create_button.clicked.connect(self.create_theme)
         self.create_button.setDefault(True)
         button_layout.addWidget(self.create_button)
