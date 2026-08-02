@@ -696,7 +696,7 @@ requires-dist = [
     { name = "pyinstaller", marker = "extra == 'build'", specifier = ">=6.9.0" },
     { name = "pymysql", specifier = ">=1.1.0" },
     { name = "pyobjc", marker = "sys_platform == 'darwin'", specifier = "==10.3.1" },
-    { name = "pypoker-eval", git = "https://github.com/jejellyroll-fr/poker-eval.git?rev=v1.1.0" },
+    { name = "pypoker-eval", git = "https://github.com/jejellyroll-fr/poker-eval.git?rev=v1.2.0" },
     { name = "pyside6", specifier = ">=6.8.1" },
     { name = "pyside6", marker = "extra == 'linux'", specifier = ">=6.8.1" },
     { name = "pyside6", marker = "extra == 'macos'", specifier = ">=6.8.1" },
@@ -4610,8 +4610,8 @@ wheels = [
 
 [[package]]
 name = "pypoker-eval"
-version = "1.1.0"
-source = { git = "https://github.com/jejellyroll-fr/poker-eval.git?rev=v1.1.0#b74aef2dd85aac8e5b7932db3edd7749cb29d1a5" }
+version = "1.2.0"
+source = { git = "https://github.com/jejellyroll-fr/poker-eval.git?rev=v1.2.0#f746a822c462fa180c62bad1f428529d6e425b62" }
 
 [[package]]
 name = "pyside6"

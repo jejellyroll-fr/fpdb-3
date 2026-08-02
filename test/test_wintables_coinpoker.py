@@ -191,3 +191,427 @@ def test_is_coinpoker_table_accepts_when_class_unknown() -> None:
     assert WinTables.Table._is_coinpoker_table(None, unity) is True
     lobby = TableInfo(window_id=3, title="CoinPoker", geometry=_GEOM, window_class="Chrome_WidgetWin_1")
     assert WinTables.Table._is_coinpoker_table(None, lobby) is False
+
+
+def _make_regular_table() -> WinTables.Table:
+    """A non-CoinPoker table with the fields find_table_parameters touches."""
+    t = object.__new__(WinTables.Table)
+    t.site = "Winamax"
+    t.search_string = "Test Table"
+    t.number = None
+    t.title = ""
+    t.name = ""
+    t.type = "tour"
+    t.tournament = "123"
+    t.table = "3"
+    t.gdkhandle = None
+    t._table_geometry = None
+    t._coinpoker_argv_confirmed = False
+    t._detector = Mock()
+    return t
+
+
+def test_winamax_broadens_search_string() -> None:
+    t = _make_regular_table()
+    t.search_string = "Winamax Table 3"
+    assert t._detection_search_string() == "Winamax"
+    t.site = "PokerStars"
+    t.search_string = "Test Table"
+    assert t._detection_search_string() == "Test Table"
+
+
+def test_coinpoker_broadens_search_string() -> None:
+    t = _make_table()
+    t.site = "CoinPoker"
+    assert t._detection_search_string() == "CoinPoker"
+
+
+def test_matches_winamax_tournament_non_tour() -> None:
+    t = _make_regular_table()
+    t.type = "cash"
+    assert t._matches_winamax_tournament("Anything") is True
+
+
+def test_matches_winamax_tournament_wrong_tournament() -> None:
+    t = _make_regular_table()
+    t.tournament = "123"
+    assert t._matches_winamax_tournament("Winamax (124)") is False
+
+
+def test_matches_winamax_tournament_no_table_ignores_table() -> None:
+    t = _make_regular_table()
+    t.table = ""
+    assert t._matches_winamax_tournament("Winamax (123)") is True
+
+
+def test_matches_winamax_tournament_leading_zeros() -> None:
+    t = _make_regular_table()
+    t.tournament = "123"
+    t.table = "3"
+    assert t._matches_winamax_tournament("Winamax #03 (123)") is True
+    assert t._matches_winamax_tournament("Winamax #3 (123)") is True
+    assert t._matches_winamax_tournament("Winamax #04 (123)") is False
+
+
+def test_select_window_rejects_bad_words_and_empty_titles() -> None:
+    t = _make_regular_table()
+    t.site = "PokerStars"
+    bad = TableInfo(window_id=1, title="PokerStars Lobby", geometry=_GEOM)
+    empty = TableInfo(window_id=2, title="", geometry=_GEOM)
+    good = TableInfo(window_id=3, title="PokerStars Table 3", geometry=_GEOM)
+    with patch("fpdb_3_legacy.WinTables.Table.check_bad_words", side_effect=lambda title: "lobby" in title.lower()):
+        assert t._select_window([bad, empty, good], "Test Table") is good
+
+
+def test_select_window_none_when_no_qualifying() -> None:
+    t = _make_regular_table()
+    t.site = "PokerStars"
+    bad = TableInfo(window_id=1, title="PokerStars Lobby", geometry=_GEOM)
+    with patch("fpdb_3_legacy.WinTables.Table.check_bad_words", return_value=True):
+        assert t._select_window([bad], "Test Table") is None
+
+
+def test_select_window_winamax_rejects_wrong_tournament() -> None:
+    t = _make_regular_table()
+    wrong = TableInfo(window_id=1, title="Winamax #04 (124)", geometry=_GEOM)
+    good = TableInfo(window_id=2, title="Winamax #03 (123)", geometry=_GEOM)
+    assert t._select_window([wrong, good], "Winamax") is good
+
+
+def test_select_window_logs_and_scans_past_errors() -> None:
+    t = _make_regular_table()
+    t.site = "PokerStars"
+    failing = TableInfo(window_id=1, title="PokerStars Table 1", geometry=_GEOM)
+    good = TableInfo(window_id=2, title="PokerStars Table 2", geometry=_GEOM)
+    calls = {"n": 0}
+
+    def explode(title: str) -> bool:
+        calls["n"] += 1
+        if title == "PokerStars Table 1":
+            raise RuntimeError("boom")
+        return False
+
+    with patch("fpdb_3_legacy.WinTables.Table.check_bad_words", side_effect=explode):
+        assert t._select_window([failing, good], "Test Table") is good
+    assert calls["n"] == 2
+
+
+def test_find_table_parameters_uses_cached_geometry() -> None:
+    t = _make_regular_table()
+    t.site = "PokerStars"
+    t.search_string = "Test Table"
+    t._detector.find_tables.return_value = [TableInfo(window_id=42, title="Test Table", geometry=_GEOM)]
+    t.find_table_parameters()
+    assert t.number == 42
+    assert t.title == "Test Table"
+    assert t._table_geometry is _GEOM
+
+
+def test_find_table_parameters_not_found_lists_windows() -> None:
+    t = _make_regular_table()
+    t.site = "PokerStars"
+    t._detector.find_tables.side_effect = lambda s: [] if s == "Test Table" else [TableInfo(window_id=9, title="Other", geometry=_GEOM)]
+    t.find_table_parameters()
+    assert t.number is None
+
+
+def test_window_pid_non_windows() -> None:
+    assert WinTables._window_pid(None) is None
+    assert WinTables._window_pid(0) is None
+    with patch("sys.platform", "linux"):
+        assert WinTables._window_pid(123) is None
+
+
+def test_get_geometry_uses_cached_geometry_once() -> None:
+    t = _make_regular_table()
+    t.site = "PokerStars"
+    t.number = 42
+    t._table_geometry = _GEOM
+    geom = t.get_geometry()
+    assert geom is not None
+    assert geom["x"] == _GEOM.x + 3
+    assert geom["y"] == _GEOM.y + 29 + 3
+    assert geom["width"] == _GEOM.width - 2 * 3
+    assert geom["height"] == _GEOM.height - 2 * 3 - 29
+    # Cache is single-use: next call queries the live window.
+    t._detector.is_window_visible.return_value = True
+    t._detector.get_window_geometry.return_value = _GEOM
+    geom2 = t.get_geometry()
+    assert geom2 is not None
+
+
+def test_get_geometry_visible_false_returns_none() -> None:
+    t = _make_regular_table()
+    t.site = "PokerStars"
+    t.number = 42
+    t._detector.is_window_visible.return_value = False
+    assert t.get_geometry() is None
+
+
+def test_get_geometry_no_live_geometry_returns_none() -> None:
+    t = _make_regular_table()
+    t.site = "PokerStars"
+    t.number = 42
+    t._detector.is_window_visible.return_value = True
+    t._detector.get_window_geometry.return_value = None
+    assert t.get_geometry() is None
+
+
+def test_get_geometry_coinpoker_live() -> None:
+    t = _make_table()
+    t.number = 111
+    t._detector.find_tables.return_value = _windows((957, "930357"))
+    t._detector.is_window_displayed.return_value = True
+    t._detector.get_window_geometry.return_value = _GEOM
+    with patch("fpdb.infrastructure.platform.windows_process.table_id_for_pid", return_value="930357"):
+        geom = t.get_geometry()
+    assert geom is not None
+    assert geom["width"] == _GEOM.width - 6
+
+
+def test_get_window_title() -> None:
+    t = _make_regular_table()
+    t.number = 42
+    t._detector.get_window_title.return_value = "Hello"
+    assert t.get_window_title() == "Hello"
+    t._detector.get_window_title.return_value = None
+    assert t.get_window_title() == ""
+
+
+def test_move_and_resize_window() -> None:
+    t = _make_regular_table()
+    t.number = 42
+    t._detector.resize_window.return_value = True
+    assert t.move_and_resize_window(1, 2, 3, 4) is None
+    t._detector.resize_window.assert_called_once_with(42, 1, 2, 3, 4)
+    t.number = None
+    assert t.move_and_resize_window(1, 2, 3, 4) is None
+
+
+def test_topify_reparents() -> None:
+    t = _make_regular_table()
+    t.number = 42
+    window = Mock()
+    handle = Mock()
+    window.windowHandle.return_value = handle
+    t.topify(window)
+    handle.setTransientParent.assert_called_once_with(t.gdkhandle)
+    handle.setFlags.assert_called_once()
+    # Second call reuses the cached handle.
+    t.topify(window)
+    assert handle.setTransientParent.call_count == 2
+
+
+def test_check_bad_words_case_insensitive() -> None:
+    t = _make_regular_table()
+    assert t.check_bad_words("Table Lobby 1") is True
+    assert t.check_bad_words("Table HUD: 1") is True
+    assert t.check_bad_words("Normal Table 1") is False
+
+
+def test_match_coinpoker_by_argv_import_error() -> None:
+    t = _make_table()
+    with patch.dict(sys.modules, {"fpdb.infrastructure.platform.windows_process": None}):
+        with patch("fpdb.infrastructure.platform.windows_process.table_id_for_pid", side_effect=ImportError):
+            assert t._match_coinpoker_by_argv([]) is None
+
+
+def test_select_coinpoker_window_warns_when_multiple_unresolved() -> None:
+    t = _make_table()
+    t1 = TableInfo(window_id=111, title="CoinPoker", geometry=_GEOM, process_id=956, window_class="UnityWndClass")
+    t2 = TableInfo(window_id=222, title="CoinPoker", geometry=_GEOM, process_id=957, window_class="UnityWndClass")
+    with patch("fpdb_3_legacy.WinTables.Table._match_coinpoker_by_argv", return_value=None):
+        assert t._select_coinpoker_window([t1, t2]) is None
+
+
+def test_tracked_window_belongs_elsewhere_no_target() -> None:
+    t = _make_regular_table()
+    t.search_string = "NoDigitsHere"
+    assert t._tracked_window_belongs_elsewhere() is False
+
+
+def test_tracked_window_belongs_elsewhere_no_pid() -> None:
+    t = _make_regular_table()
+    t.search_string = "Table 930357"
+    t.number = 42
+    with patch("fpdb_3_legacy.WinTables._window_pid", return_value=None):
+        assert t._tracked_window_belongs_elsewhere() is False
+
+
+def test_tracked_window_belongs_elsewhere_different_table() -> None:
+    t = _make_regular_table()
+    t.search_string = "Table 930357"
+    t.number = 42
+    with patch("fpdb_3_legacy.WinTables._window_pid", return_value=956):
+        with patch("fpdb.infrastructure.platform.windows_process.table_id_for_pid", return_value="999"):
+            assert t._tracked_window_belongs_elsewhere() is True
+
+
+def test_tracked_window_belongs_elsewhere_same_table() -> None:
+    t = _make_regular_table()
+    t.search_string = "Table 930357"
+    t.number = 42
+    with patch("fpdb_3_legacy.WinTables._window_pid", return_value=956):
+        with patch("fpdb.infrastructure.platform.windows_process.table_id_for_pid", return_value="930357"):
+            assert t._tracked_window_belongs_elsewhere() is False
+
+
+def test_match_coinpoker_by_argv_empty_target() -> None:
+    t = _make_table()
+    t.search_string = "No digits"
+    assert t._match_coinpoker_by_argv([]) is None
+
+
+def test_find_table_parameters_open_windows_listing_errors() -> None:
+    t = _make_regular_table()
+    t.site = "PokerStars"
+    t._detector.find_tables.side_effect = lambda s: (_ for _ in ()).throw(RuntimeError("boom")) if s == "" else []
+    t.find_table_parameters()
+    assert t.number is None
+
+
+def test_coinpoker_live_geometry_hidden_fallback() -> None:
+    # Not confirmed and the tracked window is hidden: close.
+    t = _make_table()
+    t.number = 111
+    t._coinpoker_argv_confirmed = False
+    t._detector.find_tables.return_value = []
+    t._detector.is_window_displayed.return_value = False
+    assert t._coinpoker_live_geometry() is None
+
+
+def test_tracked_window_argv_check_error_is_safe() -> None:
+    t = _make_regular_table()
+    t.search_string = "Table 930357"
+    t.number = 42
+    with patch("fpdb_3_legacy.WinTables._window_pid", return_value=956):
+        with patch("fpdb.infrastructure.platform.windows_process.table_id_for_pid", side_effect=OSError("denied")):
+            assert t._tracked_window_belongs_elsewhere() is False
+
+
+def test_get_geometry_coinpoker_none_closes() -> None:
+    t = _make_table()
+    t.number = 111
+    t._detector.find_tables.return_value = []
+    t._coinpoker_argv_confirmed = True
+    assert t.get_geometry() is None
+
+
+def test_move_and_resize_window_failure_logs() -> None:
+    t = _make_regular_table()
+    t.number = 42
+    t._detector.resize_window.return_value = False
+    assert t.move_and_resize_window(1, 2, 3, 4) is None
+
+
+def test_topify_reuses_existing_handle() -> None:
+    # gdkhandle already set: topify must skip creating a new one.
+    t = _make_regular_table()
+    t.number = 42
+    t.gdkhandle = "EXISTING"
+    window = Mock()
+    handle = Mock()
+    window.windowHandle.return_value = handle
+    t.topify(window)
+    handle.setTransientParent.assert_called_once_with("EXISTING")
+    handle.setFlags.assert_called_once()
+
+
+def test_topify_creates_handle_on_first_call() -> None:
+    t = _make_regular_table()
+    t.number = 42
+    window = Mock()
+    handle = Mock()
+    window.windowHandle.return_value = handle
+    with patch("fpdb_3_legacy.WinTables.QWindow") as qwin:
+        qwin.fromWinId.return_value = "QHANDLE"
+        t.topify(window)
+        qwin.fromWinId.assert_called_once_with(42)
+    assert t.gdkhandle == "QHANDLE"
+
+
+def test_win32_border_metrics_path() -> None:
+    t = _make_regular_table()
+    t.site = "PokerStars"
+    t.number = 42
+    t._table_geometry = _GEOM
+    WinTables.GetSystemMetrics = Mock(side_effect=[8, 40])
+    WinTables.SM_CXSIZEFRAME = 32
+    WinTables.SM_CYCAPTION = 4
+    with patch("sys.platform", "win32"):
+        geom = t.get_geometry()
+    assert geom["x"] == _GEOM.x + 8
+    assert geom["y"] == _GEOM.y + 40 + 8
+    WinTables.GetSystemMetrics.assert_any_call(32)
+    WinTables.GetSystemMetrics.assert_any_call(4)
+
+
+def test_coinpoker_live_geometry_keeps_same_hwnd() -> None:
+    # The window still carries our id and its HWND is unchanged: geometry is
+    # returned without re-binding or dropping the cached parent handle.
+    t = _make_table()
+    t.number = 1057
+    t.gdkhandle = "HANDLE"
+    t._detector.find_tables.return_value = _windows((957, "930357"))
+    t._detector.is_window_displayed.return_value = True
+    t._detector.get_window_geometry.return_value = _GEOM
+    with patch("fpdb.infrastructure.platform.windows_process.table_id_for_pid", return_value="930357"):
+        assert t._coinpoker_live_geometry() is _GEOM
+    assert t.number == 1057
+    assert t.gdkhandle == "HANDLE"
+
+
+def test_window_pid_win32_path() -> None:
+    fake_ulong = Mock()
+    fake_ulong.value = 1234
+    fake_win = Mock()
+    fake_win.GetWindowThreadProcessId = Mock(return_value=1)
+    fake_ctypes = Mock()
+    fake_ctypes.byref = lambda x: x
+    fake_ctypes.c_ulong = Mock(return_value=fake_ulong)
+    fake_ctypes.windll = Mock(user32=fake_win)
+
+    with patch("sys.platform", "win32"):
+        with patch.dict("sys.modules", {"ctypes": fake_ctypes}):
+            with patch("builtins.__import__", lambda name, *a, **k: fake_ctypes if name == "ctypes" else __import__(name, *a, **k)):
+                assert WinTables._window_pid(555) == 1234
+    fake_win.GetWindowThreadProcessId.assert_called_once_with(555, fake_ulong)
+
+
+def test_window_pid_win32_zero_is_none() -> None:
+    fake_ulong = Mock()
+    fake_ulong.value = 0
+    fake_win = Mock()
+    fake_win.GetWindowThreadProcessId = Mock(return_value=1)
+    fake_ctypes = Mock()
+    fake_ctypes.byref = lambda x: x
+    fake_ctypes.c_ulong = Mock(return_value=fake_ulong)
+    fake_ctypes.windll = Mock(user32=fake_win)
+
+    with patch("sys.platform", "win32"):
+        with patch.dict("sys.modules", {"ctypes": fake_ctypes}):
+            with patch("builtins.__import__", lambda name, *a, **k: fake_ctypes if name == "ctypes" else __import__(name, *a, **k)):
+                assert WinTables._window_pid(555) is None
+
+
+def test_window_pid_win32_error_is_none() -> None:
+    with patch("sys.platform", "win32"):
+        with patch("builtins.__import__", lambda name, *a, **k: (_ for _ in ()).throw(ImportError("boom")) if name == "ctypes" else __import__(name, *a, **k)):
+            assert WinTables._window_pid(555) is None
+
+
+def test_constructor_initialises_state() -> None:
+    detector = Mock()
+    detector.find_tables.return_value = []
+    detector.is_window_visible.return_value = False
+    config = Mock()
+    config.hhcs = {"PokerStars": Mock(converter=Mock())}
+    with patch("fpdb_3_legacy.WinTables.get_table_detector", return_value=detector):
+        with patch("fpdb_3_legacy.TableWindow.getTableTitleRe", return_value="Table 1"):
+            with patch("fpdb_3_legacy.TableWindow.sleep"):
+                t = WinTables.Table(config, "PokerStars", table_name="Table 1")
+    assert t._detector is detector
+    assert t._table_geometry is None
+    assert t.gdkhandle is None
+    assert t._coinpoker_argv_confirmed is False
+    assert t.name == "Table 1"

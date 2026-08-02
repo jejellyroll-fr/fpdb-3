@@ -675,6 +675,78 @@ l'indentation interne du SQL, sans effet), et un essai de la CLI reconstruite.
 - `fpdb/infrastructure/platform/winamax_title_parser.py` (0 %, 106 instructions,
   logique pure) : gain immédiat pour un coût nul.
 
+### Étape 9 — ✅ FAIT (2026-08-02) : logique pure `platform-pkg` & `import`
+
+La couverture mesurée était plus élevée que les planchers ne le disaient : le
+cliquet n'avait pas été ré-ensemencé depuis les tests de `winamax_title_parser`
+(0 % → 89 %). Ré-ensemencement : total **61,1 → 64,3 %**, `platform-pkg` 17,1 → 30,3 %.
+
+Puis tranche de tests unitaires sur les modules à 0 % de logique pure :
+
+- `permissions.py` (100 %), `linux.py` (100 %), `detect_site.py` (100 %),
+  `card_path.py` (100 %), `winamax_title_parser.py` (89 → 99 %).
+- +52 tests (6 938 → 6 990 verts dans la sélection non-Qt). Cliquet ré-ensemencé :
+  total **64,6 %**, `platform-pkg` **49,7 %**.
+
+Second passage (2026-08-02) : `macos.py` (723 lignes) passé de 0 % à **98 %**
+(60 tests, mock Quartz/AppKit/AppleScript). +60 tests (6 990 → 7 050 verts).
+Cliquet ré-ensemencé : total **65,0 %**, `platform-pkg` **86,6 %**.
+
+Troisième passage (2026-08-02) : `HandHistory.py` (parseur XML de la colonne
+`HandHistory.XMLDump`) passé de 0 % à **98 %** (19 tests : constructions
+directes de chaque classe, coercition booléenne, chemins d'erreur, `main` avec
+`test.xml` temporaire). Seul reste le garde `if __name__ == "__main__"`.
++19 tests (7 051 → 7 070 verts). Cliquet ré-ensemencé : total **65,2 %**.
+
+Quatrième passage (2026-08-02) : `PlayerProfiler.py` (classification de
+joueurs) passé de 0 % à **100 %** (14 tests couvrant chaque archétype, les
+garde-fous anti-division-par-zéro, la règle `min_hands`, la valeur par défaut
+UNKNOWN et la complétude des tables icônes/couleurs). Un `test_player_profiler.py`
+historique vivait dans `fpdb_3_legacy/` où `testpaths = tests test` ne le
+collecte jamais : le test utile est désormais dans `test/`. +14 tests
+(7 070 → 7 084 verts). Cliquet ré-ensemencé : total **65,3 %**.
+
+Cinquième passage (2026-08-02) : `WinTables.py` (gestion Windows des tables)
+passé de 52 % à **97 %** (41 tests qt ajoutés à `test_wintables_coinpoker.py`,
+qui ne couvrait que le cas CoinPoker : filtrage Winamax tour/table avec zéros
+initiaux, élargissement de la recherche, `_select_window` hors CoinPoker,
+`_window_pid` (chemins win32 mockés), géométrie cache/single-use, déplacement/
+redimensionnement, `topify`, `_tracked_window_belongs_elsewhere`, constructeur).
+Seul reste le bloc d'import `if sys.platform == "win32"` inexécutable sur mac.
+Suite qt : 495 → **536 passés**. Cliquet ré-ensemencé : total **65,4 %**.
+
+Sixième passage (2026-08-02) : `TableWindow.py` (classe de base, parente des
+trois Tables X/OSX/Windows) passé de 10 % à **100 %** (34 tests qt dans
+`test_table_window.py` : constructeur cash/tournoi/bytes/fallback table_number,
+`__str__`, `get_game` (nl/pl/limit), `get_table_no` (match/none/None/`tableno_re`
+absent), `check_table`/`check_size`/`check_loc` (destroyed/resized/moved/no
+change), `has_table_title_changed`, `check_bad_words`, méthodes abstraites).
+Suite qt : 536 → **570 passés**. Cliquet ré-ensemencé : total **65,6 %**.
+
+Septième passage (2026-08-02) : `iPokerSummary.py` (parseur de résumés de
+tournois iPoker) passé de 9,9 % à **95 %** (55 tests dans `test_ipoker_summary.py` :
+détection gametype/limit (holdem/stud/stud hi-lo/omaha/omaha hi-lo/six-plus/5_omahahi
+par défaut), formats de dates (abrévié, ISO, j/m/a avec/sans secondes, a/m/j),
+monnaies (réelle/fun/play), buyin/rake (split `+`, `Token` avec/sans/`totalbuyin`
+non numérique, freeroll → FREE, FPP), tourNo (code tournoi, table, fallback split),
+maintien du nom de tournoi sans suffixe, place N/A, détection Twister directe,
+erreurs `FpdbParseError`, `getSplitRe`, `convert_to_decimal` (complexes `+`,
+parties symboles, `1..2`, sans correspondance numérique). Vu pendant la tranche :
+le constructeur `__init__` réinitialise `isLottery`/`tourneyMultiplier` *après*
+`parseSummary()` (la détection Twister est donc toujours écrasée — à corriger
+lorsqu'on traitera ce module), et le format de gametype `LH …` déclenche un
+`KeyError` latent (`LIMIT` présent à `None`). Cliquet ré-ensemencé : total **66,0 %**.
+
+Bugs connus non corrigés :
+- ~~**poker-eval 7stud8 low-eval**~~ — ✅ **RÉSOLU (2026-08-02)** par la release
+  **v1.2.0** du fork (voir `test/test_stud_shown_cards.py`). Le test
+  `test_a_boardless_game_still_builds_its_pots` passe maintenant (rake 6 au lieu
+  de −71). Pin de `pyproject.toml` passé `@v1.1.0` → `@v1.2.0`, `uv sync` réalisé,
+  suite complète verte : **7 051 passés, 0 échec** (vs 7 050 + 1 échec connu).
+  La cause était bien côté bibliothèque : pour une même valeur de low (484675)
+  elle attribuait le low à des mains différentes selon les cartes exactes, et
+  parfois à une main *non qualifiante* (OnePair).
+
 ---
 
 ## Récapitulatif
@@ -691,6 +763,7 @@ l'indentation interne du SQL, sans effet), et un essai de la CLI reconstruite.
 | 6 | Bugs connus + clôture des plans | 0,5 j | — | Hand id iPoker faux |
 | 7 | i18n des modules récents | 1,5 j | — | UI bilingue |
 | 8 | ✅ Continu (`ModernHudPreferences`, `winamax_title_parser`, cliquets) | fait | +9 tests, monolithe découpé | Dette de complexité & cliquet mis à jour |
+| 9 | ✅ Logique pure `platform-pkg`/`import` (permissions, linux, detect_site, card_path, winamax, macos, HandHistory, PlayerProfiler, WinTables, TableWindow, iPokerSummary) | fait | platform-pkg 17→87, total 61→66,0 | Dérive du cliquet & 7stud8 corrigé via fork v1.2.0 |
 
 **Chemin critique recommandé : 1 → 3 → 2 → 4 → 5**, l'étape 1 protégeant tout le reste
 et l'étape 3 précédant l'étape 5 parce qu'on ne déplace pas du code non testé.
