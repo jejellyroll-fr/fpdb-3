@@ -2132,6 +2132,7 @@ class HudMain(QObject):
             # Real geometry change: bump the generation so block windows re-place.
             hud.geometry_generation += 1
             hud.move_table_position()
+            self._position_loading_indicator(hud)
             for aw in hud.aux_windows:
                 aw.move_windows()
         except Exception:
@@ -2143,6 +2144,7 @@ class HudMain(QObject):
             # Real geometry change: bump the generation so block windows re-place.
             hud.geometry_generation += 1
             hud.resize_windows()
+            self._position_loading_indicator(hud)
             for aw in hud.aux_windows:
                 aw.resize_windows()
         except Exception:
@@ -2241,24 +2243,32 @@ class HudMain(QObject):
                 "border: 1px solid #777; border-radius: 4px; padding: 6px 10px; }",
             )
             label.adjustSize()
-            table_x = hud.table.x if hud.table.x is not None else 0
-            table_y = hud.table.y if hud.table.y is not None else 0
-            table_width = hud.table.width if hud.table.width is not None else label.width()
-            table_height = hud.table.height if hud.table.height is not None else label.height()
-            x = table_x + max(0, (table_width - label.width()) // 2)
-            y = table_y + max(0, (table_height - label.height()) // 2)
-            x, y = Aux_Base.clamp_to_screen(x, y)
-            label.move(x, y)
+            hud.loading_window = label
+            HudMain._position_loading_indicator(hud)
             label.create()
             hud.table.topify(label)
             label.show()
-            hud.loading_window = label
         except Exception:
             if label is not None:
                 label.close()
                 label.deleteLater()
             hud.loading_window = None
             log.exception("Could not create loading indicator for table %s", hud.table_name)
+
+    @staticmethod
+    def _position_loading_indicator(hud: Hud.Hud) -> None:
+        """Keep the provisional indicator centered on the current table geometry."""
+        label = hud.loading_window
+        if label is None:
+            return
+        table_x = hud.table.x if hud.table.x is not None else 0
+        table_y = hud.table.y if hud.table.y is not None else 0
+        table_width = hud.table.width if hud.table.width is not None else label.width()
+        table_height = hud.table.height if hud.table.height is not None else label.height()
+        x = table_x + max(0, (table_width - label.width()) // 2)
+        y = table_y + max(0, (table_height - label.height()) // 2)
+        x, y = Aux_Base.clamp_to_screen(x, y)
+        label.move(x, y)
 
     def idle_update(
         self,
