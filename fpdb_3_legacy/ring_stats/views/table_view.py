@@ -9,6 +9,7 @@ from __future__ import annotations
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QComboBox, QHBoxLayout, QLabel, QSplitter, QTableView, QVBoxLayout, QWidget
 
+from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.ring_stats.styles import get_theme_palette
 
 
@@ -23,7 +24,7 @@ class StatsTableView(QWidget):
         # Sélecteur de groupe de statistiques (Presets)
         preset_layout = QHBoxLayout()
         preset_layout.setContentsMargins(0, 0, 0, 4)
-        self.preset_label = QLabel("Groupe de statistiques :")
+        self.preset_label = QLabel(_("Statistics group:"))
         from fpdb_3_legacy.ring_stats.styles import get_theme_palette
         c = get_theme_palette()
         muted = c.get('muted_text', '#a0aec0')
@@ -58,7 +59,7 @@ class StatsTableView(QWidget):
         self.separator_widget = QWidget()
         sep_layout = QVBoxLayout(self.separator_widget)
         sep_layout.setContentsMargins(0, 8, 0, 8)
-        self.separator_label = QLabel("Répartition détaillée des mains (Hand Breakdown)")
+        self.separator_label = QLabel(_("Hand Breakdown"))
         self.separator_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.separator_label.setStyleSheet(f"font-weight: bold; text-transform: uppercase; color: {muted}; font-size: 11px;")
         sep_layout.addWidget(self.separator_label)

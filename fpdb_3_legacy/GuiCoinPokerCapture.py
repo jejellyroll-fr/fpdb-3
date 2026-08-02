@@ -34,6 +34,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.loggingFpdb import get_logger
 from fpdb_3_legacy.subprocess_launch import hud_main_command, python_module_command
 
@@ -85,11 +86,11 @@ class GuiCoinPokerCapture(QWidget):
         )
 
         controls = QHBoxLayout()
-        controls.addWidget(QLabel("Interface:"))
+        controls.addWidget(QLabel(_("Interface:")))
         self.iface_combo = QComboBox()
         controls.addWidget(self.iface_combo, 1)
 
-        game_label = QLabel("Default game:")
+        game_label = QLabel(_("Default game:"))
         self.game_combo = QComboBox()
         self.game_combo.addItems(_GAMES)
         # The variant is detected per hand from the number of cards dealt to the
@@ -101,30 +102,30 @@ class GuiCoinPokerCapture(QWidget):
         controls.addWidget(game_label)
         controls.addWidget(self.game_combo)
 
-        self.dry_run = QCheckBox("Dry run (no DB insert)")
+        self.dry_run = QCheckBox(_("Dry run (no DB insert)"))
         controls.addWidget(self.dry_run)
 
-        self.launch_hud = QCheckBox("Launch HUD")
+        self.launch_hud = QCheckBox(_("Launch HUD"))
         self.launch_hud.setChecked(True)
-        self.launch_hud.setToolTip("Also start HUD_main (uncheck if HUD/Auto Import is already running).")
+        self.launch_hud.setToolTip(_("Also start HUD_main (uncheck if HUD/Auto Import is already running)."))
         controls.addWidget(self.launch_hud)
         self.mainVBox.addLayout(controls)
 
         buttons = QHBoxLayout()
-        self.start_button = QPushButton("Start capture")
+        self.start_button = QPushButton(_("Start capture"))
         self.start_button.clicked.connect(self._start)
         buttons.addWidget(self.start_button)
-        self.stop_button = QPushButton("Stop")
+        self.stop_button = QPushButton(_("Stop"))
         self.stop_button.setEnabled(False)
         self.stop_button.clicked.connect(self._stop)
         buttons.addWidget(self.stop_button)
-        self.refresh_button = QPushButton("Refresh interfaces")
+        self.refresh_button = QPushButton(_("Refresh interfaces"))
         self.refresh_button.clicked.connect(self._populate_ifaces)
         buttons.addWidget(self.refresh_button)
         buttons.addStretch(1)
         self.mainVBox.addLayout(buttons)
 
-        self.status = QLabel("Idle.")
+        self.status = QLabel(_("Idle."))
         self.mainVBox.addWidget(self.status)
 
         self.output = QPlainTextEdit()
@@ -194,7 +195,7 @@ class GuiCoinPokerCapture(QWidget):
                     except (OSError, ValueError):
                         self.status.setText(f"Capture already active: {exc}")
                         return
-                    self.status.setText("Finishing previous capture…")
+                    self.status.setText(_("Finishing previous capture…"))
                     QTimer.singleShot(500, self._start)
                     return
                 self.status.setText(f"Capture already active: {exc}")
@@ -217,7 +218,7 @@ class GuiCoinPokerCapture(QWidget):
         if self.launch_hud.isChecked() and not self.dry_run.isChecked():
             self._launch_hud_main()
 
-        self.status.setText("Requesting privileges… accept the prompt, then play in CoinPoker.")
+        self.status.setText(_("Requesting privileges… accept the prompt, then play in CoinPoker."))
         self.start_button.setEnabled(False)
         self.stop_button.setEnabled(True)
         self.tail_timer.start()
@@ -231,7 +232,7 @@ class GuiCoinPokerCapture(QWidget):
             self._tail_log()
             self._terminate_children()
             self.proc = None
-            self.status.setText("Capture failed to start — see the log above.")
+            self.status.setText(_("Capture failed to start — see the log above."))
             self.start_button.setEnabled(True)
             self.stop_button.setEnabled(False)
             self.tail_timer.stop()
@@ -252,7 +253,7 @@ class GuiCoinPokerCapture(QWidget):
         except OSError as exc:
             self.status.setText(f"Could not write stop file: {exc}")
             return
-        self.status.setText("Stopping…")
+        self.status.setText(_("Stopping…"))
         self.stop_button.setEnabled(False)
         QTimer.singleShot(1500, self._finish_stop)
 
@@ -262,7 +263,7 @@ class GuiCoinPokerCapture(QWidget):
         self._terminate_children()
         self.stop_file.unlink(missing_ok=True)
         self.proc = None
-        self.status.setText("Idle.")
+        self.status.setText(_("Idle."))
         self.start_button.setEnabled(True)
 
     def _terminate_children(self) -> None:

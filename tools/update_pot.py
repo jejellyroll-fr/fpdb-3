@@ -29,7 +29,9 @@ def main() -> int:
         print("xgettext not found; install GNU gettext (brew install gettext).", file=sys.stderr)
         return 1
 
-    files = sorted(str(p) for p in [*SRC.glob("*.py"), *SRC.glob("*.pyw")])
+    # Recursive: subpackages such as ring_stats/ and modern_hud_preferences/
+    # hold user-visible strings too.
+    files = sorted(str(p) for p in [*SRC.rglob("*.py"), *SRC.rglob("*.pyw")])
     cmd = [
         xgettext,
         "--language=Python",

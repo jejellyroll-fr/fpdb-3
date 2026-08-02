@@ -131,6 +131,8 @@ DOMAINS: tuple[tuple[str, tuple[str, ...]], ...] = (
             "fpdb_3_legacy/*Popup*.py",
             "fpdb_3_legacy/ring_stats/*.py",
             "fpdb_3_legacy/ring_stats/**/*.py",
+            "fpdb_3_legacy/modern_hud_preferences/*.py",
+            "fpdb_3_legacy/modern_hud_preferences/**/*.py",
             "fpdb_3_legacy/ConfigReloadWidget.py",
         ),
     ),

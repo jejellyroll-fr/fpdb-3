@@ -15,6 +15,7 @@ from matplotlib.figure import Figure
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QComboBox, QFrame, QGridLayout, QHBoxLayout, QLabel, QScrollArea, QVBoxLayout, QWidget
 
+from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.localized_formats import format_currency, format_number
 from fpdb_3_legacy.ring_stats.styles import get_theme_palette
 
@@ -35,7 +36,7 @@ class HoldemGridCell(QFrame):
         self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(self.label)
 
-        self.setToolTip(f"Main : {hand_text}\nAucune statistique disponible")
+        self.setToolTip(_("Hand: {0}\nNo statistics available").format(hand_text))
         c = get_theme_palette()
         self.set_color(c.get("window", "#2d3748"))  # Couleur du thème par défaut
 
@@ -46,10 +47,12 @@ class HoldemGridCell(QFrame):
     def update_stats(self, n: int, profit: float, vpip: float, color_by: str = "profit") -> None:
         """Met à jour les statistiques de la cellule et son infobulle."""
         self.setToolTip(
-            f"<b>Main : {self.hand_text}</b><br/>"
-            f"Nombre de mains : {format_number(n, 0)}<br/>"
-            f"VPIP : {format_number(vpip, 1)}%<br/>"
-            f"Profit : {format_currency(profit, 'EUR', show_plus=profit > 0)}"
+            _("<b>Hand: {0}</b><br/>Hands: {1}<br/>VPIP: {2}%<br/>Profit: {3}").format(
+                self.hand_text,
+                format_number(n, 0),
+                format_number(vpip, 1),
+                format_currency(profit, 'EUR', show_plus=profit > 0)
+            )
         )
 
         c = get_theme_palette()
@@ -169,7 +172,7 @@ class StartingHandsTab(QWidget):
         self.main_layout.setContentsMargins(12, 12, 12, 12)
 
         # Titre dynamique de l'onglet
-        self.title_label = QLabel("Analyse des Mains de Départ")
+        self.title_label = QLabel(_("Starting Hands Analysis"))
         c = get_theme_palette()
         self.title_label.setStyleSheet(
             f"font-size: 12px; font-weight: bold; text-transform: uppercase; color: {c.get('muted_text', '#a0aec0')};"
@@ -189,7 +192,7 @@ class StartingHandsTab(QWidget):
 
         # Toggle de coloration Hold'em
         toggle_layout = QHBoxLayout()
-        toggle_lbl = QLabel("Colorer la grille par :")
+        toggle_lbl = QLabel(_("Color the grid by:"))
         toggle_lbl.setStyleSheet(f"font-size: 11px; font-weight: bold; color: {c.get('muted_text', '#a0aec0')};")
         toggle_layout.addWidget(toggle_lbl)
 
@@ -268,15 +271,15 @@ class StartingHandsTab(QWidget):
         # Dénomination selon la variante Omaha
         if variant == "omaha5":
             variant_title = "Omaha 5-Card"
-            self.title_label.setText("Analyses des textures d'Omaha 5-Card")
+            self.title_label.setText(_("Omaha 5-Card Texture Analysis"))
             pairs_counts = {"Quads": 0, "Trips": 0, "Double Paired": 0, "Single Paired": 0, "No Pair": 0}
         elif variant == "omaha6":
             variant_title = "Omaha 6-Card"
-            self.title_label.setText("Analyses des textures d'Omaha 6-Card")
+            self.title_label.setText(_("Omaha 6-Card Texture Analysis"))
             pairs_counts = {"Quads": 0, "Trips": 0, "Double Paired": 0, "Single Paired": 0, "No Pair": 0}
         else:
             variant_title = "Omaha 4-Card"
-            self.title_label.setText("Analyses des textures d'Omaha 4-Card")
+            self.title_label.setText(_("Omaha 4-Card Texture Analysis"))
             pairs_counts = {"Double Paired": 0, "Single Paired": 0, "No Pair": 0}
 
         # Agrégation statistique des mains Omaha
@@ -349,11 +352,11 @@ class StartingHandsTab(QWidget):
             scroll.setWidgetResizable(True)
             scroll.setWidget(self.holdem_grid_widget)
             self.container_layout.addWidget(scroll)
-            self.title_label.setText("Grille Hold'em (Hold'em starting hand grid)")
+            self.title_label.setText(_("Hold'em Starting Hand Grid"))
         elif mode == "omaha":
             self.container_layout.addWidget(self.omaha_widget)
             # Sera mis à jour par la méthode update_omaha_data
-            self.title_label.setText("Analyses des textures d'Omaha")
+            self.title_label.setText(_("Omaha Texture Analysis"))
 
     def refresh_theme(self, colors=None, theme_colors=None) -> None:
         if self.active_mode == "omaha":

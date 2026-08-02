@@ -25,6 +25,7 @@ from PySide6.QtWidgets import (
 
 from fpdb_3_legacy import SQL, Database, GuiReplayer
 from fpdb_3_legacy.http_capture_db_import import import_http_capture_directory, import_http_capture_hand
+from fpdb_3_legacy.i18n import gettext as _
 
 log = logging.getLogger(__name__)
 
@@ -60,7 +61,7 @@ class SwCPokerConsoleDialog(QDialog):
     def __init__(self, config=None, parent=None):
         super().__init__(parent)
         self.config = config
-        self.setWindowTitle("SwC Poker - Capture Console & Replayer")
+        self.setWindowTitle(_("SwC Poker - Capture Console & Replayer"))
         self.resize(1100, 750)
 
         self.output_dir = os.path.expanduser("~/Documents/SwC Poker/Capture/")
@@ -149,18 +150,18 @@ class SwCPokerConsoleDialog(QDialog):
 
         # Status & Controls
         ctrl_layout = QHBoxLayout()
-        self.lbl_status = QLabel("Status: 🔴 Stopped")
+        self.lbl_status = QLabel(_("Status: 🔴 Stopped"))
         self.lbl_status.setFont(QFont("Arial", 11, QFont.Weight.Bold))
         self.lbl_status.setStyleSheet("color: #ff5252;")
 
-        self.lbl_count = QLabel("Hands Captured: 0")
+        self.lbl_count = QLabel(_("Hands Captured: 0"))
         self.lbl_count.setFont(QFont("Arial", 10))
 
-        self.btn_start = QPushButton("Start Capture")
+        self.btn_start = QPushButton(_("Start Capture"))
         self.btn_start.setStyleSheet("background-color: #2e7d32; color: white; border-color: #388e3c;")
         self.btn_start.clicked.connect(self.start_capture)
 
-        self.btn_stop = QPushButton("Stop")
+        self.btn_stop = QPushButton(_("Stop"))
         self.btn_stop.setStyleSheet("background-color: #c62828; color: white; border-color: #d32f2f;")
         self.btn_stop.setEnabled(False)
         self.btn_stop.clicked.connect(self.stop_capture)
@@ -172,7 +173,7 @@ class SwCPokerConsoleDialog(QDialog):
         left_layout.addLayout(ctrl_layout)
 
         # Log view
-        lbl_console = QLabel("Capture Console (Logs):")
+        lbl_console = QLabel(_("Capture Console (Logs):"))
         left_layout.addWidget(lbl_console)
 
         self.txt_log = QTextEdit()
@@ -181,16 +182,16 @@ class SwCPokerConsoleDialog(QDialog):
 
         # Quick Actions
         actions_layout = QHBoxLayout()
-        btn_open_folder = QPushButton("Open Hand Folder")
+        btn_open_folder = QPushButton(_("Open Hand Folder"))
         btn_open_folder.clicked.connect(self.open_hands_folder)
 
-        btn_refresh = QPushButton("Refresh Hands")
+        btn_refresh = QPushButton(_("Refresh Hands"))
         btn_refresh.clicked.connect(self.populate_hand_list)
 
-        self.btn_import_db = QPushButton("Import OFC to DB")
+        self.btn_import_db = QPushButton(_("Import OFC to DB"))
         self.btn_import_db.clicked.connect(self.import_selected_hand_to_db)
 
-        self.btn_import_all_db = QPushButton("Import All OFC")
+        self.btn_import_all_db = QPushButton(_("Import All OFC"))
         self.btn_import_all_db.clicked.connect(self.import_all_hands_to_db)
 
         actions_layout.addWidget(btn_open_folder)
@@ -212,7 +213,7 @@ class SwCPokerConsoleDialog(QDialog):
         hand_list_widget = QWidget()
         hand_list_layout = QVBoxLayout(hand_list_widget)
         hand_list_layout.setContentsMargins(0, 0, 0, 0)
-        hand_list_layout.addWidget(QLabel("Captured Hand History:"))
+        hand_list_layout.addWidget(QLabel(_("Captured Hand History:")))
 
         self.lst_hands = QListWidget()
         self.lst_hands.itemSelectionChanged.connect(self.on_hand_selected)
@@ -225,7 +226,7 @@ class SwCPokerConsoleDialog(QDialog):
         self.rep_layout = QVBoxLayout(replayer_widget)
 
         # Replayer Header
-        self.lbl_game_info = QLabel("Select a hand to start replay")
+        self.lbl_game_info = QLabel(_("Select a hand to start replay"))
         self.lbl_game_info.setFont(QFont("Arial", 11, QFont.Weight.Bold))
         self.lbl_game_info.setStyleSheet("color: #ff9800; border: none;")
         self.lbl_game_info.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -261,13 +262,13 @@ class SwCPokerConsoleDialog(QDialog):
 
         # Replayer Controls
         rep_ctrl_layout = QHBoxLayout()
-        self.btn_first = QPushButton("<<")
-        self.btn_prev = QPushButton("<")
-        self.lbl_step_num = QLabel("Step 0 / 0")
+        self.btn_first = QPushButton(_("<<"))
+        self.btn_prev = QPushButton(_("<"))
+        self.lbl_step_num = QLabel(_("Step 0 / 0"))
         self.lbl_step_num.setStyleSheet("border: none; font-weight: bold;")
-        self.btn_next = QPushButton(">")
-        self.btn_last = QPushButton(">>")
-        self.btn_open_db_replayer = QPushButton("Open DB Replayer")
+        self.btn_next = QPushButton(_(">"))
+        self.btn_last = QPushButton(_(">>"))
+        self.btn_open_db_replayer = QPushButton(_("Open DB Replayer"))
         self.btn_open_db_replayer.clicked.connect(self.open_selected_hand_db_replayer)
 
         self.btn_first.clicked.connect(self.go_first_step)
@@ -310,7 +311,7 @@ class SwCPokerConsoleDialog(QDialog):
 
         self.process.start(sys.executable, [script_path])
 
-        self.lbl_status.setText("Statut : 🟢 En Cours")
+        self.lbl_status.setText(_("Statut : 🟢 En Cours"))
         self.lbl_status.setStyleSheet("color: #4caf50;")
         self.btn_start.setEnabled(False)
         self.btn_stop.setEnabled(True)
@@ -335,7 +336,7 @@ class SwCPokerConsoleDialog(QDialog):
             self.import_all_hands_to_db(silent=True)
 
     def on_process_finished(self):
-        self.lbl_status.setText("Statut : 🔴 Arrêté")
+        self.lbl_status.setText(_("Statut : 🔴 Arrêté"))
         self.lbl_status.setStyleSheet("color: #ff5252;")
         self.btn_start.setEnabled(True)
         self.btn_stop.setEnabled(False)
@@ -539,7 +540,7 @@ class SwCPokerConsoleDialog(QDialog):
         if not card_str or card_str == "--" or card_str == "-1":
             if not is_board:
                 # Red card back for hidden in-hand/hole cards
-                card_label.setText("SwC")
+                card_label.setText(_("SwC"))
                 card_label.setFont(QFont("Arial", 9, QFont.Weight.Bold))
                 card_label.setStyleSheet("""
                     background-color: #b71c1c;
@@ -848,7 +849,7 @@ class SwCPokerConsoleDialog(QDialog):
         # Step counter
         is_showdown = self.current_step >= total_steps
         self.lbl_step_num.setText(
-            "Showdown" if (is_showdown and total_steps > 0) else f"Step {self.current_step} / {total_steps}"
+            _("Showdown" if (is_showdown and total_steps > 0) else f"Step {self.current_step} / {total_steps}")
         )
 
         # Render action history up to current step
@@ -983,7 +984,7 @@ class SwCPokerConsoleDialog(QDialog):
                     sd_rows = hand_data["showdown"]["rows"].get(p_name, {})
 
                 # Row 1: TOP (3 cards)
-                lbl_top = QLabel("TOP :")
+                lbl_top = QLabel(_("TOP :"))
                 lbl_top.setStyleSheet("font-weight: bold; border: none; color: #ffb74d;")
                 grid.addWidget(lbl_top, 0, 0, Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
                 top_cards = p_cards.get("top", ["--"] * 3)
@@ -1001,7 +1002,7 @@ class SwCPokerConsoleDialog(QDialog):
                     )
 
                 # Row 2: MIDDLE (5 cards)
-                lbl_mid = QLabel("MIDDLE :")
+                lbl_mid = QLabel(_("MIDDLE :"))
                 lbl_mid.setStyleSheet("font-weight: bold; border: none; color: #ffb74d;")
                 grid.addWidget(lbl_mid, 1, 0, Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
                 mid_cards = p_cards.get("middle", ["--"] * 5)
@@ -1019,7 +1020,7 @@ class SwCPokerConsoleDialog(QDialog):
                     )
 
                 # Row 3: BOTTOM (5 cards)
-                lbl_bot = QLabel("BOTTOM :")
+                lbl_bot = QLabel(_("BOTTOM :"))
                 lbl_bot.setStyleSheet("font-weight: bold; border: none; color: #ffb74d;")
                 grid.addWidget(lbl_bot, 2, 0, Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
                 bot_cards = p_cards.get("bottom", ["--"] * 5)
@@ -1056,7 +1057,7 @@ class SwCPokerConsoleDialog(QDialog):
                 if active_cards:
                     active_layout = QHBoxLayout()
                     active_layout.setAlignment(Qt.AlignmentFlag.AlignLeft)
-                    active_layout.addWidget(QLabel("In Hand:"))
+                    active_layout.addWidget(QLabel(_("In Hand:")))
                     for card in active_cards:
                         active_layout.addWidget(self.create_card_widget(card, is_board=False))
                     p_box.addLayout(active_layout)
@@ -1065,7 +1066,7 @@ class SwCPokerConsoleDialog(QDialog):
                 # Traditional games: horizontal row of private cards
                 hole_layout = QHBoxLayout()
                 hole_layout.setAlignment(Qt.AlignmentFlag.AlignLeft)
-                hole_layout.addWidget(QLabel("Cards:"))
+                hole_layout.addWidget(QLabel(_("Cards:")))
 
                 # If there are flat cards inside cards of places list
                 flat_cards = p_cards.get("cards", [])

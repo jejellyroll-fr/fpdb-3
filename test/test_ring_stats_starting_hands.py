@@ -14,4 +14,4 @@ def test_holdem_grid_updates_known_hand(qtbot) -> None:
 
     assert tab.active_mode == "holdem"
     assert len(tab.holdem_cells) == 169
-    assert "Nombre de mains : 12" in tab.holdem_cells["AA"].toolTip()
+    assert "Hands: 12" in tab.holdem_cells["AA"].toolTip()
