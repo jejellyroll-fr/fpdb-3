@@ -1028,6 +1028,7 @@ def test_close_event_handler(hud_main) -> None:
 def test_idle_move(hud_main) -> None:
     mock_hud = MagicMock()
     mock_hud.aux_windows = [MagicMock()]
+    mock_hud.loading_window = None
     hud_main.idle_move(mock_hud)
 
     mock_hud.move_table_position.assert_called_once()
@@ -1039,11 +1040,23 @@ def test_idle_move(hud_main) -> None:
 def test_idle_resize(hud_main) -> None:
     mock_hud = MagicMock()
     mock_hud.aux_windows = [MagicMock()]
+    mock_hud.loading_window = None
     hud_main.idle_resize(mock_hud)
 
     mock_hud.resize_windows.assert_called_once()
     for aw in mock_hud.aux_windows:
         aw.resize_windows.assert_called_once()
+
+
+@pytest.mark.parametrize("geometry_callback", ["idle_move", "idle_resize"])
+def test_table_geometry_change_recenters_loading_indicator(hud_main, geometry_callback) -> None:
+    mock_hud = MagicMock(loading_window=MagicMock())
+    mock_hud.aux_windows = []
+
+    with patch.object(hud_main, "_position_loading_indicator") as position_indicator:
+        getattr(hud_main, geometry_callback)(mock_hud)
+
+    position_indicator.assert_called_once_with(mock_hud)
 
 
 # Checks that kill_hud removes the HUD from hud_dict and cleans up associated widgets.
@@ -1207,6 +1220,19 @@ def test_loading_indicator_is_topified_over_the_table(hud_main) -> None:
     indicator.hide()
     indicator.close()
     indicator.deleteLater()
+
+
+def test_loading_indicator_position_uses_current_table_geometry(hud_main) -> None:
+    indicator = MagicMock()
+    indicator.width.return_value = 120
+    indicator.height.return_value = 30
+    table = MagicMock(x=200, y=100, width=800, height=600)
+    mock_hud = MagicMock(table=table, loading_window=indicator)
+
+    with patch.object(HUD_main.Aux_Base, "clamp_to_screen", side_effect=lambda x, y: (x, y)):
+        hud_main._position_loading_indicator(mock_hud)
+
+    indicator.move.assert_called_once_with(540, 385)
 
 
 def test_idle_create_continues_after_one_auxiliary_fails(hud_main) -> None:
