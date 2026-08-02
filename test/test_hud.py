@@ -399,11 +399,18 @@ class TestHudMethods(unittest.TestCase):
 
     def test_kill_method(self) -> None:
         """Test kill method calls kill on all aux windows."""
+        loading_window = Mock()
+        self.hud.loading_window = loading_window
+
         self.hud.kill()
 
         # Check that kill was called on all aux windows
         self.mock_aux1.kill.assert_called_once()
         self.mock_aux2.kill.assert_called_once()
+        loading_window.hide.assert_called_once_with()
+        loading_window.close.assert_called_once_with()
+        loading_window.deleteLater.assert_called_once_with()
+        assert self.hud.loading_window is None
 
     def test_resize_windows(self) -> None:
         """Test resize_windows method."""
@@ -445,9 +452,10 @@ class TestHudMethods(unittest.TestCase):
             # Check that get_cards was called
             mock_get_cards.assert_called_once_with(hand_id)
 
-            # Check that create was called on all aux windows
-            self.mock_aux1.create.assert_called_once()
-            self.mock_aux2.create.assert_called_once()
+            # Window creation belongs to HUD_main.idle_create, which can isolate
+            # failures per auxiliary. Hud.create only prepares the hand model.
+            self.mock_aux1.create.assert_not_called()
+            self.mock_aux2.create.assert_not_called()
 
             # Verify cards were set
             assert self.hud.cards == {"hand": "cards"}
@@ -611,7 +619,8 @@ class TestHudIntegration(unittest.TestCase):
             assert len(hud.aux_windows) == 1
             assert mock_aux_instance in hud.aux_windows
 
-            # 2. Create/Update cycle
+            # 2. Prepare/update cycle. HUD_main owns native window creation so
+            # it can isolate failures and guarantee exactly one create call.
             hand_id = 12345
             stat_dict = {"player1": {"vpip": 25.0}}
 
@@ -619,7 +628,7 @@ class TestHudIntegration(unittest.TestCase):
                 mock_get_cards.return_value = {"cards": "data"}
 
                 hud.create(hand_id, mock_config, stat_dict)
-                mock_aux_instance.create.assert_called_once()
+                mock_aux_instance.create.assert_not_called()
 
                 hud.update(hand_id, mock_config)
                 mock_aux_instance.update_gui.assert_called_once_with(hand_id)
