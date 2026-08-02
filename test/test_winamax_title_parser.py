@@ -110,6 +110,13 @@ class TestWinamaxTitleParser(unittest.TestCase):
         assert parse_winamax_title("888poker - Table 1") is None
         assert parse_winamax_title("") is None
 
+    def test_parse_none_when_winamax_matches_no_pattern(self) -> None:
+        # Contains "winamax" so it passes is_winamax_window, but matches none
+        # of the structured patterns nor the fallbacks (no "Poker -", and
+        # "winamaxx" has no separator for the linux fallbacks).
+        assert parse_winamax_title("winamaxx") is None
+        assert parse_winamax_title("winamax") is None
+
     def test_matches_hand_history(self) -> None:
         # Cash Game match
         info_cash = parse_winamax_title("Winamax Poker - CashGame - Seattle 01 - 0.01€/0.02€")
@@ -133,8 +140,42 @@ class TestWinamaxTitleParser(unittest.TestCase):
         assert not WinamaxTitleParser.matches_hand_history(None, "Table")
         assert not WinamaxTitleParser.matches_hand_history(info_cash, "")
 
+    def test_matches_hand_history_partial_name(self) -> None:
+        info_cash = parse_winamax_title("Winamax Poker - CashGame - Seattle 01 - 0.01€/0.02€")
+        assert info_cash is not None
+        # Partial containment either direction counts.
+        assert WinamaxTitleParser.matches_hand_history(info_cash, "Seattle")
+        assert WinamaxTitleParser.matches_hand_history(info_cash, "Seattle 01 Cash Game")
+
+    def test_matches_hand_history_tournament_table_number(self) -> None:
+        # Name differs but the table number in the HH name resolves it.
+        info_tourney = parse_winamax_title('Winamax Poker - Tournament "Main Event" - Table 5')
+        assert info_tourney is not None
+        assert WinamaxTitleParser.matches_hand_history(info_tourney, "SomeTourney table 5")
+        assert WinamaxTitleParser.matches_hand_history(info_tourney, "SomeTourney table5")
+        assert not WinamaxTitleParser.matches_hand_history(info_tourney, "SomeTourney table 6")
+
+    def test_matches_hand_history_expresso_by_id(self) -> None:
+        info_expresso = parse_winamax_title("Winamax Poker - Expresso 5€ - 12345678")
+        assert info_expresso is not None
+        assert WinamaxTitleParser.matches_hand_history(info_expresso, "Expresso(12345678)")
+        assert not WinamaxTitleParser.matches_hand_history(info_expresso, "Expresso(99999999)")
+
+    def test_matches_hand_history_normalizes_punctuation(self) -> None:
+        info_cash = parse_winamax_title("Winamax Poker - CashGame - Seattle 01 - 0.01€/0.02€")
+        assert info_cash is not None
+        assert WinamaxTitleParser.matches_hand_history(info_cash, "Seattle 01!!!")
+
     def test_helpers(self) -> None:
         assert WinamaxTitleParser._normalize_blinds(" 0.01 € / 0.02 € ") == "0.01€/0.02€"
         assert WinamaxTitleParser._normalize_blinds(None) is None
         assert WinamaxTitleParser._normalize_name("  Seattle #01 ! ") == "seattle 01 "
+
+    def test_create_info_defensive_fallback(self) -> None:
+        # Unknown table types fall through to a minimal UNKNOWN info.
+        match = WinamaxTitleParser.PATTERNS["generic"].search("Winamax Poker - Whatever")
+        assert match is not None
+        info = WinamaxTitleParser._create_info("made_up", match, "Winamax Poker - Whatever")
+        assert info.table_name == "Unknown"
+        assert info.table_type == WinamaxTableType.UNKNOWN
         assert WinamaxTitleParser._normalize_name("") == ""
