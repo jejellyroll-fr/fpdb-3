@@ -25,9 +25,9 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
 )
 
+from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.loggingFpdb import get_logger
 from fpdb_3_legacy.modern_hud_preferences.preview_widgets import ColorPreviewWidget
-from fpdb_3_legacy.Translations import _
 
 log = get_logger("modern_hud_preferences.dialogs")
 
@@ -496,8 +496,10 @@ class LayoutSelectionDialog(QDialog):
         layout = QVBoxLayout(self)
 
         info = QLabel(
-            "Select the site layout coordinates you want to include in the package.\n"
-            "This will let other users position the HUD boxes exactly like yours."
+            _(
+                "Select the site layout coordinates you want to include in the package.\n"
+                "This will let other users position the HUD boxes exactly like yours."
+            )
         )
         info.setWordWrap(True)
         layout.addWidget(info)

@@ -14,8 +14,8 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.loggingFpdb import get_logger
-from fpdb_3_legacy.Translations import _
 
 log = get_logger("modern_hud_preferences.design_canvas")
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from __future__ import annotations
 
-from fpdb_3_legacy.Translations import _
+from fpdb_3_legacy.i18n import gettext as _
 
 """ThemeCreatorDialog.py
 

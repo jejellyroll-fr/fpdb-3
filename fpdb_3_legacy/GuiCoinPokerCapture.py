@@ -34,9 +34,9 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.loggingFpdb import get_logger
 from fpdb_3_legacy.subprocess_launch import hud_main_command, python_module_command
-from fpdb_3_legacy.Translations import _
 
 log = get_logger("coinpoker_capture_gui")
 

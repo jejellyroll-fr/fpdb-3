@@ -9,12 +9,12 @@ des statistiques pour le tableau de bord, les positions et les cartes.
 from __future__ import annotations
 
 from typing import Any
-from fpdb_3_legacy.Translations import _
 
 from PySide6.QtCore import QObject, Qt, Signal
 from PySide6.QtGui import QBrush, QColor, QStandardItem, QStandardItemModel
 
 from fpdb_3_legacy import Card, gui_empty_state
+from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.loggingFpdb import get_logger
 from fpdb_3_legacy.ring_stats.base import DbWorker
 from fpdb_3_legacy.ring_stats.styles import get_theme_palette
