@@ -336,13 +336,19 @@ def test_loading_hud_builds_empty_creation_args_without_querying_stats(hud_main)
     with (
         patch.object(hud_main.db_connection, "get_stats_from_hand") as get_stats,
         patch.object(hud_main, "create_HUD") as create_hud,
+        patch.object(hud_main, "_seat_players") as seat_players,
+        patch.object(hud_main, "_set_table_stats") as set_table_stats,
     ):
+        create_hud.side_effect = lambda args: hud_main.hud_dict.__setitem__(args.temp_key, MagicMock())
         hud_main._create_new_hud("101", "table-a", table_info, 1, 6, "site", loading=True)
 
     get_stats.assert_not_called()
     args = create_hud.call_args.args[0]
     assert args.stat_dict == {}
     assert args.cards == {}
+    assert args.loading is True
+    seat_players.assert_not_called()
+    set_table_stats.assert_not_called()
 
 
 def test_complete_snapshot_recreates_loading_hud_with_player_seat_mapping(hud_main) -> None:
@@ -1022,6 +1028,7 @@ def test_close_event_handler(hud_main) -> None:
 def test_idle_move(hud_main) -> None:
     mock_hud = MagicMock()
     mock_hud.aux_windows = [MagicMock()]
+    mock_hud.loading_window = None
     hud_main.idle_move(mock_hud)
 
     mock_hud.move_table_position.assert_called_once()
@@ -1033,11 +1040,23 @@ def test_idle_move(hud_main) -> None:
 def test_idle_resize(hud_main) -> None:
     mock_hud = MagicMock()
     mock_hud.aux_windows = [MagicMock()]
+    mock_hud.loading_window = None
     hud_main.idle_resize(mock_hud)
 
     mock_hud.resize_windows.assert_called_once()
     for aw in mock_hud.aux_windows:
         aw.resize_windows.assert_called_once()
+
+
+@pytest.mark.parametrize("geometry_callback", ["idle_move", "idle_resize"])
+def test_table_geometry_change_recenters_loading_indicator(hud_main, geometry_callback) -> None:
+    mock_hud = MagicMock(loading_window=MagicMock())
+    mock_hud.aux_windows = []
+
+    with patch.object(hud_main, "_position_loading_indicator") as position_indicator:
+        getattr(hud_main, geometry_callback)(mock_hud)
+
+    position_indicator.assert_called_once_with(mock_hud)
 
 
 # Checks that kill_hud removes the HUD from hud_dict and cleans up associated widgets.
@@ -1131,6 +1150,117 @@ def test_idle_create(hud_main) -> None:
 
         # Check logs - the method creates a label with site and temp_key
         mock_log.debug.assert_any_call("adding label %s", f"{table.site} - {args.temp_key}")
+
+
+def test_idle_create_builds_and_updates_each_auxiliary_once(hud_main) -> None:
+    mock_hud = MagicMock()
+    first_aux = MagicMock()
+    second_aux = MagicMock()
+    mock_hud.aux_windows = [first_aux, second_aux]
+    hud_main.hud_dict = {"test_table": mock_hud}
+    hud_main.vb = MagicMock()
+    table = MagicMock(site="test_site", number=123)
+    args = HUD_main.HUDCreationArgs(
+        new_hand_id="new_hand_id",
+        table=table,
+        temp_key="test_table",
+        max_seats=9,
+        poker_game="holdem",
+        game_type="cash",
+        stat_dict={},
+        cards={},
+    )
+
+    hud_main.idle_create(args)
+
+    first_aux.create.assert_called_once_with()
+    first_aux.update_gui.assert_called_once_with(args.new_hand_id)
+    second_aux.create.assert_called_once_with()
+    second_aux.update_gui.assert_called_once_with(args.new_hand_id)
+
+
+def test_idle_create_loading_uses_one_indicator_without_building_auxiliaries(hud_main) -> None:
+    mock_hud = MagicMock()
+    auxiliary = MagicMock()
+    mock_hud.aux_windows = [auxiliary]
+    hud_main.hud_dict = {"test_table": mock_hud}
+    hud_main.vb = MagicMock()
+    table = MagicMock(site="test_site", number=123)
+    args = HUD_main.HUDCreationArgs(
+        new_hand_id="new_hand_id",
+        table=table,
+        temp_key="test_table",
+        max_seats=9,
+        poker_game="holdem",
+        game_type="cash",
+        stat_dict={},
+        cards={},
+        loading=True,
+    )
+
+    with patch.object(hud_main, "_create_loading_indicator") as create_indicator:
+        hud_main.idle_create(args)
+
+    create_indicator.assert_called_once_with(mock_hud)
+    auxiliary.create.assert_not_called()
+    auxiliary.update_gui.assert_not_called()
+
+
+def test_loading_indicator_is_topified_over_the_table(hud_main) -> None:
+    table = MagicMock(x=100, y=50, width=800, height=600)
+    mock_hud = MagicMock(table=table, table_name="test_table", loading_window=None)
+
+    hud_main._create_loading_indicator(mock_hud)
+
+    indicator = mock_hud.loading_window
+    assert indicator is not None
+    assert indicator.objectName() == "hud-loading-indicator"
+    assert indicator.isVisible()
+    table.topify.assert_called_once_with(indicator)
+    indicator.hide()
+    indicator.close()
+    indicator.deleteLater()
+
+
+def test_loading_indicator_position_uses_current_table_geometry(hud_main) -> None:
+    indicator = MagicMock()
+    indicator.width.return_value = 120
+    indicator.height.return_value = 30
+    table = MagicMock(x=200, y=100, width=800, height=600)
+    mock_hud = MagicMock(table=table, loading_window=indicator)
+
+    with patch.object(HUD_main.Aux_Base, "clamp_to_screen", side_effect=lambda x, y: (x, y)):
+        hud_main._position_loading_indicator(mock_hud)
+
+    indicator.move.assert_called_once_with(540, 385)
+
+
+def test_idle_create_continues_after_one_auxiliary_fails(hud_main) -> None:
+    mock_hud = MagicMock()
+    failing_aux = MagicMock()
+    failing_aux.create.side_effect = RuntimeError("broken auxiliary")
+    healthy_aux = MagicMock()
+    mock_hud.aux_windows = [failing_aux, healthy_aux]
+    hud_main.hud_dict = {"test_table": mock_hud}
+    hud_main.vb = MagicMock()
+    table = MagicMock(site="test_site", number=123)
+    args = HUD_main.HUDCreationArgs(
+        new_hand_id="new_hand_id",
+        table=table,
+        temp_key="test_table",
+        max_seats=9,
+        poker_game="holdem",
+        game_type="cash",
+        stat_dict={},
+        cards={},
+    )
+
+    hud_main.idle_create(args)
+
+    failing_aux.create.assert_called_once_with()
+    failing_aux.update_gui.assert_not_called()
+    healthy_aux.create.assert_called_once_with()
+    healthy_aux.update_gui.assert_called_once_with(args.new_hand_id)
 
 
 def test_idle_update_hands_the_new_hand_to_the_hud(hud_main) -> None:
