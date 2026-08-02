@@ -112,6 +112,7 @@ class Hud:
         self.seat_players: dict[Any, Any] = {}
         self.hand_instance: Any = None
         self.is_loading = False
+        self.loading_window: Any = None
         self.table_name = ""
         self.tablenumber: Any = None
         self.tablehudlabel: Any = None
@@ -211,6 +212,14 @@ class Hud:
             except Exception:  # intentional broad catch: aux window callback boundary.
                 log.exception("Error killing aux window")
         self.aux_windows = []
+        if self.loading_window is not None:
+            try:
+                self.loading_window.hide()
+                self.loading_window.close()
+                self.loading_window.deleteLater()
+            except Exception:
+                log.exception("Error killing HUD loading indicator")
+            self.loading_window = None
         if self.db_hud_connection is not None:
             try:
                 self.db_hud_connection.close_connection()
@@ -347,13 +356,6 @@ class Hud:
                 self.hand_instance = None
 
         log.info("Creating hud from hand %d", hand)
-
-        # Call create on all aux windows
-        for aux in self.aux_windows:
-            try:
-                aux.create()
-            except Exception:  # intentional broad catch: aux window callback boundary.
-                log.exception("Error creating aux window")
 
     def update(
         self,

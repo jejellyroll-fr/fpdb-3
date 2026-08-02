@@ -93,6 +93,7 @@ class HUDCreationArgs:
     stat_dict: dict[str, Any]
     cards: dict[str, Any]
     hand_instance: Any = None
+    loading: bool = False
 
 
 class ZMQWorker(QThread):
@@ -1137,8 +1138,9 @@ class HudMain(QObject):
 
         self.hud_dict[args.temp_key].hud_params["new_max_seats"] = None  # trigger for seat layout change
 
-        for aw in self.hud_dict[args.temp_key].aux_windows:
-            aw.update_data(args.new_hand_id, self.db_connection)
+        if not args.loading:
+            for aw in self.hud_dict[args.temp_key].aux_windows:
+                aw.update_data(args.new_hand_id, self.db_connection)
 
         self.idle_create(args)
         log.debug("HUD for table %s created successfully.", args.temp_key)
@@ -1826,7 +1828,8 @@ class HudMain(QObject):
             stat_dict = merged_data.get("stat_dict", stat_dict)
             log.debug("Merged cached stats with fresh database stats")
 
-        self._merge_positions(stat_dict, new_hand_id)
+        if not loading:
+            self._merge_positions(stat_dict, new_hand_id)
         if not loading and not any(stat_dict[key]["screen_name"] == self.hero[site_id] for key in stat_dict):
             log.warning(
                 "HUD not created for hand %s table=%s: hero %r (site_id=%s) not among players %s",
@@ -1907,12 +1910,14 @@ class HudMain(QObject):
                 stat_dict=stat_dict,
                 cards=cards,
                 hand_instance=prepared.hand_instance if prepared is not None else None,
+                loading=loading,
             )
             self.create_HUD(args)
             if args.temp_key in self.hud_dict:
                 self.hud_dict[args.temp_key].is_loading = loading
-                self.hud_dict[args.temp_key].seat_players = self._seat_players(new_hand_id)
-                self._set_table_stats(self.hud_dict[args.temp_key], new_hand_id)
+                if not loading:
+                    self.hud_dict[args.temp_key].seat_players = self._seat_players(new_hand_id)
+                    self._set_table_stats(self.hud_dict[args.temp_key], new_hand_id)
         else:
             log.error('Table "%s" no longer exists', table_name)
 
@@ -2199,6 +2204,10 @@ class HudMain(QObject):
                 cards=args.cards,
                 hand_instance=args.hand_instance,
             )
+            if args.loading:
+                self._create_loading_indicator(self.hud_dict[args.temp_key])
+                hud_trace("idle_create loading: table=%s hand=%s", args.temp_key, args.new_hand_id)
+                return
             for aux_index, m in enumerate(self.hud_dict[args.temp_key].aux_windows):
                 try:
                     m.create()
@@ -2217,6 +2226,39 @@ class HudMain(QObject):
 
         except Exception:
             log.exception("Error creating HUD for hand %s.", args.new_hand_id)
+
+    @staticmethod
+    def _create_loading_indicator(hud: Hud.Hud) -> None:
+        """Show one cheap table overlay while the complete snapshot is loading."""
+        label: QLabel | None = None
+        try:
+            flags = Qt.WindowType.Window | Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint
+            label = QLabel("Loading HUD…", None, flags)
+            label.setObjectName("hud-loading-indicator")
+            label.setAttribute(Qt.WidgetAttribute.WA_ShowWithoutActivating)
+            label.setStyleSheet(
+                "QLabel { color: white; background: rgba(20, 20, 20, 210); "
+                "border: 1px solid #777; border-radius: 4px; padding: 6px 10px; }",
+            )
+            label.adjustSize()
+            table_x = hud.table.x if hud.table.x is not None else 0
+            table_y = hud.table.y if hud.table.y is not None else 0
+            table_width = hud.table.width if hud.table.width is not None else label.width()
+            table_height = hud.table.height if hud.table.height is not None else label.height()
+            x = table_x + max(0, (table_width - label.width()) // 2)
+            y = table_y + max(0, (table_height - label.height()) // 2)
+            x, y = Aux_Base.clamp_to_screen(x, y)
+            label.move(x, y)
+            label.create()
+            hud.table.topify(label)
+            label.show()
+            hud.loading_window = label
+        except Exception:
+            if label is not None:
+                label.close()
+                label.deleteLater()
+            hud.loading_window = None
+            log.exception("Could not create loading indicator for table %s", hud.table_name)
 
     def idle_update(
         self,
