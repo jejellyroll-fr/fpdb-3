@@ -1,6 +1,6 @@
 # Plan d'implémentation — HUD PT4 multiblocs
 
-Statut : rédigé le 2026-07-10. Aucun fichier de code modifié pendant cette analyse.
+Statut : ✅ FAIT (2026-07-25). Aucun fichier de code modifié pendant l'analyse initiale.
 Branche : `bigbang`. Diff courant : ~600 lignes ajoutées sur 10 fichiers, non commitées.
 
 ---

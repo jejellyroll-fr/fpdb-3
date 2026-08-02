@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 from __future__ import annotations
 
+from fpdb_3_legacy.i18n import gettext as _
+
 """ModernSeatPreferences.py.
 
 Modern interface for dynamic management of favorite seats by site.
@@ -263,17 +265,17 @@ class ModernSeatCard(QFrame):
 
         # Indicator if the site is enabled
         if hasattr(self.site_config, "enabled") and self.site_config.enabled:
-            status_label = QLabel("✓ Enabled")
+            status_label = QLabel(_("✓ Enabled"))
             status_label.setStyleSheet("color: #4CAF50; font-weight: bold;")
         else:
-            status_label = QLabel("✗ Disabled")
+            status_label = QLabel(_("✗ Disabled"))
             status_label.setStyleSheet("color: #F44336;")
         header_layout.addWidget(status_label)
 
         header_layout.addStretch()
 
         # Button to reset
-        reset_btn = QPushButton("Reset to Default")
+        reset_btn = QPushButton(_("Reset to Default"))
         reset_btn.clicked.connect(self.reset_to_default)
         header_layout.addWidget(reset_btn)
 
@@ -288,15 +290,15 @@ class ModernSeatCard(QFrame):
         seats_layout.setHorizontalSpacing(30)  # Horizontal spacing between columns
 
         # Headers
-        players_header = QLabel("<b>Players</b>")
+        players_header = QLabel(_("<b>Players</b>"))
         players_header.setAlignment(Qt.AlignmentFlag.AlignCenter)
         seats_layout.addWidget(players_header, 0, 0)
 
-        seat_header = QLabel("<b>Seat</b>")
+        seat_header = QLabel(_("<b>Seat</b>"))
         seat_header.setAlignment(Qt.AlignmentFlag.AlignCenter)
         seats_layout.addWidget(seat_header, 0, 1)
 
-        visual_header = QLabel("<b>Visual Selection</b>")
+        visual_header = QLabel(_("<b>Visual Selection</b>"))
         visual_header.setAlignment(Qt.AlignmentFlag.AlignCenter)
         seats_layout.addWidget(visual_header, 0, 2)
 
@@ -314,15 +316,15 @@ class ModernSeatCard(QFrame):
                 separator.setFrameShadow(QFrame.Shadow.Sunken)
                 seats_layout.addWidget(separator, 0, 3, 8, 1)  # Increase separator height
                 # Add headers for the second column
-                players_header2 = QLabel("<b>Players</b>")
+                players_header2 = QLabel(_("<b>Players</b>"))
                 players_header2.setAlignment(Qt.AlignmentFlag.AlignCenter)
                 seats_layout.addWidget(players_header2, 0, 4)
 
-                seat_header2 = QLabel("<b>Seat</b>")
+                seat_header2 = QLabel(_("<b>Seat</b>"))
                 seat_header2.setAlignment(Qt.AlignmentFlag.AlignCenter)
                 seats_layout.addWidget(seat_header2, 0, 5)
 
-                visual_header2 = QLabel("<b>Visual Selection</b>")
+                visual_header2 = QLabel(_("<b>Visual Selection</b>"))
                 visual_header2.setAlignment(Qt.AlignmentFlag.AlignCenter)
                 seats_layout.addWidget(visual_header2, 0, 6)
 
@@ -371,7 +373,7 @@ class ModernSeatCard(QFrame):
             visual_fav = reverse_mapping.get(int(current_fav), 0) if current_fav != 0 else 0
 
             seat_input.setText(str(visual_fav))
-            seat_input.setPlaceholderText("0")
+            seat_input.setPlaceholderText(_("0"))
             seat_input.textChanged.connect(lambda text, ms=max_seats: self.on_seat_changed(ms, text))
             self.seat_inputs[max_seats] = seat_input
 
@@ -404,7 +406,7 @@ class ModernSeatCard(QFrame):
         layout.addWidget(seats_group)
 
         # Info note
-        info_label = QLabel("💡 Set to 0 to disable favorite seat for a table size")
+        info_label = QLabel(_("💡 Set to 0 to disable favorite seat for a table size"))
         info_label.setStyleSheet("color: palette(disabled-text); font-style: italic; padding: 5px;")
         layout.addWidget(info_label)
 
@@ -436,7 +438,7 @@ class ModernSeatCard(QFrame):
 
         if reply == QMessageBox.Yes:
             for max_seats in range(2, 11):
-                self.seat_inputs[max_seats].setText("0")
+                self.seat_inputs[max_seats].setText(_("0"))
                 self.seat_selectors[max_seats].setSeat(0)
 
     def get_values(self):
@@ -465,7 +467,7 @@ class ModernSeatPreferencesDialog(QDialog):
         self.site_cards: dict[str, ModernSeatCard] = {}
         self.changes_made = False
 
-        self.setWindowTitle("Seat Preferences")
+        self.setWindowTitle(_("Seat Preferences"))
         self.setMinimumSize(1200, 800)
         self.resize(1400, 900)
 
@@ -480,11 +482,11 @@ class ModernSeatPreferencesDialog(QDialog):
         # Header
         header_layout = QVBoxLayout()
 
-        title = QLabel("Seat Preferences")
+        title = QLabel(_("Seat Preferences"))
         title.setStyleSheet("font-size: 24px; font-weight: bold; padding: 10px 0;")
         header_layout.addWidget(title)
 
-        subtitle = QLabel("Configure your favorite seats for each table size")
+        subtitle = QLabel(_("Configure your favorite seats for each table size"))
         subtitle.setStyleSheet("font-size: 14px; padding-bottom: 10px; opacity: 0.7;")
         header_layout.addWidget(subtitle)
 
@@ -494,7 +496,7 @@ class ModernSeatPreferencesDialog(QDialog):
         filter_layout = QHBoxLayout()
 
         # Status filter
-        filter_label = QLabel("Show:")
+        filter_label = QLabel(_("Show:"))
         filter_layout.addWidget(filter_label)
 
         self.filter_combo = QComboBox()
@@ -505,11 +507,11 @@ class ModernSeatPreferencesDialog(QDialog):
 
         # Search
         filter_layout.addSpacing(20)
-        search_label = QLabel("🔍")
+        search_label = QLabel(_("🔍"))
         filter_layout.addWidget(search_label)
 
         self.search_input = QLineEdit()
-        self.search_input.setPlaceholderText("Search sites...")
+        self.search_input.setPlaceholderText(_("Search sites..."))
         self.search_input.setStyleSheet(
             """
             QLineEdit {
@@ -526,7 +528,7 @@ class ModernSeatPreferencesDialog(QDialog):
         filter_layout.addStretch()
 
         # Button for auto-save
-        self.auto_save_check = QCheckBox("Auto-save changes")
+        self.auto_save_check = QCheckBox(_("Auto-save changes"))
         self.auto_save_check.setChecked(True)
         filter_layout.addWidget(self.auto_save_check)
 
@@ -548,11 +550,11 @@ class ModernSeatPreferencesDialog(QDialog):
         button_layout = QHBoxLayout()
 
         # Import/Export buttons
-        import_btn = QPushButton("Import Settings")
+        import_btn = QPushButton(_("Import Settings"))
         import_btn.clicked.connect(self.import_settings)
         button_layout.addWidget(import_btn)
 
-        export_btn = QPushButton("Export Settings")
+        export_btn = QPushButton(_("Export Settings"))
         export_btn.clicked.connect(self.export_settings)
         button_layout.addWidget(export_btn)
 
@@ -566,11 +568,11 @@ class ModernSeatPreferencesDialog(QDialog):
         button_layout.addStretch()
 
         # Save/Cancel buttons
-        save_btn = QPushButton("Save Changes")
+        save_btn = QPushButton(_("Save Changes"))
         save_btn.clicked.connect(self.save_changes)
         save_btn.setProperty("class", "primary")
 
-        cancel_btn = QPushButton("Cancel")
+        cancel_btn = QPushButton(_("Cancel"))
         cancel_btn.clicked.connect(self.reject)
 
         button_layout.addWidget(cancel_btn)

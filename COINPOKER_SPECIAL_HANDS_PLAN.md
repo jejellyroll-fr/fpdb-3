@@ -1,5 +1,6 @@
 # Plan — Run It Twice, Bomb Pot (double board), Splash Pot & EV Cashout (CoinPoker)
 
+Statut : ✅ FAIT (2026-07-25).
 Objectif : pouvoir **filtrer** dans le Hand Viewer et **afficher** dans le Replayer les
 mains CoinPoker de type *run it twice*, *bomb pot / double board*, *splash pot* et
 *EV cashout* — et surtout **capturer** ces cas depuis le flux CoinPoker (aujourd'hui

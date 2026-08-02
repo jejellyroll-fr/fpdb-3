@@ -12,6 +12,7 @@ from matplotlib.figure import Figure
 from matplotlib.ticker import FuncFormatter
 from PySide6.QtWidgets import QGridLayout, QLabel, QVBoxLayout, QWidget
 
+from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.localized_formats import format_currency, format_number
 from fpdb_3_legacy.ring_stats.styles import get_theme_palette
 from fpdb_3_legacy.ring_stats.views.widgets import GapMeter, KpiCard
@@ -150,7 +151,7 @@ class DashboardTab(QWidget):
         # 2. Section GapMeter
         gap_box = QVBoxLayout()
         gap_box.setSpacing(4)
-        self.gap_label = QLabel("Profil de Préflop (VPIP vs PFR)")
+        self.gap_label = QLabel(_("Preflop Profile (VPIP vs PFR)"))
         c = get_theme_palette()
         self.gap_label.setStyleSheet(f"font-size: 11px; font-weight: bold; text-transform: uppercase; color: {c.get('muted_text', '#a0aec0')};")
         self.gap_meter = GapMeter(0.0, 0.0)

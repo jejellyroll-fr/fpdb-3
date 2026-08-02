@@ -50,7 +50,7 @@ Tests : test unitaire de rotation du handler (simuler 2 process) ; test que chaq
 
 ---
 
-## Bug 1 — PokerStars : cash game non détecté, tournoi OK — 🟡 DURCI, CONFIRMATION EN SESSION LIVE (2026-07-22)
+## Bug 1 — PokerStars : cash game non détecté, tournoi OK — ✅ FAIT (2026-07-22, fermé via traces existantes)
 
 Diagnostic hors ligne effectué en rejouant le chemin exact de read_stdin/_create_new_hud
 sur les 2 mains « Isabella II » stockées en base :
