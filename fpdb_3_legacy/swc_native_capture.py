@@ -23,11 +23,12 @@ from decimal import Decimal
 from pathlib import Path
 from typing import BinaryIO
 
-UTC = getattr(datetime, "UTC", UTC)
-
 from fpdb_3_legacy.http_capture_diff import diff_snapshot_steps
 from fpdb_3_legacy.http_capture_models import SWC_GAME_DEFINITIONS, CapturedGameDefinition
+from fpdb_3_legacy.loggingFpdb import get_logger
 from fpdb_3_legacy.swc_http_adapter import card_id_to_str
+
+log = get_logger("swc_native_capture")
 
 SWC_APP = Path("/Applications/SwC Poker.app")
 SWC_EXECUTABLE = SWC_APP / "Contents/MacOS/SwC Poker"
@@ -2943,6 +2944,62 @@ def iter_capture_records(stream: BinaryIO) -> Iterator[NativeCaptureRecord]:
             payload=payload,
             connection_id=connection_id,
         )
+
+
+def read_records_since(path: Path, offset: int) -> tuple[list[NativeCaptureRecord], int]:
+    """Read the complete records appended to ``path`` after ``offset``.
+
+    Tailing a live archive differs from reading a finished one in two ways, and
+    ``iter_capture_records`` handles neither. The client appends while it plays,
+    so the tail is routinely a half-written record -- raising there discards
+    every hand read in the same pass. And re-reading from byte zero on each poll
+    re-parses the whole session, which grows without bound.
+
+    Records are self-delimiting (fixed header, declared payload length), so a
+    record boundary is a safe resume point: stop at the first incomplete record
+    and report the offset of the last complete one. A file shorter than
+    ``offset`` has been rotated or truncated, so reading restarts from zero.
+
+    Returns the records read and the offset to resume from.
+    """
+    try:
+        size = path.stat().st_size
+    except OSError:
+        return [], offset
+
+    if size < offset:
+        log.info("SwC capture archive shrank (%d < %d); restarting from the beginning", size, offset)
+        offset = 0
+    if size == offset:
+        return [], offset
+
+    records: list[NativeCaptureRecord] = []
+    with path.open("rb") as stream:
+        stream.seek(offset)
+        while True:
+            header = stream.read(_HEADER.size)
+            if len(header) != _HEADER.size:
+                break  # partial record at the tail; resume here next time
+            magic, version, direction, _reserved, peer_port, connection_id, payload_size, timestamp_us = _HEADER.unpack(
+                header
+            )
+            if magic != _MAGIC or version != _VERSION or direction not in (0, 1) or payload_size > _MAX_PAYLOAD:
+                raise ValueError("invalid SwC native capture header")
+            payload = stream.read(payload_size)
+            if len(payload) != payload_size:
+                break  # payload still being written
+            records.append(
+                NativeCaptureRecord(
+                    captured_at=datetime.fromtimestamp(timestamp_us / 1_000_000, tz=UTC),
+                    direction="received" if direction == 0 else "sent",
+                    peer_port=peer_port,
+                    payload=payload,
+                    connection_id=connection_id,
+                )
+            )
+            offset += _HEADER.size + payload_size
+
+    return records, offset
 
 
 def build_tap(*, force: bool = False, check_executable: bool = False) -> Path:
