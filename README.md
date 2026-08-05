@@ -4,18 +4,28 @@ The original FPDB-3 Python application: hand-history parsers, PySide6 GUI, stati
 
 ## ✨ Highlights
 
-- **Pure Python**: Zero Rust or external compilation dependencies.
-- **Hand-History Import & Analysis** from many poker rooms (PokerStars, Winamax, PartyPoker, iPoker, 888/Pacific, GGPoker, Bovada, Merge, OnGame, Microgaming…)
-- **Real-Time HUD** overlay on poker tables.
-- **Self-Contained Platform Detection**: Window detection and geometry calculations are fully integrated for Linux, macOS, and Windows.
+- **Hand-History Import & Analysis** from 26 poker rooms. See [PARSER_SUPPORT.md](PARSER_SUPPORT.md) for which converters are covered by golden snapshots and which are kept only for historical archives.
+- **Live capture** for rooms that write no hand-history files: CoinPoker (packet capture), SwC Poker (HTTP and native desktop), iPoker.
+- **Real-Time HUD** overlay with draggable multiblock stats, positional panels, and a per-profile hero toggle.
+- **Auto Notes**: rule-driven player notes with a visual workbench and card miniatures.
+- **Stats & analytics**: preflop/postflop/sizing/tournament stat modules, leak detector, player profiler.
+- **Databases**: SQLite (default), PostgreSQL, MySQL/MariaDB — configurable from the GUI, with a cross-backend migration engine.
+- **Localized**: 14 locale catalogues ship with the app; switch at runtime from *View → Language*.
 - **PySide6 Desktop GUI**: The graphical interface has been completely ported to PySide6.
-- **Databases**: SQLite (default), PostgreSQL, MySQL.
+- **Self-Contained Platform Detection**: Window detection and geometry calculations are fully integrated for Linux, macOS, and Windows.
+
+## 📦 Prebuilt downloads
+
+Standalone builds for macOS (Apple Silicon), Windows x64 and Linux x64 are attached to every
+[release](https://github.com/jejellyroll-fr/fpdb-3/releases/latest). They bundle their own Python
+runtime — no install step. On macOS, read [docs/macos-gatekeeper.md](docs/macos-gatekeeper.md) first.
 
 ## 🔧 Requirements
 
 - Python 3.11+ (3.13 recommended)
 - OS: Linux, Windows, macOS
 - HUD: X11 (Linux), native window support (Windows/macOS)
+- A C compiler and CMake — the equity engine is a native extension built at install time (see below)
 
 ## ⚙️ Install
 
@@ -30,21 +40,14 @@ pip install -e .[test]
 uv pip install -e .[test]
 ```
 
-Platform/feature extras: `.[linux]`, `.[windows]`, `.[macos]`, `.[postgresql]`.
+Platform/feature extras: `.[linux]`, `.[windows]`, `.[macos]`, `.[postgresql]`, `.[mysql]`.
 
-### Native equity engine (optional)
+### Native equity engine
 
-The equity calculations (AoF analyses, hand replayer EV) require the
-[pypoker-eval](https://github.com/jejellyroll-fr/poker-eval) C extension.
-Without it fpdb runs normally but equity features are disabled.
-
-```bash
-# install from the poker-eval repo (needs a C compiler and CMake)
-pip install "pypoker-eval @ git+https://github.com/jejellyroll-fr/poker-eval.git"
-
-# or via the optional dependency group
-pip install -e ".[native]"
-```
+Equity calculations (AoF analyses, hand replayer EV) use the
+[pypoker-eval](https://github.com/jejellyroll-fr/poker-eval) C extension. It is a **required**
+dependency, pinned to `v1.2.0`, and pip builds it from source during the install above — which is
+why a C compiler and CMake are needed. See [docs/EQUITY_ENGINE.md](docs/EQUITY_ENGINE.md).
 
 ## ▶️ Run
 
@@ -57,19 +60,21 @@ python fpdb_3_legacy/fpdb.pyw
 
 # HUD process
 python fpdb_3_legacy/HUD_main.pyw
-
-# Legacy CLI
-python fpdb_3_legacy/fpdb_cli.py --help
 ```
 
 ### macOS prebuilt builds
 
-The CI builds are unsigned, so macOS blocks their Qt libraries until the
-quarantine attribute is cleared — see [docs/macos-gatekeeper.md](docs/macos-gatekeeper.md).
+The builds ship an ad-hoc signed `fpdb.app`, which Gatekeeper assesses as a unit — but they are not
+signed with a Developer ID nor notarized, so a browser download still arrives quarantined. Move the
+bundle out of `~/Downloads` and clear the attribute:
 
 ```bash
-xattr -dr com.apple.quarantine ~/Downloads/fpdb-pyoxidizer-macos-arm64
+mv ~/Downloads/fpdb.app /Applications/
+xattr -dr com.apple.quarantine /Applications/fpdb.app
 ```
+
+Extracting the archive with `tar` rather than Finder avoids the quarantine flag in the first place.
+Full explanation in [docs/macos-gatekeeper.md](docs/macos-gatekeeper.md).
 
 ### Linux / Wayland
 
@@ -89,7 +94,10 @@ uv run pytest -k "stats"  # pattern
 make lint && make format
 ```
 
-Parser behaviour is locked by a golden-master corpus (`tests/fixtures/`) with per-hand invariant checks.
+Parser behaviour is locked by a golden-master corpus (`tests/fixtures/`) with per-hand invariant
+checks. Adding a hand-history fixture under `tests/fixtures/hands/<room>/` also requires an entry in
+`tests/fixtures/hands/live_parser_snapshots.json` — `test_live_parser_regression.py` globs each room
+directory and fails on any file the manifest does not cover.
 
 ## 🗂 Layout (selected)
 
@@ -99,11 +107,15 @@ fpdb_3_legacy/
 ├── iPoker/               # iPoker parser split into mixins
 ├── Hand.py, Database.py  # core hand model + DB layer
 ├── Hud.py, HUD_main.pyw  # HUD overlay
+├── AutoNotes*.py         # auto-note rules engine
+├── *_capture*.py         # CoinPoker / SwC / iPoker live capture
 ├── fpdb.pyw              # desktop GUI entry point
-├── fpdb_cli.py           # CLI entry point
 └── legacy_launcher.py    # `fpdb_3_legacy` console script
 fpdb/
 └── infrastructure/platform/  # platform window and geometry detection
+locale/                   # gettext .po catalogues (14 locales)
+tests/fixtures/           # golden-master hand-history corpus
+docs/                     # equity engine, macOS Gatekeeper, SwC capture protocol
 ```
 
 ## 📄 License
