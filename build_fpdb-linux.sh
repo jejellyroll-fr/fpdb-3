@@ -31,11 +31,12 @@ BASE_PATH=$(pwd)
 echo "Chemin de base : $BASE_PATH"
 
 # Nom du script principal
-MAIN_SCRIPT="fpdb.pyw"
-SECOND_SCRIPT="HUD_main.pyw"
+LEGACY_PACKAGE_DIR="fpdb_3_legacy"
+MAIN_SCRIPT="$LEGACY_PACKAGE_DIR/fpdb.pyw"
+SECOND_SCRIPT="$LEGACY_PACKAGE_DIR/HUD_main.pyw"
 
 # Options de pyinstaller
-PYINSTALLER_OPTIONS="--noconfirm --onedir --windowed --log-level=DEBUG"
+PYINSTALLER_OPTIONS="--noconfirm --onedir --windowed --log-level=DEBUG --paths=fpdb_3_legacy --paths=."
 
 # Liste de tous les fichiers pour fpdb
 FILES=(
@@ -152,12 +153,15 @@ fi
 generate_pyinstaller_command() {
     local script_path=$1
     local command="pyinstaller $PYINSTALLER_OPTIONS"
+    local source_path
+    local target_path
 
     command+=" --icon=\"$BASE_PATH/gfx/fpdb.png\""
     command+=" --additional-hooks-dir=hooks"
 
     local hidden_imports=(
-        "PyQt5" "qtpy" "qt_material" "qt_material.resources" "xcffib" "xcffib.xproto"
+        "PySide6" "PySide6.QtCore" "PySide6.QtGui" "PySide6.QtWidgets"
+        "qt_material" "qt_material.resources" "xcffib" "xcffib.xproto"
         "gevent" "gevent-websocket" "uvicorn" "requests" "numpy" "pandas" "sqlalchemy"
         "jinja2" "werkzeug" "flask" "fastapi" "orjson" "beautifulsoup4" "matplotlib"
         "six" "pycparser"
@@ -173,7 +177,14 @@ generate_pyinstaller_command() {
     command+=" --collect-all xcffib"
 
     for file in "${FILES[@]}"; do
-        command+=" --add-data \"$BASE_PATH/$file:./\""
+        if [[ "$file" == *.py || "$file" == *.pyw ]]; then
+            source_path="$BASE_PATH/$LEGACY_PACKAGE_DIR/$file"
+            target_path="fpdb_3_legacy"
+        else
+            source_path="$BASE_PATH/$file"
+            target_path="."
+        fi
+        command+=" --add-data \"$source_path:$target_path\""
     done
 
     for folder in "${FOLDERS[@]}"; do

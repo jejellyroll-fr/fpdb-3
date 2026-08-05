@@ -1,13 +1,12 @@
 """Test script for PokerTracker4 iPoker hands parsing."""
 
 import sys
-import traceback
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 
-from Configuration import Config
-from PokerTrackerToFpdb import PokerTracker
+from fpdb_3_legacy.Configuration import Config
+from fpdb_3_legacy.PokerTrackerToFpdb import PokerTracker
 
 # Sample PokerTracker4 hand text from FDJ/iPoker
 sample_hand = """GAME #8043869466 Version:24.7.1.16 Uncalled:Y Omaha PL €0.01/€0.02 2024-11-06 23:38:55/GMT
@@ -53,7 +52,7 @@ louisaf55: Shows [S8 CQ C5 C8] Flush, Ace High
 louisaf55: wins €0.56"""
 
 
-def test_pt4_ipoker_detection() -> bool:
+def test_pt4_ipoker_detection() -> None:
     """Test PokerTracker4 iPoker skin detection."""
     """Test PokerTracker4 iPoker skin detection."""
     # Create a minimal config
@@ -62,31 +61,18 @@ def test_pt4_ipoker_detection() -> bool:
     # Create PokerTracker instance
     pt = PokerTracker(config=config, autostart=False)
 
-    try:
-        gametype = pt.determineGameType(sample_hand)
+    gametype = pt.determineGameType(sample_hand)
 
-        # Test specific skin detection method
-        pt.detectiPokerSkin(sample_hand)
+    # Test specific skin detection method
+    pt.detectiPokerSkin(sample_hand)
 
-        # Test is_ipoker_skin method
-        pt.is_ipoker_skin()
+    # Test is_ipoker_skin method
+    pt.is_ipoker_skin()
 
-        # Verify detection worked
-        if pt.sitename is None:
-            msg = "Sitename detection failed"
-            raise ValueError(msg)
-        if pt.siteId is None:
-            msg = "SiteId detection failed"
-            raise ValueError(msg)
-        if gametype is None:
-            msg = "Gametype detection failed"
-            raise ValueError(msg)
-
-    except (ValueError, AssertionError, ImportError):
-        traceback.print_exc()
-        return False
-    else:
-        return True
+    # Verify detection worked
+    assert pt.sitename is not None
+    assert pt.siteId is not None
+    assert gametype is not None
 
 
 if __name__ == "__main__":

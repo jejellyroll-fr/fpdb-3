@@ -19,7 +19,7 @@ import pytest
 # Add the project root to the Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from Stats import (
+from fpdb_3_legacy.Stats import (
     call_vs_steal,
     cold_call,
     fold_vs_4bet,
@@ -125,23 +125,23 @@ class TestISOStat:
         assert result[4] == "(-/-)"
 
     def test_iso_with_zero_but_opportunities(self) -> None:
-        """Test iso returns '0.0' when player never raised but had opportunities."""
+        """iso is deprecated (needs hand-level limper tracking); returns no-data."""
         stat_dict = {"player1": {"pfr_opp": 15, "pfr": 0}}
         result = iso(stat_dict, "player1")
 
-        assert result[1] == "0.0"
-        assert result[2] == "iso=0.0%"
-        assert result[4] == "(0/15)"
+        assert result[1] == "-"
+        assert result[2] == "iso=-"
+        assert result[4] == "(-/-)"
 
     def test_iso_with_normal_value(self) -> None:
-        """Test iso returns normal percentage when player isolated."""
+        """iso stays deprecated even when preflop raise data is present."""
         stat_dict = {
-            "player1": {"pfr_opp": 20, "pfr": 6},  # 30% of 6 = 1.8 isolation raises
+            "player1": {"pfr_opp": 20, "pfr": 6},
         }
         result = iso(stat_dict, "player1")
 
-        assert result[1] == "9.0"  # 1.8/20 = 9%
-        assert result[2] == "iso=9.0%"
+        assert result[1] == "-"
+        assert result[2] == "iso=-"
 
     def test_iso_exception_handling(self) -> None:
         """Test iso returns format_no_data_stat on exceptions."""
@@ -206,23 +206,23 @@ class TestThreeBetVsStealStat:
         assert result[4] == "(-/-)"
 
     def test_three_bet_vs_steal_with_zero_but_opportunities(self) -> None:
-        """Test three_bet_vs_steal returns '0.0' when player never 3bet."""
+        """three_bet_vs_steal is deprecated (needs cross-player context); returns no-data."""
         stat_dict = {"player1": {"3bet_opp": 12, "3bet": 0}}
         result = three_bet_vs_steal(stat_dict, "player1")
 
-        assert result[1] == "0.0"
-        assert result[2] == "3bvs=0.0%"
-        assert result[4] == "(0/12)"
+        assert result[1] == "-"
+        assert result[2] == "3bvs=-"
+        assert result[4] == "(-/-)"
 
     def test_three_bet_vs_steal_with_normal_value(self) -> None:
-        """Test three_bet_vs_steal returns normal percentage when player 3bet vs steal."""
+        """three_bet_vs_steal stays deprecated even when 3bet data is present."""
         stat_dict = {
-            "player1": {"3bet_opp": 15, "3bet": 5},  # 40% of 5 = 2 3bets vs steal
+            "player1": {"3bet_opp": 15, "3bet": 5},
         }
         result = three_bet_vs_steal(stat_dict, "player1")
 
-        assert result[1] == "13.3"  # 2/15 = 13.3%
-        assert result[2] == "3bvs=13.3%"
+        assert result[1] == "-"
+        assert result[2] == "3bvs=-"
 
     def test_three_bet_vs_steal_exception_handling(self) -> None:
         """Test three_bet_vs_steal returns format_no_data_stat on exceptions."""
@@ -246,23 +246,23 @@ class TestCallVsStealStat:
         assert result[4] == "(-/-)"
 
     def test_call_vs_steal_with_zero_but_opportunities(self) -> None:
-        """Test call_vs_steal returns '0.0' when player never called vs steal."""
+        """call_vs_steal is deprecated (needs cross-player context); returns no-data."""
         stat_dict = {"player1": {"CAR_opp_0": 10, "CAR_0": 0}}
         result = call_vs_steal(stat_dict, "player1")
 
-        assert result[1] == "0.0"
-        assert result[2] == "cvs=0.0%"
-        assert result[4] == "(0/10)"
+        assert result[1] == "-"
+        assert result[2] == "cvs=-"
+        assert result[4] == "(-/-)"
 
     def test_call_vs_steal_with_normal_value(self) -> None:
-        """Test call_vs_steal returns normal percentage when player called vs steal."""
+        """call_vs_steal stays deprecated even when call data is present."""
         stat_dict = {
-            "player1": {"CAR_opp_0": 12, "CAR_0": 4},  # 50% of 4 = 2 calls vs steal
+            "player1": {"CAR_opp_0": 12, "CAR_0": 4},
         }
         result = call_vs_steal(stat_dict, "player1")
 
-        assert result[1] == "16.7"  # 2/12 = 16.7%
-        assert result[2] == "cvs=16.7%"
+        assert result[1] == "-"
+        assert result[2] == "cvs=-"
 
     def test_call_vs_steal_exception_handling(self) -> None:
         """Test call_vs_steal returns format_no_data_stat on exceptions."""
@@ -364,11 +364,11 @@ class TestNewPreflopStatsIntegration:
         assert limp(stat_dict, "active_player")[1] == "0.0"  # (5-5)/25 = 0%
         assert fold_vs_4bet(stat_dict, "active_player")[1] == "0.0"
 
-        # These should show calculated values
-        assert iso(stat_dict, "active_player")[1] == "6.0"  # (5*0.3)/25 = 6%
+        # rfi_total is still computed; iso/3bvs/cvs are deprecated -> no-data
         assert rfi_total(stat_dict, "active_player")[1] == "16.0"  # (5-1)/25 = 16%
-        assert three_bet_vs_steal(stat_dict, "active_player")[1] == "4.0"  # (1*0.4)/10 = 4%
-        assert call_vs_steal(stat_dict, "active_player")[1] == "0.0"  # (0*0.5)/8 = 0%
+        assert iso(stat_dict, "active_player")[1] == "-"
+        assert three_bet_vs_steal(stat_dict, "active_player")[1] == "-"
+        assert call_vs_steal(stat_dict, "active_player")[1] == "-"
 
     def test_mixed_scenario_preflop_stats(self) -> None:
         """Test realistic scenario with some stats having data, others not."""
@@ -394,10 +394,11 @@ class TestNewPreflopStatsIntegration:
         # Should show percentages (has data)
         assert cold_call(stat_dict, "mixed_player")[1] == "30.0"  # 3/10
         assert limp(stat_dict, "mixed_player")[1] == "13.3"  # 4/30
-        assert iso(stat_dict, "mixed_player")[1] == "8.0"  # (8*0.3)/30
         assert rfi_total(stat_dict, "mixed_player")[1] == "16.7"  # (8-3)/30
-        assert three_bet_vs_steal(stat_dict, "mixed_player")[1] == "15.0"  # (3*0.4)/8
-        assert call_vs_steal(stat_dict, "mixed_player")[1] == "15.0"  # (3*0.5)/10
+        # iso/3bvs/cvs are deprecated -> no-data
+        assert iso(stat_dict, "mixed_player")[1] == "-"
+        assert three_bet_vs_steal(stat_dict, "mixed_player")[1] == "-"
+        assert call_vs_steal(stat_dict, "mixed_player")[1] == "-"
 
         # Should show '-' (no opportunities)
         assert fold_vs_4bet(stat_dict, "mixed_player")[1] == "-"

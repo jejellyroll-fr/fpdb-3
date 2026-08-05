@@ -2,7 +2,7 @@
 
 import sys
 from collections.abc import Callable
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from decimal import Decimal
 from pathlib import Path
 
@@ -11,8 +11,8 @@ import pytest
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-import Card
-from DerivedStats import DerivedStats
+import fpdb_3_legacy.Card as Card
+from fpdb_3_legacy.DerivedStats import DerivedStats
 
 
 class MockHand:
@@ -22,7 +22,7 @@ class MockHand:
         """Initialize mock hand object with test data."""
         self.handid = "12345"
         self.tablename = "Test Table"
-        self.startTime = datetime(2024, 1, 1, 12, 0, 0, tzinfo=timezone.utc)
+        self.startTime = datetime(2024, 1, 1, 12, 0, 0, tzinfo=UTC)
         self.tourneyId = None
         self.tourneyTypeId = None
         self.hero = "Hero"
@@ -235,7 +235,7 @@ class TestAssembleHands:
 
         self._setup_and_assemble_hand(stats, setup_run_it_twice)
 
-        assert stats.hands["runItTwice"] == True
+        assert stats.hands["runItTwice"] is True
         assert len(stats.hands["boards"]) == 2
 
         # Check first board
@@ -258,7 +258,7 @@ class TestAssembleHands:
         self._setup_and_assemble_hand(stats, setup_split_pot)
 
         # In split games, boards are handled differently
-        assert stats.hands["runItTwice"] == False
+        assert stats.hands["runItTwice"] is False
         assert len(stats.hands["boards"]) == 1
 
     def test_empty_actions(self, stats: DerivedStats) -> None:

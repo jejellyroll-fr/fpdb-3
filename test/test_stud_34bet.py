@@ -11,8 +11,8 @@ import pytest
 # Add parent directory to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-import Card
-from DerivedStats import DerivedStats
+import fpdb_3_legacy.Card as Card
+from fpdb_3_legacy.DerivedStats import DerivedStats
 
 
 class MockHand:
@@ -25,7 +25,7 @@ class MockHand:
         self.maxseats = 8
         self.hero = "Hero"
         self.dbid_hands = 1
-        self.dbid_pids = {}
+        self.playerIds = {}
         self.tourneyId = None
         self.tourneyTypeId = None
         self.buyinCurrency = "USD"
@@ -171,28 +171,28 @@ class TestStud34Bet:
         # In Stud: complete = 1-bet, first raise = 2-bet, re-raise = 3-bet, re-re-raise = 4-bet
 
         # Player2 completes (1-bet) - no 2B flags
-        assert self.stats.handsplayers["Player2"]["street0_2BChance"] == False
-        assert self.stats.handsplayers["Player2"]["street0_2BDone"] == False
+        assert self.stats.handsplayers["Player2"]["street0_2BChance"] is False
+        assert self.stats.handsplayers["Player2"]["street0_2BDone"] is False
 
         # Player3 raises after complete (2-bet)
-        assert self.stats.handsplayers["Player3"]["street0_2BChance"] == True
-        assert self.stats.handsplayers["Player3"]["street0_2BDone"] == True
+        assert self.stats.handsplayers["Player3"]["street0_2BChance"] is True
+        assert self.stats.handsplayers["Player3"]["street0_2BDone"] is True
 
         # Hero re-raises (3-bet)
-        assert self.stats.handsplayers["Hero"]["street0_3BChance"] == True
-        assert self.stats.handsplayers["Hero"]["street0_3BDone"] == True
+        assert self.stats.handsplayers["Hero"]["street0_3BChance"] is True
+        assert self.stats.handsplayers["Hero"]["street0_3BDone"] is True
 
         # Player2 re-re-raises (4-bet)
-        assert self.stats.handsplayers["Player2"]["street0_4BChance"] == True
-        assert self.stats.handsplayers["Player2"]["street0_4BDone"] == True
+        assert self.stats.handsplayers["Player2"]["street0_4BChance"] is True
+        assert self.stats.handsplayers["Player2"]["street0_4BDone"] is True
 
         # Verify fold to 3-bet
-        assert self.stats.handsplayers["Player2"]["street0_FoldTo3BChance"] == True
-        assert self.stats.handsplayers["Player2"]["street0_FoldTo3BDone"] == False  # Didn't fold
+        assert self.stats.handsplayers["Player2"]["street0_FoldTo3BChance"] is True
+        assert self.stats.handsplayers["Player2"]["street0_FoldTo3BDone"] is False  # Didn't fold
 
         # Verify fold to 4-bet
-        assert self.stats.handsplayers["Hero"]["street0_FoldTo4BChance"] == True
-        assert self.stats.handsplayers["Hero"]["street0_FoldTo4BDone"] == False  # Called
+        assert self.stats.handsplayers["Hero"]["street0_FoldTo4BChance"] is True
+        assert self.stats.handsplayers["Hero"]["street0_FoldTo4BDone"] is False  # Called
 
     def test_stud_bring_in_not_counted(self) -> None:
         """Test that bring-in is not counted as a bet level."""
@@ -216,8 +216,8 @@ class TestStud34Bet:
 
         # Player2's raise after bring-in is the first bet level (1-bet)
         # So no 2B flags should be set
-        assert self.stats.handsplayers["Player2"]["street0_2BChance"] == False
-        assert self.stats.handsplayers["Player2"]["street0_2BDone"] == False
+        assert self.stats.handsplayers["Player2"]["street0_2BChance"] is False
+        assert self.stats.handsplayers["Player2"]["street0_2BDone"] is False
 
     def test_stud_complete_counts_as_aggressive(self) -> None:
         """Test that complete action is treated as aggressive."""
@@ -242,14 +242,14 @@ class TestStud34Bet:
         self.stats.getStats(self.hand)
 
         # Complete is the first bet level (1-bet) in Stud, not 2-bet
-        assert self.stats.handsplayers["Player2"]["street0_2BChance"] == False
-        assert self.stats.handsplayers["Player2"]["street0_2BDone"] == False
+        assert self.stats.handsplayers["Player2"]["street0_2BChance"] is False
+        assert self.stats.handsplayers["Player2"]["street0_2BDone"] is False
 
         # Complete should count for VPIP
-        assert self.stats.handsplayers["Player2"]["street0VPI"] == True
+        assert self.stats.handsplayers["Player2"]["street0VPI"] is True
 
         # Complete should count as aggressive action
-        assert self.stats.handsplayers["Player2"]["street0Aggr"] == True
+        assert self.stats.handsplayers["Player2"]["street0Aggr"] is True
 
     def test_stud_cold_4bet(self) -> None:
         """Test cold 4-bet scenario."""
@@ -279,8 +279,8 @@ class TestStud34Bet:
         self.stats.getStats(self.hand)
 
         # Verify cold 4-bet
-        assert self.stats.handsplayers["Player1"]["street0_C4BChance"] == True
-        assert self.stats.handsplayers["Player1"]["street0_C4BDone"] == True
+        assert self.stats.handsplayers["Player1"]["street0_C4BChance"] is True
+        assert self.stats.handsplayers["Player1"]["street0_C4BDone"] is True
 
     def test_stud_squeeze(self) -> None:
         """Test squeeze scenario in Stud."""
@@ -310,10 +310,10 @@ class TestStud34Bet:
 
         # Hero's raise is a 2-bet, not a 3-bet, so no squeeze opportunity
         # Squeeze only happens when there's a raise (2-bet) and a call, then a re-raise (3-bet)
-        assert self.stats.handsplayers["Hero"]["street0_2BChance"] == True
-        assert self.stats.handsplayers["Hero"]["street0_2BDone"] == True
-        assert self.stats.handsplayers["Hero"]["street0_SqueezeChance"] == False
-        assert self.stats.handsplayers["Hero"]["street0_SqueezeDone"] == False
+        assert self.stats.handsplayers["Hero"]["street0_2BChance"] is True
+        assert self.stats.handsplayers["Hero"]["street0_2BDone"] is True
+        assert self.stats.handsplayers["Hero"]["street0_SqueezeChance"] is False
+        assert self.stats.handsplayers["Hero"]["street0_SqueezeDone"] is False
 
     def test_stud_vpip_with_completes(self) -> None:
         """Test VPIP calculation includes completes for Stud."""
@@ -342,10 +342,10 @@ class TestStud34Bet:
         self.stats.getStats(self.hand)
 
         # All players except Player1 (who only did bring-in) should have VPIP
-        assert self.stats.handsplayers["Player1"]["street0VPI"] == False  # Only bring-in
-        assert self.stats.handsplayers["Player2"]["street0VPI"] == True  # Complete
-        assert self.stats.handsplayers["Player3"]["street0VPI"] == True  # Call
-        assert self.stats.handsplayers["Hero"]["street0VPI"] == True  # Raise
+        assert self.stats.handsplayers["Player1"]["street0VPI"] is False  # Only bring-in
+        assert self.stats.handsplayers["Player2"]["street0VPI"] is True  # Complete
+        assert self.stats.handsplayers["Player3"]["street0VPI"] is True  # Call
+        assert self.stats.handsplayers["Hero"]["street0VPI"] is True  # Raise
 
         # VPIP count should be 3
         assert self.stats.hands["playersVpi"] == 3

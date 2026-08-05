@@ -16,7 +16,7 @@ import pytest
 # Add the project root to the Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from Stats import (
+from fpdb_3_legacy.Stats import (
     bet_frequency_flop,
     bet_frequency_turn,
     non_sd_winrate,

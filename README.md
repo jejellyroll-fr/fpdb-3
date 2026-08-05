@@ -1,134 +1,111 @@
-# FPDB-3 - Free Poker Database
+# FPDB-3 Standalone Legacy (Python)
 
-[![stars](https://custom-icon-badges.demolab.com/github/stars/jejellyroll-fr/fpdb-3?logo=star)](https://github.com/jejellyroll-fr/fpdb-3/stargazers "stars")
-[![issues](https://custom-icon-badges.demolab.com/github/issues-raw/jejellyroll-fr/fpdb-3?logo=issue)](https://github.com/jejellyroll-fr/fpdb-3/issues "issues")
-[![license](https://custom-icon-badges.demolab.com/github/license/jejellyroll-fr/fpdb-3?logo=law&logoColor=white)](https://github.com/jejellyroll-fr/fpdb-3/blob/main/LICENSE?rgh-link-date=2021-08-09T18%3A10%3A26Z "license MIT")
-![example workflow](https://github.com/jejellyroll-fr/fpdb-3/actions/workflows/fpdb-3.yml/badge.svg)
+The original FPDB-3 Python application: hand-history parsers, PySide6 GUI, statistics engine, and the HUD overlay. This repository hosts the standalone, self-contained legacy Python stack. It has been separated from the `fpdb-new` monorepo by removing all Rust and modern FastAPI components to keep it lightweight, fast, and easy to run.
 
-FPDB-3 is a comprehensive poker tracking and analysis suite that provides:
-- **HUD (Heads-Up Display)** for real-time statistics overlay on poker tables
-- **Hand History Import and Analysis** from multiple poker sites
-- **Statistics and Reporting** with detailed poker metrics
-- **Web Interface** for online access to your poker data
-- **Database Management** supporting SQLite, MySQL, and PostgreSQL
+## ✨ Highlights
 
-Built on Python 3.10+ with modern tooling and actively maintained.
+- **Pure Python**: Zero Rust or external compilation dependencies.
+- **Hand-History Import & Analysis** from many poker rooms (PokerStars, Winamax, PartyPoker, iPoker, 888/Pacific, GGPoker, Bovada, Merge, OnGame, Microgaming…)
+- **Real-Time HUD** overlay on poker tables.
+- **Self-Contained Platform Detection**: Window detection and geometry calculations are fully integrated for Linux, macOS, and Windows.
+- **PySide6 Desktop GUI**: The graphical interface has been completely ported to PySide6.
+- **Databases**: SQLite (default), PostgreSQL, MySQL.
 
-## 🎯 Quick Start
+## 🔧 Requirements
 
-### System Requirements
-- Python 3.10 or higher
-- Operating System: Linux, Windows, or macOS
-- For HUD functionality: X11 (Linux), native window support (Windows/macOS)
+- Python 3.11+ (3.13 recommended)
+- OS: Linux, Windows, macOS
+- HUD: X11 (Linux), native window support (Windows/macOS)
 
-### Installation
+## ⚙️ Install
 
-#### Using UV
+From the repository root:
+
 ```bash
-# Install UV package manager
-curl -LsSf https://astral.sh/uv/install.sh | sh
+# venv + editable install with test extras
+python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
+pip install -e .[test]
 
-# Clone and setup
-git clone https://github.com/jejellyroll-fr/fpdb-3.git
-cd fpdb-3
-uv venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-
-# Install dependencies (choose your platform)
-uv pip install .[linux]      # Linux
-uv pip install .[windows]    # Windows  
-uv pip install .[macos]      # macOS
-
-# Add PostgreSQL support (optional)
-uv pip install .[postgresql]
+# or with uv (faster)
+uv pip install -e .[test]
 ```
 
+Platform/feature extras: `.[linux]`, `.[windows]`, `.[macos]`, `.[postgresql]`.
 
-### Running FPDB-3
+### Native equity engine (optional)
 
-#### Main Application (GUI)
+The equity calculations (AoF analyses, hand replayer EV) require the
+[pypoker-eval](https://github.com/jejellyroll-fr/poker-eval) C extension.
+Without it fpdb runs normally but equity features are disabled.
+
 ```bash
-uv run python fpdb.pyw
+# install from the poker-eval repo (needs a C compiler and CMake)
+pip install "pypoker-eval @ git+https://github.com/jejellyroll-fr/poker-eval.git"
+
+# or via the optional dependency group
+pip install -e ".[native]"
 ```
 
+## ▶️ Run
 
-#### Web Interface
 ```bash
-uv run python web/start_fpdb_web.py
-# Access at http://localhost:8000
+# Full launcher (console script — runs fpdb_3_legacy/legacy_launcher.py)
+uv run fpdb_3_legacy
+
+# Desktop GUI directly
+python fpdb_3_legacy/fpdb.pyw
+
+# HUD process
+python fpdb_3_legacy/HUD_main.pyw
+
+# Legacy CLI
+python fpdb_3_legacy/fpdb_cli.py --help
 ```
 
-## 🎮 Supported Poker Sites
+### macOS prebuilt builds
 
-FPDB-3 supports hand history import from:
-- PokerStars
-- Winamax
-- GGPoker
-- Bovada/Ignition
-- iPoker Network
-- And 8+ additional sites
+The CI builds are unsigned, so macOS blocks their Qt libraries until the
+quarantine attribute is cleared — see [docs/macos-gatekeeper.md](docs/macos-gatekeeper.md).
 
-See our [Compatibility Guide](https://github.com/jejellyroll-fr/fpdb-3/wiki/Compatibility-online-Rooms) for the complete list.
+```bash
+xattr -dr com.apple.quarantine ~/Downloads/fpdb-pyoxidizer-macos-arm64
+```
 
-## 🖥️ Platform-Specific Setup
+### Linux / Wayland
 
-### Linux
-- **X11**: Works out of the box
-- **Wayland**: Use the included wrapper script:
-  ```bash
-  ./fpdb-xwayland.sh
-  # or set: export FPDB_FORCE_X11=1
-  ```
+```bash
+./fpdb-xwayland.sh        # from repo root
+# or: export FPDB_FORCE_X11=1
+```
 
-### Windows
-- Requires pywin32 (included in installation)
-- Run as administrator for full HUD functionality
+## 🧪 Tests
 
-### macOS
-- Requires pyobjc (included in installation)
-- May need accessibility permissions for HUD overlay
+From the repository root:
 
-## 📚 Documentation and Support
+```bash
+make test                 # main suite (excludes GUI)
+make test-all             # incl. GUI (using run_tests.sh)
+uv run pytest -k "stats"  # pattern
+make lint && make format
+```
 
-- **Wiki**: [Complete user guide](https://github.com/jejellyroll-fr/fpdb-3/wiki)
-- **HUD Setup**: [How to configure the HUD](https://github.com/jejellyroll-fr/fpdb-3/wiki/How-to-Set-Up-and-Use-the-HUD-with-fpdb%E2%80%903-by-editing-HUD_config.xml)
-- **Linux Guide**: [Distribution-specific setup](https://github.com/jejellyroll-fr/fpdb-3/wiki/FPDB%E2%80%903-and-Different-Linux-Distributions,-X11-or-Wayland-Support-and-different-desktop-environment-(WIP))
-- **API Documentation**: [Sphinx docs](https://jejellyroll-fr.github.io/fpdb-3/)
+Parser behaviour is locked by a golden-master corpus (`tests/fixtures/`) with per-hand invariant checks.
 
-## 🐛 Bug Reports and Support
+## 🗂 Layout (selected)
 
-- **GitHub Issues**: [Report bugs](https://github.com/jejellyroll-fr/fpdb-3/issues)
-- **Discussions**: [Community support](https://github.com/jejellyroll-fr/fpdb-3/discussions)
-- **Hand History Issues**: Email problematic files to jejellyroll.fr@gmail.com
-
-When reporting bugs, please include:
-- Your operating system and version
-- Python version
-- Steps to reproduce the issue
-- Any error messages or logs
-
-## 🤝 Contributing
-
-Want to contribute? Check out our [Contributing Guide](CONTRIBUTING.md) for:
-- Development setup
-- Code style guidelines
-- Testing procedures
-- Pull request process
-
-## 📈 Development Status
-
-Follow development progress on our [Project Board](https://github.com/users/jejellyroll-fr/projects/2).
+```
+fpdb_3_legacy/
+├── *ToFpdb.py            # one parser per poker room
+├── iPoker/               # iPoker parser split into mixins
+├── Hand.py, Database.py  # core hand model + DB layer
+├── Hud.py, HUD_main.pyw  # HUD overlay
+├── fpdb.pyw              # desktop GUI entry point
+├── fpdb_cli.py           # CLI entry point
+└── legacy_launcher.py    # `fpdb_3_legacy` console script
+fpdb/
+└── infrastructure/platform/  # platform window and geometry detection
+```
 
 ## 📄 License
 
-AGPL v3 License - see [LICENSE](LICENSE) for details.
-
-## 🙏 Acknowledgments
-
-This project builds upon the work of:
-- Original FPDB team
-- MegaphoneJon's Python 3 adaptation
-- ChazDazzle's updates
-- All contributors to the poker tracking community
-
-**Free Software, Hell Yeah!**
+AGPL v3 — see [LICENSE](LICENSE).

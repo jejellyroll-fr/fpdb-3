@@ -14,7 +14,7 @@ import pytest
 # Add the project root to the Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from DerivedStats import DerivedStats
+from fpdb_3_legacy.DerivedStats import DerivedStats
 
 
 class TestCalcCBets:
@@ -303,6 +303,77 @@ class TestCalcCBets:
         assert "foldToStreet1CBDone" not in self.derived_stats.handsplayers["caller"]
         assert self.derived_stats.handsplayers["folder"]["foldToStreet1CBDone"] is True
         assert "foldToStreet1CBDone" not in self.derived_stats.handsplayers["raiser"]
+
+    def test_aggressor_folds_no_cbet_chance_on_later_streets(self):
+        """Test that aggressor who folds doesn't get CBet chance on later streets."""
+        self.derived_stats.handsplayers = {"aggressor": {}, "opponent1": {}, "opponent2": {}}
+
+        preflop_actions = [("aggressor", "raises", 200, None, False)]
+        flop_actions = [
+            ("opponent1", "bets", 150, None, False),  # Donk bet
+            ("aggressor", "folds", None, None, False),  # Aggressor folds on flop
+            ("opponent2", "calls", 150, None, False),
+        ]
+        turn_actions = [
+            ("opponent1", "bets", 300, None, False),
+            ("opponent2", "calls", 300, None, False),
+        ]
+
+        hand = self.create_mock_hand(
+            actions={
+                "PREFLOP": preflop_actions,
+                "FLOP": flop_actions,
+                "TURN": turn_actions,
+            }
+        )
+
+        self.derived_stats.calcCBets(hand)
+
+        # Aggressor should have CBet chance on flop (street1) but not done (someone bet before)
+        assert self.derived_stats.handsplayers["aggressor"]["street1CBChance"] is True
+        assert self.derived_stats.handsplayers["aggressor"]["street1CBDone"] is False
+
+        # Aggressor should NOT have CBet chance on turn (street2) because they folded
+        assert self.derived_stats.handsplayers["aggressor"]["street2CBChance"] is False
+        assert self.derived_stats.handsplayers["aggressor"]["street2CBDone"] is False
+
+    def test_aggressor_folds_late_in_hand(self):
+        """Test aggressor folding after making CBet on earlier street."""
+        self.derived_stats.handsplayers = {"aggressor": {}, "opponent": {}}
+
+        preflop_actions = [("aggressor", "raises", 200, None, False)]
+        flop_actions = [
+            ("aggressor", "bets", 150, None, False),  # CBet on flop
+            ("opponent", "calls", 150, None, False),
+        ]
+        turn_actions = [
+            ("opponent", "bets", 300, None, False),  # Opponent leads turn
+            ("aggressor", "folds", None, None, False),  # Aggressor folds
+        ]
+        river_actions = []
+
+        hand = self.create_mock_hand(
+            actions={
+                "PREFLOP": preflop_actions,
+                "FLOP": flop_actions,
+                "TURN": turn_actions,
+                "RIVER": river_actions,
+            }
+        )
+
+        self.derived_stats.calcCBets(hand)
+
+        # Flop: CBet made
+        assert self.derived_stats.handsplayers["aggressor"]["street1CBChance"] is True
+        assert self.derived_stats.handsplayers["aggressor"]["street1CBDone"] is True
+
+        # Turn: Chance exists but folded before acting aggressively
+        assert self.derived_stats.handsplayers["aggressor"]["street2CBChance"] is True
+        assert self.derived_stats.handsplayers["aggressor"]["street2CBDone"] is False
+
+        # River: No chance because folded on turn
+        assert self.derived_stats.handsplayers["aggressor"]["street3CBChance"] is False
+        assert self.derived_stats.handsplayers["aggressor"]["street3CBDone"] is False
 
 
 if __name__ == "__main__":

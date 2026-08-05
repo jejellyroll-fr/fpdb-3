@@ -3,7 +3,7 @@
 import unittest
 from unittest.mock import MagicMock, Mock
 
-from PokerStarsToFpdb import PokerStars
+from fpdb_3_legacy.PokerStarsToFpdb import PokerStars
 
 
 class TestPokerStarsProcessRaise(unittest.TestCase):

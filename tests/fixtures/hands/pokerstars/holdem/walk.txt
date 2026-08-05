@@ -1,0 +1,19 @@
+PokerStars Hand #333333333333: Hold'em No Limit ($1/$2 USD) - 2023/10/27 12:00:00 ET
+Table 'Table Name' 6-max Seat #1 is the button
+Seat 1: Button ($200 in chips)
+Seat 2: SB ($200 in chips)
+Seat 3: BB ($200 in chips)
+SB: posts small blind $1
+BB: posts big blind $2
+*** HOLE CARDS ***
+Button: folds
+BB: raises $8 to $10
+SB: folds
+Uncalled bet ($9) returned to BB
+BB collected $2 from pot
+BB: doesn't show hand
+*** SUMMARY ***
+Total pot $2 | Rake $0
+Seat 1: Button (button) folded before Flop (didn't bet)
+Seat 2: SB (small blind) folded before Flop
+Seat 3: BB (big blind) collected ($2)

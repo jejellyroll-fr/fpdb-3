@@ -13,23 +13,20 @@ from unittest.mock import Mock
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
 import pytest
-from PyQt5.QtWidgets import QLabel
+
+pytestmark = pytest.mark.qt
+from PySide6.QtWidgets import QLabel
 
 # Add the project root to the Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 # Import HUD components
-from Aux_Classic_Hud import ClassicStat
-from Aux_Hud import SimpleStat
+from fpdb_3_legacy.Aux_Classic_Hud import ClassicStat
+from fpdb_3_legacy.Aux_Hud import SimpleStat
 
 
 class TestHUDDisplayNoDataFeature:
     """Test suite for HUD display with no data feature."""
-
-    @pytest.fixture
-    def qapp(self, qapp):
-        """Ensure QApplication is available for all tests."""
-        return qapp
 
     @pytest.fixture
     def mock_config(self):
@@ -175,11 +172,6 @@ class TestSimpleStatDisplay:
     """Test suite for SimpleStat display with no data feature."""
 
     @pytest.fixture
-    def qapp(self, qapp):
-        """Ensure QApplication is available."""
-        return qapp
-
-    @pytest.fixture
     def mock_aw(self):
         """Mock AuxWindow for SimpleStat tests."""
         aw = Mock()
@@ -311,11 +303,6 @@ class TestClassicStatDisplay:
     """Test suite for ClassicStat display with no data feature."""
 
     @pytest.fixture
-    def qapp(self, qapp):
-        """Ensure QApplication is available."""
-        return qapp
-
-    @pytest.fixture
     def mock_aw(self):
         """Mock AuxWindow for ClassicStat tests."""
         aw = Mock()
@@ -431,11 +418,6 @@ class TestClassicStatDisplay:
 
 class TestHUDIntegrationScenarios:
     """Integration tests for complete HUD scenarios."""
-
-    @pytest.fixture
-    def qapp(self, qapp):
-        """Ensure QApplication is available."""
-        return qapp
 
     @pytest.fixture
     def mock_config(self):
@@ -622,11 +604,6 @@ class TestHUDUpdatePerformance:
     """Test suite for HUD update performance with no data feature."""
 
     @pytest.fixture
-    def qapp(self, qapp):
-        """Ensure QApplication is available."""
-        return qapp
-
-    @pytest.fixture
     def mock_aw(self):
         """Mock AuxWindow for performance tests."""
         aw = Mock()
@@ -739,11 +716,6 @@ class TestHUDUpdatePerformance:
 
 class TestHUDErrorHandling:
     """Test suite for HUD error handling with no data feature."""
-
-    @pytest.fixture
-    def qapp(self, qapp):
-        """Ensure QApplication is available."""
-        return qapp
 
     @pytest.fixture
     def mock_aw(self):

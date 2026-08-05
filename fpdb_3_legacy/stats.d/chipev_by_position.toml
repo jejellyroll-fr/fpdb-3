@@ -1,0 +1,93 @@
+# ChipEV (all-in expected value, in tournament chips) broken down by position
+# and table size. Ported from PokerTracker 4 custom stats:
+#
+#   .../658225d6b920e_5-courbes-chips-ev-par-position/*.pt4stat
+#
+# PT4 source columns/encoding -> FPDB:
+#   amt_expected_won            -> HandsPlayers.allInEV (stored x100, in chips)
+#   cnt_players                 -> HandsPlayers.seats
+#   position 0 (Button)         -> FPDB position 0
+#   position 8 (Big Blind)      -> FPDB position "B"
+#   position 9 (Small Blind)    -> FPDB position "S"
+#
+# All inputs already exist as HudCache columns / dimensions, so these are
+# fully plug-and-play (Tier 2): no schema change, no re-parse required.
+
+[[stat]]
+name        = "chipev_3h_btn"
+label       = "ChipEV 3-handed BTN"
+category    = "Tournament / ChipEV"
+scope       = ["tour"]
+inputs      = ["allInEV"]
+dimension   = { seats = 3, position = 0 }
+value       = "allInEV / 100.0"
+aggregate   = "sum"
+series      = "cumulative"
+format      = "%0.0f"
+description = "Chips the player was expected to win at all-in, 3-handed on the button."
+
+[[stat]]
+name        = "chipev_3h_sb"
+label       = "ChipEV 3-handed SB"
+category    = "Tournament / ChipEV"
+scope       = ["tour"]
+inputs      = ["allInEV"]
+dimension   = { seats = 3, position = "S" }
+value       = "allInEV / 100.0"
+aggregate   = "sum"
+series      = "cumulative"
+format      = "%0.0f"
+description = "Chips the player was expected to win at all-in, 3-handed in the small blind."
+
+[[stat]]
+name        = "chipev_3h_bb"
+label       = "ChipEV 3-handed BB"
+category    = "Tournament / ChipEV"
+scope       = ["tour"]
+inputs      = ["allInEV"]
+dimension   = { seats = 3, position = "B" }
+value       = "allInEV / 100.0"
+aggregate   = "sum"
+series      = "cumulative"
+format      = "%0.0f"
+description = "Chips the player was expected to win at all-in, 3-handed in the big blind."
+
+[[stat]]
+name        = "chipev_hu_sb"
+label       = "ChipEV heads-up SB"
+category    = "Tournament / ChipEV"
+scope       = ["tour"]
+inputs      = ["allInEV"]
+dimension   = { seats = 2, position = "S" }
+value       = "allInEV / 100.0"
+aggregate   = "sum"
+series      = "cumulative"
+format      = "%0.0f"
+description = "Chips the player was expected to win at all-in, heads-up in the small blind (button)."
+
+[[stat]]
+name        = "chipev_hu_bb"
+label       = "ChipEV heads-up BB"
+category    = "Tournament / ChipEV"
+scope       = ["tour"]
+inputs      = ["allInEV"]
+dimension   = { seats = 2, position = "B" }
+value       = "allInEV / 100.0"
+aggregate   = "sum"
+series      = "cumulative"
+format      = "%0.0f"
+description = "Chips the player was expected to win at all-in, heads-up in the big blind."
+
+# Overall ChipEV per tournament (PT4 chipsev_tourney): sum(amt_expected_won) / cnt_tourneys.
+# cnt_tourneys is supplied by the report/graph adapter as a context column.
+[[stat]]
+name        = "chipev_tourney"
+label       = "ChipEV / tournament"
+category    = "Tournament / ChipEV"
+scope       = ["tour"]
+inputs      = ["allInEV", "cnt_tourneys"]
+context     = ["cnt_tourneys"]
+value       = "allInEV / 100.0 / cnt_tourneys"
+aggregate   = "sum"
+format      = "%0.0f"
+description = "Average all-in chip EV per tournament."

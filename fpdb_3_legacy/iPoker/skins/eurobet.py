@@ -1,0 +1,8 @@
+from __future__ import annotations
+
+from fpdb_3_legacy.iPoker.base import iPoker
+
+
+class EurobetIPoker(iPoker):
+    sitename = "Eurobet Poker"
+    site_id = 75

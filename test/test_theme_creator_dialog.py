@@ -11,22 +11,21 @@ import sys
 import unittest
 from unittest.mock import Mock, patch
 
+import pytest
+
+pytestmark = pytest.mark.qt
+
+os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+
 # Add the parent directory to the path to import our modules
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # Only run GUI tests if we're in a GUI environment
 try:
-    from PyQt5.QtWidgets import QApplication
-
-    # Try to create a QApplication to test if GUI is available
-    app = QApplication.instance()
-    if app is None:
-        app = QApplication([])
+    from PySide6.QtWidgets import QApplication
     GUI_AVAILABLE = True
-
-except Exception:
+except ImportError:
     GUI_AVAILABLE = False
-    print("Skipping GUI tests - no display available")
 
 
 @unittest.skipUnless(GUI_AVAILABLE, "GUI not available")
@@ -43,7 +42,7 @@ class TestThemeCreatorDialog(unittest.TestCase):
 
     def setUp(self):
         """Set up test fixtures."""
-        from ThemeCreatorDialog import ThemeCreatorDialog
+        from fpdb_3_legacy.ThemeCreatorDialog import ThemeCreatorDialog
 
         self.dialog = ThemeCreatorDialog()
 
@@ -91,7 +90,7 @@ class TestThemeCreatorDialog(unittest.TestCase):
 
     def test_color_change_updates_preview(self):
         """Test that changing colors updates the preview."""
-        original_preview = self.dialog.preview_text.toPlainText()
+        self.dialog.preview_text.toPlainText()
 
         # Change primary color
         self.dialog.color_pickers["primary"].set_color("#FF0000")
@@ -136,7 +135,7 @@ class TestThemeCreatorDialog(unittest.TestCase):
         # Clear name input
         self.dialog.name_input.setText("")
 
-        with patch("ThemeCreatorDialog.QMessageBox.warning") as mock_warning:
+        with patch("fpdb_3_legacy.ThemeCreatorDialog.QMessageBox.warning") as mock_warning:
             self.dialog.create_theme()
             mock_warning.assert_called_once()
             args = mock_warning.call_args[0]
@@ -147,7 +146,7 @@ class TestThemeCreatorDialog(unittest.TestCase):
         # Test validation - empty name should be caught before trying to create
         self.dialog.name_input.setText("")
 
-        with patch("PyQt5.QtWidgets.QMessageBox.warning") as mock_warning:
+        with patch("fpdb_3_legacy.ThemeCreatorDialog.QMessageBox.warning") as mock_warning:
             self.dialog.create_theme()
             mock_warning.assert_called_once()
 
@@ -191,7 +190,7 @@ class TestColorPickerWidget(unittest.TestCase):
 
     def setUp(self):
         """Set up test fixtures."""
-        from ThemeCreatorDialog import ColorPickerWidget
+        from fpdb_3_legacy.ThemeCreatorDialog import ColorPickerWidget
 
         self.picker = ColorPickerWidget("Test Color", "#FF0000")
 
@@ -246,20 +245,20 @@ class TestThemeCreatorIntegration(unittest.TestCase):
 
     def test_show_theme_creator_function(self):
         """Test the show_theme_creator function."""
-        from ThemeCreatorDialog import show_theme_creator
+        from fpdb_3_legacy.ThemeCreatorDialog import show_theme_creator
 
         # Test the function doesn't crash
         # We can't easily test the dialog interaction without user input
         # but we can test that it creates the dialog
-        with patch("ThemeCreatorDialog.ThemeCreatorDialog") as mock_dialog_class:
+        with patch("fpdb_3_legacy.ThemeCreatorDialog.ThemeCreatorDialog") as mock_dialog_class:
             mock_dialog = Mock()
-            mock_dialog.exec_.return_value = 0  # Cancelled
+            mock_dialog.exec.return_value = 0  # Cancelled
             mock_dialog_class.return_value = mock_dialog
 
             result = show_theme_creator()
 
             mock_dialog_class.assert_called_once()
-            mock_dialog.exec_.assert_called_once()
+            mock_dialog.exec.assert_called_once()
             self.assertEqual(result, 0)
 
 

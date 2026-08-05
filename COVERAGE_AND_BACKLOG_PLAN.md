@@ -1,0 +1,803 @@
+# fpdb-3 — Chantiers inachevés & plan de couverture
+
+> Établi le 2026-07-25 sur la branche `bigbang` (HEAD `e8ae67f7`).
+> Mesures réelles, pas d'estimation : suite complète exécutée deux fois
+> (`-m "not qt and not perf"` puis `-m "not perf"`) avec `pytest-cov`.
+> Aucun fichier de code modifié pendant cette analyse.
+
+---
+
+## 0. Résumé
+
+**Santé actuelle.** La suite est verte : **4 608 tests passés, 0 échec** (18 skipped,
+10 xpassed, 183 s). Ruff, mypy et le ratchet Pyright sont verts en CI. `SQL.py` est
+entièrement démantelé, `Stats.py` aussi, les 26 parseurs sont typés.
+
+**Deux faiblesses structurelles.**
+
+1. **Trois chantiers laissés à mi-parcours**, tous datés du 2026-07-16 dans
+   `IMPROVEMENT_PLAN.md`, plus deux bugs connus non corrigés découverts pendant le
+   diagnostic Windows.
+2. **La couverture n'était ni mesurée ni gardée** : aucun job CI ne la calculait,
+   aucun seuil n'existait. Résultat mesuré : **53,6 %** (40 013 unités
+   instruction+branche non couvertes sur 86 295), avec **34 modules à 0 %**
+   représentant 5 271 instructions. *L'étape 1 du plan corrige ce point — voir
+   Partie C.*
+
+> **Convention de mesure.** Tous les pourcentages de ce document sont ceux que
+> coverage.py rapporte, **branches comprises** (c'est le chiffre qu'affiche
+> `--cov-report=term` et qu'applique le cliquet). La couverture d'instructions
+> seule, plus flatteuse, vaut 56,4 % : ne pas mélanger les deux.
+
+Le point le plus grave n'est pas le chiffre global mais **sa répartition** : le code
+qui écrit les caches statistiques (`database_caches.py`, **13 %**) et celui qui
+reconstruit une main depuis la base (`Hand.select`, `Hand.to_canonical_dict`) sont
+quasi non testés, alors que ce sont eux qui produisent les chiffres affichés dans le
+HUD et les rapports.
+
+---
+
+## Partie A — Ce qui n'est pas fini
+
+### A1. Découpage de `Database.py` — arrêté à 3/N 🟡
+
+C'est le seul chantier explicitement marqué **en cours** dans `IMPROVEMENT_PLAN.md`.
+Trois paliers livrés (caches, notes automatiques, tournois), puis plus rien depuis
+9 jours.
+
+État mesuré :
+
+| | Lignes | Méthodes |
+|---|---:|---:|
+| Avant découpage | 6 621 | 143 |
+| **Aujourd'hui** (`Database.py`) | **4 688** | **116** |
+| Extraits (`database_caches` + `_auto_notes` + `_tournaments` + `_lambda_dict`) | 2 150 | 29 |
+
+Domaines qui restent dans l'hôte, par ordre de taille des méthodes :
+
+| Domaine | Méthodes principales | Lignes |
+|---|---|---:|
+| Données de référence / DDL | `fillDefaultData`, `create_tables`, `createAllForeignKeys`, `dropAllForeignKeys`, `dropAllIndexes`, `createAllIndexes`, `ensure_feature_tables`, `_ensure_table_columns` | ~750 |
+| Import en masse | `prepareBulkImport`, `afterBulkImport`, `storeHand`, `storeHandsPlayers`, `storeHandsActions`, `resetBulkCache` | ~400 |
+| Lecture HUD | `get_stats_from_hand`, `get_stats_from_hand_session`, `init_hud_stat_vars`, `get_hero_hudcache_start` | ~280 |
+| Reconstruction de caches | `rebuild_cache`, `replace_statscache`, `cleanUpWeeksMonths` | ~380 |
+| Connexion | `connect`, `do_connect`, `check_version`, `commit`, `get_last_insert_id` | ~270 |
+
+`Database.py` reste inscrit au cliquet de complexité avec ses 4 règles
+(`C901`, `PLR0912`, `PLR0915`, `UP031`) — la dette de complexité n'a pas baissé, elle
+a été relocalisée (`database_caches.py` et `database_tournaments.py` sont eux aussi
+inscrits au cliquet).
+
+### A2bis. Quatre des cinq écrivains de cache ne pouvaient rien écrire — ✅ CORRIGÉ (2026-07-25)
+
+Mis au jour par l'étape 3. `CACHE_KEYS` porte **253** statistiques. `HudCache` a été
+élargie à 253 colonnes lors du correctif de l'issue #134 et reste protégée par
+`test_hudcache_schema_sync.py`. **Les quatre autres tables de cache ne l'ont jamais
+été** : elles ne portent que **116** de ces 253 colonnes.
+
+| Table | Colonnes `CACHE_KEYS` | Placeholders de l'INSERT | Valeurs fournies par le code |
+|---|---:|---:|---:|
+| `HudCache` | 253 | 263 | 263 ✅ |
+| `SessionsCache` | 116 | 120 | 258 ❌ |
+| `TourneysCache` | 116 | 120 | 258 ❌ |
+| `CardsCache` | 116 | 121 | 259 ❌ |
+| `PositionsCache` | 116 | 123 | 261 ❌ |
+
+Conséquence : toute insertion dans ces quatre tables lève
+`ProgrammingError: Incorrect number of bindings supplied`. Elles sont donc
+**structurellement impossibles à peupler**. `insert_positionscache` a en prime une
+incohérence interne (124 colonnes nommées pour 123 placeholders).
+
+**Portée réelle.** Ces écrivains ne sont atteints que si l'option d'import
+`cacheSessions` est active, et elle est livrée à `False` (config du dépôt, exemple, et
+défaut de `Configuration.py:942`). C'est pourquoi le défaut est resté invisible. Mais
+qui l'active perd le dernier hand de chaque lot — l'exception est avalée par le
+`except Exception` de `Importer._import_hh_file`, qui compte le hand en erreur et le
+saute, avant même `insertHands` — et n'obtient jamais de `SessionsCache`, donc le
+Session Viewer reste vide.
+
+**Correctif retenu** : aligner les écrivains sur ce que les tables déclarent, plutôt
+qu'élargir les tables. Décidé après avoir constaté que **rien ne lit les statistiques
+de ces quatre tables** — les rapports (`sessionStats`, `playerStats`,
+`playerStatsByPosition`) lisent `Hands`/`HandsPlayers`/`HudCache`, et les seuls SELECT
+qui touchent les quatre caches sont les lookups d'existence des écrivains eux-mêmes et
+les requêtes de purge. Élargir aurait investi 2-3 jours dans des colonnes que personne
+ne consomme ; l'inverse reste possible le jour où un consommateur en aura besoin.
+
+Livré :
+
+- `SESSION_CACHE_KEYS` dans `database_caches.py` — les 116 statistiques que portent ces
+  quatre tables, épelées explicitement plutôt que tranchées en `CACHE_KEYS[:116]`, pour
+  qu'une clé insérée au milieu de `CACHE_KEYS` ne puisse pas redéfinir le sous-ensemble
+  en silence. Les quatre écrivains empaquettent ce sous-ensemble ; `storeHudCache` garde
+  `CACHE_KEYS` complet.
+- **`street0FaceRaise` manquait dans 7 requêtes** (`select_SC`, `insert_SC`, `insert_TC`,
+  `insert_cardscache`, et les quatre `update_*`) : ajoutée à `CACHE_KEYS` et aux DDL, elle
+  n'avait jamais été portée dans les écritures. `select_SC` en particulier ne lisait que
+  115 colonnes alors que le code étiquetait le résultat avec 116 noms — désalignement de
+  tout le dictionnaire.
+- **`insert_cardscache` listait `street0_3BChance/Done` avant `street0_2BChance/Done`**,
+  l'inverse de `CACHE_KEYS`. Comme les écrivains empaquettent une ligne *positionnelle*,
+  les compteurs de 3-bet auraient atterri dans les colonnes de 2-bet. Ordre rétabli.
+- **`update_positionscache` mettait à jour `street0Limp`, `street0OpenLimpChance` et
+  `street0OpenLimp`**, qu'aucune variante de `PositionsCache` ne déclare : tout update
+  levait « no such column ». Retirées. Un test existant
+  (`test/test_sql_queries_positions_cache_write.py`) **exigeait leur présence** — il
+  encodait le bug ; corrigé pour exprimer le vrai contrat.
+- `insert_positionscache` : 124 colonnes pour 123 placeholders. Placeholder ajouté.
+
+Vérifié sur les trois backends. Les 4 tests de flush qui étaient `xfail` passent
+désormais réellement, et trois gardes structurelles empêchent la dérive de revenir :
+alignement placeholders/valeurs fournies, colonnes citées ⊆ colonnes de la table, et
+ordre des statistiques conforme à la liste de clés.
+
+### A2. Deux bugs identifiés, documentés, non corrigés
+
+**(a) iPoker : le hand id de la première main de chaque fichier était le code de session
+— ✅ CORRIGÉ (2026-07-25).** Décrit en note de bas de chantier dans
+`WINDOWS_HUD_BUGFIX_PLAN.md`, laissé « à traiter séparément » depuis le 22/07.
+`re_hand_info` cherchait `code="(?P<HID>[0-9]+)"`, motif que `sessioncode="…"` satisfait
+aussi — et chaque fichier iPoker s'ouvre par `<session sessioncode="…">`. Mesuré sur le
+corpus : **les 9 fichiers sur 9** étaient touchés. Le motif est désormais ancré sur
+`gamecode="…"`, seul attribut de `<game>` (356 occurrences, aucun autre).
+Régression dans `test/test_ipoker_parser.py` ; l'instantané golden de la fixture iPoker
+a été régénéré après vérification que **seul** `handid` change (`6661728946` → `7423436714`).
+
+⚠️ Sur une base déjà importée, la première main de chaque fichier iPoker porte encore
+l'ancien identifiant. Un ré-import la ré-insérera sous le bon, sans écraser l'ancienne
+ligne : une main dupliquée par fichier, à nettoyer si le sujet compte.
+
+**(b) Bug 1 PokerStars cash (Windows) — 🟡 durci, jamais confirmé.**
+`WINDOWS_HUD_BUGFIX_PLAN.md` le laisse en attente de validation live ; les trois autres
+bugs de la série sont validés. Deux autres points attendent aussi une session live :
+la synthèse de ring iPoker (PMU/bwin 6-max) et l'ancrage bas-centre sur un Twister
+2/3-max.
+
+### A3. i18n : la Vague 2 a laissé passer une génération de modules
+
+La Vague 2 déclare « marquage `_()` de TOUS les modules GUI ». C'était vrai pour les
+`Gui*` de 2026-07-12. Les modules écrits ou remaniés depuis n'ont **aucun marquage** :
+
+| Module | Chaînes Qt littérales |
+|---|---:|
+| `ModernHudPreferences.py` | 94 |
+| `ModernSitePreferences.py` | 27 |
+| `swc_poker_console.py` | 24 |
+| `ModernSeatPreferences.py` | 20 |
+| `GuiCoinPokerCapture.py` | 16 |
+| `ConfigReloadWidget.py` | 9 |
+| `ring_stats/**` (4 vues + `__init__`) | 17 |
+| `ThemeCreatorDialog.py` | 7 |
+
+Pire : `ring_stats/` a des libellés **écrits en dur en français** (`"Nombre de mains : …"`,
+assertion figée dans `test/test_ring_stats_starting_hands.py`), ce qui rend l'interface
+bilingue quelle que soit la langue choisie. Les 13 langues autres que le français
+restent par ailleurs non traduites (résidu déjà connu, hors dev).
+
+### A4. Résidus assumés (rappel, pas des oublis)
+
+- **Vague 3** : le quoting d'identifiants des requêtes n'est pas produit par le dialecte.
+  Rendement décroissant, risque élevé — reste un choix défendable.
+- **Vague 5** : 96 fichiers exemptés du cliquet de complexité (545 violations mesurées),
+  `ModernHudPreferences.py` (4 488 lignes) n'a jamais été découpé alors qu'il dépasse
+  aujourd'hui `Database.py`.
+- **HUD PT4 / CoinPoker** : `HUD_PT4_IMPLEMENTATION_PLAN.md` et
+  `COINPOKER_SPECIAL_HANDS_PLAN.md` décrivent des travaux **réalisés** (vérifié :
+  `stats_table.live_min_stack_bb`, `Aux_Hud.block_positions`/`ref_layout_width`,
+  `coinpoker_hand_builder` lit `dealerCardsRit`/`Rit2`/`DoubleBoard`/`splashPotAmount`,
+  `Hands.splashPot` en schéma, filtres `Bomb`/`2xB`/`Splash` dans `GuiHandViewer`).
+  Les fichiers ne sont simplement **pas marqués faits** — ils se lisent comme des
+  chantiers ouverts alors qu'ils ne le sont plus. À clore par édition, pas par code.
+
+---
+
+## Partie B — Le trou de couverture
+
+### B1. Mesure
+
+| Sélection | Tests | Couverture |
+|---|---:|---:|
+| Sélection hors Qt (`not qt and not perf`) | 4 222 | **46,1 %** |
+| Suite complète Qt incluse | 4 608 | **53,6 %** |
+
+86 295 unités instruction+branche mesurées, **40 013 non couvertes**.
+Le job `coverage` mesure désormais la réunion des deux sélections et le cliquet
+interdit toute baisse.
+
+### B2. Répartition par domaine (suite complète)
+
+Découpage identique à celui du cliquet (`DOMAINS` dans `tools/coverage_ratchet.py`),
+pour que ce tableau et `coverage-baseline.json` ne puissent pas diverger.
+
+| Domaine | Unités | Couv. | Manquantes |
+|---|---:|---:|---:|
+| `gui` | 20 749 | 32,2 % | **14 077** |
+| `parsers` | 17 652 | 64,1 % | 6 339 |
+| `other` (Importer, logging, Config…) | 12 909 | 55,2 % | 5 779 |
+| `database` | 5 799 | 54,2 % | 2 658 |
+| `live-capture` | 7 367 | 66,5 % | 2 465 |
+| `poker-domain` | 9 096 | 74,8 % | 2 296 |
+| `tourney-summaries` | 3 532 | 53,4 % | 1 647 |
+| `hud` | 4 579 | 65,3 % | 1 587 |
+| `maintenance-scripts` | 1 759 | 17,9 % | 1 445 |
+| `platform-pkg` | 1 069 | 17,1 % | 886 |
+
+### B3. Les trous qui comptent vraiment
+
+Le GUI domine en volume mais c'est le trou le moins dangereux : ce sont des vues, la
+CI n'a pas d'écran, et une régression s'y voit. Les trous **à risque silencieux** sont
+ceux où un chiffre faux passe inaperçu :
+
+| Module | Couv. | Pourquoi c'est grave |
+|---|---:|---|
+| **`database_caches.py`** | **12,9 %** | `storeSessions` (176/253 lignes non couvertes), `storeSessionsCache` (110/140), `storeTourneysCache`, `storeCardsCache`, `storePositionsCache`. **C'est le code qui produit les agrégats affichés par le HUD et les rapports.** Extrait en 1/N sans qu'aucun test ne l'accompagne. |
+| **`Hand.py`** (54 %) | | `select` (209/338) et `to_canonical_dict` (143/271) — relecture d'une main depuis la base et sérialisation canonique, deux chemins du replayer et de l'export. |
+| **`Database.py`** (42 %) | | `get_stats_from_hand` (81 lignes), `prepareBulkImport`/`afterBulkImport` (112), `rebuild_cache` (43), `replace_statscache` (47), `cleanUpWeeksMonths` (43). Le chemin d'import en masse et la reconstruction de caches. |
+| **`Importer.py`** (48 %) | | `_import_hh_file` (83 lignes non couvertes sur 335), `_import_summary_file` (44/87). Point d'entrée de tout import. |
+| **`Configuration.py`** (59 %) | | `get_hud_ui_parameters` (140/341) et `set_hud_ui_parameters` (61/150) : lecture/écriture du `HUD_config.xml` de l'utilisateur. |
+| **`HandDataReporter.py`** | **7,4 %** | 561 lignes non couvertes ; produit les rapports d'audit d'import. |
+| **`loggingFpdb.py`** (34,8 %) | | 364 lignes ; « la journalisation fichier est morte » est un symptôme déjà rencontré dans le diagnostic Windows. |
+| **`migration_helper.py`** | **0 %** | 256 instructions, migration inter-backends, jamais exécutée en test (le round-trip CI passe par `db_migrate`, pas par ce module). |
+
+### B4. Parseurs : où sont les fixtures inexploitées
+
+Le harnais golden (`test/test_live_parser_regression.py`) couvre 13 rooms. Les rooms
+les moins couvertes ont pourtant un corpus disponible dans `regression-test-files/cash/` :
+
+| Parseur | Couv. | Fixtures cash dispo | Dans le harnais golden ? |
+|---|---:|---:|---|
+| `BetfairToFpdb` | 17,8 % | 1 | ❌ |
+| `MergeToFpdb` | 18,4 % | 34 | ❌ |
+| `EnetToFpdb` | 21,8 % | 6 | ❌ |
+| `EverestToFpdb` | 35,8 % | 5 | ❌ |
+| `AbsoluteToFpdb` | 49,6 % | 13 | ❌ |
+| `OnGameToFpdb` | 68,5 % | 17 | ❌ |
+| `PkrToFpdb` | 77,8 % | 12 | ❌ |
+| `WinningToFpdb` | 44,0 % | 46 | ✅ (fixtures `tests/`, corpus non exploité) |
+| `FulltiltToFpdb` | 50,5 % | 54 | ✅ **1 seul fichier** |
+| `PartyPokerToFpdb` | 47,7 % | 40 | ✅ (fixtures `tests/` seulement) |
+| `MicrogamingToFpdb` | 68,9 % | 15 | ✅ **1 seul fichier** |
+| `PokerTrackerToFpdb` | 72,6 % | 20 | ✅ **1 seul fichier** |
+| `BossToFpdb` / `EverleafToFpdb` / `EntractionToFpdb` | 60–86 % | 14 / 11 / 6 | ✅ **1 seul fichier chacun** |
+| `iPoker` (via `iPoker/`) | — | 30 | ✅ **1 seul fichier** |
+
+**C'est le meilleur rendement du dépôt** : le harnais existe, il est générique
+(`file_snapshot` + manifeste JSON), et ~250 fichiers de corpus déjà versionnés ne sont
+pas branchés dessus. Élargir le manifeste ne demande pas d'écrire des assertions, juste
+de générer les snapshots et de les relire.
+
+Même remarque pour les résumés de tournoi : `iPokerSummary` 9,9 %,
+`PokerTrackerSummary` 11,1 %, `WinningSummary` 19,3 %.
+
+### B5. Modules à 0 %
+
+34 modules, 5 271 instructions. Trois familles :
+
+- **Points d'entrée GUI** (`fpdb.pyw` 1 147, `GuiSessionViewer` 406, `GuiLogView` 266,
+  `GuiAutoNotesWorkbench` 524, `ModernSeatPreferences` 550…) — coût de test élevé,
+  risque visible.
+- **Scripts d'exploitation** (`migration_helper` 256, `sync_databases` 132,
+  `backfill_showdown` 149, `backfill_boards` 115, `fix_draw_starting_hands` 110) —
+  **ils écrivent en base et personne ne les teste.** Risque élevé, coût faible.
+- **Abstraction plateforme** (`fpdb/infrastructure/platform/` : macos 292, winamax_title_parser
+  106, linux 91, permissions 77) — dont `winamax_title_parser`, pure logique de
+  parsing de titre de fenêtre, testable en 20 lignes.
+
+---
+
+## Partie C — Plan
+
+Ordonné par **rendement décroissant** (lignes couvertes ou risque levé par jour de
+travail). Chaque étape est livrable seule.
+
+### Étape 1 — Rendre la couverture visible et non-régressive — ✅ FAIT (2026-07-25)
+
+Livré :
+
+- **`tools/coverage_ratchet.py`** — lit un `coverage.json` et le compare aux planchers
+  suivis. Même patron que `todo_inventory.py --check` : `--check` en CI, `--update`
+  pour re-semer quand la couverture monte réellement.
+- **`coverage-baseline.json`** — planchers versionnés, semés au niveau **mesuré**
+  (total 53,6 %), jamais à un objectif fictif. Trois niveaux de garde :
+  1. le **total**, qui empêche la dérive globale ;
+  2. **11 domaines**, pour que le GUI (20 749 unités à 32 %) ne puisse pas diluer le
+     noyau — une chute de `poker-domain` n'est pas rattrapable par une hausse du GUI ;
+  3. **18 modules gardés individuellement** (`Database.py`, `database_*`, `Hand.py`,
+     `DerivedStats.py`, `stats_*`, `Importer.py`, `Configuration.py`), parce qu'un
+     plancher de domaine laisserait `database_caches.py` (12,9 %) pourrir en silence
+     pendant que `sql_*` monte.
+- **Job CI `coverage`** (ubuntu) — exécute les deux sélections (hors-Qt puis Qt
+  offscreen) en `--cov-append`, publie `coverage.json` + `htmlcov` en artefact, puis
+  applique le cliquet.
+- **`test/test_coverage_ratchet.py`** — 13 tests : appartenance aux domaines dans
+  l'ordre de déclaration, calcul branch-aware, hausse acceptée, baisse refusée
+  (module *et* domaine), tolérance, module gardé disparu, module gardé nouveau.
+- `[tool.coverage.run] source` inclut désormais `fpdb` en plus de `fpdb_3_legacy` ;
+  `coverage.json` est git-ignoré, `coverage-baseline.json` versionné.
+
+**Deux décisions à connaître.**
+
+*Tolérance de 0,5 point.* Découper la suite en deux passes déplace déjà le total de
+4 lignes, et une exécution n'est pas bit-stable. La tolérance absorbe ce bruit ; elle
+autorise en théorie une érosion lente, que le re-semis à chaque hausse corrige.
+
+*Le paquet `platform-pkg` a une tolérance élargie à 3 points* : sa factory sélectionne
+une implémentation par OS, or le cliquet tourne sur Linux tandis qu'un développeur
+re-sème depuis macOS ou Windows. Les autres modules OS-dépendants ne posent pas ce
+problème — `macos.py`, `linux.py`, `XTables.py` et `OSXTables.py` sont à 0 % partout
+(jamais importés), les autres sont importés avec des handles natifs simulés, et les
+deux seuls tests conditionnés par plateforme sont gated sur `win32`, qu'aucun des deux
+runners n'est.
+
+⚠️ **Planchers semés sur macOS.** Vérifié : sélection de tests identique entre macOS
+et Linux. Si le premier passage CI échoue malgré tout sur `platform-pkg`, re-semer
+depuis l'artefact Linux (`--update coverage.json`) plutôt que baisser un plancher.
+
+**Critère de sortie atteint** : une PR qui baisse la couverture d'un module gardé ou
+d'un domaine échoue en CI, avec le nom du coupable et l'écart au plancher.
+
+### Étape 2 — Brancher le corpus existant sur le harnais golden — ✅ FAIT (2026-07-25)
+
+**Parseurs 64,0 % → 77,8 % (+13,8 points), total 54,2 % → 57,1 %.** Le harnais passe de
+**58 à 597 fichiers** et de 339 à **2 867 mains**, en 5,8 s.
+
+`CASES` est désormais construit par balayage déclaratif de `regression-test-files/cash/`
+(25 rooms) au lieu d'une liste d'ajouts au cas par cas. Les 7 rooms qui n'avaient qu'un
+fichier branché (Fulltilt 54, iPoker 30, PokerTracker 20, Microgaming 15, Boss 14,
+Everleaf 11, Entraction 6) sont complètes, et les 7 rooms absentes sont entrées
+(Merge 34, OnGame 17, Absolute 13, PKR 12, Enet 6, Everest 5, Betfair 1). Les 26 entrées
+préexistantes re-clées sous `regression/` gardent une empreinte identique — vérifié — et
+les 32 entrées de `tests/fixtures/hands` sont inchangées au bit près.
+
+**Les instantanés ont été relus avant d'être figés**, comme l'exigeait le point 3, mais
+par invariants plutôt qu'à l'œil sur 2 867 mains : aucune exception de parsing sur les
+565 fichiers, aucune carte dupliquée au board, aucune action d'un joueur non assis,
+aucun rake négatif, aucun rake supérieur au pot, aucune main sans identifiant.
+
+Deux ensembles sortent de cette relecture, et deviennent des **tests nommés plutôt que
+des lignes de JSON** :
+
+- `KNOWN_EMPTY` (23 fichiers) — les refus délibérés : mains annulées, exports tronqués,
+  main observée sans stacks. Les 8 fichiers PartyPoker partagent une seule cause, un
+  joueur anonymisé qui agit sans figurer dans le préambule des sièges, d'où un
+  `FpdbHandPartialError` explicite plutôt qu'un siège inventé. Un fichier qui se met à
+  produire — ou cesse de produire — des mains échoue désormais par son nom.
+- `POT_EQUATION_EXCEPTIONS` — l'équation `encaissé + rake == pot` est vérifiée **main
+  par main** sur tout le reste du corpus. Les exceptions sont les mains cash-out (le
+  joueur encaisse une assurance, pas une part du pot) et les ré-exports tiers
+  (HM1, « converted ») dont la ligne de résumé est déjà dégradée.
+
+  **Les cinq cas inexpliqués ont été instruits (2026-07-25)** — deux corrigés, un
+  reclassé, deux démontrés irréductibles :
+  - **`5card_draw.txt` et `7stud.txt` : fixtures mal écrites, ✅ corrigées.** Elles
+    inscrivaient le pot **net** dans le champ « Total pot ». Vérifié sur des mains
+    PokerStars authentiques : la room y met le pot **brut**, et `collecté + rake ==
+    Total pot` y tient exactement. Les deux fixtures sont désormais cohérentes avec
+    leurs propres actions (6,00 et 16,05).
+  - **`cashed_out.txt` : reclassé.** Ce n'était pas un cas inexpliqué mais un cash-out
+    ordinaire — 19,00 + 1,00 = 20,00 sur la ligne de collecte, le joueur encaissant
+    ensuite une assurance de 18,80.
+  - **Les deux BetOnline : pas corrigeables, et j'ai essayé.** BetOnline imprime
+    plusieurs lignes « Total pot » pour une même main ; le corpus en contient
+    **22 exemplaires**. Dans **20**, ce sont des doublons ou des totaux courants et la
+    **dernière** ligne est le pot ; dans **2**, ce sont de vrais pots annexes qu'il faut
+    **additionner**. Ni les valeurs ni le nombre de gagnants ne séparent les deux cas.
+    J'ai implémenté la somme : elle **doublait le pot des 20 autres**, détecté par le
+    harnais golden, et je l'ai annulée. Le convertisseur garde la dernière ligne —
+    juste 20 fois sur 22 — et ces deux mains restent déséquilibrées. La caractérisation
+    complète est dans le commentaire de `POT_EQUATION_EXCEPTIONS`.
+
+**Point 4 non réalisé, et le plan était mal fondé sur ce point.** Il visait
+`iPokerSummary`, `PokerTrackerSummary` et `WinningSummary` d'après leur couverture, sans
+vérifier le corpus : **il n'existe aucun résumé iPoker** dans `regression-test-files/`,
+et Winning n'en a qu'un seul. Seul PokerTracker (11 fichiers) est atteignable. Par
+ailleurs ce n'est pas « le même patron » : les résumés se construisent en neutralisant
+`TourneySummary.__init__` et en amorçant ses défauts, classe par classe, donc ils
+demandent leur propre harnais. Reporté en étape 2bis avec une portée exacte.
+
+### Étape 2bis — Harnais golden pour les résumés de tournoi — ✅ FAIT (2026-07-25)
+
+**Domaine `tourney-summaries` 53,3 % → 59,5 %**, total 57,6 % → 57,9 %.
+`test/test_summary_regression.py` — **325 tests** sur les 112 fichiers des 6 sites,
+dont **106 empreints** (136 090 lignes joueur au total), en 3,7 s.
+
+Harnais séparé, comme annoncé : `tests/helpers/summary_regression.py` neutralise
+`TourneySummary.__init__`, amorce ses 50 attributs par défaut et appelle `parseSummary`.
+L'empreinte porte 37 champs de tournoi (numéro, buy-in, fee, prize pool, entrants,
+options rebuy/KO/satellite, horodatages) et chaque appel à `addPlayer` — rang, nom,
+gains, devise, rebuys, add-ons, KO.
+
+| Module | Avant | Après |
+|---|---:|---:|
+| `PokerTrackerSummary` | 11,1 % | **85,2 %** |
+| `FullTiltPokerSummary` | 47,3 % | 54,1 % |
+| `PokerStarsSummary` | 57,5 % | 59,1 % |
+| `WinningSummary` | 19,3 % | 22,2 % |
+| `WinamaxSummary` | 80,1 % | 80,4 % |
+| `iPokerSummary` | 9,9 % | 9,9 % — aucun corpus, comme prévu |
+
+**Un défaut du harnais découvert en route, pas du code** : la moitié du corpus Full Tilt
+est en **UTF-16-LE**. Ma première lecture retombait sur cp1252 et produisait du charabia
+qu'aucun regex d'en-tête ne pouvait reconnaître — 20 fichiers sur 43 « échouaient ».
+`TourneySummary.readFile` honore le BOM explicitement ; le harnais l'imite désormais.
+
+Deux ensembles nommés, plutôt que des digests muets :
+
+- `KNOWN_UNPARSED` (6 fichiers) — aucun n'est un défaut de convertisseur : les trois
+  archives PokerStars `.htm` et la page Winning portent **plusieurs tournois sur une
+  page**, que l'importateur découpe en morceaux avant de parser ; le `.xls` Full Tilt
+  est un classeur binaire ouvert par xlrd ; le ticket freeroll Winamax n'annonce aucune
+  valeur et est refusé.
+- **Résultat du héros perdu — 1 vrai trou sur 3, ✅ corrigé (2026-07-25).** J'avais
+  classé les trois fichiers comme un même défaut ; l'instruction en a démenti deux.
+  - **PokerStars, résumé envoyé par e-mail** : vrai trou. Le fichier nomme le joueur
+    dans sa formule d'appel (« Dear Hero, »), annonce « You finished **the tournament**
+    in 2nd place. » et « A EUR 0.90 award has been credited ». Le regex existant
+    n'acceptait que « You finished in Nth place », sans « the tournament », et rien ne
+    lisait la formule d'appel ni la ligne de gain : le tournoi s'importait **sans aucun
+    joueur**. Corrigé — le héros est enregistré rang 2, 90 centimes, EUR.
+  - **Winamax ×2 : refus délibérés, pas des défauts.** Le fichier freeroll ne contient
+    **aucune ligne `Player :`** — il ne nomme personne ; le semiturbo annonce
+    « You finished in **...** place », un rang littéralement absent. `WinamaxSummary`
+    décline explicitement dans les deux cas, et ne peut rien faire d'autre sans
+    inventer une donnée. L'ensemble est renommé `HERO_RESULT_WITHHELD_BY_THE_FILE`.
+
+Le reste du corpus est activement vérifié, pas seulement empreint : chaque résumé doit
+nommer son tournoi, n'avoir aucun montant négatif, et enregistrer au moins un joueur.
+
+Deux écarts examinés et écartés : les rangs `None` correspondent aux joueurs « still
+playing », et le « 1804 joueurs pour 1803 entrants » d'un tournoi à ré-entrée vient du
+fichier lui-même, qui annonce 1803 et liste 1804 lignes — le parseur rapporte les deux
+fidèlement.
+
+### Étape 3 — Tester les caches statistiques — ✅ FAIT (2026-07-25)
+
+`tests/test_database_caches.py` — **41 tests + 8 xfail stricts**.
+`database_caches.py` : **12,9 % → 71,9 %**, domaine `database` 54,1 % → 62,5 %,
+total 53,6 % → 54,1 %. Planchers du cliquet re-semés (diff : que des hausses).
+
+Deux couches, comme prévu :
+
+- **Tampons** (`doinsert=False`), là où l'agrégation a réellement lieu : buckets de
+  position du HudCache et leurs lettres exactes (dont dépendent `stat_adapters` et la
+  requête de stats agrégées), sommation entre mains, coercition des booléens,
+  clé de style, exclusion des types de tournoi poubelle en import de masse ;
+  regroupement des mains en sessions (seuil, extension avant/arrière, fusion par main
+  pontante, tournoi qui traverse le seuil) ; `SessionsCache` par type de jeu et joueur ;
+  `TourneysCache` et ses bornes temporelles ; clés de `CardsCache`/`PositionsCache` ;
+  `appendHandsSessionIds`.
+- **Écriture dans un vrai schéma SQLite** (`doinsert=True`, fixture `fresh_db` — jusque-là
+  définie mais utilisée par personne) : la session écrite couvre bien ses deux mains,
+  semaine et mois liés, identifiant de session résolu pour chaque main, second import
+  qui étend au lieu de dupliquer, et HudCache dont les valeurs agrégées atterrissent
+  puis se mettent à jour au lieu de doubler le profit.
+
+**Ce que l'étape a trouvé** : les quatre écrivains autres que HudCache sont
+inutilisables (voir A2bis). Les tests qui devraient les valider existent, marqués
+`xfail(strict=True)` : le jour où les tables seront élargies, ils passeront et la CI
+exigera le retrait des marqueurs. Un test paramétré compare en plus, pour chaque
+INSERT, le nombre de placeholders au nombre de valeurs que l'écrivain fournit.
+
+Également épinglé (`xfail` non nécessaire, le test documente le comportement réel) :
+`storeHudCache` dérive son décalage horaire de `(datetime.utcnow() - datetime.today()).seconds`,
+or `timedelta.seconds` n'est jamais négatif — à l'est de UTC, et sur un runner UTC, le
+décalage revient à `24 + offset` au lieu d'un petit négatif, et la `styleKey` datée
+range les mains sous le mauvais jour. Non corrigé : le changer déplacerait les lignes
+`HudCache` existantes vers d'autres buckets.
+
+### Étape 3bis — Corriger les écrivains de cache — ✅ FAIT (2026-07-25)
+
+Voir A2bis : écrivains alignés sur `SESSION_CACHE_KEYS`, `street0FaceRaise` portée dans
+les 7 requêtes qui l'omettaient, ordre 2-bet/3-bet de `CardsCache` rétabli, colonnes
+fantômes de `update_positionscache` retirées, placeholder manquant d'`insert_positionscache`
+ajouté. `cacheSessions` est de nouveau utilisable ; les 4 caches se peuplent.
+
+Deux défauts de fuseau horaire corrigés au passage, tous deux du même motif
+(`timedelta.seconds` est non signé, donc à l'est de UTC — et sur un runner UTC — le
+décalage revient à `24 + offset` au lieu d'un petit négatif) :
+
+- `storeHudCache` : la `styleKey` datée rangeait les mains sous le mauvais jour. Atteint
+  seulement avec `build_full_hudcache`. Les buckets `styleKey` sont reconstructibles
+  (`rebuild_cache`) : une reconstruction du cache est conseillée après mise à jour.
+- `storeSessions` : `weekStart`/`monthStart` étaient calculés depuis un `local` décalé
+  d'un jour entier — et cette branche-là **est** atteinte par l'import réel, puisque
+  `Importer` ne passe aucun nom de fuseau. Une session pouvait donc être rangée dans la
+  mauvaise semaine et le mauvais mois. Les sessions déjà importées gardent leurs
+  `weekId`/`monthId` erronés jusqu'à une reconstruction.
+
+**Reste ouvert** : si un jour le Session Viewer doit s'appuyer sur ces caches plutôt que
+sur `Hands`/`HandsPlayers`, il faudra élargir les quatre tables aux 253 statistiques —
+c'est le chantier qui n'a pas été fait ici, faute de consommateur.
+
+### Étape 4 — Sécuriser les scripts d'exploitation — ✅ FAIT (2026-07-25)
+
+`tests/test_maintenance_scripts.py` — **34 tests**. Domaine `maintenance-scripts`
+17,8 % → 29,8 %, total 57,1 % → 57,3 %.
+
+Priorité donnée au risque réel plutôt qu'au nombre de lignes :
+`fix_draw_starting_hands` **supprime des mains**, il passe donc de 0 % à **57,8 %** et
+concentre l'effort. Les tests vérifient ce qu'il *sélectionne* (une main de hero
+incomplète est signalée, une main complète ne l'est pas, badugi est jugé sur 4 cartes et
+non 5, une main de hold'em n'est jamais scannée, seul le siège du héros décide — juger
+sur un vilain signalerait toute la base) et ce qu'il *supprime* (la main et ses enfants
+partent, les autres restent, une liste vide ne touche à rien, et l'ensemble supprimé est
+exactement l'ensemble rapporté). `backfill_boards` 0 % → 28,9 %, `backfill_showdown`
+0 % → 22,3 %.
+
+Corrigé au passage : `fix_draw_starting_hands` faisait `sys.path.insert` puis
+`import Card, Configuration, Database` en absolu, ce qui chargeait une **seconde
+instance** de ces modules à côté de `fpdb_3_legacy.*` et polluait `sys.path` pour tout
+le processus. Passé aux imports du paquet, comme les trois autres backfills.
+
+**Deux modules ne sont pas des scripts d'exploitation, et le plan se trompait.**
+
+- **`sync_databases` (132 lignes) est mort depuis toujours** : il importe
+  `fpdb.infrastructure.adapters.legacy_schema_adapter` et
+  `fpdb.infrastructure.database.models`, qui n'ont **jamais existé** dans ce dépôt — il
+  est arrivé ainsi avec l'import initial du legacy. Il lève `ModuleNotFoundError` et ne
+  peut donc pas s'exécuter. mypy ne le voyait pas, les imports manquants étant ignorés,
+  et la CI le type-vérifie toujours. Un test épingle l'état actuel pour que sa
+  réparation ou sa suppression soit visible.
+- **`migration_helper` (256 lignes)** est un assistant interactif pour la migration
+  Python 3.13/3.14 : menus, `subprocess`, aucune base de données. Obsolète si la
+  migration est faite.
+
+**Décision prise : les deux sont supprimés** (2026-07-25). Aucune référence à
+l'exécution ne les visait — seulement les listes de lint et de typage, retirées avec
+eux. Un test vérifie qu'ils restent supprimés, pour que leur retour soit délibéré.
+Le domaine `maintenance-scripts` passe de 29,8 % à 37,7 % : retirer du code mort à 0 %
+compte autant qu'en tester.
+
+### Étape 5 — Découpage de `Database.py` — 🟡 palier 4/N fait (2026-07-25)
+
+**4/N — DDL & données de référence : `fpdb_3_legacy/database_schema.py`.**
+`Database.py` **4 688 → 3 030 lignes** (−35 %), **116 → 100 méthodes**. Depuis le début
+du découpage : 6 621 → 3 030, soit **−54 %**.
+
+Déplacé : les 16 méthodes du domaine, qui formaient un bloc contigu (L2545-3352) —
+`create_tables`, `drop_tables`, `create/dropAllIndexes`, `create/dropAllForeignKeys`,
+`drop_referential_integrity`, `rebuild_indexes`, `recreate_tables`,
+`ensure_feature_tables`, les trois `ensure_*_columns` et leurs deux aides, et
+`fillDefaultData`. Avec elles, les données qu'elles appliquent : les catalogues
+par-backend `INDEXES` (91 l.) et `FOREIGN_KEYS` (429 l.), `DB_VERSION` et
+`HANDS_PLAYERS_KEYS` (326 l.). `Database` réexporte ces deux derniers, quatre modules
+de test les important depuis lui.
+
+Méthode tenue : **16/16 méthodes identiques à l'AST près** face à `HEAD`, catalogues
+identiques en valeur, 7 méthodes et 8 attributs empruntés à l'hôte déclarés
+explicitement dans le mixin.
+
+**Dette de complexité relocalisée sans varier : 26 = 22 + 4.** Le nouveau module
+n'enfreint que `C901` et `PLR0915`, il est donc gardé contre `PLR0912` et `UP031` dès sa
+naissance — mais **l'objectif que je m'étais fixé n'est pas atteint** : `Database.py`
+enfreint toujours ses quatre règles et ne sort d'aucune. Sortir une entrée du cliquet
+demande de découper les fonctions elles-mêmes, pas de déplacer des blocs.
+
+Deux enseignements de méthode :
+
+- **L'analyse des emprunts doit couvrir les noms de module, pas seulement `self.X`.**
+  N'avoir listé que les attributs d'instance a laissé six noms indéfinis
+  (`sys`, `Card`, `CACHE_KEYS`, `HUDCACHE_EXTRA_KEYS`, `DB_VERSION`,
+  `HANDS_PLAYERS_KEYS`), dont deux créaient un cycle d'import qu'il a fallu trancher en
+  déplaçant les constantes de schéma avec le schéma.
+- **Une extraction fait légitimement baisser le plancher de couverture du module
+  source** : le DDL était bien couvert (`fresh_db` l'exécute à chaque test de base), donc
+  le reste de `Database.py` est proportionnellement moins couvert — 43,1 % → 37,2 %.
+  Vérifié avant de re-semer : 1 149 → 1 168 unités couvertes, le combiné passe de 43,1 %
+  à 43,5 %. Rien n'a été perdu, seule la répartition a changé. Le cas est désormais
+  documenté dans le cliquet.
+
+**Paliers 5/N et 6/N faits (2026-07-25).** `Database.py` **3 030 → 2 159 lignes**,
+100 → 80 méthodes. Depuis le début du découpage : **6 621 → 2 159, soit −67 %**, et
+l'objectif « sous 2 500 lignes » est atteint.
+
+- **5/N — import en masse** : `database_bulk_import.py`, 13 méthodes / 499 lignes. Le
+  mixin **possède** les tampons, puisque `resetBulkCache` les crée tous. `re_insert` et
+  les imports `csv`/`random`/`string`, qui ne servaient qu'à `executemany`, partent avec
+  lui. 13/13 identiques à l'AST près.
+- **6/N — lecture HUD** : `database_hud_stats.py`, 7 méthodes / 375 lignes.
+  `_rollback_after_failed_read` reste dans l'hôte, quatre autres méthodes l'appelant.
+  7/7 identiques à l'AST près.
+
+**Première entrée réellement retirée du cliquet** : les deux violations `UP031` de
+`Database.py` sont parties avec la lecture HUD, `Database.py` sort donc de cette règle.
+La dette de complexité totale reste à 26, répartie 14 + 5 + 4 + 3 sur les quatre
+modules — relocalisée, jamais accrue, sur les trois paliers.
+
+**Le palier 7/N ne doit pas être fait tel qu'il était prévu.** Mesuré :
+`self.__connected` est écrit en 12 endroits et **46 des 80 méthodes restantes** touchent
+l'état de connexion (`connection`, `cursor`, `__connected`, `_in_transaction`,
+`backend`, `db_server`). Ce n'est pas un domaine, c'est l'identité de l'objet : l'extraire
+inverserait la relation, l'hôte dépendant du mixin pour son propre état. S'y ajoute un
+piège de langage — `self.__connected` déplacé dans un mixin se mange en
+`_DatabaseConnectionMixin__connected` et **casse à l'exécution**, ce qui interdit le
+déplacement au mot près qui a rendu les six paliers sûrs.
+
+**Découpage des fonctions — ✅ FAIT (2026-07-25). `Database.py` sort entièrement du
+cliquet de complexité**, son entrée est supprimée de `per-file-ignores`. Les six
+fonctions fautives sont découpées le long des frontières que le code marquait déjà :
+
+- `connect` (22/24/97) → un helper par backend, `_connect_mysql`,
+  `_connect_postgresql`, `_connect_sqlite` ; ce dernier renvoie le chemin résolu et le
+  drapeau `create` que l'appelant transmet à `check_version` ;
+- `main` (18/18/77) → `_build_cli_parser` et une fonction par commande ;
+- `replace_statscache` (11/14/69) → un helper par table, plus
+  `_apply_tourney_clauses` : le bloc des trois placeholders tournoi était **triplé à
+  l'identique**, vérifié caractère par caractère avant factorisation ;
+- `rebuild_cache` (14/18) → `_rebuild_prepare_heroes`, `_rebuild_ring_cache`,
+  `_rebuild_tourney_cache` ;
+- `cleanUpWeeksMonths` (15/14) → `_clear_period_caches` (la boucle de purge était
+  écrite deux fois), `_delete_orphan_periods`, `_rebuild_period_caches` ;
+- `__init__` (57 instructions) → `_connect_and_configure` pour ce qui exige une
+  connexion ouverte.
+
+**Dette réellement supprimée, pas déplacée : 26 → 12** sur les quatre modules
+(`Database.py` 0, bulk 5, schema 4, hud 3). C'est l'objectif que les paliers 4 à 6
+n'avaient pas atteint.
+
+La vérification par AST identique n'était plus disponible — on modifie l'intérieur des
+fonctions, pas leur emplacement. Remplacée par : la suite complète (5 471 + 386), une
+comparaison de `replace_statscache` avant/après sur **les 48 combinaisons**
+table × type × `build_full_hudcache` × backend (0 divergence ; 36 ne diffèrent que par
+l'indentation interne du SQL, sans effet), et un essai de la CLI reconstruite.
+
+**Reste au cliquet pour ce domaine** : `database_caches` (16), `database_tournaments`
+(6), `database_bulk_import` (5), `database_schema` (4), `database_hud_stats` (3).
+
+### Étape 6 — Fermer les bugs connus · ~0,5 j
+
+1. **iPoker hand id** : rendre `re_hand_info` insensible au préfixe (`\bcode="…"` ou
+   ancrage sur `<game gamecode=`), + un test sur un fichier de session réel vérifiant
+   que la première main porte son `gamecode`.
+2. **Bug 1 PokerStars cash Windows** : session live, ou fermeture explicite du point
+   dans `WINDOWS_HUD_BUGFIX_PLAN.md` si les traces du 22/07 suffisent.
+3. **Marquer faits** `HUD_PT4_IMPLEMENTATION_PLAN.md` et
+   `COINPOKER_SPECIAL_HANDS_PLAN.md` (travaux vérifiés en Partie A4), pour que le
+   dépôt cesse d'annoncer des chantiers clos comme ouverts.
+
+### Étape 7 — Rattraper l'i18n des modules récents · ~1,5 j
+
+1. Marquer `_()` : `ModernHudPreferences` (94), `ModernSitePreferences` (27),
+   `ModernSeatPreferences` (20), `GuiCoinPokerCapture` (16), `ConfigReloadWidget` (9),
+   `ThemeCreatorDialog` (7), `swc_poker_console` (24).
+2. **`ring_stats/`** : retirer le français en dur (`"Nombre de mains : …"`), passer par
+   `_()`, mettre à jour `test/test_ring_stats_starting_hands.py` qui fige aujourd'hui
+   la chaîne française.
+3. Régénérer `locale/fpdb.pot` (`tools/update_pot.py`) et compléter le catalogue `fr_FR`.
+4. Ajouter un test de garde : aucun nouveau module Qt ne doit contenir de chaîne
+   littérale dans un appel `setText`/`setWindowTitle`/`addTab`/`QLabel(...)`.
+
+### Étape 8 — Continu
+
+- `ModernHudPreferences.py` (4 488 lignes) : plus gros module du dépôt, jamais découpé,
+  60 % couvert. Prochain god-module après `Database.py`.
+- Sortir progressivement les 96 fichiers du `per-file-ignores` de complexité.
+- `fpdb/infrastructure/platform/winamax_title_parser.py` (0 %, 106 instructions,
+  logique pure) : gain immédiat pour un coût nul.
+
+### Étape 9 — ✅ FAIT (2026-08-02) : logique pure `platform-pkg` & `import`
+
+La couverture mesurée était plus élevée que les planchers ne le disaient : le
+cliquet n'avait pas été ré-ensemencé depuis les tests de `winamax_title_parser`
+(0 % → 89 %). Ré-ensemencement : total **61,1 → 64,3 %**, `platform-pkg` 17,1 → 30,3 %.
+
+Puis tranche de tests unitaires sur les modules à 0 % de logique pure :
+
+- `permissions.py` (100 %), `linux.py` (100 %), `detect_site.py` (100 %),
+  `card_path.py` (100 %), `winamax_title_parser.py` (89 → 99 %).
+- +52 tests (6 938 → 6 990 verts dans la sélection non-Qt). Cliquet ré-ensemencé :
+  total **64,6 %**, `platform-pkg` **49,7 %**.
+
+Second passage (2026-08-02) : `macos.py` (723 lignes) passé de 0 % à **98 %**
+(60 tests, mock Quartz/AppKit/AppleScript). +60 tests (6 990 → 7 050 verts).
+Cliquet ré-ensemencé : total **65,0 %**, `platform-pkg` **86,6 %**.
+
+Troisième passage (2026-08-02) : `HandHistory.py` (parseur XML de la colonne
+`HandHistory.XMLDump`) passé de 0 % à **98 %** (19 tests : constructions
+directes de chaque classe, coercition booléenne, chemins d'erreur, `main` avec
+`test.xml` temporaire). Seul reste le garde `if __name__ == "__main__"`.
++19 tests (7 051 → 7 070 verts). Cliquet ré-ensemencé : total **65,2 %**.
+
+Quatrième passage (2026-08-02) : `PlayerProfiler.py` (classification de
+joueurs) passé de 0 % à **100 %** (14 tests couvrant chaque archétype, les
+garde-fous anti-division-par-zéro, la règle `min_hands`, la valeur par défaut
+UNKNOWN et la complétude des tables icônes/couleurs). Un `test_player_profiler.py`
+historique vivait dans `fpdb_3_legacy/` où `testpaths = tests test` ne le
+collecte jamais : le test utile est désormais dans `test/`. +14 tests
+(7 070 → 7 084 verts). Cliquet ré-ensemencé : total **65,3 %**.
+
+Cinquième passage (2026-08-02) : `WinTables.py` (gestion Windows des tables)
+passé de 52 % à **97 %** (41 tests qt ajoutés à `test_wintables_coinpoker.py`,
+qui ne couvrait que le cas CoinPoker : filtrage Winamax tour/table avec zéros
+initiaux, élargissement de la recherche, `_select_window` hors CoinPoker,
+`_window_pid` (chemins win32 mockés), géométrie cache/single-use, déplacement/
+redimensionnement, `topify`, `_tracked_window_belongs_elsewhere`, constructeur).
+Seul reste le bloc d'import `if sys.platform == "win32"` inexécutable sur mac.
+Suite qt : 495 → **536 passés**. Cliquet ré-ensemencé : total **65,4 %**.
+
+Sixième passage (2026-08-02) : `TableWindow.py` (classe de base, parente des
+trois Tables X/OSX/Windows) passé de 10 % à **100 %** (34 tests qt dans
+`test_table_window.py` : constructeur cash/tournoi/bytes/fallback table_number,
+`__str__`, `get_game` (nl/pl/limit), `get_table_no` (match/none/None/`tableno_re`
+absent), `check_table`/`check_size`/`check_loc` (destroyed/resized/moved/no
+change), `has_table_title_changed`, `check_bad_words`, méthodes abstraites).
+Suite qt : 536 → **570 passés**. Cliquet ré-ensemencé : total **65,6 %**.
+
+Septième passage (2026-08-02) : `iPokerSummary.py` (parseur de résumés de
+tournois iPoker) passé de 9,9 % à **95 %** (55 tests dans `test_ipoker_summary.py` :
+détection gametype/limit (holdem/stud/stud hi-lo/omaha/omaha hi-lo/six-plus/5_omahahi
+par défaut), formats de dates (abrévié, ISO, j/m/a avec/sans secondes, a/m/j),
+monnaies (réelle/fun/play), buyin/rake (split `+`, `Token` avec/sans/`totalbuyin`
+non numérique, freeroll → FREE, FPP), tourNo (code tournoi, table, fallback split),
+maintien du nom de tournoi sans suffixe, place N/A, détection Twister directe,
+erreurs `FpdbParseError`, `getSplitRe`, `convert_to_decimal` (complexes `+`,
+parties symboles, `1..2`, sans correspondance numérique). Vu pendant la tranche :
+le constructeur `__init__` réinitialise `isLottery`/`tourneyMultiplier` *après*
+`parseSummary()` (la détection Twister est donc toujours écrasée — à corriger
+lorsqu'on traitera ce module), et le format de gametype `LH …` déclenche un
+`KeyError` latent (`LIMIT` présent à `None`). Cliquet ré-ensemencé : total **66,0 %**.
+
+Bugs connus non corrigés :
+- ~~**poker-eval 7stud8 low-eval**~~ — ✅ **RÉSOLU (2026-08-02)** par la release
+  **v1.2.0** du fork (voir `test/test_stud_shown_cards.py`). Le test
+  `test_a_boardless_game_still_builds_its_pots` passe maintenant (rake 6 au lieu
+  de −71). Pin de `pyproject.toml` passé `@v1.1.0` → `@v1.2.0`, `uv sync` réalisé,
+  suite complète verte : **7 051 passés, 0 échec** (vs 7 050 + 1 échec connu).
+  La cause était bien côté bibliothèque : pour une même valeur de low (484675)
+  elle attribuait le low à des mains différentes selon les cartes exactes, et
+  parfois à une main *non qualifiante* (OnePair).
+
+---
+
+## Récapitulatif
+
+| # | Étape | Effort | Gain couverture | Risque levé |
+|---|---|---:|---:|---|
+| 1 | ✅ Cliquet de couverture en CI | fait | — | Empêche la dérive |
+| 2 | ✅ Corpus → harnais golden | fait | parseurs +13,8 pts | Régressions parseurs |
+| 2bis | ✅ Harnais résumés de tournoi | fait | domaine +6,2 pts | Régressions résumés |
+| 3 | ✅ Tests des caches statistiques | fait | +59 pts sur le module | **Chiffres HUD faux** |
+| 3bis | ✅ Corriger les écrivains de cache | fait | — | **4 caches impeuplables** |
+| 4 | ✅ Scripts d'exploitation | fait | domaine +12 pts | **Corruption de base** |
+| 5 | ✅ `Database.py` découpé et sorti du cliquet | fait | −67 % lignes, dette 26→12 | Dette de complexité |
+| 6 | Bugs connus + clôture des plans | 0,5 j | — | Hand id iPoker faux |
+| 7 | i18n des modules récents | 1,5 j | — | UI bilingue |
+| 8 | ✅ Continu (`ModernHudPreferences`, `winamax_title_parser`, cliquets) | fait | +9 tests, monolithe découpé | Dette de complexité & cliquet mis à jour |
+| 9 | ✅ Logique pure `platform-pkg`/`import` (permissions, linux, detect_site, card_path, winamax, macos, HandHistory, PlayerProfiler, WinTables, TableWindow, iPokerSummary) | fait | platform-pkg 17→87, total 61→66,0 | Dérive du cliquet & 7stud8 corrigé via fork v1.2.0 |
+
+**Chemin critique recommandé : 1 → 3 → 2 → 4 → 5**, l'étape 1 protégeant tout le reste
+et l'étape 3 précédant l'étape 5 parce qu'on ne déplace pas du code non testé.
+Toutes les étapes du plan sont faites (le palier 7/N est écarté, motivé).
+
+---
+
+## Annexe — Reproduire la mesure et manipuler le cliquet
+
+Mesurer comme le fait la CI (les deux sélections, un seul rapport combiné) :
+
+```bash
+QT_QPA_PLATFORM=offscreen .venv/bin/python -m pytest -p no:pytest-qt -m "not qt and not perf" --cov --cov-report=
+```
+
+```bash
+QT_QPA_PLATFORM=offscreen .venv/bin/python -m pytest -m qt --cov --cov-append --cov-report=
+```
+
+Produire le rapport puis vérifier les planchers :
+
+```bash
+.venv/bin/python -m coverage json -o coverage.json && .venv/bin/python tools/coverage_ratchet.py --check coverage.json
+```
+
+Re-semer les planchers — **uniquement** après une hausse réelle ; le diff de
+`coverage-baseline.json` doit alors ne montrer que des montées :
+
+```bash
+.venv/bin/python tools/coverage_ratchet.py --update coverage.json
+```
+
+Rapport HTML pour lire les lignes manquantes d'un module :
+
+```bash
+.venv/bin/python -m coverage html -d htmlcov
+```

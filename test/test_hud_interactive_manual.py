@@ -9,13 +9,13 @@ import os
 import sys
 from unittest.mock import Mock
 
-from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QApplication, QHBoxLayout, QLabel, QMainWindow, QPushButton, QVBoxLayout, QWidget
+from PySide6.QtCore import Qt
+from PySide6.QtWidgets import QApplication, QHBoxLayout, QLabel, QMainWindow, QPushButton, QVBoxLayout, QWidget
 
 # Add the project root to the Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from Aux_Hud import SimpleStat
+from fpdb_3_legacy.Aux_Hud import SimpleStat
 
 
 class HUDManualTestWindow(QMainWindow):
@@ -278,11 +278,13 @@ class HUDManualTestWindow(QMainWindow):
 
 import pytest
 
+pytestmark = pytest.mark.qt
+
 
 @pytest.fixture
 def qapp():
     """Ensure QApplication exists for tests."""
-    from PyQt5.QtWidgets import QApplication
+    from PySide6.QtWidgets import QApplication
 
     app = QApplication.instance()
     if app is None:
@@ -303,7 +305,7 @@ def qapp():
 )
 def test_hud_stat_display_scenarios(qapp, scenario_name, data, stat_name, expected_value):
     """Test HUD stat display for different data scenarios."""
-    from Aux_Hud import SimpleStat
+    from fpdb_3_legacy.Aux_Hud import SimpleStat
 
     # Create mock AuxWindow
     aw = _create_mock_auxwindow()
@@ -314,7 +316,7 @@ def test_hud_stat_display_scenarios(qapp, scenario_name, data, stat_name, expect
 
     actual_value = stat.lab.text()
     assert actual_value == expected_value, (
-        f"Scenario '{scenario_name}': {stat_name} expected '{expected_value}', " f"got '{actual_value}'"
+        f"Scenario '{scenario_name}': {stat_name} expected '{expected_value}', got '{actual_value}'"
     )
 
 
@@ -384,7 +386,7 @@ def main() -> None:
     window.show()
 
     # Run the application
-    app.exec_()
+    app.exec()
 
 
 if __name__ == "__main__":
