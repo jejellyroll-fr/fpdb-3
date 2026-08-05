@@ -310,7 +310,8 @@ class ClassicStat(Aux_Hud.SimpleStat):
 
         player_name = self.get_player_name(player_id)
         current_comment = self.get_current_comment(player_id)
-        generated_notes = self.get_generated_notes_list(player_id)
+        raw_notes = self.get_generated_notes_list(player_id)
+        generated_notes: list[dict[str, Any]] = raw_notes if isinstance(raw_notes, list) else []
 
         dialog = QDialog()
         dialog.setWindowTitle(f"Player notes: {player_name}")
@@ -434,25 +435,28 @@ class ClassicStat(Aux_Hud.SimpleStat):
 
     def get_generated_notes_list(self, player_id: int) -> list[dict[str, Any]]:
         """Return generated player notes list for UI display."""
-        db = Database.Database(self.aw.hud.config)
         try:
-            return db.getPlayerAutoNotes(player_id, limit=50)
+            db = Database.Database(self.aw.hud.config)
+            try:
+                notes = db.getPlayerAutoNotes(player_id, limit=50)
+                return notes if isinstance(notes, list) else []
+            finally:
+                db.close_connection()
         except Exception:
             log.exception("Error fetching generated notes list:")
             return []
-        finally:
-            db.close_connection()
 
     def get_generated_notes_text(self, player_id: int) -> str:
         """Return generated player notes formatted for display."""
-        db = Database.Database(self.aw.hud.config)
         try:
-            return format_generated_notes(db.getPlayerAutoNotes(player_id, limit=50))
+            db = Database.Database(self.aw.hud.config)
+            try:
+                return format_generated_notes(db.getPlayerAutoNotes(player_id, limit=50))
+            finally:
+                db.close_connection()
         except Exception:
-            log.exception("Error fetching generated notes:")
+            log.exception("Error fetching generated notes text:")
             return ""
-        finally:
-            db.close_connection()
 
     def save_comment(self, player_id: int, comment: str) -> None:
         """Saves a comment for the specified player in the database.
