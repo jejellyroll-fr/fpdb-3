@@ -3,8 +3,12 @@
 from __future__ import annotations
 
 import json
+import os
+import re
+import tempfile
+from decimal import Decimal
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from fpdb_3_legacy.AutoNotePlo import normalize_cards, rank_counts
 from fpdb_3_legacy.AutoNoteRules import PreflopContext
@@ -12,7 +16,26 @@ from fpdb_3_legacy.AutoNotes import AutoNoteRule, AutoNoteRuleSet, GeneratedAuto
 from fpdb_3_legacy.Configuration import CONFIG_PATH
 from fpdb_3_legacy.loggingFpdb import get_logger
 
+if TYPE_CHECKING:
+    from collections.abc import Mapping
+
 log = get_logger("user_autonotes_parser")
+
+# How deep a hand-edited condition tree may nest before we stop descending.
+# json.load itself caps nesting well below Python's recursion limit, but a rule
+# file is user-editable and a runaway tree should degrade, not crash the import.
+MAX_CONDITION_DEPTH = 32
+
+# Only bare {tag} placeholders are substituted. Attribute access, indexing and
+# format specs are left exactly as written instead of being evaluated, so a rule
+# file that travels between users cannot reach into objects through a template
+# such as "{player.__class__.__mro__}".
+_TEMPLATE_TAG = re.compile(r"\{([A-Za-z_][A-Za-z0-9_]*)\}")
+
+
+def render_note_template(template: str, values: Mapping[str, str]) -> str:
+    """Substitute {tag} placeholders, leaving unknown ones visible as written."""
+    return _TEMPLATE_TAG.sub(lambda m: values.get(m.group(1), m.group(0)), template)
 
 
 def get_user_autonotes_path(custom_path: Path | str | None = None) -> Path:
@@ -49,15 +72,7 @@ class CustomAutoNoteRule(AutoNoteRule):
         if "flop" in fmt_kwargs and "board" not in fmt_kwargs:
             fmt_kwargs["board"] = fmt_kwargs["flop"]
 
-        # Safe template evaluation
-        class SafeDict(dict):
-            def __missing__(self, key: str) -> str:
-                return f"{{{key}}}"
-
-        try:
-            note_text = self.note_template.format_map(SafeDict(fmt_kwargs))
-        except Exception:
-            note_text = self.note_template.format(player=player_name)
+        note_text = render_note_template(self.note_template, fmt_kwargs)
 
         return GeneratedAutoNote(
             player_id=player_id,
@@ -67,9 +82,6 @@ class CustomAutoNoteRule(AutoNoteRule):
             note_text=note_text,
             evidence=evidence,
         )
-
-
-from decimal import Decimal
 
 
 def _extract_big_blind(hand: Any) -> float:
@@ -346,20 +358,35 @@ def evaluate_condition_tree(
     hand: Any,
     player_name: str,
     context: PreflopContext,
+    depth: int = 0,
 ) -> bool:
-    """Evaluate a nested logical condition tree (AND, OR, NOT)."""
+    """Evaluate a nested logical condition tree.
+
+    ``AND`` and ``OR`` behave as expected. ``NOT`` negates the disjunction of its
+    operands -- ``NOT [a, b]`` is ``not (a or b)`` -- so with the single operand
+    the editor produces it is a plain negation, and with several it reads as
+    "none of these".
+
+    An empty tree matches every hand; a tree nested past ``MAX_CONDITION_DEPTH``
+    stops matching rather than exhausting the stack, since the file is
+    hand-editable.
+    """
     if not condition_tree:
         return True
+
+    if depth > MAX_CONDITION_DEPTH:
+        log.warning("Condition tree nested deeper than %d levels; refusing to descend", MAX_CONDITION_DEPTH)
+        return False
 
     op = str(condition_tree.get("operator", "")).upper()
     rules = condition_tree.get("rules", [])
 
     if op == "AND":
-        return all(evaluate_condition_tree(r, hand, player_name, context) for r in rules)
+        return all(evaluate_condition_tree(r, hand, player_name, context, depth + 1) for r in rules)
     if op == "OR":
-        return any(evaluate_condition_tree(r, hand, player_name, context) for r in rules)
+        return any(evaluate_condition_tree(r, hand, player_name, context, depth + 1) for r in rules)
     if op == "NOT":
-        return not any(evaluate_condition_tree(r, hand, player_name, context) for r in rules)
+        return not any(evaluate_condition_tree(r, hand, player_name, context, depth + 1) for r in rules)
 
     # Leaf condition
     return evaluate_leaf_condition(condition_tree, hand, player_name, context)
@@ -415,7 +442,7 @@ def build_evidence_dict(  # noqa: C901
     return evidence
 
 
-def compile_custom_rule(rule_dict: dict[str, Any], rule_set_id: str = "custom_user_rules") -> AutoNoteRule:
+def compile_custom_rule(rule_dict: dict[str, Any]) -> AutoNoteRule:
     """Compile declarative JSON rule dict into an AutoNoteRule instance."""
     rule_id = str(rule_dict.get("rule_id", "custom_rule"))
     version = int(rule_dict.get("version", 1))
@@ -440,16 +467,58 @@ def compile_custom_rule(rule_dict: dict[str, Any], rule_set_id: str = "custom_us
     )
 
 
+def _supports_hand_for(games: tuple[str, ...]):
+    """Build the game filter for a rule set from its declared ``games`` list.
+
+    An empty list keeps the previous behaviour -- every hand matches -- because
+    existing rule files carry no such key. Declaring games instead restricts the
+    set, so a Hold'em rule stops firing on Stud or Omaha hands.
+    """
+    if not games:
+        return lambda _h: True
+
+    def supports_hand(hand: Any) -> bool:
+        gametype = getattr(hand, "gametype", {}) or {}
+        base = gametype.get("base") if isinstance(gametype, dict) else getattr(gametype, "base", None)
+        base = str(base or "").lower()
+        if base in ("hold", "holdem"):
+            base = "holdem"
+        return base in games
+
+    return supports_hand
+
+
 def compile_custom_rule_set(rule_set_dict: dict[str, Any]) -> AutoNoteRuleSet:
-    """Compile declarative JSON rule set into an AutoNoteRuleSet instance."""
+    """Compile declarative JSON rule set into an AutoNoteRuleSet instance.
+
+    Rules whose ``rule_id`` repeats one already seen in the same set are dropped:
+    generated notes are keyed by rule id, so duplicates would make a note
+    impossible to attribute back to the rule that produced it.
+    """
     rule_set_id = str(rule_set_dict.get("rule_set_id", "custom_user_rules"))
     raw_rules = rule_set_dict.get("rules", [])
-    compiled_rules = tuple(compile_custom_rule(r, rule_set_id) for r in raw_rules if isinstance(r, dict))
+    games = tuple(str(g).lower() for g in rule_set_dict.get("games", []) or ())
+
+    compiled_rules = []
+    seen_rule_ids: set[str] = set()
+    for raw in raw_rules:
+        if not isinstance(raw, dict):
+            continue
+        rule_id = str(raw.get("rule_id", "custom_rule"))
+        if rule_id in seen_rule_ids:
+            log.warning(
+                "Rule set %r declares rule_id %r more than once; keeping the first and skipping the rest",
+                rule_set_id,
+                rule_id,
+            )
+            continue
+        seen_rule_ids.add(rule_id)
+        compiled_rules.append(compile_custom_rule(raw))
 
     return AutoNoteRuleSet(
         rule_set_id=rule_set_id,
-        rules=compiled_rules,
-        supports_hand=lambda _h: True,
+        rules=tuple(compiled_rules),
+        supports_hand=_supports_hand_for(games),
         enabled_by_default=False,
     )
 
@@ -472,22 +541,101 @@ def load_user_autonotes_data(filepath: Path | str | None = None) -> dict[str, An
 
 
 def save_user_autonotes_data(data: dict[str, Any], filepath: Path | str | None = None) -> None:
-    """Save user autonotes data structure to user_autonotes.json."""
+    """Save user autonotes data, replacing the file only once it is fully written.
+
+    Writing in place would leave the user's whole rule collection truncated if
+    the process died mid-write. Serialise to a sibling temporary file, flush it
+    to disk, then rename over the target -- the rename is atomic, so a reader
+    sees either the old file or the new one, never a partial one.
+    """
     path = get_user_autonotes_path(filepath)
     path.parent.mkdir(parents=True, exist_ok=True)
 
-    with open(path, "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=2, ensure_ascii=False)
+    handle = tempfile.NamedTemporaryFile(  # noqa: SIM115 - closed explicitly below, before the rename
+        mode="w",
+        encoding="utf-8",
+        dir=path.parent,
+        prefix=f".{path.name}.",
+        suffix=".tmp",
+        delete=False,
+    )
+    tmp_path = Path(handle.name)
+    try:
+        with handle:
+            json.dump(data, handle, indent=2, ensure_ascii=False)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(tmp_path, path)
+    except BaseException:
+        tmp_path.unlink(missing_ok=True)
+        raise
+
+    _RULE_SET_CACHE.pop(str(path), None)
+
+
+# Compiled rule sets keyed by path, kept with the (mtime_ns, size) the file had
+# when they were built. available_rule_sets() runs once per imported hand, so
+# recompiling from disk every time put a stat, a parse and a full compile in the
+# import hot path.
+_RULE_SET_CACHE: dict[str, tuple[tuple[int, int] | None, tuple[AutoNoteRuleSet, ...]]] = {}
+
+
+def _file_signature(path: Path) -> tuple[int, int] | None:
+    try:
+        stat = path.stat()
+    except OSError:
+        return None
+    return (stat.st_mtime_ns, stat.st_size)
+
+
+def compile_custom_rule_sets(data: dict[str, Any]) -> tuple[AutoNoteRuleSet, ...]:
+    """Compile every custom rule set in a loaded document, skipping duplicates.
+
+    Two sets sharing a ``rule_set_id`` -- with each other or with a built-in set
+    -- would make the enable/disable toggles ambiguous, since configuration keys
+    on that id. The first one wins and the rest are reported.
+    """
+    from fpdb_3_legacy.AutoNotes import RULE_SET_REGISTRY
+
+    builtin_ids = {rule_set.rule_set_id for rule_set in RULE_SET_REGISTRY}
+    rule_sets: list[AutoNoteRuleSet] = []
+    seen_ids: set[str] = set()
+
+    for set_dict in data.get("custom_rule_sets", []):
+        if not isinstance(set_dict, dict):
+            continue
+        rule_set_id = str(set_dict.get("rule_set_id", "custom_user_rules"))
+        if rule_set_id in builtin_ids:
+            log.warning("Custom rule set %r shadows a built-in rule set id; skipping it", rule_set_id)
+            continue
+        if rule_set_id in seen_ids:
+            log.warning("Custom rule set id %r appears more than once; keeping the first", rule_set_id)
+            continue
+        seen_ids.add(rule_set_id)
+        rule_sets.append(compile_custom_rule_set(set_dict))
+
+    return tuple(rule_sets)
 
 
 def load_custom_rule_sets(filepath: Path | str | None = None) -> tuple[AutoNoteRuleSet, ...]:
-    """Load and compile custom AutoNoteRuleSets from user_autonotes.json."""
-    data = load_user_autonotes_data(filepath)
-    raw_sets = data.get("custom_rule_sets", [])
-    rule_sets = []
+    """Load and compile custom AutoNoteRuleSets, reusing the last compile.
 
-    for set_dict in raw_sets:
-        if isinstance(set_dict, dict):
-            rule_sets.append(compile_custom_rule_set(set_dict))
+    The cache is keyed by path and invalidated when the file's mtime or size
+    changes, so edits made by the editor -- or by hand, outside fpdb -- are still
+    picked up on the next call.
+    """
+    path = get_user_autonotes_path(filepath)
+    signature = _file_signature(path)
 
-    return tuple(rule_sets)
+    cached = _RULE_SET_CACHE.get(str(path))
+    if cached is not None and cached[0] == signature:
+        return cached[1]
+
+    rule_sets = compile_custom_rule_sets(load_user_autonotes_data(path))
+    _RULE_SET_CACHE[str(path)] = (signature, rule_sets)
+    return rule_sets
+
+
+def invalidate_custom_rule_cache() -> None:
+    """Drop every compiled rule set, forcing the next load to read from disk."""
+    _RULE_SET_CACHE.clear()
