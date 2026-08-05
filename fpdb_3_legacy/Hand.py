@@ -21,6 +21,7 @@ from decimal import Decimal, InvalidOperation
 from typing import Any, TextIO
 
 from fpdb_3_legacy import Card, Configuration, DerivedStats
+from fpdb_3_legacy.autonotes_aof import is_aof_category
 from fpdb_3_legacy.Exceptions import FpdbHandDuplicate, FpdbHandPartial, FpdbParseError
 from fpdb_3_legacy.loggingFpdb import get_logger
 
@@ -1175,7 +1176,7 @@ class Hand:
 
             street = "BLAH"
 
-            if self.gametype["category"] in ("aof_omaha", "aof_holdem"):
+            if is_aof_category(self.gametype["category"]):
                 street = "FLOP"
             elif self.gametype["base"] == "hold":
                 street = "PREFLOP"
@@ -2105,7 +2106,7 @@ class HoldemOmahaHand(Hand):
                 self.shown.add(player)
             if mucked:
                 self.mucked.add(player)
-        elif self.gametype["category"] in ("aof_omaha", "aof_holdem"):
+        elif is_aof_category(self.gametype["category"]):
             self.addHoleCards(
                 "FLOP",
                 player,

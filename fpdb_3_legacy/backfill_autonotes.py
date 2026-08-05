@@ -30,6 +30,7 @@ from fpdb_3_legacy.AutoNotes import (
     rule_manifest,
     rule_set_enabled,
 )
+from fpdb_3_legacy.autonotes_aof import is_aof_category
 from fpdb_3_legacy.iPoker.dispatcher import get_parser_class_for_path as get_ipoker_parser_class_for_path
 from fpdb_3_legacy.loggingFpdb import get_logger
 from fpdb_3_legacy.parser_registry import get_parser_class
@@ -59,30 +60,30 @@ class DatabaseAutoNoteHand:
     """Small Hand-compatible adapter reconstructed from imported DB rows."""
 
     def __init__(self, hand_row, player_rows, action_rows) -> None:
-        self.dbid_hands = hand_row["id"]
-        self.handid = hand_row.get("siteHandNo")
-        self.siteId = hand_row.get("siteId")
-        self.tourNo = hand_row.get("tourneyId")
-        self.isSng = bool(hand_row.get("tourneyId"))
+        self.dbid_hands = _dict_get(hand_row, "id")
+        self.handid = _dict_get(hand_row, "siteHandNo")
+        self.siteId = _dict_get(hand_row, "siteId")
+        self.tourNo = _dict_get(hand_row, "tourneyId")
+        self.isSng = bool(_dict_get(hand_row, "tourneyId"))
         self.gametype = {
-            "base": hand_row.get("base"),
-            "category": hand_row.get("category"),
-            "limitType": hand_row.get("limitType"),
-            "type": hand_row.get("type"),
-            "siteId": hand_row.get("siteId"),
-            "bigBlind": _chips_to_units(hand_row.get("bigBlind")),
-            "smallBlind": _chips_to_units(hand_row.get("smallBlind")),
-            "bb": _chips_to_units(hand_row.get("bigBlind")),
-            "sb": _chips_to_units(hand_row.get("smallBlind")),
+            "base": _dict_get(hand_row, "base"),
+            "category": _dict_get(hand_row, "category"),
+            "limitType": _dict_get(hand_row, "limitType"),
+            "type": _dict_get(hand_row, "type"),
+            "siteId": _dict_get(hand_row, "siteId"),
+            "bigBlind": _chips_to_units(_dict_get(hand_row, "bigBlind")),
+            "smallBlind": _chips_to_units(_dict_get(hand_row, "smallBlind")),
+            "bb": _chips_to_units(_dict_get(hand_row, "bigBlind")),
+            "sb": _chips_to_units(_dict_get(hand_row, "smallBlind")),
         }
         self.bb = self.gametype["bigBlind"]
         self.hands = {
-            "finalPot": _chips_to_units(hand_row.get("finalPot")),
-            "street0Pot": _chips_to_units(hand_row.get("street0Pot")),
-            "street1Pot": _chips_to_units(hand_row.get("street1Pot")),
-            "street2Pot": _chips_to_units(hand_row.get("street2Pot")),
-            "street3Pot": _chips_to_units(hand_row.get("street3Pot")),
-            "street4Pot": _chips_to_units(hand_row.get("street4Pot")),
+            "finalPot": _chips_to_units(_dict_get(hand_row, "finalPot")),
+            "street0Pot": _chips_to_units(_dict_get(hand_row, "street0Pot")),
+            "street1Pot": _chips_to_units(_dict_get(hand_row, "street1Pot")),
+            "street2Pot": _chips_to_units(_dict_get(hand_row, "street2Pot")),
+            "street3Pot": _chips_to_units(_dict_get(hand_row, "street3Pot")),
+            "street4Pot": _chips_to_units(_dict_get(hand_row, "street4Pot")),
         }
         self.finalPot = self.hands["finalPot"]
         self.players = []
@@ -90,30 +91,32 @@ class DatabaseAutoNoteHand:
         self.handsplayers = {}
         self._holecards = {}
         for row in player_rows:
-            player = row["name"]
-            self.players.append((row.get("seatNo"), player, _chips_to_units(row.get("startCash"))))
-            self.playerIds[player] = row["playerId"]
+            player = _dict_get(row, "name", "")
+            seat_no = _dict_get(row, "seatNo")
+            start_cash = _chips_to_units(_dict_get(row, "startCash"))
+            self.players.append((seat_no, player, start_cash))
+            self.playerIds[player] = _dict_get(row, "playerId")
             self._holecards[player] = [
-                card for card in (_decode_card(row.get(f"card{index}")) for index in range(1, 21)) if card
+                card for card in (_decode_card(_dict_get(row, f"card{index}")) for index in range(1, 21)) if card
             ]
             self.handsplayers[player] = {
-                "position": _normalise_position(row.get("position")),
-                "startCash": _chips_to_units(row.get("startCash")),
-                "effStack": _chips_to_units(row.get("effStack")),
-                "totalProfit": _chips_to_units(row.get("totalProfit")),
-                "showdownWinnings": _chips_to_units(row.get("winnings")),
-                "wonAtSD": bool(row.get("wonAtSD")) if "wonAtSD" in row else None,
-                "sawShowdown": bool(row.get("sawShowdown")) if "sawShowdown" in row else None,
-                "handString": row.get("comment") or "",
-                "cnt_f_spr": row.get("cnt_f_spr"),
-                "val_f_spr": row.get("val_f_spr"),
-                "cnt_t_spr": row.get("cnt_t_spr"),
-                "val_t_spr": row.get("val_t_spr"),
-                "cnt_r_spr": row.get("cnt_r_spr"),
-                "val_r_spr": row.get("val_r_spr"),
+                "position": _normalise_position(_dict_get(row, "position")),
+                "startCash": start_cash,
+                "effStack": _chips_to_units(_dict_get(row, "effStack")),
+                "totalProfit": _chips_to_units(_dict_get(row, "totalProfit")),
+                "showdownWinnings": _chips_to_units(_dict_get(row, "winnings")),
+                "wonAtSD": bool(_dict_get(row, "wonAtSD")) if _dict_get(row, "wonAtSD") is not None else None,
+                "sawShowdown": bool(_dict_get(row, "sawShowdown")) if _dict_get(row, "sawShowdown") is not None else None,
+                "handString": _dict_get(row, "comment") or "",
+                "cnt_f_spr": _dict_get(row, "cnt_f_spr"),
+                "val_f_spr": _dict_get(row, "val_f_spr"),
+                "cnt_t_spr": _dict_get(row, "cnt_t_spr"),
+                "val_t_spr": _dict_get(row, "val_t_spr"),
+                "cnt_r_spr": _dict_get(row, "cnt_r_spr"),
+                "val_r_spr": _dict_get(row, "val_r_spr"),
             }
 
-        if hand_row.get("category") in {"aof_omaha", "aof_holdem"}:
+        if is_aof_category(hand_row.get("category")):
             self.actionStreets = ["BLINDSANTES", "FLOP", "TURN", "RIVER", "SHOWDOWN"]
             street_by_id = AOF_STREET_BY_ID
         else:
@@ -121,7 +124,8 @@ class DatabaseAutoNoteHand:
             street_by_id = STREET_BY_ID
         self.actions: dict[str, list[Any]] = {street: [] for street in self.actionStreets}
         for row in action_rows:
-            street = street_by_id.get(row.get("street"), self.actionStreets[1])
+            street_val = _dict_get(row, "street")
+            street = _normalise_street_id(street_val, street_by_id, self.actionStreets[1])
             action = _action_tuple(row)
             if action:
                 self.actions.setdefault(street, []).append(action)
@@ -194,8 +198,29 @@ def iter_files(paths):
             yield path
 
 
+def _dict_get(d: dict, key: str, default=None) -> Any:
+    if not isinstance(d, dict):
+        return default
+    if key in d:
+        return d[key]
+    lower_key = key.lower()
+    if lower_key in d:
+        return d[lower_key]
+    for k, v in d.items():
+        if k.lower() == lower_key:
+            return v
+    return default
+
+
 def _row_dict(cursor, row) -> dict:
-    return {description[0]: value for description, value in zip(cursor.description, row, strict=False)}
+    if not row:
+        return {}
+    res = {}
+    for description, value in zip(cursor.description, row, strict=False):
+        col_name = description[0]
+        res[col_name] = value
+        res[col_name.lower()] = value
+    return res
 
 
 def _chips_to_units(value):
@@ -241,26 +266,42 @@ def _normalise_position(position):
     return position
 
 
+def _normalise_street_id(street_val, street_by_id: dict[int, str], default_street: str) -> str:
+    if street_val is None:
+        return default_street
+    if isinstance(street_val, int) and street_val in street_by_id:
+        return street_by_id[street_val]
+    try:
+        int_val = int(street_val)
+        if int_val in street_by_id:
+            return street_by_id[int_val]
+    except (TypeError, ValueError):
+        pass
+    if isinstance(street_val, str) and street_val.upper() in street_by_id.values():
+        return street_val.upper()
+    return default_street
+
+
 def _amount_units(value):
     amount = _chips_to_units(value)
     return amount if amount is not None else 0
 
 
 def _action_tuple(row) -> tuple | None:
-    player = row.get("playerName")
-    action = row.get("actionName")
+    player = _dict_get(row, "playerName")
+    action = _dict_get(row, "actionName")
     if not player or not action:
         return None
-    amount = _amount_units(row.get("amount"))
+    amount = _amount_units(_dict_get(row, "amount"))
     if action in {"raises", "completes"}:
-        raise_to = _amount_units(row.get("raiseTo"))
-        amount_called = _amount_units(row.get("amountCalled"))
-        return (player, action, amount, raise_to, amount_called, bool(row.get("allIn")))
+        raise_to = _amount_units(_dict_get(row, "raiseTo"))
+        amount_called = _amount_units(_dict_get(row, "amountCalled"))
+        return (player, action, amount, raise_to, amount_called, bool(_dict_get(row, "allIn")))
     if action == "discards":
-        return (player, action, row.get("numDiscarded") or 0, row.get("cardsDiscarded"), bool(row.get("allIn")))
+        return (player, action, _dict_get(row, "numDiscarded") or 0, _dict_get(row, "cardsDiscarded"), bool(_dict_get(row, "allIn")))
     if action in {"folds", "checks", "stands pat"}:
-        return (player, action, bool(row.get("allIn")))
-    return (player, action, amount, bool(row.get("allIn")))
+        return (player, action, bool(_dict_get(row, "allIn")))
+    return (player, action, amount, bool(_dict_get(row, "allIn")))
 
 
 def _lookup_hand_ids(db, site_hand_no, site_id, stats=None):
@@ -341,12 +382,12 @@ def _database_hand_row(db, hand_id) -> dict | None:
     placeholder = db.sql.query["placeholder"]
     c = db.get_cursor()
     c.execute(
-        "SELECT H.id, H.siteHandNo, H.tourneyId, H.startTime, H.seats, H.heroSeat, "
-        "H.boardcard1, H.boardcard2, H.boardcard3, H.boardcard4, H.boardcard5, "
-        "H.street0Pot, H.street1Pot, H.street2Pot, H.street3Pot, H.street4Pot, H.finalPot, "
-        "G.siteId, G.type, G.base, G.category, G.limitType, G.smallBlind, G.bigBlind "
-        "FROM Hands H JOIN Gametypes G ON H.gametypeId=G.id "
-        f"WHERE H.id={placeholder}",
+        'SELECT H.id, H.siteHandNo AS "siteHandNo", H.tourneyId AS "tourneyId", H.startTime AS "startTime", H.seats, H.heroSeat AS "heroSeat", '
+        'H.boardcard1, H.boardcard2, H.boardcard3, H.boardcard4, H.boardcard5, '
+        'H.street0Pot AS "street0Pot", H.street1Pot AS "street1Pot", H.street2Pot AS "street2Pot", H.street3Pot AS "street3Pot", H.street4Pot AS "street4Pot", H.finalPot AS "finalPot", '
+        'G.siteId AS "siteId", G.type, G.base, G.category, G.limitType AS "limitType", G.smallBlind AS "smallBlind", G.bigBlind AS "bigBlind" '
+        'FROM Hands H JOIN Gametypes G ON H.gametypeId=G.id '
+        f'WHERE H.id={placeholder}',
         (hand_id,),
     )
     row = c.fetchone()
@@ -356,13 +397,13 @@ def _database_hand_row(db, hand_id) -> dict | None:
 def _database_player_rows(db, hand_id) -> list[dict]:
     placeholder = db.sql.query["placeholder"]
     c = db.get_cursor()
-    card_columns = ", ".join(f"HP.card{index}" for index in range(1, 21))
+    card_columns = ", ".join(f'HP.card{index} AS "card{index}"' for index in range(1, 21))
     c.execute(
-        "SELECT HP.playerId, P.name, HP.seatNo, HP.position, HP.startCash, HP.effStack, "
-        f"{card_columns}, HP.totalProfit, HP.winnings, HP.comment, HP.wonAtSD, HP.sawShowdown, "
-        "HP.cnt_f_spr, HP.val_f_spr, HP.cnt_t_spr, HP.val_t_spr, HP.cnt_r_spr, HP.val_r_spr "
-        "FROM HandsPlayers HP JOIN Players P ON HP.playerId=P.id "
-        f"WHERE HP.handId={placeholder} ORDER BY HP.seatNo",
+        'SELECT HP.playerId AS "playerId", P.name AS "name", HP.seatNo AS "seatNo", HP.position, HP.startCash AS "startCash", HP.effStack AS "effStack", '
+        f'{card_columns}, HP.totalProfit AS "totalProfit", HP.winnings, HP.comment, HP.wonAtSD AS "wonAtSD", HP.sawShowdown AS "sawShowdown", '
+        'HP.cnt_f_spr, HP.val_f_spr, HP.cnt_t_spr, HP.val_t_spr, HP.cnt_r_spr, HP.val_r_spr '
+        'FROM HandsPlayers HP JOIN Players P ON HP.playerId=P.id '
+        f'WHERE HP.handId={placeholder} ORDER BY HP.seatNo',
         (hand_id,),
     )
     return [_row_dict(c, row) for row in c.fetchall()]
@@ -372,12 +413,12 @@ def _database_action_rows(db, hand_id) -> list[dict]:
     placeholder = db.sql.query["placeholder"]
     c = db.get_cursor()
     c.execute(
-        "SELECT HA.street, HA.actionNo, HA.streetActionNo, HA.amount, HA.raiseTo, HA.amountCalled, "
-        "HA.numDiscarded, HA.cardsDiscarded, HA.allIn, P.name AS playerName, A.name AS actionName "
-        "FROM HandsActions HA "
-        "JOIN Players P ON HA.playerId=P.id "
-        "LEFT JOIN Actions A ON HA.actionId=A.id "
-        f"WHERE HA.handId={placeholder} ORDER BY HA.actionNo, HA.street, HA.streetActionNo",
+        'SELECT HA.street, HA.actionNo AS "actionNo", HA.streetActionNo AS "streetActionNo", HA.amount, HA.raiseTo AS "raiseTo", HA.amountCalled AS "amountCalled", '
+        'HA.numDiscarded AS "numDiscarded", HA.cardsDiscarded AS "cardsDiscarded", HA.allIn AS "allIn", P.name AS "playerName", A.name AS "actionName" '
+        'FROM HandsActions HA '
+        'JOIN Players P ON HA.playerId=P.id '
+        'LEFT JOIN Actions A ON HA.actionId=A.id '
+        f'WHERE HA.handId={placeholder} ORDER BY HA.actionNo, HA.street, HA.streetActionNo',
         (hand_id,),
     )
     return [_row_dict(c, row) for row in c.fetchall()]

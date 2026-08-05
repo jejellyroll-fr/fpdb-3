@@ -28,7 +28,6 @@ RULE_SET_AOF_OMAHA = "aof_omaha_allin"
 
 AOF_OMAHA_CATEGORY = "aof_omaha"
 AOF_HOLDEM_CATEGORY = "aof_holdem"
-AOF_CATEGORIES = frozenset({AOF_OMAHA_CATEGORY, AOF_HOLDEM_CATEGORY})
 AOF_CLASSIFIER_VERSION = 1
 KNOWN_BACKEND = "pypoker-eval"
 KNOWN_BACKEND_VERSION: str = "engine-1"
@@ -57,6 +56,13 @@ class AofRuleset:
     hole_cards: int = _OMAHA_HOLE_CARDS
     equal_stacks: bool = True
     game_name: str = "omaha"
+    decision_street: str = "auto"
+    board_cards_at_decision: int = _FLOP_CARDS
+    allowed_decisions: tuple[str, ...] = ("fold", "allin")
+    blind_treatment: str = "committed_before_decision"
+    multiway: bool = True
+    rake_model: str = "room_reported"
+    evaluator_game: str = "omaha"
 
 
 _RULESETS: dict[str, AofRuleset] = {
@@ -65,19 +71,37 @@ _RULESETS: dict[str, AofRuleset] = {
         hole_cards=_OMAHA_HOLE_CARDS,
         equal_stacks=True,
         game_name="omaha",
+        evaluator_game="omaha",
     ),
     AOF_HOLDEM_CATEGORY: AofRuleset(
         category=AOF_HOLDEM_CATEGORY,
         hole_cards=_HOLDEM_HOLE_CARDS,
         equal_stacks=True,
         game_name="holdem",
+        evaluator_game="holdem",
     ),
 }
 
 
-def ruleset_for(category: str) -> AofRuleset | None:
-    """Look up the registered ruleset for an AoF game category."""
-    return _RULESETS.get(category)
+def ruleset_for(category: Any) -> AofRuleset | None:
+    """Look up the registered ruleset for an AoF game category.
+
+    This registry is the single answer to "is this game played All-in or
+    Fold?". Modules used to carry their own ``{"aof_omaha", "aof_holdem"}``
+    literal, so registering a third variant meant finding and editing each of
+    them; going through here means a new entry in ``_RULESETS`` is enough.
+    """
+    return _RULESETS.get(str(category or "").strip().casefold())
+
+
+def is_aof_category(category: Any) -> bool:
+    """Whether a ``Gametypes.category`` is played under an AoF ruleset."""
+    return ruleset_for(category) is not None
+
+
+# Derived from the registry rather than written out, so the set and the
+# rulesets cannot disagree about which categories exist.
+AOF_CATEGORIES = frozenset(_RULESETS)
 
 
 @dataclass(frozen=True)
@@ -146,7 +170,7 @@ def is_aof_omaha(hand: Any) -> bool:
 def is_aof(hand: Any) -> bool:
     """True for an imported All-in or Fold category."""
     gametype = getattr(hand, "gametype", {}) or {}
-    return str(gametype.get("category", "")).lower() in AOF_CATEGORIES
+    return ruleset_for(str(gametype.get("category", "")).lower()) is not None
 
 
 def _decision_street(hand: Any) -> str:
@@ -331,22 +355,26 @@ def classify_all_in(hand: Any, player: str) -> dict[str, Any] | None:
                 }
         return None
     category = str((getattr(hand, "gametype", {}) or {}).get("category", "")).lower()
-    hole_count = _HOLDEM_HOLE_CARDS if category == AOF_HOLDEM_CATEGORY else _OMAHA_HOLE_CARDS
-    return _classify_all_in_uncached(hand, player, hole_count)
+    ruleset = ruleset_for(category)
+    if ruleset is None:
+        return None
+    return _classify_all_in_uncached(hand, player, ruleset.hole_cards, ruleset.board_cards_at_decision)
 
 
 def _classify_all_in_uncached(
     hand: Any,
     player: str,
     required_hole_cards: int = _OMAHA_HOLE_CARDS,
+    required_board_cards: int = _FLOP_CARDS,
 ) -> dict[str, Any] | None:
     if not _went_all_in(hand, player):
         return None
     hole = _cards(hand, player)
     flop = _flop(hand)
-    if len(hole) < required_hole_cards or len(flop) < _FLOP_CARDS:
+    if len(hole) < required_hole_cards or len(flop) < required_board_cards:
         return None
     hole = hole[:required_hole_cards]
+    flop = flop[:required_board_cards]
     made = _made_hand(hole, flop)
     # A draw is something the hand is still missing. Reported next to the hand
     # it already holds it is at best noise and at worst nonsense: counting the
@@ -466,13 +494,20 @@ def _build_decision(
 ) -> AofDecision:
     hole_cards = _cards(hand, player)
     flop = _flop(hand)
-    required_hole_cards = _OMAHA_HOLE_CARDS if category == AOF_OMAHA_CATEGORY else _HOLDEM_HOLE_CARDS
+    ruleset = ruleset_for(category)
+    if ruleset is None:
+        raise ValueError(f"No AoF ruleset registered for category {category!r}")
+    required_hole_cards = ruleset.hole_cards
     detail = (
-        _classify_all_in_uncached(hand, player, required_hole_cards)
-        if is_all_in and len(hole_cards) >= required_hole_cards and len(flop) >= _FLOP_CARDS
+        _classify_all_in_uncached(hand, player, required_hole_cards, ruleset.board_cards_at_decision)
+        if is_all_in and len(hole_cards) >= required_hole_cards and len(flop) >= ruleset.board_cards_at_decision
         else None
     )
-    observable = bool(is_all_in and len(hole_cards) >= required_hole_cards and len(flop) >= _FLOP_CARDS)
+    observable = bool(
+        is_all_in
+        and len(hole_cards) >= required_hole_cards
+        and len(flop) >= ruleset.board_cards_at_decision
+    )
     return AofDecision(
         hand_id=hand_id,
         player_id=player_id,
@@ -485,7 +520,7 @@ def _build_decision(
         blind_committed=blind_committed,
         cards_observable=observable,
         hole_cards=" ".join(hole_cards[:required_hole_cards]) if observable else None,
-        flop_cards=" ".join(flop[:_FLOP_CARDS]) if observable else None,
+        flop_cards=" ".join(flop[: ruleset.board_cards_at_decision]) if observable else None,
         made_hand=detail["made"] if detail else None,
         flush_draw=detail["flush_draw"] if detail else None,
         straight_outs=detail["straight_outs"] if detail else None,

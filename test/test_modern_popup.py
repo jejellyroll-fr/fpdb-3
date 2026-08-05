@@ -270,7 +270,7 @@ class TestModernPopupClasses(unittest.TestCase):
 
     def test_all_classes_registered(self) -> None:
         """Test that all modern popup classes are registered."""
-        expected_classes = ["ModernSubmenu", "ModernSubmenuLight", "ModernSubmenuClassic"]
+        expected_classes = ["ModernSubmenu", "ModernSubmenuLight", "ModernSubmenuClassic", "CategorizedPopup"]
         assert set(MODERN_POPUP_CLASSES.keys()) == set(expected_classes)
 
     def test_registered_classes_are_classes(self) -> None:

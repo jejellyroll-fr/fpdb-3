@@ -504,7 +504,7 @@ def test_the_hud_has_a_profile_for_the_game(tmp_path, monkeypatch) -> None:
     params = config.get_supported_games_parameters("aof_omaha", "ring")
 
     assert params is not None
-    assert params["game_stat_set"].name == "aof_default"
+    assert params["game_stat_set"].name == "aof_advanced"
     # The parsed set keys its cells by row and column across the whole
     # profile, so a block layout -- where each block numbers its own cells
     # from one -- is lossy there by construction, exactly as it is for the
@@ -558,12 +558,10 @@ def test_the_real_hand_reaches_player_auto_notes() -> None:
     assert note.note_text == "hero: all-in with a pair, 4 straight outs"
 
 
-def test_the_notes_can_still_be_opened_from_the_box() -> None:
-    """An icon that lights up but does not open is a worse HUD than none.
+def test_the_notes_can_still_be_opened_from_the_box_and_seen_in_the_popup() -> None:
+    """The profile offers direct note access and the rich popup exposes it.
 
-    The note text moved into the popups, where there is room to read it; the
-    identity cell is what opens the dialog, so the whole name is the target
-    rather than a single character of it.
+    Clicking either the player name or the dedicated note icon opens the note dialog.
     """
     import defusedxml.minidom as minidom
 
@@ -575,7 +573,7 @@ def test_the_notes_can_still_be_opened_from_the_box() -> None:
         if stat.getAttribute("click") == "open_comment_dialog"
     ]
 
-    assert clickable == ["playershort"]
+    assert clickable == ["playershort", "player_note"]
 
     (popup,) = [pu for pu in document.getElementsByTagName("pu") if pu.getAttribute("pu_name") == "aof_profile"]
     assert "player_note" in [s.getAttribute("pu_stat_name") for s in popup.getElementsByTagName("pu_stat")]
@@ -964,6 +962,7 @@ def test_the_profile_offers_every_cell_to_the_renderer() -> None:
 
     assert {stat.stat_name for stat in profile.stats.values()} == {
         "playershort",
+        "player_note",
         "n",
         "aof_observed",
         "aof_showdowns",
@@ -971,9 +970,6 @@ def test_the_profile_offers_every_cell_to_the_renderer() -> None:
         "aof_fold",
         "aof_weak",
         "aof_decision_ev",
-        # The marker line was replaced by real cells: the renderer does not
-        # honour colspan, so a single wide cell came out split across the row
-        # and the text was fragmented into unreadable pieces.
         "aof_no_made",
         "aof_two_pair",
         "aof_trips",

@@ -384,6 +384,44 @@ def _joins_table(event: tuple, table: str) -> bool:
     return any(joined == table for joined, _room in _joined_rooms(event))
 
 
+def _names_another_table(event: tuple, table: str) -> bool:
+    """True when this event says which table it is about, and it is not ours.
+
+    An event carrying no table is ambiguous and handled elsewhere. One that
+    carries a table is not ambiguous at all: it belongs to that table, and
+    reading it here would describe this table with another's tournament, buy-in
+    and seat count.
+    """
+    if not table:
+        return False
+    named = {
+        str(value) for _key, value in _protocol_values([event], "tableId", "table_id", "gameTableId") if str(value)
+    }
+    return bool(named) and table not in named
+
+
+def _names_many_tournaments(event: tuple) -> bool:
+    """True when this event lists several tournaments, so it names none.
+
+    The main lobby publishes the whole site: one ``lobby.lobby_details`` was
+    seen carrying 103 tournaments and 31 different entry fees. Read for "which
+    tournament is this table in", it answers with whichever happens to come
+    first -- which is how a cash table became "Tournament #70623" with a buy-in
+    of 32.0 the moment the player opened the lobby.
+    """
+    seen: set[str] = set()
+    for _key, value in _protocol_values([event], "tournamentId", "tourneyId", "tournament_id", "tourney_id"):
+        seen.add(str(value))
+        if len(seen) > 1:
+            return True
+    return False
+
+
+def _may_speak_for_table(event: tuple, table: str) -> bool:
+    """Whether a table-less marker may be read as describing ``table``."""
+    return not _names_another_table(event, table) and not _names_many_tournaments(event)
+
+
 def _table_from_title(title: Any) -> str | None:
     """The table number ending a room's table name, if it ends with one."""
     match = re.search(r"(\d+)\s*$", str(title or ""))
@@ -417,7 +455,12 @@ def _tournament_info(evs: list[tuple], table_id: str = "", *, sole_table: bool =
     # looking like a ring game.
     mine = [*(event for event in evs if _joins_table(event, table_id)), *own]
     if sole_table:
-        mine = [*evs]
+        # Holding one table, a marker that names no table has nothing else to be
+        # about -- unless it is not about a table at all. The lobby catalogue is
+        # the whole site's tournament list; reading one turned this player's
+        # cash table into "Tournament #70623, 32.0" on a 2-max table, and from
+        # that hand on nothing imported at all.
+        mine = [event for event in evs if _may_speak_for_table(event, table_id)]
     server_port = _protocol_value(own, "_coinpokerServerPort")
     tournament_transport = server_port in (3000, 3001, "3000", "3001")
     tour_no = joined_no or _joined_only_value(mine, "tournamentId", "tourneyId", "tournament_id", "tourney_id")

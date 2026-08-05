@@ -9,6 +9,9 @@ from io import StringIO
 from typing import Any
 
 from fpdb_3_legacy.http_capture_importability import ImportabilityDecision, evaluate_capture_importability
+from fpdb_3_legacy.loggingFpdb import get_logger
+
+log = get_logger("http_capture")
 
 
 class CaptureNotImportableError(ValueError):
@@ -528,6 +531,25 @@ def build_fpdb_hand(
     return hand
 
 
+def _money_to_cents(value: Any, default: int = 0) -> int:
+    """Money as fpdb stores it: whole cents, as an int.
+
+    Every text converter writes ``int(100 * Decimal(amount))`` into these
+    columns, and the columns are integers. The capture reports amounts the way
+    the room sends them, so a buy-in of "32.0" reached Postgres verbatim and
+    every hand of the session failed with "invalid input syntax for type
+    bigint" -- the HUD then had no hands to show. An amount that cannot be read
+    as money is worth no more than zero here, and is not worth losing the hand.
+    """
+    if value in (None, ""):
+        return default
+    try:
+        return int(100 * Decimal(str(value).strip().replace(",", ".")))
+    except (ArithmeticError, TypeError, ValueError):
+        log.warning("Unreadable tournament amount %r; recording it as %d", value, default)
+        return default
+
+
 def _apply_tournament_fields(hand: Any, hand_data: dict[str, Any]) -> None:
     """Copy normalized tournament metadata onto the legacy Hand model."""
     tournament = hand_data.get("tournament")
@@ -535,14 +557,14 @@ def _apply_tournament_fields(hand: Any, hand_data: dict[str, Any]) -> None:
         return
     hand.tourNo = tournament.get("tour_no")
     hand.tourneyName = tournament.get("name")
-    hand.buyin = tournament.get("buyin")
-    hand.fee = tournament.get("fee")
+    hand.buyin = _money_to_cents(tournament.get("buyin"))
+    hand.fee = _money_to_cents(tournament.get("fee"))
     hand.level = tournament.get("level")
     hand.buyinCurrency = tournament.get("buyin_currency") or "USD"
     bounty = tournament.get("bounty")
     if bounty not in (None, "", "0", 0):
         hand.isKO = True
-        hand.koBounty = bounty
+        hand.koBounty = _money_to_cents(bounty)
 
 
 def _apply_special_hand_fields(hand: Any, hand_data: dict[str, Any]) -> None:

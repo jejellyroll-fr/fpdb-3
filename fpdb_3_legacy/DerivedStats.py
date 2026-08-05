@@ -25,6 +25,7 @@ from decimal import ROUND_DOWN, Decimal
 from typing import Any
 
 from fpdb_3_legacy import Card
+from fpdb_3_legacy.autonotes_aof import is_aof_category
 from fpdb_3_legacy.equity import EquityUnavailableError, calculate_equity, expected_pot_share, load_poker_eval
 from fpdb_3_legacy.loggingFpdb import get_logger
 
@@ -411,7 +412,7 @@ def _is_all_in_or_fold(hand: Any) -> bool:
     for "preflop" are filled from that decision -- but the conventions built
     around a preflop round do not all carry over to it.
     """
-    return str((getattr(hand, "gametype", {}) or {}).get("category", "")).lower() in {"aof_omaha", "aof_holdem"}
+    return is_aof_category((getattr(hand, "gametype", {}) or {}).get("category"))
 
 
 class DerivedStats:

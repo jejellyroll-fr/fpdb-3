@@ -34,9 +34,20 @@ the Hud modules.
 
 from __future__ import annotations
 
+from html import escape
 from typing import Any
 
-from PySide6.QtWidgets import QDialog, QDialogButtonBox, QLabel, QMessageBox, QTextEdit, QVBoxLayout
+from PySide6.QtWidgets import (
+    QDialog,
+    QDialogButtonBox,
+    QHeaderView,
+    QLabel,
+    QMessageBox,
+    QTableWidget,
+    QTableWidgetItem,
+    QTextEdit,
+    QVBoxLayout,
+)
 
 #    FreePokerTools modules
 from fpdb_3_legacy import Aux_Hud, Database, Stats
@@ -47,6 +58,23 @@ from fpdb_3_legacy.loggingFpdb import get_logger
 
 # logging has been set up in fpdb.py or HUD_main.py, use their settings:
 log = get_logger("hud_main")
+
+
+def _compact_stat_html(prefix: str, value: str, suffix: str, color: str) -> str:
+    """Return safe, compact rich text for one permanent HUD statistic."""
+
+    def fragment(text: str) -> str:
+        return escape(str(text)).replace(" ", "&nbsp;")
+
+    safe_color = escape(str(color or "#F8FAFC"), quote=True)
+    return (
+        '<span style="white-space:nowrap;">'
+        '<span style="color:#94A3B8;font-size:90%;font-weight:600;">'
+        f"{fragment(prefix)}</span>"
+        f'<span style="color:{safe_color};font-weight:700;">{fragment(value)}</span>'
+        '<span style="color:#94A3B8;font-size:90%;">'
+        f"{fragment(suffix)}</span></span>"
+    )
 
 
 class ClassicHud(Aux_Hud.SimpleHUD):
@@ -211,6 +239,7 @@ class ClassicStat(Aux_Hud.SimpleStat):
         self.tip = ""  # not implemented yet
         self.hudprefix = ""
         self.hudsuffix = ""
+        self.rich_text = False
 
         # Try to get configuration for this stat from the hud config
         stat_config = None
@@ -219,6 +248,12 @@ class ClassicStat(Aux_Hud.SimpleStat):
             if hasattr(aw.hud, "supported_games_parameters") and aw.hud.supported_games_parameters:
                 stat_set = aw.hud.supported_games_parameters.get("game_stat_set")
                 if stat_set and hasattr(stat_set, "stats"):
+                    self.rich_text = str(getattr(stat_set, "rich_text", "")).strip().lower() in (
+                        "true",
+                        "yes",
+                        "1",
+                        "on",
+                    )
                     # Find the stat by name across all positions
                     for stat_obj in stat_set.stats.values():
                         if hasattr(stat_obj, "stat_name") and stat_obj.stat_name == stat:
@@ -275,24 +310,59 @@ class ClassicStat(Aux_Hud.SimpleStat):
 
         player_name = self.get_player_name(player_id)
         current_comment = self.get_current_comment(player_id)
-        generated_notes = self.get_generated_notes_text(player_id)
+        generated_notes = self.get_generated_notes_list(player_id)
 
         dialog = QDialog()
         dialog.setWindowTitle(f"Player notes: {player_name}")
+        dialog.setMinimumSize(880, 520)
         layout = QVBoxLayout(dialog)
 
         layout.addWidget(QLabel(f"Manual note for {player_name}:"))
         manual_note = QTextEdit()
         manual_note.setPlainText(current_comment)
-        manual_note.setMinimumSize(460, 160)
+        manual_note.setMaximumHeight(100)
         layout.addWidget(manual_note)
 
-        layout.addWidget(QLabel("Generated notes:"))
-        auto_notes = QTextEdit()
-        auto_notes.setReadOnly(True)
-        auto_notes.setPlainText(generated_notes or "No generated notes.")
-        auto_notes.setMinimumSize(460, 180)
-        layout.addWidget(auto_notes)
+        layout.addWidget(QLabel(f"Generated notes ({len(generated_notes)}):"))
+        if generated_notes:
+            from fpdb_3_legacy.GuiAutoNotesWorkbench import GuiAutoNotesWorkbench
+
+            bench = GuiAutoNotesWorkbench(getattr(self.aw.hud, "config", None))
+            table = QTableWidget(0, 5)
+            table.setHorizontalHeaderLabels(["Created", "Cards", "Rule", "Note", "Evidence"])
+            table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Interactive)
+            table.horizontalHeader().setSectionResizeMode(3, QHeaderView.ResizeMode.Stretch)
+            table.setAlternatingRowColors(True)
+
+            for note in generated_notes:
+                row = table.rowCount()
+                table.insertRow(row)
+                table.setItem(row, 0, QTableWidgetItem(str(note.get("createdTs") or "")))
+
+                cards_w = bench._cards_widget(bench._note_cards(note))
+                if cards_w is not None:
+                    table.setCellWidget(row, 1, cards_w)
+
+                table.setItem(row, 2, QTableWidgetItem(str(note.get("ruleId") or "")))
+                table.setItem(row, 3, QTableWidgetItem(str(note.get("noteText") or "")))
+
+                ev_w = bench._evidence_widget(str(note.get("evidenceText") or ""))
+                if ev_w is not None:
+                    table.setCellWidget(row, 4, ev_w)
+
+                table.setRowHeight(row, 42)
+
+            table.setColumnWidth(0, 140)
+            table.setColumnWidth(1, 120)
+            table.setColumnWidth(2, 160)
+            table.setColumnWidth(4, 350)
+            layout.addWidget(table, 1)
+        else:
+            auto_notes = QTextEdit()
+            auto_notes.setReadOnly(True)
+            auto_notes.setPlainText("No generated notes.")
+            auto_notes.setMaximumHeight(80)
+            layout.addWidget(auto_notes)
 
         buttons = QDialogButtonBox(QDialogButtonBox.Save | QDialogButtonBox.Cancel)
         buttons.accepted.connect(dialog.accept)
@@ -359,6 +429,17 @@ class ClassicStat(Aux_Hud.SimpleStat):
         except Exception:  # intentional broad catch: HUD comment DB lookup must not break UI.
             log.exception("Error fetching comment:")
             return ""
+        finally:
+            db.close_connection()
+
+    def get_generated_notes_list(self, player_id: int) -> list[dict[str, Any]]:
+        """Return generated player notes list for UI display."""
+        db = Database.Database(self.aw.hud.config)
+        try:
+            return db.getPlayerAutoNotes(player_id, limit=50)
+        except Exception:
+            log.exception("Error fetching generated notes list:")
+            return []
         finally:
             db.close_connection()
 
@@ -462,7 +543,8 @@ class ClassicStat(Aux_Hud.SimpleStat):
             except (ValueError, IndexError):
                 log.exception("Error in color selection:")
 
-        statstring = f"{self.hudprefix}{self.number[1]!s}{self.hudsuffix}"
+        display_value = str(self.number[1])
+        statstring = f"{self.hudprefix}{display_value}{self.hudsuffix}"
 
         # Special handling for playerprofile virtual stat
         if self.stat == "playerprofile":
@@ -471,7 +553,8 @@ class ClassicStat(Aux_Hud.SimpleStat):
 
                 profile, icon, color = classify_player(stat_dict, player_id)
                 fg = color
-                statstring = f"{self.hudprefix}{icon}{self.hudsuffix}"
+                display_value = icon
+                statstring = f"{self.hudprefix}{display_value}{self.hudsuffix}"
             except Exception:  # intentional broad catch
                 log.exception("Error in playerprofile classic stat update:")
 
@@ -495,7 +578,8 @@ class ClassicStat(Aux_Hud.SimpleStat):
                     profile, icon, color = classify_player(stat_dict, player_id, min_hands)
                     if profile != "unknown":
                         fg = color
-                        statstring = f"{self.hudprefix}{self.number[1]!s} {icon}{self.hudsuffix}"
+                        display_value = f"{self.number[1]!s} {icon}"
+                        statstring = f"{self.hudprefix}{display_value}{self.hudsuffix}"
                 except Exception:  # intentional broad catch
                     log.exception("Error in playershort/playername classic stat update:")
 
@@ -508,7 +592,13 @@ class ClassicStat(Aux_Hud.SimpleStat):
                 # Gray color when no notes
                 statstring = f'<span style="color: #808080; font-size: 16px;">{self.number[1]}</span>'
 
-        self.set_color(fg=fg, bg=None)
+        if self.rich_text and self.stat != "player_note":
+            statstring = _compact_stat_html(self.hudprefix, display_value, self.hudsuffix, fg)
+
+        # Keep the configured cell background when the value colour changes on
+        # each refresh; rebuilding the stylesheet with bg=None used to erase
+        # the row styling after the first hand.
+        self.set_color(fg=fg, bg=getattr(self, "_bg", "") or None)
         self.lab.setText(statstring)
 
         screen_name = stat_dict.get(player_id, {}).get("screen_name") or f"Player {player_id}"

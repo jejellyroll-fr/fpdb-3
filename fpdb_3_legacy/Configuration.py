@@ -52,6 +52,8 @@ if platform.system() == "Windows":
 else:
     winpaths_appdata = ""
 
+from fpdb_3_legacy.autonotes_aof import AOF_CATEGORIES
+from fpdb_3_legacy.hud_profiles import HudContext, HudProfileResolver, HudProfileRule
 from fpdb_3_legacy.loggingFpdb import get_logger
 
 # config version is used to flag a warning at runtime if the users config is
@@ -740,6 +742,13 @@ class Stat_sets:
     def __init__(self, node) -> None:
         self.name = node.getAttribute("name")
         self.show_hero_hud = node.getAttribute("show_hero_hud")
+        # Opt-in compact rich-text rendering for the permanent HUD cells.
+        # This belongs to the stat-set (rather than a poker variant) so any
+        # current or future game profile can reuse the presentation mode.
+        self.rich_text = node.getAttribute("rich_text")
+        # Optional profile-specific font size. An empty value keeps the global
+        # HUD font setting, while a profile can opt into a larger compact grid.
+        self.font_size = node.getAttribute("font_size")
         # How position-bound panels (SB/BB/BU) display in a multi-block HUD:
         #   "current" -> show only the panel matching the estimated live position
         #                (the positional HUD's expected behaviour and default);
@@ -922,22 +931,29 @@ class Popup:
         self.pu_stats = []
         self.pu_stats_submenu = []
         self.pu_stats_category = []
+        self.pu_stats_label = []
+        self.pu_stats_color = []
         # Optional free-form params for custom popup classes (e.g. the
         # RangeChartPopup chart source); kept generic so new popup types can
         # carry their own attributes without changing the schema.
         self.pu_class_params = {}
-        if node.getAttribute("pu_source"):
-            self.pu_class_params["source"] = node.getAttribute("pu_source")
-        if node.getAttribute("pu_group"):
-            self.pu_class_params["group"] = node.getAttribute("pu_group")
-        if node.getAttribute("pu_theme"):
-            self.pu_class_params["theme"] = node.getAttribute("pu_theme")
-        if node.getAttribute("pu_icon_provider"):
-            self.pu_class_params["icon_provider"] = node.getAttribute("pu_icon_provider")
+        for xml_name, param_name in {
+            "pu_source": "source",
+            "pu_group": "group",
+            "pu_theme": "theme",
+            "pu_icon_provider": "icon_provider",
+            "pu_title": "title",
+            "pu_width": "width",
+            "pu_max_height": "max_height",
+        }.items():
+            if node.getAttribute(xml_name):
+                self.pu_class_params[param_name] = node.getAttribute(xml_name)
 
         for stat_node in node.getElementsByTagName("pu_stat"):
             self.pu_stats.append(stat_node.getAttribute("pu_stat_name"))
             self.pu_stats_category.append(stat_node.getAttribute("pu_stat_category"))
+            self.pu_stats_label.append(stat_node.getAttribute("pu_stat_label"))
+            self.pu_stats_color.append(stat_node.getAttribute("pu_stat_color"))
             # if stat_node.getAttribute("pu_stat_submenu"):
             self.pu_stats_submenu.append(
                 (
@@ -1446,6 +1462,22 @@ ENTAIN_FR_WINDOWS_DATA_DIRS: dict[str, tuple[str, ...]] = {
 }
 
 
+def parse_hud_profile_rules(doc: Any) -> list[HudProfileRule]:
+    """Read the <hud_profile_rules> section of a configuration document.
+
+    Shared by the initial load and by ``Config.reload()``: a rule the user has
+    just saved has to reach the running HUD, and reload was the one path that
+    did not re-read this section.
+    """
+    rules = []
+    for order, rule_node in enumerate(doc.getElementsByTagName("hud_profile_rule")):
+        values = {name: rule_node.getAttribute(name) for name in rule_node.attributes.keys()}
+        rule = HudProfileRule.from_mapping(values, order)
+        if rule.profile:
+            rules.append(rule)
+    return rules
+
+
 class Config:
     def __init__(
         self,
@@ -1506,6 +1538,7 @@ class Config:
         self.stat_sets: dict[str, Any] = {}
         self.hhcs: dict[str, Any] = {}
         self.popup_windows: dict[str, Any] = {}
+        self.hud_profile_rules: list[HudProfileRule] = []
         self.db_selected = None  # database the user would like to use
         self.general = General()
         self.emails: dict[str, Any] = {}
@@ -1635,6 +1668,8 @@ class Config:
         for ss_node in doc.getElementsByTagName("ss"):
             ss = Stat_sets(node=ss_node)
             self.stat_sets[ss.name] = ss
+
+        self.hud_profile_rules = parse_hud_profile_rules(doc)
 
         #     s_dbs = doc.getElementsByTagName("mucked_windows")
         for hhc_node in doc.getElementsByTagName("hhc"):
@@ -1768,6 +1803,7 @@ class Config:
         from fpdb_3_legacy.hud_package import (
             install_missing_hud_package,
             merge_missing_profile_stats,
+            upgrade_legacy_popup_presentation,
         )
 
         if source_doc is None:
@@ -1790,7 +1826,7 @@ class Config:
         source_games = [
             node
             for node in source_doc.getElementsByTagName("game")
-            if node.getAttribute("game_name") in {"aof_omaha", "aof_holdem"}
+            if node.getAttribute("game_name") in AOF_CATEGORIES
         ]
         if not source_profiles or not source_games:
             return False
@@ -1804,6 +1840,14 @@ class Config:
         for source_game in source_games:
             package_root.appendChild(package_doc.importNode(source_game, True))
         changed = install_missing_hud_package(doc, package_root)
+        changed = (
+            upgrade_legacy_popup_presentation(
+                doc,
+                package_root,
+                popup_name="aof_profile",
+            )
+            or changed
+        )
         splash_stats = {"aof_splash_won", "aof_splash_freq"}
         changed = (
             merge_missing_profile_stats(
@@ -1847,10 +1891,7 @@ class Config:
             None,
         )
         if popup is not None and source_popup is not None:
-            existing = {
-                node.getAttribute("pu_stat_name")
-                for node in popup.getElementsByTagName("pu_stat")
-            }
+            existing = {node.getAttribute("pu_stat_name") for node in popup.getElementsByTagName("pu_stat")}
             for name in (
                 "aof_known_equity",
                 "aof_known_ev",
@@ -1899,6 +1940,16 @@ class Config:
                 return (str(history / "Tables"), str(history / "Tournaments"), account.name)
         return None
 
+    @staticmethod
+    def _preceding_comment(node):
+        """The comment written immediately above ``node``, if there is one."""
+        sibling = node.previousSibling
+        while sibling is not None and sibling.nodeType == sibling.TEXT_NODE and not sibling.data.strip():
+            sibling = sibling.previousSibling
+        if sibling is not None and sibling.nodeType == sibling.COMMENT_NODE:
+            return sibling
+        return None
+
     def add_missing_elements(self, doc, example_file):
         """Look through example config file and add any elements that are not in the config
         May need to add some 'enabled' attributes to turn things off - can't just delete a
@@ -1926,6 +1977,14 @@ class Config:
                             new = doc.importNode(example_node, True)  # True means do deep copy
                             t_node = self.doc.createTextNode("    ")
                             cnode.appendChild(t_node)
+                            # A section the user has never seen arrives empty and
+                            # unexplained unless the comment documenting it comes
+                            # with it. Sections whose whole content is a shipped
+                            # default need no comment and have none.
+                            comment = self._preceding_comment(example_node)
+                            if comment is not None:
+                                cnode.appendChild(doc.importNode(comment, True))
+                                cnode.appendChild(self.doc.createTextNode("\n    "))
                             cnode.appendChild(new)
                             t_node = self.doc.createTextNode("\r\n\r\n")
                             cnode.appendChild(t_node)
@@ -2108,6 +2167,9 @@ class Config:
                 ss = Stat_sets(node=ss_node)
                 stat_sets[ss.name] = ss
 
+            # Profile selection rules
+            hud_profile_rules = parse_hud_profile_rules(doc)
+
             # HHCs
             for hhc_node in doc.getElementsByTagName("hhc"):
                 hhc = HHC(node=hhc_node)
@@ -2145,6 +2207,7 @@ class Config:
         self.aux_windows = aux_windows
         self.layout_sets = layout_sets
         self.stat_sets = stat_sets
+        self.hud_profile_rules = hud_profile_rules
         self.hhcs = hhcs
         self.popup_windows = popup_windows
         if imp is not None:
@@ -3715,7 +3778,7 @@ class Config:
             sg.append(self.supported_games[game].game_name)
         return sg
 
-    def get_supported_games_parameters(self, name, game_type):
+    def get_supported_games_parameters(self, name, game_type, context: HudContext | None = None):
         """Gets a dict of parameters from the named gametype."""
         param = {}
         if name in self.supported_games:
@@ -3741,9 +3804,49 @@ class Config:
             else:
                 return None
 
+            if context is not None:
+                fallback = getattr(param["game_stat_set"], "name", None)
+                profile = HudProfileResolver(self.hud_profile_rules).resolve(context, fallback)
+                if profile in self.stat_sets:
+                    param["game_stat_set"] = self.stat_sets[profile]
+
             return param
 
         return None
+
+    def get_hud_profile_rules(self) -> list[HudProfileRule]:
+        """Return a copy of the persistent PT-style profile selection rules."""
+        return list(self.hud_profile_rules)
+
+    def set_hud_profile_rules(self, rules: list[HudProfileRule]) -> None:
+        """Replace profile rules in memory and in the configuration DOM."""
+        self.hud_profile_rules = [
+            HudProfileRule.from_mapping(rule.as_xml_attributes(), order)
+            for order, rule in enumerate(rules)
+            if rule.profile
+        ]
+        if self.doc is None:
+            return
+
+        sections = self.doc.getElementsByTagName("hud_profile_rules")
+        if sections:
+            section = sections[0]
+            while section.firstChild:
+                section.removeChild(section.firstChild)
+        else:
+            section = self.doc.createElement("hud_profile_rules")
+            self.doc.documentElement.appendChild(self.doc.createTextNode("\n    "))
+            self.doc.documentElement.appendChild(section)
+
+        for rule in self.hud_profile_rules:
+            section.appendChild(self.doc.createTextNode("\n        "))
+            node = self.doc.createElement("hud_profile_rule")
+            for name, value in rule.as_xml_attributes().items():
+                if value or name != "id":
+                    node.setAttribute(name, value)
+            section.appendChild(node)
+        if self.hud_profile_rules:
+            section.appendChild(self.doc.createTextNode("\n    "))
 
     def execution_path(self, filename):
         """Join the fpdb path to filename."""

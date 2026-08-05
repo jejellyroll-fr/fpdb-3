@@ -36,7 +36,8 @@ from PySide6.QtWidgets import (
 )
 
 from fpdb_3_legacy import Configuration
-from fpdb_3_legacy.i18n import gettext as _
+from fpdb_3_legacy.hud_profiles import HudContext, HudProfileResolver, HudProfileRule
+from fpdb_3_legacy.i18n import gettext as _, translate_hud_category, translate_hud_label
 from fpdb_3_legacy.loggingFpdb import get_logger
 from fpdb_3_legacy.modern_hud_preferences.design_canvas import HudDesignCanvas
 from fpdb_3_legacy.modern_hud_preferences.dialogs import (
@@ -48,11 +49,13 @@ from fpdb_3_legacy.modern_hud_preferences.dialogs import (
 from fpdb_3_legacy.modern_hud_preferences.preview_widgets import (
     HudPreviewWidget,
     PopupPreviewWidget,
+    PopupZoomDialog,
 )
 from fpdb_3_legacy.PopupIcons import AVAILABLE_PROVIDERS
 from fpdb_3_legacy.PopupThemes import AVAILABLE_THEMES
 
 log = get_logger("modern_hud_preferences.main_dialog")
+
 
 class ModernHudPreferences(QDialog):
     def __init__(self, config, parent=None) -> None:
@@ -591,6 +594,7 @@ class ModernHudPreferences(QDialog):
                 "ModernSubmenu",
                 "ModernSubmenuLight",
                 "ModernSubmenuClassic",
+                "CategorizedPopup",
                 "RangeChartPopup",
                 "BlockPopup",
             ]
@@ -676,13 +680,24 @@ class ModernHudPreferences(QDialog):
         right_popup_layout.setSpacing(8)
 
         # Preview section
+        preview_header_layout = QHBoxLayout()
         preview_label = QLabel(_("Popup Preview"))
         preview_label.setProperty("class", "h3")
-        right_popup_layout.addWidget(preview_label)
+        preview_header_layout.addWidget(preview_label)
+
+        preview_header_layout.addStretch()
+        self.zoom_popup_btn = QPushButton(_("🔍 Real Size"))
+        self.zoom_popup_btn.setToolTip(_("Open preview at 100% real size in a new window"))
+        self.zoom_popup_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.zoom_popup_btn.clicked.connect(self.open_popup_zoom_window)
+        preview_header_layout.addWidget(self.zoom_popup_btn)
+
+        right_popup_layout.addLayout(preview_header_layout)
 
         self.popup_preview = PopupPreviewWidget()
         self.popup_preview.setMinimumHeight(220)
         self.popup_preview.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        self.popup_preview.double_clicked_callback = self.open_popup_zoom_window
         right_popup_layout.addWidget(self.popup_preview, 1)
 
         right_popup_scroll = QScrollArea()
@@ -700,6 +715,10 @@ class ModernHudPreferences(QDialog):
 
         # Add popup tab
         self.tabs.addTab(popup_tab, _("💬 Popup Windows"))
+
+        # PT-style persistent rules selecting a HUD profile from the table
+        # context (room/game/format/seats/etc.).
+        self._create_profile_select_tab()
 
         # Tab 3: General Settings
         general_tab = QWidget()
@@ -1020,6 +1039,9 @@ class ModernHudPreferences(QDialog):
                     "group": _params.get("group", ""),
                     "theme": _params.get("theme", ""),
                     "icon_provider": _params.get("icon_provider", ""),
+                    "title": _params.get("title", ""),
+                    "width": _params.get("width", ""),
+                    "max_height": _params.get("max_height", ""),
                 }
 
                 # Extract stats and submenus
@@ -1034,6 +1056,12 @@ class ModernHudPreferences(QDialog):
                     categories = getattr(popup_obj, "pu_stats_category", [])
                     if i < len(categories) and categories[i]:
                         stat_info["category"] = categories[i]
+                    labels = getattr(popup_obj, "pu_stats_label", [])
+                    if i < len(labels) and labels[i]:
+                        stat_info["label"] = labels[i]
+                    colors = getattr(popup_obj, "pu_stats_color", [])
+                    if i < len(colors) and colors[i]:
+                        stat_info["color"] = colors[i]
 
                     popup_data["stats"].append(stat_info)
 
@@ -1073,7 +1101,7 @@ class ModernHudPreferences(QDialog):
         for stat in popup_data.get("stats", []):
             stat_text = stat["stat_name"]
             if stat.get("category"):
-                stat_text = f"[{stat['category']}] {stat_text}"
+                stat_text = f"[{translate_hud_category(stat['category'])}] {stat_text}"
             if stat.get("submenu"):
                 stat_text += f" → {stat['submenu']}"
             self.popup_stats_list.addItem(stat_text)
@@ -1160,7 +1188,7 @@ class ModernHudPreferences(QDialog):
         def _label(s):
             name = s.get("stat_name", "")
             if s.get("category"):
-                name = f"[{s['category']}] {name}"
+                name = f"[{translate_hud_category(s['category'])}] {name}"
             return f"{name}  →  {s['submenu']}" if s.get("submenu") else name
 
         block = {
@@ -1376,6 +1404,28 @@ class ModernHudPreferences(QDialog):
             popup_data.get("theme", ""),
             popup_data.get("icon_provider", ""),
         )
+
+    def open_popup_zoom_window(self) -> None:
+        """Open the currently selected popup preview at real size in a new window."""
+        if self.popup_combo.currentIndex() < 0:
+            return
+
+        popup_name = self.popup_combo.currentText()
+        popup_data = self.popup_windows.get(popup_name, {})
+        if not popup_data:
+            return
+
+        dlg = PopupZoomDialog(
+            popup_name=popup_name,
+            popup_class=popup_data.get("class", "default"),
+            stats=popup_data.get("stats", []),
+            source=popup_data.get("source", ""),
+            group=popup_data.get("group", ""),
+            theme_name=popup_data.get("theme", ""),
+            icon_provider_name=popup_data.get("icon_provider", ""),
+            parent=self,
+        )
+        dlg.exec()
 
     def _on_positional_mode_changed(self, _index: int) -> None:
         """Store the chosen positional-panel mode on the current profile."""
@@ -2842,6 +2892,236 @@ class ModernHudPreferences(QDialog):
         if stats:
             stat_set_node.appendChild(self.config.doc.createTextNode("\n        "))
 
+    @staticmethod
+    def _fill_rule_combo(combo: QComboBox, values: list[str]) -> None:
+        combo.addItem(_("ANY"), "all")
+        for value in values:
+            if value and str(value).casefold() != "all":
+                combo.addItem(str(value), str(value))
+
+    def _create_profile_select_tab(self) -> None:
+        tab = QWidget()
+        outer = QVBoxLayout(tab)
+        outer.setContentsMargins(12, 10, 12, 10)
+
+        selector = QGroupBox(_("Add Profile Definition"))
+        grid = QGridLayout(selector)
+        self.rule_site_combo = QComboBox()
+        self.rule_game_combo = QComboBox()
+        self.rule_type_combo = QComboBox()
+        self.rule_limit_combo = QComboBox()
+        self.rule_seats_combo = QComboBox()
+        self.rule_players_combo = QComboBox()
+        self.rule_speed_combo = QComboBox()
+        self.rule_profile_combo = QComboBox()
+
+        self._fill_rule_combo(self.rule_site_combo, sorted(getattr(self.config, "supported_sites", {})))
+        self._fill_rule_combo(self.rule_game_combo, sorted(getattr(self.config, "supported_games", {})))
+        self._fill_rule_combo(self.rule_type_combo, ["ring", "tour"])
+        self._fill_rule_combo(self.rule_limit_combo, ["nl", "pl", "fl", "cn"])
+        self._fill_rule_combo(self.rule_seats_combo, [str(value) for value in range(2, 11)])
+        self._fill_rule_combo(self.rule_players_combo, [str(value) for value in range(2, 11)])
+        self._fill_rule_combo(self.rule_speed_combo, ["normal", "fast"])
+        for profile in sorted(getattr(self.config, "stat_sets", {})):
+            self.rule_profile_combo.addItem(profile, profile)
+
+        fields = [
+            (_("Site"), self.rule_site_combo),
+            (_("Game"), self.rule_game_combo),
+            (_("Format"), self.rule_type_combo),
+            (_("Limit"), self.rule_limit_combo),
+            (_("Seats"), self.rule_seats_combo),
+            (_("Players"), self.rule_players_combo),
+            (_("Speed"), self.rule_speed_combo),
+            (_("HUD Profile"), self.rule_profile_combo),
+        ]
+        for index, (label, combo) in enumerate(fields):
+            combo.setMinimumHeight(34)
+            row, column = divmod(index, 2)
+            grid.addWidget(QLabel(label), row, column * 2)
+            grid.addWidget(combo, row, column * 2 + 1)
+        add_button = QPushButton(_("Add"))
+        add_button.clicked.connect(self._add_profile_rule)
+        grid.addWidget(add_button, 4, 3)
+        outer.addWidget(selector)
+
+        # Rules interact through specificity and priority, so which one a given
+        # table ends up on is not obvious from reading the list. This answers it
+        # with the resolver the HUD itself uses.
+        preview = QGroupBox(_("Effective profile for these selectors"))
+        preview_layout = QVBoxLayout(preview)
+        self.profile_preview_label = QLabel()
+        self.profile_preview_label.setWordWrap(True)
+        preview_layout.addWidget(self.profile_preview_label)
+        outer.addWidget(preview)
+        for combo in (
+            self.rule_site_combo,
+            self.rule_game_combo,
+            self.rule_type_combo,
+            self.rule_limit_combo,
+            self.rule_seats_combo,
+            self.rule_players_combo,
+            self.rule_speed_combo,
+        ):
+            combo.currentIndexChanged.connect(self._update_profile_preview)
+
+        active = QGroupBox(_("Active Profile Definitions"))
+        active_layout = QVBoxLayout(active)
+        self.profile_rules_table = QTableWidget(0, 8)
+        self.profile_rules_table.setHorizontalHeaderLabels(
+            [_("Site"), _("Game"), _("Format"), _("Limit"), _("Seats"), _("Players"), _("Speed"), _("HUD Profile")]
+        )
+        self.profile_rules_table.verticalHeader().hide()
+        self.profile_rules_table.verticalHeader().setDefaultSectionSize(36)
+        self.profile_rules_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        self.profile_rules_table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
+        self.profile_rules_table.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
+        self.profile_rules_table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
+        self.profile_rules_table.setAlternatingRowColors(True)
+        self.profile_rules_table.setMinimumHeight(180)
+        active_layout.addWidget(self.profile_rules_table)
+
+        btn_layout = QHBoxLayout()
+        btn_layout.addStretch()
+        delete_button = QPushButton(_("Delete"))
+        delete_button.clicked.connect(self._delete_profile_rule)
+        btn_layout.addWidget(delete_button)
+        active_layout.addLayout(btn_layout)
+        outer.addWidget(active, 1)
+
+        self.profile_rules = list(getattr(self.config, "get_hud_profile_rules", lambda: [])())
+        self._refresh_profile_rules_table()
+        self.tabs.addTab(tab, _("🎯 Profile Select"))
+
+    def _add_profile_rule(self) -> None:
+        if self.rule_profile_combo.currentIndex() < 0:
+            return
+        values = {
+            "id": f"rule-{len(self.profile_rules) + 1}",
+            "site": self.rule_site_combo.currentData(),
+            "game": self.rule_game_combo.currentData(),
+            "game_type": self.rule_type_combo.currentData(),
+            "limit": self.rule_limit_combo.currentData(),
+            "seats": self.rule_seats_combo.currentData(),
+            "players": self.rule_players_combo.currentData(),
+            "speed": self.rule_speed_combo.currentData(),
+            "profile": self.rule_profile_combo.currentData(),
+        }
+        rule = HudProfileRule.from_mapping(values, len(self.profile_rules))
+        if rule.selector() in {existing.selector() for existing in self.profile_rules}:
+            QMessageBox.warning(
+                self, _("Duplicate rule"), _("A profile definition with these selectors already exists.")
+            )
+            return
+        self.profile_rules.append(rule)
+        self._refresh_profile_rules_table()
+
+    def _delete_profile_rule(self) -> None:
+        row = self.profile_rules_table.currentRow()
+        if 0 <= row < len(self.profile_rules):
+            self.profile_rules.pop(row)
+            self.profile_rules = [
+                HudProfileRule.from_mapping(rule.as_xml_attributes(), order)
+                for order, rule in enumerate(self.profile_rules)
+            ]
+            self._refresh_profile_rules_table()
+
+    def _refresh_profile_rules_table(self) -> None:
+        known_profiles = set(getattr(self.config, "stat_sets", {}) or {})
+        self.profile_rules_table.setRowCount(len(self.profile_rules))
+        for row, rule in enumerate(self.profile_rules):
+            self.profile_rules_table.setRowHeight(row, 36)
+            values = [
+                rule.site,
+                rule.game,
+                rule.game_type,
+                rule.limit_type,
+                "ANY" if rule.seats is None else str(rule.seats),
+                "ANY" if rule.players is None else str(rule.players),
+                rule.speed,
+                rule.profile,
+            ]
+            for column, value in enumerate(values):
+                item = QTableWidgetItem(_("ANY") if value == "all" else value)
+                item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+                # A hand-edited config can name a profile that was since
+                # renamed or deleted; such a rule matches but selects nothing,
+                # which is invisible unless it is said here.
+                if column == len(values) - 1 and known_profiles and rule.profile not in known_profiles:
+                    item.setText(f"{rule.profile}  ⚠")
+                    item.setToolTip(_("No HUD profile of this name exists; this rule will be ignored."))
+                self.profile_rules_table.setItem(row, column, item)
+        self._update_profile_preview()
+
+    def _preview_context(self) -> HudContext:
+        """The table context described by the selector combos."""
+
+        def seats(combo: QComboBox) -> int:
+            value = str(combo.currentData() or "")
+            return int(value) if value.isdigit() else 0
+
+        return HudContext(
+            site=str(self.rule_site_combo.currentData() or "all"),
+            game=str(self.rule_game_combo.currentData() or "all"),
+            game_type=str(self.rule_type_combo.currentData() or "all"),
+            limit_type=str(self.rule_limit_combo.currentData() or "all"),
+            max_seats=seats(self.rule_seats_combo),
+            players=seats(self.rule_players_combo),
+            speed=str(self.rule_speed_combo.currentData() or "normal"),
+        )
+
+    def _default_profile_for(self, context: HudContext) -> str | None:
+        """The profile <supported_games> gives this game, ignoring the rules."""
+        getter = getattr(self.config, "get_supported_games_parameters", None)
+        if getter is None:
+            return None
+        try:
+            params = getter(context.game, context.game_type)
+        except Exception:  # intentional broad catch: a preview must never break the dialog
+            log.debug("Could not read the default profile for %s", context, exc_info=True)
+            return None
+        if not isinstance(params, dict):
+            return None
+        return getattr(params.get("game_stat_set"), "name", None)
+
+    @staticmethod
+    def _describe_rule(rule: HudProfileRule) -> str:
+        parts = [
+            f"{label}={value}"
+            for label, value in (
+                ("site", rule.site),
+                ("game", rule.game),
+                ("format", rule.game_type),
+                ("limit", rule.limit_type),
+                ("seats", rule.seats),
+                ("players", rule.players),
+                ("speed", rule.speed),
+            )
+            if value not in ("all", None)
+        ]
+        return ", ".join(parts) or _("ANY table")
+
+    def _update_profile_preview(self) -> None:
+        """Say which profile the selectors would resolve to, and why."""
+        if not hasattr(self, "profile_preview_label"):
+            return
+        context = self._preview_context()
+        winner = HudProfileResolver(self.profile_rules).matching_rule(context)
+        known_profiles = set(getattr(self.config, "stat_sets", {}) or {})
+
+        if winner is not None:
+            text = _("{profile} — from the rule {selectors}").format(
+                profile=winner.profile, selectors=self._describe_rule(winner)
+            )
+            if known_profiles and winner.profile not in known_profiles:
+                text += "\n⚠ " + _("No HUD profile of this name exists; the game default will be used instead.")
+        else:
+            default = self._default_profile_for(context)
+            text = _("{profile} — no rule matches, so the game default applies").format(profile=default or "—")
+            if default is None:
+                text += "\n" + _("Pick a Game (and Format) to see the default that would apply.")
+        self.profile_preview_label.setText(text)
+
     def save_changes(self) -> None:
         try:
             # We need to update the XML directly for the stat sets
@@ -2952,6 +3232,12 @@ class ModernHudPreferences(QDialog):
                         pu_node.setAttribute("pu_theme", popup_data["theme"])
                     if popup_data.get("icon_provider"):
                         pu_node.setAttribute("pu_icon_provider", popup_data["icon_provider"])
+                    if popup_data.get("title"):
+                        pu_node.setAttribute("pu_title", popup_data["title"])
+                    if popup_data.get("width"):
+                        pu_node.setAttribute("pu_width", str(popup_data["width"]))
+                    if popup_data.get("max_height"):
+                        pu_node.setAttribute("pu_max_height", str(popup_data["max_height"]))
 
                     # Add stats
                     for stat in popup_data["stats"]:
@@ -2964,6 +3250,10 @@ class ModernHudPreferences(QDialog):
                             pu_stat_node.setAttribute("pu_stat_submenu", stat["submenu"])
                         if stat.get("category"):
                             pu_stat_node.setAttribute("pu_stat_category", stat["category"])
+                        if stat.get("label"):
+                            pu_stat_node.setAttribute("pu_stat_label", stat["label"])
+                        if stat.get("color"):
+                            pu_stat_node.setAttribute("pu_stat_color", stat["color"])
 
                         pu_node.appendChild(pu_stat_node)
 
@@ -2987,6 +3277,14 @@ class ModernHudPreferences(QDialog):
             }
             if hasattr(self.config, "set_hud_ui_parameters"):
                 self.config.set_hud_ui_parameters(hud_params)
+
+            if hasattr(self.config, "set_hud_profile_rules"):
+                # Use the same resolver here to keep duplicate detection and
+                # runtime precedence semantics tied to one implementation.
+                duplicates = HudProfileResolver(self.profile_rules).duplicate_selectors()
+                if duplicates:
+                    raise ValueError("Duplicate HUD profile selectors")
+                self.config.set_hud_profile_rules(self.profile_rules)
 
             # Save to file
             if hasattr(self.config, "save"):

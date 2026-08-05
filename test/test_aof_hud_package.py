@@ -58,7 +58,7 @@ def test_aof_hud_package_matches_the_import_contract_and_shipped_config() -> Non
     package_advanced = _named_element(package_root, "./ss", "name", ADVANCED_PROFILE_NAME)
     package_popup = _named_element(package_root, "./pu", "pu_name", POPUP_NAME)
     package_game = _named_element(package_root, "./game", "game_name", GAME_NAME)
-    assert package_game.find("./game_stat_set[@game_type='all']").get("stat_set") == PROFILE_NAME
+    assert package_game.find("./game_stat_set[@game_type='all']").get("stat_set") == ADVANCED_PROFILE_NAME
 
     config_profile = _named_element(config_root, "./stat_sets/ss", "name", PROFILE_NAME)
     config_advanced = _named_element(config_root, "./stat_sets/ss", "name", ADVANCED_PROFILE_NAME)
@@ -71,6 +71,8 @@ def test_aof_hud_package_matches_the_import_contract_and_shipped_config() -> Non
     assert package_profile.get("rows") == "4"
     assert package_advanced.get("rows") == "6"
     for profile in (package_profile, package_advanced):
+        assert profile.get("rich_text") == "True"
+        assert profile.get("font_size") == "10"
         assert {
             stat.get("_stat_name")
             for stat in profile.findall("./stat")
@@ -93,7 +95,7 @@ def test_package_binding_follows_a_profile_renamed_during_import() -> None:
     changed = merge_package_game_bindings(
         config,
         package.documentElement,
-        profile_names={PROFILE_NAME: "aof_imported"},
+        profile_names={ADVANCED_PROFILE_NAME: "aof_imported"},
         overwrite=True,
     )
 
@@ -105,7 +107,7 @@ def test_package_binding_follows_a_profile_renamed_during_import() -> None:
         merge_package_game_bindings(
             config,
             package.documentElement,
-            profile_names={PROFILE_NAME: "aof_imported"},
+            profile_names={ADVANCED_PROFILE_NAME: "aof_imported"},
             overwrite=True,
         )
         is False
@@ -139,7 +141,7 @@ def test_existing_config_migration_is_idempotent_and_preserves_custom_profiles()
     (popup,) = _direct_named_nodes(target, "pu", "pu_name", POPUP_NAME)
     assert popup.getAttribute("pu_theme") == "CUSTOM"
     (game,) = _direct_named_nodes(target, "game", "game_name", GAME_NAME)
-    assert game.getElementsByTagName("game_stat_set")[0].getAttribute("stat_set") == PROFILE_NAME
+    assert game.getElementsByTagName("game_stat_set")[0].getAttribute("stat_set") == ADVANCED_PROFILE_NAME
 
 
 def test_existing_aof_binding_is_not_overwritten_by_the_automatic_migration() -> None:
@@ -161,6 +163,37 @@ def test_existing_aof_binding_is_not_overwritten_by_the_automatic_migration() ->
     (game,) = _direct_named_nodes(target, "game", "game_name", GAME_NAME)
     assert game.getElementsByTagName("game_stat_set")[0].getAttribute("stat_set") == "my_aof_profile"
     assert len(_direct_named_nodes(target, "ss", "name", PROFILE_NAME)) == 1
+
+
+def test_untouched_legacy_popup_is_upgraded_to_rich_package_presentation() -> None:
+    target = xml.dom.minidom.parseString(
+        """<FreePokerToolsConfig>
+          <supported_games/>
+          <stat_sets/>
+          <popup_windows>
+            <pu pu_name="aof_profile" pu_class="default">
+              <pu_stat pu_stat_name="aof_observed"/>
+              <pu_stat pu_stat_name="aof_pair"/>
+            </pu>
+          </popup_windows>
+        </FreePokerToolsConfig>""",
+    )
+    source = xml.dom.minidom.parse(str(PACKAGE))
+    config = object.__new__(Config)
+
+    assert config._migrate_aof_omaha_hud(target, source) is True
+    assert config._migrate_aof_omaha_hud(target, source) is False
+
+    (popup,) = _direct_named_nodes(target, "pu", "pu_name", POPUP_NAME)
+    assert popup.getAttribute("pu_class") == "CategorizedPopup"
+    # The presentation belongs to the package, not to the renderer: the theme
+    # named here is the one the popup is actually drawn with.
+    assert popup.getAttribute("pu_theme") == "hud_dark"
+    assert popup.getAttribute("pu_title") in {"OPPONENT PROFILE: {player}", "PROFIL ADVERSAIRE : {player}"}
+    rows = popup.getElementsByTagName("pu_stat")
+    assert len(rows) == len(source.getElementsByTagName("pu_stat"))
+    assert all(row.getAttribute("pu_stat_category") for row in rows)
+    assert all(row.getAttribute("pu_stat_label") for row in rows)
 
 
 def test_decision_ev_reclaims_only_its_packaged_cell_and_extends_the_popup() -> None:
@@ -269,7 +302,7 @@ def test_startup_migrates_an_existing_user_file_once(tmp_path: Path, monkeypatch
     migrated = Config()
     params = migrated.get_supported_games_parameters(GAME_NAME, "ring")
     assert params is not None
-    assert params["game_stat_set"].name == PROFILE_NAME
+    assert params["game_stat_set"].name == ADVANCED_PROFILE_NAME
     assert ADVANCED_PROFILE_NAME in migrated.stat_sets
     assert POPUP_NAME in migrated.popup_windows
     assert config_path.with_suffix(".xml.backup").exists()
@@ -341,4 +374,4 @@ def test_preferences_imports_the_profile_and_its_game_binding(tmp_path: Path, mo
     _named_element(saved, "./stat_sets/ss", "name", ADVANCED_PROFILE_NAME)
     _named_element(saved, "./popup_windows/pu", "pu_name", POPUP_NAME)
     game = _named_element(saved, "./supported_games/game", "game_name", GAME_NAME)
-    assert game.find("./game_stat_set[@game_type='all']").get("stat_set") == PROFILE_NAME
+    assert game.find("./game_stat_set[@game_type='all']").get("stat_set") == ADVANCED_PROFILE_NAME

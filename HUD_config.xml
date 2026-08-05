@@ -266,10 +266,10 @@
              preflop (Hold'em). The shared AoF profiles behind both bindings
              are game-agnostic. -->
         <game game_name="aof_omaha" aux="ClassicHud, mucked">
-            <game_stat_set game_type="all" stat_set="aof_default"/>
+            <game_stat_set game_type="all" stat_set="aof_advanced"/>
         </game>
         <game game_name="aof_holdem" aux="ClassicHud, mucked">
-            <game_stat_set game_type="all" stat_set="aof_default"/>
+            <game_stat_set game_type="all" stat_set="aof_advanced"/>
         </game>
         <game game_name="omahahilo" aux="ClassicHud, mucked">
             <game_stat_set game_type="ring" stat_set="omaha_cg_expert"/>
@@ -1522,45 +1522,47 @@
             <stat _rowcol="(3,1)" _stat_name="saw_f" popup="default" tip="" click="" hudcolor="" hudprefix="" hudsuffix="" stat_hicolor="" stat_hith="" stat_locolor="" stat_loth=""/>
             <stat _rowcol="(3,2)" _stat_name="wtsd" popup="default" tip="" click="" hudcolor="" hudprefix="" hudsuffix="" stat_hicolor="" stat_hith="" stat_locolor="" stat_loth=""/>
         </ss>
-        <ss name="aof_default" rows="4" cols="4" xpad="1" ypad="0">
-            <stat _rowcol="(1,1)" _stat_name="playershort" popup="aof_profile" hudprefix="" hudsuffix="" tip="" click="open_comment_dialog" hudcolor="#98FFB0"/>
-            <stat _rowcol="(1,2)" _stat_name="n" popup="aof_profile" hudprefix="H " hudsuffix="" tip="" click=""/>
-            <stat _rowcol="(1,3)" _stat_name="aof_observed" popup="aof_profile" hudprefix="obs " hudsuffix="" tip="" click=""/>
-            <stat _rowcol="(1,4)" _stat_name="aof_showdowns" popup="aof_profile" hudprefix="sd " hudsuffix="" tip="" click=""/>
-            <stat _rowcol="(2,1)" _stat_name="aof_allin" popup="aof_profile" hudprefix="AI " hudsuffix="" tip="" click="" stat_loth="25" stat_locolor="#4ADE80" stat_hith="55" stat_hicolor="#F87171"/>
-            <stat _rowcol="(2,2)" _stat_name="aof_fold" popup="aof_profile" hudprefix="F " hudsuffix="" tip="" click=""/>
-            <stat _rowcol="(2,3)" _stat_name="aof_weak" popup="aof_profile" hudprefix="wk " hudsuffix="" tip="" click=""/>
-            <stat _rowcol="(2,4)" _stat_name="aof_decision_ev" popup="aof_profile" hudprefix="EV " hudsuffix="" tip="" click=""/>
-            <stat _rowcol="(3,1)" _stat_name="aof_no_made" popup="aof_profile" hudprefix="air " hudsuffix="" tip="" click=""/>
-            <stat _rowcol="(3,2)" _stat_name="aof_two_pair" popup="aof_profile" hudprefix="2p " hudsuffix="" tip="" click=""/>
-            <stat _rowcol="(3,3)" _stat_name="aof_trips" popup="aof_profile" hudprefix="3k " hudsuffix="" tip="" click=""/>
-            <stat _rowcol="(3,4)" _stat_name="aof_nfd" popup="aof_profile" hudprefix="NFD " hudsuffix="" tip="" click=""/>
-            <stat _rowcol="(4,1)" _stat_name="aof_splash_won" popup="aof_profile" hudprefix="Spl " hudsuffix="" tip="" click=""/>
-            <stat _rowcol="(4,2)" _stat_name="aof_splash_freq" popup="aof_profile" hudprefix="Spl% " hudsuffix="" tip="" click=""/>
+        <ss name="aof_default" rows="4" cols="4" xpad="1" ypad="0" rich_text="True" font_size="10">
+            <stat _rowcol="(1,1)" _stat_name="playershort" popup="aof_profile" hudbgcolor="#0F172A" hudprefix="" hudsuffix="" tip="" click="open_comment_dialog" hudcolor="#98FFB0"/>
+            <stat _rowcol="(1,2)" _stat_name="player_note" popup="aof_profile" hudbgcolor="#0F172A" hudprefix="" hudsuffix="" tip="Notes" click="open_comment_dialog"/>
+            <stat _rowcol="(1,3)" _stat_name="n" popup="aof_profile" hudbgcolor="#0F172A" hudprefix="H " hudsuffix="" tip="" click=""/>
+            <stat _rowcol="(1,4)" _stat_name="aof_observed" popup="aof_profile" hudbgcolor="#0F172A" hudprefix="obs " hudsuffix="" tip="" click=""/>
+            <stat _rowcol="(2,1)" _stat_name="aof_allin" popup="aof_profile" hudbgcolor="#1E1B4B" hudprefix="AI " hudsuffix="" tip="" click="" stat_loth="25" stat_locolor="#4ADE80" stat_midcolor="#FFA726" stat_hith="45" stat_hicolor="#FF6B6B"/>
+            <stat _rowcol="(2,2)" _stat_name="aof_fold" popup="aof_profile" hudbgcolor="#1E1B4B" hudprefix="F " hudsuffix="" tip="" click=""/>
+            <stat _rowcol="(2,3)" _stat_name="aof_weak" popup="aof_profile" hudbgcolor="#1E1B4B" hudprefix="wk " hudsuffix="" tip="" click="" stat_loth="1.0" stat_locolor="#4ADE80" stat_hith="3.0" stat_hicolor="#FF6B6B"/>
+            <stat _rowcol="(2,4)" _stat_name="aof_decision_ev" popup="aof_profile" hudbgcolor="#1E1B4B" hudprefix="EV " hudsuffix="" tip="" click="" stat_loth="0.0" stat_locolor="#FF6B6B" stat_hith="2.0" stat_hicolor="#4ADE80"/>
+            <stat _rowcol="(3,1)" _stat_name="aof_no_made" popup="aof_profile" hudbgcolor="#132B25" hudprefix="air " hudsuffix="" tip="" click="" stat_loth="8.0" stat_locolor="#4ADE80" stat_hith="15.0" stat_hicolor="#FF6B6B"/>
+            <stat _rowcol="(3,2)" _stat_name="aof_two_pair" popup="aof_profile" hudbgcolor="#132B25" hudprefix="2p " hudsuffix="" tip="" click=""/>
+            <stat _rowcol="(3,3)" _stat_name="aof_trips" popup="aof_profile" hudbgcolor="#132B25" hudprefix="3k " hudsuffix="" tip="" click=""/>
+            <stat _rowcol="(3,4)" _stat_name="aof_nfd" popup="aof_profile" hudbgcolor="#132B25" hudprefix="NFD " hudsuffix="" tip="" click="" stat_loth="5.0" stat_locolor="#4CC9F0" stat_hith="10.0" stat_hicolor="#FF6B6B"/>
+            <stat _rowcol="(4,1)" _stat_name="aof_splash_won" popup="aof_profile" hudbgcolor="#0F2942" hudprefix="Spl " hudsuffix="" tip="" click=""/>
+            <stat _rowcol="(4,2)" _stat_name="aof_splash_freq" popup="aof_profile" hudbgcolor="#0F2942" hudprefix="Spl% " hudsuffix="" tip="" click=""/>
+            <stat _rowcol="(4,3)" _stat_name="aof_showdowns" popup="aof_profile" hudbgcolor="#0F2942" hudprefix="sd " hudsuffix="" tip="" click=""/>
         </ss>
-        <ss name="aof_advanced" rows="6" cols="4" xpad="1" ypad="0">
-            <stat _rowcol="(1,1)" _stat_name="playershort" popup="aof_profile" hudprefix="" hudsuffix="" tip="" click="open_comment_dialog" hudcolor="#98FFB0"/>
-            <stat _rowcol="(1,2)" _stat_name="n" popup="aof_profile" hudprefix="H " hudsuffix="" tip="" click=""/>
-            <stat _rowcol="(1,3)" _stat_name="aof_observed" popup="aof_profile" hudprefix="obs " hudsuffix="" tip="" click=""/>
-            <stat _rowcol="(1,4)" _stat_name="aof_showdowns" popup="aof_profile" hudprefix="sd " hudsuffix="" tip="" click=""/>
-            <stat _rowcol="(2,1)" _stat_name="aof_allin" popup="aof_profile" hudprefix="AI " hudsuffix="" tip="" click="" stat_loth="25" stat_locolor="#4ADE80" stat_hith="55" stat_hicolor="#F87171"/>
-            <stat _rowcol="(2,2)" _stat_name="aof_fold" popup="aof_profile" hudprefix="F " hudsuffix="" tip="" click=""/>
-            <stat _rowcol="(2,3)" _stat_name="aof_weak" popup="aof_profile" hudprefix="wk " hudsuffix="" tip="" click=""/>
-            <stat _rowcol="(2,4)" _stat_name="aof_decision_ev" popup="aof_profile" hudprefix="EV " hudsuffix="" tip="" click=""/>
-            <stat _rowcol="(3,1)" _stat_name="aof_no_made" popup="aof_profile" hudprefix="air " hudsuffix="" tip="" click=""/>
-            <stat _rowcol="(3,2)" _stat_name="aof_pair" popup="aof_profile" hudprefix="1p " hudsuffix="" tip="" click=""/>
-            <stat _rowcol="(3,3)" _stat_name="aof_two_pair" popup="aof_profile" hudprefix="2p " hudsuffix="" tip="" click=""/>
-            <stat _rowcol="(3,4)" _stat_name="aof_trips" popup="aof_profile" hudprefix="3k " hudsuffix="" tip="" click=""/>
-            <stat _rowcol="(4,1)" _stat_name="aof_straight" popup="aof_profile" hudprefix="str " hudsuffix="" tip="" click=""/>
-            <stat _rowcol="(4,2)" _stat_name="aof_nfd" popup="aof_profile" hudprefix="NFD " hudsuffix="" tip="" click=""/>
-            <stat _rowcol="(4,3)" _stat_name="aof_non_nfd" popup="aof_profile" hudprefix="fd " hudsuffix="" tip="" click=""/>
-            <stat _rowcol="(4,4)" _stat_name="aof_wrap9" popup="aof_profile" hudprefix="W9 " hudsuffix="" tip="" click=""/>
-            <stat _rowcol="(5,1)" _stat_name="aof_big_wrap13" popup="aof_profile" hudprefix="W13 " hudsuffix="" tip="" click=""/>
-            <stat _rowcol="(5,2)" _stat_name="aof_made" popup="aof_profile" hudprefix="made " hudsuffix="" tip="" click=""/>
-            <stat _rowcol="(5,3)" _stat_name="aof_known_equity" popup="aof_profile" hudprefix="EqK " hudsuffix="" tip="" click=""/>
-            <stat _rowcol="(5,4)" _stat_name="aof_range_equity" popup="aof_profile" hudprefix="EqR " hudsuffix="" tip="" click=""/>
-            <stat _rowcol="(6,1)" _stat_name="aof_splash_won" popup="aof_profile" hudprefix="Spl " hudsuffix="" tip="" click=""/>
-            <stat _rowcol="(6,2)" _stat_name="aof_splash_freq" popup="aof_profile" hudprefix="Spl% " hudsuffix="" tip="" click=""/>
+        <ss name="aof_advanced" rows="6" cols="4" xpad="1" ypad="0" rich_text="True" font_size="10">
+            <stat _rowcol="(1,1)" _stat_name="playershort" popup="aof_profile" hudbgcolor="#0F172A" hudprefix="" hudsuffix="" tip="" click="open_comment_dialog" hudcolor="#98FFB0"/>
+            <stat _rowcol="(1,2)" _stat_name="player_note" popup="aof_profile" hudbgcolor="#0F172A" hudprefix="" hudsuffix="" tip="Notes" click="open_comment_dialog"/>
+            <stat _rowcol="(1,3)" _stat_name="n" popup="aof_profile" hudbgcolor="#0F172A" hudprefix="H " hudsuffix="" tip="" click=""/>
+            <stat _rowcol="(1,4)" _stat_name="aof_observed" popup="aof_profile" hudbgcolor="#0F172A" hudprefix="obs " hudsuffix="" tip="" click=""/>
+            <stat _rowcol="(2,1)" _stat_name="aof_allin" popup="aof_profile" hudbgcolor="#1E1B4B" hudprefix="AI " hudsuffix="" tip="" click="" stat_loth="25" stat_locolor="#4ADE80" stat_midcolor="#FFA726" stat_hith="45" stat_hicolor="#FF6B6B"/>
+            <stat _rowcol="(2,2)" _stat_name="aof_fold" popup="aof_profile" hudbgcolor="#1E1B4B" hudprefix="F " hudsuffix="" tip="" click=""/>
+            <stat _rowcol="(2,3)" _stat_name="aof_weak" popup="aof_profile" hudbgcolor="#1E1B4B" hudprefix="wk " hudsuffix="" tip="" click="" stat_loth="1.0" stat_locolor="#4ADE80" stat_hith="3.0" stat_hicolor="#FF6B6B"/>
+            <stat _rowcol="(2,4)" _stat_name="aof_decision_ev" popup="aof_profile" hudbgcolor="#1E1B4B" hudprefix="EV " hudsuffix="" tip="" click="" stat_loth="0.0" stat_locolor="#FF6B6B" stat_hith="2.0" stat_hicolor="#4ADE80"/>
+            <stat _rowcol="(3,1)" _stat_name="aof_no_made" popup="aof_profile" hudbgcolor="#132B25" hudprefix="air " hudsuffix="" tip="" click="" stat_loth="8.0" stat_locolor="#4ADE80" stat_hith="15.0" stat_hicolor="#FF6B6B"/>
+            <stat _rowcol="(3,2)" _stat_name="aof_pair" popup="aof_profile" hudbgcolor="#132B25" hudprefix="1p " hudsuffix="" tip="" click=""/>
+            <stat _rowcol="(3,3)" _stat_name="aof_two_pair" popup="aof_profile" hudbgcolor="#132B25" hudprefix="2p " hudsuffix="" tip="" click=""/>
+            <stat _rowcol="(3,4)" _stat_name="aof_trips" popup="aof_profile" hudbgcolor="#132B25" hudprefix="3k " hudsuffix="" tip="" click=""/>
+            <stat _rowcol="(4,1)" _stat_name="aof_straight" popup="aof_profile" hudbgcolor="#0F2942" hudprefix="str " hudsuffix="" tip="" click=""/>
+            <stat _rowcol="(4,2)" _stat_name="aof_nfd" popup="aof_profile" hudbgcolor="#0F2942" hudprefix="NFD " hudsuffix="" tip="" click="" stat_loth="5.0" stat_locolor="#4CC9F0" stat_hith="10.0" stat_hicolor="#FF6B6B"/>
+            <stat _rowcol="(4,3)" _stat_name="aof_non_nfd" popup="aof_profile" hudbgcolor="#0F2942" hudprefix="fd " hudsuffix="" tip="" click=""/>
+            <stat _rowcol="(4,4)" _stat_name="aof_wrap9" popup="aof_profile" hudbgcolor="#0F2942" hudprefix="W9 " hudsuffix="" tip="" click=""/>
+            <stat _rowcol="(5,1)" _stat_name="aof_big_wrap13" popup="aof_profile" hudbgcolor="#2D1A37" hudprefix="W13 " hudsuffix="" tip="" click=""/>
+            <stat _rowcol="(5,2)" _stat_name="aof_made" popup="aof_profile" hudbgcolor="#2D1A37" hudprefix="made " hudsuffix="" tip="" click=""/>
+            <stat _rowcol="(5,3)" _stat_name="aof_known_equity" popup="aof_profile" hudbgcolor="#2D1A37" hudprefix="EqK " hudsuffix="" tip="" click="" stat_loth="45.0" stat_locolor="#FF6B6B" stat_hith="55.0" stat_hicolor="#4ADE80"/>
+            <stat _rowcol="(5,4)" _stat_name="aof_range_equity" popup="aof_profile" hudbgcolor="#2D1A37" hudprefix="EqR " hudsuffix="" tip="" click="" stat_loth="45.0" stat_locolor="#FF6B6B" stat_hith="55.0" stat_hicolor="#4ADE80"/>
+            <stat _rowcol="(6,1)" _stat_name="aof_splash_won" popup="aof_profile" hudbgcolor="#111827" hudprefix="Spl " hudsuffix="" tip="" click=""/>
+            <stat _rowcol="(6,2)" _stat_name="aof_splash_freq" popup="aof_profile" hudbgcolor="#111827" hudprefix="Spl% " hudsuffix="" tip="" click=""/>
+            <stat _rowcol="(6,3)" _stat_name="aof_showdowns" popup="aof_profile" hudbgcolor="#111827" hudprefix="sd " hudsuffix="" tip="" click=""/>
         </ss>
 
         <ss name="omaha_default" rows="3" cols="2" xpad="1" ypad="0">
@@ -2819,23 +2821,35 @@
             <pu_stat pu_stat_name="three_bet_vs_steal"/>
             <pu_stat pu_stat_name="resteal"/>
         </pu>
-    <pu pu_name="aof_profile" pu_class="default">
-            <pu_stat pu_stat_name="aof_observed"/>
-            <pu_stat pu_stat_name="aof_no_made"/>
-            <pu_stat pu_stat_name="aof_nfd"/>
-            <pu_stat pu_stat_name="aof_non_nfd"/>
-            <pu_stat pu_stat_name="aof_wrap9"/>
-            <pu_stat pu_stat_name="aof_big_wrap13"/>
-            <pu_stat pu_stat_name="aof_made"/>
-            <pu_stat pu_stat_name="aof_pair"/>
-            <pu_stat pu_stat_name="aof_two_pair"/>
-            <pu_stat pu_stat_name="aof_trips"/>
-            <pu_stat pu_stat_name="aof_straight"/>
-            <pu_stat pu_stat_name="aof_flush"/>
-            <pu_stat pu_stat_name="aof_full_house"/>
-            <pu_stat pu_stat_name="aof_quads"/>
-            <pu_stat pu_stat_name="aof_straight_flush"/>
-        <pu_stat pu_stat_name="aof_known_equity"/><pu_stat pu_stat_name="aof_known_ev"/><pu_stat pu_stat_name="aof_range_equity"/><pu_stat pu_stat_name="aof_weak"/><pu_stat pu_stat_name="aof_decision_ev"/><pu_stat pu_stat_name="aof_splash_won"/><pu_stat pu_stat_name="aof_splash_freq"/><pu_stat pu_stat_name="player_note"/></pu></popup_windows>
+    <pu pu_name="aof_profile" pu_class="CategorizedPopup" pu_theme="hud_dark" pu_icon_provider="emoji" pu_title="OPPONENT PROFILE: {player}" pu_width="420" pu_max_height="500">
+        <pu_stat pu_stat_name="aof_observed" pu_stat_category="⚡ AGGRESSIVENESS &amp; EV PROFIT" pu_stat_label="Observed All-ins"/>
+        <pu_stat pu_stat_name="aof_showdowns" pu_stat_category="⚡ AGGRESSIVENESS &amp; EV PROFIT" pu_stat_label="Showdowns"/>
+        <pu_stat pu_stat_name="aof_allin" pu_stat_category="⚡ AGGRESSIVENESS &amp; EV PROFIT" pu_stat_label="All-in"/>
+        <pu_stat pu_stat_name="aof_fold" pu_stat_category="⚡ AGGRESSIVENESS &amp; EV PROFIT" pu_stat_label="Fold"/>
+        <pu_stat pu_stat_name="aof_weak" pu_stat_category="⚡ AGGRESSIVENESS &amp; EV PROFIT" pu_stat_label="Weak AI % (EV+ Targets)" pu_stat_color="#00E59B"/>
+        <pu_stat pu_stat_name="aof_decision_ev" pu_stat_category="⚡ AGGRESSIVENESS &amp; EV PROFIT" pu_stat_label="Decision EV" pu_stat_color="#00E59B"/>
+        <pu_stat pu_stat_name="aof_range_equity" pu_stat_category="⚡ AGGRESSIVENESS &amp; EV PROFIT" pu_stat_label="Population Range Equity" pu_stat_color="#00E59B"/>
+        <pu_stat pu_stat_name="aof_known_equity" pu_stat_category="⚡ AGGRESSIVENESS &amp; EV PROFIT" pu_stat_label="Known Card Equity"/>
+        <pu_stat pu_stat_name="aof_known_ev" pu_stat_category="⚡ AGGRESSIVENESS &amp; EV PROFIT" pu_stat_label="EV vs Actual Callers" pu_stat_color="#00E59B"/>
+        <pu_stat pu_stat_name="aof_no_made" pu_stat_category="🃏 MADE HAND STRUCTURE" pu_stat_label="Air / No Made Hand"/>
+        <pu_stat pu_stat_name="aof_pair" pu_stat_category="🃏 MADE HAND STRUCTURE" pu_stat_label="1 Pair"/>
+        <pu_stat pu_stat_name="aof_two_pair" pu_stat_category="🃏 MADE HAND STRUCTURE" pu_stat_label="2 Pair"/>
+        <pu_stat pu_stat_name="aof_trips" pu_stat_category="🃏 MADE HAND STRUCTURE" pu_stat_label="Trips"/>
+        <pu_stat pu_stat_name="aof_straight" pu_stat_category="🃏 MADE HAND STRUCTURE" pu_stat_label="Straight"/>
+        <pu_stat pu_stat_name="aof_flush" pu_stat_category="🃏 MADE HAND STRUCTURE" pu_stat_label="Flush"/>
+        <pu_stat pu_stat_name="aof_full_house" pu_stat_category="🃏 MADE HAND STRUCTURE" pu_stat_label="Full House"/>
+        <pu_stat pu_stat_name="aof_quads" pu_stat_category="🃏 MADE HAND STRUCTURE" pu_stat_label="Quads"/>
+        <pu_stat pu_stat_name="aof_straight_flush" pu_stat_category="🃏 MADE HAND STRUCTURE" pu_stat_label="Straight Flush"/>
+        <pu_stat pu_stat_name="aof_made" pu_stat_category="🃏 MADE HAND STRUCTURE" pu_stat_label="Total Made Hands"/>
+        <pu_stat pu_stat_name="aof_nfd" pu_stat_category="🎯 DRAWS" pu_stat_label="Nut Flush Draw (NFD)" pu_stat_color="#16C5F4"/>
+        <pu_stat pu_stat_name="aof_non_nfd" pu_stat_category="🎯 DRAWS" pu_stat_label="Flush Draw (fd)" pu_stat_color="#16C5F4"/>
+        <pu_stat pu_stat_name="aof_wrap9" pu_stat_category="🎯 DRAWS" pu_stat_label="Wrap 9+ outs" pu_stat_color="#16C5F4"/>
+        <pu_stat pu_stat_name="aof_big_wrap13" pu_stat_category="🎯 DRAWS" pu_stat_label="Big Wrap 13+ outs" pu_stat_color="#16C5F4"/>
+        <pu_stat pu_stat_name="aof_splash_won" pu_stat_category="💰 SPLASH POTS &amp; NOTES" pu_stat_label="Splash Recovered"/>
+        <pu_stat pu_stat_name="aof_splash_freq" pu_stat_category="💰 SPLASH POTS &amp; NOTES" pu_stat_label="Splash Frequency"/>
+        <pu_stat pu_stat_name="player_note" pu_stat_category="💰 SPLASH POTS &amp; NOTES" pu_stat_label="Player Notes"/>
+    </pu>
+</popup_windows>
     <raw_hands save="none" compression="none"/>
     <raw_tourneys save="none" compression="none"/>
     <supported_databases>
@@ -4515,4 +4529,39 @@
         <hhc site="Full Tilt Poker" converter="FulltiltToFpdb" summaryImporter="FullTiltPokerSummary"/>
         <hhc site="CoinPoker" converter="CoinPokerToFpdb"/>
     </hhcs>
+    <!-- HUD profile rules: choose which stat set (HUD profile) a table gets,
+         the way PokerTracker's "Profile Select" tab does.
+
+         Each <hud_profile_rule> narrows the table context; "all" matches
+         anything:
+           site       room name as it appears in <supported_sites>, or "all"
+           game       Gametypes.category (holdem, omahahi, aof_omaha, ...)
+           game_type  "ring", "tour", or "all"
+           limit      Gametypes.limitType (nl, pl, fl, cn), or "all"
+           seats      table size (Gametypes.maxSeats), or "all"
+           players    players actually dealt into the hand, or "all"
+           speed      "normal", "fast", or "all"
+           profile    the <ss name="..."> stat set to use
+           priority   optional; higher wins between equally specific rules
+
+         The most specific matching rule wins; ties break on priority, then on
+         the order the rules appear here. When no rule matches, the profile
+         from <supported_games> is used, so an empty
+         section changes nothing.
+
+         HUD positions are remembered per (site, game, game_type, seats,
+         profile, layout). Two games that resolve to different profiles
+         therefore keep their own window placement even when the room files
+         them under a single layout set, which is what CoinPoker does.
+
+         Example: give CoinPoker's 6-max AoF Omaha tables their own profile
+         while every other table keeps the default.
+           <hud_profile_rule site="CoinPoker" game="aof_omaha" seats="6" profile="aof_advanced"/>
+
+         The GUI writes this section from HUD Preferences -> Profile Select;
+         this comment is kept outside the element so editing it there does not
+         throw the documentation away. -->
+    <hud_profile_rules>
+    </hud_profile_rules>
+
 </FreePokerToolsConfig>

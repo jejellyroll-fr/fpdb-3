@@ -22,7 +22,13 @@ sys.modules.setdefault("PySide6.QtCore", Mock())
 sys.modules.setdefault("PySide6.QtGui", Mock())
 
 import fpdb_3_legacy.Aux_Classic_Hud as Aux_Classic_Hud  # noqa: E402
-from fpdb_3_legacy.Aux_Classic_Hud import ClassicHud, ClassicLabel, ClassicStat, ClassicStatWindow  # noqa: E402
+from fpdb_3_legacy.Aux_Classic_Hud import (  # noqa: E402
+    ClassicHud,
+    ClassicLabel,
+    ClassicStat,
+    ClassicStatWindow,
+    _compact_stat_html,
+)
 
 
 @contextmanager
@@ -301,6 +307,28 @@ class TestClassicStat(unittest.TestCase):
             with patch.object(self.classic_stat, "set_color") as mock_set_color:
                 self.classic_stat.update(123, {123: {"screen_name": "Player"}})
                 mock_set_color.assert_called()
+
+    def test_compact_html_hud_escapes_content_and_styles_the_value(self) -> None:
+        html = _compact_stat_html("AI ", "<19.6>", "%", "#4ADE80")
+
+        assert "AI&nbsp;" in html
+        assert "&lt;19.6&gt;" in html
+        assert "color:#4ADE80" in html
+        assert "font-weight:700" in html
+
+    def test_update_uses_compact_html_when_stat_set_opts_in(self) -> None:
+        with patch.object(Aux_Classic_Hud.Aux_Hud.SimpleStat, "update", return_value=None):
+            self.classic_stat.rich_text = True
+            self.classic_stat.hudprefix = "AI "
+            self.classic_stat.hudsuffix = "%"
+            self.classic_stat.number = ("", "25", "", "", "", "")
+            with patch.object(self.classic_stat, "set_color"):
+                self.classic_stat.update(123, {123: {"screen_name": "Player"}})
+
+        rendered = self.classic_stat.lab.setText.call_args.args[0]
+        assert rendered.startswith("<span")
+        assert "AI&nbsp;" in rendered
+        assert ">25</span>" in rendered
 
     @patch("fpdb_3_legacy.Aux_Classic_Hud.Database.Database")
     def test_save_comment(self, mock_db_class) -> None:

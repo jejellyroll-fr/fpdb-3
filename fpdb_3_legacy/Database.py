@@ -69,6 +69,7 @@ from fpdb_3_legacy.Exceptions import (
     FpdbPostgresqlNoDatabase,
 )
 from fpdb_3_legacy.loggingFpdb import get_logger
+from fpdb_3_legacy.table_info import TableInfo
 
 # #import L10n
 # #_ = L10n.get_translation()
@@ -911,12 +912,13 @@ class Database(
             # skip and retry on a later notification instead of crashing.
             log.debug("No table info found yet for hand %s", hand_id)
             return None
-        table_info = list(row)
+        # The query selects the eight historical columns first, so the row
+        # maps onto TableInfo's leading fields; anything added to the SELECT
+        # is read by name here rather than shifting a caller's index.
+        limit_type = row[8] if len(row) > 8 else "all"
+        table_info = list(row[:8])
         if row[3] == "ring":  # cash game
-            table_info.append(None)
-            table_info.append(None)
-            table_info.append(None)
-            return table_info
+            return TableInfo.coerce([*table_info, None, None, None, limit_type])
         # tournament
         table_parts = re.split(" ", row[0], maxsplit=1)
         if len(table_parts) == 2:
@@ -950,7 +952,7 @@ class Database(
             self._rollback_after_failed_read()
 
         table_info.append(tourney_name)
-        return table_info
+        return TableInfo.coerce([*table_info, limit_type])
 
     def get_last_hand(self):
         c = self.connection.cursor()

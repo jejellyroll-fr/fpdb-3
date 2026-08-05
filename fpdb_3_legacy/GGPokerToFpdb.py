@@ -28,6 +28,7 @@ import re
 from decimal import Decimal
 from typing import Any, ClassVar, TypeAlias
 
+from fpdb_3_legacy.autonotes_aof import is_aof_category
 from fpdb_3_legacy.HandHistoryConverter import FpdbHandPartial, FpdbParseError, HandHistoryConverter
 from fpdb_3_legacy.loggingFpdb import get_logger
 
@@ -695,7 +696,7 @@ class GGPoker(HandHistoryConverter):
         # All-in or Fold format: no FLOP marker; PREFLOP contains all actions,
         # board is in the SUMMARY line. Map PREFLOP actions to FLOP (AoF model)
         # and populate board streets from the summary board line.
-        if hand.gametype.get("category") in ("aof_omaha", "aof_holdem"):
+        if is_aof_category(hand.gametype.get("category")):
             self._mark_aof_streets(hand)
             return
 

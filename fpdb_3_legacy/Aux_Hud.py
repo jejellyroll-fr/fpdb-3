@@ -41,6 +41,7 @@ from PySide6.QtWidgets import (
 
 #    FreePokerTools modules
 from fpdb_3_legacy import Aux_Base, Configuration, Popup, Stats
+from fpdb_3_legacy.hud_profiles import HudPositionScope
 from fpdb_3_legacy.i18n import gettext as _t
 from fpdb_3_legacy.loggingFpdb import get_logger, hud_trace
 
@@ -58,7 +59,7 @@ import os
 class HUDLayoutPositionsStore:
     def __init__(self) -> None:
         self.path = os.path.join(os.path.expanduser("~"), ".fpdb", "HUD_layout_positions.json")
-        self.data: dict[str, Any] = {"version": 1, "positions": {}}
+        self.data: dict[str, Any] = {"version": 2, "positions": {}}
         self.load()
 
     def load(self) -> None:
@@ -79,11 +80,22 @@ class HUDLayoutPositionsStore:
         except Exception:
             log.exception("Error saving HUD layout positions JSON")
 
+    @staticmethod
+    def _v1_key(site: str, layout: str, stat_set: str, max_seats: int, seat: str | int, block_id: str | int) -> str:
+        return f"{site}/{layout}/{stat_set}/{max_seats}/{seat}/{block_id}"
+
     def get_position(
-        self, site: str, layout: str, stat_set: str, max_seats: int, seat: str | int, block_id: str | int
+        self, site: str, layout: str, stat_set: str, max_seats: int, seat: str | int, block_id: str | int,
+        *, game: str = "all", game_type: str = "all",
     ) -> tuple[int, int] | None:
-        key = f"{site}/{layout}/{stat_set}/{max_seats}/{seat}/{block_id}"
-        pos = self.data.setdefault("positions", {}).get(key)
+        scope = HudPositionScope(site, game, game_type, max_seats, stat_set, layout)
+        positions = self.data.setdefault("positions", {})
+        pos = positions.get(scope.key(seat, block_id))
+        if pos is None:
+            # Version-1 data is an intentionally read-only fallback. The first
+            # drag writes an unambiguous v2 entry without assigning this legacy
+            # value to every game that happened to share a layout/profile.
+            pos = positions.get(self._v1_key(site, layout, stat_set, max_seats, seat, block_id))
         if pos:
             return int(pos.get("x", 0)), int(pos.get("y", 0))
         return None
@@ -146,8 +158,18 @@ class HUDLayoutPositionsStore:
         block_id: str | int,
         x: int,
         y: int,
+        *,
+        game: str = "all",
+        game_type: str = "all",
     ) -> None:
-        key = f"{site}/{layout}/{stat_set}/{max_seats}/{seat}/{block_id}"
+        if game == "all" and game_type == "all":
+            # Compatibility seam for old callers and, more importantly, for
+            # loading files produced by fpdb versions before scoped positions.
+            key = self._v1_key(site, layout, stat_set, max_seats, seat, block_id)
+        else:
+            scope = HudPositionScope(site, game, game_type, max_seats, stat_set, layout)
+            key = scope.key(seat, block_id)
+            self.data["version"] = 2
         self.data.setdefault("positions", {})[key] = {"x": x, "y": y}
         self.save()
 
@@ -252,7 +274,11 @@ class SimpleHUD(Aux_Base.AuxSeats):
         self.fgcolor = self.aux_params["fgcolor"]
         self.bgcolor = self.aux_params["bgcolor"]
         self.opacity = self.aux_params["opacity"]
-        self.font = QFont(self.aux_params["font"], int(self.aux_params["font_size"]))
+        try:
+            self.font_size = int(getattr(self.game_params, "font_size", "") or self.aux_params["font_size"])
+        except (TypeError, ValueError):
+            self.font_size = int(self.aux_params["font_size"])
+        self.font = QFont(self.aux_params["font"], self.font_size)
 
         # store these class definitions for use elsewhere
         # this is needed to guarantee that the classes in _this_ module
@@ -714,7 +740,14 @@ class SimpleHUD(Aux_Base.AuxSeats):
 
     def _stored_position(self, seat: int | str, block_index: int) -> tuple[int, int] | None:
         """A block's saved position, if one was ever saved."""
-        return get_positions_store().get_position(
+        game = getattr(self.hud, "poker_game", "all")
+        game_type = getattr(self.hud, "game_type", "all")
+        kwargs = {
+            "game": game if isinstance(game, str) else "all",
+            "game_type": game_type if isinstance(game_type, str) else "all",
+        }
+        store = get_positions_store()
+        args = (
             self.hud.site,
             self._layout_name(),
             getattr(self.game_params, "name", "default"),
@@ -722,6 +755,10 @@ class SimpleHUD(Aux_Base.AuxSeats):
             seat,
             block_index,
         )
+        try:
+            return store.get_position(*args, **kwargs)
+        except TypeError:
+            return store.get_position(*args)
 
     def _claim_legacy_block_positions(self) -> None:
         """Take over the blocks saved before layouts were told apart.
@@ -747,9 +784,55 @@ class SimpleHUD(Aux_Base.AuxSeats):
         if moved:
             log.info("Moved %d saved block position(s) onto layout %s", moved, layout_name)
 
+    def _persist_position_override(self, seat: Any, position: tuple[int, int]) -> bool:
+        """Persist classic HUD drags in the same scoped v2 store as blocks."""
+        if self._uses_block_windows():
+            return False
+        shared = getattr(getattr(self.hud, "layout_set", None), "layout", {}).get(self.hud.max)
+        canonical = self._to_shared_layout_space(position, shared) if shared is not None else position
+        stat_set = getattr(self.game_params, "name", "default")
+        game = getattr(self.hud, "poker_game", "all")
+        game_type = getattr(self.hud, "game_type", "all")
+        get_positions_store().set_position(
+            self.hud.site,
+            self._layout_name(),
+            stat_set,
+            self.hud.max,
+            seat,
+            "classic",
+            canonical[0],
+            canonical[1],
+            game=game if isinstance(game, str) else "all",
+            game_type=game_type if isinstance(game_type, str) else "all",
+        )
+        return True
+
+    def _apply_classic_position_overrides(self) -> None:
+        """Overlay scoped user positions on top of the shipped XML layout."""
+        store = get_positions_store()
+        stat_set = getattr(self.game_params, "name", "default")
+        game = getattr(self.hud, "poker_game", "all")
+        game_type = getattr(self.hud, "game_type", "all")
+        kwargs = {
+            "game": game if isinstance(game, str) else "all",
+            "game_type": game_type if isinstance(game_type, str) else "all",
+        }
+        for seat in range(1, self.hud.max + 1):
+            position = store.get_position(
+                self.hud.site, self._layout_name(), stat_set, self.hud.max, seat, "classic", **kwargs
+            )
+            if position is not None:
+                self.hud.layout.location[seat] = position
+        common = store.get_position(
+            self.hud.site, self._layout_name(), stat_set, self.hud.max, "common", "classic", **kwargs
+        )
+        if common is not None:
+            self.hud.layout.common = common
+
     def create(self) -> None:
         """Create classic one-window seats or PT4-style one-window-per-block seats."""
         if not self._uses_block_windows():
+            self._apply_classic_position_overrides()
             super().create()
             return
 
@@ -926,20 +1009,75 @@ class SimpleHUD(Aux_Base.AuxSeats):
         store = get_positions_store()
         layout_name = self._layout_name()
         stat_set = getattr(self.game_params, "name", "default")
-        store.set_position(
-            self.hud.site, layout_name, stat_set, self.hud.max, seat, block_index, canonical_x, canonical_y
-        )
+        game = getattr(self.hud, "poker_game", "all")
+        game_type = getattr(self.hud, "game_type", "all")
+        args = (self.hud.site, layout_name, stat_set, self.hud.max, seat, block_index, canonical_x, canonical_y)
+        kwargs = {
+            "game": game if isinstance(game, str) else "all",
+            "game_type": game_type if isinstance(game_type, str) else "all",
+        }
+        try:
+            store.set_position(*args, **kwargs)
+        except TypeError:
+            store.set_position(*args)
 
         self.block_positions[(seat, block_index)] = (canonical_x, canonical_y)
+        self._propagate_block_position(seat, block_index, (canonical_x, canonical_y))
         self._log_block_window_position(
             "drag-save", seat, block_index, (canonical_x, canonical_y), (new_abs_position.x(), new_abs_position.y())
         )
+
+    def _propagate_block_position(
+        self, seat: int | str, block_index: int, position: tuple[int, int]
+    ) -> None:
+        """Mirror a block drag only to open HUDs with the exact same scope."""
+        parent = getattr(self.hud, "parent", None)
+        source_scope = getattr(self.hud, "position_scope", None)
+        if source_scope is None:
+            return  # no identity to match on; see AuxSeats._propagate_to_open_huds
+        for other_hud in list(getattr(parent, "hud_dict", {}).values()):
+            if other_hud is self.hud or getattr(other_hud, "position_scope", None) != source_scope:
+                continue
+            for aux in getattr(other_hud, "aux_windows", []):
+                if not isinstance(aux, SimpleHUD) or not aux._uses_block_windows():
+                    continue
+                key = (seat, block_index)
+                aux.block_positions[key] = position
+                window = getattr(aux, "m_windows", {}).get(key)
+                if window is not None:
+                    x, y = aux._canonical_to_screen(position)
+                    window.move(x, y)
 
     def save_layout(self, *_args: Any) -> None:
         """Save the current HUD layout configuration.
 
         This method saves the positions of all HUD elements for the current table layout to the configuration.
         """
+        if isinstance(getattr(self.hud, "position_scope", None), HudPositionScope):
+            if self._uses_block_windows():
+                store = get_positions_store()
+                stat_set = getattr(self.game_params, "name", "default")
+                for (seat, block_index), position in self.block_positions.items():
+                    store.set_position(
+                        self.hud.site,
+                        self._layout_name(),
+                        stat_set,
+                        self.hud.max,
+                        seat,
+                        block_index,
+                        position[0],
+                        position[1],
+                        game=self.hud.poker_game,
+                        game_type=self.hud.game_type,
+                    )
+            else:
+                for display_seat, position in self.positions.items():
+                    slot = "common" if display_seat == "common" else self.adj[int(display_seat)]
+                    self._persist_position_override(slot, position)
+            self._save_block_offsets()
+            log.info("Scoped HUD layout saved successfully")
+            return
+
         new_locs = {self.adj[int(i)]: ((pos[0]), (pos[1])) for i, pos in list(self.positions.items()) if i != "common"}
         log.info("Saving layout for %s-max table: %s", self.hud.max, new_locs)
         self.config.save_layout_set(
@@ -1279,6 +1417,7 @@ class SimpleStat:
         self.stat_dict: dict[Any, Any] | None = None
         self.hud = aw.hud
         self.aux_params = aw.aux_params
+        self.font_size = getattr(aw, "font_size", self.aux_params.get("font_size", 8))
         self.colors = colors or {}
         self._bg = ""
 
@@ -1349,7 +1488,8 @@ class SimpleStat:
         """
         if bg:
             self._bg = bg
-        ss = f"QLabel{{font-family: {self.aux_params['font']};font-size: {self.aux_params['font_size']}pt;"
+        font_size = getattr(self, "font_size", self.aux_params["font_size"])
+        ss = f"QLabel{{font-family: {self.aux_params['font']};font-size: {font_size}pt;"
         if fg:
             ss += f"color: {fg};"
         if bg:
@@ -1912,6 +2052,7 @@ class SimpleTablePopupMenu(QWidget):
 
         hud.supported_games_parameters = dict(hud.supported_games_parameters)
         hud.supported_games_parameters["game_stat_set"] = stat_set
+        hud.position_scope = HudPositionScope.from_hud(hud)
 
         overrides = getattr(hud.parent, "_table_stat_set_overrides", None)
         if isinstance(overrides, dict):
