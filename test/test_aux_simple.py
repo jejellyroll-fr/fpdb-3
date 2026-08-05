@@ -65,7 +65,7 @@ class TestAuxClassicHudBasics(unittest.TestCase):
 
         # Import after stubbing
         global ClassicHud, ClassicStatWindow, ClassicStat, ClassicLabel, ClassicTableMw, Aux_Classic_Hud
-        import Aux_Classic_Hud  # noqa: E402
+        import fpdb_3_legacy.Aux_Classic_Hud as Aux_Classic_Hud  # noqa: E402
 
         ClassicHud = Aux_Classic_Hud.ClassicHud
         ClassicStatWindow = Aux_Classic_Hud.ClassicStatWindow

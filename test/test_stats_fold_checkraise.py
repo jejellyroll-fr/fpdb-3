@@ -13,7 +13,7 @@ import pytest
 # Add the project root to the Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from Stats import (
+from fpdb_3_legacy.Stats import (
     cr1,
     cr2,
     cr3,

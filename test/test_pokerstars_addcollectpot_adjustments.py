@@ -1,12 +1,13 @@
 import os
 import sys
 import unittest
+from decimal import Decimal
 from unittest.mock import Mock
 
 # Add the parent directory to the path to import the module
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from PokerStarsToFpdb import PokerStars
+from fpdb_3_legacy.PokerStarsToFpdb import PokerStars
 
 
 class TestAddCollectPotWithAdjustment(unittest.TestCase):
@@ -15,6 +16,7 @@ class TestAddCollectPotWithAdjustment(unittest.TestCase):
     def setUp(self):
         """Set up test fixtures."""
         self.config = Mock()
+        self.config.get_import_parameters.return_value = {"saveStarsHH": False}
         self.parser = PokerStars(self.config, "PokerStars", "USD")
 
     def _create_mock_hand(self, pot_stp=0):
@@ -48,18 +50,23 @@ class TestAddCollectPotWithAdjustment(unittest.TestCase):
 
     def test_bovada_uncalled_v1_adjustment_applied(self):
         """Test Bovada uncalled v1 adjustment when conditions are met."""
-        hand = self._create_mock_hand(pot_stp=5.0)  # hand.pot.stp = 5.0
+        hand = self._create_mock_hand(pot_stp=Decimal("5.0"))  # hand.pot.stp = 5.0
         match = self._create_mock_match("$15.00", "Player2")
-        adjustments = (True, False, 10.0, 2.0)  # bovada_uncalled_v1=True, blindsantes=10.0, adjustment=2.0
+        adjustments = (
+            True,
+            False,
+            Decimal("10.0"),
+            Decimal("2.0"),
+        )  # bovada_uncalled_v1=True, blindsantes=10.0, adjustment=2.0
 
         # Mock clearMoneyString to return clean amount
         self.parser.clearMoneyString = Mock(return_value="15.00")
 
         self.parser._addCollectPotWithAdjustment(hand, match, adjustments)
 
-        # Pot (15.0) == blindsantes (10.0) + hand.pot.stp (5.0), so adjustment should be applied
-        # Final pot = 15.0 - 2.0 = 13.0
-        hand.addCollectPot.assert_called_once_with(player="Player2", pot="13.0")
+        # Pot (15.00) == blindsantes (10.0) + hand.pot.stp (5.0), so adjustment should be applied
+        # Final pot = Decimal("15.00") - Decimal("2.0") = Decimal("13.00")
+        hand.addCollectPot.assert_called_once_with(player="Player2", pot="13.00")
 
     def test_bovada_uncalled_v1_no_adjustment_when_condition_not_met(self):
         """Test Bovada uncalled v1 doesn't adjust when pot != blindsantes + stp."""
@@ -86,23 +93,23 @@ class TestAddCollectPotWithAdjustment(unittest.TestCase):
 
         self.parser._addCollectPotWithAdjustment(hand, match, adjustments)
 
-        # Pot should be doubled: 7.5 * 2 = 15.0
-        hand.addCollectPot.assert_called_once_with(player="Player4", pot="15.0")
+        # Pot should be doubled: Decimal("7.50") * 2 = Decimal("15.00")
+        hand.addCollectPot.assert_called_once_with(player="Player4", pot="15.00")
 
     def test_bovada_uncalled_v1_takes_precedence_over_v2(self):
         """Test that bovada_uncalled_v1 condition takes precedence over v2."""
-        hand = self._create_mock_hand(pot_stp=3.0)  # hand.pot.stp = 3.0
+        hand = self._create_mock_hand(pot_stp=Decimal("3.0"))  # hand.pot.stp = 3.0
         match = self._create_mock_match("$8.00", "Player5")
-        adjustments = (True, True, 5.0, 1.5)  # Both v1 and v2 are True
+        adjustments = (True, True, Decimal("5.0"), Decimal("1.5"))  # Both v1 and v2 are True
 
         # Mock clearMoneyString to return clean amount
         self.parser.clearMoneyString = Mock(return_value="8.00")
 
         self.parser._addCollectPotWithAdjustment(hand, match, adjustments)
 
-        # Pot (8.0) == blindsantes (5.0) + hand.pot.stp (3.0), so v1 adjustment applied
-        # Final pot = 8.0 - 1.5 = 6.5 (not doubled)
-        hand.addCollectPot.assert_called_once_with(player="Player5", pot="6.5")
+        # Pot (8.00) == blindsantes (5.0) + hand.pot.stp (3.0), so v1 adjustment applied
+        # Final pot = Decimal("8.00") - Decimal("1.5") = Decimal("6.50") (not doubled)
+        hand.addCollectPot.assert_called_once_with(player="Player5", pot="6.50")
 
     def test_complex_pot_amount_with_currency_symbol(self):
         """Test handling of complex pot amounts with currency symbols."""
@@ -118,29 +125,29 @@ class TestAddCollectPotWithAdjustment(unittest.TestCase):
         # Verify clearMoneyString was called with the currency amount
         self.parser.clearMoneyString.assert_called_once_with("€125.75")
 
-        # Pot should be doubled: 125.75 * 2 = 251.5
-        hand.addCollectPot.assert_called_once_with(player="PlayerEur", pot="251.5")
+        # Pot should be doubled: Decimal("125.75") * 2 = Decimal("251.50")
+        hand.addCollectPot.assert_called_once_with(player="PlayerEur", pot="251.50")
 
     def test_zero_pot_amount(self):
         """Test handling of zero pot amount."""
-        hand = self._create_mock_hand(pot_stp=0)
+        hand = self._create_mock_hand(pot_stp=Decimal("0"))
         match = self._create_mock_match("$0.00", "Player6")
-        adjustments = (True, False, 0.0, 0.5)  # bovada_uncalled_v1=True
+        adjustments = (True, False, Decimal("0.0"), Decimal("0.5"))  # bovada_uncalled_v1=True
 
         # Mock clearMoneyString to return clean amount
         self.parser.clearMoneyString = Mock(return_value="0.00")
 
         self.parser._addCollectPotWithAdjustment(hand, match, adjustments)
 
-        # Pot (0.0) == blindsantes (0.0) + hand.pot.stp (0.0), so adjustment applied
-        # Final pot = 0.0 - 0.5 = -0.5
-        hand.addCollectPot.assert_called_once_with(player="Player6", pot="-0.5")
+        # Pot (0.00) == blindsantes (0.0) + hand.pot.stp (0), so adjustment applied
+        # Final pot = Decimal("0.00") - Decimal("0.5") = Decimal("-0.50")
+        hand.addCollectPot.assert_called_once_with(player="Player6", pot="-0.50")
 
     def test_decimal_calculations_precision(self):
         """Test decimal precision in calculations."""
-        hand = self._create_mock_hand(pot_stp=2.25)
+        hand = self._create_mock_hand(pot_stp=Decimal("2.25"))
         match = self._create_mock_match("$5.75", "Player7")
-        adjustments = (True, False, 3.50, 0.33)  # bovada_uncalled_v1=True
+        adjustments = (True, False, Decimal("3.50"), Decimal("0.33"))  # bovada_uncalled_v1=True
 
         # Mock clearMoneyString to return clean amount
         self.parser.clearMoneyString = Mock(return_value="5.75")
@@ -148,7 +155,7 @@ class TestAddCollectPotWithAdjustment(unittest.TestCase):
         self.parser._addCollectPotWithAdjustment(hand, match, adjustments)
 
         # Pot (5.75) == blindsantes (3.50) + hand.pot.stp (2.25), so adjustment applied
-        # Final pot = 5.75 - 0.33 = 5.42
+        # Final pot = Decimal("5.75") - Decimal("0.33") = Decimal("5.42")
         hand.addCollectPot.assert_called_once_with(player="Player7", pot="5.42")
 
     def test_large_pot_amounts(self):

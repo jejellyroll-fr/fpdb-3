@@ -1,0 +1,462 @@
+#!/usr/bin/env python
+from __future__ import annotations
+
+# -*- coding: utf-8 -*-
+#
+#    Copyright 2010-2011, Carl Gherardi
+#
+#    This program is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 2 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program; if not, write to the Free Software
+#    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+########################################################################
+from fpdb_3_legacy import L10n
+
+_ = L10n.get_translation()
+
+import datetime
+import re
+from decimal import Decimal
+
+from fpdb_3_legacy.HandHistoryConverter import FpdbHandPartial, FpdbParseError, HandHistoryConverter, log
+
+
+class Pkr(HandHistoryConverter):
+    compiledPlayers: set[str] = set()
+    # Class Variables
+
+    sitename = "PKR"
+    filetype = "text"
+    codepage = ("utf8", "cp1252")
+    siteId = 13  # Needs to match id entry in Sites database
+
+    mixes = {"HORSE": "horse", "8-Game": "8game", "HOSE": "hose"}  # Legal mixed games
+    # ADD Euro, Sterling, etc HERE. "play" belongs here too: determineGameType
+    # reports a play-money table as such, and PKR still writes its amounts with a
+    # dollar sign, so the action regexes need the same symbol as USD. Without the
+    # entry compilePlayerRegexs raised KeyError('play') and no hand of a
+    # play-money file could be read at all.
+    sym = {"USD": "\\$", "T$": "", "EUR": "\u20ac", "GBP": "\\£", "play": "\\$"}
+    substitutions = {
+        "LEGAL_ISO": "USD|EUR|GBP",  # legal ISO currency codes
+        "LS": "\\$|\xe2\x82\xac|\u20ac|\\£|",  # legal currency symbols - Euro(cp1252, utf-8)
+        "NUM": ".,\\d",
+    }
+
+    limits = {"NO LIMIT": "nl", "POT LIMIT": "pl", "LIMIT": "fl"}
+    games = {  # base, category
+        "HOLD'EM": ("hold", "holdem"),
+        "OMAHA": ("hold", "omahahi"),
+        "OMAHA HI/LO": ("hold", "omahahilo"),
+        "FIXME5 Card Draw": ("draw", "fivedraw"),
+    }
+    currencies = {"€": "EUR", "$": "USD", "": "T$", "£": "GBP"}
+
+    months = {
+        "January": 1,
+        "Jan": 1,
+        "February": 2,
+        "Feb": 2,
+        "March": 3,
+        "Mar": 3,
+        "April": 4,
+        "Apr": 4,
+        "May": 5,
+        "June": 6,
+        "Jun": 6,
+        "July": 7,
+        "Jul": 7,
+        "August": 8,
+        "Aug": 8,
+        "September": 9,
+        "Sep": 9,
+        "October": 10,
+        "Oct": 10,
+        "November": 11,
+        "Nov": 11,
+        "December": 12,
+        "Dec": 12,
+    }
+
+    # Static regexes
+    re_GameInfo = re.compile(
+        """
+          Table\\s\\#\\d+\\s\\-\\s((Tournament|STT)\\s\\#\\s?(?P<TOURNO>\\d+)(\\sTable\\s\\#)?)?(?P<TABLE>.+?)?\\s
+          Starting\\sHand\\s\\#(?P<HID>[0-9]+)\\s
+          Start\\stime\\sof\\shand:\\s(?P<DATETIME>.*)\\s
+          Last\\sHand\\s(n/a|\\#[0-9]+)\\s
+          Game\\sType:\\s(?P<GAME>HOLD'EM|OMAHA|OMAHA\\sHI/LO)\\s
+          Limit\\sType:\\s(?P<LIMIT>NO\\sLIMIT|LIMIT|POT\\sLIMIT)\\s
+          Table\\sType:\\s(RING|TOURNAMENT)\\s
+          Money\\sType:\\s(?P<MONEY>PLAY\\sMONEY|REAL\\sMONEY|TOURNAMENT\\sCHIPS|Real\\smoney|Tournament\\schips)\\s
+          Blinds\\sare\\snow\\s(?P<CURRENCY>{LS}|)?
+          (?P<SB>[{NUM}]+)\\s?/\\s?({LS})?
+          (?P<BB>[{NUM}]+)
+          """.format(**substitutions),
+        re.MULTILINE | re.VERBOSE,
+    )
+
+    re_PlayerInfo = re.compile(
+        """
+              ^Seat\\s(?P<SEAT>[0-9]+):\\s
+              (?P<PNAME>.+?)
+              (\\s\\(bounty\\svalue\\s({LS})?[{NUM}]+,\\sbounty\\swon\\s({LS})?[{NUM}]+\\))?\\s-\\s
+              ({LS})?(?P<CASH>[{NUM}]+)
+            """.format(**substitutions),
+        re.MULTILINE | re.VERBOSE,
+    )
+
+    re_HandInfo = re.compile(
+        """
+          ((?P<MAX>\\d+)-max\\s)?
+          (?P<PLAY>\\(Play\\sMoney\\)\\s)?
+          Moving\\sButton\\sto\\sseat\\s(?P<BUTTON>\\d+)\\s""",
+        re.MULTILINE | re.VERBOSE,
+    )
+
+    re_Identify = re.compile("Starting\\sHand\\s\\#\\d+")
+    re_SplitHands = re.compile("\n\n+")
+    re_TailSplitHands = re.compile("(\n\n\n+)")
+    re_Button = re.compile("Seat #(?P<BUTTON>\\d+) is the button", re.MULTILINE)
+    re_Board = re.compile(r"(?P<CARDS>\[.+\])")
+    re_Cards = re.compile(r"\[(?P<CARD>.+?)\]")
+    re_Partial = re.compile("Table\\s\\#\\d+\\s\\-\\s")
+    #        self.re_setHandInfoRegex('.*#(?P<HID>[0-9]+): Table (?P<TABLE>[ a-zA-Z]+) - \$?(?P<SB>[.0-9]+)/\$?(?P<BB>[.0-9]+) - (?P<GAMETYPE>.*) - (?P<HR>[0-9]+):(?P<MIN>[0-9]+) ET - (?P<YEAR>[0-9]+)/(?P<MON>[0-9]+)/(?P<DAY>[0-9]+)Table (?P<TABLE>[ a-zA-Z]+)\nSeat (?P<BUTTON>[0-9]+)')
+
+    re_DateTime = re.compile(
+        """(?P<D>[0-9]{2}) (?P<M>\\w+) (?P<Y>[0-9]{4}) (?P<H>[0-9]+):(?P<MIN>[0-9]+):(?P<S>[0-9]+)""", re.MULTILINE
+    )
+
+    def compilePlayerRegexs(self, hand):
+        players = set([player[1] for player in hand.players])
+        if not players <= self.compiledPlayers:  # x <= y means 'x is subset of y'
+            # we need to recompile the player regexs.
+            self.compiledPlayers = players
+            player_re = "(?P<PNAME>" + "|".join(map(re.escape, players)) + ")"
+            subst = {
+                "PLYR": player_re,
+                "CUR": self.sym[hand.gametype["currency"]],
+                "NUM": ".,\\d",
+            }
+            self.re_PostSB = re.compile(
+                r"^{PLYR} posts small blind \({CUR}(?P<SB>[{NUM}]+)\)".format(**subst), re.MULTILINE
+            )
+            self.re_PostBB = re.compile(
+                r"^{PLYR} posts big blind \({CUR}(?P<BB>[{NUM}]+)\)".format(**subst), re.MULTILINE
+            )
+            self.re_Antes = re.compile(r"^{PLYR} posts ante of {CUR}(?P<ANTE>[{NUM}]+)".format(**subst), re.MULTILINE)
+            self.re_BringIn = re.compile(
+                r"^{PLYR} brings[- ]in( low|) for {CUR}(?P<BRINGIN>[{NUM}]+)".format(**subst), re.MULTILINE
+            )
+            # A player entering the game posts a bare amount instead of the
+            # "posts big blind (...)" line, optionally with a separate dead post.
+            self.re_Post = re.compile(r"^{PLYR} posts {CUR}(?P<BB>[{NUM}]+)$".format(**subst), re.MULTILINE)
+            self.re_HeroCards = re.compile(
+                r"^Dealing( (?P<OLDCARDS>\[.+\]))?( (?P<NEWCARDS>\[.+\])) to {PLYR}".format(**subst), re.MULTILINE
+            )
+            self.re_Action = re.compile(
+                r"""
+                        ^{PLYR}(?P<ATYPE>\sbets|\schecks|\sraises|\scalls|\sfolds)(\sand\sshows\s\[.+\])?(\sto)?
+                        (\s({CUR})?(?P<BET>[{NUM}]+))?(\s\(all\-in\))?\s*$
+                        """.format(**subst),
+                re.MULTILINE | re.VERBOSE,
+            )
+            self.re_ShowdownAction = re.compile(r"^{PLYR} shows (?P<CARDS>\[.+\])".format(**subst), re.MULTILINE)
+            self.re_CollectPot = re.compile(
+                r"^{PLYR} (ties( side pot \#\d)?, and )?(ties|wins) {CUR}(?P<POT>[{NUM}]+)".format(**subst), re.MULTILINE
+            )
+            self.re_sitsOut = re.compile(f"^{player_re} sits out", re.MULTILINE)
+            self.re_ShownCards = re.compile(
+                f"^Seat (?P<SEAT>[0-9]+): {player_re} (\\(.*\\) )?(?P<SHOWED>showed|mucked) (?P<CARDS>\\[.+\\])",
+                re.MULTILINE,
+            )
+
+    def readSupportedGames(self):
+        return [
+            ["ring", "hold", "nl"],
+            ["ring", "hold", "pl"],
+            ["ring", "hold", "fl"],
+            ["tour", "hold", "nl"],
+            ["tour", "hold", "pl"],
+            ["tour", "hold", "fl"],
+        ]
+
+    def determineGameType(self, handText):
+        info = {}
+        m = self.re_GameInfo.search(handText)
+        if not m:
+            m2 = self.re_Partial.search(handText)
+            if not m2:
+                message = "Join in hand"
+                raise FpdbHandPartial(f"Partial hand history: {message}")
+            else:
+                tmp = handText[0:200]
+                log.error(_("PkrToFpdb.determineGameType: '%s'") % tmp)
+                raise FpdbParseError
+
+        mg = m.groupdict()
+        # print "DEBUG: %s" % mg
+
+        if "LIMIT" in mg:
+            info["limitType"] = self.limits[mg["LIMIT"]]
+        if "GAME" in mg:
+            (info["base"], info["category"]) = self.games[mg["GAME"]]
+        if "SB" in mg:
+            info["sb"] = self.clearMoneyString(mg["SB"])
+        if "BB" in mg:
+            info["bb"] = self.clearMoneyString(mg["BB"])
+        if mg.get("MONEY", "").upper() == "PLAY MONEY":
+            # Play money tables state a currency symbol like real money ones,
+            # so the money type is the only thing that tells them apart.
+            info["currency"] = "play"
+        elif "CURRENCY" in mg:
+            info["currency"] = self.currencies[mg["CURRENCY"]]
+        if "TOURNO" in mg and mg["TOURNO"] is not None:
+            info["type"] = "tour"
+        else:
+            info["type"] = "ring"
+
+        return info
+
+    def _parseDateTime(self, text):
+        """Read a header timestamp, written as "11 Jun 2012 21:38:10"."""
+        datetimestr = "2000/01/01 00:00:00"  # default used if time not found
+        for a in self.re_DateTime.finditer(text):
+            month = self.months[a.group("M")]
+            datetimestr = "{}/{}/{} {}:{}:{}".format(
+                a.group("Y"),
+                month,
+                a.group("D"),
+                a.group("H"),
+                a.group("MIN"),
+                a.group("S"),
+            )
+        # PKR headers carry no TZ marker; treat as UTC explicitly.
+        return datetime.datetime.strptime(datetimestr, "%Y/%m/%d %H:%M:%S").replace(tzinfo=datetime.UTC)
+
+    def readHandInfo(self, hand):
+        m1 = self.re_HandInfo.search(hand.handText, re.DOTALL)
+        m2 = self.re_GameInfo.search(hand.handText)
+        if m1 is None or m2 is None:
+            tmp = hand.handText[0:200]
+            log.error(_("PkrToFpdb.readHandInfo: '%s'") % tmp)
+            raise FpdbParseError
+
+        # Both patterns must match, so every field below is present.
+        info = {**m1.groupdict(), **m2.groupdict()}
+        log.debug(f"readHandInfo: {info}")
+
+        hand.handid = info["HID"]
+        hand.startTime = self._parseDateTime(info["DATETIME"])
+        hand.tablename = "1" if info["TABLE"] is None else info["TABLE"]
+        hand.buttonpos = int(info["BUTTON"])
+        if info["MAX"] is not None:
+            hand.maxseats = int(info["MAX"])
+        if info["TOURNO"] is not None:
+            hand.tourNo = info["TOURNO"]
+            # A PKR hand history never states the buy-in or the level: the
+            # header stops at the tournament number. Record the buy-in as
+            # unknown rather than inventing one; a tourney summary import can
+            # still supply it, as "NA" is the placeholder the database lets a
+            # better source override.
+            hand.buyin = 0
+            hand.fee = 0
+            hand.buyinCurrency = "NA"
+
+    def readButton(self, hand):
+        if hand.buttonpos == 0:
+            m = self.re_Button.search(hand.handText)
+            if m:
+                hand.buttonpos = int(m.group("BUTTON"))
+            else:
+                log.info("readButton: not found")
+
+    def readPlayerStacks(self, hand):
+        log.debug("readPlayerStacks")
+        m = self.re_PlayerInfo.finditer(hand.handText)
+        players = {}  # Player Stacks are printed in the same format
+        # At the beginning and end of the hand history
+        # The hash is to cache the player names, and ignore
+        # The second round
+        for a in m:
+            if a.group("PNAME") in players:
+                pass  # Ignore
+            else:
+                # print "DEBUG: addPlayer(%s, %s, %s)" % (a.group('SEAT'), a.group('PNAME'), a.group('CASH'))
+                hand.addPlayer(int(a.group("SEAT")), a.group("PNAME"), self.clearMoneyString(a.group("CASH")))
+                players[a.group("PNAME")] = True
+
+    def markStreets(self, hand):
+        # PREFLOP = ** Dealing down cards **
+        # This re fails if,  say, river is missing; then we don't get the ** that starts the river.
+        if hand.gametype["base"] in ("hold"):
+            m = re.search(
+                r"Dealing Cards(?P<PREFLOP>.+(?=Dealing Flop)|.+)"
+                r"(Dealing Flop (?P<FLOP>(\[\S\S \S\S \S\S\]|\[\S \S\]\[\S \S\]\[\S \S\]|\[\S\S\]\[\S\S\]\[\S\S\]).+(?=Dealing\sTurn)|.+))?"
+                r"(Dealing Turn (?P<TURN>(\[\S\S\]|\[\S \S\]).+(?=Dealing\sRiver)|.+))?"
+                r"(Dealing River (?P<RIVER>(\[\S\S\]|\[\S \S\]).+))?",
+                hand.handText,
+                re.DOTALL,
+            )
+        hand.addStreets(m)
+
+    def readCommunityCards(self, hand, street):  # street has been matched by markStreets, so exists in this hand
+        if street in (
+            "FLOP",
+            "TURN",
+            "RIVER",
+        ):  # a list of streets which get dealt community cards (i.e. all but PREFLOP)
+            # print "DEBUG readCommunityCards:", street, hand.streets.group(street)
+            m = self.re_Board.search(hand.streets[street])
+            if m is None:
+                raise FpdbParseError("Could not identify community cards")
+            if street == "FLOP" and re.search(r"\[\S\S \S\S \S\S\]", hand.streets[street]):
+                cards = m.group("CARDS").strip("[]").split(" ")
+            else:
+                m2 = self.re_Cards.finditer(m.group("CARDS"))
+                cards = [c.group("CARD").replace(" ", "") for c in m2]
+            hand.setCommunityCards(street, cards)
+
+    def readAntes(self, hand):
+        log.debug("reading antes")
+        m = self.re_Antes.finditer(hand.handText)
+        for player in m:
+            # ~ logging.debug("hand.addAnte(%s,%s)" %(player.group('PNAME'), player.group('ANTE')))
+            hand.addAnte(player.group("PNAME"), self.clearMoneyString(player.group("ANTE")))
+
+    def readBringIn(self, hand):
+        pass
+
+    def readBlinds(self, hand):
+        m = self.re_PostSB.search(hand.handText)
+        if m:
+            hand.addBlind(m.group("PNAME"), "small blind", self.clearMoneyString(m.group("SB")))
+        else:
+            hand.addBlind(None, None, None)
+        for a in self.re_PostBB.finditer(hand.handText):
+            hand.addBlind(a.group("PNAME"), "big blind", self.clearMoneyString(a.group("BB")))
+        for a in self.re_Post.finditer(hand.handText):
+            posted = Decimal(self.clearMoneyString(a.group("BB")))
+            subst = {
+                "PLYR": "(?P<PNAME>" + re.escape(a.group("PNAME")) + ")",
+                "CUR": self.sym[hand.gametype["currency"]],
+                "NUM": ".,\\d",
+            }
+            dead = re.search(
+                r"^{PLYR} posts {CUR}(?P<DEAD>[{NUM}]+) dead$".format(**subst), hand.handText, re.MULTILINE
+            )
+            if dead is None:
+                hand.addBlind(a.group("PNAME"), "big blind", self.clearMoneyString(a.group("BB")))
+                continue
+
+            # The site states the dead amount, so take it rather than halving the
+            # big blind: that only holds for a 2:1 structure.
+            deadAmount = Decimal(self.clearMoneyString(dead.group("DEAD")))
+            if posted == 0:
+                hand.addBlind(a.group("PNAME"), "secondsb", str(deadAmount))
+            else:
+                hand.addBlind(a.group("PNAME"), "both", str(posted + deadAmount))
+
+    def readHoleCards(self, hand):
+        #    streets PREFLOP, PREDRAW, and THIRD are special cases beacause
+        #    we need to grab hero's cards
+        for street in ("PREFLOP", "DEAL"):
+            if street in hand.streets.keys():
+                m = self.re_HeroCards.finditer(hand.streets[street])
+                for found in m:
+                    #                    if m == None:
+                    #                        hand.involved = False
+                    #                    else:
+                    hand.hero = found.group("PNAME")
+                    if re.search(r"\]\[", found.group("NEWCARDS")):
+                        m2 = self.re_Cards.finditer(found.group("NEWCARDS"))
+                        newcards = [c.group("CARD").replace(" ", "") for c in m2]
+                    else:
+                        newcards = found.group("NEWCARDS").strip("[]").split(" ")
+                    hand.addHoleCards(street, hand.hero, closed=newcards, shown=False, mucked=False, dealt=True)
+
+    def readAction(self, hand, street):
+        m = self.re_Action.finditer(hand.streets[street])
+        for action in m:
+            action.groupdict()
+            # print "DEBUG: readAction: acts: %s street: %s" % (acts, street)
+            if action.group("ATYPE") == " folds":
+                hand.addFold(street, action.group("PNAME"))
+            elif action.group("ATYPE") == " checks":
+                hand.addCheck(street, action.group("PNAME"))
+            elif action.group("ATYPE") == " calls":
+                # PKR states the total a player calls to, not what the call adds:
+                # after "Player3 calls 0.08" and "Player5 raises to 0.16", the
+                # line "Player3 calls 0.16" only puts 0.08 more in. addCallTo
+                # subtracts what the player already has in on this street.
+                hand.addCallTo(street, action.group("PNAME"), self.clearMoneyString(action.group("BET")))
+            elif action.group("ATYPE") == " raises":
+                hand.addRaiseTo(street, action.group("PNAME"), self.clearMoneyString(action.group("BET")))
+            elif action.group("ATYPE") == " bets":
+                hand.addBet(street, action.group("PNAME"), self.clearMoneyString(action.group("BET")))
+            elif action.group("ATYPE") == " discards":
+                hand.addDiscard(street, action.group("PNAME"), action.group("BET"), action.group("DISCARDED"))
+            elif action.group("ATYPE") == " stands pat":
+                hand.addStandsPat(street, action.group("PNAME"))
+            else:
+                log.debug(
+                    _("DEBUG:")
+                    + _("Unimplemented %s: '%s' '%s'") % ("readAction", action.group("PNAME"), action.group("ATYPE"))
+                )
+
+    def readShowdownActions(self, hand):
+        for shows in self.re_ShowdownAction.finditer(hand.handText):
+            if re.search(r"\]\s?\[", shows.group("CARDS")):
+                m2 = self.re_Cards.finditer(shows.group("CARDS"))
+                cards = [c.group("CARD").replace(" ", "").replace("X", "") for c in m2]
+            else:
+                cards = shows.group("CARDS").strip("X[]").split(" ")
+            # print "DEBUG: addShownCards(%s, %s)" %(cards, shows.group('PNAME'))
+            hand.addShownCards(cards, shows.group("PNAME"))
+
+    def readCollectPot(self, hand):
+        for m in self.re_CollectPot.finditer(hand.handText):
+            # print "DEBUG: addCollectPot(%s, %s)" %(m.group('PNAME'), m.group('POT'))
+            hand.addCollectPot(player=m.group("PNAME"), pot=self.clearMoneyString(m.group("POT")))
+
+    def readShownCards(self, hand):
+        for m in self.re_ShownCards.finditer(hand.handText):
+            if m.group("CARDS") is not None:
+                if re.search(r"\]\s?\[", m.group("CARDS")):
+                    m2 = self.re_Cards.finditer(m.group("CARDS"))
+                    cards = [c.group("CARD").replace(" ", "").replace("X", "") for c in m2]
+                else:
+                    cards = m.group("CARDS").strip("X[]").split(" ")
+
+                (shown, mucked) = (False, False)
+                if m.group("SHOWED") == "showed":
+                    shown = True
+                elif m.group("SHOWED") == "mucked":
+                    mucked = True
+
+                hand.addShownCards(cards=cards, player=m.group("PNAME"), shown=shown, mucked=mucked)
+
+    def readSTP(self, hand):
+        """Read Splash the Pot - not implemented."""
+        pass
+
+    def readTourneyResults(self, hand):
+        """Read tourney results - not implemented."""
+        pass
+
+    def readOther(self, hand):
+        """Read other info - not implemented."""
+        pass
+
+    def readSummaryInfo(self, summaryInfoList):
+        """Read summary info - not implemented."""
+        return True

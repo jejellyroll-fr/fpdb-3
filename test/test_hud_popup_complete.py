@@ -10,16 +10,18 @@ import sys
 from unittest.mock import Mock
 
 import pytest
-from PyQt5.QtCore import Qt
-from PyQt5.QtTest import QTest
-from PyQt5.QtWidgets import QHBoxLayout, QLabel, QVBoxLayout, QWidget
+
+pytestmark = pytest.mark.qt
+from PySide6.QtCore import Qt
+from PySide6.QtTest import QTest
+from PySide6.QtWidgets import QHBoxLayout, QLabel, QVBoxLayout, QWidget
 
 # Add the project root to the Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 # Import HUD components
-import Stats
-from Aux_Hud import SimpleStat
+import fpdb_3_legacy.Stats as Stats
+from fpdb_3_legacy.Aux_Hud import SimpleStat
 
 
 class MockPopup:
@@ -77,11 +79,6 @@ class MockPopup:
 
 class TestHUDPopupsComplete:
     """Complete test suite for HUD popups with proper mocking."""
-
-    @pytest.fixture
-    def qapp(self, qapp):
-        """Ensure QApplication is available."""
-        return qapp
 
     @pytest.fixture
     def mock_config(self):

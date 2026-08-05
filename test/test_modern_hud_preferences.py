@@ -63,7 +63,7 @@ class TestAddStatDialog(unittest.TestCase):
     def setUp(self):
         """Set up test fixtures."""
         # Import here after mocking
-        from ModernHudPreferences import AddStatDialog
+        from fpdb_3_legacy.ModernHudPreferences import AddStatDialog
 
         self.AddStatDialog = AddStatDialog
 

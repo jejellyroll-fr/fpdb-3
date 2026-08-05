@@ -42,7 +42,7 @@ class TestImportName(unittest.TestCase):
         """Import the module to test after mocks are set up."""
         # Import here to ensure mocks are active
         global importName
-        from Hud import importName
+        from fpdb_3_legacy.Hud import importName
 
     def test_import_valid_module(self) -> None:
         """Test importing a valid module and class."""
@@ -53,10 +53,11 @@ class TestImportName(unittest.TestCase):
 
     def test_import_invalid_module(self) -> None:
         """Test importing an invalid module."""
-        with patch("Hud.log") as mock_log:
+        with patch("fpdb_3_legacy.Hud.log") as mock_log:
             result = importName("nonexistent_module", "some_class")
             assert result is None
-            mock_log.exception.assert_called_once()
+            # Reported once, after both the bare and the package-qualified name fail.
+            mock_log.error.assert_called_once()
 
 
 class TestHudBasics(unittest.TestCase):
@@ -68,7 +69,7 @@ class TestHudBasics(unittest.TestCase):
 
     def test_hud_class_exists(self) -> None:
         """Test that Hud class can be imported."""
-        from Hud import Hud
+        from fpdb_3_legacy.Hud import Hud
 
         assert callable(Hud)
 

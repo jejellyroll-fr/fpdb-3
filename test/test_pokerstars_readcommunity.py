@@ -9,8 +9,8 @@ import re
 import unittest
 from unittest.mock import Mock
 
-from Exceptions import FpdbHandPartial
-from PokerStarsToFpdb import PokerStars
+from fpdb_3_legacy.Exceptions import FpdbHandPartial
+from fpdb_3_legacy.PokerStarsToFpdb import PokerStars
 
 
 class MockConfig:
@@ -92,6 +92,9 @@ class TestReadCommunityCards(unittest.TestCase):
         """Test que les cartes vides lèvent une exception FpdbHandPartial."""
         hand = Mock()
         hand.streets = {"FLOP": "[]"}
+        # No SUMMARY Board line, so board recovery finds nothing and the empty
+        # FLOP still raises (readCommunityCards reads handText to attempt recovery).
+        hand.handText = "*** FLOP *** []\n"
 
         with self.assertRaises(FpdbHandPartial) as context:
             self.parser.readCommunityCards(hand, "FLOP")

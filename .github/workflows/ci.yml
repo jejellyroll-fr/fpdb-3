@@ -1,0 +1,644 @@
+name: CI
+
+on:
+  push:
+    branches: [ bigbang, main, development ]
+  pull_request:
+    branches: [ bigbang, main, development ]
+  workflow_dispatch:
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+      - name: Install Ruff
+        run: uv tool install ruff
+      - name: Install mypy
+        run: uv tool install mypy
+      - name: Install Pyright
+        run: uv tool install pyright
+      - name: Lint repository
+        run: ruff check fpdb_3_legacy fpdb test tests tools
+      - name: Prepare compiled translation resources
+        run: python tools/prepare_briefcase_resources.py
+      - name: Verify technical-debt inventory
+        run: python tools/todo_inventory.py --check
+      - name: Type-check modernized core
+        run: >-
+          mypy
+          fpdb
+          tools/prepare_briefcase_resources.py
+          tools/todo_inventory.py
+          tools/coverage_ratchet.py
+          fpdb_3_legacy/__init__.py
+          fpdb_3_legacy/equity.py
+          fpdb_3_legacy/fpdb_api.py
+          fpdb_3_legacy/HandDataReporter.py
+          fpdb_3_legacy/ImprovedErrorHandler.py
+          fpdb_3_legacy/interlocks.py
+          fpdb_3_legacy/LeakDetector.py
+          fpdb_3_legacy/dialects.py
+          fpdb_3_legacy/pt4_adapter
+          fpdb_3_legacy/http_capture_models.py
+          fpdb_3_legacy/http_capture_actions.py
+          fpdb_3_legacy/http_capture_adapter.py
+          fpdb_3_legacy/http_capture_diff.py
+          fpdb_3_legacy/http_capture_hand_builder.py
+          fpdb_3_legacy/http_capture_db_import.py
+          fpdb_3_legacy/http_capture_ofc.py
+          fpdb_3_legacy/swc_http_adapter.py
+          fpdb_3_legacy/menu_layout.py
+          fpdb_3_legacy/i18n.py
+          fpdb_3_legacy/i18n_compile.py
+          fpdb_3_legacy/localized_formats.py
+          fpdb_3_legacy/ConfigInitializer.py
+          fpdb_3_legacy/ConfigReloadWidget.py
+          fpdb_3_legacy/Configuration.py
+          fpdb_3_legacy/ConfigurationManager.py
+          fpdb_3_legacy/Filters.py
+          fpdb_3_legacy/db_backends.py
+          fpdb_3_legacy/db_migrate.py
+          fpdb_3_legacy/Database.py
+          fpdb_3_legacy/database_bulk_import.py
+          fpdb_3_legacy/database_hud_stats.py
+          fpdb_3_legacy/database_schema.py
+          fpdb_3_legacy/http_capture_importability.py
+          fpdb_3_legacy/http_capture_registry.py
+          fpdb_3_legacy/http_capture_archive.py
+          fpdb_3_legacy/http_capture_build.py
+          fpdb_3_legacy/http_capture_refresh.py
+          fpdb_3_legacy/http_capture_replay.py
+          fpdb_3_legacy/http_capture_analyze.py
+          fpdb_3_legacy/swc_http_capture.py
+          fpdb_3_legacy/stat_adapters.py
+          fpdb_3_legacy/stats_context.py
+          fpdb_3_legacy/stats_formatting.py
+          fpdb_3_legacy/stats_display.py
+          fpdb_3_legacy/stats_financial.py
+          fpdb_3_legacy/stats_postflop.py
+          fpdb_3_legacy/stats_preflop.py
+          fpdb_3_legacy/stats_sizing.py
+          fpdb_3_legacy/stats_table.py
+          fpdb_3_legacy/stats_tournament.py
+          fpdb_3_legacy/sql_indexes.py
+          fpdb_3_legacy/sql_queries_cash_profit.py
+          fpdb_3_legacy/sql_queries_cache_maintenance.py
+          fpdb_3_legacy/sql_queries_cache_rebuild.py
+          fpdb_3_legacy/sql_queries_cards_cache_write.py
+          fpdb_3_legacy/sql_queries_core.py
+          fpdb_3_legacy/sql_queries_database_admin.py
+          fpdb_3_legacy/sql_queries_filters.py
+          fpdb_3_legacy/sql_queries_game_types.py
+          fpdb_3_legacy/sql_queries_hand_artifacts.py
+          fpdb_3_legacy/sql_queries_hand_detail.py
+          fpdb_3_legacy/sql_queries_hand_player_persistence.py
+          fpdb_3_legacy/sql_queries_hand_root_persistence.py
+          fpdb_3_legacy/sql_queries_history.py
+          fpdb_3_legacy/sql_queries_hud_aggregated_stats.py
+          fpdb_3_legacy/sql_queries_hud_current_stats.py
+          fpdb_3_legacy/sql_queries_hud_session_stats.py
+          fpdb_3_legacy/sql_queries_hud_cache_write.py
+          fpdb_3_legacy/sql_queries_import_auxiliary.py
+          fpdb_3_legacy/sql_queries_opponents.py
+          fpdb_3_legacy/sql_queries_player_detailed.py
+          fpdb_3_legacy/sql_queries_player_position.py
+          fpdb_3_legacy/sql_queries_player_auto_notes.py
+          fpdb_3_legacy/sql_queries_player_stats.py
+          fpdb_3_legacy/sql_queries_positions_cache_write.py
+          fpdb_3_legacy/sql_queries_replayer.py
+          fpdb_3_legacy/sql_queries_session_stats.py
+          fpdb_3_legacy/sql_queries_session_cache_write.py
+          fpdb_3_legacy/sql_queries_tournament_player.py
+          fpdb_3_legacy/sql_queries_tournament_graph.py
+          fpdb_3_legacy/sql_queries_tournament_persistence.py
+          fpdb_3_legacy/sql_queries_utility.py
+          fpdb_3_legacy/sql_query_placeholders.py
+          fpdb_3_legacy/sql_metadata.py
+          fpdb_3_legacy/sql_schema_cards_cache.py
+          fpdb_3_legacy/sql_schema_core.py
+          fpdb_3_legacy/sql_schema_game.py
+          fpdb_3_legacy/sql_schema_hand.py
+          fpdb_3_legacy/sql_schema_hand_player.py
+          fpdb_3_legacy/sql_schema_hand_root.py
+          fpdb_3_legacy/sql_schema_hud_cache.py
+          fpdb_3_legacy/sql_schema_import.py
+          fpdb_3_legacy/sql_schema_lookup.py
+          fpdb_3_legacy/sql_schema_player.py
+          fpdb_3_legacy/sql_schema_position_cache.py
+          fpdb_3_legacy/sql_schema_raw.py
+          fpdb_3_legacy/sql_schema_session_cache.py
+          fpdb_3_legacy/sql_schema_tournament.py
+          fpdb_3_legacy/sql_schema_tournament_cache.py
+          fpdb_3_legacy/sql_schema_time.py
+          fpdb_3_legacy/AutoNoteRules.py
+          fpdb_3_legacy/AutoNotes.py
+          fpdb_3_legacy/PlayerProfiler.py
+          fpdb_3_legacy/Exceptions.py
+          fpdb_3_legacy/ConfigObservers.py
+          fpdb_3_legacy/AutoImportConfigObserver.py
+          fpdb_3_legacy/PopupIcons.py
+          fpdb_3_legacy/ModernPopup.py
+          fpdb_3_legacy/ModernHudPreferences.py
+          fpdb_3_legacy/ModernSeatPreferences.py
+          fpdb_3_legacy/ModernSitePreferences.py
+          fpdb_3_legacy/L10n.py
+          fpdb_3_legacy/Options.py
+          fpdb_3_legacy/RegressionFileComparator.py
+          fpdb_3_legacy/PopupThemes.py
+          fpdb_3_legacy/ThemeManager.py
+          fpdb_3_legacy/ThemeCreatorDialog.py
+          fpdb_3_legacy/DetectInstalledSites.py
+          fpdb_3_legacy/detect_site.py
+          fpdb_3_legacy/Card.py
+          fpdb_3_legacy/Hand.py
+          fpdb_3_legacy/HandHistory.py
+          fpdb_3_legacy/AbsoluteToFpdb.py
+          fpdb_3_legacy/BetfairToFpdb.py
+          fpdb_3_legacy/CakeToFpdb.py
+          fpdb_3_legacy/EverestToFpdb.py
+          fpdb_3_legacy/DerivedStats.py
+          fpdb_3_legacy/HandHistoryConverter.py
+          fpdb_3_legacy/Deck.py
+          fpdb_3_legacy/TourneySummary.py
+          fpdb_3_legacy/PartyPokerSummary.py
+          fpdb_3_legacy/PartyPokerToFpdb.py
+          fpdb_3_legacy/PacificPokerSummary.py
+          fpdb_3_legacy/PacificPokerToFpdb.py
+          fpdb_3_legacy/PkrToFpdb.py
+          fpdb_3_legacy/UnibetSummary.py
+          fpdb_3_legacy/UnibetToFpdb.py
+          fpdb_3_legacy/WinningSummary.py
+          fpdb_3_legacy/iPokerSummary.py
+          fpdb_3_legacy/PokerTrackerSummary.py
+          fpdb_3_legacy/MergeSummary.py
+          fpdb_3_legacy/MergeToFpdb.py
+          fpdb_3_legacy/OnGameToFpdb.py
+          fpdb_3_legacy/EnetToFpdb.py
+          fpdb_3_legacy/EntractionToFpdb.py
+          fpdb_3_legacy/BossToFpdb.py
+          fpdb_3_legacy/EverleafToFpdb.py
+          fpdb_3_legacy/MicrogamingToFpdb.py
+          fpdb_3_legacy/KingsClubToFpdb.py
+          fpdb_3_legacy/SealsWithClubsToFpdb.py
+          fpdb_3_legacy/GGPokerToFpdb.py
+          fpdb_3_legacy/WinningToFpdb.py
+          fpdb_3_legacy/PokerTrackerToFpdb.py
+          fpdb_3_legacy/BetOnlineToFpdb.py
+          fpdb_3_legacy/FulltiltToFpdb.py
+          fpdb_3_legacy/BovadaToFpdb.py
+          fpdb_3_legacy/backfill_boards.py
+          fpdb_3_legacy/backfill_showdown.py
+          fpdb_3_legacy/backfill_autonotes.py
+          fpdb_3_legacy/card_path.py
+          fpdb_3_legacy/fpdb_cli.py
+          fpdb_3_legacy/legacy_launcher.py
+          fpdb_3_legacy/migrate_tests.py
+          fpdb_3_legacy/migrate_to_pyside6.py
+          fpdb_3_legacy/validate_pyside6_migration.py
+          fpdb_3_legacy/swc_poker_console.py
+          fpdb_3_legacy/AutoNotePlo.py
+          fpdb_3_legacy/MergeStructures.py
+          fpdb_3_legacy/stat_registry.py
+          fpdb_3_legacy/pt4_import.py
+          fpdb_3_legacy/pt4hud.py
+          fpdb_3_legacy/debug_imports.py
+          fpdb_3_legacy/debug_imports_v2.py
+          fpdb_3_legacy/debug_partypoker_parser.py
+          fpdb_3_legacy/test_fpdb_api.py
+          fpdb_3_legacy/test_draw_starting_hand.py
+          fpdb_3_legacy/test_empty_data_popups.py
+          fpdb_3_legacy/test_ftp_detection.py
+          fpdb_3_legacy/test_leak_detector.py
+          fpdb_3_legacy/test_opponents_report.py
+          fpdb_3_legacy/test_partypoker_fix.py
+          fpdb_3_legacy/test_player_profiler.py
+          fpdb_3_legacy/test_rit_parser.py
+          fpdb_3_legacy/fetch_comments.py
+          fpdb_3_legacy/fetch_reviews.py
+          fpdb_3_legacy/fix_draw_starting_hands.py
+          fpdb_3_legacy/loggingFpdb.py
+          fpdb_3_legacy/WinamaxSummary.py
+          fpdb_3_legacy/WinamaxToFpdb.py
+          fpdb_3_legacy/PokerStarsSummary.py
+          fpdb_3_legacy/PokerStarsStructures.py
+          fpdb_3_legacy/PokerStarsToFpdb.py
+          fpdb_3_legacy/FullTiltPokerSummary.py
+          fpdb_3_legacy/BovadaSummary.py
+          fpdb_3_legacy/parser_registry.py
+          fpdb_3_legacy/IdentifySite.py
+          fpdb_3_legacy/Importer.py
+          fpdb_3_legacy/GuiBulkImport.py
+          fpdb_3_legacy/GuiAutoImport.py
+          fpdb_3_legacy/GuiGraphViewer.py
+          fpdb_3_legacy/GuiSessionViewer.py
+          fpdb_3_legacy/GuiTourneyGraphViewer.py
+          fpdb_3_legacy/GuiHandViewer.py
+          fpdb_3_legacy/GuiTourHandViewer.py
+          fpdb_3_legacy/GuiReplayer.py
+          fpdb_3_legacy/GuiStatsInfo.py
+          fpdb_3_legacy/GuiConfigObserver.py
+          fpdb_3_legacy/GuiLogView.py
+          fpdb_3_legacy/GuiPrefs.py
+          fpdb_3_legacy/GuiAutoNoteRules.py
+          fpdb_3_legacy/GuiAutoNotesWorkbench.py
+          fpdb_3_legacy/GuiOpponentsReport.py
+          fpdb_3_legacy/GuiDatabase.py
+          fpdb_3_legacy/GuiRingPlayerStats.py
+          fpdb_3_legacy/GuiTourneyPlayerStats.py
+          fpdb_3_legacy/Aux_Base.py
+          fpdb_3_legacy/Aux_Hud.py
+          fpdb_3_legacy/Aux_Classic_Hud.py
+          fpdb_3_legacy/Mucked.py
+          fpdb_3_legacy/BlockPopup.py
+          fpdb_3_legacy/Popup.py
+          fpdb_3_legacy/RangeChartPopup.py
+          fpdb_3_legacy/Stats.py
+          fpdb_3_legacy/SmartHudManager.py
+          fpdb_3_legacy/TableWindow.py
+          fpdb_3_legacy/SQL.py
+          fpdb_3_legacy/OSXTables.py
+          fpdb_3_legacy/XTables.py
+          fpdb_3_legacy/WinTables.py
+          fpdb_3_legacy/Hud.py
+          fpdb_3_legacy/HUD_main.pyw
+          fpdb_3_legacy/HudStatsPersistence.py
+          fpdb_3_legacy/iPoker/__init__.py
+          fpdb_3_legacy/iPoker/dispatcher.py
+          fpdb_3_legacy/iPoker/base.py
+          fpdb_3_legacy/iPoker/xml_format.py
+          fpdb_3_legacy/iPoker/streets_actions.py
+          fpdb_3_legacy/iPoker/hand_info.py
+          fpdb_3_legacy/iPokerToFpdb.py
+          fpdb_3_legacy/iPoker/skins
+          fpdb_3_legacy/iPoker/tournament_results.py
+      - name: Type-check main application window
+        run: mypy fpdb_3_legacy/fpdb.pyw
+      - name: Cross-check modern modules with Pyright
+        run: pyright
+      - name: Type-check NumPy consumers
+        run: >-
+          mypy
+          fpdb_3_legacy/ring_stats
+          fpdb_3_legacy/test_feature_1_1.py
+          fpdb_3_legacy/test_migration.py
+          fpdb_3_legacy/validate_migration.py
+      - name: Lint newly modernized modules
+        run: >-
+          ruff check
+          fpdb_3_legacy/equity.py
+          fpdb_3_legacy/PartyPokerSummary.py
+          test/test_equity.py
+          test/test_live_parser_regression.py
+          test/test_partypoker_summary.py
+          test/test_stats_known_hands.py
+          tests/helpers/parser_regression.py
+
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python-version: ["3.11"]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - uses: astral-sh/setup-uv@v3
+      - name: Install system dependencies (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libegl1 libgl1 libglib2.0-0 libdbus-1-3 libxkbcommon0
+      - name: Install dependencies
+        run: |
+          uv pip install --system -e ".[test]"
+      - name: Run tests (no GUI)
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: |
+          python -m pytest -p no:pytest-qt -m "not qt and not perf" --tb=short
+      - name: Run Qt regression tests (offscreen)
+        if: runner.os == 'Linux'
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: |
+          python -m pytest -m qt --tb=short
+
+  native:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        python-version: ["3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - uses: astral-sh/setup-uv@v3
+      - name: Install system dependencies (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libegl1 libgl1 libglib2.0-0 libdbus-1-3 libxkbcommon0
+      - name: Install fpdb dependencies
+        run: |
+          uv pip install --system -e ".[test]"
+      - name: Build and install pypoker-eval
+        run: |
+          git clone --depth 1 https://github.com/jejellyroll-fr/poker-eval.git /tmp/poker-eval
+          uv pip install --system /tmp/poker-eval
+      - name: Smoke-test native backend
+        run: |
+          python -c "from fpdb_3_legacy.equity import load_poker_eval; pe = load_poker_eval(); assert pe is not None, 'load_poker_eval() returned None'; print('backend loaded:', type(pe))"
+      - name: Run native equity tests
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: |
+          native_tests="test/test_equity.py"
+          for f in test/test_aof_equity.py test/test_aof_ranges.py; do
+            [ -f "$f" ] && native_tests="$native_tests $f"
+          done
+          python -m pytest $native_tests -x -v --tb=short
+
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - uses: astral-sh/setup-uv@v3
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libegl1 libgl1 libglib2.0-0 libdbus-1-3 libxkbcommon0
+      - name: Install dependencies
+        run: |
+          uv pip install --system -e ".[test]"
+      # Both selections feed one combined report: the Qt suite covers the views,
+      # and the floors of coverage-baseline.json are seeded from the union.
+      - name: Measure coverage (no GUI)
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: |
+          python -m pytest -p no:pytest-qt -m "not qt and not perf" --cov --cov-report= --tb=short
+      - name: Measure coverage (Qt offscreen)
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: |
+          python -m pytest -m qt --cov --cov-append --cov-report= --tb=short
+      - name: Render coverage reports
+        run: |
+          python -m coverage json -o coverage.json
+          python -m coverage html -d htmlcov
+          python -m coverage report --skip-covered
+      - name: Enforce coverage ratchet
+        run: python tools/coverage_ratchet.py --check coverage.json
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: |
+            coverage.json
+            htmlcov
+
+  database-integration:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: fpdb
+          POSTGRES_USER: fpdb
+          POSTGRES_PASSWORD: fpdb
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U fpdb -d fpdb"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_DATABASE: fpdb
+          MYSQL_USER: fpdb
+          MYSQL_PASSWORD: fpdb
+          MYSQL_ROOT_PASSWORD: fpdb-root
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd "mysqladmin ping -h 127.0.0.1 -ufpdb -pfpdb"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - uses: astral-sh/setup-uv@v3
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libegl1 libgl1 libglib2.0-0 libdbus-1-3 libxkbcommon0
+      - name: Install database test dependencies
+        run: uv pip install --system -e ".[test-no-gui]"
+      - name: Exercise live schemas, HUD transactions, and cross-backend migration
+        env:
+          FPDB_TEST_DATABASES: postgresql,mysql
+        run: >-
+          python -m pytest -q -p no:pytest-qt
+          test/test_database_backend_integration.py
+          test/test_hud_postgresql_integration.py
+
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - uses: astral-sh/setup-uv@v3
+      - name: Install system dependencies (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libegl1 libgl1 libglib2.0-0 libdbus-1-3 libxkbcommon0
+      - name: Install dependencies
+        run: |
+          uv pip install --system -e ".[build]"
+      - name: Compile translation catalogs
+        run: python tools/compile_translations.py
+      - name: Build with PyInstaller
+        shell: bash
+        run: |
+          # numpy is only reached through import_module() in Database.py, so
+          # PyInstaller cannot see it. Without the explicit hidden import the
+          # HUD build ships none of its Python modules while the merged
+          # distribution still exposes numpy's compiled sub-packages, and
+          # "import numpy" then yields an empty namespace package.
+          if [ "${{ runner.os }}" = "Windows" ]; then
+            python -m PyInstaller --noconfirm --onedir --windowed --log-level=DEBUG --paths=fpdb_3_legacy --paths=. --hidden-import numpy --hidden-import fpdb_3_legacy.coinpoker_live_capture --hidden-import fpdb_3_legacy.Aux_Hud --hidden-import fpdb_3_legacy.Aux_Classic_Hud --hidden-import fpdb_3_legacy.Mucked --icon="gfx/tribal.jpg" --add-data "fpdb_3_legacy;fpdb_3_legacy" --add-data "gfx;gfx" --add-data "icons;icons" --add-data "fonts;fonts" --add-data "locale;locale" --add-data "HUD_config.xml;." "fpdb_3_legacy/fpdb.pyw"
+            python -m PyInstaller --noconfirm --onedir --windowed --log-level=DEBUG --paths=fpdb_3_legacy --paths=. --hidden-import numpy --hidden-import fpdb_3_legacy.coinpoker_live_capture --hidden-import fpdb_3_legacy.Aux_Hud --hidden-import fpdb_3_legacy.Aux_Classic_Hud --hidden-import fpdb_3_legacy.Mucked --icon="gfx/tribal.jpg" --add-data "fpdb_3_legacy;fpdb_3_legacy" --add-data "gfx;gfx" --add-data "icons;icons" --add-data "fonts;fonts" --add-data "locale;locale" --add-data "HUD_config.xml;." "fpdb_3_legacy/HUD_main.pyw"
+          else
+            python -m PyInstaller --noconfirm --onedir --windowed --log-level=DEBUG --paths=fpdb_3_legacy --paths=. --hidden-import numpy --hidden-import fpdb_3_legacy.coinpoker_live_capture --hidden-import fpdb_3_legacy.Aux_Hud --hidden-import fpdb_3_legacy.Aux_Classic_Hud --hidden-import fpdb_3_legacy.Mucked --icon="gfx/tribal.jpg" --add-data "fpdb_3_legacy:fpdb_3_legacy" --add-data "gfx:gfx" --add-data "icons:icons" --add-data "fonts:fonts" --add-data "locale:locale" --add-data "HUD_config.xml:." "fpdb_3_legacy/fpdb.pyw"
+            python -m PyInstaller --noconfirm --onedir --windowed --log-level=DEBUG --paths=fpdb_3_legacy --paths=. --hidden-import numpy --hidden-import fpdb_3_legacy.coinpoker_live_capture --hidden-import fpdb_3_legacy.Aux_Hud --hidden-import fpdb_3_legacy.Aux_Classic_Hud --hidden-import fpdb_3_legacy.Mucked --icon="gfx/tribal.jpg" --add-data "fpdb_3_legacy:fpdb_3_legacy" --add-data "gfx:gfx" --add-data "icons:icons" --add-data "fonts:fonts" --add-data "locale:locale" --add-data "HUD_config.xml:." "fpdb_3_legacy/HUD_main.pyw"
+          fi
+      - name: Bundle HUD inside fpdb
+        run: python tools/bundle_pyinstaller_hud.py dist
+      - name: Re-sign assembled macOS application
+        if: runner.os == 'macOS'
+        run: codesign --force --deep --sign - dist/fpdb.app
+      - name: Package build artifact
+        shell: bash
+        run: |
+          if [ "${{ runner.os }}" = "macOS" ]; then
+            cp docs/macos-gatekeeper.md dist/READ-ME-FIRST-macos.md
+            tar -czf fpdb-build.tar.gz -C dist fpdb.app READ-ME-FIRST-macos.md
+          else
+            tar -czf fpdb-build.tar.gz -C dist fpdb
+          fi
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: fpdb-build-${{ matrix.os }}
+          path: fpdb-build.tar.gz
+
+  build-pyoxidizer:
+    name: Build with PyOxidizer (${{ matrix.label }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    # PyOxidizer 0.24's cargo_toml parser cannot read the Rust 2024 edition
+    # emitted by `cargo init` since Rust 1.85.
+    env:
+      RUSTUP_TOOLCHAIN: "1.83.0"
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - label: Linux x64
+            os: ubuntu-latest
+            pyoxidizer_host: x86_64-unknown-linux-musl
+            pyoxidizer_archive: tar.gz
+            pyoxidizer_sha256: a7847f7b8111f0d73edc3d2594c5dd4dd853006360a9e7f5e91565257fef5c3e
+            target: x86_64-unknown-linux-gnu
+            executable: fpdb
+            artifact: fpdb-pyoxidizer-linux-x64
+          - label: macOS ARM64
+            os: macos-latest
+            pyoxidizer_host: aarch64-apple-darwin
+            pyoxidizer_archive: tar.gz
+            pyoxidizer_sha256: 65976b0b505857f7f43ea30de35ef6305383e54ddfae90086fd641ca14d0487f
+            target: aarch64-apple-darwin
+            executable: fpdb
+            artifact: fpdb-pyoxidizer-macos-arm64
+          - label: Windows x64
+            os: windows-latest
+            pyoxidizer_host: x86_64-pc-windows-msvc
+            pyoxidizer_archive: zip
+            pyoxidizer_sha256: c1b757bc7c64921b38bf5fd70d2a2e2f591d36fe1cae3b5722822c08f651ba7b
+            target: x86_64-pc-windows-msvc
+            executable: fpdb.exe
+            artifact: fpdb-pyoxidizer-windows-x64
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Set up Rust compatible with PyOxidizer
+        shell: bash
+        run: |
+          rustup toolchain install "$RUSTUP_TOOLCHAIN" --profile minimal --no-self-update
+          rustc --version
+          cargo --version
+      - name: Cache PyOxidizer build dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/git
+            ~/.cargo/registry
+            ~/.cache/pyoxidizer
+            ~/Library/Caches/pyoxidizer
+            ~/AppData/Local/pyoxidizer
+          key: pyoxidizer-${{ runner.os }}-${{ runner.arch }}-0.24.0-rust-1.83.0-${{ hashFiles('pyoxidizer.bzl', 'pyoxidizer-requirements.txt', 'pyproject.toml') }}
+          restore-keys: |
+            pyoxidizer-${{ runner.os }}-${{ runner.arch }}-0.24.0-rust-1.83.0-
+      - name: Install PyOxidizer
+        shell: bash
+        run: |
+          pyoxidizer_asset="pyoxidizer-0.24.0-${{ matrix.pyoxidizer_host }}.${{ matrix.pyoxidizer_archive }}"
+          pyoxidizer_archive="$RUNNER_TEMP/$pyoxidizer_asset"
+          pyoxidizer_dir="$RUNNER_TEMP/pyoxidizer-0.24.0-${{ matrix.pyoxidizer_host }}"
+          curl --fail --location --retry 3 \
+            --output "$pyoxidizer_archive" \
+            "https://github.com/indygreg/PyOxidizer/releases/download/pyoxidizer/0.24.0/$pyoxidizer_asset"
+          python -c "import hashlib, pathlib, sys; actual = hashlib.sha256(pathlib.Path(sys.argv[1]).read_bytes()).hexdigest(); assert actual == sys.argv[2], actual" \
+            "$pyoxidizer_archive" "${{ matrix.pyoxidizer_sha256 }}"
+          if [[ "$pyoxidizer_archive" == *.zip ]]; then
+            python -m zipfile -e "$pyoxidizer_archive" "$RUNNER_TEMP"
+          else
+            mkdir -p "$pyoxidizer_dir"
+            tar -xzf "$pyoxidizer_archive" --strip-components=1 -C "$pyoxidizer_dir"
+          fi
+          echo "$pyoxidizer_dir" >> "$GITHUB_PATH"
+      - name: Compile translation catalogs
+        run: python tools/compile_translations.py
+      - name: Build with PyOxidizer
+        shell: bash
+        run: |
+          if ! pyoxidizer --system-rust build --release > pyoxidizer-build.log 2>&1; then
+            tail -n 500 pyoxidizer-build.log
+            exit 1
+          fi
+          tail -n 100 pyoxidizer-build.log
+      - name: Verify PyOxidizer bundle
+        shell: bash
+        run: |
+          install_dir="build/${{ matrix.target }}/release/install"
+          test -f "$install_dir/${{ matrix.executable }}"
+          if [[ "${{ runner.os }}" != "Windows" ]]; then
+            test -x "$install_dir/${{ matrix.executable }}"
+          fi
+          test -f "$install_dir/gfx/tribal.jpg"
+          test -f "$install_dir/locale/fr_FR/LC_MESSAGES/fpdb.mo"
+          # The launcher is the interpreter of every helper process, so a
+          # broken payload layout or search path must fail the build here.
+          "$install_dir/${{ matrix.executable }}" --run-module fpdb_3_legacy.subprocess_launch
+      - name: Package PyOxidizer artifact
+        shell: bash
+        run: |
+          install_dir="build/${{ matrix.target }}/release/install"
+          if [[ "${{ runner.os }}" == "macOS" ]]; then
+            # A loose directory means one quarantined download per dylib, and
+            # Gatekeeper prompts for each of them. Ship a signed bundle: it is
+            # assessed as a unit, so the user approves the app once.
+            mkdir -p dist
+            python -m tools.package_pyoxidizer_macos "$install_dir" dist/fpdb.app --icon gfx/tribal.icns
+            codesign --verify --deep --strict dist/fpdb.app
+            dist/fpdb.app/Contents/MacOS/fpdb --run-module fpdb_3_legacy.subprocess_launch
+            cp docs/macos-gatekeeper.md dist/READ-ME-FIRST-macos.md
+            tar -czf "${{ matrix.artifact }}.tar.gz" -C dist fpdb.app READ-ME-FIRST-macos.md
+          else
+            tar -czf "${{ matrix.artifact }}.tar.gz" -C "$install_dir" .
+          fi
+      - name: Upload PyOxidizer artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: ${{ matrix.artifact }}.tar.gz
+          compression-level: 0

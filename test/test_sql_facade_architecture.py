@@ -1,0 +1,50 @@
+"""Architectural guards for the legacy SQL catalogue facade."""
+
+from __future__ import annotations
+
+from pathlib import Path
+
+from fpdb_3_legacy.SQL import Sql
+
+SQL_SOURCE = Path(__file__).parents[1] / "fpdb_3_legacy" / "SQL.py"
+SQL_MODULES = tuple(SQL_SOURCE.parent.glob("sql_*.py"))
+
+
+def test_sql_facade_contains_no_inline_create_table_ddl() -> None:
+    source = SQL_SOURCE.read_text(encoding="utf-8")
+    assert "CREATE TABLE" not in source
+    assert 'self.query["' not in source
+
+
+def test_sql_facade_installs_schema_catalogues_before_queries() -> None:
+    source = SQL_SOURCE.read_text(encoding="utf-8")
+    schema_updates = [
+        line for line in source.splitlines() if "self.query.update(" in line
+    ]
+
+    assert len(schema_updates) >= 10
+    assert "metadata_queries" in schema_updates[0]
+    assert sum("index_queries" in line for line in schema_updates) == 1
+    assert all(
+        "schema" in line or "_queries" in line for line in schema_updates[1:]
+    )
+    assert "self.query = finalize_query_placeholders(self.query, db_server)" in source
+
+
+def test_installed_queries_contain_no_literal_newline_typos() -> None:
+    for backend in ("sqlite", "postgresql", "mysql"):
+        queries = Sql(db_server=backend).query
+        for name, query in queries.items():
+            if not isinstance(query, str):
+                continue
+            assert "/n" not in query, f"{backend}:{name} contains /n"
+            assert r"\n" not in query, f"{backend}:{name} contains a literal \\n"
+
+
+def test_extracted_sql_sources_use_real_multiline_strings() -> None:
+    offenders = [
+        module.name
+        for module in SQL_MODULES
+        if r"\n" in module.read_text(encoding="utf-8")
+    ]
+    assert offenders == []

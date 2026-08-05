@@ -1,0 +1,53 @@
+PokerStars Game #35839001292:  Triple Draw 2-7 Lowball Limit ($0.10/$0.20 USD) - 2009/11/25 14:12:58 ET
+Table 'Theodora VI' 6-max Seat #5 is the button
+Seat 1: Hero ($4 in chips)
+Seat 2: rumble1111 ($4.58 in chips)
+Seat 3: Eisenherz73 ($7.54 in chips)
+Seat 4: cypis28 ($1.40 in chips)
+Seat 5: bakter9 ($0.78 in chips)
+Seat 6: TheLabman ($6.31 in chips)
+TheLabman: posts small blind $0.05
+Hero: posts big blind $0.10
+*** DEALING HANDS ***
+Dealt to Hero [8s Ts 8h 2s 3s]
+rumble1111: calls $0.10
+Eisenherz73: folds
+cypis28: raises $0.10 to $0.20
+bakter9: raises $0.10 to $0.30
+TheLabman: folds
+Hero: folds
+rumble1111: calls $0.20
+cypis28: raises $0.10 to $0.40
+Betting is capped
+bakter9: calls $0.10
+rumble1111: calls $0.10
+*** FIRST DRAW ***
+rumble1111: discards 2 cards
+cypis28: discards 2 cards
+bakter9: discards 1 card
+rumble1111: checks
+cypis28: bets $0.10
+bakter9: raises $0.10 to $0.20
+rumble1111: folds
+cypis28: calls $0.10
+*** SECOND DRAW ***
+cypis28: discards 1 card
+bakter9: stands pat
+cypis28: bets $0.20
+bakter9: calls $0.18 and is all-in
+Uncalled bet ($0.02) returned to cypis28
+*** THIRD DRAW ***
+cypis28: stands pat
+bakter9: stands pat
+*** SHOW DOWN ***
+cypis28: shows [7c 6d 9c 4s 2c] (Lo: 9,7,6,4,2)
+bakter9: shows [7s 5s 8d 4h 3c] (Lo: 8,7,5,4,3)
+bakter9 collected $2.01 from pot
+*** SUMMARY ***
+Total pot $2.11 | Rake $0.10
+Seat 1: Hero (big blind) folded before the Draw
+Seat 2: rumble1111 folded after the 1st Draw
+Seat 3: Eisenherz73 folded before the Draw (didn't bet)
+Seat 4: cypis28 showed [7c 6d 9c 4s 2c] and lost with Lo: 9,7,6,4,2
+Seat 5: bakter9 (button) showed [7s 5s 8d 4h 3c] and won ($2.01) with Lo: 8,7,5,4,3
+Seat 6: TheLabman (small blind) folded before the Draw

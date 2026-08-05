@@ -60,7 +60,7 @@ class TestPopupBase(unittest.TestCase):
 
         # Import the module to test after mocks are set up
         global Multicol, Popup, Submenu, default
-        from Popup import Multicol, Popup, Submenu, default
+        from fpdb_3_legacy.Popup import Multicol, Popup, Submenu, default
 
     @classmethod
     def tearDownClass(cls):
@@ -264,8 +264,8 @@ class TestDefaultPopup(unittest.TestCase):
 
         self.mock_stat_dict = {123: {"seat": 2, "screen_name": "Player1"}, 456: {"seat": 3, "screen_name": "Player2"}}
 
-    @patch("Popup.Stats.do_stat")
-    @patch("Popup.Stats.do_tip")
+    @patch("fpdb_3_legacy.Popup.Stats.do_stat")
+    @patch("fpdb_3_legacy.Popup.Stats.do_tip")
     def test_default_popup_create(self, mock_do_tip, mock_do_stat) -> None:
         """Test default popup creation."""
         # Mock Stats responses
@@ -283,8 +283,8 @@ class TestDefaultPopup(unittest.TestCase):
         popup.create = Mock()
 
         # Mock QLabel and layout
-        mock_label = Mock()
-        mock_layout = Mock()
+        Mock()
+        Mock()
 
         # Just verify create can be called
         popup.create()
@@ -304,7 +304,7 @@ class TestDefaultPopup(unittest.TestCase):
         popup.create()
         popup.create.assert_called_once()
 
-    @patch("Popup.Stats.do_stat")
+    @patch("fpdb_3_legacy.Popup.Stats.do_stat")
     def test_default_popup_with_na_stats(self, mock_do_stat) -> None:
         """Test default popup with NA stat values."""
         # Mock some stats returning NA
@@ -321,8 +321,8 @@ class TestDefaultPopup(unittest.TestCase):
         popup.pop = self.mock_pop
         popup.create = Mock()
 
-        mock_label = Mock()
-        mock_layout = Mock()
+        Mock()
+        Mock()
 
         # Just verify create can be called
         popup.create()
@@ -347,7 +347,7 @@ class TestSubmenuPopup(unittest.TestCase):
 
         self.mock_stat_dict = {123: {"seat": 2, "screen_name": "Player1"}, 456: {"seat": 3, "screen_name": "Player2"}}
 
-    @patch("Popup.Stats.do_stat")
+    @patch("fpdb_3_legacy.Popup.Stats.do_stat")
     def test_submenu_popup_create(self, mock_do_stat) -> None:
         """Test submenu popup creation."""
         mock_do_stat.side_effect = [
@@ -362,7 +362,7 @@ class TestSubmenuPopup(unittest.TestCase):
         popup.pop = self.mock_pop
         popup.create = Mock()
 
-        mock_layout = Mock()
+        Mock()
 
         # Just verify create can be called
         popup.create()
@@ -399,8 +399,8 @@ class TestMulticolPopup(unittest.TestCase):
 
         self.mock_stat_dict = {123: {"seat": 2, "screen_name": "Player1"}, 456: {"seat": 3, "screen_name": "Player2"}}
 
-    @patch("Popup.Stats.do_stat")
-    @patch("Popup.Stats.do_tip")
+    @patch("fpdb_3_legacy.Popup.Stats.do_stat")
+    @patch("fpdb_3_legacy.Popup.Stats.do_tip")
     def test_multicol_popup_create(self, mock_do_tip, mock_do_stat) -> None:
         """Test multicol popup creation."""
         mock_do_stat.side_effect = [
@@ -419,7 +419,7 @@ class TestMulticolPopup(unittest.TestCase):
         popup.pop = self.mock_pop
         popup.create = Mock()
 
-        mock_layout = Mock()
+        Mock()
 
         # Just verify create can be called
         popup.create()
@@ -447,9 +447,9 @@ class TestMulticolPopup(unittest.TestCase):
             popup.pop = Mock()
             popup.pop.pu_stats = [f"stat_{i}" for i in range(num_stats)]
 
-            mock_layout = Mock()
+            Mock()
 
-            with patch("Popup.Stats.do_stat") as mock_do_stat:
+            with patch("fpdb_3_legacy.Popup.Stats.do_stat") as mock_do_stat:
                 # Mock all stats to return valid data
                 mock_do_stat.side_effect = [
                     (f"stat_{i}", "25.0", "25.0%", f"Stat {i}", "details", "tip") for i in range(num_stats)
@@ -461,7 +461,8 @@ class TestMulticolPopup(unittest.TestCase):
                 popup.create.assert_called()
 
 
-class TestPopupErrorHandling(unittest.TestCase):
+@unittest.skip("Superseded by TestPopupErrorHandlingVariant2")
+class _LegacyPopupErrorHandling(unittest.TestCase):
     """Test error handling in popup classes."""
 
     def setUp(self) -> None:
@@ -484,7 +485,7 @@ class TestPopupErrorHandling(unittest.TestCase):
         popup.stat_dict = self.mock_stat_dict
         popup.pop = mock_pop
 
-        with patch("Popup.Stats.do_stat") as mock_do_stat, patch("Popup.log"):
+        with patch("fpdb_3_legacy.Popup.Stats.do_stat") as mock_do_stat, patch("fpdb_3_legacy.Popup.log"):
             # Make Stats.do_stat raise an exception
             mock_do_stat.side_effect = Exception("Stats error")
 
@@ -492,8 +493,8 @@ class TestPopupErrorHandling(unittest.TestCase):
             mock_layout = Mock()
 
             with (
-                patch("Popup.QLabel", return_value=mock_label),
-                patch("Popup.QVBoxLayout", return_value=mock_layout),
+                patch("fpdb_3_legacy.Popup.QLabel", return_value=mock_label),
+                patch("fpdb_3_legacy.Popup.QVBoxLayout", return_value=mock_layout),
                 patch.object(popup, "setLayout"),
                 patch.object(popup, "layout", return_value=mock_layout),
             ):
@@ -543,11 +544,12 @@ class TestPopupErrorHandling(unittest.TestCase):
         popup.destroy_pop.assert_called_once()
 
 
-class TestPopupIntegration(unittest.TestCase):
+@unittest.skip("Superseded by TestPopupIntegrationVariant2")
+class _LegacyPopupIntegration(unittest.TestCase):
     """Test popup integration scenarios."""
 
-    @patch("Popup.Stats.do_stat")
-    @patch("Popup.Stats.do_tip")
+    @patch("fpdb_3_legacy.Popup.Stats.do_stat")
+    @patch("fpdb_3_legacy.Popup.Stats.do_tip")
     def test_popup_lifecycle(self, mock_do_tip, mock_do_stat) -> None:
         """Test complete popup lifecycle."""
         # Setup
@@ -574,7 +576,7 @@ class TestPopupIntegration(unittest.TestCase):
         mock_do_tip.return_value = "Test tip"
 
         with (
-            patch("Popup.QWidget.__init__"),
+            patch("fpdb_3_legacy.Popup.QWidget.__init__"),
             patch.object(Popup, "show") as mock_show,
             patch.object(Popup, "move"),
             patch.object(Popup, "effectiveWinId") as mock_winid,
@@ -606,7 +608,7 @@ class TestPopupIntegration(unittest.TestCase):
                 assert mock_win.popup_count == 0
 
 
-class TestPopupErrorHandling(unittest.TestCase):
+class TestPopupErrorHandlingVariant2(unittest.TestCase):
     """Test error handling in popup classes."""
 
     def test_stats_exception_handling(self) -> None:
@@ -631,7 +633,7 @@ class TestPopupErrorHandling(unittest.TestCase):
         popup.create.assert_called_once()
 
 
-class TestPopupIntegration(unittest.TestCase):
+class TestPopupIntegrationVariant2(unittest.TestCase):
     """Test popup integration scenarios."""
 
     def test_popup_lifecycle(self) -> None:
@@ -653,19 +655,21 @@ class TestModernPopupImport(unittest.TestCase):
     """Test modern popup import handling."""
 
     def test_modern_popup_import_success(self) -> None:
-        """Test successful import of modern popup classes."""
-        # This test verifies that the import handling works
-        # The actual classes are mocked, so we just check the structure
-        with patch("Popup.log"):
-            # Re-import to test import handling
-            import importlib
+        """Popup.py re-executes cleanly and still exposes its popup classes."""
+        # Execute a throwaway copy rather than importlib.reload(fpdb_3_legacy.Popup):
+        # reload re-runs the module in place, so Popup.Popup becomes a new class object
+        # while modules that already subclassed it (RangeChartPopup, BlockPopup) keep
+        # the old one. issubclass() then fails for every later test in the session.
+        import importlib.util
 
-            import Popup
+        import fpdb_3_legacy.Popup as Popup
 
-            importlib.reload(Popup)
+        spec = importlib.util.spec_from_file_location("_popup_reimport_probe", Popup.__file__)
+        probe = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(probe)
 
-            # Should not log warning if import succeeds (mocked)
-            # In real scenario with missing ModernPopup, it would log warning
+        assert isinstance(probe.Popup, type)
+        assert callable(probe.popup_factory)
 
 
 if __name__ == "__main__":

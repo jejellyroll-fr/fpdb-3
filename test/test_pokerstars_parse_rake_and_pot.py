@@ -4,7 +4,7 @@ import unittest
 from decimal import Decimal
 from unittest.mock import Mock, patch
 
-from PokerStarsToFpdb import PokerStars
+from fpdb_3_legacy.PokerStarsToFpdb import PokerStars
 
 
 class TestPokerStarsParseRakeAndPot(unittest.TestCase):
@@ -89,7 +89,7 @@ class TestPokerStarsParseRakeAndPot(unittest.TestCase):
         self.assertFalse(hasattr(hand, "rake"))
         self.assertFalse(hasattr(hand, "rake_parsed"))
 
-    @patch("PokerStarsToFpdb.PokerStars.re_rake")
+    @patch("fpdb_3_legacy.PokerStarsToFpdb.PokerStars.re_rake")
     def test_parse_rake_and_pot_invalid_pot_value(self, mock_re_rake) -> None:
         """Test behavior when invalid pot value causes InvalidOperation exception."""
         hand = Mock()
@@ -113,7 +113,7 @@ class TestPokerStarsParseRakeAndPot(unittest.TestCase):
         with self.assertRaises(Exception):  # Currently raises InvalidOperation
             self.parser._parseRakeAndPot(hand)
 
-    @patch("PokerStarsToFpdb.PokerStars.re_rake")
+    @patch("fpdb_3_legacy.PokerStarsToFpdb.PokerStars.re_rake")
     def test_parse_rake_and_pot_invalid_rake_value(self, mock_re_rake) -> None:
         """Test behavior when invalid rake value causes InvalidOperation exception."""
         hand = Mock()

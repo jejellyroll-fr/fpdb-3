@@ -14,7 +14,7 @@ from unittest.mock import Mock, patch
 # Add the parent directory to the path to import our modules
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from ConfigInitializer import ConfigInitializer, ensure_config_initialized
+from fpdb_3_legacy.ConfigInitializer import ConfigInitializer, ensure_config_initialized
 
 
 class TestConfigInitializer(unittest.TestCase):
@@ -54,7 +54,7 @@ class TestConfigInitializer(unittest.TestCase):
                 self.assertIs(config1, config2)
                 self.assertTrue(ConfigInitializer.is_initialized())
 
-    @patch("ConfigInitializer.Path")
+    @patch("fpdb_3_legacy.ConfigInitializer.Path")
     def test_find_config_path_absolute(self, mock_path):
         """Test _find_config_path with absolute path."""
         absolute_path = "/absolute/path/to/config.xml"
@@ -64,7 +64,7 @@ class TestConfigInitializer(unittest.TestCase):
 
         self.assertEqual(result, absolute_path)
 
-    @patch("ConfigInitializer.Path")
+    @patch("fpdb_3_legacy.ConfigInitializer.Path")
     def test_find_config_path_existing_file(self, mock_path):
         """Test _find_config_path when file exists in search paths."""
         config_file = "HUD_config.xml"
@@ -75,7 +75,7 @@ class TestConfigInitializer(unittest.TestCase):
         mock_cwd_path.exists.return_value = True
         mock_path.cwd.return_value.__truediv__.return_value = mock_cwd_path
 
-        result = ConfigInitializer._find_config_path(config_file)
+        ConfigInitializer._find_config_path(config_file)
 
         # Should find the file in current directory
         mock_path.cwd.assert_called_once()
@@ -91,10 +91,12 @@ class TestConfigInitializer(unittest.TestCase):
         self.assertIn(".fpdb", result)
         self.assertIn(config_file, result)
 
-    @patch("ConfigInitializer.sys")
-    @patch("ConfigInitializer.Path")
+    @patch("fpdb_3_legacy.ConfigInitializer.sys")
+    @patch("fpdb_3_legacy.ConfigInitializer.Path")
     def test_initialize_success(self, mock_path, mock_sys):
         """Test successful initialization."""
+        import fpdb_3_legacy
+
         mock_config = Mock()
         config_path = "/path/to/config.xml"
 
@@ -102,24 +104,26 @@ class TestConfigInitializer(unittest.TestCase):
         mock_path.return_value.parent = "/fpdb/dir"
         mock_sys.path = ["/other/path"]
 
+        mock_configuration = Mock()
+        mock_configuration.get_config.return_value = config_path
+        mock_configuration.Config.return_value = mock_config
+
         with patch.object(ConfigInitializer, "_find_config_path", return_value=config_path):
-            with patch("builtins.__import__") as mock_import:
-                mock_configuration = Mock()
-                mock_configuration.get_config.return_value = config_path
-                mock_configuration.Config.return_value = mock_config
-                mock_import.return_value = mock_configuration
+            with patch.dict(sys.modules, {"fpdb_3_legacy.Configuration": mock_configuration}):
+                with patch.object(fpdb_3_legacy, "Configuration", mock_configuration, create=True):
+                    result = ConfigInitializer.initialize()
 
-                result = ConfigInitializer.initialize()
+                    self.assertEqual(result, mock_config)
+                    self.assertEqual(ConfigInitializer._config, mock_config)
+                    self.assertEqual(ConfigInitializer._config_file, config_path)
+                    self.assertTrue(ConfigInitializer._initialized)
 
-                self.assertEqual(result, mock_config)
-                self.assertEqual(ConfigInitializer._config, mock_config)
-                self.assertEqual(ConfigInitializer._config_file, config_path)
-                self.assertTrue(ConfigInitializer._initialized)
-
-    @patch("ConfigInitializer.sys")
-    @patch("ConfigInitializer.Path")
+    @patch("fpdb_3_legacy.ConfigInitializer.sys")
+    @patch("fpdb_3_legacy.ConfigInitializer.Path")
     def test_initialize_with_tuple_result(self, mock_path, mock_sys):
         """Test initialization when get_config returns a tuple."""
+        import fpdb_3_legacy
+
         mock_config = Mock()
         config_path = "/path/to/config.xml"
         tuple_result = (config_path, "example_copy", "example_path")
@@ -128,41 +132,43 @@ class TestConfigInitializer(unittest.TestCase):
         mock_path.return_value.parent = "/fpdb/dir"
         mock_sys.path = ["/other/path"]
 
+        mock_configuration = Mock()
+        mock_configuration.get_config.return_value = tuple_result
+        mock_configuration.Config.return_value = mock_config
+
         with patch.object(ConfigInitializer, "_find_config_path", return_value=config_path):
-            with patch("builtins.__import__") as mock_import:
-                mock_configuration = Mock()
-                mock_configuration.get_config.return_value = tuple_result
-                mock_configuration.Config.return_value = mock_config
-                mock_import.return_value = mock_configuration
+            with patch.dict(sys.modules, {"fpdb_3_legacy.Configuration": mock_configuration}):
+                with patch.object(fpdb_3_legacy, "Configuration", mock_configuration, create=True):
+                    result = ConfigInitializer.initialize()
 
-                result = ConfigInitializer.initialize()
+                    self.assertEqual(result, mock_config)
+                    self.assertEqual(ConfigInitializer._config_file, config_path)
 
-                self.assertEqual(result, mock_config)
-                self.assertEqual(ConfigInitializer._config_file, config_path)
-
-    @patch("ConfigInitializer.sys")
-    @patch("ConfigInitializer.Path")
+    @patch("fpdb_3_legacy.ConfigInitializer.sys")
+    @patch("fpdb_3_legacy.ConfigInitializer.Path")
     def test_initialize_fallback_to_default(self, mock_path, mock_sys):
         """Test initialization with fallback to default config."""
+        import fpdb_3_legacy
+
         mock_config = Mock()
 
         # Mock path setup
         mock_path.return_value.parent = "/fpdb/dir"
         mock_sys.path = ["/other/path"]
 
+        mock_configuration = Mock()
+        mock_configuration.Config.return_value = mock_config
+
         with patch.object(ConfigInitializer, "_find_config_path", side_effect=Exception("Config error")):
-            with patch("builtins.__import__") as mock_import:
-                mock_configuration = Mock()
-                mock_configuration.Config.return_value = mock_config
-                mock_import.return_value = mock_configuration
+            with patch.dict(sys.modules, {"fpdb_3_legacy.Configuration": mock_configuration}):
+                with patch.object(fpdb_3_legacy, "Configuration", mock_configuration, create=True):
+                    result = ConfigInitializer.initialize(fallback_to_default=True)
 
-                result = ConfigInitializer.initialize(fallback_to_default=True)
+                    self.assertEqual(result, mock_config)
+                    self.assertTrue(ConfigInitializer._initialized)
 
-                self.assertEqual(result, mock_config)
-                self.assertTrue(ConfigInitializer._initialized)
-
-    @patch("ConfigInitializer.sys")
-    @patch("ConfigInitializer.Path")
+    @patch("fpdb_3_legacy.ConfigInitializer.sys")
+    @patch("fpdb_3_legacy.ConfigInitializer.Path")
     def test_initialize_no_fallback_raises_exception(self, mock_path, mock_sys):
         """Test initialization without fallback raises exception on error."""
         # Mock path setup
@@ -173,8 +179,8 @@ class TestConfigInitializer(unittest.TestCase):
             with self.assertRaises(Exception):
                 ConfigInitializer.initialize(fallback_to_default=False)
 
-    @patch("ConfigInitializer.sys")
-    @patch("ConfigInitializer.Path")
+    @patch("fpdb_3_legacy.ConfigInitializer.sys")
+    @patch("fpdb_3_legacy.ConfigInitializer.Path")
     def test_initialize_fallback_import_error(self, mock_path, mock_sys):
         """Test initialization fallback fails with ImportError."""
         # Mock path setup

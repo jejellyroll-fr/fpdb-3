@@ -1,5 +1,5 @@
 <?xml version="1.0" ?><FreePokerToolsConfig>
-    <general version="83" config_wrap_len="-1" day_start="5" ui_language="fr_FR" config_difficulty="expert" qt_material_theme="dracula_theme.xml" popup_theme="material_dark"/>
+    <general version="83" config_wrap_len="-1" day_start="5" ui_language="fr_FR" config_difficulty="expert" qt_material_theme="dark_purple.xml" popup_theme="material_dark"/>
     <site_ids>
         <site_id site="Full Tilt Poker" id="1"/>
         <site_id site="PokerStars" id="2"/>
@@ -124,12 +124,16 @@
         <site_id site="BlackChipPoker" id="117"/>
         <site_id site="TruePoker" id="118"/>
         <site_id site="Ya Poker" id="119"/>
+        <site_id site="CoinPoker" id="140"/>
         <site_id site="PokerMaster" id="25"/>
         <site_id site="Run It Once Poker" id="26"/>
         <site_id site="GGPoker" id="27"/>
         <site_id site="KingsClub" id="28"/>
         <site_id site="PokerBros" id="29"/>
         <site_id site="Unibet" id="30"/>
+        <site_id site="Absolute" id="8"/>
+        <site_id site="Betfair" id="7"/>
+        <site_id site="Microgaming" id="20"/>
     </site_ids>
     <import callFpdbHud="True" interval="5" fastStoreHudCache="False" saveActions="True" cacheSessions="False" sessionTimeout="30" publicDB="False"/>
     <gui_tour_stats>
@@ -147,6 +151,15 @@
         <col col_name="vpip" disp_all="True" disp_posn="True" col_title="VPIP" xalignment="1.0" field_format="%3.1f" field_type="str"/>
         <col col_name="pfr" disp_all="True" disp_posn="True" col_title="PFR" xalignment="1.0" field_format="%3.1f" field_type="str"/>
         <col col_name="pf3" disp_all="True" disp_posn="True" col_title="PF3" xalignment="1.0" field_format="%3.1f" field_type="str"/>
+        <col col_name="fl3" disp_all="False" disp_posn="False" col_title="Flop3B" xalignment="1.0" field_format="%3.1f" field_type="str"/>
+        <col col_name="tn3" disp_all="False" disp_posn="False" col_title="Turn3B" xalignment="1.0" field_format="%3.1f" field_type="str"/>
+        <col col_name="rv3" disp_all="False" disp_posn="False" col_title="Rivr3B" xalignment="1.0" field_format="%3.1f" field_type="str"/>
+        <col col_name="fl4" disp_all="False" disp_posn="False" col_title="Flop4B" xalignment="1.0" field_format="%3.1f" field_type="str"/>
+        <col col_name="tn4" disp_all="False" disp_posn="False" col_title="Turn4B" xalignment="1.0" field_format="%3.1f" field_type="str"/>
+        <col col_name="rv4" disp_all="False" disp_posn="False" col_title="Rivr4B" xalignment="1.0" field_format="%3.1f" field_type="str"/>
+        <col col_name="flopen" disp_all="False" disp_posn="False" col_title="FOpen" xalignment="1.0" field_format="%3.1f" field_type="str"/>
+        <col col_name="tnopen" disp_all="False" disp_posn="False" col_title="TOpen" xalignment="1.0" field_format="%3.1f" field_type="str"/>
+        <col col_name="rvopen" disp_all="False" disp_posn="False" col_title="ROpen" xalignment="1.0" field_format="%3.1f" field_type="str"/>
         <col col_name="pf4" disp_all="True" disp_posn="True" col_title="PF4" xalignment="1.0" field_format="%3.1f" field_type="str"/>
         <col col_name="pff3" disp_all="True" disp_posn="True" col_title="PFF3" xalignment="1.0" field_format="%3.1f" field_type="str"/>
         <col col_name="pff4" disp_all="True" disp_posn="True" col_title="PFF4" xalignment="1.0" field_format="%3.1f" field_type="str"/>
@@ -154,6 +167,10 @@
         <col col_name="aggfrq" disp_all="True" disp_posn="True" col_title="AggFreq" xalignment="1.0" field_format="%3.1f" field_type="str"/>
         <col col_name="conbet" disp_all="True" disp_posn="True" col_title="ContBet" xalignment="1.0" field_format="%3.1f" field_type="str"/>
         <col col_name="rfi" disp_all="True" disp_posn="True" col_title="RFI" xalignment="1.0" field_format="%3.1f" field_type="str"/>
+        <col col_name="raisetosteal" disp_all="True" disp_posn="True" col_title="RST" xalignment="1.0" field_format="%3.1f" field_type="str"/>
+        <col col_name="suc_steal" disp_all="False" disp_posn="False" col_title="SucSt" xalignment="1.0" field_format="%3.1f" field_type="str"/>
+        <col col_name="foldsbtosteal" disp_all="True" disp_posn="True" col_title="fSB" xalignment="1.0" field_format="%3.1f" field_type="str"/>
+        <col col_name="foldbbtosteal" disp_all="True" disp_posn="True" col_title="fBB" xalignment="1.0" field_format="%3.1f" field_type="str"/>
         <col col_name="car0" disp_all="True" disp_posn="True" col_title="CARpre" xalignment="1.0" field_format="%3.1f" field_type="str"/>
         <col col_name="saw_f" disp_all="True" disp_posn="True" col_title="Saw_F" xalignment="1.0" field_format="%3.1f" field_type="str"/>
         <col col_name="sawsd" disp_all="True" disp_posn="True" col_title="SawSD" xalignment="1.0" field_format="%3.1f" field_type="str"/>
@@ -166,8 +183,11 @@
         <col col_name="pofafq" disp_all="False" disp_posn="False" col_title="PoFAFq" xalignment="1.0" field_format="%3.1f" field_type="str"/>
         <col col_name="net" disp_all="True" disp_posn="True" col_title="Net($)" xalignment="1.0" field_format="%6.2f" field_type="cash"/>
         <col col_name="bbper100" disp_all="True" disp_posn="True" col_title="bb/100" xalignment="1.0" field_format="%4.2f" field_type="str"/>
+        <col col_name="profitperhand" disp_all="False" disp_posn="False" col_title="Profit/Hnd" xalignment="1.0" field_format="%6.2f" field_type="cash"/>
         <col col_name="rake" disp_all="True" disp_posn="True" col_title="Rake($)" xalignment="1.0" field_format="%6.2f" field_type="cash"/>
         <col col_name="bb100xr" disp_all="True" disp_posn="True" col_title="bbxr/100" xalignment="1.0" field_format="%4.2f" field_type="str"/>
+        <col col_name="profhndxr" disp_all="False" disp_posn="False" col_title="ProfitHndXR" xalignment="1.0" field_format="%6.2f" field_type="cash"/>
+        <col col_name="variance" disp_all="False" disp_posn="False" col_title="Variance" xalignment="1.0" field_format="%5.2f" field_type="str"/>
         <col col_name="stddev" disp_all="True" disp_posn="True" col_title="Std. Dev." xalignment="1.0" field_format="%4.2f" field_type="str"/>
         <col col_name="totalprofit" disp_all="True" disp_posn="True" col_title="Total Profit" xalignment="1.0" field_format="$%.2f" field_type="str"/>
         <col col_name="playershort" disp_all="False" disp_posn="False" col_title="Player Name" xalignment="1.0" field_format="%s" field_type="str"/>
@@ -234,13 +254,22 @@
             <game_stat_set game_type="tour" stat_set="mtt_holdem_nl"/>
             <game_stat_set game_type="ring" stat_set="holdem_cg_expert"/>
         </game>
-        <game game_name="razz" aux="stud_mucked, ClassicHud">
+        <game game_name="razz" aux="mucked, ClassicHud">
             <game_stat_set game_type="ring" stat_set="razz_cg_expert"/>
             <game_stat_set game_type="tour" stat_set="mtt_razz"/>
         </game>
-        <game game_name="omahahi" aux="ClassicHud, mucked">
-            <game_stat_set game_type="ring" stat_set="omaha_cg_expert"/>
+        <game game_name="omahahi" aux="PLO4Hud, mucked">
+            <game_stat_set game_type="ring" stat_set="plo4_6max_pro"/>
             <game_stat_set game_type="tour" stat_set="mtt_omaha"/>
+        </game>
+        <!-- All-in or Fold: one decision per hand, on the flop (Omaha) or
+             preflop (Hold'em). The shared AoF profiles behind both bindings
+             are game-agnostic. -->
+        <game game_name="aof_omaha" aux="ClassicHud, mucked">
+            <game_stat_set game_type="all" stat_set="aof_advanced"/>
+        </game>
+        <game game_name="aof_holdem" aux="ClassicHud, mucked">
+            <game_stat_set game_type="all" stat_set="aof_advanced"/>
         </game>
         <game game_name="omahahilo" aux="ClassicHud, mucked">
             <game_stat_set game_type="ring" stat_set="omaha_cg_expert"/>
@@ -262,15 +291,15 @@
             <game_stat_set game_type="ring" stat_set="omaha_cg_expert"/>
             <game_stat_set game_type="tour" stat_set="mtt_omaha"/>
         </game>
-        <game game_name="studhi" aux="stud_mucked, ClassicHud">
+        <game game_name="studhi" aux="mucked, ClassicHud">
             <game_stat_set game_type="ring" stat_set="stud_cg_expert"/>
             <game_stat_set game_type="tour" stat_set="mtt_stud"/>
         </game>
-        <game game_name="5_studhi" aux="stud_mucked, ClassicHud">
+        <game game_name="5_studhi" aux="mucked, ClassicHud">
             <game_stat_set game_type="ring" stat_set="stud_cg_expert"/>
             <game_stat_set game_type="tour" stat_set="mtt_stud"/>
         </game>
-        <game game_name="studhilo" aux="stud_mucked, ClassicHud">
+        <game game_name="studhilo" aux="mucked, ClassicHud">
             <game_stat_set game_type="ring" stat_set="stud_cg_expert"/>
             <game_stat_set game_type="tour" stat_set="mtt_stud"/>
         </game>
@@ -306,6 +335,7 @@
     <aux_windows>
         <aw name="Simple_HUD" module="Aux_Hud" class="SimpleHUD" bgcolor="#000000" fgcolor="#FFFFFF" font="Sans" font_size="8" opacity="0.8"/>
         <aw name="ClassicHud" module="Aux_Classic_Hud" class="ClassicHud" bgcolor="#000000" fgcolor="#FFFFFF" font="Sans" font_size="8" opacity="0.8"/>
+        <aw name="PLO4Hud" module="Aux_Classic_Hud" class="ClassicHud" bgcolor="#0B1220" fgcolor="#E6EDF3" font="Sans" font_size="9" opacity="0.94"/>
         <aw name="stud_mucked" module="Mucked" class="Stud_mucked" cols="11" rows="8"/>
         <aw name="mucked" module="Mucked" class="Flop_Mucked" opacity="1.0" timeout="5"/>
         <aw name="Hello" module="Hello" class="Hello"/>
@@ -589,12 +619,12 @@
                 <location common="1" x="323" y="232"/>
             </layout>
             <layout max="6" height="652" width="920">
-                <location seat="1" hist_seat="1" x="65" y="469"/>
-                <location seat="2" hist_seat="3" x="38" y="197"/>
-                <location seat="3" hist_seat="5" x="473" y="128"/>
-                <location seat="4" hist_seat="6" x="749" y="195"/>
-                <location seat="5" hist_seat="8" x="737" y="472"/>
-                <location seat="6" hist_seat="10" x="256" y="474"/>
+                <location seat="1" hist_seat="1" x="473" y="128"/>
+                <location seat="2" hist_seat="3" x="749" y="195"/>
+                <location seat="3" hist_seat="5" x="737" y="472"/>
+                <location seat="4" hist_seat="6" x="420" y="500"/>
+                <location seat="5" hist_seat="8" x="65" y="469"/>
+                <location seat="6" hist_seat="10" x="38" y="197"/>
                 <location common="1" x="375" y="277"/>
             </layout>
             <layout max="7" height="546" width="792">
@@ -1105,28 +1135,28 @@
                 <location seat="7" x="-4" y="100"/>
                 <location common="1" x="323" y="232"/>
             </layout>
-            <layout max="8" height="103" width="336">
-                <location seat="1" x="1225" y="737"/>
-                <location seat="2" x="1055" y="318"/>
-                <location seat="3" x="1156" y="445"/>
-                <location seat="4" x="974" y="540"/>
-                <location seat="5" x="731" y="525"/>
-                <location seat="6" x="521" y="450"/>
-                <location seat="7" x="616" y="303"/>
-                <location seat="8" x="711" y="195"/>
-                <location common="1" x="137" y="41"/>
+            <layout max="8" height="546" width="792">
+                <location seat="1" x="573" y="41"/>
+                <location seat="2" x="681" y="221"/>
+                <location seat="3" x="686" y="338"/>
+                <location seat="4" x="512" y="411"/>
+                <location seat="5" x="162" y="413"/>
+                <location seat="6" x="3" y="339"/>
+                <location seat="7" x="2" y="221"/>
+                <location seat="8" x="112" y="41"/>
+                <location common="1" x="323" y="232"/>
             </layout>
-            <layout max="9" height="103" width="336">
-                <location seat="1" x="281" y="6"/>
-                <location seat="2" x="294" y="37"/>
-                <location seat="3" x="289" y="59"/>
-                <location seat="4" x="1079" y="633"/>
-                <location seat="5" x="860" y="670"/>
-                <location seat="6" x="98" y="71"/>
-                <location seat="7" x="413" y="511"/>
-                <location seat="8" x="394" y="208"/>
-                <location seat="9" x="4" y="6"/>
-                <location common="1" x="137" y="41"/>
+            <layout max="9" height="546" width="792">
+                <location seat="1" x="663" y="48"/>
+                <location seat="2" x="694" y="205"/>
+                <location seat="3" x="682" y="325"/>
+                <location seat="4" x="630" y="393"/>
+                <location seat="5" x="429" y="410"/>
+                <location seat="6" x="231" y="392"/>
+                <location seat="7" x="8" y="332"/>
+                <location seat="8" x="10" y="204"/>
+                <location seat="9" x="10" y="48"/>
+                <location common="1" x="323" y="232"/>
             </layout>
             <layout max="10" height="546" width="792">
                 <location seat="1" x="531" y="14"/>
@@ -1492,6 +1522,49 @@
             <stat _rowcol="(3,1)" _stat_name="saw_f" popup="default" tip="" click="" hudcolor="" hudprefix="" hudsuffix="" stat_hicolor="" stat_hith="" stat_locolor="" stat_loth=""/>
             <stat _rowcol="(3,2)" _stat_name="wtsd" popup="default" tip="" click="" hudcolor="" hudprefix="" hudsuffix="" stat_hicolor="" stat_hith="" stat_locolor="" stat_loth=""/>
         </ss>
+        <ss name="aof_default" rows="4" cols="4" xpad="1" ypad="0" rich_text="True" font_size="10">
+            <stat _rowcol="(1,1)" _stat_name="playershort" popup="aof_profile" hudbgcolor="#0F172A" hudprefix="" hudsuffix="" tip="" click="open_comment_dialog" hudcolor="#98FFB0"/>
+            <stat _rowcol="(1,2)" _stat_name="player_note" popup="aof_profile" hudbgcolor="#0F172A" hudprefix="" hudsuffix="" tip="Notes" click="open_comment_dialog"/>
+            <stat _rowcol="(1,3)" _stat_name="n" popup="aof_profile" hudbgcolor="#0F172A" hudprefix="H " hudsuffix="" tip="" click=""/>
+            <stat _rowcol="(1,4)" _stat_name="aof_observed" popup="aof_profile" hudbgcolor="#0F172A" hudprefix="obs " hudsuffix="" tip="" click=""/>
+            <stat _rowcol="(2,1)" _stat_name="aof_allin" popup="aof_profile" hudbgcolor="#1E1B4B" hudprefix="AI " hudsuffix="" tip="" click="" stat_loth="25" stat_locolor="#4ADE80" stat_midcolor="#FFA726" stat_hith="45" stat_hicolor="#FF6B6B"/>
+            <stat _rowcol="(2,2)" _stat_name="aof_fold" popup="aof_profile" hudbgcolor="#1E1B4B" hudprefix="F " hudsuffix="" tip="" click=""/>
+            <stat _rowcol="(2,3)" _stat_name="aof_weak" popup="aof_profile" hudbgcolor="#1E1B4B" hudprefix="wk " hudsuffix="" tip="" click="" stat_loth="1.0" stat_locolor="#4ADE80" stat_hith="3.0" stat_hicolor="#FF6B6B"/>
+            <stat _rowcol="(2,4)" _stat_name="aof_decision_ev" popup="aof_profile" hudbgcolor="#1E1B4B" hudprefix="EV " hudsuffix="" tip="" click="" stat_loth="0.0" stat_locolor="#FF6B6B" stat_hith="2.0" stat_hicolor="#4ADE80"/>
+            <stat _rowcol="(3,1)" _stat_name="aof_no_made" popup="aof_profile" hudbgcolor="#132B25" hudprefix="air " hudsuffix="" tip="" click="" stat_loth="8.0" stat_locolor="#4ADE80" stat_hith="15.0" stat_hicolor="#FF6B6B"/>
+            <stat _rowcol="(3,2)" _stat_name="aof_two_pair" popup="aof_profile" hudbgcolor="#132B25" hudprefix="2p " hudsuffix="" tip="" click=""/>
+            <stat _rowcol="(3,3)" _stat_name="aof_trips" popup="aof_profile" hudbgcolor="#132B25" hudprefix="3k " hudsuffix="" tip="" click=""/>
+            <stat _rowcol="(3,4)" _stat_name="aof_nfd" popup="aof_profile" hudbgcolor="#132B25" hudprefix="NFD " hudsuffix="" tip="" click="" stat_loth="5.0" stat_locolor="#4CC9F0" stat_hith="10.0" stat_hicolor="#FF6B6B"/>
+            <stat _rowcol="(4,1)" _stat_name="aof_splash_won" popup="aof_profile" hudbgcolor="#0F2942" hudprefix="Spl " hudsuffix="" tip="" click=""/>
+            <stat _rowcol="(4,2)" _stat_name="aof_splash_freq" popup="aof_profile" hudbgcolor="#0F2942" hudprefix="Spl% " hudsuffix="" tip="" click=""/>
+            <stat _rowcol="(4,3)" _stat_name="aof_showdowns" popup="aof_profile" hudbgcolor="#0F2942" hudprefix="sd " hudsuffix="" tip="" click=""/>
+        </ss>
+        <ss name="aof_advanced" rows="6" cols="4" xpad="1" ypad="0" rich_text="True" font_size="10">
+            <stat _rowcol="(1,1)" _stat_name="playershort" popup="aof_profile" hudbgcolor="#0F172A" hudprefix="" hudsuffix="" tip="" click="open_comment_dialog" hudcolor="#98FFB0"/>
+            <stat _rowcol="(1,2)" _stat_name="player_note" popup="aof_profile" hudbgcolor="#0F172A" hudprefix="" hudsuffix="" tip="Notes" click="open_comment_dialog"/>
+            <stat _rowcol="(1,3)" _stat_name="n" popup="aof_profile" hudbgcolor="#0F172A" hudprefix="H " hudsuffix="" tip="" click=""/>
+            <stat _rowcol="(1,4)" _stat_name="aof_observed" popup="aof_profile" hudbgcolor="#0F172A" hudprefix="obs " hudsuffix="" tip="" click=""/>
+            <stat _rowcol="(2,1)" _stat_name="aof_allin" popup="aof_profile" hudbgcolor="#1E1B4B" hudprefix="AI " hudsuffix="" tip="" click="" stat_loth="25" stat_locolor="#4ADE80" stat_midcolor="#FFA726" stat_hith="45" stat_hicolor="#FF6B6B"/>
+            <stat _rowcol="(2,2)" _stat_name="aof_fold" popup="aof_profile" hudbgcolor="#1E1B4B" hudprefix="F " hudsuffix="" tip="" click=""/>
+            <stat _rowcol="(2,3)" _stat_name="aof_weak" popup="aof_profile" hudbgcolor="#1E1B4B" hudprefix="wk " hudsuffix="" tip="" click="" stat_loth="1.0" stat_locolor="#4ADE80" stat_hith="3.0" stat_hicolor="#FF6B6B"/>
+            <stat _rowcol="(2,4)" _stat_name="aof_decision_ev" popup="aof_profile" hudbgcolor="#1E1B4B" hudprefix="EV " hudsuffix="" tip="" click="" stat_loth="0.0" stat_locolor="#FF6B6B" stat_hith="2.0" stat_hicolor="#4ADE80"/>
+            <stat _rowcol="(3,1)" _stat_name="aof_no_made" popup="aof_profile" hudbgcolor="#132B25" hudprefix="air " hudsuffix="" tip="" click="" stat_loth="8.0" stat_locolor="#4ADE80" stat_hith="15.0" stat_hicolor="#FF6B6B"/>
+            <stat _rowcol="(3,2)" _stat_name="aof_pair" popup="aof_profile" hudbgcolor="#132B25" hudprefix="1p " hudsuffix="" tip="" click=""/>
+            <stat _rowcol="(3,3)" _stat_name="aof_two_pair" popup="aof_profile" hudbgcolor="#132B25" hudprefix="2p " hudsuffix="" tip="" click=""/>
+            <stat _rowcol="(3,4)" _stat_name="aof_trips" popup="aof_profile" hudbgcolor="#132B25" hudprefix="3k " hudsuffix="" tip="" click=""/>
+            <stat _rowcol="(4,1)" _stat_name="aof_straight" popup="aof_profile" hudbgcolor="#0F2942" hudprefix="str " hudsuffix="" tip="" click=""/>
+            <stat _rowcol="(4,2)" _stat_name="aof_nfd" popup="aof_profile" hudbgcolor="#0F2942" hudprefix="NFD " hudsuffix="" tip="" click="" stat_loth="5.0" stat_locolor="#4CC9F0" stat_hith="10.0" stat_hicolor="#FF6B6B"/>
+            <stat _rowcol="(4,3)" _stat_name="aof_non_nfd" popup="aof_profile" hudbgcolor="#0F2942" hudprefix="fd " hudsuffix="" tip="" click=""/>
+            <stat _rowcol="(4,4)" _stat_name="aof_wrap9" popup="aof_profile" hudbgcolor="#0F2942" hudprefix="W9 " hudsuffix="" tip="" click=""/>
+            <stat _rowcol="(5,1)" _stat_name="aof_big_wrap13" popup="aof_profile" hudbgcolor="#2D1A37" hudprefix="W13 " hudsuffix="" tip="" click=""/>
+            <stat _rowcol="(5,2)" _stat_name="aof_made" popup="aof_profile" hudbgcolor="#2D1A37" hudprefix="made " hudsuffix="" tip="" click=""/>
+            <stat _rowcol="(5,3)" _stat_name="aof_known_equity" popup="aof_profile" hudbgcolor="#2D1A37" hudprefix="EqK " hudsuffix="" tip="" click="" stat_loth="45.0" stat_locolor="#FF6B6B" stat_hith="55.0" stat_hicolor="#4ADE80"/>
+            <stat _rowcol="(5,4)" _stat_name="aof_range_equity" popup="aof_profile" hudbgcolor="#2D1A37" hudprefix="EqR " hudsuffix="" tip="" click="" stat_loth="45.0" stat_locolor="#FF6B6B" stat_hith="55.0" stat_hicolor="#4ADE80"/>
+            <stat _rowcol="(6,1)" _stat_name="aof_splash_won" popup="aof_profile" hudbgcolor="#111827" hudprefix="Spl " hudsuffix="" tip="" click=""/>
+            <stat _rowcol="(6,2)" _stat_name="aof_splash_freq" popup="aof_profile" hudbgcolor="#111827" hudprefix="Spl% " hudsuffix="" tip="" click=""/>
+            <stat _rowcol="(6,3)" _stat_name="aof_showdowns" popup="aof_profile" hudbgcolor="#111827" hudprefix="sd " hudsuffix="" tip="" click=""/>
+        </ss>
+
         <ss name="omaha_default" rows="3" cols="2" xpad="1" ypad="0">
             <stat _rowcol="(1,1)" _stat_name="playershort" popup="omaha_complete" tip="" click="" hudcolor="#98FFB0" hudprefix="" hudsuffix=""/>
             <stat _rowcol="(1,2)" _stat_name="n" popup="default" tip="" click=""/>
@@ -1499,6 +1572,44 @@
             <stat _rowcol="(2,2)" _stat_name="pfr" popup="default" tip="" click=""/>
             <stat _rowcol="(3,1)" _stat_name="saw_f" popup="default" tip="" click=""/>
             <stat _rowcol="(3,2)" _stat_name="ffreq1" popup="default" tip="" click=""/>
+        </ss>
+        <!--
+            PLO4 cash 6-max: compact two-panel HUD.
+            Cyan / ivory / coral mean low / standard / high frequency; they do
+            not mean good / neutral / bad.  The thresholds are exploit flags,
+            not target strategy frequencies.
+        -->
+        <ss name="plo4_6max_pro" rows="4" cols="4" xpad="2" ypad="1" show_hero_hud="false">
+            <block id="plo4_identity" label="PLO4 • 6-MAX" rows="1" cols="4" x="0" y="0" bgcolor="rgba(11, 18, 32, 235)" fgcolor="#E6EDF3" bordercolor="#2DD4BF" title_bgcolor="#0F766E" title_fgcolor="#F8FAFC" cell_width="44">
+                <stat _rowcol="(1,1)" _stat_name="playershort" colspan="2" align="left" popup="plo4_full" hudcolor="#F8FAFC" hudbgcolor="#0B1220" hudprefix="" hudsuffix="" tip="" click=""/>
+                <stat _rowcol="(1,3)" _stat_name="n" popup="plo4_full" hudcolor="#94A3B8" hudbgcolor="#0B1220" hudprefix="H " hudsuffix="" tip="" click=""/>
+                <stat _rowcol="(1,4)" _stat_name="player_note" popup="plo4_full" hudcolor="#F6C85F" hudbgcolor="#0B1220" hudprefix="" hudsuffix="" tip="" click="open_comment_dialog"/>
+            </block>
+            <block id="plo4_core" label="" rows="4" cols="4" x="0" y="38" bgcolor="rgba(11, 18, 32, 235)" fgcolor="#D7E1EA" bordercolor="#334155" cell_width="44">
+                <!-- Preflop identity -->
+                <stat _rowcol="(1,1)" _stat_name="vpip" popup="plo4_preflop" hudbgcolor="#111C2E" hudprefix="VP " tip="" click="" stat_loth="23" stat_hith="30" stat_locolor="#4CC9F0" stat_midcolor="#F2F4E6" stat_hicolor="#FF6B6B"/>
+                <stat _rowcol="(1,2)" _stat_name="pfr" popup="plo4_preflop" hudbgcolor="#111C2E" hudprefix="PR " tip="" click="" stat_loth="16" stat_hith="22" stat_locolor="#4CC9F0" stat_midcolor="#F2F4E6" stat_hicolor="#FF6B6B"/>
+                <stat _rowcol="(1,3)" _stat_name="three_B" popup="plo4_preflop" hudbgcolor="#111C2E" hudprefix="3B " tip="" click="" stat_loth="6" stat_hith="9.5" stat_locolor="#4CC9F0" stat_midcolor="#F2F4E6" stat_hicolor="#FF6B6B"/>
+                <stat _rowcol="(1,4)" _stat_name="f_3bet" popup="plo4_preflop" hudbgcolor="#111C2E" hudprefix="F3 " tip="" click="" stat_loth="20" stat_hith="40" stat_locolor="#4CC9F0" stat_midcolor="#F2F4E6" stat_hicolor="#FF6B6B"/>
+
+                <!-- Preflop range construction -->
+                <stat _rowcol="(2,1)" _stat_name="cold_call" popup="plo4_preflop" hudbgcolor="#162033" hudprefix="CC " tip="" click="" stat_loth="7" stat_hith="18" stat_locolor="#4CC9F0" stat_midcolor="#F2F4E6" stat_hicolor="#FF6B6B"/>
+                <stat _rowcol="(2,2)" _stat_name="four_B" popup="plo4_preflop" hudbgcolor="#162033" hudprefix="4B " tip="" click="" stat_loth="2" stat_hith="5" stat_locolor="#4CC9F0" stat_midcolor="#F2F4E6" stat_hicolor="#FF6B6B"/>
+                <stat _rowcol="(2,3)" _stat_name="fold_vs_4bet" popup="plo4_preflop" hudbgcolor="#162033" hudprefix="F4 " tip="" click="" stat_loth="25" stat_hith="55" stat_locolor="#4CC9F0" stat_midcolor="#F2F4E6" stat_hicolor="#FF6B6B"/>
+                <stat _rowcol="(2,4)" _stat_name="squeeze" popup="plo4_preflop" hudbgcolor="#162033" hudprefix="SQ " tip="" click="" stat_loth="4" stat_hith="10" stat_locolor="#4CC9F0" stat_midcolor="#F2F4E6" stat_hicolor="#FF6B6B"/>
+
+                <!-- Flop response -->
+                <stat _rowcol="(3,1)" _stat_name="cb1" popup="plo4_postflop" hudbgcolor="#13241F" hudprefix="CBF " tip="" click="" stat_loth="40" stat_hith="65" stat_locolor="#4CC9F0" stat_midcolor="#F2F4E6" stat_hicolor="#FF6B6B"/>
+                <stat _rowcol="(3,2)" _stat_name="f_cb1" popup="plo4_postflop" hudbgcolor="#13241F" hudprefix="FCF " tip="" click="" stat_loth="35" stat_hith="55" stat_locolor="#4CC9F0" stat_midcolor="#F2F4E6" stat_hicolor="#FF6B6B"/>
+                <stat _rowcol="(3,3)" _stat_name="dbr1" popup="plo4_postflop" hudbgcolor="#13241F" hudprefix="DBF " tip="" click="" stat_loth="10" stat_hith="25" stat_locolor="#4CC9F0" stat_midcolor="#F2F4E6" stat_hicolor="#FF6B6B"/>
+                <stat _rowcol="(3,4)" _stat_name="cr1" popup="plo4_postflop" hudbgcolor="#13241F" hudprefix="XRF " tip="" click="" stat_loth="8" stat_hith="18" stat_locolor="#4CC9F0" stat_midcolor="#F2F4E6" stat_hicolor="#FF6B6B"/>
+
+                <!-- Turn and showdown -->
+                <stat _rowcol="(4,1)" _stat_name="cb2" popup="plo4_postflop" hudbgcolor="#201C2E" hudprefix="CBT " tip="" click="" stat_loth="35" stat_hith="60" stat_locolor="#4CC9F0" stat_midcolor="#F2F4E6" stat_hicolor="#FF6B6B"/>
+                <stat _rowcol="(4,2)" _stat_name="f_cb2" popup="plo4_postflop" hudbgcolor="#201C2E" hudprefix="FCT " tip="" click="" stat_loth="35" stat_hith="55" stat_locolor="#4CC9F0" stat_midcolor="#F2F4E6" stat_hicolor="#FF6B6B"/>
+                <stat _rowcol="(4,3)" _stat_name="wtsd" popup="plo4_showdown" hudbgcolor="#201C2E" hudprefix="WT " tip="" click="" stat_loth="24" stat_hith="32" stat_locolor="#4CC9F0" stat_midcolor="#F2F4E6" stat_hicolor="#FF6B6B"/>
+                <stat _rowcol="(4,4)" _stat_name="wmsd" popup="plo4_showdown" hudbgcolor="#201C2E" hudprefix="WS " tip="" click="" stat_loth="45" stat_hith="55" stat_locolor="#4CC9F0" stat_midcolor="#F2F4E6" stat_hicolor="#FF6B6B"/>
+            </block>
         </ss>
         <ss name="omaha_cg_expert" rows="5" cols="4" xpad="1" ypad="0">
             <stat _rowcol="(1,1)" _stat_name="playershort" hudcolor="#E0E0E0" popup="omaha_complete" hudprefix="" hudsuffix="" tip="" click=""/>
@@ -1547,128 +1658,128 @@
         <ss name="razz_cg_expert" rows="4" cols="4" xpad="1" ypad="0">
             <stat _rowcol="(1,1)" _stat_name="vpip" popup="default" tip="Voluntarily Put Money In Pot" click="" stat_hicolor="#F44336" stat_hith="35" stat_locolor="#4CAF50" stat_loth="15"/>
             <stat _rowcol="(1,2)" _stat_name="pfr" popup="default" tip="Preflop Raise" click="" stat_hicolor="#F44336" stat_hith="25" stat_locolor="#4CAF50" stat_loth="10"/>
-            <stat _rowcol="(1,3)" _stat_name="3B" popup="default" tip="3-Bet Percentage" click="" stat_hicolor="#F44336" stat_hith="15" stat_locolor="#4CAF50" stat_loth="5"/>
-            <stat _rowcol="(1,4)" _stat_name="fold_3B" popup="default" tip="Fold to 3-Bet" click="" stat_hicolor="#4CAF50" stat_hith="70" stat_locolor="#F44336" stat_loth="30"/>
+            <stat _rowcol="(1,3)" _stat_name="three_B" popup="default" tip="3-Bet Percentage" click="" stat_hicolor="#F44336" stat_hith="15" stat_locolor="#4CAF50" stat_loth="5"/>
+            <stat _rowcol="(1,4)" _stat_name="f_3bet" popup="default" tip="Fold to 3-Bet" click="" stat_hicolor="#4CAF50" stat_hith="70" stat_locolor="#F44336" stat_loth="30"/>
             <stat _rowcol="(2,1)" _stat_name="steal" popup="default" tip="Steal Attempt" click="" stat_hicolor="#F44336" stat_hith="30" stat_locolor="#4CAF50" stat_loth="10"/>
-            <stat _rowcol="(2,2)" _stat_name="fold_steal" popup="default" tip="Fold to Steal" click="" stat_hicolor="#4CAF50" stat_hith="70" stat_locolor="#F44336" stat_loth="30"/>
-            <stat _rowcol="(2,3)" _stat_name="cbet_4th" popup="default" tip="4th Street C-Bet" click="" stat_hicolor="#F44336" stat_hith="60" stat_locolor="#4CAF50" stat_loth="30"/>
-            <stat _rowcol="(2,4)" _stat_name="fold_cbet_4th" popup="default" tip="Fold to 4th Street C-Bet" click="" stat_hicolor="#4CAF50" stat_hith="60" stat_locolor="#F44336" stat_loth="30"/>
-            <stat _rowcol="(3,1)" _stat_name="cbet_5th" popup="default" tip="5th Street C-Bet" click="" stat_hicolor="#F44336" stat_hith="50" stat_locolor="#4CAF50" stat_loth="25"/>
-            <stat _rowcol="(3,2)" _stat_name="fold_cbet_5th" popup="default" tip="Fold to 5th Street C-Bet" click="" stat_hicolor="#4CAF50" stat_hith="55" stat_locolor="#F44336" stat_loth="25"/>
-            <stat _rowcol="(3,3)" _stat_name="cbet_6th" popup="default" tip="6th Street C-Bet" click="" stat_hicolor="#F44336" stat_hith="45" stat_locolor="#4CAF50" stat_loth="20"/>
-            <stat _rowcol="(3,4)" _stat_name="fold_cbet_6th" popup="default" tip="Fold to 6th Street C-Bet" click="" stat_hicolor="#4CAF50" stat_hith="50" stat_locolor="#F44336" stat_loth="25"/>
-            <stat _rowcol="(4,1)" _stat_name="showdown_7th" popup="default" tip="Went to Showdown on 7th Street" click="" stat_hicolor="#F44336" stat_hith="30" stat_locolor="#4CAF50" stat_loth="15"/>
-            <stat _rowcol="(4,2)" _stat_name="win_7th" popup="default" tip="Won at Showdown on 7th Street" click="" stat_hicolor="#4CAF50" stat_hith="50" stat_locolor="#F44336" stat_loth="25"/>
-            <stat _rowcol="(4,3)" _stat_name="af" popup="default" tip="Aggression Factor" click="" stat_hicolor="#F44336" stat_hith="3.0" stat_locolor="#4CAF50" stat_loth="1.5"/>
-            <stat _rowcol="(4,4)" _stat_name="total_hands" popup="default" tip="Total Hands" click=""/>
+            <stat _rowcol="(2,2)" _stat_name="f_steal" popup="default" tip="Fold to Steal" click="" stat_hicolor="#4CAF50" stat_hith="70" stat_locolor="#F44336" stat_loth="30"/>
+            <stat _rowcol="(2,3)" _stat_name="cb1" popup="default" tip="4th Street C-Bet" click="" stat_hicolor="#F44336" stat_hith="60" stat_locolor="#4CAF50" stat_loth="30"/>
+            <stat _rowcol="(2,4)" _stat_name="f_cb1" popup="default" tip="Fold to 4th Street C-Bet" click="" stat_hicolor="#4CAF50" stat_hith="60" stat_locolor="#F44336" stat_loth="30"/>
+            <stat _rowcol="(3,1)" _stat_name="cb2" popup="default" tip="5th Street C-Bet" click="" stat_hicolor="#F44336" stat_hith="50" stat_locolor="#4CAF50" stat_loth="25"/>
+            <stat _rowcol="(3,2)" _stat_name="f_cb2" popup="default" tip="Fold to 5th Street C-Bet" click="" stat_hicolor="#4CAF50" stat_hith="55" stat_locolor="#F44336" stat_loth="25"/>
+            <stat _rowcol="(3,3)" _stat_name="cb3" popup="default" tip="6th Street C-Bet" click="" stat_hicolor="#F44336" stat_hith="45" stat_locolor="#4CAF50" stat_loth="20"/>
+            <stat _rowcol="(3,4)" _stat_name="f_cb3" popup="default" tip="Fold to 6th Street C-Bet" click="" stat_hicolor="#4CAF50" stat_hith="50" stat_locolor="#F44336" stat_loth="25"/>
+            <stat _rowcol="(4,1)" _stat_name="wtsd" popup="default" tip="Went to Showdown on 7th Street" click="" stat_hicolor="#F44336" stat_hith="30" stat_locolor="#4CAF50" stat_loth="15"/>
+            <stat _rowcol="(4,2)" _stat_name="wmsd" popup="default" tip="Won at Showdown on 7th Street" click="" stat_hicolor="#4CAF50" stat_hith="50" stat_locolor="#F44336" stat_loth="25"/>
+            <stat _rowcol="(4,3)" _stat_name="agg_fact" popup="default" tip="Aggression Factor" click="" stat_hicolor="#F44336" stat_hith="3.0" stat_locolor="#4CAF50" stat_loth="1.5"/>
+            <stat _rowcol="(4,4)" _stat_name="n" popup="default" tip="Total Hands" click=""/>
         </ss>
         <ss name="draw_cg_default" rows="4" cols="4" xpad="1" ypad="0">
             <stat _rowcol="(1,1)" _stat_name="vpip" popup="default" tip="Voluntarily Put Money In Pot" click="" stat_hicolor="#F44336" stat_hith="40" stat_locolor="#4CAF50" stat_loth="20"/>
             <stat _rowcol="(1,2)" _stat_name="pfr" popup="default" tip="Preflop Raise" click="" stat_hicolor="#F44336" stat_hith="30" stat_locolor="#4CAF50" stat_loth="10"/>
-            <stat _rowcol="(1,3)" _stat_name="3B" popup="default" tip="3-Bet Percentage" click="" stat_hicolor="#F44336" stat_hith="15" stat_locolor="#4CAF50" stat_loth="5"/>
-            <stat _rowcol="(1,4)" _stat_name="fold_3B" popup="default" tip="Fold to 3-Bet" click="" stat_hicolor="#4CAF50" stat_hith="70" stat_locolor="#F44336" stat_loth="30"/>
+            <stat _rowcol="(1,3)" _stat_name="three_B" popup="default" tip="3-Bet Percentage" click="" stat_hicolor="#F44336" stat_hith="15" stat_locolor="#4CAF50" stat_loth="5"/>
+            <stat _rowcol="(1,4)" _stat_name="f_3bet" popup="default" tip="Fold to 3-Bet" click="" stat_hicolor="#4CAF50" stat_hith="70" stat_locolor="#F44336" stat_loth="30"/>
             <stat _rowcol="(2,1)" _stat_name="steal" popup="default" tip="Steal Attempt" click="" stat_hicolor="#F44336" stat_hith="35" stat_locolor="#4CAF50" stat_loth="15"/>
-            <stat _rowcol="(2,2)" _stat_name="fold_steal" popup="default" tip="Fold to Steal" click="" stat_hicolor="#4CAF50" stat_hith="70" stat_locolor="#F44336" stat_loth="30"/>
-            <stat _rowcol="(2,3)" _stat_name="cbet_1st_draw" popup="default" tip="C-Bet After 1st Draw" click="" stat_hicolor="#F44336" stat_hith="60" stat_locolor="#4CAF50" stat_loth="30"/>
-            <stat _rowcol="(2,4)" _stat_name="fold_cbet_1st_draw" popup="default" tip="Fold to C-Bet After 1st Draw" click="" stat_hicolor="#4CAF50" stat_hith="60" stat_locolor="#F44336" stat_loth="30"/>
-            <stat _rowcol="(3,1)" _stat_name="cbet_2nd_draw" popup="default" tip="C-Bet After 2nd Draw" click="" stat_hicolor="#F44336" stat_hith="50" stat_locolor="#4CAF50" stat_loth="25"/>
-            <stat _rowcol="(3,2)" _stat_name="fold_cbet_2nd_draw" popup="default" tip="Fold to C-Bet After 2nd Draw" click="" stat_hicolor="#4CAF50" stat_hith="55" stat_locolor="#F44336" stat_loth="25"/>
-            <stat _rowcol="(3,3)" _stat_name="cbet_3rd_draw" popup="default" tip="C-Bet After 3rd Draw" click="" stat_hicolor="#F44336" stat_hith="45" stat_locolor="#4CAF50" stat_loth="20"/>
-            <stat _rowcol="(3,4)" _stat_name="fold_cbet_3rd_draw" popup="default" tip="Fold to C-Bet After 3rd Draw" click="" stat_hicolor="#4CAF50" stat_hith="50" stat_locolor="#F44336" stat_loth="25"/>
+            <stat _rowcol="(2,2)" _stat_name="f_steal" popup="default" tip="Fold to Steal" click="" stat_hicolor="#4CAF50" stat_hith="70" stat_locolor="#F44336" stat_loth="30"/>
+            <stat _rowcol="(2,3)" _stat_name="cb1" popup="default" tip="C-Bet After 1st Draw" click="" stat_hicolor="#F44336" stat_hith="60" stat_locolor="#4CAF50" stat_loth="30"/>
+            <stat _rowcol="(2,4)" _stat_name="f_cb1" popup="default" tip="Fold to C-Bet After 1st Draw" click="" stat_hicolor="#4CAF50" stat_hith="60" stat_locolor="#F44336" stat_loth="30"/>
+            <stat _rowcol="(3,1)" _stat_name="cb2" popup="default" tip="C-Bet After 2nd Draw" click="" stat_hicolor="#F44336" stat_hith="50" stat_locolor="#4CAF50" stat_loth="25"/>
+            <stat _rowcol="(3,2)" _stat_name="f_cb2" popup="default" tip="Fold to C-Bet After 2nd Draw" click="" stat_hicolor="#4CAF50" stat_hith="55" stat_locolor="#F44336" stat_loth="25"/>
+            <stat _rowcol="(3,3)" _stat_name="cb3" popup="default" tip="C-Bet After 3rd Draw" click="" stat_hicolor="#F44336" stat_hith="45" stat_locolor="#4CAF50" stat_loth="20"/>
+            <stat _rowcol="(3,4)" _stat_name="f_cb3" popup="default" tip="Fold to C-Bet After 3rd Draw" click="" stat_hicolor="#4CAF50" stat_hith="50" stat_locolor="#F44336" stat_loth="25"/>
             <stat _rowcol="(4,1)" _stat_name="wtsd" popup="default" tip="Went to Showdown" click="" stat_hicolor="#F44336" stat_hith="35" stat_locolor="#4CAF50" stat_loth="25"/>
             <stat _rowcol="(4,2)" _stat_name="wmsd" popup="default" tip="Won Money at Showdown" click="" stat_hicolor="#4CAF50" stat_hith="50" stat_locolor="#F44336" stat_loth="35"/>
-            <stat _rowcol="(4,3)" _stat_name="af" popup="default" tip="Aggression Factor" click="" stat_hicolor="#F44336" stat_hith="3.0" stat_locolor="#4CAF50" stat_loth="1.5"/>
-            <stat _rowcol="(4,4)" _stat_name="total_hands" popup="default" tip="Total Hands" click=""/>
+            <stat _rowcol="(4,3)" _stat_name="agg_fact" popup="default" tip="Aggression Factor" click="" stat_hicolor="#F44336" stat_hith="3.0" stat_locolor="#4CAF50" stat_loth="1.5"/>
+            <stat _rowcol="(4,4)" _stat_name="n" popup="default" tip="Total Hands" click=""/>
         </ss>
         <ss name="stud_cg_expert" rows="4" cols="4" xpad="1" ypad="0">
             <stat _rowcol="(1,1)" _stat_name="playershort" hudcolor="#E0E0E0" popup="stud_complete" hudprefix="" hudsuffix="" tip="Player name" click=""/>
             <stat _rowcol="(1,2)" _stat_name="vpip" popup="default" tip="Voluntarily Put Money In Pot" click="" stat_hicolor="#F44336" stat_hith="40" stat_locolor="#4CAF50" stat_loth="20"/>
             <stat _rowcol="(1,3)" _stat_name="pfr" popup="default" tip="Preflop Raise" click="" stat_hicolor="#F44336" stat_hith="30" stat_locolor="#4CAF50" stat_loth="10"/>
             <stat _rowcol="(1,4)" _stat_name="n" popup="default" tip="Number of hands" click="" hudprefix="(" hudsuffix=")"/>
-            <stat _rowcol="(2,1)" _stat_name="3B" popup="default" tip="3-Bet Percentage" click="" stat_hicolor="#F44336" stat_hith="15" stat_locolor="#4CAF50" stat_loth="5"/>
-            <stat _rowcol="(2,2)" _stat_name="fold_3B" popup="default" tip="Fold to 3-Bet" click="" stat_hicolor="#4CAF50" stat_hith="70" stat_locolor="#F44336" stat_loth="30"/>
+            <stat _rowcol="(2,1)" _stat_name="three_B" popup="default" tip="3-Bet Percentage" click="" stat_hicolor="#F44336" stat_hith="15" stat_locolor="#4CAF50" stat_loth="5"/>
+            <stat _rowcol="(2,2)" _stat_name="f_3bet" popup="default" tip="Fold to 3-Bet" click="" stat_hicolor="#4CAF50" stat_hith="70" stat_locolor="#F44336" stat_loth="30"/>
             <stat _rowcol="(2,3)" _stat_name="cb1" popup="default" tip="4th Street C-Bet" click="" stat_hicolor="#F44336" stat_hith="60" stat_locolor="#4CAF50" stat_loth="30"/>
             <stat _rowcol="(2,4)" _stat_name="f_cb1" popup="default" tip="Fold to 4th Street C-Bet" click="" stat_hicolor="#4CAF50" stat_hith="60" stat_locolor="#F44336" stat_loth="30"/>
-            <stat _rowcol="(3,1)" _stat_name="cbet_5th" popup="default" tip="5th Street C-Bet" click="" stat_hicolor="#F44336" stat_hith="50" stat_locolor="#4CAF50" stat_loth="25"/>
-            <stat _rowcol="(3,2)" _stat_name="fold_cbet_5th" popup="default" tip="Fold to 5th Street C-Bet" click="" stat_hicolor="#4CAF50" stat_hith="55" stat_locolor="#F44336" stat_loth="25"/>
-            <stat _rowcol="(3,3)" _stat_name="cbet_6th" popup="default" tip="6th Street C-Bet" click="" stat_hicolor="#F44336" stat_hith="45" stat_locolor="#4CAF50" stat_loth="20"/>
-            <stat _rowcol="(3,4)" _stat_name="fold_cbet_6th" popup="default" tip="Fold to 6th Street C-Bet" click="" stat_hicolor="#4CAF50" stat_hith="50" stat_locolor="#F44336" stat_loth="25"/>
-            <stat _rowcol="(4,1)" _stat_name="showdown_7th" popup="default" tip="Went to Showdown on 7th Street" click="" stat_hicolor="#F44336" stat_hith="30" stat_locolor="#4CAF50" stat_loth="15"/>
-            <stat _rowcol="(4,2)" _stat_name="win_7th" popup="default" tip="Won at Showdown on 7th Street" click="" stat_hicolor="#4CAF50" stat_hith="50" stat_locolor="#F44336" stat_loth="25"/>
-            <stat _rowcol="(4,3)" _stat_name="af" popup="default" tip="Aggression Factor" click="" stat_hicolor="#F44336" stat_hith="3.0" stat_locolor="#4CAF50" stat_loth="1.5"/>
-            <stat _rowcol="(4,4)" _stat_name="total_hands" popup="default" tip="Total Hands" click=""/>
+            <stat _rowcol="(3,1)" _stat_name="cb2" popup="default" tip="5th Street C-Bet" click="" stat_hicolor="#F44336" stat_hith="50" stat_locolor="#4CAF50" stat_loth="25"/>
+            <stat _rowcol="(3,2)" _stat_name="f_cb2" popup="default" tip="Fold to 5th Street C-Bet" click="" stat_hicolor="#4CAF50" stat_hith="55" stat_locolor="#F44336" stat_loth="25"/>
+            <stat _rowcol="(3,3)" _stat_name="cb3" popup="default" tip="6th Street C-Bet" click="" stat_hicolor="#F44336" stat_hith="45" stat_locolor="#4CAF50" stat_loth="20"/>
+            <stat _rowcol="(3,4)" _stat_name="f_cb3" popup="default" tip="Fold to 6th Street C-Bet" click="" stat_hicolor="#4CAF50" stat_hith="50" stat_locolor="#F44336" stat_loth="25"/>
+            <stat _rowcol="(4,1)" _stat_name="wtsd" popup="default" tip="Went to Showdown on 7th Street" click="" stat_hicolor="#F44336" stat_hith="30" stat_locolor="#4CAF50" stat_loth="15"/>
+            <stat _rowcol="(4,2)" _stat_name="wmsd" popup="default" tip="Won at Showdown on 7th Street" click="" stat_hicolor="#4CAF50" stat_hith="50" stat_locolor="#F44336" stat_loth="25"/>
+            <stat _rowcol="(4,3)" _stat_name="agg_fact" popup="default" tip="Aggression Factor" click="" stat_hicolor="#F44336" stat_hith="3.0" stat_locolor="#4CAF50" stat_loth="1.5"/>
+            <stat _rowcol="(4,4)" _stat_name="n" popup="default" tip="Total Hands" click=""/>
         </ss>
         <ss name="expresso_spin_classic_nl_holdem" rows="4" cols="4" xpad="1" ypad="0">
             <stat _rowcol="(1,1)" _stat_name="vpip" popup="default" tip="Voluntarily Put Money In Pot" click="" stat_hicolor="#F44336" stat_hith="50" stat_locolor="#4CAF50" stat_loth="20"/>
             <stat _rowcol="(1,2)" _stat_name="pfr" popup="default" tip="Preflop Raise" click="" stat_hicolor="#F44336" stat_hith="40" stat_locolor="#4CAF50" stat_loth="15"/>
-            <stat _rowcol="(1,3)" _stat_name="3B" popup="default" tip="3-Bet Percentage" click="" stat_hicolor="#F44336" stat_hith="15" stat_locolor="#4CAF50" stat_loth="5"/>
-            <stat _rowcol="(1,4)" _stat_name="fold_3B" popup="default" tip="Fold to 3-Bet" click="" stat_hicolor="#4CAF50" stat_hith="70" stat_locolor="#F44336" stat_loth="30"/>
+            <stat _rowcol="(1,3)" _stat_name="three_B" popup="default" tip="3-Bet Percentage" click="" stat_hicolor="#F44336" stat_hith="15" stat_locolor="#4CAF50" stat_loth="5"/>
+            <stat _rowcol="(1,4)" _stat_name="f_3bet" popup="default" tip="Fold to 3-Bet" click="" stat_hicolor="#4CAF50" stat_hith="70" stat_locolor="#F44336" stat_loth="30"/>
             <stat _rowcol="(2,1)" _stat_name="steal" popup="default" tip="Steal Attempt" click="" stat_hicolor="#F44336" stat_hith="45" stat_locolor="#4CAF50" stat_loth="20"/>
-            <stat _rowcol="(2,2)" _stat_name="fold_steal" popup="default" tip="Fold to Steal" click="" stat_hicolor="#4CAF50" stat_hith="70" stat_locolor="#F44336" stat_loth="30"/>
+            <stat _rowcol="(2,2)" _stat_name="f_steal" popup="default" tip="Fold to Steal" click="" stat_hicolor="#4CAF50" stat_hith="70" stat_locolor="#F44336" stat_loth="30"/>
             <stat _rowcol="(2,3)" _stat_name="cbet_flop" popup="default" tip="Flop C-Bet" click="" stat_hicolor="#F44336" stat_hith="70" stat_locolor="#4CAF50" stat_loth="35"/>
-            <stat _rowcol="(2,4)" _stat_name="fold_cbet_flop" popup="default" tip="Fold to Flop C-Bet" click="" stat_hicolor="#4CAF50" stat_hith="65" stat_locolor="#F44336" stat_loth="35"/>
+            <stat _rowcol="(2,4)" _stat_name="f_cb1" popup="default" tip="Fold to Flop C-Bet" click="" stat_hicolor="#4CAF50" stat_hith="65" stat_locolor="#F44336" stat_loth="35"/>
             <stat _rowcol="(3,1)" _stat_name="cbet_turn" popup="default" tip="Turn C-Bet" click="" stat_hicolor="#F44336" stat_hith="60" stat_locolor="#4CAF50" stat_loth="25"/>
-            <stat _rowcol="(3,2)" _stat_name="fold_cbet_turn" popup="default" tip="Fold to Turn C-Bet" click="" stat_hicolor="#4CAF50" stat_hith="55" stat_locolor="#F44336" stat_loth="25"/>
-            <stat _rowcol="(3,3)" _stat_name="cbet_river" popup="default" tip="River C-Bet" click="" stat_hicolor="#F44336" stat_hith="50" stat_locolor="#4CAF50" stat_loth="20"/>
-            <stat _rowcol="(3,4)" _stat_name="fold_cbet_river" popup="default" tip="Fold to River C-Bet" click="" stat_hicolor="#4CAF50" stat_hith="50" stat_locolor="#F44336" stat_loth="20"/>
+            <stat _rowcol="(3,2)" _stat_name="f_cb2" popup="default" tip="Fold to Turn C-Bet" click="" stat_hicolor="#4CAF50" stat_hith="55" stat_locolor="#F44336" stat_loth="25"/>
+            <stat _rowcol="(3,3)" _stat_name="cb3" popup="default" tip="River C-Bet" click="" stat_hicolor="#F44336" stat_hith="50" stat_locolor="#4CAF50" stat_loth="20"/>
+            <stat _rowcol="(3,4)" _stat_name="f_cb3" popup="default" tip="Fold to River C-Bet" click="" stat_hicolor="#4CAF50" stat_hith="50" stat_locolor="#F44336" stat_loth="20"/>
             <stat _rowcol="(4,1)" _stat_name="wtsd" popup="default" tip="Went to Showdown" click="" stat_hicolor="#F44336" stat_hith="40" stat_locolor="#4CAF50" stat_loth="20"/>
             <stat _rowcol="(4,2)" _stat_name="wmsd" popup="default" tip="Won Money at Showdown" click="" stat_hicolor="#4CAF50" stat_hith="50" stat_locolor="#F44336" stat_loth="30"/>
-            <stat _rowcol="(4,3)" _stat_name="af" popup="default" tip="Aggression Factor" click="" stat_hicolor="#F44336" stat_hith="3.0" stat_locolor="#4CAF50" stat_loth="1.5"/>
-            <stat _rowcol="(4,4)" _stat_name="total_hands" popup="default" tip="Total Hands" click=""/>
+            <stat _rowcol="(4,3)" _stat_name="agg_fact" popup="default" tip="Aggression Factor" click="" stat_hicolor="#F44336" stat_hith="3.0" stat_locolor="#4CAF50" stat_loth="1.5"/>
+            <stat _rowcol="(4,4)" _stat_name="n" popup="default" tip="Total Hands" click=""/>
         </ss>
         <ss name="mtt_stud" rows="4" cols="4" xpad="1" ypad="0">
             <stat _rowcol="(1,1)" _stat_name="vpip" popup="default" tip="Voluntarily Put Money In Pot" click="" stat_hicolor="#F44336" stat_hith="40" stat_locolor="#4CAF50" stat_loth="20"/>
             <stat _rowcol="(1,2)" _stat_name="pfr" popup="default" tip="Preflop Raise" click="" stat_hicolor="#F44336" stat_hith="30" stat_locolor="#4CAF50" stat_loth="10"/>
-            <stat _rowcol="(1,3)" _stat_name="3B" popup="default" tip="3-Bet Percentage" click="" stat_hicolor="#F44336" stat_hith="15" stat_locolor="#4CAF50" stat_loth="5"/>
-            <stat _rowcol="(1,4)" _stat_name="fold_3B" popup="default" tip="Fold to 3-Bet" click="" stat_hicolor="#4CAF50" stat_hith="70" stat_locolor="#F44336" stat_loth="30"/>
+            <stat _rowcol="(1,3)" _stat_name="three_B" popup="default" tip="3-Bet Percentage" click="" stat_hicolor="#F44336" stat_hith="15" stat_locolor="#4CAF50" stat_loth="5"/>
+            <stat _rowcol="(1,4)" _stat_name="f_3bet" popup="default" tip="Fold to 3-Bet" click="" stat_hicolor="#4CAF50" stat_hith="70" stat_locolor="#F44336" stat_loth="30"/>
             <stat _rowcol="(2,1)" _stat_name="steal" popup="default" tip="Steal Attempt" click="" stat_hicolor="#F44336" stat_hith="35" stat_locolor="#4CAF50" stat_loth="15"/>
-            <stat _rowcol="(2,2)" _stat_name="fold_steal" popup="default" tip="Fold to Steal" click="" stat_hicolor="#4CAF50" stat_hith="70" stat_locolor="#F44336" stat_loth="30"/>
-            <stat _rowcol="(2,3)" _stat_name="cbet_4th" popup="default" tip="4th Street C-Bet" click="" stat_hicolor="#F44336" stat_hith="60" stat_locolor="#4CAF50" stat_loth="30"/>
-            <stat _rowcol="(2,4)" _stat_name="fold_cbet_4th" popup="default" tip="Fold to 4th Street C-Bet" click="" stat_hicolor="#4CAF50" stat_hith="60" stat_locolor="#F44336" stat_loth="30"/>
-            <stat _rowcol="(3,1)" _stat_name="cbet_5th" popup="default" tip="5th Street C-Bet" click="" stat_hicolor="#F44336" stat_hith="50" stat_locolor="#4CAF50" stat_loth="25"/>
-            <stat _rowcol="(3,2)" _stat_name="fold_cbet_5th" popup="default" tip="Fold to 5th Street C-Bet" click="" stat_hicolor="#4CAF50" stat_hith="55" stat_locolor="#F44336" stat_loth="25"/>
-            <stat _rowcol="(3,3)" _stat_name="cbet_6th" popup="default" tip="6th Street C-Bet" click="" stat_hicolor="#F44336" stat_hith="45" stat_locolor="#4CAF50" stat_loth="20"/>
-            <stat _rowcol="(3,4)" _stat_name="fold_cbet_6th" popup="default" tip="Fold to 6th Street C-Bet" click="" stat_hicolor="#4CAF50" stat_hith="50" stat_locolor="#F44336" stat_loth="25"/>
-            <stat _rowcol="(4,1)" _stat_name="showdown_7th" popup="default" tip="Went to Showdown on 7th Street" click="" stat_hicolor="#F44336" stat_hith="30" stat_locolor="#4CAF50" stat_loth="15"/>
-            <stat _rowcol="(4,2)" _stat_name="win_7th" popup="default" tip="Won at Showdown on 7th Street" click="" stat_hicolor="#4CAF50" stat_hith="50" stat_locolor="#F44336" stat_loth="25"/>
-            <stat _rowcol="(4,3)" _stat_name="af" popup="default" tip="Aggression Factor" click="" stat_hicolor="#F44336" stat_hith="3.0" stat_locolor="#4CAF50" stat_loth="1.5"/>
+            <stat _rowcol="(2,2)" _stat_name="f_steal" popup="default" tip="Fold to Steal" click="" stat_hicolor="#4CAF50" stat_hith="70" stat_locolor="#F44336" stat_loth="30"/>
+            <stat _rowcol="(2,3)" _stat_name="cb1" popup="default" tip="4th Street C-Bet" click="" stat_hicolor="#F44336" stat_hith="60" stat_locolor="#4CAF50" stat_loth="30"/>
+            <stat _rowcol="(2,4)" _stat_name="f_cb1" popup="default" tip="Fold to 4th Street C-Bet" click="" stat_hicolor="#4CAF50" stat_hith="60" stat_locolor="#F44336" stat_loth="30"/>
+            <stat _rowcol="(3,1)" _stat_name="cb2" popup="default" tip="5th Street C-Bet" click="" stat_hicolor="#F44336" stat_hith="50" stat_locolor="#4CAF50" stat_loth="25"/>
+            <stat _rowcol="(3,2)" _stat_name="f_cb2" popup="default" tip="Fold to 5th Street C-Bet" click="" stat_hicolor="#4CAF50" stat_hith="55" stat_locolor="#F44336" stat_loth="25"/>
+            <stat _rowcol="(3,3)" _stat_name="cb3" popup="default" tip="6th Street C-Bet" click="" stat_hicolor="#F44336" stat_hith="45" stat_locolor="#4CAF50" stat_loth="20"/>
+            <stat _rowcol="(3,4)" _stat_name="f_cb3" popup="default" tip="Fold to 6th Street C-Bet" click="" stat_hicolor="#4CAF50" stat_hith="50" stat_locolor="#F44336" stat_loth="25"/>
+            <stat _rowcol="(4,1)" _stat_name="wtsd" popup="default" tip="Went to Showdown on 7th Street" click="" stat_hicolor="#F44336" stat_hith="30" stat_locolor="#4CAF50" stat_loth="15"/>
+            <stat _rowcol="(4,2)" _stat_name="wmsd" popup="default" tip="Won at Showdown on 7th Street" click="" stat_hicolor="#4CAF50" stat_hith="50" stat_locolor="#F44336" stat_loth="25"/>
+            <stat _rowcol="(4,3)" _stat_name="agg_fact" popup="default" tip="Aggression Factor" click="" stat_hicolor="#F44336" stat_hith="3.0" stat_locolor="#4CAF50" stat_loth="1.5"/>
             <stat _rowcol="(4,4)" _stat_name="m_ratio" popup="default" tip="M-Ratio (stack relative to antes and bring-in)" click="" stat_hicolor="#F44336" stat_hith="10" stat_locolor="#4CAF50" stat_loth="5"/>
         </ss>
         <ss name="mtt_omaha" rows="4" cols="4" xpad="1" ypad="0">
             <stat _rowcol="(1,1)" _stat_name="vpip" popup="default" tip="Voluntarily Put Money In Pot" click="" stat_hicolor="#F44336" stat_hith="50" stat_locolor="#4CAF50" stat_loth="20"/>
             <stat _rowcol="(1,2)" _stat_name="pfr" popup="default" tip="Preflop Raise" click="" stat_hicolor="#F44336" stat_hith="35" stat_locolor="#4CAF50" stat_loth="15"/>
-            <stat _rowcol="(1,3)" _stat_name="3B" popup="default" tip="3-Bet Percentage" click="" stat_hicolor="#F44336" stat_hith="15" stat_locolor="#4CAF50" stat_loth="5"/>
-            <stat _rowcol="(1,4)" _stat_name="fold_3B" popup="default" tip="Fold to 3-Bet" click="" stat_hicolor="#4CAF50" stat_hith="70" stat_locolor="#F44336" stat_loth="30"/>
+            <stat _rowcol="(1,3)" _stat_name="three_B" popup="default" tip="3-Bet Percentage" click="" stat_hicolor="#F44336" stat_hith="15" stat_locolor="#4CAF50" stat_loth="5"/>
+            <stat _rowcol="(1,4)" _stat_name="f_3bet" popup="default" tip="Fold to 3-Bet" click="" stat_hicolor="#4CAF50" stat_hith="70" stat_locolor="#F44336" stat_loth="30"/>
             <stat _rowcol="(2,1)" _stat_name="steal" popup="default" tip="Steal Attempt" click="" stat_hicolor="#F44336" stat_hith="45" stat_locolor="#4CAF50" stat_loth="20"/>
-            <stat _rowcol="(2,2)" _stat_name="fold_steal" popup="default" tip="Fold to Steal" click="" stat_hicolor="#4CAF50" stat_hith="70" stat_locolor="#F44336" stat_loth="30"/>
+            <stat _rowcol="(2,2)" _stat_name="f_steal" popup="default" tip="Fold to Steal" click="" stat_hicolor="#4CAF50" stat_hith="70" stat_locolor="#F44336" stat_loth="30"/>
             <stat _rowcol="(2,3)" _stat_name="cbet_flop" popup="default" tip="Flop C-Bet" click="" stat_hicolor="#F44336" stat_hith="70" stat_locolor="#4CAF50" stat_loth="35"/>
-            <stat _rowcol="(2,4)" _stat_name="fold_cbet_flop" popup="default" tip="Fold to Flop C-Bet" click="" stat_hicolor="#4CAF50" stat_hith="65" stat_locolor="#F44336" stat_loth="35"/>
+            <stat _rowcol="(2,4)" _stat_name="f_cb1" popup="default" tip="Fold to Flop C-Bet" click="" stat_hicolor="#4CAF50" stat_hith="65" stat_locolor="#F44336" stat_loth="35"/>
             <stat _rowcol="(3,1)" _stat_name="cbet_turn" popup="default" tip="Turn C-Bet" click="" stat_hicolor="#F44336" stat_hith="60" stat_locolor="#4CAF50" stat_loth="25"/>
-            <stat _rowcol="(3,2)" _stat_name="fold_cbet_turn" popup="default" tip="Fold to Turn C-Bet" click="" stat_hicolor="#4CAF50" stat_hith="55" stat_locolor="#F44336" stat_loth="25"/>
-            <stat _rowcol="(3,3)" _stat_name="cbet_river" popup="default" tip="River C-Bet" click="" stat_hicolor="#F44336" stat_hith="50" stat_locolor="#4CAF50" stat_loth="20"/>
-            <stat _rowcol="(3,4)" _stat_name="fold_cbet_river" popup="default" tip="Fold to River C-Bet" click="" stat_hicolor="#4CAF50" stat_hith="50" stat_locolor="#F44336" stat_loth="20"/>
+            <stat _rowcol="(3,2)" _stat_name="f_cb2" popup="default" tip="Fold to Turn C-Bet" click="" stat_hicolor="#4CAF50" stat_hith="55" stat_locolor="#F44336" stat_loth="25"/>
+            <stat _rowcol="(3,3)" _stat_name="cb3" popup="default" tip="River C-Bet" click="" stat_hicolor="#F44336" stat_hith="50" stat_locolor="#4CAF50" stat_loth="20"/>
+            <stat _rowcol="(3,4)" _stat_name="f_cb3" popup="default" tip="Fold to River C-Bet" click="" stat_hicolor="#4CAF50" stat_hith="50" stat_locolor="#F44336" stat_loth="20"/>
             <stat _rowcol="(4,1)" _stat_name="wtsd" popup="default" tip="Went to Showdown" click="" stat_hicolor="#F44336" stat_hith="35" stat_locolor="#4CAF50" stat_loth="20"/>
             <stat _rowcol="(4,2)" _stat_name="wmsd" popup="default" tip="Won Money at Showdown" click="" stat_hicolor="#4CAF50" stat_hith="50" stat_locolor="#F44336" stat_loth="30"/>
             <stat _rowcol="(4,3)" _stat_name="m_ratio" popup="default" tip="M-Ratio (stack relative to blinds and antes)" click="" stat_hicolor="#F44336" stat_hith="10" stat_locolor="#4CAF50" stat_loth="5"/>
-            <stat _rowcol="(4,4)" _stat_name="total_hands" popup="default" tip="Total Hands" click=""/>
+            <stat _rowcol="(4,4)" _stat_name="n" popup="default" tip="Total Hands" click=""/>
         </ss>
         <ss name="mtt_draw" rows="4" cols="4" xpad="1" ypad="0">
             <stat _rowcol="(1,1)" _stat_name="vpip" popup="default" tip="Voluntarily Put Money In Pot" click="" stat_hicolor="#F44336" stat_hith="40" stat_locolor="#4CAF50" stat_loth="20"/>
             <stat _rowcol="(1,2)" _stat_name="pfr" popup="default" tip="Preflop Raise" click="" stat_hicolor="#F44336" stat_hith="30" stat_locolor="#4CAF50" stat_loth="15"/>
-            <stat _rowcol="(1,3)" _stat_name="3B" popup="default" tip="3-Bet Percentage" click="" stat_hicolor="#F44336" stat_hith="15" stat_locolor="#4CAF50" stat_loth="5"/>
-            <stat _rowcol="(1,4)" _stat_name="fold_3B" popup="default" tip="Fold to 3-Bet" click="" stat_hicolor="#4CAF50" stat_hith="70" stat_locolor="#F44336" stat_loth="30"/>
+            <stat _rowcol="(1,3)" _stat_name="three_B" popup="default" tip="3-Bet Percentage" click="" stat_hicolor="#F44336" stat_hith="15" stat_locolor="#4CAF50" stat_loth="5"/>
+            <stat _rowcol="(1,4)" _stat_name="f_3bet" popup="default" tip="Fold to 3-Bet" click="" stat_hicolor="#4CAF50" stat_hith="70" stat_locolor="#F44336" stat_loth="30"/>
             <stat _rowcol="(2,1)" _stat_name="steal" popup="default" tip="Steal Attempt" click="" stat_hicolor="#F44336" stat_hith="35" stat_locolor="#4CAF50" stat_loth="15"/>
-            <stat _rowcol="(2,2)" _stat_name="fold_steal" popup="default" tip="Fold to Steal" click="" stat_hicolor="#4CAF50" stat_hith="70" stat_locolor="#F44336" stat_loth="30"/>
-            <stat _rowcol="(2,3)" _stat_name="cbet_1st_draw" popup="default" tip="C-Bet After 1st Draw" click="" stat_hicolor="#F44336" stat_hith="60" stat_locolor="#4CAF50" stat_loth="30"/>
-            <stat _rowcol="(2,4)" _stat_name="fold_cbet_1st_draw" popup="default" tip="Fold to C-Bet After 1st Draw" click="" stat_hicolor="#4CAF50" stat_hith="60" stat_locolor="#F44336" stat_loth="30"/>
-            <stat _rowcol="(3,1)" _stat_name="cbet_2nd_draw" popup="default" tip="C-Bet After 2nd Draw" click="" stat_hicolor="#F44336" stat_hith="50" stat_locolor="#4CAF50" stat_loth="25"/>
-            <stat _rowcol="(3,2)" _stat_name="fold_cbet_2nd_draw" popup="default" tip="Fold to C-Bet After 2nd Draw" click="" stat_hicolor="#4CAF50" stat_hith="55" stat_locolor="#F44336" stat_loth="25"/>
-            <stat _rowcol="(3,3)" _stat_name="cbet_3rd_draw" popup="default" tip="C-Bet After 3rd Draw" click="" stat_hicolor="#F44336" stat_hith="45" stat_locolor="#4CAF50" stat_loth="20"/>
-            <stat _rowcol="(3,4)" _stat_name="fold_cbet_3rd_draw" popup="default" tip="Fold to C-Bet After 3rd Draw" click="" stat_hicolor="#4CAF50" stat_hith="50" stat_locolor="#F44336" stat_loth="25"/>
+            <stat _rowcol="(2,2)" _stat_name="f_steal" popup="default" tip="Fold to Steal" click="" stat_hicolor="#4CAF50" stat_hith="70" stat_locolor="#F44336" stat_loth="30"/>
+            <stat _rowcol="(2,3)" _stat_name="cb1" popup="default" tip="C-Bet After 1st Draw" click="" stat_hicolor="#F44336" stat_hith="60" stat_locolor="#4CAF50" stat_loth="30"/>
+            <stat _rowcol="(2,4)" _stat_name="f_cb1" popup="default" tip="Fold to C-Bet After 1st Draw" click="" stat_hicolor="#4CAF50" stat_hith="60" stat_locolor="#F44336" stat_loth="30"/>
+            <stat _rowcol="(3,1)" _stat_name="cb2" popup="default" tip="C-Bet After 2nd Draw" click="" stat_hicolor="#F44336" stat_hith="50" stat_locolor="#4CAF50" stat_loth="25"/>
+            <stat _rowcol="(3,2)" _stat_name="f_cb2" popup="default" tip="Fold to C-Bet After 2nd Draw" click="" stat_hicolor="#4CAF50" stat_hith="55" stat_locolor="#F44336" stat_loth="25"/>
+            <stat _rowcol="(3,3)" _stat_name="cb3" popup="default" tip="C-Bet After 3rd Draw" click="" stat_hicolor="#F44336" stat_hith="45" stat_locolor="#4CAF50" stat_loth="20"/>
+            <stat _rowcol="(3,4)" _stat_name="f_cb3" popup="default" tip="Fold to C-Bet After 3rd Draw" click="" stat_hicolor="#4CAF50" stat_hith="50" stat_locolor="#F44336" stat_loth="25"/>
             <stat _rowcol="(4,1)" _stat_name="wtsd" popup="default" tip="Went to Showdown" click="" stat_hicolor="#F44336" stat_hith="35" stat_locolor="#4CAF50" stat_loth="25"/>
             <stat _rowcol="(4,2)" _stat_name="wmsd" popup="default" tip="Won Money at Showdown" click="" stat_hicolor="#4CAF50" stat_hith="50" stat_locolor="#F44336" stat_loth="35"/>
             <stat _rowcol="(4,3)" _stat_name="m_ratio" popup="default" tip="M-Ratio (stack relative to blinds and antes)" click="" stat_hicolor="#F44336" stat_hith="10" stat_locolor="#4CAF50" stat_loth="5"/>
-            <stat _rowcol="(4,4)" _stat_name="total_hands" popup="default" tip="Total Hands" click=""/>
+            <stat _rowcol="(4,4)" _stat_name="n" popup="default" tip="Total Hands" click=""/>
         </ss>
         <ss name="holdem_default" rows="3" cols="3" xpad="1" ypad="0">
             <stat _rowcol="(1,1)" _stat_name="vpip" popup="default" tip="" click="" stat_hicolor="#F44336" stat_hith="40" stat_locolor="#4CAF50" stat_loth="25"/>
@@ -1688,37 +1799,37 @@
             <stat _rowcol="(1,4)" _stat_name="blank" popup="default" tip="" click="" stat_hicolor="" stat_hith="" stat_locolor="" stat_loth=""/>
             <stat _rowcol="(2,1)" _stat_name="vpip" popup="default" tip="Voluntarily Put Money In Pot" click="" stat_hicolor="#F44336" stat_hith="40" stat_locolor="#4CAF50" stat_loth="20"/>
             <stat _rowcol="(2,2)" _stat_name="pfr" popup="default" tip="Preflop Raise" click="" stat_hicolor="#F44336" stat_hith="30" stat_locolor="#4CAF50" stat_loth="15"/>
-            <stat _rowcol="(2,3)" _stat_name="3B" popup="default" tip="3-Bet Percentage" click="" stat_hicolor="#F44336" stat_hith="15" stat_locolor="#4CAF50" stat_loth="5"/>
-            <stat _rowcol="(2,4)" _stat_name="fold_3B" popup="default" tip="Fold to 3-Bet" click="" stat_hicolor="#4CAF50" stat_hith="70" stat_locolor="#F44336" stat_loth="30"/>
+            <stat _rowcol="(2,3)" _stat_name="three_B" popup="default" tip="3-Bet Percentage" click="" stat_hicolor="#F44336" stat_hith="15" stat_locolor="#4CAF50" stat_loth="5"/>
+            <stat _rowcol="(2,4)" _stat_name="f_3bet" popup="default" tip="Fold to 3-Bet" click="" stat_hicolor="#4CAF50" stat_hith="70" stat_locolor="#F44336" stat_loth="30"/>
             <stat _rowcol="(3,1)" _stat_name="steal" popup="default" tip="Steal Attempt" click="" stat_hicolor="#F44336" stat_hith="35" stat_locolor="#4CAF50" stat_loth="15"/>
-            <stat _rowcol="(3,2)" _stat_name="fold_steal" popup="default" tip="Fold to Steal" click="" stat_hicolor="#4CAF50" stat_hith="70" stat_locolor="#F44336" stat_loth="30"/>
+            <stat _rowcol="(3,2)" _stat_name="f_steal" popup="default" tip="Fold to Steal" click="" stat_hicolor="#4CAF50" stat_hith="70" stat_locolor="#F44336" stat_loth="30"/>
             <stat _rowcol="(3,3)" _stat_name="cbet_flop" popup="default" tip="Flop C-Bet" click="" stat_hicolor="#F44336" stat_hith="70" stat_locolor="#4CAF50" stat_loth="35"/>
-            <stat _rowcol="(3,4)" _stat_name="fold_cbet_flop" popup="default" tip="Fold to Flop C-Bet" click="" stat_hicolor="#4CAF50" stat_hith="65" stat_locolor="#F44336" stat_loth="35"/>
+            <stat _rowcol="(3,4)" _stat_name="f_cb1" popup="default" tip="Fold to Flop C-Bet" click="" stat_hicolor="#4CAF50" stat_hith="65" stat_locolor="#F44336" stat_loth="35"/>
             <stat _rowcol="(4,1)" _stat_name="cbet_turn" popup="default" tip="Turn C-Bet" click="" stat_hicolor="#F44336" stat_hith="60" stat_locolor="#4CAF50" stat_loth="25"/>
-            <stat _rowcol="(4,2)" _stat_name="fold_cbet_turn" popup="default" tip="Fold to Turn C-Bet" click="" stat_hicolor="#4CAF50" stat_hith="55" stat_locolor="#F44336" stat_loth="25"/>
-            <stat _rowcol="(4,3)" _stat_name="cbet_river" popup="default" tip="River C-Bet" click="" stat_hicolor="#F44336" stat_hith="50" stat_locolor="#4CAF50" stat_loth="20"/>
-            <stat _rowcol="(4,4)" _stat_name="fold_cbet_river" popup="default" tip="Fold to River C-Bet" click="" stat_hicolor="#4CAF50" stat_hith="50" stat_locolor="#F44336" stat_loth="20"/>
+            <stat _rowcol="(4,2)" _stat_name="f_cb2" popup="default" tip="Fold to Turn C-Bet" click="" stat_hicolor="#4CAF50" stat_hith="55" stat_locolor="#F44336" stat_loth="25"/>
+            <stat _rowcol="(4,3)" _stat_name="cb3" popup="default" tip="River C-Bet" click="" stat_hicolor="#F44336" stat_hith="50" stat_locolor="#4CAF50" stat_loth="20"/>
+            <stat _rowcol="(4,4)" _stat_name="f_cb3" popup="default" tip="Fold to River C-Bet" click="" stat_hicolor="#4CAF50" stat_hith="50" stat_locolor="#F44336" stat_loth="20"/>
             <stat _rowcol="(5,1)" _stat_name="wtsd" popup="default" tip="Went to Showdown" click="" stat_hicolor="#F44336" stat_hith="35" stat_locolor="#4CAF50" stat_loth="20"/>
             <stat _rowcol="(5,2)" _stat_name="wmsd" popup="default" tip="Won Money at Showdown" click="" stat_hicolor="#4CAF50" stat_hith="50" stat_locolor="#F44336" stat_loth="30"/>
             <stat _rowcol="(5,3)" _stat_name="m_ratio" popup="default" tip="M-Ratio (stack relative to blinds and antes)" click="" stat_hicolor="#F44336" stat_hith="10" stat_locolor="#4CAF50" stat_loth="5"/>
-            <stat _rowcol="(5,4)" _stat_name="total_hands" popup="default" tip="Total Hands" click=""/>
+            <stat _rowcol="(5,4)" _stat_name="n" popup="default" tip="Total Hands" click=""/>
         </ss>
         <ss name="mtt_razz" rows="4" cols="4" xpad="1" ypad="0">
             <stat _rowcol="(1,1)" _stat_name="vpip" popup="default" tip="Voluntarily Put Money In Pot" click="" stat_hicolor="#F44336" stat_hith="35" stat_locolor="#4CAF50" stat_loth="15"/>
             <stat _rowcol="(1,2)" _stat_name="pfr" popup="default" tip="Preflop Raise" click="" stat_hicolor="#F44336" stat_hith="25" stat_locolor="#4CAF50" stat_loth="10"/>
-            <stat _rowcol="(1,3)" _stat_name="3B" popup="default" tip="3-Bet Percentage" click="" stat_hicolor="#F44336" stat_hith="15" stat_locolor="#4CAF50" stat_loth="5"/>
-            <stat _rowcol="(1,4)" _stat_name="fold_3B" popup="default" tip="Fold to 3-Bet" click="" stat_hicolor="#4CAF50" stat_hith="70" stat_locolor="#F44336" stat_loth="30"/>
+            <stat _rowcol="(1,3)" _stat_name="three_B" popup="default" tip="3-Bet Percentage" click="" stat_hicolor="#F44336" stat_hith="15" stat_locolor="#4CAF50" stat_loth="5"/>
+            <stat _rowcol="(1,4)" _stat_name="f_3bet" popup="default" tip="Fold to 3-Bet" click="" stat_hicolor="#4CAF50" stat_hith="70" stat_locolor="#F44336" stat_loth="30"/>
             <stat _rowcol="(2,1)" _stat_name="steal" popup="default" tip="Steal Attempt" click="" stat_hicolor="#F44336" stat_hith="30" stat_locolor="#4CAF50" stat_loth="10"/>
-            <stat _rowcol="(2,2)" _stat_name="fold_steal" popup="default" tip="Fold to Steal" click="" stat_hicolor="#4CAF50" stat_hith="70" stat_locolor="#F44336" stat_loth="30"/>
-            <stat _rowcol="(2,3)" _stat_name="cbet_4th" popup="default" tip="4th Street C-Bet" click="" stat_hicolor="#F44336" stat_hith="60" stat_locolor="#4CAF50" stat_loth="30"/>
-            <stat _rowcol="(2,4)" _stat_name="fold_cbet_4th" popup="default" tip="Fold to 4th Street C-Bet" click="" stat_hicolor="#4CAF50" stat_hith="60" stat_locolor="#F44336" stat_loth="30"/>
-            <stat _rowcol="(3,1)" _stat_name="cbet_5th" popup="default" tip="5th Street C-Bet" click="" stat_hicolor="#F44336" stat_hith="50" stat_locolor="#4CAF50" stat_loth="25"/>
-            <stat _rowcol="(3,2)" _stat_name="fold_cbet_5th" popup="default" tip="Fold to 5th Street C-Bet" click="" stat_hicolor="#4CAF50" stat_hith="55" stat_locolor="#F44336" stat_loth="25"/>
-            <stat _rowcol="(3,3)" _stat_name="cbet_6th" popup="default" tip="6th Street C-Bet" click="" stat_hicolor="#F44336" stat_hith="45" stat_locolor="#4CAF50" stat_loth="20"/>
-            <stat _rowcol="(3,4)" _stat_name="fold_cbet_6th" popup="default" tip="Fold to 6th Street C-Bet" click="" stat_hicolor="#4CAF50" stat_hith="50" stat_locolor="#F44336" stat_loth="25"/>
-            <stat _rowcol="(4,1)" _stat_name="showdown_7th" popup="default" tip="Went to Showdown on 7th Street" click="" stat_hicolor="#F44336" stat_hith="30" stat_locolor="#4CAF50" stat_loth="15"/>
-            <stat _rowcol="(4,2)" _stat_name="win_7th" popup="default" tip="Won at Showdown on 7th Street" click="" stat_hicolor="#4CAF50" stat_hith="50" stat_locolor="#F44336" stat_loth="25"/>
-            <stat _rowcol="(4,3)" _stat_name="af" popup="default" tip="Aggression Factor" click="" stat_hicolor="#F44336" stat_hith="3.0" stat_locolor="#4CAF50" stat_loth="1.5"/>
+            <stat _rowcol="(2,2)" _stat_name="f_steal" popup="default" tip="Fold to Steal" click="" stat_hicolor="#4CAF50" stat_hith="70" stat_locolor="#F44336" stat_loth="30"/>
+            <stat _rowcol="(2,3)" _stat_name="cb1" popup="default" tip="4th Street C-Bet" click="" stat_hicolor="#F44336" stat_hith="60" stat_locolor="#4CAF50" stat_loth="30"/>
+            <stat _rowcol="(2,4)" _stat_name="f_cb1" popup="default" tip="Fold to 4th Street C-Bet" click="" stat_hicolor="#4CAF50" stat_hith="60" stat_locolor="#F44336" stat_loth="30"/>
+            <stat _rowcol="(3,1)" _stat_name="cb2" popup="default" tip="5th Street C-Bet" click="" stat_hicolor="#F44336" stat_hith="50" stat_locolor="#4CAF50" stat_loth="25"/>
+            <stat _rowcol="(3,2)" _stat_name="f_cb2" popup="default" tip="Fold to 5th Street C-Bet" click="" stat_hicolor="#4CAF50" stat_hith="55" stat_locolor="#F44336" stat_loth="25"/>
+            <stat _rowcol="(3,3)" _stat_name="cb3" popup="default" tip="6th Street C-Bet" click="" stat_hicolor="#F44336" stat_hith="45" stat_locolor="#4CAF50" stat_loth="20"/>
+            <stat _rowcol="(3,4)" _stat_name="f_cb3" popup="default" tip="Fold to 6th Street C-Bet" click="" stat_hicolor="#4CAF50" stat_hith="50" stat_locolor="#F44336" stat_loth="25"/>
+            <stat _rowcol="(4,1)" _stat_name="wtsd" popup="default" tip="Went to Showdown on 7th Street" click="" stat_hicolor="#F44336" stat_hith="30" stat_locolor="#4CAF50" stat_loth="15"/>
+            <stat _rowcol="(4,2)" _stat_name="wmsd" popup="default" tip="Won at Showdown on 7th Street" click="" stat_hicolor="#4CAF50" stat_hith="50" stat_locolor="#F44336" stat_loth="25"/>
+            <stat _rowcol="(4,3)" _stat_name="agg_fact" popup="default" tip="Aggression Factor" click="" stat_hicolor="#F44336" stat_hith="3.0" stat_locolor="#4CAF50" stat_loth="1.5"/>
             <stat _rowcol="(4,4)" _stat_name="m_ratio" popup="default" tip="M-Ratio (stack relative to antes and bring-in)" click="" stat_hicolor="#F44336" stat_hith="10" stat_locolor="#4CAF50" stat_loth="5"/>
         </ss>
         <ss cols="3" name="holdem_ring_classic" rows="3" xpad="1" ypad="0">
@@ -1805,8 +1916,8 @@
             <stat _rowcol="(3,4)" _stat_name="iso" popup="poppreflop" tip="Isolation Raise" click="" stat_hicolor="#F44336" stat_hith="20" stat_locolor="#4CAF50" stat_loth="8" stat_midcolor="#FFA726"/>
             <stat _rowcol="(4,1)" _stat_name="cb1" popup="popcb" tip="Flop C-Bet" click="" stat_hicolor="#F44336" stat_hith="70" stat_locolor="#4CAF50" stat_loth="50" stat_midcolor="#FFA726"/>
             <stat _rowcol="(4,2)" _stat_name="f_cb1" popup="popcb" tip="Fold to Flop C-Bet" click="" stat_hicolor="#4CAF50" stat_hith="65" stat_locolor="#F44336" stat_loth="45" stat_midcolor="#FFA726"/>
-            <stat _rowcol="(4,3)" _stat_name="cb_in_position" popup="popcb" tip="C-Bet In Position" click="" stat_hicolor="#F44336" stat_hith="75" stat_locolor="#4CAF50" stat_loth="55" stat_midcolor="#FFA726"/>
-            <stat _rowcol="(4,4)" _stat_name="cb_out_of_position" popup="popcb" tip="C-Bet Out of Position" click="" stat_hicolor="#F44336" stat_hith="65" stat_locolor="#4CAF50" stat_loth="45" stat_midcolor="#FFA726"/>
+            <stat _rowcol="(4,3)" _stat_name="cb_ip" popup="popcb" tip="C-Bet In Position" click="" stat_hicolor="#F44336" stat_hith="75" stat_locolor="#4CAF50" stat_loth="55" stat_midcolor="#FFA726"/>
+            <stat _rowcol="(4,4)" _stat_name="cb_oop" popup="popcb" tip="C-Bet Out of Position" click="" stat_hicolor="#F44336" stat_hith="65" stat_locolor="#4CAF50" stat_loth="45" stat_midcolor="#FFA726"/>
             <stat _rowcol="(5,1)" _stat_name="wtsd" popup="popwtsd" tip="Went to Showdown" click="" stat_hicolor="#F44336" stat_hith="25" stat_locolor="#4CAF50" stat_loth="15" stat_midcolor="#FFA726"/>
             <stat _rowcol="(5,2)" _stat_name="wmsd" popup="popwtsd" tip="Won Money at Showdown" click="" stat_hicolor="#4CAF50" stat_hith="55" stat_locolor="#F44336" stat_loth="45" stat_midcolor="#FFA726"/>
             <stat _rowcol="(5,3)" _stat_name="sd_winrate" popup="popwtsd" tip="Showdown Winrate" click="" stat_hicolor="#4CAF50" stat_hith="55" stat_locolor="#F44336" stat_loth="45" stat_midcolor="#FFA726"/>
@@ -2118,6 +2229,143 @@
             <pu_stat pu_stat_name="a_freq_123"/>
         </pu>
         <!-- OMAHA POPUPS -->
+        <pu pu_name="plo4_preflop" pu_class="ModernSubmenu">
+            <pu_stat pu_stat_name="playername"/>
+            <pu_stat pu_stat_name="n"/>
+            <pu_stat pu_stat_name="vpip"/>
+            <pu_stat pu_stat_name="pfr"/>
+            <pu_stat pu_stat_name="vpip_pfr_ratio"/>
+            <pu_stat pu_stat_name="rfi_total"/>
+            <pu_stat pu_stat_name="rfi_early_position"/>
+            <pu_stat pu_stat_name="rfi_middle_position"/>
+            <pu_stat pu_stat_name="rfi_late_position"/>
+            <pu_stat pu_stat_name="cold_call"/>
+            <pu_stat pu_stat_name="limp"/>
+            <pu_stat pu_stat_name="open_limp"/>
+            <pu_stat pu_stat_name="three_B"/>
+            <pu_stat pu_stat_name="f_3bet"/>
+            <pu_stat pu_stat_name="four_B"/>
+            <pu_stat pu_stat_name="fold_vs_4bet"/>
+            <pu_stat pu_stat_name="squeeze"/>
+            <pu_stat pu_stat_name="fold_to_squeeze"/>
+            <pu_stat pu_stat_name="steal"/>
+            <pu_stat pu_stat_name="f_SB_steal"/>
+            <pu_stat pu_stat_name="f_BB_steal"/>
+        </pu>
+        <pu pu_name="plo4_postflop" pu_class="ModernSubmenu">
+            <pu_stat pu_stat_name="playername"/>
+            <pu_stat pu_stat_name="n"/>
+            <pu_stat pu_stat_name="saw_f"/>
+            <!-- Flop -->
+            <pu_stat pu_stat_name="cb1"/>
+            <pu_stat pu_stat_name="cb_ip"/>
+            <pu_stat pu_stat_name="cb_oop"/>
+            <pu_stat pu_stat_name="f_cb1"/>
+            <pu_stat pu_stat_name="dbr1"/>
+            <pu_stat pu_stat_name="f_dbr1"/>
+            <pu_stat pu_stat_name="cr1"/>
+            <pu_stat pu_stat_name="check_raise_frequency"/>
+            <pu_stat pu_stat_name="bet_frequency_flop"/>
+            <pu_stat pu_stat_name="raise_frequency_flop"/>
+            <pu_stat pu_stat_name="avg_bet_size_flop"/>
+            <!-- Turn -->
+            <pu_stat pu_stat_name="cb2"/>
+            <pu_stat pu_stat_name="f_cb2"/>
+            <pu_stat pu_stat_name="dbr2"/>
+            <pu_stat pu_stat_name="f_dbr2"/>
+            <pu_stat pu_stat_name="cr2"/>
+            <pu_stat pu_stat_name="probe_bet_turn"/>
+            <pu_stat pu_stat_name="bet_frequency_turn"/>
+            <pu_stat pu_stat_name="raise_frequency_turn"/>
+            <pu_stat pu_stat_name="avg_bet_size_turn"/>
+            <!-- River -->
+            <pu_stat pu_stat_name="cb3"/>
+            <pu_stat pu_stat_name="f_cb3"/>
+            <pu_stat pu_stat_name="dbr3"/>
+            <pu_stat pu_stat_name="f_dbr3"/>
+            <pu_stat pu_stat_name="cr3"/>
+            <pu_stat pu_stat_name="probe_bet_river"/>
+            <pu_stat pu_stat_name="avg_bet_size_river"/>
+            <!-- Global pressure -->
+            <pu_stat pu_stat_name="triple_barrel"/>
+            <pu_stat pu_stat_name="overbet_frequency"/>
+            <pu_stat pu_stat_name="a_freq1"/>
+            <pu_stat pu_stat_name="a_freq2"/>
+            <pu_stat pu_stat_name="a_freq3"/>
+            <pu_stat pu_stat_name="a_freq_123"/>
+            <pu_stat pu_stat_name="agg_fact"/>
+        </pu>
+        <pu pu_name="plo4_showdown" pu_class="ModernSubmenu">
+            <pu_stat pu_stat_name="playername"/>
+            <pu_stat pu_stat_name="n"/>
+            <pu_stat pu_stat_name="wtsd"/>
+            <pu_stat pu_stat_name="wmsd"/>
+            <pu_stat pu_stat_name="wwsf"/>
+            <pu_stat pu_stat_name="WMsF"/>
+            <pu_stat pu_stat_name="sd_winrate"/>
+            <pu_stat pu_stat_name="non_sd_winrate"/>
+            <pu_stat pu_stat_name="river_call_efficiency"/>
+            <pu_stat pu_stat_name="totalprofit"/>
+            <pu_stat pu_stat_name="profit100"/>
+            <pu_stat pu_stat_name="bbper100"/>
+            <pu_stat pu_stat_name="agg_fact"/>
+            <pu_stat pu_stat_name="a_freq_123"/>
+        </pu>
+        <pu pu_name="plo4_full" pu_class="ModernSubmenu">
+            <pu_stat pu_stat_name="playername"/>
+            <pu_stat pu_stat_name="player_note"/>
+            <pu_stat pu_stat_name="n"/>
+            <!-- Preflop identity and range construction -->
+            <pu_stat pu_stat_name="vpip"/>
+            <pu_stat pu_stat_name="pfr"/>
+            <pu_stat pu_stat_name="vpip_pfr_ratio"/>
+            <pu_stat pu_stat_name="rfi_early_position"/>
+            <pu_stat pu_stat_name="rfi_middle_position"/>
+            <pu_stat pu_stat_name="rfi_late_position"/>
+            <pu_stat pu_stat_name="cold_call"/>
+            <pu_stat pu_stat_name="limp"/>
+            <pu_stat pu_stat_name="three_B"/>
+            <pu_stat pu_stat_name="f_3bet"/>
+            <pu_stat pu_stat_name="four_B"/>
+            <pu_stat pu_stat_name="fold_vs_4bet"/>
+            <pu_stat pu_stat_name="squeeze"/>
+            <!-- Flop -->
+            <pu_stat pu_stat_name="cb1"/>
+            <pu_stat pu_stat_name="cb_ip"/>
+            <pu_stat pu_stat_name="cb_oop"/>
+            <pu_stat pu_stat_name="f_cb1"/>
+            <pu_stat pu_stat_name="dbr1"/>
+            <pu_stat pu_stat_name="f_dbr1"/>
+            <pu_stat pu_stat_name="cr1"/>
+            <pu_stat pu_stat_name="avg_bet_size_flop"/>
+            <!-- Turn -->
+            <pu_stat pu_stat_name="cb2"/>
+            <pu_stat pu_stat_name="f_cb2"/>
+            <pu_stat pu_stat_name="dbr2"/>
+            <pu_stat pu_stat_name="f_dbr2"/>
+            <pu_stat pu_stat_name="cr2"/>
+            <pu_stat pu_stat_name="avg_bet_size_turn"/>
+            <!-- River and showdown -->
+            <pu_stat pu_stat_name="cb3"/>
+            <pu_stat pu_stat_name="f_cb3"/>
+            <pu_stat pu_stat_name="dbr3"/>
+            <pu_stat pu_stat_name="f_dbr3"/>
+            <pu_stat pu_stat_name="cr3"/>
+            <pu_stat pu_stat_name="avg_bet_size_river"/>
+            <pu_stat pu_stat_name="wtsd"/>
+            <pu_stat pu_stat_name="wmsd"/>
+            <pu_stat pu_stat_name="wwsf"/>
+            <pu_stat pu_stat_name="WMsF"/>
+            <pu_stat pu_stat_name="river_call_efficiency"/>
+            <!-- Pressure and results -->
+            <pu_stat pu_stat_name="a_freq1"/>
+            <pu_stat pu_stat_name="a_freq2"/>
+            <pu_stat pu_stat_name="a_freq3"/>
+            <pu_stat pu_stat_name="a_freq_123"/>
+            <pu_stat pu_stat_name="agg_fact"/>
+            <pu_stat pu_stat_name="totalprofit"/>
+            <pu_stat pu_stat_name="bbper100"/>
+        </pu>
         <pu pu_name="omaha_complete" pu_class="ModernSubmenu">
             <pu_stat pu_stat_name="playername"/>
             <pu_stat pu_stat_name="player_note"/>
@@ -2534,7 +2782,7 @@
             <pu_stat pu_stat_name="a_freq2"/>
             <pu_stat pu_stat_name="a_freq3"/>
             <pu_stat pu_stat_name="a_freq4"/>
-            <pu_stat pu_stat_name="agg_freq"/>
+            <pu_stat pu_stat_name="a_freq_123"/>
         </pu>
         <pu pu_class="default" pu_name="popcb">
             <pu_stat pu_stat_name="n"/>
@@ -2548,8 +2796,8 @@
             <pu_stat pu_stat_name="probe_bet"/>
             <pu_stat pu_stat_name="probe_bet_turn"/>
             <pu_stat pu_stat_name="probe_bet_river"/>
-            <pu_stat pu_stat_name="cb_in_position"/>
-            <pu_stat pu_stat_name="cb_out_of_position"/>
+            <pu_stat pu_stat_name="cb_ip"/>
+            <pu_stat pu_stat_name="cb_oop"/>
             <pu_stat pu_stat_name="triple_barrel"/>
             <pu_stat pu_stat_name="bet_frequency_flop"/>
             <pu_stat pu_stat_name="bet_frequency_turn"/>
@@ -2573,7 +2821,35 @@
             <pu_stat pu_stat_name="three_bet_vs_steal"/>
             <pu_stat pu_stat_name="resteal"/>
         </pu>
-    </popup_windows>
+    <pu pu_name="aof_profile" pu_class="CategorizedPopup" pu_theme="hud_dark" pu_icon_provider="emoji" pu_title="OPPONENT PROFILE: {player}" pu_width="420" pu_max_height="500">
+        <pu_stat pu_stat_name="aof_observed" pu_stat_category="⚡ AGGRESSIVENESS &amp; EV PROFIT" pu_stat_label="Observed All-ins"/>
+        <pu_stat pu_stat_name="aof_showdowns" pu_stat_category="⚡ AGGRESSIVENESS &amp; EV PROFIT" pu_stat_label="Showdowns"/>
+        <pu_stat pu_stat_name="aof_allin" pu_stat_category="⚡ AGGRESSIVENESS &amp; EV PROFIT" pu_stat_label="All-in"/>
+        <pu_stat pu_stat_name="aof_fold" pu_stat_category="⚡ AGGRESSIVENESS &amp; EV PROFIT" pu_stat_label="Fold"/>
+        <pu_stat pu_stat_name="aof_weak" pu_stat_category="⚡ AGGRESSIVENESS &amp; EV PROFIT" pu_stat_label="Weak AI % (EV+ Targets)" pu_stat_color="#00E59B"/>
+        <pu_stat pu_stat_name="aof_decision_ev" pu_stat_category="⚡ AGGRESSIVENESS &amp; EV PROFIT" pu_stat_label="Decision EV" pu_stat_color="#00E59B"/>
+        <pu_stat pu_stat_name="aof_range_equity" pu_stat_category="⚡ AGGRESSIVENESS &amp; EV PROFIT" pu_stat_label="Population Range Equity" pu_stat_color="#00E59B"/>
+        <pu_stat pu_stat_name="aof_known_equity" pu_stat_category="⚡ AGGRESSIVENESS &amp; EV PROFIT" pu_stat_label="Known Card Equity"/>
+        <pu_stat pu_stat_name="aof_known_ev" pu_stat_category="⚡ AGGRESSIVENESS &amp; EV PROFIT" pu_stat_label="EV vs Actual Callers" pu_stat_color="#00E59B"/>
+        <pu_stat pu_stat_name="aof_no_made" pu_stat_category="🃏 MADE HAND STRUCTURE" pu_stat_label="Air / No Made Hand"/>
+        <pu_stat pu_stat_name="aof_pair" pu_stat_category="🃏 MADE HAND STRUCTURE" pu_stat_label="1 Pair"/>
+        <pu_stat pu_stat_name="aof_two_pair" pu_stat_category="🃏 MADE HAND STRUCTURE" pu_stat_label="2 Pair"/>
+        <pu_stat pu_stat_name="aof_trips" pu_stat_category="🃏 MADE HAND STRUCTURE" pu_stat_label="Trips"/>
+        <pu_stat pu_stat_name="aof_straight" pu_stat_category="🃏 MADE HAND STRUCTURE" pu_stat_label="Straight"/>
+        <pu_stat pu_stat_name="aof_flush" pu_stat_category="🃏 MADE HAND STRUCTURE" pu_stat_label="Flush"/>
+        <pu_stat pu_stat_name="aof_full_house" pu_stat_category="🃏 MADE HAND STRUCTURE" pu_stat_label="Full House"/>
+        <pu_stat pu_stat_name="aof_quads" pu_stat_category="🃏 MADE HAND STRUCTURE" pu_stat_label="Quads"/>
+        <pu_stat pu_stat_name="aof_straight_flush" pu_stat_category="🃏 MADE HAND STRUCTURE" pu_stat_label="Straight Flush"/>
+        <pu_stat pu_stat_name="aof_made" pu_stat_category="🃏 MADE HAND STRUCTURE" pu_stat_label="Total Made Hands"/>
+        <pu_stat pu_stat_name="aof_nfd" pu_stat_category="🎯 DRAWS" pu_stat_label="Nut Flush Draw (NFD)" pu_stat_color="#16C5F4"/>
+        <pu_stat pu_stat_name="aof_non_nfd" pu_stat_category="🎯 DRAWS" pu_stat_label="Flush Draw (fd)" pu_stat_color="#16C5F4"/>
+        <pu_stat pu_stat_name="aof_wrap9" pu_stat_category="🎯 DRAWS" pu_stat_label="Wrap 9+ outs" pu_stat_color="#16C5F4"/>
+        <pu_stat pu_stat_name="aof_big_wrap13" pu_stat_category="🎯 DRAWS" pu_stat_label="Big Wrap 13+ outs" pu_stat_color="#16C5F4"/>
+        <pu_stat pu_stat_name="aof_splash_won" pu_stat_category="💰 SPLASH POTS &amp; NOTES" pu_stat_label="Splash Recovered"/>
+        <pu_stat pu_stat_name="aof_splash_freq" pu_stat_category="💰 SPLASH POTS &amp; NOTES" pu_stat_label="Splash Frequency"/>
+        <pu_stat pu_stat_name="player_note" pu_stat_category="💰 SPLASH POTS &amp; NOTES" pu_stat_label="Player Notes"/>
+    </pu>
+</popup_windows>
     <raw_hands save="none" compression="none"/>
     <raw_tourneys save="none" compression="none"/>
     <supported_databases>
@@ -2714,9 +2990,9 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="Bwin.fr Poker" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\jd\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\Downloads\test hand\partypoker" network="PartyPoker">
-            <layout_set game_type="all" ls="party_default"/>
-            <fav max="2" fav_seat="1"/>
+        <site site_name="Bwin.fr Poker" enabled="False" screen_name="" site_path="C:/Program Files/iPoker/" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tables" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
+            <layout_set game_type="all" ls="ipoker_default"/>
+            <fav max="2" fav_seat="0"/>
             <fav max="3" fav_seat="0"/>
             <fav max="4" fav_seat="0"/>
             <fav max="5" fav_seat="0"/>
@@ -2762,9 +3038,9 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="PartyPoker.fr" enabled="False" screen_name="" site_path="C:\Programs\PMU\PMUPoker\HandHistory" HH_path="C:\Users\jd\Downloads\test hand\partypoker" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:\Users\jd\Downloads\test hand\partypoker" network="PartyPoker">
-            <layout_set game_type="all" ls="party_default"/>
-            <fav max="2" fav_seat="1"/>
+        <site site_name="PartyPoker.fr" enabled="False" screen_name="" site_path="C:/Program Files/iPoker/" HH_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tables" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="C:/Users/jd/AppData/Local/Red Star Poker/data/85/History/Data/Tournaments" network="iPoker">
+            <layout_set game_type="all" ls="ipoker_default"/>
+            <fav max="2" fav_seat="0"/>
             <fav max="3" fav_seat="0"/>
             <fav max="4" fav_seat="0"/>
             <fav max="5" fav_seat="0"/>
@@ -3038,13 +3314,13 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="Winamax" enabled="True" HH_path="/Users/jdenis/Library/Application Support/Winamax/documents/accounts/jejellyroll/history" screen_name="jejellyroll" site_path="C:/Program Files/Winamax/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="" network="Winamax" layout_set_ring="winamax_default" layout_set_tour="winamax_default">
+        <site site_name="Winamax" enabled="True" HH_path="/home/jd/.config/winamax/documents/accounts/YOUR_SCREEN_NAME/history" screen_name="YOUR_SCREEN_NAME" site_path="" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="" network="Winamax" layout_set_ring="winamax_default" layout_set_tour="winamax_default">
             <layout_set game_type="all" ls="winamax_default"/>
             <fav max="2" fav_seat="2"/>
             <fav max="3" fav_seat="3"/>
             <fav max="4" fav_seat="0"/>
-            <fav max="5" fav_seat="0"/>
-            <fav max="6" fav_seat="0"/>
+            <fav max="5" fav_seat="1"/>
+            <fav max="6" fav_seat="1"/>
             <fav max="7" fav_seat="0"/>
             <fav max="8" fav_seat="0"/>
             <fav max="9" fav_seat="0"/>
@@ -3798,7 +4074,7 @@
         </site>
         <site site_name="Bovada" enabled="True" screen_name="" site_path="C:/Bovada/" HH_path="" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="0" network="Bovada">
             <email fetchType="request-summary" host="YOUR_EMAIL_SERVER" username="YOUR_EMAIL_USERNAME" password="YOUR_EMAIL_PASSWORD" useSsl="True" folder="INBOX"/>
-            <layout_set game_type="all" ls="bodova_default"/>
+            <layout_set game_type="all" ls="bovada_default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="3" fav_seat="0"/>
             <fav max="4" fav_seat="0"/>
@@ -3809,7 +4085,7 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="SealsWithClubs" enabled="True" screen_name="edinapoker" site_path="/Users/jdenis/Documents/SwC Poker/Hand History/" HH_path="/Users/jdenis/Documents/SwC Poker/Hand History/edinapoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="/Users/jdenis/Documents/SwC Poker/Hand History/edinapoker/" network="SealsWithClubs">
+        <site site_name="SealsWithClubs" enabled="True" screen_name="YOUR_SCREEN_NAME" site_path="/Users/YOUR_OS_USER/Documents/SwC Poker/Hand History/" HH_path="/Users/YOUR_OS_USER/Documents/SwC Poker/Hand History/YOUR_SCREEN_NAME/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="/Users/YOUR_OS_USER/Documents/SwC Poker/Hand History/YOUR_SCREEN_NAME/" network="SealsWithClubs">
             <email fetchType="request-summary" host="YOUR_EMAIL_SERVER" username="YOUR_EMAIL_USERNAME" password="YOUR_EMAIL_PASSWORD" useSsl="True" folder="INBOX"/>
             <layout_set game_type="all" ls="sealswithclubs_default"/>
             <fav max="2" fav_seat="0"/>
@@ -3939,6 +4215,194 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
+        <site site_name="Absolute" enabled="False" screen_name="" site_path="" HH_path="" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="" network="Absolute">
+            <layout_set game_type="all" ls="default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="Boss" enabled="False" screen_name="" site_path="" HH_path="" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="" network="Boss">
+            <layout_set game_type="all" ls="default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="Enet" enabled="False" screen_name="" site_path="" HH_path="" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="" network="Enet">
+            <layout_set game_type="all" ls="default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="Entraction" enabled="False" screen_name="" site_path="" HH_path="" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="" network="Entraction">
+            <layout_set game_type="all" ls="default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="Everleaf" enabled="False" screen_name="" site_path="" HH_path="" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="" network="Everleaf">
+            <layout_set game_type="all" ls="default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="Betfair" enabled="False" screen_name="" site_path="" HH_path="" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="" network="Betfair">
+            <layout_set game_type="all" ls="default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="OnGame" enabled="False" screen_name="" site_path="" HH_path="" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="" network="OnGame">
+            <layout_set game_type="all" ls="default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="Everest" enabled="False" screen_name="" site_path="" HH_path="" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="" network="Everest">
+            <layout_set game_type="all" ls="default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="Microgaming" enabled="False" screen_name="" site_path="" HH_path="" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="" network="Microgaming">
+            <layout_set game_type="all" ls="default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="PKR" enabled="False" screen_name="" site_path="" HH_path="" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="" network="PKR">
+            <layout_set game_type="all" ls="default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="Full Tilt Poker" enabled="False" screen_name="" site_path="" HH_path="" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="" network="Full Tilt Poker">
+            <layout_set game_type="all" ls="default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="CoinPoker" enabled="False" screen_name="" site_path="" HH_path="" TS_path="" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" network="CoinPoker">
+            <layout_set game_type="all" ls="default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+            <site site_name="PokerStars" enabled="False" HH_path="" screen_name="" site_path="" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="" network="PokerStars">
+            <layout_set game_type="ring" ls="ps_default"/>
+            <layout_set game_type="tour" ls="ps_default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="UltimateBet" enabled="False" HH_path="" screen_name="" site_path="" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="" network="UltimateBet">
+            <layout_set game_type="ring" ls="default"/>
+            <layout_set game_type="tour" ls="default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="Partouche" enabled="False" HH_path="" screen_name="" site_path="" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="" network="iPoker">
+            <layout_set game_type="ring" ls="ipoker_default"/>
+            <layout_set game_type="tour" ls="ipoker_default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="iPoker" enabled="False" HH_path="" screen_name="" site_path="" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="" network="iPoker">
+            <layout_set game_type="ring" ls="ipoker_default"/>
+            <layout_set game_type="tour" ls="ipoker_default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="BetOnline" enabled="False" HH_path="" screen_name="" site_path="" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="" network="Cake">
+            <layout_set game_type="ring" ls="cake_default"/>
+            <layout_set game_type="tour" ls="cake_default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="PokerMaster" enabled="False" HH_path="" screen_name="" site_path="" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="" network="PokerMaster">
+            <layout_set game_type="ring" ls="default"/>
+            <layout_set game_type="tour" ls="default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="Run It Once Poker" enabled="False" HH_path="" screen_name="" site_path="" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="" network="Run It Once Poker">
+            <layout_set game_type="ring" ls="default"/>
+            <layout_set game_type="tour" ls="default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="PokerBros" enabled="False" HH_path="" screen_name="" site_path="" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="" network="PokerBros">
+            <layout_set game_type="ring" ls="default"/>
+            <layout_set game_type="tour" ls="default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
     </supported_sites>
     <hhcs>
         <hhc site="PokerStars.COM" converter="PokerStarsToFpdb" summaryImporter="PokerStarsSummary"/>
@@ -3950,11 +4414,11 @@
         <hhc site="PartyPoker" converter="PartyPokerToFpdb"/>
         <hhc site="Party Poker" converter="PartyPokerToFpdb"/>
         <hhc site="Bwin Poker" converter="PartyPokerToFpdb"/>
-        <hhc site="Bwin.fr Poker" converter="PartyPokerToFpdb"/>
+        <hhc site="Bwin.fr Poker" converter="iPokerToFpdb" summaryImporter="iPokerSummary"/>
         <hhc site="Bwin.it Poker" converter="PartyPokerToFpdb"/>
         <hhc site="Bwin.es Poker" converter="PartyPokerToFpdb"/>
         <hhc site="Bwin.de Poker" converter="PartyPokerToFpdb"/>
-        <hhc site="PartyPoker.fr" converter="PartyPokerToFpdb"/>
+        <hhc site="PartyPoker.fr" converter="iPokerToFpdb" summaryImporter="iPokerSummary"/>
         <hhc site="PartyPoker.it" converter="PartyPokerToFpdb"/>
         <hhc site="PartyPoker.es" converter="PartyPokerToFpdb"/>
         <hhc site="PartyPoker.de" converter="PartyPokerToFpdb"/>
@@ -4051,5 +4515,53 @@
         <hhc site="KingsClub" converter="KingsClubToFpdb"/>
         <hhc site="GGPoker" converter="GGPokerToFpdb"/>
         <hhc site="Unibet" converter="UnibetToFpdb"/>
+        <hhc site="Absolute" converter="AbsoluteToFpdb"/>
+        <hhc site="UltimateBet" converter="AbsoluteToFpdb"/>
+        <hhc site="Boss" converter="BossToFpdb"/>
+        <hhc site="Enet" converter="EnetToFpdb"/>
+        <hhc site="Entraction" converter="EntractionToFpdb"/>
+        <hhc site="Everleaf" converter="EverleafToFpdb"/>
+        <hhc site="Betfair" converter="BetfairToFpdb"/>
+        <hhc site="OnGame" converter="OnGameToFpdb"/>
+        <hhc site="Everest" converter="EverestToFpdb"/>
+        <hhc site="Microgaming" converter="MicrogamingToFpdb"/>
+        <hhc site="PKR" converter="PkrToFpdb"/>
+        <hhc site="Full Tilt Poker" converter="FulltiltToFpdb" summaryImporter="FullTiltPokerSummary"/>
+        <hhc site="CoinPoker" converter="CoinPokerToFpdb"/>
     </hhcs>
+    <!-- HUD profile rules: choose which stat set (HUD profile) a table gets,
+         the way PokerTracker's "Profile Select" tab does.
+
+         Each <hud_profile_rule> narrows the table context; "all" matches
+         anything:
+           site       room name as it appears in <supported_sites>, or "all"
+           game       Gametypes.category (holdem, omahahi, aof_omaha, ...)
+           game_type  "ring", "tour", or "all"
+           limit      Gametypes.limitType (nl, pl, fl, cn), or "all"
+           seats      table size (Gametypes.maxSeats), or "all"
+           players    players actually dealt into the hand, or "all"
+           speed      "normal", "fast", or "all"
+           profile    the <ss name="..."> stat set to use
+           priority   optional; higher wins between equally specific rules
+
+         The most specific matching rule wins; ties break on priority, then on
+         the order the rules appear here. When no rule matches, the profile
+         from <supported_games> is used, so an empty
+         section changes nothing.
+
+         HUD positions are remembered per (site, game, game_type, seats,
+         profile, layout). Two games that resolve to different profiles
+         therefore keep their own window placement even when the room files
+         them under a single layout set, which is what CoinPoker does.
+
+         Example: give CoinPoker's 6-max AoF Omaha tables their own profile
+         while every other table keeps the default.
+           <hud_profile_rule site="CoinPoker" game="aof_omaha" seats="6" profile="aof_advanced"/>
+
+         The GUI writes this section from HUD Preferences -> Profile Select;
+         this comment is kept outside the element so editing it there does not
+         throw the documentation away. -->
+    <hud_profile_rules>
+    </hud_profile_rules>
+
 </FreePokerToolsConfig>

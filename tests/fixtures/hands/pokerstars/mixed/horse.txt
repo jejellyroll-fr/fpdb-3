@@ -1,0 +1,17 @@
+PokerStars Game #444444444444:  HORSE (7 Card Stud Limit) - Level I (10/20) - 2023/10/27 12:00:00 ET
+Table 'Table Name' 8-max Seat #1 is the button
+Seat 1: Player1 (1000 in chips)
+Seat 2: Player2 (1000 in chips)
+Player1: posts the ante 2
+Player2: posts the ante 2
+*** 3rd STREET ***
+Dealt to Player1 [As Ks]
+Dealt to Player2 [2s 3s]
+Player2: brings-in low for 2
+Player1: folds
+Uncalled bet (2) returned to Player2
+Player2 collected 8 from pot
+*** SUMMARY ***
+Total pot 8 | Rake 0
+Seat 1: Player1 folded on 3rd Street
+Seat 2: Player2 collected (8)

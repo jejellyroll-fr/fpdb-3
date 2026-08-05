@@ -7,7 +7,7 @@ from decimal import Decimal
 from pathlib import Path
 from unittest.mock import Mock, patch
 
-from WinamaxToFpdb import Winamax
+from fpdb_3_legacy.WinamaxToFpdb import Winamax
 
 
 class MockConfig:
@@ -466,7 +466,7 @@ class TestWinamaxComplete(unittest.TestCase):
             "re_post_both",
             "re_post_dead",
             "re_post_second_sb",
-            "re_hero_cards",
+            "re_dealt_cards",
             "re_action",
             "re_showdown_action",
             "re_collect_pot",

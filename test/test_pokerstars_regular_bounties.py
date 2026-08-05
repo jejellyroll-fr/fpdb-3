@@ -1,9 +1,10 @@
 """Tests for PokerStars regular bounties processing."""
 
 import unittest
+from decimal import Decimal
 from unittest.mock import Mock, patch
 
-from PokerStarsToFpdb import PokerStars
+from fpdb_3_legacy.PokerStarsToFpdb import PokerStars
 
 
 class MockConfig:
@@ -143,15 +144,15 @@ ChazDazzle wins the 22000 bounty for eliminating berkovich609
 
         self.parser._processSplitBounty(mock_hand, mock_match)
 
-        expected_value = 1.0 / 3.0
-        self.assertAlmostEqual(mock_hand.koCounts["Player1"], expected_value, places=6)
-        self.assertAlmostEqual(mock_hand.koCounts["Player2"], expected_value, places=6)
-        self.assertAlmostEqual(mock_hand.koCounts["Player3"], expected_value, places=6)
+        expected_value = Decimal("1") / Decimal("3")
+        self.assertEqual(mock_hand.koCounts["Player1"], expected_value)
+        self.assertEqual(mock_hand.koCounts["Player2"], expected_value)
+        self.assertEqual(mock_hand.koCounts["Player3"], expected_value)
 
     def test_process_split_bounty_existing_players(self):
         """Test _processSplitBounty method with existing players."""
         mock_hand = Mock()
-        mock_hand.koCounts = {"Player1": 1.0, "Player2": 0.5}
+        mock_hand.koCounts = {"Player1": Decimal("1.0"), "Player2": Decimal("0.5")}
 
         # Mock match object
         mock_match = Mock()
@@ -159,8 +160,8 @@ ChazDazzle wins the 22000 bounty for eliminating berkovich609
 
         self.parser._processSplitBounty(mock_hand, mock_match)
 
-        self.assertEqual(mock_hand.koCounts["Player1"], 1.5)  # 1.0 + 0.5
-        self.assertEqual(mock_hand.koCounts["Player2"], 1.0)  # 0.5 + 0.5
+        self.assertEqual(mock_hand.koCounts["Player1"], Decimal("1.5"))  # 1.0 + 0.5
+        self.assertEqual(mock_hand.koCounts["Player2"], Decimal("1.0"))  # 0.5 + 0.5
 
     def test_regular_bounty_regex_patterns(self):
         """Test that the regex correctly identifies bounty patterns."""

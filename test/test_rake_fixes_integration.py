@@ -4,7 +4,7 @@ import unittest
 from decimal import Decimal
 from unittest.mock import Mock
 
-from PokerStarsToFpdb import PokerStars
+from fpdb_3_legacy.PokerStarsToFpdb import PokerStars
 
 
 class TestRakeFixesIntegration(unittest.TestCase):
