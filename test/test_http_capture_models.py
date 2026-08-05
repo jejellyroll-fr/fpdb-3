@@ -1465,9 +1465,9 @@ def test_hand_operation_plan_maps_supported_actions_to_hand_methods():
     }
 
     assert build_hand_operations(hand_data) == [
-        {"method": "addPlayer", "args": [0, "alice", "100"], "source": "players"},
-        {"method": "addPlayer", "args": [1, "bob", "100"], "source": "players"},
-        {"method": "addPlayer", "args": [2, "carol", "100"], "source": "players"},
+        {"method": "addPlayer", "args": [1, "alice", "100"], "source": "players"},
+        {"method": "addPlayer", "args": [2, "bob", "100"], "source": "players"},
+        {"method": "addPlayer", "args": [3, "carol", "100"], "source": "players"},
         {"method": "addBlind", "args": ["alice", "small blind", "1"], "source": "actions"},
         {"method": "addBlind", "args": ["bob", "big blind", "2"], "source": "actions"},
         {"method": "addBlind", "args": ["carol", "straddle", "4"], "source": "actions"},
@@ -1487,7 +1487,7 @@ def test_hand_operation_plan_maps_pot_collections_to_hand_method():
     }
 
     assert build_hand_operations(hand_data) == [
-        {"method": "addPlayer", "args": [0, "alice", "100"], "source": "players"},
+        {"method": "addPlayer", "args": [1, "alice", "100"], "source": "players"},
         {"method": "addCollectPot", "args": ["alice", "3"], "source": "actions"},
         {"method": "addCollectPot", "args": ["alice", "2"], "source": "collections"},
         {"method": "addCollectPot", "args": ["alice", "4"], "source": "collections"},
