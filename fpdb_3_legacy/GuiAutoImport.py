@@ -12,6 +12,7 @@ import sys
 import time
 import traceback
 from optparse import OptionParser
+from pathlib import Path
 from typing import Any
 
 try:
@@ -107,36 +108,70 @@ class SwCNativeTailingThread(QThread):
 
     hand_imported = Signal(dict)
 
+    #: A hand needs the messages around it to be reconstructed, so decoded
+    #: messages are retained across polls rather than re-read from disk. This
+    #: caps that history: a long session would otherwise grow it without bound.
+    MAX_RETAINED_MESSAGES = 20000
+
     def __init__(self, raw_path: Any = None, parent: QWidget | None = None) -> None:
         super().__init__(parent)
-        from pathlib import Path
-        self.raw_path = (raw_path or (Path.home() / ".fpdb" / "swc-native-capture" / "swc-native.raw")).expanduser().resolve()
+        default = Path.home() / ".fpdb" / "swc-native-capture" / "swc-native.raw"
+        self.raw_path = Path(raw_path or default).expanduser().resolve()
         self._stop_requested = False
         self._imported_keys: set[tuple[int, int]] = set()
+        self._offset = 0
+        self._messages: list[Any] = []
+        self._consecutive_errors = 0
 
     def stop(self) -> None:
         self._stop_requested = True
 
-    def run(self) -> None:
+    def poll_once(self) -> list[dict]:
+        """Decode whatever was appended since the last call and return new hands.
+
+        Split out of the polling loop so the decode path can be exercised without
+        starting a thread or waiting on its timing.
+        """
         from fpdb_3_legacy.swc_native_capture import (
-            iter_capture_records,
             iter_protocol_messages,
             normalize_native_hands,
+            read_records_since,
         )
 
+        records, self._offset = read_records_since(self.raw_path, self._offset)
+        if not records:
+            return []
+
+        self._messages.extend(iter_protocol_messages(iter(records)))
+        if len(self._messages) > self.MAX_RETAINED_MESSAGES:
+            del self._messages[: len(self._messages) - self.MAX_RETAINED_MESSAGES]
+
+        fresh: list[dict] = []
+        for hand in normalize_native_hands(self._messages, raw_ref=str(self.raw_path)):
+            key = (hand.get("table_id", 0), hand.get("hand_id", 0))
+            if key not in self._imported_keys:
+                self._imported_keys.add(key)
+                fresh.append(hand)
+        return fresh
+
+    def run(self) -> None:
         while not self._stop_requested:
-            if self.raw_path.exists():
-                try:
-                    with self.raw_path.open("rb") as stream:
-                        messages = list(iter_protocol_messages(iter_capture_records(stream)))
-                        hands = normalize_native_hands(messages, raw_ref=str(self.raw_path))
-                        for hand in hands:
-                            key = (hand.get("table_id", 0), hand.get("hand_id", 0))
-                            if key not in self._imported_keys:
-                                self._imported_keys.add(key)
-                                self.hand_imported.emit(hand)
-                except Exception as e:
-                    log.debug("SwCNativeTailingThread error: %s", e)
+            try:
+                for hand in self.poll_once():
+                    self.hand_imported.emit(hand)
+                self._consecutive_errors = 0
+            except Exception:
+                # One failure is unremarkable while the tap is mid-write; a run of
+                # them means the archive is unreadable and the user is silently
+                # getting no hands, so say so instead of hiding it at debug level.
+                self._consecutive_errors += 1
+                if self._consecutive_errors in (1, 10, 100):
+                    log.warning(
+                        "SwC native tailing failed %d time(s) reading %s",
+                        self._consecutive_errors,
+                        self.raw_path,
+                        exc_info=True,
+                    )
             for _step in range(10):
                 if self._stop_requested:
                     break
