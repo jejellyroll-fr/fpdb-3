@@ -996,7 +996,10 @@ class AuxSeats(AuxWindow):
         seats = set()
         for data in self.hud.stat_dict.values():
             seat = data.get("seat")
-            if seat:
+            # `if seat` would read seat 0 as an empty chair and drop that player
+            # from the layout entirely, leaving them with no stat panel while
+            # everyone else got one. Only a genuinely absent seat is skipped.
+            if seat is not None:
                 seats.add(int(seat))
         return sorted(seats)
 
