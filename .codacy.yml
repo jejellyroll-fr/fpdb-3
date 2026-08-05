@@ -1,0 +1,21 @@
+---
+# Bandit's B101 ("Use of assert detected") fires on every assertion in the test
+# suite -- 10 425 of them across 372 files -- because an assert is compiled out
+# under `python -O`. That reasoning applies to production code; in pytest the
+# bare assert *is* the assertion mechanism, and this project uses no other.
+#
+# The result was a gate that failed on any pull request adding a test: #179
+# reported 87 issues, exactly the number of asserts in the four test files it
+# touched, and the five pull requests merged before it were all red for the same
+# reason. A check that cannot pass gets ignored, and an ignored check hides the
+# day it finds something real.
+#
+# Scoped to bandit on purpose rather than excluding the tests outright: every
+# other Codacy tool keeps analysing them. This mirrors a choice the repository
+# had already made -- pyproject.toml selects ruff rule groups C901, E, F, I,
+# PLR0912, PLR0915, UP and W, deliberately leaving out S (flake8-bandit).
+engines:
+  bandit:
+    exclude_paths:
+      - "test/**"
+      - "tests/**"
