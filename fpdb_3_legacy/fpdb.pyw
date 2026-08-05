@@ -87,6 +87,7 @@ from fpdb_3_legacy import (
     ModernHudPreferences,
     Options,
 )
+from fpdb_3_legacy import __version__ as PACKAGE_VERSION
 from fpdb_3_legacy.ConfigInitializer import ensure_config_initialized
 from fpdb_3_legacy.ConfigurationManager import ConfigurationManager
 from fpdb_3_legacy.Exceptions import FpdbError
@@ -137,24 +138,43 @@ log = get_logger("fpdb")
 # Note: Logger level is now controlled by Logger Dev Tool configuration
 # The get_logger() function automatically applies the correct level from saved configuration
 
-try:
-    assert not hasattr(sys, "frozen")  # We're surely not in a git repo if this fails
-    import subprocess
+def _resolve_version() -> str:
+    """Return the version to display, preferring what the checkout can tell us.
 
-    # --always falls back to an abbreviated commit hash when the repo has no tags,
-    # instead of git failing; stderr is silenced so its "No tags can describe"
-    # message does not leak to the console.
-    VERSION = subprocess.run(
-        ["git", "describe", "--tags", "--always", "--dirty"],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.DEVNULL,
-        text=True,
-        check=True,
-    ).stdout.strip()
-    if not VERSION:
-        VERSION = "3.0.0alpha"
-except Exception:
-    VERSION = "3.0.0alpha"
+    A git checkout gets ``git describe``, whose commits-since-tag and ``-dirty``
+    markers make a bug report actionable. A packaged build has no repository --
+    PyOxidizer sets ``sys.frozen`` -- so it reports the version the package
+    declares. Every fallback lands on ``PACKAGE_VERSION`` rather than a literal:
+    a hardcoded one silently went stale and made the shipped 3.3.0 binaries
+    report the beta-era version instead.
+    """
+    if getattr(sys, "frozen", False):
+        return PACKAGE_VERSION
+
+    import subprocess
+    from pathlib import Path as _Path
+
+    try:
+        # --always falls back to an abbreviated commit hash when the repo has no
+        # tags, instead of git failing; stderr is silenced so its "No tags can
+        # describe" message does not leak to the console. cwd anchors git to this
+        # source tree, so launching fpdb from inside an unrelated repository does
+        # not report that repository's version.
+        described = subprocess.run(
+            ["git", "describe", "--tags", "--always", "--dirty"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL,
+            text=True,
+            check=True,
+            cwd=_Path(__file__).resolve().parent,
+        ).stdout.strip()
+    except Exception:
+        return PACKAGE_VERSION
+
+    return described or PACKAGE_VERSION
+
+
+VERSION = _resolve_version()
 
 
 class fpdb(QMainWindow):
