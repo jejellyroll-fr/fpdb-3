@@ -1112,7 +1112,7 @@ def _build_arg_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def main() -> None:
+def main() -> None:  # noqa: C901
     args = _build_arg_parser().parse_args()
 
     if args.log_file:

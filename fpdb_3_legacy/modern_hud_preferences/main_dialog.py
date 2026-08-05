@@ -37,7 +37,8 @@ from PySide6.QtWidgets import (
 
 from fpdb_3_legacy import Configuration
 from fpdb_3_legacy.hud_profiles import HudContext, HudProfileResolver, HudProfileRule
-from fpdb_3_legacy.i18n import gettext as _, translate_hud_category, translate_hud_label
+from fpdb_3_legacy.i18n import gettext as _
+from fpdb_3_legacy.i18n import translate_hud_category
 from fpdb_3_legacy.loggingFpdb import get_logger
 from fpdb_3_legacy.modern_hud_preferences.design_canvas import HudDesignCanvas
 from fpdb_3_legacy.modern_hud_preferences.dialogs import (
@@ -2136,7 +2137,7 @@ class ModernHudPreferences(QDialog):
 
         from PySide6.QtWidgets import QFileDialog, QMessageBox
 
-        filename, _ = QFileDialog.getSaveFileName(
+        filename, _filter = QFileDialog.getSaveFileName(
             self,
             "Export HUD Profile",
             os.path.expanduser(f"~/{profile_name}.xml"),
@@ -2244,7 +2245,7 @@ class ModernHudPreferences(QDialog):
 
         from fpdb_3_legacy.hud_package import merge_package_game_bindings
 
-        filename, _ = QFileDialog.getOpenFileName(
+        filename, _filter = QFileDialog.getOpenFileName(
             self,
             "Import HUD Profile",
             os.path.expanduser("~"),

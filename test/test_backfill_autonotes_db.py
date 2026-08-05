@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from fpdb_3_legacy.backfill_autonotes import DatabaseAutoNoteHand, _action_tuple, _dict_get, _row_dict
+from fpdb_3_legacy.backfill_autonotes import DatabaseAutoNoteHand, _action_tuple, _dict_get
 
 
 def test_dict_get_case_insensitive():

@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from pathlib import Path
 import re
+from pathlib import Path
 from typing import Any
 
 from PySide6.QtCore import QDate, QObject, Qt, QThread, Signal, Slot
@@ -801,7 +801,7 @@ class GuiAutoNotesWorkbench(QWidget):
         layout.addStretch(1)
         return widget
 
-    def _evidence_widget(self, evidence_text: str) -> QWidget | None:
+    def _evidence_widget(self, evidence_text: str) -> QWidget | None:  # noqa: C901, PLR0912
         if not evidence_text or not evidence_text.strip():
             return None
 

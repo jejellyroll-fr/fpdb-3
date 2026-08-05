@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+
 import pytest
 
 pytestmark = pytest.mark.qt
@@ -12,6 +13,7 @@ os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
 def test_cards_widget_creation(qtbot):
     from PySide6.QtWidgets import QApplication
+
     from fpdb_3_legacy.GuiAutoNotesWorkbench import GuiAutoNotesWorkbench
 
     QApplication.instance() or QApplication([])
@@ -33,6 +35,7 @@ def test_cards_widget_creation(qtbot):
 
 def test_get_card_pixmap_caching(qtbot):
     from PySide6.QtWidgets import QApplication
+
     from fpdb_3_legacy.GuiAutoNotesWorkbench import GuiAutoNotesWorkbench
 
     QApplication.instance() or QApplication([])
