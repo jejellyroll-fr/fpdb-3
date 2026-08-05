@@ -13,6 +13,7 @@ os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
 def test_popup_zoom_dialog_creation(qtbot):
     from PySide6.QtWidgets import QApplication
+
     from fpdb_3_legacy.modern_hud_preferences.preview_widgets import PopupZoomDialog
 
     QApplication.instance() or QApplication([])
@@ -52,6 +53,7 @@ def test_popup_zoom_dialog_creation(qtbot):
 
 def test_popup_preview_double_click_trigger(qtbot):
     from PySide6.QtWidgets import QApplication
+
     from fpdb_3_legacy.modern_hud_preferences.preview_widgets import PopupPreviewWidget
 
     QApplication.instance() or QApplication([])

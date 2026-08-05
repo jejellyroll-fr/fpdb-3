@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+
 import pytest
 
 pytestmark = pytest.mark.qt
@@ -12,6 +13,7 @@ os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
 def test_hud_player_notes_dialog_structure(qtbot, monkeypatch):
     from PySide6.QtWidgets import QApplication, QDialog
+
     from fpdb_3_legacy.Aux_Classic_Hud import ClassicStat
 
     QApplication.instance() or QApplication([])

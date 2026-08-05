@@ -19,7 +19,8 @@ from PySide6.QtWidgets import (
 )
 
 from fpdb_3_legacy.Aux_Hud import SimpleLabel
-from fpdb_3_legacy.i18n import gettext as _, translate_hud_category, translate_hud_label
+from fpdb_3_legacy.i18n import gettext as _
+from fpdb_3_legacy.i18n import translate_hud_category, translate_hud_label
 from fpdb_3_legacy.loggingFpdb import get_logger
 from fpdb_3_legacy.PopupIcons import get_icon_provider, get_stat_category
 from fpdb_3_legacy.PopupThemes import get_theme
@@ -762,7 +763,7 @@ class PopupPreviewWidget(QWidget):
 class PopupZoomDialog(QDialog):
     """Real-size / Zoom modal dialog to view a popup preview at 1:1 or scaled dimensions."""
 
-    def __init__(
+    def __init__(  # noqa: PLR0915
         self,
         popup_name: str,
         popup_class: str,
@@ -869,8 +870,6 @@ class PopupZoomDialog(QDialog):
         self.zoom_label.setText(f"{int(self.current_zoom * 100)}%")
         frame = self.preview_widget.popup_frame
         hint = frame.sizeHint()
-        width = int(hint.width() * self.current_zoom)
-        height = int(hint.height() * self.current_zoom)
         self.size_info_label.setText(
             _("Natural Size: {w} × {h} px  (Scale: {scale}%)").format(
                 w=hint.width(), h=hint.height(), scale=int(self.current_zoom * 100)
