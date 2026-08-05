@@ -4,26 +4,22 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-import re
 from typing import Any
 
-from PySide6.QtCore import Qt, Signal, Slot
+from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QPainter, QPixmap
 from PySide6.QtSvg import QSvgRenderer
 from PySide6.QtWidgets import (
-    QApplication,
     QCheckBox,
     QComboBox,
     QGroupBox,
     QHBoxLayout,
-    QHeaderView,
     QLabel,
     QLineEdit,
     QMessageBox,
     QPlainTextEdit,
     QPushButton,
     QScrollArea,
-    QSpinBox,
     QSplitter,
     QTreeWidget,
     QTreeWidgetItem,
@@ -34,12 +30,10 @@ from PySide6.QtWidgets import (
 from fpdb_3_legacy.AutoNoteRules import PreflopContext
 from fpdb_3_legacy.AutoNotes import configured_rule_summary
 from fpdb_3_legacy.Configuration import GRAPHICS_PATH
-from fpdb_3_legacy.GGPokerToFpdb import GGPoker
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.loggingFpdb import get_logger
 from fpdb_3_legacy.user_autonotes_parser import (
     compile_custom_rule,
-    get_user_autonotes_path,
     load_user_autonotes_data,
     save_user_autonotes_data,
 )
@@ -166,7 +160,7 @@ class GuiCustomAutoNotesEditor(QWidget):
         self._build_ui()
         self.load_rules()
 
-    def _build_ui(self) -> None:
+    def _build_ui(self) -> None:  # noqa: PLR0915
         main_layout = QVBoxLayout(self)
 
         # Header Action Toolbar

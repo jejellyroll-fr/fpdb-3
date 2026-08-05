@@ -2,11 +2,9 @@
 
 from __future__ import annotations
 
-from collections import Counter
 import json
-import os
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 
 from fpdb_3_legacy.AutoNotePlo import normalize_cards, rank_counts
 from fpdb_3_legacy.AutoNoteRules import PreflopContext
@@ -73,6 +71,7 @@ class CustomAutoNoteRule(AutoNoteRule):
 
 from decimal import Decimal
 
+
 def _extract_big_blind(hand: Any) -> float:
     for attr in ("bigBlind", "bb", "big_blind"):
         val = getattr(hand, attr, None)
@@ -134,7 +133,7 @@ def _position_name(pos_val: Any) -> str:
     return str(pos_val) if pos_val is not None else ""
 
 
-def extract_field_value(field: str, hand: Any, player_name: str, context: PreflopContext) -> Any:
+def extract_field_value(field: str, hand: Any, player_name: str, context: PreflopContext) -> Any:  # noqa: C901, PLR0912, PLR0915
     """Extract named field value from hand context for declarative evaluation."""
     field = field.lower().strip()
 
@@ -264,7 +263,9 @@ def extract_field_value(field: str, hand: Any, player_name: str, context: Preflo
     return ""
 
 
-def evaluate_leaf_condition(rule: dict[str, Any], hand: Any, player_name: str, context: PreflopContext) -> bool:
+def evaluate_leaf_condition(  # noqa: C901, PLR0912
+    rule: dict[str, Any], hand: Any, player_name: str, context: PreflopContext
+) -> bool:
     field = rule.get("field", "")
     op = rule.get("operator", "eq").lower()
     target_val = rule.get("value")
@@ -283,24 +284,32 @@ def evaluate_leaf_condition(rule: dict[str, Any], hand: Any, player_name: str, c
 
     if op in ("gt", ">"):
         try:
+            if actual_val is None or target_val is None:
+                return False
             return float(actual_val) > float(target_val)
         except (TypeError, ValueError):
             return False
 
     if op in ("gte", ">="):
         try:
+            if actual_val is None or target_val is None:
+                return False
             return float(actual_val) >= float(target_val)
         except (TypeError, ValueError):
             return False
 
     if op in ("lt", "<"):
         try:
+            if actual_val is None or target_val is None:
+                return False
             return float(actual_val) < float(target_val)
         except (TypeError, ValueError):
             return False
 
     if op in ("lte", "<="):
         try:
+            if actual_val is None or target_val is None:
+                return False
             return float(actual_val) <= float(target_val)
         except (TypeError, ValueError):
             return False
@@ -356,7 +365,7 @@ def evaluate_condition_tree(
     return evaluate_leaf_condition(condition_tree, hand, player_name, context)
 
 
-def build_evidence_dict(
+def build_evidence_dict(  # noqa: C901
     hand: Any,
     player_name: str,
     context: PreflopContext,
@@ -434,7 +443,6 @@ def compile_custom_rule(rule_dict: dict[str, Any], rule_set_id: str = "custom_us
 def compile_custom_rule_set(rule_set_dict: dict[str, Any]) -> AutoNoteRuleSet:
     """Compile declarative JSON rule set into an AutoNoteRuleSet instance."""
     rule_set_id = str(rule_set_dict.get("rule_set_id", "custom_user_rules"))
-    enabled = bool(rule_set_dict.get("enabled", True))
     raw_rules = rule_set_dict.get("rules", [])
     compiled_rules = tuple(compile_custom_rule(r, rule_set_id) for r in raw_rules if isinstance(r, dict))
 
@@ -453,7 +461,7 @@ def load_user_autonotes_data(filepath: Path | str | None = None) -> dict[str, An
         return {"version": 1, "custom_rule_sets": []}
 
     try:
-        with open(path, "r", encoding="utf-8") as f:
+        with open(path, encoding="utf-8") as f:
             data = json.load(f)
             if isinstance(data, dict):
                 return data

@@ -2,15 +2,13 @@
 
 from __future__ import annotations
 
-import json
 from pathlib import Path
 from unittest.mock import MagicMock
 
-from fpdb_3_legacy.AutoNoteRules import LegacyAction, PreflopContext
+from fpdb_3_legacy.AutoNoteRules import PreflopContext
 from fpdb_3_legacy.user_autonotes_parser import (
     build_evidence_dict,
     compile_custom_rule,
-    compile_custom_rule_set,
     evaluate_condition_tree,
     load_custom_rule_sets,
     load_user_autonotes_data,
