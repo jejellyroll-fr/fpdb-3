@@ -19,13 +19,24 @@ import pytest
 from fpdb_3_legacy.GuiAutoImport import GuiAutoImport
 
 
+class _Gui(SimpleNamespace):
+    """Stands in for the widget: the callback only needs an importer and addText.
+
+    Calling the method unbound on this keeps a half-constructed QWidget out of
+    the tests — the callback touches no Qt state, so building one would only
+    add a dependency on the display.
+    """
+
+    def addText(self, text: str, _tag: str | None = None) -> None:
+        self.messages.append(text)
+
+    def on_hand(self, hand_data: dict) -> None:
+        GuiAutoImport._on_swc_native_hand_imported(self, hand_data)
+
+
 @pytest.fixture
-def gui(monkeypatch):
-    """A GuiAutoImport with just enough wired up to run the callback."""
-    widget = GuiAutoImport.__new__(GuiAutoImport)
-    widget.messages = []
-    widget.addText = lambda text, _tag=None: widget.messages.append(text)
-    return widget
+def gui():
+    return _Gui(messages=[])
 
 
 def _hand() -> dict:
@@ -42,7 +53,7 @@ def test_the_hand_is_handed_to_the_importers_database(gui, monkeypatch) -> None:
         lambda db, hand_data, **_: seen.update(db=db, hand=hand_data),
     )
 
-    gui._on_swc_native_hand_imported(_hand())
+    gui.on_hand(_hand())
 
     assert seen["db"] is sentinel
     assert seen["hand"] == _hand()
@@ -55,7 +66,7 @@ def test_a_successful_import_is_reported_to_the_user(gui, monkeypatch) -> None:
         lambda *_a, **_k: None,
     )
 
-    gui._on_swc_native_hand_imported(_hand())
+    gui.on_hand(_hand())
 
     assert any("299449673" in message for message in gui.messages)
 
@@ -63,7 +74,7 @@ def test_a_successful_import_is_reported_to_the_user(gui, monkeypatch) -> None:
 def test_no_database_is_reported_rather_than_swallowed(gui, caplog) -> None:
     gui.importer = SimpleNamespace()
 
-    gui._on_swc_native_hand_imported(_hand())
+    gui.on_hand(_hand())
 
     assert gui.messages == []
     assert any("no database connection" in record.message for record in caplog.records)
@@ -78,6 +89,6 @@ def test_a_failing_import_does_not_claim_success(gui, monkeypatch) -> None:
 
     monkeypatch.setattr("fpdb_3_legacy.http_capture_db_import.import_http_capture_hand", explode)
 
-    gui._on_swc_native_hand_imported(_hand())
+    gui.on_hand(_hand())
 
     assert gui.messages == []
