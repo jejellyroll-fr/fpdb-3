@@ -756,7 +756,7 @@ class SimpleHUD(Aux_Base.AuxSeats):
             block_index,
         )
         try:
-            return store.get_position(*args, **kwargs)
+            return store.get_position(*args, **kwargs)  # type: ignore[arg-type]
         except TypeError:
             return store.get_position(*args)
 
@@ -1017,7 +1017,7 @@ class SimpleHUD(Aux_Base.AuxSeats):
             "game_type": game_type if isinstance(game_type, str) else "all",
         }
         try:
-            store.set_position(*args, **kwargs)
+            store.set_position(*args, **kwargs)  # type: ignore[arg-type]
         except TypeError:
             store.set_position(*args)
 
