@@ -553,15 +553,25 @@ class GuiAutoImport(QWidget):
 
     def _on_swc_native_hand_imported(self, hand_data: dict) -> None:
         """Callback when a new live SwC hand is parsed from swc-native.raw."""
+        from fpdb_3_legacy.http_capture_db_import import import_http_capture_hand
+
+        # Importer holds its connection as `database`; `db` never existed, so
+        # every live hand raised AttributeError into the handler below and was
+        # dropped. Nothing captured live ever reached the database.
+        database = getattr(self.importer, "database", None)
+        if database is None:
+            log.warning("SwC live hand dropped: the importer has no database connection")
+            return
+
         try:
-            from fpdb_3_legacy.http_capture_db_import import import_http_capture_hand
-            if self.importer and self.importer.db:
-                import_http_capture_hand(self.importer.db, hand_data)
-                game_cat = hand_data.get("game", {}).get("category", "unknown")
-                hand_id = hand_data.get("hand_id", 0)
-                self.addText(f"\n[SwC Live] Imported hand #{hand_id} ({game_cat}).", "poker")
-        except Exception as e:
-            log.error("Failed to import SwC live hand: %s", e)
+            import_http_capture_hand(database, hand_data)
+        except Exception:
+            log.exception("Failed to import SwC live hand %s", hand_data.get("hand_id"))
+            return
+
+        game_cat = hand_data.get("game", {}).get("category", "unknown")
+        hand_id = hand_data.get("hand_id", 0)
+        self.addText(f"\n[SwC Live] Imported hand #{hand_id} ({game_cat}).", "poker")
 
     def import_error(self, error_msg: str) -> None:
         """Called when auto import cycle fails in the background."""
