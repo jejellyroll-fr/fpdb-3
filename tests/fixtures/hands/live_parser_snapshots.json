@@ -15,6 +15,10 @@
     "hand_count": 1,
     "sha256": "4827570a78716a49cc3c1cd0e5db5439af299a2045b135beb0d353324c41e25e"
   },
+  "ggpoker/nlh_cash_6max.txt": {
+    "hand_count": 3,
+    "sha256": "7ac5acea349db15f0f6d2df11afc86fb493cfa0c510a366e2aff8fa553228a30"
+  },
   "ggpoker/plo_cash.txt": {
     "hand_count": 13,
     "sha256": "da786ff423e1263ecf166d42c6c85d3da5d43bd52ed5f0e01c49774c0740e17b"
