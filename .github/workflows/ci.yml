@@ -27,11 +27,6 @@ jobs:
         run: python tools/prepare_briefcase_resources.py
       - name: Verify technical-debt inventory
         run: python tools/todo_inventory.py --check
-      # Run as a module: invoking the file as a script leaves the repository
-      # root off sys.path, so the module's own `from fpdb_3_legacy...` imports
-      # raise ModuleNotFoundError before the compiler is ever reached.
-      - name: Verify SwC Native Interposer compilation
-        run: python -m fpdb_3_legacy.swc_native_capture --build
       - name: Type-check modernized core
         run: >-
           mypy
@@ -306,6 +301,9 @@ jobs:
   # POSIX, GetModuleHandleA over the bundled OpenSSL DLLs on Windows. Compiling
   # it only where CI happens to run would leave two of the three branches
   # unbuilt, so each one is compiled on its own runner.
+  #
+  # swc_tap_build imports nothing but the standard library, so this needs no
+  # project install: it is a compiler check, not an import check.
   interposer:
     name: Compile SwC interposer (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
@@ -320,7 +318,7 @@ jobs:
         with:
           python-version: "3.11"
       - name: Compile the tap
-        run: python -m fpdb_3_legacy.swc_native_capture --build
+        run: python -m fpdb_3_legacy.swc_tap_build --build
 
   test:
     runs-on: ${{ matrix.os }}
