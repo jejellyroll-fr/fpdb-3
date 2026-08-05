@@ -55,6 +55,10 @@ class TestPopupXMLConfiguration(unittest.TestCase):
             "tournament_early",
             "tournament_middle",
             "tournament_bubble_late",
+            "plo4_preflop",
+            "plo4_postflop",
+            "plo4_showdown",
+            "plo4_full",
             "omaha_complete",
             "omaha_hilo_complete",
             "stud_complete",
@@ -79,6 +83,10 @@ class TestPopupXMLConfiguration(unittest.TestCase):
             "holdring_modern_light",
             "cash_6max_complete",
             "tournament_middle",
+            "plo4_preflop",
+            "plo4_postflop",
+            "plo4_showdown",
+            "plo4_full",
             "omaha_complete",
             "stud_complete",
         ]
@@ -88,9 +96,9 @@ class TestPopupXMLConfiguration(unittest.TestCase):
             pu_class = pu.get("pu_class")
 
             if pu_name in modern_popup_names:
-                assert (
-                    pu_class in modern_classes
-                ), f"Modern popup '{pu_name}' should use ModernSubmenu class, got '{pu_class}'"
+                assert pu_class in modern_classes, (
+                    f"Modern popup '{pu_name}' should use ModernSubmenu class, got '{pu_class}'"
+                )
 
     def test_popup_stat_elements(self) -> None:
         """Test that popup stat elements are properly configured."""
@@ -134,9 +142,9 @@ class TestPopupXMLConfiguration(unittest.TestCase):
                     assert required_stat in stat_names, f"Popup '{pu_name}' missing required stat '{required_stat}'"
 
                 # Check minimum number of stats
-                assert (
-                    len(stat_names) >= config["min_stats"]
-                ), f"Popup '{pu_name}' should have at least {config['min_stats']} stats, got {len(stat_names)}"
+                assert len(stat_names) >= config["min_stats"], (
+                    f"Popup '{pu_name}' should have at least {config['min_stats']} stats, got {len(stat_names)}"
+                )
 
     def test_tournament_popups_have_m_ratio(self) -> None:
         """Test that tournament popups include M-ratio stat."""
@@ -170,9 +178,9 @@ class TestPopupXMLConfiguration(unittest.TestCase):
 
                 # Most should have player_note (some basic ones might not)
                 if "complete" in pu_name or "specialist" in pu_name:
-                    assert (
-                        "player_note" in stat_names
-                    ), f"Comprehensive popup '{pu_name}' should include player_note stat"
+                    assert "player_note" in stat_names, (
+                        f"Comprehensive popup '{pu_name}' should include player_note stat"
+                    )
 
     def test_no_duplicate_popup_names(self) -> None:
         """Test that popup names are unique."""
@@ -180,9 +188,9 @@ class TestPopupXMLConfiguration(unittest.TestCase):
         popup_names = [pu.get("pu_name") for pu in popup_windows.findall("pu")]
 
         unique_names = set(popup_names)
-        assert len(popup_names) == len(
-            unique_names
-        ), f"Duplicate popup names found: {[name for name in popup_names if popup_names.count(name) > 1]}"
+        assert len(popup_names) == len(unique_names), (
+            f"Duplicate popup names found: {[name for name in popup_names if popup_names.count(name) > 1]}"
+        )
 
     def test_stat_sets_use_modern_popups(self) -> None:
         """Test that stat sets are updated to use modern popups."""
@@ -209,9 +217,26 @@ class TestPopupXMLConfiguration(unittest.TestCase):
 
                 for stat in playershort_stats:
                     popup = stat.get("popup")
-                    assert (
-                        popup == expected_popup
-                    ), f"Stat set '{ss_name}' playershort should use popup '{expected_popup}', got '{popup}'"
+                    assert popup == expected_popup, (
+                        f"Stat set '{ss_name}' playershort should use popup '{expected_popup}', got '{popup}'"
+                    )
+
+    def test_plo4_pro_profile_wiring(self) -> None:
+        """The Omaha-high cash game must load the dedicated PLO4 profile."""
+        game = self.root.find("./supported_games/game[@game_name='omahahi']")
+        assert game is not None
+        assert game.get("aux").split(",")[0] == "PLO4Hud"
+        assert game.find("./game_stat_set[@game_type='ring']").get("stat_set") == "plo4_6max_pro"
+
+        stat_set = self.root.find("./stat_sets/ss[@name='plo4_6max_pro']")
+        assert stat_set is not None
+        assert len(stat_set.findall("block")) == 2
+        assert {stat.get("popup") for stat in stat_set.findall(".//stat")} >= {
+            "plo4_preflop",
+            "plo4_postflop",
+            "plo4_showdown",
+            "plo4_full",
+        }
 
 
 class TestPopupStatValidation(unittest.TestCase):
@@ -230,72 +255,12 @@ class TestPopupStatValidation(unittest.TestCase):
 
     def get_known_stats(self) -> set[str]:
         """Get list of known stats from Stats.py."""
-        # This would ideally import Stats.py and introspect, but for now use a known list
-        return {
-            "playername",
-            "player_note",
-            "n",
-            "vpip",
-            "pfr",
-            "three_B",
-            "four_B",
-            "f_3bet",
-            "fold_vs_4bet",
-            "limp",
-            "cold_call",
-            "iso",
-            "rfi_total",
-            "rfi_early_position",
-            "rfi_middle_position",
-            "rfi_late_position",
-            "cb1",
-            "cb2",
-            "cb3",
-            "cb4",
-            "f_cb1",
-            "f_cb2",
-            "f_cb3",
-            "f_cb4",
-            "cb_ip",
-            "cb_oop",
-            "triple_barrel",
-            "float_bet",
-            "probe_bet",
-            "probe_bet_turn",
-            "probe_bet_river",
-            "check_raise_frequency",
-            "bet_frequency_flop",
-            "bet_frequency_turn",
-            "raise_frequency_flop",
-            "raise_frequency_turn",
-            "avg_bet_size_flop",
-            "avg_bet_size_turn",
-            "avg_bet_size_river",
-            "overbet_frequency",
-            "steal",
-            "f_steal",
-            "call_vs_steal",
-            "three_bet_vs_steal",
-            "resteal",
-            "wtsd",
-            "wmsd",
-            "sd_winrate",
-            "non_sd_winrate",
-            "river_call_efficiency",
-            "totalprofit",
-            "profit100",
-            "agg_fact",
-            "agg_freq",
-            "agg_pct",
-            "a_freq_123",
-            "m_ratio",
-            "saw_f",
-            "game_abbr",
-            "hands",
-            "three_bet_range",
-            "vpip_pfr_ratio",
-            "blank",
-        }
+        from fpdb_3_legacy import Stats
+        from fpdb_3_legacy.stat_registry import get_registry
+
+        # Keep this validation tied to the same two registries used by the HUD
+        # instead of maintaining another incomplete hand-written catalogue.
+        return set(Stats.get_valid_stats()) | set(get_registry().names()) | {"playername", "blank"}
 
     def test_all_popup_stats_are_valid(self) -> None:
         """Test that all stats referenced in popups are valid."""
@@ -324,7 +289,7 @@ class TestPopupStatValidation(unittest.TestCase):
         """Test that popup stats are logically categorized."""
         # Import categorization function
         try:
-            from PopupIcons import get_stat_category
+            from fpdb_3_legacy.PopupIcons import get_stat_category
         except ImportError:
             self.skipTest("PopupIcons module not available")
 
@@ -356,15 +321,15 @@ class TestPopupStatValidation(unittest.TestCase):
 
                 # Check expected categories
                 for expected_cat in test_config["expected_categories"]:
-                    assert (
-                        expected_cat in stat_categories
-                    ), f"Popup '{pu_name}' should contain stats from category '{expected_cat}'"
+                    assert expected_cat in stat_categories, (
+                        f"Popup '{pu_name}' should contain stats from category '{expected_cat}'"
+                    )
 
                 # Check forbidden categories
                 for forbidden_cat in test_config["forbidden_categories"]:
-                    assert (
-                        forbidden_cat not in stat_categories
-                    ), f"Popup '{pu_name}' should not contain stats from category '{forbidden_cat}'"
+                    assert forbidden_cat not in stat_categories, (
+                        f"Popup '{pu_name}' should not contain stats from category '{forbidden_cat}'"
+                    )
 
     def test_variant_specific_popups(self) -> None:
         """Test that variant-specific popups contain appropriate stats."""
@@ -393,14 +358,14 @@ class TestPopupStatValidation(unittest.TestCase):
                 stat_names = [stat.get("pu_stat_name") for stat in pu.findall("pu_stat")]
 
                 for should_have_stat in test_config["should_have"]:
-                    assert (
-                        should_have_stat in stat_names
-                    ), f"Variant popup '{pu_name}' should include stat '{should_have_stat}'"
+                    assert should_have_stat in stat_names, (
+                        f"Variant popup '{pu_name}' should include stat '{should_have_stat}'"
+                    )
 
                 for should_not_have_stat in test_config["should_not_have"]:
-                    assert (
-                        should_not_have_stat not in stat_names
-                    ), f"Variant popup '{pu_name}' should not include stat '{should_not_have_stat}'"
+                    assert should_not_have_stat not in stat_names, (
+                        f"Variant popup '{pu_name}' should not include stat '{should_not_have_stat}'"
+                    )
 
 
 class TestPopupUsageInStatSets(unittest.TestCase):

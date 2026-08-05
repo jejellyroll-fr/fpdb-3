@@ -9,9 +9,9 @@ from unittest.mock import Mock, patch
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from Database import HANDS_PLAYERS_KEYS
-from DerivedStats import _INIT_STATS, CENTS_MULTIPLIER, DerivedStats
-from Hand import HoldemOmahaHand
+from fpdb_3_legacy.Database import HANDS_PLAYERS_KEYS
+from fpdb_3_legacy.DerivedStats import _INIT_STATS, CENTS_MULTIPLIER, DerivedStats
+from fpdb_3_legacy.Hand import HoldemOmahaHand
 
 
 class TestCashOutFeesStorage(unittest.TestCase):

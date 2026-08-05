@@ -5,7 +5,7 @@ from unittest.mock import Mock
 
 import pytest
 
-from PokerStarsToFpdb import PokerStars
+from fpdb_3_legacy.PokerStarsToFpdb import PokerStars
 
 
 class MockConfig:
@@ -191,8 +191,8 @@ Total pot $1.10 | Rake $0.05
         assert hand.cashOutFees["Hero"] == Decimal("0.05")
         self.parser._addCashOutPotWithAdjustment.assert_called_once_with(hand, fee_collect_match, (False, False, 0, 0))
 
-    def test_walk_scenario_detection(self):
-        """Test walk scenario detection and handling."""
+    def test_collection_outside_the_summary(self):
+        """A pot collected before *** SUMMARY *** is still recorded."""
         hand_text = """PokerStars Hand #123456789:  Hold'em No Limit ($0.05/$0.10 USD)
 Table 'Test' 6-max Seat #1 is the button
 Seat 1: Hero ($10.00 in chips)
@@ -203,7 +203,6 @@ Total pot $1.10 | Rake $0.05
 """
 
         hand = self.create_mock_hand(hand_text)
-        hand.walk_adjustments = {"Hero": True}  # Simulate walk scenario detected in readAction
 
         # Mock no matches in summary section
         self.parser.re_collect_pot = Mock()
@@ -225,7 +224,6 @@ Total pot $1.10 | Rake $0.05
 
         self.parser.readCollectPot(hand)
 
-        # Should still process the collection even in walk scenario
         self.parser._addCollectPotWithAdjustment.assert_called_once()
 
     def test_run_it_times_scenario(self):

@@ -11,120 +11,22 @@ import unittest
 from pathlib import Path
 
 try:
-    from BovadaToFpdb import Bovada, FpdbHandPartial, FpdbParseError
-    from Configuration import Config
-    from Hand import DrawHand, Hand, HoldemOmahaHand, StudHand
+    from fpdb_3_legacy.BovadaToFpdb import Bovada, FpdbHandPartial, FpdbParseError
+    from fpdb_3_legacy.Configuration import Config
+    from fpdb_3_legacy.Hand import DrawHand, Hand, HoldemOmahaHand, StudHand
 except ImportError:
     import sys
 
     sys.path.insert(0, str(Path(__file__).parent.parent.resolve()))
-    from BovadaToFpdb import Bovada, FpdbHandPartial, FpdbParseError
-    from Configuration import Config
-    from Hand import DrawHand, Hand, HoldemOmahaHand, StudHand
+    from fpdb_3_legacy.BovadaToFpdb import Bovada, FpdbHandPartial, FpdbParseError
+    from fpdb_3_legacy.Configuration import Config
+    from fpdb_3_legacy.Hand import DrawHand, Hand, HoldemOmahaHand, StudHand
 
 # Logging configuration for debugging
 logging.basicConfig(level=logging.WARNING)
 
 
-class MockHand:
-    """Mock hand object for testing purposes."""
-
-    def __init__(self, hand_text: str, gametype: dict, in_path: str = "") -> None:
-        """Initialize mock hand with basic attributes."""
-        self.handText = hand_text
-        self.gametype = gametype
-        self.in_path = in_path
-        self.players = []
-        self.buttonpos = None
-        self.maxseats = 0
-        self.handid = None
-        self.startTime = None
-        self.tourNo = None
-        self.tourneyId = None
-        self.tourneyName = None
-        self.tourneyTypeId = None
-        self.buyin = None
-        self.buyinCurrency = None
-        self.fee = None
-        self.level = None
-        self.mixed = None
-        self.isSng = False
-        self.isRebuy = False
-        self.isAddOn = False
-        self.isKO = False
-        self.isProgressive = False
-        self.isMatrix = False
-        self.isShootout = False
-        self.tablename = ""
-        self.hero = ""
-        self.maxseats = 0
-        self.counted_seats = 0
-        self.runItTimes = 0
-        self.version = "LEGACY"
-        self.cancelled = False
-        self.streets = {}
-        self.actions = []
-        self.actionStreets = ["PREFLOP", "FLOP", "TURN", "RIVER"]
-        self.communityStreets = ["FLOP", "TURN", "RIVER"]
-        self.holeStreets = ["PREFLOP"]
-        self.allStreets = ["PREFLOP", "FLOP", "TURN", "RIVER"]
-        self.stacks = {}
-
-    def addPlayer(self, seat: int, name: str, chips: str) -> None:
-        """Add a player to the hand."""
-        self.players.append((seat, name, chips))
-        self.stacks[name] = float(chips)
-
-    def setUncalledBets(self, _value: str) -> None:
-        """Set uncalled bets."""
-
-    def addBlind(self, _player: str, _blindtype: str, _amount: str) -> None:
-        """Add a blind."""
-
-    def addCall(self, street: str, player: str, amount: str) -> None:
-        """Add a call action."""
-        self.actions.append((street, player, "call", amount))
-
-    def addRaise(self, street: str, player: str, amount: str) -> None:
-        """Add a raise action."""
-        self.actions.append((street, player, "raise", amount))
-
-    def addBet(self, street: str, player: str, amount: str) -> None:
-        """Add a bet action."""
-        self.actions.append((street, player, "bet", amount))
-
-    def addFold(self, street: str, player: str) -> None:
-        """Add a fold action."""
-        self.actions.append((street, player, "fold", None))
-
-    def addCheck(self, street: str, player: str) -> None:
-        """Add a check action."""
-        self.actions.append((street, player, "check", None))
-
-    def addRaiseTo(self, street: str, player: str, amount: str) -> None:
-        """Add a raise to action."""
-        self.actions.append((street, player, "raise", amount))
-
-    def addAllIn(self, street: str, player: str, amount: str) -> None:
-        """Add an all-in action."""
-        self.actions.append((street, player, "allin", amount))
-
-    def addComplete(self, street: str, player: str, amount: str) -> None:
-        """Add a complete action."""
-        self.actions.append((street, player, "complete", amount))
-
-    def addBringIn(self, street: str, player: str, amount: str) -> None:
-        """Add a bring-in action."""
-        self.actions.append((street, player, "bringin", amount))
-
-    def addAnte(self, _player: str, _amount: str) -> None:
-        """Add an ante."""
-
-    def addCards(self, _street: str, _player: str, _cards: list[str]) -> None:
-        """Add cards for a player."""
-
-    def addCollectPot(self, player: str, pot: str) -> None:
-        """Add collected pot."""
+from tests.helpers.mock_hand import ParserMockHand as MockHand  # noqa: E402
 
 
 class ComprehensiveBovadaTest(unittest.TestCase):
@@ -288,7 +190,7 @@ class ComprehensiveBovadaTest(unittest.TestCase):
 
         # Validate and return errors
         if validation_errors := self.validate_hand_data(hand, filename):
-            return [f"{filename.name} hand {hand_index+1}: {', '.join(validation_errors)}"]
+            return [f"{filename.name} hand {hand_index + 1}: {', '.join(validation_errors)}"]
         return []
 
     def _process_file_hands(self, file_path: Path, failed_files: list[str]) -> None:
@@ -310,7 +212,7 @@ class ComprehensiveBovadaTest(unittest.TestCase):
                     # These exceptions are expected for certain files
                     pass
                 except (ValueError, KeyError, AttributeError) as e:
-                    failed_files.append(f"{filename} hand {i+1}: Parsing error - {e}")
+                    failed_files.append(f"{filename} hand {i + 1}: Parsing error - {e}")
 
         except (OSError, UnicodeDecodeError) as e:
             failed_files.append(f"{filename}: Read error - {e}")
@@ -364,13 +266,13 @@ class ComprehensiveBovadaTest(unittest.TestCase):
             # Validate tournament-specific data
             if validation_errors := self._validate_tournament_hand(hand, file_path):
                 filename = file_path.name
-                return [f"{filename} hand {hand_index+1}: {', '.join(validation_errors)}"]
+                return [f"{filename} hand {hand_index + 1}: {', '.join(validation_errors)}"]
         except (FpdbParseError, FpdbHandPartial):
             # These exceptions are expected for some files
             pass
         except (ValueError, KeyError, AttributeError) as e:
             filename = file_path.name
-            return [f"{filename} hand {hand_index+1}: Parsing error - {e}"]
+            return [f"{filename} hand {hand_index + 1}: Parsing error - {e}"]
         return []
 
     def test_parse_all_tournaments(self) -> None:

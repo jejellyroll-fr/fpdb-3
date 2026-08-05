@@ -1,0 +1,37 @@
+PokerStars Game #35874566077:  Razz Limit ($0.04/$0.08 USD) - 2009/11/26 10:24:42 ET
+Table 'Procyon' 8-max Seat #1 is the button
+Seat 1: Player1 ($1.50 in chips)
+Seat 2: Player2 ($2.00 in chips)
+Player1: posts the ante $0.01
+Player2: posts the ante $0.01
+*** 3rd STREET ***
+Dealt to Player1 [2h 3d] 7s
+Dealt to Player2 [Ah 5c] 8d
+Player2: brings-in low for $0.02
+Player1: raises $0.02 to $0.04
+Player2: calls $0.02
+*** 4th STREET ***
+Dealt to Player1 [2h 3d 7s] 4c
+Dealt to Player2 [Ah 5c 8d] Kd
+Player1: bets $0.04
+Player2: calls $0.04
+*** 5th STREET ***
+Dealt to Player1 [2h 3d 7s 4c] 6s
+Dealt to Player2 [Ah 5c 8d Kd] Ts
+Player1: bets $0.08
+Player2: calls $0.08
+*** 6th STREET ***
+Dealt to Player1 [2h 3d 7s 4c 6s] 9h
+Dealt to Player2 [Ah 5c 8d Kd Ts] Jc
+Player1: bets $0.08
+Player2: calls $0.08
+*** RIVER ***
+Dealt to Player1 [2h 3d 7s 4c 6s 9h] Qs
+Player1: bets $0.08
+Player2: folds
+Uncalled bet ($0.08) returned to Player1
+Player1 collected $0.74 from pot
+*** SUMMARY ***
+Total pot $0.74 | Rake $0.00
+Seat 1: Player1 collected ($0.74)
+Seat 2: Player2 folded on River

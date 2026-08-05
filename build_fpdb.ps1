@@ -26,11 +26,14 @@ $BASE_PATH2 = $BASE_PATH
 Write-Output "Adjusted BASE_PATH2 for OS: $BASE_PATH2"
 
 # Name of the main script
-$MAIN_SCRIPT = "fpdb.pyw"
-$SECOND_SCRIPT = "HUD_main.pyw"
+$LEGACY_PACKAGE_DIR = "fpdb_3_legacy"
+$MAIN_SCRIPT = "$LEGACY_PACKAGE_DIR/fpdb.pyw"
+$SECOND_SCRIPT = "$LEGACY_PACKAGE_DIR/HUD_main.pyw"
 
 # Options of pyinstaller
-$PYINSTALLER_OPTIONS = "--noconfirm --onedir --windowed --log-level=DEBUG"
+# numpy is only imported through import_module() in Database.py; PyInstaller
+# cannot follow that, and the HUD build would otherwise ship without it.
+$PYINSTALLER_OPTIONS = "--noconfirm --onedir --windowed --log-level=DEBUG --paths=fpdb_3_legacy --paths=. --hidden-import=numpy --hidden-import=fpdb_3_legacy.coinpoker_live_capture --hidden-import=fpdb_3_legacy.Aux_Hud --hidden-import=fpdb_3_legacy.Aux_Classic_Hud --hidden-import=fpdb_3_legacy.Mucked"
 
 # List of all files
 
@@ -138,6 +141,8 @@ function Generate-PyInstallerCommand {
     )
 
     $command = "pyinstaller $PYINSTALLER_OPTIONS"
+    $sourcePath = $null
+    $targetPath = $null
 
     # add icon
     if ($OS -eq "Windows") {
@@ -148,10 +153,17 @@ function Generate-PyInstallerCommand {
 
     # process files
     foreach ($file in $FILES) {
-        if ($OS -eq "Windows") {
-            $command += " --add-data `"$BASE_PATH2\$file;.`""
+        if ($file.EndsWith(".py") -or $file.EndsWith(".pyw")) {
+            $sourcePath = Join-Path -Path $BASE_PATH2 -ChildPath "$LEGACY_PACKAGE_DIR/$file"
+            $targetPath = "fpdb_3_legacy"
         } else {
-            $command += " --add-data `"$(Join-Path -Path $BASE_PATH2 -ChildPath $file):.`""
+            $sourcePath = Join-Path -Path $BASE_PATH2 -ChildPath $file
+            $targetPath = "."
+        }
+        if ($OS -eq "Windows") {
+            $command += " --add-data `"$sourcePath;$targetPath`""
+        } else {
+            $command += " --add-data `"$sourcePath:$targetPath`""
         }
     }
 

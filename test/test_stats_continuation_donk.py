@@ -13,7 +13,7 @@ import pytest
 # Add the project root to the Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from Stats import (
+from fpdb_3_legacy.Stats import (
     cb1,
     cb2,
     cb3,
@@ -359,7 +359,6 @@ class TestContinuationDonkRegressionTests:
         """Test that all functions return properly formatted 6-element tuples."""
         stat_dict = {
             "test_player": {
-                "cb_opp_1": 5,
                 "cb_1": 3,
                 "aggr_1": 4,
                 "saw_f": 6,

@@ -14,7 +14,7 @@ import pytest
 # Add the parent directory to the path to import our modules
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from Card import (
+from fpdb_3_legacy.Card import (
     HOLDEM_UNKNOWN_HAND,
     StartCardRank,
     calcStartCards,
@@ -43,7 +43,7 @@ class TestCalcStartCards:
         mock_hand.gametype = {"category": "holdem"}
         mock_hand.join_holecards.return_value = [("A", "h"), ("K", "s")]
 
-        with patch("Card.twoStartCards", return_value=165) as mock_two_start:
+        with patch("fpdb_3_legacy.Card.twoStartCards", return_value=165) as mock_two_start:
             result = calcStartCards(mock_hand, "player1")
 
             # Should call twoStartCards with correct parameters
@@ -56,7 +56,7 @@ class TestCalcStartCards:
         mock_hand.gametype = {"category": "6_holdem"}
         mock_hand.join_holecards.return_value = [("Q", "d"), ("Q", "c")]
 
-        with patch("Card.twoStartCards", return_value=157) as mock_two_start:
+        with patch("fpdb_3_legacy.Card.twoStartCards", return_value=157) as mock_two_start:
             result = calcStartCards(mock_hand, "player1")
 
             mock_two_start.assert_called_once_with(12, "d", 12, "c")  # Q=12
@@ -68,7 +68,7 @@ class TestCalcStartCards:
         mock_hand.gametype = {"category": "razz"}
         mock_hand.join_holecards.return_value = [("A", "h"), ("2", "s"), ("3", "d")]
 
-        with patch("Card.encodeRazzStartHand", return_value=50) as mock_razz:
+        with patch("fpdb_3_legacy.Card.encodeRazzStartHand", return_value=50) as mock_razz:
             result = calcStartCards(mock_hand, "player1")
 
             mock_razz.assert_called_once_with([("A", "h"), ("2", "s"), ("3", "d")])
@@ -80,7 +80,7 @@ class TestCalcStartCards:
         mock_hand.gametype = {"category": "27_razz"}
         mock_hand.join_holecards.return_value = [("2", "h"), ("7", "s"), ("A", "d")]
 
-        with patch("Card.encodeRazzStartHand", return_value=75) as mock_razz:
+        with patch("fpdb_3_legacy.Card.encodeRazzStartHand", return_value=75) as mock_razz:
             result = calcStartCards(mock_hand, "player1")
 
             mock_razz.assert_called_once_with([("2", "h"), ("7", "s"), ("A", "d")])
@@ -434,6 +434,7 @@ class TestDecodeStartHandValue:
         """Test decodeStartHandValue for unknown games."""
         assert decodeStartHandValue("unknown_game", 123) == "xx"
         assert decodeStartHandValue("omaha", 50) == "xx"
+        assert decodeStartHandValue("omahahi", 50) == "xx"
         assert decodeStartHandValue("stud", 100) == "xx"
 
     def test_edge_cases(self):

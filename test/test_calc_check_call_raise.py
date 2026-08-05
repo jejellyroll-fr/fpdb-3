@@ -14,7 +14,7 @@ import pytest
 # Add the project root to the Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from DerivedStats import MIN_ACTIONS_FOR_CHECK_CALL_RAISE, DerivedStats
+from fpdb_3_legacy.DerivedStats import MIN_ACTIONS_FOR_CHECK_CALL_RAISE, DerivedStats
 
 
 class TestCalcCheckCallRaise:

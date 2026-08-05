@@ -1,0 +1,32 @@
+PokerStars Game #1111111111:  Omaha Hi/Lo Pot Limit ($0.50/$1.00 USD) - 2023/10/27 12:00:00 ET
+Table 'Table Name' 6-max Seat #1 is the button
+Seat 1: Player1 ($100 in chips)
+Seat 2: Player2 ($100 in chips)
+Player1: posts small blind $0.50
+Player2: posts big blind $1.00
+*** HOLE CARDS ***
+Dealt to Player1 [As 2s 3d 4h]
+Player1: raises $2.00 to $3.00
+Player2: calls $2.00
+*** FLOP *** [5c 6c 7d]
+Player2: checks
+Player1: bets $4.00
+Player2: calls $4.00
+*** TURN *** [5c 6c 7d] [8s]
+Player2: checks
+Player1: bets $10.00
+Player2: calls $10.00
+*** RIVER *** [5c 6c 7d 8s] [Ah]
+Player2: checks
+Player1: bets $20.00
+Player2: calls $20.00
+*** SHOW DOWN ***
+Player1: shows [As 2s 3d 4h] (HI: straight, 4 to 8; LO: 8-7-6-5-A)
+Player2: mucks hand
+Player1 collected $37.00 from pot
+Player1 collected $37.00 from pot
+*** SUMMARY ***
+Total pot $74.00 | Rake $0.00
+Board [5c 6c 7d 8s Ah]
+Seat 1: Player1 (small blind) showed [As 2s 3d 4h] and won ($74.00) with HI: straight, 4 to 8; LO: 8-7-6-5-A
+Seat 2: Player2 (big blind) mucked

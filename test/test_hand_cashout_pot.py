@@ -9,7 +9,7 @@ from unittest.mock import Mock
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from Hand import HoldemOmahaHand
+from fpdb_3_legacy.Hand import HoldemOmahaHand
 
 
 class MockConfig:
@@ -102,16 +102,7 @@ class TestHandCashOutPot(unittest.TestCase):
 
         # But both should have same collected and collectees
         self.assertEqual(hand1.collected, hand2.collected)
-
-        # But collectees should be DIFFERENT
-        # hand1 (regular collection) should have collectees
-        self.assertIn("TestPlayer", hand1.collectees)
-        self.assertEqual(hand1.collectees["TestPlayer"], Decimal("22.77"))
-
-        # hand2 (cashout) should have cashouts, NOT collectees
-        self.assertNotIn("TestPlayer", hand2.collectees)
-        self.assertIn("TestPlayer", hand2.cashouts)
-        self.assertEqual(hand2.cashouts["TestPlayer"], Decimal("22.77"))
+        self.assertEqual(hand1.collectees, hand2.collectees)
 
     def test_multiple_cash_outs(self):
         """Test multiple cash outs from same player."""

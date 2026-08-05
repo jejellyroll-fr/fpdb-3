@@ -15,7 +15,7 @@ import pytest
 # Add the project root to the Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from Stats import (
+from fpdb_3_legacy.Stats import (
     avg_bet_size_flop,
     avg_bet_size_river,
     avg_bet_size_turn,
@@ -39,46 +39,40 @@ class TestRFIByPositionStats:
         assert result[4] == "(-/-)"
 
     def test_rfi_early_position_with_normal_value(self) -> None:
-        """Test rfi_early_position returns normal percentage when player RFI early."""
+        """Test rfi_early_position computes from dedicated positional keys."""
         stat_dict = {
-            "player1": {"pfr_opp": 100, "pfr": 20, "tb_0": 5},  # RFI = 15
+            "player1": {"rfi_opp_ep": 100, "rfi_ep": 15},
         }
         result = rfi_early_position(stat_dict, "player1")
 
-        # early_position_opportunities = 100 * 0.25 = 25
-        # early_position_rfi = 15 * 0.25 = 3.75
-        # stat = 3.75 / 25 = 15%
+        # stat = rfi_ep / rfi_opp_ep = 15 / 100 = 15%
         assert result[1] == "15.0"
         assert result[2] == "rfi_ep=15.0%"
-        assert result[4] == "(3/25)"
+        assert result[4] == "(15/100)"
 
     def test_rfi_middle_position_with_normal_value(self) -> None:
-        """Test rfi_middle_position returns normal percentage when player RFI middle."""
+        """Test rfi_middle_position computes from dedicated positional keys."""
         stat_dict = {
-            "player1": {"pfr_opp": 100, "pfr": 20, "tb_0": 5},  # RFI = 15
+            "player1": {"rfi_opp_mp": 100, "rfi_mp": 15},
         }
         result = rfi_middle_position(stat_dict, "player1")
 
-        # middle_position_opportunities = 100 * 0.30 = 30
-        # middle_position_rfi = 15 * 0.30 = 4.5
-        # stat = 4.5 / 30 = 15%
+        # stat = rfi_mp / rfi_opp_mp = 15 / 100 = 15%
         assert result[1] == "15.0"
         assert result[2] == "rfi_mp=15.0%"
-        assert result[4] == "(4/30)"
+        assert result[4] == "(15/100)"
 
     def test_rfi_late_position_with_normal_value(self) -> None:
-        """Test rfi_late_position returns normal percentage when player RFI late."""
+        """Test rfi_late_position computes from dedicated positional keys."""
         stat_dict = {
-            "player1": {"pfr_opp": 100, "pfr": 20, "tb_0": 5},  # RFI = 15
+            "player1": {"rfi_opp_lp": 100, "rfi_lp": 15},
         }
         result = rfi_late_position(stat_dict, "player1")
 
-        # late_position_opportunities = 100 * 0.45 = 45
-        # late_position_rfi = 15 * 0.45 = 6.75
-        # stat = 6.75 / 45 = 15%
+        # stat = rfi_lp / rfi_opp_lp = 15 / 100 = 15%
         assert result[1] == "15.0"
         assert result[2] == "rfi_lp=15.0%"
-        assert result[4] == "(6/45)"
+        assert result[4] == "(15/100)"
 
     def test_rfi_position_exception_handling(self) -> None:
         """Test RFI position stats return format_no_data_stat on exceptions."""
@@ -102,31 +96,31 @@ class TestAvgBetSizeStats:
         assert result[4] == "(-/-)"
 
     def test_avg_bet_size_flop_with_bets(self) -> None:
-        """Test avg_bet_size_flop returns estimated size when player bet flop."""
+        """avg_bet_size_flop is deprecated (no bet-size column); returns no-data."""
         stat_dict = {"player1": {"street1Bets": 8, "saw_f": 20}}
         result = avg_bet_size_flop(stat_dict, "player1")
 
-        assert result[1] == " 65"  # 65% of pot
-        assert result[2] == "avg_bet_f= 65%"
-        assert result[4] == "(8 bets)"
+        assert result[1] == "-"
+        assert result[2] == "avg_bet_f=-"
+        assert result[4] == "(-/-)"
 
     def test_avg_bet_size_turn_with_bets(self) -> None:
-        """Test avg_bet_size_turn returns estimated size when player bet turn."""
+        """avg_bet_size_turn is deprecated (no bet-size column); returns no-data."""
         stat_dict = {"player1": {"street2Bets": 5, "saw_t": 15}}
         result = avg_bet_size_turn(stat_dict, "player1")
 
-        assert result[1] == " 70"  # 70% of pot
-        assert result[2] == "avg_bet_t= 70%"
-        assert result[4] == "(5 bets)"
+        assert result[1] == "-"
+        assert result[2] == "avg_bet_t=-"
+        assert result[4] == "(-/-)"
 
     def test_avg_bet_size_river_with_bets(self) -> None:
-        """Test avg_bet_size_river returns estimated size when player bet river."""
+        """avg_bet_size_river is deprecated (no bet-size column); returns no-data."""
         stat_dict = {"player1": {"street3Bets": 3, "saw_r": 10}}
         result = avg_bet_size_river(stat_dict, "player1")
 
-        assert result[1] == " 75"  # 75% of pot
-        assert result[2] == "avg_bet_r= 75%"
-        assert result[4] == "(3 bets)"
+        assert result[1] == "-"
+        assert result[2] == "avg_bet_r=-"
+        assert result[4] == "(-/-)"
 
     def test_avg_bet_size_exception_handling(self) -> None:
         """Test avg bet size stats return format_no_data_stat on exceptions."""
@@ -201,54 +195,56 @@ class TestFinalStatsIntegration:
         """Test final stats for a tight player profile."""
         stat_dict = {
             "tight_player": {
-                # Low RFI from all positions
-                "pfr_opp": 200,
-                "pfr": 24,
-                "tb_0": 4,  # RFI = 20, 10% total
+                # Low RFI from all positions (10%)
+                "rfi_opp_ep": 200,
+                "rfi_ep": 20,
+                "rfi_opp_mp": 200,
+                "rfi_mp": 20,
+                "rfi_opp_lp": 200,
+                "rfi_lp": 20,
                 # Conservative betting
                 "street1Bets": 6,
                 "street2Bets": 4,
                 "street3Bets": 2,
-                "saw_f": 40,
-                "saw_t": 25,
-                "saw_r": 15,
             },
         }
 
-        # Should show tight patterns
-        assert rfi_early_position(stat_dict, "tight_player")[1] == "10.0"  # 20*0.25 / 200*0.25 = 10%
-        assert rfi_middle_position(stat_dict, "tight_player")[1] == "10.0"  # 20*0.30 / 200*0.30 = 10%
-        assert rfi_late_position(stat_dict, "tight_player")[1] == "10.0"  # 20*0.45 / 200*0.45 = 10%
-        assert avg_bet_size_flop(stat_dict, "tight_player")[1] == " 65"  # Standard 65%
-        assert avg_bet_size_turn(stat_dict, "tight_player")[1] == " 70"  # Standard 70%
-        assert avg_bet_size_river(stat_dict, "tight_player")[1] == " 75"  # Standard 75%
+        # Should show tight RFI patterns
+        assert rfi_early_position(stat_dict, "tight_player")[1] == "10.0"  # 20/200 = 10%
+        assert rfi_middle_position(stat_dict, "tight_player")[1] == "10.0"  # 20/200 = 10%
+        assert rfi_late_position(stat_dict, "tight_player")[1] == "10.0"  # 20/200 = 10%
+        # avg_bet_size_* are deprecated -> no-data
+        assert avg_bet_size_flop(stat_dict, "tight_player")[1] == "-"
+        assert avg_bet_size_turn(stat_dict, "tight_player")[1] == "-"
+        assert avg_bet_size_river(stat_dict, "tight_player")[1] == "-"
         assert overbet_frequency(stat_dict, "tight_player")[1] == "15.0"  # Standard 15%
 
     def test_aggressive_player_profile(self) -> None:
         """Test final stats for an aggressive player profile."""
         stat_dict = {
             "aggressive_player": {
-                # High RFI from all positions
-                "pfr_opp": 150,
-                "pfr": 45,
-                "tb_0": 6,  # RFI = 39, 26% total
+                # High RFI from all positions (26%)
+                "rfi_opp_ep": 150,
+                "rfi_ep": 39,
+                "rfi_opp_mp": 150,
+                "rfi_mp": 39,
+                "rfi_opp_lp": 150,
+                "rfi_lp": 39,
                 # Aggressive betting
                 "street1Bets": 20,
                 "street2Bets": 15,
                 "street3Bets": 10,
-                "saw_f": 60,
-                "saw_t": 45,
-                "saw_r": 30,
             },
         }
 
-        # Should show aggressive patterns
-        assert rfi_early_position(stat_dict, "aggressive_player")[1] == "26.0"  # 39*0.25 / 150*0.25 = 26%
-        assert rfi_middle_position(stat_dict, "aggressive_player")[1] == "26.0"  # 39*0.30 / 150*0.30 = 26%
-        assert rfi_late_position(stat_dict, "aggressive_player")[1] == "26.0"  # 39*0.45 / 150*0.45 = 26%
-        assert avg_bet_size_flop(stat_dict, "aggressive_player")[1] == " 65"  # Standard 65%
-        assert avg_bet_size_turn(stat_dict, "aggressive_player")[1] == " 70"  # Standard 70%
-        assert avg_bet_size_river(stat_dict, "aggressive_player")[1] == " 75"  # Standard 75%
+        # Should show aggressive RFI patterns
+        assert rfi_early_position(stat_dict, "aggressive_player")[1] == "26.0"  # 39/150 = 26%
+        assert rfi_middle_position(stat_dict, "aggressive_player")[1] == "26.0"  # 39/150 = 26%
+        assert rfi_late_position(stat_dict, "aggressive_player")[1] == "26.0"  # 39/150 = 26%
+        # avg_bet_size_* are deprecated -> no-data
+        assert avg_bet_size_flop(stat_dict, "aggressive_player")[1] == "-"
+        assert avg_bet_size_turn(stat_dict, "aggressive_player")[1] == "-"
+        assert avg_bet_size_river(stat_dict, "aggressive_player")[1] == "-"
         assert overbet_frequency(stat_dict, "aggressive_player")[1] == "15.0"  # Standard 15%
 
 

@@ -1,0 +1,39 @@
+
+
+Stage #1795703036: Holdem Normal $5/$10 - 2009-12-13 12:00:30 (ET)
+Table: FIJI HWY (Real Money) Seat #6 is the dealer
+Seat 6 - FRANKIE4DITA ($192 in chips)
+Seat 3 - MRMADMONSTER ($156 in chips)
+Seat 4 - HUNGHOE ($32 in chips)
+Seat 5 - ANIMALMATT84 ($255 in chips)
+MRMADMONSTER - Posts small blind $3
+HUNGHOE - Posts big blind $5
+*** POCKET CARDS ***
+Dealt to FRANKIE4DITA [10c Ah]
+ANIMALMATT84 - Raises $10 to $10
+FRANKIE4DITA - Raises $15 to $15
+MRMADMONSTER - Folds
+HUNGHOE - Folds
+ANIMALMATT84 - Calls $5
+*** FLOP *** [8h Jc 9c]
+ANIMALMATT84 - Checks
+FRANKIE4DITA - Bets $5
+ANIMALMATT84 - Calls $5
+*** TURN *** [8h Jc 9c] [6s]
+ANIMALMATT84 - Checks
+FRANKIE4DITA - Bets $10
+ANIMALMATT84 - Calls $10
+*** RIVER *** [8h Jc 9c 6s] [3d]
+ANIMALMATT84 - Checks
+FRANKIE4DITA - Checks
+*** SHOW DOWN ***
+ANIMALMATT84 - Shows [10s 5s] (jack high)
+FRANKIE4DITA - Shows [10c Ah] (ace high)
+FRANKIE4DITA Collects $66 from main pot
+*** SUMMARY ***
+Total Pot($68) | Rake ($2)
+Board [8h Jc 9c 6s 3d]
+Seat 3: MRMADMONSTER (small blind) Folded on the POCKET CARDS
+Seat 4: HUNGHOE (big blind) Folded on the POCKET CARDS
+Seat 5: ANIMALMATT84 HI:lost with jack high [10s 5s - B:Jc,P:10s,B:9c,B:8h,B:6s]
+Seat 6: FRANKIE4DITA (dealer) won Total ($66) HI:($66) with ace high [10c Ah - P:Ah,B:Jc,P:10c,B:9c,B:8h]

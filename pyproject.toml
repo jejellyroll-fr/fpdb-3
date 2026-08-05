@@ -5,141 +5,295 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "fpdb-3"
 version = "3.0.0-alpha2"
+description = "Free Poker Database (FPDB-3) - Legacy Python Implementation"
+readme = "README.md"
+license = "AGPL-3.0-or-later"
+license-files = ["LICENSE"]
 requires-python = ">=3.11,<4.0"
 dependencies = [
-    "aiohttp==3.10.5",
     "beautifulsoup4==4.12.3",
-    "chardet==5.2.0",
-    "fastapi==0.111.0",
-    "Flask==3.0.3",
-    "future==1.0.0",
-    "matplotlib==3.9.0",
-    "mplfinance==0.12.10b0",
-    "numpy==1.26.4",
-    "pandas==2.2.2",
-    "pydantic==2.7.4",
-    "pytest==8.3.2",
-    "pytz==2024.1",
-    "qt-material==2.14",
-    "SQLAlchemy==1.4.46",
-    "uvicorn==0.30.1",
-    "xlrd==2.0.1",
-    "pyzmq==26.0.3",
-    "cachetools==5.5.0",
+    "matplotlib>=3.10.7",
+    "pandas>=2.2.2",
+    "psutil>=5.9.0",
+    "pyobjc==10.3.1; sys_platform == 'darwin'",
+    "PySide6>=6.8.1",
     "colorlog==6.9.0",
-    "pytest-qt>=4.4.0",
-    "sphinx>=7.4.7",
-    "furo>=2025.7.19",
-    "myst-parser>=4.0.1",
-    "sphinx-autodoc-typehints>=2.3.0",
-
+    "pyzmq>=26.0.3",
+    "qt-material==2.14",
+    "numpy>=2.1.0",
+    "pytz==2024.1",
+    "aiohttp>=3.13.2",
+    "cachetools==5.5.0",
+    "mplfinance>=0.12.10b0",
+    "xlrd==2.0.1",
+    "playwright>=1.40.0",
+    "pymysql>=1.1.0",
+    "defusedxml>=0.7.1",
+    "pypoker-eval @ git+https://github.com/jejellyroll-fr/poker-eval.git@v1.2.0",
 ]
 
 [project.optional-dependencies]
-docs = [
-    "sphinx<8.0",
-    "furo",
-    "myst-parser",
-    "sphinx-autodoc-typehints",
+build = [
+    "pyinstaller>=6.9.0",
+    "wheel>=0.42.0",
 ]
 test = [
     "pytest>=8.3.2",
     "pytest-qt>=4.0.2",
     "pytest-cov>=5.0.0",
-    "PyQt5==5.15.11",
+    "httpx>=0.28.0",
+    "hypothesis>=6.100.0",
+    "psycopg[binary]>=3.1.0",
+    "PySide6>=6.8.1",
     "ruff>=0.12.8",
-    "syrupy>=4.0.0",
-    "hypothesis>=6.0.0",
+    "mypy>=1.11",
 ]
-test-no-pyqt = [
+test-no-gui = [
     "pytest>=8.3.2",
     "pytest-qt>=4.0.2",
     "pytest-cov>=5.0.0",
+    "httpx>=0.28.0",
+    "hypothesis>=6.100.0",
+    "psycopg[binary]>=3.1.0",
     "ruff>=0.12.8",
-    "syrupy>=4.0.0",
-    "hypothesis>=6.0.0",
+    "mypy>=1.11",
 ]
-build = ["pyinstaller>=6.9.0", "wheel>=0.42.0"]
-build-linux = ["python-appimage==1.2.7"]
-windows = ["pywin32==306", "configparser", "PyQt5==5.15.11"]
-linux = ["xcffib==1.5.0", "PyQt5==5.15.11"]
-macos = ["pyobjc==10.3.1", "PyQt5==5.15.11"]
+windows = ["pywin32==306", "configparser", "PySide6>=6.8.1"]
+linux = ["xcffib==1.5.0", "PySide6>=6.8.1"]
+macos = ["PySide6>=6.8.1"]
+postgresql = ["psycopg[binary]>=3.1.0"]
 mysql = ["mysqlclient==2.2.4"]
-postgresql = ["psycopg2-binary==2.9.9"]
+
+[project.scripts]
+fpdb_3_legacy = "fpdb_3_legacy.legacy_launcher:main"
 
 [tool.ruff]
 extend-include = ["*.pyw"]
-extend-exclude = ["build", "archives", "documentations/notebook"]
+extend-exclude = ["build", "archives"]
 line-length = 120
 indent-width = 4
 
-[tool.ruff.format]
-exclude = ["*.ipynb"]
-
 [tool.ruff.lint]
-# Essential checks only: pycodestyle (E/W), pyflakes (F), isort (I), pyupgrade (UP)
-select = ["E", "F", "I", "UP", "W"]
+# C901/PLR0912/PLR0915 cap how complex a function may get. They are enforced
+# repo-wide; the modules that predate them are listed in per-file-ignores below.
+select = ["C901", "E", "F", "I", "PLR0912", "PLR0915", "UP", "W"]
 ignore = [
-    "E401",  # Multiple imports on one line - sometimes necessary for legacy code
-    "E731",  # Assign lambda - common pattern in callbacks
-    "E713",  # Use 'not in' - can be stylistic choice
+    "E401",
+    # Legacy entry points intentionally initialize translations, mocks, or
+    # sys.path before importing modules that depend on that state.
+    "E402",
+    # Regex, SQL, QSS, and generated display strings are frequently
+    # indivisible; formatting code is still enforced independently.
+    "E501",
+    "E731",
+    "E713",
 ]
 
-# Style des doc-strings (déplacé ici pour éviter l’avertissement de dépréciation)
-[tool.ruff.lint.pydocstyle]
-convention = "google"
-
-# Tolérances spécifiques aux tests
 [tool.ruff.lint.per-file-ignores]
-"test/*.py"  = ["E712", "S101", "SLF001", "PLR2004"]
-"test_*.py"  = ["E712", "S101", "SLF001", "PLR2004"]
+# Legacy display/SQL formatting uses width-sensitive percent specifiers that
+# require dedicated migrations rather than unsafe mechanical rewrites.
+"fpdb_3_legacy/Mucked.py" = ["UP031"]
+"fpdb_3_legacy/PokerStarsSummary.py" = ["UP031"]
+
+# Complexity ratchet. C901/PLR0912/PLR0915 are enforced everywhere; the files
+# below predate that and are listed with the exact rules they still break, so
+# a module that only exceeds one threshold stays guarded against the others.
+# This list is a ratchet: entries come off as functions are split, and no entry
+# may be added for newly written code. New violations in any file not listed
+# here fail the build.
+#
+# Splitting a module off another moves its existing violations to a new file,
+# which needs an entry of its own. That is the one case where the list grows,
+# and only if the total does not: check the counts on both sides before and
+# after with
+#   ruff check --select C901,PLR0912,PLR0915 --isolated <files>
+# so relocated debt cannot be mistaken for new debt.
+"fpdb/infrastructure/platform/macos.py" = ["C901"]
+"fpdb_3_legacy/AbsoluteToFpdb.py" = ["C901", "PLR0912"]
+"fpdb_3_legacy/Aux_Classic_Hud.py" = ["C901", "PLR0912", "PLR0915"]
+"fpdb_3_legacy/Aux_Hud.py" = ["C901", "PLR0912", "PLR0915"]
+"fpdb_3_legacy/BossToFpdb.py" = ["C901", "PLR0912"]
+"fpdb_3_legacy/Card.py" = ["C901", "PLR0912", "PLR0915"]
+"fpdb_3_legacy/Configuration.py" = ["C901", "PLR0912", "PLR0915", "UP031"]
+"fpdb_3_legacy/ConfigurationManager.py" = ["C901", "PLR0912", "PLR0915"]
+"fpdb_3_legacy/database_bulk_import.py" = ["C901", "PLR0912", "PLR0915"]
+"fpdb_3_legacy/database_caches.py" = ["C901", "PLR0912", "PLR0915"]
+"fpdb_3_legacy/database_hud_stats.py" = ["C901", "PLR0912", "PLR0915", "UP031"]
+"fpdb_3_legacy/database_schema.py" = ["C901", "PLR0915"]
+"fpdb_3_legacy/database_tournaments.py" = ["C901", "PLR0912"]
+"fpdb_3_legacy/DerivedStats.py" = ["C901", "PLR0912", "PLR0915", "UP031"]
+"fpdb_3_legacy/DetectInstalledSites.py" = ["C901", "PLR0912", "PLR0915"]
+"fpdb_3_legacy/EnetToFpdb.py" = ["C901", "PLR0912"]
+"fpdb_3_legacy/EntractionToFpdb.py" = ["C901", "PLR0912"]
+"fpdb_3_legacy/EverestToFpdb.py" = ["C901"]
+"fpdb_3_legacy/EverleafToFpdb.py" = ["C901"]
+"fpdb_3_legacy/Filters.py" = ["C901", "PLR0912"]
+"fpdb_3_legacy/FullTiltPokerSummary.py" = ["C901", "PLR0912", "PLR0915"]
+"fpdb_3_legacy/FulltiltToFpdb.py" = ["C901", "PLR0912", "PLR0915"]
+"fpdb_3_legacy/GGPokerToFpdb.py" = ["C901"]
+"fpdb_3_legacy/GuiAutoImport.py" = ["C901", "PLR0912", "PLR0915"]
+"fpdb_3_legacy/GuiAutoNotesWorkbench.py" = ["PLR0915"]
+"fpdb_3_legacy/GuiBulkImport.py" = ["PLR0915"]
+"fpdb_3_legacy/GuiGraphViewer.py" = ["C901", "PLR0912", "PLR0915", "UP031"]
+"fpdb_3_legacy/GuiHandViewer.py" = ["C901", "PLR0912", "PLR0915"]
+"fpdb_3_legacy/GuiLogView.py" = ["C901", "PLR0912", "PLR0915"]
+"fpdb_3_legacy/GuiOpponentsReport.py" = ["C901", "PLR0915"]
+"fpdb_3_legacy/GuiReplayer.py" = ["C901", "PLR0912", "PLR0915"]
+"fpdb_3_legacy/GuiSessionViewer.py" = ["C901", "PLR0912", "PLR0915"]
+"fpdb_3_legacy/GuiTourHandViewer.py" = ["C901", "PLR0915"]
+"fpdb_3_legacy/GuiTourneyGraphViewer.py" = ["C901", "PLR0912", "PLR0915", "UP031"]
+"fpdb_3_legacy/GuiTourneyPlayerStats.py" = ["PLR0915"]
+"fpdb_3_legacy/HUD_main.pyw" = ["C901", "PLR0912", "PLR0915"]
+"fpdb_3_legacy/Hand.py" = ["C901", "PLR0912", "PLR0915"]
+"fpdb_3_legacy/HandDataReporter.py" = ["C901", "PLR0912", "PLR0915"]
+"fpdb_3_legacy/HandHistoryConverter.py" = ["C901", "PLR0912", "PLR0915"]
+"fpdb_3_legacy/HudStatsPersistence.py" = ["C901"]
+"fpdb_3_legacy/IdentifySite.py" = ["C901", "PLR0912", "PLR0915"]
+"fpdb_3_legacy/Importer.py" = ["C901", "PLR0912", "PLR0915"]
+"fpdb_3_legacy/KingsClubToFpdb.py" = ["C901", "PLR0912"]
+"fpdb_3_legacy/MergeSummary.py" = ["C901", "PLR0912", "PLR0915"]
+"fpdb_3_legacy/MergeToFpdb.py" = ["C901", "PLR0912", "PLR0915"]
+"fpdb_3_legacy/MicrogamingToFpdb.py" = ["C901", "PLR0912", "PLR0915"]
+"fpdb_3_legacy/modern_hud_preferences/dialogs.py" = ["PLR0915"]
+"fpdb_3_legacy/modern_hud_preferences/main_dialog.py" = ["C901", "PLR0912", "PLR0915"]
+"fpdb_3_legacy/ModernSeatPreferences.py" = ["C901", "PLR0912", "PLR0915"]
+"fpdb_3_legacy/ModernSitePreferences.py" = ["C901", "PLR0912", "PLR0915"]
+"fpdb_3_legacy/OnGameToFpdb.py" = ["C901", "PLR0912", "PLR0915"]
+"fpdb_3_legacy/Options.py" = ["C901", "PLR0915"]
+"fpdb_3_legacy/PacificPokerToFpdb.py" = ["C901", "PLR0912", "PLR0915"]
+"fpdb_3_legacy/PartyPokerToFpdb.py" = ["C901", "PLR0912", "PLR0915"]
+"fpdb_3_legacy/PokerStarsToFpdb.py" = ["C901"]
+"fpdb_3_legacy/PokerTrackerToFpdb.py" = ["C901", "PLR0912", "PLR0915"]
+"fpdb_3_legacy/Popup.py" = ["C901", "PLR0912"]
+"fpdb_3_legacy/SQL.py" = ["PLR0915"]
+"fpdb_3_legacy/SealsWithClubsToFpdb.py" = ["C901", "PLR0912", "PLR0915"]
+"fpdb_3_legacy/Stats.py" = ["C901", "PLR0912", "PLR0915", "UP031"]
+"fpdb_3_legacy/TableWindow.py" = ["PLR0915"]
+"fpdb_3_legacy/ThemeCreatorDialog.py" = ["PLR0915"]
+"fpdb_3_legacy/ThemeManager.py" = ["C901", "PLR0912", "PLR0915"]
+"fpdb_3_legacy/TourneySummary.py" = ["PLR0915"]
+"fpdb_3_legacy/UnibetToFpdb.py" = ["C901", "PLR0912", "PLR0915"]
+"fpdb_3_legacy/WinningToFpdb.py" = ["C901", "PLR0912", "PLR0915"]
+"fpdb_3_legacy/backfill_autonotes.py" = ["C901", "PLR0912", "PLR0915"]
+"fpdb_3_legacy/backfill_boards.py" = ["C901", "PLR0912"]
+"fpdb_3_legacy/backfill_showdown.py" = ["C901", "PLR0912", "PLR0915"]
+"fpdb_3_legacy/coinpoker_hand_builder.py" = ["C901", "PLR0912", "PLR0915"]
+"fpdb_3_legacy/fpdb.pyw" = ["C901", "PLR0912", "PLR0915"]
+"fpdb_3_legacy/http_capture_actions.py" = ["C901", "PLR0912", "PLR0915"]
+"fpdb_3_legacy/http_capture_diff.py" = ["C901"]
+"fpdb_3_legacy/http_capture_hand_builder.py" = ["C901", "PLR0912"]
+"fpdb_3_legacy/http_capture_importability.py" = ["C901"]
+"fpdb_3_legacy/http_capture_replay.py" = ["C901"]
+"fpdb_3_legacy/iPoker/base.py" = ["C901"]
+"fpdb_3_legacy/interlocks.py" = ["C901", "PLR0912", "PLR0915"]
+"fpdb_3_legacy/loggingFpdb.py" = ["C901", "PLR0912", "PLR0915"]
+"fpdb_3_legacy/migrate_to_pyside6.py" = ["C901"]
+"fpdb_3_legacy/pt4_import.py" = ["C901"]
+"fpdb_3_legacy/pt4hud.py" = ["C901", "PLR0912", "PLR0915"]
+"fpdb_3_legacy/ring_stats/__init__.py" = ["C901", "PLR0912", "PLR0915"]
+"fpdb_3_legacy/ring_stats/controller.py" = ["C901", "PLR0912", "PLR0915"]
+"fpdb_3_legacy/ring_stats/views/positional_view.py" = ["C901", "PLR0912", "PLR0915"]
+"fpdb_3_legacy/ring_stats/views/starting_hands_view.py" = ["C901", "PLR0912", "PLR0915"]
+"fpdb_3_legacy/sql_indexes.py" = ["C901", "PLR0912", "PLR0915"]
+"fpdb_3_legacy/sql_queries_filters.py" = ["C901"]
+"fpdb_3_legacy/stat_registry.py" = ["C901", "PLR0912"]
+"fpdb_3_legacy/stats_tournament.py" = ["C901"]
+"fpdb_3_legacy/swc_http_adapter.py" = ["C901", "PLR0912", "PLR0915"]
+"fpdb_3_legacy/swc_http_capture.py" = ["C901", "PLR0915"]
+"fpdb_3_legacy/swc_poker_console.py" = ["C901", "PLR0912", "PLR0915"]
+"fpdb_3_legacy/test_partypoker_fix.py" = ["PLR0912", "PLR0915"]
+"test/test_hand.py" = ["C901", "PLR0912", "PLR0915"]
+"test/test_pt4hud_import.py" = ["PLR0915"]
+"tests/helpers/mock_hand.py" = ["PLR0915"]
+"tests/helpers/snapshot_io.py" = ["C901", "PLR0912"]
+
+[tool.mypy]
+python_version = "3.11"
+check_untyped_defs = true
+follow_imports = "skip"
+ignore_missing_imports = true
+warn_unused_configs = true
+
+[tool.pyright]
+include = [
+    "fpdb",
+    "tools/prepare_briefcase_resources.py",
+    "tools/todo_inventory.py",
+]
+pythonVersion = "3.11"
+typeCheckingMode = "basic"
+# Platform adapters deliberately import native modules only available on their OS.
+reportMissingImports = false
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["*"]
-exclude = [
-    "gfx",
-    "web",
-    "fonts",
-    "hooks",
-    "icons",
-    "locale",
-    "archives",
-    "resources",
-    "documentations",
-]
+include = ["fpdb_3_legacy", "fpdb_3_legacy.*", "fpdb", "fpdb.*"]
 
 [tool.coverage.run]
-source = ["."]
+source = ["fpdb_3_legacy", "fpdb"]
+branch = true
 omit = [
     "*/test/*",
     "*/tests/*",
     "*/__pycache__/*",
-    "*/site-packages/*",
-    "*/venv/*",
-    "*/.venv/*",
-    "*/archives/*",
-    "*/regression-test-files/*",
-    "*/pypoker-eval/*",
-    "*/build/*",
-    "*/dist/*",
+    "fpdb_3_legacy/test_*.py",
+    "fpdb_3_legacy/migrate_*.py",
+    "fpdb_3_legacy/validate_*.py",
 ]
 
-[tool.coverage.report]
-exclude_lines = [
-    "pragma: no cover",
-    "def __repr__",
-    "if self.debug:",
-    "if settings.DEBUG",
-    "raise AssertionError",
-    "raise NotImplementedError",
-    "if 0:",
-    "if __name__ == .__main__.:",
-    "class .*\\bProtocol\\):",
-    "@(abc\\.)?abstractmethod",
+[tool.briefcase]
+project_name = "Free Poker Database 3"
+bundle = "org.fpdb"
+version = "3.0.0-alpha2"
+
+[tool.briefcase.app.fpdb]
+formal_name = "FPDB"
+description = "Free Poker Database 3 - Legacy Edition"
+sources = ["fpdb_3_legacy", "fpdb", ".briefcase-resources"]
+requires = [
+    "PySide6>=6.8.1",
+    "matplotlib>=3.10.7",
+    "pandas>=2.2.2",
+    "psutil>=5.9.0",
+    "colorlog==6.9.0",
+    "pyzmq>=26.0.3",
+    "qt-material==2.14",
+    "numpy>=2.1.0",
+    "pytz==2024.1",
+    "aiohttp>=3.13.2",
+    "cachetools==5.5.0",
+    "mplfinance>=0.12.10b0",
+    "xlrd==2.0.1",
+    "playwright>=1.40.0",
+    "defusedxml>=0.7.1",
+    # Read by the Merge and Winamax summary parsers.
+    "beautifulsoup4==4.12.3",
+    # Imported when the user points fpdb at a MySQL database.
+    "pymysql>=1.1.0",
+    # Native equity backend used by the equity calculator and AoF tools.
+    "pypoker-eval @ git+https://github.com/jejellyroll-fr/poker-eval.git@v1.2.0"
 ]
 
-[tool.uv]
-dev-dependencies = [
-    "pre-commit>=4.3.0",
+[tool.briefcase.app.fpdb.macOS]
+universal_build = false
+min_os_version = "12.0"
+# Cocoa alone is not enough: the HUD finds its tables through Quartz, and the
+# screen-recording and accessibility checks go through ApplicationServices.
+# Both are imported inside the functions that use them, and the ImportError is
+# swallowed into "permission granted", so a package missing them does not fail
+# loudly -- the HUD just never sees a table.
+requires = [
+    "pyobjc-framework-Cocoa==10.3.1",
+    "pyobjc-framework-Quartz==10.3.1",
+    "pyobjc-framework-ApplicationServices==10.3.1"
+]
+
+[tool.briefcase.app.fpdb.windows]
+requires = [
+    "pywin32==306"
+]
+
+[tool.briefcase.app.fpdb.linux]
+requires = [
+    "xcffib==1.5.0"
 ]

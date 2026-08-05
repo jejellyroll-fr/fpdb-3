@@ -11,7 +11,7 @@ import unittest
 # Add the parent directory to Python path for imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from PopupThemes import (
+from fpdb_3_legacy.PopupThemes import (
     AVAILABLE_THEMES,
     ClassicTheme,
     MaterialDarkTheme,
@@ -176,7 +176,7 @@ class TestThemeRegistry(unittest.TestCase):
 
     def test_available_themes(self) -> None:
         """Test that all themes are registered."""
-        expected_themes = ["material_dark", "material_light", "classic"]
+        expected_themes = ["material_dark", "material_light", "classic", "hud_dark"]
         assert set(AVAILABLE_THEMES.keys()) == set(expected_themes)
 
     def test_get_theme_valid(self) -> None:
@@ -330,9 +330,9 @@ class TestThemeConsistency(unittest.TestCase):
             theme = get_theme(theme_name)
             for color_key, color_value in theme.colors.items():
                 assert isinstance(color_value, str), f"Color {color_key} in {theme_name} is not a string"
-                assert hex_pattern.match(
-                    color_value
-                ), f"Color {color_key} in {theme_name} is not valid hex: {color_value}"
+                assert hex_pattern.match(color_value), (
+                    f"Color {color_key} in {theme_name} is not valid hex: {color_value}"
+                )
 
     def test_font_values_format(self) -> None:
         """Test that font values have required properties."""
@@ -345,12 +345,19 @@ class TestThemeConsistency(unittest.TestCase):
                 assert isinstance(font_value["size"], int), f"Font {font_key} size in {theme_name} is not an integer"
 
     def test_spacing_values_format(self) -> None:
-        """Test that spacing values are positive integers."""
+        """Test that spacing values are non-negative integers.
+
+        A radius of zero is a design choice, not a missing value: square
+        corners are what a HUD popup framed against a table wants. Every other
+        spacing is a real distance and still has to be positive.
+        """
+        may_be_zero = {"border_radius"}
         for theme_name in AVAILABLE_THEMES:
             theme = get_theme(theme_name)
             for spacing_key, spacing_value in theme.spacing.items():
                 assert isinstance(spacing_value, int), f"Spacing {spacing_key} in {theme_name} is not an integer"
-                assert spacing_value > 0, f"Spacing {spacing_key} in {theme_name} is not positive"
+                minimum = 0 if spacing_key in may_be_zero else 1
+                assert spacing_value >= minimum, f"Spacing {spacing_key} in {theme_name} is below {minimum}"
 
 
 if __name__ == "__main__":

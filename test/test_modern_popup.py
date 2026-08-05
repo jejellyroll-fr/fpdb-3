@@ -69,7 +69,7 @@ class TestModernStatRow(unittest.TestCase):
             ModernSubmenuClassic, \
             ModernSubmenuLight
         global EmojiIconProvider, TextIconProvider, ClassicTheme, MaterialDarkTheme, MaterialLightTheme
-        from ModernPopup import (
+        from fpdb_3_legacy.ModernPopup import (
             MODERN_POPUP_CLASSES,
             ModernSectionWidget,
             ModernStatRow,
@@ -77,8 +77,8 @@ class TestModernStatRow(unittest.TestCase):
             ModernSubmenuClassic,
             ModernSubmenuLight,
         )
-        from PopupIcons import EmojiIconProvider, TextIconProvider
-        from PopupThemes import ClassicTheme, MaterialDarkTheme, MaterialLightTheme
+        from fpdb_3_legacy.PopupIcons import EmojiIconProvider, TextIconProvider
+        from fpdb_3_legacy.PopupThemes import ClassicTheme, MaterialDarkTheme, MaterialLightTheme
 
     @classmethod
     def tearDownClass(cls):
@@ -270,7 +270,7 @@ class TestModernPopupClasses(unittest.TestCase):
 
     def test_all_classes_registered(self) -> None:
         """Test that all modern popup classes are registered."""
-        expected_classes = ["ModernSubmenu", "ModernSubmenuLight", "ModernSubmenuClassic"]
+        expected_classes = ["ModernSubmenu", "ModernSubmenuLight", "ModernSubmenuClassic", "CategorizedPopup"]
         assert set(MODERN_POPUP_CLASSES.keys()) == set(expected_classes)
 
     def test_registered_classes_are_classes(self) -> None:
@@ -284,7 +284,7 @@ class TestPopupIntegration(unittest.TestCase):
 
     def test_stat_categorization_integration(self) -> None:
         """Test that stat categorization works."""
-        from PopupIcons import get_stat_category
+        from fpdb_3_legacy.PopupIcons import get_stat_category
 
         # Test stats from different categories
         test_stats = [
@@ -302,7 +302,7 @@ class TestPopupIntegration(unittest.TestCase):
 
     def test_color_calculation_integration(self) -> None:
         """Test color calculation."""
-        from PopupThemes import get_stat_color
+        from fpdb_3_legacy.PopupThemes import get_stat_color
 
         theme = MaterialDarkTheme()
 
@@ -318,9 +318,9 @@ class TestPopupIntegration(unittest.TestCase):
         for stat_name, value, expected_color_key in test_cases:
             color = get_stat_color(theme, stat_name, value)
             expected_color = theme.get_color(expected_color_key)
-            assert (
-                color == expected_color
-            ), f"Stat {stat_name} with value {value} should have {expected_color_key} color"
+            assert color == expected_color, (
+                f"Stat {stat_name} with value {value} should have {expected_color_key} color"
+            )
 
     def test_theme_icon_provider_compatibility(self) -> None:
         """Test theme and icon provider compatibility."""

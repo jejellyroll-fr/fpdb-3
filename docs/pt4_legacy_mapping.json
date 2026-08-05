@@ -1,0 +1,40 @@
+{
+  "_comment": "PT4 base column -> FPDB-3 LEGACY HandsPlayers column, for the .pt4stat importer (fpdb_3_legacy/pt4_import.py). Distinct from pt4_statistics_mapping.json, which targets the MODERN/Rust snake_case schema (all_in_ev, street0_4b_done) and is used for Rust parity. Every 'fpdb' column here is verified to exist in the deployed legacy HandsPlayers table. 'scale' divides the stored value (money/chips columns are stored x100). Semantics are best-effort parity; review imported non-ChipEV stats before relying on them.",
+  "columns": {
+    "amt_expected_won": { "fpdb": "allInEV", "scale": 100 },
+    "val_equity":       { "fpdb": "allInEV", "scale": 100 },
+    "amt_won":          { "fpdb": "winnings", "scale": 100 },
+    "amt_payout":       { "fpdb": "totalProfit", "scale": 100 },
+    "amt_rake":         { "fpdb": "rake", "scale": 100 },
+
+    "flg_showdown":      { "fpdb": "sawShowdown", "scale": 1 },
+    "flg_saw_showdown":  { "fpdb": "sawShowdown", "scale": 1 },
+    "flg_showed":        { "fpdb": "showed", "scale": 1 },
+    "flg_won_hand":      { "fpdb": "wonAtSD", "scale": 1 },
+    "flg_won_sd":        { "fpdb": "wonAtSD", "scale": 1 },
+
+    "flg_saw_flop":      { "fpdb": "street1Seen", "scale": 1 },
+
+    "_note_preflop": "Done/opportunity pairs enable ratio stats (e.g. 3Bet% = cnt_p_3bet/cnt_p_3bet_opp). The _opp suffix convention is confirmed by sample files (flg_t_open_opp). FPDB *Chance columns verified to exist in HandsPlayers.",
+    "flg_vpip":              { "fpdb": "street0VPI", "scale": 1 },
+    "flg_vpip_opp":          { "fpdb": "street0VPIChance", "scale": 1 },
+    "flg_p_open":            { "fpdb": "street0Aggr", "scale": 1 },
+    "flg_p_open_opp":        { "fpdb": "street0AggrChance", "scale": 1 },
+    "flg_p_first_raise":     { "fpdb": "raisedFirstIn", "scale": 1 },
+    "flg_p_first_raise_opp": { "fpdb": "raiseFirstInChance", "scale": 1 },
+    "flg_p_2bet":            { "fpdb": "street0_2BDone", "scale": 1 },
+    "flg_p_2bet_opp":        { "fpdb": "street0_2BChance", "scale": 1 },
+    "flg_p_3bet":            { "fpdb": "street0_3BDone", "scale": 1 },
+    "flg_p_3bet_opp":        { "fpdb": "street0_3BChance", "scale": 1 },
+    "flg_p_4bet":            { "fpdb": "street0_4BDone", "scale": 1 },
+    "flg_p_4bet_opp":        { "fpdb": "street0_4BChance", "scale": 1 },
+
+    "flg_f_bet":         { "fpdb": "street1Aggr", "scale": 1 },
+    "flg_t_bet":         { "fpdb": "street2Aggr", "scale": 1 },
+    "flg_r_bet":         { "fpdb": "street3Aggr", "scale": 1 },
+
+    "flg_steal_att":     { "fpdb": "stealDone", "scale": 1 },
+    "flg_steal_opp":     { "fpdb": "stealChance", "scale": 1 },
+    "flg_steal_success": { "fpdb": "success_Steal", "scale": 1 }
+  }
+}

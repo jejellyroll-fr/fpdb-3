@@ -1,0 +1,41 @@
+PokerStars Hand #258753941248:  Omaha Hi/Lo Pot Limit ($0.01/$0.02 USD) - 2025/12/03 8:59:34 PT [2025/12/03 11:59:34 ET]
+Table 'Gutemberga V' 6-max Seat #1 is the button
+Seat 1: Player1 ($2.17 in chips)
+Seat 2: Player2 ($0.16 in chips)
+Seat 3: Player3 ($1.75 in chips)
+Seat 4: Player4 ($6.10 in chips)
+Seat 5: Player5 ($0.42 in chips)
+Player2: posts small blind $0.01
+Player3: posts big blind $0.02
+*** HOLE CARDS ***
+Dealt to Player1 [2d 2h Ah 4h]
+Player4: raises $0.02 to $0.04
+Player5: folds
+Player1: calls $0.04
+Player2: folds
+Player3: folds
+*** FLOP *** [4s 8s 8h]
+Player4: bets $0.11
+Player1: calls $0.11
+*** TURN *** [4s 8s 8h] [3h]
+Player4: bets $0.32
+Player1: calls $0.32
+*** RIVER *** [4s 8s 8h 3h] [6s]
+newplayer1 joins the table at seat #6
+Player4: checks
+Player1: bets $0.94
+Player4: folds
+Uncalled bet ($0.94) returned to Player1
+Player1 collected $0.94 from pot
+Player1: doesn't show hand
+*** SUMMARY ***
+Total pot $0.97 | Rake $0.03
+Board [4s 8s 8h 3h 6s]
+Seat 1: Player1 (button) collected ($0.94)
+Seat 2: Player2 (small blind) folded before Flop
+Seat 3: Player3 (big blind) folded before Flop
+Seat 4: Player4 folded on the River
+Seat 5: Player6 (didn't bet)
+
+
+

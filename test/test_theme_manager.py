@@ -15,7 +15,7 @@ from unittest.mock import Mock, patch
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from ThemeManager import ThemeManager
+from fpdb_3_legacy.ThemeManager import ThemeManager
 
 
 class TestThemeManager(unittest.TestCase):
@@ -342,7 +342,7 @@ class TestThemeManagerIntegration(unittest.TestCase):
         if hasattr(ThemeManager, "_instance"):
             ThemeManager._instance = None
 
-    @patch("ThemeManager.log")
+    @patch("fpdb_3_legacy.ThemeManager.log")
     def test_theme_manager_logging(self, mock_log):
         """Test that ThemeManager logs appropriately."""
         theme_manager = ThemeManager()

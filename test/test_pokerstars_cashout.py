@@ -9,7 +9,7 @@ import pytest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from PokerStarsToFpdb import PokerStars
+from fpdb_3_legacy.PokerStarsToFpdb import PokerStars
 
 
 class MockConfig:
@@ -129,21 +129,21 @@ Seat 6: Player6 folded before Flop (didn't bet)"""
         collected_dict = {entry[0]: Decimal(entry[1]) for entry in collected}
 
         # Player1 collected $25.96 from pot
-        assert collected_dict["Player1"] == Decimal(
-            "25.96"
-        ), f"Player1 should collect 25.96, got {collected_dict.get('Player1')}"
+        assert collected_dict["Player1"] == Decimal("25.96"), (
+            f"Player1 should collect 25.96, got {collected_dict.get('Player1')}"
+        )
 
         # Player3 cashed out for $22.77 (also counted as a collection)
-        assert collected_dict["Player3"] == Decimal(
-            "22.77"
-        ), f"Player3 should collect 22.77, got {collected_dict.get('Player3')}"
+        assert collected_dict["Player3"] == Decimal("22.77"), (
+            f"Player3 should collect 22.77, got {collected_dict.get('Player3')}"
+        )
 
         # Check that cash out fee is captured
         assert hasattr(hand, "cashOutFees"), "Hand should have cashOutFees attribute"
         assert "Player3" in hand.cashOutFees, "Player3 should have a cash out fee recorded"
-        assert hand.cashOutFees["Player3"] == Decimal(
-            "0.46"
-        ), f"Player3 cash out fee should be 0.46, got {hand.cashOutFees['Player3']}"
+        assert hand.cashOutFees["Player3"] == Decimal("0.46"), (
+            f"Player3 cash out fee should be 0.46, got {hand.cashOutFees['Player3']}"
+        )
 
     def test_cash_out_regex_pattern(self):
         """Test the cash out regex patterns work correctly."""

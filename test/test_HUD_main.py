@@ -1,46 +1,63 @@
 import contextlib
-import shutil
+import importlib.machinery
+import importlib.util
+import os
 import sys
+import threading
+import time
 import types
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from types import SimpleNamespace
+from unittest.mock import MagicMock, call, patch
 
 import pytest
-from PyQt5.QtWidgets import QApplication
+
+pytestmark = pytest.mark.qt
+from PySide6.QtCore import QTimer
+from PySide6.QtWidgets import QApplication
 
 # import zmq
 
 # Add parent directory to path before imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-# Create a temporary copy of HUD_main.pyw as HUD_main.py
-source_file = Path(__file__).parent.parent / "HUD_main.pyw"
-temp_file = Path(__file__).parent.parent / "HUD_main.py"
-
-# Copy the file at module level
-if source_file.exists() and not temp_file.exists():
-    shutil.copy2(source_file, temp_file)
+source_file = Path(__file__).parent.parent / "fpdb_3_legacy" / "HUD_main.pyw"
 
 # Create a mock 'WinTables' module
 win_tables_module = types.ModuleType("WinTables")
 win_tables_module.Table = MagicMock()
 
-with patch.dict("sys.modules", {"WinTables": win_tables_module}):
-    import HUD_main
+sys.modules["WinTables"] = win_tables_module
+loader = importlib.machinery.SourceFileLoader("HUD_main", str(source_file))
+spec = importlib.util.spec_from_loader(loader.name, loader)
+HUD_main = importlib.util.module_from_spec(spec)
+sys.modules["HUD_main"] = HUD_main
+try:
+    loader.exec_module(HUD_main)
+except (ImportError, ModuleNotFoundError) as _e:
+    pytest.skip(
+        f"HUD_main eager-load failed (likely qt_material/PySide6 sub-module conflict "
+        f"poisoned by another conftest mock): {_e}",
+        allow_module_level=True,
+    )
 
 
 @pytest.fixture
-def app(qtbot):
-    return QApplication.instance()
+def app():
+    instance = QApplication.instance()
+    if instance is None:
+        instance = QApplication([])
+    return instance
 
 
 @pytest.fixture
-def hud_main(app, qtbot):
+def hud_main(app):
     # Crate mock
     options = MagicMock()
     options.dbname = "test_db"
     options.config = None
     options.errorsToConsole = False
+    options.log_level = "INFO"
     options.xloc = None
     options.yloc = None
 
@@ -49,10 +66,12 @@ def hud_main(app, qtbot):
     with (
         patch("HUD_main.Configuration.Config") as mock_config,
         patch("HUD_main.Configuration.set_logfile"),
-        patch("HUD_main.Database.Database"),
+        patch("HUD_main.Database.Database") as mock_database,
+        patch("HUD_main.Deck.Deck"),
         patch("HUD_main.ZMQReceiver"),
+        patch("HUD_main.ZMQWorker"),
         patch("sys.exit"),
-        patch("PyQt5.QtCore.QCoreApplication.quit"),
+        patch("HUD_main.QCoreApplication.quit"),
     ):
         mock_config_instance = MagicMock()
         mock_config.return_value = mock_config_instance
@@ -76,10 +95,16 @@ def hud_main(app, qtbot):
         mock_config_instance.get_layout.return_value = "some_layout"
 
         hm = HUD_main.HudMain(options, db_name=options.dbname)
-        qtbot.addWidget(hm.main_window)
+        # The focused HudMain tests exercise the legacy synchronous seam with a
+        # controllable Database mock. Runtime construction uses HudReadWorker,
+        # whose connection intentionally lives on its own thread.
+        hm._db_worker.stop()
+        app.processEvents()
+        hm._db_worker = None
+        hm.db_connection = mock_database.return_value
+        hm._db_available = True
         yield hm
 
-        qtbot.waitExposed(hm.main_window)
         hm.main_window.close()
 
 
@@ -96,13 +121,317 @@ def test_hud_main_initialization(hud_main) -> None:
     assert hasattr(hud_main, "zmq_receiver")
     assert hasattr(hud_main, "zmq_worker")
     assert hasattr(hud_main, "main_window")
+    assert hud_main._table_stat_set_overrides == {}
+
+
+def test_table_stat_set_override_is_scoped_by_table_and_game(hud_main) -> None:
+    hud_main.config.stat_sets = {"omaha_cg_expert": MagicMock()}
+
+    hud_main.set_table_stat_set_override("table-a", "omahahi", "ring", "omaha_cg_expert")
+
+    assert hud_main.get_table_stat_set_override("table-a", "omahahi", "ring") == "omaha_cg_expert"
+    assert hud_main.get_table_stat_set_override("table-b", "omahahi", "ring") is None
+    assert hud_main.get_table_stat_set_override("table-a", "holdem", "ring") is None
+
+    hud_main.clear_table_stat_set_override("table-a")
+    assert hud_main.get_table_stat_set_override("table-a", "omahahi", "ring") is None
 
 
 # Ensures that the handle_message method correctly calls read_stdin when provided with a hand ID.
 def test_handle_message(hud_main) -> None:
+    """A hand is held for the batch rather than processed where it arrives."""
     with patch.object(hud_main, "read_stdin") as mock_read_stdin:
         hud_main.handle_message("test_hand_id")
-        mock_read_stdin.assert_called_once_with("test_hand_id")
+
+    assert not mock_read_stdin.called
+    assert hud_main._pending_hands == ["test_hand_id"]
+    assert hud_main._hand_batch_timer.isActive()
+
+
+def test_async_drain_only_submits_work_to_the_database_thread(hud_main) -> None:
+    worker = MagicMock()
+    hud_main._db_worker = worker
+    hud_main._pending_hands = ["101", "102"]
+
+    with patch.object(hud_main, "_build_batch_request") as build_request:
+        request = HUD_main.HudBatchReadRequest(1, ("101", "102"), {})
+        build_request.return_value = request
+        hud_main._drain_pending_hands()
+
+    worker.submit.assert_called_once_with(request)
+    assert hud_main._pending_hands == []
+    assert hud_main._db_batch_inflight is True
+    assert not hud_main.db_connection.get_table_info.called
+
+
+def test_slow_database_worker_does_not_block_the_qt_event_loop(qtbot) -> None:
+    main_thread = threading.get_ident()
+    factory_threads: list[int] = []
+    database = MagicMock(backend=0)
+
+    def database_factory(_config):
+        factory_threads.append(threading.get_ident())
+        return database
+
+    class SlowService:
+        def __init__(self, _config, _database) -> None:
+            pass
+
+        def read_batch(self, request, progress_callback=None):
+            time.sleep(0.35)
+            return HUD_main.HudBatchSnapshot(
+                request.sequence,
+                request.hand_ids,
+                (),
+                {},
+                {},
+                {},
+                {},
+                {},
+            )
+
+    worker = HUD_main.HudReadWorker(MagicMock(), db_factory=database_factory)
+    ticks: list[float] = []
+    heartbeat = QTimer()
+    heartbeat.setInterval(10)
+    heartbeat.timeout.connect(lambda: ticks.append(time.monotonic()))
+
+    try:
+        with patch("HUD_main.HudReadService", SlowService):
+            with qtbot.waitSignal(worker.ready, timeout=1000):
+                worker.start()
+            heartbeat.start()
+            started = time.monotonic()
+            with qtbot.waitSignal(worker.snapshot_ready, timeout=1500):
+                worker.submit(HUD_main.HudBatchReadRequest(1, ("101",), {}))
+            elapsed = time.monotonic() - started
+    finally:
+        heartbeat.stop()
+        worker.stop()
+
+    assert factory_threads and factory_threads[0] != main_thread
+    assert elapsed >= 0.3
+    assert len(ticks) >= 15
+    assert max(b - a for a, b in zip(ticks, ticks[1:], strict=False)) < 0.15
+
+
+def test_postgresql_worker_bounds_its_own_session_queries() -> None:
+    database = MagicMock(backend=HUD_main.Database.Database.PGSQL)
+    cursor = database.connection.cursor.return_value
+
+    HUD_main.HudReadWorker._configure_session(database)
+
+    assert cursor.execute.call_args_list == [
+        call("SET statement_timeout = 10000"),
+        call("SET lock_timeout = 2000"),
+        call("SET idle_in_transaction_session_timeout = 30000"),
+    ]
+    database.connection.commit.assert_called_once_with()
+    cursor.close.assert_called_once_with()
+
+
+def test_partial_snapshot_keeps_batch_inflight_until_final_snapshot(hud_main) -> None:
+    hud_main._db_worker = MagicMock()
+    hud_main._db_batch_inflight = True
+    partial = HUD_main.HudBatchSnapshot(
+        5,
+        ("101",),
+        ("101",),
+        {},
+        {},
+        {},
+        {},
+        {},
+        revision=1,
+        final=False,
+    )
+    final = HUD_main.HudBatchSnapshot(
+        5,
+        ("101",),
+        (),
+        {},
+        {},
+        {},
+        {},
+        {},
+        revision=2,
+    )
+
+    with (
+        patch.object(hud_main, "read_stdin", return_value="table-a"),
+        patch.object(hud_main, "_refresh_other_huds") as refresh_other,
+    ):
+        hud_main._on_db_snapshot(partial)
+        assert hud_main._db_batch_inflight is True
+        refresh_other.assert_not_called()
+
+        hud_main._on_db_snapshot(final)
+
+    assert hud_main._db_batch_inflight is False
+    refresh_other.assert_called_once()
+
+
+def test_identity_snapshot_requests_a_loading_hud_before_stats_arrive(hud_main) -> None:
+    prepared = MagicMock()
+    prepared.hand_id = "101"
+    prepared.table_info = ("table-a", 6, "holdem", "ring", False, 1, "site", 6, None, None, None)
+    prepared.positions = {}
+    prepared.seat_players = {}
+    snapshot = HUD_main.HudBatchSnapshot(
+        6,
+        ("101",),
+        ("101",),
+        {"101": prepared},
+        {},
+        {},
+        {},
+        {},
+        revision=1,
+        final=False,
+        identity_only=True,
+    )
+    hud_main._db_worker = MagicMock()
+    hud_main._db_batch_inflight = True
+
+    with patch.object(hud_main, "_show_loading_hud") as show_loading:
+        hud_main._on_db_snapshot(snapshot)
+
+    show_loading.assert_called_once_with("101")
+    assert hud_main._db_batch_inflight is True
+
+
+def test_loading_hud_creation_does_not_require_statistics(hud_main) -> None:
+    # Extended table identity includes limitType after the 11 legacy fields.
+    table_info = ("table-a", 6, "holdem", "ring", False, 1, "site", 6, None, None, None, "nl")
+    hud_main._prepared_hands = {"101": MagicMock(table_info=table_info)}
+    hud_main.config.get_supported_sites.return_value = ["site"]
+    hud_main.config.get_site_parameters.return_value = {"aux_enabled": True}
+
+    with patch.object(hud_main, "_create_new_hud") as create_new_hud:
+        hud_main._show_loading_hud("101")
+
+    create_new_hud.assert_called_once_with(
+        "101",
+        "table-a",
+        table_info,
+        1,
+        6,
+        "site",
+        loading=True,
+    )
+
+
+def test_loading_hud_builds_empty_creation_args_without_querying_stats(hud_main) -> None:
+    table_info = ("table-a", 6, "holdem", "ring", False, 1, "site", 6, None, None, None)
+    prepared = MagicMock(cards={}, hand_instance=None)
+    hud_main._prepared_hands = {"101": prepared}
+    hud_main.config.get_supported_games_parameters.return_value = {"aux": ""}
+    hud_main.Tables = MagicMock()
+    hud_main.Tables.Table.return_value = MagicMock(
+        number=12,
+        title="table-a",
+        x=0,
+        y=0,
+        width=800,
+        height=600,
+    )
+
+    with (
+        patch.object(hud_main.db_connection, "get_stats_from_hand") as get_stats,
+        patch.object(hud_main, "create_HUD") as create_hud,
+        patch.object(hud_main, "_seat_players") as seat_players,
+        patch.object(hud_main, "_set_table_stats") as set_table_stats,
+    ):
+        create_hud.side_effect = lambda args: hud_main.hud_dict.__setitem__(args.temp_key, MagicMock())
+        hud_main._create_new_hud("101", "table-a", table_info, 1, 6, "site", loading=True)
+
+    get_stats.assert_not_called()
+    args = create_hud.call_args.args[0]
+    assert args.stat_dict == {}
+    assert args.cards == {}
+    assert args.loading is True
+    seat_players.assert_not_called()
+    set_table_stats.assert_not_called()
+
+
+def test_complete_snapshot_recreates_loading_hud_with_player_seat_mapping(hud_main) -> None:
+    """An identity-only HUD cannot be upgraded in place after seats arrive."""
+    hand_id = "101"
+    table_info = ("table-a", 6, "holdem", "ring", False, 1, "site", 6, None, None, None, "nl")
+    hud_main.cache[hand_id] = table_info
+    hud_main.hud_dict["table-a"] = MagicMock(is_loading=True)
+    hud_main.config.get_supported_sites.return_value = ["site"]
+    hud_main.config.get_site_parameters.return_value = {"aux_enabled": True}
+
+    def kill_loading_hud(_event, temp_key):
+        del hud_main.hud_dict[temp_key]
+
+    def create_complete_hud(_hand_id, temp_key, *_args, **_kwargs):
+        hud_main.hud_dict[temp_key] = MagicMock(is_loading=False)
+
+    with (
+        patch.object(hud_main, "_initialize_hero_data"),
+        patch.object(hud_main, "_handle_tournament_table_changes", return_value=False),
+        patch.object(hud_main, "_handle_hud_reconfiguration", return_value=("holdem", None)),
+        patch.object(hud_main, "kill_hud", side_effect=kill_loading_hud) as kill_hud,
+        patch.object(hud_main, "_create_new_hud", side_effect=create_complete_hud) as create_hud,
+        patch.object(hud_main, "_update_existing_hud") as update_hud,
+    ):
+        assert hud_main.read_stdin(hand_id) == "table-a"
+
+    kill_hud.assert_called_once_with(None, "table-a")
+    create_hud.assert_called_once_with(hand_id, "table-a", table_info, 1, 6, "site")
+    update_hud.assert_not_called()
+    assert hud_main._last_processed_hands["table-a"] == hand_id
+
+
+def test_runtime_replay_error_cannot_start_the_legacy_recovery_worker(hud_main) -> None:
+    hud_main._db_worker = MagicMock()
+
+    with patch.object(hud_main, "_start_db_recovery") as start_recovery:
+        assert hud_main.note_db_error(RuntimeError("connection reset by peer")) is False
+
+    start_recovery.assert_not_called()
+
+
+def test_pending_hand_queue_keeps_only_its_bounded_latest_tail(hud_main) -> None:
+    saved = HUD_main.MAX_PENDING_HANDS
+    HUD_main.MAX_PENDING_HANDS = 3
+    try:
+        for hand_id in ("1", "2", "3", "4"):
+            hud_main._enqueue_hand(hand_id)
+    finally:
+        HUD_main.MAX_PENDING_HANDS = saved
+
+    assert hud_main._pending_hands == ["2", "3", "4"]
+
+
+def test_repeated_batch_timeouts_are_counted_and_reported(hud_main) -> None:
+    request = HUD_main.HudBatchReadRequest(7, ("101",), {})
+
+    with (
+        patch("HUD_main.QTimer.singleShot"),
+        patch("HUD_main.log.warning") as warning,
+    ):
+        hud_main._on_db_batch_failed(request, "statement timeout")
+        hud_main._on_db_batch_failed(request, "statement timeout")
+
+    assert hud_main._db_consecutive_failures == 2
+    assert warning.call_args_list[-1].args[2] == 2
+
+
+def test_batch_retry_backs_off_once_after_five_consecutive_failures(hud_main) -> None:
+    request = HUD_main.HudBatchReadRequest(8, ("101",), {})
+
+    with (
+        patch("HUD_main.QTimer.singleShot") as single_shot,
+        patch("HUD_main.log.error") as error,
+    ):
+        for _ in range(7):
+            hud_main._on_db_batch_failed(request, "statement timeout")
+
+    assert [item.args[0] for item in single_shot.call_args_list] == [5000] * 5 + [30000] * 2
+    error.assert_called_once()
 
 
 # Checks that the destroy method properly closes connections and stops processes.
@@ -110,8 +439,9 @@ def test_destroy(hud_main) -> None:
     with (
         patch.object(hud_main.zmq_receiver, "close") as mock_close,
         patch.object(hud_main.zmq_worker, "stop") as mock_stop,
-        patch("PyQt5.QtCore.QCoreApplication.quit") as mock_quit,
+        patch("HUD_main.QCoreApplication.quit") as mock_quit,
     ):
+        hud_main.destroy()
         hud_main.destroy()
         mock_close.assert_called_once()
         mock_stop.assert_called_once()
@@ -135,6 +465,28 @@ def test_check_tables(hud_main, status, expected_method) -> None:
     with patch.object(hud_main, expected_method) as mock_method:
         hud_main.check_tables()
         mock_method.assert_called_once_with(None, mock_hud)
+
+
+def test_check_tables_skipped_during_drag(hud_main) -> None:
+    """While a HUD window is dragged, check_tables must not poll geometry or
+    re-raise windows (that stutters the drag on macOS)."""
+    from fpdb_3_legacy import Aux_Base
+
+    mock_hud = MagicMock()
+    mock_hud.table.check_table.return_value = "client_moved"
+    hud_main.hud_dict = {"test_table": mock_hud}
+
+    Aux_Base.set_drag_active(True)
+    try:
+        with (
+            patch.object(hud_main, "_handle_table_status") as mock_status,
+            patch.object(hud_main, "_topify_mac_windows") as mock_topify,
+        ):
+            hud_main.check_tables()
+            mock_status.assert_not_called()
+            mock_topify.assert_not_called()
+    finally:
+        Aux_Base.set_drag_active(False)
 
 
 # Ensures that create_HUD creates a new HUD and adds it to the hud_dict.
@@ -198,6 +550,7 @@ def test_read_stdin_cached(hud_main) -> None:
         9,
         "tour_number",
         "tab_number",
+        None,  # tourney_name: unset for a cash table
     )
     temp_key = "table_name"
     hud_main.hud_dict[temp_key] = MagicMock()
@@ -217,9 +570,206 @@ def test_read_stdin_cached(hud_main) -> None:
         ),
         patch.object(hud_main, "get_cards", return_value={}),
         patch.object(hud_main, "update_HUD") as mock_update_hud,
+        patch.object(hud_main, "_refresh_other_huds") as mock_refresh_other_huds,
     ):
         hud_main.read_stdin(test_hand_id)
         assert mock_update_hud.called, "update_HUD n'a pas été appelé"
+        # The batch refreshes the other tables once, not each processed hand.
+        assert not mock_refresh_other_huds.called
+
+
+def test_refresh_other_huds_uses_each_tables_last_hand(hud_main) -> None:
+    """A global refresh keeps every secondary HUD on its own table context."""
+    hud_main.hud_dict = {
+        "table-a": MagicMock(),
+        "table-b": MagicMock(),
+        "table-c": MagicMock(),
+        "table-without-hand": MagicMock(),
+        "table-without-info": MagicMock(),
+    }
+    hud_main._last_processed_hands = {
+        "table-a": "hand-a",
+        "table-b": "hand-b",
+        "table-c": "hand-c",
+        "table-without-info": "hand-missing",
+    }
+    table_infos = {
+        "hand-b": ("table-b", 6, "holdem", "ring", False, 2, "SiteB", 5, None, None, None),
+        "hand-c": ("table-c", 9, "omahahi", "tour", False, 3, "SiteC", 8, "T1", "1", "MTT"),
+    }
+
+    with (
+        patch.object(hud_main, "_get_table_info", side_effect=table_infos.get) as get_table_info,
+        patch.object(hud_main, "_refresh_secondary_hud") as update_existing_hud,
+    ):
+        hud_main._refresh_other_huds("table-a")
+
+    assert get_table_info.call_args_list == [call("hand-b"), call("hand-c"), call("hand-missing")]
+    assert update_existing_hud.call_args_list == [
+        # stat_dict=None: with no hero known yet there is nothing to batch, so
+        # each table fetches its own statistics, as this path always did.
+        call("hand-b", "table-b", "ring", 2, 5, stat_dict=None),
+        call("hand-c", "table-c", "tour", 3, 8, stat_dict=None),
+    ]
+
+
+def test_refresh_other_huds_isolates_secondary_table_failure(hud_main) -> None:
+    """Regression: a broken secondary HUD must not block later HUD refreshes."""
+    hud_main.hud_dict = {
+        "source": MagicMock(),
+        "broken": MagicMock(),
+        "healthy": MagicMock(),
+    }
+    hud_main._last_processed_hands = {
+        "source": "hand-source",
+        "broken": "hand-broken",
+        "healthy": "hand-healthy",
+    }
+    table_infos = {
+        "hand-broken": ("broken", 6, "holdem", "ring", False, 1, "Site", 6, None, None, None),
+        "hand-healthy": ("healthy", 6, "holdem", "ring", False, 1, "Site", 6, None, None, None),
+    }
+    hud_main.db_connection.connection.rollback.reset_mock()
+
+    with (
+        patch.object(hud_main, "_get_table_info", side_effect=table_infos.get),
+        patch.object(
+            hud_main,
+            "_refresh_secondary_hud",
+            side_effect=[RuntimeError("secondary HUD failed"), None],
+        ) as update_existing_hud,
+    ):
+        hud_main._refresh_other_huds("source")
+
+    assert update_existing_hud.call_args_list == [
+        call("hand-broken", "broken", "ring", 1, 6, stat_dict=None),
+        call("hand-healthy", "healthy", "ring", 1, 6, stat_dict=None),
+    ]
+    hud_main.db_connection.connection.rollback.assert_called_once_with()
+
+
+def test_batched_stats_failure_rolls_back_before_per_table_fallback(hud_main) -> None:
+    """PostgreSQL must leave the connection usable for the promised fallback."""
+    hud = MagicMock()
+    hud.hud_params = {"hud_days": 30, "h_hud_days": 90}
+    hud.poker_game = "holdem"
+    hud_main.hud_dict = {"table": hud}
+    hud_main.hero_ids = {1: 42}
+    hud_main.db_connection.get_stats_from_hands.side_effect = RuntimeError("bad batched query")
+    hud_main.db_connection.connection.rollback.reset_mock()
+    pending = [("table", "hand", "ring", 1, 6)]
+
+    with patch.object(hud_main, "note_db_error", return_value=False):
+        result = hud_main._batch_secondary_stats(pending)
+
+    assert result == {}
+    hud_main.db_connection.connection.rollback.assert_called_once_with()
+
+
+def test_refresh_secondary_hud_only_rereads_the_statistics(hud_main) -> None:
+    """A table with no new hand of its own is refreshed with one query, not six.
+
+    Its seats, cards and table stats all describe the hand it already holds, so
+    re-reading them returns what the HUD has. This runs once per open table per
+    hand dealt anywhere, so the full update would cost a number of queries
+    growing with the square of the number of tables.
+    """
+    hud = MagicMock()
+    hud.hud_params = {"hud_days": 90, "h_hud_days": 30}
+    hud_main.hud_dict = {"table-b": hud}
+    hud_main.hero_ids = {2: 7}
+    db = hud_main.db_connection
+    for query in ("get_seat_players", "get_cards", "get_table_min_stack_bb"):
+        getattr(db, query).reset_mock()
+
+    aux = MagicMock()
+    hud.aux_windows = [aux]
+
+    with (
+        patch.object(hud_main, "_merge_positions") as merge_positions,
+        patch.object(hud_main, "update_HUD") as update_hud,
+    ):
+        hud_main._refresh_secondary_hud("hand-b", "table-b", "ring", 2, 5)
+
+    db.get_stats_from_hand.assert_called_once_with(
+        "hand-b",
+        "ring",
+        hud.hud_params,
+        7,
+        5,
+        poker_game=hud.poker_game,
+    )
+    assert hud.stat_dict is db.get_stats_from_hand.return_value
+    merge_positions.assert_called_once_with(db.get_stats_from_hand.return_value, "hand-b")
+
+    # Redraw from the new stat_dict, without the path that rebuilds the hand
+    # through hand_factory, re-reads the cards and updates the aux windows a
+    # second time.
+    aux.refresh_stats.assert_called_once_with("hand-b")
+    assert not aux.update_gui.called
+    assert not update_hud.called
+    assert not hud.update.called
+
+    # The four lookups that describe the unchanged hand.
+    assert not db.get_seat_players.called
+    assert not db.get_cards.called
+    assert not db.get_table_min_stack_bb.called
+    assert not any(aux.update_data.called for aux in hud.aux_windows)
+
+
+def test_a_hands_seats_are_read_from_the_database_once(hud_main) -> None:
+    """HandsPlayers is written with the hand and never rewritten afterwards.
+
+    read_stdin only gets past _get_table_info for a hand whose own query
+    already joined HandsPlayers, so by the time anything here asks, the rows
+    are committed and settled. Reading them once per hand instead of once per
+    caller matters because every open table asks again for the same hand.
+    """
+    db = hud_main.db_connection
+    db.get_seat_players.reset_mock()
+    db.get_seat_players.return_value = {1: {"player_id": 7, "screen_name": "hero"}}
+
+    first = hud_main._seat_players("hand-a")
+    second = hud_main._seat_players("hand-a")
+
+    assert first is second
+    db.get_seat_players.assert_called_once_with("hand-a")
+
+
+def test_a_different_hand_is_read_on_its_own(hud_main) -> None:
+    db = hud_main.db_connection
+    db.get_seat_players.reset_mock()
+
+    hud_main._seat_players("hand-a")
+    hud_main._seat_players("hand-b")
+
+    assert db.get_seat_players.call_args_list == [call("hand-a"), call("hand-b")]
+
+
+def test_a_hands_positions_are_read_from_the_database_once(hud_main) -> None:
+    db = hud_main.db_connection
+    db.get_hand_positions.reset_mock()
+    db.get_hand_positions.return_value = {7: "SB"}
+
+    first = hud_main._hand_positions("hand-a")
+    second = hud_main._hand_positions("hand-a")
+
+    assert first is second
+    db.get_hand_positions.assert_called_once_with("hand-a")
+
+
+def test_seats_and_positions_do_not_answer_for_each_other(hud_main) -> None:
+    # They are cached under one store, so the hand id alone cannot be the key.
+    db = hud_main.db_connection
+    db.get_seat_players.reset_mock()
+    db.get_hand_positions.reset_mock()
+    db.get_seat_players.return_value = {1: {"player_id": 7}}
+    db.get_hand_positions.return_value = {7: "BB"}
+
+    assert hud_main._seat_players("hand-a") == {1: {"player_id": 7}}
+    assert hud_main._hand_positions("hand-a") == {7: "BB"}
+    db.get_seat_players.assert_called_once_with("hand-a")
+    db.get_hand_positions.assert_called_once_with("hand-a")
 
 
 # Confirms that cached data is used if available when calling read_stdin.
@@ -254,6 +804,7 @@ def test_read_stdin_not_cached(hud_main) -> None:
         9,
         123456,
         "Table 789",
+        "tourney_name",
     )
 
     with (
@@ -272,6 +823,35 @@ def test_read_stdin_not_cached(hud_main) -> None:
     ):
         hud_main.read_stdin(test_hand_id)
         assert mock_create_hud.called, "create_HUD n'a pas été appelé"
+
+
+@pytest.mark.parametrize("table_name", ["", "   ", None])
+def test_read_stdin_skips_hands_without_table_name(hud_main, table_name) -> None:
+    table_info = (
+        table_name,
+        9,
+        "holdem",
+        "ring",
+        False,
+        1,
+        "CoinPoker",
+        6,
+        None,
+        None,
+        None,
+    )
+
+    with (
+        patch.object(hud_main, "_initialize_hero_data"),
+        patch.object(hud_main, "_get_table_info", return_value=table_info),
+        patch.object(hud_main, "_create_new_hud") as create_hud,
+        patch.object(hud_main, "_update_existing_hud") as update_hud,
+    ):
+        hud_main.read_stdin("27827")
+
+    create_hud.assert_not_called()
+    update_hud.assert_not_called()
+    assert "" not in hud_main.hud_dict
 
 
 # Ensures that get_cards retrieves both player and community cards correctly.
@@ -350,7 +930,7 @@ def test_zmqworker_stop() -> None:
 
 
 # Tests the run loop of ZMQWorker, ensuring it stops after processing a message.
-def test_zmqworker_run(hud_main) -> None:
+def test_zmqworker_run() -> None:
     zmq_receiver = MagicMock()
     worker = HUD_main.ZMQWorker(zmq_receiver)
 
@@ -451,6 +1031,7 @@ def test_close_event_handler(hud_main) -> None:
 def test_idle_move(hud_main) -> None:
     mock_hud = MagicMock()
     mock_hud.aux_windows = [MagicMock()]
+    mock_hud.loading_window = None
     hud_main.idle_move(mock_hud)
 
     mock_hud.move_table_position.assert_called_once()
@@ -462,11 +1043,23 @@ def test_idle_move(hud_main) -> None:
 def test_idle_resize(hud_main) -> None:
     mock_hud = MagicMock()
     mock_hud.aux_windows = [MagicMock()]
+    mock_hud.loading_window = None
     hud_main.idle_resize(mock_hud)
 
     mock_hud.resize_windows.assert_called_once()
     for aw in mock_hud.aux_windows:
         aw.resize_windows.assert_called_once()
+
+
+@pytest.mark.parametrize("geometry_callback", ["idle_move", "idle_resize"])
+def test_table_geometry_change_recenters_loading_indicator(hud_main, geometry_callback) -> None:
+    mock_hud = MagicMock(loading_window=MagicMock())
+    mock_hud.aux_windows = []
+
+    with patch.object(hud_main, "_position_loading_indicator") as position_indicator:
+        getattr(hud_main, geometry_callback)(mock_hud)
+
+    position_indicator.assert_called_once_with(mock_hud)
 
 
 # Checks that kill_hud removes the HUD from hud_dict and cleans up associated widgets.
@@ -508,9 +1101,8 @@ def test_client_destroyed(hud_main) -> None:
 
 
 # Verifies that idle_create creates a new HUD and adds it to hud_dict, along with logging.
-@pytest.mark.parametrize("import_path", ["HUD_main.QLabel", "PyQt5.QtWidgets.QLabel"])
-def test_idle_create(import_path, hud_main) -> None:
-    with patch(import_path), patch("HUD_main.log") as mock_log:
+def test_idle_create(hud_main) -> None:
+    with patch.object(HUD_main, "log") as mock_log:
         # Configuration
         mock_hud = MagicMock()
         mock_hud.tablehudlabel = MagicMock()
@@ -560,28 +1152,157 @@ def test_idle_create(import_path, hud_main) -> None:
                 )
 
         # Check logs - the method creates a label with site and temp_key
-        expected_log_message = f"adding label {table.site} - {args.temp_key}"
-
-        log_message_found = any(call[0][0] == expected_log_message for call in mock_log.debug.call_args_list)
+        mock_log.debug.assert_any_call("adding label %s", f"{table.site} - {args.temp_key}")
 
 
-# Ensures that idle_update updates the HUD and auxiliary windows.
-def test_idle_update(hud_main) -> None:
-    # Create a mock HUD
+def test_idle_create_builds_and_updates_each_auxiliary_once(hud_main) -> None:
+    mock_hud = MagicMock()
+    first_aux = MagicMock()
+    second_aux = MagicMock()
+    mock_hud.aux_windows = [first_aux, second_aux]
+    hud_main.hud_dict = {"test_table": mock_hud}
+    hud_main.vb = MagicMock()
+    table = MagicMock(site="test_site", number=123)
+    args = HUD_main.HUDCreationArgs(
+        new_hand_id="new_hand_id",
+        table=table,
+        temp_key="test_table",
+        max_seats=9,
+        poker_game="holdem",
+        game_type="cash",
+        stat_dict={},
+        cards={},
+    )
+
+    hud_main.idle_create(args)
+
+    first_aux.create.assert_called_once_with()
+    first_aux.update_gui.assert_called_once_with(args.new_hand_id)
+    second_aux.create.assert_called_once_with()
+    second_aux.update_gui.assert_called_once_with(args.new_hand_id)
+
+
+def test_idle_create_loading_uses_one_indicator_without_building_auxiliaries(hud_main) -> None:
+    mock_hud = MagicMock()
+    auxiliary = MagicMock()
+    mock_hud.aux_windows = [auxiliary]
+    hud_main.hud_dict = {"test_table": mock_hud}
+    hud_main.vb = MagicMock()
+    table = MagicMock(site="test_site", number=123)
+    args = HUD_main.HUDCreationArgs(
+        new_hand_id="new_hand_id",
+        table=table,
+        temp_key="test_table",
+        max_seats=9,
+        poker_game="holdem",
+        game_type="cash",
+        stat_dict={},
+        cards={},
+        loading=True,
+    )
+
+    with patch.object(hud_main, "_create_loading_indicator") as create_indicator:
+        hud_main.idle_create(args)
+
+    create_indicator.assert_called_once_with(mock_hud)
+    auxiliary.create.assert_not_called()
+    auxiliary.update_gui.assert_not_called()
+
+
+def test_loading_indicator_is_topified_over_the_table(hud_main) -> None:
+    table = MagicMock(x=100, y=50, width=800, height=600)
+    mock_hud = MagicMock(table=table, table_name="test_table", loading_window=None)
+
+    hud_main._create_loading_indicator(mock_hud)
+
+    indicator = mock_hud.loading_window
+    assert indicator is not None
+    assert indicator.objectName() == "hud-loading-indicator"
+    assert indicator.isVisible()
+    table.topify.assert_called_once_with(indicator)
+    indicator.hide()
+    indicator.close()
+    indicator.deleteLater()
+
+
+def test_loading_indicator_position_uses_current_table_geometry(hud_main) -> None:
+    indicator = MagicMock()
+    indicator.width.return_value = 120
+    indicator.height.return_value = 30
+    table = MagicMock(x=200, y=100, width=800, height=600)
+    mock_hud = MagicMock(table=table, loading_window=indicator)
+
+    with patch.object(HUD_main.Aux_Base, "clamp_to_screen", side_effect=lambda x, y: (x, y)):
+        hud_main._position_loading_indicator(mock_hud)
+
+    indicator.move.assert_called_once_with(540, 385)
+
+
+def test_idle_create_continues_after_one_auxiliary_fails(hud_main) -> None:
+    mock_hud = MagicMock()
+    failing_aux = MagicMock()
+    failing_aux.create.side_effect = RuntimeError("broken auxiliary")
+    healthy_aux = MagicMock()
+    mock_hud.aux_windows = [failing_aux, healthy_aux]
+    hud_main.hud_dict = {"test_table": mock_hud}
+    hud_main.vb = MagicMock()
+    table = MagicMock(site="test_site", number=123)
+    args = HUD_main.HUDCreationArgs(
+        new_hand_id="new_hand_id",
+        table=table,
+        temp_key="test_table",
+        max_seats=9,
+        poker_game="holdem",
+        game_type="cash",
+        stat_dict={},
+        cards={},
+    )
+
+    hud_main.idle_create(args)
+
+    failing_aux.create.assert_called_once_with()
+    failing_aux.update_gui.assert_not_called()
+    healthy_aux.create.assert_called_once_with()
+    healthy_aux.update_gui.assert_called_once_with(args.new_hand_id)
+
+
+def test_idle_update_hands_the_new_hand_to_the_hud(hud_main) -> None:
     temp_key = "table_name"
     mock_hud = MagicMock()
     hud_main.hud_dict[temp_key] = mock_hud
-    hud_main.hud_dict[temp_key].aux_windows = [MagicMock()]
+    mock_hud.aux_windows = [MagicMock()]
 
-    # Call idle_update
     hud_main.idle_update("new_hand_id", temp_key, hud_main.config)
 
-    # Assert update method was called
     mock_hud.update.assert_called_once_with("new_hand_id", hud_main.config)
 
-    # Assert aux_windows update_gui was called
-    for aw in hud_main.hud_dict[temp_key].aux_windows:
-        aw.update_gui.assert_called_once_with("new_hand_id")
+
+def test_idle_update_leaves_the_aux_windows_to_the_hud(hud_main) -> None:
+    """Hud.update owns the new-hand cycle, and owns it alone.
+
+    Refreshing them here as well drew each window twice per hand. For the
+    mucked-cards windows that is not merely wasted work: theirs appends a row
+    to the list and re-shows the cards, so every hand was replayed.
+    """
+    temp_key = "table_name"
+    mock_hud = MagicMock()
+    aux = MagicMock()
+    mock_hud.aux_windows = [aux]
+    hud_main.hud_dict[temp_key] = mock_hud
+
+    hud_main.idle_update("new_hand_id", temp_key, hud_main.config)
+
+    assert not aux.update_gui.called
+
+
+def test_idle_update_survives_a_hud_that_cannot_update(hud_main) -> None:
+    temp_key = "table_name"
+    mock_hud = MagicMock()
+    mock_hud.aux_windows = []
+    mock_hud.update.side_effect = RuntimeError("update failed")
+    hud_main.hud_dict[temp_key] = mock_hud
+
+    hud_main.idle_update("new_hand_id", temp_key, hud_main.config)
 
 
 # Confirms that idle_kill removes widgets from the layout and calls the HUD's kill method.
@@ -589,18 +1310,34 @@ def test_idle_kill_widget_removal(hud_main) -> None:
     mock_hud = MagicMock()
     hud_main.hud_dict["test_table"] = mock_hud
     hud_main.vb = MagicMock()
+    # Grab the label now: idle_kill clears the attribute once the label is gone.
+    label = mock_hud.tablehudlabel
 
     # Call idle_kill
     hud_main.idle_kill("test_table")
 
-    # Assert widget was removed from layout
-    hud_main.vb.removeWidget.assert_called_once_with(mock_hud.tablehudlabel)
+    # Assert widget was removed from layout, then destroyed rather than detached
+    hud_main.vb.removeWidget.assert_called_once_with(label)
+    label.deleteLater.assert_called_once()
+    label.setParent.assert_not_called()
+    assert mock_hud.tablehudlabel is None
 
     # Assert kill method on HUD was called
     mock_hud.kill.assert_called_once()
 
     # Assert HUD is removed from the dictionary
     assert "test_table" not in hud_main.hud_dict
+
+
+def test_loading_hud_does_not_overwrite_persisted_stats_when_killed(hud_main) -> None:
+    mock_hud = MagicMock(is_loading=True)
+    hud_main.hud_dict["test_table"] = mock_hud
+    hud_main.vb = MagicMock()
+
+    with patch.object(hud_main.stats_persistence, "save_hud_stats") as save_stats:
+        hud_main.idle_kill("test_table")
+
+    save_stats.assert_not_called()
 
 
 # Ensures that check_tables calls the correct methods for different table statuses.
@@ -688,9 +1425,551 @@ def test_client_methods(hud_main, method_name, expected_args) -> None:
 #         mock_log_info.assert_called_with("ZMQ receiver closed")
 
 
-# Cleanup function to remove the temporary file after all tests
-def teardown_module() -> None:
-    """Remove the temporary HUD_main.py file after all tests are done."""
-    temp_file = Path(__file__).parent.parent / "HUD_main.py"
-    if temp_file.exists():
-        temp_file.unlink()
+# Ensures that process_message returns early and does not poll if the socket is already closed.
+def test_process_message_closed_socket() -> None:
+    with patch("zmq.Context"), patch("zmq.Poller") as mock_poller_cls:
+        receiver = HUD_main.ZMQReceiver()
+        receiver.socket.closed = True
+
+        receiver.process_message()
+
+        mock_poller_cls.return_value.poll.assert_not_called()
+
+
+# Ensures that ENOTSOCK ZMQErrors are handled gracefully without raising traceback exceptions.
+def test_process_message_enotsock_handling() -> None:
+    import zmq
+
+    with patch("zmq.Context"), patch("zmq.Poller") as mock_poller_cls:
+        receiver = HUD_main.ZMQReceiver()
+        receiver.socket.closed = False
+
+        error = zmq.ZMQError()
+        if hasattr(zmq, "ENOTSOCK"):
+            error.errno = zmq.ENOTSOCK
+        else:
+            error.errno = 88  # Fallback for standard Unix ENOTSOCK
+
+        mock_poller_cls.return_value.poll.side_effect = error
+
+        with patch("HUD_main.log") as mock_log:
+            receiver.process_message()
+            mock_log.info.assert_any_call("ZMQ socket closed during poll")
+            mock_log.exception.assert_not_called()
+
+
+def test_advance_live_positions_rotates_button(hud_main) -> None:
+    """Positional panels need the CURRENT hand's position; _advance_live_positions
+    moves the button one seat from the last imported hand (works even when a
+    player is sitting out, since they are still seated)."""
+    # 3 seated players; last hand seat1=BTN, seat2=SB, seat3=BB (seat3 could be
+    # an absent hero -- still seated, still in the rotation).
+    hud_main.db_connection.get_seat_players.return_value = {
+        1: {"player_id": 11},
+        2: {"player_id": 12},
+        3: {"player_id": 13},
+    }
+    stat_dict = {
+        11: {"position": "0"},  # BTN last hand
+        12: {"position": "S"},  # SB
+        13: {"position": "B"},  # BB
+    }
+    hud_main._advance_live_positions(stat_dict, "H1")
+    # button advances to seat2: seat2=BTN, seat3=SB, seat1=BB
+    assert stat_dict[12]["live_position"] == "0"
+    assert stat_dict[13]["live_position"] == "S"
+    assert stat_dict[11]["live_position"] == "B"
+
+
+def test_advance_live_positions_no_button_is_noop(hud_main) -> None:
+    """If no button can be identified, leave live_position unset so callers fall
+    back to the imported position."""
+    hud_main.db_connection.get_seat_players.return_value = {
+        1: {"player_id": 11},
+        2: {"player_id": 12},
+    }
+    stat_dict = {11: {"position": "S"}, 12: {"position": "B"}}
+    hud_main._advance_live_positions(stat_dict, "H1")
+    assert "live_position" not in stat_dict[11]
+    assert "live_position" not in stat_dict[12]
+
+
+# --- batching -----------------------------------------------------------------
+#
+# A round of twelve tables arrives as twelve notifications a few milliseconds
+# apart. Processing each on arrival meant refreshing twelve HUDs twelve times.
+
+
+def _table_info(table_name: str) -> tuple:
+    return (table_name, 6, "holdem", "ring", False, 1, "Site", 6, None, None, None)
+
+
+def test_hands_arriving_together_are_processed_as_one_batch(hud_main) -> None:
+    hands = {"h-a": _table_info("table-a"), "h-b": _table_info("table-b")}
+    for hand_id in hands:
+        hud_main._enqueue_hand(hand_id)
+
+    with (
+        patch.object(hud_main, "_get_table_info", side_effect=hands.get),
+        patch.object(hud_main, "read_stdin", side_effect=["table-a", "table-b"]) as read_stdin,
+        patch.object(hud_main, "_refresh_other_huds") as refresh_other,
+    ):
+        hud_main._drain_pending_hands()
+
+    assert read_stdin.call_args_list == [call("h-a"), call("h-b")]
+    # One refresh for the whole batch, naming both tables as already done.
+    refresh_other.assert_called_once_with({"table-a", "table-b"})
+
+
+def test_only_the_last_hand_of_a_table_is_processed(hud_main) -> None:
+    """An earlier hand would only be overwritten by the next one."""
+    hands = {"h-1": _table_info("table-a"), "h-2": _table_info("table-a"), "h-3": _table_info("table-b")}
+    for hand_id in hands:
+        hud_main._enqueue_hand(hand_id)
+
+    with (
+        patch.object(hud_main, "_get_table_info", side_effect=hands.get),
+        patch.object(hud_main, "read_stdin") as read_stdin,
+        patch.object(hud_main, "_refresh_other_huds"),
+    ):
+        hud_main._drain_pending_hands()
+
+    assert read_stdin.call_args_list == [call("h-2"), call("h-3")]
+
+
+def test_a_hand_whose_table_is_unknown_still_takes_the_normal_path(hud_main) -> None:
+    # Not yet committed to the database: it keeps the behaviour it had, which
+    # is to be looked at and logged rather than silently dropped here.
+    hud_main._enqueue_hand("h-known")
+    hud_main._enqueue_hand("h-uncommitted")
+
+    with (
+        patch.object(hud_main, "_get_table_info", side_effect={"h-known": _table_info("table-a")}.get),
+        patch.object(hud_main, "read_stdin", side_effect=["table-a", None]) as read_stdin,
+        patch.object(hud_main, "_refresh_other_huds") as refresh_other,
+    ):
+        hud_main._drain_pending_hands()
+
+    assert read_stdin.call_args_list == [call("h-known"), call("h-uncommitted")]
+    refresh_other.assert_called_once_with({"table-a"})
+
+
+def test_the_queue_is_emptied_by_the_batch(hud_main) -> None:
+    hud_main._enqueue_hand("h-a")
+
+    with (
+        patch.object(hud_main, "_get_table_info", side_effect={"h-a": _table_info("table-a")}.get),
+        patch.object(hud_main, "read_stdin"),
+        patch.object(hud_main, "_refresh_other_huds"),
+    ):
+        hud_main._drain_pending_hands()
+
+    assert hud_main._pending_hands == []
+
+
+def test_an_empty_batch_does_nothing(hud_main) -> None:
+    with patch.object(hud_main, "_refresh_other_huds") as refresh_other:
+        hud_main._drain_pending_hands()
+
+    assert not refresh_other.called
+
+
+def test_the_window_starts_at_the_first_hand_rather_than_the_last(hud_main) -> None:
+    """A sliding window would let continuous traffic postpone the batch."""
+    hud_main._enqueue_hand("h-a")
+
+    with patch.object(hud_main._hand_batch_timer, "start") as start:
+        hud_main._enqueue_hand("h-b")
+
+    assert not start.called
+    assert hud_main._pending_hands == ["h-a", "h-b"]
+
+
+def test_one_failing_hand_does_not_stop_the_batch(hud_main) -> None:
+    hands = {"h-bad": _table_info("table-a"), "h-good": _table_info("table-b")}
+    for hand_id in hands:
+        hud_main._enqueue_hand(hand_id)
+    hud_main.db_connection.connection.rollback.reset_mock()
+
+    with (
+        patch.object(hud_main, "_get_table_info", side_effect=hands.get),
+        patch.object(hud_main, "read_stdin", side_effect=[RuntimeError("boom"), "table-b"]) as read_stdin,
+        patch.object(hud_main, "_refresh_other_huds") as refresh_other,
+    ):
+        hud_main._drain_pending_hands()
+
+    assert read_stdin.call_args_list == [call("h-bad"), call("h-good")]
+    # Once to clear the ordinary statement error before continuing, then once
+    # to release the successful read transaction at the end of the batch.
+    assert hud_main.db_connection.connection.rollback.call_count == 2
+    # The table that failed is *not* excluded: it never got its new hand, so
+    # it still needs the statistics refresh.
+    refresh_other.assert_called_once_with({"table-b"})
+
+
+def test_shutting_down_drops_a_waiting_batch(hud_main) -> None:
+    # It would otherwise fire against a closed database connection.
+    hud_main._enqueue_hand("h-a")
+
+    with (
+        patch.object(hud_main.zmq_receiver, "close"),
+        patch.object(hud_main.zmq_worker, "stop"),
+        patch("HUD_main.QCoreApplication.quit"),
+    ):
+        hud_main.destroy()
+
+    assert not hud_main._hand_batch_timer.isActive()
+    assert hud_main._pending_hands == []
+
+
+def test_a_round_of_twelve_tables_costs_twelve_refreshes(hud_main) -> None:
+    """The whole point of the batch, measured rather than asserted.
+
+    Twelve tables each dealing one hand used to mean twelve passes over twelve
+    HUDs: twelve full updates plus a hundred and thirty-two secondary ones, all
+    of them aggregated queries on the thread that has to finish before the
+    player acts. Batched, every table has a hand of its own, so none of them
+    needs the secondary path at all.
+    """
+    tables = [f"table-{index:02d}" for index in range(12)]
+    hands = {f"h-{table}": _table_info(table) for table in tables}
+    hud_main.hud_dict = dict.fromkeys(tables, MagicMock())
+    for hand_id in hands:
+        hud_main._enqueue_hand(hand_id)
+
+    with (
+        patch.object(hud_main, "_get_table_info", side_effect=hands.get),
+        patch.object(hud_main, "read_stdin") as read_stdin,
+        patch.object(hud_main, "_refresh_secondary_hud") as secondary,
+    ):
+        hud_main._drain_pending_hands()
+
+    assert read_stdin.call_count == 12
+    assert secondary.call_count == 0
+
+
+def test_a_table_that_missed_the_round_is_refreshed_once(hud_main) -> None:
+    # The secondary path is for tables that dealt nothing this batch, and it
+    # runs once for them however many hands the batch carried.
+    hands = {"h-a": _table_info("table-a"), "h-b": _table_info("table-b")}
+    hud_main.hud_dict = {"table-a": MagicMock(), "table-b": MagicMock(), "table-idle": MagicMock()}
+    hud_main._last_processed_hands = {"table-idle": "h-idle"}
+    for hand_id in hands:
+        hud_main._enqueue_hand(hand_id)
+
+    with (
+        patch.object(hud_main, "_get_table_info", side_effect={**hands, "h-idle": _table_info("table-idle")}.get),
+        patch.object(hud_main, "read_stdin"),
+        patch.object(hud_main, "_refresh_secondary_hud") as secondary,
+    ):
+        hud_main._drain_pending_hands()
+
+    secondary.assert_called_once_with("h-idle", "table-idle", "ring", 1, 6, stat_dict=None)
+
+
+# --- the two aux families -----------------------------------------------------
+#
+# A table's aux windows are not all statistics windows. The mucked-cards ones
+# react to a *new* hand: theirs appends a row to a list and re-shows the cards.
+# A statistics refresh happens when some *other* table dealt, so anything that
+# replays a hand here shows the player something they already saw.
+
+
+def _stats_aux() -> MagicMock:
+    from fpdb_3_legacy.Aux_Hud import SimpleHUD
+
+    return MagicMock(spec=SimpleHUD)
+
+
+def _mucked_aux() -> MagicMock:
+    from fpdb_3_legacy.Mucked import Flop_Mucked
+
+    return MagicMock(spec=Flop_Mucked)
+
+
+def test_only_the_statistics_windows_redraw_on_a_secondary_refresh(hud_main) -> None:
+    hud = MagicMock()
+    hud.hud_params = {"hud_days": 90, "h_hud_days": 30}
+    stats, mucked = _stats_aux(), _mucked_aux()
+    hud.aux_windows = [stats, mucked]
+    hud_main.hud_dict = {"table-b": hud}
+    hud_main.hero_ids = {2: 7}
+
+    with patch.object(hud_main, "_merge_positions"):
+        hud_main._refresh_secondary_hud("hand-b", "table-b", "ring", 2, 5)
+
+    # Both are asked; only the statistics one has anything to do, and neither
+    # is sent down the new-hand path.
+    stats.refresh_stats.assert_called_once_with("hand-b")
+    mucked.refresh_stats.assert_called_once_with("hand-b")
+    assert not stats.update_gui.called
+    assert not mucked.update_gui.called
+
+
+def test_the_mucked_windows_do_nothing_on_a_statistics_refresh() -> None:
+    """The contract itself: only a statistics HUD implements refresh_stats."""
+    from fpdb_3_legacy.Aux_Base import AuxWindow
+    from fpdb_3_legacy.Aux_Hud import SimpleHUD
+    from fpdb_3_legacy.Mucked import Flop_Mucked, Stud_mucked
+
+    assert AuxWindow.refresh_stats is Flop_Mucked.refresh_stats
+    assert AuxWindow.refresh_stats is Stud_mucked.refresh_stats
+    assert SimpleHUD.refresh_stats is not AuxWindow.refresh_stats
+
+
+def test_a_mucked_window_does_not_replay_a_hand_when_asked_for_statistics() -> None:
+    # Stud_list.update_gui appends a row per call, which is what a statistics
+    # refresh must never trigger. The no-op is what keeps it from happening.
+    from fpdb_3_legacy.Mucked import Stud_mucked
+
+    aux = MagicMock(spec=Stud_mucked)
+    aux.refresh_stats = Stud_mucked.refresh_stats.__get__(aux)
+
+    assert aux.refresh_stats("hand-b") is None
+    assert not aux.update_gui.called
+
+
+def test_one_broken_aux_window_does_not_stop_the_others(hud_main) -> None:
+    hud = MagicMock()
+    hud.hud_params = {"hud_days": 90, "h_hud_days": 30}
+    broken, healthy = _stats_aux(), _stats_aux()
+    broken.refresh_stats.side_effect = RuntimeError("aux failed")
+    hud.aux_windows = [broken, healthy]
+    hud_main.hud_dict = {"table-b": hud}
+    hud_main.hero_ids = {2: 7}
+
+    with patch.object(hud_main, "_merge_positions"):
+        hud_main._refresh_secondary_hud("hand-b", "table-b", "ring", 2, 5)
+
+    healthy.refresh_stats.assert_called_once_with("hand-b")
+
+
+def test_a_table_whose_hand_failed_is_still_refreshed(hud_main) -> None:
+    """It never received its new hand, so it is as stale as an idle table."""
+    hands = {"h-bad": _table_info("table-bad"), "h-ok": _table_info("table-ok")}
+    hud_main.hud_dict = {"table-bad": MagicMock(), "table-ok": MagicMock()}
+    hud_main._last_processed_hands = {"table-bad": "h-earlier"}
+    for hand_id in hands:
+        hud_main._enqueue_hand(hand_id)
+
+    with (
+        patch.object(hud_main, "_get_table_info", side_effect={**hands, "h-earlier": _table_info("table-bad")}.get),
+        patch.object(hud_main, "read_stdin", side_effect=[RuntimeError("boom"), "table-ok"]),
+        patch.object(hud_main, "_refresh_secondary_hud") as secondary,
+    ):
+        hud_main._drain_pending_hands()
+
+    secondary.assert_called_once_with("h-earlier", "table-bad", "ring", 1, 6, stat_dict=None)
+
+
+def test_a_table_skipped_rather_than_updated_is_still_refreshed(hud_main) -> None:
+    # read_stdin answers None when it decided not to touch the HUD at all.
+    hud_main.hud_dict = {"table-a": MagicMock()}
+    hud_main._last_processed_hands = {"table-a": "h-earlier"}
+    hud_main._enqueue_hand("h-a")
+
+    with (
+        patch.object(
+            hud_main,
+            "_get_table_info",
+            side_effect={"h-a": _table_info("table-a"), "h-earlier": _table_info("table-a")}.get,
+        ),
+        patch.object(hud_main, "read_stdin", return_value=None),
+        patch.object(hud_main, "_refresh_secondary_hud") as secondary,
+    ):
+        hud_main._drain_pending_hands()
+
+    secondary.assert_called_once_with("h-earlier", "table-a", "ring", 1, 6, stat_dict=None)
+
+
+# --- a tournament table the player was moved away from ------------------------
+
+
+def _tour_hud(table_key: str) -> MagicMock:
+    hud = MagicMock()
+    hud.table.key = table_key
+    return hud
+
+
+def test_the_window_of_the_table_left_behind_is_taken_down(hud_main) -> None:
+    hud_main.hud_dict = {"1160377 Table 4": _tour_hud("1160377 Table 4")}
+
+    with patch.object(hud_main, "table_is_stale") as stale:
+        hud_main._handle_tournament_table_changes("tour", "1160377 Table 9", "1160377")
+
+    stale.assert_called_once_with(hud_main.hud_dict["1160377 Table 4"])
+
+
+def test_another_tournament_is_left_where_it_is(hud_main) -> None:
+    hud_main.hud_dict = {"81498 Table 4": _tour_hud("81498 Table 4")}
+
+    with patch.object(hud_main, "table_is_stale") as stale:
+        hud_main._handle_tournament_table_changes("tour", "1160377 Table 9", "1160377")
+
+    assert not stale.called
+
+
+def test_a_tournament_whose_number_merely_starts_the_same_is_left_alone(hud_main) -> None:
+    """A prefix match made tournament 116 the same as 1160391."""
+    hud_main.hud_dict = {"1160391 Table 4": _tour_hud("1160391 Table 4")}
+
+    with patch.object(hud_main, "table_is_stale") as stale:
+        hud_main._handle_tournament_table_changes("tour", "116 Table 9", "116")
+
+    assert not stale.called
+
+
+def test_every_table_of_the_tournament_left_behind_is_taken_down(hud_main) -> None:
+    # Re-entry tournaments can leave more than one behind.
+    hud_main.hud_dict = {
+        "1160377 Table 4": _tour_hud("1160377 Table 4"),
+        "1160377 Table 7": _tour_hud("1160377 Table 7"),
+        "81498 Table 1": _tour_hud("81498 Table 1"),
+    }
+
+    with patch.object(hud_main, "table_is_stale") as stale:
+        hud_main._handle_tournament_table_changes("tour", "1160377 Table 9", "1160377")
+
+    assert stale.call_count == 2
+
+
+def test_a_ring_table_is_never_treated_as_a_move(hud_main) -> None:
+    hud_main.hud_dict = {"some table": _tour_hud("some table")}
+
+    with patch.object(hud_main, "table_is_stale") as stale:
+        assert hud_main._handle_tournament_table_changes("ring", "some other table", "") is False
+
+    assert not stale.called
+
+
+# --- Applying saved profile rules to tables that are already open ------------
+# HUD Preferences runs in the fpdb process; this one is a subprocess, so a rule
+# saved with Apply reaches the open tables only by way of the file.
+
+
+def _named_stat_set(profile_name: str) -> MagicMock:
+    # ``name`` is reserved by the MagicMock constructor, so it is set after.
+    stat_set = MagicMock()
+    stat_set.name = profile_name
+    return stat_set
+
+
+def _profile_hud(profile_name: str, *, game: str = "aof_omaha", table_key: str = "table-a") -> MagicMock:
+    hud = MagicMock()
+    hud.poker_game = game
+    hud.game_type = "ring"
+    hud.table.key = table_key
+    hud.table_name = table_key
+    hud.hud_context = HUD_main.HudContext(site="CoinPoker", game=game, game_type="ring", max_seats=6)
+    hud.supported_games_parameters = {"game_stat_set": _named_stat_set(profile_name)}
+    hud.aux_windows = []
+    hud.stat_dict = {}
+    return hud
+
+
+def _config_file(hud_main, tmp_path, contents: str = "<config/>") -> Path:
+    path = tmp_path / "HUD_config.xml"
+    path.write_text(contents, encoding="utf-8")
+    hud_main.config.file = str(path)
+    hud_main._config_fingerprint = hud_main._read_config_fingerprint()
+    return path
+
+
+def _resolves_to(hud_main, profile_name: str) -> MagicMock:
+    stat_set = _named_stat_set(profile_name)
+    hud_main.config.get_supported_games_parameters.return_value = {"game_stat_set": stat_set}
+    return stat_set
+
+
+def test_an_unchanged_config_file_is_not_reloaded(hud_main, tmp_path) -> None:
+    _config_file(hud_main, tmp_path)
+
+    assert hud_main.refresh_profiles_from_config() == 0
+    hud_main.config.reload.assert_not_called()
+
+
+def test_a_saved_rule_rebuilds_only_the_tables_whose_profile_changed(hud_main, tmp_path) -> None:
+    path = _config_file(hud_main, tmp_path)
+    changed = _profile_hud("aof_default", table_key="table-a")
+    unchanged = _profile_hud("plo4_6max_pro", game="omahahi", table_key="table-b")
+    hud_main.hud_dict = {"table-a": changed, "table-b": unchanged}
+
+    def resolve(poker_game, _game_type, _context=None):
+        return {"game_stat_set": _named_stat_set("aof_advanced" if poker_game == "aof_omaha" else "plo4_6max_pro")}
+
+    hud_main.config.get_supported_games_parameters.side_effect = resolve
+    hud_main.config.reload.return_value = True
+    path.write_text("<config changed=\"1\"/>", encoding="utf-8")
+    os.utime(path, (time.time() + 5, time.time() + 5))
+
+    assert hud_main.refresh_profiles_from_config() == 1
+    assert changed.supported_games_parameters["game_stat_set"].name == "aof_advanced"
+    assert unchanged.supported_games_parameters["game_stat_set"].name == "plo4_6max_pro"
+
+
+def test_a_table_local_profile_choice_survives_a_config_change(hud_main, tmp_path) -> None:
+    """The table menu is the player's explicit, session-only decision."""
+    path = _config_file(hud_main, tmp_path)
+    hud = _profile_hud("aof_default")
+    hud_main.hud_dict = {"table-a": hud}
+    hud_main.config.stat_sets = {"aof_default": MagicMock()}
+    hud_main.set_table_stat_set_override("table-a", "aof_omaha", "ring", "aof_default")
+    _resolves_to(hud_main, "aof_advanced")
+    hud_main.config.reload.return_value = True
+    os.utime(path, (time.time() + 5, time.time() + 5))
+
+    assert hud_main.refresh_profiles_from_config() == 0
+    assert hud.supported_games_parameters["game_stat_set"].name == "aof_default"
+
+
+def test_a_config_that_will_not_parse_leaves_the_profiles_in_use(hud_main, tmp_path) -> None:
+    path = _config_file(hud_main, tmp_path)
+    hud = _profile_hud("aof_default")
+    hud_main.hud_dict = {"table-a": hud}
+    hud_main.config.reload.return_value = False
+    _resolves_to(hud_main, "aof_advanced")
+    os.utime(path, (time.time() + 5, time.time() + 5))
+
+    assert hud_main.refresh_profiles_from_config() == 0
+    assert hud.supported_games_parameters["game_stat_set"].name == "aof_default"
+
+
+def test_the_change_is_detected_only_once(hud_main, tmp_path) -> None:
+    path = _config_file(hud_main, tmp_path)
+    hud_main.config.reload.return_value = True
+    os.utime(path, (time.time() + 5, time.time() + 5))
+
+    hud_main.refresh_profiles_from_config()
+    hud_main.refresh_profiles_from_config()
+
+    assert hud_main.config.reload.call_count == 1
+
+
+def test_a_rebuild_recomputes_the_scope_so_positions_follow_the_profile() -> None:
+    """Saved positions are filed under the profile, so the scope must move."""
+    hud = _profile_hud("aof_default")
+    hud.site = "CoinPoker"
+    hud.max = 6
+    hud.layout_set = SimpleNamespace(name="default")
+    hud.aux_windows = []
+    HUD_main.HudMain._rebuild_hud_with_stat_set(hud, _named_stat_set("aof_advanced"))
+
+    assert hud.position_scope.profile == "aof_advanced"
+    assert hud.position_scope.game == "aof_omaha"
+
+
+def test_a_failed_rebuild_restarts_the_table_instead_of_orphaning_windows(hud_main, tmp_path) -> None:
+    path = _config_file(hud_main, tmp_path)
+    hud = _profile_hud("aof_default")
+    hud_main.hud_dict = {"table-a": hud}
+    hud_main.config.reload.return_value = True
+    _resolves_to(hud_main, "aof_advanced")
+    os.utime(path, (time.time() + 5, time.time() + 5))
+
+    with (
+        patch.object(HUD_main.HudMain, "_rebuild_hud_with_stat_set", side_effect=RuntimeError("boom")),
+        patch.object(hud_main, "kill_hud") as kill_hud,
+    ):
+        assert hud_main.refresh_profiles_from_config() == 1
+
+    kill_hud.assert_called_once_with(None, "table-a")

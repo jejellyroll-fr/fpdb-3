@@ -1,0 +1,4648 @@
+- id: betonline_cash_nlhe_10max_0_01_0_02_201604_zero_ante
+  source: regression-test-files/cash/BetOnline/Flop/NLHE-10max-0.01-0.02-201604.zero.ante.txt
+  room: betonline
+  format: cash
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: betonline_cash_nlhe_10max_0_25_0_50_201203_unknown_player_wins
+  source: regression-test-files/cash/BetOnline/Flop/NLHE-10max-0.25-0.50-201203.unknown.player.wins.txt
+  room: betonline
+  format: cash
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: betonline_cash_nlhe_10max_0_25_0_50_201204_post_dead
+  source: regression-test-files/cash/BetOnline/Flop/NLHE-10max-0.25-0.50-201204.post.dead.txt
+  room: betonline
+  format: cash
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: betonline_cash_nlhe_10max_0_25_0_50_201204_post_now
+  source: regression-test-files/cash/BetOnline/Flop/NLHE-10max-0.25-0.50-201204.post.now.txt
+  room: betonline
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: betonline_cash_nlhe_10max_usd_0_01_0_02_201605_3_way_allin
+  source: regression-test-files/cash/BetOnline/Flop/NLHE-10max-USD-0.01-0.02-201605.3.way.allin.txt
+  room: betonline
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: betonline_cash_nlhe_10max_usd_0_01_0_02_201605_fold_blinds_antes
+  source: regression-test-files/cash/BetOnline/Flop/NLHE-10max-USD-0.01-0.02-201605.fold.blinds.antes.txt
+  room: betonline
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: betonline_cash_nlhe_10max_usd_0_01_0_02_201605_winner_no_show
+  source: regression-test-files/cash/BetOnline/Flop/NLHE-10max-USD-0.01-0.02-201605.winner.no.show.txt
+  room: betonline
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: betonline_cash_nlhe_10max_usd_0_25_0_05_201108
+  source: regression-test-files/cash/BetOnline/Flop/NLHE-10max-USD-0.25-0.05-201108.txt
+  room: betonline
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: betonline_cash_nlhe_10max_usd_0_25_0_50_201206_paynorake
+  source: regression-test-files/cash/BetOnline/Flop/NLHE-10max-USD-0.25-0.50-201206.PayNoRake.txt
+  room: betonline
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: betonline_cash_nlhe_10max_usd_1_00_2_00_201204_actionpoker
+  source: regression-test-files/cash/BetOnline/Flop/NLHE-10max-USD-1.00-2.00-201204.ActionPoker.txt
+  room: betonline
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: betonline_cash_nlhe_10max_play_10_20_201204_gearpoker
+  source: regression-test-files/cash/BetOnline/Flop/NLHE-10max-play-10-20-201204.GearPoker.txt
+  room: betonline
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: betonline_cash_plo_10max_usd_0_05_0_10_201209
+  source: regression-test-files/cash/BetOnline/Flop/PLO-10max-USD-0.05-0.10-201209.txt
+  room: betonline
+  format: cash
+  tags:
+  - regression
+  - regression_only
+- id: betfair_cash_plo_6max_usd_0_05_0_10_200909_all_in_river_splitpot
+  source: regression-test-files/cash/Betfair/Flop/PLO-6max-USD-0.05-0.10-200909.All.in.river.splitpot.txt
+  room: betfair
+  format: cash
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: bovada_cash_flhe_6max_usd_30_60_201512_new_blinds
+  source: regression-test-files/cash/Bovada/Flop/FLHE-6max-USD - $30-$60 - 201512.new.blinds.txt
+  room: bovada
+  format: cash
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: bovada_cash_flhe_9max_usd_8_16_201307_all_in_blind
+  source: regression-test-files/cash/Bovada/Flop/FLHE-9max-USD - $8-$16 - 201307.all.in.blind.txt
+  room: bovada
+  format: cash
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: bovada_cash_lhe_9max_usd_20_40_201204_limit_blinds
+  source: regression-test-files/cash/Bovada/Flop/LHE-9max-USD - $20-$40 - 201204.limit.blinds.txt
+  room: bovada
+  format: cash
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: bovada_cash_lhe_usd_2_4_201205_bodog
+  source: regression-test-files/cash/Bovada/Flop/LHE-USD-2-4-201205.Bodog.txt
+  room: bovada
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: bovada_cash_lhe_usd_8_16_201204_old_format
+  source: regression-test-files/cash/Bovada/Flop/LHE-USD-8-16-201204.old.format.txt
+  room: bovada
+  format: cash
+  tags:
+  - regression
+  - regression_only
+- id: bovada_cash_nlhe_6max_usd_0_10_0_25_202104_zonepoker
+  source: regression-test-files/cash/Bovada/Flop/NLHE-6max-USD - $0.10-$0.25 - 202104.ZonePoker.txt
+  room: bovada
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: bovada_cash_nlhe_6max_usd_0_25_0_50_201804_bodog_eu
+  source: regression-test-files/cash/Bovada/Flop/NLHE-6max-USD - $0.25-$0.50 - 201804.bodog.eu.txt
+  room: bovada
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: bovada_cash_nlhe_6max_usd_zone_0_02_0_05_201803_board_fix
+  source: regression-test-files/cash/Bovada/Flop/NLHE-6max-USD-ZONE - $0.02-$0.05
+    - 201803.board.fix.txt
+  room: bovada
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: bovada_cash_nlhe_usd_0_05_0_10_201308_zonepoker
+  source: regression-test-files/cash/Bovada/Flop/NLHE-USD - $0.05-$0.10 - 201308.ZonePoker.txt
+  room: bovada
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: bovada_cash_nlhe_usd_0_25_0_50_201608_ignition
+  source: regression-test-files/cash/Bovada/Flop/NLHE-USD - $0.25-$0.50 - 201608.Ignition.txt
+  room: bovada
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: bovada_cash_nlhe_usd_0_25_0_50_202103_mvs_version
+  source: regression-test-files/cash/Bovada/Flop/NLHE-USD - $0.25-$0.50 - 202103.MVS.version.txt
+  room: bovada
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: bovada_cash_nlhe_usd_1_00_2_00_202104_bodog_com_mvs
+  source: regression-test-files/cash/Bovada/Flop/NLHE-USD - $1.00-$2.00 - 202104.Bodog.com.MVS.txt
+  room: bovada
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: bovada_cash_nlhe_usd_2_4_201209_bodog_uk
+  source: regression-test-files/cash/Bovada/Flop/NLHE-USD-$2-$4-201209.Bodog.UK.txt
+  room: bovada
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: bovada_cash_nlhe_usd_0_10_0_25_201208_raise_to_format_change
+  source: regression-test-files/cash/Bovada/Flop/NLHE-USD-0.10-0.25-201208.raise.to.format.change.txt
+  room: bovada
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: bovada_cash_nlhe_usd_0_10_0_25_201209_ring_0_10_0_25_post_both
+  source: regression-test-files/cash/Bovada/Flop/NLHE-USD-0.10-0.25-201209.RING -
+    $0.10-$0.25 - .post.both.txt
+  room: bovada
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: bovada_cash_nlhe_usd_zone_0_02_0_05_201411_allin_blind
+  source: regression-test-files/cash/Bovada/Flop/NLHE-USD-ZONE - $0.02-$0.05 - 201411.Allin.blind.txt
+  room: bovada
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: bovada_cash_plo_usd_2_00_4_00_201205_multiway_allin
+  source: regression-test-files/cash/Bovada/Flop/PLO-USD-2.00-4.00-201205.multiway.allin.txt
+  room: bovada
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: bovada_cash_plo_usd_5_10_201204_new_format
+  source: regression-test-files/cash/Bovada/Flop/PLO-USD-5-10-201204.new.format.txt
+  room: bovada
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: bovada_cash_plo8_9max_usd_0_02_0_05_201408_corrupted_lines
+  source: regression-test-files/cash/Bovada/Flop/PLO8-9max-USD-0.02-0.05-201408.corrupted.lines.txt
+  room: bovada
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: bovada_cash_7_stud_usd_2_00_4_00_201205
+  source: regression-test-files/cash/Bovada/Stud/7-Stud-USD-2.00-4.00-201205.txt
+  room: bovada
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: bovada_cash_7_studhl_usd_0_25_0_50_201209
+  source: regression-test-files/cash/Bovada/Stud/7-StudHL-USD-0.25-0.50-201209.txt
+  room: bovada
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: bovada_cash_7_studhl_usd_ring_5_10_1_25ante_201404
+  source: regression-test-files/cash/Bovada/Stud/7-StudHL-USD-RING-$5-$10,$1.25Ante-201404.txt
+  room: bovada
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: cake_cash_lhe_6max_usd_3_00_6_00_201207_datetime_dashes
+  source: regression-test-files/cash/Cake/Flop/LHE-6max-USD-3.00-6.00-201207.datetime.dashes.txt
+  room: cake
+  format: cash
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: cake_cash_lhe_6max_usd_5_00_10_00_201206
+  source: regression-test-files/cash/Cake/Flop/LHE-6max-USD-5.00-10.00-201206.txt
+  room: cake
+  format: cash
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: cake_cash_lhe_fr_0_02_0_04_201105_all_in
+  source: regression-test-files/cash/Cake/Flop/LHE-FR-0.02-0.04-201105.All-in.txt
+  room: cake
+  format: cash
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: cake_cash_lhe_fr_0_02_0_04_201105_all_streets_with_mucked
+  source: regression-test-files/cash/Cake/Flop/LHE-FR-0.02-0.04-201105.All.streets.with.mucked.txt
+  room: cake
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: cake_cash_lhe_fr_0_02_0_04_201108_sample_with_no_table_max
+  source: regression-test-files/cash/Cake/Flop/LHE-FR-0.02-0.04-201108.Sample.with.no.table.max.txt
+  room: cake
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: cake_cash_nlhe_2_max_0_10_0_20_201205_max_uppercase
+  source: regression-test-files/cash/Cake/Flop/NLHE-2-max-0.10-0.20-201205.max.uppercase.txt
+  room: cake
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: cake_cash_nlhe_6_max_0_05_0_10_201108_sample
+  source: regression-test-files/cash/Cake/Flop/NLHE-6-max-0.05-0.10-201108.Sample.txt
+  room: cake
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: cake_cash_nlhe_6max_usd_0_25_0_50_201004_new_showdown_formats
+  source: regression-test-files/cash/Cake/Flop/NLHE-6max-USD-0.25-0.50-201004.new.showdown.formats.txt
+  room: cake
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: cake_cash_nlhe_usd_0_05_0_10_201205_dead_blind
+  source: regression-test-files/cash/Cake/Flop/NLHE-USD-0.05-0.10-201205.dead.blind.txt
+  room: cake
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: cake_cash_nlhe_play_1_2_201205
+  source: regression-test-files/cash/Cake/Flop/NLHE-play-1-2-201205.txt
+  room: cake
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: cake_cash_plo_6max_eur_0_04_0_08_201206_usd_conversion
+  source: regression-test-files/cash/Cake/Flop/PLO-6max-EUR-0.04-0.08-201206.USD.conversion.txt
+  room: cake
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: cake_cash_plo_6max_eur_0_20_0_41_201209_round_penny
+  source: regression-test-files/cash/Cake/Flop/PLO-6max-EUR-0.20-0.41-201209.round.penny.txt
+  room: cake
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: ggpoker_cash_nl_shortdeck_5max_usd_0_2_202103
+  source: regression-test-files/cash/GGPoker/Flop/NL-ShortDeck-5max-USD-0.2-202103.txt
+  room: ggpoker
+  format: cash
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: ggpoker_cash_nl_shortdeck_5max_usd_100_202104_internal
+  source: regression-test-files/cash/GGPoker/Flop/NL-ShortDeck-5max-USD-100-202104.internal.txt
+  room: ggpoker
+  format: cash
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: ggpoker_cash_plo_6max_usd_0_01_0_02_202104_stp
+  source: regression-test-files/cash/GGPoker/Flop/PLO-6max-USD-0.01-0.02-202104.STP.txt
+  room: ggpoker
+  format: cash
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: ggpoker_cash_plo_6max_usd_0_5_1_00_202006
+  source: regression-test-files/cash/GGPoker/Flop/PLO-6max-USD-0.5-1.00-202006.txt
+  room: ggpoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: ggpoker_cash_plo_6max_usd_0_50_1_00_202004
+  source: regression-test-files/cash/GGPoker/Flop/PLO-6max-USD-0.50-1.00-202004.txt
+  room: ggpoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: ggpoker_cash_plo_6max_usd_2_5_202101_rit
+  source: regression-test-files/cash/GGPoker/Flop/PLO-6max-USD-2-5-202101.RIT.txt
+  room: ggpoker
+  format: cash
+  tags:
+  - regression
+  - regression_only
+- id: ggpoker_cash_plo_6max_usd_2_5_202106_run_it_thrice
+  source: regression-test-files/cash/GGPoker/Flop/PLO-6max-USD-2-5-202106.run.it.thrice.txt
+  room: ggpoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: ggpoker_cash_plo_6max_usd_5_10_202101_missed
+  source: regression-test-files/cash/GGPoker/Flop/PLO-6max-USD-5-10-202101.missed.txt
+  room: ggpoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: ggpoker_cash_plo5_6max_usd_0_1_0_25_202104_over_straddle
+  source: regression-test-files/cash/GGPoker/Flop/PLO5-6max-USD-0.1-0.25-202104.over.straddle.txt
+  room: ggpoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: ggpoker_cash_plo5_6max_usd_2_5_202104_jackpot
+  source: regression-test-files/cash/GGPoker/Flop/PLO5-6max-USD-2-5-202104.Jackpot.txt
+  room: ggpoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: ggpoker_cash_plo5_6max_usd_2_5_202104_missed
+  source: regression-test-files/cash/GGPoker/Flop/PLO5-6max-USD-2-5-202104.missed.txt
+  room: ggpoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: ggpoker_cash_plo5_6max_usd_25_50_202104_rit
+  source: regression-test-files/cash/GGPoker/Flop/PLO5-6max-USD-25-50-202104.RIT.txt
+  room: ggpoker
+  format: cash
+  tags:
+  - regression
+  - regression_only
+- id: ggpoker_cash_plo5_6max_usd_25_50_202104_straddle
+  source: regression-test-files/cash/GGPoker/Flop/PLO5-6max-USD-25-50-202104.straddle.txt
+  room: ggpoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: ggpoker_cash_plo5_6max_usd_25_50_20210411
+  source: regression-test-files/cash/GGPoker/Flop/PLO5-6max-USD-25-50-20210411.txt
+  room: ggpoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: ggpoker_cash_plo5_6max_usd_5_10_202104_straddle
+  source: regression-test-files/cash/GGPoker/Flop/PLO5-6max-USD-5-10-202104.straddle.txt
+  room: ggpoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: kingsclub_cash_2_7_drawmaha_fl_usd_60_120_202108_showdown
+  source: regression-test-files/cash/KingsClub/Draw/2-7 Drawmaha-FL-USD-60-120-202108.showdown.txt
+  room: kingsclub
+  format: cash
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: kingsclub_cash_2_7_drawmaha_fl_usd_60_120_202108
+  source: regression-test-files/cash/KingsClub/Draw/2-7 Drawmaha-FL-USD-60-120-202108.txt
+  room: kingsclub
+  format: cash
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: kingsclub_cash_2_7_triple_draw_lowball_fl_usd_40_80_202101
+  source: regression-test-files/cash/KingsClub/Draw/2-7 Triple Draw Lowball-FL-USD-40-80-202101.txt
+  room: kingsclub
+  format: cash
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: kingsclub_cash_2_7_triple_draw_lowball_fl_usd_44_88_202012_rake
+  source: regression-test-files/cash/KingsClub/Draw/2-7 Triple Draw Lowball-FL-USD-44-88-202012.rake.txt
+  room: kingsclub
+  format: cash
+  tags:
+  - regression
+  - regression_only
+- id: kingsclub_cash_a5_1_draw_limit_usd_50_100_202102
+  source: regression-test-files/cash/KingsClub/Draw/A5-1-Draw-Limit-USD-50-100-202102.txt
+  room: kingsclub
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: kingsclub_cash_a5_3_draw_limit_usd_44_88_202010
+  source: regression-test-files/cash/KingsClub/Draw/A5-3-Draw-Limit-USD-44-88-202010.txt
+  room: kingsclub
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: kingsclub_cash_badacey_limit_usd_22_44_202101
+  source: regression-test-files/cash/KingsClub/Draw/Badacey-Limit-USD-22-44-202101.txt
+  room: kingsclub
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: kingsclub_cash_badeucey_limit_usd_22_44_202101
+  source: regression-test-files/cash/KingsClub/Draw/Badeucey-Limit-USD-22-44-202101.txt
+  room: kingsclub
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: kingsclub_cash_badugi_limit_usd_30_60_202010
+  source: regression-test-files/cash/KingsClub/Draw/Badugi-Limit-USD-30-60-202010.txt
+  room: kingsclub
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: kingsclub_cash_nl_2_7_sd_usd_125_250_202103_rit
+  source: regression-test-files/cash/KingsClub/Draw/NL-2-7-SD-USD-125-250-202103.RIT.txt
+  room: kingsclub
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: kingsclub_cash_nl_2_7_sd_usd_125_250_202103_missed_sb
+  source: regression-test-files/cash/KingsClub/Draw/NL-2-7-SD-USD-125-250-202103.missed.sb.txt
+  room: kingsclub
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: kingsclub_cash_nl_2_7_sd_usd_25_50_202108_1_rit
+  source: regression-test-files/cash/KingsClub/Draw/NL-2-7-SD-USD-25-50-202108.1.RIT.txt
+  room: kingsclub
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: kingsclub_cash_nl_2_7_sd_usd_25_50_202108_2_rit
+  source: regression-test-files/cash/KingsClub/Draw/NL-2-7-SD-USD-25-50-202108.2.RIT.txt
+  room: kingsclub
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: kingsclub_cash_nl_2_7_sd_usd_25_50_202108_3_rit
+  source: regression-test-files/cash/KingsClub/Draw/NL-2-7-SD-USD-25-50-202108.3.RIT.txt
+  room: kingsclub
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: kingsclub_cash_nl_2_7_sd_usd_25_50_202108_4_rit
+  source: regression-test-files/cash/KingsClub/Draw/NL-2-7-SD-USD-25-50-202108.4.RIT.txt
+  room: kingsclub
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: kingsclub_cash_5_card_plo_usd_5_10_202010
+  source: regression-test-files/cash/KingsClub/Flop/5-Card-PLO-USD-5-10-202010.txt
+  room: kingsclub
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: kingsclub_cash_5_card_plo8_usd_11_22_202010_quartered
+  source: regression-test-files/cash/KingsClub/Flop/5-Card-PLO8-USD-11-22-202010.quartered.txt
+  room: kingsclub
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: kingsclub_cash_5_card_plo8_usd_11_22_202010
+  source: regression-test-files/cash/KingsClub/Flop/5-Card-PLO8-USD-11-22-202010.txt
+  room: kingsclub
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: kingsclub_cash_lhe_usd_40_80_202012
+  source: regression-test-files/cash/KingsClub/Flop/LHE-USD-40-80-202012.txt
+  room: kingsclub
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: kingsclub_cash_lo_split_usd_60_120_202108
+  source: regression-test-files/cash/KingsClub/Flop/LO-Split-USD-60-120-202108.txt
+  room: kingsclub
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: kingsclub_cash_lo8_usd_40_80_202101
+  source: regression-test-files/cash/KingsClub/Flop/LO8-USD-40-80-202101.txt
+  room: kingsclub
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: kingsclub_cash_lo8_usd_500_100_202104_rio
+  source: regression-test-files/cash/KingsClub/Flop/LO8-USD-500-100-202104.RIO.txt
+  room: kingsclub
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: kingsclub_cash_nlhe_usd_125_250_202012_multi_pot
+  source: regression-test-files/cash/KingsClub/Flop/NLHE-USD-125-250-202012.multi.pot.txt
+  room: kingsclub
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: kingsclub_cash_nlhe_usd_5_10_202101
+  source: regression-test-files/cash/KingsClub/Flop/NLHE-USD-5-10-202101.txt
+  room: kingsclub
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: kingsclub_cash_plo_usd_125_250_202102_rit
+  source: regression-test-files/cash/KingsClub/Flop/PLO-USD-125-250-202102.RIT.txt
+  room: kingsclub
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: kingsclub_cash_plo_usd_5_10_202101
+  source: regression-test-files/cash/KingsClub/Flop/PLO-USD-5-10-202101.txt
+  room: kingsclub
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: kingsclub_cash_plo8_usd_5_10_202101
+  source: regression-test-files/cash/KingsClub/Flop/PLO8-USD-5-10-202101.txt
+  room: kingsclub
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: kingsclub_cash_2_7_razz_usd_22_44_202101
+  source: regression-test-files/cash/KingsClub/Stud/2-7 Razz-USD-22-44-202101.txt
+  room: kingsclub
+  format: cash
+  tags:
+  - regression
+  - regression_only
+- id: kingsclub_cash_7_stud_usd_44_88_202010
+  source: regression-test-files/cash/KingsClub/Stud/7-Stud-USD-44-88-202010.txt
+  room: kingsclub
+  format: cash
+  tags:
+  - regression
+  - regression_only
+- id: kingsclub_cash_7_studhl_usd_40_80_202101
+  source: regression-test-files/cash/KingsClub/Stud/7-StudHL-USD-40-80-202101.txt
+  room: kingsclub
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: kingsclub_cash_razz_usd_500_100_202101_multi_pot_failure
+  source: regression-test-files/cash/KingsClub/Stud/Razz-USD-500-100-202101.multi.pot.failure.txt
+  room: kingsclub
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: merge_cash_3_draw_limit_usd_1_2_201104_multi_hand_sample
+  source: regression-test-files/cash/Merge/Draw/3-Draw-Limit-USD-1-2-201104.Multi.hand.sample.txt
+  room: merge
+  format: cash
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: merge_cash_3_draw_limit_usd_1_2_201104_sample_with_showdown
+  source: regression-test-files/cash/Merge/Draw/3-Draw-Limit-USD-1-2-201104.Sample.with.showdown.txt
+  room: merge
+  format: cash
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: merge_cash_3_draw_limit_usd_5_10_201105_all_in_on_second_draw
+  source: regression-test-files/cash/Merge/Draw/3-Draw-Limit-USD-5-10-201105.All-in.on.second.draw.txt
+  room: merge
+  format: cash
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: merge_cash_3_draw_pl_usd_0_05_0_10_201102_sample_all_streets
+  source: regression-test-files/cash/Merge/Draw/3-Draw-PL-USD-0.05-0.10-201102.Sample.all.streets.txt
+  room: merge
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: merge_cash_5_carddraw_pl_usd_0_05_0_10_201111
+  source: regression-test-files/cash/Merge/Draw/5-Carddraw-PL-USD-0.05-0.10.201111.txt
+  room: merge
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: merge_cash_a5_3_draw_limit_usd_0_50_1_201105_sample
+  source: regression-test-files/cash/Merge/Draw/A5-3-Draw-Limit-USD-0.50-1-201105.Sample.txt
+  room: merge
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: merge_cash_badugi_hpl_usd_0_50_0_50_201104_sample
+  source: regression-test-files/cash/Merge/Draw/Badugi-HPL-USD-0.50-0.50-201104.Sample.txt
+  room: merge
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: merge_cash_badugi_pl_usd_0_05_0_10_201101_sample
+  source: regression-test-files/cash/Merge/Draw/Badugi-PL-USD-0.05-0.10-201101.Sample.txt
+  room: merge
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: merge_cash_flhe_9max_usd_0_02_0_04_20110416
+  source: regression-test-files/cash/Merge/Flop/FLHE-9max-USD-0.02-0.04.20110416.xml
+  room: merge
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: merge_cash_lo8_9max_usd_1_00_2_00_201112_post_both
+  source: regression-test-files/cash/Merge/Flop/LO8-9max-USD-1.00-2.00-201112.post.both.txt
+  room: merge
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: merge_cash_nlhe_6max_usd_0_02_0_04_201107_none_dealtin
+  source: regression-test-files/cash/Merge/Flop/NLHE-6max-USD-0.02-0.04.201107.none.dealtin.xml
+  room: merge
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: merge_cash_nlhe_6max_usd_0_02_0_04_201107_show_one_card
+  source: regression-test-files/cash/Merge/Flop/NLHE-6max-USD-0.02-0.04.201107.show.one.card.xml
+  room: merge
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: merge_cash_nlhe_6max_usd_1_00_2_00_201308_player_acts_after_fold
+  source: regression-test-files/cash/Merge/Flop/NLHE-6max-USD-1.00-2.00-201308.player.acts.after.fold.txt
+  room: merge
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: merge_cash_nlhe_6max_usd_1_00_2_00_201308_weird_all_in_line
+  source: regression-test-files/cash/Merge/Flop/NLHE-6max-USD-1.00-2.00-201308.weird.all.in.line.txt
+  room: merge
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: merge_cash_nlhe_9max_usd_0_25_0_50_200810_all_streets
+  source: regression-test-files/cash/Merge/Flop/NLHE-9max-USD-0.25-0.50.200810.All.Streets.txt
+  room: merge
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: merge_cash_nlhe_9max_play_10_20_201208
+  source: regression-test-files/cash/Merge/Flop/NLHE-9max-play-10-20-201208.txt
+  room: merge
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: merge_cash_nlhe_usd_1_00_2_00_201009_addcallandraise_format
+  source: regression-test-files/cash/Merge/Flop/NLHE-USD-1.00-2.00-201009.addCallandRaise.format.txt
+  room: merge
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: merge_cash_nlo_usd_0_10_0_25_201001_sample
+  source: regression-test-files/cash/Merge/Flop/NLO-USD-0.10-0.25-201001.Sample.txt
+  room: merge
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: merge_cash_plo_6max_usd_0_10_0_20_20110428
+  source: regression-test-files/cash/Merge/Flop/PLO-6max-USD-0.10-0.20.20110428.xml
+  room: merge
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: merge_cash_plo_usd_0_25_0_50_201111_raiseto_uncalledbet
+  source: regression-test-files/cash/Merge/Flop/PLO-USD-0.25-0.50-201111.raiseTo.uncalledbet.txt
+  room: merge
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: merge_cash_plo_usd_0_50_1_00_201009_colon_divider
+  source: regression-test-files/cash/Merge/Flop/PLO-USD-0.50-1.00-201009.colon.divider.txt
+  room: merge
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: merge_cash_plo_usd_0_50_1_00_201206_new_date_format
+  source: regression-test-files/cash/Merge/Flop/PLO-USD-0.50-1.00-201206.new.date.format.txt
+  room: merge
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: merge_cash_plo8_usd_0_25_0_50_201111
+  source: regression-test-files/cash/Merge/Flop/PLO8-USD-0.25-0.50-201111.txt
+  room: merge
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: merge_cash_tropicana_vii_new_format
+  source: regression-test-files/cash/Merge/Flop/Tropicana VII.new.format.txt
+  room: merge
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: merge_cash_horse_8max_usd_0_25_0_50_201409_new_format
+  source: regression-test-files/cash/Merge/Mixed/HORSE-8max-USD-0.25-0.50-201409.new.format.txt
+  room: merge
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: merge_cash_7_stud_usd_0_50_1_00_201102_sample
+  source: regression-test-files/cash/Merge/Stud/7-Stud-USD-0.50-1.00-201102.Sample.txt
+  room: merge
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: merge_cash_7_studhl_usd_0_25_0_50_201111
+  source: regression-test-files/cash/Merge/Stud/7-StudHL-USD-0.25-0.50-201111.txt
+  room: merge
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: merge_cash_7_studhl_usd_0_25_0_50_201307_no_null
+  source: regression-test-files/cash/Merge/Stud/7-StudHL-USD-0.25-0.50-201307.no.null.xml
+  room: merge
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: merge_cash_nl7_studhl_0_01_0_02_0_10_201204
+  source: regression-test-files/cash/Merge/Stud/NL7-StudHL-0.01-0.02-0.10-201204.xml
+  room: merge
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: merge_cash_razz_usd_0_50_1_00_201111_allin
+  source: regression-test-files/cash/Merge/Stud/Razz-USD-0.50-1.00-201111.allIn.txt
+  room: merge
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pacificpoker_cash_888_fhe_usd_5_10_201203_all_in_blind
+  source: regression-test-files/cash/PacificPoker/Flop/888-FHE-USD-5-10-201203.all.in.blind.txt
+  room: pacificpoker
+  format: cash
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: pacificpoker_cash_888_flh_10max_usd_0_02_0_04_201306_max_seats
+  source: regression-test-files/cash/PacificPoker/Flop/888-FLH-10max-USD-0.02-0.04-201306.max.seats.txt
+  room: pacificpoker
+  format: cash
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: pacificpoker_cash_888_flh_pm_0_50_1_00_heroloses18
+  source: regression-test-files/cash/PacificPoker/Flop/888-FLH-PM-0.50-1.00-HeroLoses18.txt
+  room: pacificpoker
+  format: cash
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: pacificpoker_cash_888_flh_pm_0_50_1_00
+  source: regression-test-files/cash/PacificPoker/Flop/888-FLH-PM-0.50-1.00.txt
+  room: pacificpoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pacificpoker_cash_888_flh_pm_1_00_2_00_stacks_over_1k
+  source: regression-test-files/cash/PacificPoker/Flop/888-FLH-PM-1.00-2.00-stacks_over_1k.txt
+  room: pacificpoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pacificpoker_cash_888_flh_usd_0_02_0_04
+  source: regression-test-files/cash/PacificPoker/Flop/888-FLH-USD-0.02-0.04.txt
+  room: pacificpoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pacificpoker_cash_888_flo_pm_30_60
+  source: regression-test-files/cash/PacificPoker/Flop/888-FLO-PM-30-60.txt
+  room: pacificpoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pacificpoker_cash_888_flohl_pm_30_60
+  source: regression-test-files/cash/PacificPoker/Flop/888-FLOHL-PM-30-60.txt
+  room: pacificpoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pacificpoker_cash_888_lhe_hu_usd_10_20_201202_cancelled_hand
+  source: regression-test-files/cash/PacificPoker/Flop/888-LHE-HU-USD-10-20-201202.cancelled.hand.txt
+  room: pacificpoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pacificpoker_cash_888_lhe_usd_0_01_0_02
+  source: regression-test-files/cash/PacificPoker/Flop/888-LHE-USD-0.01-0.02.txt
+  room: pacificpoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pacificpoker_cash_888_nlh_usd_0_01_0_02
+  source: regression-test-files/cash/PacificPoker/Flop/888-NLH-USD-0.01-0.02.txt
+  room: pacificpoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pacificpoker_cash_888_nlhe_pm_1_00_2_00
+  source: regression-test-files/cash/PacificPoker/Flop/888-NLHE-PM-1.00-2.00.txt
+  room: pacificpoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pacificpoker_cash_888_nlhe_usd_0_01_0_02_201107_non_english_post_both
+  source: regression-test-files/cash/PacificPoker/Flop/888-NLHE-USD-0.01-0.02-201107.non.english.post.both.txt
+  room: pacificpoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pacificpoker_cash_888_nlhe_usd_0_01_0_02_rake_greater_than_25_pct
+  source: regression-test-files/cash/PacificPoker/Flop/888-NLHE-USD-0.01-0.02.rake.greater.than.25.pct.txt
+  room: pacificpoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pacificpoker_cash_888_nlhe_usd_0_02_0_04_201107_russian_cards
+  source: regression-test-files/cash/PacificPoker/Flop/888-NLHE-USD-0.02-0.04-201107.russian.cards.txt
+  room: pacificpoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pacificpoker_cash_888_nlhe_usd_5_10_201205_uncalled_non_blind
+  source: regression-test-files/cash/PacificPoker/Flop/888-NLHE-USD-5-10-201205.uncalled.non.blind.txt
+  room: pacificpoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pacificpoker_cash_888_plh_pm_1_00_2_00
+  source: regression-test-files/cash/PacificPoker/Flop/888-PLH-PM-1.00-2.00.txt
+  room: pacificpoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pacificpoker_cash_888_plo_usd_10_00_20_00_201405_dutch
+  source: regression-test-files/cash/PacificPoker/Flop/888-PLO-USD-10.00-20.00-201405.dutch.txt
+  room: pacificpoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pacificpoker_cash_888_plo_usd_25_50_201508_secondsb
+  source: regression-test-files/cash/PacificPoker/Flop/888-PLO-USD-25-50-201508.secondsb.txt
+  room: pacificpoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pacificpoker_cash_nlhe_10max_usd_0_50_1_00_201607_jackpot_table
+  source: regression-test-files/cash/PacificPoker/Flop/NLHE-10max-USD-0.50-1.00-201607.jackpot.table.txt
+  room: pacificpoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pacificpoker_cash_nlhe_6max_usd_0_12_0_25_202206_ca_on
+  source: regression-test-files/cash/PacificPoker/Flop/NLHE-6max-USD-0.12-0.25-202206.ca-on.txt
+  room: pacificpoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pacificpoker_cash_plo_6max_usd_25_50_201503_observed_hand
+  source: regression-test-files/cash/PacificPoker/Flop/PLO-6max-USD-25-50-201503.observed.hand.txt
+  room: pacificpoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pacificpoker_cash_plo_6max_usd_25_50_201604_swedish
+  source: regression-test-files/cash/PacificPoker/Flop/PLO-6max-USD-25-50-201604.Swedish.txt
+  room: pacificpoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: partypoker_cash_lhe_6max_usd_15_30_201104_live_second_sb
+  source: regression-test-files/cash/PartyPoker/Flop/LHE-6max-USD-15-30-201104.live.second.sb.txt
+  room: partypoker
+  format: cash
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: partypoker_cash_lo8_usd_20_40_201201_limit3format
+  source: regression-test-files/cash/PartyPoker/Flop/LO8-USD-20-40.201201.limit3format.txt
+  room: partypoker
+  format: cash
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: partypoker_cash_nldhe_usd_0_01_0_02_201205_double_holdem
+  source: regression-test-files/cash/PartyPoker/Flop/NLDHE-USD-0.01-0.02-201205.double.holdem.txt
+  room: partypoker
+  format: cash
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: partypoker_cash_nlhe_10max_freeroll_201207_name_starts_with_number
+  source: regression-test-files/cash/PartyPoker/Flop/NLHE-10max-Freeroll-201207.name.starts.with.number.txt
+  room: partypoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: partypoker_cash_nlhe_6max_usd_0_01_0_02_201812_converted
+  source: regression-test-files/cash/PartyPoker/Flop/NLHE-6max-USD-0.01-0.02-201812.converted.txt
+  room: partypoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: partypoker_cash_nlhe_6max_usd_0_02_0_04_201209_club_wpt_format
+  source: regression-test-files/cash/PartyPoker/Flop/NLHE-6max-USD-0.02-0.04-201209.club.wpt.format.txt
+  room: partypoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: partypoker_cash_nlhe_6max_usd_0_02_0_04_201303_extra_spaces
+  source: regression-test-files/cash/PartyPoker/Flop/NLHE-6max-USD-0.02-0.04-201303.extra.spaces.txt
+  room: partypoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: partypoker_cash_nlhe_6max_usd_0_05_0_10_201209_silent_post_both
+  source: regression-test-files/cash/PartyPoker/Flop/NLHE-6max-USD-0.05-0.10-201209.silent.post.both.txt
+  room: partypoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: partypoker_cash_nlhe_6max_usd_0_05_0_10_201210_enet_converted
+  source: regression-test-files/cash/PartyPoker/Flop/NLHE-6max-USD-0.05-0.10-201210.enet.converted.txt
+  room: partypoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: partypoker_cash_nlhe_6max_usd_0_05_0_10_201608_fastforward
+  source: regression-test-files/cash/PartyPoker/Flop/NLHE-6max-USD-0.05-0.10-201608.fastforward.txt
+  room: partypoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: partypoker_cash_nlhe_6max_usd_0_10_0_25_201212_mac_format
+  source: regression-test-files/cash/PartyPoker/Flop/NLHE-6max-USD-0.10-0.25-201212.Mac.Format.txt
+  room: partypoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: partypoker_cash_nlhe_6max_usd_0_25_0_50_201212_mac_format
+  source: regression-test-files/cash/PartyPoker/Flop/NLHE-6max-USD-0.25-0.50-201212.Mac.Format.txt
+  room: partypoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: partypoker_cash_nlhe_eur_6max_0_10_0_25_201112_post_both
+  source: regression-test-files/cash/PartyPoker/Flop/NLHE-EUR-6max-0.10-0.25-201112.post.both.txt
+  room: partypoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: partypoker_cash_nlhe_usd_0_01_0_02_20100712_emailedhistory
+  source: regression-test-files/cash/PartyPoker/Flop/NLHE-USD-0.01-0.02-20100712.emailedHistory.txt
+  room: partypoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: partypoker_cash_nlhe_usd_0_01_0_02_20100731_bigblindisforcedallin
+  source: regression-test-files/cash/PartyPoker/Flop/NLHE-USD-0.01-0.02-20100731.bigBlindIsForcedAllIn.txt
+  room: partypoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: partypoker_cash_nlhe_usd_0_01_0_02_20100807_newplayerwithzerostack
+  source: regression-test-files/cash/PartyPoker/Flop/NLHE-USD-0.01-0.02-20100807.newPlayerWithZeroStack.txt
+  room: partypoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: partypoker_cash_nlhe_usd_0_01_0_02_201901_wpn_converted
+  source: regression-test-files/cash/PartyPoker/Flop/NLHE-USD-0.01-0.02-201901.WPN.converted.txt
+  room: partypoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: partypoker_cash_nlhe_usd_0_02_0_04_20100804_smallblindisforcedallin
+  source: regression-test-files/cash/PartyPoker/Flop/NLHE-USD-0.02-0.04-20100804.smallBlindIsForcedAllIn.txt
+  room: partypoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: partypoker_cash_nlhe_usd_0_05_0_10_201209_period_after_actions
+  source: regression-test-files/cash/PartyPoker/Flop/NLHE-USD-0.05-0.10-201209.period.after.actions.txt
+  room: partypoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: partypoker_cash_nlhe_usd_0_50_1_00_202103_pokerbros
+  source: regression-test-files/cash/PartyPoker/Flop/NLHE-USD-0.50-1.00-202103.PokerBros.txt
+  room: partypoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: partypoker_cash_nlhe_usd_6max_0_02_0_04_201205_new_table_format
+  source: regression-test-files/cash/PartyPoker/Flop/NLHE-USD-6max-0.02-0.04-201205.new.table.format.txt
+  room: partypoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: partypoker_cash_nlhe_usd_9max_0_01_0_02_201203_post_both
+  source: regression-test-files/cash/PartyPoker/Flop/NLHE-USD-9max-0.01-0.02-201203.post.both.txt
+  room: partypoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: partypoker_cash_plo_2max_usd_0_50_1_00_201601_unknown_preamble
+  source: regression-test-files/cash/PartyPoker/Flop/PLO-2max-USD-0.50-1.00-201601.unknown.preamble.txt
+  room: partypoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: partypoker_cash_plo_2max_usd_25_50_201710_deep
+  source: regression-test-files/cash/PartyPoker/Flop/PLO-2max-USD-25-50-201710.deep.txt
+  room: partypoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: partypoker_cash_plo_6max_usd_5_10_201202_diff_format
+  source: regression-test-files/cash/PartyPoker/Flop/PLO-6max-USD-5-10-201202.diff.format.txt
+  room: partypoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: partypoker_cash_short_deck_6max_usd_1_00_1_00_201904
+  source: regression-test-files/cash/PartyPoker/Flop/Short-Deck-6max-USD-1.00-1.00-201904.txt
+  room: partypoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: partypoker_cash_7_studhl_usd_0_50_1_00_201008
+  source: regression-test-files/cash/PartyPoker/Stud/7-StudHL-USD-0.50-1.00-201008.txt
+  room: partypoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: partypoker_cash_7_studhl_usd_10_20_201202_wins_lo_pot
+  source: regression-test-files/cash/PartyPoker/Stud/7-StudHL-USD-10-20.201202.wins.lo.pot.txt
+  room: partypoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokertracker_cash_nlhe_2max_eur_25_00_50_00_201305_new_format
+  source: regression-test-files/cash/PokerTracker/Flop/NLHE-2max-EUR-25.00-50.00-201305.new.format.txt
+  room: pokertracker
+  format: cash
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: pokertracker_cash_nlhe_6max_usd_0_02_0_04_201412_merge_v2_post_sb
+  source: regression-test-files/cash/PokerTracker/Flop/NLHE-6max-USD-0.02-0.04-201412.Merge.v2.post.sb.txt
+  room: pokertracker
+  format: cash
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: pokertracker_cash_nlhe_6max_usd_0_02_0_04_201412_merge_weird_allin_sb_corrupted
+  source: regression-test-files/cash/PokerTracker/Flop/NLHE-6max-USD-0.02-0.04-201412.Merge.weird.allin.sb.corrupted.txt
+  room: pokertracker
+  format: cash
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: ipoker_cash_nlhe_eur_0_01_0_02_201901_ipoker_uncalled
+  source: regression-test-files/cash/PokerTracker/Flop/NLHE-EUR-0.01-0.02-201901.iPoker.Uncalled.txt
+  room: ipoker
+  format: cash
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: pokertracker_cash_nlhe_eur_0_05_0_10_201111_microgaming
+  source: regression-test-files/cash/PokerTracker/Flop/NLHE-EUR-0.05-0.10-201111.Microgaming.txt
+  room: pokertracker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokertracker_cash_nlhe_eur_0_05_0_10_201205_microgaming_post_both
+  source: regression-test-files/cash/PokerTracker/Flop/NLHE-EUR-0.05-0.10-201205.Microgaming.post.both.txt
+  room: pokertracker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: ipoker_cash_nlhe_eur_0_05_0_10_201901_ipoker_new_version
+  source: regression-test-files/cash/PokerTracker/Flop/NLHE-EUR-0.05-0.10-201901.iPoker.new.version.txt
+  room: ipoker
+  format: cash
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: ipoker_cash_nlhe_eur_5_10_202104_ipoker_shows_one
+  source: regression-test-files/cash/PokerTracker/Flop/NLHE-EUR-5-10-202104.iPoker.shows.one.txt
+  room: ipoker
+  format: cash
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: ipoker_cash_nlhe_usd_0_05_0_10_201110_ipoker
+  source: regression-test-files/cash/PokerTracker/Flop/NLHE-USD-0.05-0.10-201110.iPoker.txt
+  room: ipoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: ipoker_cash_nlhe_usd_0_10_0_20_201204_pt4_merge
+  source: regression-test-files/cash/PokerTracker/Flop/NLHE-USD-0.10-0.20-201204.PT4.Merge.txt
+  room: ipoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: ipoker_cash_nlhe_usd_0_10_0_25_201201_merge_post_both
+  source: regression-test-files/cash/PokerTracker/Flop/NLHE-USD-0.10-0.25-201201.Merge-post-both.txt
+  room: ipoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokertracker_cash_nlhe_usd_0_50_1_00_201101_everest
+  source: regression-test-files/cash/PokerTracker/Flop/NLHE-USD-0.50-1.00-201101.Everest.txt
+  room: pokertracker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: ipoker_cash_nlhe_usd_0_50_1_00_201101_merge
+  source: regression-test-files/cash/PokerTracker/Flop/NLHE-USD-0.50-1.00-201101.Merge.txt
+  room: ipoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: ipoker_cash_nlhe_usd_0_50_1_00_201101_ipoker_post_both
+  source: regression-test-files/cash/PokerTracker/Flop/NLHE-USD-0.50-1.00-201101.iPoker.post.both.txt
+  room: ipoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: ipoker_cash_nlhe_usd_0_50_1_00_201101_ipoker_raise_by
+  source: regression-test-files/cash/PokerTracker/Flop/NLHE-USD-0.50-1.00-201101.iPoker.raise.by.txt
+  room: ipoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: ipoker_cash_nlhe_usd_1_00_2_00_201812_ipoker_zone
+  source: regression-test-files/cash/PokerTracker/Flop/NLHE-USD-1.00-2.00-201812.iPoker.Zone.txt
+  room: ipoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokertracker_cash_plo_2max_eur_0_25_0_50_201309_microgaming_export
+  source: regression-test-files/cash/PokerTracker/Flop/PLO-2max-EUR-0.25-0.50-201309.Microgaming.Export.txt
+  room: pokertracker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: ipoker_cash_plo_2max_usd_50_00_100_00_201308_ipoker_archive
+  source: regression-test-files/cash/PokerTracker/Flop/PLO-2max-USD-50.00-100.00-201308.iPoker.archive.txt
+  room: ipoker
+  format: cash
+  tags:
+  - regression
+  - regression_only
+- id: sealswithclubs_cash_hh20240710_no_rake_micro_stakes_1_28248_0_02_0_04_real_money_no_limit_hold_em
+  source: 'regression-test-files/cash/SealsWithClubs/private/Nouveau dossier/HH20240710
+    No-Rake Micro Stakes #1 (#28248) - 0.02-0.04 - Real Money No Limit Hold''em.txt'
+  room: sealswithclubs
+  format: cash
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: sealswithclubs_cash_hh20240710_no_rake_micro_stakes_3_38183669_0_05_0_10_real_money_no_limit_hold_em
+  source: 'regression-test-files/cash/SealsWithClubs/private/Nouveau dossier/HH20240710
+    No-Rake Micro Stakes #3 (#38183669) - 0.05-0.10 - Real Money No Limit Hold''em.txt'
+  room: sealswithclubs
+  format: cash
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: sealswithclubs_cash_hh20240710_no_rake_micro_stakes_plo_2_184040571_0_05_0_10_real_money_pot_limit_omaha
+  source: 'regression-test-files/cash/SealsWithClubs/private/Nouveau dossier/HH20240710
+    No-Rake Micro Stakes PLO #2 (#184040571) - 0.05-0.10 - Real Money Pot Limit Omaha.txt'
+  room: sealswithclubs
+  format: cash
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: pokerstars_cash_2_7_single_draw_nl_usd_0_25_0_50_201106_allin
+  source: regression-test-files/cash/Stars/Draw/2-7 Single Draw-NL-USD-0.25-0.50-201106.allin.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: pokerstars_cash_2_7_single_draw_nl_usd_0_25_0_50_201106_standspat
+  source: regression-test-files/cash/Stars/Draw/2-7 Single Draw-NL-USD-0.25-0.50-201106.standspat.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: pokerstars_cash_3_draw_limit_usd_0_10_0_20_200911
+  source: regression-test-files/cash/Stars/Draw/3-Draw-Limit-USD-0.10-0.20-200911.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: pokerstars_cash_5_carddraw_fl_usd_0_10_0_20_201106_foldednodraw
+  source: regression-test-files/cash/Stars/Draw/5-Carddraw-FL-USD-0.10-0.20-201106.FoldedNodraw.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_5_carddraw_fl_usd_0_10_0_20_201106_walked
+  source: regression-test-files/cash/Stars/Draw/5-Carddraw-FL-USD-0.10-0.20-201106.Walked.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_5_carddraw_fl_usd_0_10_0_20_201106_sidepot
+  source: regression-test-files/cash/Stars/Draw/5-Carddraw-FL-USD-0.10-0.20-201106.sidepot.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_5_carddraw_fl_usd_0_25_0_50_201209_fold_to_cb_fix
+  source: regression-test-files/cash/Stars/Draw/5-Carddraw-FL-USD-0.25-0.50-201209.fold.to.cb.fix.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_5_carddraw_fl_usd_30_60_201605_check_raise_fix
+  source: regression-test-files/cash/Stars/Draw/5-Carddraw-FL-USD-30-60-201605.check.raise.fix.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_5_carddraw_nl_usd_0_25_0_50_sample
+  source: regression-test-files/cash/Stars/Draw/5-Carddraw-NL-USD-0.25-0.50.Sample.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_5_carddraw_pl_usd_0_50_1_00_201009_sample
+  source: regression-test-files/cash/Stars/Draw/5-Carddraw-PL-USD-0.50-1.00.201009.Sample.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_5_carddraw_usd_0_10_0_20_200911
+  source: regression-test-files/cash/Stars/Draw/5-Carddraw-USD-0.10-0.20-200911.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_badugi_usd_0_25_0_50_201009
+  source: regression-test-files/cash/Stars/Draw/Badugi-USD-0.25-0.50-201009.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_nlsdraw_usd_0_25_0_50_201009_mucked_cards
+  source: regression-test-files/cash/Stars/Draw/NLSDraw-USD-0.25-0.50-201009.Mucked.cards.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_triple_draw_2_7_lowball_fl_usd_0_10_0_20_201106_sample
+  source: regression-test-files/cash/Stars/Draw/Triple Draw 2-7 Lowball-FL-USD-0.10-0.20-201106.sample.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_triple_draw_2_7_lowball_fl_usd_1_00_2_00_201206_duplicate_holecards
+  source: regression-test-files/cash/Stars/Draw/Triple Draw 2-7 Lowball-FL-USD-1.00-2.00-201206.duplicate.holecards.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_2025_nl_6max_usd_0_05_0_10_cashout
+  source: regression-test-files/cash/Stars/Flop/2025-NL-6max-USD-0.05-0.10.cashout.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - regression_only
+- id: pokerstars_cash_2025_nl_uncalled_bet
+  source: regression-test-files/cash/Stars/Flop/2025-NL-uncalled-bet.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_258753941248_anon5
+  source: regression-test-files/cash/Stars/Flop/258753941248_anon5.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_5_card_plo_6max_usd_0_50_1_00_201305_shows_one
+  source: regression-test-files/cash/Stars/Flop/5-Card-PLO-6max-USD-0.50-1.00-201305.shows.one.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_5_card_plo_6max_usd_15_30_201905_pokermaster
+  source: regression-test-files/cash/Stars/Flop/5-Card-PLO-6max-USD-15-30-201905.PokerMaster.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_5_card_plo_6max_usd_3_00_6_00_201303
+  source: regression-test-files/cash/Stars/Flop/5-Card-PLO-6max-USD-3.00-6.00-201303.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_5_card_plo8_6max_usd_2_00_4_00_201304
+  source: regression-test-files/cash/Stars/Flop/5-Card-PLO8-6max-USD-2.00-4.00-201304.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_6_holdem_6max_usd_0_25_0_25_multiple_cash_out
+  source: regression-test-files/cash/Stars/Flop/6+Holdem-6max-USD-0.25-0.25.multiple.Cash.Out.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_6_holdem_6max_usd_0_50_0_50_201907_no_break_space
+  source: regression-test-files/cash/Stars/Flop/6+Holdem-6max-USD-0.50-0.50-201907.no.break.space.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_6_holdem_6max_usd_2_00_2_00_201904_walk
+  source: regression-test-files/cash/Stars/Flop/6+Holdem-6max-USD-2.00-2.00-201904.walk.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_6_holdem_6max_usd_5_00_5_00_201901
+  source: regression-test-files/cash/Stars/Flop/6+Holdem-6max-USD-5.00-5.00-201901.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_6_card_plo_6max_usd_0_05_0_10_202111_cash_out
+  source: regression-test-files/cash/Stars/Flop/6-Card-PLO-6max-USD-0.05-0.10-202111.cash.out.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - regression_only
+- id: pokerstars_cash_6_card_plo_6max_usd_0_10_0_25_202201_multiway_allin_deadcards
+  source: regression-test-files/cash/Stars/Flop/6-Card-PLO-6max-USD-0.10-0.25-202201.multiway.allin.deadcards.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - regression_only
+- id: pokerstars_cash_6_card_plo_6max_usd_0_25_0_50_202004
+  source: regression-test-files/cash/Stars/Flop/6-Card-PLO-6max-USD-0.25-0.50-202004.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_6_card_plo_6max_usd_0_50_1_00_202004_cash_out
+  source: regression-test-files/cash/Stars/Flop/6-Card-PLO-6max-USD-0.50-1.00-202004.Cash.Out.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - regression_only
+- id: pokerstars_cash_6_card_plo_6max_usd_1_00_2_00_202004_cash_out_2
+  source: regression-test-files/cash/Stars/Flop/6-Card-PLO-6max-USD-1.00-2.00-202004.Cash.Out.2.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - regression_only
+- id: pokerstars_cash_hh20100819_vibilia_ii_0_02_0_04_usd_лимит_холдем
+  source: regression-test-files/cash/Stars/Flop/HH20100819 Vibilia II - $0,02-$0,04
+    - USD Лимит Холдем.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_hh20251130_latona_v_0_10_0_25_usd_pot_limit_5_card_omaha_hi_lo
+  source: regression-test-files/cash/Stars/Flop/HH20251130.Latona.V.-.0.10-.0.25.-.USD.Pot.Limit.5.Card.Omaha.Hi-Lo.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_lhe_10max_usd_0_05_0_10_pf_all_fold_to_bb
+  source: regression-test-files/cash/Stars/Flop/LHE-10max-USD-0.05-0.10-PF_all_fold_to_BB.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_lhe_10max_usd_1_00_2_00_200508_hero_takes_a_walk
+  source: regression-test-files/cash/Stars/Flop/LHE-10max-USD-1.00-2.00-200508.hero.takes.a.walk.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_lhe_10max_usd_1_00_2_00_no_max_seats
+  source: regression-test-files/cash/Stars/Flop/LHE-10max-USD-1.00-2.00-No_max_seats.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_lhe_usd_1_00_200508_bb_and_button_same_player
+  source: regression-test-files/cash/Stars/Flop/LHE-USD-1.00-200508.BB.and.Button.same.player.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_nlh_plo_6max_usd_0_10_0_20_201204
+  source: regression-test-files/cash/Stars/Flop/NLH-PLO-6max-USD-0.10-0.20-201204.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_nlhe_10max_usd_1_00_2_00_200910_hm1_export_raiseto
+  source: regression-test-files/cash/Stars/Flop/NLHE-10max-USD-1.00-2.00-200910.HM1.export.raiseTo.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_nlhe_10max_usd_1_00_2_00_200910_hm1_shows_one
+  source: regression-test-files/cash/Stars/Flop/NLHE-10max-USD-1.00-2.00-200910.HM1.shows.one.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_nlhe_2max_usd_0_25_0_50_201005_hitnrun
+  source: regression-test-files/cash/Stars/Flop/NLHE-2max-USD-0.25-0.50-201005.Hitnrun.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_nlhe_6_max_usd_10_20_201701_converted_split_summary
+  source: regression-test-files/cash/Stars/Flop/NLHE-6-max-USD-10-20-201701.converted.split.summary.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - regression_only
+- id: pokerstars_cash_nlhe_6_max_usd_10_20_201701_pot1_converted_walk
+  source: regression-test-files/cash/Stars/Flop/NLHE-6-max-USD-10-20-201701.pot1.converted.walk.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - regression_only
+- id: pokerstars_cash_nlhe_6_max_usd_10_20_201701_pot2_converted_walk
+  source: regression-test-files/cash/Stars/Flop/NLHE-6-max-USD-10-20-201701.pot2.converted.walk.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - regression_only
+- id: pokerstars_cash_nlhe_6max_eur_0_02_0_04_201902_rio
+  source: regression-test-files/cash/Stars/Flop/NLHE-6max-EUR-0.02-0.04-201902.RIO.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_nlhe_6max_eur_0_05_0_10_200911
+  source: regression-test-files/cash/Stars/Flop/NLHE-6max-EUR-0.05-0.10-200911.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_nlhe_6max_eur_0_05_0_10_201906_rio_stp
+  source: regression-test-files/cash/Stars/Flop/NLHE-6max-EUR-0.05-0.10-201906.RIO.STP.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_nlhe_6max_eur_0_05_0_10_201906_rio_stp_walk
+  source: regression-test-files/cash/Stars/Flop/NLHE-6max-EUR-0.05-0.10-201906.RIO.STP.walk.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_nlhe_6max_eur_0_05_0_10_201906_rio_hero
+  source: regression-test-files/cash/Stars/Flop/NLHE-6max-EUR-0.05-0.10-201906.RIO.hero.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_nlhe_6max_eur_0_05_0_10_201906_rio_walk
+  source: regression-test-files/cash/Stars/Flop/NLHE-6max-EUR-0.05-0.10-201906.RIO.walk.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_nlhe_6max_eur_1_00_2_00_201212_runittwice
+  source: regression-test-files/cash/Stars/Flop/NLHE-6max-EUR-1.00-2.00-201212.RunItTwice.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_nlhe_6max_usd_0_01_0_02_201101_export_from_pt_or_hem_trailing_whitespace
+  source: regression-test-files/cash/Stars/Flop/NLHE-6max-USD-0.01-0.02-201101.Export.from.PT.or.HEM.trailing.whitespace.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_nlhe_6max_usd_0_01_0_02_201301_zoom_archive_format
+  source: regression-test-files/cash/Stars/Flop/NLHE-6max-USD-0.01-0.02-201301.zoom.archive.format.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_nlhe_6max_usd_0_05_0_10_200911
+  source: regression-test-files/cash/Stars/Flop/NLHE-6max-USD-0.05-0.10-200911.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_nlhe_6max_usd_0_05_0_10_200912_allin_pre
+  source: regression-test-files/cash/Stars/Flop/NLHE-6max-USD-0.05-0.10-200912.Allin-pre.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_nlhe_6max_usd_0_05_0_10_200912_stats_comparision
+  source: regression-test-files/cash/Stars/Flop/NLHE-6max-USD-0.05-0.10-200912.Stats-comparision.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_nlhe_6max_usd_0_50_1_00_202103_pokerbros
+  source: regression-test-files/cash/Stars/Flop/NLHE-6max-USD-0.50-1.00-202103.PokerBros.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_nlhe_6max_usd_2_00_4_00_pt2_export
+  source: regression-test-files/cash/Stars/Flop/NLHE-6max-USD-2.00-4.00.PT2.export.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_nlhe_6max_usd_3_00_6_00_201310_old_converted_walk
+  source: regression-test-files/cash/Stars/Flop/NLHE-6max-USD-3.00-6.00-201310.old.converted.walk.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_nlhe_6max_play_25_50_201605_fulltilt_rush
+  source: regression-test-files/cash/Stars/Flop/NLHE-6max-play-25-50-201605.FullTilt.Rush.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_nlhe_6max_play_5_10_201605_fulltilt
+  source: regression-test-files/cash/Stars/Flop/NLHE-6max-play-5-10-201605.FullTilt.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_nlhe_8max_cny_2_00_4_00_201903_elitehud
+  source: regression-test-files/cash/Stars/Flop/NLHE-8max-CNY-2.00-4.00-201903.elitehud.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_nlhe_9_max_usd_2_00_4_00_201901_pokermaster_w_straddle
+  source: regression-test-files/cash/Stars/Flop/NLHE-9-max-USD-2.00-4.00-201901.PokerMaster.w.Straddle.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_nlhe_9max_usd_0_25_0_50_200801_4_way_split_unequal_rake
+  source: regression-test-files/cash/Stars/Flop/NLHE-9max-USD-0.25-0.50-200801.4.way.split.unequal.rake.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_nlhe_9max_play_1_2_201201_home_game
+  source: regression-test-files/cash/Stars/Flop/NLHE-9max-play-1-2-201201.Home.Game.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_nlhe_cap_9max_usd_0_25_0_50_201011_capped_preflop
+  source: regression-test-files/cash/Stars/Flop/NLHE-CAP-9max-USD-0.25-0.50-201011.Capped.preflop.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_nlhe_fr_usd_0_01_0_02_201004_4betpf
+  source: regression-test-files/cash/Stars/Flop/NLHE-FR-USD-0.01-0.02-201004.4betPF.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_nlhe_fr_usd_0_01_0_02_201005_microgrind
+  source: regression-test-files/cash/Stars/Flop/NLHE-FR-USD-0.01-0.02-201005.microgrind.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_nlhe_fr_usd_0_01_0_02_201006_foldsoutofturn
+  source: regression-test-files/cash/Stars/Flop/NLHE-FR-USD-0.01-0.02-201006.foldsoutofturn.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_nlhe_fr_usd_0_05_0_10_201004_allinwithamtreturned
+  source: regression-test-files/cash/Stars/Flop/NLHE-FR-USD-0.05-0.10-201004.allinWithAmtReturned.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_nlhe_split_6max_usd_1_00_2_00_201803
+  source: regression-test-files/cash/Stars/Flop/NLHE-Split-6max-USD-1.00-2.00-201803.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_nlhe_play_100_200_201201_ev_rounding
+  source: regression-test-files/cash/Stars/Flop/NLHE-play-100-200-201201.ev.rounding.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_pl_courchevel_6max_usd_0_50_1_00_201604_weird_board
+  source: regression-test-files/cash/Stars/Flop/PL-Courchevel-6max-USD-0.50-1.00-201604.weird.board.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_pl_courchevel_6max_usd_3_00_6_00_201303
+  source: regression-test-files/cash/Stars/Flop/PL-Courchevel-6max-USD-3.00-6.00-201303.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_pl_courchevel_hl_6max_usd_1_00_2_00_201303_run_it_twice
+  source: regression-test-files/cash/Stars/Flop/PL-Courchevel-HL-6max-USD-1.00-2.00-201303.Run.It.Twice.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_plo_6_max_usd_30_60_201703_converted_secondsb
+  source: regression-test-files/cash/Stars/Flop/PLO-6-max-USD-30-60-201703.converted.secondsb.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_plo_6max_eur_0_10_0_20_201904_rio_side_pots
+  source: regression-test-files/cash/Stars/Flop/PLO-6max-EUR-0.10-0.20-201904.RIO.Side.Pots.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_plo_6max_eur_0_25_0_50_201908_rio_stp_side_pot
+  source: regression-test-files/cash/Stars/Flop/PLO-6max-EUR-0.25-0.50-201908.RIO.STP.side.pot.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_plo_6max_eur_1_00_2_00_201902_rio_raiseto_bug
+  source: regression-test-files/cash/Stars/Flop/PLO-6max-EUR-1.00-2.00-201902.RIO.raiseTo.bug.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_plo_6max_usd_0_50_1_00_201204_shows_2
+  source: regression-test-files/cash/Stars/Flop/PLO-6max-USD-0.50-1.00-201204.shows.2.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_plo_6max_usd_10_20_201703_converted_disconnected_folds
+  source: regression-test-files/cash/Stars/Flop/PLO-6max-USD-10-20-201703.converted.disconnected.folds.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_plo_6max_usd_200_400_201505_rit_leaves_table
+  source: regression-test-files/cash/Stars/Flop/PLO-6max-USD-200-400-201505.rit.leaves.table.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_plo_6max_usd_5_10_201509_converted_format
+  source: regression-test-files/cash/Stars/Flop/PLO-6max-USD-5-10-201509.converted.format.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_plo_6max_usd_5_10_201509_converted_uncalled_bet
+  source: regression-test-files/cash/Stars/Flop/PLO-6max-USD-5-10-201509.converted.uncalled.bet.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_plo_fr_usd_0_01_0_02_201006_sidepots
+  source: regression-test-files/cash/Stars/Flop/PLO-FR-USD-0.01-0.02-201006.sidepots.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_plo5_hi_lo_usd_0_10_0_25_issue137
+  source: regression-test-files/cash/Stars/Flop/PLO5-Hi-Lo-USD-0.10-0.25-issue137.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_plo8_6max_usd_0_01_0_02_200911
+  source: regression-test-files/cash/Stars/Flop/PLO8-6max-USD-0.01-0.02-200911.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_plo8_9max_usd_0_01_0_02_20100829_no_vpip_from_posted_bb
+  source: regression-test-files/cash/Stars/Flop/PLO8-9max-USD-0.01-0.02-20100829.No.VPIP.from.posted.bb.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_7_stud_usd_0_04_0_08_200907_missing_showdown_card
+  source: regression-test-files/cash/Stars/Stud/7-Stud-USD-0.04-0.08-200907.Missing.Showdown.Card.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_7_stud_usd_0_04_0_08_200911
+  source: regression-test-files/cash/Stars/Stud/7-Stud-USD-0.04-0.08-200911.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_7_studhl_usd_0_04_0_08_200911_cardtest
+  source: regression-test-files/cash/Stars/Stud/7-StudHL-USD-0.04-0.08-200911.Cardtest.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_7_studhl_usd_0_04_0_08_200911
+  source: regression-test-files/cash/Stars/Stud/7-StudHL-USD-0.04-0.08-200911.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_7_studhl_usd_400_800_201701_3bet_fix
+  source: regression-test-files/cash/Stars/Stud/7-StudHL-USD-400-800-201701.3bet.fix.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_hh20110417_salm_ix_0_04_0_08_ante_0_01_usd_limit_stud
+  source: regression-test-files/cash/Stars/Stud/HH20110417 Salm IX - $0.04-$0.08 Ante
+    $0.01 - USD Limit Stud.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_razz_usd_0_04_0_08_200911
+  source: regression-test-files/cash/Stars/Stud/Razz-USD-0.04-0.08-200911.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_hh20240714_boyce_0_01_0_02_eur_pot_limit_fusion
+  source: regression-test-files/cash/Stars/private/ring/HH20240714 Boyce - €0.01-€0.02
+    - EUR Pot Limit Fusion.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_hh20240714_scania_0_01_0_02_eur_pot_limit_fusion
+  source: regression-test-files/cash/Stars/private/ring/HH20240714 Scania - €0.01-€0.02
+    - EUR Pot Limit Fusion.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: pokerstars_cash_hh20240722_alzirr_0_01_0_02_eur_pot_limit_fusion
+  source: regression-test-files/cash/Stars/private/ring/HH20240722 Alzirr - €0.01-€0.02
+    - EUR Pot Limit Fusion.txt
+  room: pokerstars
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: unibet_cash_nlhe_eur_0_05_0_10_202104_banzi
+  source: regression-test-files/cash/Unibet/Flop/NLHE-EUR-0.05-0.10-202104.Banzi.txt
+  room: unibet
+  format: cash
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: winamax_cash_triple_draw_2_7_fl_6max_play_0_50_1_00_201610_export
+  source: regression-test-files/cash/Winamax/Draw/Triple Draw 2-7-FL-6max-play-0.50-1.00-201610.export.txt
+  room: winamax
+  format: cash
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: winamax_cash_5_card_plo_6max_eur_2_00_4_00_201611_raiseto
+  source: regression-test-files/cash/Winamax/Flop/5-Card-PLO-6max-EUR-2.00-4.00-201611.raiseTo.txt
+  room: winamax
+  format: cash
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: winamax_cash_5_card_plo_6max_eur_5_00_10_00_201703_format2
+  source: regression-test-files/cash/Winamax/Flop/5-Card-PLO-6max-EUR-5.00-10.00-201703.format2.txt
+  room: winamax
+  format: cash
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: winamax_cash_5_card_plo8_6max_eur_1_00_2_00_201611
+  source: regression-test-files/cash/Winamax/Flop/5-Card-PLO8-6max-EUR-1.00-2.00-201611.txt
+  room: winamax
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: winamax_cash_lhe_2max_eur_0_05_0_10_201204
+  source: regression-test-files/cash/Winamax/Flop/LHE-2max-EUR-0.05-0.10-201204.txt
+  room: winamax
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: winamax_cash_nlhe_2max_eur_2_4_201704_go_fast
+  source: regression-test-files/cash/Winamax/Flop/NLHE-2max-EUR-2-4-201704.go.fast.txt
+  room: winamax
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: winamax_cash_nlhe_5max_eur_1_2_201201_hero_sitting_out
+  source: regression-test-files/cash/Winamax/Flop/NLHE-5max-EUR-1-2-201201.Hero.Sitting.Out.txt
+  room: winamax
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: winamax_cash_nlhe_5max_eur_2_00_4_00_202005_action_error
+  source: regression-test-files/cash/Winamax/Flop/NLHE-5max-EUR-2.00-4.00-202005.action.error.txt
+  room: winamax
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: winamax_cash_nlhe_5max_play_0_10_0_20_201208
+  source: regression-test-files/cash/Winamax/Flop/NLHE-5max-play-0.10-0.20-201208.txt
+  room: winamax
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: winamax_cash_nlhe_5max_play_0_50_1_00_201304_players_not_in_summary
+  source: regression-test-files/cash/Winamax/Flop/NLHE-5max-play-0.50-1.00-201304.players.not.in.summary.txt
+  room: winamax
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: winamax_cash_nlhe_fr_eur_0_02_0_05_201010_invalid_side_pot_player8
+  source: regression-test-files/cash/Winamax/Flop/NLHE-FR-EUR-0.02-0.05-201010.Invalid.side.pot.Player8.txt
+  room: winamax
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: winamax_cash_nlhe_fr_eur_0_02_0_05_201010_real_side_pot_with_bad_collected_biggest_stack_wins
+  source: regression-test-files/cash/Winamax/Flop/NLHE-FR-EUR-0.02-0.05-201010.Real.side.pot.with.bad.collected.Biggest.stack.wins.txt
+  room: winamax
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: winamax_cash_nlhe_fr_eur_0_02_0_05_201010_side_pot_biggest_stack_loses_main
+  source: regression-test-files/cash/Winamax/Flop/NLHE-FR-EUR-0.02-0.05-201010.Side.pot.Biggest.stack.loses.main.txt
+  room: winamax
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: winamax_cash_plo_5max_eur_1_00_2_00_201407_ante_raise
+  source: regression-test-files/cash/Winamax/Flop/PLO-5max-EUR-1.00-2.00-201407.ante.raise.txt
+  room: winamax
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: winamax_cash_plo_5max_eur_1_00_2_00_201408_bad_pot
+  source: regression-test-files/cash/Winamax/Flop/PLO-5max-EUR-1.00-2.00-201408.bad.pot.txt
+  room: winamax
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: winamax_cash_plo_5max_eur_1_00_2_00_201611_post_both
+  source: regression-test-files/cash/Winamax/Flop/PLO-5max-EUR-1.00-2.00-201611.post.both.txt
+  room: winamax
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: winamax_cash_plo_5max_eur_2_4_202104_no_colon
+  source: regression-test-files/cash/Winamax/Flop/PLO-5max-EUR-2-4-202104.no.colon.txt
+  room: winamax
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: winamax_cash_plo_5max_eur_2_00_4_00_201412_sb_oop
+  source: regression-test-files/cash/Winamax/Flop/PLO-5max-EUR-2.00-4.00-201412.sb.oop.txt
+  room: winamax
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: winamax_cash_plo_fr_eur_0_02_0_05_201009_real_side_pot_with_bad_collected
+  source: regression-test-files/cash/Winamax/Flop/PLO-FR-EUR-0.02-0.05-201009.Real.side.pot.with.bad.collected.txt
+  room: winamax
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: winamax_cash_plo_fr_eur_0_50_1_00_201103_hid_out_of_range
+  source: regression-test-files/cash/Winamax/Flop/PLO-FR-EUR-0.50-1.00-201103.hid.out.of.range.txt
+  room: winamax
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: winamax_cash_plo8_2max_play_0_05_0_10_201610_export
+  source: regression-test-files/cash/Winamax/Flop/PLO8-2max-play-0.05-0.10-201610.export.txt
+  room: winamax
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: winamax_cash_plo8_6max_eur_1_00_2_00_201611
+  source: regression-test-files/cash/Winamax/Flop/PLO8-6max-EUR-1.00-2.00-201611.txt
+  room: winamax
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: winamax_cash_20240520_colorado_real_holdem_no_limit
+  source: regression-test-files/cash/Winamax/Flop/private/cash/20240520_Colorado_real_holdem_no-limit.txt
+  room: winamax
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: winamax_cash_20240612_ferrare_02_real_omaha5_pot_limit
+  source: regression-test-files/cash/Winamax/Flop/private/cash/20240612_Ferrare 02_real_omaha5_pot-limit.txt
+  room: winamax
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: winamax_cash_20240616_casablanca_02_real_omaha_pot_limit
+  source: regression-test-files/cash/Winamax/Flop/private/cash/20240616_Casablanca
+    02_real_omaha_pot-limit.txt
+  room: winamax
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: winamax_cash_20240616_ferrare_real_omaha5_pot_limit
+  source: regression-test-files/cash/Winamax/Flop/private/cash/20240616_Ferrare_real_omaha5_pot-limit.txt
+  room: winamax
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: winamax_cash_20240703_casablanca_04_real_omaha_pot_limit
+  source: regression-test-files/cash/Winamax/Flop/private/cash/20240703_Casablanca
+    04_real_omaha_pot-limit.txt
+  room: winamax
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: winamax_cash_20240707_casablanca_07_real_omaha_pot_limit
+  source: regression-test-files/cash/Winamax/Flop/private/cash/20240707_Casablanca
+    07_real_omaha_pot-limit.txt
+  room: winamax
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: winamax_cash_20240711_casablanca_03_real_omaha_pot_limit
+  source: regression-test-files/cash/Winamax/Flop/private/cash/20240711_Casablanca
+    03_real_omaha_pot-limit.txt
+  room: winamax
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: winamax_cash_20240711_ferrare_04_real_omaha5_pot_limit
+  source: regression-test-files/cash/Winamax/Flop/private/cash/20240711_Ferrare 04_real_omaha5_pot-limit.txt
+  room: winamax
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: winamax_cash_20240714_aalen_09_real_holdem_no_limit
+  source: regression-test-files/cash/Winamax/Flop/private/cash/20240714_Aalen 09_real_holdem_no-limit.txt
+  room: winamax
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: winamax_cash_20240714_pittsburgh_02_real_omaha_pot_limit
+  source: regression-test-files/cash/Winamax/Flop/private/cash/20240714_Pittsburgh
+    02_real_omaha_pot-limit.txt
+  room: winamax
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: winamax_cash_20240714_pittsburgh_real_omaha_pot_limit
+  source: regression-test-files/cash/Winamax/Flop/private/cash/20240714_Pittsburgh_real_omaha_pot-limit.txt
+  room: winamax
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: winamax_cash_20240715_casablanca_02_real_omaha_pot_limit
+  source: regression-test-files/cash/Winamax/Flop/private/cash/20240715_Casablanca
+    02_real_omaha_pot-limit.txt
+  room: winamax
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: winamax_cash_20240715_nice_24_real_holdem_no_limit
+  source: regression-test-files/cash/Winamax/Flop/private/cash/20240715_Nice 24_real_holdem_no-limit.txt
+  room: winamax
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: winamax_cash_20240723_casablanca_03_real_omaha_pot_limit
+  source: regression-test-files/cash/Winamax/Flop/private/cash/20240723_Casablanca
+    03_real_omaha_pot-limit.txt
+  room: winamax
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: winamax_cash_20240723_casablanca_04_real_omaha_pot_limit
+  source: regression-test-files/cash/Winamax/Flop/private/cash/20240723_Casablanca
+    04_real_omaha_pot-limit.txt
+  room: winamax
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: winamax_cash_7_stud_6max_play_0_5_0_10_201606_export
+  source: regression-test-files/cash/Winamax/Stud/7-Stud-6max-play-0.5-0.10-201606.export.txt
+  room: winamax
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: winningpoker_cash_6_holdem_6_max_usd_0_02_0_05_201902_hh00000000_g0
+  source: regression-test-files/cash/Winning/Flop/6+Holdem-6-max-USD-0.02-0.05-201902.HH00000000
+    G0.txt
+  room: winningpoker
+  format: cash
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: winningpoker_cash_7stud_8max_usd_0_04_0_08_201907_cashid_tn_gorham_gametype
+  source: regression-test-files/cash/Winning/7Stud-8max-USD-0.04-0.08-201907.CASHID-TN-Gorham
+    GAMETYPE.txt
+  room: winningpoker
+  format: cash
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: winningpoker_cash_lo8_6max_usd_20_40_201907_cashid_tn_st_fullstop_lucie_gametype
+  source: regression-test-files/cash/Winning/Flop/LO8-6max-USD-20-40-201907.CASHID-TN-St{FULLSTOP}
+    Lucie GAMETYPE.txt
+  room: winningpoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: winningpoker_cash_nlhe_6max_usd_0_05_0_10_201906_rushid_tn_blitz_poker_gametype
+  source: regression-test-files/cash/Winning/Flop/NLHE-6max-USD-0.05-0.10-201906.RUSHID-TN-Blitz
+    Poker GAMETYPE.txt
+  room: winningpoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: winningpoker_cash_nlhe_9max_usd_0_01_0_02_201911_cashid_tn_miramar_cap_gametype
+  source: regression-test-files/cash/Winning/Flop/NLHE-9max-USD-0.01-0.02-201911.CASHID-TN-Miramar
+    (Cap) GAMETYPE.txt
+  room: winningpoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: winningpoker_cash_nlhe_9max_usd_0_02_0_05_202104_post_dead
+  source: regression-test-files/cash/Winning/Flop/NLHE-9max-USD-0.02-0.05-202104.post.dead.txt
+  room: winningpoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: winningpoker_cash_nlhe_9max_usd_0_02_0_05_202104_walk
+  source: regression-test-files/cash/Winning/Flop/NLHE-9max-USD-0.02-0.05-202104.walk.txt
+  room: winningpoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: winningpoker_cash_nlhe_9max_usd_1_00_2_00_201612_unknown_player_acts_hh20160621_g30997753
+  source: regression-test-files/cash/Winning/Flop/NLHE-9max-USD-1.00-2.00-201612.Unknown.Player.Acts.HH20160621
+    G30997753.txt
+  room: winningpoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: winningpoker_cash_nlo8_6max_usd_3_6_202104_rit
+  source: regression-test-files/cash/Winning/Flop/NLO8-6max-USD-3-6-202104.RIT.txt
+  room: winningpoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: winningpoker_cash_nlo8_6max_usd_3_6_202104_walk
+  source: regression-test-files/cash/Winning/Flop/NLO8-6max-USD-3-6-202104.walk.txt
+  room: winningpoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: winningpoker_cash_plo_6max_usd_5_00_10_00_201504_capped_hh00000000_g0
+  source: regression-test-files/cash/Winning/Flop/PLO-6max-USD-5.00-10.00-201504.capped.HH00000000
+    G0.txt
+  room: winningpoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: winningpoker_cash_plo8_6max_usd_3_6_201701_short_hh20170115_g31084891
+  source: regression-test-files/cash/Winning/Flop/PLO8-6max-USD-3-6-201701.short.HH20170115
+    G31084891.txt
+  room: winningpoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: winningpoker_cash_plo8_6max_usd_40_80_201610_disconnected_allin_hh00000000_g0
+  source: regression-test-files/cash/Winning/Flop/PLO8-6max-USD-40-80-201610.disconnected.allin.HH00000000
+    G0.txt
+  room: winningpoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: winningpoker_cash_hh20241128_cashid_g32867925t697_tn_ormond_beach_gametype_5_omaha_h_backslash_l_limit_pot_cur_real_ond_f_buyin_0_min_1_max_2
+  source: regression-test-files/cash/Winning/private/ACR poker/HH20241128 CASHID-G32867925T697
+    TN-Ormond Beach GAMETYPE-5 Omaha H{BACKSLASH}L LIMIT-pot CUR-REAL OND-F BUYIN-0
+    MIN-1 MAX-2.txt
+  room: winningpoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: winningpoker_cash_hh20241128_cashid_g32867925t719_tn_oblong_gametype_5_omaha_h_backslash_l_limit_pot_cur_real_ond_f_buyin_0_min_1_max_2
+  source: regression-test-files/cash/Winning/private/ACR poker/HH20241128 CASHID-G32867925T719
+    TN-Oblong GAMETYPE-5 Omaha H{BACKSLASH}L LIMIT-pot CUR-REAL OND-F BUYIN-0 MIN-1
+    MAX-2.txt
+  room: winningpoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: winningpoker_cash_hh20241128_cashid_g32868144t60_tn_shelley_gametype_5_omaha_h_backslash_l_reshuffle_limit_pot_cur_real_ond_f_buyin_0_min_1_max_2
+  source: regression-test-files/cash/Winning/private/ACR poker/HH20241128 CASHID-G32868144T60
+    TN-Shelley GAMETYPE-5 Omaha H{BACKSLASH}L Reshuffle LIMIT-pot CUR-REAL OND-F BUYIN-0
+    MIN-1 MAX-2.txt
+  room: winningpoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: winningpoker_cash_hh20241128_cashid_g32868347t1_tn_pocahontas_gametype_5_omaha_limit_pot_cur_real_ond_f_buyin_0_min_1_max_2
+  source: regression-test-files/cash/Winning/private/ACR poker/HH20241128 CASHID-G32868347T1
+    TN-Pocahontas GAMETYPE-5 Omaha LIMIT-pot CUR-REAL OND-F BUYIN-0 MIN-1 MAX-2.txt
+  room: winningpoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: ipoker_cash_5cplo_eur_0_05_0_10_202105_new_date_format
+  source: regression-test-files/cash/iPoker/Flop/5CPLO-EUR-0.05-0.10-202105.new.date.format.txt
+  room: ipoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: ipoker_cash_5cplo_eur_0_50_1_00_202201_no_player_element
+  source: regression-test-files/cash/iPoker/Flop/5CPLO-EUR-0.50-1.00-202201.no.player.element.txt
+  room: ipoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: ipoker_cash_5cplo_eur_2_00_4_00_201905
+  source: regression-test-files/cash/iPoker/Flop/5CPLO-EUR-2.00-4.00-201905.txt
+  room: ipoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: ipoker_cash_6_holdem_eur_0_25_0_50_201702
+  source: regression-test-files/cash/iPoker/Flop/6+Holdem-EUR-0.25-0.50-201702.txt
+  room: ipoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: ipoker_cash_lhe_10max_usd_0_10_0_20_201107_player_sitting_out
+  source: regression-test-files/cash/iPoker/Flop/LHE-10max-USD-0.10-0.20-201107.player.sitting.out.xml
+  room: ipoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: ipoker_cash_lhe_5_10_10_20_usd_201103_hem_archive
+  source: regression-test-files/cash/iPoker/Flop/LHE-5-10-10-20-USD-201103.HEM.archive.txt
+  room: ipoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: ipoker_cash_lhe_hu_usd_20_40_201103_flat_format
+  source: regression-test-files/cash/iPoker/Flop/LHE-HU-USD-20-40-201103.flat.format.txt
+  room: ipoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: ipoker_cash_lhe_usd_10_20_201204_new_date_format
+  source: regression-test-files/cash/iPoker/Flop/LHE-USD-10-20-201204.new.date.format.txt
+  room: ipoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: ipoker_cash_lhe_usd_5_10_201204_post_both
+  source: regression-test-files/cash/iPoker/Flop/LHE-USD-5-10-201204.post.both.txt
+  room: ipoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: ipoker_cash_nlhe_6max_usd_0_01_0_02_201111_spanish_sample
+  source: regression-test-files/cash/iPoker/Flop/NLHE-6max-USD-0.01-0.02-201111.Spanish.sample.xml
+  room: ipoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: ipoker_cash_nlhe_eur_0_01_0_02_201701_new_datetime_format
+  source: regression-test-files/cash/iPoker/Flop/NLHE-EUR-0.01-0.02-201701.new.datetime.format.txt
+  room: ipoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: ipoker_cash_nlhe_eur_0_25_0_50_201202_russian_nl
+  source: regression-test-files/cash/iPoker/Flop/NLHE-EUR-0.25-0.50-201202.Russian.NL.txt
+  room: ipoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: ipoker_cash_nlhe_gbp_0_05_0_10_201307_uncalled_2nd_winner
+  source: regression-test-files/cash/iPoker/Flop/NLHE-GBP-0.05-0.10-201307.uncalled.2nd.winner.xml
+  room: ipoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: ipoker_cash_nlhe_gbp_0_05_0_10_201307_uncalled_less_than_rake
+  source: regression-test-files/cash/iPoker/Flop/NLHE-GBP-0.05-0.10-201307.uncalled.less.than.rake.xml
+  room: ipoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: ipoker_cash_nlhe_rsd_1_00_2_00_201210_serbian_dinar
+  source: regression-test-files/cash/iPoker/Flop/NLHE-RSD-1.00-2.00-201210.Serbian.Dinar.txt
+  room: ipoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: ipoker_cash_nlhe_usd_0_02_0_04_201111
+  source: regression-test-files/cash/iPoker/Flop/NLHE-USD-0.02-0.04-201111.txt
+  room: ipoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: ipoker_cash_nlhe_usd_0_05_0_10_201312_player_antes_then_sits_out
+  source: regression-test-files/cash/iPoker/Flop/NLHE-USD-0.05-0.10-201312.player.antes.then.sits.out.txt
+  room: ipoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: ipoker_cash_nlhe_usd_0_10_0_20_201112_post_both
+  source: regression-test-files/cash/iPoker/Flop/NLHE-USD-0.10-0.20.201112.post.both.txt
+  room: ipoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: ipoker_cash_plo_eur_0_10_0_20_201207_cny_currency
+  source: regression-test-files/cash/iPoker/Flop/PLO-EUR-0.10-0.20-201207.CNY.currency.txt
+  room: ipoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: ipoker_cash_plo_eur_0_10_0_20_201604_export_bad_players
+  source: regression-test-files/cash/iPoker/Flop/PLO-EUR-0.10-0.20-201604.export.bad.players.txt
+  room: ipoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: ipoker_cash_plo_eur_0_25_0_50_201605_export_bad_actions
+  source: regression-test-files/cash/iPoker/Flop/PLO-EUR-0.25-0.50-201605.export.bad.actions.txt
+  room: ipoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: ipoker_cash_plo_eur_0_50_1_00_202009_no_uncalled
+  source: regression-test-files/cash/iPoker/Flop/PLO-EUR-0.50-1.00-202009.no.uncalled.xml
+  room: ipoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: ipoker_cash_plo_eur_2_50_5_00_201901_no_max_seats
+  source: regression-test-files/cash/iPoker/Flop/PLO-EUR-2.50-5.00-201901.no.max.seats.txt
+  room: ipoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: ipoker_cash_plo_eur_5_00_10_00_201504_non_standard_player_name
+  source: regression-test-files/cash/iPoker/Flop/PLO-EUR-5.00-10.00-201504.non.standard.player.name.txt
+  room: ipoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: ipoker_cash_plo_usd_0_01_0_02_201108_sample
+  source: regression-test-files/cash/iPoker/Flop/PLO-USD-0.01-0.02-201108.Sample.txt
+  room: ipoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: ipoker_cash_plo_usd_100_00_200_00_201307_archive
+  source: regression-test-files/cash/iPoker/Flop/PLO-USD-100.00-200.00-201307.archive.txt
+  room: ipoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: ipoker_cash_plo_usd_5_10_201631_partial_format
+  source: regression-test-files/cash/iPoker/Flop/PLO-USD-5-10-201631.partial.format.xml
+  room: ipoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: ipoker_cash_5_studl_usd_0_05_0_10_201111_sample_with_showdown
+  source: regression-test-files/cash/iPoker/Stud/5-StudL-USD-0.05-0.10-201111.Sample.with.showdown.xml
+  room: ipoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: ipoker_cash_7_studhl_eur_0_05_0_10_201405
+  source: regression-test-files/cash/iPoker/Stud/7-StudHL-EUR-0.05-0.10-201405.txt
+  room: ipoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: ipoker_cash_7_studl_usd_0_05_0_10_201009
+  source: regression-test-files/cash/iPoker/Stud/7-StudL-USD-0.05-0.10-201009.txt
+  room: ipoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: ipoker_cash_4836413352
+  source: regression-test-files/cash/iPoker/private/betclic/4836413352.xml
+  room: ipoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: ipoker_cash_4836431436
+  source: regression-test-files/cash/iPoker/private/betclic/4836431436.xml
+  room: ipoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: ipoker_cash_4838283968
+  source: regression-test-files/cash/iPoker/private/betclic/4838283968.xml
+  room: ipoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: ipoker_cash_4839423323
+  source: regression-test-files/cash/iPoker/private/betclic/4839423323.xml
+  room: ipoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: ipoker_cash_4839466573
+  source: regression-test-files/cash/iPoker/private/betclic/4839466573.xml
+  room: ipoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: ipoker_cash_4842185207
+  source: regression-test-files/cash/iPoker/private/betclic/4842185207.xml
+  room: ipoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: ipoker_cash_4842826525
+  source: regression-test-files/cash/iPoker/private/betclic/4842826525.xml
+  room: ipoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: ipoker_cash_4843334470
+  source: regression-test-files/cash/iPoker/private/betclic/4843334470.xml
+  room: ipoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: ipoker_cash_4843847171
+  source: regression-test-files/cash/iPoker/private/betclic/4843847171.xml
+  room: ipoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: ipoker_cash_4844297211
+  source: regression-test-files/cash/iPoker/private/betclic/4844297211.xml
+  room: ipoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: ipoker_cash_4844773946
+  source: regression-test-files/cash/iPoker/private/betclic/4844773946.xml
+  room: ipoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: ipoker_cash_4845745090
+  source: regression-test-files/cash/iPoker/private/betclic/4845745090.xml
+  room: ipoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: ipoker_cash_4846346154
+  source: regression-test-files/cash/iPoker/private/betclic/4846346154.xml
+  room: ipoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: ipoker_cash_4846876997
+  source: regression-test-files/cash/iPoker/private/betclic/4846876997.xml
+  room: ipoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: ipoker_cash_4847882123
+  source: regression-test-files/cash/iPoker/private/betclic/4847882123.xml
+  room: ipoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: ipoker_cash_4849763842
+  source: regression-test-files/cash/iPoker/private/betclic/4849763842.xml
+  room: ipoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: ipoker_cash_4850763732
+  source: regression-test-files/cash/iPoker/private/betclic/4850763732.xml
+  room: ipoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: ipoker_cash_4917507530
+  source: regression-test-files/cash/iPoker/private/betclic/4917507530.xml
+  room: ipoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: ipoker_cash_4940855885
+  source: regression-test-files/cash/iPoker/private/betclic/4940855885.xml
+  room: ipoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: ipoker_cash_4943633274
+  source: regression-test-files/cash/iPoker/private/betclic/4943633274.xml
+  room: ipoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: ipoker_cash_4943638048
+  source: regression-test-files/cash/iPoker/private/betclic/4943638048.xml
+  room: ipoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: ipoker_cash_4949337236
+  source: regression-test-files/cash/iPoker/private/betclic/4949337236.xml
+  room: ipoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: ipoker_cash_4959965823
+  source: regression-test-files/cash/iPoker/private/betclic/4959965823.xml
+  room: ipoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: ipoker_cash_5009118315
+  source: regression-test-files/cash/iPoker/private/betclic/5009118315.xml
+  room: ipoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: ipoker_cash_5010741980
+  source: regression-test-files/cash/iPoker/private/betclic/5010741980.xml
+  room: ipoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: ipoker_cash_5014346192
+  source: regression-test-files/cash/iPoker/private/betclic/5014346192.xml
+  room: ipoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: ipoker_cash_5014386974
+  source: regression-test-files/cash/iPoker/private/betclic/5014386974.xml
+  room: ipoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: ipoker_cash_5059572224
+  source: regression-test-files/cash/iPoker/private/betclic/5059572224.xml
+  room: ipoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: ipoker_cash_5643116803
+  source: regression-test-files/cash/iPoker/private/fdj/cash/5643116803.xml
+  room: ipoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: ipoker_cash_5643119685
+  source: regression-test-files/cash/iPoker/private/fdj/cash/5643119685.xml
+  room: ipoker
+  format: cash
+  tags:
+  - regression
+  - golden
+- id: betonline_mtt_nlhe_10max_usd_mtt_201210_dead_stack
+  source: regression-test-files/tour/BetOnline/Flop/NLHE-10max-USD-MTT-201210.dead.stack.txt
+  room: betonline
+  format: mtt
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: betonline_mtt_nlhe_10max_usd_mtt_201603_post_ante
+  source: regression-test-files/tour/BetOnline/Flop/NLHE-10max-USD-MTT-201603.post.ante.txt
+  room: betonline
+  format: mtt
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: bovada_mtt_nlhe_6max_usd_stt_holdem_double_up_turbo_10_0_50_201502
+  source: regression-test-files/tour/Bovada/Flop/NLHE-6max-USD-STT - Holdem (Double-Up
+    Turbo) - $10-$0.50 - 201502.txt
+  room: bovada
+  format: mtt
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: bovada_mtt_nlhe_6max_usd_stt_hyper_turbo_500_chips_25_1_25_201706
+  source: regression-test-files/tour/Bovada/Flop/NLHE-6max-USD-STT - Hyper Turbo (500
+    Chips) - $25-$1.25 - 201706.txt
+  room: bovada
+  format: mtt
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: bovada_mtt_nlhe_9max_freeroll_201207_disconnect_timeout
+  source: regression-test-files/tour/Bovada/Flop/NLHE-9max-Freeroll-201207.disconnect.timeout.txt
+  room: bovada
+  format: mtt
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: bovada_mtt_nlhe_9max_usd_10_0_60_201212_all_in_blind_antes
+  source: regression-test-files/tour/Bovada/Flop/NLHE-9max-USD - $10-$0.60 - 201212.all.in.blind.antes.txt
+  room: bovada
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: bovada_mtt_nlhe_9max_usd_10_201211_ante_all_in
+  source: regression-test-files/tour/Bovada/Flop/NLHE-9max-USD-10-201211.ante.all.in.txt
+  room: bovada
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: bovada_mtt_nlhe_9max_usd_15_201207_allin_raise_timeout
+  source: regression-test-files/tour/Bovada/Flop/NLHE-9max-USD-15-201207.allin.raise.timeout.txt
+  room: bovada
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: bovada_mtt_nlhe_9max_usd_3_201204_missing_limit_info
+  source: regression-test-files/tour/Bovada/Flop/NLHE-9max-USD-3-201204.missing.limit.info.txt
+  room: bovada
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: bovada_mtt_nlhe_9max_usd_3_201208_raises_timout
+  source: regression-test-files/tour/Bovada/Flop/NLHE-9max-USD-3-201208.raises.timout.txt
+  room: bovada
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: bovada_mtt_nlhe_9max_usd_mtt_rebuy_3_0_30_201211
+  source: regression-test-files/tour/Bovada/Flop/NLHE-9max-USD-MTT (Rebuy) - $3-$0.30
+    - 201211.txt
+  room: bovada
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: bovada_mtt_nlhe_9max_usd_mtt_1_000_guaranteed_rebuy_3_0_30_201211
+  source: regression-test-files/tour/Bovada/Flop/NLHE-9max-USD-MTT - $1.000 Guaranteed
+    (Rebuy) - $3-$0.30 - 201211.txt
+  room: bovada
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: bovada_mtt_nlhe_9max_usd_mtt_2_000_guaranteed_10_000_chips_3_0_30_201606_mtt_max_seats
+  source: regression-test-files/tour/Bovada/Flop/NLHE-9max-USD-MTT - $2.000 Guaranteed
+    (10.000 Chips) - $3-$0.30 - 201606.MTT.max.seats.txt
+  room: bovada
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: bovada_mtt_nlhe_9max_usd_mtt_25_2_50_202104_ignititon_mvs
+  source: regression-test-files/tour/Bovada/Flop/NLHE-9max-USD-MTT - $25-$2.50 - 202104.Ignititon.MVS.txt
+  room: bovada
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: bovada_mtt_nlhe_9max_usd_mtt_9_000_guaranteed_ds_20_2_201408_corrupted_lines
+  source: regression-test-files/tour/Bovada/Flop/NLHE-9max-USD-MTT - $9.000 Guaranteed
+    (DS) - $20-$2 - 201408.corrupted.lines.txt
+  room: bovada
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: bovada_mtt_nlhe_9max_usd_mtt_gspo9_high_roller_tune_up_50_000_gtd_300_25_202110
+  source: regression-test-files/tour/Bovada/Flop/NLHE-9max-USD-MTT - GSPO9 High Roller
+    Tune-Up - $50.000 Gtd - $300-$25 - 202110.txt
+  room: bovada
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: bovada_mtt_nlhe_9max_usd_mtt_monthly_milly_1_000_000_guaranteed_tt_500_35_202106
+  source: regression-test-files/tour/Bovada/Flop/NLHE-9max-USD-MTT - Monthly Milly
+    - $1.000.000 Guaranteed - TT$500-$35 - 202106.txt
+  room: bovada
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: bovada_mtt_nlhe_9max_usd_mtt_monthly_milly_satellite_10_seats_gtd_turbo_55_5_202105
+  source: regression-test-files/tour/Bovada/Flop/NLHE-9max-USD-MTT - Monthly Milly
+    Satellite 10 Seats Gtd (Turbo) - $55-$5 - 202105.txt
+  room: bovada
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: bovada_mtt_nlhe_9max_usd_mtt_no_limit_holdem_rebuy_2_0_25_201301_allin_ante
+  source: regression-test-files/tour/Bovada/Flop/NLHE-9max-USD-MTT - No Limit Holdem
+    (Rebuy) - $2-$0.25 - 201301.allin.ante.txt
+  room: bovada
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: bovada_mtt_nlhe_9max_usd_mtt_smpo_super_duper_high_roller_no_145_150_000_gtd_1_000_55_202108
+  source: regression-test-files/tour/Bovada/Flop/NLHE-9max-USD-MTT - SMPO Super Duper
+    High Roller No.145 - $150.000 Gtd - $1,000-$55 - 202108.txt
+  room: bovada
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: bovada_mtt_nlhe_9max_usd_mtt_201301_all_in_blind
+  source: regression-test-files/tour/Bovada/Flop/NLHE-9max-USD-MTT-201301.all.in.blind.txt
+  room: bovada
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: bovada_mtt_nlhe_9max_usd_stt_3_0_30_201601_out_of_order_seats
+  source: regression-test-files/tour/Bovada/Flop/NLHE-9max-USD-STT - $3-$0.30 - 201601.out.of.order.seats.txt
+  room: bovada
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: bovada_mtt_nlhe_9max_usd_stt_3_0_30_201601_repeat_actions_ok
+  source: regression-test-files/tour/Bovada/Flop/NLHE-9max-USD-STT - $3-$0.30 - 201601.repeat.actions.ok.txt
+  room: bovada
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: bovada_mtt_nlhe_usd_1_00_stt_201208_1_0_10
+  source: regression-test-files/tour/Bovada/Flop/NLHE-USD-1.00-STT-201208. - $1-$0.10
+    - .txt
+  room: bovada
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: bovada_mtt_nlhe_usd_mtt_5_knockout_10_1_201512_ko
+  source: regression-test-files/tour/Bovada/Flop/NLHE-USD-MTT - ($5 Knockout) - $10-$1
+    - 201512.KO.txt
+  room: bovada
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: bovada_mtt_plo8_9max_usd_10_mtt_201207
+  source: regression-test-files/tour/Bovada/Flop/PLO8-9max-USD-10-MTT-201207.txt
+  room: bovada
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: bovada_mtt_plo8_usd_mtt_1_0_10_201409_low_vs_lo
+  source: regression-test-files/tour/Bovada/Flop/PLO8-USD-MTT - $1-0.10 - 201409.LOW.vs.LO.txt
+  room: bovada
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: bovada_mtt_plo8_usd_mtt_10_1_201207_allin_call_pf
+  source: regression-test-files/tour/Bovada/Flop/PLO8-USD-MTT - $10-$1 - 201207.allin.call.pf.txt
+  room: bovada
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: bovada_mtt_7_stud_usd_mtt_10_1_201206
+  source: regression-test-files/tour/Bovada/Stud/7-Stud-USD-MTT - $10-$1 - 201206.txt
+  room: bovada
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: cake_mtt_nlhe_10max_15_usd_201204_new_format
+  source: regression-test-files/tour/Cake/Flop/NLHE-10max-15-USD-201204.new.format.txt
+  room: cake
+  format: mtt
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: cake_mtt_nlhe_10max_40_usd_201201_ticketcash
+  source: regression-test-files/tour/Cake/Flop/NLHE-10max-40-USD-201201.ticketcash.txt
+  room: cake
+  format: mtt
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: cake_mtt_nlhe_10max_9_usd_201202_new_format
+  source: regression-test-files/tour/Cake/Flop/NLHE-10max-9-USD-201202.new.format.txt
+  room: cake
+  format: mtt
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: cake_mtt_nlhe_10max_usd_mtt_0_05_201206_minus_sign_b4_rake
+  source: regression-test-files/tour/Cake/Flop/NLHE-10max-USD-MTT-0.05-201206.minus.sign.b4.rake.txt
+  room: cake
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: cake_mtt_nlhe_6max_15_usd_201111_new_format
+  source: regression-test-files/tour/Cake/Flop/NLHE-6max-15-USD-201111.new.format.txt
+  room: cake
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: cake_mtt_nlhe_9max_usd_10_1_201312_trim_hh
+  source: regression-test-files/tour/Cake/Flop/NLHE-9max-USD-10-1-201312.trim.hh.txt
+  room: cake
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: cake_mtt_nlhe_9max_usd_mtt_201206_bounty
+  source: regression-test-files/tour/Cake/Flop/NLHE-9max-USD-MTT-201206.bounty.txt
+  room: cake
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: cake_mtt_nlhe_9max_usd_mtt_5_201206_underscore_substitution
+  source: regression-test-files/tour/Cake/Flop/NLHE-9max-USD-MTT-5-201206.underscore.substitution.txt
+  room: cake
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: cake_mtt_nlhe_free_mtt_201205
+  source: regression-test-files/tour/Cake/Flop/NLHE-FREE-MTT-201205.txt
+  room: cake
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: cake_mtt_nlhe_hu_15_usd_201201_new_format
+  source: regression-test-files/tour/Cake/Flop/NLHE-HU-15-USD-201201.new.format.txt
+  room: cake
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: cake_mtt_nlhe_usd_1_stt_201103_max_seats
+  source: regression-test-files/tour/Cake/Flop/NLHE-USD-1-STT-201103.max.seats.txt
+  room: cake
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: cake_mtt_nlhe_usd_2_stt_201205_thousand_delimiter
+  source: regression-test-files/tour/Cake/Flop/NLHE-USD-2-STT-201205.thousand.delimiter.txt
+  room: cake
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: cake_mtt_nlhe_usd_5_50_coinflip_201207
+  source: regression-test-files/tour/Cake/Flop/NLHE-USD-5.50-Coinflip-201207.txt
+  room: cake
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: cake_mtt_plo8_2max_usd_5_201307
+  source: regression-test-files/tour/Cake/Flop/PLO8-2max-USD-5-201307.txt
+  room: cake
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: ggpoker_mtt_nlhe_8max_mtt_usd_1050_202104_extra_space
+  source: regression-test-files/tour/GGPoker/Flop/NLHE-8max-MTT-USD-1050-202104.extra.space.txt
+  room: ggpoker
+  format: mtt
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: ggpoker_mtt_nlhe_8max_mtt_usd_250_202006
+  source: regression-test-files/tour/GGPoker/Flop/NLHE-8max-MTT-USD-250-202006.txt
+  room: ggpoker
+  format: mtt
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: ggpoker_mtt_nlhe_8max_mtt_usd_52_50_202104_ko
+  source: regression-test-files/tour/GGPoker/Flop/NLHE-8max-MTT-USD-52.50-202104.KO.txt
+  room: ggpoker
+  format: mtt
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: ggpoker_mtt_nlhe_8max_mtt_usd_5k_202008
+  source: regression-test-files/tour/GGPoker/Flop/NLHE-8max-MTT-USD-5k-202008.txt
+  room: ggpoker
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: ggpoker_mtt_plo_6max_mtt_usd_1k_202006
+  source: regression-test-files/tour/GGPoker/Flop/PLO-6max-MTT-USD-1k-202006.txt
+  room: ggpoker
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: ggpoker_mtt_plo_nlo_6max_mtt_usd_8_40_202104_ko
+  source: regression-test-files/tour/GGPoker/Flop/PLO-NLO-6max-MTT-USD-8.40-202104.KO.txt
+  room: ggpoker
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: merge_mtt_nlhe_freeroll_mtt_201108_allin_raiseto_fix
+  source: regression-test-files/tour/Merge/Flop/NLHE-Freeroll-MTT-201108.allin.raiseTo.fix.txt
+  room: merge
+  format: mtt
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: merge_mtt_nlhe_hu_usd_5_75_stt_201208_new_header_format
+  source: regression-test-files/tour/Merge/Flop/NLHE-HU-USD-5.75-STT-201208.new.header.format.txt
+  room: merge
+  format: mtt
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: merge_mtt_nlhe_usd_11_mtt_201503_v_2_1
+  source: regression-test-files/tour/Merge/Flop/NLHE-USD-11-MTT-201503.v.2.1.txt
+  room: merge
+  format: mtt
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: merge_mtt_nlhe_usd_freeroll_201201_sample
+  source: regression-test-files/tour/Merge/Flop/NLHE-USD-Freeroll-201201.Sample.txt
+  room: merge
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: merge_mtt_nlhe_usd_stt_201202_exported
+  source: regression-test-files/tour/Merge/Flop/NLHE-USD-STT-201202.exported.txt
+  room: merge
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: merge_mtt_nlhe_usd_stt_201112_allin_blind
+  source: regression-test-files/tour/Merge/Flop/NLHE-USD-STT.201112.allin.blind.txt
+  room: merge
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: merge_mtt_nlhe_usd_unk_201105_dead_small_blind
+  source: regression-test-files/tour/Merge/Flop/NLHE-USD-Unk-201105.Dead.small.blind.txt
+  room: merge
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: merge_mtt_nlhe_usd_unk_201105_player_big_blind_all_in
+  source: regression-test-files/tour/Merge/Flop/NLHE-USD-Unk-201105.Player.Big.blind.all.in.txt
+  room: merge
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: merge_mtt_plo_usd_husng_0_10_0_20_20110428
+  source: regression-test-files/tour/Merge/Flop/PLO-USD-HUSNG-0.10-0.20-20110428.txt
+  room: merge
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: merge_mtt_plo8_usd_sng_2_2012_sample
+  source: regression-test-files/tour/Merge/Flop/PLO8-USD-SNG-2-2012.Sample.xml
+  room: merge
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: merge_mtt_horse_tournament_freeroll_201107
+  source: regression-test-files/tour/Merge/Mixed/HORSE-Tournament-Freeroll.201107.xml
+  room: merge
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: pacificpoker_mtt_nlhe_10max_free_201901
+  source: regression-test-files/tour/PacificPoker/Flop/NLHE-10max-FREE-201901.txt
+  room: pacificpoker
+  format: mtt
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: pacificpoker_mtt_nlhe_10max_free_202004_space_delimiter
+  source: regression-test-files/tour/PacificPoker/Flop/NLHE-10max-Free-202004.space.delimiter.txt
+  room: pacificpoker
+  format: mtt
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: pacificpoker_mtt_nlhe_6max_mtt_40_4_201901_ro_mm_fix
+  source: regression-test-files/tour/PacificPoker/Flop/NLHE-6max-MTT-40-4-201901.ro.MM.fix.txt
+  room: pacificpoker
+  format: mtt
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: pacificpoker_mtt_nlhe_6max_sng_0_10_201206_hands
+  source: regression-test-files/tour/PacificPoker/Flop/NLHE-6max-SNG-0.10-201206.hands.txt
+  room: pacificpoker
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: pacificpoker_mtt_nlhe_free_mtt_75freeroll_201202_multi_pot_ante_all_in
+  source: regression-test-files/tour/PacificPoker/Flop/NLHE-FREE-MTT-$75Freeroll-201202.multi.pot.ante.all.in.txt
+  room: pacificpoker
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: pacificpoker_mtt_nlhe_free_mtt_75freeroll20120217
+  source: regression-test-files/tour/PacificPoker/Flop/NLHE-FREE-MTT-$75Freeroll20120217.txt
+  room: pacificpoker
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: pacificpoker_mtt_nlhe_free_mtt_201311_all_in_blind_no_uncalled
+  source: regression-test-files/tour/PacificPoker/Flop/NLHE-FREE-MTT-201311.all.in.blind.no.uncalled.txt
+  room: pacificpoker
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: pacificpoker_mtt_nlhe_mtt_eur_0_01_201206_freeroll_buyin_hands
+  source: regression-test-files/tour/PacificPoker/Flop/NLHE-MTT-EUR-0.01-201206.freeroll.buyin.hands.txt
+  room: pacificpoker
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: pacificpoker_mtt_nlhe_mtt_usd_13_95_1_05_201901_blast
+  source: regression-test-files/tour/PacificPoker/Flop/NLHE-MTT-USD-13.95-1.05-201901.BLAST.txt
+  room: pacificpoker
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: pacificpoker_mtt_nlhe_pm_mtt_10_20120221
+  source: regression-test-files/tour/PacificPoker/Flop/NLHE-PM-MTT-10-20120221.txt
+  room: pacificpoker
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: pacificpoker_mtt_nlhe_stt_5_00_201901_blast
+  source: regression-test-files/tour/PacificPoker/Flop/NLHE-STT-5.00-201901.BLAST.txt
+  room: pacificpoker
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: pacificpoker_mtt_nlhe_usd_husng_0_25_201201_sample
+  source: regression-test-files/tour/PacificPoker/Flop/NLHE-USD-HUSNG-0.25-201201.Sample.txt
+  room: pacificpoker
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: pacificpoker_mtt_nlhe_usd_mtt_0_90_201205_multiway_allin_blind
+  source: regression-test-files/tour/PacificPoker/Flop/NLHE-USD-MTT-0.90-201205.multiway.allin.blind.txt
+  room: pacificpoker
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: pacificpoker_mtt_nlhe_usd_mtt_0_90_201205_uncalledbets_correct
+  source: regression-test-files/tour/PacificPoker/Flop/NLHE-USD-MTT-0.90-201205.uncalledbets.correct.txt
+  room: pacificpoker
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: pacificpoker_mtt_nlhe_usd_mtt_0_90_201205_uncalledbets_false_positive
+  source: regression-test-files/tour/PacificPoker/Flop/NLHE-USD-MTT-0.90-201205.uncalledbets.false.positive.txt
+  room: pacificpoker
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: pacificpoker_mtt_nlhe_usd_mtt_0_90_201205_walk
+  source: regression-test-files/tour/PacificPoker/Flop/NLHE-USD-MTT-0.90-201205.walk.txt
+  room: pacificpoker
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: pacificpoker_mtt_nlhe_usd_mtt_3_15_201205_call_allin
+  source: regression-test-files/tour/PacificPoker/Flop/NLHE-USD-MTT-3.15-201205.call.allin.txt
+  room: pacificpoker
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: pacificpoker_mtt_plo8_usd_mtt_1_80_0_20_201306_all_in_blind_bad_pot
+  source: regression-test-files/tour/PacificPoker/Flop/PLO8-USD-MTT-1.80-0.20-201306.all.in.blind.bad.pot.txt
+  room: pacificpoker
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: pacificpoker_mtt_plo8_usd_stt_10_1_201308_no_pot_awarded
+  source: regression-test-files/tour/PacificPoker/Flop/PLO8-USD-STT-10-1-201308.no.pot.awarded.txt
+  room: pacificpoker
+  format: mtt
+  tags:
+  - regression
+  - regression_only
+- id: partypoker_mtt_lhe_freeroll_mtt_201207
+  source: regression-test-files/tour/PartyPoker/Flop/LHE-Freeroll-MTT-201207.txt
+  room: partypoker
+  format: mtt
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: partypoker_mtt_nlhe_25_usd_freeroll_mtt_201205_player_moved
+  source: regression-test-files/tour/PartyPoker/Flop/NLHE-25-USD-Freeroll-MTT-201205.player.moved.txt
+  room: partypoker
+  format: mtt
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: partypoker_mtt_nlhe_4max_stt_usd_1_201607_second_trny_format
+  source: regression-test-files/tour/PartyPoker/Flop/NLHE-4max-STT-USD-1-201607.second.trny.format.txt
+  room: partypoker
+  format: mtt
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: partypoker_mtt_nlhe_9max_mtt_unknownbuyin_201812_converted
+  source: regression-test-files/tour/PartyPoker/Flop/NLHE-9max-MTT-unknownBuyin-201812.converted.txt
+  room: partypoker
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: partypoker_mtt_nlhe_freeroll_mtt_201008_sample_hand
+  source: regression-test-files/tour/PartyPoker/Flop/NLHE-Freeroll-MTT-201008.Sample.hand.txt
+  room: partypoker
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: partypoker_mtt_nlhe_mtt_usd_100_9_202104_anon
+  source: regression-test-files/tour/PartyPoker/Flop/NLHE-MTT-USD-100-9-202104.anon.txt
+  room: partypoker
+  format: mtt
+  tags:
+  - regression
+  - regression_only
+- id: partypoker_mtt_nlhe_mtt_usd_3_0_0_3_202105_anon
+  source: regression-test-files/tour/PartyPoker/Flop/NLHE-MTT-USD-3.0-0.3-202105.anon.txt
+  room: partypoker
+  format: mtt
+  tags:
+  - regression
+  - regression_only
+- id: partypoker_mtt_nlhe_mtt_usd_30_3_200508_old_format
+  source: regression-test-files/tour/PartyPoker/Flop/NLHE-MTT-USD-30-3-200508.Old.Format.txt
+  room: partypoker
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: partypoker_mtt_nlhe_mtt_usd_4_8_0_2_202104_anon
+  source: regression-test-files/tour/PartyPoker/Flop/NLHE-MTT-USD-4.8-0.2-202104.anon.txt
+  room: partypoker
+  format: mtt
+  tags:
+  - regression
+  - regression_only
+- id: partypoker_mtt_nlhe_mtt_usd_50_5_202104_anon
+  source: regression-test-files/tour/PartyPoker/Flop/NLHE-MTT-USD-50-5-202104.anon.txt
+  room: partypoker
+  format: mtt
+  tags:
+  - regression
+  - regression_only
+- id: partypoker_mtt_nlhe_mtt_usd_50_5_202104_bad_math
+  source: regression-test-files/tour/PartyPoker/Flop/NLHE-MTT-USD-50-5-202104.bad.math.txt
+  room: partypoker
+  format: mtt
+  tags:
+  - regression
+  - regression_only
+- id: partypoker_mtt_nlhe_mtt_usd_530_201307_no_tz
+  source: regression-test-files/tour/PartyPoker/Flop/NLHE-MTT-USD-530-201307.no.tz.txt
+  room: partypoker
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: partypoker_mtt_nlhe_sng_usd_0_23_0_02_201912
+  source: regression-test-files/tour/PartyPoker/Flop/NLHE-SNG-USD-0.23-0.02-201912.txt
+  room: partypoker
+  format: mtt
+  tags:
+  - regression
+  - regression_only
+- id: partypoker_mtt_nlhe_usd_mtt_215_201110_level_change
+  source: regression-test-files/tour/PartyPoker/Flop/NLHE-USD-MTT-215-201110.level.change.txt
+  room: partypoker
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: partypoker_mtt_nlhe_usd_mtt_unknownbuyin_200811_emailedhandhistory
+  source: regression-test-files/tour/PartyPoker/Flop/NLHE-USD-MTT-unknownBuyIn-200811.emailedHandHistory.txt
+  room: partypoker
+  format: mtt
+  tags:
+  - regression
+  - regression_only
+- id: partypoker_mtt_nlhe_usd_stt_201203_heads_up
+  source: regression-test-files/tour/PartyPoker/Flop/NLHE-USD-STT.201203.heads.up.txt
+  room: partypoker
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: partypoker_mtt_plo_usd_stt_1_00_201008_sample
+  source: regression-test-files/tour/PartyPoker/Flop/PLO-USD-STT-1.00.201008.Sample.txt
+  room: partypoker
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: partypoker_mtt_plo8_10max_usd_20_2_201310_chat_fix
+  source: regression-test-files/tour/PartyPoker/Flop/PLO8-10max-USD-20-2-201310.chat.fix.txt
+  room: partypoker
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: partypoker_mtt_7_stud_usd_mtt_6_00_201205
+  source: regression-test-files/tour/PartyPoker/Stud/7-Stud-USD-MTT-6.00-201205.txt
+  room: partypoker
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: pokertracker_mtt_lhe_eur_sng_201111_everest
+  source: regression-test-files/tour/PokerTracker/Flop/LHE-EUR-SNG-201111.Everest.txt
+  room: pokertracker
+  format: mtt
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: pokertracker_mtt_nlhe_2max_usd_0_stt_201307_microgaming_allin_blind
+  source: regression-test-files/tour/PokerTracker/Flop/NLHE-2max-USD-0-STT-201307.Microgaming.allin.blind.txt
+  room: pokertracker
+  format: mtt
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: pokertracker_mtt_nlhe_2max_usd_0_stt_201307_microgaming
+  source: regression-test-files/tour/PokerTracker/Flop/NLHE-2max-USD-0-STT-201307.Microgaming.txt
+  room: pokertracker
+  format: mtt
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: pokertracker_mtt_nlhe_9max_usd_mtt_16_50_201307_microgaming_antes
+  source: regression-test-files/tour/PokerTracker/Flop/NLHE-9max-USD-MTT-16.50-201307.Microgaming.antes.txt
+  room: pokertracker
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: ipoker_mtt_nlhe_eur_200_mtt_201901_ipoker
+  source: regression-test-files/tour/PokerTracker/Flop/NLHE-EUR-200-MTT-201901.iPoker.txt
+  room: ipoker
+  format: mtt
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: ipoker_mtt_nlhe_usd_sng_2_201106_ipoker
+  source: regression-test-files/tour/PokerTracker/Flop/NLHE-USD-SNG-2-201106.iPoker.txt
+  room: ipoker
+  format: mtt
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: ipoker_mtt_nlhe_usd_sng_2_201111_merge
+  source: regression-test-files/tour/PokerTracker/Flop/NLHE-USD-SNG-2-201111.Merge.txt
+  room: ipoker
+  format: mtt
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: ipoker_mtt_plo_usd_5_201202_merge_all_in_blind
+  source: regression-test-files/tour/PokerTracker/Flop/PLO-USD-5-201202.Merge.all.in.blind.txt
+  room: ipoker
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: sealswithclubs_mtt_hh20240710_t227614744_pot_limit_omaha_5_cards_0_0
+  source: regression-test-files/tour/SealsWithClubs/private/HH20240710 T227614744
+    Pot Limit Omaha 5 Cards 0 + 0.txt
+  room: sealswithclubs
+  format: mtt
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: sealswithclubs_mtt_hh20240710_t227618160_no_limit_hold_em_0_0
+  source: regression-test-files/tour/SealsWithClubs/private/HH20240710 T227618160
+    No Limit Hold'em 0 + 0.txt
+  room: sealswithclubs
+  format: mtt
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: sealswithclubs_mtt_hh20240710_t227630719_no_limit_hold_em_0_0
+  source: regression-test-files/tour/SealsWithClubs/private/HH20240710 T227630719
+    No Limit Hold'em 0 + 0.txt
+  room: sealswithclubs
+  format: mtt
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: sealswithclubs_mtt_hh20240710_t227636996_fixed_limit_hold_em_0_0
+  source: regression-test-files/tour/SealsWithClubs/private/HH20240710 T227636996
+    Fixed Limit Hold'em 0 + 0.txt
+  room: sealswithclubs
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: sealswithclubs_mtt_hh20240711_t227720219_no_limit_hold_em_0_0
+  source: regression-test-files/tour/SealsWithClubs/private/HH20240711 T227720219
+    No Limit Hold'em 0 + 0.txt
+  room: sealswithclubs
+  format: mtt
+  tags:
+  - regression
+  - regression_only
+- id: pokerstars_mtt_2_7_single_draw_nl_usd_2max_stt_1_40_201212_ante_all_in
+  source: regression-test-files/tour/Stars/Draw/2-7 Single Draw-NL-USD-2max-STT-1.40-201212.ante.all.in.txt
+  room: pokerstars
+  format: mtt
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: pokerstars_mtt_lbad_usd_mtt8_201011
+  source: regression-test-files/tour/Stars/Draw/LBad-USD-MTT8-201011.txt
+  room: pokerstars
+  format: mtt
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: pokerstars_mtt_lbad_usd_sng8_201011
+  source: regression-test-files/tour/Stars/Draw/LBad-USD-SNG8-201011.txt
+  room: pokerstars
+  format: mtt
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: pokerstars_mtt_5_card_plo_6max_mtt_usd_12_30_12_25_2_45_201611_progressive_split_ko
+  source: regression-test-files/tour/Stars/Flop/5-Card-PLO-6max-MTT-USD-12.30-12.25-2.45-201611.progressive.split.ko.txt
+  room: pokerstars
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: pokerstars_mtt_5_card_plo_6max_mtt_usd_12_30_12_25_2_45_201611_progressive
+  source: regression-test-files/tour/Stars/Flop/5-Card-PLO-6max-MTT-USD-12.30-12.25-2.45-201611.progressive.txt
+  room: pokerstars
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: pokerstars_mtt_5_card_plo_6max_mtt_usd_12_30_12_25_2_45_201611_progressive_won
+  source: regression-test-files/tour/Stars/Flop/5-Card-PLO-6max-MTT-USD-12.30-12.25-2.45-201611.progressive.won.txt
+  room: pokerstars
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: pokerstars_mtt_lhe_fr_fpp_20100710
+  source: regression-test-files/tour/Stars/Flop/LHE-FR-FPP-20100710.txt
+  room: pokerstars
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: pokerstars_mtt_lhe_usd_mtt_2_201007_mixed_holdem
+  source: regression-test-files/tour/Stars/Flop/LHE-USD-MTT-2-201007.Mixed.Holdem.txt
+  room: pokerstars
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: pokerstars_mtt_lhe_usd_stt_5_20100607_allinpreflop
+  source: regression-test-files/tour/Stars/Flop/LHE-USD-STT-5-20100607.allInPreflop.txt
+  room: pokerstars
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: pokerstars_mtt_mplo_6max_mtt_usd_27_201605
+  source: regression-test-files/tour/Stars/Flop/MPLO-6max-MTT-USD-27-201605.txt
+  room: pokerstars
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: pokerstars_mtt_nlhe_2max_mtt_200611_shootout_no_buyin
+  source: regression-test-files/tour/Stars/Flop/NLHE-2max-MTT-200611.shootout.no.buyin.txt
+  room: pokerstars
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: pokerstars_mtt_nlhe_2max_usd_stt_20_201209
+  source: regression-test-files/tour/Stars/Flop/NLHE-2max-USD-STT-20-201209.txt
+  room: pokerstars
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: pokerstars_mtt_nlhe_3max_eur_5_202104_rio
+  source: regression-test-files/tour/Stars/Flop/NLHE-3max-EUR-5-202104.RIO.txt
+  room: pokerstars
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: pokerstars_mtt_nlhe_3max_eur_5_00_202102_rio_cub3d
+  source: regression-test-files/tour/Stars/Flop/NLHE-3max-EUR-5.00-202102.RIO.cub3d.txt
+  room: pokerstars
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: pokerstars_mtt_nlhe_3max_eur_5_00_202103_classic
+  source: regression-test-files/tour/Stars/Flop/NLHE-3max-EUR-5.00-202103.classic.txt
+  room: pokerstars
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: pokerstars_mtt_nlhe_4max_mtt_usd_2_201305_shootout
+  source: regression-test-files/tour/Stars/Flop/NLHE-4max-MTT-USD-2-201305.shootout.txt
+  room: pokerstars
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: pokerstars_mtt_nlhe_6max_mtt_usd_125_201505_old_converted_tourney
+  source: regression-test-files/tour/Stars/Flop/NLHE-6max-MTT-USD-125-201505.old.converted.tourney.txt
+  room: pokerstars
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: pokerstars_mtt_nlhe_6max_mtt_usd_125_201505_old_converted_walk_no_sb
+  source: regression-test-files/tour/Stars/Flop/NLHE-6max-MTT-USD-125-201505.old.converted.walk.no.sb.txt
+  room: pokerstars
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: pokerstars_mtt_nlhe_6max_stt_play_1000_201605_fulltilt
+  source: regression-test-files/tour/Stars/Flop/NLHE-6max-STT-play-1000-201605.FullTilt.txt
+  room: pokerstars
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: pokerstars_mtt_nlhe_9_max_usd_10_stt_200512_player_sitting_out
+  source: regression-test-files/tour/Stars/Flop/NLHE-9-max-USD-10-STT-200512.player.sitting.out.txt
+  room: pokerstars
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: pokerstars_mtt_nlhe_9max_freeroll_mtt_201209_concatenated_partial
+  source: regression-test-files/tour/Stars/Flop/NLHE-9max-Freeroll-MTT-201209.concatenated.partial.txt
+  room: pokerstars
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: pokerstars_mtt_nlhe_9max_mtt_freeroll_201909_progressive_bounty
+  source: regression-test-files/tour/Stars/Flop/NLHE-9max-MTT-Freeroll-201909.progressive.bounty.txt
+  room: pokerstars
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: pokerstars_mtt_nlhe_9max_mtt_inr_136_50_13_50_201901
+  source: regression-test-files/tour/Stars/Flop/NLHE-9max-MTT-INR-136.50-13.50-201901.txt
+  room: pokerstars
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: pokerstars_mtt_nlhe_9max_mtt_usd_2_50_201305_ko
+  source: regression-test-files/tour/Stars/Flop/NLHE-9max-MTT-USD-2.50-201305.KO.txt
+  room: pokerstars
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: pokerstars_mtt_nlhe_9max_mtt_usd_201112_3_merged_sessions
+  source: regression-test-files/tour/Stars/Flop/NLHE-9max-MTT-USD-201112.3.merged.sessions.txt
+  room: pokerstars
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: pokerstars_mtt_nlhe_9max_mtt_usd_3_201407_zoom
+  source: regression-test-files/tour/Stars/Flop/NLHE-9max-MTT-USD-3-201407.Zoom.txt
+  room: pokerstars
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: pokerstars_mtt_nlhe_9max_mtt_usd_5000_200909_2_day_tour_level_i
+  source: regression-test-files/tour/Stars/Flop/NLHE-9max-MTT-USD-5000-200909.2.day.tour.level.I.txt
+  room: pokerstars
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: pokerstars_mtt_nlhe_9max_mtt_usd_5000_200909_2_day_tour_level_xl
+  source: regression-test-files/tour/Stars/Flop/NLHE-9max-MTT-USD-5000-200909.2.day.tour.level.XL.txt
+  room: pokerstars
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: pokerstars_mtt_nlhe_9max_sc_mtt_201512
+  source: regression-test-files/tour/Stars/Flop/NLHE-9max-SC-MTT-201512.txt
+  room: pokerstars
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: pokerstars_mtt_nlhe_9max_usd_10_stt_200512_hero_cannot_raise_pf
+  source: regression-test-files/tour/Stars/Flop/NLHE-9max-USD-10-STT-200512.hero.cannot.raise.pf.txt
+  room: pokerstars
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: pokerstars_mtt_nlhe_fpp_mtt_1r_201005_allinlotsrebuy
+  source: regression-test-files/tour/Stars/Flop/NLHE-FPP-MTT-1r-201005.AllinLotsRebuy.txt
+  room: pokerstars
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: pokerstars_mtt_nlhe_gbp_mtt_201107_5_0_50
+  source: regression-test-files/tour/Stars/Flop/NLHE-GBP-MTT-201107-£5 + £0.50.txt
+  room: pokerstars
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: pokerstars_mtt_nlhe_play_stt_20110405
+  source: regression-test-files/tour/Stars/Flop/NLHE-Play-STT-20110405.txt
+  room: pokerstars
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: pokerstars_mtt_nlhe_usd_husng_20_201003_hero_wins
+  source: regression-test-files/tour/Stars/Flop/NLHE-USD-HUSNG-20-201003.Hero.Wins.txt
+  room: pokerstars
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: pokerstars_mtt_nlhe_usd_mtt_1_ko_201008
+  source: regression-test-files/tour/Stars/Flop/NLHE-USD-MTT-1-KO.201008.txt
+  room: pokerstars
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: pokerstars_mtt_nlhe_usd_mtt_2_201007_mixed_holdem
+  source: regression-test-files/tour/Stars/Flop/NLHE-USD-MTT-2-201007.Mixed.Holdem.txt
+  room: pokerstars
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: pokerstars_mtt_nlhe_usd_mtt_5r_200710
+  source: regression-test-files/tour/Stars/Flop/NLHE-USD-MTT-5r-200710.txt
+  room: pokerstars
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: pokerstars_mtt_nlhe_usd_mtt_665_35_201611_bounty_format
+  source: regression-test-files/tour/Stars/Flop/NLHE-USD-MTT-665-35-201611.bounty.format.txt
+  room: pokerstars
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: pokerstars_mtt_nlhe_usd_stt_1_201004_8betpf
+  source: regression-test-files/tour/Stars/Flop/NLHE-USD-STT-1-201004.8betPF.txt
+  room: pokerstars
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: pokerstars_mtt_nlhe_usd_stt_20_201006_donturbo
+  source: regression-test-files/tour/Stars/Flop/NLHE-USD-STT-20-201006.DONturbo.txt
+  room: pokerstars
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: pokerstars_mtt_nlhe_usd_stt_201109_showsonecard
+  source: regression-test-files/tour/Stars/Flop/NLHE-USD-STT-201109.ShowsOneCard.txt
+  room: pokerstars
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: pokerstars_mtt_nlhe_play_stt_2000_201202_allin_blind
+  source: regression-test-files/tour/Stars/Flop/NLHE-play-STT-2000.201202.allin.blind.txt
+  room: pokerstars
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: pokerstars_mtt_nlo8_6max_mtt_usd_37_50_37_50_7_201410_progressive_old
+  source: regression-test-files/tour/Stars/Flop/NLO8-6max-MTT-USD-37.50-37.50-7-201410.progressive.old.txt
+  room: pokerstars
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: pokerstars_mtt_nlo8_usd_stt_201109_knockout_sample
+  source: regression-test-files/tour/Stars/Flop/NLO8-USD-STT-201109.Knockout.sample.txt
+  room: pokerstars
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: pokerstars_mtt_pl_courcheval_hl_6max_usd_7_50_201705_fixed_flop
+  source: regression-test-files/tour/Stars/Flop/PL-Courcheval-HL-6max-USD-7.50-201705.fixed.flop.txt
+  room: pokerstars
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: pokerstars_mtt_plnl_usd_stt_200_201209
+  source: regression-test-files/tour/Stars/Flop/PLNL-USD-STT-200-201209.txt
+  room: pokerstars
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: pokerstars_mtt_plo_9max_usd_mtt_usd_200_50_15_201209_split_ko
+  source: regression-test-files/tour/Stars/Flop/PLO-9max-USD-MTT-USD-200-50-15-201209.split.ko.txt
+  room: pokerstars
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: pokerstars_mtt_plo_usd_mtt_3_201201_sample
+  source: regression-test-files/tour/Stars/Flop/PLO-USD-MTT-3-201201.Sample.txt
+  room: pokerstars
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: pokerstars_mtt_plo8_6max_usd_11_1_202105_chico_converted
+  source: regression-test-files/tour/Stars/Flop/PLO8-6max-USD-11-1-202105.Chico.Converted.txt
+  room: pokerstars
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: pokerstars_mtt_plo8_9max_usd_stt_5_00_200505_hero_quartered
+  source: regression-test-files/tour/Stars/Flop/PLO8-9max-USD-STT-5.00-200505.hero.quartered.txt
+  room: pokerstars
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: pokerstars_mtt_8_game_2max_stt_play_100_201306_homegame_shootout
+  source: regression-test-files/tour/Stars/Mixed/8-Game-2max-STT-play-100-201306.homeGame.shootout.txt
+  room: pokerstars
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: pokerstars_mtt_7_studhl_usd_10_1_200906_pt2_export
+  source: regression-test-files/tour/Stars/Stud/7-StudHL-USD-10-1-200906.PT2.export.txt
+  room: pokerstars
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: pokerstars_mtt_razz_8max_usd_200_15_201009_bracket_in_alias
+  source: regression-test-files/tour/Stars/Stud/Razz-8max-USD-200-15-201009.bracket.in.alias.txt
+  room: pokerstars
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: pokerstars_mtt_triple_stud_usd_2_00_0_20_mtt_201301
+  source: regression-test-files/tour/Stars/Stud/Triple-Stud-USD-2.00-0.20-MTT-201301.txt
+  room: pokerstars
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: pokerstars_mtt_nouveau_document_texte_2
+  source: regression-test-files/tour/Stars/private/pokerstars it/sng/Nouveau Document
+    texte (2).txt
+  room: pokerstars
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: pokerstars_mtt_nouveau_document_texte
+  source: regression-test-files/tour/Stars/private/pokerstars it/sng/Nouveau Document
+    texte.txt
+  room: pokerstars
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: pokerstars_mtt_hh20240701_t3773094929_no_limit_hold_em_0_23_0_02
+  source: regression-test-files/tour/Stars/private/test spin/HH20240701 T3773094929
+    No Limit Hold'em €0.23 + €0.02.txt
+  room: pokerstars
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: pokerstars_mtt_hh20240722_t3780634352_no_limit_hold_em_0_23_0_02
+  source: regression-test-files/tour/Stars/private/test spin/HH20240722 T3780634352
+    No Limit Hold'em €0.23 + €0.02.txt
+  room: pokerstars
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: winamax_mtt_20110305_freeroll_150_80_5142226_real_holdem_no_limit
+  source: regression-test-files/tour/Winamax/Flop/20110305_Freeroll 150%80(5142226)_real_holdem_no-limit.txt
+  room: winamax
+  format: mtt
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: winamax_mtt_nlhe_10max_free_201207_ticket_only
+  source: regression-test-files/tour/Winamax/Flop/NLHE-10max-FREE-201207.Ticket.only.txt
+  room: winamax
+  format: mtt
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: winamax_mtt_nlhe_eur_stt_fullhist
+  source: regression-test-files/tour/Winamax/Flop/NLHE-EUR-STT-FullHist.txt
+  room: winamax
+  format: mtt
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: winamax_mtt_nlhe_free_mtt_201103_full_history
+  source: regression-test-files/tour/Winamax/Flop/NLHE-Free-MTT-201103.Full.History.txt
+  room: winamax
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: winamax_mtt_nlhe_free_mtt_201206_ticket_only_sample
+  source: regression-test-files/tour/Winamax/Flop/NLHE-Free-MTT-201206-Ticket.only.sample.txt
+  room: winamax
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: winamax_mtt_nlhe_mtt_eur_22_5_22_5_5_202208_bounty_ticket
+  source: regression-test-files/tour/Winamax/Flop/NLHE-MTT-EUR-22.5-22.5-5-202208.bounty.ticket.txt
+  room: winamax
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: winamax_mtt_nlhe_ticket_mtt_201010_raise_written_as_bet_preflop
+  source: regression-test-files/tour/Winamax/Flop/NLHE-Ticket-MTT-201010.raise.written.as.bet.preflop.txt
+  room: winamax
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: winamax_mtt_nlhe_ticket_mtt_201010_side_pot
+  source: regression-test-files/tour/Winamax/Flop/NLHE-Ticket-MTT-201010.side.pot.txt
+  room: winamax
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: winamax_mtt_nlhe_ticket_mtt_201207_ticket_only
+  source: regression-test-files/tour/Winamax/Flop/NLHE-Ticket-MTT-201207.ticket.only.txt
+  room: winamax
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: winamax_mtt_20240625_expresso_nitro_807245893_real_holdem_no_limit
+  source: regression-test-files/tour/Winamax/private/expressos/20240625_Expresso Nitro(807245893)_real_holdem_no-limit.txt
+  room: winamax
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: winamax_mtt_20240625_expresso_nitro_807245999_real_holdem_no_limit
+  source: regression-test-files/tour/Winamax/private/expressos/20240625_Expresso Nitro(807245999)_real_holdem_no-limit.txt
+  room: winamax
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: winamax_mtt_20240625_expresso_nitro_807460294_real_holdem_no_limit
+  source: regression-test-files/tour/Winamax/private/expressos/20240625_Expresso Nitro(807460294)_real_holdem_no-limit.txt
+  room: winamax
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: winamax_mtt_20240625_expresso_nitro_807460400_real_holdem_no_limit
+  source: regression-test-files/tour/Winamax/private/expressos/20240625_Expresso Nitro(807460400)_real_holdem_no-limit.txt
+  room: winamax
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: winamax_mtt_20240706_expresso_nitro_811582205_real_holdem_no_limit
+  source: regression-test-files/tour/Winamax/private/expressos/20240706_Expresso Nitro(811582205)_real_holdem_no-limit.txt
+  room: winamax
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: winamax_mtt_20240706_expresso_nitro_811582244_real_holdem_no_limit
+  source: regression-test-files/tour/Winamax/private/expressos/20240706_Expresso Nitro(811582244)_real_holdem_no-limit.txt
+  room: winamax
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: winamax_mtt_20240706_expresso_nitro_811583293_real_holdem_no_limit
+  source: regression-test-files/tour/Winamax/private/expressos/20240706_Expresso Nitro(811583293)_real_holdem_no-limit.txt
+  room: winamax
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: winamax_mtt_20240706_expresso_nitro_811583453_real_holdem_no_limit
+  source: regression-test-files/tour/Winamax/private/expressos/20240706_Expresso Nitro(811583453)_real_holdem_no-limit.txt
+  room: winamax
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: winamax_mtt_20240706_expresso_nitro_811585885_real_holdem_no_limit
+  source: regression-test-files/tour/Winamax/private/expressos/20240706_Expresso Nitro(811585885)_real_holdem_no-limit.txt
+  room: winamax
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: winamax_mtt_20240706_expresso_nitro_811586036_real_holdem_no_limit
+  source: regression-test-files/tour/Winamax/private/expressos/20240706_Expresso Nitro(811586036)_real_holdem_no-limit.txt
+  room: winamax
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: winamax_mtt_20240706_expresso_nitro_811587097_real_holdem_no_limit
+  source: regression-test-files/tour/Winamax/private/expressos/20240706_Expresso Nitro(811587097)_real_holdem_no-limit.txt
+  room: winamax
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: winamax_mtt_20240706_expresso_nitro_811587231_real_holdem_no_limit
+  source: regression-test-files/tour/Winamax/private/expressos/20240706_Expresso Nitro(811587231)_real_holdem_no-limit.txt
+  room: winamax
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: winamax_mtt_20240706_expresso_nitro_811587458_real_holdem_no_limit
+  source: regression-test-files/tour/Winamax/private/expressos/20240706_Expresso Nitro(811587458)_real_holdem_no-limit.txt
+  room: winamax
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: winamax_mtt_20240706_expresso_811588671_real_holdem_no_limit
+  source: regression-test-files/tour/Winamax/private/expressos/20240706_Expresso(811588671)_real_holdem_no-limit.txt
+  room: winamax
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: winamax_mtt_20240706_expresso_811588878_real_holdem_no_limit
+  source: regression-test-files/tour/Winamax/private/expressos/20240706_Expresso(811588878)_real_holdem_no-limit.txt
+  room: winamax
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: winamax_mtt_20240723_expresso_nitro_817765321_real_holdem_no_limit
+  source: regression-test-files/tour/Winamax/private/expressos/20240723_Expresso Nitro(817765321)_real_holdem_no-limit.txt
+  room: winamax
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: winningpoker_mtt_nlhe_8max_na_0_0_202207_gtd
+  source: regression-test-files/tour/Winning/NLHE-8max-NA-0-0-202207.GTD.txt
+  room: winningpoker
+  format: mtt
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: winningpoker_mtt_nlhe_9max_free_hh20160914_t6106397_g34835015_201609_ante
+  source: regression-test-files/tour/Winning/NLHE-9max-FREE-HH20160914 T6106397-G34835015-201609.ante.txt
+  room: winningpoker
+  format: mtt
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: winningpoker_mtt_nlhe_9max_na_0_0_201907_scheduledid_tn_the_venom_5_000_000_gtd_day_1c_gametype
+  source: regression-test-files/tour/Winning/NLHE-9max-NA-0-0-201907.SCHEDULEDID-TN-The
+    Venom - $5,000,000 GTD - Day 1C GAMETYPE.txt
+  room: winningpoker
+  format: mtt
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: winningpoker_mtt_nlhe_9max_usd_hh20160828_t5795043_g33949698_201608_ante_2
+  source: regression-test-files/tour/Winning/NLHE-9max-USD- HH20160828 T5795043-G33949698-201608.ante.2.txt
+  room: winningpoker
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: winningpoker_mtt_nlhe_na_0_0_hh00000000_t1_g0_201601_unknown_player_acts
+  source: regression-test-files/tour/Winning/NLHE-NA-0-0 HH00000000 T1-G0-201601.unknown.player.acts.txt
+  room: winningpoker
+  format: mtt
+  tags:
+  - regression
+  - regression_only
+- id: winningpoker_mtt_nlhe_na_0_0_hh00000000_t2_g0_201801_data_mined_format
+  source: regression-test-files/tour/Winning/NLHE-NA-0-0 HH00000000 T2-G0-201801.data.mined.format.txt
+  room: winningpoker
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: winningpoker_mtt_nlhe_na_0_0_hh20190118_t9360380_g0_201901
+  source: regression-test-files/tour/Winning/NLHE-NA-0-0 HH20190118 T9360380-G0-201901.txt
+  room: winningpoker
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: winningpoker_mtt_plo8_9max_usd_15_201906_sitgoid_tn_15_plo_hi_backslash_lo_turbo_on_demand_gametype
+  source: regression-test-files/tour/Winning/PLO8-9max-USD-15-201906.SITGOID-TN-$15
+    PLO Hi{BACKSLASH}Lo Turbo - On Demand GAMETYPE.txt
+  room: winningpoker
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: ipoker_mtt_nlhe_10max_mtt_10_1_201901_bovada_converted
+  source: regression-test-files/tour/iPoker/Flop/NLHE-10max-MTT-10-1-201901.Bovada.converted.txt
+  room: ipoker
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: ipoker_mtt_nlhe_2max_usd_sng_2000_201210
+  source: regression-test-files/tour/iPoker/Flop/NLHE-2max-USD-SNG-2000-201210.txt
+  room: ipoker
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: ipoker_mtt_nlhe_3max_usd_sng_1_00_twister
+  source: regression-test-files/tour/iPoker/Flop/NLHE-3max-USD-SNG-1.00.Twister.txt
+  room: ipoker
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: ipoker_mtt_nlhe_eur_mtt_30_201302_slight_format_change
+  source: regression-test-files/tour/iPoker/Flop/NLHE-EUR-MTT-30-201302.slight.format.change.txt
+  room: ipoker
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: ipoker_mtt_nlhe_eur_sng_0_50_ipoker_it
+  source: regression-test-files/tour/iPoker/Flop/NLHE-EUR-SNG-0.50.iPoker.it.txt
+  room: ipoker
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: ipoker_mtt_nlhe_gbp_mtt_5_201403_fppbuyin
+  source: regression-test-files/tour/iPoker/Flop/NLHE-GBP-MTT-5-201403.FPPbuyin.txt
+  room: ipoker
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: ipoker_mtt_nlhe_usd_10_1_201901_card_catcher
+  source: regression-test-files/tour/iPoker/Flop/NLHE-USD-10-1-201901.card.catcher.txt
+  room: ipoker
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: ipoker_mtt_nlhe_usd_mtt_5r_201112_sample
+  source: regression-test-files/tour/iPoker/Flop/NLHE-USD-MTT-5r-201112.Sample.xml
+  room: ipoker
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: ipoker_mtt_nlhe_usd_mtt_freeroll_201107
+  source: regression-test-files/tour/iPoker/Flop/NLHE-USD-MTT-Freeroll-201107.txt
+  room: ipoker
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: ipoker_mtt_nlhe_usd_sng_100_5_201610_new_tourno_format
+  source: regression-test-files/tour/iPoker/Flop/NLHE-USD-SNG-100-5-201610.new.tourno.format.xml
+  room: ipoker
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: ipoker_mtt_7_studhi_usd_stt_5_201103
+  source: regression-test-files/tour/iPoker/Stud/7-StudHi-USD-STT-5-201103.txt
+  room: ipoker
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: ipoker_mtt_5642125465
+  source: regression-test-files/tour/iPoker/private/fdj/sng/1/5642125465.xml
+  room: ipoker
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: ipoker_mtt_5642131037
+  source: regression-test-files/tour/iPoker/private/fdj/sng/2/5642131037.xml
+  room: ipoker
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: ipoker_mtt_5642131663
+  source: regression-test-files/tour/iPoker/private/fdj/sng/3/5642131663.xml
+  room: ipoker
+  format: mtt
+  tags:
+  - regression
+  - golden
+- id: absolute_cash_7_studhl_usd_0_02_0_04_200903_river_with_mucked
+  source: regression-test-files/cash/Absolute/Stud/7-StudHL-USD-0.02-0.04-200903.River.with.mucked.txt
+  room: absolute
+  format: cash
+  converter: AbsoluteToFpdb
+  parser_class: Absolute
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: boss_cash_5cd_fl_eur_2_4_opoker_sample
+  source: regression-test-files/cash/Boss/Draw/5CD-FL-EUR-2-4.Opoker.sample.xml
+  room: boss
+  format: cash
+  converter: BossToFpdb
+  parser_class: Boss
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: enet_cash_nlhe_6max_eur_0_05_0_10_201210_post_dead
+  source: regression-test-files/cash/Enet/Flop/NLHE-6max-EUR-0.05-0.10-201210.post.dead.txt
+  room: enet
+  format: cash
+  converter: EnetToFpdb
+  parser_class: Enet
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: entraction_cash_lhe_hu_eur_10_20_201103
+  source: regression-test-files/cash/Entraction/Flop/LHE-HU-EUR-10-20-201103.txt
+  room: entraction
+  format: cash
+  converter: EntractionToFpdb
+  parser_class: Entraction
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: everest_cash_nlhe_eur_0_01_0_02_201104_sample_emailed
+  source: regression-test-files/cash/Everest/Flop/NLHE-EUR-0.01-0.02-201104.Sample.emailed.txt
+  room: everest
+  format: cash
+  converter: EverestToFpdb
+  parser_class: Everest
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: everleaf_cash_7_stud_eur_0_05_0_10_201108_new_format
+  source: regression-test-files/cash/Everleaf/Stud/7-Stud-EUR-0.05-0.10.201108-new-format.txt
+  room: everleaf
+  format: cash
+  converter: EverleafToFpdb
+  parser_class: Everleaf
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: fulltilt_cash_3_draw_limit_usd_1500_3000_201101_archive_sample
+  source: regression-test-files/cash/FTP/Draw/3-Draw-Limit-USD-1500-3000-201101.FTP.Archive.sample.txt
+  room: fulltilt
+  format: cash
+  converter: FulltiltToFpdb
+  parser_class: Fulltilt
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: microgaming_cash_plo_6max_eur_5_10_201603_v5_secondsb_raised
+  source: regression-test-files/cash/Microgaming/Flop/PLO-6max-EUR-5-10-201603.v5.secondsb.raised.txt
+  room: microgaming
+  format: cash
+  converter: MicrogamingToFpdb
+  parser_class: Microgaming
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: ongame_cash_7_stud_usd_0_10_0_20_201009_sample
+  source: regression-test-files/cash/OnGame/Stud/7-Stud-USD-0.10-0.20-201009.Sample.txt
+  room: ongame
+  format: cash
+  converter: OnGameToFpdb
+  parser_class: OnGame
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: pkr_cash_nlhe_10max_play_5_10_201108
+  source: regression-test-files/cash/PKR/Flop/NLHE-10max-play-5-10-201108.txt
+  room: pkr
+  format: cash
+  converter: PkrToFpdb
+  parser_class: Pkr
+  tags:
+  - regression
+  - golden
+  - smoke
+- id: ipoker_betclic_cash_4836413352
+  source: regression-test-files/cash/iPoker/private/betclic/4836413352.xml
+  room: ipoker
+  skin: betclic
+  format: cash
+  converter: iPokerToFpdb
+  parser_class: iPoker
+  tags:
+  - regression
+  - golden
+  - smoke
+  - skin_detection
+- id: ipoker_fdj_cash_5643116803
+  source: regression-test-files/cash/iPoker/private/fdj/cash/5643116803.xml
+  room: ipoker
+  skin: fdj
+  format: cash
+  converter: iPokerToFpdb
+  parser_class: iPoker
+  tags:
+  - regression
+  - golden
+  - skin_detection
+- id: ipoker_fdj_mtt_5642125465
+  source: regression-test-files/tour/iPoker/private/fdj/sng/1/5642125465.xml
+  room: ipoker
+  skin: fdj
+  format: mtt
+  converter: iPokerToFpdb
+  parser_class: iPoker
+  tags:
+  - regression
+  - golden
+  - skin_detection

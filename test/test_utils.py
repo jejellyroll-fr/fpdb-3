@@ -10,7 +10,7 @@ import pytest
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from unittest.mock import Mock
 
-from DerivedStats import DerivedStats
+from fpdb_3_legacy.DerivedStats import DerivedStats
 
 
 class TestUtilityMethodsFinal:

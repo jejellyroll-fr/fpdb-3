@@ -1,0 +1,24 @@
+PokerStars Hand #222222222222: Tournament #3333333333, $10+$10+$2 USD Hold'em No Limit - Level I (10/20) - 2023/10/27 12:00:00 ET
+Table '3333333333 1' 9-max Seat #1 is the button
+Seat 1: Hero (1500 in chips, $10 bounty)
+Seat 2: Villain (1500 in chips, $10 bounty)
+Hero: posts small blind 10
+Villain: posts big blind 20
+*** HOLE CARDS ***
+Dealt to Hero [As Ks]
+Hero: raises 1480 to 1500 and is all-in
+Villain: calls 1480 and is all-in
+*** FLOP *** [Ah Kh Qs]
+*** TURN *** [Ah Kh Qs] [Js]
+*** RIVER *** [Ah Kh Qs Js] [Ts]
+*** SHOW DOWN ***
+Hero: shows [As Ks] (a Royal Flush)
+Villain: shows [2c 7d] (high card Ace)
+Hero collected 3000 from pot
+Hero wins $5 for eliminating Villain and their own bounty increases by $5 to $15
+*** SUMMARY ***
+Total pot 3000 | Rake 0
+Title: Progressive KO
+Board [Ah Kh Qs Js Ts]
+Seat 1: Hero (button) (small blind) showed [As Ks] and won (3000)
+Seat 2: Villain (big blind) showed [2c 7d] and lost

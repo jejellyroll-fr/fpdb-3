@@ -1,0 +1,20 @@
+PokerStars Game #2695932189:  5-Card Omaha High Pot Limit ($0.10/$0.20 USD) - 2012/08/15 12:00:00 ET
+Table 'Nampa' 6-max Seat #1 is the button
+Seat 1: Player1 ($20.00 in chips)
+Seat 2: Player2 ($20.00 in chips)
+Player1: posts small blind $0.10
+Player2: posts big blind $0.20
+*** HOLE CARDS ***
+Dealt to Player1 [As Ks Qs Js Ts]
+Player1: raises $0.40 to $0.60
+Player2: calls $0.40
+*** FLOP *** [2h 3h 4h]
+Player2: checks
+Player1: bets $1.20
+Player2: folds
+Uncalled bet ($1.20) returned to Player1
+Player1 collected $1.20 from pot
+*** SUMMARY ***
+Total pot $1.20 | Rake $0.00
+Seat 1: Player1 (small blind) collected ($1.20)
+Seat 2: Player2 (big blind) folded on the Flop

@@ -1,9 +1,10 @@
 """Tests for PokerStars progressive bounties processing."""
 
 import unittest
+from decimal import Decimal, InvalidOperation
 from unittest.mock import Mock
 
-from PokerStarsToFpdb import PokerStars
+from fpdb_3_legacy.PokerStarsToFpdb import PokerStars
 
 
 class MockConfig:
@@ -113,7 +114,7 @@ Player2 wins $4.00 for eliminating Player4 and their own bounty increases by $2.
         self.assertEqual(mock_hand.endBounty["Player1"], 850)  # 8.50 * 100
         self.assertEqual(mock_hand.endBounty["Player2"], 900)  # 9.00 * 100
         self.assertEqual(mock_hand.koCounts["Player1"], 20.0)  # 300 / 15.0
-        self.assertAlmostEqual(mock_hand.koCounts["Player2"], 26.67, places=1)  # 400 / 15.0
+        self.assertAlmostEqual(mock_hand.koCounts["Player2"], Decimal("26.67"), places=1)  # 400 / 15.0
 
     def test_tournament_winner_bonus(self):
         """Test tournament winner gets end bounty added."""
@@ -190,7 +191,7 @@ Player1 wins $3.75 for eliminating Player2 and their own bounty increases by $1.
         self.assertEqual(mock_hand.koCounts["Player1"], 30.0)  # 375 / 12.5
 
     def test_comma_in_amt_fails(self):
-        """Test that comma in AMT fails due to float() conversion."""
+        """Test that comma in AMT fails due to Decimal() conversion."""
         mock_hand = Mock()
         mock_hand.endBounty = {}
         mock_hand.isProgressive = False
@@ -201,8 +202,8 @@ Player1 wins $1,250.50 for eliminating Player2 and their own bounty increases by
 *** SUMMARY ***
 """
 
-        # Test that method raises ValueError due to comma in AMT
-        with self.assertRaises(ValueError):
+        # Test that method raises InvalidOperation due to comma in AMT (Decimal conversion)
+        with self.assertRaises(InvalidOperation):
             self.parser._processProgressiveBounties(mock_hand)
 
 

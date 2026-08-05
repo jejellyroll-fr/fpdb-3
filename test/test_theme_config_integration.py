@@ -14,9 +14,9 @@ from unittest.mock import Mock, patch
 # Add the parent directory to the path to import our modules
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from ConfigObservers import GuiPrefsObserver
-from ConfigurationManager import ChangeType, ConfigChange, ConfigurationManager
-from ThemeManager import ThemeManager
+from fpdb_3_legacy.ConfigObservers import GuiPrefsObserver
+from fpdb_3_legacy.ConfigurationManager import ChangeType, ConfigChange, ConfigurationManager
+from fpdb_3_legacy.ThemeManager import ThemeManager
 
 
 class TestThemeConfigIntegration(unittest.TestCase):
@@ -60,7 +60,7 @@ class TestThemeConfigIntegration(unittest.TestCase):
             ChangeType.THEME_SETTINGS, "general.qt_material_theme", "dark_purple.xml", "light_blue.xml"
         )
 
-        with patch("ThemeManager.ThemeManager") as mock_theme_manager_class:
+        with patch("fpdb_3_legacy.ThemeManager.ThemeManager") as mock_theme_manager_class:
             mock_theme_manager = Mock()
             mock_theme_manager.set_qt_material_theme.return_value = True
             mock_theme_manager_class.return_value = mock_theme_manager
@@ -77,7 +77,7 @@ class TestThemeConfigIntegration(unittest.TestCase):
         # Create a popup theme change
         change = ConfigChange(ChangeType.THEME_SETTINGS, "general.popup_theme", "material_dark", "classic")
 
-        with patch("ThemeManager.ThemeManager") as mock_theme_manager_class:
+        with patch("fpdb_3_legacy.ThemeManager.ThemeManager") as mock_theme_manager_class:
             mock_theme_manager = Mock()
             mock_theme_manager.set_popup_theme.return_value = True
             mock_theme_manager_class.return_value = mock_theme_manager
@@ -107,7 +107,7 @@ class TestThemeConfigIntegration(unittest.TestCase):
             ChangeType.THEME_SETTINGS, "general.qt_material_theme", "dark_purple.xml", "light_blue.xml"
         )
 
-        with patch("ThemeManager.ThemeManager") as mock_theme_manager_class:
+        with patch("fpdb_3_legacy.ThemeManager.ThemeManager") as mock_theme_manager_class:
             # Simulate ThemeManager throwing an exception
             mock_theme_manager_class.side_effect = Exception("Theme manager error")
 
@@ -216,7 +216,7 @@ class TestThemeConfigIntegration(unittest.TestCase):
         theme_changes = [c for c in changes if c.type == ChangeType.THEME_SETTINGS]
 
         # Step 4: Apply changes through observer
-        with patch("ThemeManager.ThemeManager") as mock_theme_manager_class:
+        with patch("fpdb_3_legacy.ThemeManager.ThemeManager") as mock_theme_manager_class:
             mock_theme_manager = Mock()
             mock_theme_manager.set_qt_material_theme.return_value = True
             mock_theme_manager.set_popup_theme.return_value = True
@@ -291,7 +291,7 @@ class TestThemeConfigErrorHandling(unittest.TestCase):
             ChangeType.THEME_SETTINGS, "general.qt_material_theme", "dark_purple.xml", "light_blue.xml"
         )
 
-        with patch("ThemeManager.ThemeManager", side_effect=ImportError("Module not found")):
+        with patch("fpdb_3_legacy.ThemeManager.ThemeManager", side_effect=ImportError("Module not found")):
             result = observer._update_theme(change)
 
             self.assertFalse(result, "Should fail gracefully on import error")

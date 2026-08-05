@@ -3,8 +3,8 @@
 import unittest
 from unittest.mock import Mock
 
-from Hand import Hand
-from PokerStarsToFpdb import STUD_HOLE_CARDS_COUNT, PokerStars
+from fpdb_3_legacy.Hand import Hand
+from fpdb_3_legacy.PokerStarsToFpdb import STUD_HOLE_CARDS_COUNT, PokerStars
 
 
 class MockConfig:
