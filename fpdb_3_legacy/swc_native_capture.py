@@ -10,7 +10,6 @@ import json
 import os
 import platform
 import re
-import shutil
 import struct
 import subprocess
 import sys
@@ -30,21 +29,15 @@ from fpdb_3_legacy.swc_http_adapter import card_id_to_str
 
 log = get_logger("swc_native_capture")
 
-SWC_APP = Path("/Applications/SwC Poker.app")
-SWC_EXECUTABLE = SWC_APP / "Contents/MacOS/SwC Poker"
-SOURCE_PATH = Path(__file__).with_name("swc_native_tap.c")
-BUILD_DIR = Path.home() / ".fpdb" / "swc-native-capture"
-
-
-def get_tap_library_path() -> Path:
-    system_name = platform.system()
-    if system_name == "Darwin":
-        return BUILD_DIR / "libswc_native_tap.dylib"
-    elif system_name == "Windows":
-        return BUILD_DIR / "swc_native_tap.dll"
-    else:
-        return BUILD_DIR / "libswc_native_tap.so"
-
+# Compiling the tap lives in its own stdlib-only module so CI can verify the
+# build on every platform without installing the project; re-exported here so
+# existing callers keep importing it from the place they always have.
+from fpdb_3_legacy.swc_tap_build import (  # noqa: E402
+    BUILD_DIR,
+    SWC_EXECUTABLE,
+    build_tap,
+    get_tap_library_path,
+)
 
 TAP_LIBRARY = get_tap_library_path()
 DEFAULT_ARCHIVE = BUILD_DIR / "swc-native.raw"
@@ -3000,68 +2993,6 @@ def read_records_since(path: Path, offset: int) -> tuple[list[NativeCaptureRecor
             offset += _HEADER.size + payload_size
 
     return records, offset
-
-
-def build_tap(*, force: bool = False, check_executable: bool = False) -> Path:
-    system_name = platform.system()
-    if system_name not in {"Darwin", "Linux", "Windows"}:
-        raise RuntimeError(f"the native SwC tap is not supported on {system_name}")
-    if check_executable and system_name == "Darwin" and not SWC_EXECUTABLE.exists():
-        raise FileNotFoundError(f"SwC client not found at {SWC_APP}")
-    tap_lib = get_tap_library_path()
-    if tap_lib.exists() and not force and tap_lib.stat().st_mtime >= SOURCE_PATH.stat().st_mtime:
-        return tap_lib
-
-    BUILD_DIR.mkdir(mode=0o700, parents=True, exist_ok=True)
-
-    if system_name == "Darwin":
-        command = [
-            "clang",
-            "-arch",
-            "x86_64",
-            "-dynamiclib",
-            "-O2",
-            "-Wall",
-            "-Wextra",
-            "-undefined",
-            "dynamic_lookup",
-            "-o",
-            str(tap_lib),
-            str(SOURCE_PATH),
-        ]
-    elif system_name == "Windows":
-        compiler = "x86_64-w64-mingw32-gcc" if shutil.which("x86_64-w64-mingw32-gcc") else "gcc"
-        command = [
-            compiler,
-            "-shared",
-            "-O2",
-            "-Wall",
-            "-Wextra",
-            "-o",
-            str(tap_lib),
-            str(SOURCE_PATH),
-            "-lws2_32",
-        ]
-    else:
-        compiler = "clang" if shutil.which("clang") else "gcc"
-        command = [
-            compiler,
-            "-shared",
-            "-fPIC",
-            "-O2",
-            "-Wall",
-            "-Wextra",
-            "-o",
-            str(tap_lib),
-            str(SOURCE_PATH),
-            "-ldl",
-        ]
-    subprocess.run(command, check=True)
-    try:
-        tap_lib.chmod(0o700)
-    except OSError:
-        pass
-    return tap_lib
 
 
 def running_client_pids() -> list[int]:
