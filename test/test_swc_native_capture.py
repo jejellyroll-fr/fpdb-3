@@ -1516,3 +1516,28 @@ def test_build_native_ofc_summary_excludes_non_ofc_hands():
 def test_iter_capture_records_rejects_corruption(data, message):
     with pytest.raises(ValueError, match=message):
         list(iter_capture_records(io.BytesIO(data)))
+
+
+def test_build_tap_cross_platform(tmp_path, monkeypatch):
+    from fpdb_3_legacy import swc_native_capture
+
+    monkeypatch.setattr(swc_native_capture, "BUILD_DIR", tmp_path)
+    tap_path = swc_native_capture.build_tap(force=True)
+    assert tap_path.exists()
+    assert tap_path.name in ("libswc_native_tap.dylib", "libswc_native_tap.so", "swc_native_tap.dll")
+
+
+def test_swc_native_tailing_thread(tmp_path):
+    from fpdb_3_legacy.GuiAutoImport import SwCNativeTailingThread
+    raw = tmp_path / "swc-native.raw"
+    raw.write_bytes(_record())
+
+    thread = SwCNativeTailingThread(raw_path=raw)
+    imported = []
+    thread.hand_imported.connect(imported.append)
+    thread.start()
+    thread.stop()
+    thread.wait(1000)
+    # Thread terminates cleanly
+    assert not thread.isRunning()
+
