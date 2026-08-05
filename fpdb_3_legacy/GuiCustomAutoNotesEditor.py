@@ -508,6 +508,29 @@ class GuiCustomAutoNotesEditor(QWidget):
             "capture_action_sequence": self.chk_ev_actions.isChecked(),
         }
 
+    def _existing_rule_ids(self) -> set[str]:
+        return {
+            str(rule.get("rule_id", ""))
+            for cset in self.user_data.get("custom_rule_sets", [])
+            for rule in cset.get("rules", [])
+        }
+
+    def _unique_rule_id(self, candidate: str) -> str:
+        """Return `candidate`, suffixed if needed so no two rules share an id.
+
+        Generated notes are keyed by rule id, so a collision makes a note
+        impossible to attribute. Both entry points can produce one: duplicating
+        the same rule twice yields `<id>_copy` twice, and numbering new rules by
+        list length repeats an id as soon as an earlier rule was deleted.
+        """
+        existing = self._existing_rule_ids()
+        if candidate not in existing:
+            return candidate
+        suffix = 2
+        while f"{candidate}_{suffix}" in existing:
+            suffix += 1
+        return f"{candidate}_{suffix}"
+
     def on_new_rule(self) -> None:
         custom_sets = self.user_data.setdefault("custom_rule_sets", [])
         if not custom_sets:
@@ -516,7 +539,7 @@ class GuiCustomAutoNotesEditor(QWidget):
 
         count = len(cset.get("rules", [])) + 1
         new_rule = {
-            "rule_id": f"custom_rule_{count}",
+            "rule_id": self._unique_rule_id(f"custom_rule_{count}"),
             "version": 1,
             "name": f"Custom Rule #{count}",
             "note_template": "{player} action with {hole} (Stack: {eff_stack_bb}bb)",
@@ -546,7 +569,7 @@ class GuiCustomAutoNotesEditor(QWidget):
         cset = custom_sets[0]
 
         dupe = json.loads(json.dumps(self.current_rule_dict))
-        dupe["rule_id"] = f"{dupe.get('rule_id', 'rule')}_copy"
+        dupe["rule_id"] = self._unique_rule_id(f"{dupe.get('rule_id', 'rule')}_copy")
         dupe["name"] = f"{dupe.get('name', 'Rule')} (Copy)"
 
         cset.setdefault("rules", []).append(dupe)
@@ -566,18 +589,50 @@ class GuiCustomAutoNotesEditor(QWidget):
         if res != QMessageBox.StandardButton.Yes:
             return
 
+        # Match on identity, not equality: two rules can hold identical content,
+        # and list.remove() would then drop the first match instead of the one
+        # the user selected.
         for cset in self.user_data.get("custom_rule_sets", []):
             rules = cset.get("rules", [])
-            if self.current_rule_dict in rules:
-                rules.remove(self.current_rule_dict)
-                break
+            for index, rule in enumerate(rules):
+                if rule is self.current_rule_dict:
+                    del rules[index]
+                    break
+            else:
+                continue
+            break
 
         self.current_rule_dict = None
         self._populate_tree()
         self._clear_condition_rows()
 
+    def _duplicate_rule_ids(self) -> list[str]:
+        seen: set[str] = set()
+        duplicates: list[str] = []
+        for cset in self.user_data.get("custom_rule_sets", []):
+            for rule in cset.get("rules", []):
+                rule_id = str(rule.get("rule_id", ""))
+                if rule_id in seen and rule_id not in duplicates:
+                    duplicates.append(rule_id)
+                seen.add(rule_id)
+        return duplicates
+
     def on_save_rules(self) -> None:
         self._sync_current_rule()
+
+        # The id field is free text, so the generated ids can still be edited into
+        # a collision. Refuse rather than rename silently: notes are keyed by rule
+        # id, and renaming someone's rule would orphan the notes it already wrote.
+        duplicates = self._duplicate_rule_ids()
+        if duplicates:
+            QMessageBox.warning(
+                self,
+                _("Duplicate Rule IDs"),
+                _("These rule IDs are used more than once: %s\n\nGive each rule a unique ID before saving.")
+                % ", ".join(duplicates),
+            )
+            return
+
         save_user_autonotes_data(self.user_data)
         QMessageBox.information(self, _("Saved"), _("Custom Auto Notes rules saved successfully!"))
         self.rules_saved.emit()
