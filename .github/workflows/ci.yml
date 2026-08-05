@@ -27,6 +27,8 @@ jobs:
         run: python tools/prepare_briefcase_resources.py
       - name: Verify technical-debt inventory
         run: python tools/todo_inventory.py --check
+      - name: Verify SwC Native Interposer compilation
+        run: python fpdb_3_legacy/swc_native_capture.py --build
       - name: Type-check modernized core
         run: >-
           mypy

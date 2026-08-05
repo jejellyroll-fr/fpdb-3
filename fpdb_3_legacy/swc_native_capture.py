@@ -10,6 +10,7 @@ import json
 import os
 import platform
 import re
+import shutil
 import struct
 import subprocess
 import sys
@@ -22,6 +23,8 @@ from decimal import Decimal
 from pathlib import Path
 from typing import BinaryIO
 
+UTC = getattr(datetime, "UTC", UTC)
+
 from fpdb_3_legacy.http_capture_diff import diff_snapshot_steps
 from fpdb_3_legacy.http_capture_models import SWC_GAME_DEFINITIONS, CapturedGameDefinition
 from fpdb_3_legacy.swc_http_adapter import card_id_to_str
@@ -30,7 +33,19 @@ SWC_APP = Path("/Applications/SwC Poker.app")
 SWC_EXECUTABLE = SWC_APP / "Contents/MacOS/SwC Poker"
 SOURCE_PATH = Path(__file__).with_name("swc_native_tap.c")
 BUILD_DIR = Path.home() / ".fpdb" / "swc-native-capture"
-TAP_LIBRARY = BUILD_DIR / "libswc_native_tap.dylib"
+
+
+def get_tap_library_path() -> Path:
+    system_name = platform.system()
+    if system_name == "Darwin":
+        return BUILD_DIR / "libswc_native_tap.dylib"
+    elif system_name == "Windows":
+        return BUILD_DIR / "swc_native_tap.dll"
+    else:
+        return BUILD_DIR / "libswc_native_tap.so"
+
+
+TAP_LIBRARY = get_tap_library_path()
 DEFAULT_ARCHIVE = BUILD_DIR / "swc-native.raw"
 DEFAULT_STATUS = BUILD_DIR / "swc-native.status"
 
@@ -2930,32 +2945,66 @@ def iter_capture_records(stream: BinaryIO) -> Iterator[NativeCaptureRecord]:
         )
 
 
-def build_tap(*, force: bool = False) -> Path:
-    if platform.system() != "Darwin":
-        raise RuntimeError("the native SwC tap is only supported on macOS")
-    if not SWC_EXECUTABLE.exists():
+def build_tap(*, force: bool = False, check_executable: bool = False) -> Path:
+    system_name = platform.system()
+    if system_name not in {"Darwin", "Linux", "Windows"}:
+        raise RuntimeError(f"the native SwC tap is not supported on {system_name}")
+    if check_executable and system_name == "Darwin" and not SWC_EXECUTABLE.exists():
         raise FileNotFoundError(f"SwC client not found at {SWC_APP}")
-    if TAP_LIBRARY.exists() and not force and TAP_LIBRARY.stat().st_mtime >= SOURCE_PATH.stat().st_mtime:
-        return TAP_LIBRARY
+    tap_lib = get_tap_library_path()
+    if tap_lib.exists() and not force and tap_lib.stat().st_mtime >= SOURCE_PATH.stat().st_mtime:
+        return tap_lib
 
     BUILD_DIR.mkdir(mode=0o700, parents=True, exist_ok=True)
-    command = [
-        "clang",
-        "-arch",
-        "x86_64",
-        "-dynamiclib",
-        "-O2",
-        "-Wall",
-        "-Wextra",
-        "-undefined",
-        "dynamic_lookup",
-        "-o",
-        str(TAP_LIBRARY),
-        str(SOURCE_PATH),
-    ]
+
+    if system_name == "Darwin":
+        command = [
+            "clang",
+            "-arch",
+            "x86_64",
+            "-dynamiclib",
+            "-O2",
+            "-Wall",
+            "-Wextra",
+            "-undefined",
+            "dynamic_lookup",
+            "-o",
+            str(tap_lib),
+            str(SOURCE_PATH),
+        ]
+    elif system_name == "Windows":
+        compiler = "x86_64-w64-mingw32-gcc" if shutil.which("x86_64-w64-mingw32-gcc") else "gcc"
+        command = [
+            compiler,
+            "-shared",
+            "-O2",
+            "-Wall",
+            "-Wextra",
+            "-o",
+            str(tap_lib),
+            str(SOURCE_PATH),
+            "-lws2_32",
+        ]
+    else:
+        compiler = "clang" if shutil.which("clang") else "gcc"
+        command = [
+            compiler,
+            "-shared",
+            "-fPIC",
+            "-O2",
+            "-Wall",
+            "-Wextra",
+            "-o",
+            str(tap_lib),
+            str(SOURCE_PATH),
+            "-ldl",
+        ]
     subprocess.run(command, check=True)
-    TAP_LIBRARY.chmod(0o700)
-    return TAP_LIBRARY
+    try:
+        tap_lib.chmod(0o700)
+    except OSError:
+        pass
+    return tap_lib
 
 
 def running_client_pids() -> list[int]:
@@ -2980,9 +3029,11 @@ def native_client_environment(archive: Path, tap: Path, *, port: int, include_ou
     for name in tuple(env):
         if name == "LANG" or name == "LANGUAGE" or name.startswith("LC_"):
             env.pop(name, None)
+    system_name = platform.system()
+    interpose_var = "DYLD_INSERT_LIBRARIES" if system_name == "Darwin" else "LD_PRELOAD"
     env.update(
         {
-            "DYLD_INSERT_LIBRARIES": str(tap),
+            interpose_var: str(tap),
             "SWC_CAPTURE_PATH": str(archive),
             "SWC_CAPTURE_STATUS_PATH": str(archive.with_suffix(".status")),
             "SWC_CAPTURE_PORT": str(port),
