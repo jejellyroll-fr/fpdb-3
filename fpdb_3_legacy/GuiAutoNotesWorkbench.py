@@ -33,7 +33,6 @@ from PySide6.QtWidgets import (
 
 from fpdb_3_legacy import GuiReplayer
 from fpdb_3_legacy.AutoNotes import configured_rule_summary
-from fpdb_3_legacy.GuiCustomAutoNotesEditor import GuiCustomAutoNotesEditor
 from fpdb_3_legacy.backfill_autonotes import (
     backfill_database_preview,
     backfill_preview,
@@ -43,6 +42,7 @@ from fpdb_3_legacy.backfill_autonotes import (
 )
 from fpdb_3_legacy.Configuration import GRAPHICS_PATH
 from fpdb_3_legacy.Database import Database
+from fpdb_3_legacy.GuiCustomAutoNotesEditor import GuiCustomAutoNotesEditor
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.loggingFpdb import get_logger
 
