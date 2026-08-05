@@ -120,7 +120,9 @@ def generate_for_hand(
 
 
 def available_rule_sets() -> tuple[AutoNoteRuleSet, ...]:
-    return RULE_SET_REGISTRY
+    from fpdb_3_legacy.user_autonotes_parser import load_custom_rule_sets
+
+    return RULE_SET_REGISTRY + load_custom_rule_sets()
 
 
 def available_rule_set_ids() -> set[str]:
@@ -232,7 +234,7 @@ def _rule_sets_for_hand(
         return (AutoNoteRuleSet("custom", enabled_rules, lambda _h: True),)
 
     selected = []
-    for rule_set in RULE_SET_REGISTRY:
+    for rule_set in available_rule_sets():
         if rule_set_ids is not None and rule_set.rule_set_id not in rule_set_ids:
             continue
         if not rule_set.supports_hand(hand) or not rule_set_enabled(
