@@ -10,24 +10,21 @@ import sys
 from unittest.mock import Mock
 
 import pytest
-from PyQt5.QtTest import QTest
-from PyQt5.QtWidgets import QHBoxLayout, QLabel, QMainWindow, QVBoxLayout, QWidget
+
+pytestmark = pytest.mark.qt
+from PySide6.QtTest import QTest
+from PySide6.QtWidgets import QHBoxLayout, QLabel, QMainWindow, QVBoxLayout, QWidget
 
 # Add the project root to the Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 # Import HUD components
-from Aux_Classic_Hud import ClassicStat
-from Aux_Hud import SimpleStat
+from fpdb_3_legacy.Aux_Classic_Hud import ClassicStat
+from fpdb_3_legacy.Aux_Hud import SimpleStat
 
 
 class TestVisualHUDDisplay:
     """Test suite for visual HUD display verification."""
-
-    @pytest.fixture
-    def qapp(self, qapp):
-        """Ensure QApplication is available."""
-        return qapp
 
     @pytest.fixture
     def real_aw(self):

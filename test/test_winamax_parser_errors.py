@@ -10,8 +10,8 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).parent.parent.resolve()))
 
-from Exceptions import FpdbHandPartial, FpdbParseError
-from WinamaxToFpdb import Winamax
+from fpdb_3_legacy.Exceptions import FpdbHandPartial, FpdbParseError
+from fpdb_3_legacy.WinamaxToFpdb import Winamax
 
 
 class MockConfig:

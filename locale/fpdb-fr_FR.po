@@ -119,7 +119,7 @@ msgstr ""
 #: Aux_Hud.py:271 Aux_Hud.py:305 Aux_Hud.py:322
 #, fuzzy
 msgid "Custom"
-msgstr "  Personnalisé"
+msgstr "Personnalisé"
 
 #: Aux_Hud.py:272
 #, fuzzy
@@ -164,7 +164,7 @@ msgstr ""
 
 #: Aux_Hud.py:301
 msgid "Show Player Stats for"
-msgstr ""
+msgstr "Afficher les stats joueur pour"
 
 #: Aux_Hud.py:308 Aux_Hud.py:325
 #, fuzzy
@@ -173,7 +173,7 @@ msgstr "À:"
 
 #: Aux_Hud.py:318
 msgid "Show Opponent Stats for"
-msgstr ""
+msgstr "Afficher les stats adversaire pour"
 
 #: BetOnlineToFpdb.py:209
 msgid "BetOnlineToFpdb.determineGameType: '%s'"
@@ -3750,7 +3750,7 @@ msgstr ""
 #: fpdb.pyw:818
 #, fuzzy
 msgid "Configure"
-msgstr "Fichier de configuration"
+msgstr "Configurer"
 
 #: fpdb.pyw:821
 msgid "Cash"
@@ -4641,3 +4641,423 @@ msgstr ""
 
 #~ msgid "markStreets appeared to fail: First 100 chars: '%s'"
 #~ msgstr "markStreets : echec : premiers 100 caractères : '%s'"
+
+# --- Vague 2: fpdb-3 UI (menus & database panel) ---
+
+msgid "A database name is required."
+msgstr "Un nom de base de données est requis."
+
+msgid "About"
+msgstr "À propos"
+
+msgid "Add database"
+msgstr "Ajouter une base de données"
+
+msgid "Add..."
+msgstr "Ajouter…"
+
+msgid "Auto Note Rules"
+msgstr "Règles de notes automatiques"
+
+msgid "Auto Notes Workbench"
+msgstr "Atelier de notes automatiques"
+
+msgid "Backend"
+msgstr "Moteur"
+
+msgid "Backend:"
+msgstr "Moteur :"
+
+msgid "Configured databases:"
+msgstr "Bases de données configurées :"
+
+msgid "Create database"
+msgstr "Créer la base de données"
+
+msgid "Create tables"
+msgstr "Créer les tables"
+
+msgid "Database"
+msgstr "Base de données"
+
+msgid "Databases…"
+msgstr "Bases de données…"
+
+msgid "Default"
+msgstr "Par défaut"
+
+msgid "Delete"
+msgstr "Supprimer"
+
+msgid "Dump Database to Textfile"
+msgstr "Exporter la base vers un fichier texte"
+
+msgid "Edit database"
+msgstr "Modifier la base de données"
+
+msgid "Edit..."
+msgstr "Modifier…"
+
+msgid "File"
+msgstr "Fichier"
+
+msgid "HUD Preferences"
+msgstr "Préférences du HUD"
+
+msgid "Host / Path"
+msgstr "Hôte / Chemin"
+
+msgid "Host:"
+msgstr "Hôte :"
+
+msgid "Import filters"
+msgstr "Filtres d'import"
+
+msgid "Language"
+msgstr "Langue"
+
+msgid "Manage HUD Sites"
+msgstr "Gérer les sites du HUD"
+
+msgid "Migrate to..."
+msgstr "Migrer vers…"
+
+msgid "Name:"
+msgstr "Nom :"
+
+msgid "Opponents Report"
+msgstr "Rapport sur les adversaires"
+
+msgid "Password:"
+msgstr "Mot de passe :"
+
+msgid "Port:"
+msgstr "Port :"
+
+msgid "Seat Settings"
+msgstr "Paramètres des sièges"
+
+msgid "Set as default"
+msgstr "Définir par défaut"
+
+msgid "Stats Guide"
+msgstr "Guide des stats"
+
+msgid "System default"
+msgstr "Langue du système"
+
+msgid "Test connection"
+msgstr "Tester la connexion"
+
+msgid "Themes"
+msgstr "Thèmes"
+
+msgid "Tools"
+msgstr "Outils"
+
+msgid "Tourney Hand Viewer"
+msgstr "Visionneuse de mains de tournoi"
+
+msgid "User"
+msgstr "Utilisateur"
+
+msgid "User:"
+msgstr "Utilisateur :"
+
+msgid "View"
+msgstr "Affichage"
+
+# --- Vague 2: bulk import panel ---
+
+msgid "Importing..."
+msgstr "Importation en cours…"
+
+msgid "Bulk Import Error"
+msgstr "Erreur d'import massif"
+
+msgid "Configured Import Directories:"
+msgstr "Répertoires d'import configurés :"
+
+msgid "Path"
+msgstr "Chemin"
+
+msgid "Move imported files to:"
+msgstr "Déplacer les fichiers importés vers :"
+
+msgid "Move failed files to:"
+msgstr "Déplacer les fichiers en échec vers :"
+
+msgid "Choose a destination directory"
+msgstr "Choisir un répertoire de destination"
+
+# --- Vague 2: auto import panel ---
+
+msgid "FPDB Auto Import"
+msgstr "Import automatique FPDB"
+
+msgid "Time between imports (seconds):"
+msgstr "Délai entre imports (secondes) :"
+
+msgid "Ready"
+msgstr "Prêt"
+
+msgid "Auto Import Running..."
+msgstr "Import automatique en cours…"
+
+msgid "Settings"
+msgstr "Paramètres"
+
+msgid "Log"
+msgstr "Journal"
+
+# --- Vague 2: filters panel ---
+
+msgid "Category"
+msgstr "Catégorie"
+
+msgid "Limit Type"
+msgstr "Type de limite"
+
+msgid "Buyin"
+msgstr "Buy-in"
+
+msgid "Refresh Filters"
+msgstr "Rafraîchir les filtres"
+
+msgid "Reset"
+msgstr "Réinitialiser"
+
+msgid "Off Suit"
+msgstr "Dépareillées"
+
+# --- Vague 2: preferences & viewers ---
+
+msgid "Tour Player Stats"
+msgstr "Stats joueur tournoi"
+
+# --- Vague 2: viewers & reports ---
+
+msgid "FPDB 3 info"
+msgstr "Infos FPDB 3"
+
+msgid "Min hands vs hero:"
+msgstr "Mains min. contre le héros :"
+
+msgid "Top N opponents:"
+msgstr "Top N adversaires :"
+
+msgid "Sort by:"
+msgstr "Trier par :"
+
+msgid "Copy to clipboard"
+msgstr "Copier dans le presse-papiers"
+
+# --- Vague 2: hand/log viewers & auto notes ---
+
+msgid "◀ Prev"
+msgstr "◀ Préc."
+
+msgid "Next ▶"
+msgstr "Suiv. ▶"
+
+msgid "Filter: "
+msgstr "Filtre : "
+
+msgid "No data found for the selected filters."
+msgstr "Aucune donnée pour les filtres sélectionnés."
+
+msgid "Log Viewer"
+msgstr "Visionneuse de journaux"
+
+msgid "Select Log File:"
+msgstr "Fichier de journal :"
+
+msgid "Filter by Module:"
+msgstr "Filtrer par module :"
+
+msgid "Copy selection to clipboard"
+msgstr "Copier la sélection dans le presse-papiers"
+
+msgid "Automatic Notes"
+msgstr "Notes automatiques"
+
+msgid "Enable or disable automatic player-note rules."
+msgstr "Activer ou désactiver les règles de notes automatiques."
+
+msgid "Generate automatic notes"
+msgstr "Générer des notes automatiques"
+
+# --- Vague 2: main window dialogs ---
+
+msgid "PT4 HUD imported"
+msgstr "HUD PT4 importé"
+
+msgid "PT4 stats import"
+msgstr "Import des stats PT4"
+
+msgid "Enable or disable sites for HUD display"
+msgstr "Activer ou désactiver les sites pour l'affichage du HUD"
+
+msgid "Search:"
+msgstr "Rechercher :"
+
+msgid "Skip these games when importing"
+msgstr "Ignorer ces jeux à l'import"
+
+msgid "Confirm recreating HUD cache"
+msgstr "Confirmer la reconstruction du cache HUD"
+
+msgid "Unsaved Changes"
+msgstr "Modifications non enregistrées"
+
+msgid "You have unsaved configuration changes."
+msgstr "Vous avez des modifications de configuration non enregistrées."
+
+msgid "Select All"
+msgstr "Tout sélectionner"
+
+msgid "Deselect All"
+msgstr "Tout désélectionner"
+
+msgid "Clear All"
+msgstr "Tout effacer"
+
+# --- Vague 2: replayer, auto-notes workbench, HUD popups ---
+
+msgid "FPDB Hand Replayer"
+msgstr "Rejoueur de mains FPDB"
+
+msgid "Prev"
+msgstr "Préc."
+
+msgid "Previous action"
+msgstr "Action précédente"
+
+msgid "Start"
+msgstr "Début"
+
+msgid "End"
+msgstr "Fin"
+
+msgid "Play"
+msgstr "Lecture"
+
+msgid "Next"
+msgstr "Suiv."
+
+msgid "Next action"
+msgstr "Action suivante"
+
+msgid "Hide Cards"
+msgstr "Masquer les cartes"
+
+msgid "Deck:"
+msgstr "Jeu de cartes :"
+
+msgid "Card deck"
+msgstr "Jeu de cartes"
+
+msgid "Current card deck preview"
+msgstr "Aperçu du jeu de cartes actuel"
+
+msgid "Run"
+msgstr "Exécuter"
+
+msgid "Player Notes"
+msgstr "Notes joueur"
+
+msgid "Pool"
+msgstr "Pool"
+
+msgid "Hand-history source"
+msgstr "Source d'historique de mains"
+
+msgid "Folder"
+msgstr "Dossier"
+
+msgid "Rule set"
+msgstr "Jeu de règles"
+
+msgid "Dry Run"
+msgstr "Simulation"
+
+msgid "Write Notes"
+msgstr "Écrire les notes"
+
+msgid "Database hands"
+msgstr "Mains de la base"
+
+msgid "Dry Run DB"
+msgstr "Simulation (base)"
+
+msgid "Write DB Notes"
+msgstr "Écrire les notes (base)"
+
+msgid "Idle"
+msgstr "Inactif"
+
+msgid "Search"
+msgstr "Rechercher"
+
+msgid "Load Notes"
+msgstr "Charger les notes"
+
+msgid "Notes: 0"
+msgstr "Notes : 0"
+
+msgid "Top rule: -"
+msgstr "Règle principale : -"
+
+msgid "Latest: -"
+msgstr "Dernière : -"
+
+msgid "HUD - stats"
+msgstr "HUD - stats"
+
+msgid "Stat Set (HUD):"
+msgstr "Jeu de stats (HUD) :"
+
+msgid "No data to display"
+msgstr "Aucune donnée à afficher"
+
+msgid "Your database contains no hands yet."
+msgstr "Votre base de données ne contient encore aucune main."
+
+msgid "Nothing has been imported into this database — that is normal right after creating or recreating the tables.\n\nImport hand histories first (Import > Bulk Import, or start the auto-import), then refresh this tab."
+msgstr "Rien n'a encore été importé dans cette base — c'est normal juste après avoir créé ou recréé les tables.\n\nImportez d'abord des historiques de mains (Import > Bulk Import, ou lancez l'import automatique), puis rafraîchissez cet onglet."
+
+msgid "No site is selected in the filters."
+msgstr "Aucun site n'est sélectionné dans les filtres."
+
+msgid "Tick at least one site in the Sites section on the left, then refresh."
+msgstr "Cochez au moins un site dans la section Sites à gauche, puis rafraîchissez."
+
+msgid "No player matches the selected site and hero."
+msgstr "Aucun joueur ne correspond au site et au héros sélectionnés."
+
+msgid "Check the hero selected in the Heroes filter and make sure hands for that player were imported for the selected site."
+msgstr "Vérifiez le héros choisi dans le filtre Heroes et assurez-vous que des mains de ce joueur ont été importées pour le site sélectionné."
+
+msgid "No limit is selected in the filters."
+msgstr "Aucune limite n'est sélectionnée dans les filtres."
+
+msgid "Tick at least one limit (stake) on the left, then refresh."
+msgstr "Cochez au moins une limite (stake) à gauche, puis rafraîchissez."
+
+msgid "No game type is selected in the filters."
+msgstr "Aucun type de jeu n'est sélectionné dans les filtres."
+
+msgid "Tick at least one game on the left, then refresh."
+msgstr "Cochez au moins un jeu à gauche, puis rafraîchissez."
+
+msgid "No currency is selected in the filters."
+msgstr "Aucune devise n'est sélectionnée dans les filtres."
+
+msgid "Tick at least one currency on the left, then refresh."
+msgstr "Cochez au moins une devise à gauche, puis rafraîchissez."
+
+msgid "No hand matches the selected filters."
+msgstr "Aucune main ne correspond aux filtres sélectionnés."
+
+msgid "The database holds hands, but none of them match this selection.\n\nWiden the filters (dates, limits, games, seats) and refresh."
+msgstr "La base contient des mains, mais aucune ne correspond à cette sélection.\n\nÉlargissez les filtres (dates, limites, jeux, sièges) puis rafraîchissez."

@@ -1,0 +1,27 @@
+PokerStars Hand #2234567890: Tournament #12345678, $10+$1+$2.50 USD Hold'em No Limit - Level I (10/20) - 2023/10/27 13:00:00 ET
+Table '12345678 1' 9-max Seat #1 is the button
+Seat 1: Player1 (1500 in chips)
+Seat 2: Player2 (1500 in chips)
+Seat 3: Player3 (1500 in chips)
+Player1: posts small blind 10
+Player2: posts big blind 20
+*** HOLE CARDS ***
+Dealt to Player1 [Ah As]
+Player3: raises 1480 to 1500 and is all-in
+Player1: raises 10 to 1510 and is all-in
+Player2: folds
+Uncalled bet (10) returned to Player1
+*** FLOP *** [Kd Qd Jd]
+*** TURN *** [Kd Qd Jd] [Td]
+*** RIVER *** [Kd Qd Jd Td] [9d]
+*** SHOW DOWN ***
+Player1: shows [Ah As] (a flush, Ace high)
+Player3: shows [Kh Ks] (a flush, King high)
+Player1 collected 3020 from pot
+Player1 wins the $2.50 bounty for eliminating Player3
+*** SUMMARY ***
+Total pot 3020 | Rake 0
+Board [Kd Qd Jd Td 9d]
+Seat 1: Player1 (button) (small blind) showed [Ah As] and won (3020) with a flush, Ace high
+Seat 2: Player2 (big blind) folded before Flop
+Seat 3: Player3 showed [Kh Ks] and lost with a flush, King high

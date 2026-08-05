@@ -10,27 +10,24 @@ import sys
 from unittest.mock import Mock, patch
 
 import pytest
-from PyQt5.QtCore import QPoint, Qt
-from PyQt5.QtGui import QMouseEvent
-from PyQt5.QtWidgets import QLabel
+
+pytestmark = pytest.mark.qt
+from PySide6.QtCore import QPoint, Qt
+from PySide6.QtGui import QMouseEvent
+from PySide6.QtWidgets import QLabel
 
 # Add the project root to the Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 # Import HUD components
-import Popup
-import Stats
-from Aux_Classic_Hud import ClassicStat
-from Aux_Hud import SimpleStat
+import fpdb_3_legacy.Popup as Popup
+import fpdb_3_legacy.Stats as Stats
+from fpdb_3_legacy.Aux_Classic_Hud import ClassicStat
+from fpdb_3_legacy.Aux_Hud import SimpleStat
 
 
 class TestHUDTooltips:
     """Test suite for HUD tooltip display with no data feature."""
-
-    @pytest.fixture
-    def qapp(self, qapp):
-        """Ensure QApplication is available."""
-        return qapp
 
     @pytest.fixture
     def mock_aw(self):
@@ -232,11 +229,6 @@ class TestHUDPopups:
     """Test suite for HUD popup windows with no data feature."""
 
     @pytest.fixture
-    def qapp(self, qapp):
-        """Ensure QApplication is available."""
-        return qapp
-
-    @pytest.fixture
     def mock_config(self):
         """Mock configuration for popup tests."""
         config = Mock()
@@ -258,7 +250,7 @@ class TestHUDPopups:
     @pytest.fixture
     def mock_window(self, mock_config, qapp):
         """Mock window for popup tests."""
-        from PyQt5.QtWidgets import QWidget
+        from PySide6.QtWidgets import QWidget
 
         # Create a real QWidget to avoid Mock issues with QWidget parent
         window = QWidget()
@@ -491,11 +483,6 @@ class TestHUDPopupInteraction:
     """Test suite for HUD popup interaction with no data feature."""
 
     @pytest.fixture
-    def qapp(self, qapp):
-        """Ensure QApplication is available."""
-        return qapp
-
-    @pytest.fixture
     def mock_config(self):
         """Mock configuration for interaction tests."""
         config = Mock()
@@ -567,7 +554,7 @@ class TestHUDPopupInteraction:
         stat.update(1, stat_dict)
 
         # Mock popup creation
-        with patch("Popup.popup_factory") as mock_popup_factory:
+        with patch("fpdb_3_legacy.Popup.popup_factory") as mock_popup_factory:
             mock_popup = Mock()
             mock_popup_factory.return_value = mock_popup
 
@@ -633,11 +620,6 @@ class TestHUDPopupInteraction:
 
 class TestHUDStatFormatting:
     """Test suite for HUD stat formatting with no data feature."""
-
-    @pytest.fixture
-    def qapp(self, qapp):
-        """Ensure QApplication is available."""
-        return qapp
 
     @pytest.fixture
     def mock_aw(self):

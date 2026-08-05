@@ -5,19 +5,47 @@ Tests for Aux_Classic_Hud.py.
 import os
 import sys
 import unittest
+from contextlib import contextmanager
 from unittest.mock import Mock, patch
+
+import pytest
+
+pytestmark = pytest.mark.qt
 
 # Make repo root importable
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # Very light stubs to avoid real GUI deps
-sys.modules.setdefault("PyQt5", Mock())
-sys.modules.setdefault("PyQt5.QtWidgets", Mock())
-sys.modules.setdefault("PyQt5.QtCore", Mock())
-sys.modules.setdefault("PyQt5.QtGui", Mock())
+sys.modules.setdefault("PySide6", Mock())
+sys.modules.setdefault("PySide6.QtWidgets", Mock())
+sys.modules.setdefault("PySide6.QtCore", Mock())
+sys.modules.setdefault("PySide6.QtGui", Mock())
 
-import Aux_Classic_Hud  # noqa: E402
-from Aux_Classic_Hud import ClassicHud, ClassicLabel, ClassicStat, ClassicStatWindow  # noqa: E402
+import fpdb_3_legacy.Aux_Classic_Hud as Aux_Classic_Hud  # noqa: E402
+from fpdb_3_legacy.Aux_Classic_Hud import (  # noqa: E402
+    ClassicHud,
+    ClassicLabel,
+    ClassicStat,
+    ClassicStatWindow,
+    _compact_stat_html,
+)
+
+
+@contextmanager
+def _note_dialog(comment: str):
+    """Mock the current rich notes dialog (manual + generated notes editors)."""
+    with (
+        patch("fpdb_3_legacy.Aux_Classic_Hud.QDialog") as dialog_class,
+        patch("fpdb_3_legacy.Aux_Classic_Hud.QTextEdit") as text_edit_class,
+        patch("fpdb_3_legacy.Aux_Classic_Hud.QVBoxLayout"),
+        patch("fpdb_3_legacy.Aux_Classic_Hud.QDialogButtonBox"),
+        patch("fpdb_3_legacy.Aux_Classic_Hud.QLabel"),
+    ):
+        manual_note, generated_notes = Mock(), Mock()
+        text_edit_class.side_effect = [manual_note, generated_notes]
+        manual_note.toPlainText.return_value = comment
+        dialog_class.return_value.exec.return_value = dialog_class.Accepted
+        yield dialog_class.return_value
 
 
 # ------------------------------
@@ -136,20 +164,20 @@ class TestClassicStat(unittest.TestCase):
 
     def test_comment_dialog_setup(self) -> None:
         with (
-            patch("Aux_Classic_Hud.QInputDialog") as mock_dialog,
+            _note_dialog("New comment") as mock_dialog,
             patch.object(self.classic_stat, "get_player_name", return_value="TestPlayer"),
             patch.object(self.classic_stat, "get_current_comment", return_value="Existing"),
+            patch.object(self.classic_stat, "get_generated_notes_text", return_value="Generated"),
         ):
             self.classic_stat.stat = "playershort"
             self.classic_stat.lab.aw_seat = 2
             self.classic_stat.stat_dict = {123: {"seat": 2, "screen_name": "TestPlayer"}}
-            mock_dialog.getMultiLineText.return_value = ("New comment", True)
             with patch.object(self.classic_stat, "save_comment") as mock_save:
                 self.classic_stat.open_comment_dialog(Mock())
-                mock_dialog.getMultiLineText.assert_called_once()
-                mock_save.assert_called_once()
+                mock_dialog.exec.assert_called_once()
+                mock_save.assert_called_once_with(123, "New comment")
 
-    @patch("Aux_Classic_Hud.Database.Database")
+    @patch("fpdb_3_legacy.Aux_Classic_Hud.Database.Database")
     def test_get_current_comment(self, mock_db_class) -> None:
         mock_db = Mock()
         mock_cur = Mock()
@@ -161,13 +189,14 @@ class TestClassicStat(unittest.TestCase):
         assert res == "Test comment"
         mock_db.close_connection.assert_called_once()
 
-    @patch("Aux_Classic_Hud.Database.Database")
+    @patch("fpdb_3_legacy.Aux_Classic_Hud.Database.Database")
     def test_get_current_comment_no_result(self, mock_db_class) -> None:
         mock_db = Mock()
         mock_cur = Mock()
         mock_db.cursor = mock_cur
         mock_db.sql.query = {"get_player_comment": "SELECT comment FROM players WHERE id = %s"}
         mock_cur.fetchone.return_value = None
+        mock_db.playerHasNotes.return_value = False
         mock_db_class.return_value = mock_db
         res = self.classic_stat.get_current_comment(123)
         assert res == ""
@@ -188,7 +217,7 @@ class TestClassicStat(unittest.TestCase):
         pid = self.classic_stat.get_player_id()
         assert pid is None
 
-    @patch("Aux_Classic_Hud.Database.Database")
+    @patch("fpdb_3_legacy.Aux_Classic_Hud.Database.Database")
     def test_get_player_name(self, mock_db_class) -> None:
         mock_db = Mock()
         mock_cur = Mock()
@@ -199,7 +228,7 @@ class TestClassicStat(unittest.TestCase):
         name = self.classic_stat.get_player_name(123)
         assert name == "TestPlayer"
 
-    @patch("Aux_Classic_Hud.Database.Database")
+    @patch("fpdb_3_legacy.Aux_Classic_Hud.Database.Database")
     def test_get_player_name_not_found(self, mock_db_class) -> None:
         mock_db = Mock()
         mock_cur = Mock()
@@ -210,54 +239,56 @@ class TestClassicStat(unittest.TestCase):
         name = self.classic_stat.get_player_name(999)
         assert name == "Unknown Player"
 
-    @patch("Aux_Classic_Hud.Database.Database")
+    @patch("fpdb_3_legacy.Aux_Classic_Hud.Database.Database")
     def test_has_comment_false(self, mock_db_class) -> None:
         mock_db = Mock()
         mock_cur = Mock()
         mock_db.cursor = mock_cur
         mock_db.sql.query = {"get_player_comment": "SELECT comment FROM players WHERE id = %s"}
         mock_cur.fetchone.return_value = None
+        mock_db.playerHasNotes.return_value = False
         mock_db_class.return_value = mock_db
         assert self.classic_stat.has_comment(123) is False
         mock_db.close_connection.assert_called_once()
 
-    @patch("Aux_Classic_Hud.Database.Database")
+    @patch("fpdb_3_legacy.Aux_Classic_Hud.Database.Database")
     def test_has_comment_true(self, mock_db_class) -> None:
         mock_db = Mock()
         mock_cur = Mock()
         mock_db.cursor = mock_cur
         mock_db.sql.query = {"get_player_comment": "SELECT comment FROM players WHERE id = %s"}
         mock_cur.fetchone.return_value = ("Some note",)
+        mock_db.playerHasNotes.return_value = True
         mock_db_class.return_value = mock_db
         assert self.classic_stat.has_comment(123) is True
         mock_db.close_connection.assert_called_once()
 
     def test_open_comment_dialog_playershort(self) -> None:
         with (
-            patch("Aux_Classic_Hud.QInputDialog") as mock_dialog,
+            _note_dialog("New comment") as mock_dialog,
             patch.object(self.classic_stat, "get_player_name", return_value="TestPlayer"),
             patch.object(self.classic_stat, "get_current_comment", return_value=""),
+            patch.object(self.classic_stat, "get_generated_notes_text", return_value=""),
         ):
             self.classic_stat.stat = "playershort"
             self.classic_stat.stat_dict = {123: {"seat": 2, "screen_name": "TestPlayer"}}
             self.classic_stat.lab.aw_seat = 2
-            mock_dialog.getMultiLineText.return_value = ("New comment", True)
             with patch.object(self.classic_stat, "save_comment") as mock_save:
                 self.classic_stat.open_comment_dialog(Mock())
-                mock_dialog.getMultiLineText.assert_called_once()
-                mock_save.assert_called_once()
+                mock_dialog.exec.assert_called_once()
+                mock_save.assert_called_once_with(123, "New comment")
 
     def test_open_comment_dialog_wrong_stat(self) -> None:
-        with patch("Aux_Classic_Hud.QInputDialog") as mock_dialog:
+        with patch("fpdb_3_legacy.Aux_Classic_Hud.QDialog") as mock_dialog:
             self.classic_stat.stat = "vpip"
             self.classic_stat.lab.aw_seat = 2
             self.classic_stat.open_comment_dialog(Mock())
-            mock_dialog.getMultiLineText.assert_not_called()
+            mock_dialog.assert_not_called()
 
     def test_update_no_number(self) -> None:
         with (
             patch.object(Aux_Classic_Hud.Aux_Hud.SimpleStat, "update", return_value=None),
-            patch("Aux_Classic_Hud.log") as mock_log,
+            patch("fpdb_3_legacy.Aux_Classic_Hud.log") as mock_log,
         ):
             self.classic_stat.stat_loth = "20"
             self.classic_stat.stat_hith = "35"
@@ -277,26 +308,49 @@ class TestClassicStat(unittest.TestCase):
                 self.classic_stat.update(123, {123: {"screen_name": "Player"}})
                 mock_set_color.assert_called()
 
-    @patch("Aux_Classic_Hud.Database.Database")
+    def test_compact_html_hud_escapes_content_and_styles_the_value(self) -> None:
+        html = _compact_stat_html("AI ", "<19.6>", "%", "#4ADE80")
+
+        assert "AI&nbsp;" in html
+        assert "&lt;19.6&gt;" in html
+        assert "color:#4ADE80" in html
+        assert "font-weight:700" in html
+
+    def test_update_uses_compact_html_when_stat_set_opts_in(self) -> None:
+        with patch.object(Aux_Classic_Hud.Aux_Hud.SimpleStat, "update", return_value=None):
+            self.classic_stat.rich_text = True
+            self.classic_stat.hudprefix = "AI "
+            self.classic_stat.hudsuffix = "%"
+            self.classic_stat.number = ("", "25", "", "", "", "")
+            with patch.object(self.classic_stat, "set_color"):
+                self.classic_stat.update(123, {123: {"screen_name": "Player"}})
+
+        rendered = self.classic_stat.lab.setText.call_args.args[0]
+        assert rendered.startswith("<span")
+        assert "AI&nbsp;" in rendered
+        assert ">25</span>" in rendered
+
+    @patch("fpdb_3_legacy.Aux_Classic_Hud.Database.Database")
     def test_save_comment(self, mock_db_class) -> None:
         mock_db = Mock()
         mock_cur = Mock()
         mock_db.cursor = mock_cur
         mock_db.sql.query = {"update_player_comment": "UPDATE players SET comment = %s WHERE id = %s"}
         mock_db_class.return_value = mock_db
-        with patch("Aux_Classic_Hud.QMessageBox"):
+        with patch("fpdb_3_legacy.Aux_Classic_Hud.QMessageBox"):
             self.classic_stat.save_comment(123, "New comment")
         mock_cur.execute.assert_called_once()
         # L'impl peut ne pas appeler commit() directement; on vérifie la fermeture
         mock_db.close_connection.assert_called_once()
 
-    @patch("Aux_Classic_Hud.Database.Database")
+    @patch("fpdb_3_legacy.Aux_Classic_Hud.Database.Database")
     def test_update_player_note_with_comment(self, mock_db_class) -> None:
         mock_db = Mock()
         mock_cur = Mock()
         mock_db.cursor = mock_cur
         mock_db.sql.query = {"get_player_comment": "SELECT comment FROM players WHERE id = %s"}
         mock_cur.fetchone.return_value = ("Has note",)
+        mock_db.playerHasNotes.return_value = True
         mock_db_class.return_value = mock_db
 
         with patch.object(Aux_Classic_Hud.Aux_Hud.SimpleStat, "update", return_value=None):
@@ -307,13 +361,14 @@ class TestClassicStat(unittest.TestCase):
             label_html = self.classic_stat.lab.setText.call_args[0][0]
             self.assertTrue("#FFA500" in label_html or "orange" in label_html.lower())
 
-    @patch("Aux_Classic_Hud.Database.Database")
+    @patch("fpdb_3_legacy.Aux_Classic_Hud.Database.Database")
     def test_update_player_note_without_comment(self, mock_db_class) -> None:
         mock_db = Mock()
         mock_cur = Mock()
         mock_db.cursor = mock_cur
         mock_db.sql.query = {"get_player_comment": "SELECT comment FROM players WHERE id = %s"}
         mock_cur.fetchone.return_value = None
+        mock_db.playerHasNotes.return_value = False
         mock_db_class.return_value = mock_db
 
         with patch.object(Aux_Classic_Hud.Aux_Hud.SimpleStat, "update", return_value=None):
@@ -345,7 +400,7 @@ class TestClassicLabel(unittest.TestCase):
 # ------------------------------
 class TestClassicTableMw(unittest.TestCase):
     def test_initialization(self) -> None:
-        from Aux_Classic_Hud import ClassicTableMw
+        from fpdb_3_legacy.Aux_Classic_Hud import ClassicTableMw
 
         assert ClassicTableMw is not None
 
@@ -354,7 +409,7 @@ class TestClassicTableMw(unittest.TestCase):
 # Integration-ish
 # ------------------------------
 class TestClassicHudIntegration(unittest.TestCase):
-    @patch("Aux_Classic_Hud.Database.Database")
+    @patch("fpdb_3_legacy.Aux_Classic_Hud.Database.Database")
     def test_comment_system_integration(self, mock_db_class) -> None:
         mock_db = Mock()
         mock_cur = Mock()
@@ -368,7 +423,7 @@ class TestClassicHudIntegration(unittest.TestCase):
         with (
             patch.object(Aux_Classic_Hud.Aux_Hud.SimpleStat, "__init__", return_value=None),
             patch.object(Aux_Classic_Hud.Aux_Hud.SimpleStat, "update", return_value=None),
-            patch("Aux_Classic_Hud.QInputDialog") as mock_dialog,
+            _note_dialog("New comment"),
         ):
             mock_aw = Mock()
             mock_hud = Mock()
@@ -387,16 +442,16 @@ class TestClassicHudIntegration(unittest.TestCase):
             stat.lab.aw_seat = 2
             stat.stat_dict = {123: {"seat": 2, "screen_name": "TestPlayer"}}
 
-            mock_dialog.getMultiLineText.return_value = ("New comment", True)
             with (
                 patch.object(stat, "get_player_name", return_value="TestPlayer"),
                 patch.object(stat, "get_current_comment", return_value=""),
+                patch.object(stat, "get_generated_notes_text", return_value=""),
                 patch.object(stat, "save_comment") as mock_save,
             ):
                 stat.open_comment_dialog(Mock())
                 mock_save.assert_called()
 
-    @patch("Aux_Classic_Hud.Database.Database")
+    @patch("fpdb_3_legacy.Aux_Classic_Hud.Database.Database")
     def test_full_stat_lifecycle(self, mock_db_class) -> None:
         mock_db = Mock()
         mock_cur = Mock()
@@ -411,7 +466,7 @@ class TestClassicHudIntegration(unittest.TestCase):
         with (
             patch.object(Aux_Classic_Hud.Aux_Hud.SimpleStat, "__init__", return_value=None),
             patch.object(Aux_Classic_Hud.Aux_Hud.SimpleStat, "update", return_value=None),
-            patch("Aux_Classic_Hud.QInputDialog") as mock_dialog,
+            _note_dialog("Updated comment"),
         ):
             mock_aw = Mock()
             mock_hud = Mock()
@@ -437,10 +492,10 @@ class TestClassicHudIntegration(unittest.TestCase):
                 mock_set_color.assert_called()
 
             # Open comment dialog
-            mock_dialog.getMultiLineText.return_value = ("Updated comment", True)
             with (
                 patch.object(stat, "get_player_name", return_value="Player"),
                 patch.object(stat, "get_current_comment", return_value=""),
+                patch.object(stat, "get_generated_notes_text", return_value=""),
                 patch.object(stat, "save_comment") as mock_save,
             ):
                 stat.open_comment_dialog(Mock())
@@ -451,7 +506,7 @@ class TestClassicHudIntegration(unittest.TestCase):
 # Error handling
 # ------------------------------
 class TestErrorHandling(unittest.TestCase):
-    @patch("Aux_Classic_Hud.Database.Database")
+    @patch("fpdb_3_legacy.Aux_Classic_Hud.Database.Database")
     def test_database_error_handling(self, mock_db_class) -> None:
         mock_db = Mock()
         mock_db.cursor.execute.side_effect = Exception("Database error")
@@ -461,8 +516,8 @@ class TestErrorHandling(unittest.TestCase):
         with (
             patch.object(Aux_Classic_Hud.Aux_Hud.SimpleStat, "__init__", return_value=None),
             patch.object(Aux_Classic_Hud.Aux_Hud.SimpleStat, "update", return_value=None),
-            patch("Aux_Classic_Hud.log") as mock_log,
-            patch("Aux_Classic_Hud.QMessageBox"),
+            patch("fpdb_3_legacy.Aux_Classic_Hud.log") as mock_log,
+            patch("fpdb_3_legacy.Aux_Classic_Hud.QMessageBox"),
         ):
             mock_aw = Mock()
             mock_hud = Mock()

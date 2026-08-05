@@ -14,6 +14,39 @@ from unittest.mock import Mock, patch
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
+def _setup_hud_mocks(original_modules: dict) -> None:
+    """Install mocks for fpdb_3_legacy sub-modules required by Hud.py."""
+    modules_to_mock = [
+        "fpdb_3_legacy.Database",
+        "fpdb_3_legacy.Hand",
+        "fpdb_3_legacy.loggingFpdb",
+    ]
+    for module_name in modules_to_mock:
+        if module_name in sys.modules:
+            original_modules[module_name] = sys.modules[module_name]
+        mock_mod = Mock()
+        # loggingFpdb.get_logger is called at module-import time; make it
+        # return a proper Mock logger so the module-level `log = get_logger(…)`
+        # succeeds and `log.warning / log.exception` are callable.
+        if module_name == "fpdb_3_legacy.loggingFpdb":
+            mock_mod.get_logger = Mock(return_value=Mock())
+        sys.modules[module_name] = mock_mod
+
+
+def _teardown_hud_mocks(original_modules: dict) -> None:
+    """Remove mocks installed by _setup_hud_mocks."""
+    modules_to_mock = [
+        "fpdb_3_legacy.Database",
+        "fpdb_3_legacy.Hand",
+        "fpdb_3_legacy.loggingFpdb",
+    ]
+    for module_name in modules_to_mock:
+        if module_name in original_modules:
+            sys.modules[module_name] = original_modules[module_name]
+        elif module_name in sys.modules:
+            del sys.modules[module_name]
+
+
 class TestImportName(unittest.TestCase):
     """Test the importName utility function."""
 
@@ -21,27 +54,19 @@ class TestImportName(unittest.TestCase):
     def setUpClass(cls):
         """Set up mocks for HUD tests."""
         cls._original_modules = {}
-        modules_to_mock = ["Database", "Hand", "loggingFpdb"]
+        _setup_hud_mocks(cls._original_modules)
 
-        for module_name in modules_to_mock:
-            if module_name in sys.modules:
-                cls._original_modules[module_name] = sys.modules[module_name]
-            sys.modules[module_name] = Mock()
+        # Evict a previously-cached Hud module so the mocks take effect.
+        sys.modules.pop("fpdb_3_legacy.Hud", None)
 
         # Import the module to test after mocks are set up
         global Hud, importName
-        from Hud import Hud, importName
+        from fpdb_3_legacy.Hud import Hud, importName
 
     @classmethod
     def tearDownClass(cls):
         """Clean up mocks after HUD tests."""
-        modules_to_mock = ["Database", "Hand", "loggingFpdb"]
-
-        for module_name in modules_to_mock:
-            if module_name in cls._original_modules:
-                sys.modules[module_name] = cls._original_modules[module_name]
-            elif module_name in sys.modules:
-                del sys.modules[module_name]
+        _teardown_hud_mocks(cls._original_modules)
 
     def test_import_valid_module(self) -> None:
         """Test importing a valid module and class."""
@@ -52,10 +77,11 @@ class TestImportName(unittest.TestCase):
 
     def test_import_invalid_module(self) -> None:
         """Test importing an invalid module."""
-        with patch("Hud.log") as mock_log:
+        with patch("fpdb_3_legacy.Hud.log") as mock_log:
             result = importName("nonexistent_module", "some_class")
             assert result is None
-            mock_log.exception.assert_called_once()
+            # Reported once, after both the bare and the package-qualified name fail.
+            mock_log.error.assert_called_once()
 
     def test_import_invalid_attribute(self) -> None:
         """Test importing a valid module but invalid attribute."""
@@ -66,6 +92,12 @@ class TestImportName(unittest.TestCase):
 
 class TestHudInitialization(unittest.TestCase):
     """Test HUD initialization."""
+
+    @classmethod
+    def setUpClass(cls):
+        """Ensure Hud is importable (mocks installed by TestImportName.setUpClass)."""
+        global Hud, importName
+        from fpdb_3_legacy.Hud import Hud, importName
 
     def setUp(self) -> None:
         """Set up test environment."""
@@ -97,7 +129,7 @@ class TestHudInitialization(unittest.TestCase):
 
     def test_hud_initialization_success(self) -> None:
         """Test successful HUD initialization."""
-        with patch("Hud.importName") as mock_import:
+        with patch("fpdb_3_legacy.Hud.importName") as mock_import:
             mock_import.return_value = Mock()
 
             hud = Hud(
@@ -117,6 +149,7 @@ class TestHudInitialization(unittest.TestCase):
             assert hud.game_type == "ring"
             assert hud.max == 6
             assert hud.site == "PokerStars"
+            assert hud.is_loading is False
 
             # Check that hud_params is a copy, not reference
             assert hud.hud_params == self.mock_parent.hud_params
@@ -127,11 +160,38 @@ class TestHudInitialization(unittest.TestCase):
             self.mock_config.get_supported_games_parameters.assert_called_once_with("holdem", "ring")
             self.mock_config.get_layout.assert_called_once_with("PokerStars", "ring")
 
+    def test_hud_initialization_applies_matching_table_profile_override(self) -> None:
+        """A HUD restart keeps this table's profile without changing defaults."""
+        default_stat_set = Mock(name="DefaultStatSet")
+        override_stat_set = Mock(name="OverrideStatSet")
+        self.mock_table.key = "table-42"
+        self.mock_parent._table_stat_set_overrides = {
+            "table-42": ("holdem", "ring", "OverrideStatSet"),
+        }
+        self.mock_parent.get_table_stat_set_override.return_value = "OverrideStatSet"
+        self.mock_config.stat_sets = {"OverrideStatSet": override_stat_set}
+        self.mock_config.get_supported_games_parameters.return_value = {
+            "aux": "",
+            "game_stat_set": default_stat_set,
+        }
+
+        hud = Hud(
+            parent=self.mock_parent,
+            table=self.mock_table,
+            max_players=6,
+            poker_game="holdem",
+            game_type="ring",
+            config=self.mock_config,
+        )
+
+        assert hud.supported_games_parameters["game_stat_set"] is override_stat_set
+        self.mock_parent.get_table_stat_set_override.assert_called_once_with("table-42", "holdem", "ring")
+
     def test_hud_initialization_no_supported_games(self) -> None:
         """Test HUD initialization when no supported games config exists."""
         self.mock_config.get_supported_games_parameters.return_value = None
 
-        with patch("Hud.log") as mock_log:
+        with patch("fpdb_3_legacy.Hud.log") as mock_log:
             Hud(
                 parent=self.mock_parent,
                 table=self.mock_table,
@@ -148,7 +208,7 @@ class TestHudInitialization(unittest.TestCase):
         """Test HUD initialization when no layout exists."""
         self.mock_config.get_layout.return_value = None
 
-        with patch("Hud.log") as mock_log:
+        with patch("fpdb_3_legacy.Hud.log") as mock_log:
             Hud(
                 parent=self.mock_parent,
                 table=self.mock_table,
@@ -165,7 +225,7 @@ class TestHudInitialization(unittest.TestCase):
         """Test HUD initialization when no layout exists for max players."""
         self.mock_config.get_layout.return_value.layout = {9: Mock()}  # Only 9-max layout
 
-        with patch("Hud.log") as mock_log:
+        with patch("fpdb_3_legacy.Hud.log") as mock_log:
             Hud(
                 parent=self.mock_parent,
                 table=self.mock_table,
@@ -184,7 +244,7 @@ class TestHudInitialization(unittest.TestCase):
 
     def test_aux_windows_initialization(self) -> None:
         """Test that aux windows are properly initialized."""
-        with patch("Hud.importName") as mock_import:
+        with patch("fpdb_3_legacy.Hud.importName") as mock_import:
             mock_aux_class = Mock()
             mock_import.return_value = mock_aux_class
             mock_aux_instance = Mock()
@@ -225,7 +285,7 @@ class TestHudInitialization(unittest.TestCase):
 
         self.mock_config.get_aux_parameters.side_effect = mock_get_aux_params
 
-        with patch("Hud.importName") as mock_import:
+        with patch("fpdb_3_legacy.Hud.importName") as mock_import:
             mock_import.side_effect = [Mock(), Mock()]
 
             hud = Hud(
@@ -262,7 +322,7 @@ class TestHudInitialization(unittest.TestCase):
 
     def test_failed_aux_import(self) -> None:
         """Test initialization when aux import fails."""
-        with patch("Hud.importName") as mock_import:
+        with patch("fpdb_3_legacy.Hud.importName") as mock_import:
             mock_import.return_value = None  # Import failed
 
             hud = Hud(
@@ -281,6 +341,12 @@ class TestHudInitialization(unittest.TestCase):
 
 class TestHudMethods(unittest.TestCase):
     """Test HUD methods."""
+
+    @classmethod
+    def setUpClass(cls):
+        """Ensure Hud is importable (mocks installed by TestImportName.setUpClass)."""
+        global Hud, importName
+        from fpdb_3_legacy.Hud import Hud, importName
 
     def setUp(self) -> None:
         """Set up test HUD instance."""
@@ -333,11 +399,18 @@ class TestHudMethods(unittest.TestCase):
 
     def test_kill_method(self) -> None:
         """Test kill method calls kill on all aux windows."""
+        loading_window = Mock()
+        self.hud.loading_window = loading_window
+
         self.hud.kill()
 
         # Check that kill was called on all aux windows
         self.mock_aux1.kill.assert_called_once()
         self.mock_aux2.kill.assert_called_once()
+        loading_window.hide.assert_called_once_with()
+        loading_window.close.assert_called_once_with()
+        loading_window.deleteLater.assert_called_once_with()
+        assert self.hud.loading_window is None
 
     def test_resize_windows(self) -> None:
         """Test resize_windows method."""
@@ -379,9 +452,10 @@ class TestHudMethods(unittest.TestCase):
             # Check that get_cards was called
             mock_get_cards.assert_called_once_with(hand_id)
 
-            # Check that create was called on all aux windows
-            self.mock_aux1.create.assert_called_once()
-            self.mock_aux2.create.assert_called_once()
+            # Window creation belongs to HUD_main.idle_create, which can isolate
+            # failures per auxiliary. Hud.create only prepares the hand model.
+            self.mock_aux1.create.assert_not_called()
+            self.mock_aux2.create.assert_not_called()
 
             # Verify cards were set
             assert self.hud.cards == {"hand": "cards"}
@@ -398,17 +472,57 @@ class TestHudMethods(unittest.TestCase):
             # Check that get_cards was called
             mock_get_cards.assert_called_once_with(hand_id)
 
-            # Check that update was called on all aux windows
-            self.mock_aux1.update.assert_called_once()
-            self.mock_aux2.update.assert_called_once()
+            # Check that update_gui was called on all aux windows
+            self.mock_aux1.update_gui.assert_called_once_with(hand_id)
+            self.mock_aux2.update_gui.assert_called_once_with(hand_id)
 
             # Verify cards were updated
             assert self.hud.cards == {"updated": "cards"}
 
+    def test_update_rebuilds_the_hand_once(self) -> None:
+        """One new hand is one rebuild, however many aux windows watch it.
+
+        hand_factory reads the whole hand back out of the database; doing it
+        per aux window, or twice per hand, is the cost this owns.
+        """
+        self.hud.db_hud_connection = Mock()
+
+        with (
+            patch.object(self.hud, "get_cards") as mock_get_cards,
+            patch("fpdb_3_legacy.Hud.Hand.hand_factory") as mock_factory,
+        ):
+            self.hud.update(12345, self.mock_config)
+
+        mock_factory.assert_called_once()
+        mock_get_cards.assert_called_once_with(12345)
+
+    def test_one_failing_aux_window_does_not_cost_the_others_their_update(self) -> None:
+        """The isolation that makes this the only place aux windows refresh."""
+        self.mock_aux1.update_gui.side_effect = RuntimeError("aux failed")
+
+        with patch.object(self.hud, "get_cards"):
+            self.hud.update(12345, self.mock_config)
+
+        self.mock_aux1.update_gui.assert_called_once_with(12345)
+        self.mock_aux2.update_gui.assert_called_once_with(12345)
+
+    def test_a_failing_aux_window_is_named_in_the_log(self) -> None:
+        # The caller used to report which window failed; that report belongs
+        # here now, where the failure is caught.
+        self.mock_aux1.update_gui.side_effect = RuntimeError("aux failed")
+
+        with (
+            patch.object(self.hud, "get_cards"),
+            patch("fpdb_3_legacy.Hud.log") as mock_log,
+        ):
+            self.hud.update(12345, self.mock_config)
+
+        assert mock_log.exception.called
+        assert "%s" in mock_log.exception.call_args[0][0]
+
     def test_get_cards_with_database(self) -> None:
         """Test get_cards method with database connection."""
         hand_id = 12345
-        expected_cards = {"hole": ["Ah", "Kh"], "flop": ["Qh", "Jh", "Th"]}
 
         # Mock database connection
         mock_db = Mock()
@@ -444,7 +558,7 @@ class TestHudMethods(unittest.TestCase):
         mock_db.get_cards.side_effect = Exception("Database error")
         self.hud.db_hud_connection = mock_db
 
-        with patch("Hud.log") as mock_log:
+        with patch("fpdb_3_legacy.Hud.log") as mock_log:
             result = self.hud.get_cards(hand_id)
 
             # Should return empty dict and log error
@@ -454,6 +568,12 @@ class TestHudMethods(unittest.TestCase):
 
 class TestHudIntegration(unittest.TestCase):
     """Test HUD integration scenarios."""
+
+    @classmethod
+    def setUpClass(cls):
+        """Ensure Hud is importable (mocks installed by TestImportName.setUpClass)."""
+        global Hud, importName
+        from fpdb_3_legacy.Hud import Hud, importName
 
     def test_full_hud_lifecycle(self) -> None:
         """Test complete HUD lifecycle from creation to destruction."""
@@ -479,7 +599,7 @@ class TestHudIntegration(unittest.TestCase):
         mock_config.get_layout.return_value = mock_layout
         mock_config.get_aux_parameters.return_value = {"module": "Aux_Classic_Hud", "class": "Hud"}
 
-        with patch("Hud.importName") as mock_import:
+        with patch("fpdb_3_legacy.Hud.importName") as mock_import:
             mock_aux_class = Mock()
             mock_aux_instance = Mock()
             mock_aux_class.return_value = mock_aux_instance
@@ -499,7 +619,8 @@ class TestHudIntegration(unittest.TestCase):
             assert len(hud.aux_windows) == 1
             assert mock_aux_instance in hud.aux_windows
 
-            # 2. Create/Update cycle
+            # 2. Prepare/update cycle. HUD_main owns native window creation so
+            # it can isolate failures and guarantee exactly one create call.
             hand_id = 12345
             stat_dict = {"player1": {"vpip": 25.0}}
 
@@ -507,10 +628,10 @@ class TestHudIntegration(unittest.TestCase):
                 mock_get_cards.return_value = {"cards": "data"}
 
                 hud.create(hand_id, mock_config, stat_dict)
-                mock_aux_instance.create.assert_called_once()
+                mock_aux_instance.create.assert_not_called()
 
                 hud.update(hand_id, mock_config)
-                mock_aux_instance.update.assert_called_once()
+                mock_aux_instance.update_gui.assert_called_once_with(hand_id)
 
             # 3. Layout operations
             hud.resize_windows()
@@ -529,6 +650,12 @@ class TestHudIntegration(unittest.TestCase):
 
 class TestHudErrorHandling(unittest.TestCase):
     """Test HUD error handling scenarios."""
+
+    @classmethod
+    def setUpClass(cls):
+        """Ensure Hud is importable (mocks installed by TestImportName.setUpClass)."""
+        global Hud, importName
+        from fpdb_3_legacy.Hud import Hud, importName
 
     def test_aux_method_exceptions(self) -> None:
         """Test that HUD handles exceptions in aux window methods gracefully."""
@@ -573,7 +700,7 @@ class TestHudErrorHandling(unittest.TestCase):
         hud.aux_windows = [mock_aux]
 
         # Test that methods don't crash when aux methods fail
-        with patch("Hud.log"):
+        with patch("fpdb_3_legacy.Hud.log"):
             # These should not raise exceptions
             try:
                 hud.kill()
@@ -583,5 +710,68 @@ class TestHudErrorHandling(unittest.TestCase):
                 self.fail(f"HUD method should handle aux exceptions gracefully: {e}")
 
 
+class TestMuckedCards(unittest.TestCase):
+    """Test Mucked cards scaling and properties."""
+
+    def test_mucked_cards_scaling(self) -> None:
+        """Test that Flop_Mucked scales card width and height correctly."""
+        from fpdb_3_legacy.Mucked import Flop_Mucked
+
+        mock_parent = Mock()
+        # Mock card dimensions in parent
+        mock_parent.hud_params = {
+            "card_ht": "78",
+            "card_wd": "56",
+            "mucked_cards_size": "70"  # 70% scale
+        }
+
+        mock_hud = Mock()
+        mock_hud.parent = mock_parent
+        mock_hud.table.x = 10
+        mock_hud.table.y = 20
+
+        mock_config = Mock()
+        mock_config.get_layout.return_value = Mock()
+
+        # Instantiate Flop_Mucked with parameters
+        params = {"opacity": "0.7"}
+
+        mucked = Flop_Mucked(mock_hud, mock_config, params)
+
+        # Scale should be 0.7
+        assert mucked.card_scale == 0.7
+
+        # Dimensions should be 70% of 78 and 56
+        assert mucked.card_width == int(56 * 0.7)  # 39
+        assert mucked.card_height == int(78 * 0.7)  # 54
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
+
+
+class TestResizeWindowsRefLayout(unittest.TestCase):
+    """resize_windows must not crash when Aux_Hud._ensure_reference has already
+    frozen ref_layout_width/height (but not locations/common)."""
+
+    def test_resize_windows_freezes_missing_ref_fields(self) -> None:
+        import types
+
+        from fpdb_3_legacy.Hud import Hud as HudClass
+
+        h = HudClass.__new__(HudClass)
+        h.max = 3
+        h.layout = types.SimpleNamespace(
+            width=792, height=546,
+            location=[None, (681, 221), (2, 221), (162, 413)], common=(323, 232),
+        )
+        h.table = types.SimpleNamespace(width=1360, height=880)
+        h.aux_windows = []
+        # Only width/height pre-set (as _ensure_reference does); no locations.
+        h.ref_layout_width = 792
+        h.ref_layout_height = 546
+
+        h.resize_windows()  # must not raise AttributeError
+
+        self.assertTrue(hasattr(h, "ref_layout_locations"))
+        self.assertEqual(h.layout.location[1], (1169, 356))  # (681,221) * 1360/792

@@ -9,6 +9,10 @@ import sys
 import unittest
 from unittest.mock import Mock, patch
 
+import pytest
+
+pytestmark = pytest.mark.qt
+
 # Add the parent directory to Python path for imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -62,7 +66,7 @@ class TestPopupBasics(unittest.TestCase):
 
     def test_import_popup_classes(self) -> None:
         """Test that popup classes can be imported."""
-        from Popup import Multicol, Popup, Submenu, default
+        from fpdb_3_legacy.Popup import Multicol, Popup, Submenu, default
 
         assert callable(Popup)
         assert callable(default)
@@ -81,10 +85,10 @@ class TestPopupBasics(unittest.TestCase):
         # Verify it was called
         popup.destroy_pop.assert_called_once()
 
-    @patch("Popup.Stats.do_stat")
+    @patch("fpdb_3_legacy.Popup.Stats.do_stat")
     def test_default_popup_player_finding(self, mock_do_stat) -> None:
         """Test that default popup can find players."""
-        from Popup import default
+        from fpdb_3_legacy.Popup import default
 
         # Mock Stats response
         mock_do_stat.return_value = ("vpip", "25.0", "25.0%", "VPIP 25.0%", "details", "tip")

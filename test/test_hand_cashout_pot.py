@@ -9,7 +9,7 @@ from unittest.mock import Mock
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from Hand import HoldemOmahaHand
+from fpdb_3_legacy.Hand import HoldemOmahaHand
 
 
 class MockConfig:

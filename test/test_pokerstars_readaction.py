@@ -1,10 +1,9 @@
 """Comprehensive tests for PokerStarsToFpdb.readAction method."""
 
 import unittest
-from decimal import Decimal
 from unittest.mock import Mock
 
-from PokerStarsToFpdb import PokerStars
+from fpdb_3_legacy.PokerStarsToFpdb import PokerStars
 
 
 class MockConfig:
@@ -58,8 +57,6 @@ class TestPokerStarsReadAction(unittest.TestCase):
         self.hand.addDiscard = Mock()
         self.hand.addStandsPat = Mock()
         self.hand.addUncalled = Mock()
-        # Allow walk_adjustments attribute assignment
-        self.hand.walk_adjustments = {}
 
     def test_readaction_empty_street(self) -> None:
         """Test readAction with empty street."""
@@ -170,7 +167,7 @@ Player2: stands pat"""
         self.hand.addStandsPat.assert_called_with("DRAW", "Player2", None)
 
     def test_readaction_uncalled_bet_basic(self) -> None:
-        """Test readAction with uncalled bet (non-walk scenario)."""
+        """Test readAction with an uncalled bet won by another player."""
         street_text = "Player1: bets $5.00\nUncalled bet ($5.00) returned to Player1"
 
         self.hand.streets = {"RIVER": street_text}
@@ -194,128 +191,50 @@ Player2: stands pat"""
 
         self.parser.readAction(self.hand, "RIVER")
 
-        # Should add uncalled bet but not create walk adjustment
         self.hand.addUncalled.assert_called_with("RIVER", "Player1", "5.00")
-        self.assertEqual(len(self.hand.walk_adjustments), 0)
 
-    def test_readaction_walk_scenario_equal_amounts(self) -> None:
-        """Test readAction with walk scenario (uncalled == collected)."""
-        street_text = "Uncalled bet ($1.00) returned to Player1"
+    def _uncalled_bet(self, street: str, player: str, bet: str, collected: str) -> None:
+        """Drive readAction over a street whose only event is an uncalled bet."""
+        self.hand.streets = {street: f"Uncalled bet (${bet}) returned to {player}"}
+        self.hand.handText = f"*** PREFLOP ***\n{player} collected ${collected}\n*** SUMMARY ***"
 
-        self.hand.streets = {"PREFLOP": street_text}
-        self.hand.handText = "*** PREFLOP ***\nPlayer1 collected $1.00\n*** SUMMARY ***"
-
-        # Mock action processing
         self.parser.re_action = Mock()
         self.parser.re_action.finditer = Mock(return_value=[])
 
-        # Mock uncalled bet
         uncalled_match = Mock()
-        uncalled_match.group = Mock(side_effect=lambda x: {"PNAME": "Player1", "BET": "1.00"}.get(x))
+        uncalled_match.group = Mock(side_effect=lambda x: {"PNAME": player, "BET": bet}.get(x))
         self.parser.re_uncalled = Mock()
         self.parser.re_uncalled.search = Mock(return_value=uncalled_match)
 
-        # Mock collection (same player, same amount)
         collection_match = Mock()
-        collection_match.group = Mock(side_effect=lambda x: {"PNAME": "Player1", "POT": "1.00"}.get(x))
+        collection_match.group = Mock(side_effect=lambda x: {"PNAME": player, "POT": collected}.get(x))
         self.parser.re_collect_pot2 = Mock()
         self.parser.re_collect_pot2.search = Mock(return_value=collection_match)
 
-        self.parser.readAction(self.hand, "PREFLOP")
+        self.parser.readAction(self.hand, street)
 
-        # Should add uncalled bet and create walk adjustment
-        self.hand.addUncalled.assert_called_with("PREFLOP", "Player1", "1.00")
-        self.assertEqual(len(self.hand.walk_adjustments), 1)
-        self.assertEqual(self.hand.walk_adjustments["Player1"], Decimal("1.00"))
+    def test_uncalled_bet_larger_than_the_pot_is_still_returned(self) -> None:
+        """A shove everyone folds to returns far more than the blinds it wins."""
+        self._uncalled_bet("PREFLOP", "Player1", "2.00", collected="0.50")
 
-    def test_readaction_walk_scenario_bb_walk(self) -> None:
-        """Test readAction with BB walk scenario (uncalled > collected)."""
-        street_text = "Uncalled bet ($2.00) returned to Player1"
-
-        self.hand.streets = {"PREFLOP": street_text}
-        self.hand.handText = "*** PREFLOP ***\nPlayer1 collected $0.50\n*** SUMMARY ***"
-
-        # Mock action processing
-        self.parser.re_action = Mock()
-        self.parser.re_action.finditer = Mock(return_value=[])
-
-        # Mock uncalled bet
-        uncalled_match = Mock()
-        uncalled_match.group = Mock(side_effect=lambda x: {"PNAME": "Player1", "BET": "2.00"}.get(x))
-        self.parser.re_uncalled = Mock()
-        self.parser.re_uncalled.search = Mock(return_value=uncalled_match)
-
-        # Mock collection (same player, smaller amount - BB walk)
-        collection_match = Mock()
-        collection_match.group = Mock(side_effect=lambda x: {"PNAME": "Player1", "POT": "0.50"}.get(x))
-        self.parser.re_collect_pot2 = Mock()
-        self.parser.re_collect_pot2.search = Mock(return_value=collection_match)
-
-        self.parser.readAction(self.hand, "PREFLOP")
-
-        # Should add uncalled bet and create walk adjustment
         self.hand.addUncalled.assert_called_with("PREFLOP", "Player1", "2.00")
-        self.assertEqual(len(self.hand.walk_adjustments), 1)
-        self.assertEqual(self.hand.walk_adjustments["Player1"], Decimal("2.00"))
 
-    def test_readaction_not_walk_scenario(self) -> None:
-        """Test readAction with not-walk scenario (uncalled < collected)."""
-        street_text = "Uncalled bet ($1.00) returned to Player1"
+    def test_uncalled_bet_equal_to_the_pot_is_still_returned(self) -> None:
+        self._uncalled_bet("PREFLOP", "Player1", "1.00", collected="1.00")
 
-        self.hand.streets = {"PREFLOP": street_text}
-        self.hand.handText = "*** PREFLOP ***\nPlayer1 collected $5.00\n*** SUMMARY ***"
-
-        # Mock action processing
-        self.parser.re_action = Mock()
-        self.parser.re_action.finditer = Mock(return_value=[])
-
-        # Mock uncalled bet
-        uncalled_match = Mock()
-        uncalled_match.group = Mock(side_effect=lambda x: {"PNAME": "Player1", "BET": "1.00"}.get(x))
-        self.parser.re_uncalled = Mock()
-        self.parser.re_uncalled.search = Mock(return_value=uncalled_match)
-
-        # Mock collection (same player, larger amount - not a walk)
-        collection_match = Mock()
-        collection_match.group = Mock(side_effect=lambda x: {"PNAME": "Player1", "POT": "5.00"}.get(x))
-        self.parser.re_collect_pot2 = Mock()
-        self.parser.re_collect_pot2.search = Mock(return_value=collection_match)
-
-        self.parser.readAction(self.hand, "PREFLOP")
-
-        # Should add uncalled bet but not create walk adjustment
         self.hand.addUncalled.assert_called_with("PREFLOP", "Player1", "1.00")
-        self.assertEqual(len(self.hand.walk_adjustments), 0)
+
+    def test_uncalled_bet_smaller_than_the_pot_is_returned(self) -> None:
+        """The shape of a real walk: the blind returned is half what it wins."""
+        self._uncalled_bet("PREFLOP", "Player1", "1.00", collected="5.00")
+
+        self.hand.addUncalled.assert_called_with("PREFLOP", "Player1", "1.00")
 
     def test_readaction_uncalled_bet_with_commas(self) -> None:
         """Test readAction handles comma-separated amounts in uncalled bets."""
-        street_text = "Uncalled bet ($1,500.00) returned to Player1"
+        self._uncalled_bet("RIVER", "Player1", "1,500.00", collected="1,500.00")
 
-        self.hand.streets = {"RIVER": street_text}
-        self.hand.handText = "*** PREFLOP ***\nPlayer1 collected $1,500.00\n*** SUMMARY ***"
-
-        # Mock action processing
-        self.parser.re_action = Mock()
-        self.parser.re_action.finditer = Mock(return_value=[])
-
-        # Mock uncalled bet with comma
-        uncalled_match = Mock()
-        uncalled_match.group = Mock(side_effect=lambda x: {"PNAME": "Player1", "BET": "1,500.00"}.get(x))
-        self.parser.re_uncalled = Mock()
-        self.parser.re_uncalled.search = Mock(return_value=uncalled_match)
-
-        # Mock collection with comma
-        collection_match = Mock()
-        collection_match.group = Mock(side_effect=lambda x: {"PNAME": "Player1", "POT": "1,500.00"}.get(x))
-        self.parser.re_collect_pot2 = Mock()
-        self.parser.re_collect_pot2.search = Mock(return_value=collection_match)
-
-        self.parser.readAction(self.hand, "RIVER")
-
-        # Should handle comma removal and create walk adjustment
         self.hand.addUncalled.assert_called_with("RIVER", "Player1", "1,500.00")
-        self.assertEqual(len(self.hand.walk_adjustments), 1)
-        self.assertEqual(self.hand.walk_adjustments["Player1"], Decimal("1500.00"))
 
     def test_readaction_uncalled_bet_player_name_with_spaces(self) -> None:
         """Test readAction handles player names with leading/trailing spaces."""
@@ -373,36 +292,6 @@ Player2: stands pat"""
         # Should process actions but not call addUncalled
         self.hand.addCheck.assert_called()
         self.hand.addUncalled.assert_not_called()
-
-    def test_readaction_existing_walk_adjustments(self) -> None:
-        """Test readAction when hand already has walk_adjustments."""
-        street_text = "Uncalled bet ($1.00) returned to Player1"
-
-        self.hand.streets = {"PREFLOP": street_text}
-        self.hand.handText = "*** PREFLOP ***\nPlayer1 collected $1.00\n*** SUMMARY ***"
-        self.hand.walk_adjustments = {"ExistingPlayer": Decimal("0.50")}
-
-        # Mock action processing
-        self.parser.re_action = Mock()
-        self.parser.re_action.finditer = Mock(return_value=[])
-
-        # Mock walk scenario
-        uncalled_match = Mock()
-        uncalled_match.group = Mock(side_effect=lambda x: {"PNAME": "Player1", "BET": "1.00"}.get(x))
-        self.parser.re_uncalled = Mock()
-        self.parser.re_uncalled.search = Mock(return_value=uncalled_match)
-
-        collection_match = Mock()
-        collection_match.group = Mock(side_effect=lambda x: {"PNAME": "Player1", "POT": "1.00"}.get(x))
-        self.parser.re_collect_pot2 = Mock()
-        self.parser.re_collect_pot2.search = Mock(return_value=collection_match)
-
-        self.parser.readAction(self.hand, "PREFLOP")
-
-        # Should add to existing walk_adjustments
-        self.assertEqual(len(self.hand.walk_adjustments), 2)
-        self.assertEqual(self.hand.walk_adjustments["ExistingPlayer"], Decimal("0.50"))
-        self.assertEqual(self.hand.walk_adjustments["Player1"], Decimal("1.00"))
 
 
 if __name__ == "__main__":

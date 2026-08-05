@@ -29,11 +29,14 @@ fi
 echo "Adjusted BASE_PATH2 for OS: $BASE_PATH2"
 
 # Name of the main script
-MAIN_SCRIPT="fpdb.pyw"
-SECOND_SCRIPT="HUD_main.pyw"
+LEGACY_PACKAGE_DIR="fpdb_3_legacy"
+MAIN_SCRIPT="$LEGACY_PACKAGE_DIR/fpdb.pyw"
+SECOND_SCRIPT="$LEGACY_PACKAGE_DIR/HUD_main.pyw"
 
 # Options of pyinstaller
-PYINSTALLER_OPTIONS="--noconfirm --onedir --windowed --log-level=DEBUG"
+# numpy is only imported through import_module() in Database.py; PyInstaller
+# cannot follow that, and the HUD build would otherwise ship without it.
+PYINSTALLER_OPTIONS="--noconfirm --onedir --windowed --log-level=DEBUG --paths=fpdb_3_legacy --paths=. --hidden-import=numpy --hidden-import=fpdb_3_legacy.coinpoker_live_capture --hidden-import=fpdb_3_legacy.Aux_Hud --hidden-import=fpdb_3_legacy.Aux_Classic_Hud --hidden-import=fpdb_3_legacy.Mucked"
 
 # List of all files for fpdb
 FILES=(
@@ -58,7 +61,6 @@ FILES=(
     "Exceptions.py"
     "Filters.py"
     "fpdb.pyw"
-    "fpdb.toml"
     "GGPokerToFpdb.py"
     "GuiAutoImport.py"
     "GuiBulkImport.py"
@@ -79,7 +81,6 @@ FILES=(
     "HandHistoryConverter.py"
     "Hud.py"
     "HudStatsPersistence.py"
-    "HUD_config.test.xml"
     "HUD_config.xml"
     "HUD_config.xml.example"
     "HUD_main.pyw"
@@ -104,7 +105,6 @@ FILES=(
     "PokerTrackerToFpdb.py"
     "Popup.py"
     "SealsWithClubsToFpdb.py"
-    "settings.json"
     "SQL.py"
     "Stats.py"
     "TableWindow.py"
@@ -133,20 +133,28 @@ FOLDERS=(
     "icons"
     "fonts"
     "locale"
-    "utils"
 )
 
 # Function to generate the pyinstaller command
 generate_pyinstaller_command() {
     local script_path=$1
     local command="pyinstaller $PYINSTALLER_OPTIONS"
+    local source_path
+    local target_path
 
     # Add icon
     command+=" --icon=\"$BASE_PATH2/gfx/tribal.icns\""
 
     # Process files
     for file in "${FILES[@]}"; do
-        command+=" --add-data \"$BASE_PATH2/$file:./\""
+        if [[ "$file" == *.py || "$file" == *.pyw ]]; then
+            source_path="$BASE_PATH2/$LEGACY_PACKAGE_DIR/$file"
+            target_path="fpdb_3_legacy"
+        else
+            source_path="$BASE_PATH2/$file"
+            target_path="."
+        fi
+        command+=" --add-data \"$source_path:$target_path\""
     done
 
     # Process folders

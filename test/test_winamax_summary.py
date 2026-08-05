@@ -7,12 +7,13 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
+from bs4 import BeautifulSoup
 
 # Add project path for imports
 sys.path.insert(0, str((Path(__file__).parent / "..").resolve()))
 
-from Exceptions import FpdbParseError
-from WinamaxSummary import WinamaxSummary
+from fpdb_3_legacy.Exceptions import FpdbParseError
+from fpdb_3_legacy.WinamaxSummary import WinamaxSummary
 
 
 class TestWinamaxSummary:
@@ -52,7 +53,7 @@ class TestWinamaxSummary:
                         You won 0.92€
                         """
 
-        with patch("TourneySummary.TourneySummary.__init__", return_value=None):
+        with patch("fpdb_3_legacy.TourneySummary.TourneySummary.__init__", return_value=None):
             summary = self._create_summary(summary_text)
 
             # Mock parent methods
@@ -72,7 +73,7 @@ class TestWinamaxSummary:
             assert summary.isSng is True  # <= 10 players
 
             # Verify start time
-            expected_time = datetime.datetime(2011, 10, 31, 17, 11, 45, tzinfo=datetime.timezone.utc)
+            expected_time = datetime.datetime(2011, 10, 31, 17, 11, 45, tzinfo=datetime.UTC)
             assert summary.startTime == expected_time
 
             # Verify player was added
@@ -104,7 +105,7 @@ class TestWinamaxSummary:
                         You finished in 9th place
                         """
 
-        with patch("TourneySummary.TourneySummary.__init__", return_value=None):
+        with patch("fpdb_3_legacy.TourneySummary.TourneySummary.__init__", return_value=None):
             summary = self._create_summary(summary_text)
 
             summary.addPlayer = MagicMock()
@@ -144,7 +145,7 @@ class TestWinamaxSummary:
                         You finished in 5th place
                         """
 
-        with patch("TourneySummary.TourneySummary.__init__", return_value=None):
+        with patch("fpdb_3_legacy.TourneySummary.TourneySummary.__init__", return_value=None):
             summary = self._create_summary(summary_text)
 
             summary.addPlayer = MagicMock()
@@ -184,7 +185,7 @@ class TestWinamaxSummary:
                         You finished in 5th place
                         """
 
-        with patch("TourneySummary.TourneySummary.__init__", return_value=None):
+        with patch("fpdb_3_legacy.TourneySummary.TourneySummary.__init__", return_value=None):
             summary = self._create_summary(summary_text)
 
             summary.addPlayer = MagicMock()
@@ -216,7 +217,7 @@ class TestWinamaxSummary:
                         You finished in 23th place
                         """
 
-        with patch("TourneySummary.TourneySummary.__init__", return_value=None):
+        with patch("fpdb_3_legacy.TourneySummary.TourneySummary.__init__", return_value=None):
             summary = self._create_summary(summary_text)
 
             summary.addPlayer = MagicMock()
@@ -250,7 +251,7 @@ class TestWinamaxSummary:
                         You won 15.50€ + Bounty 2.00€
                         """
 
-        with patch("TourneySummary.TourneySummary.__init__", return_value=None):
+        with patch("fpdb_3_legacy.TourneySummary.TourneySummary.__init__", return_value=None):
             summary = self._create_summary(summary_text)
 
             summary.addPlayer = MagicMock()
@@ -266,7 +267,7 @@ class TestWinamaxSummary:
 
     def test_currency_detection(self) -> None:
         """Test different currency detection."""
-        with patch("TourneySummary.TourneySummary.__init__", return_value=None):
+        with patch("fpdb_3_legacy.TourneySummary.TourneySummary.__init__", return_value=None):
             summary = WinamaxSummary(
                 config=self.config,
                 db=self.db,
@@ -292,7 +293,7 @@ class TestWinamaxSummary:
 
     def test_expresso_lottery_detection(self) -> None:
         """Test Expresso lottery tournament detection."""
-        with patch("TourneySummary.TourneySummary.__init__", return_value=None):
+        with patch("fpdb_3_legacy.TourneySummary.TourneySummary.__init__", return_value=None):
             summary = WinamaxSummary()
             summary.tourneyName = "Expresso Super High Roller"
             summary.prizepool = 500  # 5€ in cents
@@ -317,7 +318,7 @@ class TestWinamaxSummary:
             summary.gametype = {}
             return summary
 
-        with patch("TourneySummary.TourneySummary.__init__", return_value=None):
+        with patch("fpdb_3_legacy.TourneySummary.TourneySummary.__init__", return_value=None):
             # Test holdem no-limit parsing
             summary = create_summary()
             levels = "[10-20:0:180:holdem-no-limit,15-30:0:180:holdem-no-limit]"
@@ -344,7 +345,7 @@ class TestWinamaxSummary:
 
     def test_split_re(self) -> None:
         """Test the split regular expression."""
-        with patch("TourneySummary.TourneySummary.__init__", return_value=None):
+        with patch("fpdb_3_legacy.TourneySummary.TourneySummary.__init__", return_value=None):
             summary = WinamaxSummary(
                 config=self.config,
                 db=self.db,
@@ -359,7 +360,7 @@ class TestWinamaxSummary:
 
     def test_ticket_winnings(self) -> None:
         """Test parsing ticket winnings."""
-        with patch("TourneySummary.TourneySummary.__init__", return_value=None):
+        with patch("fpdb_3_legacy.TourneySummary.TourneySummary.__init__", return_value=None):
             summary = WinamaxSummary(
                 config=self.config,
                 db=self.db,
@@ -406,7 +407,7 @@ You played 30min 0s
 You finished in 10th place
 """
 
-        with patch("TourneySummary.TourneySummary.__init__", return_value=None):
+        with patch("fpdb_3_legacy.TourneySummary.TourneySummary.__init__", return_value=None):
             summary = self._create_summary(summary_text)
 
             summary.addPlayer = MagicMock()
@@ -420,7 +421,7 @@ You finished in 10th place
         """Test error handling for malformed summaries."""
         malformed_summary = "This is not a valid Winamax summary"
 
-        with patch("TourneySummary.TourneySummary.__init__", return_value=None):
+        with patch("fpdb_3_legacy.TourneySummary.TourneySummary.__init__", return_value=None):
             summary = WinamaxSummary(
                 config=self.config,
                 db=self.db,
@@ -432,7 +433,7 @@ You finished in 10th place
             summary.summaryText = malformed_summary
             summary.hhtype = "summary"
 
-            with pytest.raises(FpdbParseError, match=".*"):
+            with pytest.raises(FpdbParseError):
                 summary.parseSummary()
 
     def test_identify_pattern(self) -> None:
@@ -462,7 +463,7 @@ You played 30min 0s
 You finished in 50th place
 """
 
-        with patch("TourneySummary.TourneySummary.__init__", return_value=None):
+        with patch("fpdb_3_legacy.TourneySummary.TourneySummary.__init__", return_value=None):
             summary = self._create_summary(summary_text)
 
             summary.addPlayer = MagicMock()
@@ -475,7 +476,7 @@ You finished in 50th place
 
     def test_convert_to_decimal(self) -> None:
         """Test the convert_to_decimal method."""
-        with patch("TourneySummary.TourneySummary.__init__", return_value=None):
+        with patch("fpdb_3_legacy.TourneySummary.TourneySummary.__init__", return_value=None):
             summary = WinamaxSummary(
                 config=self.config,
                 db=self.db,
@@ -492,7 +493,7 @@ You finished in 50th place
 
     def test_parse_basic_info_detailed(self) -> None:
         """Test _parse_basic_info method in detail."""
-        with patch("TourneySummary.TourneySummary.__init__", return_value=None):
+        with patch("fpdb_3_legacy.TourneySummary.TourneySummary.__init__", return_value=None):
             summary = WinamaxSummary(
                 config=self.config,
                 db=self.db,
@@ -515,12 +516,12 @@ You finished in 50th place
             assert summary.prizepool == 15000  # Uses PRIZEPOOL2 (150€ in cents)
             assert summary.tourNo == "987654"
 
-            expected_time = datetime.datetime(2023, 12, 25, 14, 30, 45, tzinfo=datetime.timezone.utc)
+            expected_time = datetime.datetime(2023, 12, 25, 14, 30, 45, tzinfo=datetime.UTC)
             assert summary.startTime == expected_time
 
     def test_parse_buyin_info_detailed(self) -> None:
         """Test _parse_buyin_info method with various scenarios."""
-        with patch("TourneySummary.TourneySummary.__init__", return_value=None):
+        with patch("fpdb_3_legacy.TourneySummary.TourneySummary.__init__", return_value=None):
             summary = WinamaxSummary(
                 config=self.config,
                 db=self.db,
@@ -561,7 +562,7 @@ You finished in 50th place
 
     def test_parse_rebuy_addon_detailed(self) -> None:
         """Test _parse_rebuy_addon method."""
-        with patch("TourneySummary.TourneySummary.__init__", return_value=None):
+        with patch("fpdb_3_legacy.TourneySummary.TourneySummary.__init__", return_value=None):
             summary = WinamaxSummary(
                 config=self.config,
                 db=self.db,
@@ -590,7 +591,7 @@ You finished in 50th place
 
     def test_parse_tournament_type_detailed(self) -> None:
         """Test _parse_tournament_type method."""
-        with patch("TourneySummary.TourneySummary.__init__", return_value=None):
+        with patch("fpdb_3_legacy.TourneySummary.TourneySummary.__init__", return_value=None):
             summary = WinamaxSummary(
                 config=self.config,
                 db=self.db,
@@ -623,7 +624,7 @@ You finished in 50th place
 
     def test_parse_player_info_detailed(self) -> None:
         """Test _parse_player_info method with various scenarios."""
-        with patch("TourneySummary.TourneySummary.__init__", return_value=None):
+        with patch("fpdb_3_legacy.TourneySummary.TourneySummary.__init__", return_value=None):
             summary = WinamaxSummary(
                 config=self.config,
                 db=self.db,
@@ -665,7 +666,7 @@ You finished in 50th place
 
     def test_set_default_gametype(self) -> None:
         """Test _set_default_gametype method."""
-        with patch("TourneySummary.TourneySummary.__init__", return_value=None):
+        with patch("fpdb_3_legacy.TourneySummary.TourneySummary.__init__", return_value=None):
             summary = WinamaxSummary(
                 config=self.config,
                 db=self.db,
@@ -683,7 +684,7 @@ You finished in 50th place
 
     def test_extract_gametype_string(self) -> None:
         """Test _extract_gametype_string method."""
-        with patch("TourneySummary.TourneySummary.__init__", return_value=None):
+        with patch("fpdb_3_legacy.TourneySummary.TourneySummary.__init__", return_value=None):
             summary = WinamaxSummary(
                 config=self.config,
                 db=self.db,
@@ -708,7 +709,7 @@ You finished in 50th place
 
     def test_parse_gametype_string(self) -> None:
         """Test _parse_gametype_string method."""
-        with patch("TourneySummary.TourneySummary.__init__", return_value=None):
+        with patch("fpdb_3_legacy.TourneySummary.TourneySummary.__init__", return_value=None):
             summary = WinamaxSummary(
                 config=self.config,
                 db=self.db,
@@ -744,7 +745,7 @@ You finished in 50th place
 
     def test_set_limit_type(self) -> None:
         """Test _set_limit_type method."""
-        with patch("TourneySummary.TourneySummary.__init__", return_value=None):
+        with patch("fpdb_3_legacy.TourneySummary.TourneySummary.__init__", return_value=None):
             summary = WinamaxSummary(
                 config=self.config,
                 db=self.db,
@@ -777,7 +778,7 @@ You finished in 50th place
 
     def test_parse_gametype_methods_integration(self) -> None:
         """Test integration of gametype parsing methods."""
-        with patch("TourneySummary.TourneySummary.__init__", return_value=None):
+        with patch("fpdb_3_legacy.TourneySummary.TourneySummary.__init__", return_value=None):
             summary = WinamaxSummary(
                 config=self.config,
                 db=self.db,
@@ -820,7 +821,7 @@ You finished in 50th place
             assert summary.isLottery is expected_is_lottery
             assert summary.tourneyMultiplier == expected_multiplier
 
-        with patch("TourneySummary.TourneySummary.__init__", return_value=None):
+        with patch("fpdb_3_legacy.TourneySummary.TourneySummary.__init__", return_value=None):
             summary = WinamaxSummary()
 
             # Test no tournament name
@@ -845,7 +846,7 @@ You finished in 50th place
 
     def test_different_game_types(self) -> None:
         """Test parsing of different game types from the games dictionary."""
-        with patch("TourneySummary.TourneySummary.__init__", return_value=None):
+        with patch("fpdb_3_legacy.TourneySummary.TourneySummary.__init__", return_value=None):
             summary = WinamaxSummary(
                 config=self.config,
                 db=self.db,
@@ -867,7 +868,7 @@ You finished in 50th place
 
     def test_different_limit_types(self) -> None:
         """Test parsing of different limit types."""
-        with patch("TourneySummary.TourneySummary.__init__", return_value=None):
+        with patch("fpdb_3_legacy.TourneySummary.TourneySummary.__init__", return_value=None):
             summary = WinamaxSummary(
                 config=self.config,
                 db=self.db,
@@ -902,7 +903,7 @@ You finished in 50th place
 
     def test_buyin_info_with_ko_bounty(self) -> None:
         """Test _parse_buyin_info with KO bounty."""
-        with patch("TourneySummary.TourneySummary.__init__", return_value=None):
+        with patch("fpdb_3_legacy.TourneySummary.TourneySummary.__init__", return_value=None):
             summary = WinamaxSummary(
                 config=self.config,
                 db=self.db,
@@ -930,7 +931,7 @@ You finished in 50th place
 
     def test_player_info_edge_cases(self) -> None:
         """Test _parse_player_info edge cases."""
-        with patch("TourneySummary.TourneySummary.__init__", return_value=None):
+        with patch("fpdb_3_legacy.TourneySummary.TourneySummary.__init__", return_value=None):
             summary = WinamaxSummary(
                 config=self.config,
                 db=self.db,
@@ -951,7 +952,7 @@ You finished in 50th place
 
     def test_parse_summary_dispatch(self) -> None:
         """Test parseSummary method dispatching."""
-        with patch("TourneySummary.TourneySummary.__init__", return_value=None):
+        with patch("fpdb_3_legacy.TourneySummary.TourneySummary.__init__", return_value=None):
             summary = WinamaxSummary(
                 config=self.config,
                 db=self.db,
@@ -975,7 +976,7 @@ You finished in 50th place
 
     def test_buyin_info_zero_values(self) -> None:
         """Test _parse_buyin_info with zero buy-in values."""
-        with patch("TourneySummary.TourneySummary.__init__", return_value=None):
+        with patch("fpdb_3_legacy.TourneySummary.TourneySummary.__init__", return_value=None):
             summary = WinamaxSummary(
                 config=self.config,
                 db=self.db,
@@ -1000,7 +1001,7 @@ You finished in 50th place
 
     def test_currency_variants(self) -> None:
         """Test additional currency detection variants."""
-        with patch("TourneySummary.TourneySummary.__init__", return_value=None):
+        with patch("fpdb_3_legacy.TourneySummary.TourneySummary.__init__", return_value=None):
             summary = WinamaxSummary(
                 config=self.config,
                 db=self.db,
@@ -1042,7 +1043,7 @@ You finished in 50th place
 
     def test_initialization(self) -> None:
         """Test __init__ method and lottery initialization."""
-        with patch("TourneySummary.TourneySummary.__init__", return_value=None):
+        with patch("fpdb_3_legacy.TourneySummary.TourneySummary.__init__", return_value=None):
             summary = WinamaxSummary(
                 config=self.config,
                 db=self.db,
@@ -1053,3 +1054,61 @@ You finished in 50th place
             # Verify lottery fields are initialized
             assert summary.isLottery is False
             assert summary.tourneyMultiplier == 1
+
+    def _classify(self, mode: str | None, entries: str) -> bool:
+        """Run the format classification in isolation."""
+        summary = WinamaxSummary.__new__(WinamaxSummary)
+        summary.isSng = False
+        summary.speed = "Normal"
+        summary.entries = entries
+        summary._parse_tournament_type({"MODE": mode, "SPEED": None})
+        return summary.isSng
+
+    @pytest.mark.parametrize(
+        ("mode", "entries", "is_sng"),
+        [
+            # The summary states the format from 2012 on; it settles the question.
+            ("sng", "3", True),
+            ("sngType : sitngo", "2", True),
+            ("sngType : freeroll100k", "10", True),
+            ("tt", "1743", False),
+            ("ttType : flight", "1097", False),
+            # A tournament that drew a small field is still a tournament: the
+            # stated format must win over the size of the field.
+            ("tt", "8", False),
+        ],
+    )
+    def test_stated_mode_decides_the_format(self, mode: str, entries: str, is_sng: bool) -> None:
+        assert self._classify(mode, entries) is is_sng
+
+    @pytest.mark.parametrize(
+        ("entries", "is_sng"),
+        [
+            # Older summaries state no format, so a field that fits one table is
+            # the only evidence of a sit & go.
+            ("10", True),
+            ("5000", False),
+            # Known limitation: a multi-table sit & go is indistinguishable from
+            # a tournament once the format is unstated.
+            ("18", False),
+        ],
+    )
+    def test_field_size_is_the_only_evidence_without_a_stated_mode(self, entries: str, is_sng: bool) -> None:
+        assert self._classify(None, entries) is is_sng
+
+    def test_html_helpers_keep_gametype_and_money_units(self) -> None:
+        """HTML parsing uses its dedicated gametype path and stores cents."""
+        with patch("fpdb_3_legacy.TourneySummary.TourneySummary.__init__", return_value=None):
+            summary = WinamaxSummary(
+                config=self.config,
+                db=self.db,
+                siteName="Winamax",
+                summaryText="",
+            )
+            summary.gametype = {}
+
+            summary._parse_html_gametype(["<h1>No Limit Hold'em</h1>"])
+            summary._parse_prizepool(BeautifulSoup('<div class="title2">Prizepool: 12,50</div>', "html.parser"))
+
+            assert summary.gametype == {"limitType": "nl", "category": "holdem"}
+            assert summary.prizepool == 1250

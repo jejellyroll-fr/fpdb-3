@@ -1,0 +1,104 @@
+{
+  "site": "SealsWithClubs",
+  "hand_id": 777,
+  "table_id": "table-http",
+  "buttonpos": 1,
+  "game": {
+    "base": "hold",
+    "category": "holdem",
+    "fpdb_supported": true
+  },
+  "gametype": {
+    "type": "ring",
+    "base": "hold",
+    "category": "holdem",
+    "limitType": "nl",
+    "currency": "mBTC",
+    "sb": "1",
+    "bb": "2",
+    "maxSeats": 2
+  },
+  "streets": {
+    "holeStreets": ["PREFLOP"],
+    "communityStreets": ["FLOP", "TURN", "RIVER"]
+  },
+  "metadata": {
+    "state_model": "events"
+  },
+  "players": [
+    {
+      "seat_idx": 1,
+      "name": "alice",
+      "starting_stack": "100",
+      "cards": ["Ah", "Ad"]
+    },
+    {
+      "seat_idx": 2,
+      "name": "bob",
+      "starting_stack": "100",
+      "cards": ["Kh", "Kd"]
+    }
+  ],
+  "board": ["2c", "3d", "4h", "5s", "6c"],
+  "actions": [
+    {
+      "street": "BLINDSANTES",
+      "player": "alice",
+      "type": "small blind",
+      "amount": "1"
+    },
+    {
+      "street": "BLINDSANTES",
+      "player": "bob",
+      "type": "big blind",
+      "amount": "2"
+    },
+    {
+      "street": "PREFLOP",
+      "player": "alice",
+      "type": "calls",
+      "amount": "1"
+    },
+    {
+      "street": "PREFLOP",
+      "player": "bob",
+      "type": "checks"
+    },
+    {
+      "street": "FLOP",
+      "player": "alice",
+      "type": "checks"
+    },
+    {
+      "street": "FLOP",
+      "player": "bob",
+      "type": "checks"
+    },
+    {
+      "street": "TURN",
+      "player": "alice",
+      "type": "checks"
+    },
+    {
+      "street": "TURN",
+      "player": "bob",
+      "type": "checks"
+    },
+    {
+      "street": "RIVER",
+      "player": "alice",
+      "type": "checks"
+    },
+    {
+      "street": "RIVER",
+      "player": "bob",
+      "type": "checks"
+    }
+  ],
+  "collections": [
+    {
+      "player": "alice",
+      "pot": "4"
+    }
+  ]
+}

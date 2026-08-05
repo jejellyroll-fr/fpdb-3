@@ -1,9 +1,10 @@
 """Comprehensive tests for PokerStars _processSplitBounty method."""
 
 import unittest
+from decimal import Decimal
 from unittest.mock import Mock
 
-from PokerStarsToFpdb import PokerStars
+from fpdb_3_legacy.PokerStarsToFpdb import PokerStars
 
 
 class MockConfig:
@@ -72,10 +73,10 @@ class TestProcessSplitBounty(unittest.TestCase):
 
         self.parser._processSplitBounty(hand, match)
 
-        expected_value = 1.0 / 3.0
-        self.assertAlmostEqual(hand.koCounts["Player1"], expected_value, places=10)
-        self.assertAlmostEqual(hand.koCounts["Player2"], expected_value, places=10)
-        self.assertAlmostEqual(hand.koCounts["Player3"], expected_value, places=10)
+        expected_value = Decimal("1") / Decimal("3")
+        self.assertEqual(hand.koCounts["Player1"], expected_value)
+        self.assertEqual(hand.koCounts["Player2"], expected_value)
+        self.assertEqual(hand.koCounts["Player3"], expected_value)
         self.assertEqual(len(hand.koCounts), 3)
 
     def test_split_bounty_four_players_empty_counts(self):
@@ -92,25 +93,25 @@ class TestProcessSplitBounty(unittest.TestCase):
 
     def test_split_bounty_two_players_existing_counts(self):
         """Test splitting bounty with existing koCounts."""
-        hand = self._create_mock_hand({"Player1": 1.5, "Player2": 0.5})
+        hand = self._create_mock_hand({"Player1": Decimal("1.5"), "Player2": Decimal("0.5")})
         match = self._create_mock_match("Player1, Player2")
 
         self.parser._processSplitBounty(hand, match)
 
-        self.assertEqual(hand.koCounts["Player1"], 2.0)  # 1.5 + 0.5
-        self.assertEqual(hand.koCounts["Player2"], 1.0)  # 0.5 + 0.5
+        self.assertEqual(hand.koCounts["Player1"], Decimal("2.0"))  # 1.5 + 0.5
+        self.assertEqual(hand.koCounts["Player2"], Decimal("1.0"))  # 0.5 + 0.5
 
     def test_split_bounty_mixed_existing_counts(self):
         """Test splitting bounty where some players exist and some don't."""
-        hand = self._create_mock_hand({"Player1": 2.0, "Player3": 1.0})
+        hand = self._create_mock_hand({"Player1": Decimal("2.0"), "Player3": Decimal("1.0")})
         match = self._create_mock_match("Player1, Player2, Player3")
 
         self.parser._processSplitBounty(hand, match)
 
-        expected_addition = 1.0 / 3.0
-        self.assertAlmostEqual(hand.koCounts["Player1"], 2.0 + expected_addition, places=10)
-        self.assertAlmostEqual(hand.koCounts["Player2"], expected_addition, places=10)
-        self.assertAlmostEqual(hand.koCounts["Player3"], 1.0 + expected_addition, places=10)
+        expected_addition = Decimal("1") / Decimal("3")
+        self.assertEqual(hand.koCounts["Player1"], Decimal("2.0") + expected_addition)
+        self.assertEqual(hand.koCounts["Player2"], expected_addition)
+        self.assertEqual(hand.koCounts["Player3"], Decimal("1.0") + expected_addition)
         self.assertEqual(len(hand.koCounts), 3)
 
     def test_split_bounty_single_player(self):
@@ -130,10 +131,10 @@ class TestProcessSplitBounty(unittest.TestCase):
 
         self.parser._processSplitBounty(hand, match)
 
-        expected_value = 1.0 / 3.0
-        self.assertAlmostEqual(hand.koCounts["Player-1"], expected_value, places=10)
-        self.assertAlmostEqual(hand.koCounts["Player_2"], expected_value, places=10)
-        self.assertAlmostEqual(hand.koCounts["Player.3"], expected_value, places=10)
+        expected_value = Decimal("1") / Decimal("3")
+        self.assertEqual(hand.koCounts["Player-1"], expected_value)
+        self.assertEqual(hand.koCounts["Player_2"], expected_value)
+        self.assertEqual(hand.koCounts["Player.3"], expected_value)
 
     def test_split_bounty_numbers_in_names(self):
         """Test splitting bounty with numbers in player names."""
@@ -160,25 +161,25 @@ class TestProcessSplitBounty(unittest.TestCase):
 
     def test_split_bounty_zero_existing_count(self):
         """Test splitting bounty where a player has zero existing count."""
-        hand = self._create_mock_hand({"Player1": 0, "Player2": 2.0})
+        hand = self._create_mock_hand({"Player1": 0, "Player2": Decimal("2.0")})
         match = self._create_mock_match("Player1, Player2")
 
         self.parser._processSplitBounty(hand, match)
 
-        self.assertEqual(hand.koCounts["Player1"], 0.5)
-        self.assertEqual(hand.koCounts["Player2"], 2.5)
+        self.assertEqual(hand.koCounts["Player1"], Decimal("0.5"))
+        self.assertEqual(hand.koCounts["Player2"], Decimal("2.5"))
 
     def test_split_bounty_fractional_existing_counts(self):
         """Test splitting bounty with fractional existing counts."""
-        hand = self._create_mock_hand({"Player1": 0.33, "Player2": 0.67})
+        hand = self._create_mock_hand({"Player1": Decimal("0.33"), "Player2": Decimal("0.67")})
         match = self._create_mock_match("Player1, Player2, Player3")
 
         self.parser._processSplitBounty(hand, match)
 
-        expected_addition = 1.0 / 3.0
-        self.assertAlmostEqual(hand.koCounts["Player1"], 0.33 + expected_addition, places=10)
-        self.assertAlmostEqual(hand.koCounts["Player2"], 0.67 + expected_addition, places=10)
-        self.assertAlmostEqual(hand.koCounts["Player3"], expected_addition, places=10)
+        expected_addition = Decimal("1") / Decimal("3")
+        self.assertEqual(hand.koCounts["Player1"], Decimal("0.33") + expected_addition)
+        self.assertEqual(hand.koCounts["Player2"], Decimal("0.67") + expected_addition)
+        self.assertEqual(hand.koCounts["Player3"], expected_addition)
 
     def test_split_bounty_large_number_of_players(self):
         """Test splitting bounty between many players."""
@@ -188,7 +189,7 @@ class TestProcessSplitBounty(unittest.TestCase):
 
         self.parser._processSplitBounty(hand, match)
 
-        expected_value = 0.1
+        expected_value = Decimal("1") / Decimal("10")
         for player in players:
             self.assertEqual(hand.koCounts[player], expected_value)
         self.assertEqual(len(hand.koCounts), 10)
@@ -209,14 +210,14 @@ class TestProcessSplitBounty(unittest.TestCase):
 
         self.parser._processSplitBounty(hand, match)
 
-        expected_value = 1.0 / 7.0
+        expected_value = Decimal("1") / Decimal("7")
         total = sum(hand.koCounts.values())
 
         for player in ["P1", "P2", "P3", "P4", "P5", "P6", "P7"]:
-            self.assertAlmostEqual(hand.koCounts[player], expected_value, places=10)
+            self.assertEqual(hand.koCounts[player], expected_value)
 
-        # Total should be 1.0 (accounting for floating point precision)
-        self.assertAlmostEqual(total, 1.0, places=10)
+        # Total should be ~1 (Decimal division rounding at context precision)
+        self.assertAlmostEqual(total, Decimal("1"), places=10)
 
     def test_split_bounty_empty_player_name_handling(self):
         """Test handling of empty spaces in player names."""

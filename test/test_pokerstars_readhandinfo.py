@@ -9,8 +9,8 @@ from unittest.mock import Mock, patch
 parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, parent_dir)
 
-from Exceptions import FpdbHandPartial, FpdbParseError
-from PokerStarsToFpdb import PokerStars
+from fpdb_3_legacy.Exceptions import FpdbHandPartial, FpdbParseError
+from fpdb_3_legacy.PokerStarsToFpdb import PokerStars
 
 
 class TestPokerStarsReadHandInfo(unittest.TestCase):
@@ -262,7 +262,7 @@ Second summary"""
 
             self.assertIn("not cleanly split", str(cm.exception))
 
-    @patch("PokerStarsToFpdb.log")
+    @patch("fpdb_3_legacy.PokerStarsToFpdb.log")
     def test_readHandInfo_logging_behavior(self, mock_log):
         """Test logging behavior in various scenarios."""
         # Test error case that definitely triggers logging
@@ -282,7 +282,7 @@ Valid summary"""
         # Verify error log was called
         mock_log.error.assert_called_once()
 
-    @patch("PokerStarsToFpdb.log")
+    @patch("fpdb_3_legacy.PokerStarsToFpdb.log")
     def test_readHandInfo_error_logging(self, mock_log):
         """Test error logging when regex matches fail."""
         hand_text = """PokerStars Game #123: Invalid format

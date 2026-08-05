@@ -1,0 +1,178 @@
+"""GuiPrefs module for FPDB preferences dialog.
+from __future__ import annotations
+Copyright 2008-2011 Carl Gherardi
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published by
+the Free Software Foundation, version 3 of the License.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program. If not, see <http://www.gnu.org/licenses/>.
+In the "official" distribution you can find the license in agpl-3.0.txt.
+"""
+
+from typing import Any
+
+from PySide6.QtCore import Qt
+from PySide6.QtWidgets import (
+    QDialog,
+    QDialogButtonBox,
+    QTreeWidget,
+    QTreeWidgetItem,
+    QVBoxLayout,
+)
+
+from fpdb_3_legacy import Configuration
+from fpdb_3_legacy.i18n import N_
+from fpdb_3_legacy.i18n import gettext as _
+
+rewrite = {
+    "general": N_("General"),
+    "supported_databases": N_("Databases"),
+    "import": N_("Import"),
+    "hud_ui": N_("HUD"),
+    "supported_sites": N_("Sites"),
+    "supported_games": N_("Games"),
+    "popup_windows": N_("Popup Windows"),
+    "pu": N_("Window"),
+    "pu_name": N_("Popup Name"),
+    "pu_stat": N_("Stat"),
+    "pu_stat_name": N_("Stat Name"),
+    "aux_windows": N_("Auxiliary Windows"),
+    "aw stud_mucked": N_("Stud mucked"),
+    "aw mucked": N_("Mucked"),
+    "hhcs": N_("Hand History Converters"),
+    "gui_cash_stats": N_("Ring Player Stats"),
+    "field_type": N_("Field Type"),
+    "col_title": N_("Column Heading"),
+    "xalignment": N_("Left/Right Align"),
+    "disp_all": N_("Show in Summaries"),
+    "disp_posn": N_("Show in Position Stats"),
+    "col_name": N_("Stat Name"),
+    "field_format": N_("Format"),
+    "gui_tour_stats": N_("Tour Player Stats"),
+}
+
+
+class GuiPrefs(QDialog):
+    """Preferences dialog for FPDB configuration."""
+
+    def __init__(self, config: Any, parentwin: Any) -> None:
+        """Initialize preferences dialog."""
+        QDialog.__init__(self, parentwin)
+        self.resize(600, 350)
+        self.config = config
+        self.setLayout(QVBoxLayout())
+
+        self.doc = self.config.get_doc()
+
+        self.configView = QTreeWidget()
+        self.configView.setColumnCount(2)
+        self.configView.setHeaderLabels(
+            [_("Setting"), _("Value (double-click to change)")],
+        )
+
+        if self.doc.documentElement.tagName == "FreePokerToolsConfig":
+            self.root = QTreeWidgetItem(["fpdb", None])
+            self.configView.addTopLevelItem(self.root)
+            self.root.setExpanded(True)
+            for elem in self.doc.documentElement.childNodes:
+                self.addTreeRows(self.root, elem)
+        self.layout().addWidget(self.configView)
+        self.configView.resizeColumnToContents(0)
+
+        self.configView.itemChanged.connect(self.updateConf)
+        btns = QDialogButtonBox(QDialogButtonBox.Save | QDialogButtonBox.Cancel, self)
+        btns.accepted.connect(self.accept)
+        btns.rejected.connect(self.reject)
+        self.layout().addWidget(btns)
+
+    def updateConf(self, item: Any, column: int) -> None:
+        """Update configuration item."""
+        if column != 1:
+            return
+        item.data(1, Qt.ItemDataRole.UserRole).value = item.data(1, Qt.ItemDataRole.DisplayRole)
+
+    def rewriteText(self, s: str) -> tuple[str, bool]:
+        """Rewrite text using the rewrite dictionary."""
+        upd = False
+        if s in rewrite:
+            s = _(rewrite[s])  # rewrite holds N_()-marked labels; translate at use
+            upd = True
+        return (s, upd)
+
+    def addTreeRows(self, parent: Any, node: Any) -> None:
+        """Add tree rows to the configuration view."""
+        if node.nodeType == node.ELEMENT_NODE:
+            (setting, value) = (node.nodeName, None)
+        elif node.nodeType == node.TEXT_NODE:
+            # text nodes hold the whitespace (or whatever) between the xml elements, not used here
+            (setting, value) = (
+                "TEXT: [" + node.nodeValue + "|" + node.nodeValue + "]",
+                node.data,
+            )
+        else:
+            (setting, value) = ("?? " + node.nodeValue, "type=" + str(node.nodeType))
+
+        if node.nodeType not in (node.TEXT_NODE, node.COMMENT_NODE):
+            name = ""
+            item = QTreeWidgetItem(parent, [setting, value])
+            if node.hasAttributes():
+                for i in range(node.attributes.length):
+                    local_name, updated = self.rewriteText(
+                        node.attributes.item(i).localName,
+                    )
+                    attritem = QTreeWidgetItem(
+                        item,
+                        [local_name, node.attributes.item(i).value],
+                    )
+                    attritem.setData(1, Qt.ItemDataRole.UserRole, node.attributes.item(i))
+                    attritem.setFlags(attritem.flags() | Qt.ItemFlag.ItemIsEditable)
+
+                    if node.attributes.item(i).localName in (
+                        "site_name",
+                        "game_name",
+                        "stat_name",
+                        "name",
+                        "db_server",
+                        "site",
+                        "col_name",
+                    ):
+                        name = " " + node.attributes.item(i).value
+
+            label, updated = self.rewriteText(setting + name)
+            if name != "" or updated:
+                item.setData(0, 0, label)
+
+            if node.hasChildNodes():
+                for elem in node.childNodes:
+                    self.addTreeRows(item, elem)
+
+
+def main(argv=None):
+    if argv is None:
+        argv = sys.argv[1:]
+
+    # Simple - just launch the preferences GUI like the original
+    Configuration.set_logfile("fpdb-log.txt")
+    config = Configuration.Config()
+
+    from PySide6.QtWidgets import QApplication, QMainWindow
+
+    app = QApplication([])
+    main_window = QMainWindow()
+    main_window.show()
+    prefs = GuiPrefs(config, main_window)
+    prefs.exec()
+    app.exec()
+    return 0
+
+
+if __name__ == "__main__":
+    import sys
+
+    sys.exit(main())

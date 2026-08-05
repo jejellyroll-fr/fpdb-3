@@ -9,9 +9,9 @@ from decimal import Decimal
 from pathlib import Path
 from unittest.mock import Mock, patch
 
-from Hand import Hand
-from HandHistoryConverter import FpdbHandPartial, FpdbParseError
-from PokerStarsToFpdb import POKERSTARS_PATH_PATTERNS, POKERSTARS_SKIN_IDS, SITE_POKERSTARS_IT, PokerStars
+from fpdb_3_legacy.Hand import Hand
+from fpdb_3_legacy.HandHistoryConverter import FpdbHandPartial, FpdbParseError
+from fpdb_3_legacy.PokerStarsToFpdb import POKERSTARS_PATH_PATTERNS, POKERSTARS_SKIN_IDS, SITE_POKERSTARS_IT, PokerStars
 
 
 class MockConfig:
@@ -173,7 +173,7 @@ class TestPokerStarsSkinDetection(unittest.TestCase):
     def test_detect_pokerstars_it_aams(self) -> None:
         """Test Italian skin detection via AAMS ID."""
         hand_text = (
-            "PokerStars Game #123: Hold'em No Limit ($0.05/$0.10 USD) - " "2023/08/02 11:24:53 CET [ADM ID: ABC123]"
+            "PokerStars Game #123: Hold'em No Limit ($0.05/$0.10 USD) - 2023/08/02 11:24:53 CET [ADM ID: ABC123]"
         )
         skin, site_id = self.parser.detectPokerStarsSkin(hand_text)
         self.assertEqual(skin, "PokerStars.IT")
@@ -196,7 +196,7 @@ class TestPokerStarsSkinDetection(unittest.TestCase):
 
     def test_detect_skin_by_hero_suffix(self) -> None:
         """Test skin detection via hero name suffix."""
-        hand_text = "PokerStars Game #123: Hold'em No Limit ($0.05/$0.10 USD)\n" "Dealt to hero.fr [As Ks]"
+        hand_text = "PokerStars Game #123: Hold'em No Limit ($0.05/$0.10 USD)\nDealt to hero.fr [As Ks]"
         skin, site_id = self.parser.detectPokerStarsSkin(hand_text)
         self.assertEqual(skin, "PokerStars.FR")
         self.assertEqual(site_id, 33)
@@ -677,7 +677,7 @@ class TestPokerStarsParser(unittest.TestCase):
 
     def test_limit_blind_mapping(self) -> None:
         """Test fixed limit blind mapping."""
-        fl_text = "PokerStars Game #123: Hold'em Fixed Limit ($0.10/$0.20 USD) - " "2023/08/02 11:24:53 ET"
+        fl_text = "PokerStars Game #123: Hold'em Fixed Limit ($0.10/$0.20 USD) - 2023/08/02 11:24:53 ET"
         game_info = self.parser.determineGameType(fl_text)
         self.assertEqual(game_info["limitType"], "fl")
         self.assertEqual(game_info["sb"], "0.05")
@@ -727,7 +727,7 @@ hero2 = PokerStars.IT
 
             # Mock the config file path
             with patch.object(Path, "__truediv__", return_value=config_file):
-                with patch("PokerStarsToFpdb.Path") as mock_path:
+                with patch("fpdb_3_legacy.PokerStarsToFpdb.Path") as mock_path:
                     mock_path.return_value.parent = Path(temp_dir)
                     mappings = self.parser.loadHeroMappings()
 
@@ -887,7 +887,7 @@ Player2: posts small blind $0.10"""
 
     def test_compile_player_regexs_merge_site(self) -> None:
         """Test compilePlayerRegexs for Merge network sites."""
-        from PokerStarsToFpdb import SITE_MERGE
+        from fpdb_3_legacy.PokerStarsToFpdb import SITE_MERGE
 
         hand = Mock()
         hand.players = [(1, "Player1"), (2, "Hero")]
@@ -1103,12 +1103,13 @@ Player4: posts button blind $0.05"""
         street_text = "Dealt to Hero [As Ks]"
         hand = Mock()
         hand.streets = {"PREFLOP": street_text}
+        hand.holeStreets = []  # no draw streets (readHoleCards iterates this)
         hand.addHoleCards = Mock()
         hand.hero = None
 
-        # Mock the regex
+        # Mock the regex; OLDCARDS is None for a genuine initial deal.
         mock_match = Mock()
-        mock_match.group.side_effect = lambda x: {"PNAME": "Hero", "NEWCARDS": "As Ks"}[x]
+        mock_match.group.side_effect = lambda x: {"PNAME": "Hero", "NEWCARDS": "As Ks", "OLDCARDS": None}.get(x)
 
         self.parser.re_hero_cards = Mock()
         self.parser.re_hero_cards.finditer = Mock(return_value=[mock_match])
@@ -1203,6 +1204,11 @@ Player2, Player3 split the $10.00 bounty for eliminating Player4"""
         hand = Mock()
         hand.handText = hand_text
         hand.koCounts = {}
+        hand.tourneyRanks = {}
+        hand.tourneyWinnings = {}
+        hand.tourneyWinningsCurrency = {}
+        hand.players = []
+        hand.gametype = {"currency": "USD"}
 
         # Mock bounty regex to return matches
         bounty_matches = [
@@ -1237,6 +1243,33 @@ Player2, Player3 split the $10.00 bounty for eliminating Player4"""
         # Check that bounties were processed
         self.assertIn("Player1", hand.koCounts)
         self.assertEqual(hand.koCounts["Player1"], 1)
+
+    def test_read_tourney_results_infers_winner_from_runner_up_line(self) -> None:
+        """PokerStars hand histories can omit the winner line for heads-up finishes."""
+        hand_text = """PokerStars Hand #261044408646: Tournament #4006174726, €0.91+€0.09 EUR Hold'em No Limit - Level VII (100/200) - 2026/06/05 22:51:42 CET
+Table '4006174726 1' 3-max Seat #2 is the button
+Seat 2: PeraLimones (705 in chips)
+Seat 3: jeje_sat (795 in chips)
+PeraLimones finished the tournament in 2nd place
+*** SUMMARY ***
+Seat 2: PeraLimones (button) showed [Jc Kh] and lost with a pair of Aces
+Seat 3: jeje_sat showed [6s 4d] and won (1500) with two pair, Aces and Sixes"""
+
+        hand = Mock()
+        hand.handText = hand_text
+        hand.koCounts = {}
+        hand.tourneyRanks = {}
+        hand.tourneyWinnings = {}
+        hand.tourneyWinningsCurrency = {}
+        hand.players = [(2, "PeraLimones", 705), (3, "jeje_sat", 795)]
+        hand.gametype = {"currency": "EUR"}
+        hand.koBounty = 0
+
+        self.parser.readTourneyResults(hand)
+
+        self.assertEqual(hand.tourneyRanks["PeraLimones"], 2)
+        self.assertEqual(hand.tourneyRanks["jeje_sat"], 1)
+        self.assertNotIn("jeje_sat", hand.tourneyWinnings)
 
     def test_read_collect_pot_basic(self) -> None:
         """Test readCollectPot basic functionality."""
@@ -1493,7 +1526,7 @@ Second summary"""
 
     def test_processDateTime_with_SITE_MERGE(self):
         """Test _processDateTime handles SITE_MERGE correctly."""
-        from PokerStarsToFpdb import SITE_MERGE
+        from fpdb_3_legacy.PokerStarsToFpdb import SITE_MERGE
 
         original_site_id = self.parser.site_id
         self.parser.site_id = SITE_MERGE
@@ -1520,7 +1553,7 @@ Second summary"""
             mock_hand.startTime = None
 
             # Mock the changeTimezone method
-            with patch("PokerStarsToFpdb.HandHistoryConverter.changeTimezone") as mock_timezone:
+            with patch("fpdb_3_legacy.PokerStarsToFpdb.HandHistoryConverter.changeTimezone") as mock_timezone:
                 mock_timezone.return_value = datetime.datetime(2025, 8, 2, 15, 24, 30)
 
                 # Test standard datetime format with seconds
@@ -1542,7 +1575,7 @@ Second summary"""
             mock_hand = Mock()
 
             # Mock the changeTimezone method
-            with patch("PokerStarsToFpdb.HandHistoryConverter.changeTimezone") as mock_timezone:
+            with patch("fpdb_3_legacy.PokerStarsToFpdb.HandHistoryConverter.changeTimezone") as mock_timezone:
                 mock_timezone.return_value = datetime.datetime(2025, 8, 2, 15, 24, 30)
 
                 test_cases = [
@@ -1583,7 +1616,7 @@ Second summary"""
 
     def test_processDateTime_SITE_MERGE_no_match(self):
         """Test _processDateTime with SITE_MERGE when no regex matches are found."""
-        from PokerStarsToFpdb import SITE_MERGE
+        from fpdb_3_legacy.PokerStarsToFpdb import SITE_MERGE
 
         original_site_id = self.parser.site_id
         self.parser.site_id = SITE_MERGE
@@ -1603,7 +1636,7 @@ Second summary"""
 
     def test_processDateTime_edge_cases(self):
         """Test _processDateTime with edge cases."""
-        from PokerStarsToFpdb import SITE_MERGE
+        from fpdb_3_legacy.PokerStarsToFpdb import SITE_MERGE
 
         original_site_id = self.parser.site_id
 
@@ -2537,7 +2570,7 @@ Seat 1: Player1 ($10.00 in chips)
 Dealt to Player1 [As Kh]
 Player1: folds"""
 
-        game_info = self.parser.determineGameType(rio_hand)
+        self.parser.determineGameType(rio_hand)
         self.assertEqual(self.parser.sitename, "Run It Once Poker")
 
     def test_determine_game_type_split_pot_game(self) -> None:
@@ -2556,6 +2589,8 @@ Player1: folds"""
         """Test readCommunityCards raises FpdbHandPartial on empty cards."""
         hand = Mock()
         hand.streets = {"FLOP": "[]"}
+        # No SUMMARY Board line, so board recovery finds nothing and it still raises.
+        hand.handText = "*** FLOP *** []\n"
 
         # Mock empty card detection
         self.parser.re_empty_card = Mock()

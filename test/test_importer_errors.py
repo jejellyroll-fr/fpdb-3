@@ -9,9 +9,9 @@ import pytest
 # Add project path for imports
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-import Database  # Import Database for patching
-from IdentifySite import FPDBFile, Site
-from Importer import Importer
+import fpdb_3_legacy.Database as Database  # Import Database for patching
+from fpdb_3_legacy.IdentifySite import FPDBFile, Site
+from fpdb_3_legacy.Importer import Importer
 
 # --- Simple Mocks ---
 
@@ -146,17 +146,17 @@ def importer(config_mock):
     # Patch Database.Database methods called during Importer init
     # Note: We patch the Database class IN the Database module where it is defined
     with (
-        patch("Database.Database.do_connect", mock_do_connect_with_connection),
+        patch("fpdb_3_legacy.Database.Database.do_connect", mock_do_connect_with_connection),
         patch(
-            "Database.Database.check_version",
+            "fpdb_3_legacy.Database.Database.check_version",
             mock_check_version,
         ),  # Prevents real verification but initializes wrongDbVersion
         patch(
-            "Database.Database.get_sites",
+            "fpdb_3_legacy.Database.Database.get_sites",
             return_value=None,
         ),  # Prevents real reading
         patch(
-            "Database.Database.is_connected",
+            "fpdb_3_legacy.Database.Database.is_connected",
             return_value=True,
         ),  # Ensures it thinks it's connected
         # Explicit rollback patch to ensure it doesn't raise an error if connection isn't fully mocked
@@ -192,7 +192,7 @@ def importer(config_mock):
 @pytest.fixture
 def mock_fpdb_file(config_mock):
     # Mock Site initialization
-    with patch("IdentifySite.Site.__init__", return_value=None):
+    with patch("fpdb_3_legacy.IdentifySite.Site.__init__", return_value=None):
         mock_site = Site("Winamax", "WinamaxToFpdb", "Winamax", "WinamaxSummary", None)
         # Manually assign necessary attributes
         mock_site.name = "Winamax"
@@ -225,10 +225,10 @@ def test_error_triggers_autopop(importer, mock_fpdb_file, monkeypatch, caplog) -
 
     # --- PATCH CORRECTION ---
     # Patch 'os.path.exists' WHERE IT IS IMPORTED/USED in the Importer module
-    monkeypatch.setattr("Importer.os.path.exists", lambda path: True)
+    monkeypatch.setattr("fpdb_3_legacy.Importer.os.path.exists", lambda path: True)
     # Patch 'os.stat' WHERE IT IS IMPORTED/USED in the Importer module
     monkeypatch.setattr(
-        "Importer.os.stat",
+        "fpdb_3_legacy.Importer.os.stat",
         lambda path: os.stat_result((0, 0, 0, 0, 0, 0, 100, 0, time.time() - 10, 0)),
     )
     # -------------------------

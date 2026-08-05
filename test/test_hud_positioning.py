@@ -5,9 +5,13 @@ import copy
 import unittest
 from unittest.mock import Mock, patch
 
-import Aux_Base
-import Aux_Hud
-import Configuration
+import pytest
+
+pytestmark = pytest.mark.qt
+
+import fpdb_3_legacy.Aux_Base as Aux_Base
+import fpdb_3_legacy.Aux_Hud as Aux_Hud
+import fpdb_3_legacy.Configuration as Configuration
 
 
 class TestHudPositioning(unittest.TestCase):
@@ -246,37 +250,40 @@ class TestHudStatSetSwitching(unittest.TestCase):
         """Test that change_stat_set tries hot refresh before restart."""
         # Mock successful refresh
         new_game_params = Mock()
-        self.config.get_supported_games_parameters.return_value = {"game_stat_set": new_game_params}
+        self.popup_menu._update_stat_set_in_config = Mock(return_value=new_game_params)
 
         # Mock successful update
         stat_sets_dict = {0: ("StatSet1", "StatSet1")}
 
-        with patch("Aux_Hud.log") as mock_log:
+        with patch("fpdb_3_legacy.Aux_Hud.log") as mock_log:
             # Call change_stat_set
             self.popup_menu.change_stat_set(0, stat_sets_dict)
 
             # Should try refresh first
             self.parent_window.aw.refresh_stats_layout.assert_called_once()
-            self.parent_window.aw.update.assert_called_once_with(self.hud.stat_dict)
+            self.parent_window.aw.destroy.assert_called_once()
+            self.parent_window.aw.create.assert_called_once()
+            self.parent_window.aw.update_gui.assert_called_once_with(None)
 
             # Should log success, not restart
-            mock_log.info.assert_called_with("HUD refreshed with new stat set: %s", "StatSet1")
+            mock_log.info.assert_called_with("HUD rebuilt with new stat set: %s", "StatSet1")
             self.hud.parent.kill_hud.assert_not_called()
 
     def test_change_stat_set_restarts_on_refresh_failure(self) -> None:
         """Test that change_stat_set restarts HUD when refresh fails."""
         # Mock failed refresh
-        self.config.get_supported_games_parameters.side_effect = KeyError("Refresh failed")
+        self.popup_menu._update_stat_set_in_config = Mock(return_value=Mock())
+        self.parent_window.aw.refresh_stats_layout.side_effect = KeyError("Refresh failed")
 
         stat_sets_dict = {0: ("StatSet1", "StatSet1")}
 
-        with patch("Aux_Hud.log") as mock_log:
+        with patch("fpdb_3_legacy.Aux_Hud.log") as mock_log:
             # Call change_stat_set
             self.popup_menu.change_stat_set(0, stat_sets_dict)
 
             # Should log failure and restart
             mock_log.info.assert_called_with(
-                "Refreshing HUD failed, restarting to apply stat set '%s': %s",
+                "Rebuilding HUD failed, restarting to apply stat set '%s': %s",
                 "StatSet1",
                 unittest.mock.ANY,
             )
@@ -294,9 +301,10 @@ class TestHudStatSetSwitching(unittest.TestCase):
         game_params.xpad = 5
         game_params.ypad = 5
         game_params.stats = {
-            "stat1": Mock(rowcol=(0, 0), stat_name="vpip", popup="popup1", tip="tip1"),
-            "stat2": Mock(rowcol=(0, 1), stat_name="pfr", popup="popup2", tip="tip2"),
+            (0, 0): Mock(rowcol=(0, 0), stat_name="vpip", popup="popup1", tip="tip1"),
+            (0, 1): Mock(rowcol=(0, 1), stat_name="pfr", popup="popup2", tip="tip2"),
         }
+        game_params.blocks = []
         simple_hud.game_params = game_params
 
         # Call refresh_stats_layout
@@ -388,6 +396,112 @@ class TestHudRegressionPrevention(unittest.TestCase):
 
         # Verify save was called correctly
         config.save_layout_set.assert_called_once_with(layout_set, 6, positions, 800, 600)
+
+
+class TestClampToScreen(unittest.TestCase):
+    """Test clamp_to_screen keeps windows on a visible screen."""
+
+    @staticmethod
+    def _mock_screen(left: int, top: int, width: int, height: int, name: str = "screen"):
+        screen = Mock()
+        geometry = Mock()
+        geometry.x.return_value = left
+        geometry.y.return_value = top
+        geometry.width.return_value = width
+        geometry.height.return_value = height
+        geometry.left.return_value = left
+        geometry.top.return_value = top
+        geometry.right.return_value = left + width - 1
+        geometry.bottom.return_value = top + height - 1
+        screen.geometry.return_value = geometry
+        screen.name.return_value = name
+        return screen
+
+    def test_point_on_screen_is_returned_unchanged(self) -> None:
+        """A point already inside a screen stays put."""
+        screen = self._mock_screen(0, 0, 1920, 1080)
+        app = Mock()
+        app.screenAt.return_value = screen
+        with patch.object(Aux_Base, "QApplication") as mock_qapp:
+            mock_qapp.instance.return_value = app
+            x, y = Aux_Base.clamp_to_screen(100, 200)
+        assert (x, y) == (100, 200)
+
+    def test_offscreen_point_is_clamped_to_nearest_screen(self) -> None:
+        """Regression: a point off every screen must be pulled back, not left off-screen.
+
+        Reproduces the 'QRect(4226,0 ...) outside any known screen' bug.
+        """
+        screen = self._mock_screen(0, 0, 1920, 1080)
+        app = Mock()
+        app.screenAt.return_value = None  # 4226,0 is on no screen
+        app.screens.return_value = [screen]
+        with patch.object(Aux_Base, "QApplication") as mock_qapp:
+            mock_qapp.instance.return_value = app
+            x, y = Aux_Base.clamp_to_screen(4226, 0)
+        # Must land inside the only available screen's bounds.
+        assert 0 <= x <= 1920
+        assert 0 <= y <= 1080
+        assert x < 4226
+
+    def test_offscreen_picks_closest_of_multiple_screens(self) -> None:
+        """The nearest screen wins when several are available."""
+        left_screen = self._mock_screen(0, 0, 1920, 1080, "left")
+        right_screen = self._mock_screen(1920, 0, 1920, 1080, "right")
+        app = Mock()
+        app.screenAt.return_value = None
+        app.screens.return_value = [left_screen, right_screen]
+        with patch.object(Aux_Base, "QApplication") as mock_qapp:
+            mock_qapp.instance.return_value = app
+            x, _y = Aux_Base.clamp_to_screen(4226, 0)
+        # 4226 is closest to the right screen (1920..3839) -> clamped onto it.
+        assert x >= 1920
+
+
+def test_drag_propagates_to_shared_layout_so_new_tables_inherit() -> None:
+    # A HUD deep-copies its layout at creation, so a drag that only touched this
+    # HUD's copy was lost on the next table. The drag must write through to the
+    # shared layout_set that later tables copy from.
+    from types import SimpleNamespace
+
+    # Same dimensions: no scaling, positions stored as dropped.
+    shared = SimpleNamespace(location=[None] * 11, common=(0, 0), width=800, height=600)
+    hud = SimpleNamespace(
+        max=6, layout_set=SimpleNamespace(layout={6: shared}), table=SimpleNamespace(width=800, height=600)
+    )
+    aux = object.__new__(Aux_Base.AuxSeats)
+    aux.hud = hud
+
+    aux._propagate_to_shared_layout(3, (100, 200))
+    aux._propagate_to_shared_layout("common", (50, 60))
+
+    assert shared.location[3] == (100, 200)
+    assert shared.common == (50, 60)
+
+
+def test_drag_is_converted_into_the_shared_layout_scale() -> None:
+    # The table is twice the shared layout's reference size, so the dropped pixel
+    # position must be halved before storing, or a new HUD would scale it up twice.
+    from types import SimpleNamespace
+
+    shared = SimpleNamespace(location=[None] * 11, common=(0, 0), width=400, height=300)
+    hud = SimpleNamespace(
+        max=6, layout_set=SimpleNamespace(layout={6: shared}), table=SimpleNamespace(width=800, height=600)
+    )
+    aux = object.__new__(Aux_Base.AuxSeats)
+    aux.hud = hud
+
+    aux._propagate_to_shared_layout(2, (200, 200))
+
+    assert shared.location[2] == (100, 100)  # 200 * 400/800, 200 * 300/600
+
+
+def test_propagate_is_a_noop_without_a_shared_layout() -> None:
+    from types import SimpleNamespace
+
+    aux = object.__new__(Aux_Base.AuxSeats)
+    aux.hud = SimpleNamespace(max=6, layout_set=None)
+    aux._propagate_to_shared_layout(2, (1, 2))  # must not raise
 
 
 if __name__ == "__main__":

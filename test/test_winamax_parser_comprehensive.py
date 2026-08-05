@@ -9,8 +9,8 @@ from unittest.mock import Mock
 
 import pytest
 
-from Exceptions import FpdbHandPartialError, FpdbParseError
-from WinamaxToFpdb import Winamax
+from fpdb_3_legacy.Exceptions import FpdbHandPartialError, FpdbParseError
+from fpdb_3_legacy.WinamaxToFpdb import Winamax
 
 
 class MockConfig:
@@ -774,9 +774,9 @@ class TestWinamaxParserComprehensive(unittest.TestCase):
 
         # Test symbol values - EUR may have multiple encodings
         eur_symbol = self.parser.sym["EUR"]
-        assert (
-            "€" in eur_symbol or "â\x82¬" in eur_symbol
-        ), f"EUR symbol should contain euro character, got: {eur_symbol!r}"
+        assert "€" in eur_symbol or "â\x82¬" in eur_symbol, (
+            f"EUR symbol should contain euro character, got: {eur_symbol!r}"
+        )
 
         # USD symbol may be escaped for regex
         usd_symbol = self.parser.sym["USD"]

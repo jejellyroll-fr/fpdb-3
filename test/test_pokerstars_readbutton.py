@@ -3,7 +3,7 @@
 import unittest
 from unittest.mock import Mock, patch
 
-from PokerStarsToFpdb import PokerStars
+from fpdb_3_legacy.PokerStarsToFpdb import PokerStars
 
 
 class MockConfig:
@@ -101,7 +101,7 @@ Hero: posts small blind $0.01"""
         hand = Mock()
         hand.handText = "No button information in this text"
 
-        with patch("PokerStarsToFpdb.log") as mock_log:
+        with patch("fpdb_3_legacy.PokerStarsToFpdb.log") as mock_log:
             self.parser.readButton(hand)
             mock_log.info.assert_called_once_with("readButton: not found")
 
@@ -115,7 +115,7 @@ Hero: posts small blind $0.01"""
         hand = Mock()
         hand.handText = ""
 
-        with patch("PokerStarsToFpdb.log") as mock_log:
+        with patch("fpdb_3_legacy.PokerStarsToFpdb.log") as mock_log:
             self.parser.readButton(hand)
             mock_log.info.assert_called_once_with("readButton: not found")
 
@@ -133,7 +133,7 @@ Hero: posts small blind $0.01"""
                 hand = Mock()
                 hand.handText = malformed_text
 
-                with patch("PokerStarsToFpdb.log") as mock_log:
+                with patch("fpdb_3_legacy.PokerStarsToFpdb.log") as mock_log:
                     self.parser.readButton(hand)
                     mock_log.info.assert_called_once_with("readButton: not found")
 
@@ -167,7 +167,7 @@ Seat #2 is the button"""
                     self.parser.readButton(hand)
                     self.assertEqual(hand.buttonpos, 3)
                 else:
-                    with patch("PokerStarsToFpdb.log"):
+                    with patch("fpdb_3_legacy.PokerStarsToFpdb.log"):
                         self.parser.readButton(hand)
                         # For non-matching cases, buttonpos shouldn't be set to an integer
                         buttonpos_value = getattr(hand, "buttonpos", "NOT_SET")
@@ -203,7 +203,6 @@ Seat 8: Hero ($100.00 in chips)"""
         self.assertIsNotNone(self.parser.re_button)
 
         # Test the pattern directly
-        pattern = r"Seat #(?P<BUTTON>\d+) is the button"
         test_text = "Seat #5 is the button"
         match = self.parser.re_button.search(test_text)
 

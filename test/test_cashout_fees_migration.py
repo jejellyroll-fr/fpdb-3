@@ -8,8 +8,8 @@ from unittest.mock import Mock, patch
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from Database import HANDS_PLAYERS_KEYS
-from SQL import Sql
+from fpdb_3_legacy.Database import HANDS_PLAYERS_KEYS
+from fpdb_3_legacy.SQL import Sql
 
 
 class TestCashOutFeesMigration(unittest.TestCase):
@@ -65,9 +65,8 @@ class TestCashOutFeesMigration(unittest.TestCase):
         """Test that store_hands_players has correct number of placeholders."""
         insert_query = self.sql.query.get("store_hands_players")
 
-        # Count column names (between INSERT and VALUES)
+        # Column names (between INSERT and VALUES)
         columns_section = insert_query.split("values")[0]
-        columns = [col.strip() for col in columns_section.split(",") if col.strip() and "INSERT" not in col.upper()]
 
         # Count placeholders (%s)
         values_section = insert_query.split("values")[1] if "values" in insert_query else ""
@@ -84,13 +83,12 @@ class TestCashOutFeesMigration(unittest.TestCase):
         self.assertIn("cashOutFee", HANDS_PLAYERS_KEYS, "cashOutFee should be in HANDS_PLAYERS_KEYS")
         self.assertIn("isCashOut", HANDS_PLAYERS_KEYS, "isCashOut should be in HANDS_PLAYERS_KEYS")
 
-        # Verify they're at the expected positions (should be last after reverse)
-        # Since the list is reversed, isCashOut should be at index 0, cashOutFee at index 1
+        # cashOutFee must immediately follow isCashOut. (This used to assert the
+        # absolute indices 0/1, which broke as soon as later keys were appended;
+        # only their relative order is meaningful.)
+        i = HANDS_PLAYERS_KEYS.index("isCashOut")
         self.assertEqual(
-            HANDS_PLAYERS_KEYS[0], "isCashOut", "isCashOut should be first in HANDS_PLAYERS_KEYS (after reverse)"
-        )
-        self.assertEqual(
-            HANDS_PLAYERS_KEYS[1], "cashOutFee", "cashOutFee should be second in HANDS_PLAYERS_KEYS (after reverse)"
+            HANDS_PLAYERS_KEYS[i + 1], "cashOutFee", "cashOutFee should immediately follow isCashOut"
         )
 
     def test_backward_compatibility(self):
@@ -114,7 +112,7 @@ class TestCashOutFeesMigration(unittest.TestCase):
         for column in existing_columns:
             self.assertIn(column, create_query, f"Existing column '{column}' should still be present")
 
-    @patch("Database.Database")
+    @patch("fpdb_3_legacy.Database.Database")
     def test_database_insertion_compatibility(self, mock_db):
         """Test that database insertion works with new cashOutFee field."""
         # This tests the theoretical insertion flow
@@ -195,8 +193,10 @@ class TestCashOutFeesPerformance(unittest.TestCase):
 
     def test_hands_players_keys_length(self):
         """Test that adding cashOutFee doesn't significantly impact key list size."""
-        # This is more of a sanity check
-        self.assertLess(len(HANDS_PLAYERS_KEYS), 200, "HANDS_PLAYERS_KEYS shouldn't be excessively long")
+        # Sanity check against runaway growth. The list legitimately grew past the
+        # original 200 (per-street 3-bet/probe/delayed-cbet stats, etc.); keep a
+        # generous ceiling rather than an arbitrarily tight one.
+        self.assertLess(len(HANDS_PLAYERS_KEYS), 400, "HANDS_PLAYERS_KEYS shouldn't be excessively long")
         self.assertGreater(len(HANDS_PLAYERS_KEYS), 50, "HANDS_PLAYERS_KEYS should contain substantial data")
 
     def test_key_lookup_performance(self):

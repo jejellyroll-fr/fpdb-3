@@ -1,53 +1,101 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-
-<FreePokerToolsConfig xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<?xml version="1.0" ?><FreePokerToolsConfig xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
     <!-- config_wrap_len  is preferred max line length in this file, -1 means no max
          day_start        is time that logical day starts, e.g. 5 means that any play
                           between 00:00 and 04:59:59 counts as being on the previous day -->
-    <general version="83"
-             config_wrap_len="-1"
-             day_start="5"
-             ui_language="system"
-             config_difficulty="expert"
-            />
+    <general version="83" config_wrap_len="-1" day_start="5" ui_language="system" config_difficulty="expert"/>
 
-    <import callFpdbHud = "True" interval = "5"  fastStoreHudCache="False" saveActions="True" cacheSessions="False" sessionTimeout="30" publicDB="False"></import>
+    <import callFpdbHud="True" interval="5" fastStoreHudCache="False" saveActions="True" cacheSessions="False" sessionTimeout="30" publicDB="False"/>
+
+    <autonotes enabled="True" maxPerHand="20" maxPerPlayerPerHand="3">
+        <ruleset name="hwang_plo_preflop" enabled="True">
+            <rule id="hwang_plo_081" enabled="True"/>
+            <rule id="hwang_plo_082" enabled="True"/>
+            <rule id="hwang_plo_083" enabled="True"/>
+            <rule id="hwang_plo_084" enabled="True"/>
+            <rule id="hwang_plo_085" enabled="True"/>
+            <rule id="hwang_plo_086" enabled="True"/>
+            <rule id="hwang_plo_087" enabled="True"/>
+        </ruleset>
+        <ruleset name="holdem_cash_preflop" enabled="False">
+            <rule id="holdem_cash_001" enabled="True"/>
+            <rule id="holdem_cash_002" enabled="True"/>
+            <rule id="holdem_cash_003" enabled="True"/>
+        </ruleset>
+        <ruleset name="tournament_push_fold" enabled="False">
+            <rule id="tourney_pf_001" enabled="True"/>
+            <rule id="tourney_pf_002" enabled="True"/>
+            <rule id="tourney_pf_003" enabled="True"/>
+        </ruleset>
+        <ruleset name="plo_spr_postflop" enabled="False">
+            <rule id="plo_spr_001" enabled="True"/>
+            <rule id="plo_spr_002" enabled="True"/>
+            <rule id="plo_spr_003" enabled="True"/>
+        </ruleset>
+        <ruleset name="flop_texture" enabled="False">
+            <rule id="flop_texture_001" enabled="True"/>
+            <rule id="flop_texture_002" enabled="True"/>
+            <rule id="flop_texture_003" enabled="True"/>
+        </ruleset>
+        <ruleset name="showdown_quality" enabled="False">
+            <rule id="showdown_quality_001" enabled="True"/>
+            <rule id="showdown_quality_002" enabled="True"/>
+            <rule id="showdown_quality_003" enabled="True"/>
+        </ruleset>
+        <ruleset name="hero_relative" enabled="False">
+            <rule id="hero_relative_001" enabled="True"/>
+            <rule id="hero_relative_002" enabled="True"/>
+            <rule id="hero_relative_003" enabled="True"/>
+            <rule id="hero_relative_004" enabled="True"/>
+        </ruleset>
+        <ruleset name="range_capture" enabled="False">
+            <rule id="range_capture_001" enabled="True"/>
+            <rule id="range_capture_002" enabled="True"/>
+            <rule id="range_capture_003" enabled="True"/>
+            <rule id="range_capture_004" enabled="True"/>
+        </ruleset>
+        <ruleset name="stud_draw_first_street" enabled="False">
+            <rule id="stud_draw_001" enabled="True"/>
+            <rule id="stud_draw_002" enabled="True"/>
+            <rule id="stud_draw_003" enabled="True"/>
+            <rule id="stud_draw_004" enabled="True"/>
+        </ruleset>
+    </autonotes>
 
 
     <gui_cash_stats>
-        <col col_name="game"       disp_all="True"  disp_posn="True"  col_title="Game"     xalignment="0.0" field_format="%s"    field_type="str"/>
-        <col col_name="hand"       disp_all="False" disp_posn="False" col_title="Hand"     xalignment="0.0" field_format="%s"    field_type="str"/>
-        <col col_name="plposition" disp_all="False" disp_posn="False" col_title="Posn"     xalignment="1.0" field_format="%s"    field_type="str"/>
-        <col col_name="pname"      disp_all="False" disp_posn="False" col_title="Name"     xalignment="0.0" field_format="%s"    field_type="str"/>
-        <col col_name="n"          disp_all="True"  disp_posn="True"  col_title="Hds"      xalignment="1.0" field_format="%1.0f" field_type="str"/>
-        <col col_name="avgseats"   disp_all="False" disp_posn="False" col_title="Seats"    xalignment="1.0" field_format="%3.1f" field_type="str"/>
-        <col col_name="vpip"       disp_all="True"  disp_posn="True"  col_title="VPIP"     xalignment="1.0" field_format="%3.1f" field_type="str"/>
-        <col col_name="pfr"        disp_all="True"  disp_posn="True"  col_title="PFR"      xalignment="1.0" field_format="%3.1f" field_type="str"/>
-        <col col_name="pf3"        disp_all="True"  disp_posn="True"  col_title="PF3"      xalignment="1.0" field_format="%3.1f" field_type="str"/>
-        <col col_name="pf4"        disp_all="True"  disp_posn="True"  col_title="PF4"      xalignment="1.0" field_format="%3.1f" field_type="str"/>
-        <col col_name="pff3"       disp_all="True"  disp_posn="True"  col_title="PFF3"     xalignment="1.0" field_format="%3.1f" field_type="str"/>
-        <col col_name="pff4"       disp_all="True"  disp_posn="True"  col_title="PFF4"     xalignment="1.0" field_format="%3.1f" field_type="str"/>
-        <col col_name="aggfac"     disp_all="True"  disp_posn="True"  col_title="AggFac"   xalignment="1.0" field_format="%2.2f" field_type="str"/>
-        <col col_name="aggfrq"     disp_all="True"  disp_posn="True"  col_title="AggFreq"  xalignment="1.0" field_format="%3.1f" field_type="str"/>
-        <col col_name="conbet"     disp_all="True"  disp_posn="True"  col_title="ContBet"  xalignment="1.0" field_format="%3.1f" field_type="str"/>
-        <col col_name="rfi"        disp_all="True"  disp_posn="True"  col_title="RFI"      xalignment="1.0" field_format="%3.1f" field_type="str"/>
-        <col col_name="steals"     disp_all="True"  disp_posn="True"  col_title="Steals"   xalignment="1.0" field_format="%3.1f" field_type="str"/>
-        <col col_name="car0"       disp_all="True"  disp_posn="True"  col_title="CARpre"   xalignment="1.0" field_format="%3.1f" field_type="str"/>
-        <col col_name="saw_f"      disp_all="True"  disp_posn="True"  col_title="Saw_F"    xalignment="1.0" field_format="%3.1f" field_type="str"/>
-        <col col_name="sawsd"      disp_all="True"  disp_posn="True"  col_title="SawSD"    xalignment="1.0" field_format="%3.1f" field_type="str"/>
-        <col col_name="wtsdwsf"    disp_all="True"  disp_posn="True"  col_title="WtSDwsF"  xalignment="1.0" field_format="%3.1f" field_type="str"/>
-        <col col_name="wmsf"       disp_all="True"  disp_posn="True"  col_title="W$wsF"    xalignment="1.0" field_format="%3.1f" field_type="str"/>
-        <col col_name="wmsd"       disp_all="True"  disp_posn="True"  col_title="W$SD"     xalignment="1.0" field_format="%3.1f" field_type="str"/>
-        <col col_name="flafq"      disp_all="True"  disp_posn="True"  col_title="FlAFq"    xalignment="1.0" field_format="%3.1f" field_type="str"/>
-        <col col_name="tuafq"      disp_all="True"  disp_posn="True"  col_title="TuAFq"    xalignment="1.0" field_format="%3.1f" field_type="str"/>
-        <col col_name="rvafq"      disp_all="True"  disp_posn="True"  col_title="RvAFq"    xalignment="1.0" field_format="%3.1f" field_type="str"/>
-        <col col_name="pofafq"     disp_all="False" disp_posn="False" col_title="PoFAFq"   xalignment="1.0" field_format="%3.1f" field_type="str"/>
-        <col col_name="net"        disp_all="True"  disp_posn="True"  col_title="Net($)"   xalignment="1.0" field_format="%6.2f" field_type="cash"/>
-        <col col_name="bbper100"   disp_all="True"  disp_posn="True"  col_title="bb/100"   xalignment="1.0" field_format="%4.2f" field_type="str"/>
-        <col col_name="rake"       disp_all="True"  disp_posn="True"  col_title="Rake($)"  xalignment="1.0" field_format="%6.2f" field_type="cash"/>
-        <col col_name="bb100xr"    disp_all="True"  disp_posn="True"  col_title="bbxr/100" xalignment="1.0" field_format="%4.2f" field_type="str"/>
-        <col col_name="stddev"     disp_all="True"  disp_posn="True" col_title="Std. Dev." xalignment="1.0" field_format="%4.2f" field_type="str"/>
+        <col col_name="game" disp_all="True" disp_posn="True" col_title="Game" xalignment="0.0" field_format="%s" field_type="str"/>
+        <col col_name="hand" disp_all="False" disp_posn="False" col_title="Hand" xalignment="0.0" field_format="%s" field_type="str"/>
+        <col col_name="plposition" disp_all="False" disp_posn="False" col_title="Posn" xalignment="1.0" field_format="%s" field_type="str"/>
+        <col col_name="pname" disp_all="False" disp_posn="False" col_title="Name" xalignment="0.0" field_format="%s" field_type="str"/>
+        <col col_name="n" disp_all="True" disp_posn="True" col_title="Hds" xalignment="1.0" field_format="%1.0f" field_type="str"/>
+        <col col_name="avgseats" disp_all="False" disp_posn="False" col_title="Seats" xalignment="1.0" field_format="%3.1f" field_type="str"/>
+        <col col_name="vpip" disp_all="True" disp_posn="True" col_title="VPIP" xalignment="1.0" field_format="%3.1f" field_type="str"/>
+        <col col_name="pfr" disp_all="True" disp_posn="True" col_title="PFR" xalignment="1.0" field_format="%3.1f" field_type="str"/>
+        <col col_name="pf3" disp_all="True" disp_posn="True" col_title="PF3" xalignment="1.0" field_format="%3.1f" field_type="str"/>
+        <col col_name="pf4" disp_all="True" disp_posn="True" col_title="PF4" xalignment="1.0" field_format="%3.1f" field_type="str"/>
+        <col col_name="pff3" disp_all="True" disp_posn="True" col_title="PFF3" xalignment="1.0" field_format="%3.1f" field_type="str"/>
+        <col col_name="pff4" disp_all="True" disp_posn="True" col_title="PFF4" xalignment="1.0" field_format="%3.1f" field_type="str"/>
+        <col col_name="aggfac" disp_all="True" disp_posn="True" col_title="AggFac" xalignment="1.0" field_format="%2.2f" field_type="str"/>
+        <col col_name="aggfrq" disp_all="True" disp_posn="True" col_title="AggFreq" xalignment="1.0" field_format="%3.1f" field_type="str"/>
+        <col col_name="conbet" disp_all="True" disp_posn="True" col_title="ContBet" xalignment="1.0" field_format="%3.1f" field_type="str"/>
+        <col col_name="rfi" disp_all="True" disp_posn="True" col_title="RFI" xalignment="1.0" field_format="%3.1f" field_type="str"/>
+        <col col_name="steals" disp_all="True" disp_posn="True" col_title="Steals" xalignment="1.0" field_format="%3.1f" field_type="str"/>
+        <col col_name="car0" disp_all="True" disp_posn="True" col_title="CARpre" xalignment="1.0" field_format="%3.1f" field_type="str"/>
+        <col col_name="saw_f" disp_all="True" disp_posn="True" col_title="Saw_F" xalignment="1.0" field_format="%3.1f" field_type="str"/>
+        <col col_name="sawsd" disp_all="True" disp_posn="True" col_title="SawSD" xalignment="1.0" field_format="%3.1f" field_type="str"/>
+        <col col_name="wtsdwsf" disp_all="True" disp_posn="True" col_title="WtSDwsF" xalignment="1.0" field_format="%3.1f" field_type="str"/>
+        <col col_name="wmsf" disp_all="True" disp_posn="True" col_title="W$wsF" xalignment="1.0" field_format="%3.1f" field_type="str"/>
+        <col col_name="wmsd" disp_all="True" disp_posn="True" col_title="W$SD" xalignment="1.0" field_format="%3.1f" field_type="str"/>
+        <col col_name="flafq" disp_all="True" disp_posn="True" col_title="FlAFq" xalignment="1.0" field_format="%3.1f" field_type="str"/>
+        <col col_name="tuafq" disp_all="True" disp_posn="True" col_title="TuAFq" xalignment="1.0" field_format="%3.1f" field_type="str"/>
+        <col col_name="rvafq" disp_all="True" disp_posn="True" col_title="RvAFq" xalignment="1.0" field_format="%3.1f" field_type="str"/>
+        <col col_name="pofafq" disp_all="False" disp_posn="False" col_title="PoFAFq" xalignment="1.0" field_format="%3.1f" field_type="str"/>
+        <col col_name="net" disp_all="True" disp_posn="True" col_title="Net($)" xalignment="1.0" field_format="%6.2f" field_type="cash"/>
+        <col col_name="bbper100" disp_all="True" disp_posn="True" col_title="bb/100" xalignment="1.0" field_format="%4.2f" field_type="str"/>
+        <col col_name="rake" disp_all="True" disp_posn="True" col_title="Rake($)" xalignment="1.0" field_format="%6.2f" field_type="cash"/>
+        <col col_name="bb100xr" disp_all="True" disp_posn="True" col_title="bbxr/100" xalignment="1.0" field_format="%4.2f" field_type="str"/>
+        <col col_name="stddev" disp_all="True" disp_posn="True" col_title="Std. Dev." xalignment="1.0" field_format="%4.2f" field_type="str"/>
     </gui_cash_stats>
 
 <!-- These values determine what stats are displayed in the HUD
@@ -109,42 +157,12 @@
           16.7 (50 divided by 3) to big blind of 150 (50 times 3) are included
         - To include all levels, use a value of "10000"
 -->
-    <hud_ui
-    stat_range="A"
-    stat_days="90"
-    aggregation_level_multiplier="3"
-    seats_style="A"
-    seats_cust_nums_low="6"
-    seats_cust_nums_high="10"
-
-
-    hero_stat_range="A"
-    hero_stat_days="30"
-    hero_aggregation_level_multiplier="1"
-    hero_seats_style="A"
-    hero_seats_cust_nums_low="6"
-    hero_seats_cust_nums_high="10"
-
-    label="FPDBmenu"
-
-    card_ht="39"
-    card_wd="28"
-    deck_type="colour"
-    card_back="back04"
-   />
+    <hud_ui stat_range="A" stat_days="90" aggregation_level_multiplier="3" seats_style="A" seats_cust_nums_low="6" seats_cust_nums_high="10" hero_stat_range="A" hero_stat_days="30" hero_aggregation_level_multiplier="1" hero_seats_style="A" hero_seats_cust_nums_low="6" hero_seats_cust_nums_high="10" label="FPDBmenu" card_ht="39" card_wd="28" deck_type="colour" card_back="back04"/>
 
 
     <supported_sites>
-        <site site_name="PokerStars"
-                enabled="True"
-                screen_name="YOUR SCREEN NAME HERE"
-                site_path="C:/Program Files/PokerStars/"
-                HH_path="C:/Program Files/PokerStars/HandHistory/YOUR SCREEN NAME HERE/"
-                TS_path="C:/Program Files/PokerStars/TournSummary/YOUR SCREEN NAME HERE/"
-                aux_enabled="True" hud_menu_xshift="20" hud_menu_yshift="-20">
-            <email fetchType="request-summary" host="YOUR_EMAIL_SERVER"
-                username="YOUR_EMAIL_USERNAME" password="YOUR_EMAIL_PASSWORD"
-                useSsl="True" folder="INBOX"/>
+        <site site_name="PokerStars" enabled="True" screen_name="YOUR SCREEN NAME HERE" site_path="C:/Program Files/PokerStars/" HH_path="C:/Program Files/PokerStars/HandHistory/YOUR SCREEN NAME HERE/" TS_path="C:/Program Files/PokerStars/TournSummary/YOUR SCREEN NAME HERE/" aux_enabled="True" hud_menu_xshift="20" hud_menu_yshift="-20">
+            <email fetchType="request-summary" host="YOUR_EMAIL_SERVER" username="YOUR_EMAIL_USERNAME" password="YOUR_EMAIL_PASSWORD" useSsl="True" folder="INBOX"/>
             <layout_set game_type="ring" ls="ps_default"/>
             <layout_set game_type="tour" ls="ps_default"/>
             <fav max="2" fav_seat="0"/>
@@ -156,12 +174,7 @@
             <fav max="10" fav_seat="0"/>
         </site>
 
-        <site site_name="Full Tilt Poker"
-                enabled="False"
-                screen_name="YOUR SCREEN NAME HERE"
-                site_path="C:/Program Files/Full Tilt Poker/"
-                HH_path="C:/Program Files/Full Tilt Poker/HandHistory/YOUR SCREEN NAME HERE/"
-                aux_enabled="True" hud_menu_xshift="20" hud_menu_yshift="-20">
+        <site site_name="Full Tilt Poker" enabled="False" screen_name="YOUR SCREEN NAME HERE" site_path="C:/Program Files/Full Tilt Poker/" HH_path="C:/Program Files/Full Tilt Poker/HandHistory/YOUR SCREEN NAME HERE/" aux_enabled="True" hud_menu_xshift="20" hud_menu_yshift="-20">
             <layout_set game_type="all" ls="fulltilt_default"/>
             <fav fav_seat="1" max="2"/>
             <fav fav_seat="3" max="5"/>
@@ -171,12 +184,7 @@
 
         </site>
 
-        <site site_name="Everleaf"
-                enabled="False"
-                HH_path="C:\Users\WindowsUserName\Documents\EverleafSiteName\HandHistory\YOUR SCREEN NAME HERE"
-                screen_name="YOUR SCREEN NAME HERE"
-                site_path="C:\Users\WindowsUserName\AppData\Roaming\EverleafSiteName\"
-                aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0">
+        <site site_name="Everleaf" enabled="False" HH_path="C:\Users\WindowsUserName\Documents\EverleafSiteName\HandHistory\YOUR SCREEN NAME HERE" screen_name="YOUR SCREEN NAME HERE" site_path="C:\Users\WindowsUserName\AppData\Roaming\EverleafSiteName\" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0">
             <layout_set game_type="all" ls="everleaf_default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="4" fav_seat="0"/>
@@ -187,12 +195,7 @@
             <fav max="10" fav_seat="0"/>
         </site>
 
-        <site site_name="Boss"
-                enabled="False"
-                screen_name="YOUR SCREEN NAME HERE"
-                site_path=""
-                HH_path=""
-                aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0">
+        <site site_name="Boss" enabled="False" screen_name="YOUR SCREEN NAME HERE" site_path="" HH_path="" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0">
             <layout_set game_type="all" ls="boss_default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="4" fav_seat="0"/>
@@ -205,12 +208,7 @@
 
 
 
-        <site site_name="PartyPoker"
-                enabled="False"
-                screen_name="YOUR SCREEN NAME HERE"
-                site_path="C:/Program Files/PartyGaming/PartyPoker"
-                HH_path="C:/Program Files/PartyGaming/PartyPoker/HandHistory/YOUR SCREEN NAME HERE/"
-                aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0">
+        <site site_name="PartyPoker" enabled="False" screen_name="YOUR SCREEN NAME HERE" site_path="C:/Program Files/PartyGaming/PartyPoker" HH_path="C:/Program Files/PartyGaming/PartyPoker/HandHistory/YOUR SCREEN NAME HERE/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0">
             <layout_set game_type="all" ls="party_default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="4" fav_seat="0"/>
@@ -221,12 +219,7 @@
             <fav max="10" fav_seat="0"/>
         </site>
 
-        <site site_name="Merge"
-                enabled="False"
-                HH_path="C:/Program Files/Carbon Poker/HandHistory/YOUR SCREEN NAME HERE/"
-                screen_name="YOUR SCREEN NAME HERE"
-                site_path="C:/Program Files/Merge/"
-                aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0">
+        <site site_name="Merge" enabled="False" HH_path="C:/Program Files/Carbon Poker/HandHistory/YOUR SCREEN NAME HERE/" screen_name="YOUR SCREEN NAME HERE" site_path="C:/Program Files/Merge/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0">
             <layout_set game_type="all" ls="merge_default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="4" fav_seat="0"/>
@@ -237,12 +230,7 @@
             <fav max="10" fav_seat="0"/>
         </site>
 
-        <site site_name="OnGame"
-                enabled="False"
-                HH_path="C:/Program Files/OnGame Sking/HandHistory/YOUR SCREEN NAME HERE/"
-                screen_name="YOUR SCREEN NAME HERE"
-                site_path="C:/Program Files/OnGame/"
-                aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0">
+        <site site_name="OnGame" enabled="False" HH_path="C:/Program Files/OnGame Sking/HandHistory/YOUR SCREEN NAME HERE/" screen_name="YOUR SCREEN NAME HERE" site_path="C:/Program Files/OnGame/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0">
             <layout_set game_type="all" ls="ongame_default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="4" fav_seat="0"/>
@@ -253,12 +241,7 @@
             <fav max="10" fav_seat="0"/>
         </site>
 
-        <site site_name="PKR"
-                enabled="False"
-                HH_path="C:/Program Files/PKR/HandHistory/YOUR SCREEN NAME HERE/"
-                screen_name="YOUR SCREEN NAME HERE"
-                site_path="C:/Program Files/PKR/"
-                aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0">
+        <site site_name="PKR" enabled="False" HH_path="C:/Program Files/PKR/HandHistory/YOUR SCREEN NAME HERE/" screen_name="YOUR SCREEN NAME HERE" site_path="C:/Program Files/PKR/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0">
             <layout_set game_type="all" ls="default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="4" fav_seat="0"/>
@@ -269,12 +252,7 @@
             <fav max="10" fav_seat="0"/>
         </site>
 
-        <site site_name="Winamax"
-                enabled="False"
-                HH_path="C:/Program Files/Winamax/HandHistory/YOUR SCREEN NAME HERE/"
-                screen_name="YOUR SCREEN NAME HERE"
-                site_path="C:/Program Files/Winamax/"
-                aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0">
+        <site site_name="Winamax" enabled="False" HH_path="C:/Program Files/Winamax/HandHistory/YOUR SCREEN NAME HERE/" screen_name="YOUR SCREEN NAME HERE" site_path="C:/Program Files/Winamax/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0">
             <layout_set game_type="all" ls="winamax_default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="4" fav_seat="0"/>
@@ -286,12 +264,7 @@
             <fav max="10" fav_seat="0"/>
         </site>
 
-        <site site_name="Everest"
-                enabled="False"
-                HH_path="C:/Program Files/Everest/HandHistory/YOUR SCREEN NAME HERE/"
-                screen_name="YOUR SCREEN NAME HERE"
-                site_path="C:/Program Files/Everest/"
-                aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0">
+        <site site_name="Everest" enabled="False" HH_path="C:/Program Files/Everest/HandHistory/YOUR SCREEN NAME HERE/" screen_name="YOUR SCREEN NAME HERE" site_path="C:/Program Files/Everest/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0">
             <layout_set game_type="all" ls="everest_default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="4" fav_seat="0"/>
@@ -302,12 +275,7 @@
             <fav max="10" fav_seat="0"/>
         </site>
 
-        <site site_name="PacificPoker"
-                enabled="False"
-                HH_path="C:/Program Files/PacificPoker/HandHistory/YOUR SCREEN NAME HERE/"
-                screen_name="YOUR SCREEN NAME HERE"
-                site_path="C:/Program Files/PacificPoker/"
-                aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0">
+        <site site_name="PacificPoker" enabled="False" HH_path="C:/Program Files/PacificPoker/HandHistory/YOUR SCREEN NAME HERE/" screen_name="YOUR SCREEN NAME HERE" site_path="C:/Program Files/PacificPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0">
             <layout_set game_type="all" ls="pacific_default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="4" fav_seat="0"/>
@@ -318,12 +286,7 @@
             <fav max="10" fav_seat="0"/>
         </site>
 
-        <site site_name="Cake"
-                enabled="False"
-                HH_path="C:/Program Files/Cake/HandHistory/YOUR SCREEN NAME HERE/"
-                screen_name="YOUR SCREEN NAME HERE"
-                site_path="C:/Program Files/Cake/"
-                aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0">
+        <site site_name="Cake" enabled="False" HH_path="C:/Program Files/Cake/HandHistory/YOUR SCREEN NAME HERE/" screen_name="YOUR SCREEN NAME HERE" site_path="C:/Program Files/Cake/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0">
             <layout_set game_type="all" ls="default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="4" fav_seat="0"/>
@@ -334,12 +297,7 @@
             <fav max="10" fav_seat="0"/>
         </site>
 
-        <site site_name="Entraction"
-                enabled="False"
-                HH_path="C:/Program Files/Entraction/HandHistory/YOUR SCREEN NAME HERE/"
-                screen_name="YOUR SCREEN NAME HERE"
-                site_path="C:/Program Files/Entraction/"
-                aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0">
+        <site site_name="Entraction" enabled="False" HH_path="C:/Program Files/Entraction/HandHistory/YOUR SCREEN NAME HERE/" screen_name="YOUR SCREEN NAME HERE" site_path="C:/Program Files/Entraction/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0">
             <layout_set game_type="all" ls="entraction_default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="4" fav_seat="0"/>
@@ -350,12 +308,7 @@
             <fav max="10" fav_seat="0"/>
         </site>
 
-        <site site_name="iPoker"
-                enabled="False"
-                HH_path="C:/Program Files/iPoker/HandHistory/YOUR SCREEN NAME HERE/"
-                screen_name="YOUR SCREEN NAME HERE"
-                site_path="C:/Program Files/iPoker/"
-                aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0">
+        <site site_name="iPoker" enabled="False" HH_path="C:/Program Files/iPoker/HandHistory/YOUR SCREEN NAME HERE/" screen_name="YOUR SCREEN NAME HERE" site_path="C:/Program Files/iPoker/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0">
             <layout_set game_type="all" ls="ipoker_default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="4" fav_seat="0"/>
@@ -366,12 +319,7 @@
             <fav max="10" fav_seat="0"/>
         </site>
 
-        <site site_name="BetOnline"
-                enabled="False"
-                screen_name="YOUR SCREEN NAME HERE"
-                site_path="C:/Program Files/BetOnline/"
-                HH_path="C:/Program Files/BetOnline/HandHistory/Hero/"
-                aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0">
+        <site site_name="BetOnline" enabled="False" screen_name="YOUR SCREEN NAME HERE" site_path="C:/Program Files/BetOnline/" HH_path="C:/Program Files/BetOnline/HandHistory/Hero/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0">
             <email fetchType="request-summary" host="YOUR_EMAIL_SERVER" username="YOUR_EMAIL_USERNAME" password="YOUR_EMAIL_PASSWORD" useSsl="True" folder="INBOX"/>
             <layout_set game_type="all" ls="betonline_default"/>
             <fav max="2" fav_seat="0"/>
@@ -383,12 +331,7 @@
             <fav max="10" fav_seat="0"/>
         </site>
 
-        <site site_name="Bovada"
-                enabled="False"
-                screen_name="YOUR SCREEN NAME HERE"
-                site_path="C:/Bovada/"
-                HH_path="C:/Bovada/"
-                aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0">
+        <site site_name="Bovada" enabled="False" screen_name="YOUR SCREEN NAME HERE" site_path="C:/Bovada/" HH_path="C:/Bovada/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0">
             <email fetchType="request-summary" host="YOUR_EMAIL_SERVER" username="YOUR_EMAIL_USERNAME" password="YOUR_EMAIL_PASSWORD" useSsl="True" folder="INBOX"/>
             <layout_set game_type="all" ls="bodova_default"/>
             <fav max="2" fav_seat="0"/>
@@ -400,12 +343,7 @@
             <fav max="10" fav_seat="0"/>
         </site>
 
-        <site site_name="Enet"
-                enabled="False"
-                screen_name="YOUR SCREEN NAME HERE"
-                site_path="C:/Enet/"
-                HH_path="C:/Enet/"
-                aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0">
+        <site site_name="Enet" enabled="False" screen_name="YOUR SCREEN NAME HERE" site_path="C:/Enet/" HH_path="C:/Enet/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0">
             <email fetchType="request-summary" host="YOUR_EMAIL_SERVER" username="YOUR_EMAIL_USERNAME" password="YOUR_EMAIL_PASSWORD" useSsl="True" folder="INBOX"/>
             <layout_set game_type="all" ls="enet_default"/>
             <fav max="2" fav_seat="0"/>
@@ -417,12 +355,7 @@
             <fav max="10" fav_seat="0"/>
         </site>
 
-        <site site_name="SealsWithClubs"
-                enabled="False"
-                screen_name="YOUR SCREEN NAME HERE"
-                site_path="C:/Program Files/SealsWithClubs/handhistories"
-                HH_path="C:/Program Files/SealsWithClubs/handhistories"
-                aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0">
+        <site site_name="SealsWithClubs" enabled="False" screen_name="YOUR SCREEN NAME HERE" site_path="C:/Program Files/SealsWithClubs/handhistories" HH_path="C:/Program Files/SealsWithClubs/handhistories" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0">
             <email fetchType="request-summary" host="YOUR_EMAIL_SERVER" username="YOUR_EMAIL_USERNAME" password="YOUR_EMAIL_PASSWORD" useSsl="True" folder="INBOX"/>
             <layout_set game_type="all" ls="sealswithclubs_default"/>
             <fav max="2" fav_seat="0"/>
@@ -434,16 +367,23 @@
             <fav max="10" fav_seat="0"/>
         </site>
 
-        <site site_name="WinningPoker"
-                enabled="False"
-                screen_name="Hero"
-                site_path="C:/AmericasCardroom/"
-                HH_path="C:/AmericasCardroom/"
-                aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0">
+        <site site_name="WinningPoker" enabled="False" screen_name="Hero" site_path="C:/AmericasCardroom/" HH_path="C:/AmericasCardroom/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0">
             <email fetchType="request-summary" host="YOUR_EMAIL_SERVER" username="YOUR_EMAIL_USERNAME" password="YOUR_EMAIL_PASSWORD" useSsl="True" folder="INBOX"/>
             <layout_set game_type="all" ls="winning_default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="4" fav_seat="0"/>
+            <fav max="6" fav_seat="0"/>
+            <fav max="7" fav_seat="0"/>
+            <fav max="8" fav_seat="0"/>
+            <fav max="9" fav_seat="0"/>
+            <fav max="10" fav_seat="0"/>
+        </site>
+        <site site_name="CoinPoker" enabled="False" screen_name="YOUR SCREEN NAME HERE" site_path="" HH_path="" TS_path="" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" network="CoinPoker">
+            <layout_set game_type="all" ls="default"/>
+            <fav max="2" fav_seat="0"/>
+            <fav max="3" fav_seat="0"/>
+            <fav max="4" fav_seat="0"/>
+            <fav max="5" fav_seat="0"/>
             <fav max="6" fav_seat="0"/>
             <fav max="7" fav_seat="0"/>
             <fav max="8" fav_seat="0"/>
@@ -471,11 +411,17 @@
             <game_stat_set game_type="tour" stat_set="holdem_tour"/>
             <game_stat_set game_type="ring" stat_set="holdem_ring"/>
         </game>
-        <game game_name="razz" aux="stud_mucked, ClassicHud">
+        <game game_name="razz" aux="mucked, ClassicHud">
             <game_stat_set game_type="all" stat_set="stud_default"/>
         </game>
         <game game_name="omahahi" aux="ClassicHud, mucked">
             <game_stat_set game_type="all" stat_set="omaha_default"/>
+        </game>
+        <!-- All-in or Fold: one decision per hand, on the flop. The ordinary
+             Omaha profile would label that decision "preflop", a street this
+             game does not have. -->
+        <game game_name="aof_omaha" aux="ClassicHud, mucked">
+            <game_stat_set game_type="all" stat_set="aof_advanced"/>
         </game>
         <game game_name="omahahilo" aux="ClassicHud, mucked">
             <game_stat_set game_type="all" stat_set="omaha_default"/>
@@ -492,13 +438,13 @@
         <game game_name="cour_hilo" aux="ClassicHud, mucked">
             <game_stat_set game_type="all" stat_set="omaha_default"/>
         </game>
-        <game game_name="studhi" aux="stud_mucked, ClassicHud">
+        <game game_name="studhi" aux="mucked, ClassicHud">
             <game_stat_set game_type="all" stat_set="stud_default"/>
         </game>
-        <game game_name="5_studhi" aux="stud_mucked, ClassicHud">
+        <game game_name="5_studhi" aux="mucked, ClassicHud">
             <game_stat_set game_type="all" stat_set="stud_default"/>
         </game>
-        <game game_name="studhilo" aux="stud_mucked, ClassicHud">
+        <game game_name="studhilo" aux="mucked, ClassicHud">
             <game_stat_set game_type="all" stat_set="stud_default"/>
         </game>
         <game game_name="27_3draw" aux="ClassicHud, mucked">
@@ -511,12 +457,12 @@
             <game_stat_set game_type="all" stat_set="draw_default"/>
         </game>
         <game game_name="fivedraw" aux="ClassicHud, mucked">
-            <game_stat_set game_type="all" stat_set ="draw_default"/>
+            <game_stat_set game_type="all" stat_set="draw_default"/>
         </game>
         <game game_name="a5_3draw" aux="ClassicHud, mucked">
-            <game_stat_set game_type="all" stat_set ="draw_default"/>
+            <game_stat_set game_type="all" stat_set="draw_default"/>
         </game>
-        <game game_name="6_omahahi" aux="ClassicHud, mucked" >
+        <game game_name="6_omahahi" aux="ClassicHud, mucked">
             <game_stat_set game_type="all" stat_set="omaha_default"/>
         </game>
     </supported_games>
@@ -530,10 +476,8 @@
         -->
 
         <!-- HUD aux's -->
-        <aw name="Simple_HUD" module="Aux_Hud" class="Simple_HUD"
-                bgcolor="#000000" fgcolor="#FFFFFF" font="Sans" font_size="8" opacity="0.8"/>
-        <aw name="ClassicHud" module="Aux_Classic_Hud" class="ClassicHud"
-                bgcolor="#000000" fgcolor="#FFFFFF" font="Sans" font_size="8" opacity="0.8"/>
+        <aw name="Simple_HUD" module="Aux_Hud" class="Simple_HUD" bgcolor="#000000" fgcolor="#FFFFFF" font="Sans" font_size="8" opacity="0.8"/>
+        <aw name="ClassicHud" module="Aux_Classic_Hud" class="ClassicHud" bgcolor="#000000" fgcolor="#FFFFFF" font="Sans" font_size="8" opacity="0.8"/>
 
         <!-- Mucked card aux's -->
         <aw name="stud_mucked" module="Mucked" class="Stud_mucked" cols="11" rows="8"/>
@@ -1812,73 +1756,116 @@
         </ss>
 
         <ss name="stud_default" rows="3" cols="2" xpad="1" ypad="0">
-            <stat  _rowcol="(1,1)" _stat_name="playershort" popup="default" tip="" click="" hudcolor="#98FFB0" hudprefix="" hudsuffix=""/>
-            <stat  _rowcol="(1,2)" _stat_name="n" popup="default" tip="" click=""/>
-            <stat  _rowcol="(2,1)" _stat_name="vpip" popup="default" tip="" click="" stat_loth="20" stat_locolor ="#408000" stat_hith="40" stat_hicolor ="#F05000"/>
-            <stat  _rowcol="(2,2)" _stat_name="pfr" popup="default" tip="" click=""/>
-            <stat  _rowcol="(3,1)" _stat_name="saw_f" popup="default" tip="" click=""/>
-            <stat  _rowcol="(3,2)" _stat_name="ffreq1" popup="default" tip="" click=""/>
+            <stat _rowcol="(1,1)" _stat_name="playershort" popup="default" tip="" click="" hudcolor="#98FFB0" hudprefix="" hudsuffix=""/>
+            <stat _rowcol="(1,2)" _stat_name="n" popup="default" tip="" click=""/>
+            <stat _rowcol="(2,1)" _stat_name="vpip" popup="default" tip="" click="" stat_loth="20" stat_locolor="#408000" stat_hith="40" stat_hicolor="#F05000"/>
+            <stat _rowcol="(2,2)" _stat_name="pfr" popup="default" tip="" click=""/>
+            <stat _rowcol="(3,1)" _stat_name="saw_f" popup="default" tip="" click=""/>
+            <stat _rowcol="(3,2)" _stat_name="ffreq1" popup="default" tip="" click=""/>
+        </ss>
+
+        <ss name="aof_default" rows="4" cols="4" xpad="1" ypad="0" rich_text="True" font_size="10">
+            <stat _rowcol="(1,1)" _stat_name="playershort" popup="aof_profile" hudbgcolor="#0F172A" hudprefix="" hudsuffix="" tip="" click="open_comment_dialog" hudcolor="#98FFB0"/>
+            <stat _rowcol="(1,2)" _stat_name="player_note" popup="aof_profile" hudbgcolor="#0F172A" hudprefix="" hudsuffix="" tip="Notes" click="open_comment_dialog"/>
+            <stat _rowcol="(1,3)" _stat_name="n" popup="aof_profile" hudbgcolor="#0F172A" hudprefix="H " hudsuffix="" tip="" click=""/>
+            <stat _rowcol="(1,4)" _stat_name="aof_observed" popup="aof_profile" hudbgcolor="#0F172A" hudprefix="obs " hudsuffix="" tip="" click=""/>
+            <stat _rowcol="(2,1)" _stat_name="aof_allin" popup="aof_profile" hudbgcolor="#1E1B4B" hudprefix="AI " hudsuffix="" tip="" click="" stat_loth="25" stat_locolor="#4ADE80" stat_midcolor="#FFA726" stat_hith="45" stat_hicolor="#FF6B6B"/>
+            <stat _rowcol="(2,2)" _stat_name="aof_fold" popup="aof_profile" hudbgcolor="#1E1B4B" hudprefix="F " hudsuffix="" tip="" click=""/>
+            <stat _rowcol="(2,3)" _stat_name="aof_weak" popup="aof_profile" hudbgcolor="#1E1B4B" hudprefix="wk " hudsuffix="" tip="" click="" stat_loth="1.0" stat_locolor="#4ADE80" stat_hith="3.0" stat_hicolor="#FF6B6B"/>
+            <stat _rowcol="(2,4)" _stat_name="aof_decision_ev" popup="aof_profile" hudbgcolor="#1E1B4B" hudprefix="EV " hudsuffix="" tip="" click="" stat_loth="0.0" stat_locolor="#FF6B6B" stat_hith="2.0" stat_hicolor="#4ADE80"/>
+            <stat _rowcol="(3,1)" _stat_name="aof_no_made" popup="aof_profile" hudbgcolor="#132B25" hudprefix="air " hudsuffix="" tip="" click="" stat_loth="8.0" stat_locolor="#4ADE80" stat_hith="15.0" stat_hicolor="#FF6B6B"/>
+            <stat _rowcol="(3,2)" _stat_name="aof_two_pair" popup="aof_profile" hudbgcolor="#132B25" hudprefix="2p " hudsuffix="" tip="" click=""/>
+            <stat _rowcol="(3,3)" _stat_name="aof_trips" popup="aof_profile" hudbgcolor="#132B25" hudprefix="3k " hudsuffix="" tip="" click=""/>
+            <stat _rowcol="(3,4)" _stat_name="aof_nfd" popup="aof_profile" hudbgcolor="#132B25" hudprefix="NFD " hudsuffix="" tip="" click="" stat_loth="5.0" stat_locolor="#4CC9F0" stat_hith="10.0" stat_hicolor="#FF6B6B"/>
+            <stat _rowcol="(4,1)" _stat_name="aof_splash_won" popup="aof_profile" hudbgcolor="#0F2942" hudprefix="Spl " hudsuffix="" tip="" click=""/>
+            <stat _rowcol="(4,2)" _stat_name="aof_splash_freq" popup="aof_profile" hudbgcolor="#0F2942" hudprefix="Spl% " hudsuffix="" tip="" click=""/>
+            <stat _rowcol="(4,3)" _stat_name="aof_showdowns" popup="aof_profile" hudbgcolor="#0F2942" hudprefix="sd " hudsuffix="" tip="" click=""/>
+        </ss>
+        <ss name="aof_advanced" rows="6" cols="4" xpad="1" ypad="0" rich_text="True" font_size="10">
+            <stat _rowcol="(1,1)" _stat_name="playershort" popup="aof_profile" hudbgcolor="#0F172A" hudprefix="" hudsuffix="" tip="" click="open_comment_dialog" hudcolor="#98FFB0"/>
+            <stat _rowcol="(1,2)" _stat_name="player_note" popup="aof_profile" hudbgcolor="#0F172A" hudprefix="" hudsuffix="" tip="Notes" click="open_comment_dialog"/>
+            <stat _rowcol="(1,3)" _stat_name="n" popup="aof_profile" hudbgcolor="#0F172A" hudprefix="H " hudsuffix="" tip="" click=""/>
+            <stat _rowcol="(1,4)" _stat_name="aof_observed" popup="aof_profile" hudbgcolor="#0F172A" hudprefix="obs " hudsuffix="" tip="" click=""/>
+            <stat _rowcol="(2,1)" _stat_name="aof_allin" popup="aof_profile" hudbgcolor="#1E1B4B" hudprefix="AI " hudsuffix="" tip="" click="" stat_loth="25" stat_locolor="#4ADE80" stat_midcolor="#FFA726" stat_hith="45" stat_hicolor="#FF6B6B"/>
+            <stat _rowcol="(2,2)" _stat_name="aof_fold" popup="aof_profile" hudbgcolor="#1E1B4B" hudprefix="F " hudsuffix="" tip="" click=""/>
+            <stat _rowcol="(2,3)" _stat_name="aof_weak" popup="aof_profile" hudbgcolor="#1E1B4B" hudprefix="wk " hudsuffix="" tip="" click="" stat_loth="1.0" stat_locolor="#4ADE80" stat_hith="3.0" stat_hicolor="#FF6B6B"/>
+            <stat _rowcol="(2,4)" _stat_name="aof_decision_ev" popup="aof_profile" hudbgcolor="#1E1B4B" hudprefix="EV " hudsuffix="" tip="" click="" stat_loth="0.0" stat_locolor="#FF6B6B" stat_hith="2.0" stat_hicolor="#4ADE80"/>
+            <stat _rowcol="(3,1)" _stat_name="aof_no_made" popup="aof_profile" hudbgcolor="#132B25" hudprefix="air " hudsuffix="" tip="" click="" stat_loth="8.0" stat_locolor="#4ADE80" stat_hith="15.0" stat_hicolor="#FF6B6B"/>
+            <stat _rowcol="(3,2)" _stat_name="aof_pair" popup="aof_profile" hudbgcolor="#132B25" hudprefix="1p " hudsuffix="" tip="" click=""/>
+            <stat _rowcol="(3,3)" _stat_name="aof_two_pair" popup="aof_profile" hudbgcolor="#132B25" hudprefix="2p " hudsuffix="" tip="" click=""/>
+            <stat _rowcol="(3,4)" _stat_name="aof_trips" popup="aof_profile" hudbgcolor="#132B25" hudprefix="3k " hudsuffix="" tip="" click=""/>
+            <stat _rowcol="(4,1)" _stat_name="aof_straight" popup="aof_profile" hudbgcolor="#0F2942" hudprefix="str " hudsuffix="" tip="" click=""/>
+            <stat _rowcol="(4,2)" _stat_name="aof_nfd" popup="aof_profile" hudbgcolor="#0F2942" hudprefix="NFD " hudsuffix="" tip="" click="" stat_loth="5.0" stat_locolor="#4CC9F0" stat_hith="10.0" stat_hicolor="#FF6B6B"/>
+            <stat _rowcol="(4,3)" _stat_name="aof_non_nfd" popup="aof_profile" hudbgcolor="#0F2942" hudprefix="fd " hudsuffix="" tip="" click=""/>
+            <stat _rowcol="(4,4)" _stat_name="aof_wrap9" popup="aof_profile" hudbgcolor="#0F2942" hudprefix="W9 " hudsuffix="" tip="" click=""/>
+            <stat _rowcol="(5,1)" _stat_name="aof_big_wrap13" popup="aof_profile" hudbgcolor="#2D1A37" hudprefix="W13 " hudsuffix="" tip="" click=""/>
+            <stat _rowcol="(5,2)" _stat_name="aof_made" popup="aof_profile" hudbgcolor="#2D1A37" hudprefix="made " hudsuffix="" tip="" click=""/>
+            <stat _rowcol="(5,3)" _stat_name="aof_known_equity" popup="aof_profile" hudbgcolor="#2D1A37" hudprefix="EqK " hudsuffix="" tip="" click="" stat_loth="45.0" stat_locolor="#FF6B6B" stat_hith="55.0" stat_hicolor="#4ADE80"/>
+            <stat _rowcol="(5,4)" _stat_name="aof_range_equity" popup="aof_profile" hudbgcolor="#2D1A37" hudprefix="EqR " hudsuffix="" tip="" click="" stat_loth="45.0" stat_locolor="#FF6B6B" stat_hith="55.0" stat_hicolor="#4ADE80"/>
+            <stat _rowcol="(6,1)" _stat_name="aof_splash_won" popup="aof_profile" hudbgcolor="#111827" hudprefix="Spl " hudsuffix="" tip="" click=""/>
+            <stat _rowcol="(6,2)" _stat_name="aof_splash_freq" popup="aof_profile" hudbgcolor="#111827" hudprefix="Spl% " hudsuffix="" tip="" click=""/>
+            <stat _rowcol="(6,3)" _stat_name="aof_showdowns" popup="aof_profile" hudbgcolor="#111827" hudprefix="sd " hudsuffix="" tip="" click=""/>
         </ss>
 
         <ss name="omaha_default" rows="3" cols="2" xpad="1" ypad="0">
-            <stat  _rowcol="(1,1)" _stat_name="playershort" popup="default" tip="" click="" hudcolor="#98FFB0" hudprefix="" hudsuffix=""/>
-            <stat  _rowcol="(1,2)" _stat_name="n" popup="default" tip="" click=""/>
-            <stat  _rowcol="(2,1)" _stat_name="vpip" popup="default" tip="" click="" stat_loth="20" stat_locolor ="#408000" stat_hith="40" stat_hicolor ="#F05000"/>
-            <stat  _rowcol="(2,2)" _stat_name="pfr" popup="default" tip="" click=""/>
-            <stat  _rowcol="(3,1)" _stat_name="saw_f" popup="default" tip="" click=""/>
-            <stat  _rowcol="(3,2)" _stat_name="ffreq1" popup="default" tip="" click=""/>
+            <stat _rowcol="(1,1)" _stat_name="playershort" popup="default" tip="" click="" hudcolor="#98FFB0" hudprefix="" hudsuffix=""/>
+            <stat _rowcol="(1,2)" _stat_name="n" popup="default" tip="" click=""/>
+            <stat _rowcol="(2,1)" _stat_name="vpip" popup="default" tip="" click="" stat_loth="20" stat_locolor="#408000" stat_hith="40" stat_hicolor="#F05000"/>
+            <stat _rowcol="(2,2)" _stat_name="pfr" popup="default" tip="" click=""/>
+            <stat _rowcol="(3,1)" _stat_name="saw_f" popup="default" tip="" click=""/>
+            <stat _rowcol="(3,2)" _stat_name="ffreq1" popup="default" tip="" click=""/>
         </ss>
 
         <ss name="holdem_default" rows="3" cols="3" xpad="1" ypad="0">
-            <stat  _rowcol="(1,1)" _stat_name="vpip" popup="default" tip="" click="" stat_hicolor="#F05000" stat_hith="40" stat_locolor="#408000" stat_loth="25"/>
-            <stat  _rowcol="(1,2)" _stat_name="pfr" popup="default" tip="" click="" stat_hicolor="#F05000" stat_hith="35" stat_locolor="#408000" stat_loth="20"/>
-            <stat  _rowcol="(1,3)" _stat_name="three_B" popup="default" tip="" click="" stat_hicolor="#F05000" stat_hith="13" stat_locolor="#408000" stat_loth="4"/>
-            <stat  _rowcol="(2,1)" _stat_name="n" popup="default" tip="" click=""/>
-            <stat  _rowcol="(2,2)" _stat_name="playershort" popup="default" tip="" click="" hudcolor="#98FFB0" hudprefix="" hudsuffix=""/>
-            <stat  _rowcol="(2,3)" _stat_name="cb1" popup="default" tip="" click=""/>
-            <stat  _rowcol="(3,1)" _stat_name="wtsd" popup="default" tip="" click=""/>
-            <stat  _rowcol="(3,2)" _stat_name="steal" popup="default" tip="" click=""/>
-            <stat  _rowcol="(3,3)" _stat_name="totalprofit" popup="default" tip="" click="" stat_hicolor="#408000" stat_hith="0" stat_locolor="#F05000" stat_loth="0"/>
+            <stat _rowcol="(1,1)" _stat_name="vpip" popup="default" tip="" click="" stat_hicolor="#F05000" stat_hith="40" stat_locolor="#408000" stat_loth="25"/>
+            <stat _rowcol="(1,2)" _stat_name="pfr" popup="default" tip="" click="" stat_hicolor="#F05000" stat_hith="35" stat_locolor="#408000" stat_loth="20"/>
+            <stat _rowcol="(1,3)" _stat_name="three_B" popup="default" tip="" click="" stat_hicolor="#F05000" stat_hith="13" stat_locolor="#408000" stat_loth="4"/>
+            <stat _rowcol="(2,1)" _stat_name="n" popup="default" tip="" click=""/>
+            <stat _rowcol="(2,2)" _stat_name="playershort" popup="default" tip="" click="" hudcolor="#98FFB0" hudprefix="" hudsuffix=""/>
+            <stat _rowcol="(2,3)" _stat_name="cb1" popup="default" tip="" click=""/>
+            <stat _rowcol="(3,1)" _stat_name="wtsd" popup="default" tip="" click=""/>
+            <stat _rowcol="(3,2)" _stat_name="steal" popup="default" tip="" click=""/>
+            <stat _rowcol="(3,3)" _stat_name="totalprofit" popup="default" tip="" click="" stat_hicolor="#408000" stat_hith="0" stat_locolor="#F05000" stat_loth="0"/>
         </ss>
 
         <!-- ring-game config with context popups (seppone)-->
         <ss cols="3" name="holdem_ring_classic" rows="3" xpad="1" ypad="0">
-            <stat  _rowcol="(1,1)" _stat_name="vpip" popup="default" stat_hicolor="#F05000" stat_hith="40" stat_locolor="#408000" stat_loth="25" tip="" click=""/>
-            <stat  _rowcol="(1,2)" _stat_name="pfr" popup="default" stat_hicolor="#F05000" stat_hith="35" stat_locolor="#408000" stat_loth="20" tip="" click=""/>
-            <stat  _rowcol="(1,3)" _stat_name="three_B" popup="default" stat_hicolor="#F05000" stat_hith="13" stat_locolor="#408000" stat_loth="4" tip="" click=""/>
-            <stat  _rowcol="(2,1)" _stat_name="n" popup="pophands" tip="" click=""/>
-            <stat  _rowcol="(2,2)" _stat_name="playershort" popup="default" hudcolor="#98FFB0" hudprefix="" hudsuffix="" tip="" click=""/>
-            <stat  _rowcol="(2,3)" _stat_name="cb1" popup="default" tip="" click=""/>
-            <stat  _rowcol="(3,1)" _stat_name="wtsd" popup="default" tip="" click=""/>
-            <stat  _rowcol="(3,2)" _stat_name="steal" popup="default" tip="" click=""/>
-            <stat  _rowcol="(3,3)" _stat_name="totalprofit" popup="default" stat_hicolor="#408000" stat_hith="0" stat_locolor="#F05000" stat_loth="0" tip="" click=""/>
+            <stat _rowcol="(1,1)" _stat_name="vpip" popup="default" stat_hicolor="#F05000" stat_hith="40" stat_locolor="#408000" stat_loth="25" tip="" click=""/>
+            <stat _rowcol="(1,2)" _stat_name="pfr" popup="default" stat_hicolor="#F05000" stat_hith="35" stat_locolor="#408000" stat_loth="20" tip="" click=""/>
+            <stat _rowcol="(1,3)" _stat_name="three_B" popup="default" stat_hicolor="#F05000" stat_hith="13" stat_locolor="#408000" stat_loth="4" tip="" click=""/>
+            <stat _rowcol="(2,1)" _stat_name="n" popup="pophands" tip="" click=""/>
+            <stat _rowcol="(2,2)" _stat_name="playershort" popup="default" hudcolor="#98FFB0" hudprefix="" hudsuffix="" tip="" click=""/>
+            <stat _rowcol="(2,3)" _stat_name="cb1" popup="default" tip="" click=""/>
+            <stat _rowcol="(3,1)" _stat_name="wtsd" popup="default" tip="" click=""/>
+            <stat _rowcol="(3,2)" _stat_name="steal" popup="default" tip="" click=""/>
+            <stat _rowcol="(3,3)" _stat_name="totalprofit" popup="default" stat_hicolor="#408000" stat_hith="0" stat_locolor="#F05000" stat_loth="0" tip="" click=""/>
         </ss>
 
         <ss cols="3" name="holdem_ring" rows="4" xpad="1" ypad="0">
             <stat _rowcol="(1,1)" _stat_name="blank" popup="default"/>
             <stat _rowcol="(1,2)" _stat_name="playershort" hudcolor="#7F9476" hudprefix="" hudsuffix="" popup="holdring_main" tip=""/>
-            <stat _rowcol="(1,3)" _stat_name="n" hudcolor="#7F9476" popup="pophands" tip="" hudprefix="(" hudsuffix=")" />
-            <stat _rowcol="(2,1)" _stat_name="vpip_0" hudcolor = "#ECEBD0" popup="poppreflop" stat_hicolor="#D86C1D" stat_hith="40" stat_locolor="#5ec265" stat_loth="25" hudprefix="vpi:" tip=""/>
-            <stat _rowcol="(2,2)" _stat_name="pfr_0" hudcolor = "#ECEBD0" popup="poppreflop" stat_hicolor="#D86C1D" stat_hith="35" stat_locolor="#5ec265" stat_loth="20" hudprefix="pfr:" tip=""/>
-            <stat _rowcol="(2,3)" _stat_name="three_B_0" hudcolor = "#ECEBD0" popup="pop3bet" stat_hicolor="#D86C1D" stat_hith="13" stat_locolor="#5ec265" stat_loth="4" hudprefix="3bp:" tip=""/>
-            <stat _rowcol="(3,1)" _stat_name="steal_0" hudcolor = "#ECEBD0" popup="popsteal" stat_hicolor="#D86C1D" stat_hith="45" stat_locolor="#5ec265" stat_loth="10" hudprefix="st:" tip=""/>
-            <stat _rowcol="(3,2)" _stat_name="f_steal_0" hudcolor = "#ECEBD0" popup="popsteal" stat_hicolor="#5EC265" stat_hith="65" stat_locolor="#D86C1D" stat_loth="25" hudprefix="fst:" tip=""/>
-            <stat _rowcol="(3,3)" _stat_name="car0_0" hudcolor = "#ECEBD0" popup="popsteal" stat_hicolor="#D86C1D" stat_hith="45" stat_locolor="#5ec265" stat_loth="10" hudprefix="car:" tip=""/>
+            <stat _rowcol="(1,3)" _stat_name="n" hudcolor="#7F9476" popup="pophands" tip="" hudprefix="(" hudsuffix=")"/>
+            <stat _rowcol="(2,1)" _stat_name="vpip_0" hudcolor="#ECEBD0" popup="poppreflop" stat_hicolor="#D86C1D" stat_hith="40" stat_locolor="#5ec265" stat_loth="25" hudprefix="vpi:" tip=""/>
+            <stat _rowcol="(2,2)" _stat_name="pfr_0" hudcolor="#ECEBD0" popup="poppreflop" stat_hicolor="#D86C1D" stat_hith="35" stat_locolor="#5ec265" stat_loth="20" hudprefix="pfr:" tip=""/>
+            <stat _rowcol="(2,3)" _stat_name="three_B_0" hudcolor="#ECEBD0" popup="pop3bet" stat_hicolor="#D86C1D" stat_hith="13" stat_locolor="#5ec265" stat_loth="4" hudprefix="3bp:" tip=""/>
+            <stat _rowcol="(3,1)" _stat_name="steal_0" hudcolor="#ECEBD0" popup="popsteal" stat_hicolor="#D86C1D" stat_hith="45" stat_locolor="#5ec265" stat_loth="10" hudprefix="st:" tip=""/>
+            <stat _rowcol="(3,2)" _stat_name="f_steal_0" hudcolor="#ECEBD0" popup="popsteal" stat_hicolor="#5EC265" stat_hith="65" stat_locolor="#D86C1D" stat_loth="25" hudprefix="fst:" tip=""/>
+            <stat _rowcol="(3,3)" _stat_name="car0_0" hudcolor="#ECEBD0" popup="popsteal" stat_hicolor="#D86C1D" stat_hith="45" stat_locolor="#5ec265" stat_loth="10" hudprefix="car:" tip=""/>
             <stat _rowcol="(4,1)" _stat_name="cb1_0" hudcolor="#D86C1D" popup="popcb" stat_hicolor="#D86C1D" stat_hith="75" stat_locolor="#5ec265" stat_loth="35" hudprefix="cbf:" tip=""/>
-            <stat _rowcol="(4,2)" _stat_name="f_cb1_0" hudcolor = "#ECEBD0" popup="popsteal" stat_hicolor="#D86C1D" stat_hith="45" stat_locolor="#5ec265" stat_loth="10" hudprefix="fcb:" tip=""/>
-            <stat _rowcol="(4,3)" _stat_name="a_freq_123_0" hudcolor = "#ECEBD0" popup="popagg" stat_hicolor="#D86C1D" stat_hith="65" stat_locolor="#5ec265" stat_loth="20" hudprefix="afr:" hudsuffix="%" tip=""/>
+            <stat _rowcol="(4,2)" _stat_name="f_cb1_0" hudcolor="#ECEBD0" popup="popsteal" stat_hicolor="#D86C1D" stat_hith="45" stat_locolor="#5ec265" stat_loth="10" hudprefix="fcb:" tip=""/>
+            <stat _rowcol="(4,3)" _stat_name="a_freq_123_0" hudcolor="#ECEBD0" popup="popagg" stat_hicolor="#D86C1D" stat_hith="65" stat_locolor="#5ec265" stat_loth="20" hudprefix="afr:" hudsuffix="%" tip=""/>
         </ss>
 
         <ss cols="3" name="holdem_tour_classic" rows="3" xpad="1" ypad="0">
-            <stat  _rowcol="(1,1)" _stat_name="vpip" popup="default" stat_hicolor="#F05000" stat_hith="40" stat_locolor="#408000" stat_loth="25" tip="" click=""/>
-            <stat  _rowcol="(1,2)" _stat_name="pfr" popup="default" stat_hicolor="#F05000" stat_hith="35" stat_locolor="#408000" stat_loth="20" tip="" click=""/>
-            <stat  _rowcol="(1,3)" _stat_name="three_B" popup="default" stat_hicolor="#F05000" stat_hith="13" stat_locolor="#408000" stat_loth="4" tip="" click=""/>
-            <stat  _rowcol="(2,1)" _stat_name="n" popup="default" tip="" click=""/>
-            <stat  _rowcol="(2,2)" _stat_name="playershort" popup="default" hudcolor="#98FFB0" hudprefix="" hudsuffix="" tip="" click=""/>
-            <stat  _rowcol="(2,3)" _stat_name="cb1" popup="default" tip="" click=""/>
-            <stat  _rowcol="(3,1)" _stat_name="wtsd" popup="default" tip="" click=""/>
-            <stat  _rowcol="(3,2)" _stat_name="steal" popup="default" tip="" click=""/>
-            <stat  _rowcol="(3,3)" _stat_name="m_ratio" popup="default" click="" stat_hicolor="#408000" hudcolor="#FFFC00"  stat_hith="19.99" stat_locolor="#FF0000" stat_loth="9.99" tip=""/>
+            <stat _rowcol="(1,1)" _stat_name="vpip" popup="default" stat_hicolor="#F05000" stat_hith="40" stat_locolor="#408000" stat_loth="25" tip="" click=""/>
+            <stat _rowcol="(1,2)" _stat_name="pfr" popup="default" stat_hicolor="#F05000" stat_hith="35" stat_locolor="#408000" stat_loth="20" tip="" click=""/>
+            <stat _rowcol="(1,3)" _stat_name="three_B" popup="default" stat_hicolor="#F05000" stat_hith="13" stat_locolor="#408000" stat_loth="4" tip="" click=""/>
+            <stat _rowcol="(2,1)" _stat_name="n" popup="default" tip="" click=""/>
+            <stat _rowcol="(2,2)" _stat_name="playershort" popup="default" hudcolor="#98FFB0" hudprefix="" hudsuffix="" tip="" click=""/>
+            <stat _rowcol="(2,3)" _stat_name="cb1" popup="default" tip="" click=""/>
+            <stat _rowcol="(3,1)" _stat_name="wtsd" popup="default" tip="" click=""/>
+            <stat _rowcol="(3,2)" _stat_name="steal" popup="default" tip="" click=""/>
+            <stat _rowcol="(3,3)" _stat_name="m_ratio" popup="default" click="" stat_hicolor="#408000" hudcolor="#FFFC00" stat_hith="19.99" stat_locolor="#FF0000" stat_loth="9.99" tip=""/>
         </ss>
 
         <ss cols="3" name="holdem_tour" rows="3" xpad="1" ypad="0">
@@ -2114,7 +2101,35 @@
             <pu_stat pu_stat_name="f_BB_steal"/>
             <pu_stat pu_stat_name="f_SB_steal"/>
         </pu>
-    </popup_windows>
+    <pu pu_name="aof_profile" pu_class="CategorizedPopup" pu_theme="hud_dark" pu_icon_provider="emoji" pu_title="OPPONENT PROFILE: {player}" pu_width="420" pu_max_height="500">
+        <pu_stat pu_stat_name="aof_observed" pu_stat_category="⚡ AGGRESSIVENESS &amp; EV PROFIT" pu_stat_label="Observed All-ins"/>
+        <pu_stat pu_stat_name="aof_showdowns" pu_stat_category="⚡ AGGRESSIVENESS &amp; EV PROFIT" pu_stat_label="Showdowns"/>
+        <pu_stat pu_stat_name="aof_allin" pu_stat_category="⚡ AGGRESSIVENESS &amp; EV PROFIT" pu_stat_label="All-in"/>
+        <pu_stat pu_stat_name="aof_fold" pu_stat_category="⚡ AGGRESSIVENESS &amp; EV PROFIT" pu_stat_label="Fold"/>
+        <pu_stat pu_stat_name="aof_weak" pu_stat_category="⚡ AGGRESSIVENESS &amp; EV PROFIT" pu_stat_label="Weak AI % (EV+ Targets)" pu_stat_color="#00E59B"/>
+        <pu_stat pu_stat_name="aof_decision_ev" pu_stat_category="⚡ AGGRESSIVENESS &amp; EV PROFIT" pu_stat_label="Decision EV" pu_stat_color="#00E59B"/>
+        <pu_stat pu_stat_name="aof_range_equity" pu_stat_category="⚡ AGGRESSIVENESS &amp; EV PROFIT" pu_stat_label="Population Range Equity" pu_stat_color="#00E59B"/>
+        <pu_stat pu_stat_name="aof_known_equity" pu_stat_category="⚡ AGGRESSIVENESS &amp; EV PROFIT" pu_stat_label="Known Card Equity"/>
+        <pu_stat pu_stat_name="aof_known_ev" pu_stat_category="⚡ AGGRESSIVENESS &amp; EV PROFIT" pu_stat_label="EV vs Actual Callers" pu_stat_color="#00E59B"/>
+        <pu_stat pu_stat_name="aof_no_made" pu_stat_category="🃏 MADE HAND STRUCTURE" pu_stat_label="Air / No Made Hand"/>
+        <pu_stat pu_stat_name="aof_pair" pu_stat_category="🃏 MADE HAND STRUCTURE" pu_stat_label="1 Pair"/>
+        <pu_stat pu_stat_name="aof_two_pair" pu_stat_category="🃏 MADE HAND STRUCTURE" pu_stat_label="2 Pair"/>
+        <pu_stat pu_stat_name="aof_trips" pu_stat_category="🃏 MADE HAND STRUCTURE" pu_stat_label="Trips"/>
+        <pu_stat pu_stat_name="aof_straight" pu_stat_category="🃏 MADE HAND STRUCTURE" pu_stat_label="Straight"/>
+        <pu_stat pu_stat_name="aof_flush" pu_stat_category="🃏 MADE HAND STRUCTURE" pu_stat_label="Flush"/>
+        <pu_stat pu_stat_name="aof_full_house" pu_stat_category="🃏 MADE HAND STRUCTURE" pu_stat_label="Full House"/>
+        <pu_stat pu_stat_name="aof_quads" pu_stat_category="🃏 MADE HAND STRUCTURE" pu_stat_label="Quads"/>
+        <pu_stat pu_stat_name="aof_straight_flush" pu_stat_category="🃏 MADE HAND STRUCTURE" pu_stat_label="Straight Flush"/>
+        <pu_stat pu_stat_name="aof_made" pu_stat_category="🃏 MADE HAND STRUCTURE" pu_stat_label="Total Made Hands"/>
+        <pu_stat pu_stat_name="aof_nfd" pu_stat_category="🎯 DRAWS" pu_stat_label="Nut Flush Draw (NFD)" pu_stat_color="#16C5F4"/>
+        <pu_stat pu_stat_name="aof_non_nfd" pu_stat_category="🎯 DRAWS" pu_stat_label="Flush Draw (fd)" pu_stat_color="#16C5F4"/>
+        <pu_stat pu_stat_name="aof_wrap9" pu_stat_category="🎯 DRAWS" pu_stat_label="Wrap 9+ outs" pu_stat_color="#16C5F4"/>
+        <pu_stat pu_stat_name="aof_big_wrap13" pu_stat_category="🎯 DRAWS" pu_stat_label="Big Wrap 13+ outs" pu_stat_color="#16C5F4"/>
+        <pu_stat pu_stat_name="aof_splash_won" pu_stat_category="💰 SPLASH POTS &amp; NOTES" pu_stat_label="Splash Recovered"/>
+        <pu_stat pu_stat_name="aof_splash_freq" pu_stat_category="💰 SPLASH POTS &amp; NOTES" pu_stat_label="Splash Frequency"/>
+        <pu_stat pu_stat_name="player_note" pu_stat_category="💰 SPLASH POTS &amp; NOTES" pu_stat_label="Player Notes"/>
+    </pu>
+</popup_windows>
 
 
     <hhcs>
@@ -2132,7 +2147,8 @@
         <hhc site="WinningPoker" converter="WinningToFpdb" summaryImporter="WinningSummary"/>
         <hhc site="GGPoker" converter="GGPokerToFpdb"/>
         <hhc site="KingsClub" converter="KingsClubToFpdb"/>
-        <hhc site="Unibet" converter="UnibetToFpdb"/>
+        <hhc site="Unibet" converter="UnibetToFpdb" summaryImporter="UnibetSummary"/>
+        <hhc site="CoinPoker" converter="CoinPokerToFpdb"/>
     </hhcs>
 
 
@@ -2147,7 +2163,40 @@
              <database db_server="sqlite" db_name="fpdb.db3" db_ip="localhost" db_user="fpdb" db_pass="fpdb"/>
         <!-- <database db_server="postgresql" db_user="fpdb" db_pass="YOUR POSTGRES PASSWORD" db_name="fpdb" db_ip="localhost" ></database> -->
     </supported_databases>
-</FreePokerToolsConfig>
+    <!-- HUD profile rules: choose which stat set (HUD profile) a table gets,
+         the way PokerTracker's "Profile Select" tab does.
 
-<!-- IMPORTANT: Please note that fpdb stores your email password in clear text.
+         Each <hud_profile_rule> narrows the table context; "all" matches
+         anything:
+           site       room name as it appears in <supported_sites>, or "all"
+           game       Gametypes.category (holdem, omahahi, aof_omaha, ...)
+           game_type  "ring", "tour", or "all"
+           limit      Gametypes.limitType (nl, pl, fl, cn), or "all"
+           seats      table size (Gametypes.maxSeats), or "all"
+           players    players actually dealt into the hand, or "all"
+           speed      "normal", "fast", or "all"
+           profile    the <ss name="..."> stat set to use
+           priority   optional; higher wins between equally specific rules
+
+         The most specific matching rule wins; ties break on priority, then on
+         the order the rules appear here. When no rule matches, the profile
+         from <supported_games> is used, so an empty
+         section changes nothing.
+
+         HUD positions are remembered per (site, game, game_type, seats,
+         profile, layout). Two games that resolve to different profiles
+         therefore keep their own window placement even when the room files
+         them under a single layout set, which is what CoinPoker does.
+
+         Example: give CoinPoker's 6-max AoF Omaha tables their own profile
+         while every other table keeps the default.
+           <hud_profile_rule site="CoinPoker" game="aof_omaha" seats="6" profile="aof_advanced"/>
+
+         The GUI writes this section from HUD Preferences -> Profile Select;
+         this comment is kept outside the element so editing it there does not
+         throw the documentation away. -->
+    <hud_profile_rules>
+    </hud_profile_rules>
+
+</FreePokerToolsConfig><!-- IMPORTANT: Please note that fpdb stores your email password in clear text.
 So do not post a config containing a password on the Internet or anywhere else without removing the password! -->

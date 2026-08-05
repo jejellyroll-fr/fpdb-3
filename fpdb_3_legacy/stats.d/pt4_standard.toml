@@ -1,0 +1,222 @@
+# Standard poker statistics as declarative descriptors, normalised onto FPDB-3
+# legacy HandsPlayers columns (all verified to exist). These mirror the common
+# PT4 stats but, unlike the ~600 native functions in Stats.py (HUD-only), they
+# are surface-agnostic: the registry adapters expose them in the report grid.
+#
+# They are RATE stats (percentages), so they have no `series` — cumulative
+# curves are for chip/EV metrics, not rates. Scope is ring+tour.
+#
+# Each value is "100 * <done> / <chance>"; the registry sums each input across
+# the rows, then evaluates the ratio (division by zero renders as "-").
+
+[[stat]]
+name        = "vpip"
+label       = "VPIP"
+category    = "Standard / Preflop"
+scope       = ["ring", "tour"]
+inputs      = ["street0VPI", "street0VPIChance"]
+boolean_inputs = ["street0VPI", "street0VPIChance"]
+value       = "100 * street0VPI / street0VPIChance"
+aggregate   = "ratio"
+format      = "%0.1f"
+description = "Voluntarily put money in pot."
+
+[[stat]]
+name        = "pfr"
+label       = "PFR"
+category    = "Standard / Preflop"
+scope       = ["ring", "tour"]
+inputs      = ["street0Aggr", "street0AggrChance"]
+boolean_inputs = ["street0Aggr", "street0AggrChance"]
+value       = "100 * street0Aggr / street0AggrChance"
+aggregate   = "ratio"
+format      = "%0.1f"
+description = "Preflop raise."
+
+[[stat]]
+name        = "rfi"
+label       = "RFI"
+category    = "Standard / Preflop"
+scope       = ["ring", "tour"]
+inputs      = ["raisedFirstIn", "raiseFirstInChance"]
+boolean_inputs = ["raisedFirstIn", "raiseFirstInChance"]
+value       = "100 * raisedFirstIn / raiseFirstInChance"
+aggregate   = "ratio"
+format      = "%0.1f"
+description = "Raise first in (open raise)."
+
+[[stat]]
+name        = "three_bet"
+label       = "3Bet"
+category    = "Standard / Preflop"
+scope       = ["ring", "tour"]
+inputs      = ["street0_3BDone", "street0_3BChance"]
+boolean_inputs = ["street0_3BDone", "street0_3BChance"]
+value       = "100 * street0_3BDone / street0_3BChance"
+aggregate   = "ratio"
+format      = "%0.1f"
+description = "Preflop 3-bet."
+
+[[stat]]
+name        = "four_bet"
+label       = "4Bet"
+category    = "Standard / Preflop"
+scope       = ["ring", "tour"]
+inputs      = ["street0_4BDone", "street0_4BChance"]
+boolean_inputs = ["street0_4BDone", "street0_4BChance"]
+value       = "100 * street0_4BDone / street0_4BChance"
+aggregate   = "ratio"
+format      = "%0.1f"
+description = "Preflop 4-bet."
+
+[[stat]]
+name        = "steal"
+label       = "Steal"
+category    = "Standard / Preflop"
+scope       = ["ring", "tour"]
+inputs      = ["stealDone", "stealChance"]
+boolean_inputs = ["stealDone", "stealChance"]
+value       = "100 * stealDone / stealChance"
+aggregate   = "ratio"
+format      = "%0.1f"
+description = "Attempt to steal the blinds."
+
+[[stat]]
+name        = "fold_bb_to_steal"
+label       = "Fold BB to Steal"
+category    = "Standard / Preflop"
+scope       = ["ring", "tour"]
+inputs      = ["foldedBbToSteal", "foldBbToStealChance"]
+boolean_inputs = ["foldedBbToSteal", "foldBbToStealChance"]
+value       = "100 * foldedBbToSteal / foldBbToStealChance"
+aggregate   = "ratio"
+format      = "%0.1f"
+description = "Fold the big blind facing a steal attempt."
+
+[[stat]]
+name        = "cbet_flop"
+label       = "C-bet Flop"
+category    = "Standard / Postflop"
+scope       = ["ring", "tour"]
+inputs      = ["street1CBDone", "street1CBChance"]
+boolean_inputs = ["street1CBDone", "street1CBChance"]
+value       = "100 * street1CBDone / street1CBChance"
+aggregate   = "ratio"
+format      = "%0.1f"
+description = "Continuation bet on the flop."
+
+[[stat]]
+name        = "cbet_turn"
+label       = "C-bet Turn"
+category    = "Standard / Postflop"
+scope       = ["ring", "tour"]
+inputs      = ["street2CBDone", "street2CBChance"]
+boolean_inputs = ["street2CBDone", "street2CBChance"]
+value       = "100 * street2CBDone / street2CBChance"
+aggregate   = "ratio"
+format      = "%0.1f"
+description = "Continuation bet on the turn."
+
+[[stat]]
+name        = "fold_to_cbet_flop"
+label       = "Fold to C-bet Flop"
+category    = "Standard / Postflop"
+scope       = ["ring", "tour"]
+inputs      = ["foldToStreet1CBDone", "foldToStreet1CBChance"]
+boolean_inputs = ["foldToStreet1CBDone", "foldToStreet1CBChance"]
+value       = "100 * foldToStreet1CBDone / foldToStreet1CBChance"
+aggregate   = "ratio"
+format      = "%0.1f"
+description = "Fold facing a flop continuation bet."
+
+[[stat]]
+name        = "wtsd"
+label       = "WTSD"
+category    = "Standard / Showdown"
+scope       = ["ring", "tour"]
+inputs      = ["sawShowdown", "street1Seen"]
+boolean_inputs = ["sawShowdown", "street1Seen"]
+value       = "100 * sawShowdown / street1Seen"
+aggregate   = "ratio"
+format      = "%0.1f"
+description = "Went to showdown after seeing the flop."
+
+[[stat]]
+name        = "wsd"
+label       = "W$SD"
+category    = "Standard / Showdown"
+scope       = ["ring", "tour"]
+inputs      = ["wonAtSD", "sawShowdown"]
+boolean_inputs = ["wonAtSD", "sawShowdown"]
+value       = "100 * wonAtSD / sawShowdown"
+aggregate   = "ratio"
+format      = "%0.1f"
+description = "Won money at showdown."
+
+# --- Advanced stats present in FPDB's data (DerivedStats computes them) but not
+# surfaced as grid columns. Numerator/denominator match the native Stats.py
+# definitions (float_turn/float_river/fold_to_squeeze) verbatim.
+
+[[stat]]
+name        = "float_turn"
+label       = "Float Turn"
+category    = "Standard / Postflop"
+scope       = ["ring", "tour"]
+inputs      = ["flg_t_float", "flg_t_float_opp"]
+boolean_inputs = ["flg_t_float", "flg_t_float_opp"]
+value       = "100 * flg_t_float / flg_t_float_opp"
+aggregate   = "ratio"
+format      = "%0.1f"
+description = "Continued (bet/raise) the turn after floating the flop."
+
+[[stat]]
+name        = "float_river"
+label       = "Float River"
+category    = "Standard / Postflop"
+scope       = ["ring", "tour"]
+inputs      = ["flg_r_float", "flg_r_float_opp"]
+boolean_inputs = ["flg_r_float", "flg_r_float_opp"]
+value       = "100 * flg_r_float / flg_r_float_opp"
+aggregate   = "ratio"
+format      = "%0.1f"
+description = "Continued (bet/raise) the river after floating the turn."
+
+[[stat]]
+name        = "fold_to_squeeze"
+label       = "Fold to Squeeze"
+category    = "Standard / Preflop"
+scope       = ["ring", "tour"]
+inputs      = ["street0_FoldToSqueezeDone", "street0_FoldToSqueezeChance"]
+boolean_inputs = ["street0_FoldToSqueezeDone", "street0_FoldToSqueezeChance"]
+value       = "100 * street0_FoldToSqueezeDone / street0_FoldToSqueezeChance"
+aggregate   = "ratio"
+format      = "%0.1f"
+description = "Folded preflop facing a squeeze 3-bet."
+
+# Delayed turn c-bet — newly derived in DerivedStats._calc_delayed_turn_cbet and
+# persisted to HandsPlayers (street2DelayedCB*). Populates on re-import.
+[[stat]]
+name        = "delayed_cbet_turn"
+label       = "Delayed C-bet Turn"
+category    = "Standard / Postflop"
+scope       = ["ring", "tour"]
+inputs      = ["street2DelayedCBDone", "street2DelayedCBChance"]
+boolean_inputs = ["street2DelayedCBDone", "street2DelayedCBChance"]
+value       = "100 * street2DelayedCBDone / street2DelayedCBChance"
+aggregate   = "ratio"
+format      = "%0.1f"
+description = "Bet the turn after checking the flop as the preflop aggressor."
+
+# Turn probe — newly derived in DerivedStats._calc_turn_probe and persisted to
+# HandsPlayers (street2Probe*). Populates on re-import.
+[[stat]]
+name        = "probe_turn"
+label       = "Probe Turn"
+category    = "Standard / Postflop"
+scope       = ["ring", "tour"]
+inputs      = ["street2ProbeDone", "street2ProbeChance"]
+boolean_inputs = ["street2ProbeDone", "street2ProbeChance"]
+value       = "100 * street2ProbeDone / street2ProbeChance"
+aggregate   = "ratio"
+format      = "%0.1f"
+description = "Bet the turn (as non-aggressor) after the preflop raiser checked the flop."

@@ -18,7 +18,7 @@ from unittest.mock import Mock, patch
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from ThemeManager import CUSTOM_THEMES_DIR, ThemeManager
+from fpdb_3_legacy.ThemeManager import CUSTOM_THEMES_DIR, ThemeManager
 
 
 class TestCustomThemes(unittest.TestCase):
@@ -151,7 +151,7 @@ class TestCustomThemes(unittest.TestCase):
         result = self.theme_manager._validate_custom_theme(nonexistent_file)
         self.assertFalse(result)
 
-    @patch("ThemeManager.CUSTOM_THEMES_DIR")
+    @patch("fpdb_3_legacy.ThemeManager.CUSTOM_THEMES_DIR")
     @patch("shutil.copy2")
     def test_install_custom_theme_success(self, mock_copy, mock_custom_dir):
         """Test successful custom theme installation."""
@@ -176,7 +176,7 @@ class TestCustomThemes(unittest.TestCase):
 
         self.assertFalse(result)
 
-    @patch("ThemeManager.CUSTOM_THEMES_DIR")
+    @patch("fpdb_3_legacy.ThemeManager.CUSTOM_THEMES_DIR")
     def test_install_custom_theme_invalid_file(self, mock_custom_dir):
         """Test installing invalid theme file."""
         invalid_file = self.temp_dir / "invalid.xml"
@@ -187,7 +187,7 @@ class TestCustomThemes(unittest.TestCase):
 
         self.assertFalse(result)
 
-    @patch("ThemeManager.CUSTOM_THEMES_DIR")
+    @patch("fpdb_3_legacy.ThemeManager.CUSTOM_THEMES_DIR")
     @patch("shutil.copy2")
     def test_install_custom_theme_with_custom_name(self, mock_copy, mock_custom_dir):
         """Test installing theme with custom name."""
@@ -224,7 +224,7 @@ class TestCustomThemes(unittest.TestCase):
             self.assertEqual(themes, ["theme1.xml", "theme2.xml"])
             mock_get_custom.assert_called_once()
 
-    @patch("ThemeManager.CUSTOM_THEMES_DIR")
+    @patch("fpdb_3_legacy.ThemeManager.CUSTOM_THEMES_DIR")
     def test_remove_custom_theme_success(self, mock_custom_dir):
         """Test successful removal of custom theme."""
         # Mock theme file
@@ -244,7 +244,7 @@ class TestCustomThemes(unittest.TestCase):
         self.assertTrue(result)
         mock_theme_path.unlink.assert_called_once()
 
-    @patch("ThemeManager.CUSTOM_THEMES_DIR")
+    @patch("fpdb_3_legacy.ThemeManager.CUSTOM_THEMES_DIR")
     def test_remove_custom_theme_nonexistent(self, mock_custom_dir):
         """Test removing non-existent custom theme."""
         mock_theme_path = Mock()
@@ -255,7 +255,7 @@ class TestCustomThemes(unittest.TestCase):
 
         self.assertFalse(result)
 
-    @patch("ThemeManager.CUSTOM_THEMES_DIR")
+    @patch("fpdb_3_legacy.ThemeManager.CUSTOM_THEMES_DIR")
     def test_remove_custom_theme_current_theme(self, mock_custom_dir):
         """Test removing currently active custom theme (should fail)."""
         mock_theme_path = Mock()
@@ -270,7 +270,7 @@ class TestCustomThemes(unittest.TestCase):
         self.assertFalse(result)
         mock_theme_path.unlink.assert_not_called()
 
-    @patch("PyQt5.QtWidgets.QApplication")
+    @patch("PySide6.QtWidgets.QApplication")
     def test_apply_custom_theme_to_application(self, mock_qapp_class):
         """Test applying custom theme to application fails when theme file doesn't exist."""
         # Mock QApplication instance
@@ -285,7 +285,28 @@ class TestCustomThemes(unittest.TestCase):
         self.assertFalse(result)
 
     @patch("qt_material.apply_stylesheet")
-    @patch("PyQt5.QtWidgets.QApplication")
+    @patch("PySide6.QtWidgets.QApplication")
+    def test_apply_custom_theme_uses_absolute_path(self, mock_qapp_class, mock_apply_stylesheet):
+        """Custom themes are applied from their own directory, never copied into qt_material."""
+        import qt_material
+
+        mock_app = Mock()
+        mock_qapp_class.instance.return_value = mock_app
+        qt_material_themes_dir = Path(qt_material.__file__).parent / "themes"
+
+        with (
+            patch("fpdb_3_legacy.ThemeManager.CUSTOM_THEMES_DIR", self.temp_dir),
+            patch.object(self.theme_manager, "is_custom_theme", return_value=True),
+            patch.object(self.theme_manager, "apply_legacy_polish"),
+        ):
+            result = self.theme_manager._apply_theme_to_application("test_theme.xml")
+
+        self.assertTrue(result)
+        mock_apply_stylesheet.assert_called_once_with(mock_app, theme=str(self.test_theme_file))
+        self.assertFalse((qt_material_themes_dir / "test_theme.xml").exists())
+
+    @patch("qt_material.apply_stylesheet")
+    @patch("PySide6.QtWidgets.QApplication")
     def test_apply_builtin_theme_to_application(self, mock_qapp_class, mock_apply_stylesheet):
         """Test applying built-in theme to application."""
         # Mock QApplication instance
@@ -299,7 +320,7 @@ class TestCustomThemes(unittest.TestCase):
         self.assertTrue(result)
         mock_apply_stylesheet.assert_called_once_with(mock_app, theme="dark_purple.xml")
 
-    @patch("PyQt5.QtWidgets.QApplication")
+    @patch("PySide6.QtWidgets.QApplication")
     def test_apply_theme_no_qapplication(self, mock_qapp_class):
         """Test applying custom theme when no QApplication instance exists."""
         mock_qapp_class.instance.return_value = None
@@ -347,8 +368,8 @@ class TestCustomThemeIntegration(unittest.TestCase):
         theme_manager.initialize(config=mock_config)
 
         # Test the workflow with mocked file operations
-        with patch("ThemeManager.CUSTOM_THEMES_DIR") as mock_dir:
-            with patch("shutil.copy2") as mock_copy:
+        with patch("fpdb_3_legacy.ThemeManager.CUSTOM_THEMES_DIR") as mock_dir:
+            with patch("shutil.copy2"):
                 with patch("pathlib.Path.exists", return_value=True):  # Mock file exists
                     with patch.object(theme_manager, "_validate_custom_theme", return_value=True):
                         with patch.object(theme_manager, "_detect_available_themes") as mock_detect:

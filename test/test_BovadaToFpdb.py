@@ -5,132 +5,24 @@ various game types including Hold'em, Omaha, and Stud variants.
 """
 
 import unittest
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from decimal import Decimal
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
 try:
-    from BovadaToFpdb import Bovada, FpdbHandPartial, FpdbParseError
+    from fpdb_3_legacy.BovadaToFpdb import Bovada, FpdbHandPartial, FpdbParseError
 except ImportError:
     import sys
 
     sys.path.insert(0, str(Path(__file__).parent.parent.resolve()))
-    from BovadaToFpdb import Bovada, FpdbHandPartial, FpdbParseError
+    from fpdb_3_legacy.BovadaToFpdb import Bovada, FpdbHandPartial, FpdbParseError
 
 
 # --- Mocks ---
-class MockHand:
-    """Mock hand object for testing Bovada parser functionality."""
-
-    def __init__(self, hand_text: str, gametype: dict, in_path: str = "") -> None:
-        """Initialize mock hand with basic attributes."""
-        self.handText = hand_text
-        self.gametype = gametype
-        self.in_path = in_path
-        self.players = []
-        self.buttonpos = None
-        self.maxseats = 0
-        self.handid = None
-        self.startTime = None
-        self.tourNo = None
-        self.buyin = None
-        self.fee = None
-        self.buyinCurrency = None
-        self.isKO = False
-        self.koBounty = None
-        self.tablename = None
-        self.speed = None
-        self.version = None
-        self.allInBlind = False
-        self.uncalledBets = True
-        self.sb = None
-        self.bb = None
-        self.antes = {}
-        self.bringIn = {}
-        self.blinds = []
-        self.streets = dict.fromkeys(
-            ["PREFLOP", "FLOP", "TURN", "RIVER", "SHOWDOWN", "DEAL", "THIRD", "FOURTH", "FIFTH", "SIXTH", "SEVENTH"], ""
-        )
-        self.actionStreets = ["PREFLOP", "FLOP", "TURN", "RIVER", "THIRD", "FOURTH", "FIFTH", "SIXTH", "SEVENTH"]
-        self.community_cards = {"FLOP": [], "TURN": [], "RIVER": []}
-        self.hole_cards = {}
-        self.actions = []
-        self.shown_cards = {}
-        self.pot_winners = []
-        self.koCounts = {}
-        self.rake = None
-        self.totalpot = None
-        self.isZonePoker = False
-        self.totalcollected = Decimal(0)
-        self.stacks = {}
-        self.dealt = set()
-
-    def addPlayer(self, seat_no: int, name: str, stack: str) -> None:
-        """Add a player to the hand."""
-        player_info = {"seat": seat_no, "name": name, "stack": Decimal(stack)}
-        self.players.append(player_info)
-        self.stacks[name] = Decimal(stack)
-
-    def addAnte(self, player: str, amount: str) -> None:
-        """Add an ante for a player."""
-        self.antes[player] = Decimal(amount)
-
-    def addBringIn(self, player: str, amount: str) -> None:
-        """Add a bring-in bet for a player."""
-        self.bringIn = {"player": player, "amount": Decimal(amount)}
-
-    def addBlind(self, player: str, blind_type: str, amount: str) -> None:
-        """Add a blind bet for a player."""
-        self.blinds.append({"player": player, "type": blind_type, "amount": Decimal(amount)})
-
-    def setUncalledBets(self, value: bool) -> None:
-        """Set whether to track uncalled bets."""
-        self.uncalledBets = value
-
-    def setCommunityCards(self, street: str, cards: list) -> None:
-        """Set community cards for a street."""
-        self.community_cards[street] = cards
-
-    def addHoleCards(self, street: str, player: str, **kwargs) -> None:
-        """Add hole cards for a player on a street."""
-        if player not in self.hole_cards:
-            self.hole_cards[player] = {}
-        self.hole_cards[player][street] = kwargs
-
-    def addFold(self, street: str, player: str) -> None:
-        """Add a fold action."""
-        self.actions.append((street, player, "fold", None))
-
-    def addCheck(self, street: str, player: str) -> None:
-        """Add a check action."""
-        self.actions.append((street, player, "check", None))
-
-    def addCall(self, street: str, player: str, amount: str) -> None:
-        """Add a call action."""
-        self.actions.append((street, player, "call", Decimal(amount)))
-
-    def addBet(self, street: str, player: str, amount: str) -> None:
-        """Add a bet action."""
-        self.actions.append((street, player, "bet", Decimal(amount)))
-
-    def addRaiseTo(self, street: str, player: str, amount: str) -> None:
-        """Add a raise action."""
-        self.actions.append((street, player, "raise", Decimal(amount)))
-
-    def addAllIn(self, street: str, player: str, amount: str) -> None:
-        """Add an all-in action."""
-        self.actions.append((street, player, "allin", Decimal(amount)))
-
-    def addShownCards(self, cards: list, player: str) -> None:
-        """Add shown cards for a player."""
-        self.shown_cards[player] = cards
-
-    def addCollectPot(self, player: str, pot: str) -> None:
-        """Add pot collection for a player."""
-        self.pot_winners.append({"player": player, "amount": Decimal(pot)})
-        self.totalcollected += Decimal(pot)
+from tests.helpers.mock_hand import ParserMockHand as MockHand  # noqa: E402
 
 
 class MockConfig:
@@ -335,13 +227,36 @@ class TestBovadaParser(unittest.TestCase):
         assert hand.community_cards["FLOP"] == ["2c", "Qc", "7h"]
         assert hand.community_cards["TURN"] == ["Ac"]
 
+    def test_populate_missing_zone_board_streets(self) -> None:
+        hand = SimpleNamespace(
+            gametype={"base": "hold", "fast": True},
+            handText="*** FLOP *** [2c Qc 7h]\n*** TURN *** [2c Qc 7h] [Ac]",
+            streets={"FLOP": "", "TURN": "", "RIVER": ""},
+        )
+
+        self.parser._populate_missing_board_streets(hand)
+
+        assert hand.streets["FLOP"] == "2c Qc 7h"
+        assert hand.streets["TURN"] == "Ac"
+
+    def test_process_board_cards_keeps_only_actions_in_street(self) -> None:
+        hand = SimpleNamespace(
+            gametype={"base": "hold", "fast": False},
+            handText="",
+            streets={"FLOP": "[2c Qc 7h]\nSeat 1: checks"},
+        )
+
+        self.parser._process_board_cards(hand)
+
+        assert hand.streets["FLOP"] == "Seat 1: checks"
+
     def test_read_hand_info_datetime_and_id(self) -> None:
         hand_text, _ = load_hand_history("NLHE-6max-USD - $0.25-$0.50 - 201804.bodog.eu.txt")
         gametype = self.parser.determineGameType(hand_text.split("\n\n")[0])
         hand = MockHand(hand_text, gametype)
         self.parser.readHandInfo(hand)
         assert hand.handid == "3598529418"
-        expected_utc_time = datetime(2018, 4, 29, 1, 52, 54, tzinfo=timezone.utc)
+        expected_utc_time = datetime(2018, 4, 29, 1, 52, 54, tzinfo=UTC)
         assert hand.startTime == expected_utc_time
 
     def test_read_hole_cards_hero_holdem(self) -> None:

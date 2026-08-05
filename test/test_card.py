@@ -1,4 +1,11 @@
-from Card import StartCardRank, cardFromValueSuit, decodeStartHandValue, encodeCard, twoStartCards, valueSuitFromCard
+from fpdb_3_legacy.Card import (
+    StartCardRank,
+    cardFromValueSuit,
+    decodeStartHandValue,
+    encodeCard,
+    twoStartCards,
+    valueSuitFromCard,
+)
 
 
 def test_twoStartCards() -> None:

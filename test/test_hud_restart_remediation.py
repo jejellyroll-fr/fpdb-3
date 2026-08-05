@@ -15,9 +15,9 @@ import pytest
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # Import modules to test
-from HudStatsPersistence import HudStatsPersistence
-from ImprovedErrorHandler import ErrorSeverity, ImprovedErrorHandler
-from SmartHudManager import RestartReason, SmartHudManager
+from fpdb_3_legacy.HudStatsPersistence import HudStatsPersistence
+from fpdb_3_legacy.ImprovedErrorHandler import ErrorSeverity, ImprovedErrorHandler
+from fpdb_3_legacy.SmartHudManager import RestartReason, SmartHudManager
 
 
 class TestHudStatsPersistence:
@@ -157,13 +157,40 @@ class TestImprovedErrorHandler:
         """Test file position reset decision."""
         file_path = "/test/file.txt"
 
-        # Permanent error should reset
+        # Permanent error should not reset
         permanent_error = error_handler.record_error(file_path, "error", "invalid format", "corrupted")
-        assert error_handler.should_reset_file_position(file_path, permanent_error) is True
+        assert error_handler.should_reset_file_position(file_path, permanent_error) is False
 
-        # Temporary error should not reset
+        # Temporary error should reset
         temp_error = error_handler.record_error(file_path, "error", "connection timeout", "valid data")
-        assert error_handler.should_reset_file_position(file_path, temp_error) is False
+        assert error_handler.should_reset_file_position(file_path, temp_error) is True
+
+    def test_classify_unfinished_hand_error(self, error_handler) -> None:
+        """Test that unfinished hand errors are classified as TEMPORARY."""
+        error_message = "Hand 123456 is unfinished: no '*** SUMMARY ***' section, the hand has no result yet."
+        hand_text = "valid hand text..."
+        severity = error_handler.classify_error(error_message, hand_text)
+        assert severity == ErrorSeverity.TEMPORARY
+
+        # It should always reset the file position
+        error = error_handler.record_error("/test/unfinished.txt", "partial", error_message, hand_text)
+        assert error_handler.should_reset_file_position("/test/unfinished.txt", error) is True
+
+    def test_temporary_errors_ignored_in_threshold(self, error_handler) -> None:
+        """Test that TEMPORARY errors do not count towards the threshold for RECOVERABLE errors."""
+        file_path = "/test/threshold.txt"
+
+        # Record multiple temporary/unfinished hand errors
+        for i in range(10):
+            error_msg = f"Hand {i} is unfinished: no '*** SUMMARY ***' section"
+            error = error_handler.record_error(file_path, "partial", error_msg, "valid hand text...")
+            # Temporary errors should always say reset is True
+            assert error_handler.should_reset_file_position(file_path, error) is True
+
+        # Now record a recoverable error. Since temporary errors are ignored in the threshold check,
+        # the recoverable error should still return True (retry) instead of False (skip).
+        rec_error = error_handler.record_error(file_path, "error", "Unknown parsing issue", "Hand #123456: ...")
+        assert error_handler.should_reset_file_position(file_path, rec_error) is True
 
     def test_error_history_cleanup(self, error_handler) -> None:
         """Test automatic cleanup of old errors."""
@@ -274,7 +301,7 @@ class TestSmartHudManager:
         table_key = "test_table"
 
         # Create table state without resetting error count and disable cooldown
-        from SmartHudManager import TableState
+        from fpdb_3_legacy.SmartHudManager import TableState
 
         # Disable cooldown for this test
         original_cooldown = hud_manager.restart_cooldown
@@ -345,9 +372,9 @@ class TestIntegration:
 def reset_global_instances() -> None:
     """Reset global instances before each test."""
     # Reset global instances to avoid test interference
-    import HudStatsPersistence
-    import ImprovedErrorHandler
-    import SmartHudManager
+    import fpdb_3_legacy.HudStatsPersistence as HudStatsPersistence
+    import fpdb_3_legacy.ImprovedErrorHandler as ImprovedErrorHandler
+    import fpdb_3_legacy.SmartHudManager as SmartHudManager
 
     HudStatsPersistence._persistence_instance = None
     ImprovedErrorHandler._error_handler_instance = None

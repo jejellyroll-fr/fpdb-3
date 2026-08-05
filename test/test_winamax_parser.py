@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from WinamaxToFpdb import Winamax
+from fpdb_3_legacy.WinamaxToFpdb import Winamax
 
 
 class MockConfig:

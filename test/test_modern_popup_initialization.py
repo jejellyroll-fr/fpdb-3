@@ -32,8 +32,8 @@ def _test_theme_values(theme) -> None:
 
 def _get_theme_and_icon_provider():
     """Import and return theme and icon provider functions."""
-    from PopupIcons import get_icon_provider
-    from PopupThemes import get_theme
+    from fpdb_3_legacy.PopupIcons import get_icon_provider
+    from fpdb_3_legacy.PopupThemes import get_theme
 
     return get_theme, get_icon_provider
 
@@ -62,29 +62,13 @@ def _run_theme_and_provider_tests() -> None:
     _test_theme_values(theme)
 
 
-def test_modern_submenu_attributes() -> bool | None:
+def test_modern_submenu_attributes() -> None:
     """Test que ModernSubmenu a tous les attributs requis après init."""
-    try:
-        _run_theme_and_provider_tests()
-        return True
-
-    except Exception:
-        import traceback
-
-        traceback.print_exc()
-        return False
+    _run_theme_and_provider_tests()
 
 
 def test_initialization_order() -> None:
     """Test that the initialization order is correct."""
     # Simulate the corrected initialization order
-    steps = [
-        "1. Extract theme/icon names from kwargs",
-        "2. Initialize theme = get_theme(theme_name)",
-        "3. Initialize icon_provider = get_icon_provider(icon_provider_name)",
-        "4. Initialize sections = {}",
-        "5. Call super().__init__() which calls create()",
-        "6. create() calls setup_window_style() which uses self.theme",
-    ]
 
     # Steps are documented above for reference

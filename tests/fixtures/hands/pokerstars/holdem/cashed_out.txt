@@ -1,0 +1,24 @@
+PokerStars Hand #1000000000:  Hold'em No Limit ($0.05/$0.10 USD) - 2025/01/01 12:00:00 ET
+Table 'CashOut Table' 6-max Seat #1 is the button
+Seat 1: Player1 ($10.00 in chips)
+Seat 2: Player2 ($10.00 in chips)
+Player1: posts small blind $0.05
+Player2: posts big blind $0.10
+*** HOLE CARDS ***
+Dealt to Player1 [Ah As]
+Player1: raises $0.20 to $0.30
+Player2: raises $9.70 to $10.00 and is all-in
+Player1: calls $9.70 and is all-in
+*** FLOP *** [Ks Qs Js]
+*** TURN *** [Ks Qs Js] [Ts]
+*** RIVER *** [Ks Qs Js Ts] [9s]
+*** SHOW DOWN ***
+Player1: shows [Ah As] (Royal Flush)
+Player2: shows [2c 3c] (High Card King)
+Player1 collected $19.00 from pot
+Player1 cashed out the hand for $18.80 | Cash Out Fee $0.20
+*** SUMMARY ***
+Total pot $20.00 | Rake $1.00
+Board [Ks Qs Js Ts 9s]
+Seat 1: Player1 (small blind) showed [Ah As] and won ($19.00) with Royal Flush (cashed out)
+Seat 2: Player2 (big blind) showed [2c 3c] and lost with High Card King

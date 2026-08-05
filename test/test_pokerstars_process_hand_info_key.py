@@ -3,7 +3,7 @@
 import unittest
 from unittest.mock import Mock, patch
 
-from PokerStarsToFpdb import PokerStars
+from fpdb_3_legacy.PokerStarsToFpdb import PokerStars
 
 
 class MockConfig:
