@@ -381,6 +381,33 @@ def _events_from_lines(lines: Iterable[str]) -> Iterator[tuple]:
         yield from reassembler.feed_line(line.rstrip("\n"))
 
 
+def _events_from_archive(path: str) -> Iterator[tuple]:
+    """Replay the decoded events ``RawEventArchive`` wrote for one day.
+
+    This is the post-decode form, so a replay skips TCP reassembly entirely and
+    reproduces exactly what the pump was handed live. It is what makes hands
+    recoverable after a build or import bug is fixed: the events are still on
+    disk, and running them back through the corrected code imports what the
+    session lost.
+    """
+    with open(path, encoding="utf-8", errors="replace") as handle:
+        for line_no, raw_line in enumerate(handle, 1):
+            line = raw_line.strip()
+            if not line:
+                continue
+            try:
+                record = json.loads(line)
+            except ValueError:
+                print(f"[WARN] {os.path.basename(path)}:{line_no} is not JSON; skipped")
+                continue
+            name = record.get("event")
+            if not isinstance(name, str):
+                # Every consumer reads the event by name; a record without one
+                # describes nothing and would fail deep inside the builder.
+                continue
+            yield (name, record.get("hand_id"), record.get("payload"))
+
+
 def ensure_coinpoker_site(db) -> None:
     """Insert the CoinPoker row into the Sites table if it is missing."""
     try:
@@ -910,7 +937,22 @@ def _make_equity_coordinator(config, notify) -> KnownCardsAnalysisCoordinator:
     )
 
 
-def run(events: Iterable[tuple], *, dry_run: bool, table_category: str, config_file: str | None = None) -> None:
+def run(
+    events: Iterable[tuple],
+    *,
+    dry_run: bool,
+    table_category: str,
+    config_file: str | None = None,
+    archive: bool = True,
+    notify_hud: bool = True,
+) -> None:
+    """Build and import hands from a stream of decoded events.
+
+    ``archive`` is off for a replay: the events being read already came from
+    the archive, and appending them would grow it by a copy of itself on every
+    run. ``notify_hud`` is off for the same reason -- a bulk catch-up would
+    walk the HUD through hours of finished tables.
+    """
     file_id = 0
     notify = None
     known_aof_tables: dict[str, Any] = {}
@@ -923,7 +965,7 @@ def run(events: Iterable[tuple], *, dry_run: bool, table_category: str, config_f
         db, config = _open_db(config_file)
         file_id = _ensure_capture_file(db)
         known_aof_tables = _known_aof_tables(db)
-        notify = _make_hud_notifier()
+        notify = _make_hud_notifier() if notify_hud else None
 
     equity_coordinator = None if dry_run else _make_equity_coordinator(config, notify)
     pump = HandPump(
@@ -936,13 +978,14 @@ def run(events: Iterable[tuple], *, dry_run: bool, table_category: str, config_f
         equity_coordinator=equity_coordinator,
         known_aof_tables=known_aof_tables,
     )
-    raw_archive = RawEventArchive()
-    print("[INFO] === CoinPoker live feed active ===")
+    raw_archive = RawEventArchive() if archive else None
+    print("[INFO] === CoinPoker live feed active ===" if archive else "[INFO] === CoinPoker archive replay ===")
     accumulated: list[tuple] = []
     since_check = 0
     try:
         for event in events:
-            raw_archive.append(event)
+            if raw_archive is not None:
+                raw_archive.append(event)
             accumulated.append(event)
             since_check += 1
             # Re-evaluate hands periodically (the server pushes many small events).
@@ -1020,11 +1063,44 @@ def _acquire_instance_lock(path: str | None = None):
     return handle
 
 
-def main() -> None:
+def _replay_archives(args: Any) -> None:
+    """Re-import every named event archive, one session per file.
+
+    Each day's capture was its own session, and the "only one table was seen"
+    licence that lets a table-less marker speak for a table is a property of a
+    session. Pooling the days into one run would silently change what the
+    events are read to mean, so each file gets its own pump.
+    """
+    try:
+        for path in sorted(args.replay_archive):
+            print(f"[INFO] replaying {path}")
+            run(
+                _events_from_archive(path),
+                dry_run=args.dry_run,
+                table_category=args.game,
+                config_file=args.config_file,
+                archive=False,
+                notify_hud=False,
+            )
+    except KeyboardInterrupt:
+        print("\n[INFO] Stopped.")
+        sys.exit(0)
+
+
+def _build_arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="CoinPoker live HUD capture feed (native libpcap/Npcap)")
     src = parser.add_mutually_exclusive_group(required=True)
     src.add_argument("--live", action="store_true", help="Capture live traffic (needs root/Administrator).")
     src.add_argument("--replay", metavar="PCAP", help="Read a saved pcap/pcapng file (no privileges needed).")
+    src.add_argument(
+        "--replay-archive",
+        metavar="JSONL",
+        nargs="+",
+        help=(
+            "Re-import from coinpoker-raw-*.jsonl event archives (no privileges needed). "
+            "Hands already in the database are skipped as duplicates, so this is safe to repeat."
+        ),
+    )
     src.add_argument("--stdin", action="store_true", help="Read tcpdump -S -x text from stdin (portable fallback).")
     src.add_argument("--list-ifaces", action="store_true", help="List capture devices and exit.")
     parser.add_argument("--iface", help="Capture device (default: auto; 'any' on Linux).")
@@ -1033,7 +1109,11 @@ def main() -> None:
     parser.add_argument("--log-file", help="Tee all output to this file (used by the GUI tab).")
     parser.add_argument("--stop-file", help="Exit cleanly once this file exists (GUI stop signal).")
     parser.add_argument("--config-file", help="Explicit HUD_config.xml path (needed when launched elevated).")
-    args = parser.parse_args()
+    return parser
+
+
+def main() -> None:
+    args = _build_arg_parser().parse_args()
 
     if args.log_file:
         _logf = open(args.log_file, "a", buffering=1, encoding="utf-8")  # noqa: SIM115
@@ -1042,6 +1122,12 @@ def main() -> None:
 
     if args.list_ifaces:
         _print_devices()
+        return
+
+    if args.replay_archive:
+        # Reads decoded events off disk: no capture device, no privileges, and
+        # no instance lock -- it competes with nothing.
+        _replay_archives(args)
         return
 
     import os
@@ -1059,6 +1145,10 @@ def main() -> None:
         except RuntimeError as exc:
             print(f"[ERROR] {exc}")
             sys.exit(1)
+
+    if args.replay_archive:
+        _replay_archives(args)
+        return
 
     if args.live:
         events = _events_from_segments(capture_live(args.iface, BPF_FILTER, stop=stop))

@@ -161,3 +161,64 @@ def merge_missing_profile_stats(
             str(max(dimensions[0], int(source.getAttribute("rows")))),
         )
     return changed
+
+
+def _is_untouched_legacy_popup(target: Any, source: Any, legacy_classes: frozenset[str]) -> bool:
+    if target.getAttribute("pu_class") not in legacy_classes:
+        return False
+    presentation_attributes = {
+        name for name in target.attributes.keys() if name.startswith("pu_") and name not in {"pu_name", "pu_class"}
+    }
+    if presentation_attributes:
+        return False
+
+    source_names = {
+        node.getAttribute("pu_stat_name")
+        for node in _direct_children(source, "pu_stat")
+        if node.getAttribute("pu_stat_name")
+    }
+    target_stats = _direct_children(target, "pu_stat")
+    if not target_stats:
+        return False
+    return all(
+        stat.getAttribute("pu_stat_name") in source_names and set(stat.attributes.keys()) == {"pu_stat_name"}
+        for stat in target_stats
+    )
+
+
+def upgrade_legacy_popup_presentation(
+    config_doc: Any,
+    package_root: Any,
+    *,
+    popup_name: str,
+    legacy_classes: frozenset[str] = frozenset({"", "default"}),
+) -> bool:
+    """Upgrade an untouched legacy popup to the package's rich presentation.
+
+    Existing named popups normally belong to the user and must not be
+    overwritten. There is one safe exception: an old stock popup whose class
+    is still ``default`` and whose rows contain only known bare stat names.
+    Any presentation attribute, custom row attribute or unknown statistic
+    makes the popup user-owned and leaves it untouched.
+
+    The helper is package-driven and contains no game or stat names, so future
+    HUD packages can reuse the same migration contract.
+    """
+    source = _named_node(package_root, "pu", "pu_name", popup_name)
+    target = _named_node(config_doc, "pu", "pu_name", popup_name)
+    if source is None or target is None or not _is_untouched_legacy_popup(target, source, legacy_classes):
+        return False
+
+    for name in list(target.attributes.keys()):
+        if name != "pu_name":
+            target.removeAttribute(name)
+    for name in source.attributes.keys():
+        if name != "pu_name":
+            target.setAttribute(name, source.getAttribute(name))
+    while target.firstChild:
+        target.removeChild(target.firstChild)
+    for source_stat in _direct_children(source, "pu_stat"):
+        _append_imported(config_doc, target, source_stat)
+    if _direct_children(target, "pu_stat"):
+        target.appendChild(config_doc.createTextNode("\n    "))
+    return True

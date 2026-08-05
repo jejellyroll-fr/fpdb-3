@@ -43,6 +43,7 @@ from qt_material import apply_stylesheet
 
 from fpdb_3_legacy import Aux_Base, Configuration, Database, Deck, Hud, Options, db_profile
 from fpdb_3_legacy.db_reconnect import is_connection_lost
+from fpdb_3_legacy.hud_profiles import HudContext, HudPositionScope
 from fpdb_3_legacy.hud_read_service import (
     HudBatchReadRequest,
     HudBatchSnapshot,
@@ -53,6 +54,7 @@ from fpdb_3_legacy.hud_read_service import (
 from fpdb_3_legacy.HudStatsPersistence import get_hud_stats_persistence
 from fpdb_3_legacy.loggingFpdb import get_logger, hud_trace
 from fpdb_3_legacy.SmartHudManager import RestartReason, get_smart_hud_manager
+from fpdb_3_legacy.table_info import TableInfo
 
 # Logging configuration
 
@@ -92,6 +94,7 @@ class HUDCreationArgs:
     game_type: str
     stat_dict: dict[str, Any]
     cards: dict[str, Any]
+    context: HudContext | None = None
     hand_instance: Any = None
     loading: bool = False
 
@@ -523,6 +526,10 @@ class HudMain(QObject):
             # Values include game identity so a recycled table key cannot leak a
             # Hold'em/PLO choice into another game.
             self._table_stat_set_overrides: dict[str, tuple[str, str, str]] = {}
+            # Fingerprint of HUD_config.xml as last read. Preferences run in the
+            # fpdb process, not this one, so a saved profile rule reaches the
+            # open tables by way of the file rather than a call.
+            self._config_fingerprint = self._read_config_fingerprint()
             # Last hand id processed per table. The ZMQ producer (auto-import
             # re-scanning growing files) can deliver the same Hands.id more than
             # once; this makes read_stdin idempotent so each hand refreshes the
@@ -759,6 +766,7 @@ class HudMain(QObject):
             table_info = self._last_table_info.get(temp_key) or self.cache.get(last_hand_id)
             if table_info is None:
                 continue
+            info = TableInfo.coerce(table_info)
             needs_mucked = any(type(aux).__module__.rsplit(".", 1)[-1] == "Mucked" for aux in hud.aux_windows)
             contexts.append(
                 HudTableReadContext(
@@ -766,9 +774,9 @@ class HudMain(QObject):
                     last_hand_id=last_hand_id,
                     hud_params=dict(hud.hud_params),
                     poker_game=hud.poker_game,
-                    game_type=table_info[3],
-                    site_id=table_info[5],
-                    num_seats=table_info[7],
+                    game_type=info.game_type,
+                    site_id=info.site_id,
+                    num_seats=info.num_seats,
                     needs_mucked_data=needs_mucked,
                 ),
             )
@@ -789,41 +797,30 @@ class HudMain(QObject):
         if prepared is None or prepared.table_info is None:
             return None
         table_info = prepared.table_info
-        (
-            table_name,
-            _max_seats,
-            poker_game,
-            game_type,
-            fast,
-            site_id,
-            site_name,
-            num_seats,
-            tour_number,
-            tab_number,
-            _tourney_name,
-        ) = table_info
+        info = TableInfo.coerce(table_info)
+        table_name = info.table_name
         if not isinstance(table_name, str) or not table_name.strip():
             return None
 
         enabled_sites = self.config.get_supported_sites()
-        hud_site_name = self._resolve_hud_config_site(site_name, enabled_sites)
+        hud_site_name = self._resolve_hud_config_site(info.site_name, enabled_sites)
         aux_disabled_sites = [
             site for site in enabled_sites if not self.config.get_site_parameters(site)["aux_enabled"]
         ]
-        if fast or hud_site_name in aux_disabled_sites or hud_site_name not in enabled_sites:
+        if info.fast or hud_site_name in aux_disabled_sites or hud_site_name not in enabled_sites:
             return None
 
-        temp_key = self._get_temp_key(game_type, tour_number, tab_number, table_name)
+        temp_key = self._get_temp_key(info.game_type, info.tour_number, info.tab_number, table_name)
         if temp_key in self.hud_dict:
             return temp_key
-        if self._handle_tournament_table_changes(game_type, temp_key, tour_number):
+        if self._handle_tournament_table_changes(info.game_type, temp_key, info.tour_number):
             return None
         self._create_new_hud(
             hand_id,
             temp_key,
             table_info,
-            site_id,
-            num_seats,
+            info.site_id,
+            info.num_seats,
             hud_site_name,
             loading=True,
         )
@@ -1029,6 +1026,11 @@ class HudMain(QObject):
         # the drag stutter. Table geometry changes are picked up on the next tick.
         if Aux_Base.is_drag_active():
             return
+        # Checked here rather than on a timer of its own: it is one os.stat
+        # unless the file really changed, and skipping it during a drag also
+        # keeps the HUD's own layout writes from rebuilding what is being
+        # dragged.
+        self.refresh_profiles_from_config()
         if not self.hud_dict:
             # log.info("Waiting for hands ...")
             pass
@@ -1118,6 +1120,88 @@ class HudMain(QObject):
         """Forget the local profile when the underlying table is gone."""
         self._table_stat_set_overrides.pop(table, None)
 
+    def _read_config_fingerprint(self) -> tuple[float, int] | None:
+        """Cheap change detector for HUD_config.xml, polled with the tables."""
+        try:
+            stat = os.stat(self.config.file)
+        except OSError:
+            return None
+        return (stat.st_mtime, stat.st_size)
+
+    def refresh_profiles_from_config(self) -> int:
+        """Re-apply the profile rules to open tables after a config change.
+
+        HUD Preferences runs in the fpdb process and this one is a subprocess,
+        so nothing can call in when Apply is pressed: the configuration file is
+        the signal. Rebuilding a HUD destroys and recreates its windows, which
+        the player sees, so only tables whose effective profile actually
+        changed are touched -- saving an unrelated preference rebuilds nothing.
+
+        Returns the number of tables rebuilt.
+        """
+        fingerprint = self._read_config_fingerprint()
+        if fingerprint is None or fingerprint == self._config_fingerprint:
+            return 0
+        self._config_fingerprint = fingerprint
+        if self.config.reload() is False:
+            log.warning("HUD_config.xml changed but could not be reloaded; keeping the profiles in use")
+            return 0
+
+        rebuilt = 0
+        for temp_key, hud in list(self.hud_dict.items()):
+            if self._reapply_profile(temp_key, hud):
+                rebuilt += 1
+        if rebuilt:
+            log.info("Config change applied: %d table(s) rebuilt with a new HUD profile", rebuilt)
+        return rebuilt
+
+    def _reapply_profile(self, temp_key: str, hud: Hud.Hud) -> bool:
+        """Rebuild one table if the rules now select a different profile."""
+        context = getattr(hud, "hud_context", None)
+        if context is None:
+            return False
+        table_key = getattr(getattr(hud, "table", None), "key", None)
+        if table_key is not None and self.get_table_stat_set_override(table_key, hud.poker_game, hud.game_type):
+            # The table menu is an explicit, session-only choice by the player.
+            return False
+
+        params = self.config.get_supported_games_parameters(hud.poker_game, hud.game_type, context)
+        new_stat_set = params.get("game_stat_set") if isinstance(params, dict) else None
+        if new_stat_set is None:
+            return False
+        current = (hud.supported_games_parameters or {}).get("game_stat_set")
+        if getattr(new_stat_set, "name", None) == getattr(current, "name", None):
+            return False
+
+        try:
+            self._rebuild_hud_with_stat_set(hud, new_stat_set)
+        except Exception:  # intentional broad catch: a failed rebuild must leave no orphan windows
+            log.exception("Rebuilding %s for profile %s failed; restarting it", temp_key, new_stat_set.name)
+            self.kill_hud(None, temp_key)
+        return True
+
+    @staticmethod
+    def _rebuild_hud_with_stat_set(hud: Hud.Hud, stat_set: Any) -> None:
+        """Swap a HUD onto another profile, the way the table menu does.
+
+        The scope is recomputed with the profile because saved positions are
+        filed under it: a table that changes profile has to read the positions
+        belonging to the new one, not keep pointing at the old one's.
+        """
+        hud.supported_games_parameters = dict(hud.supported_games_parameters)
+        hud.supported_games_parameters["game_stat_set"] = stat_set
+        hud.position_scope = HudPositionScope.from_hud(hud)
+        for aux in list(getattr(hud, "aux_windows", [])):
+            if not hasattr(aux, "refresh_stats_layout"):
+                continue  # Mucked and friends carry no stat-set layout
+            aux.game_params = stat_set
+            aux.destroy()
+            aux.refresh_stats_layout()
+            aux.create()
+            if getattr(hud, "stat_dict", None):
+                aux.update_gui(None)
+        log.info("Table %s rebuilt with HUD profile %s", getattr(hud, "table_name", "?"), stat_set.name)
+
     def create_HUD(self, args: HUDCreationArgs) -> None:
         """Create a new HUD for a table."""
         log.debug("Creating HUD for table %s and hand %s", args.temp_key, args.new_hand_id)
@@ -1128,6 +1212,7 @@ class HudMain(QObject):
             args.poker_game,
             args.game_type,
             self.config,
+            args.context,
         )
         self.hud_dict[args.temp_key].table_name = args.temp_key
         self.hud_dict[args.temp_key].stat_dict = args.stat_dict
@@ -1470,9 +1555,8 @@ class HudMain(QObject):
                     unresolved.extend(hand_ids[index + 1 :])
                     break
                 continue
-            table_name, game_type = table_info[0], table_info[3]
-            tour_number, tab_number = table_info[8], table_info[9]
-            latest[self._get_temp_key(game_type, tour_number, tab_number, table_name)] = hand_id
+            info = TableInfo.coerce(table_info)
+            latest[self._get_temp_key(info.game_type, info.tour_number, info.tab_number, info.table_name)] = hand_id
         return latest, unresolved
 
     def _drain_pending_hands(self) -> None:
@@ -1667,7 +1751,8 @@ class HudMain(QObject):
                 )
                 continue
 
-            pending.append((table_name, last_hand_id, table_info[3], table_info[5], table_info[7]))
+            info = TableInfo.coerce(table_info)
+            pending.append((table_name, last_hand_id, info.game_type, info.site_id, info.num_seats))
         return pending
 
     def _batch_secondary_stats(self, pending: list[tuple]) -> dict:
@@ -1789,10 +1874,15 @@ class HudMain(QObject):
         loading: bool = False,
     ) -> None:
         """Create a new HUD for a table."""
-        (table_name, max_seats, poker_game, game_type, _, _, site_name, _, tour_number, tab_number, tourney_name) = (
-            table_info
-        )
-        hud_site_name = hud_site_name or site_name
+        info = TableInfo.coerce(table_info)
+        table_name = info.table_name
+        max_seats = info.max_seats
+        poker_game = info.poker_game
+        game_type = info.game_type
+        tour_number = info.tour_number
+        tab_number = info.tab_number
+        tourney_name = info.tourney_name
+        hud_site_name = hud_site_name or info.site_name
         hud_poker_game = self._resolve_hud_poker_game(poker_game)
         if self.config.get_supported_games_parameters(hud_poker_game, game_type) is None:
             log.error(
@@ -1857,7 +1947,7 @@ class HudMain(QObject):
             log.error(
                 "HUD create: table name %s not found for db_site=%s hud_site=%s, skipping.",
                 table_name,
-                site_name,
+                info.site_name,
                 hud_site_name,
             )
             return
@@ -1909,6 +1999,15 @@ class HudMain(QObject):
                 game_type=game_type,
                 stat_dict=stat_dict,
                 cards=cards,
+                context=HudContext(
+                    site=hud_site_name,
+                    game=hud_poker_game,
+                    game_type=game_type,
+                    limit_type=info.limit_type,
+                    max_seats=max_seats,
+                    players=info.num_seats,
+                    speed="fast" if info.fast else "normal",
+                ),
                 hand_instance=prepared.hand_instance if prepared is not None else None,
                 loading=loading,
             )
@@ -1943,19 +2042,15 @@ class HudMain(QObject):
             )
             return None
 
-        (
-            table_name,
-            max_seats,
-            poker_game,
-            game_type,
-            fast,
-            site_id,
-            site_name,
-            num_seats,
-            tour_number,
-            tab_number,
-            tourney_name,
-        ) = table_info
+        info = TableInfo.coerce(table_info)
+        table_name = info.table_name
+        poker_game = info.poker_game
+        game_type = info.game_type
+        site_id = info.site_id
+        site_name = info.site_name
+        num_seats = info.num_seats
+        tour_number = info.tour_number
+        tab_number = info.tab_number
 
         # A cash-table HUD is keyed directly by table_name.  Legacy/corrupt
         # rows may have an empty name; accepting one creates a ghost HUD shown
@@ -1973,14 +2068,14 @@ class HudMain(QObject):
         aux_disabled_sites = [
             site for site in enabled_sites if not self.config.get_site_parameters(site)["aux_enabled"]
         ]
-        if fast or hud_site_name in aux_disabled_sites or hud_site_name not in enabled_sites:
+        if info.fast or hud_site_name in aux_disabled_sites or hud_site_name not in enabled_sites:
             log.warning(
                 "HUD creation skipped for hand %s table=%s db_site=%s hud_site=%s: fast=%s, aux_disabled=%s, site_enabled=%s",
                 new_hand_id,
                 table_name,
                 site_name,
                 hud_site_name,
-                fast,
+                info.fast,
                 hud_site_name in aux_disabled_sites,
                 hud_site_name in enabled_sites,
             )

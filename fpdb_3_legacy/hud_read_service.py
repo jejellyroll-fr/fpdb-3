@@ -17,6 +17,7 @@ from typing import Any
 from fpdb_3_legacy import Database, Hand
 from fpdb_3_legacy.db_reconnect import is_connection_lost
 from fpdb_3_legacy.loggingFpdb import get_logger
+from fpdb_3_legacy.table_info import TableInfo
 
 log = get_logger("hud_read_service")
 
@@ -48,8 +49,9 @@ def _snapshot_hand(prepared: HudPreparedHand) -> HudPreparedHand:
 
 def hud_temp_key(table_info: tuple) -> str:
     """Return the table identity used by ``HudMain.hud_dict``."""
-    table_name, game_type = table_info[0], table_info[3]
-    tour_number, tab_number = table_info[8], table_info[9]
+    info = TableInfo.coerce(table_info)
+    table_name, game_type = info.table_name, info.game_type
+    tour_number, tab_number = info.tour_number, info.tab_number
     if game_type != "tour":
         return table_name
     try:
@@ -336,7 +338,8 @@ class HudReadService:
         hero_id: int,
         needs_mucked_data: bool,
     ) -> HudPreparedHand:
-        game_type, num_seats = table_info[3], table_info[7]
+        info = TableInfo.coerce(table_info)
+        game_type, num_seats = info.game_type, info.num_seats
         self.database.init_hud_stat_vars(hud_params["hud_days"], hud_params["h_hud_days"])
         stat_dict = self.database.get_stats_from_hand(
             hand_id,
@@ -453,14 +456,13 @@ class HudReadService:
             table_info = hands[_hand_key(hand_id)].table_info
             if table_info is None:
                 continue
-            temp_key = hud_temp_key(table_info)
+            info = TableInfo.coerce(table_info)
+            temp_key = hud_temp_key(info)
             context = contexts.get(temp_key)
-            poker_game = context.poker_game if context else hud_poker_game(table_info[2])
+            poker_game = context.poker_game if context else hud_poker_game(info.poker_game)
             params = context.hud_params if context else request.hud_params
             needs_mucked = (
-                context.needs_mucked_data
-                if context
-                else self._needs_mucked_data(poker_game, table_info[3])
+                context.needs_mucked_data if context else self._needs_mucked_data(poker_game, info.game_type)
             )
             try:
                 hands[_hand_key(hand_id)] = self._read_hand(
@@ -468,7 +470,7 @@ class HudReadService:
                     table_info,
                     params,
                     poker_game,
-                    hero_ids.get(table_info[5], -1),
+                    hero_ids.get(info.site_id, -1),
                     needs_mucked,
                 )
                 loaded_tables.add(temp_key)

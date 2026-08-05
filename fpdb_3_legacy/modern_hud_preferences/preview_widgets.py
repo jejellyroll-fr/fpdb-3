@@ -6,9 +6,12 @@ from typing import Any
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QColor, QFont, QLinearGradient, QPainter, QPen
 from PySide6.QtWidgets import (
+    QDialog,
     QFrame,
     QGridLayout,
+    QHBoxLayout,
     QLabel,
+    QPushButton,
     QScrollArea,
     QSizePolicy,
     QVBoxLayout,
@@ -16,6 +19,7 @@ from PySide6.QtWidgets import (
 )
 
 from fpdb_3_legacy.Aux_Hud import SimpleLabel
+from fpdb_3_legacy.i18n import gettext as _, translate_hud_category, translate_hud_label
 from fpdb_3_legacy.loggingFpdb import get_logger
 from fpdb_3_legacy.PopupIcons import get_icon_provider, get_stat_category
 from fpdb_3_legacy.PopupThemes import get_theme
@@ -555,7 +559,7 @@ class PopupPreviewWidget(QWidget):
             self._add_empty_state(popup_name)
             return
 
-        if popup_class.startswith("ModernSubmenu"):
+        if popup_class.startswith("ModernSubmenu") or popup_class == "CategorizedPopup":
             if not theme_name:
                 theme_name = (
                     "material_light"
@@ -693,14 +697,18 @@ class PopupPreviewWidget(QWidget):
         )
         grouped: dict[str, list[dict]] = {}
         for stat in stats:
-            category = stat.get("category") or get_stat_category(stat.get("stat_name", ""))
+            raw_cat = stat.get("category") or get_stat_category(stat.get("stat_name", ""))
+            category = translate_hud_category(raw_cat)
             grouped.setdefault(category, []).append(stat)
 
         section_order = ["player_info", "preflop", "flop", "turn", "river", "steal", "aggression", "general"]
         ordered_sections = [name for name in section_order if name in grouped]
         ordered_sections.extend(name for name in grouped if name not in ordered_sections)
         for section_name in ordered_sections:
-            header = QLabel(f"{icons.get_section_icon(section_name)}  {section_name.replace('_', ' ').title()}")
+            display_section = translate_hud_category(section_name)
+            if "_" in display_section:
+                display_section = display_section.replace("_", " ").title()
+            header = QLabel(f"{icons.get_section_icon(section_name)}  {display_section}")
             header.setStyleSheet(
                 f"color:{theme.get_color('text_accent')};"
                 f"background:{theme.get_color('section_bg')};"
@@ -709,8 +717,10 @@ class PopupPreviewWidget(QWidget):
             self.popup_layout.addWidget(header)
             for stat in grouped[section_name]:
                 stat_name = stat.get("stat_name", "")
+                raw_label = stat.get("label", "")
+                label_text = translate_hud_label(raw_label) if raw_label else stat_name
                 value = self.sample_values.get(stat_name.lower(), "--")
-                row = QLabel(f"{icons.get_icon(stat_name)}  {stat_name:<18} {value:>7}")
+                row = QLabel(f"{icons.get_icon(stat_name)}  {label_text:<18} {value:>7}")
                 row.setStyleSheet(f"color:{theme.get_color('text_primary')};padding:2px 8px;")
                 self.popup_layout.addWidget(row)
 
@@ -727,6 +737,12 @@ class PopupPreviewWidget(QWidget):
             grid.addWidget(self._row_label(stat), row, col)
         self.popup_layout.addLayout(grid)
 
+    def mouseDoubleClickEvent(self, event) -> None:
+        if self.double_clicked_callback and callable(self.double_clicked_callback):
+            self.double_clicked_callback()
+        if event is not None:
+            super().mouseDoubleClickEvent(event)
+
     def _row_label(self, stat: dict, *, indent: bool = False) -> QLabel:
         stat_name = stat.get("stat_name", "")
         key = stat_name.lower()
@@ -741,6 +757,125 @@ class PopupPreviewWidget(QWidget):
         label.setMinimumHeight(22)
         label.show()
         return label
+
+
+class PopupZoomDialog(QDialog):
+    """Real-size / Zoom modal dialog to view a popup preview at 1:1 or scaled dimensions."""
+
+    def __init__(
+        self,
+        popup_name: str,
+        popup_class: str,
+        stats: list[dict],
+        source: str = "",
+        group: str = "",
+        theme_name: str = "",
+        icon_provider_name: str = "",
+        parent: QWidget | None = None,
+    ) -> None:
+        super().__init__(parent)
+        self.popup_name = popup_name
+        self.current_zoom = 1.0
+
+        self.setWindowTitle(_("🔍 Popup Preview — {name} (Real Size)").format(name=popup_name))
+        self.resize(720, 580)
+        self.setMinimumSize(420, 320)
+
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(16, 16, 16, 16)
+        layout.setSpacing(12)
+
+        # Header bar with title and zoom controls
+        header_layout = QHBoxLayout()
+        title_label = QLabel(f"🔍 {popup_name}")
+        title_label.setStyleSheet("font-size: 15px; font-weight: bold; color: #a78bfa;")
+        header_layout.addWidget(title_label)
+
+        header_layout.addStretch()
+
+        zoom_out_btn = QPushButton("➖")
+        zoom_out_btn.setToolTip(_("Zoom out (-25%)"))
+        zoom_out_btn.setFixedWidth(46)
+        zoom_out_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        zoom_out_btn.clicked.connect(self._zoom_out)
+
+        self.zoom_label = QLabel("100%")
+        self.zoom_label.setStyleSheet("font-weight: bold; min-width: 45px; text-align: center;")
+
+        zoom_in_btn = QPushButton("➕")
+        zoom_in_btn.setToolTip(_("Zoom in (+25%)"))
+        zoom_in_btn.setFixedWidth(46)
+        zoom_in_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        zoom_in_btn.clicked.connect(self._zoom_in)
+
+        zoom_reset_btn = QPushButton(_("100% Reset"))
+        zoom_reset_btn.setToolTip(_("Reset to 100% natural size"))
+        zoom_reset_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        zoom_reset_btn.clicked.connect(self._zoom_reset)
+
+        header_layout.addWidget(zoom_out_btn)
+        header_layout.addWidget(self.zoom_label)
+        header_layout.addWidget(zoom_in_btn)
+        header_layout.addWidget(zoom_reset_btn)
+
+        layout.addLayout(header_layout)
+
+        # Container scroll area
+        self.scroll_area = QScrollArea()
+        self.scroll_area.setWidgetResizable(True)
+        self.scroll_area.setFrameShape(QFrame.Shape.StyledPanel)
+
+        # Preview Widget inside scroll area
+        self.preview_widget = PopupPreviewWidget()
+        self.preview_widget.scroll_area.setMinimumSize(0, 0)
+        self.preview_widget.set_popup(
+            popup_name, popup_class, stats, source, group, theme_name, icon_provider_name
+        )
+
+        self.scroll_area.setWidget(self.preview_widget)
+        layout.addWidget(self.scroll_area, 1)
+
+        # Footer
+        footer_layout = QHBoxLayout()
+        self.size_info_label = QLabel()
+        self.size_info_label.setStyleSheet("color: #94a3b8; font-size: 11px;")
+        footer_layout.addWidget(self.size_info_label)
+
+        footer_layout.addStretch()
+        close_btn = QPushButton(_("Close"))
+        close_btn.setMinimumWidth(90)
+        close_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        close_btn.clicked.connect(self.accept)
+        footer_layout.addWidget(close_btn)
+
+        layout.addLayout(footer_layout)
+        self._update_scale()
+
+    def _zoom_in(self) -> None:
+        if self.current_zoom < 3.0:
+            self.current_zoom += 0.25
+            self._update_scale()
+
+    def _zoom_out(self) -> None:
+        if self.current_zoom > 0.5:
+            self.current_zoom -= 0.25
+            self._update_scale()
+
+    def _zoom_reset(self) -> None:
+        self.current_zoom = 1.0
+        self._update_scale()
+
+    def _update_scale(self) -> None:
+        self.zoom_label.setText(f"{int(self.current_zoom * 100)}%")
+        frame = self.preview_widget.popup_frame
+        hint = frame.sizeHint()
+        width = int(hint.width() * self.current_zoom)
+        height = int(hint.height() * self.current_zoom)
+        self.size_info_label.setText(
+            _("Natural Size: {w} × {h} px  (Scale: {scale}%)").format(
+                w=hint.width(), h=hint.height(), scale=int(self.current_zoom * 100)
+            )
+        )
 
 
 # --- PT4-style design canvas (typed coloured chips in a grid) ---

@@ -28,6 +28,7 @@ from typing import Any
 
 #    FreePokerTools modules
 from fpdb_3_legacy import Database, Hand
+from fpdb_3_legacy.hud_profiles import HudContext, HudPositionScope
 
 #    Standard Library modules
 from fpdb_3_legacy.loggingFpdb import get_logger
@@ -77,7 +78,7 @@ def importName(module_name: str, name: str) -> Any:
 class Hud:
     """A class to manage the HUD overlays."""
 
-    def __init__(self, parent: Any, table: Any, max_players: int, poker_game: str, game_type: str, config: Any) -> None:  # noqa: PLR0913
+    def __init__(self, parent: Any, table: Any, max_players: int, poker_game: str, game_type: str, config: Any, context: HudContext | None = None) -> None:  # noqa: PLR0913, PLR0915
         """Initialize the HUD.
 
         This method is intended to be called from the stdin thread,
@@ -100,6 +101,13 @@ class Hud:
         # it changes, so per-hand refreshes never reposition (see Aux_Hud).
         self.geometry_generation: int = 0
         self.site = table.site
+        provided_context = context
+        self.hud_context = provided_context or HudContext(
+            site=self.site,
+            game=poker_game,
+            game_type=game_type,
+            max_seats=max_players,
+        )
         self.hud_params = dict.copy(
             parent.hud_params,
         )  # we must dict.copy a fresh hud_params dict
@@ -118,10 +126,14 @@ class Hud:
         self.tablehudlabel: Any = None
 
         self.site_parameters = config.get_site_parameters(self.table.site)
-        self.supported_games_parameters = config.get_supported_games_parameters(
-            self.poker_game,
-            self.game_type,
-        )
+        if provided_context is None:
+            self.supported_games_parameters = config.get_supported_games_parameters(self.poker_game, self.game_type)
+        else:
+            self.supported_games_parameters = config.get_supported_games_parameters(
+                self.poker_game,
+                self.game_type,
+                self.hud_context,
+            )
         overrides = getattr(parent, "_table_stat_set_overrides", None)
         if self.supported_games_parameters is not None and isinstance(overrides, dict):
             override_name = parent.get_table_stat_set_override(
@@ -164,6 +176,7 @@ class Hud:
         self.layout = copy.deepcopy(
             self.layout_set.layout[self.max],
         )  # deepcopy required here, because self.layout is used
+        self.position_scope = HudPositionScope.from_hud(self)
         log.debug(
             f"HUD layout created for {self.max}-max table. Positions: {[self.layout.location[i] for i in range(1, self.max + 1) if self.layout.location[i] is not None]}"
         )

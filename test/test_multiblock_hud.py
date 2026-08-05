@@ -167,7 +167,7 @@ def test_block_derives_grid_size_when_unspecified():
 def test_simplehud_accepts_zero_sized_multiblock_profile():
     """Block coordinates must not be indexed into the empty classic grid."""
     ss = _ss(
-        '<ss name="plo4" rows="0" cols="0">'
+        '<ss name="plo4" rows="0" cols="0" font_size="10">'
         '<block label="Identity" rows="1" cols="2">'
         '<stat _rowcol="(1,1)" _stat_name="playershort"/>'
         '<stat _rowcol="(1,2)" _stat_name="n"/></block>'
@@ -191,6 +191,7 @@ def test_simplehud_accepts_zero_sized_multiblock_profile():
 
     aw = Aux_Hud.SimpleHUD(hud, types.SimpleNamespace(), aux_params)
 
+    assert aw.font_size == 10
     assert aw.stats == []
     assert aw.popups == []
     assert aw.tips == []

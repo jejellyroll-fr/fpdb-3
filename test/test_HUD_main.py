@@ -1,11 +1,13 @@
 import contextlib
 import importlib.machinery
 import importlib.util
+import os
 import sys
 import threading
 import time
 import types
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import MagicMock, call, patch
 
 import pytest
@@ -299,7 +301,8 @@ def test_identity_snapshot_requests_a_loading_hud_before_stats_arrive(hud_main) 
 
 
 def test_loading_hud_creation_does_not_require_statistics(hud_main) -> None:
-    table_info = ("table-a", 6, "holdem", "ring", False, 1, "site", 6, None, None, None)
+    # Extended table identity includes limitType after the 11 legacy fields.
+    table_info = ("table-a", 6, "holdem", "ring", False, 1, "site", 6, None, None, None, "nl")
     hud_main._prepared_hands = {"101": MagicMock(table_info=table_info)}
     hud_main.config.get_supported_sites.return_value = ["site"]
     hud_main.config.get_site_parameters.return_value = {"aux_enabled": True}
@@ -354,7 +357,7 @@ def test_loading_hud_builds_empty_creation_args_without_querying_stats(hud_main)
 def test_complete_snapshot_recreates_loading_hud_with_player_seat_mapping(hud_main) -> None:
     """An identity-only HUD cannot be upgraded in place after seats arrive."""
     hand_id = "101"
-    table_info = ("table-a", 6, "holdem", "ring", False, 1, "site", 6, None, None, None)
+    table_info = ("table-a", 6, "holdem", "ring", False, 1, "site", 6, None, None, None, "nl")
     hud_main.cache[hand_id] = table_info
     hud_main.hud_dict["table-a"] = MagicMock(is_loading=True)
     hud_main.config.get_supported_sites.return_value = ["site"]
@@ -1837,3 +1840,136 @@ def test_a_ring_table_is_never_treated_as_a_move(hud_main) -> None:
         assert hud_main._handle_tournament_table_changes("ring", "some other table", "") is False
 
     assert not stale.called
+
+
+# --- Applying saved profile rules to tables that are already open ------------
+# HUD Preferences runs in the fpdb process; this one is a subprocess, so a rule
+# saved with Apply reaches the open tables only by way of the file.
+
+
+def _named_stat_set(profile_name: str) -> MagicMock:
+    # ``name`` is reserved by the MagicMock constructor, so it is set after.
+    stat_set = MagicMock()
+    stat_set.name = profile_name
+    return stat_set
+
+
+def _profile_hud(profile_name: str, *, game: str = "aof_omaha", table_key: str = "table-a") -> MagicMock:
+    hud = MagicMock()
+    hud.poker_game = game
+    hud.game_type = "ring"
+    hud.table.key = table_key
+    hud.table_name = table_key
+    hud.hud_context = HUD_main.HudContext(site="CoinPoker", game=game, game_type="ring", max_seats=6)
+    hud.supported_games_parameters = {"game_stat_set": _named_stat_set(profile_name)}
+    hud.aux_windows = []
+    hud.stat_dict = {}
+    return hud
+
+
+def _config_file(hud_main, tmp_path, contents: str = "<config/>") -> Path:
+    path = tmp_path / "HUD_config.xml"
+    path.write_text(contents, encoding="utf-8")
+    hud_main.config.file = str(path)
+    hud_main._config_fingerprint = hud_main._read_config_fingerprint()
+    return path
+
+
+def _resolves_to(hud_main, profile_name: str) -> MagicMock:
+    stat_set = _named_stat_set(profile_name)
+    hud_main.config.get_supported_games_parameters.return_value = {"game_stat_set": stat_set}
+    return stat_set
+
+
+def test_an_unchanged_config_file_is_not_reloaded(hud_main, tmp_path) -> None:
+    _config_file(hud_main, tmp_path)
+
+    assert hud_main.refresh_profiles_from_config() == 0
+    hud_main.config.reload.assert_not_called()
+
+
+def test_a_saved_rule_rebuilds_only_the_tables_whose_profile_changed(hud_main, tmp_path) -> None:
+    path = _config_file(hud_main, tmp_path)
+    changed = _profile_hud("aof_default", table_key="table-a")
+    unchanged = _profile_hud("plo4_6max_pro", game="omahahi", table_key="table-b")
+    hud_main.hud_dict = {"table-a": changed, "table-b": unchanged}
+
+    def resolve(poker_game, _game_type, _context=None):
+        return {"game_stat_set": _named_stat_set("aof_advanced" if poker_game == "aof_omaha" else "plo4_6max_pro")}
+
+    hud_main.config.get_supported_games_parameters.side_effect = resolve
+    hud_main.config.reload.return_value = True
+    path.write_text("<config changed=\"1\"/>", encoding="utf-8")
+    os.utime(path, (time.time() + 5, time.time() + 5))
+
+    assert hud_main.refresh_profiles_from_config() == 1
+    assert changed.supported_games_parameters["game_stat_set"].name == "aof_advanced"
+    assert unchanged.supported_games_parameters["game_stat_set"].name == "plo4_6max_pro"
+
+
+def test_a_table_local_profile_choice_survives_a_config_change(hud_main, tmp_path) -> None:
+    """The table menu is the player's explicit, session-only decision."""
+    path = _config_file(hud_main, tmp_path)
+    hud = _profile_hud("aof_default")
+    hud_main.hud_dict = {"table-a": hud}
+    hud_main.config.stat_sets = {"aof_default": MagicMock()}
+    hud_main.set_table_stat_set_override("table-a", "aof_omaha", "ring", "aof_default")
+    _resolves_to(hud_main, "aof_advanced")
+    hud_main.config.reload.return_value = True
+    os.utime(path, (time.time() + 5, time.time() + 5))
+
+    assert hud_main.refresh_profiles_from_config() == 0
+    assert hud.supported_games_parameters["game_stat_set"].name == "aof_default"
+
+
+def test_a_config_that_will_not_parse_leaves_the_profiles_in_use(hud_main, tmp_path) -> None:
+    path = _config_file(hud_main, tmp_path)
+    hud = _profile_hud("aof_default")
+    hud_main.hud_dict = {"table-a": hud}
+    hud_main.config.reload.return_value = False
+    _resolves_to(hud_main, "aof_advanced")
+    os.utime(path, (time.time() + 5, time.time() + 5))
+
+    assert hud_main.refresh_profiles_from_config() == 0
+    assert hud.supported_games_parameters["game_stat_set"].name == "aof_default"
+
+
+def test_the_change_is_detected_only_once(hud_main, tmp_path) -> None:
+    path = _config_file(hud_main, tmp_path)
+    hud_main.config.reload.return_value = True
+    os.utime(path, (time.time() + 5, time.time() + 5))
+
+    hud_main.refresh_profiles_from_config()
+    hud_main.refresh_profiles_from_config()
+
+    assert hud_main.config.reload.call_count == 1
+
+
+def test_a_rebuild_recomputes_the_scope_so_positions_follow_the_profile() -> None:
+    """Saved positions are filed under the profile, so the scope must move."""
+    hud = _profile_hud("aof_default")
+    hud.site = "CoinPoker"
+    hud.max = 6
+    hud.layout_set = SimpleNamespace(name="default")
+    hud.aux_windows = []
+    HUD_main.HudMain._rebuild_hud_with_stat_set(hud, _named_stat_set("aof_advanced"))
+
+    assert hud.position_scope.profile == "aof_advanced"
+    assert hud.position_scope.game == "aof_omaha"
+
+
+def test_a_failed_rebuild_restarts_the_table_instead_of_orphaning_windows(hud_main, tmp_path) -> None:
+    path = _config_file(hud_main, tmp_path)
+    hud = _profile_hud("aof_default")
+    hud_main.hud_dict = {"table-a": hud}
+    hud_main.config.reload.return_value = True
+    _resolves_to(hud_main, "aof_advanced")
+    os.utime(path, (time.time() + 5, time.time() + 5))
+
+    with (
+        patch.object(HUD_main.HudMain, "_rebuild_hud_with_stat_set", side_effect=RuntimeError("boom")),
+        patch.object(hud_main, "kill_hud") as kill_hud,
+    ):
+        assert hud_main.refresh_profiles_from_config() == 1
+
+    kill_hud.assert_called_once_with(None, "table-a")

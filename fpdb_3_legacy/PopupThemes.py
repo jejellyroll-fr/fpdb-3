@@ -14,15 +14,39 @@ StatThresholds = dict[str, dict[str, float]]
 class PopupTheme:
     """Base class for popup themes."""
 
+    #: Colours cycled through to tell consecutive sections apart. A theme that
+    #: wants its own set overrides this; renderers must not hard-code one.
+    section_accents: tuple[str, ...] = ("#03DAC6", "#BB86FC", "#FFB74D", "#4FC3F7", "#F06292")
+
     def __init__(self, name: str) -> None:
         self.name = name
         self.colors: dict[str, str] = {}
         self.fonts: dict[str, FontSpec] = {}
         self.spacing: dict[str, int] = {}
 
+    #: Where to look when a theme predates a colour a renderer now asks for.
+    #: Without this a new key falls through to white, which on a dark theme is
+    #: a bright band the author never chose.
+    _COLOR_FALLBACKS = {
+        "text_muted": ("text_secondary", "text_primary"),
+        "scrollbar_bg": ("header_bg", "window_bg"),
+        "stat_neutral": ("text_primary",),
+        "row_bg_odd": ("row_bg_even", "window_bg"),
+    }
+
     def get_color(self, element: str) -> str:
         """Get color for a specific element."""
-        return self.colors.get(element, "#FFFFFF")
+        if element in self.colors:
+            return self.colors[element]
+        for alias in self._COLOR_FALLBACKS.get(element, ()):
+            if alias in self.colors:
+                return self.colors[alias]
+        return "#FFFFFF"
+
+    def get_section_accent(self, index: int) -> str:
+        """Accent colour for the section at ``index``, cycling as needed."""
+        accents = self.section_accents or PopupTheme.section_accents
+        return accents[index % len(accents)]
 
     def get_font(self, element: str) -> FontSpec:
         """Get font properties for a specific element."""
@@ -172,11 +196,63 @@ class ClassicTheme(PopupTheme):
         }
 
 
+class HudDarkTheme(PopupTheme):
+    """Near-black, high-contrast theme for popups read over a poker table.
+
+    The Material themes are built for a desktop window; a popup that opens on
+    top of a lit table needs a darker surface and brighter values to stay
+    legible. Nothing here is tied to a poker variant -- any profile can select
+    it with ``pu_theme="hud_dark"``.
+    """
+
+    section_accents = ("#00B8F0", "#00E5A8", "#A78BFA", "#F5B942", "#FB7185")
+
+    def __init__(self) -> None:
+        super().__init__("hud_dark")
+        self.colors = {
+            "window_bg": "#020407",
+            "header_bg": "#101A2E",
+            "section_bg": "#111B30",
+            "row_bg_even": "#020407",
+            "row_bg_odd": "#070E1A",
+            "text_primary": "#D7E0EA",
+            "text_secondary": "#9AA9C1",
+            "text_muted": "#63758F",
+            "text_accent": "#16C5F4",
+            "border": "#334155",
+            "hover": "#152238",
+            "selected": "#1E293B",
+            "stat_high": "#FF6B7A",
+            "stat_medium": "#F5B942",
+            "stat_low": "#00E59B",
+            "stat_neutral": "#F8FAFC",
+            "scrollbar_bg": "#07101F",
+            "close_bg": "#FF6B7A",
+            "close_text": "#020407",
+        }
+        self.fonts = {
+            "header": {"family": "Segoe UI", "size": 12, "weight": "bold"},
+            "section_title": {"family": "Segoe UI", "size": 11, "weight": "bold"},
+            "stat_name": {"family": "Segoe UI", "size": 11, "weight": "normal"},
+            "stat_value": {"family": "Segoe UI", "size": 12, "weight": "bold"},
+            "stat_sample": {"family": "Segoe UI", "size": 10, "weight": "normal"},
+            "close_button": {"family": "Segoe UI", "size": 10, "weight": "bold"},
+        }
+        self.spacing = {
+            "window_padding": 8,
+            "section_spacing": 6,
+            "row_height": 21,
+            "icon_size": 14,
+            "border_radius": 0,
+        }
+
+
 # Theme registry
 AVAILABLE_THEMES = {
     "material_dark": MaterialDarkTheme,
     "material_light": MaterialLightTheme,
     "classic": ClassicTheme,
+    "hud_dark": HudDarkTheme,
 }
 
 

@@ -2,10 +2,13 @@
 
 from __future__ import annotations
 
+from pathlib import Path
 import re
 from typing import Any
 
 from PySide6.QtCore import QDate, QObject, Qt, QThread, Signal, Slot
+from PySide6.QtGui import QPainter, QPixmap
+from PySide6.QtSvg import QSvgRenderer
 from PySide6.QtWidgets import (
     QApplication,
     QComboBox,
@@ -37,11 +40,14 @@ from fpdb_3_legacy.backfill_autonotes import (
     format_rule_counts,
     format_stats_json,
 )
+from fpdb_3_legacy.Configuration import GRAPHICS_PATH
 from fpdb_3_legacy.Database import Database
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.loggingFpdb import get_logger
 
 log = get_logger("gui_autonotes_workbench")
+
+_CARD_PIXMAP_CACHE: dict[tuple[str, str, int, int], QPixmap] = {}
 
 
 class _AutoNotesWorker(QObject):
@@ -199,9 +205,7 @@ class GuiAutoNotesWorkbench(QWidget):
         self.table = QTableWidget(0, len(self.TABLE_HEADERS))
         self.table.setHorizontalHeaderLabels(self.TABLE_HEADERS)
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Interactive)
-        self.table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.Interactive)
         self.table.horizontalHeader().setSectionResizeMode(7, QHeaderView.ResizeMode.Stretch)
-        self.table.horizontalHeader().setSectionResizeMode(8, QHeaderView.ResizeMode.Stretch)
         self.table.setAlternatingRowColors(True)
         self.table.setSortingEnabled(True)
         self.table.itemDoubleClicked.connect(lambda item: self.open_replayer_from_table(self.table, item.row(), 3))
@@ -254,7 +258,6 @@ class GuiAutoNotesWorkbench(QWidget):
         )
         self.player_notes_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Interactive)
         self.player_notes_table.horizontalHeader().setSectionResizeMode(3, QHeaderView.ResizeMode.Stretch)
-        self.player_notes_table.horizontalHeader().setSectionResizeMode(4, QHeaderView.ResizeMode.Stretch)
         self.player_notes_table.setAlternatingRowColors(True)
         self.player_notes_table.itemDoubleClicked.connect(
             lambda item: self.open_replayer_from_table(self.player_notes_table, item.row(), 5),
@@ -341,7 +344,6 @@ class GuiAutoNotesWorkbench(QWidget):
         )
         self.recent_notes_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Interactive)
         self.recent_notes_table.horizontalHeader().setSectionResizeMode(6, QHeaderView.ResizeMode.Stretch)
-        self.recent_notes_table.horizontalHeader().setSectionResizeMode(7, QHeaderView.ResizeMode.Stretch)
         self.recent_notes_table.setAlternatingRowColors(True)
         self.recent_notes_table.setMinimumHeight(300)
         self.recent_notes_table.itemDoubleClicked.connect(
@@ -658,13 +660,25 @@ class GuiAutoNotesWorkbench(QWidget):
         table.setSortingEnabled(False)
         table.setRowCount(0)
         card_columns = self._card_columns_for_table(table)
+        evidence_columns = self._evidence_columns_for_table(table)
         for values in rows:
             row = table.rowCount()
             table.insertRow(row)
             for column, value in enumerate(values):
-                self._set_table_value(table, row, column, value, visual_cards=column in card_columns)
+                self._set_table_value(
+                    table,
+                    row,
+                    column,
+                    value,
+                    visual_cards=column in card_columns,
+                    visual_evidence=column in evidence_columns,
+                )
         table.setSortingEnabled(True)
         table.resizeColumnsToContents()
+        for col in card_columns:
+            table.setColumnWidth(col, max(table.columnWidth(col), 120))
+        for col in evidence_columns:
+            table.setColumnWidth(col, max(table.columnWidth(col), 360))
 
     def _set_table_value(
         self,
@@ -673,20 +687,37 @@ class GuiAutoNotesWorkbench(QWidget):
         column: int,
         value: Any,
         visual_cards: bool = False,
+        visual_evidence: bool = False,
     ) -> None:
         text = "" if value is None else str(value)
         table.setItem(row, column, self._table_item(text))
-        if visual_cards and text.strip():
+        if visual_evidence and text.strip():
+            evidence_widget = self._evidence_widget(text)
+            if evidence_widget is not None:
+                table.setCellWidget(row, column, evidence_widget)
+                table.setRowHeight(row, max(table.rowHeight(row), 42))
+        elif visual_cards and text.strip():
             cards_widget = self._cards_widget(text)
             if cards_widget is not None:
                 table.setCellWidget(row, column, cards_widget)
-                table.setRowHeight(row, max(table.rowHeight(row), 34))
+                table.setRowHeight(row, max(table.rowHeight(row), 42))
 
     def _card_columns_for_table(self, table: QTableWidget) -> set[int]:
         if table is self.player_notes_table:
             return {1}
         if table is self.recent_notes_table:
             return {2}
+        if table is getattr(self, "table", None):
+            return {1}
+        return set()
+
+    def _evidence_columns_for_table(self, table: QTableWidget) -> set[int]:
+        if table is self.player_notes_table:
+            return {4}
+        if table is self.recent_notes_table:
+            return {7}
+        if table is getattr(self, "table", None):
+            return {8}
         return set()
 
     def _table_item(self, value: Any) -> QTableWidgetItem:
@@ -699,16 +730,48 @@ class GuiAutoNotesWorkbench(QWidget):
     def _note_cards(self, note: dict[str, Any]) -> str:
         evidence = note.get("evidence") or {}
         if isinstance(evidence, dict):
-            cards = evidence.get("hole_cards") or evidence.get("draw_hand") or evidence.get("door_card")
+            cards = (
+                evidence.get("hole")
+                or evidence.get("hole_cards")
+                or evidence.get("draw_hand")
+                or evidence.get("door_card")
+                or evidence.get("cards")
+            )
             if cards:
+                if isinstance(cards, (list, tuple)):
+                    return " ".join(str(c) for c in cards)
                 return str(cards)
         evidence_text = str(note.get("evidenceText") or "")
-        for key in ("hole_cards=", "draw_hand=", "door_card="):
+        for key in ("hole=", "hole_cards=", "draw_hand=", "door_card=", "cards="):
             if key not in evidence_text:
                 continue
             tail = evidence_text.split(key, 1)[1]
             return tail.split(";", 1)[0].strip()
         return ""
+
+    def _get_card_pixmap(self, rank: str, suit: str, width: int = 25, height: int = 33) -> QPixmap | None:
+        rank_str = "10" if rank.upper() in ("10", "T") else rank.lower()
+        suit_str = suit.lower()
+        key = (rank_str, suit_str, width, height)
+        if key in _CARD_PIXMAP_CACHE:
+            return _CARD_PIXMAP_CACHE[key]
+
+        cards_dir = Path(GRAPHICS_PATH) / "cards" / "simple_flat_4color"
+        svg_path = cards_dir / f"{suit_str}_{rank_str}.svg"
+        if not svg_path.exists():
+            svg_path = cards_dir / f"{suit_str}_{rank_str.upper()}.svg"
+            if not svg_path.exists():
+                return None
+
+        renderer = QSvgRenderer(str(svg_path))
+        pixmap = QPixmap(width, height)
+        pixmap.fill(Qt.GlobalColor.transparent)
+        painter = QPainter(pixmap)
+        renderer.render(painter)
+        painter.end()
+
+        _CARD_PIXMAP_CACHE[key] = pixmap
+        return pixmap
 
     def _cards_widget(self, cards_text: str) -> QWidget | None:
         cards = self._parse_cards(cards_text)
@@ -716,21 +779,94 @@ class GuiAutoNotesWorkbench(QWidget):
             return None
         widget = QWidget()
         layout = QHBoxLayout(widget)
-        layout.setContentsMargins(3, 1, 3, 1)
+        layout.setContentsMargins(4, 1, 4, 1)
         layout.setSpacing(3)
         for rank, suit in cards:
-            label = QLabel(self._card_html(rank, suit))
-            label.setTextFormat(Qt.TextFormat.RichText)
-            label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-            label.setMinimumWidth(28)
-            label.setStyleSheet(
-                "QLabel { background: #f8fafc; border: 1px solid #64748b; "
-                "border-radius: 4px; padding: 2px 4px; font-weight: 700; }",
-            )
-            label.setToolTip(cards_text)
-            layout.addWidget(label)
+            pixmap = self._get_card_pixmap(rank, suit, width=25, height=33)
+            if pixmap:
+                lbl = QLabel()
+                lbl.setPixmap(pixmap)
+                lbl.setToolTip(f"{rank}{suit}")
+                layout.addWidget(lbl)
+            else:
+                label = QLabel(self._card_html(rank, suit))
+                label.setTextFormat(Qt.TextFormat.RichText)
+                label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+                label.setStyleSheet(
+                    "QLabel { background: #f8fafc; border: 1px solid #64748b; "
+                    "border-radius: 4px; padding: 2px 4px; font-weight: 700; }",
+                )
+                label.setToolTip(cards_text)
+                layout.addWidget(label)
         layout.addStretch(1)
         return widget
+
+    def _evidence_widget(self, evidence_text: str) -> QWidget | None:
+        if not evidence_text or not evidence_text.strip():
+            return None
+
+        widget = QWidget()
+        layout = QHBoxLayout(widget)
+        layout.setContentsMargins(4, 1, 4, 1)
+        layout.setSpacing(4)
+
+        parts = [p.strip() for p in evidence_text.split(";") if p.strip()]
+        card_pattern = re.compile(r"\b(10|[2-9TJQKA])([hdcsHDCS])\b")
+        found_any_card = False
+
+        for part in parts:
+            if "=" in part:
+                key, val = part.split("=", 1)
+                key = key.strip()
+                val = val.strip()
+            else:
+                key, val = "", part.strip()
+
+            if key:
+                key_label = QLabel(f"{key}:")
+                key_label.setStyleSheet("color: #a78bfa; font-weight: 700; font-size: 11px;")
+                layout.addWidget(key_label)
+
+            cards = list(card_pattern.finditer(val))
+            if cards:
+                found_any_card = True
+                last_end = 0
+                for m in cards:
+                    prefix = val[last_end:m.start()].strip()
+                    if prefix:
+                        txt_lbl = QLabel(prefix)
+                        txt_lbl.setStyleSheet("color: #cbd5e1; font-size: 11px;")
+                        layout.addWidget(txt_lbl)
+
+                    rank, suit = m.group(1), m.group(2)
+                    pixmap = self._get_card_pixmap(rank, suit, width=25, height=33)
+                    if pixmap:
+                        card_lbl = QLabel()
+                        card_lbl.setPixmap(pixmap)
+                        card_lbl.setToolTip(f"{rank}{suit}")
+                        layout.addWidget(card_lbl)
+                    else:
+                        txt_lbl = QLabel(f"{rank}{suit}")
+                        layout.addWidget(txt_lbl)
+                    last_end = m.end()
+
+                suffix = val[last_end:].strip()
+                if suffix:
+                    txt_lbl = QLabel(suffix)
+                    txt_lbl.setStyleSheet("color: #cbd5e1; font-size: 11px;")
+                    layout.addWidget(txt_lbl)
+            else:
+                txt_lbl = QLabel(val)
+                txt_lbl.setStyleSheet("color: #cbd5e1; font-size: 11px;")
+                layout.addWidget(txt_lbl)
+
+            if part != parts[-1]:
+                sep = QLabel("•")
+                sep.setStyleSheet("color: #475569; font-size: 10px;")
+                layout.addWidget(sep)
+
+        layout.addStretch(1)
+        return widget if found_any_card else None
 
     def _parse_cards(self, cards_text: str) -> list[tuple[str, str]]:
         cards = []

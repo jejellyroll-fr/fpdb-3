@@ -790,11 +790,9 @@ class AuxSeats(AuxWindow):
                 slot = self.adj[i]
                 self.hud.layout.location[slot] = new_position  # update the hud-level dict,
                 # so other aux can be told
-                self._propagate_to_shared_layout(slot, new_position)
             elif i == "common":
                 slot = "common"
                 self.hud.layout.common = new_position
-                self._propagate_to_shared_layout("common", new_position)
             else:
                 log.warning("Ignoring unexpected HUD seat identifier while saving position: %r", i)
                 return
@@ -805,13 +803,20 @@ class AuxSeats(AuxWindow):
             table_h = getattr(self.hud.table, "height", 0) or 0
             self._update_reference_position(self.hud, slot, new_position, table_w, table_h)
             self._propagate_to_open_huds(slot, new_position)
+            scoped_override = self._persist_position_override(slot, new_position)
             # configure_event_cb only fires on a genuine drag-release (see
             # SeatWindow.button_release_left, gated on moved==True), so this
             # writes the config at most once per drag. Block-window HUDs already
             # auto-persist to the positions store; this makes the classic
             # one-window-per-seat HUD persist too, instead of keeping drags in
             # memory only until the "Save HUD Layout" menu is used.
-            self._persist_layout_after_drag()
+            if not scoped_override:
+                self._propagate_to_shared_layout(slot, new_position)
+                self._persist_layout_after_drag()
+
+    def _persist_position_override(self, seat: Any, position: tuple[int, int]) -> bool:
+        """Persist a scoped user override when the concrete HUD supports it."""
+        return False
 
     def _persist_layout_after_drag(self) -> None:
         """Write the just-dragged layout to HUD_config.xml immediately.
@@ -897,23 +902,32 @@ class AuxSeats(AuxWindow):
         same slot is the same place on every table even when the hero sits in a
         different seat, so the value transfers directly; only a table-size
         difference needs scaling.
+
+        Two tables count as the same arrangement only when their whole
+        ``HudPositionScope`` matches -- room, game, cash/tournament, seats,
+        profile and layout. Pairing on the layout set alone made CoinPoker's
+        PLO4 and AoF PLO4 tables, which share one layout, drag each other
+        around. A HUD with no scope propagates to nothing: without an identity
+        it cannot claim to be the same arrangement as anything else.
         """
         parent = getattr(self.hud, "parent", None)
         hud_dict = getattr(parent, "hud_dict", None)
         if not hud_dict:
             return
 
+        source_scope = getattr(self.hud, "position_scope", None)
+        if source_scope is None:
+            log.debug("Drag not mirrored: table %r has no position scope", getattr(self.hud, "table_name", "?"))
+            return
+
         src_w = getattr(self.hud.table, "width", 0) or 0
         src_h = getattr(self.hud.table, "height", 0) or 0
-        layout_set = getattr(self.hud, "layout_set", None)
 
         for other in list(hud_dict.values()):
             if other is self.hud:
                 continue
-            # Same layout set and seat count, or the slot means something else.
-            if getattr(other, "layout_set", None) is not layout_set:
-                continue
-            if getattr(other, "max", None) != getattr(self.hud, "max", None):
+            # Seat count is part of the scope, so it needs no separate test.
+            if getattr(other, "position_scope", None) != source_scope:
                 continue
             try:
                 self._apply_position_to_hud(other, seat, position, src_w, src_h)

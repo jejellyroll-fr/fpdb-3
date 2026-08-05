@@ -4,6 +4,7 @@ Modern popup windows with improved UI/UX for the HUD.
 """
 
 from collections import defaultdict
+from html import escape
 
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QFont
@@ -14,11 +15,13 @@ from PySide6.QtWidgets import (
     QProgressBar,
     QPushButton,
     QScrollArea,
+    QTextBrowser,
     QVBoxLayout,
     QWidget,
 )
 
 from fpdb_3_legacy import Stats
+from fpdb_3_legacy.i18n import translate_hud_category, translate_hud_label
 from fpdb_3_legacy.loggingFpdb import get_logger
 from fpdb_3_legacy.Popup import Popup
 from fpdb_3_legacy.PopupIcons import IconProvider, get_icon_provider, get_stat_category
@@ -31,8 +34,8 @@ def resolve_popup_stat_category(pop, index: int, stat_name: str) -> str:
     """Return a per-popup section override, falling back to automatic grouping."""
     overrides = getattr(pop, "pu_stats_category", [])
     if index < len(overrides) and overrides[index]:
-        return overrides[index]
-    return get_stat_category(stat_name)
+        return translate_hud_category(overrides[index])
+    return translate_hud_category(get_stat_category(stat_name))
 
 
 class ModernStatRow(QWidget):
@@ -518,10 +521,211 @@ class ModernSubmenuClassic(ModernSubmenu):
         super().__init__(*args, **kwargs)
 
 
+class CategorizedPopup(ModernSubmenu):
+    """Compact rich-text popup driven entirely by popup XML metadata.
+
+    The renderer knows nothing about a poker variant.  Section names, optional
+    row labels and colours come from ``pu_stat`` attributes, the surface comes
+    from ``pu_theme``, and the values and samples retain the normal six-field
+    :mod:`Stats` contract.  It defaults to ``hud_dark`` because a popup opened
+    over a table needs more contrast than the desktop themes give, but any
+    registered theme can be selected instead.
+    """
+
+    def __init__(self, *args, **kwargs) -> None:
+        kwargs.setdefault("_default_theme", "hud_dark")
+        super().__init__(*args, **kwargs)
+
+    def setup_window_style(self) -> None:
+        """Create the tightly framed popup surface described by the theme."""
+        self.setObjectName("categorizedPopup")
+        self.setStyleSheet(f"""
+            QWidget#categorizedPopup {{
+                background-color: {self.theme.get_color("window_bg")};
+                border: 1px solid {self.theme.get_color("border")};
+            }}
+        """)
+        self.main_layout = QVBoxLayout()
+        padding = self.theme.get_spacing("window_padding")
+        self.main_layout.setContentsMargins(padding, padding, padding, padding)
+        self.main_layout.setSpacing(self.theme.get_spacing("section_spacing"))
+        self.setLayout(self.main_layout)
+
+    @staticmethod
+    def _safe_dimension(params: dict, name: str, default: int, minimum: int, maximum: int) -> int:
+        try:
+            return min(max(int(params.get(name, default)), minimum), maximum)
+        except (TypeError, ValueError):
+            return default
+
+    def create_header(self, player_id: int) -> None:
+        """Render a configurable title bar; ``{player}`` expands at runtime."""
+        player_name = str(self.stat_dict[player_id].get("screen_name", "Unknown"))
+        params = getattr(self.pop, "pu_class_params", {}) or {}
+        template = str(params.get("title", "Player profile: {player}"))
+        try:
+            title = template.format(player=player_name)
+        except (KeyError, ValueError):
+            title = f"{template} {player_name}"
+
+        icon = self.icon_provider.get_header_icon()
+        self.player_label = QLabel(f"{icon}  {title}" if icon else title)
+        self.player_label.setTextFormat(Qt.TextFormat.PlainText)
+        font = self.theme.get_font("header")
+        self.player_label.setStyleSheet(f"""
+            QLabel {{
+                color: {self.theme.get_color("text_accent")};
+                background-color: {self.theme.get_color("header_bg")};
+                border: none;
+                padding: 5px 7px;
+                font-family: "{font.get("family", "Segoe UI")}", "Helvetica Neue", sans-serif;
+                font-size: {font.get("size", 12)}px;
+                font-weight: {"700" if font.get("weight") == "bold" else "400"};
+            }}
+        """)
+        self.header_widget = self.player_label
+        self.main_layout.addWidget(self.header_widget)
+
+    def _stat_rows(self, player_id: int) -> list[tuple[str, str, str, str, str]]:
+        """Return category, label, value, sample and explicit-colour rows."""
+        categories = getattr(self.pop, "pu_stats_category", [])
+        labels = getattr(self.pop, "pu_stats_label", [])
+        colors = getattr(self.pop, "pu_stats_color", [])
+        rows = []
+        for index, stat_name in enumerate(self.pop.pu_stats):
+            try:
+                data = Stats.do_stat(
+                    self.stat_dict,
+                    player=int(player_id),
+                    stat=stat_name,
+                    hand_instance=self.hand_instance,
+                )
+            except (KeyError, TypeError, ValueError):
+                log.warning("Unable to render popup statistic %s", stat_name, exc_info=True)
+                data = None
+
+            raw_cat = (
+                categories[index] if index < len(categories) and categories[index] else get_stat_category(stat_name)
+            )
+            category = translate_hud_category(raw_cat)
+            configured_label = labels[index] if index < len(labels) else ""
+            if configured_label:
+                configured_label = translate_hud_label(configured_label)
+            configured_color = colors[index] if index < len(colors) else ""
+            if data:
+                long_value = str(data[3]) if len(data) > 3 else stat_name
+                inferred_label = long_value.split("=", 1)[0].strip() if "=" in long_value else stat_name
+                value = str(data[1]) if len(data) > 1 else "-"
+                sample = str(data[4]) if len(data) > 4 else ""
+            else:
+                inferred_label, value, sample = stat_name, "-", ""
+            rows.append((str(category), configured_label or inferred_label, value, sample, configured_color))
+        return rows
+
+    def _rich_html(self, rows: list[tuple[str, str, str, str, str]]) -> str:
+        """Build the Qt rich-text document for a categorized stat table.
+
+        Every colour and size is read from the theme, so a profile changes the
+        look with ``pu_theme`` rather than by editing this renderer. A colour
+        given on a ``pu_stat`` still wins: it is a statement about that
+        statistic, not about the surface it is drawn on.
+        """
+        theme = self.theme
+        grouped: dict[str, list[tuple[str, str, str, str]]] = {}
+        for category, label, value, sample, color in rows:
+            grouped.setdefault(category, []).append((label, value, sample, color))
+
+        label_font = theme.get_font("stat_name")
+        value_font = theme.get_font("stat_value")
+        sample_font = theme.get_font("stat_sample")
+        section_font = theme.get_font("section_title")
+        family = str(label_font.get("family", "Segoe UI"))
+
+        chunks = [
+            f'<div style="background-color:{theme.get_color("window_bg")};'
+            f'color:{theme.get_color("text_primary")};'
+            f'font-family:{escape(family)},Helvetica Neue,sans-serif;">'
+        ]
+        for section_index, (category, stats) in enumerate(grouped.items()):
+            accent = theme.get_section_accent(section_index)
+            chunks.append(
+                '<table width="100%" cellspacing="0" cellpadding="0" style="margin-top:5px;">'
+                f'<tr><td colspan="3" style="background-color:{escape(theme.get_color("section_bg"))};'
+                f'color:{escape(theme.get_color("text_secondary"))};'
+                f'font-size:{section_font.get("size", 11)}px;font-weight:700;padding:3px 5px;">'
+                f'<span style="color:{escape(accent)};">◆</span>&nbsp; {escape(category)}</td></tr>'
+            )
+            for label, value, sample, configured_color in stats:
+                value_color = configured_color or self._value_color(value)
+                chunks.append(
+                    "<tr>"
+                    f'<td width="58%" style="color:{escape(theme.get_color("text_primary"))};'
+                    f'font-size:{label_font.get("size", 11)}px;padding:2px 5px;">{escape(label)}</td>'
+                    f'<td width="18%" align="right" style="color:{escape(value_color)};'
+                    f'font-size:{value_font.get("size", 12)}px;'
+                    f'font-weight:700;padding:2px 5px;">{escape(value)}</td>'
+                    f'<td width="24%" align="right" style="color:{escape(theme.get_color("text_muted"))};'
+                    f'font-size:{sample_font.get("size", 10)}px;padding:2px 5px;">'
+                    f"{escape(sample)}</td></tr>"
+                )
+            chunks.append("</table>")
+        chunks.append("</div>")
+        return "".join(chunks)
+
+    def _value_color(self, value: str) -> str:
+        """Signed values read faster in colour; the theme picks which colours."""
+        stripped = value.lstrip()
+        if stripped.startswith("+"):
+            return self.theme.get_color("stat_low")
+        if stripped.startswith("-"):
+            return self.theme.get_color("stat_high")
+        return self.theme.get_color("stat_neutral")
+
+    def create_content(self, player_id: int) -> None:
+        """Display the categorized HTML in a scrollable, focus-free browser."""
+        params = getattr(self.pop, "pu_class_params", {}) or {}
+        width = self._safe_dimension(params, "width", 420, 300, 900)
+        max_height = self._safe_dimension(params, "max_height", 500, 260, 1200)
+        rows = self._stat_rows(player_id)
+
+        self.browser = QTextBrowser()
+        self.browser.setObjectName("categorizedPopupBrowser")
+        self.browser.setReadOnly(True)
+        self.browser.setOpenExternalLinks(False)
+        self.browser.setFrameShape(QFrame.Shape.NoFrame)
+        self.browser.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.browser.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        self.browser.document().setDocumentMargin(0)
+        self.browser.setHtml(self._rich_html(rows))
+        self.browser.setStyleSheet(f"""
+            QTextBrowser#categorizedPopupBrowser {{
+                background-color: {self.theme.get_color("window_bg")};
+                color: {self.theme.get_color("text_primary")};
+                border: none;
+                padding: 0px;
+            }}
+            QScrollBar:vertical {{ background: {self.theme.get_color("scrollbar_bg")}; width: 8px; }}
+            QScrollBar::handle:vertical {{ background: {self.theme.get_color("border")}; min-height: 28px; }}
+        """)
+
+        row_height = self.theme.get_spacing("row_height")
+        estimated_height = 12 + len(rows) * row_height + len({row[0] for row in rows}) * 24
+        height = min(max(estimated_height, 280), max_height)
+        # A minimum height allowed QTextBrowser's size hint to enlarge the whole
+        # popup beyond the configured cap.  Fixed viewport dimensions keep the
+        # popup compact; overflow remains available through the vertical scroll.
+        self.browser.setFixedHeight(height)
+        self.main_layout.addWidget(self.browser)
+        self.setFixedWidth(width)
+        total_height = height + self.header_widget.sizeHint().height() + 26
+        self.setFixedHeight(total_height)
+
+
 # Register the new popup classes
 # These can be used in HUD_config.xml as pu_class values
 MODERN_POPUP_CLASSES = {
     "ModernSubmenu": ModernSubmenu,
     "ModernSubmenuLight": ModernSubmenuLight,
     "ModernSubmenuClassic": ModernSubmenuClassic,
+    "CategorizedPopup": CategorizedPopup,
 }

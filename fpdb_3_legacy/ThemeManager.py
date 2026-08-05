@@ -402,9 +402,24 @@ class ThemeManager:
                 color: {c["text"]};
                 border: 1px solid {c["border"]};
                 border-radius: 5px;
-                padding: 5px 8px;
+                padding: 4px 8px;
+                min-height: 28px;
                 selection-background-color: {c["selection"]};
                 selection-color: {c["highlighted_text"]};
+            }}
+            QComboBox QAbstractItemView {{
+                background-color: {c["input"]};
+                color: {c["text"]};
+                border: 1px solid {c["border"]};
+                border-radius: 5px;
+                padding: 4px;
+                selection-background-color: {c["selection"]};
+                selection-color: {c["highlighted_text"]};
+                outline: 0px;
+            }}
+            QComboBox QAbstractItemView::item {{
+                min-height: 28px;
+                padding: 6px 10px;
             }}
             QLineEdit:hover, QTextEdit:hover, QPlainTextEdit:hover, QComboBox:hover, QDateEdit:hover, QSpinBox:hover {{
                 background-color: {c["input_hover"]};
@@ -618,7 +633,7 @@ class ThemeManager:
                 font-size: 12px;
                 font-weight: 600;
                 min-width: 90px;
-                min-height: 26px;
+                min-height: 28px;
             }}
             QComboBox:hover, QDateEdit:hover, QSpinBox:hover, QLineEdit:hover {{
                 border-color: {accent};
@@ -629,6 +644,12 @@ class ThemeManager:
                 selection-background-color: {accent};
                 selection-color: {text};
                 color: {text};
+                padding: 4px;
+                outline: 0px;
+            }}
+            QComboBox QAbstractItemView::item {{
+                min-height: 28px;
+                padding: 6px 10px;
             }}
             QComboBox:disabled, QDateEdit:disabled, QSpinBox:disabled, QLineEdit:disabled,
             QCheckBox:disabled, QRadioButton:disabled {{

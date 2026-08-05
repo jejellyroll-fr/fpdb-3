@@ -12,19 +12,24 @@ import argparse
 from typing import Any
 
 from fpdb_3_legacy import Configuration, Database
-from fpdb_3_legacy.autonotes_aof import AofDecision, extract_decisions
+from fpdb_3_legacy.autonotes_aof import AOF_CATEGORIES, AofDecision, extract_decisions
 from fpdb_3_legacy.backfill_autonotes import load_hand_from_database
 
 
 def _hand_ids_after(db: Any, after_id: int, limit: int) -> list[int]:
     placeholder = db.sql.query["placeholder"]
+    # The categories come from the ruleset registry rather than a literal, so a
+    # newly registered variant is backfilled without editing this query. They
+    # are still parameter-bound, not interpolated into the SQL text.
+    categories = sorted(AOF_CATEGORIES)
+    category_placeholders = ", ".join([placeholder] * len(categories))
     cursor = db.get_cursor()
     cursor.execute(
         "SELECT H.id FROM Hands H "
         "JOIN Gametypes G ON H.gametypeId=G.id "
-        f"WHERE H.id>{placeholder} AND G.category IN ('aof_omaha', 'aof_holdem') "
+        f"WHERE H.id>{placeholder} AND G.category IN ({category_placeholders}) "
         f"ORDER BY H.id ASC LIMIT {placeholder}",
-        (int(after_id), int(limit)),
+        (int(after_id), *categories, int(limit)),
     )
     return [int(row[0]) for row in cursor.fetchall()]
 

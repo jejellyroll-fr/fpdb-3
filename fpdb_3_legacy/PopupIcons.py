@@ -38,6 +38,10 @@ class IconProvider:
         }
         return section_icons.get(section_name, "📂")
 
+    def get_header_icon(self) -> str:
+        """Glyph for a popup's title bar. Empty means draw no icon."""
+        return "📊"
+
 
 class EmojiIconProvider(IconProvider):
     """Emoji-based icon provider."""
@@ -201,6 +205,10 @@ class UnicodeIconProvider(IconProvider):
 
 class TextIconProvider(IconProvider):
     """Text-based icon provider for compatibility."""
+
+    def get_header_icon(self) -> str:
+        """No glyph: this provider exists for surfaces that cannot show one."""
+        return ""
 
     def __init__(self) -> None:
         super().__init__("text")
