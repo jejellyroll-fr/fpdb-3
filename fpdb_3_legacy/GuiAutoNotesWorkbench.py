@@ -42,6 +42,7 @@ from fpdb_3_legacy.backfill_autonotes import (
 )
 from fpdb_3_legacy.Configuration import GRAPHICS_PATH
 from fpdb_3_legacy.Database import Database
+from fpdb_3_legacy.GuiCustomAutoNotesEditor import GuiCustomAutoNotesEditor
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.loggingFpdb import get_logger
 
@@ -117,13 +118,23 @@ class GuiAutoNotesWorkbench(QWidget):
         self.run_tab = QWidget()
         self.player_tab = QWidget()
         self.pool_tab = QWidget()
+        self.custom_rules_editor = GuiCustomAutoNotesEditor(config=self.config, parent=self)
+        self.custom_rules_editor.rules_saved.connect(self._refresh_ruleset_combo)
+
         self.tabs.addTab(self.run_tab, _("Run"))
         self.tabs.addTab(self.player_tab, _("Player Notes"))
         self.tabs.addTab(self.pool_tab, _("Pool"))
+        self.tabs.addTab(self.custom_rules_editor, _("Custom Rules"))
 
         self._build_run_tab(self.run_tab)
         self._build_player_tab(self.player_tab)
         self._build_pool_tab(self.pool_tab)
+
+    def _refresh_ruleset_combo(self) -> None:
+        self.ruleset_combo.clear()
+        self.ruleset_combo.addItem("All configured rule sets", "")
+        for rule_set in configured_rule_summary(self.config):
+            self.ruleset_combo.addItem(rule_set["ruleSet"], rule_set["ruleSet"])
 
     def _build_run_tab(self, tab: QWidget) -> None:
         layout = QVBoxLayout(tab)
