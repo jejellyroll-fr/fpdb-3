@@ -5,6 +5,8 @@ on:
     branches: [ bigbang, main, development ]
   pull_request:
     branches: [ bigbang, main, development ]
+  release:
+    types: [ published ]
   workflow_dispatch:
 
 jobs:
@@ -522,6 +524,9 @@ jobs:
     name: Build with PyOxidizer (${{ matrix.label }})
     runs-on: ${{ matrix.os }}
     timeout-minutes: 60
+    # Needed by the release-asset upload step below; read-only elsewhere.
+    permissions:
+      contents: write
     # PyOxidizer 0.24's cargo_toml parser cannot read the Rust 2024 edition
     # emitted by `cargo init` since Rust 1.85.
     env:
@@ -642,3 +647,13 @@ jobs:
           name: ${{ matrix.artifact }}
           path: ${{ matrix.artifact }}.tar.gz
           compression-level: 0
+      # On a published release, the same tarball also becomes a downloadable
+      # release asset, so users do not need a GitHub account to fetch a build.
+      - name: Attach PyOxidizer build to the release
+        if: github.event_name == 'release'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          ASSET: ${{ matrix.artifact }}.tar.gz
+        run: gh release upload "$RELEASE_TAG" "$ASSET" --clobber --repo "$GITHUB_REPOSITORY"
