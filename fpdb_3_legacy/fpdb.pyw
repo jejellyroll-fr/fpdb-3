@@ -90,6 +90,7 @@ from fpdb_3_legacy import (
 from fpdb_3_legacy import __version__ as PACKAGE_VERSION
 from fpdb_3_legacy.ConfigInitializer import ensure_config_initialized
 from fpdb_3_legacy.ConfigurationManager import ConfigurationManager
+from fpdb_3_legacy.disabled_sites import is_site_disabled
 from fpdb_3_legacy.Exceptions import FpdbError
 from fpdb_3_legacy.GuiConfigObserver import GuiConfigObserver
 from fpdb_3_legacy.i18n import gettext as _
@@ -1578,6 +1579,11 @@ class fpdb(QMainWindow):
 
     def tab_coinpoker_capture(self, widget, data=None) -> None:
         """Open the CoinPoker live packet-capture tab."""
+        if is_site_disabled("CoinPoker"):
+            # The menu no longer offers this tab; refuse the stale entry points
+            # (saved layouts, scripted calls) rather than starting a capture.
+            log.info("CoinPoker support is disabled; not opening the live capture tab")
+            return
         new_thread = GuiCoinPokerCapture.GuiCoinPokerCapture(self.config, self)
         self.threads.append(new_thread)
         self.add_and_display_tab(new_thread, "CoinPoker Capture")

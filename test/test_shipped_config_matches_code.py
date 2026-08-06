@@ -14,6 +14,7 @@ from xml.etree import ElementTree as ET
 import pytest
 
 from fpdb_3_legacy import Stats
+from fpdb_3_legacy.disabled_sites import DISABLED_SITES
 from fpdb_3_legacy.stat_registry import get_registry
 
 TEMPLATE = Path("HUD_config.xml")
@@ -86,10 +87,22 @@ def test_the_shipped_config_declares_every_seeded_site(config_root: ET.Element) 
 
     No hand-history folder to watch, no screen name, no HUD layout - the site
     simply is not in the list the GUI shows.
+
+    A disabled room is the deliberate exception: it keeps its Sites row so
+    hands imported before it was switched off still resolve their siteId, but
+    it is no longer offered in the configuration.
     """
     declared = {site.get("site_name") for site in config_root.findall("supported_sites/site")}
 
-    assert sorted(_seeded_sites() - declared) == []
+    assert sorted(_seeded_sites() - declared - DISABLED_SITES) == []
+
+
+def test_a_disabled_room_is_seeded_but_not_offered(config_root: ET.Element) -> None:
+    """The two halves of the exception above, stated directly."""
+    declared = {site.get("site_name") for site in config_root.findall("supported_sites/site")}
+
+    assert DISABLED_SITES <= _seeded_sites()  # historical hands keep a valid siteId
+    assert DISABLED_SITES.isdisjoint(declared)  # but the room cannot be configured
 
 
 def test_the_shipped_config_declares_no_unknown_site(config_root: ET.Element) -> None:

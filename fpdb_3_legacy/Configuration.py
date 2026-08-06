@@ -53,6 +53,7 @@ else:
     winpaths_appdata = ""
 
 from fpdb_3_legacy.autonotes_aof import AOF_CATEGORIES
+from fpdb_3_legacy.disabled_sites import is_site_disabled
 from fpdb_3_legacy.hud_profiles import HudContext, HudProfileResolver, HudProfileRule
 from fpdb_3_legacy.loggingFpdb import get_logger
 
@@ -442,6 +443,11 @@ class Site:
         self.HH_path = normalizePath(node.getAttribute("HH_path"))
         self.TS_path = normalizePath(node.getAttribute("TS_path"))
         self.enabled = string_to_bool(node.getAttribute("enabled"), default=True)
+        # A room whose support is switched off stays off whatever the config
+        # file says: an older HUD_config.xml (or the preferences editor) may
+        # still carry enabled="True" for it. See fpdb_3_legacy.disabled_sites.
+        if is_site_disabled(self.site_name):
+            self.enabled = False
         self.aux_enabled = string_to_bool(node.getAttribute("aux_enabled"), default=True)
         self.hud_menu_xshift = node.getAttribute("hud_menu_xshift")
         self.hud_menu_xshift = 1 if self.hud_menu_xshift == "" else int(self.hud_menu_xshift)
@@ -1674,6 +1680,10 @@ class Config:
         #     s_dbs = doc.getElementsByTagName("mucked_windows")
         for hhc_node in doc.getElementsByTagName("hhc"):
             hhc = HHC(node=hhc_node)
+            # Without a converter binding, IdentifySite never builds a parser
+            # for the room, so bulk/auto import stops recognising its files.
+            if is_site_disabled(hhc.site):
+                continue
             self.hhcs[hhc.site] = hhc
 
         #        s_dbs = doc.getElementsByTagName("popup_windows")
@@ -2170,9 +2180,12 @@ class Config:
             # Profile selection rules
             hud_profile_rules = parse_hud_profile_rules(doc)
 
-            # HHCs
+            # HHCs (disabled rooms keep no converter binding -- see the
+            # matching skip in the initial load)
             for hhc_node in doc.getElementsByTagName("hhc"):
                 hhc = HHC(node=hhc_node)
+                if is_site_disabled(hhc.site):
+                    continue
                 hhcs[hhc.site] = hhc
 
             # Popup windows

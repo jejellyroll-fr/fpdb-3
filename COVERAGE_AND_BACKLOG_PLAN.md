@@ -181,10 +181,10 @@ restent par ailleurs non traduites (résidu déjà connu, hors dev).
 - **Vague 5** : 96 fichiers exemptés du cliquet de complexité (545 violations mesurées),
   `ModernHudPreferences.py` (4 488 lignes) n'a jamais été découpé alors qu'il dépasse
   aujourd'hui `Database.py`.
-- **HUD PT4 / CoinPoker** : `HUD_PT4_IMPLEMENTATION_PLAN.md` et
-  `COINPOKER_SPECIAL_HANDS_PLAN.md` décrivent des travaux **réalisés** (vérifié :
+- **HUD PT4 / mains spéciales** : `HUD_PT4_IMPLEMENTATION_PLAN.md` décrit des
+  travaux **réalisés** (vérifié :
   `stats_table.live_min_stack_bb`, `Aux_Hud.block_positions`/`ref_layout_width`,
-  `coinpoker_hand_builder` lit `dealerCardsRit`/`Rit2`/`DoubleBoard`/`splashPotAmount`,
+  le constructeur de mains lit `dealerCardsRit`/`Rit2`/`DoubleBoard`/`splashPotAmount`,
   `Hands.splashPot` en schéma, filtres `Bomb`/`2xB`/`Splash` dans `GuiHandViewer`).
   Les fichiers ne sont simplement **pas marqués faits** — ils se lisent comme des
   chantiers ouverts alors qu'ils ne le sont plus. À clore par édition, pas par code.
@@ -651,9 +651,8 @@ l'indentation interne du SQL, sans effet), et un essai de la CLI reconstruite.
    que la première main porte son `gamecode`.
 2. **Bug 1 PokerStars cash Windows** : session live, ou fermeture explicite du point
    dans `WINDOWS_HUD_BUGFIX_PLAN.md` si les traces du 22/07 suffisent.
-3. **Marquer faits** `HUD_PT4_IMPLEMENTATION_PLAN.md` et
-   `COINPOKER_SPECIAL_HANDS_PLAN.md` (travaux vérifiés en Partie A4), pour que le
-   dépôt cesse d'annoncer des chantiers clos comme ouverts.
+3. **Marquer fait** `HUD_PT4_IMPLEMENTATION_PLAN.md` (travaux vérifiés en
+   Partie A4), pour que le dépôt cesse d'annoncer des chantiers clos comme ouverts.
 
 ### Étape 7 — Rattraper l'i18n des modules récents · ~1,5 j
 

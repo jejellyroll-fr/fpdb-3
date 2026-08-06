@@ -32,3 +32,15 @@ Kept for importing historical archives, without a current-format support claim:
 Moving a converter out of this tier requires a representative fixture and a
 golden snapshot covering identity, gametype, players, board, actions, winnings,
 pot, and rake.
+
+## Disabled
+
+Support is switched off in the application, but the code and its tests stay in
+the tree:
+
+- CoinPoker (converter, packet-capture pipeline, Unity table detection)
+
+The switch is `DISABLED_SITES` in `fpdb_3_legacy/disabled_sites.py`: the room
+is forced off in the configuration, keeps no `<hhc>` converter binding, and its
+live-capture tab is hidden. Re-enabling it means removing its name from that
+set, not restoring deleted files.

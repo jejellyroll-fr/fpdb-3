@@ -124,7 +124,6 @@
         <site_id site="BlackChipPoker" id="117"/>
         <site_id site="TruePoker" id="118"/>
         <site_id site="Ya Poker" id="119"/>
-        <site_id site="CoinPoker" id="140"/>
         <site_id site="PokerMaster" id="25"/>
         <site_id site="Run It Once Poker" id="26"/>
         <site_id site="GGPoker" id="27"/>
@@ -4292,13 +4291,6 @@
             <fav max="9" fav_seat="0"/>
             <fav max="10" fav_seat="0"/>
         </site>
-        <site site_name="CoinPoker" enabled="False" screen_name="" site_path="" HH_path="" TS_path="" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" network="CoinPoker">
-            <layout_set game_type="all" ls="default"/>
-            <fav max="2" fav_seat="0"/>
-            <fav max="6" fav_seat="0"/>
-            <fav max="9" fav_seat="0"/>
-            <fav max="10" fav_seat="0"/>
-        </site>
             <site site_name="PokerStars" enabled="False" HH_path="" screen_name="" site_path="" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0" TS_path="" network="PokerStars">
             <layout_set game_type="ring" ls="ps_default"/>
             <layout_set game_type="tour" ls="ps_default"/>
@@ -4527,7 +4519,6 @@
         <hhc site="Microgaming" converter="MicrogamingToFpdb"/>
         <hhc site="PKR" converter="PkrToFpdb"/>
         <hhc site="Full Tilt Poker" converter="FulltiltToFpdb" summaryImporter="FullTiltPokerSummary"/>
-        <hhc site="CoinPoker" converter="CoinPokerToFpdb"/>
     </hhcs>
     <!-- HUD profile rules: choose which stat set (HUD profile) a table gets,
          the way PokerTracker's "Profile Select" tab does.
@@ -4552,11 +4543,11 @@
          HUD positions are remembered per (site, game, game_type, seats,
          profile, layout). Two games that resolve to different profiles
          therefore keep their own window placement even when the room files
-         them under a single layout set, which is what CoinPoker does.
+         them under a single layout set, as some rooms do.
 
-         Example: give CoinPoker's 6-max AoF Omaha tables their own profile
+         Example: give a room's 6-max AoF Omaha tables their own profile
          while every other table keeps the default.
-           <hud_profile_rule site="CoinPoker" game="aof_omaha" seats="6" profile="aof_advanced"/>
+           <hud_profile_rule site="YOUR SITE" game="aof_omaha" seats="6" profile="aof_advanced"/>
 
          The GUI writes this section from HUD Preferences -> Profile Select;
          this comment is kept outside the element so editing it there does not
