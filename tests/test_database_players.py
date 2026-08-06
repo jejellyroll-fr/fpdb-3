@@ -5,8 +5,6 @@ from __future__ import annotations
 from types import SimpleNamespace
 from unittest.mock import MagicMock
 
-import pytest
-
 from fpdb_3_legacy.Database import Database
 from fpdb_3_legacy.database_players import DatabasePlayersMixin
 
