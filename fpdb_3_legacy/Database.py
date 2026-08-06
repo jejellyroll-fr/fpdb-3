@@ -507,12 +507,12 @@ class Database(
         try:
             try:
                 import MySQLdb
-            except (ImportError, ModuleNotFoundError):
+            except ImportError:
                 import pymysql
 
                 pymysql.install_as_MySQLdb()
                 import MySQLdb
-        except (ImportError, ModuleNotFoundError) as err:
+        except ImportError as err:
             raise FpdbDatabaseError(
                 "MySQL driver ('pymysql' / 'MySQLdb') is not installed or available in this environment/build. "
                 "Please install 'pymysql' or configure SQLite in your database configuration."
@@ -549,7 +549,7 @@ class Database(
         """Open a PostgreSQL connection, preferring a local peer connection."""
         try:
             import psycopg
-        except (ImportError, ModuleNotFoundError) as err:
+        except ImportError as err:
             raise FpdbDatabaseError(
                 "PostgreSQL driver ('psycopg') is not installed or available in this environment/build. "
                 "Please install 'psycopg' or configure SQLite in your database configuration."

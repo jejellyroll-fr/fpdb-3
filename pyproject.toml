@@ -29,6 +29,10 @@ dependencies = [
     "playwright>=1.40.0",
     "pymysql>=1.1.0",
     "defusedxml>=0.7.1",
+    # PostgreSQL is offered in the GUI's database chooser, so the driver has to
+    # ship with the application. Left as an extra, a packaged build could only
+    # ever open SQLite or MySQL.
+    "psycopg[binary]>=3.1.0",
     "pypoker-eval @ git+https://github.com/jejellyroll-fr/poker-eval.git@v1.2.0",
 ]
 
@@ -270,6 +274,8 @@ requires = [
     "beautifulsoup4==4.12.3",
     # Imported when the user points fpdb at a MySQL database.
     "pymysql>=1.1.0",
+    # Likewise for PostgreSQL.
+    "psycopg[binary]>=3.1.0",
     # Native equity backend used by the equity calculator and AoF tools.
     "pypoker-eval @ git+https://github.com/jejellyroll-fr/poker-eval.git@v1.2.0"
 ]
