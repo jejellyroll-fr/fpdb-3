@@ -46,6 +46,7 @@ class PartyPoker(HandHistoryConverter):
     re_PostDead: Any
     re_HeroCards: Any
     re_CollectPot: Any
+    re_CashOutAmount: Any
     re_ShownCards: Any
     db: Any
     sitename = "PartyPoker"
@@ -1701,7 +1702,7 @@ class PartyPoker(HandHistoryConverter):
         """Total of the summary's announced pots, or None when it cannot be used."""
 
         pots = [Decimal(self.clearMoneyString(m.group("POT"))) for m in self.re_AnnouncedPot.finditer(hand.handText)]
-        return sum(pots) if pots else None
+        return sum(pots, Decimal(0)) if pots else None
 
     def readShownCards(self, hand) -> None:
         log.info("Entering readShownCards method")
