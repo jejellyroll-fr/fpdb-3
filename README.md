@@ -90,6 +90,15 @@ Full explanation in [docs/macos-gatekeeper.md](docs/macos-gatekeeper.md).
 # or: export FPDB_FORCE_X11=1
 ```
 
+### Profiling
+
+Profiling is off by default. To record a session, set `FPDB_PROFILE=1`; fpdb
+then writes a `.prof` and a readable summary to `~/fpdb_profiles` on exit.
+
+```bash
+FPDB_PROFILE=1 python fpdb_3_legacy/fpdb.pyw
+```
+
 ## 🧪 Tests
 
 From the repository root:
