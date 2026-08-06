@@ -49,6 +49,7 @@ from fpdb_3_legacy.database_caches import HUDCACHE_EXTRA_KEYS as HUDCACHE_EXTRA_
 from fpdb_3_legacy.database_caches import DatabaseCachesMixin
 from fpdb_3_legacy.database_hud_stats import DatabaseHudStatsMixin
 from fpdb_3_legacy.database_lambda_dict import LambdaDict
+from fpdb_3_legacy.database_players import DatabasePlayersMixin
 from fpdb_3_legacy.database_schema import DB_VERSION, DatabaseSchemaMixin
 
 # HANDS_PLAYERS_KEYS moved to database_schema with the DDL that checks those
@@ -209,6 +210,7 @@ class Database(
     DatabaseBulkImportMixin,
     DatabaseCachesMixin,
     DatabaseHudStatsMixin,
+    DatabasePlayersMixin,
     DatabaseSchemaMixin,
     DatabaseTournamentsMixin,
 ):
@@ -1168,81 +1170,7 @@ class Database(
         # print "session stat_dict =", stat_dict
         # return stat_dict
 
-    def get_player_id(self, config, siteName, playerName):
-        c = self.connection.cursor()
-        # conversion to UTF-8 in Python 3 is not needed
-        c.execute(self.sql.query["get_player_id"], (playerName, siteName))
-        row = c.fetchone()
-        if row:
-            return row[0]
 
-        # Fallback to search for playerName on any site if not found on the specified site
-        ph = self.sql.query.get("placeholder", "%s")
-        q1 = "SELECT id FROM Players WHERE name = %s".replace("%s", ph)
-        c.execute(q1, (playerName,))
-        rows = c.fetchall()
-        if len(rows) == 1:
-            log.info(
-                f"Database.get_player_id: Fallback found unique player ID {rows[0][0]} for '{playerName}' (searched across all sites)"
-            )
-            return rows[0][0]
-        elif len(rows) > 1:
-            # If there are multiple players with this name, let's try to match siteName prefix or sub-network
-            q2 = """
-                SELECT p.id
-                FROM Players p
-                JOIN Sites s ON p.siteId = s.id
-                WHERE p.name = %s
-                AND (s.name LIKE %s OR %s LIKE s.name || %s)
-            """.replace("%s", ph)
-            c.execute(q2, (playerName, siteName + "%", siteName, "%"))
-            match_rows = c.fetchall()
-            if match_rows:
-                log.info(
-                    f"Database.get_player_id: Fallback matched site prefix player ID {match_rows[0][0]} for '{playerName}' on site '{siteName}' variant"
-                )
-                return match_rows[0][0]
-            # Otherwise return the first one
-            log.info(
-                f"Database.get_player_id: Fallback returned first player ID {rows[0][0]} of multiple matches for '{playerName}'"
-            )
-            return rows[0][0]
-        # None, not False: every caller tests `is not None`, and a bool would slip
-        # through as a player id -- int(False) == 0 in the GUI viewers, and a
-        # `playerId != %s` bind that PostgreSQL rejects outright in the HUD.
-        return None
-
-    def get_player_site_id(self, playerId):
-        c = self.connection.cursor()
-        ph = self.sql.query.get("placeholder", "%s")
-        q = "SELECT siteId FROM Players WHERE id = %s".replace("%s", ph)
-        c.execute(q, (playerId,))
-        row = c.fetchone()
-        if row:
-            return row[0]
-        return None
-
-    def get_player_name_by_id(self, playerId):
-        c = self.get_cursor()
-        ph = self.sql.query.get("placeholder", "%s")
-        q = "SELECT name FROM Players WHERE id = %s".replace("%s", ph)
-        c.execute(q, (playerId,))
-        row = c.fetchone()
-        if row:
-            return row[0]
-        return None
-
-    def get_player_names(self, config, site_id=None, like_player_name="%"):
-        """Fetch player names from players. Use site_id and like_player_name if provided."""
-        if site_id is None:
-            site_id = -1
-        c = self.get_cursor()
-        # conversion to UTF-8 in Python 3 is not needed
-        c.execute(
-            self.sql.query["get_player_names"],
-            (like_player_name, site_id, site_id),
-        )
-        return c.fetchall()
 
     def get_site_id(self, site):
         c = self.get_cursor()
@@ -1857,108 +1785,7 @@ class Database(
         c = self.get_cursor()
         c.execute(q, fdata)
 
-    def _hero_aliases(self, site_name):
-        """Resolve the configured hero aliases for a site, defensively.
 
-        Uses ``Config.get_hero_aliases`` when available, otherwise falls back to
-        the single ``screen_name``. Tolerates fake/minimal config objects used in
-        tests.
-        """
-        cfg = self.config
-        getter = getattr(cfg, "get_hero_aliases", None)
-        if callable(getter):
-            return list(getter(site_name) or [])
-        site = getattr(cfg, "supported_sites", {}).get(site_name)
-        if site is None:
-            return []
-        screen_name = getattr(site, "screen_name", "")
-        return [screen_name] if screen_name else []
-
-    def _resolve_alias_ids(self, site_name, aliases):
-        """Resolve exact ``(siteId, name)`` matches for a list of aliases."""
-        site_res = self.get_site_id(site_name)
-        if not site_res:
-            return set()
-        site_id = site_res[0][0]
-        aliases = [a for a in aliases if a]
-        if not aliases:
-            return set()
-        ph = self.sql.query["placeholder"]
-        marks = ",".join(["%s"] * len(aliases))
-        q = f"SELECT id FROM Players WHERE siteId=%s AND name IN ({marks})".replace("%s", ph)
-        c = self.get_cursor()
-        c.execute(q, tuple([site_id, *aliases]))
-        return {int(r[0]) for r in c.fetchall()}
-
-    def get_hero_player_ids_for_profile(self, profile):
-        """Return hero playerIds for a multiroom :class:`HeroProfile`.
-
-        ``profile`` may be a ``HeroProfile`` instance or a profile name. Each
-        ``(site, alias)`` link is matched **exactly** on ``(siteId, name)``;
-        results are deduplicated across rooms. Returns ``[]`` if unresolved.
-        """
-        if isinstance(profile, str):
-            getter = getattr(self.config, "get_hero_profiles", None)
-            profile = getter().get(profile) if callable(getter) else None
-        if profile is None:
-            return []
-        ids = set()
-        for site_name, aliases in profile.aliases_by_site().items():
-            ids.update(self._resolve_alias_ids(site_name, aliases))
-        return sorted(ids)
-
-    def get_hero_player_ids(self, site_name=None, profile=None):
-        """Return every hero playerId for a site (multi-alias aware).
-
-        When ``profile`` is given (a ``HeroProfile`` or its name), resolve the
-        multiroom profile across all its rooms instead of a single site.
-
-        Per-site resolution order:
-          1. Configured aliases matched **exactly** on ``(siteId, name)`` — no
-             cross-site fuzzy fallback, to avoid mis-attributing look-alike names.
-          2. If none resolve, fall back to the ``Players.hero`` flag set during
-             import (so old imports work without alias config).
-
-        Results are deduplicated. Returns ``[]`` when the site is unknown.
-        """
-        if profile is not None:
-            return self.get_hero_player_ids_for_profile(profile)
-
-        site_res = self.get_site_id(site_name)
-        if not site_res:
-            return []
-        site_id = site_res[0][0]
-
-        ids = self._resolve_alias_ids(site_name, self._hero_aliases(site_name))
-
-        if not ids:
-            ph = self.sql.query["placeholder"]
-            q = "SELECT id FROM Players WHERE siteId=%s AND hero=%s".replace("%s", ph)
-            c = self.get_cursor()
-            c.execute(q, (site_id, True))
-            ids.update(int(r[0]) for r in c.fetchall())
-
-        return sorted(ids)
-
-    def getHeroIds(self, pids, sitename):
-        # Grab playerIds using hero names in HUD_Config.xml
-        try:
-            # derive list of program owner's player ids
-            hero_ids = []
-            # make sure at least two values in list
-            # so that tuple generation creates doesn't use
-            # () or (1,) style
-            for site in self.config.get_supported_sites():
-                aliases = set(self._hero_aliases(site))
-                for n, v in list(pids.items()):
-                    if sitename == site and n in aliases:
-                        hero_ids.append(v)
-
-        except Exception:  # intentional broad catch: hero-id resolution over config/pids best-effort, log only
-            err = traceback.extract_tb(sys.exc_info()[2])[-1]
-            log.exception("Error acquiring hero ids")
-            log.exception(f"traceback: {err}")
-        return hero_ids
 
     def fetchallDict(self, cursor, desc):
         data = cursor.fetchall()
@@ -2007,51 +1834,7 @@ class Database(
         self.siteHandNos.append(key)
         return False
 
-    def getSqlPlayerIDs(self, pnames, siteid, hero):
-        result = {}
-        if self.pcache is None:
-            self.pcache = LambdaDict(
-                lambda key: self.insertPlayer(key[0], key[1], key[2]),
-            )
 
-        for player in pnames:
-            result[player] = self.pcache[(player, siteid, player == hero)]
-            # NOTE: Using the LambdaDict does the same thing as:
-            # if player in self.pcache:
-            #    #print "DEBUG: cachehit"
-            #    pass
-            # else:
-            #    self.pcache[player] = self.insertPlayer(player, siteid)
-            # result[player] = self.pcache[player]
-
-        return result
-
-    def insertPlayer(self, name, site_id, hero):
-        insert_player = "INSERT INTO Players (name, siteId, hero, chars) VALUES (%s, %s, %s, %s)"
-        insert_player = insert_player.replace("%s", self.sql.query["placeholder"])
-        _name = name[:32] if name else " "
-        if not _name:
-            _name = " "
-        if re_char.match(_name[0]):
-            char = "123"
-        elif len(_name) == 1 or re_char.match(_name[1]):
-            char = _name[0] + "1"
-        else:
-            char = _name[:2]
-
-        key = (_name, site_id, hero, char.upper())
-
-        c = self.get_cursor()
-        if self.backend == self.MYSQL_INNODB:
-            # LAST_INSERT_ID(id) makes connection.insert_id() return the
-            # existing row id as well as the id of a newly inserted player.
-            upsert_player = insert_player + " ON DUPLICATE KEY UPDATE hero=hero OR VALUES(hero), id=LAST_INSERT_ID(id)"
-            c.execute(upsert_player, key)
-            return self.get_last_insert_id(c)
-
-        q = "SELECT id, name, hero FROM Players WHERE name=%s and siteid=%s"
-        q = q.replace("%s", self.sql.query["placeholder"])
-        return self.insertOrUpdate("players", c, key, q, insert_player)
 
     def insertOrUpdate(self, type, cursor, key, select, insert):
         if type == "players":
