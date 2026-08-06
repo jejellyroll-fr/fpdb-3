@@ -696,7 +696,6 @@ class SealsWithClubs(HandHistoryConverter):
             # Old format has no summary line; let Hand compute the pot from the
             # bets and derive the rake from pot - collected. Refunds appear as
             # "X refunded N" and are handled as uncalled bets.
-            hand.setUncalledBets(True)
             for m in self.re_OldCollect.finditer(hand.handText):
                 hand.addCollectPot(player=m.group("PNAME"), pot=m.group("POT"))
             return
@@ -725,11 +724,6 @@ class SealsWithClubs(HandHistoryConverter):
                 hand.addCollectPot(player=m.group("PNAME"), pot=m.group("POT").replace(",", ""))
             elif m.group("POT2") is not None:
                 hand.addCollectPot(player=m.group("PNAME"), pot=m.group("POT2").replace(",", ""))
-
-        # The uncalled bets themselves are returned to their owner in
-        # readAction; the summary pot above already excludes them.
-        if self.re_Uncalled.search(hand.handText) is not None:
-            hand.setUncalledBets(True)
 
         # Set rake
         if hand.rake is None:

@@ -641,10 +641,6 @@ class Cake(HandHistoryConverter):
         # Flag to keep track of whether the small blind is still live.
         live_blind = True
 
-        # If no bets were returned, set the uncalled bets flag to True.
-        if not self.re_return_bet.search(hand.handText):
-            hand.setUncalledBets(True)
-
         # Find all instances of the small blind and add them to the Hand object.
         for a in self.re_post_sb.finditer(hand.handText):
             if live_blind:
@@ -724,9 +720,6 @@ class Cake(HandHistoryConverter):
             bet = self.convertMoneyString("BET", action)
             action_type = action.group("ATYPE")
 
-            # If the current action is a fold and not in preflop, add a fold to the Hand object
-            if street != "PREFLOP" or action_type != " folds":
-                hand.setUncalledBets(False)
             if action_type == " folds":
                 hand.addFold(street, action.group("PNAME"))
 
@@ -740,7 +733,6 @@ class Cake(HandHistoryConverter):
 
             # If the current action is a raise, add a raise to the Hand object
             elif action_type == " raises":
-                hand.setUncalledBets(None)
                 hand.addRaiseTo(street, action.group("PNAME"), bet)
 
             # If the current action is a bet, add a bet to the Hand object

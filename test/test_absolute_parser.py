@@ -82,7 +82,6 @@ def test_absolute_incoming_player_post_is_one_big_blind() -> None:
         handid="123",
         players=[(3, "New Player", "1.00")],
         addBlind=lambda *args: calls.append(args),
-        setUncalledBets=lambda _value: None,
     )
     parser = Absolute.__new__(Absolute)
     parser.compiledPlayers = set()
@@ -161,7 +160,6 @@ def test_absolute_stud_completion_is_recorded() -> None:
     hand = SimpleNamespace(
         players=[(1, "Alice", "10.00")],
         streets={"THIRD": "Alice - Completes to $0.20"},
-        setUncalledBets=lambda _value: None,
         addComplete=lambda *args: completions.append(args),
     )
     parser = Absolute.__new__(Absolute)

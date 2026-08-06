@@ -258,8 +258,6 @@ class Microgaming(HandHistoryConverter):
             if key == "MAX" and info.get(key) is not None:
                 hand.maxseats = int(info[key])
 
-        hand.setUncalledBets(True)
-
     def readButton(self, hand):
         pass
         # m = self.re_Button.search(hand.handText)
@@ -411,8 +409,6 @@ class Microgaming(HandHistoryConverter):
         allIns = 0
         m = self.re_Action.finditer(hand.streets[street])
         for action in m:
-            if action.group("ATYPE") in ("Call", "Raise", "AllIn") and allIns > 0:
-                hand.setUncalledBets(False)
             # print "DEBUG: %s action.groupdict(): %s" % (street, action.groupdict())
             pname = self.playerNameFromSeatNo(action.group("SEAT"), hand)
             if action.group("ATYPE") == "Fold":
@@ -449,8 +445,6 @@ class Microgaming(HandHistoryConverter):
                     hand.addBet(street, pname, action.group("BET"))
             elif action.group("ATYPE") == "AllIn":
                 all_in_amount = action.group("BET").replace(",", "")
-                if Decimal(all_in_amount) <= (hand.lastBet[street] - sum(hand.bets[street][pname])):
-                    hand.setUncalledBets(False)
                 hand.addAllIn(street, pname, action.group("BET"))
                 allIns += 1
             elif action.group("ATYPE") == "PostedToPlay":

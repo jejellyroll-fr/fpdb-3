@@ -391,7 +391,6 @@ class Absolute(HandHistoryConverter):
             hand.addBlind(None, None, None)
         for a in self.re_PostBB.finditer(hand.handText):
             hand.addBlind(a.group("PNAME"), "big blind", a.group("BB"))
-            hand.setUncalledBets(True)
             found_big = True
         for a in self.re_PostIncoming.finditer(hand.handText):
             hand.addBlind(a.group("PNAME"), "big blind", a.group("BB"))
@@ -407,12 +406,10 @@ class Absolute(HandHistoryConverter):
                     bet = acts["BET"].replace(",", "")
                     if found_small:
                         hand.addBlind(acts["PNAME"], "big blind", bet)
-                        hand.setUncalledBets(True)
                     elif found_big:
                         hand.addBlind(acts["PNAME"], "small blind", bet)
 
         for a in self.re_PostBoth.finditer(hand.handText):
-            hand.setUncalledBets(None)
             hand.addBlind(a.group("PNAME"), "both", a.group("BB"))
 
     def readButton(self, hand):
@@ -471,22 +468,18 @@ class Absolute(HandHistoryConverter):
                 hand.addCheck(street, action.group("PNAME"))
             elif action.group("ATYPE") == "Calls ":
                 bet = action.group("BET").replace(",", "")
-                hand.setUncalledBets(None)
                 hand.addCall(street, action.group("PNAME"), bet)
             elif action.group("ATYPE") == "Bets " or action.group("ATYPE") == "All-In ":
                 if action.group("BET") is None:
                     # timeout all-in
                     raise FpdbHandPartial(f"Partial hand history: {hand.handid}")
                 bet = action.group("BET").replace(",", "")
-                hand.setUncalledBets(None)
                 hand.addBet(street, action.group("PNAME"), bet)
             elif action.group("ATYPE") == "Raises " or action.group("ATYPE") == "All-In(Raise) ":
                 bet = action.group("BET").replace(",", "")
-                hand.setUncalledBets(None)
                 hand.addCallandRaise(street, action.group("PNAME"), bet)
             elif action.group("ATYPE") == "Completes to ":
                 bet = action.group("BET").replace(",", "")
-                hand.setUncalledBets(None)
                 hand.addComplete(street, action.group("PNAME"), bet)
             else:
                 log.debug(

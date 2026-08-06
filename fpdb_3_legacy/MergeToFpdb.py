@@ -836,7 +836,6 @@ class Merge(HandHistoryConverter):
         pass
 
     def readCollectPot(self, hand) -> None:
-        hand.setUncalledBets(True)
         for m in self.re_CollectPot.finditer(hand.handText):
             pname = self.playerNameFromSeatNo(m.group("PSEAT"), hand)
             if pname is not None:

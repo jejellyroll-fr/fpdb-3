@@ -1215,7 +1215,6 @@ class Winamax(HandHistoryConverter):
         Returns:
             None
         """
-        hand.setUncalledBets(True)
         for m in self.re_collect_pot.finditer(hand.handText):
             hand.addCollectPot(player=m.group("PNAME"), pot=m.group("POT"))
 

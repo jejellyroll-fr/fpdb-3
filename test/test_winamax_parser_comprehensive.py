@@ -87,10 +87,6 @@ class MockHand:
         self.players.append([seat, name, Decimal(str(chips))])
         self.stacks[name] = Decimal(str(chips))
 
-    def setUncalledBets(self, value: bool) -> None:
-        """Set uncalled bets flag."""
-        self.uncalledbets = value
-
     def addBlind(self, player: str, blindtype: str, amount: float | None) -> None:
         """Add a blind bet to the hand."""
         if amount is not None:

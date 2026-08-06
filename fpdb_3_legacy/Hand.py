@@ -140,7 +140,6 @@ class Hand:
         self.counted_seats = 0
         self.buttonpos = 0
         self.runItTimes = 0
-        self.uncalledbets = False
         self.checkForUncalled = False
         self.adjustCollected = False
         self.cashedOut = False
@@ -1440,9 +1439,6 @@ class Hand:
             raise FpdbHandPartial(
                 msg,
             )
-
-    def setUncalledBets(self, value) -> None:
-        self.uncalledbets = value
 
     def calculate_net_collected(self) -> None:
         """Calculate the net collected amount for each player."""
