@@ -1516,3 +1516,62 @@ def test_build_native_ofc_summary_excludes_non_ofc_hands():
 def test_iter_capture_records_rejects_corruption(data, message):
     with pytest.raises(ValueError, match=message):
         list(iter_capture_records(io.BytesIO(data)))
+
+
+def test_build_tap_cross_platform(tmp_path, monkeypatch):
+    from fpdb_3_legacy import swc_native_capture
+
+    monkeypatch.setattr(swc_native_capture, "BUILD_DIR", tmp_path)
+    tap_path = swc_native_capture.build_tap(force=True)
+    assert tap_path.exists()
+    assert tap_path.name in ("libswc_native_tap.dylib", "libswc_native_tap.so", "swc_native_tap.dll")
+
+
+def _tailing_thread(tmp_path, monkeypatch, hands):
+    """A tailing thread whose decode stage yields `hands`, wired to a real archive."""
+    from fpdb_3_legacy import swc_native_capture
+    from fpdb_3_legacy.GuiAutoImport import SwCNativeTailingThread
+
+    monkeypatch.setattr(swc_native_capture, "iter_protocol_messages", lambda records: list(records))
+    monkeypatch.setattr(swc_native_capture, "normalize_native_hands", lambda messages, raw_ref=None: hands)
+
+    raw = tmp_path / "swc-native.raw"
+    raw.write_bytes(_record())
+    return SwCNativeTailingThread(raw_path=raw), raw
+
+
+def test_swc_native_tailing_yields_decoded_hands(tmp_path, monkeypatch):
+    """The original test only asserted a clean stop, so the decode path was free to break."""
+    hand = {"table_id": 7, "hand_id": 1234}
+    thread, _raw = _tailing_thread(tmp_path, monkeypatch, [hand])
+
+    assert thread.poll_once() == [hand]
+
+
+def test_swc_native_tailing_does_not_reimport_a_known_hand(tmp_path, monkeypatch):
+    hand = {"table_id": 7, "hand_id": 1234}
+    thread, raw = _tailing_thread(tmp_path, monkeypatch, [hand])
+    assert thread.poll_once() == [hand]
+
+    with raw.open("ab") as handle:
+        handle.write(_record(b"more"))
+
+    assert thread.poll_once() == []
+
+
+def test_swc_native_tailing_consumes_the_archive_once(tmp_path, monkeypatch):
+    """A poll must advance past what it read instead of re-parsing from zero."""
+    thread, raw = _tailing_thread(tmp_path, monkeypatch, [])
+    thread.poll_once()
+
+    assert thread._offset == raw.stat().st_size
+
+
+def test_swc_native_tailing_thread_stops_cleanly(tmp_path, monkeypatch):
+    thread, _raw = _tailing_thread(tmp_path, monkeypatch, [])
+    thread.start()
+    thread.stop()
+    thread.wait(2000)
+
+    assert not thread.isRunning()
+

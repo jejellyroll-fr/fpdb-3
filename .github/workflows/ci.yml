@@ -297,6 +297,29 @@ jobs:
           test/test_stats_known_hands.py
           tests/helpers/parser_regression.py
 
+  # The interposer carries a distinct #ifdef branch per platform -- dlsym on
+  # POSIX, GetModuleHandleA over the bundled OpenSSL DLLs on Windows. Compiling
+  # it only where CI happens to run would leave two of the three branches
+  # unbuilt, so each one is compiled on its own runner.
+  #
+  # swc_tap_build imports nothing but the standard library, so this needs no
+  # project install: it is a compiler check, not an import check.
+  interposer:
+    name: Compile SwC interposer (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Compile the tap
+        run: python -m fpdb_3_legacy.swc_tap_build --build
+
   test:
     runs-on: ${{ matrix.os }}
     strategy:

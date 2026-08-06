@@ -12,9 +12,13 @@ import sys
 import time
 import traceback
 from optparse import OptionParser
+from pathlib import Path
 from typing import Any
 
-import interlocks
+try:
+    import interlocks
+except ImportError:
+    from fpdb_3_legacy import interlocks
 from PySide6.QtCore import QDateTime, QThread, QTimer, Signal
 from PySide6.QtGui import QColor, QPalette, QTextCharFormat, QTextCursor
 from PySide6.QtWidgets import (
@@ -99,6 +103,81 @@ class AutoImportThread(QThread):
             self.error.emit(str(e))
 
 
+class SwCNativeTailingThread(QThread):
+    """Background thread tailing raw SwC native capture and importing live hands."""
+
+    hand_imported = Signal(dict)
+
+    #: A hand needs the messages around it to be reconstructed, so decoded
+    #: messages are retained across polls rather than re-read from disk. This
+    #: caps that history: a long session would otherwise grow it without bound.
+    MAX_RETAINED_MESSAGES = 20000
+
+    def __init__(self, raw_path: Any = None, parent: QWidget | None = None) -> None:
+        super().__init__(parent)
+        default = Path.home() / ".fpdb" / "swc-native-capture" / "swc-native.raw"
+        self.raw_path = Path(raw_path or default).expanduser().resolve()
+        self._stop_requested = False
+        self._imported_keys: set[tuple[int, int]] = set()
+        self._offset = 0
+        self._messages: list[Any] = []
+        self._consecutive_errors = 0
+
+    def stop(self) -> None:
+        self._stop_requested = True
+
+    def poll_once(self) -> list[dict]:
+        """Decode whatever was appended since the last call and return new hands.
+
+        Split out of the polling loop so the decode path can be exercised without
+        starting a thread or waiting on its timing.
+        """
+        from fpdb_3_legacy.swc_native_capture import (
+            iter_protocol_messages,
+            normalize_native_hands,
+            read_records_since,
+        )
+
+        records, self._offset = read_records_since(self.raw_path, self._offset)
+        if not records:
+            return []
+
+        self._messages.extend(iter_protocol_messages(iter(records)))
+        if len(self._messages) > self.MAX_RETAINED_MESSAGES:
+            del self._messages[: len(self._messages) - self.MAX_RETAINED_MESSAGES]
+
+        fresh: list[dict] = []
+        for hand in normalize_native_hands(self._messages, raw_ref=str(self.raw_path)):
+            key = (hand.get("table_id", 0), hand.get("hand_id", 0))
+            if key not in self._imported_keys:
+                self._imported_keys.add(key)
+                fresh.append(hand)
+        return fresh
+
+    def run(self) -> None:
+        while not self._stop_requested:
+            try:
+                for hand in self.poll_once():
+                    self.hand_imported.emit(hand)
+                self._consecutive_errors = 0
+            except Exception:
+                # One failure is unremarkable while the tap is mid-write; a run of
+                # them means the archive is unreadable and the user is silently
+                # getting no hands, so say so instead of hiding it at debug level.
+                self._consecutive_errors += 1
+                if self._consecutive_errors in (1, 10, 100):
+                    log.warning(
+                        "SwC native tailing failed %d time(s) reading %s",
+                        self._consecutive_errors,
+                        self.raw_path,
+                        exc_info=True,
+                    )
+            for _step in range(10):
+                if self._stop_requested:
+                    break
+                time.sleep(0.25)
+
+
 class GuiAutoImport(QWidget):
     log_message = Signal(str, str)
 
@@ -108,6 +187,7 @@ class GuiAutoImport(QWidget):
             self.log_message.connect(self._addText_slot)
         self.importtimer: QTimer | None = None
         self.import_thread: AutoImportThread | None = None
+        self.swc_tailing_thread: SwCNativeTailingThread | None = None
         # Outage bookkeeping, so the database going away is reported once rather
         # than once per interval, and its return is reported too.
         self._deferred_cycles = 0
@@ -438,6 +518,10 @@ class GuiAutoImport(QWidget):
     def _finalize_auto_import_stop(self) -> None:
         """Release importer resources after no worker can still be using them."""
         self._stop_cleanup_pending = False
+        if self.swc_tailing_thread is not None:
+            self.swc_tailing_thread.stop()
+            self.swc_tailing_thread.wait(1000)
+            self.swc_tailing_thread = None
         self.importer.autoSummaryGrab(True)
         self.settings["global_lock"].release()
         self.addText("\nStopping Auto Import. Global lock released.", "unlock")
@@ -452,6 +536,42 @@ class GuiAutoImport(QWidget):
             self.pipe_to_hud = None
         self.intervalEntry.setEnabled(True)
         self.startButton.setEnabled(True)
+
+    def start_swc_native_capture(self) -> None:
+        """Launch SwC native TLS capture and start live raw tailing thread."""
+        try:
+            from fpdb_3_legacy.swc_native_capture import DEFAULT_ARCHIVE, build_tap
+            build_tap(check_executable=False)
+            if self.swc_tailing_thread is None or not self.swc_tailing_thread.isRunning():
+                self.swc_tailing_thread = SwCNativeTailingThread(DEFAULT_ARCHIVE, parent=self)
+                self.swc_tailing_thread.hand_imported.connect(self._on_swc_native_hand_imported)
+                self.swc_tailing_thread.start()
+                self.addText(_("\nSwC Native Live HUD tailing thread started."), "poker")
+        except Exception as e:
+            log.warning("Could not start SwC native capture: %s", e)
+            self.addText(f"\nSwC Native Capture warning: {e}", "warning")
+
+    def _on_swc_native_hand_imported(self, hand_data: dict) -> None:
+        """Callback when a new live SwC hand is parsed from swc-native.raw."""
+        from fpdb_3_legacy.http_capture_db_import import import_http_capture_hand
+
+        # Importer holds its connection as `database`; `db` never existed, so
+        # every live hand raised AttributeError into the handler below and was
+        # dropped. Nothing captured live ever reached the database.
+        database = getattr(self.importer, "database", None)
+        if database is None:
+            log.warning("SwC live hand dropped: the importer has no database connection")
+            return
+
+        try:
+            import_http_capture_hand(database, hand_data)
+        except Exception:
+            log.exception("Failed to import SwC live hand %s", hand_data.get("hand_id"))
+            return
+
+        game_cat = hand_data.get("game", {}).get("category", "unknown")
+        hand_id = hand_data.get("hand_id", 0)
+        self.addText(f"\n[SwC Live] Imported hand #{hand_id} ({game_cat}).", "poker")
 
     def import_error(self, error_msg: str) -> None:
         """Called when auto import cycle fails in the background."""
@@ -737,6 +857,7 @@ class GuiAutoImport(QWidget):
                         self.updatePaths()
 
                         self.do_import()
+                        self.start_swc_native_capture()
                         interval = self.intervalEntry.value()
                         self.importtimer = QTimer()
                         self.importtimer.timeout.connect(self.do_import)
