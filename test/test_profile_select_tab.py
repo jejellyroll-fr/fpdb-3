@@ -19,6 +19,11 @@ os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 EXAMPLE = os.path.join(ROOT, "HUD_config.xml.example")
 
+# The site combo is populated from the example config, so these tests can only
+# drive a rule for a site that config still declares. Nothing here is specific
+# to the room chosen -- it just has to exist.
+SITE = "PokerStars"
+
 pytestmark = [pytest.mark.qt, pytest.mark.skipif(not os.path.exists(EXAMPLE), reason="example config missing")]
 
 
@@ -66,13 +71,13 @@ def test_the_tab_exists_and_starts_empty(dialog) -> None:
 
 def test_adding_a_rule_lists_it_with_wildcards_spelled_out(dialog) -> None:
     profile = dialog.rule_profile_combo.itemData(0)
-    _select(dialog, site="CoinPoker", game="omahahi", seats="6", profile=profile)
+    _select(dialog, site=SITE, game="omahahi", seats="6", profile=profile)
 
     dialog._add_profile_rule()
 
     assert dialog.profile_rules_table.rowCount() == 1
     row = [dialog.profile_rules_table.item(0, column).text() for column in range(8)]
-    assert row[0] == "coinpoker"
+    assert row[0] == SITE.lower()
     assert row[1] == "omahahi"
     assert row[2] == "ANY", "an unset dimension must read as ANY, not blank"
     assert row[4] == "6"
@@ -85,7 +90,7 @@ def test_a_duplicate_rule_is_refused(dialog, monkeypatch) -> None:
     warned = []
     monkeypatch.setattr(main_dialog.QMessageBox, "warning", lambda *args: warned.append(args))
     profile = dialog.rule_profile_combo.itemData(0)
-    _select(dialog, site="CoinPoker", game="omahahi", profile=profile)
+    _select(dialog, site=SITE, game="omahahi", profile=profile)
 
     dialog._add_profile_rule()
     dialog._add_profile_rule()
@@ -110,13 +115,13 @@ def test_deleting_a_rule_renumbers_the_rest(dialog) -> None:
 
 def test_the_preview_names_the_rule_that_wins(dialog) -> None:
     profile = dialog.rule_profile_combo.itemData(0)
-    _select(dialog, site="CoinPoker", game="omahahi", seats="6", profile=profile)
+    _select(dialog, site=SITE, game="omahahi", seats="6", profile=profile)
     dialog._add_profile_rule()
 
     text = dialog.profile_preview_label.text()
 
     assert profile in text
-    assert "site=coinpoker" in text and "seats=6" in text
+    assert f"site={SITE.lower()}" in text and "seats=6" in text
 
 
 def test_the_preview_falls_back_to_the_game_default(dialog) -> None:
@@ -135,10 +140,10 @@ def test_the_preview_follows_the_most_specific_rule(dialog) -> None:
     profiles = [dialog.rule_profile_combo.itemData(i) for i in range(2)]
     _select(dialog, game="omahahi", profile=profiles[0])
     dialog._add_profile_rule()
-    _select(dialog, site="CoinPoker", game="omahahi", seats="6", profile=profiles[1])
+    _select(dialog, site=SITE, game="omahahi", seats="6", profile=profiles[1])
     dialog._add_profile_rule()
 
-    _select(dialog, site="CoinPoker", game="omahahi", seats="6")
+    _select(dialog, site=SITE, game="omahahi", seats="6")
 
     assert profiles[1] in dialog.profile_preview_label.text()
 
@@ -163,14 +168,14 @@ def test_saved_rules_survive_a_reload_and_reach_the_resolver(dialog) -> None:
     from fpdb_3_legacy.hud_profiles import HudContext
 
     profile = dialog.rule_profile_combo.itemData(0)
-    _select(dialog, site="CoinPoker", game="omahahi", seats="6", profile=profile)
+    _select(dialog, site=SITE, game="omahahi", seats="6", profile=profile)
     dialog._add_profile_rule()
     dialog.config.set_hud_profile_rules(dialog.profile_rules)
     dialog.config.save()
 
     reloaded = Conf.Config(file=str(dialog._config_path))
     params = reloaded.get_supported_games_parameters(
-        "omahahi", "ring", HudContext("CoinPoker", "omahahi", "ring", max_seats=6)
+        "omahahi", "ring", HudContext(SITE, "omahahi", "ring", max_seats=6)
     )
 
     assert params["game_stat_set"].name == profile
@@ -179,7 +184,7 @@ def test_saved_rules_survive_a_reload_and_reach_the_resolver(dialog) -> None:
 def test_reload_picks_up_rules_saved_by_another_process(dialog) -> None:
     """HUD_main reloads the same object; the rules must come back with it."""
     profile = dialog.rule_profile_combo.itemData(0)
-    _select(dialog, site="CoinPoker", game="aof_omaha", profile=profile)
+    _select(dialog, site=SITE, game="aof_omaha", profile=profile)
     dialog._add_profile_rule()
     dialog.config.set_hud_profile_rules(dialog.profile_rules)
     dialog.config.save()
