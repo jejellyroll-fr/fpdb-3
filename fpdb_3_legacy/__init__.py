@@ -8,4 +8,4 @@ This package contains the legacy Python implementation of FPDB-3.
 It is maintained for parity testing with the new Rust implementation.
 """
 
-__version__ = "3.3.0"
+__version__ = "3.2.0"
