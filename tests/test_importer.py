@@ -247,3 +247,42 @@ def test_the_hud_and_session_switches_are_held_on_the_importer(importer, setter,
     getattr(importer, setter)(value)
 
     assert getattr(importer, attribute) == value
+
+
+def test_test_sidecars_are_ignored_and_not_queued(importer, tmp_path) -> None:
+    sidecars = [
+        tmp_path / "sample.txt.hp",
+        tmp_path / "sample.txt.gt",
+        tmp_path / "sample.txt.hands",
+    ]
+    for file in sidecars:
+        file.write_text("{'dummy': 1}", encoding="utf-8")
+        assert not importer._is_valid_import_file(str(file))
+        assert not importer.addImportFile(str(file), "auto")
+
+    assert importer.filelist == {}
+
+
+def test_failed_site_identification_is_cached_without_repeated_processing(importer, tmp_path, caplog) -> None:
+    unknown_file = tmp_path / "unknown_data.txt"
+    unknown_file.write_text("random content not a hand history\n", encoding="utf-8")
+
+    # First attempt: fails site identification, logs warning once
+    assert not importer.addImportFile(str(unknown_file), "auto")
+    assert str(unknown_file) in importer.failed_files
+    assert str(unknown_file) in importer.idsite.failed_files
+    warnings = [rec for rec in caplog.records if "siteId Failed" in rec.message]
+    assert len(warnings) == 1
+
+    # Second attempt: cached in failed_files, immediately skipped without adding new warning
+    caplog.clear()
+    assert not importer.addImportFile(str(unknown_file), "auto")
+    warnings_second = [rec for rec in caplog.records if "siteId Failed" in rec.message]
+    assert len(warnings_second) == 0
+
+    # Directory import loop: also skips cached failed file without warning
+    caplog.clear()
+    importer.addImportDirectory(str(tmp_path), monitor=False)
+    warnings_dir = [rec for rec in caplog.records if "siteId Failed" in rec.message]
+    assert len(warnings_dir) == 0
+
