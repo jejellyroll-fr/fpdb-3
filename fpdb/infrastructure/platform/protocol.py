@@ -7,8 +7,9 @@ Uses Python's Protocol (PEP 544) for structural subtyping.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from enum import StrEnum
 from typing import Protocol, runtime_checkable
+
+from fpdb.compat import StrEnum
 
 
 class Platform(StrEnum):

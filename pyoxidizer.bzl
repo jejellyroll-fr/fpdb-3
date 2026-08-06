@@ -141,6 +141,7 @@ def make_install(exe):
         include=[
             CWD + "/fpdb_3_legacy/**/*.py",
             CWD + "/fpdb_3_legacy/**/*.pyw",
+            CWD + "/fpdb_3_legacy/**/*.c",
             CWD + "/fpdb_3_legacy/**/*.toml",
             CWD + "/fpdb_3_legacy/**/*.xml",
             CWD + "/fpdb_3_legacy/**/*.sql",
@@ -161,6 +162,7 @@ def make_install(exe):
             CWD + "/locale/**/*.po",
             CWD + "/locale/**/*.mo",
             CWD + "/HUD_config.xml",
+            CWD + "/HUD_config.xml.example",
         ],
         exclude=[
             "**/__pycache__/**",
@@ -172,6 +174,10 @@ def make_install(exe):
     files.add_file(
         FileContent(path=CWD + "/HUD_config.xml.example"),
         path="pyfpdb/HUD_config.xml.example",
+    )
+    files.add_file(
+        FileContent(path=CWD + "/HUD_config.xml.example"),
+        path="HUD_config.xml.example",
     )
     return files
 

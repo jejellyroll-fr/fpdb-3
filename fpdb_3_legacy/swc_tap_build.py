@@ -73,8 +73,13 @@ def build_tap(*, force: bool = False, check_executable: bool = False) -> Path:
         raise FileNotFoundError(msg)
 
     tap_lib = get_tap_library_path()
-    if tap_lib.exists() and not force and tap_lib.stat().st_mtime >= SOURCE_PATH.stat().st_mtime:
-        return tap_lib
+    if tap_lib.exists() and not force:
+        if not SOURCE_PATH.exists() or tap_lib.stat().st_mtime >= SOURCE_PATH.stat().st_mtime:
+            return tap_lib
+
+    if not SOURCE_PATH.exists():
+        msg = f"SwC tap source file not found at {SOURCE_PATH}"
+        raise FileNotFoundError(msg)
 
     BUILD_DIR.mkdir(mode=0o700, parents=True, exist_ok=True)
     subprocess.run(_compile_command(system_name, tap_lib), check=True)

@@ -248,7 +248,9 @@ def _find_example_config(file_name: str) -> str:
         os.path.join(str(SOURCE_ROOT_PATH), example_name),
         os.path.join(str(SOURCE_DIR), example_name),
         os.path.join(FPDB_ROOT_PATH, example_name),
+        os.path.join(os.path.dirname(FPDB_ROOT_PATH), example_name),
         os.path.join(PYFPDB_PATH, example_name),
+        os.path.join(os.path.dirname(PYFPDB_PATH), example_name),
     ]
     for candidate in candidates:
         normalized = candidate.replace("\\", "/")
@@ -1818,6 +1820,9 @@ class Config:
 
         if source_doc is None:
             source_path = _find_example_config("HUD_config.xml")
+            if not os.path.exists(source_path):
+                log.info("Example config file %s not found, skipping AoF Omaha HUD migration", source_path)
+                return False
             try:
                 source_doc = defusedxml.minidom.parse(source_path)
             except XML_PARSE_ERRORS as exc:
@@ -1966,6 +1971,10 @@ class Config:
         config section now because this will add it back in.
         """
         nodes_added = 0
+
+        if not example_file or not os.path.exists(example_file):
+            log.info(f"Example configuration file {example_file} not found. Skipping missing elements addition.")
+            return nodes_added
 
         try:
             example_doc = defusedxml.minidom.parse(example_file)
