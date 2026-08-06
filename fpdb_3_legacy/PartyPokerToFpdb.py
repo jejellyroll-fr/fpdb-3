@@ -1626,8 +1626,6 @@ class PartyPoker(HandHistoryConverter):
     def readCollectPot(self, hand) -> None:
         log.info("Entering readCollectPot method")
 
-        hand.setUncalledBets(True)
-
         cashed_out = self._read_cash_outs(hand)
         remaining = self._announced_pot_total(hand)
 

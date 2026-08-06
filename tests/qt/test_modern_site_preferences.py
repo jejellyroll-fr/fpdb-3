@@ -24,6 +24,41 @@ def test_site_card_prefills_extra_aliases(qtbot) -> None:
 
 
 @pytest.mark.qt
+def test_site_card_does_not_scan_the_filesystem_to_offer_auto_detect(qtbot, monkeypatch) -> None:
+    """Building a card must not run site detection.
+
+    Whether a site offers auto-detection is a lookup in a static list, but it
+    used to be answered by constructing a DetectInstalledSites -- which parses
+    the configuration and probes the filesystem for every supported network.
+    One card did that once; a dialog full of them froze the UI for seconds, and
+    on a cold cache far longer.
+    """
+    from fpdb_3_legacy import DetectInstalledSites
+    from fpdb_3_legacy.ModernSitePreferences import ModernSiteCard
+
+    def explode(*args, **kwargs):
+        msg = "site detection must not run while building a site card"
+        raise AssertionError(msg)
+
+    monkeypatch.setattr(DetectInstalledSites, "DetectInstalledSites", explode)
+
+    site_config = types.SimpleNamespace(
+        enabled=True,
+        screen_name="main",
+        hero_aliases=["main"],
+        HH_path="/tmp/hh",
+        TS_path="",
+    )
+    card = ModernSiteCard("PokerStars", site_config)
+    qtbot.addWidget(card)
+
+    # PokerStars has a detector, so the button is still offered.
+    assert card.is_site_detectable() is True
+    # A site with no detector still gets no button.
+    assert not ModernSiteCard("Some Unknown Room", site_config).is_site_detectable()
+
+
+@pytest.mark.qt
 def test_site_card_get_values_returns_deduped_hero_aliases(qtbot) -> None:
     from fpdb_3_legacy.ModernSitePreferences import ModernSiteCard
 

@@ -86,95 +86,19 @@ def test_play_money_ring_is_not_read_as_a_real_currency() -> None:
     assert game_type["currency"] == "play"
 
 
-def test_partypoker_modern_hh_summary_and_splitting() -> None:
+def test_the_cash_out_summary_separates_the_payout_from_the_pot() -> None:
+    """A player insures an all-in and takes the payout instead of the pot."""
     from fpdb_3_legacy.Configuration import Config
 
-    sample_hands = """***** Hand History For Game 1770659766668adeb0h5qfm *****
-0.10/0.25 Omaha Hi Game Table (PL) - Mon Feb 09 12:55:26 EST 2026
-Table Table 7488952 (Real Money) -- Seat 1 is the button
-Total number of players : 4/6
-Seat 1: Player4 ($56.64)
-Seat 2: Player1 ($19.93)
-Seat 3: Player2 ($20.20)
-Seat 4: Hero ($25.86)
-Player1 posts small blind (0.10)
-Player2 posts big blind (0.25)
-** Dealing down cards **
-Dealt to Hero [ 9c, 7h, 8h, 4d ]
-Hero raises 0.85 to 0.85
-Player4 folds
-Player1 folds
-Player2 raises 2.40 to 2.65
-Hero calls (1.80)
-** Dealing Flop ** : [ Jc, 7d, 6c ]
-Player2 bets (5.13)
-Hero raises 20.52 to 20.52
-Player2 calls (12.42)
-Player2 is all-In.
-Creating Main Pot with $ 38.50 with Player2, Hero
-Player2 Cash-out Premium % is 1.0
-Player2 opted for cash-out
-Player2 probabilty is 60.37
-Player2 Cashout Amount is 23.01
-** Dealing Turn ** : [ Ts ]
-** Dealing River ** : [ Js ]
-** Summary **
-Main Pot: $38.50 Rake: $2.0
-Board: [ Jc, 7d, 6c, Ts, Js ]
-Player4 balance $56.64, didn't bet (folded)
-Player1 balance $19.83, lost $0.10 (folded)
-Player2 Cashed out balance $23.01, bet $20.20, collected $23.01, net +$2.81[ Tc, Ac, Ad, 4c ] [ two pairs, aces and jacks -- Ac,Ad,Jc,Js,Ts ]
-Hero balance $44.16, bet $23.17, collected $41.47, net +$18.30[ 9c, 7h, 8h, 4d ] [ a straight, seven to jack -- Jc,Ts,9c,8h,7d ]
+    path = CASH / "PLO-6max-USD-0.10-0.25-202602.cash.out.txt"
+    hands = PartyPoker(config=Config(), in_path=str(path), autostart=True).getProcessedHands()
 
-***** Hand History For Game 1784559729098bywbird3xlj *****
-0.10/0.25 Omaha Hi Game Table (PL) - Mon Jul 20 11:01:17 EDT 2026
-Table Table 7490030 (Real Money) -- Seat 1 is the button
-Total number of players : 4/6
-Seat 1: Player4 ($113.97)
-Seat 2: Player1 ($12.60)
-Seat 3: Hero ($51.56)
-Seat 4: Player3 ($85.96)
-Player1 posts small blind (0.10)
-Hero posts big blind (0.25)
-** Dealing down cards **
-Dealt to Hero [ 7s, Tc, 5c, Jh ]
-Player3 folds
-Player4 folds
-Player1 calls (0.15)
-Hero checks
-** Dealing Flop ** : [ 8d, 5s, 8h ]
-Player1 checks
-Hero checks
-** Dealing Turn ** : [ 2c ]
-Player1 bets (0.32)
-Hero calls (0.32)
-** Dealing River ** : [ 6s ]
-Player1 checks
-Hero checks
-** Summary **
-Main Pot: $1.09 Rake: $0.05
-Board: [ 8d, 5s, 8h, 2c, 6s ]
-Player4 balance $113.97, didn't bet (folded)
-Player1 balance $13.12, bet $0.57, collected $1.09, net +$0.52[ 9s, 4d, 8s, Jc ] [ three of a kind, eights -- Jc,8s,8d,8h,6s ]
-Hero balance $50.99, lost $0.57[ 7s, Tc, 5c, Jh ] [ two pairs, eights and fives -- Jh,8d,8h,5c,5s ]
-Player3 balance $85.96, didn't bet (folded)
-"""
-
-    config = Config()
-    parser = PartyPoker(config, autostart=False)
-    parser.obs = sample_hands
-    parser.in_path = "test.txt"
-    parser.readFile = lambda: None
-
-    hands_list = parser.allHandsAsList()
-    assert len(hands_list) == 2
-
-    # Process hand 1 (Cashout & Showdown)
-    hand1 = parser.processHand(hands_list[0])
-    assert hand1.handid == "1770659766668"
-    assert hand1.hero == "Hero"
-    assert "Player2" in hand1.shown
-    assert "Hero" in hand1.shown
+    assert len(hands) == 1
+    hand = hands[0]
+    assert hand.handid == "1770659766668"
+    assert hand.hero == "Hero"
+    assert "Player2" in hand.shown
+    assert "Hero" in hand.shown
 
     # The summary reports what left the table, which is two different kinds of
     # money here. Player2's 23.01 is an insurance payout that never sat in the
@@ -182,20 +106,42 @@ Player3 balance $85.96, didn't bet (folded)
     # Player2, all-in for less, could not call. Recording either as pot winnings
     # is what GGPoker's readCollectPot calls out: "cashouts are separate
     # transactions that don't affect the main pot distribution".
-    assert hand1.cashedOut is True
-    assert hand1.cashOutAmounts["Player2"] == Decimal("23.01")
-    assert "Player2" not in dict(hand1.collected)  # insurance, not the pot
-    assert ["Hero", "38.50"] in hand1.collected
-    assert hand1.pot.returned["Hero"] == Decimal("2.97")
-    assert hand1.totalpot - hand1.rake == Decimal("38.50")  # the announced Main Pot
+    assert hand.cashedOut is True
+    assert hand.cashOutAmounts["Player2"] == Decimal("23.01")
+    assert "Player2" not in dict(hand.collected)  # insurance, not the pot
+    assert ["Hero", "38.50"] in hand.collected
+    assert hand.pot.returned["Hero"] == Decimal("2.97")
+    assert hand.totalpot - hand.rake == Decimal("38.50")  # the announced Main Pot
 
-    # Process hand 2
-    hand2 = parser.processHand(hands_list[1])
-    assert hand2.handid == "1784559729098"
-    assert hand2.hero == "Hero"
-    assert ["Player1", "1.09"] in hand2.collected
-    assert "Player1" in hand2.shown
 
+def test_consecutive_modern_hands_are_split_and_parsed() -> None:
+    """The modern export concatenates hands; each one must survive the split."""
+    from fpdb_3_legacy.Configuration import Config
+
+    path = CASH / "PLO-6max-USD-0.10-0.25-202607.multi.hand.split.txt"
+
+    # allHandsAsList consumes the observed text, so split on a parser of its
+    # own rather than on the one that has already processed the file.
+    splitter = PartyPoker(config=Config(), in_path=str(path), autostart=False)
+    splitter.obs = _read(path)
+    assert len(splitter.allHandsAsList()) == 4
+
+    parser = PartyPoker(config=Config(), in_path=str(path), autostart=True)
+    hands = {hand.handid: hand for hand in parser.getProcessedHands()}
+    assert set(hands) == {"1784559729098", "1784559699067", "1784559686726", "1784559652796"}
+
+    showdown = hands["1784559729098"]
+    assert showdown.hero == "Hero"
+    assert ["Player1", "1.09"] in showdown.collected
+    assert "Player1" in showdown.shown
+
+    # Everyone folds to the big blind: no board, and the summary's "collected
+    # $0.35" is the whole 0.10 + 0.25 of blinds, including the 0.15 of his own
+    # big blind nobody called. The pot is the announced 0.20.
+    walk = hands["1784559652796"]
+    assert all(not cards for cards in walk.board.values())
+    assert ["Hero", "0.20"] in walk.collected
+    assert walk.pot.returned["Hero"] == Decimal("0.15")
 
 
 def test_the_summary_collected_keeps_its_uncalled_bet_out_of_the_pot() -> None:

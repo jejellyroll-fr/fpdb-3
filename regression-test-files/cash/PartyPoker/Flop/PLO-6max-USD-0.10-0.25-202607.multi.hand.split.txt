@@ -1,0 +1,118 @@
+***** Hand History For Game 1784559729098bywbird3xlj *****
+0.10/0.25 Omaha Hi Game Table (PL) - Mon Jul 20 11:01:17 EDT 2026
+Table Table 7490030 (Real Money) -- Seat 1 is the button
+Total number of players : 4/6
+Seat 1: Player4 ($113.97)
+Seat 2: Player1 ($12.60)
+Seat 3: Hero ($51.56)
+Seat 4: Player3 ($85.96)
+Player1 posts small blind (0.10)
+Hero posts big blind (0.25)
+** Dealing down cards **
+Dealt to Hero [ 7s, Tc, 5c, Jh ]
+Player3 folds 
+Player4 folds 
+Player1 calls (0.15)
+Hero checks 
+** Dealing Flop ** :  [ 8d, 5s, 8h ]
+Player1 checks 
+Hero checks 
+** Dealing Turn ** :  [ 2c ]
+Player1 bets (0.32)
+Hero calls (0.32)
+** Dealing River ** :  [ 6s ]
+Player1 checks 
+Hero checks 
+** Summary **
+Main Pot: $1.09 Rake: $0.05
+Board: [ 8d, 5s, 8h, 2c, 6s ]
+Player4 balance $113.97, didn't bet (folded)
+Player1 balance $13.12, bet $0.57, collected $1.09, net +$0.52[ 9s, 4d, 8s, Jc ] [ three of a kind, eights -- Jc,8s,8d,8h,6s ]
+Hero balance $50.99, lost $0.57[ 7s, Tc, 5c, Jh ] [ two pairs, eights and fives -- Jh,8d,8h,5c,5s ]
+Player3 balance $85.96, didn't bet (folded)
+
+
+***** Hand History For Game 17845596990673djb7na2i87 *****
+0.10/0.25 Omaha Hi Game Table (PL) - Mon Jul 20 11:00:56 EDT 2026
+Table Table 7509241 (Real Money) -- Seat 1 is the button
+Total number of players : 4/6
+Seat 1: Hero ($124.44)
+Seat 2: Player1 ($7.02)
+Seat 3: Player2 ($95.23)
+Seat 4: Player3 ($113.97)
+Player1 posts small blind (0.10)
+Player2 posts big blind (0.25)
+** Dealing down cards **
+Dealt to Hero [ 2c, Qs, Jh, Ac ]
+Player3 folds 
+Hero raises 0.85 to 0.85
+Player1 raises 2.70 to 2.80
+Player2 calls (2.55)
+Hero calls (1.95)
+** Dealing Flop ** :  [ 8d, 5h, Ah ]
+Player1 bets (4.22)
+Player1 is all-In.
+Player2 folds 
+Hero calls (4.22)
+Creating Main Pot with $ 16 with Player1, Hero
+** Dealing Turn ** :  [ Th ]
+** Dealing River ** :  [ 5d ]
+** Summary **
+Main Pot: $16 Rake: $0.84
+Board: [ 8d, 5h, Ah, Th, 5d ]
+Hero balance $117.42, lost $7.02[ 2c, Qs, Jh, Ac ] [ two pairs, aces and fives -- Ac,Ah,Qs,5h,5d ]
+Player1 balance $16, bet $7.02, collected $16, net +$8.98[ 8s, Ks, 3d, Ad ] [ two pairs, aces and eights -- Ad,Ah,Th,8s,8d ]
+Player2 balance $92.43, lost $2.80 (folded)
+Player3 balance $113.97, didn't bet (folded)
+
+
+***** Hand History For Game 17845596867267gpyxw6jp9t *****
+0.10/0.25 Omaha Hi Game Table (PL) - Mon Jul 20 11:00:51 EDT 2026
+Table Table 7520920 (Real Money) -- Seat 1 is the button
+Total number of players : 4/6
+Seat 1: Player4 ($95.23)
+Seat 2: Hero ($32.32)
+Seat 3: Player2 ($21.95)
+Seat 4: Player3 ($7.02)
+Hero posts small blind (0.10)
+Player2 posts big blind (0.25)
+** Dealing down cards **
+Dealt to Hero [ Tc, Qs, 6c, Kh ]
+Player3 folds 
+Player4 folds 
+Hero raises 0.65 to 0.75
+Player2 calls (0.50)
+** Dealing Flop ** :  [ 2s, 6s, 9s ]
+Hero checks 
+Player2 bets (1.07)
+Hero folds 
+** Summary **
+Main Pot: $1.43 Rake: $0.07
+Board: [ 2s, 6s, 9s ]
+Player4 balance $95.23, didn't bet (folded)
+Hero balance $31.57, lost $0.75 (folded)
+Player2 balance $22.63, bet $1.82, collected $2.50, net +$0.68
+Player3 balance $7.02, didn't bet (folded)
+
+
+***** Hand History For Game 1784559652796h1yodv7zdsi *****
+0.10/0.25 Omaha Hi Game Table (PL) - Mon Jul 20 11:00:48 EDT 2026
+Table Table 7519720 (Real Money) -- Seat 1 is the button
+Total number of players : 4/6
+Seat 1: Player4 ($95.23)
+Seat 2: Player1 ($22.05)
+Seat 3: Hero ($124.34)
+Seat 4: Player3 ($7.02)
+Player1 posts small blind (0.10)
+Hero posts big blind (0.25)
+** Dealing down cards **
+Dealt to Hero [ Jd, 2c, 6h, As ]
+Player3 folds 
+Player4 folds 
+Player1 folds 
+** Summary **
+Main Pot: $0.20 Rake: $0.0
+Player4 balance $95.23, didn't bet (folded)
+Player1 balance $21.95, lost $0.10 (folded)
+Hero balance $124.44, bet $0.25, collected $0.35, net +$0.10
+Player3 balance $7.02, didn't bet (folded)

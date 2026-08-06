@@ -611,9 +611,6 @@ class PokerTracker(HandHistoryConverter):
             info.update(m.groupdict())
         info.update(m2.groupdict())
 
-        if self.sitename != "Everest" and info.get("UNCALLED") is None:
-            hand.setUncalledBets(True)
-
         # print 'readHandInfo', info
         for key in sorted(info.keys(), key=lambda x: 0 if x == "DATETIME" else 1):
             if key == "DATETIME":
@@ -1072,8 +1069,6 @@ class PokerTracker(HandHistoryConverter):
             elif action.group("ATYPE") in (" Allin", " went all-in"):
                 amount = Decimal(self.clearMoneyString(action.group("BET")))
                 hand.addAllIn(street, action.group("PNAME"), action.group("BET"))
-                if curr_pot > amount and curr_pot > Decimal(0) and self.sitename == "Microgaming":
-                    hand.setUncalledBets(False)
                 curr_pot = amount
             else:
                 log.debug(
@@ -1081,10 +1076,7 @@ class PokerTracker(HandHistoryConverter):
                 )
 
     def allInBlind(self, hand, street, action, actiontype) -> None:
-        if street in ("PREFLOP", "DEAL"):
-            player = action.group("PNAME")
-            if hand.stacks[player] == 0:
-                hand.setUncalledBets(True)
+        pass
 
     def adjustMergeTourneyStack(self, hand, player, amount) -> None:
         if self.sitename == "Merge":

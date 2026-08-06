@@ -1219,9 +1219,6 @@ class Bovada(HandHistoryConverter):
         Args:
             hand: The Hand object to update with blind information.
         """
-        if not self.re_return_bet.search(hand.handText):
-            hand.setUncalledBets(True)
-
         self._process_small_blinds(hand)
         self._process_big_blinds(hand)
         self._process_all_in_actions(hand)
@@ -1455,21 +1452,7 @@ class Bovada(HandHistoryConverter):
                     hand.handid,
                     action.group("PNAME"),
                 )
-                self._handle_uncalled_bets(hand, action)
                 self._process_action(hand, street, player, action)
-
-    def _handle_uncalled_bets(self, hand: "Hand", action: re.Match[str]) -> None:
-        """Handle uncalled bets for the hand.
-
-        This method checks the action type and updates the Hand object to indicate whether there are uncalled bets,
-        based on the current action and all-in blind status.
-
-        Args:
-            hand: The Hand object to update with uncalled bet information.
-            action: The regex match object representing the current action.
-        """
-        if action.group("ATYPE") not in self.ACTION_NO_UNCALLED_BETS and not hand.allInBlind:
-            hand.setUncalledBets(False)
 
     def _process_action(self, hand: "Hand", street: str, player: str, action: re.Match[str]) -> None:
         """Process and assign a specific player action for a given street.
@@ -1610,7 +1593,6 @@ class Bovada(HandHistoryConverter):
                 action.group("PNAME"),
             )
             if hand.stacks[player] == 0 and not self.re_return_bet.search(hand.handText):
-                hand.setUncalledBets(True)
                 hand.allInBlind = True
 
     def readShowdownActions(self, hand: "Hand") -> None:

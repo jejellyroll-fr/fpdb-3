@@ -599,9 +599,6 @@ class IPokerStreetsActionsMixin:
         """
         log.info("Entering readCollectPot method")
 
-        # Enable uncalled bets
-        hand.setUncalledBets(True)
-
         # Initialize total pot to zero
         total_pot = Decimal("0.00")
 

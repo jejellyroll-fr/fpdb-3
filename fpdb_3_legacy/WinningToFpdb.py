@@ -1662,15 +1662,6 @@ class Winning(HandHistoryConverter):
                     log.debug(
                         f"Adjustment calculated: {adjustment}, Blinds/Antes total: {blindsantes}",
                     )
-            else:
-                log.debug(
-                    "Not all actions in PREFLOP are folds, checking for uncalled bets",
-                )
-                m0 = self.re_Uncalled.search(hand.handText)
-                if not m0:
-                    hand.setUncalledBets(True)
-                    log.debug("Set uncalled bets to True")
-
             for m in self.re_CollectPot2.finditer(post):
                 pot = self.clearMoneyString(m.group("POT"))
                 player = m.group("PNAME")
