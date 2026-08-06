@@ -508,9 +508,6 @@ class PartyPoker(HandHistoryConverter):
 
     def readSTP(self, hand) -> None:
         log.debug(f"Starting STP read hand_id: {hand.handid}, status: not_implemented")
-        log.warning(
-            f"STP functionality not implemented hand_id: {hand.handid}, method: readSTP",
-        )
 
     def _determineCurrency(self, stakeSymbol: str, handText: str) -> str:
         """Resolve the currency a ring game's amounts are expressed in.
@@ -1476,7 +1473,7 @@ class PartyPoker(HandHistoryConverter):
 
     def readBringIn(self, hand) -> None:
         log.info("Entering readBringIn method")
-        log.warning("Method not implemented")
+        log.debug("Method not implemented")
 
     def readHoleCards(self, hand) -> None:
         log.info("Entering readHoleCards method")
@@ -1624,7 +1621,7 @@ class PartyPoker(HandHistoryConverter):
 
     def readShowdownActions(self, hand) -> None:
         log.debug("Entering readShowdownActions method")
-        log.warning("Method not implemented")
+        log.debug("Method not implemented")
 
     def readCollectPot(self, hand) -> None:
         log.info("Entering readCollectPot method")
@@ -1730,7 +1727,7 @@ class PartyPoker(HandHistoryConverter):
 
     def readSummaryInfo(self, summaryInfoList) -> bool:
         log.debug("Entering readSummaryInfo method")
-        log.warning("Method not implemented")
+        log.debug("Method not implemented")
         return True
 
     def convert_to_decimal(self, string):

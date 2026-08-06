@@ -201,17 +201,21 @@ def set_locale_translation(config_path: str | None = None) -> None:
     resolved_locale = set_format_locale(ui_language)
     log.info("Display format locale: %s", resolved_locale)
 
-    try:
-        fr_translation = gettext.translation(
-            "fpdb",
-            path_string,
-            languages=[ui_language] if ui_language and ui_language != "system" else None,
-        )
-        fr_translation.install()
-    except (FileNotFoundError, OSError):
+    if not ui_language or ui_language == "en" or ui_language.startswith("en_"):
         gettext.NullTranslations().install()
-        log.warning(
-            "No translation file found for domain 'fpdb' in %s for language %s; using source strings.",
-            path_string,
-            ui_language,
-        )
+        log.info("Using source strings for language: %s", ui_language or "en")
+    else:
+        try:
+            fr_translation = gettext.translation(
+                "fpdb",
+                path_string,
+                languages=[ui_language] if ui_language != "system" else None,
+            )
+            fr_translation.install()
+        except (FileNotFoundError, OSError):
+            gettext.NullTranslations().install()
+            log.warning(
+                "No translation file found for domain 'fpdb' in %s for language %s; using source strings.",
+                path_string,
+                ui_language,
+            )
