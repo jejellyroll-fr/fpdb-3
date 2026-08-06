@@ -2,12 +2,11 @@ import io
 import struct
 import threading
 from dataclasses import replace
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 
 import pytest
 
-# datetime.UTC only exists on Python 3.11+; the project targets >=3.10.
-UTC = UTC
+UTC = getattr(datetime, "UTC", timezone.utc)
 
 from fpdb_3_legacy.swc_native_capture import (
     NativeAnimationEvent,

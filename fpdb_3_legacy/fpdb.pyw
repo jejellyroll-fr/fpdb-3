@@ -15,6 +15,10 @@
 # In the "official" distribution you can find the license in agpl-3.0.txt.
 
 import sys
+import datetime
+
+if not hasattr(datetime, "UTC"):
+    datetime.UTC = datetime.timezone.utc
 
 from fpdb_3_legacy.subprocess_launch import dispatch_run_module
 

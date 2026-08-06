@@ -5,7 +5,9 @@ various game types including Hold'em, Omaha, and Stud variants.
 """
 
 import unittest
-from datetime import UTC, datetime
+from datetime import datetime, timezone
+
+UTC = getattr(datetime, "UTC", timezone.utc)
 from decimal import Decimal
 from pathlib import Path
 from types import SimpleNamespace

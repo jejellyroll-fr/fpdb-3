@@ -5,7 +5,9 @@ from __future__ import annotations
 from collections import Counter
 from collections.abc import Sequence
 from dataclasses import dataclass, replace
-from datetime import UTC, datetime
+from datetime import datetime, timezone
+
+UTC = getattr(datetime, "UTC", timezone.utc)
 from decimal import ROUND_HALF_UP, Decimal
 from typing import Protocol
 

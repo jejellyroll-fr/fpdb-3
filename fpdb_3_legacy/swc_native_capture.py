@@ -17,7 +17,9 @@ import threading
 from collections import Counter
 from collections.abc import Iterator
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import datetime, timezone
+
+UTC = getattr(datetime, "UTC", timezone.utc)
 from decimal import Decimal
 from pathlib import Path
 from typing import BinaryIO
