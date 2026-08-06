@@ -487,10 +487,20 @@ jobs:
           test/test_hud_postgresql_integration.py
 
   build:
+    name: Build with PyInstaller (${{ matrix.label }})
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        include:
+          - os: ubuntu-latest
+            label: Linux x64
+            artifact: fpdb-pyinstaller-linux-x64
+          - os: macos-latest
+            label: macOS ARM64
+            artifact: fpdb-pyinstaller-macos-arm64
+          - os: windows-latest
+            label: Windows x64
+            artifact: fpdb-pyinstaller-windows-x64
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python
@@ -530,18 +540,33 @@ jobs:
         run: codesign --force --deep --sign - dist/fpdb.app
       - name: Package build artifact
         shell: bash
+        env:
+          ARTIFACT: ${{ matrix.artifact }}
         run: |
           if [ "${{ runner.os }}" = "macOS" ]; then
             cp docs/macos-gatekeeper.md dist/READ-ME-FIRST-macos.md
-            tar -czf fpdb-build.tar.gz -C dist fpdb.app READ-ME-FIRST-macos.md
+            tar -czf "$ARTIFACT.tar.gz" -C dist fpdb.app READ-ME-FIRST-macos.md
           else
-            tar -czf fpdb-build.tar.gz -C dist fpdb
+            tar -czf "$ARTIFACT.tar.gz" -C dist fpdb
           fi
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: fpdb-build-${{ matrix.os }}
-          path: fpdb-build.tar.gz
+          name: ${{ matrix.artifact }}
+          path: ${{ matrix.artifact }}.tar.gz
+          compression-level: 0
+      # Shipped alongside the PyOxidizer tarballs rather than instead of them:
+      # the PyOxidizer Windows build does not run, so on that platform this is
+      # the only working download, and offering the same pair everywhere keeps
+      # the release predictable.
+      - name: Attach PyInstaller build to the release
+        if: github.event_name == 'release'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          ASSET: ${{ matrix.artifact }}.tar.gz
+        run: gh release upload "$RELEASE_TAG" "$ASSET" --clobber --repo "$GITHUB_REPOSITORY"
 
   build-pyoxidizer:
     name: Build with PyOxidizer (${{ matrix.label }})

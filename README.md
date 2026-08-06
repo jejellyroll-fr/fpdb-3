@@ -20,6 +20,13 @@ Standalone builds for macOS (Apple Silicon), Windows x64 and Linux x64 are attac
 [release](https://github.com/jejellyroll-fr/fpdb-3/releases/latest). They bundle their own Python
 runtime — no install step. On macOS, read [docs/macos-gatekeeper.md](docs/macos-gatekeeper.md) first.
 
+Each platform ships two builds:
+
+- `fpdb-pyoxidizer-*` — a single embedded interpreter, the smaller download.
+- `fpdb-pyinstaller-*` — a directory distribution.
+
+**On Windows, take the PyInstaller build**: the PyOxidizer one does not currently run.
+
 ## 🔧 Requirements
 
 - Python 3.11+ (3.13 recommended)
