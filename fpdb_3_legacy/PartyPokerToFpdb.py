@@ -289,7 +289,7 @@ class PartyPoker(HandHistoryConverter):
         r"Total\s+number\s+of\s+players\s*:\s*(?P<COUNTED_SEATS>\d+)",
         re.MULTILINE,
     )
-    re_identify = re.compile(r"\*{5}\sHand\sHistory\s[fF]or\sGame\s\d+\w+?\s")
+    re_identify = re.compile(r"\*{5}\sHand\sHistory\s[fF]or\sGame\s\w+")
     # Hands are normally preceded by a "Game #N starts. / #Game No : N" banner.
     # Some exports (e.g. tournament STT histories) omit the banner and simply
     # separate bare "***** Hand History for Game N *****" headers with blank
@@ -297,7 +297,7 @@ class PartyPoker(HandHistoryConverter):
     # one chunk that fails identification (many markers => isPartial count != 1).
     re_SplitHands = re.compile(
         r"Game\s*\#\d+\s*starts.\n\n+\#Game\s*No\s*\:\s*\d+\s*"
-        r"|\n\n+(?=\*\*\*\*\*\sHand\sHistory\sfor\sGame)"
+        r"|\n\n+(?=\*\*\*\*\*\sHand\sHistory\s[fF]or\sGame)"
     )
     re_TailSplitHands = re.compile("(\x00+)")
     lineSplitter = "\n"
@@ -435,8 +435,8 @@ class PartyPoker(HandHistoryConverter):
                 "re_Antes": rf"{subst['PLYR']} posts ante(?: of)? [\[\(\)\]]?{subst['CUR_SYM']}?(?P<ANTE>[.,0-9]+)\s*({subst['CUR']})?[\[\(\)\]]?\.?\s*$",
                 "re_Action": r"""(?P<PNAME>.+?)\s(?P<ATYPE>bets|checks|raises|completes|bring-ins|calls|folds|is\sall-In|double\sbets)(?:\s*[\[\(\)\]]?\s?(€|\$)?(?P<BET>[.,\d]+)\s*(EUR|DOL)?\s*[\]\)]?)?(?:\sto\s[.,\d]+)?\.?\s*$""",
                 "re_HeroCards": rf"Dealt to {subst['PLYR']} \[\s*(?P<NEWCARDS>.+)\s*\]",
-                "re_ShownCards": rf"{subst['PLYR']} (?P<SHOWED>(?:doesn\'t )?shows?) \[ *(?P<CARDS>.+) *\](?P<COMBINATION>.+)\.",
-                "re_CollectPot": rf"{subst['PLYR']}\s+wins\s+(Lo\s\()?{subst['CUR_SYM']}?(?P<POT>[.,\d]+)\s*({subst['CUR']})?\)?",
+                "re_ShownCards": rf"{subst['PLYR']}(?: (?P<SHOWED>(?:doesn\'t )?shows?)|(?:\s+Cashed\s+out)?\s+balance\s+[^\[\n]+)\s*\[\s*(?P<CARDS>[A-Za-z0-9,\s]+?)\s*\](?:\s*\[\s*|\s*)(?P<COMBINATION>[^\]\n\.]*?)(?:\s*\]|\.|\s*$)",
+                "re_CollectPot": rf"{subst['PLYR']}(?:\s+wins\s+(?:Lo\s\()?|(?:\s+Cashed\s+out)?\s+balance\s+[^,\n]+,\s*(?:bet\s+[^,\n]+,\s*)?collected\s+){subst['CUR_SYM']}?(?P<POT>[.,\d]+)",
             }
 
             try:
