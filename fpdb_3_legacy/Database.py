@@ -62,6 +62,7 @@ from fpdb_3_legacy.db_reconnect import (
     reconnect_on_connection_loss,
 )
 from fpdb_3_legacy.Exceptions import (
+    FpdbDatabaseError,
     FpdbError,
     FpdbMySQLAccessDenied,
     FpdbMySQLNoDatabase,
@@ -504,12 +505,18 @@ class Database(
         # Prefer mysqlclient (MySQLdb); fall back to the pure-Python pymysql
         # shim so MySQL works without the system libraries mysqlclient needs.
         try:
-            import MySQLdb
-        except ImportError:
-            import pymysql
+            try:
+                import MySQLdb
+            except (ImportError, ModuleNotFoundError):
+                import pymysql
 
-            pymysql.install_as_MySQLdb()
-            import MySQLdb
+                pymysql.install_as_MySQLdb()
+                import MySQLdb
+        except (ImportError, ModuleNotFoundError) as err:
+            raise FpdbDatabaseError(
+                "MySQL driver ('pymysql' / 'MySQLdb') is not installed or available in this environment/build. "
+                "Please install 'pymysql' or configure SQLite in your database configuration."
+            ) from err
 
         # Note: SQLAlchemy 2.0 removed pool.manage
         # MySQLdb has its own connection pooling, so we don't need it
@@ -540,7 +547,13 @@ class Database(
 
     def _connect_postgresql(self, host, port, user, password, database) -> None:
         """Open a PostgreSQL connection, preferring a local peer connection."""
-        import psycopg
+        try:
+            import psycopg
+        except (ImportError, ModuleNotFoundError) as err:
+            raise FpdbDatabaseError(
+                "PostgreSQL driver ('psycopg') is not installed or available in this environment/build. "
+                "Please install 'psycopg' or configure SQLite in your database configuration."
+            ) from err
 
         # Note: SQLAlchemy 2.0 removed pool.manage
         # psycopg has its own connection pooling, so we don't need it
