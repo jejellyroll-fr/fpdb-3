@@ -128,10 +128,20 @@ sqlite_version = sqlite3.sqlite_version
 
 
 PROFILE_OUTPUT_DIR = os.path.join(os.path.expanduser("~"), "fpdb_profiles")
-os.makedirs(PROFILE_OUTPUT_DIR, exist_ok=True)
 
-profiler = cProfile.Profile()
-profiler.enable()
+# Profiling is opt-in through FPDB_PROFILE=1. It used to be unconditional, so
+# every session -- including the packaged PyInstaller and PyOxidizer builds,
+# which have no way to turn it off -- ran under cProfile. That roughly doubles
+# the cost of the call-heavy Python paths (config parsing, widget building),
+# and each exit dumped a stats file, which is how ~/fpdb_profiles reached a
+# thousand files. Set the variable when you actually want a profile.
+PROFILING_ENABLED = os.environ.get("FPDB_PROFILE", "") not in ("", "0", "false", "False")
+
+profiler = None
+if PROFILING_ENABLED:
+    os.makedirs(PROFILE_OUTPUT_DIR, exist_ok=True)
+    profiler = cProfile.Profile()
+    profiler.enable()
 
 
 # Set up initial console logging to capture early logs
@@ -1284,13 +1294,18 @@ class fpdb(QMainWindow):
             )
             sys.exit()
 
-        # Now reconfigure logging with the log directory from the configuration
-        setup_logging(log_dir=self.config.dir_log)
-        if options.log_level != "EMPTY":
-            level = getattr(logging, options.log_level)
-            logging.getLogger().setLevel(level)
-            for handler in logging.getLogger().handlers:
-                handler.setLevel(level)
+        # Now reconfigure logging with the log directory from the configuration.
+        # Only when it actually changed: setup_logging() tears down the root
+        # handlers and reopens the rotating log file, and load_profile() runs on
+        # nearly every dialog the menus open.
+        if self.config.dir_log != getattr(self, "_configured_log_dir", None):
+            setup_logging(log_dir=self.config.dir_log)
+            self._configured_log_dir = self.config.dir_log
+            if options.log_level != "EMPTY":
+                level = getattr(logging, options.log_level)
+                logging.getLogger().setLevel(level)
+                for handler in logging.getLogger().handlers:
+                    handler.setLevel(level)
 
         log.info(f"Logfile is {os.path.join(self.config.dir_log, 'fpdb-log.txt')}")
         log.info(f"load profiles {self.config.example_copy}")
@@ -1352,46 +1367,57 @@ class fpdb(QMainWindow):
         self.settings.update(self.config.get_import_parameters())
         self.settings.update(self.config.get_default_paths())
 
-        # Disconnect from the database if already connected
-        if self.db is not None and self.db.is_connected():
-            self.db.disconnect()
-
         # Set up SQL and connect to the database
         self.sql = SQL.Sql(db_server=self.settings["db-server"])
         err_msg = None
-        try:
-            self.db = Database.Database(self.config, sql=self.sql)
-            if self.db.get_backend_name() == "SQLite":
-                # Inform SQLite users where the database file is located
-                log.info(f"Connected to SQLite: {self.db.db_path}")
-        except Exceptions.FpdbMySQLAccessDenied:
-            err_msg = "MySQL Server reports: Access denied. Are your permissions set correctly?"
-        except Exceptions.FpdbMySQLNoDatabase:
-            err_msg = (
-                "MySQL client reports: 2002 or 2003 error."
-                " Unable to connect - Please check that the MySQL service has been started."
-            )
-        except Exceptions.FpdbPostgresqlAccessDenied:
-            err_msg = "PostgreSQL Server reports: Access denied. Are your permissions set correctly?"
-        except Exceptions.FpdbPostgresqlNoDatabase:
-            err_msg = (
-                "PostgreSQL client reports: Unable to connect - "
-                "Please check that the PostgreSQL service has been started."
-            )
-        except Exceptions.FpdbError as e:
-            # Any other connection failure (e.g. host cannot be resolved). Catch
-            # it here so a bad database config does not crash fpdb at startup.
-            err_msg = str(e)
-        self._db_connect_error = err_msg
-        if err_msg is not None:
-            self.db = None
-            # During startup recovery (_ensure_database_or_prompt) a single
-            # recovery dialog is shown instead of this warning; warn directly
-            # otherwise (e.g. reloads triggered from the menus).
-            if not getattr(self, "_suppress_db_warning", False):
-                self.warning_box(err_msg)
-        if self.db is not None and not self.db.is_connected():
-            self.db = None
+
+        # Reuse the live connection when the reloaded config still names the
+        # same database: the menus call load_profile() on nearly every dialog,
+        # and reconnecting each time cost a round trip on the GUI thread and
+        # dropped the database read caches for no gain.
+        reused_connection = self.db is not None and self.db.rebind_config(self.config)
+        if reused_connection:
+            self.db.sql = self.sql
+            self._db_connect_error = None
+            log.debug("Configuration reloaded; keeping the existing database connection")
+        else:
+            # Disconnect from the database if already connected
+            if self.db is not None and self.db.is_connected():
+                self.db.disconnect()
+
+            try:
+                self.db = Database.Database(self.config, sql=self.sql)
+                if self.db.get_backend_name() == "SQLite":
+                    # Inform SQLite users where the database file is located
+                    log.info(f"Connected to SQLite: {self.db.db_path}")
+            except Exceptions.FpdbMySQLAccessDenied:
+                err_msg = "MySQL Server reports: Access denied. Are your permissions set correctly?"
+            except Exceptions.FpdbMySQLNoDatabase:
+                err_msg = (
+                    "MySQL client reports: 2002 or 2003 error."
+                    " Unable to connect - Please check that the MySQL service has been started."
+                )
+            except Exceptions.FpdbPostgresqlAccessDenied:
+                err_msg = "PostgreSQL Server reports: Access denied. Are your permissions set correctly?"
+            except Exceptions.FpdbPostgresqlNoDatabase:
+                err_msg = (
+                    "PostgreSQL client reports: Unable to connect - "
+                    "Please check that the PostgreSQL service has been started."
+                )
+            except Exceptions.FpdbError as e:
+                # Any other connection failure (e.g. host cannot be resolved). Catch
+                # it here so a bad database config does not crash fpdb at startup.
+                err_msg = str(e)
+            self._db_connect_error = err_msg
+            if err_msg is not None:
+                self.db = None
+                # During startup recovery (_ensure_database_or_prompt) a single
+                # recovery dialog is shown instead of this warning; warn directly
+                # otherwise (e.g. reloads triggered from the menus).
+                if not getattr(self, "_suppress_db_warning", False):
+                    self.warning_box(err_msg)
+            if self.db is not None and not self.db.is_connected():
+                self.db = None
 
         # Check for database version issues
         if self.db is not None and self.db.wrongDbVersion:
@@ -2048,17 +2074,19 @@ if __name__ == "__main__":
 
         app.exec()
     finally:
-        profiler.disable()
-        s = io.StringIO()
-        ps = pstats.Stats(profiler, stream=s).sort_stats("cumulative")
-        ps.print_stats()
+        if profiler is not None:
+            profiler.disable()
+            s = io.StringIO()
+            ps = pstats.Stats(profiler, stream=s).sort_stats("cumulative")
+            ps.print_stats()
 
-        # Use timestamp or process ID for unique filenames
-        timestamp = time.strftime("%Y%m%d-%H%M%S")
-        results_file = os.path.join(PROFILE_OUTPUT_DIR, f"fpdb_profile_results_{timestamp}.txt")
-        profile_file = os.path.join(PROFILE_OUTPUT_DIR, f"fpdb_profile_{timestamp}.prof")
+            # Use timestamp or process ID for unique filenames
+            timestamp = time.strftime("%Y%m%d-%H%M%S")
+            results_file = os.path.join(PROFILE_OUTPUT_DIR, f"fpdb_profile_results_{timestamp}.txt")
+            profile_file = os.path.join(PROFILE_OUTPUT_DIR, f"fpdb_profile_{timestamp}.prof")
 
-        with open(results_file, "w") as f:
-            f.write(s.getvalue())
+            with open(results_file, "w") as f:
+                f.write(s.getvalue())
 
-        profiler.dump_stats(profile_file)
+            profiler.dump_stats(profile_file)
+            log.info(f"Profile written to {profile_file}")

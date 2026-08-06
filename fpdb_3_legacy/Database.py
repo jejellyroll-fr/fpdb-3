@@ -325,6 +325,41 @@ class Database(
 
     # end def __init__
 
+    def connection_params_changed(self, c) -> bool:
+        """Return whether ``c`` points at a different database than the live one."""
+        db_params = c.get_db_parameters()
+        return (
+            db_params["db-backend"] != self.backend
+            or db_params["db-server"] != self.db_server
+            or db_params["db-databaseName"] != self.database
+            or db_params["db-host"] != self.host
+        )
+
+    def rebind_config(self, c) -> bool:
+        """Adopt a freshly parsed config on the open connection, or refuse.
+
+        Reloading the configuration -- which fpdb does before opening most of
+        its dialogs -- used to disconnect and reconnect unconditionally. On a
+        networked backend that is a connect round trip on the GUI thread, and
+        it also throws away the read caches this object keeps for the HUD.
+        When the reloaded config still names the same database there is nothing
+        to reconnect to, so refresh only the values ``__init__`` derives from
+        the config and keep the connection.
+
+        Returns False when the connection is down or the config points
+        somewhere else; the caller then builds a new Database as before.
+        """
+        if not self.is_connected() or self.connection_params_changed(c):
+            return False
+
+        self.config = c
+        self.import_options = c.get_import_parameters()
+        gen = c.get_general_params()
+        self.day_start = float(gen["day_start"]) if "day_start" in gen else 0.0
+        self.sessionTimeout = float(self.import_options["sessionTimeout"])
+        self.publicDB = self.import_options["publicDB"]
+        return True
+
     def _connect_and_configure(self, c) -> None:
         """Open the connection, then set up what needs an open connection."""
         # connect to db

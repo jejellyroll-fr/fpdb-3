@@ -714,6 +714,28 @@ def test_each_detected_room_reports_a_hand_history_path(detector) -> None:
         assert info["hhpath"]
 
 
+def test_the_rooms_it_can_look_for_are_known_without_building_a_detector(detector) -> None:
+    # The auto-detect button in Site Preferences only needs this list, and asking
+    # a whole DetectInstalledSites for it meant one config parse and one
+    # filesystem sweep per site card.
+    assert list(detect_module.SUPPORTED_SITES) == detector.supportedSites
+    assert detect_module.is_network_detectable("PokerStars")
+    assert not detect_module.is_network_detectable("A Room That Does Not Exist")
+
+
+@pytest.mark.parametrize("network", ["PokerStars", "iPoker", "PartyGaming"])
+def test_looking_for_one_room_still_answers_for_that_room(network) -> None:
+    # Site Preferences detects the network of the card that was clicked, rather
+    # than sweeping all of them, so the scoped construction has to fill in
+    # everything the caller reads back.
+    scoped = DetectInstalledSites(sitename=network)
+
+    assert network in scoped.sitestatusdict
+    assert set(scoped.sitestatusdict[network]) >= {"detected", "hhpath", "heroname", "tspath"}
+    for accessor in ("get_all_pokerstars_variants", "get_all_ipoker_skins", "get_all_partypoker_skins"):
+        assert isinstance(getattr(scoped, accessor)(), list)
+
+
 @pytest.mark.parametrize(
     "accessor", ["get_all_pokerstars_variants", "get_all_ipoker_skins", "get_all_partypoker_skins"]
 )

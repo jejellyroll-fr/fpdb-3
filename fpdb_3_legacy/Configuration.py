@@ -259,6 +259,48 @@ def _find_example_config(file_name: str) -> str:
     return os.path.join(CONFIG_PATH, example_name).replace("\\", "/")
 
 
+# Parsed example configs, keyed by path -> ((mtime, size), document).
+_EXAMPLE_DOC_CACHE: dict[str, tuple[tuple[float, int], Any]] = {}
+
+
+def _parse_example_config(path: str) -> Any | None:
+    """Return the parsed example config at ``path``, reusing an earlier parse.
+
+    Every ``Config()`` used to parse the ~120 KB example twice -- once for
+    ``add_missing_elements()`` and once for the AoF Omaha migration -- and a
+    single popup that rebuilds several ``Config`` objects paid for it each
+    time. The example ships with the application and only ever gets read
+    (migrations import copies of its nodes into the user document), so one
+    parse can serve every caller. The cache is keyed on the file's mtime and
+    size so a replaced example -- an upgrade dropping a new file in place -- is
+    picked up rather than served stale.
+
+    Returns None when the file is missing or unparsable; callers treat that as
+    "no example available" exactly as they did before.
+    """
+    if not path or not os.path.exists(path):
+        return None
+
+    try:
+        stat = os.stat(path)
+        stamp = (stat.st_mtime, stat.st_size)
+    except OSError:
+        return None
+
+    cached = _EXAMPLE_DOC_CACHE.get(path)
+    if cached is not None and cached[0] == stamp:
+        return cached[1]
+
+    try:
+        doc = defusedxml.minidom.parse(path)
+    except XML_PARSE_ERRORS as e:
+        log.exception(f"Error parsing example configuration file {path}. Exception: {e}")
+        return None
+
+    _EXAMPLE_DOC_CACHE[path] = (stamp, doc)
+    return doc
+
+
 def get_config(file_name, fallback=True):
     """Resolve a user config and optionally bootstrap it from an example file."""
     config_path = os.path.join(CONFIG_PATH, file_name).replace("\\", "/")
@@ -1822,10 +1864,9 @@ class Config:
             if not os.path.exists(source_path):
                 log.info("Example config file %s not found, skipping AoF Omaha HUD migration", source_path)
                 return False
-            try:
-                source_doc = defusedxml.minidom.parse(source_path)
-            except XML_PARSE_ERRORS as exc:
-                log.exception("Could not read the shipped AoF Omaha HUD profile from %s: %s", source_path, exc)
+            source_doc = _parse_example_config(source_path)
+            if source_doc is None:
+                log.warning("Could not read the shipped AoF Omaha HUD profile from %s", source_path)
                 return False
 
         source_profiles = [
@@ -1975,12 +2016,8 @@ class Config:
             log.info(f"Example configuration file {example_file} not found. Skipping missing elements addition.")
             return nodes_added
 
-        try:
-            example_doc = defusedxml.minidom.parse(example_file)
-        except XML_PARSE_ERRORS as e:
-            log.exception(
-                f"Error parsing example configuration file {example_file}. See error log file. Exception: {e}",
-            )
+        example_doc = _parse_example_config(example_file)
+        if example_doc is None:
             return nodes_added
 
         for cnode in doc.getElementsByTagName("FreePokerToolsConfig"):
