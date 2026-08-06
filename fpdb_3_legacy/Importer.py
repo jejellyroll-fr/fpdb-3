@@ -36,6 +36,7 @@ from fpdb_3_legacy.Exceptions import (
     FpdbParseError,
     FpdbSummaryNotFound,
 )
+from fpdb_3_legacy.import_failure_cache import SIDECAR_EXTENSIONS, FailureCache
 from fpdb_3_legacy.iPoker.dispatcher import get_parser_class_for_path as get_ipoker_parser_class_for_path
 from fpdb_3_legacy.loggingFpdb import get_logger
 from fpdb_3_legacy.parser_registry import get_parser_class, get_summary_class
@@ -155,7 +156,7 @@ class Importer:
         self.idsite = IdentifySite.IdentifySite(config)
 
         self.filelist: dict[str, IdentifySite.FPDBFile] = {}
-        self.failed_files: set[str] = set()
+        self.failed_files = FailureCache()
         self.dirlist: dict[Any, list[Any]] = {}
         self.siteIds: dict[str, int] = {}
         self.removeFromFileList: dict[str, bool] = {}  # to remove deleted files
@@ -386,7 +387,9 @@ class Importer:
         self.updatedtime = {}
         self.pos_in_file = {}
         self.filelist = {}
-        self.failed_files = set()
+        # Reassigned rather than cleared in place: callers that build an
+        # Importer without running __init__ rely on this creating the cache.
+        self.failed_files = FailureCache()
 
     def logImport(self, type, file, stored, dups, partial, skipped, errs, ttime, id) -> None:
         """Log the results of an import operation to the database.
@@ -465,13 +468,13 @@ class Importer:
         # filename not guaranteed to be unicode
         if (
             self.filelist.get(filename) is not None
-            or filename in self.failed_files
+            or self.failed_files.failed(filename)
             or not os.path.exists(filename)
         ):
             return False
 
         if not self._is_valid_import_file(filename):
-            self.failed_files.add(filename)
+            self.failed_files.remember(filename)
             return False
 
         self.idsite.processFile(filename)
@@ -479,7 +482,7 @@ class Importer:
             fpdbfile = self.idsite.filelist[filename]
         else:
             log.warning(f"siteId Failed for: '{filename}'")
-            self.failed_files.add(filename)
+            self.failed_files.remember(filename)
             return False
 
         self.addFileToList(fpdbfile)
@@ -594,10 +597,8 @@ class Importer:
             ".o",
             ".obj",
             ".py",
-            # Test & sidecar reference data
-            ".hp",
-            ".gt",
-            ".hands",
+            # Test & sidecar reference data (shared with IdentifySite)
+            *SIDECAR_EXTENSIONS,
         }
 
         if ext in ignored_extensions:
@@ -675,7 +676,7 @@ class Importer:
                     if os.path.islink(filename):
                         log.info(f"Ignoring symlink {filename}")
                         continue
-                    if not self._is_valid_import_file(filename) or filename in self.failed_files:
+                    if not self._is_valid_import_file(filename) or self.failed_files.failed(filename):
                         continue
                     if (time() - os.stat(filename).st_mtime) <= 43200:  # look all files modded in the last 12 hours
                         # need long time because FTP in Win does not
@@ -717,14 +718,16 @@ class Importer:
                     self.updatedsize.pop(filename, None)
                     self.updatedtime.pop(filename, None)
                     self.pos_in_file.pop(filename, None)
-            for filename in list(self.failed_files):
+            for failed_path in list(self.failed_files):
                 try:
-                    file_path = os.path.abspath(filename)
+                    # The cache accepts bytes paths, which commonpath cannot mix
+                    # with the str prefix, so normalise before comparing.
+                    file_path = os.path.abspath(os.fsdecode(failed_path))
                     common = os.path.commonpath([watched_prefix, file_path])
                 except ValueError:
                     continue
                 if common == watched_prefix:
-                    self.failed_files.discard(filename)
+                    self.failed_files.discard(failed_path)
 
     def runImport(self):
         """Run the import process for all files in the file list.
