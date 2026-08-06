@@ -7,7 +7,17 @@ Uses Python's Protocol (PEP 544) for structural subtyping.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from enum import StrEnum
+try:
+    from enum import StrEnum
+except ImportError:
+    from enum import Enum
+
+    class StrEnum(str, Enum):  # type: ignore[no-redef]
+        """Fallback StrEnum for Python < 3.11."""
+
+        def __str__(self) -> str:
+            return str(self.value)
+
 from typing import Protocol, runtime_checkable
 
 
