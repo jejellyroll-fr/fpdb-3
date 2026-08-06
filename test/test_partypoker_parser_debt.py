@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from decimal import Decimal
 from pathlib import Path
 
 import pytest
@@ -184,3 +185,27 @@ Player3 balance $85.96, didn't bet (folded)
     assert ["Player1", "1.09"] in hand2.collected
     assert "Player1" in hand2.shown
 
+
+
+def test_the_summary_collected_keeps_its_uncalled_bet_out_of_the_pot() -> None:
+    """PartyPoker's "collected" is what left the table, not the pot won.
+
+    Every other room reports the pot alone -- PokerStars prints "Uncalled bet
+    returned" on its own line and keeps it out of both "collected" and "Total
+    pot" -- and Hand.addUncalled removes it from the pot to match. Passing the
+    summary figure through unchanged made Hand.totalPot() see more collected
+    than the announced pot and build an extra solo pot from the difference,
+    inflating the pot by exactly the bet nobody called.
+
+    In this hand Player3 bets 0.13 on the flop, Player6 folds, and the summary
+    reads "bet $0.21, collected $0.31, net +$0.1" against "Main Pot: $0.18".
+    """
+    from fpdb_3_legacy.Configuration import Config
+
+    path = CASH / "NLHE-USD-0.01-0.02-20100712.emailedHistory.txt"
+    hand = PartyPoker(config=Config(), in_path=str(path), autostart=True).getProcessedHands()[0]
+
+    assert hand.totalpot == Decimal("0.18")  # the announced pot, not the 0.31 collected
+    assert hand.rake == Decimal("0.00")  # the file says "Rake: $0"
+    assert hand.collectees["Player3"] == Decimal("0.18")
+    assert hand.pot.returned["Player3"] == Decimal("0.13")  # the uncalled flop bet
