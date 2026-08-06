@@ -155,6 +155,7 @@ class Importer:
         self.idsite = IdentifySite.IdentifySite(config)
 
         self.filelist: dict[str, IdentifySite.FPDBFile] = {}
+        self.failed_files: set[str] = set()
         self.dirlist: dict[Any, list[Any]] = {}
         self.siteIds: dict[str, int] = {}
         self.removeFromFileList: dict[str, bool] = {}  # to remove deleted files
@@ -385,6 +386,7 @@ class Importer:
         self.updatedtime = {}
         self.pos_in_file = {}
         self.filelist = {}
+        self.failed_files = set()
 
     def logImport(self, type, file, stored, dups, partial, skipped, errs, ttime, id) -> None:
         """Log the results of an import operation to the database.
@@ -461,7 +463,15 @@ class Importer:
         """
         # DEBUG->print("addimportfile: filename is a", filename.__class__, filename)
         # filename not guaranteed to be unicode
-        if self.filelist.get(filename) is not None or not os.path.exists(filename):
+        if (
+            self.filelist.get(filename) is not None
+            or filename in self.failed_files
+            or not os.path.exists(filename)
+        ):
+            return False
+
+        if not self._is_valid_import_file(filename):
+            self.failed_files.add(filename)
             return False
 
         self.idsite.processFile(filename)
@@ -469,6 +479,7 @@ class Importer:
             fpdbfile = self.idsite.filelist[filename]
         else:
             log.warning(f"siteId Failed for: '{filename}'")
+            self.failed_files.add(filename)
             return False
 
         self.addFileToList(fpdbfile)
@@ -568,8 +579,14 @@ class Importer:
             ".rtf",
             # Database
             ".db",
+            ".db-wal",
+            ".db-shm",
             ".sqlite",
+            ".sqlite-wal",
+            ".sqlite-shm",
             ".sqlite3",
+            ".sqlite3-wal",
+            ".sqlite3-shm",
             ".mdb",
             # Code/Compiled
             ".pyc",
@@ -577,6 +594,10 @@ class Importer:
             ".o",
             ".obj",
             ".py",
+            # Test & sidecar reference data
+            ".hp",
+            ".gt",
+            ".hands",
         }
 
         if ext in ignored_extensions:
@@ -654,6 +675,8 @@ class Importer:
                     if os.path.islink(filename):
                         log.info(f"Ignoring symlink {filename}")
                         continue
+                    if not self._is_valid_import_file(filename) or filename in self.failed_files:
+                        continue
                     if (time() - os.stat(filename).st_mtime) <= 43200:  # look all files modded in the last 12 hours
                         # need long time because FTP in Win does not
                         # update the timestamp on the HH during session
@@ -694,6 +717,14 @@ class Importer:
                     self.updatedsize.pop(filename, None)
                     self.updatedtime.pop(filename, None)
                     self.pos_in_file.pop(filename, None)
+            for filename in list(self.failed_files):
+                try:
+                    file_path = os.path.abspath(filename)
+                    common = os.path.commonpath([watched_prefix, file_path])
+                except ValueError:
+                    continue
+                if common == watched_prefix:
+                    self.failed_files.discard(filename)
 
     def runImport(self):
         """Run the import process for all files in the file list.

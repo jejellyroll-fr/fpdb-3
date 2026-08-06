@@ -155,6 +155,7 @@ class IdentifySite:
         self.codepage = ("utf8", "cp1252", "ISO-8859-1")
         self.sitelist: dict[int | None, Site] = {}
         self.filelist: dict[str | bytes, FPDBFile] = {}
+        self.failed_files: set[str | bytes] = set()
         self.re_Identify_PT: re.Pattern[str] | None = None
         self.re_SumIdentify_PT: re.Pattern[str] | None = None
         self.generateSiteList(hhcs)
@@ -330,6 +331,8 @@ class IdentifySite:
             self.processFile(path)
 
     def get_fobj(self, file):
+        if file in self.failed_files:
+            return False
         try:
             fobj = self.filelist[file]
         except KeyError:
@@ -341,6 +344,7 @@ class IdentifySite:
 
     def clear_filelist(self) -> None:
         self.filelist = {}
+        self.failed_files = set()
 
     def generateSiteList(self, hhcs) -> None:
         """Generates a ordered dictionary of site, filter and filter name for each site in hhcs."""
@@ -390,7 +394,7 @@ class IdentifySite:
 
     def processFile(self, path) -> None:
         log.debug(f"process fill identify {path}")
-        if path not in self.filelist:
+        if path not in self.filelist and path not in self.failed_files:
             log.debug(f"filelist {self.filelist}")
             whole_file, kodec = self.read_file(path)
             # log.debug('whole_file',whole_file)
@@ -401,13 +405,16 @@ class IdentifySite:
                 # print(fobj.path)
                 if fobj is False:  # Site id failed
                     log.debug(f"siteId Failed for: {path}")
+                    self.failed_files.add(path)
                 else:
                     self.filelist[path] = fobj
+            else:
+                self.failed_files.add(path)
 
     def read_file(self, in_path):
-        # Ignore macOS-specific hidden files such as .DS_Store
-        if in_path.endswith(".DS_Store"):
-            log.warning(f"Skipping system file {in_path}")
+        # Ignore macOS-specific hidden files such as .DS_Store and test sidecars/artifacts
+        if in_path.endswith((".DS_Store", ".hp", ".gt", ".hands")):
+            log.warning(f"Skipping system or test sidecar file {in_path}")
             return None, None
 
         # Excel file management if xlrd is available
