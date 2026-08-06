@@ -66,10 +66,18 @@ class TestRememberingFailures:
         assert not cache.failed(target)
 
     def test_a_second_failure_re_arms_the_cache(self, tmp_path: Path) -> None:
+        """A file that changed, failed again, and has not changed since stays skipped.
+
+        The content grows rather than being swapped for something the same
+        length: the signature is (size, mtime), so a same-size rewrite inside
+        one filesystem mtime tick is deliberately not detected. Hand histories
+        only ever grow, so that trade-off costs nothing real -- but a test must
+        not claim a guarantee the design does not make.
+        """
         cache = FailureCache()
         target = _touch(tmp_path / "junk.txt", "one")
         cache.remember(target)
-        _touch(target, "two")
+        _touch(target, "one and more")
         assert not cache.failed(target)
 
         cache.remember(target)

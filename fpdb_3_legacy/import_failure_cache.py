@@ -12,6 +12,11 @@ same cache that silenced the warning also silences the loss.
 
 So the failure is remembered against the file's size and modification time. An
 unchanged file is skipped; one that has grown is read again.
+
+The signature does not catch a rewrite that keeps the byte count identical and
+lands inside one filesystem mtime tick — coarse on Windows in particular. That
+is deliberate: detecting it would mean reading the file, which is exactly the
+work being avoided, and a hand history only ever grows as the client appends.
 """
 
 from __future__ import annotations
