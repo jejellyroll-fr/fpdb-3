@@ -1,0 +1,36 @@
+***** Hand History For Game 1770659766668adeb0h5qfm *****
+0.10/0.25 Omaha Hi Game Table (PL) - Mon Feb 09 12:55:26 EST 2026
+Table Table 7488952 (Real Money) -- Seat 1 is the button
+Total number of players : 4/6
+Seat 1: Player4 ($56.64)
+Seat 2: Player1 ($19.93)
+Seat 3: Player2 ($20.20)
+Seat 4: Hero ($25.86)
+Player1 posts small blind (0.10)
+Player2 posts big blind (0.25)
+** Dealing down cards **
+Dealt to Hero [ 9c, 7h, 8h, 4d ]
+Hero raises 0.85 to 0.85
+Player4 folds 
+Player1 folds 
+Player2 raises 2.40 to 2.65
+Hero calls (1.80)
+** Dealing Flop ** :  [ Jc, 7d, 6c ]
+Player2 bets (5.13)
+Hero raises 20.52 to 20.52
+Player2 calls (12.42)
+Player2 is all-In.
+Creating Main Pot with $ 38.50 with Player2, Hero
+Player2 Cash-out Premium % is 1.0
+Player2 opted for cash-out
+Player2 probabilty is 60.37
+Player2 Cashout Amount is 23.01
+** Dealing Turn ** :  [ Ts ]
+** Dealing River ** :  [ Js ]
+** Summary **
+Main Pot: $38.50 Rake: $2.0
+Board: [ Jc, 7d, 6c, Ts, Js ]
+Player4 balance $56.64, didn't bet (folded)
+Player1 balance $19.83, lost $0.10 (folded)
+Player2 Cashed out  balance $23.01, bet $20.20, collected $23.01, net +$2.81[ Tc, Ac, Ad, 4c ] [ two pairs, aces and jacks -- Ac,Ad,Jc,Js,Ts ]
+Hero balance $44.16, bet $23.17, collected $41.47, net +$18.30[ 9c, 7h, 8h, 4d ] [ a straight, seven to jack -- Jc,Ts,9c,8h,7d ]
