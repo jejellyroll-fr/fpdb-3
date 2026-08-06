@@ -2,10 +2,7 @@
 
 from __future__ import annotations
 
-import pytest
-
 from fpdb_3_legacy import GuiAutoNoteRules, GuiOpponentsReport, GuiStatsInfo, GuiTourneyPlayerStats
-
 
 # ---------------------------------------------------------------------------
 # GuiStatsInfo Tests
