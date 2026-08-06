@@ -352,6 +352,20 @@ jobs:
           QT_QPA_PLATFORM: offscreen
         run: |
           python -m pytest -m qt --tb=short
+      # The perf tests assert wall-clock budgets, some as tight as 5 ms for a
+      # loop of pure-Python work. Hosted runners are shared and noisy -- the
+      # Windows ones especially -- so as a required check on all three they
+      # would fail on runner scheduling far more often than on a real
+      # regression, and a check that cries wolf stops being read. Run them on
+      # Linux, where the numbers are the most comparable between runs, and
+      # report without blocking the merge.
+      - name: Run performance tests (offscreen, advisory)
+        if: runner.os == 'Linux'
+        continue-on-error: true
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: |
+          python -m pytest -m perf --tb=short
 
   native:
     runs-on: ${{ matrix.os }}
