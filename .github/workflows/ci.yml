@@ -352,6 +352,11 @@ jobs:
           QT_QPA_PLATFORM: offscreen
         run: |
           python -m pytest -m qt --tb=short
+      - name: Run performance tests (offscreen)
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: |
+          python -m pytest -m perf --tb=short
 
   native:
     runs-on: ${{ matrix.os }}
