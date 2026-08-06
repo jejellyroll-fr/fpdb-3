@@ -1,8 +1,18 @@
-"""Comprehensive unit and non-regression tests for uncalled bets using real hand history fixtures.
+"""Uncalled bets, checked against real hand histories from every supported room.
 
-Verifies that uncalled bets are correctly recognized, returned to the proper player
-in `hand.pot.returned`, and accounted for in total pot, rake, and net collected calculations
-across all supported poker room fixture files without money leaks or phantom rake.
+When the last bet of a street goes uncalled the room hands it back, and the
+returned chips must leave the pot with it. Get that wrong in either direction
+and the money does not add up: too little returned and the winner is credited
+with chips nobody ever paid, too much and the rake looks larger than it was.
+
+So each room is read from its own fixture and the accounting identity is
+checked on every hand it yields:
+
+    total pot == what the collectors were credited + rake
+
+with the returned bets already taken out of the total. That identity is what
+"no money leaks or phantom rake" actually means, and it is what a regression in
+uncalled-bet handling breaks first.
 """
 
 from __future__ import annotations
@@ -27,6 +37,21 @@ from fpdb_3_legacy.WinningToFpdb import Winning
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURES = ROOT / "tests" / "fixtures" / "hands"
 
+# One fixture per room, so a room whose uncalled-bet handling regresses is named
+# by the failing test rather than hidden in a combined run.
+ROOMS = [
+    pytest.param(PokerStars, "pokerstars/holdem/cash_nl_6max.txt", id="pokerstars"),
+    pytest.param(PartyPoker, "partypoker/stud/7stud.txt", id="partypoker"),
+    pytest.param(Winamax, "winamax/nlhe_cash.txt", id="winamax"),
+    pytest.param(Unibet, "unibet/banzai.txt", id="unibet"),
+    pytest.param(iPoker, "ipoker/twister/twister_sng.txt", id="ipoker"),
+    pytest.param(Bovada, "bovada/zone_poker.txt", id="bovada"),
+    pytest.param(Winning, "winning/modern_cash.txt", id="winning"),
+    pytest.param(Cake, "cake/cash_nlhe.txt", id="cake"),
+    pytest.param(PacificPoker, "pacific/jackpot_table.txt", id="pacific"),
+    pytest.param(GGPoker, "ggpoker/nlh_cash_6max.txt", id="ggpoker"),
+]
+
 
 @pytest.fixture(scope="module")
 def parser_config() -> Config:
@@ -42,115 +67,23 @@ def parse_fixture(parser_class, parser_config, relative_path: str):
     return hands
 
 
-def test_pokerstars_real_fixture_uncalled_bets(parser_config) -> None:
-    """Test PokerStars real fixture hands for uncalled bet accounting."""
-    hands = parse_fixture(PokerStars, parser_config, "pokerstars/holdem/cash_nl_6max.txt")
+@pytest.mark.parametrize(("parser_class", "fixture"), ROOMS)
+def test_a_returned_bet_is_given_back_to_one_player(parser_class, fixture, parser_config) -> None:
+    for hand in parse_fixture(parser_class, parser_config, fixture):
+        for player, amount in hand.pot.returned.items():
+            assert amount > 0, f"hand {hand.handid}: uncalled bet returned to {player} is {amount}"
 
-    for hand in hands:
-        if hand.pot.returned:
-            for player, amount in hand.pot.returned.items():
-                assert amount > 0, f"Uncalled bet for {player} must be positive"
+
+@pytest.mark.parametrize(("parser_class", "fixture"), ROOMS)
+def test_the_pot_is_exactly_what_was_collected_plus_rake(parser_class, fixture, parser_config) -> None:
+    # The returned chips are already out of totalpot, so anything left over
+    # after the collectors and the rake is money the parser invented or lost.
+    for hand in parse_fixture(parser_class, parser_config, fixture):
         hand.calculate_net_collected()
-        collected_sum = sum(hand.collectees.values())
-        returned_sum = sum(hand.pot.returned.values())
+        collected = sum(hand.collectees.values())
         rake = Decimal(str(hand.rake))
-        assert hand.totalpot >= collected_sum, f"Total pot {hand.totalpot} must cover collected {collected_sum}"
 
-
-def test_partypoker_real_fixture_uncalled_bets(parser_config) -> None:
-    """Test PartyPoker real fixture hands for uncalled bet accounting."""
-    hands = parse_fixture(PartyPoker, parser_config, "partypoker/stud/7stud.txt")
-
-    for hand in hands:
-        if hand.pot.returned:
-            for player, amount in hand.pot.returned.items():
-                assert amount > 0
-        hand.calculate_net_collected()
-
-
-def test_winamax_real_fixture_uncalled_bets(parser_config) -> None:
-    """Test Winamax real fixture hands for uncalled bet accounting."""
-    hands = parse_fixture(Winamax, parser_config, "winamax/nlhe_cash.txt")
-
-    for hand in hands:
-        if hand.pot.returned:
-            for player, amount in hand.pot.returned.items():
-                assert amount > 0
-        hand.calculate_net_collected()
-
-
-def test_unibet_real_fixture_uncalled_bets(parser_config) -> None:
-    """Test Unibet real fixture hands for uncalled bet accounting."""
-    hands = parse_fixture(Unibet, parser_config, "unibet/banzai.txt")
-
-    for hand in hands:
-        if hand.pot.returned:
-            for player, amount in hand.pot.returned.items():
-                assert amount > 0
-        hand.calculate_net_collected()
-
-
-def test_ipoker_real_fixture_uncalled_bets(parser_config) -> None:
-    """Test iPoker real fixture hands for uncalled bet accounting."""
-    hands = parse_fixture(iPoker, parser_config, "ipoker/twister/twister_sng.txt")
-
-    for hand in hands:
-        if hand.pot.returned:
-            for player, amount in hand.pot.returned.items():
-                assert amount > 0
-        hand.calculate_net_collected()
-
-
-def test_bovada_real_fixture_uncalled_bets(parser_config) -> None:
-    """Test Bovada real fixture hands for uncalled bet accounting."""
-    hands = parse_fixture(Bovada, parser_config, "bovada/zone_poker.txt")
-
-    for hand in hands:
-        if hand.pot.returned:
-            for player, amount in hand.pot.returned.items():
-                assert amount > 0
-        hand.calculate_net_collected()
-
-
-def test_winning_real_fixture_uncalled_bets(parser_config) -> None:
-    """Test Winning real fixture hands for uncalled bet accounting."""
-    hands = parse_fixture(Winning, parser_config, "winning/modern_cash.txt")
-
-    for hand in hands:
-        if hand.pot.returned:
-            for player, amount in hand.pot.returned.items():
-                assert amount > 0
-        hand.calculate_net_collected()
-
-
-def test_cake_real_fixture_uncalled_bets(parser_config) -> None:
-    """Test Cake real fixture hands for uncalled bet accounting."""
-    hands = parse_fixture(Cake, parser_config, "cake/cash_nlhe.txt")
-
-    for hand in hands:
-        if hand.pot.returned:
-            for player, amount in hand.pot.returned.items():
-                assert amount > 0
-        hand.calculate_net_collected()
-
-
-def test_pacific_real_fixture_uncalled_bets(parser_config) -> None:
-    """Test Pacific / 888 real fixture hands for uncalled bet accounting."""
-    hands = parse_fixture(PacificPoker, parser_config, "pacific/jackpot_table.txt")
-
-    for hand in hands:
-        if hand.pot.returned:
-            for player, amount in hand.pot.returned.items():
-                assert amount > 0
-        hand.calculate_net_collected()
-
-
-def test_ggpoker_real_fixture_uncalled_bets(parser_config) -> None:
-    """Test GGPoker real fixture hands for uncalled bet accounting."""
-    hands = parse_fixture(GGPoker, parser_config, "ggpoker/nlh_cash_6max.txt")
-
-    for hand in hands:
-        if hand.pot.returned:
-            for player, amount in hand.pot.returned.items():
-                assert amount > 0
-        hand.calculate_net_collected()
+        assert hand.totalpot == collected + rake, (
+            f"hand {hand.handid}: pot {hand.totalpot} != collected {collected} + rake {rake}"
+            f" (returned {sum(hand.pot.returned.values())})"
+        )

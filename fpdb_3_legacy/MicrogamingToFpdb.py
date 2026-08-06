@@ -444,7 +444,6 @@ class Microgaming(HandHistoryConverter):
                 else:
                     hand.addBet(street, pname, action.group("BET"))
             elif action.group("ATYPE") == "AllIn":
-                all_in_amount = action.group("BET").replace(",", "")
                 hand.addAllIn(street, pname, action.group("BET"))
                 allIns += 1
             elif action.group("ATYPE") == "PostedToPlay":
