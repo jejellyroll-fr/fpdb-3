@@ -201,17 +201,25 @@ def set_locale_translation(config_path: str | None = None) -> None:
     resolved_locale = set_format_locale(ui_language)
     log.info("Display format locale: %s", resolved_locale)
 
-    try:
-        fr_translation = gettext.translation(
-            "fpdb",
-            path_string,
-            languages=[ui_language] if ui_language and ui_language != "system" else None,
-        )
-        fr_translation.install()
-    except (FileNotFoundError, OSError):
+    # English is the language the source strings are written in, so there is no
+    # catalogue to find and never was: asking for one only produced a warning on
+    # every start. A missing ui_language is not English, though -- it means the
+    # same as "system", and has to keep falling through to the environment.
+    if ui_language == "en" or (ui_language or "").startswith("en_"):
         gettext.NullTranslations().install()
-        log.warning(
-            "No translation file found for domain 'fpdb' in %s for language %s; using source strings.",
-            path_string,
-            ui_language,
-        )
+        log.info("Using source strings for language: %s", ui_language)
+    else:
+        try:
+            fr_translation = gettext.translation(
+                "fpdb",
+                path_string,
+                languages=[ui_language] if ui_language and ui_language != "system" else None,
+            )
+            fr_translation.install()
+        except (FileNotFoundError, OSError):
+            gettext.NullTranslations().install()
+            log.warning(
+                "No translation file found for domain 'fpdb' in %s for language %s; using source strings.",
+                path_string,
+                ui_language,
+            )

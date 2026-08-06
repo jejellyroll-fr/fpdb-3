@@ -68,6 +68,53 @@ def test_explicit_missing_path_falls_back_to_get_config(tmp_path, monkeypatch) -
     L10n.set_locale_translation(str(tmp_path / "does-not-exist.xml"))  # must not raise
 
 
+def _config_with(tmp_path, general_attrs: str):
+    cfg = tmp_path / "HUD_config.xml"
+    cfg.write_text(f"<config><general {general_attrs}></general></config>")
+    return cfg
+
+
+def test_english_does_not_look_for_a_catalogue(tmp_path, monkeypatch, caplog) -> None:
+    """English is the source language, so there is no catalogue to miss.
+
+    Asking gettext for one only ever produced a warning on every start.
+    """
+    asked = []
+    monkeypatch.setattr(
+        L10n.gettext,
+        "translation",
+        lambda *args, **kwargs: asked.append(kwargs.get("languages")),
+    )
+
+    with caplog.at_level("WARNING"):
+        L10n.set_locale_translation(str(_config_with(tmp_path, 'ui_language="en"')))
+
+    assert asked == []
+    assert "No translation file found" not in caplog.text
+
+
+def test_a_missing_ui_language_still_follows_the_environment(tmp_path, monkeypatch) -> None:
+    """No ui_language means the same as "system", not English.
+
+    Both have to reach gettext with languages=None so it reads the environment;
+    treating a missing value as English would silently pin such a config to
+    untranslated strings.
+    """
+    asked = []
+
+    def fake_translation(_domain, _localedir=None, languages=None, **_kwargs):
+        asked.append(languages)
+        msg = "no catalogue"
+        raise FileNotFoundError(msg)
+
+    monkeypatch.setattr(L10n.gettext, "translation", fake_translation)
+
+    L10n.set_locale_translation(str(_config_with(tmp_path, 'other="x"')))
+    L10n.set_locale_translation(str(_config_with(tmp_path, 'ui_language="system"')))
+
+    assert asked == [None, None]
+
+
 if __name__ == "__main__":
     import pytest
 
