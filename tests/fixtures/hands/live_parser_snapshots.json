@@ -1495,6 +1495,14 @@
     "hand_count": 1,
     "sha256": "fc68a787750aafdd1b424e2b3db72f7f5a90d0872990b6827d963984789b4ec4"
   },
+  "regression/PartyPoker/Flop/PLO-6max-USD-0.10-0.25-202602.cash.out.txt": {
+    "hand_count": 1,
+    "sha256": "2a0fa09ccbba82f2e92bc469aa217b16218055096b410c63866b8cd888df2d6a"
+  },
+  "regression/PartyPoker/Flop/PLO-6max-USD-0.10-0.25-202607.multi.hand.split.txt": {
+    "hand_count": 4,
+    "sha256": "9c199eab52c0aa4c63f591058ddd2af83ee9902604143ce561bfcc8307e95ad2"
+  },
   "regression/PartyPoker/Flop/PLO-6max-USD-5-10-201202.diff.format.txt": {
     "hand_count": 1,
     "sha256": "46850c545e92481f5d647f951f5a3da3608f28885a7682f687bbb3d2240060ec"
