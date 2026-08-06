@@ -8,20 +8,27 @@ definition, one place where the lint exception has to be justified.
 
 `fpdb` is the lower layer: `fpdb_3_legacy` imports from it and never the
 reverse, so both packages can rely on this module.
+
+The branch tests `sys.version_info` rather than catching ImportError: type
+checkers evaluate the version test and keep the real stdlib type. With the
+try/except form Pyright takes the fallback as the declared type and then
+rejects `enum.StrEnum` itself as incompatible with it.
 """
 
 from __future__ import annotations
 
-try:  # Python 3.11+
+import sys
+
+if sys.version_info >= (3, 11):
     from enum import StrEnum
-except ImportError:  # the 3.10 embedded in packaged builds
+else:
     from enum import Enum
 
-    class StrEnum(str, Enum):  # type: ignore[no-redef]
+    class StrEnum(str, Enum):
         """`enum.StrEnum` for Python 3.10.
 
         Mixing `str` into an `Enum` is what 3.11 made a builtin; on 3.10 it is
-        still the way to get members that compare and format as their value.
+        still how you get members that compare and format as their value.
         """
 
         def __str__(self) -> str:

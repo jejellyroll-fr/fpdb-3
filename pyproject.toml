@@ -100,10 +100,12 @@ ignore = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
-# The 3.10 fallback for enum.StrEnum is a str/Enum mix by definition, which is
-# exactly what UP042 forbids. Confined to the compat module so the rule keeps
-# applying everywhere else.
-"fpdb/compat.py" = ["UP042"]
+# Both rules read the 3.11 floor from requires-python and conclude the 3.10
+# fallback is dead code: UP036 calls the version block outdated, UP042 forbids
+# the str/Enum mix that *is* StrEnum before 3.11. The packaged builds run 3.10
+# (see the UP017 note above), so the block is live there. Confined to this file
+# so both rules keep applying everywhere else.
+"fpdb/compat.py" = ["UP036", "UP042"]
 
 # Legacy display/SQL formatting uses width-sensitive percent specifiers that
 # require dedicated migrations rather than unsafe mechanical rewrites.
