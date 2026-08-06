@@ -24,6 +24,7 @@ from typing import Any
 
 from fpdb_3_legacy import Configuration
 from fpdb_3_legacy.HandHistoryConverter import HandHistoryConverter, unpack_sqlite_hand_history
+from fpdb_3_legacy.import_failure_cache import FailureCache, is_sidecar_file
 from fpdb_3_legacy.loggingFpdb import get_logger
 from fpdb_3_legacy.parser_registry import (
     LEGACY_MODULE_REGISTRY as LEGACY_MODULE_REGISTRY,
@@ -155,9 +156,18 @@ class IdentifySite:
         self.codepage = ("utf8", "cp1252", "ISO-8859-1")
         self.sitelist: dict[int | None, Site] = {}
         self.filelist: dict[str | bytes, FPDBFile] = {}
+        self.failed_files = FailureCache()
         self.re_Identify_PT: re.Pattern[str] | None = None
         self.re_SumIdentify_PT: re.Pattern[str] | None = None
         self.generateSiteList(hhcs)
+
+    def identification_failed(self, path) -> bool:
+        """True if `path` already failed and has not been written to since."""
+        return self.failed_files.failed(path)
+
+    def remember_failure(self, path) -> None:
+        """Record that `path` failed as it currently stands."""
+        self.failed_files.remember(path)
 
     def detectiPokerSkin(self, handText):
         """Detect specific iPoker skin from hand text content."""
@@ -330,6 +340,8 @@ class IdentifySite:
             self.processFile(path)
 
     def get_fobj(self, file):
+        if self.identification_failed(file):
+            return False
         try:
             fobj = self.filelist[file]
         except KeyError:
@@ -341,6 +353,7 @@ class IdentifySite:
 
     def clear_filelist(self) -> None:
         self.filelist = {}
+        self.failed_files = FailureCache()
 
     def generateSiteList(self, hhcs) -> None:
         """Generates a ordered dictionary of site, filter and filter name for each site in hhcs."""
@@ -390,24 +403,37 @@ class IdentifySite:
 
     def processFile(self, path) -> None:
         log.debug(f"process fill identify {path}")
-        if path not in self.filelist:
-            log.debug(f"filelist {self.filelist}")
-            whole_file, kodec = self.read_file(path)
-            # log.debug('whole_file',whole_file)
-            log.debug(f"kodec {kodec}")
-            if whole_file:
-                fobj = self.idSite(path, whole_file, kodec)
-                log.debug(f"siteid obj {fobj}")
-                # print(fobj.path)
-                if fobj is False:  # Site id failed
-                    log.debug(f"siteId Failed for: {path}")
-                else:
-                    self.filelist[path] = fobj
+        if path in self.filelist or self.identification_failed(path):
+            return
+
+        log.debug(f"filelist {self.filelist}")
+        whole_file, kodec = self.read_file(path)
+        # log.debug('whole_file',whole_file)
+        log.debug(f"kodec {kodec}")
+        if not whole_file:
+            # Empty or unreadable: the poker client creates the history file when
+            # a table opens and only writes the first hand later, so this is a
+            # file that has not been written yet, not one that never will be.
+            # Recording the signature means the next poll re-reads it as soon as
+            # anything lands in it, without re-reading an unchanged one.
+            self.remember_failure(path)
+            return
+
+        fobj = self.idSite(path, whole_file, kodec)
+        log.debug(f"siteid obj {fobj}")
+        # print(fobj.path)
+        if fobj is False:  # Site id failed
+            log.debug(f"siteId Failed for: {path}")
+            self.remember_failure(path)
+        else:
+            self.filelist[path] = fobj
 
     def read_file(self, in_path):
-        # Ignore macOS-specific hidden files such as .DS_Store
-        if in_path.endswith(".DS_Store"):
-            log.warning(f"Skipping system file {in_path}")
+        # System leftovers and the regression corpus' reference data are not
+        # hand histories. Logged at debug: they are expected in a watched
+        # directory, and shouting about them is the noise this set out to fix.
+        if is_sidecar_file(in_path):
+            log.debug(f"Skipping system or sidecar file {in_path}")
             return None, None
 
         # Excel file management if xlrd is available
