@@ -6,7 +6,7 @@ from datetime import datetime, timezone
 
 import pytest
 
-UTC = getattr(datetime, "UTC", timezone.utc)
+UTC = timezone.utc  # datetime.UTC is 3.11+; the packaged builds embed 3.10
 
 from fpdb_3_legacy.swc_native_capture import (
     NativeAnimationEvent,

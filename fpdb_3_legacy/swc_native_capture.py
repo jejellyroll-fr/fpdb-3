@@ -19,7 +19,7 @@ from collections.abc import Iterator
 from dataclasses import dataclass
 from datetime import datetime, timezone
 
-UTC = getattr(datetime, "UTC", timezone.utc)
+UTC = timezone.utc  # datetime.UTC is 3.11+; the packaged builds embed 3.10
 from decimal import Decimal
 from pathlib import Path
 from typing import BinaryIO

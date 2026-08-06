@@ -7,7 +7,7 @@ from collections.abc import Sequence
 from dataclasses import dataclass, replace
 from datetime import datetime, timezone
 
-UTC = getattr(datetime, "UTC", timezone.utc)
+UTC = timezone.utc  # datetime.UTC is 3.11+; the packaged builds embed 3.10
 from decimal import ROUND_HALF_UP, Decimal
 from typing import Protocol
 
