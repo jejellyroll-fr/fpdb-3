@@ -173,10 +173,21 @@ Player3 balance $85.96, didn't bet (folded)
     hand1 = parser.processHand(hands_list[0])
     assert hand1.handid == "1770659766668"
     assert hand1.hero == "Hero"
-    assert ["Player2", "23.01"] in hand1.collected
-    assert ["Hero", "41.47"] in hand1.collected
     assert "Player2" in hand1.shown
     assert "Hero" in hand1.shown
+
+    # The summary reports what left the table, which is two different kinds of
+    # money here. Player2's 23.01 is an insurance payout that never sat in the
+    # pot, and Hero's 41.47 is the 38.50 pot plus the 2.97 of his own bet that
+    # Player2, all-in for less, could not call. Recording either as pot winnings
+    # is what GGPoker's readCollectPot calls out: "cashouts are separate
+    # transactions that don't affect the main pot distribution".
+    assert hand1.cashedOut is True
+    assert hand1.cashOutAmounts["Player2"] == Decimal("23.01")
+    assert "Player2" not in dict(hand1.collected)  # insurance, not the pot
+    assert ["Hero", "38.50"] in hand1.collected
+    assert hand1.pot.returned["Hero"] == Decimal("2.97")
+    assert hand1.totalpot - hand1.rake == Decimal("38.50")  # the announced Main Pot
 
     # Process hand 2
     hand2 = parser.processHand(hands_list[1])

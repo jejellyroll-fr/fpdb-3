@@ -293,14 +293,11 @@ class PartyPoker(HandHistoryConverter):
     # winner it carries their own uncalled bet back. Every other room reports the
     # pot alone (PokerStars prints the return on its own line and keeps it out of
     # both "collected" and "Total pot"), and Hand.addUncalled removes it from the
-    # pot to match. These two let readCollectPot tell the pot from the surplus.
+    # pot to match. This lets readCollectPot tell the pot from the surplus.
     re_AnnouncedPot = re.compile(
         r"^\s*(?:Main|Side)\s+Pot(?:\s+\d+)?\s*:\s*[$€£]?\s*(?P<POT>[.,\d]+)",
         re.MULTILINE | re.IGNORECASE,
     )
-    # A cash-out pays insurance money that never sat in the pot, so there the
-    # surplus is real and must not be mistaken for an uncalled bet.
-    re_CashedOut = re.compile(r"Cash-?out|Cashed\s+out", re.IGNORECASE)
     re_identify = re.compile(r"\*{5}\sHand\sHistory\s[fF]or\sGame\s\w+")
     # Hands are normally preceded by a "Game #N starts. / #Game No : N" banner.
     # Some exports (e.g. tournament STT histories) omit the banner and simply
@@ -449,6 +446,11 @@ class PartyPoker(HandHistoryConverter):
                 "re_HeroCards": rf"Dealt to {subst['PLYR']} \[\s*(?P<NEWCARDS>.+)\s*\]",
                 "re_ShownCards": rf"{subst['PLYR']}(?: (?P<SHOWED>(?:doesn\'t )?shows?)|(?:\s+Cashed\s+out)?\s+balance\s+[^\[\n]+)\s*\[\s*(?P<CARDS>[A-Za-z0-9,\s]+?)\s*\](?:\s*\[\s*|\s*)(?P<COMBINATION>[^\]\n\.]*?)(?:\s*\]|\.|\s*$)",
                 "re_CollectPot": rf"{subst['PLYR']}(?:\s+wins\s+(?:Lo\s\()?|(?:\s+Cashed\s+out)?\s+balance\s+[^,\n]+,\s*(?:bet\s+[^,\n]+,\s*)?collected\s+){subst['CUR_SYM']}?(?P<POT>[.,\d]+)",
+                # The body announces a cash-out before the summary does, the way
+                # GGPoker prints "Receives Cashout". This is what tells the two
+                # kinds of money apart: the summary line looks identical either
+                # way, so without it an insurance payout reads as pot winnings.
+                "re_CashOutAmount": rf"^{subst['PLYR']}\s+Cashout\s+Amount\s+is\s+{subst['CUR_SYM']}?(?P<AMOUNT>[.,\d]+)",
             }
 
             try:
@@ -1628,11 +1630,19 @@ class PartyPoker(HandHistoryConverter):
 
         hand.setUncalledBets(True)
 
+        cashed_out = self._read_cash_outs(hand)
         remaining = self._announced_pot_total(hand)
 
         for m in self.re_CollectPot.finditer(hand.handText):
             player = m.group("PNAME")
             pot = Decimal(self.clearMoneyString(m.group("POT")))
+
+            if player in cashed_out:
+                # Insurance money that never sat in the pot. DerivedStats keeps
+                # it in its own column precisely so it is not counted as pot
+                # winnings; it is recorded by _read_cash_outs above.
+                log.debug("PartyPoker: %s cashed out %s, not pot winnings", player, pot)
+                continue
 
             if remaining is not None:
                 # Hand.totalPot() decides what to do with a lone unmatched bet by
@@ -1663,15 +1673,32 @@ class PartyPoker(HandHistoryConverter):
 
         log.info("Exiting readCollectPot method")
 
-    def _announced_pot_total(self, hand) -> Decimal | None:
-        """Total of the summary's announced pots, or None when it cannot be used.
+    def _read_cash_outs(self, hand) -> set[str]:
+        """Record each player's cash-out and return who took one.
 
-        Returns None for a cash-out hand: the insurance payout never sat in the
-        pot, so the surplus over the announced total is real money owed to the
-        player rather than a bet nobody called.
+        Same model as GGPoker: the payout goes to hand.cashOutAmounts, which
+        DerivedStats carries to HandsPlayers.cashOutAmount/isCashOut and the
+        HandsCashout table, and it stays out of the pot.
+
+        The fee is left alone. PartyPoker prints "Cash-out Premium % is 1.0", a
+        rate whose base is not stated -- and the summary reconciles without it
+        (bet 20.20, collected 23.01, net +2.81), so there is nothing to derive.
+        Recording a guessed figure in a money column would be worse than none.
         """
-        if self.re_CashedOut.search(hand.handText):
-            return None
+        cashed_out: set[str] = set()
+        for m in self.re_CashOutAmount.finditer(hand.handText):
+            player = m.group("PNAME")
+            amount = Decimal(self.clearMoneyString(m.group("AMOUNT")))
+            hand.cashOutAmounts[player] = amount
+            cashed_out.add(player)
+            log.debug("PartyPoker: %s cashed out for %s", player, amount)
+
+        if cashed_out:
+            hand.cashedOut = True
+        return cashed_out
+
+    def _announced_pot_total(self, hand) -> Decimal | None:
+        """Total of the summary's announced pots, or None when it cannot be used."""
 
         pots = [Decimal(self.clearMoneyString(m.group("POT"))) for m in self.re_AnnouncedPot.finditer(hand.handText)]
         return sum(pots) if pots else None
