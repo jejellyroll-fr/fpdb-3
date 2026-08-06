@@ -89,3 +89,48 @@ def test_filesystem_traversal_order_independence(tmp_path: Path) -> None:
         res2 = find_duplicate_ipoker_files(tmp_path)
 
     assert res1 == res2, f"Results differed across traversal orders: {res1} vs {res2}"
+
+
+def test_a_file_that_cannot_be_parsed_is_left_alone(tmp_path: Path) -> None:
+    # This tool deletes files, so anything it cannot fully read has to survive
+    # -- including a truncated session whose codes it never got to see.
+    broken = tmp_path / "truncated.xml"
+    broken.write_text("<session><game gamecode=\"10001\">", encoding="utf-8")
+    known = tmp_path / "known.xml"
+    known.write_text(SAMPLE_XML_1, encoding="utf-8")
+
+    assert extract_ipoker_gamecodes(broken) == set()
+    assert clean_duplicate_ipoker_files(tmp_path, dry_run=False) == []
+    assert broken.exists()
+    assert known.exists()
+
+
+def test_an_entity_declaration_is_refused_rather_than_expanded(tmp_path: Path) -> None:
+    # Session files come from the poker room. An entity declaration is the
+    # billion-laughs vector, and the stock parser expands it without a word --
+    # it would report this file's gamecode as 10001. The hardened one refuses
+    # the declaration outright, so nothing is extracted and the file is left
+    # alone. Swap the parser back and this test fails, which is the point.
+    hostile = tmp_path / "hostile.xml"
+    hostile.write_text(
+        '<?xml version="1.0"?>\n'
+        '<!DOCTYPE session [<!ENTITY code "10001">]>\n'
+        '<session><game gamecode="&code;"/></session>',
+        encoding="utf-8",
+    )
+
+    assert extract_ipoker_gamecodes(hostile) == set()
+
+
+def test_a_file_that_could_not_be_deleted_is_not_reported_as_removed(tmp_path: Path) -> None:
+    # Reporting a failed deletion as a cleanup tells the player the problem is
+    # gone when their directory is untouched.
+    first = tmp_path / "session_01.xml"
+    second = tmp_path / "session_02.xml"
+    first.write_text(SAMPLE_XML_1, encoding="utf-8")
+    second.write_text(SAMPLE_XML_2, encoding="utf-8")
+
+    with patch.object(Path, "unlink", side_effect=PermissionError("read-only")):
+        assert clean_duplicate_ipoker_files(tmp_path, dry_run=False) == []
+
+    assert second.exists()
