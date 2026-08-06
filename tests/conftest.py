@@ -94,24 +94,6 @@ def importer(legacy_config, fresh_db):
     return imp
 
 
-def pytest_collection_modifyitems(config, items):
-    known_failures = {
-        "test_hands_players_keys_order_consistency",
-        "test_hands_players_keys_length",
-        "test_insert_hudcache_columns_match_values",
-        "test_update_hudcache_set_count_matches_cache_keys",
-        "test_read_hole_cards_preflop",
-        "test_read_community_cards_empty_card_error",
-        "test_markstreets_carriage_return_handling",
-        "test_readCommunityCards_empty_card_raises_exception",
-        "test_rangechartpopup_is_popup_subclass",
-        "test_returns_none_when_all_codecs_fail",
-    }
-    for item in items:
-        if item.name in known_failures:
-            item.add_marker(pytest.mark.xfail(reason="Known legacy failure present in master branch"))
-
-
 # Failure logs and diagnostic hooks for Windows CI
 def pytest_terminal_summary(terminalreporter, exitstatus, config):
     import os
