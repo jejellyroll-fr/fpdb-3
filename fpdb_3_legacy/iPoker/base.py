@@ -774,22 +774,6 @@ class iPoker(IPokerStreetsActionsMixin, IPokerHandInfoMixin, IPokerTournamentRes
             self.info["seats"] = mg2["SEATS"]
             log.debug("Set number of seats to '%s'.", self.info["seats"])
 
-    def _process_uncalled_bets(self, hand_text: str) -> None:
-        """Process uncalled bets settings."""
-        if self.re_uncalled_bets.search(hand_text):
-            self.uncalledbets = False
-            log.debug("Uncalled bets disabled.")
-        else:
-            self.uncalledbets = True
-            log.debug("Uncalled bets enabled.")
-            mv = self.re_client_version.search(hand_text)
-            if mv:
-                major_version = mv.group("VERSION").split(".")[0]
-                log.debug("Client version major number: %s", major_version)
-                if int(major_version) >= self.MIN_CLIENT_VERSION_FOR_UNCALLED_BETS:
-                    self.uncalledbets = False
-                    log.debug("Client version >= 20 => Uncalled bets disabled.")
-
     def _process_tournament_info(self, mg: dict, mg3: dict, hand_text: str) -> bool:
         """Process tournament-specific information."""
         # Check if this is a tournament (type should already be set by _parse_xml_format)
@@ -1162,9 +1146,6 @@ class iPoker(IPokerStreetsActionsMixin, IPokerHandInfoMixin, IPokerTournamentRes
 
         # Process seats information
         self._process_seats_info(mg2)
-
-        # Process uncalled bets information
-        self._process_uncalled_bets(hand_text)
 
         # Detect tournament vs ring game (check for tournament markers in whole file)
         if hasattr(self, "whole_file") and self.whole_file:

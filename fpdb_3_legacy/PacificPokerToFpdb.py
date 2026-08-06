@@ -527,8 +527,6 @@ class PacificPoker(HandHistoryConverter):
             hand.addBringIn(m.group("PNAME"), m.group("BRINGIN"))
 
     def readBlinds(self, hand) -> None:
-        if hasattr(hand, "startTime") and hasattr(hand, "newFormat") and hand.startTime < hand.newFormat:
-            hand.setUncalledBets(True)
         liveBlind, hand.allInBlind = True, False
         for a in self.re_PostSB.finditer(hand.handText):
             if a.group("PNAME") in hand.stacks:
@@ -642,8 +640,6 @@ class PacificPoker(HandHistoryConverter):
         m = self.re_Action.finditer(hand.streets[street])
         for action in m:
             action.groupdict()
-            if street not in ("PREFLOP", "DEAL"):
-                hand.setUncalledBets(False)
             # print "DEBUG: acts: %s" %acts
             bet = self.clearMoneyString(action.group("BET")) if action.group("BET") else None
             if action.group("PNAME") in hand.stacks:
@@ -672,8 +668,6 @@ class PacificPoker(HandHistoryConverter):
                     )
 
                 if action.group("ATYPE") not in (" checks", " folds") and not hand.allInBlind:
-                    if not (hand.stacks[action.group("PNAME")] == 0 and action.group("ATYPE") == " calls"):
-                        hand.setUncalledBets(False)
                     if hand.stacks[action.group("PNAME")] == 0 and action.group("ATYPE") == " raises":
                         hand.checkForUncalled = True
             else:
@@ -686,7 +680,6 @@ class PacificPoker(HandHistoryConverter):
         if street in ("PREFLOP", "DEAL") and hand.stacks[action.group("PNAME")] == 0:
             if actiontype == "ante":
                 if action.group("PNAME") in [p for (p, b) in hand.posted]:
-                    hand.setUncalledBets(False)
                     hand.checkForUncalled = True
                     hand.allInBlind = True
             elif actiontype in (
@@ -694,7 +687,6 @@ class PacificPoker(HandHistoryConverter):
                 "big blind",
                 "both",
             ) and not self.re_Antes.search(hand.handText):
-                hand.setUncalledBets(False)
                 hand.checkForUncalled = True
                 hand.allInBlind = True
 

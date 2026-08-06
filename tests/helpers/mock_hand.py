@@ -177,9 +177,6 @@ class ParserMockHand:
     def addBlind(self, player: str, blind_type: str, amount: str) -> None:
         self.blinds.append({"player": player, "type": blind_type, "amount": self._dec(amount)})
 
-    def setUncalledBets(self, value: bool) -> None:
-        self.uncalledBets = bool(value)
-
     def setCommunityCards(self, street: str, cards: list[str]) -> None:
         self.community_cards[street] = list(cards)
 

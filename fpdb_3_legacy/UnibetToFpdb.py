@@ -984,7 +984,6 @@ class Unibet(HandHistoryConverter):
         """Reads knockout bounties and add them to the koCounts dict."""
 
     def readCollectPot(self, hand) -> None:
-        hand.setUncalledBets(True)
         for m in self.re_CollectPot.finditer(hand.handText):
             # A "wins" line is only written for a pot actually taken, so unlike the
             # summary there is no zero-amount row to filter out here. A player who
