@@ -171,11 +171,18 @@ def build_hand_operations(hand_data: dict[str, Any]) -> list[dict[str, Any]]:
         name = player.get("name")
         if involved and name and name not in involved:
             continue
+        # seat_idx is a 0-based index into the snapshot's seat array; every other
+        # site numbers seats from 1, and so does the rest of fpdb. Passing the
+        # raw index through gave the first player seat 0, which the HUD's
+        # `if seat:` occupancy check reads as empty -- that player silently got
+        # no stat panel while everyone else did.
+        seat_idx = player.get("seat_idx")
+        seat_number = seat_idx + 1 if isinstance(seat_idx, int) else seat_idx
         operations.append(
             {
                 "method": "addPlayer",
                 "args": [
-                    player.get("seat_idx"),
+                    seat_number,
                     player.get("name"),
                     str(player.get("starting_stack", 0)),
                 ],
