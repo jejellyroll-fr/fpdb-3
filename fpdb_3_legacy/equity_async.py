@@ -4,21 +4,11 @@ from __future__ import annotations
 
 from collections.abc import Callable, Hashable
 from dataclasses import dataclass
-try:
-    from enum import StrEnum
-except ImportError:
-    from enum import Enum
-
-    class StrEnum(str, Enum):  # type: ignore[no-redef]
-        """Fallback StrEnum for Python < 3.11."""
-
-        def __str__(self) -> str:
-            return str(self.value)
-
 from queue import Full, Queue
 from threading import Lock, Thread
 from typing import Any, Generic, TypeVar, cast
 
+from fpdb.compat import StrEnum
 from fpdb_3_legacy.equity import EquityEngine, EquityUnavailableError
 from fpdb_3_legacy.loggingFpdb import get_logger
 
