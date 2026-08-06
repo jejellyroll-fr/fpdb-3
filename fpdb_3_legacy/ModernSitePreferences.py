@@ -263,10 +263,16 @@ class ModernSiteCard(QFrame):
                 self.enable_toggle.setChecked(True)
 
     def is_site_detectable(self):
-        """Check if the site is detectable."""
-        detector = DetectInstalledSites.DetectInstalledSites()
+        """Check if the site is detectable.
+
+        Answering this only needs the static list of networks that have a
+        detector. Building a DetectInstalledSites to read that list re-parsed
+        the whole configuration and swept the filesystem for all networks --
+        roughly 1700 stat() calls -- once per site card, so opening this dialog
+        did that work a dozen times over and threw every result away.
+        """
         network_name = self.get_network_for_skin(self.site_name)
-        return network_name in detector.supportedSites
+        return DetectInstalledSites.is_network_detectable(network_name)
 
     def get_network_for_skin(self, site_name):
         """Map a skin to its parent network for detection."""
@@ -289,8 +295,11 @@ class ModernSiteCard(QFrame):
 
     def detect_clicked(self) -> None:
         """Automatically detect paths."""
-        detector = DetectInstalledSites.DetectInstalledSites()
         detection_site = self.get_network_for_skin(self.site_name)
+        # Scope the sweep to the network this card is about: the default "All"
+        # probes every supported network, and "Detect all sites" calls this once
+        # per card, which made detection quadratic in the number of sites shown.
+        detector = DetectInstalledSites.DetectInstalledSites(sitename=detection_site)
 
         if detection_site == "PokerStars":
             all_variants = detector.get_all_pokerstars_variants()

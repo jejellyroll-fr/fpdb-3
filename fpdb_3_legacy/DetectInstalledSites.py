@@ -1254,6 +1254,38 @@ class CPNDetector(SiteDetector):
         return {"detected": False, "hhpath": "", "heroname": "", "tspath": ""}
 
 
+# Networks this module knows how to look for, in priority order. Kept at module
+# level so callers that only need the list -- "does this site offer auto-detect?"
+# -- can read it without building a DetectInstalledSites, whose constructor
+# parses the configuration and sweeps the filesystem for every network.
+SUPPORTED_SITES = (
+    "PokerStars",
+    "Winamax",
+    "iPoker",
+    "ACR",
+    "SealsWithClubs",
+    # Legacy sites (keeping for compatibility)
+    "PartyPoker",
+    "PartyGaming",
+    "Merge",
+    "Full Tilt Poker",
+    "PacificPoker",
+    "Cake",
+    "CPN",
+    "Everygame",
+    "Bovada",
+    "GGPoker",
+    "Unibet",
+    "KingsClub",
+    "BetOnline",
+)
+
+
+def is_network_detectable(network_name: str) -> bool:
+    """Return whether ``network_name`` has an auto-detection implementation."""
+    return network_name in SUPPORTED_SITES
+
+
 class DetectInstalledSites:
     """Main class for detecting installed poker sites."""
 
@@ -1268,27 +1300,7 @@ class DetectInstalledSites:
         self.detected = ""
 
         # Modern supported sites with priority order
-        self.supported_sites = [
-            "PokerStars",
-            "Winamax",
-            "iPoker",
-            "ACR",
-            "SealsWithClubs",
-            # Legacy sites (keeping for compatibility)
-            "PartyPoker",
-            "PartyGaming",
-            "Merge",
-            "Full Tilt Poker",
-            "PacificPoker",
-            "Cake",
-            "CPN",
-            "Everygame",
-            "Bovada",
-            "GGPoker",
-            "Unibet",
-            "KingsClub",
-            "BetOnline",
-        ]
+        self.supported_sites = list(SUPPORTED_SITES)
 
         # Initialize detectors
         self.detectors = {
