@@ -324,7 +324,6 @@ def normalizePath(path):
 # application wide consts
 
 APPLICATION_NAME_SHORT = "fpdb"
-APPLICATION_VERSION = "xx.xx.xx"
 
 DATABASE_TYPE_POSTGRESQL = "postgresql"
 DATABASE_TYPE_SQLITE = "sqlite"
