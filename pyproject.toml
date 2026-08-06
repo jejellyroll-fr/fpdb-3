@@ -87,6 +87,12 @@ ignore = [
     "E501",
     "E731",
     "E713",
+    # UP017 rewrites `timezone.utc` to `datetime.UTC`, which requires 3.11.
+    # requires-python says >=3.11, but the shipped binaries do not run on it:
+    # PyOxidizer 0.24 cannot link CPython 3.11+ and embeds 3.10.14 (see
+    # pyoxidizer.bzl), where `datetime.UTC` does not exist. Applying this rule
+    # would reintroduce the exact import that breaks every packaged build.
+    "UP017",
 ]
 
 [tool.ruff.lint.per-file-ignores]

@@ -8,4 +8,9 @@ This package contains the legacy Python implementation of FPDB-3.
 It is maintained for parity testing with the new Rust implementation.
 """
 
+import datetime
+
+if not hasattr(datetime, "UTC"):
+    datetime.UTC = datetime.timezone.utc
+
 __version__ = "3.2.0"
