@@ -88,6 +88,7 @@ PARSING_MODULES = (
     "ModernHudPreferences.py",
     "L10n.py",
     "ThemeManager.py",
+    "fix_ipoker_duplicate_session_hands.py",
 )
 
 # Creating a document is not parsing, so getDOMImplementation stays on the
