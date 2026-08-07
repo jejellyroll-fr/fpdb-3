@@ -658,8 +658,28 @@ def test_find_tables_without_titles_uses_sole_blank_window() -> None:
     detector._match_target_window_by_pid = Mock(return_value=None)
     detector.find_tables_applescript = Mock(return_value=[])
     blank = TableInfo(window_id=3, title="", geometry=TableGeometry(0, 0, 600, 500), process_name="PokerStars")
-    result = detector._find_tables_without_titles("table", [], [blank], 0, 0)
+    result = detector._find_tables_without_titles("pokerstars", [], [blank], 0, 0)
     assert result == [blank]
+
+
+def test_find_tables_without_titles_rejects_cross_room_blank_window_fallback() -> None:
+    detector = _detector()
+    detector._match_target_window_by_pid = Mock(return_value=None)
+    detector.find_tables_applescript = Mock(return_value=[])
+    winamax_blank = TableInfo(window_id=3, title="", geometry=TableGeometry(0, 0, 600, 500), process_name="Winamax")
+    # PartyPoker search string (#?7490030) must NOT hijack the Winamax window
+    result = detector._find_tables_without_titles("#?7490030", [], [winamax_blank], 0, 0)
+    assert result is None
+
+
+def test_is_process_matching_search() -> None:
+    detector = _detector()
+    assert detector._is_process_matching_search("Winamax", "Winamax Casablanca 02") is True
+    assert detector._is_process_matching_search("Winamax", "") is True
+    assert detector._is_process_matching_search("Winamax", "#?7490030") is False
+    assert detector._is_process_matching_search("Winamax", "PartyPoker Table 1") is False
+    assert detector._is_process_matching_search("PokerStars", "PokerStars Table 5") is True
+    assert detector._is_process_matching_search("PokerStars", "Winamax SpeedPool") is False
 
 
 def test_find_tables_without_titles_returns_none() -> None:

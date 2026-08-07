@@ -297,17 +297,67 @@ class MacOSTableDetector:
 
         if len(blank_target_windows) == 1:
             fallback = blank_target_windows[0]
-            logger.warning(
-                "Using the only visible %s window as a fallback for table search %r "
-                "because macOS did not expose a window title and AppleScript did not "
-                "return a match. Grant Screen Recording/Accessibility permissions for "
-                "reliable multi-table detection.",
-                fallback.process_name,
-                search_string,
-            )
-            return [fallback]
+            if self._is_process_matching_search(fallback.process_name, search_string):
+                logger.warning(
+                    "Using the only visible %s window as a fallback for table search %r "
+                    "because macOS did not expose a window title and AppleScript did not "
+                    "return a match. Grant Screen Recording/Accessibility permissions for "
+                    "reliable multi-table detection.",
+                    fallback.process_name,
+                    search_string,
+                )
+                return [fallback]
 
         return None
+
+    def _is_process_matching_search(self, process_name: str, search_string: str) -> bool:
+        """Check if a fallback target window's process matches the search string.
+
+        Prevents cross-assigning a fallback window of one poker client (e.g. Winamax)
+        to a table search originating from a different poker room (e.g. PartyPoker).
+        """
+        if not search_string:
+            return True
+
+        search_lower = search_string.casefold()
+        proc_lower = process_name.casefold()
+
+        process_groups: dict[str, tuple[str, ...]] = {
+            "winamax": ("winamax",),
+            "pokerstars": ("pokerstars", "stars"),
+            "party": ("party", "pmu", "bwin"),
+            "coinpoker": ("coinpoker", "coin"),
+            "full tilt": ("full tilt", "fulltilt"),
+            "888": ("888", "pacific"),
+            "bovada": ("bovada", "bodog"),
+            "ggpoker": ("ggpoker", "gg"),
+            "sealswithclubs": ("seals", "swc"),
+            "ipoker": ("ipoker", "betclic"),
+        }
+
+        fallback_group = None
+        for group, keywords in process_groups.items():
+            if any(kw in proc_lower for kw in keywords):
+                fallback_group = group
+                break
+
+        if fallback_group is None:
+            return proc_lower in search_lower
+
+        # Reject if search_string explicitly belongs to another poker process family
+        for group, keywords in process_groups.items():
+            if group == fallback_group:
+                continue
+            if any(kw in search_lower for kw in keywords):
+                return False
+
+        # If search_string does not mention fallback_group keywords, reject unless search_string is empty/wildcard
+        fallback_keywords = process_groups[fallback_group]
+        if not any(kw in search_lower for kw in fallback_keywords):
+            if search_lower not in ("", ".*", "^.*$"):
+                return False
+
+        return True
 
     def _is_target_process(self, process_name: str | None) -> bool:
         if not process_name:
