@@ -5,8 +5,10 @@ from __future__ import annotations
 
 import argparse
 import os
+import plistlib
 import shutil
 import stat
+import subprocess
 from pathlib import Path
 
 
@@ -31,6 +33,28 @@ def _copy_executable(source: Path, destination: Path) -> None:
     destination.chmod(destination.stat().st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
 
 
+def _update_mac_info_plist(info_plist: Path) -> None:
+    if not info_plist.is_file():
+        return
+    try:
+        with info_plist.open("rb") as handle:
+            info = plistlib.load(handle)
+        info["CFBundleIdentifier"] = "org.fpdb.fpdb3"
+        info["NSAppleEventsUsageDescription"] = (
+            "FPDB requires Automation access to detect poker table window titles via AppleScript."
+        )
+        info["NSScreenCaptureUsageDescription"] = (
+            "FPDB requires Screen Recording permission to identify poker table window titles for the HUD."
+        )
+        info["NSAccessibilityUsageDescription"] = (
+            "FPDB requires Accessibility permission to locate and position HUD windows over poker tables."
+        )
+        with info_plist.open("wb") as handle:
+            plistlib.dump(info, handle)
+    except Exception:
+        pass
+
+
 def bundle_pyinstaller_hud(dist_dir: Path) -> Path:
     """Merge the HUD PyInstaller output into fpdb and return the bundled executable."""
     fpdb_app = dist_dir / "fpdb.app"
@@ -50,6 +74,24 @@ def bundle_pyinstaller_hud(dist_dir: Path) -> Path:
         bundled_executable = fpdb_contents / "MacOS" / "HUD_main"
         _copy_executable(hud_contents / "MacOS" / "HUD_main", bundled_executable)
         shutil.rmtree(hud_app)
+
+        # Update Info.plist privacy usage descriptions & bundle ID
+        _update_mac_info_plist(fpdb_contents / "Info.plist")
+
+        # Strip quarantine extended attribute so Gatekeeper does not block execution
+        subprocess.run(["/usr/bin/xattr", "-cr", str(fpdb_app)], check=False)
+
+        # Re-sign the merged bundle inside-out
+        try:
+            from tools.adhoc_sign_macos import adhoc_sign, find_mach_o_files
+
+            adhoc_sign(find_mach_o_files(fpdb_contents / "Resources"))
+        except Exception:
+            pass
+
+        codesign_bin = shutil.which("codesign") or "/usr/bin/codesign"
+        subprocess.run([codesign_bin, "--force", "--deep", "--sign", "-", str(fpdb_app)], check=False)
+
         return bundled_executable
 
     fpdb_dir = dist_dir / "fpdb"
