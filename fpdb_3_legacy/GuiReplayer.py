@@ -626,7 +626,7 @@ def order_players_clockwise(players: list[ReplayPlayer], hero_name: str | None =
 class GuiReplayer(QWidget):
     """A Replayer to replay hands."""
 
-    def __init__(self, config, querylist, mainwin, handlist) -> None:
+    def __init__(self, config, querylist, mainwin, handlist, db=None) -> None:
         QWidget.__init__(self, None)
         self.resize(1800, 1080)
         self.setMinimumSize(800, 600)
@@ -634,7 +634,12 @@ class GuiReplayer(QWidget):
         self.main_window = mainwin
         self.sql = querylist
         self.newpot = Decimal()
-        self.db = Database.Database(self.conf, sql=self.sql)
+        if db is not None:
+            self.db = db
+        elif hasattr(mainwin, "db") and mainwin.db is not None:
+            self.db = mainwin.db
+        else:
+            self.db = Database.Database(self.conf, sql=self.sql)
         self.states: list[Any] = []  # List with all table states.
         self.handlist = handlist
         self.handidx = 0
@@ -2298,6 +2303,9 @@ class GuiReplayer(QWidget):
             self.replay_model = self._build_ofc_replay_model(ofc_hand)
         else:
             hand = Hand.hand_factory(entry, self.conf, self.db)
+            if hand is None:
+                log.error("Could not load hand ID %s for replayer", entry)
+                return
             self.currency = hand.sym
             self.currency_code = str(hand.gametype.get("currency", "USD"))
             self.Heroes = hand.hero or self._resolve_hero(hand.sitename)

@@ -681,11 +681,19 @@ class GuiHandViewer(QSplitter):
             handlist = sorted(self.hands.keys())
             hand_index = handlist.index(hand_id)
 
+            if getattr(self, "replayer", None) is not None and self.replayer.isVisible():
+                self.replayer.handlist = handlist
+                self.replayer.play_hand(hand_index)
+                self.replayer.raise_()
+                self.replayer.activateWindow()
+                return
+
             self.replayer = GuiReplayer.GuiReplayer(
                 self.config,
                 self.sql,
                 self.main_window,
                 handlist,
+                db=self.db,
             )
             self.replayer.play_hand(hand_index)
             self.replayer.raise_()
