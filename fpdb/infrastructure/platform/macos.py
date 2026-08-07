@@ -310,12 +310,20 @@ class MacOSTableDetector:
 
         return None
 
-    def _is_process_matching_search(self, process_name: str, search_string: str) -> bool:
+    def _is_process_matching_search(self, process_name: str | None, search_string: str) -> bool:
         """Check if a fallback target window's process matches the search string.
 
         Prevents cross-assigning a fallback window of one poker client (e.g. Winamax)
         to a table search originating from a different poker room (e.g. PartyPoker).
+
+        Quartz does not always report an owner name, which is why TableInfo types
+        it as optional. A window whose process cannot be identified is exactly the
+        one this check exists to refuse: there is nothing to compare the search
+        against, so it is not offered as a fallback.
         """
+        if process_name is None:
+            return False
+
         if not search_string:
             return True
 

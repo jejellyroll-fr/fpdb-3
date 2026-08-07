@@ -682,6 +682,14 @@ def test_is_process_matching_search() -> None:
     assert detector._is_process_matching_search("PokerStars", "Winamax SpeedPool") is False
 
 
+def test_a_window_with_no_owner_name_is_not_used_as_a_fallback() -> None:
+    # Quartz does not always report an owner name. Calling casefold() on that
+    # None used to be an AttributeError waiting for the first window without one.
+    detector = _detector()
+    assert detector._is_process_matching_search(None, "Winamax Casablanca 02") is False
+    assert detector._is_process_matching_search(None, "") is False
+
+
 def test_a_room_keyword_is_not_matched_inside_an_ordinary_table_name() -> None:
     # Keywords are substring-matched against the table search string too, so a
     # short one turns any table whose name happens to contain it into another
