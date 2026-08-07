@@ -55,6 +55,9 @@ def write_info_plist(contents: Path, executable: str, version: str, icon: str | 
         "CFBundleVersion": version,
         "LSMinimumSystemVersion": "11.0",
         "NSHighResolutionCapable": True,
+        "NSAppleEventsUsageDescription": "FPDB requires Automation access to detect poker table window titles via AppleScript.",
+        "NSScreenCaptureUsageDescription": "FPDB requires Screen Recording permission to identify poker table window titles for the HUD.",
+        "NSAccessibilityUsageDescription": "FPDB requires Accessibility permission to locate and position HUD windows over poker tables.",
     }
     if icon:
         info["CFBundleIconFile"] = icon
@@ -83,6 +86,12 @@ def build_app(install_dir: Path, app_path: Path, executable: str, version: str, 
         shutil.copy2(icon, resources / icon.name)
         icon_name = icon.name
     write_info_plist(contents, executable, version, icon_name)
+
+    # Strip quarantine extended attribute if present so Gatekeeper does not block execution
+    subprocess.run(  # noqa: S603
+        ["/usr/bin/xattr", "-dr", "com.apple.quarantine", str(app_path)],  # noqa: S607
+        check=False,
+    )
 
     # Sign inside out: nested Mach-O files first, then seal the bundle. The
     # wheels ship linker-signed binaries, which macOS treats as unsigned.

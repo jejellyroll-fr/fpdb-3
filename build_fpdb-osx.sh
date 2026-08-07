@@ -243,7 +243,7 @@ EOF
     <key>CFBundleIconFile</key>
     <string>tribal.icns</string>
     <key>CFBundleIdentifier</key>
-    <string>com.example.$APP_NAME</string>
+    <string>org.fpdb.fpdb3</string>
     <key>CFBundleInfoDictionaryVersion</key>
     <string>6.0</string>
     <key>CFBundlePackageType</key>
@@ -256,6 +256,12 @@ EOF
     <string>10.9</string>
     <key>NSHighResolutionCapable</key>
     <true/>
+    <key>NSAppleEventsUsageDescription</key>
+    <string>FPDB requires Automation access to detect poker table window titles via AppleScript.</string>
+    <key>NSScreenCaptureUsageDescription</key>
+    <string>FPDB requires Screen Recording permission to identify poker table window titles for the HUD.</string>
+    <key>NSAccessibilityUsageDescription</key>
+    <string>FPDB requires Accessibility permission to locate and position HUD windows over poker tables.</string>
 </dict>
 </plist>
 EOF
