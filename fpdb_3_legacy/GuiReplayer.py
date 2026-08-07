@@ -2191,7 +2191,7 @@ class GuiReplayer(QWidget):
         hand = getattr(getattr(self, "replay_model", None), "hand", None)
         category = hand.gametype.get("category", "") if hand else ""
         game_info = Card.games.get(category)
-        game = game_info[1] if game_info else None
+        game = (game_info[1] if game_info else None) or category or (hand.gametype.get("base", "") if hand else "")
         equity = None
         if game:
             cache: dict[Any, Decimal | None] = getattr(self, "_equity_cache", None) or {}

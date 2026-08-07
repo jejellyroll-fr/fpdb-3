@@ -81,3 +81,31 @@ def test_hero_odds_summary_formatted_string(monkeypatch) -> None:
     assert "Call Eq 60.0%" in summary
     assert "edge +35.0 pts" in summary
     assert "Push Eq 60.0%" in summary
+
+
+def test_hero_decision_metrics_supports_stud_and_draw() -> None:
+    replayer = GuiReplayer.__new__(GuiReplayer)
+    replayer.Heroes = "Hero"
+    replayer.currency_code = "USD"
+    # Stud/Draw gametypes: studhi, 7stud8, razz, 27_3draw, badugi
+    hand = SimpleNamespace(gametype={"category": "studhi", "base": "stud"})
+    replayer.replay_model = SimpleNamespace(hand=hand)
+
+    frame = SimpleNamespace(
+        players=[
+            ReplayPlayer("Hero", 1, Decimal(0), Decimal(20), "calls", False, ["As", "Kd", "Qc", "Jh", "Ts"]),
+            ReplayPlayer("Villain", 2, Decimal(0), Decimal(40), "bets", False, ["2s", "3d", "4c", "5h", "7s"]),
+        ],
+        pot=Decimal(60),
+        board={},
+        render_board=set(),
+    )
+
+    metrics = replayer._hero_decision_metrics(frame, 0)
+
+    # Pot Odds are computed from chips & pot regardless of variant
+    assert metrics["facing_call"] is True
+    assert metrics["call_amount"] == Decimal(20)
+    assert metrics["pot_odds_pct"] == Decimal(25)  # 20 / (60 + 20) = 25%
+    assert metrics["pot_odds_ratio"] == Decimal(3)  # 60 / 20 = 3:1
+
