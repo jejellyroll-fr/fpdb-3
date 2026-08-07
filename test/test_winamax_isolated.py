@@ -205,6 +205,21 @@ class TestWinamaxIsolated(unittest.TestCase):
             assert re.search(tour_re, "Winamax TournamentName(123456789)(#0)") is not None
             assert re.search(tour_re, "Winamax TournamentName(123456789)(#6)") is None
 
+    def test_read_stp_splash_pot(self) -> None:
+        """Test readSTP with Splash Pot, Drop Pot, and Escape to Pot headers."""
+        for text in [
+            "Escape to Pot: total 5.00€",
+            "Splash Pot: total 5.00€",
+            "Splash Pot: 10€",
+            "Splash to Pot: total 2.50€",
+            "Drop Pot: total 5.00€",
+        ]:
+            hand = Mock()
+            hand.handText = text
+            self.parser.readSTP(hand)
+            hand.addSTP.assert_called()
+            assert hand.bombPot in (250, 500, 1000)
+
     def test_detect_lottery_tournaments(self) -> None:
         """Test _detect_lottery_tournaments method."""
         mock_hand = Mock()

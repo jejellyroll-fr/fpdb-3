@@ -154,12 +154,12 @@ class Winamax(HandHistoryConverter):
     )
     re_mixed = re.compile(r"_(?P<MIXED>10games|8games|horse)_")
     re_hutp = re.compile(
-        r"Hold\-up\sto\sPot:\stotal\s(({LS})?(?P<AMOUNT>[.0-9]+)({LS})?)".format(**substitutions),
-        re.MULTILINE | re.VERBOSE,
+        r"(?:Hold\-?up|Escape|Splash|Drop)(?:\s+(?:to|pot))*\s*:\s*(?:total\s*)?({LS})?(?P<AMOUNT>[.0-9]+)({LS})?".format(**substitutions),
+        re.IGNORECASE | re.MULTILINE | re.VERBOSE,
     )
     re_escape_pot = re.compile(
-        r"Escape\sto\sPot:\stotal\s(({LS})?(?P<AMOUNT>[.0-9]+)({LS})?)".format(**substitutions),
-        re.MULTILINE | re.VERBOSE,
+        r"(?:Escape|Splash|Drop|Hold\-?up)(?:\s+(?:to|pot))*\s*:\s*(?:total\s*)?({LS})?(?P<AMOUNT>[.0-9]+)({LS})?".format(**substitutions),
+        re.IGNORECASE | re.MULTILINE | re.VERBOSE,
     )
     # 2010/09/21 03:10:51 UTC
     re_date_time = re.compile(
@@ -871,9 +871,9 @@ class Winamax(HandHistoryConverter):
             hand.addBringIn(m.group("PNAME"), m.group("BRINGIN"))  # type: ignore[attr-defined]
 
     def readSTP(self, hand: Hand) -> None:
-        """Parses and sets special tournament pot (STP) or bomb pot amounts.
+        """Parses and sets special tournament pot (STP), Escape, Splash, or bomb pot amounts.
 
-        This function searches the hand text for STP or bomb pot amounts and
+        This function searches the hand text for STP, Escape, or Splash pot amounts and
         updates the hand object with the corresponding values.
 
         Args:
@@ -884,10 +884,10 @@ class Winamax(HandHistoryConverter):
         """
         if m := self.re_hutp.search(hand.handText):
             hand.addSTP(m.group("AMOUNT"))
+            hand.bombPot = int(Decimal(m.group("AMOUNT")) * 100)
         elif m := self.re_escape_pot.search(hand.handText):
             hand.addSTP(m.group("AMOUNT"))
-            # Store bomb pot amount in dedicated field
-            hand.bombPot = int(Decimal(m.group("AMOUNT")) * 100)  # Convert to cents
+            hand.bombPot = int(Decimal(m.group("AMOUNT")) * 100)
 
     def readHoleCards(self, hand: Hand) -> None:
         """Read and parse hole cards for all players from hand history.

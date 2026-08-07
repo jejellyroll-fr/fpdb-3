@@ -15,6 +15,8 @@ log = logging.getLogger(__name__)
 FAST_FOLD_TITLE_PATTERNS = (
     re.compile(r"Go\s*Fast", re.IGNORECASE),
     re.compile(r"HOLD-?UP", re.IGNORECASE),
+    re.compile(r"Escape", re.IGNORECASE),
+    re.compile(r"Splash", re.IGNORECASE),
     re.compile(r"Zoom", re.IGNORECASE),
     re.compile(r"Rush", re.IGNORECASE),
 )
