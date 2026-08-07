@@ -1013,7 +1013,7 @@ class HudMain(QObject):
     def _on_winamax_log_seat_update(self, pool_id: str, seat_map: dict[int, str]) -> None:
         """Callback from WinamaxLiveLogReader when real-time seat assignments change."""
         log.info("WinamaxLiveLogReader seat update for pool %s: %s", pool_id, seat_map)
-        self.update_fast_fold_seats("Winamax", seat_map)
+        self.update_fast_fold_seats("Winamax", seat_map, pool_id=pool_id)
 
     def _handle_table_status(self, hud: Hud.Hud) -> None:
         """Handle status changes for a single table."""
@@ -1272,22 +1272,41 @@ class HudMain(QObject):
         table_name: str,
         seat_player_map: dict[int, str],
         game_type: str = "ring",
+        pool_id: str = "",
     ) -> bool:
         """Update live HUD overlays for a Fast-Fold / Escape table with new seat assignments immediately."""
+        import re
+
         from fpdb_3_legacy.fast_fold_engine import FastFoldEngine, is_fast_fold_table
 
-        log.info("HUD_main.update_fast_fold_seats: table=%s, seats=%s", table_name, seat_player_map)
-        target_hud = None
+        log.info("HUD_main.update_fast_fold_seats: table=%s, pool=%s, seats=%s", table_name, pool_id, seat_player_map)
+        target_huds = []
         for key, hud in self.hud_dict.items():
             hud_title = getattr(hud, "title", "") or getattr(hud, "table_name", "") or key
             if table_name in key or table_name in hud_title or is_fast_fold_table(hud_title):
-                target_hud = hud
-                break
+                target_huds.append(hud)
 
-        if target_hud is not None:
-            engine = FastFoldEngine(config=self.config, db_connection=self.db_connection)
-            return engine.update_hud_seats(target_hud, seat_player_map, game_type=game_type)
-        return False
+        if not target_huds:
+            return False
+
+        target_hud = target_huds[0]
+        if pool_id and len(target_huds) > 1:
+            m = re.search(r"t(\d+)$|(\d+)\.\d+$|\.(\d+)$", pool_id)
+            if m:
+                idx = int(m.group(1) or m.group(2) or m.group(3)) % len(target_huds)
+                target_hud = target_huds[idx]
+
+        target_hud.fast_fold_seats = seat_player_map
+        engine = FastFoldEngine(config=self.config, db_connection=self.db_connection)
+        success = engine.update_hud_seats(target_hud, seat_player_map, game_type=game_type)
+
+        for aw in getattr(target_hud, "aux_windows", []):
+            with contextlib.suppress(Exception):
+                aw.update_data(None, self.db_connection)
+                if hasattr(aw, "update_gui"):
+                    aw.update_gui(None)
+
+        return success
 
     def _initialize_hero_data(self) -> None:
         """Initialize hero data from the configuration."""
@@ -1516,6 +1535,16 @@ class HudMain(QObject):
                 merged = self.stats_persistence.merge_stats(cached_stats, {"stat_dict": stat_dict})
                 stat_dict = merged.get("stat_dict", stat_dict)
 
+        if is_fast_fold_table(getattr(hud, "title", "")) and getattr(hud, "fast_fold_seats", None):
+            from fpdb_3_legacy.fast_fold_engine import FastFoldEngine
+
+            engine = FastFoldEngine(config=self.config, db_connection=self.db_connection)
+            stat_dict = engine.get_player_stats_for_seat_map(
+                hud.fast_fold_seats,
+                game_type=game_type,
+                db_conn=self.db_connection,
+            )
+
         self._merge_positions(stat_dict, new_hand_id)
         try:
             hud.stat_dict = stat_dict
@@ -1528,6 +1557,9 @@ class HudMain(QObject):
         hud.cards = self.get_cards(new_hand_id, hud.poker_game)
         for aw in hud.aux_windows:
             aw.update_data(new_hand_id, self.db_connection)
+            if hasattr(aw, "update_gui"):
+                with contextlib.suppress(Exception):
+                    aw.update_gui(None)
         prepared = self._prepared_hands.get(str(new_hand_id))
         self.update_HUD(
             new_hand_id,
