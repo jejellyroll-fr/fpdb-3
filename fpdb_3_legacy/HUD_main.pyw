@@ -563,6 +563,13 @@ class HudMain(QObject):
                 height=self.hud_params["card_ht"],
             )
 
+            from fpdb_3_legacy.winamax_live_log_reader import WinamaxLiveLogReader
+
+            self.winamax_log_reader = WinamaxLiveLogReader(
+                on_seat_update=self._on_winamax_log_seat_update
+            )
+            self.winamax_log_reader.start()
+
             # Cache initialization
             self.cache: TTLCache = TTLCache(maxsize=1000, ttl=300)  # Cache of 1000 elements with a TTL of 5 minutes
             # Per-hand reads of HandsPlayers. That table is written in the same
@@ -985,6 +992,17 @@ class HudMain(QObject):
             with contextlib.suppress(RuntimeError):
                 zmq_worker.stop()
             self.zmq_worker = None
+
+        log_reader = getattr(self, "winamax_log_reader", None)
+        if log_reader is not None:
+            with contextlib.suppress(Exception):
+                log_reader.stop()
+            self.winamax_log_reader = None
+
+    def _on_winamax_log_seat_update(self, pool_id: str, seat_map: dict[int, str]) -> None:
+        """Callback from WinamaxLiveLogReader when real-time seat assignments change."""
+        log.info("WinamaxLiveLogReader seat update for pool %s: %s", pool_id, seat_map)
+        self.update_fast_fold_seats("Winamax", seat_map)
 
         zmq_receiver = getattr(self, "zmq_receiver", None)
         if zmq_receiver is not None:
