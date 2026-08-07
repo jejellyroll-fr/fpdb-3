@@ -91,11 +91,11 @@ class WinamaxTitleParser:
             r"Table\s*(?P<table_num>\d+)",
             re.IGNORECASE,
         ),
-        # Expresso: "Winamax Poker - Expresso 5€ - 123456789"
+        # Expresso: "Winamax Poker - Expresso 5€ - 123456789", "Winamax Poker - Expresso Nitro 5€ - 123456789", "Winamax Expresso Nitro(123456789)"
         "expresso": re.compile(
-            r"Winamax\s+Poker\s*-\s*Expresso\s*"
-            r"(?P<buyin>[\d.,]+\s*[€$£]?)\s*-\s*"
-            r"(?P<table_id>\d+)",
+            r"Winamax\s+(?:Poker\s*-\s*)?Expresso(?:\s+Nitro)?(?:\s+Turbo)?\s*"
+            r"(?:(?P<buyin>[\d.,]+\s*[€$£]?)\s*-\s*)?"
+            r"(?:\(?(?P<table_id>\d+)\)?)(?:\(#\d+\))?",
             re.IGNORECASE,
         ),
         # Sit & Go: "Winamax Poker - Sit&Go "Name" - Table 1"

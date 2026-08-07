@@ -76,6 +76,20 @@ class TestWinamaxTitleParser(unittest.TestCase):
         assert info.table_number == 987654321
         assert not info.is_fast_fold
 
+    def test_parse_expresso_nitro(self) -> None:
+        title = "Winamax Poker - Expresso Nitro 5€ - 987654321"
+        info = parse_winamax_title(title)
+        assert info is not None
+        assert info.table_type == WinamaxTableType.EXPRESSO
+        assert info.table_number == 987654321
+        assert info.buyin == "5€"
+
+        title_alt = "Winamax Expresso Nitro(987654321)"
+        info_alt = parse_winamax_title(title_alt)
+        assert info_alt is not None
+        assert info_alt.table_type == WinamaxTableType.EXPRESSO
+        assert info_alt.table_number == 987654321
+
     def test_parse_sit_and_go(self) -> None:
         title = 'Winamax Poker - Sit&Go "SNG Turbo" - Table 2'
         info = parse_winamax_title(title)
