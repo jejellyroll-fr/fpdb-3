@@ -36,25 +36,29 @@ def clear_quarantine(app_path: Path) -> bool:
             check=False,
             capture_output=True,
         )
-        return res.returncode == 0
-    except Exception:
+    except (OSError, subprocess.SubprocessError) as exc:
+        # A missing or unrunnable xattr is the only thing that lands here; a
+        # non-zero exit is reported through returncode, not raised.
+        print(f"Could not run xattr on {app_path}: {exc}", file=sys.stderr)
         return False
+    return res.returncode == 0
 
 
 def re_sign_bundle(app_path: Path) -> bool:
     """Apply an ad-hoc code signature to seal the app bundle."""
     if not _IS_MACOS or not app_path.exists():
         return False
+    codesign_bin = shutil.which("codesign") or "/usr/bin/codesign"
     try:
-        codesign_bin = shutil.which("codesign") or "/usr/bin/codesign"
         res = subprocess.run(
             [codesign_bin, "--force", "--deep", "--sign", "-", str(app_path)],
             check=False,
             capture_output=True,
         )
-        return res.returncode == 0
-    except Exception:
+    except (OSError, subprocess.SubprocessError) as exc:
+        print(f"Could not run codesign on {app_path}: {exc}", file=sys.stderr)
         return False
+    return res.returncode == 0
 
 
 def check_and_print_permission_status() -> permissions.PermissionStatus:
@@ -75,13 +79,21 @@ def check_and_print_permission_status() -> permissions.PermissionStatus:
     return status
 
 
-def setup_app_bundle(app_path: Path) -> dict[str, bool]:
-    """Strip quarantine and ad-hoc sign the given .app bundle."""
-    results = {
-        "quarantine_cleared": clear_quarantine(app_path),
-        "signed": re_sign_bundle(app_path),
+def setup_app_bundle(
+    app_path: Path,
+    *,
+    clear: bool = True,
+    sign: bool = True,
+) -> dict[str, bool]:
+    """Strip quarantine and/or ad-hoc sign the given .app bundle.
+
+    Both steps run by default: that is what someone who just passes a bundle
+    path wants. ``clear`` and ``sign`` let the CLI flags select one of them.
+    """
+    return {
+        "quarantine_cleared": clear_quarantine(app_path) if clear else False,
+        "signed": re_sign_bundle(app_path) if sign else False,
     }
-    return results
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -89,7 +101,12 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--app-path", type=Path, help="Path to fpdb.app bundle.")
     parser.add_argument("--clear-quarantine", action="store_true", help="Remove quarantine extended attribute.")
     parser.add_argument("--re-sign", action="store_true", help="Re-sign app bundle ad-hoc.")
-    parser.add_argument("--check-status", action="store_true", default=True, help="Check current macOS permissions status.")
+    parser.add_argument(
+        "--check-status",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Check current macOS permissions status.",
+    )
 
     args = parser.parse_args(argv)
 
@@ -97,12 +114,24 @@ def main(argv: list[str] | None = None) -> int:
         print("macOS permission tools are only applicable on Darwin/macOS systems.")
         return 0
 
-    if args.app_path and args.app_path.exists():
-        res = setup_app_bundle(args.app_path)
+    if args.app_path:
+        if not args.app_path.exists():
+            # Silently doing nothing here reads as "it worked", and the whole
+            # point of the tool is to tell the user where they stand.
+            print(f"No bundle at {args.app_path}", file=sys.stderr)
+            return 1
+        # Neither flag means "do the usual thing", which is both steps.
+        selected = args.clear_quarantine or args.re_sign
+        res = setup_app_bundle(
+            args.app_path,
+            clear=args.clear_quarantine or not selected,
+            sign=args.re_sign or not selected,
+        )
         print(f"Quarantine cleared: {res['quarantine_cleared']}")
         print(f"Ad-hoc signed:     {res['signed']}")
 
-    check_and_print_permission_status()
+    if args.check_status:
+        check_and_print_permission_status()
     return 0
 
 
