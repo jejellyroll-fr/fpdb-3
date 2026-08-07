@@ -1,114 +1,13 @@
 # Backlog
 
-État au 2026-08-06, après la 3.4.1. Chaque tâche porte la preuve qui l'a fait
+État au 2026-08-07, après la 3.4.2. Chaque tâche porte la preuve qui l'a fait
 remonter, de quoi la vérifier, et ce qui peut mal tourner.
 
 Ordonné par rendement : ce qui lève un risque réel pour peu de travail d'abord.
 
 ---
 
-## 1. Purger la liste `known_failures` — les 10 tests passent
-
-**Problème.** `tests/conftest.py:95` marque 10 tests en `xfail` via une liste
-codée en dur, avec le motif « Known legacy failure present in master branch ».
-Les 10 passent aujourd'hui.
-
-Le hook `pytest_collection_modifyitems` est au niveau session : il s'applique
-donc aussi aux fichiers de `test/`, pas seulement à `tests/`. D'où les 9 `XPASS`
-de chaque exécution ; le dixième
-(`test_rangechartpopup_is_popup_subclass`) porte le marqueur `qt` et n'apparaît
-pas dans la suite par défaut.
-
-**Pourquoi ça compte.** Ces `xfail` ne sont pas `strict`. Une régression réelle
-sur l'un de ces 10 tests serait rapportée comme échec *attendu*, et la CI
-resterait verte. Dix tests protègent donc actuellement du vide.
-
-**À faire.** Supprimer le bloc `known_failures` et le `add_marker` associé. Si
-un test s'avère réellement instable, le marquer individuellement dans son
-fichier avec `strict=True` et une raison datée — pas dans une liste centrale
-que personne ne relit.
-
-**Vérifier.**
-
-```bash
-python -m pytest test tests -q -rX
-```
-
-Zéro `XPASS` attendu, et le total de `passed` augmente de 9.
-
-**Risque.** Faible. Si un test échoue vraiment après retrait, c'est une
-information qu'on n'avait pas.
-
----
-
-## 2. `uncalledbets` : un signal écrit 37 fois, jamais lu
-
-**Problème.** 16 parsers appellent `hand.setUncalledBets(...)` et
-`fpdb_3_legacy/iPoker/base.py` écrit l'attribut directement. Le setter est
-`Hand.py:1444`, l'initialisation `Hand.py:143`. Aucune lecture nulle part :
-
-```bash
-git grep -n "uncalledbets" -- '*.py' '*.pyw' | grep -vE "uncalledbets\s*="
-```
-
-ne retourne rien.
-
-**Pourquoi ça compte.** Les parsers signalent si la room a déjà retiré les mises
-non suivies, et le signal est jeté. C'est exactement la décision que
-`Hand.totalPot()` prend à l'aveugle dans `handle_leftover` (`Hand.py:1555`) en
-comparant `totalcollected` au pot — la logique qui s'est mal branchée sur
-PartyPoker et a fait enregistrer un pot entier en rake pendant des mois.
-
-**Attention.** Le rapprochement est plausible, pas démontré. Avant de câbler le
-drapeau sur `handle_leftover`, il faut retracer l'intention d'origine : le
-comportement actuel est *deviné* mais correct sur les 85 goldens PartyPoker et
-tout le corpus. Deux issues défendables :
-
-- brancher le drapeau et vérifier qu'aucun golden ne bouge (s'il en bouge, on
-  aura trouvé d'autres rooms mal parsées) ;
-- ou constater qu'il ne sert plus et supprimer les 37 appels plus le setter.
-
-Ce qu'il ne faut pas faire : le laisser en l'état, où il donne l'illusion d'un
-mécanisme actif.
-
-**Vérifier.** Suite complète plus les goldens, avant/après :
-
-```bash
-python -m pytest test/test_live_parser_regression.py -q
-```
-
-**Risque.** Moyen si on câble : touche la comptabilité des pots de toutes les
-rooms. Nul si on supprime.
-
----
-
-## 3. 12 tests `perf` n'ont aucun point d'exécution
-
-**Problème.** `test/test_popup_performance.py` porte `pytestmark =
-pytest.mark.perf`. `pytest.ini` déselectionne `perf` dans ses `addopts`, et les
-deux invocations pytest de la CI (`.github/workflows/ci.yml:348` et `:416`)
-portent `-m "not qt and not perf"`. Aucune étape ne les lance — contrairement
-aux tests `qt`, qui ont la leur.
-
-**État.** Ils passent aujourd'hui (12/12, vérifié le 2026-08-06), mais rien ne
-le garantirait s'ils cessaient de le faire.
-
-**À faire.** Soit ajouter une étape CI `-m perf` sur le modèle de l'étape `qt`,
-soit les supprimer. Un test de performance sans seuil ni exécution ne mesure
-rien.
-
-**Vérifier.**
-
-```bash
-QT_QPA_PLATFORM=offscreen python -m pytest -m perf -q
-```
-
-**Risque.** Faible. À noter s'ils entrent en CI : ce sont des mesures de temps,
-donc sensibles à la charge du runner. Prévoir des seuils larges.
-
----
-
-## 4. iPoker : mains dupliquées sur les bases déjà importées
+## 1. iPoker : mains dupliquées sur les bases déjà importées
 
 **Problème.** Le correctif du hand id iPoker (2026-07-25) a déplacé
 `re_hand_info` de `sessioncode="…"` vers `gamecode="…"` — le premier motif
@@ -121,25 +20,34 @@ base déjà importée, la première main de chaque fichier iPoker porte encore
 l'ancien identifiant. Un ré-import l'insère sous le bon sans écraser l'ancienne
 ligne : une main dupliquée par fichier importé.
 
-Aucun script ne traite ça — les trois `backfill_*` couvrent boards, showdown et
-autonotes, pas les identifiants.
+**Ne pas confondre avec l'outil livré en 3.4.2.**
+`fpdb_3_legacy/fix_ipoker_duplicate_session_hands.py` (#193) travaille sur les
+**fichiers XML du disque** : il repère les sessions dont tous les `gamecode`
+sont déjà couverts par un fichier précédent et les supprime, de façon
+déterministe. C'est utile *avant* import, et ça ne touche pas la base. La
+migration des lignes déjà insérées n'existe toujours pas — les trois
+`backfill_*` couvrent boards, showdown et autonotes, pas les identifiants.
 
 **À faire.** Un script de maintenance qui repère, pour chaque fichier iPoker
 importé, la main dont le `siteHandNo` égale un `sessioncode` du corpus, et la
 supprime ou la réconcilie. À faire tourner une fois, avec un mode `--dry-run`.
 
 **Risque.** Élevé : il supprime des lignes en base. Impose un `--dry-run` par
-défaut, un décompte affiché avant action, et une sauvegarde documentée.
+défaut, un décompte affiché avant action, et une sauvegarde documentée. À noter
+que l'outil de 3.4.2 a fait le choix inverse — `--dry-run` y est un drapeau
+optionnel, pas le défaut — parce qu'il ne touche que des fichiers que l'import
+sait régénérer. Ce raisonnement ne tient plus dès qu'on écrit en base.
 
 ---
 
-## 5. Découpage de `Database.py` — arrêté en cours de route
+## 2. Découpage de `Database.py` — arrêté en cours de route
 
-**État.** 2 413 lignes, plancher de couverture 48,6 % (`coverage-baseline.json`).
-C'était le seul chantier explicitement marqué « en cours » dans les plans
-supprimés. Plusieurs domaines ont bien été extraits — `database_bulk_import`,
-`database_caches`, `database_hud_stats`, `database_schema`,
-`database_tournaments` — mais l'hôte reste gros.
+**État au 2026-08-07.** 2 231 lignes (2 413 avant la 3.4.2), plancher de
+couverture 48,6 % (`coverage-baseline.json`, inchangé). `database_players` a
+été extrait en #194, ce qui porte à sept les domaines sortis :
+`database_aof`, `database_auto_notes`, `database_bulk_import`,
+`database_caches`, `database_hud_stats`, `database_players`,
+`database_schema`, `database_tournaments`. L'hôte reste gros.
 
 **À faire.** Poursuivre par domaine, en vérifiant à chaque extraction que le
 cliquet de complexité de `pyproject.toml` ne grossit pas : une extraction
@@ -154,23 +62,88 @@ extraction doit laisser la suite complète verte.
 
 ---
 
-## 6. Couverture du domaine `gui` — 37 %, le plus bas
+## 3. Couverture du domaine `gui` — 37 %, le plus bas
 
-**État.** `coverage-baseline.json` donne 37,0 % pour `gui`, contre 83,6 % pour
-`poker-domain` et 86,6 % pour `platform-pkg`. Tiré vers le bas par les points
-d'entrée : `fpdb.pyw`, `GuiSessionViewer`, `GuiLogView`,
+**État.** `coverage-baseline.json` donne toujours 37,0 % pour `gui`, contre
+83,6 % pour `poker-domain` et 86,6 % pour `platform-pkg`. Tiré vers le bas par
+les points d'entrée : `fpdb.pyw`, `GuiSessionViewer`, `GuiLogView`,
 `GuiAutoNotesWorkbench`, `ModernSeatPreferences`.
+
+**Ce qui a bougé.** #195 a ajouté des tests unitaires sur le formatage et la
+logique métier GUI (`tests/test_gui_formatting_and_business_logic.py`), et #197
+un test Qt de non-régression sur les cartes de site. Le plancher n'a pas été
+re-cliqueté : la valeur ci-dessus est le seuil, pas la couverture réelle
+d'aujourd'hui. La régénérer fait partie du travail.
 
 **À faire.** Cibler ce qui est testable sans fenêtre : la logique de sélection,
 de formatage et de filtrage, en la séparant du câblage Qt. Le harnais `qt`
-offscreen existe déjà et tourne en CI.
+offscreen existe déjà et tourne en CI. Puis :
+
+```bash
+python tools/coverage_ratchet.py --update coverage.json
+```
 
 **Risque.** Faible, mais le rendement décroît vite — l'essentiel du code GUI
 restant est du câblage.
 
 ---
 
-## 7. Points en attente de validation live
+## 4. `Configuration` lit son XML avec minidom
+
+**Problème.** `Configuration.py` parse et réécrit la configuration avec
+`minidom`, le parseur XML le plus lent de la stdlib. Sur un `HUD_config.xml` de
+300 Ko, mesuré le 2026-08-06 :
+
+| | |
+|---|---|
+| `defusedxml.minidom.parse` | 18,6 ms |
+| `ElementTree.parse` | 2,7 ms |
+
+Un seul `Config()` fait 566 000 appels de fonction, dont 244 000 dans
+`_get_elements_by_tagName_helper` — `getElementsByTagName` étant une descente
+récursive de tout le sous-arbre à chaque appel.
+
+**Pourquoi ce n'est pas urgent.** #197 a supprimé l'essentiel du coût : les
+deux parsings de l'exemple par `Config()` sont mis en cache, et `Config()`
+s'exécute désormais une à deux fois par session au lieu de 27. Le gain restant
+est donc de l'ordre de 16 ms, une fois.
+
+**Pourquoi c'est quand même listé.** 12 fichiers de `fpdb_3_legacy/` (39 dans
+tout le dépôt) manipulent le DOM, dont le **chemin d'écriture** de la
+configuration ; `Configuration.py` à lui seul porte 134 appels DOM. C'est un
+refactor transverse, pas une optimisation — délibérément écarté de #197 pour
+cette raison.
+
+**À faire.** Si c'est entrepris : sa propre PR, avec une couverture de
+round-trip dédiée (lire → modifier → écrire → relire) avant de toucher au
+parseur. La motivation réelle est la lisibilité et la sûreté du code de config,
+pas la vitesse.
+
+**Risque.** Élevé sur la persistance de la configuration utilisateur.
+
+---
+
+## 5. Les binaires macOS ne sont ni signés ni notarisés
+
+**Problème.** Les artefacts CI sont signés ad-hoc. macOS pose donc
+`com.apple.quarantine` sur tout ce qui vient d'un navigateur, Gatekeeper refuse
+de charger les bibliothèques Qt non signées, et le bundle tourne depuis un
+montage App Translocation en lecture seule.
+
+**Effet mesuré.** Les traces de profilage d'une session 3.4.1 montrent les
+chemins `/private/var/…/AppTranslocation/…` : chaque première ouverture d'une
+fenêtre paie la validation Gatekeeper des ressources qu'elle charge.
+
+**Contournement documenté.** `docs/macos-gatekeeper.md` — déplacer le bundle
+hors de `~/Downloads` puis `xattr -dr com.apple.quarantine`.
+
+**À faire.** `codesign --options runtime` + `xcrun notarytool submit` en CI.
+Demande un compte Apple Developer et des secrets CI, que le dépôt n'a pas.
+Tâche d'infrastructure, pas de développement.
+
+---
+
+## 6. Points en attente de validation live
 
 Ni corrigeables ni vérifiables sans une session de jeu réelle :
 
@@ -183,25 +156,54 @@ Ni corrigeables ni vérifiables sans une session de jeu réelle :
 
 ---
 
-## 8. Traductions
+## 7. Traductions
 
 13 des 14 locales livrées ne sont pas traduites — seul le français l'est. Le
 pipeline gettext, le sélecteur de langue et l'extraction fonctionnent : il ne
 manque que le contenu des catalogues. Tâche de traduction, pas de
 développement.
 
+À noter depuis la 3.4.2 : #198 a corrigé la résolution de langue elle-même —
+une configuration sans `ui_language` retombe sur `system` et non sur l'anglais,
+donc les configs anciennes ne sont plus épinglées aux chaînes non traduites.
+
 ---
 
-## Vérifié comme fait, malgré ce que disaient les plans supprimés
+## Fait en 3.4.2
 
-Relu depuis l'historique git avant suppression :
+Vérifié dans l'arbre, pas seulement dans les messages de commit :
+
+- **Liste `known_failures` purgée** (#190) — `tests/conftest.py` ne contient
+  plus le bloc ; la suite ne rapporte plus aucun `XPASS` (7 394 passed contre
+  7 328 passed + 9 xpassed avant).
+- **`uncalledbets` supprimé** (#191) — plus aucune occurrence dans le code
+  applicatif ; seule une mention subsiste dans un docstring de
+  `tests/helpers/mock_hand.py`. La branche « supprimer » a été retenue plutôt
+  que « câbler sur `handle_leftover` », et `tests/test_uncalled_bets_real_hands.py`
+  couvre désormais la comptabilité sur mains réelles.
+- **Les tests `perf` ont un point d'exécution** (#192) —
+  `.github/workflows/ci.yml:368` lance `python -m pytest -m perf`, sur Linux
+  seulement et en `continue-on-error`. Les budgets en temps mural sont trop
+  sensibles à la charge des runners partagés pour bloquer un merge, mais le
+  résultat apparaît dans le log.
+- **Attribution PartyPoker** (#196) — les mains vont au skin configuré et non
+  au dernier `<hhc>` du fichier de config.
+- **Performance des popups** (#197) — profilage passé en opt-in
+  (`FPDB_PROFILE=1`), Site Preferences ne balaie plus le disque par carte,
+  la connexion base survit au rechargement de config.
+
+---
+
+## Vérifié comme fait, avant la 3.4.2
+
+Relu depuis l'historique git avant suppression des anciens plans :
 
 - **i18n** — `modern_hud_preferences/` porte 167 appels `_()`, et les libellés
   écrits en dur en français dans `ring_stats/` ont disparu.
 - **Scripts d'exploitation** — passés de 0 % à un plancher de 44,5 %
   (`tests/test_maintenance_scripts.py`).
 - **Hand id iPoker** — corrigé côté code ; seule la migration des données reste
-  (tâche 4).
+  (tâche 1).
 - **Version affichée par les binaires** — l'ancien repli `"3.0.0alpha"` de
   `fpdb.pyw` a été supprimé en `a5c3a435` ; `_resolve_version()` retombe sur
   `fpdb_3_legacy.__version__`.
