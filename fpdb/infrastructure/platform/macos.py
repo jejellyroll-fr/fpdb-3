@@ -297,17 +297,81 @@ class MacOSTableDetector:
 
         if len(blank_target_windows) == 1:
             fallback = blank_target_windows[0]
-            logger.warning(
-                "Using the only visible %s window as a fallback for table search %r "
-                "because macOS did not expose a window title and AppleScript did not "
-                "return a match. Grant Screen Recording/Accessibility permissions for "
-                "reliable multi-table detection.",
-                fallback.process_name,
-                search_string,
-            )
-            return [fallback]
+            if self._is_process_matching_search(fallback.process_name, search_string):
+                logger.warning(
+                    "Using the only visible %s window as a fallback for table search %r "
+                    "because macOS did not expose a window title and AppleScript did not "
+                    "return a match. Grant Screen Recording/Accessibility permissions for "
+                    "reliable multi-table detection.",
+                    fallback.process_name,
+                    search_string,
+                )
+                return [fallback]
 
         return None
+
+    def _is_process_matching_search(self, process_name: str | None, search_string: str) -> bool:
+        """Check if a fallback target window's process matches the search string.
+
+        Prevents cross-assigning a fallback window of one poker client (e.g. Winamax)
+        to a table search originating from a different poker room (e.g. PartyPoker).
+
+        Quartz does not always report an owner name, which is why TableInfo types
+        it as optional. A window whose process cannot be identified is exactly the
+        one this check exists to refuse: there is nothing to compare the search
+        against, so it is not offered as a fallback.
+        """
+        if process_name is None:
+            return False
+
+        if not search_string:
+            return True
+
+        search_lower = search_string.casefold()
+        proc_lower = process_name.casefold()
+
+        # Keywords are matched as substrings against both the process name and
+        # the table search string, so every one of them has to be long enough to
+        # be a room and nothing else. "gg" and "coin" were not: a table named
+        # "Biggie" or "Coinflip" reads as GGPoker or CoinPoker and gets a
+        # legitimate fallback from another room rejected. The full product names
+        # already cover the real process names.
+        process_groups: dict[str, tuple[str, ...]] = {
+            "winamax": ("winamax",),
+            "pokerstars": ("pokerstars", "stars"),
+            "party": ("party", "pmu", "bwin"),
+            "coinpoker": ("coinpoker",),
+            "full tilt": ("full tilt", "fulltilt"),
+            "888": ("888", "pacific"),
+            "bovada": ("bovada", "bodog"),
+            "ggpoker": ("ggpoker",),
+            "sealswithclubs": ("seals", "swc"),
+            "ipoker": ("ipoker", "betclic"),
+        }
+
+        fallback_group = None
+        for group, keywords in process_groups.items():
+            if any(kw in proc_lower for kw in keywords):
+                fallback_group = group
+                break
+
+        if fallback_group is None:
+            return proc_lower in search_lower
+
+        # Reject if search_string explicitly belongs to another poker process family
+        for group, keywords in process_groups.items():
+            if group == fallback_group:
+                continue
+            if any(kw in search_lower for kw in keywords):
+                return False
+
+        # If search_string does not mention fallback_group keywords, reject unless search_string is empty/wildcard
+        fallback_keywords = process_groups[fallback_group]
+        if not any(kw in search_lower for kw in fallback_keywords):
+            if search_lower not in ("", ".*", "^.*$"):
+                return False
+
+        return True
 
     def _is_target_process(self, process_name: str | None) -> bool:
         if not process_name:

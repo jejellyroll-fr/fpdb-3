@@ -658,8 +658,48 @@ def test_find_tables_without_titles_uses_sole_blank_window() -> None:
     detector._match_target_window_by_pid = Mock(return_value=None)
     detector.find_tables_applescript = Mock(return_value=[])
     blank = TableInfo(window_id=3, title="", geometry=TableGeometry(0, 0, 600, 500), process_name="PokerStars")
-    result = detector._find_tables_without_titles("table", [], [blank], 0, 0)
+    result = detector._find_tables_without_titles("pokerstars", [], [blank], 0, 0)
     assert result == [blank]
+
+
+def test_find_tables_without_titles_rejects_cross_room_blank_window_fallback() -> None:
+    detector = _detector()
+    detector._match_target_window_by_pid = Mock(return_value=None)
+    detector.find_tables_applescript = Mock(return_value=[])
+    winamax_blank = TableInfo(window_id=3, title="", geometry=TableGeometry(0, 0, 600, 500), process_name="Winamax")
+    # PartyPoker search string (#?7490030) must NOT hijack the Winamax window
+    result = detector._find_tables_without_titles("#?7490030", [], [winamax_blank], 0, 0)
+    assert result is None
+
+
+def test_is_process_matching_search() -> None:
+    detector = _detector()
+    assert detector._is_process_matching_search("Winamax", "Winamax Casablanca 02") is True
+    assert detector._is_process_matching_search("Winamax", "") is True
+    assert detector._is_process_matching_search("Winamax", "#?7490030") is False
+    assert detector._is_process_matching_search("Winamax", "PartyPoker Table 1") is False
+    assert detector._is_process_matching_search("PokerStars", "PokerStars Table 5") is True
+    assert detector._is_process_matching_search("PokerStars", "Winamax SpeedPool") is False
+
+
+def test_a_window_with_no_owner_name_is_not_used_as_a_fallback() -> None:
+    # Quartz does not always report an owner name. Calling casefold() on that
+    # None used to be an AttributeError waiting for the first window without one.
+    detector = _detector()
+    assert detector._is_process_matching_search(None, "Winamax Casablanca 02") is False
+    assert detector._is_process_matching_search(None, "") is False
+
+
+def test_a_room_keyword_is_not_matched_inside_an_ordinary_table_name() -> None:
+    # Keywords are substring-matched against the table search string too, so a
+    # short one turns any table whose name happens to contain it into another
+    # room and rejects a legitimate fallback.
+    detector = _detector()
+    assert detector._is_process_matching_search("Winamax", "Winamax Biggie 04") is True
+    assert detector._is_process_matching_search("Winamax", "Winamax Coinflip 04") is True
+    # The real rooms still reject each other.
+    assert detector._is_process_matching_search("Winamax", "GGPoker Rush 12") is False
+    assert detector._is_process_matching_search("CoinPoker", "Winamax Casablanca 02") is False
 
 
 def test_find_tables_without_titles_returns_none() -> None:
