@@ -682,6 +682,18 @@ def test_is_process_matching_search() -> None:
     assert detector._is_process_matching_search("PokerStars", "Winamax SpeedPool") is False
 
 
+def test_a_room_keyword_is_not_matched_inside_an_ordinary_table_name() -> None:
+    # Keywords are substring-matched against the table search string too, so a
+    # short one turns any table whose name happens to contain it into another
+    # room and rejects a legitimate fallback.
+    detector = _detector()
+    assert detector._is_process_matching_search("Winamax", "Winamax Biggie 04") is True
+    assert detector._is_process_matching_search("Winamax", "Winamax Coinflip 04") is True
+    # The real rooms still reject each other.
+    assert detector._is_process_matching_search("Winamax", "GGPoker Rush 12") is False
+    assert detector._is_process_matching_search("CoinPoker", "Winamax Casablanca 02") is False
+
+
 def test_find_tables_without_titles_returns_none() -> None:
     detector = _detector()
     detector._match_target_window_by_pid = Mock(return_value=None)

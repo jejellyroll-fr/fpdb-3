@@ -322,15 +322,21 @@ class MacOSTableDetector:
         search_lower = search_string.casefold()
         proc_lower = process_name.casefold()
 
+        # Keywords are matched as substrings against both the process name and
+        # the table search string, so every one of them has to be long enough to
+        # be a room and nothing else. "gg" and "coin" were not: a table named
+        # "Biggie" or "Coinflip" reads as GGPoker or CoinPoker and gets a
+        # legitimate fallback from another room rejected. The full product names
+        # already cover the real process names.
         process_groups: dict[str, tuple[str, ...]] = {
             "winamax": ("winamax",),
             "pokerstars": ("pokerstars", "stars"),
             "party": ("party", "pmu", "bwin"),
-            "coinpoker": ("coinpoker", "coin"),
+            "coinpoker": ("coinpoker",),
             "full tilt": ("full tilt", "fulltilt"),
             "888": ("888", "pacific"),
             "bovada": ("bovada", "bodog"),
-            "ggpoker": ("ggpoker", "gg"),
+            "ggpoker": ("ggpoker",),
             "sealswithclubs": ("seals", "swc"),
             "ipoker": ("ipoker", "betclic"),
         }
