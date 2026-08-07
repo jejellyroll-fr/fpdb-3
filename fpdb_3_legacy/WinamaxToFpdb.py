@@ -18,7 +18,6 @@ from __future__ import annotations
 #    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 ########################################################################
 import datetime
-import platform
 import re
 from collections.abc import Callable
 from decimal import Decimal
@@ -1284,13 +1283,6 @@ class Winamax(HandHistoryConverter):
             tournament,
             table_number,
         )
-        sys_platform = platform.system()  # Linux, Windows, Darwin
-        # Use word boundaries to prevent partial matches (e.g., "Casablanca" matching "Casablanca 02")
-        if sys_platform[:5] == "Linux" or sys_platform == "Darwin":
-            regex = rf"^Winamax {re.escape(table_name or '')}(\s|$)"
-        else:
-            regex = rf"^Winamax {re.escape(table_name or '')} /"
-        log.debug("regex get table cash title: %s", regex)
         if tournament:
             t_escaped = re.escape(str(tournament))
             t_num = str(table_number) if table_number is not None else "0"
@@ -1299,8 +1291,12 @@ class Winamax(HandHistoryConverter):
                 rf"Winamax\s+.*(?:\(?{t_escaped}\)?)"
                 rf"(?:\(#0*(?:{t_num_escaped}|0)\)|(?!\(#\d+\)))$"
             )
-
             log.debug("regex get mtt sng expresso cash title: %s", regex)
+        elif table_name:
+            t_name = re.escape(table_name)
+            regex = rf"Winamax\s+.*{t_name}"
+        else:
+            regex = r"^Winamax "
         log.info("Winamax.getTableTitleRe: returns: '%s'", regex)
         return regex
 

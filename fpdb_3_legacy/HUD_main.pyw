@@ -1461,14 +1461,17 @@ class HudMain(QObject):
             values.get("screen_name") == self.hero.get(site_id)
             for values in stat_dict.values()
         ):
-            log.warning(
-                "Removing loading HUD for hand %s table=%s: hero %r is not seated",
-                new_hand_id,
-                temp_key,
-                self.hero.get(site_id),
-            )
-            self.kill_hud(None, temp_key)
-            return False
+            from fpdb_3_legacy.fast_fold_engine import is_fast_fold_table
+
+            if not is_fast_fold_table(getattr(hud, "title", "")):
+                log.warning(
+                    "Removing loading HUD for hand %s table=%s: hero %r is not seated",
+                    new_hand_id,
+                    temp_key,
+                    self.hero.get(site_id),
+                )
+                self.kill_hud(None, temp_key)
+                return False
 
         if was_loading:
             cached_stats = self.stats_persistence.load_hud_stats(temp_key)
