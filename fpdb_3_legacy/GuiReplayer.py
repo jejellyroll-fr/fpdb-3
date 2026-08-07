@@ -623,6 +623,23 @@ def order_players_clockwise(players: list[ReplayPlayer], hero_name: str | None =
     return ordered
 
 
+def resolve_replayer_db(config, querylist, mainwin, db=None):
+    """Return the database the replayer should read through.
+
+    Opening one of its own is the last resort: a fresh Database connects and
+    builds its caches on the GUI thread, which is what froze the window every
+    time a hand was double-clicked in the hand viewer. The caller's connection
+    is reused instead, and the replayer only ever reads through it -- it never
+    disconnects what it was handed.
+    """
+    if db is not None:
+        return db
+    caller_db = getattr(mainwin, "db", None)
+    if caller_db is not None:
+        return caller_db
+    return Database.Database(config, sql=querylist)
+
+
 class GuiReplayer(QWidget):
     """A Replayer to replay hands."""
 
@@ -634,12 +651,7 @@ class GuiReplayer(QWidget):
         self.main_window = mainwin
         self.sql = querylist
         self.newpot = Decimal()
-        if db is not None:
-            self.db = db
-        elif hasattr(mainwin, "db") and mainwin.db is not None:
-            self.db = mainwin.db
-        else:
-            self.db = Database.Database(self.conf, sql=self.sql)
+        self.db = resolve_replayer_db(self.conf, self.sql, mainwin, db)
         self.states: list[Any] = []  # List with all table states.
         self.handlist = handlist
         self.handidx = 0
