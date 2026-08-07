@@ -54,3 +54,43 @@ def test_fast_fold_engine_hud_update() -> None:
     assert 55 in mock_hud.stat_dict
     assert mock_hud.stat_dict[55]["screen_name"] == "HeroOpponent"
     mock_hud.update_hud.assert_called_once()
+
+
+def test_partial_hand_seat_map_extraction() -> None:
+    from fpdb_3_legacy.WinamaxToFpdb import Winamax
+
+    mock_config = MagicMock()
+    parser = Winamax(mock_config)
+    hand_text = (
+        'Winamax Poker - Go Fast "Marbella" - HandId: #9434802-28434-1490719852 - Holdem no limit (2€/4€)\n'
+        "Table: 'Marbella' 6-max (real money) Seat #1 is the button\n"
+        "Seat 1: Player15 (86.50€)\n"
+        "Seat 2: player2 (102€)\n"
+        "Seat 3: Player13.. (99.50€)\n"
+        "Seat 4: Player14 (36€)\n"
+        "Seat 5: Hero (101.50€)\n"
+        "Seat 6: Player16 (80.50€)\n"
+        "*** ANTE/BLINDS ***\n"
+        "Player15 posts small blind 1€\n"
+        "player2 posts big blind 2€\n"
+        "Dealt to Hero [9h 7h 8d 7d]\n"
+        "*** PRE-FLOP ***\n"
+    )
+
+    mock_hand = MagicMock()
+    mock_hand.handText = hand_text
+
+    try:
+        parser.readPlayerStacks(mock_hand)
+    except Exception:
+        pass
+
+    assert hasattr(mock_hand, "seat_map")
+    assert mock_hand.seat_map == {
+        1: "Player15",
+        2: "player2",
+        3: "Player13..",
+        4: "Player14",
+        5: "Hero",
+        6: "Player16",
+    }

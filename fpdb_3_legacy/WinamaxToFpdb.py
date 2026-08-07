@@ -638,6 +638,14 @@ class Winamax(HandHistoryConverter):
             hand.isLottery = "Expresso" in tourname
             hand.tourneyMultiplier = 1
 
+    def _extract_seat_map(self, hand_text: str) -> dict[int, str]:
+        """Extract seat number to player screen name mapping from pre-summary hand text."""
+        pre = hand_text.split("*** SUMMARY ***")[0]
+        return {
+            int(a.group("SEAT")): a.group("PNAME")
+            for a in self.re_player_info.finditer(pre)
+        }
+
     def readPlayerStacks(self, hand: Hand) -> None:
         """Parse player stacks from hand text.
 
@@ -651,9 +659,8 @@ class Winamax(HandHistoryConverter):
         Raises:
             FpdbHandPartial: If hand cannot be split properly or has too few players.
         """
-        # Split hand text for Winamax, as the players listed in the hh preamble and the summary will differ
-        # if someone is sitting out.
-        # Going to parse both and only add players in the summary.
+        hand.seat_map = self._extract_seat_map(hand.handText)
+
         handsplit = hand.handText.split("*** SUMMARY ***")
         if len(handsplit) != self.EXPECTED_SUMMARY_PARTS:
             self.raise_summary_partial(hand, "*** SUMMARY ***")

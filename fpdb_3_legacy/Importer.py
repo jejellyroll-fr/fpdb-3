@@ -1300,6 +1300,24 @@ class Importer:
                             import traceback
 
                             partial += 1
+                            if hasattr(hand, "seat_map") and hand.seat_map and hasattr(hand, "tablename"):
+                                from fpdb_3_legacy.fast_fold_engine import is_fast_fold_table
+
+                                tname = getattr(hand, "tablename", "") or ""
+                                htext = getattr(hand, "handText", "") or ""
+                                if is_fast_fold_table(tname) or is_fast_fold_table(htext):
+                                    log.info(
+                                        "Partial hand detected on Fast-Fold / Escape table %s: updating seat HUD stats immediately",
+                                        tname,
+                                    )
+                                    if self.hud and hasattr(self.hud, "update_fast_fold_seats"):
+                                        gtype = (
+                                            getattr(hand, "gametype", {}).get("type", "ring")
+                                            if hasattr(hand, "gametype") and isinstance(hand.gametype, dict)
+                                            else "ring"
+                                        )
+                                        self.hud.update_fast_fold_seats(tname, hand.seat_map, game_type=gtype)
+
                             self.import_issues.append(
                                 f"[PARTIAL] In {fpdbfile.path}: Hand starting with '{hand.handText[:30]}...' - {e}"
                             )

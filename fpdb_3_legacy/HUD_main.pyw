@@ -1247,10 +1247,29 @@ class HudMain(QObject):
             self.idle_update(
                 new_hand_id,
                 table_name,
-                config,
-                cards=cards,
-                hand_instance=hand_instance,
             )
+
+    def update_fast_fold_seats(
+        self,
+        table_name: str,
+        seat_player_map: dict[int, str],
+        game_type: str = "ring",
+    ) -> bool:
+        """Update live HUD overlays for a Fast-Fold / Escape table with new seat assignments immediately."""
+        from fpdb_3_legacy.fast_fold_engine import FastFoldEngine, is_fast_fold_table
+
+        log.info("HUD_main.update_fast_fold_seats: table=%s, seats=%s", table_name, seat_player_map)
+        target_hud = None
+        for key, hud in self.hud_dict.items():
+            hud_title = getattr(hud, "title", "") or getattr(hud, "table_name", "") or key
+            if table_name in key or table_name in hud_title or is_fast_fold_table(hud_title):
+                target_hud = hud
+                break
+
+        if target_hud is not None:
+            engine = FastFoldEngine(config=self.config, db_connection=self.db_connection)
+            return engine.update_hud_seats(target_hud, seat_player_map, game_type=game_type)
+        return False
 
     def _initialize_hero_data(self) -> None:
         """Initialize hero data from the configuration."""
