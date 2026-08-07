@@ -84,6 +84,9 @@ def test_bundle_declares_the_launcher_and_icon(install_dir: Path, tmp_path: Path
     assert info["CFBundleIconFile"] == "tribal.icns"
     assert info["CFBundleShortVersionString"] == "3.0.0"
     assert info["CFBundleIdentifier"] == package_pyoxidizer_macos.BUNDLE_IDENTIFIER
+    assert "NSAppleEventsUsageDescription" in info
+    assert "NSScreenCaptureUsageDescription" in info
+    assert "NSAccessibilityUsageDescription" in info
     assert (app / "Contents" / "Resources" / "tribal.icns").is_file()
 
 
