@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from decimal import Decimal
 from types import SimpleNamespace
-from unittest.mock import MagicMock
+from typing import Any, cast
 
 from fpdb_3_legacy.GuiReplayer import GuiReplayer, ReplayPlayer
 
@@ -26,10 +26,10 @@ def test_hero_decision_metrics_pot_odds_and_equities(monkeypatch) -> None:
     replayer.currency_code = "USD"
 
     hand = SimpleNamespace(gametype={"category": "holdem", "base": "hold"})
-    replayer.replay_model = SimpleNamespace(hand=hand)
+    replayer.replay_model = cast(Any, SimpleNamespace(hand=hand))
 
     # Hero facing a $5 call into a $15 pot ($20 pot after call -> 25% pot odds, 3:1 ratio)
-    frame = SimpleNamespace(
+    frame = cast(Any, SimpleNamespace(
         players=[
             ReplayPlayer("Hero", 1, Decimal(0), Decimal(10), "calls", False, ["As", "Ah"]),
             ReplayPlayer("Villain", 2, Decimal(0), Decimal(15), "bets", False, ["Ks", "Kh"]),
@@ -37,7 +37,7 @@ def test_hero_decision_metrics_pot_odds_and_equities(monkeypatch) -> None:
         pot=Decimal(15),
         board={"FLOP": ["2c", "3d", "4h"]},
         render_board={"FLOP"},
-    )
+    ))
 
     monkeypatch.setattr("fpdb_3_legacy.GuiReplayer.calculate_equity", lambda *args, **kwargs: SimpleNamespace(
         players=[SimpleNamespace(equity=Decimal("0.60")), SimpleNamespace(equity=Decimal("0.40"))]
@@ -58,9 +58,9 @@ def test_hero_odds_summary_formatted_string(monkeypatch) -> None:
     replayer = GuiReplayer.__new__(GuiReplayer)
     replayer.Heroes = "Hero"
     replayer.currency_code = "USD"
-    replayer.replay_model = SimpleNamespace(hand=SimpleNamespace(gametype={"category": "holdem"}))
+    replayer.replay_model = cast(Any, SimpleNamespace(hand=SimpleNamespace(gametype={"category": "holdem"})))
 
-    frame = SimpleNamespace(
+    frame = cast(Any, SimpleNamespace(
         players=[
             ReplayPlayer("Hero", 1, Decimal(0), Decimal(10), "calls", False, ["As", "Ah"]),
             ReplayPlayer("Villain", 2, Decimal(0), Decimal(15), "bets", False, ["Ks", "Kh"]),
@@ -68,7 +68,7 @@ def test_hero_odds_summary_formatted_string(monkeypatch) -> None:
         pot=Decimal(15),
         board={"FLOP": ["2c", "3d", "4h"]},
         render_board={"FLOP"},
-    )
+    ))
 
     monkeypatch.setattr("fpdb_3_legacy.GuiReplayer.calculate_equity", lambda *args, **kwargs: SimpleNamespace(
         players=[SimpleNamespace(equity=Decimal("0.60")), SimpleNamespace(equity=Decimal("0.40"))]
@@ -89,9 +89,9 @@ def test_hero_decision_metrics_supports_stud_and_draw() -> None:
     replayer.currency_code = "USD"
     # Stud/Draw gametypes: studhi, 7stud8, razz, 27_3draw, badugi
     hand = SimpleNamespace(gametype={"category": "studhi", "base": "stud"})
-    replayer.replay_model = SimpleNamespace(hand=hand)
+    replayer.replay_model = cast(Any, SimpleNamespace(hand=hand))
 
-    frame = SimpleNamespace(
+    frame = cast(Any, SimpleNamespace(
         players=[
             ReplayPlayer("Hero", 1, Decimal(0), Decimal(20), "calls", False, ["As", "Kd", "Qc", "Jh", "Ts"]),
             ReplayPlayer("Villain", 2, Decimal(0), Decimal(40), "bets", False, ["2s", "3d", "4c", "5h", "7s"]),
@@ -99,7 +99,7 @@ def test_hero_decision_metrics_supports_stud_and_draw() -> None:
         pot=Decimal(60),
         board={},
         render_board=set(),
-    )
+    ))
 
     metrics = replayer._hero_decision_metrics(frame, 0)
 
