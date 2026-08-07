@@ -748,6 +748,7 @@ class TestMuckedCards(unittest.TestCase):
     def test_mucked_cards_positioned_under_hud(self) -> None:
         """Test that Flop_Mucked positions card container below the anchor HUD window."""
         from PySide6.QtCore import QRect
+
         from fpdb_3_legacy.Mucked import Flop_Mucked
 
         mock_parent = Mock()
