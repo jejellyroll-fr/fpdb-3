@@ -9,17 +9,6 @@ from typing import Any, cast
 from fpdb_3_legacy.GuiReplayer import GuiReplayer, ReplayPlayer
 
 
-class _FakeEquityBackend:
-    def poker_eval(self, **kwargs):
-        return {
-            "info": (1000, 0, 1),
-            "eval": [
-                {"ev": 600, "winhi": 550, "tiehi": 100, "losehi": 350},
-                {"ev": 400, "winhi": 350, "tiehi": 100, "losehi": 550},
-            ],
-        }
-
-
 def test_hero_decision_metrics_pot_odds_and_equities(monkeypatch) -> None:
     replayer = GuiReplayer.__new__(GuiReplayer)
     replayer.Heroes = "Hero"
