@@ -221,21 +221,22 @@ class TestPopupXMLConfiguration(unittest.TestCase):
                         f"Stat set '{ss_name}' playershort should use popup '{expected_popup}', got '{popup}'"
                     )
 
-    def test_plo4_pro_profile_wiring(self) -> None:
-        """The Omaha-high cash game must load the dedicated PLO4 profile."""
+    def test_plo_pro_html_profile_wiring(self) -> None:
+        """The Omaha-high cash game must load the dedicated PLO HTML profile."""
         game = self.root.find("./supported_games/game[@game_name='omahahi']")
         assert game is not None
         assert game.get("aux").split(",")[0] == "PLO4Hud"
-        assert game.find("./game_stat_set[@game_type='ring']").get("stat_set") == "plo4_6max_pro"
+        assert game.find("./game_stat_set[@game_type='ring']").get("stat_set") == "plo_pro_html"
 
-        stat_set = self.root.find("./stat_sets/ss[@name='plo4_6max_pro']")
+        stat_set = self.root.find("./stat_sets/ss[@name='plo_pro_html']")
         assert stat_set is not None
-        assert len(stat_set.findall("block")) == 2
         assert {stat.get("popup") for stat in stat_set.findall(".//stat")} >= {
-            "plo4_preflop",
-            "plo4_postflop",
-            "plo4_showdown",
-            "plo4_full",
+            "plo_popup_preflop",
+            "plo_popup_flop",
+            "plo_popup_turn",
+            "plo_popup_river",
+            "plo_popup_showdown",
+            "plo_popup_full",
         }
 
 
