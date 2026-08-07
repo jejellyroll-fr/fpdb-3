@@ -3,11 +3,14 @@
 from __future__ import annotations
 
 import os
+import plistlib
+import subprocess
+import sys
 from pathlib import Path
 
 import pytest
 
-from tools.bundle_pyinstaller_hud import bundle_pyinstaller_hud
+from tools.bundle_pyinstaller_hud import _update_mac_info_plist, bundle_pyinstaller_hud
 
 
 @pytest.mark.parametrize("executable_name", ["HUD_main", "HUD_main.exe"])
@@ -54,6 +57,77 @@ def test_bundles_macos_hud_inside_main_app(tmp_path: Path) -> None:
     assert (fpdb_contents / "Frameworks" / "hud_only" / "module.dylib").is_file()
     assert (fpdb_contents / "Resources" / "hud_data" / "config.xml").is_file()
     assert not (dist / "HUD_main.app").exists()
+
+
+def test_info_plist_gains_the_privacy_descriptions(tmp_path: Path) -> None:
+    # macOS only remembers a granted permission when the bundle declares why it
+    # wants it and keeps a stable identifier, so these four keys are the whole
+    # point of the step.
+    info_plist = tmp_path / "Info.plist"
+    with info_plist.open("wb") as handle:
+        plistlib.dump({"CFBundleName": "fpdb", "CFBundleIdentifier": "com.example.fpdb"}, handle)
+
+    assert _update_mac_info_plist(info_plist) is True
+
+    with info_plist.open("rb") as handle:
+        info = plistlib.load(handle)
+    assert info["CFBundleIdentifier"] == "org.fpdb.fpdb3"
+    assert "AppleScript" in info["NSAppleEventsUsageDescription"]
+    assert info["NSScreenCaptureUsageDescription"]
+    assert info["NSAccessibilityUsageDescription"]
+    # Untouched keys survive the rewrite.
+    assert info["CFBundleName"] == "fpdb"
+
+
+def test_a_missing_or_unreadable_info_plist_is_reported(tmp_path: Path, capsys) -> None:
+    assert _update_mac_info_plist(tmp_path / "absent.plist") is False
+    assert "No Info.plist" in capsys.readouterr().out
+
+    broken = tmp_path / "Info.plist"
+    broken.write_text("not a plist", encoding="utf-8")
+    assert _update_mac_info_plist(broken) is False
+    assert "Could not update" in capsys.readouterr().out
+
+
+def test_the_signing_helper_exposes_what_the_bundler_imports() -> None:
+    # The bundler imported a name that does not exist ('adhoc_sign' instead of
+    # 'sign'), and the ImportError went into a bare except, so the signing it
+    # was meant to add silently never ran.
+    from tools import adhoc_sign_macos
+
+    assert callable(adhoc_sign_macos.sign)
+    assert callable(adhoc_sign_macos.find_mach_o_files)
+
+
+@pytest.mark.skipif(sys.platform != "darwin", reason="the macOS branch only runs on macOS")
+def test_runs_as_a_script_the_way_ci_invokes_it(tmp_path: Path) -> None:
+    # CI runs "python tools/bundle_pyinstaller_hud.py dist", which puts tools/
+    # on sys.path instead of the repository root -- so importing the sibling
+    # module as tools.adhoc_sign_macos raised ModuleNotFoundError and took the
+    # macOS build down. Importing this file from a test cannot catch that.
+    repo_root = Path(__file__).resolve().parent.parent
+    dist = tmp_path / "dist"
+    fpdb_contents = dist / "fpdb.app" / "Contents"
+    hud_contents = dist / "HUD_main.app" / "Contents"
+    for directory in ("MacOS", "Frameworks", "Resources"):
+        (fpdb_contents / directory).mkdir(parents=True)
+    (hud_contents / "MacOS").mkdir(parents=True)
+    (hud_contents / "MacOS" / "HUD_main").write_text("executable", encoding="utf-8")
+    with (fpdb_contents / "Info.plist").open("wb") as handle:
+        plistlib.dump({"CFBundleName": "fpdb"}, handle)
+
+    result = subprocess.run(
+        [sys.executable, "tools/bundle_pyinstaller_hud.py", str(dist)],
+        cwd=repo_root,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stderr
+    with (fpdb_contents / "Info.plist").open("rb") as handle:
+        info = plistlib.load(handle)
+    assert info["CFBundleIdentifier"] == "org.fpdb.fpdb3"
 
 
 def test_rejects_incomplete_macos_outputs(tmp_path: Path) -> None:

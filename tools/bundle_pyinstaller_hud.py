@@ -5,9 +5,14 @@ from __future__ import annotations
 
 import argparse
 import os
+import plistlib
 import shutil
 import stat
+import subprocess
+import sys
 from pathlib import Path
+
+_REPO_ROOT = Path(__file__).resolve().parent.parent
 
 
 def _merge_tree(source: Path, destination: Path) -> None:
@@ -31,6 +36,74 @@ def _copy_executable(source: Path, destination: Path) -> None:
     destination.chmod(destination.stat().st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
 
 
+def _update_mac_info_plist(info_plist: Path) -> bool:
+    """Write the privacy usage descriptions and bundle id into an Info.plist.
+
+    Returns whether the file was rewritten. A failure here is reported rather
+    than swallowed: the whole point of this step is that macOS remembers the
+    permissions the user grants, and a bundle shipped without the keys asks
+    again on every launch -- the exact symptom, arriving silently.
+    """
+    if not info_plist.is_file():
+        print(f"No Info.plist at {info_plist}; privacy descriptions not written")
+        return False
+    try:
+        with info_plist.open("rb") as handle:
+            info = plistlib.load(handle)
+        info["CFBundleIdentifier"] = "org.fpdb.fpdb3"
+        info["NSAppleEventsUsageDescription"] = (
+            "FPDB requires Automation access to detect poker table window titles via AppleScript."
+        )
+        info["NSScreenCaptureUsageDescription"] = (
+            "FPDB requires Screen Recording permission to identify poker table window titles for the HUD."
+        )
+        info["NSAccessibilityUsageDescription"] = (
+            "FPDB requires Accessibility permission to locate and position HUD windows over poker tables."
+        )
+        with info_plist.open("wb") as handle:
+            plistlib.dump(info, handle)
+    except (OSError, plistlib.InvalidFileException) as exc:
+        print(f"Could not update {info_plist}: {exc}")
+        return False
+    return True
+
+
+def _run_macos_tool(command: list[str]) -> None:
+    """Run a macOS-only build tool, reporting rather than raising if it is absent.
+
+    subprocess.run(check=False) only forgives a non-zero exit; a missing binary
+    still raises, which is how /usr/bin/xattr took the Linux test run down with
+    it once this ran on a bundle built anywhere but macOS.
+    """
+    try:
+        subprocess.run(command, check=False)
+    except OSError as exc:
+        print(f"Could not run {command[0]}: {exc}")
+
+
+def _sign_macos_bundle(fpdb_app: Path, resources: Path) -> None:
+    """Ad-hoc sign the merged bundle, innermost Mach-O files first.
+
+    Gatekeeper assesses a bundle as a unit, so the nested binaries the merge
+    just moved in have to be signed before the bundle itself is sealed.
+    """
+    # CI runs this file as a script ("python tools/bundle_pyinstaller_hud.py"),
+    # which puts tools/ on sys.path rather than the repository root, so the
+    # sibling module is not reachable as tools.adhoc_sign_macos. The tests
+    # import this file as tools.bundle_pyinstaller_hud, where it is. Add the
+    # root when it is missing so both ways of running work.
+    if str(_REPO_ROOT) not in sys.path:
+        sys.path.insert(0, str(_REPO_ROOT))
+
+    from tools.adhoc_sign_macos import find_mach_o_files
+    from tools.adhoc_sign_macos import sign as adhoc_sign
+
+    adhoc_sign(find_mach_o_files(resources))
+
+    codesign_bin = shutil.which("codesign") or "/usr/bin/codesign"
+    _run_macos_tool([codesign_bin, "--force", "--deep", "--sign", "-", str(fpdb_app)])
+
+
 def bundle_pyinstaller_hud(dist_dir: Path) -> Path:
     """Merge the HUD PyInstaller output into fpdb and return the bundled executable."""
     fpdb_app = dist_dir / "fpdb.app"
@@ -50,6 +123,18 @@ def bundle_pyinstaller_hud(dist_dir: Path) -> Path:
         bundled_executable = fpdb_contents / "MacOS" / "HUD_main"
         _copy_executable(hud_contents / "MacOS" / "HUD_main", bundled_executable)
         shutil.rmtree(hud_app)
+
+        # Update Info.plist privacy usage descriptions & bundle ID
+        _update_mac_info_plist(fpdb_contents / "Info.plist")
+
+        # xattr and codesign only exist on macOS, and signing a bundle assembled
+        # anywhere else is meaningless. The tests build an .app tree on whatever
+        # host they run on, so this branch is reached off-Darwin too.
+        if sys.platform == "darwin":
+            # Strip quarantine so Gatekeeper does not block execution
+            _run_macos_tool(["/usr/bin/xattr", "-cr", str(fpdb_app)])
+            _sign_macos_bundle(fpdb_app, fpdb_contents / "Resources")
+
         return bundled_executable
 
     fpdb_dir = dist_dir / "fpdb"
