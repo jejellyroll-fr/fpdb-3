@@ -1552,7 +1552,10 @@ class HudMain(QObject):
             log.exception("hud_dict[%s] was not found", temp_key)
             return False
 
-        hud.seat_players = self._seat_players(new_hand_id)
+        if is_fast_fold_table(getattr(hud, "title", "")) and getattr(hud, "fast_fold_seat_players", None):
+            hud.seat_players = hud.fast_fold_seat_players
+        else:
+            hud.seat_players = self._seat_players(new_hand_id)
         self._set_table_stats(hud, new_hand_id)
         hud.cards = self.get_cards(new_hand_id, hud.poker_game)
         for aw in hud.aux_windows:

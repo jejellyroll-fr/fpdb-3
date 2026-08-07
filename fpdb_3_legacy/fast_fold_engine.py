@@ -102,6 +102,18 @@ class FastFoldEngine:
         stat_dict = self.get_player_stats_for_seat_map(seat_player_map, game_type=game_type, db_conn=db_conn)
         hud.stat_dict = stat_dict
 
+        seat_players: dict[int, dict[str, Any]] = {}
+        for pid, pdata in stat_dict.items():
+            seat = pdata.get("seat")
+            if seat is not None:
+                seat_players[int(seat)] = {
+                    "player_id": pid,
+                    "screen_name": pdata.get("screen_name"),
+                    "seat": seat,
+                }
+        hud.seat_players = seat_players
+        hud.fast_fold_seat_players = seat_players
+
         if hasattr(hud, "update_hud"):
             try:
                 hud.update_hud(stat_dict)
