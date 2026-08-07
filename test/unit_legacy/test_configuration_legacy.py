@@ -191,6 +191,19 @@ def test_frozen_resource_root_falls_back_to_executable(tmp_path, monkeypatch) ->
     assert Configuration._frozen_resource_root() == str(executable.parent)
 
 
+def test_frozen_resource_root_macos_app_bundle_resources(tmp_path, monkeypatch) -> None:
+    macos_dir = tmp_path / "Contents" / "MacOS"
+    resources_dir = tmp_path / "Contents" / "Resources"
+    macos_dir.mkdir(parents=True)
+    resources_dir.mkdir(parents=True)
+    executable = macos_dir / "fpdb"
+
+    monkeypatch.delattr(Configuration.sys, "_MEIPASS", raising=False)
+    monkeypatch.setattr(Configuration.sys, "executable", str(executable))
+
+    assert Configuration._frozen_resource_root() == str(resources_dir)
+
+
 def test_get_config_bootstraps_user_file_from_source_example(tmp_path, monkeypatch) -> None:
     config_dir = tmp_path / "config"
     source_dir = tmp_path / "source"

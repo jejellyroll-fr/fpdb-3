@@ -85,7 +85,12 @@ def _frozen_resource_root() -> str:
     bundle_dir = getattr(sys, "_MEIPASS", None)
     if bundle_dir:
         return os.path.abspath(os.fspath(bundle_dir))
-    return os.path.dirname(os.path.abspath(sys.executable))
+    exe_dir = os.path.dirname(os.path.abspath(sys.executable))
+    if os.path.basename(exe_dir) == "MacOS":
+        resources_dir = os.path.join(os.path.dirname(exe_dir), "Resources")
+        if os.path.isdir(resources_dir):
+            return resources_dir
+    return exe_dir
 
 
 if hasattr(sys, "frozen"):
