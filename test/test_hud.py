@@ -745,6 +745,44 @@ class TestMuckedCards(unittest.TestCase):
         assert mucked.card_width == int(56 * 0.7)  # 39
         assert mucked.card_height == int(78 * 0.7)  # 54
 
+    def test_mucked_cards_positioned_under_hud(self) -> None:
+        """Test that Flop_Mucked positions card container below the anchor HUD window."""
+        from PySide6.QtCore import QRect
+        from fpdb_3_legacy.Mucked import Flop_Mucked
+
+        mock_parent = Mock()
+        mock_parent.hud_params = {"card_ht": "50", "card_wd": "30"}
+        mock_hud = Mock()
+        mock_hud.parent = mock_parent
+        mock_config = Mock()
+
+        mucked = Flop_Mucked(mock_hud, mock_config, {})
+
+        anchor_window = Mock()
+        anchor_window.windowTitle.return_value = "HUD - stats"
+        anchor_window.frameGeometry.return_value = QRect(100, 200, 150, 80)
+        anchor_window.screen.return_value = None
+
+        stat_aux = Mock()
+        stat_aux.uses_timer = False
+        stat_aux.m_windows = {1: anchor_window}
+
+        mucked.hud.aux_windows = [mucked, stat_aux]
+
+        hint = Mock()
+        hint.width.return_value = 60
+        hint.height.return_value = 40
+        container = Mock()
+        container.width.return_value = 60
+        container.height.return_value = 40
+        container.sizeHint.return_value = hint
+        container.screen.return_value = None
+
+        mucked._move_next_to_hud(container, 1)
+
+        # Left = 100, Bottom = 200 + 80 - 1 = 279, Margin = 6 -> y = 285
+        container.move.assert_called_once_with(100, 285)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

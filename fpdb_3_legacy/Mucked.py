@@ -315,15 +315,15 @@ class Flop_Mucked(Aux_Base.AuxSeats, QObject):
             x, y = self._table_position(i)
         else:
             geometry = anchor.frameGeometry()
-            x = geometry.right() + margin
-            y = geometry.top()
+            x = geometry.left()
+            y = geometry.bottom() + margin
 
             screen = container.screen() or anchor.screen()
             if screen is not None:
                 available = screen.availableGeometry()
-                if x + width > available.right():
-                    x = geometry.left() - width - margin
-                y = max(available.top(), min(y, available.bottom() - height + 1))
+                if y + height > available.bottom():
+                    y = geometry.top() - height - margin
+                x = max(available.left(), min(x, available.right() - width + 1))
 
         x, y = Aux_Base.clamp_to_screen(x, y, width, height)
         container.move(x, y)
