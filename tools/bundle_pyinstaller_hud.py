@@ -12,6 +12,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+_REPO_ROOT = Path(__file__).resolve().parent.parent
+
 
 def _merge_tree(source: Path, destination: Path) -> None:
     """Copy missing entries from source into destination without replacing fpdb files."""
@@ -85,9 +87,18 @@ def _sign_macos_bundle(fpdb_app: Path, resources: Path) -> None:
     Gatekeeper assesses a bundle as a unit, so the nested binaries the merge
     just moved in have to be signed before the bundle itself is sealed.
     """
-    from tools.adhoc_sign_macos import find_mach_o_files, sign
+    # CI runs this file as a script ("python tools/bundle_pyinstaller_hud.py"),
+    # which puts tools/ on sys.path rather than the repository root, so the
+    # sibling module is not reachable as tools.adhoc_sign_macos. The tests
+    # import this file as tools.bundle_pyinstaller_hud, where it is. Add the
+    # root when it is missing so both ways of running work.
+    if str(_REPO_ROOT) not in sys.path:
+        sys.path.insert(0, str(_REPO_ROOT))
 
-    sign(find_mach_o_files(resources))
+    from tools.adhoc_sign_macos import find_mach_o_files
+    from tools.adhoc_sign_macos import sign as adhoc_sign
+
+    adhoc_sign(find_mach_o_files(resources))
 
     codesign_bin = shutil.which("codesign") or "/usr/bin/codesign"
     _run_macos_tool([codesign_bin, "--force", "--deep", "--sign", "-", str(fpdb_app)])
