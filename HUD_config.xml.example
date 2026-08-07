@@ -466,6 +466,7 @@
         <!-- HUD aux's -->
         <aw name="Simple_HUD" module="Aux_Hud" class="Simple_HUD" bgcolor="#000000" fgcolor="#FFFFFF" font="Sans" font_size="8" opacity="0.8"/>
         <aw name="ClassicHud" module="Aux_Classic_Hud" class="ClassicHud" bgcolor="#000000" fgcolor="#FFFFFF" font="Sans" font_size="8" opacity="0.8"/>
+        <aw name="PLO4Hud" module="Aux_Classic_Hud" class="ClassicHud" bgcolor="#0B1220" fgcolor="#E6EDF3" font="Sans" font_size="9" opacity="0.94"/>
 
         <!-- Mucked card aux's -->
         <aw name="stud_mucked" module="Mucked" class="Stud_mucked" cols="11" rows="8"/>
@@ -2149,7 +2150,99 @@
         <pu_stat pu_stat_name="aof_splash_freq" pu_stat_category="💰 SPLASH POTS &amp; NOTES" pu_stat_label="Splash Frequency"/>
         <pu_stat pu_stat_name="player_note" pu_stat_category="💰 SPLASH POTS &amp; NOTES" pu_stat_label="Player Notes"/>
     </pu>
-</popup_windows>
+        <!-- ULTRA-MODERN PLO HTML CATEGORIZED POPUPS -->
+        <pu pu_name="plo_popup_preflop" pu_class="CategorizedPopup" pu_theme="hud_dark" pu_icon_provider="emoji" pu_title="PLO PREFLOP PROFILE: {player}" pu_width="440" pu_max_height="520">
+            <pu_stat pu_stat_name="vpip" pu_stat_category="🎯 PREFLOP IDENTITY &amp; RFI" pu_stat_label="VPIP (Voluntarily Put In Pot)"/>
+            <pu_stat pu_stat_name="pfr" pu_stat_category="🎯 PREFLOP IDENTITY &amp; RFI" pu_stat_label="PFR (Preflop Raise)"/>
+            <pu_stat pu_stat_name="vpip_pfr_ratio" pu_stat_category="🎯 PREFLOP IDENTITY &amp; RFI" pu_stat_label="VPIP / PFR Ratio"/>
+            <pu_stat pu_stat_name="rfi_total" pu_stat_category="🎯 PREFLOP IDENTITY &amp; RFI" pu_stat_label="RFI Total"/>
+            <pu_stat pu_stat_name="rfi_early_position" pu_stat_category="🎯 PREFLOP IDENTITY &amp; RFI" pu_stat_label="RFI Early Position (EP)"/>
+            <pu_stat pu_stat_name="rfi_middle_position" pu_stat_category="🎯 PREFLOP IDENTITY &amp; RFI" pu_stat_label="RFI Middle Position (MP)"/>
+            <pu_stat pu_stat_name="rfi_late_position" pu_stat_category="🎯 PREFLOP IDENTITY &amp; RFI" pu_stat_label="RFI Late Position (CO/BTN)"/>
+            <pu_stat pu_stat_name="three_B" pu_stat_category="⚔️ 3-BET &amp; 4-BET WAR" pu_stat_label="3-Bet %"/>
+            <pu_stat pu_stat_name="f_3bet" pu_stat_category="⚔️ 3-BET &amp; 4-BET WAR" pu_stat_label="Fold to 3-Bet %"/>
+            <pu_stat pu_stat_name="four_B" pu_stat_category="⚔️ 3-BET &amp; 4-BET WAR" pu_stat_label="4-Bet %"/>
+            <pu_stat pu_stat_name="fold_vs_4bet" pu_stat_category="⚔️ 3-BET &amp; 4-BET WAR" pu_stat_label="Fold to 4-Bet %"/>
+            <pu_stat pu_stat_name="squeeze" pu_stat_category="⚔️ 3-BET &amp; 4-BET WAR" pu_stat_label="Squeeze %"/>
+            <pu_stat pu_stat_name="fold_to_squeeze" pu_stat_category="⚔️ 3-BET &amp; 4-BET WAR" pu_stat_label="Fold to Squeeze %"/>
+            <pu_stat pu_stat_name="limp" pu_stat_category="🛑 PASSIVE &amp; STEAL ACTIONS" pu_stat_label="Limp %"/>
+            <pu_stat pu_stat_name="open_limp" pu_stat_category="🛑 PASSIVE &amp; STEAL ACTIONS" pu_stat_label="Open Limp %"/>
+            <pu_stat pu_stat_name="cold_call" pu_stat_category="🛑 PASSIVE &amp; STEAL ACTIONS" pu_stat_label="Cold Call %"/>
+            <pu_stat pu_stat_name="steal" pu_stat_category="🛑 PASSIVE &amp; STEAL ACTIONS" pu_stat_label="Steal Attempt %"/>
+            <pu_stat pu_stat_name="f_SB_steal" pu_stat_category="🛑 PASSIVE &amp; STEAL ACTIONS" pu_stat_label="Fold SB to Steal %"/>
+            <pu_stat pu_stat_name="f_BB_steal" pu_stat_category="🛑 PASSIVE &amp; STEAL ACTIONS" pu_stat_label="Fold BB to Steal %"/>
+        </pu>
+        <pu pu_name="plo_popup_flop" pu_class="CategorizedPopup" pu_theme="hud_dark" pu_icon_provider="emoji" pu_title="PLO FLOP PROFILE: {player}" pu_width="440" pu_max_height="520">
+            <pu_stat pu_stat_name="cb1" pu_stat_category="🟢 FLOP CONTINUATION &amp; POSITION" pu_stat_label="Flop C-Bet %"/>
+            <pu_stat pu_stat_name="cb_ip" pu_stat_category="🟢 FLOP CONTINUATION &amp; POSITION" pu_stat_label="Flop C-Bet In Position (IP)"/>
+            <pu_stat pu_stat_name="cb_oop" pu_stat_category="🟢 FLOP CONTINUATION &amp; POSITION" pu_stat_label="Flop C-Bet Out of Position (OOP)"/>
+            <pu_stat pu_stat_name="f_cb1" pu_stat_category="🟢 FLOP CONTINUATION &amp; POSITION" pu_stat_label="Fold to Flop C-Bet %"/>
+            <pu_stat pu_stat_name="avg_bet_size_flop" pu_stat_category="🟢 FLOP CONTINUATION &amp; POSITION" pu_stat_label="Avg Bet Size Flop (% pot)"/>
+            <pu_stat pu_stat_name="cr1" pu_stat_category="💥 FLOP AGGRESSION &amp; DEFENSE" pu_stat_label="Check-Raise Flop %"/>
+            <pu_stat pu_stat_name="check_raise_frequency" pu_stat_category="💥 FLOP AGGRESSION &amp; DEFENSE" pu_stat_label="Overall Check-Raise Freq"/>
+            <pu_stat pu_stat_name="dbr1" pu_stat_category="💥 FLOP AGGRESSION &amp; DEFENSE" pu_stat_label="Donk Bet Flop %"/>
+            <pu_stat pu_stat_name="f_dbr1" pu_stat_category="💥 FLOP AGGRESSION &amp; DEFENSE" pu_stat_label="Fold to Donk Bet Flop %"/>
+            <pu_stat pu_stat_name="bet_frequency_flop" pu_stat_category="💥 FLOP AGGRESSION &amp; DEFENSE" pu_stat_label="Bet Frequency Flop"/>
+            <pu_stat pu_stat_name="raise_frequency_flop" pu_stat_category="💥 FLOP AGGRESSION &amp; DEFENSE" pu_stat_label="Raise Frequency Flop"/>
+        </pu>
+        <pu pu_name="plo_popup_turn" pu_class="CategorizedPopup" pu_theme="hud_dark" pu_icon_provider="emoji" pu_title="PLO TURN PROFILE: {player}" pu_width="440" pu_max_height="520">
+            <pu_stat pu_stat_name="cb2" pu_stat_category="🟡 TURN BARRELING &amp; DEFENSE" pu_stat_label="Turn C-Bet %"/>
+            <pu_stat pu_stat_name="f_cb2" pu_stat_category="🟡 TURN BARRELING &amp; DEFENSE" pu_stat_label="Fold to Turn C-Bet %"/>
+            <pu_stat pu_stat_name="cr2" pu_stat_category="🟡 TURN BARRELING &amp; DEFENSE" pu_stat_label="Check-Raise Turn %"/>
+            <pu_stat pu_stat_name="dbr2" pu_stat_category="🟡 TURN BARRELING &amp; DEFENSE" pu_stat_label="Donk Bet Turn %"/>
+            <pu_stat pu_stat_name="f_dbr2" pu_stat_category="🟡 TURN BARRELING &amp; DEFENSE" pu_stat_label="Fold to Donk Bet Turn %"/>
+            <pu_stat pu_stat_name="probe_bet_turn" pu_stat_category="🟡 TURN BARRELING &amp; DEFENSE" pu_stat_label="Probe Bet Turn %"/>
+            <pu_stat pu_stat_name="bet_frequency_turn" pu_stat_category="📊 TURN AGGRESSION &amp; SIZING" pu_stat_label="Bet Frequency Turn"/>
+            <pu_stat pu_stat_name="raise_frequency_turn" pu_stat_category="📊 TURN AGGRESSION &amp; SIZING" pu_stat_label="Raise Frequency Turn"/>
+            <pu_stat pu_stat_name="avg_bet_size_turn" pu_stat_category="📊 TURN AGGRESSION &amp; SIZING" pu_stat_label="Avg Bet Size Turn (% pot)"/>
+            <pu_stat pu_stat_name="a_freq2" pu_stat_category="📊 TURN AGGRESSION &amp; SIZING" pu_stat_label="Turn Aggression Freq"/>
+        </pu>
+        <pu pu_name="plo_popup_river" pu_class="CategorizedPopup" pu_theme="hud_dark" pu_icon_provider="emoji" pu_title="PLO RIVER PROFILE: {player}" pu_width="440" pu_max_height="520">
+            <pu_stat pu_stat_name="cb3" pu_stat_category="🔴 RIVER BARRELING &amp; EFFICIENCY" pu_stat_label="River C-Bet %"/>
+            <pu_stat pu_stat_name="f_cb3" pu_stat_category="🔴 RIVER BARRELING &amp; EFFICIENCY" pu_stat_label="Fold to River C-Bet %"/>
+            <pu_stat pu_stat_name="cr3" pu_stat_category="🔴 RIVER BARRELING &amp; EFFICIENCY" pu_stat_label="Check-Raise River %"/>
+            <pu_stat pu_stat_name="dbr3" pu_stat_category="🔴 RIVER BARRELING &amp; EFFICIENCY" pu_stat_label="Donk Bet River %"/>
+            <pu_stat pu_stat_name="f_dbr3" pu_stat_category="🔴 RIVER BARRELING &amp; EFFICIENCY" pu_stat_label="Fold to Donk Bet River %"/>
+            <pu_stat pu_stat_name="probe_bet_river" pu_stat_category="🔴 RIVER BARRELING &amp; EFFICIENCY" pu_stat_label="Probe Bet River %"/>
+            <pu_stat pu_stat_name="avg_bet_size_river" pu_stat_category="🔴 RIVER BARRELING &amp; EFFICIENCY" pu_stat_label="Avg Bet Size River (% pot)"/>
+            <pu_stat pu_stat_name="triple_barrel" pu_stat_category="🔥 TRIPLE BARREL &amp; OVERBETS" pu_stat_label="Triple Barrel %"/>
+            <pu_stat pu_stat_name="overbet_frequency" pu_stat_category="🔥 TRIPLE BARREL &amp; OVERBETS" pu_stat_label="Overbet Frequency"/>
+            <pu_stat pu_stat_name="river_call_efficiency" pu_stat_category="🔥 TRIPLE BARREL &amp; OVERBETS" pu_stat_label="River Call Efficiency"/>
+            <pu_stat pu_stat_name="a_freq3" pu_stat_category="🔥 TRIPLE BARREL &amp; OVERBETS" pu_stat_label="River Aggression Freq"/>
+        </pu>
+        <pu pu_name="plo_popup_showdown" pu_class="CategorizedPopup" pu_theme="hud_dark" pu_icon_provider="emoji" pu_title="PLO SHOWDOWN &amp; RESULTS: {player}" pu_width="440" pu_max_height="520">
+            <pu_stat pu_stat_name="wtsd" pu_stat_category="🏆 SHOWDOWN &amp; WINRATES" pu_stat_label="WTSD% (Went To Showdown)"/>
+            <pu_stat pu_stat_name="wmsd" pu_stat_category="🏆 SHOWDOWN &amp; WINRATES" pu_stat_label="WSD% (Won Money at Showdown)"/>
+            <pu_stat pu_stat_name="wwsf" pu_stat_category="🏆 SHOWDOWN &amp; WINRATES" pu_stat_label="WWSF% (Won When Saw Flop)"/>
+            <pu_stat pu_stat_name="WMsF" pu_stat_category="🏆 SHOWDOWN &amp; WINRATES" pu_stat_label="WMsF% (Won Money Saw Flop)"/>
+            <pu_stat pu_stat_name="sd_winrate" pu_stat_category="🏆 SHOWDOWN &amp; WINRATES" pu_stat_label="Showdown Winrate (bb/100)"/>
+            <pu_stat pu_stat_name="non_sd_winrate" pu_stat_category="🏆 SHOWDOWN &amp; WINRATES" pu_stat_label="Non-Showdown Winrate (bb/100)"/>
+            <pu_stat pu_stat_name="totalprofit" pu_stat_category="🏆 SHOWDOWN &amp; WINRATES" pu_stat_label="Total Profit ($)"/>
+            <pu_stat pu_stat_name="profit100" pu_stat_category="🏆 SHOWDOWN &amp; WINRATES" pu_stat_label="Profit bb/100"/>
+        </pu>
+        <pu pu_name="plo_popup_full" pu_class="CategorizedPopup" pu_theme="hud_dark" pu_icon_provider="emoji" pu_title="FULL PLO PROFILE: {player}" pu_width="460" pu_max_height="600">
+            <pu_stat pu_stat_name="vpip" pu_stat_category="🎯 PREFLOP CORE &amp; RFI" pu_stat_label="VPIP"/>
+            <pu_stat pu_stat_name="pfr" pu_stat_category="🎯 PREFLOP CORE &amp; RFI" pu_stat_label="PFR"/>
+            <pu_stat pu_stat_name="rfi_total" pu_stat_category="🎯 PREFLOP CORE &amp; RFI" pu_stat_label="RFI Total"/>
+            <pu_stat pu_stat_name="three_B" pu_stat_category="⚔️ 3-BET &amp; 4-BET WAR" pu_stat_label="3-Bet %"/>
+            <pu_stat pu_stat_name="f_3bet" pu_stat_category="⚔️ 3-BET &amp; 4-BET WAR" pu_stat_label="Fold to 3-Bet %"/>
+            <pu_stat pu_stat_name="four_B" pu_stat_category="⚔️ 3-BET &amp; 4-BET WAR" pu_stat_label="4-Bet %"/>
+            <pu_stat pu_stat_name="fold_vs_4bet" pu_stat_category="⚔️ 3-BET &amp; 4-BET WAR" pu_stat_label="Fold to 4-Bet %"/>
+            <pu_stat pu_stat_name="squeeze" pu_stat_category="⚔️ 3-BET &amp; 4-BET WAR" pu_stat_label="Squeeze %"/>
+            <pu_stat pu_stat_name="cb1" pu_stat_category="🟢 FLOP ACTION" pu_stat_label="Flop C-Bet %"/>
+            <pu_stat pu_stat_name="f_cb1" pu_stat_category="🟢 FLOP ACTION" pu_stat_label="Fold to Flop C-Bet %"/>
+            <pu_stat pu_stat_name="cr1" pu_stat_category="🟢 FLOP ACTION" pu_stat_label="Check-Raise Flop %"/>
+            <pu_stat pu_stat_name="cb2" pu_stat_category="🟡 TURN ACTION" pu_stat_label="Turn C-Bet %"/>
+            <pu_stat pu_stat_name="f_cb2" pu_stat_category="🟡 TURN ACTION" pu_stat_label="Fold to Turn C-Bet %"/>
+            <pu_stat pu_stat_name="cr2" pu_stat_category="🟡 TURN ACTION" pu_stat_label="Check-Raise Turn %"/>
+            <pu_stat pu_stat_name="cb3" pu_stat_category="🔴 RIVER ACTION" pu_stat_label="River C-Bet %"/>
+            <pu_stat pu_stat_name="f_cb3" pu_stat_category="🔴 RIVER ACTION" pu_stat_label="Fold to River C-Bet %"/>
+            <pu_stat pu_stat_name="triple_barrel" pu_stat_category="🔴 RIVER ACTION" pu_stat_label="Triple Barrel %"/>
+            <pu_stat pu_stat_name="wtsd" pu_stat_category="🏆 SHOWDOWN &amp; RESULTS" pu_stat_label="WTSD %"/>
+            <pu_stat pu_stat_name="wmsd" pu_stat_category="🏆 SHOWDOWN &amp; RESULTS" pu_stat_label="WSD %"/>
+            <pu_stat pu_stat_name="profit100" pu_stat_category="🏆 SHOWDOWN &amp; RESULTS" pu_stat_label="Profit bb/100"/>
+        </pu>
+    </popup_windows>
 
 
     <hhcs>
