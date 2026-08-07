@@ -1212,6 +1212,50 @@ class Database(
         c.execute(self.sql.query["getSiteId"], (site,))
         return c.fetchall()
 
+    def get_player_id_by_name(self, player_name: str) -> int | None:
+        """Retrieve database player ID by player screen name."""
+        try:
+            ph = self.sql.query.get("placeholder", "%s")
+            q = f"SELECT id FROM Players WHERE name = {ph}"
+            c = self.get_cursor()
+            c.execute(q, (player_name,))
+            row = c.fetchone()
+            return int(row[0]) if row else None
+        except Exception:
+            log.exception("get_player_id_by_name failed for player %s", player_name)
+            self._rollback_after_failed_read()
+            return None
+
+    def get_player_stats_by_name(self, player_name: str, game_type: str = "ring") -> dict[str, Any]:
+        """Fetch accumulated lifetime HUD stats for a player screen name."""
+        player_id = self.get_player_id_by_name(player_name)
+        if player_id is None:
+            return {"screen_name": player_name, "n": 0}
+        try:
+            ph = self.sql.query.get("placeholder", "%s")
+            q = f"SELECT n, vpip, pfr, three_B, f_3bet, cb1, f_cb1, wtsd, profit100 FROM HudCache WHERE playerId = {ph}"
+            c = self.get_cursor()
+            c.execute(q, (player_id,))
+            row = c.fetchone()
+            if row:
+                return {
+                    "player_id": player_id,
+                    "screen_name": player_name,
+                    "n": row[0] or 0,
+                    "vpip": float(row[1] or 0),
+                    "pfr": float(row[2] or 0),
+                    "three_B": float(row[3] or 0),
+                    "f_3bet": float(row[4] or 0),
+                    "cb1": float(row[5] or 0),
+                    "f_cb1": float(row[6] or 0),
+                    "wtsd": float(row[7] or 0),
+                    "profit100": float(row[8] or 0),
+                }
+        except Exception:
+            log.debug("HudCache query fallback for player %s", player_name)
+            self._rollback_after_failed_read()
+        return {"player_id": player_id, "screen_name": player_name, "n": 0}
+
     def resetCache(self) -> None:
         self.ttold: set[Any] = set()  # TourneyTypes old
         self.ttnew: set[Any] = set()  # TourneyTypes new
