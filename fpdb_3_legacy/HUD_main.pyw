@@ -999,11 +999,6 @@ class HudMain(QObject):
                 log_reader.stop()
             self.winamax_log_reader = None
 
-    def _on_winamax_log_seat_update(self, pool_id: str, seat_map: dict[int, str]) -> None:
-        """Callback from WinamaxLiveLogReader when real-time seat assignments change."""
-        log.info("WinamaxLiveLogReader seat update for pool %s: %s", pool_id, seat_map)
-        self.update_fast_fold_seats("Winamax", seat_map)
-
         zmq_receiver = getattr(self, "zmq_receiver", None)
         if zmq_receiver is not None:
             with contextlib.suppress(RuntimeError):
@@ -1014,6 +1009,11 @@ class HudMain(QObject):
 
         log.info("Quitting normally")
         QCoreApplication.quit()
+
+    def _on_winamax_log_seat_update(self, pool_id: str, seat_map: dict[int, str]) -> None:
+        """Callback from WinamaxLiveLogReader when real-time seat assignments change."""
+        log.info("WinamaxLiveLogReader seat update for pool %s: %s", pool_id, seat_map)
+        self.update_fast_fold_seats("Winamax", seat_map)
 
     def _handle_table_status(self, hud: Hud.Hud) -> None:
         """Handle status changes for a single table."""
