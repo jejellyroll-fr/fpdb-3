@@ -9,6 +9,7 @@ import plistlib
 import shutil
 import stat
 import subprocess
+import sys
 from pathlib import Path
 
 
@@ -33,9 +34,17 @@ def _copy_executable(source: Path, destination: Path) -> None:
     destination.chmod(destination.stat().st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
 
 
-def _update_mac_info_plist(info_plist: Path) -> None:
+def _update_mac_info_plist(info_plist: Path) -> bool:
+    """Write the privacy usage descriptions and bundle id into an Info.plist.
+
+    Returns whether the file was rewritten. A failure here is reported rather
+    than swallowed: the whole point of this step is that macOS remembers the
+    permissions the user grants, and a bundle shipped without the keys asks
+    again on every launch -- the exact symptom, arriving silently.
+    """
     if not info_plist.is_file():
-        return
+        print(f"No Info.plist at {info_plist}; privacy descriptions not written")
+        return False
     try:
         with info_plist.open("rb") as handle:
             info = plistlib.load(handle)
@@ -51,8 +60,37 @@ def _update_mac_info_plist(info_plist: Path) -> None:
         )
         with info_plist.open("wb") as handle:
             plistlib.dump(info, handle)
-    except Exception:
-        pass
+    except (OSError, plistlib.InvalidFileException) as exc:
+        print(f"Could not update {info_plist}: {exc}")
+        return False
+    return True
+
+
+def _run_macos_tool(command: list[str]) -> None:
+    """Run a macOS-only build tool, reporting rather than raising if it is absent.
+
+    subprocess.run(check=False) only forgives a non-zero exit; a missing binary
+    still raises, which is how /usr/bin/xattr took the Linux test run down with
+    it once this ran on a bundle built anywhere but macOS.
+    """
+    try:
+        subprocess.run(command, check=False)
+    except OSError as exc:
+        print(f"Could not run {command[0]}: {exc}")
+
+
+def _sign_macos_bundle(fpdb_app: Path, resources: Path) -> None:
+    """Ad-hoc sign the merged bundle, innermost Mach-O files first.
+
+    Gatekeeper assesses a bundle as a unit, so the nested binaries the merge
+    just moved in have to be signed before the bundle itself is sealed.
+    """
+    from tools.adhoc_sign_macos import find_mach_o_files, sign
+
+    sign(find_mach_o_files(resources))
+
+    codesign_bin = shutil.which("codesign") or "/usr/bin/codesign"
+    _run_macos_tool([codesign_bin, "--force", "--deep", "--sign", "-", str(fpdb_app)])
 
 
 def bundle_pyinstaller_hud(dist_dir: Path) -> Path:
@@ -78,19 +116,13 @@ def bundle_pyinstaller_hud(dist_dir: Path) -> Path:
         # Update Info.plist privacy usage descriptions & bundle ID
         _update_mac_info_plist(fpdb_contents / "Info.plist")
 
-        # Strip quarantine extended attribute so Gatekeeper does not block execution
-        subprocess.run(["/usr/bin/xattr", "-cr", str(fpdb_app)], check=False)
-
-        # Re-sign the merged bundle inside-out
-        try:
-            from tools.adhoc_sign_macos import adhoc_sign, find_mach_o_files
-
-            adhoc_sign(find_mach_o_files(fpdb_contents / "Resources"))
-        except Exception:
-            pass
-
-        codesign_bin = shutil.which("codesign") or "/usr/bin/codesign"
-        subprocess.run([codesign_bin, "--force", "--deep", "--sign", "-", str(fpdb_app)], check=False)
+        # xattr and codesign only exist on macOS, and signing a bundle assembled
+        # anywhere else is meaningless. The tests build an .app tree on whatever
+        # host they run on, so this branch is reached off-Darwin too.
+        if sys.platform == "darwin":
+            # Strip quarantine so Gatekeeper does not block execution
+            _run_macos_tool(["/usr/bin/xattr", "-cr", str(fpdb_app)])
+            _sign_macos_bundle(fpdb_app, fpdb_contents / "Resources")
 
         return bundled_executable
 
