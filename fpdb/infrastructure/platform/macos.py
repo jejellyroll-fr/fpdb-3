@@ -437,6 +437,9 @@ class MacOSTableDetector:
                 return window
         return None
 
+    _OSASCRIPT = "/usr/bin/osascript"
+    """Absolute, so the scan cannot be diverted by whatever PATH the app inherited."""
+
     _APPLESCRIPT_TIMEOUT = 5.0
 
     _AUTOMATION_BLOCKED_MARKERS = (
@@ -510,8 +513,10 @@ class MacOSTableDetector:
             )
 
             script = "\n".join(script_lines)
-            result = subprocess.run(
-                ["osascript", "-e", script],
+            # Absolute path, fixed argv, no shell. The script is built above
+            # from a constant list of process names, never from window content.
+            result = subprocess.run(  # noqa: S603  # nosec B603
+                [self._OSASCRIPT, "-e", script],
                 capture_output=True,
                 text=True,
                 timeout=self._APPLESCRIPT_TIMEOUT,

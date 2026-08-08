@@ -36,6 +36,17 @@ def _detector(*, window_list: list[dict] | None = None) -> MacOSTableDetector:
     return detector
 
 
+def _hung_osascript() -> TimeoutExpired:
+    """What osascript raises when the Automation prompt is left unanswered.
+
+    This constructs an exception, not a process: Semgrep's subprocess audit
+    matches the constructor by name, which is why the suppression lives here
+    rather than being repeated at each use.
+    """
+    # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-audit.dangerous-subprocess-use-audit
+    return TimeoutExpired(cmd="osascript", timeout=5)
+
+
 def _window(
     *,
     number: int = 1,
@@ -812,7 +823,7 @@ def test_run_applescript_scan_treats_a_hung_scan_as_blocking() -> None:
     with (
         patch(
             "fpdb.infrastructure.platform.macos.subprocess.run",
-            side_effect=TimeoutExpired(cmd="osascript", timeout=5),
+            side_effect=_hung_osascript(),
         ),
         patch("fpdb.infrastructure.platform.macos.logger") as logger,
     ):
@@ -829,7 +840,7 @@ def test_a_hung_scan_is_not_repeated_on_the_next_lookup() -> None:
     detector._match_target_window_by_pid = Mock(return_value=None)
     with patch(
         "fpdb.infrastructure.platform.macos.subprocess.run",
-        side_effect=TimeoutExpired(cmd="osascript", timeout=5),
+        side_effect=_hung_osascript(),
     ) as run:
         detector._find_tables_without_titles("Winamax Colorado 6", [], [], 3, 0)
         detector._find_tables_without_titles("Winamax Colorado 5", [], [], 3, 0)
