@@ -13,4 +13,4 @@ import datetime
 if not hasattr(datetime, "UTC"):
     datetime.UTC = datetime.timezone.utc
 
-__version__ = "3.6.0"
+__version__ = "3.6.1"
