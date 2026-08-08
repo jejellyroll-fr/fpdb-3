@@ -515,6 +515,7 @@ class MacOSTableDetector:
             script = "\n".join(script_lines)
             # Absolute path, fixed argv, no shell. The script is built above
             # from a constant list of process names, never from window content.
+            # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-audit.dangerous-subprocess-use-audit
             result = subprocess.run(  # noqa: S603  # nosec B603
                 [self._OSASCRIPT, "-e", script],
                 capture_output=True,
