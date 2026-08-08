@@ -312,7 +312,10 @@ class Winamax(HandHistoryConverter):
         elif mg.get("RING"):
             info["type"] = "ring"
             info["currency"] = "EUR" if mg.get("MONEY") else "play"
-            info["fast"] = "Go Fast" in (mg.get("RING") or "")
+            # ESCAPE and HOLD-UP are Winamax's other names for the same fast-fold
+            # format as Go Fast: the hero is moved to a new table on every fold.
+            ring = mg.get("RING") or ""
+            info["fast"] = any(marker in ring for marker in ("Go Fast", "ESCAPE", "HOLD-UP"))
 
     def _parse_limit_info(self, mg: dict[str, str], info: dict[str, Any], hand_text: str) -> None:
         """Parses and updates the limit type information from match groups.

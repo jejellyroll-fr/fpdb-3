@@ -136,3 +136,72 @@ def test_hero_not_seated_returns_identity_without_error() -> None:
     adj = aux.adj_seats()
 
     assert adj == list(range(7))  # identity fallback, no exception
+
+
+def test_a_hud_with_no_players_yet_keeps_the_configured_ring() -> None:
+    """Synthesising from an empty table gives a ring of Nones.
+
+    That ring is stored on the layout, so every later seat lookup maps to None
+    and every stat block hides itself -- for as long as the table lives. A HUD
+    created before its first hand (from the client log) starts exactly here.
+    """
+    ring = [None, 1, 2, 3, 4, 5, 6]
+    aux = _make_aux(6, ring, [None] + [(i * 10, i * 10) for i in range(6)], 700, {}, "Hero")
+
+    assert aux._effective_hh_seats() == ring
+
+
+def test_seats_stay_usable_after_a_hud_is_created_empty() -> None:
+    """adj_seats stores the ring it computed, so an empty one is not recoverable."""
+    ring = [None, 1, 2, 3, 4, 5, 6]
+    aux = _make_aux(6, ring, [None] + [(i * 10, i * 10) for i in range(6)], 700, {}, "Hero")
+
+    adj = aux.adj_seats()
+
+    assert aux.hud.layout.hh_seats == ring
+    assert _is_permutation(adj, 6)
+
+
+def test_mucked_windows_are_not_built_for_fast_fold_tables() -> None:
+    """They replay a showdown of a table the hero left before it finished."""
+    from types import SimpleNamespace as NS
+
+    from fpdb_3_legacy.Hud import Hud
+
+    hud = object.__new__(Hud)
+    hud.aux_windows = []
+    hud.supported_games_parameters = {"aux": "ClassicHud, mucked"}
+
+    built = []
+
+    class _Config:
+        @staticmethod
+        def get_aux_parameters(name):
+            return {
+                "ClassicHud": {"module": "Aux_Classic_Hud", "class": "ClassicHud"},
+                "mucked": {"module": "Mucked", "class": "Flop_Mucked"},
+            }[name]
+
+    def _fake_import(module, cls):
+        def _make(*_a, **_k):
+            built.append(cls)
+            return NS(cls=cls)
+
+        return _make
+
+    import fpdb_3_legacy.Hud as hud_module
+
+    original = hud_module.importName
+    hud_module.importName = _fake_import
+    try:
+        hud.hud_context = NS(speed="fast")
+        hud._build_aux_windows(_Config())
+        assert built == ["ClassicHud"]
+
+        built.clear()
+        hud.aux_windows = []
+        hud.hud_context = NS(speed="normal")
+        hud._build_aux_windows(_Config())
+        assert built == ["ClassicHud", "Flop_Mucked"]
+    finally:
+        hud_module.importName = original

@@ -120,6 +120,18 @@ class TestWinamaxIsolated(unittest.TestCase):
         # Test with ring game
         self._assert_game_type_info({"RING": "some ring", "MONEY": True}, "ring", "EUR")
 
+    def test_fast_fold_flag_covers_all_winamax_fast_formats(self) -> None:
+        """ESCAPE and HOLD-UP are Fast-Fold too, not just Go Fast."""
+        for ring, expected in (
+            ('Go Fast "Marbella"', True),
+            ('ESCAPE "Casablanca"', True),
+            ('HOLD-UP "Valencia"', True),
+            ("CashGame", False),
+        ):
+            info: dict = {}
+            self.parser._parse_game_type_info({"RING": ring, "MONEY": True}, info)
+            assert info["fast"] is expected, ring
+
     def test_limit_info_parsing(self) -> None:
         """Test _parse_limit_info method."""
         mg = {"LIMIT": "no limit"}

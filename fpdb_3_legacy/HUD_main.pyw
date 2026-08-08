@@ -6,6 +6,7 @@ Main for FreePokerTools HUD.
 
 import contextlib
 import os
+import re
 import sys
 
 # When launched as a bare script (``python HUD_main.pyw``), sys.path[0] is this
@@ -43,10 +44,18 @@ from qt_material import apply_stylesheet
 
 from fpdb_3_legacy import Aux_Base, Configuration, Database, Deck, Hud, Options, db_profile
 from fpdb_3_legacy.db_reconnect import is_connection_lost
+from fpdb_3_legacy.fast_fold_engine import (
+    FastFoldEngine,
+    FastFoldStatsRequest,
+    FastFoldStatsResult,
+    build_seat_map,
+    is_fast_fold_table,
+)
 from fpdb_3_legacy.hud_profiles import HudContext, HudPositionScope
 from fpdb_3_legacy.hud_read_service import (
     HudBatchReadRequest,
     HudBatchSnapshot,
+    HudPreparedHand,
     HudReadService,
     HudReplayDatabase,
     HudTableReadContext,
@@ -59,6 +68,9 @@ from fpdb_3_legacy.table_info import TableInfo
 # Logging configuration
 
 log = get_logger("hud_main")
+
+FAST_FOLD_POOL_PREFIX = "gf."
+"""What the Winamax log calls a Fast-Fold pool, covering Escape and HOLD-UP."""
 
 # How long an arriving hand waits for its neighbours. Twelve tables dealing at
 # once arrive as twelve separate notifications; holding them briefly turns that
@@ -176,6 +188,7 @@ class HudReadWorker(QThread):
     snapshot_ready = Signal(object)
     unavailable = Signal(str)
     batch_failed = Signal(object, str)
+    fast_fold_stats_ready = Signal(object)
 
     def __init__(
         self,
@@ -216,6 +229,41 @@ class HudReadWorker(QThread):
         with contextlib.suppress(Exception):
             database.close_connection()
 
+    @staticmethod
+    def _read_fast_fold_stats(
+        database: Database.Database,
+        request: FastFoldStatsRequest,
+    ) -> FastFoldStatsResult:
+        """Read stats for the players a Fast-Fold table currently seats.
+
+        Ends the read transaction the way HudReadService.read_batch does. On
+        PostgreSQL a SELECT opens one, and leaving it open parks the connection
+        "idle in transaction" holding its snapshot -- which stalls the importer
+        writing alongside it, and eventually trips the worker's own
+        idle_in_transaction_session_timeout.
+        """
+        try:
+            gametype_id = None
+            if request.hand_id is not None:
+                info = database.get_gameinfo_from_hid(request.hand_id)
+                gametype_id = info["gametypeId"] if info else None
+
+            stat_dict = FastFoldEngine(db_connection=database).get_player_stats_for_seat_map(
+                request.seat_map,
+                db_conn=database,
+                gametype_id=gametype_id,
+                num_seats=request.num_seats,
+            )
+        finally:
+            with contextlib.suppress(Exception):
+                database.connection.rollback()
+
+        return FastFoldStatsResult(
+            temp_key=request.temp_key,
+            seat_map=dict(request.seat_map),
+            stat_dict=stat_dict,
+        )
+
     def run(self) -> None:
         """Connect, process one request at a time, and reconnect in this thread."""
         database: Database.Database | None = None
@@ -249,8 +297,12 @@ class HudReadWorker(QThread):
                     break
 
             assert service is not None
+            fast_fold = isinstance(pending, FastFoldStatsRequest)
             try:
-                snapshot = service.read_batch(pending, progress_callback=self.snapshot_ready.emit)
+                if fast_fold:
+                    result = self._read_fast_fold_stats(database, pending)
+                else:
+                    snapshot = service.read_batch(pending, progress_callback=self.snapshot_ready.emit)
             except Exception as exc:
                 if database is not None and is_connection_lost(database.backend, exc):
                     if not unavailable_announced:
@@ -260,9 +312,17 @@ class HudReadWorker(QThread):
                     database = None
                     service = None
                     continue
-                self.batch_failed.emit(pending, str(exc))
+                if fast_fold:
+                    # Seats are refreshed on the next log line anyway, so a failed
+                    # read is not worth the batch-retry machinery.
+                    log.warning("Fast-Fold stats read failed for table %s: %s", pending.temp_key, exc)
+                else:
+                    self.batch_failed.emit(pending, str(exc))
             else:
-                self.snapshot_ready.emit(snapshot)
+                if fast_fold:
+                    self.fast_fold_stats_ready.emit(result)
+                else:
+                    self.snapshot_ready.emit(snapshot)
             pending = None
 
         self._close_database(database)
@@ -345,6 +405,44 @@ class HudMainWindow(QWidget):
 
 class HudMain(QObject):
     """A main() object to own both the socket thread and the gui."""
+
+    # WinamaxLiveLogReader tails the log on its own thread; this carries its
+    # updates onto the GUI thread, which is the only one allowed to touch the
+    # HUD widgets or the database connection.
+    winamax_table_update = Signal(object)
+
+    AX_READS_PER_HAND = 6
+    """How many times a table's window may be re-read within one hand.
+
+    Each read costs ~20ms and the seats settle within the first few log lines,
+    so this bounds the cost while still letting a table that was read before it
+    was drawn fill in.
+    """
+
+    HERO_SLOT = 0
+    """The bottom chair, which is where the client always draws the hero."""
+
+    MIN_PLAYERS_TO_SHOW = 2
+    """Players a window must be drawing before its blocks are worth showing.
+
+    The hero alone means the table is between hands or waiting for players, and
+    stat blocks over an empty felt describe nobody.
+    """
+
+    FAST_FOLD_MAX_SEATS = 6
+    """Seats on a Winamax Escape / Go Fast table.
+
+    The window says what is played and for how much, but not how many chairs it
+    draws; the pools are 6-max. An imported hand corrects it if that changes.
+    """
+
+    AX_RECHECK_DELAYS_MS = (250, 700, 1500)
+    """When to look at the window again after a hand starts.
+
+    Every log line of a new hand -- the hand id, both blinds, the hole cards --
+    is written in the same millisecond, before the client has drawn the table,
+    so re-reading on log lines alone would just repeat the same empty answer.
+    """
 
     def __init__(self, options: Values, db_name: str = "fpdb") -> None:
         """Initialize the main HUD application."""
@@ -535,6 +633,29 @@ class HudMain(QObject):
             # once; this makes read_stdin idempotent so each hand refreshes the
             # HUD exactly once, without re-running create/update on a duplicate.
             self._last_processed_hands: dict[str, str] = {}
+            # Winamax log pool -> hud_dict key, learned once a hand from that
+            # table has been imported and reused while the table stays open.
+            self._winamax_pool_huds: dict[str, str] = {}
+            # hud_dict keys known to be Fast-Fold tables.
+            self._fast_fold_tables: set[str] = set()
+            # hud_dict key -> the seat map last sent to the worker, so an
+            # unchanged table does not queue a read on every log line.
+            self._fast_fold_pending: dict[str, dict[int, str]] = {}
+            # Pools reported once as having no HUD of their own, so the warning
+            # is not repeated on every log line.
+            self._unpaired_pools: set[str] = set()
+            # window title -> (hand id, slot -> login read off that window). Kept
+            # per window so two tables do not evict each other, and per hand
+            # because each read walks another process's accessibility tree.
+            self._ax_rings: dict[str, tuple[str, dict[int, str], int]] = {}
+            # Timeline bookkeeping: when each hand's first log line arrived, and
+            # which hand a table's in-flight stats request belongs to.
+            self._ff_started: dict[str, float] = {}
+            self._ff_pending_hand: dict[str, str] = {}
+            # Learned from the first imported Winamax hand. A log-created HUD
+            # does not need it (it reads nothing from the database), but keeping
+            # it lets the table carry the same identity as an imported one.
+            self._winamax_site_id: Any = None
             self.blacklist: list[Any] = []
             # The real connection is created and owned by HudReadWorker.  The
             # UI only ever sees an in-memory replay facade for completed reads.
@@ -563,10 +684,17 @@ class HudMain(QObject):
                 height=self.hud_params["card_ht"],
             )
 
+            from fpdb_3_legacy.winamax_ax_seats import WinamaxAXSeatReader, is_supported
             from fpdb_3_legacy.winamax_live_log_reader import WinamaxLiveLogReader
 
+            # Reads seats off the table window itself. The log can only say who
+            # has acted, and never where they sit; this knows both, immediately.
+            self.winamax_ax_seats = WinamaxAXSeatReader() if is_supported() else None
+
+            # Queued by Qt because the reader emits from its tailing thread.
+            self.winamax_table_update.connect(self._on_winamax_table_update)
             self.winamax_log_reader = WinamaxLiveLogReader(
-                on_seat_update=self._on_winamax_log_seat_update
+                on_table_update=self.winamax_table_update.emit,
             )
             self.winamax_log_reader.start()
 
@@ -594,6 +722,7 @@ class HudMain(QObject):
             self._db_worker.snapshot_ready.connect(self._on_db_snapshot)
             self._db_worker.unavailable.connect(self._on_db_worker_unavailable)
             self._db_worker.batch_failed.connect(self._on_db_batch_failed)
+            self._db_worker.fast_fold_stats_ready.connect(self._on_fast_fold_stats)
             self._db_worker.start()
 
             # Stats persistence initialization
@@ -814,10 +943,20 @@ class HudMain(QObject):
         aux_disabled_sites = [
             site for site in enabled_sites if not self.config.get_site_parameters(site)["aux_enabled"]
         ]
-        if info.fast or hud_site_name in aux_disabled_sites or hud_site_name not in enabled_sites:
+        fast_unsupported = info.fast and not self._has_live_seat_source(info.site_name)
+        if fast_unsupported or hud_site_name in aux_disabled_sites or hud_site_name not in enabled_sites:
             return None
 
+        qualified = self._qualify_fast_fold_table(info, hand_id)
+        if qualified is None:
+            return None
+        info = qualified
+        table_name = info.table_name
+        table_info = info
+
         temp_key = self._get_temp_key(info.game_type, info.tour_number, info.tab_number, table_name)
+        if info.fast:
+            self._fast_fold_tables.add(temp_key)
         if temp_key in self.hud_dict:
             return temp_key
         if self._handle_tournament_table_changes(info.game_type, temp_key, info.tour_number):
@@ -1010,10 +1149,462 @@ class HudMain(QObject):
         log.info("Quitting normally")
         QCoreApplication.quit()
 
-    def _on_winamax_log_seat_update(self, pool_id: str, seat_map: dict[int, str]) -> None:
-        """Callback from WinamaxLiveLogReader when real-time seat assignments change."""
-        log.info("WinamaxLiveLogReader seat update for pool %s: %s", pool_id, seat_map)
-        self.update_fast_fold_seats("Winamax", seat_map, pool_id=pool_id)
+    def _clear_fast_fold_table(self, temp_key: str, hud: Hud.Hud, hand_id: str, reason: str) -> None:
+        """Take a Fast-Fold table's blocks down, once, and say why.
+
+        The seat windows hide themselves when their seat holds nobody, so
+        emptying the seats is what removes them from an idle felt.
+        """
+        if self._fast_fold_pending.pop(temp_key, None) is None and not getattr(hud, "stat_dict", None):
+            return  # already down
+        FastFoldEngine.clear_seats(hud)
+        self._ff_trace(hand_id, "cleared", f"table={temp_key} ({reason})")
+
+    def _recheck_window(self, pool: str) -> None:
+        """Re-run a table's live update once the client has had time to draw it."""
+        reader = getattr(self, "winamax_log_reader", None)
+        table = reader.get_table(pool) if reader is not None else None
+        if table is not None:
+            self._on_winamax_table_update(table)
+
+    def _ff_trace(self, hand_id: str, event: str, detail: str = "") -> None:
+        """One timeline line per step of a live Fast-Fold update.
+
+        At WARNING because that is the level this HUD's diagnostics are pinned
+        to (see DIAGNOSTIC_LEVEL_CAP): a report of "the seats are wrong" cannot
+        be acted on without knowing what was read, when, and from where. ``+Nms``
+        is measured from the hand-start line, so a slow step is visible as a
+        gap rather than having to be inferred.
+        """
+        started = self._ff_started.get(hand_id)
+        elapsed = "" if started is None else f" +{(time.monotonic() - started) * 1000:.0f}ms"
+        log.warning("FF[%s]%s %s %s", hand_id, elapsed, event, detail)
+
+    def _on_winamax_table_update(self, update: Any) -> None:
+        """Apply a live Winamax log update. Runs on the GUI thread."""
+        if not update.pool.startswith(FAST_FOLD_POOL_PREFIX):
+            # An ordinary cash or tournament table. It has a HUD of its own,
+            # driven by imports; tracing it and scheduling window rechecks for
+            # it would be work with nothing at the end of it.
+            return
+
+        if update.hand_id not in self._ff_started:
+            # The hand-start line: the clock for everything that follows.
+            if len(self._ff_started) > 200:
+                self._ff_started.clear()
+            self._ff_started[update.hand_id] = time.monotonic()
+            lag = ""
+            if update.logged_at_ms:
+                lag = f" (read {time.time() * 1000 - update.logged_at_ms:.0f}ms after the client wrote it)"
+            self._ff_trace(
+                update.hand_id,
+                "hand-start",
+                f"pool={update.pool} [table] {update.table_no}{lag}",
+            )
+            # The client writes the hand-start line before it has drawn the new
+            # table, and the blinds and hole cards follow in the same
+            # millisecond -- so every log line of this hand arrives too early to
+            # see the players. Come back once the window has caught up.
+            for delay_ms in self.AX_RECHECK_DELAYS_MS:
+                QTimer.singleShot(delay_ms, lambda pool=update.pool: self._recheck_window(pool))
+
+        found = self._find_fast_fold_hud(update)
+        if found is None:
+            return
+        temp_key, hud = found
+
+        if update.finished:
+            # The hand is over, or the hero folded and was moved on. Either way
+            # nobody is at this table now, and leaving the blocks up over an
+            # empty felt is the one thing worse than showing nothing.
+            reason = "hero folded, moving on" if update.hero_left else "hand over"
+            self._clear_fast_fold_table(temp_key, hud, update.hand_id, reason)
+            return
+
+        max_seats = getattr(hud, "max", 6) or 6
+        engine = FastFoldEngine(config=self.config)
+        hero_seat = engine.pin_hero_seat(hud)
+
+        # The window itself is the better source: it names every player at the
+        # chair they are drawn in, so the table is right from the moment it is
+        # dealt, empty chairs included. The log ring stays as the fallback for
+        # platforms with no accessibility reader.
+        slots = self._ax_slots(hud, update.hand_id, max_seats)
+        # The client draws the hero in the bottom chair whenever the table is
+        # drawn at all, sitting out included. A read without it caught the
+        # window mid-redraw, and acting on it seats the wrong people for a
+        # fraction of a second before the next read corrects them.
+        drawn = self.HERO_SLOT in slots
+        if drawn and len(slots) >= self.MIN_PLAYERS_TO_SHOW:
+            # Slot 0 is the bottom chair, which is the one the hero is pinned to.
+            seat_map = {((slot + hero_seat - 1) % max_seats) + 1: login for slot, login in slots.items()}
+            source = "window"
+        elif slots:
+            # Either the window holds nobody but the hero -- between hands, or
+            # waiting for players -- or it was caught half-drawn. Either way
+            # there is no table to describe yet; the rechecks will come back.
+            self._clear_fast_fold_table(temp_key, hud, update.hand_id, "table not dealt yet")
+            return
+        elif update.ring and update.hero:
+            seat_map = build_seat_map(update.ring, update.hero, max_seats=max_seats, hero_seat=hero_seat)
+            source = "log-ring"
+        else:
+            # Nothing to show yet: a new hand has started and neither the window
+            # nor the log has said who is at the new table.
+            self._clear_fast_fold_table(temp_key, hud, update.hand_id, "no players known yet")
+            return
+
+        if not seat_map or seat_map == self._fast_fold_pending.get(temp_key):
+            return
+        self._fast_fold_pending[temp_key] = seat_map
+
+        self._ff_trace(
+            update.hand_id,
+            "seats",
+            f"table={temp_key} source={source} hero_seat={hero_seat} "
+            f"seats={ {s: seat_map[s] for s in sorted(seat_map)} }",
+        )
+        # Reading the stats needs the real connection, which lives on the worker
+        # thread; the seats come back through fast_fold_stats_ready.
+        worker = getattr(self, "_db_worker", None)
+        if worker is None:
+            self._ff_trace(update.hand_id, "stats-skipped", "no database worker")
+            return
+        self._ff_pending_hand[temp_key] = update.hand_id
+        self._ff_trace(update.hand_id, "stats-requested", f"table={temp_key}")
+        worker.submit(
+            FastFoldStatsRequest(
+                temp_key=temp_key,
+                seat_map=seat_map,
+                hand_id=self._stats_reference_hand(temp_key),
+                num_seats=getattr(hud, "max", 6) or 6,
+            ),
+        )
+
+    def _stats_reference_hand(self, temp_key: str) -> Any:
+        """A hand to take the gametypeId from when reading live player stats.
+
+        This table's own last hand, when it has one. A window that has not had a
+        hand imported yet would otherwise get no gametypeId, the stats aggregate
+        would be skipped, and every seat would read "NA" -- so fall back to
+        another window on the same pool, which plays the same game for the same
+        stakes.
+        """
+        hand_id = self._last_processed_hands.get(temp_key)
+        if hand_id is not None:
+            return hand_id
+
+        base = re.sub(r"\s+\d+$", "", temp_key)
+        for other_key, other_hand in self._last_processed_hands.items():
+            if re.sub(r"\s+\d+$", "", other_key) == base:
+                return other_hand
+        return None
+
+    def _ax_slots(self, hud: Hud.Hud, hand_id: str, max_seats: int) -> dict[int, str]:
+        """Players drawn on this table's window, keyed by layout slot from the bottom.
+
+        Read once per hand and remembered: the seats cannot change within one,
+        while the log emits a line for every action, and each read is a
+        synchronous walk of another process's accessibility tree (~20ms).
+
+        Empty when the platform has no reader, or the window could not be read;
+        the caller then falls back to the log-derived ring.
+        """
+        reader = getattr(self, "winamax_ax_seats", None)
+        title = getattr(getattr(hud, "table", None), "title", "") or ""
+        if reader is None or not title:
+            return {}
+
+        cached_hand, cached_slots, reads = self._ax_rings.get(title, (None, {}, 0))
+        if cached_hand != hand_id:
+            cached_slots, reads = {}, 0
+
+        # The hand-start line beats the client to the draw: read then and only
+        # the hero is on the table yet. So keep re-reading on later lines of the
+        # same hand, taking the fullest answer, until the table is full or the
+        # budget runs out -- caching that first partial read is what left the
+        # overlay showing one player for a whole hand.
+        if len(cached_slots) >= max_seats or reads >= self.AX_READS_PER_HAND:
+            return cached_slots
+
+        started = time.monotonic()
+        slots = reader.read_window(title, max_seats)
+        took = (time.monotonic() - started) * 1000
+        # A read holding the hero's chair beats one without it even when the
+        # one without it names more players: the second caught the window
+        # half-drawn, and its extra names are the previous table's.
+        best = max(
+            (cached_slots, slots),
+            key=lambda answer: (self.HERO_SLOT in answer, len(answer)),
+        )
+        self._ax_rings[title] = (hand_id, best, reads + 1)
+
+        if slots != cached_slots:
+            empty = sorted(set(range(max_seats)) - set(best))
+            self._ff_trace(
+                hand_id,
+                "window-read",
+                f"{title!r} {took:.0f}ms read#{reads + 1} players={len(best)} "
+                f"slots={ {s: best[s] for s in sorted(best)} } empty={empty}",
+            )
+        return best
+
+    def _on_fast_fold_stats(self, result: FastFoldStatsResult) -> None:
+        """Apply stats the worker read for a Fast-Fold table. Runs on the GUI thread."""
+        hand_id = self._ff_pending_hand.get(result.temp_key, "?")
+        hud = self.hud_dict.get(result.temp_key)
+        if hud is None:
+            self._ff_trace(hand_id, "stats-dropped", f"table={result.temp_key} has no HUD any more")
+            return
+
+        applied = FastFoldEngine.apply_seats(hud, result.seat_map, result.stat_dict)
+        with_stats = sum(1 for row in result.stat_dict.values() if row.get("n"))
+        self._ff_trace(
+            hand_id,
+            "stats-applied" if applied else "stats-empty",
+            f"table={result.temp_key} players={len(result.stat_dict)} with_history={with_stats}",
+        )
+
+    def _has_live_seat_source(self, site_name: str) -> bool:
+        """Whether a real-time seat source is running for this site.
+
+        Only Winamax has one: its client writes a log this HUD tails. Without it
+        a Fast-Fold HUD can only ever show the players of an already-finished
+        hand, which is why such tables are still skipped elsewhere.
+        """
+        if str(site_name).lower() != "winamax":
+            return False
+        reader = getattr(self, "winamax_log_reader", None)
+        return bool(reader is not None and reader.is_tailing)
+
+    def _qualify_fast_fold_table(self, info: TableInfo, hand_id: Any) -> TableInfo | None:
+        """Qualify a Fast-Fold table name with the client window it was played on.
+
+        Every Escape window on a pool writes its hands under the pool's name
+        ("Casablanca"), so all of them key one HUD and overwrite each other's
+        seats. The client log records which ``[table] N`` dealt each hand, and
+        that index is also the suffix in the window title, so appending it both
+        separates the HUDs and narrows the existing title search to the single
+        matching window ("Winamax Casablanca 5").
+
+        Returns ``None`` when the window cannot be determined -- typically a hand
+        already in flight when the log tailing started. Creating a HUD from the
+        bare pool name would let it claim whichever window matched first and
+        report the wrong table number; the next hand carries the mapping.
+
+        The hand's site id comes from the snapshot rather than a query: by the
+        time this runs, ``db_connection`` is the database-free replay facade.
+        """
+        if not info.fast or not self._has_live_seat_source(info.site_name):
+            return info
+
+        prepared = self._prepared_hands.get(str(hand_id))
+        # The identity-only snapshot carries site_hand_no and nothing else, so
+        # prefer it: it arrives a hand earlier than the Hand object does.
+        site_hand_no = getattr(prepared, "site_hand_no", None) or getattr(
+            getattr(prepared, "hand_instance", None), "handid", None
+        )
+        table_no = self.winamax_log_reader.table_no_for_hand(site_hand_no) if site_hand_no else None
+        if not table_no:
+            # WARNING because this is what delays a table's HUD by a hand or two
+            # at startup, and the delay is otherwise invisible.
+            log.warning(
+                "FF import: hand %s (site id %s) is not in the log window map, so which window "
+                "it was played on is unknown; skipping it rather than keying a HUD on the bare "
+                "pool name %r. The next hand on that window carries the mapping.",
+                hand_id,
+                site_hand_no,
+                info.table_name,
+            )
+            return None
+
+        log.warning(
+            "FF import: hand %s (site id %s) -> window %s, table %r",
+            hand_id,
+            site_hand_no,
+            table_no,
+            f"{info.table_name} {table_no}",
+        )
+        return info._replace(table_name=f"{info.table_name} {table_no}")
+
+    def _hud_is_fast_fold(self, hud: Hud.Hud, temp_key: str = "") -> bool:
+        """Whether this table plays the Fast-Fold format.
+
+        Checked in order of reliability: the imported hand's game type, a pool
+        seen in the Winamax log, then the window title. The title only helps on
+        sites that name the format in it -- Winamax Escape tables do not.
+        """
+        if temp_key and temp_key in self._fast_fold_tables:
+            return True
+        # Explicit True only: a stand-in object answers every attribute, and
+        # "probably fast-fold" would quietly switch off the ordinary refresh.
+        if getattr(hud, "is_fast_fold", False) is True:
+            return True
+        # Only real strings: the title match is a regex, and a stand-in object
+        # hands back something that is neither a name nor empty.
+        table_name = getattr(hud, "table_name", None)
+        game_type = getattr(hud, "game_type", None)
+        return is_fast_fold_table(
+            table_name if isinstance(table_name, str) and table_name else temp_key,
+            game_type=game_type if isinstance(game_type, str) else "",
+        )
+
+    def _ensure_fast_fold_hud(self, update: Any) -> tuple[str, Hud.Hud] | None:
+        """Create the HUD for a Fast-Fold window the log has just reported.
+
+        Display is driven by the log, which names the window the instant a hand
+        starts. Hand histories cannot do this job: they arrive seconds to
+        minutes later, every window on a pool writes under the same table name,
+        and at startup a backlog of already-finished hands would each claim a
+        window at random. They are left to do what only they can -- bring the
+        statistics.
+
+        The window describes itself ("ESCAPE - 0,01-0,02 EUR - Pot Limit
+        Omaha"), which is where the game comes from; everything else is the
+        pool's own shape.
+        """
+        reader = getattr(self, "winamax_ax_seats", None)
+        if reader is None:
+            return None
+
+        window = reader.find_table_window(update.table_no)
+        if window is None:
+            return None
+        temp_key = window.table_name
+        if temp_key in self.hud_dict:
+            return temp_key, self.hud_dict[temp_key]
+
+        poker_game = window.poker_game
+        if not poker_game:
+            self._ff_trace(
+                update.hand_id,
+                "create-skipped",
+                f"{window.title!r} does not say what is being played: {window.description!r}",
+            )
+            return None
+
+        info = TableInfo(
+            table_name=temp_key,
+            max_seats=self.FAST_FOLD_MAX_SEATS,
+            poker_game=poker_game,
+            game_type="ring",
+            fast=True,
+            site_id=self._winamax_site_id,
+            site_name="Winamax",
+            num_seats=self.FAST_FOLD_MAX_SEATS,
+        )
+        # A loading HUD reads nothing from the database, but it does take the
+        # hole cards from the prepared hand; there is no hand here, so stand one
+        # in rather than sending it to look for one.
+        synthetic_hand = f"live:{update.hand_id}"
+        self._prepared_hands[synthetic_hand] = HudPreparedHand(hand_id=synthetic_hand)
+
+        self._fast_fold_tables.add(temp_key)
+        # A full HUD, not the loading placeholder: that one has no aux windows,
+        # so it can only ever show "Loading HUD..." until an import replaces it.
+        # The seats arrive from the window moments later.
+        self._create_new_hud(
+            synthetic_hand,
+            temp_key,
+            info,
+            self._winamax_site_id,
+            self.FAST_FOLD_MAX_SEATS,
+            "Winamax",
+            stats={},
+        )
+        hud = self.hud_dict.get(temp_key)
+        if hud is None:
+            self._ff_trace(update.hand_id, "create-failed", f"table={temp_key} window={window.title!r}")
+            return None
+
+        hud.is_fast_fold = True
+        self._ff_trace(
+            update.hand_id,
+            "hud-created",
+            f"table={temp_key} window={window.title!r} game={poker_game} (from the log, no import needed)",
+        )
+        return temp_key, hud
+
+    def _find_fast_fold_hud(self, update: Any) -> tuple[str, Hud.Hud] | None:
+        """Match a log pool to an open Winamax HUD.
+
+        The log is what identifies a table as Fast-Fold: pools are named ``gf.``
+        ("go fast"), which covers Escape and HOLD-UP too. The window title cannot
+        be used for this -- an Escape table is titled "Winamax Casablanca 3",
+        carrying only the display name and the client's table index, with no hint
+        of the format.
+
+        That trailing index is what ties a window to a ``[table] N`` line, so it
+        is also what pairs a pool with a HUD when several tables are open.
+        """
+        if not update.pool.startswith(FAST_FOLD_POOL_PREFIX):
+            return None
+
+        candidates: list[tuple[str, Hud.Hud]] = [
+            (temp_key, hud)
+            for temp_key, hud in self.hud_dict.items()
+            if str(getattr(hud, "site", "")).lower() == "winamax"
+        ]
+        if not candidates:
+            return self._ensure_fast_fold_hud(update)
+
+        chosen: tuple[str, Hud.Hud] | None = None
+        indexed = False
+        for temp_key, hud in candidates:
+            title = getattr(getattr(hud, "table", None), "title", "") or ""
+            m = re.search(r"(\d+)\s*$", title)
+            if not m:
+                continue
+            indexed = True
+            if m.group(1) == str(update.table_no):
+                chosen = (temp_key, hud)
+                break
+
+        # Falling back to "the only table open" is right only when no window
+        # title carried an index to match on. Once they do, a pool that matches
+        # none of them belongs to a window whose HUD does not exist yet -- taking
+        # somebody else's is how the wrong table's players end up on screen.
+        if chosen is None and not indexed and len(candidates) == 1:
+            chosen = candidates[0]
+
+        if chosen is None:
+            remembered = self._winamax_pool_huds.get(update.pool)
+            chosen = next(((k, h) for k, h in candidates if k == remembered), None)
+
+        if chosen is None:
+            # No HUD for this window yet: build one from the window itself
+            # rather than waiting for one of its hands to be imported.
+            return self._ensure_fast_fold_hud(update)
+
+        temp_key, hud = chosen
+
+        # Every Escape window on a pool is named after the pool ("Casablanca"), so
+        # hands from all of them import under one table name and share a single
+        # HUD -- fpdb has no window-level identity to tell them apart. Feeding
+        # that one HUD from several pools just makes it flip between tables, so
+        # bind it to the first pool and leave the rest alone: one correct table
+        # beats two wrong ones.
+        bound = self._winamax_pool_huds.get(update.pool)
+        if bound is None and temp_key in self._winamax_pool_huds.values():
+            if update.pool not in self._unpaired_pools:
+                self._unpaired_pools.add(update.pool)
+                log.warning(
+                    "Winamax pool %s (table %s) shares table name %r with a pool already "
+                    "driving that HUD; its seats will not be shown. Multiple Escape tables "
+                    "on one pool need per-window HUDs.",
+                    update.pool,
+                    update.table_no,
+                    temp_key,
+                )
+            return None
+
+        self._winamax_pool_huds[update.pool] = temp_key
+        self._fast_fold_tables.add(temp_key)
+        # The pool name is the authority, so record it on the HUD: the background
+        # import path needs to know this table is Fast-Fold, and the hand history
+        # it works from arrives far too late to decide it.
+        hud.is_fast_fold = True
+        return temp_key, hud
 
     def _handle_table_status(self, hud: Hud.Hud) -> None:
         """Handle status changes for a single table."""
@@ -1265,48 +1856,10 @@ class HudMain(QObject):
             self.idle_update(
                 new_hand_id,
                 table_name,
+                config,
+                cards=cards,
+                hand_instance=hand_instance,
             )
-
-    def update_fast_fold_seats(
-        self,
-        table_name: str,
-        seat_player_map: dict[int, str],
-        game_type: str = "ring",
-        pool_id: str = "",
-    ) -> bool:
-        """Update live HUD overlays for a Fast-Fold / Escape table with new seat assignments immediately."""
-        import re
-
-        from fpdb_3_legacy.fast_fold_engine import FastFoldEngine, is_fast_fold_table
-
-        log.info("HUD_main.update_fast_fold_seats: table=%s, pool=%s, seats=%s", table_name, pool_id, seat_player_map)
-        target_huds = []
-        for key, hud in self.hud_dict.items():
-            hud_title = getattr(hud, "title", "") or getattr(hud, "table_name", "") or key
-            if table_name in key or table_name in hud_title or is_fast_fold_table(hud_title):
-                target_huds.append(hud)
-
-        if not target_huds:
-            return False
-
-        target_hud = target_huds[0]
-        if pool_id and len(target_huds) > 1:
-            m = re.search(r"t(\d+)$|(\d+)\.\d+$|\.(\d+)$", pool_id)
-            if m:
-                idx = int(m.group(1) or m.group(2) or m.group(3)) % len(target_huds)
-                target_hud = target_huds[idx]
-
-        target_hud.fast_fold_seats = seat_player_map
-        engine = FastFoldEngine(config=self.config, db_connection=self.db_connection)
-        success = engine.update_hud_seats(target_hud, seat_player_map, game_type=game_type)
-
-        for aw in getattr(target_hud, "aux_windows", []):
-            with contextlib.suppress(Exception):
-                aw.update_data(None, self.db_connection)
-                if hasattr(aw, "update_gui"):
-                    aw.update_gui(None)
-
-        return success
 
     def _initialize_hero_data(self) -> None:
         """Initialize hero data from the configuration."""
@@ -1517,9 +2070,7 @@ class HudMain(QObject):
             values.get("screen_name") == self.hero.get(site_id)
             for values in stat_dict.values()
         ):
-            from fpdb_3_legacy.fast_fold_engine import is_fast_fold_table
-
-            if not is_fast_fold_table(getattr(hud, "title", "")):
+            if not self._hud_is_fast_fold(hud, temp_key):
                 log.warning(
                     "Removing loading HUD for hand %s table=%s: hero %r is not seated",
                     new_hand_id,
@@ -1535,34 +2086,31 @@ class HudMain(QObject):
                 merged = self.stats_persistence.merge_stats(cached_stats, {"stat_dict": stat_dict})
                 stat_dict = merged.get("stat_dict", stat_dict)
 
-        if is_fast_fold_table(getattr(hud, "title", "")) and getattr(hud, "fast_fold_seats", None):
-            from fpdb_3_legacy.fast_fold_engine import FastFoldEngine
+        # On a Fast-Fold table the hand being imported finished seconds ago and
+        # the hero has already been moved on. Its players are history, so the
+        # live path owns this overlay outright -- including when it holds
+        # nobody. Falling back to the imported hand when the live map is empty
+        # is what put a finished table's players back on screen seconds after
+        # the overlay had been cleared, and left them there once the hero sat
+        # out and no further hand came to clear them again.
+        if self._hud_is_fast_fold(hud, temp_key):
+            stat_dict = getattr(hud, "stat_dict", None) or {}
+            seat_players = getattr(hud, "fast_fold_seat_players", None) or {}
+        else:
+            self._merge_positions(stat_dict, new_hand_id)
+            seat_players = self._seat_players(new_hand_id)
 
-            engine = FastFoldEngine(config=self.config, db_connection=self.db_connection)
-            stat_dict = engine.get_player_stats_for_seat_map(
-                hud.fast_fold_seats,
-                game_type=game_type,
-                db_conn=self.db_connection,
-            )
-
-        self._merge_positions(stat_dict, new_hand_id)
         try:
             hud.stat_dict = stat_dict
         except KeyError:
             log.exception("hud_dict[%s] was not found", temp_key)
             return False
 
-        if is_fast_fold_table(getattr(hud, "title", "")) and getattr(hud, "fast_fold_seat_players", None):
-            hud.seat_players = hud.fast_fold_seat_players
-        else:
-            hud.seat_players = self._seat_players(new_hand_id)
+        hud.seat_players = seat_players
         self._set_table_stats(hud, new_hand_id)
         hud.cards = self.get_cards(new_hand_id, hud.poker_game)
         for aw in hud.aux_windows:
             aw.update_data(new_hand_id, self.db_connection)
-            if hasattr(aw, "update_gui"):
-                with contextlib.suppress(Exception):
-                    aw.update_gui(None)
         prepared = self._prepared_hands.get(str(new_hand_id))
         self.update_HUD(
             new_hand_id,
@@ -1812,6 +2360,16 @@ class HudMain(QObject):
             if table_name in updated_tables:
                 continue
 
+            if self._hud_is_fast_fold(self.hud_dict[table_name], table_name):
+                # This refresh replaces stat_dict with the players of the last
+                # hand imported for the table. On a Fast-Fold table those left
+                # long ago, and the seats still point at the live players -- so
+                # every block would look up a player id the statistics no longer
+                # hold, and show a nameless column of NA. Its statistics come
+                # from the live path instead.
+                log.debug("Skipping global HUD refresh for Fast-Fold table %s", table_name)
+                continue
+
             last_hand_id = self._last_processed_hands.get(table_name)
             if last_hand_id is None:
                 log.debug("Skipping global HUD refresh for %s: no last hand", table_name)
@@ -1947,8 +2505,19 @@ class HudMain(QObject):
         hud_site_name: str | None = None,
         *,
         loading: bool = False,
+        stats: dict | None = None,
     ) -> None:
-        """Create a new HUD for a table."""
+        """Create a new HUD for a table.
+
+        ``loading`` builds the placeholder shown while a table's first hand is
+        still being read: it has no aux windows, so it cannot display anything
+        until a later hand replaces it.
+
+        ``stats`` supplies the statistics directly instead of reading them from
+        the database, which is what lets a table be created from the client log
+        with no hand behind it -- a full HUD, aux windows and all, on a thread
+        that has no database connection.
+        """
         info = TableInfo.coerce(table_info)
         table_name = info.table_name
         max_seats = info.max_seats
@@ -1971,7 +2540,12 @@ class HudMain(QObject):
             return
 
         log.debug("create new hud for hand %s", new_hand_id)
-        if loading:
+        # Everything below that reads the database is skipped both for the
+        # placeholder and when the caller brought its own statistics.
+        from_database = stats is None and not loading
+        if stats is not None:
+            stat_dict = stats
+        elif loading:
             stat_dict = {}
         else:
             self.db_connection.init_hud_stat_vars(self.hud_params["hud_days"], self.hud_params["h_hud_days"])
@@ -1986,16 +2560,16 @@ class HudMain(QObject):
             log.debug("got stats for hand %s", new_hand_id)
 
         # Try to load cached stats to preserve data across restarts
-        cached_stats = None if loading else self.stats_persistence.load_hud_stats(temp_key)
+        cached_stats = self.stats_persistence.load_hud_stats(temp_key) if from_database else None
         if cached_stats:
             log.info(f"Found cached HUD stats for table {temp_key}, merging with current data")
             merged_data = self.stats_persistence.merge_stats(cached_stats, {"stat_dict": stat_dict})
             stat_dict = merged_data.get("stat_dict", stat_dict)
             log.debug("Merged cached stats with fresh database stats")
 
-        if not loading:
+        if from_database:
             self._merge_positions(stat_dict, new_hand_id)
-        if not loading and not any(stat_dict[key]["screen_name"] == self.hero[site_id] for key in stat_dict):
+        if from_database and not any(stat_dict[key]["screen_name"] == self.hero[site_id] for key in stat_dict):
             log.warning(
                 "HUD not created for hand %s table=%s: hero %r (site_id=%s) not among players %s",
                 new_hand_id,
@@ -2143,20 +2717,42 @@ class HudMain(QObject):
         aux_disabled_sites = [
             site for site in enabled_sites if not self.config.get_site_parameters(site)["aux_enabled"]
         ]
-        if info.fast or hud_site_name in aux_disabled_sites or hud_site_name not in enabled_sites:
+        # Fast-Fold tables were skipped outright because a hand history names
+        # opponents the hero has already left behind by the time it is imported.
+        # Winamax is now covered by the live log reader, which reports the real
+        # composition within milliseconds, so a HUD there is worth creating.
+        # Sites with no such source would still only show stale opponents.
+        fast_unsupported = info.fast and not self._has_live_seat_source(site_name)
+        if fast_unsupported or hud_site_name in aux_disabled_sites or hud_site_name not in enabled_sites:
             log.warning(
-                "HUD creation skipped for hand %s table=%s db_site=%s hud_site=%s: fast=%s, aux_disabled=%s, site_enabled=%s",
+                "HUD creation skipped for hand %s table=%s db_site=%s hud_site=%s: "
+                "fast=%s (live seat source=%s), aux_disabled=%s, site_enabled=%s",
                 new_hand_id,
                 table_name,
                 site_name,
                 hud_site_name,
                 info.fast,
+                self._has_live_seat_source(site_name),
                 hud_site_name in aux_disabled_sites,
                 hud_site_name in enabled_sites,
             )
             return None
 
+        if str(site_name).lower() == "winamax" and info.site_id is not None:
+            self._winamax_site_id = info.site_id
+
+        qualified = self._qualify_fast_fold_table(info, new_hand_id)
+        if qualified is None:
+            return None
+        info = qualified
+        table_name = info.table_name
+        table_info = info
+
         temp_key = self._get_temp_key(game_type, tour_number, tab_number, table_name)
+        if info.fast:
+            # Remembered so the background import path keeps the live composition
+            # from the very first hand, before any log update has been matched.
+            self._fast_fold_tables.add(temp_key)
         log.debug("Generated temp_key: %s for table: %s", temp_key, table_name)
 
         # Idempotency: skip a hand already processed for this table (duplicate
