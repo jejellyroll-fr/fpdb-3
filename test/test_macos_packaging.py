@@ -171,6 +171,12 @@ def test_ci_smokes_precede_final_pyoxidizer_signature() -> None:
     assert "Contents/MacOS/fpdb" not in assemble[final_sign:]
 
 
+def test_pyoxidizer_runtime_cannot_mutate_a_signed_bundle_with_bytecode() -> None:
+    config = (Path(__file__).resolve().parent.parent / "pyoxidizer.bzl").read_text()
+
+    assert '"sys.dont_write_bytecode = True"' in config
+
+
 def test_bundle_declares_the_launcher_and_icon(install_dir: Path, tmp_path: Path, monkeypatch) -> None:
     monkeypatch.setattr(package_pyoxidizer_macos, "sign", lambda paths, **kwargs: None)
     monkeypatch.setattr(package_pyoxidizer_macos, "sign_bundle", lambda app, **kwargs: None)

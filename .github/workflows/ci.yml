@@ -775,8 +775,8 @@ jobs:
         if: runner.os == 'macOS'
         shell: bash
         env:
-          # The filesystem importer otherwise fills the unsigned smoke bundle
-          # with thousands of disposable .pyc files before its final seal.
+          # Defense in depth; pyoxidizer.bzl also sets dont_write_bytecode
+          # because the embedded interpreter may ignore this environment flag.
           PYTHONDONTWRITEBYTECODE: "1"
         run: |
           install_dir="build/${{ matrix.target }}/release/install"
