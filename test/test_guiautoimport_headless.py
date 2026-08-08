@@ -213,7 +213,9 @@ def test_launch_hud_pyinstaller_macos_reuses_main_app_identity(monkeypatch, tmp_
 
     command = mock_popen.call_args.args[0]
     assert command == [str(fpdb_executable), "--hud", "--config", "bundled.xml"]
-    assert mock_popen.call_args.kwargs["env"]["PYINSTALLER_RESET_ENVIRONMENT"] == "1"
+    child_env = mock_popen.call_args.kwargs["env"]
+    assert child_env["PYINSTALLER_RESET_ENVIRONMENT"] == "1"
+    assert child_env["FPDB_REQUEST_MACOS_PERMISSIONS"] == "1"
 
 
 def test_launch_hud_pyoxidizer_reuses_main_executable(monkeypatch, tmp_path):
@@ -232,7 +234,7 @@ def test_launch_hud_pyoxidizer_reuses_main_executable(monkeypatch, tmp_path):
 
     command = mock_popen.call_args.args[0]
     assert command == [str(fpdb_executable), "--hud", "--config", "bundled.xml"]
-    assert "env" not in mock_popen.call_args.kwargs
+    assert mock_popen.call_args.kwargs["env"]["FPDB_REQUEST_MACOS_PERMISSIONS"] == "1"
 
 
 def test_check_hud_process_started_clears_terminated_process():

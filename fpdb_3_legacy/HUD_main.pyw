@@ -1465,10 +1465,20 @@ class HudMain(QObject):
         """
         reader = getattr(self, "winamax_ax_seats", None)
         if reader is None:
+            self._ff_trace(
+                update.hand_id,
+                "create-deferred",
+                "macOS accessibility reader unavailable; waiting for an imported hand",
+            )
             return None
 
         window = reader.find_table_window(update.table_no)
         if window is None:
+            self._ff_trace(
+                update.hand_id,
+                "create-deferred",
+                f"Winamax [table] {update.table_no} is not accessible; waiting for an imported hand",
+            )
             return None
         temp_key = window.table_name
         if temp_key in self.hud_dict:
@@ -2067,8 +2077,7 @@ class HudMain(QObject):
         log.debug("got stats for hand %s", new_hand_id)
 
         if was_loading and not any(
-            values.get("screen_name") == self.hero.get(site_id)
-            for values in stat_dict.values()
+            values.get("screen_name") == self.hero.get(site_id) for values in stat_dict.values()
         ):
             if not self._hud_is_fast_fold(hud, temp_key):
                 log.warning(
