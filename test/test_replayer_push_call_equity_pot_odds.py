@@ -10,7 +10,7 @@ from fpdb_3_legacy.GuiReplayer import GuiReplayer, ReplayPlayer
 
 
 def test_hero_decision_metrics_pot_odds_and_equities(monkeypatch) -> None:
-    replayer = GuiReplayer.__new__(GuiReplayer)
+    replayer = cast(Any, GuiReplayer).__new__(GuiReplayer)  # pylint: disable=no-value-for-parameter
     replayer.Heroes = "Hero"
     replayer.currency_code = "USD"
 
@@ -44,7 +44,7 @@ def test_hero_decision_metrics_pot_odds_and_equities(monkeypatch) -> None:
 
 
 def test_hero_odds_summary_formatted_string(monkeypatch) -> None:
-    replayer = GuiReplayer.__new__(GuiReplayer)
+    replayer = cast(Any, GuiReplayer).__new__(GuiReplayer)  # pylint: disable=no-value-for-parameter
     replayer.Heroes = "Hero"
     replayer.currency_code = "USD"
     replayer.replay_model = cast(Any, SimpleNamespace(hand=SimpleNamespace(gametype={"category": "holdem"})))
@@ -73,7 +73,7 @@ def test_hero_odds_summary_formatted_string(monkeypatch) -> None:
 
 
 def test_hero_decision_metrics_supports_stud_and_draw() -> None:
-    replayer = GuiReplayer.__new__(GuiReplayer)
+    replayer = cast(Any, GuiReplayer).__new__(GuiReplayer)  # pylint: disable=no-value-for-parameter
     replayer.Heroes = "Hero"
     replayer.currency_code = "USD"
     # Stud/Draw gametypes: studhi, 7stud8, razz, 27_3draw, badugi
@@ -97,4 +97,3 @@ def test_hero_decision_metrics_supports_stud_and_draw() -> None:
     assert metrics["call_amount"] == Decimal(20)
     assert metrics["pot_odds_pct"] == Decimal(25)  # 20 / (60 + 20) = 25%
     assert metrics["pot_odds_ratio"] == Decimal(3)  # 60 / 20 = 3:1
-
