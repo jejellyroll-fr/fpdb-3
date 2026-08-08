@@ -1,5 +1,9 @@
 """Regression tests for blind-level aggregated current-hand HUD stats."""
 
+from types import SimpleNamespace
+from unittest.mock import MagicMock
+
+from fpdb_3_legacy.database_hud_stats import DatabaseHudStatsMixin
 from fpdb_3_legacy.SQL import Sql
 from fpdb_3_legacy.sql_queries_hud_aggregated_stats import hud_aggregated_stats_queries
 
@@ -35,10 +39,6 @@ def test_hud_aggregated_stats_keeps_hero_and_opponent_scopes() -> None:
 
 def _rewritten_for_players(backend: str, placeholder: str, player_count: int = 3) -> str:
     """The aggregate re-keyed on a player set, as get_stats_for_players runs it."""
-    from unittest.mock import MagicMock
-
-    from fpdb_3_legacy.database_hud_stats import DatabaseHudStatsMixin
-
     mixin = DatabaseHudStatsMixin()
     mixin.sql = MagicMock()
     mixin.sql.query = {"placeholder": placeholder}
@@ -69,3 +69,69 @@ def test_live_player_rewrite_drops_every_hand_dependency() -> None:
     assert "WHERE hc.playerId IN (?, ?, ?)" in sql_text
     # 3 player ids + the 14 range/stake parameters the caller binds.
     assert sql_text.count("?") == 17
+
+
+def _player_stats_mixin() -> tuple[DatabaseHudStatsMixin, MagicMock, MagicMock]:
+    mixin = DatabaseHudStatsMixin()
+    cursor = MagicMock()
+    connection = MagicMock()
+    connection.cursor.return_value = cursor
+    mixin.connection = connection
+    mixin.sql = SimpleNamespace(query=Sql(db_server="sqlite").query)
+    mixin._hud_chipev_clause = ""
+    mixin._merge_aof_profile_stats = MagicMock()
+    return mixin, cursor, mixin._merge_aof_profile_stats
+
+
+def test_get_stats_for_players_maps_rows_and_binds_ranges() -> None:
+    """The live path returns the same row shape and filters as the hand path."""
+    mixin, cursor, merge_profiles = _player_stats_mixin()
+    cursor.description = [("player_id",), ("screen_name",), ("N",)]
+    cursor.fetchall.return_value = [(11, "Alice", 23), (12, "Bob", 7)]
+
+    result = mixin.get_stats_for_players([11, "12"], gametype_id=7, hero_id=11, num_seats=5)
+
+    assert result == {
+        11: {"player_id": 11, "screen_name": "Alice", "n": 23},
+        12: {"player_id": 12, "screen_name": "Bob", "n": 7},
+    }
+    sql_text, subs = cursor.execute.call_args.args
+    assert "WHERE hc.playerId IN (?, ?)" in sql_text
+    assert "HandsPlayers" not in sql_text
+    assert subs == (
+        11,
+        12,
+        11,
+        "0000000",
+        1000,
+        1000,
+        7,
+        0,
+        10,
+        11,
+        "0000000",
+        1000,
+        1000,
+        7,
+        0,
+        10,
+    )
+    merge_profiles.assert_called_once_with(result, None)
+
+
+def test_get_stats_for_players_short_circuits_without_players() -> None:
+    mixin, cursor, merge_profiles = _player_stats_mixin()
+
+    assert mixin.get_stats_for_players([], gametype_id=7) == {}
+    cursor.execute.assert_not_called()
+    merge_profiles.assert_not_called()
+
+
+def test_get_stats_for_players_rejects_query_drift() -> None:
+    """A changed aggregate must fail closed instead of executing partial SQL."""
+    mixin, cursor, merge_profiles = _player_stats_mixin()
+    mixin.sql.query["get_stats_from_hand_aggregated"] = "SELECT 1"
+
+    assert mixin.get_stats_for_players([11], gametype_id=7) == {}
+    cursor.execute.assert_not_called()
+    merge_profiles.assert_not_called()
