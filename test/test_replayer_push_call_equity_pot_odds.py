@@ -48,6 +48,10 @@ def test_hero_odds_summary_formatted_string(monkeypatch) -> None:
     replayer.Heroes = "Hero"
     replayer.currency_code = "USD"
     replayer.replay_model = cast(Any, SimpleNamespace(hand=SimpleNamespace(gametype={"category": "holdem"})))
+    replayer.states = [
+        SimpleNamespace(players={}),
+        SimpleNamespace(players={1: SimpleNamespace(name="Hero", justacted=True, action="calls")}),
+    ]
 
     frame = cast(Any, SimpleNamespace(
         players=[
@@ -70,6 +74,9 @@ def test_hero_odds_summary_formatted_string(monkeypatch) -> None:
     assert "Call Eq 60.0%" in summary
     assert "edge +35.0 pts" in summary
     assert "Push Eq 60.0%" in summary
+
+    replayer.states[1].players[1].name = "Villain"
+    assert replayer._hero_odds_summary(frame, 0) == ""
 
 
 def test_hero_decision_metrics_supports_stud_and_draw() -> None:
