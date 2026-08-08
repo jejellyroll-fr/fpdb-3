@@ -541,6 +541,7 @@ class GuiAutoImport(QWidget):
         """Launch SwC native TLS capture and start live raw tailing thread."""
         try:
             from fpdb_3_legacy.swc_native_capture import DEFAULT_ARCHIVE, build_tap
+
             build_tap(check_executable=False)
             if self.swc_tailing_thread is None or not self.swc_tailing_thread.isRunning():
                 self.swc_tailing_thread = SwCNativeTailingThread(DEFAULT_ARCHIVE, parent=self)
@@ -718,11 +719,14 @@ class GuiAutoImport(QWidget):
         # 1) build command line
         # ------------------------------------------------------------------
         command: str | list[str]
-        if getattr(sys, "frozen", False) == "pyoxidizer":
+        frozen = getattr(sys, "frozen", False)
+        if frozen == "pyoxidizer" or (frozen and sys.platform == "darwin"):
+            # On macOS the HUD must retain fpdb.app's code identity so its
+            # Screen Recording and Accessibility grants remain valid.
             command = [sys.executable, "--hud", *self.settings["cl_options"].split()]
             bs = 1
 
-        elif getattr(sys, "frozen", False):
+        elif frozen:
             executable = "HUD_main.exe" if os.name == "nt" else "HUD_main"
             command = os.path.join(self._hud_base_path(), executable)
             if not os.path.isfile(command):

@@ -2359,6 +2359,84 @@ def test_no_hud_is_created_when_the_window_does_not_say_what_is_played(hud_main)
     create.assert_not_called()
 
 
+def test_a_hud_is_created_from_the_title_alone_once_the_pool_game_is_known(hud_main) -> None:
+    """A packaged build reads no window header, so the game comes from an import.
+
+    Without this the Fast-Fold HUD waits for the hand history on every hand,
+    which is the multi-second delay seen in the PyInstaller and PyOxidizer
+    bundles but never in a source run.
+    """
+    from fpdb_3_legacy.winamax_pool_games import WinamaxPoolGames
+
+    hud_main.winamax_pool_games = WinamaxPoolGames(None)
+    hud_main.winamax_pool_games.remember("Casablanca", "omahahi")
+    # System Events gives the title but cannot read the client's own header.
+    hud_main.winamax_ax_seats = SimpleNamespace(find_table_window=lambda table_no: _ax_window(description=""))
+    hud_main.hud_dict = {}
+    created = {}
+
+    def fake_create(hand_id, temp_key, info, site_id, num_seats, site, *, loading=False, stats=None):
+        created.update(info=info)
+        hud_main.hud_dict[temp_key] = SimpleNamespace(site="Winamax", table=SimpleNamespace(title=info.table_name))
+
+    try:
+        with patch.object(hud_main, "_create_new_hud", side_effect=fake_create):
+            found = hud_main._find_fast_fold_hud(_log_update(table_no="6"))
+
+        assert found is not None
+        assert found[0] == "Casablanca 6"
+        assert created["info"].poker_game == "omahahi"
+    finally:
+        hud_main.hud_dict = {}
+
+
+def test_the_window_header_wins_over_what_was_remembered(hud_main) -> None:
+    """A pool that changed game must not be built from a stale memory."""
+    from fpdb_3_legacy.winamax_pool_games import WinamaxPoolGames
+
+    hud_main.winamax_pool_games = WinamaxPoolGames(None)
+    hud_main.winamax_pool_games.remember("Casablanca", "holdem")
+    hud_main.winamax_ax_seats = SimpleNamespace(find_table_window=lambda table_no: _ax_window())
+    hud_main.hud_dict = {}
+    created = {}
+
+    def fake_create(hand_id, temp_key, info, site_id, num_seats, site, *, loading=False, stats=None):
+        created.update(info=info)
+        hud_main.hud_dict[temp_key] = SimpleNamespace(site="Winamax", table=SimpleNamespace(title=info.table_name))
+
+    try:
+        with patch.object(hud_main, "_create_new_hud", side_effect=fake_create):
+            hud_main._find_fast_fold_hud(_log_update(table_no="6"))
+        assert created["info"].poker_game == "omahahi"
+    finally:
+        hud_main.hud_dict = {}
+
+
+def test_an_imported_hand_records_what_its_pool_deals(hud_main) -> None:
+    """That record is what lets every later hand skip the wait."""
+    from fpdb_3_legacy.table_info import TableInfo
+    from fpdb_3_legacy.winamax_pool_games import WinamaxPoolGames
+
+    hud_main.winamax_pool_games = WinamaxPoolGames(None)
+    hud_main._prepared_hands = {"42": SimpleNamespace(site_hand_no="22753788-426918-1786200400")}
+    hud_main.winamax_log_reader = SimpleNamespace(table_no_for_hand=lambda _hand: "4", is_tailing=True)
+    info = TableInfo(
+        table_name="Colorado",
+        max_seats=6,
+        poker_game="omahahi",
+        game_type="ring",
+        fast=True,
+        site_id=15,
+        site_name="Winamax",
+        num_seats=6,
+    )
+
+    qualified = hud_main._qualify_fast_fold_table(info, "42")
+
+    assert qualified.table_name == "Colorado 4"
+    assert hud_main.winamax_pool_games.get("Colorado 2") == "omahahi"
+
+
 def test_no_hud_is_created_when_the_window_is_gone(hud_main) -> None:
     hud_main.winamax_ax_seats = SimpleNamespace(find_table_window=lambda table_no: None)
     hud_main.hud_dict = {}
