@@ -18,7 +18,7 @@ def test_re_sign_bundle_returns_false_for_non_existent_path(tmp_path: Path) -> N
     assert not grant_macos_permissions.re_sign_bundle(non_existent)
 
 
-def test_setup_app_bundle_invokes_quarantine_and_sign(tmp_path: Path, monkeypatch) -> None:
+def test_setup_app_bundle_does_not_destroy_a_stable_signature_by_default(tmp_path: Path, monkeypatch) -> None:
     app_path = tmp_path / "fpdb.app"
     app_path.mkdir()
 
@@ -27,7 +27,7 @@ def test_setup_app_bundle_invokes_quarantine_and_sign(tmp_path: Path, monkeypatc
 
     results = grant_macos_permissions.setup_app_bundle(app_path)
     assert results["quarantine_cleared"] is True
-    assert results["signed"] is True
+    assert results["signed"] is False
 
 
 def test_check_and_print_permission_status(monkeypatch, capsys) -> None:
@@ -53,7 +53,7 @@ def test_setup_app_bundle_flags_select_one_step(tmp_path: Path, monkeypatch) -> 
     only_clear = grant_macos_permissions.setup_app_bundle(app_path, sign=False)
     assert only_clear == {"quarantine_cleared": True, "signed": False}
 
-    only_sign = grant_macos_permissions.setup_app_bundle(app_path, clear=False)
+    only_sign = grant_macos_permissions.setup_app_bundle(app_path, clear=False, sign=True)
     assert only_sign == {"quarantine_cleared": False, "signed": True}
 
 

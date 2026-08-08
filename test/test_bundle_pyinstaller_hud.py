@@ -45,24 +45,24 @@ def test_bundles_macos_hud_inside_main_app(tmp_path: Path) -> None:
     (hud_contents / "MacOS").mkdir(parents=True)
     (hud_contents / "Frameworks" / "hud_only").mkdir(parents=True)
     (hud_contents / "Resources" / "hud_data").mkdir(parents=True)
+    (fpdb_contents / "MacOS" / "fpdb").write_text("main executable", encoding="utf-8")
     (hud_contents / "MacOS" / "HUD_main").write_text("executable", encoding="utf-8")
     (hud_contents / "Frameworks" / "hud_only" / "module.dylib").write_text("dependency", encoding="utf-8")
     (hud_contents / "Resources" / "hud_data" / "config.xml").write_text("data", encoding="utf-8")
 
     bundled = bundle_pyinstaller_hud(dist)
 
-    assert bundled == fpdb_contents / "MacOS" / "HUD_main"
+    assert bundled == fpdb_contents / "MacOS" / "fpdb"
     assert bundled.is_file()
-    assert os.access(bundled, os.X_OK)
     assert (fpdb_contents / "Frameworks" / "hud_only" / "module.dylib").is_file()
     assert (fpdb_contents / "Resources" / "hud_data" / "config.xml").is_file()
+    assert not (fpdb_contents / "MacOS" / "HUD_main").exists()
     assert not (dist / "HUD_main.app").exists()
 
 
 def test_info_plist_gains_the_privacy_descriptions(tmp_path: Path) -> None:
-    # macOS only remembers a granted permission when the bundle declares why it
-    # wants it and keeps a stable identifier, so these four keys are the whole
-    # point of the step.
+    # Usage descriptions make the native privacy prompts actionable; the code
+    # signature, tested separately, provides the stable TCC identity.
     info_plist = tmp_path / "Info.plist"
     with info_plist.open("wb") as handle:
         plistlib.dump({"CFBundleName": "fpdb", "CFBundleIdentifier": "com.example.fpdb"}, handle)
@@ -72,6 +72,8 @@ def test_info_plist_gains_the_privacy_descriptions(tmp_path: Path) -> None:
     with info_plist.open("rb") as handle:
         info = plistlib.load(handle)
     assert info["CFBundleIdentifier"] == "org.fpdb.fpdb3"
+    assert info["CFBundleShortVersionString"] != "0.0.0"
+    assert info["CFBundleVersion"] == info["CFBundleShortVersionString"]
     assert "AppleScript" in info["NSAppleEventsUsageDescription"]
     assert info["NSScreenCaptureUsageDescription"]
     assert info["NSAccessibilityUsageDescription"]
@@ -112,6 +114,7 @@ def test_runs_as_a_script_the_way_ci_invokes_it(tmp_path: Path) -> None:
     for directory in ("MacOS", "Frameworks", "Resources"):
         (fpdb_contents / directory).mkdir(parents=True)
     (hud_contents / "MacOS").mkdir(parents=True)
+    (fpdb_contents / "MacOS" / "fpdb").write_text("main executable", encoding="utf-8")
     (hud_contents / "MacOS" / "HUD_main").write_text("executable", encoding="utf-8")
     with (fpdb_contents / "Info.plist").open("wb") as handle:
         plistlib.dump({"CFBundleName": "fpdb"}, handle)

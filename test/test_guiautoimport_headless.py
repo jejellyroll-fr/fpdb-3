@@ -193,13 +193,8 @@ def test_launch_hud_uses_bundled_sibling_executable(monkeypatch, tmp_path, platf
     assert popen_kwargs["env"]["PYINSTALLER_RESET_ENVIRONMENT"] == "1"
 
 
-def test_launch_hud_pyinstaller_macos_uses_the_sibling_executable(monkeypatch, tmp_path):
-    """'fpdb --hud' has no HUD in it: only HUD_main's own archive is complete.
-
-    The fpdb executable is analysed from fpdb.pyw, which never imports the HUD's
-    backend, so running the HUD inside it died on startup with
-    ModuleNotFoundError (OSXTables, then fpdb.infrastructure).
-    """
+def test_launch_hud_pyinstaller_macos_reuses_the_main_executable(monkeypatch, tmp_path):
+    """The macOS HUD must retain the main bundle's privacy identity."""
     settings = _make_settings(MagicMock())
     settings["cl_options"] = "--config bundled.xml"
     config = _make_config()
@@ -209,10 +204,6 @@ def test_launch_hud_pyinstaller_macos_uses_the_sibling_executable(monkeypatch, t
     gui_mod = sys.modules["fpdb_3_legacy.GuiAutoImport"]
     fpdb_executable = tmp_path / "fpdb"
     fpdb_executable.touch()
-    # Chosen from os.name, not sys.platform, so follow the host: the Windows
-    # runner looks for HUD_main.exe even with sys.platform faked to darwin.
-    hud_executable = tmp_path / ("HUD_main.exe" if os.name == "nt" else "HUD_main")
-    hud_executable.touch()
     monkeypatch.setattr(gui_mod.sys, "frozen", True, raising=False)
     monkeypatch.setattr(gui_mod.sys, "executable", str(fpdb_executable))
     monkeypatch.setattr(gui_mod.sys, "platform", "darwin")
@@ -222,12 +213,9 @@ def test_launch_hud_pyinstaller_macos_uses_the_sibling_executable(monkeypatch, t
         gui._launch_hud()
 
     command = mock_popen.call_args.args[0]
-    assert command == [str(hud_executable), "--config", "bundled.xml"]
+    assert command == [str(fpdb_executable), "--hud", "--config", "bundled.xml"]
     child_env = mock_popen.call_args.kwargs["env"]
     assert child_env["PYINSTALLER_RESET_ENVIRONMENT"] == "1"
-    # Finding table windows no longer depends on macOS Accessibility, so the
-    # HUD must not push the user at System Settings on every launch.
-    assert "FPDB_REQUEST_MACOS_PERMISSIONS" not in child_env
 
 
 def test_launch_hud_pyoxidizer_reuses_main_executable(monkeypatch, tmp_path):

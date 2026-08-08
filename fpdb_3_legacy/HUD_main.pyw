@@ -774,10 +774,11 @@ class HudMain(QObject):
         """Diagnose macOS privacy permissions required for table detection.
 
         Screen Recording is needed for Quartz to expose window titles;
-        Accessibility/Automation is needed for the AppleScript fallback used by
-        Electron clients (e.g. Winamax). Logs a clear, actionable message for any
-        missing permission. Set ``FPDB_REQUEST_MACOS_PERMISSIONS=1`` to also
-        trigger the native prompts and open the relevant System Settings panes.
+        Accessibility is needed for Winamax seats and System Events GUI
+        scripting; Automation is a separate consent requested by the first
+        Apple Event. Frozen builds trigger the native Screen Recording and
+        Accessibility prompts automatically. Source installs can opt in with
+        ``FPDB_REQUEST_MACOS_PERMISSIONS=1``.
         """
         try:
             from fpdb.infrastructure.platform import permissions
@@ -793,7 +794,7 @@ class HudMain(QObject):
         for message in permissions.describe_missing(status):
             log.warning(message)
 
-        if os.getenv("FPDB_REQUEST_MACOS_PERMISSIONS") == "1":
+        if getattr(sys, "frozen", False) or os.getenv("FPDB_REQUEST_MACOS_PERMISSIONS") == "1":
             if not status.screen_recording:
                 log.info("Requesting Screen Recording permission (native prompt)...")
                 permissions.request_screen_recording_permission()

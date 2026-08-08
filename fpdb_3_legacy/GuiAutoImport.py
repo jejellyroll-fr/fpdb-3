@@ -37,6 +37,7 @@ from PySide6.QtWidgets import (
 from fpdb_3_legacy import Configuration, Importer
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.loggingFpdb import get_logger
+from fpdb_3_legacy.subprocess_launch import hud_main_command
 
 # Import for dynamic reloading configuration
 try:
@@ -720,19 +721,9 @@ class GuiAutoImport(QWidget):
         # ------------------------------------------------------------------
         command: str | list[str]
         frozen = getattr(sys, "frozen", False)
-        if frozen == "pyoxidizer":
-            # A single binary hosts both entry points; --hud selects HUD_main.
-            command = [sys.executable, "--hud", *self.settings["cl_options"].split()]
-            bs = 1
-
-        elif frozen:
-            executable = "HUD_main.exe" if os.name == "nt" else "HUD_main"
-            command = os.path.join(self._hud_base_path(), executable)
-            if not os.path.isfile(command):
-                msg = f"HUD_main not found at {command}"
-                raise FileNotFoundError(msg)
-            command = [command, *self.settings["cl_options"].split()]
-            bs = 0 if os.name == "nt" else 1
+        if frozen:
+            command = hud_main_command(*self.settings["cl_options"].split())
+            bs = 0 if os.name == "nt" and frozen != "pyoxidizer" else 1
 
         elif self.config.install_method == "exe":
             command = "HUD_main.exe"

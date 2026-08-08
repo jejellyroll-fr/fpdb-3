@@ -64,32 +64,42 @@ OSASCRIPT = "/usr/bin/osascript"
 
 AUTOMATION_REFUSED_MARKERS = (
     "-1743",  # not authorised to send Apple events
-    "-1712",  # the Automation prompt is up and unanswered, so the event timed out
     "Not authorized to send Apple events",
-    "AppleEvent timed out",
 )
 
-_automation_refused = False
-"""Whether System Events has already turned this process away.
+ACCESSIBILITY_REFUSED_MARKERS = (
+    # Do not match bare -1719: Apple also uses it for an invalid list index.
+    "not allowed assistive access",
+    "does not have access to assistive devices",
+)
+
+SYSTEM_EVENTS_TIMEOUT_MARKERS = ("-1712", "AppleEvent timed out")
+
+_system_events_blocked = False
+"""Whether System Events has already refused or timed out for this process.
 
 Reset by restarting, which is also what granting the permission requires.
 """
 
 
-def _report_automation_refused(detail: str) -> None:
+def _report_system_events_blocked(detail: str, reason: str) -> None:
     """Say once, at WARNING, that no table window can be read and why."""
-    global _automation_refused
-    if _automation_refused:
+    global _system_events_blocked
+    if _system_events_blocked:
         return
-    _automation_refused = True
+    _system_events_blocked = True
+    if reason == "Automation":
+        action = "Allow FPDB -> System Events in Privacy & Security > Automation"
+    elif reason == "Accessibility":
+        action = "Allow FPDB in Privacy & Security > Accessibility"
+    else:
+        action = "Check for a pending permission prompt and that System Events is responsive"
     log.warning(
-        "Fast HUD cannot see the Winamax table windows: this application is not allowed to "
-        "control 'System Events' (Automation). On macOS that is the only way to read an "
-        "Electron client's window title -- the accessibility API needs a grant macOS never "
-        "prompts for, and Quartz never exposes an Electron title at all. Allow it in System "
-        "Settings > Privacy & Security > Automation (FPDB -> System Events) and restart FPDB. "
-        "If FPDB is not listed there, run 'tccutil reset AppleEvents org.fpdb.fpdb3' so macOS "
-        "asks again. Until then the HUD only appears once a hand has been imported. Detail: %s",
+        "Fast HUD cannot see the Winamax table windows through System Events (%s). "
+        "%s, then restart FPDB. Screen Recording is the preferred path for window "
+        "titles; Accessibility is also required to read seats. Detail: %s",
+        reason,
+        action,
         detail,
     )
 
@@ -97,11 +107,9 @@ def _report_automation_refused(detail: str) -> None:
 def applescript_window_titles() -> list[str]:
     """Titles of the client's windows, read through System Events.
 
-    The direct accessibility API needs this process to hold *Accessibility*,
-    which macOS never prompts for: a packaged build is a new TCC client and
-    starts without it, so every AX call comes back empty. Going through System
-    Events instead needs only *Automation*, which macOS does prompt for and
-    which the rest of fpdb already relies on to find these same windows.
+    This is GUI scripting: FPDB needs Automation to control System Events and
+    Accessibility to inspect its process/window tree. Quartz is preferred when
+    Screen Recording exposes the real title and CGWindowID.
 
     Returns an empty list when the client is not running or the scan is
     refused; the caller then falls back to waiting for an imported hand. A
@@ -109,6 +117,8 @@ def applescript_window_titles() -> list[str]:
     open" and "this build will never see a table", and the two used to look
     identical in the log.
     """
+    if _system_events_blocked:
+        return []
     try:
         # Absolute path, fixed argv, no shell, and nothing interpolated into the script.
         result = subprocess.run(  # noqa: S603  # nosec B603
@@ -119,8 +129,10 @@ def applescript_window_titles() -> list[str]:
             check=False,
         )
     except subprocess.TimeoutExpired:
-        # The Automation prompt is on screen and nobody has answered it.
-        _report_automation_refused(f"osascript did not return within {APPLESCRIPT_TIMEOUT:.0f}s")
+        _report_system_events_blocked(
+            f"osascript did not return within {APPLESCRIPT_TIMEOUT:.0f}s",
+            "timeout",
+        )
         return []
     except OSError as exc:
         log.debug("Could not run %s: %s", OSASCRIPT, exc)
@@ -128,7 +140,11 @@ def applescript_window_titles() -> list[str]:
     if result.returncode != 0:
         stderr = result.stderr.strip()
         if any(marker in stderr for marker in AUTOMATION_REFUSED_MARKERS):
-            _report_automation_refused(stderr)
+            _report_system_events_blocked(stderr, "Automation")
+        elif any(marker in stderr for marker in ACCESSIBILITY_REFUSED_MARKERS):
+            _report_system_events_blocked(stderr, "Accessibility")
+        elif any(marker in stderr for marker in SYSTEM_EVENTS_TIMEOUT_MARKERS):
+            _report_system_events_blocked(stderr, "timeout")
         else:
             log.debug("System Events refused the Winamax window list: %s", stderr)
         return []

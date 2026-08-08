@@ -1,15 +1,17 @@
 """macOS privacy-permission preflight for HUD table detection.
 
-Table detection on macOS depends on two *separate* privacy permissions, and a
+Table detection on macOS depends on separate privacy permissions, and a
 missing one is the usual reason a HUD never appears ("table name ... not
 found"):
 
 * **Screen Recording** – required for Quartz (``CGWindowListCopyWindowInfo``) to
   expose window *titles* (``kCGWindowName``). Without it every title is empty,
   so title-based matching fails. Geometry/IDs are still available.
-* **Accessibility / Automation** – required for the AppleScript (``System
-  Events``) fallback used for Electron clients such as Winamax, which never
-  expose titles through Quartz. Without it ``osascript`` returns nothing.
+* **Accessibility** – required for the Winamax seat reader and for System
+  Events GUI scripting of processes/windows.
+* **Automation** – separately requested by macOS when FPDB sends an Apple Event
+  to System Events. There is no side-effect-free preflight for that consent, so
+  it is diagnosed from the first real scan rather than stored in this snapshot.
 
 This module checks, requests, and explains those permissions. Everything is a
 safe no-op (returning ``True``) on non-macOS so callers need no platform guard.
@@ -146,9 +148,9 @@ def describe_missing(status: PermissionStatus | None = None) -> list[str]:
         )
     if not status.accessibility:
         messages.append(
-            "Accessibility/Automation permission is missing: the AppleScript "
-            "fallback used for Electron clients (e.g. Winamax) cannot list "
-            "windows. Grant it in System Settings > Privacy & Security > "
-            "Accessibility (then restart FPDB).",
+            "Accessibility permission is missing: FPDB cannot inspect poker "
+            "windows or read Winamax seats through Accessibility/System Events. "
+            "Grant it in System Settings > Privacy & Security > Accessibility "
+            "(then restart FPDB).",
         )
     return messages

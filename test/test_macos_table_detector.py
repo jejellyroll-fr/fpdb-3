@@ -27,8 +27,8 @@ def _detector(*, window_list: list[dict] | None = None) -> MacOSTableDetector:
     detector._applescript_last_result = []
     detector._permissions_checked = False
     detector._permission_status = None
-    detector._automation_warned = False
-    detector._automation_blocked = False
+    detector._system_events_warned = False
+    detector._system_events_blocked = False
     detector._NSWorkspace = Mock()
     detector._kCGNullWindowID = 0
     detector._kCGWindowListOptionOnScreenOnly = 8
@@ -37,7 +37,7 @@ def _detector(*, window_list: list[dict] | None = None) -> MacOSTableDetector:
 
 
 def _hung_osascript() -> TimeoutExpired:
-    """What osascript raises when the Automation prompt is left unanswered.
+    """What osascript raises for a pending prompt or unresponsive Apple Event.
 
     This constructs an exception, not a process: Semgrep's subprocess audit
     matches the constructor by name, which is why the suppression lives here
@@ -239,7 +239,7 @@ def test_run_applescript_scan_warns_on_automation_blocked() -> None:
         patch("fpdb.infrastructure.platform.macos.logger") as logger,
     ):
         detector._run_applescript_scan()
-    assert detector._automation_warned is True
+    assert detector._system_events_warned is True
     logger.warning.assert_called_once()
 
 
@@ -263,8 +263,8 @@ def test_run_applescript_scan_does_not_warn_on_other_errors() -> None:
         patch("fpdb.infrastructure.platform.macos.logger") as logger,
     ):
         detector._run_applescript_scan()
-    assert detector._automation_warned is False
-    assert detector._automation_blocked is False
+    assert detector._system_events_warned is False
+    assert detector._system_events_blocked is False
     logger.warning.assert_not_called()
 
 
@@ -273,11 +273,11 @@ def test_run_applescript_scan_treats_a_refusal_as_blocking() -> None:
     result = Mock(returncode=1, stdout="", stderr="-1743 operation not allowed")
     with patch("fpdb.infrastructure.platform.macos.subprocess.run", return_value=result):
         detector._run_applescript_scan()
-    assert detector._automation_blocked is True
+    assert detector._system_events_blocked is True
 
 
 def test_run_applescript_scan_treats_an_unanswered_prompt_as_blocking() -> None:
-    """-1712 means the Automation dialog is up and nobody has answered it.
+    """-1712 means the Apple Event timed out, often on a pending prompt.
 
     Every later scan would sit through the same multi-second timeout, and
     Fast-Fold reaches this path on every hand.
@@ -289,8 +289,39 @@ def test_run_applescript_scan_treats_an_unanswered_prompt_as_blocking() -> None:
         patch("fpdb.infrastructure.platform.macos.logger") as logger,
     ):
         detector._run_applescript_scan()
-    assert detector._automation_blocked is True
+    assert detector._system_events_blocked is True
     logger.warning.assert_called_once()
+
+
+def test_run_applescript_scan_reports_accessibility_refusal() -> None:
+    detector = _detector()
+    result = Mock(
+        returncode=1,
+        stdout="",
+        stderr="System Events got an error: osascript is not allowed assistive access. (-1719)",
+    )
+    with (
+        patch("fpdb.infrastructure.platform.macos.subprocess.run", return_value=result),
+        patch("fpdb.infrastructure.platform.macos.logger") as logger,
+    ):
+        detector._run_applescript_scan()
+
+    assert detector._system_events_blocked is True
+    assert "accessibility" in logger.warning.call_args.args
+
+
+def test_run_applescript_scan_does_not_treat_bare_1719_as_a_permission_error() -> None:
+    """Apple also uses -1719 for an invalid list index."""
+    detector = _detector()
+    result = Mock(returncode=1, stdout="", stderr="Can't get item 7 of list. (-1719)")
+    with (
+        patch("fpdb.infrastructure.platform.macos.subprocess.run", return_value=result),
+        patch("fpdb.infrastructure.platform.macos.logger") as logger,
+    ):
+        detector._run_applescript_scan()
+
+    assert detector._system_events_blocked is False
+    logger.warning.assert_not_called()
 
 
 def test_run_applescript_scan_swallows_errors() -> None:
@@ -612,6 +643,22 @@ def test_check_permissions_once_requests_when_env_set() -> None:
         permissions.open_accessibility_settings.assert_called_once()
 
 
+def test_check_permissions_once_requests_automatically_when_frozen() -> None:
+    detector = _detector()
+    with (
+        patch.dict("os.environ", {}, clear=True),
+        patch("fpdb.infrastructure.platform.macos.sys.frozen", True, create=True),
+        patch("fpdb.infrastructure.platform.macos.permissions") as permissions,
+    ):
+        permissions.get_status.return_value = Mock(screen_recording=False, accessibility=False)
+        permissions.describe_missing.return_value = ["missing"]
+
+        detector._check_permissions_once()
+
+        permissions.request_screen_recording_permission.assert_called_once()
+        permissions.request_accessibility_permission.assert_called_once_with(prompt=True)
+
+
 def test_check_permissions_once_env_skips_granted_permissions() -> None:
     detector = _detector()
     with (
@@ -722,12 +769,7 @@ def test_find_tables_without_titles_uses_sole_blank_window() -> None:
 
 
 def test_find_tables_without_titles_still_scans_when_accessibility_is_missing() -> None:
-    """Driving System Events needs Automation, which is a different grant.
-
-    Gating the scan on Accessibility switched it off in every packaged build,
-    and for an Electron client like Winamax it is the only way left to read a
-    window title -- Quartz never exposes one.
-    """
+    """Try once so System Events can request Automation and explain the refusal."""
     detector = _detector()
     detector._match_target_window_by_pid = Mock(return_value=None)
     detector._check_permissions_once = Mock(return_value=Mock(accessibility=False))
@@ -746,7 +788,7 @@ def test_find_tables_without_titles_stops_scanning_once_system_events_refuses() 
     detector = _detector()
     detector._match_target_window_by_pid = Mock(return_value=None)
     detector.find_tables_applescript = Mock(return_value=[])
-    detector._automation_blocked = True
+    detector._system_events_blocked = True
     blank = TableInfo(window_id=3, title="", geometry=TableGeometry(0, 0, 600, 500), process_name="Winamax")
 
     result = detector._find_tables_without_titles("Winamax Bucarest 6", [], [blank], 3, 0)
@@ -829,7 +871,7 @@ def test_run_applescript_scan_treats_a_hung_scan_as_blocking() -> None:
     ):
         detector._run_applescript_scan()
 
-    assert detector._automation_blocked is True
+    assert detector._system_events_blocked is True
     logger.warning.assert_called_once()
     logger.error.assert_not_called()
 

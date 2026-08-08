@@ -41,27 +41,15 @@ def test_hud_command_uses_pyoxidizer_subcommand(monkeypatch) -> None:
     assert hud_main_command("-x") == [sys.executable, "--hud", "-x"]
 
 
-def test_hud_command_uses_the_sibling_executable_on_pyinstaller_macos(monkeypatch, tmp_path) -> None:
-    """Only PyOxidizer hosts both entry points in one binary.
-
-    Routing PyInstaller's macOS HUD through 'fpdb --hud' killed it on startup:
-    the fpdb executable's dependency analysis started at fpdb.pyw and never saw
-    the HUD's imports, so OSXTables and fpdb.infrastructure are simply not in
-    its archive. The sibling HUD_main executable carries its own complete one.
-    """
+def test_hud_command_reuses_the_main_executable_on_pyinstaller_macos(monkeypatch, tmp_path) -> None:
+    """One executable gives both processes the same macOS TCC identity."""
     monkeypatch.setattr(sys, "frozen", True, raising=False)
     monkeypatch.setattr(sys, "platform", "darwin")
     monkeypatch.setattr(sys, "executable", str(tmp_path / "fpdb"))
-    # The name is chosen from os.name, not sys.platform, so this test has to
-    # follow the host it runs on -- the Windows runner builds HUD_main.exe.
-    hud = tmp_path / ("HUD_main.exe" if os.name == "nt" else "HUD_main")
-    hud.write_text("")
 
     command = hud_main_command("-x")
 
-    assert Path(command[0]) == hud.resolve()
-    assert command[1:] == ["-x"]
-    assert HUD_FLAG not in command
+    assert command == [str(tmp_path / "fpdb"), HUD_FLAG, "-x"]
 
 
 def test_hud_command_uses_sibling_executable_when_frozen(monkeypatch, tmp_path) -> None:

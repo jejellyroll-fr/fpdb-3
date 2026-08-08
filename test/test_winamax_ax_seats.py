@@ -307,7 +307,7 @@ class TestAutomationRefusalIsReported:
 
     @staticmethod
     def _run(monkeypatch, *, returncode: int, stderr: str):
-        monkeypatch.setattr(winamax_ax_seats, "_automation_refused", False)
+        monkeypatch.setattr(winamax_ax_seats, "_system_events_blocked", False)
         monkeypatch.setattr(
             winamax_ax_seats.subprocess,
             "run",
@@ -331,10 +331,27 @@ class TestAutomationRefusalIsReported:
         assert "Automation" in warnings[0].getMessage()
 
     def test_an_unanswered_prompt_counts_as_a_refusal(self, monkeypatch, caplog) -> None:
-        """-1712 means the permission dialog is up and nobody has answered it."""
+        """A timed-out Apple Event is blocked, whatever made it unresponsive."""
         with caplog.at_level("WARNING", logger=winamax_ax_seats.log.name):
             assert self._run(monkeypatch, returncode=1, stderr="AppleEvent timed out. (-1712)") == []
         assert any(r.levelname == "WARNING" for r in caplog.records)
+
+    def test_accessibility_refusal_is_classified_from_its_text(self, monkeypatch, caplog) -> None:
+        with caplog.at_level("WARNING", logger=winamax_ax_seats.log.name):
+            assert (
+                self._run(
+                    monkeypatch,
+                    returncode=1,
+                    stderr="osascript is not allowed assistive access. (-1719)",
+                )
+                == []
+            )
+        assert "Accessibility" in caplog.records[0].getMessage()
+
+    def test_bare_1719_is_not_misclassified_as_accessibility(self, monkeypatch, caplog) -> None:
+        with caplog.at_level("WARNING", logger=winamax_ax_seats.log.name):
+            assert self._run(monkeypatch, returncode=1, stderr="Can't get item 8. (-1719)") == []
+        assert not [record for record in caplog.records if record.levelname == "WARNING"]
 
     def test_an_ordinary_failure_is_not_dressed_up_as_a_permission_problem(self, monkeypatch, caplog) -> None:
         with caplog.at_level("WARNING", logger=winamax_ax_seats.log.name):
@@ -342,7 +359,7 @@ class TestAutomationRefusalIsReported:
         assert not [r for r in caplog.records if r.levelname == "WARNING"]
 
     def test_a_hung_scan_is_reported_too(self, monkeypatch, caplog) -> None:
-        monkeypatch.setattr(winamax_ax_seats, "_automation_refused", False)
+        monkeypatch.setattr(winamax_ax_seats, "_system_events_blocked", False)
 
         def timeout(*_a, **_k):
             raise winamax_ax_seats.subprocess.TimeoutExpired(cmd="osascript", timeout=5)
@@ -351,6 +368,19 @@ class TestAutomationRefusalIsReported:
         with caplog.at_level("WARNING", logger=winamax_ax_seats.log.name):
             assert winamax_ax_seats.applescript_window_titles() == []
         assert any(r.levelname == "WARNING" for r in caplog.records)
+
+    def test_a_blocked_scan_is_not_retried_after_the_ttl(self, monkeypatch) -> None:
+        calls = []
+        monkeypatch.setattr(winamax_ax_seats, "_system_events_blocked", False)
+        monkeypatch.setattr(
+            winamax_ax_seats.subprocess,
+            "run",
+            lambda *_a, **_k: (calls.append(1), SimpleNamespace(returncode=1, stdout="", stderr="(-1743)"))[1],
+        )
+
+        assert winamax_ax_seats.applescript_window_titles() == []
+        assert winamax_ax_seats.applescript_window_titles() == []
+        assert calls == [1]
 
     def test_the_scan_runs_from_an_absolute_path(self) -> None:
         """So it cannot be diverted by whatever PATH the packaged app inherited."""

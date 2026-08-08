@@ -1,4 +1,4 @@
-"""Assembly and ad-hoc signing of the macOS PyOxidizer bundle.
+"""Assembly and signing of the macOS PyOxidizer bundle.
 
 codesign itself is not exercised here (it only exists on macOS runners); the
 layout it demands is, because getting that wrong is what breaks the build.
@@ -52,9 +52,55 @@ def test_mach_o_search_covers_extensionless_framework_binaries(tmp_path: Path) -
     assert found == [framework / "QtCore"]
 
 
+def test_release_signing_gate_rejects_ad_hoc_identity(monkeypatch) -> None:
+    monkeypatch.setenv(adhoc_sign_macos.REQUIRE_STABLE_SIGNING_ENV, "1")
+    monkeypatch.delenv(adhoc_sign_macos.SIGNING_IDENTITY_ENV, raising=False)
+
+    with pytest.raises(RuntimeError, match="Developer ID"):
+        adhoc_sign_macos.resolve_signing_identity()
+
+
+def test_developer_id_signing_enables_runtime_timestamp_and_entitlements(tmp_path: Path) -> None:
+    entitlements = tmp_path / "entitlements.plist"
+    entitlements.touch()
+
+    command = adhoc_sign_macos._codesign_command(  # noqa: SLF001
+        [tmp_path / "fpdb.app"],
+        identity="Developer ID Application: FPDB (TEAMID1234)",
+        deep=True,
+        entitlements=entitlements,
+    )
+
+    assert "--options" in command
+    assert "runtime" in command
+    assert "--timestamp" in command
+    assert command[command.index("--entitlements") + 1] == str(entitlements)
+
+
+def test_ad_hoc_signing_does_not_claim_hardened_runtime(tmp_path: Path) -> None:
+    command = adhoc_sign_macos._codesign_command(  # noqa: SLF001
+        [tmp_path / "fpdb.app"],
+        identity=adhoc_sign_macos.ADHOC_IDENTITY,
+        deep=True,
+        entitlements=package_pyoxidizer_macos.ENTITLEMENTS,
+    )
+
+    assert "runtime" not in command
+    assert "--timestamp" not in command
+    assert "--entitlements" not in command
+
+
+def test_release_entitlements_allow_apple_events() -> None:
+    with package_pyoxidizer_macos.ENTITLEMENTS.open("rb") as handle:
+        entitlements = plistlib.load(handle)
+
+    assert entitlements["com.apple.security.automation.apple-events"] is True
+
+
 def test_bundle_keeps_only_the_launcher_in_macos(install_dir: Path, tmp_path: Path, monkeypatch) -> None:
     """codesign refuses to seal a bundle whose MacOS directory holds payload."""
-    monkeypatch.setattr(package_pyoxidizer_macos, "adhoc_sign", lambda paths: None)
+    monkeypatch.setattr(package_pyoxidizer_macos, "sign", lambda paths, **kwargs: None)
+    monkeypatch.setattr(package_pyoxidizer_macos, "sign_bundle", lambda app, **kwargs: None)
     monkeypatch.setattr(package_pyoxidizer_macos.subprocess, "run", lambda *args, **kwargs: None)
     icon = tmp_path / "tribal.icns"
     icon.write_bytes(b"icns")
@@ -71,7 +117,8 @@ def test_bundle_keeps_only_the_launcher_in_macos(install_dir: Path, tmp_path: Pa
 
 
 def test_bundle_declares_the_launcher_and_icon(install_dir: Path, tmp_path: Path, monkeypatch) -> None:
-    monkeypatch.setattr(package_pyoxidizer_macos, "adhoc_sign", lambda paths: None)
+    monkeypatch.setattr(package_pyoxidizer_macos, "sign", lambda paths, **kwargs: None)
+    monkeypatch.setattr(package_pyoxidizer_macos, "sign_bundle", lambda app, **kwargs: None)
     monkeypatch.setattr(package_pyoxidizer_macos.subprocess, "run", lambda *args, **kwargs: None)
     icon = tmp_path / "tribal.icns"
     icon.write_bytes(b"icns")

@@ -11,7 +11,8 @@ bundle whose MacOS directory holds anything else ("bundle format unrecognized,
 invalid, or unsuitable") -- so the payload goes to ``Contents/Resources``, which
 the interpreter config in pyoxidizer.bzl knows how to find.
 
-This is ad-hoc signing, not notarization: macOS still asks the user once.
+Local builds are ad-hoc signed. Release CI supplies a Developer ID identity,
+then notarizes and staples the completed bundle.
 
 Run it from the repository root: ``python -m tools.package_pyoxidizer_macos``.
 """
@@ -26,11 +27,11 @@ import sys
 import tomllib
 from pathlib import Path
 
-from tools.adhoc_sign_macos import find_mach_o_files
-from tools.adhoc_sign_macos import sign as adhoc_sign
+from tools.adhoc_sign_macos import find_mach_o_files, resolve_signing_identity, sign, sign_bundle
 
 BUNDLE_IDENTIFIER = "org.fpdb.fpdb3"
 DEFAULT_VERSION = "0.0.0"
+ENTITLEMENTS = Path(__file__).resolve().with_name("macos-entitlements.plist")
 
 
 def read_version(pyproject: Path) -> str:
@@ -65,8 +66,16 @@ def write_info_plist(contents: Path, executable: str, version: str, icon: str | 
         plistlib.dump(info, handle)
 
 
-def build_app(install_dir: Path, app_path: Path, executable: str, version: str, icon: Path | None) -> Path:
-    """Assemble, ad-hoc sign and return the .app bundle."""
+def build_app(
+    install_dir: Path,
+    app_path: Path,
+    executable: str,
+    version: str,
+    icon: Path | None,
+    *,
+    signing_identity: str | None = None,
+) -> Path:
+    """Assemble, sign and return the .app bundle."""
     if not (install_dir / executable).is_file():
         msg = f"no {executable} executable in {install_dir}"
         raise FileNotFoundError(msg)
@@ -87,19 +96,18 @@ def build_app(install_dir: Path, app_path: Path, executable: str, version: str, 
         icon_name = icon.name
     write_info_plist(contents, executable, version, icon_name)
 
-    # Strip quarantine extended attribute if present so Gatekeeper does not block execution
+    # Clean build inputs can carry quarantine. A browser may attach it again to
+    # the download; release notarization, not this build-time xattr, handles that.
     subprocess.run(  # noqa: S603
         ["/usr/bin/xattr", "-dr", "com.apple.quarantine", str(app_path)],  # noqa: S607
         check=False,
     )
 
-    # Sign inside out: nested Mach-O files first, then seal the bundle. The
-    # wheels ship linker-signed binaries, which macOS treats as unsigned.
-    adhoc_sign(find_mach_o_files(resources))
-    subprocess.run(  # noqa: S603
-        ["/usr/bin/codesign", "--force", "--deep", "--sign", "-", str(app_path)],  # noqa: S607
-        check=True,
-    )
+    # Sign inside out: nested Mach-O files first, then seal the bundle. Wheels
+    # ship linker-signed binaries, which macOS treats as unsigned.
+    identity = resolve_signing_identity(signing_identity)
+    sign(find_mach_o_files(resources), identity=identity)
+    sign_bundle(app_path, identity=identity, entitlements=ENTITLEMENTS)
     return app_path
 
 
@@ -110,13 +118,25 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--executable", default="fpdb", help="Launcher name inside the install directory.")
     parser.add_argument("--icon", type=Path, default=None, help="Optional .icns file.")
     parser.add_argument("--version", default=None, help="Bundle version (defaults to the pyproject version).")
+    parser.add_argument(
+        "--signing-identity",
+        default=None,
+        help="codesign identity (defaults to FPDB_MACOS_SIGNING_IDENTITY, then ad-hoc '-').",
+    )
     args = parser.parse_args(argv)
 
     if not args.install_dir.is_dir():
         parser.error(f"not a directory: {args.install_dir}")
 
     version = args.version or read_version(Path(__file__).resolve().parent.parent / "pyproject.toml")
-    app = build_app(args.install_dir, args.app_path, args.executable, version, args.icon)
+    app = build_app(
+        args.install_dir,
+        args.app_path,
+        args.executable,
+        version,
+        args.icon,
+        signing_identity=args.signing_identity,
+    )
     print(f"built {app} (version {version})")
     return 0
 
