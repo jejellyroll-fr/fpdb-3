@@ -2164,78 +2164,167 @@ class GuiReplayer(QWidget):
         return f"{player.name} {player.action}{allin_suffix}"
 
     def _next_actor_name(self, current_index: int) -> str | None:
+        if not getattr(self, "states", None):
+            return None
         for state in self.states[current_index + 1 :]:
             for player in state.players.values():
                 if player.justacted and player.action:
                     return player.name
         return None
 
-    def _hero_odds_summary(self, frame: ReplayFrame, current_index: int) -> str:
-        if self._next_actor_name(current_index) != self.Heroes:
-            return ""
+    def _hero_decision_metrics(self, frame: ReplayFrame, current_index: int) -> dict[str, Any]:
         hero = next((player for player in frame.players if player.name == self.Heroes), None)
         if hero is None:
-            return ""
-        call_amount = max((player.chips for player in frame.players), default=Decimal(0)) - hero.chips
-        if call_amount <= 0 or frame.pot <= 0:
-            return ""
-        pot_after_call = frame.pot + call_amount
-        if pot_after_call <= 0:
-            return ""
-        equity_needed = (call_amount / pot_after_call) * Decimal(100)
-        summary = (
-            f"Hero call {format_replay_amount(call_amount, self.currency_code)} · "
-            f"pot odds {format_number(equity_needed, 1)}%"
-        )
-        hand = self.replay_model.hand
-        category = hand.gametype.get("category", "")
+            return {}
+
+        max_chips = max((player.chips for player in frame.players if player.action != "folds"), default=Decimal(0))
+        call_amount = max(Decimal(0), max_chips - hero.chips)
+        facing_call = call_amount > 0 and frame.pot > 0
+        pot_odds_pct = None
+        pot_odds_ratio = None
+        if facing_call:
+            pot_after_call = frame.pot + call_amount
+            if pot_after_call > 0:
+                pot_odds_pct = (call_amount / pot_after_call) * Decimal(100)
+                pot_odds_ratio = frame.pot / call_amount
+
+        hand = getattr(getattr(self, "replay_model", None), "hand", None)
+        category = hand.gametype.get("category", "") if hand else ""
         game_info = Card.games.get(category)
-        game = game_info[1] if game_info else None
-        if not game:
-            return summary
-        cache: dict[Any, Decimal | None] = getattr(self, "_equity_cache", None) or {}
-        self._equity_cache = cache
-        key = (
-            game,
-            tuple((player.name, tuple(player.holecards), player.action) for player in frame.players),
-            tuple(sorted(frame.render_board)),
-            tuple((street, tuple(frame.board.get(street) or [])) for street in ("FLOP", "TURN", "RIVER")),
-        )
-        if key not in cache:
-            cache[key] = replay_hero_equity(frame, self.Heroes, game)
-        equity = cache[key]
-        if equity is not None:
-            equity_pct = equity * Decimal(100)
-            edge = equity_pct - equity_needed
-            summary += f" · equity {format_number(equity_pct, 1)}% · edge {format_number(edge, 1, show_plus=True)} pts"
-        return summary
+        game = (game_info[1] if game_info else None) or category or (hand.gametype.get("base", "") if hand else "")
+        equity = None
+        if game:
+            cache: dict[Any, Decimal | None] = getattr(self, "_equity_cache", None) or {}
+            self._equity_cache = cache
+            key = (
+                game,
+                tuple((player.name, tuple(player.holecards), player.action) for player in frame.players),
+                tuple(sorted(frame.render_board)),
+                tuple((street, tuple(frame.board.get(street) or [])) for street in ("FLOP", "TURN", "RIVER")),
+            )
+            if key not in cache:
+                cache[key] = replay_hero_equity(frame, self.Heroes, game)
+            equity = cache[key]
+
+        call_equity_pct = (equity * Decimal(100)) if equity is not None else None
+        push_equity_pct = (equity * Decimal(100)) if equity is not None else None
+        call_edge_pts = (call_equity_pct - pot_odds_pct) if (call_equity_pct is not None and pot_odds_pct is not None) else None
+        is_allin = any(player.allin for player in frame.players if player.action != "folds")
+
+        return {
+            "hero": hero,
+            "call_amount": call_amount,
+            "facing_call": facing_call,
+            "pot_odds_pct": pot_odds_pct,
+            "pot_odds_ratio": pot_odds_ratio,
+            "call_equity_pct": call_equity_pct,
+            "call_edge_pts": call_edge_pts,
+            "push_equity_pct": push_equity_pct,
+            "is_allin": is_allin,
+            "is_hero_turn": self._next_actor_name(current_index) == self.Heroes,
+        }
+
+    def _hero_odds_summary(self, frame: ReplayFrame, current_index: int) -> str:
+        metrics = self._hero_decision_metrics(frame, current_index)
+        if not metrics.get("is_hero_turn"):
+            return ""
+        parts = []
+        if metrics.get("facing_call"):
+            call_amt = format_replay_amount(metrics["call_amount"], self.currency_code)
+            odds_pct = format_number(metrics["pot_odds_pct"], 1)
+            ratio = format_number(metrics["pot_odds_ratio"], 1)
+            parts.append(f"Hero call {call_amt} · pot odds {odds_pct}% ({ratio}:1)")
+        if metrics.get("call_equity_pct") is not None:
+            eq_pct = format_number(metrics["call_equity_pct"], 1)
+            parts.append(f"Call Eq {eq_pct}%")
+            if metrics.get("call_edge_pts") is not None:
+                edge = format_number(metrics["call_edge_pts"], 1, show_plus=True)
+                parts.append(f"edge {edge} pts")
+        if metrics.get("push_equity_pct") is not None:
+            push_pct = format_number(metrics["push_equity_pct"], 1)
+            label = "Push/All-in Eq" if metrics.get("is_allin") else "Push Eq"
+            parts.append(f"{label} {push_pct}%")
+        return " · ".join(parts)
 
     def _draw_summary(self, painter: QPainter, frame: ReplayFrame, layout: ReplayLayout, current_index: int) -> None:
-        summary_width = min(620, max(300, layout.table_rect.width() * 0.46))
+        metrics = self._hero_decision_metrics(frame, current_index)
+        has_metrics = bool(
+            metrics.get("is_hero_turn")
+            and (metrics.get("facing_call") or metrics.get("push_equity_pct") is not None)
+        )
+        box_height = 78 if has_metrics else 56
+        summary_width = min(640, max(320, layout.table_rect.width() * 0.48))
         if layout.timeline_rect.isNull():
             x = self.width() - summary_width - 28
         else:
             x = layout.timeline_rect.x() - summary_width - 16
         x = max(28, x)
-        rect = QRectF(x, 14, summary_width, 64)
+        rect = QRectF(x, 12, summary_width, box_height)
         painter.setPen(QPen(QColor("#46505a"), 1))
         painter.setBrush(QColor("#171d22"))
-        painter.drawRoundedRect(rect, 7, 7)
+        painter.drawRoundedRect(rect, 8, 8)
+
+        # Line 1: Action Summary
         painter.setFont(QFont("Helvetica", 10, QFont.Weight.Bold))
         painter.setPen(QColor("#eef3f7"))
         painter.drawText(
-            rect.adjusted(12, 8, -12, -34),
+            QRectF(rect.x() + 12, rect.y() + 6, rect.width() - 24, 20),
             Qt.AlignmentFlag.AlignLeft,
             self._current_action_summary(frame),
         )
-        odds = self._hero_odds_summary(frame, current_index)
-        painter.setFont(QFont("Helvetica", 9, QFont.Weight.DemiBold))
-        painter.setPen(QColor("#ffe769") if odds else QColor("#9aa5ad"))
-        painter.drawText(
-            rect.adjusted(12, 32, -12, -8),
-            Qt.AlignmentFlag.AlignLeft,
-            odds or "Use arrows/space to review decisions",
-        )
+
+        if not has_metrics:
+            painter.setFont(QFont("Helvetica", 9, QFont.Weight.DemiBold))
+            painter.setPen(QColor("#9aa5ad"))
+            painter.drawText(
+                QRectF(rect.x() + 12, rect.y() + 28, rect.width() - 24, 20),
+                Qt.AlignmentFlag.AlignLeft,
+                "Use arrows/space to review decisions",
+            )
+            return
+
+        # Line 2: Pot Odds & Call Equity
+        line2_parts = []
+        if metrics.get("facing_call"):
+            call_amt = format_replay_amount(metrics["call_amount"], self.currency_code)
+            odds_pct = format_number(metrics["pot_odds_pct"], 1)
+            ratio = format_number(metrics["pot_odds_ratio"], 1)
+            line2_parts.append(f"Pot Odds: {odds_pct}% ({ratio}:1) [Call {call_amt}]")
+        if metrics.get("call_equity_pct") is not None:
+            eq_pct = format_number(metrics["call_equity_pct"], 1)
+            line2_parts.append(f"Call Eq: {eq_pct}%")
+            if metrics.get("call_edge_pts") is not None:
+                edge = format_number(metrics["call_edge_pts"], 1, show_plus=True)
+                line2_parts.append(f"Edge: {edge} pts")
+
+        if line2_parts:
+            painter.setFont(QFont("Helvetica", 9, QFont.Weight.DemiBold))
+            edge_val = metrics.get("call_edge_pts")
+            color = QColor("#ffe769")
+            if edge_val is not None:
+                color = QColor("#4ade80") if edge_val >= 0 else QColor("#ff6b6b")
+            painter.setPen(color)
+            painter.drawText(
+                QRectF(rect.x() + 12, rect.y() + 28, rect.width() - 24, 20),
+                Qt.AlignmentFlag.AlignLeft,
+                "  ·  ".join(line2_parts),
+            )
+
+        # Line 3: Push / All-in Equity
+        line3_parts = []
+        if metrics.get("push_equity_pct") is not None:
+            push_pct = format_number(metrics["push_equity_pct"], 1)
+            label = "Push/All-in Eq" if metrics.get("is_allin") else "Push Eq"
+            line3_parts.append(f"{label}: {push_pct}%")
+
+        if line3_parts:
+            painter.setFont(QFont("Helvetica", 9, QFont.Weight.DemiBold))
+            painter.setPen(QColor("#a78bfa"))
+            painter.drawText(
+                QRectF(rect.x() + 12, rect.y() + 50, rect.width() - 24, 20),
+                Qt.AlignmentFlag.AlignLeft,
+                "  ·  ".join(line3_parts),
+            )
 
     def _draw_timeline(self, painter: QPainter, layout: ReplayLayout) -> None:
         if layout.timeline_rect.isNull():
