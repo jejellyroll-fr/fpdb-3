@@ -26,6 +26,7 @@ def _detector(*, window_list: list[dict] | None = None) -> MacOSTableDetector:
     detector._applescript_last_scan = 0.0
     detector._applescript_last_result = []
     detector._permissions_checked = False
+    detector._permission_status = None
     detector._automation_warned = False
     detector._NSWorkspace = Mock()
     detector._kCGNullWindowID = 0
@@ -194,11 +195,7 @@ def test_find_tables_applescript_rescans_after_ttl() -> None:
 
 def test_run_applescript_scan_parses_entries() -> None:
     detector = _detector()
-    stdout = (
-        "PokerStars|Table 1|10|20|600|500, "
-        "Winamax|SpeedPool|5|5|800|600, "
-        "PokerStars|Lobby|0|0|300|200"
-    )
+    stdout = "PokerStars|Table 1|10|20|600|500, Winamax|SpeedPool|5|5|800|600, PokerStars|Lobby|0|0|300|200"
     with patch(
         "fpdb.infrastructure.platform.macos.subprocess.run",
         return_value=Mock(returncode=0, stdout=stdout, stderr=""),
@@ -271,7 +268,9 @@ def test_match_target_window_by_pid_exact() -> None:
         TableInfo(window_id=1, title="", geometry=TableGeometry(0, 0, 600, 500), process_id=101),
         TableInfo(window_id=2, title="", geometry=TableGeometry(0, 0, 600, 500), process_id=102),
     ]
-    with patch("fpdb.infrastructure.platform.macos_process.table_id_for_pid", side_effect={101: "922564", 102: "1"}.__getitem__):
+    with patch(
+        "fpdb.infrastructure.platform.macos_process.table_id_for_pid", side_effect={101: "922564", 102: "1"}.__getitem__
+    ):
         assert detector._match_target_window_by_pid("922564", windows).window_id == 1
 
 
@@ -362,7 +361,9 @@ def test_get_window_geometry_for_fake_id_uses_cache() -> None:
     detector = _detector()
     fake_id = detector._FAKE_ID_BASE + 5
     detector._applescript_cache[fake_id] = TableInfo(
-        window_id=fake_id, title="Table 1", geometry=TableGeometry(3, 4, 600, 500),
+        window_id=fake_id,
+        title="Table 1",
+        geometry=TableGeometry(3, 4, 600, 500),
     )
     detector.find_tables_applescript = Mock()
     geometry = detector.get_window_geometry(fake_id)
@@ -375,7 +376,9 @@ def test_get_window_geometry_for_real_id_queries_quartz() -> None:
     desc = Mock(
         return_value=[{"kCGWindowBounds": {"X": 1, "Y": 2, "Width": 640, "Height": 480}}],
     )
-    with patch.dict("sys.modules", {"Quartz": Mock(), "Quartz.CoreGraphics": Mock(CGWindowListCreateDescriptionFromArray=desc)}):
+    with patch.dict(
+        "sys.modules", {"Quartz": Mock(), "Quartz.CoreGraphics": Mock(CGWindowListCreateDescriptionFromArray=desc)}
+    ):
         geometry = detector.get_window_geometry(9)
     assert geometry == (1, 2, 640, 480) or (geometry.x, geometry.y, geometry.width, geometry.height) == (1, 2, 640, 480)
 
@@ -383,7 +386,9 @@ def test_get_window_geometry_for_real_id_queries_quartz() -> None:
 def test_get_window_geometry_none_when_window_missing() -> None:
     detector = _detector()
     desc = Mock(return_value=[])
-    with patch.dict("sys.modules", {"Quartz": Mock(), "Quartz.CoreGraphics": Mock(CGWindowListCreateDescriptionFromArray=desc)}):
+    with patch.dict(
+        "sys.modules", {"Quartz": Mock(), "Quartz.CoreGraphics": Mock(CGWindowListCreateDescriptionFromArray=desc)}
+    ):
         assert detector.get_window_geometry(9) is None
 
 
@@ -391,7 +396,10 @@ def test_get_window_geometry_none_on_error() -> None:
     detector = _detector()
     with patch.dict(
         "sys.modules",
-        {"Quartz": Mock(), "Quartz.CoreGraphics": Mock(CGWindowListCreateDescriptionFromArray=Mock(side_effect=RuntimeError))},
+        {
+            "Quartz": Mock(),
+            "Quartz.CoreGraphics": Mock(CGWindowListCreateDescriptionFromArray=Mock(side_effect=RuntimeError)),
+        },
     ):
         assert detector.get_window_geometry(9) is None
 
@@ -405,7 +413,9 @@ def test_is_window_visible_real_id() -> None:
 def test_is_window_visible_fake_id_rescans() -> None:
     detector = _detector()
     fake_id = detector._FAKE_ID_BASE + 5
-    detector._applescript_cache[fake_id] = TableInfo(window_id=fake_id, title="T", geometry=TableGeometry(0, 0, 600, 500))
+    detector._applescript_cache[fake_id] = TableInfo(
+        window_id=fake_id, title="T", geometry=TableGeometry(0, 0, 600, 500)
+    )
     detector.find_tables_applescript = Mock()
     assert detector.is_window_visible(fake_id) is True
     detector.find_tables_applescript.assert_called_once_with("")
@@ -429,7 +439,9 @@ def test_get_window_title_fake_id() -> None:
     detector = _detector()
     fake_id = detector._FAKE_ID_BASE + 5
     detector._applescript_cache[fake_id] = TableInfo(
-        window_id=fake_id, title="Table Alpha", geometry=TableGeometry(0, 0, 600, 500),
+        window_id=fake_id,
+        title="Table Alpha",
+        geometry=TableGeometry(0, 0, 600, 500),
     )
     assert detector.get_window_title(fake_id) == "Table Alpha"
     assert detector.get_window_title(detector._FAKE_ID_BASE + 999) is None
@@ -438,14 +450,18 @@ def test_get_window_title_fake_id() -> None:
 def test_get_window_title_real_id() -> None:
     detector = _detector()
     desc = Mock(return_value=[{"kCGWindowName": "Table Beta"}])
-    with patch.dict("sys.modules", {"Quartz": Mock(), "Quartz.CoreGraphics": Mock(CGWindowListCreateDescriptionFromArray=desc)}):
+    with patch.dict(
+        "sys.modules", {"Quartz": Mock(), "Quartz.CoreGraphics": Mock(CGWindowListCreateDescriptionFromArray=desc)}
+    ):
         assert detector.get_window_title(9) == "Table Beta"
 
 
 def test_get_window_title_none_when_window_missing() -> None:
     detector = _detector()
     desc = Mock(return_value=[])
-    with patch.dict("sys.modules", {"Quartz": Mock(), "Quartz.CoreGraphics": Mock(CGWindowListCreateDescriptionFromArray=desc)}):
+    with patch.dict(
+        "sys.modules", {"Quartz": Mock(), "Quartz.CoreGraphics": Mock(CGWindowListCreateDescriptionFromArray=desc)}
+    ):
         assert detector.get_window_title(9) is None
 
 
@@ -453,7 +469,10 @@ def test_get_window_title_none_on_error() -> None:
     detector = _detector()
     with patch.dict(
         "sys.modules",
-        {"Quartz": Mock(), "Quartz.CoreGraphics": Mock(CGWindowListCreateDescriptionFromArray=Mock(side_effect=RuntimeError))},
+        {
+            "Quartz": Mock(),
+            "Quartz.CoreGraphics": Mock(CGWindowListCreateDescriptionFromArray=Mock(side_effect=RuntimeError)),
+        },
     ):
         assert detector.get_window_title(9) is None
 
@@ -627,7 +646,9 @@ def test_check_permissions_once_noop_when_permissions_ok() -> None:
 
 def test_find_tables_without_titles_prefers_pid_match() -> None:
     detector = _detector()
-    target = TableInfo(window_id=1, title="", geometry=TableGeometry(0, 0, 600, 500), process_name="CoinPoker", process_id=99)
+    target = TableInfo(
+        window_id=1, title="", geometry=TableGeometry(0, 0, 600, 500), process_name="CoinPoker", process_id=99
+    )
     detector._match_target_window_by_pid = Mock(return_value=target)
     result = detector._find_tables_without_titles("922564", [target], [], 2, 0)
     assert result == [target]
@@ -660,6 +681,19 @@ def test_find_tables_without_titles_uses_sole_blank_window() -> None:
     blank = TableInfo(window_id=3, title="", geometry=TableGeometry(0, 0, 600, 500), process_name="PokerStars")
     result = detector._find_tables_without_titles("pokerstars", [], [blank], 0, 0)
     assert result == [blank]
+
+
+def test_find_tables_without_titles_skips_slow_applescript_when_accessibility_is_missing() -> None:
+    detector = _detector()
+    detector._match_target_window_by_pid = Mock(return_value=None)
+    detector._check_permissions_once = Mock(return_value=Mock(accessibility=False))
+    detector.find_tables_applescript = Mock(return_value=[])
+    blank = TableInfo(window_id=3, title="", geometry=TableGeometry(0, 0, 600, 500), process_name="Winamax")
+
+    result = detector._find_tables_without_titles("Winamax Bucarest 6", [], [blank], 3, 0)
+
+    assert result == [blank]
+    detector.find_tables_applescript.assert_not_called()
 
 
 def test_find_tables_without_titles_rejects_cross_room_blank_window_fallback() -> None:

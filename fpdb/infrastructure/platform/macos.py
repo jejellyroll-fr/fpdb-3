@@ -91,6 +91,7 @@ class MacOSTableDetector:
 
         # Emit the privacy-permission diagnosis at most once per process.
         self._permissions_checked = False
+        self._permission_status: permissions.PermissionStatus | None = None
         self._automation_warned = False
 
         # Lazy-import macOS dependencies
@@ -118,17 +119,18 @@ class MacOSTableDetector:
         """Get the current platform"""
         return self._platform
 
-    def _check_permissions_once(self) -> None:
+    def _check_permissions_once(self) -> permissions.PermissionStatus:
         """Log the privacy-permission diagnosis once when titles are missing.
 
         Set ``FPDB_REQUEST_MACOS_PERMISSIONS=1`` to also trigger the native
         prompts / open the relevant System Settings panes automatically.
         """
         if self._permissions_checked:
-            return
+            return self._permission_status or permissions.get_status()
         self._permissions_checked = True
 
         status = permissions.get_status()
+        self._permission_status = status
         messages = permissions.describe_missing(status)
         if not messages:
             # Titles missing despite permissions looking granted (e.g. an
@@ -136,7 +138,7 @@ class MacOSTableDetector:
             logger.debug(
                 "Quartz exposed no window titles but permissions look granted; relying on the AppleScript fallback.",
             )
-            return
+            return status
 
         for message in messages:
             logger.warning(message)
@@ -150,6 +152,7 @@ class MacOSTableDetector:
                 logger.info("Requesting Accessibility permission (native prompt)...")
                 permissions.request_accessibility_permission(prompt=True)
                 permissions.open_accessibility_settings()
+        return status
 
     def find_tables(self, search_string: str = "") -> list[TableInfo]:
         """Find all windows matching the search string
@@ -284,13 +287,18 @@ class MacOSTableDetector:
                 )
                 return [pid_match]
 
-        if total_windows > 0 and titled_windows == 0:
-            # No Quartz title for any window almost always means Screen Recording
-            # is off. Emit the precise, actionable diagnosis once.
-            self._check_permissions_once()
-        else:
+        permission_status = self._check_permissions_once()
+        if not (total_windows > 0 and titled_windows == 0):
             logger.debug("DIAGNOSTIC: No Quartz window matched the search string. Trying AppleScript fallback...")
-        applescript_tables = self.find_tables_applescript(search_string)
+        # System Events takes around two seconds to reject an untrusted app.
+        # Fast-Fold can hit this path several times for one newly imported hand,
+        # so do not make a synchronous call that the native permission check has
+        # already told us cannot succeed.
+        applescript_tables = []
+        if permission_status.accessibility:
+            applescript_tables = self.find_tables_applescript(search_string)
+        else:
+            logger.debug("Skipping AppleScript table scan because Accessibility permission is unavailable")
         if applescript_tables:
             logger.debug(f"DIAGNOSTIC: AppleScript fallback found {len(applescript_tables)} matching tables")
             return applescript_tables
