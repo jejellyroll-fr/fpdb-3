@@ -493,6 +493,8 @@ def write_config(out_dir: Path) -> Path:
     A copy, never the original: the reader's own configuration and their own
     database have to come out of this untouched.
     """
+    from xml.etree.ElementTree import SubElement
+
     from defusedxml import ElementTree as DefusedElementTree
 
     source = REPO / "HUD_config.xml"
@@ -506,6 +508,28 @@ def write_config(out_dir: Path) -> Path:
         if database.get("db_server") == "sqlite":
             database.set("db_name", "demo.db3")
             database.set("db_path", str(out_dir))
+    for site in tree.getroot().iter("site"):
+        is_demo_site = site.get("site_name") == "PokerStars.COM"
+        site.set("enabled", "True" if is_demo_site else "False")
+        if is_demo_site:
+            site.set("screen_name", HERO)
+            site.set("HH_path", str(out_dir / "hands"))
+            site.set("TS_path", "")
+
+    # The source profile may leave the Hold'em rule sets disabled. Enable a
+    # representative set in the disposable copy so the Auto Notes screenshot
+    # demonstrates real matches instead of an empty workbench.
+    root = tree.getroot()
+    autonotes = next(iter(root.iter("autonotes")), None)
+    if autonotes is None:
+        autonotes = SubElement(root, "autonotes")
+    enabled_rule_sets = {"holdem_cash_preflop", "flop_texture", "showdown_quality", "hero_relative"}
+    ruleset_nodes = {node.get("name"): node for node in autonotes.iter("ruleset")}
+    for rule_set_name in enabled_rule_sets:
+        node = ruleset_nodes.get(rule_set_name)
+        if node is None:
+            node = SubElement(autonotes, "ruleset", name=rule_set_name)
+        node.set("enabled", "True")
     tree.write(destination, encoding="utf-8", xml_declaration=True)
     return destination
 

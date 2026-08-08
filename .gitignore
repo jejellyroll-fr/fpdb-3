@@ -252,3 +252,6 @@ tests/fixtures/expected/
 
 # Personal capture files (contain user-specific data)
 CoinPoker_*_Cash.txt
+
+# Reproducible wiki screenshot output
+/wiki-images/
