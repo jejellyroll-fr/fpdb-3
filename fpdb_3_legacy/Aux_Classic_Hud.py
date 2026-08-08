@@ -315,7 +315,7 @@ class ClassicStat(Aux_Hud.SimpleStat):
 
         dialog = QDialog()
         dialog.setWindowTitle(f"Player notes: {player_name}")
-        dialog.setMinimumSize(880, 520)
+        dialog.setMinimumSize(960, 560)
         layout = QVBoxLayout(dialog)
 
         layout.addWidget(QLabel(f"Manual note for {player_name}:"))
@@ -331,32 +331,54 @@ class ClassicStat(Aux_Hud.SimpleStat):
             bench = GuiAutoNotesWorkbench(getattr(self.aw.hud, "config", None))
             table = QTableWidget(0, 5)
             table.setHorizontalHeaderLabels(["Created", "Cards", "Rule", "Note", "Evidence"])
-            table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Interactive)
-            table.horizontalHeader().setSectionResizeMode(3, QHeaderView.ResizeMode.Stretch)
             table.setAlternatingRowColors(True)
 
             for note in generated_notes:
                 row = table.rowCount()
                 table.insertRow(row)
-                table.setItem(row, 0, QTableWidgetItem(str(note.get("createdTs") or "")))
+
+                created_text = str(note.get("createdTs") or "")
+                created_item = QTableWidgetItem(created_text)
+                created_item.setToolTip(created_text)
+                table.setItem(row, 0, created_item)
 
                 cards_w = bench._cards_widget(bench._note_cards(note))
                 if cards_w is not None:
                     table.setCellWidget(row, 1, cards_w)
+                else:
+                    cards_item = QTableWidgetItem("")
+                    table.setItem(row, 1, cards_item)
 
-                table.setItem(row, 2, QTableWidgetItem(str(note.get("ruleId") or "")))
-                table.setItem(row, 3, QTableWidgetItem(str(note.get("noteText") or "")))
+                rule_text = str(note.get("ruleId") or "")
+                rule_item = QTableWidgetItem(rule_text)
+                rule_item.setToolTip(rule_text)
+                table.setItem(row, 2, rule_item)
 
-                ev_w = bench._evidence_widget(str(note.get("evidenceText") or ""))
+                note_text = str(note.get("noteText") or note.get("description") or note.get("ruleId") or "")
+                note_item = QTableWidgetItem(note_text)
+                note_item.setToolTip(note_text)
+                table.setItem(row, 3, note_item)
+
+                ev_text = str(note.get("evidenceText") or "")
+                ev_item = QTableWidgetItem(ev_text)
+                ev_item.setToolTip(ev_text)
+                table.setItem(row, 4, ev_item)
+
+                ev_w = bench._evidence_widget(ev_text)
                 if ev_w is not None:
                     table.setCellWidget(row, 4, ev_w)
 
                 table.setRowHeight(row, 42)
 
+            header = table.horizontalHeader()
+            header.setSectionResizeMode(QHeaderView.ResizeMode.Interactive)
+            header.setSectionResizeMode(3, QHeaderView.ResizeMode.Stretch)
+            header.setSectionResizeMode(4, QHeaderView.ResizeMode.Stretch)
             table.setColumnWidth(0, 140)
-            table.setColumnWidth(1, 120)
-            table.setColumnWidth(2, 160)
-            table.setColumnWidth(4, 350)
+            table.setColumnWidth(1, 100)
+            table.setColumnWidth(2, 140)
+            table.setColumnWidth(3, 250)
+            table.setColumnWidth(4, 250)
             layout.addWidget(table, 1)
         else:
             auto_notes = QTextEdit()
