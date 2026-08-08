@@ -25,131 +25,10 @@ import logging
 import math
 import platform
 import re
-import subprocess  # nosec B404 - only ever runs the fixed osascript command below
-import time
 from dataclasses import dataclass
 from typing import Any
 
 log = logging.getLogger(__name__)
-
-# Lists the client's window titles through System Events. Used when the
-# accessibility API itself is closed to us -- see WINDOW_SCAN_TTL.
-_WINDOW_TITLES_SCRIPT = """
-tell application "System Events"
-    set windowList to {}
-    repeat with proc in (processes whose name contains "Winamax")
-        repeat with win in (every window of proc)
-            try
-                set end of windowList to name of win
-            end try
-        end repeat
-    end repeat
-    return windowList
-end tell
-"""
-
-WINDOW_SCAN_TTL = 1.0
-"""Seconds an AppleScript window list stays good for.
-
-Each scan is a synchronous ``osascript`` call costing a couple of hundred
-milliseconds, and a busy pool starts hands faster than that. One scan per
-second is far below the rate at which windows are opened or closed, and keeps
-the fallback off the critical path.
-"""
-
-APPLESCRIPT_TIMEOUT = 5.0
-
-OSASCRIPT = "/usr/bin/osascript"
-"""Absolute, so the scan cannot be diverted by whatever PATH the app inherited."""
-
-AUTOMATION_REFUSED_MARKERS = (
-    "-1743",  # not authorised to send Apple events
-    "Not authorized to send Apple events",
-)
-
-ACCESSIBILITY_REFUSED_MARKERS = (
-    # Do not match bare -1719: Apple also uses it for an invalid list index.
-    "not allowed assistive access",
-    "does not have access to assistive devices",
-)
-
-SYSTEM_EVENTS_TIMEOUT_MARKERS = ("-1712", "AppleEvent timed out")
-
-_system_events_blocked = False
-"""Whether System Events has already refused or timed out for this process.
-
-Reset by restarting, which is also what granting the permission requires.
-"""
-
-
-def _report_system_events_blocked(detail: str, reason: str) -> None:
-    """Say once, at WARNING, that no table window can be read and why."""
-    global _system_events_blocked
-    if _system_events_blocked:
-        return
-    _system_events_blocked = True
-    if reason == "Automation":
-        action = "Allow FPDB -> System Events in Privacy & Security > Automation"
-    elif reason == "Accessibility":
-        action = "Allow FPDB in Privacy & Security > Accessibility"
-    else:
-        action = "Check for a pending permission prompt and that System Events is responsive"
-    log.warning(
-        "Fast HUD cannot see the Winamax table windows through System Events (%s). "
-        "%s, then restart FPDB. Screen Recording is the preferred path for window "
-        "titles; Accessibility is also required to read seats. Detail: %s",
-        reason,
-        action,
-        detail,
-    )
-
-
-def applescript_window_titles() -> list[str]:
-    """Titles of the client's windows, read through System Events.
-
-    This is GUI scripting: FPDB needs Automation to control System Events and
-    Accessibility to inspect its process/window tree. Quartz is preferred when
-    Screen Recording exposes the real title and CGWindowID.
-
-    Returns an empty list when the client is not running or the scan is
-    refused; the caller then falls back to waiting for an imported hand. A
-    refusal is reported once, loudly: it is the difference between "no table is
-    open" and "this build will never see a table", and the two used to look
-    identical in the log.
-    """
-    if _system_events_blocked:
-        return []
-    try:
-        # Absolute path, fixed argv, no shell, and nothing interpolated into the script.
-        result = subprocess.run(  # noqa: S603  # nosec B603
-            [OSASCRIPT, "-e", _WINDOW_TITLES_SCRIPT],
-            capture_output=True,
-            text=True,
-            timeout=APPLESCRIPT_TIMEOUT,
-            check=False,
-        )
-    except subprocess.TimeoutExpired:
-        _report_system_events_blocked(
-            f"osascript did not return within {APPLESCRIPT_TIMEOUT:.0f}s",
-            "timeout",
-        )
-        return []
-    except OSError as exc:
-        log.debug("Could not run %s: %s", OSASCRIPT, exc)
-        return []
-    if result.returncode != 0:
-        stderr = result.stderr.strip()
-        if any(marker in stderr for marker in AUTOMATION_REFUSED_MARKERS):
-            _report_system_events_blocked(stderr, "Automation")
-        elif any(marker in stderr for marker in ACCESSIBILITY_REFUSED_MARKERS):
-            _report_system_events_blocked(stderr, "Accessibility")
-        elif any(marker in stderr for marker in SYSTEM_EVENTS_TIMEOUT_MARKERS):
-            _report_system_events_blocked(stderr, "timeout")
-        else:
-            log.debug("System Events refused the Winamax window list: %s", stderr)
-        return []
-    return [title.strip() for title in result.stdout.strip().split(",") if title.strip()]
-
 
 # A player's stack, e.g. "552,5 BB" or "7,64 €". The client draws it directly
 # under the name, and that pairing is what identifies a seat -- far steadier than
@@ -203,6 +82,9 @@ class AXTableWindow:
 
     description: str
     """The client's own header, e.g. ``ESCAPE - 0,01-0,02 € - Pot Limit Omaha``."""
+
+    window_id: int | None = None
+    """CGWindowID (or the detector's synthetic fallback ID), when resolved."""
 
     @property
     def table_name(self) -> str:
@@ -342,21 +224,13 @@ def seat_slots_from_positions(
 class WinamaxAXSeatReader:
     """Reads seated players from Winamax table windows through macOS accessibility."""
 
-    def __init__(self) -> None:
+    def __init__(self, table_detector: Any | None = None) -> None:
         self._app: Any = None
         self._pid: int | None = None
-        self._titles: list[str] = []
-        self._titles_read_at = 0.0
-        self._fallback_announced = False
-
-    def _window_titles(self) -> list[str]:
-        """The client's window titles via System Events, at most once a second."""
-        now = time.monotonic()
-        if now - self._titles_read_at < WINDOW_SCAN_TTL:
-            return self._titles
-        self._titles = applescript_window_titles()
-        self._titles_read_at = now
-        return self._titles
+        # Reuse the platform singleton also owned by OSXTables. Besides avoiding
+        # two independent System Events circuit breakers, this lets the window
+        # resolved at hand-start be handed straight to HUD creation.
+        self._table_detector: Any | None = table_detector
 
     def _application(self) -> Any:
         """The AX handle for the running client, with its web tree switched on."""
@@ -438,18 +312,64 @@ class WinamaxAXSeatReader:
         6"), which is the same index the log writes, so a pool can be tied to a
         window without waiting for any hand to be imported.
 
-        Tries the accessibility API first, because it also reads the header that
-        names the game. When that is closed to us -- the normal state of a
-        packaged build, which macOS treats as a new client with no
-        *Accessibility* grant -- the title alone is recovered through System
-        Events, and the game is left for the caller to supply.
+        Quartz is tried first through the shared platform detector, because it
+        yields the real CGWindowID without an Apple Event when Screen Recording
+        is granted. Accessibility then enriches that answer with the client
+        header and seats. Only when Quartz and AX cannot resolve the window does
+        the shared detector use its throttled System Events fallback.
         """
         if not is_supported():
             return None
-        window = self._find_table_window_ax(table_no)
-        if window is not None:
-            return window
-        return self._find_table_window_applescript(table_no)
+
+        detected = self._find_table_window_detector(table_no, allow_fallback=False)
+        accessible = self._find_table_window_ax(table_no)
+        if detected is not None:
+            if accessible is not None:
+                return AXTableWindow(
+                    title=detected.title,
+                    description=accessible.description,
+                    window_id=detected.window_id,
+                )
+            return detected
+
+        # AX can name the table without Screen Recording, but it cannot provide
+        # the CGWindowID needed to attach an overlay. Give the shared detector a
+        # final chance to pair it through System Events and preserve the AX
+        # header if it succeeds.
+        detected = self._find_table_window_detector(table_no, allow_fallback=True)
+        if detected is not None:
+            if accessible is not None:
+                return AXTableWindow(
+                    title=detected.title,
+                    description=accessible.description,
+                    window_id=detected.window_id,
+                )
+            return detected
+        return accessible
+
+    def _find_table_window_detector(self, table_no: str, *, allow_fallback: bool) -> AXTableWindow | None:
+        """Resolve one indexed Winamax window through the shared macOS detector."""
+        try:
+            if self._table_detector is None:
+                from fpdb.infrastructure.platform import get_table_detector
+
+                self._table_detector = get_table_detector()
+            search = rf"^Winamax\s+.*\s{re.escape(str(table_no))}\s*$"
+            tables = self._table_detector.find_tables(search, allow_fallback=allow_fallback)
+        except Exception:
+            log.debug("Shared macOS detector could not resolve Winamax table %s", table_no, exc_info=True)
+            return None
+
+        for table in tables:
+            title = str(getattr(table, "title", "") or "")
+            if not self._is_table_no(title, table_no):
+                continue
+            try:
+                window_id = int(table.window_id)
+            except (AttributeError, TypeError, ValueError):
+                window_id = None
+            return AXTableWindow(title=title, description="", window_id=window_id)
+        return None
 
     def _find_table_window_ax(self, table_no: str) -> AXTableWindow | None:
         """The table window and its header, read through the accessibility API."""
@@ -469,22 +389,6 @@ class WinamaxAXSeatReader:
                 return AXTableWindow(title=title, description=labels[0].login if labels else "")
         except Exception:
             log.exception("Could not look up the Winamax window for table %s", table_no)
-        return None
-
-    def _find_table_window_applescript(self, table_no: str) -> AXTableWindow | None:
-        """The table window by title only, read through System Events."""
-        for title in self._window_titles():
-            if not self._is_table_no(title, table_no):
-                continue
-            if not self._fallback_announced:
-                self._fallback_announced = True
-                log.info(
-                    "Reading Winamax table windows through System Events: the accessibility "
-                    "API returned nothing for this process. Table windows are still found, but "
-                    "seats come from the log rather than the window. Granting this application "
-                    "Accessibility in System Settings > Privacy & Security restores the direct read.",
-                )
-            return AXTableWindow(title=title, description="")
         return None
 
     @staticmethod

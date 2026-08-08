@@ -116,6 +116,61 @@ def test_bundle_keeps_only_the_launcher_in_macos(install_dir: Path, tmp_path: Pa
     assert not (resources / "fpdb").exists()
 
 
+def test_deferred_bundle_is_not_signed(install_dir: Path, tmp_path: Path, monkeypatch) -> None:
+    calls: list[str] = []
+    monkeypatch.setattr(package_pyoxidizer_macos, "sign_app", lambda *args, **kwargs: calls.append("sign"))
+    monkeypatch.setattr(package_pyoxidizer_macos.subprocess, "run", lambda *args, **kwargs: None)
+
+    package_pyoxidizer_macos.build_app(
+        install_dir,
+        tmp_path / "fpdb.app",
+        "fpdb",
+        "3.0.0",
+        None,
+        defer_signing=True,
+    )
+
+    assert calls == []
+
+
+def test_sign_existing_seals_nested_code_before_bundle(tmp_path: Path, monkeypatch) -> None:
+    app = tmp_path / "fpdb.app"
+    resources = app / "Contents" / "Resources"
+    resources.mkdir(parents=True)
+    nested = resources / "libexample.dylib"
+    nested.write_bytes(MACH_O_HEADER)
+    calls: list[tuple[str, object]] = []
+
+    monkeypatch.setattr(package_pyoxidizer_macos, "resolve_signing_identity", lambda identity: "identity")
+    monkeypatch.setattr(package_pyoxidizer_macos, "sign", lambda paths, **kwargs: calls.append(("nested", paths)))
+    monkeypatch.setattr(
+        package_pyoxidizer_macos,
+        "sign_bundle",
+        lambda bundle, **kwargs: calls.append(("bundle", bundle)),
+    )
+
+    result = package_pyoxidizer_macos.sign_app(app)
+
+    assert result == app
+    assert calls == [("nested", [nested]), ("bundle", app)]
+
+
+def test_ci_smokes_precede_final_pyoxidizer_signature() -> None:
+    workflow = (Path(__file__).resolve().parent.parent / ".github" / "workflows" / "ci.yml").read_text()
+    start = workflow.index("- name: Assemble PyOxidizer macOS application")
+    end = workflow.index("- name: Notarize and staple PyOxidizer macOS release", start)
+    assemble = workflow[start:end]
+
+    unsigned = assemble.index("--defer-signing")
+    last_smoke = assemble.index("--run-module fpdb.infrastructure.platform.macos")
+    final_sign = assemble.index("--sign-existing dist/fpdb.app")
+    final_verify = assemble.index("codesign --verify --deep --strict dist/fpdb.app")
+
+    assert unsigned < last_smoke < final_sign < final_verify
+    assert 'PYTHONDONTWRITEBYTECODE: "1"' in assemble
+    assert "Contents/MacOS/fpdb" not in assemble[final_sign:]
+
+
 def test_bundle_declares_the_launcher_and_icon(install_dir: Path, tmp_path: Path, monkeypatch) -> None:
     monkeypatch.setattr(package_pyoxidizer_macos, "sign", lambda paths, **kwargs: None)
     monkeypatch.setattr(package_pyoxidizer_macos, "sign_bundle", lambda app, **kwargs: None)

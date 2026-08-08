@@ -7,9 +7,7 @@ Events GUI-scripting fallback when Quartz titles are unavailable.
 from __future__ import annotations
 
 import logging
-import os
 import subprocess
-import sys
 
 from . import permissions
 from .protocol import Platform, TableGeometry, TableInfo
@@ -127,8 +125,9 @@ class MacOSTableDetector:
     def _check_permissions_once(self) -> permissions.PermissionStatus:
         """Log the privacy-permission diagnosis once when titles are missing.
 
-        Frozen apps trigger the native prompts automatically. Source installs
-        can opt in with ``FPDB_REQUEST_MACOS_PERMISSIONS=1``.
+        This detector is deliberately diagnostic-only. ``HudMain`` owns the
+        native prompts so one missing title cannot reopen System Settings or
+        duplicate a request already made at HUD startup.
         """
         if self._permissions_checked:
             return self._permission_status or permissions.get_status()
@@ -147,23 +146,16 @@ class MacOSTableDetector:
 
         for message in messages:
             logger.warning(message)
-
-        if getattr(sys, "frozen", False) or os.getenv("FPDB_REQUEST_MACOS_PERMISSIONS") == "1":
-            if not status.screen_recording:
-                logger.info("Requesting Screen Recording permission (native prompt)...")
-                permissions.request_screen_recording_permission()
-                permissions.open_screen_recording_settings()
-            if not status.accessibility:
-                logger.info("Requesting Accessibility permission (native prompt)...")
-                permissions.request_accessibility_permission(prompt=True)
-                permissions.open_accessibility_settings()
         return status
 
-    def find_tables(self, search_string: str = "") -> list[TableInfo]:
+    def find_tables(self, search_string: str = "", *, allow_fallback: bool = True) -> list[TableInfo]:
         """Find all windows matching the search string
 
         Args:
             search_string: String to search for in window titles
+            allow_fallback: Whether argv/System Events may be used when Quartz
+                exposes no matching title. Fast Fold disables this for its
+                first pass so Accessibility can answer before any Apple Event.
 
         Returns:
             List of TableInfo for matching windows
@@ -248,7 +240,7 @@ class MacOSTableDetector:
         # either no window matched, or none exposed a title at all (most often
         # missing Screen Recording permission).
         has_only_empty_titles = len(tables) > 0 and all(t.title == "" for t in tables)
-        if len(tables) == 0 or has_only_empty_titles:
+        if allow_fallback and (len(tables) == 0 or has_only_empty_titles):
             fallback = self._find_tables_without_titles(
                 search_string,
                 target_table_windows,

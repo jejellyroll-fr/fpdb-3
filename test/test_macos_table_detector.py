@@ -7,6 +7,7 @@ stubbed ``subprocess.run`` for the AppleScript fallback.
 
 from __future__ import annotations
 
+import sys
 import time
 import zlib
 from subprocess import TimeoutExpired
@@ -131,6 +132,15 @@ def test_find_tables_returns_fallback_when_quartz_blank() -> None:
     fallback = [TableInfo(window_id=1, title="", geometry=TableGeometry(0, 0, 600, 500), process_name="PokerStars")]
     detector._find_tables_without_titles = Mock(return_value=fallback)
     assert detector.find_tables("pokerstars") == fallback
+
+
+def test_find_tables_can_make_a_quartz_only_first_pass() -> None:
+    detector = _detector(window_list=[_window(number=1, title="", owner="Winamax", pid=42)])
+    detector._find_tables_without_titles = Mock(return_value=[Mock()])
+
+    assert detector.find_tables(r"^Winamax\s+.*\s4\s*$", allow_fallback=False) == []
+
+    detector._find_tables_without_titles.assert_not_called()
 
 
 def test_find_tables_collects_blank_target_windows() -> None:
@@ -628,26 +638,11 @@ def test_check_permissions_once_logs_missing() -> None:
         assert logger.warning.call_count == 2
 
 
-def test_check_permissions_once_requests_when_env_set() -> None:
+def test_check_permissions_once_is_diagnostic_only_even_when_prompts_were_requested() -> None:
     detector = _detector()
     with (
         patch.dict("os.environ", {"FPDB_REQUEST_MACOS_PERMISSIONS": "1"}),
-        patch("fpdb.infrastructure.platform.macos.permissions") as permissions,
-    ):
-        permissions.get_status.return_value = Mock(screen_recording=False, accessibility=False)
-        permissions.describe_missing.return_value = ["missing"]
-        detector._check_permissions_once()
-        permissions.request_screen_recording_permission.assert_called_once()
-        permissions.open_screen_recording_settings.assert_called_once()
-        permissions.request_accessibility_permission.assert_called_once_with(prompt=True)
-        permissions.open_accessibility_settings.assert_called_once()
-
-
-def test_check_permissions_once_requests_automatically_when_frozen() -> None:
-    detector = _detector()
-    with (
-        patch.dict("os.environ", {}, clear=True),
-        patch("fpdb.infrastructure.platform.macos.sys.frozen", True, create=True),
+        patch.object(sys, "frozen", True, create=True),
         patch("fpdb.infrastructure.platform.macos.permissions") as permissions,
     ):
         permissions.get_status.return_value = Mock(screen_recording=False, accessibility=False)
@@ -655,52 +650,10 @@ def test_check_permissions_once_requests_automatically_when_frozen() -> None:
 
         detector._check_permissions_once()
 
-        permissions.request_screen_recording_permission.assert_called_once()
-        permissions.request_accessibility_permission.assert_called_once_with(prompt=True)
-
-
-def test_check_permissions_once_env_skips_granted_permissions() -> None:
-    detector = _detector()
-    with (
-        patch.dict("os.environ", {"FPDB_REQUEST_MACOS_PERMISSIONS": "1"}),
-        patch("fpdb.infrastructure.platform.macos.permissions") as permissions,
-    ):
-        permissions.get_status.return_value = Mock(screen_recording=True, accessibility=False)
-        permissions.describe_missing.return_value = ["missing accessibility"]
-        detector._check_permissions_once()
-        permissions.request_screen_recording_permission.assert_not_called()
-        permissions.open_screen_recording_settings.assert_not_called()
-        permissions.request_accessibility_permission.assert_called_once()
-
-
-def test_check_permissions_once_env_skips_all_when_granted() -> None:
-    detector = _detector()
-    with (
-        patch.dict("os.environ", {"FPDB_REQUEST_MACOS_PERMISSIONS": "1"}),
-        patch("fpdb.infrastructure.platform.macos.permissions") as permissions,
-    ):
-        permissions.get_status.return_value = Mock(screen_recording=True, accessibility=True)
-        permissions.describe_missing.return_value = []
-        detector._check_permissions_once()
         permissions.request_screen_recording_permission.assert_not_called()
         permissions.open_screen_recording_settings.assert_not_called()
         permissions.request_accessibility_permission.assert_not_called()
         permissions.open_accessibility_settings.assert_not_called()
-
-
-def test_check_permissions_once_env_accessibility_granted() -> None:
-    detector = _detector()
-    with (
-        patch.dict("os.environ", {"FPDB_REQUEST_MACOS_PERMISSIONS": "1"}),
-        patch("fpdb.infrastructure.platform.macos.permissions") as permissions,
-    ):
-        # Accessibility granted but Screen Recording missing: only the latter is
-        # requested, and the accessibility branch is skipped.
-        permissions.get_status.return_value = Mock(screen_recording=False, accessibility=True)
-        permissions.describe_missing.return_value = ["missing screen recording"]
-        detector._check_permissions_once()
-        permissions.request_screen_recording_permission.assert_called_once()
-        permissions.request_accessibility_permission.assert_not_called()
 
 
 def test_check_permissions_once_runs_at_most_once() -> None:

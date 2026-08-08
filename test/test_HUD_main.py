@@ -16,6 +16,9 @@ pytestmark = pytest.mark.qt
 from PySide6.QtCore import QTimer
 from PySide6.QtWidgets import QApplication
 
+from fpdb.infrastructure.platform import permissions as macos_permissions
+from fpdb.infrastructure.platform.macos import MacOSTableDetector
+
 # import zmq
 
 # Add parent directory to path before imports
@@ -122,6 +125,60 @@ def test_hud_main_initialization(hud_main) -> None:
     assert hasattr(hud_main, "zmq_worker")
     assert hasattr(hud_main, "main_window")
     assert hud_main._table_stat_set_overrides == {}
+
+
+@pytest.mark.parametrize(
+    ("status", "requested", "restart_message"),
+    [
+        (
+            macos_permissions.PermissionStatus(screen_recording=False, accessibility=False),
+            "screen",
+            "After granting Screen Recording permission, restart FPDB for it to take effect.",
+        ),
+        (
+            macos_permissions.PermissionStatus(screen_recording=True, accessibility=False),
+            "accessibility",
+            "After granting Accessibility permission, restart FPDB for it to take effect.",
+        ),
+        (macos_permissions.PermissionStatus(screen_recording=True, accessibility=True), None, None),
+    ],
+)
+def test_hud_main_is_the_single_sequenced_macos_permission_prompt_owner(
+    status: macos_permissions.PermissionStatus,
+    requested: str | None,
+    restart_message: str | None,
+) -> None:
+    """A detector preflight after HUD startup must not duplicate its prompt."""
+    detector = object.__new__(MacOSTableDetector)
+    detector._permissions_checked = False
+    detector._permission_status = None
+
+    with (
+        patch.dict(os.environ, {}, clear=True),
+        patch.object(HUD_main.sys, "frozen", True, create=True),
+        patch.object(macos_permissions, "get_status", return_value=status),
+        patch.object(macos_permissions, "describe_missing", return_value=[]),
+        patch.object(macos_permissions, "request_screen_recording_permission") as request_screen,
+        patch.object(macos_permissions, "open_screen_recording_settings") as open_screen,
+        patch.object(macos_permissions, "request_accessibility_permission") as request_accessibility,
+        patch.object(macos_permissions, "open_accessibility_settings") as open_accessibility,
+        patch.object(HUD_main.log, "warning") as warning,
+    ):
+        HUD_main.HudMain._check_macos_permissions(SimpleNamespace())
+        detector._check_permissions_once()
+
+    expected_screen_calls = 1 if requested == "screen" else 0
+    expected_accessibility_calls = 1 if requested == "accessibility" else 0
+    assert request_screen.call_count == expected_screen_calls
+    assert open_screen.call_count == expected_screen_calls
+    assert request_accessibility.call_count == expected_accessibility_calls
+    assert open_accessibility.call_count == expected_accessibility_calls
+    if requested == "accessibility":
+        request_accessibility.assert_called_once_with(prompt=True)
+    if restart_message is None:
+        warning.assert_not_called()
+    else:
+        warning.assert_called_once_with(restart_message)
 
 
 def test_table_stat_set_override_is_scoped_by_table_and_game(hud_main) -> None:
@@ -335,6 +392,7 @@ def test_loading_hud_builds_empty_creation_args_without_querying_stats(hud_main)
         width=800,
         height=600,
     )
+    resolved_window = SimpleNamespace(window_id=12, title="Winamax table-a")
 
     with (
         patch.object(hud_main.db_connection, "get_stats_from_hand") as get_stats,
@@ -343,13 +401,31 @@ def test_loading_hud_builds_empty_creation_args_without_querying_stats(hud_main)
         patch.object(hud_main, "_set_table_stats") as set_table_stats,
     ):
         create_hud.side_effect = lambda args: hud_main.hud_dict.__setitem__(args.temp_key, MagicMock())
-        hud_main._create_new_hud("101", "table-a", table_info, 1, 6, "site", loading=True)
+        hud_main._create_new_hud(
+            "101",
+            "table-a",
+            table_info,
+            1,
+            6,
+            "site",
+            loading=True,
+            resolved_window=resolved_window,
+        )
 
     get_stats.assert_not_called()
     args = create_hud.call_args.args[0]
     assert args.stat_dict == {}
     assert args.cards == {}
     assert args.loading is True
+    hud_main.Tables.Table.assert_called_once_with(
+        hud_main.config,
+        "site",
+        table_name="table-a",
+        tournament=None,
+        table_number=None,
+        tourney_name=None,
+        resolved_window=resolved_window,
+    )
     seat_players.assert_not_called()
     set_table_stats.assert_not_called()
 
@@ -2312,10 +2388,14 @@ def test_recheck_replays_the_readers_current_state_for_a_pool(hud_main) -> None:
     applied.assert_called_once_with(table)
 
 
-def _ax_window(title="Winamax Casablanca 6", description="ESCAPE - 0,01-0,02 € - Pot Limit Omaha"):
+def _ax_window(
+    title="Winamax Casablanca 6",
+    description="ESCAPE - 0,01-0,02 € - Pot Limit Omaha",
+    window_id=None,
+):
     from fpdb_3_legacy.winamax_ax_seats import AXTableWindow
 
-    return AXTableWindow(title=title, description=description)
+    return AXTableWindow(title=title, description=description, window_id=window_id)
 
 
 def test_a_hud_is_created_from_the_log_without_waiting_for_an_import(hud_main) -> None:
@@ -2344,6 +2424,36 @@ def test_a_hud_is_created_from_the_log_without_waiting_for_an_import(hud_main) -
         # No real hand exists, so a stand-in keeps the loading HUD off the database.
         assert created["hand_id"].startswith("live:")
         assert hud_main.hud_dict["Casablanca 6"].is_fast_fold is True
+    finally:
+        hud_main.hud_dict = {}
+
+
+def test_fast_fold_reuses_the_window_resolved_at_hand_start(hud_main) -> None:
+    """HUD construction must not perform a second macOS window lookup."""
+    resolved = _ax_window(window_id=48_782)
+    hud_main.winamax_ax_seats = SimpleNamespace(find_table_window=lambda table_no: resolved)
+    hud_main.hud_dict = {}
+    created = {}
+
+    def fake_create(
+        hand_id,
+        temp_key,
+        info,
+        site_id,
+        num_seats,
+        site,
+        *,
+        loading=False,
+        stats=None,
+        resolved_window=None,
+    ):
+        created.update(resolved_window=resolved_window)
+        hud_main.hud_dict[temp_key] = SimpleNamespace(site="Winamax", table=SimpleNamespace(title=info.table_name))
+
+    try:
+        with patch.object(hud_main, "_create_new_hud", side_effect=fake_create):
+            assert hud_main._find_fast_fold_hud(_log_update(table_no="6")) is not None
+        assert created["resolved_window"] is resolved
     finally:
         hud_main.hud_dict = {}
 

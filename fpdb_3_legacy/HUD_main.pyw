@@ -799,11 +799,16 @@ class HudMain(QObject):
                 log.info("Requesting Screen Recording permission (native prompt)...")
                 permissions.request_screen_recording_permission()
                 permissions.open_screen_recording_settings()
-            if not status.accessibility:
+                log.warning(
+                    "After granting Screen Recording permission, restart FPDB for it to take effect.",
+                )
+            elif not status.accessibility:
                 log.info("Requesting Accessibility permission (native prompt)...")
                 permissions.request_accessibility_permission(prompt=True)
                 permissions.open_accessibility_settings()
-            log.warning("After granting permissions, restart FPDB for them to take effect.")
+                log.warning(
+                    "After granting Accessibility permission, restart FPDB for it to take effect.",
+                )
 
     def handle_worker_error(self, error_message: str) -> None:
         """Handle errors from the ZMQ worker."""
@@ -1543,6 +1548,9 @@ class HudMain(QObject):
         # A full HUD, not the loading placeholder: that one has no aux windows,
         # so it can only ever show "Loading HUD..." until an import replaces it.
         # The seats arrive from the window moments later.
+        create_kwargs: dict[str, Any] = {"stats": {}}
+        if window.window_id is not None:
+            create_kwargs["resolved_window"] = window
         self._create_new_hud(
             synthetic_hand,
             temp_key,
@@ -1550,7 +1558,7 @@ class HudMain(QObject):
             self._winamax_site_id,
             self.FAST_FOLD_MAX_SEATS,
             "Winamax",
-            stats={},
+            **create_kwargs,
         )
         hud = self.hud_dict.get(temp_key)
         if hud is None:
@@ -2545,6 +2553,7 @@ class HudMain(QObject):
         *,
         loading: bool = False,
         stats: dict | None = None,
+        resolved_window: Any | None = None,
     ) -> None:
         """Create a new HUD for a table.
 
@@ -2556,6 +2565,10 @@ class HudMain(QObject):
         the database, which is what lets a table be created from the client log
         with no hand behind it -- a full HUD, aux windows and all, on a thread
         that has no database connection.
+
+        ``resolved_window`` is a macOS Fast-Fold window already found at hand
+        start. Passing it through prevents OSXTables from performing a second
+        window scan that can disagree with the first one while TCC is changing.
         """
         info = TableInfo.coerce(table_info)
         table_name = info.table_name
@@ -2627,6 +2640,8 @@ class HudMain(QObject):
             "table_number": tab_number,
             "tourney_name": tourney_name,
         }
+        if resolved_window is not None:
+            table_kwargs["resolved_window"] = resolved_window
         tablewindow = self.Tables.Table(self.config, hud_site_name, **table_kwargs)
 
         if tablewindow.number is None:

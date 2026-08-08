@@ -774,14 +774,19 @@ jobs:
       - name: Assemble PyOxidizer macOS application
         if: runner.os == 'macOS'
         shell: bash
+        env:
+          # The filesystem importer otherwise fills the unsigned smoke bundle
+          # with thousands of disposable .pyc files before its final seal.
+          PYTHONDONTWRITEBYTECODE: "1"
         run: |
           install_dir="build/${{ matrix.target }}/release/install"
           mkdir -p dist
-          python -m tools.package_pyoxidizer_macos "$install_dir" dist/fpdb.app --icon gfx/tribal.icns
-          codesign --verify --deep --strict dist/fpdb.app
+          python -m tools.package_pyoxidizer_macos "$install_dir" dist/fpdb.app --icon gfx/tribal.icns --defer-signing
           dist/fpdb.app/Contents/MacOS/fpdb --hud --help
           dist/fpdb.app/Contents/MacOS/fpdb --run-module fpdb_3_legacy.OSXTables
           dist/fpdb.app/Contents/MacOS/fpdb --run-module fpdb.infrastructure.platform.macos
+          python -m tools.package_pyoxidizer_macos --sign-existing dist/fpdb.app
+          codesign --verify --deep --strict dist/fpdb.app
           if [[ "${{ github.event_name }}" == "release" ]]; then
             codesign -dv --verbose=4 dist/fpdb.app 2> "$RUNNER_TEMP/fpdb-signature.txt"
             codesign -dr - dist/fpdb.app 2> "$RUNNER_TEMP/fpdb-requirement.txt"
@@ -812,6 +817,7 @@ jobs:
         run: |
           install_dir="build/${{ matrix.target }}/release/install"
           if [[ "${{ runner.os }}" == "macOS" ]]; then
+            codesign --verify --deep --strict dist/fpdb.app
             cp docs/macos-gatekeeper.md dist/READ-ME-FIRST-macos.md
             tar -czf "${{ matrix.artifact }}.tar.gz" -C dist fpdb.app READ-ME-FIRST-macos.md
           else
