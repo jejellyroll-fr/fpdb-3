@@ -839,7 +839,7 @@ class SimpleHUD(Aux_Base.AuxSeats):
         log.debug("=== SIMPLEHUD MULTI-BLOCK CREATE() METHOD CALLED ===")
         self.adj = self.adj_seats()
         self.hero_display_seat = self._hero_display_seat()
-        self.m_windows: dict[Any, Any] = {}
+        self.m_windows = {}
         self._keep_block_positions_for_this_table()
         self._claim_legacy_block_positions()
         # Unscaled reference seat anchors, captured once. Kept separate from the

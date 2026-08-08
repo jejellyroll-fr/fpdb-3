@@ -470,7 +470,7 @@ class AuxSeats(AuxWindow):
         # been created yet answers "nothing to place" rather than raising: a
         # loading HUD deliberately skips create(), and the table watcher can
         # report a move or a resize while it is still on screen.
-        self.adj: dict[int, int] = {}
+        self.adj: list[int] = []
         self.m_windows: dict[Any, Any] = {}
         # but _not_ offset to the absolute screen position
         self.displayed = False  # the seat windows are displayed
@@ -598,7 +598,7 @@ class AuxSeats(AuxWindow):
         """
         log.debug("=== AUX_BASE CREATE() METHOD CALLED ===")
         self.adj = self.adj_seats()
-        self.m_windows: dict[Any, Any] = {}
+        self.m_windows = {}
         window_keys: list[int | str] = [*range(1, self.hud.max + 1), "common"]
         for i in window_keys:
             if i == "common":

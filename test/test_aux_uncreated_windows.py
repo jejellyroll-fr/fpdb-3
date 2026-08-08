@@ -48,7 +48,7 @@ def uncreated() -> AuxSeats:
 
 class TestBeforeCreate:
     def test_the_seat_map_exists_and_is_empty(self, uncreated: AuxSeats) -> None:
-        assert uncreated.adj == {}
+        assert uncreated.adj == []
         assert uncreated.m_windows == {}
 
     def test_resizing_is_a_no_op(self, uncreated: AuxSeats) -> None:
@@ -76,7 +76,7 @@ class TestAfterCreate:
         hud.layout.location = {seat: (seat * 10, seat * 20) for seat in range(1, 7)}
         hud.layout.common = (5, 6)
         aux = AuxSeats(hud, Mock(), {})
-        aux.adj = dict.fromkeys(range(1, 7), 1) | {1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6}
+        aux.adj = list(range(7))  # identity: seat N sits at layout slot N
         aux.m_windows = {seat: Mock() for seat in range(1, 7)} | {"common": Mock()}
 
         aux.resize_windows()
