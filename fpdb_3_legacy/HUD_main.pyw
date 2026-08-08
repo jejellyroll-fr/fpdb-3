@@ -686,10 +686,18 @@ class HudMain(QObject):
 
             from fpdb_3_legacy.winamax_ax_seats import WinamaxAXSeatReader, is_supported
             from fpdb_3_legacy.winamax_live_log_reader import WinamaxLiveLogReader
+            from fpdb_3_legacy.winamax_pool_games import WinamaxPoolGames
 
             # Reads seats off the table window itself. The log can only say who
             # has acted, and never where they sit; this knows both, immediately.
             self.winamax_ax_seats = WinamaxAXSeatReader() if is_supported() else None
+
+            # The window says which game it deals only to a process holding
+            # macOS Accessibility, which packaged builds do not. Imported hands
+            # say it unconditionally, so what they prove is kept.
+            self.winamax_pool_games = WinamaxPoolGames(
+                Path(Configuration.CONFIG_PATH) / "winamax_pool_games.json" if Configuration.CONFIG_PATH else None,
+            )
 
             # Queued by Qt because the reader emits from its tailing thread.
             self.winamax_table_update.connect(self._on_winamax_table_update)
@@ -1425,6 +1433,10 @@ class HudMain(QObject):
             table_no,
             f"{info.table_name} {table_no}",
         )
+        # This hand settles what the pool deals, which is the one thing the log
+        # cannot say. Kept so later hands on this pool -- and later sessions --
+        # can build their HUD from the log alone.
+        self.winamax_pool_games.remember(info.table_name, info.poker_game)
         return info._replace(table_name=f"{info.table_name} {table_no}")
 
     def _hud_is_fast_fold(self, hud: Hud.Hud, temp_key: str = "") -> bool:
@@ -1477,19 +1489,23 @@ class HudMain(QObject):
             self._ff_trace(
                 update.hand_id,
                 "create-deferred",
-                f"Winamax [table] {update.table_no} is not accessible; waiting for an imported hand",
+                f"no open Winamax window is titled with the client index {update.table_no}; "
+                f"waiting for an imported hand",
             )
             return None
         temp_key = window.table_name
         if temp_key in self.hud_dict:
             return temp_key, self.hud_dict[temp_key]
 
-        poker_game = window.poker_game
+        # The window states the game only when the accessibility API answered.
+        # Otherwise fall back on what an imported hand from this pool proved.
+        poker_game = window.poker_game or self.winamax_pool_games.get(temp_key)
         if not poker_game:
             self._ff_trace(
                 update.hand_id,
                 "create-skipped",
-                f"{window.title!r} does not say what is being played: {window.description!r}",
+                f"{window.title!r} does not say what is being played ({window.description!r}) and "
+                f"no hand from this pool has been imported yet; the next one settles it",
             )
             return None
 

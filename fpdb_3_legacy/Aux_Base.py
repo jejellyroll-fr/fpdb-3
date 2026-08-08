@@ -466,6 +466,12 @@ class AuxSeats(AuxWindow):
         """
         super().__init__(hud, params, config)
         self.positions: dict[Any, tuple[int, int]] = {}
+        # Both are filled in by create(). Declared here so an aux that has not
+        # been created yet answers "nothing to place" rather than raising: a
+        # loading HUD deliberately skips create(), and the table watcher can
+        # report a move or a resize while it is still on screen.
+        self.adj: dict[int, int] = {}
+        self.m_windows: dict[Any, Any] = {}
         # but _not_ offset to the absolute screen position
         self.displayed = False  # the seat windows are displayed
         self.uses_timer = False  # the Aux_seats object uses a timer to control hiding
@@ -502,6 +508,8 @@ class AuxSeats(AuxWindow):
         Updates the internal map of window positions based on the latest table and layout dimensions,
         then moves all windows accordingly.
         """
+        if not self.m_windows:
+            return  # not created yet; create() will place everything itself
         log.debug("RESIZING HUD WINDOWS - Table dimensions: %dx%d", self.hud.table.width, self.hud.table.height)
         # Resize calculation has already happened in HUD_main&hud.py
         # refresh our internal map to reflect these changes
@@ -534,6 +542,8 @@ class AuxSeats(AuxWindow):
         Calculates the absolute positions for each window based on the table's current coordinates and layout,
         clamps them to the screen, and moves the windows accordingly.
         """
+        if not self.m_windows:
+            return  # not created yet; there is nothing on screen to move
         # Ensure table coordinates are valid (not negative or off-screen)
         table_x = max(0, self.hud.table.x) if self.hud.table.x is not None else 50
         table_y = max(0, self.hud.table.y) if self.hud.table.y is not None else 50

@@ -784,18 +784,6 @@ class GuiAutoImport(QWidget):
             env = os.environ.copy()
             env["PYINSTALLER_RESET_ENVIRONMENT"] = "1"
 
-        # Source launches normally inherit macOS privacy grants from the user's
-        # terminal/Python. Packaged applications are separate TCC clients and
-        # start without those grants, so Fast HUD can tail Winamax's log but
-        # cannot inspect the table window. It then falls back to the delayed
-        # hand-history import, which looks like a slow trigger. Opt packaged
-        # macOS HUDs into the existing native permission preflight so the user
-        # is prompted instead of silently taking that slow path.
-        if getattr(sys, "frozen", False) and sys.platform == "darwin":
-            if env is None:
-                env = os.environ.copy()
-            env.setdefault("FPDB_REQUEST_MACOS_PERMISSIONS", "1")
-
         if sys.platform.startswith("linux") and os.getenv("FPDB_FORCE_X11") == "1":
             if env is None:
                 env = os.environ.copy()

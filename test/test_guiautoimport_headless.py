@@ -215,7 +215,9 @@ def test_launch_hud_pyinstaller_macos_reuses_main_app_identity(monkeypatch, tmp_
     assert command == [str(fpdb_executable), "--hud", "--config", "bundled.xml"]
     child_env = mock_popen.call_args.kwargs["env"]
     assert child_env["PYINSTALLER_RESET_ENVIRONMENT"] == "1"
-    assert child_env["FPDB_REQUEST_MACOS_PERMISSIONS"] == "1"
+    # Finding table windows no longer depends on macOS Accessibility, so the
+    # HUD must not push the user at System Settings on every launch.
+    assert "FPDB_REQUEST_MACOS_PERMISSIONS" not in child_env
 
 
 def test_launch_hud_pyoxidizer_reuses_main_executable(monkeypatch, tmp_path):
@@ -235,7 +237,7 @@ def test_launch_hud_pyoxidizer_reuses_main_executable(monkeypatch, tmp_path):
 
     command = mock_popen.call_args.args[0]
     assert command == [str(fpdb_executable), "--hud", "--config", "bundled.xml"]
-    assert mock_popen.call_args.kwargs["env"]["FPDB_REQUEST_MACOS_PERMISSIONS"] == "1"
+    assert "env" not in mock_popen.call_args.kwargs
 
 
 def test_launch_hud_pyoxidizer_non_macos_does_not_request_macos_permissions(monkeypatch, tmp_path):
