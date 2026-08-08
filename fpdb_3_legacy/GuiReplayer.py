@@ -2226,6 +2226,8 @@ class GuiReplayer(QWidget):
 
     def _hero_odds_summary(self, frame: ReplayFrame, current_index: int) -> str:
         metrics = self._hero_decision_metrics(frame, current_index)
+        if not metrics.get("is_hero_turn"):
+            return ""
         parts = []
         if metrics.get("facing_call"):
             call_amt = format_replay_amount(metrics["call_amount"], self.currency_code)
@@ -2246,7 +2248,10 @@ class GuiReplayer(QWidget):
 
     def _draw_summary(self, painter: QPainter, frame: ReplayFrame, layout: ReplayLayout, current_index: int) -> None:
         metrics = self._hero_decision_metrics(frame, current_index)
-        has_metrics = bool(metrics.get("facing_call") or metrics.get("push_equity_pct") is not None)
+        has_metrics = bool(
+            metrics.get("is_hero_turn")
+            and (metrics.get("facing_call") or metrics.get("push_equity_pct") is not None)
+        )
         box_height = 78 if has_metrics else 56
         summary_width = min(640, max(320, layout.table_rect.width() * 0.48))
         if layout.timeline_rect.isNull():
