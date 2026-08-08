@@ -258,6 +258,13 @@ class iPoker(IPokerStreetsActionsMixin, IPokerHandInfoMixin, IPokerTournamentRes
         r'|chips="({LS})?(?P<CASH>[\d.,\s]+)({LS})?"'
         r'|dealer="(?P<BUTTONPOS>(0|1))"'
         r'|win="({LS})?(?P<WIN>[\d.,\s]+)({LS})?"'
+        # Run-it-twice hands split the winnings across one boardNwin attribute
+        # per board. They are matched but not captured: WIN already carries the
+        # player's total, and the per-board split is only meaningful alongside
+        # the second board, which readCommunityCards does not yet read. Leaving
+        # them out of the alternation makes the whole <player> tag fail to
+        # match, so every run-it-twice hand is discarded as a partial hand.
+        r'|board\d+win="({LS})?[\d.,\s]+({LS})?"'
         r'|bet="({LS})?(?P<BET>[^"]+)({LS})?"'
         r'|rakeamount="({LS})?(?P<RAKEAMOUNT>[\d.,\s]+)({LS})?"'
         r'|addon="\d*"'
@@ -268,8 +275,13 @@ class iPoker(IPokerStreetsActionsMixin, IPokerHandInfoMixin, IPokerTournamentRes
         re.MULTILINE,
     )
 
+    # A run-it-twice street carries one <cards board="boardN"> tag per board.
+    # search() returns the first, so such a hand is read as a single-board hand
+    # running out board 1; the second board is not modelled yet. Without board
+    # in the alternation the tag does not match at all and readCommunityCards
+    # rejects the whole hand.
     re_board = re.compile(
-        r'<cards( (type="(?P<STREET>Flop|Turn|River)"|player=""))+>(?P<CARDS>.+?)</cards>',
+        r'<cards( (type="(?P<STREET>Flop|Turn|River)"|player=""|board="[^"]*"))+>(?P<CARDS>.+?)</cards>',
         re.MULTILINE,
     )
     re_end_of_hand = re.compile(r'<round id="END_OF_GAME"', re.MULTILINE)
