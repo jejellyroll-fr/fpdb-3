@@ -6,7 +6,7 @@ from fpdb_3_legacy.sql_queries_core import core_lookup_queries
 
 def test_core_lookup_queries_are_installed_exactly() -> None:
     expected = core_lookup_queries()
-    assert len(expected) == 6
+    assert len(expected) == 8
     for backend in ("mysql", "postgresql"):
         assert expected.items() <= Sql(db_server=backend).query.items()
     sqlite_expected = {key: value.replace("%s", "?") for key, value in expected.items()}
