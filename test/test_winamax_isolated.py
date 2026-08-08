@@ -195,6 +195,8 @@ class TestWinamaxIsolated(unittest.TestCase):
             expresso_re = self.parser.getTableTitleRe(tournament="1142290368", table_number="1")
             assert re.search(expresso_re, "Winamax Expresso Nitro(1142290368)(#0)") is not None
             assert re.search(expresso_re, "Winamax Expresso Nitro(1142290368)(#1)") is not None
+            assert re.search(expresso_re, "Winamax Poker - Expresso Nitro 5€ - 1142290368") is not None
+            assert re.search(expresso_re, "Winamax Poker - Expresso 5€ - 1142290368") is not None
             assert re.search(expresso_re, "Winamax Expresso Nitro(999999999)(#0)") is None
 
             # Test Tournament with specific table number

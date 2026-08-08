@@ -1295,7 +1295,10 @@ class Winamax(HandHistoryConverter):
             t_escaped = re.escape(str(tournament))
             t_num = str(table_number) if table_number is not None else "0"
             t_num_escaped = re.escape(t_num)
-            regex = rf"Winamax\s+([^\(]+)\({t_escaped}\)\(#0*(?:{t_num_escaped}|0)\)"
+            regex = (
+                rf"Winamax\s+.*(?:\(?{t_escaped}\)?)"
+                rf"(?:\(#0*(?:{t_num_escaped}|0)\)|(?!\(#\d+\)))$"
+            )
 
             log.debug("regex get mtt sng expresso cash title: %s", regex)
         log.info("Winamax.getTableTitleRe: returns: '%s'", regex)
