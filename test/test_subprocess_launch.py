@@ -52,7 +52,9 @@ def test_hud_command_uses_the_sibling_executable_on_pyinstaller_macos(monkeypatc
     monkeypatch.setattr(sys, "frozen", True, raising=False)
     monkeypatch.setattr(sys, "platform", "darwin")
     monkeypatch.setattr(sys, "executable", str(tmp_path / "fpdb"))
-    hud = tmp_path / "HUD_main"
+    # The name is chosen from os.name, not sys.platform, so this test has to
+    # follow the host it runs on -- the Windows runner builds HUD_main.exe.
+    hud = tmp_path / ("HUD_main.exe" if os.name == "nt" else "HUD_main")
     hud.write_text("")
 
     command = hud_main_command("-x")

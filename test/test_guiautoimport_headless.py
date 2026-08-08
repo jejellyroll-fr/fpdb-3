@@ -209,7 +209,9 @@ def test_launch_hud_pyinstaller_macos_uses_the_sibling_executable(monkeypatch, t
     gui_mod = sys.modules["fpdb_3_legacy.GuiAutoImport"]
     fpdb_executable = tmp_path / "fpdb"
     fpdb_executable.touch()
-    hud_executable = tmp_path / "HUD_main"
+    # Chosen from os.name, not sys.platform, so follow the host: the Windows
+    # runner looks for HUD_main.exe even with sys.platform faked to darwin.
+    hud_executable = tmp_path / ("HUD_main.exe" if os.name == "nt" else "HUD_main")
     hud_executable.touch()
     monkeypatch.setattr(gui_mod.sys, "frozen", True, raising=False)
     monkeypatch.setattr(gui_mod.sys, "executable", str(fpdb_executable))
