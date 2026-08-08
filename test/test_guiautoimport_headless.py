@@ -160,7 +160,6 @@ def test_hud_base_path_is_module_dir_and_holds_hud_main():
 @pytest.mark.parametrize(
     ("platform_name", "os_name", "executable_name"),
     [
-        ("darwin", "posix", "HUD_main"),
         ("linux", "posix", "HUD_main"),
         ("win32", "nt", "HUD_main.exe"),
     ],
@@ -192,6 +191,29 @@ def test_launch_hud_uses_bundled_sibling_executable(monkeypatch, tmp_path, platf
     assert command == [str(hud_executable), "--config", "bundled.xml"]
     popen_kwargs = mock_popen.call_args.kwargs
     assert popen_kwargs["env"]["PYINSTALLER_RESET_ENVIRONMENT"] == "1"
+
+
+def test_launch_hud_pyinstaller_macos_reuses_main_app_identity(monkeypatch, tmp_path):
+    """The HUD must share fpdb.app's TCC grants instead of using a sibling identity."""
+    settings = _make_settings(MagicMock())
+    settings["cl_options"] = "--config bundled.xml"
+    config = _make_config()
+    config.install_method = "app"
+    gui = _make_gui(settings, config)
+
+    gui_mod = sys.modules["fpdb_3_legacy.GuiAutoImport"]
+    fpdb_executable = tmp_path / "fpdb"
+    fpdb_executable.touch()
+    monkeypatch.setattr(gui_mod.sys, "frozen", True, raising=False)
+    monkeypatch.setattr(gui_mod.sys, "executable", str(fpdb_executable))
+    monkeypatch.setattr(gui_mod.sys, "platform", "darwin")
+
+    with patch.object(gui_mod.subprocess, "Popen", return_value=MagicMock()) as mock_popen:
+        gui._launch_hud()
+
+    command = mock_popen.call_args.args[0]
+    assert command == [str(fpdb_executable), "--hud", "--config", "bundled.xml"]
+    assert mock_popen.call_args.kwargs["env"]["PYINSTALLER_RESET_ENVIRONMENT"] == "1"
 
 
 def test_launch_hud_pyoxidizer_reuses_main_executable(monkeypatch, tmp_path):

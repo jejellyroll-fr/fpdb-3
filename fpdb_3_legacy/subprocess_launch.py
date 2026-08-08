@@ -16,6 +16,7 @@ import sys
 from pathlib import Path
 
 RUN_MODULE_FLAG = "--run-module"
+HUD_FLAG = "--hud"
 
 
 def python_module_command(module: str, *args: str, unbuffered: bool = True) -> list[str]:
@@ -38,9 +39,12 @@ def hud_main_command(*args: str) -> list[str]:
         FileNotFoundError: when a packaged build has no HUD_main next to it.
     """
     frozen = getattr(sys, "frozen", False)
-    if frozen == "pyoxidizer":
-        # A single binary hosts both entry points; --hud selects HUD_main.
-        return [sys.executable, "--hud", *args]
+    if frozen == "pyoxidizer" or (frozen and sys.platform == "darwin"):
+        # Keep the macOS HUD under the main app's code identity. TCC grants
+        # Screen Recording and Accessibility to that identity; a separately
+        # frozen sibling has another designated requirement and loses both
+        # permissions even though it lives inside fpdb.app.
+        return [sys.executable, HUD_FLAG, *args]
     if frozen:
         # PyInstaller ships HUD_main as a sibling executable of fpdb.
         name = "HUD_main.exe" if os.name == "nt" else "HUD_main"
@@ -70,6 +74,26 @@ def dispatch_run_module(argv: list[str] | None = None) -> bool:
     sys.argv = [module, *argv[3:]]
     unbuffer_streams()
     runpy.run_module(module, run_name="__main__", alter_sys=True)
+    return True
+
+
+def dispatch_hud_main(argv: list[str] | None = None) -> bool:
+    """Run ``HUD_main.pyw`` through the current frozen launcher.
+
+    PyInstaller's macOS bundle must use the same executable for the GUI and HUD
+    so macOS applies the app's TCC permissions to both processes. The HUD script
+    is already shipped as package data beside this module.
+    """
+    argv = sys.argv if argv is None else argv
+    if len(argv) < 2 or argv[1] != HUD_FLAG:
+        return False
+    hud_main = Path(__file__).resolve().with_name("HUD_main.pyw")
+    if not hud_main.is_file():
+        msg = f"HUD_main not found at {hud_main}"
+        raise FileNotFoundError(msg)
+    sys.argv = [str(hud_main), *argv[2:]]
+    unbuffer_streams()
+    runpy.run_path(str(hud_main), run_name="__main__")
     return True
 
 
