@@ -39,11 +39,8 @@ def hud_main_command(*args: str) -> list[str]:
         FileNotFoundError: when a packaged build has no HUD_main next to it.
     """
     frozen = getattr(sys, "frozen", False)
-    if frozen == "pyoxidizer" or (frozen and sys.platform == "darwin"):
-        # Keep the macOS HUD under the main app's code identity. TCC grants
-        # Screen Recording and Accessibility to that identity; a separately
-        # frozen sibling has another designated requirement and loses both
-        # permissions even though it lives inside fpdb.app.
+    if frozen == "pyoxidizer":
+        # A single binary hosts both entry points; --hud selects HUD_main.
         return [sys.executable, HUD_FLAG, *args]
     if frozen:
         # PyInstaller ships HUD_main as a sibling executable of fpdb.

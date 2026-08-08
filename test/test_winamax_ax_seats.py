@@ -296,3 +296,62 @@ class TestApplescriptWindowTitles:
         monkeypatch.setattr(winamax_ax_seats.subprocess, "run", timeout)
 
         assert winamax_ax_seats.applescript_window_titles() == []
+
+
+class TestAutomationRefusalIsReported:
+    """A refused scan and an empty table list used to look identical in the log.
+
+    They are opposite situations: one means "no table is open", the other means
+    "this build will never see a table until the user grants Automation".
+    """
+
+    @staticmethod
+    def _run(monkeypatch, *, returncode: int, stderr: str):
+        monkeypatch.setattr(winamax_ax_seats, "_automation_refused", False)
+        monkeypatch.setattr(
+            winamax_ax_seats.subprocess,
+            "run",
+            lambda *_a, **_k: SimpleNamespace(returncode=returncode, stdout="", stderr=stderr),
+        )
+        return winamax_ax_seats.applescript_window_titles()
+
+    def test_a_refusal_is_reported_once_at_warning(self, monkeypatch, caplog) -> None:
+        with caplog.at_level("WARNING", logger=winamax_ax_seats.log.name):
+            assert self._run(monkeypatch, returncode=1, stderr="execution error: Not authorized (-1743)") == []
+            # Second call: still refused, but the user has already been told.
+            monkeypatch.setattr(
+                winamax_ax_seats.subprocess,
+                "run",
+                lambda *_a, **_k: SimpleNamespace(returncode=1, stdout="", stderr="(-1743)"),
+            )
+            assert winamax_ax_seats.applescript_window_titles() == []
+
+        warnings = [r for r in caplog.records if r.levelname == "WARNING"]
+        assert len(warnings) == 1
+        assert "Automation" in warnings[0].getMessage()
+
+    def test_an_unanswered_prompt_counts_as_a_refusal(self, monkeypatch, caplog) -> None:
+        """-1712 means the permission dialog is up and nobody has answered it."""
+        with caplog.at_level("WARNING", logger=winamax_ax_seats.log.name):
+            assert self._run(monkeypatch, returncode=1, stderr="AppleEvent timed out. (-1712)") == []
+        assert any(r.levelname == "WARNING" for r in caplog.records)
+
+    def test_an_ordinary_failure_is_not_dressed_up_as_a_permission_problem(self, monkeypatch, caplog) -> None:
+        with caplog.at_level("WARNING", logger=winamax_ax_seats.log.name):
+            assert self._run(monkeypatch, returncode=1, stderr="syntax error somewhere") == []
+        assert not [r for r in caplog.records if r.levelname == "WARNING"]
+
+    def test_a_hung_scan_is_reported_too(self, monkeypatch, caplog) -> None:
+        monkeypatch.setattr(winamax_ax_seats, "_automation_refused", False)
+
+        def timeout(*_a, **_k):
+            raise winamax_ax_seats.subprocess.TimeoutExpired(cmd="osascript", timeout=5)
+
+        monkeypatch.setattr(winamax_ax_seats.subprocess, "run", timeout)
+        with caplog.at_level("WARNING", logger=winamax_ax_seats.log.name):
+            assert winamax_ax_seats.applescript_window_titles() == []
+        assert any(r.levelname == "WARNING" for r in caplog.records)
+
+    def test_the_scan_runs_from_an_absolute_path(self) -> None:
+        """So it cannot be diverted by whatever PATH the packaged app inherited."""
+        assert winamax_ax_seats.OSASCRIPT.startswith("/")

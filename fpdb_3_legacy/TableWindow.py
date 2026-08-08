@@ -104,6 +104,11 @@ class Table_Window:
         self.gdkhandle: Any = None
         self.number: Any = None
         self.title = ""
+        # Filled in by HUD_main once the window is paired with a HUD: the key it
+        # files the HUD under, and the table size it was matched at. Declared
+        # here because Hud and the aux windows both read them back.
+        self.key = ""
+        self.max: int | None = None
         self.name = ""
         self.type = ""
         self.tournament: int | None = None

@@ -29,6 +29,7 @@ from dataclasses import dataclass
 from optparse import Values
 from pathlib import Path
 from queue import Empty, Queue
+from types import ModuleType
 from typing import Any
 
 import zmq as _zmq
@@ -579,21 +580,33 @@ class HudMain(QObject):
         self.config = Configuration.Config(file=options.config, dbname=options.dbname)
         log.info("HUD_main initialized - Config loaded, OS family: %s", self.config.os_family)
 
-        # Selecting the right module for the OS
+        # Selecting the right module for the OS. Imported through the package
+        # rather than as bare top-level modules: a bare "import OSXTables" only
+        # resolves because the repository root happens to be on sys.path, which
+        # is true of a source checkout and of HUD_main's own frozen archive, but
+        # not of every way this file can be run. Each import stays inside its
+        # branch -- the other two backends need bindings this platform lacks --
+        # and the module is bound once, so mypy sees a single definition.
+        tables: ModuleType
         if self.config.os_family == "Linux":
             # Simplified: XWayland support or X11 fallback
             if os.getenv("QT_QPA_PLATFORM") == "xcb" or not os.environ.get("WAYLAND_DISPLAY"):
                 log.info("XWayland forced under wayland → backend XTables")
-                import XTables as Tables
             else:
                 log.info("Session X11 detected → backend XTables")
-                import XTables as Tables
+            from fpdb_3_legacy import XTables
+
+            tables = XTables
         elif self.config.os_family == "Mac":
-            import OSXTables as Tables
+            from fpdb_3_legacy import OSXTables
+
+            tables = OSXTables
         elif self.config.os_family in ("XP", "Win7"):
-            import WinTables as Tables
+            from fpdb_3_legacy import WinTables
+
+            tables = WinTables
         log.info("HudMain starting: Using db name = %s", db_name)
-        self.Tables = Tables  # Assign Tables to self.Tables
+        self.Tables = tables
 
         # Surface missing macOS privacy permissions at startup so table-detection
         # failures ("table name ... not found") are explained before the first hand.
