@@ -164,11 +164,12 @@ def test_ci_smokes_precede_final_pyoxidizer_signature() -> None:
     unsigned = assemble.index("--defer-signing")
     last_smoke = assemble.index("--run-module fpdb.infrastructure.platform.macos")
     final_sign = assemble.index("--sign-existing dist/fpdb.app")
+    immutable_smoke = assemble.index("--run-module fpdb_3_legacy.winamax_ax_seats")
     final_verify = assemble.index("codesign --verify --deep --strict dist/fpdb.app")
 
-    assert unsigned < last_smoke < final_sign < final_verify
+    assert unsigned < last_smoke < final_sign < immutable_smoke < final_verify
     assert 'PYTHONDONTWRITEBYTECODE: "1"' in assemble
-    assert "Contents/MacOS/fpdb" not in assemble[final_sign:]
+    assert "Contents/MacOS/fpdb" not in assemble[final_verify:]
 
 
 def test_pyoxidizer_runtime_cannot_mutate_a_signed_bundle_with_bytecode() -> None:

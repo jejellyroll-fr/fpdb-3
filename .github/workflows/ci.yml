@@ -786,6 +786,9 @@ jobs:
           dist/fpdb.app/Contents/MacOS/fpdb --run-module fpdb_3_legacy.OSXTables
           dist/fpdb.app/Contents/MacOS/fpdb --run-module fpdb.infrastructure.platform.macos
           python -m tools.package_pyoxidizer_macos --sign-existing dist/fpdb.app
+          # Prove that a fresh filesystem import cannot mutate the sealed app.
+          # This module is intentionally absent from the pre-sign smoke list.
+          dist/fpdb.app/Contents/MacOS/fpdb --run-module fpdb_3_legacy.winamax_ax_seats
           codesign --verify --deep --strict dist/fpdb.app
           if [[ "${{ github.event_name }}" == "release" ]]; then
             codesign -dv --verbose=4 dist/fpdb.app 2> "$RUNNER_TEMP/fpdb-signature.txt"
