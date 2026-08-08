@@ -20,6 +20,10 @@ def core_lookup_queries() -> dict[str, str]:
             and Players.siteId = Sites.id
         """
 
+    query["get_player_id_by_name"] = "SELECT id FROM Players WHERE name = %s"
+
+    query["get_site_hand_no"] = "SELECT siteHandNo FROM Hands WHERE id = %s"
+
     query["get_player_names"] = """
             select p.name
             from Players p
@@ -58,4 +62,3 @@ def core_lookup_queries() -> dict[str, str]:
         """
 
     return query
-

@@ -120,6 +120,7 @@ class Hud:
         self.seat_players: dict[Any, Any] = {}
         self.hand_instance: Any = None
         self.is_loading = False
+        self.is_fast_fold = False
         self.loading_window: Any = None
         self.table_name = ""
         self.tablenumber: Any = None

@@ -1219,9 +1219,8 @@ class Database(
         ids, such as the Winamax client log.
         """
         try:
-            ph = self.sql.query.get("placeholder", "%s")
             c = self.get_cursor()
-            c.execute(f"SELECT siteHandNo FROM Hands WHERE id = {ph}", (hand_id,))
+            c.execute(self.sql.query["get_site_hand_no"], (hand_id,))
             row = c.fetchone()
             return str(row[0]) if row and row[0] is not None else None
         except Exception:
@@ -1232,10 +1231,8 @@ class Database(
     def get_player_id_by_name(self, player_name: str) -> int | None:
         """Retrieve database player ID by player screen name."""
         try:
-            ph = self.sql.query.get("placeholder", "%s")
-            q = f"SELECT id FROM Players WHERE name = {ph}"
             c = self.get_cursor()
-            c.execute(q, (player_name,))
+            c.execute(self.sql.query["get_player_id_by_name"], (player_name,))
             row = c.fetchone()
             return int(row[0]) if row else None
         except Exception:
