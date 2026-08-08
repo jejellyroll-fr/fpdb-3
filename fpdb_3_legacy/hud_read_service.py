@@ -35,6 +35,7 @@ def _snapshot_hand(prepared: HudPreparedHand) -> HudPreparedHand:
     return HudPreparedHand(
         hand_id=prepared.hand_id,
         table_info=prepared.table_info,
+        site_hand_no=prepared.site_hand_no,
         stat_dict=copy.deepcopy(prepared.stat_dict),
         positions=copy.deepcopy(prepared.positions),
         seat_players=copy.deepcopy(prepared.seat_players),
@@ -96,6 +97,9 @@ class HudPreparedHand:
 
     hand_id: str
     table_info: tuple | None = None
+    site_hand_no: str | None = None
+    """The site's own hand id, which the Winamax log also speaks."""
+
     stat_dict: dict[Any, Any] = field(default_factory=dict)
     positions: dict[Any, Any] = field(default_factory=dict)
     seat_players: dict[Any, Any] = field(default_factory=dict)
@@ -412,7 +416,12 @@ class HudReadService:
             prepared = HudPreparedHand(
                 hand_id=hand_id,
                 table_info=table_info,
-                loaded_fields=frozenset({"table_info"}),
+                # Carried this early so a Fast-Fold table can be tied to the
+                # client window it was played on straight away. Without it the
+                # loading HUD cannot be placed and the table waits for the full
+                # snapshot, which costs it a hand or two.
+                site_hand_no=self.database.get_site_hand_no(hand_id),
+                loaded_fields=frozenset({"table_info", "site_hand_no"}),
             )
             hands[_hand_key(hand_id)] = prepared
             latest[hud_temp_key(table_info)] = hand_id

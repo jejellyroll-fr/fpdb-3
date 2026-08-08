@@ -2243,7 +2243,7 @@ class ModernHudPreferences(QDialog):
         import defusedxml.minidom
         from PySide6.QtWidgets import QFileDialog, QInputDialog, QMessageBox
 
-        from fpdb_3_legacy.hud_package import merge_package_game_bindings
+        from fpdb_3_legacy.hud_package import merge_package_game_bindings, merge_package_profile_rules
 
         filename, _filter = QFileDialog.getOpenFileName(
             self,
@@ -2500,6 +2500,17 @@ class ModernHudPreferences(QDialog):
             # it when the table opens. Repoint the binding when a conflicting
             # profile was renamed during this import.
             merge_package_game_bindings(
+                self.config.doc,
+                root,
+                profile_names={imported_name: new_profile_name},
+                overwrite=True,
+            )
+
+            # E. Apply any profile rules the package carries. A package meant
+            # for one kind of table -- Fast-Fold, say -- selects itself with a
+            # rule rather than by taking over the game's binding, which every
+            # ordinary table of that game would otherwise inherit.
+            merge_package_profile_rules(
                 self.config.doc,
                 root,
                 profile_names={imported_name: new_profile_name},

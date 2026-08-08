@@ -381,6 +381,122 @@ class DatabaseHudStatsMixin:
         self._merge_aof_profile_stats(stat_dict, poker_game or handinfo["category"])
         return stat_dict
 
+    def _live_player_rewrites(self, placeholder: str, player_count: int):
+        """The edits that key the HUD aggregate on players instead of a hand.
+
+        Fast-Fold tables know who is sitting there from the client log long
+        before any hand history for that table exists, so there is no hand to
+        join through. Rewriting the one source query keeps the column list --
+        and therefore every stat function downstream -- identical to the normal
+        path; a second copy of a 300-line aggregate would drift, and the HUD
+        would report different numbers depending on which path served it.
+        """
+        ids = ", ".join([placeholder] * player_count)
+        return (
+            # The seat column reads HandsPlayers through the hand being asked
+            # about. There is no such hand here and the caller assigns seats from
+            # the log, so the whole expression goes -- along with the last
+            # references to both Hands and HandsPlayers.
+            (
+                "max(case when hc.gametypeId = h.gametypeId\n"
+                "                            then hp.seatNo\n"
+                "                            else -1\n"
+                "                       end)                            AS seat,",
+                "-1                                         AS seat,",
+            ),
+            (
+                "FROM Hands h\n                 INNER JOIN HandsPlayers hp ON (hp.handId = h.id)\n"
+                "                 INNER JOIN HudCache hc     ON (hc.playerId = hp.playerId)",
+                "FROM HudCache hc",
+            ),
+            (f"WHERE h.id = {placeholder}", f"WHERE hc.playerId IN ({ids})"),
+            ("hp.playerId != ", "hc.playerId != "),
+            ("hp.playerId = ", "hc.playerId = "),
+        )
+
+    @reconnect_on_connection_loss
+    def get_stats_for_players(
+        self,
+        player_ids,
+        gametype_id,
+        hud_params=None,
+        hero_id=-1,
+        num_seats=6,
+        poker_game: str | None = None,
+    ):
+        """HUD stats for a set of players, with no hand to hang them on.
+
+        Same aggregate and same columns as :meth:`get_stats_from_hand`, so the
+        result drops straight into a HUD's ``stat_dict``. ``gametype_id`` says
+        which stakes to consider comparable and normally comes from a hand
+        already imported for the table.
+        """
+        if not player_ids:
+            return {}
+
+        if hud_params is None:
+            hud_params = dict(_DEFAULT_HUD_PARAMS)
+        # Session stats are read from a different query, one that needs hands on
+        # this table. These players have none yet, so read all of history rather
+        # than returning a stat line of blanks.
+        stat_range = "A" if hud_params["stat_range"] == "S" else hud_params["stat_range"]
+        h_stat_range = "A" if hud_params["h_stat_range"] == "S" else hud_params["h_stat_range"]
+
+        seats_min, seats_max = self._seat_bounds(
+            hud_params["seats_style"],
+            hud_params["seats_cust_nums_low"],
+            hud_params["seats_cust_nums_high"],
+            num_seats,
+        )
+        h_seats_min, h_seats_max = self._seat_bounds(
+            hud_params["h_seats_style"],
+            hud_params["h_seats_cust_nums_low"],
+            hud_params["h_seats_cust_nums_high"],
+            num_seats,
+        )
+
+        ids = [int(pid) for pid in player_ids]
+        placeholder = self.sql.query.get("placeholder", "%s")
+        sql_text = self._inject_hud_chipev_columns(self.sql.query["get_stats_from_hand_aggregated"])
+        for original, replacement in self._live_player_rewrites(placeholder, len(ids)):
+            if original not in sql_text:
+                log.warning(
+                    "Cannot key the HUD aggregate on players: %r is no longer in the query; "
+                    "no live Fast-Fold stats this update.",
+                    original,
+                )
+                return {}
+            sql_text = sql_text.replace(original, replacement, 1)
+
+        subs = (
+            *ids,
+            hero_id,
+            self._style_key(stat_range, hero=False),
+            hud_params["agg_bb_mult"],
+            hud_params["agg_bb_mult"],
+            gametype_id,
+            seats_min,
+            seats_max,
+            hero_id,
+            self._style_key(h_stat_range, hero=True),
+            hud_params["h_agg_bb_mult"],
+            hud_params["h_agg_bb_mult"],
+            gametype_id,
+            h_seats_min,
+            h_seats_max,
+        )
+
+        stat_dict: dict[Any, Any] = {}
+        c = self.connection.cursor()
+        c.execute(sql_text, subs)
+        colnames = [desc[0] for desc in c.description]
+        for row in c.fetchall():
+            t_dict = {name.lower(): val for name, val in zip(colnames, row, strict=False)}
+            stat_dict[t_dict["player_id"]] = t_dict
+
+        self._merge_aof_profile_stats(stat_dict, poker_game)
+        return stat_dict
+
     def _batch_rewrites(self, placeholder: str):
         """The edits that turn the per-hand aggregate into a per-batch one.
 

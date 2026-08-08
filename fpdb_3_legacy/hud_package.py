@@ -88,6 +88,57 @@ def merge_package_game_bindings(
     return changed
 
 
+def merge_package_profile_rules(
+    config_doc: Any,
+    package_root: Any,
+    *,
+    profile_names: Mapping[str, str] | None = None,
+    overwrite: bool,
+) -> bool:
+    """Merge ``<hud_profile_rule>`` entries carried by a package.
+
+    A rule is what lets a profile apply to some tables and not others -- a
+    Fast-Fold stat set is only wanted on Fast-Fold tables, and binding it to the
+    game instead would replace the profile every ordinary cash table uses.
+
+    Rules are matched on what they select, not on their id, so importing the
+    same package twice does not stack duplicates. ``profile_names`` rewrites the
+    profile reference when the imported profile was renamed on conflict.
+    """
+    changed = False
+    names = profile_names or {}
+    source_rules = package_root.getElementsByTagName("hud_profile_rule")
+    if not source_rules:
+        return False
+
+    section = _container(config_doc, "hud_profile_rules")
+    selectors = ("site", "game", "game_type", "limit_type", "seats", "players", "speed")
+
+    for source_rule in source_rules:
+        profile = source_rule.getAttribute("profile")
+        if not profile:
+            continue
+        wanted = {name: source_rule.getAttribute(name) for name in selectors}
+        existing = next(
+            (
+                node
+                for node in config_doc.getElementsByTagName("hud_profile_rule")
+                if all(node.getAttribute(name) == value for name, value in wanted.items())
+            ),
+            None,
+        )
+        if existing is not None and not overwrite:
+            continue
+
+        imported = _append_imported(config_doc, section, source_rule)
+        imported.setAttribute("profile", names.get(profile, profile))
+        if existing is not None:
+            existing.parentNode.removeChild(existing)
+        changed = True
+
+    return changed
+
+
 def install_missing_hud_package(config_doc: Any, package_root: Any) -> bool:
     """Install missing profiles, popups and bindings without overwriting users."""
     changed = False

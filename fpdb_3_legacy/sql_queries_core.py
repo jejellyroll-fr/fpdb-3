@@ -22,11 +22,7 @@ def core_lookup_queries() -> dict[str, str]:
 
     query["get_player_id_by_name"] = "SELECT id FROM Players WHERE name = %s"
 
-    query["get_player_stats_by_name"] = """
-            SELECT n, vpip, pfr, three_B, f_3bet, cb1, f_cb1, wtsd, profit100
-            FROM HudCache
-            WHERE playerId = %s
-        """
+    query["get_site_hand_no"] = "SELECT siteHandNo FROM Hands WHERE id = %s"
 
     query["get_player_names"] = """
             select p.name

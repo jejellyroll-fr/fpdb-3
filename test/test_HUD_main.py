@@ -1973,3 +1973,591 @@ def test_a_failed_rebuild_restarts_the_table_instead_of_orphaning_windows(hud_ma
         assert hud_main.refresh_profiles_from_config() == 1
 
     kill_hud.assert_called_once_with(None, "table-a")
+
+
+def test_update_hud_forwards_config_and_cards_to_idle_update(hud_main) -> None:
+    """Dropping any of these raises TypeError on every hand, on every site."""
+    cards = {"player": ["As", "Kd"]}
+    hand_instance = object()
+
+    with patch.object(hud_main, "idle_update") as idle_update:
+        hud_main.update_HUD("hand-1", "table-a", hud_main.config, cards=cards, hand_instance=hand_instance)
+
+    idle_update.assert_called_once_with(
+        "hand-1",
+        "table-a",
+        hud_main.config,
+        cards=cards,
+        hand_instance=hand_instance,
+    )
+
+
+def test_hud_is_fast_fold_trusts_the_flag_set_from_the_winamax_log(hud_main) -> None:
+    # An Escape window is titled "Winamax Casablanca 3": nothing in the name says
+    # Fast-Fold, so only the log-derived flag can identify it.
+    hud = SimpleNamespace(table_name="Casablanca", game_type="ring", is_fast_fold=False)
+    assert hud_main._hud_is_fast_fold(hud, "Casablanca") is False
+
+    hud.is_fast_fold = True
+    assert hud_main._hud_is_fast_fold(hud, "Casablanca") is True
+
+
+def _log_update(pool="gf.cgmatchmaker.gf_1.t22754010.0", table_no="1"):
+    return SimpleNamespace(pool=pool, table_no=table_no, hand_id="22754010-6356-1786128858", table_id="22754010")
+
+
+def test_find_fast_fold_hud_ignores_non_go_fast_pools(hud_main) -> None:
+    hud_main.hud_dict = {"t": SimpleNamespace(site="Winamax", table=SimpleNamespace(title="Winamax Casablanca 1"))}
+    try:
+        assert hud_main._find_fast_fold_hud(_log_update(pool="cash.table.1")) is None
+    finally:
+        hud_main.hud_dict = {}
+
+
+def test_find_fast_fold_hud_matches_single_table_and_marks_it(hud_main) -> None:
+    # Title index 1 matches the default update's [table] 1.
+    hud = SimpleNamespace(site="Winamax", table=SimpleNamespace(title="Winamax Casablanca 1"))
+    hud_main.hud_dict = {"casablanca": hud}
+    try:
+        assert hud_main._find_fast_fold_hud(_log_update()) == ("casablanca", hud)
+        assert hud.is_fast_fold is True
+    finally:
+        hud_main.hud_dict = {}
+
+
+def test_find_fast_fold_hud_pairs_multiple_tables_by_title_index(hud_main) -> None:
+    """The trailing number in the window title is the client's [table] N index."""
+    hud1 = SimpleNamespace(site="Winamax", table=SimpleNamespace(title="Winamax Casablanca 1"))
+    hud2 = SimpleNamespace(site="Winamax", table=SimpleNamespace(title="Winamax Casablanca 2"))
+    hud_main.hud_dict = {"a": hud1, "b": hud2}
+    try:
+        assert hud_main._find_fast_fold_hud(_log_update(table_no="2")) == ("b", hud2)
+        assert hud_main._find_fast_fold_hud(_log_update(table_no="1")) == ("a", hud1)
+    finally:
+        hud_main.hud_dict = {}
+
+
+def test_fast_fold_hud_is_created_when_a_live_seat_source_exists(hud_main) -> None:
+    """Escape tables used to be skipped outright; the log reader now feeds them."""
+    hud_main.winamax_log_reader = SimpleNamespace(is_tailing=True)
+    assert hud_main._has_live_seat_source("Winamax") is True
+
+    # No tailing log (client absent, or logs elsewhere) => no live data to show.
+    hud_main.winamax_log_reader = SimpleNamespace(is_tailing=False)
+    assert hud_main._has_live_seat_source("Winamax") is False
+
+    # Other sites have no such source at all, so their Fast-Fold tables stay skipped.
+    hud_main.winamax_log_reader = SimpleNamespace(is_tailing=True)
+    assert hud_main._has_live_seat_source("PokerStars") is False
+
+
+def test_hud_is_fast_fold_remembers_tables_flagged_at_import(hud_main) -> None:
+    hud = SimpleNamespace(table_name="Casablanca", game_type="ring", is_fast_fold=False)
+    assert hud_main._hud_is_fast_fold(hud, "Casablanca") is False
+
+    hud_main._fast_fold_tables.add("Casablanca")
+    assert hud_main._hud_is_fast_fold(hud, "Casablanca") is True
+
+
+def test_a_second_pool_sharing_one_hud_is_left_alone(hud_main) -> None:
+    """Two Escape windows on a pool import under one table name and one HUD."""
+    hud = SimpleNamespace(site="Winamax", table=SimpleNamespace(title="Winamax Casablanca 1"))
+    hud_main.hud_dict = {"casablanca": hud}
+    try:
+        first = hud_main._find_fast_fold_hud(_log_update(pool="gf.p.t1.0", table_no="1"))
+        assert first == ("casablanca", hud)
+
+        # A different pool would otherwise overwrite the same HUD's seats.
+        assert hud_main._find_fast_fold_hud(_log_update(pool="gf.p.t1.1", table_no="2")) is None
+        # The pool that got there first keeps driving it.
+        assert hud_main._find_fast_fold_hud(_log_update(pool="gf.p.t1.0", table_no="1")) == ("casablanca", hud)
+    finally:
+        hud_main.hud_dict = {}
+
+
+def _fast_info(hud_main, table_name="Casablanca"):
+    from fpdb_3_legacy.table_info import TableInfo
+
+    return TableInfo(table_name=table_name, fast=True, site_name="Winamax", game_type="ring")
+
+
+def _prepared_with_site_id(site_hand_no):
+    """A snapshot entry carrying the hand's site id, as the worker prepares it."""
+    return SimpleNamespace(hand_instance=SimpleNamespace(handid=site_hand_no))
+
+
+def test_fast_fold_table_name_is_qualified_by_its_window(hud_main) -> None:
+    """Two Escape windows write hands under one pool name; the log separates them."""
+    hud_main.winamax_log_reader = SimpleNamespace(
+        is_tailing=True,
+        table_no_for_hand=lambda site_hand_no: {"227540101": "5", "227540102": "6"}.get(site_hand_no),
+    )
+    hud_main._prepared_hands = {
+        "101": _prepared_with_site_id("227540101"),
+        "102": _prepared_with_site_id("227540102"),
+    }
+
+    assert hud_main._qualify_fast_fold_table(_fast_info(hud_main), 101).table_name == "Casablanca 5"
+    assert hud_main._qualify_fast_fold_table(_fast_info(hud_main), 102).table_name == "Casablanca 6"
+
+
+def test_unmappable_fast_fold_hand_is_skipped_not_keyed_on_the_pool_name(hud_main) -> None:
+    """A bare pool name would claim whichever window matched first, mis-numbering it."""
+    hud_main.winamax_log_reader = SimpleNamespace(is_tailing=True, table_no_for_hand=lambda _h: None)
+    hud_main._prepared_hands = {"999": _prepared_with_site_id("227540109")}
+
+    assert hud_main._qualify_fast_fold_table(_fast_info(hud_main), 999) is None
+
+
+def test_unmappable_fast_fold_hand_is_skipped_without_a_hand_instance(hud_main) -> None:
+    """Identity-only snapshots carry no Hand object to read the site id from."""
+    hud_main.winamax_log_reader = SimpleNamespace(is_tailing=True, table_no_for_hand=lambda _h: "5")
+    hud_main._prepared_hands = {}
+
+    assert hud_main._qualify_fast_fold_table(_fast_info(hud_main), 1) is None
+
+
+def test_non_fast_tables_are_never_qualified(hud_main) -> None:
+    from fpdb_3_legacy.table_info import TableInfo
+
+    info = TableInfo(table_name="Casablanca", fast=False, site_name="Winamax", game_type="ring")
+    hud_main.winamax_log_reader = SimpleNamespace(is_tailing=True, table_no_for_hand=lambda _h: "5")
+
+    assert hud_main._qualify_fast_fold_table(info, 1).table_name == "Casablanca"
+
+
+def _ff_hud(title):
+    return SimpleNamespace(site="Winamax", table=SimpleNamespace(title=title))
+
+
+def test_a_pool_with_no_hud_of_its_own_does_not_borrow_another(hud_main) -> None:
+    """Once titles carry an index, an unmatched pool has no HUD yet -- not this one."""
+    hud = _ff_hud("Winamax Casablanca 6")
+    hud_main.hud_dict = {"Casablanca 6": hud}
+    # No window reader, so the unmatched pool cannot get a HUD of its own here;
+    # this is about not handing it somebody else's.
+    hud_main.winamax_ax_seats = None
+    try:
+        assert hud_main._find_fast_fold_hud(_log_update(table_no="6")) == ("Casablanca 6", hud)
+        # Pool for window 5, whose HUD has not been created yet.
+        assert hud_main._find_fast_fold_hud(_log_update(pool="gf.p.t1.4", table_no="5")) is None
+    finally:
+        hud_main.hud_dict = {}
+
+
+def test_unindexed_title_still_falls_back_to_the_only_table(hud_main) -> None:
+    hud = _ff_hud("Winamax Casablanca")
+    hud_main.hud_dict = {"Casablanca": hud}
+    try:
+        assert hud_main._find_fast_fold_hud(_log_update(table_no="5")) == ("Casablanca", hud)
+    finally:
+        hud_main.hud_dict = {}
+
+
+def test_window_reads_are_kept_per_window_not_globally(hud_main) -> None:
+    """Two tables must not evict each other's seats; each read is a ~20ms IPC walk."""
+    reads = []
+    full = {slot: f"p{slot}" for slot in range(6)}
+
+    def read_window(title, max_seats=6):
+        reads.append(title)
+        return full
+
+    hud_main.winamax_ax_seats = SimpleNamespace(read_window=read_window)
+    hud5, hud6 = _ff_hud("Winamax Casablanca 5"), _ff_hud("Winamax Casablanca 6")
+
+    hud_main._ax_slots(hud5, "hand-1", 6)
+    hud_main._ax_slots(hud6, "hand-1", 6)
+    hud_main._ax_slots(hud5, "hand-1", 6)
+    assert reads == ["Winamax Casablanca 5", "Winamax Casablanca 6"]
+
+    # A new hand is a new table, so it must be read again.
+    hud_main._ax_slots(hud5, "hand-2", 6)
+    assert reads[-1] == "Winamax Casablanca 5"
+    assert len(reads) == 3
+
+
+def test_an_empty_window_read_is_not_cached(hud_main) -> None:
+    """The window may not be drawn yet; the next line of the same hand retries."""
+    reads = []
+
+    def read_window(title, max_seats=6):
+        reads.append(title)
+        return {}
+
+    hud_main.winamax_ax_seats = SimpleNamespace(read_window=read_window)
+    hud = _ff_hud("Winamax Casablanca 5")
+
+    hud_main._ax_slots(hud, "hand-1", 6)
+    hud_main._ax_slots(hud, "hand-1", 6)
+    assert len(reads) == 2
+
+
+def test_stats_reference_hand_falls_back_to_the_same_pool(hud_main) -> None:
+    """Without a gametypeId the stats aggregate is skipped and every seat reads NA."""
+    hud_main._last_processed_hands = {"Casablanca 6": "hand-99"}
+
+    assert hud_main._stats_reference_hand("Casablanca 6") == "hand-99"
+    # Window 5 has had no hand imported yet, but shares the pool and its stakes.
+    assert hud_main._stats_reference_hand("Casablanca 5") == "hand-99"
+    # A different pool must not be borrowed from.
+    assert hud_main._stats_reference_hand("Marbella 2") is None
+
+
+def test_live_stats_read_always_ends_its_transaction() -> None:
+    """A SELECT opens a transaction on PostgreSQL; leaving it open stalls the importer."""
+    from fpdb_3_legacy.fast_fold_engine import FastFoldStatsRequest
+
+    database = MagicMock()
+    database.get_gameinfo_from_hid.return_value = {"gametypeId": 7}
+    database.get_player_id_by_name.return_value = 55
+    database.get_stats_for_players.return_value = {55: {"player_id": 55, "screen_name": "A", "n": 9}}
+
+    request = FastFoldStatsRequest(temp_key="Casablanca 5", seat_map={1: "A"}, hand_id=101)
+    result = HUD_main.HudReadWorker._read_fast_fold_stats(database, request)
+
+    assert result.temp_key == "Casablanca 5"
+    assert 55 in result.stat_dict
+    database.connection.rollback.assert_called_once()
+
+
+def test_live_stats_read_ends_its_transaction_even_when_it_fails() -> None:
+    from fpdb_3_legacy.fast_fold_engine import FastFoldStatsRequest
+
+    database = MagicMock()
+    database.get_gameinfo_from_hid.side_effect = RuntimeError("boom")
+
+    request = FastFoldStatsRequest(temp_key="Casablanca 5", seat_map={1: "A"}, hand_id=101)
+    with pytest.raises(RuntimeError):
+        HUD_main.HudReadWorker._read_fast_fold_stats(database, request)
+
+    database.connection.rollback.assert_called_once()
+
+
+def test_window_is_resolved_from_the_identity_snapshot(hud_main) -> None:
+    """The identity snapshot arrives a hand before the Hand object, so use it."""
+    hud_main.winamax_log_reader = SimpleNamespace(
+        is_tailing=True,
+        table_no_for_hand=lambda site_hand_no: "5" if site_hand_no == "227540101" else None,
+    )
+    hud_main._prepared_hands = {"101": SimpleNamespace(site_hand_no="227540101", hand_instance=None)}
+
+    assert hud_main._qualify_fast_fold_table(_fast_info(hud_main), 101).table_name == "Casablanca 5"
+
+
+def test_a_partial_window_read_is_not_frozen_for_the_whole_hand(hud_main) -> None:
+    """The hand-start line beats the client to drawing the table."""
+    answers = [
+        {0: "Hero"},  # read at hand start: only the hero is drawn yet
+        {0: "Hero", 2: "Player17", 5: "player09"},
+        {0: "Hero", 2: "Player17", 5: "player09"},
+    ]
+    reads = []
+
+    def read_window(title, max_seats=6):
+        reads.append(title)
+        return answers[min(len(reads) - 1, len(answers) - 1)]
+
+    hud_main.winamax_ax_seats = SimpleNamespace(read_window=read_window)
+    hud = _ff_hud("Winamax Casablanca 5")
+
+    assert hud_main._ax_slots(hud, "hand-1", 6) == {0: "Hero"}
+    # The next look at the window must not be served from that partial answer.
+    assert len(hud_main._ax_slots(hud, "hand-1", 6)) == 3
+    assert len(reads) == 2
+
+
+def test_window_rereads_are_bounded_within_a_hand(hud_main) -> None:
+    reads = []
+
+    def read_window(title, max_seats=6):
+        reads.append(title)
+        return {0: "Hero"}
+
+    hud_main.winamax_ax_seats = SimpleNamespace(read_window=read_window)
+    hud = _ff_hud("Winamax Casablanca 5")
+
+    for _ in range(20):
+        hud_main._ax_slots(hud, "hand-1", 6)
+
+    assert len(reads) == hud_main.AX_READS_PER_HAND
+
+
+def test_a_full_table_stops_being_re_read(hud_main) -> None:
+    reads = []
+    full = {slot: f"p{slot}" for slot in range(6)}
+
+    def read_window(title, max_seats=6):
+        reads.append(title)
+        return full
+
+    hud_main.winamax_ax_seats = SimpleNamespace(read_window=read_window)
+    hud = _ff_hud("Winamax Casablanca 5")
+
+    for _ in range(5):
+        assert hud_main._ax_slots(hud, "hand-1", 6) == full
+
+    assert len(reads) == 1
+
+
+def test_recheck_replays_the_readers_current_state_for_a_pool(hud_main) -> None:
+    """The window is looked at again on a timer, not on the next log line."""
+    table = SimpleNamespace(pool="gf.p.t1.0", hand_id="h1", table_no="1", ring=[], hero=None, logged_at_ms=0)
+    hud_main.winamax_log_reader = SimpleNamespace(get_table=lambda pool: table if pool == "gf.p.t1.0" else None)
+
+    with patch.object(hud_main, "_on_winamax_table_update") as applied:
+        hud_main._recheck_window("gf.p.t1.0")
+        hud_main._recheck_window("gf.p.other")
+
+    applied.assert_called_once_with(table)
+
+
+def _ax_window(title="Winamax Casablanca 6", description="ESCAPE - 0,01-0,02 € - Pot Limit Omaha"):
+    from fpdb_3_legacy.winamax_ax_seats import AXTableWindow
+
+    return AXTableWindow(title=title, description=description)
+
+
+def test_a_hud_is_created_from_the_log_without_waiting_for_an_import(hud_main) -> None:
+    """Display follows the log; hand histories only bring statistics."""
+    hud_main.winamax_ax_seats = SimpleNamespace(find_table_window=lambda table_no: _ax_window())
+    hud_main.hud_dict = {}
+    created = {}
+
+    def fake_create(hand_id, temp_key, info, site_id, num_seats, site, *, loading=False, stats=None):
+        created.update(temp_key=temp_key, info=info, loading=loading, stats=stats, hand_id=hand_id)
+        hud_main.hud_dict[temp_key] = SimpleNamespace(site="Winamax", table=SimpleNamespace(title=info.table_name))
+
+    try:
+        with patch.object(hud_main, "_create_new_hud", side_effect=fake_create):
+            found = hud_main._find_fast_fold_hud(_log_update(table_no="6"))
+
+        assert found is not None
+        assert found[0] == "Casablanca 6"
+        # A full HUD, not the placeholder: that one has no seat windows.
+        assert created["loading"] is False
+        assert created["stats"] == {}
+        assert created["info"].poker_game == "omahahi"
+        assert created["info"].fast is True
+        assert created["info"].game_type == "ring"
+        assert created["info"].max_seats == hud_main.FAST_FOLD_MAX_SEATS
+        # No real hand exists, so a stand-in keeps the loading HUD off the database.
+        assert created["hand_id"].startswith("live:")
+        assert hud_main.hud_dict["Casablanca 6"].is_fast_fold is True
+    finally:
+        hud_main.hud_dict = {}
+
+
+def test_no_hud_is_created_when_the_window_does_not_say_what_is_played(hud_main) -> None:
+    hud_main.winamax_ax_seats = SimpleNamespace(
+        find_table_window=lambda table_no: _ax_window(description="ESCAPE - 0,01-0,02 €")
+    )
+    hud_main.hud_dict = {}
+
+    with patch.object(hud_main, "_create_new_hud") as create:
+        assert hud_main._find_fast_fold_hud(_log_update(table_no="6")) is None
+    create.assert_not_called()
+
+
+def test_no_hud_is_created_when_the_window_is_gone(hud_main) -> None:
+    hud_main.winamax_ax_seats = SimpleNamespace(find_table_window=lambda table_no: None)
+    hud_main.hud_dict = {}
+
+    with patch.object(hud_main, "_create_new_hud") as create:
+        assert hud_main._find_fast_fold_hud(_log_update(table_no="9")) is None
+    create.assert_not_called()
+
+
+def test_an_existing_hud_is_reused_rather_than_recreated(hud_main) -> None:
+    hud = _ff_hud("Winamax Casablanca 6")
+    hud_main.winamax_ax_seats = SimpleNamespace(find_table_window=lambda table_no: _ax_window())
+    hud_main.hud_dict = {"Casablanca 6": hud}
+    try:
+        with patch.object(hud_main, "_create_new_hud") as create:
+            assert hud_main._find_fast_fold_hud(_log_update(table_no="6")) == ("Casablanca 6", hud)
+        create.assert_not_called()
+    finally:
+        hud_main.hud_dict = {}
+
+
+def _live_update(**kw):
+    base = {
+        "pool": "gf.p.t1.0",
+        "table_no": "6",
+        "hand_id": "h1",
+        "table_id": "t1",
+        "ring": ["Hero"],
+        "hero": "Hero",
+        "hero_left": False,
+        "hand_over": False,
+        "finished": False,
+        "logged_at_ms": 0,
+    }
+    base.update(kw)
+    base["finished"] = base["hero_left"] or base["hand_over"]
+    return SimpleNamespace(**base)
+
+
+def test_the_overlay_is_cleared_when_the_hero_fast_folds(hud_main) -> None:
+    """Those players are no longer the ones in front of the hero."""
+    hud = _ff_hud("Winamax Casablanca 6")
+    hud_main.hud_dict = {"Casablanca 6": hud}
+    hud_main._fast_fold_pending["Casablanca 6"] = {1: "Hero"}
+    try:
+        with patch.object(HUD_main.FastFoldEngine, "clear_seats") as cleared:
+            hud_main._on_winamax_table_update(_live_update(hero_left=True))
+
+        cleared.assert_called_once_with(hud)
+        assert "Casablanca 6" not in hud_main._fast_fold_pending
+    finally:
+        hud_main.hud_dict = {}
+
+
+def test_the_blocks_come_down_when_the_hand_is_over(hud_main) -> None:
+    hud = _ff_hud("Winamax Casablanca 6")
+    hud_main.hud_dict = {"Casablanca 6": hud}
+    hud_main._fast_fold_pending["Casablanca 6"] = {1: "Hero"}
+    try:
+        with patch.object(HUD_main.FastFoldEngine, "clear_seats") as cleared:
+            hud_main._on_winamax_table_update(_live_update(hand_over=True))
+        cleared.assert_called_once_with(hud)
+    finally:
+        hud_main.hud_dict = {}
+
+
+def test_a_table_holding_only_the_hero_is_not_worth_showing(hud_main) -> None:
+    """Between hands the window still draws the hero, and nobody else."""
+    hud = _ff_hud("Winamax Casablanca 6")
+    hud_main.hud_dict = {"Casablanca 6": hud}
+    hud_main._fast_fold_pending["Casablanca 6"] = {1: "Hero"}
+    hud_main.winamax_ax_seats = SimpleNamespace(read_window=lambda t, max_seats=6: {0: "Hero"})
+    try:
+        with patch.object(HUD_main.FastFoldEngine, "clear_seats") as cleared:
+            hud_main._on_winamax_table_update(_live_update(ring=[], hero=None))
+        cleared.assert_called_once_with(hud)
+    finally:
+        hud_main.hud_dict = {}
+
+
+def test_clearing_an_already_empty_table_does_nothing(hud_main) -> None:
+    hud = SimpleNamespace(stat_dict={})
+    with patch.object(HUD_main.FastFoldEngine, "clear_seats") as cleared:
+        hud_main._clear_fast_fold_table("Casablanca 6", hud, "h1", "hand over")
+    cleared.assert_not_called()
+
+
+def test_fast_fold_tables_are_left_out_of_the_secondary_refresh(hud_main) -> None:
+    """That refresh swaps in the players of the last imported hand.
+
+    On a Fast-Fold table those left long ago while the seats still point at the
+    live players, so every block looks up a player id the statistics no longer
+    hold -- a nameless column of NA.
+    """
+    fast = _ff_hud("Winamax Casablanca 3")
+    slow = SimpleNamespace(site="Winamax", table=SimpleNamespace(title="Winamax Casablanca"), game_type="ring")
+    hud_main.hud_dict = {"Casablanca 3": fast, "Casablanca": slow}
+    hud_main._fast_fold_tables = {"Casablanca 3"}
+    hud_main._last_processed_hands = {"Casablanca 3": 10, "Casablanca": 11}
+    try:
+        with patch.object(hud_main, "_get_table_info", return_value=None) as table_info:
+            hud_main._tables_to_refresh(set())
+        # Only the ordinary table was even looked up.
+        assert [c.args[0] for c in table_info.call_args_list] == [11]
+    finally:
+        hud_main.hud_dict = {}
+
+
+def test_a_half_drawn_window_is_not_acted_on(hud_main) -> None:
+    """The client always draws the hero, so a read without them caught a redraw."""
+    hud = _ff_hud("Winamax Casablanca 6")
+    hud_main.hud_dict = {"Casablanca 6": hud}
+    hud_main._fast_fold_tables = {"Casablanca 6"}
+    # The table is currently showing players, so there is something to take down.
+    hud_main._fast_fold_pending["Casablanca 6"] = {1: "Player01"}
+    # Three players, none of them in the hero's chair.
+    hud_main.winamax_ax_seats = SimpleNamespace(
+        read_window=lambda t, max_seats=6: {3: "Player01", 4: "Player04", 5: "Player06"}
+    )
+    try:
+        with patch.object(HUD_main.FastFoldEngine, "clear_seats") as cleared:
+            hud_main._on_winamax_table_update(_live_update(table_no="6"))
+        cleared.assert_called_once_with(hud)
+    finally:
+        hud_main.hud_dict = {}
+
+
+def test_a_read_holding_the_hero_beats_a_bigger_one_without(hud_main) -> None:
+    answers = [
+        {1: "a", 2: "b", 3: "c", 4: "d"},  # half-drawn: no hero chair
+        {0: "Hero", 2: "b", 3: "c"},  # drawn, and smaller
+    ]
+    reads = []
+
+    def read_window(title, max_seats=6):
+        reads.append(title)
+        return answers[min(len(reads) - 1, len(answers) - 1)]
+
+    hud_main.winamax_ax_seats = SimpleNamespace(read_window=read_window)
+    hud = _ff_hud("Winamax Casablanca 5")
+
+    hud_main._ax_slots(hud, "hand-1", 6)
+    assert hud_main._ax_slots(hud, "hand-1", 6) == {0: "Hero", 2: "b", 3: "c"}
+
+
+def test_an_import_never_repopulates_a_cleared_fast_fold_table(hud_main) -> None:
+    """This is what put a finished table's players back after the hero sat out.
+
+    The overlay is cleared, then a hand imported seconds later fell through to
+    the ordinary path and seated its own -- long gone -- players, with no
+    further hand coming to clear them again.
+    """
+    hud = SimpleNamespace(
+        site="Winamax",
+        table=SimpleNamespace(title="Winamax Casablanca 6"),
+        stat_dict={},
+        fast_fold_seats={},
+        fast_fold_seat_players={},
+        aux_windows=[],
+        poker_game="holdem",
+        max=6,
+        is_loading=False,
+        cards={},
+        hud_params={"hud_days": 30, "h_hud_days": 90},
+    )
+    hud_main.hud_dict = {"Casablanca 6": hud}
+    hud_main._fast_fold_tables = {"Casablanca 6"}
+    hud_main.hero_ids = {1: 7}
+    hud_main.hero = {1: "Hero"}
+    imported = {77: {"screen_name": "Player01", "seat": 1, "n": 50}}
+    hud_main.db_connection.get_stats_from_hand.return_value = imported
+
+    try:
+        with (
+            patch.object(hud_main, "_seat_players", return_value={1: {"player_id": 77}}) as seat_players,
+            patch.object(hud_main, "_merge_positions") as merge_positions,
+            patch.object(hud_main, "_set_table_stats"),
+            patch.object(hud_main, "get_cards", return_value={}),
+            patch.object(hud_main, "update_HUD"),
+        ):
+            hud_main._update_existing_hud("hand-1", "Casablanca 6", "ring", 1, 6)
+
+        # The live map owns the overlay, and it is empty.
+        assert hud.stat_dict == {}
+        assert hud.seat_players == {}
+        seat_players.assert_not_called()
+        merge_positions.assert_not_called()
+    finally:
+        hud_main.hud_dict = {}
+
+
+def test_ordinary_pools_do_not_enter_the_fast_fold_path(hud_main) -> None:
+    """A cash table has its own import-driven HUD; tracing it does nothing useful."""
+    hud_main.hud_dict = {}
+    with (
+        patch.object(hud_main, "_ff_trace") as traced,
+        patch.object(HUD_main.QTimer, "singleShot") as scheduled,
+    ):
+        hud_main._on_winamax_table_update(_live_update(pool="cg.tamgr.cg_4.t5228", table_no="9"))
+
+    traced.assert_not_called()
+    scheduled.assert_not_called()

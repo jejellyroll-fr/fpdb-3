@@ -18,7 +18,6 @@ from __future__ import annotations
 #    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 ########################################################################
 import datetime
-import platform
 import re
 from collections.abc import Callable
 from decimal import Decimal
@@ -154,12 +153,12 @@ class Winamax(HandHistoryConverter):
     )
     re_mixed = re.compile(r"_(?P<MIXED>10games|8games|horse)_")
     re_hutp = re.compile(
-        r"Hold\-up\sto\sPot:\stotal\s(({LS})?(?P<AMOUNT>[.0-9]+)({LS})?)".format(**substitutions),
-        re.MULTILINE | re.VERBOSE,
+        r"(?:Hold\-?up|Escape|Splash|Drop)(?:\s+(?:to|pot))*\s*:\s*(?:total\s*)?({LS})?(?P<AMOUNT>[.0-9]+)({LS})?".format(**substitutions),
+        re.IGNORECASE | re.MULTILINE | re.VERBOSE,
     )
     re_escape_pot = re.compile(
-        r"Escape\sto\sPot:\stotal\s(({LS})?(?P<AMOUNT>[.0-9]+)({LS})?)".format(**substitutions),
-        re.MULTILINE | re.VERBOSE,
+        r"(?:Escape|Splash|Drop|Hold\-?up)(?:\s+(?:to|pot))*\s*:\s*(?:total\s*)?({LS})?(?P<AMOUNT>[.0-9]+)({LS})?".format(**substitutions),
+        re.IGNORECASE | re.MULTILINE | re.VERBOSE,
     )
     # 2010/09/21 03:10:51 UTC
     re_date_time = re.compile(
@@ -313,7 +312,10 @@ class Winamax(HandHistoryConverter):
         elif mg.get("RING"):
             info["type"] = "ring"
             info["currency"] = "EUR" if mg.get("MONEY") else "play"
-            info["fast"] = "Go Fast" in (mg.get("RING") or "")
+            # ESCAPE and HOLD-UP are Winamax's other names for the same fast-fold
+            # format as Go Fast: the hero is moved to a new table on every fold.
+            ring = mg.get("RING") or ""
+            info["fast"] = any(marker in ring for marker in ("Go Fast", "ESCAPE", "HOLD-UP"))
 
     def _parse_limit_info(self, mg: dict[str, str], info: dict[str, Any], hand_text: str) -> None:
         """Parses and updates the limit type information from match groups.
@@ -639,6 +641,14 @@ class Winamax(HandHistoryConverter):
             hand.isLottery = "Expresso" in tourname
             hand.tourneyMultiplier = 1
 
+    def _extract_seat_map(self, hand_text: str) -> dict[int, str]:
+        """Extract seat number to player screen name mapping from pre-summary hand text."""
+        pre = hand_text.split("*** SUMMARY ***")[0]
+        return {
+            int(a.group("SEAT")): a.group("PNAME")
+            for a in self.re_player_info.finditer(pre)
+        }
+
     def readPlayerStacks(self, hand: Hand) -> None:
         """Parse player stacks from hand text.
 
@@ -652,9 +662,8 @@ class Winamax(HandHistoryConverter):
         Raises:
             FpdbHandPartial: If hand cannot be split properly or has too few players.
         """
-        # Split hand text for Winamax, as the players listed in the hh preamble and the summary will differ
-        # if someone is sitting out.
-        # Going to parse both and only add players in the summary.
+        hand.seat_map = self._extract_seat_map(hand.handText)
+
         handsplit = hand.handText.split("*** SUMMARY ***")
         if len(handsplit) != self.EXPECTED_SUMMARY_PARTS:
             self.raise_summary_partial(hand, "*** SUMMARY ***")
@@ -871,9 +880,9 @@ class Winamax(HandHistoryConverter):
             hand.addBringIn(m.group("PNAME"), m.group("BRINGIN"))  # type: ignore[attr-defined]
 
     def readSTP(self, hand: Hand) -> None:
-        """Parses and sets special tournament pot (STP) or bomb pot amounts.
+        """Parses and sets special tournament pot (STP), Escape, Splash, or bomb pot amounts.
 
-        This function searches the hand text for STP or bomb pot amounts and
+        This function searches the hand text for STP, Escape, or Splash pot amounts and
         updates the hand object with the corresponding values.
 
         Args:
@@ -884,10 +893,10 @@ class Winamax(HandHistoryConverter):
         """
         if m := self.re_hutp.search(hand.handText):
             hand.addSTP(m.group("AMOUNT"))
+            hand.bombPot = int(Decimal(m.group("AMOUNT")) * 100)
         elif m := self.re_escape_pot.search(hand.handText):
             hand.addSTP(m.group("AMOUNT"))
-            # Store bomb pot amount in dedicated field
-            hand.bombPot = int(Decimal(m.group("AMOUNT")) * 100)  # Convert to cents
+            hand.bombPot = int(Decimal(m.group("AMOUNT")) * 100)
 
     def readHoleCards(self, hand: Hand) -> None:
         """Read and parse hole cards for all players from hand history.
@@ -1284,13 +1293,6 @@ class Winamax(HandHistoryConverter):
             tournament,
             table_number,
         )
-        sys_platform = platform.system()  # Linux, Windows, Darwin
-        # Use word boundaries to prevent partial matches (e.g., "Casablanca" matching "Casablanca 02")
-        if sys_platform[:5] == "Linux" or sys_platform == "Darwin":
-            regex = rf"^Winamax {re.escape(table_name or '')}(\s|$)"
-        else:
-            regex = rf"^Winamax {re.escape(table_name or '')} /"
-        log.debug("regex get table cash title: %s", regex)
         if tournament:
             t_escaped = re.escape(str(tournament))
             t_num = str(table_number) if table_number is not None else "0"
@@ -1299,8 +1301,12 @@ class Winamax(HandHistoryConverter):
                 rf"Winamax\s+.*(?:\(?{t_escaped}\)?)"
                 rf"(?:\(#0*(?:{t_num_escaped}|0)\)|(?!\(#\d+\)))$"
             )
-
             log.debug("regex get mtt sng expresso cash title: %s", regex)
+        elif table_name:
+            t_name = re.escape(table_name)
+            regex = rf"Winamax\s+.*{t_name}"
+        else:
+            regex = r"^Winamax "
         log.info("Winamax.getTableTitleRe: returns: '%s'", regex)
         return regex
 

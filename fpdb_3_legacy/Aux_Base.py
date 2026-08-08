@@ -1016,8 +1016,15 @@ class AuxSeats(AuxWindow):
         max_seats = self.hud.max
         ring = self._config_ring()
         occupied = self._occupied_seats()
+        if not occupied:
+            # Nothing to synthesise a ring from. Falling through would build one
+            # of all Nones and store it on the layout, and every later seat
+            # lookup would map to None -- hiding every stat block for as long as
+            # the table lives. A HUD created before its first hand (from the
+            # client log, say) starts here, and its seats arrive moments later.
+            return list(ring)
         covered = {ring[i] for i in range(1, max_seats + 1) if i < len(ring) and ring[i] is not None}
-        if occupied and set(occupied) <= covered:
+        if set(occupied) <= covered:
             return list(ring)
 
         synth: list[Any] = [None] * (max_seats + 1)
@@ -1067,6 +1074,22 @@ class AuxSeats(AuxWindow):
             fav = 0
         return fav if fav else self._bottom_center_slot()
 
+    def _report_missing_hero(self, hh_seats: list[Any]) -> None:
+        """Say why the seats were left unrotated, at the level it deserves.
+
+        A HUD built before its first hand has nobody to rotate to yet and the
+        identity mapping is the right answer until its seats arrive. A HUD built
+        around a hand the hero is missing from is a real problem.
+        """
+        if self.hud.stat_dict:
+            log.error(
+                "HUD seat mapping: hero seat not found (hh_seats=%s, occupied=%s)",
+                hh_seats,
+                self._occupied_seats(),
+            )
+        else:
+            log.debug("HUD seat mapping: no players yet, leaving seats unrotated")
+
     def adj_seats(self) -> list[int]:
         """Map visual seats to layout positions with the hero anchored bottom-centre.
 
@@ -1101,12 +1124,8 @@ class AuxSeats(AuxWindow):
                         break
                 break
 
-        if not actual_seat:  # shouldn't happen: HUDs aren't created when the hero isn't seated.
-            log.error(
-                "HUD seat mapping: hero seat not found (hh_seats=%s, occupied=%s)",
-                hh_seats,
-                self._occupied_seats(),
-            )
+        if not actual_seat:
+            self._report_missing_hero(hh_seats)
             return adj
 
         for i in range(max_seats):

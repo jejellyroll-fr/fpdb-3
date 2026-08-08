@@ -202,6 +202,7 @@ class Hand:
 
         self.seating: list[Any] = []
         self.players: list[Any] = []
+        self.seat_map: dict[int, str] = {}
         # Cache used for checkPlayerExists.
         self.player_exists_cache: set[str] = set()
         self.posted: list[Any] = []

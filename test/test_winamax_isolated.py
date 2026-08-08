@@ -120,6 +120,18 @@ class TestWinamaxIsolated(unittest.TestCase):
         # Test with ring game
         self._assert_game_type_info({"RING": "some ring", "MONEY": True}, "ring", "EUR")
 
+    def test_fast_fold_flag_covers_all_winamax_fast_formats(self) -> None:
+        """ESCAPE and HOLD-UP are Fast-Fold too, not just Go Fast."""
+        for ring, expected in (
+            ('Go Fast "Marbella"', True),
+            ('ESCAPE "Casablanca"', True),
+            ('HOLD-UP "Valencia"', True),
+            ("CashGame", False),
+        ):
+            info: dict = {}
+            self.parser._parse_game_type_info({"RING": ring, "MONEY": True}, info)
+            assert info["fast"] is expected, ring
+
     def test_limit_info_parsing(self) -> None:
         """Test _parse_limit_info method."""
         mg = {"LIMIT": "no limit"}
@@ -204,6 +216,21 @@ class TestWinamaxIsolated(unittest.TestCase):
             assert re.search(tour_re, "Winamax TournamentName(123456789)(#5)") is not None
             assert re.search(tour_re, "Winamax TournamentName(123456789)(#0)") is not None
             assert re.search(tour_re, "Winamax TournamentName(123456789)(#6)") is None
+
+    def test_read_stp_splash_pot(self) -> None:
+        """Test readSTP with Splash Pot, Drop Pot, and Escape to Pot headers."""
+        for text in [
+            "Escape to Pot: total 5.00€",
+            "Splash Pot: total 5.00€",
+            "Splash Pot: 10€",
+            "Splash to Pot: total 2.50€",
+            "Drop Pot: total 5.00€",
+        ]:
+            hand = Mock()
+            hand.handText = text
+            self.parser.readSTP(hand)
+            hand.addSTP.assert_called()
+            assert hand.bombPot in (250, 500, 1000)
 
     def test_detect_lottery_tournaments(self) -> None:
         """Test _detect_lottery_tournaments method."""

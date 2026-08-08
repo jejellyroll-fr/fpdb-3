@@ -120,6 +120,7 @@ class Hud:
         self.seat_players: dict[Any, Any] = {}
         self.hand_instance: Any = None
         self.is_loading = False
+        self.is_fast_fold = False
         self.loading_window: Any = None
         self.table_name = ""
         self.tablenumber: Any = None
@@ -190,30 +191,42 @@ class Hud:
         # should be propagated to other tables of different sizes
 
         # if there are AUX windows configured, set them up
-        if self.supported_games_parameters["aux"] != [""]:
-            for aux_str in self.supported_games_parameters["aux"].split(","):
-                aux = aux_str.strip()  # remove leading/trailing spaces
-                aux_params = config.get_aux_parameters(aux)
-                my_import = importName(aux_params["module"], aux_params["class"])
-                if my_import is None:
-                    continue
-                # The main action happening below !!!
-                # the module/class is instantiated and is fed the config
-                # and aux_params.  Normally this is ultimately inherited
-                # at Mucked.Aux_seats() for a hud aux
-                #
-                # The instatiated aux object is recorded in the
-                # self.aux_windows list in this module
-                #
-                # Subsequent updates to the aux's are controlled by
-                # hud_main.pyw
-                #
-                self.aux_windows.append(my_import(self, config, aux_params))
+        self._build_aux_windows(config)
 
         self.creation_attrs = None
 
     def move_table_position(self) -> None:
         """Move the table position."""
+
+    def _build_aux_windows(self, config: Any) -> None:
+        """Instantiate the aux windows this table's game is configured for.
+
+        Each module/class named in the configuration is fed the config and its
+        own parameters, and the resulting object is what hud_main later drives.
+        """
+        if self.supported_games_parameters["aux"] == [""]:
+            return
+        for aux_str in self.supported_games_parameters["aux"].split(","):
+            aux_params = config.get_aux_parameters(aux_str.strip())
+            my_import = importName(aux_params["module"], aux_params["class"])
+            if my_import is None or self._skips_aux(aux_params):
+                continue
+            self.aux_windows.append(my_import(self, config, aux_params))
+
+    def _skips_aux(self, aux_params: dict[str, Any]) -> bool:
+        """Whether this table has no use for an aux window.
+
+        Mucked-cards displays replay the showdown of a finished hand. On a
+        Fast-Fold table the hero has left before most hands end and the next one
+        is already being dealt, so they describe a table nobody is at -- and they
+        read hand data the live path never fetches.
+        """
+        if aux_params.get("module") != "Mucked":
+            return False
+        if self.hud_context.speed != "fast":
+            return False
+        log.info("Skipping %s aux window: no mucked cards on a Fast-Fold table", aux_params.get("class"))
+        return True
 
     def kill(self) -> None:
         """Kill all stat_windows, popups and aux_windows in this HUD."""
