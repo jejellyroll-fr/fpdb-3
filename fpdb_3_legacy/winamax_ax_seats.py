@@ -25,7 +25,7 @@ import logging
 import math
 import platform
 import re
-import subprocess
+import subprocess  # nosec B404 - only ever runs the fixed osascript command below
 import time
 from dataclasses import dataclass
 from typing import Any
@@ -59,6 +59,9 @@ the fallback off the critical path.
 
 APPLESCRIPT_TIMEOUT = 5.0
 
+OSASCRIPT = "/usr/bin/osascript"
+"""Absolute, so the scan cannot be diverted by whatever PATH the app inherited."""
+
 
 def applescript_window_titles() -> list[str]:
     """Titles of the client's windows, read through System Events.
@@ -73,8 +76,9 @@ def applescript_window_titles() -> list[str]:
     refused; the caller then falls back to waiting for an imported hand.
     """
     try:
-        result = subprocess.run(  # noqa: S603 - fixed argv, no shell, no user input
-            ["osascript", "-e", _WINDOW_TITLES_SCRIPT],  # noqa: S607 - resolved from PATH by design
+        # Absolute path, fixed argv, no shell, and nothing interpolated into the script.
+        result = subprocess.run(  # noqa: S603  # nosec B603
+            [OSASCRIPT, "-e", _WINDOW_TITLES_SCRIPT],
             capture_output=True,
             text=True,
             timeout=APPLESCRIPT_TIMEOUT,
