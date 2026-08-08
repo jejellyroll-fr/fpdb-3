@@ -82,15 +82,11 @@ from fpdb_3_legacy import (
     GuiBulkImport,
     GuiCoinPokerCapture,
     GuiDatabase,
-    GuiGraphViewer,
     GuiHandViewer,
     GuiLogView,
     GuiOpponentsReport,
     GuiPrefs,
-    GuiRingPlayerStats,
-    GuiSessionViewer,
     GuiTourHandViewer,
-    GuiTourneyGraphViewer,
     GuiTourneyPlayerStats,
     ModernHudPreferences,
     Options,
@@ -156,6 +152,7 @@ if options.log_level != "EMPTY":
 log = get_logger("fpdb")
 # Note: Logger level is now controlled by Logger Dev Tool configuration
 # The get_logger() function automatically applies the correct level from saved configuration
+
 
 def _resolve_version() -> str:
     """Return the version to display, preferring what the checkout can tell us.
@@ -345,7 +342,10 @@ class fpdb(QMainWindow):
         from PySide6.QtWidgets import QFileDialog, QMessageBox
 
         path, _filter = QFileDialog.getOpenFileName(
-            self, "Import PT4 HUD layout", "", "PT4 HUD layout (*.pt4hud);;All files (*)",
+            self,
+            "Import PT4 HUD layout",
+            "",
+            "PT4 HUD layout (*.pt4hud);;All files (*)",
         )
         if not path:
             return
@@ -366,8 +366,10 @@ class fpdb(QMainWindow):
             f"• {summary['stats']} stats mapped to a new HUD stat-set.",
         ]
         if summary["charts"]:
-            lines.append(f"• {len(summary['charts'])} range chart(s) ({', '.join(summary['charts'])}) "
-                         f"→ popup '{summary['popup']}'.")
+            lines.append(
+                f"• {len(summary['charts'])} range chart(s) ({', '.join(summary['charts'])}) "
+                f"→ popup '{summary['popup']}'."
+            )
         if summary["unmapped"]:
             lines.append(f"• {len(summary['unmapped'])} custom formula stat(s) could not be mapped.")
         lines.append("\nAssign the new stat-set / popup to a game in HUD Preferences.")
@@ -385,7 +387,10 @@ class fpdb(QMainWindow):
         from PySide6.QtWidgets import QFileDialog, QMessageBox
 
         paths, _filter = QFileDialog.getOpenFileNames(
-            self, "Import PT4 stats", "", "PT4 stat (*.pt4stat);;All files (*)",
+            self,
+            "Import PT4 stats",
+            "",
+            "PT4 stat (*.pt4stat);;All files (*)",
         )
         if not paths:
             return
@@ -621,9 +626,31 @@ class fpdb(QMainWindow):
 
         GROUPS = {
             "Hold'em": ["holdem", "2_holdem", "6_holdem"],
-            "Omaha": ["omahahi", "omahahilo", "5_omahahi", "6_omahahi", "5_omaha8", "6_omaha8", "cour_hi", "cour_hilo", "aof_omaha", "fusion", "irish"],
+            "Omaha": [
+                "omahahi",
+                "omahahilo",
+                "5_omahahi",
+                "6_omahahi",
+                "5_omaha8",
+                "6_omaha8",
+                "cour_hi",
+                "cour_hilo",
+                "aof_omaha",
+                "fusion",
+                "irish",
+            ],
             "Stud": ["5_studhi", "razz", "studhi", "studhilo", "27_razz"],
-            "Draw && Others": ["27_3draw", "fivedraw", "badugi", "27_1draw", "a5_3draw", "a5_1draw", "badacey", "badeucey", "drawmaha"]
+            "Draw && Others": [
+                "27_3draw",
+                "fivedraw",
+                "badugi",
+                "27_1draw",
+                "a5_3draw",
+                "a5_1draw",
+                "badacey",
+                "badeucey",
+                "drawmaha",
+            ],
         }
 
         # Dynamically append any other games found in Card.games to prevent missed game types
@@ -635,6 +662,7 @@ class fpdb(QMainWindow):
             GROUPS["Other"] = other_games
 
         from fpdb_3_legacy.ThemeManager import ThemeManager
+
         palette = ThemeManager().get_legacy_palette()
         border_color = palette.get("border", "#483d65")
 
@@ -1090,7 +1118,7 @@ class fpdb(QMainWindow):
                 sys.exit()
         else:
             self.warning_box(
-                "The updated preferences have not been loaded because windows are open. " "Restart fpdb to load them.",
+                "The updated preferences have not been loaded because windows are open. Restart fpdb to load them.",
             )
 
     def process_close_messages(self) -> None:
@@ -1170,9 +1198,18 @@ class fpdb(QMainWindow):
             themes = ThemeManager().get_available_qt_themes()
         except ImportError:
             themes = [
-                "dark_purple.xml", "dark_teal.xml", "dark_blue.xml", "dark_cyan.xml",
-                "dark_pink.xml", "dark_red.xml", "light_purple.xml", "light_teal.xml",
-                "light_blue.xml", "light_cyan.xml", "light_pink.xml", "light_red.xml",
+                "dark_purple.xml",
+                "dark_teal.xml",
+                "dark_blue.xml",
+                "dark_cyan.xml",
+                "dark_pink.xml",
+                "dark_red.xml",
+                "light_purple.xml",
+                "light_teal.xml",
+                "light_blue.xml",
+                "light_cyan.xml",
+                "light_pink.xml",
+                "light_red.xml",
             ]
         for theme in themes:
             action = QAction(theme, self)
@@ -1638,6 +1675,11 @@ class fpdb(QMainWindow):
     # end def tab_import_imap_summaries
 
     def tab_ring_player_stats(self, widget, data=None) -> None:
+        # This package imports Matplotlib and scans every system font. Frozen
+        # builds cannot reliably reuse that scan, so importing it at startup
+        # delayed Auto Import even though no graphing tab had been requested.
+        from fpdb_3_legacy import GuiRingPlayerStats
+
         new_ps_thread = GuiRingPlayerStats.GuiRingPlayerStats(self.config, self.sql, self)
         self.threads.append(new_ps_thread)
         self.add_and_display_tab(new_ps_thread, "Ring Player Stats")
@@ -1664,6 +1706,8 @@ class fpdb(QMainWindow):
     #     self.add_and_display_tab(ps_tab, "Positional Stats")
 
     def tab_session_stats(self, widget, data=None) -> None:
+        from fpdb_3_legacy import GuiSessionViewer
+
         colors = self.get_theme_colors()
         new_ps_thread = GuiSessionViewer.GuiSessionViewer(self.config, self.sql, self, self, colors=colors)
         self.threads.append(new_ps_thread)
@@ -1718,6 +1762,8 @@ class fpdb(QMainWindow):
 
     def tabGraphViewer(self, widget, data=None) -> None:
         """Opens a graph viewer tab."""
+        from fpdb_3_legacy import GuiGraphViewer
+
         colors = self.get_theme_colors()
         new_gv_thread = GuiGraphViewer.GuiGraphViewer(self.sql, self.config, self, colors=colors)
         self.threads.append(new_gv_thread)
@@ -1725,6 +1771,8 @@ class fpdb(QMainWindow):
 
     def tabTourneyGraphViewer(self, widget, data=None) -> None:
         """Opens a graph viewer tab."""
+        from fpdb_3_legacy import GuiTourneyGraphViewer
+
         colors = self.get_theme_colors()
         new_gv_thread = GuiTourneyGraphViewer.GuiTourneyGraphViewer(self.sql, self.config, self, colors=colors)
         self.threads.append(new_gv_thread)
@@ -1733,6 +1781,7 @@ class fpdb(QMainWindow):
     def tabStatsInfo(self, widget, data=None) -> None:
         """Opens a statistics guide tab."""
         from fpdb_3_legacy import GuiStatsInfo
+
         new_si_tab = GuiStatsInfo.GuiStatsInfo(self.config, self)
         self.threads.append(new_si_tab)
         self.add_and_display_tab(new_si_tab, "Stats Guide")
