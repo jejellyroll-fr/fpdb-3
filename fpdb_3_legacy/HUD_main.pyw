@@ -579,19 +579,22 @@ class HudMain(QObject):
         self.config = Configuration.Config(file=options.config, dbname=options.dbname)
         log.info("HUD_main initialized - Config loaded, OS family: %s", self.config.os_family)
 
-        # Selecting the right module for the OS
+        # Selecting the right module for the OS. Imported through the package,
+        # not as bare top-level modules: the frozen macOS build runs the HUD
+        # inside the fpdb executable, whose analysis only ever saw
+        # "fpdb_3_legacy.*" imports, so a bare "import OSXTables" is not in its
+        # archive and the HUD dies on startup with ModuleNotFoundError.
         if self.config.os_family == "Linux":
             # Simplified: XWayland support or X11 fallback
             if os.getenv("QT_QPA_PLATFORM") == "xcb" or not os.environ.get("WAYLAND_DISPLAY"):
                 log.info("XWayland forced under wayland → backend XTables")
-                import XTables as Tables
             else:
                 log.info("Session X11 detected → backend XTables")
-                import XTables as Tables
+            from fpdb_3_legacy import XTables as Tables
         elif self.config.os_family == "Mac":
-            import OSXTables as Tables
+            from fpdb_3_legacy import OSXTables as Tables
         elif self.config.os_family in ("XP", "Win7"):
-            import WinTables as Tables
+            from fpdb_3_legacy import WinTables as Tables
         log.info("HudMain starting: Using db name = %s", db_name)
         self.Tables = Tables  # Assign Tables to self.Tables
 

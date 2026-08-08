@@ -62,6 +62,37 @@ APPLESCRIPT_TIMEOUT = 5.0
 OSASCRIPT = "/usr/bin/osascript"
 """Absolute, so the scan cannot be diverted by whatever PATH the app inherited."""
 
+AUTOMATION_REFUSED_MARKERS = (
+    "-1743",  # not authorised to send Apple events
+    "-1712",  # the Automation prompt is up and unanswered, so the event timed out
+    "Not authorized to send Apple events",
+    "AppleEvent timed out",
+)
+
+_automation_refused = False
+"""Whether System Events has already turned this process away.
+
+Reset by restarting, which is also what granting the permission requires.
+"""
+
+
+def _report_automation_refused(detail: str) -> None:
+    """Say once, at WARNING, that no table window can be read and why."""
+    global _automation_refused
+    if _automation_refused:
+        return
+    _automation_refused = True
+    log.warning(
+        "Fast HUD cannot see the Winamax table windows: this application is not allowed to "
+        "control 'System Events' (Automation). On macOS that is the only way to read an "
+        "Electron client's window title -- the accessibility API needs a grant macOS never "
+        "prompts for, and Quartz never exposes an Electron title at all. Allow it in System "
+        "Settings > Privacy & Security > Automation (FPDB -> System Events) and restart FPDB. "
+        "If FPDB is not listed there, run 'tccutil reset AppleEvents org.fpdb.fpdb3' so macOS "
+        "asks again. Until then the HUD only appears once a hand has been imported. Detail: %s",
+        detail,
+    )
+
 
 def applescript_window_titles() -> list[str]:
     """Titles of the client's windows, read through System Events.
@@ -73,7 +104,10 @@ def applescript_window_titles() -> list[str]:
     which the rest of fpdb already relies on to find these same windows.
 
     Returns an empty list when the client is not running or the scan is
-    refused; the caller then falls back to waiting for an imported hand.
+    refused; the caller then falls back to waiting for an imported hand. A
+    refusal is reported once, loudly: it is the difference between "no table is
+    open" and "this build will never see a table", and the two used to look
+    identical in the log.
     """
     try:
         # Absolute path, fixed argv, no shell, and nothing interpolated into the script.
@@ -84,11 +118,19 @@ def applescript_window_titles() -> list[str]:
             timeout=APPLESCRIPT_TIMEOUT,
             check=False,
         )
-    except (subprocess.TimeoutExpired, OSError) as exc:
-        log.debug("Could not list Winamax windows through System Events: %s", exc)
+    except subprocess.TimeoutExpired:
+        # The Automation prompt is on screen and nobody has answered it.
+        _report_automation_refused(f"osascript did not return within {APPLESCRIPT_TIMEOUT:.0f}s")
+        return []
+    except OSError as exc:
+        log.debug("Could not run %s: %s", OSASCRIPT, exc)
         return []
     if result.returncode != 0:
-        log.debug("System Events refused the Winamax window list: %s", result.stderr.strip())
+        stderr = result.stderr.strip()
+        if any(marker in stderr for marker in AUTOMATION_REFUSED_MARKERS):
+            _report_automation_refused(stderr)
+        else:
+            log.debug("System Events refused the Winamax window list: %s", stderr)
         return []
     return [title.strip() for title in result.stdout.strip().split(",") if title.strip()]
 

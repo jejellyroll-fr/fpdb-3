@@ -28,6 +28,7 @@ def _detector(*, window_list: list[dict] | None = None) -> MacOSTableDetector:
     detector._permissions_checked = False
     detector._permission_status = None
     detector._automation_warned = False
+    detector._automation_blocked = False
     detector._NSWorkspace = Mock()
     detector._kCGNullWindowID = 0
     detector._kCGWindowListOptionOnScreenOnly = 8
@@ -252,7 +253,33 @@ def test_run_applescript_scan_does_not_warn_on_other_errors() -> None:
     ):
         detector._run_applescript_scan()
     assert detector._automation_warned is False
+    assert detector._automation_blocked is False
     logger.warning.assert_not_called()
+
+
+def test_run_applescript_scan_treats_a_refusal_as_blocking() -> None:
+    detector = _detector()
+    result = Mock(returncode=1, stdout="", stderr="-1743 operation not allowed")
+    with patch("fpdb.infrastructure.platform.macos.subprocess.run", return_value=result):
+        detector._run_applescript_scan()
+    assert detector._automation_blocked is True
+
+
+def test_run_applescript_scan_treats_an_unanswered_prompt_as_blocking() -> None:
+    """-1712 means the Automation dialog is up and nobody has answered it.
+
+    Every later scan would sit through the same multi-second timeout, and
+    Fast-Fold reaches this path on every hand.
+    """
+    detector = _detector()
+    result = Mock(returncode=1, stdout="", stderr="AppleEvent timed out. (-1712)")
+    with (
+        patch("fpdb.infrastructure.platform.macos.subprocess.run", return_value=result),
+        patch("fpdb.infrastructure.platform.macos.logger") as logger,
+    ):
+        detector._run_applescript_scan()
+    assert detector._automation_blocked is True
+    logger.warning.assert_called_once()
 
 
 def test_run_applescript_scan_swallows_errors() -> None:
@@ -683,17 +710,39 @@ def test_find_tables_without_titles_uses_sole_blank_window() -> None:
     assert result == [blank]
 
 
-def test_find_tables_without_titles_skips_slow_applescript_when_accessibility_is_missing() -> None:
+def test_find_tables_without_titles_still_scans_when_accessibility_is_missing() -> None:
+    """Driving System Events needs Automation, which is a different grant.
+
+    Gating the scan on Accessibility switched it off in every packaged build,
+    and for an Electron client like Winamax it is the only way left to read a
+    window title -- Quartz never exposes one.
+    """
     detector = _detector()
     detector._match_target_window_by_pid = Mock(return_value=None)
     detector._check_permissions_once = Mock(return_value=Mock(accessibility=False))
-    detector.find_tables_applescript = Mock(return_value=[])
+    found = TableInfo(window_id=9, title="Winamax Bucarest 6", geometry=TableGeometry(0, 0, 600, 500))
+    detector.find_tables_applescript = Mock(return_value=[found])
     blank = TableInfo(window_id=3, title="", geometry=TableGeometry(0, 0, 600, 500), process_name="Winamax")
 
     result = detector._find_tables_without_titles("Winamax Bucarest 6", [], [blank], 3, 0)
 
-    assert result == [blank]
+    detector.find_tables_applescript.assert_called_once_with("Winamax Bucarest 6")
+    assert result == [found]
+
+
+def test_find_tables_without_titles_stops_scanning_once_system_events_refuses() -> None:
+    """A refused scan costs seconds, and Fast-Fold hits this path per hand."""
+    detector = _detector()
+    detector._match_target_window_by_pid = Mock(return_value=None)
+    detector.find_tables_applescript = Mock(return_value=[])
+    detector._automation_blocked = True
+    blank = TableInfo(window_id=3, title="", geometry=TableGeometry(0, 0, 600, 500), process_name="Winamax")
+
+    result = detector._find_tables_without_titles("Winamax Bucarest 6", [], [blank], 3, 0)
+
     detector.find_tables_applescript.assert_not_called()
+    # The sole-window heuristic is still allowed to answer.
+    assert result == [blank]
 
 
 def test_find_tables_without_titles_rejects_cross_room_blank_window_fallback() -> None:

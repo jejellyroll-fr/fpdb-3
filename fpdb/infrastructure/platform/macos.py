@@ -94,6 +94,12 @@ class MacOSTableDetector:
         self._permission_status: permissions.PermissionStatus | None = None
         self._automation_warned = False
 
+        # Set once System Events has told us this process may not drive it.
+        # Until it does, the scan is always worth trying: Automation is the one
+        # grant macOS prompts for, so a refusal now can become a grant later --
+        # but only after a restart, which clears this too.
+        self._automation_blocked = False
+
         # Lazy-import macOS dependencies
         try:
             from AppKit import NSWorkspace
@@ -287,18 +293,19 @@ class MacOSTableDetector:
                 )
                 return [pid_match]
 
-        permission_status = self._check_permissions_once()
+        self._check_permissions_once()
         if not (total_windows > 0 and titled_windows == 0):
             logger.debug("DIAGNOSTIC: No Quartz window matched the search string. Trying AppleScript fallback...")
-        # System Events takes around two seconds to reject an untrusted app.
-        # Fast-Fold can hit this path several times for one newly imported hand,
-        # so do not make a synchronous call that the native permission check has
-        # already told us cannot succeed.
+        # Not gated on Accessibility: driving System Events needs *Automation*,
+        # which is a different grant and the only one macOS actually prompts
+        # for. Gating on Accessibility switched this scan off in every packaged
+        # build -- and for an Electron client like Winamax it is the only way
+        # left to read a window title, Quartz never exposing one. The cost it
+        # was meant to avoid is instead avoided by stopping once System Events
+        # has actually refused us.
         applescript_tables = []
-        if permission_status.accessibility:
+        if not self._automation_blocked:
             applescript_tables = self.find_tables_applescript(search_string)
-        else:
-            logger.debug("Skipping AppleScript table scan because Accessibility permission is unavailable")
         if applescript_tables:
             logger.debug(f"DIAGNOSTIC: AppleScript fallback found {len(applescript_tables)} matching tables")
             return applescript_tables
@@ -487,18 +494,34 @@ class MacOSTableDetector:
                 result.stderr.strip(),
             )
 
-            if result.returncode != 0 and not self._automation_warned:
+            if result.returncode != 0:
                 stderr = result.stderr.strip()
-                if "-1743" in stderr or "Not authorized to send Apple events" in stderr:
+                # -1743: refused outright. -1712: the Automation prompt is on
+                # screen unanswered, so the event timed out. Both mean the same
+                # thing for us -- no window titles until the user allows it --
+                # and both must stop the scan, or every table lookup pays a
+                # multi-second timeout.
+                blocked = any(
+                    marker in stderr
+                    for marker in ("-1743", "-1712", "Not authorized to send Apple events", "AppleEvent timed out")
+                )
+                if blocked:
+                    self._automation_blocked = True
+                if blocked and not self._automation_warned:
                     self._automation_warned = True
                     logger.warning(
-                        "AppleScript fallback is blocked: this app is not allowed to "
-                        "control 'System Events' (Automation). Grant it in System "
-                        "Settings > Privacy & Security > Automation (allow FPDB/your "
-                        "terminal to control System Events), then restart FPDB. "
+                        "Poker table windows cannot be read: this application is not allowed "
+                        "to control 'System Events' (Automation). On macOS that is the only "
+                        "way to read an Electron client's window title -- Quartz never exposes "
+                        "one -- so the HUD cannot find its table. Allow it in System Settings > "
+                        "Privacy & Security > Automation (FPDB -> System Events) and restart "
+                        "FPDB. If FPDB is not listed there, run "
+                        "'tccutil reset AppleEvents org.fpdb.fpdb3' so macOS asks again. "
                         "osascript error: %s",
                         stderr,
                     )
+                elif not blocked:
+                    logger.debug("AppleScript window scan failed: %s", stderr)
 
             if result.returncode == 0 and result.stdout.strip():
                 windows_str = result.stdout.strip()

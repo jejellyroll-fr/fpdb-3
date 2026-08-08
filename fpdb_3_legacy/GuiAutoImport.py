@@ -720,9 +720,8 @@ class GuiAutoImport(QWidget):
         # ------------------------------------------------------------------
         command: str | list[str]
         frozen = getattr(sys, "frozen", False)
-        if frozen == "pyoxidizer" or (frozen and sys.platform == "darwin"):
-            # On macOS the HUD must retain fpdb.app's code identity so its
-            # Screen Recording and Accessibility grants remain valid.
+        if frozen == "pyoxidizer":
+            # A single binary hosts both entry points; --hud selects HUD_main.
             command = [sys.executable, "--hud", *self.settings["cl_options"].split()]
             bs = 1
 
