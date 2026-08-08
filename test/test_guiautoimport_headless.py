@@ -228,6 +228,7 @@ def test_launch_hud_pyoxidizer_reuses_main_executable(monkeypatch, tmp_path):
     fpdb_executable = tmp_path / "fpdb"
     monkeypatch.setattr(gui_mod.sys, "frozen", "pyoxidizer", raising=False)
     monkeypatch.setattr(gui_mod.sys, "executable", str(fpdb_executable))
+    monkeypatch.setattr(gui_mod.sys, "platform", "darwin")
 
     with patch.object(gui_mod.subprocess, "Popen", return_value=MagicMock()) as mock_popen:
         gui._launch_hud()
@@ -235,6 +236,22 @@ def test_launch_hud_pyoxidizer_reuses_main_executable(monkeypatch, tmp_path):
     command = mock_popen.call_args.args[0]
     assert command == [str(fpdb_executable), "--hud", "--config", "bundled.xml"]
     assert mock_popen.call_args.kwargs["env"]["FPDB_REQUEST_MACOS_PERMISSIONS"] == "1"
+
+
+def test_launch_hud_pyoxidizer_non_macos_does_not_request_macos_permissions(monkeypatch, tmp_path):
+    settings = _make_settings(MagicMock())
+    settings["cl_options"] = ""
+    gui = _make_gui(settings, _make_config())
+
+    gui_mod = sys.modules["fpdb_3_legacy.GuiAutoImport"]
+    monkeypatch.setattr(gui_mod.sys, "frozen", "pyoxidizer", raising=False)
+    monkeypatch.setattr(gui_mod.sys, "executable", str(tmp_path / "fpdb"))
+    monkeypatch.setattr(gui_mod.sys, "platform", "linux")
+
+    with patch.object(gui_mod.subprocess, "Popen", return_value=MagicMock()) as mock_popen:
+        gui._launch_hud()
+
+    assert "env" not in mock_popen.call_args.kwargs
 
 
 def test_check_hud_process_started_clears_terminated_process():
