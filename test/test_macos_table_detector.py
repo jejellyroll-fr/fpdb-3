@@ -799,3 +799,66 @@ def test_synthetic_window_id_is_deterministic() -> None:
     two = base + zlib.crc32(b"Table Alpha") % 1_000_000
     assert one == two
     assert one >= base
+
+
+def test_run_applescript_scan_treats_a_hung_scan_as_blocking() -> None:
+    """An unanswered Automation prompt blocks osascript rather than failing it.
+
+    TimeoutExpired never reaches the return-code handling, so before this the
+    broad handler swallowed it and left the scan enabled -- every table lookup
+    then paid the full timeout again.
+    """
+    detector = _detector()
+    with (
+        patch(
+            "fpdb.infrastructure.platform.macos.subprocess.run",
+            side_effect=TimeoutExpired(cmd="osascript", timeout=5),
+        ),
+        patch("fpdb.infrastructure.platform.macos.logger") as logger,
+    ):
+        detector._run_applescript_scan()
+
+    assert detector._automation_blocked is True
+    logger.warning.assert_called_once()
+    logger.error.assert_not_called()
+
+
+def test_a_hung_scan_is_not_repeated_on_the_next_lookup() -> None:
+    """The whole point of noticing the block: the second lookup must be free."""
+    detector = _detector()
+    detector._match_target_window_by_pid = Mock(return_value=None)
+    with patch(
+        "fpdb.infrastructure.platform.macos.subprocess.run",
+        side_effect=TimeoutExpired(cmd="osascript", timeout=5),
+    ) as run:
+        detector._find_tables_without_titles("Winamax Colorado 6", [], [], 3, 0)
+        detector._find_tables_without_titles("Winamax Colorado 5", [], [], 3, 0)
+
+    assert run.call_count == 1
+
+
+def test_an_empty_result_still_respects_the_scan_ttl() -> None:
+    """"Nothing found" is what a refused or hanging scan returns, too.
+
+    Re-scanning whenever the last result was empty made that the one case that
+    repeated on every lookup.
+    """
+    detector = _detector()
+    detector._applescript_last_result = []
+    detector._applescript_last_scan = time.monotonic()
+    detector._run_applescript_scan = Mock()
+
+    detector.find_tables_applescript("anything")
+
+    detector._run_applescript_scan.assert_not_called()
+
+
+def test_the_first_scan_still_runs_with_no_cached_result() -> None:
+    detector = _detector()
+    detector._applescript_last_result = []
+    detector._applescript_last_scan = 0.0
+    detector._run_applescript_scan = Mock()
+
+    detector.find_tables_applescript("anything")
+
+    detector._run_applescript_scan.assert_called_once()

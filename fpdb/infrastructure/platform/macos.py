@@ -437,6 +437,31 @@ class MacOSTableDetector:
                 return window
         return None
 
+    _APPLESCRIPT_TIMEOUT = 5.0
+
+    _AUTOMATION_BLOCKED_MARKERS = (
+        "-1743",  # not authorised to send Apple events
+        "-1712",  # the Automation prompt is up and unanswered, so the event timed out
+        "Not authorized to send Apple events",
+        "AppleEvent timed out",
+    )
+
+    def _report_automation_blocked(self, detail: str) -> None:
+        """Stop scanning, and say once why no table window can be read."""
+        self._automation_blocked = True
+        if self._automation_warned:
+            return
+        self._automation_warned = True
+        logger.warning(
+            "Poker table windows cannot be read: this application is not allowed to control "
+            "'System Events' (Automation). On macOS that is the only way to read an Electron "
+            "client's window title -- Quartz never exposes one -- so the HUD cannot find its "
+            "table. Allow it in System Settings > Privacy & Security > Automation "
+            "(FPDB -> System Events) and restart FPDB. If FPDB is not listed there, run "
+            "'tccutil reset AppleEvents org.fpdb.fpdb3' so macOS asks again. Detail: %s",
+            detail,
+        )
+
     def _run_applescript_scan(self) -> None:
         """Execute the full AppleScript scan and populate the cache.
 
@@ -485,7 +510,12 @@ class MacOSTableDetector:
             )
 
             script = "\n".join(script_lines)
-            result = subprocess.run(["osascript", "-e", script], capture_output=True, text=True, timeout=5)
+            result = subprocess.run(
+                ["osascript", "-e", script],
+                capture_output=True,
+                text=True,
+                timeout=self._APPLESCRIPT_TIMEOUT,
+            )
 
             logger.debug(
                 "DIAGNOSTIC: AppleScript exited with code %d. Output len: %d. Error: '%s'",
@@ -501,26 +531,9 @@ class MacOSTableDetector:
                 # thing for us -- no window titles until the user allows it --
                 # and both must stop the scan, or every table lookup pays a
                 # multi-second timeout.
-                blocked = any(
-                    marker in stderr
-                    for marker in ("-1743", "-1712", "Not authorized to send Apple events", "AppleEvent timed out")
-                )
-                if blocked:
-                    self._automation_blocked = True
-                if blocked and not self._automation_warned:
-                    self._automation_warned = True
-                    logger.warning(
-                        "Poker table windows cannot be read: this application is not allowed "
-                        "to control 'System Events' (Automation). On macOS that is the only "
-                        "way to read an Electron client's window title -- Quartz never exposes "
-                        "one -- so the HUD cannot find its table. Allow it in System Settings > "
-                        "Privacy & Security > Automation (FPDB -> System Events) and restart "
-                        "FPDB. If FPDB is not listed there, run "
-                        "'tccutil reset AppleEvents org.fpdb.fpdb3' so macOS asks again. "
-                        "osascript error: %s",
-                        stderr,
-                    )
-                elif not blocked:
+                if any(marker in stderr for marker in self._AUTOMATION_BLOCKED_MARKERS):
+                    self._report_automation_blocked(stderr)
+                else:
                     logger.debug("AppleScript window scan failed: %s", stderr)
 
             if result.returncode == 0 and result.stdout.strip():
@@ -558,6 +571,12 @@ class MacOSTableDetector:
                             self._applescript_last_result.append(table_info)
                             self._applescript_cache[window_id] = table_info
 
+        except subprocess.TimeoutExpired:
+            # An unanswered Automation prompt blocks osascript rather than
+            # failing it, so this never reaches the return-code handling above.
+            # Left uncounted it is the worst case of all: every table lookup
+            # pays the full timeout again.
+            self._report_automation_blocked(f"osascript did not return within {self._APPLESCRIPT_TIMEOUT:.0f}s")
         except Exception as e:
             logger.error(f"Error in _run_applescript_scan: {e}", exc_info=True)
 
@@ -573,7 +592,11 @@ class MacOSTableDetector:
         import time
 
         now = time.monotonic()
-        if not self._applescript_last_result or (now - self._applescript_last_scan) >= self._applescript_scan_ttl:
+        # The TTL applies to an empty result too. Re-scanning whenever the last
+        # one found nothing sounds harmless, but "nothing" is exactly what a
+        # refused or hanging scan returns -- so the one case that must not
+        # repeat was the one case that repeated on every single lookup.
+        if (now - self._applescript_last_scan) >= self._applescript_scan_ttl:
             self._run_applescript_scan()
 
         try:
