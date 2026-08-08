@@ -2426,10 +2426,15 @@ class fpdb(QMainWindow):
             self.central_layout.addWidget(self.custom_title_bar)
             self.setMenuBar(self.menuBar())
         else:
-            # Add title bar and menu bar to layout
+            # Add title bar and menu bar to layout. QLayout.setMenuBar reserves
+            # a strip above the layout's contents, so using it here put the menu
+            # bar over the title bar: the window buttons were not on the top
+            # line, and the row users tried to drag was the menu bar, which has
+            # no move handler. Add the menu bar as an ordinary second row so the
+            # replacement title bar really is the topmost one.
             self.central_layout.addWidget(self.custom_title_bar)
             self.menu_bar = self.menuBar()
-            self.central_layout.setMenuBar(self.menu_bar)
+            self.central_layout.addWidget(self.menu_bar)
 
         self.nb: QTabWidget = QTabWidget()
         self.nb.setTabsClosable(True)
