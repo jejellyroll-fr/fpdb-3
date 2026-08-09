@@ -29,7 +29,6 @@ import platform
 import re
 import shutil
 import sys
-import threading
 import traceback
 import xml.parsers.expat
 from pathlib import Path

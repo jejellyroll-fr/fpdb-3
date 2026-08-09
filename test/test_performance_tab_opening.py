@@ -15,9 +15,13 @@ def test_mplconfigdir_configured() -> None:
     assert os.environ["MPLCONFIGDIR"].startswith(Configuration.CONFIG_PATH)
 
 
-def test_filters_uses_isolated_cursor(qapp: MagicMock) -> None:
+def test_filters_uses_isolated_cursor() -> None:
     """Verify Filters creates a dedicated cursor to avoid lock contention on db.cursor."""
-    _ = qapp
+    from PySide6.QtWidgets import QApplication
+
+    if QApplication.instance() is None:
+        _app = QApplication([])
+
     mock_connection = MagicMock()
     mock_dedicated_cursor = MagicMock()
     mock_connection.cursor.return_value = mock_dedicated_cursor
