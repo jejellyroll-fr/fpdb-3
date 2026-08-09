@@ -856,6 +856,11 @@ class HudMain(QObject):
             self._hand_batch_timer.setInterval(HAND_BATCH_INTERVAL_MS)
             self._hand_batch_timer.timeout.connect(self._drain_pending_hands)
 
+            self._cleanup_timer = QTimer(self)
+            self._cleanup_timer.setInterval(2000)
+            self._cleanup_timer.timeout.connect(self._cleanup_closed_windows)
+            self._cleanup_timer.start()
+
             self._db_worker: HudReadWorker | None = HudReadWorker(self.config, parent=self)
             self._db_worker.ready.connect(self._on_db_worker_ready)
             self._db_worker.snapshot_ready.connect(self._on_db_snapshot)
@@ -1151,7 +1156,7 @@ class HudMain(QObject):
         temp_key = self._get_temp_key(info.game_type, info.tour_number, info.tab_number, table_name)
         if info.fast:
             self._fast_fold_tables.add(temp_key)
-        if temp_key in self.hud_dict:
+        if any(k == temp_key or k.startswith(f"{temp_key} #") for k in self.hud_dict):
             return temp_key
         if self._handle_tournament_table_changes(info.game_type, temp_key, info.tour_number):
             return None
@@ -1360,6 +1365,28 @@ class HudMain(QObject):
         self._fast_fold_pending.pop(temp_key, None)
         FastFoldEngine.clear_seats(hud)
         self._ff_trace(hand_id, "cleared", f"table={temp_key} ({reason})")
+
+    def _cleanup_closed_windows(self) -> None:
+        """Close HUD overlays for Winamax table windows that have closed at session end."""
+        if platform.system() != "Windows":
+            return
+        import ctypes
+        is_window = ctypes.windll.user32.IsWindow
+        to_remove = []
+        for temp_key, hud in list(self.hud_dict.items()):
+            if not getattr(hud, "is_fast_fold", False):
+                continue
+            m = re.search(r"#(\d+)$", temp_key)
+            if m:
+                hwnd = int(m.group(1))
+                if not is_window(hwnd):
+                    to_remove.append((temp_key, hud))
+        for temp_key, hud in to_remove:
+            log.info("Closing Fast-Fold HUD for closed window: %s", temp_key)
+            self._clear_fast_fold_table(temp_key, hud, "session-end", "window closed")
+            with contextlib.suppress(Exception):
+                hud.close()
+            self.hud_dict.pop(temp_key, None)
 
     def _recheck_window(self, pool: str) -> None:
         """Re-run a table's live update once the client has had time to draw it."""
