@@ -480,6 +480,7 @@ class MacOSTableDetector:
         import zlib
 
         logger.debug("DIAGNOSTIC: Running full AppleScript scan")
+        t0 = time.perf_counter()
         self._applescript_cache.clear()
         self._applescript_last_result = []
 
@@ -583,6 +584,7 @@ class MacOSTableDetector:
         except Exception as e:
             logger.error(f"Error in _run_applescript_scan: {e}", exc_info=True)
 
+        logger.info("[PERF-TIMING] _run_applescript_scan completed in %.3f s (found %d windows)", time.perf_counter() - t0, len(self._applescript_last_result))
         self._applescript_last_scan = time.monotonic()
 
     def find_tables_applescript(self, search_string: str = "") -> list[TableInfo]:

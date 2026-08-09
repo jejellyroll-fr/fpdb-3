@@ -12,6 +12,7 @@ Provides a comprehensive filtering system for poker data analysis with support f
 from __future__ import annotations
 
 import itertools
+import time
 import unicodedata
 from functools import partial
 from pathlib import Path
@@ -365,12 +366,13 @@ class Filters(QWidget):
             log.exception("Unable to build theme-aware filter stylesheet")
             return ""
 
-    def make_filter(self) -> None:  # noqa: PLR0912, C901
+    def make_filter(self) -> None:  # noqa: PLR0912, C901, PLR0915
         """Create all filter widgets based on display configuration.
 
         This method is complex by design as it handles multiple filter types
         and their conditional display logic.
         """
+        t0 = time.perf_counter()
         self.siteid: dict[str, int] = {}
         self.cards: dict[str, bool] = {}
         self.type: str | None = None
@@ -426,6 +428,7 @@ class Filters(QWidget):
 
         self.db.rollback()
         self.set_default_hero()
+        log.info("[PERF-TIMING] Filters.make_filter built in %.3f s", time.perf_counter() - t0)
 
     def _clear_layout(self, layout: Any) -> None:
         """Recursively remove and delete every item from a layout."""

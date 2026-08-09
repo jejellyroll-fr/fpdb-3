@@ -43,6 +43,7 @@ import os
 import pstats
 import queue
 import sqlite3
+import time
 from functools import partial
 from importlib import import_module
 from typing import Any
@@ -215,18 +216,21 @@ class fpdb(QMainWindow):
 
     def add_and_display_tab(self, new_page, new_tab_name) -> None:
         """Adds a tab, namely creates the button and displays it and appends all the relevant arrays."""
+        t0 = time.perf_counter()
         if not new_tab_name or not isinstance(new_tab_name, str):
             raise ValueError(f"Invalid tab name: {new_tab_name!r}")
 
         for name in self.nb_tab_names:
             if name == new_tab_name:
                 self.display_tab(new_tab_name)
+                log.info("[PERF-TIMING] Switched to existing tab '%s' in %.3f s", new_tab_name, time.perf_counter() - t0)
                 return  # if tab already exists, just go to it
 
         self.nb_tab_names.append(new_tab_name)
 
         index = self.nb.addTab(new_page, new_tab_name)
         self.nb.setCurrentIndex(index)
+        log.info("[PERF-TIMING] Opened and added new tab '%s' in %.3f s", new_tab_name, time.perf_counter() - t0)
 
     def display_tab(self, new_tab_name) -> None:
         """Displays the indicated tab."""
