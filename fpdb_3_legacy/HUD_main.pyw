@@ -1352,13 +1352,12 @@ class HudMain(QObject):
         QCoreApplication.quit()
 
     def _clear_fast_fold_table(self, temp_key: str, hud: Hud.Hud, hand_id: str, reason: str) -> None:
-        """Take a Fast-Fold table's blocks down, once, and say why.
+        """Take a Fast-Fold table's blocks down and say why.
 
         The seat windows hide themselves when their seat holds nobody, so
         emptying the seats is what removes them from an idle felt.
         """
-        if self._fast_fold_pending.pop(temp_key, None) is None and not getattr(hud, "stat_dict", None):
-            return  # already down
+        self._fast_fold_pending.pop(temp_key, None)
         FastFoldEngine.clear_seats(hud)
         self._ff_trace(hand_id, "cleared", f"table={temp_key} ({reason})")
 
@@ -1443,8 +1442,10 @@ class HudMain(QObject):
         # fraction of a second before the next read corrects them.
         drawn = self.HERO_SLOT in slots
         if drawn and len(slots) >= self.MIN_PLAYERS_TO_SHOW:
-            # Slot 0 is the bottom chair, which is the one the hero is pinned to.
-            seat_map = {((slot + hero_seat - 1) % max_seats) + 1: login for slot, login in slots.items()}
+            # Slot 0 is the bottom-center chair where the client draws the hero.
+            # Map slot 0 to the layout anchor seat (seat 3 for 6-max Winamax layouts).
+            anchor_seat = engine._anchor_slot(hud) or 3
+            seat_map = {((slot + anchor_seat - 1) % max_seats) + 1: login for slot, login in slots.items()}
             source = "window"
         elif slots:
             # Either the window holds nobody but the hero -- between hands, or
