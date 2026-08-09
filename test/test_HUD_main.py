@@ -13,8 +13,10 @@ from unittest.mock import MagicMock, call, patch
 import pytest
 
 pytestmark = pytest.mark.qt
-from PySide6.QtCore import QTimer
+from PySide6.QtCore import Qt, QTimer
 from PySide6.QtWidgets import QApplication
+
+from fpdb.infrastructure.platform import permissions as macos_permissions
 
 # import zmq
 
@@ -122,6 +124,216 @@ def test_hud_main_initialization(hud_main) -> None:
     assert hasattr(hud_main, "zmq_worker")
     assert hasattr(hud_main, "main_window")
     assert hud_main._table_stat_set_overrides == {}
+
+
+def _winamax_source_owner(enabled_sites: list[str]) -> SimpleNamespace:
+    config = MagicMock()
+    config.get_supported_sites.return_value = enabled_sites
+    return SimpleNamespace(
+        config=config,
+        winamax_table_update=MagicMock(),
+        _on_winamax_table_update=MagicMock(),
+        _site_enabled_in_config=HUD_main.HudMain._site_enabled_in_config,
+    )
+
+
+def test_winamax_live_sources_are_not_constructed_when_site_is_disabled() -> None:
+    owner = _winamax_source_owner(["PokerStars"])
+    with (
+        patch("fpdb_3_legacy.winamax_ax_seats.is_supported") as is_supported,
+        patch("fpdb_3_legacy.winamax_ax_seats.WinamaxAXSeatReader") as ax_reader,
+        patch("fpdb_3_legacy.winamax_pool_games.WinamaxPoolGames") as pool_games,
+        patch("fpdb_3_legacy.winamax_live_log_reader.WinamaxLiveLogReader") as log_reader,
+    ):
+        HUD_main.HudMain._initialize_winamax_live_sources(owner)
+
+    assert owner.winamax_ax_seats is None
+    assert owner.winamax_pool_games is None
+    assert owner.winamax_log_reader is None
+    is_supported.assert_not_called()
+    ax_reader.assert_not_called()
+    pool_games.assert_not_called()
+    log_reader.assert_not_called()
+    owner.winamax_table_update.connect.assert_not_called()
+
+
+def test_winamax_live_sources_start_when_site_is_enabled() -> None:
+    owner = _winamax_source_owner(["PokerStars", "Winamax"])
+    ax_instance = MagicMock()
+    pool_instance = MagicMock()
+    log_instance = MagicMock()
+    with (
+        patch("fpdb_3_legacy.winamax_ax_seats.is_supported", return_value=True),
+        patch("fpdb_3_legacy.winamax_ax_seats.WinamaxAXSeatReader", return_value=ax_instance) as ax_reader,
+        patch("fpdb_3_legacy.winamax_pool_games.WinamaxPoolGames", return_value=pool_instance) as pool_games,
+        patch(
+            "fpdb_3_legacy.winamax_live_log_reader.WinamaxLiveLogReader",
+            return_value=log_instance,
+        ) as log_reader,
+    ):
+        HUD_main.HudMain._initialize_winamax_live_sources(owner)
+
+    assert owner.winamax_ax_seats is ax_instance
+    assert owner.winamax_pool_games is pool_instance
+    assert owner.winamax_log_reader is log_instance
+    ax_reader.assert_called_once_with()
+    pool_games.assert_called_once()
+    log_reader.assert_called_once_with(on_table_update=owner.winamax_table_update.emit)
+    log_instance.start.assert_called_once_with()
+    owner.winamax_table_update.connect.assert_called_once_with(owner._on_winamax_table_update)
+
+
+@pytest.mark.parametrize(
+    "status",
+    [
+        macos_permissions.PermissionStatus(screen_recording=False, accessibility=False),
+        macos_permissions.PermissionStatus(screen_recording=True, accessibility=False),
+        macos_permissions.PermissionStatus(screen_recording=True, accessibility=True),
+    ],
+)
+def test_hud_main_startup_permission_preflight_is_diagnostic_only(
+    status: macos_permissions.PermissionStatus,
+) -> None:
+    """Frozen startup and the legacy opt-in never prompt or open Settings."""
+    owner = SimpleNamespace()
+
+    with (
+        patch.dict(os.environ, {"FPDB_REQUEST_MACOS_PERMISSIONS": "1"}, clear=True),
+        patch.object(HUD_main.sys, "frozen", True, create=True),
+        patch.object(macos_permissions, "get_status", return_value=status),
+        patch.object(macos_permissions, "describe_missing", return_value=[]),
+        patch.object(macos_permissions, "request_screen_recording_permission") as request_screen,
+        patch.object(macos_permissions, "open_screen_recording_settings") as open_screen,
+        patch.object(macos_permissions, "request_accessibility_permission") as request_accessibility,
+        patch.object(macos_permissions, "open_accessibility_settings") as open_accessibility,
+    ):
+        HUD_main.HudMain._check_macos_permissions(owner)
+
+    assert owner._macos_permission_status is status
+    request_screen.assert_not_called()
+    open_screen.assert_not_called()
+    request_accessibility.assert_not_called()
+    open_accessibility.assert_not_called()
+
+
+def test_macos_permission_dialog_refresh_is_diagnostic_only(app) -> None:
+    status = macos_permissions.PermissionStatus(False, True, app_data=None)
+    with (
+        patch.object(macos_permissions, "get_status", return_value=status),
+        patch.object(macos_permissions, "request_screen_recording_permission") as request_screen,
+        patch.object(macos_permissions, "request_accessibility_permission") as request_accessibility,
+        patch.object(macos_permissions, "open_screen_recording_settings") as open_screen,
+        patch.object(macos_permissions, "open_accessibility_settings") as open_accessibility,
+    ):
+        dialog = HUD_main.MacOSPermissionsDialog()
+        dialog.refresh_status()
+
+        assert dialog.screen_status_label.text() == "Missing"
+        assert dialog.accessibility_status_label.text() == "Granted"
+        assert dialog.app_data_status_label.text() == "Not preflightable"
+        assert "NSAppDataUsageDescription" in dialog.app_data_info_label.text()
+        assert not hasattr(dialog, "app_data_settings_button")
+        assert not hasattr(dialog, "_open_app_data_settings")
+        request_screen.assert_not_called()
+        request_accessibility.assert_not_called()
+        open_screen.assert_not_called()
+        open_accessibility.assert_not_called()
+        dialog.close()
+
+
+def test_macos_permission_dialog_request_buttons_are_isolated(app) -> None:
+    status = macos_permissions.PermissionStatus(False, False)
+    with (
+        patch.object(macos_permissions, "get_status", return_value=status),
+        patch.object(macos_permissions, "request_screen_recording_permission") as request_screen,
+        patch.object(macos_permissions, "request_accessibility_permission") as request_accessibility,
+        patch.object(macos_permissions, "open_screen_recording_settings") as open_screen,
+        patch.object(macos_permissions, "open_accessibility_settings") as open_accessibility,
+    ):
+        dialog = HUD_main.MacOSPermissionsDialog()
+        dialog.set_status(status)
+
+        dialog.screen_request_button.click()
+        request_screen.assert_called_once_with()
+        request_accessibility.assert_not_called()
+        open_screen.assert_not_called()
+        open_accessibility.assert_not_called()
+
+        request_screen.reset_mock()
+        dialog.accessibility_request_button.click()
+        request_accessibility.assert_called_once_with(prompt=True)
+        request_screen.assert_not_called()
+        open_screen.assert_not_called()
+        open_accessibility.assert_not_called()
+        dialog.close()
+
+
+def test_macos_permission_dialog_settings_buttons_open_only_their_pane(app) -> None:
+    status = macos_permissions.PermissionStatus(False, False)
+    with (
+        patch.object(macos_permissions, "open_screen_recording_settings") as open_screen,
+        patch.object(macos_permissions, "open_accessibility_settings") as open_accessibility,
+    ):
+        dialog = HUD_main.MacOSPermissionsDialog()
+        dialog.set_status(status)
+
+        dialog.screen_settings_button.click()
+        open_screen.assert_called_once_with()
+        open_accessibility.assert_not_called()
+
+        open_screen.reset_mock()
+        dialog.accessibility_settings_button.click()
+        open_accessibility.assert_called_once_with()
+        open_screen.assert_not_called()
+        assert not hasattr(dialog, "app_data_settings_button")
+        dialog.close()
+
+
+def test_macos_permission_dialog_rechecks_without_prompt_on_app_activation() -> None:
+    dialog = MagicMock()
+    dialog.isVisible.return_value = True
+    owner = SimpleNamespace(_macos_permissions_dialog=dialog)
+
+    HUD_main.HudMain._on_application_state_changed(owner, Qt.ApplicationState.ApplicationInactive)
+    dialog.refresh_status.assert_not_called()
+
+    HUD_main.HudMain._on_application_state_changed(owner, Qt.ApplicationState.ApplicationActive)
+    dialog.refresh_status.assert_called_once_with()
+
+
+def test_macos_permission_action_exists_before_any_table_without_auto_show(tmp_path) -> None:
+    """The HUD main window exposes onboarding without needing a detected table."""
+    owner = SimpleNamespace(
+        options=SimpleNamespace(xloc=None, yloc=None),
+        config=SimpleNamespace(os_family="Mac", graphics_path=str(tmp_path)),
+        close_event_handler=MagicMock(),
+        destroy=MagicMock(),
+        check_tables=MagicMock(),
+        show_macos_permissions=MagicMock(),
+        _on_application_state_changed=MagicMock(),
+    )
+    main_window = MagicMock()
+    layout = MagicMock()
+    permissions_button = MagicMock()
+    timer = MagicMock()
+    app_instance = MagicMock()
+
+    with (
+        patch.object(HUD_main, "HudMainWindow", return_value=main_window),
+        patch.object(HUD_main, "QVBoxLayout", return_value=layout),
+        patch.object(HUD_main, "QLabel"),
+        patch.object(HUD_main, "QPushButton", return_value=permissions_button),
+        patch.object(HUD_main, "QTimer", return_value=timer),
+        patch.object(HUD_main.QApplication, "instance", return_value=app_instance),
+        patch.object(HUD_main, "MacOSPermissionsDialog") as permissions_dialog,
+    ):
+        HUD_main.HudMain.init_main_window(owner)
+
+    assert owner._macos_permissions_dialog is None
+    permissions_dialog.assert_not_called()
+    permissions_button.clicked.connect.assert_called_once_with(owner.show_macos_permissions)
+    layout.addWidget.assert_any_call(permissions_button)
+    main_window.show.assert_called_once_with()
 
 
 def test_table_stat_set_override_is_scoped_by_table_and_game(hud_main) -> None:
@@ -335,6 +547,7 @@ def test_loading_hud_builds_empty_creation_args_without_querying_stats(hud_main)
         width=800,
         height=600,
     )
+    resolved_window = SimpleNamespace(window_id=12, title="Winamax table-a")
 
     with (
         patch.object(hud_main.db_connection, "get_stats_from_hand") as get_stats,
@@ -343,13 +556,31 @@ def test_loading_hud_builds_empty_creation_args_without_querying_stats(hud_main)
         patch.object(hud_main, "_set_table_stats") as set_table_stats,
     ):
         create_hud.side_effect = lambda args: hud_main.hud_dict.__setitem__(args.temp_key, MagicMock())
-        hud_main._create_new_hud("101", "table-a", table_info, 1, 6, "site", loading=True)
+        hud_main._create_new_hud(
+            "101",
+            "table-a",
+            table_info,
+            1,
+            6,
+            "site",
+            loading=True,
+            resolved_window=resolved_window,
+        )
 
     get_stats.assert_not_called()
     args = create_hud.call_args.args[0]
     assert args.stat_dict == {}
     assert args.cards == {}
     assert args.loading is True
+    hud_main.Tables.Table.assert_called_once_with(
+        hud_main.config,
+        "site",
+        table_name="table-a",
+        tournament=None,
+        table_number=None,
+        tourney_name=None,
+        resolved_window=resolved_window,
+    )
     seat_players.assert_not_called()
     set_table_stats.assert_not_called()
 
@@ -1899,7 +2130,7 @@ def test_a_saved_rule_rebuilds_only_the_tables_whose_profile_changed(hud_main, t
 
     hud_main.config.get_supported_games_parameters.side_effect = resolve
     hud_main.config.reload.return_value = True
-    path.write_text("<config changed=\"1\"/>", encoding="utf-8")
+    path.write_text('<config changed="1"/>', encoding="utf-8")
     os.utime(path, (time.time() + 5, time.time() + 5))
 
     assert hud_main.refresh_profiles_from_config() == 1
@@ -2312,10 +2543,14 @@ def test_recheck_replays_the_readers_current_state_for_a_pool(hud_main) -> None:
     applied.assert_called_once_with(table)
 
 
-def _ax_window(title="Winamax Casablanca 6", description="ESCAPE - 0,01-0,02 € - Pot Limit Omaha"):
+def _ax_window(
+    title="Winamax Casablanca 6",
+    description="ESCAPE - 0,01-0,02 € - Pot Limit Omaha",
+    window_id=None,
+):
     from fpdb_3_legacy.winamax_ax_seats import AXTableWindow
 
-    return AXTableWindow(title=title, description=description)
+    return AXTableWindow(title=title, description=description, window_id=window_id)
 
 
 def test_a_hud_is_created_from_the_log_without_waiting_for_an_import(hud_main) -> None:
@@ -2344,6 +2579,36 @@ def test_a_hud_is_created_from_the_log_without_waiting_for_an_import(hud_main) -
         # No real hand exists, so a stand-in keeps the loading HUD off the database.
         assert created["hand_id"].startswith("live:")
         assert hud_main.hud_dict["Casablanca 6"].is_fast_fold is True
+    finally:
+        hud_main.hud_dict = {}
+
+
+def test_fast_fold_reuses_the_window_resolved_at_hand_start(hud_main) -> None:
+    """HUD construction must not perform a second macOS window lookup."""
+    resolved = _ax_window(window_id=48_782)
+    hud_main.winamax_ax_seats = SimpleNamespace(find_table_window=lambda table_no: resolved)
+    hud_main.hud_dict = {}
+    created = {}
+
+    def fake_create(
+        hand_id,
+        temp_key,
+        info,
+        site_id,
+        num_seats,
+        site,
+        *,
+        loading=False,
+        stats=None,
+        resolved_window=None,
+    ):
+        created.update(resolved_window=resolved_window)
+        hud_main.hud_dict[temp_key] = SimpleNamespace(site="Winamax", table=SimpleNamespace(title=info.table_name))
+
+    try:
+        with patch.object(hud_main, "_create_new_hud", side_effect=fake_create):
+            assert hud_main._find_fast_fold_hud(_log_update(table_no="6")) is not None
+        assert created["resolved_window"] is resolved
     finally:
         hud_main.hud_dict = {}
 

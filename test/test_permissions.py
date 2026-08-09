@@ -25,6 +25,7 @@ def test_off_macos_everything_is_a_safe_noop() -> None:
 
 def test_permission_status_aggregation() -> None:
     assert PermissionStatus(True, True).all_granted
+    assert PermissionStatus(True, True, app_data=False).all_granted
     assert not PermissionStatus(True, False).all_granted
     assert not PermissionStatus(False, True).all_granted
     assert not PermissionStatus(False, False).all_granted
@@ -133,6 +134,12 @@ def test_open_settings_uses_deep_link_on_macos() -> None:
             )
 
 
+def test_app_data_exposes_no_synthetic_request_or_settings_action() -> None:
+    assert not hasattr(permissions, "request_app_data_permission")
+    assert not hasattr(permissions, "open_app_data_settings")
+    assert not hasattr(permissions, "_APP_DATA_PANE")
+
+
 def test_open_settings_swallows_failures() -> None:
     with patch.object(permissions, "_IS_MACOS", True):
         with patch("fpdb.infrastructure.platform.permissions.subprocess.run", side_effect=OSError("no open")) as run:
@@ -146,7 +153,20 @@ def test_describe_missing_lists_only_missing_permissions() -> None:
         messages = permissions.describe_missing(status)
         assert len(messages) == 2
         assert "Screen Recording" in messages[0]
+        assert "quit and reopen FPDB manually only if" in messages[0]
         assert "Accessibility" in messages[1]
+        assert "Recheck" in messages[1]
+        assert "restart" not in messages[1].lower()
+
+
+def test_describe_missing_reports_known_app_data_denial_without_gating_hud() -> None:
+    with patch.object(permissions, "_IS_MACOS", True):
+        status = PermissionStatus(True, True, app_data=False)
+        messages = permissions.describe_missing(status)
+        assert status.all_granted is True
+        assert len(messages) == 1
+        assert "App Data" in messages[0]
+        assert "no safe preflight, request API, or dedicated Settings pane" in messages[0]
 
 
 def test_describe_missing_none_fetches_status() -> None:
@@ -164,3 +184,4 @@ def test_get_status_builds_snapshot() -> None:
             status = permissions.get_status()
             assert status.screen_recording is True
             assert status.accessibility is False
+            assert status.app_data is None

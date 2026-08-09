@@ -1,9 +1,8 @@
 """The OS backend must be imported through the package, not as a bare module.
 
 On macOS the frozen build runs the HUD inside the *fpdb* executable
-(``fpdb --hud``), whose dependency analysis only ever saw ``fpdb_3_legacy.*``
-imports. A bare ``import OSXTables`` is therefore absent from that executable's
-archive, and the HUD died on startup with::
+(``fpdb --hud``). HUD_main is reached through ``runpy``, so PyInstaller needs a
+hook to include its dynamic backend graph; a bare import also used to die with::
 
     ModuleNotFoundError: No module named 'OSXTables'
 
@@ -20,6 +19,9 @@ from pathlib import Path
 import pytest
 
 HUD_MAIN = Path(__file__).parent.parent / "fpdb_3_legacy" / "HUD_main.pyw"
+PYINSTALLER_HOOK = (
+    Path(__file__).parent.parent / "tools" / "pyinstaller_hooks" / "hook-fpdb_3_legacy.subprocess_launch.py"
+)
 BACKENDS = ("OSXTables", "XTables", "WinTables")
 
 
@@ -43,6 +45,15 @@ def test_no_backend_is_imported_as_a_bare_top_level_module() -> None:
         f"runs the HUD inside the fpdb executable, which has no such modules; import "
         f"them as 'from fpdb_3_legacy import <name> as Tables' instead."
     )
+
+
+def test_pyinstaller_main_hook_includes_the_macos_hud_backend_graph() -> None:
+    """runpy hides these imports from analysis of the main fpdb executable."""
+    tree = ast.parse(PYINSTALLER_HOOK.read_text(encoding="utf-8"))
+    strings = {node.value for node in ast.walk(tree) if isinstance(node, ast.Constant) and isinstance(node.value, str)}
+
+    assert "fpdb_3_legacy.OSXTables" in strings
+    assert "fpdb.infrastructure.platform.macos" in strings
 
 
 @pytest.mark.parametrize("backend", BACKENDS)

@@ -1,14 +1,12 @@
 """macOS table detector implementation
 
-Uses AppKit/Quartz frameworks for window detection on macOS.
-Also uses AppleScript as fallback for apps like Winamax (Electron)
-that don't expose window titles through Quartz.
+Uses AppKit/Quartz frameworks for window detection on macOS, with a System
+Events GUI-scripting fallback when Quartz titles are unavailable.
 """
 
 from __future__ import annotations
 
 import logging
-import os
 import subprocess
 
 from . import permissions
@@ -92,13 +90,12 @@ class MacOSTableDetector:
         # Emit the privacy-permission diagnosis at most once per process.
         self._permissions_checked = False
         self._permission_status: permissions.PermissionStatus | None = None
-        self._automation_warned = False
+        self._system_events_warned = False
 
-        # Set once System Events has told us this process may not drive it.
-        # Until it does, the scan is always worth trying: Automation is the one
-        # grant macOS prompts for, so a refusal now can become a grant later --
-        # but only after a restart, which clears this too.
-        self._automation_blocked = False
+        # Set once System Events has refused GUI scripting or stopped answering.
+        # A restart is required after changing either Automation or
+        # Accessibility, and also clears this circuit breaker.
+        self._system_events_blocked = False
 
         # Lazy-import macOS dependencies
         try:
@@ -128,8 +125,9 @@ class MacOSTableDetector:
     def _check_permissions_once(self) -> permissions.PermissionStatus:
         """Log the privacy-permission diagnosis once when titles are missing.
 
-        Set ``FPDB_REQUEST_MACOS_PERMISSIONS=1`` to also trigger the native
-        prompts / open the relevant System Settings panes automatically.
+        This detector is deliberately diagnostic-only. ``HudMain`` owns the
+        native prompts so one missing title cannot reopen System Settings or
+        duplicate a request already made at HUD startup.
         """
         if self._permissions_checked:
             return self._permission_status or permissions.get_status()
@@ -148,23 +146,16 @@ class MacOSTableDetector:
 
         for message in messages:
             logger.warning(message)
-
-        if os.getenv("FPDB_REQUEST_MACOS_PERMISSIONS") == "1":
-            if not status.screen_recording:
-                logger.info("Requesting Screen Recording permission (native prompt)...")
-                permissions.request_screen_recording_permission()
-                permissions.open_screen_recording_settings()
-            if not status.accessibility:
-                logger.info("Requesting Accessibility permission (native prompt)...")
-                permissions.request_accessibility_permission(prompt=True)
-                permissions.open_accessibility_settings()
         return status
 
-    def find_tables(self, search_string: str = "") -> list[TableInfo]:
+    def find_tables(self, search_string: str = "", *, allow_fallback: bool = True) -> list[TableInfo]:
         """Find all windows matching the search string
 
         Args:
             search_string: String to search for in window titles
+            allow_fallback: Whether argv/System Events may be used when Quartz
+                exposes no matching title. Fast Fold disables this for its
+                first pass so Accessibility can answer before any Apple Event.
 
         Returns:
             List of TableInfo for matching windows
@@ -233,10 +224,10 @@ class MacOSTableDetector:
         except Exception as e:
             logger.error(f"Error finding tables via Quartz: {e}", exc_info=True)
 
-        # Quartz only exposes window titles when Screen Recording permission is
-        # granted; without it kCGWindowName is empty for every window. Electron
-        # clients (e.g. Winamax) also never expose titles through Quartz. Detect
-        # both cases so we can tell a permission problem apart from a regex miss.
+        # Quartz only exposes other applications' window titles when Screen
+        # Recording is granted; without it kCGWindowName is empty. A granted
+        # build does expose Winamax titles, so an empty title is a permission or
+        # lookup signal, not an Electron limitation.
         logger.debug(
             "DIAGNOSTIC: Quartz saw %d on-screen windows, %d with titles; %d matched search '%s'",
             total_windows,
@@ -246,10 +237,10 @@ class MacOSTableDetector:
         )
 
         # Fallback to AppleScript / argv when Quartz produced no usable match:
-        # either no window matched, or none exposed a title at all (missing Screen
-        # Recording permission / Electron client).
+        # either no window matched, or none exposed a title at all (most often
+        # missing Screen Recording permission).
         has_only_empty_titles = len(tables) > 0 and all(t.title == "" for t in tables)
-        if len(tables) == 0 or has_only_empty_titles:
+        if allow_fallback and (len(tables) == 0 or has_only_empty_titles):
             fallback = self._find_tables_without_titles(
                 search_string,
                 target_table_windows,
@@ -296,15 +287,12 @@ class MacOSTableDetector:
         self._check_permissions_once()
         if not (total_windows > 0 and titled_windows == 0):
             logger.debug("DIAGNOSTIC: No Quartz window matched the search string. Trying AppleScript fallback...")
-        # Not gated on Accessibility: driving System Events needs *Automation*,
-        # which is a different grant and the only one macOS actually prompts
-        # for. Gating on Accessibility switched this scan off in every packaged
-        # build -- and for an Electron client like Winamax it is the only way
-        # left to read a window title, Quartz never exposing one. The cost it
-        # was meant to avoid is instead avoided by stopping once System Events
-        # has actually refused us.
+        # System Events GUI scripting needs both Automation (to send it Apple
+        # Events) and Accessibility (to inspect processes/windows). Try once so
+        # macOS can surface the Automation request, then stop after an explicit
+        # refusal or timeout instead of blocking every table lookup.
         applescript_tables = []
-        if not self._automation_blocked:
+        if not self._system_events_blocked:
             applescript_tables = self.find_tables_applescript(search_string)
         if applescript_tables:
             logger.debug(f"DIAGNOSTIC: AppleScript fallback found {len(applescript_tables)} matching tables")
@@ -444,26 +432,42 @@ class MacOSTableDetector:
 
     _AUTOMATION_BLOCKED_MARKERS = (
         "-1743",  # not authorised to send Apple events
-        "-1712",  # the Automation prompt is up and unanswered, so the event timed out
         "Not authorized to send Apple events",
-        "AppleEvent timed out",
     )
 
-    def _report_automation_blocked(self, detail: str) -> None:
+    _ACCESSIBILITY_BLOCKED_MARKERS = (
+        # Often accompanied by -1719, but that number alone also means an
+        # invalid index. Match the diagnostic text, never the bare number.
+        "not allowed assistive access",
+        "does not have access to assistive devices",
+    )
+
+    _SYSTEM_EVENTS_TIMEOUT_MARKERS = ("-1712", "AppleEvent timed out")
+
+    def _report_system_events_blocked(self, detail: str, reason: str) -> None:
         """Stop scanning, and say once why no table window can be read."""
-        self._automation_blocked = True
-        if self._automation_warned:
+        self._system_events_blocked = True
+        if self._system_events_warned:
             return
-        self._automation_warned = True
-        logger.warning(
-            "Poker table windows cannot be read: this application is not allowed to control "
-            "'System Events' (Automation). On macOS that is the only way to read an Electron "
-            "client's window title -- Quartz never exposes one -- so the HUD cannot find its "
-            "table. Allow it in System Settings > Privacy & Security > Automation "
-            "(FPDB -> System Events) and restart FPDB. If FPDB is not listed there, run "
-            "'tccutil reset AppleEvents org.fpdb.fpdb3' so macOS asks again. Detail: %s",
-            detail,
-        )
+        self._system_events_warned = True
+        if reason == "automation":
+            action = "Allow FPDB -> System Events in Privacy & Security > Automation"
+        elif reason == "accessibility":
+            action = "Allow FPDB in Privacy & Security > Accessibility"
+        else:
+            action = "Check for a pending permission prompt and that System Events is responsive"
+        logger.warning("Poker table windows cannot be read through System Events (%s). %s, then restart FPDB. Detail: %s", reason, action, detail)
+
+    def _handle_system_events_failure(self, stderr: str) -> None:
+        """Classify a failed System Events scan without conflating TCC services."""
+        if any(marker in stderr for marker in self._AUTOMATION_BLOCKED_MARKERS):
+            self._report_system_events_blocked(stderr, "automation")
+        elif any(marker in stderr for marker in self._ACCESSIBILITY_BLOCKED_MARKERS):
+            self._report_system_events_blocked(stderr, "accessibility")
+        elif any(marker in stderr for marker in self._SYSTEM_EVENTS_TIMEOUT_MARKERS):
+            self._report_system_events_blocked(stderr, "timeout")
+        else:
+            logger.debug("AppleScript window scan failed: %s", stderr)
 
     def _run_applescript_scan(self) -> None:
         """Execute the full AppleScript scan and populate the cache.
@@ -532,15 +536,7 @@ class MacOSTableDetector:
 
             if result.returncode != 0:
                 stderr = result.stderr.strip()
-                # -1743: refused outright. -1712: the Automation prompt is on
-                # screen unanswered, so the event timed out. Both mean the same
-                # thing for us -- no window titles until the user allows it --
-                # and both must stop the scan, or every table lookup pays a
-                # multi-second timeout.
-                if any(marker in stderr for marker in self._AUTOMATION_BLOCKED_MARKERS):
-                    self._report_automation_blocked(stderr)
-                else:
-                    logger.debug("AppleScript window scan failed: %s", stderr)
+                self._handle_system_events_failure(stderr)
 
             if result.returncode == 0 and result.stdout.strip():
                 windows_str = result.stdout.strip()
@@ -578,11 +574,12 @@ class MacOSTableDetector:
                             self._applescript_cache[window_id] = table_info
 
         except subprocess.TimeoutExpired:
-            # An unanswered Automation prompt blocks osascript rather than
-            # failing it, so this never reaches the return-code handling above.
-            # Left uncounted it is the worst case of all: every table lookup
-            # pays the full timeout again.
-            self._report_automation_blocked(f"osascript did not return within {self._APPLESCRIPT_TIMEOUT:.0f}s")
+            # A pending prompt or an unresponsive System Events process can
+            # block osascript. Do not make every table lookup pay the timeout.
+            self._report_system_events_blocked(
+                f"osascript did not return within {self._APPLESCRIPT_TIMEOUT:.0f}s",
+                "timeout",
+            )
         except Exception as e:
             logger.error(f"Error in _run_applescript_scan: {e}", exc_info=True)
 
@@ -591,8 +588,8 @@ class MacOSTableDetector:
     def find_tables_applescript(self, search_string: str = "") -> list[TableInfo]:
         """Find tables using AppleScript for all active poker processes.
 
-        This serves as a robust fallback on macOS 10.15+ when Screen Recording
-        permissions are missing or when Electron apps do not expose titles via Quartz.
+        This serves as a fallback when Screen Recording is missing or Quartz
+        otherwise produced no usable title.
         """
         import re
         import time

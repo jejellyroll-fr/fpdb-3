@@ -37,6 +37,7 @@ from PySide6.QtWidgets import (
 from fpdb_3_legacy import Configuration, Importer
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.loggingFpdb import get_logger
+from fpdb_3_legacy.subprocess_launch import hud_main_command
 
 # Import for dynamic reloading configuration
 try:
@@ -720,19 +721,9 @@ class GuiAutoImport(QWidget):
         # ------------------------------------------------------------------
         command: str | list[str]
         frozen = getattr(sys, "frozen", False)
-        if frozen == "pyoxidizer":
-            # A single binary hosts both entry points; --hud selects HUD_main.
-            command = [sys.executable, "--hud", *self.settings["cl_options"].split()]
-            bs = 1
-
-        elif frozen:
-            executable = "HUD_main.exe" if os.name == "nt" else "HUD_main"
-            command = os.path.join(self._hud_base_path(), executable)
-            if not os.path.isfile(command):
-                msg = f"HUD_main not found at {command}"
-                raise FileNotFoundError(msg)
-            command = [command, *self.settings["cl_options"].split()]
-            bs = 0 if os.name == "nt" else 1
+        if frozen:
+            command = hud_main_command(*self.settings["cl_options"].split())
+            bs = 0 if os.name == "nt" and frozen != "pyoxidizer" else 1
 
         elif self.config.install_method == "exe":
             command = "HUD_main.exe"
@@ -934,7 +925,13 @@ class GuiAutoImport(QWidget):
         super().closeEvent(event)
 
     def _configured_import_directories(self) -> dict[tuple[str, str], str]:
-        """Return existing import directories from the current enabled sites."""
+        """Resolve import paths for the current enabled sites.
+
+        This helper is reached only from an active ``updatePaths()`` call.
+        Keeping ``get_default_paths(site)`` here preserves room-specific path
+        recovery (for example after an OS/account migration) without probing
+        any site while Auto Import is stopped.
+        """
         directories: dict[tuple[str, str], str] = {}
         for site in self.config.get_supported_sites():
             # A site can be enabled under <supported_sites> without a matching
@@ -946,7 +943,7 @@ class GuiAutoImport(QWidget):
             except KeyError as e:
                 log.warning("Skipping auto-import for misconfigured site %s (missing config: %s)", site, e)
                 continue
-            if not params["enabled"]:
+            if not params.get("enabled", False):
                 continue
 
             try:
@@ -954,6 +951,7 @@ class GuiAutoImport(QWidget):
             except KeyError as e:
                 log.warning("Skipping auto-import paths for misconfigured site %s (missing config: %s)", site, e)
                 continue
+
             hh_path = paths.get("hud-defaultPath")
             if hh_path and os.path.isdir(hh_path):
                 directories[(site, "hh")] = hh_path
@@ -970,6 +968,13 @@ class GuiAutoImport(QWidget):
 
     def updatePaths(self) -> None:
         """Reload config paths and resynchronise the importer's watched dirs."""
+        if not self.doAutoImportBool:
+            # Configuration observers also run while the tab is merely open.
+            # Defer all reload/path work until Start Auto Import (or the
+            # headless equivalent) has explicitly made the importer active.
+            log.debug("Deferring auto-import path update while Auto Import is stopped")
+            return
+
         log.debug("Updating auto-import paths from configuration")
 
         if hasattr(self.config, "reload"):
@@ -1019,7 +1024,10 @@ def main(argv=None):
 
     settings.update(config.get_db_parameters())
     settings.update(config.get_import_parameters())
-    settings.update(config.get_default_paths())
+    # Path discovery belongs to an active Auto Import session. In particular,
+    # get_default_paths() probes fallback locations when the configured default
+    # is missing, which is inappropriate while merely constructing this entry
+    # point.
     settings["global_lock"] = interlocks.InterProcessLock(name="fpdb_global_lock")
     settings["cl_options"] = ".".join(argv)
 

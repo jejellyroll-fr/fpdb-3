@@ -1404,7 +1404,9 @@ class fpdb(QMainWindow):
         self.settings.update({"cl_options": cl_options})
         self.settings.update(self.config.get_db_parameters())
         self.settings.update(self.config.get_import_parameters())
-        self.settings.update(self.config.get_default_paths())
+        # Default-path resolution may inspect fallback locations when a saved
+        # room path is stale. Keep profile loading passive; import entry points
+        # resolve paths only when the user actually opens/starts that workflow.
 
         # Set up SQL and connect to the database
         self.sql = SQL.Sql(db_server=self.settings["db-server"])
@@ -1646,6 +1648,10 @@ class fpdb(QMainWindow):
 
     def tab_bulk_import(self, widget, data=None) -> None:
         """Opens a tab for bulk importing."""
+        # Bulk Import still gets its detected/custom default, but resolving it
+        # here avoids probing protected folders during ordinary application
+        # startup and profile refreshes.
+        self.settings.update(self.config.get_default_paths())
         new_import_thread = GuiBulkImport.GuiBulkImport(self.settings, self.config, self.sql, self)
         self.threads.append(new_import_thread)
         self.add_and_display_tab(new_import_thread, "Bulk Import")

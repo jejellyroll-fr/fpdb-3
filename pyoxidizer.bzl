@@ -70,6 +70,10 @@ def make_exe(dist):
         "import runpy",
         "import sys",
         "sys.frozen = 'pyoxidizer'",
+        # A signed .app must stay byte-for-byte immutable after launch. The
+        # embedded interpreter does not reliably honour PYTHONDONTWRITEBYTECODE,
+        # so enforce this before any filesystem module is imported.
+        "sys.dont_write_bytecode = True",
         "root = os.path.dirname(sys.executable)",
         "bundle_resources = os.path.join(os.path.dirname(root), 'Resources')",
         "if os.path.isdir(os.path.join(bundle_resources, 'fpdb_3_legacy')):",

@@ -399,11 +399,13 @@ jobs:
         env:
           QT_QPA_PLATFORM: offscreen
         run: |
-          native_tests="test/test_equity.py"
+          native_tests=(test/test_equity.py)
           for f in test/test_aof_equity.py test/test_aof_ranges.py; do
-            [ -f "$f" ] && native_tests="$native_tests $f"
+            if [[ -f "$f" ]]; then
+              native_tests+=("$f")
+            fi
           done
-          python -m pytest $native_tests -x -v --tb=short
+          python -m pytest "${native_tests[@]}" -x -v --tb=short
 
   coverage:
     runs-on: ubuntu-latest
@@ -509,9 +511,6 @@ jobs:
           - os: ubuntu-latest
             label: Linux x64
             artifact: fpdb-pyinstaller-linux-x64
-          - os: macos-latest
-            label: macOS ARM64
-            artifact: fpdb-pyinstaller-macos-arm64
           - os: windows-latest
             label: Windows x64
             artifact: fpdb-pyinstaller-windows-x64
@@ -541,40 +540,30 @@ jobs:
           # distribution still exposes numpy's compiled sub-packages, and
           # "import numpy" then yields an empty namespace package.
           if [ "${{ runner.os }}" = "Windows" ]; then
-            python -m PyInstaller --noconfirm --onedir --windowed --log-level=DEBUG --paths=fpdb_3_legacy --paths=. --hidden-import numpy --hidden-import fpdb_3_legacy.coinpoker_live_capture --hidden-import fpdb_3_legacy.Aux_Hud --hidden-import fpdb_3_legacy.Aux_Classic_Hud --hidden-import fpdb_3_legacy.Mucked --icon="gfx/tribal.jpg" --add-data "fpdb_3_legacy;fpdb_3_legacy" --add-data "gfx;gfx" --add-data "icons;icons" --add-data "fonts;fonts" --add-data "locale;locale" --add-data "HUD_config.xml;." "fpdb_3_legacy/fpdb.pyw"
-            python -m PyInstaller --noconfirm --onedir --windowed --log-level=DEBUG --paths=fpdb_3_legacy --paths=. --hidden-import numpy --hidden-import fpdb_3_legacy.coinpoker_live_capture --hidden-import fpdb_3_legacy.Aux_Hud --hidden-import fpdb_3_legacy.Aux_Classic_Hud --hidden-import fpdb_3_legacy.Mucked --icon="gfx/tribal.jpg" --add-data "fpdb_3_legacy;fpdb_3_legacy" --add-data "gfx;gfx" --add-data "icons;icons" --add-data "fonts;fonts" --add-data "locale;locale" --add-data "HUD_config.xml;." "fpdb_3_legacy/HUD_main.pyw"
+            python -m PyInstaller --noconfirm --onedir --windowed --log-level=DEBUG --paths=fpdb_3_legacy --paths=. --additional-hooks-dir=tools/pyinstaller_hooks --hidden-import numpy --hidden-import fpdb_3_legacy.coinpoker_live_capture --hidden-import fpdb_3_legacy.Aux_Hud --hidden-import fpdb_3_legacy.Aux_Classic_Hud --hidden-import fpdb_3_legacy.Mucked --icon="gfx/tribal.jpg" --add-data "fpdb_3_legacy;fpdb_3_legacy" --add-data "gfx;gfx" --add-data "icons;icons" --add-data "fonts;fonts" --add-data "locale;locale" --add-data "HUD_config.xml;." "fpdb_3_legacy/fpdb.pyw"
+            python -m PyInstaller --noconfirm --onedir --windowed --log-level=DEBUG --paths=fpdb_3_legacy --paths=. --additional-hooks-dir=tools/pyinstaller_hooks --hidden-import numpy --hidden-import fpdb_3_legacy.coinpoker_live_capture --hidden-import fpdb_3_legacy.Aux_Hud --hidden-import fpdb_3_legacy.Aux_Classic_Hud --hidden-import fpdb_3_legacy.Mucked --icon="gfx/tribal.jpg" --add-data "fpdb_3_legacy;fpdb_3_legacy" --add-data "gfx;gfx" --add-data "icons;icons" --add-data "fonts;fonts" --add-data "locale;locale" --add-data "HUD_config.xml;." "fpdb_3_legacy/HUD_main.pyw"
           else
-            python -m PyInstaller --noconfirm --onedir --windowed --log-level=DEBUG --paths=fpdb_3_legacy --paths=. --hidden-import numpy --hidden-import fpdb_3_legacy.coinpoker_live_capture --hidden-import fpdb_3_legacy.Aux_Hud --hidden-import fpdb_3_legacy.Aux_Classic_Hud --hidden-import fpdb_3_legacy.Mucked --icon="gfx/tribal.jpg" --add-data "fpdb_3_legacy:fpdb_3_legacy" --add-data "gfx:gfx" --add-data "icons:icons" --add-data "fonts:fonts" --add-data "locale:locale" --add-data "HUD_config.xml:." "fpdb_3_legacy/fpdb.pyw"
-            python -m PyInstaller --noconfirm --onedir --windowed --log-level=DEBUG --paths=fpdb_3_legacy --paths=. --hidden-import numpy --hidden-import fpdb_3_legacy.coinpoker_live_capture --hidden-import fpdb_3_legacy.Aux_Hud --hidden-import fpdb_3_legacy.Aux_Classic_Hud --hidden-import fpdb_3_legacy.Mucked --icon="gfx/tribal.jpg" --add-data "fpdb_3_legacy:fpdb_3_legacy" --add-data "gfx:gfx" --add-data "icons:icons" --add-data "fonts:fonts" --add-data "locale:locale" --add-data "HUD_config.xml:." "fpdb_3_legacy/HUD_main.pyw"
+            python -m PyInstaller --noconfirm --onedir --windowed --log-level=DEBUG --paths=fpdb_3_legacy --paths=. --additional-hooks-dir=tools/pyinstaller_hooks --hidden-import numpy --hidden-import fpdb_3_legacy.coinpoker_live_capture --hidden-import fpdb_3_legacy.Aux_Hud --hidden-import fpdb_3_legacy.Aux_Classic_Hud --hidden-import fpdb_3_legacy.Mucked --icon="gfx/tribal.jpg" --add-data "fpdb_3_legacy:fpdb_3_legacy" --add-data "gfx:gfx" --add-data "icons:icons" --add-data "fonts:fonts" --add-data "locale:locale" --add-data "HUD_config.xml:." "fpdb_3_legacy/fpdb.pyw"
+            python -m PyInstaller --noconfirm --onedir --windowed --log-level=DEBUG --paths=fpdb_3_legacy --paths=. --additional-hooks-dir=tools/pyinstaller_hooks --hidden-import numpy --hidden-import fpdb_3_legacy.coinpoker_live_capture --hidden-import fpdb_3_legacy.Aux_Hud --hidden-import fpdb_3_legacy.Aux_Classic_Hud --hidden-import fpdb_3_legacy.Mucked --icon="gfx/tribal.jpg" --add-data "fpdb_3_legacy:fpdb_3_legacy" --add-data "gfx:gfx" --add-data "icons:icons" --add-data "fonts:fonts" --add-data "locale:locale" --add-data "HUD_config.xml:." "fpdb_3_legacy/HUD_main.pyw"
           fi
       - name: Bundle HUD inside fpdb
         run: python tools/bundle_pyinstaller_hud.py dist
-      - name: Re-sign assembled macOS application
-        if: runner.os == 'macOS'
-        run: codesign --force --deep --sign - dist/fpdb.app
       - name: Package build artifact
         shell: bash
         env:
           ARTIFACT: ${{ matrix.artifact }}
-        run: |
-          if [ "${{ runner.os }}" = "macOS" ]; then
-            cp docs/macos-gatekeeper.md dist/READ-ME-FIRST-macos.md
-            tar -czf "$ARTIFACT.tar.gz" -C dist fpdb.app READ-ME-FIRST-macos.md
-          else
-            tar -czf "$ARTIFACT.tar.gz" -C dist fpdb
-          fi
+        run: tar -czf "$ARTIFACT.tar.gz" -C dist fpdb
       - name: Upload Build Artifacts
+        if: runner.os != 'macOS'
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact }}
           path: ${{ matrix.artifact }}.tar.gz
           compression-level: 0
-      # Shipped alongside the PyOxidizer tarballs rather than instead of them:
-      # the PyOxidizer Windows build does not run, so on that platform this is
-      # the only working download, and offering the same pair everywhere keeps
-      # the release predictable.
+      # macOS is distributed only by build-pyoxidizer. Keep the runner guard as
+      # defense in depth if a macOS entry is ever accidentally reintroduced.
       - name: Attach PyInstaller build to the release
-        if: github.event_name == 'release'
+        if: github.event_name == 'release' && runner.os != 'macOS'
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -593,6 +582,10 @@ jobs:
     # emitted by `cargo init` since Rust 1.85.
     env:
       RUSTUP_TOOLCHAIN: "1.83.0"
+      # release/published covers both final releases and published prereleases
+      # (including RCs), so neither may fall back to an ad-hoc identity.
+      FPDB_MACOS_SIGNING_IDENTITY: ${{ github.event_name == 'release' && secrets.MACOS_SIGNING_IDENTITY || '-' }}
+      FPDB_REQUIRE_STABLE_MACOS_SIGNING: ${{ github.event_name == 'release' && '1' || '0' }}
     strategy:
       fail-fast: false
       matrix:
@@ -623,6 +616,35 @@ jobs:
             artifact: fpdb-pyoxidizer-windows-x64
     steps:
       - uses: actions/checkout@v4
+      - name: Validate macOS release credentials
+        if: runner.os == 'macOS' && github.event_name == 'release'
+        shell: bash
+        env:
+          MACOS_CERTIFICATE_P12_BASE64: ${{ secrets.MACOS_CERTIFICATE_P12_BASE64 }}
+          MACOS_CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
+          MACOS_NOTARY_API_KEY_P8_BASE64: ${{ secrets.MACOS_NOTARY_API_KEY_P8_BASE64 }}
+          MACOS_NOTARY_KEY_ID: ${{ secrets.MACOS_NOTARY_KEY_ID }}
+          MACOS_NOTARY_ISSUER_ID: ${{ secrets.MACOS_NOTARY_ISSUER_ID }}
+        run: |
+          missing=0
+          for name in FPDB_MACOS_SIGNING_IDENTITY MACOS_CERTIFICATE_P12_BASE64 MACOS_CERTIFICATE_PASSWORD MACOS_NOTARY_API_KEY_P8_BASE64 MACOS_NOTARY_KEY_ID MACOS_NOTARY_ISSUER_ID; do
+            if [[ -z "${!name}" || "${!name}" == "-" ]]; then
+              echo "::error::Missing required macOS release credential: $name"
+              missing=1
+            fi
+          done
+          if [[ "$FPDB_MACOS_SIGNING_IDENTITY" != "Developer ID Application: "* ]] ||
+             [[ ! "$FPDB_MACOS_SIGNING_IDENTITY" =~ \([A-Z0-9]{10}\)$ ]]; then
+            echo "::error::MACOS_SIGNING_IDENTITY must be a Developer ID Application identity ending in a 10-character Team ID"
+            missing=1
+          fi
+          exit "$missing"
+      - name: Import Developer ID certificate
+        if: runner.os == 'macOS' && github.event_name == 'release'
+        uses: apple-actions/import-codesign-certs@v7
+        with:
+          p12-file-base64: ${{ secrets.MACOS_CERTIFICATE_P12_BASE64 }}
+          p12-password: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -686,20 +708,77 @@ jobs:
           # The launcher is the interpreter of every helper process, so a
           # broken payload layout or search path must fail the build here.
           "$install_dir/${{ matrix.executable }}" --run-module fpdb_3_legacy.subprocess_launch
+      - name: Assemble PyOxidizer macOS application
+        if: runner.os == 'macOS'
+        shell: bash
+        env:
+          # Defense in depth; pyoxidizer.bzl also sets dont_write_bytecode
+          # because the embedded interpreter may ignore this environment flag.
+          PYTHONDONTWRITEBYTECODE: "1"
+        run: |
+          install_dir="build/${{ matrix.target }}/release/install"
+          mkdir -p dist
+          python -m tools.package_pyoxidizer_macos "$install_dir" dist/fpdb.app --icon gfx/tribal.icns --defer-signing
+          dist/fpdb.app/Contents/MacOS/fpdb --hud --help
+          dist/fpdb.app/Contents/MacOS/fpdb --run-module fpdb_3_legacy.OSXTables
+          dist/fpdb.app/Contents/MacOS/fpdb --run-module fpdb.infrastructure.platform.macos
+          python -m tools.package_pyoxidizer_macos --sign-existing dist/fpdb.app
+          # Prove that a fresh filesystem import cannot mutate the sealed app.
+          # This module is intentionally absent from the pre-sign smoke list.
+          dist/fpdb.app/Contents/MacOS/fpdb --run-module fpdb_3_legacy.winamax_ax_seats
+          codesign --verify --deep --strict dist/fpdb.app
+          if [[ "${{ github.event_name }}" == "release" ]]; then
+            codesign -dv --verbose=4 dist/fpdb.app 2> "$RUNNER_TEMP/fpdb-signature.txt"
+            codesign -dr - dist/fpdb.app 2> "$RUNNER_TEMP/fpdb-requirement.txt"
+            codesign -d --entitlements :- dist/fpdb.app > "$RUNNER_TEMP/fpdb-entitlements.plist" 2>/dev/null
+            if [[ "$FPDB_MACOS_SIGNING_IDENTITY" =~ \(([A-Z0-9]{10})\)$ ]]; then
+              expected_team_id="${BASH_REMATCH[1]}"
+            else
+              echo "::error::Could not extract Team ID from Developer ID identity"
+              exit 1
+            fi
+            grep -Fqx "Authority=$FPDB_MACOS_SIGNING_IDENTITY" "$RUNNER_TEMP/fpdb-signature.txt"
+            grep -Fqx "TeamIdentifier=$expected_team_id" "$RUNNER_TEMP/fpdb-signature.txt"
+            grep -Fxq 'Identifier=org.fpdb.fpdb3' "$RUNNER_TEMP/fpdb-signature.txt"
+            grep -Eq '^CodeDirectory .*flags=.*\(runtime\)' "$RUNNER_TEMP/fpdb-signature.txt"
+            grep -Fq 'identifier "org.fpdb.fpdb3"' "$RUNNER_TEMP/fpdb-requirement.txt"
+            grep -Fq 'anchor apple generic' "$RUNNER_TEMP/fpdb-requirement.txt"
+            if grep -q 'designated => cdhash' "$RUNNER_TEMP/fpdb-requirement.txt"; then
+              echo "::error::Release signature still has a version-specific cdhash requirement"
+              exit 1
+            fi
+            grep -q 'com.apple.security.automation.apple-events' "$RUNNER_TEMP/fpdb-entitlements.plist"
+          fi
+      - name: Notarize and staple PyOxidizer macOS release
+        if: runner.os == 'macOS' && github.event_name == 'release'
+        shell: bash
+        env:
+          MACOS_NOTARY_API_KEY_P8_BASE64: ${{ secrets.MACOS_NOTARY_API_KEY_P8_BASE64 }}
+          MACOS_NOTARY_KEY_ID: ${{ secrets.MACOS_NOTARY_KEY_ID }}
+          MACOS_NOTARY_ISSUER_ID: ${{ secrets.MACOS_NOTARY_ISSUER_ID }}
+        run: |
+          python -c 'import base64, os, pathlib, sys; pathlib.Path(sys.argv[1]).write_bytes(base64.b64decode(os.environ["MACOS_NOTARY_API_KEY_P8_BASE64"]))' "$RUNNER_TEMP/fpdb-notary-key.p8"
+          ditto -c -k --keepParent dist/fpdb.app "$RUNNER_TEMP/fpdb-pyoxidizer-notary.zip"
+          xcrun notarytool submit "$RUNNER_TEMP/fpdb-pyoxidizer-notary.zip" --key "$RUNNER_TEMP/fpdb-notary-key.p8" --key-id "$MACOS_NOTARY_KEY_ID" --issuer "$MACOS_NOTARY_ISSUER_ID" --wait
+          xcrun stapler staple dist/fpdb.app
+          xcrun stapler validate dist/fpdb.app
+          codesign --verify --deep --strict --verbose=2 dist/fpdb.app
+          spctl --assess --type execute --verbose=4 dist/fpdb.app
       - name: Package PyOxidizer artifact
         shell: bash
         run: |
           install_dir="build/${{ matrix.target }}/release/install"
           if [[ "${{ runner.os }}" == "macOS" ]]; then
-            # A loose directory means one quarantined download per dylib, and
-            # Gatekeeper prompts for each of them. Ship a signed bundle: it is
-            # assessed as a unit, so the user approves the app once.
-            mkdir -p dist
-            python -m tools.package_pyoxidizer_macos "$install_dir" dist/fpdb.app --icon gfx/tribal.icns
             codesign --verify --deep --strict dist/fpdb.app
-            dist/fpdb.app/Contents/MacOS/fpdb --run-module fpdb_3_legacy.subprocess_launch
             cp docs/macos-gatekeeper.md dist/READ-ME-FIRST-macos.md
             tar -czf "${{ matrix.artifact }}.tar.gz" -C dist fpdb.app READ-ME-FIRST-macos.md
+            verify_dir="$(mktemp -d "$RUNNER_TEMP/fpdb-pyoxidizer-artifact.XXXXXX")"
+            tar -xzf "${{ matrix.artifact }}.tar.gz" -C "$verify_dir"
+            codesign --verify --deep --strict --verbose=2 "$verify_dir/fpdb.app"
+            if [[ "${{ github.event_name }}" == "release" ]]; then
+              xcrun stapler validate "$verify_dir/fpdb.app"
+              spctl --assess --type execute --verbose=4 "$verify_dir/fpdb.app"
+            fi
           else
             tar -czf "${{ matrix.artifact }}.tar.gz" -C "$install_dir" .
           fi
