@@ -2790,6 +2790,10 @@ class HudMain(QObject):
         start. Passing it through prevents OSXTables from performing a second
         window scan that can disagree with the first one while TCC is changing.
         """
+        if not resolved_window and any(k.startswith(f"{temp_key} #") for k, h in self.hud_dict.items() if getattr(h, "is_fast_fold", False)):
+            log.info("Skipping legacy HUD creation for %r: live FastFold HUD is already active", temp_key)
+            return
+
         info = TableInfo.coerce(table_info)
         table_name = info.table_name
         max_seats = info.max_seats
