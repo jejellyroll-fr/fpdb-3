@@ -1448,6 +1448,11 @@ class HudMain(QObject):
             self._clear_fast_fold_table(temp_key, hud, update.hand_id, "table not dealt yet")
             return
         elif update.ring and update.hero:
+            hand_start_time = self._ff_started.get(update.hand_id, 0)
+            elapsed = time.monotonic() - hand_start_time if hand_start_time else 1.0
+            if len(update.ring) < max_seats and elapsed < 0.5:
+                # Wait for the full ring to accumulate in log buffer so all 6 player HUDs appear simultaneously
+                return
             seat_map = build_seat_map(update.ring, update.hero, max_seats=max_seats, hero_seat=hero_seat)
             source = "log-ring"
         else:
@@ -1690,7 +1695,10 @@ class HudMain(QObject):
                 f"waiting for an imported hand",
             )
             return None
-        temp_key = window.table_name
+        if window.window_id is not None:
+            temp_key = f"{window.table_name} #{window.window_id}"
+        else:
+            temp_key = f"{window.table_name} #{update.table_no}"
         if temp_key in self.hud_dict:
             return temp_key, self.hud_dict[temp_key]
 
