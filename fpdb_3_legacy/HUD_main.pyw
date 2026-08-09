@@ -770,6 +770,7 @@ class HudMain(QObject):
         try:
             # HUD dictionary and parameters
             self.hud_dict: dict[str, Hud.Hud] = {}
+            self._macos_permissions_dialog: MacOSPermissionsDialog | None = None
             # Session-only profile choices made from an individual table menu.
             # Values include game identity so a recycled table key cannot leak a
             # Hold'em/PLO choice into another game.
@@ -1264,7 +1265,7 @@ class HudMain(QObject):
         self.label = QLabel("Closing this window will exit from the HUD.")
         self.vb.addWidget(self.label)
         if self.config.os_family == "Mac":
-            self._macos_permissions_dialog: MacOSPermissionsDialog | None = None
+            self._macos_permissions_dialog = None
             self.macos_permissions_button = QPushButton("macOS Permissions…")
             self.macos_permissions_button.clicked.connect(self.show_macos_permissions)
             self.vb.addWidget(self.macos_permissions_button)
