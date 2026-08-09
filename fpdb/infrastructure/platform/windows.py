@@ -72,7 +72,7 @@ class WindowsTableDetector:
         """Get the current platform"""
         return self._platform
 
-    def find_tables(self, search_string: str = "") -> list[TableInfo]:
+    def find_tables(self, search_string: str = "", allow_fallback: bool = True, **kwargs) -> list[TableInfo]:
         """Find all windows matching the search string
 
         The caller passes a regular expression (see getTableTitleRe), so the

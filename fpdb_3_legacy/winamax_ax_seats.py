@@ -117,11 +117,11 @@ def poker_game_from_description(description: str) -> str | None:
 def is_supported() -> bool:
     """Whether this platform can locate the client's table windows at all.
 
-    True on macOS regardless of the accessibility API: ``find_table_window``
-    falls back to System Events, which is enough to create a HUD. Reading
-    seats still needs the API -- see :func:`is_ax_available`.
+    True on macOS and Windows: ``find_table_window`` resolves table windows
+    so a FastFold HUD can be attached on hand-start. Reading seats via accessibility
+    still needs the API -- see :func:`is_ax_available`.
     """
-    return platform.system() == "Darwin"
+    return platform.system() in ("Darwin", "Windows")
 
 
 def is_ax_available() -> bool:

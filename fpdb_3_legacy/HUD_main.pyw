@@ -1677,7 +1677,7 @@ class HudMain(QObject):
             self._ff_trace(
                 update.hand_id,
                 "create-deferred",
-                "macOS accessibility reader unavailable; waiting for an imported hand",
+                "Winamax table resolver unavailable; waiting for an imported hand",
             )
             return None
 
@@ -1695,9 +1695,9 @@ class HudMain(QObject):
             return temp_key, self.hud_dict[temp_key]
 
         # The window states the game only when the accessibility API answered.
-        # Otherwise fall back on what an imported hand from this pool proved.
+        # Otherwise fall back on what an imported hand from this pool proved, or default to holdem.
         pool_games = getattr(self, "winamax_pool_games", None)
-        poker_game = window.poker_game or (pool_games.get(temp_key) if pool_games is not None else None)
+        poker_game = window.poker_game or (pool_games.get(temp_key) if pool_games is not None else None) or "holdem"
         if not poker_game:
             self._ff_trace(
                 update.hand_id,
