@@ -61,11 +61,33 @@ class IPokerXMLFormatMixin:
         )
         gametype_pattern_no_blinds = r"(\w+(?:\s+\w+)*)\s+" r"(NL|PL|L|SL|БЛ|LP|No\s+limit|Pot\s+limit|Limit)\s*$"
 
+        # iPoker names the game for every variant except 5 card Omaha, whose
+        # gametype carries the limit and blinds alone ("PL €1/€2"). Both patterns
+        # above require a name, so those sessions reached the filename fallback
+        # below and imported as NL Holdem 0.01/0.02 -- every hand except the
+        # first, which still carries the session header and is read by base.py.
+        # Only the pot limit markers are accepted: 5 card Omaha is pot limit
+        # only, and a nameless "NL €1/€2" is not a game that exists.
+        gametype_pattern_five_card_omaha = r"(PL|Pot\s+limit|LP)\s*[^\d]*([0-9.,]+)/[^\d]*([0-9.,]+)\s*$"
+
         gametype_match = re.match(gametype_pattern_with_blinds, gametype_text)
         if not gametype_match:
             gametype_match = re.match(gametype_pattern_no_blinds, gametype_text)
 
-        if gametype_match:
+        five_card_omaha_match = None
+        if not gametype_match:
+            five_card_omaha_match = re.match(gametype_pattern_five_card_omaha, gametype_text)
+
+        if five_card_omaha_match:
+            # base.py reads a missing category the same way when it parses the
+            # session header (_determine_base_category), and the two paths have
+            # to agree or one table imports under two gametype ids.
+            self.info["base"] = "hold"
+            self.info["category"] = "5_omahahi"
+            self.info["limitType"] = "pl"
+            self.info["sb"] = five_card_omaha_match.group(2).replace(",", ".")
+            self.info["bb"] = five_card_omaha_match.group(3).replace(",", ".")
+        elif gametype_match:
             game_name = gametype_match.group(1)
             limit_type = gametype_match.group(2)
 
