@@ -644,7 +644,7 @@ jobs:
           fi
           exit "$missing"
       - name: Import Developer ID certificate
-        if: runner.os == 'macOS' && github.event_name == 'release' && secrets.MACOS_SIGNING_IDENTITY != ''
+        if: runner.os == 'macOS' && github.event_name == 'release' && env.FPDB_REQUIRE_STABLE_MACOS_SIGNING == '1'
         uses: apple-actions/import-codesign-certs@v7
         with:
           p12-file-base64: ${{ secrets.MACOS_CERTIFICATE_P12_BASE64 }}
@@ -754,7 +754,7 @@ jobs:
             grep -q 'com.apple.security.automation.apple-events' "$RUNNER_TEMP/fpdb-entitlements.plist"
           fi
       - name: Notarize and staple PyOxidizer macOS release
-        if: runner.os == 'macOS' && github.event_name == 'release' && secrets.MACOS_SIGNING_IDENTITY != ''
+        if: runner.os == 'macOS' && github.event_name == 'release' && env.FPDB_REQUIRE_STABLE_MACOS_SIGNING == '1'
         shell: bash
         env:
           MACOS_NOTARY_API_KEY_P8_BASE64: ${{ secrets.MACOS_NOTARY_API_KEY_P8_BASE64 }}
