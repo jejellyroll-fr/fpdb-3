@@ -127,18 +127,23 @@ def is_supported() -> bool:
 def is_ax_available() -> bool:
     """Whether the accessibility API can be called from this process.
 
-    Only reports whether the bindings are importable. Whether macOS will
-    actually answer depends on this binary holding *Accessibility*, which is
-    not knowable without trying.
+    On macOS, checks ApplicationServices / AppKit bindings.
+    On Windows, checks comtypes UIAutomationCore binding.
     """
-    if platform.system() != "Darwin":
-        return False
-    try:
-        import ApplicationServices  # noqa: F401
-        from AppKit import NSWorkspace  # noqa: F401
-    except ImportError:
-        return False
-    return True
+    if platform.system() == "Darwin":
+        try:
+            import ApplicationServices  # noqa: F401
+            from AppKit import NSWorkspace  # noqa: F401
+            return True
+        except ImportError:
+            return False
+    elif platform.system() == "Windows":
+        try:
+            import comtypes.client  # noqa: F401
+            return True
+        except ImportError:
+            return False
+    return False
 
 
 def is_stack_label(text: str) -> bool:
@@ -409,6 +414,8 @@ class WinamaxAXSeatReader:
         """
         if not is_ax_available():
             return {}
+        if platform.system() == "Windows":
+            return self._read_window_windows_by_title(title, max_seats)
         try:
             app = self._application()
             if app is None:
@@ -429,3 +436,55 @@ class WinamaxAXSeatReader:
         except Exception:
             log.exception("Could not read Winamax seats from window %r", title)
         return {}
+
+    def _read_window_windows_by_title(self, title: str, max_seats: int = 6) -> dict[int, str]:
+        """Read seated players from Winamax window via Windows UIAutomation."""
+        try:
+            if self._table_detector is None:
+                from fpdb.infrastructure.platform import get_table_detector
+                self._table_detector = get_table_detector()
+            tables = self._table_detector.find_tables(re.escape(title))
+            if not tables:
+                return {}
+            hwnd = tables[0].window_id
+            if hwnd is None:
+                return {}
+            return self._read_window_windows(int(hwnd), max_seats)
+        except Exception:
+            log.debug("Failed to read Windows seats for %r:", title, exc_info=True)
+            return {}
+
+    def _read_window_windows(self, hwnd: int, max_seats: int = 6) -> dict[int, str]:
+        try:
+            import comtypes.client
+            UIAutomationClient = comtypes.client.GetModule("UIAutomationCore.dll")
+            uia = comtypes.client.CreateObject(UIAutomationClient.CUIAutomation)
+
+            elem = uia.ElementFromHandle(hwnd)
+            if elem is None:
+                return {}
+            condition = uia.CreateTrueCondition()
+            found = elem.FindAll(UIAutomationClient.TreeScope_Subtree, condition)
+            if not found or not found.Length:
+                return {}
+
+            labels: list[AXSeat] = []
+            for i in range(min(found.Length, 300)):
+                item = found.GetElement(i)
+                name = item.CurrentName
+                if isinstance(name, str) and name and len(name) <= 40:
+                    name = name.replace("\xa0", " ").strip()
+                    rect = item.CurrentBoundingRectangle
+                    if rect:
+                        labels.append(AXSeat(name, rect.left, rect.top))
+            players = seats_from_labels(labels)
+            if not players:
+                return {}
+            win_rect = elem.CurrentBoundingRectangle
+            if not win_rect:
+                return {}
+            centre = (win_rect.left + (win_rect.right - win_rect.left) / 2, win_rect.top + (win_rect.bottom - win_rect.top) / 2)
+            return seat_slots_from_positions(players, centre, max_seats)
+        except Exception:
+            log.debug("Error reading Winamax UIAutomation seats on Windows for HWND %s:", hwnd, exc_info=True)
+            return {}
