@@ -584,8 +584,8 @@ jobs:
       RUSTUP_TOOLCHAIN: "1.83.0"
       # release/published covers both final releases and published prereleases
       # (including RCs), so neither may fall back to an ad-hoc identity.
-      FPDB_MACOS_SIGNING_IDENTITY: ${{ github.event_name == 'release' && secrets.MACOS_SIGNING_IDENTITY || '-' }}
-      FPDB_REQUIRE_STABLE_MACOS_SIGNING: ${{ github.event_name == 'release' && '1' || '0' }}
+      FPDB_MACOS_SIGNING_IDENTITY: ${{ secrets.MACOS_SIGNING_IDENTITY || '-' }}
+      FPDB_REQUIRE_STABLE_MACOS_SIGNING: ${{ secrets.MACOS_SIGNING_IDENTITY != '' && '1' || '0' }}
     strategy:
       fail-fast: false
       matrix:
@@ -626,6 +626,10 @@ jobs:
           MACOS_NOTARY_KEY_ID: ${{ secrets.MACOS_NOTARY_KEY_ID }}
           MACOS_NOTARY_ISSUER_ID: ${{ secrets.MACOS_NOTARY_ISSUER_ID }}
         run: |
+          if [[ -z "${FPDB_MACOS_SIGNING_IDENTITY}" || "${FPDB_MACOS_SIGNING_IDENTITY}" == "-" ]]; then
+            echo "::warning::MACOS_SIGNING_IDENTITY secret is not configured in repository; macOS release will use ad-hoc signing."
+            exit 0
+          fi
           missing=0
           for name in FPDB_MACOS_SIGNING_IDENTITY MACOS_CERTIFICATE_P12_BASE64 MACOS_CERTIFICATE_PASSWORD MACOS_NOTARY_API_KEY_P8_BASE64 MACOS_NOTARY_KEY_ID MACOS_NOTARY_ISSUER_ID; do
             if [[ -z "${!name}" || "${!name}" == "-" ]]; then
@@ -640,7 +644,7 @@ jobs:
           fi
           exit "$missing"
       - name: Import Developer ID certificate
-        if: runner.os == 'macOS' && github.event_name == 'release'
+        if: runner.os == 'macOS' && github.event_name == 'release' && secrets.MACOS_SIGNING_IDENTITY != ''
         uses: apple-actions/import-codesign-certs@v7
         with:
           p12-file-base64: ${{ secrets.MACOS_CERTIFICATE_P12_BASE64 }}
@@ -750,7 +754,7 @@ jobs:
             grep -q 'com.apple.security.automation.apple-events' "$RUNNER_TEMP/fpdb-entitlements.plist"
           fi
       - name: Notarize and staple PyOxidizer macOS release
-        if: runner.os == 'macOS' && github.event_name == 'release'
+        if: runner.os == 'macOS' && github.event_name == 'release' && secrets.MACOS_SIGNING_IDENTITY != ''
         shell: bash
         env:
           MACOS_NOTARY_API_KEY_P8_BASE64: ${{ secrets.MACOS_NOTARY_API_KEY_P8_BASE64 }}
@@ -775,7 +779,7 @@ jobs:
             verify_dir="$(mktemp -d "$RUNNER_TEMP/fpdb-pyoxidizer-artifact.XXXXXX")"
             tar -xzf "${{ matrix.artifact }}.tar.gz" -C "$verify_dir"
             codesign --verify --deep --strict --verbose=2 "$verify_dir/fpdb.app"
-            if [[ "${{ github.event_name }}" == "release" ]]; then
+            if [[ "${{ github.event_name }}" == "release" && "$FPDB_MACOS_SIGNING_IDENTITY" != "-" ]]; then
               xcrun stapler validate "$verify_dir/fpdb.app"
               spctl --assess --type execute --verbose=4 "$verify_dir/fpdb.app"
             fi
