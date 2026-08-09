@@ -113,11 +113,10 @@ class RingStatsController(QObject):
         self.columns = config.get_gui_cash_stat_params()
         self._workers: list[DbWorker] = []
 
-        # Détection automatique de l'environnement de test ou SQLite pour exécution synchrone
-        # En mode SQLite, nous forçons l'exécution synchrone pour éviter les exceptions de thread
+        # Force synchronous mode only in test suites (pytest/unittest)
         import sys
-        is_sqlite = (hasattr(db, "backend") and db.backend == 4)
-        self.async_mode = (not is_sqlite) and ("pytest" not in sys.modules and "unittest" not in sys.modules)
+
+        self.async_mode = "pytest" not in sys.modules and "unittest" not in sys.modules
 
         self._last_summary_stats: dict[str, Any] | None = None
         self._last_profit_data: tuple[Any, Any, Any, Any] | None = None
@@ -198,7 +197,7 @@ class RingStatsController(QObject):
         # Nettoyer les anciens workers
         self._workers = [w for w in self._workers if not w.isFinished()]
 
-        worker = DbWorker(self.cursor, query_name, sql)
+        worker = DbWorker(self.db, query_name, sql)
         worker.finished.connect(callback)
 
         def on_error(err):

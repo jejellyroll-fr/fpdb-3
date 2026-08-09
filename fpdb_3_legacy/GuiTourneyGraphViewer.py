@@ -46,7 +46,10 @@ try:
             mpl.use("qt5agg")
         except ValueError as e:
             log.exception(f"Matplotlib use error: {e}")
-    FigureCanvas = getattr(import_module("matplotlib.backends.backend_qt5agg"), "FigureCanvas")
+    try:
+        FigureCanvas = getattr(import_module("matplotlib.backends.backend_qtagg"), "FigureCanvasQTAgg")
+    except ImportError:
+        FigureCanvas = getattr(import_module("matplotlib.backends.backend_qt5agg"), "FigureCanvas")
     Figure = getattr(import_module("matplotlib.figure"), "Figure")
     FuncFormatter = getattr(import_module("matplotlib.ticker"), "FuncFormatter")
     cumsum = getattr(import_module("numpy"), "cumsum")

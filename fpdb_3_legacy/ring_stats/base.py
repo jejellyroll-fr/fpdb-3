@@ -23,17 +23,24 @@ class DbWorker(QThread):
     # Arguments: (error_message)
     error = Signal(str)
 
-    def __init__(self, cursor, query_name: str, query_sql: str) -> None:
+    def __init__(self, db_or_cursor, query_name: str, query_sql: str) -> None:
         super().__init__()
-        self.cursor = cursor
+        self.db_or_cursor = db_or_cursor
         self.query_name = query_name
         self.query_sql = query_sql
 
     def run(self) -> None:
         try:
-            self.cursor.execute(self.query_sql)
-            results = self.cursor.fetchall()
-            colnames = [desc[0].lower() for desc in self.cursor.description] if self.cursor.description else []
+            db = self.db_or_cursor
+            conn = getattr(db, "connection", None)
+            cursor = conn.cursor() if conn else getattr(db, "cursor", db)
+            try:
+                cursor.execute(self.query_sql)
+                results = cursor.fetchall()
+                colnames = [desc[0].lower() for desc in cursor.description] if cursor.description else []
+            finally:
+                if conn and hasattr(cursor, "close"):
+                    cursor.close()
             self.finished.emit(self.query_name, results, colnames)
         except Exception as e:  # noqa: BLE001 - Qt worker boundary reports DB-driver errors through its signal.
             self.error.emit(str(e))
