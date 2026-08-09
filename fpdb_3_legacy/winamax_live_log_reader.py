@@ -343,7 +343,7 @@ class WinamaxLiveLogReader:
             self._hand_tables.popitem(last=False)
         return table
 
-    def process_line(self, line: str) -> None:
+    def process_line(self, line: str, notify: bool = True) -> None:
         """Update table state from one log line and notify on change."""
         parsed = self.parse_log_line(line)
         if not parsed:
@@ -362,7 +362,10 @@ class WinamaxLiveLogReader:
             # Reported straight away, with an empty ring: on a Fast-Fold table
             # the hero has just been moved somewhere new, and everyone the HUD is
             # still showing has been left behind.
-            self._notify(table)
+            if notify:
+                self._notify(table)
+            else:
+                self._mark_pending(table)
             return
 
         table = self._tables.get(pool)
@@ -372,6 +375,23 @@ class WinamaxLiveLogReader:
             return
 
         if self._apply_event(table, event, parsed):
+            if notify:
+                self._notify(table)
+            else:
+                self._mark_pending(table)
+
+    def _mark_pending(self, table: WinamaxTableUpdate) -> None:
+        if not hasattr(self, "_pending_updates"):
+            self._pending_updates = {}
+        self._pending_updates[table.pool] = table
+
+    def _flush_pending(self) -> None:
+        pending = getattr(self, "_pending_updates", None)
+        if not pending:
+            return
+        to_notify = list(pending.values())
+        pending.clear()
+        for table in to_notify:
             self._notify(table)
 
     @staticmethod
@@ -442,8 +462,12 @@ class WinamaxLiveLogReader:
                         self._tailing = latest
 
                     if file_obj:
+                        has_lines = False
                         while line := file_obj.readline():
-                            self.process_line(line)
+                            self.process_line(line, notify=False)
+                            has_lines = True
+                        if has_lines:
+                            self._flush_pending()
 
                 except Exception:
                     log.exception("Error reading Winamax live log:")
