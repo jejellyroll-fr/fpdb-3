@@ -49,7 +49,7 @@ from typing import Any
 
 import interlocks
 from loggingFpdb import get_logger, setup_logging
-from PySide6.QtCore import QCoreApplication, QDate, QPoint, Qt
+from PySide6.QtCore import QCoreApplication, QDate, QPoint, Qt, QTimer
 from PySide6.QtGui import QAction, QIcon
 from PySide6.QtWidgets import (
     QApplication,
@@ -2128,6 +2128,9 @@ if __name__ == "__main__":
 
         # Register main window with theme manager for future theme changes
         theme_manager._main_window = me
+
+        # Pre-warm matplotlib on Qt main thread during idle time
+        QTimer.singleShot(500, Configuration.prewarm_matplotlib)
 
         app.exec()
     finally:

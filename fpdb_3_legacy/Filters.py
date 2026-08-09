@@ -248,7 +248,7 @@ class Filters(QWidget):
             display = {}
         super().__init__(None)
         self.db = db
-        self.db_cursor: Any = db.cursor
+        self.db_cursor: Any = db.connection.cursor() if getattr(db, "connection", None) else db.cursor
         self.sql = db.sql
         self.conf = db.config
         self.display = display
