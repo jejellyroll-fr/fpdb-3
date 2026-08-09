@@ -14,6 +14,15 @@ import pytest
 from tools import adhoc_sign_macos, package_pyoxidizer_macos
 
 MACH_O_HEADER = b"\xcf\xfa\xed\xfe" + b"\x00" * 60
+REPO_ROOT = Path(__file__).resolve().parent.parent
+CI_WORKFLOW = REPO_ROOT / ".github" / "workflows" / "ci.yml"
+
+
+def _workflow_job(workflow: str, job: str, next_job: str | None = None) -> str:
+    start = workflow.index(f"  {job}:\n")
+    if next_job is None:
+        return workflow[start:]
+    return workflow[start : workflow.index(f"\n  {next_job}:\n", start)]
 
 
 @pytest.fixture
@@ -155,8 +164,20 @@ def test_sign_existing_seals_nested_code_before_bundle(tmp_path: Path, monkeypat
     assert calls == [("nested", [nested]), ("bundle", app)]
 
 
+def test_release_pyoxidizer_rejects_a_non_developer_id_identity(tmp_path: Path, monkeypatch) -> None:
+    app = tmp_path / "fpdb.app"
+    (app / "Contents" / "Resources").mkdir(parents=True)
+    monkeypatch.setenv(adhoc_sign_macos.REQUIRE_STABLE_SIGNING_ENV, "1")
+
+    with pytest.raises(RuntimeError, match="Developer ID Application"):
+        package_pyoxidizer_macos.sign_app(
+            app,
+            signing_identity="Apple Development: FPDB (TEAMID1234)",
+        )
+
+
 def test_ci_smokes_precede_final_pyoxidizer_signature() -> None:
-    workflow = (Path(__file__).resolve().parent.parent / ".github" / "workflows" / "ci.yml").read_text()
+    workflow = CI_WORKFLOW.read_text()
     start = workflow.index("- name: Assemble PyOxidizer macOS application")
     end = workflow.index("- name: Notarize and staple PyOxidizer macOS release", start)
     assemble = workflow[start:end]
@@ -170,6 +191,47 @@ def test_ci_smokes_precede_final_pyoxidizer_signature() -> None:
     assert unsigned < last_smoke < final_sign < immutable_smoke < final_verify
     assert 'PYTHONDONTWRITEBYTECODE: "1"' in assemble
     assert "Contents/MacOS/fpdb" not in assemble[final_verify:]
+
+
+def test_ci_distributes_macos_only_with_pyoxidizer() -> None:
+    workflow = CI_WORKFLOW.read_text()
+    pyinstaller = _workflow_job(workflow, "build", "build-pyoxidizer")
+    pyoxidizer = _workflow_job(workflow, "build-pyoxidizer")
+
+    assert "os: ubuntu-latest" in pyinstaller
+    assert "os: windows-latest" in pyinstaller
+    assert "fpdb-pyinstaller-linux-x64" in pyinstaller
+    assert "fpdb-pyinstaller-windows-x64" in pyinstaller
+    assert "macos-latest" not in pyinstaller
+    assert "fpdb-pyinstaller-macos" not in workflow
+    assert "fpdb.app" not in pyinstaller
+    assert "if: runner.os != 'macOS'" in pyinstaller
+    assert "if: github.event_name == 'release' && runner.os != 'macOS'" in pyinstaller
+
+    assert "os: macos-latest" in pyoxidizer
+    assert "artifact: fpdb-pyoxidizer-macos-arm64" in pyoxidizer
+
+
+def test_release_and_rc_pyoxidizer_artifacts_require_stable_developer_id() -> None:
+    workflow = CI_WORKFLOW.read_text()
+    pyoxidizer = _workflow_job(workflow, "build-pyoxidizer")
+
+    # GitHub sends release/published for public prereleases (including RCs) as
+    # well as final releases, so this is the shared distribution gate.
+    assert "release:\n    types: [ published ]" in workflow
+    assert "FPDB_REQUIRE_STABLE_MACOS_SIGNING: ${{ github.event_name == 'release' && '1' || '0' }}" in pyoxidizer
+    assert '"Developer ID Application: "*' in pyoxidizer
+    assert 'grep -Fqx "Authority=$FPDB_MACOS_SIGNING_IDENTITY"' in pyoxidizer
+    assert 'grep -Fqx "TeamIdentifier=$expected_team_id"' in pyoxidizer
+    assert "grep -Fq 'anchor apple generic'" in pyoxidizer
+    assert "grep -q 'designated => cdhash'" in pyoxidizer
+    assert "spctl --assess --type execute --verbose=4 dist/fpdb.app" in pyoxidizer
+
+    archive = pyoxidizer.index('tar -czf "${{ matrix.artifact }}.tar.gz" -C dist fpdb.app')
+    extract = pyoxidizer.index('tar -xzf "${{ matrix.artifact }}.tar.gz" -C "$verify_dir"')
+    verify = pyoxidizer.index('codesign --verify --deep --strict --verbose=2 "$verify_dir/fpdb.app"')
+    upload = pyoxidizer.index("- name: Upload PyOxidizer artifact")
+    assert archive < extract < verify < upload
 
 
 def test_pyoxidizer_runtime_cannot_mutate_a_signed_bundle_with_bytecode() -> None:
@@ -196,6 +258,7 @@ def test_bundle_declares_the_launcher_and_icon(install_dir: Path, tmp_path: Path
     assert "NSAppleEventsUsageDescription" in info
     assert "NSScreenCaptureUsageDescription" in info
     assert "NSAccessibilityUsageDescription" in info
+    assert "poker client data files" in info["NSAppDataUsageDescription"]
     assert (app / "Contents" / "Resources" / "tribal.icns").is_file()
 
 

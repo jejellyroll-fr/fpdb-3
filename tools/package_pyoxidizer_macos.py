@@ -21,18 +21,27 @@ Run it from the repository root: ``python -m tools.package_pyoxidizer_macos``.
 from __future__ import annotations
 
 import argparse
+import os
 import plistlib
+import re
 import shutil
 import subprocess
 import sys
 import tomllib
 from pathlib import Path
 
-from tools.adhoc_sign_macos import find_mach_o_files, resolve_signing_identity, sign, sign_bundle
+from tools.adhoc_sign_macos import (
+    REQUIRE_STABLE_SIGNING_ENV,
+    find_mach_o_files,
+    resolve_signing_identity,
+    sign,
+    sign_bundle,
+)
 
 BUNDLE_IDENTIFIER = "org.fpdb.fpdb3"
 DEFAULT_VERSION = "0.0.0"
 ENTITLEMENTS = Path(__file__).resolve().with_name("macos-entitlements.plist")
+_DEVELOPER_ID_APPLICATION = re.compile(r"Developer ID Application: .+ \([A-Z0-9]{10}\)")
 
 
 def read_version(pyproject: Path) -> str:
@@ -60,6 +69,7 @@ def write_info_plist(contents: Path, executable: str, version: str, icon: str | 
         "NSAppleEventsUsageDescription": "FPDB requires Automation access to detect poker table window titles via AppleScript.",
         "NSScreenCaptureUsageDescription": "FPDB requires Screen Recording permission to identify poker table window titles for the HUD.",
         "NSAccessibilityUsageDescription": "FPDB requires Accessibility permission to locate and position HUD windows over poker tables.",
+        "NSAppDataUsageDescription": "FPDB needs access to poker client data files, including hand histories and logs, to import hands and display the HUD.",
     }
     if icon:
         info["CFBundleIconFile"] = icon
@@ -120,6 +130,9 @@ def sign_app(app_path: Path, *, signing_identity: str | None = None) -> Path:
     # Sign inside out: nested Mach-O files first, then seal the bundle. Wheels
     # ship linker-signed binaries, which macOS treats as unsigned.
     identity = resolve_signing_identity(signing_identity)
+    if os.getenv(REQUIRE_STABLE_SIGNING_ENV) == "1" and _DEVELOPER_ID_APPLICATION.fullmatch(identity) is None:
+        msg = "PyOxidizer release signing requires a Developer ID Application identity with a 10-character Team ID"
+        raise RuntimeError(msg)
     sign(find_mach_o_files(resources), identity=identity)
     sign_bundle(app_path, identity=identity, entitlements=ENTITLEMENTS)
     return app_path

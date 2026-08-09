@@ -84,6 +84,8 @@ def test_run_headless_imports_then_shuts_down_cleanly():
     lock.acquire.return_value = True
     gui = _make_gui(_make_settings(lock), _make_config(interval=1))
     gui.updatePaths = MagicMock()
+    path_sync_states = []
+    gui.updatePaths.side_effect = lambda: path_sync_states.append(gui.doAutoImportBool)
 
     # Stop the otherwise-infinite loop after the first sleep.
     with patch.object(sys.modules["fpdb_3_legacy.GuiAutoImport"].time, "sleep", side_effect=KeyboardInterrupt):
@@ -91,6 +93,7 @@ def test_run_headless_imports_then_shuts_down_cleanly():
 
     assert rc == 0
     gui.updatePaths.assert_called_once()
+    assert path_sync_states == [True]
     gui.importer.autoSummaryGrab.assert_any_call()  # per-cycle grab
     gui.importer.runUpdated.assert_called_once()
     gui.importer.autoSummaryGrab.assert_called_with(force=True)  # final grab
@@ -118,7 +121,6 @@ def test_update_paths_monitors_multiple_sites_and_content_types(tmp_path):
     sites = ["PokerStars", "Winamax"]
     config.get_supported_sites.return_value = sites
     config.get_site_parameters.side_effect = lambda site: {"enabled": site in sites}
-
     paths = {}
     for site in sites:
         hh_path = tmp_path / site / "hands"
@@ -134,6 +136,7 @@ def test_update_paths_monitors_multiple_sites_and_content_types(tmp_path):
     gui = _make_gui(_make_settings(MagicMock()), config)
     gui.importer.dirlist = {}
     gui.addText = MagicMock()
+    gui.doAutoImportBool = True
 
     gui.updatePaths()
 
@@ -145,6 +148,111 @@ def test_update_paths_monitors_multiple_sites_and_content_types(tmp_path):
     assert gui.importer.addImportDirectory.call_count == 4
     for site_key, path in expected.items():
         gui.importer.addImportDirectory.assert_any_call(path, monitor=True, site=site_key)
+    assert [entry.args[0] for entry in config.get_default_paths.call_args_list] == sites
+
+
+def test_passive_path_refresh_does_not_reload_or_probe_configuration():
+    """Opening the tab or receiving a passive observer refresh touches no paths."""
+    config = _make_config()
+    config.get_supported_sites.side_effect = AssertionError("site paths must remain untouched while stopped")
+    gui = _make_gui(_make_settings(MagicMock()), config)
+    gui.importer.dirlist = {("Winamax", "hh"): ["/previous/path", "passthrough"]}
+
+    gui.updatePaths()
+
+    config.reload.assert_not_called()
+    config.get_supported_sites.assert_not_called()
+    config.get_default_paths.assert_not_called()
+    gui.importer.addImportDirectory.assert_not_called()
+    gui.importer.removeImportDirectory.assert_not_called()
+
+
+def test_update_paths_resolves_enabled_sites_but_never_disabled_sites(tmp_path):
+    """Active path recovery is allowed only for enabled sites."""
+    detected_hands = tmp_path / "Winamax" / "accounts" / "Hero" / "history"
+    detected_hands.mkdir(parents=True)
+    config = _make_config()
+    config.get_supported_sites.return_value = ["Winamax", "Disabled", "NoPaths"]
+    config.get_site_parameters.side_effect = {
+        "Winamax": {
+            "enabled": True,
+        },
+        "Disabled": {
+            "enabled": False,
+            "HH_path": "~/Downloads/disabled/hands",
+            "TS_path": "~/Library/Application Support/disabled/summaries",
+        },
+        "NoPaths": {"enabled": True},
+    }.__getitem__
+
+    def detected_paths(site):
+        if site == "Disabled":
+            raise AssertionError("disabled site path detection must never run")
+        if site == "Winamax":
+            return {"hud-defaultPath": str(detected_hands)}
+        return {}
+
+    config.get_default_paths.side_effect = detected_paths
+
+    gui = _make_gui(_make_settings(MagicMock()), config)
+    gui.importer.dirlist = {}
+    gui.addText = MagicMock()
+    gui.doAutoImportBool = True
+
+    gui.updatePaths()
+
+    gui.importer.addImportDirectory.assert_called_once_with(
+        str(detected_hands),
+        monitor=True,
+        site=("Winamax", "hh"),
+    )
+    assert [entry.args[0] for entry in config.get_default_paths.call_args_list] == ["Winamax", "NoPaths"]
+
+
+def test_active_config_refresh_replaces_only_the_changed_watch(tmp_path):
+    """Dynamic path changes still resynchronise an active auto-import session."""
+    old_hands = tmp_path / "old" / "hands"
+    new_hands = tmp_path / "new" / "hands"
+    new_hands.mkdir(parents=True)
+    config = _make_config()
+    config.get_supported_sites.return_value = ["Winamax"]
+    config.get_site_parameters.return_value = {"enabled": True}
+    config.get_default_paths.return_value = {"hud-defaultPath": str(new_hands)}
+    gui = _make_gui(_make_settings(MagicMock()), config)
+    gui.importer.dirlist = {("Winamax", "hh"): [str(old_hands), "passthrough"]}
+    gui.addText = MagicMock()
+    gui.doAutoImportBool = True
+
+    gui.updatePaths()
+
+    config.reload.assert_called_once_with()
+    gui.importer.removeImportDirectory.assert_called_once_with(str(old_hands), site=("Winamax", "hh"))
+    gui.importer.addImportDirectory.assert_called_once_with(
+        str(new_hands),
+        monitor=True,
+        site=("Winamax", "hh"),
+    )
+
+
+def test_standalone_main_does_not_resolve_paths_before_headless_start():
+    """The standalone entry point must not auto-detect a default site path."""
+    from fpdb_3_legacy import GuiAutoImport
+
+    config = _make_config()
+    config.get_default_paths.side_effect = AssertionError("default path resolution is not startup work")
+    runner = MagicMock()
+    runner.run_headless.return_value = 0
+
+    with (
+        patch.object(GuiAutoImport.Configuration, "Config", return_value=config),
+        patch.object(GuiAutoImport, "GuiAutoImport", return_value=runner) as gui_class,
+        patch.object(GuiAutoImport.interlocks, "InterProcessLock", return_value=MagicMock()),
+    ):
+        assert GuiAutoImport.main(["-q"]) == 0
+
+    config.get_default_paths.assert_not_called()
+    gui_class.assert_called_once()
+    assert gui_class.call_args.kwargs["cli"] is True
 
 
 def test_hud_base_path_is_module_dir_and_holds_hud_main():

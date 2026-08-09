@@ -77,6 +77,7 @@ def test_info_plist_gains_the_privacy_descriptions(tmp_path: Path) -> None:
     assert "AppleScript" in info["NSAppleEventsUsageDescription"]
     assert info["NSScreenCaptureUsageDescription"]
     assert info["NSAccessibilityUsageDescription"]
+    assert "poker client data files" in info["NSAppDataUsageDescription"]
     # Untouched keys survive the rewrite.
     assert info["CFBundleName"] == "fpdb"
 

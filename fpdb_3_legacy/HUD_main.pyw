@@ -40,7 +40,7 @@ zmq: Any = _zmq
 from cachetools import TTLCache
 from PySide6.QtCore import QCoreApplication, QEvent, QObject, Qt, QThread, QTimer, Signal
 from PySide6.QtGui import QCloseEvent, QIcon
-from PySide6.QtWidgets import QApplication, QLabel, QVBoxLayout, QWidget
+from PySide6.QtWidgets import QApplication, QDialog, QGridLayout, QHBoxLayout, QLabel, QPushButton, QVBoxLayout, QWidget
 from qt_material import apply_stylesheet
 
 from fpdb_3_legacy import Aux_Base, Configuration, Database, Deck, Hud, Options, db_profile
@@ -404,6 +404,143 @@ class HudMainWindow(QWidget):
         self._on_close(event)
 
 
+class MacOSPermissionsDialog(QDialog):
+    """Explicit, non-modal onboarding for the HUD's macOS permissions.
+
+    Constructing or refreshing this dialog only runs side-effect-free
+    preflights. Native prompts and System Settings are reached exclusively from
+    the corresponding user-operated buttons.
+    """
+
+    status_changed = Signal(object)
+
+    def __init__(self, parent: QWidget | None = None) -> None:
+        """Build the permission status and action rows."""
+        super().__init__(parent)
+        self.setWindowTitle("FPDB macOS Permissions")
+        self.setModal(False)
+        self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose, False)
+
+        layout = QVBoxLayout(self)
+        intro = QLabel(
+            "FPDB checks these permissions without requesting them. "
+            "Use the buttons below only when you want macOS to prompt or open System Settings.",
+        )
+        intro.setWordWrap(True)
+        layout.addWidget(intro)
+        screen_note = QLabel(
+            "macOS groups this under Screen & System Audio Recording. "
+            "FPDB reads window metadata only and does not request microphone access.",
+        )
+        screen_note.setWordWrap(True)
+        layout.addWidget(screen_note)
+
+        grid = QGridLayout()
+        grid.addWidget(QLabel("Permission"), 0, 0)
+        grid.addWidget(QLabel("Status"), 0, 1)
+        grid.addWidget(QLabel("Actions"), 0, 2, 1, 2)
+
+        self.screen_status_label = QLabel()
+        self.screen_request_button = QPushButton("Request Screen Recording")
+        self.screen_settings_button = QPushButton("Open Screen Recording Settings")
+        grid.addWidget(QLabel("Screen Recording"), 1, 0)
+        grid.addWidget(self.screen_status_label, 1, 1)
+        grid.addWidget(self.screen_request_button, 1, 2)
+        grid.addWidget(self.screen_settings_button, 1, 3)
+
+        self.accessibility_status_label = QLabel()
+        self.accessibility_request_button = QPushButton("Request Accessibility")
+        self.accessibility_settings_button = QPushButton("Open Accessibility Settings")
+        grid.addWidget(QLabel("Accessibility"), 2, 0)
+        grid.addWidget(self.accessibility_status_label, 2, 1)
+        grid.addWidget(self.accessibility_request_button, 2, 2)
+        grid.addWidget(self.accessibility_settings_button, 2, 3)
+
+        self.app_data_status_label = QLabel()
+        self.app_data_info_label = QLabel(
+            "Informational only: macOS prompts on the first protected Winamax file access, "
+            "using the bundle's NSAppDataUsageDescription.",
+        )
+        self.app_data_info_label.setWordWrap(True)
+        grid.addWidget(QLabel("App Data"), 3, 0)
+        grid.addWidget(self.app_data_status_label, 3, 1)
+        grid.addWidget(self.app_data_info_label, 3, 2, 1, 2)
+        grid.setColumnStretch(2, 1)
+        layout.addLayout(grid)
+
+        restart_note = QLabel(
+            "After changing Screen Recording, quit and reopen FPDB yourself if table titles remain unavailable. "
+            "FPDB never restarts automatically.",
+        )
+        restart_note.setWordWrap(True)
+        layout.addWidget(restart_note)
+
+        button_row = QHBoxLayout()
+        self.recheck_button = QPushButton("Recheck")
+        self.close_button = QPushButton("Close")
+        button_row.addWidget(self.recheck_button)
+        button_row.addStretch(1)
+        button_row.addWidget(self.close_button)
+        layout.addLayout(button_row)
+
+        self.screen_request_button.clicked.connect(self._request_screen_recording)
+        self.screen_settings_button.clicked.connect(self._open_screen_recording_settings)
+        self.accessibility_request_button.clicked.connect(self._request_accessibility)
+        self.accessibility_settings_button.clicked.connect(self._open_accessibility_settings)
+        self.recheck_button.clicked.connect(self.refresh_status)
+        self.close_button.clicked.connect(self.hide)
+
+    @staticmethod
+    def _binary_status(granted: bool) -> str:
+        return "Granted" if granted else "Missing"
+
+    def set_status(self, status: Any) -> None:
+        """Render an already-computed permission snapshot without side effects."""
+        self.screen_status_label.setText(self._binary_status(status.screen_recording))
+        self.accessibility_status_label.setText(self._binary_status(status.accessibility))
+        if status.app_data is None:
+            self.app_data_status_label.setText("Not preflightable")
+        else:
+            self.app_data_status_label.setText(self._binary_status(status.app_data))
+        self.screen_request_button.setEnabled(not status.screen_recording)
+        self.accessibility_request_button.setEnabled(not status.accessibility)
+
+    def refresh_status(self) -> Any:
+        """Run diagnostic-only preflights and update the three status rows."""
+        from fpdb.infrastructure.platform import permissions
+
+        status = permissions.get_status()
+        self.set_status(status)
+        self.status_changed.emit(status)
+        return status
+
+    def _request_screen_recording(self) -> None:
+        """Request Screen Recording after an explicit button click."""
+        from fpdb.infrastructure.platform import permissions
+
+        permissions.request_screen_recording_permission()
+        self.refresh_status()
+
+    def _request_accessibility(self) -> None:
+        """Request Accessibility after an explicit button click."""
+        from fpdb.infrastructure.platform import permissions
+
+        permissions.request_accessibility_permission(prompt=True)
+        self.refresh_status()
+
+    @staticmethod
+    def _open_screen_recording_settings() -> None:
+        from fpdb.infrastructure.platform import permissions
+
+        permissions.open_screen_recording_settings()
+
+    @staticmethod
+    def _open_accessibility_settings() -> None:
+        from fpdb.infrastructure.platform import permissions
+
+        permissions.open_accessibility_settings()
+
+
 class HudMain(QObject):
     """A main() object to own both the socket thread and the gui."""
 
@@ -697,27 +834,7 @@ class HudMain(QObject):
                 height=self.hud_params["card_ht"],
             )
 
-            from fpdb_3_legacy.winamax_ax_seats import WinamaxAXSeatReader, is_supported
-            from fpdb_3_legacy.winamax_live_log_reader import WinamaxLiveLogReader
-            from fpdb_3_legacy.winamax_pool_games import WinamaxPoolGames
-
-            # Reads seats off the table window itself. The log can only say who
-            # has acted, and never where they sit; this knows both, immediately.
-            self.winamax_ax_seats = WinamaxAXSeatReader() if is_supported() else None
-
-            # The window says which game it deals only to a process holding
-            # macOS Accessibility, which packaged builds do not. Imported hands
-            # say it unconditionally, so what they prove is kept.
-            self.winamax_pool_games = WinamaxPoolGames(
-                Path(Configuration.CONFIG_PATH) / "winamax_pool_games.json" if Configuration.CONFIG_PATH else None,
-            )
-
-            # Queued by Qt because the reader emits from its tailing thread.
-            self.winamax_table_update.connect(self._on_winamax_table_update)
-            self.winamax_log_reader = WinamaxLiveLogReader(
-                on_table_update=self.winamax_table_update.emit,
-            )
-            self.winamax_log_reader.start()
+            self._initialize_winamax_live_sources()
 
             # Cache initialization
             self.cache: TTLCache = TTLCache(maxsize=1000, ttl=300)  # Cache of 1000 elements with a TTL of 5 minutes
@@ -771,44 +888,93 @@ class HudMain(QObject):
             raise
 
     def _check_macos_permissions(self) -> None:
-        """Diagnose macOS privacy permissions required for table detection.
+        """Diagnose macOS privacy permissions without prompting or opening Settings.
 
-        Screen Recording is needed for Quartz to expose window titles;
-        Accessibility is needed for Winamax seats and System Events GUI
-        scripting; Automation is a separate consent requested by the first
-        Apple Event. Frozen builds trigger the native Screen Recording and
-        Accessibility prompts automatically. Source installs can opt in with
-        ``FPDB_REQUEST_MACOS_PERMISSIONS=1``.
+        This startup path is deliberately identical for source and frozen
+        builds. Permission requests belong only to the explicit onboarding
+        buttons in :class:`MacOSPermissionsDialog`.
         """
         try:
             from fpdb.infrastructure.platform import permissions
         except Exception:
             log.debug("macOS permissions preflight unavailable", exc_info=True)
+            self._macos_permission_status = None
             return
 
         status = permissions.get_status()
+        self._macos_permission_status = status
         if status.all_granted:
             log.info("macOS permissions OK (Screen Recording + Accessibility granted)")
-            return
-
         for message in permissions.describe_missing(status):
             log.warning(message)
+        if status.app_data is None:
+            log.info("macOS App Data permission is managed by macOS and cannot be preflighted safely")
 
-        if getattr(sys, "frozen", False) or os.getenv("FPDB_REQUEST_MACOS_PERMISSIONS") == "1":
-            if not status.screen_recording:
-                log.info("Requesting Screen Recording permission (native prompt)...")
-                permissions.request_screen_recording_permission()
-                permissions.open_screen_recording_settings()
-                log.warning(
-                    "After granting Screen Recording permission, restart FPDB for it to take effect.",
-                )
-            elif not status.accessibility:
-                log.info("Requesting Accessibility permission (native prompt)...")
-                permissions.request_accessibility_permission(prompt=True)
-                permissions.open_accessibility_settings()
-                log.warning(
-                    "After granting Accessibility permission, restart FPDB for it to take effect.",
-                )
+    @staticmethod
+    def _site_enabled_in_config(config: Any, site_name: str) -> bool:
+        """Read an enabled-site flag from the loaded config without resolving paths."""
+        try:
+            enabled_sites = config.get_supported_sites()
+            wanted = site_name.casefold()
+            return any(str(site).casefold() == wanted for site in enabled_sites)
+        except Exception:
+            log.warning("Could not read enabled sites while initializing %s live sources", site_name, exc_info=True)
+            return False
+
+    def _initialize_winamax_live_sources(self) -> None:
+        """Start Winamax-only helpers when Winamax is enabled in the loaded config."""
+        self.winamax_ax_seats = None
+        self.winamax_pool_games = None
+        self.winamax_log_reader = None
+        if not self._site_enabled_in_config(self.config, "Winamax"):
+            log.info("Winamax is disabled; live log and Accessibility helpers will not be initialized")
+            return
+
+        from fpdb_3_legacy.winamax_ax_seats import WinamaxAXSeatReader, is_supported
+        from fpdb_3_legacy.winamax_live_log_reader import WinamaxLiveLogReader
+        from fpdb_3_legacy.winamax_pool_games import WinamaxPoolGames
+
+        # Reads seats off the table window itself. The log can only say who has
+        # acted, and never where they sit; this knows both, immediately.
+        self.winamax_ax_seats = WinamaxAXSeatReader() if is_supported() else None
+
+        # The window says which game it deals only to a process holding macOS
+        # Accessibility. Imported hands say it unconditionally, so keep what
+        # they prove for later live hands.
+        self.winamax_pool_games = WinamaxPoolGames(
+            Path(Configuration.CONFIG_PATH) / "winamax_pool_games.json" if Configuration.CONFIG_PATH else None,
+        )
+
+        # Queued by Qt because the reader emits from its tailing thread.
+        self.winamax_table_update.connect(self._on_winamax_table_update)
+        self.winamax_log_reader = WinamaxLiveLogReader(
+            on_table_update=self.winamax_table_update.emit,
+        )
+        self.winamax_log_reader.start()
+
+    def show_macos_permissions(self) -> None:
+        """Show the explicit macOS permission onboarding window."""
+        dialog = getattr(self, "_macos_permissions_dialog", None)
+        if dialog is None:
+            dialog = MacOSPermissionsDialog(self.main_window)
+            dialog.status_changed.connect(self._remember_macos_permission_status)
+            self._macos_permissions_dialog = dialog
+        dialog.refresh_status()
+        dialog.show()
+        dialog.raise_()
+        dialog.activateWindow()
+
+    def _remember_macos_permission_status(self, status: Any) -> None:
+        """Keep the latest UI preflight snapshot for diagnostics."""
+        self._macos_permission_status = status
+
+    def _on_application_state_changed(self, state: Any) -> None:
+        """Recheck an open onboarding window after returning from Settings."""
+        if state != Qt.ApplicationState.ApplicationActive:
+            return
+        dialog = getattr(self, "_macos_permissions_dialog", None)
+        if dialog is not None and dialog.isVisible():
+            dialog.refresh_status()
 
     def handle_worker_error(self, error_message: str) -> None:
         """Handle errors from the ZMQ worker."""
@@ -1097,6 +1263,14 @@ class HudMain(QObject):
         self.main_window.setLayout(self.vb)
         self.label = QLabel("Closing this window will exit from the HUD.")
         self.vb.addWidget(self.label)
+        if self.config.os_family == "Mac":
+            self._macos_permissions_dialog: MacOSPermissionsDialog | None = None
+            self.macos_permissions_button = QPushButton("macOS Permissions…")
+            self.macos_permissions_button.clicked.connect(self.show_macos_permissions)
+            self.vb.addWidget(self.macos_permissions_button)
+            app = QApplication.instance()
+            if app is not None:
+                app.applicationStateChanged.connect(self._on_application_state_changed)
         self.main_window.setWindowTitle("HUD Main Window")
         cards_path = Path(self.config.graphics_path) / "tribal.jpg"
         if cards_path.exists():
@@ -1431,7 +1605,8 @@ class HudMain(QObject):
         site_hand_no = getattr(prepared, "site_hand_no", None) or getattr(
             getattr(prepared, "hand_instance", None), "handid", None
         )
-        table_no = self.winamax_log_reader.table_no_for_hand(site_hand_no) if site_hand_no else None
+        log_reader = getattr(self, "winamax_log_reader", None)
+        table_no = log_reader.table_no_for_hand(site_hand_no) if log_reader is not None and site_hand_no else None
         if not table_no:
             # WARNING because this is what delays a table's HUD by a hand or two
             # at startup, and the delay is otherwise invisible.
@@ -1455,7 +1630,9 @@ class HudMain(QObject):
         # This hand settles what the pool deals, which is the one thing the log
         # cannot say. Kept so later hands on this pool -- and later sessions --
         # can build their HUD from the log alone.
-        self.winamax_pool_games.remember(info.table_name, info.poker_game)
+        pool_games = getattr(self, "winamax_pool_games", None)
+        if pool_games is not None:
+            pool_games.remember(info.table_name, info.poker_game)
         return info._replace(table_name=f"{info.table_name} {table_no}")
 
     def _hud_is_fast_fold(self, hud: Hud.Hud, temp_key: str = "") -> bool:
@@ -1518,7 +1695,8 @@ class HudMain(QObject):
 
         # The window states the game only when the accessibility API answered.
         # Otherwise fall back on what an imported hand from this pool proved.
-        poker_game = window.poker_game or self.winamax_pool_games.get(temp_key)
+        pool_games = getattr(self, "winamax_pool_games", None)
+        poker_game = window.poker_game or (pool_games.get(temp_key) if pool_games is not None else None)
         if not poker_game:
             self._ff_trace(
                 update.hand_id,

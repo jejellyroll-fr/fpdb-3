@@ -72,6 +72,10 @@ def _update_mac_info_plist(info_plist: Path, *, version: str | None = None) -> b
         info["NSAccessibilityUsageDescription"] = (
             "FPDB requires Accessibility permission to locate and position HUD windows over poker tables."
         )
+        info["NSAppDataUsageDescription"] = (
+            "FPDB needs access to poker client data files, including hand histories and logs, "
+            "to import hands and display the HUD."
+        )
         with info_plist.open("wb") as handle:
             plistlib.dump(info, handle)
     except (OSError, plistlib.InvalidFileException) as exc:
