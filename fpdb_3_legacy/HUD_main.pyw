@@ -1423,6 +1423,11 @@ class HudMain(QObject):
             self._clear_fast_fold_table(temp_key, hud, update.hand_id, reason)
             return
 
+        # On a new hand start for this table, clear the previous hand's HUD stats immediately at +0ms
+        # so old player stat blocks do not linger while the new table is dealt.
+        if update.hand_id not in self._ff_pending_hand.values():
+            FastFoldEngine.clear_seats(hud)
+
         max_seats = getattr(hud, "max", 6) or 6
         engine = FastFoldEngine(config=self.config)
         hero_seat = engine.pin_hero_seat(hud)
