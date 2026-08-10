@@ -436,7 +436,7 @@ class WinamaxAXSeatReader:
         m = re.search(r"(\d+)\s*$", title or "")
         return m is not None and m.group(1) == str(table_no)
 
-    def read_window(  # noqa: C901
+    def read_window(  # noqa: C901, PLR0912
         self,
         title: str,
         max_seats: int = 6,
@@ -460,9 +460,18 @@ class WinamaxAXSeatReader:
             if app is None:
                 return {}
             matching_windows: list[tuple[Any, tuple[float, float], tuple[float, float]]] = []
+            clean_title = re.sub(r"\s*#\d+$", "", title)
             for window in self._attr(app, "AXWindows") or []:
-                if self._attr(window, "AXTitle") != title:
-                    continue
+                w_title = str(self._attr(window, "AXTitle") or "")
+                clean_w_title = re.sub(r"\s*#\d+$", "", w_title)
+                if clean_w_title != clean_title:
+                    m_req = re.search(r"(\d+)\s*$", clean_title)
+                    m_win = re.search(r"(\d+)\s*$", clean_w_title)
+                    if m_req and m_win:
+                        if m_req.group(1) != m_win.group(1):
+                            continue
+                    elif clean_w_title not in clean_title and clean_title not in clean_w_title:
+                        continue
                 origin, size = self._geometry(window)
                 if origin is None or size is None or not size[0] or not size[1]:
                     continue

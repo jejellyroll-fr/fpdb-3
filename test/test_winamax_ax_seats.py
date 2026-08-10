@@ -375,3 +375,38 @@ def test_read_window_with_table_pos_selects_closest_window(monkeypatch) -> None:
     assert 0 in slots1
     assert slots1[0] == "Table1_Hero"
 
+
+def test_read_window_matches_title_by_table_number(monkeypatch) -> None:
+    """read_window matches when requested title and AXTitle share the same trailing table index."""
+    from fpdb_3_legacy.winamax_ax_seats import AXSeat, WinamaxAXSeatReader
+
+    reader = WinamaxAXSeatReader()
+    monkeypatch.setattr("fpdb_3_legacy.winamax_ax_seats.is_ax_available", lambda: True)
+    monkeypatch.setattr("platform.system", lambda: "Darwin")
+
+    app = object()
+    win = object()
+    monkeypatch.setattr(reader, "_application", lambda: app)
+
+    def mock_attr(obj, attr):
+        if obj is app and attr == "AXWindows":
+            return [win]
+        if obj is win and attr == "AXTitle":
+            return "Winamax Casablanca 6"
+        return None
+
+    def mock_geometry(obj):
+        return (100.0, 100.0), (800.0, 600.0)
+
+    def mock_collect_text(obj, labels):
+        labels.extend([AXSeat("Hero", 500, 600), AXSeat("100 BB", 490, 615)])
+
+    monkeypatch.setattr(reader, "_attr", mock_attr)
+    monkeypatch.setattr(reader, "_geometry", mock_geometry)
+    monkeypatch.setattr(reader, "_collect_text", mock_collect_text)
+
+    # Requesting "Winamax Casablanca 6 #1234" should match window titled "Winamax Casablanca 6"
+    slots = reader.read_window("Winamax Casablanca 6 #1234", 6)
+    assert 0 in slots
+    assert slots[0] == "Hero"
+
