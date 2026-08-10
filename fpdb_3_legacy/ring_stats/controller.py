@@ -136,6 +136,7 @@ class RingStatsController(QObject):
     def refresh_all(self, filter_widget) -> None:
         """Lance l'ensemble des requêtes asynchrones en fonction des filtres appliqués."""
         debug_log("refresh_all called!")
+        self.shutdown_workers()
         # 1. Extraction des filtres
         sites = filter_widget.getSites()
         heroes = filter_widget.getHeroes()
