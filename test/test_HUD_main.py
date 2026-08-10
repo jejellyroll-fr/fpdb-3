@@ -2929,3 +2929,12 @@ def test_ordinary_pools_do_not_enter_the_fast_fold_path(hud_main) -> None:
 
     traced.assert_not_called()
     scheduled.assert_not_called()
+
+
+def test_hud_is_fast_fold_matches_base_name_and_sets_flag(hud_main) -> None:
+    """_hud_is_fast_fold matches base table names and sets is_fast_fold = True on the HUD."""
+    hud = SimpleNamespace(table_name="Winamax - Bucarest 1", is_fast_fold=False)
+    hud_main._fast_fold_tables = {"Winamax - Bucarest 1 #2410"}
+
+    assert hud_main._hud_is_fast_fold(hud, "Bucarest 1") is True
+    assert hud.is_fast_fold is True

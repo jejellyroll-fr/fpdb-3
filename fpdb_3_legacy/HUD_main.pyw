@@ -1702,24 +1702,45 @@ class HudMain(QObject):
     def _hud_is_fast_fold(self, hud: Hud.Hud, temp_key: str = "") -> bool:
         """Whether this table plays the Fast-Fold format.
 
-        Checked in order of reliability: the imported hand's game type, a pool
-        seen in the Winamax log, then the window title. The title only helps on
-        sites that name the format in it -- Winamax Escape tables do not.
+        Checked in order of reliability: active fast fold tables, base table
+        names with matching table indices, imported hand game types, then window titles.
         """
-        if temp_key and temp_key in self._fast_fold_tables:
-            return True
-        # Explicit True only: a stand-in object answers every attribute, and
-        # "probably fast-fold" would quietly switch off the ordinary refresh.
         if getattr(hud, "is_fast_fold", False) is True:
             return True
-        # Only real strings: the title match is a regex, and a stand-in object
-        # hands back something that is neither a name nor empty.
+        if temp_key and temp_key in self._fast_fold_tables:
+            hud.is_fast_fold = True
+            return True
+
+        clean_key = re.sub(r"\s*#\d+$", "", temp_key or "")
+        hud_table_name = getattr(hud, "table_name", None) or ""
+        clean_hud_name = re.sub(r"\s*#\d+$", "", hud_table_name if isinstance(hud_table_name, str) else "")
+
+        for ff_table in list(self._fast_fold_tables):
+            clean_ff = re.sub(r"\s*#\d+$", "", ff_table)
+            for check in (clean_key, clean_hud_name):
+                if not check:
+                    continue
+                if check == clean_ff:
+                    hud.is_fast_fold = True
+                    return True
+                m1 = re.search(r"(\d+)\s*$", check)
+                m2 = re.search(r"(\d+)\s*$", clean_ff)
+                if m1 and m2 and m1.group(1) == m2.group(1):
+                    b1 = re.sub(r"\s*\d+$", "", check)
+                    b2 = re.sub(r"\s*\d+$", "", clean_ff)
+                    if b1 in b2 or b2 in b1:
+                        hud.is_fast_fold = True
+                        return True
+
         table_name = getattr(hud, "table_name", None)
         game_type = getattr(hud, "game_type", None)
-        return is_fast_fold_table(
+        is_ff = is_fast_fold_table(
             table_name if isinstance(table_name, str) and table_name else temp_key,
             game_type=game_type if isinstance(game_type, str) else "",
         )
+        if is_ff:
+            hud.is_fast_fold = True
+        return is_ff
 
     def _ensure_fast_fold_hud(self, update: Any) -> tuple[str, Hud.Hud] | None:
         """Create the HUD for a Fast-Fold window the log has just reported.
