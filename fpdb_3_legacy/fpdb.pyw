@@ -1874,6 +1874,12 @@ class fpdb(QMainWindow):
             self.threads.remove(item)
 
         if item is not None:
+            # Stop any QThreads before destruction: a widget removed from a
+            # QTabWidget does not receive closeEvent, so DbWorker threads (ring
+            # stats) would otherwise keep running as zombies.
+            shutdown = getattr(item, "shutdown_workers", None)
+            if callable(shutdown):
+                shutdown()
             item.deleteLater()
 
     def __init__(self) -> None:

@@ -379,7 +379,7 @@ class Filters(QWidget):
 
         for site in self.conf.get_supported_sites():
             self.db_cursor.execute(self.sql.query["getSiteId"], (site,))
-            result = self.db.cursor.fetchall()
+            result = self.db_cursor.fetchall()
             if len(result) == 1:
                 self.siteid[site] = result[0][0]
             else:
@@ -1151,7 +1151,7 @@ class Filters(QWidget):
         frame.setLayout(vbox1)
 
         self.db_cursor.execute(self.sql.query["getGames"])
-        result = self.db.cursor.fetchall()
+        result = self.db_cursor.fetchall()
         log.debug("get games %s", result)
         self.gameList = QComboBox()
         for count, _game in enumerate(result, start=0):
@@ -1207,7 +1207,7 @@ class Filters(QWidget):
         frame.setLayout(vbox1)
 
         self.db_cursor.execute(self.sql.query["getTourneyNames"])
-        result = self.db.cursor.fetchall()
+        result = self.db_cursor.fetchall()
         log.debug("get tourney name %s", result)
         self.gameList = QComboBox()
         for count, _game in enumerate(result, start=0):
@@ -1298,7 +1298,7 @@ class Filters(QWidget):
         frame.setLayout(vbox1)
 
         self.db_cursor.execute(self.sql.query["getCurrencies"])
-        result = self.db.cursor.fetchall()
+        result = self.db_cursor.fetchall()
         if len(result) >= 1:
             for line in result:
                 cname = self.currencyName[line[0]] if line[0] in self.currencyName else line[0]
@@ -1342,7 +1342,7 @@ class Filters(QWidget):
         frame.setLayout(vbox1)
 
         self.db_cursor.execute(self.sql.query["getCashLimits"])
-        result = self.db.cursor.fetchall()
+        result = self.db_cursor.fetchall()
         limits_found = set()
         types_found = set()
 

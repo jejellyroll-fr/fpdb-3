@@ -32,15 +32,34 @@ class DbWorker(QThread):
     def run(self) -> None:
         try:
             db = self.db_or_cursor
-            conn = getattr(db, "connection", None)
-            cursor = conn.cursor() if conn else getattr(db, "cursor", db)
-            try:
-                cursor.execute(self.query_sql)
-                results = cursor.fetchall()
-                colnames = [desc[0].lower() for desc in cursor.description] if cursor.description else []
-            finally:
-                if conn and hasattr(cursor, "close"):
-                    cursor.close()
+            # SQLite: run the query on a dedicated connection for this thread.
+            # Sharing one sqlite3.Connection across threads without an
+            # application-level lock serializes execute/fetchall pairs and can
+            # interleave statements, which deadlocks the GUI on macOS.
+            # WAL mode allows one connection per thread safely.
+            dedicated = getattr(db, "create_worker_connection", None)
+            if callable(dedicated):
+                conn = dedicated()
+                try:
+                    cursor = conn.cursor()
+                    try:
+                        cursor.execute(self.query_sql)
+                        results = cursor.fetchall()
+                        colnames = [desc[0].lower() for desc in cursor.description] if cursor.description else []
+                    finally:
+                        cursor.close()
+                finally:
+                    conn.close()
+            else:
+                conn = getattr(db, "connection", None)
+                cursor = conn.cursor() if conn else getattr(db, "cursor", db)
+                try:
+                    cursor.execute(self.query_sql)
+                    results = cursor.fetchall()
+                    colnames = [desc[0].lower() for desc in cursor.description] if cursor.description else []
+                finally:
+                    if conn and hasattr(cursor, "close"):
+                        cursor.close()
             self.finished.emit(self.query_name, results, colnames)
         except Exception as e:  # noqa: BLE001 - Qt worker boundary reports DB-driver errors through its signal.
             self.error.emit(str(e))
@@ -103,10 +122,21 @@ class ModernStatsWidget(QTabWidget):
             f"Une erreur est survenue lors du chargement des statistiques :\n\n{error_message}",
         )
 
-    def closeEvent(self, event) -> None:
-        """S'assure que tous les workers d'arrière-plan sont arrêtés avant fermeture."""
+    def shutdown_workers(self) -> None:
+        """Stop all background workers.
+
+        Called explicitly when the tab is removed from the QTabWidget
+        (``close_tab`` in fpdb.pyw): a widget detached from a QTabWidget does
+        not receive ``closeEvent``, so without this call the QThreads would keep
+        running on a connection whose parent widget is destroyed.
+        """
         for worker in self._workers:
             if worker.isRunning():
                 worker.terminate()
                 worker.wait()
+        self._workers = []
+
+    def closeEvent(self, event) -> None:
+        """Ensure all background workers are stopped before closing."""
+        self.shutdown_workers()
         super().closeEvent(event)

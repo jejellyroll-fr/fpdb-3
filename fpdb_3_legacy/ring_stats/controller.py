@@ -121,6 +121,18 @@ class RingStatsController(QObject):
         self._last_summary_stats: dict[str, Any] | None = None
         self._last_profit_data: tuple[Any, Any, Any, Any] | None = None
 
+    def shutdown_workers(self) -> None:
+        """Stop all DbWorker threads started by this controller.
+
+        Called when the host tab is closed: QThreads must not outlive their
+        parent widget.
+        """
+        for worker in self._workers:
+            if worker.isRunning():
+                worker.terminate()
+                worker.wait()
+        self._workers = []
+
     def refresh_all(self, filter_widget) -> None:
         """Lance l'ensemble des requêtes asynchrones en fonction des filtres appliqués."""
         debug_log("refresh_all called!")

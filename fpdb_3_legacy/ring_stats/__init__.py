@@ -159,6 +159,16 @@ class GuiRingPlayerStats(QSplitter):
         self.controller.position_data_ready.connect(self.position_tab.update_position_data)
         self.controller.no_data_found.connect(self.handle_no_data_found)
 
+    def shutdown_workers(self) -> None:
+        """Stop DB workers from both the controller and the tab widget.
+
+        Called by fpdb.pyw ``close_tab`` before ``deleteLater``: a widget
+        removed from a QTabWidget does not receive ``closeEvent``, so without
+        this the QThreads would outlive the tab.
+        """
+        self.controller.shutdown_workers()
+        self.stats_tabs.shutdown_workers()
+
     def handle_no_data_found(self, reason: str = "") -> None:
         """Explique pourquoi l'onglet est vide (filtre incomplet, base vide, ...)."""
         try:

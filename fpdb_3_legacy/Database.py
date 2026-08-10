@@ -797,6 +797,41 @@ class Database(
             self.connection.ping(True)
         return self.connection.cursor()
 
+    def create_worker_connection(self):
+        """Open a dedicated SQLite connection for a background worker thread.
+
+        Returns None for non-SQLite backends: those drivers handle concurrent
+        cursors on a shared connection correctly, so workers keep using it.
+
+        Sharing one sqlite3.Connection across threads (check_same_thread=False)
+        without an application-level lock interleaves execute/fetchall pairs
+        from the GUI thread and DbWorker threads, which deadlocks the GUI on
+        macOS. WAL mode makes one read connection per thread safe. The returned
+        connection is intentionally NOT passed through db_profile.wrap_connection:
+        profiling is single-process bookkeeping and worker round trips stay
+        attributed to the main connection.
+        """
+        if self.backend != self.SQLITE or not self.db_path or self.db_path == ":memory:":
+            return None
+        import sqlite3
+
+        conn = sqlite3.connect(
+            self.db_path,
+            detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES,
+            timeout=60.0,
+            check_same_thread=False,
+        )
+        conn.execute("PRAGMA busy_timeout=60000")
+        conn.execute("PRAGMA journal_mode=WAL")
+        conn.execute("PRAGMA synchronous=0")
+        conn.create_function("floor", 1, math.floor)
+        conn.create_function("sqrt", 1, math.sqrt)
+        tmp = sqlitemath()
+        conn.create_function("mod", 2, tmp.mod)
+        if use_numpy:
+            conn.create_aggregate("variance", 1, VARIANCE)
+        return conn
+
     def close_connection(self) -> None:
         if getattr(self, "connection", None):
             self.connection.close()
