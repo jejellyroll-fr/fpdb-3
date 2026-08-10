@@ -183,19 +183,8 @@ class GuiRingPlayerStats(QSplitter):
         # Forcer la mise à jour des feuilles de style pour s'adapter à un changement de thème
         self._apply_theme()
 
-        from PySide6.QtCore import Qt
-        from PySide6.QtWidgets import QApplication
-
-        is_sync = not getattr(self.controller, "async_mode", True)
-        if is_sync:
-            QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
-
-        try:
-            # Lancer le rechargement des requêtes
-            self.controller.refresh_all(self.filters)
-        finally:
-            if is_sync:
-                QApplication.restoreOverrideCursor()
+        # Lancer le rechargement des requêtes
+        self.controller.refresh_all(self.filters)
 
     def refresh_theme(self, colors=None, theme_colors=None) -> None:
         """Appelé par ThemeManager.apply_legacy_polish() lors d'un changement de thème.

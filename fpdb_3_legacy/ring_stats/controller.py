@@ -124,13 +124,20 @@ class RingStatsController(QObject):
     def shutdown_workers(self) -> None:
         """Stop all DbWorker threads started by this controller.
 
-        Called when the host tab is closed: QThreads must not outlive their
-        parent widget.
+        Called when the host tab is closed or refreshed: disconnects signals
+        immediately so stale workers never update the UI thread, and terminates them.
         """
         for worker in self._workers:
             if worker.isRunning():
+                try:
+                    worker.finished.disconnect()
+                except (TypeError, RuntimeError):
+                    pass
+                try:
+                    worker.error.disconnect()
+                except (TypeError, RuntimeError):
+                    pass
                 worker.terminate()
-                worker.wait()
         self._workers = []
 
     def refresh_all(self, filter_widget) -> None:
@@ -385,97 +392,101 @@ class RingStatsController(QObject):
         color_down = QColor(c_palette.get("graph_down", "#f56565"))
         color_neutral = QColor(c_palette.get("text", "#edf2f7"))
 
-        for sqlrow in range(len(result)):
-            treerow: list[QStandardItem] = []
-            for col, column in enumerate(cols_to_show):
-                value = None
-                sortValue = -1e9
+        model.blockSignals(True)
+        try:
+            for sqlrow in range(len(result)):
+                treerow: list[QStandardItem] = []
+                for col, column in enumerate(cols_to_show):
+                    value = None
+                    sortValue = -1e9
 
-                if column[colalias] in colnames:
-                    value = result[sqlrow][colnames.index(column[colalias])]
-                    if column[colalias] == "plposition":
-                        if value == "B":
-                            value = "BB"
-                        elif value == "S":
-                            value = "SB"
-                        elif value == "0":
-                            value = "Btn"
-                elif column[colalias] == "game":
-                    if holecards:
-                        cat_idx = colnames.index("category")
-                        value = Card.decodeStartHandValue(result[sqlrow][cat_idx], result[sqlrow][hgametypeid_idx])
-                    else:
-                        # Formatage d'une ligne de limite de jeu
-                        minbb = result[sqlrow][colnames.index("minbigblind")]
-                        maxbb = result[sqlrow][colnames.index("maxbigblind")]
-                        value = (
-                            result[sqlrow][colnames.index("limittype")] + " " +
-                            result[sqlrow][colnames.index("category")].title() + " " +
-                            result[sqlrow][colnames.index("name")] + " " +
-                            result[sqlrow][colnames.index("currency")] + " "
-                        )
-                        if 100 * int(minbb // 100.0) != minbb:
-                            value += f"{minbb // 100.0:.2f}"
+                    if column[colalias] in colnames:
+                        value = result[sqlrow][colnames.index(column[colalias])]
+                        if column[colalias] == "plposition":
+                            if value == "B":
+                                value = "BB"
+                            elif value == "S":
+                                value = "SB"
+                            elif value == "0":
+                                value = "Btn"
+                    elif column[colalias] == "game":
+                        if holecards:
+                            cat_idx = colnames.index("category")
+                            value = Card.decodeStartHandValue(result[sqlrow][cat_idx], result[sqlrow][hgametypeid_idx])
                         else:
-                            value += f"{minbb // 100.0:.0f}"
-                        if minbb != maxbb:
-                            if 100 * int(maxbb // 100.0) != maxbb:
-                                value += f" - {maxbb // 100.0:.2f}"
-                            else:
-                                value += f" - {maxbb // 100.0:.0f}"
-                        ante = result[sqlrow][colnames.index("ante")]
-                        if ante > 0:
-                            value += f" ante: {ante // 100.0:.2f}"
-                        if result[sqlrow][colnames.index("fast")] == 1:
-                            value += " " + fast_names.get(result[sqlrow][colnames.index("name")], "Fast")
-
-                # Valeur par défaut
-                item = QStandardItem("")
-                if value is not None and value != -999:
-                    item = QStandardItem(column[colformat] % value)
-
-                    # Déterminer la valeur de tri (sortValue)
-                    if column[colalias] == "game" and holecards:
-                        cat_idx = colnames.index("category")
-                        if result[sqlrow][cat_idx] == "holdem":
-                            sortValue = (
-                                1000 * ranks.get(value[0], 0) +
-                                10 * ranks.get(value[1], 0) +
-                                (1 if len(value) == 3 and value[2] == "s" else 0)
+                            # Formatage d'une ligne de limite de jeu
+                            minbb = result[sqlrow][colnames.index("minbigblind")]
+                            maxbb = result[sqlrow][colnames.index("maxbigblind")]
+                            value = (
+                                result[sqlrow][colnames.index("limittype")] + " " +
+                                result[sqlrow][colnames.index("category")].title() + " " +
+                                result[sqlrow][colnames.index("name")] + " " +
+                                result[sqlrow][colnames.index("currency")] + " "
                             )
+                            if 100 * int(minbb // 100.0) != minbb:
+                                value += f"{minbb // 100.0:.2f}"
+                            else:
+                                value += f"{minbb // 100.0:.0f}"
+                            if minbb != maxbb:
+                                if 100 * int(maxbb // 100.0) != maxbb:
+                                    value += f" - {maxbb // 100.0:.2f}"
+                                else:
+                                    value += f" - {maxbb // 100.0:.0f}"
+                            ante = result[sqlrow][colnames.index("ante")]
+                            if ante > 0:
+                                value += f" ante: {ante // 100.0:.2f}"
+                            if result[sqlrow][colnames.index("fast")] == 1:
+                                value += " " + fast_names.get(result[sqlrow][colnames.index("name")], "Fast")
+
+                    # Valeur par défaut
+                    item = QStandardItem("")
+                    if value is not None and value != -999:
+                        item = QStandardItem(column[colformat] % value)
+
+                        # Déterminer la valeur de tri (sortValue)
+                        if column[colalias] == "game" and holecards:
+                            cat_idx = colnames.index("category")
+                            if result[sqlrow][cat_idx] == "holdem":
+                                sortValue = (
+                                    1000 * ranks.get(value[0], 0) +
+                                    10 * ranks.get(value[1], 0) +
+                                    (1 if len(value) == 3 and value[2] == "s" else 0)
+                                )
+                            else:
+                                sortValue = -1
+                        elif column[colalias] in ("game", "pname"):
+                            sortValue = value
+                        elif column[colalias] == "plposition":
+                            order_list = ["BB", "SB", "Btn", "1", "2", "3", "4", "5", "6", "7"]
+                            sortValue = order_list.index(value) if value in order_list else 99
                         else:
-                            sortValue = -1
-                    elif column[colalias] in ("game", "pname"):
-                        sortValue = value
-                    elif column[colalias] == "plposition":
-                        order_list = ["BB", "SB", "Btn", "1", "2", "3", "4", "5", "6", "7"]
-                        sortValue = order_list.index(value) if value in order_list else 99
-                    else:
-                        sortValue = float(value)
+                            sortValue = float(value)
 
-                item.setData(sortValue, Qt.ItemDataRole.UserRole)
-                item.setEditable(False)
+                    item.setData(sortValue, Qt.ItemDataRole.UserRole)
+                    item.setEditable(False)
 
-                # Appliquer la couleur vert/rouge sur les profits
-                if column[colalias] in _WINNINGS_ALIASES and value is not None and value != -999:
-                    try:
-                        v = float(value)
-                        item.setForeground(QBrush(color_up if v > 0 else color_down if v < 0 else color_neutral))
-                    except (TypeError, ValueError):
-                        pass
+                    # Appliquer la couleur vert/rouge sur les profits
+                    if column[colalias] in _WINNINGS_ALIASES and value is not None and value != -999:
+                        try:
+                            v = float(value)
+                            item.setForeground(QBrush(color_up if v > 0 else color_down if v < 0 else color_neutral))
+                        except (TypeError, ValueError):
+                            pass
 
-                # Alignements des cellules (à droite sauf pour la colonne 0)
-                if col != 0:
-                    item.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+                    # Alignements des cellules (à droite sauf pour la colonne 0)
+                    if col != 0:
+                        item.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
 
-                # Tooltip d'aide en survol
-                if column[colalias] != "game" and len(treerow) > 0:
-                    desc_heading = column[colheading]
-                    help_text = onlinehelp.get(desc_heading, desc_heading)
-                    item.setToolTip(f"<big>{desc_heading} pour {treerow[0].text()}</big><br/><i>{help_text}</i>")
+                    # Tooltip d'aide en survol
+                    if column[colalias] != "game" and len(treerow) > 0:
+                        desc_heading = column[colheading]
+                        help_text = onlinehelp.get(desc_heading, desc_heading)
+                        item.setToolTip(f"<big>{desc_heading} pour {treerow[0].text()}</big><br/><i>{help_text}</i>")
 
-                treerow.append(item)
-            model.appendRow(treerow)
+                    treerow.append(item)
+                model.appendRow(treerow)
+        finally:
+            model.blockSignals(False)
 
     def _calculate_dashboard_kpis(self, result: list, colnames: list) -> dict:
         """Calcule les KPIs totaux du joueur en agrégeant les lignes de résultats."""
