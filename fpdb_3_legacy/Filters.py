@@ -12,6 +12,7 @@ Provides a comprehensive filtering system for poker data analysis with support f
 from __future__ import annotations
 
 import itertools
+import time
 import unicodedata
 from functools import partial
 from pathlib import Path
@@ -248,7 +249,7 @@ class Filters(QWidget):
             display = {}
         super().__init__(None)
         self.db = db
-        self.db_cursor: Any = db.cursor
+        self.db_cursor: Any = db.connection.cursor() if getattr(db, "connection", None) else db.cursor
         self.sql = db.sql
         self.conf = db.config
         self.display = display
@@ -365,19 +366,20 @@ class Filters(QWidget):
             log.exception("Unable to build theme-aware filter stylesheet")
             return ""
 
-    def make_filter(self) -> None:  # noqa: PLR0912, C901
+    def make_filter(self) -> None:  # noqa: PLR0912, C901, PLR0915
         """Create all filter widgets based on display configuration.
 
         This method is complex by design as it handles multiple filter types
         and their conditional display logic.
         """
+        t0 = time.perf_counter()
         self.siteid: dict[str, int] = {}
         self.cards: dict[str, bool] = {}
         self.type: str | None = None
 
         for site in self.conf.get_supported_sites():
             self.db_cursor.execute(self.sql.query["getSiteId"], (site,))
-            result = self.db.cursor.fetchall()
+            result = self.db_cursor.fetchall()
             if len(result) == 1:
                 self.siteid[site] = result[0][0]
             else:
@@ -426,6 +428,7 @@ class Filters(QWidget):
 
         self.db.rollback()
         self.set_default_hero()
+        log.info("[PERF-TIMING] Filters.make_filter built in %.3f s", time.perf_counter() - t0)
 
     def _clear_layout(self, layout: Any) -> None:
         """Recursively remove and delete every item from a layout."""
@@ -1148,7 +1151,7 @@ class Filters(QWidget):
         frame.setLayout(vbox1)
 
         self.db_cursor.execute(self.sql.query["getGames"])
-        result = self.db.cursor.fetchall()
+        result = self.db_cursor.fetchall()
         log.debug("get games %s", result)
         self.gameList = QComboBox()
         for count, _game in enumerate(result, start=0):
@@ -1204,7 +1207,7 @@ class Filters(QWidget):
         frame.setLayout(vbox1)
 
         self.db_cursor.execute(self.sql.query["getTourneyNames"])
-        result = self.db.cursor.fetchall()
+        result = self.db_cursor.fetchall()
         log.debug("get tourney name %s", result)
         self.gameList = QComboBox()
         for count, _game in enumerate(result, start=0):
@@ -1295,7 +1298,7 @@ class Filters(QWidget):
         frame.setLayout(vbox1)
 
         self.db_cursor.execute(self.sql.query["getCurrencies"])
-        result = self.db.cursor.fetchall()
+        result = self.db_cursor.fetchall()
         if len(result) >= 1:
             for line in result:
                 cname = self.currencyName[line[0]] if line[0] in self.currencyName else line[0]
@@ -1339,7 +1342,7 @@ class Filters(QWidget):
         frame.setLayout(vbox1)
 
         self.db_cursor.execute(self.sql.query["getCashLimits"])
-        result = self.db.cursor.fetchall()
+        result = self.db_cursor.fetchall()
         limits_found = set()
         types_found = set()
 

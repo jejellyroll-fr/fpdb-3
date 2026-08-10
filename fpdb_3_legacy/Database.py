@@ -24,8 +24,10 @@ import math
 
 #    Standard Library modules
 import os
+import queue
 import re
 import sys
+import threading
 import traceback
 from datetime import datetime, timedelta
 from decimal import Decimal
@@ -217,6 +219,11 @@ class Database(
     MYSQL_INNODB = 2
     PGSQL = 3
     SQLITE = 4
+
+    # Global pool for worker connections shared across all Database instances
+    # to strictly bound the maximum concurrent DB connections from workers
+    _worker_conn_pool: queue.Queue[Any] = queue.Queue()
+    _worker_conn_semaphore = threading.Semaphore(4)
 
     hero_hudstart_def = "1999-12-31"  # default for length of Hero's stats in HUD
     villain_hudstart_def = "1999-12-31"  # default for length of Villain's stats in HUD
@@ -797,11 +804,140 @@ class Database(
             self.connection.ping(True)
         return self.connection.cursor()
 
+    @contextlib.contextmanager
+    def worker_connection(self):
+        """Context manager for a dedicated worker connection from a bounded pool.
+
+        Limits the number of concurrent connections to avoid hitting
+        max_connections on PostgreSQL (and MySQL).
+        """
+        self._worker_conn_semaphore.acquire()
+        conn = None
+        try:
+            try:
+                conn = self._worker_conn_pool.get_nowait()
+            except queue.Empty:
+                conn = self._create_new_worker_connection()
+
+            yield conn
+        finally:
+            if conn is not None:
+                self._worker_conn_pool.put(conn)
+            self._worker_conn_semaphore.release()
+
+    def _create_new_worker_connection(self):
+        """Open a dedicated connection for a background worker thread.
+
+        Returns None when no dedicated connection can be built (e.g. SQLite
+        ``:memory:``), in which case the worker falls back to the shared
+        connection.
+
+        No DBAPI driver used here allows two threads to drive one connection
+        concurrently without an application-level lock:
+
+        - sqlite3 (check_same_thread=False) serializes calls but interleaves
+          execute/fetchall pairs from the GUI thread and DbWorker threads,
+          which deadlocks the GUI on macOS. WAL mode makes one read connection
+          per thread safe.
+        - psycopg3 is thread-safe at connection level but NOT at cursor level:
+          two threads sharing one connection can interleave execute/fetchall.
+        - MySQLdb/pymysql has threadsafety=1: connections must NOT be shared
+          across threads at all.
+
+        The returned connection is intentionally NOT passed through
+        db_profile.wrap_connection: profiling is single-process bookkeeping and
+        worker round trips stay attributed to the main connection.
+        """
+        if self.backend == self.SQLITE:
+            return self._create_sqlite_worker_connection()
+        if self.backend == self.PGSQL:
+            return self._create_postgresql_worker_connection()
+        if self.backend == self.MYSQL_INNODB:
+            return self._create_mysql_worker_connection()
+        return None
+
+    def _create_sqlite_worker_connection(self):
+        """Dedicated SQLite connection for a worker thread (WAL mode)."""
+        if not self.db_path or self.db_path == ":memory:":
+            return None
+        import sqlite3
+
+        conn = sqlite3.connect(
+            self.db_path,
+            detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES,
+            timeout=60.0,
+            check_same_thread=False,
+        )
+        conn.execute("PRAGMA busy_timeout=60000")
+        conn.execute("PRAGMA journal_mode=WAL")
+        conn.execute("PRAGMA synchronous=0")
+        conn.create_function("floor", 1, math.floor)
+        conn.create_function("sqrt", 1, math.sqrt)
+        tmp = sqlitemath()
+        conn.create_function("mod", 2, tmp.mod)
+        if use_numpy:
+            conn.create_aggregate("variance", 1, VARIANCE)
+        return conn
+
+    def _create_postgresql_worker_connection(self):
+        """Dedicated PostgreSQL connection for a worker thread."""
+        import psycopg
+
+        kwargs = {"dbname": self.database, **PG_NETWORK_KWARGS}
+        if self.host not in ("localhost", "127.0.0.1"):
+            kwargs.update({"host": self.host, "port": self.port, "user": self.user, "password": self.password})
+        try:
+            return psycopg.connect(**kwargs)
+        except psycopg.OperationalError:
+            # Local peer connection failed; retry with explicit credentials.
+            return psycopg.connect(
+                host=self.host,
+                port=self.port,
+                user=self.user,
+                password=self.password,
+                dbname=self.database,
+                **PG_NETWORK_KWARGS,
+            )
+
+    def _create_mysql_worker_connection(self):
+        """Dedicated MySQL connection for a worker thread."""
+        try:
+            import MySQLdb
+        except ImportError:
+            import pymysql
+
+            pymysql.install_as_MySQLdb()
+            import MySQLdb
+
+        kwargs = {
+            "host": self.host,
+            "user": self.user,
+            "passwd": self.password,
+            "db": self.database,
+            "charset": "utf8",
+            "use_unicode": True,
+            **MYSQL_NETWORK_KWARGS,
+        }
+        if self.port:
+            kwargs["port"] = int(self.port)
+        return MySQLdb.connect(**kwargs)
+
     def close_connection(self) -> None:
         if getattr(self, "connection", None):
             self.connection.close()
             self.connection = None
         self.__connected = False
+
+    @classmethod
+    def close_worker_pool(cls) -> None:
+        """Close all connections currently idling in the global worker pool."""
+        while not cls._worker_conn_pool.empty():
+            try:
+                conn = cls._worker_conn_pool.get_nowait()
+                if conn is not None:
+                    conn.close()
+            except queue.Empty:
+                break
 
     def _close_cursor_quietly(self) -> None:
         cursor = getattr(self, "cursor", None)

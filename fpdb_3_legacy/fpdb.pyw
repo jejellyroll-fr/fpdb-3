@@ -43,6 +43,7 @@ import os
 import pstats
 import queue
 import sqlite3
+import time
 from functools import partial
 from importlib import import_module
 from typing import Any
@@ -213,20 +214,38 @@ class fpdb(QMainWindow):
     #         pathcomp = f"{path}/ppt/p2.jar"
     #     subprocess.call(["java", "-jar", pathcomp])
 
-    def add_and_display_tab(self, new_page, new_tab_name) -> None:
-        """Adds a tab, namely creates the button and displays it and appends all the relevant arrays."""
+    def add_and_display_tab(self, new_page, new_tab_name, allow_multiple: bool = True) -> None:
+        """Adds a tab, creates the button, displays it and appends all the relevant arrays."""
+        t0 = time.perf_counter()
         if not new_tab_name or not isinstance(new_tab_name, str):
             raise ValueError(f"Invalid tab name: {new_tab_name!r}")
 
-        for name in self.nb_tab_names:
-            if name == new_tab_name:
-                self.display_tab(new_tab_name)
-                return  # if tab already exists, just go to it
+        if not allow_multiple and new_tab_name in self.nb_tab_names:
+            self.display_tab(new_tab_name)
+            log.info("[PERF-TIMING] Switched to existing tab '%s' in %.3f s", new_tab_name, time.perf_counter() - t0)
+            if new_page is not None:
+                with contextlib.suppress(ValueError):
+                    self.threads.remove(new_page)
+                shutdown = getattr(new_page, "shutdown_workers", None)
+                if callable(shutdown):
+                    shutdown()
+                new_page.deleteLater()
+            return
 
-        self.nb_tab_names.append(new_tab_name)
+        final_tab_name = new_tab_name
+        if allow_multiple and new_tab_name in self.nb_tab_names:
+            count = 2
+            while f"{new_tab_name} ({count})" in self.nb_tab_names:
+                count += 1
+            final_tab_name = f"{new_tab_name} ({count})"
 
-        index = self.nb.addTab(new_page, new_tab_name)
+        self.nb_tab_names.append(final_tab_name)
+        if new_page not in self.threads:
+            self.threads.append(new_page)
+
+        index = self.nb.addTab(new_page, final_tab_name)
         self.nb.setCurrentIndex(index)
+        log.info("[PERF-TIMING] Opened and added new tab '%s' in %.3f s", final_tab_name, time.perf_counter() - t0)
 
     def display_tab(self, new_tab_name) -> None:
         """Displays the indicated tab."""
@@ -242,15 +261,25 @@ class fpdb(QMainWindow):
         self.nb.setCurrentIndex(tab_no)
 
     def dia_about(self, widget, data=None) -> None:
+        """Show the legal notice, and point at the tab that has the details.
+
+        The box keeps the licence text it always carried, but the version and
+        environment facts a bug report needs now live in the Version tab
+        (issue #226) rather than being squeezed into a modal that cannot be
+        copied from.
+        """
+        from fpdb_3_legacy import version_info
+
         QMessageBox.about(
             self,
-            f"FPDB{VERSION!s}",
-            "Copyright 2008-2023. See contributors.txt for details"
+            f"FPDB {VERSION!s}",
+            f"FPDB {VERSION} ({version_info.detect_packaging()})\n\n"
+            "Copyright 2008-2023. See contributors.txt for details.\n"
             "You are free to change, and distribute original or changed versions "
-            "of fpdb within the rules set out by the license"
-            "https://github.com/jejellyroll-fr/fpdb-3"
-            "\n"
-            "Your config file is: " + self.config.file,
+            "of fpdb within the rules set out by the license.\n"
+            f"{version_info.REPOSITORY_URL}\n\n"
+            f"Your config file is: {self.config.file}\n\n"
+            "See Help > Version for the full version and environment report.",
         )
 
     def dia_advanced_preferences(self, widget, data=None) -> None:
@@ -1659,8 +1688,6 @@ class fpdb(QMainWindow):
     def tab_coinpoker_capture(self, widget, data=None) -> None:
         """Open the CoinPoker live packet-capture tab."""
         if is_site_disabled("CoinPoker"):
-            # The menu no longer offers this tab; refuse the stale entry points
-            # (saved layouts, scripted calls) rather than starting a capture.
             log.info("CoinPoker support is disabled; not opening the live capture tab")
             return
         new_thread = GuiCoinPokerCapture.GuiCoinPokerCapture(self.config, self)
@@ -1686,11 +1713,21 @@ class fpdb(QMainWindow):
         # This package imports Matplotlib and scans every system font. Frozen
         # builds cannot reliably reuse that scan, so importing it at startup
         # delayed Auto Import even though no graphing tab had been requested.
+        import time
+        t0 = time.time()
+        log.warning("[PERF] tab_ring_player_stats: Importing GuiRingPlayerStats")
         from fpdb_3_legacy import GuiRingPlayerStats
+        t1 = time.time()
+        log.warning(f"[PERF] tab_ring_player_stats: Import took {t1 - t0:.3f}s. Creating GuiRingPlayerStats...")
 
         new_ps_thread = GuiRingPlayerStats.GuiRingPlayerStats(self.config, self.sql, self)
+        t2 = time.time()
+        log.warning(f"[PERF] tab_ring_player_stats: Instantiation took {t2 - t1:.3f}s. Adding tab...")
+
         self.threads.append(new_ps_thread)
         self.add_and_display_tab(new_ps_thread, "Ring Player Stats")
+        t3 = time.time()
+        log.warning(f"[PERF] tab_ring_player_stats: Adding tab took {t3 - t2:.3f}s. Total: {t3 - t0:.3f}s")
 
     def tab_opponents_report(self, widget, data=None) -> None:
         new_thread = GuiOpponentsReport.GuiOpponentsReport(self.config, self.sql, self)
@@ -1726,12 +1763,37 @@ class fpdb(QMainWindow):
         self.threads.append(new_ps_thread)
         self.add_and_display_tab(new_ps_thread, "Hand Viewer")
 
+    def tab_version_info(self, widget=None, data=None) -> None:
+        """Displays the Version / About tab (issue #226).
+
+        Imported lazily like the other tabs so startup does not pay for a view
+        most sessions never open. ``allow_multiple=False``: the tab is a static
+        snapshot of the running build, so a second copy would only duplicate the
+        first.
+        """
+        from fpdb_3_legacy import GuiVersionInfo
+
+        new_tab = GuiVersionInfo.GuiVersionInfo(
+            config=self.config,
+            db=getattr(self, "db", None),
+            version=VERSION,
+            parent=self,
+        )
+        self.add_and_display_tab(new_tab, "Version", allow_multiple=False)
+
     def tab_main_help(self, widget, data=None) -> None:
-        """Displays a tab with the main fpdb help screen."""
+        """Displays a tab with the main fpdb help screen.
+
+        This is the landing tab at startup, so it names the running build: it
+        used to greet the user without ever saying which version had been
+        launched (issue #226). The details themselves live in the Version tab.
+        """
         mh_tab = QLabel(
             (
-                """
-                        Welcome to Fpdb!
+                f"""
+                        Welcome to Fpdb {VERSION}!
+
+                        Open Help > Version for the full version, packaging and environment report.
 
                         This program is currently in an alpha-state, so our database format is still sometimes changed.
                         You should therefore always keep your hand history files so that you can re-import
@@ -1870,6 +1932,12 @@ class fpdb(QMainWindow):
             self.threads.remove(item)
 
         if item is not None:
+            # Stop any QThreads before destruction: a widget removed from a
+            # QTabWidget does not receive closeEvent, so DbWorker threads (ring
+            # stats) would otherwise keep running as zombies.
+            shutdown = getattr(item, "shutdown_workers", None)
+            if callable(shutdown):
+                shutdown()
             item.deleteLater()
 
     def __init__(self) -> None:
