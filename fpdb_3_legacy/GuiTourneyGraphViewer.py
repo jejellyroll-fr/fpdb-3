@@ -37,30 +37,8 @@ log = get_logger("gui_tourney_graph_viewer")
 # imported, so "empty database" means no hands *and* no tournaments.
 _TOURNEY_TABLES = ("Hands", "Tourneys")
 
-try:
-    calluse = "matplotlib" not in sys.modules
-    mpl = import_module("matplotlib")
-
-    if calluse:
-        try:
-            mpl.use("qt5agg")
-        except ValueError as e:
-            log.exception(f"Matplotlib use error: {e}")
-    try:
-        FigureCanvas = getattr(import_module("matplotlib.backends.backend_qtagg"), "FigureCanvasQTAgg")
-    except ImportError:
-        FigureCanvas = getattr(import_module("matplotlib.backends.backend_qt5agg"), "FigureCanvas")
-    Figure = getattr(import_module("matplotlib.figure"), "Figure")
-    FuncFormatter = getattr(import_module("matplotlib.ticker"), "FuncFormatter")
-    cumsum = getattr(import_module("numpy"), "cumsum")
-except ImportError as inst:
-    log.exception(
-        "Failed to load libs for graphing, graphing will not function. Please install numpy and matplotlib if you want to use graphs.",
-    )
-    log.exception(
-        "This is of no consequence for other parts of the program, e.g., import and HUD are NOT affected by this problem.",
-    )
-    log.exception(f"ImportError: {inst.args}")
+import numpy as np
+import pyqtgraph as pg
 
 
 class GuiTourneyGraphViewer(QSplitter):
@@ -116,28 +94,17 @@ class GuiTourneyGraphViewer(QSplitter):
         self.setStretchFactor(0, 0)
         self.setStretchFactor(1, 1)
 
-        self.fig: Any = None
-        self.canvas: Any = None
+        self.plot_widget: Any = None
 
         self.db.rollback()
         self.exportFile = None
 
     def clearGraphData(self) -> None:
-        try:
-            if self.canvas:
-                self.graphBox.removeWidget(self.canvas)
-                self.canvas.setParent(None)
-        except (AttributeError, RuntimeError) as e:
-            # Handle specific exceptions related to widget removal
-            log.exception(f"Error removing widget: {e}")
-
-        if self.fig is not None:
-            self.fig.clear()
-            self.fig = None
-
-        if self.canvas is not None:
-            self.canvas.destroy()
-            self.canvas = None
+        with contextlib.suppress(Exception):
+            if self.plot_widget:
+                self.graphBox.removeWidget(self.plot_widget)
+                self.plot_widget.setParent(None)
+                self.plot_widget = None
 
         # Declarative ChipEV-by-position curves, recomputed on each generate.
         self.chipev_curves: list[Any] = []
@@ -231,127 +198,55 @@ class GuiTourneyGraphViewer(QSplitter):
 
         is_dark = is_dark_color(bg_color)
 
-        self.fig = Figure(figsize=(5.0, 4.0), dpi=100)
-        self.fig.patch.set_facecolor(bg_color)
-        self.canvas = FigureCanvas(self.fig)
-        self.canvas.setParent(self)
-
-        self.ax = self.fig.add_subplot(111)
-
-        # Configure axes backgrounds and grid
-        self.ax.set_facecolor(bg_color)
-
-        grid_color = "#334155" if is_dark else "#cbd5e1"
-        self.ax.grid(True, color=grid_color, linestyle=":", linewidth=0.6, alpha=0.7)
-
-        # Position spines at standard outer edges, hide top and right
-        border_color = "#2d3741" if is_dark else "#cbd5e1"
-        self.ax.spines["left"].set_color(border_color)
-        self.ax.spines["bottom"].set_color(border_color)
-        self.ax.spines["top"].set_visible(False)
-        self.ax.spines["right"].set_visible(False)
-        self.ax.spines["left"].set_position(("outward", 0))
-        self.ax.spines["bottom"].set_position(("outward", 0))
-        self.ax.xaxis.set_ticks_position("bottom")
-        self.ax.yaxis.set_ticks_position("left")
-
-        # Tick colors and sizes
-        self.ax.tick_params(axis="x", colors=fg_color, labelsize=9)
-        self.ax.tick_params(axis="y", colors=fg_color, labelsize=9)
-
-        # Labels
-        self.ax.set_xlabel("Tournaments", color=fg_color, labelpad=8, fontsize=10, fontweight="bold")
+        self.plot_widget = pg.PlotWidget()
+        self.plot_widget.setBackground(bg_color)
+        self.plot_widget.showGrid(x=True, y=True, alpha=0.3)
+        self.plot_widget.setTitle(f"<span style='color:{fg_color}; font-size:11pt; font-weight:bold;'>Tournament Results{names}</span>")
+        self.plot_widget.setLabel("bottom", "Tournaments", **{"color": fg_color, "font-size": "9pt"})
         display_currency = currencies[0] if currencies else "USD"
-        self.ax.set_ylabel(
-            currency_symbol(display_currency), color=fg_color, labelpad=8, fontsize=10, fontweight="bold"
-        )
-        self.ax.yaxis.set_major_formatter(FuncFormatter(lambda value, _position: format_number(value)))
+        self.plot_widget.setLabel("left", currency_symbol(display_currency), **{"color": fg_color, "font-size": "9pt"})
 
-        # Title
-        title_color = "#ffffff" if is_dark else "#0f172a"
-        self.ax.set_title(
-            "Tournament Results" + names,
-            color=title_color,
-            pad=15,
-            fontsize=12,
-            fontweight="bold",
-        )
-
-        # Zero baseline
+        border_color = "#2d3741" if is_dark else "#cbd5e1"
         zero_color = "#475569" if is_dark else "#94a3b8"
-        self.ax.axhline(0, color=zero_color, linestyle="--", linewidth=1.0, alpha=0.7)
 
-        # Modern green line color based on theme
-        # Modern green line color based on theme
+        axis_pen = pg.mkPen(color=border_color, width=1)
+        self.plot_widget.getAxis("left").setPen(axis_pen)
+        self.plot_widget.getAxis("bottom").setPen(axis_pen)
+        self.plot_widget.getAxis("left").setTextPen(pg.mkPen(color=fg_color))
+        self.plot_widget.getAxis("bottom").setTextPen(pg.mkPen(color=fg_color))
+
+        legend = self.plot_widget.addLegend(offset=(10, 10))
+        legend.setBrush(pg.mkBrush(color=bg_color))
+        legend.setPen(pg.mkPen(color=border_color))
+
+        self.plot_widget.addLine(y=0, pen=pg.mkPen(color=zero_color, width=1, style=Qt.PenStyle.DashLine))
+
         if is_dark:
             line_hands_color = "#22c55e"
-            if "line_hands" in self.colors:
-                val = self.colors["line_hands"]
-                if val not in ("c", "g"):
-                    line_hands_color = val
+            if "line_hands" in self.colors and self.colors["line_hands"] not in ("c", "g"):
+                line_hands_color = self.colors["line_hands"]
         else:
             line_hands_color = "#15803d"
-            if "line_hands" in self.colors:
-                val = self.colors["line_hands"]
-                if val not in ("c", "g"):
-                    line_hands_color = val
+            if "line_hands" in self.colors and self.colors["line_hands"] not in ("c", "g"):
+                line_hands_color = self.colors["line_hands"]
 
-        self.ax.plot(
+        self.plot_widget.plot(
             green,
-            color=line_hands_color,
-            linewidth=2.5,
-            label=f"Tournaments: {format_number(len(green), 0)}\nProfit: {format_currency(green[-1], display_currency)}",
+            pen=pg.mkPen(color=line_hands_color, width=2.5),
+            name=f"Tournaments: {format_number(len(green), 0)} | Profit: {format_currency(green[-1], display_currency)}",
         )
 
-        # ChipEV-by-position curves (declarative; see stat_registry.py).
-        # Plotted on a secondary y-axis because they are measured in tournament
-        # chips, not the profit currency of the main line.
         chipev_curves = getattr(self, "chipev_curves", [])
         if chipev_curves:
-            # Avoid green: the main profit line is green, so curves use a
-            # distinct palette (orange/blue/purple/red/teal/yellow).
             curve_palette = ["#ff9f43", "#54a0ff", "#a55eea", "#fc5c65", "#00d2d3", "#fed330"]
-            ax_ev = self.ax.twinx()
-            ax_ev.set_ylabel("ChipEV (chips)", color=fg_color, labelpad=8, fontsize=9)
-            ax_ev.tick_params(axis="y", colors=fg_color, labelsize=8)
-            ax_ev.spines["top"].set_visible(False)
             for idx, (label, values) in enumerate(chipev_curves):
-                ax_ev.plot(
+                self.plot_widget.plot(
                     values,
-                    color=curve_palette[idx % len(curve_palette)],
-                    linewidth=1.5,
-                    linestyle="-",
-                    alpha=0.9,
-                    label=f"{label}: {format_number(values[-1], 0)}",
+                    pen=pg.mkPen(color=curve_palette[idx % len(curve_palette)], width=1.5),
+                    name=f"{label}: {format_number(values[-1], 0)}",
                 )
-            # Merge the secondary-axis legend entries into the main legend.
-            ev_handles, ev_labels = ax_ev.get_legend_handles_labels()
-            main_handles, main_labels = self.ax.get_legend_handles_labels()
-            self.ax.legend_handles_extra = (main_handles + ev_handles, main_labels + ev_labels)
 
-        legend_face = "#20272d" if is_dark else "#f8fafc"
-        legend_edge = "#2d3741" if is_dark else "#e2e8f0"
-
-        legend_args = dict(
-            loc="upper left",
-            fancybox=True,
-            frameon=True,
-            facecolor=legend_face,
-            edgecolor=legend_edge,
-            labelcolor=fg_color,
-            framealpha=0.9,
-        )
-        extra = getattr(self.ax, "legend_handles_extra", None)
-        if extra:
-            legend = self.ax.legend(extra[0], extra[1], **legend_args)
-        else:
-            legend = self.ax.legend(**legend_args)
-        for text in legend.get_texts():
-            text.set_fontsize(8.5)
-            text.set_fontweight("bold")
-
-        self.graphBox.addWidget(self.canvas)
-        self.canvas.draw()
+        self.graphBox.addWidget(self.plot_widget)
 
     def getData(self, names, sites, Tourneys):
         tmp = self.sql.query["tourneyGraphType"]
@@ -478,12 +373,12 @@ class GuiTourneyGraphViewer(QSplitter):
             return []
 
     def exportGraph(self) -> None:
-        if self.fig is None:
+        if self.plot_widget is None:
             return
 
-        path = os.getcwd()
-        path = path + "/graph.png"
-        self.fig.savefig(path)
+        path = os.getcwd() + "/graph.png"
+        pixmap = self.plot_widget.grab()
+        pixmap.save(path)
         msg = QMessageBox()
         msg.setWindowTitle(_("FPDB 3 info"))
         mess = "Your graph is saved in " + path

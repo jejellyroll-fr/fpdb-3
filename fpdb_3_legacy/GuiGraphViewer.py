@@ -24,13 +24,7 @@ from importlib import import_module
 from time import time
 from typing import Any
 
-np = import_module("numpy")
-try:
-    FigureCanvas = getattr(import_module("matplotlib.backends.backend_qtagg"), "FigureCanvasQTAgg")
-except ImportError:
-    FigureCanvas = getattr(import_module("matplotlib.backends.backend_qt5agg"), "FigureCanvas")
-Figure = getattr(import_module("matplotlib.figure"), "Figure")
-FuncFormatter = getattr(import_module("matplotlib.ticker"), "FuncFormatter")
+import pyqtgraph as pg
 from PySide6.QtWidgets import (
     QFrame,
     QMessageBox,
@@ -105,23 +99,17 @@ class GuiGraphViewer(QSplitter):
         self.setStretchFactor(0, 0)
         self.setStretchFactor(1, 1)
 
-        self.fig: Any = None
-        self.canvas: Any = None
+        self.plot_widget: Any = None
         self.exportFile = None
 
         self.db.rollback()
 
     def clearGraphData(self) -> None:
         with contextlib.suppress(Exception):
-            if self.canvas:
-                self.graphBox.removeWidget(self.canvas)
-                self.canvas.setParent(None)
-        if self.fig is not None:
-            self.fig.clear()
-            self.fig = None
-        if self.canvas is not None:
-            self.canvas.destroy()
-            self.canvas = None
+            if self.plot_widget:
+                self.graphBox.removeWidget(self.plot_widget)
+                self.plot_widget.setParent(None)
+                self.plot_widget = None
 
     def generateGraph(self, widget) -> None:
         self.clearGraphData()
@@ -214,141 +202,83 @@ class GuiGraphViewer(QSplitter):
 
         is_dark = is_dark_color(bg_color)
 
-        self.fig = Figure(figsize=(5.0, 4.0), dpi=100)
-        self.fig.patch.set_facecolor(bg_color)
-        self.canvas = FigureCanvas(self.fig)
-        self.canvas.setParent(self)
+        self.plot_widget = pg.PlotWidget()
+        self.plot_widget.setBackground(bg_color)
+        self.plot_widget.showGrid(x=True, y=True, alpha=0.3)
+        self.plot_widget.setTitle(f"<span style='color:{fg_color}; font-size:11pt; font-weight:bold;'>Profit graph for ring games{names}</span>")
+        self.plot_widget.setLabel("bottom", "Hands", **{"color": fg_color, "font-size": "9pt"})
+        self.plot_widget.setLabel("left", display_in, **{"color": fg_color, "font-size": "9pt"})
 
-        self.ax = self.fig.add_subplot(111)
-
-        # Configure axes backgrounds and grid
-        self.ax.set_facecolor(bg_color)
-
-        grid_color = "#334155" if is_dark else "#cbd5e1"
-        self.ax.grid(True, color=grid_color, linestyle=":", linewidth=0.6, alpha=0.7)
-
-        # Position spines at standard outer edges, hide top and right
         border_color = "#2d3741" if is_dark else "#cbd5e1"
-        self.ax.spines["left"].set_color(border_color)
-        self.ax.spines["bottom"].set_color(border_color)
-        self.ax.spines["top"].set_visible(False)
-        self.ax.spines["right"].set_visible(False)
-        self.ax.spines["left"].set_position(("outward", 0))
-        self.ax.spines["bottom"].set_position(("outward", 0))
-        self.ax.xaxis.set_ticks_position("bottom")
-        self.ax.yaxis.set_ticks_position("left")
-
-        # Tick colors and sizes
-        self.ax.tick_params(axis="x", colors=fg_color, labelsize=9)
-        self.ax.tick_params(axis="y", colors=fg_color, labelsize=9)
-
-        # Labels
-        self.ax.set_xlabel("Hands", color=fg_color, labelpad=8, fontsize=10, fontweight="bold")
-        self.ax.set_ylabel(display_in, color=fg_color, labelpad=8, fontsize=10, fontweight="bold")
-        self.ax.yaxis.set_major_formatter(FuncFormatter(lambda value, _position: format_number(value)))
-
-        # Title
-        title_color = "#ffffff" if is_dark else "#0f172a"
-        self.ax.set_title(
-            f"Profit graph for ring games{names}",
-            color=title_color,
-            pad=15,
-            fontsize=12,
-            fontweight="bold",
-        )
-
-        # Zero baseline
         zero_color = "#475569" if is_dark else "#94a3b8"
-        self.ax.axhline(0, color=zero_color, linestyle="--", linewidth=1.0, alpha=0.7)
 
-        # Color mapping to modern, vibrant colors based on theme contrast
-        # Color mapping to modern, vibrant colors based on theme contrast
+        axis_pen = pg.mkPen(color=border_color, width=1)
+        self.plot_widget.getAxis("left").setPen(axis_pen)
+        self.plot_widget.getAxis("bottom").setPen(axis_pen)
+        self.plot_widget.getAxis("left").setTextPen(pg.mkPen(color=fg_color))
+        self.plot_widget.getAxis("bottom").setTextPen(pg.mkPen(color=fg_color))
+
+        legend = self.plot_widget.addLegend(offset=(10, 10))
+        legend.setBrush(pg.mkBrush(color=bg_color))
+        legend.setPen(pg.mkPen(color=border_color))
+
+        self.plot_widget.addLine(y=0, pen=pg.mkPen(color=zero_color, width=1, style=Qt.PenStyle.DashLine))
+
         if is_dark:
             color_map = {
-                "c": "#22c55e",  # Green net winnings
-                "b": "#00a2ff",  # Modern Sleek Blue (Showdown)
-                "m": "#f43f5e",  # Modern Soft Red (Non-showdown)
-                "g": "#22c55e",  # Green
-                "r": "#f43f5e",  # Soft Red
-                "orange": "#ff9f43",  # Modern Soft Orange (EV)
+                "c": "#22c55e",
+                "b": "#00a2ff",
+                "m": "#f43f5e",
+                "g": "#22c55e",
+                "r": "#f43f5e",
+                "orange": "#ff9f43",
             }
         else:
             color_map = {
-                "c": "#15803d",  # Darker Green
-                "b": "#1d4ed8",  # Darker Blue
-                "m": "#be123c",  # Darker Red
-                "g": "#15803d",  # Darker Green
-                "r": "#be123c",  # Darker Red
-                "orange": "#d97706",  # Darker Amber/Orange
+                "c": "#15803d",
+                "b": "#1d4ed8",
+                "m": "#be123c",
+                "g": "#15803d",
+                "r": "#be123c",
+                "orange": "#d97706",
             }
 
         def get_modern_color(key: str, fallback: str) -> str:
             val = self.colors.get(key, fallback)
             return color_map.get(val, val)
 
-        if "showdown" in graphops:
-            log.debug(f"blue max: {blue.max()}")
-            self.ax.plot(
+        if "showdown" in graphops and len(blue) > 0:
+            self.plot_widget.plot(
                 blue,
-                color=get_modern_color("line_showdown", "b"),
-                linewidth=1.8,
-                label=_("Showdown") + f" ({display_in}): {format_number(blue[-1])}",
+                pen=pg.mkPen(color=get_modern_color("line_showdown", "b"), width=1.8),
+                name=_("Showdown") + f" ({display_in}): {format_number(blue[-1])}",
             )
 
-        if "nonshowdown" in graphops:
-            self.ax.plot(
+        if "nonshowdown" in graphops and len(red) > 0:
+            self.plot_widget.plot(
                 red,
-                color=get_modern_color("line_nonshowdown", "m"),
-                linewidth=1.8,
-                label=_("Non-showdown") + f" ({display_in}): {format_number(red[-1])}",
+                pen=pg.mkPen(color=get_modern_color("line_nonshowdown", "m"), width=1.8),
+                name=_("Non-showdown") + f" ({display_in}): {format_number(red[-1])}",
             )
-        if "ev" in graphops:
-            self.ax.plot(
+
+        if "ev" in graphops and len(orange) > 0:
+            self.plot_widget.plot(
                 orange,
-                color=get_modern_color("line_ev", "orange"),
-                linewidth=1.8,
-                linestyle="-.",
-                label=("All-in EV") + f" ({display_in}): {format_number(orange[-1])}",
+                pen=pg.mkPen(color=get_modern_color("line_ev", "orange"), width=1.8, style=Qt.PenStyle.DashLine),
+                name=("All-in EV") + f" ({display_in}): {format_number(orange[-1])}",
             )
-        # getRingProfitGraph prepends a 0 so the curve starts at the origin, so the
-        # series holds one point *more* than there are hands: counting the points
-        # reported one hand too many (10 for the 9 the hand viewer lists).
+
         hand_count = max(len(green) - 1, 0)
-        self.ax.plot(
+        self.plot_widget.plot(
             green,
-            color=get_modern_color("line_hands", "c"),
-            linewidth=2.5,
-            label=_("Hands")
-            + f": {format_number(hand_count, 0)}\n"
+            pen=pg.mkPen(color=get_modern_color("line_hands", "c"), width=2.5),
+            name=_("Hands")
+            + f": {format_number(hand_count, 0)} | "
             + _("Profit")
             + f": ({display_in}): {format_number(green[-1])}",
         )
 
-        handles, labels = self.ax.get_legend_handles_labels()
-        handles = handles[-1:] + handles[:-1]
-        labels = labels[-1:] + labels[:-1]
-
-        legend_face = "#20272d" if is_dark else "#f8fafc"
-        legend_edge = "#2d3741" if is_dark else "#e2e8f0"
-
-        legend = self.ax.legend(
-            handles,
-            labels,
-            loc="upper left",
-            fancybox=True,
-            frameon=True,
-            facecolor=legend_face,
-            edgecolor=legend_edge,
-            labelcolor=fg_color,
-            framealpha=0.9,
-        )
-        legend.set_draggable(state=1)
-        for text in legend.get_texts():
-            text.set_fontsize(8.5)
-            text.set_fontweight("bold")
-
-        self.graphBox.addWidget(self.canvas)
-        self.canvas.draw()
+        self.graphBox.addWidget(self.plot_widget)
 
     def plotGraph(self) -> None:
         self.ax.set_title("No Data for Player(s) Found")
@@ -522,10 +452,11 @@ class GuiGraphViewer(QSplitter):
         return (greenline / 100, blueline / 100, redline / 100, orangeline / 100)
 
     def exportGraph(self) -> None:
-        if self.fig is None:
+        if self.plot_widget is None:
             return
         path = f"{os.getcwd()}/graph.png"
-        self.fig.savefig(path)
+        pixmap = self.plot_widget.grab()
+        pixmap.save(path)
         msg = QMessageBox()
         msg.setWindowTitle(_("FPDB 3 info"))
         mess = f"Your graph is saved in {path}"
