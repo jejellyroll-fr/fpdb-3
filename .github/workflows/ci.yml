@@ -606,14 +606,6 @@ jobs:
             target: aarch64-apple-darwin
             executable: fpdb
             artifact: fpdb-pyoxidizer-macos-arm64
-          - label: Windows x64
-            os: windows-latest
-            pyoxidizer_host: x86_64-pc-windows-msvc
-            pyoxidizer_archive: zip
-            pyoxidizer_sha256: c1b757bc7c64921b38bf5fd70d2a2e2f591d36fe1cae3b5722822c08f651ba7b
-            target: x86_64-pc-windows-msvc
-            executable: fpdb.exe
-            artifact: fpdb-pyoxidizer-windows-x64
     steps:
       - uses: actions/checkout@v4
       - name: Validate macOS release credentials

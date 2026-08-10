@@ -54,6 +54,13 @@ case "$BUILDER" in
         
     pyoxidizer)
         echo "=== Building with PyOxidizer ==="
+        case "$(uname -s 2>/dev/null || echo MINGW)" in
+            MINGW*|MSYS*|CYGWIN*)
+                echo "Error: PyOxidizer builds on Windows are deprecated (Issue #225)."
+                echo "Please use build_fpdb.ps1 (PyInstaller) or Nuitka for Windows builds."
+                exit 1
+                ;;
+        esac
         # Ensure PyOxidizer is installed
         if ! command -v pyoxidizer &> /dev/null; then
             echo "Installing PyOxidizer..."
