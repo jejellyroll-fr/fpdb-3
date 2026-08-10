@@ -230,7 +230,7 @@ def seat_slots_from_positions(
     slots: dict[int, tuple[float, str]] = {}
 
     for seat in seats:
-        angle = (math.atan2(seat.x - cx, seat.y - cy) + 2 * math.pi) % (2 * math.pi)
+        angle = (math.atan2(cx - seat.x, seat.y - cy) + 2 * math.pi) % (2 * math.pi)
         slot = round(angle / step) % max_seats
         # The table is an ellipse, so angles are not evenly spaced; keep the
         # player nearest a slot's centre if two ever round to the same one.

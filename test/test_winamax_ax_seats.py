@@ -60,38 +60,38 @@ def test_bare_units_and_readouts_are_not_players() -> None:
 def test_slots_run_clockwise_from_the_bottom_chair() -> None:
     """Positions taken from a real 6-max Escape window."""
     seats = [
-        AXSeat("Player_Three", 69, 181),  # left, upper
-        AXSeat("PlayerFive", 329, 139),  # top centre
-        AXSeat("Player04", 601, 181),  # right, upper
-        AXSeat("Player06", 599, 432),  # right, lower
-        AXSeat("Hero", 346, 474),  # bottom centre -- the hero
+        AXSeat("Player_Three", 69, 181),  # left, upper (slot 2)
+        AXSeat("PlayerFive", 329, 139),  # top centre (slot 3)
+        AXSeat("Player04", 601, 181),  # right, upper (slot 4)
+        AXSeat("Player06", 599, 432),  # right, lower (slot 5)
+        AXSeat("Hero", 346, 474),  # bottom centre -- the hero (slot 0)
     ]
 
     slots = seat_slots_from_positions(seats, CENTRE, 6)
 
     assert slots[0] == "Hero"
-    assert slots[1] == "Player06"
-    assert slots[2] == "Player04"
+    assert slots[2] == "Player_Three"
     assert slots[3] == "PlayerFive"
-    assert slots[4] == "Player_Three"
-    # Nobody in the left-lower chair, so slot 5 stays empty.
-    assert 5 not in slots
+    assert slots[4] == "Player04"
+    assert slots[5] == "Player06"
+    # Nobody in the left-lower chair, so slot 1 stays empty.
+    assert 1 not in slots
 
 
 def test_an_empty_chair_does_not_shift_the_players_after_it() -> None:
     """Numbering players consecutively puts blocks on the wrong seats."""
     seats = [
-        AXSeat("Hero", 346, 474),  # bottom centre
-        AXSeat("player07", 69, 432),  # left lower
-        AXSeat("Player06", 69, 181),  # left upper
-        # top centre empty
-        AXSeat("player2", 601, 181),  # right upper
-        AXSeat("PLAYERCAPS", 599, 432),  # right lower
+        AXSeat("Hero", 346, 474),  # bottom centre (slot 0)
+        AXSeat("player07", 69, 432),  # left lower (slot 1)
+        AXSeat("Player06", 69, 181),  # left upper (slot 2)
+        # top centre empty (slot 3 empty)
+        AXSeat("player2", 601, 181),  # right upper (slot 4)
+        AXSeat("PLAYERCAPS", 599, 432),  # right lower (slot 5)
     ]
 
     slots = seat_slots_from_positions(seats, CENTRE, 6)
 
-    assert slots == {0: "Hero", 1: "PLAYERCAPS", 2: "player2", 4: "Player06", 5: "player07"}
+    assert slots == {0: "Hero", 1: "player07", 2: "Player06", 4: "player2", 5: "PLAYERCAPS"}
 
 
 def test_slots_do_not_depend_on_the_order_read() -> None:
@@ -276,3 +276,27 @@ class TestFindTableWindow:
 
         assert WinamaxAXSeatReader(detector).find_table_window("4") is None
         assert detector.calls == []
+
+
+def test_full_six_max_table_slots_and_layout_seat_map() -> None:
+    """Verify that a full 6-max table maps all 6 players to layout seats 3, 4, 5, 6, 1, 2."""
+    seats = [
+        AXSeat("Hero", 346, 474),  # Slot 0 -> Seat 3 (Bottom centre)
+        AXSeat("Meteorito8", 69, 432),  # Slot 1 -> Seat 4 (Bottom left)
+        AXSeat("Putignac", 69, 181),  # Slot 2 -> Seat 5 (Top left)
+        AXSeat("Jokic....", 329, 139),  # Slot 3 -> Seat 6 (Top centre)
+        AXSeat("almarcha0346", 601, 181),  # Slot 4 -> Seat 1 (Top right)
+        AXSeat("Stun_Gun_Tim", 599, 432),  # Slot 5 -> Seat 2 (Bottom right)
+    ]
+
+    slots = seat_slots_from_positions(seats, CENTRE, 6)
+    anchor_seat = 3
+    seat_map = {((slot + anchor_seat - 1) % 6) + 1: login for slot, login in slots.items()}
+
+    assert seat_map[3] == "Hero"
+    assert seat_map[4] == "Meteorito8"
+    assert seat_map[5] == "Putignac"
+    assert seat_map[6] == "Jokic...."
+    assert seat_map[1] == "almarcha0346"
+    assert seat_map[2] == "Stun_Gun_Tim"
+
