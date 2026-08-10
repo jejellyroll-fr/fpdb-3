@@ -220,6 +220,11 @@ class Database(
     PGSQL = 3
     SQLITE = 4
 
+    # Global pool for worker connections shared across all Database instances
+    # to strictly bound the maximum concurrent DB connections from workers
+    _worker_conn_pool = queue.Queue()
+    _worker_conn_semaphore = threading.Semaphore(4)
+
     hero_hudstart_def = "1999-12-31"  # default for length of Hero's stats in HUD
     villain_hudstart_def = "1999-12-31"  # default for length of Villain's stats in HUD
 
@@ -278,8 +283,6 @@ class Database(
         self.connection: Any = None
         self.cursor: Any = None
         self.__connected = False
-        self._worker_conn_pool = queue.Queue()
-        self._worker_conn_semaphore = threading.Semaphore(4)
         self.wrongDbVersion = False
         self.settings = {}
         self.settings["os"] = "linuxmac" if os.name != "nt" else "windows"
@@ -925,14 +928,16 @@ class Database(
             self.connection = None
         self.__connected = False
 
-        if hasattr(self, "_worker_conn_pool"):
-            while not self._worker_conn_pool.empty():
-                try:
-                    conn = self._worker_conn_pool.get_nowait()
-                    if conn is not None:
-                        conn.close()
-                except queue.Empty:
-                    break
+    @classmethod
+    def close_worker_pool(cls) -> None:
+        """Close all connections currently idling in the global worker pool."""
+        while not cls._worker_conn_pool.empty():
+            try:
+                conn = cls._worker_conn_pool.get_nowait()
+                if conn is not None:
+                    conn.close()
+            except queue.Empty:
+                break
 
     def _close_cursor_quietly(self) -> None:
         cursor = getattr(self, "cursor", None)

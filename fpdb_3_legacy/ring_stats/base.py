@@ -6,6 +6,8 @@ modernes, ainsi que le système d'exécution de requêtes asynchrones en arrièr
 
 from __future__ import annotations
 
+import contextlib
+
 from PySide6.QtCore import QThread, Signal
 from PySide6.QtWidgets import QMessageBox, QTabWidget
 
@@ -138,8 +140,13 @@ class ModernStatsWidget(QTabWidget):
         """
         for worker in self._workers:
             if worker.isRunning():
-                worker.terminate()
-                worker.wait()
+                # Disconnect signals so they don't update a destroyed GUI.
+                # Do NOT terminate() as it abruptly kills the thread and leaks
+                # DB connection pool semaphores!
+                with contextlib.suppress(Exception):
+                    worker.finished.disconnect()
+                with contextlib.suppress(Exception):
+                    worker.error.disconnect()
         self._workers = []
 
     def closeEvent(self, event) -> None:
