@@ -2139,8 +2139,15 @@ if __name__ == "__main__":
         # Register main window with theme manager for future theme changes
         theme_manager._main_window = me
 
-        # Pre-warm matplotlib on Qt main thread during idle time
-        QTimer.singleShot(500, Configuration.prewarm_matplotlib)
+        # Pre-warm matplotlib synchronously and BEFORE the event loop starts.
+        # The first FigureCanvas built by any tab triggers matplotlib's font
+        # cache rebuild on whatever thread builds it; if that happens on the
+        # Qt main thread after app.exec() it freezes the GUI, and in a
+        # PyOxidizer bundle (packaged fonts, first run after a rebuild) the
+        # rebuild can take several seconds. Doing it here, on the main thread
+        # and before any tab exists, means the cache is ready before the user
+        # can open a single tab.
+        Configuration.prewarm_matplotlib()
 
         app.exec()
     finally:

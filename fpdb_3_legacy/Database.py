@@ -24,8 +24,10 @@ import math
 
 #    Standard Library modules
 import os
+import queue
 import re
 import sys
+import threading
 import traceback
 from datetime import datetime, timedelta
 from decimal import Decimal
@@ -276,6 +278,8 @@ class Database(
         self.connection: Any = None
         self.cursor: Any = None
         self.__connected = False
+        self._worker_conn_pool = queue.Queue()
+        self._worker_conn_semaphore = threading.Semaphore(4)
         self.wrongDbVersion = False
         self.settings = {}
         self.settings["os"] = "linuxmac" if os.name != "nt" else "windows"
@@ -797,7 +801,28 @@ class Database(
             self.connection.ping(True)
         return self.connection.cursor()
 
-    def create_worker_connection(self):
+    @contextlib.contextmanager
+    def worker_connection(self):
+        """Context manager for a dedicated worker connection from a bounded pool.
+
+        Limits the number of concurrent connections to avoid hitting
+        max_connections on PostgreSQL (and MySQL).
+        """
+        self._worker_conn_semaphore.acquire()
+        conn = None
+        try:
+            try:
+                conn = self._worker_conn_pool.get_nowait()
+            except queue.Empty:
+                conn = self._create_new_worker_connection()
+
+            yield conn
+        finally:
+            if conn is not None:
+                self._worker_conn_pool.put(conn)
+            self._worker_conn_semaphore.release()
+
+    def _create_new_worker_connection(self):
         """Open a dedicated connection for a background worker thread.
 
         Returns None when no dedicated connection can be built (e.g. SQLite
@@ -899,6 +924,15 @@ class Database(
             self.connection.close()
             self.connection = None
         self.__connected = False
+
+        if hasattr(self, "_worker_conn_pool"):
+            while not self._worker_conn_pool.empty():
+                try:
+                    conn = self._worker_conn_pool.get_nowait()
+                    if conn is not None:
+                        conn.close()
+                except queue.Empty:
+                    break
 
     def _close_cursor_quietly(self) -> None:
         cursor = getattr(self, "cursor", None)

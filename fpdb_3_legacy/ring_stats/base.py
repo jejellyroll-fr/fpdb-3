@@ -32,34 +32,40 @@ class DbWorker(QThread):
     def run(self) -> None:
         try:
             db = self.db_or_cursor
-            # SQLite: run the query on a dedicated connection for this thread.
-            # Sharing one sqlite3.Connection across threads without an
-            # application-level lock serializes execute/fetchall pairs and can
-            # interleave statements, which deadlocks the GUI on macOS.
-            # WAL mode allows one connection per thread safely.
-            dedicated = getattr(db, "create_worker_connection", None)
-            if callable(dedicated):
-                conn = dedicated()
-                try:
-                    cursor = conn.cursor()
-                    try:
-                        cursor.execute(self.query_sql)
-                        results = cursor.fetchall()
-                        colnames = [desc[0].lower() for desc in cursor.description] if cursor.description else []
-                    finally:
-                        cursor.close()
-                finally:
-                    conn.close()
-            else:
-                conn = getattr(db, "connection", None)
-                cursor = conn.cursor() if conn else getattr(db, "cursor", db)
+
+            def _exec_on_conn(conn_obj):
+                cursor = conn_obj.cursor() if hasattr(conn_obj, "cursor") else db
                 try:
                     cursor.execute(self.query_sql)
-                    results = cursor.fetchall()
-                    colnames = [desc[0].lower() for desc in cursor.description] if cursor.description else []
+                    res = cursor.fetchall()
+                    cols = [desc[0].lower() for desc in cursor.description] if cursor.description else []
+                    return res, cols
                 finally:
-                    if conn and hasattr(cursor, "close"):
+                    # Do not close the shared db/cursor object if it doesn't belong to us
+                    if hasattr(cursor, "close") and cursor is not db:
                         cursor.close()
+
+            worker_conn_ctx = getattr(db, "worker_connection", None)
+            dedicated = getattr(db, "create_worker_connection", None)
+
+            if callable(worker_conn_ctx):
+                with worker_conn_ctx() as conn:
+                    if conn is not None:
+                        results, colnames = _exec_on_conn(conn)
+                    else:
+                        results, colnames = _exec_on_conn(getattr(db, "connection", db))
+            elif callable(dedicated):
+                conn = dedicated()
+                if conn is not None:
+                    try:
+                        results, colnames = _exec_on_conn(conn)
+                    finally:
+                        conn.close()
+                else:
+                    results, colnames = _exec_on_conn(getattr(db, "connection", db))
+            else:
+                results, colnames = _exec_on_conn(getattr(db, "connection", db))
+
             self.finished.emit(self.query_name, results, colnames)
         except Exception as e:  # noqa: BLE001 - Qt worker boundary reports DB-driver errors through its signal.
             self.error.emit(str(e))
