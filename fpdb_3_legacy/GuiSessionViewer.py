@@ -37,6 +37,7 @@ from fpdb_3_legacy import Database, Filters, GuiHandViewer, gui_empty_state
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.localized_formats import currency_symbol, format_currency, format_datetime, format_number
 from fpdb_3_legacy.loggingFpdb import get_logger
+from fpdb_3_legacy.ring_stats.base import DbWorker
 
 log = get_logger("gui_session_viewer")
 DEBUG = False
@@ -62,6 +63,7 @@ class GuiSessionViewer(QSplitter):
         self.canvas: Any = None
         self.ax: Any = None
         self.graphBox: Any = None
+        self._db_worker: DbWorker | None = None
 
         # create new db connection to avoid conflicts with other threads
         self.db = Database.Database(self.conf, sql=self.sql)
@@ -215,41 +217,58 @@ class GuiSessionViewer(QSplitter):
         seats,
     ) -> None:
         starttime = time()
+        q = self.build_session_query(playerids, sitenos, games, currencies, limits, seats)
 
-        (results, quotes) = self.generateDatasets(
-            playerids,
-            sitenos,
-            games,
-            currencies,
-            limits,
-            seats,
-        )
+        # Disconnect any previously running worker for this tab
+        if self._db_worker is not None:
+            with contextlib.suppress(Exception):
+                self._db_worker.finished.disconnect()
 
-        if not results or not quotes:
-            self.clearGraphData()
-            if self.canvas:
-                self.canvas.setParent(None)
-                self.canvas = None
+        self._db_worker = DbWorker(self.db, "sessionStats", q)
+
+        def _on_query_finished(name, results_rows, colnames):
+            hands = list(results_rows) if results_rows else []
+            log.warning(f"GuiSessionViewer DbWorker finished: returned {len(hands)} hands.")
+            if not hands:
+                self.clearGraphData()
+                if self.canvas:
+                    self.canvas.setParent(None)
+                    self.canvas = None
+                gui_empty_state.show_no_data(self, context="Session viewer", db=self.db)
+                with contextlib.suppress(Exception):
+                    self.db.rollback()
+                return
+
+            (results, quotes) = self.process_session_hands(hands)
+            if not results or not quotes:
+                self.clearGraphData()
+                if self.canvas:
+                    self.canvas.setParent(None)
+                    self.canvas = None
+                gui_empty_state.show_no_data(self, context="Session viewer", db=self.db)
+                with contextlib.suppress(Exception):
+                    self.db.rollback()
+                return
+
+            if DEBUG:
+                for x in quotes:
+                    log.debug(f"start {x[1]}\tend {x[2]}\thigh {x[3]}\tlow {x[4]}")
+
+            self.generateGraph(quotes, currencies)
+            self.addTable(frame, results)
+            with contextlib.suppress(Exception):
+                self.db.rollback()
+            log.warning(f"[PERF] GuiSessionViewer Stats page displayed in {time() - starttime:4.2f} seconds")
+
+        def _on_query_error(err_msg):
+            log.error(f"GuiSessionViewer DbWorker error: {err_msg}")
             gui_empty_state.show_no_data(self, context="Session viewer", db=self.db)
-            self.db.rollback()
-            return
 
-        if DEBUG:
-            for x in quotes:
-                log.debug(f"start {x[1]}\tend {x[2]}\thigh {x[3]}\tlow {x[4]}")
+        self._db_worker.finished.connect(_on_query_finished)
+        self._db_worker.error.connect(_on_query_error)
+        self._db_worker.start()
 
-        self.generateGraph(quotes, currencies)
-
-        self.addTable(frame, results)
-
-        self.db.rollback()
-        log.debug(f"Stats page displayed in {time() - starttime:4.2f} seconds")
-
-    def generateDatasets(self, playerids, sitenos, games, currencies, limits, seats):
-        log.warning(f"GuiSessionViewer.generateDatasets: playerids: {playerids}, sitenos: {sitenos}, games: {games}, currencies: {currencies}, limits: {limits}, seats: {seats}")
-        THRESHOLD = 1800  # Min # of secs between consecutive hands before being considered a new session
-        PADDING = 5  # Additional time in minutes to add to a session, session startup, shutdown etc
-
+    def build_session_query(self, playerids, sitenos, games, currencies, limits, seats) -> str:
         q = self.sql.query["sessionStats"]
         start_date, end_date = self.filters.getDates()
         q = q.replace(
@@ -257,6 +276,7 @@ class GuiSessionViewer(QSplitter):
             " BETWEEN '" + start_date + "' AND '" + end_date + "'",
         )
 
+        gametest = ""
         for m in list(self.filters.display.items()):
             if m[0] == "Games" and m[1]:
                 if len(games) > 0:
@@ -272,9 +292,6 @@ class GuiSessionViewer(QSplitter):
         limittest = self.filters.get_limits_where_clause(limits)
         q = q.replace("<limit_test>", limittest)
 
-        # Guard against an empty currency selection producing "gt.currency in
-        # ()", which is invalid SQL: the failed query aborts the transaction and
-        # blanks every later session graph. Match no rows instead.
         if currencies:
             currencytest = str(tuple(currencies))
             currencytest = currencytest.replace(",)", ")")
@@ -296,59 +313,19 @@ class GuiSessionViewer(QSplitter):
         nametest = nametest.replace("L", "")
         nametest = nametest.replace(",)", ")")
         q = q.replace("<player_test>", nametest)
-        q = q.replace("<ampersand_s>", "%s")
+        return q.replace("<ampersand_s>", "%s")
 
-        if DEBUG:
-            hands = [
-                ("10000", 10),
-                ("10000", 20),
-                ("10000", 30),
-                ("20000", -10),
-                ("20000", -20),
-                ("20000", -30),
-                ("30000", 40),
-                ("40000", 0),
-                ("50000", -40),
-                ("60000", 10),
-                ("60000", 30),
-                ("60000", -20),
-                ("70000", -20),
-                ("70000", 10),
-                ("70000", 30),
-                ("80000", -10),
-                ("80000", -30),
-                ("80000", 20),
-                ("90000", 20),
-                ("90000", -10),
-                ("90000", -30),
-                ("100000", 30),
-                ("100000", -50),
-                ("100000", 30),
-                ("110000", -20),
-                ("110000", 50),
-                ("110000", -20),
-                ("120000", -30),
-                ("120000", 50),
-                ("120000", -30),
-                ("130000", 20),
-                ("130000", -50),
-                ("130000", 20),
-                ("140000", 40),
-                ("140000", -40),
-                ("150000", -40),
-                ("150000", 40),
-                ("160000", -40),
-                ("160000", 80),
-                ("160000", -40),
-            ]
-        else:
-            log.warning(f"GuiSessionViewer.generateDatasets: Executing SQL query:\n{q}")
-            self.db.cursor.execute(q)
-            hands = self.db.cursor.fetchall()
+    def generateDatasets(self, playerids, sitenos, games, currencies, limits, seats):
+        q = self.build_session_query(playerids, sitenos, games, currencies, limits, seats)
+        self.db.cursor.execute(q)
+        hands = self.db.cursor.fetchall()
+        return self.process_session_hands(hands)
+
+    def process_session_hands(self, hands: list):
+        THRESHOLD = 1800  # Min # of secs between consecutive hands before being considered a new session
+        PADDING = 5  # Additional time in minutes to add to a session, session startup, shutdown etc
 
         hands = list(hands)
-        log.warning(f"GuiSessionViewer.generateDatasets: SQL query returned {len(hands)} hands.")
-
         if not hands:
             return ([], [])
 

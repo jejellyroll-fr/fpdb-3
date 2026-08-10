@@ -39,7 +39,7 @@ fast_names = {
     "Winamax": "Go Fast"
 }
 _WINNINGS_ALIASES = frozenset({"net", "bbper100", "profitperhand", "evbb100", "bb100", "profit100"})
-_MAX_DETAIL_ROWS = 1000
+_MAX_DETAIL_ROWS = 500
 
 # Textes d'aide pour les infobulles des colonnes
 onlinehelp = {
