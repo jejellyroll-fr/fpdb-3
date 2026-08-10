@@ -6,6 +6,8 @@ modernes, ainsi que le système d'exécution de requêtes asynchrones en arrièr
 
 from __future__ import annotations
 
+import contextlib
+
 from PySide6.QtCore import QThread, Signal
 from PySide6.QtWidgets import QMessageBox, QTabWidget
 
@@ -23,19 +25,69 @@ class DbWorker(QThread):
     # Arguments: (error_message)
     error = Signal(str)
 
-    def __init__(self, cursor, query_name: str, query_sql: str) -> None:
+    def __init__(self, db_or_cursor, query_name: str, query_sql: str) -> None:
         super().__init__()
-        self.cursor = cursor
+        self.db_or_cursor = db_or_cursor
         self.query_name = query_name
         self.query_sql = query_sql
 
-    def run(self) -> None:
+    def run(self) -> None:  # noqa: PLR0915
+        import logging
+        import time
+        log = logging.getLogger("DbWorker")
+        t_start = time.time()
+        log.warning(f"[PERF] DbWorker.run start: {self.query_name}")
         try:
-            self.cursor.execute(self.query_sql)
-            results = self.cursor.fetchall()
-            colnames = [desc[0].lower() for desc in self.cursor.description] if self.cursor.description else []
+            db = self.db_or_cursor
+
+            def _exec_on_conn(conn_obj):
+                t0 = time.time()
+                cursor = conn_obj.cursor() if hasattr(conn_obj, "cursor") else db
+                try:
+                    cursor.execute(self.query_sql)
+                    t1 = time.time()
+                    res = cursor.fetchall()
+                    t2 = time.time()
+                    cols = [desc[0].lower() for desc in cursor.description] if cursor.description else []
+                    log.warning(f"[PERF] DbWorker {self.query_name} SQL EXEC: {t1-t0:.3f}s | FETCH: {t2-t1:.3f}s")
+                    return res, cols
+                finally:
+                    # Do not close the shared db/cursor object if it doesn't belong to us
+                    if hasattr(cursor, "close") and cursor is not db:
+                        cursor.close()
+
+            worker_conn_ctx = getattr(db, "worker_connection", None)
+            dedicated = getattr(db, "create_worker_connection", None)
+
+            t_acq = time.time()
+            if callable(worker_conn_ctx):
+                with worker_conn_ctx() as conn:
+                    t_post_acq = time.time()
+                    log.warning(f"[PERF] DbWorker {self.query_name} Connection Acquire: {t_post_acq - t_acq:.3f}s")
+                    if conn is not None:
+                        results, colnames = _exec_on_conn(conn)
+                    else:
+                        results, colnames = _exec_on_conn(getattr(db, "connection", db))
+            elif callable(dedicated):
+                conn = dedicated()
+                t_post_acq = time.time()
+                log.warning(f"[PERF] DbWorker {self.query_name} Connection Acquire (legacy): {t_post_acq - t_acq:.3f}s")
+                if conn is not None:
+                    try:
+                        results, colnames = _exec_on_conn(conn)
+                    finally:
+                        conn.close()
+                else:
+                    results, colnames = _exec_on_conn(getattr(db, "connection", db))
+            else:
+                log.warning(f"[PERF] DbWorker {self.query_name} Connection Acquire (shared): 0.0s")
+                results, colnames = _exec_on_conn(getattr(db, "connection", db))
+
+            t_emit = time.time()
             self.finished.emit(self.query_name, results, colnames)
+            log.warning(f"[PERF] DbWorker {self.query_name} emit took: {time.time() - t_emit:.3f}s | Total: {time.time() - t_start:.3f}s")
         except Exception as e:  # noqa: BLE001 - Qt worker boundary reports DB-driver errors through its signal.
+            log.error(f"[PERF] DbWorker {self.query_name} ERROR: {e}")
             self.error.emit(str(e))
 
 
@@ -96,10 +148,26 @@ class ModernStatsWidget(QTabWidget):
             f"Une erreur est survenue lors du chargement des statistiques :\n\n{error_message}",
         )
 
-    def closeEvent(self, event) -> None:
-        """S'assure que tous les workers d'arrière-plan sont arrêtés avant fermeture."""
+    def shutdown_workers(self) -> None:
+        """Stop all background workers.
+
+        Called explicitly when the tab is removed from the QTabWidget
+        (``close_tab`` in fpdb.pyw): a widget detached from a QTabWidget does
+        not receive ``closeEvent``, so without this call the QThreads would keep
+        running on a connection whose parent widget is destroyed.
+        """
         for worker in self._workers:
             if worker.isRunning():
-                worker.terminate()
-                worker.wait()
+                # Disconnect signals so they don't update a destroyed GUI.
+                # Do NOT terminate() as it abruptly kills the thread and leaks
+                # DB connection pool semaphores!
+                with contextlib.suppress(Exception):
+                    worker.finished.disconnect()
+                with contextlib.suppress(Exception):
+                    worker.error.disconnect()
+        self._workers = []
+
+    def closeEvent(self, event) -> None:
+        """Ensure all background workers are stopped before closing."""
+        self.shutdown_workers()
         super().closeEvent(event)

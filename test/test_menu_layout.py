@@ -131,6 +131,13 @@ def test_new_database_panel_is_reachable_from_the_menu():
     assert "dia_database_config" in handlers
 
 
+def test_version_tab_is_reachable_from_the_help_menu():
+    """Issue #226: the running build's version had no home in the UI at all."""
+    help_menu = next(m for m in menu_layout.menu_layout() if m.title == "Help")
+    handlers = [item.handler for item in help_menu.items]
+    assert "tab_version_info" in handlers
+
+
 if __name__ == "__main__":
     import pytest
 
