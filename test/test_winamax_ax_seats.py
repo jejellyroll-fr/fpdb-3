@@ -300,3 +300,54 @@ def test_full_six_max_table_slots_and_layout_seat_map() -> None:
     assert seat_map[1] == "almarcha0346"
     assert seat_map[2] == "Stun_Gun_Tim"
 
+
+def test_read_window_with_table_pos_selects_closest_window(monkeypatch) -> None:
+    """When two table windows have identical titles, table_pos picks the window at those screen coordinates."""
+    reader = WinamaxAXSeatReader()
+    monkeypatch.setattr(winamax_ax_seats, "is_ax_available", lambda: True)
+    monkeypatch.setattr(winamax_ax_seats.platform, "system", lambda: "Darwin")
+
+    win1 = SimpleNamespace(title="ESCAPE - 0,01-0,02 €")
+    win2 = SimpleNamespace(title="ESCAPE - 0,01-0,02 €")
+
+    # App with two identically named windows at (0, 0) and (1000, 0)
+    app = SimpleNamespace()
+    monkeypatch.setattr(reader, "_application", lambda: app)
+
+    def mock_attr(obj, attr):
+        if obj is app and attr == "AXWindows":
+            return [win1, win2]
+        if obj in (win1, win2) and attr == "AXTitle":
+            return "ESCAPE - 0,01-0,02 €"
+        return None
+
+    def mock_geometry(obj):
+        if obj is win1:
+            return (0.0, 0.0), (800.0, 600.0)
+        if obj is win2:
+            return (1000.0, 0.0), (800.0, 600.0)
+        return None, None
+
+    labels_win1 = [AXSeat("Table1_Hero", 400, 500), AXSeat("100 BB", 390, 515)]
+    labels_win2 = [AXSeat("Table2_Hero", 1400, 500), AXSeat("100 BB", 1390, 515)]
+
+    def mock_collect_text(obj, labels):
+        if obj is win1:
+            labels.extend(labels_win1)
+        elif obj is win2:
+            labels.extend(labels_win2)
+
+    monkeypatch.setattr(reader, "_attr", mock_attr)
+    monkeypatch.setattr(reader, "_geometry", mock_geometry)
+    monkeypatch.setattr(reader, "_collect_text", mock_collect_text)
+
+    # Read window matching Table 2 at x=1000, y=0
+    slots2 = reader.read_window("ESCAPE - 0,01-0,02 €", 6, table_pos=(1000.0, 0.0))
+    assert 0 in slots2
+    assert slots2[0] == "Table2_Hero"
+
+    # Read window matching Table 1 at x=0, y=0
+    slots1 = reader.read_window("ESCAPE - 0,01-0,02 €", 6, table_pos=(0.0, 0.0))
+    assert 0 in slots1
+    assert slots1[0] == "Table1_Hero"
+

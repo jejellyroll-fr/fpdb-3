@@ -418,42 +418,67 @@ class WinamaxAXSeatReader:
         m = re.search(r"(\d+)\s*$", title or "")
         return m is not None and m.group(1) == str(table_no)
 
-    def read_window(self, title: str, max_seats: int = 6) -> dict[int, str]:
+    def read_window(  # noqa: C901
+        self,
+        title: str,
+        max_seats: int = 6,
+        table_pos: tuple[float, float] | None = None,
+    ) -> dict[int, str]:
         """Players at the window with this exact title, keyed by layout slot.
 
         Slot 0 is the bottom-centre chair, where the client draws the hero, and
         slots count clockwise from there. Empty chairs are simply absent.
 
-        Returns an empty map when the client is not running, the window is not
-        found, or accessibility is unavailable -- the caller then keeps whatever
-        the log was able to work out.
+        When multiple table windows share the same title (e.g. multi-tabling
+        identical stakes), ``table_pos`` selects the window closest to the
+        target table's screen coordinates.
         """
         if not is_ax_available():
             return {}
         if platform.system() == "Windows":
-            return self._read_window_windows_by_title(title, max_seats)
+            return self._read_window_windows_by_title(title, max_seats, table_pos=table_pos)
         try:
             app = self._application()
             if app is None:
                 return {}
+            matching_windows: list[tuple[Any, tuple[float, float], tuple[float, float]]] = []
             for window in self._attr(app, "AXWindows") or []:
                 if self._attr(window, "AXTitle") != title:
                     continue
                 origin, size = self._geometry(window)
                 if origin is None or size is None or not size[0] or not size[1]:
-                    return {}
-                labels: list[AXSeat] = []
-                self._collect_text(window, labels)
-                players = seats_from_labels(labels)
-                if not players:
-                    return {}
-                centre = (origin[0] + size[0] / 2, origin[1] + size[1] / 2)
-                return seat_slots_from_positions(players, centre, max_seats)
+                    continue
+                matching_windows.append((window, origin, size))
+
+            if not matching_windows:
+                return {}
+
+            if table_pos is not None and len(matching_windows) > 1:
+                tx, ty = table_pos
+                best_window, best_origin, best_size = min(
+                    matching_windows,
+                    key=lambda w: (w[1][0] - tx) ** 2 + (w[1][1] - ty) ** 2,
+                )
+            else:
+                best_window, best_origin, best_size = matching_windows[0]
+
+            labels: list[AXSeat] = []
+            self._collect_text(best_window, labels)
+            players = seats_from_labels(labels)
+            if not players:
+                return {}
+            centre = (best_origin[0] + best_size[0] / 2, best_origin[1] + best_size[1] / 2)
+            return seat_slots_from_positions(players, centre, max_seats)
         except Exception:
             log.exception("Could not read Winamax seats from window %r", title)
         return {}
 
-    def _read_window_windows_by_title(self, title: str, max_seats: int = 6) -> dict[int, str]:
+    def _read_window_windows_by_title(
+        self,
+        title: str,
+        max_seats: int = 6,
+        table_pos: tuple[float, float] | None = None,
+    ) -> dict[int, str]:
         """Read seated players from Winamax window via Windows UIAutomation."""
         try:
             if self._table_detector is None:
@@ -462,7 +487,15 @@ class WinamaxAXSeatReader:
             tables = self._table_detector.find_tables(re.escape(title))
             if not tables:
                 return {}
-            hwnd = tables[0].window_id
+            if table_pos is not None and len(tables) > 1:
+                tx, ty = table_pos
+                best_table = min(
+                    tables,
+                    key=lambda t: (t.bounds[0] - tx) ** 2 + (t.bounds[1] - ty) ** 2 if t.bounds else 0,
+                )
+                hwnd = best_table.window_id
+            else:
+                hwnd = tables[0].window_id
             if hwnd is None:
                 return {}
             return self._read_window_windows(int(hwnd), max_seats)

@@ -1559,11 +1559,13 @@ class HudMain(QObject):
         the caller then falls back to the log-derived ring.
         """
         reader = getattr(self, "winamax_ax_seats", None)
-        title = getattr(getattr(hud, "table", None), "title", "") or ""
+        table = getattr(hud, "table", None)
+        title = getattr(table, "title", "") or ""
         if reader is None or not title:
             return {}
 
-        cached_hand, cached_slots, reads = self._ax_rings.get(title, (None, {}, 0))
+        table_key = getattr(table, "key", None) or title
+        cached_hand, cached_slots, reads = self._ax_rings.get(table_key, (None, {}, 0))
         if cached_hand != hand_id:
             cached_slots, reads = {}, 0
 
@@ -1575,8 +1577,15 @@ class HudMain(QObject):
         if (self.HERO_SLOT in cached_slots and len(cached_slots) >= 2 and reads >= 1) or len(cached_slots) >= max_seats or reads >= self.AX_READS_PER_HAND:
             return cached_slots
 
+        table_pos = None
+        if table is not None and getattr(table, "x", None) is not None and getattr(table, "y", None) is not None:
+            table_pos = (float(table.x), float(table.y))
+
         started = time.monotonic()
-        slots = reader.read_window(title, max_seats)
+        if table_pos is not None:
+            slots = reader.read_window(title, max_seats, table_pos=table_pos)
+        else:
+            slots = reader.read_window(title, max_seats)
         took = (time.monotonic() - started) * 1000
         # A read holding the hero's chair beats one without it even when the
         # one without it names more players: the second caught the window
@@ -1585,14 +1594,14 @@ class HudMain(QObject):
             (cached_slots, slots),
             key=lambda answer: (self.HERO_SLOT in answer, len(answer)),
         )
-        self._ax_rings[title] = (hand_id, best, reads + 1)
+        self._ax_rings[table_key] = (hand_id, best, reads + 1)
 
         if slots != cached_slots:
             empty = sorted(set(range(max_seats)) - set(best))
             self._ff_trace(
                 hand_id,
                 "window-read",
-                f"{title!r} {took:.0f}ms read#{reads + 1} players={len(best)} "
+                f"{title!r} (key={table_key}) {took:.0f}ms read#{reads + 1} players={len(best)} "
                 f"slots={ {s: best[s] for s in sorted(best)} } empty={empty}",
             )
         return best
