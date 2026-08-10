@@ -65,6 +65,8 @@ class Table(Table_Window):
     Now uses the Platform Abstraction Layer (Feature 1.5) for table detection.
     """
 
+    _resolved_window = None
+
     def __init__(self, *args, **kwargs):
         """Initialize table with platform detector."""
         # Fast Fold resolves the indexed table window at hand-start. Reusing

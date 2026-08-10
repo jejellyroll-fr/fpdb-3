@@ -1362,7 +1362,8 @@ class HudMain(QObject):
         The seat windows hide themselves when their seat holds nobody, so
         emptying the seats is what removes them from an idle felt.
         """
-        self._fast_fold_pending.pop(temp_key, None)
+        if self._fast_fold_pending.pop(temp_key, None) is None and not getattr(hud, "stat_dict", None) and not getattr(hud, "seat_players", None):
+            return  # already down
         FastFoldEngine.clear_seats(hud)
         self._ff_trace(hand_id, "cleared", f"table={temp_key} ({reason})")
 
@@ -1458,7 +1459,8 @@ class HudMain(QObject):
         # On a new hand start for this table, clear the previous hand's HUD stats immediately at +0ms
         # so old player stat blocks do not linger while the new table is dealt.
         if update.hand_id not in self._ff_pending_hand.values():
-            FastFoldEngine.clear_seats(hud)
+            if getattr(hud, "stat_dict", None) or getattr(hud, "seat_players", None):
+                FastFoldEngine.clear_seats(hud)
 
         max_seats = getattr(hud, "max", 6) or 6
         engine = FastFoldEngine(config=self.config)
@@ -1737,14 +1739,14 @@ class HudMain(QObject):
         if window.window_id is not None:
             temp_key = f"{window.table_name} #{window.window_id}"
         else:
-            temp_key = f"{window.table_name} #{update.table_no}"
+            temp_key = window.table_name
         if temp_key in self.hud_dict:
             return temp_key, self.hud_dict[temp_key]
 
         # The window states the game only when the accessibility API answered.
-        # Otherwise fall back on what an imported hand from this pool proved, or default to holdem.
+        # Otherwise fall back on what an imported hand from this pool proved.
         pool_games = getattr(self, "winamax_pool_games", None)
-        poker_game = window.poker_game or (pool_games.get(temp_key) if pool_games is not None else None) or "holdem"
+        poker_game = window.poker_game or (pool_games.get(temp_key) or pool_games.get(window.table_name) if pool_games is not None else None)
         if not poker_game:
             self._ff_trace(
                 update.hand_id,
