@@ -1659,7 +1659,8 @@ class fpdb(QMainWindow):
     def tab_auto_import(self, widget, data=None) -> None:
         """Opens the auto import tab."""
         new_aimp_thread = GuiAutoImport.GuiAutoImport(self.settings, self.config, self.sql, self)
-        self.add_and_display_tab(new_aimp_thread, "HUD", allow_multiple=False)
+        self.threads.append(new_aimp_thread)
+        self.add_and_display_tab(new_aimp_thread, "HUD")
         if options.autoimport:
             new_aimp_thread.startClicked(new_aimp_thread.startButton, "autostart")
             options.autoimport = False
@@ -1668,7 +1669,8 @@ class fpdb(QMainWindow):
         """Opens a tab for bulk importing."""
         self.settings.update(self.config.get_default_paths())
         new_import_thread = GuiBulkImport.GuiBulkImport(self.settings, self.config, self.sql, self)
-        self.add_and_display_tab(new_import_thread, "Bulk Import", allow_multiple=False)
+        self.threads.append(new_import_thread)
+        self.add_and_display_tab(new_import_thread, "Bulk Import")
 
     def tab_coinpoker_capture(self, widget, data=None) -> None:
         """Open the CoinPoker live packet-capture tab."""
@@ -1676,12 +1678,14 @@ class fpdb(QMainWindow):
             log.info("CoinPoker support is disabled; not opening the live capture tab")
             return
         new_thread = GuiCoinPokerCapture.GuiCoinPokerCapture(self.config, self)
-        self.add_and_display_tab(new_thread, "CoinPoker Capture", allow_multiple=False)
+        self.threads.append(new_thread)
+        self.add_and_display_tab(new_thread, "CoinPoker Capture")
 
     def tab_auto_notes_workbench(self, widget, data=None) -> None:
         """Open the automatic notes workbench tab."""
         new_thread = GuiAutoNotesWorkbench.GuiAutoNotesWorkbench(self.config, self)
-        self.add_and_display_tab(new_thread, "Auto Notes", allow_multiple=False)
+        self.threads.append(new_thread)
+        self.add_and_display_tab(new_thread, "Auto Notes")
 
     # def tab_tourney_import(self, widget, data=None):
     #     """opens a tab for bulk importing tournament summaries"""
