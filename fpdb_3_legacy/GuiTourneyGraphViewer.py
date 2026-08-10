@@ -330,9 +330,9 @@ class GuiTourneyGraphViewer(QSplitter):
         if len(winnings) == 0:
             return None
 
-        green = [float(x[1]) for x in winnings]
-        greenline = cumsum(green)
-        return (greenline) // (100)
+        green = np.array([float(x[1]) for x in winnings])
+        greenline = green.cumsum()
+        return greenline / 100.0
 
     def getChipEVCurves(self, apply_filters):
         """Compute the cumulative ChipEV-by-position curves for the hero.

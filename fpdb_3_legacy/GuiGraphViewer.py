@@ -22,8 +22,7 @@ import contextlib
 import os
 from importlib import import_module
 from time import time
-from typing import Any
-
+import numpy as np
 import pyqtgraph as pg
 from PySide6.QtWidgets import (
     QFrame,
@@ -427,10 +426,10 @@ class GuiGraphViewer(QSplitter):
         if len(winnings) == 0:
             return (None, None, None, None)
 
-        green = np.array([0, *[float(x[1]) for x in winnings]])
-        blue = np.array([0, *[float(x[1]) if x[2] else 0.0 for x in winnings]])
-        red = np.array([0, *[float(x[1]) if not x[2] else 0.0 for x in winnings]])
-        orange = np.array([0, *[float(x[3]) for x in winnings]])
+        green = np.array([0.0, *[float(x[1]) for x in winnings]])
+        blue = np.array([0.0, *[float(x[1]) if x[2] else 0.0 for x in winnings]])
+        red = np.array([0.0, *[float(x[1]) if not x[2] else 0.0 for x in winnings]])
+        orange = np.array([0.0, *[float(x[3]) if x[3] is not None else 0.0 for x in winnings]])
         # NumPy 2.x: use array method instead of numpy.cumsum()
         greenline = green.cumsum()
         blueline = blue.cumsum()
