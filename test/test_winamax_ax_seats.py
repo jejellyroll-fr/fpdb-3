@@ -45,6 +45,30 @@ def test_names_are_the_labels_with_a_stack_drawn_under_them() -> None:
     assert [s.login for s in seats_from_labels(labels)] == ["Hero", "Player_Three"]
 
 
+def test_hud_overlay_labels_are_filtered_out() -> None:
+    """Labels from an active FPDB HUD overlay box (e.g. 'jejel.', 'almar.') must not be read as players."""
+    from fpdb_3_legacy.winamax_ax_seats import is_hud_label
+
+    assert is_hud_label("jejel.")
+    assert is_hud_label("almar.")
+    assert is_hud_label("fishk.")
+    assert is_hud_label("Lexyn.")
+    assert is_hud_label("VP 50.4")
+    assert is_hud_label("H 520")
+
+    assert not is_hud_label("jejellyroll")
+    assert not is_hud_label("almarcha0346")
+    assert not is_hud_label("fishkingbull")
+
+    labels = [
+        AXSeat("jejel.", 346, 474),
+        AXSeat("200 BB", 335, 491),
+        AXSeat("jejellyroll", 346, 474),
+        AXSeat("200 BB", 335, 491),
+    ]
+    assert [s.login for s in seats_from_labels(labels)] == ["jejellyroll"]
+
+
 def test_bare_units_and_readouts_are_not_players() -> None:
     """A timer or slider readout can sit above a chip amount without being a seat."""
     labels = [

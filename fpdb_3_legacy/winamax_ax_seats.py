@@ -185,6 +185,23 @@ def is_seat_label(text: str) -> bool:
     return text.isupper() and " " in text
 
 
+def is_hud_label(text: str) -> bool:
+    """Whether a text node comes from an active FPDB HUD overlay window."""
+    t = (text or "").replace("\xa0", " ").strip()
+    if not t:
+        return True
+
+    # Truncated HUD headers, e.g. "jejel.", "almar.", "fishk.", "Lexyn.", "Zibit.", "HERGI.", "Stun_.", "anton."
+    if len(t) <= 6 and t.endswith("."):
+        return True
+
+    # HUD stat box lines or headers
+    if re.search(r"^(H\s*\d+|VP|PR|3B|F3|ST|FS|CB|FC|WW|LP|WS|F|T|R)\b", t, re.IGNORECASE):
+        return True
+
+    return False
+
+
 def seats_from_labels(labels: list[AXSeat]) -> list[AXSeat]:
     """Keep the labels that are player names, by pairing each with its stack.
 
@@ -198,6 +215,7 @@ def seats_from_labels(labels: list[AXSeat]) -> list[AXSeat]:
         if (
             is_stack_label(candidate.login)
             or is_seat_label(candidate.login)
+            or is_hud_label(candidate.login)
             or not _CAN_BE_LOGIN.match(candidate.login)
         ):
             continue
