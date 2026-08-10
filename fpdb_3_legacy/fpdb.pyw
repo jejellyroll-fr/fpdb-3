@@ -214,23 +214,38 @@ class fpdb(QMainWindow):
     #         pathcomp = f"{path}/ppt/p2.jar"
     #     subprocess.call(["java", "-jar", pathcomp])
 
-    def add_and_display_tab(self, new_page, new_tab_name) -> None:
-        """Adds a tab, namely creates the button and displays it and appends all the relevant arrays."""
+    def add_and_display_tab(self, new_page, new_tab_name, allow_multiple: bool = True) -> None:
+        """Adds a tab, creates the button, displays it and appends all the relevant arrays."""
         t0 = time.perf_counter()
         if not new_tab_name or not isinstance(new_tab_name, str):
             raise ValueError(f"Invalid tab name: {new_tab_name!r}")
 
-        for name in self.nb_tab_names:
-            if name == new_tab_name:
-                self.display_tab(new_tab_name)
-                log.info("[PERF-TIMING] Switched to existing tab '%s' in %.3f s", new_tab_name, time.perf_counter() - t0)
-                return  # if tab already exists, just go to it
+        if not allow_multiple and new_tab_name in self.nb_tab_names:
+            self.display_tab(new_tab_name)
+            log.info("[PERF-TIMING] Switched to existing tab '%s' in %.3f s", new_tab_name, time.perf_counter() - t0)
+            if new_page is not None:
+                with contextlib.suppress(ValueError):
+                    self.threads.remove(new_page)
+                shutdown = getattr(new_page, "shutdown_workers", None)
+                if callable(shutdown):
+                    shutdown()
+                new_page.deleteLater()
+            return
 
-        self.nb_tab_names.append(new_tab_name)
+        final_tab_name = new_tab_name
+        if allow_multiple and new_tab_name in self.nb_tab_names:
+            count = 2
+            while f"{new_tab_name} ({count})" in self.nb_tab_names:
+                count += 1
+            final_tab_name = f"{new_tab_name} ({count})"
 
-        index = self.nb.addTab(new_page, new_tab_name)
+        self.nb_tab_names.append(final_tab_name)
+        if new_page not in self.threads:
+            self.threads.append(new_page)
+
+        index = self.nb.addTab(new_page, final_tab_name)
         self.nb.setCurrentIndex(index)
-        log.info("[PERF-TIMING] Opened and added new tab '%s' in %.3f s", new_tab_name, time.perf_counter() - t0)
+        log.info("[PERF-TIMING] Opened and added new tab '%s' in %.3f s", final_tab_name, time.perf_counter() - t0)
 
     def display_tab(self, new_tab_name) -> None:
         """Displays the indicated tab."""
@@ -1644,38 +1659,29 @@ class fpdb(QMainWindow):
     def tab_auto_import(self, widget, data=None) -> None:
         """Opens the auto import tab."""
         new_aimp_thread = GuiAutoImport.GuiAutoImport(self.settings, self.config, self.sql, self)
-        self.threads.append(new_aimp_thread)
-        self.add_and_display_tab(new_aimp_thread, "HUD")
+        self.add_and_display_tab(new_aimp_thread, "HUD", allow_multiple=False)
         if options.autoimport:
             new_aimp_thread.startClicked(new_aimp_thread.startButton, "autostart")
             options.autoimport = False
 
     def tab_bulk_import(self, widget, data=None) -> None:
         """Opens a tab for bulk importing."""
-        # Bulk Import still gets its detected/custom default, but resolving it
-        # here avoids probing protected folders during ordinary application
-        # startup and profile refreshes.
         self.settings.update(self.config.get_default_paths())
         new_import_thread = GuiBulkImport.GuiBulkImport(self.settings, self.config, self.sql, self)
-        self.threads.append(new_import_thread)
-        self.add_and_display_tab(new_import_thread, "Bulk Import")
+        self.add_and_display_tab(new_import_thread, "Bulk Import", allow_multiple=False)
 
     def tab_coinpoker_capture(self, widget, data=None) -> None:
         """Open the CoinPoker live packet-capture tab."""
         if is_site_disabled("CoinPoker"):
-            # The menu no longer offers this tab; refuse the stale entry points
-            # (saved layouts, scripted calls) rather than starting a capture.
             log.info("CoinPoker support is disabled; not opening the live capture tab")
             return
         new_thread = GuiCoinPokerCapture.GuiCoinPokerCapture(self.config, self)
-        self.threads.append(new_thread)
-        self.add_and_display_tab(new_thread, "CoinPoker Capture")
+        self.add_and_display_tab(new_thread, "CoinPoker Capture", allow_multiple=False)
 
     def tab_auto_notes_workbench(self, widget, data=None) -> None:
         """Open the automatic notes workbench tab."""
         new_thread = GuiAutoNotesWorkbench.GuiAutoNotesWorkbench(self.config, self)
-        self.threads.append(new_thread)
-        self.add_and_display_tab(new_thread, "Auto Notes")
+        self.add_and_display_tab(new_thread, "Auto Notes", allow_multiple=False)
 
     # def tab_tourney_import(self, widget, data=None):
     #     """opens a tab for bulk importing tournament summaries"""
@@ -2148,16 +2154,6 @@ if __name__ == "__main__":
 
         # Register main window with theme manager for future theme changes
         theme_manager._main_window = me
-
-        # Pre-warm matplotlib synchronously and BEFORE the event loop starts.
-        # The first FigureCanvas built by any tab triggers matplotlib's font
-        # cache rebuild on whatever thread builds it; if that happens on the
-        # Qt main thread after app.exec() it freezes the GUI, and in a
-        # PyOxidizer bundle (packaged fonts, first run after a rebuild) the
-        # rebuild can take several seconds. Doing it here, on the main thread
-        # and before any tab exists, means the cache is ready before the user
-        # can open a single tab.
-        Configuration.prewarm_matplotlib()
 
         app.exec()
     finally:
