@@ -1100,7 +1100,7 @@ class AuxSeats(AuxWindow):
         else:
             log.debug("HUD seat mapping: no players yet, leaving seats unrotated")
 
-    def adj_seats(self) -> list[int]:
+    def adj_seats(self) -> list[int]:  # noqa: C901
         """Map visual seats to layout positions with the hero anchored bottom-centre.
 
         The hero is always rotated to the anchor slot (bottom-centre by default),
@@ -1113,11 +1113,15 @@ class AuxSeats(AuxWindow):
         max_seats = self.hud.max
         adj = list(range(max_seats + 1))  # identity default
 
-        # Refresh visual-slot -> physical-seat so player lookups
-        # (get_id_from_seat) and this position rotation agree, even when the
-        # site numbers seats sparsely on a larger grid.
         hh_seats = self._effective_hh_seats()
         self.hud.layout.hh_seats = hh_seats
+
+        # FastFold overlays (Winamax Escape / Go Fast) handle visual rotation
+        # directly in FastFoldEngine when mapping slots to seat numbers (mapping
+        # the bottom-centre hero slot to layout seat 3). Performing a second
+        # rotation here would shift every seat whenever stat_dict holds a non-anchor seat.
+        if getattr(self.hud, "is_fast_fold", False):
+            return adj
 
         anchor = self._anchor_slot()
         if not anchor:

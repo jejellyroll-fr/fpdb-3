@@ -203,6 +203,23 @@ def test_pin_hero_seat_is_remembered_once_decided() -> None:
     assert FastFoldEngine(config=MagicMock()).pin_hero_seat(hud) == 3
 
 
+def test_adj_seats_returns_identity_for_fast_fold_huds() -> None:
+    """FastFold HUDs visually rotate in FastFoldEngine, so AuxSeats must not apply a second rotation."""
+    from fpdb_3_legacy.Aux_Base import AuxSeats
+
+    hud = MagicMock()
+    hud.max = 6
+    hud.site = "Winamax"
+    hud.is_fast_fold = True
+    hud.stat_dict = {101: {"screen_name": "Hero", "seat": 1}}  # Seat 1 in imported hand history
+
+    aux = MagicMock(spec=AuxSeats)
+    aux.hud = hud
+    aux._effective_hh_seats.return_value = list(range(7))
+
+    assert AuxSeats.adj_seats(aux) == [0, 1, 2, 3, 4, 5, 6]
+
+
 def test_clear_seats_blanks_the_overlay_and_redraws() -> None:
     aux = MagicMock()
     hud = MagicMock()
