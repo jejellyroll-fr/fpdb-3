@@ -252,6 +252,9 @@ def prewarm_matplotlib() -> None:
     """Ensure matplotlib and its font list are pre-warmed safely."""
     try:
         import matplotlib
+        # Force Qt backend immediately to prevent Native macOS backend (macosx) 
+        # from initializing its own event loop and deadlocking with PySide6.
+        matplotlib.use("qtagg")
         import matplotlib.font_manager
 
         _ = matplotlib.font_manager.fontManager.ttflist
