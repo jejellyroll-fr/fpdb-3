@@ -1,7 +1,6 @@
 """Unit test for InterProcessLock acquire and release functionality."""
 
 import os
-import platform
 
 from fpdb_3_legacy import interlocks
 

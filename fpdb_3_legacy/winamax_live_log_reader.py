@@ -441,7 +441,7 @@ class WinamaxLiveLogReader:
         if thread and thread.is_alive():
             thread.join(timeout=2.0)
 
-    def _watch_loop(self) -> None:
+    def _watch_loop(self) -> None:  # noqa: C901
         """Tail the newest Winamax log file, following rotation."""
         file_obj = None
         current_path: Path | None = None

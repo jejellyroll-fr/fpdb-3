@@ -1,7 +1,7 @@
 """Unit tests for FastFold multi-tabling key uniqueness and simultaneous ring rendering."""
 
 from types import SimpleNamespace
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 from fpdb_3_legacy import HUD_main
 

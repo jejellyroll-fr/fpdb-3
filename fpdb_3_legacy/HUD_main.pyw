@@ -1368,6 +1368,7 @@ class HudMain(QObject):
 
     def _cleanup_closed_windows(self) -> None:
         """Close HUD overlays for Winamax table windows that have closed at session end."""
+        import platform
         if platform.system() != "Windows":
             return
         import ctypes
