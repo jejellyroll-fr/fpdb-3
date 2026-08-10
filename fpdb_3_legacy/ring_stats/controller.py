@@ -113,18 +113,30 @@ class RingStatsController(QObject):
         self.columns = config.get_gui_cash_stat_params()
         self._workers: list[DbWorker] = []
 
-        # Détection automatique de l'environnement de test ou SQLite pour exécution synchrone
-        # En mode SQLite, nous forçons l'exécution synchrone pour éviter les exceptions de thread
+        # Force synchronous mode only in test suites (pytest/unittest)
         import sys
-        is_sqlite = (hasattr(db, "backend") and db.backend == 4)
-        self.async_mode = (not is_sqlite) and ("pytest" not in sys.modules and "unittest" not in sys.modules)
+
+        self.async_mode = "pytest" not in sys.modules and "unittest" not in sys.modules
 
         self._last_summary_stats: dict[str, Any] | None = None
         self._last_profit_data: tuple[Any, Any, Any, Any] | None = None
 
+    def shutdown_workers(self) -> None:
+        """Stop all DbWorker threads started by this controller.
+
+        Called when the host tab is closed: QThreads must not outlive their
+        parent widget.
+        """
+        for worker in self._workers:
+            if worker.isRunning():
+                worker.terminate()
+                worker.wait()
+        self._workers = []
+
     def refresh_all(self, filter_widget) -> None:
         """Lance l'ensemble des requêtes asynchrones en fonction des filtres appliqués."""
         debug_log("refresh_all called!")
+        self.shutdown_workers()
         # 1. Extraction des filtres
         sites = filter_widget.getSites()
         heroes = filter_widget.getHeroes()
@@ -174,21 +186,36 @@ class RingStatsController(QObject):
         # Paramètres pour affiner les requêtes
         filter_params = (filter_widget, playerids, sitenos, limits, seats, groups, dates, games, currencies, num_hands)
 
+        import logging
+        import time
+        log = logging.getLogger("controller")
+
+        t0 = time.time()
         # 2. Lancer la requête pour le tableau résumé (summary grid)
         sql_summary = self._get_refined_sql("playerDetailedStats", False, *filter_params)
+        t1 = time.time()
+        log.warning(f"[PERF] controller sql_summary generation: {t1-t0:.3f}s")
         self._run_query("summary", sql_summary, self._on_summary_query_finished)
 
         # 3. Lancer la requête pour le détail des mains (hand detailed stats)
         if "allplayers" not in groups:
             sql_hands = self._get_refined_sql("playerDetailedStats", True, *filter_params)
+            t2 = time.time()
+            log.warning(f"[PERF] controller sql_hands generation: {t2-t1:.3f}s")
             self._run_query("hands", sql_hands, self._on_hands_query_finished)
+        else:
+            t2 = time.time()
 
         # 4. Lancer la requête spécifique pour le Poker Table (Heatmap de position)
         sql_positions = self._get_refined_sql("playerDetailedStats", False, *filter_params, force_position=True)
+        t3 = time.time()
+        log.warning(f"[PERF] controller sql_positions generation: {t3-t2:.3f}s")
         self._run_query("positions", sql_positions, self._on_positions_query_finished)
 
         # 5. Lancer la requête chronologique de profit
         sql_profit = self._get_refined_sql_profit(playerids, sitenos, limits, dates, games, currencies, filter_widget)
+        t4 = time.time()
+        log.warning(f"[PERF] controller sql_profit generation: {t4-t3:.3f}s. Total queries dispatch: {t4-t0:.3f}s")
         self._run_query("profit", sql_profit, self._on_profit_query_finished)
 
     def _run_query(self, query_name: str, sql: str, callback) -> None:
@@ -198,7 +225,7 @@ class RingStatsController(QObject):
         # Nettoyer les anciens workers
         self._workers = [w for w in self._workers if not w.isFinished()]
 
-        worker = DbWorker(self.cursor, query_name, sql)
+        worker = DbWorker(self.db, query_name, sql)
         worker.finished.connect(callback)
 
         def on_error(err):
