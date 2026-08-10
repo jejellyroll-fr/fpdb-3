@@ -798,20 +798,39 @@ class Database(
         return self.connection.cursor()
 
     def create_worker_connection(self):
-        """Open a dedicated SQLite connection for a background worker thread.
+        """Open a dedicated connection for a background worker thread.
 
-        Returns None for non-SQLite backends: those drivers handle concurrent
-        cursors on a shared connection correctly, so workers keep using it.
+        Returns None when no dedicated connection can be built (e.g. SQLite
+        ``:memory:``), in which case the worker falls back to the shared
+        connection.
 
-        Sharing one sqlite3.Connection across threads (check_same_thread=False)
-        without an application-level lock interleaves execute/fetchall pairs
-        from the GUI thread and DbWorker threads, which deadlocks the GUI on
-        macOS. WAL mode makes one read connection per thread safe. The returned
-        connection is intentionally NOT passed through db_profile.wrap_connection:
-        profiling is single-process bookkeeping and worker round trips stay
-        attributed to the main connection.
+        No DBAPI driver used here allows two threads to drive one connection
+        concurrently without an application-level lock:
+
+        - sqlite3 (check_same_thread=False) serializes calls but interleaves
+          execute/fetchall pairs from the GUI thread and DbWorker threads,
+          which deadlocks the GUI on macOS. WAL mode makes one read connection
+          per thread safe.
+        - psycopg3 is thread-safe at connection level but NOT at cursor level:
+          two threads sharing one connection can interleave execute/fetchall.
+        - MySQLdb/pymysql has threadsafety=1: connections must NOT be shared
+          across threads at all.
+
+        The returned connection is intentionally NOT passed through
+        db_profile.wrap_connection: profiling is single-process bookkeeping and
+        worker round trips stay attributed to the main connection.
         """
-        if self.backend != self.SQLITE or not self.db_path or self.db_path == ":memory:":
+        if self.backend == self.SQLITE:
+            return self._create_sqlite_worker_connection()
+        if self.backend == self.PGSQL:
+            return self._create_postgresql_worker_connection()
+        if self.backend == self.MYSQL_INNODB:
+            return self._create_mysql_worker_connection()
+        return None
+
+    def _create_sqlite_worker_connection(self):
+        """Dedicated SQLite connection for a worker thread (WAL mode)."""
+        if not self.db_path or self.db_path == ":memory:":
             return None
         import sqlite3
 
@@ -831,6 +850,49 @@ class Database(
         if use_numpy:
             conn.create_aggregate("variance", 1, VARIANCE)
         return conn
+
+    def _create_postgresql_worker_connection(self):
+        """Dedicated PostgreSQL connection for a worker thread."""
+        import psycopg
+
+        kwargs = {"dbname": self.database, **PG_NETWORK_KWARGS}
+        if self.host not in ("localhost", "127.0.0.1"):
+            kwargs.update({"host": self.host, "port": self.port, "user": self.user, "password": self.password})
+        try:
+            return psycopg.connect(**kwargs)
+        except psycopg.OperationalError:
+            # Local peer connection failed; retry with explicit credentials.
+            return psycopg.connect(
+                host=self.host,
+                port=self.port,
+                user=self.user,
+                password=self.password,
+                dbname=self.database,
+                **PG_NETWORK_KWARGS,
+            )
+
+    def _create_mysql_worker_connection(self):
+        """Dedicated MySQL connection for a worker thread."""
+        try:
+            import MySQLdb
+        except ImportError:
+            import pymysql
+
+            pymysql.install_as_MySQLdb()
+            import MySQLdb
+
+        kwargs = {
+            "host": self.host,
+            "user": self.user,
+            "passwd": self.password,
+            "db": self.database,
+            "charset": "utf8",
+            "use_unicode": True,
+            **MYSQL_NETWORK_KWARGS,
+        }
+        if self.port:
+            kwargs["port"] = int(self.port)
+        return MySQLdb.connect(**kwargs)
 
     def close_connection(self) -> None:
         if getattr(self, "connection", None):
