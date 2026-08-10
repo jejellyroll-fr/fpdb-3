@@ -171,14 +171,15 @@ def test_partial_hand_seat_map_extraction() -> None:
     }
 
 
-def test_pin_hero_seat_uses_the_seat_from_the_imported_hand() -> None:
+def test_pin_hero_seat_locks_to_the_layout_anchor_seat() -> None:
+    """FastFold HUDs always anchor the hero at the bottom-centre (seat 3 by default)."""
     config = MagicMock()
     config.is_hero_name.side_effect = lambda _site, name: name == "Hero"
     hud = MagicMock()
     hud.stat_dict = {7: {"screen_name": "Hero", "seat": 4}, 8: {"screen_name": "Villain", "seat": 2}}
     del hud.fast_fold_hero_seat
 
-    assert FastFoldEngine(config=config).pin_hero_seat(hud) == 4
+    assert FastFoldEngine(config=config).pin_hero_seat(hud) == 3
 
 
 def test_pin_hero_seat_falls_back_to_the_layout_anchor_before_any_hand() -> None:

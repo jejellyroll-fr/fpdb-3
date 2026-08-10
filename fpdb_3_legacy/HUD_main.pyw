@@ -1572,7 +1572,7 @@ class HudMain(QObject):
         # same hand, taking the fullest answer, until the table is full or the
         # budget runs out -- caching that first partial read is what left the
         # overlay showing one player for a whole hand.
-        if len(cached_slots) >= max_seats or reads >= self.AX_READS_PER_HAND:
+        if (self.HERO_SLOT in cached_slots and len(cached_slots) >= 2 and reads >= 1) or len(cached_slots) >= max_seats or reads >= self.AX_READS_PER_HAND:
             return cached_slots
 
         started = time.monotonic()
