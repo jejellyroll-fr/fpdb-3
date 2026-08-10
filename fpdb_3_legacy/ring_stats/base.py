@@ -36,7 +36,7 @@ class DbWorker(QThread):
         import logging
         log = logging.getLogger("DbWorker")
         t_start = time.time()
-        log.info(f"[PERF] DbWorker.run start: {self.query_name}")
+        log.warning(f"[PERF] DbWorker.run start: {self.query_name}")
         try:
             db = self.db_or_cursor
 
@@ -49,7 +49,7 @@ class DbWorker(QThread):
                     res = cursor.fetchall()
                     t2 = time.time()
                     cols = [desc[0].lower() for desc in cursor.description] if cursor.description else []
-                    log.info(f"[PERF] DbWorker {self.query_name} SQL EXEC: {t1-t0:.3f}s | FETCH: {t2-t1:.3f}s")
+                    log.warning(f"[PERF] DbWorker {self.query_name} SQL EXEC: {t1-t0:.3f}s | FETCH: {t2-t1:.3f}s")
                     return res, cols
                 finally:
                     # Do not close the shared db/cursor object if it doesn't belong to us
@@ -63,7 +63,7 @@ class DbWorker(QThread):
             if callable(worker_conn_ctx):
                 with worker_conn_ctx() as conn:
                     t_post_acq = time.time()
-                    log.info(f"[PERF] DbWorker {self.query_name} Connection Acquire: {t_post_acq - t_acq:.3f}s")
+                    log.warning(f"[PERF] DbWorker {self.query_name} Connection Acquire: {t_post_acq - t_acq:.3f}s")
                     if conn is not None:
                         results, colnames = _exec_on_conn(conn)
                     else:
@@ -71,7 +71,7 @@ class DbWorker(QThread):
             elif callable(dedicated):
                 conn = dedicated()
                 t_post_acq = time.time()
-                log.info(f"[PERF] DbWorker {self.query_name} Connection Acquire (legacy): {t_post_acq - t_acq:.3f}s")
+                log.warning(f"[PERF] DbWorker {self.query_name} Connection Acquire (legacy): {t_post_acq - t_acq:.3f}s")
                 if conn is not None:
                     try:
                         results, colnames = _exec_on_conn(conn)
@@ -80,12 +80,12 @@ class DbWorker(QThread):
                 else:
                     results, colnames = _exec_on_conn(getattr(db, "connection", db))
             else:
-                log.info(f"[PERF] DbWorker {self.query_name} Connection Acquire (shared): 0.0s")
+                log.warning(f"[PERF] DbWorker {self.query_name} Connection Acquire (shared): 0.0s")
                 results, colnames = _exec_on_conn(getattr(db, "connection", db))
 
             t_emit = time.time()
             self.finished.emit(self.query_name, results, colnames)
-            log.info(f"[PERF] DbWorker {self.query_name} emit took: {time.time() - t_emit:.3f}s | Total: {time.time() - t_start:.3f}s")
+            log.warning(f"[PERF] DbWorker {self.query_name} emit took: {time.time() - t_emit:.3f}s | Total: {time.time() - t_start:.3f}s")
         except Exception as e:  # noqa: BLE001 - Qt worker boundary reports DB-driver errors through its signal.
             log.error(f"[PERF] DbWorker {self.query_name} ERROR: {e}")
             self.error.emit(str(e))
