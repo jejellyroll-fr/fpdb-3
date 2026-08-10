@@ -121,6 +121,7 @@ class GuiSessionViewer(QSplitter):
         self.stats_frame.setObjectName("statsSurface")
         self.stats_frame.setLayout(QVBoxLayout())
         self.view: Any = None
+        self.plot_widget: Any = None
         heading = QLabel(self.filterText["handhead"])
         heading.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.stats_frame.layout().addWidget(heading)
@@ -357,12 +358,9 @@ class GuiSessionViewer(QSplitter):
         profits = np.array([float(x[1]) for x in hands])
         # NumPy 2.x: use array methods instead of numpy functions
         diffs = np.diff(times)
-        diffs2 = np.append(diffs, THRESHOLD + 1)
-        index = np.nonzero(diffs2 > THRESHOLD)
-        if len(index[0]) > 0:
-            pass
-        else:
-            index = [[0]]
+        diffs2: np.ndarray = np.append(diffs, THRESHOLD + 1)
+        nonzero_tuple = np.nonzero(diffs2 > THRESHOLD)
+        index_arr: np.ndarray = nonzero_tuple[0] if len(nonzero_tuple[0]) > 0 else np.array([0])
 
         first_idx = 1
         quotes = []
@@ -378,9 +376,9 @@ class GuiSessionViewer(QSplitter):
         global_hwm: Any = None
 
         self.times = []
-        for i in range(len(index[0])):
-            last_idx = index[0][i]
-            hds = last_idx - first_idx + 1
+        for i in range(len(index_arr)):
+            last_idx = int(index_arr[i])
+            hds: int = last_idx - first_idx + 1
             if hds > 0:
                 stime = format_datetime(datetime.fromtimestamp(times[first_idx]))
                 etime = format_datetime(datetime.fromtimestamp(times[last_idx]))
@@ -392,12 +390,12 @@ class GuiSessionViewer(QSplitter):
                 if minutesplayed == 0:
                     minutesplayed = 1
                 hph = hds * 60 / minutesplayed
-                end_idx = last_idx + 1
+                end_idx: int = last_idx + 1
                 won = (sum(profits[first_idx:end_idx])) // (100.0)
                 hwm = cum_sum[first_idx - 1 : end_idx].max()  # NumPy 2.x: use array method
                 lwm = cum_sum[first_idx - 1 : end_idx].min()  # NumPy 2.x: use array method
-                open = (sum(profits[:first_idx])) // (100)
-                close = (sum(profits[:end_idx])) // (100)
+                open_val = int((sum(profits[:first_idx])) // (100))
+                close_val = int((sum(profits[:end_idx])) // (100))
 
                 total_hands = total_hands + hds
                 total_time = total_time + minutesplayed
@@ -406,7 +404,7 @@ class GuiSessionViewer(QSplitter):
                 if global_hwm is None or global_hwm < hwm:
                     global_hwm = hwm
                 if global_open is None:
-                    global_open = open
+                    global_open = open_val
                     global_stime = stime
 
                 results.append(
@@ -416,20 +414,20 @@ class GuiSessionViewer(QSplitter):
                         stime,
                         etime,
                         format_number(hph, 0),
-                        format_number(open),
-                        format_number(close),
+                        format_number(open_val),
+                        format_number(close_val),
                         format_number(lwm),
                         format_number(hwm),
                         format_number(hwm - lwm),
                         format_number(won),
                     ],
                 )
-                quotes.append((sid, open, close, hwm, lwm))
+                quotes.append((sid, open_val, close_val, hwm, lwm))
                 first_idx = end_idx
                 sid = sid + 1
             else:
                 log.debug("hds <= 0")
-        global_close = close
+        global_close = close_val
         global_etime = etime
         results.append([""] * 11)
         results.append(
@@ -452,7 +450,7 @@ class GuiSessionViewer(QSplitter):
 
     def clearGraphData(self) -> None:
         with contextlib.suppress(Exception):
-            if hasattr(self, "plot_widget") and self.plot_widget:
+            if self.plot_widget is not None:
                 self.graphBox.layout().removeWidget(self.plot_widget)
                 self.plot_widget.setParent(None)
                 self.plot_widget = None

@@ -222,7 +222,7 @@ class Database(
 
     # Global pool for worker connections shared across all Database instances
     # to strictly bound the maximum concurrent DB connections from workers
-    _worker_conn_pool = queue.Queue()
+    _worker_conn_pool: queue.Queue[Any] = queue.Queue()
     _worker_conn_semaphore = threading.Semaphore(4)
 
     hero_hudstart_def = "1999-12-31"  # default for length of Hero's stats in HUD
