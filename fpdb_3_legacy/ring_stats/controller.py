@@ -185,21 +185,36 @@ class RingStatsController(QObject):
         # Paramètres pour affiner les requêtes
         filter_params = (filter_widget, playerids, sitenos, limits, seats, groups, dates, games, currencies, num_hands)
 
+        import time
+        import logging
+        log = logging.getLogger("controller")
+        
+        t0 = time.time()
         # 2. Lancer la requête pour le tableau résumé (summary grid)
         sql_summary = self._get_refined_sql("playerDetailedStats", False, *filter_params)
+        t1 = time.time()
+        log.info(f"[PERF] controller sql_summary generation: {t1-t0:.3f}s")
         self._run_query("summary", sql_summary, self._on_summary_query_finished)
 
         # 3. Lancer la requête pour le détail des mains (hand detailed stats)
         if "allplayers" not in groups:
             sql_hands = self._get_refined_sql("playerDetailedStats", True, *filter_params)
+            t2 = time.time()
+            log.info(f"[PERF] controller sql_hands generation: {t2-t1:.3f}s")
             self._run_query("hands", sql_hands, self._on_hands_query_finished)
+        else:
+            t2 = time.time()
 
         # 4. Lancer la requête spécifique pour le Poker Table (Heatmap de position)
         sql_positions = self._get_refined_sql("playerDetailedStats", False, *filter_params, force_position=True)
+        t3 = time.time()
+        log.info(f"[PERF] controller sql_positions generation: {t3-t2:.3f}s")
         self._run_query("positions", sql_positions, self._on_positions_query_finished)
 
         # 5. Lancer la requête chronologique de profit
         sql_profit = self._get_refined_sql_profit(playerids, sitenos, limits, dates, games, currencies, filter_widget)
+        t4 = time.time()
+        log.info(f"[PERF] controller sql_profit generation: {t4-t3:.3f}s. Total queries dispatch: {t4-t0:.3f}s")
         self._run_query("profit", sql_profit, self._on_profit_query_finished)
 
     def _run_query(self, query_name: str, sql: str, callback) -> None:

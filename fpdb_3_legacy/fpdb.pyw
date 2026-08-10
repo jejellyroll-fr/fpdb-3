@@ -1690,11 +1690,21 @@ class fpdb(QMainWindow):
         # This package imports Matplotlib and scans every system font. Frozen
         # builds cannot reliably reuse that scan, so importing it at startup
         # delayed Auto Import even though no graphing tab had been requested.
+        import time
+        t0 = time.time()
+        log.info("[PERF] tab_ring_player_stats: Importing GuiRingPlayerStats")
         from fpdb_3_legacy import GuiRingPlayerStats
+        t1 = time.time()
+        log.info(f"[PERF] tab_ring_player_stats: Import took {t1 - t0:.3f}s. Creating GuiRingPlayerStats...")
 
         new_ps_thread = GuiRingPlayerStats.GuiRingPlayerStats(self.config, self.sql, self)
+        t2 = time.time()
+        log.info(f"[PERF] tab_ring_player_stats: Instantiation took {t2 - t1:.3f}s. Adding tab...")
+        
         self.threads.append(new_ps_thread)
         self.add_and_display_tab(new_ps_thread, "Ring Player Stats")
+        t3 = time.time()
+        log.info(f"[PERF] tab_ring_player_stats: Adding tab took {t3 - t2:.3f}s. Total: {t3 - t0:.3f}s")
 
     def tab_opponents_report(self, widget, data=None) -> None:
         new_thread = GuiOpponentsReport.GuiOpponentsReport(self.config, self.sql, self)
