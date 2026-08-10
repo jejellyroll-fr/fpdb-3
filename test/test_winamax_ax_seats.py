@@ -185,173 +185,94 @@ def test_the_pot_label_does_not_take_a_seat() -> None:
     assert [s.login for s in seats_from_labels(labels)] == ["Hero", "Player08"]
 
 
-class TestFindTableWindowWithoutAccessibility:
-    """A packaged build holds no macOS Accessibility grant, so the API answers nothing.
+class _Detector:
+    """Small stand-in for the shared MacOSTableDetector lookup order."""
 
-    Table windows must still be found -- otherwise the Fast-Fold HUD silently
-    waits for the hand history and appears seconds late.
-    """
+    def __init__(self, quartz=(), fallback=()) -> None:
+        self.quartz = list(quartz)
+        self.fallback = list(fallback)
+        self.calls: list[tuple[str, bool]] = []
+
+    def find_tables(self, search: str, *, allow_fallback: bool = True):
+        self.calls.append((search, allow_fallback))
+        return self.fallback if allow_fallback else self.quartz
+
+
+class TestFindTableWindow:
+    """Fast Fold shares the platform detector used later by OSXTables."""
 
     @staticmethod
-    def _reader(monkeypatch, titles: list[str]) -> WinamaxAXSeatReader:
+    def _table(title: str, window_id: int = 48_782) -> SimpleNamespace:
+        return SimpleNamespace(title=title, window_id=window_id)
+
+    @staticmethod
+    def _enable_macos(monkeypatch) -> None:
         monkeypatch.setattr(winamax_ax_seats.platform, "system", lambda: "Darwin")
-        # The accessibility API is reachable but returns nothing, which is what
-        # macOS does for a process that was never granted Accessibility.
+
+    def test_quartz_window_is_preferred_and_enriched_by_accessibility(self, monkeypatch) -> None:
+        self._enable_macos(monkeypatch)
+        detector = _Detector(quartz=[self._table("Winamax Colorado 4")])
+        from_ax = AXTableWindow(
+            title="Winamax Colorado 4",
+            description="ESCAPE - 0,01-0,02 € - Pot Limit Omaha",
+        )
+        monkeypatch.setattr(WinamaxAXSeatReader, "_find_table_window_ax", lambda _self, _no: from_ax)
+
+        window = WinamaxAXSeatReader(detector).find_table_window("4")
+
+        assert window == AXTableWindow(
+            title="Winamax Colorado 4",
+            description=from_ax.description,
+            window_id=48_782,
+        )
+        assert window.poker_game == "omahahi"
+        assert detector.calls == [(r"^Winamax\s+.*\s4\s*$", False)]
+
+    def test_system_events_is_only_the_shared_detectors_last_resort(self, monkeypatch) -> None:
+        self._enable_macos(monkeypatch)
+        detector = _Detector(fallback=[self._table("Winamax Colorado 4", 2_123_456)])
         monkeypatch.setattr(WinamaxAXSeatReader, "_find_table_window_ax", lambda _self, _no: None)
-        monkeypatch.setattr(winamax_ax_seats, "applescript_window_titles", lambda: titles)
-        return WinamaxAXSeatReader()
-
-    def test_window_is_found_through_system_events(self, monkeypatch) -> None:
-        reader = self._reader(monkeypatch, ["Winamax", "Winamax Colorado 4"])
-
-        window = reader.find_table_window("4")
+        window = WinamaxAXSeatReader(detector).find_table_window("4")
 
         assert window is not None
         assert window.title == "Winamax Colorado 4"
-        assert window.table_name == "Colorado 4"
-        # System Events cannot read the client's header, so the game is unknown
-        # and the caller supplies it from an imported hand.
+        assert window.window_id == 2_123_456
         assert window.poker_game is None
+        assert detector.calls == [
+            (r"^Winamax\s+.*\s4\s*$", False),
+            (r"^Winamax\s+.*\s4\s*$", True),
+        ]
 
     def test_only_the_window_carrying_the_client_index_matches(self, monkeypatch) -> None:
-        reader = self._reader(monkeypatch, ["Winamax Colorado 3", "Winamax Colorado 4"])
-
-        assert reader.find_table_window("3").title == "Winamax Colorado 3"
-        assert reader.find_table_window("9") is None
-
-    def test_lobby_alone_is_not_a_table(self, monkeypatch) -> None:
-        reader = self._reader(monkeypatch, ["Winamax"])
-
-        assert reader.find_table_window("1") is None
-
-    def test_the_scan_is_throttled(self, monkeypatch) -> None:
-        """Hands start faster than osascript returns, so it must not run per hand."""
-        calls = []
-        monkeypatch.setattr(winamax_ax_seats.platform, "system", lambda: "Darwin")
-        monkeypatch.setattr(WinamaxAXSeatReader, "_find_table_window_ax", lambda _self, _no: None)
-        monkeypatch.setattr(
-            winamax_ax_seats,
-            "applescript_window_titles",
-            lambda: (calls.append(1), ["Winamax Colorado 4"])[1],
+        self._enable_macos(monkeypatch)
+        detector = _Detector(
+            quartz=[
+                self._table("Winamax Colorado 3", 101),
+                self._table("Winamax Colorado 4", 102),
+            ]
         )
-        reader = WinamaxAXSeatReader()
+        monkeypatch.setattr(WinamaxAXSeatReader, "_find_table_window_ax", lambda _self, _no: None)
 
-        for _ in range(5):
-            assert reader.find_table_window("4") is not None
+        window = WinamaxAXSeatReader(detector).find_table_window("4")
 
-        assert len(calls) == 1
+        assert window is not None
+        assert window.title == "Winamax Colorado 4"
+        assert window.window_id == 102
 
-    def test_the_accessibility_answer_is_preferred(self, monkeypatch) -> None:
-        """It carries the header, which names the game; System Events cannot."""
-        monkeypatch.setattr(winamax_ax_seats.platform, "system", lambda: "Darwin")
-        from_ax = AXTableWindow(title="Winamax Colorado 4", description="ESCAPE - 0,01-0,02 € - Pot Limit Omaha")
+    def test_accessibility_answer_survives_when_no_window_id_is_available(self, monkeypatch) -> None:
+        self._enable_macos(monkeypatch)
+        detector = _Detector()
+        from_ax = AXTableWindow(
+            title="Winamax Colorado 4",
+            description="ESCAPE - 0,01-0,02 € - Pot Limit Omaha",
+        )
         monkeypatch.setattr(WinamaxAXSeatReader, "_find_table_window_ax", lambda _self, _no: from_ax)
 
-        def unreachable() -> list[str]:
-            msg = "System Events must not be consulted when the API answered"
-            raise AssertionError(msg)
-
-        monkeypatch.setattr(winamax_ax_seats, "applescript_window_titles", unreachable)
-
-        assert WinamaxAXSeatReader().find_table_window("4").poker_game == "omahahi"
+        assert WinamaxAXSeatReader(detector).find_table_window("4") == from_ax
 
     def test_nothing_is_attempted_off_macos(self, monkeypatch) -> None:
         monkeypatch.setattr(winamax_ax_seats.platform, "system", lambda: "Linux")
+        detector = _Detector(quartz=[self._table("Winamax Colorado 4")])
 
-        assert WinamaxAXSeatReader().find_table_window("4") is None
-
-
-class TestApplescriptWindowTitles:
-    def test_a_refused_scan_is_not_an_error(self, monkeypatch) -> None:
-        """Automation may be denied too; the caller then waits for an import."""
-        monkeypatch.setattr(
-            winamax_ax_seats.subprocess,
-            "run",
-            lambda *_a, **_k: SimpleNamespace(returncode=1, stdout="", stderr="not authorized"),
-        )
-
-        assert winamax_ax_seats.applescript_window_titles() == []
-
-    def test_titles_are_split_and_stripped(self, monkeypatch) -> None:
-        monkeypatch.setattr(
-            winamax_ax_seats.subprocess,
-            "run",
-            lambda *_a, **_k: SimpleNamespace(
-                returncode=0,
-                stdout="Winamax, Winamax Colorado 3, Winamax Colorado 4\n",
-                stderr="",
-            ),
-        )
-
-        assert winamax_ax_seats.applescript_window_titles() == [
-            "Winamax",
-            "Winamax Colorado 3",
-            "Winamax Colorado 4",
-        ]
-
-    def test_a_timeout_is_survivable(self, monkeypatch) -> None:
-        def timeout(*_a, **_k):
-            raise winamax_ax_seats.subprocess.TimeoutExpired(cmd="osascript", timeout=5)
-
-        monkeypatch.setattr(winamax_ax_seats.subprocess, "run", timeout)
-
-        assert winamax_ax_seats.applescript_window_titles() == []
-
-
-class TestAutomationRefusalIsReported:
-    """A refused scan and an empty table list used to look identical in the log.
-
-    They are opposite situations: one means "no table is open", the other means
-    "this build will never see a table until the user grants Automation".
-    """
-
-    @staticmethod
-    def _run(monkeypatch, *, returncode: int, stderr: str):
-        monkeypatch.setattr(winamax_ax_seats, "_automation_refused", False)
-        monkeypatch.setattr(
-            winamax_ax_seats.subprocess,
-            "run",
-            lambda *_a, **_k: SimpleNamespace(returncode=returncode, stdout="", stderr=stderr),
-        )
-        return winamax_ax_seats.applescript_window_titles()
-
-    def test_a_refusal_is_reported_once_at_warning(self, monkeypatch, caplog) -> None:
-        with caplog.at_level("WARNING", logger=winamax_ax_seats.log.name):
-            assert self._run(monkeypatch, returncode=1, stderr="execution error: Not authorized (-1743)") == []
-            # Second call: still refused, but the user has already been told.
-            monkeypatch.setattr(
-                winamax_ax_seats.subprocess,
-                "run",
-                lambda *_a, **_k: SimpleNamespace(returncode=1, stdout="", stderr="(-1743)"),
-            )
-            assert winamax_ax_seats.applescript_window_titles() == []
-
-        warnings = [r for r in caplog.records if r.levelname == "WARNING"]
-        assert len(warnings) == 1
-        assert "Automation" in warnings[0].getMessage()
-
-    def test_an_unanswered_prompt_counts_as_a_refusal(self, monkeypatch, caplog) -> None:
-        """-1712 means the permission dialog is up and nobody has answered it."""
-        with caplog.at_level("WARNING", logger=winamax_ax_seats.log.name):
-            assert self._run(monkeypatch, returncode=1, stderr="AppleEvent timed out. (-1712)") == []
-        assert any(r.levelname == "WARNING" for r in caplog.records)
-
-    def test_an_ordinary_failure_is_not_dressed_up_as_a_permission_problem(self, monkeypatch, caplog) -> None:
-        with caplog.at_level("WARNING", logger=winamax_ax_seats.log.name):
-            assert self._run(monkeypatch, returncode=1, stderr="syntax error somewhere") == []
-        assert not [r for r in caplog.records if r.levelname == "WARNING"]
-
-    def test_a_hung_scan_is_reported_too(self, monkeypatch, caplog) -> None:
-        monkeypatch.setattr(winamax_ax_seats, "_automation_refused", False)
-
-        def timeout(*_a, **_k):
-            raise winamax_ax_seats.subprocess.TimeoutExpired(cmd="osascript", timeout=5)
-
-        monkeypatch.setattr(winamax_ax_seats.subprocess, "run", timeout)
-        with caplog.at_level("WARNING", logger=winamax_ax_seats.log.name):
-            assert winamax_ax_seats.applescript_window_titles() == []
-        assert any(r.levelname == "WARNING" for r in caplog.records)
-
-    def test_the_scan_runs_from_an_absolute_path(self) -> None:
-        """So it cannot be diverted by whatever PATH the packaged app inherited."""
-        assert winamax_ax_seats.OSASCRIPT.startswith("/")
+        assert WinamaxAXSeatReader(detector).find_table_window("4") is None
+        assert detector.calls == []

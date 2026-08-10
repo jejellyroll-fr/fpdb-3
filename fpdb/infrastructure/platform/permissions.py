@@ -1,15 +1,21 @@
 """macOS privacy-permission preflight for HUD table detection.
 
-Table detection on macOS depends on two *separate* privacy permissions, and a
+Table detection on macOS depends on separate privacy permissions, and a
 missing one is the usual reason a HUD never appears ("table name ... not
 found"):
 
 * **Screen Recording** – required for Quartz (``CGWindowListCopyWindowInfo``) to
   expose window *titles* (``kCGWindowName``). Without it every title is empty,
   so title-based matching fails. Geometry/IDs are still available.
-* **Accessibility / Automation** – required for the AppleScript (``System
-  Events``) fallback used for Electron clients such as Winamax, which never
-  expose titles through Quartz. Without it ``osascript`` returns nothing.
+* **Accessibility** – required for the Winamax seat reader and for System
+  Events GUI scripting of processes/windows.
+* **App Data** – macOS may require consent when FPDB reads Winamax logs or hand
+  histories owned by another application. There is no side-effect-free public
+  preflight for this consent; its status is therefore informational until the
+  first real file access, whose system prompt uses ``NSAppDataUsageDescription``.
+* **Automation** – separately requested by macOS when FPDB sends an Apple Event
+  to System Events. There is no side-effect-free preflight for that consent, so
+  it is diagnosed from the first real scan rather than stored in this snapshot.
 
 This module checks, requests, and explains those permissions. Everything is a
 safe no-op (returning ``True``) on non-macOS so callers need no platform guard.
@@ -37,9 +43,15 @@ class PermissionStatus:
 
     screen_recording: bool
     accessibility: bool
+    # macOS exposes no public, side-effect-free App Data preflight. ``None`` is
+    # deliberately distinct from granted: the UI can explain that the status
+    # is managed by macOS without pretending that access was verified.
+    app_data: bool | None = None
 
     @property
     def all_granted(self) -> bool:
+        # App Data is informational and must never gate table detection or HUD
+        # startup: unlike the two checks above, it cannot be preflighted safely.
         return self.screen_recording and self.accessibility
 
 
@@ -126,6 +138,7 @@ def get_status() -> PermissionStatus:
     return PermissionStatus(
         screen_recording=has_screen_recording_permission(),
         accessibility=has_accessibility_permission(),
+        app_data=None,
     )
 
 
@@ -141,14 +154,22 @@ def describe_missing(status: PermissionStatus | None = None) -> list[str]:
         messages.append(
             "Screen Recording permission is missing: Quartz cannot read window "
             "titles, so poker tables won't be detected by title. Grant it in "
-            "System Settings > Privacy & Security > Screen Recording (then "
-            "restart FPDB).",
+            "System Settings > Privacy & Security > Screen & System Audio "
+            "Recording. Return to FPDB and use Recheck; quit and reopen FPDB "
+            "manually only if table titles remain unavailable.",
         )
     if not status.accessibility:
         messages.append(
-            "Accessibility/Automation permission is missing: the AppleScript "
-            "fallback used for Electron clients (e.g. Winamax) cannot list "
-            "windows. Grant it in System Settings > Privacy & Security > "
-            "Accessibility (then restart FPDB).",
+            "Accessibility permission is missing: FPDB cannot inspect poker "
+            "windows or read Winamax seats through Accessibility/System Events. "
+            "Grant it in System Settings > Privacy & Security > Accessibility "
+            "and then return to FPDB and use Recheck.",
+        )
+    if status.app_data is False:
+        messages.append(
+            "App Data access is missing: FPDB may be unable to read Winamax "
+            "logs or hand histories. macOS owns this consent and provides no "
+            "safe preflight, request API, or dedicated Settings pane; FPDB "
+            "therefore waits for the prompt from the first real file access.",
         )
     return messages

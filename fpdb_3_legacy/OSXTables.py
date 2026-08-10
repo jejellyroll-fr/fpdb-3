@@ -24,6 +24,7 @@ from __future__ import annotations
 
 #    Standard Library modules
 import ctypes
+import time
 from typing import Any
 
 from AppKit import NSView, NSWindowAbove
@@ -45,6 +46,10 @@ class Table(Table_Window):
 
     def __init__(self, *args, **kwargs):
         """Initialize table with platform detector."""
+        # Fast Fold resolves the indexed Winamax window at hand-start. Reusing
+        # that answer avoids a second, potentially different Quartz/System
+        # Events scan during HUD construction.
+        self._resolved_window = kwargs.pop("resolved_window", None)
         self._detector = get_table_detector()
         super().__init__(*args, **kwargs)
 
@@ -58,8 +63,26 @@ class Table(Table_Window):
         Returns:
             The window title if found, None otherwise.
         """
+        t0 = time.perf_counter()
         self.number = None
         log.debug("DIAGNOSTIC: Starting window detection for search string: '%s'", self.search_string)
+
+        if self._resolved_window is not None:
+            try:
+                number = int(self._resolved_window.window_id)
+                title = str(self._resolved_window.title)
+            except (AttributeError, TypeError, ValueError):
+                log.warning("Ignoring invalid pre-resolved macOS window: %r", self._resolved_window)
+            else:
+                if number > 0 and title and not self.check_bad_words(title):
+                    self.number = number
+                    self.title = title
+                    log.debug(
+                        "DIAGNOSTIC: Reusing pre-resolved table window ID: %s, title: '%s'",
+                        self.number,
+                        self.title,
+                    )
+                    return self.title
 
         # Use platform abstraction layer to find tables
         tables = self._detector.find_tables(self.search_string)
@@ -83,9 +106,9 @@ class Table(Table_Window):
             # Found matching table
             self.number = int(table_info.window_id)
             self.title = title
-            log.debug("DIAGNOSTIC: TABLE WINDOW DETECTED - ID: %s, Title: '%s'", self.number, self.title)
+            log.info("[PERF-TIMING] OSXTables.find_table_parameters for '%s' matched '%s' in %.3f s", self.search_string, self.title, time.perf_counter() - t0)
             return self.title
-
+        log.info("[PERF-TIMING] OSXTables.find_table_parameters for '%s' completed in %.3f s", self.search_string, time.perf_counter() - t0)
         if self.number is None:
             # At ERROR level: HUD_main reports the same failure as an error, and the
             # osx_tables logger is commonly persisted at ERROR, which would drop the

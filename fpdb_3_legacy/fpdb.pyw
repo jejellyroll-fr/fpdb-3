@@ -43,6 +43,7 @@ import os
 import pstats
 import queue
 import sqlite3
+import time
 from functools import partial
 from importlib import import_module
 from typing import Any
@@ -213,20 +214,38 @@ class fpdb(QMainWindow):
     #         pathcomp = f"{path}/ppt/p2.jar"
     #     subprocess.call(["java", "-jar", pathcomp])
 
-    def add_and_display_tab(self, new_page, new_tab_name) -> None:
-        """Adds a tab, namely creates the button and displays it and appends all the relevant arrays."""
+    def add_and_display_tab(self, new_page, new_tab_name, allow_multiple: bool = True) -> None:
+        """Adds a tab, creates the button, displays it and appends all the relevant arrays."""
+        t0 = time.perf_counter()
         if not new_tab_name or not isinstance(new_tab_name, str):
             raise ValueError(f"Invalid tab name: {new_tab_name!r}")
 
-        for name in self.nb_tab_names:
-            if name == new_tab_name:
-                self.display_tab(new_tab_name)
-                return  # if tab already exists, just go to it
+        if not allow_multiple and new_tab_name in self.nb_tab_names:
+            self.display_tab(new_tab_name)
+            log.info("[PERF-TIMING] Switched to existing tab '%s' in %.3f s", new_tab_name, time.perf_counter() - t0)
+            if new_page is not None:
+                with contextlib.suppress(ValueError):
+                    self.threads.remove(new_page)
+                shutdown = getattr(new_page, "shutdown_workers", None)
+                if callable(shutdown):
+                    shutdown()
+                new_page.deleteLater()
+            return
 
-        self.nb_tab_names.append(new_tab_name)
+        final_tab_name = new_tab_name
+        if allow_multiple and new_tab_name in self.nb_tab_names:
+            count = 2
+            while f"{new_tab_name} ({count})" in self.nb_tab_names:
+                count += 1
+            final_tab_name = f"{new_tab_name} ({count})"
 
-        index = self.nb.addTab(new_page, new_tab_name)
+        self.nb_tab_names.append(final_tab_name)
+        if new_page not in self.threads:
+            self.threads.append(new_page)
+
+        index = self.nb.addTab(new_page, final_tab_name)
         self.nb.setCurrentIndex(index)
+        log.info("[PERF-TIMING] Opened and added new tab '%s' in %.3f s", final_tab_name, time.perf_counter() - t0)
 
     def display_tab(self, new_tab_name) -> None:
         """Displays the indicated tab."""
@@ -1404,7 +1423,9 @@ class fpdb(QMainWindow):
         self.settings.update({"cl_options": cl_options})
         self.settings.update(self.config.get_db_parameters())
         self.settings.update(self.config.get_import_parameters())
-        self.settings.update(self.config.get_default_paths())
+        # Default-path resolution may inspect fallback locations when a saved
+        # room path is stale. Keep profile loading passive; import entry points
+        # resolve paths only when the user actually opens/starts that workflow.
 
         # Set up SQL and connect to the database
         self.sql = SQL.Sql(db_server=self.settings["db-server"])
@@ -1646,6 +1667,7 @@ class fpdb(QMainWindow):
 
     def tab_bulk_import(self, widget, data=None) -> None:
         """Opens a tab for bulk importing."""
+        self.settings.update(self.config.get_default_paths())
         new_import_thread = GuiBulkImport.GuiBulkImport(self.settings, self.config, self.sql, self)
         self.threads.append(new_import_thread)
         self.add_and_display_tab(new_import_thread, "Bulk Import")
@@ -1653,8 +1675,6 @@ class fpdb(QMainWindow):
     def tab_coinpoker_capture(self, widget, data=None) -> None:
         """Open the CoinPoker live packet-capture tab."""
         if is_site_disabled("CoinPoker"):
-            # The menu no longer offers this tab; refuse the stale entry points
-            # (saved layouts, scripted calls) rather than starting a capture.
             log.info("CoinPoker support is disabled; not opening the live capture tab")
             return
         new_thread = GuiCoinPokerCapture.GuiCoinPokerCapture(self.config, self)
@@ -1680,11 +1700,21 @@ class fpdb(QMainWindow):
         # This package imports Matplotlib and scans every system font. Frozen
         # builds cannot reliably reuse that scan, so importing it at startup
         # delayed Auto Import even though no graphing tab had been requested.
+        import time
+        t0 = time.time()
+        log.warning("[PERF] tab_ring_player_stats: Importing GuiRingPlayerStats")
         from fpdb_3_legacy import GuiRingPlayerStats
+        t1 = time.time()
+        log.warning(f"[PERF] tab_ring_player_stats: Import took {t1 - t0:.3f}s. Creating GuiRingPlayerStats...")
 
         new_ps_thread = GuiRingPlayerStats.GuiRingPlayerStats(self.config, self.sql, self)
+        t2 = time.time()
+        log.warning(f"[PERF] tab_ring_player_stats: Instantiation took {t2 - t1:.3f}s. Adding tab...")
+
         self.threads.append(new_ps_thread)
         self.add_and_display_tab(new_ps_thread, "Ring Player Stats")
+        t3 = time.time()
+        log.warning(f"[PERF] tab_ring_player_stats: Adding tab took {t3 - t2:.3f}s. Total: {t3 - t0:.3f}s")
 
     def tab_opponents_report(self, widget, data=None) -> None:
         new_thread = GuiOpponentsReport.GuiOpponentsReport(self.config, self.sql, self)
@@ -1864,6 +1894,12 @@ class fpdb(QMainWindow):
             self.threads.remove(item)
 
         if item is not None:
+            # Stop any QThreads before destruction: a widget removed from a
+            # QTabWidget does not receive closeEvent, so DbWorker threads (ring
+            # stats) would otherwise keep running as zombies.
+            shutdown = getattr(item, "shutdown_workers", None)
+            if callable(shutdown):
+                shutdown()
             item.deleteLater()
 
     def __init__(self) -> None:

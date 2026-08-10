@@ -10,8 +10,7 @@ from __future__ import annotations
 import re
 from typing import Any
 
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.figure import Figure
+import pyqtgraph as pg
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QComboBox, QFrame, QGridLayout, QHBoxLayout, QLabel, QScrollArea, QVBoxLayout, QWidget
 
@@ -100,67 +99,62 @@ class HoldemGridCell(QFrame):
             return hex2
 
 
-class OmahaChartsCanvas(FigureCanvas):
-    """Tracés Matplotlib pour analyser les statistiques d'Omaha par catégorie."""
+class OmahaChartsWidget(pg.GraphicsLayoutWidget):
+    """Tracés pyqtgraph pour analyser les statistiques d'Omaha par catégorie."""
 
     def __init__(self, parent=None) -> None:
-        self.fig = Figure(figsize=(6, 4), dpi=100)
-        super().__init__(self.fig)
-        self.setParent(parent)
+        super().__init__(parent)
+        self.plot1 = self.addPlot(title="Couleurs")
+        self.plot2 = self.addPlot(title="Configuration")
         self.update_style()
 
     def update_style(self) -> None:
         c = get_theme_palette()
-        self.fig.patch.set_facecolor(c.get("sidebar", "#1a202c"))
-        self.draw()
+        bg_color = c.get("sidebar", "#1a202c")
+        text_color = c.get("text", "#edf2f7")
+        grid_color = c.get("grid", "#4a5568")
+
+        self.setBackground(bg_color)
+
+        for p in (self.plot1, self.plot2):
+            axis_pen = pg.mkPen(color=grid_color, width=1)
+            p.getAxis("left").setPen(axis_pen)
+            p.getAxis("bottom").setPen(axis_pen)
+            p.getAxis("left").setTextPen(pg.mkPen(color=text_color))
+            p.getAxis("bottom").setTextPen(pg.mkPen(color=text_color))
 
     def plot_omaha_analysis(self, suitedness: dict[str, int], pairs: dict[str, int], variant_title: str) -> None:
-        self.fig.clear()
+        self.plot1.clear()
+        self.plot2.clear()
         self.update_style()
 
         c = get_theme_palette()
         text_color = c.get("text", "#edf2f7")
         accent = c.get("accent", "#319795")
         accent_soft = c.get("accent_soft", "#4fd1c5")
-        orange = c.get("graph_ev", "#f59e3d")
-        color_down = c.get("graph_down", "#f56565")
 
-        # 2 Graphiques côte à côte : Répartition des couleurs (Suits) et des Paires
-        ax1 = self.fig.add_subplot(121)
-        ax2 = self.fig.add_subplot(122)
-
-        for ax in (ax1, ax2):
-            ax.set_facecolor(c.get("sidebar", "#1a202c"))
-            for spine in ax.spines.values():
-                spine.set_color(c.get("border", "#4a5568"))
-            ax.tick_params(colors=text_color, labelsize=8)
+        self.plot1.setTitle(f"<span style='color:{text_color}; font-size:9pt; font-weight:bold;'>Couleurs ({variant_title})</span>")
+        self.plot2.setTitle(f"<span style='color:{text_color}; font-size:9pt; font-weight:bold;'>Configuration ({variant_title})</span>")
 
         # 1. Graphe de Suitedness
         if suitedness:
             labels = list(suitedness.keys())
             values = list(suitedness.values())
-            colors = [accent, accent_soft, orange, color_down][: len(labels)]
-            ax1.pie(
-                values, labels=labels, autopct="%1.1f%%", colors=colors, textprops={"color": text_color, "fontsize": 8}
-            )
-            ax1.set_title(f"Couleurs ({variant_title})", color=text_color, fontsize=9, fontweight="bold")
-        else:
-            ax1.text(0.5, 0.5, "Aucune donnée", color=text_color, ha="center")
+            x = list(range(len(labels)))
+            bg1 = pg.BarGraphItem(x=x, height=values, width=0.5, brush=pg.mkBrush(color=accent), pen=pg.mkPen(color=accent))
+            self.plot1.addItem(bg1)
+            ticks1 = [(i, label) for i, label in enumerate(labels)]
+            self.plot1.getAxis("bottom").setTicks([ticks1])
 
         # 2. Graphe des Paires
         if pairs:
             labels = list(pairs.keys())
             values = list(pairs.values())
-            colors = [accent, accent_soft, orange, color_down, c.get("graph_purple", "#9f7aea")][: len(labels)]
-            ax2.bar(labels, values, color=colors, alpha=0.85)
-            ax2.set_title(f"Configuration ({variant_title})", color=text_color, fontsize=9, fontweight="bold")
-            ax2.set_ylabel("Mains", color=text_color, fontsize=8)
-            ax2.tick_params(axis="x", rotation=30)
-        else:
-            ax2.text(0.5, 0.5, "Aucune donnée", color=text_color, ha="center")
-
-        self.fig.tight_layout()
-        self.draw()
+            x = list(range(len(labels)))
+            bg2 = pg.BarGraphItem(x=x, height=values, width=0.5, brush=pg.mkBrush(color=accent_soft), pen=pg.mkPen(color=accent_soft))
+            self.plot2.addItem(bg2)
+            ticks2 = [(i, label) for i, label in enumerate(labels)]
+            self.plot2.getAxis("bottom").setTicks([ticks2])
 
 
 class StartingHandsTab(QWidget):
@@ -215,7 +209,7 @@ class StartingHandsTab(QWidget):
 
         self.omaha_widget = QWidget()
         omaha_layout = QVBoxLayout(self.omaha_widget)
-        self.omaha_canvas = OmahaChartsCanvas(self.omaha_widget)
+        self.omaha_canvas = OmahaChartsWidget(self.omaha_widget)
         omaha_layout.addWidget(self.omaha_canvas)
 
         self.active_mode: str | None = None  # 'holdem' ou 'omaha'

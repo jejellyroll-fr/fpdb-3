@@ -1,12 +1,9 @@
 """Utility to assist with macOS Gatekeeper quarantine removal and privacy permissions setup.
 
-macOS Gatekeeper and TCC (Transparency, Consent, and Control) security policies enforce:
-1. Gatekeeper checks unverified downloads. Stripping 'com.apple.quarantine' and applying
-   ad-hoc codesign allows fpdb.app to run without 'Unidentified Developer' blocks.
-2. TCC permissions (Screen Recording, Accessibility, AppleScript Automation). Including
-   NSAppleEventsUsageDescription, NSScreenCaptureUsageDescription, and NSAccessibilityUsageDescription
-   in Info.plist with a stable bundle ID (org.fpdb.fpdb3) ensures macOS retains the user's
-   approval permanently across launches.
+macOS Gatekeeper and TCC (Transparency, Consent, and Control) are separate:
+quarantine can translocate or block an unnotarized download, while TCC grants
+Screen Recording, Accessibility, and Automation to a code-signing requirement.
+A stable bundle ID alone cannot make an ad-hoc signature stable between builds.
 
 Run from command line:
     python -m tools.grant_macos_permissions [--app-path PATH] [--clear-quarantine] [--check-status]
@@ -45,7 +42,11 @@ def clear_quarantine(app_path: Path) -> bool:
 
 
 def re_sign_bundle(app_path: Path) -> bool:
-    """Apply an ad-hoc code signature to seal the app bundle."""
+    """Replace the bundle signature with ad-hoc signing (development only).
+
+    This intentionally destroys a Developer ID signature and its stable TCC
+    identity. It is never part of the default setup path.
+    """
     if not _IS_MACOS or not app_path.exists():
         return False
     codesign_bin = shutil.which("codesign") or "/usr/bin/codesign"
@@ -83,12 +84,12 @@ def setup_app_bundle(
     app_path: Path,
     *,
     clear: bool = True,
-    sign: bool = True,
+    sign: bool = False,
 ) -> dict[str, bool]:
-    """Strip quarantine and/or ad-hoc sign the given .app bundle.
+    """Strip quarantine and, only when explicit, ad-hoc sign the bundle.
 
-    Both steps run by default: that is what someone who just passes a bundle
-    path wants. ``clear`` and ``sign`` let the CLI flags select one of them.
+    Re-signing is off by default because it invalidates a published Developer
+    ID signature and the privacy grants tied to it.
     """
     return {
         "quarantine_cleared": clear_quarantine(app_path) if clear else False,
@@ -120,12 +121,12 @@ def main(argv: list[str] | None = None) -> int:
             # point of the tool is to tell the user where they stand.
             print(f"No bundle at {args.app_path}", file=sys.stderr)
             return 1
-        # Neither flag means "do the usual thing", which is both steps.
+        # Neither flag means the safe local workaround: clear quarantine only.
         selected = args.clear_quarantine or args.re_sign
         res = setup_app_bundle(
             args.app_path,
             clear=args.clear_quarantine or not selected,
-            sign=args.re_sign or not selected,
+            sign=args.re_sign,
         )
         print(f"Quarantine cleared: {res['quarantine_cleared']}")
         print(f"Ad-hoc signed:     {res['signed']}")

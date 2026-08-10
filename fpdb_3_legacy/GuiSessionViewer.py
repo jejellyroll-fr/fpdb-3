@@ -14,18 +14,14 @@ from __future__ import annotations
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 # In the "official" distribution you can find the license in agpl-3.0.txt.
+import contextlib
 import sys
-import traceback
 from datetime import datetime
-from importlib import import_module
 from time import gmtime, strftime, time
 from typing import Any
 
-mpl = import_module("matplotlib")
-np = import_module("numpy")
-FigureCanvas = getattr(import_module("matplotlib.backends.backend_qt5agg"), "FigureCanvas")
-Figure = getattr(import_module("matplotlib.figure"), "Figure")
-FuncFormatter = getattr(import_module("matplotlib.ticker"), "FuncFormatter")
+import numpy as np
+import pyqtgraph as pg
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QStandardItem, QStandardItemModel
 from PySide6.QtWidgets import (
@@ -42,26 +38,8 @@ from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.localized_formats import currency_symbol, format_currency, format_datetime, format_number
 from fpdb_3_legacy.loggingFpdb import get_logger
 
-# import L10n
-# _ = L10n.get_translation()
-
-
-# import Charset
-
-
 log = get_logger("gui_session_viewer")
 DEBUG = False
-
-try:
-    calluse = not "matplotlib" in sys.modules
-    if calluse:
-        try:
-            mpl.use("qt5agg")
-        except ValueError as e:
-            log.exception(f"error importing matplotlib: {e}")
-except ImportError as inst:
-    log.exception("Failed to load numpy and/or matplotlib in Session Viewer")
-    log.exception(f"ImportError: {inst.args}")
 
 
 class GuiSessionViewer(QSplitter):
@@ -92,7 +70,6 @@ class GuiSessionViewer(QSplitter):
         settings = {}
         settings.update(self.conf.get_db_parameters())
         settings.update(self.conf.get_import_parameters())
-        settings.update(self.conf.get_default_paths())
 
         # text used on screen stored here so that it can be configured
         self.filterText = {"handhead": _("Hand Breakdown for all levels listed above")}
@@ -144,6 +121,7 @@ class GuiSessionViewer(QSplitter):
         self.stats_frame.setObjectName("statsSurface")
         self.stats_frame.setLayout(QVBoxLayout())
         self.view: Any = None
+        self.plot_widget: Any = None
         heading = QLabel(self.filterText["handhead"])
         heading.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.stats_frame.layout().addWidget(heading)
@@ -380,12 +358,9 @@ class GuiSessionViewer(QSplitter):
         profits = np.array([float(x[1]) for x in hands])
         # NumPy 2.x: use array methods instead of numpy functions
         diffs = np.diff(times)
-        diffs2 = np.append(diffs, THRESHOLD + 1)
-        index = np.nonzero(diffs2 > THRESHOLD)
-        if len(index[0]) > 0:
-            pass
-        else:
-            index = [[0]]
+        diffs2: np.ndarray = np.append(diffs, THRESHOLD + 1)
+        nonzero_tuple = np.nonzero(diffs2 > THRESHOLD)
+        index_arr: np.ndarray = nonzero_tuple[0] if len(nonzero_tuple[0]) > 0 else np.array([0])
 
         first_idx = 1
         quotes = []
@@ -401,9 +376,9 @@ class GuiSessionViewer(QSplitter):
         global_hwm: Any = None
 
         self.times = []
-        for i in range(len(index[0])):
-            last_idx = index[0][i]
-            hds = last_idx - first_idx + 1
+        for i in range(len(index_arr)):
+            last_idx = int(index_arr[i])
+            hds: int = last_idx - first_idx + 1
             if hds > 0:
                 stime = format_datetime(datetime.fromtimestamp(times[first_idx]))
                 etime = format_datetime(datetime.fromtimestamp(times[last_idx]))
@@ -415,12 +390,12 @@ class GuiSessionViewer(QSplitter):
                 if minutesplayed == 0:
                     minutesplayed = 1
                 hph = hds * 60 / minutesplayed
-                end_idx = last_idx + 1
+                end_idx: int = last_idx + 1
                 won = (sum(profits[first_idx:end_idx])) // (100.0)
                 hwm = cum_sum[first_idx - 1 : end_idx].max()  # NumPy 2.x: use array method
                 lwm = cum_sum[first_idx - 1 : end_idx].min()  # NumPy 2.x: use array method
-                open = (sum(profits[:first_idx])) // (100)
-                close = (sum(profits[:end_idx])) // (100)
+                open_val = int((sum(profits[:first_idx])) // (100))
+                close_val = int((sum(profits[:end_idx])) // (100))
 
                 total_hands = total_hands + hds
                 total_time = total_time + minutesplayed
@@ -429,7 +404,7 @@ class GuiSessionViewer(QSplitter):
                 if global_hwm is None or global_hwm < hwm:
                     global_hwm = hwm
                 if global_open is None:
-                    global_open = open
+                    global_open = open_val
                     global_stime = stime
 
                 results.append(
@@ -439,20 +414,20 @@ class GuiSessionViewer(QSplitter):
                         stime,
                         etime,
                         format_number(hph, 0),
-                        format_number(open),
-                        format_number(close),
+                        format_number(open_val),
+                        format_number(close_val),
                         format_number(lwm),
                         format_number(hwm),
                         format_number(hwm - lwm),
                         format_number(won),
                     ],
                 )
-                quotes.append((sid, open, close, hwm, lwm))
+                quotes.append((sid, open_val, close_val, hwm, lwm))
                 first_idx = end_idx
                 sid = sid + 1
             else:
                 log.debug("hds <= 0")
-        global_close = close
+        global_close = close_val
         global_etime = etime
         results.append([""] * 11)
         results.append(
@@ -474,27 +449,11 @@ class GuiSessionViewer(QSplitter):
         return (results, quotes)
 
     def clearGraphData(self) -> None:
-        try:
-            try:
-                if self.canvas:
-                    self.graphBox.layout().removeWidget(self.canvas)
-                    self.canvas.setParent(None)
-            except (AttributeError, RuntimeError) as e:
-                # Handle specific exceptions here if you expect them
-                log.exception(f"Error during canvas cleanup: {e}")
-
-            if self.fig is not None:
-                self.fig.clear()
-            self.fig = None
-
-            if self.canvas is not None:
-                self.canvas.destroy()
-            self.canvas = None
-        except Exception as e:  # intentional broad catch: matplotlib canvas build boundary, log only
-            # Catch all other exceptions and log for better debugging
-            err = traceback.extract_tb(sys.exc_info()[2])[-1]
-            log.exception(f"Error: {err[2]}({err[1]}): {e}")
-            raise
+        with contextlib.suppress(Exception):
+            if self.plot_widget is not None:
+                self.graphBox.layout().removeWidget(self.plot_widget)
+                self.plot_widget.setParent(None)
+                self.plot_widget = None
 
     def generateGraph(self, quotes, currencies: list[str] | None = None) -> None:
         self.clearGraphData()
@@ -557,14 +516,6 @@ class GuiSessionViewer(QSplitter):
         gain = self.colors.get("line_up", "#22c55e")
         loss = self.colors.get("line_down", "#ef4444")
 
-        self.fig = Figure(figsize=(6.2, 3.2), dpi=100)
-        self.fig.patch.set_facecolor(bg)
-        self.canvas = FigureCanvas(self.fig)
-        self.canvas.setParent(self)
-
-        self.ax = self.fig.add_subplot(111)
-        self.ax.set_facecolor(bg)
-
         session_ids = np.array([float(q[0]) for q in quotes])
         opens = np.array([float(q[1]) for q in quotes])
         closes = np.array([float(q[2]) for q in quotes])
@@ -574,68 +525,34 @@ class GuiSessionViewer(QSplitter):
         display_currency = currencies[0] if currencies else "USD"
 
         session_colors = [gain if value >= 0 else loss for value in profits]
-        self.ax.vlines(session_ids, lows, highs, color=grid, linewidth=1.0, alpha=0.38, zorder=1)
-        for sid, start, end, color in zip(session_ids, opens, closes, session_colors, strict=False):
-            self.ax.plot([sid, sid], [start, end], color=color, linewidth=5.0, alpha=0.78, solid_capstyle="round", zorder=2)
-            self.ax.scatter([sid], [end], s=42, color=color, edgecolor=bg, linewidth=1.2, zorder=4)
 
-        self.ax.plot(session_ids, closes, color=line, linewidth=2.8, marker="o", markersize=5.0, zorder=5)
-        self.ax.axhline(0, color=grid, linestyle="--", linewidth=1.0, alpha=0.85, zorder=3)
-
-        best_idx = int(np.argmax(closes))
-        worst_idx = int(np.argmin(closes))
-        for idx, label, offset in ((best_idx, "Best", 10), (worst_idx, "Worst", -18)):
-            if best_idx == worst_idx and label == "Worst":
-                continue
-            self.ax.annotate(
-                f"{label} {format_currency(closes[idx], display_currency)}",
-                (session_ids[idx], closes[idx]),
-                textcoords="offset points",
-                xytext=(8, offset),
-                color=fg,
-                fontsize=8,
-                alpha=0.86,
-            )
-
-        for sid, close, profit in zip(session_ids, closes, profits, strict=False):
-            self.ax.annotate(
-                format_currency(profit, display_currency),
-                (sid, close),
-                textcoords="offset points",
-                xytext=(0, 10 if profit >= 0 else -16),
-                ha="center",
-                color=gain if profit >= 0 else loss,
-                fontsize=8,
-                fontweight="bold",
-                alpha=0.9,
-            )
+        self.plot_widget = pg.PlotWidget()
+        self.plot_widget.setBackground(bg)
+        self.plot_widget.showGrid(x=True, y=True, alpha=0.3)
 
         total = closes[-1] if len(closes) else 0
-        self.ax.set_title(
-            f"Session profit: {format_currency(total, display_currency)}{names}",
-            color=fg,
-            fontsize=13,
-            fontweight="bold",
-            pad=10,
-        )
-        self.ax.set_xlabel(_("Session"), fontsize=10, color=fg, labelpad=8)
-        self.ax.set_ylabel(currency_symbol(display_currency), color=fg, labelpad=8)
-        self.ax.yaxis.set_major_formatter(FuncFormatter(lambda value, _position: format_number(value)))
-        self.ax.tick_params(axis="x", colors=fg, labelsize=9)
-        self.ax.tick_params(axis="y", colors=fg, labelsize=9)
-        self.ax.grid(True, color=grid, linestyle=":", linewidth=0.6, alpha=0.6)
-        self.ax.set_xticks(session_ids)
-        self.ax.margins(x=0.08, y=0.22)
+        self.plot_widget.setTitle(f"<span style='color:{fg}; font-size:11pt; font-weight:bold;'>Session profit: {format_currency(total, display_currency)}{names}</span>")
+        self.plot_widget.setLabel("bottom", _("Session"), **{"color": fg, "font-size": "9pt"})
+        self.plot_widget.setLabel("left", currency_symbol(display_currency), **{"color": fg, "font-size": "9pt"})
 
-        for spine in ("top", "right"):
-            self.ax.spines[spine].set_visible(False)
-        for spine in ("left", "bottom"):
-            self.ax.spines[spine].set_color(grid)
-            self.ax.spines[spine].set_alpha(0.75)
+        axis_pen = pg.mkPen(color=grid, width=1)
+        self.plot_widget.getAxis("left").setPen(axis_pen)
+        self.plot_widget.getAxis("bottom").setPen(axis_pen)
+        self.plot_widget.getAxis("left").setTextPen(pg.mkPen(color=fg))
+        self.plot_widget.getAxis("bottom").setTextPen(pg.mkPen(color=fg))
 
-        self.fig.tight_layout(pad=1.5)
-        self.graphBox.layout().addWidget(self.canvas)
-        self.canvas.draw()
+        self.plot_widget.addLine(y=0, pen=pg.mkPen(color=grid, width=1, style=Qt.PenStyle.DashLine))
+
+        for sid, start, end, low, high, color in zip(session_ids, opens, closes, lows, highs, session_colors, strict=False):
+            self.plot_widget.plot([sid, sid], [low, high], pen=pg.mkPen(color=color, width=1.5))
+            self.plot_widget.plot([sid, sid], [start, end], pen=pg.mkPen(color=color, width=4.0))
+
+        self.plot_widget.plot(session_ids, closes, pen=pg.mkPen(color=line, width=2.8), symbol="o", symbolSize=6, symbolBrush=pg.mkBrush(color=line))
+
+        ticks = [(sid, str(int(sid))) for sid in session_ids]
+        self.plot_widget.getAxis("bottom").setTicks([ticks])
+
+        self.graphBox.layout().addWidget(self.plot_widget)
 
     def addTable(self, frame, results) -> None:
         colxalign, colheading = list(range(2))
