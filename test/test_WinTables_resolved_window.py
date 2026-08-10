@@ -34,6 +34,7 @@ def test_wintables_init_pops_resolved_window():
     """Verify that Table.__init__ stores resolved_window attribute."""
     resolved_window = SimpleNamespace(window_id=999, title="FastFold Table")
 
-    with patch("fpdb_3_legacy.TableWindow.Table_Window.__init__", return_value=None):
+    with patch("fpdb_3_legacy.TableWindow.Table_Window.__init__", return_value=None), \
+         patch("fpdb_3_legacy.WinTables.get_table_detector", return_value=MagicMock()):
         table = WinTables.Table(MagicMock(), "Winamax", resolved_window=resolved_window)
         assert table._resolved_window == resolved_window
