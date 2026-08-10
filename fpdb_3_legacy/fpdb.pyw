@@ -242,15 +242,25 @@ class fpdb(QMainWindow):
         self.nb.setCurrentIndex(tab_no)
 
     def dia_about(self, widget, data=None) -> None:
+        """Show the legal notice, and point at the tab that has the details.
+
+        The box keeps the licence text it always carried, but the version and
+        environment facts a bug report needs now live in the Version tab
+        (issue #226) rather than being squeezed into a modal that cannot be
+        copied from.
+        """
+        from fpdb_3_legacy import version_info
+
         QMessageBox.about(
             self,
-            f"FPDB{VERSION!s}",
-            "Copyright 2008-2023. See contributors.txt for details"
+            f"FPDB {VERSION!s}",
+            f"FPDB {VERSION} ({version_info.detect_packaging()})\n\n"
+            "Copyright 2008-2023. See contributors.txt for details.\n"
             "You are free to change, and distribute original or changed versions "
-            "of fpdb within the rules set out by the license"
-            "https://github.com/jejellyroll-fr/fpdb-3"
-            "\n"
-            "Your config file is: " + self.config.file,
+            "of fpdb within the rules set out by the license.\n"
+            f"{version_info.REPOSITORY_URL}\n\n"
+            f"Your config file is: {self.config.file}\n\n"
+            "See Help > Version for the full version and environment report.",
         )
 
     def dia_advanced_preferences(self, widget, data=None) -> None:
@@ -1726,12 +1736,37 @@ class fpdb(QMainWindow):
         self.threads.append(new_ps_thread)
         self.add_and_display_tab(new_ps_thread, "Hand Viewer")
 
+    def tab_version_info(self, widget=None, data=None) -> None:
+        """Displays the Version / About tab (issue #226).
+
+        Imported lazily like the other tabs so startup does not pay for a view
+        most sessions never open. ``allow_multiple=False``: the tab is a static
+        snapshot of the running build, so a second copy would only duplicate the
+        first.
+        """
+        from fpdb_3_legacy import GuiVersionInfo
+
+        new_tab = GuiVersionInfo.GuiVersionInfo(
+            config=self.config,
+            db=getattr(self, "db", None),
+            version=VERSION,
+            parent=self,
+        )
+        self.add_and_display_tab(new_tab, "Version", allow_multiple=False)
+
     def tab_main_help(self, widget, data=None) -> None:
-        """Displays a tab with the main fpdb help screen."""
+        """Displays a tab with the main fpdb help screen.
+
+        This is the landing tab at startup, so it names the running build: it
+        used to greet the user without ever saying which version had been
+        launched (issue #226). The details themselves live in the Version tab.
+        """
         mh_tab = QLabel(
             (
-                """
-                        Welcome to Fpdb!
+                f"""
+                        Welcome to Fpdb {VERSION}!
+
+                        Open Help > Version for the full version, packaging and environment report.
 
                         This program is currently in an alpha-state, so our database format is still sometimes changed.
                         You should therefore always keep your hand history files so that you can re-import
