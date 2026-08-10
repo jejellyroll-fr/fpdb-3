@@ -8,11 +8,7 @@ from __future__ import annotations
 
 import math
 
-try:
-    from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
-except ImportError:
-    from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.figure import Figure
+import pyqtgraph as pg
 from PySide6.QtCore import QRectF, Qt
 from PySide6.QtGui import QBrush, QColor, QFont, QPainter, QPen
 from PySide6.QtWidgets import QSplitter, QVBoxLayout, QWidget
@@ -173,14 +169,12 @@ class PokerTableWidget(QWidget):
                 painter.drawText(QRectF(sx - seat_w / 2.0, sy - seat_h / 2.0 + 20, seat_w, 12), Qt.AlignmentFlag.AlignCenter, "Pas de main")
 
 
-class PositionalChartCanvas(FigureCanvas):
-    """Graphique en barres matplotlib comparant VPIP et PFR par position."""
+class PositionalChartWidget(pg.PlotWidget):
+    """Graphique en barres pyqtgraph comparant VPIP et PFR par position."""
 
     def __init__(self, parent=None) -> None:
-        self.fig = Figure(figsize=(5, 3), dpi=100)
-        self.axes = self.fig.add_subplot(111)
-        super().__init__(self.fig)
-        self.setParent(parent)
+        super().__init__(parent)
+        self.showGrid(y=True, alpha=0.3)
         self.update_style()
 
     def update_style(self) -> None:
@@ -189,44 +183,47 @@ class PositionalChartCanvas(FigureCanvas):
         text_color = c.get("text", "#edf2f7")
         grid_color = c.get("grid", "#4a5568")
 
-        self.fig.patch.set_facecolor(bg_color)
-        self.axes.set_facecolor(bg_color)
-
-        self.axes.spines['bottom'].set_color(grid_color)
-        self.axes.spines['top'].set_color(grid_color)
-        self.axes.spines['right'].set_color(grid_color)
-        self.axes.spines['left'].set_color(grid_color)
-
-        self.axes.tick_params(colors=text_color, labelsize=8)
-        self.axes.yaxis.grid(True, color=grid_color, linestyle='--', alpha=0.5)
-        self.axes.set_title("VPIP & PFR par Position", color=text_color, fontsize=10, fontweight='bold')
-        self.draw()
+        self.setBackground(bg_color)
+        self.setTitle(f"<span style='color:{text_color}; font-size:10pt; font-weight:bold;'>VPIP & PFR par Position</span>")
+        self.setLabel("left", "%", **{"color": text_color, "font-size": "8pt"})
+        axis_pen = pg.mkPen(color=grid_color, width=1)
+        self.getAxis("left").setPen(axis_pen)
+        self.getAxis("bottom").setPen(axis_pen)
+        self.getAxis("left").setTextPen(pg.mkPen(color=text_color))
+        self.getAxis("bottom").setTextPen(pg.mkPen(color=text_color))
 
     def plot_data(self, positions: list[str], vpips: list[float], pfrs: list[float]) -> None:
-        self.axes.clear()
+        self.clear()
         self.update_style()
 
         if not positions:
-            self.draw()
             return
 
         c = get_theme_palette()
         vpip_color = c.get("accent", "#319795")
         pfr_color = c.get("graph_ev", "#f59e3d")
-        text_color = c.get("text", "#edf2f7")
+        border_color = c.get("border", "#4a5568")
 
-        x = range(len(positions))
+        legend = self.addLegend(offset=(10, 10))
+        legend.setBrush(pg.mkBrush(color=c.get("sidebar", "#1a202c")))
+        legend.setPen(pg.mkPen(color=border_color))
+
+        x = list(range(len(positions)))
         width = 0.35
 
-        # Barres côte à côte
-        self.axes.bar([i - width/2 for i in x], vpips, width, label='VPIP', color=vpip_color, alpha=0.85)
-        self.axes.bar([i + width/2 for i in x], pfrs, width, label='PFR', color=pfr_color, alpha=0.85)
+        bg_vpip = pg.BarGraphItem(
+            x=[i - width / 2 for i in x], height=vpips, width=width,
+            brush=pg.mkBrush(color=vpip_color), pen=pg.mkPen(color=vpip_color), name="VPIP"
+        )
+        bg_pfr = pg.BarGraphItem(
+            x=[i + width / 2 for i in x], height=pfrs, width=width,
+            brush=pg.mkBrush(color=pfr_color), pen=pg.mkPen(color=pfr_color), name="PFR"
+        )
+        self.addItem(bg_vpip)
+        self.addItem(bg_pfr)
 
-        self.axes.set_xticks(x)
-        self.axes.set_xticklabels(positions, color=text_color)
-        self.axes.set_ylabel("%", color=text_color)
-        self.axes.legend(facecolor=c.get("sidebar", "#1a202c"), edgecolor=c.get("border", "#4a5568"), labelcolor=text_color, fontsize=8)
-        self.draw()
+        ticks = [(i, pos) for i, pos in enumerate(positions)]
+        self.getAxis("bottom").setTicks([ticks])
 
 
 class PositionalTab(QWidget):
@@ -246,7 +243,7 @@ class PositionalTab(QWidget):
         splitter.addWidget(self.poker_table)
 
         # 2. Canvas Graphique de Position
-        self.canvas = PositionalChartCanvas(self)
+        self.canvas = PositionalChartWidget(self)
         splitter.addWidget(self.canvas)
 
         splitter.setStretchFactor(0, 3)

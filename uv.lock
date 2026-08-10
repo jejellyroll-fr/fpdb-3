@@ -618,6 +618,7 @@ dependencies = [
     { name = "pymysql" },
     { name = "pyobjc", marker = "sys_platform == 'darwin'" },
     { name = "pypoker-eval" },
+    { name = "pyqtgraph" },
     { name = "pyside6" },
     { name = "pytz" },
     { name = "pyzmq" },
@@ -699,6 +700,7 @@ requires-dist = [
     { name = "pymysql", specifier = ">=1.1.0" },
     { name = "pyobjc", marker = "sys_platform == 'darwin'", specifier = "==10.3.1" },
     { name = "pypoker-eval", git = "https://github.com/jejellyroll-fr/poker-eval.git?rev=v1.2.0" },
+    { name = "pyqtgraph", specifier = ">=0.13.0" },
     { name = "pyside6", specifier = ">=6.8.1" },
     { name = "pyside6", marker = "extra == 'linux'", specifier = ">=6.8.1" },
     { name = "pyside6", marker = "extra == 'macos'", specifier = ">=6.8.1" },
@@ -4614,6 +4616,19 @@ wheels = [
 name = "pypoker-eval"
 version = "1.2.0"
 source = { git = "https://github.com/jejellyroll-fr/poker-eval.git?rev=v1.2.0#f746a822c462fa180c62bad1f428529d6e425b62" }
+
+[[package]]
+name = "pyqtgraph"
+version = "0.14.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "colorama" },
+    { name = "numpy", version = "2.4.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.12'" },
+    { name = "numpy", version = "2.5.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
+]
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/32/36/4c242f81fdcbfa4fb62a5645f6af79191f4097a0577bd5460c24f19cc4ef/pyqtgraph-0.14.0-py3-none-any.whl", hash = "sha256:7abb7c3e17362add64f8711b474dffac5e7b0e9245abdf992e9a44119b7aa4f5", size = 1924755, upload-time = "2025-11-16T19:43:22.251Z" },
+]
 
 [[package]]
 name = "pyside6"

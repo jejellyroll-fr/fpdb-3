@@ -8,12 +8,8 @@ from __future__ import annotations
 
 import numpy as np
 
-try:
-    from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
-except ImportError:
-    from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.figure import Figure
-from matplotlib.ticker import FuncFormatter
+import pyqtgraph as pg
+from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QGridLayout, QLabel, QVBoxLayout, QWidget
 
 from fpdb_3_legacy.i18n import gettext as _
@@ -22,99 +18,79 @@ from fpdb_3_legacy.ring_stats.styles import get_theme_palette
 from fpdb_3_legacy.ring_stats.views.widgets import GapMeter, KpiCard
 
 
-class ProfitGraphCanvas(FigureCanvas):
-    """Canvas Matplotlib intégré pour tracer la courbe de profit cumulé."""
+class ProfitGraphWidget(pg.PlotWidget):
+    """Widget pyqtgraph performant pour le graphique de profit cumulé."""
 
     def __init__(self, parent=None) -> None:
-        self.fig = Figure(figsize=(5, 3), dpi=100)
-        self.axes = self.fig.add_subplot(111)
-        super().__init__(self.fig)
-        self.setParent(parent)
+        super().__init__(parent)
+        self.showGrid(x=True, y=True, alpha=0.3)
         self.update_style()
 
     def update_style(self) -> None:
-        """Adapte les couleurs du graphique Matplotlib au thème courant de l'application."""
+        """Adapte les couleurs au thème courant de l'application."""
         c = get_theme_palette()
-
-        # Récupération des couleurs du thème
         bg_color = c.get("sidebar", "#1a202c")
         text_color = c.get("text", "#edf2f7")
         grid_color = c.get("grid", "#4a5568")
 
-        # Application au graphique
-        self.fig.patch.set_facecolor(bg_color)
-        self.axes.set_facecolor(bg_color)
-
-        self.axes.spines['bottom'].set_color(grid_color)
-        self.axes.spines['top'].set_color(grid_color)
-        self.axes.spines['right'].set_color(grid_color)
-        self.axes.spines['left'].set_color(grid_color)
-
-        self.axes.tick_params(colors=text_color, labelsize=8)
-        self.axes.yaxis.set_major_formatter(FuncFormatter(lambda value, _position: format_number(value)))
-        self.axes.yaxis.grid(True, color=grid_color, linestyle='--', alpha=0.5)
-        self.axes.xaxis.grid(True, color=grid_color, linestyle='--', alpha=0.3)
-        self.axes.set_title("Évolution du Profit", color=text_color, fontsize=10, fontweight='bold')
-        self.draw()
+        self.setBackground(bg_color)
+        self.setTitle(f"<span style='color:{text_color}; font-size:10pt; font-weight:bold;'>Évolution du Profit</span>")
+        self.setLabel("left", "Profit ($ / BB)", **{"color": text_color, "font-size": "8pt"})
+        self.setLabel("bottom", "Mains Jouées", **{"color": text_color, "font-size": "8pt"})
+        axis_pen = pg.mkPen(color=grid_color, width=1)
+        self.getAxis("left").setPen(axis_pen)
+        self.getAxis("bottom").setPen(axis_pen)
+        self.getAxis("left").setTextPen(pg.mkPen(color=text_color))
+        self.getAxis("bottom").setTextPen(pg.mkPen(color=text_color))
 
     def plot_profit_data(self, profits: tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray] | list[float], hands: list[int]) -> None:
         """Trace les courbes de profit cumulé (Net, Showdown, Non-Showdown, EV)."""
-        self.axes.clear()
+        self.clear()
         self.update_style()
 
         if not profits:
-            self.draw()
             return
 
         c = get_theme_palette()
         color_up = c.get("graph_up", "#48bb78")
         color_down = c.get("graph_down", "#f56565")
-        text_color = c.get("text", "#edf2f7")
         border_color = c.get("border", "#4a5568")
 
         if isinstance(profits, tuple) and len(profits) == 4:
             green, blue, red, ev = profits
         else:
-            # Fallback si ce n'est pas un tuple de 4 elements
             green = np.cumsum(profits)
             blue = np.array([])
             red = np.array([])
             ev = np.array([])
 
         if len(green) == 0:
-            self.draw()
             return
 
         x = np.arange(len(green))
 
-        # 1. Tracer Net Profit (Vert)
-        self.axes.plot(x, green, color=color_up, linewidth=2, label="Net Profit")
+        # Ajouter la légende
+        legend = self.addLegend(offset=(10, 10))
+        legend.setBrush(pg.mkBrush(color=c.get("sidebar", "#1a202c")))
+        legend.setPen(pg.mkPen(color=border_color))
 
-        # 2. Tracer Showdown Profit (Bleu)
+        # Ligne zéro
+        self.addLine(y=0, pen=pg.mkPen(color=border_color, width=1, style=Qt.PenStyle.DashLine))
+
+        # 1. Net Profit (Vert)
+        self.plot(x, green, pen=pg.mkPen(color=color_up, width=2), name="Net Profit")
+
+        # 2. Showdown Profit (Bleu)
         if len(blue) > 0:
-            self.axes.plot(x, blue, color=c.get("graph_showdown", "#3182ce"), linewidth=1.2, linestyle="--", label="Showdown", alpha=0.8)
+            self.plot(x, blue, pen=pg.mkPen(color=c.get("graph_showdown", "#3182ce"), width=1.5, style=Qt.PenStyle.DashLine), name="Showdown")
 
-        # 3. Tracer Non-Showdown Profit (Rouge)
+        # 3. Non-Showdown Profit (Rouge)
         if len(red) > 0:
-            self.axes.plot(x, red, color=color_down, linewidth=1.2, linestyle="--", label="Non-Showdown", alpha=0.8)
+            self.plot(x, red, pen=pg.mkPen(color=color_down, width=1.5, style=Qt.PenStyle.DashLine), name="Non-Showdown")
 
-        # 4. Tracer All-In EV (Orange)
+        # 4. All-In EV (Orange)
         if len(ev) > 0 and not np.all(ev == 0):
-            self.axes.plot(x, ev, color=c.get("graph_ev", "#dd6b20"), linewidth=1.5, label="All-In EV", alpha=0.9)
-
-        # Remplir la zone sous Net Profit
-        self.axes.fill_between(x, green, 0, where=(green >= 0), color=color_up, alpha=0.1, interpolate=True)
-        self.axes.fill_between(x, green, 0, where=(green < 0), color=color_down, alpha=0.1, interpolate=True)
-
-        # Ligne de référence à y=0
-        self.axes.axhline(0, color=border_color, linestyle='-', linewidth=0.8, alpha=0.7)
-
-        self.axes.set_ylabel("Profit ($ / BB)", color=text_color, fontsize=8)
-        self.axes.set_xlabel("Mains Jouées", color=text_color, fontsize=8)
-
-        # Afficher la légende
-        self.axes.legend(loc="upper left", facecolor=c.get("sidebar", "#1a202c"), edgecolor=border_color, labelcolor=text_color, fontsize=8, framealpha=0.6)
-        self.draw()
+            self.plot(x, ev, pen=pg.mkPen(color=c.get("graph_ev", "#dd6b20"), width=1.5), name="All-In EV")
 
 
 class DashboardTab(QWidget):
@@ -165,7 +141,7 @@ class DashboardTab(QWidget):
         layout.addLayout(gap_box)
 
         # 3. Graphique de Profit
-        self.canvas = ProfitGraphCanvas(self)
+        self.canvas = ProfitGraphWidget(self)
         layout.addWidget(self.canvas, 1)  # Prend tout l'espace disponible verticalement
 
     def update_data(self, summary_stats: dict, profits: list[float]) -> None:
