@@ -70,12 +70,12 @@ def test_slots_run_clockwise_from_the_bottom_chair() -> None:
     slots = seat_slots_from_positions(seats, CENTRE, 6)
 
     assert slots[0] == "Hero"
-    assert slots[2] == "Player_Three"
+    assert slots[1] == "Player06"
+    assert slots[2] == "Player04"
     assert slots[3] == "PlayerFive"
-    assert slots[4] == "Player04"
-    assert slots[5] == "Player06"
-    # Nobody in the left-lower chair, so that slot stays empty.
-    assert 1 not in slots
+    assert slots[4] == "Player_Three"
+    # Nobody in the left-lower chair, so slot 5 stays empty.
+    assert 5 not in slots
 
 
 def test_an_empty_chair_does_not_shift_the_players_after_it() -> None:
@@ -91,7 +91,7 @@ def test_an_empty_chair_does_not_shift_the_players_after_it() -> None:
 
     slots = seat_slots_from_positions(seats, CENTRE, 6)
 
-    assert slots == {0: "Hero", 1: "player07", 2: "Player06", 4: "player2", 5: "PLAYERCAPS"}
+    assert slots == {0: "Hero", 1: "PLAYERCAPS", 2: "player2", 4: "Player06", 5: "player07"}
 
 
 def test_slots_do_not_depend_on_the_order_read() -> None:

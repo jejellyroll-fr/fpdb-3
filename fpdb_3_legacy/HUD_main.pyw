@@ -1372,7 +1372,10 @@ class HudMain(QObject):
         if platform.system() != "Windows":
             return
         import ctypes
-        is_window = ctypes.windll.user32.IsWindow
+        windll = getattr(ctypes, "windll", None)
+        if windll is None:
+            return
+        is_window = windll.user32.IsWindow
         to_remove = []
         for temp_key, hud in list(self.hud_dict.items()):
             if not getattr(hud, "is_fast_fold", False):
@@ -1385,8 +1388,10 @@ class HudMain(QObject):
         for temp_key, hud in to_remove:
             log.info("Closing Fast-Fold HUD for closed window: %s", temp_key)
             self._clear_fast_fold_table(temp_key, hud, "session-end", "window closed")
-            with contextlib.suppress(Exception):
-                hud.close()
+            close_hud = getattr(hud, "close", getattr(hud, "kill", None))
+            if callable(close_hud):
+                with contextlib.suppress(Exception):
+                    close_hud()
             self.hud_dict.pop(temp_key, None)
 
     def _recheck_window(self, pool: str) -> None:
