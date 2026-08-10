@@ -249,6 +249,14 @@ class HudReadWorker(QThread):
                 info = database.get_gameinfo_from_hid(request.hand_id)
                 gametype_id = info["gametypeId"] if info else None
 
+            if gametype_id is None and hasattr(database, "connection") and database.connection:
+                with contextlib.suppress(Exception):
+                    c = database.connection.cursor()
+                    c.execute("SELECT id FROM Gametypes ORDER BY id DESC LIMIT 1")
+                    r = c.fetchone()
+                    if r:
+                        gametype_id = r[0]
+
             stat_dict = FastFoldEngine(db_connection=database).get_player_stats_for_seat_map(
                 request.seat_map,
                 db_conn=database,
@@ -1456,11 +1464,11 @@ class HudMain(QObject):
             self._clear_fast_fold_table(temp_key, hud, update.hand_id, reason)
             return
 
-        # On a new hand start for this table, clear the previous hand's HUD stats immediately at +0ms
-        # so old player stat blocks do not linger while the new table is dealt.
-        if update.hand_id not in self._ff_pending_hand.values():
+        last_hand = getattr(hud, "ff_last_hand_id", None)
+        if last_hand != update.hand_id:
+            hud.ff_last_hand_id = update.hand_id
             if getattr(hud, "stat_dict", None) or getattr(hud, "seat_players", None):
-                FastFoldEngine.clear_seats(hud)
+                self._clear_fast_fold_table(temp_key, hud, update.hand_id, "new hand start")
 
         max_seats = getattr(hud, "max", 6) or 6
         engine = FastFoldEngine(config=self.config)

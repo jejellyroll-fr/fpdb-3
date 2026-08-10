@@ -2847,6 +2847,31 @@ def test_a_read_holding_the_hero_beats_a_bigger_one_without(hud_main) -> None:
     assert hud_main._ax_slots(hud, "hand-1", 6) == {0: "Hero", 2: "b", 3: "c"}
 
 
+def test_read_fast_fold_stats_falls_back_to_recent_gametype() -> None:
+    """When a table has no reference hand yet, _read_fast_fold_stats falls back to recent gametype_id."""
+    from fpdb_3_legacy.fast_fold_engine import FastFoldStatsRequest
+
+    db = MagicMock()
+    db.get_gameinfo_from_hid.return_value = None
+    cursor = MagicMock()
+    cursor.fetchone.return_value = (42,)
+    db.connection.cursor.return_value = cursor
+
+    req = FastFoldStatsRequest(
+        temp_key="Winamax Escape 1",
+        seat_map={3: "Hero"},
+        hand_id=None,
+        num_seats=6,
+    )
+
+    with patch.object(HUD_main.FastFoldEngine, "get_player_stats_for_seat_map") as get_stats:
+        get_stats.return_value = {1: {"screen_name": "Hero", "seat": 3, "n": 100}}
+        res = HUD_main.HudReadWorker._read_fast_fold_stats(db, req)
+
+    assert res.stat_dict[1]["n"] == 100
+    assert get_stats.call_args.kwargs["gametype_id"] == 42
+
+
 def test_an_import_never_repopulates_a_cleared_fast_fold_table(hud_main) -> None:
     """This is what put a finished table's players back after the hero sat out.
 
