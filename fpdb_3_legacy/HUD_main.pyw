@@ -856,6 +856,11 @@ class HudMain(QObject):
             self._hand_batch_timer.setInterval(HAND_BATCH_INTERVAL_MS)
             self._hand_batch_timer.timeout.connect(self._drain_pending_hands)
 
+            self._cleanup_timer = QTimer(self)
+            self._cleanup_timer.setInterval(2000)
+            self._cleanup_timer.timeout.connect(self._cleanup_closed_windows)
+            self._cleanup_timer.start()
+
             self._db_worker: HudReadWorker | None = HudReadWorker(self.config, parent=self)
             self._db_worker.ready.connect(self._on_db_worker_ready)
             self._db_worker.snapshot_ready.connect(self._on_db_snapshot)
@@ -1151,7 +1156,7 @@ class HudMain(QObject):
         temp_key = self._get_temp_key(info.game_type, info.tour_number, info.tab_number, table_name)
         if info.fast:
             self._fast_fold_tables.add(temp_key)
-        if temp_key in self.hud_dict:
+        if any(k == temp_key or k.startswith(f"{temp_key} #") for k in self.hud_dict):
             return temp_key
         if self._handle_tournament_table_changes(info.game_type, temp_key, info.tour_number):
             return None
@@ -1352,15 +1357,37 @@ class HudMain(QObject):
         QCoreApplication.quit()
 
     def _clear_fast_fold_table(self, temp_key: str, hud: Hud.Hud, hand_id: str, reason: str) -> None:
-        """Take a Fast-Fold table's blocks down, once, and say why.
+        """Take a Fast-Fold table's blocks down and say why.
 
         The seat windows hide themselves when their seat holds nobody, so
         emptying the seats is what removes them from an idle felt.
         """
-        if self._fast_fold_pending.pop(temp_key, None) is None and not getattr(hud, "stat_dict", None):
-            return  # already down
+        self._fast_fold_pending.pop(temp_key, None)
         FastFoldEngine.clear_seats(hud)
         self._ff_trace(hand_id, "cleared", f"table={temp_key} ({reason})")
+
+    def _cleanup_closed_windows(self) -> None:
+        """Close HUD overlays for Winamax table windows that have closed at session end."""
+        import platform
+        if platform.system() != "Windows":
+            return
+        import ctypes
+        is_window = ctypes.windll.user32.IsWindow
+        to_remove = []
+        for temp_key, hud in list(self.hud_dict.items()):
+            if not getattr(hud, "is_fast_fold", False):
+                continue
+            m = re.search(r"#(\d+)$", temp_key)
+            if m:
+                hwnd = int(m.group(1))
+                if not is_window(hwnd):
+                    to_remove.append((temp_key, hud))
+        for temp_key, hud in to_remove:
+            log.info("Closing Fast-Fold HUD for closed window: %s", temp_key)
+            self._clear_fast_fold_table(temp_key, hud, "session-end", "window closed")
+            with contextlib.suppress(Exception):
+                hud.close()
+            self.hud_dict.pop(temp_key, None)
 
     def _recheck_window(self, pool: str) -> None:
         """Re-run a table's live update once the client has had time to draw it."""
@@ -1423,6 +1450,11 @@ class HudMain(QObject):
             self._clear_fast_fold_table(temp_key, hud, update.hand_id, reason)
             return
 
+        # On a new hand start for this table, clear the previous hand's HUD stats immediately at +0ms
+        # so old player stat blocks do not linger while the new table is dealt.
+        if update.hand_id not in self._ff_pending_hand.values():
+            FastFoldEngine.clear_seats(hud)
+
         max_seats = getattr(hud, "max", 6) or 6
         engine = FastFoldEngine(config=self.config)
         hero_seat = engine.pin_hero_seat(hud)
@@ -1438,8 +1470,10 @@ class HudMain(QObject):
         # fraction of a second before the next read corrects them.
         drawn = self.HERO_SLOT in slots
         if drawn and len(slots) >= self.MIN_PLAYERS_TO_SHOW:
-            # Slot 0 is the bottom chair, which is the one the hero is pinned to.
-            seat_map = {((slot + hero_seat - 1) % max_seats) + 1: login for slot, login in slots.items()}
+            # Slot 0 is the bottom-center chair where the client draws the hero.
+            # Map slot 0 to the layout anchor seat (seat 3 for 6-max Winamax layouts).
+            anchor_seat = engine._anchor_slot(hud) or 3
+            seat_map = {((slot + anchor_seat - 1) % max_seats) + 1: login for slot, login in slots.items()}
             source = "window"
         elif slots:
             # Either the window holds nobody but the hero -- between hands, or
@@ -1448,6 +1482,11 @@ class HudMain(QObject):
             self._clear_fast_fold_table(temp_key, hud, update.hand_id, "table not dealt yet")
             return
         elif update.ring and update.hero:
+            hand_start_time = self._ff_started.get(update.hand_id, 0)
+            elapsed = time.monotonic() - hand_start_time if hand_start_time else 1.0
+            if len(update.ring) < max_seats and elapsed < 0.5:
+                # Wait for the full ring to accumulate in log buffer so all 6 player HUDs appear simultaneously
+                return
             seat_map = build_seat_map(update.ring, update.hero, max_seats=max_seats, hero_seat=hero_seat)
             source = "log-ring"
         else:
@@ -1677,7 +1716,7 @@ class HudMain(QObject):
             self._ff_trace(
                 update.hand_id,
                 "create-deferred",
-                "macOS accessibility reader unavailable; waiting for an imported hand",
+                "Winamax table resolver unavailable; waiting for an imported hand",
             )
             return None
 
@@ -1690,14 +1729,17 @@ class HudMain(QObject):
                 f"waiting for an imported hand",
             )
             return None
-        temp_key = window.table_name
+        if window.window_id is not None:
+            temp_key = f"{window.table_name} #{window.window_id}"
+        else:
+            temp_key = f"{window.table_name} #{update.table_no}"
         if temp_key in self.hud_dict:
             return temp_key, self.hud_dict[temp_key]
 
         # The window states the game only when the accessibility API answered.
-        # Otherwise fall back on what an imported hand from this pool proved.
+        # Otherwise fall back on what an imported hand from this pool proved, or default to holdem.
         pool_games = getattr(self, "winamax_pool_games", None)
-        poker_game = window.poker_game or (pool_games.get(temp_key) if pool_games is not None else None)
+        poker_game = window.poker_game or (pool_games.get(temp_key) if pool_games is not None else None) or "holdem"
         if not poker_game:
             self._ff_trace(
                 update.hand_id,
@@ -2749,6 +2791,10 @@ class HudMain(QObject):
         start. Passing it through prevents OSXTables from performing a second
         window scan that can disagree with the first one while TCC is changing.
         """
+        if not resolved_window and any(k.startswith(f"{temp_key} #") for k, h in self.hud_dict.items() if getattr(h, "is_fast_fold", False)):
+            log.info("Skipping legacy HUD creation for %r: live FastFold HUD is already active", temp_key)
+            return
+
         info = TableInfo.coerce(table_info)
         table_name = info.table_name
         max_seats = info.max_seats

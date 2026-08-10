@@ -67,6 +67,9 @@ class Table(Table_Window):
 
     def __init__(self, *args, **kwargs):
         """Initialize table with platform detector."""
+        # Fast Fold resolves the indexed table window at hand-start. Reusing
+        # that answer avoids a second, potentially different window scan during HUD construction.
+        self._resolved_window = kwargs.pop("resolved_window", None)
         self._detector = get_table_detector()
         self._table_geometry = None
         self.gdkhandle: QWindow | None = None
@@ -202,6 +205,24 @@ class Table(Table_Window):
         Now uses the platform abstraction layer for cleaner, testable code.
         """
         log.debug("Starting window detection for search string: %s", self.search_string)
+
+        if self._resolved_window is not None:
+            try:
+                number = int(self._resolved_window.window_id)
+                title = str(self._resolved_window.title)
+            except (AttributeError, TypeError, ValueError):
+                log.warning("Ignoring invalid pre-resolved Windows window: %r", self._resolved_window)
+            else:
+                if number > 0 and title and not self.check_bad_words(title):
+                    self.number = number
+                    self.title = title
+                    self._table_geometry = self._detector.get_window_geometry(number)
+                    log.debug(
+                        "Reusing pre-resolved table window HWND: %s, title: '%s'",
+                        self.number,
+                        self.title,
+                    )
+                    return
 
         search_str = self._detection_search_string()
         tables = self._detector.find_tables(search_str)

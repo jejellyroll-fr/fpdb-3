@@ -208,8 +208,8 @@ class FastFoldEngine:
             # No hand imported yet, so adj_seats found no hero to rotate and left
             # the layout unrotated: visual seat and layout slot are the same. Put
             # the hero straight on the slot the layout anchors them to -- the
-            # bottom of the table, where the client draws them.
-            hero_seat = self._anchor_slot(hud) or 1
+            # bottom-center of the table (seat 3 on 6-max Winamax layouts), where the client draws them.
+            hero_seat = self._anchor_slot(hud) or 3
 
         hud.fast_fold_hero_seat = hero_seat
         return hero_seat

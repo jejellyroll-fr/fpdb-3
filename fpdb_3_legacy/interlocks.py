@@ -147,16 +147,26 @@ class InterProcessLockWin32(InterProcessLockBase):
         self.mutex: Any = None
 
     def acquire_impl(self, wait) -> None:
-        self.mutex = win32event.CreateMutex(None, 0, self.getHashedName())
+        self.mutex = win32event.CreateMutex(None, 1, self.getHashedName())
         if win32api.GetLastError() == winerror.ERROR_ALREADY_EXISTS:
-            self.mutex.Close()
-            self.mutex = None
+            if self.mutex:
+                win32api.CloseHandle(self.mutex)
+                self.mutex = None
             raise SingleInstanceError(
                 "Could not acquire exclusive lock on " + self.name,
             )
 
     def release_impl(self) -> None:
-        self.mutex.Close()
+        if self.mutex:
+            try:
+                win32event.ReleaseMutex(self.mutex)
+            except Exception:
+                pass
+            try:
+                win32api.CloseHandle(self.mutex)
+            except Exception:
+                pass
+            self.mutex = None
 
 
 class InterProcessLockSocket(InterProcessLockBase):
