@@ -20,10 +20,12 @@ from __future__ import annotations
 # _ = L10n.get_translation()
 import contextlib
 import os
-from importlib import import_module
 from time import time
+from typing import Any
+
 import numpy as np
 import pyqtgraph as pg
+from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
     QFrame,
     QMessageBox,

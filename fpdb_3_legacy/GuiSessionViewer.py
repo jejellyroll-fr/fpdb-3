@@ -16,9 +16,7 @@ from __future__ import annotations
 # In the "official" distribution you can find the license in agpl-3.0.txt.
 import contextlib
 import sys
-import traceback
 from datetime import datetime
-from importlib import import_module
 from time import gmtime, strftime, time
 from typing import Any
 

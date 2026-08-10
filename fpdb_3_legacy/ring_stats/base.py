@@ -31,9 +31,9 @@ class DbWorker(QThread):
         self.query_name = query_name
         self.query_sql = query_sql
 
-    def run(self) -> None:
-        import time
+    def run(self) -> None:  # noqa: PLR0915
         import logging
+        import time
         log = logging.getLogger("DbWorker")
         t_start = time.time()
         log.warning(f"[PERF] DbWorker.run start: {self.query_name}")
@@ -58,7 +58,7 @@ class DbWorker(QThread):
 
             worker_conn_ctx = getattr(db, "worker_connection", None)
             dedicated = getattr(db, "create_worker_connection", None)
-            
+
             t_acq = time.time()
             if callable(worker_conn_ctx):
                 with worker_conn_ctx() as conn:

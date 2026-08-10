@@ -186,10 +186,10 @@ class RingStatsController(QObject):
         # Paramètres pour affiner les requêtes
         filter_params = (filter_widget, playerids, sitenos, limits, seats, groups, dates, games, currencies, num_hands)
 
-        import time
         import logging
+        import time
         log = logging.getLogger("controller")
-        
+
         t0 = time.time()
         # 2. Lancer la requête pour le tableau résumé (summary grid)
         sql_summary = self._get_refined_sql("playerDetailedStats", False, *filter_params)

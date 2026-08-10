@@ -6,7 +6,10 @@ Unit tests verifying pyqtgraph views instantiation and plot updates.
 from __future__ import annotations
 
 import numpy as np
+import pytest
 from PySide6.QtWidgets import QApplication
+
+pytestmark = pytest.mark.qt
 
 
 def get_qapp():

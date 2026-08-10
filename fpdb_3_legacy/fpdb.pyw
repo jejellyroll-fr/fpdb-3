@@ -50,7 +50,7 @@ from typing import Any
 
 import interlocks
 from loggingFpdb import get_logger, setup_logging
-from PySide6.QtCore import QCoreApplication, QDate, QPoint, Qt, QTimer
+from PySide6.QtCore import QCoreApplication, QDate, QPoint, Qt
 from PySide6.QtGui import QAction, QIcon
 from PySide6.QtWidgets import (
     QApplication,
@@ -1710,7 +1710,7 @@ class fpdb(QMainWindow):
         new_ps_thread = GuiRingPlayerStats.GuiRingPlayerStats(self.config, self.sql, self)
         t2 = time.time()
         log.warning(f"[PERF] tab_ring_player_stats: Instantiation took {t2 - t1:.3f}s. Adding tab...")
-        
+
         self.threads.append(new_ps_thread)
         self.add_and_display_tab(new_ps_thread, "Ring Player Stats")
         t3 = time.time()

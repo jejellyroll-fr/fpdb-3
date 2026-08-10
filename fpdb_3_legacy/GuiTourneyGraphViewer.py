@@ -17,10 +17,12 @@ from __future__ import annotations
 import contextlib
 import os
 import sys
-from importlib import import_module
 from time import time
 from typing import Any
 
+import numpy as np
+import pyqtgraph as pg
+from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QFrame, QMessageBox, QScrollArea, QSplitter, QVBoxLayout
 
 from fpdb_3_legacy import Database, Filters, gui_empty_state
@@ -38,8 +40,6 @@ log = get_logger("gui_tourney_graph_viewer")
 # imported, so "empty database" means no hands *and* no tournaments.
 _TOURNEY_TABLES = ("Hands", "Tourneys")
 
-import numpy as np
-import pyqtgraph as pg
 
 
 class GuiTourneyGraphViewer(QSplitter):
