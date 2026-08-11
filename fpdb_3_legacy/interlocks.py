@@ -42,7 +42,11 @@ class SingleInstanceError(RuntimeError):
     """Thrown when you try to acquire an InterProcessLock and another version of the process is already running."""
 
 
-def acquire_hud_instance_lock(source: str) -> Any:
+HUD_INSTANCE_LOCK_NAME = "fpdb_hud_instance"
+"""Name of the machine-wide lock that admits exactly one HUD process."""
+
+
+def acquire_hud_instance_lock(source: str, name: str = HUD_INSTANCE_LOCK_NAME) -> Any:
     """Acquire the single process lock used by the HUD entry point.
 
     The GUI can start the HUD through more than one launch path (normal
@@ -50,8 +54,13 @@ def acquire_hud_instance_lock(source: str) -> Any:
     makes a second HUD fail before it binds ZMQ or creates any Qt windows.
     The caller owns the returned lock and must release it when the event loop
     exits.
+
+    ``name`` exists so a test can exercise the mutual exclusion on a lock of
+    its own. Taking the real one would make the test's result depend on
+    whether a HUD happens to be running on the machine, and would lock the
+    user out of their own HUD while it ran.
     """
-    lock = InterProcessLock(name="fpdb_hud_instance")
+    lock = InterProcessLock(name=name)
     if not lock.acquire(source):
         raise SingleInstanceError("The FPDB HUD process is already running")
     return lock

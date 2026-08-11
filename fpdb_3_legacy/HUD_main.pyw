@@ -2412,6 +2412,11 @@ class HudMain(QObject):
         self.hud_dict[args.temp_key].cards = args.cards
         self.hud_dict[args.temp_key].max = args.max_seats
         self.hud_dict[args.temp_key]._fpdb_generation = self._hud_generation
+        # Before idle_create, because the aux windows read this in adj_seats()
+        # when they are built. Setting it afterwards -- which is where every
+        # caller used to set it -- left the seat rotation applied twice.
+        if self._creation_is_fast_fold(args):
+            self.hud_dict[args.temp_key].is_fast_fold = True
 
         args.table.hud = self.hud_dict[args.temp_key]
 
@@ -2437,6 +2442,18 @@ class HudMain(QObject):
             self._describe_overlay_win_ids(created),
         )
         log.debug("HUD for table %s created successfully.", args.temp_key)
+
+    def _creation_is_fast_fold(self, args: HUDCreationArgs) -> bool:
+        """Whether the HUD being created is for a Fast-Fold table.
+
+        Decided from what the caller already knows rather than from the HUD
+        object, because this has to be answered before the HUD's aux windows
+        exist. ``context.speed`` is set by ``_create_new_hud`` for every path;
+        the table set is the fallback for a direct ``create_HUD`` call.
+        """
+        if getattr(args.context, "speed", None) == "fast":
+            return True
+        return args.temp_key in getattr(self, "_fast_fold_tables", set())
 
     def _destroy_superseded_hud(self, temp_key: str) -> None:
         """Tear down a HUD whose window has been claimed by another key.

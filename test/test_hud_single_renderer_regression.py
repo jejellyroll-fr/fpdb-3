@@ -10,10 +10,12 @@ real processes rather than a mock of the lock.
 
 from __future__ import annotations
 
+import inspect
 import os
 import subprocess
 import sys
 import textwrap
+import uuid
 from types import SimpleNamespace
 from unittest.mock import MagicMock
 
@@ -23,6 +25,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 
 from fpdb_3_legacy import HUD_main
 from fpdb_3_legacy.hud_window_registry import ClaimOutcome, HudWindowRegistry
+from fpdb_3_legacy.interlocks import acquire_hud_instance_lock
 
 REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 
@@ -32,8 +35,19 @@ REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 # --------------------------------------------------------------------------
 
 
-def _hud_lock_child_source(action: str) -> str:
-    """A child that takes the real HUD lock and reports what happened."""
+@pytest.fixture
+def lock_name() -> str:
+    """A lock of this test run's own.
+
+    Never the production ``fpdb_hud_instance``: that one is machine-wide, so
+    taking it would make the result depend on whether the developer has a HUD
+    open, and would lock them out of it for the duration.
+    """
+    return f"fpdb_hud_instance_test_{os.getpid()}_{uuid.uuid4().hex[:8]}"
+
+
+def _hud_lock_child_source(action: str, lock_name: str) -> str:
+    """A child that takes the HUD lock through the real code and reports back."""
     return textwrap.dedent(
         f"""
         import sys
@@ -41,21 +55,29 @@ def _hud_lock_child_source(action: str) -> str:
         from fpdb_3_legacy.interlocks import SingleInstanceError, acquire_hud_instance_lock
 
         try:
-            lock = acquire_hud_instance_lock("test-{action}")
+            lock = acquire_hud_instance_lock("test-{action}", name={lock_name!r})
         except SingleInstanceError:
             print("REFUSED")
             sys.exit(1)
         print("ACQUIRED", flush=True)
         if {action!r} == "hold":
             sys.stdin.readline()
-            lock.release()
-        else:
-            lock.release()
+        lock.release()
         """,
     )
 
 
-def test_two_hud_launches_leave_a_single_owner() -> None:
+def test_the_hud_entry_point_uses_the_machine_wide_lock() -> None:
+    """The default is the shared name, whatever the tests above use."""
+    from fpdb_3_legacy.interlocks import HUD_INSTANCE_LOCK_NAME
+
+    signature = inspect.signature(acquire_hud_instance_lock)
+
+    assert HUD_INSTANCE_LOCK_NAME == "fpdb_hud_instance"
+    assert signature.parameters["name"].default == HUD_INSTANCE_LOCK_NAME
+
+
+def test_two_hud_launches_leave_a_single_owner(lock_name) -> None:
     """The second ``--hud`` process must refuse to start, not start quietly.
 
     Two live HUD processes each build their own overlays over the same tables,
@@ -65,7 +87,7 @@ def test_two_hud_launches_leave_a_single_owner() -> None:
     held across process boundaries.
     """
     holder = subprocess.Popen(
-        [sys.executable, "-c", _hud_lock_child_source("hold")],
+        [sys.executable, "-c", _hud_lock_child_source("hold", lock_name)],
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         text=True,
@@ -75,7 +97,7 @@ def test_two_hud_launches_leave_a_single_owner() -> None:
         assert holder.stdout.readline().strip() == "ACQUIRED"
 
         second = subprocess.run(
-            [sys.executable, "-c", _hud_lock_child_source("try")],
+            [sys.executable, "-c", _hud_lock_child_source("try", lock_name)],
             capture_output=True,
             text=True,
             timeout=60,
@@ -91,7 +113,7 @@ def test_two_hud_launches_leave_a_single_owner() -> None:
         holder.wait(timeout=60)
 
 
-def test_the_lock_is_released_when_the_hud_exits() -> None:
+def test_the_lock_is_released_when_the_hud_exits(lock_name) -> None:
     """A HUD that has quit must not lock the next one out.
 
     The refusal above is only correct if it is temporary: a crash or a normal
@@ -99,7 +121,7 @@ def test_the_lock_is_released_when_the_hud_exits() -> None:
     reboot, which is worse than the bug it prevents.
     """
     first = subprocess.run(
-        [sys.executable, "-c", _hud_lock_child_source("try")],
+        [sys.executable, "-c", _hud_lock_child_source("try", lock_name)],
         capture_output=True,
         text=True,
         timeout=60,
@@ -109,7 +131,7 @@ def test_the_lock_is_released_when_the_hud_exits() -> None:
     assert "ACQUIRED" in first.stdout
 
     second = subprocess.run(
-        [sys.executable, "-c", _hud_lock_child_source("try")],
+        [sys.executable, "-c", _hud_lock_child_source("try", lock_name)],
         capture_output=True,
         text=True,
         timeout=60,
@@ -216,6 +238,7 @@ def _hud_main_for_create() -> HUD_main.HudMain:
     hud_main.hud_dict = {}
     hud_main._window_registry = HudWindowRegistry()
     hud_main._hud_generation = 0
+    hud_main._fast_fold_tables = set()
     hud_main.config = MagicMock()
     hud_main.db_connection = MagicMock()
     hud_main._prepared_hands = {}
@@ -223,7 +246,7 @@ def _hud_main_for_create() -> HUD_main.HudMain:
     return hud_main
 
 
-def _creation_args(temp_key: str, window_id: int) -> HUD_main.HUDCreationArgs:
+def _creation_args(temp_key: str, window_id: int, *, speed: str = "normal") -> HUD_main.HUDCreationArgs:
     return HUD_main.HUDCreationArgs(
         new_hand_id="hand1",
         table=SimpleNamespace(number=window_id, key=temp_key, hud=None),
@@ -233,6 +256,7 @@ def _creation_args(temp_key: str, window_id: int) -> HUD_main.HUDCreationArgs:
         game_type="ring",
         stat_dict={},
         cards={},
+        context=SimpleNamespace(speed=speed),
         loading=True,
     )
 
@@ -277,6 +301,56 @@ def test_two_windows_produce_two_huds_through_create(monkeypatch) -> None:
 
     assert sorted(hud_main.hud_dict) == ["Colorado 1 #61632", "Colorado 2 #61633"]
     assert hud_main.idle_create.call_count == 2
+
+
+# --------------------------------------------------------------------------
+# Seats are rotated once, not twice
+# --------------------------------------------------------------------------
+
+
+def test_a_fast_fold_hud_knows_it_before_its_aux_windows_are_built(monkeypatch) -> None:
+    """``is_fast_fold`` must be true by the time the overlays are created.
+
+    ``AuxSeats.adj_seats`` returns the identity mapping for Fast-Fold because
+    ``FastFoldEngine`` has already rotated the client's slots onto layout
+    seats. It reads the flag while the aux windows are being built, and every
+    caller used to set the flag *after* creation -- so the check never fired
+    and the seats were rotated a second time, by the hero's seat in the last
+    imported hand. That put every player's block on their neighbour's chair.
+    """
+    hud_main = _hud_main_for_create()
+    monkeypatch.setattr(HUD_main.Hud, "Hud", MagicMock(side_effect=lambda *a, **k: MagicMock(is_fast_fold=False)))
+    seen: list[bool] = []
+    hud_main.idle_create = lambda args: seen.append(hud_main.hud_dict[args.temp_key].is_fast_fold)
+
+    hud_main.create_HUD(_creation_args("Colorado 1 #61632", 61632, speed="fast"))
+
+    assert seen == [True]
+
+
+def test_a_fast_fold_table_known_only_by_key_is_still_flagged(monkeypatch) -> None:
+    """A direct create_HUD call must not lose the Fast-Fold identity."""
+    hud_main = _hud_main_for_create()
+    hud_main._fast_fold_tables.add("Colorado 1 #61632")
+    monkeypatch.setattr(HUD_main.Hud, "Hud", MagicMock(side_effect=lambda *a, **k: MagicMock(is_fast_fold=False)))
+    seen: list[bool] = []
+    hud_main.idle_create = lambda args: seen.append(hud_main.hud_dict[args.temp_key].is_fast_fold)
+
+    hud_main.create_HUD(_creation_args("Colorado 1 #61632", 61632))
+
+    assert seen == [True]
+
+
+def test_an_ordinary_table_is_not_flagged_as_fast_fold(monkeypatch) -> None:
+    """A cash table must keep the rotation adj_seats does for it."""
+    hud_main = _hud_main_for_create()
+    monkeypatch.setattr(HUD_main.Hud, "Hud", MagicMock(side_effect=lambda *a, **k: MagicMock(is_fast_fold=False)))
+    seen: list[bool] = []
+    hud_main.idle_create = lambda args: seen.append(hud_main.hud_dict[args.temp_key].is_fast_fold)
+
+    hud_main.create_HUD(_creation_args("Some Cash Table", 4242))
+
+    assert seen == [False]
 
 
 # --------------------------------------------------------------------------
