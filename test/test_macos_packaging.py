@@ -212,6 +212,17 @@ def test_ci_distributes_macos_only_with_pyoxidizer() -> None:
     assert "artifact: fpdb-pyoxidizer-macos-arm64" in pyoxidizer
 
 
+def test_native_ci_installs_the_released_poker_eval_wheel() -> None:
+    workflow = CI_WORKFLOW.read_text()
+    native = _workflow_job(workflow, "native", "coverage")
+
+    assert "Install released pypoker-eval wheel" in native
+    assert "releases/download/v1.2.0" in native
+    assert "git clone --depth 1 https://github.com/jejellyroll-fr/poker-eval.git" not in native
+    assert "manylinux_2_17_x86_64.manylinux2014_x86_64.whl" in native
+    assert "macosx_11_0_arm64.whl" in native
+
+
 def test_release_and_rc_pyoxidizer_artifacts_require_stable_developer_id() -> None:
     workflow = CI_WORKFLOW.read_text()
     pyoxidizer = _workflow_job(workflow, "build-pyoxidizer")
