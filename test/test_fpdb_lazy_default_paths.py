@@ -36,7 +36,7 @@ def _calls_get_default_paths(method: ast.FunctionDef) -> bool:
 def _load_method(name: str, namespace: dict[str, Any]) -> Any:
     module = ast.Module(body=[_fpdb_method(name)], type_ignores=[])
     ast.fix_missing_locations(module)
-    exec(compile(module, str(SOURCE), "exec"), namespace)  # noqa: S102 - executes repository source under test
+    exec(compile(module, str(SOURCE), "exec"), namespace)  # noqa: S102  # nosec B102 - executes repository source under test
     return namespace[name]
 
 

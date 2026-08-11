@@ -37,8 +37,8 @@ class _Db:
 
 
 def _git(repo: Path, *args: str) -> None:
-    subprocess.run(  # noqa: S603
-        ["git", *args],  # noqa: S607
+    subprocess.run(  # noqa: S603  # nosec B603 - fixed test helper argv, no shell
+        ["git", *args],  # nosec B607 - fixed test helper executable
         cwd=repo,
         check=True,
         stdout=subprocess.DEVNULL,
@@ -149,7 +149,7 @@ def test_a_hanging_git_cannot_freeze_the_gui_thread(tmp_path, monkeypatch) -> No
     monkeypatch.delattr(sys, "frozen", raising=False)
 
     def timeout(*args, **kwargs):
-        raise subprocess.TimeoutExpired(cmd="git", timeout=5)
+        raise subprocess.TimeoutExpired(cmd="git", timeout=5)  # nosec B603 - controlled test exception
 
     monkeypatch.setattr(subprocess, "run", timeout)
 
