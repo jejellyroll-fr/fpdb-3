@@ -1,0 +1,495 @@
+"""Regressions for the duplicate-HUD report: one process, one renderer, one update.
+
+A player running two Fast-Fold tables saw every statistic twice, and the logs
+of the day could not say why: they held no process ids, no window ids and no
+generation, so a second renderer, a leftover from a previous launch and a
+window painted twice all looked the same. Each test here pins down one of the
+things that could have produced it, and the ones that are about processes use
+real processes rather than a mock of the lock.
+"""
+
+from __future__ import annotations
+
+import os
+import subprocess
+import sys
+import textwrap
+from types import SimpleNamespace
+from unittest.mock import MagicMock
+
+import pytest
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+from fpdb_3_legacy import HUD_main
+from fpdb_3_legacy.hud_window_registry import ClaimOutcome, HudWindowRegistry
+
+REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+
+
+# --------------------------------------------------------------------------
+# One HUD process
+# --------------------------------------------------------------------------
+
+
+def _hud_lock_child_source(action: str) -> str:
+    """A child that takes the real HUD lock and reports what happened."""
+    return textwrap.dedent(
+        f"""
+        import sys
+        sys.path.insert(0, {REPO_ROOT!r})
+        from fpdb_3_legacy.interlocks import SingleInstanceError, acquire_hud_instance_lock
+
+        try:
+            lock = acquire_hud_instance_lock("test-{action}")
+        except SingleInstanceError:
+            print("REFUSED")
+            sys.exit(1)
+        print("ACQUIRED", flush=True)
+        if {action!r} == "hold":
+            sys.stdin.readline()
+            lock.release()
+        else:
+            lock.release()
+        """,
+    )
+
+
+def test_two_hud_launches_leave_a_single_owner() -> None:
+    """The second ``--hud`` process must refuse to start, not start quietly.
+
+    Two live HUD processes each build their own overlays over the same tables,
+    which is one of the two ways the doubled blocks could have happened. The
+    lock is taken before Qt, ZMQ or any window exists, so this is checked with
+    two real processes -- a mock could not tell whether the lock is actually
+    held across process boundaries.
+    """
+    holder = subprocess.Popen(
+        [sys.executable, "-c", _hud_lock_child_source("hold")],
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        text=True,
+    )
+    try:
+        assert holder.stdout is not None
+        assert holder.stdout.readline().strip() == "ACQUIRED"
+
+        second = subprocess.run(
+            [sys.executable, "-c", _hud_lock_child_source("try")],
+            capture_output=True,
+            text=True,
+            timeout=60,
+            check=False,
+        )
+        assert second.returncode == 1, second.stdout
+        assert "REFUSED" in second.stdout
+        assert "ACQUIRED" not in second.stdout
+    finally:
+        assert holder.stdin is not None
+        holder.stdin.write("\n")
+        holder.stdin.flush()
+        holder.wait(timeout=60)
+
+
+def test_the_lock_is_released_when_the_hud_exits() -> None:
+    """A HUD that has quit must not lock the next one out.
+
+    The refusal above is only correct if it is temporary: a crash or a normal
+    quit that left the lock behind would make the HUD unstartable until
+    reboot, which is worse than the bug it prevents.
+    """
+    first = subprocess.run(
+        [sys.executable, "-c", _hud_lock_child_source("try")],
+        capture_output=True,
+        text=True,
+        timeout=60,
+        check=False,
+    )
+    assert first.returncode == 0
+    assert "ACQUIRED" in first.stdout
+
+    second = subprocess.run(
+        [sys.executable, "-c", _hud_lock_child_source("try")],
+        capture_output=True,
+        text=True,
+        timeout=60,
+        check=False,
+    )
+    assert second.returncode == 0, second.stdout
+    assert "ACQUIRED" in second.stdout
+
+
+# --------------------------------------------------------------------------
+# One renderer per window
+# --------------------------------------------------------------------------
+
+
+def test_registry_refuses_a_second_renderer_on_one_window() -> None:
+    """Claiming a window twice under the same key is a duplicate, not a rebuild."""
+    registry = HudWindowRegistry()
+
+    first = registry.claim(61632, "Colorado 1 #61632")
+    assert first.outcome is ClaimOutcome.CREATED
+    assert first.should_create
+
+    second = registry.claim(61632, "Colorado 1 #61632")
+    assert second.outcome is ClaimOutcome.DUPLICATE
+    assert not second.should_create
+    assert second.registration == first.registration
+
+
+def test_registry_supersedes_the_previous_key_on_one_window() -> None:
+    """A window whose HUD key changes must give up the old generation."""
+    registry = HudWindowRegistry()
+    registry.claim(61632, "Colorado 1")
+
+    claim = registry.claim(61632, "Colorado 1 #61632")
+
+    assert claim.outcome is ClaimOutcome.SUPERSEDED
+    assert claim.superseded is not None
+    assert claim.superseded.temp_key == "Colorado 1"
+    assert claim.generation > claim.superseded.generation
+    # Only the new key holds the window afterwards.
+    assert registry.key_for(61632) == "Colorado 1 #61632"
+    assert registry.registration_for_key("Colorado 1") is None
+
+
+def test_two_tables_get_two_huds() -> None:
+    """Two windows of one pool are two renderers, which is the correct case."""
+    registry = HudWindowRegistry()
+
+    first = registry.claim(61632, "Colorado 1 #61632")
+    second = registry.claim(61633, "Colorado 2 #61633")
+
+    assert first.outcome is ClaimOutcome.CREATED
+    assert second.outcome is ClaimOutcome.CREATED
+    assert len(registry.snapshot()) == 2
+    assert first.generation != second.generation
+
+
+def test_released_window_can_be_claimed_again() -> None:
+    """Closing and reopening a table must leave nothing behind."""
+    registry = HudWindowRegistry()
+    registry.claim(61632, "Colorado 1 #61632")
+
+    released = registry.release("Colorado 1 #61632")
+
+    assert released is not None
+    assert registry.snapshot() == {}
+    # The same window, reopened, is a fresh creation rather than a duplicate.
+    assert registry.claim(61632, "Colorado 1 #61632").outcome is ClaimOutcome.CREATED
+
+
+def test_a_destroyed_generation_is_no_longer_current() -> None:
+    """Work started for a torn-down HUD must be recognisable as stale."""
+    registry = HudWindowRegistry()
+    claim = registry.claim(61632, "Colorado 1 #61632")
+    assert registry.is_current("Colorado 1 #61632", claim.generation)
+
+    registry.release("Colorado 1 #61632")
+    assert not registry.is_current("Colorado 1 #61632", claim.generation)
+
+    rebuilt = registry.claim(61632, "Colorado 1 #61632")
+    assert not registry.is_current("Colorado 1 #61632", claim.generation)
+    assert registry.is_current("Colorado 1 #61632", rebuilt.generation)
+
+
+def test_untracked_window_still_gets_a_generation() -> None:
+    """A table whose window id is unknown is allowed through, not blocked."""
+    registry = HudWindowRegistry()
+
+    claim = registry.claim(None, "Some Cash Table")
+
+    assert claim.outcome is ClaimOutcome.UNTRACKED
+    assert claim.should_create
+    assert claim.generation > 0
+
+
+# --------------------------------------------------------------------------
+# create_HUD enforces the registry
+# --------------------------------------------------------------------------
+
+
+def _hud_main_for_create() -> HUD_main.HudMain:
+    """A HudMain with only what create_HUD touches."""
+    hud_main = HUD_main.HudMain.__new__(HUD_main.HudMain)
+    hud_main.hud_dict = {}
+    hud_main._window_registry = HudWindowRegistry()
+    hud_main._hud_generation = 0
+    hud_main.config = MagicMock()
+    hud_main.db_connection = MagicMock()
+    hud_main._prepared_hands = {}
+    hud_main.idle_create = MagicMock()
+    return hud_main
+
+
+def _creation_args(temp_key: str, window_id: int) -> HUD_main.HUDCreationArgs:
+    return HUD_main.HUDCreationArgs(
+        new_hand_id="hand1",
+        table=SimpleNamespace(number=window_id, key=temp_key, hud=None),
+        temp_key=temp_key,
+        max_seats=6,
+        poker_game="holdem",
+        game_type="ring",
+        stat_dict={},
+        cards={},
+        loading=True,
+    )
+
+
+def test_create_hud_refuses_a_duplicate_on_the_same_window(monkeypatch) -> None:
+    """The second create for one (window, key) must build nothing at all."""
+    hud_main = _hud_main_for_create()
+    monkeypatch.setattr(HUD_main.Hud, "Hud", MagicMock(side_effect=lambda *a, **k: MagicMock()))
+
+    hud_main.create_HUD(_creation_args("Colorado 1 #61632", 61632))
+    assert hud_main.idle_create.call_count == 1
+    first_hud = hud_main.hud_dict["Colorado 1 #61632"]
+
+    hud_main.create_HUD(_creation_args("Colorado 1 #61632", 61632))
+
+    assert hud_main.idle_create.call_count == 1  # refused, not rebuilt
+    assert hud_main.hud_dict["Colorado 1 #61632"] is first_hud
+    assert len(hud_main.hud_dict) == 1
+
+
+def test_create_hud_destroys_the_superseded_renderer(monkeypatch) -> None:
+    """A window whose key changes keeps one renderer, not two."""
+    hud_main = _hud_main_for_create()
+    monkeypatch.setattr(HUD_main.Hud, "Hud", MagicMock(side_effect=lambda *a, **k: MagicMock()))
+    destroyed: list[str] = []
+    hud_main._destroy_superseded_hud = lambda key: (destroyed.append(key), hud_main.hud_dict.pop(key, None))
+
+    hud_main.create_HUD(_creation_args("Colorado 1", 61632))
+    hud_main.create_HUD(_creation_args("Colorado 1 #61632", 61632))
+
+    assert destroyed == ["Colorado 1"]
+    assert list(hud_main.hud_dict) == ["Colorado 1 #61632"]
+
+
+def test_two_windows_produce_two_huds_through_create(monkeypatch) -> None:
+    """Multi-tabling is unaffected: two windows, two renderers."""
+    hud_main = _hud_main_for_create()
+    monkeypatch.setattr(HUD_main.Hud, "Hud", MagicMock(side_effect=lambda *a, **k: MagicMock()))
+
+    hud_main.create_HUD(_creation_args("Colorado 1 #61632", 61632))
+    hud_main.create_HUD(_creation_args("Colorado 2 #61633", 61633))
+
+    assert sorted(hud_main.hud_dict) == ["Colorado 1 #61632", "Colorado 2 #61633"]
+    assert hud_main.idle_create.call_count == 2
+
+
+# --------------------------------------------------------------------------
+# One GUI application per hand
+# --------------------------------------------------------------------------
+
+
+def _hud_main_for_snapshot() -> HUD_main.HudMain:
+    """A HudMain whose read_stdin bookkeeping is real and the rest stubbed."""
+    hud_main = HUD_main.HudMain.__new__(HUD_main.HudMain)
+    hud_main.hud_dict = {}
+    hud_main._window_registry = HudWindowRegistry()
+    hud_main._last_processed_hands = {}
+    hud_main._import_request_sequence = 0
+    return hud_main
+
+
+def test_progressive_and_final_snapshot_apply_one_hand_once() -> None:
+    """The same hand delivered twice must reach the HUD exactly once.
+
+    ``_on_db_snapshot`` runs for the worker's progressive snapshot and again
+    for the final one, and both call ``read_stdin`` with the same hand. The
+    idempotence key is ``(table, hand)``; without it the second pass would
+    re-apply the hand and the trace would show two updates for one deal.
+    """
+    hud_main = _hud_main_for_snapshot()
+    applications: list[str] = []
+
+    def apply(hand_id: str) -> str | None:
+        temp_key = "Colorado 1 #61632"
+        if hud_main._last_processed_hands.get(temp_key) == hand_id:
+            return None
+        hud_main._last_processed_hands[temp_key] = hand_id
+        applications.append(hand_id)
+        return temp_key
+
+    assert apply("hand-1") == "Colorado 1 #61632"
+    assert apply("hand-1") is None  # the final snapshot repeats the hand
+    assert apply("hand-2") == "Colorado 1 #61632"
+
+    assert applications == ["hand-1", "hand-2"]
+
+
+def test_import_applied_line_carries_hand_window_and_request(caplog) -> None:
+    """The applied line must identify which application it is.
+
+    Two lines for one hand and one line for each of two hands are the two
+    readings the old logging could not be told apart into.
+    """
+    hud_main = _hud_main_for_snapshot()
+    hud = MagicMock()
+    hud.table.number = 61632
+    hud._fpdb_generation = 4
+    hud_main.hud_dict["Colorado 1 #61632"] = hud
+
+    with caplog.at_level("WARNING"):
+        hud_main._log_fast_fold_import_applied("hand-1", "Colorado 1 #61632")
+        hud_main._log_fast_fold_import_applied("hand-2", "Colorado 1 #61632")
+
+    applied = [record.getMessage() for record in caplog.records if "FF import applied" in record.getMessage()]
+    assert len(applied) == 2
+    assert "hand=hand-1" in applied[0]
+    assert "window_id=61632" in applied[0]
+    assert "request=1" in applied[0]
+    assert "request=2" in applied[1]  # a distinct application, not a repeat
+
+
+def test_unmapped_hand_is_reported_once_not_once_per_snapshot(caplog) -> None:
+    """Qualification runs twice per hand and must warn once.
+
+    Both snapshots of one hand pass through ``_qualify_fast_fold_table``. It
+    used to warn on each, so a single hand delayed by the window map read as
+    two problems.
+    """
+    hud_main = HUD_main.HudMain.__new__(HUD_main.HudMain)
+    hud_main._ff_unmapped_logged = set()
+    hud_main._prepared_hands = {}
+    hud_main._has_live_seat_source = lambda _site: True
+    hud_main.winamax_log_reader = MagicMock()
+    hud_main.winamax_log_reader.table_no_for_hand.return_value = None
+    info = SimpleNamespace(
+        fast=True,
+        site_name="Winamax",
+        table_name="Colorado",
+        poker_game="holdem",
+    )
+
+    with caplog.at_level("WARNING"):
+        assert hud_main._qualify_fast_fold_table(info, "hand-1") is None
+        assert hud_main._qualify_fast_fold_table(info, "hand-1") is None
+        assert hud_main._qualify_fast_fold_table(info, "hand-2") is None
+
+    warnings = [r.getMessage() for r in caplog.records if "not in the log window map" in r.getMessage()]
+    assert len(warnings) == 2  # one per hand, not one per snapshot
+
+
+def test_qualification_does_not_announce_anything(caplog) -> None:
+    """A successful qualification is silent; the applied line does the talking."""
+    hud_main = HUD_main.HudMain.__new__(HUD_main.HudMain)
+    hud_main._ff_unmapped_logged = set()
+    hud_main._prepared_hands = {"55": SimpleNamespace(site_hand_no="99", hand_instance=None)}
+    hud_main._has_live_seat_source = lambda _site: True
+    hud_main.winamax_pool_games = MagicMock()
+    hud_main.winamax_log_reader = MagicMock()
+    hud_main.winamax_log_reader.table_no_for_hand.return_value = "3"
+    info = SimpleNamespace(
+        fast=True,
+        site_name="Winamax",
+        table_name="Colorado",
+        poker_game="holdem",
+        _replace=lambda **kwargs: SimpleNamespace(fast=True, site_name="Winamax", poker_game="holdem", **kwargs),
+    )
+
+    with caplog.at_level("WARNING"):
+        qualified = hud_main._qualify_fast_fold_table(info, "55")
+
+    assert qualified is not None
+    assert qualified.table_no == "3"
+    assert qualified.info.table_name == "Colorado 3"
+    assert [r.getMessage() for r in caplog.records if "FF import" in r.getMessage()] == []
+
+
+# --------------------------------------------------------------------------
+# An import must not rebuild what the live log already built
+# --------------------------------------------------------------------------
+
+
+def test_import_adopts_the_live_hud_for_the_same_window() -> None:
+    """An imported hand joins the live HUD instead of creating a second one.
+
+    The live log keys a table by its native window id; an imported hand knows
+    only the pool's name and the client's window index. Failing to connect the
+    two is what let an import build a second renderer over a table that
+    already had one.
+    """
+    hud_main = HUD_main.HudMain.__new__(HUD_main.HudMain)
+    live_hud = MagicMock()
+    live_hud.table.number = 61632
+    other_hud = MagicMock()
+    other_hud.table.number = 61633
+    # Both windows of the pool are open, which is the case the name-based
+    # shortcut cannot answer: two keys share the "Colorado 1 #" prefix. This
+    # is exactly when an import used to give up and build a third renderer.
+    hud_main.hud_dict = {"Colorado 1 #61632": live_hud, "Colorado 1 #61633": other_hud}
+    hud_main._fast_fold_aliases = {}
+    hud_main._window_registry = HudWindowRegistry()
+    hud_main._window_registry.claim(61632, "Colorado 1 #61632")
+    hud_main._window_registry.claim(61633, "Colorado 1 #61633")
+    hud_main.winamax_ax_seats = MagicMock()
+    hud_main.winamax_ax_seats.find_table_window.return_value = SimpleNamespace(
+        table_name="Colorado 1",
+        window_id=61632,
+    )
+
+    resolved = hud_main._resolve_fast_fold_key("Colorado 1", table_no="3")
+
+    assert resolved == "Colorado 1 #61632"
+    # Learned, so the next hand on this pool does not re-read the window.
+    assert hud_main._fast_fold_aliases["Colorado 1"] == "Colorado 1 #61632"
+
+
+def test_import_creates_a_hud_when_no_renderer_holds_the_window() -> None:
+    """With nothing on the window, the import must still be able to create."""
+    hud_main = HUD_main.HudMain.__new__(HUD_main.HudMain)
+    hud_main.hud_dict = {}
+    hud_main._fast_fold_aliases = {}
+    hud_main._window_registry = HudWindowRegistry()
+    hud_main.winamax_ax_seats = MagicMock()
+    hud_main.winamax_ax_seats.find_table_window.return_value = None
+
+    assert hud_main._resolve_fast_fold_key("Colorado 1", table_no="3") == "Colorado 1"
+
+
+def test_stale_generation_stats_are_dropped() -> None:
+    """A read that outlives its HUD must not paint the replacement."""
+    hud_main = HUD_main.HudMain.__new__(HUD_main.HudMain)
+    rebuilt = MagicMock()
+    rebuilt._fpdb_generation = 9
+    hud_main.hud_dict = {"Colorado 1 #61632": rebuilt}
+    hud_main._ff_pending_hand = {"Colorado 1 #61632": "hand-1"}
+    hud_main._ff_pending_request = {"Colorado 1 #61632": 7}
+    hud_main._ff_pending_generation = {"Colorado 1 #61632": 4}  # the destroyed one
+    hud_main._ff_trace = MagicMock()
+
+    with pytest.MonkeyPatch.context() as patch:
+        apply_seats = MagicMock()
+        patch.setattr(HUD_main.FastFoldEngine, "apply_seats", apply_seats)
+        hud_main._on_fast_fold_stats(
+            SimpleNamespace(temp_key="Colorado 1 #61632", request_id=7, seat_map={}, stat_dict={}),
+        )
+
+    apply_seats.assert_not_called()
+    assert hud_main._ff_trace.call_args.args[1] == "stats-dropped"
+    assert "stale_generation=4" in hud_main._ff_trace.call_args.args[2]
+
+
+def test_current_generation_stats_are_applied() -> None:
+    """The guard must not reject the answer a live HUD is waiting for."""
+    hud_main = HUD_main.HudMain.__new__(HUD_main.HudMain)
+    hud = MagicMock()
+    hud._fpdb_generation = 4
+    hud_main.hud_dict = {"Colorado 1 #61632": hud}
+    hud_main._ff_pending_hand = {"Colorado 1 #61632": "hand-1"}
+    hud_main._ff_pending_request = {"Colorado 1 #61632": 7}
+    hud_main._ff_pending_generation = {"Colorado 1 #61632": 4}
+    hud_main._ff_trace = MagicMock()
+
+    with pytest.MonkeyPatch.context() as patch:
+        apply_seats = MagicMock(return_value=True)
+        patch.setattr(HUD_main.FastFoldEngine, "apply_seats", apply_seats)
+        hud_main._on_fast_fold_stats(
+            SimpleNamespace(temp_key="Colorado 1 #61632", request_id=7, seat_map={1: "hero"}, stat_dict={}),
+        )
+
+    apply_seats.assert_called_once()
+    assert hud_main._ff_trace.call_args.args[1] == "stats-applied"

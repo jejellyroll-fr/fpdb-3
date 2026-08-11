@@ -2335,8 +2335,8 @@ def test_fast_fold_table_name_is_qualified_by_its_window(hud_main) -> None:
         "102": _prepared_with_site_id("227540102"),
     }
 
-    assert hud_main._qualify_fast_fold_table(_fast_info(hud_main), 101).table_name == "Casablanca 5"
-    assert hud_main._qualify_fast_fold_table(_fast_info(hud_main), 102).table_name == "Casablanca 6"
+    assert hud_main._qualify_fast_fold_table(_fast_info(hud_main), 101).info.table_name == "Casablanca 5"
+    assert hud_main._qualify_fast_fold_table(_fast_info(hud_main), 102).info.table_name == "Casablanca 6"
 
 
 def test_unmappable_fast_fold_hand_is_skipped_not_keyed_on_the_pool_name(hud_main) -> None:
@@ -2361,7 +2361,7 @@ def test_non_fast_tables_are_never_qualified(hud_main) -> None:
     info = TableInfo(table_name="Casablanca", fast=False, site_name="Winamax", game_type="ring")
     hud_main.winamax_log_reader = SimpleNamespace(is_tailing=True, table_no_for_hand=lambda _h: "5")
 
-    assert hud_main._qualify_fast_fold_table(info, 1).table_name == "Casablanca"
+    assert hud_main._qualify_fast_fold_table(info, 1).info.table_name == "Casablanca"
 
 
 def _ff_hud(title):
@@ -2488,7 +2488,7 @@ def test_window_is_resolved_from_the_identity_snapshot(hud_main) -> None:
     )
     hud_main._prepared_hands = {"101": SimpleNamespace(site_hand_no="227540101", hand_instance=None)}
 
-    assert hud_main._qualify_fast_fold_table(_fast_info(hud_main), 101).table_name == "Casablanca 5"
+    assert hud_main._qualify_fast_fold_table(_fast_info(hud_main), 101).info.table_name == "Casablanca 5"
 
 
 def test_a_partial_window_read_is_not_frozen_for_the_whole_hand(hud_main) -> None:
@@ -2713,7 +2713,8 @@ def test_an_imported_hand_records_what_its_pool_deals(hud_main) -> None:
 
     qualified = hud_main._qualify_fast_fold_table(info, "42")
 
-    assert qualified.table_name == "Colorado 4"
+    assert qualified.info.table_name == "Colorado 4"
+    assert qualified.table_no == "4"
     assert hud_main.winamax_pool_games.get("Colorado 2") == "omahahi"
 
 

@@ -35,6 +35,7 @@ from PySide6.QtWidgets import (
 )
 
 from fpdb_3_legacy import Configuration, Importer
+from fpdb_3_legacy.hud_diagnostics import session_id
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.loggingFpdb import get_logger
 from fpdb_3_legacy.subprocess_launch import hud_main_command
@@ -782,6 +783,16 @@ class GuiAutoImport(QWidget):
 
         log.info("opening pipe to HUD")
         log.debug(f"Running {command!r} with bs={bs}")
+        # WARNING, not DEBUG: which argv actually started the HUD is the first
+        # thing a duplicate-overlay report needs, and DEBUG is not on in the
+        # logs users send.
+        log.warning(
+            "HUD launch: session=%s parent_pid=%s install_method=%s command=%r",
+            session_id(),
+            os.getpid(),
+            self.config.install_method,
+            command,
+        )
 
         # ------------------------------------------------------------------
         # 3) launch HUD

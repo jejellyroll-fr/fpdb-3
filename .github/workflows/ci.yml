@@ -640,9 +640,14 @@ jobs:
           MACOS_NOTARY_KEY_ID: ${{ secrets.MACOS_NOTARY_KEY_ID }}
           MACOS_NOTARY_ISSUER_ID: ${{ secrets.MACOS_NOTARY_ISSUER_ID }}
         run: |
+          # A public release must not fall back to ad-hoc signing. An ad-hoc
+          # identity changes with every build, so macOS treats each release as
+          # a different application: the Accessibility and Automation grants
+          # the HUD needs stop applying after an update, and the bundle is
+          # subject to App Translocation. Failing here is the point.
           if [[ -z "${FPDB_MACOS_SIGNING_IDENTITY}" || "${FPDB_MACOS_SIGNING_IDENTITY}" == "-" ]]; then
-            echo "::warning::MACOS_SIGNING_IDENTITY secret is not configured in repository; macOS release will use ad-hoc signing."
-            exit 0
+            echo "::error::MACOS_SIGNING_IDENTITY is not configured. A macOS release requires a stable Developer ID Application identity; an ad-hoc bundle must not be published."
+            exit 1
           fi
           missing=0
           for name in FPDB_MACOS_SIGNING_IDENTITY MACOS_CERTIFICATE_P12_BASE64 MACOS_CERTIFICATE_PASSWORD MACOS_NOTARY_API_KEY_P8_BASE64 MACOS_NOTARY_KEY_ID MACOS_NOTARY_ISSUER_ID; do
@@ -753,6 +758,13 @@ jobs:
               expected_team_id="${BASH_REMATCH[1]}"
             else
               echo "::error::Could not extract Team ID from Developer ID identity"
+              exit 1
+            fi
+            # "Signature=adhoc" is the one word that says this bundle has no
+            # stable identity. Assert its absence explicitly rather than
+            # inferring it from the Authority line being present.
+            if grep -Fq 'Signature=adhoc' "$RUNNER_TEMP/fpdb-signature.txt"; then
+              echo "::error::Release bundle is ad-hoc signed; it has no stable TCC identity and must not be published"
               exit 1
             fi
             grep -Fqx "Authority=$FPDB_MACOS_SIGNING_IDENTITY" "$RUNNER_TEMP/fpdb-signature.txt"

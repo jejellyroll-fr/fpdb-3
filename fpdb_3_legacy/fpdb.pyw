@@ -102,6 +102,7 @@ from fpdb_3_legacy.Exceptions import FpdbError
 from fpdb_3_legacy.GuiConfigObserver import GuiConfigObserver
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.L10n import set_locale_translation
+from fpdb_3_legacy.ui_instrumentation import TabOpenProfiler
 
 np = import_module("numpy")
 
@@ -1713,21 +1714,18 @@ class fpdb(QMainWindow):
         # This package imports Matplotlib and scans every system font. Frozen
         # builds cannot reliably reuse that scan, so importing it at startup
         # delayed Auto Import even though no graphing tab had been requested.
-        import time
-        t0 = time.time()
-        log.warning("[PERF] tab_ring_player_stats: Importing GuiRingPlayerStats")
-        from fpdb_3_legacy import GuiRingPlayerStats
-        t1 = time.time()
-        log.warning(f"[PERF] tab_ring_player_stats: Import took {t1 - t0:.3f}s. Creating GuiRingPlayerStats...")
+        profiler = TabOpenProfiler("Ring Player Stats")
+        with profiler.phase("import"):
+            from fpdb_3_legacy import GuiRingPlayerStats
 
-        new_ps_thread = GuiRingPlayerStats.GuiRingPlayerStats(self.config, self.sql, self)
-        t2 = time.time()
-        log.warning(f"[PERF] tab_ring_player_stats: Instantiation took {t2 - t1:.3f}s. Adding tab...")
+        with profiler.phase("construct"):
+            new_ps_thread = GuiRingPlayerStats.GuiRingPlayerStats(self.config, self.sql, self)
 
+        profiler.watch_first_paint(new_ps_thread)
         self.threads.append(new_ps_thread)
-        self.add_and_display_tab(new_ps_thread, "Ring Player Stats")
-        t3 = time.time()
-        log.warning(f"[PERF] tab_ring_player_stats: Adding tab took {t3 - t2:.3f}s. Total: {t3 - t0:.3f}s")
+        with profiler.phase("add_tab"):
+            self.add_and_display_tab(new_ps_thread, "Ring Player Stats")
+        profiler.report(log)
 
     def tab_opponents_report(self, widget, data=None) -> None:
         new_thread = GuiOpponentsReport.GuiOpponentsReport(self.config, self.sql, self)
@@ -1751,12 +1749,19 @@ class fpdb(QMainWindow):
     #     self.add_and_display_tab(ps_tab, "Positional Stats")
 
     def tab_session_stats(self, widget, data=None) -> None:
-        from fpdb_3_legacy import GuiSessionViewer
+        profiler = TabOpenProfiler("Session Stats")
+        with profiler.phase("import"):
+            from fpdb_3_legacy import GuiSessionViewer
 
         colors = self.get_theme_colors()
-        new_ps_thread = GuiSessionViewer.GuiSessionViewer(self.config, self.sql, self, self, colors=colors)
+        with profiler.phase("construct"):
+            new_ps_thread = GuiSessionViewer.GuiSessionViewer(self.config, self.sql, self, self, colors=colors)
+
+        profiler.watch_first_paint(new_ps_thread)
         self.threads.append(new_ps_thread)
-        self.add_and_display_tab(new_ps_thread, "Session Stats")
+        with profiler.phase("add_tab"):
+            self.add_and_display_tab(new_ps_thread, "Session Stats")
+        profiler.report(log)
 
     def tab_hand_viewer(self, widget, data=None) -> None:
         new_ps_thread = GuiHandViewer.GuiHandViewer(self.config, self.sql, self)
@@ -1832,12 +1837,19 @@ class fpdb(QMainWindow):
 
     def tabGraphViewer(self, widget, data=None) -> None:
         """Opens a graph viewer tab."""
-        from fpdb_3_legacy import GuiGraphViewer
+        profiler = TabOpenProfiler("Graphs")
+        with profiler.phase("import"):
+            from fpdb_3_legacy import GuiGraphViewer
 
         colors = self.get_theme_colors()
-        new_gv_thread = GuiGraphViewer.GuiGraphViewer(self.sql, self.config, self, colors=colors)
+        with profiler.phase("construct"):
+            new_gv_thread = GuiGraphViewer.GuiGraphViewer(self.sql, self.config, self, colors=colors)
+
+        profiler.watch_first_paint(new_gv_thread)
         self.threads.append(new_gv_thread)
-        self.add_and_display_tab(new_gv_thread, "Graphs")
+        with profiler.phase("add_tab"):
+            self.add_and_display_tab(new_gv_thread, "Graphs")
+        profiler.report(log)
 
     def tabTourneyGraphViewer(self, widget, data=None) -> None:
         """Opens a graph viewer tab."""
@@ -2162,8 +2174,48 @@ class CustomTitleBar(QWidget):
             self.main_window.oldPos = event.globalPos()
 
 
+def warn_if_app_translocated() -> bool:
+    """Tell the user to install the app properly when macOS has quarantined it.
+
+    A downloaded .app run from Downloads is started by macOS from a read-only,
+    randomly named mount with a throwaway identity. Nothing works the way it
+    is documented to: Accessibility and Automation grants do not stick, so the
+    HUD reads no table windows, and the failure looks like a bug in fpdb
+    rather than a place the app was left. There is no programmatic fix -- the
+    user has to move it -- so this says so, once, at startup.
+
+    Returns whether the warning was shown, so a test can check the decision
+    without a dialog.
+    """
+    from fpdb_3_legacy.hud_diagnostics import bundle_path, is_app_translocated
+
+    if sys.platform != "darwin" or not is_app_translocated():
+        return False
+
+    bundle = bundle_path() or sys.executable
+    log.error("Refusing to pretend this works: fpdb is running translocated from %s", bundle)
+    QMessageBox.warning(
+        None,
+        "Move FPDB to Applications",
+        "macOS is running FPDB from a temporary, read-only copy (App Translocation), "
+        "which happens when a downloaded app is launched from where it was unzipped.\n\n"
+        "In this state macOS gives FPDB a throwaway identity, so the Accessibility and "
+        "Automation permissions the HUD needs cannot be granted to it and table windows "
+        "will not be detected.\n\n"
+        "Quit FPDB, move FPDB.app into /Applications, and launch it from there.",
+    )
+    return True
+
+
 if __name__ == "__main__":
     import time
+
+    from fpdb_3_legacy.hud_diagnostics import ROLE_MAIN, log_process_identity
+
+    # One banner per launch, before anything can fail: which build ran, from
+    # where, as which process. The HUD child inherits this session id, so both
+    # processes of one launch can be told apart from a previous run's.
+    log_process_identity(log, ROLE_MAIN)
 
     # qt_material import moved to ThemeManager
 
@@ -2182,6 +2234,8 @@ if __name__ == "__main__":
 
     try:
         app = QApplication([])
+
+        warn_if_app_translocated()
 
         # Initialize ThemeManager and apply saved theme
         from fpdb_3_legacy.ThemeManager import ThemeManager

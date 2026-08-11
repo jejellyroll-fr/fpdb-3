@@ -249,6 +249,37 @@ def test_release_and_rc_pyoxidizer_artifacts_require_stable_developer_id() -> No
     assert archive < extract < verify < upload
 
 
+def test_a_release_without_a_developer_id_fails_instead_of_publishing_ad_hoc() -> None:
+    """A missing signing identity must stop the release, not downgrade it.
+
+    An ad-hoc identity changes with every build, so macOS treats each release
+    as a different application: the Accessibility and Automation grants the
+    HUD depends on stop applying after an update, and the bundle is subject to
+    App Translocation. This used to be a warning that let the job carry on and
+    publish the bundle anyway.
+    """
+    workflow = CI_WORKFLOW.read_text()
+    pyoxidizer = _workflow_job(workflow, "build-pyoxidizer")
+    start = pyoxidizer.index("- name: Validate macOS release credentials")
+    gate = pyoxidizer[start : pyoxidizer.index("- name: Import Developer ID certificate", start)]
+
+    assert "if: runner.os == 'macOS' && github.event_name == 'release'" in gate
+    assert "::error::MACOS_SIGNING_IDENTITY is not configured" in gate
+    # The missing-identity branch must exit non-zero, and must not be a warning.
+    missing_branch = gate[gate.index('if [[ -z "${FPDB_MACOS_SIGNING_IDENTITY}"') :]
+    assert "exit 1" in missing_branch[: missing_branch.index("\n          fi\n")]
+    assert "::warning::MACOS_SIGNING_IDENTITY" not in gate
+
+
+def test_release_verification_rejects_an_ad_hoc_signature() -> None:
+    """The published bundle is asserted not to be ad-hoc, not merely signed."""
+    workflow = CI_WORKFLOW.read_text()
+    pyoxidizer = _workflow_job(workflow, "build-pyoxidizer")
+
+    assert "grep -Fq 'Signature=adhoc'" in pyoxidizer
+    assert "::error::Release bundle is ad-hoc signed" in pyoxidizer
+
+
 def test_pyoxidizer_runtime_cannot_mutate_a_signed_bundle_with_bytecode() -> None:
     config = (Path(__file__).resolve().parent.parent / "pyoxidizer.bzl").read_text()
 
