@@ -1981,7 +1981,12 @@ class HudMain(QObject):
 
     def _handle_table_status(self, hud: Hud.Hud) -> None:
         """Handle status changes for a single table."""
-        status = hud.table.check_table()
+        table = getattr(hud, "table", None)
+        if table is None:
+            # Preview and lightweight test HUDs can intentionally omit the
+            # live table object. They must not break the shared status timer.
+            return
+        status = table.check_table()
         if status == "client_destroyed":
             self.client_destroyed(None, hud)
         elif status == "client_moved":
