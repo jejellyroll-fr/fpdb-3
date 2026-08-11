@@ -720,6 +720,13 @@ def test_check_tables_skipped_during_drag(hud_main) -> None:
         Aux_Base.set_drag_active(False)
 
 
+def test_check_tables_ignores_preview_hud_without_live_table(hud_main) -> None:
+    """Preview/lightweight HUDs must not crash the periodic table poll."""
+    hud_main.hud_dict = {"preview": SimpleNamespace()}
+
+    hud_main.check_tables()
+
+
 # Ensures that create_HUD creates a new HUD and adds it to the hud_dict.
 def test_create_hud(hud_main) -> None:
     with (
@@ -2435,6 +2442,14 @@ def test_stats_reference_hand_falls_back_to_the_same_pool(hud_main) -> None:
     assert hud_main._stats_reference_hand("Marbella 2") is None
 
 
+def test_stats_reference_hand_resolves_a_window_discriminator_alias(hud_main) -> None:
+    """A live window key can reuse the hand imported under its human key."""
+    hud_main._last_processed_hands = {"Casablanca 6": "hand-99"}
+    hud_main._fast_fold_aliases = {"Casablanca 6": "Casablanca 6 #48782"}
+
+    assert hud_main._stats_reference_hand("Casablanca 6 #48782") == "hand-99"
+
+
 def test_live_stats_read_always_ends_its_transaction() -> None:
     """A SELECT opens a transaction on PostgreSQL; leaving it open stalls the importer."""
     from fpdb_3_legacy.fast_fold_engine import FastFoldStatsRequest
@@ -2847,16 +2862,12 @@ def test_a_read_holding_the_hero_beats_a_bigger_one_without(hud_main) -> None:
     assert hud_main._ax_slots(hud, "hand-1", 6) == {0: "Hero", 2: "b", 3: "c"}
 
 
-def test_read_fast_fold_stats_falls_back_to_recent_gametype() -> None:
-    """When a table has no reference hand yet, _read_fast_fold_stats falls back to recent gametype_id."""
+def test_read_fast_fold_stats_does_not_guess_a_gametype() -> None:
+    """A live table without a reference hand must not borrow a global gametype."""
     from fpdb_3_legacy.fast_fold_engine import FastFoldStatsRequest
 
     db = MagicMock()
     db.get_gameinfo_from_hid.return_value = None
-    cursor = MagicMock()
-    cursor.fetchone.return_value = (42,)
-    db.connection.cursor.return_value = cursor
-
     req = FastFoldStatsRequest(
         temp_key="Winamax Escape 1",
         seat_map={3: "Hero"},
@@ -2869,7 +2880,47 @@ def test_read_fast_fold_stats_falls_back_to_recent_gametype() -> None:
         res = HUD_main.HudReadWorker._read_fast_fold_stats(db, req)
 
     assert res.stat_dict[1]["n"] == 100
-    assert get_stats.call_args.kwargs["gametype_id"] == 42
+    assert get_stats.call_args.kwargs["gametype_id"] is None
+    db.connection.cursor.assert_not_called()
+
+
+def test_late_fast_fold_stats_are_dropped(hud_main) -> None:
+    """A result from an older seat read cannot overwrite the current hand."""
+    from fpdb_3_legacy.fast_fold_engine import FastFoldStatsResult
+
+    hud = SimpleNamespace(stat_dict={}, seat_players={})
+    hud_main.hud_dict = {"Escape 1": hud}
+    hud_main._ff_pending_hand["Escape 1"] = "hand-new"
+    hud_main._ff_pending_request["Escape 1"] = 2
+
+    stale = FastFoldStatsResult(
+        temp_key="Escape 1",
+        seat_map={3: "old-player"},
+        stat_dict={1: {"screen_name": "old-player", "seat": 3, "n": 1}},
+        request_id=1,
+    )
+    with patch.object(HUD_main.FastFoldEngine, "apply_seats") as applied:
+        hud_main._on_fast_fold_stats(stale)
+
+    applied.assert_not_called()
+
+
+def test_clearing_a_fast_fold_table_invalidates_inflight_stats(hud_main) -> None:
+    """Clearing a table must also invalidate a worker result already in flight."""
+    from fpdb_3_legacy.fast_fold_engine import FastFoldStatsResult
+
+    hud = SimpleNamespace(stat_dict={1: {"screen_name": "old"}}, seat_players={1: "old"})
+    hud_main.hud_dict = {"Escape 1": hud}
+    hud_main._fast_fold_pending["Escape 1"] = {3: "old"}
+    hud_main._ff_pending_request["Escape 1"] = 7
+
+    hud_main._clear_fast_fold_table("Escape 1", hud, "hand-old", "new hand")
+    stale = FastFoldStatsResult(temp_key="Escape 1", request_id=7)
+
+    with patch.object(HUD_main.FastFoldEngine, "apply_seats") as applied:
+        hud_main._on_fast_fold_stats(stale)
+
+    applied.assert_not_called()
 
 
 def test_an_import_never_repopulates_a_cleared_fast_fold_table(hud_main) -> None:

@@ -2,7 +2,7 @@
 
 from unittest.mock import MagicMock, patch
 
-from fpdb.infrastructure.platform.protocol import TableInfo
+from fpdb.infrastructure.platform.protocol import TableGeometry, TableInfo
 from fpdb_3_legacy import winamax_ax_seats
 
 
@@ -15,8 +15,9 @@ def test_is_supported_returns_true_on_windows_and_darwin():
         assert winamax_ax_seats.is_supported() is True
 
 
-def test_winamax_ax_seat_reader_finds_window_on_windows():
+def test_winamax_ax_seat_reader_finds_window_on_windows(monkeypatch):
     """Verify that WinamaxAXSeatReader resolves table window on Windows."""
+    monkeypatch.setattr(winamax_ax_seats.platform, "system", lambda: "Windows")
     mock_table = TableInfo(
         window_id=123456,
         title="Winamax Colorado 3",
@@ -33,3 +34,32 @@ def test_winamax_ax_seat_reader_finds_window_on_windows():
         assert window.title == "Winamax Colorado 3"
         assert window.window_id == 123456
         assert window.table_name == "Colorado 3"
+
+
+def test_windows_seat_read_selects_the_closest_duplicate_title(monkeypatch):
+    """UIAutomation must read the window paired by geometry, not first match."""
+    reader = winamax_ax_seats.WinamaxAXSeatReader(
+        table_detector=MagicMock(
+            find_tables=lambda _pattern: [
+                TableInfo(
+                    window_id=101,
+                    title="Winamax Colorado 3",
+                    geometry=TableGeometry(x=0, y=0, width=800, height=600),
+                ),
+                TableInfo(
+                    window_id=202,
+                    title="Winamax Colorado 3",
+                    geometry=TableGeometry(x=1200, y=0, width=800, height=600),
+                ),
+            ]
+        )
+    )
+    read = MagicMock(return_value={0: "Hero"})
+    monkeypatch.setattr(reader, "_read_window_windows", read)
+    monkeypatch.setattr(winamax_ax_seats.platform, "system", lambda: "Windows")
+    monkeypatch.setattr(winamax_ax_seats, "is_ax_available", lambda: True)
+
+    slots = reader.read_window("Winamax Colorado 3", table_pos=(1200, 0))
+
+    assert slots == {0: "Hero"}
+    read.assert_called_once_with(202, 6)

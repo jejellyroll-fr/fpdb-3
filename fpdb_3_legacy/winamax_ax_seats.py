@@ -360,7 +360,16 @@ class WinamaxAXSeatReader:
         if not is_supported():
             return None
 
+        system = platform.system()
         detected = self._find_table_window_detector(table_no, allow_fallback=False)
+        # The detector is the Windows window-resolution contract. The AX tree
+        # reader below imports AppKit/ApplicationServices and must never be
+        # probed on Windows merely because the shared reader supports both OSes.
+        if system == "Windows":
+            return detected
+        if system != "Darwin":
+            return None
+
         accessible = self._find_table_window_ax(table_no)
         if detected is not None:
             if accessible is not None:
@@ -387,7 +396,7 @@ class WinamaxAXSeatReader:
         return accessible
 
     def _find_table_window_detector(self, table_no: str, *, allow_fallback: bool) -> AXTableWindow | None:
-        """Resolve one indexed Winamax window through the shared macOS detector."""
+        """Resolve one indexed Winamax window through the platform detector."""
         try:
             if self._table_detector is None:
                 from fpdb.infrastructure.platform import get_table_detector
@@ -518,7 +527,9 @@ class WinamaxAXSeatReader:
                 tx, ty = table_pos
                 best_table = min(
                     tables,
-                    key=lambda t: (t.bounds[0] - tx) ** 2 + (t.bounds[1] - ty) ** 2 if t.bounds else 0,
+                    key=lambda t: (
+                        (t.geometry.x - tx) ** 2 + (t.geometry.y - ty) ** 2 if t.geometry else 0
+                    ),
                 )
                 hwnd = best_table.window_id
             else:
