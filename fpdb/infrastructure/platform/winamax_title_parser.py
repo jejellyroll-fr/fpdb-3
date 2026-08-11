@@ -1,8 +1,8 @@
 """
-Parser for Winamax window titles.
+Parser pour les titres de fenêtres Winamax.
 
-This module extracts information from Winamax client window titles
-to enable association with hand histories.
+Ce module extrait les informations des titres de fenêtres du client Winamax
+pour permettre l'association avec les hand histories.
 """
 
 from __future__ import annotations
@@ -13,7 +13,7 @@ from enum import Enum
 
 
 class WinamaxTableType(Enum):
-    """Winamax table types."""
+    """Types de tables Winamax."""
 
     CASH_GAME = "cash"
     GO_FAST = "go_fast"
@@ -25,7 +25,7 @@ class WinamaxTableType(Enum):
 
 @dataclass
 class WinamaxWindowInfo:
-    """Information extracted from a Winamax window title."""
+    """Information extraite du titre de fenêtre Winamax."""
 
     table_name: str
     table_type: WinamaxTableType
@@ -39,7 +39,7 @@ class WinamaxWindowInfo:
 
     @property
     def display_name(self) -> str:
-        """Display name for the HUD."""
+        """Nom d'affichage pour le HUD."""
         if self.table_type == WinamaxTableType.TOURNAMENT and self.table_number:
             return f"{self.tournament_name} - Table {self.table_number}"
         return self.table_name
@@ -47,9 +47,9 @@ class WinamaxWindowInfo:
 
 class WinamaxTitleParser:
     """
-    Parse Winamax window titles to extract table information.
+    Parse les titres de fenêtres Winamax pour extraire les informations de table.
 
-    Supported formats:
+    Formats supportés:
     - Cash Game: "Winamax Poker - CashGame - TableName - 0.01€/0.02€ - EUR"
     - Go Fast: "Winamax Poker - Go Fast "PoolName" - 0.05€/0.10€"
     - Tournament: "Winamax Poker - Tournament "Name" - Table 5"
@@ -57,7 +57,7 @@ class WinamaxTitleParser:
     - HOLD-UP: "Winamax Poker - HOLD-UP "PoolName" - 0.05€/0.10€"
     """
 
-    # Patterns for different table types
+    # Patterns pour différents types de tables
     PATTERNS = {
         # Cash Game: "Winamax Poker - CashGame - TableName - 0.01€/0.02€ - EUR"
         # Aussi: "Winamax Poker - NL Holdem - TableName - 0.01€/0.02€"
@@ -83,7 +83,7 @@ class WinamaxTitleParser:
             re.IGNORECASE,
         ),
         # Tournament: "Winamax Poker - Tournament "Name" - Table 5"
-        # Also with tournament number: "Winamax Poker - Tournament(123456789) "Name" - Table 5"
+        # Aussi avec numéro de tournoi: "Winamax Poker - Tournament(123456789) "Name" - Table 5"
         "tournament": re.compile(
             r"Winamax\s+Poker\s*-\s*Tournament"
             r"(?:\((?P<tourney_id>\d+)\))?\s*[\"']?"
@@ -114,12 +114,12 @@ class WinamaxTitleParser:
         "linux_generic": re.compile(r"^Winamax\s+(?P<content>.+)$", re.IGNORECASE),
     }
 
-    # Pattern to detect whether this is a Winamax window
+    # Pattern pour détecter si c'est une fenêtre Winamax
     WINAMAX_PATTERN = re.compile(r"winamax", re.IGNORECASE)
 
     @classmethod
     def is_winamax_window(cls, title: str) -> bool:
-        """Check whether the title matches a Winamax window."""
+        """Vérifie si le titre correspond à une fenêtre Winamax."""
         if not title:
             return False
         return bool(cls.WINAMAX_PATTERN.search(title))
@@ -127,13 +127,13 @@ class WinamaxTitleParser:
     @classmethod
     def parse(cls, title: str) -> WinamaxWindowInfo | None:
         """
-        Parse a Winamax window title.
+        Parse un titre de fenêtre Winamax.
 
         Args:
-            title: Window title
+            title: Titre de la fenêtre
 
         Returns:
-            WinamaxWindowInfo if this is a Winamax window, otherwise None
+            WinamaxWindowInfo si c'est une fenêtre Winamax, None sinon
         """
         if not title or not cls.is_winamax_window(title):
             return None
@@ -147,14 +147,14 @@ class WinamaxTitleParser:
             if match:
                 return cls._create_info(table_type, match, title)
 
-        # Generic fallback (Winamax Poker - ...)
+        # Fallback générique (Winamax Poker - ...)
         generic_match = cls.PATTERNS["generic"].search(title)
         if generic_match:
             return WinamaxWindowInfo(
                 table_name=generic_match.group("content").strip(), table_type=WinamaxTableType.UNKNOWN, raw_title=title
             )
 
-        # Generic Linux fallback (Winamax ...)
+        # Fallback Linux générique (Winamax ...)
         linux_generic_match = cls.PATTERNS["linux_generic"].search(title)
         if linux_generic_match:
             return WinamaxWindowInfo(
@@ -167,7 +167,7 @@ class WinamaxTitleParser:
 
     @classmethod
     def _create_info(cls, table_type: str, match: re.Match, title: str) -> WinamaxWindowInfo:
-        """Create a WinamaxWindowInfo from a regex match."""
+        """Crée un WinamaxWindowInfo à partir d'un match regex."""
         groups = match.groupdict()
 
         if table_type == "cash":
@@ -191,7 +191,7 @@ class WinamaxTitleParser:
         elif table_type == "holdup":
             return WinamaxWindowInfo(
                 table_name=groups.get("pool_name", "").strip(),
-                table_type=WinamaxTableType.GO_FAST,  # Treated as fast-fold
+                table_type=WinamaxTableType.GO_FAST,  # Traité comme fast-fold
                 blinds=cls._normalize_blinds(groups.get("blinds")),
                 is_fast_fold=True,
                 raw_title=title,
@@ -237,10 +237,10 @@ class WinamaxTitleParser:
 
     @classmethod
     def _normalize_blinds(cls, blinds: str | None) -> str | None:
-        """Normalize the blinds format."""
+        """Normalise le format des blinds."""
         if not blinds:
             return None
-        # Remove extra whitespace
+        # Supprimer les espaces superflus
         return re.sub(r"\s+", "", blinds)
 
     @classmethod
@@ -248,20 +248,20 @@ class WinamaxTitleParser:
         cls, window_info: WinamaxWindowInfo, hh_table_name: str, hh_tournament_id: str | None = None
     ) -> bool:
         """
-        Check whether a window corresponds to a hand-history table.
+        Vérifie si une fenêtre correspond à une table du hand history.
 
         Args:
-            window_info: Window information
+            window_info: Info de la fenêtre
             hh_table_name: Nom de table extrait du hand history
             hh_tournament_id: ID de tournoi si applicable
 
         Returns:
-            True if the window corresponds to the hand history
+            True si la fenêtre correspond au hand history
         """
         if not window_info or not hh_table_name:
             return False
 
-        # Normalize names for comparison
+        # Normaliser les noms pour comparaison
         window_name = cls._normalize_name(window_info.table_name)
         hh_name = cls._normalize_name(hh_table_name)
 
@@ -269,15 +269,15 @@ class WinamaxTitleParser:
         if window_name == hh_name:
             return True
 
-        # Partial match (the HH name is contained in the title or vice versa)
+        # Match partiel (le nom HH est contenu dans le titre ou vice-versa)
         if hh_name in window_name or window_name in hh_name:
             return True
 
-        # For tournaments, also compare the table number
+        # Pour les tournois, comparer aussi le numéro de table
         if window_info.table_type == WinamaxTableType.TOURNAMENT:
             # Format HH possible: "TourneyName(123456789)#5" ou similaire
             if window_info.table_number:
-                # Look for the table number in the HH name
+                # Chercher le numéro de table dans le nom HH
                 table_patterns = [
                     f"#{window_info.table_number}",
                     f"table{window_info.table_number}",
@@ -287,7 +287,7 @@ class WinamaxTitleParser:
                     if pattern in hh_name.lower():
                         return True
 
-        # For Expresso, match on the table ID
+        # Pour Expresso, matcher sur l'ID de table
         if window_info.table_type == WinamaxTableType.EXPRESSO:
             if window_info.table_number and str(window_info.table_number) in hh_table_name:
                 return True
@@ -296,16 +296,16 @@ class WinamaxTitleParser:
 
     @classmethod
     def _normalize_name(cls, name: str) -> str:
-        """Normalize a name for comparison."""
+        """Normalise un nom pour comparaison."""
         if not name:
             return ""
-        # Lowercase, remove special characters, normalize whitespace
+        # Minuscules, supprimer caractères spéciaux, normaliser espaces
         normalized = name.lower().strip()
         normalized = re.sub(r"[^\w\s]", "", normalized)
         normalized = re.sub(r"\s+", " ", normalized)
         return normalized
 
 
-# Alias for shorter imports
+# Alias pour import plus court
 parse_winamax_title = WinamaxTitleParser.parse
 is_winamax_window = WinamaxTitleParser.is_winamax_window

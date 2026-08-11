@@ -18,7 +18,7 @@ from typing import Any
 if not hasattr(datetime, "UTC"):
     datetime.UTC = datetime.timezone.utc
 
-__version__ = "3.6.3"
+__version__ = "3.6.5"
 
 
 def __getattr__(name: str) -> Any:
@@ -40,4 +40,3 @@ def __getattr__(name: str) -> Any:
                 loader.exec_module(mod)
                 return mod
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-

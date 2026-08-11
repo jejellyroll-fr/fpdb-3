@@ -107,8 +107,9 @@ def _run_git(args: list[str], cwd: Path) -> str | None:
         git = shutil.which("git")
         if git is None:
             return None
+        # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-audit.dangerous-subprocess-use-audit
         completed = subprocess.run(  # noqa: S603 - fixed argv, no shell
-            [git, *args],  # nosec B603 - fixed argv, no shell; executable resolved by shutil.which
+            [git, *args],
             stdout=subprocess.PIPE,
             stderr=subprocess.DEVNULL,
             text=True,

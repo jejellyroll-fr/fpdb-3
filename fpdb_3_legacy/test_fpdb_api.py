@@ -5,15 +5,15 @@ from __future__ import annotations
 FPDB API Test Suite
 ===================
 
-Test script to verify that the FPDB API works correctly.
+Script de test pour vérifier que l'API FPDB fonctionne correctement.
 
 Usage:
-    # The API must be started before running the tests
+    # L'API doit être démarrée avant de lancer les tests
     python run_fpdb_api.py &
     sleep 3
     python test_fpdb_api.py
 
-    # Or use a custom host/port
+    # Ou avec un host/port personnalisé
     python test_fpdb_api.py --host 127.0.0.1 --port 8000
 """
 

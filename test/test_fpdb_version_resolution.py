@@ -15,13 +15,22 @@ from __future__ import annotations
 import re
 import subprocess
 import sys
+import tomllib
 from pathlib import Path
+from types import CodeType, FunctionType
 
 import pytest
 
 from fpdb_3_legacy import __version__ as PACKAGE_VERSION
 
 SOURCE = Path(__file__).resolve().parents[1] / "fpdb_3_legacy" / "fpdb.pyw"
+PYPROJECT = SOURCE.parents[1] / "pyproject.toml"
+
+
+def test_package_version_matches_project_metadata() -> None:
+    metadata = tomllib.loads(PYPROJECT.read_text(encoding="utf-8"))
+
+    assert PACKAGE_VERSION == metadata["project"]["version"]
 
 
 @pytest.fixture(scope="module")
@@ -33,8 +42,9 @@ def resolve_version():
     # __file__ must be present: _resolve_version anchors git to its own directory,
     # and without it the NameError would be swallowed by the fallback path.
     namespace: dict = {"sys": sys, "PACKAGE_VERSION": PACKAGE_VERSION, "__file__": str(SOURCE)}
-    exec(compile(source[start:end], str(SOURCE), "exec"), namespace)  # noqa: S102
-    return namespace["_resolve_version"]
+    compiled = compile(source[start:end], str(SOURCE), "exec")
+    code = next(item for item in compiled.co_consts if isinstance(item, CodeType) and item.co_name == "_resolve_version")
+    return FunctionType(code, namespace, "_resolve_version")
 
 
 def test_the_source_assigns_no_hardcoded_version_literal() -> None:

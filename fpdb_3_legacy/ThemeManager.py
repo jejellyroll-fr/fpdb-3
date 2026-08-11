@@ -519,7 +519,7 @@ class ThemeManager:
                 background-color: {card_hover};
             }}
 
-            /* Clean section titles (no more opaque green box with border) */
+            /* Titres de section épurés (plus de boîte verte opaque avec bordure) */
             QLabel#filterTitle {{
                 background-color: transparent;
                 color: {accent};
@@ -556,7 +556,7 @@ class ThemeManager:
                 background-color: {accent_panel};
             }}
 
-            /* Secondary buttons / options (inside frames) */
+            /* Boutons secondaires / options (à l'intérieur des cadres) */
             #filterSidebar QGroupBox QPushButton {{
                 background-color: {input_bg};
                 color: {text};
@@ -579,7 +579,7 @@ class ThemeManager:
                 color: #ffffff;
             }}
 
-            /* Modernized checkboxes and radio buttons */
+            /* Cases à cocher et boutons radio modernisés */
             QCheckBox, QRadioButton {{
                 spacing: 8px;
                 padding: 4px 6px;
@@ -661,7 +661,7 @@ class ThemeManager:
                 width: 20px;
             }}
 
-            /* Numeric selection buttons (Spin/Date buttons) */
+            /* Boutons de sélection numérique (Spin/Date buttons) */
             QDateEdit::up-button, QDateEdit::down-button,
             QSpinBox::up-button, QSpinBox::down-button {{
                 subcontrol-origin: border;

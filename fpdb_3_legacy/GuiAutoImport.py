@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import os
 
-# OPTION A: use XWayland when the variable is set
+# OPTION A : on veut XWayland si la variable est posée
 if os.getenv("FPDB_FORCE_X11") == "1":
     os.environ.setdefault("QT_QPA_PLATFORM", "xcb")
 
@@ -860,7 +860,7 @@ class GuiAutoImport(QWidget):
             else:
                 self.addText("\nAuto Import aborted. Global lock not available.", "error")
 
-        else:  # "Start" button unchecked -> stop
+        else:  # bouton « Start » décoché → arrêt
             self.doAutoImportBool = False
             if self.importtimer:
                 self.importtimer.stop()

@@ -16,10 +16,10 @@ VALIDATION_NUMPY_ERRORS = (AssertionError, AttributeError, ImportError, TypeErro
 
 
 def check_version(package: str, min_version: str, name: str | None = None) -> bool:
-    """Verify that a package is installed with the minimum required version.
+    """Vérifie qu'un package est installé avec la version minimale requise.
 
     Args:
-        package: Package name to verify
+        package: Nom du package à vérifier
         min_version: Version minimale requise
         name: Nom d'affichage (optionnel)
 
@@ -66,7 +66,7 @@ def check_version(package: str, min_version: str, name: str | None = None) -> bo
 
 
 def check_imports() -> bool:
-    """Verify that critical imports work."""
+    """Vérifie que les imports critiques fonctionnent."""
     print("\n=== Vérification des Imports ===\n")
 
     imports_ok = True
@@ -75,7 +75,7 @@ def check_imports() -> bool:
     try:
         print("✅ NumPy imports       OK (max/min/sum removed as expected)")
 
-        # Test that max/min/sum are no longer imported directly
+        # Test que max/min/sum ne sont plus importés directement
         try:
             from numpy import max, min, sum  # noqa: F401 -- import compatibility test
 
@@ -124,7 +124,7 @@ def check_imports() -> bool:
 
 
 def check_numpy_functionality() -> bool:
-    """Verify that NumPy 2.x features work."""
+    """Vérifie que les fonctionnalités NumPy 2.x fonctionnent."""
     print("\n=== Test Fonctionnalités NumPy ===\n")
 
     try:
@@ -153,7 +153,7 @@ def check_numpy_functionality() -> bool:
         assert sum_val == 20, "array.sum() failed"
         print(f"✅ array.sum()         OK: {sum_val}")
 
-        # Test var (must always work)
+        # Test var (doit toujours fonctionner)
         from numpy import var
 
         variance = var([1, 2, 3, 4, 5])
@@ -174,7 +174,7 @@ def main():
     print(f"\nPython version: {sys.version}")
     print(f"Python {sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}\n")
 
-    # Verify Python compatibility
+    # Vérifier compatibilité Python
     if sys.version_info >= (3, 13):
         print(f"✅ Python 3.{sys.version_info.minor} compatible avec migration\n")
     else:
@@ -182,14 +182,14 @@ def main():
 
     print("=== Vérification des Versions ===\n")
 
-    # Critical dependencies
+    # Dépendances critiques
     all_ok = True
     all_ok &= check_version("numpy", "2.1.0", "NumPy")
     all_ok &= check_version("sqlalchemy", "2.0.0", "SQLAlchemy")
     all_ok &= check_version("matplotlib", "3.10.7", "matplotlib")
     all_ok &= check_version("mplfinance", "0.12.10", "mplfinance")
 
-    # Medium-priority dependencies
+    # Dépendances moyennes
     all_ok &= check_version("fastapi", "0.121.1", "FastAPI")
     all_ok &= check_version("pydantic", "2.12.1", "Pydantic")
     all_ok &= check_version("aiohttp", "3.13.2", "aiohttp")
@@ -197,18 +197,18 @@ def main():
     # PySide6 (LGPL license)
     check_version("PySide6", "6.8.1", "PySide6")
 
-    # Other dependencies
+    # Autres dépendances
     check_version("pandas", "2.2.0", "pandas")
 
     # Test imports
     imports_ok = check_imports()
     all_ok &= imports_ok
 
-    # Test NumPy features
+    # Test fonctionnalités NumPy
     numpy_ok = check_numpy_functionality()
     all_ok &= numpy_ok
 
-    # Summary
+    # Résumé
     print("\n" + "=" * 60)
     if all_ok:
         print("✅ VALIDATION RÉUSSIE - Migration compatible")

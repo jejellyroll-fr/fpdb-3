@@ -81,7 +81,7 @@ class TestClassicStatWindow(unittest.TestCase):
         assert self.stat_window.aw is self.mock_aw
 
     def test_mousePressEvent(self) -> None:
-        # Do not depend on Qt: only verify that the call does not fail
+        # On ne dépend pas de Qt: on vérifie juste que l'appel ne plante pas
         evt = Mock()
         self.stat_window.mousePressEvent(evt)
         self.assertTrue(True)
@@ -98,7 +98,7 @@ class TestClassicStat(unittest.TestCase):
             self.mock_aw.hud = self.mock_hud
             self.mock_aw.params = {"fgcolor": "#FFFFFF", "bgcolor": "#000000"}
 
-            # What the parent and other paths read
+            # ce que lit le parent / autres chemins
             self.mock_hud.supported_games_parameters = None
             self.mock_hud.config = Mock()
             self.mock_hud.config.get_db_parameters.return_value = {"db-backend": "sqlite"}
@@ -114,7 +114,7 @@ class TestClassicStat(unittest.TestCase):
             self.classic_stat.seat = 2
             self.classic_stat.lab = Mock()
             self.classic_stat.hudcolor = "#FFFFFF"
-            # Required if the parent's set_color is invoked
+            # requis si set_color du parent est invoqué
             self.classic_stat.aux_params = {"font": "Arial", "font_size": 10}
 
     def test_initialization_without_config(self) -> None:
@@ -340,7 +340,7 @@ class TestClassicStat(unittest.TestCase):
         with patch("fpdb_3_legacy.Aux_Classic_Hud.QMessageBox"):
             self.classic_stat.save_comment(123, "New comment")
         mock_cur.execute.assert_called_once()
-            # The implementation may not call commit() directly; verify closure
+        # L'impl peut ne pas appeler commit() directement; on vérifie la fermeture
         mock_db.close_connection.assert_called_once()
 
     @patch("fpdb_3_legacy.Aux_Classic_Hud.Database.Database")
@@ -536,7 +536,7 @@ class TestErrorHandling(unittest.TestCase):
             stat.number = ("", "invalid_number", "", "", "", "")
             stat.aux_params = {"font": "Arial", "font_size": 10}
 
-            # Trigger error handling (ValueError parse + database error) and log it
+            # On veut déclencher la gestion d'erreur (ValueError parse + erreur DB), et logger
             try:
                 stat.update(123, {123: {"screen_name": "Player"}})
                 stat.save_comment(123, "x")

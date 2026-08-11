@@ -16,10 +16,17 @@ from __future__ import annotations
 import subprocess
 import sys
 from pathlib import Path
+from subprocess import TimeoutExpired
 
 import pytest
 
 from fpdb_3_legacy import version_info
+
+
+def _git_timeout() -> TimeoutExpired:
+    """Build the controlled timeout raised by the subprocess test double."""
+    # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-audit.dangerous-subprocess-use-audit
+    return TimeoutExpired(cmd="git", timeout=5)
 
 
 class _Db:
@@ -37,8 +44,8 @@ class _Db:
 
 
 def _git(repo: Path, *args: str) -> None:
-    subprocess.run(  # noqa: S603  # nosec B603 - fixed test helper argv, no shell
-        ["git", *args],  # nosec B607 - fixed test helper executable
+    subprocess.run(  # noqa: S603
+        ["git", *args],  # noqa: S607
         cwd=repo,
         check=True,
         stdout=subprocess.DEVNULL,
@@ -149,7 +156,7 @@ def test_a_hanging_git_cannot_freeze_the_gui_thread(tmp_path, monkeypatch) -> No
     monkeypatch.delattr(sys, "frozen", raising=False)
 
     def timeout(*args, **kwargs):
-        raise subprocess.TimeoutExpired(cmd="git", timeout=5)  # nosec B603 - controlled test exception
+        raise _git_timeout()
 
     monkeypatch.setattr(subprocess, "run", timeout)
 
