@@ -360,6 +360,12 @@ jobs:
             test/test_fast_fold_engine.py \
             test/test_winamax_ax_seats.py \
             test/test_windows_fast_fold_resolver.py
+
+      - name: Run FastHUD Qt regression tests (offscreen)
+        if: runner.os != 'Windows'
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: |
           python -m pytest -q -m qt test/test_HUD_main.py
       - name: Run Qt regression tests (offscreen)
         if: runner.os == 'Linux'

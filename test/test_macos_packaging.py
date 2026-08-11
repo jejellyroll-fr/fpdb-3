@@ -278,3 +278,14 @@ def test_version_comes_from_pyproject() -> None:
     pyproject = Path(__file__).resolve().parent.parent / "pyproject.toml"
 
     assert package_pyoxidizer_macos.read_version(pyproject) != package_pyoxidizer_macos.DEFAULT_VERSION
+
+
+def test_fast_hud_qt_contracts_do_not_hang_windows_ci() -> None:
+    workflow = CI_WORKFLOW.read_text()
+    test_job = _workflow_job(workflow, "test", "native")
+
+    start = test_job.index("- name: Run FastHUD Qt regression tests (offscreen)")
+    step = test_job[start : test_job.index("\n      - name:", start + 1)]
+
+    assert "if: runner.os != 'Windows'" in step
+    assert "test/test_HUD_main.py" in step
