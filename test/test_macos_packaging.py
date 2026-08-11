@@ -231,6 +231,10 @@ def test_release_and_rc_pyoxidizer_artifacts_require_stable_developer_id() -> No
     # well as final releases, so this is the shared distribution gate.
     assert "release:\n    types: [ published ]" in workflow
     assert "FPDB_REQUIRE_STABLE_MACOS_SIGNING: ${{ secrets.MACOS_SIGNING_IDENTITY != '' && '1' || '0' }}" in pyoxidizer
+    assert (
+        'if [[ "${{ github.event_name }}" == "release" && "$FPDB_REQUIRE_STABLE_MACOS_SIGNING" == "1" ]]; then'
+        in pyoxidizer
+    )
     assert '"Developer ID Application: "*' in pyoxidizer
     assert 'grep -Fqx "Authority=$FPDB_MACOS_SIGNING_IDENTITY"' in pyoxidizer
     assert 'grep -Fqx "TeamIdentifier=$expected_team_id"' in pyoxidizer
