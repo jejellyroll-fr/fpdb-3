@@ -1188,7 +1188,7 @@ class HudMain(QObject):
         """Resolve an imported human key to its active window HUD key."""
         aliases = getattr(self, "_fast_fold_aliases", {})
         aliased = aliases.get(temp_key)
-        if aliased in getattr(self, "hud_dict", {}):
+        if isinstance(aliased, str) and aliased in getattr(self, "hud_dict", {}):
             return aliased
         candidates = [
             key
@@ -1499,7 +1499,7 @@ class HudMain(QObject):
 
         last_hand = getattr(hud, "ff_last_hand_id", None)
         if last_hand != update.hand_id:
-            hud.ff_last_hand_id = update.hand_id
+            setattr(hud, "ff_last_hand_id", update.hand_id)
             if getattr(hud, "stat_dict", None) or getattr(hud, "seat_players", None):
                 self._clear_fast_fold_table(temp_key, hud, update.hand_id, "new hand start")
 
