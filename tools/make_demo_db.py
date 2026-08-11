@@ -389,30 +389,37 @@ class HandWriter:
         awarded = round(self.pot - rake, 2)
 
         shown: dict[str, tuple[int, ...]] = {}
+        awards: dict[str, float] = {}
         if showdown and len(self.live) > 1:
             lines.append("*** SHOW DOWN ***")
             for player in self.live:
                 shown[player.name] = hand_rank(player.cards + self.board)
-            winner = max(self.live, key=lambda player: shown[player.name])
+            best_rank = max(shown.values())
+            winners = [player for player in self.live if shown[player.name] == best_rank]
             for player in self.live:
                 cards = " ".join(player.cards)
                 lines.append(f"{player.name}: shows [{cards}] ({describe(player.cards + self.board)})")
         else:
-            winner = self.live[0]
-        lines.append(f"{winner.name} collected {money(awarded)} from pot")
+            winners = [self.live[0]]
+
+        share_cents, remainder = divmod(round(awarded * 100), len(winners))
+        for index, winner in enumerate(winners):
+            awards[winner.name] = (share_cents + (index < remainder)) / 100
+            lines.append(f"{winner.name} collected {money(awards[winner.name])} from pot")
 
         lines.append("*** SUMMARY ***")
         lines.append(f"Total pot {money(self.pot)} | Rake {money(rake)}")
         if self.board:
             lines.append(f"Board [{' '.join(self.board)}]")
-        lines.extend(self._summary_line(player, winner, awarded, shown) for player in self.players)
+        winner_names = {winner.name for winner in winners}
+        lines.extend(self._summary_line(player, winner_names, awards, shown) for player in self.players)
         return lines
 
     def _summary_line(
         self,
         player: Player,
-        winner: Player,
-        awarded: float,
+        winner_names: set[str],
+        awards: dict[str, float],
         shown: dict[str, tuple[int, ...]],
     ) -> str:
         prefix = f"Seat {player.seat}: {player.name}"
@@ -426,11 +433,11 @@ class HandWriter:
         if player.name in shown:
             cards = " ".join(player.cards)
             category = describe(player.cards + self.board)
-            if player is winner:
-                return f"{prefix} showed [{cards}] and won ({money(awarded)}) with {category}"
+            if player.name in winner_names:
+                return f"{prefix} showed [{cards}] and won ({money(awards[player.name])}) with {category}"
             return f"{prefix} showed [{cards}] and lost with {category}"
-        if player is winner:
-            return f"{prefix} collected ({money(awarded)})"
+        if player.name in winner_names:
+            return f"{prefix} collected ({money(awards[player.name])})"
         if player.folded:
             where = ("before Flop", "on the Flop", "on the Turn", "on the River")[player.last_street_seen]
             suffix = " (didn't bet)" if player.last_street_seen == 0 and player.committed == 0 else ""
@@ -450,6 +457,8 @@ def generate(out_dir: Path, hand_count: int, seed: int) -> Path:
     """Write the invented hand histories, one file per simulated session."""
     rng = random.Random(seed)
     hands_dir = out_dir / "hands"
+    if hands_dir.exists():
+        shutil.rmtree(hands_dir)
     hands_dir.mkdir(parents=True, exist_ok=True)
 
     sessions = max(1, -(-hand_count // HANDS_PER_FILE))
@@ -505,11 +514,13 @@ def write_config(out_dir: Path) -> Path:
 
     tree = DefusedElementTree.parse(destination)
     for database in tree.getroot().iter("database"):
+        database.set("default", "False")
         if database.get("db_server") == "sqlite":
             database.set("db_name", "demo.db3")
             database.set("db_path", str(out_dir))
+            database.set("default", "True")
     for site in tree.getroot().iter("site"):
-        is_demo_site = site.get("site_name") == "PokerStars.COM"
+        is_demo_site = site.get("site_name") in {"PokerStars", "PokerStars.COM"}
         site.set("enabled", "True" if is_demo_site else "False")
         if is_demo_site:
             site.set("screen_name", HERO)
