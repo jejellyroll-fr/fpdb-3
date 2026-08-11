@@ -1,0 +1,22 @@
+{
+  "room": "Winamax",
+  "format": "FastFold",
+  "platform": "macOS",
+  "table_id": "gf.escape.1",
+  "raw_log": [
+    "[table] 1 gf.escape.1 hand 22754010-6356-1786128858",
+    "[table] 1 gf.escape.1 cards login=\"Hero\"",
+    "[table] 1 gf.escape.1 action SB login=\"Hero\"",
+    "[table] 1 gf.escape.1 action BB login=\"Player02\"",
+    "[table] 1 gf.escape.1 action CALL login=\"Player03\"",
+    "[table] 1 gf.escape.1 action CALL login=\"Player04\"",
+    "[table] 1 gf.escape.1 action CALL login=\"Player05\"",
+    "[table] 1 gf.escape.1 action CALL login=\"Player06\""
+  ],
+  "expected": {
+    "table_no": "1",
+    "hand_id": "22754010-6356-1786128858",
+    "hero": "Hero",
+    "ring": ["Hero", "Player02", "Player03", "Player04", "Player05", "Player06"]
+  }
+}

@@ -388,10 +388,17 @@ jobs:
       - name: Install fpdb dependencies
         run: |
           uv pip install --system -e ".[test]"
-      - name: Build and install pypoker-eval
+      - name: Install released pypoker-eval wheel
+        shell: bash
         run: |
-          git clone --depth 1 https://github.com/jejellyroll-fr/poker-eval.git /tmp/poker-eval
-          uv pip install --system /tmp/poker-eval
+          python_tag="cp${{ matrix.python-version }}"
+          python_tag="${python_tag//./}"
+          if [[ "$RUNNER_OS" == "macOS" ]]; then
+            wheel="pypoker_eval-1.2.0-${python_tag}-${python_tag}-macosx_11_0_arm64.whl"
+          else
+            wheel="pypoker_eval-1.2.0-${python_tag}-${python_tag}-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
+          fi
+          uv pip install --system "https://github.com/jejellyroll-fr/poker-eval/releases/download/v1.2.0/${wheel}"
       - name: Smoke-test native backend
         run: |
           python -c "from fpdb_3_legacy.equity import load_poker_eval; pe = load_poker_eval(); assert pe is not None, 'load_poker_eval() returned None'; print('backend loaded:', type(pe))"
