@@ -18,7 +18,8 @@ from __future__ import annotations
 
 import os
 import platform
-import subprocess
+import shutil
+import subprocess  # nosec B404 - subprocess is used with fixed arguments and no shell
 import sys
 from dataclasses import dataclass, field
 from importlib import import_module
@@ -103,8 +104,12 @@ def _run_git(args: list[str], cwd: Path) -> str | None:
     the same thing here -- there is nothing to display.
     """
     try:
+        git = shutil.which("git")
+        if git is None:
+            return None
+        # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-audit.dangerous-subprocess-use-audit
         completed = subprocess.run(  # noqa: S603 - fixed argv, no shell
-            ["git", *args],  # noqa: S607 - git is resolved from PATH by design
+            [git, *args],
             stdout=subprocess.PIPE,
             stderr=subprocess.DEVNULL,
             text=True,

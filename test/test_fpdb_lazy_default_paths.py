@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import ast
 from pathlib import Path
-from types import SimpleNamespace
+from types import CodeType, FunctionType, SimpleNamespace
 from typing import Any
 from unittest.mock import MagicMock
 
@@ -34,10 +34,13 @@ def _calls_get_default_paths(method: ast.FunctionDef) -> bool:
 
 
 def _load_method(name: str, namespace: dict[str, Any]) -> Any:
-    module = ast.Module(body=[_fpdb_method(name)], type_ignores=[])
+    method = _fpdb_method(name)
+    module = ast.Module(body=[method], type_ignores=[])
     ast.fix_missing_locations(module)
-    exec(compile(module, str(SOURCE), "exec"), namespace)  # noqa: S102 - executes repository source under test
-    return namespace[name]
+    compiled = compile(module, str(SOURCE), "exec")
+    code = next(item for item in compiled.co_consts if isinstance(item, CodeType) and item.co_name == name)
+    defaults = tuple(ast.literal_eval(default) for default in method.args.defaults)
+    return FunctionType(code, namespace, name, defaults)
 
 
 def test_profile_loading_never_resolves_import_default_paths() -> None:
