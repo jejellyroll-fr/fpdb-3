@@ -161,11 +161,11 @@ class InterProcessLockWin32(InterProcessLockBase):
             try:
                 win32event.ReleaseMutex(self.mutex)
             except Exception:
-                pass
+                log.debug("Could not release the Windows mutex", exc_info=True)
             try:
                 win32api.CloseHandle(self.mutex)
             except Exception:
-                pass
+                log.debug("Could not close the Windows mutex handle", exc_info=True)
             self.mutex = None
 
 
