@@ -1202,6 +1202,28 @@ class Database(
         self._gameinfo_cache[hand_id] = gameinfo
         return gameinfo
 
+    def get_last_gametype_id_for_table(self, site_name, table_name):
+        """Return the gametypeId this table last dealt, or None.
+
+        A Fast-Fold HUD built from the client log has no hand of its own to
+        take a gametypeId from -- the log names the table seconds to minutes
+        before the hand history arrives. Without one the statistics query is
+        skipped entirely and the first hand of every table shows empty blocks.
+        The pool's own last imported hand settles it, and a pool does not
+        change what it deals.
+
+        Takes the site's name rather than its id because the id is itself
+        learned from an imported hand, which is the thing missing here.
+        """
+        if not site_name or not table_name:
+            return None
+        cursor = self.connection.cursor()
+        query = self.sql.query["get_last_gametype_for_table"]
+        query = query.replace("%s", self.sql.query["placeholder"])
+        cursor.execute(query, (site_name, table_name))
+        row = cursor.fetchone()
+        return None if row is None else row[0]
+
     #   Query 'get_hand_info' does not exist, so it seems
     #    def get_hand_info(self, new_hand_id):
     #        c = self.connection.cursor()

@@ -6,7 +6,7 @@ from fpdb_3_legacy.sql_queries_core import core_lookup_queries
 
 def test_core_lookup_queries_are_installed_exactly() -> None:
     expected = core_lookup_queries()
-    assert len(expected) == 8
+    assert len(expected) == 9
     for backend in ("mysql", "postgresql"):
         assert expected.items() <= Sql(db_server=backend).query.items()
     sqlite_expected = {key: value.replace("%s", "?") for key, value in expected.items()}
@@ -23,3 +23,12 @@ def test_core_lookup_queries_keep_expected_parameters_and_links() -> None:
     assert gameinfo.count("%s") == 1
     assert "h.gametypeId" in gameinfo
     assert "s.id = p.siteId" in gameinfo
+
+    # Resolves a pool's game with no hand of the table's own, which is what a
+    # log-built Fast-Fold HUD has on its first update.
+    last_gametype = queries["get_last_gametype_for_table"]
+    assert last_gametype.count("%s") == 2  # site name, then table name
+    assert "s.name = %s" in last_gametype  # by name: the site id needs a hand
+    assert "h.tableName = %s" in last_gametype
+    assert "ORDER BY h.id DESC" in last_gametype  # the pool's newest hand
+    assert "LIMIT 1" in last_gametype

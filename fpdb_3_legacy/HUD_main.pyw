@@ -266,6 +266,18 @@ class HudReadWorker(QThread):
             if request.hand_id is not None:
                 info = database.get_gameinfo_from_hid(request.hand_id)
                 gametype_id = info["gametypeId"] if info else None
+            if gametype_id is None and request.site_name and request.pool_name:
+                # A table the client log named before any of its hands was
+                # imported. Without this the statistics query below is skipped
+                # and the table's first update draws every block empty. Only
+                # this pool's own hands are consulted, and only when the pool
+                # is known: borrowing another table's stakes would be worse
+                # than showing nothing.
+                with contextlib.suppress(Exception):
+                    gametype_id = database.get_last_gametype_id_for_table(
+                        request.site_name,
+                        request.pool_name,
+                    )
 
             stat_dict = FastFoldEngine(db_connection=database).get_player_stats_for_seat_map(
                 request.seat_map,
@@ -1642,34 +1654,64 @@ class HudMain(QObject):
             f"table={temp_key} source={source} hero_seat={hero_seat} "
             f"seats={ {s: seat_map[s] for s in sorted(seat_map)} }",
         )
-        # Reading the stats needs the real connection, which lives on the worker
-        # thread; the seats come back through fast_fold_stats_ready.
+        self._request_fast_fold_stats(temp_key, hud, seat_map, update.hand_id)
+
+    def _request_fast_fold_stats(
+        self,
+        temp_key: str,
+        hud: Hud.Hud,
+        seat_map: dict[int, str],
+        hand_id: Any,
+    ) -> None:
+        """Ask the worker for the seated players' statistics.
+
+        Reading them needs the real connection, which lives on the worker
+        thread; the answer comes back through ``fast_fold_stats_ready``. The
+        request carries the site and pool as well as a reference hand, because
+        a table the client log named before any of its hands was imported has
+        no hand of its own and would otherwise get no statistics at all.
+        """
         worker = getattr(self, "_db_worker", None)
         if worker is None:
-            self._ff_trace(update.hand_id, "stats-skipped", "no database worker")
+            self._ff_trace(hand_id, "stats-skipped", "no database worker")
             return
         request_id = self._next_fast_fold_request_id()
-        self._ff_pending_hand[temp_key] = update.hand_id
+        self._ff_pending_hand[temp_key] = hand_id
         self._ff_pending_request[temp_key] = request_id
         # The generation this read belongs to. A HUD destroyed and rebuilt
         # while the worker is busy gets a new one, and the answer to the old
         # request must not be painted onto the replacement's windows.
         self._ff_pending_generation[temp_key] = getattr(hud, "_fpdb_generation", None)
+        reference_hand = self._stats_reference_hand(temp_key)
         self._ff_trace(
-            update.hand_id,
+            hand_id,
             "stats-requested",
             f"table={temp_key} window_id={getattr(getattr(hud, 'table', None), 'number', None)} "
-            f"generation={self._ff_pending_generation[temp_key]} request={request_id}",
+            f"generation={self._ff_pending_generation[temp_key]} request={request_id} "
+            f"reference_hand={reference_hand}",
         )
         worker.submit(
             FastFoldStatsRequest(
                 temp_key=temp_key,
                 seat_map=seat_map,
-                hand_id=self._stats_reference_hand(temp_key),
+                hand_id=reference_hand,
+                site_name=getattr(getattr(hud, "table", None), "site", "") or "Winamax",
+                pool_name=self._pool_name(temp_key),
                 num_seats=getattr(hud, "max", 6) or 6,
                 request_id=request_id,
             ),
         )
+
+    @staticmethod
+    def _pool_name(temp_key: str) -> str:
+        """The table name a hand history records, taken back out of a HUD key.
+
+        A Fast-Fold HUD key is the pool plus the client's window index plus the
+        native window id ("Casablanca 5 #61825"); the hands themselves are
+        written under the bare pool name. Stripping both suffixes is what lets
+        the worker find a hand of this pool when the table has none of its own.
+        """
+        return re.sub(r"\s+\d+$", "", re.sub(r"\s*#\d+$", "", temp_key)).strip()
 
     def _stats_reference_hand(self, temp_key: str) -> Any:
         """A hand to take the gametypeId from when reading live player stats.
@@ -1677,6 +1719,10 @@ class HudMain(QObject):
         This table's own last hand, when it has one. A window that has not had a
         hand imported yet may use another window from the same pool, which is
         still narrower than guessing from the newest global Gametypes row.
+
+        None when nothing has been imported yet -- the first table of a
+        session. The worker then resolves the gametypeId from the pool's own
+        last hand instead; see ``get_last_gametype_id_for_table``.
         """
         hand_id = self._last_processed_hands.get(temp_key)
         if hand_id is not None:
