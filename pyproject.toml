@@ -29,6 +29,7 @@ dependencies = [
     "playwright>=1.40.0",
     "pymysql>=1.1.0",
     "defusedxml>=0.7.1",
+    "pyqtgraph>=0.13.0",
     # PostgreSQL is offered in the GUI's database chooser, so the driver has to
     # ship with the application. Left as an extra, a packaged build could only
     # ever open SQLite or MySQL.
@@ -290,7 +291,8 @@ requires = [
     # Likewise for PostgreSQL.
     "psycopg[binary]>=3.1.0",
     # Native equity backend used by the equity calculator and AoF tools.
-    "pypoker-eval @ git+https://github.com/jejellyroll-fr/poker-eval.git@v1.2.0"
+    "pypoker-eval @ git+https://github.com/jejellyroll-fr/poker-eval.git@v1.2.0",
+    "pyqtgraph>=0.13.0",
 ]
 
 [tool.briefcase.app.fpdb.macOS]

@@ -7,6 +7,7 @@ heavy Qt main window. Handler existence is checked by scanning fpdb.pyw source.
 
 from __future__ import annotations
 
+import ast
 import os
 import re
 import sys
@@ -27,7 +28,15 @@ def _all_items():
 def test_top_level_menus_are_grouped_by_intent():
     titles = [m.title for m in menu_layout.menu_layout()]
     assert titles == [
-        "File", "Configure", "Import", "Cash", "Tournament", "Database", "Tools", "View", "Help",
+        "File",
+        "Configure",
+        "Import",
+        "Cash",
+        "Tournament",
+        "Database",
+        "Tools",
+        "View",
+        "Help",
     ]
 
 
@@ -56,6 +65,27 @@ def test_all_handlers_are_defined_on_the_main_window():
         if item.handler in sentinels:
             continue
         assert item.handler in defined, f"handler '{item.handler}' not defined in fpdb.pyw"
+
+
+def test_graphing_modules_are_lazy_so_auto_import_does_not_build_the_font_cache():
+    """Frozen startup must not import Matplotlib-backed tabs Auto Import does not use."""
+    with open(FPDB_PYW, encoding="utf-8") as source_file:
+        tree = ast.parse(source_file.read())
+
+    expensive = {
+        "GuiGraphViewer",
+        "GuiRingPlayerStats",
+        "GuiSessionViewer",
+        "GuiTourneyGraphViewer",
+    }
+    eager = {
+        alias.name
+        for node in tree.body
+        if isinstance(node, ast.ImportFrom) and node.module == "fpdb_3_legacy"
+        for alias in node.names
+    }
+
+    assert eager.isdisjoint(expensive)
 
 
 def test_view_menu_exposes_themes_and_language_submenus():
@@ -99,6 +129,13 @@ def test_new_database_panel_is_reachable_from_the_menu():
     """Regression: the multi-backend Databases panel must stay in the menu."""
     handlers = {item.handler for _m, item in _all_items()}
     assert "dia_database_config" in handlers
+
+
+def test_version_tab_is_reachable_from_the_help_menu():
+    """Issue #226: the running build's version had no home in the UI at all."""
+    help_menu = next(m for m in menu_layout.menu_layout() if m.title == "Help")
+    handlers = [item.handler for item in help_menu.items]
+    assert "tab_version_info" in handlers
 
 
 if __name__ == "__main__":

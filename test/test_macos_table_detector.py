@@ -7,6 +7,7 @@ stubbed ``subprocess.run`` for the AppleScript fallback.
 
 from __future__ import annotations
 
+import sys
 import time
 import zlib
 from subprocess import TimeoutExpired
@@ -26,12 +27,25 @@ def _detector(*, window_list: list[dict] | None = None) -> MacOSTableDetector:
     detector._applescript_last_scan = 0.0
     detector._applescript_last_result = []
     detector._permissions_checked = False
-    detector._automation_warned = False
+    detector._permission_status = None
+    detector._system_events_warned = False
+    detector._system_events_blocked = False
     detector._NSWorkspace = Mock()
     detector._kCGNullWindowID = 0
     detector._kCGWindowListOptionOnScreenOnly = 8
     detector._CGWindowListCopyWindowInfo = Mock(return_value=window_list or [])
     return detector
+
+
+def _hung_osascript() -> TimeoutExpired:
+    """What osascript raises for a pending prompt or unresponsive Apple Event.
+
+    This constructs an exception, not a process: Semgrep's subprocess audit
+    matches the constructor by name, which is why the suppression lives here
+    rather than being repeated at each use.
+    """
+    # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-audit.dangerous-subprocess-use-audit
+    return TimeoutExpired(cmd="osascript", timeout=5)
 
 
 def _window(
@@ -120,6 +134,15 @@ def test_find_tables_returns_fallback_when_quartz_blank() -> None:
     assert detector.find_tables("pokerstars") == fallback
 
 
+def test_find_tables_can_make_a_quartz_only_first_pass() -> None:
+    detector = _detector(window_list=[_window(number=1, title="", owner="Winamax", pid=42)])
+    detector._find_tables_without_titles = Mock(return_value=[Mock()])
+
+    assert detector.find_tables(r"^Winamax\s+.*\s4\s*$", allow_fallback=False) == []
+
+    detector._find_tables_without_titles.assert_not_called()
+
+
 def test_find_tables_collects_blank_target_windows() -> None:
     detector = _detector(
         window_list=[
@@ -194,11 +217,7 @@ def test_find_tables_applescript_rescans_after_ttl() -> None:
 
 def test_run_applescript_scan_parses_entries() -> None:
     detector = _detector()
-    stdout = (
-        "PokerStars|Table 1|10|20|600|500, "
-        "Winamax|SpeedPool|5|5|800|600, "
-        "PokerStars|Lobby|0|0|300|200"
-    )
+    stdout = "PokerStars|Table 1|10|20|600|500, Winamax|SpeedPool|5|5|800|600, PokerStars|Lobby|0|0|300|200"
     with patch(
         "fpdb.infrastructure.platform.macos.subprocess.run",
         return_value=Mock(returncode=0, stdout=stdout, stderr=""),
@@ -230,7 +249,7 @@ def test_run_applescript_scan_warns_on_automation_blocked() -> None:
         patch("fpdb.infrastructure.platform.macos.logger") as logger,
     ):
         detector._run_applescript_scan()
-    assert detector._automation_warned is True
+    assert detector._system_events_warned is True
     logger.warning.assert_called_once()
 
 
@@ -254,7 +273,64 @@ def test_run_applescript_scan_does_not_warn_on_other_errors() -> None:
         patch("fpdb.infrastructure.platform.macos.logger") as logger,
     ):
         detector._run_applescript_scan()
-    assert detector._automation_warned is False
+    assert detector._system_events_warned is False
+    assert detector._system_events_blocked is False
+    logger.warning.assert_not_called()
+
+
+def test_run_applescript_scan_treats_a_refusal_as_blocking() -> None:
+    detector = _detector()
+    result = Mock(returncode=1, stdout="", stderr="-1743 operation not allowed")
+    with patch("fpdb.infrastructure.platform.macos.subprocess.run", return_value=result):
+        detector._run_applescript_scan()
+    assert detector._system_events_blocked is True
+
+
+def test_run_applescript_scan_treats_an_unanswered_prompt_as_blocking() -> None:
+    """-1712 means the Apple Event timed out, often on a pending prompt.
+
+    Every later scan would sit through the same multi-second timeout, and
+    Fast-Fold reaches this path on every hand.
+    """
+    detector = _detector()
+    result = Mock(returncode=1, stdout="", stderr="AppleEvent timed out. (-1712)")
+    with (
+        patch("fpdb.infrastructure.platform.macos.subprocess.run", return_value=result),
+        patch("fpdb.infrastructure.platform.macos.logger") as logger,
+    ):
+        detector._run_applescript_scan()
+    assert detector._system_events_blocked is True
+    logger.warning.assert_called_once()
+
+
+def test_run_applescript_scan_reports_accessibility_refusal() -> None:
+    detector = _detector()
+    result = Mock(
+        returncode=1,
+        stdout="",
+        stderr="System Events got an error: osascript is not allowed assistive access. (-1719)",
+    )
+    with (
+        patch("fpdb.infrastructure.platform.macos.subprocess.run", return_value=result),
+        patch("fpdb.infrastructure.platform.macos.logger") as logger,
+    ):
+        detector._run_applescript_scan()
+
+    assert detector._system_events_blocked is True
+    assert "accessibility" in logger.warning.call_args.args
+
+
+def test_run_applescript_scan_does_not_treat_bare_1719_as_a_permission_error() -> None:
+    """Apple also uses -1719 for an invalid list index."""
+    detector = _detector()
+    result = Mock(returncode=1, stdout="", stderr="Can't get item 7 of list. (-1719)")
+    with (
+        patch("fpdb.infrastructure.platform.macos.subprocess.run", return_value=result),
+        patch("fpdb.infrastructure.platform.macos.logger") as logger,
+    ):
+        detector._run_applescript_scan()
+
+    assert detector._system_events_blocked is False
     logger.warning.assert_not_called()
 
 
@@ -271,7 +347,9 @@ def test_match_target_window_by_pid_exact() -> None:
         TableInfo(window_id=1, title="", geometry=TableGeometry(0, 0, 600, 500), process_id=101),
         TableInfo(window_id=2, title="", geometry=TableGeometry(0, 0, 600, 500), process_id=102),
     ]
-    with patch("fpdb.infrastructure.platform.macos_process.table_id_for_pid", side_effect={101: "922564", 102: "1"}.__getitem__):
+    with patch(
+        "fpdb.infrastructure.platform.macos_process.table_id_for_pid", side_effect={101: "922564", 102: "1"}.__getitem__
+    ):
         assert detector._match_target_window_by_pid("922564", windows).window_id == 1
 
 
@@ -362,7 +440,9 @@ def test_get_window_geometry_for_fake_id_uses_cache() -> None:
     detector = _detector()
     fake_id = detector._FAKE_ID_BASE + 5
     detector._applescript_cache[fake_id] = TableInfo(
-        window_id=fake_id, title="Table 1", geometry=TableGeometry(3, 4, 600, 500),
+        window_id=fake_id,
+        title="Table 1",
+        geometry=TableGeometry(3, 4, 600, 500),
     )
     detector.find_tables_applescript = Mock()
     geometry = detector.get_window_geometry(fake_id)
@@ -375,7 +455,9 @@ def test_get_window_geometry_for_real_id_queries_quartz() -> None:
     desc = Mock(
         return_value=[{"kCGWindowBounds": {"X": 1, "Y": 2, "Width": 640, "Height": 480}}],
     )
-    with patch.dict("sys.modules", {"Quartz": Mock(), "Quartz.CoreGraphics": Mock(CGWindowListCreateDescriptionFromArray=desc)}):
+    with patch.dict(
+        "sys.modules", {"Quartz": Mock(), "Quartz.CoreGraphics": Mock(CGWindowListCreateDescriptionFromArray=desc)}
+    ):
         geometry = detector.get_window_geometry(9)
     assert geometry == (1, 2, 640, 480) or (geometry.x, geometry.y, geometry.width, geometry.height) == (1, 2, 640, 480)
 
@@ -383,7 +465,9 @@ def test_get_window_geometry_for_real_id_queries_quartz() -> None:
 def test_get_window_geometry_none_when_window_missing() -> None:
     detector = _detector()
     desc = Mock(return_value=[])
-    with patch.dict("sys.modules", {"Quartz": Mock(), "Quartz.CoreGraphics": Mock(CGWindowListCreateDescriptionFromArray=desc)}):
+    with patch.dict(
+        "sys.modules", {"Quartz": Mock(), "Quartz.CoreGraphics": Mock(CGWindowListCreateDescriptionFromArray=desc)}
+    ):
         assert detector.get_window_geometry(9) is None
 
 
@@ -391,7 +475,10 @@ def test_get_window_geometry_none_on_error() -> None:
     detector = _detector()
     with patch.dict(
         "sys.modules",
-        {"Quartz": Mock(), "Quartz.CoreGraphics": Mock(CGWindowListCreateDescriptionFromArray=Mock(side_effect=RuntimeError))},
+        {
+            "Quartz": Mock(),
+            "Quartz.CoreGraphics": Mock(CGWindowListCreateDescriptionFromArray=Mock(side_effect=RuntimeError)),
+        },
     ):
         assert detector.get_window_geometry(9) is None
 
@@ -405,7 +492,9 @@ def test_is_window_visible_real_id() -> None:
 def test_is_window_visible_fake_id_rescans() -> None:
     detector = _detector()
     fake_id = detector._FAKE_ID_BASE + 5
-    detector._applescript_cache[fake_id] = TableInfo(window_id=fake_id, title="T", geometry=TableGeometry(0, 0, 600, 500))
+    detector._applescript_cache[fake_id] = TableInfo(
+        window_id=fake_id, title="T", geometry=TableGeometry(0, 0, 600, 500)
+    )
     detector.find_tables_applescript = Mock()
     assert detector.is_window_visible(fake_id) is True
     detector.find_tables_applescript.assert_called_once_with("")
@@ -429,7 +518,9 @@ def test_get_window_title_fake_id() -> None:
     detector = _detector()
     fake_id = detector._FAKE_ID_BASE + 5
     detector._applescript_cache[fake_id] = TableInfo(
-        window_id=fake_id, title="Table Alpha", geometry=TableGeometry(0, 0, 600, 500),
+        window_id=fake_id,
+        title="Table Alpha",
+        geometry=TableGeometry(0, 0, 600, 500),
     )
     assert detector.get_window_title(fake_id) == "Table Alpha"
     assert detector.get_window_title(detector._FAKE_ID_BASE + 999) is None
@@ -438,14 +529,18 @@ def test_get_window_title_fake_id() -> None:
 def test_get_window_title_real_id() -> None:
     detector = _detector()
     desc = Mock(return_value=[{"kCGWindowName": "Table Beta"}])
-    with patch.dict("sys.modules", {"Quartz": Mock(), "Quartz.CoreGraphics": Mock(CGWindowListCreateDescriptionFromArray=desc)}):
+    with patch.dict(
+        "sys.modules", {"Quartz": Mock(), "Quartz.CoreGraphics": Mock(CGWindowListCreateDescriptionFromArray=desc)}
+    ):
         assert detector.get_window_title(9) == "Table Beta"
 
 
 def test_get_window_title_none_when_window_missing() -> None:
     detector = _detector()
     desc = Mock(return_value=[])
-    with patch.dict("sys.modules", {"Quartz": Mock(), "Quartz.CoreGraphics": Mock(CGWindowListCreateDescriptionFromArray=desc)}):
+    with patch.dict(
+        "sys.modules", {"Quartz": Mock(), "Quartz.CoreGraphics": Mock(CGWindowListCreateDescriptionFromArray=desc)}
+    ):
         assert detector.get_window_title(9) is None
 
 
@@ -453,7 +548,10 @@ def test_get_window_title_none_on_error() -> None:
     detector = _detector()
     with patch.dict(
         "sys.modules",
-        {"Quartz": Mock(), "Quartz.CoreGraphics": Mock(CGWindowListCreateDescriptionFromArray=Mock(side_effect=RuntimeError))},
+        {
+            "Quartz": Mock(),
+            "Quartz.CoreGraphics": Mock(CGWindowListCreateDescriptionFromArray=Mock(side_effect=RuntimeError)),
+        },
     ):
         assert detector.get_window_title(9) is None
 
@@ -540,63 +638,22 @@ def test_check_permissions_once_logs_missing() -> None:
         assert logger.warning.call_count == 2
 
 
-def test_check_permissions_once_requests_when_env_set() -> None:
+def test_check_permissions_once_is_diagnostic_only_even_when_prompts_were_requested() -> None:
     detector = _detector()
     with (
         patch.dict("os.environ", {"FPDB_REQUEST_MACOS_PERMISSIONS": "1"}),
+        patch.object(sys, "frozen", True, create=True),
         patch("fpdb.infrastructure.platform.macos.permissions") as permissions,
     ):
         permissions.get_status.return_value = Mock(screen_recording=False, accessibility=False)
         permissions.describe_missing.return_value = ["missing"]
+
         detector._check_permissions_once()
-        permissions.request_screen_recording_permission.assert_called_once()
-        permissions.open_screen_recording_settings.assert_called_once()
-        permissions.request_accessibility_permission.assert_called_once_with(prompt=True)
-        permissions.open_accessibility_settings.assert_called_once()
 
-
-def test_check_permissions_once_env_skips_granted_permissions() -> None:
-    detector = _detector()
-    with (
-        patch.dict("os.environ", {"FPDB_REQUEST_MACOS_PERMISSIONS": "1"}),
-        patch("fpdb.infrastructure.platform.macos.permissions") as permissions,
-    ):
-        permissions.get_status.return_value = Mock(screen_recording=True, accessibility=False)
-        permissions.describe_missing.return_value = ["missing accessibility"]
-        detector._check_permissions_once()
-        permissions.request_screen_recording_permission.assert_not_called()
-        permissions.open_screen_recording_settings.assert_not_called()
-        permissions.request_accessibility_permission.assert_called_once()
-
-
-def test_check_permissions_once_env_skips_all_when_granted() -> None:
-    detector = _detector()
-    with (
-        patch.dict("os.environ", {"FPDB_REQUEST_MACOS_PERMISSIONS": "1"}),
-        patch("fpdb.infrastructure.platform.macos.permissions") as permissions,
-    ):
-        permissions.get_status.return_value = Mock(screen_recording=True, accessibility=True)
-        permissions.describe_missing.return_value = []
-        detector._check_permissions_once()
         permissions.request_screen_recording_permission.assert_not_called()
         permissions.open_screen_recording_settings.assert_not_called()
         permissions.request_accessibility_permission.assert_not_called()
         permissions.open_accessibility_settings.assert_not_called()
-
-
-def test_check_permissions_once_env_accessibility_granted() -> None:
-    detector = _detector()
-    with (
-        patch.dict("os.environ", {"FPDB_REQUEST_MACOS_PERMISSIONS": "1"}),
-        patch("fpdb.infrastructure.platform.macos.permissions") as permissions,
-    ):
-        # Accessibility granted but Screen Recording missing: only the latter is
-        # requested, and the accessibility branch is skipped.
-        permissions.get_status.return_value = Mock(screen_recording=False, accessibility=True)
-        permissions.describe_missing.return_value = ["missing screen recording"]
-        detector._check_permissions_once()
-        permissions.request_screen_recording_permission.assert_called_once()
-        permissions.request_accessibility_permission.assert_not_called()
 
 
 def test_check_permissions_once_runs_at_most_once() -> None:
@@ -627,7 +684,9 @@ def test_check_permissions_once_noop_when_permissions_ok() -> None:
 
 def test_find_tables_without_titles_prefers_pid_match() -> None:
     detector = _detector()
-    target = TableInfo(window_id=1, title="", geometry=TableGeometry(0, 0, 600, 500), process_name="CoinPoker", process_id=99)
+    target = TableInfo(
+        window_id=1, title="", geometry=TableGeometry(0, 0, 600, 500), process_name="CoinPoker", process_id=99
+    )
     detector._match_target_window_by_pid = Mock(return_value=target)
     result = detector._find_tables_without_titles("922564", [target], [], 2, 0)
     assert result == [target]
@@ -659,6 +718,36 @@ def test_find_tables_without_titles_uses_sole_blank_window() -> None:
     detector.find_tables_applescript = Mock(return_value=[])
     blank = TableInfo(window_id=3, title="", geometry=TableGeometry(0, 0, 600, 500), process_name="PokerStars")
     result = detector._find_tables_without_titles("pokerstars", [], [blank], 0, 0)
+    assert result == [blank]
+
+
+def test_find_tables_without_titles_still_scans_when_accessibility_is_missing() -> None:
+    """Try once so System Events can request Automation and explain the refusal."""
+    detector = _detector()
+    detector._match_target_window_by_pid = Mock(return_value=None)
+    detector._check_permissions_once = Mock(return_value=Mock(accessibility=False))
+    found = TableInfo(window_id=9, title="Winamax Bucarest 6", geometry=TableGeometry(0, 0, 600, 500))
+    detector.find_tables_applescript = Mock(return_value=[found])
+    blank = TableInfo(window_id=3, title="", geometry=TableGeometry(0, 0, 600, 500), process_name="Winamax")
+
+    result = detector._find_tables_without_titles("Winamax Bucarest 6", [], [blank], 3, 0)
+
+    detector.find_tables_applescript.assert_called_once_with("Winamax Bucarest 6")
+    assert result == [found]
+
+
+def test_find_tables_without_titles_stops_scanning_once_system_events_refuses() -> None:
+    """A refused scan costs seconds, and Fast-Fold hits this path per hand."""
+    detector = _detector()
+    detector._match_target_window_by_pid = Mock(return_value=None)
+    detector.find_tables_applescript = Mock(return_value=[])
+    detector._system_events_blocked = True
+    blank = TableInfo(window_id=3, title="", geometry=TableGeometry(0, 0, 600, 500), process_name="Winamax")
+
+    result = detector._find_tables_without_titles("Winamax Bucarest 6", [], [blank], 3, 0)
+
+    detector.find_tables_applescript.assert_not_called()
+    # The sole-window heuristic is still allowed to answer.
     assert result == [blank]
 
 
@@ -716,3 +805,66 @@ def test_synthetic_window_id_is_deterministic() -> None:
     two = base + zlib.crc32(b"Table Alpha") % 1_000_000
     assert one == two
     assert one >= base
+
+
+def test_run_applescript_scan_treats_a_hung_scan_as_blocking() -> None:
+    """An unanswered Automation prompt blocks osascript rather than failing it.
+
+    TimeoutExpired never reaches the return-code handling, so before this the
+    broad handler swallowed it and left the scan enabled -- every table lookup
+    then paid the full timeout again.
+    """
+    detector = _detector()
+    with (
+        patch(
+            "fpdb.infrastructure.platform.macos.subprocess.run",
+            side_effect=_hung_osascript(),
+        ),
+        patch("fpdb.infrastructure.platform.macos.logger") as logger,
+    ):
+        detector._run_applescript_scan()
+
+    assert detector._system_events_blocked is True
+    logger.warning.assert_called_once()
+    logger.error.assert_not_called()
+
+
+def test_a_hung_scan_is_not_repeated_on_the_next_lookup() -> None:
+    """The whole point of noticing the block: the second lookup must be free."""
+    detector = _detector()
+    detector._match_target_window_by_pid = Mock(return_value=None)
+    with patch(
+        "fpdb.infrastructure.platform.macos.subprocess.run",
+        side_effect=_hung_osascript(),
+    ) as run:
+        detector._find_tables_without_titles("Winamax Colorado 6", [], [], 3, 0)
+        detector._find_tables_without_titles("Winamax Colorado 5", [], [], 3, 0)
+
+    assert run.call_count == 1
+
+
+def test_an_empty_result_still_respects_the_scan_ttl() -> None:
+    """"Nothing found" is what a refused or hanging scan returns, too.
+
+    Re-scanning whenever the last result was empty made that the one case that
+    repeated on every lookup.
+    """
+    detector = _detector()
+    detector._applescript_last_result = []
+    detector._applescript_last_scan = time.monotonic()
+    detector._run_applescript_scan = Mock()
+
+    detector.find_tables_applescript("anything")
+
+    detector._run_applescript_scan.assert_not_called()
+
+
+def test_the_first_scan_still_runs_with_no_cached_result() -> None:
+    detector = _detector()
+    detector._applescript_last_result = []
+    detector._applescript_last_scan = 0.0
+    detector._run_applescript_scan = Mock()
+
+    detector.find_tables_applescript("anything")
+
+    detector._run_applescript_scan.assert_called_once()

@@ -9,7 +9,9 @@ from pathlib import Path
 import pytest
 
 from fpdb_3_legacy.subprocess_launch import (
+    HUD_FLAG,
     RUN_MODULE_FLAG,
+    dispatch_hud_main,
     dispatch_run_module,
     hud_main_command,
     python_module_command,
@@ -39,8 +41,20 @@ def test_hud_command_uses_pyoxidizer_subcommand(monkeypatch) -> None:
     assert hud_main_command("-x") == [sys.executable, "--hud", "-x"]
 
 
+def test_hud_command_reuses_the_main_executable_on_pyinstaller_macos(monkeypatch, tmp_path) -> None:
+    """One executable gives both processes the same macOS TCC identity."""
+    monkeypatch.setattr(sys, "frozen", True, raising=False)
+    monkeypatch.setattr(sys, "platform", "darwin")
+    monkeypatch.setattr(sys, "executable", str(tmp_path / "fpdb"))
+
+    command = hud_main_command("-x")
+
+    assert command == [str(tmp_path / "fpdb"), HUD_FLAG, "-x"]
+
+
 def test_hud_command_uses_sibling_executable_when_frozen(monkeypatch, tmp_path) -> None:
     monkeypatch.setattr(sys, "frozen", True, raising=False)
+    monkeypatch.setattr(sys, "platform", "win32" if os.name == "nt" else "linux")
     monkeypatch.setattr(sys, "executable", str(tmp_path / "fpdb"))
     hud = tmp_path / ("HUD_main.exe" if os.name == "nt" else "HUD_main")
     hud.write_text("")
@@ -53,6 +67,7 @@ def test_hud_command_uses_sibling_executable_when_frozen(monkeypatch, tmp_path) 
 
 def test_hud_command_reports_missing_packaged_executable(monkeypatch, tmp_path) -> None:
     monkeypatch.setattr(sys, "frozen", True, raising=False)
+    monkeypatch.setattr(sys, "platform", "win32" if os.name == "nt" else "linux")
     monkeypatch.setattr(sys, "executable", str(tmp_path / "fpdb"))
 
     with pytest.raises(FileNotFoundError):
@@ -98,8 +113,7 @@ def test_dispatch_runs_the_requested_module(monkeypatch, tmp_path) -> None:
     module_dir.mkdir()
     (module_dir / "__init__.py").write_text("")
     (module_dir / "mod.py").write_text(
-        "import sys, pathlib\n"
-        "pathlib.Path(sys.argv[1]).write_text(f'{__name__}|{sys.argv[2]}')\n",
+        "import sys, pathlib\npathlib.Path(sys.argv[1]).write_text(f'{__name__}|{sys.argv[2]}')\n",
     )
     monkeypatch.syspath_prepend(str(tmp_path))
     marker = tmp_path / "ran.txt"
@@ -107,3 +121,14 @@ def test_dispatch_runs_the_requested_module(monkeypatch, tmp_path) -> None:
 
     assert dispatch_run_module() is True
     assert marker.read_text() == "__main__|--live"
+
+
+def test_dispatch_hud_main_runs_packaged_script_with_forwarded_args(monkeypatch) -> None:
+    monkeypatch.setattr(sys, "argv", ["fpdb", HUD_FLAG, "--config", "bundled.xml"])
+
+    monkeypatch.setattr("fpdb_3_legacy.subprocess_launch.runpy.run_path", lambda *args, **kwargs: None)
+
+    assert dispatch_hud_main() is True
+
+    assert Path(sys.argv[0]).name == "HUD_main.pyw"
+    assert sys.argv[1:] == ["--config", "bundled.xml"]

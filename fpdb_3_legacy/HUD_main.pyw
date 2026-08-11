@@ -29,6 +29,7 @@ from dataclasses import dataclass
 from optparse import Values
 from pathlib import Path
 from queue import Empty, Queue
+from types import ModuleType
 from typing import Any
 
 import zmq as _zmq
@@ -39,7 +40,7 @@ zmq: Any = _zmq
 from cachetools import TTLCache
 from PySide6.QtCore import QCoreApplication, QEvent, QObject, Qt, QThread, QTimer, Signal
 from PySide6.QtGui import QCloseEvent, QIcon
-from PySide6.QtWidgets import QApplication, QLabel, QVBoxLayout, QWidget
+from PySide6.QtWidgets import QApplication, QDialog, QGridLayout, QHBoxLayout, QLabel, QPushButton, QVBoxLayout, QWidget
 from qt_material import apply_stylesheet
 
 from fpdb_3_legacy import Aux_Base, Configuration, Database, Deck, Hud, Options, db_profile
@@ -262,6 +263,7 @@ class HudReadWorker(QThread):
             temp_key=request.temp_key,
             seat_map=dict(request.seat_map),
             stat_dict=stat_dict,
+            request_id=request.request_id,
         )
 
     def run(self) -> None:
@@ -401,6 +403,143 @@ class HudMainWindow(QWidget):
     def closeEvent(self, event: QCloseEvent) -> None:  # noqa: N802
         """Forward the native close event to the HUD owner."""
         self._on_close(event)
+
+
+class MacOSPermissionsDialog(QDialog):
+    """Explicit, non-modal onboarding for the HUD's macOS permissions.
+
+    Constructing or refreshing this dialog only runs side-effect-free
+    preflights. Native prompts and System Settings are reached exclusively from
+    the corresponding user-operated buttons.
+    """
+
+    status_changed = Signal(object)
+
+    def __init__(self, parent: QWidget | None = None) -> None:
+        """Build the permission status and action rows."""
+        super().__init__(parent)
+        self.setWindowTitle("FPDB macOS Permissions")
+        self.setModal(False)
+        self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose, False)
+
+        layout = QVBoxLayout(self)
+        intro = QLabel(
+            "FPDB checks these permissions without requesting them. "
+            "Use the buttons below only when you want macOS to prompt or open System Settings.",
+        )
+        intro.setWordWrap(True)
+        layout.addWidget(intro)
+        screen_note = QLabel(
+            "macOS groups this under Screen & System Audio Recording. "
+            "FPDB reads window metadata only and does not request microphone access.",
+        )
+        screen_note.setWordWrap(True)
+        layout.addWidget(screen_note)
+
+        grid = QGridLayout()
+        grid.addWidget(QLabel("Permission"), 0, 0)
+        grid.addWidget(QLabel("Status"), 0, 1)
+        grid.addWidget(QLabel("Actions"), 0, 2, 1, 2)
+
+        self.screen_status_label = QLabel()
+        self.screen_request_button = QPushButton("Request Screen Recording")
+        self.screen_settings_button = QPushButton("Open Screen Recording Settings")
+        grid.addWidget(QLabel("Screen Recording"), 1, 0)
+        grid.addWidget(self.screen_status_label, 1, 1)
+        grid.addWidget(self.screen_request_button, 1, 2)
+        grid.addWidget(self.screen_settings_button, 1, 3)
+
+        self.accessibility_status_label = QLabel()
+        self.accessibility_request_button = QPushButton("Request Accessibility")
+        self.accessibility_settings_button = QPushButton("Open Accessibility Settings")
+        grid.addWidget(QLabel("Accessibility"), 2, 0)
+        grid.addWidget(self.accessibility_status_label, 2, 1)
+        grid.addWidget(self.accessibility_request_button, 2, 2)
+        grid.addWidget(self.accessibility_settings_button, 2, 3)
+
+        self.app_data_status_label = QLabel()
+        self.app_data_info_label = QLabel(
+            "Informational only: macOS prompts on the first protected Winamax file access, "
+            "using the bundle's NSAppDataUsageDescription.",
+        )
+        self.app_data_info_label.setWordWrap(True)
+        grid.addWidget(QLabel("App Data"), 3, 0)
+        grid.addWidget(self.app_data_status_label, 3, 1)
+        grid.addWidget(self.app_data_info_label, 3, 2, 1, 2)
+        grid.setColumnStretch(2, 1)
+        layout.addLayout(grid)
+
+        restart_note = QLabel(
+            "After changing Screen Recording, quit and reopen FPDB yourself if table titles remain unavailable. "
+            "FPDB never restarts automatically.",
+        )
+        restart_note.setWordWrap(True)
+        layout.addWidget(restart_note)
+
+        button_row = QHBoxLayout()
+        self.recheck_button = QPushButton("Recheck")
+        self.close_button = QPushButton("Close")
+        button_row.addWidget(self.recheck_button)
+        button_row.addStretch(1)
+        button_row.addWidget(self.close_button)
+        layout.addLayout(button_row)
+
+        self.screen_request_button.clicked.connect(self._request_screen_recording)
+        self.screen_settings_button.clicked.connect(self._open_screen_recording_settings)
+        self.accessibility_request_button.clicked.connect(self._request_accessibility)
+        self.accessibility_settings_button.clicked.connect(self._open_accessibility_settings)
+        self.recheck_button.clicked.connect(self.refresh_status)
+        self.close_button.clicked.connect(self.hide)
+
+    @staticmethod
+    def _binary_status(granted: bool) -> str:
+        return "Granted" if granted else "Missing"
+
+    def set_status(self, status: Any) -> None:
+        """Render an already-computed permission snapshot without side effects."""
+        self.screen_status_label.setText(self._binary_status(status.screen_recording))
+        self.accessibility_status_label.setText(self._binary_status(status.accessibility))
+        if status.app_data is None:
+            self.app_data_status_label.setText("Not preflightable")
+        else:
+            self.app_data_status_label.setText(self._binary_status(status.app_data))
+        self.screen_request_button.setEnabled(not status.screen_recording)
+        self.accessibility_request_button.setEnabled(not status.accessibility)
+
+    def refresh_status(self) -> Any:
+        """Run diagnostic-only preflights and update the three status rows."""
+        from fpdb.infrastructure.platform import permissions
+
+        status = permissions.get_status()
+        self.set_status(status)
+        self.status_changed.emit(status)
+        return status
+
+    def _request_screen_recording(self) -> None:
+        """Request Screen Recording after an explicit button click."""
+        from fpdb.infrastructure.platform import permissions
+
+        permissions.request_screen_recording_permission()
+        self.refresh_status()
+
+    def _request_accessibility(self) -> None:
+        """Request Accessibility after an explicit button click."""
+        from fpdb.infrastructure.platform import permissions
+
+        permissions.request_accessibility_permission(prompt=True)
+        self.refresh_status()
+
+    @staticmethod
+    def _open_screen_recording_settings() -> None:
+        from fpdb.infrastructure.platform import permissions
+
+        permissions.open_screen_recording_settings()
+
+    @staticmethod
+    def _open_accessibility_settings() -> None:
+        from fpdb.infrastructure.platform import permissions
+
+        permissions.open_accessibility_settings()
 
 
 class HudMain(QObject):
@@ -579,21 +718,33 @@ class HudMain(QObject):
         self.config = Configuration.Config(file=options.config, dbname=options.dbname)
         log.info("HUD_main initialized - Config loaded, OS family: %s", self.config.os_family)
 
-        # Selecting the right module for the OS
+        # Selecting the right module for the OS. Imported through the package
+        # rather than as bare top-level modules: a bare "import OSXTables" only
+        # resolves because the repository root happens to be on sys.path, which
+        # is true of a source checkout and of HUD_main's own frozen archive, but
+        # not of every way this file can be run. Each import stays inside its
+        # branch -- the other two backends need bindings this platform lacks --
+        # and the module is bound once, so mypy sees a single definition.
+        tables: ModuleType
         if self.config.os_family == "Linux":
             # Simplified: XWayland support or X11 fallback
             if os.getenv("QT_QPA_PLATFORM") == "xcb" or not os.environ.get("WAYLAND_DISPLAY"):
                 log.info("XWayland forced under wayland → backend XTables")
-                import XTables as Tables
             else:
                 log.info("Session X11 detected → backend XTables")
-                import XTables as Tables
+            from fpdb_3_legacy import XTables
+
+            tables = XTables
         elif self.config.os_family == "Mac":
-            import OSXTables as Tables
+            from fpdb_3_legacy import OSXTables
+
+            tables = OSXTables
         elif self.config.os_family in ("XP", "Win7"):
-            import WinTables as Tables
+            from fpdb_3_legacy import WinTables
+
+            tables = WinTables
         log.info("HudMain starting: Using db name = %s", db_name)
-        self.Tables = Tables  # Assign Tables to self.Tables
+        self.Tables = tables
 
         # Surface missing macOS privacy permissions at startup so table-detection
         # failures ("table name ... not found") are explained before the first hand.
@@ -620,6 +771,7 @@ class HudMain(QObject):
         try:
             # HUD dictionary and parameters
             self.hud_dict: dict[str, Hud.Hud] = {}
+            self._macos_permissions_dialog: MacOSPermissionsDialog | None = None
             # Session-only profile choices made from an individual table menu.
             # Values include game identity so a recycled table key cannot leak a
             # Hold'em/PLO choice into another game.
@@ -636,6 +788,10 @@ class HudMain(QObject):
             # Winamax log pool -> hud_dict key, learned once a hand from that
             # table has been imported and reused while the table stays open.
             self._winamax_pool_huds: dict[str, str] = {}
+            # Imported hands use the human table key while a live FastFold HUD
+            # may also carry a window discriminator. Keep that alias explicit
+            # instead of making every caller guess with string prefixes.
+            self._fast_fold_aliases: dict[str, str] = {}
             # hud_dict keys known to be Fast-Fold tables.
             self._fast_fold_tables: set[str] = set()
             # hud_dict key -> the seat map last sent to the worker, so an
@@ -649,9 +805,11 @@ class HudMain(QObject):
             # because each read walks another process's accessibility tree.
             self._ax_rings: dict[str, tuple[str, dict[int, str], int]] = {}
             # Timeline bookkeeping: when each hand's first log line arrived, and
-            # which hand a table's in-flight stats request belongs to.
+            # which hand/table request is currently allowed to update the HUD.
             self._ff_started: dict[str, float] = {}
             self._ff_pending_hand: dict[str, str] = {}
+            self._ff_pending_request: dict[str, int] = {}
+            self._ff_request_sequence = 0
             # Learned from the first imported Winamax hand. A log-created HUD
             # does not need it (it reads nothing from the database), but keeping
             # it lets the table carry the same identity as an imported one.
@@ -684,19 +842,7 @@ class HudMain(QObject):
                 height=self.hud_params["card_ht"],
             )
 
-            from fpdb_3_legacy.winamax_ax_seats import WinamaxAXSeatReader, is_supported
-            from fpdb_3_legacy.winamax_live_log_reader import WinamaxLiveLogReader
-
-            # Reads seats off the table window itself. The log can only say who
-            # has acted, and never where they sit; this knows both, immediately.
-            self.winamax_ax_seats = WinamaxAXSeatReader() if is_supported() else None
-
-            # Queued by Qt because the reader emits from its tailing thread.
-            self.winamax_table_update.connect(self._on_winamax_table_update)
-            self.winamax_log_reader = WinamaxLiveLogReader(
-                on_table_update=self.winamax_table_update.emit,
-            )
-            self.winamax_log_reader.start()
+            self._initialize_winamax_live_sources()
 
             # Cache initialization
             self.cache: TTLCache = TTLCache(maxsize=1000, ttl=300)  # Cache of 1000 elements with a TTL of 5 minutes
@@ -716,6 +862,11 @@ class HudMain(QObject):
             self._hand_batch_timer.setSingleShot(True)
             self._hand_batch_timer.setInterval(HAND_BATCH_INTERVAL_MS)
             self._hand_batch_timer.timeout.connect(self._drain_pending_hands)
+
+            self._cleanup_timer = QTimer(self)
+            self._cleanup_timer.setInterval(2000)
+            self._cleanup_timer.timeout.connect(self._cleanup_closed_windows)
+            self._cleanup_timer.start()
 
             self._db_worker: HudReadWorker | None = HudReadWorker(self.config, parent=self)
             self._db_worker.ready.connect(self._on_db_worker_ready)
@@ -750,38 +901,93 @@ class HudMain(QObject):
             raise
 
     def _check_macos_permissions(self) -> None:
-        """Diagnose macOS privacy permissions required for table detection.
+        """Diagnose macOS privacy permissions without prompting or opening Settings.
 
-        Screen Recording is needed for Quartz to expose window titles;
-        Accessibility/Automation is needed for the AppleScript fallback used by
-        Electron clients (e.g. Winamax). Logs a clear, actionable message for any
-        missing permission. Set ``FPDB_REQUEST_MACOS_PERMISSIONS=1`` to also
-        trigger the native prompts and open the relevant System Settings panes.
+        This startup path is deliberately identical for source and frozen
+        builds. Permission requests belong only to the explicit onboarding
+        buttons in :class:`MacOSPermissionsDialog`.
         """
         try:
             from fpdb.infrastructure.platform import permissions
         except Exception:
             log.debug("macOS permissions preflight unavailable", exc_info=True)
+            self._macos_permission_status = None
             return
 
         status = permissions.get_status()
+        self._macos_permission_status = status
         if status.all_granted:
             log.info("macOS permissions OK (Screen Recording + Accessibility granted)")
-            return
-
         for message in permissions.describe_missing(status):
             log.warning(message)
+        if status.app_data is None:
+            log.info("macOS App Data permission is managed by macOS and cannot be preflighted safely")
 
-        if os.getenv("FPDB_REQUEST_MACOS_PERMISSIONS") == "1":
-            if not status.screen_recording:
-                log.info("Requesting Screen Recording permission (native prompt)...")
-                permissions.request_screen_recording_permission()
-                permissions.open_screen_recording_settings()
-            if not status.accessibility:
-                log.info("Requesting Accessibility permission (native prompt)...")
-                permissions.request_accessibility_permission(prompt=True)
-                permissions.open_accessibility_settings()
-            log.warning("After granting permissions, restart FPDB for them to take effect.")
+    @staticmethod
+    def _site_enabled_in_config(config: Any, site_name: str) -> bool:
+        """Read an enabled-site flag from the loaded config without resolving paths."""
+        try:
+            enabled_sites = config.get_supported_sites()
+            wanted = site_name.casefold()
+            return any(str(site).casefold() == wanted for site in enabled_sites)
+        except Exception:
+            log.warning("Could not read enabled sites while initializing %s live sources", site_name, exc_info=True)
+            return False
+
+    def _initialize_winamax_live_sources(self) -> None:
+        """Start Winamax-only helpers when Winamax is enabled in the loaded config."""
+        self.winamax_ax_seats = None
+        self.winamax_pool_games = None
+        self.winamax_log_reader = None
+        if not self._site_enabled_in_config(self.config, "Winamax"):
+            log.info("Winamax is disabled; live log and Accessibility helpers will not be initialized")
+            return
+
+        from fpdb_3_legacy.winamax_ax_seats import WinamaxAXSeatReader, is_supported
+        from fpdb_3_legacy.winamax_live_log_reader import WinamaxLiveLogReader
+        from fpdb_3_legacy.winamax_pool_games import WinamaxPoolGames
+
+        # Reads seats off the table window itself. The log can only say who has
+        # acted, and never where they sit; this knows both, immediately.
+        self.winamax_ax_seats = WinamaxAXSeatReader() if is_supported() else None
+
+        # The window says which game it deals only to a process holding macOS
+        # Accessibility. Imported hands say it unconditionally, so keep what
+        # they prove for later live hands.
+        self.winamax_pool_games = WinamaxPoolGames(
+            Path(Configuration.CONFIG_PATH) / "winamax_pool_games.json" if Configuration.CONFIG_PATH else None,
+        )
+
+        # Queued by Qt because the reader emits from its tailing thread.
+        self.winamax_table_update.connect(self._on_winamax_table_update)
+        self.winamax_log_reader = WinamaxLiveLogReader(
+            on_table_update=self.winamax_table_update.emit,
+        )
+        self.winamax_log_reader.start()
+
+    def show_macos_permissions(self) -> None:
+        """Show the explicit macOS permission onboarding window."""
+        dialog = getattr(self, "_macos_permissions_dialog", None)
+        if dialog is None:
+            dialog = MacOSPermissionsDialog(self.main_window)
+            dialog.status_changed.connect(self._remember_macos_permission_status)
+            self._macos_permissions_dialog = dialog
+        dialog.refresh_status()
+        dialog.show()
+        dialog.raise_()
+        dialog.activateWindow()
+
+    def _remember_macos_permission_status(self, status: Any) -> None:
+        """Keep the latest UI preflight snapshot for diagnostics."""
+        self._macos_permission_status = status
+
+    def _on_application_state_changed(self, state: Any) -> None:
+        """Recheck an open onboarding window after returning from Settings."""
+        if state != Qt.ApplicationState.ApplicationActive:
+            return
+        dialog = getattr(self, "_macos_permissions_dialog", None)
+        if dialog is not None and dialog.isVisible():
+            dialog.refresh_status()
 
     def handle_worker_error(self, error_message: str) -> None:
         """Handle errors from the ZMQ worker."""
@@ -957,6 +1163,9 @@ class HudMain(QObject):
         temp_key = self._get_temp_key(info.game_type, info.tour_number, info.tab_number, table_name)
         if info.fast:
             self._fast_fold_tables.add(temp_key)
+        resolved_key = self._resolve_fast_fold_key(temp_key)
+        if resolved_key != temp_key:
+            return resolved_key
         if temp_key in self.hud_dict:
             return temp_key
         if self._handle_tournament_table_changes(info.game_type, temp_key, info.tour_number):
@@ -974,6 +1183,19 @@ class HudMain(QObject):
             self._last_table_info[temp_key] = table_info
             return temp_key
         return None
+
+    def _resolve_fast_fold_key(self, temp_key: str) -> str:
+        """Resolve an imported human key to its active window HUD key."""
+        aliases = getattr(self, "_fast_fold_aliases", {})
+        aliased = aliases.get(temp_key)
+        if isinstance(aliased, str) and aliased in getattr(self, "hud_dict", {}):
+            return aliased
+        candidates = [
+            key
+            for key in getattr(self, "hud_dict", {})
+            if key.startswith(f"{temp_key} #")
+        ]
+        return candidates[0] if len(candidates) == 1 else temp_key
 
     def _on_db_snapshot(self, snapshot: HudBatchSnapshot) -> None:
         """Apply a database-free snapshot on the Qt thread."""
@@ -1070,6 +1292,14 @@ class HudMain(QObject):
         self.main_window.setLayout(self.vb)
         self.label = QLabel("Closing this window will exit from the HUD.")
         self.vb.addWidget(self.label)
+        if self.config.os_family == "Mac":
+            self._macos_permissions_dialog = None
+            self.macos_permissions_button = QPushButton("macOS Permissions…")
+            self.macos_permissions_button.clicked.connect(self.show_macos_permissions)
+            self.vb.addWidget(self.macos_permissions_button)
+            app = QApplication.instance()
+            if app is not None:
+                app.applicationStateChanged.connect(self._on_application_state_changed)
         self.main_window.setWindowTitle("HUD Main Window")
         cards_path = Path(self.config.graphics_path) / "tribal.jpg"
         if cards_path.exists():
@@ -1150,15 +1380,55 @@ class HudMain(QObject):
         QCoreApplication.quit()
 
     def _clear_fast_fold_table(self, temp_key: str, hud: Hud.Hud, hand_id: str, reason: str) -> None:
-        """Take a Fast-Fold table's blocks down, once, and say why.
+        """Take a Fast-Fold table's blocks down and say why.
 
         The seat windows hide themselves when their seat holds nobody, so
         emptying the seats is what removes them from an idle felt.
         """
-        if self._fast_fold_pending.pop(temp_key, None) is None and not getattr(hud, "stat_dict", None):
+        pending = self._fast_fold_pending.pop(temp_key, None)
+        pending_requests = getattr(self, "_ff_pending_request", None)
+        if pending_requests is not None:
+            pending_requests.pop(temp_key, None)
+        pending_hands = getattr(self, "_ff_pending_hand", None)
+        if pending_hands is not None:
+            pending_hands.pop(temp_key, None)
+        if pending is None and not getattr(hud, "stat_dict", None) and not getattr(hud, "seat_players", None):
             return  # already down
         FastFoldEngine.clear_seats(hud)
         self._ff_trace(hand_id, "cleared", f"table={temp_key} ({reason})")
+
+    def _cleanup_closed_windows(self) -> None:
+        """Close HUD overlays for Winamax table windows that have closed at session end."""
+        import platform
+        if platform.system() != "Windows":
+            return
+        import ctypes
+        windll = getattr(ctypes, "windll", None)
+        if windll is None:
+            return
+        is_window = windll.user32.IsWindow
+        to_remove = []
+        for temp_key, hud in list(self.hud_dict.items()):
+            if not getattr(hud, "is_fast_fold", False):
+                continue
+            m = re.search(r"#(\d+)$", temp_key)
+            if m:
+                hwnd = int(m.group(1))
+                if not is_window(hwnd):
+                    to_remove.append((temp_key, hud))
+        for temp_key, hud in to_remove:
+            log.info("Closing Fast-Fold HUD for closed window: %s", temp_key)
+            self._clear_fast_fold_table(temp_key, hud, "session-end", "window closed")
+            close_hud = getattr(hud, "close", getattr(hud, "kill", None))
+            if callable(close_hud):
+                with contextlib.suppress(Exception):
+                    close_hud()
+            self.hud_dict.pop(temp_key, None)
+            aliases = getattr(self, "_fast_fold_aliases", None)
+            if aliases is not None:
+                for alias, live_key in list(aliases.items()):
+                    if live_key == temp_key:
+                        aliases.pop(alias, None)
 
     def _recheck_window(self, pool: str) -> None:
         """Re-run a table's live update once the client has had time to draw it."""
@@ -1179,6 +1449,12 @@ class HudMain(QObject):
         started = self._ff_started.get(hand_id)
         elapsed = "" if started is None else f" +{(time.monotonic() - started) * 1000:.0f}ms"
         log.warning("FF[%s]%s %s %s", hand_id, elapsed, event, detail)
+
+    def _next_fast_fold_request_id(self) -> int:
+        """Return a process-local id for the next asynchronous seat read."""
+        request_id = int(getattr(self, "_ff_request_sequence", 0)) + 1
+        self._ff_request_sequence = request_id
+        return request_id
 
     def _on_winamax_table_update(self, update: Any) -> None:
         """Apply a live Winamax log update. Runs on the GUI thread."""
@@ -1221,6 +1497,12 @@ class HudMain(QObject):
             self._clear_fast_fold_table(temp_key, hud, update.hand_id, reason)
             return
 
+        last_hand = getattr(hud, "ff_last_hand_id", None)
+        if last_hand != update.hand_id:
+            setattr(hud, "ff_last_hand_id", update.hand_id)
+            if getattr(hud, "stat_dict", None) or getattr(hud, "seat_players", None):
+                self._clear_fast_fold_table(temp_key, hud, update.hand_id, "new hand start")
+
         max_seats = getattr(hud, "max", 6) or 6
         engine = FastFoldEngine(config=self.config)
         hero_seat = engine.pin_hero_seat(hud)
@@ -1236,8 +1518,10 @@ class HudMain(QObject):
         # fraction of a second before the next read corrects them.
         drawn = self.HERO_SLOT in slots
         if drawn and len(slots) >= self.MIN_PLAYERS_TO_SHOW:
-            # Slot 0 is the bottom chair, which is the one the hero is pinned to.
-            seat_map = {((slot + hero_seat - 1) % max_seats) + 1: login for slot, login in slots.items()}
+            # Slot 0 is the bottom-center chair where the client draws the hero.
+            # Map slot 0 to the layout anchor seat (seat 3 for 6-max Winamax layouts).
+            anchor_seat = engine._anchor_slot(hud) or 3
+            seat_map = {((slot + anchor_seat - 1) % max_seats) + 1: login for slot, login in slots.items()}
             source = "window"
         elif slots:
             # Either the window holds nobody but the hero -- between hands, or
@@ -1246,6 +1530,11 @@ class HudMain(QObject):
             self._clear_fast_fold_table(temp_key, hud, update.hand_id, "table not dealt yet")
             return
         elif update.ring and update.hero:
+            hand_start_time = self._ff_started.get(update.hand_id, 0)
+            elapsed = time.monotonic() - hand_start_time if hand_start_time else 1.0
+            if len(update.ring) < max_seats and elapsed < 0.5:
+                # Wait for the full ring to accumulate in log buffer so all 6 player HUDs appear simultaneously
+                return
             seat_map = build_seat_map(update.ring, update.hero, max_seats=max_seats, hero_seat=hero_seat)
             source = "log-ring"
         else:
@@ -1270,14 +1559,17 @@ class HudMain(QObject):
         if worker is None:
             self._ff_trace(update.hand_id, "stats-skipped", "no database worker")
             return
+        request_id = self._next_fast_fold_request_id()
         self._ff_pending_hand[temp_key] = update.hand_id
-        self._ff_trace(update.hand_id, "stats-requested", f"table={temp_key}")
+        self._ff_pending_request[temp_key] = request_id
+        self._ff_trace(update.hand_id, "stats-requested", f"table={temp_key} request={request_id}")
         worker.submit(
             FastFoldStatsRequest(
                 temp_key=temp_key,
                 seat_map=seat_map,
                 hand_id=self._stats_reference_hand(temp_key),
                 num_seats=getattr(hud, "max", 6) or 6,
+                request_id=request_id,
             ),
         )
 
@@ -1285,18 +1577,25 @@ class HudMain(QObject):
         """A hand to take the gametypeId from when reading live player stats.
 
         This table's own last hand, when it has one. A window that has not had a
-        hand imported yet would otherwise get no gametypeId, the stats aggregate
-        would be skipped, and every seat would read "NA" -- so fall back to
-        another window on the same pool, which plays the same game for the same
-        stakes.
+        hand imported yet may use another window from the same pool, which is
+        still narrower than guessing from the newest global Gametypes row.
         """
         hand_id = self._last_processed_hands.get(temp_key)
         if hand_id is not None:
             return hand_id
 
-        base = re.sub(r"\s+\d+$", "", temp_key)
+        aliases = getattr(self, "_fast_fold_aliases", {})
+        for imported_key, live_key in aliases.items():
+            if live_key == temp_key:
+                hand_id = self._last_processed_hands.get(imported_key)
+                if hand_id is not None:
+                    return hand_id
+
+        clean_key = re.sub(r"\s*#\d+$", "", temp_key)
+        base = re.sub(r"\s+\d+$", "", clean_key)
         for other_key, other_hand in self._last_processed_hands.items():
-            if re.sub(r"\s+\d+$", "", other_key) == base:
+            clean_other = re.sub(r"\s*#\d+$", "", other_key)
+            if re.sub(r"\s+\d+$", "", clean_other) == base:
                 return other_hand
         return None
 
@@ -1311,11 +1610,13 @@ class HudMain(QObject):
         the caller then falls back to the log-derived ring.
         """
         reader = getattr(self, "winamax_ax_seats", None)
-        title = getattr(getattr(hud, "table", None), "title", "") or ""
+        table = getattr(hud, "table", None)
+        title = getattr(table, "title", "") or ""
         if reader is None or not title:
             return {}
 
-        cached_hand, cached_slots, reads = self._ax_rings.get(title, (None, {}, 0))
+        table_key = getattr(table, "key", None) or title
+        cached_hand, cached_slots, reads = self._ax_rings.get(table_key, (None, {}, 0))
         if cached_hand != hand_id:
             cached_slots, reads = {}, 0
 
@@ -1324,11 +1625,18 @@ class HudMain(QObject):
         # same hand, taking the fullest answer, until the table is full or the
         # budget runs out -- caching that first partial read is what left the
         # overlay showing one player for a whole hand.
-        if len(cached_slots) >= max_seats or reads >= self.AX_READS_PER_HAND:
+        if (self.HERO_SLOT in cached_slots and len(cached_slots) >= max_seats - 1) or len(cached_slots) >= max_seats or reads >= self.AX_READS_PER_HAND:
             return cached_slots
 
+        table_pos = None
+        if table is not None and getattr(table, "x", None) is not None and getattr(table, "y", None) is not None:
+            table_pos = (float(table.x), float(table.y))
+
         started = time.monotonic()
-        slots = reader.read_window(title, max_seats)
+        if table_pos is not None:
+            slots = reader.read_window(title, max_seats, table_pos=table_pos)
+        else:
+            slots = reader.read_window(title, max_seats)
         took = (time.monotonic() - started) * 1000
         # A read holding the hero's chair beats one without it even when the
         # one without it names more players: the second caught the window
@@ -1337,14 +1645,14 @@ class HudMain(QObject):
             (cached_slots, slots),
             key=lambda answer: (self.HERO_SLOT in answer, len(answer)),
         )
-        self._ax_rings[title] = (hand_id, best, reads + 1)
+        self._ax_rings[table_key] = (hand_id, best, reads + 1)
 
         if slots != cached_slots:
             empty = sorted(set(range(max_seats)) - set(best))
             self._ff_trace(
                 hand_id,
                 "window-read",
-                f"{title!r} {took:.0f}ms read#{reads + 1} players={len(best)} "
+                f"{title!r} (key={table_key}) {took:.0f}ms read#{reads + 1} players={len(best)} "
                 f"slots={ {s: best[s] for s in sorted(best)} } empty={empty}",
             )
         return best
@@ -1352,6 +1660,14 @@ class HudMain(QObject):
     def _on_fast_fold_stats(self, result: FastFoldStatsResult) -> None:
         """Apply stats the worker read for a Fast-Fold table. Runs on the GUI thread."""
         hand_id = self._ff_pending_hand.get(result.temp_key, "?")
+        expected_request = getattr(self, "_ff_pending_request", {}).get(result.temp_key)
+        if expected_request is None or result.request_id != expected_request:
+            self._ff_trace(
+                hand_id,
+                "stats-dropped",
+                f"table={result.temp_key} stale_request={result.request_id} expected={expected_request}",
+            )
+            return
         hud = self.hud_dict.get(result.temp_key)
         if hud is None:
             self._ff_trace(hand_id, "stats-dropped", f"table={result.temp_key} has no HUD any more")
@@ -1404,7 +1720,8 @@ class HudMain(QObject):
         site_hand_no = getattr(prepared, "site_hand_no", None) or getattr(
             getattr(prepared, "hand_instance", None), "handid", None
         )
-        table_no = self.winamax_log_reader.table_no_for_hand(site_hand_no) if site_hand_no else None
+        log_reader = getattr(self, "winamax_log_reader", None)
+        table_no = log_reader.table_no_for_hand(site_hand_no) if log_reader is not None and site_hand_no else None
         if not table_no:
             # WARNING because this is what delays a table's HUD by a hand or two
             # at startup, and the delay is otherwise invisible.
@@ -1425,29 +1742,61 @@ class HudMain(QObject):
             table_no,
             f"{info.table_name} {table_no}",
         )
+        # This hand settles what the pool deals, which is the one thing the log
+        # cannot say. Kept so later hands on this pool -- and later sessions --
+        # can build their HUD from the log alone.
+        pool_games = getattr(self, "winamax_pool_games", None)
+        if pool_games is not None:
+            pool_games.remember(info.table_name, info.poker_game)
         return info._replace(table_name=f"{info.table_name} {table_no}")
 
     def _hud_is_fast_fold(self, hud: Hud.Hud, temp_key: str = "") -> bool:
         """Whether this table plays the Fast-Fold format.
 
-        Checked in order of reliability: the imported hand's game type, a pool
-        seen in the Winamax log, then the window title. The title only helps on
-        sites that name the format in it -- Winamax Escape tables do not.
+        Checked in order of reliability: active fast fold tables, base table
+        names with matching table indices, imported hand game types, then window titles.
         """
-        if temp_key and temp_key in self._fast_fold_tables:
-            return True
-        # Explicit True only: a stand-in object answers every attribute, and
-        # "probably fast-fold" would quietly switch off the ordinary refresh.
         if getattr(hud, "is_fast_fold", False) is True:
             return True
-        # Only real strings: the title match is a regex, and a stand-in object
-        # hands back something that is neither a name nor empty.
+        if temp_key and temp_key in self._fast_fold_tables:
+            hud.is_fast_fold = True
+            return True
+
+        resolved_key = self._resolve_fast_fold_key(temp_key) if temp_key else temp_key
+        if resolved_key and resolved_key != temp_key and resolved_key in self.hud_dict:
+            hud.is_fast_fold = True
+            return True
+
+        clean_key = re.sub(r"\s*#\d+$", "", temp_key or "")
+        hud_table_name = getattr(hud, "table_name", None) or ""
+        clean_hud_name = re.sub(r"\s*#\d+$", "", hud_table_name if isinstance(hud_table_name, str) else "")
+
+        for ff_table in list(self._fast_fold_tables):
+            clean_ff = re.sub(r"\s*#\d+$", "", ff_table)
+            for check in (clean_key, clean_hud_name):
+                if not check:
+                    continue
+                if check == clean_ff:
+                    hud.is_fast_fold = True
+                    return True
+                m1 = re.search(r"(\d+)\s*$", check)
+                m2 = re.search(r"(\d+)\s*$", clean_ff)
+                if m1 and m2 and m1.group(1) == m2.group(1):
+                    b1 = re.sub(r"\s*\d+$", "", check)
+                    b2 = re.sub(r"\s*\d+$", "", clean_ff)
+                    if b1 in b2 or b2 in b1:
+                        hud.is_fast_fold = True
+                        return True
+
         table_name = getattr(hud, "table_name", None)
         game_type = getattr(hud, "game_type", None)
-        return is_fast_fold_table(
+        is_ff = is_fast_fold_table(
             table_name if isinstance(table_name, str) and table_name else temp_key,
             game_type=game_type if isinstance(game_type, str) else "",
         )
+        if is_ff:
+            hud.is_fast_fold = True
+        return is_ff
 
     def _ensure_fast_fold_hud(self, update: Any) -> tuple[str, Hud.Hud] | None:
         """Create the HUD for a Fast-Fold window the log has just reported.
@@ -1465,21 +1814,42 @@ class HudMain(QObject):
         """
         reader = getattr(self, "winamax_ax_seats", None)
         if reader is None:
+            self._ff_trace(
+                update.hand_id,
+                "create-deferred",
+                "Winamax table resolver unavailable; waiting for an imported hand",
+            )
             return None
 
         window = reader.find_table_window(update.table_no)
         if window is None:
+            self._ff_trace(
+                update.hand_id,
+                "create-deferred",
+                f"no open Winamax window is titled with the client index {update.table_no}; "
+                f"waiting for an imported hand",
+            )
             return None
-        temp_key = window.table_name
+        if window.window_id is not None:
+            temp_key = f"{window.table_name} #{window.window_id}"
+        else:
+            temp_key = window.table_name
+        aliases = getattr(self, "_fast_fold_aliases", None)
+        if aliases is not None:
+            aliases[window.table_name] = temp_key
         if temp_key in self.hud_dict:
             return temp_key, self.hud_dict[temp_key]
 
-        poker_game = window.poker_game
+        # The window states the game only when the accessibility API answered.
+        # Otherwise fall back on what an imported hand from this pool proved.
+        pool_games = getattr(self, "winamax_pool_games", None)
+        poker_game = window.poker_game or (pool_games.get(temp_key) or pool_games.get(window.table_name) if pool_games is not None else None)
         if not poker_game:
             self._ff_trace(
                 update.hand_id,
                 "create-skipped",
-                f"{window.title!r} does not say what is being played: {window.description!r}",
+                f"{window.title!r} does not say what is being played ({window.description!r}) and "
+                f"no hand from this pool has been imported yet; the next one settles it",
             )
             return None
 
@@ -1503,6 +1873,9 @@ class HudMain(QObject):
         # A full HUD, not the loading placeholder: that one has no aux windows,
         # so it can only ever show "Loading HUD..." until an import replaces it.
         # The seats arrive from the window moments later.
+        create_kwargs: dict[str, Any] = {"stats": {}}
+        if window.window_id is not None:
+            create_kwargs["resolved_window"] = window
         self._create_new_hud(
             synthetic_hand,
             temp_key,
@@ -1510,7 +1883,7 @@ class HudMain(QObject):
             self._winamax_site_id,
             self.FAST_FOLD_MAX_SEATS,
             "Winamax",
-            stats={},
+            **create_kwargs,
         )
         hud = self.hud_dict.get(temp_key)
         if hud is None:
@@ -1608,7 +1981,12 @@ class HudMain(QObject):
 
     def _handle_table_status(self, hud: Hud.Hud) -> None:
         """Handle status changes for a single table."""
-        status = hud.table.check_table()
+        table = getattr(hud, "table", None)
+        if table is None:
+            # Preview and lightweight test HUDs can intentionally omit the
+            # live table object. They must not break the shared status timer.
+            return
+        status = table.check_table()
         if status == "client_destroyed":
             self.client_destroyed(None, hud)
         elif status == "client_moved":
@@ -2067,8 +2445,7 @@ class HudMain(QObject):
         log.debug("got stats for hand %s", new_hand_id)
 
         if was_loading and not any(
-            values.get("screen_name") == self.hero.get(site_id)
-            for values in stat_dict.values()
+            values.get("screen_name") == self.hero.get(site_id) for values in stat_dict.values()
         ):
             if not self._hud_is_fast_fold(hud, temp_key):
                 log.warning(
@@ -2506,6 +2883,7 @@ class HudMain(QObject):
         *,
         loading: bool = False,
         stats: dict | None = None,
+        resolved_window: Any | None = None,
     ) -> None:
         """Create a new HUD for a table.
 
@@ -2517,7 +2895,15 @@ class HudMain(QObject):
         the database, which is what lets a table be created from the client log
         with no hand behind it -- a full HUD, aux windows and all, on a thread
         that has no database connection.
+
+        ``resolved_window`` is a macOS Fast-Fold window already found at hand
+        start. Passing it through prevents OSXTables from performing a second
+        window scan that can disagree with the first one while TCC is changing.
         """
+        if not resolved_window and self._resolve_fast_fold_key(temp_key) != temp_key:
+            log.info("Skipping legacy HUD creation for %r: live FastFold HUD is already active", temp_key)
+            return
+
         info = TableInfo.coerce(table_info)
         table_name = info.table_name
         max_seats = info.max_seats
@@ -2588,6 +2974,8 @@ class HudMain(QObject):
             "table_number": tab_number,
             "tourney_name": tourney_name,
         }
+        if resolved_window is not None:
+            table_kwargs["resolved_window"] = resolved_window
         tablewindow = self.Tables.Table(self.config, hud_site_name, **table_kwargs)
 
         if tablewindow.number is None:
@@ -2753,6 +3141,7 @@ class HudMain(QObject):
             # Remembered so the background import path keeps the live composition
             # from the very first hand, before any log update has been matched.
             self._fast_fold_tables.add(temp_key)
+            temp_key = self._resolve_fast_fold_key(temp_key)
         log.debug("Generated temp_key: %s for table: %s", temp_key, table_name)
 
         # Idempotency: skip a hand already processed for this table (duplicate

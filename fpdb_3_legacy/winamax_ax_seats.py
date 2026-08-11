@@ -60,6 +60,22 @@ _SEAT_LABELS = frozenset(
         "all in",
         "waiting",
         "empty",
+        "3x",
+        "x3",
+        "x2.25",
+        "x2.5",
+        "x2",
+        "pot",
+        "call",
+        "fold",
+        "raise to",
+        "auto-buy",
+        "recaver",
+        "tu es absent",
+        "quitter",
+        "revenir",
+        "loading hud...",
+        "hud - stats",
     }
 )
 
@@ -82,6 +98,9 @@ class AXTableWindow:
 
     description: str
     """The client's own header, e.g. ``ESCAPE - 0,01-0,02 € - Pot Limit Omaha``."""
+
+    window_id: int | None = None
+    """CGWindowID (or the detector's synthetic fallback ID), when resolved."""
 
     @property
     def table_name(self) -> str:
@@ -112,15 +131,35 @@ def poker_game_from_description(description: str) -> str | None:
 
 
 def is_supported() -> bool:
-    """Whether this platform can read seats from the window."""
-    if platform.system() != "Darwin":
-        return False
-    try:
-        import ApplicationServices  # noqa: F401
-        from AppKit import NSWorkspace  # noqa: F401
-    except ImportError:
-        return False
-    return True
+    """Whether this platform can locate the client's table windows at all.
+
+    True on macOS and Windows: ``find_table_window`` resolves table windows
+    so a FastFold HUD can be attached on hand-start. Reading seats via accessibility
+    still needs the API -- see :func:`is_ax_available`.
+    """
+    return platform.system() in ("Darwin", "Windows")
+
+
+def is_ax_available() -> bool:
+    """Whether the accessibility API can be called from this process.
+
+    On macOS, checks ApplicationServices / AppKit bindings.
+    On Windows, checks comtypes UIAutomationCore binding.
+    """
+    if platform.system() == "Darwin":
+        try:
+            import ApplicationServices  # noqa: F401
+            from AppKit import NSWorkspace  # noqa: F401
+            return True
+        except ImportError:
+            return False
+    elif platform.system() == "Windows":
+        try:
+            import comtypes.client  # noqa: F401
+            return True
+        except ImportError:
+            return False
+    return False
 
 
 def is_stack_label(text: str) -> bool:
@@ -146,6 +185,23 @@ def is_seat_label(text: str) -> bool:
     return text.isupper() and " " in text
 
 
+def is_hud_label(text: str) -> bool:
+    """Whether a text node comes from an active FPDB HUD overlay window."""
+    t = (text or "").replace("\xa0", " ").strip()
+    if not t:
+        return True
+
+    # Truncated HUD headers, e.g. "jejel.", "almar.", "fishk.", "Lexyn.", "Zibit.", "HERGI.", "Stun_.", "anton."
+    if len(t) <= 6 and t.endswith("."):
+        return True
+
+    # HUD stat box lines or headers
+    if re.search(r"^(H\s*\d+|VP|PR|3B|F3|ST|FS|CB|FC|WW|LP|WS|F|T|R)\b", t, re.IGNORECASE):
+        return True
+
+    return False
+
+
 def seats_from_labels(labels: list[AXSeat]) -> list[AXSeat]:
     """Keep the labels that are player names, by pairing each with its stack.
 
@@ -159,6 +215,7 @@ def seats_from_labels(labels: list[AXSeat]) -> list[AXSeat]:
         if (
             is_stack_label(candidate.login)
             or is_seat_label(candidate.login)
+            or is_hud_label(candidate.login)
             or not _CAN_BE_LOGIN.match(candidate.login)
         ):
             continue
@@ -206,9 +263,13 @@ def seat_slots_from_positions(
 class WinamaxAXSeatReader:
     """Reads seated players from Winamax table windows through macOS accessibility."""
 
-    def __init__(self) -> None:
+    def __init__(self, table_detector: Any | None = None) -> None:
         self._app: Any = None
         self._pid: int | None = None
+        # Reuse the platform singleton also owned by OSXTables. Besides avoiding
+        # two independent System Events circuit breakers, this lets the window
+        # resolved at hand-start be handed straight to HUD creation.
+        self._table_detector: Any | None = table_detector
 
     def _application(self) -> Any:
         """The AX handle for the running client, with its web tree switched on."""
@@ -289,8 +350,78 @@ class WinamaxAXSeatReader:
         The client numbers its table windows in their titles ("Winamax Casablanca
         6"), which is the same index the log writes, so a pool can be tied to a
         window without waiting for any hand to be imported.
+
+        Quartz is tried first through the shared platform detector, because it
+        yields the real CGWindowID without an Apple Event when Screen Recording
+        is granted. Accessibility then enriches that answer with the client
+        header and seats. Only when Quartz and AX cannot resolve the window does
+        the shared detector use its throttled System Events fallback.
         """
         if not is_supported():
+            return None
+
+        system = platform.system()
+        detected = self._find_table_window_detector(table_no, allow_fallback=False)
+        # The detector is the Windows window-resolution contract. The AX tree
+        # reader below imports AppKit/ApplicationServices and must never be
+        # probed on Windows merely because the shared reader supports both OSes.
+        if system == "Windows":
+            return detected
+        if system != "Darwin":
+            return None
+
+        accessible = self._find_table_window_ax(table_no)
+        if detected is not None:
+            if accessible is not None:
+                return AXTableWindow(
+                    title=detected.title,
+                    description=accessible.description,
+                    window_id=detected.window_id,
+                )
+            return detected
+
+        # AX can name the table without Screen Recording, but it cannot provide
+        # the CGWindowID needed to attach an overlay. Give the shared detector a
+        # final chance to pair it through System Events and preserve the AX
+        # header if it succeeds.
+        detected = self._find_table_window_detector(table_no, allow_fallback=True)
+        if detected is not None:
+            if accessible is not None:
+                return AXTableWindow(
+                    title=detected.title,
+                    description=accessible.description,
+                    window_id=detected.window_id,
+                )
+            return detected
+        return accessible
+
+    def _find_table_window_detector(self, table_no: str, *, allow_fallback: bool) -> AXTableWindow | None:
+        """Resolve one indexed Winamax window through the platform detector."""
+        try:
+            if self._table_detector is None:
+                from fpdb.infrastructure.platform import get_table_detector
+
+                self._table_detector = get_table_detector()
+            search = rf"^Winamax\s+.*\s{re.escape(str(table_no))}\s*$"
+            tables = self._table_detector.find_tables(search, allow_fallback=allow_fallback)
+        except Exception:
+            log.debug("Shared macOS detector could not resolve Winamax table %s", table_no, exc_info=True)
+            return None
+
+        for table in tables:
+            title = str(getattr(table, "title", "") or "")
+            if not self._is_table_no(title, table_no):
+                continue
+            try:
+                window_id = int(table.window_id)
+            except (AttributeError, TypeError, ValueError):
+                window_id = None
+            return AXTableWindow(title=title, description="", window_id=window_id)
+        return None
+
+    def _find_table_window_ax(self, table_no: str) -> AXTableWindow | None:
+        """The table window and its header, read through the accessibility API."""
+        if not is_ax_available():
             return None
         try:
             app = self._application()
@@ -298,8 +429,7 @@ class WinamaxAXSeatReader:
                 return None
             for window in self._attr(app, "AXWindows") or []:
                 title = self._attr(window, "AXTitle") or ""
-                m = re.search(r"(\d+)\s*$", title)
-                if not m or m.group(1) != str(table_no):
+                if not self._is_table_no(title, table_no):
                     continue
                 labels: list[AXSeat] = []
                 self._collect_text(window, labels)
@@ -309,35 +439,139 @@ class WinamaxAXSeatReader:
             log.exception("Could not look up the Winamax window for table %s", table_no)
         return None
 
-    def read_window(self, title: str, max_seats: int = 6) -> dict[int, str]:
+    @staticmethod
+    def _is_table_no(title: str, table_no: str) -> bool:
+        """Whether a window title carries the client index the log reported."""
+        m = re.search(r"(\d+)\s*$", title or "")
+        return m is not None and m.group(1) == str(table_no)
+
+    def read_window(  # noqa: C901, PLR0912
+        self,
+        title: str,
+        max_seats: int = 6,
+        table_pos: tuple[float, float] | None = None,
+    ) -> dict[int, str]:
         """Players at the window with this exact title, keyed by layout slot.
 
         Slot 0 is the bottom-centre chair, where the client draws the hero, and
         slots count clockwise from there. Empty chairs are simply absent.
 
-        Returns an empty map when the client is not running, the window is not
-        found, or accessibility is unavailable -- the caller then keeps whatever
-        the log was able to work out.
+        When multiple table windows share the same title (e.g. multi-tabling
+        identical stakes), ``table_pos`` selects the window closest to the
+        target table's screen coordinates.
         """
-        if not is_supported():
+        if not is_ax_available():
             return {}
+        if platform.system() == "Windows":
+            return self._read_window_windows_by_title(title, max_seats, table_pos=table_pos)
         try:
             app = self._application()
             if app is None:
                 return {}
+            matching_windows: list[tuple[Any, tuple[float, float], tuple[float, float]]] = []
+            clean_title = re.sub(r"\s*#\d+$", "", title)
             for window in self._attr(app, "AXWindows") or []:
-                if self._attr(window, "AXTitle") != title:
-                    continue
+                w_title = str(self._attr(window, "AXTitle") or "")
+                clean_w_title = re.sub(r"\s*#\d+$", "", w_title)
+                if clean_w_title != clean_title:
+                    m_req = re.search(r"(\d+)\s*$", clean_title)
+                    m_win = re.search(r"(\d+)\s*$", clean_w_title)
+                    if m_req and m_win:
+                        if m_req.group(1) != m_win.group(1):
+                            continue
+                    elif clean_w_title not in clean_title and clean_title not in clean_w_title:
+                        continue
                 origin, size = self._geometry(window)
                 if origin is None or size is None or not size[0] or not size[1]:
-                    return {}
-                labels: list[AXSeat] = []
-                self._collect_text(window, labels)
-                players = seats_from_labels(labels)
-                if not players:
-                    return {}
-                centre = (origin[0] + size[0] / 2, origin[1] + size[1] / 2)
-                return seat_slots_from_positions(players, centre, max_seats)
+                    continue
+                matching_windows.append((window, origin, size))
+
+            if not matching_windows:
+                return {}
+
+            if table_pos is not None and len(matching_windows) > 1:
+                tx, ty = table_pos
+                best_window, best_origin, best_size = min(
+                    matching_windows,
+                    key=lambda w: (w[1][0] - tx) ** 2 + (w[1][1] - ty) ** 2,
+                )
+            else:
+                best_window, best_origin, best_size = matching_windows[0]
+
+            labels: list[AXSeat] = []
+            self._collect_text(best_window, labels)
+            players = seats_from_labels(labels)
+            if not players:
+                return {}
+            centre = (best_origin[0] + best_size[0] / 2, best_origin[1] + best_size[1] / 2)
+            return seat_slots_from_positions(players, centre, max_seats)
         except Exception:
             log.exception("Could not read Winamax seats from window %r", title)
         return {}
+
+    def _read_window_windows_by_title(
+        self,
+        title: str,
+        max_seats: int = 6,
+        table_pos: tuple[float, float] | None = None,
+    ) -> dict[int, str]:
+        """Read seated players from Winamax window via Windows UIAutomation."""
+        try:
+            if self._table_detector is None:
+                from fpdb.infrastructure.platform import get_table_detector
+                self._table_detector = get_table_detector()
+            tables = self._table_detector.find_tables(re.escape(title))
+            if not tables:
+                return {}
+            if table_pos is not None and len(tables) > 1:
+                tx, ty = table_pos
+                best_table = min(
+                    tables,
+                    key=lambda t: (
+                        (t.geometry.x - tx) ** 2 + (t.geometry.y - ty) ** 2 if t.geometry else 0
+                    ),
+                )
+                hwnd = best_table.window_id
+            else:
+                hwnd = tables[0].window_id
+            if hwnd is None:
+                return {}
+            return self._read_window_windows(int(hwnd), max_seats)
+        except Exception:
+            log.debug("Failed to read Windows seats for %r:", title, exc_info=True)
+            return {}
+
+    def _read_window_windows(self, hwnd: int, max_seats: int = 6) -> dict[int, str]:
+        try:
+            import comtypes.client
+            UIAutomationClient = comtypes.client.GetModule("UIAutomationCore.dll")
+            uia = comtypes.client.CreateObject(UIAutomationClient.CUIAutomation)
+
+            elem = uia.ElementFromHandle(hwnd)
+            if elem is None:
+                return {}
+            condition = uia.CreateTrueCondition()
+            found = elem.FindAll(UIAutomationClient.TreeScope_Subtree, condition)
+            if not found or not found.Length:
+                return {}
+
+            labels: list[AXSeat] = []
+            for i in range(min(found.Length, 300)):
+                item = found.GetElement(i)
+                name = item.CurrentName
+                if isinstance(name, str) and name and len(name) <= 40:
+                    name = name.replace("\xa0", " ").strip()
+                    rect = item.CurrentBoundingRectangle
+                    if rect:
+                        labels.append(AXSeat(name, rect.left, rect.top))
+            players = seats_from_labels(labels)
+            if not players:
+                return {}
+            win_rect = elem.CurrentBoundingRectangle
+            if not win_rect:
+                return {}
+            centre = (win_rect.left + (win_rect.right - win_rect.left) / 2, win_rect.top + (win_rect.bottom - win_rect.top) / 2)
+            return seat_slots_from_positions(players, centre, max_seats)
+        except Exception:
+            log.debug("Error reading Winamax UIAutomation seats on Windows for HWND %s:", hwnd, exc_info=True)
+            return {}

@@ -24,11 +24,13 @@ import sys
 if not hasattr(datetime, "UTC"):
     datetime.UTC = datetime.timezone.utc
 
-from fpdb_3_legacy.subprocess_launch import dispatch_run_module
+from fpdb_3_legacy.subprocess_launch import dispatch_hud_main, dispatch_run_module
 
 # Frozen builds have no "python -m": helper processes re-invoke this executable
 # with --run-module. Dispatch before pulling in the GUI stack below.
 if __name__ == "__main__" and dispatch_run_module():
+    sys.exit(0)
+if __name__ == "__main__" and dispatch_hud_main():
     sys.exit(0)
 
 import atexit
@@ -41,6 +43,7 @@ import os
 import pstats
 import queue
 import sqlite3
+import time
 from functools import partial
 from importlib import import_module
 from typing import Any
@@ -82,15 +85,11 @@ from fpdb_3_legacy import (
     GuiBulkImport,
     GuiCoinPokerCapture,
     GuiDatabase,
-    GuiGraphViewer,
     GuiHandViewer,
     GuiLogView,
     GuiOpponentsReport,
     GuiPrefs,
-    GuiRingPlayerStats,
-    GuiSessionViewer,
     GuiTourHandViewer,
-    GuiTourneyGraphViewer,
     GuiTourneyPlayerStats,
     ModernHudPreferences,
     Options,
@@ -157,6 +156,7 @@ log = get_logger("fpdb")
 # Note: Logger level is now controlled by Logger Dev Tool configuration
 # The get_logger() function automatically applies the correct level from saved configuration
 
+
 def _resolve_version() -> str:
     """Return the version to display, preferring what the checkout can tell us.
 
@@ -214,20 +214,38 @@ class fpdb(QMainWindow):
     #         pathcomp = f"{path}/ppt/p2.jar"
     #     subprocess.call(["java", "-jar", pathcomp])
 
-    def add_and_display_tab(self, new_page, new_tab_name) -> None:
-        """Adds a tab, namely creates the button and displays it and appends all the relevant arrays."""
+    def add_and_display_tab(self, new_page, new_tab_name, allow_multiple: bool = True) -> None:
+        """Adds a tab, creates the button, displays it and appends all the relevant arrays."""
+        t0 = time.perf_counter()
         if not new_tab_name or not isinstance(new_tab_name, str):
             raise ValueError(f"Invalid tab name: {new_tab_name!r}")
 
-        for name in self.nb_tab_names:
-            if name == new_tab_name:
-                self.display_tab(new_tab_name)
-                return  # if tab already exists, just go to it
+        if not allow_multiple and new_tab_name in self.nb_tab_names:
+            self.display_tab(new_tab_name)
+            log.info("[PERF-TIMING] Switched to existing tab '%s' in %.3f s", new_tab_name, time.perf_counter() - t0)
+            if new_page is not None:
+                with contextlib.suppress(ValueError):
+                    self.threads.remove(new_page)
+                shutdown = getattr(new_page, "shutdown_workers", None)
+                if callable(shutdown):
+                    shutdown()
+                new_page.deleteLater()
+            return
 
-        self.nb_tab_names.append(new_tab_name)
+        final_tab_name = new_tab_name
+        if allow_multiple and new_tab_name in self.nb_tab_names:
+            count = 2
+            while f"{new_tab_name} ({count})" in self.nb_tab_names:
+                count += 1
+            final_tab_name = f"{new_tab_name} ({count})"
 
-        index = self.nb.addTab(new_page, new_tab_name)
+        self.nb_tab_names.append(final_tab_name)
+        if new_page not in self.threads:
+            self.threads.append(new_page)
+
+        index = self.nb.addTab(new_page, final_tab_name)
         self.nb.setCurrentIndex(index)
+        log.info("[PERF-TIMING] Opened and added new tab '%s' in %.3f s", final_tab_name, time.perf_counter() - t0)
 
     def display_tab(self, new_tab_name) -> None:
         """Displays the indicated tab."""
@@ -243,15 +261,25 @@ class fpdb(QMainWindow):
         self.nb.setCurrentIndex(tab_no)
 
     def dia_about(self, widget, data=None) -> None:
+        """Show the legal notice, and point at the tab that has the details.
+
+        The box keeps the licence text it always carried, but the version and
+        environment facts a bug report needs now live in the Version tab
+        (issue #226) rather than being squeezed into a modal that cannot be
+        copied from.
+        """
+        from fpdb_3_legacy import version_info
+
         QMessageBox.about(
             self,
-            f"FPDB{VERSION!s}",
-            "Copyright 2008-2023. See contributors.txt for details"
+            f"FPDB {VERSION!s}",
+            f"FPDB {VERSION} ({version_info.detect_packaging()})\n\n"
+            "Copyright 2008-2023. See contributors.txt for details.\n"
             "You are free to change, and distribute original or changed versions "
-            "of fpdb within the rules set out by the license"
-            "https://github.com/jejellyroll-fr/fpdb-3"
-            "\n"
-            "Your config file is: " + self.config.file,
+            "of fpdb within the rules set out by the license.\n"
+            f"{version_info.REPOSITORY_URL}\n\n"
+            f"Your config file is: {self.config.file}\n\n"
+            "See Help > Version for the full version and environment report.",
         )
 
     def dia_advanced_preferences(self, widget, data=None) -> None:
@@ -345,7 +373,10 @@ class fpdb(QMainWindow):
         from PySide6.QtWidgets import QFileDialog, QMessageBox
 
         path, _filter = QFileDialog.getOpenFileName(
-            self, "Import PT4 HUD layout", "", "PT4 HUD layout (*.pt4hud);;All files (*)",
+            self,
+            "Import PT4 HUD layout",
+            "",
+            "PT4 HUD layout (*.pt4hud);;All files (*)",
         )
         if not path:
             return
@@ -366,8 +397,10 @@ class fpdb(QMainWindow):
             f"• {summary['stats']} stats mapped to a new HUD stat-set.",
         ]
         if summary["charts"]:
-            lines.append(f"• {len(summary['charts'])} range chart(s) ({', '.join(summary['charts'])}) "
-                         f"→ popup '{summary['popup']}'.")
+            lines.append(
+                f"• {len(summary['charts'])} range chart(s) ({', '.join(summary['charts'])}) "
+                f"→ popup '{summary['popup']}'."
+            )
         if summary["unmapped"]:
             lines.append(f"• {len(summary['unmapped'])} custom formula stat(s) could not be mapped.")
         lines.append("\nAssign the new stat-set / popup to a game in HUD Preferences.")
@@ -385,7 +418,10 @@ class fpdb(QMainWindow):
         from PySide6.QtWidgets import QFileDialog, QMessageBox
 
         paths, _filter = QFileDialog.getOpenFileNames(
-            self, "Import PT4 stats", "", "PT4 stat (*.pt4stat);;All files (*)",
+            self,
+            "Import PT4 stats",
+            "",
+            "PT4 stat (*.pt4stat);;All files (*)",
         )
         if not paths:
             return
@@ -621,9 +657,31 @@ class fpdb(QMainWindow):
 
         GROUPS = {
             "Hold'em": ["holdem", "2_holdem", "6_holdem"],
-            "Omaha": ["omahahi", "omahahilo", "5_omahahi", "6_omahahi", "5_omaha8", "6_omaha8", "cour_hi", "cour_hilo", "aof_omaha", "fusion", "irish"],
+            "Omaha": [
+                "omahahi",
+                "omahahilo",
+                "5_omahahi",
+                "6_omahahi",
+                "5_omaha8",
+                "6_omaha8",
+                "cour_hi",
+                "cour_hilo",
+                "aof_omaha",
+                "fusion",
+                "irish",
+            ],
             "Stud": ["5_studhi", "razz", "studhi", "studhilo", "27_razz"],
-            "Draw && Others": ["27_3draw", "fivedraw", "badugi", "27_1draw", "a5_3draw", "a5_1draw", "badacey", "badeucey", "drawmaha"]
+            "Draw && Others": [
+                "27_3draw",
+                "fivedraw",
+                "badugi",
+                "27_1draw",
+                "a5_3draw",
+                "a5_1draw",
+                "badacey",
+                "badeucey",
+                "drawmaha",
+            ],
         }
 
         # Dynamically append any other games found in Card.games to prevent missed game types
@@ -635,6 +693,7 @@ class fpdb(QMainWindow):
             GROUPS["Other"] = other_games
 
         from fpdb_3_legacy.ThemeManager import ThemeManager
+
         palette = ThemeManager().get_legacy_palette()
         border_color = palette.get("border", "#483d65")
 
@@ -1090,7 +1149,7 @@ class fpdb(QMainWindow):
                 sys.exit()
         else:
             self.warning_box(
-                "The updated preferences have not been loaded because windows are open. " "Restart fpdb to load them.",
+                "The updated preferences have not been loaded because windows are open. Restart fpdb to load them.",
             )
 
     def process_close_messages(self) -> None:
@@ -1170,9 +1229,18 @@ class fpdb(QMainWindow):
             themes = ThemeManager().get_available_qt_themes()
         except ImportError:
             themes = [
-                "dark_purple.xml", "dark_teal.xml", "dark_blue.xml", "dark_cyan.xml",
-                "dark_pink.xml", "dark_red.xml", "light_purple.xml", "light_teal.xml",
-                "light_blue.xml", "light_cyan.xml", "light_pink.xml", "light_red.xml",
+                "dark_purple.xml",
+                "dark_teal.xml",
+                "dark_blue.xml",
+                "dark_cyan.xml",
+                "dark_pink.xml",
+                "dark_red.xml",
+                "light_purple.xml",
+                "light_teal.xml",
+                "light_blue.xml",
+                "light_cyan.xml",
+                "light_pink.xml",
+                "light_red.xml",
             ]
         for theme in themes:
             action = QAction(theme, self)
@@ -1365,7 +1433,9 @@ class fpdb(QMainWindow):
         self.settings.update({"cl_options": cl_options})
         self.settings.update(self.config.get_db_parameters())
         self.settings.update(self.config.get_import_parameters())
-        self.settings.update(self.config.get_default_paths())
+        # Default-path resolution may inspect fallback locations when a saved
+        # room path is stale. Keep profile loading passive; import entry points
+        # resolve paths only when the user actually opens/starts that workflow.
 
         # Set up SQL and connect to the database
         self.sql = SQL.Sql(db_server=self.settings["db-server"])
@@ -1607,6 +1677,10 @@ class fpdb(QMainWindow):
 
     def tab_bulk_import(self, widget, data=None) -> None:
         """Opens a tab for bulk importing."""
+        # Bulk Import still gets its detected/custom default, but resolving it
+        # here avoids probing protected folders during ordinary application
+        # startup and profile refreshes.
+        self.settings.update(self.config.get_default_paths())
         new_import_thread = GuiBulkImport.GuiBulkImport(self.settings, self.config, self.sql, self)
         self.threads.append(new_import_thread)
         self.add_and_display_tab(new_import_thread, "Bulk Import")
@@ -1614,8 +1688,6 @@ class fpdb(QMainWindow):
     def tab_coinpoker_capture(self, widget, data=None) -> None:
         """Open the CoinPoker live packet-capture tab."""
         if is_site_disabled("CoinPoker"):
-            # The menu no longer offers this tab; refuse the stale entry points
-            # (saved layouts, scripted calls) rather than starting a capture.
             log.info("CoinPoker support is disabled; not opening the live capture tab")
             return
         new_thread = GuiCoinPokerCapture.GuiCoinPokerCapture(self.config, self)
@@ -1638,9 +1710,24 @@ class fpdb(QMainWindow):
     # end def tab_import_imap_summaries
 
     def tab_ring_player_stats(self, widget, data=None) -> None:
+        # This package imports Matplotlib and scans every system font. Frozen
+        # builds cannot reliably reuse that scan, so importing it at startup
+        # delayed Auto Import even though no graphing tab had been requested.
+        import time
+        t0 = time.time()
+        log.warning("[PERF] tab_ring_player_stats: Importing GuiRingPlayerStats")
+        from fpdb_3_legacy import GuiRingPlayerStats
+        t1 = time.time()
+        log.warning(f"[PERF] tab_ring_player_stats: Import took {t1 - t0:.3f}s. Creating GuiRingPlayerStats...")
+
         new_ps_thread = GuiRingPlayerStats.GuiRingPlayerStats(self.config, self.sql, self)
+        t2 = time.time()
+        log.warning(f"[PERF] tab_ring_player_stats: Instantiation took {t2 - t1:.3f}s. Adding tab...")
+
         self.threads.append(new_ps_thread)
         self.add_and_display_tab(new_ps_thread, "Ring Player Stats")
+        t3 = time.time()
+        log.warning(f"[PERF] tab_ring_player_stats: Adding tab took {t3 - t2:.3f}s. Total: {t3 - t0:.3f}s")
 
     def tab_opponents_report(self, widget, data=None) -> None:
         new_thread = GuiOpponentsReport.GuiOpponentsReport(self.config, self.sql, self)
@@ -1664,6 +1751,8 @@ class fpdb(QMainWindow):
     #     self.add_and_display_tab(ps_tab, "Positional Stats")
 
     def tab_session_stats(self, widget, data=None) -> None:
+        from fpdb_3_legacy import GuiSessionViewer
+
         colors = self.get_theme_colors()
         new_ps_thread = GuiSessionViewer.GuiSessionViewer(self.config, self.sql, self, self, colors=colors)
         self.threads.append(new_ps_thread)
@@ -1674,12 +1763,37 @@ class fpdb(QMainWindow):
         self.threads.append(new_ps_thread)
         self.add_and_display_tab(new_ps_thread, "Hand Viewer")
 
+    def tab_version_info(self, widget=None, data=None) -> None:
+        """Displays the Version / About tab (issue #226).
+
+        Imported lazily like the other tabs so startup does not pay for a view
+        most sessions never open. ``allow_multiple=False``: the tab is a static
+        snapshot of the running build, so a second copy would only duplicate the
+        first.
+        """
+        from fpdb_3_legacy import GuiVersionInfo
+
+        new_tab = GuiVersionInfo.GuiVersionInfo(
+            config=self.config,
+            db=getattr(self, "db", None),
+            version=VERSION,
+            parent=self,
+        )
+        self.add_and_display_tab(new_tab, "Version", allow_multiple=False)
+
     def tab_main_help(self, widget, data=None) -> None:
-        """Displays a tab with the main fpdb help screen."""
+        """Displays a tab with the main fpdb help screen.
+
+        This is the landing tab at startup, so it names the running build: it
+        used to greet the user without ever saying which version had been
+        launched (issue #226). The details themselves live in the Version tab.
+        """
         mh_tab = QLabel(
             (
-                """
-                        Welcome to Fpdb!
+                f"""
+                        Welcome to Fpdb {VERSION}!
+
+                        Open Help > Version for the full version, packaging and environment report.
 
                         This program is currently in an alpha-state, so our database format is still sometimes changed.
                         You should therefore always keep your hand history files so that you can re-import
@@ -1718,6 +1832,8 @@ class fpdb(QMainWindow):
 
     def tabGraphViewer(self, widget, data=None) -> None:
         """Opens a graph viewer tab."""
+        from fpdb_3_legacy import GuiGraphViewer
+
         colors = self.get_theme_colors()
         new_gv_thread = GuiGraphViewer.GuiGraphViewer(self.sql, self.config, self, colors=colors)
         self.threads.append(new_gv_thread)
@@ -1725,6 +1841,8 @@ class fpdb(QMainWindow):
 
     def tabTourneyGraphViewer(self, widget, data=None) -> None:
         """Opens a graph viewer tab."""
+        from fpdb_3_legacy import GuiTourneyGraphViewer
+
         colors = self.get_theme_colors()
         new_gv_thread = GuiTourneyGraphViewer.GuiTourneyGraphViewer(self.sql, self.config, self, colors=colors)
         self.threads.append(new_gv_thread)
@@ -1733,6 +1851,7 @@ class fpdb(QMainWindow):
     def tabStatsInfo(self, widget, data=None) -> None:
         """Opens a statistics guide tab."""
         from fpdb_3_legacy import GuiStatsInfo
+
         new_si_tab = GuiStatsInfo.GuiStatsInfo(self.config, self)
         self.threads.append(new_si_tab)
         self.add_and_display_tab(new_si_tab, "Stats Guide")
@@ -1813,6 +1932,12 @@ class fpdb(QMainWindow):
             self.threads.remove(item)
 
         if item is not None:
+            # Stop any QThreads before destruction: a widget removed from a
+            # QTabWidget does not receive closeEvent, so DbWorker threads (ring
+            # stats) would otherwise keep running as zombies.
+            shutdown = getattr(item, "shutdown_workers", None)
+            if callable(shutdown):
+                shutdown()
             item.deleteLater()
 
     def __init__(self) -> None:

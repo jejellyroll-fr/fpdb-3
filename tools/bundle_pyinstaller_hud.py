@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Bundle the PyInstaller HUD executable inside the main fpdb distribution."""
+"""Merge the PyInstaller HUD dependencies into the main fpdb distribution."""
 
 from __future__ import annotations
 
@@ -10,9 +10,11 @@ import shutil
 import stat
 import subprocess
 import sys
+import tomllib
 from pathlib import Path
 
 _REPO_ROOT = Path(__file__).resolve().parent.parent
+_ENTITLEMENTS = Path(__file__).resolve().with_name("macos-entitlements.plist")
 
 
 def _merge_tree(source: Path, destination: Path) -> None:
@@ -36,13 +38,20 @@ def _copy_executable(source: Path, destination: Path) -> None:
     destination.chmod(destination.stat().st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
 
 
-def _update_mac_info_plist(info_plist: Path) -> bool:
+def _project_version() -> str:
+    try:
+        with (_REPO_ROOT / "pyproject.toml").open("rb") as handle:
+            return str(tomllib.load(handle)["project"]["version"])
+    except (OSError, KeyError, tomllib.TOMLDecodeError):
+        return "0.0.0"
+
+
+def _update_mac_info_plist(info_plist: Path, *, version: str | None = None) -> bool:
     """Write the privacy usage descriptions and bundle id into an Info.plist.
 
     Returns whether the file was rewritten. A failure here is reported rather
-    than swallowed: the whole point of this step is that macOS remembers the
-    permissions the user grants, and a bundle shipped without the keys asks
-    again on every launch -- the exact symptom, arriving silently.
+    than swallowed because missing privacy descriptions prevent macOS from
+    presenting the corresponding consent correctly.
     """
     if not info_plist.is_file():
         print(f"No Info.plist at {info_plist}; privacy descriptions not written")
@@ -51,6 +60,9 @@ def _update_mac_info_plist(info_plist: Path) -> bool:
         with info_plist.open("rb") as handle:
             info = plistlib.load(handle)
         info["CFBundleIdentifier"] = "org.fpdb.fpdb3"
+        bundle_version = version or _project_version()
+        info["CFBundleShortVersionString"] = bundle_version
+        info["CFBundleVersion"] = bundle_version
         info["NSAppleEventsUsageDescription"] = (
             "FPDB requires Automation access to detect poker table window titles via AppleScript."
         )
@@ -59,6 +71,10 @@ def _update_mac_info_plist(info_plist: Path) -> bool:
         )
         info["NSAccessibilityUsageDescription"] = (
             "FPDB requires Accessibility permission to locate and position HUD windows over poker tables."
+        )
+        info["NSAppDataUsageDescription"] = (
+            "FPDB needs access to poker client data files, including hand histories and logs, "
+            "to import hands and display the HUD."
         )
         with info_plist.open("wb") as handle:
             plistlib.dump(info, handle)
@@ -81,8 +97,8 @@ def _run_macos_tool(command: list[str]) -> None:
         print(f"Could not run {command[0]}: {exc}")
 
 
-def _sign_macos_bundle(fpdb_app: Path, resources: Path) -> None:
-    """Ad-hoc sign the merged bundle, innermost Mach-O files first.
+def _sign_macos_bundle(fpdb_app: Path, contents: Path) -> None:
+    """Sign the merged bundle, innermost Mach-O files first.
 
     Gatekeeper assesses a bundle as a unit, so the nested binaries the merge
     just moved in have to be signed before the bundle itself is sealed.
@@ -95,13 +111,11 @@ def _sign_macos_bundle(fpdb_app: Path, resources: Path) -> None:
     if str(_REPO_ROOT) not in sys.path:
         sys.path.insert(0, str(_REPO_ROOT))
 
-    from tools.adhoc_sign_macos import find_mach_o_files
-    from tools.adhoc_sign_macos import sign as adhoc_sign
+    from tools.adhoc_sign_macos import find_mach_o_files, resolve_signing_identity, sign, sign_bundle
 
-    adhoc_sign(find_mach_o_files(resources))
-
-    codesign_bin = shutil.which("codesign") or "/usr/bin/codesign"
-    _run_macos_tool([codesign_bin, "--force", "--deep", "--sign", "-", str(fpdb_app)])
+    identity = resolve_signing_identity()
+    sign(find_mach_o_files(contents), identity=identity)
+    sign_bundle(fpdb_app, identity=identity, entitlements=_ENTITLEMENTS)
 
 
 def bundle_pyinstaller_hud(dist_dir: Path) -> Path:
@@ -120,8 +134,12 @@ def bundle_pyinstaller_hud(dist_dir: Path) -> Path:
             if source.is_dir():
                 _merge_tree(source, fpdb_contents / directory)
 
-        bundled_executable = fpdb_contents / "MacOS" / "HUD_main"
-        _copy_executable(hud_contents / "MacOS" / "HUD_main", bundled_executable)
+        # The HUD_main build contributes dependencies only. Launching its
+        # separate executable would give PyInstaller two macOS TCC identities;
+        # the main executable dispatches ``--hud`` instead.
+        bundled_executable = fpdb_contents / "MacOS" / "fpdb"
+        if not bundled_executable.is_file():
+            raise FileNotFoundError(f"fpdb executable not found: {bundled_executable}")
         shutil.rmtree(hud_app)
 
         # Update Info.plist privacy usage descriptions & bundle ID
@@ -133,7 +151,7 @@ def bundle_pyinstaller_hud(dist_dir: Path) -> Path:
         if sys.platform == "darwin":
             # Strip quarantine so Gatekeeper does not block execution
             _run_macos_tool(["/usr/bin/xattr", "-cr", str(fpdb_app)])
-            _sign_macos_bundle(fpdb_app, fpdb_contents / "Resources")
+            _sign_macos_bundle(fpdb_app, fpdb_contents)
 
         return bundled_executable
 

@@ -34,6 +34,9 @@ class FastFoldStatsRequest:
 
     num_seats: int = 6
 
+    request_id: int = 0
+    """Monotonic GUI request id used to discard late worker results."""
+
 
 @dataclass(frozen=True)
 class FastFoldStatsResult:
@@ -42,6 +45,9 @@ class FastFoldStatsResult:
     temp_key: str
     seat_map: dict[int, str] = field(default_factory=dict)
     stat_dict: dict[int, dict[str, Any]] = field(default_factory=dict)
+
+    request_id: int = 0
+    """The request id that produced this result."""
 
 FAST_FOLD_TITLE_PATTERNS = (
     re.compile(r"Go\s*Fast", re.IGNORECASE),
@@ -66,7 +72,7 @@ def build_seat_map(
     ring: list[str],
     hero: str | None,
     max_seats: int,
-    hero_seat: int = 1,
+    hero_seat: int = 3,
 ) -> dict[int, str]:
     """Turn a clockwise ring of logins into ``{seat_number: login}``.
 
@@ -180,39 +186,15 @@ class FastFoldEngine:
     def pin_hero_seat(self, hud: Any) -> int:
         """Return (and remember) the seat number this HUD assigns to the hero.
 
-        ``Aux_Base.adj_seats`` decides once, at HUD creation, which layout slot
-        the hero's stat block sits on, based on the hero's seat in the hand it
-        was created from. Live updates have to keep the hero on that same seat
-        number or every block ends up rotated by the difference.
+        FastFold table layouts always draw the hero at the bottom-center anchor
+        slot (seat 3 on 6-max Winamax layouts). Forcing hero_seat to the layout
+        anchor ensures live updates and log-ring fallbacks use the exact same seat
+        anchor without rotating HUD blocks across hands.
         """
-        pinned = getattr(hud, "fast_fold_hero_seat", None)
-        if pinned:
-            return int(pinned)
-
-        hero_seat: int | None = None
-        config = self.config or getattr(hud, "config", None)
-        site = getattr(hud, "site", None)
-        for pdata in (getattr(hud, "stat_dict", None) or {}).values():
-            name = pdata.get("screen_name")
-            seat = pdata.get("seat")
-            if seat is None or not name:
-                continue
-            try:
-                if config is not None and config.is_hero_name(site, name):
-                    hero_seat = int(seat)
-                    break
-            except Exception:
-                log.debug("is_hero_name failed for %r", name, exc_info=True)
-
-        if hero_seat is None:
-            # No hand imported yet, so adj_seats found no hero to rotate and left
-            # the layout unrotated: visual seat and layout slot are the same. Put
-            # the hero straight on the slot the layout anchors them to -- the
-            # bottom of the table, where the client draws them.
-            hero_seat = self._anchor_slot(hud) or 1
-
-        hud.fast_fold_hero_seat = hero_seat
-        return hero_seat
+        anchor = self._anchor_slot(hud) or 3
+        if hud is not None:
+            hud.fast_fold_hero_seat = anchor
+        return anchor
 
     @staticmethod
     def _anchor_slot(hud: Any) -> int | None:

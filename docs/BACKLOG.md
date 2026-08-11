@@ -123,23 +123,25 @@ pas la vitesse.
 
 ---
 
-## 5. Les binaires macOS ne sont ni signés ni notarisés
+## 5. Provisionner les secrets de signature/notarisation macOS
 
-**Problème.** Les artefacts CI sont signés ad-hoc. macOS pose donc
-`com.apple.quarantine` sur tout ce qui vient d'un navigateur, Gatekeeper refuse
-de charger les bibliothèques Qt non signées, et le bundle tourne depuis un
-montage App Translocation en lecture seule.
+**État.** Le workflow sait signer les releases avec Developer ID, hardened
+runtime et entitlement Apple Events, puis notariser/stapler les deux variantes.
+Il refuse désormais une release ad-hoc ou sans Team ID. Les builds ordinaires de
+PR restent volontairement ad-hoc, les secrets n'étant pas exposés au code non
+fiable.
 
 **Effet mesuré.** Les traces de profilage d'une session 3.4.1 montrent les
 chemins `/private/var/…/AppTranslocation/…` : chaque première ouverture d'une
 fenêtre paie la validation Gatekeeper des ressources qu'elle charge.
 
-**Contournement documenté.** `docs/macos-gatekeeper.md` — déplacer le bundle
-hors de `~/Downloads` puis `xattr -dr com.apple.quarantine`.
+**À provisionner.** Les six secrets décrits dans `docs/macos-gatekeeper.md`, en
+utilisant le même certificat Developer ID Application pour PyInstaller,
+PyOxidizer et toutes les releases suivantes.
 
-**À faire.** `codesign --options runtime` + `xcrun notarytool submit` en CI.
-Demande un compte Apple Developer et des secrets CI, que le dépôt n'a pas.
-Tâche d'infrastructure, pas de développement.
+**Pourquoi.** Une signature ad-hoc a une designated requirement liée au CDHash
+du build. Même avec un `CFBundleIdentifier` stable, TCC ne peut donc pas
+réutiliser les autorisations Screen Recording/Accessibility entre versions.
 
 ---
 

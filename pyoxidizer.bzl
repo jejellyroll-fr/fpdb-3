@@ -14,15 +14,13 @@ def make_dist():
             "https://github.com/astral-sh/python-build-standalone/releases/download/20240713/cpython-3.10.14%2B20240713-aarch64-apple-darwin-pgo%2Blto-full.tar.zst",
             "4558c58bd03309d0c7131d4b5c2cbce9843d385fbcc7d75e575b4bf887bf5f68",
         ],
-        "x86_64-pc-windows-msvc": [
-            "https://github.com/astral-sh/python-build-standalone/releases/download/20240713/cpython-3.10.14%2B20240713-x86_64-pc-windows-msvc-shared-pgo-full.tar.zst",
-            "1003c93f92fdcca57308076995b224b888a7ee556763759e69d36e198b5bef14",
-        ],
         "x86_64-unknown-linux-gnu": [
             "https://github.com/astral-sh/python-build-standalone/releases/download/20240713/cpython-3.10.14%2B20240713-x86_64-unknown-linux-gnu-pgo-full.tar.zst",
             "f15c2b569f3bf8ba01737c5f46cf71e8bc07129ecc7304de9ba47b220acee47e",
         ],
     }
+    if BUILD_TARGET_TRIPLE == "x86_64-pc-windows-msvc":
+        fail("PyOxidizer is deprecated on Windows (Issue #225). Use PyInstaller (build_fpdb.ps1) or Nuitka for Windows builds.")
     if BUILD_TARGET_TRIPLE not in distributions:
         fail("unsupported PyOxidizer build target: " + BUILD_TARGET_TRIPLE)
 
@@ -70,6 +68,10 @@ def make_exe(dist):
         "import runpy",
         "import sys",
         "sys.frozen = 'pyoxidizer'",
+        # A signed .app must stay byte-for-byte immutable after launch. The
+        # embedded interpreter does not reliably honour PYTHONDONTWRITEBYTECODE,
+        # so enforce this before any filesystem module is imported.
+        "sys.dont_write_bytecode = True",
         "root = os.path.dirname(sys.executable)",
         "bundle_resources = os.path.join(os.path.dirname(root), 'Resources')",
         "if os.path.isdir(os.path.join(bundle_resources, 'fpdb_3_legacy')):",

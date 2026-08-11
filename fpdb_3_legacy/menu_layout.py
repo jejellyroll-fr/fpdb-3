@@ -180,6 +180,11 @@ def menu_layout() -> tuple[Menu, ...]:
             N_("Help"),
             (
                 MenuItem(N_("Help Tab"), "tab_main_help"),
+                MenuItem(
+                    N_("Version"),
+                    "tab_version_info",
+                    tip=N_("Version, packaging and runtime environment details"),
+                ),
                 MenuItem(N_("Stats Guide"), "tabStatsInfo"),
                 MenuItem(N_("Log Messages"), "dia_logs", tip=N_("Log and debug messages")),
                 MenuItem(N_("About"), "dia_about", tip=N_("About the program"), separator_before=True),
