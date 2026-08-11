@@ -720,6 +720,13 @@ def test_check_tables_skipped_during_drag(hud_main) -> None:
         Aux_Base.set_drag_active(False)
 
 
+def test_check_tables_ignores_preview_hud_without_live_table(hud_main) -> None:
+    """Preview/lightweight HUDs must not crash the periodic table poll."""
+    hud_main.hud_dict = {"preview": SimpleNamespace()}
+
+    hud_main.check_tables()
+
+
 # Ensures that create_HUD creates a new HUD and adds it to the hud_dict.
 def test_create_hud(hud_main) -> None:
     with (
