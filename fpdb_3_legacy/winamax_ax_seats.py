@@ -527,7 +527,9 @@ class WinamaxAXSeatReader:
                 tx, ty = table_pos
                 best_table = min(
                     tables,
-                    key=lambda t: (t.bounds[0] - tx) ** 2 + (t.bounds[1] - ty) ** 2 if t.bounds else 0,
+                    key=lambda t: (
+                        (t.geometry.x - tx) ** 2 + (t.geometry.y - ty) ** 2 if t.geometry else 0
+                    ),
                 )
                 hwnd = best_table.window_id
             else:
