@@ -289,3 +289,13 @@ def test_fast_hud_qt_contracts_do_not_hang_windows_ci() -> None:
 
     assert "if: runner.os != 'Windows'" in step
     assert "test/test_HUD_main.py" in step
+
+
+def test_fast_hud_platform_contract_command_is_powershell_safe() -> None:
+    workflow = CI_WORKFLOW.read_text()
+    test_job = _workflow_job(workflow, "test", "native")
+    start = test_job.index("- name: Run FastHUD platform contracts")
+    step = test_job[start : test_job.index("\n      - name:", start + 1)]
+
+    command = next(line.strip() for line in step.splitlines() if line.strip().startswith("python -m pytest -q"))
+    assert "\\" not in command
