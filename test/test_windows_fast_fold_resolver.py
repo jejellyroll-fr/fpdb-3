@@ -2,7 +2,7 @@
 
 from unittest.mock import MagicMock, patch
 
-from fpdb.infrastructure.platform.protocol import TableInfo
+from fpdb.infrastructure.platform.protocol import TableGeometry, TableInfo
 from fpdb_3_legacy import winamax_ax_seats
 
 
@@ -38,13 +38,19 @@ def test_winamax_ax_seat_reader_finds_window_on_windows(monkeypatch):
 
 def test_windows_seat_read_selects_the_closest_duplicate_title(monkeypatch):
     """UIAutomation must read the window paired by geometry, not first match."""
-    from types import SimpleNamespace
-
     reader = winamax_ax_seats.WinamaxAXSeatReader(
         table_detector=MagicMock(
             find_tables=lambda _pattern: [
-                SimpleNamespace(window_id=101, bounds=(0, 0, 800, 600)),
-                SimpleNamespace(window_id=202, bounds=(1200, 0, 800, 600)),
+                TableInfo(
+                    window_id=101,
+                    title="Winamax Colorado 3",
+                    geometry=TableGeometry(x=0, y=0, width=800, height=600),
+                ),
+                TableInfo(
+                    window_id=202,
+                    title="Winamax Colorado 3",
+                    geometry=TableGeometry(x=1200, y=0, width=800, height=600),
+                ),
             ]
         )
     )
