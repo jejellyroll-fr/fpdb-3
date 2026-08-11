@@ -346,6 +346,21 @@ jobs:
           QT_QPA_PLATFORM: offscreen
         run: |
           python -m pytest -p no:pytest-qt -m "not qt and not perf" --tb=short
+      - name: Run FastHUD platform contracts
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: |
+          # These tests use deterministic Winamax captures and mocked platform
+          # APIs, so they exercise the macOS and Windows contracts on every
+          # runner without requiring a live poker client.
+          python -m pytest -q -m "not qt" \
+            test/test_fast_fold_replay.py \
+            test/test_fast_fold_clockwise_mapping_and_cleanup.py \
+            test/test_fast_fold_display_optimization.py \
+            test/test_fast_fold_engine.py \
+            test/test_winamax_ax_seats.py \
+            test/test_windows_fast_fold_resolver.py
+          python -m pytest -q -m qt test/test_HUD_main.py
       - name: Run Qt regression tests (offscreen)
         if: runner.os == 'Linux'
         env:
