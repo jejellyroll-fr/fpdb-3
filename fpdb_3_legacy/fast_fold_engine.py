@@ -34,6 +34,9 @@ class FastFoldStatsRequest:
 
     num_seats: int = 6
 
+    request_id: int = 0
+    """Monotonic GUI request id used to discard late worker results."""
+
 
 @dataclass(frozen=True)
 class FastFoldStatsResult:
@@ -42,6 +45,9 @@ class FastFoldStatsResult:
     temp_key: str
     seat_map: dict[int, str] = field(default_factory=dict)
     stat_dict: dict[int, dict[str, Any]] = field(default_factory=dict)
+
+    request_id: int = 0
+    """The request id that produced this result."""
 
 FAST_FOLD_TITLE_PATTERNS = (
     re.compile(r"Go\s*Fast", re.IGNORECASE),

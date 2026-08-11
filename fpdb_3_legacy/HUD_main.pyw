@@ -249,14 +249,6 @@ class HudReadWorker(QThread):
                 info = database.get_gameinfo_from_hid(request.hand_id)
                 gametype_id = info["gametypeId"] if info else None
 
-            if gametype_id is None and hasattr(database, "connection") and database.connection:
-                with contextlib.suppress(Exception):
-                    c = database.connection.cursor()
-                    c.execute("SELECT id FROM Gametypes ORDER BY id DESC LIMIT 1")
-                    r = c.fetchone()
-                    if r:
-                        gametype_id = r[0]
-
             stat_dict = FastFoldEngine(db_connection=database).get_player_stats_for_seat_map(
                 request.seat_map,
                 db_conn=database,
@@ -271,6 +263,7 @@ class HudReadWorker(QThread):
             temp_key=request.temp_key,
             seat_map=dict(request.seat_map),
             stat_dict=stat_dict,
+            request_id=request.request_id,
         )
 
     def run(self) -> None:
@@ -795,6 +788,10 @@ class HudMain(QObject):
             # Winamax log pool -> hud_dict key, learned once a hand from that
             # table has been imported and reused while the table stays open.
             self._winamax_pool_huds: dict[str, str] = {}
+            # Imported hands use the human table key while a live FastFold HUD
+            # may also carry a window discriminator. Keep that alias explicit
+            # instead of making every caller guess with string prefixes.
+            self._fast_fold_aliases: dict[str, str] = {}
             # hud_dict keys known to be Fast-Fold tables.
             self._fast_fold_tables: set[str] = set()
             # hud_dict key -> the seat map last sent to the worker, so an
@@ -808,9 +805,11 @@ class HudMain(QObject):
             # because each read walks another process's accessibility tree.
             self._ax_rings: dict[str, tuple[str, dict[int, str], int]] = {}
             # Timeline bookkeeping: when each hand's first log line arrived, and
-            # which hand a table's in-flight stats request belongs to.
+            # which hand/table request is currently allowed to update the HUD.
             self._ff_started: dict[str, float] = {}
             self._ff_pending_hand: dict[str, str] = {}
+            self._ff_pending_request: dict[str, int] = {}
+            self._ff_request_sequence = 0
             # Learned from the first imported Winamax hand. A log-created HUD
             # does not need it (it reads nothing from the database), but keeping
             # it lets the table carry the same identity as an imported one.
@@ -1164,7 +1163,10 @@ class HudMain(QObject):
         temp_key = self._get_temp_key(info.game_type, info.tour_number, info.tab_number, table_name)
         if info.fast:
             self._fast_fold_tables.add(temp_key)
-        if any(k == temp_key or k.startswith(f"{temp_key} #") for k in self.hud_dict):
+        resolved_key = self._resolve_fast_fold_key(temp_key)
+        if resolved_key != temp_key:
+            return resolved_key
+        if temp_key in self.hud_dict:
             return temp_key
         if self._handle_tournament_table_changes(info.game_type, temp_key, info.tour_number):
             return None
@@ -1181,6 +1183,19 @@ class HudMain(QObject):
             self._last_table_info[temp_key] = table_info
             return temp_key
         return None
+
+    def _resolve_fast_fold_key(self, temp_key: str) -> str:
+        """Resolve an imported human key to its active window HUD key."""
+        aliases = getattr(self, "_fast_fold_aliases", {})
+        aliased = aliases.get(temp_key)
+        if aliased in getattr(self, "hud_dict", {}):
+            return aliased
+        candidates = [
+            key
+            for key in getattr(self, "hud_dict", {})
+            if key.startswith(f"{temp_key} #")
+        ]
+        return candidates[0] if len(candidates) == 1 else temp_key
 
     def _on_db_snapshot(self, snapshot: HudBatchSnapshot) -> None:
         """Apply a database-free snapshot on the Qt thread."""
@@ -1370,7 +1385,14 @@ class HudMain(QObject):
         The seat windows hide themselves when their seat holds nobody, so
         emptying the seats is what removes them from an idle felt.
         """
-        if self._fast_fold_pending.pop(temp_key, None) is None and not getattr(hud, "stat_dict", None) and not getattr(hud, "seat_players", None):
+        pending = self._fast_fold_pending.pop(temp_key, None)
+        pending_requests = getattr(self, "_ff_pending_request", None)
+        if pending_requests is not None:
+            pending_requests.pop(temp_key, None)
+        pending_hands = getattr(self, "_ff_pending_hand", None)
+        if pending_hands is not None:
+            pending_hands.pop(temp_key, None)
+        if pending is None and not getattr(hud, "stat_dict", None) and not getattr(hud, "seat_players", None):
             return  # already down
         FastFoldEngine.clear_seats(hud)
         self._ff_trace(hand_id, "cleared", f"table={temp_key} ({reason})")
@@ -1402,6 +1424,11 @@ class HudMain(QObject):
                 with contextlib.suppress(Exception):
                     close_hud()
             self.hud_dict.pop(temp_key, None)
+            aliases = getattr(self, "_fast_fold_aliases", None)
+            if aliases is not None:
+                for alias, live_key in list(aliases.items()):
+                    if live_key == temp_key:
+                        aliases.pop(alias, None)
 
     def _recheck_window(self, pool: str) -> None:
         """Re-run a table's live update once the client has had time to draw it."""
@@ -1422,6 +1449,12 @@ class HudMain(QObject):
         started = self._ff_started.get(hand_id)
         elapsed = "" if started is None else f" +{(time.monotonic() - started) * 1000:.0f}ms"
         log.warning("FF[%s]%s %s %s", hand_id, elapsed, event, detail)
+
+    def _next_fast_fold_request_id(self) -> int:
+        """Return a process-local id for the next asynchronous seat read."""
+        request_id = int(getattr(self, "_ff_request_sequence", 0)) + 1
+        self._ff_request_sequence = request_id
+        return request_id
 
     def _on_winamax_table_update(self, update: Any) -> None:
         """Apply a live Winamax log update. Runs on the GUI thread."""
@@ -1526,14 +1559,17 @@ class HudMain(QObject):
         if worker is None:
             self._ff_trace(update.hand_id, "stats-skipped", "no database worker")
             return
+        request_id = self._next_fast_fold_request_id()
         self._ff_pending_hand[temp_key] = update.hand_id
-        self._ff_trace(update.hand_id, "stats-requested", f"table={temp_key}")
+        self._ff_pending_request[temp_key] = request_id
+        self._ff_trace(update.hand_id, "stats-requested", f"table={temp_key} request={request_id}")
         worker.submit(
             FastFoldStatsRequest(
                 temp_key=temp_key,
                 seat_map=seat_map,
                 hand_id=self._stats_reference_hand(temp_key),
                 num_seats=getattr(hud, "max", 6) or 6,
+                request_id=request_id,
             ),
         )
 
@@ -1541,18 +1577,25 @@ class HudMain(QObject):
         """A hand to take the gametypeId from when reading live player stats.
 
         This table's own last hand, when it has one. A window that has not had a
-        hand imported yet would otherwise get no gametypeId, the stats aggregate
-        would be skipped, and every seat would read "NA" -- so fall back to
-        another window on the same pool, which plays the same game for the same
-        stakes.
+        hand imported yet may use another window from the same pool, which is
+        still narrower than guessing from the newest global Gametypes row.
         """
         hand_id = self._last_processed_hands.get(temp_key)
         if hand_id is not None:
             return hand_id
 
-        base = re.sub(r"\s+\d+$", "", temp_key)
+        aliases = getattr(self, "_fast_fold_aliases", {})
+        for imported_key, live_key in aliases.items():
+            if live_key == temp_key:
+                hand_id = self._last_processed_hands.get(imported_key)
+                if hand_id is not None:
+                    return hand_id
+
+        clean_key = re.sub(r"\s*#\d+$", "", temp_key)
+        base = re.sub(r"\s+\d+$", "", clean_key)
         for other_key, other_hand in self._last_processed_hands.items():
-            if re.sub(r"\s+\d+$", "", other_key) == base:
+            clean_other = re.sub(r"\s*#\d+$", "", other_key)
+            if re.sub(r"\s+\d+$", "", clean_other) == base:
                 return other_hand
         return None
 
@@ -1617,6 +1660,14 @@ class HudMain(QObject):
     def _on_fast_fold_stats(self, result: FastFoldStatsResult) -> None:
         """Apply stats the worker read for a Fast-Fold table. Runs on the GUI thread."""
         hand_id = self._ff_pending_hand.get(result.temp_key, "?")
+        expected_request = getattr(self, "_ff_pending_request", {}).get(result.temp_key)
+        if expected_request is None or result.request_id != expected_request:
+            self._ff_trace(
+                hand_id,
+                "stats-dropped",
+                f"table={result.temp_key} stale_request={result.request_id} expected={expected_request}",
+            )
+            return
         hud = self.hud_dict.get(result.temp_key)
         if hud is None:
             self._ff_trace(hand_id, "stats-dropped", f"table={result.temp_key} has no HUD any more")
@@ -1711,6 +1762,11 @@ class HudMain(QObject):
             hud.is_fast_fold = True
             return True
 
+        resolved_key = self._resolve_fast_fold_key(temp_key) if temp_key else temp_key
+        if resolved_key and resolved_key != temp_key and resolved_key in self.hud_dict:
+            hud.is_fast_fold = True
+            return True
+
         clean_key = re.sub(r"\s*#\d+$", "", temp_key or "")
         hud_table_name = getattr(hud, "table_name", None) or ""
         clean_hud_name = re.sub(r"\s*#\d+$", "", hud_table_name if isinstance(hud_table_name, str) else "")
@@ -1778,6 +1834,9 @@ class HudMain(QObject):
             temp_key = f"{window.table_name} #{window.window_id}"
         else:
             temp_key = window.table_name
+        aliases = getattr(self, "_fast_fold_aliases", None)
+        if aliases is not None:
+            aliases[window.table_name] = temp_key
         if temp_key in self.hud_dict:
             return temp_key, self.hud_dict[temp_key]
 
@@ -2836,7 +2895,7 @@ class HudMain(QObject):
         start. Passing it through prevents OSXTables from performing a second
         window scan that can disagree with the first one while TCC is changing.
         """
-        if not resolved_window and any(k.startswith(f"{temp_key} #") for k, h in self.hud_dict.items() if getattr(h, "is_fast_fold", False)):
+        if not resolved_window and self._resolve_fast_fold_key(temp_key) != temp_key:
             log.info("Skipping legacy HUD creation for %r: live FastFold HUD is already active", temp_key)
             return
 
@@ -3077,6 +3136,7 @@ class HudMain(QObject):
             # Remembered so the background import path keeps the live composition
             # from the very first hand, before any log update has been matched.
             self._fast_fold_tables.add(temp_key)
+            temp_key = self._resolve_fast_fold_key(temp_key)
         log.debug("Generated temp_key: %s for table: %s", temp_key, table_name)
 
         # Idempotency: skip a hand already processed for this table (duplicate

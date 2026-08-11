@@ -434,16 +434,6 @@ class DatabaseHudStatsMixin:
         if not player_ids:
             return {}
 
-        if gametype_id is None and hasattr(self, "connection") and self.connection:
-            try:
-                c = self.connection.cursor()
-                c.execute("SELECT id FROM Gametypes ORDER BY id DESC LIMIT 1")
-                r = c.fetchone()
-                if r:
-                    gametype_id = r[0]
-            except Exception:
-                pass
-
         if hud_params is None:
             hud_params = dict(_DEFAULT_HUD_PARAMS)
         # Session stats are read from a different query, one that needs hands on
