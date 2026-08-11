@@ -2,7 +2,7 @@
 
 Affiche l'onglet 'Analyse des Mains' :
 - Pour le Hold'em : Grille interactive 13x13 avec coloration thermique (VPIP ou Profit).
-- Pour l'Omaha : Analyses catégorielles (suitedness, paires) représentées par des graphiques Matplotlib.
+- For Omaha: Categorical analyses (suitedness, pairs) represented by Matplotlib charts.
 """
 
 from __future__ import annotations
@@ -38,14 +38,14 @@ class HoldemGridCell(QFrame):
 
         self.setToolTip(_("Hand: {0}\nNo statistics available").format(hand_text))
         c = get_theme_palette()
-        self.set_color(c.get("window", "#2d3748"))  # Couleur du thème par défaut
+        self.set_color(c.get("window", "#2d3748"))  # Default theme color
 
     def set_color(self, hex_color: str) -> None:
         """Modifie la couleur de fond de la cellule."""
         self.setStyleSheet(f"QFrame#handCell {{ background-color: {hex_color}; }}")
 
     def update_stats(self, n: int, profit: float, vpip: float, color_by: str = "profit") -> None:
-        """Met à jour les statistiques de la cellule et son infobulle."""
+        """Update cell statistics and its tooltip."""
         self.setToolTip(
             _("<b>Hand: {0}</b><br/>Hands: {1}<br/>VPIP: {2}%<br/>Profit: {3}").format(
                 self.hand_text,
@@ -63,17 +63,17 @@ class HoldemGridCell(QFrame):
 
         if n > 0:
             if color_by == "vpip":
-                # Coloration par VPIP % (dégradé bleu/vert du thème)
+                # Color by VPIP % (theme blue/green gradient)
                 alpha = min(1.0, 0.05 + (vpip / 100.0))
                 color = self._interpolate_color(bg_card, accent, alpha)
             else:
                 # Coloration par Profit
                 if profit > 0:
-                    # Dégradé de vert
+                    # Green gradient
                     alpha = min(1.0, 0.15 + (profit / 20.0))
                     color = self._interpolate_color(bg_card, color_up, alpha)
                 elif profit < 0:
-                    # Dégradé de rouge
+                    # Red gradient
                     alpha = min(1.0, 0.15 + (abs(profit) / 20.0))
                     color = self._interpolate_color(bg_card, color_down, alpha)
                 else:
@@ -84,7 +84,7 @@ class HoldemGridCell(QFrame):
         self.set_color(color)
 
     def _interpolate_color(self, hex1: str, hex2: str, factor: float) -> str:
-        """Calcule une couleur interpolée entre deux couleurs hexa."""
+        """Calculate an interpolated color between two hexadecimal colors."""
         try:
             h1 = hex1.lstrip("#")
             h2 = hex2.lstrip("#")
@@ -101,7 +101,7 @@ class HoldemGridCell(QFrame):
 
 
 class OmahaChartsCanvas(FigureCanvas):
-    """Tracés Matplotlib pour analyser les statistiques d'Omaha par catégorie."""
+    """Matplotlib plots for analyzing Omaha statistics by category."""
 
     def __init__(self, parent=None) -> None:
         self.fig = Figure(figsize=(6, 4), dpi=100)
@@ -125,7 +125,7 @@ class OmahaChartsCanvas(FigureCanvas):
         orange = c.get("graph_ev", "#f59e3d")
         color_down = c.get("graph_down", "#f56565")
 
-        # 2 Graphiques côte à côte : Répartition des couleurs (Suits) et des Paires
+        # 2 Side-by-side charts: suit and pair distributions
         ax1 = self.fig.add_subplot(121)
         ax2 = self.fig.add_subplot(122)
 
@@ -147,7 +147,7 @@ class OmahaChartsCanvas(FigureCanvas):
         else:
             ax1.text(0.5, 0.5, "Aucune donnée", color=text_color, ha="center")
 
-        # 2. Graphe des Paires
+        # 2. Pair chart
         if pairs:
             labels = list(pairs.keys())
             values = list(pairs.values())
@@ -179,13 +179,13 @@ class StartingHandsTab(QWidget):
         )
         self.main_layout.addWidget(self.title_label)
 
-        # Conteneur principal qui changera dynamiquement selon le jeu
+        # Main container that changes dynamically based on the game
         self.container = QWidget()
         self.container_layout = QVBoxLayout(self.container)
         self.container_layout.setContentsMargins(0, 0, 0, 0)
         self.main_layout.addWidget(self.container, 1)
 
-        # Composants pré-créés pour Hold'em et Omaha
+        # Pre-created components for Hold'em and Omaha
         self.holdem_grid_widget = QWidget()
         holdem_main_layout = QVBoxLayout(self.holdem_grid_widget)
         holdem_main_layout.setContentsMargins(0, 0, 0, 0)
@@ -231,10 +231,10 @@ class StartingHandsTab(QWidget):
                 c2 = ranks[col]
 
                 if row < col:
-                    # Suited (en haut à droite)
+                    # Suited (top right)
                     hand = f"{c1}{c2}s"
                 elif row > col:
-                    # Offsuit (en bas à gauche)
+                    # Offsuit (bottom left)
                     hand = f"{c2}{c1}o"
                 else:
                     # Paire (diagonale)
@@ -259,16 +259,16 @@ class StartingHandsTab(QWidget):
                 cell.update_stats(0, 0.0, 0.0, self.holdem_color_by)
 
     def update_holdem_data(self, hand_stats: dict[str, dict]) -> None:
-        """Affiche la grille de Hold'em et met à jour ses cellules avec les statistiques."""
+        """Display the Hold'em grid and update its cells with statistics."""
         self._set_mode("holdem")
         self.holdem_hand_stats = hand_stats
         self.redraw_holdem_grid()
 
     def update_omaha_data(self, hand_stats: list[dict], variant: str = "omaha4") -> None:
-        """Affiche et génère les graphiques d'analyse Omaha à partir de la liste des mains."""
+        """Display and generate Omaha analysis charts from the hand list."""
         self._set_mode("omaha")
 
-        # Dénomination selon la variante Omaha
+        # Naming based on the Omaha variant
         if variant == "omaha5":
             variant_title = "Omaha 5-Card"
             self.title_label.setText(_("Omaha 5-Card Texture Analysis"))
@@ -282,7 +282,7 @@ class StartingHandsTab(QWidget):
             self.title_label.setText(_("Omaha 4-Card Texture Analysis"))
             pairs_counts = {"Double Paired": 0, "Single Paired": 0, "No Pair": 0}
 
-        # Agrégation statistique des mains Omaha
+        # Statistical aggregation of Omaha hands
         suitedness_counts = {"Double Suited": 0, "Single Suited": 0, "Rainbow": 0, "Autre": 0}
 
         for row in hand_stats:
@@ -299,7 +299,7 @@ class StartingHandsTab(QWidget):
             else:
                 suitedness_counts["Autre"] += n
 
-            # 2. Analyse des paires (détection de doublons dans la chaîne des hauteurs)
+            # 2. Pair analysis (duplicate detection in the rank string)
             match = re.match(r"^([AKQJT98765432]+)", hand_str)
             if match:
                 ranks_part = match.group(1)
@@ -327,7 +327,7 @@ class StartingHandsTab(QWidget):
                     else:
                         pairs_counts["No Pair"] += n
 
-        # Nettoyage des catégories vides
+        # Remove empty categories
         suitedness_counts = {k: v for k, v in suitedness_counts.items() if v > 0}
         pairs_counts = {k: v for k, v in pairs_counts.items() if v > 0}
 
@@ -340,13 +340,13 @@ class StartingHandsTab(QWidget):
 
         self.active_mode = mode
 
-        # Vider le layout du conteneur
+        # Clear the container layout
         while self.container_layout.count() > 0:
             item = self.container_layout.takeAt(0)
             if item.widget():
                 item.widget().setParent(None)
 
-        # Ajouter le widget correspondant
+        # Add the corresponding widget
         if mode == "holdem":
             scroll = QScrollArea()
             scroll.setWidgetResizable(True)
@@ -355,7 +355,7 @@ class StartingHandsTab(QWidget):
             self.title_label.setText(_("Hold'em Starting Hand Grid"))
         elif mode == "omaha":
             self.container_layout.addWidget(self.omaha_widget)
-            # Sera mis à jour par la méthode update_omaha_data
+        # Updated by the update_omaha_data method
             self.title_label.setText(_("Omaha Texture Analysis"))
 
     def refresh_theme(self, colors=None, theme_colors=None) -> None:

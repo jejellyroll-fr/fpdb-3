@@ -1,8 +1,8 @@
 """__init__.py
 
-Point d'entrée du package ring_stats.
-Exporte la classe GuiRingPlayerStats modernisée, héritant de QSplitter pour
-conserver une compatibilité descendante totale avec fpdb.pyw, mais hébergeant
+Entry point for the ring_stats package.
+Exports the modernized GuiRingPlayerStats class, inheriting from QSplitter to
+maintain full backward compatibility with fpdb.pyw while hosting
 l'architecture d'onglets asynchrones.
 """
 
@@ -44,9 +44,9 @@ colalias, colheading, colshowsumm, colshowposn, colformat, coltype, colxalign = 
 
 
 class GuiRingPlayerStats(QSplitter):
-    """Widget principal de statistiques Cash Game (Ring Player Stats) modernisé.
+    """Modern main Cash Game statistics widget (Ring Player Stats).
 
-    Conserve le comportement d'origine (Splitter avec filtres à gauche)
+    Preserves the original behavior (splitter with filters on the left)
     mais remplace les tableaux bruts de droite par un QTabWidget moderne
     contenant les tableaux de bord, graphes, heatmaps de positions et starting hands.
     """
@@ -58,11 +58,11 @@ class GuiRingPlayerStats(QSplitter):
         self.main_window = mainwin
         self.sql = querylist
 
-        # Initialisation de la base de données
+        # Initialize the database
         self.db = Database.Database(self.conf, sql=self.sql)
         self.cursor = self.db.cursor
 
-        # Filtres détaillés d'origine
+        # Original detailed filters
         self.handtests: list[list[Any]] = [
             ["gt.maxSeats", "Size of Table", 2, 10],
             ["h.playersVpi", "Players who VPI", 0, 10],
@@ -88,7 +88,7 @@ class GuiRingPlayerStats(QSplitter):
         self.cardsFilters: list[str] = []
         self.columns = self.conf.get_gui_cash_stat_params()
 
-        # 1. Barre latérale des filtres (Gauche)
+        # 1. Filter sidebar (left)
         filters_display = {
             "Heroes": True,
             "Sites": True,
@@ -125,18 +125,18 @@ class GuiRingPlayerStats(QSplitter):
         sidebar_scroll.setWidget(self.filters)
         self.addWidget(sidebar_scroll)
 
-        # 2. Zone d'affichage des statistiques modernisée (Droite)
+        # 2. Modernized statistics display area (right)
         self.stats_tabs = ModernStatsWidget(self)
 
-        # Onglet 1 : Tableau de Bord
+        # Tab 1: Dashboard
         self.dashboard_tab = DashboardTab(self.stats_tabs)
         self.stats_tabs.addTab(self.dashboard_tab, _("Dashboard"))
 
-        # Onglet 2 : Tableaux détaillés
+        # Tab 2: Detailed tables
         self.table_tab = StatsTableView(self.stats_tabs)
         self.stats_tabs.addTab(self.table_tab, _("Stats Tables"))
 
-        # Onglet 3 : Heatmap des Positions
+        # Tab 3: Position heatmap
         self.position_tab = PositionalTab(self.stats_tabs)
         self.stats_tabs.addTab(self.position_tab, _("Position Heatmap"))
 
@@ -146,11 +146,11 @@ class GuiRingPlayerStats(QSplitter):
 
         self.addWidget(self.stats_tabs)
 
-        # Configuration des étirements
+        # Configure stretch factors
         self.setStretchFactor(0, 0)
         self.setStretchFactor(1, 1)
 
-        # 3. Contrôleur
+        # 3. Controller
         self.controller = RingStatsController(self.db, self.conf, self.sql)
         self.controller.dashboard_data_ready.connect(self.dashboard_tab.update_data)
         self.controller.summary_model_ready.connect(self.table_tab.set_summary_model)
@@ -169,8 +169,8 @@ class GuiRingPlayerStats(QSplitter):
         self.db.rollback()
 
     def refreshStats(self, checkState=None) -> None:
-        """Déclenché lors d'un rafraîchissement des filtres."""
-        # Forcer la mise à jour des feuilles de style pour s'adapter à un changement de thème
+        """Called when filters are refreshed."""
+        # Force stylesheet updates to adapt to a theme change
         self._apply_theme()
 
         from PySide6.QtCore import Qt
@@ -181,22 +181,22 @@ class GuiRingPlayerStats(QSplitter):
             QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
 
         try:
-            # Lancer le rechargement des requêtes
+            # Start reloading the queries
             self.controller.refresh_all(self.filters)
         finally:
             if is_sync:
                 QApplication.restoreOverrideCursor()
 
     def refresh_theme(self, colors=None, theme_colors=None) -> None:
-        """Appelé par ThemeManager.apply_legacy_polish() lors d'un changement de thème.
+        """Called by ThemeManager.apply_legacy_polish() when the theme changes.
 
-        Ré-applique la feuille de style QSS sur le conteneur d'onglets et
-        propage la mise à jour des couleurs à tous les onglets enfants.
+        Reapply the QSS stylesheet to the tab container and propagate color
+        updates to all child tabs.
         """
         self._apply_theme()
 
     def _apply_theme(self) -> None:
-        """Ré-applique les styles du thème à tous les composants."""
+        """Reapply theme styles to all components."""
         self.stats_tabs.apply_theme_stylesheet()
         self.dashboard_tab.refresh_theme()
         self.position_tab.refresh_theme()
@@ -204,11 +204,11 @@ class GuiRingPlayerStats(QSplitter):
         self.table_tab.refresh_theme()
 
     def update_hands_tab_data(self, model: QStandardItemModel) -> None:
-        """Intercepte le modèle de mains détaillé pour mettre à jour la grille/graphe de starting hands."""
+        """Intercept the detailed hand model to update the starting-hand grid/graph."""
         hand_stats = {}
         omaha_rows = []
 
-        # Trouver la colonne qui contient les cartes de départ (Hand)
+        # Find the column containing the starting cards (Hand)
         hand_col_idx = 0
         try:
             hand_heading = next(x for x in self.columns if x[0] == "hand")[1]
@@ -224,7 +224,7 @@ class GuiRingPlayerStats(QSplitter):
         categories = model.property("categories") or []
         log.info("Active categories for hands tab: %s", categories)
 
-        # Déterminer la variante Omaha
+        # Determine the Omaha variant
         variant = "omaha4"
         if any(cat in categories for cat in ["5_omahahi", "5_omahalo"]):
             variant = "omaha5"
@@ -236,11 +236,11 @@ class GuiRingPlayerStats(QSplitter):
             if not any("holdem" in cat for cat in categories):
                 is_holdem = False
         else:
-            # Vérifier le type de jeu sur la première ligne en guise de fallback
+            # Check the game type on the first row as a fallback
             if model.rowCount() > 0:
                 first_item = model.item(0, hand_col_idx)
                 first_game_name = first_item.text() if first_item else ""
-                # Omaha contient généralement des suffixes comme ss, ds, ou des nombres à 4 chiffres
+                # Omaha usually contains suffixes such as ss, ds, or four-digit numbers
                 if any(suffix in first_game_name.lower() for suffix in ["ss", "ds", "rainbow"]):
                     is_holdem = False
                 else:
@@ -254,7 +254,7 @@ class GuiRingPlayerStats(QSplitter):
                 hand_text = item_hand.text() if item_hand else ""
                 if not hand_text:
                     continue
-                # Extraction des valeurs
+                # Extract values
                 try:
                     n = float(model.item(row, 1).text()) if model.item(row, 1) else 0
                     vpip = float(model.item(row, 2).text().replace("%", "")) if model.item(row, 2) else 0.0
@@ -284,7 +284,7 @@ class GuiRingPlayerStats(QSplitter):
             self.hands_tab.update_omaha_data(omaha_rows, variant)
 
     def showColumnConfig(self) -> None:
-        """Affiche la boîte de dialogue de configuration des colonnes."""
+        """Display the column configuration dialog."""
         dialog = QDialog(self.main_window)
         dialog.setWindowTitle(_("Column Configuration"))
         layout = QVBoxLayout(dialog)
@@ -332,7 +332,7 @@ class GuiRingPlayerStats(QSplitter):
             self.refreshStats(None)
 
     def showDetailFilter(self, checkState) -> None:
-        """Affiche les filtres avancés (Pocket Pairs, Suited Connectors, etc.)."""
+        """Display advanced filters (Pocket Pairs, Suited Connectors, etc.)."""
         detailDialog = QDialog(self.main_window)
         detailDialog.setWindowTitle(_("Detailed Filters"))
 

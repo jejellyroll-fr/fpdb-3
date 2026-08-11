@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# Arrêter en cas d'erreur
+# Stop on error
 set -e
 
-# Fonction pour détecter l'OS
+# Function to detect the operating system
 detect_os() {
     case "$(uname -s)" in
         Linux*)     echo "Linux" ;;
@@ -19,13 +19,13 @@ if [ "$OS" != "Linux" ]; then
     exit 1
 fi
 
-# Téléchargement de appimagetool
+# Download appimagetool
 if [ ! -f ./appimagetool-x86_64.AppImage ]; then
     wget https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
     chmod +x appimagetool-x86_64.AppImage
 fi
 
-# Définir le chemin de base
+# Define the base path
 BASE_PATH=$(pwd)
 
 echo "Chemin de base : $BASE_PATH"
@@ -38,7 +38,7 @@ SECOND_SCRIPT="$LEGACY_PACKAGE_DIR/HUD_main.pyw"
 # Options de pyinstaller
 PYINSTALLER_OPTIONS="--noconfirm --onedir --windowed --log-level=DEBUG --paths=fpdb_3_legacy --paths=."
 
-# Liste de tous les fichiers pour fpdb
+# List all files for fpdb
 FILES=(
     "AutoImportConfigObserver.py"
     "Aux_Base.py"
@@ -139,7 +139,7 @@ FOLDERS=(
     "utils"
 )
 
-# Convertir tribal.jpg en fpdb.png si nécessaire
+# Convert tribal.jpg to fpdb.png if necessary
 if [ ! -f "$BASE_PATH/gfx/fpdb.png" ]; then
     if [ -f "$BASE_PATH/gfx/tribal.jpg" ]; then
         magick convert "$BASE_PATH/gfx/tribal.jpg" "$BASE_PATH/gfx/fpdb.png"
@@ -149,7 +149,7 @@ if [ ! -f "$BASE_PATH/gfx/fpdb.png" ]; then
     fi
 fi
 
-# Fonction pour générer la commande pyinstaller
+# Function to generate the PyInstaller command
 generate_pyinstaller_command() {
     local script_path=$1
     local command="pyinstaller $PYINSTALLER_OPTIONS"
@@ -193,7 +193,7 @@ generate_pyinstaller_command() {
 
     command+=" \"$BASE_PATH/$script_path\""
 
-    # Écrire la commande dans un fichier temporaire
+    # Write the command to a temporary file
     echo "#!/bin/bash" > temp_pyinstaller_command.sh
     echo "$command" >> temp_pyinstaller_command.sh
     chmod +x temp_pyinstaller_command.sh
@@ -215,10 +215,10 @@ cat temp_pyinstaller_command.sh
 
 echo "fpdb build success."
 
-# Nettoyage du fichier temporaire
+# Clean up the temporary file
 rm temp_pyinstaller_command.sh
 
-# Copier HUD_main _internal dans fpdb
+# Copy HUD_main _internal into fpdb
 echo "Copie de HUD_main _internal dans fpdb"
 if [ -d "$BASE_PATH/dist/HUD_main/_internal" ]; then
     cp -R "$BASE_PATH/dist/HUD_main/_internal" "$BASE_PATH/dist/fpdb/"
@@ -229,18 +229,18 @@ else
     exit 1
 fi
 
-# Création de l'AppImage
+# Create the AppImage
 APP_DIR="$BASE_PATH/AppDir"
 mkdir -p "$APP_DIR/usr/bin"
 mkdir -p "$APP_DIR/usr/share/icons/hicolor/256x256/apps"
 
 cp -r "$BASE_PATH/dist/fpdb/"* "$APP_DIR/usr/bin/"
 
-# Copier l'icône en fpdb.png
+# Copy the icon to fpdb.png
 cp "$BASE_PATH/gfx/fpdb.png" "$APP_DIR/usr/share/icons/hicolor/256x256/apps/fpdb.png"
 cp "$BASE_PATH/gfx/fpdb.png" "$APP_DIR/fpdb.png"
 
-# Créer un fichier desktop
+# Create a desktop file
 cat <<EOF > "$APP_DIR/fpdb.desktop"
 [Desktop Entry]
 Name=fpdb
@@ -250,7 +250,7 @@ Type=Application
 Categories=Utility;
 EOF
 
-# Création du fichier AppRun
+# Create the AppRun file
 cat <<'EOF' > "$APP_DIR/AppRun"
 #!/bin/bash
 HERE="$(dirname "$(readlink -f "${0}")")"
@@ -260,10 +260,10 @@ EOF
 
 chmod +x "$APP_DIR/AppRun"
 
-# Créer l'AppImage avec un nom personnalisé en spécifiant l'architecture
+# Create the AppImage with a custom name and explicit architecture
 ARCH=x86_64 ./appimagetool-x86_64.AppImage "$APP_DIR" fpdb-x86_64.AppImage
 
-# Nettoyer les fichiers de build
+# Clean up build files
 echo "Nettoyage des fichiers de build..."
 rm -rf "$BASE_PATH/build"
 rm -rf "$BASE_PATH/dist/HUD_main"

@@ -1,7 +1,7 @@
 """dashboard_view.py
 
 Affiche l'onglet principal 'Tableau de Bord' avec les KPI Cards, la jauge de Gap,
-et le graphique de profit cumulé Matplotlib.
+and the cumulative-profit Matplotlib chart.
 """
 
 from __future__ import annotations
@@ -19,7 +19,7 @@ from fpdb_3_legacy.ring_stats.views.widgets import GapMeter, KpiCard
 
 
 class ProfitGraphCanvas(FigureCanvas):
-    """Canvas Matplotlib intégré pour tracer la courbe de profit cumulé."""
+    """Embedded Matplotlib canvas for plotting the cumulative profit curve."""
 
     def __init__(self, parent=None) -> None:
         self.fig = Figure(figsize=(5, 3), dpi=100)
@@ -29,10 +29,10 @@ class ProfitGraphCanvas(FigureCanvas):
         self.update_style()
 
     def update_style(self) -> None:
-        """Adapte les couleurs du graphique Matplotlib au thème courant de l'application."""
+        """Adapt Matplotlib chart colors to the application's current theme."""
         c = get_theme_palette()
 
-        # Récupération des couleurs du thème
+        # Retrieve theme colors
         bg_color = c.get("sidebar", "#1a202c")
         text_color = c.get("text", "#edf2f7")
         grid_color = c.get("grid", "#4a5568")
@@ -54,7 +54,7 @@ class ProfitGraphCanvas(FigureCanvas):
         self.draw()
 
     def plot_profit_data(self, profits: tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray] | list[float], hands: list[int]) -> None:
-        """Trace les courbes de profit cumulé (Net, Showdown, Non-Showdown, EV)."""
+        """Plot cumulative profit curves (Net, Showdown, Non-Showdown, EV)."""
         self.axes.clear()
         self.update_style()
 
@@ -98,17 +98,17 @@ class ProfitGraphCanvas(FigureCanvas):
         if len(ev) > 0 and not np.all(ev == 0):
             self.axes.plot(x, ev, color=c.get("graph_ev", "#dd6b20"), linewidth=1.5, label="All-In EV", alpha=0.9)
 
-        # Remplir la zone sous Net Profit
+        # Fill the area below Net Profit
         self.axes.fill_between(x, green, 0, where=(green >= 0), color=color_up, alpha=0.1, interpolate=True)
         self.axes.fill_between(x, green, 0, where=(green < 0), color=color_down, alpha=0.1, interpolate=True)
 
-        # Ligne de référence à y=0
+        # Reference line at y=0
         self.axes.axhline(0, color=border_color, linestyle='-', linewidth=0.8, alpha=0.7)
 
         self.axes.set_ylabel("Profit ($ / BB)", color=text_color, fontsize=8)
         self.axes.set_xlabel("Mains Jouées", color=text_color, fontsize=8)
 
-        # Afficher la légende
+        # Display the legend
         self.axes.legend(loc="upper left", facecolor=c.get("sidebar", "#1a202c"), edgecolor=border_color, labelcolor=text_color, fontsize=8, framealpha=0.6)
         self.draw()
 
@@ -124,7 +124,7 @@ class DashboardTab(QWidget):
         layout.setContentsMargins(16, 16, 16, 16)
         layout.setSpacing(16)
 
-        # 1. Grille des KPI Cards (Top)
+        # 1. KPI card grid (top)
         kpi_container = QWidget()
         self.kpi_layout = QGridLayout(kpi_container)
         self.kpi_layout.setContentsMargins(0, 0, 0, 0)
@@ -138,7 +138,7 @@ class DashboardTab(QWidget):
         self.card_3bet = KpiCard("3Bet", "0.0%")
         self.card_agg = KpiCard("Agression (AF)", "0.00")
 
-        # Placement dans la grille (2 lignes, 3 colonnes)
+        # Grid placement (2 rows, 3 columns)
         self.kpi_layout.addWidget(self.card_hands, 0, 0)
         self.kpi_layout.addWidget(self.card_net, 0, 1)
         self.kpi_layout.addWidget(self.card_vpip, 0, 2)
@@ -165,8 +165,8 @@ class DashboardTab(QWidget):
         layout.addWidget(self.canvas, 1)  # Prend tout l'espace disponible verticalement
 
     def update_data(self, summary_stats: dict, profits: list[float]) -> None:
-        """Met à jour les KPI cards, la jauge de gap, et redessine le graphique."""
-        # 1. Mise à jour des cartes KPI
+        """Update KPI cards and the gap gauge, then redraw the chart."""
+        # 1. Update KPI cards
         hands = summary_stats.get("hands", 0)
         self.card_hands.set_value(format_number(hands, 0))
 
@@ -188,14 +188,14 @@ class DashboardTab(QWidget):
         agg = summary_stats.get("aggfac", 0.0)
         self.card_agg.set_value(format_number(agg, 2))
 
-        # 2. Mise à jour du GapMeter
+        # 2. Update the GapMeter
         self.gap_meter.set_values(vpip, pfr)
 
-        # 3. Mise à jour du graphique de profit
+        # 3. Update the profit chart
         self.canvas.plot_profit_data(profits, list(range(len(profits))))
 
     def refresh_theme(self, colors=None, theme_colors=None) -> None:
-        """Force la mise à jour graphique lors d'un changement de thème."""
+        """Force a chart update when the theme changes."""
         c = get_theme_palette()
         muted = c.get('muted_text', '#a0aec0')
         self.gap_label.setStyleSheet(f"font-size: 11px; font-weight: bold; text-transform: uppercase; color: {muted};")

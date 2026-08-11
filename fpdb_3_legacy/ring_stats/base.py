@@ -1,7 +1,7 @@
 """base.py
 
-Contient la classe de base ModernStatsWidget pour les widgets de statistiques
-modernes, ainsi que le système d'exécution de requêtes asynchrones en arrière-plan.
+Contains the ModernStatsWidget base class for statistics widgets
+modern components, as well as the asynchronous background query execution system.
 """
 
 from __future__ import annotations
@@ -13,13 +13,13 @@ from fpdb_3_legacy.ring_stats.styles import get_modern_qss
 
 
 class DbWorker(QThread):
-    """Worker asynchrone pour exécuter des requêtes SQL lourdes en arrière-plan."""
+    """Asynchronous worker for executing heavy SQL queries in the background."""
 
-    # Signal émis lorsque les données sont chargées avec succès
+    # Signal emitted when data is loaded successfully
     # Arguments: (query_name, result_rows, column_names)
     finished = Signal(str, list, list)
 
-    # Signal émis en cas d'erreur de base de données
+    # Signal emitted when a database error occurs
     # Arguments: (error_message)
     error = Signal(str)
 
@@ -40,12 +40,12 @@ class DbWorker(QThread):
 
 
 class ModernStatsWidget(QTabWidget):
-    """Classe de base pour toutes les fenêtres de statistiques modernisées.
+    """Base class for all modernized statistics windows.
 
-    Gère :
-    - L'application de la feuille de style (QSS) liée au thème actif
-    - Le chargement asynchrone des données
-    - L'affichage d'indicateurs de chargement ou d'erreur
+    Handles:
+    - Applying the stylesheet (QSS) for the active theme
+    - Asynchronous data loading
+    - Displaying loading or error indicators
     """
 
     def __init__(self, parent=None) -> None:
@@ -55,26 +55,26 @@ class ModernStatsWidget(QTabWidget):
         self.apply_theme_stylesheet()
 
     def apply_theme_stylesheet(self) -> None:
-        """Récupère et applique le style QSS synchronisé avec le thème courant."""
+        """Retrieve and apply the QSS style synchronized with the current theme."""
         qss = get_modern_qss()
         self.setStyleSheet(qss)
 
     def showEvent(self, event) -> None:
-        """Déclenché lorsque le widget est affiché. Assure la mise à jour du style."""
+        """Called when the widget is shown. Ensures the style is updated."""
         super().showEvent(event)
         self.apply_theme_stylesheet()
 
     def run_async_query(self, cursor, query_name: str, query_sql: str, callback, error_callback=None) -> None:
-        """Lance une requête SQL en arrière-plan sans bloquer la GUI.
+        """Run a SQL query in the background without blocking the GUI.
 
         Args:
-            cursor: Le curseur de la base de données.
-            query_name: Identifiant de la requête (pour le callback).
-            query_sql: Chaîne SQL raffinée à exécuter.
-            callback: Fonction appelée avec (query_name, results, colnames) à la fin.
-            error_callback: Fonction optionnelle appelée en cas d'erreur.
+            cursor: Database cursor.
+            query_name: Query identifier (for the callback).
+            query_sql: Refined SQL statement to execute.
+            callback: Function called with (query_name, results, colnames) on completion.
+            error_callback: Optional function called on error.
         """
-        # Nettoyage des workers terminés
+        # Clean up completed workers
         self._workers = [w for w in self._workers if not w.isFinished()]
 
         worker = DbWorker(cursor, query_name, query_sql)
@@ -89,15 +89,15 @@ class ModernStatsWidget(QTabWidget):
         worker.start()
 
     def handle_db_error(self, error_message: str) -> None:
-        """Comportement par défaut lors d'une erreur de base de données."""
+        """Default behavior when a database error occurs."""
         QMessageBox.critical(
             self,
-            "Erreur Base de Données",
+            "Database Error",
             f"Une erreur est survenue lors du chargement des statistiques :\n\n{error_message}",
         )
 
     def closeEvent(self, event) -> None:
-        """S'assure que tous les workers d'arrière-plan sont arrêtés avant fermeture."""
+        """Ensure all background workers are stopped before closing."""
         for worker in self._workers:
             if worker.isRunning():
                 worker.terminate()

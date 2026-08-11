@@ -47,7 +47,7 @@ def find_file(name, path):
 
 def load_hand_history(filename):
     if filename in _file_cache:
-        # Retourne le contenu et le chemin depuis le cache
+        # Return the content and path from the cache
         return _file_cache[filename]
 
     script_dir = Path(__file__).parent
@@ -56,7 +56,7 @@ def load_hand_history(filename):
     if file_path := find_file(filename, str(base_search_dir)):
         with open(file_path, encoding="utf-8-sig") as f:
             content = f.read()
-            # Met en cache le contenu et le chemin
+            # Cache the content and path
             _file_cache[filename] = (content, file_path)
             return content, file_path
     else:
@@ -87,7 +87,7 @@ class TestBovadaParser(unittest.TestCase):
         hand_text, file_path = load_hand_history("7-Stud-USD-2.00-4.00-201205.txt")
         self.parser.in_path = file_path
         gametype = self.parser.determineGameType(hand_text.split("\n\n")[0])
-        # Pour Stud, on vérifie le type de jeu et les paramètres de base
+        # For Stud, verify the game type and basic parameters
         assert gametype["base"] == "stud"
         assert gametype["category"] == "studhi"
         assert gametype["limitType"] == "fl"
@@ -104,7 +104,7 @@ class TestBovadaParser(unittest.TestCase):
         gametype = self.parser.determineGameType(hand_text.split("\n\n")[0])
         hand = MockHand(hand_text, gametype)
         self.parser.readPlayerStacks(hand)
-        # Les joueurs dans le fichier sont Seat+1, Seat+3, Seat+5, donc le 3ème (index 2) est Seat 5
+        # Players in the file are Seat+1, Seat+3, Seat+5, so the third (index 2) is Seat 5
         assert hand.players[2]["name"] == "Seat 5"
 
     def test_read_antes_and_bring_in_stud(self) -> None:
@@ -114,7 +114,7 @@ class TestBovadaParser(unittest.TestCase):
         self.parser.readPlayerStacks(hand)
         self.parser.readAntes(hand)
         self.parser.readBringIn(hand)
-        # Le bring-in est fait par Seat+5 dans le fichier, qui est mappé à 'Seat 5'
+        # The bring-in is made by Seat+5 in the file, mapped to 'Seat 5'
         assert hand.bringIn["player"] == "Seat 5"
 
     def test_read_blinds_and_posts(self) -> None:
@@ -124,7 +124,7 @@ class TestBovadaParser(unittest.TestCase):
         hand = MockHand(hand_text, gametype)
         self.parser.readPlayerStacks(hand)
         self.parser.readBlinds(hand)
-        # Dans le fichier, "Small Blind" est payée par Seat 5
+        # In the file, "Small Blind" is paid by Seat 5
         sb_post = next(b for b in hand.blinds if b["type"] == "small blind")
         assert sb_post["player"] == "Seat 5"
 
@@ -139,14 +139,14 @@ class TestBovadaParser(unittest.TestCase):
         self.parser.readAction(hand, "FLOP")
         self.parser.readAction(hand, "TURN")
 
-        # Simplification du test pour vérifier que des actions sont bien parsées
-        # car la logique de markStreets semble complexe à répliquer parfaitement.
+        # Simplify the test to verify that actions are parsed correctly
+        # because markStreets logic seems complex to reproduce exactly.
         assert len(hand.actions) > 0, "Aucune action n'a été parsée"
-        # Vérification d'une action clé
+        # Verify a key action
         raise_action = any(a for a in hand.actions if a[2] == "raise" and a[3] == Decimal("1.50"))
         assert raise_action, "La relance à 1.50 n'a pas été trouvée"
 
-    # --- Le reste des tests qui passaient déjà ---
+    # --- Remaining tests that already passed ---
     def test_determine_game_type_zone_poker(self) -> None:
         hand_text, _ = load_hand_history("NLHE-USD - $0.05-$0.10 - 201308.ZonePoker.txt")
         gametype = self.parser.determineGameType(hand_text.split("\n\n")[0])

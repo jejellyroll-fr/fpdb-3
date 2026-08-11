@@ -437,7 +437,7 @@ class MacOSTableDetector:
         self._applescript_last_result = []
 
         try:
-            # Script AppleScript pour lister toutes les fenêtres de ces processus
+            # AppleScript to list all windows belonging to these processes
             script_lines = [
                 'tell application "System Events"',
                 "    set windowList to {}",
@@ -494,7 +494,7 @@ class MacOSTableDetector:
 
             if result.returncode == 0 and result.stdout.strip():
                 windows_str = result.stdout.strip()
-                # Sortie de la forme: "proc|title|x|y|w|h, proc|title|x|y|w|h, ..."
+                # Output format: "proc|title|x|y|w|h, proc|title|x|y|w|h, ..."
                 entries = re.split(r",\s*(?=[a-zA-Z0-9_.\-\s]+\|)", windows_str)
 
                 for entry in entries:
@@ -510,7 +510,7 @@ class MacOSTableDetector:
                         except (ValueError, IndexError):
                             continue
 
-                        # Si la fenêtre a des dimensions valides
+                        # If the window has valid dimensions
                         if title and not any(
                             bad in title for bad in ["History for table:", "HUD:", "Chat:", "FPDBHUD", "Lobby"]
                         ):

@@ -19,7 +19,7 @@ from fpdb_3_legacy.ring_stats.styles import get_theme_palette
 
 
 class PokerTableWidget(QWidget):
-    """Dessine une table de poker 2D avec des sièges interactifs."""
+    """Draw a 2D poker table with interactive seats."""
 
     def __init__(self, parent=None) -> None:
         super().__init__(parent)
@@ -27,7 +27,7 @@ class PokerTableWidget(QWidget):
         self.position_data: dict[str, dict] = {}
         self.table_size = 6
 
-        # Angles en radians pour chaque configuration (Btn à droite 0.5 rad pour l'esthétique)
+        # Angles in radians for each layout (button on the right at 0.5 rad for aesthetics)
         self.angles_by_layout = {
             2: {
                 "SB": math.pi / 2,     # Bas
@@ -55,7 +55,7 @@ class PokerTableWidget(QWidget):
         }
 
     def set_mapped_position_data(self, data: dict[str, dict], table_size: int) -> None:
-        """Met à jour les données statistiques par position et redessine la table."""
+        """Update positional statistics and redraw the table."""
         self.position_data = data
         self.table_size = table_size
         self.update()
@@ -79,19 +79,19 @@ class PokerTableWidget(QWidget):
         h = self.height()
         cx, cy = w / 2.0, h / 2.0
 
-        # 1. Dessiner le tapis (feutre de la table) - Ellipse centrale
+        # 1. Draw the felt (table surface) - central ellipse
         table_w, table_h = w * 0.7, h * 0.65
         painter.setPen(QPen(border_color, 4))
         painter.setBrush(QBrush(felt_color))
         rect_table = QRectF(cx - table_w / 2.0, cy - table_h / 2.0, table_w, table_h)
         painter.drawEllipse(rect_table)
 
-        # Ligne décorative interne sur la table
+        # Inner decorative line on the table
         painter.setPen(QPen(border_color.lighter(120), 1, Qt.PenStyle.DashLine))
         rect_inner = QRectF(cx - table_w * 0.9 / 2.0, cy - table_h * 0.9 / 2.0, table_w * 0.9, table_h * 0.9)
         painter.drawEllipse(rect_inner)
 
-        # Titre au milieu de la table (avec le format détecté)
+        # Title in the middle of the table (with the detected format)
         painter.setPen(muted_color)
         font = QFont(painter.font())
         font.setPointSize(9)
@@ -100,11 +100,11 @@ class PokerTableWidget(QWidget):
         size_lbl = f"{self.table_size}-MAX HEATMAP" if self.table_size > 2 else "HEADS-UP HEATMAP"
         painter.drawText(QRectF(cx - 120, cy - 15, 240, 30), Qt.AlignmentFlag.AlignCenter, size_lbl)
 
-        # 2. Dessiner les sièges autour de la table
+        # 2. Draw seats around the table
         radius_x = table_w / 2.0 + 35
         radius_y = table_h / 2.0 + 25
 
-        # Choisir les sièges à afficher selon la taille de table
+        # Choose seats to display based on table size
         if self.table_size == 2:
             seats_to_show = ["SB", "BB"]
             layout_angles = self.angles_by_layout[2]
@@ -120,10 +120,10 @@ class PokerTableWidget(QWidget):
             sx = cx + radius_x * math.cos(angle)
             sy = cy + radius_y * math.sin(angle)
 
-            # Récupérer les stats de ce siège
+            # Get statistics for this seat
             stats = self.position_data.get(seat)
 
-            # Dessiner la boîte du siège
+            # Draw the seat box
             seat_w, seat_h = 75, 45
             rect_seat = QRectF(sx - seat_w / 2.0, sy - seat_h / 2.0, seat_w, seat_h)
 
@@ -136,7 +136,7 @@ class PokerTableWidget(QWidget):
 
             painter.drawRoundedRect(rect_seat, 5, 5)
 
-            # Dessiner le texte du siège
+            # Draw the seat text
             painter.setPen(text_color)
             font.setPointSize(8)
             font.setBold(True)
@@ -162,7 +162,7 @@ class PokerTableWidget(QWidget):
                 painter.setFont(font)
                 painter.drawText(QRectF(sx - seat_w / 2.0, sy - seat_h / 2.0 + 28, seat_w, 12), Qt.AlignmentFlag.AlignCenter, profit_text)
             else:
-                # Siège vide
+                # Empty seat
                 font.setPointSize(7)
                 font.setBold(False)
                 painter.setFont(font)
@@ -215,7 +215,7 @@ class PositionalChartCanvas(FigureCanvas):
         x = range(len(positions))
         width = 0.35
 
-        # Barres côte à côte
+        # Side-by-side bars
         self.axes.bar([i - width/2 for i in x], vpips, width, label='VPIP', color=vpip_color, alpha=0.85)
         self.axes.bar([i + width/2 for i in x], pfrs, width, label='PFR', color=pfr_color, alpha=0.85)
 
@@ -234,7 +234,7 @@ class PositionalTab(QWidget):
         layout = QVBoxLayout(self)
         layout.setContentsMargins(12, 12, 12, 12)
 
-        # Splitter vertical pour diviser la table de poker et le graphe
+        # Vertical splitter dividing the poker table and chart
         splitter = QSplitter(Qt.Orientation.Vertical)
         layout.addWidget(splitter)
 
@@ -250,25 +250,25 @@ class PositionalTab(QWidget):
         splitter.setStretchFactor(1, 2)
 
     def detect_table_size(self, position_stats: dict[str, dict]) -> int:
-        """Détecte la taille de la table à partir des clés de position présentes dans les données."""
+        """Detect table size from the positional keys present in the data."""
         keys = list(position_stats.keys())
 
-        # Si on voit des clés de full ring
+        # If full-ring keys are present
         if any(k in keys for k in ("6", "7", "8", "9", "UTG+1", "MP+1", "HJ")):
             return 9
 
-        # Si on voit des clés de 6-max
+        # If 6-max keys are present
         if any(k in keys for k in ("3", "4", "5", "UTG", "MP", "CO")):
             return 6
 
-        # S'il n'y a que SB/BB/Btn et 2 sièges max
+        # If only SB/BB/Button and at most two seats are present
         if len(keys) <= 2:
             return 2
 
         return 6
 
     def map_positions_to_layout(self, position_stats: dict[str, dict], table_size: int) -> dict[str, dict]:
-        """Mappe les clés de position de la base de données vers les positions physiques de la table."""
+        """Map database position keys to physical table positions."""
         mapped = {}
 
         if table_size == 2:
@@ -318,15 +318,15 @@ class PositionalTab(QWidget):
         return mapped
 
     def update_position_data(self, position_stats: dict[str, dict]) -> None:
-        """Met à jour les composants avec de nouvelles statistiques de position."""
-        # 1. Détecter la taille et mapper les positions
+        """Update components with new positional statistics."""
+        # 1. Detect the size and map positions
         table_size = self.detect_table_size(position_stats)
         mapped_stats = self.map_positions_to_layout(position_stats, table_size)
 
-        # 2. Mettre à jour le widget de table
+        # 2. Update the table widget
         self.poker_table.set_mapped_position_data(mapped_stats, table_size)
 
-        # 3. Mettre à jour le graphique barres Matplotlib (ordonné)
+        # 3. Update the Matplotlib bar chart (ordered)
         if table_size == 2:
             positions = ["SB", "BB"]
         elif table_size == 6:

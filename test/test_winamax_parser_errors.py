@@ -68,7 +68,7 @@ PlayerA collected 20 from pot
 PlayerA: doesn't show hand
 """  # Fin abrupte, absence de la section SUMMARY
 
-    # Ajout de l'attribut handid pour éviter l'AttributeError
+    # Add the handid attribute to avoid AttributeError
     mock_hand = type(
         "obj",
         (object,),

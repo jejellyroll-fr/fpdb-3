@@ -1306,7 +1306,7 @@ class Importer:
 
                             # Report partial hand with traceback
                             if self.hand_data_reporter:
-                                # Capturer la stack trace pour les mains partielles aussi
+                                # Capture the stack trace for partial hands as well
                                 full_traceback = traceback.format_exc()
                                 enriched_error = Exception(
                                     f"[PARTIAL] Hand starting with '{hand.handText[:30] if hasattr(hand, 'handText') else 'Unknown'}...': '{e}'"
@@ -1332,9 +1332,9 @@ class Importer:
 
                             # Report error hand with full traceback
                             if self.hand_data_reporter:
-                                # Capturer la stack trace ici où elle est disponible
+                                # Capture the stack trace here, where it is available
                                 full_traceback = traceback.format_exc()
-                                # Créer un objet d'erreur enrichi avec la stack trace
+                                # Create an error object enriched with the stack trace
                                 enriched_error = Exception(str(e))
                                 enriched_error.full_traceback = full_traceback
                                 self.hand_data_reporter.report_hand_failure(

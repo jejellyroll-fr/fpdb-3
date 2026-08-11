@@ -1,9 +1,9 @@
 """controller.py
 
-Le contrôleur du package ring_stats.
-Gère l'extraction asynchrone des données de la base de données, la construction
-des QStandardItemModels conformes à l'ancien comportement, et le calcul
-des statistiques pour le tableau de bord, les positions et les cartes.
+Controller for the ring_stats package.
+Handles asynchronous database extraction, construction of QStandardItemModels
+matching the legacy behavior, and calculation
+of statistics for the dashboard, positions, and cards.
 """
 
 from __future__ import annotations
@@ -41,7 +41,7 @@ fast_names = {
 _WINNINGS_ALIASES = frozenset({"net", "bbper100", "profitperhand", "evbb100", "bb100", "profit100"})
 _MAX_DETAIL_ROWS = 1000
 
-# Textes d'aide pour les infobulles des colonnes
+# Help text for column tooltips
 onlinehelp = {
     "Game": _("Game type (Hold'em, Omaha, etc.)"),
     "Hand": _("Starting cards (Hole cards)"),
@@ -94,9 +94,9 @@ onlinehelp = {
 
 
 class RingStatsController(QObject):
-    """Contrôleur centralisant l'accès aux données et leur formatage."""
+    """Controller centralizing data access and formatting."""
 
-    # Signaux pour communiquer avec les fenêtres de visualisation
+    # Signals used to communicate with visualization windows
     summary_model_ready = Signal(QStandardItemModel)
     hand_model_ready = Signal(QStandardItemModel)
     dashboard_data_ready = Signal(dict, object)
@@ -113,8 +113,8 @@ class RingStatsController(QObject):
         self.columns = config.get_gui_cash_stat_params()
         self._workers: list[DbWorker] = []
 
-        # Détection automatique de l'environnement de test ou SQLite pour exécution synchrone
-        # En mode SQLite, nous forçons l'exécution synchrone pour éviter les exceptions de thread
+        # Automatically detect test or SQLite environments for synchronous execution
+        # In SQLite mode, force synchronous execution to avoid thread exceptions
         import sys
         is_sqlite = (hasattr(db, "backend") and db.backend == 4)
         self.async_mode = (not is_sqlite) and ("pytest" not in sys.modules and "unittest" not in sys.modules)
@@ -123,9 +123,9 @@ class RingStatsController(QObject):
         self._last_profit_data: tuple[Any, Any, Any, Any] | None = None
 
     def refresh_all(self, filter_widget) -> None:
-        """Lance l'ensemble des requêtes asynchrones en fonction des filtres appliqués."""
+        """Launch all asynchronous queries according to the applied filters."""
         debug_log("refresh_all called!")
-        # 1. Extraction des filtres
+        # 1. Extract filters
         sites = filter_widget.getSites()
         heroes = filter_widget.getHeroes()
         siteids = filter_widget.getSiteIds()
@@ -143,7 +143,7 @@ class RingStatsController(QObject):
         self._last_summary_stats = None
         self._last_profit_data = None
 
-        # Résolution des ids de joueurs et sites
+        # Resolve player and site IDs
         sitenos = []
         playerids = []
         for site in sites:
@@ -171,31 +171,31 @@ class RingStatsController(QObject):
             self.no_data_found.emit(missing.value)
             return
 
-        # Paramètres pour affiner les requêtes
+        # Parameters used to refine the queries
         filter_params = (filter_widget, playerids, sitenos, limits, seats, groups, dates, games, currencies, num_hands)
 
-        # 2. Lancer la requête pour le tableau résumé (summary grid)
+        # 2. Run the summary grid query
         sql_summary = self._get_refined_sql("playerDetailedStats", False, *filter_params)
         self._run_query("summary", sql_summary, self._on_summary_query_finished)
 
-        # 3. Lancer la requête pour le détail des mains (hand detailed stats)
+        # 3. Run the detailed hand statistics query
         if "allplayers" not in groups:
             sql_hands = self._get_refined_sql("playerDetailedStats", True, *filter_params)
             self._run_query("hands", sql_hands, self._on_hands_query_finished)
 
-        # 4. Lancer la requête spécifique pour le Poker Table (Heatmap de position)
+        # 4. Run the Poker Table query (position heatmap)
         sql_positions = self._get_refined_sql("playerDetailedStats", False, *filter_params, force_position=True)
         self._run_query("positions", sql_positions, self._on_positions_query_finished)
 
-        # 5. Lancer la requête chronologique de profit
+        # 5. Run the chronological profit query
         sql_profit = self._get_refined_sql_profit(playerids, sitenos, limits, dates, games, currencies, filter_widget)
         self._run_query("profit", sql_profit, self._on_profit_query_finished)
 
     def _run_query(self, query_name: str, sql: str, callback) -> None:
-        """Lance une requête asynchrone à l'aide d'un DbWorker (ou synchrone en test)."""
+        """Run a query asynchronously through a DbWorker (or synchronously in tests)."""
         debug_log(f"_run_query: name={query_name}, async_mode={self.async_mode}")
         debug_log(f"SQL for {query_name}:\n{sql}")
-        # Nettoyer les anciens workers
+        # Clean up old workers
         self._workers = [w for w in self._workers if not w.isFinished()]
 
         worker = DbWorker(self.cursor, query_name, sql)
@@ -214,7 +214,7 @@ class RingStatsController(QObject):
             worker.run()
 
     def _on_summary_query_finished(self, name: str, result: list, colnames: list) -> None:
-        """Callback appelé lorsque la requête récapitulative est terminée."""
+        """Callback called when the summary query completes."""
         debug_log(f"_on_summary_query_finished: returned {len(result) if result else 0} rows")
         if not result:
             self._last_summary_stats = {}
@@ -222,7 +222,7 @@ class RingStatsController(QObject):
             self.no_data_found.emit(gui_empty_state.NoDataReason.NO_ROWS.value)
             return
 
-        # Créer le modèle standard de données
+        # Create the standard data model
         colshow = colshowposn if "posn" in self._last_groups else colshowsumm
         cols_to_show = [x for x in self.columns if x[colshow]]
 
@@ -233,16 +233,16 @@ class RingStatsController(QObject):
             model.setHorizontalHeaderItem(col, header_item)
         model.setSortRole(Qt.ItemDataRole.UserRole)
 
-        # Remplir le modèle
+        # Populate the model
         self._populate_model(model, result, colnames, cols_to_show, holecards=False)
         self.summary_model_ready.emit(model)
 
-        # Calculer le global VPIP, PFR, hands, net pour le Tableau de Bord
+        # Calculate global VPIP, PFR, hands, and net for the dashboard
         self._last_summary_stats = self._calculate_dashboard_kpis(result, colnames)
         self._check_and_emit_dashboard()
 
     def _on_profit_query_finished(self, name: str, result: list, colnames: list) -> None:
-        """Callback appelé lorsque la requête chronologique de profit est terminée."""
+        """Callback called when the chronological profit query completes."""
         debug_log(f"_on_profit_query_finished: returned {len(result) if result else 0} rows")
         import numpy as np
 
@@ -274,7 +274,7 @@ class RingStatsController(QObject):
             self.dashboard_data_ready.emit(self._last_summary_stats, self._last_profit_data)
 
     def _on_hands_query_finished(self, name: str, result: list, colnames: list) -> None:
-        """Callback appelé lorsque la requête détaillée par main est terminée."""
+        """Callback called when the per-hand detail query completes."""
         debug_log(f"_on_hands_query_finished: returned {len(result) if result else 0} rows")
         if not result:
             return
@@ -296,7 +296,7 @@ class RingStatsController(QObject):
             model.setHorizontalHeaderItem(col, header_item)
         model.setSortRole(Qt.ItemDataRole.UserRole)
 
-        # Attacher les catégories de jeu actives au modèle pour détection
+        # Attach active game categories to the model for detection
         categories = set()
         cat_idx = colnames.index("category") if "category" in colnames else -1
         if cat_idx != -1:
@@ -305,7 +305,7 @@ class RingStatsController(QObject):
                     categories.add(str(row[cat_idx]))
         model.setProperty("categories", list(categories))
 
-        # Limiter le nombre de lignes à charger dans la table détail pour préserver la réactivité
+        # Limit rows loaded into the detail table to preserve responsiveness
         rows_to_load = result
         if len(result) > _MAX_DETAIL_ROWS:
             rows_to_load = result[:_MAX_DETAIL_ROWS]
@@ -314,7 +314,7 @@ class RingStatsController(QObject):
         self.hand_model_ready.emit(model)
 
     def _on_positions_query_finished(self, name: str, result: list, colnames: list) -> None:
-        """Callback pour l'affichage de la table de poker positionnelle."""
+        """Callback for displaying the positional poker table."""
         position_stats = {}
 
         vpip_idx = colnames.index("vpip") if "vpip" in colnames else -1
@@ -326,8 +326,8 @@ class RingStatsController(QObject):
         for row in result:
             if pos_idx != -1:
                 db_pos = str(row[pos_idx])
-                # Laisser la vue mapper les chiffres de sièges de manière dynamique,
-                # mais uniformiser les blinds et le bouton.
+                # Let the view map seat numbers dynamically,
+                # but normalize blinds and the button.
                 pos_label = db_pos
                 if db_pos == "S":
                     pos_label = "SB"
@@ -351,7 +351,7 @@ class RingStatsController(QObject):
         self.position_data_ready.emit(position_stats)
 
     def _populate_model(self, model: QStandardItemModel, result: list, colnames: list, cols_to_show: list, holecards: bool) -> None:
-        """Remplit le QStandardItemModel en conservant le formatage et les tooltips d'origine."""
+        """Populate the QStandardItemModel while preserving the original formatting and tooltips."""
         hgametypeid_idx = colnames.index("hgametypeid") if "hgametypeid" in colnames else -1
         c_palette = get_theme_palette()
         color_up = QColor(c_palette.get("graph_up", "#48bb78"))
@@ -378,7 +378,7 @@ class RingStatsController(QObject):
                         cat_idx = colnames.index("category")
                         value = Card.decodeStartHandValue(result[sqlrow][cat_idx], result[sqlrow][hgametypeid_idx])
                     else:
-                        # Formatage d'une ligne de limite de jeu
+                        # Format a game-limit row
                         minbb = result[sqlrow][colnames.index("minbigblind")]
                         maxbb = result[sqlrow][colnames.index("maxbigblind")]
                         value = (
@@ -402,12 +402,12 @@ class RingStatsController(QObject):
                         if result[sqlrow][colnames.index("fast")] == 1:
                             value += " " + fast_names.get(result[sqlrow][colnames.index("name")], "Fast")
 
-                # Valeur par défaut
+                # Default value
                 item = QStandardItem("")
                 if value is not None and value != -999:
                     item = QStandardItem(column[colformat] % value)
 
-                    # Déterminer la valeur de tri (sortValue)
+                    # Determine the sort value (sortValue)
                     if column[colalias] == "game" and holecards:
                         cat_idx = colnames.index("category")
                         if result[sqlrow][cat_idx] == "holdem":
@@ -429,7 +429,7 @@ class RingStatsController(QObject):
                 item.setData(sortValue, Qt.ItemDataRole.UserRole)
                 item.setEditable(False)
 
-                # Appliquer la couleur vert/rouge sur les profits
+                # Apply green/red coloring to profits
                 if column[colalias] in _WINNINGS_ALIASES and value is not None and value != -999:
                     try:
                         v = float(value)
@@ -437,7 +437,7 @@ class RingStatsController(QObject):
                     except (TypeError, ValueError):
                         pass
 
-                # Alignements des cellules (à droite sauf pour la colonne 0)
+                # Cell alignment (right-aligned except for column 0)
                 if col != 0:
                     item.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
 
@@ -451,7 +451,7 @@ class RingStatsController(QObject):
             model.appendRow(treerow)
 
     def _calculate_dashboard_kpis(self, result: list, colnames: list) -> dict:
-        """Calcule les KPIs totaux du joueur en agrégeant les lignes de résultats."""
+        """Calculate the player's total KPIs by aggregating result rows."""
         hands_idx = colnames.index("n") if "n" in colnames else -1
         net_idx = colnames.index("net") if "net" in colnames else -1
         vpip_idx = colnames.index("vpip") if "vpip" in colnames else -1
@@ -477,7 +477,7 @@ class RingStatsController(QObject):
             if currency_idx != -1 and row[currency_idx]:
                 currencies.add(str(row[currency_idx]))
 
-            # Agrégation pondérée par le nombre de mains
+            # Weight aggregation by the number of hands
             weighted_vpip += (float(row[vpip_idx]) if vpip_idx != -1 and row[vpip_idx] is not None and row[vpip_idx] != -999 else 0.0) * h
             weighted_pfr += (float(row[pfr_idx]) if pfr_idx != -1 and row[pfr_idx] is not None and row[pfr_idx] != -999 else 0.0) * h
             weighted_pf3 += (float(row[pf3_idx]) if pf3_idx != -1 and row[pf3_idx] is not None and row[pf3_idx] != -999 else 0.0) * h
@@ -494,7 +494,7 @@ class RingStatsController(QObject):
         }
 
     def _get_refined_sql(self, query: str, holecards: bool, filter_widget, playerids, sitenos, limits, seats, groups, dates, games, currencies, num_hands, force_position: bool = False) -> str:
-        """Adapte et affine la requête SQL brute en injectant les filtres actifs."""
+        """Adapt and refine the raw SQL query by injecting active filters."""
         self._last_groups = groups
 
         tmp = self.sql.query[query]
@@ -525,7 +525,7 @@ class RingStatsController(QObject):
         tmp = tmp.replace("<playerName>", pname)
         tmp = tmp.replace("<havingclause>", having)
 
-        # Filtre sur les jeux
+        # Game filter
         gametest = ""
         if len(games) > 0:
             gametest = str(tuple(games)).replace("L", "").replace(",)", ")").replace("u'", "'")
@@ -534,12 +534,12 @@ class RingStatsController(QObject):
             gametest = "and gt.category IS NULL"
         tmp = tmp.replace("<game_test>", gametest)
 
-        # Filtre devises
+        # Currency filter
         currencytest = str(tuple(currencies)).replace(",)", ")").replace("u'", "'")
         currencytest = f"AND gt.currency in {currencytest}"
         tmp = tmp.replace("<currency_test>", currencytest)
 
-        # Filtre sites
+        # Site filter
         sitetest = ""
         if len(sitenos) > 0:
             sitetest = str(tuple(sitenos)).replace("L", "").replace(",)", ")").replace("u'", "'")
@@ -548,7 +548,7 @@ class RingStatsController(QObject):
             sitetest = "and gt.siteId IS NULL"
         tmp = tmp.replace("<site_test>", sitetest)
 
-        # Filtre sièges
+        # Seat filter
         if seats:
             tmp = tmp.replace("<seats_test>", f"between {seats['from']} and {seats['to']}")
             if "seats" in groups:
@@ -605,7 +605,7 @@ class RingStatsController(QObject):
         return tmp
 
     def _get_refined_sql_profit(self, playerids, sitenos, limits, dates, games, currencies, filter_widget) -> str:
-        """Formate la requête chronologique de profit avec les filtres actifs."""
+        """Format the chronological profit query with active filters."""
         tmp = self.sql.query["getRingProfitAllHandsPlayerIdSiteInDollars"]
         nametest = str(tuple(playerids)).replace("L", "").replace(",)", ")") if playerids else "1 = 2"
         sitetest = str(tuple(sitenos)).replace("L", "").replace(",)", ")") if sitenos else "1 = 2"

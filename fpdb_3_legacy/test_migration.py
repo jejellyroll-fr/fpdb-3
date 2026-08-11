@@ -21,14 +21,14 @@ class TestNumPyMigration(unittest.TestCase):
     """Tests de validation de la migration NumPy 2.x."""
 
     def test_numpy_version(self):
-        """Vérifie que NumPy 2.x est installé."""
+        """Verify that NumPy 2.x is installed."""
         version = np.__version__
         major_version = int(version.split(".")[0])
         self.assertGreaterEqual(major_version, 2, f"NumPy 2.x requis, version actuelle : {version}")
         print(f"✅ NumPy version : {version}")
 
     def test_cumsum_function(self):
-        """Test cumsum() - utilisé dans GuiGraphViewer et GuiSessionViewer."""
+        """Test cumsum() - used in GuiGraphViewer and GuiSessionViewer."""
         # Test simple
         arr = [1, 2, 3, 4, 5]
         result: np.ndarray = cumsum(arr)
@@ -37,7 +37,7 @@ class TestNumPyMigration(unittest.TestCase):
         np.testing.assert_array_equal(result, expected)
         print(f"✅ cumsum() : {list(result)}")
 
-        # Test avec floats (comme dans le code réel)
+        # Test with floats (as in the real code)
         profits = [10.5, 20.3, -5.2, 15.7]
         cumulative: np.ndarray = cumsum(profits)
         self.assertEqual(len(cumulative), len(profits))
@@ -45,7 +45,7 @@ class TestNumPyMigration(unittest.TestCase):
         print("✅ cumsum() avec floats : OK")
 
     def test_array_max_method(self):
-        """Test array.max() - remplace numpy.max() déprécié."""
+        """Test array.max() - replaces deprecated numpy.max()."""
         # Simulation du code GuiSessionViewer
         cum_sum = np.array([0, 10, 15, 12, 18, 25, 20])
         first_idx = 1
@@ -58,7 +58,7 @@ class TestNumPyMigration(unittest.TestCase):
         print(f"✅ array.max() : {hwm} (high water mark)")
 
     def test_array_min_method(self):
-        """Test array.min() - remplace numpy.min() déprécié."""
+        """Test array.min() - replaces deprecated numpy.min()."""
         # Simulation du code GuiSessionViewer
         cum_sum = np.array([0, 10, 15, 12, 18, 25, 20])
         first_idx = 1
@@ -71,7 +71,7 @@ class TestNumPyMigration(unittest.TestCase):
         print(f"✅ array.min() : {lwm} (low water mark)")
 
     def test_append_function(self):
-        """Test append() - utilisé dans GuiSessionViewer."""
+        """Test append() - used in GuiSessionViewer."""
         arr = np.array([1, 2, 3])
         value = 4
 
@@ -82,7 +82,7 @@ class TestNumPyMigration(unittest.TestCase):
         print(f"✅ append() : {list(result)}")
 
     def test_diff_function(self):
-        """Test diff() - utilisé dans GuiSessionViewer pour calculs de temps."""
+        """Test diff() - used in GuiSessionViewer for time calculations."""
         times = [1000, 1500, 1800, 2500, 3000]
         times_array = np.array(times)
 
@@ -93,7 +93,7 @@ class TestNumPyMigration(unittest.TestCase):
         print(f"✅ diff() : {list(diffs)}")
 
     def test_nonzero_function(self):
-        """Test nonzero() - utilisé dans GuiSessionViewer pour détection sessions."""
+        """Test nonzero() - used in GuiSessionViewer for session detection."""
         arr = np.array([0, 1, 0, 2, 0, 0, 3])
 
         indices = nonzero(arr)
@@ -105,7 +105,7 @@ class TestNumPyMigration(unittest.TestCase):
         print(f"✅ nonzero() : {list(indices[0])}")
 
     def test_var_function(self):
-        """Test var() - utilisé dans Database.py (optionnel)."""
+        """Test var() - used in Database.py (optional)."""
         from numpy import var
 
         data = [1, 2, 3, 4, 5]
@@ -116,20 +116,20 @@ class TestNumPyMigration(unittest.TestCase):
         print(f"✅ var() : {variance}")
 
     def test_deprecated_functions_removed(self):
-        """Vérifie que les fonctions dépréciées ne sont plus importées."""
-        # Ces fonctions ne doivent PAS être dans le namespace après import
+        """Verify that deprecated functions are no longer imported."""
+        # These functions must NOT be in the namespace after import
 
         # On ne devrait pas pouvoir importer max, min, sum directement
-        # (mais elles peuvent encore exister dans numpy. namespace)
+        # (but they may still exist in the NumPy namespace)
         print("✅ Imports dépréciés non utilisés")
 
     def test_realistic_session_calculation(self):
-        """Test avec données réalistes de GuiSessionViewer."""
+        """Test with realistic GuiSessionViewer data."""
         # Simulation d'une session de poker
         profits = [10.5, -5.2, 15.3, -8.1, 20.7, -3.4, 12.9]
 
-        # Calcul cumulatif (comme dans le code)
-        cum_sum = cumsum(profits) / 100.0  # Division par 100 comme dans le code
+        # Cumulative calculation (as in the code)
+        cum_sum = cumsum(profits) / 100.0  # Divide by 100 as in the code
 
         # Calcul high/low water marks
         hwm = cum_sum.max()
@@ -141,8 +141,8 @@ class TestNumPyMigration(unittest.TestCase):
         print(f"✅ Session réaliste : HWM={hwm:.2f}, LWM={lwm:.2f}, Final={cum_sum[-1]:.2f}")
 
     def test_graph_viewer_calculation(self):
-        """Test avec données réalistes de GuiGraphViewer."""
-        # Simulation de résultats de mains
+        """Test with realistic GuiGraphViewer data."""
+        # Simulate hand results
         winnings = [
             (1, 10.0, True, 5.0),  # (id, profit, showdown, ev)
             (2, -5.0, False, 2.0),
@@ -151,7 +151,7 @@ class TestNumPyMigration(unittest.TestCase):
             (5, 20.0, True, 18.0),
         ]
 
-        # Comme dans GuiGraphViewer
+        # As in GuiGraphViewer
         green = [0] + [float(x[1]) for x in winnings]
         blue = [0] + [float(x[1]) if x[2] is True else 0.0 for x in winnings]
         red = [0] + [float(x[1]) if x[2] is False else 0.0 for x in winnings]
@@ -170,10 +170,10 @@ class TestNumPyMigration(unittest.TestCase):
 
 
 class TestSQLAlchemyCompatibility(unittest.TestCase):
-    """Tests de compatibilité SQLAlchemy 2.0."""
+    """SQLAlchemy 2.0 compatibility tests."""
 
     def test_sqlalchemy_version(self):
-        """Vérifie que SQLAlchemy 2.0+ est installé."""
+        """Verify that SQLAlchemy 2.0+ is installed."""
         try:
             import sqlalchemy
 
@@ -185,7 +185,7 @@ class TestSQLAlchemyCompatibility(unittest.TestCase):
             self.fail("SQLAlchemy n'est pas installé")
 
     def test_sqlalchemy_pool_import(self):
-        """Vérifie que sqlalchemy.pool peut être importé."""
+        """Verify that sqlalchemy.pool can be imported."""
         try:
             from sqlalchemy import pool  # noqa: F401 -- import compatibility test
 
@@ -195,17 +195,17 @@ class TestSQLAlchemyCompatibility(unittest.TestCase):
 
 
 class TestMatplotlibCompatibility(unittest.TestCase):
-    """Tests de compatibilité matplotlib."""
+    """Matplotlib compatibility tests."""
 
     def test_matplotlib_version(self):
-        """Vérifie que matplotlib 3.10.7+ est installé."""
+        """Verify that matplotlib 3.10.7+ is installed."""
         try:
             import matplotlib
 
             version = matplotlib.__version__
             parts = [int(x) for x in version.split(".")[:3]]
 
-            # Vérifier >= 3.10.7
+            # Verify >= 3.10.7
             is_compatible = (
                 parts[0] > 3
                 or (parts[0] == 3 and parts[1] > 10)
@@ -218,7 +218,7 @@ class TestMatplotlibCompatibility(unittest.TestCase):
             self.fail("matplotlib n'est pas installé")
 
     def test_matplotlib_qt_backend(self):
-        """Vérifie que le backend QtAgg compatible PySide6 peut être importé."""
+        """Verify that the PySide6-compatible QtAgg backend can be imported."""
         try:
             from matplotlib.backends.backend_qtagg import FigureCanvas  # noqa: F401 -- import compatibility test
             from matplotlib.figure import Figure  # noqa: F401 -- import compatibility test
@@ -229,10 +229,10 @@ class TestMatplotlibCompatibility(unittest.TestCase):
 
 
 class TestMplfinanceCompatibility(unittest.TestCase):
-    """Tests de compatibilité mplfinance."""
+    """Mplfinance compatibility tests."""
 
     def test_mplfinance_version(self):
-        """Vérifie que mplfinance 0.12.10+ est installé."""
+        """Verify that mplfinance 0.12.10+ is installed."""
         try:
             import mplfinance
 
@@ -242,7 +242,7 @@ class TestMplfinanceCompatibility(unittest.TestCase):
             self.fail("mplfinance n'est pas installé")
 
     def test_mplfinance_candlestick(self):
-        """Vérifie que candlestick_ochl peut être importé."""
+        """Verify that candlestick_ochl can be imported."""
         try:
             from mplfinance.original_flavor import candlestick_ochl  # noqa: F401 -- import compatibility test
 
@@ -252,22 +252,22 @@ class TestMplfinanceCompatibility(unittest.TestCase):
 
 
 def run_tests():
-    """Exécute tous les tests."""
-    # Créer la suite de tests
+    """Run all tests."""
+    # Create the test suite
     loader = unittest.TestLoader()
     suite = unittest.TestSuite()
 
-    # Ajouter les tests
+    # Add the tests
     suite.addTests(loader.loadTestsFromTestCase(TestNumPyMigration))
     suite.addTests(loader.loadTestsFromTestCase(TestSQLAlchemyCompatibility))
     suite.addTests(loader.loadTestsFromTestCase(TestMatplotlibCompatibility))
     suite.addTests(loader.loadTestsFromTestCase(TestMplfinanceCompatibility))
 
-    # Exécuter
+    # Run
     runner = unittest.TextTestRunner(verbosity=2)
     result = runner.run(suite)
 
-    # Résumé
+    # Summary
     print("\n" + "=" * 70)
     if result.wasSuccessful():
         print("✅ TOUS LES TESTS RÉUSSIS")
