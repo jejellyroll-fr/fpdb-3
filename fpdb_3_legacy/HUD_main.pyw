@@ -62,6 +62,7 @@ from fpdb_3_legacy.hud_read_service import (
     HudTableReadContext,
 )
 from fpdb_3_legacy.HudStatsPersistence import get_hud_stats_persistence
+from fpdb_3_legacy.interlocks import SingleInstanceError, acquire_hud_instance_lock
 from fpdb_3_legacy.loggingFpdb import get_logger, hud_trace
 from fpdb_3_legacy.SmartHudManager import RestartReason, get_smart_hud_manager
 from fpdb_3_legacy.table_info import TableInfo
@@ -771,6 +772,7 @@ class HudMain(QObject):
         try:
             # HUD dictionary and parameters
             self.hud_dict: dict[str, Hud.Hud] = {}
+            self._hud_generation = 0
             self._macos_permissions_dialog: MacOSPermissionsDialog | None = None
             # Session-only profile choices made from an individual table menu.
             # Values include game identity so a recycled table key cannot leak a
@@ -1840,6 +1842,22 @@ class HudMain(QObject):
         if temp_key in self.hud_dict:
             return temp_key, self.hud_dict[temp_key]
 
+        # The table title is not unique in Fast-Fold.  The native window id is
+        # the stable identity, so reuse a HUD already attached to that window
+        # even if an earlier resolver pass produced a different text key.
+        existing = self._find_hud_by_window_id(window.window_id)
+        if existing is not None:
+            existing_key, existing_hud = existing
+            if aliases is not None:
+                aliases[window.table_name] = existing_key
+            existing_hud.is_fast_fold = True
+            self._ff_trace(
+                update.hand_id,
+                "hud-reused",
+                f"table={existing_key} window={window.title!r} window_id={window.window_id}",
+            )
+            return existing_key, existing_hud
+
         # The window states the game only when the accessibility API answered.
         # Otherwise fall back on what an imported hand from this pool proved.
         pool_games = getattr(self, "winamax_pool_games", None)
@@ -1897,6 +1915,16 @@ class HudMain(QObject):
             f"table={temp_key} window={window.title!r} game={poker_game} (from the log, no import needed)",
         )
         return temp_key, hud
+
+    def _find_hud_by_window_id(self, window_id: Any) -> tuple[str, Hud.Hud] | None:
+        """Return the HUD attached to ``window_id``, if one is already alive."""
+        if window_id is None:
+            return None
+        for key, hud in self.hud_dict.items():
+            table = getattr(hud, "table", None)
+            if getattr(table, "number", None) == window_id:
+                return key, hud
+        return None
 
     def _find_fast_fold_hud(self, update: Any) -> tuple[str, Hud.Hud] | None:
         """Match a log pool to an open Winamax HUD.
@@ -2192,6 +2220,7 @@ class HudMain(QObject):
     def create_HUD(self, args: HUDCreationArgs) -> None:
         """Create a new HUD for a table."""
         log.debug("Creating HUD for table %s and hand %s", args.temp_key, args.new_hand_id)
+        self._hud_generation = getattr(self, "_hud_generation", 0) + 1
         self.hud_dict[args.temp_key] = Hud.Hud(
             self,
             args.table,
@@ -2205,6 +2234,7 @@ class HudMain(QObject):
         self.hud_dict[args.temp_key].stat_dict = args.stat_dict
         self.hud_dict[args.temp_key].cards = args.cards
         self.hud_dict[args.temp_key].max = args.max_seats
+        self.hud_dict[args.temp_key]._fpdb_generation = self._hud_generation
 
         args.table.hud = self.hud_dict[args.temp_key]
 
@@ -2215,6 +2245,15 @@ class HudMain(QObject):
                 aw.update_data(args.new_hand_id, self.db_connection)
 
         self.idle_create(args)
+        log.warning(
+            "HUD create complete: pid=%s generation=%s table=%r hwnd=%s aux=%s profile=%r",
+            os.getpid(),
+            self._hud_generation,
+            args.temp_key,
+            getattr(args.table, "number", None),
+            len(getattr(self.hud_dict[args.temp_key], "aux_windows", [])),
+            getattr(getattr(self.hud_dict[args.temp_key], "stat_set", None), "name", None),
+        )
         log.debug("HUD for table %s created successfully.", args.temp_key)
 
     def update_HUD(
@@ -3489,11 +3528,31 @@ if __name__ == "__main__":
             # HUD-log.txt. "hud_trace" is unregistered, so this handler survives.
             trace_log.info("HUD trace channel active (bypasses fpdb logger registry)")
 
-    (options, argv) = Options.fpdb_options()
+    try:
+        hud_instance_lock = acquire_hud_instance_lock(
+            f"pid={os.getpid()} ppid={os.getppid()} executable={sys.executable}",
+        )
+    except SingleInstanceError:
+        log.error(
+            "HUD startup refused: another HUD process owns fpdb_hud_instance (pid=%s)",
+            os.getpid(),
+        )
+        raise SystemExit(1) from None
 
-    app = QApplication([])
-    apply_stylesheet(app, theme="dark_purple.xml")
+    log.warning(
+        "HUD process identity: pid=%s ppid=%s executable=%s",
+        os.getpid(),
+        os.getppid(),
+        sys.executable,
+    )
+    try:
+        (options, argv) = Options.fpdb_options()
 
-    hm = HudMain(options, db_name=options.dbname)
+        app = QApplication([])
+        apply_stylesheet(app, theme="dark_purple.xml")
 
-    app.exec()
+        hm = HudMain(options, db_name=options.dbname)
+
+        app.exec()
+    finally:
+        hud_instance_lock.release()

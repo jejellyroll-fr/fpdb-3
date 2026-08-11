@@ -60,3 +60,28 @@ def test_unique_temp_key_for_multitabling():
 
     # Keys must be distinct so multi-tabling does not collide!
     assert key1 != key2
+
+
+def test_reuses_existing_hud_when_window_id_is_seen_again():
+    """A resolver retry must not create a second HUD for one native window."""
+    hud_main = HUD_main.HudMain.__new__(HUD_main.HudMain)
+    existing = MagicMock()
+    existing.table.number = 592342
+    hud_main.hud_dict = {"Colorado 8": existing}
+    hud_main._fast_fold_aliases = {}
+    hud_main._ff_trace = MagicMock()
+
+    window = SimpleNamespace(
+        table_name="Colorado 8",
+        title="Winamax Colorado 8",
+        window_id=592342,
+        poker_game="holdem",
+        description="Escape",
+    )
+    hud_main.winamax_ax_seats = MagicMock()
+    hud_main.winamax_ax_seats.find_table_window.return_value = window
+
+    result = hud_main._ensure_fast_fold_hud(SimpleNamespace(hand_id="hand125", table_no="3"))
+
+    assert result == ("Colorado 8", existing)
+    assert hud_main._ff_trace.call_args.args[1] == "hud-reused"
