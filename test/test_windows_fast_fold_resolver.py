@@ -15,8 +15,9 @@ def test_is_supported_returns_true_on_windows_and_darwin():
         assert winamax_ax_seats.is_supported() is True
 
 
-def test_winamax_ax_seat_reader_finds_window_on_windows():
+def test_winamax_ax_seat_reader_finds_window_on_windows(monkeypatch):
     """Verify that WinamaxAXSeatReader resolves table window on Windows."""
+    monkeypatch.setattr(winamax_ax_seats.platform, "system", lambda: "Windows")
     mock_table = TableInfo(
         window_id=123456,
         title="Winamax Colorado 3",
