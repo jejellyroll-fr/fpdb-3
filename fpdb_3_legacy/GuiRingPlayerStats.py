@@ -10,7 +10,7 @@ import sys
 
 from PySide6.QtWidgets import QApplication, QMainWindow
 
-# Import de la classe modernisée depuis le package ring_stats
+# Import the modernized class from the ring_stats package
 from fpdb_3_legacy.ring_stats import GuiRingPlayerStats
 
 
@@ -32,13 +32,13 @@ def main(argv=None):
     sql = SQL.Sql(db_server=settings["db-server"])
     main_window = QMainWindow()
 
-    # Instanciation de la classe modernisée
+    # Instantiate the modernized class
     viewer = GuiRingPlayerStats(config, sql, main_window)
     main_window.setCentralWidget(viewer)
     main_window.show()
     main_window.resize(1400, 800)
 
-    # Lancement initial des stats
+    # Initial statistics launch
     viewer.refreshStats()
 
     app.exec()

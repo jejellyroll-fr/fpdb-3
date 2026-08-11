@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
-"""Test de la Feature 1.1: Migration Stack Technique Moderne"""
+"""Test Feature 1.1: Modern Technology Stack Migration."""
 
 import sys
 from pathlib import Path
@@ -12,10 +12,10 @@ LEGACY_DIR = Path(__file__).resolve().parent
 
 
 def test_numpy_2x_array_methods():
-    """Test que les méthodes array NumPy 2.x fonctionnent"""
+    """Test that NumPy 2.x array methods work."""
     print("Test NumPy 2.x array methods...")
 
-    # Test cumsum (comme dans GuiGraphViewer.py)
+    # Test cumsum (as in GuiGraphViewer.py)
     green = np.array([0, 100, 200, -50, 150])
     greenline = green.cumsum()
     expected = np.array([0, 100, 300, 250, 400])
@@ -27,7 +27,7 @@ def test_numpy_2x_array_methods():
     assert greenline.min() == 0, "min failed"
     print(f"  ✓ max/min: {greenline.max()}, {greenline.min()}")
 
-    # Test diff (comme dans GuiSessionViewer.py)
+    # Test diff (as in GuiSessionViewer.py)
     times = np.array([1000, 2000, 3500, 5000])
     diffs = np.diff(times)
     expected_diffs = np.array([1000, 1500, 1500])
@@ -50,7 +50,7 @@ def test_numpy_2x_array_methods():
 
 
 def test_sqlalchemy_2x():
-    """Test que SQLAlchemy 2.x est installé"""
+    """Test that SQLAlchemy 2.x is installed."""
     print("Test SQLAlchemy 2.x...")
 
     try:
@@ -69,7 +69,7 @@ def test_sqlalchemy_2x():
 
 
 def test_matplotlib_3_10():
-    """Test que matplotlib 3.10+ est installé"""
+    """Test that matplotlib 3.10+ is installed."""
     print("Test matplotlib 3.10+...")
 
     try:
@@ -88,7 +88,7 @@ def test_matplotlib_3_10():
 
 
 def test_fastapi_pydantic():
-    """Test que FastAPI et Pydantic sont à jour"""
+    """Test that FastAPI and Pydantic are up to date."""
     print("Test FastAPI et Pydantic...")
 
     try:
@@ -116,25 +116,25 @@ def test_fastapi_pydantic():
 
 
 def test_code_modifications():
-    """Test que les modifications de code sont correctes"""
+    """Test that the code changes are correct."""
     print("Test des modifications de code...")
 
-    # Vérifier GuiGraphViewer.py
+    # Check GuiGraphViewer.py
     with open(LEGACY_DIR / "GuiGraphViewer.py") as f:
         content = f.read()
 
     # Ne devrait plus avoir "from numpy import cumsum"
     assert "from numpy import cumsum" not in content, "GuiGraphViewer.py: 'from numpy import cumsum' encore présent"
 
-    # Devrait avoir "import numpy as np"
+    # Should contain "import numpy as np"
     assert "import numpy as np" in content, "GuiGraphViewer.py: 'import numpy as np' manquant"
 
-    # Devrait avoir ".cumsum()"
+    # Should contain ".cumsum()"
     assert ".cumsum()" in content, "GuiGraphViewer.py: '.cumsum()' manquant"
 
     print("  ✓ GuiGraphViewer.py: migrations NumPy correctes")
 
-    # Vérifier GuiSessionViewer.py
+    # Check GuiSessionViewer.py
     with open(LEGACY_DIR / "GuiSessionViewer.py") as f:
         content = f.read()
 
@@ -145,11 +145,11 @@ def test_code_modifications():
 
     print("  ✓ GuiSessionViewer.py: migrations NumPy correctes")
 
-    # Vérifier Database.py
+    # Check Database.py
     with open(LEGACY_DIR / "Database.py") as f:
         content = f.read()
 
-    # Devrait avoir le nouveau commentaire SQLAlchemy 2.0
+    # Should have the new SQLAlchemy 2.0 comment
     assert "SQLAlchemy pool.manage was removed in 2.0" in content, "Database.py: commentaire SQLAlchemy 2.0 manquant"
 
     print("  ✓ Database.py: migration SQLAlchemy correcte")
@@ -158,9 +158,9 @@ def test_code_modifications():
 
 
 def main():
-    """Exécute tous les tests de la Feature 1.1"""
+    """Run all Feature 1.1 tests."""
     print("=" * 60)
-    print("Tests Feature 1.1: Migration Stack Technique Moderne")
+    print("Feature 1.1 Tests: Modern Technology Stack Migration")
     print("=" * 60)
     print()
 

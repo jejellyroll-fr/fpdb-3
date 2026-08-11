@@ -3,7 +3,7 @@ from __future__ import annotations
 
 """
 Script de validation de la migration PySide6
-Vérifie que tous les composants Qt sont correctement migrés
+Verify that all Qt components have been migrated correctly.
 """
 
 import sys
@@ -14,7 +14,7 @@ REPO_ROOT = LEGACY_DIR.parent
 
 
 def test_pyside6_imports():
-    """Test que PySide6 est installé et fonctionnel"""
+    """Test that PySide6 is installed and functional."""
     print("🔍 Test des imports PySide6...")
 
     try:
@@ -25,7 +25,7 @@ def test_pyside6_imports():
         print("❌ PySide6 n'est pas installé!")
         return False
 
-    # Test des modules principaux
+    # Test the main modules
     modules = [
         "PySide6.QtCore",
         "PySide6.QtWidgets",
@@ -44,10 +44,10 @@ def test_pyside6_imports():
 
 
 def check_pyqt5_references():
-    """Vérifie qu'il ne reste pas de références PyQt5 problématiques"""
+    """Verify that no problematic PyQt5 references remain."""
     print("\n🔍 Vérification des références PyQt5 restantes...")
 
-    # Fichiers à vérifier
+    # Files to check
     important_files = [
         "fpdb.pyw",
         "loggingFpdb.py",
@@ -73,7 +73,7 @@ def check_pyqt5_references():
 
 
 def test_application_structure():
-    """Vérifie la structure de l'application"""
+    """Verify the application structure."""
     print("\n🔍 Vérification de la structure de l'application...")
 
     # Fichiers essentiels
@@ -96,7 +96,7 @@ def test_application_structure():
 
 
 def test_test_files():
-    """Vérifie que les fichiers de test sont migrés"""
+    """Verify that test files have been migrated."""
     print("\n🔍 Vérification des fichiers de test...")
 
     test_dir = REPO_ROOT / "test"
@@ -145,9 +145,9 @@ def main():
             print(f"\n❌ Erreur dans {test_name}: {e}")
             results.append((test_name, False))
 
-    # Résumé
+    # Summary
     print("\n" + "=" * 60)
-    print("📊 RÉSUMÉ")
+    print("📊 SUMMARY")
     print("=" * 60)
 
     all_passed = True

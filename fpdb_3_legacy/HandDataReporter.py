@@ -717,7 +717,7 @@ class HandDataReporter:
                                 for line_num, line in enumerate(displayed_snippet.split("\n"), 1):
                                     if line.strip():
                                         print(f"           {line_num:2d}: {line}")
-                                    if line_num > 50:  # Limiter à 50 lignes max
+                                    if line_num > 50:  # Limit to 50 lines maximum
                                         print("           ... (content truncated)")
                                         break
                             else:
@@ -791,7 +791,7 @@ class HandDataReporter:
                             if players_with_cards:
                                 for player in players_with_cards:
                                     cards = hand["players"][player]["hole_cards"]
-                                    # Remplacer les cartes "0x" par "[cachées]"
+                                    # Replace "0x" cards with "[hidden]"
                                     if "0x" in cards:
                                         cards = cards.replace("0x", "X").replace("X X X X", "[hidden]")
 
@@ -902,25 +902,25 @@ class HandDataReporter:
                         # This section is disabled as it's too technical for end user
                         # To reactivate, uncomment the following lines
                         # if hand.get('object_structure') and hand['object_structure'].get('attributes'):
-                        #     print(f"         🔍 Structure de l'objet Hand (échantillon):")
+                        #     print(f"         🔍 Hand object structure (sample):")
                         #     attrs = hand['object_structure']['attributes']
                         #     important_attrs = ['siteHandNo', 'handid', 'tablename', 'actions', 'holecards', 'board', 'posted', 'collected']
                         #     for attr in important_attrs:
                         #         if attr in attrs:
                         #             print(f"            - {attr}: {attrs[attr]['type']} = {attrs[attr]['value']}")
                         #
-                        #             # Afficher la structure détaillée des dictionnaires
+                        #             # Display the detailed dictionary structure
                         #             if 'dict_structure' in attrs[attr]:
-                        #                 print(f"              Structure détaillée:")
+                        #                 print(f"              Detailed structure:")
                         #                 for key, structure in attrs[attr]['dict_structure'].items():
                         #                     if structure['type'] == 'list':
                         #                         print(f"                {key}: {structure['type']}[{structure['length']}] = {structure['content']}")
                         #                     else:
                         #                         print(f"                {key}: {structure['type']} = {structure['value']}")
                         #
-                        #             # Afficher le contenu des listes
+                        #             # Display the list contents
                         #             if 'list_content' in attrs[attr]:
-                        #                 print(f"              Contenu de la liste:")
+                        #                 print(f"              List contents:")
                         #                 for item in attrs[attr]['list_content']:
                         #                     print(f"                [{item['index']}]: {item['type']} = {item['value']}")
                         #
@@ -994,7 +994,7 @@ class HandDataReporter:
                         {"critical": "🔥", "error": "❌", "warning": "⚠️", "unknown": "❓"}.get(severity, "❓")
 
                     if self.report_level in ["detailed", "full"]:
-                        for error in real_errors[:2]:  # Première 2 erreurs
+                        for error in real_errors[:2]:  # First two errors
                             severity = error.get("severity", "unknown")
                             {"critical": "🔥", "error": "❌", "warning": "⚠️", "unknown": "❓"}.get(severity, "❓")
 

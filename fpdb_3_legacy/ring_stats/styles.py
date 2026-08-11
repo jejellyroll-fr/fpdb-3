@@ -1,7 +1,7 @@
 """styles.py
 
 Fournit les feuilles de style (QSS) dynamiques et les palettes de couleurs
-synchronisées avec le ThemeManager de FPDB.
+synchronized with FPDB's ThemeManager.
 """
 
 from __future__ import annotations
@@ -10,12 +10,12 @@ from fpdb_3_legacy.ThemeManager import ThemeManager
 
 
 def get_theme_palette() -> dict[str, str]:
-    """Récupère la palette de couleurs normalisée du thème actif."""
+    """Retrieve the normalized color palette for the active theme."""
     return ThemeManager().get_legacy_palette()
 
 
 def get_modern_qss() -> str:
-    """Génère la feuille de style QSS globale pour les composants modernes."""
+    """Generate the global QSS stylesheet for modern components."""
     c = get_theme_palette()
 
     # Text colors
@@ -36,7 +36,7 @@ def get_modern_qss() -> str:
     color_up = c.get("graph_up", "#48bb78")
     color_down = c.get("graph_down", "#f56565")
 
-    # Détection dynamique du mode sombre/clair
+    # Dynamically detect dark/light mode
     dark = True
     try:
         h = bg_window.lstrip("#")
@@ -46,14 +46,14 @@ def get_modern_qss() -> str:
     except (AttributeError, ValueError):
         dark = True
 
-    # Variables translucides pour adapter automatiquement aux fonds
+    # Translucent variables for automatic background adaptation
     border_rgba = "rgba(255, 255, 255, 0.08)" if dark else "rgba(0, 0, 0, 0.08)"
     grid_rgba = "rgba(255, 255, 255, 0.06)" if dark else "rgba(0, 0, 0, 0.06)"
     alt_bg_rgba = "rgba(255, 255, 255, 0.02)" if dark else "rgba(0, 0, 0, 0.02)"
     card_border_rgba = "rgba(255, 255, 255, 0.12)" if dark else "rgba(0, 0, 0, 0.12)"
 
     return f"""
-    /* Style général des onglets - Flat / Web moderne */
+    /* General tab style - modern flat/web */
     QTabWidget::panel {{
         border: 1px solid {border_rgba};
         background-color: {bg_window};
@@ -108,10 +108,10 @@ def get_modern_qss() -> str:
         font-weight: bold;
     }}
 
-    /* Tableaux de statistiques modernisés (sans grille verticale) */
+    /* Modernized statistics tables (without vertical grid lines) */
     QTableView {{
         background-color: {bg_base};
-        gridline-color: transparent; /* Masquer la grille système par défaut */
+        gridline-color: transparent; /* Hide the default system grid */
         selection-background-color: {accent};
         selection-color: #ffffff;
         border: 1px solid {border_rgba};
@@ -133,7 +133,7 @@ def get_modern_qss() -> str:
         color: {muted_color};
         padding: 10px 12px;
         border: none;
-        border-bottom: 2px solid {accent}; /* Soulignement de l'en-tête */
+        border-bottom: 2px solid {accent}; /* Header underline */
         font-weight: bold;
         font-size: 11px;
         text-transform: uppercase;
@@ -220,7 +220,7 @@ def get_modern_qss() -> str:
         height: 1px;
     }}
 
-    /* Boutons et éléments interactifs */
+    /* Buttons and interactive elements */
     QPushButton {{
         background-color: {bg_card};
         border: 1px solid {border_rgba};

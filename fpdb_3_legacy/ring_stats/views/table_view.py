@@ -1,7 +1,7 @@
 """table_view.py
 
-Contient l'onglet 'Tableaux de Statistiques' qui regroupe la table récapitulative
-des limites de jeu et la table détaillée du breakdown des mains.
+Contains the 'Statistics Tables' tab, which groups the game-limit summary table
+and the detailed hand-breakdown table.
 """
 
 from __future__ import annotations
@@ -14,14 +14,14 @@ from fpdb_3_legacy.ring_stats.styles import get_theme_palette
 
 
 class StatsTableView(QWidget):
-    """Onglet regroupant les tableaux détaillés réorganisés dans un QSplitter."""
+    """Tab containing detailed tables arranged in a QSplitter."""
 
     def __init__(self, parent=None) -> None:
         super().__init__(parent)
         layout = QVBoxLayout(self)
         layout.setContentsMargins(12, 12, 12, 12)
 
-        # Sélecteur de groupe de statistiques (Presets)
+        # Statistics group selector (presets)
         preset_layout = QHBoxLayout()
         preset_layout.setContentsMargins(0, 0, 0, 4)
         self.preset_label = QLabel(_("Statistics group:"))
@@ -45,17 +45,17 @@ class StatsTableView(QWidget):
         preset_layout.addStretch()
         layout.addLayout(preset_layout)
 
-        # Splitter vertical pour héberger les deux tableaux
+        # Vertical splitter hosting both tables
         self.splitter = QSplitter(Qt.Orientation.Vertical)
         layout.addWidget(self.splitter)
 
-        # 1. Tableau du haut (Niveaux / Limites de jeu)
+        # 1. Top table (levels / game limits)
         self.summary_table = QTableView()
         self.summary_table.setSortingEnabled(True)
         self.summary_table.verticalHeader().hide()
         self.splitter.addWidget(self.summary_table)
 
-        # 2. Séparateur avec titre pour le breakdown des mains
+        # 2. Separator with a title for the hand breakdown
         self.separator_widget = QWidget()
         sep_layout = QVBoxLayout(self.separator_widget)
         sep_layout.setContentsMargins(0, 8, 0, 8)
@@ -65,31 +65,31 @@ class StatsTableView(QWidget):
         sep_layout.addWidget(self.separator_label)
         self.splitter.addWidget(self.separator_widget)
 
-        # 3. Tableau du bas (Détail par main de départ)
+        # 3. Bottom table (details by starting hand)
         self.hand_table = QTableView()
         self.hand_table.setSortingEnabled(True)
         self.hand_table.verticalHeader().hide()
         self.splitter.addWidget(self.hand_table)
 
-        # Ajustement des proportions du splitter
+        # Adjust splitter proportions
         self.splitter.setStretchFactor(0, 3)
         self.splitter.setStretchFactor(1, 0)
         self.splitter.setStretchFactor(2, 4)
 
     def set_summary_model(self, model) -> None:
-        """Assigne le modèle de données du tableau récapitulatif des limites."""
+        """Assign the data model for the limits summary table."""
         self.summary_table.setModel(model)
         self._polish_table(self.summary_table)
         self.apply_preset()
 
     def set_hand_model(self, model) -> None:
-        """Assigne le modèle de données du tableau de breakdown des mains."""
+        """Assign the data model for the hand breakdown table."""
         self.hand_table.setModel(model)
         self._polish_table(self.hand_table)
         self.apply_preset()
 
     def apply_preset(self) -> None:
-        """Filtre les colonnes à afficher en fonction du preset sélectionné."""
+        """Filter displayed columns according to the selected preset."""
         preset_name = self.preset_combo.currentText()
 
         presets = {
@@ -125,24 +125,24 @@ class StatsTableView(QWidget):
                 if not alias:
                     continue
 
-                # Affiche toujours la colonne si "Tout afficher" ou si l'alias fait partie du preset
+                # Always display the column if "Show all" is selected or the alias is in the preset
                 if preset_name == "Tout afficher" or alias in preset_cols:
                     table.setColumnHidden(col, False)
                 else:
                     table.setColumnHidden(col, True)
 
-            # Recalculer les largeurs après masquage
+            # Recalculate widths after hiding columns
             table.resizeColumnsToContents()
             table.resizeColumnToContents(0)
             table.resizeRowsToContents()
 
     def _polish_table(self, table: QTableView) -> None:
-        """Applique des finitions esthétiques de dimensions de colonnes sur le tableau."""
+        """Apply final aesthetic adjustments to table column dimensions."""
         table.setAlternatingRowColors(True)
         table.setShowGrid(False)
 
     def refresh_theme(self, colors=None, theme_colors=None) -> None:
-        """Force la mise à jour des couleurs et bordures lors d'un changement de thème."""
+        """Force color and border updates when the theme changes."""
         c = get_theme_palette()
         muted = c.get('muted_text', '#a0aec0')
         self.preset_label.setStyleSheet(f"font-weight: bold; color: {muted}; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;")

@@ -58,12 +58,12 @@ def _run_theme_and_provider_tests() -> None:
     theme = get_theme(theme_name)
     icon_provider = get_icon_provider(icon_provider_name)
 
-    # Vérifier que les objets sont utilisables
+    # Verify that the objects are usable
     _test_theme_values(theme)
 
 
 def test_modern_submenu_attributes() -> None:
-    """Test que ModernSubmenu a tous les attributs requis après init."""
+    """Test that ModernSubmenu has all required attributes after initialization."""
     _run_theme_and_provider_tests()
 
 

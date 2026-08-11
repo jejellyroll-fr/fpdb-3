@@ -2132,7 +2132,7 @@ Player2: stands pat
         mg = {"TOURNO": "12345"}
         info = {}
 
-        # Maintenant que le bug est corrigé, ça devrait fonctionner sans erreur
+        # Now that the bug is fixed, this should work without errors
         self.parser._determineGameFormat(mg, info)
 
         self.assertEqual(info["type"], "tour")

@@ -1,8 +1,8 @@
 """widgets.py
 
-Widgets graphiques réutilisables pour les vues statistiques de FPDB :
-- KpiCard : Carte KPI avec titre, valeur et jauge de progression
-- GapMeter : Jauge visuelle comparant le VPIP et le PFR
+Reusable graphical widgets for FPDB statistics views:
+- KpiCard: KPI card with title, value, and progress gauge
+- GapMeter: Visual gauge comparing VPIP and PFR
 """
 
 from __future__ import annotations
@@ -15,7 +15,7 @@ from fpdb_3_legacy.ring_stats.styles import get_theme_palette
 
 
 class KpiCard(QFrame):
-    """Carte statistique au style moderne pour afficher des métriques clés."""
+    """Modern-styled statistics card for displaying key metrics."""
 
     def __init__(self, title: str, value: str, trend: str = "", value_type: str = "normal", parent=None) -> None:
         super().__init__(parent)
@@ -25,12 +25,12 @@ class KpiCard(QFrame):
         layout.setContentsMargins(12, 12, 12, 12)
         layout.setSpacing(4)
 
-        # Titre de la stat
+        # Statistic title
         self.title_label = QLabel(title)
         self.title_label.setObjectName("kpiTitle")
         self.title_label.setAlignment(Qt.AlignmentFlag.AlignLeft)
 
-        # Valeur principale
+        # Main value
         self.value_label = QLabel(value)
         if value_type == "green":
             self.value_label.setObjectName("kpiValueGreen")
@@ -43,7 +43,7 @@ class KpiCard(QFrame):
         layout.addWidget(self.title_label)
         layout.addWidget(self.value_label)
 
-        # Tendance optionnelle (ex: +3% ou flèche)
+        # Optional trend (e.g. +3% or an arrow)
         if trend:
             self.trend_label = QLabel(trend)
             c = get_theme_palette()
@@ -51,7 +51,7 @@ class KpiCard(QFrame):
             layout.addWidget(self.trend_label)
 
     def set_value(self, value: str, value_type: str = "normal") -> None:
-        """Met à jour la valeur affichée et adapte son style CSS."""
+        """Update the displayed value and adapt its CSS style."""
         self.value_label.setText(value)
         if value_type == "green":
             self.value_label.setObjectName("kpiValueGreen")
@@ -59,13 +59,13 @@ class KpiCard(QFrame):
             self.value_label.setObjectName("kpiValueRed")
         else:
             self.value_label.setObjectName("kpiValue")
-        # Forcer le rafraîchissement de la feuille de style
+        # Force a stylesheet refresh
         self.value_label.style().unpolish(self.value_label)
         self.value_label.style().polish(self.value_label)
 
 
 class GapMeter(QWidget):
-    """Jauge visuelle représentant la différence (le 'gap') entre VPIP et PFR."""
+    """Visual gauge representing the difference (the 'gap') between VPIP and PFR."""
 
     def __init__(self, vpip: float = 0.0, pfr: float = 0.0, parent=None) -> None:
         super().__init__(parent)
@@ -75,7 +75,7 @@ class GapMeter(QWidget):
         self.setMaximumHeight(30)
 
     def set_values(self, vpip: float, pfr: float) -> None:
-        """Met à jour les valeurs de VPIP et PFR et redessine le widget."""
+        """Update VPIP and PFR values and redraw the widget."""
         self.vpip = max(0.0, min(100.0, vpip))
         self.pfr = max(0.0, min(100.0, pfr))
         self.update()
@@ -87,7 +87,7 @@ class GapMeter(QWidget):
         # Dimensions
         w = self.width()
         h = self.height()
-        r = 6.0  # Rayon des coins arrondis
+        r = 6.0  # Rounded-corner radius
 
         c = get_theme_palette()
         border_color = QColor(c.get("border", "#4a5568"))
@@ -95,36 +95,36 @@ class GapMeter(QWidget):
         pfr_color = QColor(c.get("accent", "#319795"))  # Couleur de l'accent (PFR)
         gap_color = QColor(c.get("graph_ev", "#f59e3d"))  # Couleur d'attente/passive (VPIP - PFR)
 
-        # 1. Dessiner le fond (piste vide 100%)
+        # 1. Draw the background (100% empty track)
         painter.setPen(QPen(border_color, 1))
         painter.setBrush(QBrush(bg_color))
         rect_bg = QRectF(0, 4, w - 1, h - 8)
         painter.drawRoundedRect(rect_bg, r, r)
 
-        # S'assurer que le VPIP n'est pas inférieur au PFR
+        # Ensure VPIP is not lower than PFR
         actual_vpip = max(self.vpip, self.pfr)
 
-        # 2. Dessiner le PFR (première partie de la barre)
+        # 2. Draw PFR (the first part of the bar)
         if self.pfr > 0:
             pfr_width = (self.pfr / 100.0) * (w - 2)
             painter.setPen(Qt.PenStyle.NoPen)
             painter.setBrush(QBrush(pfr_color))
-            # Dessiner le rectangle PFR (arrondi à gauche)
+            # Draw the PFR rectangle (rounded on the left)
             rect_pfr = QRectF(1, 5, pfr_width, h - 10)
             painter.drawRoundedRect(rect_pfr, r, r)
 
-        # 3. Dessiner le Gap (VPIP - PFR, partie passive)
+        # 3. Draw the gap (VPIP - PFR, passive portion)
         gap_val = actual_vpip - self.pfr
         if gap_val > 0:
             pfr_width = (self.pfr / 100.0) * (w - 2)
             gap_width = (gap_val / 100.0) * (w - 2)
             painter.setPen(Qt.PenStyle.NoPen)
             painter.setBrush(QBrush(gap_color))
-            # Dessiner le rectangle de gap
+            # Draw the gap rectangle
             rect_gap = QRectF(1 + pfr_width, 5, gap_width, h - 10)
             painter.drawRoundedRect(rect_gap, r, r)
 
-        # 4. Afficher du texte d'aide si assez grand
+        # 4. Display help text if large enough
         if w > 150:
             painter.setPen(QColor(c.get("text", "#edf2f7")))
             font = painter.font()
