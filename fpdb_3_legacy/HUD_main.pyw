@@ -1984,7 +1984,7 @@ class HudMain(QObject):
         aliases = getattr(self, "_fast_fold_aliases", None)
         if aliases is not None:
             aliases[window.table_name] = temp_key
-        if temp_key in self.hud_dict:
+        if temp_key in self.hud_dict and not self._discard_loading_hud(temp_key, update.hand_id):
             return temp_key, self.hud_dict[temp_key]
 
         # The table title is not unique in Fast-Fold.  The native window id is
@@ -1993,15 +1993,16 @@ class HudMain(QObject):
         existing = self._find_hud_by_window_id(window.window_id)
         if existing is not None:
             existing_key, existing_hud = existing
-            if aliases is not None:
-                aliases[window.table_name] = existing_key
-            existing_hud.is_fast_fold = True
-            self._ff_trace(
-                update.hand_id,
-                "hud-reused",
-                f"table={existing_key} window={window.title!r} window_id={window.window_id}",
-            )
-            return existing_key, existing_hud
+            if not self._discard_loading_hud(existing_key, update.hand_id):
+                if aliases is not None:
+                    aliases[window.table_name] = existing_key
+                existing_hud.is_fast_fold = True
+                self._ff_trace(
+                    update.hand_id,
+                    "hud-reused",
+                    f"table={existing_key} window={window.title!r} window_id={window.window_id}",
+                )
+                return existing_key, existing_hud
 
         # The window states the game only when the accessibility API answered.
         # Otherwise fall back on what an imported hand from this pool proved.
@@ -2060,6 +2061,31 @@ class HudMain(QObject):
             f"table={temp_key} window={window.title!r} game={poker_game} (from the log, no import needed)",
         )
         return temp_key, hud
+
+    def _discard_loading_hud(self, temp_key: str, hand_id: Any) -> bool:
+        """Tear down a loading placeholder so a real HUD can take its window.
+
+        The placeholder an imported hand puts up has ``loading=True``, and
+        ``idle_create`` returns from that before building a single aux window
+        -- it exists to show "Loading HUD..." and nothing else. Adopting it
+        because it holds the right native window, which is what the
+        duplicate-renderer guard would otherwise do, leaves the live log
+        writing seats into a HUD that has no windows to draw them in: the
+        table stays on "Loading HUD..." for as long as it is open.
+
+        Returns whether a placeholder was discarded, in which case the caller
+        must go on and create the real HUD.
+        """
+        hud = self.hud_dict.get(temp_key)
+        if hud is None or not getattr(hud, "is_loading", False):
+            return False
+        self._ff_trace(
+            hand_id,
+            "loading-replaced",
+            f"table={temp_key} had no overlay windows; building the real HUD from the log",
+        )
+        self.idle_kill(temp_key)
+        return temp_key not in self.hud_dict
 
     def _find_hud_by_window_id(self, window_id: Any) -> tuple[str, Hud.Hud] | None:
         """Return the HUD attached to ``window_id``, if one is already alive."""
