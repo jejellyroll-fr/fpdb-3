@@ -294,6 +294,22 @@ class TestFindTableWindow:
 
         assert WinamaxAXSeatReader(detector).find_table_window("4") == from_ax
 
+    def test_windows_resolution_never_probes_the_macos_ax_path(self, monkeypatch) -> None:
+        """Windows table resolution must not import or call AppKit code."""
+        monkeypatch.setattr(winamax_ax_seats.platform, "system", lambda: "Windows")
+        detector = _Detector(quartz=[self._table("Winamax Colorado 4", 901)])
+        reader = WinamaxAXSeatReader(detector)
+        monkeypatch.setattr(
+            reader,
+            "_find_table_window_ax",
+            lambda _table_no: (_ for _ in ()).throw(AssertionError("macOS AX path called on Windows")),
+        )
+
+        window = reader.find_table_window("4")
+
+        assert window == AXTableWindow("Winamax Colorado 4", "", 901)
+        assert detector.calls == [(r"^Winamax\s+.*\s4\s*$", False)]
+
     def test_nothing_is_attempted_off_macos(self, monkeypatch) -> None:
         monkeypatch.setattr(winamax_ax_seats.platform, "system", lambda: "Linux")
         detector = _Detector(quartz=[self._table("Winamax Colorado 4")])
@@ -409,4 +425,3 @@ def test_read_window_matches_title_by_table_number(monkeypatch) -> None:
     slots = reader.read_window("Winamax Casablanca 6 #1234", 6)
     assert 0 in slots
     assert slots[0] == "Hero"
-

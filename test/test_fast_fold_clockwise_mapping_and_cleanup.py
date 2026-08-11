@@ -23,20 +23,20 @@ def test_clockwise_seat_slots_from_positions():
 
     # Bottom-center hero seat
     hero_seat = AXSeat("hero", 500, 500)
-    # Bottom-right seat
-    br_seat = AXSeat("player_br", 700, 450)
-    # Bottom-left seat
-    bl_seat = AXSeat("player_bl", 300, 450)
+    # Lower-left seat is the next clockwise slot in screen coordinates.
+    lower_right = AXSeat("player_br", 700, 450)
+    # Lower-right seat is the previous clockwise slot.
+    lower_left = AXSeat("player_bl", 300, 450)
 
-    seats = [hero_seat, br_seat, bl_seat]
+    seats = [hero_seat, lower_right, lower_left]
     slots = seat_slots_from_positions(seats, centre, max_seats)
 
     # Hero at bottom-center must be slot 0
     assert slots[0] == "hero"
-    # Clockwise bottom-right seat must be slot 1
-    assert slots[1] == "player_br"
-    # Clockwise bottom-left seat must be slot 5
-    assert slots[5] == "player_bl"
+    # Screen coordinates have a downward Y axis: from the bottom, clockwise
+    # advances toward the lower-left position.
+    assert slots[1] == "player_bl"
+    assert slots[5] == "player_br"
 
 
 def test_show_loading_hud_prevents_duplicate_fast_fold_hud():
