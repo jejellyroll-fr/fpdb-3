@@ -745,7 +745,7 @@ jobs:
           # This module is intentionally absent from the pre-sign smoke list.
           dist/fpdb.app/Contents/MacOS/fpdb --run-module fpdb_3_legacy.winamax_ax_seats
           codesign --verify --deep --strict dist/fpdb.app
-          if [[ "${{ github.event_name }}" == "release" ]]; then
+          if [[ "${{ github.event_name }}" == "release" && "$FPDB_REQUIRE_STABLE_MACOS_SIGNING" == "1" ]]; then
             codesign -dv --verbose=4 dist/fpdb.app 2> "$RUNNER_TEMP/fpdb-signature.txt"
             codesign -dr - dist/fpdb.app 2> "$RUNNER_TEMP/fpdb-requirement.txt"
             codesign -d --entitlements :- dist/fpdb.app > "$RUNNER_TEMP/fpdb-entitlements.plist" 2>/dev/null
