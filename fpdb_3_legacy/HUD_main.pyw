@@ -591,6 +591,15 @@ class HudMain(QObject):
     HERO_SLOT = 0
     """The bottom chair, which is where the client always draws the hero."""
 
+    FF_IDLE_RECHECK_SECONDS = 20.0
+    """Silence on a Fast-Fold table before its window is asked about directly.
+
+    Long enough that a hand being tanked over is never mistaken for an empty
+    table -- the log emits a line for every action, so a hand in progress
+    refreshes this constantly -- and short enough that blocks do not sit over
+    an abandoned felt for the minutes measured before the sweep existed.
+    """
+
     FF_UNMAPPED_LOG_MEMORY = 500
     """Hands remembered as already reported missing from the log window map.
 
@@ -862,6 +871,10 @@ class HudMain(QObject):
             # twice made one delayed hand look like two.
             self._ff_unmapped_logged: set[str] = set()
             self._import_request_sequence = 0
+            # When each Fast-Fold table was last spoken about by the client
+            # log. A table nobody has mentioned for a while is asked directly
+            # whether it still seats anyone; see _sweep_stale_fast_fold_tables.
+            self._ff_last_activity: dict[str, float] = {}
             # Learned from the first imported Winamax hand. A log-created HUD
             # does not need it (it reads nothing from the database), but keeping
             # it lets the table carry the same identity as an imported one.
@@ -918,6 +931,7 @@ class HudMain(QObject):
             self._cleanup_timer = QTimer(self)
             self._cleanup_timer.setInterval(2000)
             self._cleanup_timer.timeout.connect(self._cleanup_closed_windows)
+            self._cleanup_timer.timeout.connect(self._sweep_stale_fast_fold_tables)
             self._cleanup_timer.start()
 
             self._db_worker: HudReadWorker | None = HudReadWorker(self.config, parent=self)
@@ -1495,6 +1509,72 @@ class HudMain(QObject):
         FastFoldEngine.clear_seats(hud)
         self._ff_trace(hand_id, "cleared", f"table={temp_key} ({reason})")
 
+    def _sweep_stale_fast_fold_tables(self) -> None:
+        """Take down blocks left over a table the log has gone quiet on.
+
+        Clearing a Fast-Fold table is otherwise driven entirely by the client
+        log: the hand-over line, or the next hand's start. Neither arrives when
+        the hero has been moved away and the felt is waiting for players, and
+        neither arrives for a hand that was already finished when the reader
+        started tailing -- which is why starting the HUD mid-hand left one
+        table showing the remains of a hand nobody was playing. Measured on a
+        real session, blocks stayed up over an empty table for 50, 80 and 124
+        seconds at a stretch.
+
+        So a table nobody has said anything about for a while is asked
+        directly. Only a window that answers with the hero drawn and nobody
+        else is cleared: the client always draws the hero when it draws the
+        table at all, so a read without the hero is a failed or half-finished
+        read rather than an empty table, and acting on it would blank a live
+        table every time the accessibility API was slow.
+        """
+        reader = getattr(self, "winamax_ax_seats", None)
+        if reader is None:
+            return
+        now = time.monotonic()
+        for temp_key, hud in list(self.hud_dict.items()):
+            if not getattr(hud, "is_fast_fold", False):
+                continue
+            if not (getattr(hud, "stat_dict", None) or getattr(hud, "seat_players", None)):
+                continue  # nothing on screen to take down
+            idle = now - self._ff_last_activity.get(temp_key, now)
+            if idle < self.FF_IDLE_RECHECK_SECONDS:
+                continue
+
+            slots = self._read_window_slots(hud)
+            # Whatever the answer, do not ask again for another idle period:
+            # each read walks another process's accessibility tree.
+            self._ff_last_activity[temp_key] = now
+            if slots is None or self.HERO_SLOT not in slots:
+                continue  # could not read it; leave what is on screen alone
+            if len(slots) >= self.MIN_PLAYERS_TO_SHOW:
+                continue  # really still being played
+
+            self._clear_fast_fold_table(
+                temp_key,
+                hud,
+                "idle-sweep",
+                f"the window seats {len(slots)} player(s) after {idle:.0f}s without a log line",
+            )
+
+    def _read_window_slots(self, hud: Hud.Hud) -> dict[int, str] | None:
+        """Read a table window's seats now, bypassing the per-hand cache.
+
+        None when there is nothing to read from -- no resolver, or a HUD whose
+        table has no title -- which the caller must not confuse with an empty
+        table.
+        """
+        reader = getattr(self, "winamax_ax_seats", None)
+        table = getattr(hud, "table", None)
+        title = getattr(table, "title", "") or ""
+        if reader is None or not title:
+            return None
+        try:
+            return reader.read_window(title, getattr(hud, "max", 6) or 6) or {}
+        except Exception:
+            log.exception("Could not re-read the Fast-Fold window %r while sweeping idle tables", title)
+            return None
+
     def _cleanup_closed_windows(self) -> None:
         """Close HUD overlays for Winamax table windows that have closed at session end."""
         import platform
@@ -1589,6 +1669,8 @@ class HudMain(QObject):
         if found is None:
             return
         temp_key, hud = found
+        # What the idle sweep measures staleness against.
+        self._ff_last_activity[temp_key] = time.monotonic()
 
         if update.finished:
             # The hand is over, or the hero folded and was moved on. Either way
