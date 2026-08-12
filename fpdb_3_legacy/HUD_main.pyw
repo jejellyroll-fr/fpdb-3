@@ -932,6 +932,7 @@ class HudMain(QObject):
             self._cleanup_timer.setInterval(2000)
             self._cleanup_timer.timeout.connect(self._cleanup_closed_windows)
             self._cleanup_timer.timeout.connect(self._sweep_stale_fast_fold_tables)
+            self._cleanup_timer.timeout.connect(self._reap_orphan_overlay_windows)
             self._cleanup_timer.start()
 
             self._db_worker: HudReadWorker | None = HudReadWorker(self.config, parent=self)
@@ -1508,6 +1509,82 @@ class HudMain(QObject):
             return  # already down
         FastFoldEngine.clear_seats(hud)
         self._ff_trace(hand_id, "cleared", f"table={temp_key} ({reason})")
+
+    def _owned_seat_windows(self) -> set[int]:
+        """Every overlay window some live HUD still holds a reference to.
+
+        Anything else that is a seat window belongs to nobody: it can no
+        longer be updated, cleared or destroyed, because every one of those
+        paths reaches a window through its aux's ``m_windows``.
+        """
+        owned: set[int] = set()
+        for hud in list(self.hud_dict.values()):
+            for aux in list(getattr(hud, "aux_windows", None) or []):
+                for window in list((getattr(aux, "m_windows", None) or {}).values()):
+                    if window is not None:
+                        owned.add(id(window))
+                container = getattr(aux, "container", None)
+                if container is not None:
+                    owned.add(id(container))
+        return owned
+
+    @staticmethod
+    def _live_seat_windows() -> list[Any]:
+        """Every seat window this process currently has on screen."""
+        app = QApplication.instance()
+        if app is None:
+            return []
+        return [widget for widget in app.topLevelWidgets() if isinstance(widget, Aux_Base.SeatWindow)]
+
+    def _reap_orphan_overlay_windows(self) -> None:
+        """Take down overlay windows no HUD owns any more.
+
+        A ``SeatWindow`` exists only to be an overlay owned by an aux window.
+        One that is on screen while no live HUD references it cannot be
+        reached by any update, by the between-hands clear, or by the teardown
+        at the end of the session -- it just sits over the table showing
+        whatever numbers it had when it was orphaned. That is what a player
+        sees as a second, frozen HUD per table.
+
+        Rather than depend on knowing which path leaked it, this states the
+        invariant directly: an overlay nobody owns has no business being on
+        screen. Reported at WARNING as well as removed, because a leak is a
+        defect even once it is being cleaned up after.
+        """
+        orphans = [window for window in self._live_seat_windows() if id(window) not in self._owned_seat_windows()]
+        if not orphans:
+            return
+
+        by_class: dict[str, int] = {}
+        for window in orphans:
+            name = type(window).__name__
+            by_class[name] = by_class.get(name, 0) + 1
+        log.warning(
+            "HUD overlay leak: %d window(s) on screen that no HUD owns (%s); taking them down. "
+            "session=%s pid=%s huds=%d",
+            len(orphans),
+            ", ".join(f"{name}x{count}" for name, count in sorted(by_class.items())),
+            session_id(),
+            os.getpid(),
+            len(self.hud_dict),
+        )
+        for window in orphans:
+            for step in ("hide", "close", "destroy", "deleteLater"):
+                action = getattr(window, step, None)
+                if callable(action):
+                    with contextlib.suppress(Exception):
+                        action()
+
+    def _describe_window_census(self) -> str:
+        """How many overlay windows exist, against how many are owned.
+
+        The per-HUD ``overlays=`` field counts ``m_windows``, so it can only
+        ever report what is owned -- it reported seven per table while
+        fourteen were on screen. This counts what Qt actually has.
+        """
+        live = self._live_seat_windows()
+        owned = self._owned_seat_windows()
+        return f"{len(live)}(owned={sum(1 for w in live if id(w) in owned)})"
 
     def _sweep_stale_fast_fold_tables(self) -> None:
         """Take down blocks left over a table the log has gone quiet on.
@@ -2584,7 +2661,7 @@ class HudMain(QObject):
         created = self.hud_dict[args.temp_key]
         log.warning(
             "HUD created: session=%s pid=%s generation=%s table=%r window_id=%s hand=%s "
-            "profile=%r aux=%s overlays=%s",
+            "profile=%r aux=%s overlays=%s process_overlays=%s",
             session_id(),
             os.getpid(),
             self._hud_generation,
@@ -2594,6 +2671,8 @@ class HudMain(QObject):
             getattr(getattr(created, "stat_set", None), "name", None),
             self._describe_aux_windows(created),
             self._describe_overlay_win_ids(created),
+            # Everything Qt has, not only what this HUD admits to owning.
+            self._describe_window_census(),
         )
         log.debug("HUD for table %s created successfully.", args.temp_key)
 
@@ -3783,14 +3862,19 @@ class HudMain(QObject):
                 del self.hud_dict[table]
                 released = self._window_registry.release(table)
                 log.warning(
-                    "HUD destroyed: session=%s pid=%s generation=%s table=%r window_id=%s overlays=%s",
+                    "HUD destroyed: session=%s pid=%s generation=%s table=%r window_id=%s "
+                    "overlays=%s process_overlays=%s",
                     session_id(),
                     os.getpid(),
                     None if released is None else released.generation,
                     table,
                     None if released is None else released.window_id,
                     overlays,
+                    self._describe_window_census(),
                 )
+                # A teardown that leaves windows behind is exactly the defect
+                # a player sees persist past the end of the session.
+                self._reap_orphan_overlay_windows()
             self.main_window.resize(1, 1)
         except Exception:
             log.exception("Error killing HUD for table: %s.", table)
