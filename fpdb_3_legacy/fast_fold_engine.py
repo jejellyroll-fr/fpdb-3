@@ -32,6 +32,22 @@ class FastFoldStatsRequest:
     hand_id: Any = None
     """Any hand imported for this table, used to resolve its gametypeId."""
 
+    site_name: str = ""
+    """Site of the table, for resolving the gametypeId without a hand.
+
+    The name, not the id: the id is itself read off an imported hand, which
+    is exactly what a log-built table does not have yet.
+    """
+
+    pool_name: str = ""
+    """Table name as the hand histories record it, without the window suffix.
+
+    A table built from the client log has no imported hand yet, so
+    :attr:`hand_id` is None on its first update and the gametypeId cannot be
+    read from a hand. The pool's own last imported hand answers it instead,
+    and the pool name is how the worker finds that hand.
+    """
+
     num_seats: int = 6
 
     request_id: int = 0

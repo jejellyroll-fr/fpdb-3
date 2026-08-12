@@ -249,6 +249,69 @@ def test_release_and_rc_pyoxidizer_artifacts_require_stable_developer_id() -> No
     assert archive < extract < verify < upload
 
 
+def _signing_gate() -> str:
+    workflow = CI_WORKFLOW.read_text()
+    pyoxidizer = _workflow_job(workflow, "build-pyoxidizer")
+    start = pyoxidizer.index("- name: Validate macOS release credentials")
+    return pyoxidizer[start : pyoxidizer.index("- name: Import Developer ID certificate", start)]
+
+
+def test_a_release_with_no_signing_identity_warns_and_ships_ad_hoc() -> None:
+    """With nothing configured, the release still produces a macOS bundle.
+
+    An ad-hoc identity changes with every build, so macOS treats each release
+    as a different application: the Accessibility and Automation grants the
+    HUD depends on stop applying after an update, and the bundle is subject to
+    App Translocation. Every fpdb release to date has paid that cost, and
+    turning it into a hard failure would withhold the only macOS artefact the
+    project ships rather than improve it. So this branch warns loudly and
+    carries on -- deliberately, not by omission.
+    """
+    gate = _signing_gate()
+
+    assert "if: runner.os == 'macOS' && github.event_name == 'release'" in gate
+    assert "::warning::MACOS_SIGNING_IDENTITY is not configured" in gate
+    missing_branch = gate[gate.index('if [[ -z "${FPDB_MACOS_SIGNING_IDENTITY}"') :]
+    unconfigured = missing_branch[: missing_branch.index("\n          fi\n")]
+    assert "exit 0" in unconfigured
+    assert "exit 1" not in unconfigured
+
+
+def test_a_half_configured_release_fails_instead_of_downgrading_to_ad_hoc() -> None:
+    """Signing configured halfway is a mistake, and must not ship silently.
+
+    Once an identity exists the maintainer means to publish a signed build, so
+    a missing certificate or notary credential has to stop the release rather
+    than quietly fall back to the ad-hoc path above.
+    """
+    gate = _signing_gate()
+
+    for credential in (
+        "MACOS_CERTIFICATE_P12_BASE64",
+        "MACOS_CERTIFICATE_PASSWORD",
+        "MACOS_NOTARY_API_KEY_P8_BASE64",
+        "MACOS_NOTARY_KEY_ID",
+        "MACOS_NOTARY_ISSUER_ID",
+    ):
+        assert credential in gate
+
+    assert "::error::Missing required macOS release credential" in gate
+    # A malformed identity is caught too: it must be a Developer ID Application
+    # identity carrying a 10-character Team ID.
+    assert '"Developer ID Application: "*' in gate
+    assert "::error::MACOS_SIGNING_IDENTITY must be a Developer ID Application identity" in gate
+    assert 'exit "$missing"' in gate
+
+
+def test_release_verification_rejects_an_ad_hoc_signature() -> None:
+    """The published bundle is asserted not to be ad-hoc, not merely signed."""
+    workflow = CI_WORKFLOW.read_text()
+    pyoxidizer = _workflow_job(workflow, "build-pyoxidizer")
+
+    assert "grep -Fq 'Signature=adhoc'" in pyoxidizer
+    assert "::error::Release bundle is ad-hoc signed" in pyoxidizer
+
+
 def test_pyoxidizer_runtime_cannot_mutate_a_signed_bundle_with_bytecode() -> None:
     config = (Path(__file__).resolve().parent.parent / "pyoxidizer.bzl").read_text()
 
@@ -314,3 +377,50 @@ def test_fast_hud_platform_contract_command_is_powershell_safe() -> None:
 
     command = next(line.strip() for line in step.splitlines() if line.strip().startswith("python -m pytest -q"))
     assert "\\" not in command
+
+
+def test_no_step_of_the_test_job_uses_a_shell_continuation() -> None:
+    """The test job runs on windows-latest, where the shell is PowerShell.
+
+    A trailing backslash is a line continuation in bash and nothing at all in
+    PowerShell, which reads the next line's "--cov" as a unary operator and
+    fails the step before pytest ever starts. The one-step version of this
+    check existed already and did not cover the step that then broke, so it
+    now covers every step in the job.
+
+    Write the command on one line, or add `shell: bash` to the step.
+    """
+    workflow = CI_WORKFLOW.read_text()
+    test_job = _workflow_job(workflow, "test", "native")
+
+    offenders = [
+        line.strip()
+        for line in test_job.splitlines()
+        if line.rstrip().endswith("\\") and not line.strip().startswith("#")
+    ]
+
+    assert not offenders, (
+        "these lines continue with a backslash, which PowerShell does not understand:\n"
+        + "\n".join(offenders)
+    )
+
+
+def test_the_fast_hud_coverage_gate_is_wired_up() -> None:
+    """The gate is what stops the Fast-Fold modules slipping below 100%."""
+    workflow = CI_WORKFLOW.read_text()
+    test_job = _workflow_job(workflow, "test", "native")
+    start = test_job.index("- name: Check FastHUD coverage has not dropped")
+    step = test_job[start : test_job.index("\n      - name:", start + 1)]
+
+    assert "--cov-fail-under=100" in step
+    assert "--cov-branch" in step
+    for module in (
+        "fast_fold_engine",
+        "winamax_ax_seats",
+        "winamax_live_log_reader",
+        "winamax_pool_games",
+        "hud_window_registry",
+        "hud_diagnostics",
+        "OSXTables",
+    ):
+        assert f"--cov=fpdb_3_legacy.{module}" in step, f"{module} is no longer held at 100%"

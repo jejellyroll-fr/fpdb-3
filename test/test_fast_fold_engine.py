@@ -220,6 +220,43 @@ def test_adj_seats_returns_identity_for_fast_fold_huds() -> None:
     assert AuxSeats.adj_seats(aux) == [0, 1, 2, 3, 4, 5, 6]
 
 
+def test_a_fast_fold_hud_not_yet_flagged_is_rotated_twice() -> None:
+    """The defect the flag ordering caused, kept as the reason for the guard.
+
+    Reproduces the reported symptom: on Winamax Escape 6-max (fav_seat 4), a
+    HUD whose ``is_fast_fold`` was still False when its aux windows were built
+    got a second rotation from the hero's seat in the last imported hand, and
+    every player's block landed on their neighbour's chair. The two tables
+    open at the time were rotated by different amounts because their heroes
+    had sat in different seats.
+    """
+    from fpdb_3_legacy.Aux_Base import AuxSeats
+
+    def rotation_for(hero_hand_seat: int) -> list[int]:
+        hud = MagicMock()
+        hud.max = 6
+        hud.site = "Winamax"
+        hud.is_fast_fold = False  # the state every caller used to leave it in
+        hud.site_parameters = {"fav_seat": {6: 4}}
+        hud.stat_dict = {101: {"screen_name": "Hero", "seat": hero_hand_seat}}
+        aux = MagicMock(spec=AuxSeats)
+        aux.hud = hud
+        aux.config = MagicMock()
+        aux.config.is_hero_name.side_effect = lambda _site, name: name == "Hero"
+        aux._effective_hh_seats.return_value = list(range(7))
+        aux._anchor_slot.return_value = 4
+        return AuxSeats.adj_seats(aux)
+
+    identity = [0, 1, 2, 3, 4, 5, 6]
+    # Bucarest 4: hero's imported seat 5 shifted every block one chair back.
+    assert rotation_for(5) == [0, 6, 1, 2, 3, 4, 5]
+    # Bucarest 3: hero's imported seat 3 shifted them the other way.
+    assert rotation_for(3) == [0, 2, 3, 4, 5, 6, 1]
+    # Two tables of one pool disagreeing is the tell, and neither is identity.
+    assert rotation_for(5) != rotation_for(3)
+    assert rotation_for(5) != identity
+
+
 def test_clear_seats_blanks_the_overlay_and_redraws() -> None:
     aux = MagicMock()
     hud = MagicMock()
