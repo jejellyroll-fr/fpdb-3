@@ -364,15 +364,11 @@ jobs:
           # them, so this holds on every runner -- which is the point: a
           # Windows or Linux implementation must not be able to leave the
           # macOS paths untested. Lowering this number is the regression.
-          python -m pytest -q -p no:pytest-qt -m "not qt and not perf" \
-            --cov=fpdb_3_legacy.fast_fold_engine \
-            --cov=fpdb_3_legacy.winamax_ax_seats \
-            --cov=fpdb_3_legacy.winamax_live_log_reader \
-            --cov=fpdb_3_legacy.winamax_pool_games \
-            --cov=fpdb_3_legacy.hud_window_registry \
-            --cov=fpdb_3_legacy.hud_diagnostics \
-            --cov=fpdb_3_legacy.OSXTables \
-            --cov-branch --cov-report=term-missing --cov-fail-under=100
+          #
+          # One line, no backslash continuations: this job also runs on
+          # windows-latest, where the default shell is PowerShell and a
+          # trailing "\" makes it read the next line as a unary operator.
+          python -m pytest -q -p no:pytest-qt -m "not qt and not perf" --cov=fpdb_3_legacy.fast_fold_engine --cov=fpdb_3_legacy.winamax_ax_seats --cov=fpdb_3_legacy.winamax_live_log_reader --cov=fpdb_3_legacy.winamax_pool_games --cov=fpdb_3_legacy.hud_window_registry --cov=fpdb_3_legacy.hud_diagnostics --cov=fpdb_3_legacy.OSXTables --cov-branch --cov-report=term-missing --cov-fail-under=100
 
       - name: Run FastHUD Qt regression tests (offscreen)
         if: runner.os != 'Windows'
