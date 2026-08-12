@@ -839,7 +839,10 @@ class SimpleHUD(Aux_Base.AuxSeats):
         log.debug("=== SIMPLEHUD MULTI-BLOCK CREATE() METHOD CALLED ===")
         self.adj = self.adj_seats()
         self.hero_display_seat = self._hero_display_seat()
-        self.m_windows = {}
+        # Same reason as the classic path: rebinding m_windows here would
+        # orphan the previous block windows on screen for good. See
+        # AuxSeats._discard_previous_windows.
+        self._discard_previous_windows()
         self._keep_block_positions_for_this_table()
         self._claim_legacy_block_positions()
         # Unscaled reference seat anchors, captured once. Kept separate from the

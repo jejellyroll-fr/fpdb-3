@@ -282,6 +282,12 @@ class WinamaxLiveLogReader:
         the end of the log recovers the pairings; the callback stays silent so
         no long-finished table is ever reported as current.
         """
+        # Counted outside the try: a seek that fails on a locked or truncated
+        # file used to leave this unbound, and the report below then raised
+        # UnboundLocalError over the handled error -- which the watch loop
+        # caught as a read failure, closed the file, and retried, so priming
+        # could never succeed on such a log.
+        lines = 0
         try:
             file_obj.seek(0, os.SEEK_END)
             size = file_obj.tell()
@@ -290,7 +296,6 @@ class WinamaxLiveLogReader:
                 file_obj.readline()  # discard a line the seek cut in half
 
             self._priming = True
-            lines = 0
             for line in file_obj:
                 self.process_line(line)
                 lines += 1

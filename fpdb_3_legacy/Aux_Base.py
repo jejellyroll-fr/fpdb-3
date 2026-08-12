@@ -590,6 +590,31 @@ class AuxSeats(AuxWindow):
         )
         self.m_windows["common"].move(clamped_common_x, clamped_common_y)
 
+    def _discard_previous_windows(self) -> None:
+        """Take down any windows a previous ``create`` left behind.
+
+        ``create`` used to start by rebinding ``m_windows`` to a fresh dict.
+        Every other method -- update, refresh, destroy, kill -- reaches the
+        windows only through that dict, so the previous generation became
+        unreachable while Qt kept showing it: a second set of stat blocks over
+        every seat, frozen at the numbers it last had, surviving the seats
+        being cleared between hands and surviving the HUD being killed at the
+        end of the session. It could not even be seen in the diagnostics,
+        which count ``m_windows``.
+
+        Creating twice is now idempotent. It is also reported, because a
+        caller doing it is still doing something it did not mean to.
+        """
+        existing = getattr(self, "m_windows", None)
+        if existing:
+            log.warning(
+                "HUD aux %s re-created while it still owned %d window(s); destroying them first",
+                type(self).__name__,
+                len(existing),
+            )
+            self.destroy()
+        self.m_windows = {}
+
     def create(self) -> None:
         """Create and initialize all seat and common windows for the HUD.
 
@@ -598,7 +623,7 @@ class AuxSeats(AuxWindow):
         """
         log.debug("=== AUX_BASE CREATE() METHOD CALLED ===")
         self.adj = self.adj_seats()
-        self.m_windows = {}
+        self._discard_previous_windows()
         window_keys: list[int | str] = [*range(1, self.hud.max + 1), "common"]
         for i in window_keys:
             if i == "common":

@@ -61,4 +61,23 @@ def core_lookup_queries() -> dict[str, str]:
                 limit 1
         """
 
+    # A Fast-Fold HUD is built from the client log, before any hand of that
+    # table has been imported, so it has no hand to take a gametypeId from --
+    # and without one the statistics query is skipped and every block shows
+    # empty. The pool has been played before, though, so its own last hand
+    # answers what game it deals.
+    # Keyed on the site's name rather than its id: the id is learned from an
+    # imported hand, and this exists precisely for the case where no hand has
+    # been imported yet.
+    query["get_last_gametype_for_table"] = """
+            SELECT h.gametypeId
+                FROM Hands h
+                JOIN Gametypes g ON g.id = h.gametypeId
+                JOIN Sites s ON s.id = g.siteId
+                WHERE s.name = %s
+                  AND h.tableName = %s
+                ORDER BY h.id DESC
+                LIMIT 1
+        """
+
     return query

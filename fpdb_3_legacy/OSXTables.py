@@ -109,20 +109,21 @@ class Table(Table_Window):
             log.info("[PERF-TIMING] OSXTables.find_table_parameters for '%s' matched '%s' in %.3f s", self.search_string, self.title, time.perf_counter() - t0)
             return self.title
         log.info("[PERF-TIMING] OSXTables.find_table_parameters for '%s' completed in %.3f s", self.search_string, time.perf_counter() - t0)
-        if self.number is None:
-            # At ERROR level: HUD_main reports the same failure as an error, and the
-            # osx_tables logger is commonly persisted at ERROR, which would drop the
-            # very window list needed to tell a wrong search string from an absent
-            # table.
-            log.error("Window detection failed: no match found for search string '%s'", self.search_string)
-            try:
-                all_tables = self._detector.find_tables("")
-                titles = [t.title for t in all_tables if t.title]
-                log.error("Currently open windows: %s", titles)
-            except Exception as e:
-                log.error("Could not list open windows: %s", e)
-            return None
-
+        # Reaching here means nothing matched: every branch that resolves a
+        # window returns from inside the loop above. There used to be a
+        # `if self.number is None` guard around this, which could not be false.
+        #
+        # At ERROR level: HUD_main reports the same failure as an error, and the
+        # osx_tables logger is commonly persisted at ERROR, which would drop the
+        # very window list needed to tell a wrong search string from an absent
+        # table.
+        log.error("Window detection failed: no match found for search string '%s'", self.search_string)
+        try:
+            all_tables = self._detector.find_tables("")
+            titles = [t.title for t in all_tables if t.title]
+            log.error("Currently open windows: %s", titles)
+        except Exception as e:
+            log.error("Could not list open windows: %s", e)
         return None
 
     def get_geometry(self) -> dict[str, int] | None:
