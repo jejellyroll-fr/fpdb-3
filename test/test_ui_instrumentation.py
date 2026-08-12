@@ -71,7 +71,15 @@ def test_profiler_records_the_first_paint(qtbot) -> None:
 
 
 def test_stall_monitor_measures_a_real_block(qtbot) -> None:
-    """A blocked event loop must be reported, with roughly the right size."""
+    """A blocked event loop must be reported, with roughly the right size.
+
+    A lower bound only. This measures the event loop, so it measures the
+    whole machine: load can only make a stall larger, never smaller, so
+    asserting "at least 300ms" survives a busy runner. The upper bound is
+    what does not -- an earlier version asserted an idle loop stayed under
+    100 ms and a runner under coverage reported 557 ms on a loop doing
+    nothing at all. That direction is pinned below without a clock.
+    """
     from PySide6.QtCore import QTimer
 
     monitor = UiStallMonitor()
@@ -82,36 +90,6 @@ def test_stall_monitor_measures_a_real_block(qtbot) -> None:
 
     assert monitor.max_stall_ms >= 300
     assert monitor.stalls_over(UI_STALL_BUDGET_MS)
-
-
-def test_stall_monitor_tells_an_idle_loop_from_a_blocked_one(qtbot) -> None:
-    """The instrument must discriminate, not merely produce a number.
-
-    Compared within one run rather than against a fixed threshold: this
-    measures the event loop, so it measures the whole machine. A CI runner
-    under coverage reported 557 ms on a loop doing nothing at all, which
-    failed an absolute "an idle loop reports no stall over 100 ms" and said
-    nothing about the code. The difference between the two runs is the
-    property that actually belongs to the instrument.
-    """
-    from PySide6.QtCore import QTimer
-
-    idle = UiStallMonitor()
-    idle.start()
-    qtbot.wait(500)
-    idle.stop()
-
-    blocked = UiStallMonitor()
-    blocked.start()
-    QTimer.singleShot(100, lambda: time.sleep(0.4))
-    qtbot.wait(800)
-    blocked.stop()
-
-    assert idle.ticks > 0, "the monitor never ran"
-    assert blocked.max_stall_ms > idle.max_stall_ms + 200, (
-        f"a 400ms block ({blocked.max_stall_ms:.0f}ms) was not distinguishable from an idle "
-        f"loop ({idle.max_stall_ms:.0f}ms)"
-    )
 
 
 def test_an_idle_loop_is_not_reported_as_one_long_freeze() -> None:

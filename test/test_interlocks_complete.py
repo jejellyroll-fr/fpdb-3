@@ -305,26 +305,29 @@ def test_the_chosen_mechanism_is_one_of_the_three() -> None:
 
 
 @pytest.mark.parametrize(
-    ("absent", "expected"),
+    ("present", "expected"),
     [
-        ((), "InterProcessLockFcntl"),
-        (("fcntl",), "InterProcessLockWin32"),
-        (("fcntl", "win32api"), "InterProcessLockSocket"),
+        (("fcntl",), "InterProcessLockFcntl"),
+        (("win32api", "win32event", "winerror"), "InterProcessLockWin32"),
+        ((), "InterProcessLockSocket"),
     ],
     ids=["unix", "windows-with-pywin32", "windows-without-pywin32"],
 )
-def test_the_platform_picks_the_first_mechanism_it_can_import(absent, expected, monkeypatch, restore_bindings) -> None:
+def test_the_platform_picks_the_first_mechanism_it_can_import(present, expected, monkeypatch, restore_bindings) -> None:
     """Two of the three branches are dead code on any given machine.
 
-    A plain Windows install has neither fcntl nor pywin32 and lands on the
-    socket lock -- the branch a developer is least likely to be running, and
-    the one that shipped a lock which excluded nobody.
+    Every binding is supplied or withheld explicitly rather than left to the
+    host: an earlier version only blocked what should be absent, so the
+    "unix" case passed on macOS and picked the Windows mutex on Windows,
+    where ``import fcntl`` really does fail.
+
+    The case that matters most is the last one. A plain Windows install has
+    neither fcntl nor pywin32 and lands on the socket lock -- the branch a
+    developer is least likely to be running, and the one that shipped a lock
+    which excluded nobody.
     """
-    for missing in absent:
-        monkeypatch.setitem(sys.modules, missing, None)
-    for present in ("win32api", "win32event", "winerror"):
-        if present not in absent:
-            monkeypatch.setitem(sys.modules, present, types.ModuleType(present))
+    for binding in ("fcntl", "win32api", "win32event", "winerror"):
+        monkeypatch.setitem(sys.modules, binding, types.ModuleType(binding) if binding in present else None)
 
     assert interlocks.select_lock_class().__name__ == expected
 
