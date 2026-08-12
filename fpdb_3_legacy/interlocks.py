@@ -47,6 +47,35 @@ class SingleInstanceError(RuntimeError):
 HUD_INSTANCE_LOCK_NAME = "fpdb_hud_instance"
 """Name of the machine-wide lock that admits exactly one HUD process."""
 
+HUD_ALREADY_RUNNING_EXIT_CODE = 3
+"""Exit status a HUD uses when another one already owns the instance lock.
+
+Distinct from a crash so the GUI can tell the user what actually happened.
+"HUD_main exited during startup with code 1" sent an investigation into two
+HUDs drawing over every table down several wrong paths, because nothing
+anywhere said that a second HUD had been refused.
+"""
+
+
+def read_lock_owner(name: str = HUD_INSTANCE_LOCK_NAME) -> str | None:
+    """Who holds this lock, as they described themselves when taking it.
+
+    Returns None when nothing recorded an owner -- an older build that did
+    not write one, or a platform whose lock is not a file.
+    """
+    try:
+        lock = InterProcessLock(name=name)
+    except Exception:
+        return None
+    path = getattr(lock, "lock_file_name", None)
+    if not path:
+        return None
+    try:
+        with open(path, encoding="utf-8") as handle:  # noqa: PTH123 - mirrors the lock's own file access
+            return handle.read().strip() or None
+    except OSError:
+        return None
+
 
 def acquire_hud_instance_lock(source: str, name: str = HUD_INSTANCE_LOCK_NAME) -> Any:
     """Acquire the single process lock used by the HUD entry point.
@@ -89,6 +118,14 @@ class InterProcessLockBase:
     def acquire_impl(self, wait) -> None:
         pass
 
+    def _record_owner(self, source: str) -> None:
+        """Leave a note saying who took the lock, where a refused caller can read it.
+
+        Only the file-based lock can do this; the others have nowhere to
+        write. Best-effort by design: failing to leave the note must never
+        cost the caller the lock it just acquired.
+        """
+
     def acquire(self, source, wait=False, retry_time=1) -> bool:
         if source is None:
             source = "Unknown"
@@ -100,6 +137,7 @@ class InterProcessLockBase:
                 self.acquire_impl(wait)
                 self._has_lock = True
                 self.heldBy = source
+                self._record_owner(source)
                 log.debug("Lock acquired successfully")
             except SingleInstanceError:
                 if not wait:
@@ -173,6 +211,18 @@ class InterProcessLockFcntl(InterProcessLockBase):
             raise SingleInstanceError(
                 "Could not acquire exclusive lock on " + self.lock_file_name,
             )
+
+    def _record_owner(self, source: str) -> None:
+        """Write the owner's identity into the lock file it already holds."""
+        if self.lockfd is None:
+            return
+        try:
+            self.lockfd.seek(0)
+            self.lockfd.truncate()
+            self.lockfd.write(source)
+            self.lockfd.flush()
+        except (OSError, ValueError):
+            log.debug("Could not record the lock owner in %s", self.lock_file_name, exc_info=True)
 
     def release_impl(self) -> None:
         fcntl.lockf(self.lockfd, fcntl.LOCK_UN)

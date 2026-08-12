@@ -37,6 +37,7 @@ from PySide6.QtWidgets import (
 from fpdb_3_legacy import Configuration, Importer
 from fpdb_3_legacy.hud_diagnostics import session_id
 from fpdb_3_legacy.i18n import gettext as _
+from fpdb_3_legacy.interlocks import HUD_ALREADY_RUNNING_EXIT_CODE, read_lock_owner
 from fpdb_3_legacy.loggingFpdb import get_logger
 from fpdb_3_legacy.subprocess_launch import hud_main_command
 
@@ -825,7 +826,18 @@ class GuiAutoImport(QWidget):
         if return_code is None:
             log.info("HUD process %s is running", process.pid)
             return
-        msg = f"HUD_main exited during startup with code {return_code}"
+        if return_code == HUD_ALREADY_RUNNING_EXIT_CODE:
+            # The one startup failure a player can act on, and the one that
+            # otherwise shows up as a second set of stat blocks over every
+            # table with nothing anywhere to explain it.
+            owner = read_lock_owner() or "owner not recorded"
+            msg = (
+                "The HUD did not start: another FPDB HUD is already running and owns the "
+                f"single-HUD lock ({owner}). Two HUDs draw two sets of stat blocks over every "
+                "table. Quit the other one, then start Auto Import again."
+            )
+        else:
+            msg = f"HUD_main exited during startup with code {return_code}"
         log.error(msg)
         self.addText(f"\n*** {msg}", "error")
         self.pipe_to_hud = None

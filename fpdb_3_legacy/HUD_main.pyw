@@ -64,7 +64,13 @@ from fpdb_3_legacy.hud_read_service import (
 )
 from fpdb_3_legacy.hud_window_registry import ClaimOutcome, HudWindowRegistry
 from fpdb_3_legacy.HudStatsPersistence import get_hud_stats_persistence
-from fpdb_3_legacy.interlocks import SingleInstanceError, acquire_hud_instance_lock
+from fpdb_3_legacy.interlocks import (
+    HUD_ALREADY_RUNNING_EXIT_CODE,
+    HUD_INSTANCE_LOCK_NAME,
+    SingleInstanceError,
+    acquire_hud_instance_lock,
+    read_lock_owner,
+)
 from fpdb_3_legacy.loggingFpdb import get_logger, hud_trace
 from fpdb_3_legacy.SmartHudManager import RestartReason, get_smart_hud_manager
 from fpdb_3_legacy.table_info import TableInfo
@@ -4095,12 +4101,18 @@ if __name__ == "__main__":
     try:
         hud_instance_lock = acquire_hud_instance_lock(format_identity(identity))
     except SingleInstanceError:
+        # Naming the owner matters: two HUDs draw two sets of stat blocks over
+        # every table, and without this the second one dies silently and the
+        # player is left looking at a duplicate nobody can account for.
         log.error(
-            "HUD startup refused: another HUD process owns fpdb_hud_instance (pid=%s session=%s)",
+            "HUD startup refused: another FPDB HUD already owns %s. This process (pid=%s session=%s) "
+            "is exiting. Owner: %s",
+            HUD_INSTANCE_LOCK_NAME,
             identity["pid"],
             identity["session"],
+            read_lock_owner() or "not recorded (an older build, or a lock with no file)",
         )
-        raise SystemExit(1) from None
+        raise SystemExit(HUD_ALREADY_RUNNING_EXIT_CODE) from None
 
     try:
         (options, argv) = Options.fpdb_options()

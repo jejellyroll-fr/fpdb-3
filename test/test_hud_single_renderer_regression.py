@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import inspect
 import os
+import pathlib
 import subprocess
 import sys
 import textwrap
@@ -28,6 +29,7 @@ from fpdb_3_legacy.hud_window_registry import ClaimOutcome, HudWindowRegistry
 from fpdb_3_legacy.interlocks import acquire_hud_instance_lock
 
 REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+REPO_ROOT_PATH = pathlib.Path(REPO_ROOT)
 
 
 # --------------------------------------------------------------------------
@@ -659,3 +661,71 @@ def test_current_generation_stats_are_applied() -> None:
 
     apply_seats.assert_called_once()
     assert hud_main._ff_trace.call_args.args[1] == "stats-applied"
+
+
+# --------------------------------------------------------------------------
+# Saying that a second HUD was refused
+# --------------------------------------------------------------------------
+
+
+def test_the_lock_records_who_holds_it(lock_name) -> None:
+    """A refused HUD must be able to name the one that beat it to it.
+
+    Without this the second HUD dies with "exited during startup with code 1"
+    and the player is left looking at two sets of stat blocks with nothing
+    anywhere connecting the two facts.
+    """
+    from fpdb_3_legacy.interlocks import acquire_hud_instance_lock, read_lock_owner
+
+    lock = acquire_hud_instance_lock("pid=4242 session=abc role='hud'", name=lock_name)
+    try:
+        assert read_lock_owner(lock_name) == "pid=4242 session=abc role='hud'"
+    finally:
+        lock.release()
+
+
+def test_an_owner_is_readable_from_another_process(lock_name) -> None:
+    """The reader is a different process from the holder, by definition."""
+    holder = subprocess.Popen(
+        [sys.executable, "-c", _hud_lock_child_source("hold", lock_name)],
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        text=True,
+    )
+    try:
+        assert holder.stdout is not None
+        assert holder.stdout.readline().strip() == "ACQUIRED"
+
+        from fpdb_3_legacy.interlocks import read_lock_owner
+
+        assert read_lock_owner(lock_name) == "test-hold"
+    finally:
+        assert holder.stdin is not None
+        holder.stdin.write("\n")
+        holder.stdin.flush()
+        holder.wait(timeout=60)
+
+
+def test_an_unheld_lock_names_nobody() -> None:
+    from fpdb_3_legacy.interlocks import read_lock_owner
+
+    assert read_lock_owner(f"never_taken_{uuid.uuid4().hex}") is None
+
+
+def test_being_refused_is_its_own_exit_status() -> None:
+    """The GUI has to tell this apart from a crash to explain it to the player."""
+    from fpdb_3_legacy.interlocks import HUD_ALREADY_RUNNING_EXIT_CODE
+
+    source = (REPO_ROOT_PATH / "fpdb_3_legacy" / "HUD_main.pyw").read_text(encoding="utf-8")
+
+    assert HUD_ALREADY_RUNNING_EXIT_CODE != 1, "must not collide with an ordinary failure"
+    assert "raise SystemExit(HUD_ALREADY_RUNNING_EXIT_CODE)" in source
+
+
+def test_the_gui_explains_a_refusal_instead_of_reporting_a_code() -> None:
+    """"exited during startup with code 1" is not something a player can act on."""
+    source = (REPO_ROOT_PATH / "fpdb_3_legacy" / "GuiAutoImport.py").read_text(encoding="utf-8")
+
+    assert "HUD_ALREADY_RUNNING_EXIT_CODE" in source
+    assert "another FPDB HUD is already running" in source
+    assert "Quit the other one" in source
