@@ -156,37 +156,101 @@ def test_forgetting_a_note_that_is_not_there_is_harmless(name) -> None:
 # ---------------------------------------------------------------------------
 
 
-fcntl_only = pytest.mark.skipif(
-    interlocks.InterProcessLock is not interlocks.InterProcessLockFcntl,
-    reason="this platform does not select the fcntl lock",
-)
+@pytest.fixture
+def fcntl_lock(monkeypatch, tmp_path, name):
+    """A file lock driven by stand-in fcntl bindings, on any platform.
+
+    Windows has no fcntl and no ``/tmp``, so these methods used to be skipped
+    there -- which left the class uncovered on the one platform that cannot
+    run it for real, exactly the asymmetry this file exists to remove. The
+    bindings and the lock directory are both supplied, so the class runs
+    everywhere and a Windows developer sees an fcntl regression.
+    """
+    calls: list[tuple[str, int]] = []
+
+    def flock(_fd, options):
+        calls.append(("flock", options))
+
+    def lockf(_fd, options):
+        calls.append(("lockf", options))
+
+    fake = types.ModuleType("fcntl")
+    fake.LOCK_EX, fake.LOCK_NB, fake.LOCK_UN = 2, 4, 8
+    fake.flock, fake.lockf = flock, lockf
+    monkeypatch.setattr(interlocks, "fcntl", fake)
+    monkeypatch.setattr(interlocks, "LOCK_FILE_DIRECTORY", str(tmp_path))
+
+    return types.SimpleNamespace(
+        lock=interlocks.InterProcessLockFcntl(name=name),
+        fake=fake,
+        calls=calls,
+        directory=tmp_path,
+    )
 
 
-@fcntl_only
-def test_the_lock_file_is_named_after_the_lock(name) -> None:
-    lock = interlocks.InterProcessLockFcntl(name=name)
-
-    assert lock.lock_file_name.startswith(interlocks.LOCK_FILE_DIRECTORY)
-    assert name in lock.lock_file_name
+def test_the_lock_file_is_named_after_the_lock(fcntl_lock, name) -> None:
+    assert fcntl_lock.lock.lock_file_name.startswith(str(fcntl_lock.directory))
+    assert name in fcntl_lock.lock.lock_file_name
+    assert fcntl_lock.lock.lock_file_name.endswith(".lck")
 
 
-@fcntl_only
-def test_characters_a_filename_cannot_hold_are_replaced() -> None:
-    lock = interlocks.InterProcessLockFcntl(name="a/b?c<d>e:f;g*h|i'j\"k^l=m.n[o]p")
+def test_characters_a_filename_cannot_hold_are_replaced(fcntl_lock) -> None:
+    fcntl_lock.lock.name = "a/b?c<d>e:f;g*h|i'j\"k^l=m.n[o]p"
 
-    assert "/" not in os.path.basename(lock.lock_file_name).removesuffix(".lck")
+    assert set(fcntl_lock.lock.getHashedName()) <= set("abcdefghijklmnop_")
 
 
-@fcntl_only
-def test_a_lock_file_that_vanished_does_not_break_release(name, monkeypatch) -> None:
+def test_taking_the_lock_asks_for_an_exclusive_non_blocking_flock(fcntl_lock) -> None:
+    """Non-blocking is what turns "already held" into a refusal, not a hang."""
+    assert fcntl_lock.lock.acquire("test") is True
+
+    assert fcntl_lock.calls == [("flock", fcntl_lock.fake.LOCK_EX | fcntl_lock.fake.LOCK_NB)]
+    assert os.path.isfile(fcntl_lock.lock.lock_file_name)
+
+
+def test_waiting_for_the_lock_drops_the_non_blocking_flag(fcntl_lock) -> None:
+    fcntl_lock.lock.acquire_impl(wait=True)
+
+    assert fcntl_lock.calls == [("flock", fcntl_lock.fake.LOCK_EX)]
+
+
+def test_a_refused_flock_closes_the_file_it_opened(fcntl_lock) -> None:
+    """Leaving the descriptor open would leak one per refused attempt."""
+    fcntl_lock.fake.flock = MagicMock(side_effect=OSError("would block"))
+
+    with pytest.raises(interlocks.SingleInstanceError, match="Could not acquire"):
+        fcntl_lock.lock.acquire_impl(wait=False)
+
+    assert fcntl_lock.lock.lockfd is None
+
+
+def test_releasing_unlocks_closes_and_removes_the_file(fcntl_lock) -> None:
+    fcntl_lock.lock.acquire("test")
+    path = fcntl_lock.lock.lock_file_name
+
+    fcntl_lock.lock.release()
+
+    assert ("lockf", fcntl_lock.fake.LOCK_UN) in fcntl_lock.calls
+    assert fcntl_lock.lock.lockfd is None
+    assert not os.path.exists(path)
+
+
+def test_a_lock_file_that_vanished_does_not_break_release(fcntl_lock, monkeypatch) -> None:
     """The flock is the guarantee; the file is bookkeeping."""
-    lock = interlocks.InterProcessLockFcntl(name=name)
-    assert lock.acquire("test")
+    fcntl_lock.lock.acquire("test")
     monkeypatch.setattr(interlocks.os, "unlink", MagicMock(side_effect=OSError("gone")))
 
-    lock.release()
+    fcntl_lock.lock.release()
 
-    assert lock._has_lock is False
+    assert fcntl_lock.lock._has_lock is False
+
+
+def test_a_missing_lock_directory_is_refused_at_construction(monkeypatch, name) -> None:
+    """Silently writing the lock somewhere else would exclude nobody."""
+    monkeypatch.setattr(interlocks, "LOCK_FILE_DIRECTORY", "/nonexistent-lock-directory")
+
+    with pytest.raises(AssertionError):
+        interlocks.InterProcessLockFcntl(name=name)
 
 
 # ---------------------------------------------------------------------------

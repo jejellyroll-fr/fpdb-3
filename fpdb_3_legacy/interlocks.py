@@ -192,6 +192,10 @@ class InterProcessLockBase:
 
 LOCK_FILE_DIRECTORY = "/tmp"
 
+#: Characters that must not reach a lock file's name. A separator among them
+#: would send two processes looking for one lock to two different places.
+_BAD_FILENAME_CHARACTERS = re.compile(r"[/?<>\\:;*|'\"^=.\[\]]")
+
 #: Port range the socket lock picks from: above the registered ports, below
 #: the top of the ephemeral range.
 _LOCK_PORT_BASE = 65530
@@ -224,10 +228,12 @@ class InterProcessLockFcntl(InterProcessLockBase):
 
     # This is the suggested way to get a safe file name, but I like having a descriptively named lock file.
     def getHashedName(self):
-        import re
-
-        bad_filename_character_re = re.compile(r"/\?<>\\\:;\*\|\'\"\^=\.\[\]")
-        return bad_filename_character_re.sub("_", self.name)
+        # A character class. Without the brackets this was a literal sequence
+        # -- it replaced the exact string /?<>\:;*|'"^=.[] and nothing else --
+        # so it sanitised no name anybody would ever use. A name carrying a
+        # separator then built a path into another directory, where a second
+        # process looking for the same lock would not find it.
+        return _BAD_FILENAME_CHARACTERS.sub("_", self.name)
 
     def acquire_impl(self, wait) -> None:
         self.lockfd = open(self.lock_file_name, "w")
