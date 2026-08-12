@@ -210,22 +210,26 @@ def test_no_leak_says_nothing(hud_main, caplog) -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_the_census_counts_what_qt_has_not_what_a_hud_claims(hud_main) -> None:
+def test_the_census_counts_what_qt_has_not_what_a_hud_claims(hud_main, monkeypatch) -> None:
     """``overlays=`` reported 7 per table while 14 were on screen."""
     owned = [Overlay() for _ in range(7)]
     leaked = [Overlay() for _ in range(7)]
+    for window in owned + leaked:
+        window.isVisible = lambda: True
     hud_main.hud_dict = {"Colorado 1 #76304": _hud_with(*owned)}
-    hud_main._on_screen.extend(owned + leaked)
+    monkeypatch.setattr(HUD_main.HudMain, "_all_seat_windows", staticmethod(lambda: owned + leaked))
 
-    assert hud_main._describe_window_census() == "14(owned=7)"
+    assert hud_main._describe_window_census() == "14(visible=14,owned=7)"
 
 
-def test_the_census_agrees_with_itself_when_nothing_leaked(hud_main) -> None:
+def test_the_census_agrees_with_itself_when_nothing_leaked(hud_main, monkeypatch) -> None:
     owned = [Overlay() for _ in range(7)]
+    for window in owned:
+        window.isVisible = lambda: True
     hud_main.hud_dict = {"Colorado 1 #76304": _hud_with(*owned)}
-    hud_main._on_screen.extend(owned)
+    monkeypatch.setattr(HUD_main.HudMain, "_all_seat_windows", staticmethod(lambda: list(owned)))
 
-    assert hud_main._describe_window_census() == "7(owned=7)"
+    assert hud_main._describe_window_census() == "7(visible=7,owned=7)"
 
 
 # ---------------------------------------------------------------------------
@@ -350,3 +354,84 @@ def test_the_full_census_survives_having_no_application(monkeypatch) -> None:
     monkeypatch.setattr(HUD_main.QApplication, "instance", staticmethod(lambda: None))
 
     assert HUD_main.HudMain._describe_all_top_level_widgets() == "none"
+
+
+# ---------------------------------------------------------------------------
+# The census, sampled when it can be right
+# ---------------------------------------------------------------------------
+
+
+def test_the_census_separates_existing_shown_and_owned(qtbot, monkeypatch) -> None:
+    """Each number answers a different question, and one alone misleads.
+
+    A seat window is hidden when its seat is empty, so ``total`` and
+    ``visible`` differ constantly and neither on its own says whether
+    anything leaked.
+    """
+    main = HUD_main.HudMain.__new__(HUD_main.HudMain)
+    shown = Aux_Base.SeatWindow(aw=MagicMock(), seat=1)
+    hidden = Aux_Base.SeatWindow(aw=MagicMock(), seat=2)
+    leaked = Aux_Base.SeatWindow(aw=MagicMock(), seat=3)
+    for window in (shown, hidden, leaked):
+        qtbot.addWidget(window)
+    shown.show()
+    leaked.show()
+    qtbot.waitExposed(shown)
+    main.hud_dict = {"Colorado 1 #77750": _hud_with(shown, hidden)}
+    # Only these three: other tests in this QApplication leave seat windows
+    # behind, and the point here is the three counts, not Qt's global state.
+    monkeypatch.setattr(
+        HUD_main.HudMain, "_all_seat_windows", staticmethod(lambda: [shown, hidden, leaked])
+    )
+
+    census = main._describe_window_census()
+
+    assert census == "3(visible=2,owned=2)"
+
+
+def test_the_census_is_logged_only_when_it_moves(monkeypatch, caplog) -> None:
+    """It is sampled every two seconds; unchanged ticks must stay quiet."""
+    main = HUD_main.HudMain.__new__(HUD_main.HudMain)
+    main.hud_dict = {}
+    monkeypatch.setattr(HUD_main.HudMain, "_describe_window_census", lambda self: "7(visible=6,owned=7)")
+    monkeypatch.setattr(HUD_main.HudMain, "_describe_all_top_level_widgets", staticmethod(lambda: "x"))
+
+    with caplog.at_level("WARNING"):
+        main._log_window_census_when_it_changes()
+        main._log_window_census_when_it_changes()
+        main._log_window_census_when_it_changes()
+
+    assert len([r for r in caplog.records if "HUD windows:" in r.getMessage()]) == 1
+
+
+def test_a_changed_census_is_logged_again(monkeypatch, caplog) -> None:
+    main = HUD_main.HudMain.__new__(HUD_main.HudMain)
+    main.hud_dict = {}
+    monkeypatch.setattr(HUD_main.HudMain, "_describe_all_top_level_widgets", staticmethod(lambda: "x"))
+    censuses = iter(["7(visible=6,owned=7)", "14(visible=12,owned=14)"])
+    monkeypatch.setattr(HUD_main.HudMain, "_describe_window_census", lambda self: next(censuses))
+
+    with caplog.at_level("WARNING"):
+        main._log_window_census_when_it_changes()
+        main._log_window_census_when_it_changes()
+
+    assert len([r for r in caplog.records if "HUD windows:" in r.getMessage()]) == 2
+
+
+def test_the_census_is_sampled_on_the_cleanup_timer() -> None:
+    """Sampling only at creation catches the one moment it is always wrong."""
+    import ast
+    from pathlib import Path
+
+    source = (Path(__file__).resolve().parent.parent / "fpdb_3_legacy" / "HUD_main.pyw").read_text(encoding="utf-8")
+    connected = {
+        node.args[0].attr
+        for node in ast.walk(ast.parse(source))
+        if isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Attribute)
+        and node.func.attr == "connect"
+        and node.args
+        and isinstance(node.args[0], ast.Attribute)
+    }
+
+    assert "_log_window_census_when_it_changes" in connected

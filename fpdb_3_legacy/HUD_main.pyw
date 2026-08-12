@@ -933,6 +933,7 @@ class HudMain(QObject):
             self._cleanup_timer.timeout.connect(self._cleanup_closed_windows)
             self._cleanup_timer.timeout.connect(self._sweep_stale_fast_fold_tables)
             self._cleanup_timer.timeout.connect(self._reap_orphan_overlay_windows)
+            self._cleanup_timer.timeout.connect(self._log_window_census_when_it_changes)
             self._cleanup_timer.start()
 
             self._db_worker: HudReadWorker | None = HudReadWorker(self.config, parent=self)
@@ -1607,16 +1608,45 @@ class HudMain(QObject):
                     with contextlib.suppress(Exception):
                         action()
 
-    def _describe_window_census(self) -> str:
-        """How many overlay windows exist, against how many are owned.
+    @staticmethod
+    def _all_seat_windows() -> list[Any]:
+        """Every seat window this process holds, shown or not."""
+        app = QApplication.instance()
+        if app is None:
+            return []
+        return [widget for widget in app.topLevelWidgets() if isinstance(widget, Aux_Base.SeatWindow)]
 
-        The per-HUD ``overlays=`` field counts ``m_windows``, so it can only
-        ever report what is owned -- it reported seven per table while
-        fourteen were on screen. This counts what Qt actually has.
+    def _describe_window_census(self) -> str:
+        """Overlay windows this process holds: total, shown, and owned.
+
+        All three, because each answers a different question and any one of
+        them alone has already misled this investigation. ``total`` says how
+        many exist; ``visible`` how many a player can see -- a seat window is
+        hidden when its seat is empty, so the two differ constantly; ``owned``
+        how many a live HUD can still reach.
+
+        total > owned is a leak inside this process. total == owned while the
+        screen shows more blocks than that means the extra ones are somebody
+        else's.
         """
-        live = self._live_seat_windows()
+        everything = self._all_seat_windows()
         owned = self._owned_seat_windows()
-        return f"{len(live)}(owned={sum(1 for w in live if id(w) in owned)})"
+        visible = sum(1 for window in everything if window.isVisible())
+        return f"{len(everything)}(visible={visible},owned={sum(1 for w in everything if id(w) in owned)})"
+
+    def _log_window_census_when_it_changes(self) -> None:
+        """Report the census on the cleanup tick, but only when it moves.
+
+        Taking it at creation samples the one moment it is guaranteed to be
+        wrong: Qt has not yet shown the windows just built, so it undercounts
+        every time. Sampling on the timer catches the settled state, and only
+        logging changes keeps a two-second tick from filling the log.
+        """
+        census = f"{self._describe_window_census()} {self._describe_all_top_level_widgets()}"
+        if census == getattr(self, "_last_window_census", None):
+            return
+        self._last_window_census = census
+        log.warning("HUD windows: %s huds=%d", census, len(self.hud_dict))
 
     def _sweep_stale_fast_fold_tables(self) -> None:
         """Take down blocks left over a table the log has gone quiet on.
@@ -2706,7 +2736,6 @@ class HudMain(QObject):
             # Everything Qt has, not only what this HUD admits to owning.
             self._describe_window_census(),
         )
-        log.warning("HUD windows on screen: %s", self._describe_all_top_level_widgets())
         log.debug("HUD for table %s created successfully.", args.temp_key)
 
     def _creation_is_fast_fold(self, args: HUDCreationArgs) -> bool:
