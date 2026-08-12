@@ -286,10 +286,14 @@ def test_only_seat_windows_are_treated_as_overlays(qtbot) -> None:
 
     overlay = Aux_Base.SeatWindow(aw=MagicMock(), seat=1)
     qtbot.addWidget(overlay)
+    overlay.show()
     plain = QWidget()
     qtbot.addWidget(plain)
+    plain.show()
     label = QLabel("Loading HUD…")
     qtbot.addWidget(label)
+    label.show()
+    qtbot.waitExposed(overlay)
 
     found = HUD_main.HudMain._live_seat_windows()
 
@@ -303,3 +307,46 @@ def test_no_application_means_nothing_to_reap(monkeypatch) -> None:
     monkeypatch.setattr(HUD_main.QApplication, "instance", staticmethod(lambda: None))
 
     assert HUD_main.HudMain._live_seat_windows() == []
+
+
+def test_a_window_being_torn_down_is_not_a_leak(qtbot) -> None:
+    """Qt keeps a closed window in topLevelWidgets until it processes the delete.
+
+    Reaping on that basis reported the HUD that had just been killed as a
+    leak, on every single teardown -- seven windows, four times a session.
+    Visibility is what separates "still on screen" from "on its way out".
+    """
+    overlay = Aux_Base.SeatWindow(aw=MagicMock(), seat=1)
+    qtbot.addWidget(overlay)
+    overlay.show()
+    qtbot.waitExposed(overlay)
+    assert overlay in HUD_main.HudMain._live_seat_windows()
+
+    overlay.hide()
+
+    assert overlay not in HUD_main.HudMain._live_seat_windows()
+
+
+def test_the_full_widget_census_names_every_visible_class(qtbot) -> None:
+    """The question the seat-window count cannot answer: is it even ours?"""
+    from PySide6.QtWidgets import QLabel
+
+    overlay = Aux_Base.SeatWindow(aw=MagicMock(), seat=1)
+    qtbot.addWidget(overlay)
+    overlay.show()
+    label = QLabel("Loading HUD…")
+    qtbot.addWidget(label)
+    label.show()
+    qtbot.waitExposed(overlay)
+    qtbot.waitExposed(label)
+
+    census = HUD_main.HudMain._describe_all_top_level_widgets()
+
+    assert "SeatWindowx1" in census
+    assert "QLabelx1" in census
+
+
+def test_the_full_census_survives_having_no_application(monkeypatch) -> None:
+    monkeypatch.setattr(HUD_main.QApplication, "instance", staticmethod(lambda: None))
+
+    assert HUD_main.HudMain._describe_all_top_level_widgets() == "none"

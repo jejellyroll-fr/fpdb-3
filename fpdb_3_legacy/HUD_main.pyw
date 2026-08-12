@@ -1530,11 +1530,43 @@ class HudMain(QObject):
 
     @staticmethod
     def _live_seat_windows() -> list[Any]:
-        """Every seat window this process currently has on screen."""
+        """Every seat window this process currently has *on screen*.
+
+        Visibility is part of the definition, not a refinement of it. A window
+        that has been torn down still appears in ``topLevelWidgets`` until Qt
+        processes the deferred delete on the next pass of the event loop, and
+        it is no longer owned by anything, so counting it would report the
+        HUD that was just killed as a leak -- which is precisely what the
+        first version of this did on every teardown.
+        """
         app = QApplication.instance()
         if app is None:
             return []
-        return [widget for widget in app.topLevelWidgets() if isinstance(widget, Aux_Base.SeatWindow)]
+        return [
+            widget
+            for widget in app.topLevelWidgets()
+            if isinstance(widget, Aux_Base.SeatWindow) and widget.isVisible()
+        ]
+
+    @staticmethod
+    def _describe_all_top_level_widgets() -> str:
+        """Every top-level widget this process owns, counted by class.
+
+        Broader than the seat-window census on purpose: it is the answer to
+        "is this second set of blocks even ours?". A HUD drawn by something
+        that is not a ``SeatWindow`` -- another aux type, a stray label, or
+        another application entirely -- shows up here or nowhere.
+        """
+        app = QApplication.instance()
+        if app is None:
+            return "none"
+        counts: dict[str, int] = {}
+        for widget in app.topLevelWidgets():
+            if not widget.isVisible():
+                continue
+            name = type(widget).__name__
+            counts[name] = counts.get(name, 0) + 1
+        return ",".join(f"{name}x{count}" for name, count in sorted(counts.items())) or "none"
 
     def _reap_orphan_overlay_windows(self) -> None:
         """Take down overlay windows no HUD owns any more.
@@ -2674,6 +2706,7 @@ class HudMain(QObject):
             # Everything Qt has, not only what this HUD admits to owning.
             self._describe_window_census(),
         )
+        log.warning("HUD windows on screen: %s", self._describe_all_top_level_widgets())
         log.debug("HUD for table %s created successfully.", args.temp_key)
 
     def _creation_is_fast_fold(self, args: HUDCreationArgs) -> bool:
