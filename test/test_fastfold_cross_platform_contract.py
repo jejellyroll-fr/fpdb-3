@@ -325,3 +325,48 @@ def test_a_platform_that_can_resolve_windows_is_declared_supported() -> None:
         f"{sorted(declared - dispatched)} is declared supported but has no branch in find_table_window, "
         f"so it silently takes another platform's path"
     )
+
+
+# ---------------------------------------------------------------------------
+# The HUD looks at its own windows, not at the process's
+# ---------------------------------------------------------------------------
+
+
+def test_the_hud_never_walks_every_window_in_the_process() -> None:
+    """``QApplication.topLevelWidgets()`` is not the HUD's to walk.
+
+    Three attempts at a process-wide overlay scanner each broke something
+    new, and none of them found a bug:
+
+      * it destroyed widgets it did not own, and one HudMain's timer tore
+        down another's in the test suite;
+      * it reported the HUD that had just been killed as a leak, because Qt
+        keeps a closed window listed until it processes the deferred delete;
+      * it segfaulted on a Linux runner, iterating the list while Qt was
+        freeing widgets during teardown.
+
+    The question it was built to answer -- does fpdb own more overlays than
+    it thinks -- is settled structurally by
+    ``AuxSeats._discard_previous_windows``. The question it accidentally
+    answered -- who else is drawing on the table -- belongs to
+    ``tools/find_hud_windows.py``, which asks the window server and so can
+    see other applications, which no in-process scan ever could.
+
+    A HUD reasons about ``hud_dict`` and the aux windows hanging off it.
+    """
+    source = (REPO_ROOT / "fpdb_3_legacy" / "HUD_main.pyw").read_text(encoding="utf-8")
+    tree = ast.parse(source)
+
+    offenders = [
+        node.lineno
+        for node in ast.walk(tree)
+        if isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Attribute)
+        and node.func.attr == "topLevelWidgets"
+    ]
+
+    assert not offenders, (
+        f"HUD_main walks every window in the process at line(s) {offenders}. Widgets it does not "
+        f"own may be mid-destruction, and touching them has segfaulted. To find out who else is "
+        f"drawing on a table, use tools/find_hud_windows.py."
+    )

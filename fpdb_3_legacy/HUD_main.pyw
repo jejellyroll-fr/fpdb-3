@@ -938,8 +938,6 @@ class HudMain(QObject):
             self._cleanup_timer.setInterval(2000)
             self._cleanup_timer.timeout.connect(self._cleanup_closed_windows)
             self._cleanup_timer.timeout.connect(self._sweep_stale_fast_fold_tables)
-            self._cleanup_timer.timeout.connect(self._report_orphan_overlay_windows)
-            self._cleanup_timer.timeout.connect(self._log_window_census_when_it_changes)
             self._cleanup_timer.start()
 
             self._db_worker: HudReadWorker | None = HudReadWorker(self.config, parent=self)
@@ -1516,143 +1514,6 @@ class HudMain(QObject):
             return  # already down
         FastFoldEngine.clear_seats(hud)
         self._ff_trace(hand_id, "cleared", f"table={temp_key} ({reason})")
-
-    def _owned_seat_windows(self) -> set[int]:
-        """Every overlay window some live HUD still holds a reference to.
-
-        Anything else that is a seat window belongs to nobody: it can no
-        longer be updated, cleared or destroyed, because every one of those
-        paths reaches a window through its aux's ``m_windows``.
-        """
-        owned: set[int] = set()
-        for hud in list(self.hud_dict.values()):
-            for aux in list(getattr(hud, "aux_windows", None) or []):
-                for window in list((getattr(aux, "m_windows", None) or {}).values()):
-                    if window is not None:
-                        owned.add(id(window))
-                container = getattr(aux, "container", None)
-                if container is not None:
-                    owned.add(id(container))
-        return owned
-
-    @staticmethod
-    def _live_seat_windows() -> list[Any]:
-        """Every seat window this process currently has *on screen*.
-
-        Visibility is part of the definition, not a refinement of it. A window
-        that has been torn down still appears in ``topLevelWidgets`` until Qt
-        processes the deferred delete on the next pass of the event loop, and
-        it is no longer owned by anything, so counting it would report the
-        HUD that was just killed as a leak -- which is precisely what the
-        first version of this did on every teardown.
-        """
-        app = QApplication.instance()
-        if app is None:
-            return []
-        return [
-            widget
-            for widget in app.topLevelWidgets()
-            if isinstance(widget, Aux_Base.SeatWindow) and widget.isVisible()
-        ]
-
-    @staticmethod
-    def _describe_all_top_level_widgets() -> str:
-        """Every top-level widget this process owns, counted by class.
-
-        Broader than the seat-window census on purpose: it is the answer to
-        "is this second set of blocks even ours?". A HUD drawn by something
-        that is not a ``SeatWindow`` -- another aux type, a stray label, or
-        another application entirely -- shows up here or nowhere.
-        """
-        app = QApplication.instance()
-        if app is None:
-            return "none"
-        counts: dict[str, int] = {}
-        for widget in app.topLevelWidgets():
-            if not widget.isVisible():
-                continue
-            name = type(widget).__name__
-            counts[name] = counts.get(name, 0) + 1
-        return ",".join(f"{name}x{count}" for name, count in sorted(counts.items())) or "none"
-
-    def _report_orphan_overlay_windows(self) -> list[Any]:
-        """Name overlay windows on screen that no HUD owns. Returns them.
-
-        A ``SeatWindow`` exists only to be an overlay owned by an aux window,
-        and every path that updates, clears or destroys one reaches it through
-        its aux's ``m_windows``. One on screen that no live HUD references is
-        therefore unreachable: frozen at whatever numbers it last had, and
-        beyond the reach of the between-hands clear and the teardown.
-
-        This reports and does not destroy. An earlier version took them down,
-        which was the wrong trade twice over: the leak it guarded against is
-        fixed where it happened (``AuxSeats._discard_previous_windows``), the
-        census showed it never fired against a real one, and destroying
-        widgets on the strength of "this HudMain does not own it" reaches
-        beyond what this object can actually know -- as the test suite
-        demonstrated by having one HudMain tear down another's windows.
-
-        The report is what earned its place: it names the class and the count,
-        which is what points at whichever path leaked.
-        """
-        owned = self._owned_seat_windows()
-        orphans = [window for window in self._live_seat_windows() if id(window) not in owned]
-        if not orphans:
-            return []
-
-        by_class: dict[str, int] = {}
-        for window in orphans:
-            name = type(window).__name__
-            by_class[name] = by_class.get(name, 0) + 1
-        log.warning(
-            "HUD overlay leak: %d window(s) on screen that no HUD owns (%s). session=%s pid=%s huds=%d",
-            len(orphans),
-            ", ".join(f"{name}x{count}" for name, count in sorted(by_class.items())),
-            session_id(),
-            os.getpid(),
-            len(self.hud_dict),
-        )
-        return orphans
-
-    @staticmethod
-    def _all_seat_windows() -> list[Any]:
-        """Every seat window this process holds, shown or not."""
-        app = QApplication.instance()
-        if app is None:
-            return []
-        return [widget for widget in app.topLevelWidgets() if isinstance(widget, Aux_Base.SeatWindow)]
-
-    def _describe_window_census(self) -> str:
-        """Overlay windows this process holds: total, shown, and owned.
-
-        All three, because each answers a different question and any one of
-        them alone has already misled this investigation. ``total`` says how
-        many exist; ``visible`` how many a player can see -- a seat window is
-        hidden when its seat is empty, so the two differ constantly; ``owned``
-        how many a live HUD can still reach.
-
-        total > owned is a leak inside this process. total == owned while the
-        screen shows more blocks than that means the extra ones are somebody
-        else's.
-        """
-        everything = self._all_seat_windows()
-        owned = self._owned_seat_windows()
-        visible = sum(1 for window in everything if window.isVisible())
-        return f"{len(everything)}(visible={visible},owned={sum(1 for w in everything if id(w) in owned)})"
-
-    def _log_window_census_when_it_changes(self) -> None:
-        """Report the census on the cleanup tick, but only when it moves.
-
-        Taking it at creation samples the one moment it is guaranteed to be
-        wrong: Qt has not yet shown the windows just built, so it undercounts
-        every time. Sampling on the timer catches the settled state, and only
-        logging changes keeps a two-second tick from filling the log.
-        """
-        census = f"{self._describe_window_census()} {self._describe_all_top_level_widgets()}"
-        if census == getattr(self, "_last_window_census", None):
-            return
-        self._last_window_census = census
-        log.warning("HUD windows: %s huds=%d", census, len(self.hud_dict))
 
     def _sweep_stale_fast_fold_tables(self) -> None:
         """Take down blocks left over a table the log has gone quiet on.
@@ -2729,7 +2590,7 @@ class HudMain(QObject):
         created = self.hud_dict[args.temp_key]
         log.warning(
             "HUD created: session=%s pid=%s generation=%s table=%r window_id=%s hand=%s "
-            "profile=%r aux=%s overlays=%s process_overlays=%s",
+            "profile=%r aux=%s overlays=%s",
             session_id(),
             os.getpid(),
             self._hud_generation,
@@ -2739,8 +2600,6 @@ class HudMain(QObject):
             getattr(getattr(created, "stat_set", None), "name", None),
             self._describe_aux_windows(created),
             self._describe_overlay_win_ids(created),
-            # Everything Qt has, not only what this HUD admits to owning.
-            self._describe_window_census(),
         )
         log.debug("HUD for table %s created successfully.", args.temp_key)
 
@@ -3930,15 +3789,13 @@ class HudMain(QObject):
                 del self.hud_dict[table]
                 released = self._window_registry.release(table)
                 log.warning(
-                    "HUD destroyed: session=%s pid=%s generation=%s table=%r window_id=%s "
-                    "overlays=%s process_overlays=%s",
+                    "HUD destroyed: session=%s pid=%s generation=%s table=%r window_id=%s overlays=%s",
                     session_id(),
                     os.getpid(),
                     None if released is None else released.generation,
                     table,
                     None if released is None else released.window_id,
                     overlays,
-                    self._describe_window_census(),
                 )
             self.main_window.resize(1, 1)
         except Exception:
