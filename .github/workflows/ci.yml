@@ -669,17 +669,24 @@ jobs:
           MACOS_NOTARY_KEY_ID: ${{ secrets.MACOS_NOTARY_KEY_ID }}
           MACOS_NOTARY_ISSUER_ID: ${{ secrets.MACOS_NOTARY_ISSUER_ID }}
         run: |
-          # A public release must not fall back to ad-hoc signing. An ad-hoc
-          # identity changes with every build, so macOS treats each release as
-          # a different application: the Accessibility and Automation grants
-          # the HUD needs stop applying after an update, and the bundle is
-          # subject to App Translocation. Failing here is the point.
+          # An ad-hoc identity changes with every build, so macOS treats each
+          # release as a different application: the Accessibility and
+          # Automation grants the HUD needs stop applying after an update, and
+          # the bundle is subject to App Translocation. That is a real cost,
+          # and it is the cost every fpdb release has paid so far.
+          #
+          # With no identity configured at all, warn and carry on rather than
+          # withhold the only macOS artefact the project ships. Once
+          # MACOS_SIGNING_IDENTITY exists this becomes a hard gate again --
+          # see the branch below, which fails when signing is configured only
+          # halfway. A half-configured release must never quietly downgrade
+          # itself to ad-hoc; that would be a mistake rather than a choice.
           if [[ -z "${FPDB_MACOS_SIGNING_IDENTITY}" || "${FPDB_MACOS_SIGNING_IDENTITY}" == "-" ]]; then
-            echo "::error::MACOS_SIGNING_IDENTITY is not configured. A macOS release requires a stable Developer ID Application identity; an ad-hoc bundle must not be published."
-            exit 1
+            echo "::warning::MACOS_SIGNING_IDENTITY is not configured: this release ships an ad-hoc macOS bundle. Users must re-grant Automation access after every update, and Gatekeeper will quarantine the app (see docs/macos-gatekeeper.md). Configure a Developer ID Application identity to publish a stable, notarised build."
+            exit 0
           fi
           missing=0
-          for name in FPDB_MACOS_SIGNING_IDENTITY MACOS_CERTIFICATE_P12_BASE64 MACOS_CERTIFICATE_PASSWORD MACOS_NOTARY_API_KEY_P8_BASE64 MACOS_NOTARY_KEY_ID MACOS_NOTARY_ISSUER_ID; do
+          for name in MACOS_CERTIFICATE_P12_BASE64 MACOS_CERTIFICATE_PASSWORD MACOS_NOTARY_API_KEY_P8_BASE64 MACOS_NOTARY_KEY_ID MACOS_NOTARY_ISSUER_ID; do
             if [[ -z "${!name}" || "${!name}" == "-" ]]; then
               echo "::error::Missing required macOS release credential: $name"
               missing=1

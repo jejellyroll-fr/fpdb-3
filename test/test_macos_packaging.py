@@ -249,26 +249,58 @@ def test_release_and_rc_pyoxidizer_artifacts_require_stable_developer_id() -> No
     assert archive < extract < verify < upload
 
 
-def test_a_release_without_a_developer_id_fails_instead_of_publishing_ad_hoc() -> None:
-    """A missing signing identity must stop the release, not downgrade it.
+def _signing_gate() -> str:
+    workflow = CI_WORKFLOW.read_text()
+    pyoxidizer = _workflow_job(workflow, "build-pyoxidizer")
+    start = pyoxidizer.index("- name: Validate macOS release credentials")
+    return pyoxidizer[start : pyoxidizer.index("- name: Import Developer ID certificate", start)]
+
+
+def test_a_release_with_no_signing_identity_warns_and_ships_ad_hoc() -> None:
+    """With nothing configured, the release still produces a macOS bundle.
 
     An ad-hoc identity changes with every build, so macOS treats each release
     as a different application: the Accessibility and Automation grants the
     HUD depends on stop applying after an update, and the bundle is subject to
-    App Translocation. This used to be a warning that let the job carry on and
-    publish the bundle anyway.
+    App Translocation. Every fpdb release to date has paid that cost, and
+    turning it into a hard failure would withhold the only macOS artefact the
+    project ships rather than improve it. So this branch warns loudly and
+    carries on -- deliberately, not by omission.
     """
-    workflow = CI_WORKFLOW.read_text()
-    pyoxidizer = _workflow_job(workflow, "build-pyoxidizer")
-    start = pyoxidizer.index("- name: Validate macOS release credentials")
-    gate = pyoxidizer[start : pyoxidizer.index("- name: Import Developer ID certificate", start)]
+    gate = _signing_gate()
 
     assert "if: runner.os == 'macOS' && github.event_name == 'release'" in gate
-    assert "::error::MACOS_SIGNING_IDENTITY is not configured" in gate
-    # The missing-identity branch must exit non-zero, and must not be a warning.
+    assert "::warning::MACOS_SIGNING_IDENTITY is not configured" in gate
     missing_branch = gate[gate.index('if [[ -z "${FPDB_MACOS_SIGNING_IDENTITY}"') :]
-    assert "exit 1" in missing_branch[: missing_branch.index("\n          fi\n")]
-    assert "::warning::MACOS_SIGNING_IDENTITY" not in gate
+    unconfigured = missing_branch[: missing_branch.index("\n          fi\n")]
+    assert "exit 0" in unconfigured
+    assert "exit 1" not in unconfigured
+
+
+def test_a_half_configured_release_fails_instead_of_downgrading_to_ad_hoc() -> None:
+    """Signing configured halfway is a mistake, and must not ship silently.
+
+    Once an identity exists the maintainer means to publish a signed build, so
+    a missing certificate or notary credential has to stop the release rather
+    than quietly fall back to the ad-hoc path above.
+    """
+    gate = _signing_gate()
+
+    for credential in (
+        "MACOS_CERTIFICATE_P12_BASE64",
+        "MACOS_CERTIFICATE_PASSWORD",
+        "MACOS_NOTARY_API_KEY_P8_BASE64",
+        "MACOS_NOTARY_KEY_ID",
+        "MACOS_NOTARY_ISSUER_ID",
+    ):
+        assert credential in gate
+
+    assert "::error::Missing required macOS release credential" in gate
+    # A malformed identity is caught too: it must be a Developer ID Application
+    # identity carrying a 10-character Team ID.
+    assert '"Developer ID Application: "*' in gate
+    assert "::error::MACOS_SIGNING_IDENTITY must be a Developer ID Application identity" in gate
+    assert 'exit "$missing"' in gate
 
 
 def test_release_verification_rejects_an_ad_hoc_signature() -> None:
