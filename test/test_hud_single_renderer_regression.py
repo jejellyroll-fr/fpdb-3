@@ -77,6 +77,98 @@ def test_the_hud_entry_point_uses_the_machine_wide_lock() -> None:
     assert signature.parameters["name"].default == HUD_INSTANCE_LOCK_NAME
 
 
+def test_the_socket_lock_picks_the_same_port_in_every_process() -> None:
+    """Two processes must contend for one port, or the lock excludes nobody.
+
+    The socket lock is the fallback wherever there is no fcntl and no
+    pywin32 -- a plain Windows install among them, where it is the only thing
+    standing between the user and two HUD processes drawing over each other.
+    Its port used to come from ``hash()``, which Python salts per process, so
+    every process bound a different port, none ever collided, and the lock
+    admitted as many holders as asked without failing visibly.
+    """
+    from fpdb_3_legacy.interlocks import InterProcessLockSocket, port_for_lock_name
+
+    source = textwrap.dedent(
+        f"""
+        import sys
+        sys.path.insert(0, {REPO_ROOT!r})
+        from fpdb_3_legacy.interlocks import InterProcessLockSocket
+        print(InterProcessLockSocket(name="fpdb_hud_instance").portno)
+        """,
+    )
+    ports = set()
+    for seed in ("0", "1", "random"):
+        # A fresh hash seed per child is what the old derivation could not survive.
+        result = subprocess.run(
+            [sys.executable, "-c", source],
+            capture_output=True,
+            text=True,
+            timeout=60,
+            check=True,
+            env={**os.environ, "PYTHONHASHSEED": seed},
+        )
+        ports.add(result.stdout.strip())
+
+    assert len(ports) == 1, f"the same lock name resolved to {sorted(ports)} in different processes"
+    assert ports == {str(InterProcessLockSocket(name="fpdb_hud_instance").portno)}
+    assert port_for_lock_name("a") != port_for_lock_name("b"), "different locks must not share a port"
+
+
+def _socket_lock_child_source(action: str, lock_name: str) -> str:
+    """A child that takes the socket lock specifically, whatever the platform."""
+    return textwrap.dedent(
+        f"""
+        import sys
+        sys.path.insert(0, {REPO_ROOT!r})
+        from fpdb_3_legacy.interlocks import InterProcessLockSocket
+
+        lock = InterProcessLockSocket(name={lock_name!r})
+        if not lock.acquire("test-{action}"):
+            print("REFUSED")
+            sys.exit(1)
+        print("ACQUIRED", flush=True)
+        if {action!r} == "hold":
+            sys.stdin.readline()
+        lock.release()
+        """,
+    )
+
+
+def test_the_socket_lock_really_excludes_a_second_process(lock_name) -> None:
+    """Exercised on every platform, because every platform can fall back to it.
+
+    Windows without pywin32 and any Unix without fcntl land here, and CI
+    installs neither on Windows -- so this is the lock the Windows runner
+    actually tests. Two real processes, because that is the only way to see a
+    lock that never excludes anybody.
+    """
+    holder = subprocess.Popen(
+        [sys.executable, "-c", _socket_lock_child_source("hold", lock_name)],
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        text=True,
+    )
+    try:
+        assert holder.stdout is not None
+        assert holder.stdout.readline().strip() == "ACQUIRED"
+
+        second = subprocess.run(
+            [sys.executable, "-c", _socket_lock_child_source("try", lock_name)],
+            capture_output=True,
+            text=True,
+            timeout=60,
+            check=False,
+        )
+        assert second.returncode == 1, second.stdout
+        assert "REFUSED" in second.stdout
+    finally:
+        assert holder.stdin is not None
+        holder.stdin.write("\n")
+        holder.stdin.flush()
+        holder.wait(timeout=60)
+
+
 def test_two_hud_launches_leave_a_single_owner(lock_name) -> None:
     """The second ``--hud`` process must refuse to start, not start quietly.
 

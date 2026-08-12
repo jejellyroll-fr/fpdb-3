@@ -131,8 +131,11 @@ def test_the_list_of_files_allowed_a_macos_import_stays_short() -> None:
     for relative in MACOS_MODULE_SCOPE_ALLOWED:
         assert (REPO_ROOT / relative).is_file(), f"{relative} no longer exists; drop it from the allow-list"
 
+    # as_posix, not str: on Windows str() renders backslashes and nothing
+    # would ever match the allow-list, so the check would pass by accident on
+    # the one platform it is most meant to protect.
     actual = {
-        str(path.relative_to(REPO_ROOT))
+        path.relative_to(REPO_ROOT).as_posix()
         for path in (REPO_ROOT / "fpdb_3_legacy").glob("*.py")
         if module_scope_imports(path) & MACOS_ONLY_MODULES
     }

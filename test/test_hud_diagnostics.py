@@ -101,9 +101,19 @@ def test_translocation_is_detected_from_the_mount_path() -> None:
 
 
 def test_bundle_path_finds_the_enclosing_app() -> None:
-    """The warning has to name the bundle the user must move."""
-    assert bundle_path(TRANSLOCATED).endswith("/d/fpdb.app")
-    assert bundle_path("/Applications/fpdb.app/Contents/MacOS/fpdb") == "/Applications/fpdb.app"
+    """The warning has to name the bundle the user must move.
+
+    Compared as paths rather than as strings: this runs on Windows too, where
+    pathlib renders the same location with backslashes. Asserting the POSIX
+    spelling would fail there for no reason -- ``bundle_path`` is called on
+    every platform, it simply never finds a ``.app`` outside macOS.
+    """
+    from pathlib import Path
+
+    translocated = Path(bundle_path(TRANSLOCATED))
+    assert translocated.name == "fpdb.app"
+    assert translocated.parent.name == "d"
+    assert Path(bundle_path("/Applications/fpdb.app/Contents/MacOS/fpdb")) == Path("/Applications/fpdb.app")
     assert bundle_path("/usr/local/bin/fpdb") is None
 
 

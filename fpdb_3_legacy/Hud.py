@@ -121,6 +121,11 @@ class Hud:
         self.hand_instance: Any = None
         self.is_loading = False
         self.is_fast_fold = False
+        # Which build of this table's HUD this object is. HUD_main hands out a
+        # new one whenever a window's renderer is replaced, so an asynchronous
+        # read that comes back after its HUD was torn down can be recognised
+        # and dropped instead of painting the replacement's windows.
+        self._fpdb_generation: int = 0
         self.loading_window: Any = None
         self.table_name = ""
         self.tablenumber: Any = None

@@ -6,8 +6,10 @@ import base64
 import doctest
 import os
 import os.path
+import socket
 import sys
 import time
+import zlib
 from typing import Any
 
 from fpdb_3_legacy.loggingFpdb import get_logger
@@ -121,6 +123,25 @@ class InterProcessLockBase:
 
 LOCK_FILE_DIRECTORY = "/tmp"
 
+#: Port range the socket lock picks from: above the registered ports, below
+#: the top of the ephemeral range.
+_LOCK_PORT_BASE = 65530
+_LOCK_PORT_SPAN = 32749
+
+
+def port_for_lock_name(name: str) -> int:
+    """The port two processes must agree on to contend for the same lock.
+
+    Uses a stable digest rather than ``hash()``. Python salts string hashing
+    per process (PYTHONHASHSEED), so the old derivation gave every process a
+    different port for the same name: each bound its own, none ever collided,
+    and the lock admitted as many holders as asked. Nothing failed visibly --
+    it simply never excluded anybody, which on Windows is what stood between
+    the user and two HUD processes drawing over each other.
+    """
+    digest = zlib.crc32(name.encode("utf-8"))
+    return _LOCK_PORT_BASE - digest % _LOCK_PORT_SPAN
+
 
 class InterProcessLockFcntl(InterProcessLockBase):
     def __init__(self, name=None) -> None:
@@ -194,10 +215,17 @@ class InterProcessLockWin32(InterProcessLockBase):
 
 
 class InterProcessLockSocket(InterProcessLockBase):
+    """Mutual exclusion by binding a port derived from the lock's name.
+
+    The fallback for platforms with neither fcntl nor pywin32 -- which
+    includes a Windows install without pywin32, where this is what guards the
+    single HUD process.
+    """
+
     def __init__(self, name=None) -> None:
         InterProcessLockBase.__init__(self, name)
         self.socket: Any = None
-        self.portno = 65530 - abs(self.getHashedName().__hash__()) % 32749
+        self.portno = port_for_lock_name(self.getHashedName())
 
     def acquire_impl(self, wait) -> None:
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -228,8 +256,10 @@ except ImportError:
 
         InterProcessLock = InterProcessLockWin32
     except ImportError:
-        import socket
-
+        # socket is imported at module scope: importing it only here left
+        # InterProcessLockSocket raising NameError on every platform that
+        # does have fcntl or pywin32, so the fallback could never be
+        # exercised -- or tested -- anywhere it was not already the choice.
         InterProcessLock = InterProcessLockSocket
 
 
