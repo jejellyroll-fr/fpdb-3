@@ -195,3 +195,143 @@ def test_an_unsupported_platform_explains_itself(monkeypatch, capsys) -> None:
 
     assert tool.main([]) == 2
     assert "needs macOS" in capsys.readouterr().err
+
+
+# ---------------------------------------------------------------------------
+# Reading the real window list
+# ---------------------------------------------------------------------------
+
+
+def install_quartz(monkeypatch, windows):
+    """Stand in for the Quartz bindings, so the reader runs on any platform."""
+    import types
+
+    quartz = types.ModuleType("Quartz")
+    quartz.kCGWindowListOptionOnScreenOnly = 1
+    quartz.kCGWindowListExcludeDesktopElements = 16
+    quartz.kCGNullWindowID = 0
+    quartz.CGWindowListCopyWindowInfo = lambda _options, _relative: windows
+    monkeypatch.setitem(sys.modules, "Quartz", quartz)
+    return quartz
+
+
+def test_the_window_server_answer_is_read_field_by_field(monkeypatch) -> None:
+    """Every field the report uses comes from one key of the raw dictionary."""
+    import tools.find_hud_windows as tool
+
+    install_quartz(
+        monkeypatch,
+        [
+            {
+                "kCGWindowOwnerPID": 1342,
+                "kCGWindowOwnerName": "PokerTracker 4",
+                "kCGWindowName": "MVS Winamax Table: Colorado 1",
+                "kCGWindowLayer": 3,
+                "kCGWindowBounds": {"X": 771.0, "Y": 39.0, "Width": 749.0, "Height": 583.0},
+            },
+        ],
+    )
+
+    (found,) = tool.on_screen_windows()
+
+    assert found == Window(
+        pid=1342,
+        owner="PokerTracker 4",
+        name="MVS Winamax Table: Colorado 1",
+        x=771.0,
+        y=39.0,
+        width=749.0,
+        height=583.0,
+        layer=3,
+    )
+
+
+def test_a_window_that_omits_everything_still_parses(monkeypatch) -> None:
+    """The server leaves keys out: an unnamed window has no kCGWindowName."""
+    import tools.find_hud_windows as tool
+
+    install_quartz(monkeypatch, [{}])
+
+    (found,) = tool.on_screen_windows()
+
+    assert found.pid == 0
+    assert found.owner == ""
+    assert found.name == ""
+    assert (found.x, found.y, found.width, found.height, found.layer) == (0.0, 0.0, 0.0, 0.0, 0)
+
+
+def test_an_empty_answer_is_not_an_error(monkeypatch) -> None:
+    """CGWindowListCopyWindowInfo returns None when it has nothing to say."""
+    import tools.find_hud_windows as tool
+
+    install_quartz(monkeypatch, None)
+
+    assert tool.on_screen_windows() == []
+
+
+def test_without_the_bindings_the_tool_says_what_it_needs(monkeypatch) -> None:
+    import tools.find_hud_windows as tool
+
+    monkeypatch.setitem(sys.modules, "Quartz", None)
+
+    with pytest.raises(RuntimeError, match="needs macOS"):
+        tool.on_screen_windows()
+
+
+# ---------------------------------------------------------------------------
+# The command line
+# ---------------------------------------------------------------------------
+
+
+def test_the_command_reports_a_foreign_hud(monkeypatch, capsys) -> None:
+    import tools.find_hud_windows as tool
+
+    block = window(pid=1342, owner="PokerTracker 4", x=800, y=100, width=50, height=30)
+    monkeypatch.setattr(tool, "on_screen_windows", lambda: [TABLE, block])
+
+    assert tool.main([]) == 1
+    assert "PokerTracker 4" in capsys.readouterr().out
+
+
+def test_the_command_takes_another_site(monkeypatch, capsys) -> None:
+    """Winamax is the default because that is where Fast-Fold lives."""
+    import tools.find_hud_windows as tool
+
+    table = window(pid=100, owner="PokerStars", name="PokerStars Table X", width=757, height=592)
+    monkeypatch.setattr(tool, "on_screen_windows", lambda: [table])
+
+    assert tool.main(["--site", "PokerStars"]) == 0
+    assert "1 PokerStars table window(s) open" in capsys.readouterr().out
+
+
+def test_running_it_as_a_command_carries_the_status_out(monkeypatch) -> None:
+    """The exit status is the point of the check; __main__ must not drop it."""
+    import runpy
+
+    # runpy executes a fresh copy of the module, so the stand-in has to be
+    # the binding it imports, not an attribute of the copy already loaded.
+    install_quartz(
+        monkeypatch,
+        [
+            {
+                "kCGWindowOwnerPID": 100,
+                "kCGWindowOwnerName": "Winamax",
+                "kCGWindowName": "Winamax Colorado 1",
+                "kCGWindowLayer": 0,
+                "kCGWindowBounds": {"X": 755, "Y": 33, "Width": 757, "Height": 592},
+            },
+            {
+                "kCGWindowOwnerPID": 1342,
+                "kCGWindowOwnerName": "PokerTracker 4",
+                "kCGWindowName": "MVS Winamax Table: Colorado 1",
+                "kCGWindowLayer": 3,
+                "kCGWindowBounds": {"X": 800, "Y": 100, "Width": 50, "Height": 30},
+            },
+        ],
+    )
+    monkeypatch.setattr(sys, "argv", ["find_hud_windows.py"])
+
+    with pytest.raises(SystemExit) as exit_info:
+        runpy.run_module("tools.find_hud_windows", run_name="__main__")
+
+    assert exit_info.value.code == 1

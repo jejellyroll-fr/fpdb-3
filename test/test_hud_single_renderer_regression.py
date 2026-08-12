@@ -729,3 +729,82 @@ def test_the_gui_explains_a_refusal_instead_of_reporting_a_code() -> None:
     assert "HUD_ALREADY_RUNNING_EXIT_CODE" in source
     assert "another FPDB HUD is already running" in source
     assert "Quit the other one" in source
+
+
+def _owner_child_source(lock_name: str, source: str) -> str:
+    """A child that takes the socket lock and holds it, whatever the platform."""
+    return textwrap.dedent(
+        f"""
+        import sys
+        sys.path.insert(0, {REPO_ROOT!r})
+        from fpdb_3_legacy.interlocks import InterProcessLockSocket
+
+        lock = InterProcessLockSocket(name={lock_name!r})
+        print("ACQUIRED" if lock.acquire({source!r}) else "REFUSED", flush=True)
+        sys.stdin.readline()
+        lock.release()
+        """,
+    )
+
+
+def test_every_lock_kind_records_its_owner(lock_name) -> None:
+    """Windows has no lock file, and that is where naming the holder matters most.
+
+    A plain Windows install has neither fcntl nor pywin32, so the socket
+    fallback is what guards the single HUD there -- and a bound socket has
+    nowhere to write. Recording the owner beside the lock rather than inside
+    it is what makes the answer available on every platform.
+    """
+    from fpdb_3_legacy.interlocks import read_lock_owner
+
+    holder = subprocess.Popen(
+        [sys.executable, "-c", _owner_child_source(lock_name, "pid=999 role='hud'")],
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        text=True,
+    )
+    try:
+        assert holder.stdout is not None
+        assert holder.stdout.readline().strip() == "ACQUIRED"
+
+        assert read_lock_owner(lock_name) == "pid=999 role='hud'"
+    finally:
+        assert holder.stdin is not None
+        holder.stdin.write("\n")
+        holder.stdin.flush()
+        holder.wait(timeout=60)
+
+    assert read_lock_owner(lock_name) is None, "the note outlived the lock"
+
+
+def test_a_lock_name_that_is_not_a_filename_still_works() -> None:
+    """Lock names are free text; the note has to live somewhere legal."""
+    from fpdb_3_legacy.interlocks import InterProcessLockSocket, owner_file_path, read_lock_owner
+
+    name = f"fpdb hud/instance:{uuid.uuid4().hex[:8]}"
+    assert "/" not in os.path.basename(owner_file_path(name))
+
+    lock = InterProcessLockSocket(name=name)
+    assert lock.acquire("pid=1 role='hud'")
+    try:
+        assert read_lock_owner(name) == "pid=1 role='hud'"
+    finally:
+        lock.release()
+
+
+def test_failing_to_record_an_owner_does_not_cost_the_lock(monkeypatch, lock_name) -> None:
+    """The note is a convenience; the lock is the guarantee."""
+    from fpdb_3_legacy import interlocks
+
+    monkeypatch.setattr(
+        interlocks,
+        "owner_file_path",
+        lambda _name: "/nonexistent-directory/owner",
+    )
+    lock = interlocks.InterProcessLockSocket(name=lock_name)
+
+    try:
+        assert lock.acquire("pid=1 role='hud'") is True
+        assert interlocks.read_lock_owner(lock_name) is None
+    finally:
+        lock.release()

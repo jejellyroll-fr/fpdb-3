@@ -84,19 +84,51 @@ def test_stall_monitor_measures_a_real_block(qtbot) -> None:
     assert monitor.stalls_over(UI_STALL_BUDGET_MS)
 
 
-def test_stall_monitor_stays_quiet_on_an_idle_loop(qtbot) -> None:
-    """An idle loop must not be reported as frozen.
+def test_stall_monitor_tells_an_idle_loop_from_a_blocked_one(qtbot) -> None:
+    """The instrument must discriminate, not merely produce a number.
 
-    Without this the three-tab budget could be met by an instrument that
-    reports nothing, or missed by one that reports noise.
+    Compared within one run rather than against a fixed threshold: this
+    measures the event loop, so it measures the whole machine. A CI runner
+    under coverage reported 557 ms on a loop doing nothing at all, which
+    failed an absolute "an idle loop reports no stall over 100 ms" and said
+    nothing about the code. The difference between the two runs is the
+    property that actually belongs to the instrument.
+    """
+    from PySide6.QtCore import QTimer
+
+    idle = UiStallMonitor()
+    idle.start()
+    qtbot.wait(500)
+    idle.stop()
+
+    blocked = UiStallMonitor()
+    blocked.start()
+    QTimer.singleShot(100, lambda: time.sleep(0.4))
+    qtbot.wait(800)
+    blocked.stop()
+
+    assert idle.ticks > 0, "the monitor never ran"
+    assert blocked.max_stall_ms > idle.max_stall_ms + 200, (
+        f"a 400ms block ({blocked.max_stall_ms:.0f}ms) was not distinguishable from an idle "
+        f"loop ({idle.max_stall_ms:.0f}ms)"
+    )
+
+
+def test_an_idle_loop_is_not_reported_as_one_long_freeze() -> None:
+    """No wall clock: the arithmetic alone, so a busy machine cannot skew it.
+
+    Ticks that arrive when asked contribute nothing, which is what stops the
+    three-tab budget being met by an instrument that reports noise.
     """
     monitor = UiStallMonitor()
-    monitor.start()
-    qtbot.wait(500)
-    monitor.stop()
+    monitor._expected = time.perf_counter() + monitor._interval_ms / 1000
 
-    assert monitor.ticks > 0
-    assert not monitor.stalls_over(UI_STALL_BUDGET_MS), f"idle loop reported stalls: {monitor.stalls}"
+    for _ in range(5):
+        monitor._expected = time.perf_counter()  # exactly on time
+        monitor._on_tick()
+
+    assert monitor.ticks == 5
+    assert monitor.stalls_over(UI_STALL_BUDGET_MS) == ()
 
 
 def test_a_stopped_monitor_keeps_what_it_measured(qtbot) -> None:

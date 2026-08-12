@@ -134,8 +134,14 @@ def group_by_process(windows: list[Window]) -> dict[tuple[int, str], int]:
     return counts
 
 
-def report(site: str, out: Any = sys.stdout) -> int:
-    """Print who is drawing over the tables. Returns a process exit status."""
+def report(site: str, out: Any = None) -> int:
+    """Print who is drawing over the tables. Returns a process exit status.
+
+    ``out`` is resolved here rather than in the signature: a default of
+    ``sys.stdout`` is evaluated at import, so it would hold the stream from
+    then on and write past anything that replaced it later.
+    """
+    out = sys.stdout if out is None else out
     windows = on_screen_windows()
     tables = poker_tables(windows, site)
     if not tables:

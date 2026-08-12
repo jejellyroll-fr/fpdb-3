@@ -6,8 +6,10 @@ import base64
 import doctest
 import os
 import os.path
+import re
 import socket
 import sys
+import tempfile
 import time
 import zlib
 from typing import Any
@@ -24,6 +26,15 @@ INTERLOCK_CLI_ERRORS = (AssertionError, OSError, RuntimeError, TypeError, ValueE
 INTERLOCK_LIST_ERRORS = (OSError,)
 
 InterProcessLock: Any = None
+
+# The platform bindings each lock class needs, declared here so they are
+# visible to a reader and to static analysis. select_lock_class() fills in
+# whichever ones this platform can import; the rest stay None, and the class
+# that would have used them is never the one selected.
+fcntl: Any = None
+win32api: Any = None
+win32event: Any = None
+winerror: Any = None
 
 """
 Just use me like a thread lock.  acquire() / release() / locked()
@@ -57,21 +68,27 @@ anywhere said that a second HUD had been refused.
 """
 
 
+def owner_file_path(name: str) -> str:
+    """Where the holder of ``name`` leaves a note saying who it is.
+
+    A file of its own rather than the lock itself, because only one of the
+    three lock mechanisms is a file: a Windows mutex and a bound socket have
+    nowhere to write. Recording the owner beside the lock instead makes the
+    answer available on every platform -- which matters most on Windows,
+    where the socket fallback is what a plain install uses.
+    """
+    safe = re.sub(r"[^A-Za-z0-9_.-]", "_", name)
+    return os.path.join(tempfile.gettempdir(), f"{safe}.owner")  # noqa: PTH118 - plain paths, no Path elsewhere here
+
+
 def read_lock_owner(name: str = HUD_INSTANCE_LOCK_NAME) -> str | None:
     """Who holds this lock, as they described themselves when taking it.
 
-    Returns None when nothing recorded an owner -- an older build that did
-    not write one, or a platform whose lock is not a file.
+    Returns None when nothing recorded an owner -- nobody holds it, or an
+    older build that did not leave a note.
     """
     try:
-        lock = InterProcessLock(name=name)
-    except Exception:
-        return None
-    path = getattr(lock, "lock_file_name", None)
-    if not path:
-        return None
-    try:
-        with open(path, encoding="utf-8") as handle:  # noqa: PTH123 - mirrors the lock's own file access
+        with open(owner_file_path(name), encoding="utf-8") as handle:  # noqa: PTH123 - see owner_file_path
             return handle.read().strip() or None
     except OSError:
         return None
@@ -119,12 +136,25 @@ class InterProcessLockBase:
         pass
 
     def _record_owner(self, source: str) -> None:
-        """Leave a note saying who took the lock, where a refused caller can read it.
+        """Leave a note saying who took the lock, for whoever is refused next.
 
-        Only the file-based lock can do this; the others have nowhere to
-        write. Best-effort by design: failing to leave the note must never
-        cost the caller the lock it just acquired.
+        Best-effort by design: failing to leave the note must never cost the
+        caller the lock it has already acquired. A refused caller then simply
+        cannot name the holder, which is the situation this exists to improve
+        on, not to depend on.
         """
+        try:
+            with open(owner_file_path(self.name), "w", encoding="utf-8") as handle:  # noqa: PTH123
+                handle.write(source)
+        except OSError:
+            log.debug("Could not record the owner of lock %s", self.name, exc_info=True)
+
+    def _forget_owner(self) -> None:
+        """Remove the note when the lock is given back."""
+        try:
+            os.unlink(owner_file_path(self.name))  # noqa: PTH108 - see owner_file_path
+        except OSError:
+            pass
 
     def acquire(self, source, wait=False, retry_time=1) -> bool:
         if source is None:
@@ -149,6 +179,7 @@ class InterProcessLockBase:
 
     def release(self) -> None:
         self.release_impl()  # type: ignore[attr-defined]  # implemented by platform-specific lock subclasses
+        self._forget_owner()
         self._has_lock = False
         self.heldBy = None
 
@@ -211,18 +242,6 @@ class InterProcessLockFcntl(InterProcessLockBase):
             raise SingleInstanceError(
                 "Could not acquire exclusive lock on " + self.lock_file_name,
             )
-
-    def _record_owner(self, source: str) -> None:
-        """Write the owner's identity into the lock file it already holds."""
-        if self.lockfd is None:
-            return
-        try:
-            self.lockfd.seek(0)
-            self.lockfd.truncate()
-            self.lockfd.write(source)
-            self.lockfd.flush()
-        except (OSError, ValueError):
-            log.debug("Could not record the lock owner in %s", self.lock_file_name, exc_info=True)
 
     def release_impl(self) -> None:
         fcntl.lockf(self.lockfd, fcntl.LOCK_UN)
@@ -293,24 +312,42 @@ class InterProcessLockSocket(InterProcessLockBase):
         self.socket = None
 
 
-# Set InterProcessLock to the correct type given the sysem parameters available
-try:
-    import fcntl
+def select_lock_class() -> Any:
+    """The locking mechanism this platform can actually use.
 
-    InterProcessLock = InterProcessLockFcntl
-except ImportError:
+    A function rather than a bare try/except at module scope so the choice can
+    be exercised: two of the three branches are unreachable on any given
+    machine, and the one that matters most -- a Windows install with no
+    pywin32, which falls through to the socket -- is the one a developer is
+    least likely to be running.
+    """
+    # Each lock class reads its bindings as module globals, so an import that
+    # stayed local to this function would leave the class raising NameError
+    # the moment it was used. socket already cost that once: it was imported
+    # only in the branch that selects the socket lock, so the fallback could
+    # not run anywhere it was not already the only choice.
+    global fcntl, win32api, win32event, winerror  # noqa: PLW0603 - see the module-level declarations
+
     try:
-        import win32api
-        import win32event
-        import winerror
-
-        InterProcessLock = InterProcessLockWin32
+        import fcntl as _fcntl
     except ImportError:
-        # socket is imported at module scope: importing it only here left
-        # InterProcessLockSocket raising NameError on every platform that
-        # does have fcntl or pywin32, so the fallback could never be
-        # exercised -- or tested -- anywhere it was not already the choice.
-        InterProcessLock = InterProcessLockSocket
+        pass
+    else:
+        fcntl = _fcntl
+        return InterProcessLockFcntl
+
+    try:
+        import win32api as _win32api
+        import win32event as _win32event
+        import winerror as _winerror
+    except ImportError:
+        return InterProcessLockSocket
+
+    win32api, win32event, winerror = _win32api, _win32event, _winerror
+    return InterProcessLockWin32
+
+
+InterProcessLock = select_lock_class()
 
 
 def test_construct() -> None:
@@ -470,9 +507,9 @@ def main(argv=None):
 
     if args.list_locks:
         print("=== Active Lock Files ===")
-        # Look for lock files in common locations
-        import tempfile
-
+        # Look for lock files in common locations. tempfile is imported at
+        # module scope; a second import here would shadow it and make the
+        # directory impossible to point elsewhere.
         temp_dir = tempfile.gettempdir()
         lock_files: list[str] = []
 

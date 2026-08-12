@@ -938,7 +938,7 @@ class HudMain(QObject):
             self._cleanup_timer.setInterval(2000)
             self._cleanup_timer.timeout.connect(self._cleanup_closed_windows)
             self._cleanup_timer.timeout.connect(self._sweep_stale_fast_fold_tables)
-            self._cleanup_timer.timeout.connect(self._reap_orphan_overlay_windows)
+            self._cleanup_timer.timeout.connect(self._report_orphan_overlay_windows)
             self._cleanup_timer.timeout.connect(self._log_window_census_when_it_changes)
             self._cleanup_timer.start()
 
@@ -1575,44 +1575,44 @@ class HudMain(QObject):
             counts[name] = counts.get(name, 0) + 1
         return ",".join(f"{name}x{count}" for name, count in sorted(counts.items())) or "none"
 
-    def _reap_orphan_overlay_windows(self) -> None:
-        """Take down overlay windows no HUD owns any more.
+    def _report_orphan_overlay_windows(self) -> list[Any]:
+        """Name overlay windows on screen that no HUD owns. Returns them.
 
-        A ``SeatWindow`` exists only to be an overlay owned by an aux window.
-        One that is on screen while no live HUD references it cannot be
-        reached by any update, by the between-hands clear, or by the teardown
-        at the end of the session -- it just sits over the table showing
-        whatever numbers it had when it was orphaned. That is what a player
-        sees as a second, frozen HUD per table.
+        A ``SeatWindow`` exists only to be an overlay owned by an aux window,
+        and every path that updates, clears or destroys one reaches it through
+        its aux's ``m_windows``. One on screen that no live HUD references is
+        therefore unreachable: frozen at whatever numbers it last had, and
+        beyond the reach of the between-hands clear and the teardown.
 
-        Rather than depend on knowing which path leaked it, this states the
-        invariant directly: an overlay nobody owns has no business being on
-        screen. Reported at WARNING as well as removed, because a leak is a
-        defect even once it is being cleaned up after.
+        This reports and does not destroy. An earlier version took them down,
+        which was the wrong trade twice over: the leak it guarded against is
+        fixed where it happened (``AuxSeats._discard_previous_windows``), the
+        census showed it never fired against a real one, and destroying
+        widgets on the strength of "this HudMain does not own it" reaches
+        beyond what this object can actually know -- as the test suite
+        demonstrated by having one HudMain tear down another's windows.
+
+        The report is what earned its place: it names the class and the count,
+        which is what points at whichever path leaked.
         """
-        orphans = [window for window in self._live_seat_windows() if id(window) not in self._owned_seat_windows()]
+        owned = self._owned_seat_windows()
+        orphans = [window for window in self._live_seat_windows() if id(window) not in owned]
         if not orphans:
-            return
+            return []
 
         by_class: dict[str, int] = {}
         for window in orphans:
             name = type(window).__name__
             by_class[name] = by_class.get(name, 0) + 1
         log.warning(
-            "HUD overlay leak: %d window(s) on screen that no HUD owns (%s); taking them down. "
-            "session=%s pid=%s huds=%d",
+            "HUD overlay leak: %d window(s) on screen that no HUD owns (%s). session=%s pid=%s huds=%d",
             len(orphans),
             ", ".join(f"{name}x{count}" for name, count in sorted(by_class.items())),
             session_id(),
             os.getpid(),
             len(self.hud_dict),
         )
-        for window in orphans:
-            for step in ("hide", "close", "destroy", "deleteLater"):
-                action = getattr(window, step, None)
-                if callable(action):
-                    with contextlib.suppress(Exception):
-                        action()
+        return orphans
 
     @staticmethod
     def _all_seat_windows() -> list[Any]:
@@ -3940,9 +3940,6 @@ class HudMain(QObject):
                     overlays,
                     self._describe_window_census(),
                 )
-                # A teardown that leaves windows behind is exactly the defect
-                # a player sees persist past the end of the session.
-                self._reap_orphan_overlay_windows()
             self.main_window.resize(1, 1)
         except Exception:
             log.exception("Error killing HUD for table: %s.", table)

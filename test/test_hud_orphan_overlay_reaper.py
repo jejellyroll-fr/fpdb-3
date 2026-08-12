@@ -91,7 +91,7 @@ def test_a_window_a_hud_owns_is_left_alone(hud_main) -> None:
     hud_main.hud_dict = {"Colorado 1 #76304": _hud_with(owned)}
     hud_main._on_screen.append(owned)
 
-    hud_main._reap_orphan_overlay_windows()
+    hud_main._report_orphan_overlay_windows()
 
     assert owned.taken_down == []
 
@@ -102,10 +102,10 @@ def test_a_window_no_hud_owns_is_taken_down(hud_main) -> None:
     hud_main.hud_dict = {"Colorado 1 #76304": _hud_with(owned)}
     hud_main._on_screen.extend([owned, orphan])
 
-    hud_main._reap_orphan_overlay_windows()
+    orphans = hud_main._report_orphan_overlay_windows()
 
-    assert orphan.taken_down == ["hide", "close", "destroy", "deleteLater"]
-    assert owned.taken_down == []
+    assert orphans == [orphan]
+    assert orphan.taken_down == [], "reporting must not destroy a widget it does not own"
 
 
 def test_an_aux_container_counts_as_owned(hud_main) -> None:
@@ -119,7 +119,7 @@ def test_an_aux_container_counts_as_owned(hud_main) -> None:
     hud_main.hud_dict = {"Colorado 1 #76304": hud}
     hud_main._on_screen.append(contained)
 
-    hud_main._reap_orphan_overlay_windows()
+    hud_main._report_orphan_overlay_windows()
 
     assert contained.taken_down == []
 
@@ -129,9 +129,7 @@ def test_every_window_is_orphaned_once_the_last_hud_is_gone(hud_main) -> None:
     first, second = Overlay(), Overlay()
     hud_main._on_screen.extend([first, second])
 
-    hud_main._reap_orphan_overlay_windows()
-
-    assert first.taken_down and second.taken_down
+    assert hud_main._report_orphan_overlay_windows() == [first, second]
 
 
 def test_windows_of_other_tables_are_not_reaped(hud_main) -> None:
@@ -140,7 +138,7 @@ def test_windows_of_other_tables_are_not_reaped(hud_main) -> None:
     hud_main.hud_dict = {f"Colorado {i} #7630{i}": _hud_with(w) for i, w in enumerate(windows, 1)}
     hud_main._on_screen.extend(windows)
 
-    hud_main._reap_orphan_overlay_windows()
+    hud_main._report_orphan_overlay_windows()
 
     assert not any(window.taken_down for window in windows)
 
@@ -153,24 +151,27 @@ def test_a_hud_with_no_aux_windows_owns_nothing(hud_main) -> None:
     hud_main.hud_dict = {"Colorado 1 #76304": hud}
     hud_main._on_screen.append(orphan)
 
-    hud_main._reap_orphan_overlay_windows()
-
-    assert orphan.taken_down
+    assert hud_main._report_orphan_overlay_windows() == [orphan]
 
 
 def test_nothing_on_screen_is_not_an_error(hud_main) -> None:
-    hud_main._reap_orphan_overlay_windows()
+    hud_main._report_orphan_overlay_windows()
 
 
-def test_a_window_that_refuses_to_close_does_not_stop_the_others(hud_main) -> None:
-    """One stuck widget must not leave the rest of the leak on screen."""
-    stubborn, ordinary = Overlay(), Overlay()
-    stubborn.close = MagicMock(side_effect=RuntimeError("already deleted"))
-    hud_main._on_screen.extend([stubborn, ordinary])
+def test_no_orphan_is_ever_destroyed(hud_main) -> None:
+    """Reporting is the whole contract.
 
-    hud_main._reap_orphan_overlay_windows()
+    An earlier version took these down, and a HudMain destroying widgets on
+    the strength of "I do not own it" reaches past what it can know: in the
+    test suite one HudMain's timer tore down another's windows. The leak is
+    fixed where it happens; this only has to name it.
+    """
+    orphans = [Overlay() for _ in range(3)]
+    hud_main._on_screen.extend(orphans)
 
-    assert ordinary.taken_down == ["hide", "close", "destroy", "deleteLater"]
+    hud_main._report_orphan_overlay_windows()
+
+    assert all(window.taken_down == [] for window in orphans)
 
 
 # ---------------------------------------------------------------------------
@@ -187,7 +188,7 @@ def test_a_leak_is_reported_with_its_size_and_class(hud_main, caplog) -> None:
     hud_main._on_screen.extend([Overlay(), Overlay()])
 
     with caplog.at_level("WARNING"):
-        hud_main._reap_orphan_overlay_windows()
+        hud_main._report_orphan_overlay_windows()
 
     message = " ".join(record.getMessage() for record in caplog.records)
     assert "HUD overlay leak: 2 window(s)" in message
@@ -200,7 +201,7 @@ def test_no_leak_says_nothing(hud_main, caplog) -> None:
     hud_main._on_screen.append(owned)
 
     with caplog.at_level("WARNING"):
-        hud_main._reap_orphan_overlay_windows()
+        hud_main._report_orphan_overlay_windows()
 
     assert "overlay leak" not in " ".join(r.getMessage() for r in caplog.records)
 
@@ -254,24 +255,32 @@ def test_the_reaper_is_on_the_cleanup_timer() -> None:
         and isinstance(node.args[0], ast.Attribute)
     }
 
-    assert "_reap_orphan_overlay_windows" in connected, "nothing calls the reaper periodically"
+    assert "_report_orphan_overlay_windows" in connected, "nothing calls the reaper periodically"
 
 
-def test_tearing_a_hud_down_reaps_what_it_left_behind() -> None:
-    """kill_hud is the moment a leak becomes permanent, so it checks there too."""
+def test_nothing_in_the_hud_destroys_a_window_it_does_not_own() -> None:
+    """The guard that used to do it is gone, and must not come back.
+
+    Checked in the source because the hazard is structural: any caller that
+    hides, closes or destroys the output of the orphan report is destroying
+    widgets on the strength of one HudMain's view of the process.
+    """
     import ast
     from pathlib import Path
 
     source = (Path(__file__).resolve().parent.parent / "fpdb_3_legacy" / "HUD_main.pyw").read_text(encoding="utf-8")
     tree = ast.parse(source)
-    kill = next(n for n in ast.walk(tree) if isinstance(n, ast.FunctionDef) and n.name == "idle_kill")
-    calls = {
+    report = next(
+        n for n in ast.walk(tree) if isinstance(n, ast.FunctionDef) and n.name == "_report_orphan_overlay_windows"
+    )
+    destructive = {
         node.func.attr
-        for node in ast.walk(kill)
+        for node in ast.walk(report)
         if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
-    }
+    } & {"hide", "close", "destroy", "deleteLater"}
 
-    assert "_reap_orphan_overlay_windows" in calls
+    assert not destructive, f"the orphan report calls {sorted(destructive)}; it must only report"
+    assert "_reap_orphan_overlay_windows" not in source, "the destructive reaper is back"
 
 
 # ---------------------------------------------------------------------------
