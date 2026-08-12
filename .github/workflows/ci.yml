@@ -428,7 +428,21 @@ jobs:
           else
             wheel="pypoker_eval-1.2.0-${python_tag}-${python_tag}-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
           fi
-          uv pip install --system "https://github.com/jejellyroll-fr/poker-eval/releases/download/v1.2.0/${wheel}"
+          url="https://github.com/jejellyroll-fr/poker-eval/releases/download/v1.2.0/${wheel}"
+          # GitHub's release CDN answers 503 often enough to redden a build on
+          # its own, and uv's own retries span about ten seconds -- shorter
+          # than such a blip tends to last. Spacing a few attempts turns it
+          # into a delay instead of a failed run that has to be restarted by
+          # hand. A wheel that is genuinely missing still fails, just later.
+          for attempt in 1 2 3; do
+            if uv pip install --system "$url"; then
+              exit 0
+            fi
+            echo "::warning::pypoker-eval wheel download failed (attempt ${attempt}/3); retrying"
+            sleep $((attempt * 15))
+          done
+          echo "::error::Could not download the pypoker-eval wheel after 3 attempts: ${url}"
+          exit 1
       - name: Smoke-test native backend
         run: |
           python -c "from fpdb_3_legacy.equity import load_poker_eval; pe = load_poker_eval(); assert pe is not None, 'load_poker_eval() returned None'; print('backend loaded:', type(pe))"
