@@ -256,13 +256,24 @@ class fpdb(QMainWindow):
         # No timing line here: it duplicated the profiler's "add_tab" phase and
         # was logged at INFO, below the log file's floor.
 
-    def open_tab(self, name, build, *, allow_multiple: bool = True):
+    def open_tab(self, name, build, *, allow_multiple: bool = True, module: str | None = None):
         """Build a page, show it as a tab, and time the whole thing.
 
         Every tab goes through here so that all of them are measured, not the
-        three that happened to carry a hand-written profiler block. ``build``
-        is called inside the timed "construct" phase and returns the page; it
-        performs its own lazy imports, which are timed with it.
+        three that happened to carry a hand-written profiler block.
+
+        ``module`` is the module a lazily imported page comes from. It is
+        imported here, inside its own "import" phase, and handed to ``build``
+        -- which is why ``build`` takes an argument for those tabs and none for
+        the tabs whose module is already imported at startup. Importing inside
+        ``build`` instead would fold the two costs into one figure, and telling
+        them apart is the open question of #249: on a PyOxidizer bundle the
+        first use of a tab resolves its module out of the embedded blob (over a
+        translocated read-only mount, when the .app was left in Downloads),
+        while construction is the widget, its filters and its DB connection.
+        The second open of the same tab reads ``import=0ms``, the module being
+        in ``sys.modules`` by then, so two lines for one tab answer "is the
+        wait the import?" on their own.
 
         Returns the page, or None when ``build`` declined to produce one, or
         when a single-instance tab was already open and was simply shown.
@@ -280,8 +291,13 @@ class fpdb(QMainWindow):
         profiler = TabOpenProfiler(name)
         profiler.watch_ui_stalls()
 
+        imported = None
+        if module is not None:
+            with profiler.phase("import"):
+                imported = import_module(module)
+
         with profiler.phase("construct"):
-            page = build()
+            page = build() if imported is None else build(imported)
 
         if page is None:
             profiler.result()  # stops the stall monitor started above
@@ -1758,17 +1774,16 @@ class fpdb(QMainWindow):
     # end def tab_import_imap_summaries
 
     def tab_ring_player_stats(self, widget, data=None) -> None:
-        def build():
-            # Imported lazily: the package pulls in the whole ring-stats view
-            # tree, and most sessions never open this tab. It used to be
-            # described as a Matplotlib font scan, which stopped being true
-            # with the move to PyQtGraph (#228) and sent a later performance
-            # analysis (#249) after a cost that no longer exists.
-            from fpdb_3_legacy import GuiRingPlayerStats
-
-            return GuiRingPlayerStats.GuiRingPlayerStats(self.config, self.sql, self)
-
-        self.open_tab("Ring Player Stats", build)
+        # Imported lazily by open_tab, which times it separately: the package
+        # pulls in the whole ring-stats view tree, and most sessions never open
+        # this tab. The cost used to be described as a Matplotlib font scan,
+        # which stopped being true with the move to PyQtGraph (#228) and sent a
+        # later performance analysis (#249) after a cost that no longer exists.
+        self.open_tab(
+            "Ring Player Stats",
+            lambda module: module.GuiRingPlayerStats(self.config, self.sql, self),
+            module="fpdb_3_legacy.GuiRingPlayerStats",
+        )
 
     def tab_opponents_report(self, widget, data=None) -> None:
         self.open_tab("Opponents Report", lambda: GuiOpponentsReport.GuiOpponentsReport(self.config, self.sql, self))
@@ -1789,13 +1804,11 @@ class fpdb(QMainWindow):
     #     self.add_and_display_tab(ps_tab, "Positional Stats")
 
     def tab_session_stats(self, widget, data=None) -> None:
-        def build():
-            from fpdb_3_legacy import GuiSessionViewer
-
+        def build(module):
             colors = self.get_theme_colors()
-            return GuiSessionViewer.GuiSessionViewer(self.config, self.sql, self, self, colors=colors)
+            return module.GuiSessionViewer(self.config, self.sql, self, self, colors=colors)
 
-        self.open_tab("Session Stats", build)
+        self.open_tab("Session Stats", build, module="fpdb_3_legacy.GuiSessionViewer")
 
     def tab_hand_viewer(self, widget, data=None) -> None:
         self.open_tab("Hand Viewer", lambda: GuiHandViewer.GuiHandViewer(self.config, self.sql, self))
@@ -1808,17 +1821,15 @@ class fpdb(QMainWindow):
         snapshot of the running build, so a second copy would only duplicate the
         first.
         """
-        def build():
-            from fpdb_3_legacy import GuiVersionInfo
-
-            return GuiVersionInfo.GuiVersionInfo(
+        def build(module):
+            return module.GuiVersionInfo(
                 config=self.config,
                 db=getattr(self, "db", None),
                 version=VERSION,
                 parent=self,
             )
 
-        self.open_tab("Version", build, allow_multiple=False)
+        self.open_tab("Version", build, allow_multiple=False, module="fpdb_3_legacy.GuiVersionInfo")
 
     def tab_main_help(self, widget, data=None) -> None:
         """Displays a tab with the main fpdb help screen.
@@ -1872,34 +1883,29 @@ class fpdb(QMainWindow):
     def tabGraphViewer(self, widget, data=None) -> None:
         """Opens a graph viewer tab."""
 
-        def build():
-            from fpdb_3_legacy import GuiGraphViewer
-
+        def build(module):
             colors = self.get_theme_colors()
-            return GuiGraphViewer.GuiGraphViewer(self.sql, self.config, self, colors=colors)
+            return module.GuiGraphViewer(self.sql, self.config, self, colors=colors)
 
-        self.open_tab("Graphs", build)
+        self.open_tab("Graphs", build, module="fpdb_3_legacy.GuiGraphViewer")
 
     def tabTourneyGraphViewer(self, widget, data=None) -> None:
         """Opens a graph viewer tab."""
 
-        def build():
-            from fpdb_3_legacy import GuiTourneyGraphViewer
-
+        def build(module):
             colors = self.get_theme_colors()
-            return GuiTourneyGraphViewer.GuiTourneyGraphViewer(self.sql, self.config, self, colors=colors)
+            return module.GuiTourneyGraphViewer(self.sql, self.config, self, colors=colors)
 
-        self.open_tab("Tourney Graphs", build)
+        self.open_tab("Tourney Graphs", build, module="fpdb_3_legacy.GuiTourneyGraphViewer")
 
     def tabStatsInfo(self, widget, data=None) -> None:
         """Opens a statistics guide tab."""
 
-        def build():
-            from fpdb_3_legacy import GuiStatsInfo
-
-            return GuiStatsInfo.GuiStatsInfo(self.config, self)
-
-        self.open_tab("Stats Guide", build)
+        self.open_tab(
+            "Stats Guide",
+            lambda module: module.GuiStatsInfo(self.config, self),
+            module="fpdb_3_legacy.GuiStatsInfo",
+        )
 
     # def tabStove(self, widget, data=None):
     #     """opens a tab for poker stove"""
