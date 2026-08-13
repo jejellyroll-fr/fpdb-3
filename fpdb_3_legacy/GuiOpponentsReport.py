@@ -47,7 +47,6 @@ limits in the filter sidebar to speed it up.
 from __future__ import annotations
 
 import contextlib
-
 from collections.abc import Sequence
 from time import time
 

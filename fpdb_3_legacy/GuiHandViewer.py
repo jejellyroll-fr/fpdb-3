@@ -233,6 +233,10 @@ class GuiHandViewer(QSplitter):
     def close_owned_database(self) -> None:
         """Release the connection created for this tab."""
         with contextlib.suppress(Exception):
+            if self.replayer is not None:
+                self.replayer.close()
+                self.replayer = None
+        with contextlib.suppress(Exception):
             self.db.disconnect()
 
     def init_card_images(self):
