@@ -105,6 +105,11 @@ class GuiGraphViewer(QSplitter):
 
         self.db.rollback()
 
+    def close_owned_database(self) -> None:
+        """Release the connection created for this tab."""
+        with contextlib.suppress(Exception):
+            self.db.disconnect()
+
     def clearGraphData(self) -> None:
         with contextlib.suppress(Exception):
             if self.plot_widget:
