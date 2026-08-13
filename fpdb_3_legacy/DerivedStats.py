@@ -890,6 +890,14 @@ class DerivedStats:
             committed_player_stats["common"] = int(100 * hand.pot.common[player])
             committed_player_stats["committed"] = int(100 * money_committed)
             committed_player_stats["totalProfit"] = int(committed_player_stats["winnings"] - paid)
+            # Live-capture builders keep splash payouts outside pot collections,
+            # while hand-history converters include STP in the pot. Normalize the
+            # stored profit so the graph's optional splash subtraction is valid
+            # for both representations.
+            if not _pot_stp(hand) and getattr(hand, "splashWinnings", None):
+                committed_player_stats["totalProfit"] += int(
+                    CENTS_MULTIPLIER * _to_decimal(hand.splashWinnings.get(player, 0)),
+                )
             committed_player_stats["flg_won_hand"] = committed_player_stats["totalProfit"] > 0
             committed_player_stats["allInEV"] = committed_player_stats["totalProfit"]
             committed_player_stats["rakeDealt"] = 100 * hand.rake / len(hand.players)
