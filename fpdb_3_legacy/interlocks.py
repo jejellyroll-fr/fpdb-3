@@ -4,6 +4,7 @@ from __future__ import annotations
 # Thanks JJ!
 import base64
 import doctest
+import errno
 import os
 import os.path
 import re
@@ -196,10 +197,17 @@ LOCK_FILE_DIRECTORY = "/tmp"
 #: would send two processes looking for one lock to two different places.
 _BAD_FILENAME_CHARACTERS = re.compile(r"[/?<>\\:;*|'\"^=.\[\]]")
 
-#: Port range the socket lock picks from: above the registered ports, below
-#: the top of the ephemeral range.
-_LOCK_PORT_BASE = 65530
-_LOCK_PORT_SPAN = 32749
+#: Port range the socket lock picks from. Kept strictly below 32768, which is
+#: what keeps it clear of the dynamic range the OS itself allocates outbound
+#: connections from -- 49152-65535 on Windows and on modern Linux.
+#:
+#: The previous range was 32782-65530, chosen as "below the top of the
+#: ephemeral range", i.e. inside it. Any unrelated process holding one of those
+#: ports made the lock refuse a name nobody held, reported to the user as "The
+#: FPDB HUD process is already running" (#259). A lock must not contend with
+#: the operating system for its own identifier.
+_LOCK_PORT_BASE = 20000
+_LOCK_PORT_SPAN = 12768  # -> 20000..32767
 
 
 def port_for_lock_name(name: str) -> int:
@@ -213,7 +221,7 @@ def port_for_lock_name(name: str) -> int:
     the user and two HUD processes drawing over each other.
     """
     digest = zlib.crc32(name.encode("utf-8"))
-    return _LOCK_PORT_BASE - digest % _LOCK_PORT_SPAN
+    return _LOCK_PORT_BASE + digest % _LOCK_PORT_SPAN
 
 
 class InterProcessLockFcntl(InterProcessLockBase):
@@ -306,12 +314,28 @@ class InterProcessLockSocket(InterProcessLockBase):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
             self.socket.bind(("127.0.0.1", self.portno))
-        except OSError:
+        except OSError as exc:
             self.socket.close()
             self.socket = None
-            raise SingleInstanceError(
-                "Could not acquire exclusive lock on " + self.name,
+            if exc.errno in (errno.EADDRINUSE, errno.EACCES):
+                # The honest reading: the port is taken. Usually that is another
+                # holder of this lock, but a port cannot say who bound it, so the
+                # message names the port instead of asserting a HUD is running.
+                raise SingleInstanceError(
+                    f"Could not acquire exclusive lock on {self.name}: port {self.portno} is already bound",
+                ) from exc
+            # Anything else is a broken environment, not a second HUD. Reporting
+            # it as "already running" sent the user hunting for a process that
+            # does not exist.
+            log.error(
+                "Lock %s could not be tested: binding port %d failed with %s",
+                self.name,
+                self.portno,
+                exc,
             )
+            raise SingleInstanceError(
+                f"Could not test the lock on {self.name}: binding port {self.portno} failed ({exc})",
+            ) from exc
 
     def release_impl(self) -> None:
         self.socket.close()

@@ -13,6 +13,8 @@ import pytest
 
 from fpdb_3_legacy import interlocks
 from fpdb_3_legacy.interlocks import (
+    _LOCK_PORT_BASE,
+    _LOCK_PORT_SPAN,
     InterProcessLock,
     InterProcessLockBase,
     InterProcessLockFcntl,
@@ -129,7 +131,11 @@ def test_socket_lock_portno_is_deterministic() -> None:
     # computed in __init__.
     name = _unique_name("sock")
     lock = InterProcessLockSocket(name=name)
-    assert 65530 - 32749 <= lock.portno <= 65530
+    # Read from the module rather than repeated as literals: this assertion
+    # hard-coded the old 32782-65530 range, which sat inside the ephemeral
+    # range the OS allocates from (#259), and had to be edited by hand when the
+    # range moved.
+    assert _LOCK_PORT_BASE <= lock.portno < _LOCK_PORT_BASE + _LOCK_PORT_SPAN
 
 
 def test_main_no_args_prints_help_returns_zero(capsys) -> None:
