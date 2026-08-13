@@ -389,17 +389,69 @@ def test_move_and_resize_window() -> None:
 
 
 def test_topify_reparents() -> None:
+    """QWindow.fromWinId must be patched, not merely stubbed by import order.
+
+    ``t.number`` is a fabricated table id, and ``fromWinId`` takes it as a
+    *native* window handle. The module-level ``sys.modules.setdefault`` stubs
+    above only apply when this file imports PySide6 first, which is not the
+    case under ``-m qt``: pytest-qt has already imported the real Qt, so the
+    real ``fromWinId`` dereferenced 42 as an ``NSView*`` and segfaulted the
+    interpreter on macOS, taking the rest of the Qt suite with it (#258).
+    """
     t = _make_regular_table()
     t.number = 42
     window = Mock()
     handle = Mock()
     window.windowHandle.return_value = handle
-    t.topify(window)
-    handle.setTransientParent.assert_called_once_with(t.gdkhandle)
-    handle.setFlags.assert_called_once()
-    # Second call reuses the cached handle.
-    t.topify(window)
-    assert handle.setTransientParent.call_count == 2
+
+    table_handle = Mock()
+    with patch.object(WinTables, "QWindow") as qwindow_cls:
+        qwindow_cls.fromWinId.return_value = table_handle
+
+        t.topify(window)
+
+        qwindow_cls.fromWinId.assert_called_once_with(42)
+        assert t.gdkhandle is table_handle
+        handle.setTransientParent.assert_called_once_with(table_handle)
+        handle.setFlags.assert_called_once()
+
+        # Second call reuses the cached handle instead of resolving it again.
+        t.topify(window)
+        assert handle.setTransientParent.call_count == 2
+        qwindow_cls.fromWinId.assert_called_once_with(42)
+
+
+def test_topify_gives_up_when_the_table_window_is_gone() -> None:
+    """A table that closed mid-call must not take the HUD down with it.
+
+    ``fromWinId`` returns None for a window id that no longer exists, and the
+    next line called ``setTransientParent`` on it regardless -- and the HUD
+    calls topify exactly when tables are appearing and disappearing.
+    """
+    t = _make_regular_table()
+    t.number = 42
+    window = Mock()
+
+    with patch.object(WinTables, "QWindow") as qwindow_cls:
+        qwindow_cls.fromWinId.return_value = None
+
+        t.topify(window)
+
+        assert t.gdkhandle is None, "un handle non résolu ne doit pas être mis en cache"
+        window.windowHandle.assert_not_called()
+
+
+def test_topify_gives_up_when_the_hud_window_has_no_handle() -> None:
+    """windowHandle() is None until the widget is native; skip rather than crash."""
+    t = _make_regular_table()
+    t.number = 42
+    window = Mock()
+    window.windowHandle.return_value = None
+
+    with patch.object(WinTables, "QWindow") as qwindow_cls:
+        qwindow_cls.fromWinId.return_value = Mock()
+
+        t.topify(window)  # ne doit pas lever
 
 
 def test_check_bad_words_case_insensitive() -> None:

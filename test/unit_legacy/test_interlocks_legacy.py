@@ -129,7 +129,7 @@ def test_socket_lock_portno_is_deterministic() -> None:
     # computed in __init__.
     name = _unique_name("sock")
     lock = InterProcessLockSocket(name=name)
-    assert 65530 - 32749 <= lock.portno <= 65530
+    assert 20000 <= lock.portno < 20000 + 12768
 
 
 def test_main_no_args_prints_help_returns_zero(capsys) -> None:

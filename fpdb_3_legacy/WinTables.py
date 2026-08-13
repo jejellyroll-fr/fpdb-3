@@ -393,11 +393,27 @@ class Table(Table_Window):
             log.info("No window to move")
 
     def topify(self, window) -> None:
-        """Make the specified Qt window 'always on top' under Windows."""
+        """Make the specified Qt window 'always on top' under Windows.
+
+        Both handles are checked because the HUD calls this precisely while
+        tables are appearing and disappearing: ``fromWinId`` returns None for a
+        table that has just closed, and ``windowHandle`` returns None until the
+        HUD widget has a native window. Either one used to be dereferenced
+        unconditionally on the next line.
+        """
         if self.gdkhandle is None:
             self.gdkhandle = QWindow.fromWinId(int(self.number))
+            if self.gdkhandle is None:
+                # Not cached: a later call retries, in case the id was simply
+                # not resolvable yet.
+                log.warning("Cannot topify: no window for table id %s", self.number)
+                return
 
         qwindow = window.windowHandle()
+        if qwindow is None:
+            log.warning("Cannot topify: the HUD window has no native handle yet")
+            return
+
         qwindow.setTransientParent(self.gdkhandle)
         qwindow.setFlags(
             Qt.WindowType.Tool

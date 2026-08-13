@@ -14,7 +14,9 @@ mutex regression and a Windows developer sees an fcntl one.
 
 from __future__ import annotations
 
+import errno
 import os
+import socket
 import sys
 import types
 import uuid
@@ -349,10 +351,50 @@ def test_a_released_socket_lock_can_be_taken_again(name) -> None:
     lock.release()
 
 
+def test_a_busy_port_is_reported_as_a_busy_port(name, monkeypatch) -> None:
+    """A bound port is reported as contention, not an unexplained failure."""
+    lock = interlocks.InterProcessLockSocket(name=name)
+
+    def refuse(_address):
+        raise OSError(errno.EADDRINUSE, "Address already in use")
+
+    monkeypatch.setattr(socket.socket, "bind", lambda self, addr: refuse(addr))
+
+    with pytest.raises(interlocks.SingleInstanceError) as excinfo:
+        lock.acquire_impl(wait=False)
+
+    assert str(lock.portno) in str(excinfo.value)
+    assert "already bound" in str(excinfo.value)
+
+
+def test_a_bind_that_fails_for_another_reason_is_not_called_a_second_hud(name, monkeypatch) -> None:
+    """A broken socket environment is reported distinctly from contention."""
+    lock = interlocks.InterProcessLockSocket(name=name)
+
+    def refuse(_address):
+        raise OSError(errno.ENETDOWN, "Network is down")
+
+    monkeypatch.setattr(socket.socket, "bind", lambda self, addr: refuse(addr))
+
+    with pytest.raises(interlocks.SingleInstanceError) as excinfo:
+        lock.acquire_impl(wait=False)
+
+    message = str(excinfo.value)
+    assert "could not test the lock" in message.lower()
+    assert "Network is down" in message
+
+
 def test_the_port_stays_inside_the_range_it_declares() -> None:
     for candidate in ("a", "fpdb_hud_instance", "x" * 200, ""):
         port = interlocks.port_for_lock_name(candidate)
-        assert interlocks._LOCK_PORT_BASE - interlocks._LOCK_PORT_SPAN < port <= interlocks._LOCK_PORT_BASE
+        assert interlocks._LOCK_PORT_BASE <= port < interlocks._LOCK_PORT_BASE + interlocks._LOCK_PORT_SPAN
+
+
+def test_the_port_never_lands_in_the_range_the_os_allocates_from() -> None:
+    """The lock must not contend with the OS for its own identifier."""
+    for i in range(5000):
+        port = interlocks.port_for_lock_name(f"fpdb_hud_instance_test_{i}_{i * 7919:x}")
+        assert 1024 < port < 32768
 
 
 # ---------------------------------------------------------------------------
