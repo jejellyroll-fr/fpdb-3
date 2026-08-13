@@ -163,7 +163,7 @@ generate_pyinstaller_command() {
         "PySide6" "PySide6.QtCore" "PySide6.QtGui" "PySide6.QtWidgets"
         "qt_material" "qt_material.resources" "xcffib" "xcffib.xproto"
         "gevent" "gevent-websocket" "uvicorn" "requests" "numpy" "pandas" "sqlalchemy"
-        "jinja2" "werkzeug" "flask" "fastapi" "orjson" "beautifulsoup4" "matplotlib"
+        "jinja2" "werkzeug" "flask" "fastapi" "orjson" "beautifulsoup4"
         "six" "pycparser"
     )
     for import in "${hidden_imports[@]}"; do

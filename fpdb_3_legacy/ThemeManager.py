@@ -245,7 +245,7 @@ class ThemeManager:
         }
 
     def get_theme_colors(self) -> dict[str, str]:
-        """Return colors used by matplotlib-based legacy viewers."""
+        """Return colors used by the legacy graph viewers (PyQtGraph since #228)."""
         colors = self.get_legacy_palette()
         return {
             "background": colors["surface_panel"],
@@ -853,7 +853,6 @@ class ThemeManager:
                 refresh_theme = getattr(widget, "refresh_theme", None)
                 if callable(refresh_theme):
                     refresh_theme(colors, theme_colors)
-                self._refresh_matplotlib_canvas(widget, colors, theme_colors)
 
             for widget in widgets:
                 try:
@@ -875,29 +874,6 @@ class ThemeManager:
             return ""
         pattern = rf"{re.escape(FPDB_THEME_START)}.*?{re.escape(FPDB_THEME_END)}"
         return re.sub(pattern, "", stylesheet, flags=re.DOTALL)
-
-    def _refresh_matplotlib_canvas(self, widget, colors: dict[str, str], theme_colors: dict[str, str]) -> None:
-        """Repaint existing matplotlib canvases after a live theme change."""
-        fig = getattr(widget, "fig", None)
-        canvas = getattr(widget, "canvas", None)
-        if fig is None or canvas is None:
-            return
-
-        try:
-            fig.patch.set_facecolor(theme_colors["background"])
-            for axis in getattr(fig, "axes", []):
-                axis.set_facecolor(colors["surface_panel"])
-                axis.tick_params(axis="x", colors=theme_colors["foreground"])
-                axis.tick_params(axis="y", colors=theme_colors["foreground"])
-                axis.xaxis.label.set_color(theme_colors["foreground"])
-                axis.yaxis.label.set_color(theme_colors["foreground"])
-                axis.title.set_color(theme_colors["foreground"])
-                for spine in axis.spines.values():
-                    spine.set_color(colors["muted_text"])
-                axis.grid(color=theme_colors["grid"], linestyle=":", linewidth=0.6, alpha=0.75)
-            canvas.draw_idle()
-        except (AttributeError, RuntimeError, ValueError) as e:
-            log.debug(f"Unable to refresh matplotlib canvas theme: {e}")
 
     def initialize(self, config=None, main_window=None):
         """Initialize the ThemeManager.

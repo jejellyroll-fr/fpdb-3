@@ -59,9 +59,7 @@ class GuiSessionViewer(QSplitter):
         self.PGSQL = 3
         self.SQLITE = 4
 
-        self.fig: Any = None
         self.canvas: Any = None
-        self.ax: Any = None
         self.graphBox: Any = None
         self._db_worker: DbWorker | None = None
 
