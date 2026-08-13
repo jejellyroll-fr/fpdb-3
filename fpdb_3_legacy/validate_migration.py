@@ -139,21 +139,31 @@ IMPORT_CHECKS: list[tuple[str, Callable[[], object], bool]] = [
 def check_import(label: str, probe: Callable[[], object], *, optional: bool = False) -> bool:
     """Exécute une sonde d'import et rapporte son résultat.
 
+    ``optional`` tolerates an *absence*, not a breakage. Only ``ImportError``
+    is forgiven, because that is the only failure the application itself
+    survives: ``Database.py`` guards ``import sqlalchemy`` with
+    ``except ImportError`` alone, so an installed-but-broken package raising
+    ``AttributeError``, ``OSError`` or ``RuntimeError`` aborts startup. Passing
+    the validator in that situation would be a false all-clear.
+
     Args:
         label: Nom affiché
         probe: Appelable qui effectue l'import à valider
-        optional: Si True, un échec est signalé sans invalider la migration
+        optional: Si True, une absence est signalée sans invalider la migration
 
     Returns:
-        True si l'import a réussi, ou s'il a échoué mais que la dépendance est
-        optionnelle.
+        True si l'import a réussi, ou s'il est absent alors que la dépendance
+        est optionnelle.
     """
     try:
         probe()
-    except VALIDATION_IMPORT_ERRORS as e:
+    except ImportError as e:
         if optional:
             print(f"⚠️  {label:20s} OPTIONAL: {e}")
             return True
+        print(f"❌ {label:20s} FAILED: {e}")
+        return False
+    except VALIDATION_IMPORT_ERRORS as e:
         print(f"❌ {label:20s} FAILED: {e}")
         return False
     print(f"✅ {label:20s} OK")

@@ -49,6 +49,21 @@ def test_check_import_tolerates_an_optional_failure() -> None:
     assert validate_migration.check_import("sqlalchemy", missing, optional=True) is True
 
 
+@pytest.mark.parametrize("broken", [AttributeError, OSError, RuntimeError])
+def test_an_optional_dependency_that_is_broken_is_not_tolerated(broken: type[Exception]) -> None:
+    """Optional means "may be absent", not "may be installed and broken".
+
+    ``Database.py`` guards ``import sqlalchemy`` with ``except ImportError``
+    alone, so any other failure from that import aborts application startup.
+    Reporting it as an acceptable absence would be a false all-clear.
+    """
+
+    def installed_but_broken() -> object:
+        raise broken("sqlalchemy is installed but unusable")
+
+    assert validate_migration.check_import("sqlalchemy", installed_but_broken, optional=True) is False
+
+
 def test_check_imports_fails_when_a_required_probe_fails(monkeypatch: pytest.MonkeyPatch) -> None:
     """La régression : aucune entrée ne pouvait faire échouer check_imports()."""
 
