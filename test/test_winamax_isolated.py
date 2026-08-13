@@ -228,9 +228,11 @@ class TestWinamaxIsolated(unittest.TestCase):
         ]:
             hand = Mock()
             hand.handText = text
+            hand.bombPot = 0
             self.parser.readSTP(hand)
             hand.addSTP.assert_called()
-            assert hand.bombPot in (250, 500, 1000)
+            assert hand.splashPot in (250, 500, 1000)
+            assert hand.bombPot == 0
 
     def test_detect_lottery_tournaments(self) -> None:
         """Test _detect_lottery_tournaments method."""
