@@ -43,6 +43,33 @@ def _load_method(name: str, namespace: dict[str, Any]) -> Any:
     return FunctionType(code, namespace, name, defaults)
 
 
+def _tab_host(settings: dict[str, Any], config: Any) -> SimpleNamespace:
+    """A stub window whose ``open_tab`` keeps the real contract.
+
+    Tabs are opened through ``fpdb.open_tab`` since #249, so the stub has to
+    provide it: it calls the builder, then hands the page to
+    ``add_and_display_tab``, which is what these tests assert on.
+    """
+    window = SimpleNamespace(
+        settings=settings,
+        config=config,
+        sql=object(),
+        threads=[],
+        add_and_display_tab=MagicMock(),
+    )
+
+    def open_tab(name, build, *, allow_multiple: bool = True):
+        page = build()
+        if page is None:
+            return None
+        window.threads.append(page)
+        window.add_and_display_tab(page, name)
+        return page
+
+    window.open_tab = open_tab
+    return window
+
+
 def test_profile_loading_never_resolves_import_default_paths() -> None:
     """Startup/profile refresh stays passive even when saved paths are stale."""
     assert not _calls_get_default_paths(_fpdb_method("load_profile"))
@@ -63,13 +90,7 @@ def test_bulk_import_resolves_default_paths_only_when_opened() -> None:
         "bulkImport-defaultPath": "/Users/player/Documents/Poker/Hands",
         "hud-defaultPath": "/Users/player/Documents/Poker/Hands",
     }
-    window = SimpleNamespace(
-        settings=settings,
-        config=config,
-        sql=object(),
-        threads=[],
-        add_and_display_tab=MagicMock(),
-    )
+    window = _tab_host(settings, config)
 
     tab_bulk_import(window, None)
 
@@ -95,13 +116,7 @@ def test_opening_auto_import_does_not_trigger_global_default_detection() -> None
     settings = {"global_lock": object(), "db-host": "localhost"}
     config = MagicMock()
     config.get_default_paths.side_effect = AssertionError("opening the tab must remain passive")
-    window = SimpleNamespace(
-        settings=settings,
-        config=config,
-        sql=object(),
-        threads=[],
-        add_and_display_tab=MagicMock(),
-    )
+    window = _tab_host(settings, config)
 
     tab_auto_import(window, None)
 

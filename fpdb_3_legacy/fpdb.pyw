@@ -223,7 +223,14 @@ class fpdb(QMainWindow):
 
         if not allow_multiple and new_tab_name in self.nb_tab_names:
             self.display_tab(new_tab_name)
-            log.info("[PERF-TIMING] Switched to existing tab '%s' in %.3f s", new_tab_name, time.perf_counter() - t0)
+            # At WARNING like the other [PERF] diagnostics: the root logger is
+            # pinned to WARNING (loggingFpdb.DIAGNOSTIC_LEVEL_CAP), so this line
+            # logged at INFO never reached a single user log.
+            log.warning(
+                "[PERF] switched to existing tab '%s' in %.0f ms",
+                new_tab_name,
+                (time.perf_counter() - t0) * 1000,
+            )
             if new_page is not None:
                 with contextlib.suppress(ValueError):
                     self.threads.remove(new_page)
@@ -246,7 +253,37 @@ class fpdb(QMainWindow):
 
         index = self.nb.addTab(new_page, final_tab_name)
         self.nb.setCurrentIndex(index)
-        log.info("[PERF-TIMING] Opened and added new tab '%s' in %.3f s", final_tab_name, time.perf_counter() - t0)
+        # No timing line here: it duplicated the profiler's "add_tab" phase and
+        # was logged at INFO, below the log file's floor.
+
+    def open_tab(self, name, build, *, allow_multiple: bool = True):
+        """Build a page, show it as a tab, and time the whole thing.
+
+        Every tab goes through here so that all of them are measured, not the
+        three that happened to carry a hand-written profiler block. ``build``
+        is called inside the timed "construct" phase and returns the page; it
+        performs its own lazy imports, which are timed with it.
+
+        Returns the page, or None when ``build`` declined to produce one.
+        """
+        profiler = TabOpenProfiler(name)
+        profiler.watch_ui_stalls()
+
+        with profiler.phase("construct"):
+            page = build()
+
+        if page is None:
+            return None
+
+        profiler.watch_first_paint(page)
+        with profiler.phase("add_tab"):
+            # add_and_display_tab appends to self.threads itself.
+            self.add_and_display_tab(page, name, allow_multiple=allow_multiple)
+
+        # Deferred to the first paint: reporting here would measure everything
+        # except the interval the user actually waits through (issue #249).
+        profiler.report_when_painted(log)
+        return page
 
     def display_tab(self, new_tab_name) -> None:
         """Displays the indicated tab."""
@@ -1669,9 +1706,10 @@ class fpdb(QMainWindow):
 
     def tab_auto_import(self, widget, data=None) -> None:
         """Opens the auto import tab."""
-        new_aimp_thread = GuiAutoImport.GuiAutoImport(self.settings, self.config, self.sql, self)
-        self.threads.append(new_aimp_thread)
-        self.add_and_display_tab(new_aimp_thread, "HUD")
+        new_aimp_thread = self.open_tab(
+            "HUD",
+            lambda: GuiAutoImport.GuiAutoImport(self.settings, self.config, self.sql, self),
+        )
         if options.autoimport:
             new_aimp_thread.startClicked(new_aimp_thread.startButton, "autostart")
             options.autoimport = False
@@ -1682,24 +1720,21 @@ class fpdb(QMainWindow):
         # here avoids probing protected folders during ordinary application
         # startup and profile refreshes.
         self.settings.update(self.config.get_default_paths())
-        new_import_thread = GuiBulkImport.GuiBulkImport(self.settings, self.config, self.sql, self)
-        self.threads.append(new_import_thread)
-        self.add_and_display_tab(new_import_thread, "Bulk Import")
+        self.open_tab(
+            "Bulk Import",
+            lambda: GuiBulkImport.GuiBulkImport(self.settings, self.config, self.sql, self),
+        )
 
     def tab_coinpoker_capture(self, widget, data=None) -> None:
         """Open the CoinPoker live packet-capture tab."""
         if is_site_disabled("CoinPoker"):
             log.info("CoinPoker support is disabled; not opening the live capture tab")
             return
-        new_thread = GuiCoinPokerCapture.GuiCoinPokerCapture(self.config, self)
-        self.threads.append(new_thread)
-        self.add_and_display_tab(new_thread, "CoinPoker Capture")
+        self.open_tab("CoinPoker Capture", lambda: GuiCoinPokerCapture.GuiCoinPokerCapture(self.config, self))
 
     def tab_auto_notes_workbench(self, widget, data=None) -> None:
         """Open the automatic notes workbench tab."""
-        new_thread = GuiAutoNotesWorkbench.GuiAutoNotesWorkbench(self.config, self)
-        self.threads.append(new_thread)
-        self.add_and_display_tab(new_thread, "Auto Notes")
+        self.open_tab("Auto Notes", lambda: GuiAutoNotesWorkbench.GuiAutoNotesWorkbench(self.config, self))
 
     # def tab_tourney_import(self, widget, data=None):
     #     """opens a tab for bulk importing tournament summaries"""
@@ -1711,38 +1746,29 @@ class fpdb(QMainWindow):
     # end def tab_import_imap_summaries
 
     def tab_ring_player_stats(self, widget, data=None) -> None:
-        # Imported lazily: the package pulls in the whole ring-stats view tree,
-        # and most sessions never open this tab. It used to be described as a
-        # Matplotlib font scan, which stopped being true with the move to
-        # PyQtGraph (#228) and sent a later performance analysis (#249) after a
-        # cost that no longer exists.
-        profiler = TabOpenProfiler("Ring Player Stats")
-        with profiler.phase("import"):
+        def build():
+            # Imported lazily: the package pulls in the whole ring-stats view
+            # tree, and most sessions never open this tab. It used to be
+            # described as a Matplotlib font scan, which stopped being true
+            # with the move to PyQtGraph (#228) and sent a later performance
+            # analysis (#249) after a cost that no longer exists.
             from fpdb_3_legacy import GuiRingPlayerStats
 
-        with profiler.phase("construct"):
-            new_ps_thread = GuiRingPlayerStats.GuiRingPlayerStats(self.config, self.sql, self)
+            return GuiRingPlayerStats.GuiRingPlayerStats(self.config, self.sql, self)
 
-        profiler.watch_first_paint(new_ps_thread)
-        self.threads.append(new_ps_thread)
-        with profiler.phase("add_tab"):
-            self.add_and_display_tab(new_ps_thread, "Ring Player Stats")
-        profiler.report(log)
+        self.open_tab("Ring Player Stats", build)
 
     def tab_opponents_report(self, widget, data=None) -> None:
-        new_thread = GuiOpponentsReport.GuiOpponentsReport(self.config, self.sql, self)
-        self.threads.append(new_thread)
-        self.add_and_display_tab(new_thread, "Opponents Report")
+        self.open_tab("Opponents Report", lambda: GuiOpponentsReport.GuiOpponentsReport(self.config, self.sql, self))
 
     def tab_tourney_player_stats(self, widget, data=None) -> None:
-        new_ps_thread = GuiTourneyPlayerStats.GuiTourneyPlayerStats(self.config, self.db, self.sql, self)
-        self.threads.append(new_ps_thread)
-        self.add_and_display_tab(new_ps_thread, "Tourney Stats")
+        self.open_tab(
+            "Tourney Stats",
+            lambda: GuiTourneyPlayerStats.GuiTourneyPlayerStats(self.config, self.db, self.sql, self),
+        )
 
     def tab_tourney_viewer_stats(self, widget, data=None) -> None:
-        new_thread = GuiTourHandViewer.TourHandViewer(self.config, self.sql, self)
-        self.threads.append(new_thread)
-        self.add_and_display_tab(new_thread, "Tourney Viewer")
+        self.open_tab("Tourney Viewer", lambda: GuiTourHandViewer.TourHandViewer(self.config, self.sql, self))
 
     # def tab_positional_stats(self, widget, data=None):
     #     new_ps_thread = GuiPositionalStats.GuiPositionalStats(self.config, self.sql)
@@ -1751,24 +1777,16 @@ class fpdb(QMainWindow):
     #     self.add_and_display_tab(ps_tab, "Positional Stats")
 
     def tab_session_stats(self, widget, data=None) -> None:
-        profiler = TabOpenProfiler("Session Stats")
-        with profiler.phase("import"):
+        def build():
             from fpdb_3_legacy import GuiSessionViewer
 
-        colors = self.get_theme_colors()
-        with profiler.phase("construct"):
-            new_ps_thread = GuiSessionViewer.GuiSessionViewer(self.config, self.sql, self, self, colors=colors)
+            colors = self.get_theme_colors()
+            return GuiSessionViewer.GuiSessionViewer(self.config, self.sql, self, self, colors=colors)
 
-        profiler.watch_first_paint(new_ps_thread)
-        self.threads.append(new_ps_thread)
-        with profiler.phase("add_tab"):
-            self.add_and_display_tab(new_ps_thread, "Session Stats")
-        profiler.report(log)
+        self.open_tab("Session Stats", build)
 
     def tab_hand_viewer(self, widget, data=None) -> None:
-        new_ps_thread = GuiHandViewer.GuiHandViewer(self.config, self.sql, self)
-        self.threads.append(new_ps_thread)
-        self.add_and_display_tab(new_ps_thread, "Hand Viewer")
+        self.open_tab("Hand Viewer", lambda: GuiHandViewer.GuiHandViewer(self.config, self.sql, self))
 
     def tab_version_info(self, widget=None, data=None) -> None:
         """Displays the Version / About tab (issue #226).
@@ -1778,15 +1796,17 @@ class fpdb(QMainWindow):
         snapshot of the running build, so a second copy would only duplicate the
         first.
         """
-        from fpdb_3_legacy import GuiVersionInfo
+        def build():
+            from fpdb_3_legacy import GuiVersionInfo
 
-        new_tab = GuiVersionInfo.GuiVersionInfo(
-            config=self.config,
-            db=getattr(self, "db", None),
-            version=VERSION,
-            parent=self,
-        )
-        self.add_and_display_tab(new_tab, "Version", allow_multiple=False)
+            return GuiVersionInfo.GuiVersionInfo(
+                config=self.config,
+                db=getattr(self, "db", None),
+                version=VERSION,
+                parent=self,
+            )
+
+        self.open_tab("Version", build, allow_multiple=False)
 
     def tab_main_help(self, widget, data=None) -> None:
         """Displays a tab with the main fpdb help screen.
@@ -1815,7 +1835,7 @@ class fpdb(QMainWindow):
                         and mit.txt in the fpdb installation directory."""
             ),
         )
-        self.add_and_display_tab(mh_tab, "Help")
+        self.open_tab("Help", lambda: mh_tab)
 
     def get_theme_colors(self):
         """Returns a dictionary containing the theme colors used in the application.
@@ -1839,36 +1859,35 @@ class fpdb(QMainWindow):
 
     def tabGraphViewer(self, widget, data=None) -> None:
         """Opens a graph viewer tab."""
-        profiler = TabOpenProfiler("Graphs")
-        with profiler.phase("import"):
+
+        def build():
             from fpdb_3_legacy import GuiGraphViewer
 
-        colors = self.get_theme_colors()
-        with profiler.phase("construct"):
-            new_gv_thread = GuiGraphViewer.GuiGraphViewer(self.sql, self.config, self, colors=colors)
+            colors = self.get_theme_colors()
+            return GuiGraphViewer.GuiGraphViewer(self.sql, self.config, self, colors=colors)
 
-        profiler.watch_first_paint(new_gv_thread)
-        self.threads.append(new_gv_thread)
-        with profiler.phase("add_tab"):
-            self.add_and_display_tab(new_gv_thread, "Graphs")
-        profiler.report(log)
+        self.open_tab("Graphs", build)
 
     def tabTourneyGraphViewer(self, widget, data=None) -> None:
         """Opens a graph viewer tab."""
-        from fpdb_3_legacy import GuiTourneyGraphViewer
 
-        colors = self.get_theme_colors()
-        new_gv_thread = GuiTourneyGraphViewer.GuiTourneyGraphViewer(self.sql, self.config, self, colors=colors)
-        self.threads.append(new_gv_thread)
-        self.add_and_display_tab(new_gv_thread, "Tourney Graphs")
+        def build():
+            from fpdb_3_legacy import GuiTourneyGraphViewer
+
+            colors = self.get_theme_colors()
+            return GuiTourneyGraphViewer.GuiTourneyGraphViewer(self.sql, self.config, self, colors=colors)
+
+        self.open_tab("Tourney Graphs", build)
 
     def tabStatsInfo(self, widget, data=None) -> None:
         """Opens a statistics guide tab."""
-        from fpdb_3_legacy import GuiStatsInfo
 
-        new_si_tab = GuiStatsInfo.GuiStatsInfo(self.config, self)
-        self.threads.append(new_si_tab)
-        self.add_and_display_tab(new_si_tab, "Stats Guide")
+        def build():
+            from fpdb_3_legacy import GuiStatsInfo
+
+            return GuiStatsInfo.GuiStatsInfo(self.config, self)
+
+        self.open_tab("Stats Guide", build)
 
     # def tabStove(self, widget, data=None):
     #     """opens a tab for poker stove"""
