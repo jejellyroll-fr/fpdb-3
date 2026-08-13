@@ -140,6 +140,11 @@ class GuiSessionViewer(QSplitter):
         self.main_vbox.addWidget(self.graphBox)
         self.main_vbox.addWidget(self.stats_frame)
 
+    def close_owned_database(self) -> None:
+        """Release the connection created for this tab."""
+        with contextlib.suppress(Exception):
+            self.db.disconnect()
+
     def refreshStats(self, checkState) -> None:
         log.warning(f"GuiSessionViewer.refreshStats called with checkState: {checkState}")
         if self.view:

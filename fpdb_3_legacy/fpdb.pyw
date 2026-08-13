@@ -1983,6 +1983,11 @@ class fpdb(QMainWindow):
             shutdown = getattr(item, "shutdown_workers", None)
             if callable(shutdown):
                 shutdown()
+            # Only tabs that created their own connection implement this hook.
+            # GuiTourneyPlayerStats shares the main window's connection.
+            close_database = getattr(item, "close_owned_database", None)
+            if callable(close_database):
+                close_database()
             item.deleteLater()
 
     def __init__(self) -> None:

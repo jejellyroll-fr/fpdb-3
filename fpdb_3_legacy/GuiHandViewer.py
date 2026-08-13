@@ -18,6 +18,7 @@ from __future__ import annotations
 # This code once was in GuiReplayer.py and was split up in this and the former by zarturo.
 # import L10n
 # _ = L10n.get_translation()
+import contextlib
 from decimal import Decimal
 from functools import partial
 from io import StringIO
@@ -228,6 +229,15 @@ class GuiHandViewer(QSplitter):
 
         self.view.resizeColumnsToContents()
         self.view.setSortingEnabled(True)
+
+    def close_owned_database(self) -> None:
+        """Release the connection created for this tab."""
+        with contextlib.suppress(Exception):
+            if self.replayer is not None:
+                self.replayer.close()
+                self.replayer = None
+        with contextlib.suppress(Exception):
+            self.db.disconnect()
 
     def init_card_images(self):
         suits = ("s", "h", "d", "c")
