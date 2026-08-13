@@ -341,6 +341,10 @@ jobs:
       - name: Install dependencies
         run: |
           uv pip install --system -e ".[test]"
+      - name: Install the Windows platform bindings
+        if: runner.os == 'Windows'
+        run: |
+          uv pip install --system pywin32==306
       - name: Run tests (no GUI)
         env:
           QT_QPA_PLATFORM: offscreen
