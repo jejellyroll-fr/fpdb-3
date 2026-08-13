@@ -264,8 +264,19 @@ class fpdb(QMainWindow):
         is called inside the timed "construct" phase and returns the page; it
         performs its own lazy imports, which are timed with it.
 
-        Returns the page, or None when ``build`` declined to produce one.
+        Returns the page, or None when ``build`` declined to produce one, or
+        when a single-instance tab was already open and was simply shown.
         """
+        if not allow_multiple and name in self.nb_tab_names:
+            # Already open: switching costs nothing, and there is nothing to
+            # measure. Building the page anyway would hand a widget to
+            # add_and_display_tab that it discards, leaving the paint watcher
+            # attached to something never shown -- so no paint would arrive and
+            # the backstop would log a misleading "not-painted total=10000ms"
+            # ten seconds later, with the stall monitor running throughout.
+            self.add_and_display_tab(None, name, allow_multiple=False)
+            return None
+
         profiler = TabOpenProfiler(name)
         profiler.watch_ui_stalls()
 
@@ -273,6 +284,7 @@ class fpdb(QMainWindow):
             page = build()
 
         if page is None:
+            profiler.result()  # stops the stall monitor started above
             return None
 
         profiler.watch_first_paint(page)

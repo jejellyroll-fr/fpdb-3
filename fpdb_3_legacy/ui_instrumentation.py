@@ -124,6 +124,7 @@ class TabOpenProfiler:
         self._paint_watcher: _FirstPaintWatcher | None = None
         self._pending_log: logging.Logger | None = None
         self._stall_monitor: UiStallMonitor | None = None
+        self._timeout_timer: QTimer | None = None
 
     @contextmanager
     def phase(self, phase: str) -> Iterator[None]:
@@ -186,11 +187,29 @@ class TabOpenProfiler:
         if self._paint_watcher is not None and self._paint_watcher.first_paint_ms is not None:
             self._emit_pending()
             return
-        QTimer.singleShot(timeout_ms, self._emit_pending)
+
+        if self._paint_watcher is None:
+            QTimer.singleShot(timeout_ms, self._emit_pending)
+            return
+
+        # Parented to the watcher, itself parented to the widget, so the
+        # backstop dies with the tab. A free-standing QTimer.singleShot outlives
+        # it and fires into a deleted widget when a tab is closed before it has
+        # painted -- which crashed the interpreter rather than logging a line.
+        self._timeout_timer = QTimer(self._paint_watcher)
+        self._timeout_timer.setSingleShot(True)
+        self._timeout_timer.timeout.connect(self._emit_pending)
+        self._timeout_timer.start(timeout_ms)
 
     def result(self) -> TabTiming:
         """Return the timing collected so far."""
-        self._timing.first_paint_ms = None if self._paint_watcher is None else self._paint_watcher.first_paint_ms
+        # The watcher is parented to the widget, so a tab closed before it
+        # painted leaves a wrapper around a deleted C++ object. Reading through
+        # it then raises RuntimeError, and the timing is simply "never painted".
+        try:
+            self._timing.first_paint_ms = None if self._paint_watcher is None else self._paint_watcher.first_paint_ms
+        except RuntimeError:
+            self._timing.first_paint_ms = None
         self._timing.total_ms = (time.perf_counter() - self._started) * 1000
         if self._stall_monitor is not None:
             self._stall_monitor.stop()

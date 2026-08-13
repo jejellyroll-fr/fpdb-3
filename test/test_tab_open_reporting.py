@@ -15,6 +15,8 @@ from __future__ import annotations
 import ast
 import logging
 from pathlib import Path
+from types import CodeType, FunctionType, SimpleNamespace
+from unittest.mock import MagicMock
 
 import pytest
 from PySide6.QtWidgets import QLabel, QWidget
@@ -23,6 +25,18 @@ from fpdb_3_legacy.ui_instrumentation import TabOpenProfiler
 
 SOURCE = Path(__file__).resolve().parents[1] / "fpdb_3_legacy" / "fpdb.pyw"
 TREE = ast.parse(SOURCE.read_text(encoding="utf-8"), filename=str(SOURCE))
+
+
+def _load_fpdb_method(name: str):
+    """Compile one method out of fpdb.pyw without building the Qt main window."""
+    fpdb_class = next(node for node in TREE.body if isinstance(node, ast.ClassDef) and node.name == "fpdb")
+    method = next(node for node in fpdb_class.body if isinstance(node, ast.FunctionDef) and node.name == name)
+    module = ast.Module(body=[method], type_ignores=[])
+    ast.fix_missing_locations(module)
+    compiled = compile(module, str(SOURCE), "exec")
+    code = next(item for item in compiled.co_consts if isinstance(item, CodeType) and item.co_name == name)
+    namespace = {"TabOpenProfiler": TabOpenProfiler, "log": logging.getLogger("test-open-tab")}
+    return FunctionType(code, namespace, name)
 
 
 def _tab_methods() -> list[ast.FunctionDef]:
@@ -77,6 +91,54 @@ class _RecordingLogger(logging.Logger):
         self.lines.append(msg % args if args else msg)
 
 
+def test_reopening_a_single_instance_tab_builds_nothing() -> None:
+    """A tab already open must not be rebuilt, watched, or waited on.
+
+    ``add_and_display_tab`` discards the page when ``allow_multiple=False``
+    and the tab exists, so building one would leave the paint watcher on a
+    widget that is never shown: no paint would arrive, and the backstop would
+    log a misleading ``not-painted total=10000ms`` ten seconds later.
+    """
+    open_tab = _load_fpdb_method("open_tab")
+    built = []
+
+    window = SimpleNamespace(
+        nb_tab_names=["Version"],
+        threads=[],
+        add_and_display_tab=MagicMock(),
+    )
+
+    def build():
+        built.append("called")
+        return QLabel("contenu")
+
+    result = open_tab(window, "Version", build, allow_multiple=False)
+
+    assert result is None
+    assert built == [], "la page ne doit pas être construite pour un onglet déjà ouvert"
+    window.add_and_display_tab.assert_called_once_with(None, "Version", allow_multiple=False)
+
+
+@pytest.mark.qt
+def test_a_single_instance_tab_is_built_the_first_time(qtbot) -> None:
+    """The early return must not swallow the genuine first open."""
+    open_tab = _load_fpdb_method("open_tab")
+    page = QLabel("contenu")
+    qtbot.addWidget(page)
+
+    window = SimpleNamespace(
+        nb_tab_names=[],
+        threads=[],
+        add_and_display_tab=MagicMock(),
+    )
+
+    result = open_tab(window, "Version", lambda: page, allow_multiple=False)
+
+    assert result is page
+    window.add_and_display_tab.assert_called_once_with(page, "Version", allow_multiple=False)
+
+
+@pytest.mark.qt
 def test_reporting_inline_cannot_see_the_paint(qtbot) -> None:
     """The regression itself, stated as a test.
 
@@ -97,6 +159,7 @@ def test_reporting_inline_cannot_see_the_paint(qtbot) -> None:
     assert "not-painted" in timing.format()
 
 
+@pytest.mark.qt
 def test_report_when_painted_waits_for_the_first_paint(qtbot) -> None:
     log = _RecordingLogger()
     widget = QLabel("contenu")
@@ -114,6 +177,7 @@ def test_report_when_painted_waits_for_the_first_paint(qtbot) -> None:
     assert "not-painted" not in log.lines[0]
 
 
+@pytest.mark.qt
 def test_a_widget_that_never_paints_still_reports_once(qtbot) -> None:
     """The backstop: a tab that never draws is the symptom, not a reason to go quiet."""
     log = _RecordingLogger()
@@ -130,6 +194,7 @@ def test_a_widget_that_never_paints_still_reports_once(qtbot) -> None:
     assert "not-painted" in log.lines[0]
 
 
+@pytest.mark.qt
 def test_the_report_is_not_emitted_twice(qtbot) -> None:
     """Paint and timeout can both fire; only one line may be written."""
     log = _RecordingLogger()
@@ -147,6 +212,31 @@ def test_the_report_is_not_emitted_twice(qtbot) -> None:
     assert len(log.lines) == 1
 
 
+@pytest.mark.qt
+def test_a_tab_closed_before_it_paints_does_not_crash(qtbot) -> None:
+    """The backstop must die with the widget it was waiting on.
+
+    A free-standing QTimer.singleShot outlives the tab and fires into a
+    deleted C++ object, which aborted the interpreter instead of logging.
+    """
+    log = _RecordingLogger()
+    widget = QWidget()
+    qtbot.addWidget(widget)
+
+    profiler = TabOpenProfiler("Graphs")
+    profiler.watch_first_paint(widget)
+    profiler.report_when_painted(log, timeout_ms=30)
+
+    widget.deleteLater()
+    widget.setParent(None)
+    del widget
+    qtbot.wait(120)  # le backstop aurait expiré ici
+
+    # Rien n'est journalisé, et surtout rien ne plante.
+    assert log.lines == []
+
+
+@pytest.mark.qt
 def test_stall_monitor_is_folded_into_the_same_line(qtbot) -> None:
     """Lead 2 of #249: the stall figure was only ever produced inside tests."""
     log = _RecordingLogger()
@@ -164,6 +254,7 @@ def test_stall_monitor_is_folded_into_the_same_line(qtbot) -> None:
     assert "max_stall=" in log.lines[0]
 
 
+@pytest.mark.qt
 @pytest.mark.parametrize("with_monitor", [False, True])
 def test_format_stays_greppable(qtbot, with_monitor: bool) -> None:
     widget = QLabel("contenu")
