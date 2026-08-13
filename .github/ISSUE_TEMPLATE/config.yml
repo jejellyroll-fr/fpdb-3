@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Documentation and troubleshooting
+    url: https://github.com/jejellyroll-fr/fpdb-3/wiki/HUD-troubleshooting
+    about: Check the wiki troubleshooting guide before opening a new issue.
+  - name: Privacy-safe captures and screenshots
+    url: https://github.com/jejellyroll-fr/fpdb-3/blob/development/docs/ISSUE_REPORTING.md
+    about: Read this before attaching screenshots, logs, hand histories, or captures.

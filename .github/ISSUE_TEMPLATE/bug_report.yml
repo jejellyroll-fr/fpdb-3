@@ -1,0 +1,81 @@
+name: Bug report
+description: Report a reproducible problem in FPDB.
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Before attaching evidence, read the [privacy-safe reporting guide](https://github.com/jejellyroll-fr/fpdb-3/blob/development/docs/ISSUE_REPORTING.md).
+
+        Do not attach raw captures, hand histories, logs, or screenshots containing player names, account identifiers, tokens, or local paths.
+  - type: input
+    id: fpdb_version
+    attributes:
+      label: FPDB version
+      description: This field is mandatory. Copy the value from Help → About, or provide the exact release tag/commit.
+      placeholder: 3.7.0, or commit db45a693
+    validations:
+      required: true
+  - type: dropdown
+    id: installation
+    attributes:
+      label: Installation type
+      options:
+        - Prebuilt PyOxidizer binary
+        - Prebuilt PyInstaller binary
+        - Source installation
+        - Other
+    validations:
+      required: true
+  - type: dropdown
+    id: operating_system
+    attributes:
+      label: Operating system
+      options:
+        - macOS
+        - Windows
+        - Linux
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: poker_room
+    attributes:
+      label: Poker room and game format
+      description: Include the room, cash/tournament format, and game variant if relevant.
+      placeholder: Winamax Go Fast NLHE cash
+  - type: textarea
+    id: permissions
+    attributes:
+      label: Permissions and environment
+      description: For macOS HUD issues, state whether Screen Recording, Accessibility, and Automation are granted. For Linux, state X11 or Wayland.
+      placeholder: |-
+        macOS permissions: Screen Recording ✓, Accessibility ✓, Automation ✓
+        Linux display: X11
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Give the smallest sequence that reproduces the problem.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Privacy-safe evidence
+      description: Paste a sanitized error, test output, or anonymized screenshot. Follow the reporting guide before uploading anything.
+      render: text

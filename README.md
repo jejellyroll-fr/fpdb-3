@@ -156,7 +156,7 @@ fpdb/
 └── infrastructure/platform/  # platform window and geometry detection
 locale/                   # gettext .po catalogues (14 locales)
 tests/fixtures/           # golden-master hand-history corpus
-docs/                     # equity engine, macOS Gatekeeper, SwC capture protocol
+docs/                     # equity engine, macOS Gatekeeper, SwC capture, issue reporting
 ```
 
 ## 📄 License
