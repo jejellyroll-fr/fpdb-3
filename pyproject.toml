@@ -39,6 +39,11 @@ dependencies = [
 build = [
     "pyinstaller>=6.9.0",
     "wheel>=0.42.0",
+    # PyInstaller converts the .jpg application icon to .ico for the Windows
+    # executable, and needs Pillow to do it. Pillow used to arrive transitively
+    # through matplotlib; dropping that dependency broke the Windows build, so
+    # the build-time requirement is now declared where it belongs.
+    "pillow>=10.0.0",
 ]
 test = [
     "pytest>=8.3.2",
