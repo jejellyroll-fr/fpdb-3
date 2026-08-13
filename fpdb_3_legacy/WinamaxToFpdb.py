@@ -1233,11 +1233,23 @@ class Winamax(HandHistoryConverter):
             # Winamax does not identify the splash component on collection lines.
             # Allocate it pro rata for split pots; for a single winner this is the
             # exact amount dropped by the room.
-            splash = Decimal(splash_pot) / 100
+            splash_cents = int(splash_pot)
             total_collected = Decimal(total_collected)
+            shares = []
+            allocated_cents = 0
+            for player, amount in hand.collectees.items():
+                exact_cents = Decimal(splash_cents) * amount / total_collected
+                cents = int(exact_cents)
+                shares.append((player, cents, exact_cents - cents))
+                allocated_cents += cents
+
+            # Distribute the leftover cents by largest remainder so persisted
+            # per-player values still add up to the room's splash amount.
+            remainder = splash_cents - allocated_cents
+            shares.sort(key=lambda share: share[2], reverse=True)
             hand.splashWinnings = {
-                player: splash * amount / total_collected
-                for player, amount in hand.collectees.items()
+                player: Decimal(cents + (index < remainder)) / 100
+                for index, (player, cents, _) in enumerate(shares)
             }
 
     def readShownCards(self, hand: Hand) -> None:

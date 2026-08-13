@@ -247,6 +247,25 @@ class TestWinamaxComplete(unittest.TestCase):
         self.parser.readCollectPot(hand)
         assert hand.splashWinnings == {"Hero": Decimal("0.20")}
 
+    def test_read_collect_pot_preserves_splash_cents_when_split(self) -> None:
+        """Split splash winnings are rounded to cents without losing value."""
+        hand = Mock()
+        hand.handText = "Alice collected 1.00€\nBob collected 1.00€\nCarol collected 1.00€"
+        hand.splashPot = 20
+        hand.totalcollected = Decimal("3.00")
+        hand.collectees = {
+            "Alice": Decimal("1.00"),
+            "Bob": Decimal("1.00"),
+            "Carol": Decimal("1.00"),
+        }
+        hand.players = [[1, "Alice", Decimal("1.00")], [2, "Bob", Decimal("1.00")], [3, "Carol", Decimal("1.00")]]
+        hand.gametype = {"currency": "EUR"}
+        self.parser.compilePlayerRegexs(hand)
+        self.parser.readCollectPot(hand)
+
+        assert sum(hand.splashWinnings.values()) == Decimal("0.20")
+        assert sorted(hand.splashWinnings.values()) == [Decimal("0.06"), Decimal("0.07"), Decimal("0.07")]
+
     def test_read_antes_method(self) -> None:
         """Test readAntes method with stud games."""
         mock_hand = Mock()
