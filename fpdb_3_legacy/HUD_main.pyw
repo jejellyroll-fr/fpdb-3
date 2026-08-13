@@ -67,6 +67,8 @@ from fpdb_3_legacy.HudStatsPersistence import get_hud_stats_persistence
 from fpdb_3_legacy.interlocks import (
     HUD_ALREADY_RUNNING_EXIT_CODE,
     HUD_INSTANCE_LOCK_NAME,
+    HUD_LOCK_UNDETERMINED_EXIT_CODE,
+    LockUndeterminedError,
     SingleInstanceError,
     acquire_hud_instance_lock,
     read_lock_owner,
@@ -3954,6 +3956,19 @@ if __name__ == "__main__":
 
     try:
         hud_instance_lock = acquire_hud_instance_lock(format_identity(identity))
+    except LockUndeterminedError as exc:
+        # Not a refusal: the lock mechanism never answered. Saying "another HUD
+        # owns the lock" here would be a guess, and the one time it was wrong
+        # the user had no HUD to quit and no way to tell (#259).
+        log.error(
+            "HUD startup aborted: the single-HUD lock %s could not be tested (%s). This process "
+            "(pid=%s session=%s) is exiting. Whether another HUD is running is unknown.",
+            HUD_INSTANCE_LOCK_NAME,
+            exc,
+            identity["pid"],
+            identity["session"],
+        )
+        raise SystemExit(HUD_LOCK_UNDETERMINED_EXIT_CODE) from None
     except SingleInstanceError:
         # Naming the owner matters: two HUDs draw two sets of stat blocks over
         # every table, and without this the second one dies silently and the
