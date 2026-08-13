@@ -14,8 +14,9 @@ from __future__ import annotations
 
 import ast
 import logging
+from importlib import import_module
 from pathlib import Path
-from types import CodeType, FunctionType, SimpleNamespace
+from types import SimpleNamespace
 from unittest.mock import MagicMock
 
 import pytest
@@ -33,10 +34,16 @@ def _load_fpdb_method(name: str):
     method = next(node for node in fpdb_class.body if isinstance(node, ast.FunctionDef) and node.name == name)
     module = ast.Module(body=[method], type_ignores=[])
     ast.fix_missing_locations(module)
-    compiled = compile(module, str(SOURCE), "exec")
-    code = next(item for item in compiled.co_consts if isinstance(item, CodeType) and item.co_name == name)
-    namespace = {"TabOpenProfiler": TabOpenProfiler, "log": logging.getLogger("test-open-tab")}
-    return FunctionType(code, namespace, name)
+    namespace = {
+        "TabOpenProfiler": TabOpenProfiler,
+        "import_module": import_module,
+        "log": logging.getLogger("test-open-tab"),
+    }
+    # exec rather than FunctionType(code, ...): keyword defaults live on the
+    # function object, not on its code, so a hand-built function would demand
+    # every keyword-only argument at every call site here.
+    exec(compile(module, str(SOURCE), "exec"), namespace)  # noqa: S102 - compiling one method out of fpdb.pyw
+    return namespace[name]
 
 
 def _tab_methods() -> list[ast.FunctionDef]:
@@ -66,6 +73,23 @@ def test_every_tab_is_instrumented() -> None:
     ]
 
     assert unmeasured == [], f"ces onglets s'ouvrent sans être mesurés : {unmeasured}"
+
+
+def test_no_tab_imports_its_page_itself() -> None:
+    """A lazy import must go through ``open_tab``, which times it on its own.
+
+    Lead 7 of #249 is whether the wait is the module coming out of the
+    PyOxidizer blob or the widget being built. A tab that imports inside its
+    own ``build`` folds both into ``construct=``, and the line can no longer
+    tell them apart -- which is the shape the original report was captured in.
+    """
+    offenders = [
+        method.name
+        for method in _tab_methods()
+        if any(isinstance(node, (ast.Import, ast.ImportFrom)) for node in ast.walk(method))
+    ]
+
+    assert offenders == [], f"ces onglets importent eux-mêmes, hors de la phase mesurée : {offenders}"
 
 
 def test_no_tab_reports_inline() -> None:
@@ -136,6 +160,63 @@ def test_a_single_instance_tab_is_built_the_first_time(qtbot) -> None:
 
     assert result is page
     window.add_and_display_tab.assert_called_once_with(page, "Version", allow_multiple=False)
+
+
+def _window_showing(page) -> SimpleNamespace:
+    """A stand-in main window whose add_and_display_tab shows the page."""
+    return SimpleNamespace(
+        nb_tab_names=[],
+        threads=[],
+        add_and_display_tab=MagicMock(side_effect=lambda *_args, **_kwargs: page.show()),
+    )
+
+
+@pytest.mark.qt
+def test_the_import_is_timed_apart_from_the_construction(qtbot) -> None:
+    """Lead 7 of #249 needs the two costs separated, not summed.
+
+    The evidence in the report carried ``import=`` and ``construct=`` as
+    distinct figures; folding the lazy import into ``build`` lost that split,
+    and with it the only way to say from a log whether a translocated bundle
+    is paying for resolving the module out of its embedded blob.
+    """
+    open_tab = _load_fpdb_method("open_tab")
+    recorder = _RecordingLogger()
+    open_tab.__globals__["log"] = recorder
+    page = QLabel("contenu")
+    qtbot.addWidget(page)
+    received = []
+
+    def build(module):
+        received.append(module)
+        return page
+
+    result = open_tab(_window_showing(page), "Graphs", build, module="json")
+
+    qtbot.waitUntil(lambda: bool(recorder.lines), timeout=5000)
+
+    assert result is page
+    assert received == [import_module("json")], "le module importé doit être passé à build"
+    line = recorder.lines[0]
+    assert "import=" in line
+    assert line.index("import=") < line.index("construct=")
+
+
+@pytest.mark.qt
+def test_a_tab_without_a_lazy_module_reports_no_import_phase(qtbot) -> None:
+    """Tabs imported at startup pay nothing here, and must not claim a phase."""
+    open_tab = _load_fpdb_method("open_tab")
+    recorder = _RecordingLogger()
+    open_tab.__globals__["log"] = recorder
+    page = QLabel("contenu")
+    qtbot.addWidget(page)
+
+    open_tab(_window_showing(page), "Hand Viewer", lambda: page)
+
+    qtbot.waitUntil(lambda: bool(recorder.lines), timeout=5000)
+
+    assert "import=" not in recorder.lines[0]
+    assert "construct=" in recorder.lines[0]
 
 
 @pytest.mark.qt

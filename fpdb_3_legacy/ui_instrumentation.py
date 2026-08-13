@@ -2,10 +2,19 @@
 
 The third tab a user opens is reported as slow, and the SQL behind it is not:
 the queries measured in isolation come back in tenths of a second. That leaves
-the work that a query timer cannot see -- importing Matplotlib and scanning
-the system fonts, building the widget, and the first real paint -- plus the
-only figure that matches what "frozen" means to a user, which is how long the
-Qt event loop went without running.
+the work that a query timer cannot see -- importing the page's module, building
+the widget, and the first real paint -- plus the only figure that matches what
+"frozen" means to a user, which is how long the Qt event loop went without
+running. (This paragraph used to name a Matplotlib font scan. That cost left
+with the PyQtGraph migration in #228, and the sentence outliving it is what
+sent the #249 analysis after a suspect that no longer existed.)
+
+The import is timed on its own because it is the one phase whose cost depends
+on how the application was installed: a PyOxidizer bundle resolves a module
+out of its embedded blob on first use, over a randomized read-only mount when
+macOS has translocated the .app. ``fpdb.open_tab`` performs it, so a tab that
+imports its own page inside ``build`` would hide that figure inside
+``construct=``.
 
 Two instruments, both usable in production and in a test:
 
