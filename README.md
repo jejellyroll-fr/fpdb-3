@@ -30,6 +30,16 @@ release artifacts are Developer ID signed and notarized only when the repository
 credentials are configured; otherwise the workflow publishes an ad-hoc artifact with the limitations
 described there.
 
+## Credits
+
+FPDB-3 continues the original FPDB project, whose history predates the Python
+3 migration. The complete historical contributor list is preserved in
+[`contributors.txt`](contributors.txt), including project administration,
+code, documentation, translations, testing and community support.
+
+The Python 3 continuation is credited to MegaphoneJon and ChazDazzle, with
+current maintenance, release and documentation work by jejellyroll-fr.
+
 The available packagers depend on the platform:
 
 - macOS ships only `fpdb-pyoxidizer-macos-arm64`. Keeping a single signed app
