@@ -1,12 +1,14 @@
 # FPDB-3 Legacy (Python)
 
-The original FPDB-3 Python application: hand-history parsers, PySide6 GUI,
-statistics engine, and the HUD overlay. This is the **reference
-implementation** — the Modern (`fpdb/`) and Rust (`rustyFPDB/`) ports are
-validated against its behaviour through parity testing.
+This is the 3.7.0 reference application.
 
-> Actively maintained for parity. New product work happens on the Modern and
-> Rust stacks, but the legacy app remains fully usable.
+The original FPDB-3 Python application: hand-history parsers, PySide6 GUI,
+statistics engine, and the HUD overlay. This standalone repository is the
+actively maintained Python application; the `fpdb/` package contains the
+shared platform/window infrastructure used by the legacy HUD.
+
+> The fast-fold HUD path in 3.7.0 includes platform-specific window contracts,
+> duplicate-renderer interlocks, and deterministic seat handling.
 
 ## ✨ Highlights
 
@@ -20,7 +22,10 @@ validated against its behaviour through parity testing.
 
 ## 🔧 Requirements
 
-- Python 3.10+ (3.13 supported)
+- Source installation: Python 3.11+ (3.13 supported).
+- PyOxidizer binaries embed CPython 3.10.14 and do not require a system Python;
+  PyOxidizer 0.24 cannot link CPython 3.11+. This does not lower the minimum
+  for source installations.
 - OS: Linux, Windows, macOS
 - HUD: X11 (Linux), native window support (Windows/macOS)
 
@@ -29,20 +34,25 @@ validated against its behaviour through parity testing.
 From the repository root:
 
 ```bash
-# venv + editable install with test extras
-python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
+# venv + editable install with test extras (macOS/Linux)
+python3 -m venv .venv
+source .venv/bin/activate
 pip install -e .[test]
 
 # or with uv (faster)
 uv pip install -e .[test]
 ```
 
+On Windows PowerShell, create and activate the environment with
+`py -3 -m venv .venv` and `.venv\Scripts\Activate.ps1`, then run the same
+`pip install` command.
+
 Platform/feature extras: `.[linux]`, `.[windows]`, `.[macos]`, `.[postgresql]`.
 
 ## ▶️ Run
 
 ```bash
-# Full launcher (console script — runs run_fpdb_full.py)
+# Full launcher (console script)
 uv run fpdb_3_legacy
 
 # Desktop GUI directly
