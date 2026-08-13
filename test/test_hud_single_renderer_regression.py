@@ -731,6 +731,30 @@ def test_the_gui_explains_a_refusal_instead_of_reporting_a_code() -> None:
     assert "Quit the other one" in source
 
 
+def test_a_lock_that_could_not_be_tested_is_its_own_exit_status() -> None:
+    """"Quit the other HUD" is bad advice when there may not be another HUD.
+
+    The socket fallback reported an unrelated bind failure as a refusal, so a
+    Windows user with no pywin32 could be told a HUD was running when none was
+    (#259). The verdict and the absence of a verdict now leave by different
+    doors.
+    """
+    from fpdb_3_legacy.interlocks import HUD_ALREADY_RUNNING_EXIT_CODE, HUD_LOCK_UNDETERMINED_EXIT_CODE
+
+    source = (REPO_ROOT_PATH / "fpdb_3_legacy" / "HUD_main.pyw").read_text(encoding="utf-8")
+
+    assert HUD_LOCK_UNDETERMINED_EXIT_CODE not in (0, 1, HUD_ALREADY_RUNNING_EXIT_CODE)
+    assert "raise SystemExit(HUD_LOCK_UNDETERMINED_EXIT_CODE)" in source
+    assert "except LockUndeterminedError" in source
+
+
+def test_the_gui_does_not_blame_a_hud_it_cannot_prove_exists() -> None:
+    source = (REPO_ROOT_PATH / "fpdb_3_legacy" / "GuiAutoImport.py").read_text(encoding="utf-8")
+
+    assert "HUD_LOCK_UNDETERMINED_EXIT_CODE" in source
+    assert "could not be tested" in source
+
+
 def _owner_child_source(lock_name: str, source: str) -> str:
     """A child that takes the socket lock and holds it, whatever the platform."""
     return textwrap.dedent(

@@ -37,7 +37,11 @@ from PySide6.QtWidgets import (
 from fpdb_3_legacy import Configuration, Importer
 from fpdb_3_legacy.hud_diagnostics import session_id
 from fpdb_3_legacy.i18n import gettext as _
-from fpdb_3_legacy.interlocks import HUD_ALREADY_RUNNING_EXIT_CODE, read_lock_owner
+from fpdb_3_legacy.interlocks import (
+    HUD_ALREADY_RUNNING_EXIT_CODE,
+    HUD_LOCK_UNDETERMINED_EXIT_CODE,
+    read_lock_owner,
+)
 from fpdb_3_legacy.loggingFpdb import get_logger
 from fpdb_3_legacy.subprocess_launch import hud_main_command
 
@@ -835,6 +839,15 @@ class GuiAutoImport(QWidget):
                 "The HUD did not start: another FPDB HUD is already running and owns the "
                 f"single-HUD lock ({owner}). Two HUDs draw two sets of stat blocks over every "
                 "table. Quit the other one, then start Auto Import again."
+            )
+        elif return_code == HUD_LOCK_UNDETERMINED_EXIT_CODE:
+            # Deliberately not "another HUD is running": the HUD reached this
+            # exit because it could not find out. Sending the player off to
+            # quit a HUD they do not have is what #259 was about.
+            msg = (
+                "The HUD did not start: the single-HUD lock could not be tested, so whether "
+                "another FPDB HUD is running is unknown. See HUD-log.txt for the underlying "
+                "error. If no other HUD is running, retrying usually succeeds."
             )
         else:
             msg = f"HUD_main exited during startup with code {return_code}"

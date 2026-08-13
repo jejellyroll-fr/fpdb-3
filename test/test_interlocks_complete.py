@@ -101,6 +101,92 @@ def test_a_waiting_caller_retries_until_the_lock_is_free(monkeypatch, name) -> N
         lock.release()
 
 
+def test_a_waiting_caller_does_not_retry_a_lock_it_could_not_test(monkeypatch, name) -> None:
+    """Waiting for an untestable lock waits for nothing.
+
+    ``SingleInstanceError`` means "taken", and taken locks get given back, so
+    retrying is sound. ``LockUndeterminedError`` means the mechanism never
+    answered -- a bind failing with ENETDOWN does not become a free port
+    because a second elapsed. Retrying it spins until the user gives up.
+    """
+    lock = interlocks.InterProcessLock(name=name)
+    attempts = {"n": 0}
+
+    def never_answers(_wait):
+        attempts["n"] += 1
+        raise interlocks.LockUndeterminedError("the mechanism is broken")
+
+    monkeypatch.setattr(lock, "acquire_impl", never_answers)
+    monkeypatch.setattr(interlocks.time, "sleep", lambda _seconds: None)
+
+    with pytest.raises(interlocks.LockUndeterminedError):
+        lock.acquire("waiting", wait=True, retry_time=0)
+
+    assert attempts["n"] == 1
+
+
+def test_a_refusal_keeps_the_reason_the_mechanism_gave(monkeypatch, name) -> None:
+    """``acquire`` reports refusal as a bare False, which throws the reason away."""
+    lock = interlocks.InterProcessLock(name=name)
+
+    def refuse(_wait):
+        raise interlocks.SingleInstanceError("port 20001 is already bound")
+
+    monkeypatch.setattr(lock, "acquire_impl", refuse)
+
+    assert lock.acquire("refused") is False
+    assert lock.last_error == "port 20001 is already bound"
+
+
+def test_a_later_success_clears_the_previous_reason(name) -> None:
+    lock = interlocks.InterProcessLock(name=name)
+    lock.last_error = "stale"
+
+    assert lock.acquire("first") is True
+    try:
+        assert lock.last_error is None
+    finally:
+        lock.release()
+
+
+def test_the_hud_refusal_names_the_port_rather_than_only_the_verdict(monkeypatch, name) -> None:
+    """The user is shown "already running"; the reason has to travel with it.
+
+    Without this the improved bind messages reach the debug log and nowhere
+    else, and every refusal reads identically whatever caused it (#259).
+    """
+
+    def refuse(_self, _wait):
+        raise interlocks.SingleInstanceError(f"Could not acquire exclusive lock on {name}: port 20001 is already bound")
+
+    monkeypatch.setattr(interlocks.InterProcessLock, "acquire_impl", refuse)
+
+    with pytest.raises(interlocks.SingleInstanceError) as excinfo:
+        interlocks.acquire_hud_instance_lock("pid=2 role='hud'", name=name)
+
+    message = str(excinfo.value)
+    assert "already running" in message
+    assert "port 20001" in message
+
+
+def test_an_untestable_lock_reaches_the_hud_entry_point_as_its_own_error(monkeypatch, name) -> None:
+    """The HUD exits on a different code for it, so the GUI can say something true."""
+
+    def never_answers(_self, _wait):
+        raise interlocks.LockUndeterminedError("binding port 20001 failed (Network is down)")
+
+    monkeypatch.setattr(interlocks.InterProcessLock, "acquire_impl", never_answers)
+
+    with pytest.raises(interlocks.LockUndeterminedError):
+        interlocks.acquire_hud_instance_lock("pid=2 role='hud'", name=name)
+
+
+def test_the_two_refusals_stay_distinguishable() -> None:
+    """A subclass, so old callers keep refusing; distinct, so new ones can tell."""
+    assert issubclass(interlocks.LockUndeterminedError, interlocks.SingleInstanceError)
+    assert interlocks.HUD_LOCK_UNDETERMINED_EXIT_CODE != interlocks.HUD_ALREADY_RUNNING_EXIT_CODE
+
+
 def test_the_same_process_cannot_take_a_lock_twice(name) -> None:
     """Re-entering would let one process believe it is two."""
     lock = interlocks.InterProcessLock(name=name)
@@ -376,12 +462,63 @@ def test_a_bind_that_fails_for_another_reason_is_not_called_a_second_hud(name, m
 
     monkeypatch.setattr(socket.socket, "bind", lambda self, addr: refuse(addr))
 
-    with pytest.raises(interlocks.SingleInstanceError) as excinfo:
+    with pytest.raises(interlocks.LockUndeterminedError) as excinfo:
         lock.acquire_impl(wait=False)
 
     message = str(excinfo.value)
     assert "could not test the lock" in message.lower()
     assert "Network is down" in message
+
+
+def test_a_busy_port_is_not_reported_as_an_untestable_lock(name, monkeypatch) -> None:
+    """EADDRINUSE is an answer, and the only one the lock can act on."""
+    lock = interlocks.InterProcessLockSocket(name=name)
+
+    def refuse(_address):
+        raise OSError(errno.EADDRINUSE, "Address already in use")
+
+    monkeypatch.setattr(socket.socket, "bind", lambda self, addr: refuse(addr))
+
+    with pytest.raises(interlocks.SingleInstanceError) as excinfo:
+        lock.acquire_impl(wait=False)
+
+    assert not isinstance(excinfo.value, interlocks.LockUndeterminedError)
+
+
+def test_the_socket_asks_windows_for_a_bind_that_means_something(name, monkeypatch) -> None:
+    """Without SO_EXCLUSIVEADDRUSE a Windows bind is not proof the port was free.
+
+    Another process asking for SO_REUSEADDR can bind a port this lock already
+    holds, which would let a second HUD through the one guard a plain Windows
+    install has. The option exists only on Windows, so it is injected here to
+    be exercised on every runner.
+    """
+    monkeypatch.setattr(socket, "SO_EXCLUSIVEADDRUSE", 4, raising=False)
+    options: list[tuple[int, int, int]] = []
+    real_setsockopt = socket.socket.setsockopt
+
+    def record(self, level, option, value) -> None:
+        options.append((level, option, value))
+        if option != 4:  # the stand-in is not a real option on this platform
+            real_setsockopt(self, level, option, value)
+
+    monkeypatch.setattr(socket.socket, "setsockopt", record)
+
+    lock = interlocks.InterProcessLockSocket(name=name)
+    lock.acquire_impl(wait=False)
+    try:
+        assert (socket.SOL_SOCKET, 4, 1) in options
+    finally:
+        lock.release_impl()
+
+
+def test_a_platform_without_the_option_still_binds(name, monkeypatch) -> None:
+    """Everywhere but Windows there is no such option, and no need for one."""
+    monkeypatch.delattr(socket, "SO_EXCLUSIVEADDRUSE", raising=False)
+
+    lock = interlocks.InterProcessLockSocket(name=name)
+    assert lock.acquire("only-holder") is True
+    lock.release()
 
 
 def test_the_port_stays_inside_the_range_it_declares() -> None:
