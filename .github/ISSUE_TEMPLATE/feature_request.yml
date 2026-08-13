@@ -1,0 +1,52 @@
+name: Feature request
+description: Suggest an improvement to FPDB.
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        The FPDB version is mandatory even for feature requests: it records the behavior and UI baseline the request refers to.
+
+        If you attach a screenshot or capture, read the [privacy-safe reporting guide](https://github.com/jejellyroll-fr/fpdb-3/blob/development/docs/ISSUE_REPORTING.md) first.
+  - type: input
+    id: fpdb_version
+    attributes:
+      label: FPDB version concerned
+      description: Copy the value from Help → About, or provide the exact release tag/commit.
+      placeholder: 3.7.0, or commit db45a693
+    validations:
+      required: true
+  - type: dropdown
+    id: installation
+    attributes:
+      label: Installation type
+      options:
+        - Prebuilt PyOxidizer binary
+        - Prebuilt PyInstaller binary
+        - Source installation
+        - Not yet installed
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or use case
+      description: What limitation or workflow should FPDB address?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe the behavior you would like, including relevant room, platform, or HUD details.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Supporting evidence
+      description: Add privacy-safe screenshots or captures only. Remove player names, account identifiers, tokens, and local paths first.
+      render: text

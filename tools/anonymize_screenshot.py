@@ -6,7 +6,7 @@ table window carries other people's screen names. This paints chosen rectangles
 out of an image before it is published to the wiki, and strips the metadata the
 capture tool wrote into the file.
 
-    python tools/anonymize_screenshot.py table.png -o table-wiki.png \
+    uv run python tools/anonymize_screenshot.py table.png -o table-wiki.png \
         --box 120,340,180,22 --box 410,190,180,22
 
 Coordinates are ``x,y,width,height`` in pixels from the top-left. Pass

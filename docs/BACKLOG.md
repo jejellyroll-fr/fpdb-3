@@ -1,211 +1,219 @@
 # Backlog
 
-État au 2026-08-07, après la 3.4.2. Chaque tâche porte la preuve qui l'a fait
-remonter, de quoi la vérifier, et ce qui peut mal tourner.
+Status as of 2026-08-13, after 3.7.0. Each item records the evidence that
+raised it, how to verify it, and what can go wrong.
 
-Ordonné par rendement : ce qui lève un risque réel pour peu de travail d'abord.
-
----
-
-## 1. iPoker : mains dupliquées sur les bases déjà importées
-
-**Problème.** Le correctif du hand id iPoker (2026-07-25) a déplacé
-`re_hand_info` de `sessioncode="…"` vers `gamecode="…"` — le premier motif
-matchait aussi l'en-tête `<session sessioncode="…">` qui ouvre chaque fichier,
-donnant à la première main de chaque fichier l'identifiant de session. Mesuré à
-l'époque : 9 fichiers sur 9 touchés.
-
-**Ce qui reste.** Le code est corrigé, **les données ne le sont pas**. Sur une
-base déjà importée, la première main de chaque fichier iPoker porte encore
-l'ancien identifiant. Un ré-import l'insère sous le bon sans écraser l'ancienne
-ligne : une main dupliquée par fichier importé.
-
-**Ne pas confondre avec l'outil livré en 3.4.2.**
-`fpdb_3_legacy/fix_ipoker_duplicate_session_hands.py` (#193) travaille sur les
-**fichiers XML du disque** : il repère les sessions dont tous les `gamecode`
-sont déjà couverts par un fichier précédent et les supprime, de façon
-déterministe. C'est utile *avant* import, et ça ne touche pas la base. La
-migration des lignes déjà insérées n'existe toujours pas — les trois
-`backfill_*` couvrent boards, showdown et autonotes, pas les identifiants.
-
-**À faire.** Un script de maintenance qui repère, pour chaque fichier iPoker
-importé, la main dont le `siteHandNo` égale un `sessioncode` du corpus, et la
-supprime ou la réconcilie. À faire tourner une fois, avec un mode `--dry-run`.
-
-**Risque.** Élevé : il supprime des lignes en base. Impose un `--dry-run` par
-défaut, un décompte affiché avant action, et une sauvegarde documentée. À noter
-que l'outil de 3.4.2 a fait le choix inverse — `--dry-run` y est un drapeau
-optionnel, pas le défaut — parce qu'il ne touche que des fichiers que l'import
-sait régénérer. Ce raisonnement ne tient plus dès qu'on écrit en base.
+Ordered by return on effort: risks that can be removed with little work come
+first.
 
 ---
 
-## 2. Découpage de `Database.py` — arrêté en cours de route
+## 1. iPoker: duplicate hands in already-imported databases
 
-**État au 2026-08-07.** 2 231 lignes (2 413 avant la 3.4.2), plancher de
-couverture 48,6 % (`coverage-baseline.json`, inchangé). `database_players` a
-été extrait en #194, ce qui porte à sept les domaines sortis :
+**Problem.** The iPoker hand-id fix (2026-07-25) moved `re_hand_info` from
+`sessioncode="…"` to `gamecode="…"` — the first pattern also matched the
+`<session sessioncode="…">` header that opens every file, assigning the session
+id to the first hand in each file. At the time, 9 of 9 files were affected.
+
+**What remains.** The code is fixed, but **the data is not**. In an already
+imported database, the first hand in each iPoker file still carries the old id.
+Re-importing it inserts the hand under the correct id without replacing the old
+row: one duplicate hand per imported file.
+
+**Do not confuse this with the tool shipped in 3.4.2.**
+`fpdb_3_legacy/fix_ipoker_duplicate_session_hands.py` (#193) operates on
+**XML files on disk**: it finds sessions whose `gamecode` values are all
+already covered by a previous file and removes them deterministically. This is
+useful *before* import and does not touch the database. Migration of rows that
+are already inserted still does not exist — the three `backfill_*` scripts
+cover boards, showdown and auto notes, not identifiers.
+
+**To do.** Write a maintenance script that, for every imported iPoker file,
+finds the hand whose `siteHandNo` equals a `sessioncode` in the corpus, then
+deletes or reconciles it. It should be run once, with a `--dry-run` mode.
+
+**Risk.** High: it deletes database rows. Make `--dry-run` the default, show a
+count before taking action, and document the backup procedure. Note that the
+3.4.2 tool made the opposite choice — `--dry-run` is an optional flag there,
+not the default — because it only touches files that the importer can
+regenerate. That reasoning no longer applies once the database is written.
+
+---
+
+## 2. Splitting up `Database.py` — stopped midway
+
+**Status as of 2026-08-13.** 2,231 lines (2,413 before 3.4.2), with a 48.6%
+coverage floor (`coverage-baseline.json`, unchanged). `database_players` was
+extracted in #194, bringing the number of extracted domains to seven:
 `database_aof`, `database_auto_notes`, `database_bulk_import`,
 `database_caches`, `database_hud_stats`, `database_players`,
-`database_schema`, `database_tournaments`. L'hôte reste gros.
+`database_schema`, and `database_tournaments`. The host file is still large.
 
-**À faire.** Poursuivre par domaine, en vérifiant à chaque extraction que le
-cliquet de complexité de `pyproject.toml` ne grossit pas : une extraction
-déplace la dette, elle ne doit pas en créer.
+**To do.** Continue by domain, checking after every extraction that the
+complexity ratchet in `pyproject.toml` does not grow: an extraction moves debt;
+it must not create more of it.
 
 ```bash
-ruff check --select C901,PLR0912,PLR0915 --isolated <fichiers>
+ruff check --select C901,PLR0912,PLR0915 --isolated <files>
 ```
 
-**Risque.** Moyen. `Database.py` est au centre de l'import et du HUD ; toute
-extraction doit laisser la suite complète verte.
+**Risk.** Medium. `Database.py` is central to importing and the HUD; every
+extraction must leave the full test suite green.
 
 ---
 
-## 3. Couverture du domaine `gui` — 37 %, le plus bas
+## 3. `gui` domain coverage — 37%, the lowest
 
-**État.** `coverage-baseline.json` donne toujours 37,0 % pour `gui`, contre
-83,6 % pour `poker-domain` et 86,6 % pour `platform-pkg`. Tiré vers le bas par
-les points d'entrée : `fpdb.pyw`, `GuiSessionViewer`, `GuiLogView`,
-`GuiAutoNotesWorkbench`, `ModernSeatPreferences`.
+**Status.** `coverage-baseline.json` still reports 37.0% for `gui`, versus
+83.6% for `poker-domain` and 86.6% for `platform-pkg`. The entry points pull it
+down: `fpdb.pyw`, `GuiSessionViewer`, `GuiLogView`, `GuiAutoNotesWorkbench`,
+and `ModernSeatPreferences`.
 
-**Ce qui a bougé.** #195 a ajouté des tests unitaires sur le formatage et la
-logique métier GUI (`tests/test_gui_formatting_and_business_logic.py`), et #197
-un test Qt de non-régression sur les cartes de site. Le plancher n'a pas été
-re-cliqueté : la valeur ci-dessus est le seuil, pas la couverture réelle
-d'aujourd'hui. La régénérer fait partie du travail.
+**What changed.** #195 added unit tests for GUI formatting and business logic
+(`tests/test_gui_formatting_and_business_logic.py`), and #197 added a Qt
+regression test for site cards. The floor has not been ratcheted again: the
+value above is the threshold, not today's actual coverage. Regenerating it is
+part of the work.
 
-**À faire.** Cibler ce qui est testable sans fenêtre : la logique de sélection,
-de formatage et de filtrage, en la séparant du câblage Qt. Le harnais `qt`
-offscreen existe déjà et tourne en CI. Puis :
+**To do.** Target logic that can be tested without a window — selection,
+formatting and filtering — by separating it from Qt wiring. The offscreen `qt`
+harness already exists and runs in CI. Then:
 
 ```bash
 python tools/coverage_ratchet.py --update coverage.json
 ```
 
-**Risque.** Faible, mais le rendement décroît vite — l'essentiel du code GUI
-restant est du câblage.
+**Risk.** Low, but returns diminish quickly: most of the remaining GUI code is
+wiring.
 
 ---
 
-## 4. `Configuration` lit son XML avec minidom
+## 4. `Configuration` reads XML with minidom
 
-**Problème.** `Configuration.py` parse et réécrit la configuration avec
-`minidom`, le parseur XML le plus lent de la stdlib. Sur un `HUD_config.xml` de
-300 Ko, mesuré le 2026-08-06 :
+**Problem.** `Configuration.py` parses and rewrites configuration with
+`minidom`, the slowest XML parser in the standard library. Measured on a
+300-KB `HUD_config.xml` on 2026-08-06:
 
 | | |
 |---|---|
-| `defusedxml.minidom.parse` | 18,6 ms |
-| `ElementTree.parse` | 2,7 ms |
+| `defusedxml.minidom.parse` | 18.6 ms |
+| `ElementTree.parse` | 2.7 ms |
 
-Un seul `Config()` fait 566 000 appels de fonction, dont 244 000 dans
-`_get_elements_by_tagName_helper` — `getElementsByTagName` étant une descente
-récursive de tout le sous-arbre à chaque appel.
+A single `Config()` call makes 566,000 function calls, including 244,000 in
+`_get_elements_by_tagName_helper` — `getElementsByTagName` recursively walks
+the entire subtree on every call.
 
-**Pourquoi ce n'est pas urgent.** #197 a supprimé l'essentiel du coût : les
-deux parsings de l'exemple par `Config()` sont mis en cache, et `Config()`
-s'exécute désormais une à deux fois par session au lieu de 27. Le gain restant
-est donc de l'ordre de 16 ms, une fois.
+**Why this is not urgent.** #197 removed most of the cost: the two example
+parses performed by `Config()` are cached, and `Config()` now runs once or
+twice per session instead of 27 times. The remaining gain is therefore about
+16 ms, once per session.
 
-**Pourquoi c'est quand même listé.** 12 fichiers de `fpdb_3_legacy/` (39 dans
-tout le dépôt) manipulent le DOM, dont le **chemin d'écriture** de la
-configuration ; `Configuration.py` à lui seul porte 134 appels DOM. C'est un
-refactor transverse, pas une optimisation — délibérément écarté de #197 pour
-cette raison.
+**Why it is still listed.** Twelve files in `fpdb_3_legacy/` (39 in the whole
+repository) manipulate the DOM, including the configuration **write path**;
+`Configuration.py` alone makes 134 DOM calls. This is a cross-cutting refactor,
+not an optimization — it was deliberately left out of #197 for that reason.
 
-**À faire.** Si c'est entrepris : sa propre PR, avec une couverture de
-round-trip dédiée (lire → modifier → écrire → relire) avant de toucher au
-parseur. La motivation réelle est la lisibilité et la sûreté du code de config,
-pas la vitesse.
+**To do.** If undertaken, give it its own PR, with dedicated round-trip
+coverage (read → modify → write → read again) before changing the parser. The
+real motivation is configuration-code readability and safety, not speed.
 
-**Risque.** Élevé sur la persistance de la configuration utilisateur.
+**Risk.** High for user-configuration persistence.
 
 ---
 
-## 5. Provisionner les secrets de signature/notarisation macOS
+## 5. Provision macOS signing/notarization secrets
 
-**État.** Le workflow sait signer les releases avec Developer ID, hardened
-runtime et entitlement Apple Events, puis notariser/stapler les deux variantes.
-Il refuse désormais une release ad-hoc ou sans Team ID. Les builds ordinaires de
-PR restent volontairement ad-hoc, les secrets n'étant pas exposés au code non
-fiable.
+**Status as of 2026-08-13.** The workflow can sign releases with Developer ID,
+hardened runtime and the Apple Events entitlement, then notarize and staple the
+macOS bundle when the secrets are configured. 3.7.0 retains an explicit ad-hoc
+fallback when `MACOS_SIGNING_IDENTITY` is not provisioned; PR builds remain
+deliberately ad hoc.
 
-**Effet mesuré.** Les traces de profilage d'une session 3.4.1 montrent les
-chemins `/private/var/…/AppTranslocation/…` : chaque première ouverture d'une
-fenêtre paie la validation Gatekeeper des ressources qu'elle charge.
+**Measured effect.** Profiling traces from a 3.4.1 session show paths such as
+`/private/var/…/AppTranslocation/…`: each first window opening pays Gatekeeper's
+validation cost for the resources it loads.
 
-**À provisionner.** Les six secrets décrits dans `docs/macos-gatekeeper.md`, en
-utilisant le même certificat Developer ID Application pour PyInstaller,
-PyOxidizer et toutes les releases suivantes.
+**To provision.** The six secrets described in
+`docs/macos-gatekeeper.md`, using the same Developer ID Application certificate
+for PyInstaller, PyOxidizer and all subsequent releases.
 
-**Pourquoi.** Une signature ad-hoc a une designated requirement liée au CDHash
-du build. Même avec un `CFBundleIdentifier` stable, TCC ne peut donc pas
-réutiliser les autorisations Screen Recording/Accessibility entre versions.
-
----
-
-## 6. Points en attente de validation live
-
-Ni corrigeables ni vérifiables sans une session de jeu réelle :
-
-- **Bug PokerStars cash sous Windows** — durci, jamais confirmé. Les trois
-  autres bugs de la même série sont validés.
-- **Synthèse ring iPoker** (PMU / bwin 6-max).
-- **Ancrage bas-centre du HUD** sur un Twister 2/3-max.
-
-À traiter quand l'occasion se présente ; rien à faire d'ici là.
+**Why.** An ad-hoc signature has a designated requirement tied to the build's
+CDHash. Even with a stable `CFBundleIdentifier`, TCC therefore cannot reuse
+Screen Recording/Accessibility permissions between versions.
 
 ---
 
-## 7. Traductions
+## 6. Items awaiting live validation
 
-13 des 14 locales livrées ne sont pas traduites — seul le français l'est. Le
-pipeline gettext, le sélecteur de langue et l'extraction fonctionnent : il ne
-manque que le contenu des catalogues. Tâche de traduction, pas de
-développement.
+Neither fixable nor verifiable without a real play session:
 
-À noter depuis la 3.4.2 : #198 a corrigé la résolution de langue elle-même —
-une configuration sans `ui_language` retombe sur `system` et non sur l'anglais,
-donc les configs anciennes ne sont plus épinglées aux chaînes non traduites.
+- **PokerStars cash bug on Windows** — hardened, never confirmed. The other
+  three bugs in the same series are validated.
+- **iPoker ring summary** (PMU / bwin 6-max).
+- **Bottom-center HUD anchoring** on a 2/3-max Twister.
 
----
-
-## Fait en 3.4.2
-
-Vérifié dans l'arbre, pas seulement dans les messages de commit :
-
-- **Liste `known_failures` purgée** (#190) — `tests/conftest.py` ne contient
-  plus le bloc ; la suite ne rapporte plus aucun `XPASS` (7 394 passed contre
-  7 328 passed + 9 xpassed avant).
-- **`uncalledbets` supprimé** (#191) — plus aucune occurrence dans le code
-  applicatif ; seule une mention subsiste dans un docstring de
-  `tests/helpers/mock_hand.py`. La branche « supprimer » a été retenue plutôt
-  que « câbler sur `handle_leftover` », et `tests/test_uncalled_bets_real_hands.py`
-  couvre désormais la comptabilité sur mains réelles.
-- **Les tests `perf` ont un point d'exécution** (#192) —
-  `.github/workflows/ci.yml:368` lance `python -m pytest -m perf`, sur Linux
-  seulement et en `continue-on-error`. Les budgets en temps mural sont trop
-  sensibles à la charge des runners partagés pour bloquer un merge, mais le
-  résultat apparaît dans le log.
-- **Attribution PartyPoker** (#196) — les mains vont au skin configuré et non
-  au dernier `<hhc>` du fichier de config.
-- **Performance des popups** (#197) — profilage passé en opt-in
-  (`FPDB_PROFILE=1`), Site Preferences ne balaie plus le disque par carte,
-  la connexion base survit au rechargement de config.
+Handle these when an opportunity arises; there is nothing to do until then.
 
 ---
 
-## Vérifié comme fait, avant la 3.4.2
+## 7. Translations
 
-Relu depuis l'historique git avant suppression des anciens plans :
+Thirteen of the 14 shipped locales are untranslated — only French is complete.
+The gettext pipeline, language selector and extraction work; only catalogue
+content is missing. This is a translation task, not a development task.
 
-- **i18n** — `modern_hud_preferences/` porte 167 appels `_()`, et les libellés
-  écrits en dur en français dans `ring_stats/` ont disparu.
-- **Scripts d'exploitation** — passés de 0 % à un plancher de 44,5 %
+Since 3.4.2, note that #198 fixed language resolution itself: a configuration
+without `ui_language` falls back to `system`, not English, so old
+configurations are no longer pinned to untranslated strings.
+
+---
+
+## Completed in 3.7.0
+
+Verified in the tree:
+
+- **FastHUD** — the fast-fold HUD lifecycle is hardened: one renderer per
+  table, duplicate-instance interlocks, orphan-overlay cleanup, deterministic
+  seat rotation and lock-owner diagnostics.
+- **Cross-platform contracts** — the macOS and Windows paths are covered by
+  deterministic replay tests, and the FastHUD coverage gate remains at 100% in
+  CI.
+- **Version** — the package, Briefcase bundle and `fpdb_3_legacy.__version__`
+  are aligned on 3.7.0.
+
+## Completed in 3.4.2
+
+Verified in the tree, not only in commit messages:
+
+- **Purged `known_failures` list** (#190) — `tests/conftest.py` no longer
+  contains the block; the suite reports no `XPASS` (7,394 passed versus
+  7,328 passed + 9 xpassed before).
+- **Removed `uncalledbets`** (#191) — no occurrence remains in application
+  code; only a mention survives in a docstring in
+  `tests/helpers/mock_hand.py`. The remove branch was chosen over wiring it to
+  `handle_leftover`, and `tests/test_uncalled_bets_real_hands.py` now covers
+  accounting on real hands.
+- **Performance tests have an execution point** (#192) —
+  `.github/workflows/ci.yml:368` runs `python -m pytest -m perf`, on Linux only
+  and with `continue-on-error`. Wall-clock budgets are too sensitive to shared
+  runner load to block a merge, but the result appears in the log.
+- **PartyPoker attribution** (#196) — hands go to the configured skin rather
+  than the last `<hhc>` in the configuration file.
+- **Popup performance** (#197) — profiling is opt-in (`FPDB_PROFILE=1`), Site
+  Preferences no longer scans the disk per card, and the database connection
+  survives configuration reloads.
+
+---
+
+## Verified as completed before 3.4.2
+
+Re-read from git history before the old plans were removed:
+
+- **i18n** — `modern_hud_preferences/` contains 167 `_()` calls, and hard-coded
+  French labels in `ring_stats/` are gone.
+- **Operations scripts** — raised from 0% to a 44.5% floor
   (`tests/test_maintenance_scripts.py`).
-- **Hand id iPoker** — corrigé côté code ; seule la migration des données reste
-  (tâche 1).
-- **Version affichée par les binaires** — l'ancien repli `"3.0.0alpha"` de
-  `fpdb.pyw` a été supprimé en `a5c3a435` ; `_resolve_version()` retombe sur
+- **iPoker hand id** — fixed in code; only data migration remains (item 1).
+- **Version displayed by binaries** — the old `"3.0.0alpha"` fallback in
+  `fpdb.pyw` was removed in `a5c3a435`; `_resolve_version()` falls back to
   `fpdb_3_legacy.__version__`.
