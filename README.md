@@ -38,7 +38,8 @@ FPDB-3 continues the original FPDB project, whose history predates the Python
 code, documentation, translations, testing and community support.
 
 The Python 3 continuation is credited to MegaphoneJon and ChazDazzle, with
-current maintenance, release and documentation work by jejellyroll-fr.
+contributions from Bruno Duyé, Carl Gherardi and Samuele Fiorin (`sf-87`),
+and current maintenance, release and documentation work by jejellyroll-fr.
 
 The available packagers depend on the platform:
 

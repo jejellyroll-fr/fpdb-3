@@ -98,6 +98,15 @@ MegaphoneJon - Python 3 adaptation lineage.
 ChazDazzle - Python 3 adaptation and ongoing project contributions.
 jejellyroll-fr - current FPDB-3 maintenance, releases and documentation.
 
+FPDB-3 contributors found in the repository history
+====================================================
+Bruno Duyé / brunetton - 103 commits, including parser, HUD, logging and
+quality improvements (2024-2025).
+Carl Gherardi - 8 commits in the Python 3 repository history, continuing his
+original FPDB work (2025).
+Samuele Fiorin / sf-87 - 32 commits, including parser fixes, tournament
+statistics, GUI improvements and cleanup (2024).
+
 This historical list is preserved in recognition of the original FPDB
 community. The original contributors file explicitly noted that the list was
 incomplete.
