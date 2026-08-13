@@ -7,7 +7,7 @@ def cash_profit_queries() -> dict[str, str]:
     """Return cash profit curves in native units, big blinds, and dollars."""
     query: dict[str, str] = {}
     query["getRingProfitAllHandsPlayerIdSite"] = """
-        SELECT hp.handId, hp.totalProfit, hp.sawShowdown
+        SELECT hp.handId, hp.totalProfit, hp.sawShowdown, COALESCE(hp.splashWinnings, 0)
         FROM HandsPlayers hp
         INNER JOIN Players pl      ON  (pl.id = hp.playerId)
         INNER JOIN Hands h         ON  (h.id  = hp.handId)
@@ -19,11 +19,11 @@ def cash_profit_queries() -> dict[str, str]:
         <limit_test>
         <game_test>
         AND   gt.type = 'ring'
-        GROUP BY h.startTime, hp.handId, hp.sawShowdown, hp.totalProfit
+        GROUP BY h.startTime, hp.handId, hp.sawShowdown, hp.totalProfit, hp.splashWinnings
         ORDER BY h.startTime"""
 
     query["getRingProfitAllHandsPlayerIdSiteInBB"] = """
-        SELECT hp.handId, ( hp.totalProfit / ( gt.bigBlind  * 2.0 ) ) * 100 , hp.sawShowdown, ( hp.allInEV / ( gt.bigBlind * 2.0 ) ) * 100
+        SELECT hp.handId, ( hp.totalProfit / ( gt.bigBlind  * 2.0 ) ) * 100 , hp.sawShowdown, ( hp.allInEV / ( gt.bigBlind * 2.0 ) ) * 100, ( COALESCE(hp.splashWinnings, 0) / ( gt.bigBlind * 2.0 ) ) * 100
         FROM HandsPlayers hp
         INNER JOIN Players pl      ON  (pl.id = hp.playerId)
         INNER JOIN Hands h         ON  (h.id  = hp.handId)
@@ -36,11 +36,11 @@ def cash_profit_queries() -> dict[str, str]:
         <game_test>
         <currency_test>
         AND   hp.tourneysPlayersId IS NULL
-        GROUP BY h.startTime, hp.handId, hp.sawShowdown, hp.totalProfit, hp.allInEV, gt.bigBlind
+        GROUP BY h.startTime, hp.handId, hp.sawShowdown, hp.totalProfit, hp.allInEV, hp.splashWinnings, gt.bigBlind
         ORDER BY h.startTime"""
 
     query["getRingProfitAllHandsPlayerIdSiteInDollars"] = """
-        SELECT hp.handId, hp.totalProfit, hp.sawShowdown, hp.allInEV
+        SELECT hp.handId, hp.totalProfit, hp.sawShowdown, hp.allInEV, COALESCE(hp.splashWinnings, 0)
         FROM HandsPlayers hp
         INNER JOIN Players pl      ON  (pl.id = hp.playerId)
         INNER JOIN Hands h         ON  (h.id  = hp.handId)
@@ -53,8 +53,7 @@ def cash_profit_queries() -> dict[str, str]:
         <game_test>
         <currency_test>
         AND   hp.tourneysPlayersId IS NULL
-        GROUP BY h.startTime, hp.handId, hp.sawShowdown, hp.totalProfit, hp.allInEV
+        GROUP BY h.startTime, hp.handId, hp.sawShowdown, hp.totalProfit, hp.allInEV, hp.splashWinnings
         ORDER BY h.startTime"""
 
     return query
-

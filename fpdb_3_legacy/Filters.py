@@ -1431,6 +1431,9 @@ class Filters(QWidget):
         self.cbGraphops["nonshowdown"] = QCheckBox(_("Non-Showdown Winnings"))
         vbox1.addWidget(self.cbGraphops["nonshowdown"])
 
+        self.cbGraphops["nosplash"] = QCheckBox(_("Net profit excluding splash pots"))
+        vbox1.addWidget(self.cbGraphops["nosplash"])
+
         self.cbGraphops["ev"] = QCheckBox(_("EV"))
         vbox1.addWidget(self.cbGraphops["ev"])
 

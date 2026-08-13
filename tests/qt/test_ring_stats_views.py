@@ -37,6 +37,7 @@ def test_dashboard_tab_pyqtgraph_plot(qtbot):
         np.array([5.0, 15.0, 30.0, 60.0]),
         np.array([5.0, 10.0, 20.0, 40.0]),
         np.array([12.0, 28.0, 55.0, 105.0]),
+        np.array([10.0, 24.0, 47.0, 90.0]),
     )
 
     tab.update_data(summary_stats, profits)

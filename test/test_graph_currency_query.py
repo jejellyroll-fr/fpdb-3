@@ -42,8 +42,8 @@ def _run(units: str, currencies: list[str] | None = None) -> str:
     executed: list[str] = []
     viewer = _make_viewer(executed)
     result = viewer.getRingProfitGraph([1], [2], [], [], currencies if currencies is not None else ["USD"], units)
-    # Empty result set -> (None, None, None, None), but the query still ran.
-    assert result == (None, None, None, None)
+    # Empty result set -> all five curves are empty, but the query still ran.
+    assert result == (None, None, None, None, None)
     assert executed, "no SQL query was executed"
     return executed[0].split(" ", 1)[0]  # the marker token
 
@@ -102,5 +102,16 @@ def test_query_failure_rolls_back_and_does_not_propagate() -> None:
     )
 
     result = viewer.getRingProfitGraph([1], [2], [], [], ["USD"], "$")
-    assert result == (None, None, None, None)
+    assert result == (None, None, None, None, None)
     assert rolled_back, "transaction was not rolled back after query failure"
+
+
+def test_profit_curves_include_a_splash_excluded_series() -> None:
+    executed: list[str] = []
+    viewer = _make_viewer(executed)
+    viewer.db.cursor.fetchall = lambda: [(1, 120, True, 0, 20)]
+
+    green, _blue, _red, _orange, nosplash = viewer.getRingProfitGraph([1], [2], [], [], ["USD"], "$")
+
+    assert green.tolist() == [0.0, 1.2]
+    assert nosplash.tolist() == [0.0, 1.0]
