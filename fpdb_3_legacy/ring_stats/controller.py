@@ -119,7 +119,7 @@ class RingStatsController(QObject):
         self.async_mode = "pytest" not in sys.modules and "unittest" not in sys.modules
 
         self._last_summary_stats: dict[str, Any] | None = None
-        self._last_profit_data: tuple[Any, Any, Any, Any] | None = None
+        self._last_profit_data: tuple[Any, Any, Any, Any, Any] | None = None
 
     def shutdown_workers(self) -> None:
         """Stop all DbWorker threads started by this controller.
@@ -252,7 +252,7 @@ class RingStatsController(QObject):
         debug_log(f"_on_summary_query_finished: returned {len(result) if result else 0} rows")
         if not result:
             self._last_summary_stats = {}
-            self._last_profit_data = ([], [], [], [])
+            self._last_profit_data = ([], [], [], [], [])
             self.no_data_found.emit(gui_empty_state.NoDataReason.NO_ROWS.value)
             return
 
@@ -281,7 +281,7 @@ class RingStatsController(QObject):
         import numpy as np
 
         if not result:
-            self._last_profit_data = ([], [], [], [])
+            self._last_profit_data = ([], [], [], [], [])
             self._check_and_emit_dashboard()
             return
 
@@ -290,16 +290,18 @@ class RingStatsController(QObject):
             blue = np.array([0.0, *[float(x[1]) if x[2] else 0.0 for x in result]])
             red = np.array([0.0, *[float(x[1]) if not x[2] else 0.0 for x in result]])
             orange = np.array([0.0, *[float(x[3]) if x[3] is not None else 0.0 for x in result]])
+            splash = np.array([0.0, *[float(x[4]) if x[4] is not None else 0.0 for x in result]])
 
             greenline = green.cumsum() / 100.0
             blueline = blue.cumsum() / 100.0
             redline = red.cumsum() / 100.0
             orangeline = orange.cumsum() / 100.0
+            nosplashline = (green - splash).cumsum() / 100.0
 
-            self._last_profit_data = (greenline, blueline, redline, orangeline)
+            self._last_profit_data = (greenline, blueline, redline, orangeline, nosplashline)
         except Exception as e:
             log.error(f"Error processing profit data: {e}")
-            self._last_profit_data = ([], [], [], [])
+            self._last_profit_data = ([], [], [], [], [])
 
         self._check_and_emit_dashboard()
 
