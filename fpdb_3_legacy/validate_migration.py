@@ -1,13 +1,24 @@
 #!/usr/bin/env python3
-from __future__ import annotations
-
 """Script de validation de la migration Python 3.13/3.14 + PySide6.
 
-Ce script vérifie que toutes les bibliothèques sont correctement installées
-avec les versions compatibles Python 3.13/3.14 et PySide6.
+Ce script vérifie que les bibliothèques dont l'application dépend réellement
+sont installées, importables, et dans une version compatible.
+
+Deux règles tirées d'un échec de ce script :
+
+* Une vérification d'import passe par :func:`check_import`, qui exécute une
+  sonde. Les blocs ``try:`` écrits à la main ne contenaient aucun import et
+  affichaient donc ``OK`` quoi qu'il arrive -- y compris pour des paquets
+  absents de l'environnement.
+* Seules les dépendances déclarées dans ``pyproject.toml`` comptent dans le
+  verdict. Vérifier un paquet non déclaré faisait échouer le script sur une
+  installation saine.
 """
 
+from __future__ import annotations
+
 import sys
+from collections.abc import Callable
 from importlib import metadata
 
 VALIDATION_VERSION_ERRORS = (TypeError, ValueError)
@@ -65,62 +76,96 @@ def check_version(package: str, min_version: str, name: str | None = None) -> bo
         return False
 
 
+def _probe_numpy() -> object:
+    """Importe NumPy et exerce l'API 2.x utilisée par l'application."""
+    import numpy as np
+
+    return np.array([1, 2, 3]).sum()
+
+
+def _probe_pyside6() -> object:
+    """Importe les modules Qt dont dépendent la fenêtre principale et le HUD."""
+    from PySide6 import QtCore, QtWidgets
+
+    return QtCore.qVersion(), QtWidgets.QWidget
+
+
+def _probe_pyqtgraph() -> object:
+    """Importe le moteur de rendu des graphiques (remplace Matplotlib, cf. #228)."""
+    import pyqtgraph as pg
+
+    return pg.PlotWidget
+
+
+def _probe_pandas() -> object:
+    """Importe pandas."""
+    import pandas as pd
+
+    return pd.DataFrame
+
+
+def _probe_aiohttp() -> object:
+    """Importe aiohttp, utilisé par les captures HTTP."""
+    import aiohttp
+
+    return aiohttp.ClientSession
+
+
+def _probe_sqlalchemy() -> object:
+    """Importe SQLAlchemy.
+
+    Optionnel : ``Database.py`` le sonde derrière un ``try``/``except`` et
+    bascule sur ``use_sqlalchemy = False`` s'il manque. Le rapporter comme une
+    erreur ferait échouer une installation parfaitement valide.
+    """
+    import sqlalchemy
+
+    return sqlalchemy.__version__
+
+
+#: Sondes exécutées par :func:`check_imports`, sous la forme
+#: ``(libellé, sonde, optionnel)``. Chaque sonde doit réellement importer :
+#: c'est ce qu'un test de régression vérifie.
+IMPORT_CHECKS: list[tuple[str, Callable[[], object], bool]] = [
+    ("NumPy", _probe_numpy, False),
+    ("PySide6", _probe_pyside6, False),
+    ("pyqtgraph", _probe_pyqtgraph, False),
+    ("pandas", _probe_pandas, False),
+    ("aiohttp", _probe_aiohttp, False),
+    ("SQLAlchemy", _probe_sqlalchemy, True),
+]
+
+
+def check_import(label: str, probe: Callable[[], object], *, optional: bool = False) -> bool:
+    """Exécute une sonde d'import et rapporte son résultat.
+
+    Args:
+        label: Nom affiché
+        probe: Appelable qui effectue l'import à valider
+        optional: Si True, un échec est signalé sans invalider la migration
+
+    Returns:
+        True si l'import a réussi, ou s'il a échoué mais que la dépendance est
+        optionnelle.
+    """
+    try:
+        probe()
+    except VALIDATION_IMPORT_ERRORS as e:
+        if optional:
+            print(f"⚠️  {label:20s} OPTIONAL: {e}")
+            return True
+        print(f"❌ {label:20s} FAILED: {e}")
+        return False
+    print(f"✅ {label:20s} OK")
+    return True
+
+
 def check_imports() -> bool:
     """Vérifie que les imports critiques fonctionnent."""
     print("\n=== Vérification des Imports ===\n")
 
-    imports_ok = True
-
-    # NumPy
-    try:
-        print("✅ NumPy imports       OK (max/min/sum removed as expected)")
-
-        # Test que max/min/sum ne sont plus importés directement
-        try:
-            from numpy import max, min, sum  # noqa: F401 -- import compatibility test
-
-            print("⚠️  NumPy max/min/sum  STILL AVAILABLE (unexpected, but OK)")
-        except ImportError:
-            print("✅ NumPy max/min/sum  REMOVED (expected in NumPy 2.x)")
-    except VALIDATION_IMPORT_ERRORS as e:
-        print(f"❌ NumPy imports       FAILED: {e}")
-        imports_ok = False
-
-    # SQLAlchemy
-    try:
-        print("✅ SQLAlchemy pool     OK")
-    except VALIDATION_IMPORT_ERRORS as e:
-        print(f"❌ SQLAlchemy pool     FAILED: {e}")
-        imports_ok = False
-
-    # matplotlib
-    try:
-        print("✅ matplotlib QtAgg    OK")
-    except VALIDATION_IMPORT_ERRORS as e:
-        print(f"❌ matplotlib QtAgg    FAILED: {e}")
-        imports_ok = False
-
-    # mplfinance
-    try:
-        print("✅ mplfinance          OK")
-    except VALIDATION_IMPORT_ERRORS as e:
-        print(f"❌ mplfinance          FAILED: {e}")
-        imports_ok = False
-
-    # PySide6
-    try:
-        print("✅ PySide6             OK")
-    except VALIDATION_IMPORT_ERRORS as e:
-        print(f"❌ PySide6             FAILED: {e}")
-        imports_ok = False
-
-    # FastAPI (optionnel)
-    try:
-        print("✅ FastAPI/Pydantic    OK")
-    except VALIDATION_IMPORT_ERRORS as e:
-        print(f"⚠️  FastAPI/Pydantic    OPTIONAL: {e}")
-
-    return imports_ok
+    results = [check_import(label, probe, optional=optional) for label, probe, optional in IMPORT_CHECKS]
+    return all(results)
 
 
 def check_numpy_functionality() -> bool:
@@ -182,23 +227,14 @@ def main():
 
     print("=== Vérification des Versions ===\n")
 
-    # Dépendances critiques
+    # Dépendances déclarées dans pyproject.toml. Les minima suivent cette
+    # déclaration : un écart ici ferait échouer une installation conforme.
     all_ok = True
     all_ok &= check_version("numpy", "2.1.0", "NumPy")
-    all_ok &= check_version("sqlalchemy", "2.0.0", "SQLAlchemy")
-    all_ok &= check_version("matplotlib", "3.10.7", "matplotlib")
-    all_ok &= check_version("mplfinance", "0.12.10", "mplfinance")
-
-    # Dépendances moyennes
-    all_ok &= check_version("fastapi", "0.121.1", "FastAPI")
-    all_ok &= check_version("pydantic", "2.12.1", "Pydantic")
+    all_ok &= check_version("PySide6", "6.8.1", "PySide6")
+    all_ok &= check_version("pyqtgraph", "0.13.0", "pyqtgraph")
+    all_ok &= check_version("pandas", "2.2.2", "pandas")
     all_ok &= check_version("aiohttp", "3.13.2", "aiohttp")
-
-    # PySide6 (LGPL license)
-    check_version("PySide6", "6.8.1", "PySide6")
-
-    # Autres dépendances
-    check_version("pandas", "2.2.0", "pandas")
 
     # Test imports
     imports_ok = check_imports()
