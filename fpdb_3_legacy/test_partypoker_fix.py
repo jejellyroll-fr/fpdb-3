@@ -22,7 +22,7 @@ logging.disable(logging.CRITICAL)
 
 # Mock GUI dependencies only when PySide6 is not installed. Installing mocks
 # unconditionally pollutes sys.modules during pytest collection and breaks
-# later PySide6/matplotlib compatibility tests.
+# later PySide6 compatibility tests.
 try:
     import PySide6  # noqa: F401
 except ImportError:

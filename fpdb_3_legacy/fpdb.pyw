@@ -1711,9 +1711,11 @@ class fpdb(QMainWindow):
     # end def tab_import_imap_summaries
 
     def tab_ring_player_stats(self, widget, data=None) -> None:
-        # This package imports Matplotlib and scans every system font. Frozen
-        # builds cannot reliably reuse that scan, so importing it at startup
-        # delayed Auto Import even though no graphing tab had been requested.
+        # Imported lazily: the package pulls in the whole ring-stats view tree,
+        # and most sessions never open this tab. It used to be described as a
+        # Matplotlib font scan, which stopped being true with the move to
+        # PyQtGraph (#228) and sent a later performance analysis (#249) after a
+        # cost that no longer exists.
         profiler = TabOpenProfiler("Ring Player Stats")
         with profiler.phase("import"):
             from fpdb_3_legacy import GuiRingPlayerStats
