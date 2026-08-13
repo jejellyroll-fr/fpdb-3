@@ -28,6 +28,7 @@ from PySide6.QtGui import QBrush, QColor, QPainter, QPixmap, QStandardItem, QSta
 from PySide6.QtWidgets import (
     QApplication,
     QCheckBox,
+    QComboBox,
     QFrame,
     QHBoxLayout,
     QLabel,
@@ -126,6 +127,7 @@ class GuiHandViewer(QSplitter):
             "Total Pot": 15,
             "Rake": 16,
             "SiteHandNo": 17,
+            "Splash": 18,
         }
         self.view = QTableView()
         self.view.setSelectionBehavior(QTableView.SelectRows)
@@ -157,6 +159,7 @@ class GuiHandViewer(QSplitter):
                 "Total Pot",
                 "Rake",
                 "SiteHandId",
+                "Splash",
             ],
         )
 
@@ -194,7 +197,6 @@ class GuiHandViewer(QSplitter):
         self.flagCashout = QCheckBox("CO$")
         self.flagBombPot = QCheckBox("Bomb")
         self.flagDoubleBoard = QCheckBox("2xB")
-        self.flagSplashPot = QCheckBox("Splash")
         _flag_tips = {
             "AI": "went all-in",
             "SD": "saw showdown",
@@ -202,7 +204,6 @@ class GuiHandViewer(QSplitter):
             "CO$": "EV cashout",
             "Bomb": "bomb pot",
             "2xB": "double board",
-            "Splash": "splash pot",
         }
         for cb in (
             self.flagAllIn,
@@ -211,11 +212,17 @@ class GuiHandViewer(QSplitter):
             self.flagCashout,
             self.flagBombPot,
             self.flagDoubleBoard,
-            self.flagSplashPot,
         ):
             cb.setToolTip(_("Filter: ") + _flag_tips[cb.text()])
             cb.stateChanged.connect(lambda _state: self.loadHands(None))
             self.pagerBox.addWidget(cb)
+        self.flagSplashPot = QComboBox()
+        self.flagSplashPot.addItem(_("All hands"), "all")
+        self.flagSplashPot.addItem(_("Splash pots only"), "only")
+        self.flagSplashPot.addItem(_("Exclude splash pots"), "exclude")
+        self.flagSplashPot.setToolTip(_("Filter: splash pot"))
+        self.flagSplashPot.currentIndexChanged.connect(lambda _index: self.loadHands(None))
+        self.pagerBox.addWidget(self.flagSplashPot)
         self.handsVBox.addLayout(self.pagerBox)
         self._update_pager()
 
@@ -267,8 +274,9 @@ class GuiHandViewer(QSplitter):
             extra.append("h.bombPot > 0")
         if getattr(self, "flagDoubleBoard", None) and self.flagDoubleBoard.isChecked():
             extra.append("(SELECT COUNT(*) FROM Boards b WHERE b.handId = h.id) >= 2")
-        if getattr(self, "flagSplashPot", None) and self.flagSplashPot.isChecked():
-            extra.append("h.splashPot > 0")
+        splash_condition = self._splash_filter_condition()
+        if splash_condition:
+            extra.append(splash_condition)
         if extra:
             q = q + " AND " + " AND ".join(extra)
 
@@ -290,6 +298,17 @@ class GuiHandViewer(QSplitter):
         result = [r[0] for r in c.fetchall()]
         log.info("Load Hands matched %d hand(s) for dates %s..%s", len(result), start, end)
         return result
+
+    def _splash_filter_condition(self) -> str | None:
+        """Return the SQL condition for the selected splash-pot mode."""
+        mode = "all"
+        selector = getattr(self, "flagSplashPot", None)
+        if selector is not None and hasattr(selector, "currentData"):
+            mode = selector.currentData() or "all"
+        return {
+            "only": "h.splashPot > 0",
+            "exclude": "(h.splashPot = 0 OR h.splashPot IS NULL)",
+        }.get(mode)
 
     def rankedhand(self, hand, game):
         ranks = {
@@ -401,6 +420,9 @@ class GuiHandViewer(QSplitter):
         totalpot = hand.totalpot
         rake = hand.rake if hand.rake is not None else Decimal("0.00")
         sitehandid = hand.handid
+        currency = str(hand.gametype.get("currency", "USD"))
+        splash = getattr(hand, "splashPot", 0) or 0
+        splash_won = (getattr(hand, "splashWinnings", {}) or {}).get(hero, 0) or 0
         base = hand.gametype["base"]
         category = hand.gametype.get("category", "")
 
@@ -468,6 +490,7 @@ class GuiHandViewer(QSplitter):
             "Total Pot": format_number(totalpot),
             "Rake": format_number(rake),
             "SiteHandNo": str(sitehandid),
+            "Splash": self._format_splash(splash, splash_won, currency),
         }
 
         ordered = sorted(self.colnum.items(), key=lambda kv: kv[1])
@@ -495,6 +518,11 @@ class GuiHandViewer(QSplitter):
                 try:
                     item.setData(float(values[name]), Qt.ItemDataRole.UserRole)
                 except (TypeError, ValueError):
+                    pass
+            elif name == "Splash":
+                try:
+                    item.setData(float(Decimal(str(splash)) / 100), Qt.ItemDataRole.UserRole)
+                except (TypeError, ValueError, ArithmeticError):
                     pass
             if name in ("Won", "Net"):
                 try:
@@ -554,6 +582,18 @@ class GuiHandViewer(QSplitter):
 
     def _format_position(self, pos) -> str:
         return self._POSITION_NAMES.get(str(pos), str(pos))
+
+    @staticmethod
+    def _format_splash(splash, splash_won, currency: str) -> str:
+        """Format the room drop and, when present, the hero's collected share."""
+        try:
+            drop_text = format_currency(Decimal(str(splash)) / 100, currency)
+            if splash_won:
+                won_text = format_currency(splash_won, currency)
+                return f"{drop_text} ({won_text} won)"
+            return drop_text
+        except (TypeError, ValueError, ArithmeticError):
+            return ""
 
     def _format_datetime(self, hand) -> str:
         st = getattr(hand, "startTime", None)
