@@ -1,11 +1,16 @@
 #!/usr/bin/env python3
-from __future__ import annotations
-
 """Tests de validation pour la migration NumPy 2.x.
 
 Ce module teste les fonctionnalités NumPy critiques utilisées dans FPDB.
+
+Une dépendance optionnelle absente doit provoquer un *skip*, jamais un échec :
+appeler ``self.fail()`` faisait échouer ce script sur une installation
+parfaitement conforme, SQLAlchemy n'étant requis nulle part.
 """
 
+from __future__ import annotations
+
+import importlib.util
 import sys
 import unittest
 from pathlib import Path
@@ -116,11 +121,23 @@ class TestNumPyMigration(unittest.TestCase):
         print(f"✅ var() : {variance}")
 
     def test_deprecated_functions_removed(self):
-        """Vérifie que les fonctions dépréciées ne sont plus importées."""
-        # Ces fonctions ne doivent PAS être dans le namespace après import
+        """Vérifie que les modules migrés n'importent plus max/min/sum de NumPy.
 
-        # On ne devrait pas pouvoir importer max, min, sum directement
-        # (mais elles peuvent encore exister dans numpy. namespace)
+        La version précédente de ce test n'affirmait rien : elle affichait un
+        ``✅`` sans rien vérifier. Sa prémisse était de surcroît fausse -- NumPy
+        2.x exporte toujours ``max``/``min``/``sum``. L'invariant réel de la
+        migration porte sur le code de FPDB, qui doit utiliser les méthodes de
+        tableau, et c'est lui qui est vérifié ici.
+        """
+        legacy_dir = Path(__file__).resolve().parent
+        for module in ("GuiGraphViewer.py", "GuiSessionViewer.py"):
+            content = (legacy_dir / module).read_text(encoding="utf-8")
+            for name in ("max", "min", "sum"):
+                self.assertNotIn(
+                    f"from numpy import {name}",
+                    content,
+                    f"{module} importe encore numpy.{name} au lieu de la méthode de tableau",
+                )
         print("✅ Imports dépréciés non utilisés")
 
     def test_realistic_session_calculation(self):
@@ -169,86 +186,34 @@ class TestNumPyMigration(unittest.TestCase):
         print(f"✅ GraphViewer : Green={greenline[-1]:.2f}, Blue={blueline[-1]:.2f}, Red={redline[-1]:.2f}")
 
 
+HAS_SQLALCHEMY = importlib.util.find_spec("sqlalchemy") is not None
+
+
+@unittest.skipUnless(HAS_SQLALCHEMY, "SQLAlchemy est une dépendance optionnelle (cf. Database.py)")
 class TestSQLAlchemyCompatibility(unittest.TestCase):
-    """Tests de compatibilité SQLAlchemy 2.0."""
+    """Tests de compatibilité SQLAlchemy 2.0.
+
+    ``Database.py`` sonde SQLAlchemy derrière un ``try``/``except`` et bascule
+    sur ``use_sqlalchemy = False`` s'il manque ; il n'est déclaré dans aucune
+    section de ``pyproject.toml``. Son absence est donc normale et se traduit
+    par un skip, là où la version précédente appelait ``self.fail()`` et
+    faisait échouer le script sur une installation saine.
+    """
 
     def test_sqlalchemy_version(self):
-        """Vérifie que SQLAlchemy 2.0+ est installé."""
-        try:
-            import sqlalchemy
+        """Vérifie que SQLAlchemy, s'il est présent, est en 2.x."""
+        import sqlalchemy
 
-            version = sqlalchemy.__version__
-            major_version = int(version.split(".")[0])
-            self.assertGreaterEqual(major_version, 2, f"SQLAlchemy 2.x requis, version actuelle : {version}")
-            print(f"✅ SQLAlchemy version : {version}")
-        except ImportError:
-            self.fail("SQLAlchemy n'est pas installé")
+        version = sqlalchemy.__version__
+        major_version = int(version.split(".")[0])
+        self.assertGreaterEqual(major_version, 2, f"SQLAlchemy 2.x requis, version actuelle : {version}")
+        print(f"✅ SQLAlchemy version : {version}")
 
     def test_sqlalchemy_pool_import(self):
         """Vérifie que sqlalchemy.pool peut être importé."""
-        try:
-            from sqlalchemy import pool  # noqa: F401 -- import compatibility test
+        from sqlalchemy import pool  # noqa: F401 -- import compatibility test
 
-            print("✅ sqlalchemy.pool importé avec succès")
-        except ImportError as e:
-            self.fail(f"Impossible d'importer sqlalchemy.pool : {e}")
-
-
-class TestMatplotlibCompatibility(unittest.TestCase):
-    """Tests de compatibilité matplotlib."""
-
-    def test_matplotlib_version(self):
-        """Vérifie que matplotlib 3.10.7+ est installé."""
-        try:
-            import matplotlib
-
-            version = matplotlib.__version__
-            parts = [int(x) for x in version.split(".")[:3]]
-
-            # Vérifier >= 3.10.7
-            is_compatible = (
-                parts[0] > 3
-                or (parts[0] == 3 and parts[1] > 10)
-                or (parts[0] == 3 and parts[1] == 10 and parts[2] >= 7)
-            )
-
-            self.assertTrue(is_compatible, f"matplotlib 3.10.7+ requis, version actuelle : {version}")
-            print(f"✅ matplotlib version : {version}")
-        except ImportError:
-            self.fail("matplotlib n'est pas installé")
-
-    def test_matplotlib_qt_backend(self):
-        """Vérifie que le backend QtAgg compatible PySide6 peut être importé."""
-        try:
-            from matplotlib.backends.backend_qtagg import FigureCanvas  # noqa: F401 -- import compatibility test
-            from matplotlib.figure import Figure  # noqa: F401 -- import compatibility test
-
-            print("✅ matplotlib QtAgg backend importé")
-        except ImportError as e:
-            self.fail(f"Impossible d'importer backend QtAgg : {e}")
-
-
-class TestMplfinanceCompatibility(unittest.TestCase):
-    """Tests de compatibilité mplfinance."""
-
-    def test_mplfinance_version(self):
-        """Vérifie que mplfinance 0.12.10+ est installé."""
-        try:
-            import mplfinance
-
-            version = mplfinance.__version__
-            print(f"✅ mplfinance version : {version}")
-        except ImportError:
-            self.fail("mplfinance n'est pas installé")
-
-    def test_mplfinance_candlestick(self):
-        """Vérifie que candlestick_ochl peut être importé."""
-        try:
-            from mplfinance.original_flavor import candlestick_ochl  # noqa: F401 -- import compatibility test
-
-            print("✅ mplfinance candlestick_ochl importé")
-        except ImportError as e:
-            self.fail(f"Impossible d'importer candlestick_ochl : {e}")
+        print("✅ sqlalchemy.pool importé avec succès")
 
 
 def run_tests():
@@ -257,11 +222,10 @@ def run_tests():
     loader = unittest.TestLoader()
     suite = unittest.TestSuite()
 
-    # Ajouter les tests
+    # Ajouter les tests. matplotlib et mplfinance ne figurent plus ici : aucun
+    # code applicatif ne les importe depuis le passage à PyQtGraph (#228).
     suite.addTests(loader.loadTestsFromTestCase(TestNumPyMigration))
     suite.addTests(loader.loadTestsFromTestCase(TestSQLAlchemyCompatibility))
-    suite.addTests(loader.loadTestsFromTestCase(TestMatplotlibCompatibility))
-    suite.addTests(loader.loadTestsFromTestCase(TestMplfinanceCompatibility))
 
     # Exécuter
     runner = unittest.TextTestRunner(verbosity=2)
