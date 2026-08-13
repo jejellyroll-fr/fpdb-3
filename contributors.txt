@@ -100,7 +100,7 @@ jejellyroll-fr - current FPDB-3 maintenance, releases and documentation.
 
 Special thanks for FPDB-3
 =========================
-Special thanks to Bruno Duyé (brunetton), Carl Gherardi and Samuele Fiorin
+Special thanks to Bruno Duyé (brunetton), Carl Gherardi (Worros) and Samuele Fiorin
 (sf-87), whose contributions, encouragement and support helped keep this
 project moving forward after the Python 3 migration.
 
