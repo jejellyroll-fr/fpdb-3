@@ -16,7 +16,7 @@ import ast
 import logging
 from importlib import import_module
 from pathlib import Path
-from types import SimpleNamespace
+from types import CodeType, FunctionType, SimpleNamespace
 from unittest.mock import MagicMock
 
 import pytest
@@ -34,16 +34,24 @@ def _load_fpdb_method(name: str):
     method = next(node for node in fpdb_class.body if isinstance(node, ast.FunctionDef) and node.name == name)
     module = ast.Module(body=[method], type_ignores=[])
     ast.fix_missing_locations(module)
+    compiled = compile(module, str(SOURCE), "exec")
+    code = next(item for item in compiled.co_consts if isinstance(item, CodeType) and item.co_name == name)
     namespace = {
         "TabOpenProfiler": TabOpenProfiler,
         "import_module": import_module,
         "log": logging.getLogger("test-open-tab"),
     }
-    # exec rather than FunctionType(code, ...): keyword defaults live on the
-    # function object, not on its code, so a hand-built function would demand
-    # every keyword-only argument at every call site here.
-    exec(compile(module, str(SOURCE), "exec"), namespace)  # noqa: S102 - compiling one method out of fpdb.pyw
-    return namespace[name]
+    function = FunctionType(code, namespace, name)
+    # Keyword defaults live on the function object, not on its code, so a
+    # function built this way demands every keyword-only argument at every call
+    # site. Read them off the same AST rather than restating open_tab's
+    # signature here, which would go stale the next time it grows a keyword.
+    function.__kwdefaults__ = {
+        arg.arg: ast.literal_eval(default)
+        for arg, default in zip(method.args.kwonlyargs, method.args.kw_defaults, strict=True)
+        if default is not None
+    }
+    return function
 
 
 def _tab_methods() -> list[ast.FunctionDef]:
