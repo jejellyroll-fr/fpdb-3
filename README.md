@@ -41,6 +41,26 @@ The Python 3 continuation is credited to MegaphoneJon and ChazDazzle, with
 contributions from Bruno Duyé, Carl Gherardi and Samuele Fiorin (`sf-87`),
 and current maintenance, release and documentation work by jejellyroll-fr.
 
+### Existing clones after a history rewrite
+
+If you cloned the repository before a history rewrite, do not pull directly
+into the old branch. First preserve any local work, then realign the clone to
+the remote branch. This keeps a recoverable pointer to your previous state:
+
+```sh
+git stash push -u -m "before fpdb history sync"
+git fetch origin
+git branch backup/before-fpdb-history-sync
+git switch main
+git reset --hard origin/main
+git switch development
+git reset --hard origin/development
+```
+
+Use the backup branch to recover local commits and `git stash pop` to restore
+uncommitted work if needed. The `reset --hard` commands discard uncommitted
+changes on the two local branches, which is why the stash command comes first.
+
 The available packagers depend on the platform:
 
 - macOS ships only `fpdb-pyoxidizer-macos-arm64`. Keeping a single signed app
