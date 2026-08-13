@@ -8,6 +8,7 @@ l'architecture d'onglets asynchrones.
 
 from __future__ import annotations
 
+import contextlib
 from typing import Any
 
 from PySide6.QtCore import Qt
@@ -168,6 +169,11 @@ class GuiRingPlayerStats(QSplitter):
         """
         self.controller.shutdown_workers()
         self.stats_tabs.shutdown_workers()
+
+    def close_owned_database(self) -> None:
+        """Release the connection created for this tab."""
+        with contextlib.suppress(Exception):
+            self.db.disconnect()
 
     def handle_no_data_found(self, reason: str = "") -> None:
         """Explique pourquoi l'onglet est vide (filtre incomplet, base vide, ...)."""

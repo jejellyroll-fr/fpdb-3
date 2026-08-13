@@ -46,6 +46,8 @@ limits in the filter sidebar to speed it up.
 # In the "official" distribution you can find the license in agpl-3.0.txt.
 from __future__ import annotations
 
+import contextlib
+
 from collections.abc import Sequence
 from time import time
 
@@ -485,6 +487,11 @@ class GuiOpponentsReport(QSplitter):
     # ------------------------------------------------------------------
     # Data loading
     # ------------------------------------------------------------------
+    def close_owned_database(self) -> None:
+        """Release the connection created for this tab."""
+        with contextlib.suppress(Exception):
+            self.db.disconnect()
+
     def refreshStats(self, checkState=None) -> None:
         try:
             self.fillStatsFrame()
