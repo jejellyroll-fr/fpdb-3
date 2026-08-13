@@ -1,14 +1,14 @@
 """Tests for Hand Viewer splash-pot filtering and display."""
 
+from types import SimpleNamespace
 from unittest.mock import MagicMock
 
 from fpdb_3_legacy.GuiHandViewer import GuiHandViewer
 
 
 def test_splash_filter_conditions_include_legacy_null_rows() -> None:
-    viewer = GuiHandViewer.__new__(GuiHandViewer)
     selector = MagicMock()
-    viewer.flagSplashPot = selector
+    viewer = SimpleNamespace(flagSplashPot=selector)
 
     selector.currentData.return_value = "all"
     assert viewer._splash_filter_condition() is None
@@ -25,4 +25,3 @@ def test_splash_display_contains_drop_and_hero_share() -> None:
 
     assert "0.20" in display
     assert "won" in display
-
