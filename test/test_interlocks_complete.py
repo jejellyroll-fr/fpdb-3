@@ -14,7 +14,9 @@ mutex regression and a Windows developer sees an fcntl one.
 
 from __future__ import annotations
 
+import errno
 import os
+import socket
 import sys
 import types
 import uuid
@@ -347,6 +349,39 @@ def test_a_released_socket_lock_can_be_taken_again(name) -> None:
 
     assert lock.acquire("second") is True
     lock.release()
+
+
+def test_a_busy_port_is_reported_as_a_busy_port(name, monkeypatch) -> None:
+    """A bound port is reported as contention, not an unexplained failure."""
+    lock = interlocks.InterProcessLockSocket(name=name)
+
+    def refuse(_address):
+        raise OSError(errno.EADDRINUSE, "Address already in use")
+
+    monkeypatch.setattr(socket.socket, "bind", lambda self, addr: refuse(addr))
+
+    with pytest.raises(interlocks.SingleInstanceError) as excinfo:
+        lock.acquire_impl(wait=False)
+
+    assert str(lock.portno) in str(excinfo.value)
+    assert "already bound" in str(excinfo.value)
+
+
+def test_a_bind_that_fails_for_another_reason_is_not_called_a_second_hud(name, monkeypatch) -> None:
+    """A broken socket environment is reported distinctly from contention."""
+    lock = interlocks.InterProcessLockSocket(name=name)
+
+    def refuse(_address):
+        raise OSError(errno.ENETDOWN, "Network is down")
+
+    monkeypatch.setattr(socket.socket, "bind", lambda self, addr: refuse(addr))
+
+    with pytest.raises(interlocks.SingleInstanceError) as excinfo:
+        lock.acquire_impl(wait=False)
+
+    message = str(excinfo.value)
+    assert "could not test the lock" in message.lower()
+    assert "Network is down" in message
 
 
 def test_the_port_stays_inside_the_range_it_declares() -> None:
