@@ -11,13 +11,13 @@ def test_splash_filter_conditions_include_legacy_null_rows() -> None:
     viewer = SimpleNamespace(flagSplashPot=selector)
 
     selector.currentData.return_value = "all"
-    assert viewer._splash_filter_condition() is None
+    assert GuiHandViewer._splash_filter_condition(viewer) is None
 
     selector.currentData.return_value = "only"
-    assert viewer._splash_filter_condition() == "h.splashPot > 0"
+    assert GuiHandViewer._splash_filter_condition(viewer) == "h.splashPot > 0"
 
     selector.currentData.return_value = "exclude"
-    assert viewer._splash_filter_condition() == "(h.splashPot = 0 OR h.splashPot IS NULL)"
+    assert GuiHandViewer._splash_filter_condition(viewer) == "(h.splashPot = 0 OR h.splashPot IS NULL)"
 
 
 def test_splash_display_contains_drop_and_hero_share() -> None:
