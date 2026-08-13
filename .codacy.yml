@@ -14,8 +14,19 @@
 # other Codacy tool keeps analysing them. This mirrors a choice the repository
 # had already made -- pyproject.toml selects ruff rule groups C901, E, F, I,
 # PLR0912, PLR0915, UP and W, deliberately leaving out S (flake8-bandit).
+#
+# The same reasoning covers the migration check scripts. They are test scripts
+# by content -- they assert and report -- but they live in the package
+# directory rather than under test/, so the two globs above never reached them
+# and four added assertions failed the gate on #252. Listed by name rather than
+# with a `fpdb_3_legacy/test_*` glob so that a future production module cannot
+# drift out of analysis by being named after a test.
 engines:
   bandit:
     exclude_paths:
       - "test/**"
       - "tests/**"
+      - "fpdb_3_legacy/validate_migration.py"
+      - "fpdb_3_legacy/test_migration.py"
+      - "fpdb_3_legacy/test_feature_1_1.py"
+      - "fpdb_3_legacy/test_partypoker_fix.py"
