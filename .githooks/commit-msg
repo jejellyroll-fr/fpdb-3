@@ -42,6 +42,10 @@ if [ "$prefix" = auto ]; then
     # that choice. Read the character back off the scissors line git generated,
     # and otherwise fall back to the '#' git picks for an empty buffer.
     prefix=$(awk '/^. -+ >8 -+$/ { print substr($0, 1, 1); exit }' "$msg_file")
+    # Without --verbose there is no scissors line, but git appended its status
+    # template at the end, so the last non-blank line carries the prefix.
+    [ -n "$prefix" ] || prefix=$(awk 'NF { last = $0 }
+        END { c = substr(last, 1, 1); if (index("#;@!$%^&|:", c) > 0) print c }' "$msg_file")
     [ -n "$prefix" ] || prefix='#'
 fi
 
@@ -57,13 +61,17 @@ cleaned=$(awk -v p="$prefix" '
             }
         # Only cut when the tail really is the diff git appended for
         # --verbose; a scissors line in a -F message survives into the commit.
+        # Require the exact shape git emits: the cut line, then its own comment
+        # lines, then the diff. Free-floating patch text below a scissors marker
+        # is not proof that git generated the tail.
         tail_is_diff = 0
-        if (cut > 0)
-            for (i = cut; i <= n; i++)
-                if (line[i] ~ /^diff --git /) {
-                    tail_is_diff = 1
-                    break
-                }
+        if (cut > 0) {
+            j = cut + 1
+            comments = 0
+            while (j <= n && substr(line[j], 1, plen) == p) { j++; comments++ }
+            if (comments >= 1 && j <= n && line[j] ~ /^diff --git /)
+                tail_is_diff = 1
+        }
         last = tail_is_diff ? cut - 1 : n
         for (i = 1; i <= last; i++)
             if (substr(line[i], 1, plen) != p) print line[i]
