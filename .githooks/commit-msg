@@ -27,10 +27,17 @@ msg_file="$1"
 # cleanup=whitespace and keeps that text in the stored message, so discarding
 # it here would let a trailer through unseen.
 #
-# Known limit: `git commit -F` also keeps comment lines, so a trailer that is
-# commented out in the message file survives into the commit unchecked. Git
-# does not parse a commented line as a trailer, so no co-author attribution
-# results from it -- only the literal text remains.
+# Accepted limits. This hook guards against an accidental trailer, not against
+# someone determined to plant one -- anyone determined already has --no-verify.
+# Both remaining holes need a hand-written `git commit -F` message:
+#
+#   * A commented-out trailer survives, because -F keeps comment lines. Git
+#     does not parse a commented line as a trailer, so nothing is attributed;
+#     only the literal text remains.
+#   * A message reproducing git's own template shape below a scissors marker
+#     is taken for a generated tail and skipped. Closing this for real would
+#     mean checking the stored message instead, in a pre-push hook, since a
+#     commit-msg hook runs before cleanup and is told nothing about its mode.
 
 prefix=$(git config --get core.commentString 2>/dev/null)
 [ -n "$prefix" ] || prefix=$(git config --get core.commentChar 2>/dev/null)
