@@ -1,35 +1,87 @@
 #!/bin/sh
 #
-# Reject Claude / Anthropic attribution trailers in commit messages.
+# Reject AI attribution trailers in commit messages.
 #
-# Matches only *attribution* lines (Co-Authored-By trailers, "Generated with"
-# footers, @anthropic.com addresses) plus any "Claude Code" mention -- a commit
-# that merely names Claude in prose, e.g. "Ignore local Claude config", passes.
+# Matches only attribution lines (co-author trailers, "Generated with"
+# footers, Anthropic e-mail addresses) plus any "Claude Code" mention. A
+# commit that merely names Claude in prose, e.g. "Ignore local Claude
+# config", passes.
 #
 # Enable in your clone (once per clone, hooks are not shared by git itself):
 #     git config core.hooksPath .githooks
+# or just: make dev-setup
 #
 # Bypass for a one-off with: git commit --no-verify
 
 msg_file="$1"
 [ -n "$msg_file" ] && [ -f "$msg_file" ] || exit 0
 
-# Drop comment lines and anything below the --verbose scissors line, so the
-# git-supplied template can never trip the check.
-cleaned=$(sed -e '/^# -\{1,\} >8 -\{1,\}$/,$d' -e '/^[[:space:]]*#/d' "$msg_file")
+# This hook runs BEFORE git cleans the message up, so it must remove exactly
+# what git would remove and nothing more:
+#
+#   * Comment lines. Git only treats the prefix as a comment at column 0, and
+#     the prefix is configurable, so honour core.commentString / commentChar.
+#   * The verbose diff that --verbose appends below the scissors line.
+#
+# It must NOT drop a scissors tail in general: `git commit -F` uses
+# cleanup=whitespace and keeps that text in the stored message, so discarding
+# it here would let a trailer through unseen.
+#
+# Known limit: `git commit -F` also keeps comment lines, so a trailer that is
+# commented out in the message file survives into the commit unchecked. Git
+# does not parse a commented line as a trailer, so no co-author attribution
+# results from it -- only the literal text remains.
+
+prefix=$(git config --get core.commentString 2>/dev/null)
+[ -n "$prefix" ] || prefix=$(git config --get core.commentChar 2>/dev/null)
+[ -n "$prefix" ] || prefix='#'
+
+if [ "$prefix" = auto ]; then
+    # Git resolves "auto" against the message as it stood BEFORE its template
+    # was appended, which this hook cannot observe -- so do not try to replay
+    # that choice. Read the character back off the scissors line git generated,
+    # and otherwise fall back to the '#' git picks for an empty buffer.
+    prefix=$(awk '/^. -+ >8 -+$/ { print substr($0, 1, 1); exit }' "$msg_file")
+    [ -n "$prefix" ] || prefix='#'
+fi
+
+cleaned=$(awk -v p="$prefix" '
+    { line[++n] = $0 }
+    END {
+        plen = length(p)
+        cut = 0
+        for (i = 1; i <= n; i++)
+            if (substr(line[i], 1, plen) == p && substr(line[i], plen + 1) ~ /^ -+ >8 -+$/) {
+                cut = i
+                break
+            }
+        # Only cut when the tail really is the diff git appended for
+        # --verbose; a scissors line in a -F message survives into the commit.
+        tail_is_diff = 0
+        if (cut > 0)
+            for (i = cut; i <= n; i++)
+                if (line[i] ~ /^diff --git /) {
+                    tail_is_diff = 1
+                    break
+                }
+        last = tail_is_diff ? cut - 1 : n
+        for (i = 1; i <= last; i++)
+            if (substr(line[i], 1, plen) != p) print line[i]
+    }
+' "$msg_file")
 
 hits=$(printf '%s\n' "$cleaned" | grep -nEi \
-  -e '^[[:space:]]*co-authored-by:.*(claude|anthropic)' \
-  -e '@anthropic\.com' \
-  -e 'generated with[[:space:]]*\[?claude' \
-  -e '(claude code|claude\.com/claude-code)')
+    -e '^[[:space:]]*co-authored-by:.*(claude|anthropic)' \
+    -e '@anthropic\.com' \
+    -e 'generated with[[:space:]]*\[?claude' \
+    -e '(claude code|claude\.com/claude-code)')
 
 [ -z "$hits" ] || {
-  echo "commit-msg: refused -- Claude/Anthropic attribution in the message:" >&2
-  printf '%s\n' "$hits" | sed 's/^/  /' >&2
-  echo "" >&2
-  echo "Remove those lines, or commit with --no-verify to override." >&2
-  exit 1
+    echo "commit-msg: refused -- AI attribution in the message:" >&2
+    printf '%s\n' "$hits" | sed 's/^/  /' >&2
+    echo "" >&2
+    echo "Remove those lines, or commit with --no-verify to override." >&2
+    exit 1
 }
 
 exit 0
