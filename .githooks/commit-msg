@@ -1,0 +1,35 @@
+#!/bin/sh
+#
+# Reject Claude / Anthropic attribution trailers in commit messages.
+#
+# Matches only *attribution* lines (Co-Authored-By trailers, "Generated with"
+# footers, @anthropic.com addresses) plus any "Claude Code" mention -- a commit
+# that merely names Claude in prose, e.g. "Ignore local Claude config", passes.
+#
+# Enable in your clone (once per clone, hooks are not shared by git itself):
+#     git config core.hooksPath .githooks
+#
+# Bypass for a one-off with: git commit --no-verify
+
+msg_file="$1"
+[ -n "$msg_file" ] && [ -f "$msg_file" ] || exit 0
+
+# Drop comment lines and anything below the --verbose scissors line, so the
+# git-supplied template can never trip the check.
+cleaned=$(sed -e '/^# -\{1,\} >8 -\{1,\}$/,$d' -e '/^[[:space:]]*#/d' "$msg_file")
+
+hits=$(printf '%s\n' "$cleaned" | grep -nEi \
+  -e '^[[:space:]]*co-authored-by:.*(claude|anthropic)' \
+  -e '@anthropic\.com' \
+  -e 'generated with[[:space:]]*\[?claude' \
+  -e '(claude code|claude\.com/claude-code)')
+
+[ -z "$hits" ] || {
+  echo "commit-msg: refused -- Claude/Anthropic attribution in the message:" >&2
+  printf '%s\n' "$hits" | sed 's/^/  /' >&2
+  echo "" >&2
+  echo "Remove those lines, or commit with --no-verify to override." >&2
+  exit 1
+}
+
+exit 0
