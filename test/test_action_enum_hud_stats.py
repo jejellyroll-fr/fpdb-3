@@ -226,6 +226,15 @@ class TestSessionHudQuery:
         assert all(key == key.lower() for key in CACHE_KEYS)
 
 
+# The counters the seeded hand below is expected to move; every other one of
+# the 51 must come out of the rebuild at zero.
+_SEEDED_COUNTERS = frozenset({
+    "cnt_t_face_float", "cnt_t_raise_float",
+    "cnt_f_face_cbet", "cnt_f_call_cbet",
+    "cnt_p_face_3bet",
+})
+
+
 def _schema_connection() -> sqlite3.Connection:
     sql = SQL.Sql(db_server="sqlite")
     conn = sqlite3.connect(":memory:")
@@ -241,7 +250,7 @@ def _schema_connection() -> sqlite3.Connection:
 class TestCacheRebuild:
     """rebuild_cache clears HudCache, so it has to be able to refill the counters."""
 
-    def _rebuilt_row(self, columns: str) -> tuple:
+    def _rebuilt_row(self) -> dict:
         import fpdb_3_legacy.Database as Database
 
         sql = SQL.Sql(db_server="sqlite")
@@ -279,25 +288,29 @@ class TestCacheRebuild:
         db._rebuild_ring_cache("HudCache", None, None, None)
 
         try:
-            return conn.execute(f"SELECT {columns} FROM HudCache").fetchone()
+            # Selects * so the query stays a literal: what matters is the value
+            # the rebuild wrote, and sqlite3.Row already labels the columns.
+            conn.row_factory = sqlite3.Row
+            row = conn.execute("SELECT * FROM HudCache").fetchone()
+            return dict(row) if row is not None else {}
         finally:
             conn.close()
             del db
 
     def test_rebuild_recounts_from_the_stored_enum_chars(self) -> None:
         """Without this the rebuild refills HudCache with zeros and loses them."""
-        row = self._rebuilt_row(
-            "cnt_t_face_float, cnt_t_call_float, cnt_t_raise_float,"
-            " cnt_f_face_cbet, cnt_f_call_cbet, cnt_f_raise_cbet",
-        )
-        assert row == (1, 0, 1, 1, 1, 0)
+        row = self._rebuilt_row()
+        assert (row["cnt_t_face_float"], row["cnt_t_call_float"], row["cnt_t_raise_float"]) == (1, 0, 1)
+        assert (row["cnt_f_face_cbet"], row["cnt_f_call_cbet"], row["cnt_f_raise_cbet"]) == (1, 1, 0)
 
     def test_rebuild_counts_a_fold_as_faced_only(self) -> None:
         """The fold leg is derived at render time, so only faced may move."""
-        assert self._rebuilt_row("cnt_p_face_3bet, cnt_p_call_3bet, cnt_p_raise_3bet") == (1, 0, 0)
+        row = self._rebuilt_row()
+        assert (row["cnt_p_face_3bet"], row["cnt_p_call_3bet"], row["cnt_p_raise_3bet"]) == (1, 0, 0)
 
     def test_rebuild_leaves_untouched_situations_at_zero(self) -> None:
-        assert self._rebuilt_row("cnt_r_face_donk, cnt_r_face_cbet") == (0, 0)
+        row = self._rebuilt_row()
+        assert not any(row[key] for key in CACHE_KEYS if key not in _SEEDED_COUNTERS)
 
     @pytest.mark.parametrize("table", ["CardsCache", "PositionsCache", "SessionsCache"])
     def test_other_caches_do_not_inherit_the_columns(self, table: str) -> None:
