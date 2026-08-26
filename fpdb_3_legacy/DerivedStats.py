@@ -1326,10 +1326,16 @@ class DerivedStats:
         for pos_i, (raw_i, pname, act) in enumerate(preflop_raw):
             ps = ps_all.get(pname)
             if ps is not None and level >= 2 and pname != last_raiser:
-                already = any(p2 == pname and a2 in decision
-                              for p2, _n, a2 in preflop_raw
-                              if prev_raise_pos is not None
-                              and prev_raise_pos < pos_i > p2 > prev_raise_pos)
+                # Keep a player's FIRST answer to the standing raise: anything
+                # they did between that raise and now has already answered it.
+                # Preflop this is close to unreachable -- one decision per raise
+                # level -- but it pins the enum to the first reaction when a
+                # parser emits an extra action for the same level.
+                already = any(
+                    other == pname and a2 in decision
+                    for j, (_raw_j, other, a2) in enumerate(preflop_raw)
+                    if prev_raise_pos is not None and prev_raise_pos < j < pos_i
+                )
                 if not already:
                     resp = resp_of.get(act)
                     if resp is not None and resp in ("F", "C", "R"):
