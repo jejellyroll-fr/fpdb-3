@@ -1272,7 +1272,9 @@ class DerivedStats:
 
         def pos_code(name):
             v = ps_all.get(name, {}).get("position")
-            return {"S": 9, "B": 8}.get(v, v)
+            if v is not None and not isinstance(v, str):
+                v = None
+            return {"S": 9, "B": 8}.get(v, v) if isinstance(v, str) else v
 
 
         # ---- enum_folded -------------------------------------------------
@@ -1321,17 +1323,17 @@ class DerivedStats:
                               if prev_raise_pos is not None
                               and prev_raise_pos < pos_i > p2 > prev_raise_pos)
                 if not already:
-                    ch = resp_of.get(act)
-                    if ch:
+                    resp = resp_of.get(act)
+                    if resp is not None and resp in ("F", "C", "R"):
                         if level == 3:
-                            ps["enum_p_3bet_action"] = ch
+                            ps["enum_p_3bet_action"] = resp
                             # Squeeze defence: responder facing the 3-bet
                             # when >=1 cold call was made between open and 3-bet.
                             # F/C/R responses all qualify (PT4 convention).
                             if cold_calls_at_2 >= 1:
-                                ps["enum_p_squeeze_action"] = ch
+                                ps["enum_p_squeeze_action"] = resp
                         elif level == 4:
-                            ps["enum_p_4bet_action"] = ch
+                            ps["enum_p_4bet_action"] = resp
             if act in ("raises", "bets", "completes"):
                 if act == "raises":
                     if level == 2:
