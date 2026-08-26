@@ -25,6 +25,7 @@ from decimal import ROUND_DOWN, Decimal
 from typing import Any
 
 from fpdb_3_legacy import Card
+from fpdb_3_legacy.action_enum_stats import derive_counters as derive_action_enum_counters
 from fpdb_3_legacy.autonotes_aof import is_aof_category
 from fpdb_3_legacy.equity import EquityUnavailableError, calculate_equity, expected_pot_share, load_poker_eval
 from fpdb_3_legacy.loggingFpdb import get_logger
@@ -1538,6 +1539,11 @@ class DerivedStats:
                     ps["enum_face_allin_action"] = r
                     recorded_ai.add(pname)
                     faced_any = True
+
+        # The HUD sums HudCache and cannot sum a char, so turn each response
+        # into faced/called/raised counters while the enums are in hand.
+        for ps in ps_all.values():
+            derive_action_enum_counters(ps)
 
     @staticmethod
     def _pt4_ring_code(hand: Any, seat: Any):
