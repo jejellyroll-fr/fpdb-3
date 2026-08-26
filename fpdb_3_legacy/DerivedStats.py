@@ -1475,7 +1475,6 @@ class DerivedStats:
             fi, fa = first_agg(p_acts)
             if fi is None or fa[0] != prev_aggr:
                 continue
-            cbet_i = p_acts.index(fa)
             for pname, ps in ps_all.items():
                 if pname == prev_aggr:
                     continue
