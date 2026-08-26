@@ -311,7 +311,27 @@ def hand_player_persistence_queries() -> dict[str, str]:
              street2DelayedCBChance,
              street2DelayedCBDone,
              street2ProbeChance,
-             street2ProbeDone
+             street2ProbeDone,
+             enum_p_3bet_action,
+             enum_p_4bet_action,
+             enum_p_squeeze_action,
+             enum_f_3bet_action,
+             enum_f_4bet_action,
+             enum_f_cbet_action,
+             enum_f_donk_action,
+             enum_t_3bet_action,
+             enum_t_4bet_action,
+             enum_t_cbet_action,
+             enum_t_float_action,
+             enum_t_donk_action,
+             enum_r_3bet_action,
+             enum_r_4bet_action,
+             enum_r_cbet_action,
+             enum_r_float_action,
+             enum_r_donk_action,
+             enum_face_allin,
+             enum_face_allin_action,
+             enum_folded
             )
             values (
                  %s, %s, %s, %s, %s,
@@ -372,6 +392,10 @@ def hand_player_persistence_queries() -> dict[str, str]:
             %s, %s, %s, %s,
             %s, %s, %s, %s
             ,
-                 %s)"""
+                 %s,
+                 %s, %s, %s, %s, %s,
+                 %s, %s, %s, %s, %s,
+                 %s, %s, %s, %s, %s,
+                 %s, %s, %s, %s, %s)"""
     return query
 

@@ -1,10 +1,10 @@
-"""Tests PT4 enum_*_action pour DerivedStats.calcActionEnums.
+"""PT4 enum_*_action tests for DerivedStats.calcActionEnums.
 
-Couverture des scenarios ajoutes apres la review Codex (PR #266) :
-- Squeeze F / 4-bet (pas seulement call)
-- Final aggressor apres raise postflop
-- Float IP (reference Rust validee ~99.4 % vs PT4 live)
-- 3-bet/4-bet caller preservation (reference Rust validee)
+Scenarios added after the Codex review of PR #266:
+- squeeze F / 4-bet, not only the call
+- final aggressor after a postflop raise
+- IP float (Rust reference, validated ~99.4% against PT4 live)
+- 3-bet/4-bet caller preservation (validated Rust reference)
 """
 
 import os
@@ -57,7 +57,7 @@ Seat 2: Caller folded on the Turn
 Seat 3: ThreeBettor collected €1.81
 """
 
-# Squeeze F : l'open-raisier fold au 3-bet apres un cold-call.
+# Squeeze F: the open-raiser folds to the 3-bet after a cold call.
 STARS_SQUEEZE_FOLD = """PokerStars Hand #261999999990:  Hold'em No Limit (€0.01/€0.02 EUR) - 2026/06/07 18:00:00 CET
 Table 'Squeeze Fold' 6-max Seat #3 is the button
 Seat 1: OpenRaiser (€2.00 in chips)
@@ -84,8 +84,9 @@ Seat 2: ColdCaller folded on the Flop
 Seat 3: Squeezer collected €0.65
 """
 
-# Aggressor chain : PFA c-bet flop, villain raise, PFA call, villain barre turn.
-# La barre turn du villain est un "cbet" du villain (nouveau flop_aggr), pas un donk.
+# Aggressor chain: PFA c-bets the flop, villain raises, PFA calls, villain fires
+# the turn. That turn barrel is the villain's own c-bet as the new flop
+# aggressor, not a donk bet.
 STARS_RAISE_CHAIN = """PokerStars Hand #261999999980:  Hold'em No Limit (€0.01/€0.02 EUR) - 2026/06/07 18:00:00 CET
 Table 'Raise Chain' 6-max Seat #3 is the button
 Seat 1: PFA (€2.00 in chips)
@@ -111,6 +112,36 @@ Board [9h Kd 9d 2c]
 Seat 1: PFA folded on the Turn
 Seat 2: Villain collected €2.00
 Seat 3: ColdCaller folded on the Flop
+"""
+
+# IP float by a non-blind player: the button calls the flop c-bet of the PFA
+# (small blind), then raises the turn barrel. pos_code has to compare an integer
+# position (button = 0) against a blind position ("S") without discarding either.
+STARS_FLOAT_IP = """PokerStars Hand #261999999977:  Hold'em No Limit (€0.01/€0.02 EUR) - 2026/06/07 18:00:00 CET
+Table 'Float IP' 6-max Seat #3 is the button
+Seat 1: PFA (€2.00 in chips)
+Seat 2: BBGuy (€2.00 in chips)
+Seat 3: Floater (€2.00 in chips)
+PFA: posts small blind €0.01
+BBGuy: posts big blind €0.02
+*** HOLE CARDS ***
+Dealt to PFA [As Kd]
+Floater: calls €0.02
+PFA: raises €0.06 to €0.08
+BBGuy: folds
+Floater: calls €0.06
+*** FLOP *** [9h Kd 2d]
+PFA: bets €0.10
+Floater: calls €0.10
+*** TURN *** [9h Kd 2d] [7c]
+PFA: bets €0.20
+Floater: raises €0.40 to €0.60
+PFA: folds
+*** SUMMARY ***
+Total pot €0.96 | Rake €0.04
+Board [9h Kd 2d 7c]
+Seat 1: PFA folded on the Turn
+Seat 3: Floater collected €0.92
 """
 
 
@@ -145,8 +176,13 @@ def raise_chain_stats():
     return _build_stats(STARS_RAISE_CHAIN)
 
 
+@pytest.fixture()
+def float_ip_stats():
+    return _build_stats(STARS_FLOAT_IP)
+
+
 # ---------------------------------------------------------------------------
-# Tests existants (scenario de base)
+# Base scenario
 # ---------------------------------------------------------------------------
 
 
@@ -193,19 +229,19 @@ def test_all_enums_default_to_n_when_absent(stats_by_player):
 
 
 def test_os_path_guard_removed():
-    """Le fichier ne doit plus contenir de garde auto-ajoutee."""
+    """The file must no longer carry an auto-added guard."""
     path = os.path.join(os.path.dirname(__file__), "..", "fpdb_3_legacy", "DerivedStats.py")
     src = open(path, encoding="utf-8").read()
     assert "AUTO-ADDED" not in src
 
 
 # ---------------------------------------------------------------------------
-# Fix 1 (Codex P1) : squeeze defense accepte F / C / R
+# Codex P1: squeeze defence accepts F / C / R
 # ---------------------------------------------------------------------------
 
 
 def test_squeeze_open_raiser_folds_is_recorded_as_F(squeeze_fold_stats):
-    """L'open-raisier fold au 3-bet alors qu'il y a un cold caller : squeeze F."""
+    """The open-raiser folds to the 3-bet with a cold caller in: squeeze F."""
     assert squeeze_fold_stats["OpenRaiser"]["enum_p_3bet_action"] == "F"
     assert squeeze_fold_stats["OpenRaiser"]["enum_p_squeeze_action"] == "F"
 
@@ -221,47 +257,75 @@ def test_squeezer_does_not_face_own_3bet(squeeze_fold_stats):
 
 
 # ---------------------------------------------------------------------------
-# Fix 3 (Codex P2) : aggressor chain apres raise postflop
+# Codex P2: aggressor chain after a postflop raise
 # ---------------------------------------------------------------------------
 
 
 def test_postflop_raise_promotes_aggressor(raise_chain_stats):
-    """PFA c-bet flop -> villain raise -> PFA call. Le villain devient le
-    flop_aggr effectif, donc sa barre turn est un c-bet, pas un donk."""
-    # Villain : barre turn apres avoir raise le flop. C'est son c-bet turn.
+    """PFA c-bets the flop -> villain raises -> PFA calls.
+
+    The villain becomes the effective flop aggressor, so the turn barrel is his
+    c-bet rather than a donk bet.
+    """
+    # The villain fires that barrel, so he never faces it himself.
     assert raise_chain_stats["Villain"]["enum_t_cbet_action"] == "N"
-    # PFA fold face a la barre turn : enregistre comme c-bet repondu.
+    # PFA folds to it, which is a c-bet answered.
     assert raise_chain_stats["PFA"]["enum_t_cbet_action"] == "F"
 
 
 def test_postflop_chain_does_not_record_donk_for_re_raiser(raise_chain_stats):
-    """La barre turn du villain n'est pas un donk (c'est sa continuation bet
-    en tant que dernier raiseur du flop)."""
+    """The villain's turn barrel is not a donk bet.
+
+    He was the last player to raise the flop, so it is his continuation bet.
+    """
     assert raise_chain_stats["Villain"]["enum_t_donk_action"] == "N"
 
 
 # ---------------------------------------------------------------------------
-# Documentation des choix de reference (Codex P1 #1 et P2 #4)
+# Reference behaviour kept on purpose (Codex P1 #1 and P2 #4)
 # ---------------------------------------------------------------------------
 
 
-def test_float_records_caller_response_to_second_barrel(stats_by_player):
-    """Le float enum suit la semantique Rust validee ~99.4 % vs PT4 live :
-    l'agressor barre deux rues consecutives, l'enum enregistre la reponse
-    du caller a la deuxieme barre. Comportement documente intentionnel."""
-    # Le ThreeBettor barre flop et turn ; Caller call flop et fold turn.
-    # Le Caller fait face a la 2e barre : c'est son enum_t_float_action.
-    # (Dans la main de base, Caller fold au turn sans avoir eu a repondre a
-    # la 2e barre en tant que caller du c-bet flop — il est en check-call
-    # et la 2e action du turn est son propre fold, pas une reponse. Donc
-    # l'enum reste a N ici, ce qui reste coherent avec la definition
-    # "caller IP repond a la deuxieme barre".)
+def test_float_requires_the_caller_to_be_in_position(stats_by_player):
+    """The float enum follows the Rust semantics validated ~99.4% vs PT4 live.
+
+    The aggressor fires two streets in a row and the enum records the caller's
+    answer to the second barrel -- but only when that caller is in position.
+    """
+    # ThreeBettor (button) barrels flop and turn; Caller (BB) calls the flop
+    # then folds the turn. The barrelling pattern is there, but Caller is out of
+    # position against the button, and PT4 excludes an OOP float, hence N.
     assert stats_by_player["Caller"]["enum_t_float_action"] == "N"
 
 
 def test_3bet_caller_already_acted_keeps_enum_n(stats_by_player):
-    """Le caller qui cold-call entre open et 3-bet est deja documente
-    comme ayant fait face au 3-bet (enum_p_3bet_action). Le Rust
-    valide contre PT4 ne le recompte pas dans l'enum postflop."""
-    # Comportement documente : Caller a repondu au 3-bet (C).
+    """A cold caller between the open and the 3-bet already faced that 3-bet.
+
+    enum_p_3bet_action records it, and the Rust reference validated against PT4
+    does not count it again in the postflop enums.
+    """
+    # Documented behaviour: Caller answered the 3-bet with a call.
     assert stats_by_player["Caller"]["enum_p_3bet_action"] == "C"
+
+
+# ---------------------------------------------------------------------------
+# IP float by a non-blind player (regression from PR #266)
+# ---------------------------------------------------------------------------
+
+
+def test_float_ip_records_the_raise_of_a_non_blind_caller(float_ip_stats):
+    """The button calls the flop c-bet then raises the turn barrel: enum = R.
+
+    Guards against a position comparison that would drop integer positions
+    (button = 0) and keep only the "S"/"B" blinds, which leaves the float enums
+    inert on virtually every hand.
+    """
+    assert float_ip_stats["Floater"]["position"] == 0
+    assert float_ip_stats["PFA"]["position"] == "S"
+    assert float_ip_stats["Floater"]["enum_t_float_action"] == "R"
+
+
+def test_float_ip_leaves_the_aggressor_at_n(float_ip_stats):
+    """The aggressor is never the floater of his own barrel."""
+    assert float_ip_stats["PFA"]["enum_t_float_action"] == "N"
+    assert float_ip_stats["BBGuy"]["enum_t_float_action"] == "N"

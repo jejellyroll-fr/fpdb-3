@@ -387,21 +387,28 @@ def _initRaiseSizing(init: dict[str, Any]) -> None:
     init["val_p_5bet_facing_bp"] = 0
 
 
+# PT4 enum_*_action columns, in the order HandsPlayers stores them. Both
+# database_schema.HANDS_PLAYERS_KEYS and the store_hands_players insert repeat
+# this order; test_action_enum_persistence guards the three against drift.
+ACTION_ENUM_KEYS = (
+    "enum_p_3bet_action", "enum_p_4bet_action", "enum_p_squeeze_action",
+    "enum_f_3bet_action", "enum_f_4bet_action", "enum_f_cbet_action",
+    "enum_f_donk_action", "enum_t_3bet_action", "enum_t_4bet_action",
+    "enum_t_cbet_action", "enum_t_float_action", "enum_t_donk_action",
+    "enum_r_3bet_action", "enum_r_4bet_action", "enum_r_cbet_action",
+    "enum_r_float_action", "enum_r_donk_action",
+    "enum_face_allin", "enum_face_allin_action", "enum_folded",
+)
+
+
 def _initActionEnums(init: dict[str, Any]) -> None:
     """PT4 action enums: response char F/C/R, or N when situation absent.
 
     enum_folded carries the street of the fold (P/F/T/R/N); enum_face_allin
     uses a lowercase street char when folded, uppercase otherwise.
     """
-    for key in ("enum_p_3bet_action", "enum_p_4bet_action", "enum_p_squeeze_action",
-                "enum_f_3bet_action", "enum_f_4bet_action", "enum_f_cbet_action",
-                "enum_f_donk_action", "enum_t_3bet_action", "enum_t_4bet_action",
-                "enum_t_cbet_action", "enum_t_float_action", "enum_t_donk_action",
-                "enum_r_3bet_action", "enum_r_4bet_action", "enum_r_cbet_action",
-                "enum_r_float_action", "enum_r_donk_action",
-                "enum_face_allin", "enum_face_allin_action"):
+    for key in ACTION_ENUM_KEYS:
         init[key] = "N"
-    init["enum_folded"] = "N"
 
 
 def _buildStatsInitializer() -> dict:
@@ -1270,16 +1277,24 @@ class DerivedStats:
         acts_by = {st: snapshot.get(st, [])
                    for st in ("PREFLOP", "FLOP", "TURN", "RIVER")}
 
-        def pos_code(name):
+        def pos_code(name: str) -> int | None:
+            """Positional rank: lower means closer to the button, i.e. later.
+
+            ``position`` is an int for seated players (0 = button, growing
+            away from it) and "S"/"B" for the blinds, which act first
+            postflop and therefore rank behind every numbered seat.
+            """
             v = ps_all.get(name, {}).get("position")
-            if v is not None and not isinstance(v, str):
-                v = None
-            return {"S": 9, "B": 8}.get(v, v) if isinstance(v, str) else v
+            if isinstance(v, str):
+                if v in ("S", "B"):
+                    return 9 if v == "S" else 8
+                return int(v) if v.isdigit() else None
+            return v if isinstance(v, int) else None
 
 
         # ---- enum_folded -------------------------------------------------
-        # Chaque joueur est marqué sur SA première rue de fold (pas de break
-        # global : plusieurs joueurs foldent à des rues différentes).
+        # Each player is marked on the street where THEY folded, so there is no
+        # global break: several players fold on different streets.
         fold_streets = (("P", "BLINDSANTES"), ("P", "PREFLOP"), ("F", "FLOP"),
                         ("T", "TURN"), ("R", "RIVER"))
         pending = set(ps_all)
@@ -1318,10 +1333,16 @@ class DerivedStats:
         for pos_i, (raw_i, pname, act) in enumerate(preflop_raw):
             ps = ps_all.get(pname)
             if ps is not None and level >= 2 and pname != last_raiser:
-                already = any(p2 == pname and a2 in decision
-                              for p2, _n, a2 in preflop_raw
-                              if prev_raise_pos is not None
-                              and prev_raise_pos < pos_i > p2 > prev_raise_pos)
+                # Keep a player's FIRST answer to the standing raise: anything
+                # they did between that raise and now has already answered it.
+                # Preflop this is close to unreachable -- one decision per raise
+                # level -- but it pins the enum to the first reaction when a
+                # parser emits an extra action for the same level.
+                already = any(
+                    other == pname and a2 in decision
+                    for j, (_raw_j, other, a2) in enumerate(preflop_raw)
+                    if prev_raise_pos is not None and prev_raise_pos < j < pos_i
+                )
                 if not already:
                     resp = resp_of.get(act)
                     if resp is not None and resp in ("F", "C", "R"):

@@ -347,7 +347,35 @@ HANDS_PLAYERS_KEYS = [
     # Turn probe bet (DerivedStats._calc_turn_probe).
     "street2ProbeChance",
     "street2ProbeDone",
+    # PT4 action enums (DerivedStats.calcActionEnums). One char per column --
+    # F/C/R for the response, N when the situation never came up -- so they are
+    # CHAR(1) rather than the INT the other stat columns use. The order mirrors
+    # DerivedStats.ACTION_ENUM_KEYS and the store_hands_players insert.
+    "enum_p_3bet_action",
+    "enum_p_4bet_action",
+    "enum_p_squeeze_action",
+    "enum_f_3bet_action",
+    "enum_f_4bet_action",
+    "enum_f_cbet_action",
+    "enum_f_donk_action",
+    "enum_t_3bet_action",
+    "enum_t_4bet_action",
+    "enum_t_cbet_action",
+    "enum_t_float_action",
+    "enum_t_donk_action",
+    "enum_r_3bet_action",
+    "enum_r_4bet_action",
+    "enum_r_cbet_action",
+    "enum_r_float_action",
+    "enum_r_donk_action",
+    "enum_face_allin",
+    "enum_face_allin_action",
+    "enum_folded",
 ]
+
+# The subset of HANDS_PLAYERS_KEYS holding a PT4 action enum. Split out so the
+# migration can give them a char column instead of the INT default.
+ACTION_ENUM_COLUMNS = [key for key in HANDS_PLAYERS_KEYS if key.startswith("enum_")]
 
 # Just like STATS_KEYS, this lets us efficiently add data at the
 # "beginning" later.
@@ -1019,6 +1047,8 @@ class DatabaseSchemaMixin:
     def ensure_handsplayers_columns(self) -> None:
         """Add missing HandsPlayers stat columns for databases created by older code."""
         definitions = {column: "INT DEFAULT 0" for column in HANDS_PLAYERS_KEYS}
+        # The PT4 action enums store a single response char, not a counter.
+        definitions.update({column: "CHAR(1) DEFAULT 'N'" for column in ACTION_ENUM_COLUMNS})
         definitions["handString"] = "TEXT"
         definitions["cashOutFee"] = "INT DEFAULT 0"
         definitions["isCashOut"] = "BOOLEAN DEFAULT 0"
