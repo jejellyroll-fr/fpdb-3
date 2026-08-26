@@ -1325,9 +1325,10 @@ class DerivedStats:
                     if ch:
                         if level == 3:
                             ps["enum_p_3bet_action"] = ch
-                            # Caller facing the 3-bet with a cold call between
-                            # open and 3-bet = squeeze defence.
-                            if act == "calls" and cold_calls_at_2 >= 1:
+                            # Squeeze defence: responder facing the 3-bet
+                            # when >=1 cold call was made between open and 3-bet.
+                            # F/C/R responses all qualify (PT4 convention).
+                            if cold_calls_at_2 >= 1:
                                 ps["enum_p_squeeze_action"] = ch
                         elif level == 4:
                             ps["enum_p_4bet_action"] = ch
@@ -1366,20 +1367,30 @@ class DerivedStats:
             return None, None
 
         # ---- postflop aggressor chain -------------------------------------
+        # The street aggressor is the last player to RAISE on that street.
+        # If no one raised, the prior-street aggressor who c-bet remains the
+        # aggressor for chain purposes. If a non-prior-aggressor donks the
+        # street, the prior aggressor's chain ownership is preserved
+        # (donk defence / re-raise is handled by the 3-bet/4-bet enum and
+        # the donk enum).
         flop_first_i, flop_first_a = first_agg(acts_by["FLOP"])
-        if preflop_aggr is not None and flop_first_a is not None \
+        flop_lrs = raises_only(acts_by["FLOP"])
+        if flop_lrs:
+            flop_aggr = flop_lrs[-1][1][0]
+        elif preflop_aggr is not None and flop_first_a is not None \
                 and flop_first_a[0] == preflop_aggr:
             flop_aggr = preflop_aggr
         else:
-            lr = raises_only(acts_by["FLOP"])
-            flop_aggr = lr[-1][1][0] if lr else None
+            flop_aggr = None
         turn_first_i, turn_first_a = first_agg(acts_by["TURN"])
-        if turn_first_a is not None and flop_aggr is not None \
+        turn_lrs = raises_only(acts_by["TURN"])
+        if turn_lrs:
+            turn_aggr = turn_lrs[-1][1][0]
+        elif turn_first_a is not None and flop_aggr is not None \
                 and turn_first_a[0] == flop_aggr:
             turn_aggr = flop_aggr
         else:
-            lr = raises_only(acts_by["TURN"])
-            turn_aggr = lr[-1][1][0] if lr else None
+            turn_aggr = None
 
         # ---- cbet facing ---------------------------------------------------
         def face_cbet(acts, aggr, key):
@@ -1438,6 +1449,12 @@ class DerivedStats:
         record_facing_post(acts_by["RIVER"], "enum_r_3bet_action", "enum_r_4bet_action")
 
         # ---- float (IP only) -----------------------------------------------
+        # PT4 float semantics (validated ~99.4% in Rust/Modern vs PT4 live):
+        # the prior-street aggressor fires a c-bet, the IP caller calls, then
+        # the prior aggressor bets the next street — the enum records the
+        # CALLER's response to that second barrel (F/C/R). "Delayed bet"
+        # (caller donks the next street into a checking aggressor) is covered
+        # by enum_*_donk_action, not here.
         def called_cbet_ip(acts, aggr, pname):
             fi, fa = first_agg(acts)
             if fi is None or fa[0] != aggr:
