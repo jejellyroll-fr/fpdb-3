@@ -39,6 +39,8 @@ import pytz
 from cachetools import TTLCache
 
 from fpdb_3_legacy import SQL, Card, Configuration, db_profile
+from fpdb_3_legacy.action_enum_stats import CACHE_KEYS as ACTION_ENUM_CACHE_KEYS
+from fpdb_3_legacy.action_enum_stats import SITUATIONS as ACTION_ENUM_SITUATIONS
 from fpdb_3_legacy.database_aof import DatabaseAofMixin
 from fpdb_3_legacy.database_auto_notes import DatabaseAutoNotesMixin
 from fpdb_3_legacy.database_bulk_import import DatabaseBulkImportMixin
@@ -1472,6 +1474,26 @@ class Database(
             query = query.replace("<tourney_group_clause>", "")
         return query
 
+    @staticmethod
+    def _statscache_action_enum_columns(query):
+        """Rebuild the HudCache action-enum counters from the stored enum chars.
+
+        The counters are summed at import, so a rebuild that did not name them
+        would refill HudCache with zeros and drop whatever had accumulated.
+        HandsPlayers keeps the response char per hand, which is enough to count
+        them again from scratch.
+        """
+        insert_columns = "".join(f"\n            ,{key}" for key in ACTION_ENUM_CACHE_KEYS)
+        select_columns = "".join(
+            f"\n                  ,sum(CASE WHEN hp.{situation.enum_key} {test} THEN 1 ELSE 0 END)"
+            for situation in ACTION_ENUM_SITUATIONS
+            for test in ("<> 'N'", "= 'C'", "= 'R'")
+        )
+        return query.replace("<extra_insert_columns>", insert_columns).replace(
+            "<extra_select_columns>",
+            select_columns,
+        )
+
     def _statscache_hudcache(self, query, type):
         """Fill the rebuild template for HudCache, whose key carries the position."""
         insert = """HudCache
@@ -1500,6 +1522,7 @@ class Database(
         query = query.replace("<select>", select)
         query = query.replace("<group>", group)
         query = query.replace("<sessions_join_clause>", "")
+        query = self._statscache_action_enum_columns(query)
 
         if self.build_full_hudcache:
             query = query.replace(
@@ -1657,12 +1680,14 @@ class Database(
 
     def replace_statscache(self, type, table, query):
         if table == "HudCache":
-            return self._statscache_hudcache(query, type)
-        if table == "CardsCache":
-            return self._statscache_cardscache(query, type)
-        if table == "PositionsCache":
-            return self._statscache_positionscache(query, type)
-        return query
+            query = self._statscache_hudcache(query, type)
+        elif table == "CardsCache":
+            query = self._statscache_cardscache(query, type)
+        elif table == "PositionsCache":
+            query = self._statscache_positionscache(query, type)
+        # The action-enum counters are HudCache-only, so every other cache
+        # drops their placeholders rather than inheriting columns it lacks.
+        return query.replace("<extra_insert_columns>", "").replace("<extra_select_columns>", "")
 
     def _rebuild_prepare_heroes(self, h_start, v_start):
         """Resolve the owner's player ids and the two rebuild start dates."""

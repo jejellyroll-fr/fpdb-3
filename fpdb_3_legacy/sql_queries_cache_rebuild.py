@@ -122,7 +122,7 @@ def cache_rebuild_queries(db_server: str) -> dict[str, str]:
             ,street4Raises
             ,street1Discards
             ,street2Discards
-            ,street3Discards
+            ,street3Discards<extra_insert_columns>
             )
             SELECT <select>
                   ,count(1)
@@ -239,7 +239,7 @@ def cache_rebuild_queries(db_server: str) -> dict[str, str]:
                   ,sum(hp.street4Raises)
                   ,sum(street1Discards)
                   ,sum(street2Discards)
-                  ,sum(street3Discards)
+                  ,sum(street3Discards)<extra_select_columns>
             FROM Hands h
             INNER JOIN HandsPlayers hp ON (h.id = hp.handId<hero_join>)
             INNER JOIN Gametypes g ON (h.gametypeId = g.id)
@@ -364,7 +364,7 @@ def cache_rebuild_queries(db_server: str) -> dict[str, str]:
             ,street4Raises
             ,street1Discards
             ,street2Discards
-            ,street3Discards
+            ,street3Discards<extra_insert_columns>
             )
             SELECT <select>
                   ,count(1)
@@ -481,7 +481,7 @@ def cache_rebuild_queries(db_server: str) -> dict[str, str]:
                   ,sum(CAST(hp.street4Raises as integer))
                   ,sum(CAST(street1Discards as integer))
                   ,sum(CAST(street2Discards as integer))
-                  ,sum(CAST(street3Discards as integer))
+                  ,sum(CAST(street3Discards as integer))<extra_select_columns>
             FROM Hands h
             INNER JOIN HandsPlayers hp ON (h.id = hp.handId<hero_join>)
             INNER JOIN Gametypes g ON (h.gametypeId = g.id)
@@ -606,7 +606,7 @@ def cache_rebuild_queries(db_server: str) -> dict[str, str]:
             ,street4Raises
             ,street1Discards
             ,street2Discards
-            ,street3Discards
+            ,street3Discards<extra_insert_columns>
             )
             SELECT <select>
                   ,count(1)
@@ -723,7 +723,7 @@ def cache_rebuild_queries(db_server: str) -> dict[str, str]:
                   ,sum(CAST(hp.street4Raises as integer))
                   ,sum(CAST(street1Discards as integer))
                   ,sum(CAST(street2Discards as integer))
-                  ,sum(CAST(street3Discards as integer))
+                  ,sum(CAST(street3Discards as integer))<extra_select_columns>
             FROM Hands h
             INNER JOIN HandsPlayers hp ON (h.id = hp.handId<hero_join>)
             INNER JOIN Gametypes g ON (h.gametypeId = g.id)

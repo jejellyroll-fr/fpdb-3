@@ -212,6 +212,107 @@ class TestStatFunctions:
         assert len(set(labels)) == len(labels)
 
 
+class TestSessionHudQuery:
+    """stat_range "S" reads HandsPlayers, not HudCache, and must still see them."""
+
+    @pytest.mark.parametrize("db_server", ["mysql", "postgresql", "sqlite"])
+    def test_session_query_derives_every_counter(self, db_server: str) -> None:
+        query = SQL.Sql(db_server=db_server).query["get_stats_from_hand_session"]
+        missing = [key for key in CACHE_KEYS if f"AS {key}" not in query]
+        assert not missing, f"{db_server} session query does not expose {missing}"
+
+    def test_session_aliases_are_lowercase(self) -> None:
+        """get_stats_from_hand_session lowercases column names before summing."""
+        assert all(key == key.lower() for key in CACHE_KEYS)
+
+
+def _schema_connection() -> sqlite3.Connection:
+    sql = SQL.Sql(db_server="sqlite")
+    conn = sqlite3.connect(":memory:")
+    for name in sql.query:
+        if name.startswith("create") and name.endswith("Table"):
+            try:
+                conn.execute(sql.query[name])
+            except sqlite3.Error:  # unrelated table, not what this covers
+                pass
+    return conn
+
+
+class TestCacheRebuild:
+    """rebuild_cache clears HudCache, so it has to be able to refill the counters."""
+
+    def _rebuilt_row(self, columns: str) -> tuple:
+        import fpdb_3_legacy.Database as Database
+
+        sql = SQL.Sql(db_server="sqlite")
+        conn = _schema_connection()
+        conn.execute(
+            "INSERT INTO Gametypes (id, siteId, currency, type, base, category, limitType,"
+            " hiLo, mix, smallBet, bigBet, maxSeats, ante, buyinType)"
+            " VALUES (1, 1, 'USD', 'ring', 'hold', 'holdem', 'nl', 'h', 'none', 5, 10, 6, 0, 'regular')",
+        )
+        conn.execute(
+            "INSERT INTO Hands (id, tableName, siteHandNo, gametypeId, fileId, startTime, importTime,"
+            " seats, heroSeat, maxPosition, playersVpi, playersAtStreet1, playersAtStreet2,"
+            " playersAtStreet3, playersAtStreet4, playersAtShowdown,"
+            " street0Raises, street1Raises, street2Raises, street3Raises, street4Raises)"
+            " VALUES (1, 'T', '1', 1, 1, '2026-01-01 00:00:00', '2026-01-01 00:00:00',"
+            " 3, 1, 2, 2, 2, 2, 0, 0, 0, 1, 1, 0, 0, 0)",
+        )
+        conn.execute("INSERT INTO Players (id, name, siteId) VALUES (7, 'Floater', 1)")
+        conn.execute(
+            "INSERT INTO HandsPlayers (handId, playerId, startCash, effStack, seatNo, sitout,"
+            " card1, card2, common, committed, winnings, rake, rakeDealt, rakeContributed,"
+            " rakeWeighted, position, tourneysPlayersId,"
+            " enum_t_float_action, enum_f_cbet_action, enum_p_3bet_action)"
+            " VALUES (1, 7, 100, 100, 3, 0, 1, 2, 0, 0, 0, 0, 0, 0, 0, '0', NULL, 'R', 'C', 'F')",
+        )
+        conn.commit()
+
+        db = Database.Database.__new__(Database.Database)
+        db.backend = Database.Database.SQLITE
+        db.build_full_hudcache = True
+        db.sql = sql
+        db.connection = conn
+        db.hero_ids = None
+        db._in_transaction = 0
+        db._rebuild_ring_cache("HudCache", None, None, None)
+
+        try:
+            return conn.execute(f"SELECT {columns} FROM HudCache").fetchone()
+        finally:
+            conn.close()
+            del db
+
+    def test_rebuild_recounts_from_the_stored_enum_chars(self) -> None:
+        """Without this the rebuild refills HudCache with zeros and loses them."""
+        row = self._rebuilt_row(
+            "cnt_t_face_float, cnt_t_call_float, cnt_t_raise_float,"
+            " cnt_f_face_cbet, cnt_f_call_cbet, cnt_f_raise_cbet",
+        )
+        assert row == (1, 0, 1, 1, 1, 0)
+
+    def test_rebuild_counts_a_fold_as_faced_only(self) -> None:
+        """The fold leg is derived at render time, so only faced may move."""
+        assert self._rebuilt_row("cnt_p_face_3bet, cnt_p_call_3bet, cnt_p_raise_3bet") == (1, 0, 0)
+
+    def test_rebuild_leaves_untouched_situations_at_zero(self) -> None:
+        assert self._rebuilt_row("cnt_r_face_donk, cnt_r_face_cbet") == (0, 0)
+
+    @pytest.mark.parametrize("table", ["CardsCache", "PositionsCache", "SessionsCache"])
+    def test_other_caches_do_not_inherit_the_columns(self, table: str) -> None:
+        """Only HudCache has them; the placeholders must vanish elsewhere."""
+        import fpdb_3_legacy.Database as Database
+
+        db = Database.Database.__new__(Database.Database)
+        db.backend = Database.Database.SQLITE
+        db.build_full_hudcache = True
+        query = db.replace_statscache("ring", table, SQL.Sql(db_server="sqlite").query["rebuildCache"])
+        assert "<extra_insert_columns>" not in query
+        assert "<extra_select_columns>" not in query
+        assert not [key for key in CACHE_KEYS if key in query]
+
+
 class TestParsedHand:
     """A real hand must reach the counters, not just the enum chars."""
 
