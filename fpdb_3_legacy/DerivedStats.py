@@ -1286,8 +1286,8 @@ class DerivedStats:
 
 
         # ---- enum_folded -------------------------------------------------
-        # Chaque joueur est marqué sur SA première rue de fold (pas de break
-        # global : plusieurs joueurs foldent à des rues différentes).
+        # Each player is marked on the street where THEY folded, so there is no
+        # global break: several players fold on different streets.
         fold_streets = (("P", "BLINDSANTES"), ("P", "PREFLOP"), ("F", "FLOP"),
                         ("T", "TURN"), ("R", "RIVER"))
         pending = set(ps_all)
