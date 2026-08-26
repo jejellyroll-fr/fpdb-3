@@ -132,8 +132,13 @@ class TestActionEnumSchemaSync:
 class TestActionEnumRoundTrip:
     """A parsed hand must land its enum values in HandsPlayers."""
 
-    def _stored(self, columns: str) -> tuple[dict, dict]:
-        """Insert a parsed hand through the real storeHandsPlayers, then read back."""
+    def _stored(self) -> tuple[dict, dict]:
+        """Insert a parsed hand through the real storeHandsPlayers, then read back.
+
+        Rows come back as name -> column dict. The select names no columns of
+        its own so the query stays a literal: the point is what the insert
+        wrote, and sqlite3.Row already labels it.
+        """
         pdata = _hands_players()
         conn = _sqlite_connection()
 
@@ -147,13 +152,14 @@ class TestActionEnumRoundTrip:
         db.storeHandsPlayers(hid=1, pids=pids, pdata=pdata, doinsert=True)
 
         try:
-            rows = {
-                name: conn.execute(
-                    f"SELECT {columns} FROM HandsPlayers WHERE playerId = ?",
-                    (pids[name],),
+            conn.row_factory = sqlite3.Row
+            rows = {}
+            for name, pid in pids.items():
+                row = conn.execute(
+                    "SELECT * FROM HandsPlayers WHERE playerId = ?",
+                    (pid,),
                 ).fetchone()
-                for name in pdata
-            }
+                rows[name] = dict(row) if row is not None else None
         finally:
             conn.close()
             # db has to outlive the reads: Database.__del__ closes the connection.
@@ -162,22 +168,21 @@ class TestActionEnumRoundTrip:
         return pdata, rows
 
     def test_enum_values_survive_the_insert(self) -> None:
-        pdata, rows = self._stored("enum_t_float_action")
+        pdata, rows = self._stored()
         assert pdata["Floater"]["enum_t_float_action"] == "R", "fixture no longer exercises a float"
         assert rows["Floater"] is not None, "no HandsPlayers row was written"
-        assert rows["Floater"][0] == "R"
+        assert rows["Floater"]["enum_t_float_action"] == "R"
 
     def test_absent_situations_are_stored_as_n(self) -> None:
         """The default must round-trip too, so aggregates can count it."""
-        _pdata, rows = self._stored("enum_t_float_action")
-        assert rows["BBGuy"][0] == "N"
+        _pdata, rows = self._stored()
+        assert rows["BBGuy"]["enum_t_float_action"] == "N"
 
     def test_every_enum_column_is_written(self) -> None:
         """All twenty columns must carry what DerivedStats computed."""
-        columns = ", ".join(ACTION_ENUM_KEYS)
-        pdata, rows = self._stored(columns)
+        pdata, rows = self._stored()
         for name, row in rows.items():
-            stored = dict(zip(ACTION_ENUM_KEYS, row))
+            stored = {key: row[key] for key in ACTION_ENUM_KEYS}
             expected = {key: pdata[name][key] for key in ACTION_ENUM_KEYS}
             assert stored == expected, f"{name} round-tripped wrong"
 
