@@ -387,21 +387,28 @@ def _initRaiseSizing(init: dict[str, Any]) -> None:
     init["val_p_5bet_facing_bp"] = 0
 
 
+# PT4 enum_*_action columns, in the order HandsPlayers stores them. Both
+# database_schema.HANDS_PLAYERS_KEYS and the store_hands_players insert repeat
+# this order; test_action_enum_persistence guards the three against drift.
+ACTION_ENUM_KEYS = (
+    "enum_p_3bet_action", "enum_p_4bet_action", "enum_p_squeeze_action",
+    "enum_f_3bet_action", "enum_f_4bet_action", "enum_f_cbet_action",
+    "enum_f_donk_action", "enum_t_3bet_action", "enum_t_4bet_action",
+    "enum_t_cbet_action", "enum_t_float_action", "enum_t_donk_action",
+    "enum_r_3bet_action", "enum_r_4bet_action", "enum_r_cbet_action",
+    "enum_r_float_action", "enum_r_donk_action",
+    "enum_face_allin", "enum_face_allin_action", "enum_folded",
+)
+
+
 def _initActionEnums(init: dict[str, Any]) -> None:
     """PT4 action enums: response char F/C/R, or N when situation absent.
 
     enum_folded carries the street of the fold (P/F/T/R/N); enum_face_allin
     uses a lowercase street char when folded, uppercase otherwise.
     """
-    for key in ("enum_p_3bet_action", "enum_p_4bet_action", "enum_p_squeeze_action",
-                "enum_f_3bet_action", "enum_f_4bet_action", "enum_f_cbet_action",
-                "enum_f_donk_action", "enum_t_3bet_action", "enum_t_4bet_action",
-                "enum_t_cbet_action", "enum_t_float_action", "enum_t_donk_action",
-                "enum_r_3bet_action", "enum_r_4bet_action", "enum_r_cbet_action",
-                "enum_r_float_action", "enum_r_donk_action",
-                "enum_face_allin", "enum_face_allin_action"):
+    for key in ACTION_ENUM_KEYS:
         init[key] = "N"
-    init["enum_folded"] = "N"
 
 
 def _buildStatsInitializer() -> dict:

@@ -331,7 +331,27 @@ def hand_player_schema_queries(db_server: str) -> dict[str, str]:
                                 cnt_r_raise_made_2 INT,
                                 val_r_raise_made_2_bp INT,
                                 cnt_p_5bet_facing INT,
-                                val_p_5bet_facing_bp INT)
+                                val_p_5bet_facing_bp INT,
+                                enum_p_3bet_action CHAR(1) DEFAULT 'N',
+                                enum_p_4bet_action CHAR(1) DEFAULT 'N',
+                                enum_p_squeeze_action CHAR(1) DEFAULT 'N',
+                                enum_f_3bet_action CHAR(1) DEFAULT 'N',
+                                enum_f_4bet_action CHAR(1) DEFAULT 'N',
+                                enum_f_cbet_action CHAR(1) DEFAULT 'N',
+                                enum_f_donk_action CHAR(1) DEFAULT 'N',
+                                enum_t_3bet_action CHAR(1) DEFAULT 'N',
+                                enum_t_4bet_action CHAR(1) DEFAULT 'N',
+                                enum_t_cbet_action CHAR(1) DEFAULT 'N',
+                                enum_t_float_action CHAR(1) DEFAULT 'N',
+                                enum_t_donk_action CHAR(1) DEFAULT 'N',
+                                enum_r_3bet_action CHAR(1) DEFAULT 'N',
+                                enum_r_4bet_action CHAR(1) DEFAULT 'N',
+                                enum_r_cbet_action CHAR(1) DEFAULT 'N',
+                                enum_r_float_action CHAR(1) DEFAULT 'N',
+                                enum_r_donk_action CHAR(1) DEFAULT 'N',
+                                enum_face_allin CHAR(1) DEFAULT 'N',
+                                enum_face_allin_action CHAR(1) DEFAULT 'N',
+                                enum_folded CHAR(1) DEFAULT 'N')
                                 ENGINE=INNODB"""
     elif db_server == "postgresql":
         ddl = """CREATE TABLE HandsPlayers (
@@ -659,7 +679,27 @@ def hand_player_schema_queries(db_server: str) -> dict[str, str]:
                                 cnt_r_raise_made_2 INT,
                                 val_r_raise_made_2_bp INT,
                                 cnt_p_5bet_facing INT,
-                                val_p_5bet_facing_bp INT)"""
+                                val_p_5bet_facing_bp INT,
+                                enum_p_3bet_action CHAR(1) DEFAULT 'N',
+                                enum_p_4bet_action CHAR(1) DEFAULT 'N',
+                                enum_p_squeeze_action CHAR(1) DEFAULT 'N',
+                                enum_f_3bet_action CHAR(1) DEFAULT 'N',
+                                enum_f_4bet_action CHAR(1) DEFAULT 'N',
+                                enum_f_cbet_action CHAR(1) DEFAULT 'N',
+                                enum_f_donk_action CHAR(1) DEFAULT 'N',
+                                enum_t_3bet_action CHAR(1) DEFAULT 'N',
+                                enum_t_4bet_action CHAR(1) DEFAULT 'N',
+                                enum_t_cbet_action CHAR(1) DEFAULT 'N',
+                                enum_t_float_action CHAR(1) DEFAULT 'N',
+                                enum_t_donk_action CHAR(1) DEFAULT 'N',
+                                enum_r_3bet_action CHAR(1) DEFAULT 'N',
+                                enum_r_4bet_action CHAR(1) DEFAULT 'N',
+                                enum_r_cbet_action CHAR(1) DEFAULT 'N',
+                                enum_r_float_action CHAR(1) DEFAULT 'N',
+                                enum_r_donk_action CHAR(1) DEFAULT 'N',
+                                enum_face_allin CHAR(1) DEFAULT 'N',
+                                enum_face_allin_action CHAR(1) DEFAULT 'N',
+                                enum_folded CHAR(1) DEFAULT 'N')"""
     elif db_server == "sqlite":
         ddl = """CREATE TABLE HandsPlayers (
                                 id INTEGER PRIMARY KEY,
@@ -986,7 +1026,27 @@ def hand_player_schema_queries(db_server: str) -> dict[str, str]:
                                   cnt_r_raise_made_2 INT,
                                   val_r_raise_made_2_bp INT,
                                   cnt_p_5bet_facing INT,
-                                  val_p_5bet_facing_bp INT)
+                                  val_p_5bet_facing_bp INT,
+                                  enum_p_3bet_action CHAR(1) DEFAULT 'N',
+                                  enum_p_4bet_action CHAR(1) DEFAULT 'N',
+                                  enum_p_squeeze_action CHAR(1) DEFAULT 'N',
+                                  enum_f_3bet_action CHAR(1) DEFAULT 'N',
+                                  enum_f_4bet_action CHAR(1) DEFAULT 'N',
+                                  enum_f_cbet_action CHAR(1) DEFAULT 'N',
+                                  enum_f_donk_action CHAR(1) DEFAULT 'N',
+                                  enum_t_3bet_action CHAR(1) DEFAULT 'N',
+                                  enum_t_4bet_action CHAR(1) DEFAULT 'N',
+                                  enum_t_cbet_action CHAR(1) DEFAULT 'N',
+                                  enum_t_float_action CHAR(1) DEFAULT 'N',
+                                  enum_t_donk_action CHAR(1) DEFAULT 'N',
+                                  enum_r_3bet_action CHAR(1) DEFAULT 'N',
+                                  enum_r_4bet_action CHAR(1) DEFAULT 'N',
+                                  enum_r_cbet_action CHAR(1) DEFAULT 'N',
+                                  enum_r_float_action CHAR(1) DEFAULT 'N',
+                                  enum_r_donk_action CHAR(1) DEFAULT 'N',
+                                  enum_face_allin CHAR(1) DEFAULT 'N',
+                                  enum_face_allin_action CHAR(1) DEFAULT 'N',
+                                  enum_folded CHAR(1) DEFAULT 'N')
                                 """
     else:
         return {}
