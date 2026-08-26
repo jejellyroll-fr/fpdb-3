@@ -113,6 +113,36 @@ Seat 2: Villain collected €2.00
 Seat 3: ColdCaller folded on the Flop
 """
 
+# Float IP par un joueur non-blind : le bouton call le c-bet flop du PFA
+# (small blind), puis raise la 2e barre turn. pos_code doit comparer une
+# position entiere (bouton = 0) a une position blind ("S") sans les annuler.
+STARS_FLOAT_IP = """PokerStars Hand #261999999977:  Hold'em No Limit (€0.01/€0.02 EUR) - 2026/06/07 18:00:00 CET
+Table 'Float IP' 6-max Seat #3 is the button
+Seat 1: PFA (€2.00 in chips)
+Seat 2: BBGuy (€2.00 in chips)
+Seat 3: Floater (€2.00 in chips)
+PFA: posts small blind €0.01
+BBGuy: posts big blind €0.02
+*** HOLE CARDS ***
+Dealt to PFA [As Kd]
+Floater: calls €0.02
+PFA: raises €0.06 to €0.08
+BBGuy: folds
+Floater: calls €0.06
+*** FLOP *** [9h Kd 2d]
+PFA: bets €0.10
+Floater: calls €0.10
+*** TURN *** [9h Kd 2d] [7c]
+PFA: bets €0.20
+Floater: raises €0.40 to €0.60
+PFA: folds
+*** SUMMARY ***
+Total pot €0.96 | Rake €0.04
+Board [9h Kd 2d 7c]
+Seat 1: PFA folded on the Turn
+Seat 3: Floater collected €0.92
+"""
+
 
 def _build_stats(hand_text: str) -> dict:
     config = LegacyConfiguration.Config()
@@ -143,6 +173,11 @@ def squeeze_fold_stats():
 @pytest.fixture()
 def raise_chain_stats():
     return _build_stats(STARS_RAISE_CHAIN)
+
+
+@pytest.fixture()
+def float_ip_stats():
+    return _build_stats(STARS_FLOAT_IP)
 
 
 # ---------------------------------------------------------------------------
@@ -245,17 +280,13 @@ def test_postflop_chain_does_not_record_donk_for_re_raiser(raise_chain_stats):
 # ---------------------------------------------------------------------------
 
 
-def test_float_records_caller_response_to_second_barrel(stats_by_player):
+def test_float_requires_the_caller_to_be_in_position(stats_by_player):
     """Le float enum suit la semantique Rust validee ~99.4 % vs PT4 live :
-    l'agressor barre deux rues consecutives, l'enum enregistre la reponse
-    du caller a la deuxieme barre. Comportement documente intentionnel."""
-    # Le ThreeBettor barre flop et turn ; Caller call flop et fold turn.
-    # Le Caller fait face a la 2e barre : c'est son enum_t_float_action.
-    # (Dans la main de base, Caller fold au turn sans avoir eu a repondre a
-    # la 2e barre en tant que caller du c-bet flop — il est en check-call
-    # et la 2e action du turn est son propre fold, pas une reponse. Donc
-    # l'enum reste a N ici, ce qui reste coherent avec la definition
-    # "caller IP repond a la deuxieme barre".)
+    l'agresseur barre deux rues consecutives et l'enum enregistre la reponse
+    du caller a la deuxieme barre — mais seulement si ce caller est IP."""
+    # Le ThreeBettor (bouton) barre flop et turn ; Caller (BB) call le flop
+    # puis fold la turn. Le motif de barre est bien la, mais le Caller est
+    # OOP face au bouton : la definition PT4 exclut le float OOP, donc N.
     assert stats_by_player["Caller"]["enum_t_float_action"] == "N"
 
 
@@ -265,3 +296,26 @@ def test_3bet_caller_already_acted_keeps_enum_n(stats_by_player):
     valide contre PT4 ne le recompte pas dans l'enum postflop."""
     # Comportement documente : Caller a repondu au 3-bet (C).
     assert stats_by_player["Caller"]["enum_p_3bet_action"] == "C"
+
+
+# ---------------------------------------------------------------------------
+# Float IP par un joueur non-blind (regression PR #266)
+# ---------------------------------------------------------------------------
+
+
+def test_float_ip_records_the_raise_of_a_non_blind_caller(float_ip_stats):
+    """Le bouton call le c-bet flop puis raise la 2e barre : enum = R.
+
+    Garde-fou contre une comparaison de positions qui ecarterait les
+    positions entieres (bouton = 0) au profit des seules blinds "S"/"B",
+    ce qui rendrait les float enums inertes sur la quasi-totalite des mains.
+    """
+    assert float_ip_stats["Floater"]["position"] == 0
+    assert float_ip_stats["PFA"]["position"] == "S"
+    assert float_ip_stats["Floater"]["enum_t_float_action"] == "R"
+
+
+def test_float_ip_leaves_the_aggressor_at_n(float_ip_stats):
+    """L'agresseur n'est jamais le floater de sa propre barre."""
+    assert float_ip_stats["PFA"]["enum_t_float_action"] == "N"
+    assert float_ip_stats["BBGuy"]["enum_t_float_action"] == "N"

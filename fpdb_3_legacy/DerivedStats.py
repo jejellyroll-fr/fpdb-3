@@ -1270,11 +1270,19 @@ class DerivedStats:
         acts_by = {st: snapshot.get(st, [])
                    for st in ("PREFLOP", "FLOP", "TURN", "RIVER")}
 
-        def pos_code(name):
+        def pos_code(name: str) -> int | None:
+            """Positional rank: lower means closer to the button, i.e. later.
+
+            ``position`` is an int for seated players (0 = button, growing
+            away from it) and "S"/"B" for the blinds, which act first
+            postflop and therefore rank behind every numbered seat.
+            """
             v = ps_all.get(name, {}).get("position")
-            if v is not None and not isinstance(v, str):
-                v = None
-            return {"S": 9, "B": 8}.get(v, v) if isinstance(v, str) else v
+            if isinstance(v, str):
+                if v in ("S", "B"):
+                    return 9 if v == "S" else 8
+                return int(v) if v.isdigit() else None
+            return v if isinstance(v, int) else None
 
 
         # ---- enum_folded -------------------------------------------------
