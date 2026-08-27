@@ -8,6 +8,9 @@ des statistiques pour le tableau de bord, les positions et les cartes.
 
 from __future__ import annotations
 
+import contextlib
+import os
+import sys
 from typing import Any
 
 from PySide6.QtCore import QObject, Qt, Signal
@@ -24,6 +27,25 @@ log = get_logger("ring_stats_controller")
 def debug_log(msg: str) -> None:
     """Route detailed diagnostics through the configured logger."""
     log.debug(msg)
+
+
+def running_under_test() -> bool:
+    """True while a test runner is driving this process.
+
+    ``"unittest" in sys.modules`` used to be half of this test, and it was
+    wrong in production in the worst possible way. ``fpdb_3_legacy.interlocks``
+    imported ``doctest`` at module scope, ``doctest`` imports ``unittest``, and
+    ``fpdb.pyw`` imports ``interlocks`` while starting up -- so every real run
+    of the GUI looked like a test run. Ring Player Stats therefore ran all four
+    of its queries and built every model on the GUI thread, which is exactly
+    what the DbWorker threads exist to avoid, and the asynchronous path only
+    ever ran where nobody was looking.
+
+    Nothing in the application imports pytest, and ``PYTEST_CURRENT_TEST`` is
+    set by pytest for the duration of a test, so both signals mean what they
+    say.
+    """
+    return "pytest" in sys.modules or "PYTEST_CURRENT_TEST" in os.environ
 
 colalias, colheading, colshowsumm, colshowposn, colformat, coltype, colxalign = (
     0, 1, 2, 3, 4, 5, 6
@@ -104,7 +126,7 @@ class RingStatsController(QObject):
     # Carries a NoDataReason value so the view can explain *why* it is empty.
     no_data_found = Signal(str)
 
-    def __init__(self, db, config, sql) -> None:
+    def __init__(self, db, config, sql, *, async_mode: bool | None = None) -> None:
         super().__init__()
         self.db = db
         self.cursor = db.cursor
@@ -113,10 +135,9 @@ class RingStatsController(QObject):
         self.columns = config.get_gui_cash_stat_params()
         self._workers: list[DbWorker] = []
 
-        # Force synchronous mode only in test suites (pytest/unittest)
-        import sys
-
-        self.async_mode = "pytest" not in sys.modules and "unittest" not in sys.modules
+        # Synchronous only under a test runner, so a test can assert on results
+        # without pumping the event loop. Passing async_mode explicitly wins.
+        self.async_mode = not running_under_test() if async_mode is None else async_mode
 
         self._last_summary_stats: dict[str, Any] | None = None
         self._last_profit_data: tuple[Any, Any, Any, Any, Any] | None = None
@@ -124,20 +145,24 @@ class RingStatsController(QObject):
     def shutdown_workers(self) -> None:
         """Stop all DbWorker threads started by this controller.
 
-        Called when the host tab is closed or refreshed: disconnects signals
-        immediately so stale workers never update the UI thread, and terminates them.
+        Called when the host tab is closed or refreshed. Disconnecting the
+        signals is what actually protects the UI: a worker that finishes after
+        its tab is gone then has nobody to deliver results to.
+
+        It does not terminate the thread, for the reason ``ModernStatsWidget``
+        already documents -- ``QThread.terminate`` kills the thread wherever it
+        happens to be, including inside ``Database.worker_connection``, which
+        holds a semaphore permit from a pool of four shared by every tab. Four
+        such kills and the next query waits for a permit that will never be
+        released. The queries here are bounded, so letting one finish and be
+        ignored costs a fraction of a second.
         """
         for worker in self._workers:
             if worker.isRunning():
-                try:
+                with contextlib.suppress(TypeError, RuntimeError):
                     worker.finished.disconnect()
-                except (TypeError, RuntimeError):
-                    pass
-                try:
+                with contextlib.suppress(TypeError, RuntimeError):
                     worker.error.disconnect()
-                except (TypeError, RuntimeError):
-                    pass
-                worker.terminate()
         self._workers = []
 
     def refresh_all(self, filter_widget) -> None:
