@@ -376,6 +376,28 @@ def test_check_hud_process_started_clears_terminated_process():
     assert gui.pipe_to_hud is None
 
 
+def test_an_untestable_lock_is_not_reported_as_another_hud():
+    """The player is told what is known, which is that nothing is known (#259).
+
+    Sending them off to quit a HUD they may not have is the failure this
+    branch exists to avoid.
+    """
+    from fpdb_3_legacy.interlocks import HUD_LOCK_UNDETERMINED_EXIT_CODE
+
+    gui = _make_gui(_make_settings(MagicMock()), _make_config())
+    process = MagicMock(pid=1234)
+    process.poll.return_value = HUD_LOCK_UNDETERMINED_EXIT_CODE
+    gui.pipe_to_hud = process
+    gui.addText = MagicMock()
+
+    gui._check_hud_process_started()
+
+    message = gui.addText.call_args.args[0]
+    assert "could not be tested" in message
+    assert "is unknown" in message
+    assert "Quit the other one" not in message
+
+
 @pytest.mark.skipif(sys.platform == "win32", reason="exercises the POSIX/source HUD-launch branch")
 def test_launch_hud_uses_module_relative_path(monkeypatch, tmp_path):
     """_launch_hud must find HUD_main.pyw even when sys.path[0]/CWD are unrelated."""

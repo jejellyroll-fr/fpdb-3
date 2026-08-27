@@ -25,6 +25,7 @@ from decimal import ROUND_DOWN, Decimal
 from typing import Any
 
 from fpdb_3_legacy import Card
+from fpdb_3_legacy.action_enum_stats import derive_counters as derive_action_enum_counters
 from fpdb_3_legacy.autonotes_aof import is_aof_category
 from fpdb_3_legacy.equity import EquityUnavailableError, calculate_equity, expected_pot_share, load_poker_eval
 from fpdb_3_legacy.loggingFpdb import get_logger
@@ -387,6 +388,30 @@ def _initRaiseSizing(init: dict[str, Any]) -> None:
     init["val_p_5bet_facing_bp"] = 0
 
 
+# PT4 enum_*_action columns, in the order HandsPlayers stores them. Both
+# database_schema.HANDS_PLAYERS_KEYS and the store_hands_players insert repeat
+# this order; test_action_enum_persistence guards the three against drift.
+ACTION_ENUM_KEYS = (
+    "enum_p_3bet_action", "enum_p_4bet_action", "enum_p_squeeze_action",
+    "enum_f_3bet_action", "enum_f_4bet_action", "enum_f_cbet_action",
+    "enum_f_donk_action", "enum_t_3bet_action", "enum_t_4bet_action",
+    "enum_t_cbet_action", "enum_t_float_action", "enum_t_donk_action",
+    "enum_r_3bet_action", "enum_r_4bet_action", "enum_r_cbet_action",
+    "enum_r_float_action", "enum_r_donk_action",
+    "enum_face_allin", "enum_face_allin_action", "enum_folded",
+)
+
+
+def _initActionEnums(init: dict[str, Any]) -> None:
+    """PT4 action enums: response char F/C/R, or N when situation absent.
+
+    enum_folded carries the street of the fold (P/F/T/R/N); enum_face_allin
+    uses a lowercase street char when folded, uppercase otherwise.
+    """
+    for key in ACTION_ENUM_KEYS:
+        init[key] = "N"
+
+
 def _buildStatsInitializer() -> dict:
     """Build the per-player stat row every hand starts from."""
     init: dict[str, Any] = {}
@@ -399,6 +424,7 @@ def _buildStatsInitializer() -> dict:
     _initPerStreetCounters(init)
     _initPostflopStreetStats(init)
     _initRaiseSizing(init)
+    _initActionEnums(init)
     return init
 
 
@@ -432,6 +458,11 @@ class DerivedStats:
 
     def getStats(self, hand: Any) -> None:
         """Calculate and store statistics for a poker hand."""
+        # Snapshot the raw action tuples before downstream calculators may
+        # condense/replace hand.actions (calcActionEnums depends on them).
+        self.raw_actions_snapshot = {
+            st: list(acts) for st, acts in getattr(hand, "actions", {}).items()
+        }
         for player in hand.players:
             self.handsplayers[player[1]] = _INIT_STATS.copy()
 
@@ -890,6 +921,14 @@ class DerivedStats:
             committed_player_stats["common"] = int(100 * hand.pot.common[player])
             committed_player_stats["committed"] = int(100 * money_committed)
             committed_player_stats["totalProfit"] = int(committed_player_stats["winnings"] - paid)
+            # Live-capture builders keep splash payouts outside pot collections,
+            # while hand-history converters include STP in the pot. Normalize the
+            # stored profit so the graph's optional splash subtraction is valid
+            # for both representations.
+            if not _pot_stp(hand) and getattr(hand, "splashWinnings", None):
+                committed_player_stats["totalProfit"] += int(
+                    CENTS_MULTIPLIER * _to_decimal(hand.splashWinnings.get(player, 0)),
+                )
             committed_player_stats["flg_won_hand"] = committed_player_stats["totalProfit"] > 0
             committed_player_stats["allInEV"] = committed_player_stats["totalProfit"]
             committed_player_stats["rakeDealt"] = 100 * hand.rake / len(hand.players)
@@ -958,6 +997,7 @@ class DerivedStats:
         self.calcCheckCallRaise(hand)
         self.calc34BetStreet0(hand)
         self.calcSqueezeDefense(hand)
+        self.calcActionEnums(hand)
         self.calcFaceLimpers(hand)
         self.calc3BetPostflop(hand)
         self.calc4BetPostflop(hand)
@@ -1216,6 +1256,312 @@ class DerivedStats:
                 if is_allin and act in ("bets", "raises", "completes"):
                     allin_aggr = True
                     aggressor = pname
+
+    def calcActionEnums(self, hand: Any) -> None:
+        """PT4 enum_*_action family: response char (F/C/R) per situation.
+
+        Mirrors the validated Rust/Modern semantics: facing the Nth raise
+        preflop, squeeze defence (cold caller between open and 3-bet),
+        c-bet / donk / float facing postflop (float requires position),
+        aggressive all-ins faced, and the street of the fold. Situation
+        absent leaves "N".
+        """
+        if not getattr(self, "handsplayers", None):
+            return
+        ps_all = self.handsplayers
+
+        resp_of = {"folds": "F", "calls": "C", "completes": "C",
+                   "bets": "R", "raises": "R"}
+        decision = set(resp_of) | {"checks"}
+
+        snapshot = getattr(self, "raw_actions_snapshot", {})
+        acts_by = {st: snapshot.get(st, [])
+                   for st in ("PREFLOP", "FLOP", "TURN", "RIVER")}
+
+        def pos_code(name: str) -> int | None:
+            """Positional rank: lower means closer to the button, i.e. later.
+
+            ``position`` is an int for seated players (0 = button, growing
+            away from it) and "S"/"B" for the blinds, which act first
+            postflop and therefore rank behind every numbered seat.
+            """
+            v = ps_all.get(name, {}).get("position")
+            if isinstance(v, str):
+                if v in ("S", "B"):
+                    return 9 if v == "S" else 8
+                return int(v) if v.isdigit() else None
+            return v if isinstance(v, int) else None
+
+
+        # ---- enum_folded -------------------------------------------------
+        # Each player is marked on the street where THEY folded, so there is no
+        # global break: several players fold on different streets.
+        fold_streets = (("P", "BLINDSANTES"), ("P", "PREFLOP"), ("F", "FLOP"),
+                        ("T", "TURN"), ("R", "RIVER"))
+        pending = set(ps_all)
+        for ch, st in fold_streets:
+            if not pending:
+                break
+            acts_st = hand.actions.get(st, [])
+            for pname in list(pending):
+                if any(a[0] == pname and a[1] == "folds" for a in acts_st):
+                    ps_all[pname]["enum_folded"] = ch
+                    pending.discard(pname)
+
+        # ---- preflop: facing raises levels 2/3 + squeeze defender --------
+        # Facing levels are counted over PREFLOP raises only (blinds excluded;
+        # legacy convention: open = first raise, 3-bet = second, etc.). Raw
+        # entries are normalised defensively because other calculators may
+        # reshape hand.actions before this runs.
+        def _norm(entry):
+            a = entry[0] if isinstance(entry, tuple) and entry and                 not isinstance(entry[0], str) else entry
+            if isinstance(a, (tuple, list)) and len(a) >= 2 \
+                    and isinstance(a[0], str) and isinstance(a[1], str):
+                return a[0], a[1]
+            return None
+
+        preflop_raw = []
+        for idx, entry in enumerate(snapshot.get("BLINDSANTES", []) + acts_by["PREFLOP"]):
+            norm = _norm(entry)
+            if norm is None:
+                continue
+            preflop_raw.append((idx, norm[0], norm[1]))
+
+        level = 1
+        last_raiser = None
+        prev_raise_pos = None
+        cold_calls_at_2 = 0
+        for pos_i, (raw_i, pname, act) in enumerate(preflop_raw):
+            ps = ps_all.get(pname)
+            if ps is not None and level >= 2 and pname != last_raiser:
+                # Keep a player's FIRST answer to the standing raise: anything
+                # they did between that raise and now has already answered it.
+                # Preflop this is close to unreachable -- one decision per raise
+                # level -- but it pins the enum to the first reaction when a
+                # parser emits an extra action for the same level.
+                already = any(
+                    other == pname and a2 in decision
+                    for j, (_raw_j, other, a2) in enumerate(preflop_raw)
+                    if prev_raise_pos is not None and prev_raise_pos < j < pos_i
+                )
+                if not already:
+                    resp = resp_of.get(act)
+                    if resp is not None and resp in ("F", "C", "R"):
+                        if level == 3:
+                            ps["enum_p_3bet_action"] = resp
+                            # Squeeze defence: responder facing the 3-bet
+                            # when >=1 cold call was made between open and 3-bet.
+                            # F/C/R responses all qualify (PT4 convention).
+                            if cold_calls_at_2 >= 1:
+                                ps["enum_p_squeeze_action"] = resp
+                        elif level == 4:
+                            ps["enum_p_4bet_action"] = resp
+            if act in ("raises", "bets", "completes"):
+                if act == "raises":
+                    if level == 2:
+                        cold_calls_at_2 = sum(
+                            1 for _pi, _n2, a2 in preflop_raw
+                            if prev_raise_pos is not None
+                            and prev_raise_pos < _pi < pos_i and a2 == "calls")
+                    prev_raise_pos = pos_i
+                    level += 1
+                last_raiser = pname
+
+        preflop_aggr = None
+        for _pi, _n, a2 in reversed(preflop_raw):
+            if a2 == "raises":
+                preflop_aggr = _n
+                break
+
+        # ---- helpers ------------------------------------------------------
+        def first_agg(acts):
+            for i, a in enumerate(acts):
+                if a[1] in ("bets", "raises"):
+                    return i, a
+            return None, None
+
+        def raises_only(acts):
+            return [(i, a) for i, a in enumerate(acts) if a[1] == "raises"]
+
+        def first_decision(acts, pname, after_i=None):
+            for i, a in enumerate(acts):
+                if a[0] == pname and a[1] in decision \
+                        and (after_i is None or i > after_i):
+                    return i, a
+            return None, None
+
+        # ---- postflop aggressor chain -------------------------------------
+        # The street aggressor is the last player to RAISE on that street.
+        # If no one raised, the prior-street aggressor who c-bet remains the
+        # aggressor for chain purposes. If a non-prior-aggressor donks the
+        # street, the prior aggressor's chain ownership is preserved
+        # (donk defence / re-raise is handled by the 3-bet/4-bet enum and
+        # the donk enum).
+        flop_first_i, flop_first_a = first_agg(acts_by["FLOP"])
+        flop_lrs = raises_only(acts_by["FLOP"])
+        if flop_lrs:
+            flop_aggr = flop_lrs[-1][1][0]
+        elif preflop_aggr is not None and flop_first_a is not None \
+                and flop_first_a[0] == preflop_aggr:
+            flop_aggr = preflop_aggr
+        else:
+            flop_aggr = None
+        turn_first_i, turn_first_a = first_agg(acts_by["TURN"])
+        turn_lrs = raises_only(acts_by["TURN"])
+        if turn_lrs:
+            turn_aggr = turn_lrs[-1][1][0]
+        elif turn_first_a is not None and flop_aggr is not None \
+                and turn_first_a[0] == flop_aggr:
+            turn_aggr = flop_aggr
+        else:
+            turn_aggr = None
+
+        # ---- cbet facing ---------------------------------------------------
+        def face_cbet(acts, aggr, key):
+            if not aggr:
+                return
+            fi, fa = first_agg(acts)
+            if fi is None or fa[0] != aggr:
+                return
+            for pname, ps in ps_all.items():
+                if pname == aggr:
+                    continue
+                di, da = first_decision(acts, pname, fi)
+                if da is not None:
+                    ps[key] = resp_of.get(da[1], "N")
+
+        face_cbet(acts_by["FLOP"], preflop_aggr, "enum_f_cbet_action")
+        face_cbet(acts_by["TURN"], flop_aggr, "enum_t_cbet_action")
+        face_cbet(acts_by["RIVER"], turn_aggr, "enum_r_cbet_action")
+
+        # ---- donk facing ---------------------------------------------------
+        def face_donk(acts, prev_aggr, key):
+            if not prev_aggr:
+                return
+            fi, fa = first_agg(acts)
+            if fi is None or fa[0] == prev_aggr:
+                return
+            di, da = first_decision(acts, prev_aggr, fi)
+            if da is not None:
+                ps_all[prev_aggr][key] = resp_of.get(da[1], "N")
+
+        face_donk(acts_by["FLOP"], preflop_aggr, "enum_f_donk_action")
+        face_donk(acts_by["TURN"], flop_aggr, "enum_t_donk_action")
+        face_donk(acts_by["RIVER"], turn_aggr, "enum_r_donk_action")
+
+        # ---- 3bet/4bet facing postflop --------------------------------------
+        def record_facing_post(acts, key3, key4):
+            rs = raises_only(acts)
+            for level, key in ((2, key3), (3, key4)):
+                if len(rs) < level:
+                    continue
+                ti, ta = rs[level - 1]
+                pi, _pa = rs[level - 2]
+                for pname, ps in ps_all.items():
+                    if pname == ta[0]:
+                        continue
+                    acted_between = any(x[0] == pname and x[1] in decision
+                                        for x in acts[pi + 1:ti])
+                    if acted_between:
+                        continue
+                    di, da = first_decision(acts, pname, ti)
+                    if da is not None:
+                        ps[key] = resp_of.get(da[1], "N")
+
+        record_facing_post(acts_by["FLOP"], "enum_f_3bet_action", "enum_f_4bet_action")
+        record_facing_post(acts_by["TURN"], "enum_t_3bet_action", "enum_t_4bet_action")
+        record_facing_post(acts_by["RIVER"], "enum_r_3bet_action", "enum_r_4bet_action")
+
+        # ---- float (IP only) -----------------------------------------------
+        # PT4 float semantics (validated ~99.4% in Rust/Modern vs PT4 live):
+        # the prior-street aggressor fires a c-bet, the IP caller calls, then
+        # the prior aggressor bets the next street — the enum records the
+        # CALLER's response to that second barrel (F/C/R). "Delayed bet"
+        # (caller donks the next street into a checking aggressor) is covered
+        # by enum_*_donk_action, not here.
+        def called_cbet_ip(acts, aggr, pname):
+            fi, fa = first_agg(acts)
+            if fi is None or fa[0] != aggr:
+                return False
+            pa, pn_ = pos_code(pname), pos_code(aggr)
+            if pa is None or pn_ is None or not (pa < pn_):
+                return False
+            return any(a[0] == pname and a[1] == "calls" for a in acts[fi + 1:])
+
+        for prev_acts, prev_aggr, next_acts, key in (
+            ("FLOP", preflop_aggr, "TURN", "enum_t_float_action"),
+            ("TURN", flop_aggr, "RIVER", "enum_r_float_action"),
+        ):
+            if not prev_aggr:
+                continue
+            p_acts = hand.actions.get(prev_acts, [])
+            n_acts = hand.actions.get(next_acts, [])
+            fi, fa = first_agg(p_acts)
+            if fi is None or fa[0] != prev_aggr:
+                continue
+            for pname, ps in ps_all.items():
+                if pname == prev_aggr:
+                    continue
+                if not called_cbet_ip(p_acts, prev_aggr, pname):
+                    continue
+                bi, ba = first_agg(n_acts)
+                if ba is None or ba[0] != prev_aggr:
+                    continue
+                di, da = first_decision(n_acts, pname, bi)
+                if da is not None:
+                    ps[key] = resp_of.get(da[1], "N")
+
+        # ---- faced all-in ----------------------------------------------------
+        recorded_ai = set()
+        faced_any = False
+        for sc_key, st in (("P", "PREFLOP"), ("F", "FLOP"),
+                           ("T", "TURN"), ("R", "RIVER")):
+            if faced_any:
+                break
+            acts_st = snapshot.get(st, [])
+            spots = []
+            for i, a in enumerate(acts_st):
+                is_ai = bool(a[-1]) if len(a) > MIN_ACTION_LENGTH_FOR_ALLIN \
+                    and a[1] != "discards" else False
+                if is_ai and a[1] in ("bets", "raises", "completes"):
+                    spots.append((i, a))
+            for ai_i, ai_a in spots:
+                aggressor = ai_a[0]
+                for pname, ps in ps_all.items():
+                    if pname == aggressor or pname in recorded_ai:
+                        continue
+                    di, da = first_decision(acts_st, pname, ai_i)
+                    if da is None:
+                        continue
+                    r = resp_of.get(da[1], "N")
+                    street_ch = sc_key.lower() if r == "F" else sc_key
+                    ps["enum_face_allin"] = street_ch
+                    ps["enum_face_allin_action"] = r
+                    recorded_ai.add(pname)
+                    faced_any = True
+
+        # The HUD sums HudCache and cannot sum a char, so turn each response
+        # into faced/called/raised counters while the enums are in hand.
+        for ps in ps_all.values():
+            derive_action_enum_counters(ps)
+
+    @staticmethod
+    def _pt4_ring_code(hand: Any, seat: Any):
+        """PT4 ring index for a seat (BTN=0 ... SB=9); None when unknown."""
+        if seat is None:
+            return None
+        try:
+            seats = sorted({p[0] for p in hand.players})
+        except Exception:
+            return None
+        if seat not in seats:
+            return None
+        btn = getattr(hand, "buttonpos", None)
+        if btn not in seats:
+            btn = seats[0]
+        start = seats.index(btn)
+        ordered = seats[start:] + seats[:start]
+        return ordered.index(seat)
 
     def calcPreflopRaiseFacing(self, hand: Any) -> None:
         """Record the size of the preflop raise faced, per level (PT4 convention).

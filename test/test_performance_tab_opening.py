@@ -2,10 +2,8 @@
 
 from __future__ import annotations
 
-import os
 from unittest.mock import MagicMock
 
-import fpdb_3_legacy.Configuration as Configuration
 from fpdb_3_legacy.Filters import Filters
 
 
@@ -24,12 +22,6 @@ class _WorkerStub:
 
     def start(self) -> None:
         pass
-
-
-def test_mplconfigdir_configured() -> None:
-    """Verify MPLCONFIGDIR is set to a user-writable path under CONFIG_PATH."""
-    assert "MPLCONFIGDIR" in os.environ
-    assert os.environ["MPLCONFIGDIR"].startswith(Configuration.CONFIG_PATH)
 
 
 def test_filters_uses_isolated_cursor() -> None:

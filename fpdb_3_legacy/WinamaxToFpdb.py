@@ -153,11 +153,11 @@ class Winamax(HandHistoryConverter):
     )
     re_mixed = re.compile(r"_(?P<MIXED>10games|8games|horse)_")
     re_hutp = re.compile(
-        r"(?:Hold\-?up|Escape|Splash|Drop)(?:\s+(?:to|pot))*\s*:\s*(?:total\s*)?({LS})?(?P<AMOUNT>[.0-9]+)({LS})?".format(**substitutions),
+        r"Hold\-?up(?:\s+(?:to|pot))*\s*:\s*(?:total\s*)?({LS})?(?P<AMOUNT>[.0-9]+)({LS})?".format(**substitutions),
         re.IGNORECASE | re.MULTILINE | re.VERBOSE,
     )
     re_escape_pot = re.compile(
-        r"(?:Escape|Splash|Drop|Hold\-?up)(?:\s+(?:to|pot))*\s*:\s*(?:total\s*)?({LS})?(?P<AMOUNT>[.0-9]+)({LS})?".format(**substitutions),
+        r"(?:Escape|Splash|Drop)(?:\s+(?:to|pot))*\s*:\s*(?:total\s*)?({LS})?(?P<AMOUNT>[.0-9]+)({LS})?".format(**substitutions),
         re.IGNORECASE | re.MULTILINE | re.VERBOSE,
     )
     # 2010/09/21 03:10:51 UTC
@@ -896,7 +896,7 @@ class Winamax(HandHistoryConverter):
             hand.bombPot = int(Decimal(m.group("AMOUNT")) * 100)
         elif m := self.re_escape_pot.search(hand.handText):
             hand.addSTP(m.group("AMOUNT"))
-            hand.bombPot = int(Decimal(m.group("AMOUNT")) * 100)
+            hand.splashPot = int(Decimal(m.group("AMOUNT")) * 100)
 
     def readHoleCards(self, hand: Hand) -> None:
         """Read and parse hole cards for all players from hand history.
@@ -1226,6 +1226,31 @@ class Winamax(HandHistoryConverter):
         """
         for m in self.re_collect_pot.finditer(hand.handText):
             hand.addCollectPot(player=m.group("PNAME"), pot=m.group("POT"))
+
+        splash_pot = getattr(hand, "splashPot", 0)
+        total_collected = getattr(hand, "totalcollected", 0)
+        if isinstance(splash_pot, (int, Decimal)) and isinstance(total_collected, (int, Decimal)) and splash_pot and total_collected:
+            # Winamax does not identify the splash component on collection lines.
+            # Allocate it pro rata for split pots; for a single winner this is the
+            # exact amount dropped by the room.
+            splash_cents = int(splash_pot)
+            total_collected = Decimal(total_collected)
+            shares = []
+            allocated_cents = 0
+            for player, amount in hand.collectees.items():
+                exact_cents = Decimal(splash_cents) * amount / total_collected
+                cents = int(exact_cents)
+                shares.append((player, cents, exact_cents - cents))
+                allocated_cents += cents
+
+            # Distribute the leftover cents by largest remainder so persisted
+            # per-player values still add up to the room's splash amount.
+            remainder = splash_cents - allocated_cents
+            shares.sort(key=lambda share: share[2], reverse=True)
+            hand.splashWinnings = {
+                player: Decimal(cents + (index < remainder)) / 100
+                for index, (player, cents, _) in enumerate(shares)
+            }
 
     def readShownCards(self, hand: Hand) -> None:
         """Parses and processes all shown cards in the hand.

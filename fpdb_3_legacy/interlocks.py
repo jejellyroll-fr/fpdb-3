@@ -3,7 +3,7 @@ from __future__ import annotations
 
 # Thanks JJ!
 import base64
-import doctest
+import errno
 import os
 import os.path
 import re
@@ -55,6 +55,23 @@ class SingleInstanceError(RuntimeError):
     """Thrown when you try to acquire an InterProcessLock and another version of the process is already running."""
 
 
+class LockUndeterminedError(SingleInstanceError):
+    """Thrown when the lock could not be tested at all.
+
+    Distinct from its parent because the two say different things. A
+    ``SingleInstanceError`` means the mechanism answered and the answer was
+    "taken"; this one means the mechanism never answered, so whether another
+    HUD is running is simply unknown. The socket lock cannot tell those apart
+    on its own -- a bind failing with ENETDOWN is not evidence of a second HUD
+    -- and reporting both as "the HUD is already running" sent users hunting
+    for a process that did not exist (#259).
+
+    A subclass so that every caller written against ``SingleInstanceError``
+    keeps refusing to start, which is still the safe answer when the lock is
+    untestable. Only the diagnostics change.
+    """
+
+
 HUD_INSTANCE_LOCK_NAME = "fpdb_hud_instance"
 """Name of the machine-wide lock that admits exactly one HUD process."""
 
@@ -65,6 +82,15 @@ Distinct from a crash so the GUI can tell the user what actually happened.
 "HUD_main exited during startup with code 1" sent an investigation into two
 HUDs drawing over every table down several wrong paths, because nothing
 anywhere said that a second HUD had been refused.
+"""
+
+HUD_LOCK_UNDETERMINED_EXIT_CODE = 4
+"""Exit status a HUD uses when it could not test the instance lock at all.
+
+Separate from HUD_ALREADY_RUNNING_EXIT_CODE because the advice differs. That
+one means "quit your other HUD"; this one means the lock mechanism itself
+failed, and quitting a HUD the user does not have will not help. Telling them
+otherwise is the bug behind #259.
 """
 
 
@@ -110,7 +136,11 @@ def acquire_hud_instance_lock(source: str, name: str = HUD_INSTANCE_LOCK_NAME) -
     """
     lock = InterProcessLock(name=name)
     if not lock.acquire(source):
-        raise SingleInstanceError("The FPDB HUD process is already running")
+        # Carry the mechanism's own account of the refusal. Without it every
+        # refusal reads "already running", including the ones where the lock
+        # merely could not be tested, and the user has nothing to go on.
+        detail = f" ({lock.last_error})" if lock.last_error else ""
+        raise SingleInstanceError(f"The FPDB HUD process is already running{detail}")
     return lock
 
 
@@ -121,6 +151,11 @@ class InterProcessLockBase:
             name = sys.argv[0]
         self.name = name
         self.heldBy = None
+        #: Why the last acquire() was refused, in the words of the mechanism
+        #: that refused it. acquire() reports refusal as a bare False, which
+        #: throws that away; the caller needs it to tell a held lock from an
+        #: untestable one.
+        self.last_error: str | None = None
 
     def getHashedName(self):
         log.debug(f"Original name: {self.name}")  # debug
@@ -162,6 +197,7 @@ class InterProcessLockBase:
         if self._has_lock:  # make sure 2nd acquire in the same process fails
             log.warning(f"Lock already held by: {self.heldBy}")
             return False
+        self.last_error = None
         while not self._has_lock:
             try:
                 self.acquire_impl(wait)
@@ -169,7 +205,14 @@ class InterProcessLockBase:
                 self.heldBy = source
                 self._record_owner(source)
                 log.debug("Lock acquired successfully")
-            except SingleInstanceError:
+            except LockUndeterminedError as exc:
+                # Waiting cannot help here: nothing was ever tested, so there
+                # is nothing to wait for. Retrying every retry_time seconds
+                # would spin on a broken environment until the user gave up.
+                self.last_error = str(exc)
+                raise
+            except SingleInstanceError as exc:
+                self.last_error = str(exc)
                 if not wait:
                     log.debug("Failed to acquire lock without waiting")
                     return False
@@ -196,10 +239,11 @@ LOCK_FILE_DIRECTORY = "/tmp"
 #: would send two processes looking for one lock to two different places.
 _BAD_FILENAME_CHARACTERS = re.compile(r"[/?<>\\:;*|'\"^=.\[\]]")
 
-#: Port range the socket lock picks from: above the registered ports, below
-#: the top of the ephemeral range.
-_LOCK_PORT_BASE = 65530
-_LOCK_PORT_SPAN = 32749
+#: Port range the socket lock picks from. Keep it strictly below 32768 so it
+#: does not contend with the dynamic range that the OS allocates to outbound
+#: connections (49152-65535 on Windows and modern Linux).
+_LOCK_PORT_BASE = 20000
+_LOCK_PORT_SPAN = 12768  # -> 20000..32767
 
 
 def port_for_lock_name(name: str) -> int:
@@ -213,7 +257,7 @@ def port_for_lock_name(name: str) -> int:
     the user and two HUD processes drawing over each other.
     """
     digest = zlib.crc32(name.encode("utf-8"))
-    return _LOCK_PORT_BASE - digest % _LOCK_PORT_SPAN
+    return _LOCK_PORT_BASE + digest % _LOCK_PORT_SPAN
 
 
 class InterProcessLockFcntl(InterProcessLockBase):
@@ -304,14 +348,33 @@ class InterProcessLockSocket(InterProcessLockBase):
 
     def acquire_impl(self, wait) -> None:
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        # Windows lets a second process bind a port somebody already holds if
+        # that process asks for SO_REUSEADDR, so a successful bind there does
+        # not by itself mean the port was free. SO_EXCLUSIVEADDRUSE is what
+        # makes the bind mean what this lock needs it to mean. It exists only
+        # on Windows, which is also the only platform that needs it -- the
+        # other two mechanisms are chosen everywhere else.
+        exclusive = getattr(socket, "SO_EXCLUSIVEADDRUSE", None)
+        if exclusive is not None:
+            self.socket.setsockopt(socket.SOL_SOCKET, exclusive, 1)
         try:
             self.socket.bind(("127.0.0.1", self.portno))
-        except OSError:
+        except OSError as exc:
             self.socket.close()
             self.socket = None
-            raise SingleInstanceError(
-                "Could not acquire exclusive lock on " + self.name,
+            if exc.errno in (errno.EADDRINUSE, errno.EACCES):
+                raise SingleInstanceError(
+                    f"Could not acquire exclusive lock on {self.name}: port {self.portno} is already bound",
+                ) from exc
+            log.error(
+                "Lock %s could not be tested: binding port %d failed with %s",
+                self.name,
+                self.portno,
+                exc,
             )
+            raise LockUndeterminedError(
+                f"Could not test the lock on {self.name}: binding port {self.portno} failed ({exc})",
+            ) from exc
 
     def release_impl(self) -> None:
         self.socket.close()
@@ -479,6 +542,11 @@ def main(argv=None):
     if args.test or args.interactive:
         print("Running doctest suite for interlocks module...")
         try:
+            # Imported here, not at module scope: doctest pulls in unittest,
+            # and a module the GUI imports while starting up must not make the
+            # whole process look like a test run to code that sniffs sys.modules.
+            import doctest
+
             result = doctest.testmod(optionflags=doctest.IGNORE_EXCEPTION_DETAIL)
             if result.failed == 0:
                 print(f"✓ All {result.attempted} doctests passed")

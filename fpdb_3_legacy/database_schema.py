@@ -11,6 +11,7 @@ are declared below so the coupling is visible.
 
 from __future__ import annotations
 
+import contextlib
 import sys
 from typing import TYPE_CHECKING, Any
 
@@ -22,6 +23,42 @@ log = get_logger("db")
 
 # Schema version written into Settings by create_tables and checked on connect.
 DB_VERSION = 224
+
+# How long a migration may wait for a table lock before giving up.
+#
+# PostgreSQL and MySQL both wait forever by default, and ``ensure_feature_tables``
+# runs on *every* Database() construction -- which the GUI does once per heavy
+# tab. One tab left idle inside a read transaction on Gametypes is enough to
+# make the next tab's ALTER TABLE wait on it for the life of the process, on the
+# GUI thread, with no timeout and nothing logged: the freeze reported in #249.
+# Migrations are re-attempted on every connection, so losing a race is a delay
+# until the next one, while blocking on it is the application hanging.
+DDL_LOCK_TIMEOUT_MS = 2000
+
+# Width Gametypes.category must have for aof_holdem (10 chars) to fit. The
+# statements are spelled out rather than formatted from the constant: the
+# quality gate rejects SQL built by string interpolation, whatever the input.
+GAMETYPE_CATEGORY_WIDTH = 10
+WIDEN_GAMETYPE_CATEGORY_MYSQL = "ALTER TABLE Gametypes MODIFY category VARCHAR(10) NOT NULL"
+WIDEN_GAMETYPE_CATEGORY_SQL = "ALTER TABLE Gametypes ALTER COLUMN category TYPE VARCHAR(10)"
+
+# Reads a column's declared width. MySQL needs the schema pinned because
+# information_schema.columns spans every database on the server; PostgreSQL's
+# is already scoped to the connected one.
+COLUMN_WIDTH_SQL = (
+    "SELECT character_maximum_length FROM information_schema.columns "
+    "WHERE lower(table_name) = %s AND lower(column_name) = %s"
+)
+COLUMN_WIDTH_MYSQL = (
+    "SELECT character_maximum_length FROM information_schema.columns "
+    "WHERE lower(table_name) = %s AND lower(column_name) = %s AND table_schema = DATABASE()"
+)
+
+# Session settings that apply DDL_LOCK_TIMEOUT_MS on each server backend.
+SET_PGSQL_LOCK_TIMEOUT = "SET lock_timeout = 2000"
+RESET_PGSQL_LOCK_TIMEOUT = "SET lock_timeout = DEFAULT"
+SET_MYSQL_LOCK_TIMEOUT = "SET SESSION lock_wait_timeout = 2"
+RESET_MYSQL_LOCK_TIMEOUT = "SET SESSION lock_wait_timeout = DEFAULT"
 
 # Keys used to index into player data in storeHandsPlayers.
 HANDS_PLAYERS_KEYS = [
@@ -347,7 +384,35 @@ HANDS_PLAYERS_KEYS = [
     # Turn probe bet (DerivedStats._calc_turn_probe).
     "street2ProbeChance",
     "street2ProbeDone",
+    # PT4 action enums (DerivedStats.calcActionEnums). One char per column --
+    # F/C/R for the response, N when the situation never came up -- so they are
+    # CHAR(1) rather than the INT the other stat columns use. The order mirrors
+    # DerivedStats.ACTION_ENUM_KEYS and the store_hands_players insert.
+    "enum_p_3bet_action",
+    "enum_p_4bet_action",
+    "enum_p_squeeze_action",
+    "enum_f_3bet_action",
+    "enum_f_4bet_action",
+    "enum_f_cbet_action",
+    "enum_f_donk_action",
+    "enum_t_3bet_action",
+    "enum_t_4bet_action",
+    "enum_t_cbet_action",
+    "enum_t_float_action",
+    "enum_t_donk_action",
+    "enum_r_3bet_action",
+    "enum_r_4bet_action",
+    "enum_r_cbet_action",
+    "enum_r_float_action",
+    "enum_r_donk_action",
+    "enum_face_allin",
+    "enum_face_allin_action",
+    "enum_folded",
 ]
+
+# The subset of HANDS_PLAYERS_KEYS holding a PT4 action enum. Split out so the
+# migration can give them a char column instead of the INT default.
+ACTION_ENUM_COLUMNS = [key for key in HANDS_PLAYERS_KEYS if key.startswith("enum_")]
 
 # Just like STATS_KEYS, this lets us efficiently add data at the
 # "beginning" later.
@@ -953,10 +1018,61 @@ class DatabaseSchemaMixin:
 
     # end def recreate_tables
 
+    @contextlib.contextmanager
+    def bounded_ddl_lock_wait(self):
+        """Make every migration inside the block fail rather than block.
+
+        A migration that cannot take its lock is a migration that has to wait
+        for another connection to end its transaction -- something a GUI tab
+        holding an open read can keep doing for hours. Both server backends
+        wait for that lock forever unless told otherwise, so the statement
+        never raises, never logs, and never returns: the caller simply stops.
+
+        The timeout is set on the session rather than with SET LOCAL because
+        the block below commits between statements, and a SET LOCAL would not
+        survive the commit. It is restored on the way out, so nothing outside
+        this block inherits it. SQLite has no such knob (it serialises with its
+        own busy timeout) and is left alone.
+        """
+        applied = False
+        try:
+            if self.backend == self.PGSQL:
+                self.get_cursor().execute(SET_PGSQL_LOCK_TIMEOUT)
+                applied = True
+            elif self.backend == self.MYSQL_INNODB:
+                # MySQL counts metadata-lock waits in whole seconds, minimum 1.
+                self.get_cursor().execute(SET_MYSQL_LOCK_TIMEOUT)
+                applied = True
+        except Exception:  # noqa: BLE001 - an unsupported knob must not stop the migrations
+            log.debug("Could not bound the migration lock wait", exc_info=True)
+        try:
+            yield
+        finally:
+            if applied:
+                # The last statement may have left the connection in an aborted
+                # transaction, which refuses everything until it is rolled back.
+                with contextlib.suppress(Exception):
+                    self.rollback()
+                with contextlib.suppress(Exception):
+                    if self.backend == self.PGSQL:
+                        self.get_cursor().execute(RESET_PGSQL_LOCK_TIMEOUT)
+                    else:
+                        self.get_cursor().execute(RESET_MYSQL_LOCK_TIMEOUT)
+                    self.commit()
+
     def ensure_feature_tables(self) -> None:
         """Create tables added after the original schema if they are missing, so
         that databases created by older versions keep working (used for the
-        showdown combinations, cashout details, and additive HudCache stats)."""
+        showdown combinations, cashout details, and additive HudCache stats).
+
+        Runs on every connection, so it must never block: see
+        :meth:`bounded_ddl_lock_wait`.
+        """
+        with self.bounded_ddl_lock_wait():
+            self._run_feature_migrations()
+
+    def _run_feature_migrations(self) -> None:
+        """The migrations themselves, each one best-effort and self-contained."""
         for query_name in (
             "createHandsShowdownTable",
             "createHandsCashoutTable",
@@ -1019,6 +1135,8 @@ class DatabaseSchemaMixin:
     def ensure_handsplayers_columns(self) -> None:
         """Add missing HandsPlayers stat columns for databases created by older code."""
         definitions = {column: "INT DEFAULT 0" for column in HANDS_PLAYERS_KEYS}
+        # The PT4 action enums store a single response char, not a counter.
+        definitions.update({column: "CHAR(1) DEFAULT 'N'" for column in ACTION_ENUM_COLUMNS})
         definitions["handString"] = "TEXT"
         definitions["cashOutFee"] = "INT DEFAULT 0"
         definitions["isCashOut"] = "BOOLEAN DEFAULT 0"
@@ -1032,32 +1150,59 @@ class DatabaseSchemaMixin:
         }
         self._ensure_table_columns("Hands", definitions)
 
+    def _column_character_length(self, table: str, column: str) -> int | None:
+        """Declared width of a character column, or None when there is none.
+
+        None covers both "no such column" and a type with no declared width, so
+        callers can treat it as "nothing to widen".
+        """
+        c = self.get_cursor()
+        # Two whole statements rather than one built by appending the MySQL
+        # clause: the analyser reads any query assembled from parts as an
+        # injection site, and it is right to, even when every part is a literal.
+        query = COLUMN_WIDTH_MYSQL if self.backend == self.MYSQL_INNODB else COLUMN_WIDTH_SQL
+        c.execute(query, (table.lower(), column.lower()))
+        row = c.fetchone()
+        return None if row is None else row[0]
+
     def _ensure_gametype_category_width(self) -> None:
         """Widen Gametypes.category to varchar(10) for aof_holdem support.
 
         The original schema used varchar(9), which fits aof_omaha (8 chars)
         but not aof_holdem (10 chars). Avoided on SQLite (TEXT is unbounded)
         and skipped when the column is already wide enough.
+
+        That last sentence used to be a claim rather than a check: the only
+        test was that a column named "category" exists, so an ALTER TABLE went
+        out on every single connection, for the life of the schema, to set a
+        width that was already set. It takes ACCESS EXCLUSIVE on Gametypes,
+        which is why a database that had nothing to migrate could still hang
+        the GUI behind another tab's open read (#249). Reading the width first
+        makes the statement run once, on the one database that needs it.
         """
         if self.backend == self.SQLITE:
             return
         try:
-            existing = self._get_table_columns("Gametypes")
-        except Exception:  # noqa: BLE001
+            width = self._column_character_length("Gametypes", "category")
+        except Exception:  # noqa: BLE001 - table absent during first-time setup
             self.rollback()
             return
-        if not existing or "category" not in {c.lower() for c in existing}:
+        if width is None or width >= GAMETYPE_CATEGORY_WIDTH:
             return
         try:
             c = self.get_cursor()
             if self.backend == self.MYSQL_INNODB:
-                c.execute("ALTER TABLE Gametypes MODIFY category VARCHAR(10) NOT NULL")
+                c.execute(WIDEN_GAMETYPE_CATEGORY_MYSQL)
             else:
-                c.execute("ALTER TABLE Gametypes ALTER COLUMN category TYPE VARCHAR(10)")
+                c.execute(WIDEN_GAMETYPE_CATEGORY_SQL)
             self.commit()
-            log.info("Widened Gametypes.category to varchar(10)")
-        except Exception:  # noqa: BLE001 - column may already be wide enough or table locked.
+            log.info("Widened Gametypes.category to varchar(%d)", GAMETYPE_CATEGORY_WIDTH)
+        except Exception:  # noqa: BLE001 - another connection holds the table; retried next connection.
             self.rollback()
+            log.warning(
+                "Could not widen Gametypes.category to varchar(%d); retrying on the next connection",
+                GAMETYPE_CATEGORY_WIDTH,
+            )
 
     def _ensure_table_columns(self, table: str, definitions: dict[str, str]) -> None:
         try:
@@ -1080,9 +1225,19 @@ class DatabaseSchemaMixin:
                 c.execute(f"ALTER TABLE {table} ADD COLUMN {column} {definitions[column]}")
             self.commit()
             log.info("Added %s missing %s columns: %s", len(missing), table, ", ".join(missing))
-        except Exception:
+        except Exception:  # noqa: BLE001 - reported, then retried on the next connection
             self.rollback()
-            raise
+            # Raising here used to abort whatever was opening the connection.
+            # Now that the block bounds its lock wait, the likeliest failure is
+            # losing a race for the table -- against the HUD process starting at
+            # the same time, say -- and taking down the window that lost is a
+            # worse answer than saying so and trying again next connection.
+            log.warning(
+                "Could not add missing %s columns (%s); retrying on the next connection",
+                table,
+                ", ".join(missing),
+                exc_info=True,
+            )
 
     def create_tables(self) -> None:
         log.debug(f"{self.sql.query['createSettingsTable']}")

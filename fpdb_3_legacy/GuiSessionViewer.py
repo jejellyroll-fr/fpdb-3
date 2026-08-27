@@ -59,9 +59,7 @@ class GuiSessionViewer(QSplitter):
         self.PGSQL = 3
         self.SQLITE = 4
 
-        self.fig: Any = None
         self.canvas: Any = None
-        self.ax: Any = None
         self.graphBox: Any = None
         self._db_worker: DbWorker | None = None
 
@@ -141,6 +139,11 @@ class GuiSessionViewer(QSplitter):
         self.setStretchFactor(1, 1)
         self.main_vbox.addWidget(self.graphBox)
         self.main_vbox.addWidget(self.stats_frame)
+
+    def close_owned_database(self) -> None:
+        """Release the connection created for this tab."""
+        with contextlib.suppress(Exception):
+            self.db.disconnect()
 
     def refreshStats(self, checkState) -> None:
         log.warning(f"GuiSessionViewer.refreshStats called with checkState: {checkState}")

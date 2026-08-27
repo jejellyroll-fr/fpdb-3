@@ -75,6 +75,8 @@ jobs:
           fpdb_3_legacy/http_capture_analyze.py
           fpdb_3_legacy/swc_http_capture.py
           fpdb_3_legacy/stat_adapters.py
+          fpdb_3_legacy/action_enum_stats.py
+          fpdb_3_legacy/stats_action_enums.py
           fpdb_3_legacy/stats_context.py
           fpdb_3_legacy/stats_formatting.py
           fpdb_3_legacy/stats_display.py
@@ -341,6 +343,10 @@ jobs:
       - name: Install dependencies
         run: |
           uv pip install --system -e ".[test]"
+      - name: Install the Windows platform bindings
+        if: runner.os == 'Windows'
+        run: |
+          uv pip install --system pywin32==306
       - name: Run tests (no GUI)
         env:
           QT_QPA_PLATFORM: offscreen

@@ -2,7 +2,6 @@
 # pypoker-eval is installed separately in pyoxidizer.bzl because its metadata
 # requires Python 3.11 while PyOxidizer 0.24 embeds Python 3.10.
 beautifulsoup4==4.12.3
-matplotlib>=3.10.7
 pandas>=2.2.2
 psutil>=5.9.0
 pyobjc==10.3.1; sys_platform == 'darwin'
@@ -14,7 +13,6 @@ numpy>=2.1.0
 pytz==2024.1
 aiohttp>=3.13.2
 cachetools==5.5.0
-mplfinance>=0.12.10b0
 xlrd==2.0.1
 playwright>=1.40.0
 pymysql>=1.1.0

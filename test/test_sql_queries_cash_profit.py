@@ -19,6 +19,10 @@ def test_cash_profit_queries_keep_units_equity_and_filters() -> None:
     assert "hp.allInEV" in big_blinds
     assert "gt.bigBlind" in big_blinds
     assert "hp.allInEV" in dollars
+    assert "COALESCE(hp.splashWinnings, 0)" in big_blinds
+    assert "COALESCE(hp.splashWinnings, 0)" in dollars
+    assert "hp.splashWinnings" in queries["getRingProfitAllHandsPlayerIdSite"]
+    assert "gt.bigBlind" in big_blinds
     for query in queries.values():
         assert "<player_test>" in query
         assert "<site_test>" in query

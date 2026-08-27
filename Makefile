@@ -42,6 +42,8 @@ clean: ## Clean up generated files
 
 # Development workflow commands
 dev-setup: install-deps ## Set up development environment
+	@git config core.hooksPath .githooks
+	@echo "Git hooks enabled (core.hooksPath -> .githooks)"
 	@echo "Development environment ready!"
 	@echo "Run 'make test' to run tests"
 	@echo "Run 'make lint' to check code style"

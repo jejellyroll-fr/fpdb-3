@@ -218,6 +218,54 @@ class TestWinamaxComplete(unittest.TestCase):
         mock_hand.handText = "Hand with escape pot information"
         self.parser.readSTP(mock_hand)
 
+    def test_read_stp_distinguishes_bomb_and_splash_pots(self) -> None:
+        """Hold-up is a bomb pot; Escape/Splash/Drop are splash pots."""
+        bomb_hand = Mock()
+        bomb_hand.handText = "Hold-up to Pot: total 0.20€"
+        bomb_hand.splashPot = 0
+        self.parser.readSTP(bomb_hand)
+        assert bomb_hand.bombPot == 20
+        assert bomb_hand.splashPot == 0
+
+        splash_hand = Mock()
+        splash_hand.handText = "Escape: total 0.20€"
+        splash_hand.bombPot = 0
+        self.parser.readSTP(splash_hand)
+        assert splash_hand.splashPot == 20
+        assert splash_hand.bombPot == 0
+
+    def test_read_collect_pot_attributes_splash_winnings(self) -> None:
+        """A sole winner receives the full splash amount."""
+        hand = Mock()
+        hand.handText = "Hero collected 1.20€"
+        hand.splashPot = 20
+        hand.totalcollected = Decimal("1.20")
+        hand.collectees = {"Hero": Decimal("1.20")}
+        hand.players = [[1, "Hero", Decimal("1.20")]]
+        hand.gametype = {"currency": "EUR"}
+        self.parser.compilePlayerRegexs(hand)
+        self.parser.readCollectPot(hand)
+        assert hand.splashWinnings == {"Hero": Decimal("0.20")}
+
+    def test_read_collect_pot_preserves_splash_cents_when_split(self) -> None:
+        """Split splash winnings are rounded to cents without losing value."""
+        hand = Mock()
+        hand.handText = "Alice collected 1.00€\nBob collected 1.00€\nCarol collected 1.00€"
+        hand.splashPot = 20
+        hand.totalcollected = Decimal("3.00")
+        hand.collectees = {
+            "Alice": Decimal("1.00"),
+            "Bob": Decimal("1.00"),
+            "Carol": Decimal("1.00"),
+        }
+        hand.players = [[1, "Alice", Decimal("1.00")], [2, "Bob", Decimal("1.00")], [3, "Carol", Decimal("1.00")]]
+        hand.gametype = {"currency": "EUR"}
+        self.parser.compilePlayerRegexs(hand)
+        self.parser.readCollectPot(hand)
+
+        assert sum(hand.splashWinnings.values()) == Decimal("0.20")
+        assert sorted(hand.splashWinnings.values()) == [Decimal("0.06"), Decimal("0.07"), Decimal("0.07")]
+
     def test_read_antes_method(self) -> None:
         """Test readAntes method with stud games."""
         mock_hand = Mock()

@@ -1,7 +1,13 @@
 #!/usr/bin/env python3
-from __future__ import annotations
+"""Test de la Feature 1.1: Migration Stack Technique Moderne.
 
-"""Test de la Feature 1.1: Migration Stack Technique Moderne"""
+Les vérifications renvoyaient ``True``/``False`` et ``main()`` jetait ce
+résultat : le script annonçait « SUCCÈS: Tous les tests passés » quel que soit
+l'état des dépendances. Un contrôle dont le verdict est ignoré ne contrôle
+rien, d'où la séparation explicite ci-dessous entre requis et optionnel.
+"""
+
+from __future__ import annotations
 
 import sys
 from pathlib import Path
@@ -49,70 +55,54 @@ def test_numpy_2x_array_methods():
     print("✅ Tous les tests NumPy 2.x passés!\n")
 
 
+def test_pyqtgraph():
+    """Test que PyQtGraph, moteur de rendu des graphiques, est utilisable.
+
+    Ajouté parce qu'il ne l'était pas : c'est la bibliothèque qui dessine tous
+    les graphiques depuis #228, et la seule dépendance critique que rien ne
+    vérifiait.
+    """
+    print("Test PyQtGraph...")
+
+    import pyqtgraph as pg
+
+    version = pg.__version__
+    major_minor = tuple(map(int, version.split(".")[:2]))
+
+    assert major_minor >= (0, 13), f"pyqtgraph 0.13+ requis, trouvé {version}"
+    assert hasattr(pg, "PlotWidget"), "pyqtgraph.PlotWidget introuvable"
+    print(f"  ✓ pyqtgraph version: {version}")
+    print("✅ PyQtGraph confirmé!\n")
+
+
 def test_sqlalchemy_2x():
-    """Test que SQLAlchemy 2.x est installé"""
-    print("Test SQLAlchemy 2.x...")
+    """Test que SQLAlchemy, s'il est présent, est en 2.x.
+
+    Dépendance optionnelle : ``Database.py`` la sonde derrière un
+    ``try``/``except`` et n'est déclarée dans aucune section de
+    ``pyproject.toml``. Une absence -- ou une version trop ancienne -- est
+    signalée, jamais fatale.
+
+    Returns:
+        True si utilisable, False sinon. Le verdict est repris par ``main()``.
+    """
+    print("Test SQLAlchemy 2.x (optionnel)...")
 
     try:
         import sqlalchemy
-
-        version = sqlalchemy.__version__
-        major = int(version.split(".")[0])
-
-        assert major >= 2, f"SQLAlchemy 2.0+ requis, trouvé {version}"
-        print(f"  ✓ SQLAlchemy version: {version}")
-        print("✅ SQLAlchemy 2.x confirmé!\n")
-        return True
     except ImportError:
-        print("  ⚠ SQLAlchemy non installé (optionnel)")
+        print("  ⚠ SQLAlchemy non installé (optionnel)\n")
         return False
 
-
-def test_matplotlib_3_10():
-    """Test que matplotlib 3.10+ est installé"""
-    print("Test matplotlib 3.10+...")
-
-    try:
-        import matplotlib
-
-        version = matplotlib.__version__
-        major_minor = tuple(map(int, version.split(".")[:2]))
-
-        assert major_minor >= (3, 10), f"matplotlib 3.10+ requis, trouvé {version}"
-        print(f"  ✓ matplotlib version: {version}")
-        print("✅ matplotlib 3.10+ confirmé!\n")
-        return True
-    except ImportError:
-        print("  ⚠ matplotlib non installé")
+    version = sqlalchemy.__version__
+    major = int(version.split(".")[0])
+    if major < 2:
+        print(f"  ⚠ SQLAlchemy 2.0+ attendu, trouvé {version} (optionnel)\n")
         return False
 
-
-def test_fastapi_pydantic():
-    """Test que FastAPI et Pydantic sont à jour"""
-    print("Test FastAPI et Pydantic...")
-
-    try:
-        import fastapi
-        import pydantic
-
-        fastapi_version = fastapi.__version__
-        pydantic_version = pydantic.__version__
-
-        # FastAPI >= 0.121.1
-        fastapi_parts = tuple(map(int, fastapi_version.split(".")[:3]))
-        assert fastapi_parts >= (0, 121, 1), f"FastAPI 0.121.1+ requis, trouvé {fastapi_version}"
-
-        # Pydantic >= 2.12.1
-        pydantic_major = int(pydantic_version.split(".")[0])
-        assert pydantic_major >= 2, f"Pydantic 2.x requis, trouvé {pydantic_version}"
-
-        print(f"  ✓ FastAPI version: {fastapi_version}")
-        print(f"  ✓ Pydantic version: {pydantic_version}")
-        print("✅ FastAPI et Pydantic à jour!\n")
-        return True
-    except ImportError:
-        print("  ⚠ FastAPI/Pydantic non installés (optionnels)")
-        return False
+    print(f"  ✓ SQLAlchemy version: {version}")
+    print("✅ SQLAlchemy 2.x confirmé!\n")
+    return True
 
 
 def test_code_modifications():
@@ -138,8 +128,11 @@ def test_code_modifications():
     with open(LEGACY_DIR / "GuiSessionViewer.py") as f:
         content = f.read()
 
-    # Ne devrait plus avoir "from numpy import append, cumsum, diff, nonzero"
-    assert "from numpy import append" not in content or "import numpy as np" in content
+    # Ne devrait plus avoir "from numpy import append, cumsum, diff, nonzero".
+    # L'ancienne forme "A not in content or B in content" était satisfaite dès
+    # que le module importait numpy, donc n'interdisait rien.
+    assert "from numpy import append" not in content, "GuiSessionViewer.py: 'from numpy import append' encore présent"
+    assert "import numpy as np" in content, "GuiSessionViewer.py: 'import numpy as np' manquant"
     assert ".cumsum()" in content, "GuiSessionViewer.py: '.cumsum()' manquant"
     assert "np.diff" in content, "GuiSessionViewer.py: 'np.diff' manquant"
 
@@ -165,11 +158,13 @@ def main():
     print()
 
     try:
+        # Requis : une défaillance lève une AssertionError, reprise plus bas.
         test_numpy_2x_array_methods()
-        test_sqlalchemy_2x()
-        test_matplotlib_3_10()
-        test_fastapi_pydantic()
+        test_pyqtgraph()
         test_code_modifications()
+
+        # Optionnel : le verdict est rapporté, pas jeté.
+        sqlalchemy_ok = test_sqlalchemy_2x()
 
         print("=" * 60)
         print("🎉 SUCCÈS: Tous les tests Feature 1.1 passés!")
@@ -178,28 +173,16 @@ def main():
         print("Résumé des versions:")
         print(f"  • NumPy: {np.__version__}")
 
-        try:
+        import pyqtgraph as pg
+
+        print(f"  • pyqtgraph: {pg.__version__}")
+
+        if sqlalchemy_ok:
             import sqlalchemy
 
             print(f"  • SQLAlchemy: {sqlalchemy.__version__}")
-        except ImportError:
-            pass
-
-        try:
-            import matplotlib
-
-            print(f"  • matplotlib: {matplotlib.__version__}")
-        except ImportError:
-            pass
-
-        try:
-            import fastapi
-            import pydantic
-
-            print(f"  • FastAPI: {fastapi.__version__}")
-            print(f"  • Pydantic: {pydantic.__version__}")
-        except ImportError:
-            pass
+        else:
+            print("  • SQLAlchemy: absent ou < 2.x (optionnel, non bloquant)")
 
         return 0
 

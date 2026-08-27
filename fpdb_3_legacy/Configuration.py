@@ -20,7 +20,6 @@ from __future__ import annotations
 ########################################################################
 #    Standard Library modules
 import codecs
-import contextlib
 import inspect
 import json
 import locale
@@ -240,26 +239,6 @@ else:
 POSIX = os.name == "posix"
 
 PYTHON_VERSION = sys.version[:3]
-
-if CONFIG_PATH and "MPLCONFIGDIR" not in os.environ:
-    mpl_dir = os.path.join(CONFIG_PATH, "matplotlib").replace("\\", "/")
-    with contextlib.suppress(OSError):
-        os.makedirs(mpl_dir, exist_ok=True)
-    os.environ["MPLCONFIGDIR"] = mpl_dir
-
-
-def prewarm_matplotlib() -> None:
-    """Ensure matplotlib and its font list are pre-warmed safely."""
-    try:
-        import matplotlib
-        # Force Qt backend immediately to prevent Native macOS backend (macosx)
-        # from initializing its own event loop and deadlocking with PySide6.
-        matplotlib.use("qtagg")
-        import matplotlib.font_manager
-
-        _ = matplotlib.font_manager.fontManager.ttflist
-    except Exception:
-        pass
 
 # logging has been set up in fpdb.py or HUD_main.py, use their settings:
 log = get_logger("configuration")

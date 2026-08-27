@@ -8,6 +8,9 @@ des statistiques pour le tableau de bord, les positions et les cartes.
 
 from __future__ import annotations
 
+import contextlib
+import os
+import sys
 from typing import Any
 
 from PySide6.QtCore import QObject, Qt, Signal
@@ -24,6 +27,25 @@ log = get_logger("ring_stats_controller")
 def debug_log(msg: str) -> None:
     """Route detailed diagnostics through the configured logger."""
     log.debug(msg)
+
+
+def running_under_test() -> bool:
+    """True while a test runner is driving this process.
+
+    ``"unittest" in sys.modules`` used to be half of this test, and it was
+    wrong in production in the worst possible way. ``fpdb_3_legacy.interlocks``
+    imported ``doctest`` at module scope, ``doctest`` imports ``unittest``, and
+    ``fpdb.pyw`` imports ``interlocks`` while starting up -- so every real run
+    of the GUI looked like a test run. Ring Player Stats therefore ran all four
+    of its queries and built every model on the GUI thread, which is exactly
+    what the DbWorker threads exist to avoid, and the asynchronous path only
+    ever ran where nobody was looking.
+
+    Nothing in the application imports pytest, and ``PYTEST_CURRENT_TEST`` is
+    set by pytest for the duration of a test, so both signals mean what they
+    say.
+    """
+    return "pytest" in sys.modules or "PYTEST_CURRENT_TEST" in os.environ
 
 colalias, colheading, colshowsumm, colshowposn, colformat, coltype, colxalign = (
     0, 1, 2, 3, 4, 5, 6
@@ -104,7 +126,7 @@ class RingStatsController(QObject):
     # Carries a NoDataReason value so the view can explain *why* it is empty.
     no_data_found = Signal(str)
 
-    def __init__(self, db, config, sql) -> None:
+    def __init__(self, db, config, sql, *, async_mode: bool | None = None) -> None:
         super().__init__()
         self.db = db
         self.cursor = db.cursor
@@ -113,37 +135,66 @@ class RingStatsController(QObject):
         self.columns = config.get_gui_cash_stat_params()
         self._workers: list[DbWorker] = []
 
-        # Force synchronous mode only in test suites (pytest/unittest)
-        import sys
-
-        self.async_mode = "pytest" not in sys.modules and "unittest" not in sys.modules
+        # Synchronous only under a test runner, so a test can assert on results
+        # without pumping the event loop. Passing async_mode explicitly wins.
+        self.async_mode = not running_under_test() if async_mode is None else async_mode
 
         self._last_summary_stats: dict[str, Any] | None = None
-        self._last_profit_data: tuple[Any, Any, Any, Any] | None = None
+        self._last_profit_data: tuple[Any, Any, Any, Any, Any] | None = None
+
+        # Bumped by every refresh_all. A result carrying an older number belongs
+        # to filters the user has already replaced: see is_current_result.
+        self._generation = 0
 
     def shutdown_workers(self) -> None:
         """Stop all DbWorker threads started by this controller.
 
-        Called when the host tab is closed or refreshed: disconnects signals
-        immediately so stale workers never update the UI thread, and terminates them.
+        Called when the host tab is closed or refreshed. Disconnecting the
+        signals is what actually protects the UI: a worker that finishes after
+        its tab is gone then has nobody to deliver results to.
+
+        It does not terminate the thread, for the reason ``ModernStatsWidget``
+        already documents -- ``QThread.terminate`` kills the thread wherever it
+        happens to be, including inside ``Database.worker_connection``, which
+        holds a semaphore permit from a pool of four shared by every tab. Four
+        such kills and the next query waits for a permit that will never be
+        released. The queries here are bounded, so letting one finish and be
+        ignored costs a fraction of a second.
         """
         for worker in self._workers:
             if worker.isRunning():
-                try:
+                with contextlib.suppress(TypeError, RuntimeError):
                     worker.finished.disconnect()
-                except (TypeError, RuntimeError):
-                    pass
-                try:
+                with contextlib.suppress(TypeError, RuntimeError):
                     worker.error.disconnect()
-                except (TypeError, RuntimeError):
-                    pass
-                worker.terminate()
         self._workers = []
+
+    def is_current_result(self) -> bool:
+        """False when this result belongs to a refresh the user has replaced.
+
+        Disconnecting a superseded worker's signals is not enough on its own.
+        ``shutdown_workers`` only reaches workers that are still running, and a
+        query that came back quickly is neither running nor still in the list --
+        its callback is simply sitting in the GUI thread's event queue, and it
+        is delivered after the next refresh has already started.
+
+        The visible half of that is a table filled from the previous filters.
+        The quiet half is worse: ``_check_and_emit_dashboard`` emits as soon as
+        it holds both a summary and a profit series, so a stale one arriving
+        beside a fresh one produces a single dashboard describing two different
+        filter sets, with nothing on screen to say so.
+
+        A worker carrying no generation at all is treated as current: the
+        callbacks are called directly in tests, where there is no sender to ask.
+        """
+        generation = getattr(self.sender(), "generation", None)
+        return generation is None or generation == self._generation
 
     def refresh_all(self, filter_widget) -> None:
         """Lance l'ensemble des requêtes asynchrones en fonction des filtres appliqués."""
         debug_log("refresh_all called!")
         self.shutdown_workers()
+        self._generation += 1
         # 1. Extraction des filtres
         sites = filter_widget.getSites()
         heroes = filter_widget.getHeroes()
@@ -225,6 +276,12 @@ class RingStatsController(QObject):
         log.warning(f"[PERF] controller sql_profit generation: {t4-t3:.3f}s. Total queries dispatch: {t4-t0:.3f}s")
         self._run_query("profit", sql_profit, self._on_profit_query_finished)
 
+        # The player and site lookups above ran on the tab's own connection, and
+        # a read opens a transaction like anything else. The workers use their
+        # own pooled connections, so ending this one now leaves nothing of this
+        # refresh holding a lock (#271).
+        self.db.rollback()
+
     def _run_query(self, query_name: str, sql: str, callback) -> None:
         """Lance une requête asynchrone à l'aide d'un DbWorker (ou synchrone en test)."""
         debug_log(f"_run_query: name={query_name}, async_mode={self.async_mode}")
@@ -233,6 +290,10 @@ class RingStatsController(QObject):
         self._workers = [w for w in self._workers if not w.isFinished()]
 
         worker = DbWorker(self.db, query_name, sql)
+        # Read back through sender() by is_current_result. Carried on the worker
+        # rather than added to the signal so DbWorker stays the same object the
+        # other stats widgets connect to.
+        worker.generation = self._generation
         worker.finished.connect(callback)
 
         def on_error(err):
@@ -249,10 +310,14 @@ class RingStatsController(QObject):
 
     def _on_summary_query_finished(self, name: str, result: list, colnames: list) -> None:
         """Callback appelé lorsque la requête récapitulative est terminée."""
+        if not self.is_current_result():
+            debug_log("_on_summary_query_finished: result of a superseded refresh, discarded")
+            return
+
         debug_log(f"_on_summary_query_finished: returned {len(result) if result else 0} rows")
         if not result:
             self._last_summary_stats = {}
-            self._last_profit_data = ([], [], [], [])
+            self._last_profit_data = ([], [], [], [], [])
             self.no_data_found.emit(gui_empty_state.NoDataReason.NO_ROWS.value)
             return
 
@@ -277,11 +342,15 @@ class RingStatsController(QObject):
 
     def _on_profit_query_finished(self, name: str, result: list, colnames: list) -> None:
         """Callback appelé lorsque la requête chronologique de profit est terminée."""
+        if not self.is_current_result():
+            debug_log("_on_profit_query_finished: result of a superseded refresh, discarded")
+            return
+
         debug_log(f"_on_profit_query_finished: returned {len(result) if result else 0} rows")
         import numpy as np
 
         if not result:
-            self._last_profit_data = ([], [], [], [])
+            self._last_profit_data = ([], [], [], [], [])
             self._check_and_emit_dashboard()
             return
 
@@ -290,16 +359,18 @@ class RingStatsController(QObject):
             blue = np.array([0.0, *[float(x[1]) if x[2] else 0.0 for x in result]])
             red = np.array([0.0, *[float(x[1]) if not x[2] else 0.0 for x in result]])
             orange = np.array([0.0, *[float(x[3]) if x[3] is not None else 0.0 for x in result]])
+            splash = np.array([0.0, *[float(x[4]) if x[4] is not None else 0.0 for x in result]])
 
             greenline = green.cumsum() / 100.0
             blueline = blue.cumsum() / 100.0
             redline = red.cumsum() / 100.0
             orangeline = orange.cumsum() / 100.0
+            nosplashline = (green - splash).cumsum() / 100.0
 
-            self._last_profit_data = (greenline, blueline, redline, orangeline)
+            self._last_profit_data = (greenline, blueline, redline, orangeline, nosplashline)
         except Exception as e:
             log.error(f"Error processing profit data: {e}")
-            self._last_profit_data = ([], [], [], [])
+            self._last_profit_data = ([], [], [], [], [])
 
         self._check_and_emit_dashboard()
 
@@ -309,6 +380,10 @@ class RingStatsController(QObject):
 
     def _on_hands_query_finished(self, name: str, result: list, colnames: list) -> None:
         """Callback appelé lorsque la requête détaillée par main est terminée."""
+        if not self.is_current_result():
+            debug_log("_on_hands_query_finished: result of a superseded refresh, discarded")
+            return
+
         debug_log(f"_on_hands_query_finished: returned {len(result) if result else 0} rows")
         if not result:
             return
@@ -349,6 +424,10 @@ class RingStatsController(QObject):
 
     def _on_positions_query_finished(self, name: str, result: list, colnames: list) -> None:
         """Callback pour l'affichage de la table de poker positionnelle."""
+        if not self.is_current_result():
+            debug_log("_on_positions_query_finished: result of a superseded refresh, discarded")
+            return
+
         position_stats = {}
 
         vpip_idx = colnames.index("vpip") if "vpip" in colnames else -1

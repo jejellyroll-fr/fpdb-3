@@ -105,6 +105,11 @@ class GuiGraphViewer(QSplitter):
 
         self.db.rollback()
 
+    def close_owned_database(self) -> None:
+        """Release the connection created for this tab."""
+        with contextlib.suppress(Exception):
+            self.db.disconnect()
+
     def clearGraphData(self) -> None:
         with contextlib.suppress(Exception):
             if self.plot_widget:
@@ -167,7 +172,7 @@ class GuiGraphViewer(QSplitter):
         # log.debug("currencies selcted:", self.filters.getCurrencies())
 
         starttime = time()
-        (green, blue, red, orange) = self.getRingProfitGraph(
+        (green, blue, red, orange, nosplash) = self.getRingProfitGraph(
             playerids,
             sitenos,
             limits,
@@ -269,6 +274,13 @@ class GuiGraphViewer(QSplitter):
                 name=("All-in EV") + f" ({display_in}): {format_number(orange[-1])}",
             )
 
+        if "nosplash" in graphops and len(nosplash) > 0 and not np.array_equal(nosplash, green):
+            self.plot_widget.plot(
+                nosplash,
+                pen=pg.mkPen(color=get_modern_color("line_no_splash", "orange"), width=1.8, style=Qt.PenStyle.DashLine),
+                name=_("Net profit excluding splash") + f" ({display_in}): {format_number(nosplash[-1])}",
+            )
+
         hand_count = max(len(green) - 1, 0)
         self.plot_widget.plot(
             green,
@@ -280,73 +292,6 @@ class GuiGraphViewer(QSplitter):
         )
 
         self.graphBox.addWidget(self.plot_widget)
-
-    def plotGraph(self) -> None:
-        self.ax.set_title("No Data for Player(s) Found")
-        green = [
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            500.0,
-            1000.0,
-            900.0,
-            800.0,
-            700.0,
-            600.0,
-            500.0,
-            400.0,
-            300.0,
-            200.0,
-            100.0,
-            0.0,
-            500.0,
-            1000.0,
-            1000.0,
-            1000.0,
-            1000.0,
-            1000.0,
-            1000.0,
-            1000.0,
-            1000.0,
-            1000.0,
-            1000.0,
-            1000.0,
-            1000.0,
-            1000.0,
-            875.0,
-            750.0,
-            625.0,
-            500.0,
-            375.0,
-            250.0,
-            125.0,
-            0.0,
-            0.0,
-            0.0,
-            0.0,
-            500.0,
-            1000.0,
-            900.0,
-            800.0,
-            700.0,
-            600.0,
-            500.0,
-            400.0,
-            300.0,
-            200.0,
-            100.0,
-            0.0,
-            500.0,
-            1000.0,
-            1000.0,
-        ]
-        self.ax.plot(
-            green,
-            color=self.colors["line_hands"],
-            linewidth=0.5,
-            label=_("Hands") + f": {format_number(len(green), 0)}\n" + _("Profit") + f": {format_number(green[-1])}",
-        )
 
     def getRingProfitGraph(self, names, sites, limits, games, currencies, units):
         log.warning(
@@ -420,23 +365,25 @@ class GuiGraphViewer(QSplitter):
             # in an aborted transaction that blanks every subsequent graph.
             log.exception("getRingProfitGraph: query failed; rolling back")
             self.db.rollback()
-            return (None, None, None, None)
+            return (None, None, None, None, None)
         self.db.rollback()
 
         log.warning(f"GuiGraphViewer.getRingProfitGraph: SQL query returned {len(winnings)} records.")
 
         if len(winnings) == 0:
-            return (None, None, None, None)
+            return (None, None, None, None, None)
 
         green = np.array([0.0, *[float(x[1]) for x in winnings]])
         blue = np.array([0.0, *[float(x[1]) if x[2] else 0.0 for x in winnings]])
         red = np.array([0.0, *[float(x[1]) if not x[2] else 0.0 for x in winnings]])
         orange = np.array([0.0, *[float(x[3]) if x[3] is not None else 0.0 for x in winnings]])
+        splash = np.array([0.0, *[float(x[4]) if x[4] is not None else 0.0 for x in winnings]])
         # NumPy 2.x: use array method instead of numpy.cumsum()
         greenline = green.cumsum()
         blueline = blue.cumsum()
         redline = red.cumsum()
         orangeline = orange.cumsum()
+        nosplashline = (green - splash).cumsum()
 
         # log.debug("Data :")
         # log.debug("Green:", green[:10])  # show only the first 10 results
@@ -450,7 +397,7 @@ class GuiGraphViewer(QSplitter):
         # log.debug("Redline:", redline[:10])
         # log.debug("Orangeline:", orangeline[:10])
 
-        return (greenline / 100, blueline / 100, redline / 100, orangeline / 100)
+        return (greenline / 100, blueline / 100, redline / 100, orangeline / 100, nosplashline / 100)
 
     def exportGraph(self) -> None:
         if self.plot_widget is None:
