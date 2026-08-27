@@ -87,9 +87,9 @@ def test_the_bundled_wheel_libraries_are_collected() -> None:
     assert "is_wheel_library_payload" in BZL
 
 
-def test_the_payload_is_put_back_beside_its_package() -> None:
-    """PyOxidizer installs "numpy.libs" as "numpy/libs"; the loaders look beside."""
-    assert "tools.relocate_wheel_payloads" in CI
+def test_the_wheel_library_payloads_are_repaired() -> None:
+    """PyOxidizer misplaces them on Linux and drops them on Windows."""
+    assert "tools.repair_wheel_payloads" in CI
 
 
 def test_the_bundle_is_verified_to_import_numpy() -> None:

@@ -771,13 +771,16 @@ jobs:
             exit 1
           fi
           tail -n 100 pyoxidizer-build.log
-      - name: Put wheel library payloads back beside their package
+      - name: Repair the wheel library payloads PyOxidizer loses
         shell: bash
         run: |
-          # PyOxidizer installs "numpy.libs" as "numpy/libs", reading the dot
-          # as a package separator, and every loader looking for the payload
-          # looks beside the package instead. See the tool's docstring.
-          python -m tools.relocate_wheel_payloads "build/${{ matrix.target }}/release/install"
+          # On Linux it installs "numpy.libs" as "numpy/libs", reading the dot
+          # as a package separator; on Windows it does not collect the
+          # directory at all. Either way the bundle cannot import numpy. The
+          # tool moves what is misplaced and restores what is missing from the
+          # wheel it came from, checked against the bundle's own RECORD
+          # hashes. See its docstring.
+          python -m tools.repair_wheel_payloads "build/${{ matrix.target }}/release/install" --wheel-dir "$RUNNER_TEMP/payload-wheels"
       - name: Verify PyOxidizer bundle
         shell: bash
         run: |
