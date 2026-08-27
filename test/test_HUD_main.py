@@ -3071,3 +3071,48 @@ def test_a_closed_table_is_not_reported_as_an_error(hud_main) -> None:
 
     error.assert_not_called()
     assert info.call_count == 1
+
+
+def test_the_baseline_is_the_table_the_hud_was_built_on(hud_main) -> None:
+    """A window handed to the next match before the first poll must not set it.
+
+    Seeding at attach is what makes the poll compare against the table this HUD
+    was actually built on; taking the first poll's read as the baseline would
+    adopt the replacement table and leave the stale HUD in place for good.
+    """
+    table = _tour_table([1200533055, 1200533055])  # window already moved on
+    table.title_table_no = 1200531183  # what seed_title_table_no() recorded
+    hud = SimpleNamespace(table=table)
+
+    with patch.object(hud_main, "table_is_stale") as stale:
+        hud_main._handle_tour_table_switch(hud, table)
+
+    stale.assert_called_once_with(hud)
+
+
+def test_a_seeded_table_window_reads_its_number_from_the_matched_title() -> None:
+    """seed_title_table_no() uses the title the window search already captured."""
+    from fpdb_3_legacy.TableWindow import Table_Window
+
+    table = Table_Window.__new__(Table_Window)
+    table.tableno_re = r"^[^|]*?(?<!\d)(\d{6,})\s*(?:\||$)"
+    table.title = "Twister 0.25€ 1200531183 | NL Hold'em | Niveau 1 | 10/20"
+    table.title_table_no = None
+
+    table.seed_title_table_no()
+
+    assert table.title_table_no == 1200531183
+
+
+def test_a_title_the_pattern_cannot_read_leaves_no_baseline() -> None:
+    """No baseline means the poll leaves that HUD alone, which is the safe end."""
+    from fpdb_3_legacy.TableWindow import Table_Window
+
+    table = Table_Window.__new__(Table_Window)
+    table.tableno_re = r"(?:Twister|Spins)"  # no capturing group
+    table.title = "Twister 0.25€ | NL Hold'em"
+    table.title_table_no = None
+
+    table.seed_title_table_no()
+
+    assert table.title_table_no is None

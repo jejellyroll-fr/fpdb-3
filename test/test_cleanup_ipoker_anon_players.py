@@ -34,6 +34,7 @@ PLAYERS_OF_HAND = {
     1114: [(655, "anon_5879604460_1"), (656, "anon_5879604460_5")],
     2000: [(658, "anon_5879604460_9"), (659, "anon_hunter")],
 }
+IPOKER_SITES = {"Bwin.fr Poker"}
 HAND_ROWS = {
     1114: (1114, "Sea Lake, 560237915", "2026-08-27 21:12:11"),
     2000: (2000, "Scone, 560235983", "2026-08-27 21:30:00"),
@@ -79,7 +80,7 @@ def _db(cursor: _Cursor) -> SimpleNamespace:
 
 
 def test_only_hands_made_entirely_of_placeholders_are_offered() -> None:
-    placeholders, hands, kept = survey(_db(_Cursor()))
+    placeholders, hands, kept = survey(_db(_Cursor()), IPOKER_SITES)
 
     assert [p[0] for p in placeholders] == [655, 656, 658]  # 659 is a real name
     assert list(hands) == [1114]  # 2000 seats a real player, so it stays
@@ -92,7 +93,7 @@ def test_a_real_player_named_like_a_placeholder_is_never_deleted() -> None:
     Deleting them would take every hand they played with them, which is why the
     generated form is matched in full rather than by its prefix.
     """
-    placeholders, hands, _kept = survey(_db(_Cursor()))
+    placeholders, hands, _kept = survey(_db(_Cursor()), IPOKER_SITES)
 
     assert 659 not in [p[0] for p in placeholders]
     assert 2000 not in hands  # the hand they sit in is not offered either
@@ -223,3 +224,33 @@ def test_nothing_points_at_a_deleted_table_from_outside_the_script() -> None:
             if parent not in tables:
                 continue
             assert child in cleared, f"{child} references {parent} but is never deleted"
+
+
+def test_a_matching_name_on_another_site_is_left_alone() -> None:
+    """Only the iPoker converter ever wrote these names.
+
+    A player on any other site whose screen name happens to read like one is
+    somebody real, and this tool deletes players.
+    """
+    placeholders, hands, _kept = survey(_db(_Cursor()), {"PokerStars"})
+
+    assert placeholders == []
+    assert hands == {}
+
+
+def test_apply_and_rehearse_cannot_be_asked_for_together() -> None:
+    """--rehearse promises a rollback; combined with --apply it used to commit."""
+    import subprocess
+    import sys
+    from pathlib import Path
+
+    tool = Path(__file__).resolve().parent.parent / "tools" / "cleanup_ipoker_anon_players.py"
+    result = subprocess.run(  # noqa: S603
+        [sys.executable, str(tool), "--apply", "--rehearse"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode != 0
+    assert "not allowed with argument" in result.stderr

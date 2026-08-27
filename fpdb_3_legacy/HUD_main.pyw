@@ -3524,6 +3524,11 @@ class HudMain(QObject):
         # was matched: user reports of "table not detected" are impossible to
         # diagnose without the matched hwnd/title (or their absence).
         self._tables_attached.add(temp_key)
+        # Baseline for _handle_tour_table_switch, taken from the title this HUD
+        # was built on rather than from the first poll up to 800 ms later: a
+        # Twister window handed to the next match in between would otherwise
+        # become the baseline, and the stale HUD would sit there unnoticed.
+        tablewindow.seed_title_table_no()
         log.warning(
             "HUD attach: table=%r site=%s hwnd=%s title=%r geometry=(%s,%s %sx%s)",
             temp_key,

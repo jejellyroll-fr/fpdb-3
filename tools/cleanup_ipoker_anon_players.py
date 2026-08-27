@@ -108,7 +108,18 @@ def _sql(statement: str, placeholder: str) -> str:
     return statement.replace("%s", placeholder)
 
 
-def survey(db) -> tuple[list, dict, list]:
+def ipoker_sites(config) -> set[str]:
+    """Site names whose hands the iPoker converter reads.
+
+    Only that converter ever wrote these placeholders, so only its sites are
+    candidates. A player on another site whose screen name happens to look like
+    one is somebody real -- and a site the config does not list at all is left
+    alone rather than guessed at.
+    """
+    return {name for name, hhc in config.hhcs.items() if hhc.converter == "iPokerToFpdb"}
+
+
+def survey(db, sites: set[str]) -> tuple[list, dict, list]:
     """Report the placeholders, the hands made only of them, and what is kept.
 
     Returns (placeholders, hands_by_id, kept), where `kept` holds the
@@ -119,7 +130,11 @@ def survey(db) -> tuple[list, dict, list]:
     cursor = db.get_cursor()
 
     cursor.execute(SELECT_PLACEHOLDERS)
-    placeholders = [(int(row[0]), row[1], row[2]) for row in cursor.fetchall() if PLACEHOLDER_RE.match(str(row[1]))]
+    placeholders = [
+        (int(row[0]), row[1], row[2])
+        for row in cursor.fetchall()
+        if PLACEHOLDER_RE.match(str(row[1])) and row[2] in sites
+    ]
 
     hands: dict[int, tuple] = {}
     kept: list[tuple[int, str, int]] = []
@@ -131,6 +146,8 @@ def survey(db) -> tuple[list, dict, list]:
             cursor.execute(_sql(SELECT_PLAYERS_OF_HAND, ph), (hand_id,))
             seated = cursor.fetchall()
             if any(not PLACEHOLDER_RE.match(str(seat_name)) for _pid, seat_name in seated):
+                # A real player at the table: the hand carries information, and
+                # deleting the placeholder would orphan it.
                 kept.append((player_id, name, int(hand_id)))
                 continue
             cursor.execute(_sql(SELECT_HAND, ph), (hand_id,))
@@ -177,26 +194,8 @@ def delete(db, hand_ids: list[int], player_ids: list[int], *, commit: bool = Tru
     return removed
 
 
-def main() -> int:
-    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--config", help="HUD_config.xml to read the database from (default: the configured one)")
-    parser.add_argument("--apply", action="store_true", help="delete; without it nothing is written")
-    parser.add_argument(
-        "--rehearse",
-        action="store_true",
-        help="run the deletion against the real database and roll it back, reporting what it did",
-    )
-    args = parser.parse_args()
-
-    config = Config(file=args.config) if args.config else Config()
-    db = Database(config)
-    print(f"Database {db.database}@{db.host}\n")
-
-    placeholders, hands, kept = survey(db)
-    if not placeholders:
-        print("No placeholder players found; nothing to clean up.")
-        return 0
-
+def report(placeholders: list, hands: dict, kept: list) -> None:
+    """Print what was found, including what is deliberately being left alone."""
     print(f"{len(placeholders)} placeholder player(s):")
     for player_id, name, site in placeholders:
         print(f"  {player_id:>7}  {name}  ({site})")
@@ -209,6 +208,37 @@ def main() -> int:
         print("\nLeft alone, because the hand also seats a real player:")
         for player_id, name, hand_id in kept:
             print(f"  player {player_id} ({name}) in hand {hand_id}")
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("--config", help="HUD_config.xml to read the database from (default: the configured one)")
+    # Mutually exclusive: "--apply --rehearse" would otherwise commit, which is
+    # the exact opposite of what the person typing --rehearse asked for.
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument("--apply", action="store_true", help="delete; without it nothing is written")
+    mode.add_argument(
+        "--rehearse",
+        action="store_true",
+        help="run the deletion against the real database and roll it back, reporting what it did",
+    )
+    args = parser.parse_args()
+
+    config = Config(file=args.config) if args.config else Config()
+    db = Database(config)
+    print(f"Database {db.database}@{db.host}\n")
+
+    sites = ipoker_sites(config)
+    if not sites:
+        print("No iPoker site in this configuration; nothing this tool wrote can be here.")
+        return 0
+
+    placeholders, hands, kept = survey(db, sites)
+    if not placeholders:
+        print("No placeholder players found; nothing to clean up.")
+        return 0
+
+    report(placeholders, hands, kept)
 
     deletable = sorted({pid for pid, _n, _s in placeholders} - {pid for pid, _n, _h in kept})
     if not deletable:
