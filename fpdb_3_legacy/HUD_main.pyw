@@ -1457,6 +1457,14 @@ class HudMain(QObject):
             return
         self._shutdown_started = True
 
+        # Stop every timer owned by the HUD before the event loop can dispatch
+        # another callback against tables that are already being torn down.
+        for timer_name in ("_cleanup_timer", "check_tables_timer"):
+            timer = getattr(self, timer_name, None)
+            if timer is not None:
+                with contextlib.suppress(RuntimeError):
+                    timer.stop()
+
         # A batch still waiting would fire against a torn-down connection.
         batch_timer = getattr(self, "_hand_batch_timer", None)
         if batch_timer is not None:
