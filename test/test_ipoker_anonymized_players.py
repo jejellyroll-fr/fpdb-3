@@ -19,6 +19,7 @@ from types import SimpleNamespace
 import pytest
 
 from fpdb_3_legacy.Configuration import Config
+from fpdb_3_legacy.HandHistoryConverter import FpdbHandPartial
 from fpdb_3_legacy.iPoker.base import iPoker
 
 NICK = "jejesat76"
@@ -183,3 +184,34 @@ def test_ambiguous_seat_occupant_is_scoped_not_guessed(config: Config) -> None:
     hand = SimpleNamespace(handText=ANON_GAME, handid="9026868234")
     parser._deanonymize_players(hand)
     assert f'name="anon_{SESSION_CODE}_3"' in hand.handText
+
+
+def test_a_fully_anonymous_hand_is_not_stored(config: Config) -> None:
+    """Live import reaching an observed hand before the hero has played one.
+
+    Nothing names a seat yet, so storing the hand would create a Players row per
+    seat that no statistic is ever read back through -- the hero is not in the
+    hand, so it builds no HUD, and the real names the file reveals minutes later
+    never reach the rows already written. The hand is dropped instead; a later
+    full import of the file stores it under the real opponents.
+    """
+    only_anon = HEADER + ANON_GAME + "\n</session>"
+    parser = _parser(config, only_anon)
+    parser.info = {"type": "ring"}
+    hand = SimpleNamespace(handText=HEADER + ANON_GAME, handid="")
+
+    with pytest.raises(FpdbHandPartial):
+        parser.readHandInfo(hand)
+
+
+def test_a_hand_with_one_recovered_seat_is_still_stored(config: Config) -> None:
+    """Partial knowledge is real knowledge: only a nameless hand is dropped."""
+    parser = _parser(config, SESSION_FILE)  # holds a named hand
+    parser.info = {"type": "ring"}
+    parser.tablename = "Scone, 560235983"
+    hand = SimpleNamespace(handText=HEADER + ANON_GAME, handid="")
+
+    parser.readHandInfo(hand)  # must not raise
+
+    assert hand.handid == "9026868234"
+    assert 'name="CR7012"' in hand.handText
