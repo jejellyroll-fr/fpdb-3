@@ -794,6 +794,13 @@ jobs:
           # The launcher is the interpreter of every helper process, so a
           # broken payload layout or search path must fail the build here.
           "$install_dir/${{ matrix.executable }}" --run-module fpdb_3_legacy.subprocess_launch
+          # The HUD's first act is to import the platform package through the
+          # fpdb namespace, and on Windows ".pyw" is an importable source
+          # suffix: with the legacy directory ahead of the packaged libraries,
+          # "import fpdb" found fpdb_3_legacy/fpdb.pyw and the HUD died on
+          # "'fpdb' is not a package" every time auto-import started it. The
+          # bundle above was otherwise perfectly good, so nothing here noticed.
+          "$install_dir/${{ matrix.executable }}" --run-module fpdb.infrastructure.platform.factory
           # numpy's extension modules need the shared libraries their wheel
           # bundles in a top-level "numpy.libs" directory. PyOxidizer drops
           # anything it cannot classify, and that directory is not a package,

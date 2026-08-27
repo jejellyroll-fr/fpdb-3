@@ -92,6 +92,18 @@ def test_the_wheel_library_payloads_are_repaired() -> None:
     assert "tools.repair_wheel_payloads" in CI
 
 
+def test_the_packaged_libraries_precede_the_legacy_scripts() -> None:
+    """On Windows ".pyw" is importable, so fpdb.pyw shadows the fpdb package.
+
+    With the legacy directory first, "import fpdb.infrastructure" fails with
+    "'fpdb' is not a package" and the HUD cannot start.
+    """
+    assert "lib_dir = os.path.join(root, 'lib')" in BZL
+    assert "sys.path.insert(0, lib_dir)" in BZL
+    # And the build proves it, by importing through the fpdb namespace.
+    assert "--run-module fpdb.infrastructure.platform.factory" in CI
+
+
 def test_the_bundle_is_verified_to_import_numpy() -> None:
     """A bundle that cannot import numpy cannot open a window; the build must say so."""
     assert "--run-module numpy.__config__" in CI

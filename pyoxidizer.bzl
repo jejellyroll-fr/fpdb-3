@@ -123,6 +123,17 @@ def make_exe(dist):
         "legacy_dir = os.path.join(root, 'fpdb_3_legacy')",
         "sys.path.insert(0, root)",
         "sys.path.insert(0, legacy_dir)",
+        # The packaged libraries come first, and on Windows that is not a
+        # preference: ".pyw" is an importable source suffix there, so with the
+        # legacy directory ahead of them "import fpdb" resolves to
+        # fpdb_3_legacy/fpdb.pyw -- the GUI script -- instead of the fpdb
+        # package. WinTables then dies on "No module named
+        # 'fpdb.infrastructure'; 'fpdb' is not a package", which is the HUD
+        # failing to start when auto-import launches it, and importing that
+        # script for its trouble runs the GUI's module-level code.
+        "lib_dir = os.path.join(root, 'lib')",
+        "if os.path.isdir(lib_dir):",
+        "    sys.path.insert(0, lib_dir)",
         "os.chdir(root)",
         "if len(sys.argv) > 1 and sys.argv[1] == '--hud':",
         "    sys.argv.pop(1)",
