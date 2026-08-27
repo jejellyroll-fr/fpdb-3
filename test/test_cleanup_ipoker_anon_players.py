@@ -151,3 +151,75 @@ def test_every_table_named_matches_the_schema_casing() -> None:
 
     assert named, "no table names found; the extraction above stopped matching"
     assert named <= ddl, f"not in the schema with this casing: {sorted(named - ddl)}"
+
+
+def _schema_foreign_keys() -> list[tuple[str, str]]:
+    """(child, parent) for every foreign key the schema declares."""
+    import re
+    from pathlib import Path
+
+    repo = Path(__file__).resolve().parent.parent
+    keys: list[tuple[str, str]] = []
+    for schema in repo.glob("fpdb_3_legacy/sql_schema_*.py"):
+        text = schema.read_text(encoding="utf-8")
+        for table in re.finditer(r"CREATE TABLE (\w+)(.*?)(?=CREATE TABLE |\Z)", text, re.S):
+            for fk in re.finditer(r"FOREIGN KEY \(\w+\) REFERENCES (\w+)\(", table.group(2)):
+                keys.append((table.group(1), fk.group(1)))
+    return keys
+
+
+def test_nothing_is_deleted_before_what_points_at_it() -> None:
+    """No foreign key in this schema cascades, so order is the whole safety.
+
+    Checked against the DDL rather than against the list, because the list is
+    what gets it wrong: AofDecisionAnalyses points at AofDecisions and Backings
+    at TourneysPlayers, and both were deleted the wrong way round -- which
+    PostgreSQL only reveals when such a row actually exists, mid-transaction,
+    after the hands are already gone.
+
+    Each pass is checked on its own. The hand pass runs first and in full, so a
+    table it clears (PlayerAutoNotes) may legitimately be deleted again in the
+    player pass, for rows pointing at hands that are staying.
+    """
+    keys = _schema_foreign_keys()
+
+    for pass_name, statements in (("hand", DELETE_BY_HAND), ("player", DELETE_BY_PLAYER)):
+        order = [table for table, _sql in statements]
+        first = {table: min(i for i, t in enumerate(order) if t == table) for table in order}
+        last = {table: max(i for i, t in enumerate(order) if t == table) for table in order}
+        for child, parent in keys:
+            if parent not in first or child not in first:
+                continue
+            assert last[child] < first[parent], (
+                f"{pass_name} pass: {child} still references {parent} when {parent} is deleted"
+            )
+
+
+def test_the_foreign_keys_are_actually_read() -> None:
+    """A silent extraction failure would make the order test vacuous."""
+    keys = _schema_foreign_keys()
+
+    assert ("AofDecisionAnalyses", "AofDecisions") in keys
+    assert ("Backings", "TourneysPlayers") in keys
+
+
+def test_nothing_points_at_a_deleted_table_from_outside_the_script() -> None:
+    """Ordering is only half of it: a child table left out entirely still fails.
+
+    That is how AofDecisionAnalyses slipped through -- it references
+    AofDecisions, which the hand pass deletes, and it was in no pass at all, so
+    an order check had nothing to compare.
+
+    A child cleared by an earlier pass counts: the hand pass removes the rows of
+    the hands being deleted, and `delete()` refuses a player still seated in any
+    hand, so no row of theirs survives in a hand that stays.
+    """
+    passes = [[table for table, _sql in DELETE_BY_HAND], [table for table, _sql in DELETE_BY_PLAYER]]
+    keys = _schema_foreign_keys()
+
+    for index, tables in enumerate(passes):
+        cleared = {table for earlier in passes[: index + 1] for table in earlier}
+        for child, parent in keys:
+            if parent not in tables:
+                continue
+            assert child in cleared, f"{child} references {parent} but is never deleted"

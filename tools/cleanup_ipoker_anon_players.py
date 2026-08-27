@@ -64,6 +64,10 @@ DELETE_BY_HAND = (
     ("HandsShowdown", "DELETE FROM HandsShowdown WHERE handId = %s"),
     ("HandsPots", "DELETE FROM HandsPots WHERE handId = %s"),
     ("HandsCashout", "DELETE FROM HandsCashout WHERE handId = %s"),
+    (
+        "AofDecisionAnalyses",
+        "DELETE FROM AofDecisionAnalyses WHERE decisionId IN (SELECT id FROM AofDecisions WHERE handId = %s)",
+    ),
     ("AofDecisions", "DELETE FROM AofDecisions WHERE handId = %s"),
     ("Boards", "DELETE FROM Boards WHERE handId = %s"),
     ("RawHands", "DELETE FROM RawHands WHERE handId = %s"),
@@ -73,16 +77,27 @@ DELETE_BY_HAND = (
 )
 
 # Everything keyed on a player, the caches included: a placeholder's HudCache
-# row is what a statistic would otherwise still be read out of.
+# row is what a statistic would otherwise still be read out of. Order matters
+# here too -- none of the schema's foreign keys cascade, so a table is emptied
+# before anything it points at (test_cleanup_ipoker_anon_players.py checks that
+# against the DDL rather than trusting this list to stay right).
 DELETE_BY_PLAYER = (
     ("HudCache", "DELETE FROM HudCache WHERE playerId = %s"),
     ("CardsCache", "DELETE FROM CardsCache WHERE playerId = %s"),
     ("PositionsCache", "DELETE FROM PositionsCache WHERE playerId = %s"),
     ("SessionsCache", "DELETE FROM SessionsCache WHERE playerId = %s"),
     ("TourneysCache", "DELETE FROM TourneysCache WHERE playerId = %s"),
+    # Both directions of Backings, and both before the entries they point at:
+    # somebody else backing the placeholder is a row the placeholder's own id
+    # does not match, and either one still referencing a TourneysPlayers row
+    # fails the deletion below.
+    (
+        "Backings",
+        "DELETE FROM Backings WHERE tourneysPlayersId IN (SELECT id FROM TourneysPlayers WHERE playerId = %s)",
+    ),
+    ("Backings", "DELETE FROM Backings WHERE playerId = %s"),
     ("TourneysPlayers", "DELETE FROM TourneysPlayers WHERE playerId = %s"),
     ("Autorates", "DELETE FROM Autorates WHERE playerId = %s"),
-    ("Backings", "DELETE FROM Backings WHERE playerId = %s"),
     ("PlayerAutoNotes", "DELETE FROM PlayerAutoNotes WHERE playerId = %s"),
     ("Players", "DELETE FROM Players WHERE id = %s"),
 )
