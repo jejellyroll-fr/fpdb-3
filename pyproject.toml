@@ -315,8 +315,14 @@ requires = [
 ]
 
 [tool.briefcase.app.fpdb.windows]
+# comtypes is how the HUD reads a table's chairs through UIAutomation. It is
+# imported inside the function that uses it and the ImportError is swallowed
+# into "no reader on this machine", so a package missing it does not fail
+# loudly -- the Fast-Fold HUD just falls back to the client log and shows its
+# stat blocks one player at a time.
 requires = [
-    "pywin32==306"
+    "pywin32==306",
+    "comtypes>=1.4.1"
 ]
 
 [tool.briefcase.app.fpdb.linux]
