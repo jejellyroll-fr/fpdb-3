@@ -128,3 +128,26 @@ def test_every_table_hanging_off_a_hand_is_cleared() -> None:
     executed = {statement for statement, _params in cursor.executed}
     for _table, statement in DELETE_BY_HAND:
         assert statement in executed
+
+
+def test_every_table_named_matches_the_schema_casing() -> None:
+    """MySQL with case-sensitive table names fails mid-transaction on a typo.
+
+    PostgreSQL folds an unquoted name either way, so a wrong casing survives
+    every rehearsal on it and only breaks on somebody else's backend, after the
+    earlier deletions have already run.
+    """
+    import re
+    from pathlib import Path
+
+    repo = Path(__file__).resolve().parent.parent
+    ddl = {"RawHands"}  # built by _raw_table_ddl(db_server, "RawHands", ...)
+    for schema in list(repo.glob("fpdb_3_legacy/sql_schema_*.py")) + list(repo.glob("fpdb_3_legacy/sql_queries_*.py")):
+        ddl |= set(re.findall(r"CREATE TABLE (?:IF NOT EXISTS )?([A-Za-z_]+)", schema.read_text(encoding="utf-8")))
+
+    source = (repo / "tools" / "cleanup_ipoker_anon_players.py").read_text(encoding="utf-8")
+    named = set(re.findall(r"DELETE FROM ([A-Za-z_]+)", source))
+    named |= set(re.findall(r"FROM ([A-Za-z_]+) ", source)) | set(re.findall(r"JOIN ([A-Za-z_]+) ", source))
+
+    assert named, "no table names found; the extraction above stopped matching"
+    assert named <= ddl, f"not in the schema with this casing: {sorted(named - ddl)}"

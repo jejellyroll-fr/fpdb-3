@@ -179,3 +179,27 @@ def test_table_no_regex_reads_the_id_from_the_title() -> None:
     assert int(re.search(regex, TITLE_MATCH_2).group(1)) == 1200530962
     # Blinds and levels are not table ids.
     assert re.search(regex, "Twister 0.25€ | NL Hold'em | Niveau 1 | 10/20") is None
+
+
+def test_the_table_id_is_read_from_the_end_of_the_name() -> None:
+    """A table can be named after its tournament as well as its own id.
+
+    Reading the first long number would return the tournament, which never
+    matches the table the hand history names -- and has_table_title_changed()
+    would then call every hand a reseat and kill the HUD on each one.
+    """
+    import re
+
+    regex = iPoker.getTableNoRe(tournament="1193390834")
+    title = "1193390834 Twister 5867402179 | NL Hold'em | Niveau 3"
+
+    assert int(re.search(regex, title).group(1)) == 5867402179
+
+
+def test_a_title_without_a_table_id_reads_as_no_table() -> None:
+    """No number to anchor on must mean "no signal", never a wrong one."""
+    import re
+
+    regex = iPoker.getTableNoRe(tournament="1200531182")
+
+    assert re.search(regex, "Twister 0.25€ | NL Hold'em | Niveau 1 | 10/20") is None

@@ -1324,8 +1324,15 @@ class iPoker(IPokerStreetsActionsMixin, IPokerHandInfoMixin, IPokerTournamentRes
         ``get_table_no`` always returned False and a window that changed table --
         an MTT reseat, or the next match of a Twister series taking over the same
         window -- was never detected.
+
+        Anchored to the end of that segment rather than taking the first long
+        number in it: a table can be named after its tournament as well
+        ("1193390834 Twister, 5867402179"), and reading the tournament number as
+        the table would make has_table_title_changed() call every hand a reseat
+        and kill the HUD on each one. The lookbehind keeps the match from
+        starting mid-number and returning a truncated id.
         """
-        return r"^[^|]*?(\d{6,})"
+        return r"^[^|]*?(?<!\d)(\d{6,})\s*(?:\||$)"
 
     @staticmethod
     def getTableTitleRe(

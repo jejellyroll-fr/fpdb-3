@@ -55,14 +55,16 @@ SELECT_REMAINING_HANDS_OF_PLAYER = "SELECT COUNT(*) FROM HandsPlayers WHERE play
 
 # Everything hanging off a hand, children before parents. Written out one
 # statement per table rather than built from a table name, so what runs is
-# exactly what is read here.
+# exactly what is read here. Table names carry the schema's own casing
+# ("AofDecisions", "Autorates"): PostgreSQL folds them either way, MySQL with
+# case-sensitive table names does not, and a miss there fails mid-transaction.
 DELETE_BY_HAND = (
     ("HandsStove", "DELETE FROM HandsStove WHERE handId = %s"),
     ("HandsActions", "DELETE FROM HandsActions WHERE handId = %s"),
     ("HandsShowdown", "DELETE FROM HandsShowdown WHERE handId = %s"),
     ("HandsPots", "DELETE FROM HandsPots WHERE handId = %s"),
     ("HandsCashout", "DELETE FROM HandsCashout WHERE handId = %s"),
-    ("AoFDecisions", "DELETE FROM AoFDecisions WHERE handId = %s"),
+    ("AofDecisions", "DELETE FROM AofDecisions WHERE handId = %s"),
     ("Boards", "DELETE FROM Boards WHERE handId = %s"),
     ("RawHands", "DELETE FROM RawHands WHERE handId = %s"),
     ("PlayerAutoNotes", "DELETE FROM PlayerAutoNotes WHERE handId = %s"),
@@ -79,7 +81,7 @@ DELETE_BY_PLAYER = (
     ("SessionsCache", "DELETE FROM SessionsCache WHERE playerId = %s"),
     ("TourneysCache", "DELETE FROM TourneysCache WHERE playerId = %s"),
     ("TourneysPlayers", "DELETE FROM TourneysPlayers WHERE playerId = %s"),
-    ("AutoRates", "DELETE FROM AutoRates WHERE playerId = %s"),
+    ("Autorates", "DELETE FROM Autorates WHERE playerId = %s"),
     ("Backings", "DELETE FROM Backings WHERE playerId = %s"),
     ("PlayerAutoNotes", "DELETE FROM PlayerAutoNotes WHERE playerId = %s"),
     ("Players", "DELETE FROM Players WHERE id = %s"),
