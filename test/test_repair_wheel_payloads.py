@@ -23,6 +23,7 @@ import pytest
 from tools.repair_wheel_payloads import (
     PayloadFile,
     digest_of,
+    download_wheel,
     is_payload_directory,
     main,
     missing_payloads,
@@ -30,6 +31,7 @@ from tools.repair_wheel_payloads import (
     relocate,
     repair,
     restore_from_wheel,
+    target_within,
 )
 
 OPENBLAS = "libscipy_openblas64_-13e2df515630b4a41f92893938845698.dll"
@@ -233,6 +235,37 @@ def test_a_wheel_missing_the_file_is_an_error(tmp_path: Path) -> None:
 
     with pytest.raises(LookupError, match="does not contain"):
         restore_from_wheel(wheel, [PayloadFile(f"numpy.libs/{OPENBLAS}", _sha(OPENBLAS_BYTES))], lib)
+
+
+def test_a_record_path_that_escapes_the_bundle_is_refused(tmp_path: Path) -> None:
+    """A RECORD is read out of the bundle and then joined to a write path."""
+    lib = tmp_path / "lib"
+    lib.mkdir()
+    escaping = "numpy.libs/../../../evil.dll"
+    wheel = _wheel(tmp_path / "numpy-2.2.6-cp310-cp310-win_amd64.whl", {escaping: OPENBLAS_BYTES})
+
+    with pytest.raises(ValueError, match="outside"):
+        restore_from_wheel(wheel, [PayloadFile(escaping, _sha(OPENBLAS_BYTES))], lib)
+
+    assert not (tmp_path.parent / "evil.dll").exists()
+
+
+def test_an_ordinary_payload_path_resolves_inside_the_bundle(tmp_path: Path) -> None:
+    lib = tmp_path / "lib"
+    lib.mkdir()
+
+    assert target_within(lib, f"numpy.libs/{OPENBLAS}") == (lib / "numpy.libs" / OPENBLAS).resolve()
+
+
+@pytest.mark.parametrize(
+    ("name", "version"),
+    [("numpy; rm -rf /", "2.2.6"), ("numpy", "2.2.6 && echo"), ("--index-url=evil", "2.2.6"), ("", "2.2.6")],
+    ids=["name-with-shell", "version-with-shell", "name-as-option", "empty-name"],
+)
+def test_a_distribution_that_does_not_parse_is_never_fetched(tmp_path: Path, name: str, version: str) -> None:
+    """The values come off a directory name; a command line is no place for one unchecked."""
+    with pytest.raises(ValueError, match="refusing to fetch"):
+        download_wheel(name, version, tmp_path)
 
 
 def test_the_digest_matches_the_form_a_record_uses() -> None:

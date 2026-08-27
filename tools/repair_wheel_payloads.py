@@ -37,8 +37,9 @@ import argparse
 import base64
 import csv
 import hashlib
+import re
 import shutil
-import subprocess
+import subprocess  # nosec B404 - fixed argv, no shell; see download_wheel
 import sys
 import zipfile
 from dataclasses import dataclass
@@ -51,6 +52,14 @@ PAYLOAD_NAMES = ("libs", "dylibs")
 # ABI, but the wheel it ships in is, and asking for the same one the bundle was
 # built from is the only way to be sure the hashes agree.
 EMBEDDED_PYTHON_VERSION = "310"
+
+# What may be put on a pip command line. Both values are read out of a directory
+# name inside the bundle we just built, so this is a sanity check rather than a
+# trust boundary -- but a command line is no place for an unchecked string, and
+# a dist-info directory that does not parse should say so rather than become a
+# strange pip invocation.
+DISTRIBUTION_NAME = re.compile(r"^[A-Za-z0-9]([A-Za-z0-9._-]*[A-Za-z0-9])?$")
+DISTRIBUTION_VERSION = re.compile(r"^[A-Za-z0-9][A-Za-z0-9.!+-]*$")
 
 
 @dataclass(frozen=True)
@@ -160,6 +169,21 @@ def digest_of(data: bytes) -> str:
     return base64.urlsafe_b64encode(hashlib.sha256(data).digest()).rstrip(b"=").decode("ascii")
 
 
+def target_within(lib_dir: Path, relative_path: str) -> Path:
+    """Resolve a RECORD path inside ``lib_dir``, refusing anything that escapes it.
+
+    A RECORD is read out of the bundle and its paths are joined to a directory
+    we then write into. "../" in one of them would write outside the bundle, so
+    it is checked rather than trusted.
+    """
+    root = lib_dir.resolve()
+    target = (root / relative_path).resolve()
+    if target != root and root not in target.parents:
+        msg = f"{relative_path} would be written outside {lib_dir}"
+        raise ValueError(msg)
+    return target
+
+
 def restore_from_wheel(wheel: Path, entries: list[PayloadFile], lib_dir: Path) -> list[Path]:
     """Write ``entries`` from ``wheel`` into ``lib_dir``, refusing a mismatch."""
     restored: list[Path] = []
@@ -169,6 +193,7 @@ def restore_from_wheel(wheel: Path, entries: list[PayloadFile], lib_dir: Path) -
             if entry.path not in available:
                 msg = f"{wheel.name} does not contain {entry.path}"
                 raise LookupError(msg)
+            target = target_within(lib_dir, entry.path)
             data = archive.read(entry.path)
             actual = digest_of(data)
             if actual != entry.sha256:
@@ -177,7 +202,6 @@ def restore_from_wheel(wheel: Path, entries: list[PayloadFile], lib_dir: Path) -
                     f"but the bundle's RECORD says {entry.sha256}"
                 )
                 raise ValueError(msg)
-            target = lib_dir / entry.path
             target.parent.mkdir(parents=True, exist_ok=True)
             target.write_bytes(data)
             restored.append(target)
@@ -186,8 +210,15 @@ def restore_from_wheel(wheel: Path, entries: list[PayloadFile], lib_dir: Path) -
 
 def download_wheel(name: str, version: str, dest: Path, python_version: str = EMBEDDED_PYTHON_VERSION) -> Path:
     """Fetch one wheel of ``name==version`` for the embedded interpreter."""
+    if not DISTRIBUTION_NAME.match(name) or not DISTRIBUTION_VERSION.match(version):
+        msg = f"refusing to fetch a distribution named {name!r} at version {version!r}"
+        raise ValueError(msg)
+
     dest.mkdir(parents=True, exist_ok=True)
-    subprocess.run(  # noqa: S603
+    # Absolute interpreter, fixed argv, no shell, and both interpolated values
+    # checked against the patterns above.
+    # nosemgrep: python.lang.security.audit.dangerous-subprocess-use-audit.dangerous-subprocess-use-audit
+    subprocess.run(  # noqa: S603  # nosec B603
         [
             sys.executable,
             "-m",
