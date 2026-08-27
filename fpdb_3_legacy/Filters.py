@@ -859,18 +859,22 @@ class Filters(QWidget):
         aborted transaction poisons every later query on that connection until
         it ends.
 
-        Arguments are trimmed to what the callback accepts. Qt hands a clicked
-        slot the button's ``checked`` flag only if the slot has room for it, and
-        PySide decides that by inspecting the callable -- which a wrapper hides.
-        Three of the registered refreshes (both exportGraph, and
-        GuiTourneyPlayerStats.refreshStats) take no argument at all, so
-        forwarding blindly turns their button into a TypeError.
+        The wrapper has to declare the argument and then decide for itself who
+        gets it. PySide reads a slot's own signature to choose what to send,
+        and a wrapper replaces the signature it is standing in for: ``def
+        run(*args)`` counts as taking none, so Qt sends nothing and the nine
+        refreshes that require ``checkState`` get called with no argument at
+        all. Declaring ``checked`` makes Qt send it; forwarding it only to a
+        callback with room for it keeps the three that take none (both
+        exportGraph, and GuiTourneyPlayerStats.refreshStats) working. Between
+        them those two rules reproduce exactly what Qt did before the wrapper
+        existed.
         """
         wanted = _accepted_positional_count(callback)
 
-        def run(*args: Any) -> Any:
+        def run(checked: bool = False) -> Any:
             try:
-                return callback(*args[:wanted])
+                return callback(*(checked,)[:wanted])
             finally:
                 self.end_read_transaction()
 

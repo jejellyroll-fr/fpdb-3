@@ -236,12 +236,19 @@ def test_the_wrapper_offers_only_the_arguments_the_callback_takes(callback, expe
     assert filters_module._accepted_positional_count(callback) == expected
 
 
-def test_a_callback_taking_nothing_survives_a_clicked_signal() -> None:
+def test_a_callback_taking_nothing_is_called_with_nothing() -> None:
+    """Calling the wrapper here says nothing about what Qt sends it.
+
+    That question is answered by clicking a real button, in
+    tests/qt/test_filter_button_arguments.py. Assuming the answer instead of
+    clicking is how ``def run(*args)`` shipped and broke every Refresh button:
+    Qt reads the wrapper's signature, and a wrapper taking ``*args`` counts as
+    taking none.
+    """
     host = RecordingFilters()
     ran: list[bool] = []
 
-    wrapped = host._releasing_read_locks(lambda: ran.append(True))
-    wrapped(False)  # what QPushButton.clicked delivers
+    host._releasing_read_locks(lambda: ran.append(True))(False)
 
     assert ran == [True]
     assert host.rollbacks == 1
