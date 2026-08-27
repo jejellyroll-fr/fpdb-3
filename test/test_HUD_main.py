@@ -678,6 +678,9 @@ def test_destroy(hud_main) -> None:
         mock_stop.assert_called_once()
         mock_quit.assert_called_once()
 
+    assert not hud_main._cleanup_timer.isActive()
+    assert not hud_main.check_tables_timer.isActive()
+
 
 # Verifies that check_tables calls the correct methods (client_destroyed, client_moved, client_resized) based on the table's status.
 @pytest.mark.parametrize(
