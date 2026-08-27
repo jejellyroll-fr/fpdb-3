@@ -846,6 +846,12 @@ class HudMain(QObject):
             # once; this makes read_stdin idempotent so each hand refreshes the
             # HUD exactly once, without re-running create/update on a duplicate.
             self._last_processed_hands: dict[str, str] = {}
+            # Tables whose window this session found at least once, and tables
+            # already reported as not found. Together they keep "table not found"
+            # an error the first time and a routine note once the table is known
+            # to have existed and closed (see _log_table_not_found).
+            self._tables_attached: set[str] = set()
+            self._tables_not_found: set[str] = set()
             # Winamax log pool -> hud_dict key, learned once a hand from that
             # table has been imported and reused while the table stays open.
             self._winamax_pool_huds: dict[str, str] = {}
@@ -2339,6 +2345,39 @@ class HudMain(QObject):
         elif getattr(table, "type", "") == "tour":
             self._handle_tour_table_switch(hud, table)
 
+    def _log_table_not_found(
+        self,
+        temp_key: str,
+        table_name: str,
+        db_site: str,
+        hud_site: str,
+        tablewindow: Any,
+    ) -> None:
+        """Report a table whose window could not be found, at the right volume.
+
+        A hand reaches the HUD 15 to 30 seconds after it was played, so the last
+        hands of a table that has just been closed -- and every hand of a Sit'n'Go
+        whose file the client only writes once the match is over -- routinely
+        arrive with no window left to attach to. Logged as errors, and once per
+        hand, they buried the case that is a real failure: a table that is open
+        on screen and never gets a HUD. That one still logs an error, once, with
+        the search string it failed on, which is the part that identifies why.
+        """
+        if temp_key in self._tables_attached:
+            report = log.info  # window was found before: the table has since closed
+        elif temp_key in self._tables_not_found:
+            report = log.debug  # already reported once for this table
+        else:
+            report = log.error
+        self._tables_not_found.add(temp_key)
+        report(
+            "HUD create: table name %s not found for db_site=%s hud_site=%s (searched %r), skipping.",
+            table_name,
+            db_site,
+            hud_site,
+            getattr(tablewindow, "search_string", ""),
+        )
+
     def _handle_tour_table_switch(self, hud: Hud.Hud, table: Any) -> None:
         """Kill a tournament HUD whose window has moved on to another table.
 
@@ -3470,12 +3509,7 @@ class HudMain(QObject):
         if tablewindow.number is None:
             if game_type == "tour":
                 table_name = f"{tour_number} {tab_number}"
-            log.error(
-                "HUD create: table name %s not found for db_site=%s hud_site=%s, skipping.",
-                table_name,
-                info.site_name,
-                hud_site_name,
-            )
+            self._log_table_not_found(temp_key, table_name, info.site_name, hud_site_name, tablewindow)
             return
         if tablewindow.number in self.blacklist:
             log.warning(
@@ -3489,6 +3523,7 @@ class HudMain(QObject):
         # One WARNING per HUD creation so the log always records WHICH window
         # was matched: user reports of "table not detected" are impossible to
         # diagnose without the matched hwnd/title (or their absence).
+        self._tables_attached.add(temp_key)
         log.warning(
             "HUD attach: table=%r site=%s hwnd=%s title=%r geometry=(%s,%s %sx%s)",
             temp_key,

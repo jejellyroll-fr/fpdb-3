@@ -3047,3 +3047,27 @@ def test_a_title_without_a_table_id_never_signals_a_switch(hud_main) -> None:
 
     stale.assert_not_called()
     assert table.title_table_no is None
+
+
+def test_a_table_that_was_never_found_is_an_error_once(hud_main) -> None:
+    """A table open on screen that never gets a HUD is the case worth shouting about."""
+    window = SimpleNamespace(search_string="Sea Lake")
+
+    with patch.object(HUD_main.log, "error") as error, patch.object(HUD_main.log, "debug") as debug:
+        hud_main._log_table_not_found("Sea Lake, 1", "Sea Lake, 1", "Bwin.fr Poker", "Bwin.fr Poker", window)
+        hud_main._log_table_not_found("Sea Lake, 1", "Sea Lake, 1", "Bwin.fr Poker", "Bwin.fr Poker", window)
+
+    assert error.call_count == 1
+    assert debug.call_count == 1  # the repeat, not a second error
+
+
+def test_a_closed_table_is_not_reported_as_an_error(hud_main) -> None:
+    """Hands reach the HUD seconds late, so a just-closed table has no window left."""
+    window = SimpleNamespace(search_string="Sea Lake")
+    hud_main._tables_attached.add("Sea Lake, 1")
+
+    with patch.object(HUD_main.log, "error") as error, patch.object(HUD_main.log, "info") as info:
+        hud_main._log_table_not_found("Sea Lake, 1", "Sea Lake, 1", "Bwin.fr Poker", "Bwin.fr Poker", window)
+
+    error.assert_not_called()
+    assert info.call_count == 1
