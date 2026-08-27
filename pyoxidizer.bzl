@@ -124,21 +124,6 @@ def make_exe(dist):
         "sys.path.insert(0, root)",
         "sys.path.insert(0, legacy_dir)",
         "os.chdir(root)",
-        # A wheel's bundled DLLs are found through os.add_dll_directory, which
-        # the wheel itself calls with a path relative to its own package
-        # (numpy: "../numpy.libs"). That only works where the payload sits
-        # exactly where the wheel installed it, and here it is placed by
-        # PyOxidizer instead -- so name the directories ourselves, from both
-        # places the bundle can hold them. Without this the first "import
-        # numpy" fails with "DLL load failed while importing
-        # _multiarray_umath" and the application never opens a window.
-        "if sys.platform == 'win32':",
-        "    for _payload_root in (root, os.path.join(root, 'lib')):",
-        "        for _entry in (os.listdir(_payload_root) if os.path.isdir(_payload_root) else []):",
-        "            if _entry.endswith('.libs'):",
-        "                _payload = os.path.join(_payload_root, _entry)",
-        "                if os.path.isdir(_payload):",
-        "                    os.add_dll_directory(_payload)",
         "if len(sys.argv) > 1 and sys.argv[1] == '--hud':",
         "    sys.argv.pop(1)",
         "    runpy.run_path(os.path.join(legacy_dir, 'HUD_main.pyw'), run_name='__main__')",
