@@ -2993,3 +2993,57 @@ def test_hud_is_fast_fold_matches_base_name_and_sets_flag(hud_main) -> None:
 
     assert hud_main._hud_is_fast_fold(hud, "Bucarest 1") is True
     assert hud.is_fast_fold is True
+
+
+def _tour_table(numbers: list[int | bool]) -> SimpleNamespace:
+    """A tournament table window whose title reports `numbers` in turn."""
+    reads = iter(numbers)
+    return SimpleNamespace(
+        type="tour",
+        number=19310,
+        key="1200531182 Table 1200531183",
+        title_table_no=None,
+        get_table_no=lambda: next(reads),
+    )
+
+
+def test_a_window_staying_on_its_table_keeps_its_hud(hud_main) -> None:
+    """The poll must not disturb a table that is simply still being played."""
+    table = _tour_table([1200531183, 1200531183])
+    hud = SimpleNamespace(table=table)
+
+    with patch.object(hud_main, "table_is_stale") as stale:
+        hud_main._handle_tour_table_switch(hud, table)  # attaches the baseline
+        hud_main._handle_tour_table_switch(hud, table)
+
+    stale.assert_not_called()
+    assert table.title_table_no == 1200531183
+
+
+def test_a_window_taken_over_by_the_next_match_drops_its_hud(hud_main) -> None:
+    """A Twister client reuses the window for the next match of the series.
+
+    Without this the finished tournament's HUD stayed on screen -- previous
+    opponents and all -- until a hand of the new match was imported.
+    """
+    table = _tour_table([1200531183, 1200533055])
+    hud = SimpleNamespace(table=table)
+
+    with patch.object(hud_main, "table_is_stale") as stale:
+        hud_main._handle_tour_table_switch(hud, table)
+        hud_main._handle_tour_table_switch(hud, table)
+
+    stale.assert_called_once_with(hud)
+
+
+def test_a_title_without_a_table_id_never_signals_a_switch(hud_main) -> None:
+    """Sites whose title omits the table id must not have their HUD killed."""
+    table = _tour_table([False, False])
+    hud = SimpleNamespace(table=table)
+
+    with patch.object(hud_main, "table_is_stale") as stale:
+        hud_main._handle_tour_table_switch(hud, table)
+        hud_main._handle_tour_table_switch(hud, table)
+
+    stale.assert_not_called()
+    assert table.title_table_no is None

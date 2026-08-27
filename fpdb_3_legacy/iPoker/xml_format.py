@@ -470,8 +470,17 @@ class IPokerXMLFormatMixin:
             except (ValueError, TypeError):
                 self.tinfo["endTime"] = None
 
-        # Set table name for tournament
+        # Set table name for tournament.
+        # The session header's <tablename> ("Twister 0.25€, 1200531183") is the
+        # only place the physical table id appears, and it sits before the first
+        # <game>: re_game_info therefore matches the first hand of a file only,
+        # and every later hand -- i.e. all of live auto-import -- lands here.
+        # Falling back to <tournamentname> dropped the ", <tableId>" suffix, so
+        # the same table was stored under two names, the HUD keyed it twice
+        # ("<tour> Table 1200531183" then "<tour> Table 0.25€") and rebuilt
+        # itself from scratch on the second hand of every tournament.
         self.tablename = "1"
-        self.info["table_name"] = self.tinfo["tourName"]
+        session_tablename = re.search(r"<tablename>([^<]*)</tablename>", self.whole_file)
+        self.info["table_name"] = session_tablename.group(1) if session_tablename else self.tinfo["tourName"]
 
         log.debug("Initialized tournament info: %s", self.tinfo)

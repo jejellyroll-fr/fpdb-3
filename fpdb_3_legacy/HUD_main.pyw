@@ -2336,6 +2336,43 @@ class HudMain(QObject):
             self.client_moved(None, hud)
         elif status == "client_resized":
             self.client_resized(None, hud)
+        elif getattr(table, "type", "") == "tour":
+            self._handle_tour_table_switch(hud, table)
+
+    def _handle_tour_table_switch(self, hud: Hud.Hud, table: Any) -> None:
+        """Kill a tournament HUD whose window has moved on to another table.
+
+        check_table() only watches geometry, so a window that keeps its size and
+        position while its title changes table went unnoticed until a hand of the
+        new table was imported -- 15 to 30 seconds later on a Twister, where the
+        client reuses the same window for the next match of the series. Until
+        then the finished tournament's HUD sat on the new table showing the
+        previous opponents. Killing it here means the worst case is no HUD for a
+        few seconds instead of a wrong one.
+        """
+        try:
+            seen = table.get_table_no()
+        except Exception:
+            log.debug("Table title check failed for %r", getattr(table, "key", "?"), exc_info=True)
+            return
+        if seen is False:
+            return
+        # The number the title carried when the HUD attached is the baseline, so
+        # a site whose title never shows the table id simply never signals here
+        # instead of the HUD being killed on a mismatch it cannot control.
+        baseline = getattr(table, "title_table_no", None)
+        if baseline is None:
+            table.title_table_no = seen
+            return
+        if seen != baseline:
+            log.warning(
+                "HUD dropped: window %s left table %s (title now shows table %s, was %s)",
+                table.number,
+                table.key,
+                seen,
+                baseline,
+            )
+            self.table_is_stale(hud)
 
     def _topify_mac_windows(self) -> None:
         """Bring all HUD windows to the top on macOS."""

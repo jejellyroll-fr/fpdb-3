@@ -115,6 +115,9 @@ class Table_Window:
         self.table: int | None = None
         self.search_string = ""
         self.tableno_re = ""
+        # Table id read from the window title when the HUD attached; HUD_main
+        # compares later reads against it to notice the window switching table.
+        self.title_table_no: int | None = None
         self.width = 0
         self.height = 0
         self.x = 0
@@ -364,6 +367,12 @@ class Table_Window:
         return False  # no change
 
     def has_table_title_changed(self, hud) -> bool:
+        if self.table is not None and self.table == self.tournament:
+            # The hand history carried no table id, so self.table holds the
+            # tournament number as a fallback: it can never equal what the title
+            # shows, and comparing them would report a move on every poll.
+            log.debug("Table id unknown (fell back to the tournament number); skipping title check")
+            return False
         log.debug("before get_table_no()")
         result = self.get_table_no()
         log.debug(f"tb has change nb {result}")
