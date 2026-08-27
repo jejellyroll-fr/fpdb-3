@@ -591,9 +591,11 @@ class HudMain(QObject):
     AX_READS_PER_HAND = 6
     """How many times a table's window may be re-read within one hand.
 
-    Each read costs ~20ms and the seats settle within the first few log lines,
-    so this bounds the cost while still letting a table that was read before it
-    was drawn fill in.
+    A read costs ~20ms through the macOS accessibility API and 100-300ms
+    through Windows UIAutomation (measured on a Chromium window), and the seats
+    settle within the first few log lines, so this bounds the cost while still
+    letting a table that was read before it was drawn fill in. Reads stop as
+    soon as the table looks full, so a full table costs one or two of them.
     """
 
     HERO_SLOT = 0
@@ -1024,6 +1026,11 @@ class HudMain(QObject):
         # Reads seats off the table window itself. The log can only say who has
         # acted, and never where they sit; this knows both, immediately.
         self.winamax_ax_seats = WinamaxAXSeatReader() if is_supported() else None
+        if self.winamax_ax_seats is not None:
+            # Whatever the reader has to build, it builds now: the first hand of
+            # the session must not pay for it on the GUI thread.
+            with contextlib.suppress(Exception):
+                self.winamax_ax_seats.prewarm()
 
         # The window says which game it deals only to a process holding macOS
         # Accessibility. Imported hands say it unconditionally, so keep what
@@ -1586,7 +1593,11 @@ class HudMain(QObject):
         if reader is None or not title:
             return None
         try:
-            return reader.read_window(title, getattr(hud, "max", 6) or 6) or {}
+            return reader.read_window(
+                title,
+                getattr(hud, "max", 6) or 6,
+                window_id=getattr(table, "number", None),
+            ) or {}
         except Exception:
             log.exception("Could not re-read the Fast-Fold window %r while sweeping idle tables", title)
             return None
@@ -1722,7 +1733,7 @@ class HudMain(QObject):
             anchor_seat = engine._anchor_slot(hud) or 3
             seat_map = {((slot + anchor_seat - 1) % max_seats) + 1: login for slot, login in slots.items()}
             source = "window"
-        elif slots:
+        elif slots and not self._ax_reads_spent(hud, update.hand_id):
             # Either the window holds nobody but the hero -- between hands, or
             # waiting for players -- or it was caught half-drawn. Either way
             # there is no table to describe yet; the rechecks will come back.
@@ -1875,10 +1886,15 @@ class HudMain(QObject):
             table_pos = (float(table.x), float(table.y))
 
         started = time.monotonic()
-        if table_pos is not None:
-            slots = reader.read_window(title, max_seats, table_pos=table_pos)
-        else:
-            slots = reader.read_window(title, max_seats)
+        # The window id is the table's identity: every window of a Fast-Fold
+        # pool carries the same name, and resolving one by title again -- on
+        # every read of every hand -- means enumerating the whole desktop.
+        slots = reader.read_window(
+            title,
+            max_seats,
+            table_pos=table_pos,
+            window_id=getattr(table, "number", None),
+        )
         took = (time.monotonic() - started) * 1000
         # A read holding the hero's chair beats one without it even when the
         # one without it names more players: the second caught the window
@@ -1898,6 +1914,22 @@ class HudMain(QObject):
                 f"slots={ {s: best[s] for s in sorted(best)} } empty={empty}",
             )
         return best
+
+    def _ax_reads_spent(self, hud: Hud.Hud, hand_id: str) -> bool:
+        """Whether this hand's budget of window reads is used up for this table.
+
+        Once it is, re-reading cannot improve the answer within this hand, so a
+        window read that never showed a dealt table has said all it is going to
+        say -- and the log-derived ring, slow as it is, describes the table
+        better than nothing. Without this, a client that answers the
+        accessibility API only partially (or not at all, while still yielding a
+        label or two) would leave the overlay permanently blank, which is worse
+        than the ring it replaced.
+        """
+        table = getattr(hud, "table", None)
+        table_key = getattr(table, "key", None) or getattr(table, "title", "") or ""
+        cached_hand, _cached_slots, reads = self._ax_rings.get(table_key, (None, {}, 0))
+        return cached_hand == hand_id and reads >= self.AX_READS_PER_HAND
 
     def _on_fast_fold_stats(self, result: FastFoldStatsResult) -> None:
         """Apply stats the worker read for a Fast-Fold table. Runs on the GUI thread."""

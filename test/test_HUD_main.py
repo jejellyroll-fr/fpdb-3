@@ -2400,7 +2400,7 @@ def test_window_reads_are_kept_per_window_not_globally(hud_main) -> None:
     reads = []
     full = {slot: f"p{slot}" for slot in range(6)}
 
-    def read_window(title, max_seats=6):
+    def read_window(title, max_seats=6, **_kwargs):
         reads.append(title)
         return full
 
@@ -2422,7 +2422,7 @@ def test_an_empty_window_read_is_not_cached(hud_main) -> None:
     """The window may not be drawn yet; the next line of the same hand retries."""
     reads = []
 
-    def read_window(title, max_seats=6):
+    def read_window(title, max_seats=6, **_kwargs):
         reads.append(title)
         return {}
 
@@ -2503,7 +2503,7 @@ def test_a_partial_window_read_is_not_frozen_for_the_whole_hand(hud_main) -> Non
     ]
     reads = []
 
-    def read_window(title, max_seats=6):
+    def read_window(title, max_seats=6, **_kwargs):
         reads.append(title)
         return answers[min(len(reads) - 1, len(answers) - 1)]
 
@@ -2519,7 +2519,7 @@ def test_a_partial_window_read_is_not_frozen_for_the_whole_hand(hud_main) -> Non
 def test_window_rereads_are_bounded_within_a_hand(hud_main) -> None:
     reads = []
 
-    def read_window(title, max_seats=6):
+    def read_window(title, max_seats=6, **_kwargs):
         reads.append(title)
         return {0: "Hero"}
 
@@ -2536,7 +2536,7 @@ def test_a_full_table_stops_being_re_read(hud_main) -> None:
     reads = []
     full = {slot: f"p{slot}" for slot in range(6)}
 
-    def read_window(title, max_seats=6):
+    def read_window(title, max_seats=6, **_kwargs):
         reads.append(title)
         return full
 
@@ -2792,7 +2792,7 @@ def test_a_table_holding_only_the_hero_is_not_worth_showing(hud_main) -> None:
     hud = _ff_hud("Winamax Casablanca 6")
     hud_main.hud_dict = {"Casablanca 6": hud}
     hud_main._fast_fold_pending["Casablanca 6"] = {1: "Hero"}
-    hud_main.winamax_ax_seats = SimpleNamespace(read_window=lambda t, max_seats=6: {0: "Hero"})
+    hud_main.winamax_ax_seats = SimpleNamespace(read_window=lambda t, max_seats=6, **_kwargs: {0: "Hero"})
     try:
         with patch.object(HUD_main.FastFoldEngine, "clear_seats") as cleared:
             hud_main._on_winamax_table_update(_live_update(ring=[], hero=None))
@@ -2838,11 +2838,52 @@ def test_a_half_drawn_window_is_not_acted_on(hud_main) -> None:
     hud_main._fast_fold_pending["Casablanca 6"] = {1: "Player01"}
     # Three players, none of them in the hero's chair.
     hud_main.winamax_ax_seats = SimpleNamespace(
-        read_window=lambda t, max_seats=6: {3: "Player01", 4: "Player04", 5: "Player06"}
+        read_window=lambda t, max_seats=6, **_kwargs: {3: "Player01", 4: "Player04", 5: "Player06"}
     )
     try:
         with patch.object(HUD_main.FastFoldEngine, "clear_seats") as cleared:
             hud_main._on_winamax_table_update(_live_update(table_no="6"))
+        cleared.assert_called_once_with(hud)
+    finally:
+        hud_main.hud_dict = {}
+
+
+def test_the_log_ring_takes_over_when_the_window_never_shows_a_dealt_table(hud_main) -> None:
+    """A client that will not answer properly must not leave the overlay blank.
+
+    The window read is the better source and a partial one is not acted on --
+    but once this hand's reads are spent, "partial" is the final answer, and the
+    log-derived ring describes the table better than nothing does.
+    """
+    hud = _ff_hud("Winamax Casablanca 6")
+    hud_main.hud_dict = {"Casablanca 6": hud}
+    hud_main._fast_fold_tables = {"Casablanca 6"}
+    # A read that names one player and never the hero's chair.
+    hud_main.winamax_ax_seats = SimpleNamespace(read_window=lambda t, max_seats=6, **_kwargs: {3: "Player01"})
+    # This hand's reads are already spent (the table is keyed by its title here).
+    hud_main._ax_rings["Winamax Casablanca 6"] = ("h1", {3: "Player01"}, hud_main.AX_READS_PER_HAND)
+    # A log line from later in the hand: the ring has had its chance to fill.
+    hud_main._ff_started["h1"] = time.monotonic() - 1.0
+    try:
+        with patch.object(HUD_main.FastFoldEngine, "clear_seats") as cleared, patch.object(
+            hud_main, "_request_fast_fold_stats"
+        ) as requested:
+            hud_main._on_winamax_table_update(_live_update(ring=["Hero", "Player01"], hero="Hero"))
+        cleared.assert_not_called()
+        assert set(requested.call_args.args[2].values()) == {"Hero", "Player01"}
+    finally:
+        hud_main.hud_dict = {}
+
+
+def test_a_partial_read_is_still_not_acted_on_while_reads_remain(hud_main) -> None:
+    hud = _ff_hud("Winamax Casablanca 6")
+    hud_main.hud_dict = {"Casablanca 6": hud}
+    hud_main._fast_fold_tables = {"Casablanca 6"}
+    hud_main._fast_fold_pending["Casablanca 6"] = {1: "Player01"}
+    hud_main.winamax_ax_seats = SimpleNamespace(read_window=lambda t, max_seats=6, **_kwargs: {3: "Player01"})
+    try:
+        with patch.object(HUD_main.FastFoldEngine, "clear_seats") as cleared:
+            hud_main._on_winamax_table_update(_live_update(ring=["Hero", "Player01"], hero="Hero"))
         cleared.assert_called_once_with(hud)
     finally:
         hud_main.hud_dict = {}
@@ -2855,7 +2896,7 @@ def test_a_read_holding_the_hero_beats_a_bigger_one_without(hud_main) -> None:
     ]
     reads = []
 
-    def read_window(title, max_seats=6):
+    def read_window(title, max_seats=6, **_kwargs):
         reads.append(title)
         return answers[min(len(reads) - 1, len(answers) - 1)]
 
