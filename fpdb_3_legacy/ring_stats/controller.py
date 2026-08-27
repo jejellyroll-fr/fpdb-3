@@ -276,6 +276,12 @@ class RingStatsController(QObject):
         log.warning(f"[PERF] controller sql_profit generation: {t4-t3:.3f}s. Total queries dispatch: {t4-t0:.3f}s")
         self._run_query("profit", sql_profit, self._on_profit_query_finished)
 
+        # The player and site lookups above ran on the tab's own connection, and
+        # a read opens a transaction like anything else. The workers use their
+        # own pooled connections, so ending this one now leaves nothing of this
+        # refresh holding a lock (#271).
+        self.db.rollback()
+
     def _run_query(self, query_name: str, sql: str, callback) -> None:
         """Lance une requête asynchrone à l'aide d'un DbWorker (ou synchrone en test)."""
         debug_log(f"_run_query: name={query_name}, async_mode={self.async_mode}")

@@ -812,6 +812,15 @@ class Database(
 
         Limits the number of concurrent connections to avoid hitting
         max_connections on PostgreSQL (and MySQL).
+
+        The connection is always returned to the pool with its transaction
+        ended. Workers only read, but a read still opens a transaction, and one
+        that is never ended does two things: it leaves the connection in ``idle
+        in transaction`` holding read locks for the life of the process --
+        pinning autovacuum off Hands and HandsPlayers, and standing in the way
+        of anything needing a stronger lock (#249, #271) -- and, when the query
+        failed, it hands the next borrower a connection whose transaction is
+        already aborted, so every later query on it fails too.
         """
         self._worker_conn_semaphore.acquire()
         conn = None
@@ -823,9 +832,25 @@ class Database(
 
             yield conn
         finally:
-            if conn is not None:
-                self._worker_conn_pool.put(conn)
+            self._return_worker_connection(conn)
             self._worker_conn_semaphore.release()
+
+    def _return_worker_connection(self, conn) -> None:
+        """Put a worker connection back, with nothing left open on it.
+
+        A connection whose rollback fails is beyond reuse, so it is dropped
+        rather than pooled; the next borrower simply opens a fresh one.
+        """
+        if conn is None:
+            return
+        try:
+            conn.rollback()
+        except Exception:  # noqa: BLE001 - a connection that cannot roll back is not reusable
+            log.debug("Discarding a worker connection that could not be rolled back", exc_info=True)
+            with contextlib.suppress(Exception):
+                conn.close()
+            return
+        self._worker_conn_pool.put(conn)
 
     def _create_new_worker_connection(self):
         """Open a dedicated connection for a background worker thread.
