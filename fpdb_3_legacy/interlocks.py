@@ -3,7 +3,6 @@ from __future__ import annotations
 
 # Thanks JJ!
 import base64
-import doctest
 import errno
 import os
 import os.path
@@ -543,6 +542,11 @@ def main(argv=None):
     if args.test or args.interactive:
         print("Running doctest suite for interlocks module...")
         try:
+            # Imported here, not at module scope: doctest pulls in unittest,
+            # and a module the GUI imports while starting up must not make the
+            # whole process look like a test run to code that sniffs sys.modules.
+            import doctest
+
             result = doctest.testmod(optionflags=doctest.IGNORE_EXCEPTION_DETAIL)
             if result.failed == 0:
                 print(f"✓ All {result.attempted} doctests passed")

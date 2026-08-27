@@ -14,6 +14,7 @@ mutex regression and a Windows developer sees an fcntl one.
 
 from __future__ import annotations
 
+import doctest
 import errno
 import os
 import socket
@@ -598,14 +599,14 @@ def test_no_arguments_prints_the_help(capsys) -> None:
 
 
 def test_the_doctest_suite_can_be_run(monkeypatch, capsys) -> None:
-    monkeypatch.setattr(interlocks.doctest, "testmod", lambda **_kwargs: types.SimpleNamespace(failed=0, attempted=7))
+    monkeypatch.setattr(doctest, "testmod", lambda **_kwargs: types.SimpleNamespace(failed=0, attempted=7))
 
     assert interlocks.main(["--test"]) == 0
     assert "All 7 doctests passed" in capsys.readouterr().out
 
 
 def test_a_failing_doctest_is_a_failing_command(monkeypatch, capsys) -> None:
-    monkeypatch.setattr(interlocks.doctest, "testmod", lambda **_kwargs: types.SimpleNamespace(failed=2, attempted=7))
+    monkeypatch.setattr(doctest, "testmod", lambda **_kwargs: types.SimpleNamespace(failed=2, attempted=7))
 
     assert interlocks.main(["--interactive"]) == 1
     assert "2/7 doctests failed" in capsys.readouterr().out
@@ -616,7 +617,7 @@ def test_a_crashing_doctest_is_reported_not_raised(monkeypatch, capsys) -> None:
         msg = "no such attribute"
         raise ValueError(msg)
 
-    monkeypatch.setattr(interlocks.doctest, "testmod", explode)
+    monkeypatch.setattr(doctest, "testmod", explode)
 
     assert interlocks.main(["--test"]) == 1
     assert "Doctests crashed" in capsys.readouterr().out
