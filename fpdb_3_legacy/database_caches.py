@@ -12,6 +12,7 @@ from typing import TYPE_CHECKING, Any
 
 import pytz
 
+from fpdb_3_legacy.action_enum_stats import CACHE_KEYS as ACTION_ENUM_CACHE_KEYS
 from fpdb_3_legacy.loggingFpdb import get_logger
 
 log = get_logger("db")
@@ -297,6 +298,11 @@ HUDCACHE_EXTRA_KEYS = [
     "street2DelayedCBDone",
     "street2ProbeChance",
     "street2ProbeDone",
+    # PT4 action-enum counters. They live here rather than in CACHE_KEYS because
+    # HandsPlayers already stores the response char they are counted from; only
+    # the HUD needs them pre-summed. storeHudCache reads them with .get(k, 0),
+    # so no HandsPlayers column is involved.
+    *ACTION_ENUM_CACHE_KEYS,
 ]
 
 

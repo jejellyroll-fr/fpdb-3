@@ -56,6 +56,159 @@ import sys
 #    FreePokerTools modules
 from fpdb_3_legacy import Configuration, Database, Hand, L10n
 from fpdb_3_legacy.loggingFpdb import get_logger
+from fpdb_3_legacy.stats_action_enums import (
+    call_float_river as call_float_river,
+)
+from fpdb_3_legacy.stats_action_enums import (
+    call_float_turn as call_float_turn,
+)
+from fpdb_3_legacy.stats_action_enums import (
+    call_vs_flop_3bet as call_vs_flop_3bet,
+)
+from fpdb_3_legacy.stats_action_enums import (
+    call_vs_flop_4bet as call_vs_flop_4bet,
+)
+from fpdb_3_legacy.stats_action_enums import (
+    call_vs_flop_cbet as call_vs_flop_cbet,
+)
+from fpdb_3_legacy.stats_action_enums import (
+    call_vs_flop_donk as call_vs_flop_donk,
+)
+from fpdb_3_legacy.stats_action_enums import (
+    call_vs_preflop_3bet as call_vs_preflop_3bet,
+)
+from fpdb_3_legacy.stats_action_enums import (
+    call_vs_preflop_4bet as call_vs_preflop_4bet,
+)
+from fpdb_3_legacy.stats_action_enums import (
+    call_vs_preflop_squeeze as call_vs_preflop_squeeze,
+)
+from fpdb_3_legacy.stats_action_enums import (
+    call_vs_river_3bet as call_vs_river_3bet,
+)
+from fpdb_3_legacy.stats_action_enums import (
+    call_vs_river_4bet as call_vs_river_4bet,
+)
+from fpdb_3_legacy.stats_action_enums import (
+    call_vs_river_cbet as call_vs_river_cbet,
+)
+from fpdb_3_legacy.stats_action_enums import (
+    call_vs_river_donk as call_vs_river_donk,
+)
+from fpdb_3_legacy.stats_action_enums import (
+    call_vs_turn_3bet as call_vs_turn_3bet,
+)
+from fpdb_3_legacy.stats_action_enums import (
+    call_vs_turn_4bet as call_vs_turn_4bet,
+)
+from fpdb_3_legacy.stats_action_enums import (
+    call_vs_turn_cbet as call_vs_turn_cbet,
+)
+from fpdb_3_legacy.stats_action_enums import (
+    call_vs_turn_donk as call_vs_turn_donk,
+)
+from fpdb_3_legacy.stats_action_enums import (
+    fold_float_river as fold_float_river,
+)
+from fpdb_3_legacy.stats_action_enums import (
+    fold_float_turn as fold_float_turn,
+)
+from fpdb_3_legacy.stats_action_enums import (
+    fold_vs_flop_3bet as fold_vs_flop_3bet,
+)
+from fpdb_3_legacy.stats_action_enums import (
+    fold_vs_flop_4bet as fold_vs_flop_4bet,
+)
+from fpdb_3_legacy.stats_action_enums import (
+    fold_vs_flop_cbet as fold_vs_flop_cbet,
+)
+from fpdb_3_legacy.stats_action_enums import (
+    fold_vs_flop_donk as fold_vs_flop_donk,
+)
+from fpdb_3_legacy.stats_action_enums import (
+    fold_vs_preflop_3bet as fold_vs_preflop_3bet,
+)
+from fpdb_3_legacy.stats_action_enums import (
+    fold_vs_preflop_4bet as fold_vs_preflop_4bet,
+)
+from fpdb_3_legacy.stats_action_enums import (
+    fold_vs_preflop_squeeze as fold_vs_preflop_squeeze,
+)
+from fpdb_3_legacy.stats_action_enums import (
+    fold_vs_river_3bet as fold_vs_river_3bet,
+)
+from fpdb_3_legacy.stats_action_enums import (
+    fold_vs_river_4bet as fold_vs_river_4bet,
+)
+from fpdb_3_legacy.stats_action_enums import (
+    fold_vs_river_cbet as fold_vs_river_cbet,
+)
+from fpdb_3_legacy.stats_action_enums import (
+    fold_vs_river_donk as fold_vs_river_donk,
+)
+from fpdb_3_legacy.stats_action_enums import (
+    fold_vs_turn_3bet as fold_vs_turn_3bet,
+)
+from fpdb_3_legacy.stats_action_enums import (
+    fold_vs_turn_4bet as fold_vs_turn_4bet,
+)
+from fpdb_3_legacy.stats_action_enums import (
+    fold_vs_turn_cbet as fold_vs_turn_cbet,
+)
+from fpdb_3_legacy.stats_action_enums import (
+    fold_vs_turn_donk as fold_vs_turn_donk,
+)
+from fpdb_3_legacy.stats_action_enums import (
+    raise_float_river as raise_float_river,
+)
+from fpdb_3_legacy.stats_action_enums import (
+    raise_float_turn as raise_float_turn,
+)
+from fpdb_3_legacy.stats_action_enums import (
+    raise_vs_flop_3bet as raise_vs_flop_3bet,
+)
+from fpdb_3_legacy.stats_action_enums import (
+    raise_vs_flop_4bet as raise_vs_flop_4bet,
+)
+from fpdb_3_legacy.stats_action_enums import (
+    raise_vs_flop_cbet as raise_vs_flop_cbet,
+)
+from fpdb_3_legacy.stats_action_enums import (
+    raise_vs_flop_donk as raise_vs_flop_donk,
+)
+from fpdb_3_legacy.stats_action_enums import (
+    raise_vs_preflop_3bet as raise_vs_preflop_3bet,
+)
+from fpdb_3_legacy.stats_action_enums import (
+    raise_vs_preflop_4bet as raise_vs_preflop_4bet,
+)
+from fpdb_3_legacy.stats_action_enums import (
+    raise_vs_preflop_squeeze as raise_vs_preflop_squeeze,
+)
+from fpdb_3_legacy.stats_action_enums import (
+    raise_vs_river_3bet as raise_vs_river_3bet,
+)
+from fpdb_3_legacy.stats_action_enums import (
+    raise_vs_river_4bet as raise_vs_river_4bet,
+)
+from fpdb_3_legacy.stats_action_enums import (
+    raise_vs_river_cbet as raise_vs_river_cbet,
+)
+from fpdb_3_legacy.stats_action_enums import (
+    raise_vs_river_donk as raise_vs_river_donk,
+)
+from fpdb_3_legacy.stats_action_enums import (
+    raise_vs_turn_3bet as raise_vs_turn_3bet,
+)
+from fpdb_3_legacy.stats_action_enums import (
+    raise_vs_turn_4bet as raise_vs_turn_4bet,
+)
+from fpdb_3_legacy.stats_action_enums import (
+    raise_vs_turn_cbet as raise_vs_turn_cbet,
+)
+from fpdb_3_legacy.stats_action_enums import (
+    raise_vs_turn_donk as raise_vs_turn_donk,
+)
 from fpdb_3_legacy.stats_aof import (
     aof_allin as aof_allin,
 )
