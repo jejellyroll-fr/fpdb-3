@@ -278,15 +278,19 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
 
-    wheel_dir = args.wheel_dir or args.install_dir.parent / "wheel-cache"
-    moved, restored = repair(args.install_dir, wheel_dir, python_version=args.python_version)
+    # Resolved once, here: the paths reported below are compared against this,
+    # and a relative install directory on the command line (which is how the
+    # build invokes it) would not match the absolute paths the repair produces.
+    install_dir = args.install_dir.resolve()
+    wheel_dir = args.wheel_dir or install_dir.parent / "wheel-cache"
+    moved, restored = repair(install_dir, wheel_dir, python_version=args.python_version)
 
     for source, target in moved:
-        print(f"moved {source.relative_to(args.install_dir)} -> {target.relative_to(args.install_dir)}")
+        print(f"moved {source.relative_to(install_dir)} -> {target.relative_to(install_dir)}")
     for target in restored:
-        print(f"restored {target.relative_to(args.install_dir)} from its wheel")
+        print(f"restored {target.relative_to(install_dir)} from its wheel")
     if not moved and not restored:
-        print(f"every wheel library payload was already in place under {args.install_dir / 'lib'}")
+        print(f"every wheel library payload was already in place under {install_dir / 'lib'}")
     return 0
 
 

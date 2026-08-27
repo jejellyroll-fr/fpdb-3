@@ -318,6 +318,16 @@ def test_the_command_reports_what_it_did(tmp_path: Path, capsys) -> None:
     assert "numpy.libs" in capsys.readouterr().out
 
 
+def test_the_command_accepts_a_relative_install_directory(tmp_path: Path, capsys, monkeypatch) -> None:
+    """How the build invokes it: a path relative to the checkout."""
+    _payload(tmp_path / "install" / "lib" / "numpy")
+    monkeypatch.chdir(tmp_path)
+
+    assert main(["install"]) == 0
+
+    assert "moved lib" in capsys.readouterr().out
+
+
 def test_the_command_says_so_when_there_is_nothing_to_do(tmp_path: Path, capsys) -> None:
     install = tmp_path / "install"
     (install / "lib").mkdir(parents=True)
