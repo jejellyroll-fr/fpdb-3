@@ -42,6 +42,18 @@ GAMETYPE_CATEGORY_WIDTH = 10
 WIDEN_GAMETYPE_CATEGORY_MYSQL = "ALTER TABLE Gametypes MODIFY category VARCHAR(10) NOT NULL"
 WIDEN_GAMETYPE_CATEGORY_SQL = "ALTER TABLE Gametypes ALTER COLUMN category TYPE VARCHAR(10)"
 
+# Reads a column's declared width. MySQL needs the schema pinned because
+# information_schema.columns spans every database on the server; PostgreSQL's
+# is already scoped to the connected one.
+COLUMN_WIDTH_SQL = (
+    "SELECT character_maximum_length FROM information_schema.columns "
+    "WHERE lower(table_name) = %s AND lower(column_name) = %s"
+)
+COLUMN_WIDTH_MYSQL = (
+    "SELECT character_maximum_length FROM information_schema.columns "
+    "WHERE lower(table_name) = %s AND lower(column_name) = %s AND table_schema = DATABASE()"
+)
+
 # Session settings that apply DDL_LOCK_TIMEOUT_MS on each server backend.
 SET_PGSQL_LOCK_TIMEOUT = "SET lock_timeout = 2000"
 RESET_PGSQL_LOCK_TIMEOUT = "SET lock_timeout = DEFAULT"
@@ -1145,14 +1157,11 @@ class DatabaseSchemaMixin:
         callers can treat it as "nothing to widen".
         """
         c = self.get_cursor()
-        query = (
-            "SELECT character_maximum_length FROM information_schema.columns "
-            "WHERE lower(table_name) = %s AND lower(column_name) = %s"
-        )
-        params: tuple[str, ...] = (table.lower(), column.lower())
-        if self.backend == self.MYSQL_INNODB:
-            query += " AND table_schema = DATABASE()"
-        c.execute(query, params)
+        # Two whole statements rather than one built by appending the MySQL
+        # clause: the analyser reads any query assembled from parts as an
+        # injection site, and it is right to, even when every part is a literal.
+        query = COLUMN_WIDTH_MYSQL if self.backend == self.MYSQL_INNODB else COLUMN_WIDTH_SQL
+        c.execute(query, (table.lower(), column.lower()))
         row = c.fetchone()
         return None if row is None else row[0]
 

@@ -72,3 +72,73 @@ def test_importing_interlocks_does_not_look_like_a_test_run() -> None:
 
     assert "doctest" not in imported
     assert "unittest" not in imported
+
+
+class StaleSender:
+    """Stands in for the DbWorker whose result is being delivered."""
+
+    def __init__(self, generation: int) -> None:
+        self.generation = generation
+
+
+def controller_at_generation(monkeypatch, current: int, sender_generation: int | None):
+    ctrl = controller.RingStatsController.__new__(controller.RingStatsController)
+    ctrl._generation = current
+    sender = StaleSender(sender_generation) if sender_generation is not None else None
+    monkeypatch.setattr(ctrl, "sender", lambda: sender, raising=False)
+    return ctrl
+
+
+def test_a_result_from_the_current_refresh_is_kept(monkeypatch) -> None:
+    ctrl = controller_at_generation(monkeypatch, current=4, sender_generation=4)
+
+    assert ctrl.is_current_result() is True
+
+
+def test_a_result_from_a_superseded_refresh_is_discarded(monkeypatch) -> None:
+    """The race disconnecting signals cannot close.
+
+    ``shutdown_workers`` only reaches workers that are still running, so a query
+    that finished before the user changed the filters still has its callback
+    queued for the GUI thread -- and it is delivered after the new refresh has
+    begun.
+    """
+    ctrl = controller_at_generation(monkeypatch, current=5, sender_generation=4)
+
+    assert ctrl.is_current_result() is False
+
+
+def test_a_direct_call_with_no_sender_is_treated_as_current(monkeypatch) -> None:
+    """Tests call the callbacks themselves; that must not read as stale."""
+    ctrl = controller_at_generation(monkeypatch, current=5, sender_generation=None)
+
+    assert ctrl.is_current_result() is True
+
+
+def test_every_result_callback_asks_before_it_acts() -> None:
+    """A guard on three of the four callbacks is a guard on none of them."""
+    import ast
+    import inspect
+
+    tree = ast.parse(inspect.getsource(controller.RingStatsController))
+    callbacks = {
+        node.name: node
+        for node in ast.walk(tree)
+        if isinstance(node, ast.FunctionDef) and node.name.startswith("_on_") and node.name.endswith("_finished")
+    }
+
+    assert set(callbacks) == {
+        "_on_summary_query_finished",
+        "_on_profit_query_finished",
+        "_on_hands_query_finished",
+        "_on_positions_query_finished",
+    }
+    for name, node in callbacks.items():
+        guards = [
+            call
+            for call in ast.walk(node)
+            if isinstance(call, ast.Call)
+            and isinstance(call.func, ast.Attribute)
+            and call.func.attr == "is_current_result"
+        ]
+        assert guards, f"{name} does not check whether its result is still wanted"
