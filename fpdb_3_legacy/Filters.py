@@ -11,7 +11,9 @@ Provides a comprehensive filtering system for poker data analysis with support f
 
 from __future__ import annotations
 
+import inspect
 import itertools
+import sys
 import time
 import unicodedata
 from functools import partial
@@ -228,6 +230,30 @@ def resolve_site_icon(site: str) -> QIcon:
     return icon
 
 
+#: Stands in for "as many as you like" when a callback declares ``*args``.
+UNLIMITED_POSITIONAL = sys.maxsize
+
+
+def _accepted_positional_count(callback: Any) -> int:
+    """How many positional arguments ``callback`` can be given.
+
+    A callable whose signature cannot be read is assumed to want none, which is
+    the safe end: an argument too few raises where the callback is defined, an
+    argument too many raises at the button.
+    """
+    try:
+        parameters = inspect.signature(callback).parameters.values()
+    except (TypeError, ValueError):
+        return 0
+    count = 0
+    for parameter in parameters:
+        if parameter.kind is parameter.VAR_POSITIONAL:
+            return UNLIMITED_POSITIONAL
+        if parameter.kind in (parameter.POSITIONAL_ONLY, parameter.POSITIONAL_OR_KEYWORD):
+            count += 1
+    return count
+
+
 class Filters(QWidget):
     """Main filtering widget for FPDB data analysis.
 
@@ -426,8 +452,8 @@ class Filters(QWidget):
         if self.display.get("Button1", False) or self.display.get("Button2", False):
             layout.addWidget(self.create_buttons())
 
-        self.db.rollback()
         self.set_default_hero()
+        self.end_read_transaction()
         log.info("[PERF-TIMING] Filters.make_filter built in %.3f s", time.perf_counter() - t0)
 
     def _clear_layout(self, layout: Any) -> None:
@@ -820,9 +846,39 @@ class Filters(QWidget):
         """Register button 1 name."""
         self.Button1.setText(title)
 
+    def _releasing_read_locks(self, callback: Any) -> Any:
+        """Wrap a filter button's callback so it cannot leave a read open.
+
+        Every tab reaches its data through one of these two buttons, so this is
+        the one place that sees them all -- including tabs written later. The
+        alternative was a rollback at the end of each tab's refresh method,
+        which is the same fix repeated seven times and forgotten the eighth.
+
+        The rollback runs even when the callback raises: a refresh that failed
+        is exactly the one leaving a transaction behind, and on PostgreSQL an
+        aborted transaction poisons every later query on that connection until
+        it ends.
+
+        Arguments are trimmed to what the callback accepts. Qt hands a clicked
+        slot the button's ``checked`` flag only if the slot has room for it, and
+        PySide decides that by inspecting the callable -- which a wrapper hides.
+        Three of the registered refreshes (both exportGraph, and
+        GuiTourneyPlayerStats.refreshStats) take no argument at all, so
+        forwarding blindly turns their button into a TypeError.
+        """
+        wanted = _accepted_positional_count(callback)
+
+        def run(*args: Any) -> Any:
+            try:
+                return callback(*args[:wanted])
+            finally:
+                self.end_read_transaction()
+
+        return run
+
     def registerButton1Callback(self, callback: Any) -> None:
         """Register button 1 callback."""
-        self.Button1.clicked.connect(callback)
+        self.Button1.clicked.connect(self._releasing_read_locks(callback))
         self.Button1.setEnabled(True)
         self.callback["button1"] = callback
 
@@ -832,7 +888,7 @@ class Filters(QWidget):
 
     def registerButton2Callback(self, callback: Any) -> None:
         """Register button 2 callback."""
-        self.Button2.clicked.connect(callback)
+        self.Button2.clicked.connect(self._releasing_read_locks(callback))
         self.Button2.setEnabled(True)
         self.callback["button2"] = callback
 
@@ -1709,6 +1765,22 @@ class Filters(QWidget):
         """Set games filter."""
         self.games = games
 
+    def end_read_transaction(self) -> None:
+        """Close the transaction the filter queries opened.
+
+        Every query here is a read, but a read still opens a transaction, and a
+        transaction nobody ends keeps the connection in ``idle in transaction``
+        for as long as the tab exists. One per tab, each holding ACCESS SHARE on
+        Gametypes, Hands, HandsPlayers, Players and Sites: autovacuum stops
+        being able to reclaim dead rows on the two tables that grow, and
+        anything wanting a stronger lock waits behind it -- which is how a
+        schema migration came to hang the GUI in #249.
+
+        ``Database.rollback`` defers while an explicit transaction block is
+        open, so this cannot cut one short.
+        """
+        self.db.rollback()
+
     def update_filters_for_hero(self) -> None:
         """Update all filters when hero selection changes."""
         if self.heroList and self.heroList.count() > 0:
@@ -1721,6 +1793,9 @@ class Filters(QWidget):
                 self.update_positions_for_hero(selected_hero, selected_site)
                 self.update_currencies_for_hero(selected_hero, selected_site)
                 self.update_tourney_filters_for_hero(selected_hero, selected_site)
+        # Reached on every hero change too, not just the first: the six updates
+        # above each run their own queries, so the transaction reopens each time.
+        self.end_read_transaction()
 
     def update_sites_for_hero(self, _hero: str, site: str) -> None:
         """Update sites filter for selected hero and site."""
