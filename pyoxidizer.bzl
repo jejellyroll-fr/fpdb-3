@@ -55,9 +55,19 @@ def is_wheel_library_payload(path):
     would put a second copy of the whole payload in the bundle.
     """
     parts = path.replace("\\", "/").split("/")
-    if len(parts) < 2:
-        return False
-    return has_suffix(parts[0], ".libs") or has_suffix(parts[0], ".dylibs")
+    # Any component, not just the first: the scanner may report a path rooted
+    # at the directory pip installed into rather than at site-packages. The
+    # name must be longer than the suffix, which keeps the hidden ".libs"
+    # directory older wheels put *inside* a package out of this -- that one is
+    # a package resource and is already classified, and taking it here as well
+    # would add a second copy of it.
+    for index in range(len(parts) - 1):
+        part = parts[index]
+        if len(part) > len(".libs") and has_suffix(part, ".libs"):
+            return True
+        if len(part) > len(".dylibs") and has_suffix(part, ".dylibs"):
+            return True
+    return False
 
 def keep_pip_resource(resource):
     if type(resource) == "File":
