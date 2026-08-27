@@ -25,6 +25,7 @@ named hands the seat map is learned from.
 from __future__ import annotations
 
 import argparse
+import re
 import sys
 from pathlib import Path
 
@@ -34,9 +35,12 @@ sys.path.insert(0, str(REPO))
 from fpdb_3_legacy.Configuration import Config  # noqa: E402
 from fpdb_3_legacy.Database import Database  # noqa: E402
 
-# "!" escapes the underscore, which is a LIKE wildcard: without it "anon_x"
-# would also match "anonyx". ESCAPE is understood by PostgreSQL, MySQL and
-# SQLite alike.
+# What the importer generated, matched in full. "anon_hunter" is a screen name
+# somebody may well be sitting under, and this tool deletes players: a prefix
+# test would take a real one, and every hand they played, with it. The LIKE is
+# only a cheap pre-filter -- "!" escapes the underscore, which is a LIKE
+# wildcard, and ESCAPE is understood by PostgreSQL, MySQL and SQLite alike.
+PLACEHOLDER_RE = re.compile(r"^anon_\d+_\d+$")
 SELECT_PLACEHOLDERS = (
     "SELECT p.id, p.name, s.name FROM Players p "
     "JOIN Sites s ON s.id = p.siteId "
@@ -98,7 +102,7 @@ def survey(db) -> tuple[list, dict, list]:
     cursor = db.get_cursor()
 
     cursor.execute(SELECT_PLACEHOLDERS)
-    placeholders = [(int(row[0]), row[1], row[2]) for row in cursor.fetchall()]
+    placeholders = [(int(row[0]), row[1], row[2]) for row in cursor.fetchall() if PLACEHOLDER_RE.match(str(row[1]))]
 
     hands: dict[int, tuple] = {}
     kept: list[tuple[int, str, int]] = []
@@ -109,7 +113,7 @@ def survey(db) -> tuple[list, dict, list]:
                 continue
             cursor.execute(_sql(SELECT_PLAYERS_OF_HAND, ph), (hand_id,))
             seated = cursor.fetchall()
-            if any(not str(seat_name).startswith("anon_") for _pid, seat_name in seated):
+            if any(not PLACEHOLDER_RE.match(str(seat_name)) for _pid, seat_name in seated):
                 kept.append((player_id, name, int(hand_id)))
                 continue
             cursor.execute(_sql(SELECT_HAND, ph), (hand_id,))

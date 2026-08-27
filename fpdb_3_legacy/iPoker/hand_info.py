@@ -23,8 +23,11 @@ _PLAYER_TAG_RE = re.compile(
 )
 _SESSION_CODE_RE = re.compile(r'sessioncode="(?P<CODE>\d+)"')
 _GAMECODE_RE = re.compile(r'<game gamecode="(?P<HID>\d+)"')
-# Prefix of the placeholder a seat gets when the session names nobody for it.
-_ANON_SCOPE_PREFIX = "anon_"
+# The placeholder a seat gets when the session names nobody for it. Matched in
+# full rather than by its "anon_" prefix: "anon_hunter" is a screen name someone
+# may well be sitting under, and reading it as a placeholder would drop the
+# hands that player is recovered in.
+_ANON_SCOPE_RE = re.compile(r"^anon_\d+_\d+$")
 
 
 class IPokerHandInfoMixin:
@@ -97,7 +100,7 @@ class IPokerHandInfoMixin:
         return [
             m.group("PNAME")
             for m in _PLAYER_TAG_RE.finditer(hand_text)
-            if not m.group("PNAME").startswith(_ANON_SCOPE_PREFIX)
+            if not _ANON_SCOPE_RE.match(m.group("PNAME"))
         ]
 
     def _deanonymize_players(self, hand: Any) -> tuple[int, int]:
@@ -147,7 +150,7 @@ class IPokerHandInfoMixin:
             text = text.replace(f'name="{old}"', f'name="{new}"').replace(f'player="{old}"', f'player="{new}"')
         hand.handText = text
 
-        recovered = {old: new for old, new in rename.items() if not new.startswith("anon_")}
+        recovered = {old: new for old, new in rename.items() if not _ANON_SCOPE_RE.match(new)}
         if recovered:
             log.info("iPoker de-anonymisation: recovered opponents from session seat map: %s", recovered)
         log.debug("iPoker de-anonymisation rename map: %s", rename)

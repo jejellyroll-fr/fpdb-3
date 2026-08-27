@@ -21,15 +21,18 @@ from tools.cleanup_ipoker_anon_players import (
     survey,
 )
 
+# What the LIKE pre-filter returns: "anon_hunter" matches it and is a real
+# player, which is why the tool tests the name in full before deleting anybody.
 PLACEHOLDERS = [
     (655, "anon_5879604460_1", "Bwin.fr Poker"),
     (656, "anon_5879604460_5", "Bwin.fr Poker"),
     (658, "anon_5879604460_9", "Bwin.fr Poker"),
+    (659, "anon_hunter", "Bwin.fr Poker"),
 ]
 HANDS_OF_PLAYER = {655: [1114], 656: [1114], 658: [2000]}
 PLAYERS_OF_HAND = {
     1114: [(655, "anon_5879604460_1"), (656, "anon_5879604460_5")],
-    2000: [(658, "anon_5879604460_9"), (700, "Requinbleu")],
+    2000: [(658, "anon_5879604460_9"), (659, "anon_hunter")],
 }
 HAND_ROWS = {
     1114: (1114, "Sea Lake, 560237915", "2026-08-27 21:12:11"),
@@ -78,9 +81,21 @@ def _db(cursor: _Cursor) -> SimpleNamespace:
 def test_only_hands_made_entirely_of_placeholders_are_offered() -> None:
     placeholders, hands, kept = survey(_db(_Cursor()))
 
-    assert [p[0] for p in placeholders] == [655, 656, 658]
+    assert [p[0] for p in placeholders] == [655, 656, 658]  # 659 is a real name
     assert list(hands) == [1114]  # 2000 seats a real player, so it stays
     assert kept == [(658, "anon_5879604460_9", 2000)]
+
+
+def test_a_real_player_named_like_a_placeholder_is_never_deleted() -> None:
+    """"anon_hunter" passes the LIKE pre-filter and is somebody's screen name.
+
+    Deleting them would take every hand they played with them, which is why the
+    generated form is matched in full rather than by its prefix.
+    """
+    placeholders, hands, _kept = survey(_db(_Cursor()))
+
+    assert 659 not in [p[0] for p in placeholders]
+    assert 2000 not in hands  # the hand they sit in is not offered either
 
 
 def test_a_hand_is_emptied_before_it_is_removed() -> None:
