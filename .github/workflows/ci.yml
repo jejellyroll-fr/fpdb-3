@@ -791,6 +791,13 @@ jobs:
           # that dies on "DLL load failed while importing _multiarray_umath"
           # before it can open a window. Everything above passed while the
           # Windows bundle could not start at all.
+          #
+          # The inventory is printed first: when this import fails, the next
+          # question is always whether the payload is absent or merely
+          # somewhere else, and the answer belongs in the same log.
+          echo "--- wheel library payloads in the bundle:"
+          find "$install_dir" -maxdepth 3 \( -name '*.libs' -o -name '*.dylibs' \) -print
+          find "$install_dir" -name 'libscipy_openblas*' -print
           "$install_dir/${{ matrix.executable }}" --run-module numpy.__config__
       - name: Assemble PyOxidizer macOS application
         if: runner.os == 'macOS'
