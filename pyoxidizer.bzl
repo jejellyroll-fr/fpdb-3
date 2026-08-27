@@ -35,7 +35,33 @@ def make_dist():
 def has_prefix(value, prefix):
     return value[:len(prefix)] == prefix
 
+def has_suffix(value, suffix):
+    return len(value) >= len(suffix) and value[len(value) - len(suffix):] == suffix
+
+def is_wheel_library_payload(path):
+    """Whether a plain file is a wheel's bundled shared-library directory.
+
+    delvewheel (Windows) and auditwheel (Linux) move a wheel's shared libraries
+    into a top-level "<package>.libs" directory beside the package. It is not a
+    Python package, so classification recognises nothing in it and drops the
+    whole thing -- and numpy's extension modules then cannot find
+    libscipy_openblas at import time:
+
+        ImportError: DLL load failed while importing _multiarray_umath
+
+    which is the application failing to start at all, since pandas imports
+    numpy. Only these directories are taken from the file scanner; anything
+    else it emits is already handled as a classified resource, and keeping both
+    would put a second copy of the whole payload in the bundle.
+    """
+    parts = path.replace("\\", "/").split("/")
+    if len(parts) < 2:
+        return False
+    return has_suffix(parts[0], ".libs") or has_suffix(parts[0], ".dylibs")
+
 def keep_pip_resource(resource):
+    if type(resource) == "File":
+        return is_wheel_library_payload(resource.path)
     name = resource.name
     if has_prefix(name, "PySide6.scripts."):
         return False
@@ -50,7 +76,13 @@ def make_exe(dist):
     policy.set_resource_handling_mode("classify")
     policy.resources_location = "filesystem-relative:lib"
     policy.resources_location_fallback = None
-    
+    # Classification alone cannot see a wheel's bundled shared libraries, which
+    # live in a top-level "<package>.libs" directory rather than inside the
+    # package. Let the scanner emit plain files as well, and take only those
+    # directories from it (see keep_pip_resource / is_wheel_library_payload).
+    policy.allow_files = True
+    policy.file_scanner_emit_files = True
+
     config = dist.make_python_interpreter_config()
     config.filesystem_importer = True
     config.oxidized_importer = False
@@ -82,6 +114,21 @@ def make_exe(dist):
         "sys.path.insert(0, root)",
         "sys.path.insert(0, legacy_dir)",
         "os.chdir(root)",
+        # A wheel's bundled DLLs are found through os.add_dll_directory, which
+        # the wheel itself calls with a path relative to its own package
+        # (numpy: "../numpy.libs"). That only works where the payload sits
+        # exactly where the wheel installed it, and here it is placed by
+        # PyOxidizer instead -- so name the directories ourselves, from both
+        # places the bundle can hold them. Without this the first "import
+        # numpy" fails with "DLL load failed while importing
+        # _multiarray_umath" and the application never opens a window.
+        "if sys.platform == 'win32':",
+        "    for _payload_root in (root, os.path.join(root, 'lib')):",
+        "        for _entry in (os.listdir(_payload_root) if os.path.isdir(_payload_root) else []):",
+        "            if _entry.endswith('.libs'):",
+        "                _payload = os.path.join(_payload_root, _entry)",
+        "                if os.path.isdir(_payload):",
+        "                    os.add_dll_directory(_payload)",
         "if len(sys.argv) > 1 and sys.argv[1] == '--hud':",
         "    sys.argv.pop(1)",
         "    runpy.run_path(os.path.join(legacy_dir, 'HUD_main.pyw'), run_name='__main__')",
@@ -126,10 +173,14 @@ def make_exe(dist):
             if keep_pip_resource(resource):
                 pip_resources.append(resource)
     exe.add_python_resources(pip_resources)
-    exe.add_python_resources(exe.read_package_root(
-        path=CWD,
-        packages=["fpdb_3_legacy", "fpdb"],
-    ))
+    # Same filter: the scanner now emits plain files, and the source tree's own
+    # non-Python files are already installed by make_install below. Adding them
+    # here as well would put two copies of each in the bundle.
+    exe.add_python_resources([
+        resource
+        for resource in exe.read_package_root(path=CWD, packages=["fpdb_3_legacy", "fpdb"])
+        if keep_pip_resource(resource)
+    ])
     
     # Add external files/assets
     # Note: assets like gfx, locale, fonts might need to be copied relative to the executable at runtime

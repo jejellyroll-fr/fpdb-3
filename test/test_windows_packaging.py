@@ -81,6 +81,22 @@ def test_the_workflow_builds_the_windows_bundle() -> None:
     assert "fpdb-pyoxidizer-windows-x64" in CI
 
 
+def test_the_bundled_wheel_libraries_are_collected() -> None:
+    """Classification drops "<package>.libs", and numpy cannot start without it."""
+    assert "policy.allow_files = True" in BZL
+    assert "is_wheel_library_payload" in BZL
+
+
+def test_the_windows_launcher_names_the_dll_directories() -> None:
+    """The wheel's own os.add_dll_directory call cannot find a relocated payload."""
+    assert "os.add_dll_directory" in BZL
+
+
+def test_the_bundle_is_verified_to_import_numpy() -> None:
+    """A bundle that cannot import numpy cannot open a window; the build must say so."""
+    assert "--run-module numpy.__config__" in CI
+
+
 def test_build_experiment_does_not_refuse_windows() -> None:
     experiment = (ROOT / "build_experiment.sh").read_text(encoding="utf-8")
     assert "PyOxidizer builds on Windows are deprecated" not in experiment

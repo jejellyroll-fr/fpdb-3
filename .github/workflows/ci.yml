@@ -784,6 +784,14 @@ jobs:
           # The launcher is the interpreter of every helper process, so a
           # broken payload layout or search path must fail the build here.
           "$install_dir/${{ matrix.executable }}" --run-module fpdb_3_legacy.subprocess_launch
+          # numpy's extension modules need the shared libraries their wheel
+          # bundles in a top-level "numpy.libs" directory. PyOxidizer drops
+          # anything it cannot classify, and that directory is not a package,
+          # so this import is what tells a bundle that starts apart from one
+          # that dies on "DLL load failed while importing _multiarray_umath"
+          # before it can open a window. Everything above passed while the
+          # Windows bundle could not start at all.
+          "$install_dir/${{ matrix.executable }}" --run-module numpy.__config__
       - name: Assemble PyOxidizer macOS application
         if: runner.os == 'macOS'
         shell: bash
