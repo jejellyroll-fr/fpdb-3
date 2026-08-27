@@ -81,21 +81,29 @@ class StaleSender:
         self.generation = generation
 
 
-def controller_at_generation(monkeypatch, current: int, sender_generation: int | None):
-    ctrl = controller.RingStatsController.__new__(controller.RingStatsController)
-    ctrl._generation = current
-    sender = StaleSender(sender_generation) if sender_generation is not None else None
-    monkeypatch.setattr(ctrl, "sender", lambda: sender, raising=False)
-    return ctrl
+class GuardHost:
+    """The real guard, on a host reduced to the two things it reads.
+
+    Borrowing the function rather than instantiating a RingStatsController
+    keeps the test off QObject construction while still exercising the
+    shipped implementation.
+    """
+
+    is_current_result = controller.RingStatsController.is_current_result
+
+    def __init__(self, current: int, sender_generation: int | None) -> None:
+        self._generation = current
+        self._sender = None if sender_generation is None else StaleSender(sender_generation)
+
+    def sender(self) -> StaleSender | None:
+        return self._sender
 
 
-def test_a_result_from_the_current_refresh_is_kept(monkeypatch) -> None:
-    ctrl = controller_at_generation(monkeypatch, current=4, sender_generation=4)
-
-    assert ctrl.is_current_result() is True
+def test_a_result_from_the_current_refresh_is_kept() -> None:
+    assert GuardHost(current=4, sender_generation=4).is_current_result() is True
 
 
-def test_a_result_from_a_superseded_refresh_is_discarded(monkeypatch) -> None:
+def test_a_result_from_a_superseded_refresh_is_discarded() -> None:
     """The race disconnecting signals cannot close.
 
     ``shutdown_workers`` only reaches workers that are still running, so a query
@@ -103,16 +111,12 @@ def test_a_result_from_a_superseded_refresh_is_discarded(monkeypatch) -> None:
     queued for the GUI thread -- and it is delivered after the new refresh has
     begun.
     """
-    ctrl = controller_at_generation(monkeypatch, current=5, sender_generation=4)
-
-    assert ctrl.is_current_result() is False
+    assert GuardHost(current=5, sender_generation=4).is_current_result() is False
 
 
-def test_a_direct_call_with_no_sender_is_treated_as_current(monkeypatch) -> None:
+def test_a_direct_call_with_no_sender_is_treated_as_current() -> None:
     """Tests call the callbacks themselves; that must not read as stale."""
-    ctrl = controller_at_generation(monkeypatch, current=5, sender_generation=None)
-
-    assert ctrl.is_current_result() is True
+    assert GuardHost(current=5, sender_generation=None).is_current_result() is True
 
 
 def test_every_result_callback_asks_before_it_acts() -> None:
