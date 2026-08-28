@@ -14,6 +14,7 @@ the HUD degraded to exactly the reported symptom and said nothing about it.
 from __future__ import annotations
 
 import logging
+import os
 
 import pytest
 
@@ -104,3 +105,75 @@ def test_nothing_is_warned_off_windows(monkeypatch, caplog) -> None:
         winamax_ax_seats.WinamaxAXSeatReader().prewarm()
 
     assert caplog.text == ""
+
+
+class _FakeElement:
+    """The parts of an IUIAutomationElement collect_labels touches."""
+
+    def __init__(self, name: str, pid: int, x: int = 10, y: int = 20) -> None:
+        self.CurrentName = name
+        self.CurrentProcessId = pid
+        self.CurrentBoundingRectangle = type("R", (), {"left": x, "top": y})()
+
+
+class _FakeFound:
+    def __init__(self, elements) -> None:
+        self._elements = elements
+        self.Length = len(elements)
+
+    def GetElement(self, index):
+        return self._elements[index]
+
+
+class _FakeRoot:
+    def __init__(self, elements) -> None:
+        self._found = _FakeFound(elements)
+
+    def FindAll(self, _scope, _condition):
+        return self._found
+
+
+def _client() -> winamax_ax_seats._WindowsUIAClient:
+    return winamax_ax_seats._WindowsUIAClient(automation=object(), condition=object())
+
+
+def test_the_huds_own_stat_blocks_are_not_read_back_as_players() -> None:
+    """The HUD's blocks are transient children of the table, so they are in the subtree.
+
+    A real walk of a Winamax table came back holding 'HUD - stats', 'VP 0.0',
+    '3B -' and the rest of the HUD's own output. Those are stat abbreviations,
+    not players, and the reader must not feed them to seats_from_labels.
+    """
+    own = os.getpid()
+    root = _FakeRoot(
+        [
+            _FakeElement("Bussy67", pid=own + 1),
+            _FakeElement("HUD - stats", pid=own),
+            _FakeElement("VP 0.0", pid=own),
+            _FakeElement("3B -", pid=own),
+            _FakeElement("0newayticket", pid=own + 1),
+        ],
+    )
+
+    labels = _client().collect_labels(root)
+
+    assert [label.login for label in labels] == ["Bussy67", "0newayticket"]
+
+
+def test_a_label_whose_owner_cannot_be_read_is_kept() -> None:
+    """Fail open: an unreadable pid is not proof the label is ours.
+
+    Dropping it would cost a real player their block, which is the failure this
+    reader exists to avoid.
+    """
+
+    class _Unreadable:
+        CurrentName = "Bussy67"
+        CurrentBoundingRectangle = type("R", (), {"left": 10, "top": 20})()
+
+        @property
+        def CurrentProcessId(self):  # noqa: N802 - UIA API
+            msg = "element is gone"
+            raise OSError(msg)
+
+    assert [label.login for label in _client().collect_labels(_FakeRoot([_Unreadable()]))] == ["Bussy67"]

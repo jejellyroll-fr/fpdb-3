@@ -28,6 +28,7 @@ from __future__ import annotations
 
 import logging
 import math
+import os
 import platform
 import re
 from dataclasses import dataclass
@@ -201,13 +202,37 @@ class _WindowsUIAClient:
         self._condition = condition
 
     def collect_labels(self, element: Any) -> list[AXSeat]:
-        """Every short text label under ``element``, with its screen position."""
+        """Every short text label under ``element``, with its screen position.
+
+        Labels belonging to this process are skipped. The HUD's own stat blocks
+        are top-level windows made transient children of the table they sit on,
+        which puts them inside the subtree searched here -- so a walk of a table
+        window came back holding the HUD's own text:
+
+            'HUD - stats'  'MonXt.'  'H 2'  'VP 0.0'  'PR 0.0'  '3B -'  'CB -'
+
+        Those are stat abbreviations, not players, and feeding them to
+        seats_from_labels can only produce nonsense or nothing. The HUD reading
+        its own output back is a loop worth cutting whatever else the client
+        does or does not expose.
+        """
         found = element.FindAll(self.TREE_SCOPE_SUBTREE, self._condition)
         if not found or not found.Length:
             return []
         labels: list[AXSeat] = []
+        own_pid = os.getpid()
         for index in range(min(found.Length, self.MAX_ELEMENTS)):
             item = found.GetElement(index)
+            # Fail open: only an element positively identified as ours is
+            # dropped. Losing a real player's label because one attribute read
+            # hiccuped would cost the whole seat map, which is the failure this
+            # reader exists to avoid.
+            try:
+                is_ours = item.CurrentProcessId == own_pid
+            except Exception:  # noqa: BLE001 - unreadable pid is not proof of anything
+                is_ours = False
+            if is_ours:
+                continue
             name = item.CurrentName
             if not isinstance(name, str) or not name or len(name) > self.MAX_LABEL_LEN:
                 continue
