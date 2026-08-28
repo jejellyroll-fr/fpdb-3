@@ -256,6 +256,14 @@ class WinamaxDetector(SiteDetector):
         if self.platform == "Windows":
             paths = get_windows_paths()
             base_path = self._check_path_exists(
+                # The current client keeps its accounts under a "documents"
+                # folder, exactly as it does on macOS and Linux. Only the two
+                # older layouts were probed here, so a Windows player of the
+                # current client was told Winamax was not installed and had to
+                # type the path in by hand -- and, one level being easy to miss,
+                # sometimes typed the parent of the history folder.
+                str(Path(paths["appdata"]) / "Winamax" / "documents" / "accounts"),
+                str(Path(paths["local_appdata"]) / "Winamax" / "documents" / "accounts"),
                 str(Path(paths["appdata"]) / "Winamax" / "accounts"),
                 str(Path(paths["local_appdata"]) / "Winamax" / "accounts"),
             )
