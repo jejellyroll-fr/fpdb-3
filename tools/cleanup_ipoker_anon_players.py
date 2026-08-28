@@ -210,7 +210,8 @@ def report(placeholders: list, hands: dict, kept: list) -> None:
             print(f"  player {player_id} ({name}) in hand {hand_id}")
 
 
-def main() -> int:
+def build_parser() -> argparse.ArgumentParser:
+    """The command line, built apart from main() so a test can exercise it."""
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--config", help="HUD_config.xml to read the database from (default: the configured one)")
     # Mutually exclusive: "--apply --rehearse" would otherwise commit, which is
@@ -222,7 +223,11 @@ def main() -> int:
         action="store_true",
         help="run the deletion against the real database and roll it back, reporting what it did",
     )
-    args = parser.parse_args()
+    return parser
+
+
+def main() -> int:
+    args = build_parser().parse_args()
 
     config = Config(file=args.config) if args.config else Config()
     db = Database(config)

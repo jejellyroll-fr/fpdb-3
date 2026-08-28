@@ -9,6 +9,8 @@ from __future__ import annotations
 
 from types import SimpleNamespace
 
+import pytest
+
 from tools.cleanup_ipoker_anon_players import (
     DELETE_BY_HAND,
     DELETE_BY_PLAYER,
@@ -17,6 +19,7 @@ from tools.cleanup_ipoker_anon_players import (
     SELECT_PLACEHOLDERS,
     SELECT_PLAYERS_OF_HAND,
     SELECT_REMAINING_HANDS_OF_PLAYER,
+    build_parser,
     delete,
     survey,
 )
@@ -238,19 +241,10 @@ def test_a_matching_name_on_another_site_is_left_alone() -> None:
     assert hands == {}
 
 
-def test_apply_and_rehearse_cannot_be_asked_for_together() -> None:
+def test_apply_and_rehearse_cannot_be_asked_for_together(capsys) -> None:
     """--rehearse promises a rollback; combined with --apply it used to commit."""
-    import subprocess
-    import sys
-    from pathlib import Path
+    with pytest.raises(SystemExit) as exit_code:
+        build_parser().parse_args(["--apply", "--rehearse"])
 
-    tool = Path(__file__).resolve().parent.parent / "tools" / "cleanup_ipoker_anon_players.py"
-    result = subprocess.run(  # noqa: S603
-        [sys.executable, str(tool), "--apply", "--rehearse"],
-        capture_output=True,
-        text=True,
-        check=False,
-    )
-
-    assert result.returncode != 0
-    assert "not allowed with argument" in result.stderr
+    assert exit_code.value.code != 0
+    assert "not allowed with argument --apply" in capsys.readouterr().err
