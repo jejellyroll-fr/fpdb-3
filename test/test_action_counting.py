@@ -5,14 +5,9 @@ This module tests the calls, bets, raises, and folds functions which count
 player actions on specific streets.
 """
 
-import os
-import sys
 from unittest.mock import Mock
 
 import pytest
-
-# Add the project root to the Python path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from fpdb_3_legacy.DerivedStats import DerivedStats
 

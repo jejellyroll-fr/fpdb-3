@@ -1,13 +1,9 @@
 import os
 import re  # Import re for Site
-import sys
 import time
 from unittest.mock import MagicMock, Mock, patch  # Import Mock and MagicMock
 
 import pytest
-
-# Add project path for imports
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 import fpdb_3_legacy.Database as Database  # Import Database for patching
 from fpdb_3_legacy.IdentifySite import FPDBFile, Site

@@ -10,7 +10,6 @@ what the ``perf`` marker is for - the default run deselects it, and these are
 run on demand with ``pytest -m perf``.
 """
 
-import os
 import sys
 import time
 import unittest
@@ -19,7 +18,6 @@ from unittest.mock import Mock
 import pytest
 
 # Add the parent directory to Python path for imports
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 pytestmark = pytest.mark.perf
 

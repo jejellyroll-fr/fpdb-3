@@ -5,15 +5,11 @@ This module tests the improved error handling, smart restart logic,
 and statistics persistence to prevent regressions.
 """
 
-import os
-import sys
 import time
 
 import pytest
 
 # Add parent directory to path for module imports
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
 # Import modules to test
 from fpdb_3_legacy.HudStatsPersistence import HudStatsPersistence
 from fpdb_3_legacy.ImprovedErrorHandler import ErrorSeverity, ImprovedErrorHandler

@@ -10,12 +10,7 @@ failed dir. These tests exercise the relocation helper directly (no DB needed).
 
 from __future__ import annotations
 
-import os
-import sys
-
 import pytest
-
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from fpdb_3_legacy.IdentifySite import FPDBFile
 from fpdb_3_legacy.Importer import Importer

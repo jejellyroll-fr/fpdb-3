@@ -8,8 +8,6 @@ import sys
 
 import pytest
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-
 
 def test_deprecated_stats():
     """Test deprecated stats return format_no_data_stat tuples."""

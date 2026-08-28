@@ -24,8 +24,6 @@ import pytest
 
 pytestmark = pytest.mark.qt
 
-sys.path.insert(0, str(Path(__file__).parent.parent))
-
 
 def _load_hud_main():
     """Load HUD_main.pyw, reusing the instance another test module loaded.

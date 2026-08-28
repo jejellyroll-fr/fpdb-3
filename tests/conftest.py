@@ -4,10 +4,6 @@ from unittest.mock import MagicMock
 
 import pytest
 
-# Ensure root is in path
-sys.path.append(os.getcwd())
-
-
 # Mock GUI dependencies only if not installed
 try:
     import PySide6  # noqa: F401 -- availability probe

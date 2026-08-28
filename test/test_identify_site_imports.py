@@ -7,12 +7,8 @@ loaded zero sites ("Could not find module ..., skipping"). They now resolve via
 ``import_fpdb_module()``, which imports the package-qualified module.
 """
 
-import os
-import sys
 
 import pytest
-
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 import fpdb_3_legacy.Configuration as Configuration
 from fpdb_3_legacy.IdentifySite import IdentifySite, import_fpdb_module

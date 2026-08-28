@@ -17,13 +17,10 @@ macOS path with it.
 
 from __future__ import annotations
 
-import os
 import sys
 from unittest.mock import MagicMock
 
 import pytest
-
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from fpdb_3_legacy import winamax_ax_seats as ax
 from fpdb_3_legacy.winamax_ax_seats import AXSeat, AXTableWindow, WinamaxAXSeatReader

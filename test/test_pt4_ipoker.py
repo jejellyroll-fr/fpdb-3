@@ -1,10 +1,5 @@
 """Test script for PokerTracker4 iPoker hands parsing."""
 
-import sys
-from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).parent))
-
 from fpdb_3_legacy.Configuration import Config
 from fpdb_3_legacy.PokerTrackerToFpdb import PokerTracker
 

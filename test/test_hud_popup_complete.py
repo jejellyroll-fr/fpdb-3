@@ -5,8 +5,6 @@ This module provides comprehensive tests for popup windows and their interaction
 with the "no data" feature, with fully resolved mocking issues.
 """
 
-import os
-import sys
 from unittest.mock import Mock
 
 import pytest
@@ -15,9 +13,6 @@ pytestmark = pytest.mark.qt
 from PySide6.QtCore import Qt
 from PySide6.QtTest import QTest
 from PySide6.QtWidgets import QHBoxLayout, QLabel, QVBoxLayout, QWidget
-
-# Add the project root to the Python path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 # Import HUD components
 import fpdb_3_legacy.Stats as Stats

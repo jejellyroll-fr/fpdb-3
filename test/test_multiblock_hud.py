@@ -8,7 +8,6 @@ stat-sets) and Aux_Hud rendering of stacked per-block grids in a seat window.
 from __future__ import annotations
 
 import os
-import sys
 import types
 
 # Only inline trusted XML literals are parsed here (no external input / DTD),
@@ -18,8 +17,6 @@ import xml.dom.minidom as minidom
 import pytest
 
 pytestmark = pytest.mark.qt
-
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 

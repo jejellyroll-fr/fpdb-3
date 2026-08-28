@@ -11,14 +11,10 @@ warning about it reported a parser failure that had not happened.
 
 from __future__ import annotations
 
-import os
-import sys
 from decimal import Decimal
 from unittest.mock import MagicMock
 
 import pytest
-
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from fpdb_3_legacy.HandHistoryConverter import HandHistoryConverter
 from fpdb_3_legacy.WinamaxToFpdb import Winamax

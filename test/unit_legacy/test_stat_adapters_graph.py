@@ -2,13 +2,9 @@
 
 from __future__ import annotations
 
-import os
-import sys
 from decimal import Decimal
 
 import pytest
-
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 
 from fpdb_3_legacy import stat_registry as sr
 from fpdb_3_legacy.stat_adapters import GraphAdapter

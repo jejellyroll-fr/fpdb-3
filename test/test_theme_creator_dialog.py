@@ -7,7 +7,6 @@ Tests the UI components and theme creation functionality.
 """
 
 import os
-import sys
 import unittest
 from unittest.mock import Mock, patch
 
@@ -18,7 +17,6 @@ pytestmark = pytest.mark.qt
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
 # Add the parent directory to the path to import our modules
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # Only run GUI tests if we're in a GUI environment
 try:

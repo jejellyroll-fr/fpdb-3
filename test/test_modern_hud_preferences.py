@@ -4,13 +4,11 @@
 Test suite for the AddStatDialog class focusing on stat_loth and stat_hith validation.
 """
 
-import os
 import sys
 import unittest
 from unittest.mock import Mock
 
 # Add the parent directory to Python path for imports
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
 class TestAddStatDialog(unittest.TestCase):

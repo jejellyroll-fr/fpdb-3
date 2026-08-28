@@ -1,18 +1,14 @@
 """Test suite for assembleHands method in DerivedStats."""
 
-import sys
 from collections.abc import Callable
 from datetime import datetime, timezone
 
 UTC = timezone.utc  # datetime.UTC is 3.11+; the packaged builds embed 3.10
 from decimal import Decimal
-from pathlib import Path
 
 import pytest
 
 # Add parent directory to path
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-
 import fpdb_3_legacy.Card as Card
 from fpdb_3_legacy.DerivedStats import DerivedStats
 

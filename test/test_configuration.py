@@ -1,10 +1,7 @@
-import sys
-from pathlib import Path
 from xml.dom.minidom import Document, parseString
 
 import pytest
 
-sys.path.append(str(Path(__file__).parent.parent))
 from fpdb_3_legacy.Configuration import Config, RawHands, RawTourneys
 
 

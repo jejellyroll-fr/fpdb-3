@@ -6,12 +6,9 @@ These tests verify handling of problematic hands identified in import reports.
 """
 
 import os
-import sys
 import unittest
 
 # Add parent directory to path for imports
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-
 from fpdb_3_legacy.Configuration import Config
 from fpdb_3_legacy.PokerStarsToFpdb import PokerStars
 

@@ -6,17 +6,13 @@ Unit tests for custom theme functionality in ThemeManager.
 Tests custom theme installation, validation, removal, and application.
 """
 
-import os
 import shutil
 
 # Add the parent directory to the path to import our modules
-import sys
 import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import Mock, patch
-
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from fpdb_3_legacy.ThemeManager import CUSTOM_THEMES_DIR, ThemeManager
 

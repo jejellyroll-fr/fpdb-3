@@ -1,13 +1,7 @@
 #!/usr/bin/env python3
 
-import os
-import sys
 import unittest
 from unittest.mock import Mock, patch
-
-# Add the parent directory to Python path to import fpdb modules
-parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(0, parent_dir)
 
 from fpdb_3_legacy.Exceptions import FpdbHandPartial, FpdbParseError
 from fpdb_3_legacy.PokerStarsToFpdb import PokerStars

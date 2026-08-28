@@ -9,15 +9,12 @@ which is how ``'ClassicHud' object has no attribute 'adj'`` reached the log.
 
 from __future__ import annotations
 
-import os
 import sys
 from unittest.mock import Mock
 
 import pytest
 
 pytestmark = pytest.mark.qt
-
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 sys.modules.setdefault("PySide6", Mock())
 sys.modules.setdefault("PySide6.QtWidgets", Mock())

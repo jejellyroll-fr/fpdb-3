@@ -24,7 +24,6 @@ import pytest
 # GuiAutoImport uses legacy-style bare imports, so the package directory itself
 # must be importable (same as test_guiautoimport_headless).
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "fpdb_3_legacy")))
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 
 def _make_config(swc_parameters):

@@ -4,13 +4,9 @@
 Test suite for the modern popup theme system.
 """
 
-import os
-import sys
 import unittest
 
 # Add the parent directory to Python path for imports
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
 from fpdb_3_legacy.PopupThemes import (
     AVAILABLE_THEMES,
     ClassicTheme,

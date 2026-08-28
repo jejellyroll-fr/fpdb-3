@@ -9,12 +9,8 @@ being a call in an unraised pot. The denominator is the open opportunity.
 
 from __future__ import annotations
 
-import os
-import sys
 from decimal import Decimal as D
 from unittest.mock import Mock
-
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 import fpdb_3_legacy.Stats as Stats
 from fpdb_3_legacy.DerivedStats import DerivedStats

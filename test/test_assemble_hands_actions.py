@@ -1,13 +1,9 @@
 """Test suite for assembleHandsActions method in DerivedStats."""
 
-import sys
 from decimal import Decimal
-from pathlib import Path
 from unittest.mock import Mock
 
 # Add parent directory to path
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-
 from fpdb_3_legacy.DerivedStats import DerivedStats
 
 

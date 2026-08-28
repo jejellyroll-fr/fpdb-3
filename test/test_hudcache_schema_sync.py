@@ -11,15 +11,11 @@ The structural tests below catch any future drift between ``CACHE_KEYS``,
 ``insert_hudcache`` and ``update_hudcache``.
 """
 
-import os
 import re
 import sqlite3
-import sys
 from contextlib import closing
 
 import pytest
-
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 import fpdb_3_legacy.Database as Database
 import fpdb_3_legacy.SQL as SQL

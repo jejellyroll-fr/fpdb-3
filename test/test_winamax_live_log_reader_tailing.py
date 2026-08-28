@@ -15,14 +15,11 @@ after the reader started, a read that fails midway, and shutdown.
 from __future__ import annotations
 
 import os
-import sys
 import time
 from pathlib import Path
 from unittest.mock import MagicMock
 
 import pytest
-
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from fpdb_3_legacy import winamax_live_log_reader as reader_module
 from fpdb_3_legacy.winamax_live_log_reader import (

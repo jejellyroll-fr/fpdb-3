@@ -9,11 +9,7 @@ before their first preflop action.
 
 from __future__ import annotations
 
-import os
-import sys
 from unittest.mock import Mock
-
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from fpdb_3_legacy.DerivedStats import DerivedStats
 

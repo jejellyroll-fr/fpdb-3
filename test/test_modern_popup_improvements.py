@@ -1,12 +1,6 @@
 #!/usr/bin/env python
 """Test to validate modern popup improvements."""
 
-import sys
-from pathlib import Path
-
-# Add the main directory to sys.path to import FPDB modules
-sys.path.insert(0, str(Path(__file__).parent.parent))
-
 
 def _setup_popup_components() -> bool:
     """Setup popup components for testing."""
