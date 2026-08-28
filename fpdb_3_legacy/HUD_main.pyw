@@ -625,6 +625,14 @@ class HudMain(QObject):
     """
 
     MIN_PLAYERS_TO_SHOW = 2
+
+    #: How long after asking for a table's statistics further ring growth is
+    #: coalesced instead of asking again. The client log names players one at a
+    #: time, so a six-handed table produced a request, a database round trip and
+    #: a redraw per name -- fourteen in one hand, across two tables, in a
+    #: measured session. The first answer is never delayed by this; only the
+    #: ones chasing it are merged.
+    FF_STATS_COALESCE_MS = 400
     """Players a window must be drawing before its blocks are worth showing.
 
     The hero alone means the table is between hands or waiting for players, and
@@ -872,6 +880,12 @@ class HudMain(QObject):
             # hud_dict key -> the seat map last sent to the worker, so an
             # unchanged table does not queue a read on every log line.
             self._fast_fold_pending: dict[str, dict[int, str]] = {}
+            # Coalescing of stats requests: when the last one went out per
+            # table, the newest seat map waiting behind it, and the timer that
+            # will send that one. See FF_STATS_COALESCE_MS.
+            self._ff_last_request_at: dict[str, float] = {}
+            self._ff_coalesced: dict[str, tuple[Any, dict[int, str], Any]] = {}
+            self._ff_coalesce_timers: dict[str, QTimer] = {}
             # Pools reported once as having no HUD of their own, so the warning
             # is not repeated on every log line.
             self._unpaired_pools: set[str] = set()
@@ -1543,6 +1557,7 @@ class HudMain(QObject):
         pending_generations = getattr(self, "_ff_pending_generation", None)
         if pending_generations is not None:
             pending_generations.pop(temp_key, None)
+        self._forget_coalesced_fast_fold_stats(temp_key)
         if pending is None and not getattr(hud, "stat_dict", None) and not getattr(hud, "seat_players", None):
             return  # already down
         FastFoldEngine.clear_seats(hud)
@@ -1779,7 +1794,72 @@ class HudMain(QObject):
             f"table={temp_key} source={source} hero_seat={hero_seat} "
             f"seats={ {s: seat_map[s] for s in sorted(seat_map)} }",
         )
-        self._request_fast_fold_stats(temp_key, hud, seat_map, update.hand_id)
+        self._request_fast_fold_stats_coalesced(temp_key, hud, seat_map, update.hand_id)
+
+    def _request_fast_fold_stats_coalesced(
+        self,
+        temp_key: str,
+        hud: Hud.Hud,
+        seat_map: dict[int, str],
+        hand_id: Any,
+    ) -> None:
+        """Ask now if nothing was asked recently, otherwise merge into one later ask.
+
+        The client log names a player only once they have acted, so a six-handed
+        table grows its ring a name at a time. Every growth used to be its own
+        request, database round trip and redraw -- fourteen of them in a single
+        hand across two tables, in a measured session, each one repainting
+        blocks the player was already reading.
+
+        Leading edge, then trailing: the first seat map of a burst goes out
+        immediately, so the blocks appear as early as they ever did. The ones
+        chasing it inside FF_STATS_COALESCE_MS are held, and only the newest
+        survives to be sent when the window closes -- an intermediate ring that
+        was already superseded is not worth a round trip.
+        """
+        now = time.monotonic()
+        last = self._ff_last_request_at.get(temp_key)
+        elapsed_ms = float("inf") if last is None else (now - last) * 1000
+
+        if elapsed_ms >= self.FF_STATS_COALESCE_MS:
+            self._ff_last_request_at[temp_key] = now
+            self._ff_coalesced.pop(temp_key, None)
+            self._request_fast_fold_stats(temp_key, hud, seat_map, hand_id)
+            return
+
+        self._ff_coalesced[temp_key] = (hud, seat_map, hand_id)
+        timer = self._ff_coalesce_timers.get(temp_key)
+        if timer is None:
+            timer = QTimer(self)
+            timer.setSingleShot(True)
+            timer.timeout.connect(lambda key=temp_key: self._flush_coalesced_fast_fold_stats(key))
+            self._ff_coalesce_timers[temp_key] = timer
+        if not timer.isActive():
+            timer.start(max(0, int(self.FF_STATS_COALESCE_MS - elapsed_ms)))
+        self._ff_trace(hand_id, "stats-coalesced", f"table={temp_key} seats={len(seat_map)}")
+
+    def _flush_coalesced_fast_fold_stats(self, temp_key: str) -> None:
+        """Send the newest seat map held back for this table, if it still applies."""
+        held = self._ff_coalesced.pop(temp_key, None)
+        if held is None:
+            return
+        hud, seat_map, hand_id = held
+        if self.hud_dict.get(temp_key) is not hud:
+            # The table was cleared or rebuilt while the map waited; the request
+            # would be answered against a HUD nobody is looking at.
+            return
+        self._ff_last_request_at[temp_key] = time.monotonic()
+        self._request_fast_fold_stats(temp_key, hud, seat_map, hand_id)
+
+    def _forget_coalesced_fast_fold_stats(self, temp_key: str) -> None:
+        """Drop anything held for a table that is going away."""
+        self._ff_coalesced.pop(temp_key, None)
+        self._ff_last_request_at.pop(temp_key, None)
+        timer = self._ff_coalesce_timers.pop(temp_key, None)
+        if timer is not None:
+            with contextlib.suppress(RuntimeError):
+                timer.stop()
+                timer.deleteLater()
 
     def _request_fast_fold_stats(
         self,
