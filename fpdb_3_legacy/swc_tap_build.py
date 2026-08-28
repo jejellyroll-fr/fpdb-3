@@ -34,10 +34,50 @@ def get_tap_library_path() -> Path:
     return BUILD_DIR / "libswc_native_tap.so"
 
 
+#: The compilers tried for each platform, in order of preference.
+COMPILERS: dict[str, tuple[str, ...]] = {
+    "Darwin": ("clang",),
+    "Windows": ("x86_64-w64-mingw32-gcc", "gcc"),
+    "Linux": ("clang", "gcc"),
+}
+
+#: What to tell someone who has none of them.
+INSTALL_HINTS: dict[str, str] = {
+    "Darwin": "Install the Xcode command line tools: xcode-select --install",
+    "Windows": "Install MSYS2 or another MinGW-w64 distribution and put gcc on PATH.",
+    "Linux": "Install clang or gcc with your package manager.",
+}
+
+
+def resolve_compiler(system_name: str) -> str:
+    """The compiler to build the tap with, or a message saying what is missing.
+
+    subprocess used to be handed a compiler name that had never been checked,
+    so a machine without one failed with the operating system's own words for
+    "that program does not exist":
+
+        SwC Native Capture warning: [WinError 2] Le fichier specifie est introuvable
+
+    Which names no compiler, no file, and nothing to do about it -- it was read
+    as an FPDB bug for months. Windows is where it always bit, because a Windows
+    machine essentially never has gcc, but a Linux box without a toolchain got
+    exactly the same non-answer.
+    """
+    candidates = COMPILERS.get(system_name, ())
+    for name in candidates:
+        if shutil.which(name):
+            return name
+    msg = (
+        f"no C compiler found to build the SwC tap: looked for {', '.join(candidates)}. "
+        f"{INSTALL_HINTS.get(system_name, 'Install one and try again.')}"
+    )
+    raise FileNotFoundError(msg)
+
+
 def _compile_command(system_name: str, tap_lib: Path) -> list[str]:
     if system_name == "Darwin":
         return [
-            "clang",
+            resolve_compiler(system_name),
             "-arch",
             "x86_64",
             "-dynamiclib",
@@ -50,10 +90,9 @@ def _compile_command(system_name: str, tap_lib: Path) -> list[str]:
             str(tap_lib),
             str(SOURCE_PATH),
         ]
+    compiler = resolve_compiler(system_name)
     if system_name == "Windows":
-        compiler = "x86_64-w64-mingw32-gcc" if shutil.which("x86_64-w64-mingw32-gcc") else "gcc"
         return [compiler, "-shared", "-O2", "-Wall", "-Wextra", "-o", str(tap_lib), str(SOURCE_PATH), "-lws2_32"]
-    compiler = "clang" if shutil.which("clang") else "gcc"
     return [compiler, "-shared", "-fPIC", "-O2", "-Wall", "-Wextra", "-o", str(tap_lib), str(SOURCE_PATH), "-ldl"]
 
 

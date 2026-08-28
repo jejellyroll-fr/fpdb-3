@@ -678,7 +678,16 @@ class Importer:
                         continue
                     if not self._is_valid_import_file(filename) or self.failed_files.failed(filename):
                         continue
-                    if (time() - os.stat(filename).st_mtime) <= 43200:  # look all files modded in the last 12 hours
+                    try:
+                        modified_at = os.stat(filename).st_mtime
+                    except OSError as e:
+                        # os.walk listed the name; the client can still rotate or
+                        # delete it before we get to stat it. Raising here aborted
+                        # the whole cycle -- every other tracked file included --
+                        # over one file that is simply no longer there.
+                        log.debug("Skipping %s: %s", filename, e)
+                        continue
+                    if (time() - modified_at) <= 43200:  # look all files modded in the last 12 hours
                         # need long time because FTP in Win does not
                         # update the timestamp on the HH during session
                         self.addImportFile(filename, "auto")
@@ -1473,7 +1482,18 @@ class Importer:
 
             if fpdbfile.ftype == "both":
                 both_files_count += 1
-                stat_info = os.stat(f)
+                try:
+                    stat_info = os.stat(f)
+                except OSError as e:
+                    # A tracked file can be deleted between two cycles. Raising
+                    # here aborted the cycle before runUpdated() -- the only
+                    # thing that purges a vanished file from filelist -- could
+                    # run, so the next cycle stat'd the same missing file and
+                    # failed the same way. Auto-import then imported nothing at
+                    # all, every interval, until it was restarted. Skipping
+                    # leaves the entry for runUpdated() to drop, this cycle.
+                    log.debug("Skipping summary for %s: %s", f, e)
+                    continue
                 file_age = time() - stat_info.st_mtime
                 log.debug(f"File {f} marked as 'both', age: {file_age:.1f}s, force: {force}")
 
