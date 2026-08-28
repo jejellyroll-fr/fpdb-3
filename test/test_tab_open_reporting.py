@@ -118,9 +118,17 @@ class _RecordingLogger(logging.Logger):
     def __init__(self) -> None:
         super().__init__("test-tab-open")
         self.lines: list[str] = []
+        self.levels: list[int] = []
+
+    # Capture whichever call the profiler makes: it reports through log() now,
+    # because only a slow open is a WARNING. A stub that intercepts one method
+    # name says nothing about the code once it uses the other.
+    def log(self, level, msg, *args, **kwargs) -> None:
+        self.levels.append(level)
+        self.lines.append(msg % args if args else msg)
 
     def warning(self, msg, *args, **kwargs) -> None:  # noqa: A002 - mirrors logging API
-        self.lines.append(msg % args if args else msg)
+        self.log(logging.WARNING, msg, *args, **kwargs)
 
 
 def test_reopening_a_single_instance_tab_builds_nothing() -> None:
