@@ -701,15 +701,22 @@ def test_check_tables(hud_main, status, expected_method) -> None:
         mock_method.assert_called_once_with(None, mock_hud)
 
 
-def test_check_tables_skipped_during_drag(hud_main) -> None:
+def test_check_tables_skipped_during_drag(hud_main, monkeypatch) -> None:
     """While a HUD window is dragged, check_tables must not poll geometry or
-    re-raise windows (that stutters the drag on macOS)."""
+    re-raise windows (that stutters the drag on macOS).
+
+    A held mouse button is part of what makes a drag real now: the flag alone is
+    no longer believed, because the release that clears it is not guaranteed to
+    arrive and a stuck flag used to stop every HUD from ever being taken down.
+    See test_hud_drag_flag.py for that half.
+    """
     from fpdb_3_legacy import Aux_Base
 
     mock_hud = MagicMock()
     mock_hud.table.check_table.return_value = "client_moved"
     hud_main.hud_dict = {"test_table": mock_hud}
 
+    monkeypatch.setattr(Aux_Base, "_a_mouse_button_is_down", lambda: True)
     Aux_Base.set_drag_active(True)
     try:
         with (
