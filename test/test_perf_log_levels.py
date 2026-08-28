@@ -17,6 +17,7 @@ import pytest
 
 # No sys.path.insert of the repo root: pytest.ini already sets `pythonpath = .`,
 # so the inserts the older test modules carry are redundant here.
+from fpdb_3_legacy.loggingFpdb import get_logger
 from fpdb_3_legacy.ui_instrumentation import (
     SLOW_TAB_OPEN_MS,
     UI_STALL_BUDGET_MS,
@@ -87,3 +88,56 @@ def test_report_logs_a_slow_open_at_warning(monkeypatch) -> None:
     record = _report_record(monkeypatch, SLOW_TAB_OPEN_MS + 500)
     assert record.levelno == logging.WARNING
     assert "[PERF] tab open" in record.getMessage()
+
+
+def _record_via(logger, handler_target, total_ms: float) -> logging.LogRecord:
+    """Drive TabOpenProfiler.report through `logger`, return the record it emitted."""
+    records: list[logging.LogRecord] = []
+
+    class Recorder(logging.Handler):
+        def emit(self, record: logging.LogRecord) -> None:
+            records.append(record)
+
+    handler_target.handlers = [Recorder()]
+    handler_target.setLevel(logging.DEBUG)
+    handler_target.propagate = False
+
+    profiler = TabOpenProfiler("Help")
+    profiler._started -= total_ms / 1000
+    profiler.report(logger)
+
+    assert len(records) == 1
+    return records[0]
+
+
+def test_report_works_against_the_logger_the_application_uses() -> None:
+    """The production logger is a wrapper, not a logging.Logger.
+
+    get_logger() returns FpdbLogger, which mirrors logging.Logger's per-level
+    methods. Reporting at a level chosen at runtime needs the variable-level
+    form, and the wrapper had none -- so the first version of this change raised
+    AttributeError on every tab open in the real application while every test
+    here passed, because they all handed report() a standard logging.Logger.
+    Reported by Codex on the pull request.
+    """
+    logger = get_logger("test_perf_log_levels_wrapper_fast")
+    record = _record_via(logger, logger.logger, total_ms=5)
+
+    assert record.levelno == logging.DEBUG
+    assert "[PERF] tab open" in record.getMessage()
+
+
+def test_the_wrapper_reports_a_slow_open_at_warning() -> None:
+    logger = get_logger("test_perf_log_levels_wrapper_slow")
+    record = _record_via(logger, logger.logger, total_ms=SLOW_TAB_OPEN_MS + 500)
+
+    assert record.levelno == logging.WARNING
+
+
+def test_the_wrapper_still_credits_the_caller_with_the_line() -> None:
+    """_get_stacklevel has to know about log(), or every record points at the wrapper."""
+    logger = get_logger("test_perf_log_levels_wrapper_stack")
+    record = _record_via(logger, logger.logger, total_ms=5)
+
+    assert record.funcName != "log"
+    assert record.filename != "loggingFpdb.py"
