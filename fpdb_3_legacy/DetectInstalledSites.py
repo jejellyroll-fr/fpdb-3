@@ -251,14 +251,34 @@ class WinamaxDetector(SiteDetector):
 
     def detect(self) -> dict[str, Any]:
         """Detect Winamax installation."""
-        base_path = None
+        for base_path in self._account_roots():
+            found = self._first_account_with_history(base_path)
+            if found is not None:
+                account, history_path = found
+                return {
+                    "detected": True,
+                    "hhpath": history_path,
+                    "heroname": account,
+                    "tspath": "",  # Winamax doesn't separate tournament summaries
+                }
 
+        return {"detected": False, "hhpath": "", "heroname": "", "tspath": ""}
+
+    def _account_roots(self) -> list[str]:
+        """Every place this platform's client may keep its accounts, best first.
+
+        All of them are tried, and the search stops at the first that holds an
+        actual history -- not at the first that merely exists. The client
+        creates its tree as soon as it runs, so a root can be there and empty
+        while the hands sit in another one; stopping at it would hide them, and
+        report a client that is plainly installed as not detected.
+        """
         if self.platform == "Windows":
             paths = get_windows_paths()
-            base_path = self._check_path_exists(
+            return [
                 # The current client keeps its accounts under a "documents"
                 # folder, exactly as it does on macOS and Linux. Only the two
-                # older layouts were probed here, so a Windows player of the
+                # older layouts used to be probed, so a Windows player of the
                 # current client was told Winamax was not installed and had to
                 # type the path in by hand -- and, one level being easy to miss,
                 # sometimes typed the parent of the history folder.
@@ -266,47 +286,45 @@ class WinamaxDetector(SiteDetector):
                 str(Path(paths["local_appdata"]) / "Winamax" / "documents" / "accounts"),
                 str(Path(paths["appdata"]) / "Winamax" / "accounts"),
                 str(Path(paths["local_appdata"]) / "Winamax" / "accounts"),
-            )
+            ]
 
-        elif self.platform == "Linux":
-            # Check for native Linux Winamax app first
-            native_path = str(Path.home() / ".config" / "winamax" / "documents" / "accounts")
-            if Path(native_path).exists():
-                base_path = native_path
-            else:
-                # Fallback to Wine installation
-                paths = get_linux_paths()
-                wine_users_path = Path(paths["wine_users"])
-                wine_paths = [str(path) for path in wine_users_path.glob("*/AppData/Roaming/Winamax/accounts")]
-                if wine_paths:
-                    base_path = wine_paths[0]
+        if self.platform == "Linux":
+            # The native app first, then every Wine prefix.
+            paths = get_linux_paths()
+            wine_users_path = Path(paths["wine_users"])
+            return [
+                str(Path.home() / ".config" / "winamax" / "documents" / "accounts"),
+                *(str(path) for path in wine_users_path.glob("*/AppData/Roaming/Winamax/accounts")),
+            ]
 
-        elif self.platform == "Darwin":  # macOS
+        if self.platform == "Darwin":  # macOS
             paths = get_mac_paths()
-            base_path = self._check_path_exists(
+            return [
                 str(Path(paths["app_support"]) / "Winamax" / "documents" / "accounts"),
                 str(Path(paths["app_support"]) / "Winamax" / "accounts"),
-            )
+            ]
 
-        if base_path and Path(base_path).exists():
-            try:
-                # Look for account folders
-                accounts = os.listdir(base_path)
-                for account in accounts:
-                    account_path = str(Path(base_path) / account)
-                    if Path(account_path).is_dir():
-                        history_path = str(Path(account_path) / "history")
-                        if Path(history_path).exists():
-                            return {
-                                "detected": True,
-                                "hhpath": history_path,
-                                "heroname": account,
-                                "tspath": "",  # Winamax doesn't separate tournament summaries
-                            }
-            except (OSError, PermissionError):
-                log.exception("Error detecting Winamax")
+        return []
 
-        return {"detected": False, "hhpath": "", "heroname": "", "tspath": ""}
+    @staticmethod
+    def _first_account_with_history(base_path: str) -> tuple[str, str] | None:
+        """The first account under ``base_path`` with a history folder, if any."""
+        try:
+            accounts = os.listdir(base_path)
+        except (FileNotFoundError, NotADirectoryError):
+            # Ordinary, now that every candidate root is tried: most of them do
+            # not exist on any one machine. Only a real access failure below is
+            # worth a trace.
+            return None
+        except OSError:
+            log.exception("Error detecting Winamax under %s", base_path)
+            return None
+
+        for account in accounts:
+            history_path = Path(base_path) / account / "history"
+            if history_path.exists():
+                return account, str(history_path)
+        return None
 
 
 # Skins whose Windows data directory is not named after the skin itself.

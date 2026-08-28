@@ -1,7 +1,10 @@
 """Regression tests for installed-site directory detection."""
 
+import logging
+import os
 from types import SimpleNamespace
 
+from fpdb_3_legacy import DetectInstalledSites
 from fpdb_3_legacy.DetectInstalledSites import SiteDetector, WinamaxDetector
 
 
@@ -88,3 +91,68 @@ def test_windows_winamax_absent_is_reported_as_not_detected(tmp_path, monkeypatc
     monkeypatch.setenv("LOCALAPPDATA", str(tmp_path / "local"))
 
     assert _winamax_detector().detect() == {"detected": False, "hhpath": "", "heroname": "", "tspath": ""}
+
+
+def test_windows_winamax_falls_back_when_the_preferred_root_holds_no_history(tmp_path, monkeypatch) -> None:
+    """A root that exists is not proof the hands are in it.
+
+    The client creates its "documents" tree as soon as it runs. Stopping at the
+    first root that merely exists hid a real history left in the older layout,
+    and reported a client that is plainly installed as not detected.
+    """
+    (tmp_path / "Winamax" / "documents" / "accounts").mkdir(parents=True)
+    history = _winamax_history(tmp_path, "Winamax", "accounts")
+    monkeypatch.setenv("APPDATA", str(tmp_path))
+    monkeypatch.setenv("LOCALAPPDATA", str(tmp_path / "local"))
+
+    assert _winamax_detector().detect()["hhpath"] == str(history)
+
+
+def test_windows_winamax_skips_an_account_with_no_history_folder(tmp_path, monkeypatch) -> None:
+    """An account directory alone is not a history; the next one may be."""
+    accounts = tmp_path / "Winamax" / "documents" / "accounts"
+    (accounts / "LoggedInOnce").mkdir(parents=True)
+    history = accounts / "Dyvinitos" / "history"
+    history.mkdir(parents=True)
+    monkeypatch.setenv("APPDATA", str(tmp_path))
+    monkeypatch.setenv("LOCALAPPDATA", str(tmp_path / "local"))
+
+    result = _winamax_detector().detect()
+
+    assert result["hhpath"] == str(history)
+    assert result["heroname"] == "Dyvinitos"
+
+
+def test_windows_winamax_falls_back_past_an_unreadable_root(tmp_path, monkeypatch, caplog) -> None:
+    """A root that cannot be listed must not end the search, but must be logged."""
+    _winamax_history(tmp_path, "Winamax", "accounts")
+    preferred = tmp_path / "Winamax" / "documents" / "accounts"
+    preferred.mkdir(parents=True)
+    monkeypatch.setenv("APPDATA", str(tmp_path))
+    monkeypatch.setenv("LOCALAPPDATA", str(tmp_path / "local"))
+
+    real_listdir = os.listdir
+
+    def listdir(path, *args, **kwargs):
+        if str(path) == str(preferred):
+            raise PermissionError(13, "Permission denied")
+        return real_listdir(path, *args, **kwargs)
+
+    monkeypatch.setattr(DetectInstalledSites.os, "listdir", listdir)
+
+    with caplog.at_level(logging.ERROR, logger="detect_installed_sites"):
+        result = _winamax_detector().detect()
+
+    assert result["detected"] is True
+    assert "Error detecting Winamax" in caplog.text
+
+
+def test_a_missing_root_is_not_logged_as_an_error(tmp_path, monkeypatch, caplog) -> None:
+    """Most candidate roots do not exist on any one machine; that is not news."""
+    monkeypatch.setenv("APPDATA", str(tmp_path / "roaming"))
+    monkeypatch.setenv("LOCALAPPDATA", str(tmp_path / "local"))
+
+    with caplog.at_level(logging.ERROR, logger="detect_installed_sites"):
+        assert _winamax_detector().detect()["detected"] is False
+
+    assert caplog.text == ""
