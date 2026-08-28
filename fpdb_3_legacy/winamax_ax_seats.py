@@ -249,7 +249,19 @@ def _windows_uia() -> _WindowsUIAClient | None:
         log.info("UIAutomation seat reader ready")
     except Exception:
         _windows_uia_unavailable = True
-        log.info("No UIAutomation seat reader on this machine; Fast-Fold seats come from the client log", exc_info=True)
+        # WARNING, not INFO: this is the difference between a Fast-Fold table's
+        # blocks appearing together and appearing one at a time over the first
+        # betting round, and it was invisible. The root logger is pinned to
+        # WARNING (loggingFpdb.DIAGNOSTIC_LEVEL_CAP) and "hud_main" is persisted
+        # lower still, so the INFO line this used to be reached no user's log --
+        # the HUD lost the window reader and said nothing about it. Once per
+        # process: the failure is remembered just above.
+        log.warning(
+            "No UIAutomation seat reader: Fast-Fold seats will come from the client log, which names a "
+            "player only once they have acted, so the stat blocks appear one at a time over the first "
+            "betting round.",
+            exc_info=True,
+        )
     return _windows_uia_client
 
 
@@ -670,6 +682,16 @@ class WinamaxAXSeatReader:
         Paid here, at startup, it is not paid on the GUI thread while a table is
         being dealt. Failure is not an error: the log-derived ring still works.
         """
-        if platform.system() != "Windows" or not is_ax_available():
+        if platform.system() != "Windows":
+            return
+        if not is_ax_available():
+            # comtypes is not importable. The win32 dependency in pyproject and
+            # the PyInstaller hook exist to stop exactly this, so a build that
+            # arrives here has lost them somewhere -- and it degraded in
+            # silence, because this branch simply returned.
+            log.warning(
+                "Fast-Fold seats will come from the client log: comtypes is not importable, so this "
+                "build cannot read a table's chairs from its window.",
+            )
             return
         _windows_uia()
