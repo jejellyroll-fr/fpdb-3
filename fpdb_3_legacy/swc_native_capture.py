@@ -41,6 +41,23 @@ from fpdb_3_legacy.swc_tap_build import (  # noqa: E402
     get_tap_library_path,
 )
 
+#: The platforms the live capture can actually run on. The tap is loaded into
+#: the client by library interposition -- DYLD_INSERT_LIBRARIES on macOS,
+#: LD_PRELOAD on Linux, see ``native_client_environment`` -- and Windows has no
+#: equivalent, so a tap built there is a library nothing can load. The C source
+#: does carry a Windows branch (GetModuleHandleA over the bundled OpenSSL DLLs)
+#: and CI compiles it on a Windows runner, but no injection path uses it yet:
+#: ``SWC_EXECUTABLE`` is a macOS bundle path and ``running_client_pids`` shells
+#: out to pgrep. Until one exists, building on Windows only produces a compiler
+#: error for a library that would go unused.
+INTERPOSABLE_SYSTEMS = frozenset({"Darwin", "Linux"})
+
+
+def native_capture_supported(system_name: str | None = None) -> bool:
+    """Whether the live native capture can be started on this platform."""
+    return (system_name or platform.system()) in INTERPOSABLE_SYSTEMS
+
+
 TAP_LIBRARY = get_tap_library_path()
 DEFAULT_ARCHIVE = BUILD_DIR / "swc-native.raw"
 DEFAULT_STATUS = BUILD_DIR / "swc-native.status"

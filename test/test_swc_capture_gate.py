@@ -19,6 +19,8 @@ import os
 import sys
 from unittest.mock import MagicMock, patch
 
+import pytest
+
 # GuiAutoImport uses legacy-style bare imports, so the package directory itself
 # must be importable (same as test_guiautoimport_headless).
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "fpdb_3_legacy")))
@@ -59,13 +61,14 @@ def _make_gui(config):
         return GuiAutoImport.GuiAutoImport(settings, config, cli=True)
 
 
-def _start_capture(config):
+def _start_capture(config, *, supported=True):
     """Run start_swc_native_capture with the compiler and thread mocked out."""
     from fpdb_3_legacy import GuiAutoImport, swc_native_capture
 
     gui = _make_gui(config)
     with (
         patch.object(swc_native_capture, "build_tap") as build_tap,
+        patch.object(swc_native_capture, "native_capture_supported", return_value=supported),
         patch.object(GuiAutoImport, "SwCNativeTailingThread") as thread,
     ):
         gui.start_swc_native_capture()
@@ -90,3 +93,64 @@ def test_the_capture_still_starts_for_a_swc_player() -> None:
     build_tap.assert_called_once()
     thread.assert_called_once()
     thread.return_value.start.assert_called_once()
+
+
+def test_nothing_is_built_where_the_tap_could_not_be_loaded() -> None:
+    """Windows has no library interposition, so the tap has nothing to be loaded into.
+
+    Building it there was the compiler failure users kept reporting -- for a
+    library that nothing on the platform could have loaded even if gcc had been
+    installed and it had built.
+    """
+    build_tap, thread = _start_capture(_make_config({"enabled": True}), supported=False)
+    build_tap.assert_not_called()
+    thread.assert_not_called()
+
+
+def test_the_supported_platforms_are_the_ones_that_can_interpose() -> None:
+    from fpdb_3_legacy.swc_native_capture import native_capture_supported
+
+    assert native_capture_supported("Darwin") is True
+    assert native_capture_supported("Linux") is True
+    assert native_capture_supported("Windows") is False
+
+
+def test_swc_tap_build_uses_the_first_compiler_on_the_path(monkeypatch) -> None:
+    from fpdb_3_legacy import swc_tap_build
+
+    monkeypatch.setattr(swc_tap_build.shutil, "which", lambda name: name == "gcc")
+
+    assert swc_tap_build.resolve_compiler("Windows") == "gcc"
+
+
+def test_swc_tap_build_reports_a_missing_compiler(monkeypatch) -> None:
+    """The message users got was the OS's, and named nothing they could act on.
+
+        SwC Native Capture warning: [WinError 2] Le fichier specifie est introuvable
+    """
+    from fpdb_3_legacy import swc_tap_build
+
+    monkeypatch.setattr(swc_tap_build.shutil, "which", lambda _name: None)
+
+    with pytest.raises(FileNotFoundError) as excinfo:
+        swc_tap_build.resolve_compiler("Windows")
+
+    message = str(excinfo.value)
+    assert "x86_64-w64-mingw32-gcc" in message
+    assert "gcc" in message
+    assert "MinGW-w64" in message
+
+
+def test_the_compiler_is_checked_before_it_is_run(monkeypatch, tmp_path) -> None:
+    """No compiler must fail with our message, not with subprocess's."""
+    from fpdb_3_legacy import swc_tap_build
+
+    monkeypatch.setattr(swc_tap_build, "BUILD_DIR", tmp_path)
+    monkeypatch.setattr(swc_tap_build.shutil, "which", lambda _name: None)
+    run = MagicMock()
+    monkeypatch.setattr(swc_tap_build.subprocess, "run", run)
+
+    with pytest.raises(FileNotFoundError, match="no C compiler found"):
+        swc_tap_build.build_tap(force=True)
+
+    run.assert_not_called()

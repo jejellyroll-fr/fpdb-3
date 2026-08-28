@@ -1,4 +1,6 @@
 import io
+import platform
+import shutil
 import struct
 import threading
 from dataclasses import replace
@@ -1518,7 +1520,20 @@ def test_iter_capture_records_rejects_corruption(data, message):
 
 
 def test_build_tap_cross_platform(tmp_path, monkeypatch):
+    """The compile itself, on whichever platform this is running.
+
+    Skipped where no compiler is installed rather than failed: this asserts that
+    the C builds, and a developer machine without a toolchain -- which is most
+    Windows machines -- cannot answer that question either way. What such a
+    machine *should* get is covered by
+    test_swc_tap_build_reports_a_missing_compiler.
+    """
     from fpdb_3_legacy import swc_native_capture
+    from fpdb_3_legacy.swc_tap_build import COMPILERS
+
+    system_name = platform.system()
+    if not any(shutil.which(name) for name in COMPILERS.get(system_name, ())):
+        pytest.skip(f"no C compiler on this {system_name} machine")
 
     monkeypatch.setattr(swc_native_capture, "BUILD_DIR", tmp_path)
     tap_path = swc_native_capture.build_tap(force=True)

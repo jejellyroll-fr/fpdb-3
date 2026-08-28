@@ -577,7 +577,23 @@ class GuiAutoImport(QWidget):
         if not self._swc_capture_wanted():
             return
         try:
-            from fpdb_3_legacy.swc_native_capture import DEFAULT_ARCHIVE, build_tap
+            from fpdb_3_legacy.swc_native_capture import (
+                DEFAULT_ARCHIVE,
+                build_tap,
+                native_capture_supported,
+            )
+
+            if not native_capture_supported():
+                # The tap is loaded into the client by library interposition,
+                # which Windows has no equivalent of. Building it there was the
+                # compiler failure users kept reporting -- for a library nothing
+                # on the platform could have loaded even if it had built.
+                log.info("SwC live capture needs library interposition, which this platform does not have.")
+                self.addText(
+                    _("\nSwC live capture is not available on this platform. Importing SwC files still works."),
+                    "info",
+                )
+                return
 
             build_tap(check_executable=False)
             if self.swc_tailing_thread is None or not self.swc_tailing_thread.isRunning():
