@@ -35,6 +35,27 @@ if sys.platform == "win32":
     SM_CYCAPTION = 4
 
 
+def _normalized(text: str) -> str:
+    """Case- and whitespace-insensitive form, for comparing a name to a title.
+
+    The client draws non-breaking spaces where a hand history writes ordinary
+    ones, so a literal comparison can miss a table that is plainly there --
+    which would cost that table its HUD entirely.
+    """
+    return " ".join(str(text).replace("\xa0", " ").split()).casefold()
+
+
+def _names_table(title: str, name: str) -> bool:
+    """Whether ``title`` carries ``name`` as a whole name rather than a substring.
+
+    Both arguments are already normalized. The boundaries matter because a pool
+    numbers its tables: "Colorado 1" is a substring of "Winamax Colorado 10",
+    and since the first accepted window wins, enumeration order alone would
+    decide which of the two a HUD attached to.
+    """
+    return re.search(rf"(?<!\w){re.escape(name)}(?!\w)", title) is not None
+
+
 def _window_pid(hwnd: int | None) -> int | None:
     """Return the process id owning ``hwnd`` on Windows, or None."""
     if sys.platform != "win32" or not hwnd:
@@ -94,6 +115,40 @@ class Table(Table_Window):
         # Winamax zero-pads the table number in the title (e.g. "(#03)"), so allow
         # optional leading zeros when matching table "3" against "#03".
         return bool(re.search(rf"(?:#|Table\s*)0*{re.escape(table)}\b", title, re.IGNORECASE))
+
+    def _plain_table_name(self) -> str:
+        """This table's own name, without the window suffix fpdb appends to it.
+
+        Fast-Fold tables are keyed "Colorado 2 #198788" so that several windows
+        of one pool stay apart, but the client's title only ever carries the
+        pool name.
+        """
+        name = str(getattr(self, "name", "") or "")
+        return re.sub(r"\s*#\d+\s*$", "", name).strip()
+
+    def _matches_winamax_table(self, title: str) -> bool:
+        """Whether a Winamax window is this table's, rather than another window of the client.
+
+        The search is broadened to the bare client name (see
+        ``_detection_search_string``), so on its own it qualifies *every* Winamax
+        window -- including the lobby, whose title is exactly "Winamax" and which
+        carries none of the bad words. When the hero's tables closed and a hand
+        of one of them was imported a moment later, that is the window the HUD
+        attached to:
+
+            HUD attach: table='Colorado 1' hwnd=264154 title='Winamax' geometry=(80,98 1095x703)
+
+        The blocks were then laid out across the lobby, scaled to it, and stayed
+        there for as long as it was open.
+        """
+        if getattr(self, "type", None) == "tour":
+            return self._matches_winamax_tournament(title)
+        name = self._plain_table_name()
+        if not name:
+            # Nothing to check against. Keep the permissive behaviour rather
+            # than refuse a window we cannot prove is the wrong one.
+            return True
+        return _names_table(_normalized(title), _normalized(name))
 
     def _detection_search_string(self) -> str:
         """Broaden the title search for clients whose title omits the table id.
@@ -193,7 +248,7 @@ class Table(Table_Window):
                 if self.check_bad_words(title):
                     log.debug("Window rejected due to bad words: %s", title)
                     continue
-                if search_str == "Winamax" and not self._matches_winamax_tournament(title):
+                if search_str == "Winamax" and not self._matches_winamax_table(title):
                     log.debug("Winamax window rejected for current tournament/table: %s", title)
                     continue
                 return table_info

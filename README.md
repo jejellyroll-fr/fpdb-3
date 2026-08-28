@@ -67,8 +67,13 @@ The available packagers depend on the platform:
   identity is required for reliable Screen Recording and Accessibility grants.
 - Linux ships both the PyOxidizer single-interpreter build and the PyInstaller
   directory distribution.
-- Windows currently requires the PyInstaller directory distribution; its
-  PyOxidizer build does not currently run.
+- Windows ships the PyInstaller directory distribution, and builds the
+  PyOxidizer single-interpreter bundle again (`fpdb-pyoxidizer-windows-x64`,
+  restored after Issue #225). PyInstaller remains the supported Windows
+  distribution: the PyOxidizer bundle is there to be compared against it, and
+  it is not what HUD timing depends on -- how fast a Fast-Fold HUD fills in is
+  decided by whether the client's chairs can be read from the table window (see
+  `fpdb_3_legacy/winamax_ax_seats.py`), not by the packager.
 
 ## 🔧 Requirements
 

@@ -33,12 +33,19 @@ $SECOND_SCRIPT = "$LEGACY_PACKAGE_DIR/HUD_main.pyw"
 # Options of pyinstaller
 # numpy is only imported through import_module() in Database.py; PyInstaller
 # cannot follow that, and the HUD build would otherwise ship without it.
-$PYINSTALLER_OPTIONS = "--noconfirm --onedir --windowed --log-level=DEBUG --paths=fpdb_3_legacy --paths=. --hidden-import=numpy --hidden-import=fpdb_3_legacy.coinpoker_live_capture --hidden-import=fpdb_3_legacy.Aux_Hud --hidden-import=fpdb_3_legacy.Aux_Classic_Hud --hidden-import=fpdb_3_legacy.Mucked"
+# comtypes is imported the same way, inside a try/except in winamax_ax_seats:
+# without it the packaged HUD cannot read a Fast-Fold table's chairs from the
+# window and falls back to the client log, which names a player only once they
+# have acted -- so the stat blocks appear one at a time. The hooks directory
+# carries the same rule for anything reached through runpy; see
+# tools/pyinstaller_hooks.
+$PYINSTALLER_OPTIONS = "--noconfirm --onedir --windowed --log-level=DEBUG --paths=fpdb_3_legacy --paths=. --additional-hooks-dir=tools/pyinstaller_hooks --hidden-import=numpy --hidden-import=comtypes --hidden-import=comtypes.client --hidden-import=fpdb_3_legacy.coinpoker_live_capture --hidden-import=fpdb_3_legacy.Aux_Hud --hidden-import=fpdb_3_legacy.Aux_Classic_Hud --hidden-import=fpdb_3_legacy.Mucked"
 
 # List of all files
-
-
-FILES=@(
+# ("FILES=@(" without the sigil is a command name to PowerShell, so this script
+# stopped on its own first array; $FILES then never existed and every
+# --add-data below was silently dropped.)
+$FILES = @(
     "AutoImportConfigObserver.py",
     "Aux_Base.py",
     "Aux_Classic_Hud.py",
@@ -163,7 +170,10 @@ function Generate-PyInstallerCommand {
         if ($OS -eq "Windows") {
             $command += " --add-data `"$sourcePath;$targetPath`""
         } else {
-            $command += " --add-data `"$sourcePath:$targetPath`""
+            # ${...} is required here: a bare variable followed by a colon
+            # reads as a drive-qualified reference (the $env form), and one of
+            # those is a parse error for the whole file.
+            $command += " --add-data `"${sourcePath}:$targetPath`""
         }
     }
 

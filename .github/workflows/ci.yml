@@ -597,8 +597,8 @@ jobs:
           # distribution still exposes numpy's compiled sub-packages, and
           # "import numpy" then yields an empty namespace package.
           if [ "${{ runner.os }}" = "Windows" ]; then
-            python -m PyInstaller --noconfirm --onedir --windowed --log-level=DEBUG --paths=fpdb_3_legacy --paths=. --additional-hooks-dir=tools/pyinstaller_hooks --hidden-import numpy --hidden-import fpdb_3_legacy.coinpoker_live_capture --hidden-import fpdb_3_legacy.Aux_Hud --hidden-import fpdb_3_legacy.Aux_Classic_Hud --hidden-import fpdb_3_legacy.Mucked --icon="gfx/tribal.jpg" --add-data "fpdb_3_legacy;fpdb_3_legacy" --add-data "gfx;gfx" --add-data "icons;icons" --add-data "fonts;fonts" --add-data "locale;locale" --add-data "HUD_config.xml;." "fpdb_3_legacy/fpdb.pyw"
-            python -m PyInstaller --noconfirm --onedir --windowed --log-level=DEBUG --paths=fpdb_3_legacy --paths=. --additional-hooks-dir=tools/pyinstaller_hooks --hidden-import numpy --hidden-import fpdb_3_legacy.coinpoker_live_capture --hidden-import fpdb_3_legacy.Aux_Hud --hidden-import fpdb_3_legacy.Aux_Classic_Hud --hidden-import fpdb_3_legacy.Mucked --icon="gfx/tribal.jpg" --add-data "fpdb_3_legacy;fpdb_3_legacy" --add-data "gfx;gfx" --add-data "icons;icons" --add-data "fonts;fonts" --add-data "locale;locale" --add-data "HUD_config.xml;." "fpdb_3_legacy/HUD_main.pyw"
+            python -m PyInstaller --noconfirm --onedir --windowed --log-level=DEBUG --paths=fpdb_3_legacy --paths=. --additional-hooks-dir=tools/pyinstaller_hooks --hidden-import numpy --hidden-import comtypes --hidden-import comtypes.client --hidden-import fpdb_3_legacy.coinpoker_live_capture --hidden-import fpdb_3_legacy.Aux_Hud --hidden-import fpdb_3_legacy.Aux_Classic_Hud --hidden-import fpdb_3_legacy.Mucked --icon="gfx/tribal.jpg" --add-data "fpdb_3_legacy;fpdb_3_legacy" --add-data "gfx;gfx" --add-data "icons;icons" --add-data "fonts;fonts" --add-data "locale;locale" --add-data "HUD_config.xml;." "fpdb_3_legacy/fpdb.pyw"
+            python -m PyInstaller --noconfirm --onedir --windowed --log-level=DEBUG --paths=fpdb_3_legacy --paths=. --additional-hooks-dir=tools/pyinstaller_hooks --hidden-import numpy --hidden-import comtypes --hidden-import comtypes.client --hidden-import fpdb_3_legacy.coinpoker_live_capture --hidden-import fpdb_3_legacy.Aux_Hud --hidden-import fpdb_3_legacy.Aux_Classic_Hud --hidden-import fpdb_3_legacy.Mucked --icon="gfx/tribal.jpg" --add-data "fpdb_3_legacy;fpdb_3_legacy" --add-data "gfx;gfx" --add-data "icons;icons" --add-data "fonts;fonts" --add-data "locale;locale" --add-data "HUD_config.xml;." "fpdb_3_legacy/HUD_main.pyw"
           else
             python -m PyInstaller --noconfirm --onedir --windowed --log-level=DEBUG --paths=fpdb_3_legacy --paths=. --additional-hooks-dir=tools/pyinstaller_hooks --hidden-import numpy --hidden-import fpdb_3_legacy.coinpoker_live_capture --hidden-import fpdb_3_legacy.Aux_Hud --hidden-import fpdb_3_legacy.Aux_Classic_Hud --hidden-import fpdb_3_legacy.Mucked --icon="gfx/tribal.jpg" --add-data "fpdb_3_legacy:fpdb_3_legacy" --add-data "gfx:gfx" --add-data "icons:icons" --add-data "fonts:fonts" --add-data "locale:locale" --add-data "HUD_config.xml:." "fpdb_3_legacy/fpdb.pyw"
             python -m PyInstaller --noconfirm --onedir --windowed --log-level=DEBUG --paths=fpdb_3_legacy --paths=. --additional-hooks-dir=tools/pyinstaller_hooks --hidden-import numpy --hidden-import fpdb_3_legacy.coinpoker_live_capture --hidden-import fpdb_3_legacy.Aux_Hud --hidden-import fpdb_3_legacy.Aux_Classic_Hud --hidden-import fpdb_3_legacy.Mucked --icon="gfx/tribal.jpg" --add-data "fpdb_3_legacy:fpdb_3_legacy" --add-data "gfx:gfx" --add-data "icons:icons" --add-data "fonts:fonts" --add-data "locale:locale" --add-data "HUD_config.xml:." "fpdb_3_legacy/HUD_main.pyw"
@@ -663,6 +663,17 @@ jobs:
             target: aarch64-apple-darwin
             executable: fpdb
             artifact: fpdb-pyoxidizer-macos-arm64
+          # Windows is built again (it was dropped for Issue #225) so the
+          # single-interpreter bundle can be compared against the PyInstaller
+          # one. PyInstaller stays the supported Windows distribution.
+          - label: Windows x64
+            os: windows-latest
+            pyoxidizer_host: x86_64-pc-windows-msvc
+            pyoxidizer_archive: zip
+            pyoxidizer_sha256: c1b757bc7c64921b38bf5fd70d2a2e2f591d36fe1cae3b5722822c08f651ba7b
+            target: x86_64-pc-windows-msvc
+            executable: fpdb.exe
+            artifact: fpdb-pyoxidizer-windows-x64
     steps:
       - uses: actions/checkout@v4
       - name: Validate macOS release credentials
@@ -760,6 +771,16 @@ jobs:
             exit 1
           fi
           tail -n 100 pyoxidizer-build.log
+      - name: Repair the wheel library payloads PyOxidizer loses
+        shell: bash
+        run: |
+          # On Linux it installs "numpy.libs" as "numpy/libs", reading the dot
+          # as a package separator; on Windows it does not collect the
+          # directory at all. Either way the bundle cannot import numpy. The
+          # tool moves what is misplaced and restores what is missing from the
+          # wheel it came from, checked against the bundle's own RECORD
+          # hashes. See its docstring.
+          python -m tools.repair_wheel_payloads "build/${{ matrix.target }}/release/install" --wheel-dir "$RUNNER_TEMP/payload-wheels"
       - name: Verify PyOxidizer bundle
         shell: bash
         run: |
@@ -773,6 +794,28 @@ jobs:
           # The launcher is the interpreter of every helper process, so a
           # broken payload layout or search path must fail the build here.
           "$install_dir/${{ matrix.executable }}" --run-module fpdb_3_legacy.subprocess_launch
+          # The HUD's first act is to import the platform package through the
+          # fpdb namespace, and on Windows ".pyw" is an importable source
+          # suffix: with the legacy directory ahead of the packaged libraries,
+          # "import fpdb" found fpdb_3_legacy/fpdb.pyw and the HUD died on
+          # "'fpdb' is not a package" every time auto-import started it. The
+          # bundle above was otherwise perfectly good, so nothing here noticed.
+          "$install_dir/${{ matrix.executable }}" --run-module fpdb.infrastructure.platform.factory
+          # numpy's extension modules need the shared libraries their wheel
+          # bundles in a top-level "numpy.libs" directory. PyOxidizer drops
+          # anything it cannot classify, and that directory is not a package,
+          # so this import is what tells a bundle that starts apart from one
+          # that dies on "DLL load failed while importing _multiarray_umath"
+          # before it can open a window. Everything above passed while the
+          # Windows bundle could not start at all.
+          #
+          # The inventory is printed first: when this import fails, the next
+          # question is always whether the payload is absent or merely
+          # somewhere else, and the answer belongs in the same log.
+          echo "--- wheel library payloads in the bundle:"
+          find "$install_dir" -maxdepth 3 \( -name '*.libs' -o -name '*.dylibs' \) -print
+          find "$install_dir" -name 'libscipy_openblas*' -print
+          "$install_dir/${{ matrix.executable }}" --run-module numpy.__config__
       - name: Assemble PyOxidizer macOS application
         if: runner.os == 'macOS'
         shell: bash
