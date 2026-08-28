@@ -73,6 +73,26 @@ def test_another_table_of_the_client_is_not_taken() -> None:
     assert _table("Colorado 1")._select_window([LOBBY, other], "Winamax") is None
 
 
+def test_a_numbered_neighbour_is_not_mistaken_for_this_table() -> None:
+    """A pool numbers its tables, so "Colorado 1" is a substring of "Colorado 10".
+
+    The first accepted window wins, so without boundaries the enumeration order
+    alone decided which of the two the HUD attached to.
+    """
+    ten = TableInfo(window_id=99, title="Winamax Colorado 10", geometry=TABLE_GEOMETRY)
+
+    assert _table("Colorado 1")._select_window([ten], "Winamax") is None
+    # And the right one is still found whichever comes first.
+    assert _table("Colorado 1")._select_window([ten, TABLE], "Winamax") is TABLE
+    assert _table("Colorado 1")._select_window([TABLE, ten], "Winamax") is TABLE
+    assert _table("Colorado 10")._select_window([TABLE, ten], "Winamax") is ten
+
+
+def test_a_name_at_the_end_of_the_title_still_matches() -> None:
+    """The boundary must not require anything after the name."""
+    assert _table("Colorado 1")._select_window([TABLE], "Winamax") is TABLE
+
+
 def test_a_tournament_table_keeps_its_own_check() -> None:
     tour = _table("22846014 - 3", table_type="tour", tournament=22846014, table=3)
     right = TableInfo(window_id=1, title="Winamax 22846014 - Table #03", geometry=TABLE_GEOMETRY)

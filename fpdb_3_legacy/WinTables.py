@@ -45,6 +45,17 @@ def _normalized(text: str) -> str:
     return " ".join(str(text).replace("\xa0", " ").split()).casefold()
 
 
+def _names_table(title: str, name: str) -> bool:
+    """Whether ``title`` carries ``name`` as a whole name rather than a substring.
+
+    Both arguments are already normalized. The boundaries matter because a pool
+    numbers its tables: "Colorado 1" is a substring of "Winamax Colorado 10",
+    and since the first accepted window wins, enumeration order alone would
+    decide which of the two a HUD attached to.
+    """
+    return re.search(rf"(?<!\w){re.escape(name)}(?!\w)", title) is not None
+
+
 def _window_pid(hwnd: int | None) -> int | None:
     """Return the process id owning ``hwnd`` on Windows, or None."""
     if sys.platform != "win32" or not hwnd:
@@ -137,7 +148,7 @@ class Table(Table_Window):
             # Nothing to check against. Keep the permissive behaviour rather
             # than refuse a window we cannot prove is the wrong one.
             return True
-        return _normalized(name) in _normalized(title)
+        return _names_table(_normalized(title), _normalized(name))
 
     def _detection_search_string(self) -> str:
         """Broaden the title search for clients whose title omits the table id.
