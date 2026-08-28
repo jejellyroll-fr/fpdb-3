@@ -1911,14 +1911,20 @@ class HudMain(QObject):
         )
         self._ax_rings[table_key] = (hand_id, best, reads + 1)
 
-        if slots != cached_slots:
-            empty = sorted(set(range(max_seats)) - set(best))
-            self._ff_trace(
-                hand_id,
-                "window-read",
-                f"{title!r} (key={table_key}) {took:.0f}ms read#{reads + 1} players={len(best)} "
-                f"slots={ {s: best[s] for s in sorted(best)} } empty={empty}",
-            )
+        # Traced on every read, not only when the answer changed. A reader that
+        # returns nothing returns the same nothing every time, so the one case
+        # worth reporting -- the window telling us about no players at all, for
+        # every hand of a session -- was the one case that logged absolutely
+        # nothing, even with FPDB_HUD_TRACE=1. The seats then come from the log
+        # ring, which names a player only once they have acted, and the blocks
+        # arrive one at a time; that is what gets reported, with no trace of why.
+        empty = sorted(set(range(max_seats)) - set(best))
+        self._ff_trace(
+            hand_id,
+            "window-read",
+            f"{title!r} (key={table_key}) {took:.0f}ms read#{reads + 1} players={len(best)} "
+            f"slots={ {s: best[s] for s in sorted(best)} } empty={empty}",
+        )
         return best
 
     def _ax_reads_spent(self, hud: Hud.Hud, hand_id: str) -> bool:
