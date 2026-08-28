@@ -589,6 +589,12 @@ class HudMain(QObject):
     winamax_table_update = Signal(object)
 
     AX_READS_PER_HAND = 6
+
+    #: Consecutive window reads that may come back with nobody on them before
+    #: the reader is given up on for the session. Six per hand, so this is five
+    #: hands of a client that never names a single player -- enough to tell a
+    #: table being redrawn from one whose content is simply not published.
+    AX_FRUITLESS_READS_BEFORE_GIVING_UP = AX_READS_PER_HAND * 5
     """How many times a table's window may be re-read within one hand.
 
     A read costs ~20ms through the macOS accessibility API and 100-300ms
@@ -873,6 +879,10 @@ class HudMain(QObject):
             # per window so two tables do not evict each other, and per hand
             # because each read walks another process's accessibility tree.
             self._ax_rings: dict[str, tuple[str, dict[int, str], int]] = {}
+            # Window reads in a row that found nobody, and whether that has gone
+            # on long enough to stop trying. See AX_FRUITLESS_READS_BEFORE_GIVING_UP.
+            self._ax_fruitless_reads = 0
+            self._ax_reader_gave_up = False
             # Timeline bookkeeping: when each hand's first log line arrived, and
             # which hand/table request is currently allowed to update the HUD.
             self._ff_started: dict[str, float] = {}
@@ -1871,7 +1881,7 @@ class HudMain(QObject):
         reader = getattr(self, "winamax_ax_seats", None)
         table = getattr(hud, "table", None)
         title = getattr(table, "title", "") or ""
-        if reader is None or not title:
+        if reader is None or not title or self._ax_reader_gave_up:
             return {}
 
         table_key = getattr(table, "key", None) or title
@@ -1918,6 +1928,24 @@ class HudMain(QObject):
         # nothing, even with FPDB_HUD_TRACE=1. The seats then come from the log
         # ring, which names a player only once they have acted, and the blocks
         # arrive one at a time; that is what gets reported, with no trace of why.
+        # A client that publishes nothing publishes nothing every time, and each
+        # read is a synchronous walk of another process's tree on the GUI
+        # thread, at hand-start, which is exactly when the HUD is trying to
+        # draw. Measured on a live session: six reads a hand, on two tables,
+        # 15-62ms each, every one of them players=0. Stop paying for it.
+        if best:
+            self._ax_fruitless_reads = 0
+        else:
+            self._ax_fruitless_reads += 1
+            if self._ax_fruitless_reads >= self.AX_FRUITLESS_READS_BEFORE_GIVING_UP:
+                self._ax_reader_gave_up = True
+                log.warning(
+                    "Giving up on the window seat reader after %d reads that found nobody: this client "
+                    "does not publish its table through the accessibility API. Fast-Fold seats come from "
+                    "the client log, which names a player only once they have acted.",
+                    self._ax_fruitless_reads,
+                )
+
         empty = sorted(set(range(max_seats)) - set(best))
         self._ff_trace(
             hand_id,
