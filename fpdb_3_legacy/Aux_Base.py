@@ -17,9 +17,11 @@ from __future__ import annotations
 
 import contextlib
 import math
+import time
 from typing import TYPE_CHECKING, Any
 
 from PySide6.QtCore import QPoint, Qt
+from PySide6.QtGui import QGuiApplication
 from PySide6.QtWidgets import QApplication, QWidget
 
 if TYPE_CHECKING:
@@ -47,17 +49,59 @@ _RING_FIT_TIE = 1.05
 # suspend its 800ms geometry scan + window re-raise (topify), which on macOS
 # re-orders the dragged window mid-drag and makes the drag stutter.
 _drag_active = False
+_drag_started_at = 0.0
+
+#: How long a drag is believed without any other sign of life. Long enough that
+#: no real drag is cut short, short enough that a closed table's blocks go away
+#: while the user is still looking at where they were.
+DRAG_ACTIVE_TIMEOUT_S = 5.0
+
+
+def _a_mouse_button_is_down() -> bool:
+    """Whether the platform still reports a held mouse button.
+
+    True when it cannot be asked -- no QGuiApplication yet, or a stubbed Qt in a
+    test. The timeout is then the only bound, which is the right way to be
+    wrong: cancelling a drag that is really in progress is worse.
+    """
+    try:
+        return bool(QGuiApplication.mouseButtons())
+    except (AttributeError, RuntimeError, TypeError):
+        return True
 
 
 def is_drag_active() -> bool:
-    """Whether a HUD window is currently being dragged."""
-    return _drag_active
+    """Whether a HUD window is currently being dragged.
+
+    The flag is cleared by SeatWindow's mouse release, and that release is not
+    guaranteed to arrive. ``startSystemMove()`` hands the drag to the window
+    manager, which runs its own modal loop and does not deliver the release to
+    the widget; the widget can also be destroyed mid-drag, when the table it
+    belongs to is the one being closed.
+
+    The flag then stayed True for the rest of the process's life -- and since
+    ``HUD_main.check_tables`` polls it *before* looking at any table, one such
+    drag meant no HUD was ever taken down again. Closing a table, or quitting
+    the client, left its blocks on screen until FPDB was restarted.
+
+    So a set flag is now believed only while it is plausible: a mouse button
+    still down, and not older than :data:`DRAG_ACTIVE_TIMEOUT_S`. Being wrong
+    here costs one stuttering drag; being wrong the other way cost every HUD.
+    """
+    if not _drag_active:
+        return False
+    if time.monotonic() - _drag_started_at > DRAG_ACTIVE_TIMEOUT_S or not _a_mouse_button_is_down():
+        _drag_trace("drag-flag cleared: no release was delivered")
+        set_drag_active(False)
+        return False
+    return True
 
 
 def set_drag_active(active: bool) -> None:
     """Mark drag start/stop (set from SeatWindow press/release)."""
-    global _drag_active
+    global _drag_active, _drag_started_at
     _drag_active = active
+    _drag_started_at = time.monotonic() if active else 0.0
 
 
 def _nearest_screen(app: Any, x: int, y: int) -> Any:
