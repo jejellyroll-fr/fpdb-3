@@ -7,11 +7,6 @@ executable-looking SQL.
 """
 from __future__ import annotations
 
-import os
-import sys
-
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
-
 from fpdb_3_legacy import SQL
 from fpdb_3_legacy import stat_registry as sr
 from fpdb_3_legacy.stat_adapters import GraphAdapter

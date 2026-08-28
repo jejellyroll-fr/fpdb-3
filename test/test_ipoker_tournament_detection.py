@@ -16,13 +16,10 @@ from __future__ import annotations
 
 import glob
 import os
-import sys
 import tempfile
 from decimal import Decimal
 
 import pytest
-
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from fpdb_3_legacy.Configuration import Config
 from fpdb_3_legacy.iPokerToFpdb import iPoker

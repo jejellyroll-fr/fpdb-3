@@ -2,14 +2,10 @@
 Comprehensive tests for PokerStarsToFpdb.readPlayerStacks method.
 """
 
-import os
-import sys
 import unittest
 from unittest.mock import Mock
 
 # Add parent directory to path to import modules
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
 from fpdb_3_legacy.PokerStarsToFpdb import PokerStars
 
 

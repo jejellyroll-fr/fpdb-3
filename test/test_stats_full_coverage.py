@@ -6,8 +6,6 @@ import sys
 
 import pytest
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-
 from fpdb_3_legacy.Stats import STATLIST, do_stat
 
 # Sample stat_dict for testing most stats

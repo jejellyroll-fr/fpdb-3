@@ -4,12 +4,8 @@ must stay aligned. A mismatch silently breaks every hand import, so this is a
 cheap canary whenever someone adds a persisted HandsPlayers column.
 """
 
-import os
 import sqlite3
-import sys
 from contextlib import closing
-
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from fpdb_3_legacy import SQL
 from fpdb_3_legacy.Database import CACHE_KEYS, HANDS_PLAYERS_KEYS, HUDCACHE_EXTRA_KEYS

@@ -12,11 +12,8 @@ Player6 wins the pot uncontested:
 """
 
 import os
-import sys
 
 import pytest
-
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from fpdb_3_legacy.DerivedStats import DerivedStats
 from fpdb_3_legacy.PokerStarsToFpdb import PokerStars

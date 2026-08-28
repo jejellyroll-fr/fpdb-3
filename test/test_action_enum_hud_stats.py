@@ -12,15 +12,11 @@ reads.
 
 from __future__ import annotations
 
-import os
 import re
 import sqlite3
-import sys
 from contextlib import closing
 
 import pytest
-
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 import fpdb_3_legacy.SQL as SQL
 import fpdb_3_legacy.Stats as Stats

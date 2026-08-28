@@ -19,7 +19,6 @@ import pytest
 # GuiAutoImport uses legacy-style bare imports (e.g. ``import interlocks``), so
 # the fpdb_3_legacy package directory must be importable directly.
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "fpdb_3_legacy")))
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 
 def _make_settings(lock):

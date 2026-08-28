@@ -14,14 +14,7 @@ from types import SimpleNamespace
 
 import pytest
 
-try:
-    from fpdb_3_legacy.BovadaToFpdb import Bovada, FpdbHandPartial, FpdbParseError
-except ImportError:
-    import sys
-
-    sys.path.insert(0, str(Path(__file__).parent.parent.resolve()))
-    from fpdb_3_legacy.BovadaToFpdb import Bovada, FpdbHandPartial, FpdbParseError
-
+from fpdb_3_legacy.BovadaToFpdb import Bovada, FpdbHandPartial, FpdbParseError
 
 # --- Mocks ---
 from tests.helpers.mock_hand import ParserMockHand as MockHand  # noqa: E402

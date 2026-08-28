@@ -1,12 +1,7 @@
 #!/usr/bin/env python3
 
-import os
-import sys
 import unittest
 from unittest.mock import Mock
-
-# Add the parent directory to sys.path to import modules
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from fpdb_3_legacy.PokerStarsToFpdb import PokerStars
 

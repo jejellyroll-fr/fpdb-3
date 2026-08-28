@@ -1,15 +1,11 @@
 #!/usr/bin/env python
 """Simplified tests for Aux_Classic_Hud.py (fixed)."""
 
-import os
 import sys
 import types
 import unittest
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
-
-# Add repo root to path
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
 class TestAuxClassicHudBasics(unittest.TestCase):

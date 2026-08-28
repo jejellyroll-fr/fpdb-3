@@ -7,15 +7,11 @@ each import and thrown away. These tests cover the three places that have to
 agree and the round trip through a real insert.
 """
 
-import os
 import re
 import sqlite3
-import sys
 from decimal import Decimal
 
 import pytest
-
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 import fpdb_3_legacy.Database as Database
 import fpdb_3_legacy.SQL as SQL

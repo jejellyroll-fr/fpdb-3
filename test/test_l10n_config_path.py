@@ -7,10 +7,6 @@ it read ``CONFIG_PATH/HUD_config.xml`` directly. It must now resolve the config
 path gracefully and never crash startup.
 """
 
-import os
-import sys
-
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from fpdb_3_legacy import L10n
 

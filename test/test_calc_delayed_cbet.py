@@ -7,13 +7,9 @@ occurred). These exercise the in-position and out-of-position lines plus the
 edge cases that must NOT count (c-bet flop, check-call flop, facing a turn bet,
 folding the flop, no turn).
 """
-import os
-import sys
 from unittest.mock import Mock
 
 import pytest
-
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from fpdb_3_legacy.DerivedStats import DerivedStats
 

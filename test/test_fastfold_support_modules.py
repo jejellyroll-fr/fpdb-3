@@ -10,13 +10,10 @@ macOS is often ordinary elsewhere.
 from __future__ import annotations
 
 import logging
-import os
 import sys
 from unittest.mock import MagicMock
 
 import pytest
-
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from fpdb_3_legacy import hud_diagnostics
 from fpdb_3_legacy.hud_window_registry import HudWindowRegistry

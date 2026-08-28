@@ -21,7 +21,6 @@ from fpdb.infrastructure.platform import permissions as macos_permissions
 # import zmq
 
 # Add parent directory to path before imports
-sys.path.insert(0, str(Path(__file__).parent.parent))
 
 source_file = Path(__file__).parent.parent / "fpdb_3_legacy" / "HUD_main.pyw"
 

@@ -6,7 +6,6 @@ between 0 (real value) and "-" (no data available) in the interface.
 """
 
 import os
-import sys
 from unittest.mock import Mock
 
 # Set Qt to use offscreen platform for headless CI environments
@@ -16,9 +15,6 @@ import pytest
 
 pytestmark = pytest.mark.qt
 from PySide6.QtWidgets import QLabel
-
-# Add the project root to the Python path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 # Import HUD components
 from fpdb_3_legacy.Aux_Classic_Hud import ClassicStat

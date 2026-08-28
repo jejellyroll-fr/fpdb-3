@@ -1,16 +1,12 @@
 #!/usr/bin/env python
 """Test suite for Stud steal functionality in DerivedStats."""
 
-import os
-import sys
 from decimal import Decimal
 from unittest.mock import Mock
 
 import pytest
 
 # Add parent directory to path
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
 import fpdb_3_legacy.Card as Card
 from fpdb_3_legacy.DerivedStats import DerivedStats
 

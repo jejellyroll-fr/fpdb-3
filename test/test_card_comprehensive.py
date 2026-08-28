@@ -5,15 +5,11 @@ This test suite provides complete coverage for all functions in the Card.py modu
 including edge cases and error conditions.
 """
 
-import os
-import sys
 from unittest.mock import Mock, patch
 
 import pytest
 
 # Add the parent directory to the path to import our modules
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
 from fpdb_3_legacy.Card import (
     HOLDEM_UNKNOWN_HAND,
     StartCardRank,

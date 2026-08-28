@@ -5,13 +5,9 @@ Turn probe = a NON-PFR opens the turn after the PFR checked the flop (declined
 the c-bet). The first eligible non-PFR to act with no bet in front of them is
 credited a chance; a bet/raise there is a done. Mirror of the delayed c-bet.
 """
-import os
-import sys
 from unittest.mock import Mock
 
 import pytest
-
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from fpdb_3_legacy.DerivedStats import DerivedStats
 

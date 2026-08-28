@@ -6,15 +6,12 @@ sites never finds the table. These tests lock in the special case: broaden the
 search to the client name and keep only the Unity render window.
 """
 
-import os
 import sys
 from unittest.mock import Mock, patch
 
 import pytest
 
 pytestmark = pytest.mark.qt
-
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # Light Qt stubs so WinTables imports without a real display.
 sys.modules.setdefault("PySide6", Mock())

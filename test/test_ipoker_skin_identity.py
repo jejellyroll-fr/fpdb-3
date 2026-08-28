@@ -10,11 +10,7 @@ PMU Poker file as "Redbet Poker (no changes)".
 
 from __future__ import annotations
 
-import os
-import sys
 from unittest.mock import MagicMock
-
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from fpdb_3_legacy.iPoker.base import iPoker
 from fpdb_3_legacy.iPoker.skins.pmu import PMUIPoker

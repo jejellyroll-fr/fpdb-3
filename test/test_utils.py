@@ -2,13 +2,10 @@
 
 """Final test suite for utility methods in DerivedStats.py."""
 
-import os
-import sys
+
+from unittest.mock import Mock
 
 import pytest
-
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from unittest.mock import Mock
 
 from fpdb_3_legacy.DerivedStats import DerivedStats
 

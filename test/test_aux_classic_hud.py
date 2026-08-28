@@ -2,7 +2,6 @@
 Tests for Aux_Classic_Hud.py.
 """
 
-import os
 import sys
 import unittest
 from contextlib import contextmanager
@@ -13,7 +12,6 @@ import pytest
 pytestmark = pytest.mark.qt
 
 # Make repo root importable
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # Very light stubs to avoid real GUI deps
 sys.modules.setdefault("PySide6", Mock())

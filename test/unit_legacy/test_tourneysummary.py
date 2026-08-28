@@ -8,13 +8,9 @@ config provides ``get_import_parameters``.
 from __future__ import annotations
 
 import io
-import os
-import sys
 import types
 
 import pytest
-
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 
 from fpdb_3_legacy.TourneySummary import TourneySummary
 

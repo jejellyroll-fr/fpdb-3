@@ -1,11 +1,7 @@
-import os
-import sys
 import unittest
 from unittest.mock import Mock
 
 # Add the parent directory to the path to import the module
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
 from fpdb_3_legacy.PokerStarsToFpdb import SITE_MERGE, PokerStars
 
 

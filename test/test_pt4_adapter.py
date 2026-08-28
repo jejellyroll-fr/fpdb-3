@@ -1,9 +1,5 @@
 """Test suite for PT4 adapter module."""
 
-import os
-import sys
-
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from fpdb_3_legacy.pt4_adapter import Pt4Config, Pt4PlayerStat, StatComparison
 from fpdb_3_legacy.pt4_adapter.comparator import _compare_bool, _compare_ratio

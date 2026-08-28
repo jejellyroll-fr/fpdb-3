@@ -5,8 +5,6 @@ This module tests the PyQt5 HUD popup windows and tooltip functionality to ensur
 proper display of "-" vs "0" values in extended stat views.
 """
 
-import os
-import sys
 from unittest.mock import Mock, patch
 
 import pytest
@@ -15,9 +13,6 @@ pytestmark = pytest.mark.qt
 from PySide6.QtCore import QPoint, Qt
 from PySide6.QtGui import QMouseEvent
 from PySide6.QtWidgets import QLabel
-
-# Add the project root to the Python path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 # Import HUD components
 import fpdb_3_legacy.Popup as Popup

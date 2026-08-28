@@ -1,12 +1,6 @@
 #!/usr/bin/env python
 """Test to verify the fix for ModernSubmenu initialization bug."""
 
-import sys
-from pathlib import Path
-
-# Add the main directory to sys.path to import FPDB modules
-sys.path.insert(0, str(Path(__file__).parent.parent))
-
 
 def _test_theme_methods(theme) -> None:
     """Test that the theme has the required methods."""

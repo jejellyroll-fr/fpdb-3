@@ -21,11 +21,8 @@ from __future__ import annotations
 
 import os
 import shutil
-import sys
 
 import pytest
-
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from fpdb_3_legacy import Configuration
 from fpdb_3_legacy.ui_instrumentation import UI_STALL_BUDGET_MS, TabOpenProfiler, UiStallMonitor

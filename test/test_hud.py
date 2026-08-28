@@ -5,13 +5,11 @@ Test suite for the HUD management system.
 """
 
 import contextlib
-import os
 import sys
 import unittest
 from unittest.mock import Mock, patch
 
 # Add the parent directory to Python path for imports
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
 def _setup_hud_mocks(original_modules: dict) -> None:

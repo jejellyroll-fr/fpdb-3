@@ -4,13 +4,11 @@
 Simplified test suite for the HUD management system.
 """
 
-import os
 import sys
 import unittest
 from unittest.mock import Mock, patch
 
 # Add the parent directory to Python path for imports
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
 class TestImportName(unittest.TestCase):

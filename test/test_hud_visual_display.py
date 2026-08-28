@@ -5,8 +5,6 @@ This module creates tests that actually show the HUD on screen for visual verifi
 of the "-" vs "0" distinction in real GUI components.
 """
 
-import os
-import sys
 from unittest.mock import Mock
 
 import pytest
@@ -14,9 +12,6 @@ import pytest
 pytestmark = pytest.mark.qt
 from PySide6.QtTest import QTest
 from PySide6.QtWidgets import QHBoxLayout, QLabel, QMainWindow, QVBoxLayout, QWidget
-
-# Add the project root to the Python path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 # Import HUD components
 from fpdb_3_legacy.Aux_Classic_Hud import ClassicStat

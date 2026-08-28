@@ -6,14 +6,10 @@ Integration tests for theme functionality with ConfigurationManager and ConfigOb
 Tests the complete configuration change workflow for themes.
 """
 
-import os
-import sys
 import unittest
 from unittest.mock import Mock, patch
 
 # Add the parent directory to the path to import our modules
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
 from fpdb_3_legacy.ConfigObservers import GuiPrefsObserver
 from fpdb_3_legacy.ConfigurationManager import ChangeType, ConfigChange, ConfigurationManager
 from fpdb_3_legacy.ThemeManager import ThemeManager

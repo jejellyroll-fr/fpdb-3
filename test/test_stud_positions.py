@@ -2,15 +2,11 @@
 
 """Test suite for Stud positions and bring-in handling in DerivedStats."""
 
-import os
 
 # Add parent directory to path
-import sys
 from unittest.mock import Mock
 
 import pytest
-
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from fpdb_3_legacy.DerivedStats import _INIT_STATS, DerivedStats
 

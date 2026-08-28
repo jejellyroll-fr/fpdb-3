@@ -6,14 +6,11 @@ Unit tests for the ConfigInitializer class.
 Tests configuration initialization, fallback mechanisms, and error handling.
 """
 
-import os
 import sys
 import unittest
 from unittest.mock import Mock, patch
 
 # Add the parent directory to the path to import our modules
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
 from fpdb_3_legacy.ConfigInitializer import ConfigInitializer, ensure_config_initialized
 
 

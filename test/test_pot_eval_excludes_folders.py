@@ -11,14 +11,10 @@ out negative, which is how these hands were found in the wild.
 
 from __future__ import annotations
 
-import os
-import sys
 from decimal import Decimal
 from unittest.mock import MagicMock
 
 import pytest
-
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 import fpdb_3_legacy.DerivedStats as _derived_stats
 from fpdb_3_legacy.DerivedStats import DerivedStats
