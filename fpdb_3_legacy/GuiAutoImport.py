@@ -79,6 +79,10 @@ DEFERRED_CYCLES_BEFORE_WARNING = 6
 # enough for an ordinary cycle to land, short enough not to read as a freeze.
 STOP_WAIT_MS = 5000
 
+# The one room with no hand history files, and so the only one the native
+# capture has anything to do for.
+SWC_SITE_NAME = "SealsWithClubs"
+
 
 def to_raw(string) -> str:
     return rf"{string}"
@@ -544,8 +548,34 @@ class GuiAutoImport(QWidget):
         self.intervalEntry.setEnabled(True)
         self.startButton.setEnabled(True)
 
+    def _swc_capture_wanted(self) -> bool:
+        """Whether this configuration has any use for the SwC native capture.
+
+        The capture exists because SwC ships no hand history files; every other
+        room writes them, so for a player of one of those there is nothing here
+        to start. That matters because building the tap shells out to a C
+        compiler, which a Windows machine almost never has, and the failure was
+        reported to every user on every Start:
+
+            SwC Native Capture warning: [WinError 2] Le fichier specifie est introuvable
+
+        -- a SealsWithClubs message sending Winamax players to look for a
+        Winamax bug. Nothing is attempted for a site that is not configured.
+        """
+        try:
+            params = self.config.get_site_parameters(SWC_SITE_NAME)
+        except KeyError:
+            log.debug("SwC native capture skipped: %s is not in the configuration", SWC_SITE_NAME)
+            return False
+        if not params.get("enabled", False):
+            log.debug("SwC native capture skipped: %s is not enabled", SWC_SITE_NAME)
+            return False
+        return True
+
     def start_swc_native_capture(self) -> None:
         """Launch SwC native TLS capture and start live raw tailing thread."""
+        if not self._swc_capture_wanted():
+            return
         try:
             from fpdb_3_legacy.swc_native_capture import DEFAULT_ARCHIVE, build_tap
 
@@ -557,7 +587,12 @@ class GuiAutoImport(QWidget):
                 self.addText(_("\nSwC Native Live HUD tailing thread started."), "poker")
         except Exception as e:
             log.warning("Could not start SwC native capture: %s", e)
-            self.addText(f"\nSwC Native Capture warning: {e}", "warning")
+            self.addText(
+                _("\nSwC live capture unavailable: {reason}. Importing SwC hand history files still works.").format(
+                    reason=e,
+                ),
+                "warning",
+            )
 
     def _on_swc_native_hand_imported(self, hand_data: dict) -> None:
         """Callback when a new live SwC hand is parsed from swc-native.raw."""
