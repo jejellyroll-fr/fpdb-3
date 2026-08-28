@@ -2,15 +2,11 @@
 
 """Test suite for setPositions method in DerivedStats."""
 
-import os
-import sys
 from decimal import Decimal
 
 import pytest
 
 # Add parent directory to path
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
 from fpdb_3_legacy.DerivedStats import _INIT_STATS, DerivedStats
 
 

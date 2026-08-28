@@ -13,13 +13,9 @@ report through HandHistoryConverter.raise_summary_partial().
 
 from __future__ import annotations
 
-import os
-import sys
 from unittest.mock import MagicMock
 
 import pytest
-
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from fpdb_3_legacy.Exceptions import FpdbHandPartial
 from fpdb_3_legacy.HandHistoryConverter import HandHistoryConverter

@@ -21,7 +21,6 @@ from fpdb.infrastructure.platform import permissions as macos_permissions
 # import zmq
 
 # Add parent directory to path before imports
-sys.path.insert(0, str(Path(__file__).parent.parent))
 
 source_file = Path(__file__).parent.parent / "fpdb_3_legacy" / "HUD_main.pyw"
 
@@ -701,15 +700,22 @@ def test_check_tables(hud_main, status, expected_method) -> None:
         mock_method.assert_called_once_with(None, mock_hud)
 
 
-def test_check_tables_skipped_during_drag(hud_main) -> None:
+def test_check_tables_skipped_during_drag(hud_main, monkeypatch) -> None:
     """While a HUD window is dragged, check_tables must not poll geometry or
-    re-raise windows (that stutters the drag on macOS)."""
+    re-raise windows (that stutters the drag on macOS).
+
+    A held mouse button is part of what makes a drag real now: the flag alone is
+    no longer believed, because the release that clears it is not guaranteed to
+    arrive and a stuck flag used to stop every HUD from ever being taken down.
+    See test_hud_drag_flag.py for that half.
+    """
     from fpdb_3_legacy import Aux_Base
 
     mock_hud = MagicMock()
     mock_hud.table.check_table.return_value = "client_moved"
     hud_main.hud_dict = {"test_table": mock_hud}
 
+    monkeypatch.setattr(Aux_Base, "_a_mouse_button_is_down", lambda: True)
     Aux_Base.set_drag_active(True)
     try:
         with (
@@ -2400,7 +2406,7 @@ def test_window_reads_are_kept_per_window_not_globally(hud_main) -> None:
     reads = []
     full = {slot: f"p{slot}" for slot in range(6)}
 
-    def read_window(title, max_seats=6):
+    def read_window(title, max_seats=6, **_kwargs):
         reads.append(title)
         return full
 
@@ -2422,7 +2428,7 @@ def test_an_empty_window_read_is_not_cached(hud_main) -> None:
     """The window may not be drawn yet; the next line of the same hand retries."""
     reads = []
 
-    def read_window(title, max_seats=6):
+    def read_window(title, max_seats=6, **_kwargs):
         reads.append(title)
         return {}
 
@@ -2503,7 +2509,7 @@ def test_a_partial_window_read_is_not_frozen_for_the_whole_hand(hud_main) -> Non
     ]
     reads = []
 
-    def read_window(title, max_seats=6):
+    def read_window(title, max_seats=6, **_kwargs):
         reads.append(title)
         return answers[min(len(reads) - 1, len(answers) - 1)]
 
@@ -2519,7 +2525,7 @@ def test_a_partial_window_read_is_not_frozen_for_the_whole_hand(hud_main) -> Non
 def test_window_rereads_are_bounded_within_a_hand(hud_main) -> None:
     reads = []
 
-    def read_window(title, max_seats=6):
+    def read_window(title, max_seats=6, **_kwargs):
         reads.append(title)
         return {0: "Hero"}
 
@@ -2536,7 +2542,7 @@ def test_a_full_table_stops_being_re_read(hud_main) -> None:
     reads = []
     full = {slot: f"p{slot}" for slot in range(6)}
 
-    def read_window(title, max_seats=6):
+    def read_window(title, max_seats=6, **_kwargs):
         reads.append(title)
         return full
 
@@ -2792,7 +2798,7 @@ def test_a_table_holding_only_the_hero_is_not_worth_showing(hud_main) -> None:
     hud = _ff_hud("Winamax Casablanca 6")
     hud_main.hud_dict = {"Casablanca 6": hud}
     hud_main._fast_fold_pending["Casablanca 6"] = {1: "Hero"}
-    hud_main.winamax_ax_seats = SimpleNamespace(read_window=lambda t, max_seats=6: {0: "Hero"})
+    hud_main.winamax_ax_seats = SimpleNamespace(read_window=lambda t, max_seats=6, **_kwargs: {0: "Hero"})
     try:
         with patch.object(HUD_main.FastFoldEngine, "clear_seats") as cleared:
             hud_main._on_winamax_table_update(_live_update(ring=[], hero=None))
@@ -2838,11 +2844,52 @@ def test_a_half_drawn_window_is_not_acted_on(hud_main) -> None:
     hud_main._fast_fold_pending["Casablanca 6"] = {1: "Player01"}
     # Three players, none of them in the hero's chair.
     hud_main.winamax_ax_seats = SimpleNamespace(
-        read_window=lambda t, max_seats=6: {3: "Player01", 4: "Player04", 5: "Player06"}
+        read_window=lambda t, max_seats=6, **_kwargs: {3: "Player01", 4: "Player04", 5: "Player06"}
     )
     try:
         with patch.object(HUD_main.FastFoldEngine, "clear_seats") as cleared:
             hud_main._on_winamax_table_update(_live_update(table_no="6"))
+        cleared.assert_called_once_with(hud)
+    finally:
+        hud_main.hud_dict = {}
+
+
+def test_the_log_ring_takes_over_when_the_window_never_shows_a_dealt_table(hud_main) -> None:
+    """A client that will not answer properly must not leave the overlay blank.
+
+    The window read is the better source and a partial one is not acted on --
+    but once this hand's reads are spent, "partial" is the final answer, and the
+    log-derived ring describes the table better than nothing does.
+    """
+    hud = _ff_hud("Winamax Casablanca 6")
+    hud_main.hud_dict = {"Casablanca 6": hud}
+    hud_main._fast_fold_tables = {"Casablanca 6"}
+    # A read that names one player and never the hero's chair.
+    hud_main.winamax_ax_seats = SimpleNamespace(read_window=lambda t, max_seats=6, **_kwargs: {3: "Player01"})
+    # This hand's reads are already spent (the table is keyed by its title here).
+    hud_main._ax_rings["Winamax Casablanca 6"] = ("h1", {3: "Player01"}, hud_main.AX_READS_PER_HAND)
+    # A log line from later in the hand: the ring has had its chance to fill.
+    hud_main._ff_started["h1"] = time.monotonic() - 1.0
+    try:
+        with patch.object(HUD_main.FastFoldEngine, "clear_seats") as cleared, patch.object(
+            hud_main, "_request_fast_fold_stats"
+        ) as requested:
+            hud_main._on_winamax_table_update(_live_update(ring=["Hero", "Player01"], hero="Hero"))
+        cleared.assert_not_called()
+        assert set(requested.call_args.args[2].values()) == {"Hero", "Player01"}
+    finally:
+        hud_main.hud_dict = {}
+
+
+def test_a_partial_read_is_still_not_acted_on_while_reads_remain(hud_main) -> None:
+    hud = _ff_hud("Winamax Casablanca 6")
+    hud_main.hud_dict = {"Casablanca 6": hud}
+    hud_main._fast_fold_tables = {"Casablanca 6"}
+    hud_main._fast_fold_pending["Casablanca 6"] = {1: "Player01"}
+    hud_main.winamax_ax_seats = SimpleNamespace(read_window=lambda t, max_seats=6, **_kwargs: {3: "Player01"})
+    try:
+        with patch.object(HUD_main.FastFoldEngine, "clear_seats") as cleared:
+            hud_main._on_winamax_table_update(_live_update(ring=["Hero", "Player01"], hero="Hero"))
         cleared.assert_called_once_with(hud)
     finally:
         hud_main.hud_dict = {}
@@ -2855,7 +2902,7 @@ def test_a_read_holding_the_hero_beats_a_bigger_one_without(hud_main) -> None:
     ]
     reads = []
 
-    def read_window(title, max_seats=6):
+    def read_window(title, max_seats=6, **_kwargs):
         reads.append(title)
         return answers[min(len(reads) - 1, len(answers) - 1)]
 
@@ -2993,3 +3040,126 @@ def test_hud_is_fast_fold_matches_base_name_and_sets_flag(hud_main) -> None:
 
     assert hud_main._hud_is_fast_fold(hud, "Bucarest 1") is True
     assert hud.is_fast_fold is True
+
+
+def _tour_table(numbers: list[int | bool]) -> SimpleNamespace:
+    """A tournament table window whose title reports `numbers` in turn."""
+    reads = iter(numbers)
+    return SimpleNamespace(
+        type="tour",
+        number=19310,
+        key="1200531182 Table 1200531183",
+        title_table_no=None,
+        get_table_no=lambda: next(reads),
+    )
+
+
+def test_a_window_staying_on_its_table_keeps_its_hud(hud_main) -> None:
+    """The poll must not disturb a table that is simply still being played."""
+    table = _tour_table([1200531183, 1200531183])
+    hud = SimpleNamespace(table=table)
+
+    with patch.object(hud_main, "table_is_stale") as stale:
+        hud_main._handle_tour_table_switch(hud, table)  # attaches the baseline
+        hud_main._handle_tour_table_switch(hud, table)
+
+    stale.assert_not_called()
+    assert table.title_table_no == 1200531183
+
+
+def test_a_window_taken_over_by_the_next_match_drops_its_hud(hud_main) -> None:
+    """A Twister client reuses the window for the next match of the series.
+
+    Without this the finished tournament's HUD stayed on screen -- previous
+    opponents and all -- until a hand of the new match was imported.
+    """
+    table = _tour_table([1200531183, 1200533055])
+    hud = SimpleNamespace(table=table)
+
+    with patch.object(hud_main, "table_is_stale") as stale:
+        hud_main._handle_tour_table_switch(hud, table)
+        hud_main._handle_tour_table_switch(hud, table)
+
+    stale.assert_called_once_with(hud)
+
+
+def test_a_title_without_a_table_id_never_signals_a_switch(hud_main) -> None:
+    """Sites whose title omits the table id must not have their HUD killed."""
+    table = _tour_table([False, False])
+    hud = SimpleNamespace(table=table)
+
+    with patch.object(hud_main, "table_is_stale") as stale:
+        hud_main._handle_tour_table_switch(hud, table)
+        hud_main._handle_tour_table_switch(hud, table)
+
+    stale.assert_not_called()
+    assert table.title_table_no is None
+
+
+def test_a_table_that_was_never_found_is_an_error_once(hud_main) -> None:
+    """A table open on screen that never gets a HUD is the case worth shouting about."""
+    window = SimpleNamespace(search_string="Sea Lake")
+
+    with patch.object(HUD_main.log, "error") as error, patch.object(HUD_main.log, "debug") as debug:
+        hud_main._log_table_not_found("Sea Lake, 1", "Sea Lake, 1", "Bwin.fr Poker", "Bwin.fr Poker", window)
+        hud_main._log_table_not_found("Sea Lake, 1", "Sea Lake, 1", "Bwin.fr Poker", "Bwin.fr Poker", window)
+
+    assert error.call_count == 1
+    assert debug.call_count == 1  # the repeat, not a second error
+
+
+def test_a_closed_table_is_not_reported_as_an_error(hud_main) -> None:
+    """Hands reach the HUD seconds late, so a just-closed table has no window left."""
+    window = SimpleNamespace(search_string="Sea Lake")
+    hud_main._tables_attached.add("Sea Lake, 1")
+
+    with patch.object(HUD_main.log, "error") as error, patch.object(HUD_main.log, "info") as info:
+        hud_main._log_table_not_found("Sea Lake, 1", "Sea Lake, 1", "Bwin.fr Poker", "Bwin.fr Poker", window)
+
+    error.assert_not_called()
+    assert info.call_count == 1
+
+
+def test_the_baseline_is_the_table_the_hud_was_built_on(hud_main) -> None:
+    """A window handed to the next match before the first poll must not set it.
+
+    Seeding at attach is what makes the poll compare against the table this HUD
+    was actually built on; taking the first poll's read as the baseline would
+    adopt the replacement table and leave the stale HUD in place for good.
+    """
+    table = _tour_table([1200533055, 1200533055])  # window already moved on
+    table.title_table_no = 1200531183  # what seed_title_table_no() recorded
+    hud = SimpleNamespace(table=table)
+
+    with patch.object(hud_main, "table_is_stale") as stale:
+        hud_main._handle_tour_table_switch(hud, table)
+
+    stale.assert_called_once_with(hud)
+
+
+def test_a_seeded_table_window_reads_its_number_from_the_matched_title() -> None:
+    """seed_title_table_no() uses the title the window search already captured."""
+    from fpdb_3_legacy.TableWindow import Table_Window
+
+    table = Table_Window.__new__(Table_Window)
+    table.tableno_re = r"^[^|]*?(?<!\d)(\d{6,})\s*(?:\||$)"
+    table.title = "Twister 0.25€ 1200531183 | NL Hold'em | Niveau 1 | 10/20"
+    table.title_table_no = None
+
+    table.seed_title_table_no()
+
+    assert table.title_table_no == 1200531183
+
+
+def test_a_title_the_pattern_cannot_read_leaves_no_baseline() -> None:
+    """No baseline means the poll leaves that HUD alone, which is the safe end."""
+    from fpdb_3_legacy.TableWindow import Table_Window
+
+    table = Table_Window.__new__(Table_Window)
+    table.tableno_re = r"(?:Twister|Spins)"  # no capturing group
+    table.title = "Twister 0.25€ | NL Hold'em"
+    table.title_table_no = None
+
+    table.seed_title_table_no()
+
+    assert table.title_table_no is None

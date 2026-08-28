@@ -35,6 +35,7 @@ the symptom is worse than none, because it answers.
 
 from __future__ import annotations
 
+import logging
 import time
 from contextlib import contextmanager
 from dataclasses import dataclass, field
@@ -43,7 +44,6 @@ from typing import TYPE_CHECKING, Any
 from PySide6.QtCore import QEvent, QObject, QTimer
 
 if TYPE_CHECKING:
-    import logging
     from collections.abc import Callable, Iterator
 
     from PySide6.QtWidgets import QWidget
@@ -59,6 +59,34 @@ UI_STALL_BUDGET_MS = 100.0
 #: before logging anyway. A tab that has not drawn within this window is the
 #: symptom being investigated, so the line must not be lost to it.
 FIRST_PAINT_TIMEOUT_MS = 10_000
+
+#: A tab open slow enough that a user would call it slow. Above this the report
+#: is a WARNING, so it reaches a log running at the default level; below it the
+#: same line goes to DEBUG.
+SLOW_TAB_OPEN_MS = 1000.0
+
+
+def perf_level(total_ms: float, max_stall_ms: float | None = None) -> int:
+    """The level a ``[PERF]`` line deserves: WARNING if slow, DEBUG if not.
+
+    Every one of these lines used to be a WARNING, on the reasoning that the
+    root logger is pinned there (``loggingFpdb.DIAGNOSTIC_LEVEL_CAP``) and a
+    slow tab is reported by users whose logs are not running at DEBUG. That
+    part still holds, and is why the slow case is left alone. What did not hold
+    is the other half: a tab that opened in 5 ms was logged at WARNING too, so
+    an ordinary session filled the log viewer with lines saying nothing was
+    wrong -- eleven of eleven, in the session that prompted this -- and buried
+    the warnings a reader is actually looking for.
+
+    A line is kept at WARNING when either figure says the user waited: the
+    total, or the longest the event loop was blocked, which is the one that
+    matches what "frozen" means to them and can be bad while the total is not.
+    """
+    if total_ms >= SLOW_TAB_OPEN_MS:
+        return logging.WARNING
+    if max_stall_ms is not None and max_stall_ms >= UI_STALL_BUDGET_MS:
+        return logging.WARNING
+    return logging.DEBUG
 
 
 @dataclass
@@ -228,11 +256,16 @@ class TabOpenProfiler:
     def report(self, log: logging.Logger) -> TabTiming:
         """Log the timing and return it.
 
-        At WARNING for the same reason the HUD's diagnostics are: a slow tab
-        is reported by users whose logs are not running at DEBUG.
+        A slow open stays at WARNING, for the same reason the HUD's diagnostics
+        are: it is reported by users whose logs are not running at DEBUG. A fast
+        one is DEBUG -- see :func:`perf_level`.
         """
         timing = self.result()
-        log.warning("[PERF] tab open: %s", timing.format())
+        log.log(
+            perf_level(timing.total_ms, timing.max_stall_ms),
+            "[PERF] tab open: %s",
+            timing.format(),
+        )
         return timing
 
 

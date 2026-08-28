@@ -1,10 +1,5 @@
 """Test script for site identification with PokerTracker4 iPoker hands."""
 
-import sys
-from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).parent))
-
 from fpdb_3_legacy.Configuration import Config
 from fpdb_3_legacy.IdentifySite import IdentifySite
 

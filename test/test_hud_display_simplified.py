@@ -5,13 +5,8 @@ This module focuses on testing the core Stats.py functionality integration
 with HUD display without complex PyQt5 mocking.
 """
 
-import os
-import sys
 
 import pytest
-
-# Add the project root to the Python path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 # Import only what we need
 import fpdb_3_legacy.Stats as Stats

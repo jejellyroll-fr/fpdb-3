@@ -6,12 +6,8 @@ point the TestHandsPlayers (THP) regression workflow depends on. These tests
 cover its argument contract; the import engine itself is exercised elsewhere.
 """
 
-import os
-import sys
 
 import pytest
-
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from fpdb_3_legacy import GuiBulkImport
 

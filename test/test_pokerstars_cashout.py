@@ -2,12 +2,9 @@
 """Test cash out functionality for PokerStars parser."""
 
 import os
-import sys
 from decimal import Decimal
 
 import pytest
-
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from fpdb_3_legacy.PokerStarsToFpdb import PokerStars
 

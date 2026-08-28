@@ -1,13 +1,9 @@
 #!/usr/bin/env python3
 """Tests for Hand.addCashOutPot method."""
 
-import os
-import sys
 import unittest
 from decimal import Decimal
 from unittest.mock import Mock
-
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from fpdb_3_legacy.Hand import HoldemOmahaHand
 

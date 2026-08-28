@@ -7,13 +7,9 @@ out)". The parser used to count both that $X and the cash-out amount, inflating
 winnings (won 35.71 instead of 15.82, net 25.29 instead of 5.40).
 """
 
-import os
-import sys
 from decimal import Decimal
 
 import pytest
-
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from fpdb_3_legacy.PokerStarsToFpdb import PokerStars
 

@@ -5,15 +5,11 @@ This script creates a real HUD display window that stays open for manual verific
 of the "-" vs "0" distinction. Close the window to exit.
 """
 
-import os
 import sys
 from unittest.mock import Mock
 
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QApplication, QHBoxLayout, QLabel, QMainWindow, QPushButton, QVBoxLayout, QWidget
-
-# Add the project root to the Python path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from fpdb_3_legacy.Aux_Hud import SimpleStat
 

@@ -14,14 +14,10 @@ A table nobody has said anything about for a while is now asked directly.
 
 from __future__ import annotations
 
-import os
-import sys
 import time
 from unittest.mock import MagicMock
 
 import pytest
-
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from fpdb_3_legacy import HUD_main
 

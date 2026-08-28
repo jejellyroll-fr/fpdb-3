@@ -115,6 +115,9 @@ class Table_Window:
         self.table: int | None = None
         self.search_string = ""
         self.tableno_re = ""
+        # Table id read from the window title when the HUD attached; HUD_main
+        # compares later reads against it to notice the window switching table.
+        self.title_table_no: int | None = None
         self.width = 0
         self.height = 0
         self.x = 0
@@ -363,7 +366,38 @@ class Table_Window:
             return "client_moved"
         return False  # no change
 
+    def seed_title_table_no(self) -> None:
+        """Record the table the title showed at the moment the HUD attached.
+
+        Read from the title already captured by the window search rather than by
+        asking the window again: a Twister client hands the same window to the
+        next match of the series, and a hand reaches the HUD seconds after it was
+        played, so a switch can fall between the attach and the first status
+        poll. Seeding here means the poll compares against what this HUD was
+        actually built on, instead of adopting the replacement table as its
+        baseline and never noticing.
+        """
+        if not self.tableno_re or not self.title:
+            return
+        try:
+            mo = re.search(self.tableno_re, self.title)
+            if mo is not None:
+                self.title_table_no = int(mo.group(1))
+        except (re.error, IndexError, ValueError):
+            # A site whose pattern does not compile, captures nothing, or
+            # captures something that is not a number simply gets no baseline,
+            # and the poll leaves its HUD alone.
+            log.debug("No table number in %r via %r", self.title, self.tableno_re)
+        else:
+            log.debug("Seeded title table number: %s", self.title_table_no)
+
     def has_table_title_changed(self, hud) -> bool:
+        if self.table is not None and self.table == self.tournament:
+            # The hand history carried no table id, so self.table holds the
+            # tournament number as a fallback: it can never equal what the title
+            # shows, and comparing them would report a move on every poll.
+            log.debug("Table id unknown (fell back to the tournament number); skipping title check")
+            return False
         log.debug("before get_table_no()")
         result = self.get_table_no()
         log.debug(f"tb has change nb {result}")

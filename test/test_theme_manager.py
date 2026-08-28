@@ -6,14 +6,10 @@ Unit tests for the ThemeManager class.
 Tests theme persistence, synchronization, and configuration integration.
 """
 
-import os
 
 # Add the parent directory to the path to import our modules
-import sys
 import unittest
 from unittest.mock import Mock, patch
-
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from fpdb_3_legacy.ThemeManager import ThemeManager
 

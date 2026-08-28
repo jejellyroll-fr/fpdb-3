@@ -22,8 +22,6 @@ from unittest.mock import MagicMock
 
 import pytest
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-
 from fpdb_3_legacy import HUD_main
 from fpdb_3_legacy.hud_window_registry import ClaimOutcome, HudWindowRegistry
 from fpdb_3_legacy.interlocks import acquire_hud_instance_lock

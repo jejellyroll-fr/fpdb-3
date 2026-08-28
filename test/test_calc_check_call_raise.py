@@ -5,14 +5,9 @@ This module tests the calcCheckCallRaise functionality which calculates
 check-call and check-raise statistics for players based on hand actions.
 """
 
-import os
-import sys
 from unittest.mock import Mock
 
 import pytest
-
-# Add the project root to the Python path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from fpdb_3_legacy.DerivedStats import MIN_ACTIONS_FOR_CHECK_CALL_RAISE, DerivedStats
 

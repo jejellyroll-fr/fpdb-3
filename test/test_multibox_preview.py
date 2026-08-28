@@ -8,13 +8,10 @@ coloured title header and a grid of cells using per-stat hudcolor/hudbgcolor.
 from __future__ import annotations
 
 import os
-import sys
 
 import pytest
 
 pytestmark = pytest.mark.qt
-
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 

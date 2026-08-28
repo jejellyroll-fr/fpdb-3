@@ -9,15 +9,12 @@ HUD.
 
 from __future__ import annotations
 
-import os
 import sys
 from unittest.mock import Mock, patch
 
 import pytest
 
 pytestmark = pytest.mark.qt
-
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # Light Qt stubs so the module imports without a real display.
 sys.modules.setdefault("PySide6", Mock())

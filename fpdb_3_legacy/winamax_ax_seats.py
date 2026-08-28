@@ -1,4 +1,4 @@
-"""Read a Winamax table's seated players straight off the window (macOS).
+"""Read a Winamax table's seated players straight off the window (macOS, Windows).
 
 Why this exists
 ---------------
@@ -15,8 +15,13 @@ its on-screen position. That is the seat, directly: no inference, no waiting for
 anyone to act, and separately per window, which is what multi-tabling a pool
 needs.
 
-macOS only. Other platforms keep the log-derived ring (see
-:mod:`fpdb_3_legacy.winamax_live_log_reader`).
+Chromium answers the platform's accessibility API on both macOS (AX, through
+``AXManualAccessibility``) and Windows (UIAutomation, through the request
+itself), so both read the window. Linux, and any machine whose client will not
+answer, keep the log-derived ring (see
+:mod:`fpdb_3_legacy.winamax_live_log_reader`) -- which is correct but slow to
+fill in: it can only name a player once they have acted, so the stat blocks
+appear one at a time over the first betting round instead of all at once.
 """
 
 from __future__ import annotations
@@ -160,6 +165,92 @@ def is_ax_available() -> bool:
         except ImportError:
             return False
     return False
+
+
+class _WindowsUIAClient:
+    """The process-wide UIAutomation client used to read a table's labels.
+
+    Built once, because it used to be built on every read: importing the
+    generated UIAutomationCore wrapper and creating the COM object cost ~130ms
+    the first time (far more in a frozen build, which has to generate the
+    wrapper in memory), and that was paid on the GUI thread while a table was
+    being dealt.
+
+    Properties are read live rather than through a cache request. That looks
+    like the obvious optimisation and measures the other way round on this
+    client: the table is a Chromium window whose subtree runs to thousands of
+    nodes, FindAllBuildCache builds a cache for every one of them, and the read
+    stops at MAX_ELEMENTS -- three times slower for the same answer.
+    """
+
+    # UIAutomationCore.idl: TreeScope_Element | _Children | _Descendants.
+    # Taken as a literal because the name comtypes generates for it has moved
+    # between versions.
+    TREE_SCOPE_SUBTREE = 7
+
+    # The walk returns the whole subtree, which on a Chromium window is far more
+    # than a table's own labels. This is what bounds the per-read cost.
+    MAX_ELEMENTS = 300
+
+    # Nothing the client labels a chair with is longer than this, and skipping
+    # the long ones (chat, promos, rules) keeps seats_from_labels cheap.
+    MAX_LABEL_LEN = 40
+
+    def __init__(self, automation: Any, condition: Any) -> None:
+        self.automation = automation
+        self._condition = condition
+
+    def collect_labels(self, element: Any) -> list[AXSeat]:
+        """Every short text label under ``element``, with its screen position."""
+        found = element.FindAll(self.TREE_SCOPE_SUBTREE, self._condition)
+        if not found or not found.Length:
+            return []
+        labels: list[AXSeat] = []
+        for index in range(min(found.Length, self.MAX_ELEMENTS)):
+            item = found.GetElement(index)
+            name = item.CurrentName
+            if not isinstance(name, str) or not name or len(name) > self.MAX_LABEL_LEN:
+                continue
+            rect = item.CurrentBoundingRectangle
+            if not rect:
+                continue
+            labels.append(AXSeat(name.replace("\xa0", " ").strip(), rect.left, rect.top))
+        return labels
+
+
+_windows_uia_client: _WindowsUIAClient | None = None
+_windows_uia_unavailable = False
+
+
+def reset_windows_uia() -> None:
+    """Drop the shared UIAutomation client so the next read rebuilds it."""
+    global _windows_uia_client, _windows_uia_unavailable
+    _windows_uia_client = None
+    _windows_uia_unavailable = False
+
+
+def _windows_uia() -> _WindowsUIAClient | None:
+    """The shared UIAutomation client, or None when this machine has no usable one.
+
+    A failure is remembered so a client that cannot be built (no comtypes, COM
+    refusing to start, a frozen build unable to generate the wrapper) is not
+    retried on every hand.
+    """
+    global _windows_uia_client, _windows_uia_unavailable
+
+    if _windows_uia_client is not None or _windows_uia_unavailable:
+        return _windows_uia_client
+    try:
+        import comtypes.client
+
+        module = comtypes.client.GetModule("UIAutomationCore.dll")
+        automation = comtypes.client.CreateObject(module.CUIAutomation)
+        _windows_uia_client = _WindowsUIAClient(automation, automation.CreateTrueCondition())
+        log.info("UIAutomation seat reader ready")
+    except Exception:
+        _windows_uia_unavailable = True
+        log.info("No UIAutomation seat reader on this machine; Fast-Fold seats come from the client log", exc_info=True)
+    return _windows_uia_client
 
 
 def is_stack_label(text: str) -> bool:
@@ -450,6 +541,7 @@ class WinamaxAXSeatReader:
         title: str,
         max_seats: int = 6,
         table_pos: tuple[float, float] | None = None,
+        window_id: int | None = None,
     ) -> dict[int, str]:
         """Players at the window with this exact title, keyed by layout slot.
 
@@ -458,11 +550,15 @@ class WinamaxAXSeatReader:
 
         When multiple table windows share the same title (e.g. multi-tabling
         identical stakes), ``table_pos`` selects the window closest to the
-        target table's screen coordinates.
+        target table's screen coordinates. ``window_id`` settles it outright and
+        is preferred where the caller has one: on Windows it also saves
+        enumerating every window on the desktop, on every read.
         """
         if not is_ax_available():
             return {}
         if platform.system() == "Windows":
+            if window_id:
+                return self._read_window_windows(int(window_id), max_seats)
             return self._read_window_windows_by_title(title, max_seats, table_pos=table_pos)
         try:
             app = self._application()
@@ -543,27 +639,16 @@ class WinamaxAXSeatReader:
 
     def _read_window_windows(self, hwnd: int, max_seats: int = 6) -> dict[int, str]:
         try:
-            import comtypes.client
-            UIAutomationClient = comtypes.client.GetModule("UIAutomationCore.dll")
-            uia = comtypes.client.CreateObject(UIAutomationClient.CUIAutomation)
+            client = _windows_uia()
+            if client is None:
+                return {}
 
-            elem = uia.ElementFromHandle(hwnd)
+            elem = client.automation.ElementFromHandle(hwnd)
             if elem is None:
                 return {}
-            condition = uia.CreateTrueCondition()
-            found = elem.FindAll(UIAutomationClient.TreeScope_Subtree, condition)
-            if not found or not found.Length:
+            labels = client.collect_labels(elem)
+            if not labels:
                 return {}
-
-            labels: list[AXSeat] = []
-            for i in range(min(found.Length, 300)):
-                item = found.GetElement(i)
-                name = item.CurrentName
-                if isinstance(name, str) and name and len(name) <= 40:
-                    name = name.replace("\xa0", " ").strip()
-                    rect = item.CurrentBoundingRectangle
-                    if rect:
-                        labels.append(AXSeat(name, rect.left, rect.top))
             players = seats_from_labels(labels)
             if not players:
                 return {}
@@ -575,3 +660,16 @@ class WinamaxAXSeatReader:
         except Exception:
             log.debug("Error reading Winamax UIAutomation seats on Windows for HWND %s:", hwnd, exc_info=True)
             return {}
+
+    def prewarm(self) -> None:
+        """Build whatever the platform's seat reader needs, before the first hand.
+
+        On Windows that is the UIAutomation client: creating it imports comtypes
+        and, in a frozen build with no writable ``comtypes.gen``, generates the
+        UIAutomationCore wrapper in memory -- a few hundred milliseconds, once.
+        Paid here, at startup, it is not paid on the GUI thread while a table is
+        being dealt. Failure is not an error: the log-derived ring still works.
+        """
+        if platform.system() != "Windows" or not is_ax_available():
+            return
+        _windows_uia()

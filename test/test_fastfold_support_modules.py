@@ -10,17 +10,15 @@ macOS is often ordinary elsewhere.
 from __future__ import annotations
 
 import logging
-import os
 import sys
 from unittest.mock import MagicMock
 
 import pytest
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-
 from fpdb_3_legacy import hud_diagnostics
 from fpdb_3_legacy.hud_window_registry import HudWindowRegistry
 from fpdb_3_legacy.ui_instrumentation import (
+    SLOW_TAB_OPEN_MS,
     UI_STALL_BUDGET_MS,
     TabOpenProfiler,
     UiStallMonitor,
@@ -111,6 +109,10 @@ def test_a_tab_timing_is_reported_as_one_line(caplog) -> None:
     profiler = TabOpenProfiler("Session Stats")
     with profiler.phase("construct"):
         pass
+    # Only a slow open is a WARNING now, and this test asserts one. Backdating
+    # the start is what makes it slow: sleeping for a second to prove a log
+    # line's format would be a second added to every run of the suite.
+    profiler._started -= SLOW_TAB_OPEN_MS / 1000 + 0.1
 
     with caplog.at_level(logging.WARNING, logger=log.name):
         timing = profiler.report(log)

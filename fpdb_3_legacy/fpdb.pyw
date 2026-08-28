@@ -102,7 +102,7 @@ from fpdb_3_legacy.Exceptions import FpdbError
 from fpdb_3_legacy.GuiConfigObserver import GuiConfigObserver
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.L10n import set_locale_translation
-from fpdb_3_legacy.ui_instrumentation import TabOpenProfiler
+from fpdb_3_legacy.ui_instrumentation import TabOpenProfiler, perf_level
 
 np = import_module("numpy")
 
@@ -223,13 +223,18 @@ class fpdb(QMainWindow):
 
         if not allow_multiple and new_tab_name in self.nb_tab_names:
             self.display_tab(new_tab_name)
-            # At WARNING like the other [PERF] diagnostics: the root logger is
-            # pinned to WARNING (loggingFpdb.DIAGNOSTIC_LEVEL_CAP), so this line
-            # logged at INFO never reached a single user log.
-            log.warning(
+            # WARNING only when it was slow, like the other [PERF] diagnostics.
+            # The root logger is pinned to WARNING
+            # (loggingFpdb.DIAGNOSTIC_LEVEL_CAP), so a line logged at INFO never
+            # reached a single user log -- but logging every switch there, and a
+            # switch is usually under a millisecond, buried the warnings a reader
+            # is looking for instead.
+            switch_ms = (time.perf_counter() - t0) * 1000
+            log.log(
+                perf_level(switch_ms),
                 "[PERF] switched to existing tab '%s' in %.0f ms",
                 new_tab_name,
-                (time.perf_counter() - t0) * 1000,
+                switch_ms,
             )
             if new_page is not None:
                 with contextlib.suppress(ValueError):

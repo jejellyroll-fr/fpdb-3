@@ -7,14 +7,11 @@ This test verifies the complete XML persistence workflow.
 """
 
 import os
-import sys
 import tempfile
 import unittest
 import xml.dom.minidom
 
 # Add the parent directory to the path to import our modules
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
 import fpdb_3_legacy.Configuration as Configuration
 from fpdb_3_legacy.ThemeManager import ThemeManager
 

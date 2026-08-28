@@ -7,13 +7,9 @@ is tested only when the sample directory is present.
 
 from __future__ import annotations
 
-import os
-import sys
 from pathlib import Path
 
 import pytest
-
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 
 from fpdb_3_legacy import pt4_import as pt4
 from fpdb_3_legacy import stat_registry as sr

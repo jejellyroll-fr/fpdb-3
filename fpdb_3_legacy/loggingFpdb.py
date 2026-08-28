@@ -1633,6 +1633,26 @@ class FpdbLogger:
         stacklevel = self._get_stacklevel()
         self.logger.exception(msg, *args, stacklevel=stacklevel, **kwargs)
 
+    def log(self, level: int, msg: object, *args: Any, **kwargs: Any) -> None:
+        """Log at a level decided at runtime.
+
+        The wrapper mirrors logging.Logger's per-level methods, and callers that
+        pick their level from what they measured need the variable-level form
+        too -- a diagnostic that is a WARNING when it reports a problem and a
+        DEBUG when it reports that there is none. Without this, such a caller
+        raised AttributeError against the real logger while passing every test
+        that handed it a standard logging.Logger.
+
+        Args:
+            level (int): The level to log at (e.g. logging.WARNING).
+            msg (str): The log message.
+            *args: Positional arguments for message formatting.
+            **kwargs: Keyword arguments for message formatting.
+
+        """
+        stacklevel = self._get_stacklevel()
+        self.logger.log(level, msg, *args, stacklevel=stacklevel, **kwargs)
+
     def setLevel(self, level: int) -> None:
         """Set the logging level for this logger.
 
@@ -1670,6 +1690,7 @@ class FpdbLogger:
                 "info",
                 "warning",
                 "error",
+                "log",
                 "__init__",
                 "_get_stacklevel",
             ):

@@ -18,17 +18,26 @@ regression without a Windows machine.
 
 from __future__ import annotations
 
-import os
 import sys
 import types
 from unittest.mock import MagicMock
 
 import pytest
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-
 from fpdb_3_legacy import winamax_ax_seats as ax
 from fpdb_3_legacy.winamax_ax_seats import WinamaxAXSeatReader
+
+
+@pytest.fixture(autouse=True)
+def _fresh_uia_client():
+    """Forget the process-wide UIAutomation client between tests.
+
+    It is deliberately built once per process, so without this each test would
+    read the previous test's tree.
+    """
+    ax.reset_windows_uia()
+    yield
+    ax.reset_windows_uia()
 
 
 @pytest.fixture
@@ -180,6 +189,57 @@ def test_the_walk_stops_once_it_has_more_labels_than_a_table_can_hold(windows, m
     assert window.FindAll.call_count == 1  # one walk, not one per label
 
 
+def test_the_client_is_built_once_for_the_whole_process(windows, monkeypatch) -> None:
+    """Reading a window must not re-import comtypes and re-create the COM object.
+
+    Rebuilding it per read is what made a read cost hundreds of milliseconds on
+    the GUI thread, six times a hand per table.
+    """
+    install_uia(monkeypatch, window=UIAElement("table", TABLE_WINDOW), descendants=seated_table(SIX_MAX))
+    import comtypes.client as client
+
+    reader = WinamaxAXSeatReader()
+    reader._read_window_windows(61825)
+    reader._read_window_windows(61825)
+    reader._read_window_windows(61825)
+
+    assert client.GetModule.call_count == 1
+    assert client.CreateObject.call_count == 1
+
+
+def test_a_client_that_cannot_be_built_is_not_rebuilt_every_hand(windows, monkeypatch) -> None:
+    """No comtypes, no COM, no window station: answer empty and stop trying."""
+    client = types.ModuleType("comtypes.client")
+    client.GetModule = MagicMock(side_effect=OSError("UIAutomationCore.dll not found"))
+    comtypes = types.ModuleType("comtypes")
+    comtypes.client = client
+    monkeypatch.setitem(sys.modules, "comtypes", comtypes)
+    monkeypatch.setitem(sys.modules, "comtypes.client", client)
+
+    reader = WinamaxAXSeatReader()
+    assert reader._read_window_windows(61825) == {}
+    assert reader._read_window_windows(61825) == {}
+    assert client.GetModule.call_count == 1
+
+
+def test_prewarm_builds_the_client_before_the_first_hand(windows, monkeypatch) -> None:
+    """The one-off cost of the bindings belongs to startup, not to a dealt hand."""
+    install_uia(monkeypatch, window=UIAElement("table", TABLE_WINDOW), descendants=[])
+    monkeypatch.setattr(ax, "is_ax_available", lambda: True)
+    import comtypes.client as client
+
+    WinamaxAXSeatReader().prewarm()
+
+    assert client.CreateObject.call_count == 1
+
+
+def test_prewarm_is_a_no_op_off_windows(monkeypatch) -> None:
+    monkeypatch.setattr(ax.platform, "system", lambda: "Linux")
+    monkeypatch.setattr(ax, "_windows_uia", MagicMock(side_effect=AssertionError("built off Windows")))
+
+    WinamaxAXSeatReader().prewarm()
+
+
 def test_a_handle_that_names_no_window_reads_as_empty(windows, monkeypatch) -> None:
     install_uia(monkeypatch, window=None, descendants=[])
 
@@ -329,3 +389,17 @@ def test_read_window_on_windows_never_touches_the_macos_api(windows) -> None:
 
     assert reader.read_window("Winamax Bucarest 3", 6, table_pos=(1.0, 2.0)) == {0: "jejellyroll"}
     reader._read_window_windows_by_title.assert_called_once_with("Winamax Bucarest 3", 6, table_pos=(1.0, 2.0))
+
+
+def test_a_known_handle_is_read_without_searching_the_desktop(windows) -> None:
+    """Every window of a Fast-Fold pool shares a title; the handle is the identity.
+
+    It also spares an enumeration of every window on the desktop, which the HUD
+    would otherwise pay for on each of the six reads it makes per hand.
+    """
+    reader = WinamaxAXSeatReader()
+    reader._read_window_windows = MagicMock(return_value={0: "jejellyroll"})
+    reader._read_window_windows_by_title = MagicMock(side_effect=AssertionError("searched by title"))
+
+    assert reader.read_window("Winamax Bucarest 3", 6, window_id=61825) == {0: "jejellyroll"}
+    reader._read_window_windows.assert_called_once_with(61825, 6)

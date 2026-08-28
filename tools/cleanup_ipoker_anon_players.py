@@ -1,0 +1,267 @@
+"""Remove the placeholder players a live iPoker import used to invent.
+
+iPoker anonymises the hands the hero was not dealt into, and the seat -> name
+map that recovers their opponents is learned from the hands the hero did play.
+Live import reaching the first observed hand of a session had neither, so every
+seat fell back to "anon_<sessioncode>_<seat>" and those names were written to
+Players. The importer no longer does that -- such a hand is skipped and comes
+back with the real names on a later full import of the file -- but databases
+already carry the rows it wrote.
+
+This removes them: the hands in which every single player is a placeholder, the
+rows that hang off those hands, and then the placeholder players themselves. A
+placeholder still seated in a hand that is kept (which the importer never
+produced, but a hand-edited database might) is reported and left alone, along
+with its hands.
+
+    python tools/cleanup_ipoker_anon_players.py              # report only
+    python tools/cleanup_ipoker_anon_players.py --apply      # delete
+
+Re-import the hand history files afterwards. The hands removed here are stored
+again under their real opponents, because by now the session files hold the
+named hands the seat map is learned from.
+"""
+
+from __future__ import annotations
+
+import argparse
+import re
+import sys
+from pathlib import Path
+
+REPO = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(REPO))
+
+from fpdb_3_legacy.Configuration import Config  # noqa: E402
+from fpdb_3_legacy.Database import Database  # noqa: E402
+
+# What the importer generated, matched in full. "anon_hunter" is a screen name
+# somebody may well be sitting under, and this tool deletes players: a prefix
+# test would take a real one, and every hand they played, with it. The LIKE is
+# only a cheap pre-filter -- "!" escapes the underscore, which is a LIKE
+# wildcard, and ESCAPE is understood by PostgreSQL, MySQL and SQLite alike.
+PLACEHOLDER_RE = re.compile(r"^anon_\d+_\d+$")
+SELECT_PLACEHOLDERS = (
+    "SELECT p.id, p.name, s.name FROM Players p "
+    "JOIN Sites s ON s.id = p.siteId "
+    "WHERE p.name LIKE 'anon!_%' ESCAPE '!' ORDER BY p.id"
+)
+SELECT_HANDS_OF_PLAYER = "SELECT DISTINCT handId FROM HandsPlayers WHERE playerId = %s"
+SELECT_PLAYERS_OF_HAND = (
+    "SELECT p.id, p.name FROM HandsPlayers hp JOIN Players p ON p.id = hp.playerId WHERE hp.handId = %s"
+)
+SELECT_HAND = "SELECT id, tableName, startTime FROM Hands WHERE id = %s"
+SELECT_REMAINING_HANDS_OF_PLAYER = "SELECT COUNT(*) FROM HandsPlayers WHERE playerId = %s"
+
+# Everything hanging off a hand, children before parents. Written out one
+# statement per table rather than built from a table name, so what runs is
+# exactly what is read here. Table names carry the schema's own casing
+# ("AofDecisions", "Autorates"): PostgreSQL folds them either way, MySQL with
+# case-sensitive table names does not, and a miss there fails mid-transaction.
+DELETE_BY_HAND = (
+    ("HandsStove", "DELETE FROM HandsStove WHERE handId = %s"),
+    ("HandsActions", "DELETE FROM HandsActions WHERE handId = %s"),
+    ("HandsShowdown", "DELETE FROM HandsShowdown WHERE handId = %s"),
+    ("HandsPots", "DELETE FROM HandsPots WHERE handId = %s"),
+    ("HandsCashout", "DELETE FROM HandsCashout WHERE handId = %s"),
+    (
+        "AofDecisionAnalyses",
+        "DELETE FROM AofDecisionAnalyses WHERE decisionId IN (SELECT id FROM AofDecisions WHERE handId = %s)",
+    ),
+    ("AofDecisions", "DELETE FROM AofDecisions WHERE handId = %s"),
+    ("Boards", "DELETE FROM Boards WHERE handId = %s"),
+    ("RawHands", "DELETE FROM RawHands WHERE handId = %s"),
+    ("PlayerAutoNotes", "DELETE FROM PlayerAutoNotes WHERE handId = %s"),
+    ("HandsPlayers", "DELETE FROM HandsPlayers WHERE handId = %s"),
+    ("Hands", "DELETE FROM Hands WHERE id = %s"),
+)
+
+# Everything keyed on a player, the caches included: a placeholder's HudCache
+# row is what a statistic would otherwise still be read out of. Order matters
+# here too -- none of the schema's foreign keys cascade, so a table is emptied
+# before anything it points at (test_cleanup_ipoker_anon_players.py checks that
+# against the DDL rather than trusting this list to stay right).
+DELETE_BY_PLAYER = (
+    ("HudCache", "DELETE FROM HudCache WHERE playerId = %s"),
+    ("CardsCache", "DELETE FROM CardsCache WHERE playerId = %s"),
+    ("PositionsCache", "DELETE FROM PositionsCache WHERE playerId = %s"),
+    ("SessionsCache", "DELETE FROM SessionsCache WHERE playerId = %s"),
+    ("TourneysCache", "DELETE FROM TourneysCache WHERE playerId = %s"),
+    # Both directions of Backings, and both before the entries they point at:
+    # somebody else backing the placeholder is a row the placeholder's own id
+    # does not match, and either one still referencing a TourneysPlayers row
+    # fails the deletion below.
+    (
+        "Backings",
+        "DELETE FROM Backings WHERE tourneysPlayersId IN (SELECT id FROM TourneysPlayers WHERE playerId = %s)",
+    ),
+    ("Backings", "DELETE FROM Backings WHERE playerId = %s"),
+    ("TourneysPlayers", "DELETE FROM TourneysPlayers WHERE playerId = %s"),
+    ("Autorates", "DELETE FROM Autorates WHERE playerId = %s"),
+    ("PlayerAutoNotes", "DELETE FROM PlayerAutoNotes WHERE playerId = %s"),
+    ("Players", "DELETE FROM Players WHERE id = %s"),
+)
+
+
+def _sql(statement: str, placeholder: str) -> str:
+    """Adapt a statement to the backend's parameter marker ("%s" or "?")."""
+    return statement.replace("%s", placeholder)
+
+
+def ipoker_sites(config) -> set[str]:
+    """Site names whose hands the iPoker converter reads.
+
+    Only that converter ever wrote these placeholders, so only its sites are
+    candidates. A player on another site whose screen name happens to look like
+    one is somebody real -- and a site the config does not list at all is left
+    alone rather than guessed at.
+    """
+    return {name for name, hhc in config.hhcs.items() if hhc.converter == "iPokerToFpdb"}
+
+
+def survey(db, sites: set[str]) -> tuple[list, dict, list]:
+    """Report the placeholders, the hands made only of them, and what is kept.
+
+    Returns (placeholders, hands_by_id, kept), where `kept` holds the
+    placeholders that share a hand with a real player: deleting those would take
+    a hand with real information down with them, so they are left in place.
+    """
+    ph = db.sql.query["placeholder"]
+    cursor = db.get_cursor()
+
+    cursor.execute(SELECT_PLACEHOLDERS)
+    placeholders = [
+        (int(row[0]), row[1], row[2])
+        for row in cursor.fetchall()
+        if PLACEHOLDER_RE.match(str(row[1])) and row[2] in sites
+    ]
+
+    hands: dict[int, tuple] = {}
+    kept: list[tuple[int, str, int]] = []
+    for player_id, name, _site in placeholders:
+        cursor.execute(_sql(SELECT_HANDS_OF_PLAYER, ph), (player_id,))
+        for (hand_id,) in cursor.fetchall():
+            if hand_id in hands:
+                continue
+            cursor.execute(_sql(SELECT_PLAYERS_OF_HAND, ph), (hand_id,))
+            seated = cursor.fetchall()
+            if any(not PLACEHOLDER_RE.match(str(seat_name)) for _pid, seat_name in seated):
+                # A real player at the table: the hand carries information, and
+                # deleting the placeholder would orphan it.
+                kept.append((player_id, name, int(hand_id)))
+                continue
+            cursor.execute(_sql(SELECT_HAND, ph), (hand_id,))
+            hands[int(hand_id)] = cursor.fetchone()
+
+    return placeholders, hands, kept
+
+
+def delete(db, hand_ids: list[int], player_ids: list[int], *, commit: bool = True) -> dict[str, int]:
+    """Delete the hands and then the players, in one transaction.
+
+    ``commit=False`` runs the whole thing and rolls it back, which is the only
+    way to find out what the real database says -- a foreign key nobody thought
+    of, a table this schema does not have -- without writing to it.
+    """
+    ph = db.sql.query["placeholder"]
+    cursor = db.get_cursor()
+    removed: dict[str, int] = {}
+
+    for hand_id in hand_ids:
+        for table, statement in DELETE_BY_HAND:
+            cursor.execute(_sql(statement, ph), (hand_id,))
+            if cursor.rowcount and cursor.rowcount > 0:
+                removed[table] = removed.get(table, 0) + cursor.rowcount
+
+    for player_id in player_ids:
+        cursor.execute(_sql(SELECT_REMAINING_HANDS_OF_PLAYER, ph), (player_id,))
+        (remaining,) = cursor.fetchone()
+        if remaining:
+            # Should not happen: survey() only offers players whose every hand
+            # is being removed. Refuse rather than orphan a hand.
+            db.connection.rollback()
+            msg = f"player {player_id} is still seated in {remaining} hand(s); nothing was deleted"
+            raise SystemExit(msg)
+        for table, statement in DELETE_BY_PLAYER:
+            cursor.execute(_sql(statement, ph), (player_id,))
+            if cursor.rowcount and cursor.rowcount > 0:
+                removed[table] = removed.get(table, 0) + cursor.rowcount
+
+    if commit:
+        db.connection.commit()
+    else:
+        db.connection.rollback()
+    return removed
+
+
+def report(placeholders: list, hands: dict, kept: list) -> None:
+    """Print what was found, including what is deliberately being left alone."""
+    print(f"{len(placeholders)} placeholder player(s):")
+    for player_id, name, site in placeholders:
+        print(f"  {player_id:>7}  {name}  ({site})")
+
+    print(f"\n{len(hands)} hand(s) whose every player is a placeholder:")
+    for hand_id, row in sorted(hands.items()):
+        print(f"  {hand_id:>7}  {row[1]}  {row[2]}")
+
+    if kept:
+        print("\nLeft alone, because the hand also seats a real player:")
+        for player_id, name, hand_id in kept:
+            print(f"  player {player_id} ({name}) in hand {hand_id}")
+
+
+def build_parser() -> argparse.ArgumentParser:
+    """The command line, built apart from main() so a test can exercise it."""
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("--config", help="HUD_config.xml to read the database from (default: the configured one)")
+    # Mutually exclusive: "--apply --rehearse" would otherwise commit, which is
+    # the exact opposite of what the person typing --rehearse asked for.
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument("--apply", action="store_true", help="delete; without it nothing is written")
+    mode.add_argument(
+        "--rehearse",
+        action="store_true",
+        help="run the deletion against the real database and roll it back, reporting what it did",
+    )
+    return parser
+
+
+def main() -> int:
+    args = build_parser().parse_args()
+
+    config = Config(file=args.config) if args.config else Config()
+    db = Database(config)
+    print(f"Database {db.database}@{db.host}\n")
+
+    sites = ipoker_sites(config)
+    if not sites:
+        print("No iPoker site in this configuration; nothing this tool wrote can be here.")
+        return 0
+
+    placeholders, hands, kept = survey(db, sites)
+    if not placeholders:
+        print("No placeholder players found; nothing to clean up.")
+        return 0
+
+    report(placeholders, hands, kept)
+
+    deletable = sorted({pid for pid, _n, _s in placeholders} - {pid for pid, _n, _h in kept})
+    if not deletable:
+        print("\nNothing can be removed without taking a real hand with it.")
+        return 0
+
+    if not (args.apply or args.rehearse):
+        print(f"\nDry run. {len(deletable)} player(s) and {len(hands)} hand(s) would be removed. Re-run with --apply.")
+        return 0
+
+    removed = delete(db, sorted(hands), deletable, commit=args.apply)
+    print("\nRemoved:" if args.apply else "\nWould remove (rolled back):")
+    for table, count in sorted(removed.items()):
+        print(f"  {count:>5}  {table}")
+    if args.apply:
+        print("\nRe-import the hand history files: those hands come back under their real opponents.")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

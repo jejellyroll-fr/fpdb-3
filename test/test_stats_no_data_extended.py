@@ -5,13 +5,8 @@ This module tests the newly implemented format_no_data_stat functionality
 for additional statistics like wtsd, wmsd, 4bet, etc.
 """
 
-import os
-import sys
 
 import pytest
-
-# Add the project root to the Python path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from fpdb_3_legacy.Stats import (
     cfour_B,

@@ -10,17 +10,9 @@ import os
 import unittest
 from pathlib import Path
 
-try:
-    from fpdb_3_legacy.BovadaToFpdb import Bovada, FpdbHandPartial, FpdbParseError
-    from fpdb_3_legacy.Configuration import Config
-    from fpdb_3_legacy.Hand import DrawHand, Hand, HoldemOmahaHand, StudHand
-except ImportError:
-    import sys
-
-    sys.path.insert(0, str(Path(__file__).parent.parent.resolve()))
-    from fpdb_3_legacy.BovadaToFpdb import Bovada, FpdbHandPartial, FpdbParseError
-    from fpdb_3_legacy.Configuration import Config
-    from fpdb_3_legacy.Hand import DrawHand, Hand, HoldemOmahaHand, StudHand
+from fpdb_3_legacy.BovadaToFpdb import Bovada, FpdbHandPartial, FpdbParseError
+from fpdb_3_legacy.Configuration import Config
+from fpdb_3_legacy.Hand import DrawHand, Hand, HoldemOmahaHand, StudHand
 
 # Logging configuration for debugging
 logging.basicConfig(level=logging.WARNING)

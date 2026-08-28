@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "fpdb-3"
-version = "3.8.0"
+version = "3.8.1"
 description = "Free Poker Database (FPDB-3) - Legacy Python Implementation"
 readme = "README.md"
 license = "AGPL-3.0-or-later"
@@ -15,6 +15,10 @@ dependencies = [
     "pandas>=2.2.2",
     "psutil>=5.9.0",
     "pyobjc==10.3.1; sys_platform == 'darwin'",
+    # UIAutomation, the Windows half of reading a table's chairs off the client
+    # window. Without it the Fast-Fold HUD can only learn who is at the table
+    # from the client log, one player per action; see winamax_ax_seats.
+    "comtypes>=1.4.1; sys_platform == 'win32'",
     "PySide6>=6.8.1",
     "colorlog==6.9.0",
     "pyzmq>=26.0.3",
@@ -66,7 +70,7 @@ test-no-gui = [
     "ruff>=0.12.8",
     "mypy>=1.11",
 ]
-windows = ["pywin32==306", "configparser", "PySide6>=6.8.1"]
+windows = ["pywin32==306", "configparser", "PySide6>=6.8.1", "comtypes>=1.4.1"]
 linux = ["xcffib==1.5.0", "PySide6>=6.8.1"]
 macos = ["PySide6>=6.8.1"]
 postgresql = ["psycopg[binary]>=3.1.0"]
@@ -265,7 +269,7 @@ omit = [
 [tool.briefcase]
 project_name = "Free Poker Database 3"
 bundle = "org.fpdb"
-version = "3.8.0"
+version = "3.8.1"
 
 [tool.briefcase.app.fpdb]
 formal_name = "FPDB"
@@ -311,8 +315,14 @@ requires = [
 ]
 
 [tool.briefcase.app.fpdb.windows]
+# comtypes is how the HUD reads a table's chairs through UIAutomation. It is
+# imported inside the function that uses it and the ImportError is swallowed
+# into "no reader on this machine", so a package missing it does not fail
+# loudly -- the Fast-Fold HUD just falls back to the client log and shows its
+# stat blocks one player at a time.
 requires = [
-    "pywin32==306"
+    "pywin32==306",
+    "comtypes>=1.4.1"
 ]
 
 [tool.briefcase.app.fpdb.linux]

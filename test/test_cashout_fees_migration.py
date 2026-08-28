@@ -1,12 +1,8 @@
 #!/usr/bin/env python3
 """Tests for cash out fees database schema migration."""
 
-import os
-import sys
 import unittest
 from unittest.mock import Mock, patch
-
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from fpdb_3_legacy.Database import HANDS_PLAYERS_KEYS
 from fpdb_3_legacy.SQL import Sql

@@ -14,13 +14,15 @@ def make_dist():
             "https://github.com/astral-sh/python-build-standalone/releases/download/20240713/cpython-3.10.14%2B20240713-aarch64-apple-darwin-pgo%2Blto-full.tar.zst",
             "4558c58bd03309d0c7131d4b5c2cbce9843d385fbcc7d75e575b4bf887bf5f68",
         ],
+        "x86_64-pc-windows-msvc": [
+            "https://github.com/astral-sh/python-build-standalone/releases/download/20240713/cpython-3.10.14%2B20240713-x86_64-pc-windows-msvc-shared-pgo-full.tar.zst",
+            "1003c93f92fdcca57308076995b224b888a7ee556763759e69d36e198b5bef14",
+        ],
         "x86_64-unknown-linux-gnu": [
             "https://github.com/astral-sh/python-build-standalone/releases/download/20240713/cpython-3.10.14%2B20240713-x86_64-unknown-linux-gnu-pgo-full.tar.zst",
             "f15c2b569f3bf8ba01737c5f46cf71e8bc07129ecc7304de9ba47b220acee47e",
         ],
     }
-    if BUILD_TARGET_TRIPLE == "x86_64-pc-windows-msvc":
-        fail("PyOxidizer is deprecated on Windows (Issue #225). Use PyInstaller (build_fpdb.ps1) or Nuitka for Windows builds.")
     if BUILD_TARGET_TRIPLE not in distributions:
         fail("unsupported PyOxidizer build target: " + BUILD_TARGET_TRIPLE)
 
@@ -33,7 +35,43 @@ def make_dist():
 def has_prefix(value, prefix):
     return value[:len(prefix)] == prefix
 
+def has_suffix(value, suffix):
+    return len(value) >= len(suffix) and value[len(value) - len(suffix):] == suffix
+
+def is_wheel_library_payload(path):
+    """Whether a plain file is a wheel's bundled shared-library directory.
+
+    delvewheel (Windows) and auditwheel (Linux) move a wheel's shared libraries
+    into a top-level "<package>.libs" directory beside the package. It is not a
+    Python package, so classification recognises nothing in it and drops the
+    whole thing -- and numpy's extension modules then cannot find
+    libscipy_openblas at import time:
+
+        ImportError: DLL load failed while importing _multiarray_umath
+
+    which is the application failing to start at all, since pandas imports
+    numpy. Only these directories are taken from the file scanner; anything
+    else it emits is already handled as a classified resource, and keeping both
+    would put a second copy of the whole payload in the bundle.
+    """
+    parts = path.replace("\\", "/").split("/")
+    # Any component, not just the first: the scanner may report a path rooted
+    # at the directory pip installed into rather than at site-packages. The
+    # name must be longer than the suffix, which keeps the hidden ".libs"
+    # directory older wheels put *inside* a package out of this -- that one is
+    # a package resource and is already classified, and taking it here as well
+    # would add a second copy of it.
+    for index in range(len(parts) - 1):
+        part = parts[index]
+        if len(part) > len(".libs") and has_suffix(part, ".libs"):
+            return True
+        if len(part) > len(".dylibs") and has_suffix(part, ".dylibs"):
+            return True
+    return False
+
 def keep_pip_resource(resource):
+    if type(resource) == "File":
+        return is_wheel_library_payload(resource.path)
     name = resource.name
     if has_prefix(name, "PySide6.scripts."):
         return False
@@ -48,7 +86,13 @@ def make_exe(dist):
     policy.set_resource_handling_mode("classify")
     policy.resources_location = "filesystem-relative:lib"
     policy.resources_location_fallback = None
-    
+    # Classification alone cannot see a wheel's bundled shared libraries, which
+    # live in a top-level "<package>.libs" directory rather than inside the
+    # package. Let the scanner emit plain files as well, and take only those
+    # directories from it (see keep_pip_resource / is_wheel_library_payload).
+    policy.allow_files = True
+    policy.file_scanner_emit_files = True
+
     config = dist.make_python_interpreter_config()
     config.filesystem_importer = True
     config.oxidized_importer = False
@@ -79,6 +123,17 @@ def make_exe(dist):
         "legacy_dir = os.path.join(root, 'fpdb_3_legacy')",
         "sys.path.insert(0, root)",
         "sys.path.insert(0, legacy_dir)",
+        # The packaged libraries come first, and on Windows that is not a
+        # preference: ".pyw" is an importable source suffix there, so with the
+        # legacy directory ahead of them "import fpdb" resolves to
+        # fpdb_3_legacy/fpdb.pyw -- the GUI script -- instead of the fpdb
+        # package. WinTables then dies on "No module named
+        # 'fpdb.infrastructure'; 'fpdb' is not a package", which is the HUD
+        # failing to start when auto-import launches it, and importing that
+        # script for its trouble runs the GUI's module-level code.
+        "lib_dir = os.path.join(root, 'lib')",
+        "if os.path.isdir(lib_dir):",
+        "    sys.path.insert(0, lib_dir)",
         "os.chdir(root)",
         "if len(sys.argv) > 1 and sys.argv[1] == '--hud':",
         "    sys.argv.pop(1)",
@@ -124,10 +179,14 @@ def make_exe(dist):
             if keep_pip_resource(resource):
                 pip_resources.append(resource)
     exe.add_python_resources(pip_resources)
-    exe.add_python_resources(exe.read_package_root(
-        path=CWD,
-        packages=["fpdb_3_legacy", "fpdb"],
-    ))
+    # Same filter: the scanner now emits plain files, and the source tree's own
+    # non-Python files are already installed by make_install below. Adding them
+    # here as well would put two copies of each in the bundle.
+    exe.add_python_resources([
+        resource
+        for resource in exe.read_package_root(path=CWD, packages=["fpdb_3_legacy", "fpdb"])
+        if keep_pip_resource(resource)
+    ])
     
     # Add external files/assets
     # Note: assets like gfx, locale, fonts might need to be copied relative to the executable at runtime

@@ -591,9 +591,11 @@ class HudMain(QObject):
     AX_READS_PER_HAND = 6
     """How many times a table's window may be re-read within one hand.
 
-    Each read costs ~20ms and the seats settle within the first few log lines,
-    so this bounds the cost while still letting a table that was read before it
-    was drawn fill in.
+    A read costs ~20ms through the macOS accessibility API and 100-300ms
+    through Windows UIAutomation (measured on a Chromium window), and the seats
+    settle within the first few log lines, so this bounds the cost while still
+    letting a table that was read before it was drawn fill in. Reads stop as
+    soon as the table looks full, so a full table costs one or two of them.
     """
 
     HERO_SLOT = 0
@@ -846,6 +848,12 @@ class HudMain(QObject):
             # once; this makes read_stdin idempotent so each hand refreshes the
             # HUD exactly once, without re-running create/update on a duplicate.
             self._last_processed_hands: dict[str, str] = {}
+            # Tables whose window this session found at least once, and tables
+            # already reported as not found. Together they keep "table not found"
+            # an error the first time and a routine note once the table is known
+            # to have existed and closed (see _log_table_not_found).
+            self._tables_attached: set[str] = set()
+            self._tables_not_found: set[str] = set()
             # Winamax log pool -> hud_dict key, learned once a hand from that
             # table has been imported and reused while the table stays open.
             self._winamax_pool_huds: dict[str, str] = {}
@@ -1024,6 +1032,11 @@ class HudMain(QObject):
         # Reads seats off the table window itself. The log can only say who has
         # acted, and never where they sit; this knows both, immediately.
         self.winamax_ax_seats = WinamaxAXSeatReader() if is_supported() else None
+        if self.winamax_ax_seats is not None:
+            # Whatever the reader has to build, it builds now: the first hand of
+            # the session must not pay for it on the GUI thread.
+            with contextlib.suppress(Exception):
+                self.winamax_ax_seats.prewarm()
 
         # The window says which game it deals only to a process holding macOS
         # Accessibility. Imported hands say it unconditionally, so keep what
@@ -1586,7 +1599,11 @@ class HudMain(QObject):
         if reader is None or not title:
             return None
         try:
-            return reader.read_window(title, getattr(hud, "max", 6) or 6) or {}
+            return reader.read_window(
+                title,
+                getattr(hud, "max", 6) or 6,
+                window_id=getattr(table, "number", None),
+            ) or {}
         except Exception:
             log.exception("Could not re-read the Fast-Fold window %r while sweeping idle tables", title)
             return None
@@ -1722,7 +1739,7 @@ class HudMain(QObject):
             anchor_seat = engine._anchor_slot(hud) or 3
             seat_map = {((slot + anchor_seat - 1) % max_seats) + 1: login for slot, login in slots.items()}
             source = "window"
-        elif slots:
+        elif slots and not self._ax_reads_spent(hud, update.hand_id):
             # Either the window holds nobody but the hero -- between hands, or
             # waiting for players -- or it was caught half-drawn. Either way
             # there is no table to describe yet; the rechecks will come back.
@@ -1875,10 +1892,15 @@ class HudMain(QObject):
             table_pos = (float(table.x), float(table.y))
 
         started = time.monotonic()
-        if table_pos is not None:
-            slots = reader.read_window(title, max_seats, table_pos=table_pos)
-        else:
-            slots = reader.read_window(title, max_seats)
+        # The window id is the table's identity: every window of a Fast-Fold
+        # pool carries the same name, and resolving one by title again -- on
+        # every read of every hand -- means enumerating the whole desktop.
+        slots = reader.read_window(
+            title,
+            max_seats,
+            table_pos=table_pos,
+            window_id=getattr(table, "number", None),
+        )
         took = (time.monotonic() - started) * 1000
         # A read holding the hero's chair beats one without it even when the
         # one without it names more players: the second caught the window
@@ -1898,6 +1920,22 @@ class HudMain(QObject):
                 f"slots={ {s: best[s] for s in sorted(best)} } empty={empty}",
             )
         return best
+
+    def _ax_reads_spent(self, hud: Hud.Hud, hand_id: str) -> bool:
+        """Whether this hand's budget of window reads is used up for this table.
+
+        Once it is, re-reading cannot improve the answer within this hand, so a
+        window read that never showed a dealt table has said all it is going to
+        say -- and the log-derived ring, slow as it is, describes the table
+        better than nothing. Without this, a client that answers the
+        accessibility API only partially (or not at all, while still yielding a
+        label or two) would leave the overlay permanently blank, which is worse
+        than the ring it replaced.
+        """
+        table = getattr(hud, "table", None)
+        table_key = getattr(table, "key", None) or getattr(table, "title", "") or ""
+        cached_hand, _cached_slots, reads = self._ax_rings.get(table_key, (None, {}, 0))
+        return cached_hand == hand_id and reads >= self.AX_READS_PER_HAND
 
     def _on_fast_fold_stats(self, result: FastFoldStatsResult) -> None:
         """Apply stats the worker read for a Fast-Fold table. Runs on the GUI thread."""
@@ -2336,6 +2374,76 @@ class HudMain(QObject):
             self.client_moved(None, hud)
         elif status == "client_resized":
             self.client_resized(None, hud)
+        elif getattr(table, "type", "") == "tour":
+            self._handle_tour_table_switch(hud, table)
+
+    def _log_table_not_found(
+        self,
+        temp_key: str,
+        table_name: str,
+        db_site: str,
+        hud_site: str,
+        tablewindow: Any,
+    ) -> None:
+        """Report a table whose window could not be found, at the right volume.
+
+        A hand reaches the HUD 15 to 30 seconds after it was played, so the last
+        hands of a table that has just been closed -- and every hand of a Sit'n'Go
+        whose file the client only writes once the match is over -- routinely
+        arrive with no window left to attach to. Logged as errors, and once per
+        hand, they buried the case that is a real failure: a table that is open
+        on screen and never gets a HUD. That one still logs an error, once, with
+        the search string it failed on, which is the part that identifies why.
+        """
+        if temp_key in self._tables_attached:
+            report = log.info  # window was found before: the table has since closed
+        elif temp_key in self._tables_not_found:
+            report = log.debug  # already reported once for this table
+        else:
+            report = log.error
+        self._tables_not_found.add(temp_key)
+        report(
+            "HUD create: table name %s not found for db_site=%s hud_site=%s (searched %r), skipping.",
+            table_name,
+            db_site,
+            hud_site,
+            getattr(tablewindow, "search_string", ""),
+        )
+
+    def _handle_tour_table_switch(self, hud: Hud.Hud, table: Any) -> None:
+        """Kill a tournament HUD whose window has moved on to another table.
+
+        check_table() only watches geometry, so a window that keeps its size and
+        position while its title changes table went unnoticed until a hand of the
+        new table was imported -- 15 to 30 seconds later on a Twister, where the
+        client reuses the same window for the next match of the series. Until
+        then the finished tournament's HUD sat on the new table showing the
+        previous opponents. Killing it here means the worst case is no HUD for a
+        few seconds instead of a wrong one.
+        """
+        try:
+            seen = table.get_table_no()
+        except Exception:
+            log.debug("Table title check failed for %r", getattr(table, "key", "?"), exc_info=True)
+            return
+        if seen is False:
+            return
+        # The number the title carried when the HUD attached is the baseline, so
+        # a site whose title never shows the table id simply never signals here
+        # instead of the HUD being killed on a mismatch it cannot control.
+        baseline = getattr(table, "title_table_no", None)
+        if baseline is None:
+            table.title_table_no = seen
+            return
+        if seen != baseline:
+            log.warning(
+                "HUD dropped: window %s left table %s (title now shows table %s, was %s)",
+                table.number,
+                table.key,
+                seen,
+                baseline,
+            )
+            self.table_is_stale(hud)
 
     def _topify_mac_windows(self) -> None:
         """Bring all HUD windows to the top on macOS."""
@@ -3433,12 +3541,7 @@ class HudMain(QObject):
         if tablewindow.number is None:
             if game_type == "tour":
                 table_name = f"{tour_number} {tab_number}"
-            log.error(
-                "HUD create: table name %s not found for db_site=%s hud_site=%s, skipping.",
-                table_name,
-                info.site_name,
-                hud_site_name,
-            )
+            self._log_table_not_found(temp_key, table_name, info.site_name, hud_site_name, tablewindow)
             return
         if tablewindow.number in self.blacklist:
             log.warning(
@@ -3452,6 +3555,12 @@ class HudMain(QObject):
         # One WARNING per HUD creation so the log always records WHICH window
         # was matched: user reports of "table not detected" are impossible to
         # diagnose without the matched hwnd/title (or their absence).
+        self._tables_attached.add(temp_key)
+        # Baseline for _handle_tour_table_switch, taken from the title this HUD
+        # was built on rather than from the first poll up to 800 ms later: a
+        # Twister window handed to the next match in between would otherwise
+        # become the baseline, and the stale HUD would sit there unnoticed.
+        tablewindow.seed_title_table_no()
         log.warning(
             "HUD attach: table=%r site=%s hwnd=%s title=%r geometry=(%s,%s %sx%s)",
             temp_key,

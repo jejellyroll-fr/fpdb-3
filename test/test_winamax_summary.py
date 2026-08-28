@@ -1,16 +1,11 @@
 """Tests for WinamaxSummary parser."""
 
 import datetime
-import sys
 from decimal import Decimal
-from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
 from bs4 import BeautifulSoup
-
-# Add project path for imports
-sys.path.insert(0, str((Path(__file__).parent / "..").resolve()))
 
 from fpdb_3_legacy.Exceptions import FpdbParseError
 from fpdb_3_legacy.WinamaxSummary import WinamaxSummary

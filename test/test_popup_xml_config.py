@@ -5,12 +5,10 @@ Test suite for validating HUD_config.xml popup configurations.
 """
 
 import os
-import sys
 import unittest
 import xml.etree.ElementTree as ET
 
 # Add the parent directory to Python path for imports
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
 class TestPopupXMLConfiguration(unittest.TestCase):

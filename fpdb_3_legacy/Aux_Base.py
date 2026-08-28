@@ -16,9 +16,12 @@
 from __future__ import annotations
 
 import contextlib
+import math
+import time
 from typing import TYPE_CHECKING, Any
 
 from PySide6.QtCore import QPoint, Qt
+from PySide6.QtGui import QGuiApplication
 from PySide6.QtWidgets import QApplication, QWidget
 
 if TYPE_CHECKING:
@@ -36,21 +39,69 @@ def _drag_trace(msg: str, *args: object) -> None:
     hud_trace(msg, *args)
 
 
+# Two rotations of a layout's slots fit the ring of chairs equally well when
+# their least-squares errors are within this factor of each other. The shipped
+# layouts, whose slots sit between the chairs rather than on them, are exactly
+# that case; the tie is then broken towards the bottom of the table.
+_RING_FIT_TIE = 1.05
+
 # True while a HUD window is being dragged. HUD_main.check_tables polls this to
 # suspend its 800ms geometry scan + window re-raise (topify), which on macOS
 # re-orders the dragged window mid-drag and makes the drag stutter.
 _drag_active = False
+_drag_started_at = 0.0
+
+#: How long a drag is believed without any other sign of life. Long enough that
+#: no real drag is cut short, short enough that a closed table's blocks go away
+#: while the user is still looking at where they were.
+DRAG_ACTIVE_TIMEOUT_S = 5.0
+
+
+def _a_mouse_button_is_down() -> bool:
+    """Whether the platform still reports a held mouse button.
+
+    True when it cannot be asked -- no QGuiApplication yet, or a stubbed Qt in a
+    test. The timeout is then the only bound, which is the right way to be
+    wrong: cancelling a drag that is really in progress is worse.
+    """
+    try:
+        return bool(QGuiApplication.mouseButtons())
+    except (AttributeError, RuntimeError, TypeError):
+        return True
 
 
 def is_drag_active() -> bool:
-    """Whether a HUD window is currently being dragged."""
-    return _drag_active
+    """Whether a HUD window is currently being dragged.
+
+    The flag is cleared by SeatWindow's mouse release, and that release is not
+    guaranteed to arrive. ``startSystemMove()`` hands the drag to the window
+    manager, which runs its own modal loop and does not deliver the release to
+    the widget; the widget can also be destroyed mid-drag, when the table it
+    belongs to is the one being closed.
+
+    The flag then stayed True for the rest of the process's life -- and since
+    ``HUD_main.check_tables`` polls it *before* looking at any table, one such
+    drag meant no HUD was ever taken down again. Closing a table, or quitting
+    the client, left its blocks on screen until FPDB was restarted.
+
+    So a set flag is now believed only while it is plausible: a mouse button
+    still down, and not older than :data:`DRAG_ACTIVE_TIMEOUT_S`. Being wrong
+    here costs one stuttering drag; being wrong the other way cost every HUD.
+    """
+    if not _drag_active:
+        return False
+    if time.monotonic() - _drag_started_at > DRAG_ACTIVE_TIMEOUT_S or not _a_mouse_button_is_down():
+        _drag_trace("drag-flag cleared: no release was delivered")
+        set_drag_active(False)
+        return False
+    return True
 
 
 def set_drag_active(active: bool) -> None:
     """Mark drag start/stop (set from SeatWindow press/release)."""
-    global _drag_active
+    global _drag_active, _drag_started_at
     _drag_active = active
+    _drag_started_at = time.monotonic() if active else 0.0
 
 
 def _nearest_screen(app: Any, x: int, y: int) -> Any:
@@ -1074,24 +1125,70 @@ class AuxSeats(AuxWindow):
             )
         return synth
 
-    def _bottom_center_slot(self) -> int:
-        """Layout slot rendered at the bottom-centre (max y, nearest to centre-x).
+    def _slot_bearings(self) -> list[tuple[float, int]]:
+        """Every configured slot as ``(bearing, slot)``, sorted clockwise from the bottom.
 
-        This is the anchor every poker client rotates the hero to, computed from
-        the layout geometry rather than a hand-maintained per-size integer.
+        The bearing is the direction of a slot seen from the middle of the ring
+        of slots: 0 is straight down, 90 is left, 180 is up. The middle is the
+        centroid of the slots themselves rather than the middle of the layout,
+        so a layout whose blocks all sit to one side still yields true angles.
         """
         layout = self.hud.layout
-        center_x = (getattr(layout, "width", 0) or 0) / 2
-        best = self.hud.max
-        best_key: tuple[int, float] | None = None
+        points: list[tuple[int, float, float]] = []
         for i in range(1, self.hud.max + 1):
             loc = layout.location[i] if i < len(layout.location) else None
             if loc is None:
                 continue
-            key = (loc[1], -abs(loc[0] - center_x))
-            if best_key is None or key > best_key:
-                best_key, best = key, i
-        return best
+            points.append((i, float(loc[0]), float(loc[1])))
+        if not points:
+            return []
+        cx = sum(point[1] for point in points) / len(points)
+        cy = sum(point[2] for point in points) / len(points)
+        bearings = [(math.degrees(math.atan2(cx - x, y - cy)) % 360.0, i) for i, x, y in points]
+        bearings.sort()
+        return bearings
+
+    def _bottom_center_slot(self) -> int:
+        """Layout slot that belongs to the client's bottom-centre chair.
+
+        The chairs of a table are evenly spaced around it and every client draws
+        the hero at the bottom-centre one, so a layout's slots are a rotation of
+        that ring. This finds which rotation, by least squares over the angles,
+        and returns the slot landing on the bottom chair. It is the anchor the
+        hero is rotated to, computed from the layout rather than from a
+        hand-maintained per-size integer.
+
+        Comparing whole rings is what makes this survive a hand-arranged layout.
+        Reading a single block's position instead -- "the lowest slot, nearest
+        the middle", as this used to -- loses to the way players actually
+        arrange them: a bottom-centre block nudged aside to clear the hero's own
+        cards and buttons sits higher than the bottom-left one, so the
+        bottom-left slot won the comparison and every stat block on the table
+        was drawn one chair off.
+
+        Ties go to the slot closest to straight down, which keeps the answer
+        unchanged for the shipped layouts whose slots sit between the chairs and
+        therefore fit two rotations equally well.
+        """
+        bearings = self._slot_bearings()
+        if not bearings:
+            return self.hud.max
+        step = 360.0 / self.hud.max
+        candidates: list[tuple[float, float, int]] = []
+        for rotation in range(len(bearings)):
+            total = 0.0
+            own = 0.0
+            for offset in range(len(bearings)):
+                bearing, _slot = bearings[(rotation + offset) % len(bearings)]
+                error = abs((bearing - offset * step + 180.0) % 360.0 - 180.0)
+                total += error * error
+                if offset == 0:
+                    own = error
+            candidates.append((total, own, bearings[rotation][1]))
+
+        best_total = min(candidate[0] for candidate in candidates)
+        tied = [candidate for candidate in candidates if candidate[0] <= best_total * _RING_FIT_TIE]
+        return min(tied, key=lambda candidate: (candidate[1], candidate[2]))[2]
 
     def _anchor_slot(self) -> int:
         """Layout slot the hero's block is pinned to.

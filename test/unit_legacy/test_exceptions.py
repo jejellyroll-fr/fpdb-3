@@ -1,12 +1,7 @@
 """Unit tests for fpdb_3_legacy.Exceptions."""
 from __future__ import annotations
 
-import os
-import sys
-
 import pytest
-
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 
 from fpdb_3_legacy import Exceptions
 

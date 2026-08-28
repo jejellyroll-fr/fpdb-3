@@ -10,13 +10,8 @@ This module tests the newly implemented advanced statistics:
 - Probe Bet River
 """
 
-import os
-import sys
 
 import pytest
-
-# Add the project root to the Python path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from fpdb_3_legacy.Stats import (
     cb_ip,
