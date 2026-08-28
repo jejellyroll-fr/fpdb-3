@@ -3034,3 +3034,126 @@ def test_hud_is_fast_fold_matches_base_name_and_sets_flag(hud_main) -> None:
 
     assert hud_main._hud_is_fast_fold(hud, "Bucarest 1") is True
     assert hud.is_fast_fold is True
+
+
+def _tour_table(numbers: list[int | bool]) -> SimpleNamespace:
+    """A tournament table window whose title reports `numbers` in turn."""
+    reads = iter(numbers)
+    return SimpleNamespace(
+        type="tour",
+        number=19310,
+        key="1200531182 Table 1200531183",
+        title_table_no=None,
+        get_table_no=lambda: next(reads),
+    )
+
+
+def test_a_window_staying_on_its_table_keeps_its_hud(hud_main) -> None:
+    """The poll must not disturb a table that is simply still being played."""
+    table = _tour_table([1200531183, 1200531183])
+    hud = SimpleNamespace(table=table)
+
+    with patch.object(hud_main, "table_is_stale") as stale:
+        hud_main._handle_tour_table_switch(hud, table)  # attaches the baseline
+        hud_main._handle_tour_table_switch(hud, table)
+
+    stale.assert_not_called()
+    assert table.title_table_no == 1200531183
+
+
+def test_a_window_taken_over_by_the_next_match_drops_its_hud(hud_main) -> None:
+    """A Twister client reuses the window for the next match of the series.
+
+    Without this the finished tournament's HUD stayed on screen -- previous
+    opponents and all -- until a hand of the new match was imported.
+    """
+    table = _tour_table([1200531183, 1200533055])
+    hud = SimpleNamespace(table=table)
+
+    with patch.object(hud_main, "table_is_stale") as stale:
+        hud_main._handle_tour_table_switch(hud, table)
+        hud_main._handle_tour_table_switch(hud, table)
+
+    stale.assert_called_once_with(hud)
+
+
+def test_a_title_without_a_table_id_never_signals_a_switch(hud_main) -> None:
+    """Sites whose title omits the table id must not have their HUD killed."""
+    table = _tour_table([False, False])
+    hud = SimpleNamespace(table=table)
+
+    with patch.object(hud_main, "table_is_stale") as stale:
+        hud_main._handle_tour_table_switch(hud, table)
+        hud_main._handle_tour_table_switch(hud, table)
+
+    stale.assert_not_called()
+    assert table.title_table_no is None
+
+
+def test_a_table_that_was_never_found_is_an_error_once(hud_main) -> None:
+    """A table open on screen that never gets a HUD is the case worth shouting about."""
+    window = SimpleNamespace(search_string="Sea Lake")
+
+    with patch.object(HUD_main.log, "error") as error, patch.object(HUD_main.log, "debug") as debug:
+        hud_main._log_table_not_found("Sea Lake, 1", "Sea Lake, 1", "Bwin.fr Poker", "Bwin.fr Poker", window)
+        hud_main._log_table_not_found("Sea Lake, 1", "Sea Lake, 1", "Bwin.fr Poker", "Bwin.fr Poker", window)
+
+    assert error.call_count == 1
+    assert debug.call_count == 1  # the repeat, not a second error
+
+
+def test_a_closed_table_is_not_reported_as_an_error(hud_main) -> None:
+    """Hands reach the HUD seconds late, so a just-closed table has no window left."""
+    window = SimpleNamespace(search_string="Sea Lake")
+    hud_main._tables_attached.add("Sea Lake, 1")
+
+    with patch.object(HUD_main.log, "error") as error, patch.object(HUD_main.log, "info") as info:
+        hud_main._log_table_not_found("Sea Lake, 1", "Sea Lake, 1", "Bwin.fr Poker", "Bwin.fr Poker", window)
+
+    error.assert_not_called()
+    assert info.call_count == 1
+
+
+def test_the_baseline_is_the_table_the_hud_was_built_on(hud_main) -> None:
+    """A window handed to the next match before the first poll must not set it.
+
+    Seeding at attach is what makes the poll compare against the table this HUD
+    was actually built on; taking the first poll's read as the baseline would
+    adopt the replacement table and leave the stale HUD in place for good.
+    """
+    table = _tour_table([1200533055, 1200533055])  # window already moved on
+    table.title_table_no = 1200531183  # what seed_title_table_no() recorded
+    hud = SimpleNamespace(table=table)
+
+    with patch.object(hud_main, "table_is_stale") as stale:
+        hud_main._handle_tour_table_switch(hud, table)
+
+    stale.assert_called_once_with(hud)
+
+
+def test_a_seeded_table_window_reads_its_number_from_the_matched_title() -> None:
+    """seed_title_table_no() uses the title the window search already captured."""
+    from fpdb_3_legacy.TableWindow import Table_Window
+
+    table = Table_Window.__new__(Table_Window)
+    table.tableno_re = r"^[^|]*?(?<!\d)(\d{6,})\s*(?:\||$)"
+    table.title = "Twister 0.25€ 1200531183 | NL Hold'em | Niveau 1 | 10/20"
+    table.title_table_no = None
+
+    table.seed_title_table_no()
+
+    assert table.title_table_no == 1200531183
+
+
+def test_a_title_the_pattern_cannot_read_leaves_no_baseline() -> None:
+    """No baseline means the poll leaves that HUD alone, which is the safe end."""
+    from fpdb_3_legacy.TableWindow import Table_Window
+
+    table = Table_Window.__new__(Table_Window)
+    table.tableno_re = r"(?:Twister|Spins)"  # no capturing group
+    table.title = "Twister 0.25€ | NL Hold'em"
+    table.title_table_no = None
+
+    table.seed_title_table_no()
+
+    assert table.title_table_no is None

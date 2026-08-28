@@ -1311,6 +1311,30 @@ class iPoker(IPokerStreetsActionsMixin, IPokerHandInfoMixin, IPokerTournamentRes
             log.exception("Error processing tournament summary")
 
     @staticmethod
+    def getTableNoRe(tournament: str | int) -> str:  # noqa: ARG004
+        """Return the regex that reads the table id back out of a window title.
+
+        The inherited pattern (``<tournament>.+(?:Table|Torneo) (\\d+)``) never
+        matches an iPoker title: the tournament number is absent from it and the
+        table is not labelled "Table <n>". A title reads
+
+            "Twister 0.25€ 1200531183 | NL Hold'em | Niveau 1 | 10/20"
+
+        so the id is the long number closing the first segment. Without this,
+        ``get_table_no`` always returned False and a window that changed table --
+        an MTT reseat, or the next match of a Twister series taking over the same
+        window -- was never detected.
+
+        Anchored to the end of that segment rather than taking the first long
+        number in it: a table can be named after its tournament as well
+        ("1193390834 Twister, 5867402179"), and reading the tournament number as
+        the table would make has_table_title_changed() call every hand a reseat
+        and kill the HUD on each one. The lookbehind keeps the match from
+        starting mid-number and returning a truncated id.
+        """
+        return r"^[^|]*?(?<!\d)(\d{6,})\s*(?:\||$)"
+
+    @staticmethod
     def getTableTitleRe(
         game_type: str,
         table_name: str | None = None,
@@ -1362,9 +1386,25 @@ class iPoker(IPokerStreetsActionsMixin, IPokerHandInfoMixin, IPokerTournamentRes
                 is_twister = True
 
             if is_twister:
-                # Twister tables don't have table numbers in the window title, they are named "Twister" or "Spins"
-                # We return a regex matching either Twister or Spins (branded on some French skins like Bwin.fr/PMU)
-                regex = r"(?:Twister|Spins)"
+                # Twister/Spins titles carry no "Table <n>", but they do end the
+                # name segment with the physical table id:
+                #   "Twister 0.25€ 1200531183 | NL Hold'em | Niveau 1 | 10/20"
+                # Pinning the regex to that id matters because the client reuses
+                # the SAME window for the next match of a Twister series: a bare
+                # "(?:Twister|Spins)" matched the recycled window, so the HUD of a
+                # tournament that had just ended was drawn -- previous opponents
+                # and all -- on the table of the new one, and every Twister of a
+                # multi-tabling session matched the same window.
+                table_id = str(table_number) if table_number is not None else ""
+                min_table_id_digits = 6  # every real iPoker table id is 9-10 digits
+                if table_id.isdigit() and len(table_id) >= min_table_id_digits and table_id != str(tournament):
+                    regex = rf"(?:Twister|Spins)[^|]*\b{table_id}\b"
+                else:
+                    # No usable table id (hand histories that never carried one,
+                    # so TableWindow handed back the tournament number or a bare
+                    # seat-style index): keep the loose match rather than pinning
+                    # the search to a number the title does not contain.
+                    regex = r"(?:Twister|Spins)"
                 log.debug("Generated regex for Twister/Spins SNG: %s", regex)
                 return regex
 

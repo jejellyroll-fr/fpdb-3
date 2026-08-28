@@ -22,6 +22,12 @@ _PLAYER_TAG_RE = re.compile(
     r'<player\b(?=[^>]*\bname="(?P<PNAME>[^"]*)")(?=[^>]*\bseat="(?P<SEAT>\d+)")[^>]*>',
 )
 _SESSION_CODE_RE = re.compile(r'sessioncode="(?P<CODE>\d+)"')
+_GAMECODE_RE = re.compile(r'<game gamecode="(?P<HID>\d+)"')
+# The placeholder a seat gets when the session names nobody for it. Matched in
+# full rather than by its "anon_" prefix: "anon_hunter" is a screen name someone
+# may well be sitting under, and reading it as a placeholder would drop the
+# hands that player is recovered in.
+_ANON_SCOPE_RE = re.compile(r"^anon_\d+_\d+$")
 
 
 class IPokerHandInfoMixin:
@@ -88,7 +94,16 @@ class IPokerHandInfoMixin:
         self._seat_names = resolved
         return resolved
 
-    def _deanonymize_players(self, hand: Any) -> None:
+    @staticmethod
+    def _named_players(hand_text: str) -> list[str]:
+        """Players the hand can actually be credited to, placeholders excluded."""
+        return [
+            m.group("PNAME")
+            for m in _PLAYER_TAG_RE.finditer(hand_text)
+            if not _ANON_SCOPE_RE.match(m.group("PNAME"))
+        ]
+
+    def _deanonymize_players(self, hand: Any) -> tuple[int, int]:
         """Recover anonymous "Player N" opponents in place on hand.handText.
 
         Only hands where the hero is not dealt are anonymous. There is therefore
@@ -102,6 +117,10 @@ class IPokerHandInfoMixin:
         markStreets/readBlinds/readAction/readHoleCards/readCollectPot all
         re-parse hand.handText, so rewriting it once here keeps players, actions,
         cards and collectees consistent under the recovered names.
+
+        Returns how many players were anonymous and how many of them were
+        recovered, which is what lets readHandInfo drop a hand nobody can be put
+        a name to.
         """
         hero_nick = getattr(self, "hero", "") or ""
 
@@ -111,7 +130,7 @@ class IPokerHandInfoMixin:
             if _ANON_NAME_RE.match(m.group("PNAME"))
         ]
         if not anon_players:
-            return  # named hand (hero dealt in): real names already present.
+            return 0, 0  # named hand (hero dealt in): real names already present.
 
         session = self._session_code()
         seat_names = self._session_seat_names()
@@ -131,10 +150,11 @@ class IPokerHandInfoMixin:
             text = text.replace(f'name="{old}"', f'name="{new}"').replace(f'player="{old}"', f'player="{new}"')
         hand.handText = text
 
-        recovered = {old: new for old, new in rename.items() if not new.startswith("anon_")}
+        recovered = {old: new for old, new in rename.items() if not _ANON_SCOPE_RE.match(new)}
         if recovered:
             log.info("iPoker de-anonymisation: recovered opponents from session seat map: %s", recovered)
         log.debug("iPoker de-anonymisation rename map: %s", rename)
+        return len(anon_players), len(recovered)
 
     def readHandInfo(self, hand: Any) -> None:
         """Parses the hand text and extracts relevant information about the hand.
@@ -144,6 +164,8 @@ class IPokerHandInfoMixin:
 
         Raises:
             FpdbParseError: If the hand text cannot be parsed.
+            FpdbHandPartial: If every player in the hand is anonymous and no seat
+                can be put a name to.
 
         Returns:
             None
@@ -152,7 +174,22 @@ class IPokerHandInfoMixin:
 
         # Recover anonymous "Player N" opponents before anything else reads
         # player names (see _deanonymize_players).
-        self._deanonymize_players(hand)
+        anonymous, recovered = self._deanonymize_players(hand)
+        if anonymous and not recovered and not self._named_players(hand.handText):
+            # Nothing in the session names a single seat yet -- live import
+            # reaching an observed hand before the hero has played one. Storing
+            # it would create a Players row per seat ("anon_<session>_<seat>")
+            # that no statistic can ever be read back through: the hero is not in
+            # the hand, so it builds no HUD, and the real names the file reveals
+            # minutes later never reach the rows already written. Leave the hand
+            # out instead; a later full import of the file, by then holding the
+            # named hands, stores it under the real opponents.
+            gamecode = _GAMECODE_RE.search(hand.handText)
+            msg = (
+                f"Hand {gamecode.group('HID') if gamecode else '?'} is fully anonymous and no seat is named "
+                f"anywhere in the session yet; skipped rather than stored under placeholder players"
+            )
+            raise FpdbHandPartial(msg)
 
         # Parse hand info from regex
         match = self._parse_hand_info_regex(hand.handText)
