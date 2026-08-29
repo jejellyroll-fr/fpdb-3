@@ -177,3 +177,97 @@ def test_a_label_whose_owner_cannot_be_read_is_kept() -> None:
             raise OSError(msg)
 
     assert [label.login for label in _client().collect_labels(_FakeRoot([_Unreadable()]))] == ["Bussy67"]
+
+
+#: ctypes.windll exists only on Windows, and these three drive it directly.
+needs_windll = pytest.mark.skipif(
+    not hasattr(winamax_ax_seats.ctypes, "windll"),
+    reason="ctypes.windll is Windows-only",
+)
+
+
+@needs_windll
+def test_a_chromium_client_is_asked_to_publish_its_tree(monkeypatch) -> None:
+    """What the macOS reader does with AXManualAccessibility, on Windows.
+
+    "Chromium only builds its web accessibility tree when an assistive client
+    asks for it; without this the windows expose nothing but their titles" --
+    and that is exactly what a Winamax table measured on Windows: six nodes, the
+    window title among them, not one player.
+    """
+    winamax_ax_seats.forget_accessibility_requests()
+    monkeypatch.setattr(winamax_ax_seats.platform, "system", lambda: "Windows")
+    sent = []
+
+    class _User32:
+        @staticmethod
+        def EnumChildWindows(_parent, callback, _param):  # noqa: N802 - Win32 API
+            callback(4242, 0)
+            return True
+
+        @staticmethod
+        def SendMessageTimeoutW(hwnd, msg, _w, lparam, _flags, _timeout, _res):  # noqa: N802 - Win32 API
+            sent.append((hwnd.value, msg, lparam.value))
+            return 1
+
+    monkeypatch.setattr(winamax_ax_seats.ctypes.windll, "user32", _User32, raising=False)
+
+    winamax_ax_seats.request_windows_accessibility(1234)
+
+    assert [s[0] for s in sent] == [1234, 4242]  # the frame and its render surface
+    assert {s[1] for s in sent} == {winamax_ax_seats._WM_GETOBJECT}
+    assert {s[2] for s in sent} == {winamax_ax_seats._OBJID_CLIENT}
+
+
+@needs_windll
+def test_a_window_is_only_asked_once(monkeypatch) -> None:
+    """Once the client has built its tree, asking again buys nothing."""
+    winamax_ax_seats.forget_accessibility_requests()
+    monkeypatch.setattr(winamax_ax_seats.platform, "system", lambda: "Windows")
+    calls = []
+
+    class _User32:
+        @staticmethod
+        def EnumChildWindows(*_a):  # noqa: N802 - Win32 API
+            return True
+
+        @staticmethod
+        def SendMessageTimeoutW(*_a):  # noqa: N802 - Win32 API
+            calls.append(1)
+            return 1
+
+    monkeypatch.setattr(winamax_ax_seats.ctypes.windll, "user32", _User32, raising=False)
+
+    winamax_ax_seats.request_windows_accessibility(1234)
+    winamax_ax_seats.request_windows_accessibility(1234)
+    winamax_ax_seats.request_windows_accessibility(1234)
+
+    assert len(calls) == 1
+
+
+@needs_windll
+def test_a_client_that_will_not_answer_is_not_fatal(monkeypatch) -> None:
+    """A busy or blocked client must not take the HUD down with it."""
+    winamax_ax_seats.forget_accessibility_requests()
+    monkeypatch.setattr(winamax_ax_seats.platform, "system", lambda: "Windows")
+
+    class _User32:
+        @staticmethod
+        def EnumChildWindows(*_a):  # noqa: N802 - Win32 API
+            msg = "the desktop went away"
+            raise OSError(msg)
+
+    monkeypatch.setattr(winamax_ax_seats.ctypes.windll, "user32", _User32, raising=False)
+
+    winamax_ax_seats.request_windows_accessibility(1234)  # must not raise
+
+
+def test_nothing_is_asked_off_windows(monkeypatch) -> None:
+    winamax_ax_seats.forget_accessibility_requests()
+    monkeypatch.setattr(winamax_ax_seats.platform, "system", lambda: "Darwin")
+    called = []
+    monkeypatch.setattr(winamax_ax_seats, "_accessibility_asked", called)
+
+    winamax_ax_seats.request_windows_accessibility(1234)
+
+    assert called == []

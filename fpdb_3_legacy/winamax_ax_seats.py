@@ -26,6 +26,7 @@ appear one at a time over the first betting round instead of all at once.
 
 from __future__ import annotations
 
+import ctypes
 import logging
 import math
 import os
@@ -245,6 +246,73 @@ class _WindowsUIAClient:
 
 _windows_uia_client: _WindowsUIAClient | None = None
 _windows_uia_unavailable = False
+
+#: WM_GETOBJECT / OBJID_CLIENT: what an assistive technology sends a window, and
+#: what a Chromium client watches for before it builds its accessibility tree.
+_WM_GETOBJECT = 0x003D
+_OBJID_CLIENT = -4
+_SMTO_ABORTIFHUNG = 0x0002
+_GETOBJECT_TIMEOUT_MS = 200
+
+#: Windows already asked, so a table is nudged once rather than on every read.
+_accessibility_asked: set[int] = set()
+
+
+def forget_accessibility_requests() -> None:
+    """Forget which windows have been asked, so the next read asks again."""
+    _accessibility_asked.clear()
+
+
+def request_windows_accessibility(hwnd: int) -> None:
+    """Ask a Chromium client to build its accessibility tree, once per window.
+
+    The macOS reader does this explicitly -- ``AXManualAccessibility`` on the
+    application -- and says why: "Chromium only builds its web accessibility
+    tree when an assistive client asks for it; without this the windows expose
+    nothing but their titles." Windows had no equivalent, and measured exactly
+    the symptom that note predicts: six nodes under a whole poker table, the
+    window title among them, and not one player. Every hand then fell back to
+    the client log, which names a player only once they have acted.
+
+    The Windows way of asking is WM_GETOBJECT with OBJID_CLIENT. It goes to the
+    table window and to each of its children, because the content is drawn in a
+    child render surface rather than the frame the HUD attached to.
+
+    SendMessageTimeout, never SendMessage: the client is another process, and a
+    blocked or busy one must not be able to hang the HUD's GUI thread. The tree
+    is built asynchronously, so the read that triggers this one will usually
+    still come back empty; the rechecks within the hand are what pick it up.
+    """
+    if platform.system() != "Windows" or not hwnd or hwnd in _accessibility_asked:
+        return
+    _accessibility_asked.add(hwnd)
+    try:
+        from ctypes import wintypes
+
+        user32 = ctypes.windll.user32
+        targets = [hwnd]
+
+        @ctypes.WINFUNCTYPE(wintypes.BOOL, wintypes.HWND, wintypes.LPARAM)
+        def _collect(child: int, _param: int) -> bool:
+            targets.append(child)
+            return True
+
+        user32.EnumChildWindows(wintypes.HWND(hwnd), _collect, 0)
+        result = ctypes.c_void_p()
+        for target in targets:
+            user32.SendMessageTimeoutW(
+                wintypes.HWND(target),
+                _WM_GETOBJECT,
+                0,
+                wintypes.LPARAM(_OBJID_CLIENT),
+                _SMTO_ABORTIFHUNG,
+                _GETOBJECT_TIMEOUT_MS,
+                ctypes.byref(result),
+            )
+        log.info("Asked %d window(s) of %s to publish their accessibility tree", len(targets), hwnd)
+    except Exception:
+        # Never fatal: without it the reader is exactly as blind as it was.
+        log.debug("Could not ask window %s for its accessibility tree", hwnd, exc_info=True)
 
 
 def reset_windows_uia() -> None:
@@ -680,6 +748,10 @@ class WinamaxAXSeatReader:
             if client is None:
                 return {}
 
+            # Ask before looking: a Chromium client publishes nothing until an
+            # assistive client asks, which is what the macOS reader does with
+            # AXManualAccessibility.
+            request_windows_accessibility(hwnd)
             elem = client.automation.ElementFromHandle(hwnd)
             if elem is None:
                 return {}
