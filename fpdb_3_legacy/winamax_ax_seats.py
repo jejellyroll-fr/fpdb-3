@@ -358,6 +358,11 @@ def _windows_uia() -> _WindowsUIAClient | None:
     return _windows_uia_client
 
 
+def read_window_for(hwnd: int, title: str = "", max_seats: int = 6) -> dict[int, str]:
+    """One window read by handle, for diagnostics that hold a HWND and no reader."""
+    return WinamaxAXSeatReader().read_window(title, max_seats, window_id=hwnd)
+
+
 def is_stack_label(text: str) -> bool:
     """Whether a text node is a chip count rather than anything else."""
     return bool(_STACK.match(text.strip()))
