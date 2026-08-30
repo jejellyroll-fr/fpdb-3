@@ -935,6 +935,14 @@ class HudMain(QObject):
             # two tables open, and a quarter with four, so multitabling gave up
             # on the reader before it had the evidence a single table needed.
             # See AX_FRUITLESS_READS_BEFORE_GIVING_UP.
+            # How long to let the client log finish naming a table's players
+            # before showing the ones it has. Read once: it is a preference, not
+            # something that changes within a session.
+            try:
+                self._fast_fold_seat_wait_ms = int(self.config.get_hud_ui_parameters().get("fast_fold_seat_wait_ms", 500))
+            except Exception:
+                log.debug("Could not read fast_fold_seat_wait_ms; using the default", exc_info=True)
+                self._fast_fold_seat_wait_ms = 500
             self._ax_fruitless_reads: dict[str, int] = {}
             self._ax_reader_gave_up: dict[str, bool] = {}
             # Timeline bookkeeping: when each hand's first log line arrived, and
@@ -1817,8 +1825,12 @@ class HudMain(QObject):
         elif update.ring and update.hero:
             hand_start_time = self._ff_started.get(update.hand_id, 0)
             elapsed = time.monotonic() - hand_start_time if hand_start_time else 1.0
-            if len(update.ring) < max_seats and elapsed < 0.5:
-                # Wait for the full ring to accumulate in log buffer so all 6 player HUDs appear simultaneously
+            if len(update.ring) < max_seats and elapsed * 1000 < self._fast_fold_seat_wait_ms:
+                # The client log names a player only once they have acted, so a
+                # six-handed table is named over several seconds. Showing what is
+                # known so far means blocks appearing one at a time; waiting means
+                # they appear together, later. Which of the two is worse is the
+                # player's call, not ours -- hud_ui/@fast_fold_seat_wait_ms.
                 return
             seat_map = build_seat_map(update.ring, update.hero, max_seats=max_seats, hero_seat=hero_seat)
             source = "log-ring"

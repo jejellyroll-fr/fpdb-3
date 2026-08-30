@@ -65,10 +65,23 @@ def _report_table(reader_module, table) -> int:
     for label in labels:
         print(f"      {label.login!r:24} @ ({label.x},{label.y})")
     if labels:
-        xs = [label.x for label in labels]
-        print(f"  label x range {min(xs)}..{max(xs)} -- compare with the window rect above:")
-        print("      same scale        -> positions are usable")
-        print("      roughly half/double -> the process and the client disagree on DPI")
+        # Each label against the window it is supposed to be inside, rather than
+        # a min/max over all of them: the window's own title reports itself at
+        # the window origin and a stray "Notifications" node reports (0,0), so a
+        # range spanning both looked like it covered the window when not one of
+        # the client's own labels was inside it.
+        outside = [
+            label
+            for label in labels
+            if not (rect.left <= label.x <= rect.right and rect.top <= label.y <= rect.bottom)
+        ]
+        print(f"  labels outside the window rect: {len(outside)} of {len(labels)}")
+        if outside:
+            print("      the client is not reporting positions in the window's coordinate space,")
+            print("      so the table centre computed from that rect puts every player on the")
+            print("      wrong chair -- the hero comes back off the bottom-centre slot.")
+            for label in outside[:5]:
+                print(f"        {label.login!r} @ ({label.x},{label.y})")
     print(f"  seats_from_labels: {reader_module.seats_from_labels(labels)}")
     print(f"  read_window      : {reader_module.read_window_for(hwnd, table.title)}")
     return len(labels)

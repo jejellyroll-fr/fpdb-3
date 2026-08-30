@@ -1053,6 +1053,8 @@ class HudUI:
     def __init__(self, node) -> None:
         self.node = node
         self.label = node.getAttribute("label")
+        if node.hasAttribute("fast_fold_seat_wait_ms"):
+            self.fast_fold_seat_wait_ms = node.getAttribute("fast_fold_seat_wait_ms")
         if node.hasAttribute("card_ht"):
             self.card_ht = node.getAttribute("card_ht")
         if node.hasAttribute("card_wd"):
@@ -3027,6 +3029,18 @@ class Config:
             hui["aggregate_ring"] = getattr(self.ui, "aggregate_ring", "True")
         except AttributeError:
             hui["aggregate_ring"] = "True"
+
+        # How long a Fast-Fold table waits for the client log to finish naming
+        # its players before it shows the ones it has. The log names a player
+        # only once they have acted, so a six-handed table is named over several
+        # seconds: showing at once means blocks appearing one at a time, waiting
+        # means they appear together but later. Neither is right for everyone,
+        # so it is a number rather than a decision. The default is what the HUD
+        # has always done.
+        try:
+            hui["fast_fold_seat_wait_ms"] = max(0, int(getattr(self.ui, "fast_fold_seat_wait_ms", 500)))
+        except (AttributeError, TypeError, ValueError):
+            hui["fast_fold_seat_wait_ms"] = 500
 
         try:
             hui["aggregate_tour"] = getattr(self.ui, "aggregate_tour", "True")

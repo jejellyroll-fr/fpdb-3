@@ -157,7 +157,14 @@
           16.7 (50 divided by 3) to big blind of 150 (50 times 3) are included
         - To include all levels, use a value of "10000"
 -->
-    <hud_ui stat_range="A" stat_days="90" aggregation_level_multiplier="3" seats_style="A" seats_cust_nums_low="6" seats_cust_nums_high="10" hero_stat_range="A" hero_stat_days="30" hero_aggregation_level_multiplier="1" hero_seats_style="A" hero_seats_cust_nums_low="6" hero_seats_cust_nums_high="10" label="FPDBmenu" card_ht="39" card_wd="28" deck_type="colour" card_back="back04"/>
+    <hud_ui stat_range="A" stat_days="90" aggregation_level_multiplier="3" seats_style="A" seats_cust_nums_low="6" seats_cust_nums_high="10" hero_stat_range="A" hero_stat_days="30" hero_aggregation_level_multiplier="1" hero_seats_style="A" hero_seats_cust_nums_low="6" hero_seats_cust_nums_high="10" label="FPDBmenu" card_ht="39" card_wd="28" deck_type="colour" card_back="back04"
+             fast_fold_seat_wait_ms="500"/>
+    <!-- fast_fold_seat_wait_ms: how long a Fast-Fold table waits for the client
+         log to finish naming its players before showing the ones it has. The log
+         names a player only once they have acted, so a six-handed table is named
+         over several seconds. 500 (the default) shows them as they arrive, one
+         block at a time; a larger value, say 5000, shows them together but later.
+         0 shows the first player the moment there is one. -->
 
 
     <supported_sites>
