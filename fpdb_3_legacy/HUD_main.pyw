@@ -227,11 +227,37 @@ class HudReadWorker(QThread):
         self.config = config
         self.db_factory = db_factory
         self._requests: Queue[HudBatchReadRequest | None] = Queue()
+        # Newest queued Fast-Fold request id per table, so the worker can drop
+        # the ones already superseded instead of reading for them. See submit().
+        self._latest_fast_fold: dict[str, int] = {}
+        self._latest_lock = threading.Lock()
         self._stopping = threading.Event()
 
     def submit(self, request: HudBatchReadRequest) -> None:
-        """Queue one immutable request from the Qt thread."""
+        """Queue one immutable request from the Qt thread.
+
+        A Fast-Fold request also records itself as its table's newest. The ring
+        grows a player at a time, so several reads for one table can be waiting
+        at once, and every one of them but the last describes a table that has
+        already changed. They used to be executed in full and discarded on
+        arrival by request id -- the database did the work, the GUI threw the
+        answer away. Now the worker drops them before reading.
+        """
+        if isinstance(request, FastFoldStatsRequest):
+            with self._latest_lock:
+                self._latest_fast_fold[request.temp_key] = request.request_id
         self._requests.put(request)
+
+    def _is_superseded(self, request: FastFoldStatsRequest) -> bool:
+        """Whether a newer read for the same table is already queued behind this one."""
+        with self._latest_lock:
+            latest = self._latest_fast_fold.get(request.temp_key)
+        return latest is not None and latest != request.request_id
+
+    def forget_fast_fold_table(self, temp_key: str) -> None:
+        """Drop what is remembered about a table nobody is watching any more."""
+        with self._latest_lock:
+            self._latest_fast_fold.pop(temp_key, None)
 
     @staticmethod
     def _configure_session(database: Database.Database) -> None:
@@ -338,6 +364,16 @@ class HudReadWorker(QThread):
 
             assert service is not None
             fast_fold = isinstance(pending, FastFoldStatsRequest)
+            if fast_fold and self._is_superseded(pending):
+                # The table has moved on while this waited its turn. Reading for
+                # it would spend a round trip on an answer the GUI discards.
+                log.debug(
+                    "Fast-Fold stats request %s for %s superseded before it ran",
+                    pending.request_id,
+                    pending.temp_key,
+                )
+                pending = None
+                continue
             try:
                 if fast_fold:
                     result = self._read_fast_fold_stats(database, pending)
@@ -894,9 +930,13 @@ class HudMain(QObject):
             # because each read walks another process's accessibility tree.
             self._ax_rings: dict[str, tuple[str, dict[int, str], int]] = {}
             # Window reads in a row that found nobody, and whether that has gone
-            # on long enough to stop trying. See AX_FRUITLESS_READS_BEFORE_GIVING_UP.
-            self._ax_fruitless_reads = 0
-            self._ax_reader_gave_up = False
+            # on long enough to stop trying -- both per table. A single counter
+            # for the whole session reached its threshold in half the hands with
+            # two tables open, and a quarter with four, so multitabling gave up
+            # on the reader before it had the evidence a single table needed.
+            # See AX_FRUITLESS_READS_BEFORE_GIVING_UP.
+            self._ax_fruitless_reads: dict[str, int] = {}
+            self._ax_reader_gave_up: dict[str, bool] = {}
             # Timeline bookkeeping: when each hand's first log line arrived, and
             # which hand/table request is currently allowed to update the HUD.
             self._ff_started: dict[str, float] = {}
@@ -1558,6 +1598,10 @@ class HudMain(QObject):
         if pending_generations is not None:
             pending_generations.pop(temp_key, None)
         self._forget_coalesced_fast_fold_stats(temp_key)
+        worker = getattr(self, "_db_worker", None)
+        if worker is not None:
+            with contextlib.suppress(Exception):
+                worker.forget_fast_fold_table(temp_key)
         if pending is None and not getattr(hud, "stat_dict", None) and not getattr(hud, "seat_players", None):
             return  # already down
         FastFoldEngine.clear_seats(hud)
@@ -1961,10 +2005,12 @@ class HudMain(QObject):
         reader = getattr(self, "winamax_ax_seats", None)
         table = getattr(hud, "table", None)
         title = getattr(table, "title", "") or ""
-        if reader is None or not title or self._ax_reader_gave_up:
+        if reader is None or not title:
             return {}
 
         table_key = getattr(table, "key", None) or title
+        if self._ax_reader_gave_up.get(table_key):
+            return {}
         cached_hand, cached_slots, reads = self._ax_rings.get(table_key, (None, {}, 0))
         if cached_hand != hand_id:
             cached_slots, reads = {}, 0
@@ -2014,16 +2060,18 @@ class HudMain(QObject):
         # draw. Measured on a live session: six reads a hand, on two tables,
         # 15-62ms each, every one of them players=0. Stop paying for it.
         if best:
-            self._ax_fruitless_reads = 0
+            self._ax_fruitless_reads[table_key] = 0
         else:
-            self._ax_fruitless_reads += 1
-            if self._ax_fruitless_reads >= self.AX_FRUITLESS_READS_BEFORE_GIVING_UP:
-                self._ax_reader_gave_up = True
+            fruitless = self._ax_fruitless_reads.get(table_key, 0) + 1
+            self._ax_fruitless_reads[table_key] = fruitless
+            if fruitless >= self.AX_FRUITLESS_READS_BEFORE_GIVING_UP:
+                self._ax_reader_gave_up[table_key] = True
                 log.warning(
-                    "Giving up on the window seat reader after %d reads that found nobody: this client "
-                    "does not publish its table through the accessibility API. Fast-Fold seats come from "
-                    "the client log, which names a player only once they have acted.",
-                    self._ax_fruitless_reads,
+                    "Giving up on the window seat reader for %s after %d reads that found nobody: this "
+                    "client is not publishing that table through the accessibility API. Its Fast-Fold "
+                    "seats come from the client log, which names a player only once they have acted.",
+                    table_key,
+                    fruitless,
                 )
 
         empty = sorted(set(range(max_seats)) - set(best))

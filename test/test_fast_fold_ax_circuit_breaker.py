@@ -32,8 +32,8 @@ def _hud_main(slots_per_read):
     return SimpleNamespace(
         winamax_ax_seats=reader,
         _ax_rings={},
-        _ax_fruitless_reads=0,
-        _ax_reader_gave_up=False,
+        _ax_fruitless_reads={},
+        _ax_reader_gave_up={},
         _ff_trace=MagicMock(),
         AX_READS_PER_HAND=HUD_main.HudMain.AX_READS_PER_HAND,
         AX_FRUITLESS_READS_BEFORE_GIVING_UP=GIVE_UP_AT,
@@ -46,8 +46,8 @@ def _hud(table_key: str = "Colorado 11 #3477872"):
     return SimpleNamespace(table=table)
 
 
-def _read(app, hand_id: str) -> dict:
-    return HUD_main.HudMain._ax_slots(app, _hud(), hand_id, 6)
+def _read(app, hand_id: str, table_key: str = "Colorado 11 #3477872") -> dict:
+    return HUD_main.HudMain._ax_slots(app, _hud(table_key), hand_id, 6)
 
 
 def test_the_reader_is_given_up_on_after_enough_empty_reads() -> None:
@@ -56,7 +56,7 @@ def test_the_reader_is_given_up_on_after_enough_empty_reads() -> None:
     for hand in range(GIVE_UP_AT):
         _read(app, f"hand-{hand}")
 
-    assert app._ax_reader_gave_up is True
+    assert app._ax_reader_gave_up.get("Colorado 11 #3477872") is True
 
 
 def test_no_further_reads_are_paid_for_once_it_has_given_up() -> None:
@@ -79,8 +79,8 @@ def test_a_reader_that_works_is_never_given_up_on() -> None:
     for hand in range(GIVE_UP_AT + 2):
         _read(app, f"hand-{hand}")
 
-    assert app._ax_reader_gave_up is False
-    assert app._ax_fruitless_reads == 0
+    assert app._ax_reader_gave_up.get("Colorado 11 #3477872") is None
+    assert app._ax_fruitless_reads.get("Colorado 11 #3477872") == 0
 
 
 def test_one_good_read_forgives_the_empty_ones_before_it() -> None:
@@ -90,4 +90,25 @@ def test_one_good_read_forgives_the_empty_ones_before_it() -> None:
     for hand in range(GIVE_UP_AT + 4):
         _read(app, f"hand-{hand}")
 
-    assert app._ax_reader_gave_up is False
+    assert app._ax_reader_gave_up.get("Colorado 11 #3477872") is None
+
+
+def test_one_table_giving_up_does_not_silence_another() -> None:
+    """A single counter reached its threshold in half the hands with two tables.
+
+    The evidence for "this client publishes nothing" has to be gathered per
+    table, or multitabling gives up before one table has been asked five hands'
+    worth of times.
+    """
+    app = _hud_main([{}] * (GIVE_UP_AT * 2 + 5))
+
+    for hand in range(GIVE_UP_AT):
+        _read(app, f"hand-{hand}", table_key="Colorado 11 #3477872")
+
+    assert app._ax_reader_gave_up.get("Colorado 11 #3477872") is True
+    assert app._ax_reader_gave_up.get("Colorado 12 #463544") is None
+
+    reads_before = app.winamax_ax_seats.read_window.call_count
+    _read(app, "another", table_key="Colorado 12 #463544")
+
+    assert app.winamax_ax_seats.read_window.call_count == reads_before + 1
