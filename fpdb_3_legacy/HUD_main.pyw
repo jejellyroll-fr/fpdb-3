@@ -1916,12 +1916,13 @@ class HudMain(QObject):
         if held is None:
             return
         hud, seat_map, hand_id = held
-        if self.hud_dict.get(temp_key) is not hud:
+        current = self.hud_dict.get(temp_key)
+        if current is None or current is not hud:
             # The table was cleared or rebuilt while the map waited; the request
             # would be answered against a HUD nobody is looking at.
             return
         self._ff_last_request_at[temp_key] = time.monotonic()
-        self._request_fast_fold_stats(temp_key, hud, seat_map, hand_id)
+        self._request_fast_fold_stats(temp_key, current, seat_map, hand_id)
 
     def _forget_coalesced_fast_fold_stats(self, temp_key: str) -> None:
         """Drop anything held for a table that is going away."""

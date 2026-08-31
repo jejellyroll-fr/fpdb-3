@@ -14,9 +14,13 @@ import pytest
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
-from fpdb_3_legacy.HUD_main import HudReadWorker  # noqa: E402
-
+from fpdb_3_legacy import HUD_main  # noqa: E402
 from fpdb_3_legacy.fast_fold_engine import FastFoldStatsRequest  # noqa: E402
+
+# HUD_main is a .pyw, which only imports as a submodule on Windows. Every other
+# test reaches it as a package attribute, and so must this one, or Linux and
+# macOS fail to collect the file at all.
+HudReadWorker = HUD_main.HudReadWorker
 
 
 @pytest.fixture
