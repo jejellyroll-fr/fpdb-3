@@ -34,6 +34,7 @@ def _hud_main(slots_per_read):
         _ax_rings={},
         _ax_fruitless_reads={},
         _ax_reader_gave_up={},
+        _ax_reader_enabled=True,
         _ff_trace=MagicMock(),
         AX_READS_PER_HAND=HUD_main.HudMain.AX_READS_PER_HAND,
         AX_FRUITLESS_READS_BEFORE_GIVING_UP=GIVE_UP_AT,
@@ -158,3 +159,12 @@ def test_one_usable_read_forgives_the_useless_ones_before_it() -> None:
         _read(app, f"hand-{hand}")
 
     assert app._ax_reader_gave_up.get("Colorado 11 #3477872") is None
+
+
+def test_the_reader_can_be_switched_off_outright() -> None:
+    """A player whose client never publishes its felt should not pay two hands a session."""
+    app = _hud_main([{0: "jejellyroll", 1: "Bussy67"}] * 5)
+    app._ax_reader_enabled = False
+
+    assert _read(app, "hand-1") == {}
+    app.winamax_ax_seats.read_window.assert_not_called()

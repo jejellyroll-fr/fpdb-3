@@ -50,3 +50,28 @@ def test_a_negative_wait_is_treated_as_none() -> None:
 def test_an_unreadable_value_falls_back_to_the_default(bad) -> None:
     """A typo in the config must not stop a table getting a HUD."""
     assert _wait_ms(fast_fold_seat_wait_ms=bad) == 500
+
+
+def _window_seats(**attributes) -> str:
+    return Config.get_hud_ui_parameters(_hud_ui(**attributes))["fast_fold_window_seats"]
+
+
+def test_the_window_reader_is_on_by_default() -> None:
+    """It is what makes the seats arrive at once, where the client publishes them."""
+    assert _window_seats() == "auto"
+
+
+def test_the_window_reader_can_be_turned_off() -> None:
+    """Each read is 94-218ms of GUI thread; a client that never answers is pure stutter."""
+    assert _window_seats(fast_fold_window_seats="off") == "off"
+
+
+@pytest.mark.parametrize("written", ["OFF", " Off ", "off"])
+def test_the_value_is_read_the_way_a_person_writes_it(written) -> None:
+    assert _window_seats(fast_fold_window_seats=written) == "off"
+
+
+@pytest.mark.parametrize("bad", ["", "no", "false", None, 3])
+def test_anything_unrecognised_leaves_the_reader_on(bad) -> None:
+    """A typo must not silently cost the fast path where it works."""
+    assert _window_seats(fast_fold_window_seats=bad) == "auto"

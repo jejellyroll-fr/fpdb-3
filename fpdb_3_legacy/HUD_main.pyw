@@ -626,11 +626,16 @@ class HudMain(QObject):
 
     AX_READS_PER_HAND = 6
 
-    #: Consecutive window reads that may come back with nobody on them before
-    #: the reader is given up on for the session. Six per hand, so this is five
-    #: hands of a client that never names a single player -- enough to tell a
-    #: table being redrawn from one whose content is simply not published.
-    AX_FRUITLESS_READS_BEFORE_GIVING_UP = AX_READS_PER_HAND * 5
+    #: Consecutive window reads that may fail to seat anyone before the reader
+    #: is given up on for that table. Two hands' worth.
+    #:
+    #: It was five, and five is what the evidence costs rather than what it is
+    #: worth: a read of a client that answers takes 94-218ms, synchronously, on
+    #: the GUI thread, six times a hand, per table. Thirty of them is four and a
+    #: half seconds of frozen HUD spent proving something a table caught
+    #: mid-redraw proves in one hand -- and a client that does not publish its
+    #: felt proves immediately. Two hands is still twice what it takes.
+    AX_FRUITLESS_READS_BEFORE_GIVING_UP = AX_READS_PER_HAND * 2
     """How many times a table's window may be re-read within one hand.
 
     A read costs ~20ms through the macOS accessibility API and 100-300ms
@@ -945,6 +950,17 @@ class HudMain(QObject):
                 self._fast_fold_seat_wait_ms = 500
             self._ax_fruitless_reads: dict[str, int] = {}
             self._ax_reader_gave_up: dict[str, bool] = {}
+            # "off" skips the window reader outright. On a client that never
+            # publishes its felt, the reads are pure stutter -- and the player
+            # who has established that should not have to re-establish it every
+            # session, two hands at a time.
+            try:
+                self._ax_reader_enabled = (
+                    str(self.config.get_hud_ui_parameters().get("fast_fold_window_seats", "auto")) != "off"
+                )
+            except Exception:
+                log.debug("Could not read fast_fold_window_seats; leaving the reader on", exc_info=True)
+                self._ax_reader_enabled = True
             # Timeline bookkeeping: when each hand's first log line arrived, and
             # which hand/table request is currently allowed to update the HUD.
             self._ff_started: dict[str, float] = {}
@@ -2017,7 +2033,7 @@ class HudMain(QObject):
         reader = getattr(self, "winamax_ax_seats", None)
         table = getattr(hud, "table", None)
         title = getattr(table, "title", "") or ""
-        if reader is None or not title:
+        if reader is None or not title or not self._ax_reader_enabled:
             return {}
 
         table_key = getattr(table, "key", None) or title
