@@ -309,10 +309,70 @@ def request_windows_accessibility(hwnd: int) -> None:
                 _GETOBJECT_TIMEOUT_MS,
                 ctypes.byref(result),
             )
-        log.info("Asked %d window(s) of %s to publish their accessibility tree", len(targets), hwnd)
+        asked_ia2 = sum(_ask_for_complete_tree(target) for target in targets)
+        log.info(
+            "Asked %d window(s) of %s to publish their accessibility tree (%d accepted IAccessible2)",
+            len(targets),
+            hwnd,
+            asked_ia2,
+        )
     except Exception:
         # Never fatal: without it the reader is exactly as blind as it was.
         log.debug("Could not ask window %s for its accessibility tree", hwnd, exc_info=True)
+
+
+def _ask_for_complete_tree(hwnd: int) -> bool:
+    """Ask one window for IAccessible2, which is what unlocks the felt.
+
+    WM_GETOBJECT alone buys Chromium's "native APIs" mode: the frame, the Views
+    widgets and the dialogs. Measured on a table mid-hand, that is exactly what
+    came back -- 'Autorebuy', 'Confirmer', the hero's own seat -- and not one
+    opponent, because the felt is web content and web content needs the complete
+    mode.
+
+    Querying IAccessible2 through IServiceProvider is what a screen reader does,
+    and what Chromium watches for before it builds that tree. Measured on the
+    same table, immediately after: 32 labels became 54, and seats_from_labels
+    went from the hero alone to all six players with their stacks.
+
+    Per process and reversible, unlike the SPI_SETSCREENREADER system flag,
+    which would change how every application on the desktop behaves.
+    """
+    try:
+        import ctypes
+        from ctypes import POINTER, byref, c_void_p, wintypes
+
+        from comtypes import COMMETHOD, GUID, HRESULT, IUnknown
+
+        class _IServiceProvider(IUnknown):
+            _iid_ = GUID("{6D5140C1-7436-11CE-8034-00AA006009FA}")
+            _methods_ = [
+                COMMETHOD(
+                    [],
+                    HRESULT,
+                    "QueryService",
+                    (["in"], POINTER(GUID), "guidService"),
+                    (["in"], POINTER(GUID), "riid"),
+                    (["out"], POINTER(c_void_p), "ppvObject"),
+                ),
+            ]
+
+        iid_accessible = GUID("{618736E0-3C3D-11CF-810C-00AA00389B71}")
+        iid_accessible2 = GUID("{E89F726E-C4F4-4C19-BB19-B647D7FA8478}")
+        accessible = POINTER(IUnknown)()
+        ctypes.oledll.oleacc.AccessibleObjectFromWindow(
+            wintypes.HWND(hwnd),
+            ctypes.c_ulong(_OBJID_CLIENT & 0xFFFFFFFF),
+            byref(iid_accessible),
+            byref(accessible),
+        )
+        provider = accessible.QueryInterface(_IServiceProvider)
+        return bool(provider.QueryService(byref(iid_accessible2), byref(iid_accessible2)))
+    except Exception:
+        # A window with no accessible object, or one that declines: the others
+        # are still worth asking, and the reader is no worse off than before.
+        log.debug("Window %s did not answer an IAccessible2 query", hwnd, exc_info=True)
+        return False
 
 
 def reset_windows_uia() -> None:
@@ -401,6 +461,38 @@ def is_hud_label(text: str) -> bool:
         return True
 
     return False
+
+
+def _table_centre(players: list[AXSeat], win_rect: Any) -> tuple[float, float]:
+    """The point the seats are arranged around, in the players' own coordinates.
+
+    The window rectangle is the obvious answer and it is the wrong one here. The
+    client reports its content in a different space from its frame -- a window
+    at x 3840..4800 whose six players sit at x 1767..2259 -- so a centre taken
+    from the frame is off to one side of every player, they all read as lying in
+    one direction from it, and the whole ring collapses into a single slot:
+
+        centre from the window rect : {2: 'CTroPinJust'}
+        centre from the players     : {0: 'jejellyroll', 1: 'depor81', ...}
+
+    Whatever the reason for the mismatch -- the HUD process is DPI-unaware, and
+    the client is not -- the players are all in one space as each other, which is
+    the only space the angles have to agree in. So the ring's own bounding box
+    is used whenever the players are not inside the frame, and the frame when
+    they are, which is what a client reporting one consistent space gives.
+    """
+    inside = all(
+        win_rect.left <= player.x <= win_rect.right and win_rect.top <= player.y <= win_rect.bottom
+        for player in players
+    )
+    if players and not inside:
+        xs = [player.x for player in players]
+        ys = [player.y for player in players]
+        return ((min(xs) + max(xs)) / 2, (min(ys) + max(ys)) / 2)
+    return (
+        win_rect.left + (win_rect.right - win_rect.left) / 2,
+        win_rect.top + (win_rect.bottom - win_rect.top) / 2,
+    )
 
 
 def seats_from_labels(labels: list[AXSeat]) -> list[AXSeat]:
@@ -769,8 +861,7 @@ class WinamaxAXSeatReader:
             win_rect = elem.CurrentBoundingRectangle
             if not win_rect:
                 return {}
-            centre = (win_rect.left + (win_rect.right - win_rect.left) / 2, win_rect.top + (win_rect.bottom - win_rect.top) / 2)
-            return seat_slots_from_positions(players, centre, max_seats)
+            return seat_slots_from_positions(players, _table_centre(players, win_rect), max_seats)
         except Exception:
             log.debug("Error reading Winamax UIAutomation seats on Windows for HWND %s:", hwnd, exc_info=True)
             return {}
