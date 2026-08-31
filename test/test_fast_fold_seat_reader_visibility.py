@@ -179,26 +179,6 @@ def test_a_label_whose_owner_cannot_be_read_is_kept() -> None:
     assert [label.login for label in _client().collect_labels(_FakeRoot([_Unreadable()]))] == ["Bussy67"]
 
 
-#: ctypes.windll exists only on Windows, and these three drive it directly.
-needs_windll = pytest.mark.skipif(
-    not hasattr(winamax_ax_seats.ctypes, "windll"),
-    reason="ctypes.windll is Windows-only",
-)
-
-
-@pytest.fixture(autouse=True)
-def _no_real_com(monkeypatch):
-    """Never let a unit test make a real COM call into an arbitrary handle.
-
-    _ask_for_complete_tree reaches oleacc and QueryInterface for real. Given the
-    invented handles these tests pass, that destabilised the interpreter: the
-    full suite aborted several hundred files later, inside an unrelated Qt
-    teardown test, and only when this file was collected.
-    """
-    monkeypatch.setattr(winamax_ax_seats, "_ask_for_complete_tree", lambda _hwnd: True)
-
-
-@needs_windll
 def test_a_chromium_client_is_asked_to_publish_its_tree(monkeypatch) -> None:
     """What the macOS reader does with AXManualAccessibility, on Windows.
 
@@ -209,77 +189,103 @@ def test_a_chromium_client_is_asked_to_publish_its_tree(monkeypatch) -> None:
     """
     winamax_ax_seats.forget_accessibility_requests()
     monkeypatch.setattr(winamax_ax_seats.platform, "system", lambda: "Windows")
-    sent = []
-
-    class _User32:
-        @staticmethod
-        def EnumChildWindows(_parent, callback, _param):  # noqa: N802 - Win32 API
-            callback(4242, 0)
-            return True
-
-        @staticmethod
-        def SendMessageTimeoutW(hwnd, msg, _w, lparam, _flags, _timeout, _res):  # noqa: N802 - Win32 API
-            sent.append((hwnd.value, msg, lparam.value))
-            return 1
-
-    monkeypatch.setattr(winamax_ax_seats.ctypes.windll, "user32", _User32, raising=False)
+    asked = []
+    monkeypatch.setattr(winamax_ax_seats, "_send_get_object", lambda hwnd: [hwnd, 4242])
+    monkeypatch.setattr(winamax_ax_seats, "_ask_for_complete_tree", lambda hwnd: asked.append(hwnd) or True)
 
     winamax_ax_seats.request_windows_accessibility(1234)
 
-    assert [s[0] for s in sent] == [1234, 4242]  # the frame and its render surface
-    assert {s[1] for s in sent} == {winamax_ax_seats._WM_GETOBJECT}
-    assert {s[2] for s in sent} == {winamax_ax_seats._OBJID_CLIENT}
+    # The frame and its render surface: the felt is drawn in the child.
+    assert asked == [1234, 4242]
 
 
-@needs_windll
 def test_a_window_is_only_asked_once(monkeypatch) -> None:
     """Once the client has built its tree, asking again buys nothing."""
     winamax_ax_seats.forget_accessibility_requests()
     monkeypatch.setattr(winamax_ax_seats.platform, "system", lambda: "Windows")
     calls = []
+    monkeypatch.setattr(winamax_ax_seats, "_send_get_object", lambda hwnd: calls.append(hwnd) or [hwnd])
+    monkeypatch.setattr(winamax_ax_seats, "_ask_for_complete_tree", lambda _hwnd: True)
 
-    class _User32:
-        @staticmethod
-        def EnumChildWindows(*_a):  # noqa: N802 - Win32 API
-            return True
+    for _ in range(3):
+        winamax_ax_seats.request_windows_accessibility(1234)
 
-        @staticmethod
-        def SendMessageTimeoutW(*_a):  # noqa: N802 - Win32 API
-            calls.append(1)
-            return 1
-
-    monkeypatch.setattr(winamax_ax_seats.ctypes.windll, "user32", _User32, raising=False)
-
-    winamax_ax_seats.request_windows_accessibility(1234)
-    winamax_ax_seats.request_windows_accessibility(1234)
-    winamax_ax_seats.request_windows_accessibility(1234)
-
-    assert len(calls) == 1
+    assert calls == [1234]
 
 
-@needs_windll
 def test_a_client_that_will_not_answer_is_not_fatal(monkeypatch) -> None:
     """A busy or blocked client must not take the HUD down with it."""
     winamax_ax_seats.forget_accessibility_requests()
     monkeypatch.setattr(winamax_ax_seats.platform, "system", lambda: "Windows")
 
-    class _User32:
-        @staticmethod
-        def EnumChildWindows(*_a):  # noqa: N802 - Win32 API
-            msg = "the desktop went away"
-            raise OSError(msg)
+    def _boom(_hwnd):
+        msg = "the desktop went away"
+        raise OSError(msg)
 
-    monkeypatch.setattr(winamax_ax_seats.ctypes.windll, "user32", _User32, raising=False)
+    monkeypatch.setattr(winamax_ax_seats, "_send_get_object", _boom)
 
     winamax_ax_seats.request_windows_accessibility(1234)  # must not raise
+
+
+def test_a_window_with_no_handle_is_not_asked(monkeypatch) -> None:
+    monkeypatch.setattr(winamax_ax_seats.platform, "system", lambda: "Windows")
+    monkeypatch.setattr(winamax_ax_seats, "_send_get_object", lambda _h: pytest.fail("asked anyway"))
+
+    winamax_ax_seats.request_windows_accessibility(0)
 
 
 def test_nothing_is_asked_off_windows(monkeypatch) -> None:
     winamax_ax_seats.forget_accessibility_requests()
     monkeypatch.setattr(winamax_ax_seats.platform, "system", lambda: "Darwin")
-    called = []
-    monkeypatch.setattr(winamax_ax_seats, "_accessibility_asked", called)
+    monkeypatch.setattr(winamax_ax_seats, "_send_get_object", lambda _h: pytest.fail("asked anyway"))
 
     winamax_ax_seats.request_windows_accessibility(1234)
 
-    assert called == []
+
+class _Rect:
+    def __init__(self, left, top, right, bottom) -> None:
+        self.left, self.top, self.right, self.bottom = left, top, right, bottom
+
+
+def test_the_ring_is_centred_on_the_players_when_they_are_not_in_the_frame() -> None:
+    """The client reports its content in a different space from its frame.
+
+    A window at x 3840..4800 whose players sit at x 1767..2259: a centre taken
+    from the frame lies to one side of every player, they all read as lying in
+    one direction from it, and the ring collapses into a single slot.
+    """
+    players = [
+        winamax_ax_seats.AXSeat("CTroPinJust", 1990, 81),
+        winamax_ax_seats.AXSeat("jejellyroll", 2000, 365),
+    ]
+
+    centre = winamax_ax_seats._table_centre(players, _Rect(3840, 0, 4800, 739))
+
+    assert centre == (1995.0, 223.0)
+
+
+def test_the_frame_is_used_when_the_players_are_inside_it() -> None:
+    """A client reporting one consistent space gives the frame's own centre."""
+    players = [winamax_ax_seats.AXSeat("jejellyroll", 400, 300)]
+
+    centre = winamax_ax_seats._table_centre(players, _Rect(0, 0, 960, 740))
+
+    assert centre == (480.0, 370.0)
+
+
+def test_no_players_leaves_the_frame_centre() -> None:
+    assert winamax_ax_seats._table_centre([], _Rect(0, 0, 100, 200)) == (50.0, 100.0)
+
+
+def test_read_window_for_reads_by_handle(monkeypatch) -> None:
+    """The diagnostic tool holds a HWND and no reader; this is its way in."""
+    seen = {}
+
+    def _read(self, title, max_seats, table_pos=None, window_id=None):
+        seen.update(title=title, max_seats=max_seats, window_id=window_id)
+        return {0: "jejellyroll"}
+
+    monkeypatch.setattr(winamax_ax_seats.WinamaxAXSeatReader, "read_window", _read)
+
+    assert winamax_ax_seats.read_window_for(1234, "Winamax Colorado 1") == {0: "jejellyroll"}
+    assert seen == {"title": "Winamax Colorado 1", "max_seats": 6, "window_id": 1234}

@@ -287,28 +287,7 @@ def request_windows_accessibility(hwnd: int) -> None:
         return
     _accessibility_asked.add(hwnd)
     try:
-        from ctypes import wintypes
-
-        user32 = ctypes.windll.user32
-        targets = [hwnd]
-
-        @ctypes.WINFUNCTYPE(wintypes.BOOL, wintypes.HWND, wintypes.LPARAM)
-        def _collect(child: int, _param: int) -> bool:
-            targets.append(child)
-            return True
-
-        user32.EnumChildWindows(wintypes.HWND(hwnd), _collect, 0)
-        result = ctypes.c_void_p()
-        for target in targets:
-            user32.SendMessageTimeoutW(
-                wintypes.HWND(target),
-                _WM_GETOBJECT,
-                0,
-                wintypes.LPARAM(_OBJID_CLIENT),
-                _SMTO_ABORTIFHUNG,
-                _GETOBJECT_TIMEOUT_MS,
-                ctypes.byref(result),
-            )
+        targets = _send_get_object(hwnd)
         asked_ia2 = sum(_ask_for_complete_tree(target) for target in targets)
         log.info(
             "Asked %d window(s) of %s to publish their accessibility tree (%d accepted IAccessible2)",
@@ -321,7 +300,43 @@ def request_windows_accessibility(hwnd: int) -> None:
         log.debug("Could not ask window %s for its accessibility tree", hwnd, exc_info=True)
 
 
-def _ask_for_complete_tree(hwnd: int) -> bool:
+def _send_get_object(hwnd: int) -> list[int]:  # pragma: no cover - Win32 calls
+    """Post WM_GETOBJECT to a window and its children; return the windows asked.
+
+    Split out so the decision above it -- platform, once per window, what to do
+    when the client will not answer -- is testable on any platform, while this
+    reaches ctypes.windll and ctypes.WINFUNCTYPE, neither of which exists off
+    Windows to be stood in for.
+
+    SendMessageTimeout, never SendMessage: the client is another process, and a
+    blocked or busy one must not be able to hang the HUD's GUI thread.
+    """
+    from ctypes import wintypes
+
+    user32 = ctypes.windll.user32
+    targets = [hwnd]
+
+    @ctypes.WINFUNCTYPE(wintypes.BOOL, wintypes.HWND, wintypes.LPARAM)
+    def _collect(child: int, _param: int) -> bool:
+        targets.append(child)
+        return True
+
+    user32.EnumChildWindows(wintypes.HWND(hwnd), _collect, 0)
+    result = ctypes.c_void_p()
+    for target in targets:
+        user32.SendMessageTimeoutW(
+            wintypes.HWND(target),
+            _WM_GETOBJECT,
+            0,
+            wintypes.LPARAM(_OBJID_CLIENT),
+            _SMTO_ABORTIFHUNG,
+            _GETOBJECT_TIMEOUT_MS,
+            ctypes.byref(result),
+        )
+    return targets
+
+
+def _ask_for_complete_tree(hwnd: int) -> bool:  # pragma: no cover - COM calls
     """Ask one window for IAccessible2, which is what unlocks the felt.
 
     WM_GETOBJECT alone buys Chromium's "native APIs" mode: the frame, the Views
