@@ -1925,10 +1925,18 @@ class HudMain(QObject):
         self._request_fast_fold_stats(temp_key, current, seat_map, hand_id)
 
     def _forget_coalesced_fast_fold_stats(self, temp_key: str) -> None:
-        """Drop anything held for a table that is going away."""
-        self._ff_coalesced.pop(temp_key, None)
-        self._ff_last_request_at.pop(temp_key, None)
-        timer = self._ff_coalesce_timers.pop(temp_key, None)
+        """Drop anything held for a table that is going away.
+
+        Reached through _clear_fast_fold_table, which is called on HUDs built
+        without the full constructor -- so the state is asked for the same
+        defensive way its neighbours in that method are, rather than assumed.
+        """
+        for name in ("_ff_coalesced", "_ff_last_request_at"):
+            held = getattr(self, name, None)
+            if held is not None:
+                held.pop(temp_key, None)
+        timers = getattr(self, "_ff_coalesce_timers", None)
+        timer = None if timers is None else timers.pop(temp_key, None)
         if timer is not None:
             with contextlib.suppress(RuntimeError):
                 timer.stop()

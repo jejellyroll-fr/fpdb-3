@@ -186,6 +186,18 @@ needs_windll = pytest.mark.skipif(
 )
 
 
+@pytest.fixture(autouse=True)
+def _no_real_com(monkeypatch):
+    """Never let a unit test make a real COM call into an arbitrary handle.
+
+    _ask_for_complete_tree reaches oleacc and QueryInterface for real. Given the
+    invented handles these tests pass, that destabilised the interpreter: the
+    full suite aborted several hundred files later, inside an unrelated Qt
+    teardown test, and only when this file was collected.
+    """
+    monkeypatch.setattr(winamax_ax_seats, "_ask_for_complete_tree", lambda _hwnd: True)
+
+
 @needs_windll
 def test_a_chromium_client_is_asked_to_publish_its_tree(monkeypatch) -> None:
     """What the macOS reader does with AXManualAccessibility, on Windows.

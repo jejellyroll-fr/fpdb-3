@@ -21,25 +21,48 @@ import pytest
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
-from PySide6.QtWidgets import QApplication  # noqa: E402
-
 from fpdb_3_legacy import HUD_main  # noqa: E402
 
 COALESCE_MS = HUD_main.HudMain.FF_STATS_COALESCE_MS
 
 
-@pytest.fixture(scope="module", autouse=True)
-def _qapp():
-    return QApplication.instance() or QApplication([])
+class _FakeTimer:
+    """Stands in for the QTimer the coalescer arms.
+
+    These tests drive the trailing send themselves, so the timer only has to
+    remember whether it is armed. Creating real QTimers here, parented to
+    throwaway QObjects that are never destroyed, aborted the interpreter several
+    hundred files later inside an unrelated Qt teardown test -- and only when
+    this file was collected.
+    """
+
+    def __init__(self, _parent=None) -> None:
+        self.started_with: int | None = None
+        self.timeout = self
+
+    def setSingleShot(self, _single: bool) -> None:  # noqa: N802 - Qt API
+        pass
+
+    def connect(self, _slot) -> None:
+        pass
+
+    def isActive(self) -> bool:  # noqa: N802 - Qt API
+        return self.started_with is not None
+
+    def start(self, ms: int) -> None:
+        self.started_with = ms
+
+    def stop(self) -> None:
+        self.started_with = None
+
+    def deleteLater(self) -> None:  # noqa: N802 - Qt API
+        pass
 
 
 class _Recorder(HUD_main.HudMain):
     """A HudMain with only the coalescing collaborators, recording what is sent."""
 
     def __init__(self) -> None:  # noqa: D107 - deliberately not HudMain.__init__
-        from PySide6.QtCore import QObject
-
-        QObject.__init__(self)
         self.sent: list[tuple[str, dict[int, str], str]] = []
         self._ff_last_request_at = {}
         self._ff_coalesced = {}
@@ -55,6 +78,7 @@ class _Recorder(HUD_main.HudMain):
 def app(monkeypatch):
     clock = {"now": 1000.0}
     monkeypatch.setattr(HUD_main.time, "monotonic", lambda: clock["now"])
+    monkeypatch.setattr(HUD_main, "QTimer", _FakeTimer)
     recorder = _Recorder()
     recorder._clock = clock
     return recorder
