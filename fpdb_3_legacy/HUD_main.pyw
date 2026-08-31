@@ -2071,7 +2071,15 @@ class HudMain(QObject):
         # thread, at hand-start, which is exactly when the HUD is trying to
         # draw. Measured on a live session: six reads a hand, on two tables,
         # 15-62ms each, every one of them players=0. Stop paying for it.
-        if best:
+        # Fruitless means "could not be acted on", not "came back empty". This
+        # counted empty reads, and a client that answers with the hero and one
+        # neighbour -- never the bottom-centre chair, never enough of the ring --
+        # answers non-empty every single time. The counter reset on every read,
+        # the breaker never tripped, and six reads a hand went on being paid for
+        # on two tables at 94-172ms each: about 1.5s of GUI thread per hand, for
+        # a seat map the caller discards. The test is the caller's own.
+        usable = self.HERO_SLOT in best and len(best) >= self.MIN_PLAYERS_TO_SHOW
+        if usable:
             self._ax_fruitless_reads[table_key] = 0
         else:
             fruitless = self._ax_fruitless_reads.get(table_key, 0) + 1
@@ -2079,9 +2087,10 @@ class HudMain(QObject):
             if fruitless >= self.AX_FRUITLESS_READS_BEFORE_GIVING_UP:
                 self._ax_reader_gave_up[table_key] = True
                 log.warning(
-                    "Giving up on the window seat reader for %s after %d reads that found nobody: this "
-                    "client is not publishing that table through the accessibility API. Its Fast-Fold "
-                    "seats come from the client log, which names a player only once they have acted.",
+                    "Giving up on the window seat reader for %s after %d reads that could not seat "
+                    "anyone: this client is not publishing enough of that table through the "
+                    "accessibility API to place the hero. Its Fast-Fold seats come from the client "
+                    "log, which names a player only once they have acted.",
                     table_key,
                     fruitless,
                 )
