@@ -190,7 +190,7 @@ def test_a_chromium_client_is_asked_to_publish_its_tree(monkeypatch) -> None:
     winamax_ax_seats.forget_accessibility_requests()
     monkeypatch.setattr(winamax_ax_seats.platform, "system", lambda: "Windows")
     asked = []
-    monkeypatch.setattr(winamax_ax_seats, "_send_get_object", lambda hwnd: [hwnd, 4242])
+    monkeypatch.setattr(winamax_ax_seats, "_send_get_object", lambda hwnd: ([hwnd, 4242], 2))
     monkeypatch.setattr(winamax_ax_seats, "_ask_for_complete_tree", lambda hwnd: asked.append(hwnd) or True)
 
     winamax_ax_seats.request_windows_accessibility(1234)
@@ -204,7 +204,7 @@ def test_a_window_is_only_asked_once(monkeypatch) -> None:
     winamax_ax_seats.forget_accessibility_requests()
     monkeypatch.setattr(winamax_ax_seats.platform, "system", lambda: "Windows")
     calls = []
-    monkeypatch.setattr(winamax_ax_seats, "_send_get_object", lambda hwnd: calls.append(hwnd) or [hwnd])
+    monkeypatch.setattr(winamax_ax_seats, "_send_get_object", lambda hwnd: (calls.append(hwnd), ([hwnd], 1))[1])
     monkeypatch.setattr(winamax_ax_seats, "_ask_for_complete_tree", lambda _hwnd: True)
 
     for _ in range(3):
@@ -330,3 +330,68 @@ def test_read_window_for_reads_by_handle(monkeypatch) -> None:
 
     assert winamax_ax_seats.read_window_for(1234, "Winamax Colorado 1") == {0: "jejellyroll"}
     assert seen == {"title": "Winamax Colorado 1", "max_seats": 6, "window_id": 1234}
+
+
+def test_a_window_that_answered_nothing_is_asked_again(monkeypatch) -> None:
+    """SendMessageTimeoutW reports a hung client by returning zero, not by raising.
+
+    _ask_for_complete_tree turns every COM failure into False the same way, so an
+    attempt can fail completely with nothing thrown. Recording the window then
+    wrote it off for the whole session on one badly timed try -- a client still
+    starting up never gets asked again.
+    """
+    winamax_ax_seats.forget_accessibility_requests()
+    monkeypatch.setattr(winamax_ax_seats.platform, "system", lambda: "Windows")
+    calls = []
+    monkeypatch.setattr(
+        winamax_ax_seats,
+        "_send_get_object",
+        lambda hwnd: (calls.append(hwnd), ([hwnd], 0))[1],
+    )
+    monkeypatch.setattr(winamax_ax_seats, "_ask_for_complete_tree", lambda _hwnd: False)
+
+    winamax_ax_seats.request_windows_accessibility(1234)
+    winamax_ax_seats.request_windows_accessibility(1234)
+
+    assert calls == [1234, 1234]
+
+
+def test_an_ia2_query_alone_is_enough_to_call_it_asked(monkeypatch) -> None:
+    """The point is that something got through, not which of the two did."""
+    winamax_ax_seats.forget_accessibility_requests()
+    monkeypatch.setattr(winamax_ax_seats.platform, "system", lambda: "Windows")
+    calls = []
+    monkeypatch.setattr(
+        winamax_ax_seats,
+        "_send_get_object",
+        lambda hwnd: (calls.append(hwnd), ([hwnd], 0))[1],
+    )
+    monkeypatch.setattr(winamax_ax_seats, "_ask_for_complete_tree", lambda _hwnd: True)
+
+    winamax_ax_seats.request_windows_accessibility(1234)
+    winamax_ax_seats.request_windows_accessibility(1234)
+
+    assert calls == [1234]
+
+
+def test_a_centre_is_not_reused_after_the_window_moved() -> None:
+    """A table moved between hands puts its chairs somewhere else.
+
+    The remembered point is then somewhere on the desktop the seats no longer
+    surround, and seats arranged around it land on the wrong chairs while still
+    passing the caller's hero check.
+    """
+    winamax_ax_seats._table_centre(FULL_RING, OFF_FRAME, 6, hwnd=1)
+    moved = _Rect(0, 0, 960, 739)
+
+    assert winamax_ax_seats._table_centre([FULL_RING[3], FULL_RING[4]], moved, 6, hwnd=1) is None
+
+
+def test_a_recycled_handle_does_not_inherit_the_old_table_s_centre() -> None:
+    """Windows hands a closed table's HWND to the next one."""
+    winamax_ax_seats._table_centre(FULL_RING, OFF_FRAME, 6, hwnd=1)
+    reused = _Rect(4800, 0, 5760, 739)
+
+    assert winamax_ax_seats._table_centre([FULL_RING[3]], reused, 6, hwnd=1) is None
+    # And the stale entry is gone rather than waiting to be asked again.
+    assert 1 not in winamax_ax_seats._table_centres

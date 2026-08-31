@@ -285,28 +285,43 @@ def request_windows_accessibility(hwnd: int) -> None:
     """
     if platform.system() != "Windows" or not hwnd or hwnd in _accessibility_asked:
         return
-    _accessibility_asked.add(hwnd)
     try:
-        targets = _send_get_object(hwnd)
+        targets, delivered = _send_get_object(hwnd)
         asked_ia2 = sum(_ask_for_complete_tree(target) for target in targets)
-        log.info(
-            "Asked %d window(s) of %s to publish their accessibility tree (%d accepted IAccessible2)",
-            len(targets),
-            hwnd,
-            asked_ia2,
-        )
     except Exception:
-        # Never fatal: without it the reader is exactly as blind as it was. The
-        # window is forgotten so a later read asks again -- a client still
-        # starting up, or momentarily hung, would otherwise be written off for
-        # the whole session by one badly timed attempt. Reported by Codex on the
-        # pull request.
-        _accessibility_asked.discard(hwnd)
+        # Never fatal: without it the reader is exactly as blind as it was.
         log.debug("Could not ask window %s for its accessibility tree", hwnd, exc_info=True)
+        return
+
+    if not delivered and not asked_ia2:
+        # Nothing got through. SendMessageTimeoutW reports a hung or
+        # still-starting client by returning zero rather than raising, and
+        # _ask_for_complete_tree turns every COM failure into False, so an
+        # attempt can fail completely without anything being thrown. Recording
+        # the window here -- which is what the first version did, before the
+        # work -- wrote it off for the whole session on one badly timed try.
+        # Reported by Codex on the pull request, twice: the exception path alone
+        # was not enough.
+        log.debug("Window %s answered none of the accessibility requests; will ask again", hwnd)
+        return
+
+    _accessibility_asked.add(hwnd)
+    log.info(
+        "Asked %d window(s) of %s to publish their accessibility tree (%d delivered, %d accepted IAccessible2)",
+        len(targets),
+        hwnd,
+        delivered,
+        asked_ia2,
+    )
 
 
-def _send_get_object(hwnd: int) -> list[int]:  # pragma: no cover - Win32 calls
-    """Post WM_GETOBJECT to a window and its children; return the windows asked.
+def _send_get_object(hwnd: int) -> tuple[list[int], int]:  # pragma: no cover - Win32 calls
+    """Post WM_GETOBJECT to a window and its children.
+
+    Returns the windows asked and how many answered. SendMessageTimeoutW reports
+    a hung or still-starting client by returning zero rather than raising, so the
+    count is the only way the caller can tell a delivered request from one that
+    quietly went nowhere.
 
     Split out so the decision above it -- platform, once per window, what to do
     when the client will not answer -- is testable on any platform, while this
@@ -328,17 +343,20 @@ def _send_get_object(hwnd: int) -> list[int]:  # pragma: no cover - Win32 calls
 
     user32.EnumChildWindows(wintypes.HWND(hwnd), _collect, 0)
     result = ctypes.c_void_p()
+    delivered = 0
     for target in targets:
-        user32.SendMessageTimeoutW(
-            wintypes.HWND(target),
-            _WM_GETOBJECT,
-            0,
-            wintypes.LPARAM(_OBJID_CLIENT),
-            _SMTO_ABORTIFHUNG,
-            _GETOBJECT_TIMEOUT_MS,
-            ctypes.byref(result),
+        delivered += bool(
+            user32.SendMessageTimeoutW(
+                wintypes.HWND(target),
+                _WM_GETOBJECT,
+                0,
+                wintypes.LPARAM(_OBJID_CLIENT),
+                _SMTO_ABORTIFHUNG,
+                _GETOBJECT_TIMEOUT_MS,
+                ctypes.byref(result),
+            ),
         )
-    return targets
+    return targets, delivered
 
 
 def _ask_for_complete_tree(hwnd: int) -> bool:  # pragma: no cover - COM calls
@@ -483,8 +501,10 @@ def is_hud_label(text: str) -> bool:
     return False
 
 
-#: Table centres learned from a full ring, keyed by window. See _table_centre.
-_table_centres: dict[int, tuple[float, float]] = {}
+#: Table centres learned from a full ring: window -> (frame, centre). The frame
+#: is kept so a centre measured at one position is not reused at another. See
+#: _table_centre.
+_table_centres: dict[int, tuple[tuple[int, int, int, int], tuple[float, float]]] = {}
 
 
 def forget_table_centres() -> None:
@@ -535,13 +555,27 @@ def _table_centre(
             win_rect.left + (win_rect.right - win_rect.left) / 2,
             win_rect.top + (win_rect.bottom - win_rect.top) / 2,
         )
+    frame = (win_rect.left, win_rect.top, win_rect.right, win_rect.bottom)
     if len(players) >= max_seats:
         xs = [player.x for player in players]
         ys = [player.y for player in players]
         centre = ((min(xs) + max(xs)) / 2, (min(ys) + max(ys)) / 2)
-        _table_centres[hwnd] = centre
+        _table_centres[hwnd] = (frame, centre)
         return centre
-    return _table_centres.get(hwnd)
+    # Only for the window it was measured on, where it was measured. A table
+    # moved or resized between hands puts its chairs somewhere else, and Windows
+    # hands a closed table's HWND to the next one -- either way the remembered
+    # point is somewhere on the desktop the seats no longer surround, and seats
+    # arranged around it land on the wrong chairs while still passing the
+    # caller's hero check. Reported by Codex on the pull request.
+    remembered = _table_centres.get(hwnd)
+    if remembered is None:
+        return None
+    known_frame, centre = remembered
+    if known_frame != frame:
+        del _table_centres[hwnd]
+        return None
+    return centre
 
 
 def seats_from_labels(labels: list[AXSeat]) -> list[AXSeat]:
