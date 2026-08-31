@@ -1691,6 +1691,14 @@ class HudMain(QObject):
         title = getattr(table, "title", "") or ""
         if reader is None or not title:
             return None
+        # The same two answers the per-hand path respects. Without them the idle
+        # sweep kept walking another process's accessibility tree every
+        # FF_IDLE_RECHECK_SECONDS, for the life of the session, on exactly the
+        # clients the breaker exists to stop reading -- and for a table nobody
+        # was even playing. Reported by Codex on the pull request.
+        table_key = getattr(table, "key", None) or title
+        if not getattr(self, "_ax_reader_enabled", True) or getattr(self, "_ax_reader_gave_up", {}).get(table_key):
+            return None
         try:
             return reader.read_window(
                 title,

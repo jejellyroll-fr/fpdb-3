@@ -403,3 +403,21 @@ def test_a_known_handle_is_read_without_searching_the_desktop(windows) -> None:
 
     assert reader.read_window("Winamax Bucarest 3", 6, window_id=61825) == {0: "jejellyroll"}
     reader._read_window_windows.assert_called_once_with(61825, 6)
+
+
+def test_a_partial_ring_off_frame_is_refused_until_a_full_one_is_seen(monkeypatch) -> None:
+    """Seating people from a centre nobody measured puts stats on the wrong chairs.
+
+    The client reports its content in a different space from its frame, so the
+    centre has to come from the players -- and a partial ring's bounding box is
+    not the table's centre. The hero would still land on slot 0 and the answer
+    be accepted, with the neighbours two chairs from where they sit.
+    """
+    ax.forget_table_centres()
+    ax.reset_windows_uia()
+    # A window at 3840..4800 whose players report at 1767..2259, as measured.
+    window = UIAElement("Winamax Colorado 1", Rect(3840, 0, 4800, 739))
+    partial = seated_table({"jejellyroll": (2000, 365), "depor81": (1783, 329)})
+    install_uia(monkeypatch, window=window, descendants=partial)
+
+    assert ax.WinamaxAXSeatReader()._read_window_windows(1234, 6) == {}

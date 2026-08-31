@@ -296,7 +296,12 @@ def request_windows_accessibility(hwnd: int) -> None:
             asked_ia2,
         )
     except Exception:
-        # Never fatal: without it the reader is exactly as blind as it was.
+        # Never fatal: without it the reader is exactly as blind as it was. The
+        # window is forgotten so a later read asks again -- a client still
+        # starting up, or momentarily hung, would otherwise be written off for
+        # the whole session by one badly timed attempt. Reported by Codex on the
+        # pull request.
+        _accessibility_asked.discard(hwnd)
         log.debug("Could not ask window %s for its accessibility tree", hwnd, exc_info=True)
 
 
@@ -478,8 +483,22 @@ def is_hud_label(text: str) -> bool:
     return False
 
 
-def _table_centre(players: list[AXSeat], win_rect: Any) -> tuple[float, float]:
-    """The point the seats are arranged around, in the players' own coordinates.
+#: Table centres learned from a full ring, keyed by window. See _table_centre.
+_table_centres: dict[int, tuple[float, float]] = {}
+
+
+def forget_table_centres() -> None:
+    """Drop the learned centres, so the next full ring is measured afresh."""
+    _table_centres.clear()
+
+
+def _table_centre(
+    players: list[AXSeat],
+    win_rect: Any,
+    max_seats: int,
+    hwnd: int,
+) -> tuple[float, float] | None:
+    """The point the seats are arranged around, or None when it is not known.
 
     The window rectangle is the obvious answer and it is the wrong one here. The
     client reports its content in a different space from its frame -- a window
@@ -490,24 +509,39 @@ def _table_centre(players: list[AXSeat], win_rect: Any) -> tuple[float, float]:
         centre from the window rect : {2: 'CTroPinJust'}
         centre from the players     : {0: 'jejellyroll', 1: 'depor81', ...}
 
-    Whatever the reason for the mismatch -- the HUD process is DPI-unaware, and
-    the client is not -- the players are all in one space as each other, which is
-    the only space the angles have to agree in. So the ring's own bounding box
-    is used whenever the players are not inside the frame, and the frame when
-    they are, which is what a client reporting one consistent space gives.
+    But the ring's own bounding box is only the table's centre when the ring is
+    complete. Read the hero and the two chairs beside them and that box is a
+    band across the bottom of the felt, whose centre sits well below the true
+    one -- the hero still lands on slot 0, so the caller accepts the answer, and
+    the two neighbours land on slots 2 and 4 instead of 1 and 5. Statistics over
+    the wrong opponents is worse than no statistics at all, which is what makes
+    this worth a measurement rather than an estimate. Reported by Codex on the
+    pull request.
+
+    So a centre is measured only from a ring with every chair in it, remembered
+    against the window, and reused for the partial reads that follow. Until one
+    full ring has been seen there is no answer, and the caller falls back to the
+    client log. A client that reports its content in the frame's own space needs
+    none of this and keeps the frame's centre.
     """
+    if not players:
+        return None
     inside = all(
         win_rect.left <= player.x <= win_rect.right and win_rect.top <= player.y <= win_rect.bottom
         for player in players
     )
-    if players and not inside:
+    if inside:
+        return (
+            win_rect.left + (win_rect.right - win_rect.left) / 2,
+            win_rect.top + (win_rect.bottom - win_rect.top) / 2,
+        )
+    if len(players) >= max_seats:
         xs = [player.x for player in players]
         ys = [player.y for player in players]
-        return ((min(xs) + max(xs)) / 2, (min(ys) + max(ys)) / 2)
-    return (
-        win_rect.left + (win_rect.right - win_rect.left) / 2,
-        win_rect.top + (win_rect.bottom - win_rect.top) / 2,
-    )
+        centre = ((min(xs) + max(xs)) / 2, (min(ys) + max(ys)) / 2)
+        _table_centres[hwnd] = centre
+        return centre
+    return _table_centres.get(hwnd)
 
 
 def seats_from_labels(labels: list[AXSeat]) -> list[AXSeat]:
@@ -876,7 +910,13 @@ class WinamaxAXSeatReader:
             win_rect = elem.CurrentBoundingRectangle
             if not win_rect:
                 return {}
-            return seat_slots_from_positions(players, _table_centre(players, win_rect), max_seats)
+            centre = _table_centre(players, win_rect, max_seats, hwnd)
+            if centre is None:
+                # A partial ring on a client whose coordinates do not match its
+                # frame, before any full ring has been measured: no centre can
+                # be trusted, so say nothing rather than seat people wrongly.
+                return {}
+            return seat_slots_from_positions(players, centre, max_seats)
         except Exception:
             log.debug("Error reading Winamax UIAutomation seats on Windows for HWND %s:", hwnd, exc_info=True)
             return {}

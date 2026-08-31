@@ -247,34 +247,75 @@ class _Rect:
         self.left, self.top, self.right, self.bottom = left, top, right, bottom
 
 
-def test_the_ring_is_centred_on_the_players_when_they_are_not_in_the_frame() -> None:
+#: A whole ring, in the coordinate space the client actually reports.
+FULL_RING = [
+    winamax_ax_seats.AXSeat("CTroPinJust", 1990, 81),
+    winamax_ax_seats.AXSeat("MuckEtMousse", 2200, 117),
+    winamax_ax_seats.AXSeat("ayuga1312", 2213, 329),
+    winamax_ax_seats.AXSeat("jejellyroll", 2000, 365),
+    winamax_ax_seats.AXSeat("depor81", 1783, 329),
+    winamax_ax_seats.AXSeat("BluffTesMots", 1767, 117),
+]
+OFF_FRAME = _Rect(3840, 0, 4800, 739)
+
+
+@pytest.fixture(autouse=True)
+def _fresh_centres():
+    winamax_ax_seats.forget_table_centres()
+    yield
+    winamax_ax_seats.forget_table_centres()
+
+
+def test_a_full_ring_is_measured_from_the_players() -> None:
     """The client reports its content in a different space from its frame.
 
     A window at x 3840..4800 whose players sit at x 1767..2259: a centre taken
     from the frame lies to one side of every player, they all read as lying in
     one direction from it, and the ring collapses into a single slot.
     """
-    players = [
-        winamax_ax_seats.AXSeat("CTroPinJust", 1990, 81),
-        winamax_ax_seats.AXSeat("jejellyroll", 2000, 365),
-    ]
+    centre = winamax_ax_seats._table_centre(FULL_RING, OFF_FRAME, 6, hwnd=1)
 
-    centre = winamax_ax_seats._table_centre(players, _Rect(3840, 0, 4800, 739))
+    assert centre == (1990.0, 223.0)
 
-    assert centre == (1995.0, 223.0)
+
+def test_a_partial_ring_has_no_centre_until_a_full_one_was_seen() -> None:
+    """Statistics over the wrong opponents is worse than none at all.
+
+    The hero and the two chairs beside them make a band across the bottom of the
+    felt, whose bounding box centre sits well below the table's. The hero still
+    lands on slot 0, so the caller would accept it, and the neighbours would land
+    two chairs away from where they sit.
+    """
+    partial = [FULL_RING[3], FULL_RING[4], FULL_RING[2]]
+
+    assert winamax_ax_seats._table_centre(partial, OFF_FRAME, 6, hwnd=1) is None
+
+
+def test_a_partial_ring_reuses_the_centre_a_full_one_measured() -> None:
+    measured = winamax_ax_seats._table_centre(FULL_RING, OFF_FRAME, 6, hwnd=1)
+    partial = [FULL_RING[3], FULL_RING[4]]
+
+    assert winamax_ax_seats._table_centre(partial, OFF_FRAME, 6, hwnd=1) == measured
+
+
+def test_each_window_learns_its_own_centre() -> None:
+    """Two tables, two coordinate spaces: one must not answer for the other."""
+    winamax_ax_seats._table_centre(FULL_RING, OFF_FRAME, 6, hwnd=1)
+
+    assert winamax_ax_seats._table_centre([FULL_RING[3]], OFF_FRAME, 6, hwnd=2) is None
 
 
 def test_the_frame_is_used_when_the_players_are_inside_it() -> None:
-    """A client reporting one consistent space gives the frame's own centre."""
+    """A client reporting one consistent space needs none of this."""
     players = [winamax_ax_seats.AXSeat("jejellyroll", 400, 300)]
 
-    centre = winamax_ax_seats._table_centre(players, _Rect(0, 0, 960, 740))
+    centre = winamax_ax_seats._table_centre(players, _Rect(0, 0, 960, 740), 6, hwnd=1)
 
     assert centre == (480.0, 370.0)
 
 
-def test_no_players_leaves_the_frame_centre() -> None:
-    assert winamax_ax_seats._table_centre([], _Rect(0, 0, 100, 200)) == (50.0, 100.0)
+def test_no_players_has_no_centre() -> None:
+    assert winamax_ax_seats._table_centre([], _Rect(0, 0, 100, 200), 6, hwnd=1) is None
 
 
 def test_read_window_for_reads_by_handle(monkeypatch) -> None:

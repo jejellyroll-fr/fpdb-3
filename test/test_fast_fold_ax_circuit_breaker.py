@@ -168,3 +168,44 @@ def test_the_reader_can_be_switched_off_outright() -> None:
 
     assert _read(app, "hand-1") == {}
     app.winamax_ax_seats.read_window.assert_not_called()
+
+
+def _sweeper(gave_up: dict, enabled: bool = True):
+    """A HudMain stub carrying only what _read_window_slots touches."""
+    reader = MagicMock()
+    reader.read_window.return_value = {0: "jejellyroll", 1: "Bussy67"}
+    table = SimpleNamespace(title="Winamax Colorado 11", key="Colorado 11 #3477872", number=3477872)
+    return (
+        SimpleNamespace(
+            winamax_ax_seats=reader,
+            _ax_reader_gave_up=gave_up,
+            _ax_reader_enabled=enabled,
+        ),
+        SimpleNamespace(table=table, max=6),
+    )
+
+
+def test_the_idle_sweep_reads_a_table_that_still_answers() -> None:
+    app, hud = _sweeper({})
+
+    assert HUD_main.HudMain._read_window_slots(app, hud) == {0: "jejellyroll", 1: "Bussy67"}
+
+
+def test_the_idle_sweep_stops_reading_a_table_given_up_on() -> None:
+    """It ran every FF_IDLE_RECHECK_SECONDS regardless, for the whole session.
+
+    The per-hand path stopped and this one did not, so an abandoned table went on
+    walking another process's accessibility tree -- on exactly the clients the
+    breaker exists to stop reading, and for a table nobody was playing.
+    """
+    app, hud = _sweeper({"Colorado 11 #3477872": True})
+
+    assert HUD_main.HudMain._read_window_slots(app, hud) is None
+    app.winamax_ax_seats.read_window.assert_not_called()
+
+
+def test_the_idle_sweep_respects_the_reader_being_switched_off() -> None:
+    app, hud = _sweeper({}, enabled=False)
+
+    assert HUD_main.HudMain._read_window_slots(app, hud) is None
+    app.winamax_ax_seats.read_window.assert_not_called()
