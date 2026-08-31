@@ -32,6 +32,7 @@ import math
 import os
 import platform
 import re
+import threading
 from dataclasses import dataclass
 from typing import Any
 
@@ -254,13 +255,20 @@ _OBJID_CLIENT = -4
 _SMTO_ABORTIFHUNG = 0x0002
 _GETOBJECT_TIMEOUT_MS = 200
 
-#: Windows already asked, so a table is nudged once rather than on every read.
+#: Windows already asked, so a table is nudged once rather than on every read,
+#: and the ones being asked right now, so a second read does not ask again while
+#: the first request is still in the air. Both are touched from the reading
+#: thread and from the request threads, hence the lock.
 _accessibility_asked: set[int] = set()
+_accessibility_in_flight: set[int] = set()
+_accessibility_lock = threading.Lock()
 
 
 def forget_accessibility_requests() -> None:
     """Forget which windows have been asked, so the next read asks again."""
-    _accessibility_asked.clear()
+    with _accessibility_lock:
+        _accessibility_asked.clear()
+        _accessibility_in_flight.clear()
 
 
 def request_windows_accessibility(hwnd: int) -> None:
@@ -278,20 +286,47 @@ def request_windows_accessibility(hwnd: int) -> None:
     table window and to each of its children, because the content is drawn in a
     child render surface rather than the frame the HUD attached to.
 
-    SendMessageTimeout, never SendMessage: the client is another process, and a
-    blocked or busy one must not be able to hang the HUD's GUI thread. The tree
-    is built asynchronously, so the read that triggers this one will usually
-    still come back empty; the rechecks within the hand are what pick it up.
+    Asked from a background thread, and nothing waits for it. SendMessageTimeout
+    is bounded, but AccessibleObjectFromWindow and QueryService are not: they
+    send their own WM_GETOBJECT and wait for the client to answer, with no
+    timeout to give up at. A hung or still-starting client could therefore hold
+    the HUD's GUI thread for as long as it liked, which is the failure this
+    reader exists inside a circuit breaker to avoid. Nothing here returns a value
+    the caller needs -- the effect is on the client, and the tree it builds is
+    built asynchronously anyway -- so the request is fired and forgotten, and the
+    rechecks within the hand pick up whatever it produced. Reported by Codex on
+    the pull request.
     """
-    if platform.system() != "Windows" or not hwnd or hwnd in _accessibility_asked:
+    if platform.system() != "Windows" or not hwnd:
         return
+    with _accessibility_lock:
+        if hwnd in _accessibility_asked or hwnd in _accessibility_in_flight:
+            return
+        _accessibility_in_flight.add(hwnd)
+    threading.Thread(
+        target=_request_windows_accessibility_now,
+        args=(hwnd,),
+        name=f"fpdb-ax-request-{hwnd}",
+        daemon=True,
+    ).start()
+
+
+def _request_windows_accessibility_now(hwnd: int) -> None:
+    """Do the asking, on a thread of its own. See request_windows_accessibility."""
     try:
         targets, delivered = _send_get_object(hwnd)
         asked_ia2 = sum(_ask_for_complete_tree(target) for target in targets)
     except Exception:
         # Never fatal: without it the reader is exactly as blind as it was.
         log.debug("Could not ask window %s for its accessibility tree", hwnd, exc_info=True)
+        with _accessibility_lock:
+            _accessibility_in_flight.discard(hwnd)
         return
+
+    with _accessibility_lock:
+        _accessibility_in_flight.discard(hwnd)
+        if delivered or asked_ia2:
+            _accessibility_asked.add(hwnd)
 
     if not delivered and not asked_ia2:
         # Nothing got through. SendMessageTimeoutW reports a hung or
@@ -305,7 +340,6 @@ def request_windows_accessibility(hwnd: int) -> None:
         log.debug("Window %s answered none of the accessibility requests; will ask again", hwnd)
         return
 
-    _accessibility_asked.add(hwnd)
     log.info(
         "Asked %d window(s) of %s to publish their accessibility tree (%d delivered, %d accepted IAccessible2)",
         len(targets),
@@ -380,7 +414,13 @@ def _ask_for_complete_tree(hwnd: int) -> bool:  # pragma: no cover - COM calls
         import ctypes
         from ctypes import POINTER, byref, c_void_p, wintypes
 
+        import comtypes
         from comtypes import COMMETHOD, GUID, HRESULT, IUnknown
+
+        # This runs on a thread of its own, and COM is per-thread: comtypes
+        # initialises the thread that imports it, not this one. The thread is
+        # short-lived and dies with the request, so nothing uninitialises it.
+        comtypes.CoInitialize()
 
         class _IServiceProvider(IUnknown):
             _iid_ = GUID("{6D5140C1-7436-11CE-8034-00AA006009FA}")

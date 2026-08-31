@@ -75,3 +75,91 @@ def test_the_value_is_read_the_way_a_person_writes_it(written) -> None:
 def test_anything_unrecognised_leaves_the_reader_on(bad) -> None:
     """A typo must not silently cost the fast path where it works."""
     assert _window_seats(fast_fold_window_seats=bad) == "auto"
+
+
+class _Update:
+    def __init__(self, pool: str = "gf.t1.0", hand_id: str = "hand-1") -> None:
+        self.pool, self.hand_id = pool, hand_id
+
+
+def _waiter(wait_ms: int, scheduled: list):
+    """A HudMain stub carrying only what _schedule_seat_wait_recheck touches."""
+    from types import SimpleNamespace
+
+    from fpdb_3_legacy import HUD_main
+
+    return SimpleNamespace(
+        _fast_fold_seat_wait_ms=wait_ms,
+        _ff_seat_wait_scheduled=set(),
+        AX_RECHECK_DELAYS_MS=HUD_main.HudMain.AX_RECHECK_DELAYS_MS,
+        FF_SEAT_WAIT_MEMO_LIMIT=HUD_main.HudMain.FF_SEAT_WAIT_MEMO_LIMIT,
+        _recheck_window=lambda pool: None,
+    ), scheduled
+
+
+def _schedule(app, update, elapsed, monkeypatch, scheduled):
+    from fpdb_3_legacy import HUD_main
+
+    monkeypatch.setattr(
+        HUD_main.QTimer,
+        "singleShot",
+        staticmethod(lambda ms, _slot: scheduled.append(ms)),
+    )
+    HUD_main.HudMain._schedule_seat_wait_recheck(app, update, elapsed)
+
+
+def test_a_long_wait_schedules_its_own_recheck(monkeypatch) -> None:
+    """The hand's other rechecks stop at 1500ms; a 5s wait needs its own.
+
+    Otherwise a short-handed table whose last ring update lands before the
+    deadline is never drawn: nothing looks again until the hand is over, and
+    then it is cleared.
+    """
+    scheduled = []
+    app, _ = _waiter(5000, scheduled)
+
+    _schedule(app, _Update(), elapsed=0.5, monkeypatch=monkeypatch, scheduled=scheduled)
+
+    assert scheduled == [4500]
+
+
+def test_a_short_wait_leans_on_the_rechecks_already_scheduled(monkeypatch) -> None:
+    """Below AX_RECHECK_DELAYS_MS this would be a second timer saying the same thing."""
+    scheduled = []
+    app, _ = _waiter(500, scheduled)
+
+    _schedule(app, _Update(), elapsed=0.0, monkeypatch=monkeypatch, scheduled=scheduled)
+
+    assert scheduled == []
+
+
+def test_one_recheck_per_hand_and_table(monkeypatch) -> None:
+    """Every ring update of the hand comes through here; one timer is enough."""
+    scheduled = []
+    app, _ = _waiter(5000, scheduled)
+
+    for elapsed in (0.2, 0.4, 0.8):
+        _schedule(app, _Update(), elapsed=elapsed, monkeypatch=monkeypatch, scheduled=scheduled)
+
+    assert len(scheduled) == 1
+
+
+def test_two_tables_each_get_one(monkeypatch) -> None:
+    scheduled = []
+    app, _ = _waiter(5000, scheduled)
+
+    _schedule(app, _Update(pool="gf.t1.0"), 0.2, monkeypatch, scheduled)
+    _schedule(app, _Update(pool="gf.t1.1"), 0.2, monkeypatch, scheduled)
+
+    assert len(scheduled) == 2
+
+
+def test_the_memo_does_not_grow_without_bound(monkeypatch) -> None:
+    """A session plays thousands of hands and nothing else prunes this."""
+    scheduled = []
+    app, _ = _waiter(5000, scheduled)
+
+    for hand in range(app.FF_SEAT_WAIT_MEMO_LIMIT + 5):
+        _schedule(app, _Update(hand_id=f"hand-{hand}"), 0.2, monkeypatch, scheduled)
+
+    assert len(app._ff_seat_wait_scheduled) <= app.FF_SEAT_WAIT_MEMO_LIMIT

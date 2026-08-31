@@ -688,6 +688,10 @@ class HudMain(QObject):
     """
 
     AX_RECHECK_DELAYS_MS = (250, 700, 1500)
+
+    #: Hands remembered as having a seat-wait recheck already scheduled. Bounded
+    #: because a session plays thousands of them and nothing else prunes it.
+    FF_SEAT_WAIT_MEMO_LIMIT = 200
     """When to look at the window again after a hand starts.
 
     Every log line of a new hand -- the hand id, both blinds, the hole cards --
@@ -948,6 +952,7 @@ class HudMain(QObject):
             except Exception:
                 log.debug("Could not read fast_fold_seat_wait_ms; using the default", exc_info=True)
                 self._fast_fold_seat_wait_ms = 500
+            self._ff_seat_wait_scheduled: set[tuple[str, str]] = set()
             self._ax_fruitless_reads: dict[str, int] = {}
             self._ax_reader_gave_up: dict[str, bool] = {}
             # "off" skips the window reader outright. On a client that never
@@ -1745,6 +1750,26 @@ class HudMain(QObject):
                     if live_key == temp_key:
                         aliases.pop(alias, None)
 
+    def _schedule_seat_wait_recheck(self, update: Any, elapsed: float) -> None:
+        """Come back when the seat wait is up, once per hand and table.
+
+        Only needed when the wait outlasts AX_RECHECK_DELAYS_MS; below that the
+        rechecks already scheduled at hand start arrive after the deadline and
+        this would be a second timer saying the same thing.
+        """
+        remaining_ms = int(self._fast_fold_seat_wait_ms - elapsed * 1000)
+        if remaining_ms <= max(self.AX_RECHECK_DELAYS_MS):
+            return
+        pending = self._ff_seat_wait_scheduled
+        key = (update.pool, update.hand_id)
+        if key in pending:
+            return
+        pending.add(key)
+        if len(pending) > self.FF_SEAT_WAIT_MEMO_LIMIT:
+            pending.clear()
+            pending.add(key)
+        QTimer.singleShot(remaining_ms, lambda pool=update.pool: self._recheck_window(pool))
+
     def _recheck_window(self, pool: str) -> None:
         """Re-run a table's live update once the client has had time to draw it."""
         reader = getattr(self, "winamax_log_reader", None)
@@ -1855,6 +1880,15 @@ class HudMain(QObject):
                 # known so far means blocks appearing one at a time; waiting means
                 # they appear together, later. Which of the two is worse is the
                 # player's call, not ours -- hud_ui/@fast_fold_seat_wait_ms.
+                #
+                # And something has to come back at the deadline. The only other
+                # rechecks of a hand are AX_RECHECK_DELAYS_MS, which stop at
+                # 1500ms: with the wait set beyond that, as the setting documents,
+                # a short-handed table whose last ring update lands before the
+                # deadline would never be drawn at all -- nothing would look
+                # again until the hand was over, and then it is cleared.
+                # Reported by Codex on the pull request.
+                self._schedule_seat_wait_recheck(update, elapsed)
                 return
             seat_map = build_seat_map(update.ring, update.hero, max_seats=max_seats, hero_seat=hero_seat)
             source = "log-ring"

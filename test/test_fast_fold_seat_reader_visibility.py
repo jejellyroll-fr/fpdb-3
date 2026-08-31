@@ -179,7 +179,26 @@ def test_a_label_whose_owner_cannot_be_read_is_kept() -> None:
     assert [label.login for label in _client().collect_labels(_FakeRoot([_Unreadable()]))] == ["Bussy67"]
 
 
-def test_a_chromium_client_is_asked_to_publish_its_tree(monkeypatch) -> None:
+@pytest.fixture
+def run_requests_here(monkeypatch):
+    """Run the request thread's work inline, so the tests stay deterministic.
+
+    The request is fired and forgotten in production -- AccessibleObjectFromWindow
+    and QueryService have no timeout, and a hung client must not hold the GUI
+    thread -- but a test that has to wait for a thread is a test that will flake.
+    """
+
+    class _Inline:
+        def __init__(self, target, args=(), **_kwargs) -> None:
+            self._target, self._args = target, args
+
+        def start(self) -> None:
+            self._target(*self._args)
+
+    monkeypatch.setattr(winamax_ax_seats.threading, "Thread", _Inline)
+
+
+def test_a_chromium_client_is_asked_to_publish_its_tree(monkeypatch, run_requests_here) -> None:
     """What the macOS reader does with AXManualAccessibility, on Windows.
 
     "Chromium only builds its web accessibility tree when an assistive client
@@ -199,12 +218,47 @@ def test_a_chromium_client_is_asked_to_publish_its_tree(monkeypatch) -> None:
     assert asked == [1234, 4242]
 
 
-def test_a_window_is_only_asked_once(monkeypatch) -> None:
+def test_the_request_does_not_run_on_the_calling_thread(monkeypatch) -> None:
+    """AccessibleObjectFromWindow and QueryService have no timeout of their own.
+
+    SendMessageTimeoutW is bounded; those two are not -- they send their own
+    WM_GETOBJECT and wait. A hung client could hold the HUD's GUI thread for as
+    long as it liked, which is what the circuit breaker around this reader exists
+    to avoid.
+    """
+    winamax_ax_seats.forget_accessibility_requests()
+    monkeypatch.setattr(winamax_ax_seats.platform, "system", lambda: "Windows")
+    started = []
+
+    class _Recording:
+        def __init__(self, target, args=(), **kwargs) -> None:
+            started.append((target, args, kwargs.get("daemon")))
+
+        def start(self) -> None:
+            pass
+
+    monkeypatch.setattr(winamax_ax_seats.threading, "Thread", _Recording)
+    monkeypatch.setattr(winamax_ax_seats, "_send_get_object", lambda _h: pytest.fail("ran inline"))
+
+    winamax_ax_seats.request_windows_accessibility(1234)
+
+    assert len(started) == 1
+    target, args, daemon = started[0]
+    assert target is winamax_ax_seats._request_windows_accessibility_now
+    assert args == (1234,)
+    assert daemon is True
+
+
+def test_a_window_is_only_asked_once(monkeypatch, run_requests_here) -> None:
     """Once the client has built its tree, asking again buys nothing."""
     winamax_ax_seats.forget_accessibility_requests()
     monkeypatch.setattr(winamax_ax_seats.platform, "system", lambda: "Windows")
     calls = []
-    monkeypatch.setattr(winamax_ax_seats, "_send_get_object", lambda hwnd: (calls.append(hwnd), ([hwnd], 1))[1])
+    monkeypatch.setattr(
+        winamax_ax_seats,
+        "_send_get_object",
+        lambda hwnd: (calls.append(hwnd), ([hwnd], 1))[1],
+    )
     monkeypatch.setattr(winamax_ax_seats, "_ask_for_complete_tree", lambda _hwnd: True)
 
     for _ in range(3):
@@ -213,7 +267,28 @@ def test_a_window_is_only_asked_once(monkeypatch) -> None:
     assert calls == [1234]
 
 
-def test_a_client_that_will_not_answer_is_not_fatal(monkeypatch) -> None:
+def test_a_second_read_does_not_ask_while_the_first_request_is_in_the_air(monkeypatch) -> None:
+    """The thread makes the window between asking and knowing wide enough to matter."""
+    winamax_ax_seats.forget_accessibility_requests()
+    monkeypatch.setattr(winamax_ax_seats.platform, "system", lambda: "Windows")
+    started = []
+
+    class _NeverRuns:
+        def __init__(self, target, args=(), **_kwargs) -> None:
+            started.append(args)
+
+        def start(self) -> None:
+            pass
+
+    monkeypatch.setattr(winamax_ax_seats.threading, "Thread", _NeverRuns)
+
+    winamax_ax_seats.request_windows_accessibility(1234)
+    winamax_ax_seats.request_windows_accessibility(1234)
+
+    assert started == [(1234,)]
+
+
+def test_a_client_that_will_not_answer_is_not_fatal(monkeypatch, run_requests_here) -> None:
     """A busy or blocked client must not take the HUD down with it."""
     winamax_ax_seats.forget_accessibility_requests()
     monkeypatch.setattr(winamax_ax_seats.platform, "system", lambda: "Windows")
@@ -225,11 +300,13 @@ def test_a_client_that_will_not_answer_is_not_fatal(monkeypatch) -> None:
     monkeypatch.setattr(winamax_ax_seats, "_send_get_object", _boom)
 
     winamax_ax_seats.request_windows_accessibility(1234)  # must not raise
+    # And it is not left in flight, so a later read tries again.
+    assert 1234 not in winamax_ax_seats._accessibility_in_flight
 
 
 def test_a_window_with_no_handle_is_not_asked(monkeypatch) -> None:
     monkeypatch.setattr(winamax_ax_seats.platform, "system", lambda: "Windows")
-    monkeypatch.setattr(winamax_ax_seats, "_send_get_object", lambda _h: pytest.fail("asked anyway"))
+    monkeypatch.setattr(winamax_ax_seats.threading, "Thread", lambda **_k: pytest.fail("asked anyway"))
 
     winamax_ax_seats.request_windows_accessibility(0)
 
@@ -237,7 +314,7 @@ def test_a_window_with_no_handle_is_not_asked(monkeypatch) -> None:
 def test_nothing_is_asked_off_windows(monkeypatch) -> None:
     winamax_ax_seats.forget_accessibility_requests()
     monkeypatch.setattr(winamax_ax_seats.platform, "system", lambda: "Darwin")
-    monkeypatch.setattr(winamax_ax_seats, "_send_get_object", lambda _h: pytest.fail("asked anyway"))
+    monkeypatch.setattr(winamax_ax_seats.threading, "Thread", lambda **_k: pytest.fail("asked anyway"))
 
     winamax_ax_seats.request_windows_accessibility(1234)
 
@@ -332,7 +409,7 @@ def test_read_window_for_reads_by_handle(monkeypatch) -> None:
     assert seen == {"title": "Winamax Colorado 1", "max_seats": 6, "window_id": 1234}
 
 
-def test_a_window_that_answered_nothing_is_asked_again(monkeypatch) -> None:
+def test_a_window_that_answered_nothing_is_asked_again(monkeypatch, run_requests_here) -> None:
     """SendMessageTimeoutW reports a hung client by returning zero, not by raising.
 
     _ask_for_complete_tree turns every COM failure into False the same way, so an
@@ -356,7 +433,7 @@ def test_a_window_that_answered_nothing_is_asked_again(monkeypatch) -> None:
     assert calls == [1234, 1234]
 
 
-def test_an_ia2_query_alone_is_enough_to_call_it_asked(monkeypatch) -> None:
+def test_an_ia2_query_alone_is_enough_to_call_it_asked(monkeypatch, run_requests_here) -> None:
     """The point is that something got through, not which of the two did."""
     winamax_ax_seats.forget_accessibility_requests()
     monkeypatch.setattr(winamax_ax_seats.platform, "system", lambda: "Windows")
