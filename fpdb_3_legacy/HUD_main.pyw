@@ -1753,13 +1753,21 @@ class HudMain(QObject):
     def _schedule_seat_wait_recheck(self, update: Any, elapsed: float) -> None:
         """Come back when the seat wait is up, once per hand and table.
 
-        Only needed when the wait outlasts AX_RECHECK_DELAYS_MS; below that the
-        rechecks already scheduled at hand start arrive after the deadline and
-        this would be a second timer saying the same thing.
+        Only needed when the configured wait outlasts AX_RECHECK_DELAYS_MS. Below
+        that, the rechecks already scheduled at hand start arrive after the
+        deadline and this would be a second timer saying the same thing.
+
+        The test is on the setting, not on what is left of it. Comparing the
+        remaining time instead left a band just above the last recheck with no
+        wakeup at all: at a 2000ms wait, a ring arriving at 600ms leaves 1400,
+        which reads as "the rechecks have this" -- and they do not, because they
+        all fire before 2000ms. Every later call inside the hand makes the same
+        wrong judgement, so nothing looked again until the hand ended. Reported
+        by Codex on the pull request.
         """
-        remaining_ms = int(self._fast_fold_seat_wait_ms - elapsed * 1000)
-        if remaining_ms <= max(self.AX_RECHECK_DELAYS_MS):
+        if self._fast_fold_seat_wait_ms <= max(self.AX_RECHECK_DELAYS_MS):
             return
+        remaining_ms = max(0, int(self._fast_fold_seat_wait_ms - elapsed * 1000))
         pending = self._ff_seat_wait_scheduled
         key = (update.pool, update.hand_id)
         if key in pending:

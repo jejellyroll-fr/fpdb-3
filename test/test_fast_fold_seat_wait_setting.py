@@ -163,3 +163,40 @@ def test_the_memo_does_not_grow_without_bound(monkeypatch) -> None:
         _schedule(app, _Update(hand_id=f"hand-{hand}"), 0.2, monkeypatch, scheduled)
 
     assert len(app._ff_seat_wait_scheduled) <= app.FF_SEAT_WAIT_MEMO_LIMIT
+
+
+def test_a_wait_just_past_the_last_recheck_still_gets_a_wakeup(monkeypatch) -> None:
+    """The band the remaining-time test left uncovered.
+
+    At a 2000ms wait, a ring arriving at 600ms leaves 1400 -- which reads as "the
+    rechecks have this" if you compare what is left rather than the setting. They
+    do not: 250, 700 and 1500 all fire before 2000. Every later call inside the
+    hand made the same wrong judgement, so nothing looked again until the hand
+    ended.
+    """
+    scheduled = []
+    app, _ = _waiter(2000, scheduled)
+
+    _schedule(app, _Update(), elapsed=0.6, monkeypatch=monkeypatch, scheduled=scheduled)
+
+    assert scheduled == [1400]
+
+
+def test_a_wait_level_with_the_last_recheck_leans_on_it(monkeypatch) -> None:
+    """1500 is exactly when the last recheck fires; a second timer adds nothing."""
+    scheduled = []
+    app, _ = _waiter(1500, scheduled)
+
+    _schedule(app, _Update(), elapsed=0.1, monkeypatch=monkeypatch, scheduled=scheduled)
+
+    assert scheduled == []
+
+
+def test_a_deadline_already_past_wakes_at_once(monkeypatch) -> None:
+    """Arithmetic guard: the remaining time must never go negative into the timer."""
+    scheduled = []
+    app, _ = _waiter(2000, scheduled)
+
+    _schedule(app, _Update(), elapsed=9.0, monkeypatch=monkeypatch, scheduled=scheduled)
+
+    assert scheduled == [0]
