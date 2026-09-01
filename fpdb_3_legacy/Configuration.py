@@ -1053,6 +1053,10 @@ class HudUI:
     def __init__(self, node) -> None:
         self.node = node
         self.label = node.getAttribute("label")
+        if node.hasAttribute("fast_fold_seat_wait_ms"):
+            self.fast_fold_seat_wait_ms = node.getAttribute("fast_fold_seat_wait_ms")
+        if node.hasAttribute("fast_fold_window_seats"):
+            self.fast_fold_window_seats = node.getAttribute("fast_fold_window_seats")
         if node.hasAttribute("card_ht"):
             self.card_ht = node.getAttribute("card_ht")
         if node.hasAttribute("card_wd"):
@@ -3027,6 +3031,30 @@ class Config:
             hui["aggregate_ring"] = getattr(self.ui, "aggregate_ring", "True")
         except AttributeError:
             hui["aggregate_ring"] = "True"
+
+        # How long a Fast-Fold table waits for the client log to finish naming
+        # its players before it shows the ones it has. The log names a player
+        # only once they have acted, so a six-handed table is named over several
+        # seconds: showing at once means blocks appearing one at a time, waiting
+        # means they appear together but later. Neither is right for everyone,
+        # so it is a number rather than a decision. The default is what the HUD
+        # has always done.
+        try:
+            hui["fast_fold_seat_wait_ms"] = max(0, int(getattr(self.ui, "fast_fold_seat_wait_ms", 500)))
+        except (AttributeError, TypeError, ValueError):
+            hui["fast_fold_seat_wait_ms"] = 500
+
+        # Whether to read a Fast-Fold table's chairs off its window at all.
+        # "auto" tries, and gives up per table once the client has shown it will
+        # not answer usefully; "off" never tries. Each read is a synchronous
+        # walk of another process's accessibility tree on the GUI thread, 94 to
+        # 218ms on a client that answers, so a player whose client has never
+        # published its felt is paying for it in stutter and nothing else.
+        try:
+            value = str(getattr(self.ui, "fast_fold_window_seats", "auto")).strip().lower()
+        except (AttributeError, TypeError, ValueError):
+            value = "auto"
+        hui["fast_fold_window_seats"] = value if value in ("auto", "off") else "auto"
 
         try:
             hui["aggregate_tour"] = getattr(self.ui, "aggregate_tour", "True")

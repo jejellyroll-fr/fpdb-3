@@ -25,7 +25,7 @@ if sys.platform.startswith("linux") and os.getenv("FPDB_FORCE_X11") == "1":
 import threading
 import time
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from optparse import Values
 from pathlib import Path
 from queue import Empty, Queue
@@ -138,6 +138,40 @@ class FastFoldQualification:
     site_hand_no: Any
 
 
+@dataclass
+class TableReadState:
+    """What has been learned about reading one table's window.
+
+    Three dictionaries held this, keyed by the table's name, each read and
+    written in a different place and each forgotten -- or not -- on its own. The
+    one that was not forgotten cost a restarted client its seats for a whole
+    session: a pool hands the same name to the next table it opens, so a new HUD
+    inherited "this client will not answer" from a client that had exited.
+
+    One object with one lifetime. Created when a table is first read, dropped
+    whole when it retires, so nothing can be left behind by being overlooked.
+    """
+
+    #: The hand the ring below was read for, the ring itself, and how many reads
+    #: it took. Reset when the hand changes: the seats cannot change within one.
+    hand_id: str | None = None
+    ring: dict[int, str] = field(default_factory=dict)
+    reads: int = 0
+
+    #: Reads in a row that could not seat anyone -- not reads that came back
+    #: empty. A client answering with the hero and one neighbour answers
+    #: non-empty every time and can never be acted on.
+    fruitless: int = 0
+
+    #: Whether the reader has been given up on for this table.
+    gave_up: bool = False
+
+    def start_hand(self, hand_id: str) -> None:
+        """Forget the previous hand's ring, keeping what was learned about the client."""
+        if self.hand_id != hand_id:
+            self.hand_id, self.ring, self.reads = hand_id, {}, 0
+
+
 class ZMQWorker(QThread):
     """A QThread to run the ZMQ message processing loop."""
 
@@ -227,11 +261,37 @@ class HudReadWorker(QThread):
         self.config = config
         self.db_factory = db_factory
         self._requests: Queue[HudBatchReadRequest | None] = Queue()
+        # Newest queued Fast-Fold request id per table, so the worker can drop
+        # the ones already superseded instead of reading for them. See submit().
+        self._latest_fast_fold: dict[str, int] = {}
+        self._latest_lock = threading.Lock()
         self._stopping = threading.Event()
 
     def submit(self, request: HudBatchReadRequest) -> None:
-        """Queue one immutable request from the Qt thread."""
+        """Queue one immutable request from the Qt thread.
+
+        A Fast-Fold request also records itself as its table's newest. The ring
+        grows a player at a time, so several reads for one table can be waiting
+        at once, and every one of them but the last describes a table that has
+        already changed. They used to be executed in full and discarded on
+        arrival by request id -- the database did the work, the GUI threw the
+        answer away. Now the worker drops them before reading.
+        """
+        if isinstance(request, FastFoldStatsRequest):
+            with self._latest_lock:
+                self._latest_fast_fold[request.temp_key] = request.request_id
         self._requests.put(request)
+
+    def _is_superseded(self, request: FastFoldStatsRequest) -> bool:
+        """Whether a newer read for the same table is already queued behind this one."""
+        with self._latest_lock:
+            latest = self._latest_fast_fold.get(request.temp_key)
+        return latest is not None and latest != request.request_id
+
+    def forget_fast_fold_table(self, temp_key: str) -> None:
+        """Drop what is remembered about a table nobody is watching any more."""
+        with self._latest_lock:
+            self._latest_fast_fold.pop(temp_key, None)
 
     @staticmethod
     def _configure_session(database: Database.Database) -> None:
@@ -338,6 +398,16 @@ class HudReadWorker(QThread):
 
             assert service is not None
             fast_fold = isinstance(pending, FastFoldStatsRequest)
+            if fast_fold and self._is_superseded(pending):
+                # The table has moved on while this waited its turn. Reading for
+                # it would spend a round trip on an answer the GUI discards.
+                log.debug(
+                    "Fast-Fold stats request %s for %s superseded before it ran",
+                    pending.request_id,
+                    pending.temp_key,
+                )
+                pending = None
+                continue
             try:
                 if fast_fold:
                     result = self._read_fast_fold_stats(database, pending)
@@ -589,6 +659,17 @@ class HudMain(QObject):
     winamax_table_update = Signal(object)
 
     AX_READS_PER_HAND = 6
+
+    #: Consecutive window reads that may fail to seat anyone before the reader
+    #: is given up on for that table. Two hands' worth.
+    #:
+    #: It was five, and five is what the evidence costs rather than what it is
+    #: worth: a read of a client that answers takes 94-218ms, synchronously, on
+    #: the GUI thread, six times a hand, per table. Thirty of them is four and a
+    #: half seconds of frozen HUD spent proving something a table caught
+    #: mid-redraw proves in one hand -- and a client that does not publish its
+    #: felt proves immediately. Two hands is still twice what it takes.
+    AX_FRUITLESS_READS_BEFORE_GIVING_UP = AX_READS_PER_HAND * 2
     """How many times a table's window may be re-read within one hand.
 
     A read costs ~20ms through the macOS accessibility API and 100-300ms
@@ -619,6 +700,14 @@ class HudMain(QObject):
     """
 
     MIN_PLAYERS_TO_SHOW = 2
+
+    #: How long after asking for a table's statistics further ring growth is
+    #: coalesced instead of asking again. The client log names players one at a
+    #: time, so a six-handed table produced a request, a database round trip and
+    #: a redraw per name -- fourteen in one hand, across two tables, in a
+    #: measured session. The first answer is never delayed by this; only the
+    #: ones chasing it are merged.
+    FF_STATS_COALESCE_MS = 400
     """Players a window must be drawing before its blocks are worth showing.
 
     The hero alone means the table is between hands or waiting for players, and
@@ -633,6 +722,10 @@ class HudMain(QObject):
     """
 
     AX_RECHECK_DELAYS_MS = (250, 700, 1500)
+
+    #: Hands remembered as having a seat-wait recheck already scheduled. Bounded
+    #: because a session plays thousands of them and nothing else prunes it.
+    FF_SEAT_WAIT_MEMO_LIMIT = 200
     """When to look at the window again after a hand starts.
 
     Every log line of a new hand -- the hand id, both blinds, the hole cards --
@@ -866,13 +959,49 @@ class HudMain(QObject):
             # hud_dict key -> the seat map last sent to the worker, so an
             # unchanged table does not queue a read on every log line.
             self._fast_fold_pending: dict[str, dict[int, str]] = {}
+            # Coalescing of stats requests: when the last one went out per
+            # table, the newest seat map waiting behind it, and the timer that
+            # will send that one. See FF_STATS_COALESCE_MS.
+            self._ff_last_request_at: dict[str, float] = {}
+            self._ff_coalesced: dict[str, tuple[Any, dict[int, str], Any]] = {}
+            self._ff_coalesce_timers: dict[str, QTimer] = {}
             # Pools reported once as having no HUD of their own, so the warning
             # is not repeated on every log line.
             self._unpaired_pools: set[str] = set()
             # window title -> (hand id, slot -> login read off that window). Kept
             # per window so two tables do not evict each other, and per hand
             # because each read walks another process's accessibility tree.
-            self._ax_rings: dict[str, tuple[str, dict[int, str], int]] = {}
+            # Window reads in a row that found nobody, and whether that has gone
+            # on long enough to stop trying -- both per table. A single counter
+            # for the whole session reached its threshold in half the hands with
+            # two tables open, and a quarter with four, so multitabling gave up
+            # on the reader before it had the evidence a single table needed.
+            # See AX_FRUITLESS_READS_BEFORE_GIVING_UP.
+            # How long to let the client log finish naming a table's players
+            # before showing the ones it has. Read once: it is a preference, not
+            # something that changes within a session.
+            try:
+                self._fast_fold_seat_wait_ms = int(self.config.get_hud_ui_parameters().get("fast_fold_seat_wait_ms", 500))
+            except Exception:
+                log.debug("Could not read fast_fold_seat_wait_ms; using the default", exc_info=True)
+                self._fast_fold_seat_wait_ms = 500
+            self._ff_seat_wait_scheduled: set[tuple[str, str]] = set()
+            # What has been learned about reading each table's window: the
+            # per-hand ring, how many reads in a row could not seat anyone, and
+            # whether the reader has been given up on for it. One object with one
+            # lifetime -- see TableReadState.
+            self._table_reads: dict[str, TableReadState] = {}
+            # "off" skips the window reader outright. On a client that never
+            # publishes its felt, the reads are pure stutter -- and the player
+            # who has established that should not have to re-establish it every
+            # session, two hands at a time.
+            try:
+                self._ax_reader_enabled = (
+                    str(self.config.get_hud_ui_parameters().get("fast_fold_window_seats", "auto")) != "off"
+                )
+            except Exception:
+                log.debug("Could not read fast_fold_window_seats; leaving the reader on", exc_info=True)
+                self._ax_reader_enabled = True
             # Timeline bookkeeping: when each hand's first log line arrived, and
             # which hand/table request is currently allowed to update the HUD.
             self._ff_started: dict[str, float] = {}
@@ -1533,6 +1662,11 @@ class HudMain(QObject):
         pending_generations = getattr(self, "_ff_pending_generation", None)
         if pending_generations is not None:
             pending_generations.pop(temp_key, None)
+        self._forget_coalesced_fast_fold_stats(temp_key)
+        worker = getattr(self, "_db_worker", None)
+        if worker is not None:
+            with contextlib.suppress(Exception):
+                worker.forget_fast_fold_table(temp_key)
         if pending is None and not getattr(hud, "stat_dict", None) and not getattr(hud, "seat_players", None):
             return  # already down
         FastFoldEngine.clear_seats(hud)
@@ -1598,6 +1732,15 @@ class HudMain(QObject):
         title = getattr(table, "title", "") or ""
         if reader is None or not title:
             return None
+        # The same two answers the per-hand path respects. Without them the idle
+        # sweep kept walking another process's accessibility tree every
+        # FF_IDLE_RECHECK_SECONDS, for the life of the session, on exactly the
+        # clients the breaker exists to stop reading -- and for a table nobody
+        # was even playing. Reported by Codex on the pull request.
+        table_key = getattr(table, "key", None) or title
+        reads = getattr(self, "_table_reads", {}).get(table_key)
+        if not getattr(self, "_ax_reader_enabled", True) or (reads is not None and reads.gave_up):
+            return None
         try:
             return reader.read_window(
                 title,
@@ -1637,12 +1780,41 @@ class HudMain(QObject):
             self.hud_dict.pop(temp_key, None)
             # This path bypasses idle_kill, so the window it held has to be
             # given back explicitly or the next HUD on it reads as a duplicate.
+            self._forget_window_seat_state(temp_key, getattr(getattr(hud, "table", None), "number", None))
             self._window_registry.release(temp_key)
             aliases = getattr(self, "_fast_fold_aliases", None)
             if aliases is not None:
                 for alias, live_key in list(aliases.items()):
                     if live_key == temp_key:
                         aliases.pop(alias, None)
+
+    def _schedule_seat_wait_recheck(self, update: Any, elapsed: float) -> None:
+        """Come back when the seat wait is up, once per hand and table.
+
+        Only needed when the configured wait outlasts AX_RECHECK_DELAYS_MS. Below
+        that, the rechecks already scheduled at hand start arrive after the
+        deadline and this would be a second timer saying the same thing.
+
+        The test is on the setting, not on what is left of it. Comparing the
+        remaining time instead left a band just above the last recheck with no
+        wakeup at all: at a 2000ms wait, a ring arriving at 600ms leaves 1400,
+        which reads as "the rechecks have this" -- and they do not, because they
+        all fire before 2000ms. Every later call inside the hand makes the same
+        wrong judgement, so nothing looked again until the hand ended. Reported
+        by Codex on the pull request.
+        """
+        if self._fast_fold_seat_wait_ms <= max(self.AX_RECHECK_DELAYS_MS):
+            return
+        remaining_ms = max(0, int(self._fast_fold_seat_wait_ms - elapsed * 1000))
+        pending = self._ff_seat_wait_scheduled
+        key = (update.pool, update.hand_id)
+        if key in pending:
+            return
+        pending.add(key)
+        if len(pending) > self.FF_SEAT_WAIT_MEMO_LIMIT:
+            pending.clear()
+            pending.add(key)
+        QTimer.singleShot(remaining_ms, lambda pool=update.pool: self._recheck_window(pool))
 
     def _recheck_window(self, pool: str) -> None:
         """Re-run a table's live update once the client has had time to draw it."""
@@ -1748,8 +1920,21 @@ class HudMain(QObject):
         elif update.ring and update.hero:
             hand_start_time = self._ff_started.get(update.hand_id, 0)
             elapsed = time.monotonic() - hand_start_time if hand_start_time else 1.0
-            if len(update.ring) < max_seats and elapsed < 0.5:
-                # Wait for the full ring to accumulate in log buffer so all 6 player HUDs appear simultaneously
+            if len(update.ring) < max_seats and elapsed * 1000 < self._fast_fold_seat_wait_ms:
+                # The client log names a player only once they have acted, so a
+                # six-handed table is named over several seconds. Showing what is
+                # known so far means blocks appearing one at a time; waiting means
+                # they appear together, later. Which of the two is worse is the
+                # player's call, not ours -- hud_ui/@fast_fold_seat_wait_ms.
+                #
+                # And something has to come back at the deadline. The only other
+                # rechecks of a hand are AX_RECHECK_DELAYS_MS, which stop at
+                # 1500ms: with the wait set beyond that, as the setting documents,
+                # a short-handed table whose last ring update lands before the
+                # deadline would never be drawn at all -- nothing would look
+                # again until the hand was over, and then it is cleared.
+                # Reported by Codex on the pull request.
+                self._schedule_seat_wait_recheck(update, elapsed)
                 return
             seat_map = build_seat_map(update.ring, update.hero, max_seats=max_seats, hero_seat=hero_seat)
             source = "log-ring"
@@ -1769,7 +1954,113 @@ class HudMain(QObject):
             f"table={temp_key} source={source} hero_seat={hero_seat} "
             f"seats={ {s: seat_map[s] for s in sorted(seat_map)} }",
         )
-        self._request_fast_fold_stats(temp_key, hud, seat_map, update.hand_id)
+        self._request_fast_fold_stats_coalesced(temp_key, hud, seat_map, update.hand_id)
+
+    def _request_fast_fold_stats_coalesced(
+        self,
+        temp_key: str,
+        hud: Hud.Hud,
+        seat_map: dict[int, str],
+        hand_id: Any,
+    ) -> None:
+        """Ask now if nothing was asked recently, otherwise merge into one later ask.
+
+        The client log names a player only once they have acted, so a six-handed
+        table grows its ring a name at a time. Every growth used to be its own
+        request, database round trip and redraw -- fourteen of them in a single
+        hand across two tables, in a measured session, each one repainting
+        blocks the player was already reading.
+
+        Leading edge, then trailing: the first seat map of a burst goes out
+        immediately, so the blocks appear as early as they ever did. The ones
+        chasing it inside FF_STATS_COALESCE_MS are held, and only the newest
+        survives to be sent when the window closes -- an intermediate ring that
+        was already superseded is not worth a round trip.
+        """
+        now = time.monotonic()
+        last = self._ff_last_request_at.get(temp_key)
+        elapsed_ms = float("inf") if last is None else (now - last) * 1000
+
+        if elapsed_ms >= self.FF_STATS_COALESCE_MS:
+            self._ff_last_request_at[temp_key] = now
+            self._ff_coalesced.pop(temp_key, None)
+            self._request_fast_fold_stats(temp_key, hud, seat_map, hand_id)
+            return
+
+        self._ff_coalesced[temp_key] = (hud, seat_map, hand_id)
+        timer = self._ff_coalesce_timers.get(temp_key)
+        if timer is None:
+            timer = QTimer(self)
+            timer.setSingleShot(True)
+            timer.timeout.connect(lambda key=temp_key: self._flush_coalesced_fast_fold_stats(key))
+            self._ff_coalesce_timers[temp_key] = timer
+        if not timer.isActive():
+            timer.start(max(0, int(self.FF_STATS_COALESCE_MS - elapsed_ms)))
+        self._ff_trace(hand_id, "stats-coalesced", f"table={temp_key} seats={len(seat_map)}")
+
+    def _flush_coalesced_fast_fold_stats(self, temp_key: str) -> None:
+        """Send the newest seat map held back for this table, if it still applies."""
+        held = self._ff_coalesced.pop(temp_key, None)
+        if held is None:
+            return
+        hud, seat_map, hand_id = held
+        current = self.hud_dict.get(temp_key)
+        if current is None or current is not hud:
+            # The table was cleared or rebuilt while the map waited; the request
+            # would be answered against a HUD nobody is looking at.
+            return
+        self._ff_last_request_at[temp_key] = time.monotonic()
+        self._request_fast_fold_stats(temp_key, current, seat_map, hand_id)
+
+    def _forget_window_seat_state(self, table_key: str, hwnd: int | None = None) -> None:
+        """Drop what was learned about reading a table, when that table retires.
+
+        The breaker's verdict, the fruitless count and the per-hand ring are all
+        keyed by the table's name, which a pool hands back: close a table and
+        Winamax gives the next one the same "Colorado 3", so a HUD built after a
+        restart inherited "this client will not answer" from a client that is no
+        longer running. It never read its window, never asked for accessibility,
+        and went straight to the log-derived seats for the rest of the session.
+
+        The accessibility cache was taught the same lesson one round earlier, by
+        the owning process rather than by the key -- and I said in reply that
+        these were safe because they are keyed by name rather than by handle.
+        That was the reason they are not. Reported by Codex on the pull request.
+        """
+        learned = getattr(self, "_table_reads", None)
+        if learned is not None:
+            learned.pop(table_key, None)
+
+        # And the window's own: whether its accessibility request was accepted,
+        # whether one is in the air, and where its table's centre was measured.
+        # Nothing released that in production, so a handle Winamax handed to
+        # another of its tables -- same process, so the owner check says nothing
+        # -- inherited an accepted request it never received, an outstanding one
+        # nobody would ever clear, and a centre belonging to a table that had
+        # closed. Reported by Codex on the pull request.
+        if hwnd:
+            with contextlib.suppress(Exception):
+                from fpdb_3_legacy.winamax_ax_seats import forget_window_state
+
+                forget_window_state(int(hwnd))
+
+    def _forget_coalesced_fast_fold_stats(self, temp_key: str) -> None:
+        """Drop anything held for a table that is going away.
+
+        Reached through _clear_fast_fold_table, which is called on HUDs built
+        without the full constructor -- so the state is asked for the same
+        defensive way its neighbours in that method are, rather than assumed.
+        """
+        for name in ("_ff_coalesced", "_ff_last_request_at"):
+            held = getattr(self, name, None)
+            if held is not None:
+                held.pop(temp_key, None)
+        timers = getattr(self, "_ff_coalesce_timers", None)
+        timer = None if timers is None else timers.pop(temp_key, None)
+        if timer is not None:
+            with contextlib.suppress(RuntimeError):
+                timer.stop()
+                timer.deleteLater()
 
     def _request_fast_fold_stats(
         self,
@@ -1871,13 +2162,17 @@ class HudMain(QObject):
         reader = getattr(self, "winamax_ax_seats", None)
         table = getattr(hud, "table", None)
         title = getattr(table, "title", "") or ""
-        if reader is None or not title:
+        if reader is None or not title or not self._ax_reader_enabled:
             return {}
 
         table_key = getattr(table, "key", None) or title
-        cached_hand, cached_slots, reads = self._ax_rings.get(table_key, (None, {}, 0))
-        if cached_hand != hand_id:
-            cached_slots, reads = {}, 0
+        state = self._table_reads.get(table_key)
+        if state is not None and state.gave_up:
+            return {}
+        if state is None:
+            state = self._table_reads.setdefault(table_key, TableReadState())
+        state.start_hand(hand_id)
+        cached_slots, reads = state.ring, state.reads
 
         # The hand-start line beats the client to the draw: read then and only
         # the hero is on the table yet. So keep re-reading on later lines of the
@@ -1909,16 +2204,51 @@ class HudMain(QObject):
             (cached_slots, slots),
             key=lambda answer: (self.HERO_SLOT in answer, len(answer)),
         )
-        self._ax_rings[table_key] = (hand_id, best, reads + 1)
+        state.ring, state.reads = best, reads + 1
 
-        if slots != cached_slots:
-            empty = sorted(set(range(max_seats)) - set(best))
-            self._ff_trace(
-                hand_id,
-                "window-read",
-                f"{title!r} (key={table_key}) {took:.0f}ms read#{reads + 1} players={len(best)} "
-                f"slots={ {s: best[s] for s in sorted(best)} } empty={empty}",
-            )
+        # Traced on every read, not only when the answer changed. A reader that
+        # returns nothing returns the same nothing every time, so the one case
+        # worth reporting -- the window telling us about no players at all, for
+        # every hand of a session -- was the one case that logged absolutely
+        # nothing, even with FPDB_HUD_TRACE=1. The seats then come from the log
+        # ring, which names a player only once they have acted, and the blocks
+        # arrive one at a time; that is what gets reported, with no trace of why.
+        # A client that publishes nothing publishes nothing every time, and each
+        # read is a synchronous walk of another process's tree on the GUI
+        # thread, at hand-start, which is exactly when the HUD is trying to
+        # draw. Measured on a live session: six reads a hand, on two tables,
+        # 15-62ms each, every one of them players=0. Stop paying for it.
+        # Fruitless means "could not be acted on", not "came back empty". This
+        # counted empty reads, and a client that answers with the hero and one
+        # neighbour -- never the bottom-centre chair, never enough of the ring --
+        # answers non-empty every single time. The counter reset on every read,
+        # the breaker never tripped, and six reads a hand went on being paid for
+        # on two tables at 94-172ms each: about 1.5s of GUI thread per hand, for
+        # a seat map the caller discards. The test is the caller's own.
+        usable = self.HERO_SLOT in best and len(best) >= self.MIN_PLAYERS_TO_SHOW
+        if usable:
+            state.fruitless = 0
+        else:
+            state.fruitless += 1
+            fruitless = state.fruitless
+            if fruitless >= self.AX_FRUITLESS_READS_BEFORE_GIVING_UP:
+                state.gave_up = True
+                log.warning(
+                    "Giving up on the window seat reader for %s after %d reads that could not seat "
+                    "anyone: this client is not publishing enough of that table through the "
+                    "accessibility API to place the hero. Its Fast-Fold seats come from the client "
+                    "log, which names a player only once they have acted.",
+                    table_key,
+                    fruitless,
+                )
+
+        empty = sorted(set(range(max_seats)) - set(best))
+        self._ff_trace(
+            hand_id,
+            "window-read",
+            f"{title!r} (key={table_key}) {took:.0f}ms read#{reads + 1} players={len(best)} "
+            f"slots={ {s: best[s] for s in sorted(best)} } empty={empty}",
+        )
         return best
 
     def _ax_reads_spent(self, hud: Hud.Hud, hand_id: str) -> bool:
@@ -1934,8 +2264,8 @@ class HudMain(QObject):
         """
         table = getattr(hud, "table", None)
         table_key = getattr(table, "key", None) or getattr(table, "title", "") or ""
-        cached_hand, _cached_slots, reads = self._ax_rings.get(table_key, (None, {}, 0))
-        return cached_hand == hand_id and reads >= self.AX_READS_PER_HAND
+        state = self._table_reads.get(table_key)
+        return state is not None and state.hand_id == hand_id and state.reads >= self.AX_READS_PER_HAND
 
     def _on_fast_fold_stats(self, result: FastFoldStatsResult) -> None:
         """Apply stats the worker read for a Fast-Fold table. Runs on the GUI thread."""
@@ -3905,7 +4235,9 @@ class HudMain(QObject):
                 self.hud_dict[table].tablehudlabel = None
                 overlays = self._describe_overlay_win_ids(hud)
                 self.hud_dict[table].kill()
+                retiring_hwnd = getattr(getattr(hud, "table", None), "number", None)
                 del self.hud_dict[table]
+                self._forget_window_seat_state(table, retiring_hwnd)
                 released = self._window_registry.release(table)
                 log.warning(
                     "HUD destroyed: session=%s pid=%s generation=%s table=%r window_id=%s overlays=%s",
