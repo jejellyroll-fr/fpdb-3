@@ -2867,7 +2867,11 @@ def test_the_log_ring_takes_over_when_the_window_never_shows_a_dealt_table(hud_m
     # A read that names one player and never the hero's chair.
     hud_main.winamax_ax_seats = SimpleNamespace(read_window=lambda t, max_seats=6, **_kwargs: {3: "Player01"})
     # This hand's reads are already spent (the table is keyed by its title here).
-    hud_main._ax_rings["Winamax Casablanca 6"] = ("h1", {3: "Player01"}, hud_main.AX_READS_PER_HAND)
+    hud_main._table_reads["Winamax Casablanca 6"] = HUD_main.TableReadState(
+        hand_id="h1",
+        ring={3: "Player01"},
+        reads=hud_main.AX_READS_PER_HAND,
+    )
     # A log line from later in the hand: the ring has had its chance to fill.
     hud_main._ff_started["h1"] = time.monotonic() - 1.0
     try:

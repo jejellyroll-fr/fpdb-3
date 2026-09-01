@@ -26,10 +26,13 @@ appear one at a time over the first betting round instead of all at once.
 
 from __future__ import annotations
 
+import ctypes
 import logging
 import math
+import os
 import platform
 import re
+import threading
 from dataclasses import dataclass
 from typing import Any
 
@@ -201,13 +204,37 @@ class _WindowsUIAClient:
         self._condition = condition
 
     def collect_labels(self, element: Any) -> list[AXSeat]:
-        """Every short text label under ``element``, with its screen position."""
+        """Every short text label under ``element``, with its screen position.
+
+        Labels belonging to this process are skipped. The HUD's own stat blocks
+        are top-level windows made transient children of the table they sit on,
+        which puts them inside the subtree searched here -- so a walk of a table
+        window came back holding the HUD's own text:
+
+            'HUD - stats'  'MonXt.'  'H 2'  'VP 0.0'  'PR 0.0'  '3B -'  'CB -'
+
+        Those are stat abbreviations, not players, and feeding them to
+        seats_from_labels can only produce nonsense or nothing. The HUD reading
+        its own output back is a loop worth cutting whatever else the client
+        does or does not expose.
+        """
         found = element.FindAll(self.TREE_SCOPE_SUBTREE, self._condition)
         if not found or not found.Length:
             return []
         labels: list[AXSeat] = []
+        own_pid = os.getpid()
         for index in range(min(found.Length, self.MAX_ELEMENTS)):
             item = found.GetElement(index)
+            # Fail open: only an element positively identified as ours is
+            # dropped. Losing a real player's label because one attribute read
+            # hiccuped would cost the whole seat map, which is the failure this
+            # reader exists to avoid.
+            try:
+                is_ours = item.CurrentProcessId == own_pid
+            except Exception:  # noqa: BLE001 - unreadable pid is not proof of anything
+                is_ours = False
+            if is_ours:
+                continue
             name = item.CurrentName
             if not isinstance(name, str) or not name or len(name) > self.MAX_LABEL_LEN:
                 continue
@@ -220,6 +247,340 @@ class _WindowsUIAClient:
 
 _windows_uia_client: _WindowsUIAClient | None = None
 _windows_uia_unavailable = False
+
+#: No process could ever own a window, so it can stand for "not yet known" in a
+#: comparison against an owner that could be None because the handle was gone.
+_UNKNOWN = object()
+
+#: WM_GETOBJECT / OBJID_CLIENT: what an assistive technology sends a window, and
+#: what a Chromium client watches for before it builds its accessibility tree.
+_WM_GETOBJECT = 0x003D
+_OBJID_CLIENT = -4
+_SMTO_ABORTIFHUNG = 0x0002
+_GETOBJECT_TIMEOUT_MS = 200
+
+@dataclass
+class _WindowState:
+    """Everything learned about reading one client window.
+
+    Three separate caches lived here, keyed by handle, each with its own
+    invalidation rule and each forgotten separately -- or, three times over,
+    not forgotten at all. Windows recycles a handle to whatever opens next, so
+    every one of them needed to know when the thing behind the numbers had
+    changed, and each learned that the hard way in turn.
+
+    One object, one lifetime. It is dropped whole when the client behind the
+    handle changes, which is the only event any of these three cared about.
+    """
+
+    #: The process this state belongs to, once one has been read. A handle whose
+    #: owner has changed is a restarted client behind recycled numbers, and
+    #: nothing learned about the old one applies -- so the state is replaced
+    #: rather than carried over. _UNKNOWN, not None: None is a real answer from
+    #: GetWindowThreadProcessId for a window that has gone.
+    owner_pid: int | None | object = _UNKNOWN
+
+    #: Whether this owner accepted an IAccessible2 query. A delivered
+    #: WM_GETOBJECT does not count: it gets Chromium as far as its native
+    #: widgets, and the felt is web content.
+    asked: bool = False
+
+    #: A request is in the air. The reads are far faster than the request, so
+    #: without this a table starts one on every read until the first returns.
+    in_flight: bool = False
+
+    #: The table centre, and the window frame it was measured against. A frame
+    #: that has moved or been handed to another table puts the chairs elsewhere,
+    #: and seats arranged around the old point land on the wrong ones.
+    centre: tuple[float, float] | None = None
+    centre_frame: tuple[int, int, int, int] | None = None
+
+
+#: Per window, and touched from the reading thread and the request threads.
+_windows: dict[int, _WindowState] = {}
+_windows_lock = threading.Lock()
+
+
+def _window_state(hwnd: int, owner_pid: int | None | object = _UNKNOWN) -> _WindowState:
+    """The state for this window, created on first sight. Call under the lock.
+
+    Given an owner, a state belonging to a different one is replaced rather than
+    returned: Windows recycles a handle to whatever opens next, and a Winamax
+    restarted while the HUD lives gets a new process behind the same numbers.
+    Everything here was learned about the old one -- whether it had been asked,
+    where its table's centre was, and whether a request it never answered is
+    still counted as in the air. Reported by Codex on the pull request, against
+    the refactor that says in its own docstring that this is what it does.
+    """
+    state = _windows.get(hwnd)
+    if state is not None and owner_pid is not _UNKNOWN and state.owner_pid is not _UNKNOWN and state.owner_pid != owner_pid:
+        log.info("Window %s has a new owner; forgetting what was learned about the old one", hwnd)
+        state = None
+    if state is None:
+        state = _WindowState()
+        _windows[hwnd] = state
+    if owner_pid is not _UNKNOWN:
+        state.owner_pid = owner_pid
+    return state
+
+
+def forget_window_state(hwnd: int | None = None) -> None:
+    """Forget one window, or all of them, so the next read starts over."""
+    with _windows_lock:
+        if hwnd is None:
+            _windows.clear()
+        else:
+            _windows.pop(hwnd, None)
+
+
+def _window_pid(hwnd: int) -> int | None:  # pragma: no cover - Win32 call
+    """The process owning a window, or None when it cannot be asked.
+
+    A local call that returns from kernel data, not a message to another
+    process's queue: unlike the accessibility requests, it cannot block on a
+    client that has stopped answering, so it is safe on the GUI thread.
+
+    Never raises. It is asked outside the request's own error handling, and a
+    caller that has been told the platform is Windows when it is not -- which is
+    what the cross-platform contract test does -- must get an answer rather than
+    an AttributeError from a ctypes.windll that is not there.
+    """
+    try:
+        import ctypes
+        from ctypes import wintypes
+
+        pid = wintypes.DWORD()
+        ctypes.windll.user32.GetWindowThreadProcessId(wintypes.HWND(hwnd), ctypes.byref(pid))
+    except Exception:
+        log.debug("Could not read the process owning window %s", hwnd, exc_info=True)
+        return None
+    return pid.value or None
+
+
+def request_windows_accessibility(hwnd: int) -> None:
+    """Ask a Chromium client to build its accessibility tree, once per window.
+
+    The macOS reader does this explicitly -- ``AXManualAccessibility`` on the
+    application -- and says why: "Chromium only builds its web accessibility
+    tree when an assistive client asks for it; without this the windows expose
+    nothing but their titles." Windows had no equivalent, and measured exactly
+    the symptom that note predicts: six nodes under a whole poker table, the
+    window title among them, and not one player. Every hand then fell back to
+    the client log, which names a player only once they have acted.
+
+    The Windows way of asking is WM_GETOBJECT with OBJID_CLIENT. It goes to the
+    table window and to each of its children, because the content is drawn in a
+    child render surface rather than the frame the HUD attached to.
+
+    Asked from a background thread, and nothing waits for it. SendMessageTimeout
+    is bounded, but AccessibleObjectFromWindow and QueryService are not: they
+    send their own WM_GETOBJECT and wait for the client to answer, with no
+    timeout to give up at. A hung or still-starting client could therefore hold
+    the HUD's GUI thread for as long as it liked, which is the failure this
+    reader exists inside a circuit breaker to avoid. Nothing here returns a value
+    the caller needs -- the effect is on the client, and the tree it builds is
+    built asynchronously anyway -- so the request is fired and forgotten, and the
+    rechecks within the hand pick up whatever it produced. Reported by Codex on
+    the pull request.
+    """
+    if platform.system() != "Windows" or not hwnd:
+        return
+    # Asked once per window *and per client*. Windows recycles a closed table's
+    # handle, and a Winamax restarted while the HUD stays alive gets a new
+    # process for the same numbers -- a handle remembered by its digits alone
+    # would tell that new Chromium it had already been asked, and it would never
+    # publish its felt. The centre cache learned the same lesson from its frame.
+    # Reported by Codex on the pull request.
+    pid = _window_pid(hwnd)
+    with _windows_lock:
+        state = _window_state(hwnd, pid)
+        if state.asked or state.in_flight:
+            return
+        state.in_flight = True
+    threading.Thread(
+        target=_request_windows_accessibility_now,
+        args=(hwnd, state),
+        name=f"fpdb-ax-request-{hwnd}",
+        daemon=True,
+    ).start()
+
+
+def _still_current(hwnd: int, state: _WindowState) -> bool:
+    """Whether this is still the state the window is being tracked by.
+
+    For a request coming back, never for one starting. The COM calls have no
+    timeout, so a request can outlive the window it was sent to and return to a
+    handle that has since been given to something else -- another client, or,
+    with Winamax still running, another table of the same one. The owner's pid
+    tells those two apart only in the first case; the object's identity tells
+    them apart in both, because the state is replaced whenever the window
+    behind the handle is not the one it was learned about.
+
+    A completion that is not about the window being tracked now has nothing to
+    say about it. Reported by Codex on the pull request, twice: once for the
+    answer overwriting the new client's state, once for the same handle inside
+    one process.
+    """
+    return _windows.get(hwnd) is state
+
+
+def _request_windows_accessibility_now(hwnd: int, state: _WindowState) -> None:
+    """Do the asking, on a thread of its own. See request_windows_accessibility."""
+    try:
+        targets, delivered = _send_get_object(hwnd)
+        asked_ia2 = sum(_ask_for_complete_tree(target) for target in targets)
+    except Exception:
+        # Never fatal: without it the reader is exactly as blind as it was.
+        log.debug("Could not ask window %s for its accessibility tree", hwnd, exc_info=True)
+        with _windows_lock:
+            if _still_current(hwnd, state):
+                state.in_flight = False
+        return
+
+    with _windows_lock:
+        if not _still_current(hwnd, state):
+            log.debug("Window %s changed hands while it was being asked; dropping the answer", hwnd)
+            return
+        state.in_flight = False
+        if asked_ia2:
+            # Only an accepted IAccessible2 query counts as asked. A delivered
+            # WM_GETOBJECT gets Chromium as far as its native widgets -- the
+            # frame, the Views controls, the dialogs -- and no further; the felt
+            # is web content, and the IA2 query is what unlocks it. Recording
+            # the window on the WM_GETOBJECT alone left a table whose IA2 query
+            # failed transiently without opponents for the rest of the session,
+            # until the circuit breaker gave up on it: the exact failure this
+            # branch exists to fix, reached through a partial success. Reported
+            # by Codex on the pull request.
+            state.asked = True
+
+    if not asked_ia2:
+        # Nothing got through. SendMessageTimeoutW reports a hung or
+        # still-starting client by returning zero rather than raising, and
+        # _ask_for_complete_tree turns every COM failure into False, so an
+        # attempt can fail completely without anything being thrown. Recording
+        # the window here -- which is what the first version did, before the
+        # work -- wrote it off for the whole session on one badly timed try.
+        # Reported by Codex on the pull request, twice: the exception path alone
+        # was not enough.
+        log.debug(
+            "Window %s accepted no IAccessible2 query (%d WM_GETOBJECT delivered); will ask again",
+            hwnd,
+            delivered,
+        )
+        return
+
+    log.info(
+        "Asked %d window(s) of %s to publish their accessibility tree (%d delivered, %d accepted IAccessible2)",
+        len(targets),
+        hwnd,
+        delivered,
+        asked_ia2,
+    )
+
+
+def _send_get_object(hwnd: int) -> tuple[list[int], int]:  # pragma: no cover - Win32 calls
+    """Post WM_GETOBJECT to a window and its children.
+
+    Returns the windows asked and how many answered. SendMessageTimeoutW reports
+    a hung or still-starting client by returning zero rather than raising, so the
+    count is the only way the caller can tell a delivered request from one that
+    quietly went nowhere.
+
+    Split out so the decision above it -- platform, once per window, what to do
+    when the client will not answer -- is testable on any platform, while this
+    reaches ctypes.windll and ctypes.WINFUNCTYPE, neither of which exists off
+    Windows to be stood in for.
+
+    SendMessageTimeout, never SendMessage: the client is another process, and a
+    blocked or busy one must not be able to hang the HUD's GUI thread.
+    """
+    from ctypes import wintypes
+
+    user32 = ctypes.windll.user32
+    targets = [hwnd]
+
+    @ctypes.WINFUNCTYPE(wintypes.BOOL, wintypes.HWND, wintypes.LPARAM)
+    def _collect(child: int, _param: int) -> bool:
+        targets.append(child)
+        return True
+
+    user32.EnumChildWindows(wintypes.HWND(hwnd), _collect, 0)
+    result = ctypes.c_void_p()
+    delivered = 0
+    for target in targets:
+        delivered += bool(
+            user32.SendMessageTimeoutW(
+                wintypes.HWND(target),
+                _WM_GETOBJECT,
+                0,
+                wintypes.LPARAM(_OBJID_CLIENT),
+                _SMTO_ABORTIFHUNG,
+                _GETOBJECT_TIMEOUT_MS,
+                ctypes.byref(result),
+            ),
+        )
+    return targets, delivered
+
+
+def _ask_for_complete_tree(hwnd: int) -> bool:  # pragma: no cover - COM calls
+    """Ask one window for IAccessible2, which is what unlocks the felt.
+
+    WM_GETOBJECT alone buys Chromium's "native APIs" mode: the frame, the Views
+    widgets and the dialogs. Measured on a table mid-hand, that is exactly what
+    came back -- 'Autorebuy', 'Confirmer', the hero's own seat -- and not one
+    opponent, because the felt is web content and web content needs the complete
+    mode.
+
+    Querying IAccessible2 through IServiceProvider is what a screen reader does,
+    and what Chromium watches for before it builds that tree. Measured on the
+    same table, immediately after: 32 labels became 54, and seats_from_labels
+    went from the hero alone to all six players with their stacks.
+
+    Per process and reversible, unlike the SPI_SETSCREENREADER system flag,
+    which would change how every application on the desktop behaves.
+    """
+    try:
+        import ctypes
+        from ctypes import POINTER, byref, c_void_p, wintypes
+
+        import comtypes
+        from comtypes import COMMETHOD, GUID, HRESULT, IUnknown
+
+        # This runs on a thread of its own, and COM is per-thread: comtypes
+        # initialises the thread that imports it, not this one. The thread is
+        # short-lived and dies with the request, so nothing uninitialises it.
+        comtypes.CoInitialize()
+
+        class _IServiceProvider(IUnknown):
+            _iid_ = GUID("{6D5140C1-7436-11CE-8034-00AA006009FA}")
+            _methods_ = [
+                COMMETHOD(
+                    [],
+                    HRESULT,
+                    "QueryService",
+                    (["in"], POINTER(GUID), "guidService"),
+                    (["in"], POINTER(GUID), "riid"),
+                    (["out"], POINTER(c_void_p), "ppvObject"),
+                ),
+            ]
+
+        iid_accessible = GUID("{618736E0-3C3D-11CF-810C-00AA00389B71}")
+        iid_accessible2 = GUID("{E89F726E-C4F4-4C19-BB19-B647D7FA8478}")
+        accessible = POINTER(IUnknown)()
+        ctypes.oledll.oleacc.AccessibleObjectFromWindow(
+            wintypes.HWND(hwnd),
+            ctypes.c_ulong(_OBJID_CLIENT & 0xFFFFFFFF),
+            byref(iid_accessible),
+            byref(accessible),
+        )
+        provider = accessible.QueryInterface(_IServiceProvider)
+        return bool(provider.QueryService(byref(iid_accessible2), byref(iid_accessible2)))
+    except Exception:
+        # A window with no accessible object, or one that declines: the others
+        # are still worth asking, and the reader is no worse off than before.
+        log.debug("Window %s did not answer an IAccessible2 query", hwnd, exc_info=True)
+        return False
 
 
 def reset_windows_uia() -> None:
@@ -249,8 +610,25 @@ def _windows_uia() -> _WindowsUIAClient | None:
         log.info("UIAutomation seat reader ready")
     except Exception:
         _windows_uia_unavailable = True
-        log.info("No UIAutomation seat reader on this machine; Fast-Fold seats come from the client log", exc_info=True)
+        # WARNING, not INFO: this is the difference between a Fast-Fold table's
+        # blocks appearing together and appearing one at a time over the first
+        # betting round, and it was invisible. The root logger is pinned to
+        # WARNING (loggingFpdb.DIAGNOSTIC_LEVEL_CAP) and "hud_main" is persisted
+        # lower still, so the INFO line this used to be reached no user's log --
+        # the HUD lost the window reader and said nothing about it. Once per
+        # process: the failure is remembered just above.
+        log.warning(
+            "No UIAutomation seat reader: Fast-Fold seats will come from the client log, which names a "
+            "player only once they have acted, so the stat blocks appear one at a time over the first "
+            "betting round.",
+            exc_info=True,
+        )
     return _windows_uia_client
+
+
+def read_window_for(hwnd: int, title: str = "", max_seats: int = 6) -> dict[int, str]:
+    """One window read by handle, for diagnostics that hold a HWND and no reader."""
+    return WinamaxAXSeatReader().read_window(title, max_seats, window_id=hwnd)
 
 
 def is_stack_label(text: str) -> bool:
@@ -291,6 +669,73 @@ def is_hud_label(text: str) -> bool:
         return True
 
     return False
+
+
+def _table_centre(
+    players: list[AXSeat],
+    win_rect: Any,
+    max_seats: int,
+    hwnd: int,
+) -> tuple[float, float] | None:
+    """The point the seats are arranged around, or None when it is not known.
+
+    The window rectangle is the obvious answer and it is the wrong one here. The
+    client reports its content in a different space from its frame -- a window
+    at x 3840..4800 whose six players sit at x 1767..2259 -- so a centre taken
+    from the frame is off to one side of every player, they all read as lying in
+    one direction from it, and the whole ring collapses into a single slot:
+
+        centre from the window rect : {2: 'CTroPinJust'}
+        centre from the players     : {0: 'jejellyroll', 1: 'depor81', ...}
+
+    But the ring's own bounding box is only the table's centre when the ring is
+    complete. Read the hero and the two chairs beside them and that box is a
+    band across the bottom of the felt, whose centre sits well below the true
+    one -- the hero still lands on slot 0, so the caller accepts the answer, and
+    the two neighbours land on slots 2 and 4 instead of 1 and 5. Statistics over
+    the wrong opponents is worse than no statistics at all, which is what makes
+    this worth a measurement rather than an estimate. Reported by Codex on the
+    pull request.
+
+    So a centre is measured only from a ring with every chair in it, remembered
+    against the window, and reused for the partial reads that follow. Until one
+    full ring has been seen there is no answer, and the caller falls back to the
+    client log. A client that reports its content in the frame's own space needs
+    none of this and keeps the frame's centre.
+    """
+    if not players:
+        return None
+    inside = all(
+        win_rect.left <= player.x <= win_rect.right and win_rect.top <= player.y <= win_rect.bottom
+        for player in players
+    )
+    if inside:
+        return (
+            win_rect.left + (win_rect.right - win_rect.left) / 2,
+            win_rect.top + (win_rect.bottom - win_rect.top) / 2,
+        )
+    frame = (win_rect.left, win_rect.top, win_rect.right, win_rect.bottom)
+    with _windows_lock:
+        state = _window_state(hwnd)
+        if len(players) >= max_seats:
+            xs = [player.x for player in players]
+            ys = [player.y for player in players]
+            state.centre = ((min(xs) + max(xs)) / 2, (min(ys) + max(ys)) / 2)
+            state.centre_frame = frame
+            return state.centre
+    # Only for the window it was measured on, where it was measured. A table
+    # moved or resized between hands puts its chairs somewhere else, and Windows
+    # hands a closed table's HWND to the next one -- either way the remembered
+    # point is somewhere on the desktop the seats no longer surround, and seats
+    # arranged around it land on the wrong chairs while still passing the
+    # caller's hero check. Reported by Codex on the pull request.
+        if state.centre is None:
+            return None
+        if state.centre_frame != frame:
+            state.centre = None
+            state.centre_frame = None
+            return None
+        return state.centre
 
 
 def seats_from_labels(labels: list[AXSeat]) -> list[AXSeat]:
@@ -643,6 +1088,10 @@ class WinamaxAXSeatReader:
             if client is None:
                 return {}
 
+            # Ask before looking: a Chromium client publishes nothing until an
+            # assistive client asks, which is what the macOS reader does with
+            # AXManualAccessibility.
+            request_windows_accessibility(hwnd)
             elem = client.automation.ElementFromHandle(hwnd)
             if elem is None:
                 return {}
@@ -655,7 +1104,12 @@ class WinamaxAXSeatReader:
             win_rect = elem.CurrentBoundingRectangle
             if not win_rect:
                 return {}
-            centre = (win_rect.left + (win_rect.right - win_rect.left) / 2, win_rect.top + (win_rect.bottom - win_rect.top) / 2)
+            centre = _table_centre(players, win_rect, max_seats, hwnd)
+            if centre is None:
+                # A partial ring on a client whose coordinates do not match its
+                # frame, before any full ring has been measured: no centre can
+                # be trusted, so say nothing rather than seat people wrongly.
+                return {}
             return seat_slots_from_positions(players, centre, max_seats)
         except Exception:
             log.debug("Error reading Winamax UIAutomation seats on Windows for HWND %s:", hwnd, exc_info=True)
@@ -670,6 +1124,16 @@ class WinamaxAXSeatReader:
         Paid here, at startup, it is not paid on the GUI thread while a table is
         being dealt. Failure is not an error: the log-derived ring still works.
         """
-        if platform.system() != "Windows" or not is_ax_available():
+        if platform.system() != "Windows":
+            return
+        if not is_ax_available():
+            # comtypes is not importable. The win32 dependency in pyproject and
+            # the PyInstaller hook exist to stop exactly this, so a build that
+            # arrives here has lost them somewhere -- and it degraded in
+            # silence, because this branch simply returned.
+            log.warning(
+                "Fast-Fold seats will come from the client log: comtypes is not importable, so this "
+                "build cannot read a table's chairs from its window.",
+            )
             return
         _windows_uia()
