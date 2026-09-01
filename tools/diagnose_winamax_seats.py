@@ -12,6 +12,11 @@ This asks the same questions the reader asks, and prints every answer:
     python tools/diagnose_winamax_seats.py
     python tools/diagnose_winamax_seats.py --wait 60
 
+``--wait`` polls until a table publishes *seats*, not merely labels: Chromium
+exposes its own frame and controls before the felt, so a window answering with a
+dozen labels and no players is the state worth waiting through rather than
+stopping at.
+
 * which windows the table detector can see at all, the lobby included
 * whether the UIAutomation client can be built (comtypes, COM, the wrapper)
 * the window's own rectangle, and every label under it with its position --
@@ -45,7 +50,15 @@ def _tables():
 
 
 def _report_table(reader_module, table) -> int:
-    """Print everything one table window will say. Returns the label count."""
+    """Print everything one table window will say. Returns the seats it yielded.
+
+    Seats, not labels. Chromium publishes its native frame and controls before
+    it publishes the felt, so a table can be answering with a dozen labels and
+    not one player -- which is the state this tool exists to tell apart from a
+    client that answers nothing. Counting labels made --wait stop there and
+    report success at exactly the wrong moment. Reported by Codex on the pull
+    request.
+    """
     hwnd = int(table.window_id)
     reader_module.request_windows_accessibility(hwnd)
     client = reader_module._windows_uia()
@@ -82,9 +95,13 @@ def _report_table(reader_module, table) -> int:
             print("      wrong chair -- the hero comes back off the bottom-centre slot.")
             for label in outside[:5]:
                 print(f"        {label.login!r} @ ({label.x},{label.y})")
-    print(f"  seats_from_labels: {reader_module.seats_from_labels(labels)}")
-    print(f"  read_window      : {reader_module.read_window_for(hwnd, table.title)}")
-    return len(labels)
+    players = reader_module.seats_from_labels(labels)
+    seats = reader_module.read_window_for(hwnd, table.title)
+    print(f"  seats_from_labels: {players}")
+    print(f"  read_window      : {seats}")
+    if labels and not seats:
+        print("  the window is answering, but not with seats yet -- still waiting")
+    return len(seats)
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -95,7 +112,7 @@ def main(argv: list[str] | None = None) -> int:
         type=int,
         default=0,
         metavar="SECONDS",
-        help="keep polling until a table publishes labels (default: report once and stop)",
+        help="keep polling until a table publishes its seats (default: report once and stop)",
     )
     args = parser.parse_args(argv)
 
