@@ -405,6 +405,26 @@ def request_windows_accessibility(hwnd: int) -> None:
     ).start()
 
 
+def _owned_window_state(hwnd: int, pid: int | None | object) -> _WindowState | None:
+    """This window's state if it still belongs to ``pid``, else None.
+
+    For a request coming back, never for one starting. The COM calls have no
+    timeout, so a request can outlive the client it was sent to and return to a
+    handle Windows has since given to another one. Asking for the state by owner
+    then rebuilt it around the *old* pid -- throwing away a successful request or
+    a measured centre that belonged to the new client, and marking the dead one
+    as asked. The error path did the same to in_flight, clearing a flag it did
+    not set and letting a second request start. Reported by Codex on the pull
+    request, against the fix for the opposite half of this.
+
+    A completion that no longer owns the window has nothing to say about it.
+    """
+    state = _windows.get(hwnd)
+    if state is None or state.owner_pid != pid:
+        return None
+    return state
+
+
 def _request_windows_accessibility_now(hwnd: int, pid: int | None = None) -> None:
     """Do the asking, on a thread of its own. See request_windows_accessibility."""
     try:
@@ -414,11 +434,16 @@ def _request_windows_accessibility_now(hwnd: int, pid: int | None = None) -> Non
         # Never fatal: without it the reader is exactly as blind as it was.
         log.debug("Could not ask window %s for its accessibility tree", hwnd, exc_info=True)
         with _windows_lock:
-            _window_state(hwnd).in_flight = False
+            stale = _owned_window_state(hwnd, pid)
+            if stale is not None:
+                stale.in_flight = False
         return
 
     with _windows_lock:
-        state = _window_state(hwnd, pid)
+        state = _owned_window_state(hwnd, pid)
+        if state is None:
+            log.debug("Window %s changed hands while it was being asked; dropping the answer", hwnd)
+            return
         state.in_flight = False
         if asked_ia2:
             # Only an accepted IAccessible2 query counts as asked. A delivered

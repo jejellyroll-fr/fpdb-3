@@ -626,3 +626,78 @@ def test_a_request_the_old_process_never_answered_does_not_block_the_new_one(
     winamax_ax_seats.request_windows_accessibility(1234)
 
     assert started == [(1234, 1000), (1234, 2000)]
+
+
+def _deferred_thread(monkeypatch, queue):
+    """Capture request threads so a test can run them in whatever order it likes."""
+
+    class _Deferred:
+        def __init__(self, target, args=(), **_kwargs) -> None:
+            self._run = lambda: target(*args)
+
+        def start(self) -> None:
+            queue.append(self._run)
+
+    monkeypatch.setattr(winamax_ax_seats.threading, "Thread", _Deferred)
+
+
+def test_a_request_that_outlived_its_client_does_not_touch_the_new_one(monkeypatch) -> None:
+    """The COM calls have no timeout, so a request can come back too late.
+
+    By then Windows may have given the handle to another client. Asking for the
+    state by owner rebuilt it around the old pid -- throwing away a successful
+    request or a measured centre belonging to the new client, and marking the
+    dead one as asked.
+    """
+    winamax_ax_seats.forget_window_state()
+    monkeypatch.setattr(winamax_ax_seats.platform, "system", lambda: "Windows")
+    monkeypatch.setattr(winamax_ax_seats, "_send_get_object", lambda hwnd: ([hwnd], 1))
+    monkeypatch.setattr(winamax_ax_seats, "_ask_for_complete_tree", lambda _hwnd: True)
+    pending: list = []
+    _deferred_thread(monkeypatch, pending)
+
+    monkeypatch.setattr(winamax_ax_seats, "_window_pid", lambda _hwnd: 1000)
+    winamax_ax_seats.request_windows_accessibility(1234)  # the old client's request
+
+    # The table closes, the handle is recycled, and the new client is asked and
+    # answers before the first request ever comes back.
+    monkeypatch.setattr(winamax_ax_seats, "_window_pid", lambda _hwnd: 2000)
+    winamax_ax_seats.forget_window_state(1234)
+    winamax_ax_seats.request_windows_accessibility(1234)
+    pending.pop()()
+    winamax_ax_seats._windows[1234].centre = (1.0, 2.0)
+
+    pending.pop()()  # the old client's request, arriving now
+
+    state = winamax_ax_seats._windows[1234]
+    assert state.owner_pid == 2000
+    assert state.asked is True
+    assert state.centre == (1.0, 2.0)
+
+
+def test_a_failure_from_a_client_that_is_gone_does_not_clear_the_new_one(monkeypatch) -> None:
+    """The error path cleared in_flight without checking whose it was.
+
+    A second request could then start for a window already being asked.
+    """
+    winamax_ax_seats.forget_window_state()
+    monkeypatch.setattr(winamax_ax_seats.platform, "system", lambda: "Windows")
+
+    def _boom(_hwnd):
+        msg = "the client went away"
+        raise OSError(msg)
+
+    monkeypatch.setattr(winamax_ax_seats, "_send_get_object", _boom)
+    pending: list = []
+    _deferred_thread(monkeypatch, pending)
+
+    monkeypatch.setattr(winamax_ax_seats, "_window_pid", lambda _hwnd: 1000)
+    winamax_ax_seats.request_windows_accessibility(1234)
+
+    monkeypatch.setattr(winamax_ax_seats, "_window_pid", lambda _hwnd: 2000)
+    winamax_ax_seats.forget_window_state(1234)
+    winamax_ax_seats.request_windows_accessibility(1234)
+
+    pending.pop(0)()  # the old client's request fails, late
+
+    assert winamax_ax_seats._windows[1234].in_flight is True
