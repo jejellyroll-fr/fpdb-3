@@ -209,3 +209,41 @@ def test_the_idle_sweep_respects_the_reader_being_switched_off() -> None:
 
     assert HUD_main.HudMain._read_window_slots(app, hud) is None
     app.winamax_ax_seats.read_window.assert_not_called()
+
+
+def test_a_retiring_table_takes_the_breaker_s_verdict_with_it() -> None:
+    """A pool hands the same name back to the next table it opens.
+
+    Close a table and Winamax gives the next one the same "Colorado 3", so a HUD
+    built after a restart inherited "this client will not answer" from a client
+    that is no longer running: it never read its window, never asked for
+    accessibility, and went straight to the log-derived seats for the session.
+    """
+    app = SimpleNamespace(
+        _ax_reader_gave_up={"Colorado 3": True},
+        _ax_fruitless_reads={"Colorado 3": 12},
+        _ax_rings={"Colorado 3": ("hand-1", {}, 12)},
+    )
+
+    HUD_main.HudMain._forget_window_seat_state(app, "Colorado 3")
+
+    assert app._ax_reader_gave_up == {}
+    assert app._ax_fruitless_reads == {}
+    assert app._ax_rings == {}
+
+
+def test_forgetting_one_table_leaves_the_others_alone() -> None:
+    app = SimpleNamespace(
+        _ax_reader_gave_up={"Colorado 3": True, "Colorado 4": True},
+        _ax_fruitless_reads={},
+        _ax_rings={},
+    )
+
+    HUD_main.HudMain._forget_window_seat_state(app, "Colorado 3")
+
+    assert app._ax_reader_gave_up == {"Colorado 4": True}
+
+
+def test_forgetting_survives_a_hud_built_without_the_full_constructor() -> None:
+    """The same shape _clear_fast_fold_table's neighbours guard against."""
+    HUD_main.HudMain._forget_window_seat_state(SimpleNamespace(), "Colorado 3")

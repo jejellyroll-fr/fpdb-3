@@ -283,12 +283,21 @@ def _window_pid(hwnd: int) -> int | None:  # pragma: no cover - Win32 call
     A local call that returns from kernel data, not a message to another
     process's queue: unlike the accessibility requests, it cannot block on a
     client that has stopped answering, so it is safe on the GUI thread.
-    """
-    import ctypes
-    from ctypes import wintypes
 
-    pid = wintypes.DWORD()
-    ctypes.windll.user32.GetWindowThreadProcessId(wintypes.HWND(hwnd), ctypes.byref(pid))
+    Never raises. It is asked outside the request's own error handling, and a
+    caller that has been told the platform is Windows when it is not -- which is
+    what the cross-platform contract test does -- must get an answer rather than
+    an AttributeError from a ctypes.windll that is not there.
+    """
+    try:
+        import ctypes
+        from ctypes import wintypes
+
+        pid = wintypes.DWORD()
+        ctypes.windll.user32.GetWindowThreadProcessId(wintypes.HWND(hwnd), ctypes.byref(pid))
+    except Exception:
+        log.debug("Could not read the process owning window %s", hwnd, exc_info=True)
+        return None
     return pid.value or None
 
 

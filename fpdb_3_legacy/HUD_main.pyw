@@ -1743,6 +1743,7 @@ class HudMain(QObject):
             self.hud_dict.pop(temp_key, None)
             # This path bypasses idle_kill, so the window it held has to be
             # given back explicitly or the next HUD on it reads as a duplicate.
+            self._forget_window_seat_state(temp_key)
             self._window_registry.release(temp_key)
             aliases = getattr(self, "_fast_fold_aliases", None)
             if aliases is not None:
@@ -1973,6 +1974,26 @@ class HudMain(QObject):
             return
         self._ff_last_request_at[temp_key] = time.monotonic()
         self._request_fast_fold_stats(temp_key, current, seat_map, hand_id)
+
+    def _forget_window_seat_state(self, table_key: str) -> None:
+        """Drop what was learned about reading a table, when that table retires.
+
+        The breaker's verdict, the fruitless count and the per-hand ring are all
+        keyed by the table's name, which a pool hands back: close a table and
+        Winamax gives the next one the same "Colorado 3", so a HUD built after a
+        restart inherited "this client will not answer" from a client that is no
+        longer running. It never read its window, never asked for accessibility,
+        and went straight to the log-derived seats for the rest of the session.
+
+        The accessibility cache was taught the same lesson one round earlier, by
+        the owning process rather than by the key -- and I said in reply that
+        these were safe because they are keyed by name rather than by handle.
+        That was the reason they are not. Reported by Codex on the pull request.
+        """
+        for name in ("_ax_reader_gave_up", "_ax_fruitless_reads", "_ax_rings"):
+            learned = getattr(self, name, None)
+            if learned is not None:
+                learned.pop(table_key, None)
 
     def _forget_coalesced_fast_fold_stats(self, temp_key: str) -> None:
         """Drop anything held for a table that is going away.
@@ -4164,6 +4185,7 @@ class HudMain(QObject):
                 overlays = self._describe_overlay_win_ids(hud)
                 self.hud_dict[table].kill()
                 del self.hud_dict[table]
+                self._forget_window_seat_state(table)
                 released = self._window_registry.release(table)
                 log.warning(
                     "HUD destroyed: session=%s pid=%s generation=%s table=%r window_id=%s overlays=%s",
