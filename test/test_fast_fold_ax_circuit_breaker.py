@@ -242,3 +242,35 @@ def test_forgetting_one_table_leaves_the_others_alone() -> None:
 def test_forgetting_survives_a_hud_built_without_the_full_constructor() -> None:
     """The same shape _clear_fast_fold_table's neighbours guard against."""
     HUD_main.HudMain._forget_window_seat_state(SimpleNamespace(), "Colorado 3")
+
+
+def test_retiring_a_table_releases_its_window_state_too(monkeypatch) -> None:
+    """Nothing released it in production, which is how a handle carried its past.
+
+    Winamax hands one table's HWND to another of its own, so the owner's pid is
+    identical and says nothing; only the HUD knows the table has gone.
+    """
+    from fpdb_3_legacy import winamax_ax_seats
+
+    forgotten = []
+    monkeypatch.setattr(winamax_ax_seats, "forget_window_state", forgotten.append)
+    app = SimpleNamespace(_table_reads={"Colorado 3": HUD_main.TableReadState()})
+
+    HUD_main.HudMain._forget_window_seat_state(app, "Colorado 3", 3477872)
+
+    assert forgotten == [3477872]
+    assert app._table_reads == {}
+
+
+def test_retiring_a_table_with_no_window_forgets_only_what_it_has(monkeypatch) -> None:
+    """A HUD torn down before its window resolved has no handle to release."""
+    from fpdb_3_legacy import winamax_ax_seats
+
+    forgotten = []
+    monkeypatch.setattr(winamax_ax_seats, "forget_window_state", forgotten.append)
+    app = SimpleNamespace(_table_reads={"Colorado 3": HUD_main.TableReadState()})
+
+    HUD_main.HudMain._forget_window_seat_state(app, "Colorado 3", None)
+
+    assert forgotten == []
+    assert app._table_reads == {}

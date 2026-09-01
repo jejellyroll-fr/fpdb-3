@@ -399,33 +399,32 @@ def request_windows_accessibility(hwnd: int) -> None:
         state.in_flight = True
     threading.Thread(
         target=_request_windows_accessibility_now,
-        args=(hwnd, pid),
+        args=(hwnd, state),
         name=f"fpdb-ax-request-{hwnd}",
         daemon=True,
     ).start()
 
 
-def _owned_window_state(hwnd: int, pid: int | None | object) -> _WindowState | None:
-    """This window's state if it still belongs to ``pid``, else None.
+def _still_current(hwnd: int, state: _WindowState) -> bool:
+    """Whether this is still the state the window is being tracked by.
 
     For a request coming back, never for one starting. The COM calls have no
-    timeout, so a request can outlive the client it was sent to and return to a
-    handle Windows has since given to another one. Asking for the state by owner
-    then rebuilt it around the *old* pid -- throwing away a successful request or
-    a measured centre that belonged to the new client, and marking the dead one
-    as asked. The error path did the same to in_flight, clearing a flag it did
-    not set and letting a second request start. Reported by Codex on the pull
-    request, against the fix for the opposite half of this.
+    timeout, so a request can outlive the window it was sent to and return to a
+    handle that has since been given to something else -- another client, or,
+    with Winamax still running, another table of the same one. The owner's pid
+    tells those two apart only in the first case; the object's identity tells
+    them apart in both, because the state is replaced whenever the window
+    behind the handle is not the one it was learned about.
 
-    A completion that no longer owns the window has nothing to say about it.
+    A completion that is not about the window being tracked now has nothing to
+    say about it. Reported by Codex on the pull request, twice: once for the
+    answer overwriting the new client's state, once for the same handle inside
+    one process.
     """
-    state = _windows.get(hwnd)
-    if state is None or state.owner_pid != pid:
-        return None
-    return state
+    return _windows.get(hwnd) is state
 
 
-def _request_windows_accessibility_now(hwnd: int, pid: int | None = None) -> None:
+def _request_windows_accessibility_now(hwnd: int, state: _WindowState) -> None:
     """Do the asking, on a thread of its own. See request_windows_accessibility."""
     try:
         targets, delivered = _send_get_object(hwnd)
@@ -434,14 +433,12 @@ def _request_windows_accessibility_now(hwnd: int, pid: int | None = None) -> Non
         # Never fatal: without it the reader is exactly as blind as it was.
         log.debug("Could not ask window %s for its accessibility tree", hwnd, exc_info=True)
         with _windows_lock:
-            stale = _owned_window_state(hwnd, pid)
-            if stale is not None:
-                stale.in_flight = False
+            if _still_current(hwnd, state):
+                state.in_flight = False
         return
 
     with _windows_lock:
-        state = _owned_window_state(hwnd, pid)
-        if state is None:
+        if not _still_current(hwnd, state):
             log.debug("Window %s changed hands while it was being asked; dropping the answer", hwnd)
             return
         state.in_flight = False

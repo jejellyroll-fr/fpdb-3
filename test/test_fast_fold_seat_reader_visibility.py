@@ -253,7 +253,11 @@ def test_the_request_does_not_run_on_the_calling_thread(monkeypatch) -> None:
     assert target is winamax_ax_seats._request_windows_accessibility_now
     # The owner is read on the calling thread -- a local call that cannot block --
     # and carried, so the worker records the window against the client it asked.
-    assert args == (1234, 4242)
+    assert args[0] == 1234
+    # The state object itself, so a completion can tell whether it is still the
+    # one the window is tracked by -- identity, not a pid that a second table of
+    # the same client would share.
+    assert args[1] is winamax_ax_seats._windows[1234]
     assert daemon is True
 
 
@@ -293,7 +297,7 @@ def test_a_second_read_does_not_ask_while_the_first_request_is_in_the_air(monkey
     winamax_ax_seats.request_windows_accessibility(1234)
     winamax_ax_seats.request_windows_accessibility(1234)
 
-    assert started == [(1234, 4242)]
+    assert [a[0] for a in started] == [1234]
 
 
 def test_a_client_that_will_not_answer_is_not_fatal(monkeypatch, run_requests_here) -> None:
@@ -625,7 +629,7 @@ def test_a_request_the_old_process_never_answered_does_not_block_the_new_one(
     monkeypatch.setattr(winamax_ax_seats, "_window_pid", lambda _hwnd: 2000)
     winamax_ax_seats.request_windows_accessibility(1234)
 
-    assert started == [(1234, 1000), (1234, 2000)]
+    assert [a[0] for a in started] == [1234, 1234]
 
 
 def _deferred_thread(monkeypatch, queue):
@@ -701,3 +705,57 @@ def test_a_failure_from_a_client_that_is_gone_does_not_clear_the_new_one(monkeyp
     pending.pop(0)()  # the old client's request fails, late
 
     assert winamax_ax_seats._windows[1234].in_flight is True
+
+
+def test_a_table_of_the_same_client_reusing_a_handle_starts_clean(monkeypatch) -> None:
+    """Winamax stays running and hands one table's HWND to another of its own.
+
+    The owner's pid is identical, so it says nothing. Nothing released the state
+    either, so the new render surface inherited an accepted request it never
+    received, an outstanding one nobody would clear, and a centre measured on a
+    table that had closed.
+    """
+    winamax_ax_seats.forget_window_state()
+    monkeypatch.setattr(winamax_ax_seats.platform, "system", lambda: "Windows")
+    monkeypatch.setattr(winamax_ax_seats, "_window_pid", lambda _hwnd: 1000)
+    monkeypatch.setattr(winamax_ax_seats, "_send_get_object", lambda hwnd: ([hwnd], 1))
+    monkeypatch.setattr(winamax_ax_seats, "_ask_for_complete_tree", lambda _hwnd: True)
+    pending: list = []
+    _deferred_thread(monkeypatch, pending)
+
+    winamax_ax_seats.request_windows_accessibility(1234)
+    pending.pop()()
+    winamax_ax_seats._windows[1234].centre = (1.0, 2.0)
+    old_state = winamax_ax_seats._windows[1234]
+
+    # The table closes: this is what the HUD now does on teardown.
+    winamax_ax_seats.forget_window_state(1234)
+    winamax_ax_seats.request_windows_accessibility(1234)
+
+    state = winamax_ax_seats._windows[1234]
+    assert state is not old_state
+    assert state.centre is None
+    assert state.asked is False
+
+
+def test_an_answer_for_a_retired_window_is_dropped_even_within_one_client(
+    monkeypatch,
+) -> None:
+    """Same pid on both sides, so only the state's identity can tell them apart."""
+    winamax_ax_seats.forget_window_state()
+    monkeypatch.setattr(winamax_ax_seats.platform, "system", lambda: "Windows")
+    monkeypatch.setattr(winamax_ax_seats, "_window_pid", lambda _hwnd: 1000)
+    monkeypatch.setattr(winamax_ax_seats, "_send_get_object", lambda hwnd: ([hwnd], 1))
+    monkeypatch.setattr(winamax_ax_seats, "_ask_for_complete_tree", lambda _hwnd: True)
+    pending: list = []
+    _deferred_thread(monkeypatch, pending)
+
+    winamax_ax_seats.request_windows_accessibility(1234)  # the closing table
+    winamax_ax_seats.forget_window_state(1234)
+    winamax_ax_seats.request_windows_accessibility(1234)  # the new one
+    pending.pop()()
+    winamax_ax_seats._windows[1234].centre = (3.0, 4.0)
+
+    pending.pop()()  # the closed table's answer, arriving now
+
+    assert winamax_ax_seats._windows[1234].centre == (3.0, 4.0)

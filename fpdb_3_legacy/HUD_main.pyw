@@ -1780,7 +1780,7 @@ class HudMain(QObject):
             self.hud_dict.pop(temp_key, None)
             # This path bypasses idle_kill, so the window it held has to be
             # given back explicitly or the next HUD on it reads as a duplicate.
-            self._forget_window_seat_state(temp_key)
+            self._forget_window_seat_state(temp_key, getattr(getattr(hud, "table", None), "number", None))
             self._window_registry.release(temp_key)
             aliases = getattr(self, "_fast_fold_aliases", None)
             if aliases is not None:
@@ -2012,7 +2012,7 @@ class HudMain(QObject):
         self._ff_last_request_at[temp_key] = time.monotonic()
         self._request_fast_fold_stats(temp_key, current, seat_map, hand_id)
 
-    def _forget_window_seat_state(self, table_key: str) -> None:
+    def _forget_window_seat_state(self, table_key: str, hwnd: int | None = None) -> None:
         """Drop what was learned about reading a table, when that table retires.
 
         The breaker's verdict, the fruitless count and the per-hand ring are all
@@ -2030,6 +2030,19 @@ class HudMain(QObject):
         learned = getattr(self, "_table_reads", None)
         if learned is not None:
             learned.pop(table_key, None)
+
+        # And the window's own: whether its accessibility request was accepted,
+        # whether one is in the air, and where its table's centre was measured.
+        # Nothing released that in production, so a handle Winamax handed to
+        # another of its tables -- same process, so the owner check says nothing
+        # -- inherited an accepted request it never received, an outstanding one
+        # nobody would ever clear, and a centre belonging to a table that had
+        # closed. Reported by Codex on the pull request.
+        if hwnd:
+            with contextlib.suppress(Exception):
+                from fpdb_3_legacy.winamax_ax_seats import forget_window_state
+
+                forget_window_state(int(hwnd))
 
     def _forget_coalesced_fast_fold_stats(self, temp_key: str) -> None:
         """Drop anything held for a table that is going away.
@@ -4222,8 +4235,9 @@ class HudMain(QObject):
                 self.hud_dict[table].tablehudlabel = None
                 overlays = self._describe_overlay_win_ids(hud)
                 self.hud_dict[table].kill()
+                retiring_hwnd = getattr(getattr(hud, "table", None), "number", None)
                 del self.hud_dict[table]
-                self._forget_window_seat_state(table)
+                self._forget_window_seat_state(table, retiring_hwnd)
                 released = self._window_registry.release(table)
                 log.warning(
                     "HUD destroyed: session=%s pid=%s generation=%s table=%r window_id=%s overlays=%s",
