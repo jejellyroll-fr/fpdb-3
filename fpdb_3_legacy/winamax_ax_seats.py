@@ -248,6 +248,10 @@ class _WindowsUIAClient:
 _windows_uia_client: _WindowsUIAClient | None = None
 _windows_uia_unavailable = False
 
+#: No process could ever own a window, so it can stand for "never asked" in a
+#: comparison against one that could be None because the handle was unreadable.
+_UNASKED = object()
+
 #: WM_GETOBJECT / OBJID_CLIENT: what an assistive technology sends a window, and
 #: what a Chromium client watches for before it builds its accessibility tree.
 _WM_GETOBJECT = 0x003D
@@ -255,11 +259,13 @@ _OBJID_CLIENT = -4
 _SMTO_ABORTIFHUNG = 0x0002
 _GETOBJECT_TIMEOUT_MS = 200
 
-#: Windows already asked, so a table is nudged once rather than on every read,
-#: and the ones being asked right now, so a second read does not ask again while
-#: the first request is still in the air. Both are touched from the reading
-#: thread and from the request threads, hence the lock.
-_accessibility_asked: set[int] = set()
+#: Windows already asked, mapped to the process that owned them at the time, so
+#: a table is nudged once rather than on every read -- and a handle Windows has
+#: since recycled to a restarted client is asked again. Alongside, the ones being
+#: asked right now, so a second read does not start a second request while the
+#: first is still in the air. Both are touched from the reading thread and from
+#: the request threads, hence the lock.
+_accessibility_asked: dict[int, int | None] = {}
 _accessibility_in_flight: set[int] = set()
 _accessibility_lock = threading.Lock()
 
@@ -269,6 +275,21 @@ def forget_accessibility_requests() -> None:
     with _accessibility_lock:
         _accessibility_asked.clear()
         _accessibility_in_flight.clear()
+
+
+def _window_pid(hwnd: int) -> int | None:  # pragma: no cover - Win32 call
+    """The process owning a window, or None when it cannot be asked.
+
+    A local call that returns from kernel data, not a message to another
+    process's queue: unlike the accessibility requests, it cannot block on a
+    client that has stopped answering, so it is safe on the GUI thread.
+    """
+    import ctypes
+    from ctypes import wintypes
+
+    pid = wintypes.DWORD()
+    ctypes.windll.user32.GetWindowThreadProcessId(wintypes.HWND(hwnd), ctypes.byref(pid))
+    return pid.value or None
 
 
 def request_windows_accessibility(hwnd: int) -> None:
@@ -299,19 +320,26 @@ def request_windows_accessibility(hwnd: int) -> None:
     """
     if platform.system() != "Windows" or not hwnd:
         return
+    # Asked once per window *and per client*. Windows recycles a closed table's
+    # handle, and a Winamax restarted while the HUD stays alive gets a new
+    # process for the same numbers -- a handle remembered by its digits alone
+    # would tell that new Chromium it had already been asked, and it would never
+    # publish its felt. The centre cache learned the same lesson from its frame.
+    # Reported by Codex on the pull request.
+    pid = _window_pid(hwnd)
     with _accessibility_lock:
-        if hwnd in _accessibility_asked or hwnd in _accessibility_in_flight:
+        if _accessibility_asked.get(hwnd, _UNASKED) == pid or hwnd in _accessibility_in_flight:
             return
         _accessibility_in_flight.add(hwnd)
     threading.Thread(
         target=_request_windows_accessibility_now,
-        args=(hwnd,),
+        args=(hwnd, pid),
         name=f"fpdb-ax-request-{hwnd}",
         daemon=True,
     ).start()
 
 
-def _request_windows_accessibility_now(hwnd: int) -> None:
+def _request_windows_accessibility_now(hwnd: int, pid: int | None = None) -> None:
     """Do the asking, on a thread of its own. See request_windows_accessibility."""
     try:
         targets, delivered = _send_get_object(hwnd)
@@ -335,7 +363,7 @@ def _request_windows_accessibility_now(hwnd: int) -> None:
             # until the circuit breaker gave up on it: the exact failure this
             # branch exists to fix, reached through a partial success. Reported
             # by Codex on the pull request.
-            _accessibility_asked.add(hwnd)
+            _accessibility_asked[hwnd] = pid
 
     if not asked_ia2:
         # Nothing got through. SendMessageTimeoutW reports a hung or
