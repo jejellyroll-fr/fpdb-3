@@ -248,9 +248,9 @@ class _WindowsUIAClient:
 _windows_uia_client: _WindowsUIAClient | None = None
 _windows_uia_unavailable = False
 
-#: No process could ever own a window, so it can stand for "never asked" in a
-#: comparison against one that could be None because the handle was unreadable.
-_UNASKED = object()
+#: No process could ever own a window, so it can stand for "not yet known" in a
+#: comparison against an owner that could be None because the handle was gone.
+_UNKNOWN = object()
 
 #: WM_GETOBJECT / OBJID_CLIENT: what an assistive technology sends a window, and
 #: what a Chromium client watches for before it builds its accessibility tree.
@@ -273,11 +273,17 @@ class _WindowState:
     handle changes, which is the only event any of these three cared about.
     """
 
-    #: The process the accessibility request was accepted for. A different owner
-    #: means a restarted client behind a recycled handle, which has not been
-    #: asked for anything. _UNASKED distinguishes "never asked" from "asked for a
-    #: window whose owner could not be read", which is a real answer.
-    asked_pid: int | None | object = None
+    #: The process this state belongs to, once one has been read. A handle whose
+    #: owner has changed is a restarted client behind recycled numbers, and
+    #: nothing learned about the old one applies -- so the state is replaced
+    #: rather than carried over. _UNKNOWN, not None: None is a real answer from
+    #: GetWindowThreadProcessId for a window that has gone.
+    owner_pid: int | None | object = _UNKNOWN
+
+    #: Whether this owner accepted an IAccessible2 query. A delivered
+    #: WM_GETOBJECT does not count: it gets Chromium as far as its native
+    #: widgets, and the felt is web content.
+    asked: bool = False
 
     #: A request is in the air. The reads are far faster than the request, so
     #: without this a table starts one on every read until the first returns.
@@ -295,12 +301,26 @@ _windows: dict[int, _WindowState] = {}
 _windows_lock = threading.Lock()
 
 
-def _window_state(hwnd: int) -> _WindowState:
-    """The state for this window, created on first sight. Call under the lock."""
+def _window_state(hwnd: int, owner_pid: int | None | object = _UNKNOWN) -> _WindowState:
+    """The state for this window, created on first sight. Call under the lock.
+
+    Given an owner, a state belonging to a different one is replaced rather than
+    returned: Windows recycles a handle to whatever opens next, and a Winamax
+    restarted while the HUD lives gets a new process behind the same numbers.
+    Everything here was learned about the old one -- whether it had been asked,
+    where its table's centre was, and whether a request it never answered is
+    still counted as in the air. Reported by Codex on the pull request, against
+    the refactor that says in its own docstring that this is what it does.
+    """
     state = _windows.get(hwnd)
+    if state is not None and owner_pid is not _UNKNOWN and state.owner_pid is not _UNKNOWN and state.owner_pid != owner_pid:
+        log.info("Window %s has a new owner; forgetting what was learned about the old one", hwnd)
+        state = None
     if state is None:
-        state = _WindowState(asked_pid=_UNASKED)
+        state = _WindowState()
         _windows[hwnd] = state
+    if owner_pid is not _UNKNOWN:
+        state.owner_pid = owner_pid
     return state
 
 
@@ -373,8 +393,8 @@ def request_windows_accessibility(hwnd: int) -> None:
     # Reported by Codex on the pull request.
     pid = _window_pid(hwnd)
     with _windows_lock:
-        state = _window_state(hwnd)
-        if state.asked_pid == pid or state.in_flight:
+        state = _window_state(hwnd, pid)
+        if state.asked or state.in_flight:
             return
         state.in_flight = True
     threading.Thread(
@@ -398,7 +418,7 @@ def _request_windows_accessibility_now(hwnd: int, pid: int | None = None) -> Non
         return
 
     with _windows_lock:
-        state = _window_state(hwnd)
+        state = _window_state(hwnd, pid)
         state.in_flight = False
         if asked_ia2:
             # Only an accepted IAccessible2 query counts as asked. A delivered
@@ -410,7 +430,7 @@ def _request_windows_accessibility_now(hwnd: int, pid: int | None = None) -> Non
             # until the circuit breaker gave up on it: the exact failure this
             # branch exists to fix, reached through a partial success. Reported
             # by Codex on the pull request.
-            state.asked_pid = pid
+            state.asked = True
 
     if not asked_ia2:
         # Nothing got through. SendMessageTimeoutW reports a hung or

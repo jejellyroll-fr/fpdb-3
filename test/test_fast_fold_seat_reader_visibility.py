@@ -504,7 +504,7 @@ def test_a_delivered_wm_getobject_alone_is_not_enough(monkeypatch, run_requests_
     winamax_ax_seats.request_windows_accessibility(1234)
 
     assert calls == [1234, 1234]
-    assert winamax_ax_seats._windows[1234].asked_pid is winamax_ax_seats._UNASKED
+    assert winamax_ax_seats._windows[1234].asked is False
 
 
 def test_a_handle_recycled_by_a_restarted_client_is_asked_again(monkeypatch, run_requests_here) -> None:
@@ -570,3 +570,59 @@ def test_one_window_can_be_forgotten_without_the_others(monkeypatch) -> None:
 
     assert 1 not in winamax_ax_seats._windows
     assert winamax_ax_seats._windows[2].centre is not None
+
+
+def test_a_new_owner_takes_the_old_client_s_state_with_it(monkeypatch, run_requests_here) -> None:
+    """The refactor's own promise: dropped whole when the client changes.
+
+    It detected the new owner and started a fresh request, but kept everything
+    the old client had taught it. A table reopening at the same geometry would
+    reuse the previous one's centre and seat its stats over the wrong opponents;
+    a request the exited process never answered would still read as in the air,
+    and the new client would never be asked at all.
+    """
+    winamax_ax_seats.forget_window_state()
+    monkeypatch.setattr(winamax_ax_seats.platform, "system", lambda: "Windows")
+    monkeypatch.setattr(winamax_ax_seats, "_send_get_object", lambda hwnd: ([hwnd], 1))
+    monkeypatch.setattr(winamax_ax_seats, "_ask_for_complete_tree", lambda _hwnd: True)
+
+    monkeypatch.setattr(winamax_ax_seats, "_window_pid", lambda _hwnd: 1000)
+    winamax_ax_seats.request_windows_accessibility(1234)
+    winamax_ax_seats._windows[1234].centre = (1.0, 2.0)
+    winamax_ax_seats._windows[1234].centre_frame = (0, 0, 10, 10)
+    assert winamax_ax_seats._windows[1234].asked is True
+
+    monkeypatch.setattr(winamax_ax_seats, "_window_pid", lambda _hwnd: 2000)
+    winamax_ax_seats.request_windows_accessibility(1234)
+
+    state = winamax_ax_seats._windows[1234]
+    assert state.owner_pid == 2000
+    assert state.centre is None
+    assert state.centre_frame is None
+
+
+def test_a_request_the_old_process_never_answered_does_not_block_the_new_one(
+    monkeypatch,
+) -> None:
+    """An exited client can leave in_flight set with no thread left to clear it."""
+    winamax_ax_seats.forget_window_state()
+    monkeypatch.setattr(winamax_ax_seats.platform, "system", lambda: "Windows")
+    started = []
+
+    class _NeverRuns:
+        def __init__(self, target, args=(), **_kwargs) -> None:
+            started.append(args)
+
+        def start(self) -> None:
+            pass
+
+    monkeypatch.setattr(winamax_ax_seats.threading, "Thread", _NeverRuns)
+
+    monkeypatch.setattr(winamax_ax_seats, "_window_pid", lambda _hwnd: 1000)
+    winamax_ax_seats.request_windows_accessibility(1234)
+    assert winamax_ax_seats._windows[1234].in_flight is True
+
+    monkeypatch.setattr(winamax_ax_seats, "_window_pid", lambda _hwnd: 2000)
+    winamax_ax_seats.request_windows_accessibility(1234)
+
+    assert started == [(1234, 1000), (1234, 2000)]
