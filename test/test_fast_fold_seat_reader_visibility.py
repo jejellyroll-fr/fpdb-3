@@ -212,7 +212,7 @@ def test_a_chromium_client_is_asked_to_publish_its_tree(monkeypatch, run_request
     and that is exactly what a Winamax table measured on Windows: six nodes, the
     window title among them, not one player.
     """
-    winamax_ax_seats.forget_accessibility_requests()
+    winamax_ax_seats.forget_window_state()
     monkeypatch.setattr(winamax_ax_seats.platform, "system", lambda: "Windows")
     asked = []
     monkeypatch.setattr(winamax_ax_seats, "_send_get_object", lambda hwnd: ([hwnd, 4242], 2))
@@ -232,7 +232,7 @@ def test_the_request_does_not_run_on_the_calling_thread(monkeypatch) -> None:
     long as it liked, which is what the circuit breaker around this reader exists
     to avoid.
     """
-    winamax_ax_seats.forget_accessibility_requests()
+    winamax_ax_seats.forget_window_state()
     monkeypatch.setattr(winamax_ax_seats.platform, "system", lambda: "Windows")
     started = []
 
@@ -259,7 +259,7 @@ def test_the_request_does_not_run_on_the_calling_thread(monkeypatch) -> None:
 
 def test_a_window_is_only_asked_once(monkeypatch, run_requests_here) -> None:
     """Once the client has built its tree, asking again buys nothing."""
-    winamax_ax_seats.forget_accessibility_requests()
+    winamax_ax_seats.forget_window_state()
     monkeypatch.setattr(winamax_ax_seats.platform, "system", lambda: "Windows")
     calls = []
     monkeypatch.setattr(
@@ -277,7 +277,7 @@ def test_a_window_is_only_asked_once(monkeypatch, run_requests_here) -> None:
 
 def test_a_second_read_does_not_ask_while_the_first_request_is_in_the_air(monkeypatch) -> None:
     """The thread makes the window between asking and knowing wide enough to matter."""
-    winamax_ax_seats.forget_accessibility_requests()
+    winamax_ax_seats.forget_window_state()
     monkeypatch.setattr(winamax_ax_seats.platform, "system", lambda: "Windows")
     started = []
 
@@ -298,7 +298,7 @@ def test_a_second_read_does_not_ask_while_the_first_request_is_in_the_air(monkey
 
 def test_a_client_that_will_not_answer_is_not_fatal(monkeypatch, run_requests_here) -> None:
     """A busy or blocked client must not take the HUD down with it."""
-    winamax_ax_seats.forget_accessibility_requests()
+    winamax_ax_seats.forget_window_state()
     monkeypatch.setattr(winamax_ax_seats.platform, "system", lambda: "Windows")
 
     def _boom(_hwnd):
@@ -309,7 +309,7 @@ def test_a_client_that_will_not_answer_is_not_fatal(monkeypatch, run_requests_he
 
     winamax_ax_seats.request_windows_accessibility(1234)  # must not raise
     # And it is not left in flight, so a later read tries again.
-    assert 1234 not in winamax_ax_seats._accessibility_in_flight
+    assert winamax_ax_seats._windows[1234].in_flight is False
 
 
 def test_a_window_with_no_handle_is_not_asked(monkeypatch) -> None:
@@ -320,7 +320,7 @@ def test_a_window_with_no_handle_is_not_asked(monkeypatch) -> None:
 
 
 def test_nothing_is_asked_off_windows(monkeypatch) -> None:
-    winamax_ax_seats.forget_accessibility_requests()
+    winamax_ax_seats.forget_window_state()
     monkeypatch.setattr(winamax_ax_seats.platform, "system", lambda: "Darwin")
     monkeypatch.setattr(winamax_ax_seats.threading, "Thread", lambda **_k: pytest.fail("asked anyway"))
 
@@ -346,9 +346,9 @@ OFF_FRAME = _Rect(3840, 0, 4800, 739)
 
 @pytest.fixture(autouse=True)
 def _fresh_centres():
-    winamax_ax_seats.forget_table_centres()
+    winamax_ax_seats.forget_window_state()
     yield
-    winamax_ax_seats.forget_table_centres()
+    winamax_ax_seats.forget_window_state()
 
 
 def test_a_full_ring_is_measured_from_the_players() -> None:
@@ -425,7 +425,7 @@ def test_a_window_that_answered_nothing_is_asked_again(monkeypatch, run_requests
     wrote it off for the whole session on one badly timed try -- a client still
     starting up never gets asked again.
     """
-    winamax_ax_seats.forget_accessibility_requests()
+    winamax_ax_seats.forget_window_state()
     monkeypatch.setattr(winamax_ax_seats.platform, "system", lambda: "Windows")
     calls = []
     monkeypatch.setattr(
@@ -443,7 +443,7 @@ def test_a_window_that_answered_nothing_is_asked_again(monkeypatch, run_requests
 
 def test_an_ia2_query_alone_is_enough_to_call_it_asked(monkeypatch, run_requests_here) -> None:
     """IAccessible2 is the one that matters; WM_GETOBJECT need not have landed."""
-    winamax_ax_seats.forget_accessibility_requests()
+    winamax_ax_seats.forget_window_state()
     monkeypatch.setattr(winamax_ax_seats.platform, "system", lambda: "Windows")
     calls = []
     monkeypatch.setattr(
@@ -479,7 +479,7 @@ def test_a_recycled_handle_does_not_inherit_the_old_table_s_centre() -> None:
 
     assert winamax_ax_seats._table_centre([FULL_RING[3]], reused, 6, hwnd=1) is None
     # And the stale entry is gone rather than waiting to be asked again.
-    assert 1 not in winamax_ax_seats._table_centres
+    assert winamax_ax_seats._windows[1].centre is None
 
 
 def test_a_delivered_wm_getobject_alone_is_not_enough(monkeypatch, run_requests_here) -> None:
@@ -490,7 +490,7 @@ def test_a_delivered_wm_getobject_alone_is_not_enough(monkeypatch, run_requests_
     WM_GETOBJECT alone left a table whose IA2 query failed transiently without
     opponents for the rest of the session, until the breaker gave up on it.
     """
-    winamax_ax_seats.forget_accessibility_requests()
+    winamax_ax_seats.forget_window_state()
     monkeypatch.setattr(winamax_ax_seats.platform, "system", lambda: "Windows")
     calls = []
     monkeypatch.setattr(
@@ -504,7 +504,7 @@ def test_a_delivered_wm_getobject_alone_is_not_enough(monkeypatch, run_requests_
     winamax_ax_seats.request_windows_accessibility(1234)
 
     assert calls == [1234, 1234]
-    assert 1234 not in winamax_ax_seats._accessibility_asked
+    assert winamax_ax_seats._windows[1234].asked_pid is winamax_ax_seats._UNASKED
 
 
 def test_a_handle_recycled_by_a_restarted_client_is_asked_again(monkeypatch, run_requests_here) -> None:
@@ -515,7 +515,7 @@ def test_a_handle_recycled_by_a_restarted_client_is_asked_again(monkeypatch, run
     it had already been asked, and it would never publish its felt -- every hand
     back to the log-derived seats, then the breaker.
     """
-    winamax_ax_seats.forget_accessibility_requests()
+    winamax_ax_seats.forget_window_state()
     monkeypatch.setattr(winamax_ax_seats.platform, "system", lambda: "Windows")
     calls = []
     monkeypatch.setattr(
@@ -543,7 +543,7 @@ def test_an_unreadable_owner_does_not_read_as_already_asked(monkeypatch, run_req
     first read of a window whose owner could not be determined would skip the
     request outright.
     """
-    winamax_ax_seats.forget_accessibility_requests()
+    winamax_ax_seats.forget_window_state()
     monkeypatch.setattr(winamax_ax_seats.platform, "system", lambda: "Windows")
     monkeypatch.setattr(winamax_ax_seats, "_window_pid", lambda _hwnd: None)
     calls = []
@@ -557,3 +557,16 @@ def test_an_unreadable_owner_does_not_read_as_already_asked(monkeypatch, run_req
     winamax_ax_seats.request_windows_accessibility(1234)
 
     assert calls == [1234]
+
+
+def test_one_window_can_be_forgotten_without_the_others(monkeypatch) -> None:
+    """A table retiring should not cost its neighbour what it learned."""
+    winamax_ax_seats.forget_window_state()
+    monkeypatch.setattr(winamax_ax_seats.platform, "system", lambda: "Windows")
+    winamax_ax_seats._table_centre(FULL_RING, OFF_FRAME, 6, hwnd=1)
+    winamax_ax_seats._table_centre(FULL_RING, OFF_FRAME, 6, hwnd=2)
+
+    winamax_ax_seats.forget_window_state(1)
+
+    assert 1 not in winamax_ax_seats._windows
+    assert winamax_ax_seats._windows[2].centre is not None

@@ -413,7 +413,7 @@ def test_a_partial_ring_off_frame_is_refused_until_a_full_one_is_seen(monkeypatc
     not the table's centre. The hero would still land on slot 0 and the answer
     be accepted, with the neighbours two chairs from where they sit.
     """
-    ax.forget_table_centres()
+    ax.forget_window_state()
     ax.reset_windows_uia()
     # A window at 3840..4800 whose players report at 1767..2259, as measured.
     window = UIAElement("Winamax Colorado 1", Rect(3840, 0, 4800, 739))

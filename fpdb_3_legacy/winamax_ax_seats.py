@@ -259,22 +259,58 @@ _OBJID_CLIENT = -4
 _SMTO_ABORTIFHUNG = 0x0002
 _GETOBJECT_TIMEOUT_MS = 200
 
-#: Windows already asked, mapped to the process that owned them at the time, so
-#: a table is nudged once rather than on every read -- and a handle Windows has
-#: since recycled to a restarted client is asked again. Alongside, the ones being
-#: asked right now, so a second read does not start a second request while the
-#: first is still in the air. Both are touched from the reading thread and from
-#: the request threads, hence the lock.
-_accessibility_asked: dict[int, int | None] = {}
-_accessibility_in_flight: set[int] = set()
-_accessibility_lock = threading.Lock()
+@dataclass
+class _WindowState:
+    """Everything learned about reading one client window.
+
+    Three separate caches lived here, keyed by handle, each with its own
+    invalidation rule and each forgotten separately -- or, three times over,
+    not forgotten at all. Windows recycles a handle to whatever opens next, so
+    every one of them needed to know when the thing behind the numbers had
+    changed, and each learned that the hard way in turn.
+
+    One object, one lifetime. It is dropped whole when the client behind the
+    handle changes, which is the only event any of these three cared about.
+    """
+
+    #: The process the accessibility request was accepted for. A different owner
+    #: means a restarted client behind a recycled handle, which has not been
+    #: asked for anything. _UNASKED distinguishes "never asked" from "asked for a
+    #: window whose owner could not be read", which is a real answer.
+    asked_pid: int | None | object = None
+
+    #: A request is in the air. The reads are far faster than the request, so
+    #: without this a table starts one on every read until the first returns.
+    in_flight: bool = False
+
+    #: The table centre, and the window frame it was measured against. A frame
+    #: that has moved or been handed to another table puts the chairs elsewhere,
+    #: and seats arranged around the old point land on the wrong ones.
+    centre: tuple[float, float] | None = None
+    centre_frame: tuple[int, int, int, int] | None = None
 
 
-def forget_accessibility_requests() -> None:
-    """Forget which windows have been asked, so the next read asks again."""
-    with _accessibility_lock:
-        _accessibility_asked.clear()
-        _accessibility_in_flight.clear()
+#: Per window, and touched from the reading thread and the request threads.
+_windows: dict[int, _WindowState] = {}
+_windows_lock = threading.Lock()
+
+
+def _window_state(hwnd: int) -> _WindowState:
+    """The state for this window, created on first sight. Call under the lock."""
+    state = _windows.get(hwnd)
+    if state is None:
+        state = _WindowState(asked_pid=_UNASKED)
+        _windows[hwnd] = state
+    return state
+
+
+def forget_window_state(hwnd: int | None = None) -> None:
+    """Forget one window, or all of them, so the next read starts over."""
+    with _windows_lock:
+        if hwnd is None:
+            _windows.clear()
+        else:
+            _windows.pop(hwnd, None)
 
 
 def _window_pid(hwnd: int) -> int | None:  # pragma: no cover - Win32 call
@@ -336,10 +372,11 @@ def request_windows_accessibility(hwnd: int) -> None:
     # publish its felt. The centre cache learned the same lesson from its frame.
     # Reported by Codex on the pull request.
     pid = _window_pid(hwnd)
-    with _accessibility_lock:
-        if _accessibility_asked.get(hwnd, _UNASKED) == pid or hwnd in _accessibility_in_flight:
+    with _windows_lock:
+        state = _window_state(hwnd)
+        if state.asked_pid == pid or state.in_flight:
             return
-        _accessibility_in_flight.add(hwnd)
+        state.in_flight = True
     threading.Thread(
         target=_request_windows_accessibility_now,
         args=(hwnd, pid),
@@ -356,12 +393,13 @@ def _request_windows_accessibility_now(hwnd: int, pid: int | None = None) -> Non
     except Exception:
         # Never fatal: without it the reader is exactly as blind as it was.
         log.debug("Could not ask window %s for its accessibility tree", hwnd, exc_info=True)
-        with _accessibility_lock:
-            _accessibility_in_flight.discard(hwnd)
+        with _windows_lock:
+            _window_state(hwnd).in_flight = False
         return
 
-    with _accessibility_lock:
-        _accessibility_in_flight.discard(hwnd)
+    with _windows_lock:
+        state = _window_state(hwnd)
+        state.in_flight = False
         if asked_ia2:
             # Only an accepted IAccessible2 query counts as asked. A delivered
             # WM_GETOBJECT gets Chromium as far as its native widgets -- the
@@ -372,7 +410,7 @@ def _request_windows_accessibility_now(hwnd: int, pid: int | None = None) -> Non
             # until the circuit breaker gave up on it: the exact failure this
             # branch exists to fix, reached through a partial success. Reported
             # by Codex on the pull request.
-            _accessibility_asked[hwnd] = pid
+            state.asked_pid = pid
 
     if not asked_ia2:
         # Nothing got through. SendMessageTimeoutW reports a hung or
@@ -591,17 +629,6 @@ def is_hud_label(text: str) -> bool:
     return False
 
 
-#: Table centres learned from a full ring: window -> (frame, centre). The frame
-#: is kept so a centre measured at one position is not reused at another. See
-#: _table_centre.
-_table_centres: dict[int, tuple[tuple[int, int, int, int], tuple[float, float]]] = {}
-
-
-def forget_table_centres() -> None:
-    """Drop the learned centres, so the next full ring is measured afresh."""
-    _table_centres.clear()
-
-
 def _table_centre(
     players: list[AXSeat],
     win_rect: Any,
@@ -646,26 +673,27 @@ def _table_centre(
             win_rect.top + (win_rect.bottom - win_rect.top) / 2,
         )
     frame = (win_rect.left, win_rect.top, win_rect.right, win_rect.bottom)
-    if len(players) >= max_seats:
-        xs = [player.x for player in players]
-        ys = [player.y for player in players]
-        centre = ((min(xs) + max(xs)) / 2, (min(ys) + max(ys)) / 2)
-        _table_centres[hwnd] = (frame, centre)
-        return centre
+    with _windows_lock:
+        state = _window_state(hwnd)
+        if len(players) >= max_seats:
+            xs = [player.x for player in players]
+            ys = [player.y for player in players]
+            state.centre = ((min(xs) + max(xs)) / 2, (min(ys) + max(ys)) / 2)
+            state.centre_frame = frame
+            return state.centre
     # Only for the window it was measured on, where it was measured. A table
     # moved or resized between hands puts its chairs somewhere else, and Windows
     # hands a closed table's HWND to the next one -- either way the remembered
     # point is somewhere on the desktop the seats no longer surround, and seats
     # arranged around it land on the wrong chairs while still passing the
     # caller's hero check. Reported by Codex on the pull request.
-    remembered = _table_centres.get(hwnd)
-    if remembered is None:
-        return None
-    known_frame, centre = remembered
-    if known_frame != frame:
-        del _table_centres[hwnd]
-        return None
-    return centre
+        if state.centre is None:
+            return None
+        if state.centre_frame != frame:
+            state.centre = None
+            state.centre_frame = None
+            return None
+        return state.centre
 
 
 def seats_from_labels(labels: list[AXSeat]) -> list[AXSeat]:

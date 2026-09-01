@@ -31,9 +31,7 @@ def _hud_main(slots_per_read):
     reader.read_window.side_effect = slots_per_read
     return SimpleNamespace(
         winamax_ax_seats=reader,
-        _ax_rings={},
-        _ax_fruitless_reads={},
-        _ax_reader_gave_up={},
+        _table_reads={},
         _ax_reader_enabled=True,
         _ff_trace=MagicMock(),
         AX_READS_PER_HAND=HUD_main.HudMain.AX_READS_PER_HAND,
@@ -58,7 +56,7 @@ def test_the_reader_is_given_up_on_after_enough_empty_reads() -> None:
     for hand in range(GIVE_UP_AT):
         _read(app, f"hand-{hand}")
 
-    assert app._ax_reader_gave_up.get("Colorado 11 #3477872") is True
+    assert app._table_reads["Colorado 11 #3477872"].gave_up is True
 
 
 def test_no_further_reads_are_paid_for_once_it_has_given_up() -> None:
@@ -85,8 +83,8 @@ def test_a_reader_that_works_is_never_given_up_on() -> None:
     for hand in range(GIVE_UP_AT + 2):
         _read(app, f"hand-{hand}")
 
-    assert app._ax_reader_gave_up.get("Colorado 11 #3477872") is None
-    assert app._ax_fruitless_reads.get("Colorado 11 #3477872") == 0
+    assert app._table_reads["Colorado 11 #3477872"].gave_up is False
+    assert app._table_reads["Colorado 11 #3477872"].fruitless == 0
 
 
 def test_one_good_read_forgives_the_empty_ones_before_it() -> None:
@@ -96,7 +94,7 @@ def test_one_good_read_forgives_the_empty_ones_before_it() -> None:
     for hand in range(GIVE_UP_AT + 4):
         _read(app, f"hand-{hand}")
 
-    assert app._ax_reader_gave_up.get("Colorado 11 #3477872") is None
+    assert app._table_reads["Colorado 11 #3477872"].gave_up is False
 
 
 def test_one_table_giving_up_does_not_silence_another() -> None:
@@ -111,8 +109,8 @@ def test_one_table_giving_up_does_not_silence_another() -> None:
     for hand in range(GIVE_UP_AT):
         _read(app, f"hand-{hand}", table_key="Colorado 11 #3477872")
 
-    assert app._ax_reader_gave_up.get("Colorado 11 #3477872") is True
-    assert app._ax_reader_gave_up.get("Colorado 12 #463544") is None
+    assert app._table_reads["Colorado 11 #3477872"].gave_up is True
+    assert "Colorado 12 #463544" not in app._table_reads
 
     reads_before = app.winamax_ax_seats.read_window.call_count
     _read(app, "another", table_key="Colorado 12 #463544")
@@ -135,7 +133,7 @@ def test_reads_that_never_seat_anyone_are_given_up_on() -> None:
     for hand in range(GIVE_UP_AT):
         _read(app, f"hand-{hand}")
 
-    assert app._ax_reader_gave_up.get("Colorado 11 #3477872") is True
+    assert app._table_reads["Colorado 11 #3477872"].gave_up is True
 
 
 def test_a_read_holding_the_hero_but_too_few_players_is_fruitless() -> None:
@@ -145,7 +143,7 @@ def test_a_read_holding_the_hero_but_too_few_players_is_fruitless() -> None:
     for hand in range(GIVE_UP_AT):
         _read(app, f"hand-{hand}")
 
-    assert app._ax_reader_gave_up.get("Colorado 11 #3477872") is True
+    assert app._table_reads["Colorado 11 #3477872"].gave_up is True
 
 
 def test_one_usable_read_forgives_the_useless_ones_before_it() -> None:
@@ -158,7 +156,7 @@ def test_one_usable_read_forgives_the_useless_ones_before_it() -> None:
     for hand in range(GIVE_UP_AT + 4):
         _read(app, f"hand-{hand}")
 
-    assert app._ax_reader_gave_up.get("Colorado 11 #3477872") is None
+    assert app._table_reads["Colorado 11 #3477872"].gave_up is False
 
 
 def test_the_reader_can_be_switched_off_outright() -> None:
@@ -170,7 +168,7 @@ def test_the_reader_can_be_switched_off_outright() -> None:
     app.winamax_ax_seats.read_window.assert_not_called()
 
 
-def _sweeper(gave_up: dict, enabled: bool = True):
+def _sweeper(gave_up: bool = False, enabled: bool = True):
     """A HudMain stub carrying only what _read_window_slots touches."""
     reader = MagicMock()
     reader.read_window.return_value = {0: "jejellyroll", 1: "Bussy67"}
@@ -178,7 +176,7 @@ def _sweeper(gave_up: dict, enabled: bool = True):
     return (
         SimpleNamespace(
             winamax_ax_seats=reader,
-            _ax_reader_gave_up=gave_up,
+            _table_reads=({"Colorado 11 #3477872": HUD_main.TableReadState(gave_up=True)} if gave_up else {}),
             _ax_reader_enabled=enabled,
         ),
         SimpleNamespace(table=table, max=6),
@@ -186,7 +184,7 @@ def _sweeper(gave_up: dict, enabled: bool = True):
 
 
 def test_the_idle_sweep_reads_a_table_that_still_answers() -> None:
-    app, hud = _sweeper({})
+    app, hud = _sweeper()
 
     assert HUD_main.HudMain._read_window_slots(app, hud) == {0: "jejellyroll", 1: "Bussy67"}
 
@@ -198,14 +196,14 @@ def test_the_idle_sweep_stops_reading_a_table_given_up_on() -> None:
     walking another process's accessibility tree -- on exactly the clients the
     breaker exists to stop reading, and for a table nobody was playing.
     """
-    app, hud = _sweeper({"Colorado 11 #3477872": True})
+    app, hud = _sweeper(gave_up=True)
 
     assert HUD_main.HudMain._read_window_slots(app, hud) is None
     app.winamax_ax_seats.read_window.assert_not_called()
 
 
 def test_the_idle_sweep_respects_the_reader_being_switched_off() -> None:
-    app, hud = _sweeper({}, enabled=False)
+    app, hud = _sweeper(enabled=False)
 
     assert HUD_main.HudMain._read_window_slots(app, hud) is None
     app.winamax_ax_seats.read_window.assert_not_called()
@@ -220,28 +218,25 @@ def test_a_retiring_table_takes_the_breaker_s_verdict_with_it() -> None:
     accessibility, and went straight to the log-derived seats for the session.
     """
     app = SimpleNamespace(
-        _ax_reader_gave_up={"Colorado 3": True},
-        _ax_fruitless_reads={"Colorado 3": 12},
-        _ax_rings={"Colorado 3": ("hand-1", {}, 12)},
+        _table_reads={"Colorado 3": HUD_main.TableReadState(gave_up=True, fruitless=12, reads=12)},
     )
 
     HUD_main.HudMain._forget_window_seat_state(app, "Colorado 3")
 
-    assert app._ax_reader_gave_up == {}
-    assert app._ax_fruitless_reads == {}
-    assert app._ax_rings == {}
+    assert app._table_reads == {}
 
 
 def test_forgetting_one_table_leaves_the_others_alone() -> None:
     app = SimpleNamespace(
-        _ax_reader_gave_up={"Colorado 3": True, "Colorado 4": True},
-        _ax_fruitless_reads={},
-        _ax_rings={},
+        _table_reads={
+            "Colorado 3": HUD_main.TableReadState(gave_up=True),
+            "Colorado 4": HUD_main.TableReadState(gave_up=True),
+        },
     )
 
     HUD_main.HudMain._forget_window_seat_state(app, "Colorado 3")
 
-    assert app._ax_reader_gave_up == {"Colorado 4": True}
+    assert list(app._table_reads) == ["Colorado 4"]
 
 
 def test_forgetting_survives_a_hud_built_without_the_full_constructor() -> None:
