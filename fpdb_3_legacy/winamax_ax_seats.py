@@ -325,10 +325,19 @@ def _request_windows_accessibility_now(hwnd: int) -> None:
 
     with _accessibility_lock:
         _accessibility_in_flight.discard(hwnd)
-        if delivered or asked_ia2:
+        if asked_ia2:
+            # Only an accepted IAccessible2 query counts as asked. A delivered
+            # WM_GETOBJECT gets Chromium as far as its native widgets -- the
+            # frame, the Views controls, the dialogs -- and no further; the felt
+            # is web content, and the IA2 query is what unlocks it. Recording
+            # the window on the WM_GETOBJECT alone left a table whose IA2 query
+            # failed transiently without opponents for the rest of the session,
+            # until the circuit breaker gave up on it: the exact failure this
+            # branch exists to fix, reached through a partial success. Reported
+            # by Codex on the pull request.
             _accessibility_asked.add(hwnd)
 
-    if not delivered and not asked_ia2:
+    if not asked_ia2:
         # Nothing got through. SendMessageTimeoutW reports a hung or
         # still-starting client by returning zero rather than raising, and
         # _ask_for_complete_tree turns every COM failure into False, so an
@@ -337,7 +346,11 @@ def _request_windows_accessibility_now(hwnd: int) -> None:
         # work -- wrote it off for the whole session on one badly timed try.
         # Reported by Codex on the pull request, twice: the exception path alone
         # was not enough.
-        log.debug("Window %s answered none of the accessibility requests; will ask again", hwnd)
+        log.debug(
+            "Window %s accepted no IAccessible2 query (%d WM_GETOBJECT delivered); will ask again",
+            hwnd,
+            delivered,
+        )
         return
 
     log.info(

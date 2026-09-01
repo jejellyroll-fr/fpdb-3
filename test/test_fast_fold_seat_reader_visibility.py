@@ -434,7 +434,7 @@ def test_a_window_that_answered_nothing_is_asked_again(monkeypatch, run_requests
 
 
 def test_an_ia2_query_alone_is_enough_to_call_it_asked(monkeypatch, run_requests_here) -> None:
-    """The point is that something got through, not which of the two did."""
+    """IAccessible2 is the one that matters; WM_GETOBJECT need not have landed."""
     winamax_ax_seats.forget_accessibility_requests()
     monkeypatch.setattr(winamax_ax_seats.platform, "system", lambda: "Windows")
     calls = []
@@ -472,3 +472,28 @@ def test_a_recycled_handle_does_not_inherit_the_old_table_s_centre() -> None:
     assert winamax_ax_seats._table_centre([FULL_RING[3]], reused, 6, hwnd=1) is None
     # And the stale entry is gone rather than waiting to be asked again.
     assert 1 not in winamax_ax_seats._table_centres
+
+
+def test_a_delivered_wm_getobject_alone_is_not_enough(monkeypatch, run_requests_here) -> None:
+    """WM_GETOBJECT gets Chromium as far as its native widgets and no further.
+
+    The frame, the Views controls, the dialogs -- never the felt, which is web
+    content and needs the IAccessible2 query. Recording the window on the
+    WM_GETOBJECT alone left a table whose IA2 query failed transiently without
+    opponents for the rest of the session, until the breaker gave up on it.
+    """
+    winamax_ax_seats.forget_accessibility_requests()
+    monkeypatch.setattr(winamax_ax_seats.platform, "system", lambda: "Windows")
+    calls = []
+    monkeypatch.setattr(
+        winamax_ax_seats,
+        "_send_get_object",
+        lambda hwnd: (calls.append(hwnd), ([hwnd], 1))[1],
+    )
+    monkeypatch.setattr(winamax_ax_seats, "_ask_for_complete_tree", lambda _hwnd: False)
+
+    winamax_ax_seats.request_windows_accessibility(1234)
+    winamax_ax_seats.request_windows_accessibility(1234)
+
+    assert calls == [1234, 1234]
+    assert 1234 not in winamax_ax_seats._accessibility_asked
