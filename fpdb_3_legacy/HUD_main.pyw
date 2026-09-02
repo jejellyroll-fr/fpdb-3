@@ -3006,6 +3006,29 @@ class HudMain(QObject):
             self._destroy_superseded_hud(claim.superseded.temp_key)
 
         self._hud_generation = claim.generation
+        try:
+            self._build_claimed_hud(args, window_id)
+        except Exception:
+            # The window is claimed before the HUD is built, so a build that
+            # raises leaves the claim behind -- and every later hand for this
+            # table is then refused as a duplicate, which makes one failure
+            # permanent and silent. Hand the window back so the next hand
+            # retries, and let the error travel on to its usual handler.
+            self._window_registry.release(args.temp_key)
+            self.hud_dict.pop(args.temp_key, None)
+            log.warning(
+                "HUD create failed for table %r on window %s; released the window so the next hand can retry",
+                args.temp_key,
+                window_id,
+            )
+            raise
+
+    def _build_claimed_hud(self, args: HUDCreationArgs, window_id: Any) -> None:
+        """Build the HUD for a window this caller has already claimed.
+
+        Separate from ``create_HUD`` only so that the claim can be undone as a
+        whole when any part of the build fails.
+        """
         self.hud_dict[args.temp_key] = Hud.Hud(
             self,
             args.table,

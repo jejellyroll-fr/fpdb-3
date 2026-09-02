@@ -212,7 +212,21 @@ class Hud:
         if self.supported_games_parameters["aux"] == [""]:
             return
         for aux_str in self.supported_games_parameters["aux"].split(","):
-            aux_params = config.get_aux_parameters(aux_str.strip())
+            aux_name = aux_str.strip()
+            aux_params = config.get_aux_parameters(aux_name)
+            if aux_params is None:
+                # An aux window the configuration names but never defines. This
+                # used to raise out of the HUD constructor, which cost the table
+                # its HUD outright -- and every later hand only ever reported
+                # the window as already claimed, so the cause never appeared
+                # again. Skip the one aux window and say which it was.
+                log.error(
+                    "Aux window %r is named by this game's configuration but no <aw> block defines it; "
+                    "skipping it. Defined aux windows: %s",
+                    aux_name,
+                    ", ".join(sorted(config.get_aux_windows())) or "(none)",
+                )
+                continue
             my_import = importName(aux_params["module"], aux_params["class"])
             if my_import is None or self._skips_aux(aux_params):
                 continue

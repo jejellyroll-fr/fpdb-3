@@ -3824,14 +3824,56 @@ class Config:
         """Gets the list of mucked window formats in the configuration."""
         return list(self.aux_windows.keys())
 
+    @staticmethod
+    def _aux_name_key(name):
+        """A form of an aux window name that survives a rename of its spelling.
+
+        Aux windows have been respelled over the years -- "Classic_HUD" became
+        "ClassicHud" -- and a user configuration written before a rename keeps
+        the old spelling in its ``aux=`` references while its ``<aw>`` blocks
+        carry the new one. Comparing on this key lets the reference still find
+        its definition, so a configuration that has simply aged does not cost
+        the player their HUD.
+        """
+        return str(name).replace("_", "").replace("-", "").replace(" ", "").casefold()
+
+    def _resolve_aux_name(self, name):
+        """The configured aux window this name refers to, or None.
+
+        An exact name always wins; only a name no ``<aw>`` block defines falls
+        back to the respelling match, so a valid configuration resolves exactly
+        as it always did.
+        """
+        if name in self.aux_windows:
+            return name
+        wanted = self._aux_name_key(name)
+        matches = [defined for defined in self.aux_windows if self._aux_name_key(defined) == wanted]
+        if len(matches) != 1:
+            # No match, or an ambiguous one: refuse to guess which was meant.
+            return None
+        # Said once per name: this is asked again for every aux window of every
+        # HUD built, so logging each time would bury the rest of a busy session.
+        warned = self.__dict__.setdefault("_respelled_aux_warned", set())
+        if name not in warned:
+            warned.add(name)
+            log.warning(
+                "Configuration asks for aux window %r, which no <aw> defines; using %r, "
+                "which differs only in spelling. Update %s to silence this.",
+                name,
+                matches[0],
+                self.file,
+            )
+        return matches[0]
+
     def get_aux_parameters(self, name):
         """Gets a dict of mucked window parameters from the named mw."""
         param = {}
-        if name in self.aux_windows:
-            for key in dir(self.aux_windows[name]):
+        resolved = self._resolve_aux_name(name)
+        if resolved is not None:
+            for key in dir(self.aux_windows[resolved]):
                 if key.startswith("__"):
                     continue
-                value = getattr(self.aux_windows[name], key)
+                value = getattr(self.aux_windows[resolved], key)
                 if callable(value):
                     continue
                 param[key] = value
