@@ -2,7 +2,7 @@
 """ChipZen normalized JSONL hand-history converter.
 
 The file format consumed here is deliberately an fpdb-owned normalization of
-ChipZen's public v1 transport + NLHE protocol, not a scrape of the website.  A
+ChipZen's public v1 transport + NLHE protocol, not a scrape of the website. A
 single line is one completed hand and carries the match/round metadata, every
 ``phase_change`` needed to reconstruct the board, optional ``turn_results`` for
 amount validation, and the canonical ``round_result.action_history``.
@@ -13,7 +13,7 @@ from __future__ import annotations
 import hashlib
 import json
 import re
-from collections import defaultdict
+from collections import defaultdict, deque
 from decimal import Decimal
 from typing import Any, ClassVar
 
@@ -35,7 +35,7 @@ class ChipZen(HandHistoryConverter):
     summaryInFile = False
 
     re_identify = re.compile(r'"schema"\s*:\s*"fpdb-chipzen-hand/v1"')
-    # JSONL: every physical line is one complete normalized hand.  The splitter
+    # JSONL: every physical line is one complete normalized hand. The splitter
     # consumes only the newline so the JSON object itself stays intact.
     re_split_hands = re.compile(r"\n+")
     re_SplitHands = re_split_hands
@@ -47,6 +47,9 @@ class ChipZen(HandHistoryConverter):
         "river": "RIVER",
     }
     _EXPECTED_BOARD_LEN: ClassVar[dict[str, int]] = {"flop": 3, "turn": 4, "river": 5}
+    _SYNTHETIC_ACTIONS: ClassVar[frozenset[str]] = frozenset(
+        {"post_small_blind", "post_big_blind", "post_ante"}
+    )
 
     @staticmethod
     def stable_hand_id(match_id: str, round_id: str | None, hand_number: int | str | None) -> int:
@@ -85,6 +88,8 @@ class ChipZen(HandHistoryConverter):
         phase_changes = record.get("phase_changes") or []
         community: dict[str, list[str]] = {}
         seen: set[str] = set()
+        all_cards: list[str] = []
+
         for change in phase_changes:
             state = change.get("state", change) if isinstance(change, dict) else {}
             phase = str(state.get("phase") or "").lower()
@@ -95,15 +100,27 @@ class ChipZen(HandHistoryConverter):
                 raise FpdbParseError(
                     f"ChipZen invalid {phase} board: expected {cls._EXPECTED_BOARD_LEN[phase]} cards, got {board!r}"
                 )
+            board = [str(card) for card in board]
             if len(set(board)) != len(board):
                 raise FpdbParseError(f"ChipZen {phase} board contains duplicate cards: {board!r}")
+
             if phase == "flop":
-                community["FLOP"] = [str(card) for card in board]
+                community["FLOP"] = board
             elif phase == "turn":
-                community["TURN"] = [str(board[-1])]
+                if "FLOP" not in community or board[:3] != community["FLOP"]:
+                    raise FpdbParseError("ChipZen turn board does not extend the recorded flop")
+                community["TURN"] = [board[-1]]
             else:
-                community["RIVER"] = [str(board[-1])]
+                expected_prefix = community.get("FLOP", []) + community.get("TURN", [])
+                if len(expected_prefix) != 4 or board[:4] != expected_prefix:
+                    raise FpdbParseError("ChipZen river board does not extend the recorded turn")
+                community["RIVER"] = [board[-1]]
+
+            all_cards = board
             seen.add(phase)
+
+        if len(all_cards) != len(set(all_cards)):
+            raise FpdbParseError(f"ChipZen board contains duplicate cards: {all_cards!r}")
 
         # If the action history says a street was reached, its phase_change is
         # mandatory because round_result deliberately does not carry the board.
@@ -115,22 +132,99 @@ class ChipZen(HandHistoryConverter):
         return community
 
     @staticmethod
-    def _turn_result_index(record: dict[str, Any]) -> dict[tuple[int, str, str, int], list[dict[str, Any]]]:
-        """Index optional post-action snapshots without assuming one export spelling."""
-        indexed: dict[tuple[int, str, str, int], list[dict[str, Any]]] = defaultdict(list)
+    def _turn_result_amounts(record: dict[str, Any]) -> dict[tuple[int, str], deque[Decimal]]:
+        """Return chronological authoritative amounts from optional turn results.
+
+        ChipZen's current v1 documentation has a deliberate/legacy mismatch in
+        its worked example: ``action_history`` records a preflop BB call as 30
+        (the matched street total), while the corresponding ``turn_result``
+        records 20 (the chips actually added by that action). ``turn_result``
+        explicitly defines calls as incremental and raises as raise-to totals,
+        so when it is present we use it to disambiguate the canonical history.
+        """
+        amounts: dict[tuple[int, str], deque[Decimal]] = defaultdict(deque)
         for item in record.get("turn_results") or []:
             details = item.get("details", item) if isinstance(item, dict) else {}
-            try:
-                key = (
-                    int(details["seat"]),
-                    str(details["action"]),
-                    str(details.get("phase") or ""),
-                    int(details.get("amount") or 0),
-                )
-            except (KeyError, TypeError, ValueError):
+            if not isinstance(details, dict):
                 continue
-            indexed[key].append(details)
-        return indexed
+            try:
+                seat = int(details["seat"])
+                action = str(details["action"])
+                amount = Decimal(str(details.get("amount", 0)))
+            except (KeyError, TypeError, ValueError, ArithmeticError):
+                continue
+            amounts[(seat, action)].append(amount)
+        return amounts
+
+    @staticmethod
+    def _next_turn_result_amount(
+        amounts: dict[tuple[int, str], deque[Decimal]], seat: int, action: str
+    ) -> Decimal | None:
+        queue = amounts.get((seat, action))
+        if not queue:
+            return None
+        return queue.popleft()
+
+    @staticmethod
+    def _highest_contribution(contributions: dict[tuple[str, int], Decimal], phase: str) -> Decimal:
+        values = [value for (street_phase, _seat), value in contributions.items() if street_phase == phase]
+        return max(values, default=Decimal(0))
+
+    @classmethod
+    def _call_increment(
+        cls,
+        *,
+        history_amount: Decimal,
+        turn_result_amount: Decimal | None,
+        prior: Decimal,
+        highest: Decimal,
+        player: str,
+        phase: str,
+    ) -> Decimal:
+        """Normalize a ChipZen call to the incremental amount fpdb expects."""
+        expected = max(Decimal(0), highest - prior)
+
+        if turn_result_amount is not None:
+            if turn_result_amount < 0:
+                raise FpdbParseError(f"ChipZen call has negative turn_result amount for {player}")
+            if turn_result_amount > expected and expected > 0:
+                raise FpdbParseError(
+                    f"ChipZen call turn_result amount {turn_result_amount} exceeds {expected} to call for {player} on {phase}"
+                )
+            if history_amount != turn_result_amount:
+                log.debug(
+                    "ChipZen call amount normalized from action_history=%s to turn_result=%s for %s on %s",
+                    history_amount,
+                    turn_result_amount,
+                    player,
+                    phase,
+                )
+            return turn_result_amount
+
+        # Current docs contain both conventions in examples. If the canonical
+        # history carries the final matched street total, convert it back to the
+        # increment. If it already carries the increment, preserve it.
+        if history_amount == expected:
+            return history_amount
+        if expected > 0 and history_amount == highest:
+            log.debug(
+                "ChipZen call amount %s interpreted as call-to total; importing increment %s for %s on %s",
+                history_amount,
+                expected,
+                player,
+                phase,
+            )
+            return expected
+        # A short all-in call can be less than the amount required to match the
+        # current bet. Without a turn_result/stack delta this is the only safe
+        # additional case we can accept.
+        if Decimal(0) <= history_amount < expected:
+            return history_amount
+        if expected == 0 and history_amount == 0:
+            return Decimal(0)
+        raise FpdbParseError(
+            f"Ambiguous ChipZen call amount {history_amount} for {player} on {phase}; expected increment {expected}"
+        )
 
     @classmethod
     def _actions(cls, record: dict[str, Any], names: dict[int, str]) -> list[dict[str, Any]]:
@@ -140,6 +234,8 @@ class ChipZen(HandHistoryConverter):
 
         actions: list[dict[str, Any]] = []
         contributions: dict[tuple[str, int], Decimal] = defaultdict(Decimal)
+        turn_result_amounts = cls._turn_result_amounts(record)
+
         for entry in history:
             if not isinstance(entry, dict):
                 raise FpdbParseError("ChipZen action_history contains a non-object entry")
@@ -154,9 +250,15 @@ class ChipZen(HandHistoryConverter):
                 raise FpdbParseError(f"ChipZen action references unknown seat {seat}")
             if phase not in cls._PHASE_TO_STREET:
                 raise FpdbParseError(f"ChipZen action has unknown phase {phase!r}")
+            if amount < 0:
+                raise FpdbParseError(f"ChipZen action has negative amount: {entry!r}")
+
             street = cls._PHASE_TO_STREET[phase]
             player = names[seat]
             key = (phase, seat)
+            observed = None if kind in cls._SYNTHETIC_ACTIONS else cls._next_turn_result_amount(
+                turn_result_amounts, seat, kind
+            )
 
             if kind == "post_small_blind":
                 actions.append({"type": "small blind", "player": player, "amount": amount})
@@ -171,22 +273,30 @@ class ChipZen(HandHistoryConverter):
             elif kind == "check":
                 actions.append({"type": "checks", "street": street, "player": player})
             elif kind == "call":
-                # The v1 prose says ActionEntry.amount is chips committed by
-                # the action.  Preserve that definition here.  Real captures
-                # with turn_result snapshots are expected in conformance tests
-                # because one prose example historically used a call-to value.
-                actions.append({"type": "calls", "street": street, "player": player, "amount": amount})
-                contributions[key] += amount
-            elif kind == "raise":
-                # ChipZen turn_action / turn_result explicitly define raises as
-                # raise-to totals, which maps directly to Hand.addRaiseTo().
-                actions.append({"type": "raises", "street": street, "player": player, "to": amount})
                 prior = contributions[key]
-                if amount < prior:
+                highest = cls._highest_contribution(contributions, phase)
+                increment = cls._call_increment(
+                    history_amount=amount,
+                    turn_result_amount=observed,
+                    prior=prior,
+                    highest=highest,
+                    player=player,
+                    phase=phase,
+                )
+                actions.append({"type": "calls", "street": street, "player": player, "amount": increment})
+                contributions[key] += increment
+            elif kind == "raise":
+                # turn_result and turn_action both define raises as raise-to
+                # totals, which maps directly to Hand.addRaiseTo().
+                raise_to = observed if observed is not None else amount
+                prior = contributions[key]
+                highest = cls._highest_contribution(contributions, phase)
+                if raise_to < prior or raise_to <= highest:
                     raise FpdbParseError(
-                        f"ChipZen raise-to {amount} is below prior street contribution {prior} for {player}"
+                        f"ChipZen raise-to {raise_to} is not above the current contribution {highest} for {player}"
                     )
-                contributions[key] = amount
+                actions.append({"type": "raises", "street": street, "player": player, "to": raise_to})
+                contributions[key] = raise_to
             else:
                 raise FpdbParseError(f"Unsupported ChipZen NLHE action {kind!r}")
 
@@ -236,20 +346,28 @@ class ChipZen(HandHistoryConverter):
         if hero and isinstance(hero_cards, list) and hero_cards:
             holecards.append({"player": hero, "cards": list(hero_cards), "street": "PREFLOP", "dealt": True})
 
+        shown_players: set[str] = set()
         for shown in result.get("showdown") or []:
             if not isinstance(shown, dict) or shown.get("seat") not in names:
                 continue
             cards = shown.get("hole_cards")
             if cards:
+                player = names[int(shown["seat"])]
+                shown_players.add(player)
                 holecards.append(
                     {
-                        "player": names[int(shown["seat"])],
+                        "player": player,
                         "cards": list(cards),
                         "street": "PREFLOP",
                         "shown": True,
                         "dealt": True,
                     }
                 )
+
+        # Avoid adding the hero twice when their private cards are also present
+        # in showdown. The shown version is richer and should win.
+        if hero in shown_players:
+            holecards = [entry for entry in holecards if entry.get("player") != hero or entry.get("shown")]
 
         collections = []
         for payout in result.get("payouts") or []:
@@ -314,7 +432,7 @@ class ChipZen(HandHistoryConverter):
         self._warn_if_hand_missing_expected_data(hand)
         return hand
 
-    # HandHistoryConverter's normal text-parsing surface is abstract.  This
+    # HandHistoryConverter's normal text-parsing surface is abstract. This
     # converter overrides processHand() because its source is structured JSON;
     # these methods therefore exist only to satisfy the common converter API.
     def readSupportedGames(self):  # noqa: N802
