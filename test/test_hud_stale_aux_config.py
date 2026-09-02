@@ -27,7 +27,6 @@ from __future__ import annotations
 import pathlib
 from types import SimpleNamespace
 from unittest.mock import MagicMock
-from xml.dom import minidom
 
 import pytest
 
@@ -223,6 +222,48 @@ def test_a_successful_build_keeps_its_claim(monkeypatch) -> None:
     assert registration.temp_key == "Casablanca 04"
 
 
+def test_the_failed_attempt_is_released_not_the_live_hud_of_the_same_table(monkeypatch) -> None:
+    """One table key can hold two windows, and only the failed one may go.
+
+    A client that recreates a table's window leaves the running HUD registered
+    under the old handle while the next hand claims the new one. Releasing by
+    key drops whichever was filed first -- the live HUD's -- and leaves the
+    window this attempt claimed registered, so every later hand for it is still
+    refused and the recovery path buys nothing.
+    """
+    hud_main = _hud_main_for_create()
+    monkeypatch.setattr(HUD_main.Hud, "Hud", MagicMock(side_effect=lambda *a, **k: MagicMock()))
+    hud_main.create_HUD(_creation_args("Casablanca 04", 111))
+    live_hud = hud_main.hud_dict["Casablanca 04"]
+
+    monkeypatch.setattr(HUD_main.Hud, "Hud", MagicMock(side_effect=TypeError("boom")))
+    with pytest.raises(TypeError):
+        hud_main.create_HUD(_creation_args("Casablanca 04", 222))
+
+    # The window the failed attempt claimed is free again...
+    assert hud_main._window_registry.lookup(222) is None
+    # ...the running HUD keeps both its registration and its place...
+    assert hud_main._window_registry.lookup(111) is not None
+    assert hud_main.hud_dict["Casablanca 04"] is live_hud
+
+    # ...and the next hand on the new window can actually build.
+    monkeypatch.setattr(HUD_main.Hud, "Hud", MagicMock(side_effect=lambda *a, **k: MagicMock()))
+    hud_main.create_HUD(_creation_args("Casablanca 04", 222))
+    assert hud_main._window_registry.lookup(222) is not None
+
+
+def test_releasing_a_registration_leaves_a_newer_one_alone() -> None:
+    """A claim already superseded by another must not take the live one with it."""
+    registry = HudWindowRegistry()
+    stale = registry.claim(111, "Casablanca 04").registration
+    current = registry.claim(111, "Casablanca 05").registration
+
+    assert registry.release_registration(stale) is False
+    assert registry.lookup(111) is current
+    assert registry.release_registration(current) is True
+    assert registry.lookup(111) is None
+
+
 # --------------------------------------------------------------------------
 # The shipped configurations must not carry a dangling reference themselves
 # --------------------------------------------------------------------------
@@ -230,31 +271,28 @@ def test_a_successful_build_keeps_its_claim(monkeypatch) -> None:
 CONFIG_TEMPLATES = ["HUD_config.xml", "HUD_config.xml.example"]
 
 
-def _defined_names(doc: minidom.Document, tag: str) -> set[str]:
-    return {node.getAttribute("name") for node in doc.getElementsByTagName(tag) if node.hasAttribute("name")}
-
-
 def _dangling_references(path: pathlib.Path) -> list[str]:
-    """Every name a configuration refers to but never defines."""
-    doc = minidom.parse(str(path))
-    defined = {tag: _defined_names(doc, tag) for tag in ("aw", "ss", "ls")}
+    """Every name a configuration refers to but never defines.
+
+    Read through ``Config`` rather than by parsing the file here, so the check
+    sees exactly the names the HUD will look up at runtime -- and so the test
+    brings no XML parser of its own into the project.
+    """
+    config = Config(file=str(path))
     dangling = []
 
-    for game in doc.getElementsByTagName("game"):
-        game_name = game.getAttribute("game_name") or "?"
-        for ref in (r.strip() for r in game.getAttribute("aux").split(",")):
-            if ref and ref not in defined["aw"]:
+    for game_name, game in config.supported_games.items():
+        for ref in (r.strip() for r in getattr(game, "aux", "").split(",")):
+            if ref and ref not in config.aux_windows:
                 dangling.append(f"game {game_name!r}: aux={ref!r} has no <aw>")
-        for attribute, tag in (("stat_set", "ss"), ("layout_set", "ls")):
-            ref = game.getAttribute(attribute).strip()
-            if ref and ref not in defined[tag]:
-                dangling.append(f"game {game_name!r}: {attribute}={ref!r} has no <{tag}>")
+        for game_type, stat_set in game.game_stat_set.items():
+            if stat_set.stat_set and stat_set.stat_set not in config.stat_sets:
+                dangling.append(f"game {game_name!r} ({game_type}): stat_set={stat_set.stat_set!r} has no <ss>")
 
-    for site in doc.getElementsByTagName("site"):
-        site_name = site.getAttribute("site_name") or "?"
+    for site_name, site in config.supported_sites.items():
         for attribute in ("layout_set_ring", "layout_set_tour"):
-            ref = site.getAttribute(attribute).strip()
-            if ref and ref not in defined["ls"]:
+            ref = str(getattr(site, attribute, "") or "").strip()
+            if ref and ref not in config.layout_sets:
                 dangling.append(f"site {site_name!r}: {attribute}={ref!r} has no <ls>")
 
     return sorted(set(dangling))
