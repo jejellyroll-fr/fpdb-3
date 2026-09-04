@@ -286,6 +286,8 @@ class PokerStars(HandHistoryConverter):
         "7 CARD STUD": ("stud", "studhi"),
         "7 Card Stud Hi/Lo": ("stud", "studhilo"),
         "7 CARD STUD HI/LO": ("stud", "studhilo"),
+        "7 Card Stud Hi / Lo": ("stud", "studhilo"),
+        "7 CARD STUD HI / LO": ("stud", "studhilo"),
         "Badugi": ("draw", "badugi"),
         "Triple Draw 2-7 Lowball": ("draw", "27_3draw"),
         "Single Draw 2-7 Lowball": ("draw", "27_1draw"),
@@ -942,6 +944,13 @@ class PokerStars(HandHistoryConverter):
         Returns:
             dict[str, str]: Dictionary containing parsed game type and related attributes.
         """
+        # PokerStars occasionally inserts spaces around separators in Stud
+        # stakes (``$2.50 / $5``) and in the Hi/Lo label.  The canonical
+        # parser format is compact, so normalize these harmless variations
+        # before applying the shared header expression.
+        hand_text = re.sub(r"(?<=\d)\s*/\s*(?=\$?\d)", "/", hand_text)
+        hand_text = re.sub(r"Hi\s*/\s*Lo", "Hi/Lo", hand_text, flags=re.IGNORECASE)
+
         m = self.re_game_info.search(hand_text)
         if not m:
             tmp = hand_text[:200]
@@ -1001,13 +1010,19 @@ class PokerStars(HandHistoryConverter):
 
         if info["limitType"] == "fl" and info["bb"] is not None:
             if info["type"] == "ring":
-                try:
-                    info["sb"] = self.lim_blinds[mg["BB"]][0]
-                    info["bb"] = self.lim_blinds[mg["BB"]][1]
-                except KeyError:
-                    tmp = hand_text[:200]
-                    log.exception("Lim_Blinds has no lookup for %r - %r", mg["BB"], tmp)
-                    raise FpdbParseError from None
+                if info.get("base") == "stud":
+                    # Stud and Razz headers contain betting limits, not
+                    # blinds. Preserve both values from the header directly.
+                    info["sb"] = mg["SB"]
+                    info["bb"] = mg["BB"]
+                else:
+                    try:
+                        info["sb"] = self.lim_blinds[mg["BB"]][0]
+                        info["bb"] = self.lim_blinds[mg["BB"]][1]
+                    except KeyError:
+                        tmp = hand_text[:200]
+                        log.exception("Lim_Blinds has no lookup for %r - %r", mg["BB"], tmp)
+                        raise FpdbParseError from None
             else:
                 bb_decimal = Decimal(info["bb"])
                 info["sb"] = str((bb_decimal / Decimal("2")).quantize(Decimal("0.01")))
@@ -1354,6 +1369,8 @@ class PokerStars(HandHistoryConverter):
                 raise FpdbHandPartial(msg)
 
         info: dict[str, Any] = {}
+        hand.handText = re.sub(r"(?<=\d)\s*/\s*(?=\$?\d)", "/", hand.handText)
+        hand.handText = re.sub(r"Hi\s*/\s*Lo", "Hi/Lo", hand.handText, flags=re.IGNORECASE)
         m = self.re_hand_info.search(hand.handText, re.DOTALL)
         m2 = self.re_game_info.search(hand.handText)
         if m is None or m2 is None:

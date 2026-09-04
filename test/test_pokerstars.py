@@ -71,6 +71,34 @@ class TestPokerStarsRegex(unittest.TestCase):
         self.assertEqual(match.group("SB"), "0.10")
         self.assertEqual(match.group("BB"), "0.25")
 
+    def test_stud_hilo_accepts_spaced_stakes_and_game_label(self) -> None:
+        """Accept Stud Hi/Lo betting limits with cosmetic spacing."""
+        for hand_id, game, stakes, expected in (
+            (1, "7 Card Stud Hi/Lo", "$2.50/$5", ("2.50", "5")),
+            (2, "7 Card Stud Hi / Lo", "$2.50 / $5", ("2.50", "5")),
+            (3, "7 Card Stud", "$5/$10", ("5", "10")),
+            (4, "Razz", "$10/$20", ("10", "20")),
+        ):
+            header = f"PokerStars Hand #{hand_id}:  {game} Limit ({stakes} USD) - 2026/01/01 00:00:00 ET"
+            with self.subTest(header=header):
+                game_info = self.parser.determineGameType(header)
+                self.assertEqual(game_info["base"], "stud")
+                self.assertEqual(game_info["limitType"], "fl")
+                self.assertEqual((game_info["sb"], game_info["bb"]), expected)
+
+    def test_fixed_limit_holdem_still_uses_blind_mapping(self) -> None:
+        """Keep converting PokerStars Hold'em limits to actual blinds."""
+        for stakes, expected in (
+            ("$2/$4", ("1.00", "2.00")),
+            ("$3/$6", ("1.00", "3.00")),
+            ("$5/$10", ("2.00", "5.00")),
+            ("$15/$30", ("10.00", "15.00")),
+        ):
+            header = f"PokerStars Hand #99:  Hold'em Limit ({stakes} USD) - 2026/01/01 00:00:00 ET"
+            with self.subTest(header=header):
+                game_info = self.parser.determineGameType(header)
+                self.assertEqual((game_info["sb"], game_info["bb"]), expected)
+
     def test_re_game_info_tournament(self) -> None:
         """Test regex pattern for parsing tournament information."""
         text = (
