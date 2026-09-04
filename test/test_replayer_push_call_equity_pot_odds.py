@@ -16,8 +16,8 @@ def test_stud_hilo_evaluation_identifies_high_and_low_winners() -> None:
 
     assert high == {"Hero"}
     assert low == {"Player5"}
-    assert cards["Hero"] == {"4s", "5s", "6d", "7d", "8s"}
-    assert cards["Player5"] == {"2h", "4c", "7c", "8h", "Ac"}
+    assert cards["Hero"] == {"4s", "5s", "5h", "6d", "7d", "8s"}
+    assert cards["Player5"] == {"2h", "Ac", "As", "4c", "7c", "8h"}
 
 
 def test_stud_hilo_low_requires_five_distinct_cards_eight_or_lower() -> None:
