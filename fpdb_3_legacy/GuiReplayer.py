@@ -228,10 +228,15 @@ def stud_hilo_winners(
         pot_scopes = []
         for _amount, participants in pots:
             eligible = [player for player in contenders if player.name in participants]
-            if eligible:
+            # A one-player scope is an uncontested award (for example, a
+            # side pot left after the other contributors folded), not a
+            # showdown comparison. Keep ``is_winner`` based on collectees,
+            # but do not invent HI/LO results or highlights for that scope.
+            if len(eligible) >= 2:
                 pot_scopes.append(eligible)
-        if pot_scopes:
-            scopes = pot_scopes
+        # When pots are available, an all-singleton list must not fall back to
+        # comparing every table player as one field.
+        scopes = pot_scopes
     high_winners = set()
     low_winners = set()
     used_cards: dict[str, frozenset[str]] = {}

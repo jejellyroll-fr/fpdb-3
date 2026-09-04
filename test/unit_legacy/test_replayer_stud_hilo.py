@@ -94,6 +94,22 @@ def test_stud_hilo_winners_are_evaluated_for_each_eligible_pot():
     assert cards["Deep"] == {"5s", "6d", "7h", "8c", "4d", "2s", "3c"}
 
 
+def test_stud_hilo_skips_uncontested_singleton_pots():
+    survivor = ReplayPlayer(
+        "Survivor", 1, Decimal(0), Decimal(0), "collected", True,
+        ["As", "Ah", "Ad", "2c", "3d", "4h", "6s"],
+    )
+
+    high, low, cards = stud_hilo_winners(
+        [survivor],
+        [(Decimal("10"), {"Survivor"})],
+    )
+
+    assert high == set()
+    assert low == set()
+    assert cards == {}
+
+
 @pytest.mark.parametrize(
     ("hero_cards", "opponent_cards", "low_winners", "hero_highlights"),
     [
