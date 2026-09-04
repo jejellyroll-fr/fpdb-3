@@ -1547,7 +1547,11 @@ class GuiReplayer(QWidget):
                 is_winner = player.name in collectees
                 explicit = winning_hands.get(player.name)
                 hole = self._normalized_cards(list(player.holecards or []))
-                if explicit:
+                # PokerStars Stud Hi/Lo showdown rows may persist all seven
+                # exposed cards as the winning hand. Recompute the exact
+                # five-card high/low result below instead of highlighting all
+                # seven cards from that ambiguous payload.
+                if explicit and category.lower() != "studhilo":
                     winning_cards = frozenset(self._normalized_cards(explicit))
                 elif is_winner:
                     # Best hand per run (Omaha = 2 hole + 3 board), unioned so
