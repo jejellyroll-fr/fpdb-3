@@ -264,6 +264,17 @@ def test_releasing_a_registration_leaves_a_newer_one_alone() -> None:
     assert registry.lookup(111) is None
 
 
+def test_releasing_an_untracked_registration_keeps_live_windows() -> None:
+    """Missing handles and absent claims cannot release another table's HUD."""
+    registry = HudWindowRegistry()
+    live = registry.claim(111, "Casablanca 04").registration
+    untracked = registry.claim(None, "Casablanca 05").registration
+
+    assert registry.release_registration(None) is False
+    assert registry.release_registration(untracked) is False
+    assert registry.snapshot() == {111: live}
+
+
 # --------------------------------------------------------------------------
 # The shipped configurations must not carry a dangling reference themselves
 # --------------------------------------------------------------------------
