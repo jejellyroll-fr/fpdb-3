@@ -96,6 +96,33 @@ class TestPokerStarsRegex(unittest.TestCase):
         normalized = self.parser._normalize_game_header(text)
         self.assertIn("Seat 1: 1 / 2", normalized)
 
+    def test_uppercase_hilo_headers_keep_their_game_type(self) -> None:
+        """Normalize slash spacing without changing uppercase game labels."""
+        for game, category in (("7 CARD STUD HI/LO", "studhilo"), ("OMAHA HI/LO", "omahahilo")):
+            for spaced in (False, True):
+                label = game.replace("/", " / ") if spaced else game
+                stakes = "$2 / $4" if spaced else "$2/$4"
+                header = f"PokerStars Hand #99:  {label} LIMIT ({stakes} USD) - 2026/01/01 00:00:00 ET"
+                with self.subTest(game=game, spaced=spaced):
+                    game_info = self.parser.determineGameType(header)
+                    self.assertEqual(game_info["category"], category)
+                    self.assertEqual(game_info["limitType"], "fl")
+
+    def test_uppercase_pt2_stud_hilo_export_imports(self) -> None:
+        """Exercise header detection and hand parsing on the actual PT2 export."""
+        hand_file = (
+            Path(__file__).resolve().parents[1]
+            / "regression-test-files/tour/Stars/Stud/7-StudHL-USD-10-1-200906.PT2.export.txt"
+        )
+        parser = PokerStars(self.config, in_path=str(hand_file), autostart=True)
+        hands = parser.getProcessedHands()
+
+        self.assertEqual(len(hands), 1)
+        self.assertEqual(hands[0].handid, "29356803849")
+        self.assertEqual(hands[0].gametype["category"], "studhilo")
+        self.assertEqual(hands[0].gametype["type"], "tour")
+        self.assertEqual(hands[0].collectees, {"Player4": Decimal("220"), "Player2": Decimal("220")})
+
     def test_fixed_limit_holdem_still_uses_blind_mapping(self) -> None:
         """Keep converting PokerStars Hold'em limits to actual blinds."""
         for stakes, expected in (

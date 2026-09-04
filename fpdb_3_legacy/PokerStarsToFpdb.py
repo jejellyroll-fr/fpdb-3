@@ -329,7 +329,8 @@ class PokerStars(HandHistoryConverter):
         head, separator, tail = text.partition("\n")
         currency = r"(?:\$|€|£|¥|₹|Rs\.\s)?"
         head = re.sub(rf"(?<=\d)\s*/\s*(?={currency}\d)", "/", head)
-        head = re.sub(r"Hi\s*/\s*Lo", "Hi/Lo", head, flags=re.IGNORECASE)
+        # The game regex accepts distinct title-case and uppercase labels.
+        head = re.sub(r"(Hi)\s*/\s*(Lo)", r"\1/\2", head, flags=re.IGNORECASE)
         return head + (separator + tail if separator else "")
 
     # Static regexes
