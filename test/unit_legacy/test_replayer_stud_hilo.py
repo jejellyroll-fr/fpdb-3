@@ -7,7 +7,7 @@ from unittest.mock import Mock
 import pytest
 
 from fpdb_3_legacy import Card
-from fpdb_3_legacy.GuiReplayer import GuiReplayer, ReplayPlayer, build_replay_layout
+from fpdb_3_legacy.GuiReplayer import GuiReplayer, ReplayPlayer, build_replay_layout, stud_hilo_winners
 
 
 @pytest.fixture
@@ -75,6 +75,25 @@ def test_no_winning_highlights_before_showdown(stud_replayer):
         assert not player.hi_winner and not player.lo_winner
 
 
+def test_stud_hilo_winners_are_evaluated_for_each_eligible_pot():
+    short = ReplayPlayer("Short", 1, Decimal(0), Decimal(0), "calls", False,
+                         ["Ks", "Kh", "Kc", "2d", "4h", "7s", "9c"])
+    hero = ReplayPlayer("Hero", 2, Decimal(0), Decimal(0), "calls", False,
+                        ["As", "Ah", "Qc", "Jd", "9h", "7c", "4s"])
+    deep = ReplayPlayer("Deep", 3, Decimal(0), Decimal(0), "calls", False,
+                        ["5s", "6d", "7h", "8c", "4d", "2s", "3c"])
+
+    high, low, cards = stud_hilo_winners(
+        [short, hero, deep],
+        [(Decimal("10"), {"Short", "Hero"}), (Decimal("10"), {"Hero", "Deep"})],
+    )
+
+    assert high == {"Short", "Deep"}
+    assert low == {"Deep"}
+    assert cards["Short"] == {"Ks", "Kh", "Kc", "9c", "7s"}
+    assert cards["Deep"] == {"5s", "6d", "7h", "8c", "4d", "2s", "3c"}
+
+
 @pytest.mark.parametrize(
     ("hero_cards", "opponent_cards", "low_winners", "hero_highlights"),
     [
@@ -121,6 +140,7 @@ def test_frame_handles_scoops_ties_and_no_low(
     assert players[1].winning_cards == ({"Ac", "2d", "3c", "4d", "6h"} if "Player5" in low_winners else set())
 
 
+@pytest.mark.qt
 def test_low_winner_render_highlights_five_cards_and_dims_other_two(stud_replayer, qapp):
     player = stud_replayer._frame_from_state(stud_replayer.states[0]).players[1]
     layout = build_replay_layout(1600, 900, ["Hero", "Player5"], hero_name="Hero")

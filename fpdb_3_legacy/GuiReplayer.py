@@ -213,35 +213,50 @@ def best_low_hand(holecards: list[str]) -> tuple[tuple[int, ...] | None, frozens
     return best if best else (None, frozenset())
 
 
-def stud_hilo_winners(players: list[ReplayPlayer]) -> tuple[set[str], set[str], dict[str, frozenset[str]]]:
-    """Evaluate Stud Hi/Lo winners and the cards used for each half."""
+def stud_hilo_winners(
+    players: list[ReplayPlayer],
+    pots: list[tuple[Any, set[str]]] | None = None,
+) -> tuple[set[str], set[str], dict[str, frozenset[str]]]:
+    """Evaluate Stud Hi/Lo winners and cards used, per eligible pot."""
     contenders = [
         player
         for player in players
         if player.action != "folds" and len([c for c in player.holecards if _is_real_card(c)]) >= 5
     ]
-    high: dict[str, tuple[tuple, frozenset[str]]] = {}
-    low: dict[str, tuple[tuple[int, ...], frozenset[str]]] = {}
-    for player in contenders:
-        high_rank, high_cards = best_hand(player.holecards, [], "stud", "studhilo")
-        if high_rank is not None:
-            high[player.name] = (high_rank, high_cards)
-        low_rank, low_cards = best_low_hand(player.holecards)
-        if low_rank is not None:
-            low[player.name] = (low_rank, low_cards)
+    scopes = [contenders]
+    if pots:
+        pot_scopes = []
+        for _amount, participants in pots:
+            eligible = [player for player in contenders if player.name in participants]
+            if eligible:
+                pot_scopes.append(eligible)
+        if pot_scopes:
+            scopes = pot_scopes
     high_winners = set()
     low_winners = set()
     used_cards: dict[str, frozenset[str]] = {}
-    if high:
-        best_rank = max(rank for rank, _cards in high.values())
-        high_winners = {name for name, (rank, _cards) in high.items() if rank == best_rank}
-        for name in high_winners:
-            used_cards[name] = high[name][1]
-    if low:
-        best_rank = min(rank for rank, _cards in low.values())
-        low_winners = {name for name, (rank, _cards) in low.items() if rank == best_rank}
-        for name in low_winners:
-            used_cards[name] = used_cards.get(name, frozenset()) | low[name][1]
+    for scope in scopes:
+        high: dict[str, tuple[tuple, frozenset[str]]] = {}
+        low: dict[str, tuple[tuple[int, ...], frozenset[str]]] = {}
+        for player in scope:
+            high_rank, high_cards = best_hand(player.holecards, [], "stud", "studhilo")
+            if high_rank is not None:
+                high[player.name] = (high_rank, high_cards)
+            low_rank, low_cards = best_low_hand(player.holecards)
+            if low_rank is not None:
+                low[player.name] = (low_rank, low_cards)
+        if high:
+            best_rank = max(rank for rank, _cards in high.values())
+            winners = {name for name, (rank, _cards) in high.items() if rank == best_rank}
+            high_winners |= winners
+            for name in winners:
+                used_cards[name] = used_cards.get(name, frozenset()) | high[name][1]
+        if low:
+            best_rank = min(rank for rank, _cards in low.values())
+            winners = {name for name, (rank, _cards) in low.items() if rank == best_rank}
+            low_winners |= winners
+            for name in winners:
+                used_cards[name] = used_cards.get(name, frozenset()) | low[name][1]
     return high_winners, low_winners, used_cards
 
 
@@ -1588,7 +1603,10 @@ class GuiReplayer(QWidget):
                 )
             )
         if is_showdown and category.lower() == "studhilo":
-            hi_winners, lo_winners, used_cards = stud_hilo_winners(players)
+            hi_winners, lo_winners, used_cards = stud_hilo_winners(
+                players,
+                getattr(hand.pot, "pots", None) if hasattr(hand, "pot") else None,
+            )
             for player in players:
                 player.hi_winner = player.name in hi_winners
                 player.lo_winner = player.name in lo_winners

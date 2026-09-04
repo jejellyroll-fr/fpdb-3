@@ -113,15 +113,15 @@
   },
   "pokerstars/mixed/horse.txt": {
     "hand_count": 1,
-    "sha256": "80ecb84cd1a2071344cf39512eb78289d5719b7f168bdc260f52bcd9f1e36aaf"
+    "sha256": "9b95ab93bd533347d833f87dc285c1fd8b742ee8918e00bb10e32192348e76d7"
   },
   "pokerstars/stud/7stud.txt": {
     "hand_count": 1,
-    "sha256": "30ccbd3ae4146bb9635dbbae6d6f8300cfa2765f82aa713eecdb7ef1a5d5edb0"
+    "sha256": "7489b9e59b3e3a5a70668fcb52709ee21b9e793e719b67f1a2934c8018263010"
   },
   "pokerstars/stud/razz.txt": {
     "hand_count": 1,
-    "sha256": "188244dde74753315d8a659f50c410ebeef24f0d1a8e7c1d1f490c36f5810491"
+    "sha256": "a18a3d086ed0bb5c383c79b639a884865da96e19f64cc51c8ff1164aec8072fb"
   },
   "regression/Absolute/Flop/IHH20090610 Chile Way - Hold'em No Limit $0.02(Real Money) Table 9339866.txt": {
     "hand_count": 1,
@@ -2009,31 +2009,31 @@
   },
   "regression/Stars/Stud/7-Stud-USD-0.04-0.08-200907.Missing.Showdown.Card.txt": {
     "hand_count": 1,
-    "sha256": "698062156b3fc657d4f8e9805c75ea68ef78c1cab40d3c159f2b9088a1da7019"
+    "sha256": "beaf43e6b2bb3b89e577d3ff28782b9aac811eb15d7dc6a257f6653519a570a8"
   },
   "regression/Stars/Stud/7-Stud-USD-0.04-0.08-200911.txt": {
     "hand_count": 11,
-    "sha256": "437fecfb8f09574cb1baa62dfd7524540b0522984e31bdc54fa0b94dcf37015c"
+    "sha256": "f2fe6e04d0ad666ab287a4986113303f9afef8d4ad583f12acf5182bbcde8af3"
   },
   "regression/Stars/Stud/7-StudHL-USD-0.04-0.08-200911.Cardtest.txt": {
     "hand_count": 1,
-    "sha256": "fe411d4b03e400c1e297043697cec6e6b774f546c771c9c6dfa07e077967bda0"
+    "sha256": "3a4cc293f547fc59b8669f509ae4004a540bab046557f1dd6ae5e60407f580a1"
   },
   "regression/Stars/Stud/7-StudHL-USD-0.04-0.08-200911.txt": {
     "hand_count": 7,
-    "sha256": "dd4ba18029f83c7636dd75e70facf7f8f6af81426cbb392b36ff49c1b2ed6737"
+    "sha256": "70554c33b0c7ff2de047169e93e79026c55ef2fdff7051151401603d60ccce05"
   },
   "regression/Stars/Stud/7-StudHL-USD-400-800-201701.3bet.fix.txt": {
     "hand_count": 1,
-    "sha256": "48d03fb75955017f543260436e3212dc9137337f30eb4fcacc4f75afda2d8970"
+    "sha256": "008e6b711a54e250e9e0f67c2976d6aa1ebc70369168ff2e2646ff49fa74fe73"
   },
   "regression/Stars/Stud/HH20110417 Salm IX - $0.04-$0.08 Ante $0.01 - USD Limit Stud.txt": {
     "hand_count": 1,
-    "sha256": "32f00fdf51497da91c377c52905e45a2315b4f363a9fe57bd7c301e7bf1bbe3b"
+    "sha256": "62c401eed7a8f5ccb5b7953c7101b2b60e5dd660d68c1a264fbc9704fc5ea86a"
   },
   "regression/Stars/Stud/Razz-USD-0.04-0.08-200911.txt": {
     "hand_count": 9,
-    "sha256": "8cea5a8bdf7e5e43abb5587a2d4dd9cf3370d5b6568fbad6bfa8ac29781aad9a"
+    "sha256": "08d907ed789413882e06946752767ea707e0febfc083bea9c4ad042b74d8934b"
   },
   "regression/UltimateBet/Flop/IHH20101106 Baseline Rd - Hold'em No Limit $0.02(Real Money) Table 25932774.txt": {
     "hand_count": 1,

@@ -74,10 +74,10 @@ class TestPokerStarsRegex(unittest.TestCase):
     def test_stud_hilo_accepts_spaced_stakes_and_game_label(self) -> None:
         """Accept Stud Hi/Lo betting limits with cosmetic spacing."""
         for hand_id, game, stakes, expected in (
-            (1, "7 Card Stud Hi/Lo", "$2.50/$5", ("2.50", "5")),
-            (2, "7 Card Stud Hi / Lo", "$2.50 / $5", ("2.50", "5")),
-            (3, "7 Card Stud", "$5/$10", ("5", "10")),
-            (4, "Razz", "$10/$20", ("10", "20")),
+            (1, "7 Card Stud Hi/Lo", "$2.50/$5", ("2.50", "2.50")),
+            (2, "7 Card Stud Hi / Lo", "$2.50 / $5", ("2.50", "2.50")),
+            (3, "7 Card Stud", "$5/$10", ("5", "5")),
+            (4, "Razz", "$10/$20", ("10", "10")),
         ):
             header = f"PokerStars Hand #{hand_id}:  {game} Limit ({stakes} USD) - 2026/01/01 00:00:00 ET"
             with self.subTest(header=header):
@@ -85,6 +85,16 @@ class TestPokerStarsRegex(unittest.TestCase):
                 self.assertEqual(game_info["base"], "stud")
                 self.assertEqual(game_info["limitType"], "fl")
                 self.assertEqual((game_info["sb"], game_info["bb"]), expected)
+
+    def test_stud_header_normalization_supports_euro_and_preserves_names(self) -> None:
+        header = "PokerStars Hand #5:  7 Card Stud Hi / Lo Limit (€2.50 / €5 EUR) - 2026/01/01 00:00:00 ET"
+        game_info = self.parser.determineGameType(header)
+        self.assertEqual(game_info["currency"], "EUR")
+        self.assertEqual((game_info["sb"], game_info["bb"]), ("2.50", "2.50"))
+
+        text = header + "\nSeat 1: 1 / 2 (€10 in chips)\n"
+        normalized = self.parser._normalize_game_header(text)
+        self.assertIn("Seat 1: 1 / 2", normalized)
 
     def test_fixed_limit_holdem_still_uses_blind_mapping(self) -> None:
         """Keep converting PokerStars Hold'em limits to actual blinds."""

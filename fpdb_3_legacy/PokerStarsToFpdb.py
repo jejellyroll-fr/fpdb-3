@@ -315,6 +315,23 @@ class PokerStars(HandHistoryConverter):
         "Rs. ": "INR",
     }
 
+    @staticmethod
+    def _normalize_game_header(text: str) -> str:
+        """Normalize cosmetic separators on the header line only.
+
+        PokerStars can write both ``$2.50 / $5`` and ``Hi / Lo``. Applying
+        these substitutions to the complete hand history can corrupt player
+        or table names containing the same text, so leave all later lines
+        byte-for-byte unchanged.
+        """
+        if not isinstance(text, str):
+            raise TypeError("PokerStars hand text must be a string")
+        head, separator, tail = text.partition("\n")
+        currency = r"(?:\$|€|£|¥|₹|Rs\.\s)?"
+        head = re.sub(rf"(?<=\d)\s*/\s*(?={currency}\d)", "/", head)
+        head = re.sub(r"Hi\s*/\s*Lo", "Hi/Lo", head, flags=re.IGNORECASE)
+        return head + (separator + tail if separator else "")
+
     # Static regexes
     re_game_info = re.compile(
         """
@@ -957,8 +974,7 @@ class PokerStars(HandHistoryConverter):
         # stakes (``$2.50 / $5``) and in the Hi/Lo label.  The canonical
         # parser format is compact, so normalize these harmless variations
         # before applying the shared header expression.
-        hand_text = re.sub(r"(?<=\d)\s*/\s*(?=\$?\d)", "/", hand_text)
-        hand_text = re.sub(r"Hi\s*/\s*Lo", "Hi/Lo", hand_text, flags=re.IGNORECASE)
+        hand_text = self._normalize_game_header(hand_text)
 
         m = self.re_game_info.search(hand_text)
         if not m:
@@ -1020,10 +1036,12 @@ class PokerStars(HandHistoryConverter):
         if info["limitType"] == "fl" and info["bb"] is not None:
             if info["type"] == "ring":
                 if info.get("base") == "stud":
-                    # Stud and Razz headers contain betting limits, not
-                    # blinds. Preserve both values from the header directly.
+                    # Stud and Razz headers contain betting limits. ``bb`` is
+                    # also used as the database small-bet key, so retain the
+                    # lower limit there; the upper limit remains available in
+                    # the parsed header and is represented by bigBet = 2*bb.
                     info["sb"] = mg["SB"]
-                    info["bb"] = mg["BB"]
+                    info["bb"] = mg["SB"]
                 else:
                     try:
                         info["sb"] = self.lim_blinds[mg["BB"]][0]
@@ -1378,10 +1396,9 @@ class PokerStars(HandHistoryConverter):
                 raise FpdbHandPartial(msg)
 
         info: dict[str, Any] = {}
-        hand.handText = re.sub(r"(?<=\d)\s*/\s*(?=\$?\d)", "/", hand.handText)
-        hand.handText = re.sub(r"Hi\s*/\s*Lo", "Hi/Lo", hand.handText, flags=re.IGNORECASE)
+        normalized_header = self._normalize_game_header(hand.handText)
         m = self.re_hand_info.search(hand.handText, re.DOTALL)
-        m2 = self.re_game_info.search(hand.handText)
+        m2 = self.re_game_info.search(normalized_header)
         if m is None or m2 is None:
             tmp = hand.handText[:200]
             log.error("read Hand Info failed: %r", tmp)
