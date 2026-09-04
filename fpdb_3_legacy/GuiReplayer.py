@@ -213,7 +213,7 @@ def best_low_hand(holecards: list[str]) -> tuple[tuple[int, ...] | None, frozens
     return best if best else (None, frozenset())
 
 
-def stud_hilo_winners(players: list["ReplayPlayer"]) -> tuple[set[str], set[str], dict[str, frozenset[str]]]:
+def stud_hilo_winners(players: list[ReplayPlayer]) -> tuple[set[str], set[str], dict[str, frozenset[str]]]:
     """Evaluate Stud Hi/Lo winners and the cards used for each half."""
     contenders = [
         player
@@ -1553,7 +1553,7 @@ class GuiReplayer(QWidget):
                 # seven cards from that ambiguous payload.
                 if explicit and category.lower() != "studhilo":
                     winning_cards = frozenset(self._normalized_cards(explicit))
-                elif is_winner:
+                elif is_winner and category.lower() != "studhilo":
                     # Best hand per run (Omaha = 2 hole + 3 board), unioned so
                     # the highlight reflects every run the winner contests.
                     for run in board_runs:
@@ -1592,8 +1592,9 @@ class GuiReplayer(QWidget):
             for player in players:
                 player.hi_winner = player.name in hi_winners
                 player.lo_winner = player.name in lo_winners
-                if player.name in used_cards:
-                    player.winning_cards |= used_cards[player.name]
+                # A low-only winner must not retain their losing high hand.
+                # The evaluator already unions both halves for a scoop.
+                player.winning_cards = used_cards.get(player.name, frozenset())
         runs_info = []
         if is_showdown and len(board_runs) > 1:
             runs_info = self._compute_run_winners(players, board_runs, base, category)
@@ -2110,16 +2111,16 @@ class GuiReplayer(QWidget):
         )
         painter.drawText(action_rect, Qt.AlignmentFlag.AlignCenter, action_text)
 
-        if is_final_frame and player.combination:
+        if is_final_frame and (player.combination or player.hi_winner or player.lo_winner):
             combo_font_size = max(9, int(10 * card_scale))
             combo_font = QFont("Helvetica", combo_font_size, QFont.Weight.Bold)
             metrics = QFontMetrics(combo_font)
-            combo_text = player.combination
+            combo_text = player.combination or ""
             if player.hi_winner or player.lo_winner:
                 result = " / ".join(
                     part for part, won in (("HI winner", player.hi_winner), ("LO winner", player.lo_winner)) if won
                 )
-                combo_text = f"{combo_text} · {result}"
+                combo_text = f"{combo_text} · {result}" if combo_text else result
             pad_x, pad_y = 10, 5
             text_w = metrics.horizontalAdvance(combo_text)
             pill_w = text_w + pad_x * 2
@@ -2199,19 +2200,29 @@ class GuiReplayer(QWidget):
             hand = self.replay_model.hand
             showdown_strings = getattr(hand, "showdownStrings", {}) or {}
             collectees = getattr(hand, "collectees", {}) or {}
-            for name, combo in showdown_strings.items():
-                if not combo:
-                    continue
+            combinations = dict(showdown_strings)
+            evaluated_players = {}
+            if hand.gametype.get("category", "").lower() == "studhilo":
+                frame = self._frame_from_state(states_shown[-1])
+                evaluated_players = {player.name: player for player in frame.players}
+                for player in frame.players:
+                    if player.hi_winner or player.lo_winner:
+                        combinations.setdefault(player.name, "")
+            for name, combo in combinations.items():
                 suffix = " (wins)" if name in collectees else ""
-                player = next((p for p in states_shown[-1].players if p.name == name), None)
+                player = evaluated_players.get(name)
                 if player is not None and (player.hi_winner or player.lo_winner):
                     result = " / ".join(
                         part
                         for part, won in (("HI winner", player.hi_winner), ("LO winner", player.lo_winner))
                         if won
                     )
-                    suffix = f" ({result})"
-                entries.append(f"{name}: {combo}{suffix}")
+                    if combo:
+                        suffix = f" ({result})"
+                    else:
+                        combo, suffix = result, ""
+                if combo:
+                    entries.append(f"{name}: {combo}{suffix}")
             for name, amount in (getattr(hand, "cashOutAmounts", {}) or {}).items():
                 entries.append(f"{name}: cashout {format_replay_amount(amount, self.currency_code)}")
             # The splash is added by the room, not won from the other players,

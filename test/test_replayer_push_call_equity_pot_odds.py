@@ -16,7 +16,7 @@ def test_stud_hilo_evaluation_identifies_high_and_low_winners() -> None:
 
     assert high == {"Hero"}
     assert low == {"Player5"}
-    assert cards["Hero"] == {"4s", "5s", "5h", "6d", "7d", "8s"}
+    assert cards["Hero"] == {"4s", "5s", "6d", "7d", "8s"}
     low_rank, low_cards = best_low_hand(villain.holecards)
     assert low_rank == (8, 7, 4, 2, 1)
     assert low_cards == {"2h", "Ac", "4c", "7c", "8h"}
