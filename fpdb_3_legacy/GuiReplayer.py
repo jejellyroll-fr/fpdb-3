@@ -198,6 +198,53 @@ def best_hand_cards(holecards: list[str], board: list[str], base: str, category:
     return best_hand(holecards, board, base, category)[1]
 
 
+def best_low_hand(holecards: list[str]) -> tuple[tuple[int, ...] | None, frozenset[str]]:
+    """Return the best qualifying five-card Ace-to-five low for Stud Hi/Lo."""
+    cards = [c for c in holecards if _is_real_card(c)]
+    best: tuple[tuple[int, ...], frozenset[str]] | None = None
+    for combination in itertools.combinations(cards, 5):
+        values = [1 if card[0] == "A" else _RANK_VALUE[card[0]] for card in combination]
+        if len(set(values)) != 5 or max(values) > 8:
+            continue
+        rank = tuple(sorted(values, reverse=True))
+        candidate = (rank, frozenset(combination))
+        if best is None or rank < best[0]:
+            best = candidate
+    return best if best else (None, frozenset())
+
+
+def stud_hilo_winners(players: list["ReplayPlayer"]) -> tuple[set[str], set[str], dict[str, frozenset[str]]]:
+    """Evaluate Stud Hi/Lo winners and the cards used for each half."""
+    contenders = [
+        player
+        for player in players
+        if player.action != "folds" and len([c for c in player.holecards if _is_real_card(c)]) >= 5
+    ]
+    high: dict[str, tuple[tuple, frozenset[str]]] = {}
+    low: dict[str, tuple[tuple[int, ...], frozenset[str]]] = {}
+    for player in contenders:
+        high_rank, high_cards = best_hand(player.holecards, [], "stud", "studhilo")
+        if high_rank is not None:
+            high[player.name] = (high_rank, high_cards)
+        low_rank, low_cards = best_low_hand(player.holecards)
+        if low_rank is not None:
+            low[player.name] = (low_rank, low_cards)
+    high_winners = set()
+    low_winners = set()
+    used_cards: dict[str, frozenset[str]] = {}
+    if high:
+        best_rank = max(rank for rank, _cards in high.values())
+        high_winners = {name for name, (rank, _cards) in high.items() if rank == best_rank}
+        for name in high_winners:
+            used_cards[name] = high[name][1]
+    if low:
+        best_rank = min(rank for rank, _cards in low.values())
+        low_winners = {name for name, (rank, _cards) in low.items() if rank == best_rank}
+        for name in low_winners:
+            used_cards[name] = used_cards.get(name, frozenset()) | low[name][1]
+    return high_winners, low_winners, used_cards
+
+
 _CATEGORY_NAMES = {
     8: "Straight Flush",
     7: "Four of a Kind",
@@ -267,6 +314,8 @@ class ReplayPlayer:
     combination: str | None = None
     winning_cards: frozenset[str] = field(default_factory=frozenset)
     is_winner: bool = False
+    hi_winner: bool = False
+    lo_winner: bool = False
     cashout: Decimal | None = None
     # Splash collected from the room, kept apart from `chips` because it is not
     # won from the other players and does not balance against the betting.
@@ -1534,6 +1583,13 @@ class GuiReplayer(QWidget):
                     ),
                 )
             )
+        if is_showdown and category.lower() == "studhilo":
+            hi_winners, lo_winners, used_cards = stud_hilo_winners(players)
+            for player in players:
+                player.hi_winner = player.name in hi_winners
+                player.lo_winner = player.name in lo_winners
+                if player.name in used_cards:
+                    player.winning_cards |= used_cards[player.name]
         runs_info = []
         if is_showdown and len(board_runs) > 1:
             runs_info = self._compute_run_winners(players, board_runs, base, category)
@@ -2055,6 +2111,11 @@ class GuiReplayer(QWidget):
             combo_font = QFont("Helvetica", combo_font_size, QFont.Weight.Bold)
             metrics = QFontMetrics(combo_font)
             combo_text = player.combination
+            if player.hi_winner or player.lo_winner:
+                result = " / ".join(
+                    part for part, won in (("HI winner", player.hi_winner), ("LO winner", player.lo_winner)) if won
+                )
+                combo_text = f"{combo_text} · {result}"
             pad_x, pad_y = 10, 5
             text_w = metrics.horizontalAdvance(combo_text)
             pill_w = text_w + pad_x * 2
@@ -2138,6 +2199,14 @@ class GuiReplayer(QWidget):
                 if not combo:
                     continue
                 suffix = " (wins)" if name in collectees else ""
+                player = next((p for p in states_shown[-1].players if p.name == name), None)
+                if player is not None and (player.hi_winner or player.lo_winner):
+                    result = " / ".join(
+                        part
+                        for part, won in (("HI winner", player.hi_winner), ("LO winner", player.lo_winner))
+                        if won
+                    )
+                    suffix = f" ({result})"
                 entries.append(f"{name}: {combo}{suffix}")
             for name, amount in (getattr(hand, "cashOutAmounts", {}) or {}).items():
                 entries.append(f"{name}: cashout {format_replay_amount(amount, self.currency_code)}")
