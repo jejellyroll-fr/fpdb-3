@@ -210,11 +210,6 @@ def best_low_hand(holecards: list[str]) -> tuple[tuple[int, ...] | None, frozens
         candidate = (rank, frozenset(combination))
         if best is None or rank < best[0]:
             best = candidate
-        elif rank == best[0]:
-            # PokerStars only prints low ranks, not suits. Keep every card
-            # that can realize an equally ranked low so the replayer does not
-            # arbitrarily highlight one of several equivalent cards.
-            best = (best[0], best[1] | candidate[1])
     return best if best else (None, frozenset())
 
 
