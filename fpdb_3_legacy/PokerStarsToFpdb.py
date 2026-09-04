@@ -819,6 +819,15 @@ class PokerStars(HandHistoryConverter):
                     ),
                     re.MULTILINE,
                 )
+                # Stud/Hi-Lo summaries use ``with HI: ...; LO: ...``
+                # without the usual ``showed`` verb. Keep the complete
+                # high/low description for the replayer and hand viewer.
+                self.re_summary_showdown = re.compile(
+                    r"Seat (?P<SEAT>[0-9]+): {PLYR} {BRKTS}\([^)]*\) with (?P<STRING>HI: .+)$".format(
+                        **subst,
+                    ),
+                    re.MULTILINE,
+                )
 
     def readSupportedGames(self) -> list[list[str]]:
         """Returns a list of supported game types for PokerStars.
@@ -2273,6 +2282,14 @@ class PokerStars(HandHistoryConverter):
                     mucked=mucked,
                     string=string,
                 )
+
+        # PokerStars Stud and Razz summary rows omit ``showed`` and only
+        # provide the textual high/low result. Preserve that result so the
+        # replayer can display both halves of a split hand.
+        summary_re = getattr(self, "re_summary_showdown", None)
+        if summary_re is not None:
+            for summary_match in summary_re.finditer(hand.handText):
+                hand.showdownStrings[summary_match.group("PNAME")] = summary_match.group("STRING")
 
     def _parseRakeAndPot(self, hand: Hand) -> None:
         """Parses rake and total pot information from the hand text and updates the hand object.

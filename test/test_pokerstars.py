@@ -1365,6 +1365,29 @@ Seat 2: Player1 mucked [7h 2c]"""
 
         self.assertEqual(hand.addShownCards.call_count, 2)
 
+    def test_read_stud_hilo_summary_results(self) -> None:
+        """Keep PokerStars Stud Hi/Lo high and low descriptions for replay."""
+        hand = Mock()
+        hand.players = [(5, "Player8"), (8, "Player9")]
+        hand.handText = (
+            "Seat 5: Player8 ($23.30) with HI: a straight, Four to Eight; LO: 8,7,6,5,4\n"
+            "Seat 8: Player9 ($23.30) with HI: a pair of Aces; LO: 8,7,4,2,A\n"
+        )
+        hand.showdownStrings = {}
+        self.parser.compilePlayerRegexs(hand)
+        self.parser.re_shown_cards = Mock()
+        self.parser.re_shown_cards.finditer = Mock(return_value=[])
+
+        self.parser.readShownCards(hand)
+
+        self.assertEqual(
+            hand.showdownStrings,
+            {
+                "Player8": "HI: a straight, Four to Eight; LO: 8,7,6,5,4",
+                "Player9": "HI: a pair of Aces; LO: 8,7,4,2,A",
+            },
+        )
+
     def test_get_table_title_re_cash(self) -> None:
         """Test getTableTitleRe for cash games."""
         result = PokerStars.getTableTitleRe("ring", "Test Table")
