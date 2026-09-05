@@ -132,6 +132,23 @@ class HudWindowRegistry:
                 return registration
         return None
 
+    def release_registration(self, registration: HudRegistration | None) -> bool:
+        """Forget exactly ``registration``, if it is still the one on file.
+
+        Undoing one failed claim needs this rather than ``release``: one key can
+        hold two windows at once -- a table whose client recreated its window
+        keeps the old registration until that HUD is torn down -- and releasing
+        by key would then drop whichever was filed first, usually the *live*
+        HUD's, leaving the window this attempt just claimed registered and every
+        later hand for it refused as a duplicate.
+        """
+        if registration is None or registration.window_id is None:
+            return False
+        if self._by_window.get(registration.window_id) is not registration:
+            return False
+        del self._by_window[registration.window_id]
+        return True
+
     def is_current(self, temp_key: str, generation: int) -> bool:
         """Whether ``generation`` is still the live HUD for ``temp_key``.
 

@@ -9,62 +9,11 @@ import sys
 import unittest
 from unittest.mock import Mock, patch
 
-# Add the parent directory to Python path for imports
-
-
-def _setup_hud_mocks(original_modules: dict) -> None:
-    """Install mocks for fpdb_3_legacy sub-modules required by Hud.py."""
-    modules_to_mock = [
-        "fpdb_3_legacy.Database",
-        "fpdb_3_legacy.Hand",
-        "fpdb_3_legacy.loggingFpdb",
-    ]
-    for module_name in modules_to_mock:
-        if module_name in sys.modules:
-            original_modules[module_name] = sys.modules[module_name]
-        mock_mod = Mock()
-        # loggingFpdb.get_logger is called at module-import time; make it
-        # return a proper Mock logger so the module-level `log = get_logger(…)`
-        # succeeds and `log.warning / log.exception` are callable.
-        if module_name == "fpdb_3_legacy.loggingFpdb":
-            mock_mod.get_logger = Mock(return_value=Mock())
-        sys.modules[module_name] = mock_mod
-
-
-def _teardown_hud_mocks(original_modules: dict) -> None:
-    """Remove mocks installed by _setup_hud_mocks."""
-    modules_to_mock = [
-        "fpdb_3_legacy.Database",
-        "fpdb_3_legacy.Hand",
-        "fpdb_3_legacy.loggingFpdb",
-    ]
-    for module_name in modules_to_mock:
-        if module_name in original_modules:
-            sys.modules[module_name] = original_modules[module_name]
-        elif module_name in sys.modules:
-            del sys.modules[module_name]
+from fpdb_3_legacy.Hud import Hud, importName
 
 
 class TestImportName(unittest.TestCase):
     """Test the importName utility function."""
-
-    @classmethod
-    def setUpClass(cls):
-        """Set up mocks for HUD tests."""
-        cls._original_modules = {}
-        _setup_hud_mocks(cls._original_modules)
-
-        # Evict a previously-cached Hud module so the mocks take effect.
-        sys.modules.pop("fpdb_3_legacy.Hud", None)
-
-        # Import the module to test after mocks are set up
-        global Hud, importName
-        from fpdb_3_legacy.Hud import Hud, importName
-
-    @classmethod
-    def tearDownClass(cls):
-        """Clean up mocks after HUD tests."""
-        _teardown_hud_mocks(cls._original_modules)
 
     def test_import_valid_module(self) -> None:
         """Test importing a valid module and class."""
@@ -90,12 +39,6 @@ class TestImportName(unittest.TestCase):
 
 class TestHudInitialization(unittest.TestCase):
     """Test HUD initialization."""
-
-    @classmethod
-    def setUpClass(cls):
-        """Ensure Hud is importable (mocks installed by TestImportName.setUpClass)."""
-        global Hud, importName
-        from fpdb_3_legacy.Hud import Hud, importName
 
     def setUp(self) -> None:
         """Set up test environment."""
@@ -340,12 +283,6 @@ class TestHudInitialization(unittest.TestCase):
 class TestHudMethods(unittest.TestCase):
     """Test HUD methods."""
 
-    @classmethod
-    def setUpClass(cls):
-        """Ensure Hud is importable (mocks installed by TestImportName.setUpClass)."""
-        global Hud, importName
-        from fpdb_3_legacy.Hud import Hud, importName
-
     def setUp(self) -> None:
         """Set up test HUD instance."""
         # Create a minimal HUD instance for testing
@@ -567,12 +504,6 @@ class TestHudMethods(unittest.TestCase):
 class TestHudIntegration(unittest.TestCase):
     """Test HUD integration scenarios."""
 
-    @classmethod
-    def setUpClass(cls):
-        """Ensure Hud is importable (mocks installed by TestImportName.setUpClass)."""
-        global Hud, importName
-        from fpdb_3_legacy.Hud import Hud, importName
-
     def test_full_hud_lifecycle(self) -> None:
         """Test complete HUD lifecycle from creation to destruction."""
         # Setup
@@ -649,12 +580,6 @@ class TestHudIntegration(unittest.TestCase):
 class TestHudErrorHandling(unittest.TestCase):
     """Test HUD error handling scenarios."""
 
-    @classmethod
-    def setUpClass(cls):
-        """Ensure Hud is importable (mocks installed by TestImportName.setUpClass)."""
-        global Hud, importName
-        from fpdb_3_legacy.Hud import Hud, importName
-
     def test_aux_method_exceptions(self) -> None:
         """Test that HUD handles exceptions in aux window methods gracefully."""
         # Setup HUD with mock aux that raises exceptions
@@ -720,7 +645,7 @@ class TestMuckedCards(unittest.TestCase):
         mock_parent.hud_params = {
             "card_ht": "78",
             "card_wd": "56",
-            "mucked_cards_size": "70"  # 70% scale
+            "mucked_cards_size": "70",  # 70% scale
         }
 
         mock_hud = Mock()
@@ -799,8 +724,10 @@ class TestResizeWindowsRefLayout(unittest.TestCase):
         h = HudClass.__new__(HudClass)
         h.max = 3
         h.layout = types.SimpleNamespace(
-            width=792, height=546,
-            location=[None, (681, 221), (2, 221), (162, 413)], common=(323, 232),
+            width=792,
+            height=546,
+            location=[None, (681, 221), (2, 221), (162, 413)],
+            common=(323, 232),
         )
         h.table = types.SimpleNamespace(width=1360, height=880)
         h.aux_windows = []
