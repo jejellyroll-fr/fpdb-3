@@ -724,7 +724,8 @@ class Database(
             settings = self.cursor.fetchone()
             if settings[0] != DB_VERSION:
                 log.error(
-                    f"Outdated or too new database version ({settings[0]}). Please recreate tables.",
+                    f"Outdated or too new database version ({settings[0]}). Back up the database first: "
+                    "recreating tables deletes all imported hands and statistics and requires reimport.",
                 )
                 self.wrongDbVersion = True
         except Exception:  # intentional broad catch: settings-table read failure triggers cross-backend table recreate

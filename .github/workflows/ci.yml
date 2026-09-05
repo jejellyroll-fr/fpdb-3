@@ -10,6 +10,18 @@ on:
   workflow_dispatch:
 
 jobs:
+  config-version:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Check configuration template versions
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: python3 tools/check_config_version.py --base "$BASE_SHA"
+
   quality:
     runs-on: ubuntu-latest
     steps:

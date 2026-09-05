@@ -1461,37 +1461,35 @@ class fpdb(QMainWindow):
                 ],
             )
             self.display_config_created_dialogue = False
-        elif self.config.wrongConfigVersion:
-            diaConfigVersionWarning = QDialog()
-            diaConfigVersionWarning.setWindowTitle(_("Strong Warning - Local configuration out of date"))
-            diaConfigVersionWarning.setLayout(QVBoxLayout())
-            label = QLabel("\nYour local configuration file needs to be updated.")
-            diaConfigVersionWarning.layout().addWidget(label)
-            label = QLabel(
-                "\nYour local configuration file needs to be updated."
-                " This error is not necessarily fatal but it is strongly recommended that you update the configuration.",
+        if self.config.wrongConfigVersion or self.config.config_reference_errors:
+            warning = QMessageBox(self)
+            warning.setIcon(QMessageBox.Warning)
+            warning.setWindowTitle(_("Configuration needs attention"))
+            warning.setText(
+                f"Configuration: {self.config.file}\n"
+                f"Version {self.config.general['version']}; expected {Configuration.CONFIG_VERSION}."
             )
-            diaConfigVersionWarning.layout().addWidget(label)
-            label = QLabel(
-                "To create a new configuration, see:"
-                " fpdb.sourceforge.net/apps/mediawiki/fpdb/index.php?title=Reset_Configuration",
+            warning.setInformativeText(
+                "Upgrade adds missing HUD definitions and repairs known renamed references, "
+                "while preserving existing profiles, layouts, sites, screen names and favourite seats. "
+                "A separate backup is saved before writing. Unknown versions or unresolved references "
+                "require manual review."
             )
-            label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
-            diaConfigVersionWarning.layout().addWidget(label)
-            label = QLabel(
-                "A new configuration will destroy all personal settings"
-                " (hud layout, site folders, screennames, favourite seats).\n",
-            )
-            diaConfigVersionWarning.layout().addWidget(label)
-            label = QLabel(_("To keep existing personal settings, you must edit the local file."))
-            diaConfigVersionWarning.layout().addWidget(label)
-            label = QLabel(_("See the release note for information about the edits needed"))
-            diaConfigVersionWarning.layout().addWidget(label)
-            btns = QDialogButtonBox(QDialogButtonBox.Ok)
-            btns.accepted.connect(diaConfigVersionWarning.accept)
-            diaConfigVersionWarning.layout().addWidget(btns)
-            diaConfigVersionWarning.exec()
-            self.config.wrongConfigVersion = False
+            warning.setDetailedText("\n".join(self.config.config_reference_errors))
+            warning.setStandardButtons(QMessageBox.Close)
+            upgrade = None
+            from fpdb_3_legacy.config_migrations import MIGRATIONS
+
+            if any(old == self.config.general["version"] for old, _new, _step in MIGRATIONS):
+                upgrade = warning.addButton(_("Back up and upgrade"), QMessageBox.AcceptRole)
+            warning.exec()
+            if upgrade is not None and warning.clickedButton() is upgrade:
+                try:
+                    backup = self.config.upgrade_config()
+                    self.config = Configuration.Config(file=self.config.file, dbname=options.dbname)
+                    self.info_box("Configuration upgraded", [f"Backup saved to {backup}"])
+                except (OSError, ValueError) as exc:
+                    self.warning_box(f"Configuration upgrade failed: {exc}")
 
         # Set up application settings
         self.settings = {}
@@ -1570,11 +1568,24 @@ class fpdb(QMainWindow):
                 self,
             )
             diaDbVersionWarning.setInformativeText(
-                "This error is not necessarily fatal but it is strongly"
-                " recommended that you recreate the tables by using the Database menu."
-                " Not doing this will likely lead to misbehavior including fpdb crashes, corrupt data, etc.",
+                "Recreating tables deletes ALL imported hands and statistics; you will need to reimport "
+                "your original histories. No automatic schema upgrade is available for this database. "
+                "Back up your database and keep your hand histories before recreating tables. "
+                "You can export a diagnostic text dump first; it is not a restorable database backup.",
             )
+            export = diaDbVersionWarning.addButton("Export text dump…", QMessageBox.ActionRole)
             diaDbVersionWarning.exec()
+            if diaDbVersionWarning.clickedButton() is export:
+                from PySide6.QtWidgets import QFileDialog
+
+                path, _filter = QFileDialog.getSaveFileName(self, "Export database", "database-dump.txt")
+                if path:
+                    try:
+                        result = self.db.dumpDatabase()
+                        with open(path, "w", encoding="utf-8") as stream:
+                            stream.write(result)
+                    except Exception as exc:
+                        self.warning_box(f"Database export failed. Keep the original database: {exc}")
 
         # Update the status bar with the database connection status
         if self.db is not None and self.db.is_connected():
