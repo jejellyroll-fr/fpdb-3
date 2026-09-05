@@ -198,6 +198,73 @@ def best_hand_cards(holecards: list[str], board: list[str], base: str, category:
     return best_hand(holecards, board, base, category)[1]
 
 
+def best_low_hand(holecards: list[str]) -> tuple[tuple[int, ...] | None, frozenset[str]]:
+    """Return the best qualifying five-card Ace-to-five low for Stud Hi/Lo."""
+    cards = [c for c in holecards if _is_real_card(c)]
+    best: tuple[tuple[int, ...], frozenset[str]] | None = None
+    for combination in itertools.combinations(cards, 5):
+        values = [1 if card[0] == "A" else _RANK_VALUE[card[0]] for card in combination]
+        if len(set(values)) != 5 or max(values) > 8:
+            continue
+        rank = tuple(sorted(values, reverse=True))
+        candidate = (rank, frozenset(combination))
+        if best is None or rank < best[0]:
+            best = candidate
+    return best if best else (None, frozenset())
+
+
+def stud_hilo_winners(
+    players: list[ReplayPlayer],
+    pots: list[tuple[Any, set[str]]] | None = None,
+) -> tuple[set[str], set[str], dict[str, frozenset[str]]]:
+    """Evaluate Stud Hi/Lo winners and cards used, per eligible pot."""
+    contenders = [
+        player
+        for player in players
+        if player.action != "folds" and len([c for c in player.holecards if _is_real_card(c)]) >= 5
+    ]
+    scopes = [contenders]
+    if pots:
+        pot_scopes = []
+        for _amount, participants in pots:
+            eligible = [player for player in contenders if player.name in participants]
+            # A one-player scope is an uncontested award (for example, a
+            # side pot left after the other contributors folded), not a
+            # showdown comparison. Keep ``is_winner`` based on collectees,
+            # but do not invent HI/LO results or highlights for that scope.
+            if len(eligible) >= 2:
+                pot_scopes.append(eligible)
+        # When pots are available, an all-singleton list must not fall back to
+        # comparing every table player as one field.
+        scopes = pot_scopes
+    high_winners = set()
+    low_winners = set()
+    used_cards: dict[str, frozenset[str]] = {}
+    for scope in scopes:
+        high: dict[str, tuple[tuple, frozenset[str]]] = {}
+        low: dict[str, tuple[tuple[int, ...], frozenset[str]]] = {}
+        for player in scope:
+            high_rank, high_cards = best_hand(player.holecards, [], "stud", "studhilo")
+            if high_rank is not None:
+                high[player.name] = (high_rank, high_cards)
+            low_rank, low_cards = best_low_hand(player.holecards)
+            if low_rank is not None:
+                low[player.name] = (low_rank, low_cards)
+        if high:
+            best_rank = max(rank for rank, _cards in high.values())
+            winners = {name for name, (rank, _cards) in high.items() if rank == best_rank}
+            high_winners |= winners
+            for name in winners:
+                used_cards[name] = used_cards.get(name, frozenset()) | high[name][1]
+        if low:
+            best_rank = min(rank for rank, _cards in low.values())
+            winners = {name for name, (rank, _cards) in low.items() if rank == best_rank}
+            low_winners |= winners
+            for name in winners:
+                used_cards[name] = used_cards.get(name, frozenset()) | low[name][1]
+    return high_winners, low_winners, used_cards
+
+
 _CATEGORY_NAMES = {
     8: "Straight Flush",
     7: "Four of a Kind",
@@ -267,6 +334,8 @@ class ReplayPlayer:
     combination: str | None = None
     winning_cards: frozenset[str] = field(default_factory=frozenset)
     is_winner: bool = False
+    hi_winner: bool = False
+    lo_winner: bool = False
     cashout: Decimal | None = None
     # Splash collected from the room, kept apart from `chips` because it is not
     # won from the other players and does not balance against the betting.
@@ -1498,9 +1567,13 @@ class GuiReplayer(QWidget):
                 is_winner = player.name in collectees
                 explicit = winning_hands.get(player.name)
                 hole = self._normalized_cards(list(player.holecards or []))
-                if explicit:
+                # PokerStars Stud Hi/Lo showdown rows may persist all seven
+                # exposed cards as the winning hand. Recompute the exact
+                # five-card high/low result below instead of highlighting all
+                # seven cards from that ambiguous payload.
+                if explicit and category.lower() != "studhilo":
                     winning_cards = frozenset(self._normalized_cards(explicit))
-                elif is_winner:
+                elif is_winner and category.lower() != "studhilo":
                     # Best hand per run (Omaha = 2 hole + 3 board), unioned so
                     # the highlight reflects every run the winner contests.
                     for run in board_runs:
@@ -1534,6 +1607,17 @@ class GuiReplayer(QWidget):
                     ),
                 )
             )
+        if is_showdown and category.lower() == "studhilo":
+            hi_winners, lo_winners, used_cards = stud_hilo_winners(
+                players,
+                getattr(hand.pot, "pots", None) if hasattr(hand, "pot") else None,
+            )
+            for player in players:
+                player.hi_winner = player.name in hi_winners
+                player.lo_winner = player.name in lo_winners
+                # A low-only winner must not retain their losing high hand.
+                # The evaluator already unions both halves for a scoop.
+                player.winning_cards = used_cards.get(player.name, frozenset())
         runs_info = []
         if is_showdown and len(board_runs) > 1:
             runs_info = self._compute_run_winners(players, board_runs, base, category)
@@ -2050,11 +2134,16 @@ class GuiReplayer(QWidget):
         )
         painter.drawText(action_rect, Qt.AlignmentFlag.AlignCenter, action_text)
 
-        if is_final_frame and player.combination:
+        if is_final_frame and (player.combination or player.hi_winner or player.lo_winner):
             combo_font_size = max(9, int(10 * card_scale))
             combo_font = QFont("Helvetica", combo_font_size, QFont.Weight.Bold)
             metrics = QFontMetrics(combo_font)
-            combo_text = player.combination
+            combo_text = player.combination or ""
+            if player.hi_winner or player.lo_winner:
+                result = " / ".join(
+                    part for part, won in (("HI winner", player.hi_winner), ("LO winner", player.lo_winner)) if won
+                )
+                combo_text = f"{combo_text} · {result}" if combo_text else result
             pad_x, pad_y = 10, 5
             text_w = metrics.horizontalAdvance(combo_text)
             pill_w = text_w + pad_x * 2
@@ -2134,11 +2223,29 @@ class GuiReplayer(QWidget):
             hand = self.replay_model.hand
             showdown_strings = getattr(hand, "showdownStrings", {}) or {}
             collectees = getattr(hand, "collectees", {}) or {}
-            for name, combo in showdown_strings.items():
-                if not combo:
-                    continue
+            combinations = dict(showdown_strings)
+            evaluated_players = {}
+            if hand.gametype.get("category", "").lower() == "studhilo":
+                frame = self._frame_from_state(states_shown[-1])
+                evaluated_players = {player.name: player for player in frame.players}
+                for player in frame.players:
+                    if player.hi_winner or player.lo_winner:
+                        combinations.setdefault(player.name, "")
+            for name, combo in combinations.items():
                 suffix = " (wins)" if name in collectees else ""
-                entries.append(f"{name}: {combo}{suffix}")
+                player = evaluated_players.get(name)
+                if player is not None and (player.hi_winner or player.lo_winner):
+                    result = " / ".join(
+                        part
+                        for part, won in (("HI winner", player.hi_winner), ("LO winner", player.lo_winner))
+                        if won
+                    )
+                    if combo:
+                        suffix = f" ({result})"
+                    else:
+                        combo, suffix = result, ""
+                if combo:
+                    entries.append(f"{name}: {combo}{suffix}")
             for name, amount in (getattr(hand, "cashOutAmounts", {}) or {}).items():
                 entries.append(f"{name}: cashout {format_replay_amount(amount, self.currency_code)}")
             # The splash is added by the room, not won from the other players,

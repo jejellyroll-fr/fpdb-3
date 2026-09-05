@@ -286,6 +286,8 @@ class PokerStars(HandHistoryConverter):
         "7 CARD STUD": ("stud", "studhi"),
         "7 Card Stud Hi/Lo": ("stud", "studhilo"),
         "7 CARD STUD HI/LO": ("stud", "studhilo"),
+        "7 Card Stud Hi / Lo": ("stud", "studhilo"),
+        "7 CARD STUD HI / LO": ("stud", "studhilo"),
         "Badugi": ("draw", "badugi"),
         "Triple Draw 2-7 Lowball": ("draw", "27_3draw"),
         "Single Draw 2-7 Lowball": ("draw", "27_1draw"),
@@ -312,6 +314,24 @@ class PokerStars(HandHistoryConverter):
         "₹": "INR",
         "Rs. ": "INR",
     }
+
+    @staticmethod
+    def _normalize_game_header(text: str) -> str:
+        """Normalize cosmetic separators on the header line only.
+
+        PokerStars can write both ``$2.50 / $5`` and ``Hi / Lo``. Applying
+        these substitutions to the complete hand history can corrupt player
+        or table names containing the same text, so leave all later lines
+        byte-for-byte unchanged.
+        """
+        if not isinstance(text, str):
+            raise TypeError("PokerStars hand text must be a string")
+        head, separator, tail = text.partition("\n")
+        currency = r"(?:\$|€|£|¥|₹|Rs\.\s)?"
+        head = re.sub(rf"(?<=\d)\s*/\s*(?={currency}\d)", "/", head)
+        # The game regex accepts distinct title-case and uppercase labels.
+        head = re.sub(r"(Hi)\s*/\s*(Lo)", r"\1/\2", head, flags=re.IGNORECASE)
+        return head + (separator + tail if separator else "")
 
     # Static regexes
     re_game_info = re.compile(
@@ -817,6 +837,15 @@ class PokerStars(HandHistoryConverter):
                     ),
                     re.MULTILINE,
                 )
+                # Stud/Hi-Lo summaries use ``with HI: ...; LO: ...``
+                # without the usual ``showed`` verb. Keep the complete
+                # high/low description for the replayer and hand viewer.
+                self.re_summary_showdown = re.compile(
+                    r"Seat (?P<SEAT>[0-9]+): {PLYR} {BRKTS}\([^)]*\) with (?P<STRING>HI: .+)$".format(
+                        **subst,
+                    ),
+                    re.MULTILINE,
+                )
 
     def readSupportedGames(self) -> list[list[str]]:
         """Returns a list of supported game types for PokerStars.
@@ -942,6 +971,12 @@ class PokerStars(HandHistoryConverter):
         Returns:
             dict[str, str]: Dictionary containing parsed game type and related attributes.
         """
+        # PokerStars occasionally inserts spaces around separators in Stud
+        # stakes (``$2.50 / $5``) and in the Hi/Lo label.  The canonical
+        # parser format is compact, so normalize these harmless variations
+        # before applying the shared header expression.
+        hand_text = self._normalize_game_header(hand_text)
+
         m = self.re_game_info.search(hand_text)
         if not m:
             tmp = hand_text[:200]
@@ -1001,13 +1036,21 @@ class PokerStars(HandHistoryConverter):
 
         if info["limitType"] == "fl" and info["bb"] is not None:
             if info["type"] == "ring":
-                try:
-                    info["sb"] = self.lim_blinds[mg["BB"]][0]
-                    info["bb"] = self.lim_blinds[mg["BB"]][1]
-                except KeyError:
-                    tmp = hand_text[:200]
-                    log.exception("Lim_Blinds has no lookup for %r - %r", mg["BB"], tmp)
-                    raise FpdbParseError from None
+                if info.get("base") == "stud":
+                    # Stud and Razz headers contain betting limits. ``bb`` is
+                    # also used as the database small-bet key, so retain the
+                    # lower limit there; the upper limit remains available in
+                    # the parsed header and is represented by bigBet = 2*bb.
+                    info["sb"] = mg["SB"]
+                    info["bb"] = mg["SB"]
+                else:
+                    try:
+                        info["sb"] = self.lim_blinds[mg["BB"]][0]
+                        info["bb"] = self.lim_blinds[mg["BB"]][1]
+                    except KeyError:
+                        tmp = hand_text[:200]
+                        log.exception("Lim_Blinds has no lookup for %r - %r", mg["BB"], tmp)
+                        raise FpdbParseError from None
             else:
                 bb_decimal = Decimal(info["bb"])
                 info["sb"] = str((bb_decimal / Decimal("2")).quantize(Decimal("0.01")))
@@ -1354,8 +1397,9 @@ class PokerStars(HandHistoryConverter):
                 raise FpdbHandPartial(msg)
 
         info: dict[str, Any] = {}
+        normalized_header = self._normalize_game_header(hand.handText)
         m = self.re_hand_info.search(hand.handText, re.DOTALL)
-        m2 = self.re_game_info.search(hand.handText)
+        m2 = self.re_game_info.search(normalized_header)
         if m is None or m2 is None:
             tmp = hand.handText[:200]
             log.error("read Hand Info failed: %r", tmp)
@@ -2256,6 +2300,14 @@ class PokerStars(HandHistoryConverter):
                     mucked=mucked,
                     string=string,
                 )
+
+        # PokerStars Stud and Razz summary rows omit ``showed`` and only
+        # provide the textual high/low result. Preserve that result so the
+        # replayer can display both halves of a split hand.
+        summary_re = getattr(self, "re_summary_showdown", None)
+        if summary_re is not None:
+            for summary_match in summary_re.finditer(hand.handText):
+                hand.showdownStrings[summary_match.group("PNAME")] = summary_match.group("STRING")
 
     def _parseRakeAndPot(self, hand: Hand) -> None:
         """Parses rake and total pot information from the hand text and updates the hand object.

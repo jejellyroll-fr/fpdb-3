@@ -423,7 +423,8 @@ class GuiHandViewer(QSplitter):
             hand.calculate_net_collected()
         bet = 0
         if hero in hand.pot.committed:
-            bet = hand.pot.committed[hero] - hand.pot.returned.get(hero, Decimal("0"))
+            # Pot.removeMoney already removes uncalled bets from committed.
+            bet = hand.pot.committed[hero]
         net = hand.net_collected.get(hero, 0)
         pos = hand.get_player_position(hero)
         nbplayers = len(hand.players)

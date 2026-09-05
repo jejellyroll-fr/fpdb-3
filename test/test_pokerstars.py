@@ -71,6 +71,71 @@ class TestPokerStarsRegex(unittest.TestCase):
         self.assertEqual(match.group("SB"), "0.10")
         self.assertEqual(match.group("BB"), "0.25")
 
+    def test_stud_hilo_accepts_spaced_stakes_and_game_label(self) -> None:
+        """Accept Stud Hi/Lo betting limits with cosmetic spacing."""
+        for hand_id, game, stakes, expected in (
+            (1, "7 Card Stud Hi/Lo", "$2.50/$5", ("2.50", "2.50")),
+            (2, "7 Card Stud Hi / Lo", "$2.50 / $5", ("2.50", "2.50")),
+            (3, "7 Card Stud", "$5/$10", ("5", "5")),
+            (4, "Razz", "$10/$20", ("10", "10")),
+        ):
+            header = f"PokerStars Hand #{hand_id}:  {game} Limit ({stakes} USD) - 2026/01/01 00:00:00 ET"
+            with self.subTest(header=header):
+                game_info = self.parser.determineGameType(header)
+                self.assertEqual(game_info["base"], "stud")
+                self.assertEqual(game_info["limitType"], "fl")
+                self.assertEqual((game_info["sb"], game_info["bb"]), expected)
+
+    def test_stud_header_normalization_supports_euro_and_preserves_names(self) -> None:
+        header = "PokerStars Hand #5:  7 Card Stud Hi / Lo Limit (€2.50 / €5 EUR) - 2026/01/01 00:00:00 ET"
+        game_info = self.parser.determineGameType(header)
+        self.assertEqual(game_info["currency"], "EUR")
+        self.assertEqual((game_info["sb"], game_info["bb"]), ("2.50", "2.50"))
+
+        text = header + "\nSeat 1: 1 / 2 (€10 in chips)\n"
+        normalized = self.parser._normalize_game_header(text)
+        self.assertIn("Seat 1: 1 / 2", normalized)
+
+    def test_uppercase_hilo_headers_keep_their_game_type(self) -> None:
+        """Normalize slash spacing without changing uppercase game labels."""
+        for game, category in (("7 CARD STUD HI/LO", "studhilo"), ("OMAHA HI/LO", "omahahilo")):
+            for spaced in (False, True):
+                label = game.replace("/", " / ") if spaced else game
+                stakes = "$2 / $4" if spaced else "$2/$4"
+                header = f"PokerStars Hand #99:  {label} LIMIT ({stakes} USD) - 2026/01/01 00:00:00 ET"
+                with self.subTest(game=game, spaced=spaced):
+                    game_info = self.parser.determineGameType(header)
+                    self.assertEqual(game_info["category"], category)
+                    self.assertEqual(game_info["limitType"], "fl")
+
+    def test_uppercase_pt2_stud_hilo_export_imports(self) -> None:
+        """Exercise header detection and hand parsing on the actual PT2 export."""
+        hand_file = (
+            Path(__file__).resolve().parents[1]
+            / "regression-test-files/tour/Stars/Stud/7-StudHL-USD-10-1-200906.PT2.export.txt"
+        )
+        parser = PokerStars(self.config, in_path=str(hand_file), autostart=True)
+        hands = parser.getProcessedHands()
+
+        self.assertEqual(len(hands), 1)
+        self.assertEqual(hands[0].handid, "29356803849")
+        self.assertEqual(hands[0].gametype["category"], "studhilo")
+        self.assertEqual(hands[0].gametype["type"], "tour")
+        self.assertEqual(hands[0].collectees, {"Player4": Decimal("220"), "Player2": Decimal("220")})
+
+    def test_fixed_limit_holdem_still_uses_blind_mapping(self) -> None:
+        """Keep converting PokerStars Hold'em limits to actual blinds."""
+        for stakes, expected in (
+            ("$2/$4", ("1.00", "2.00")),
+            ("$3/$6", ("1.00", "3.00")),
+            ("$5/$10", ("2.00", "5.00")),
+            ("$15/$30", ("10.00", "15.00")),
+        ):
+            header = f"PokerStars Hand #99:  Hold'em Limit ({stakes} USD) - 2026/01/01 00:00:00 ET"
+            with self.subTest(header=header):
+                game_info = self.parser.determineGameType(header)
+                self.assertEqual((game_info["sb"], game_info["bb"]), expected)
+
     def test_re_game_info_tournament(self) -> None:
         """Test regex pattern for parsing tournament information."""
         text = (
@@ -1336,6 +1401,29 @@ Seat 2: Player1 mucked [7h 2c]"""
         self.parser.readShownCards(hand)
 
         self.assertEqual(hand.addShownCards.call_count, 2)
+
+    def test_read_stud_hilo_summary_results(self) -> None:
+        """Keep PokerStars Stud Hi/Lo high and low descriptions for replay."""
+        hand = Mock()
+        hand.players = [(5, "Player8"), (8, "Player9")]
+        hand.handText = (
+            "Seat 5: Player8 ($23.30) with HI: a straight, Four to Eight; LO: 8,7,6,5,4\n"
+            "Seat 8: Player9 ($23.30) with HI: a pair of Aces; LO: 8,7,4,2,A\n"
+        )
+        hand.showdownStrings = {}
+        self.parser.compilePlayerRegexs(hand)
+        self.parser.re_shown_cards = Mock()
+        self.parser.re_shown_cards.finditer = Mock(return_value=[])
+
+        self.parser.readShownCards(hand)
+
+        self.assertEqual(
+            hand.showdownStrings,
+            {
+                "Player8": "HI: a straight, Four to Eight; LO: 8,7,6,5,4",
+                "Player9": "HI: a pair of Aces; LO: 8,7,4,2,A",
+            },
+        )
 
     def test_get_table_title_re_cash(self) -> None:
         """Test getTableTitleRe for cash games."""
