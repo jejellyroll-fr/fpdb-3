@@ -9,16 +9,14 @@ import shutil
 import subprocess  # nosec B404 - fixed executable and validated revision
 from pathlib import Path
 
-from defusedxml import ElementTree
-
 TEMPLATES = ("HUD_config.xml", "HUD_config.xml.example", "fpdb_3_legacy/HUD_config.xml.example")
 
 
 def version(xml: str) -> int:
-    general = ElementTree.fromstring(xml).find("general")
-    if general is None:
+    match = re.search(r"<general\b[^>]*\bversion=[\"']([0-9]+)[\"']", xml)
+    if match is None:
         raise ValueError("Configuration template is missing its general version")
-    return int(general.attrib["version"])
+    return int(match.group(1))
 
 
 def check(base: str, root: Path) -> None:
