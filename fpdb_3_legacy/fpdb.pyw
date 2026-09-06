@@ -1950,7 +1950,9 @@ class fpdb(QMainWindow):
     def info_box(self, str1, str2):
         diapath = QMessageBox(self)
         diapath.setWindowTitle(str1)
-        diapath.setText(str2)
+        if isinstance(str2, (list, tuple)):
+            str2 = "\n".join(str(item) for item in str2)
+        diapath.setText(str(str2))
         return diapath.exec()
 
     def warning_box(self, string, diatitle="FPDB WARNING"):

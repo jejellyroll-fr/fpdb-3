@@ -18,7 +18,7 @@ from typing import Any
 if not hasattr(datetime, "UTC"):
     datetime.UTC = datetime.timezone.utc
 
-__version__ = "3.9.0"
+__version__ = "3.9.1"
 
 
 def __getattr__(name: str) -> Any:
