@@ -36,6 +36,12 @@ def test_templates_have_current_version_and_resolve(name):
     template = defusedxml.minidom.parse(str(ROOT / name))
     assert int(template.getElementsByTagName("general")[0].getAttribute("version")) == CONFIG_VERSION
     assert reference_errors(template) == []
+    games = {node.getAttribute("game_name") for node in template.getElementsByTagName("game")}
+    assert {"fusion", "aof_holdem"} <= games
+    aux = {node.getAttribute("name") for node in template.getElementsByTagName("aw")}
+    stat_sets = {node.getAttribute("name") for node in template.getElementsByTagName("ss")}
+    assert "PLO4Hud" in aux
+    assert "plo_pro_html" in stat_sets
 
 
 def test_upgrade_preserves_personal_settings_and_repairs_alias():

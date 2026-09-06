@@ -398,6 +398,13 @@
         <game game_name="6_omahahi" aux="ClassicHud, mucked">
             <game_stat_set game_type="all" stat_set="omaha_default"/>
         </game>
+        <game game_name="fusion" aux="PLO4Hud, mucked">
+            <game_stat_set game_type="ring" stat_set="plo_pro_html"/>
+            <game_stat_set game_type="tour" stat_set="plo_pro_html"/>
+        </game>
+        <game game_name="aof_holdem" aux="ClassicHud, mucked">
+            <game_stat_set game_type="all" stat_set="aof_advanced"/>
+        </game>
     </supported_games>
 
 
@@ -411,6 +418,7 @@
         <!-- HUD aux's -->
         <aw name="Simple_HUD" module="Aux_Hud" class="Simple_HUD" bgcolor="#000000" fgcolor="#FFFFFF" font="Sans" font_size="8" opacity="0.8"/>
         <aw name="ClassicHud" module="Aux_Classic_Hud" class="ClassicHud" bgcolor="#000000" fgcolor="#FFFFFF" font="Sans" font_size="8" opacity="0.8"/>
+        <aw name="PLO4Hud" module="Aux_Classic_Hud" class="ClassicHud" bgcolor="#0B1220" fgcolor="#E6EDF3" font="Sans" font_size="9" opacity="0.94"/>
 
         <!-- Mucked card aux's -->
         <aw name="stud_mucked" module="Mucked" class="Stud_mucked" cols="11" rows="8"/>
@@ -1738,6 +1746,17 @@
             <stat _rowcol="(6,1)" _stat_name="aof_splash_won" popup="aof_profile" hudbgcolor="#111827" hudprefix="Spl " hudsuffix="" tip="" click=""/>
             <stat _rowcol="(6,2)" _stat_name="aof_splash_freq" popup="aof_profile" hudbgcolor="#111827" hudprefix="Spl% " hudsuffix="" tip="" click=""/>
             <stat _rowcol="(6,3)" _stat_name="aof_showdowns" popup="aof_profile" hudbgcolor="#111827" hudprefix="sd " hudsuffix="" tip="" click=""/>
+        </ss>
+
+        <ss name="plo_pro_html" rows="2" cols="4" xpad="1" ypad="0" rich_text="True" font_size="10">
+            <stat _rowcol="(1,1)" _stat_name="playershort" popup="default" hudprefix="" hudsuffix="" tip="" click=""/>
+            <stat _rowcol="(1,2)" _stat_name="n" popup="default" hudprefix="H " hudsuffix="" tip="" click=""/>
+            <stat _rowcol="(1,3)" _stat_name="vpip" popup="default" hudprefix="VP " hudsuffix="" tip="" click=""/>
+            <stat _rowcol="(1,4)" _stat_name="pfr" popup="default" hudprefix="PFR " hudsuffix="" tip="" click=""/>
+            <stat _rowcol="(2,1)" _stat_name="three_B" popup="default" hudprefix="3B " hudsuffix="" tip="" click=""/>
+            <stat _rowcol="(2,2)" _stat_name="cb1" popup="default" hudprefix="CB " hudsuffix="" tip="" click=""/>
+            <stat _rowcol="(2,3)" _stat_name="wtsd" popup="default" hudprefix="SD " hudsuffix="" tip="" click=""/>
+            <stat _rowcol="(2,4)" _stat_name="totalprofit" popup="default" hudprefix="P " hudsuffix="" tip="" click=""/>
         </ss>
 
         <ss name="omaha_default" rows="3" cols="2" xpad="1" ypad="0">
