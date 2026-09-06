@@ -28,7 +28,10 @@ def stale():
       </FreePokerToolsConfig>""")
 
 
-@pytest.mark.parametrize("name", ["HUD_config.xml", "HUD_config.xml.example"])
+@pytest.mark.parametrize(
+    "name",
+    ["HUD_config.xml", "HUD_config.xml.example", "fpdb_3_legacy/HUD_config.xml.example"],
+)
 def test_templates_have_current_version_and_resolve(name):
     template = defusedxml.minidom.parse(str(ROOT / name))
     assert int(template.getElementsByTagName("general")[0].getAttribute("version")) == CONFIG_VERSION
@@ -105,7 +108,7 @@ def test_load_reports_current_config_errors_and_invalid_version(tmp_path, monkey
 
     monkeypatch.setattr(configuration, "CONFIG_PATH", str(tmp_path))
     path = tmp_path / "HUD_config.xml"
-    xml = (ROOT / "HUD_config.xml.example").read_text()
+    xml = (ROOT / "HUD_config.xml.example").read_text(encoding="utf-8")
     path.write_text(xml.replace('aux="ClassicHud, mucked"', 'aux="unknown"'))
     config = configuration.Config(file=str(path))
     assert config.wrongConfigVersion is False
@@ -120,14 +123,14 @@ def test_upgrade_config_can_be_reloaded_and_does_not_repeat(tmp_path, monkeypatc
     monkeypatch.setattr(configuration, "CONFIG_PATH", str(tmp_path))
     monkeypatch.setattr(configuration, "_find_example_config", lambda _: str(ROOT / "HUD_config.xml.example"))
     path = tmp_path / "HUD_config.xml"
-    old = (ROOT / "HUD_config.xml.example").read_text().replace('version="84"', 'version="83"')
+    old = (ROOT / "HUD_config.xml.example").read_text(encoding="utf-8").replace('version="84"', 'version="83"')
     old = old.replace('aux="ClassicHud, mucked"', 'aux="Classic_HUD, mucked"')
     path.write_text(old)
     config = configuration.Config(file=str(path))
     assert config.wrongConfigVersion
     assert config.config_reference_errors
     backup = config.upgrade_config()
-    assert Path(backup).read_text() == old
+    assert Path(backup).read_text(encoding="utf-8") == old
     reloaded = configuration.Config(file=str(path))
     assert not reloaded.wrongConfigVersion
     assert not reloaded.config_reference_errors
@@ -150,17 +153,19 @@ def test_ci_rejects_unversioned_changes_and_version_mismatch(tmp_path):
     (tmp_path / "fpdb_3_legacy/Configuration.py").write_text("CONFIG_VERSION = 84")
     old = '<config><general version="84"/></config>'
     changed = '<config><general version="84"/><new/></config>'
-    for name in ("HUD_config.xml", "HUD_config.xml.example"):
+    for name in ("HUD_config.xml", "HUD_config.xml.example", "fpdb_3_legacy/HUD_config.xml.example"):
+        if "/" in name:
+            (tmp_path / name).parent.mkdir(parents=True, exist_ok=True)
         (tmp_path / name).write_text(changed)
     with patch("tools.check_config_version.subprocess.check_output", return_value=old):
         with pytest.raises(ValueError, match="increment"):
-            check("base", tmp_path)
-        for name in ("HUD_config.xml", "HUD_config.xml.example"):
+            check("0" * 40, tmp_path)
+        for name in ("HUD_config.xml", "HUD_config.xml.example", "fpdb_3_legacy/HUD_config.xml.example"):
             (tmp_path / name).write_text(changed.replace('version="84"', 'version="85"'))
         with pytest.raises(ValueError, match="must equal"):
-            check("base", tmp_path)
+            check("0" * 40, tmp_path)
         (tmp_path / "fpdb_3_legacy/Configuration.py").write_text("CONFIG_VERSION = 85")
-        check("base", tmp_path)
+        check("0" * 40, tmp_path)
 
 
 def test_adding_general_defaults_does_not_hide_missing_version(tmp_path, monkeypatch):
@@ -168,7 +173,7 @@ def test_adding_general_defaults_does_not_hide_missing_version(tmp_path, monkeyp
 
     monkeypatch.setattr(configuration, "CONFIG_PATH", str(tmp_path))
     path = tmp_path / "HUD_config.xml"
-    xml = (ROOT / "HUD_config.xml.example").read_text()
+    xml = (ROOT / "HUD_config.xml.example").read_text(encoding="utf-8")
     doc = parse(xml)
     general = doc.getElementsByTagName("general")[0]
     general.parentNode.removeChild(general)

@@ -3,7 +3,7 @@
     <!-- config_wrap_len  is preferred max line length in this file, -1 means no max
          day_start        is time that logical day starts, e.g. 5 means that any play
                           between 00:00 and 04:59:59 counts as being on the previous day -->
-    <general version="83" config_wrap_len="-1" day_start="5" ui_language="system" config_difficulty="expert"/>
+    <general version="84" config_wrap_len="-1" day_start="5" ui_language="system" config_difficulty="expert"/>
 
     <import callFpdbHud="True" interval="5" fastStoreHudCache="False" saveActions="True" cacheSessions="False" sessionTimeout="30" publicDB="False"/>
 
@@ -278,7 +278,7 @@
 
         <site site_name="Bovada" enabled="False" screen_name="YOUR SCREEN NAME HERE" site_path="C:/Bovada/" HH_path="C:/Bovada/" aux_enabled="True" hud_menu_xshift="0" hud_menu_yshift="0">
             <email fetchType="request-summary" host="YOUR_EMAIL_SERVER" username="YOUR_EMAIL_USERNAME" password="YOUR_EMAIL_PASSWORD" useSsl="True" folder="INBOX"/>
-            <layout_set game_type="all" ls="bodova_default"/>
+            <layout_set game_type="all" ls="bovada_default"/>
             <fav max="2" fav_seat="0"/>
             <fav max="4" fav_seat="0"/>
             <fav max="6" fav_seat="0"/>
@@ -332,70 +332,70 @@
         The parameter elements for each <game> can be extended
         without changing Configuration.Config()
         -->
-        <game game_name="holdem" aux="Classic_HUD, mucked">
+        <game game_name="holdem" aux="ClassicHud, mucked">
             <game_stat_set game_type="tour" stat_set="holdem_tour"/>
             <game_stat_set game_type="ring" stat_set="holdem_ring"/>
         </game>
-        <game game_name="2_holdem" aux="Classic_HUD, mucked">
+        <game game_name="2_holdem" aux="ClassicHud, mucked">
             <game_stat_set game_type="tour" stat_set="holdem_tour"/>
             <game_stat_set game_type="ring" stat_set="holdem_ring"/>
         </game>
-        <game game_name="irish" aux="Classic_HUD, mucked">
+        <game game_name="irish" aux="ClassicHud, mucked">
             <game_stat_set game_type="tour" stat_set="holdem_tour"/>
             <game_stat_set game_type="ring" stat_set="holdem_ring"/>
         </game>
-        <game game_name="razz" aux="mucked, Classic_HUD">
+        <game game_name="razz" aux="mucked, ClassicHud">
             <game_stat_set game_type="all" stat_set="stud_default"/>
         </game>
-        <game game_name="omahahi" aux="Classic_HUD, mucked">
+        <game game_name="omahahi" aux="ClassicHud, mucked">
             <game_stat_set game_type="all" stat_set="omaha_default"/>
         </game>
         <!-- All-in or Fold: one decision per hand, on the flop. The ordinary
              Omaha profile would label that decision "preflop", a street this
              game does not have. -->
-        <game game_name="aof_omaha" aux="Classic_HUD, mucked">
+        <game game_name="aof_omaha" aux="ClassicHud, mucked">
             <game_stat_set game_type="all" stat_set="aof_advanced"/>
         </game>
-        <game game_name="omahahilo" aux="Classic_HUD, mucked">
+        <game game_name="omahahilo" aux="ClassicHud, mucked">
             <game_stat_set game_type="all" stat_set="omaha_default"/>
         </game>
-        <game game_name="5_omahahi" aux="Classic_HUD, mucked">
+        <game game_name="5_omahahi" aux="ClassicHud, mucked">
             <game_stat_set game_type="all" stat_set="omaha_default"/>
         </game>
-        <game game_name="5_omaha8" aux="Classic_HUD, mucked">
+        <game game_name="5_omaha8" aux="ClassicHud, mucked">
             <game_stat_set game_type="all" stat_set="omaha_default"/>
         </game>
-        <game game_name="cour_hi" aux="Classic_HUD, mucked">
+        <game game_name="cour_hi" aux="ClassicHud, mucked">
             <game_stat_set game_type="all" stat_set="omaha_default"/>
         </game>
-        <game game_name="cour_hilo" aux="Classic_HUD, mucked">
+        <game game_name="cour_hilo" aux="ClassicHud, mucked">
             <game_stat_set game_type="all" stat_set="omaha_default"/>
         </game>
-        <game game_name="studhi" aux="mucked, Classic_HUD">
+        <game game_name="studhi" aux="mucked, ClassicHud">
             <game_stat_set game_type="all" stat_set="stud_default"/>
         </game>
-        <game game_name="5_studhi" aux="mucked, Classic_HUD">
+        <game game_name="5_studhi" aux="mucked, ClassicHud">
             <game_stat_set game_type="all" stat_set="stud_default"/>
         </game>
-        <game game_name="studhilo" aux="mucked, Classic_HUD">
+        <game game_name="studhilo" aux="mucked, ClassicHud">
             <game_stat_set game_type="all" stat_set="stud_default"/>
         </game>
-        <game game_name="27_3draw" aux="Classic_HUD, mucked">
+        <game game_name="27_3draw" aux="ClassicHud, mucked">
             <game_stat_set game_type="all" stat_set="draw_default"/>
         </game>
-        <game game_name="27_1draw" aux="Classic_HUD, mucked">
+        <game game_name="27_1draw" aux="ClassicHud, mucked">
             <game_stat_set game_type="all" stat_set="draw_default"/>
         </game>
-        <game game_name="badugi" aux="Classic_HUD, mucked">
+        <game game_name="badugi" aux="ClassicHud, mucked">
             <game_stat_set game_type="all" stat_set="draw_default"/>
         </game>
-        <game game_name="fivedraw" aux="Classic_HUD, mucked">
+        <game game_name="fivedraw" aux="ClassicHud, mucked">
             <game_stat_set game_type="all" stat_set="draw_default"/>
         </game>
-        <game game_name="a5_3draw" aux="Classic_HUD, mucked">
+        <game game_name="a5_3draw" aux="ClassicHud, mucked">
             <game_stat_set game_type="all" stat_set="draw_default"/>
         </game>
-        <game game_name="6_omahahi" aux="Classic_HUD, mucked">
+        <game game_name="6_omahahi" aux="ClassicHud, mucked">
             <game_stat_set game_type="all" stat_set="omaha_default"/>
         </game>
     </supported_games>
