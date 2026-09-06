@@ -1442,15 +1442,19 @@ class Hand:
             )
 
     def calculate_net_collected(self) -> None:
-        """Calculate the net collected amount for each player."""
+        """Calculate profit after the amount actually committed by each player.
+
+        ``Pot.removeMoney`` removes uncalled bets from ``pot.committed`` while
+        recording them in ``pot.returned``. Consequently ``committed`` is
+        already the net paid amount and returned money must not be added again.
+        """
         log.debug("Starting net collected calculation...")
 
         self.net_collected = {}
         for player in self.pot.committed:
             collected = self.collectees.get(player, Decimal("0.00"))
-            uncalled_bets = self.pot.returned.get(player, Decimal("0.00"))
             committed = self.pot.committed.get(player, Decimal("0.00"))
-            self.net_collected[player] = collected + uncalled_bets - committed
+            self.net_collected[player] = collected - committed
             log.debug(f"Net collected for {player}: {self.net_collected[player]:.2f}")
 
         log.debug("Net collected calculation complete.")
@@ -3080,7 +3084,7 @@ class Pot:
 
     def removeMoney(self, player, amount) -> None:
         self.committed[player] -= amount
-        self.returned[player] = amount
+        self.returned[player] = self.returned.get(player, Decimal("0.00")) + amount
 
     def setSTP(self, amount) -> None:
         self.stp = amount

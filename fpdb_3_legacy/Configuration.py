@@ -59,9 +59,8 @@ from fpdb_3_legacy.loggingFpdb import get_logger
 
 # config version is used to flag a warning at runtime if the users config is
 #  out of date.
-# The CONFIG_VERSION should be incremented __ONLY__ if the add_missing_elements()
-#  method cannot update existing standard configurations
-CONFIG_VERSION = 83
+# Increment with shipped template changes; add an explicit migration when needed.
+CONFIG_VERSION = 84
 SOURCE_DIR = Path(__file__).resolve().parent
 SOURCE_ROOT_PATH = SOURCE_DIR.parent
 
@@ -1218,7 +1217,7 @@ class General(dict):
 
         try:
             self["version"] = int(self["version"])
-        except KeyError:
+        except (KeyError, ValueError):
             self["version"] = 0
             self["ui_language"] = "system"
             self["config_difficulty"] = "expert"
@@ -1668,6 +1667,12 @@ class Config:
         if migrated:
             self.save()  # keeps a .backup of the pre-migration config
 
+        from fpdb_3_legacy.config_migrations import reference_errors
+
+        self.config_reference_errors = reference_errors(doc)
+        for error in self.config_reference_errors:
+            log.warning("Configuration %s: %s", self.file, error)
+
         #        s_sites = doc.getElementsByTagName("supported_sites")
         for site_node in doc.getElementsByTagName("site"):
             site = Site(node=site_node)
@@ -1798,6 +1803,19 @@ class Config:
             if self.db_selected is None or db.db_selected:
                 self.db_selected = db.db_name
             self.supported_databases[db.db_name] = db
+
+    def upgrade_config(self) -> str:
+        """Upgrade against the bundled template, preserving personal settings."""
+        from fpdb_3_legacy.config_migrations import upgrade_document, write_upgrade
+
+        source = _find_example_config("HUD_config.xml")
+        template = _parse_example_config(source)
+        if template is None:
+            raise ValueError(f"Cannot read configuration template {source}")
+        candidate = upgrade_document(self.doc, template, CONFIG_VERSION)
+        backup = write_upgrade(self.file, candidate)
+        log.warning("Configuration upgraded to %s; backup: %s", CONFIG_VERSION, backup)
+        return backup
 
     def _migrate_entain_fr_sites_to_ipoker(self, doc) -> bool:
         """Rewrite pre-2026 Entain France skins from PartyPoker to iPoker.
@@ -2039,6 +2057,9 @@ class Config:
                             and doc.getElementsByTagName(example_node.localName) == []
                         ):
                             new = doc.importNode(example_node, True)  # True means do deep copy
+                            if example_node.localName == "general":
+                                # Adding defaults is not a schema migration.
+                                new.setAttribute("version", "0")
                             t_node = self.doc.createTextNode("    ")
                             cnode.appendChild(t_node)
                             # A section the user has never seen arrives empty and
@@ -3824,14 +3845,56 @@ class Config:
         """Gets the list of mucked window formats in the configuration."""
         return list(self.aux_windows.keys())
 
+    @staticmethod
+    def _aux_name_key(name):
+        """A form of an aux window name that survives a rename of its spelling.
+
+        Aux windows have been respelled over the years -- "Classic_HUD" became
+        "ClassicHud" -- and a user configuration written before a rename keeps
+        the old spelling in its ``aux=`` references while its ``<aw>`` blocks
+        carry the new one. Comparing on this key lets the reference still find
+        its definition, so a configuration that has simply aged does not cost
+        the player their HUD.
+        """
+        return str(name).replace("_", "").replace("-", "").replace(" ", "").casefold()
+
+    def _resolve_aux_name(self, name):
+        """The configured aux window this name refers to, or None.
+
+        An exact name always wins; only a name no ``<aw>`` block defines falls
+        back to the respelling match, so a valid configuration resolves exactly
+        as it always did.
+        """
+        if name in self.aux_windows:
+            return name
+        wanted = self._aux_name_key(name)
+        matches = [defined for defined in self.aux_windows if self._aux_name_key(defined) == wanted]
+        if len(matches) != 1:
+            # No match, or an ambiguous one: refuse to guess which was meant.
+            return None
+        # Said once per name: this is asked again for every aux window of every
+        # HUD built, so logging each time would bury the rest of a busy session.
+        warned = self.__dict__.setdefault("_respelled_aux_warned", set())
+        if name not in warned:
+            warned.add(name)
+            log.warning(
+                "Configuration asks for aux window %r, which no <aw> defines; using %r, "
+                "which differs only in spelling. Update %s to silence this.",
+                name,
+                matches[0],
+                self.file,
+            )
+        return matches[0]
+
     def get_aux_parameters(self, name):
         """Gets a dict of mucked window parameters from the named mw."""
         param = {}
-        if name in self.aux_windows:
-            for key in dir(self.aux_windows[name]):
+        resolved = self._resolve_aux_name(name)
+        if resolved is not None:
+            for key in dir(self.aux_windows[resolved]):
                 if key.startswith("__"):
                     continue
-                value = getattr(self.aux_windows[name], key)
+                value = getattr(self.aux_windows[resolved], key)
                 if callable(value):
                     continue
                 param[key] = value

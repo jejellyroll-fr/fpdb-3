@@ -6,7 +6,27 @@ from decimal import Decimal
 from types import SimpleNamespace
 from typing import Any, cast
 
-from fpdb_3_legacy.GuiReplayer import GuiReplayer, ReplayPlayer
+from fpdb_3_legacy.GuiReplayer import GuiReplayer, ReplayPlayer, best_low_hand, stud_hilo_winners
+
+
+def test_stud_hilo_evaluation_identifies_high_and_low_winners() -> None:
+    hero = ReplayPlayer("Hero", 1, Decimal(0), Decimal(0), "calls", False, ["5s", "6d", "7d", "8s", "4s", "Kd", "5h"])
+    villain = ReplayPlayer("Player5", 5, Decimal(0), Decimal(0), "calls", False, ["2h", "Ac", "As", "7c", "Ks", "4c", "8h"])
+    high, low, cards = stud_hilo_winners([hero, villain])
+
+    assert high == {"Hero"}
+    assert low == {"Player5"}
+    assert cards["Hero"] == {"4s", "5s", "6d", "7d", "8s"}
+    low_rank, low_cards = best_low_hand(villain.holecards)
+    assert low_rank == (8, 7, 4, 2, 1)
+    assert low_cards == {"2h", "Ac", "4c", "7c", "8h"}
+    assert cards["Player5"] == low_cards
+
+
+def test_stud_hilo_low_requires_five_distinct_cards_eight_or_lower() -> None:
+    rank, cards = best_low_hand(["As", "2d", "3c", "4h", "9s", "Kd", "Qh"])
+    assert rank is None
+    assert cards == frozenset()
 
 
 def test_hero_decision_metrics_pot_odds_and_equities(monkeypatch) -> None:
