@@ -44,6 +44,10 @@ def test_templates_have_current_version_and_resolve(name):
     assert "plo_pro_html" in stat_sets
 
 
+def test_package_template_stays_synchronized_with_root_template():
+    assert (ROOT / "fpdb_3_legacy/HUD_config.xml.example").read_bytes() == (ROOT / "HUD_config.xml.example").read_bytes()
+
+
 def test_upgrade_preserves_personal_settings_and_repairs_alias():
     old = stale()
     original = old.toxml()
