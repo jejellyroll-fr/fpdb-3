@@ -10,6 +10,24 @@ on:
   workflow_dispatch:
 
 jobs:
+  config-version:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Check configuration template versions
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          base_dir="$RUNNER_TEMP/fpdb-config-base"
+          mkdir -p "$base_dir/fpdb_3_legacy"
+          for path in HUD_config.xml HUD_config.xml.example fpdb_3_legacy/HUD_config.xml.example; do
+            git show "$BASE_SHA:$path" > "$base_dir/$path"
+          done
+          python3 tools/check_config_version.py --base-dir "$base_dir"
+
   quality:
     runs-on: ubuntu-latest
     steps:

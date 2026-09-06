@@ -59,9 +59,8 @@ from fpdb_3_legacy.loggingFpdb import get_logger
 
 # config version is used to flag a warning at runtime if the users config is
 #  out of date.
-# The CONFIG_VERSION should be incremented __ONLY__ if the add_missing_elements()
-#  method cannot update existing standard configurations
-CONFIG_VERSION = 83
+# Increment with shipped template changes; add an explicit migration when needed.
+CONFIG_VERSION = 84
 SOURCE_DIR = Path(__file__).resolve().parent
 SOURCE_ROOT_PATH = SOURCE_DIR.parent
 
@@ -1218,7 +1217,7 @@ class General(dict):
 
         try:
             self["version"] = int(self["version"])
-        except KeyError:
+        except (KeyError, ValueError):
             self["version"] = 0
             self["ui_language"] = "system"
             self["config_difficulty"] = "expert"
@@ -1668,6 +1667,12 @@ class Config:
         if migrated:
             self.save()  # keeps a .backup of the pre-migration config
 
+        from fpdb_3_legacy.config_migrations import reference_errors
+
+        self.config_reference_errors = reference_errors(doc)
+        for error in self.config_reference_errors:
+            log.warning("Configuration %s: %s", self.file, error)
+
         #        s_sites = doc.getElementsByTagName("supported_sites")
         for site_node in doc.getElementsByTagName("site"):
             site = Site(node=site_node)
@@ -1798,6 +1803,19 @@ class Config:
             if self.db_selected is None or db.db_selected:
                 self.db_selected = db.db_name
             self.supported_databases[db.db_name] = db
+
+    def upgrade_config(self) -> str:
+        """Upgrade against the bundled template, preserving personal settings."""
+        from fpdb_3_legacy.config_migrations import upgrade_document, write_upgrade
+
+        source = _find_example_config("HUD_config.xml")
+        template = _parse_example_config(source)
+        if template is None:
+            raise ValueError(f"Cannot read configuration template {source}")
+        candidate = upgrade_document(self.doc, template, CONFIG_VERSION)
+        backup = write_upgrade(self.file, candidate)
+        log.warning("Configuration upgraded to %s; backup: %s", CONFIG_VERSION, backup)
+        return backup
 
     def _migrate_entain_fr_sites_to_ipoker(self, doc) -> bool:
         """Rewrite pre-2026 Entain France skins from PartyPoker to iPoker.
@@ -2039,6 +2057,9 @@ class Config:
                             and doc.getElementsByTagName(example_node.localName) == []
                         ):
                             new = doc.importNode(example_node, True)  # True means do deep copy
+                            if example_node.localName == "general":
+                                # Adding defaults is not a schema migration.
+                                new.setAttribute("version", "0")
                             t_node = self.doc.createTextNode("    ")
                             cnode.appendChild(t_node)
                             # A section the user has never seen arrives empty and
