@@ -152,20 +152,22 @@ def test_ci_rejects_unversioned_changes_and_version_mismatch(tmp_path):
     (tmp_path / "fpdb_3_legacy").mkdir()
     (tmp_path / "fpdb_3_legacy/Configuration.py").write_text("CONFIG_VERSION = 84")
     old = '<config><general version="84"/></config>'
+    base_dir = tmp_path / "base"
+    (base_dir / "fpdb_3_legacy").mkdir(parents=True)
     changed = '<config><general version="84"/><new/></config>'
     for name in ("HUD_config.xml", "HUD_config.xml.example", "fpdb_3_legacy/HUD_config.xml.example"):
         if "/" in name:
             (tmp_path / name).parent.mkdir(parents=True, exist_ok=True)
         (tmp_path / name).write_text(changed)
-    with patch("tools.check_config_version.subprocess.check_output", return_value=old):
-        with pytest.raises(ValueError, match="increment"):
-            check("0" * 40, tmp_path)
-        for name in ("HUD_config.xml", "HUD_config.xml.example", "fpdb_3_legacy/HUD_config.xml.example"):
-            (tmp_path / name).write_text(changed.replace('version="84"', 'version="85"'))
-        with pytest.raises(ValueError, match="must equal"):
-            check("0" * 40, tmp_path)
-        (tmp_path / "fpdb_3_legacy/Configuration.py").write_text("CONFIG_VERSION = 85")
-        check("0" * 40, tmp_path)
+        (base_dir / name).write_text(old)
+    with pytest.raises(ValueError, match="increment"):
+        check(base_dir, tmp_path)
+    for name in ("HUD_config.xml", "HUD_config.xml.example", "fpdb_3_legacy/HUD_config.xml.example"):
+        (tmp_path / name).write_text(changed.replace('version="84"', 'version="85"'))
+    with pytest.raises(ValueError, match="must equal"):
+        check(base_dir, tmp_path)
+    (tmp_path / "fpdb_3_legacy/Configuration.py").write_text("CONFIG_VERSION = 85")
+    check(base_dir, tmp_path)
 
 
 def test_adding_general_defaults_does_not_hide_missing_version(tmp_path, monkeypatch):
