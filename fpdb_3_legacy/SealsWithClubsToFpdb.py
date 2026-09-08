@@ -142,6 +142,18 @@ class SealsWithClubs(HandHistoryConverter):
     re_Flop = re.compile(r"\*\*\* FLOP \*\*\*")
     re_Turn = re.compile(r"\*\*\* TURN \*\*\*")
     re_River = re.compile(r"\*\*\* RIVER \*\*\*")
+
+    #: How a client names the two boards of a double-board hand. A bomb pot at a
+    #: "Double Board" table deals two runouts and splits the pot between them, so
+    #: the header appears once per board per street. Both spellings this codebase
+    #: already parses elsewhere are accepted -- "FIRST/SECOND" (PokerStarsToFpdb,
+    #: GGPokerToFpdb) and a trailing run number (WinningToFpdb) -- because a hand
+    #: that names its boards in neither is not treated as double-board at all.
+    DOUBLE_BOARD_NAMING = (
+        ("FIRST {street}", "SECOND {street}"),
+        ("{street} 1", "{street} 2"),
+    )
+    BOARD_STREETS = ("FLOP", "TURN", "RIVER")
     re_rake = re.compile(
         "Total pot (?P<TOTALPOT>\\d{1,3}(,\\d{3})*(\\.\\d+)?)\\s\\|\\sRake\\s(?P<RAKE>\\d{1,3}(,\\d{3})*(\\.\\d+)?)",
         re.MULTILINE,
@@ -492,6 +504,8 @@ class SealsWithClubs(HandHistoryConverter):
                 raise FpdbParseError
             hand.addStreets(m)
             return
+        if self._mark_double_board_streets(hand):
+            return
         if self.re_Turn.search(hand.handText) and not self.re_Flop.search(
             hand.handText,
         ):
@@ -515,9 +529,91 @@ class SealsWithClubs(HandHistoryConverter):
 
         hand.addStreets(m)
 
+    def _double_board_naming(self, hand_text: str) -> tuple[str, str] | None:
+        """The naming this hand uses for its two boards, or None if it has one board.
+
+        Only a hand that names a *second flop* is double-board; a hand naming a
+        second turn but no second flop is malformed and is left to the ordinary
+        single-board path rather than half-parsed.
+        """
+        for first, second in self.DOUBLE_BOARD_NAMING:
+            second_flop = f"*** {second.format(street='FLOP')} ***"
+            first_flop = f"*** {first.format(street='FLOP')} ***"
+            if second_flop in hand_text and first_flop in hand_text:
+                return (first, second)
+        return None
+
+    def _mark_double_board_streets(self, hand) -> bool:
+        """Split a double-board hand into per-board streets. False if it has one board.
+
+        A double board is dealt once and bet once: both runouts are shown, then
+        the single betting round follows. So each street's *actions* belong to the
+        base street (FLOP/TURN/RIVER, board one) and the second board contributes
+        only its cards, on FLOP2/TURN2/RIVER2 -- the same shape the SwC live
+        capture already produces (see http_capture_hand_builder._board_streets),
+        which keeps Hands.boardcard1..5 pointing at board one and lets
+        DerivedStats.getBoardsList encode both runs into the Boards table.
+
+        Without this, a double-board hand matched none of the single-board street
+        markers, so PREFLOP swallowed the whole hand: no board, no postflop
+        action, no showdown -- the "partial import".
+
+        Note that no SwC history seen so far names a second board: on a real
+        "Double Board Bomb Pots" table the client writes one board and pays out
+        for two (see readOther). This path therefore does not fire on SwC today;
+        it is kept because the SwC grammar is PokerStars-derived, so it would
+        start working the day the room writes the second board like every other
+        room in this codebase does.
+        """
+        naming = self._double_board_naming(hand.handText)
+        if naming is None:
+            return False
+        first, second = naming
+
+        # Every board header, in the order the client wrote them, so each block
+        # runs to whichever header comes next.
+        headers: list[tuple[str, str]] = []  # (street key, marker)
+        for street in self.BOARD_STREETS:
+            for template, suffix in ((first, ""), (second, "2")):
+                marker = f"*** {template.format(street=street)} ***"
+                if marker in hand.handText:
+                    headers.append((f"{street}{suffix}", marker))
+        headers.sort(key=lambda h: hand.handText.index(h[1]))
+
+        hole = re.search(r"\*\*\* HOLE CARDS \*\*\*", hand.handText)
+        if hole is None or not headers:
+            return False
+
+        # Boundaries: each block ends where the next header (or the showdown /
+        # summary) begins.
+        stops = [hand.handText.index(marker) for _street, marker in headers]
+        showdown = re.search(r"\*\*\* (SHOW DOWN|SUMMARY) \*\*\*", hand.handText)
+        stops.append(showdown.start() if showdown else len(hand.handText))
+
+        streets = {"PREFLOP": hand.handText[hole.end() : stops[0]]}
+        for index, (street, marker) in enumerate(headers):
+            start = hand.handText.index(marker) + len(marker)
+            streets[street] = hand.handText[start : stops[index + 1]]
+
+        # The betting round follows the *last* board of the street, so move it
+        # onto the base street and leave the extra board its header cards only.
+        for street in self.BOARD_STREETS:
+            extra = f"{street}2"
+            if street in streets and extra in streets:
+                actions = streets[extra].split("\n", 1)
+                streets[extra] = actions[0]
+                if len(actions) > 1:
+                    streets[street] = streets[street].rstrip("\n") + "\n" + actions[1]
+
+        hand.streets.update(streets)
+        hand.runItTimes = 2
+        log.info("Double board hand %s: streets %s", hand.handid, sorted(streets))
+        return True
+
     def readCommunityCards(self, hand, street) -> None:
         log.debug(f"Reading community cards for street: {street}")
-        if street in ("FLOP", "TURN", "RIVER"):
+        # A double board puts its extra runout on FLOP2/TURN2/RIVER2.
+        if street.rstrip("123456789") in self.BOARD_STREETS:
             street_header = hand.streets[street].splitlines()[0]
             brackets = re.findall(r"\[([^\]]+)\]", street_header)
             if brackets:
@@ -682,8 +778,30 @@ class SealsWithClubs(HandHistoryConverter):
         log.debug("Method readBringIn non implemented.")
 
     def readSTP(self, hand) -> None:
+        """Flag a bomb pot and record the ante money that seeded it.
+
+        SwC deals a bomb pot by taking an ante from every seated player and
+        dealing straight to the flop -- no blind is posted and there is no
+        preflop betting round. Antes on their own do not make a bomb pot (a
+        tournament posts them alongside the blinds), so it is the *absence* of
+        any blind posting that separates the two.
+
+        Only ``bombPot`` is set, never ``addSTP``: the money is the players'
+        own antes, already counted in the pot through the BLINDSANTES actions,
+        and adding it again as room-seeded money would double the pot.
+        """
         log.info("enter method readSTP.")
-        log.debug("Method readSTP non implemented.")
+        if self._is_old_format(hand.handText):
+            return
+        antes = list(self.re_Antes.finditer(hand.handText))
+        if not antes:
+            return
+        for blind in (self.re_PostSB, self.re_PostBB, self.re_PostBoth):
+            if blind.search(hand.handText):
+                return
+        total = sum(Decimal(m.group("ANTE")) for m in antes)
+        hand.bombPot = int(total * 100)
+        log.info("Bomb pot hand %s seeded with %s from %d antes", hand.handid, total, len(antes))
 
     def readTourneyResults(self, hand) -> None:
         log.info("enter method readTourneyResults.")
@@ -773,12 +891,37 @@ class SealsWithClubs(HandHistoryConverter):
         return re.escape(regex)
 
     def readOther(self, hand: Hand) -> None:
-        """Read other information from hand that doesn't fit standard categories.
+        """Report a bomb pot whose payouts prove a board the history never wrote.
 
-        Args:
-            hand: The Hand object to read other information from.
+        Observed on a real "Double Board Bomb Pots" table (hand 301461492): three
+        antes of 0.12 make a 0.36 pot, one board ``[3d 2h 9c 6d Ah]`` is written,
+        and on it Folded74Dice's two pair beats edinapoker's pair outright -- yet
+        the room pays 0.27 and 0.09. That split only resolves as two boards of
+        0.18: the written one won outright (0.18), and a *second, unwritten* one
+        chopped (0.09 each). So the SwC text history drops the second board of a
+        double board while its payouts still reflect both.
 
-        Returns:
-            None
+        Nothing can recover those cards from the text, and inventing them would
+        be worse than missing them (DerivedStats.getBoardsList falls back to the
+        first board for a missing run, which would store board one twice as if it
+        were dealt twice). This only says so in the log, so the hands that are
+        incomplete at the source can be told from the ones fpdb mis-parsed.
 
+        Unequal payouts are the detectable case. Two boards each won outright by
+        a different player pay equally and are indistinguishable from an ordinary
+        single-board chop, so they are not reported.
         """
+        if not getattr(hand, "bombPot", 0) or len(hand.collectees) < 2:
+            return
+        if "and is all-in" in hand.handText:
+            # A side pot pays different players different amounts for reasons
+            # that have nothing to do with a second board.
+            return
+        amounts = set(hand.collectees.values())
+        if len(amounts) > 1:
+            log.warning(
+                "SwC bomb pot %s pays %s from a single written board: the history omitted "
+                "the second board of a double board, so this hand's board data is incomplete",
+                hand.handid,
+                dict(hand.collectees),
+            )
