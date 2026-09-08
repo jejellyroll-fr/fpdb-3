@@ -80,7 +80,14 @@ def _native_board_rows(hand_data: dict[str, Any]) -> list[list[int]]:
 
 
 def _enrich_existing_native_boards(db: Any, hand_data: dict[str, Any]) -> int | None:
-    """Repair boards on an already-imported hand using native card evidence."""
+    """Repair boards on an already-imported hand using native card evidence.
+
+    Only the run-it-twice flag and Boards rows are repaired here. ``bombPot`` is
+    intentionally left untouched because the existing hand-history import stores
+    the total bomb-pot amount in cents, while native capture currently exposes
+    only a boolean bomb-pot marker. Replacing the stored amount with 0/1 would
+    corrupt metadata that was already correct.
+    """
 
     rows = _native_board_rows(hand_data)
     if not rows or not hasattr(db, "get_cursor") or not hasattr(db, "sql"):
@@ -102,12 +109,11 @@ def _enrich_existing_native_boards(db: Any, hand_data: dict[str, Any]) -> int | 
     if not hand_ids:
         return None
 
-    update = f"UPDATE Hands SET runItTwice={placeholder}, bombPot={placeholder} WHERE id={placeholder}"
+    update = f"UPDATE Hands SET runItTwice={placeholder} WHERE id={placeholder}"
     delete = f"DELETE FROM Boards WHERE handId={placeholder}"
     store = db.sql.query["store_boards"].replace("%s", placeholder)
-    bomb_pot = 1 if hand_data.get("bomb_pot") else 0
     for hand_id in hand_ids:
-        cursor.execute(update, (True, bomb_pot, hand_id))
+        cursor.execute(update, (True, hand_id))
         cursor.execute(delete, (hand_id,))
         for row in rows:
             cursor.execute(store, [hand_id, *row])

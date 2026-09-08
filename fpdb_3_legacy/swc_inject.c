@@ -136,9 +136,23 @@ int main(void) {
     }
 
     int status = INJ_OK;
-    if (WaitForSingleObject(thread, 30000) != WAIT_OBJECT_0) {
+    int release_remote_path = 1;
+    DWORD wait_result = WaitForSingleObject(thread, 30000);
+    if (wait_result == WAIT_TIMEOUT) {
         fprintf(stderr, "the injected LoadLibrary did not return within 30s\n");
         status = INJ_TIMEOUT;
+        /* The remote thread may still be reading this UTF-16 string. Leaving
+         * one path-sized allocation in the target is safer than freeing memory
+         * that an active LoadLibraryW call can still dereference. The allocation
+         * is reclaimed automatically when the target process exits. */
+        release_remote_path = 0;
+    } else if (wait_result != WAIT_OBJECT_0) {
+        fprintf(stderr, "waiting for the injected LoadLibrary thread failed (error %lu)\n",
+                (unsigned long)GetLastError());
+        status = INJ_THREAD;
+        /* We cannot prove that the remote thread has exited, so keep its input
+         * buffer alive for the same reason as the timeout path. */
+        release_remote_path = 0;
     } else {
         DWORD exit_code = 0;
         GetExitCodeThread(thread, &exit_code);
@@ -149,7 +163,9 @@ int main(void) {
     }
 
     CloseHandle(thread);
-    VirtualFreeEx(process, remote_path, 0, MEM_RELEASE);
+    if (release_remote_path) {
+        VirtualFreeEx(process, remote_path, 0, MEM_RELEASE);
+    }
     CloseHandle(process);
     LocalFree(argv);
     return status;

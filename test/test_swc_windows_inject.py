@@ -139,3 +139,26 @@ def test_native_windows_sources_cover_review_safety_contracts() -> None:
     assert "GetThreadContext" in tap_source
     assert "CreateToolhelp32Snapshot" in tap_source
     assert "for (int i = 0; i < 600; i++)" not in tap_source
+
+    # A timed-out remote LoadLibraryW may still be dereferencing the path.
+    # The injector must not release that allocation unless the thread finished.
+    assert "int release_remote_path = 1;" in injector_source
+    timeout_start = injector_source.index("if (wait_result == WAIT_TIMEOUT)")
+    timeout_end = injector_source.index("} else if", timeout_start)
+    assert "release_remote_path = 0;" in injector_source[timeout_start:timeout_end]
+    assert "if (release_remote_path)" in injector_source
+
+    # Header + payload form one archive record and therefore need one Windows
+    # critical section when SSL_read/SSL_write complete on different threads.
+    assert "static SRWLOCK g_capture_lock = SRWLOCK_INIT;" in tap_source
+    windows_record = tap_source.index("AcquireSRWLockExclusive(&g_capture_lock);")
+    header_write = tap_source.index("write_all(capture_fd, &header, sizeof(header));", windows_record)
+    payload_write = tap_source.index("write_all(capture_fd, buffer, (size_t)size);", header_write)
+    unlock = tap_source.index("ReleaseSRWLockExclusive(&g_capture_lock);", payload_write)
+    assert windows_record < header_write < payload_write < unlock
+
+    # The trampoline pointer must be visible before any suspended SSL caller can
+    # run through the newly patched entry point.
+    publish = tap_source.index("*published_trampoline = (ssl_rw_cdecl_fn)tramp;")
+    resume = tap_source.index("swc_resume_threads(&suspended);", publish)
+    assert publish < resume

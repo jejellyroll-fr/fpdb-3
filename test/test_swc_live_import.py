@@ -156,7 +156,7 @@ def test_native_public_hand_is_sent_through_fpdb_importer(monkeypatch) -> None:
     assert seen["config"].get_site_id("SealsWithClubs") == 23
 
 
-def test_native_boards_repair_an_existing_hand() -> None:
+def test_native_boards_repair_an_existing_hand_without_overwriting_bomb_pot_amount() -> None:
     class Cursor:
         def __init__(self) -> None:
             self.calls = []
@@ -183,7 +183,12 @@ def test_native_boards_repair_an_existing_hand() -> None:
 
     assert repaired_id == 42
     assert db.committed is True
-    assert any("runItTwice" in query for query, _params in cursor.calls)
+    update_query, update_params = next(
+        (query, params) for query, params in cursor.calls if query.startswith("UPDATE Hands")
+    )
+    assert "runItTwice" in update_query
+    assert "bombPot" not in update_query
+    assert update_params == (True, 42)
     board_insert = cursor.calls[-2:]
     assert board_insert[0][1][0] == 42
     assert board_insert[0][1][1:3] == [1, 9]

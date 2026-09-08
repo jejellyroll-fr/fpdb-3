@@ -98,6 +98,7 @@ static int capture_outbound = 0;
  * locates its files next to its own DLL (see initialize_swc_tap): these hold
  * the wide paths derived there, so status/archive writes need no environment. */
 static wchar_t g_status_path[MAX_PATH] = {0};
+static SRWLOCK g_capture_lock = SRWLOCK_INIT;
 
 static void write_status(const char *message) {
     const char *env_path = getenv("SWC_CAPTURE_STATUS_PATH");
@@ -236,8 +237,10 @@ static void record_plaintext(SSL *ssl, const void *buffer, int size, uint8_t dir
         flock(capture_fd, LOCK_UN);
     }
 #else
+    AcquireSRWLockExclusive(&g_capture_lock);
     write_all(capture_fd, &header, sizeof(header));
     write_all(capture_fd, buffer, (size_t)size);
+    ReleaseSRWLockExclusive(&g_capture_lock);
 #endif
 }
 
@@ -533,11 +536,14 @@ static int swc_suspend_other_threads(struct swc_suspended_threads *state,
     }
 }
 
-/* Install a 5-byte JMP-rel32 hook over *target*, returning a trampoline that
- * runs the displaced prologue then continues into the original, or NULL if the
- * prologue cannot be relocated or patched safely. */
-static void *swc_install_inline_hook(void *target, void *hook) {
+/* Install a 5-byte JMP-rel32 hook over *target*. The trampoline is published
+ * through published_trampoline while all other threads are still suspended,
+ * before the patched entry point can be executed by another SSL caller. */
+static void *swc_install_inline_hook(void *target, void *hook, ssl_rw_cdecl_fn *published_trampoline) {
     uint8_t *fn = (uint8_t *)target;
+    if (published_trampoline == NULL) {
+        return NULL;
+    }
     int steal = swc_prologue_len(fn, 5);
     if (steal < 5 || steal > 64) {
         return NULL;
@@ -597,11 +603,16 @@ static void *swc_install_inline_hook(void *target, void *hook) {
         return NULL;
     }
 
+    *published_trampoline = (ssl_rw_cdecl_fn)tramp;
+    MemoryBarrier();
     swc_resume_threads(&suspended);
     return tramp;
 }
 
 static int __cdecl swc_hook_SSL_read(SSL *ssl, void *buffer, int size) {
+    if (real_SSL_read == NULL) {
+        return -1;
+    }
     int result = real_SSL_read(ssl, buffer, size);
     if (result > 0) {
         record_plaintext(ssl, buffer, result, 0);
@@ -610,6 +621,9 @@ static int __cdecl swc_hook_SSL_read(SSL *ssl, void *buffer, int size) {
 }
 
 static int __cdecl swc_hook_SSL_write(SSL *ssl, void *buffer, int size) {
+    if (real_SSL_write == NULL) {
+        return -1;
+    }
     int result = real_SSL_write(ssl, buffer, size);
     if (result > 0) {
         record_plaintext(ssl, buffer, result, 1);
@@ -640,8 +654,8 @@ static int swc_try_install_hooks(void) {
         return 0;
     }
 
-    real_SSL_read = (ssl_rw_cdecl_fn)swc_install_inline_hook(addr_read, (void *)swc_hook_SSL_read);
-    real_SSL_write = (ssl_rw_cdecl_fn)swc_install_inline_hook(addr_write, (void *)swc_hook_SSL_write);
+    swc_install_inline_hook(addr_read, (void *)swc_hook_SSL_read, &real_SSL_read);
+    swc_install_inline_hook(addr_write, (void *)swc_hook_SSL_write, &real_SSL_write);
     if (real_SSL_read != NULL && real_SSL_write != NULL) {
         g_hooks_installed = 1;
         write_status("tap-hooked\n");
@@ -847,4 +861,3 @@ int SSL_write(SSL *ssl, const void *buffer, int size) {
     return result;
 }
 #endif
-
