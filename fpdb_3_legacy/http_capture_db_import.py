@@ -8,6 +8,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from fpdb_3_legacy import Card
 from fpdb_3_legacy.Exceptions import FpdbHandDuplicate
 from fpdb_3_legacy.http_capture_hand_builder import (
     CaptureNotImportableError,
@@ -60,6 +61,59 @@ def _legacy_native_card_tokens(value: Any) -> Any:
     return value
 
 
+def _native_board_rows(hand_data: dict[str, Any]) -> list[list[int]]:
+    """Return complete native boards in the ``Boards`` table shape."""
+
+    boards = hand_data.get("boards")
+    if not isinstance(boards, list) or len(boards) <= 1:
+        return []
+    normalized = _legacy_native_card_tokens(boards)
+    rows = []
+    for board_id, board in enumerate(normalized, start=1):
+        if not isinstance(board, dict):
+            return []
+        cards = [card for street in ("FLOP", "TURN", "RIVER") for card in board.get(street, [])]
+        if len(cards) < 5:
+            return []
+        rows.append([board_id, *[Card.encodeCard(card) for card in cards[:5]]])
+    return rows
+
+
+def _enrich_existing_native_boards(db: Any, hand_data: dict[str, Any]) -> int | None:
+    """Repair boards on an already-imported hand using native card evidence."""
+
+    rows = _native_board_rows(hand_data)
+    if not rows or not hasattr(db, "get_cursor") or not hasattr(db, "sql"):
+        return None
+    placeholder = db.sql.query["placeholder"]
+    cursor = db.get_cursor()
+    site_hand_no = hand_data.get("hand_id")
+    try:
+        site_hand_no = int(site_hand_no)
+    except (TypeError, ValueError):
+        pass
+    lookup = (
+        "SELECT H.id FROM Hands H JOIN Gametypes G ON H.gametypeId=G.id "
+        f"WHERE H.siteHandNo={placeholder} AND G.siteId={placeholder}"
+    )
+    cursor.execute(lookup, (site_hand_no, SWC_SITE_ID))
+    hand_ids = [row[0] for row in cursor.fetchall()]
+    if not hand_ids:
+        return None
+
+    update = f"UPDATE Hands SET runItTwice={placeholder}, bombPot={placeholder} WHERE id={placeholder}"
+    delete = f"DELETE FROM Boards WHERE handId={placeholder}"
+    store = db.sql.query["store_boards"].replace("%s", placeholder)
+    bomb_pot = 1 if hand_data.get("bomb_pot") else 0
+    for hand_id in hand_ids:
+        cursor.execute(update, (True, bomb_pot, hand_id))
+        cursor.execute(delete, (hand_id,))
+        for row in rows:
+            cursor.execute(store, [hand_id, *row])
+    db.commit()
+    return hand_ids[0]
+
+
 def _native_public_import_copy(hand_data: dict[str, Any]) -> dict[str, Any] | None:
     """Prepare a complete native public hand for the legacy Hand.py importer.
 
@@ -95,9 +149,19 @@ def _native_public_import_copy(hand_data: dict[str, Any]) -> dict[str, Any] | No
 
 
 def _import_native_hand(db: Any, hand_data: dict[str, Any], *, doinsert: bool) -> HttpCaptureImportResult:
+    repaired_hand_id = _enrich_existing_native_boards(db, hand_data) if doinsert else None
     candidate = _native_public_import_copy(hand_data)
     site_hand_no = str(hand_data.get("hand_id") or "")
     if candidate is None:
+        if repaired_hand_id is not None:
+            return HttpCaptureImportResult(
+                site_hand_no,
+                "native",
+                repaired_hand_id,
+                f"native:{site_hand_no}",
+                "updated",
+                "existing hand board metadata repaired",
+            )
         return HttpCaptureImportResult(
             site_hand_no=site_hand_no,
             kind=str((hand_data.get("game") or {}).get("base") or "unknown"),
@@ -120,6 +184,15 @@ def _import_native_hand(db: Any, hand_data: dict[str, Any], *, doinsert: bool) -
     except FpdbHandDuplicate:
         if hasattr(db, "rollback"):
             db.rollback()
+        if repaired_hand_id is not None:
+            return HttpCaptureImportResult(
+                site_hand_no,
+                "native",
+                repaired_hand_id,
+                f"native:{site_hand_no}",
+                "updated",
+                "existing hand board metadata repaired",
+            )
         return HttpCaptureImportResult(
             site_hand_no, "native", None, f"native:{site_hand_no}", "duplicate", "hand already imported"
         )

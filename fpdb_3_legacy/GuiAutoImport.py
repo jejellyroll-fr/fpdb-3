@@ -641,6 +641,9 @@ class GuiAutoImport(QWidget):
         if result is not None and result.status == "duplicate":
             self.addText(f"\n[SwC Live] Hand #{hand_data.get('hand_id', 0)} already imported.", "info")
             return
+        if result is not None and result.status == "updated":
+            self.addText(f"\n[SwC Live] Repaired boards for hand #{hand_data.get('hand_id', 0)}.", "info")
+            return
 
         game_cat = hand_data.get("game", {}).get("category", "unknown")
         hand_id = hand_data.get("hand_id", 0)

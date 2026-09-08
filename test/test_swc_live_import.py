@@ -17,7 +17,7 @@ from types import SimpleNamespace
 import pytest
 
 from fpdb_3_legacy.GuiAutoImport import GuiAutoImport
-from fpdb_3_legacy.http_capture_db_import import import_http_capture_hand
+from fpdb_3_legacy.http_capture_db_import import _enrich_existing_native_boards, import_http_capture_hand
 
 
 class _Gui(SimpleNamespace):
@@ -115,6 +115,11 @@ def _native_public_hand() -> dict:
         },
         "players": [{"name": "Hero", "seat_idx": 1, "starting_stack": None}],
         "board": ["10h", "Jd", "2d", "Ks", "10d"],
+        "boards": [
+            {"FLOP": ["10h", "Jd", "2d"], "TURN": ["Ks"], "RIVER": ["10d"]},
+            {"FLOP": ["10h", "Jd", "2d"], "TURN": ["4c"], "RIVER": ["8c"]},
+        ],
+        "bomb_pot": True,
         "actions": [
             {"type": "small blind", "player": "Hero", "street": "BLINDSANTES", "amount": 2},
             {"type": "big blind", "player": "Villain", "street": "PREFLOP", "amount": 4},
@@ -147,7 +152,42 @@ def test_native_public_hand_is_sent_through_fpdb_importer(monkeypatch) -> None:
     assert seen["hand_data"]["game"]["fpdb_supported"] is True
     assert seen["hand_data"]["players"][0]["starting_stack"] == 0
     assert seen["hand_data"]["board"] == ["Th", "Jd", "2d", "Ks", "Td"]
+    assert seen["hand_data"]["boards"][1]["RIVER"] == ["8c"]
     assert seen["config"].get_site_id("SealsWithClubs") == 23
+
+
+def test_native_boards_repair_an_existing_hand() -> None:
+    class Cursor:
+        def __init__(self) -> None:
+            self.calls = []
+
+        def execute(self, query, params) -> None:
+            self.calls.append((query, params))
+
+        def fetchall(self):
+            return [(42,)]
+
+    cursor = Cursor()
+    db = SimpleNamespace(
+        sql=SimpleNamespace(
+            query={
+                "placeholder": "?",
+                "store_boards": "insert into Boards values (%s, %s, %s, %s, %s, %s, %s)",
+            }
+        ),
+        get_cursor=lambda: cursor,
+        commit=lambda: setattr(db, "committed", True),
+    )
+
+    repaired_id = _enrich_existing_native_boards(db, _native_public_hand())
+
+    assert repaired_id == 42
+    assert db.committed is True
+    assert any("runItTwice" in query for query, _params in cursor.calls)
+    board_insert = cursor.calls[-2:]
+    assert board_insert[0][1][0] == 42
+    assert board_insert[0][1][1:3] == [1, 9]
+    assert board_insert[1][1][1:3] == [2, 9]
 
 
 def test_incomplete_native_hand_stays_capture_only(monkeypatch) -> None:
