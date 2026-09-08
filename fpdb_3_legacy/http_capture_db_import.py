@@ -88,10 +88,11 @@ def _enrich_existing_native_boards(db: Any, hand_data: dict[str, Any]) -> int | 
     placeholder = db.sql.query["placeholder"]
     cursor = db.get_cursor()
     site_hand_no = hand_data.get("hand_id")
-    try:
-        site_hand_no = int(site_hand_no)
-    except (TypeError, ValueError):
-        pass
+    if site_hand_no is not None:
+        try:
+            site_hand_no = int(site_hand_no)
+        except (TypeError, ValueError):
+            pass
     lookup = (
         "SELECT H.id FROM Hands H JOIN Gametypes G ON H.gametypeId=G.id "
         f"WHERE H.siteHandNo={placeholder} AND G.siteId={placeholder}"

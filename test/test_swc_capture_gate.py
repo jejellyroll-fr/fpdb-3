@@ -168,3 +168,21 @@ def test_the_compiler_is_checked_before_it_is_run(monkeypatch, tmp_path) -> None
         swc_tap_build.build_tap(force=True)
 
     run.assert_not_called()
+
+
+def test_windows_injector_links_shell32_for_wide_argv(monkeypatch, tmp_path) -> None:
+    from fpdb_3_legacy import swc_tap_build
+
+    source = tmp_path / "swc_inject.c"
+    source.write_text("int main(void) { return 0; }\n", encoding="utf-8")
+    monkeypatch.setattr(swc_tap_build.platform, "system", lambda: "Windows")
+    monkeypatch.setattr(swc_tap_build, "INJECTOR_SOURCE_PATH", source)
+    monkeypatch.setattr(swc_tap_build, "BUILD_DIR", tmp_path)
+    monkeypatch.setattr(swc_tap_build, "resolve_compiler", lambda _system: "gcc")
+    run = MagicMock()
+    monkeypatch.setattr(swc_tap_build.subprocess, "run", run)
+
+    swc_tap_build.build_injector(force=True)
+
+    command = run.call_args.args[0]
+    assert "-lshell32" in command

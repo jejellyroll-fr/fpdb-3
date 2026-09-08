@@ -5,12 +5,9 @@
  *
  * Windows has no LD_PRELOAD/DYLD_INSERT_LIBRARIES: a DLL is placed into an
  * already-running process by allocating the DLL path in the target and running
- * LoadLibraryW there via a remote thread. That thread's entry point must be the
- * *target's* LoadLibraryW address; kernel32.dll is loaded at the same base in
- * every process of the same bitness on a given boot, so the address this
- * injector resolves is valid in the target only when both are the same
- * bitness. The SwC Windows client is 32-bit, so this injector is built 32-bit
- * too (see swc_tap_build) and refuses a target whose bitness differs.
+ * LoadLibraryW there via a remote thread. The command line is recovered with
+ * the wide-character Windows API so paths outside the active ANSI code page
+ * are preserved end to end.
  *
  * Exit codes are distinct so the Python launcher can report precisely which
  * step failed rather than a generic "injection failed".
@@ -21,9 +18,10 @@
 #endif
 
 #include <windows.h>
+#include <shellapi.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
+#include <wchar.h>
 
 enum {
     INJ_OK = 0,
@@ -48,20 +46,28 @@ static int is_wow64(HANDLE process) {
     return wow ? 1 : 0;
 }
 
-int main(int argc, char **argv) {
-    if (argc != 3) {
-        fprintf(stderr, "usage: swc_inject <pid> <dll-path>\n");
+int main(void) {
+    int argc = 0;
+    LPWSTR *argv = CommandLineToArgvW(GetCommandLineW(), &argc);
+    if (argv == NULL || argc != 3) {
+        fwprintf(stderr, L"usage: swc_inject <pid> <dll-path>\n");
+        if (argv != NULL) {
+            LocalFree(argv);
+        }
         return INJ_USAGE;
     }
 
-    DWORD pid = (DWORD)strtoul(argv[1], NULL, 10);
-    if (pid == 0) {
-        fprintf(stderr, "invalid pid: %s\n", argv[1]);
+    wchar_t *end = NULL;
+    unsigned long parsed_pid = wcstoul(argv[1], &end, 10);
+    if (parsed_pid == 0 || end == argv[1] || *end != L'\0') {
+        fwprintf(stderr, L"invalid pid: %ls\n", argv[1]);
+        LocalFree(argv);
         return INJ_BAD_PID;
     }
+    DWORD pid = (DWORD)parsed_pid;
 
-    const char *dll_path = argv[2];
-    size_t path_bytes = strlen(dll_path) + 1;
+    const wchar_t *dll_path = argv[2];
+    SIZE_T path_bytes = (wcslen(dll_path) + 1) * sizeof(*dll_path);
 
     HANDLE process = OpenProcess(PROCESS_CREATE_THREAD | PROCESS_QUERY_INFORMATION |
                                      PROCESS_VM_OPERATION | PROCESS_VM_WRITE | PROCESS_VM_READ,
@@ -69,6 +75,7 @@ int main(int argc, char **argv) {
     if (process == NULL) {
         fprintf(stderr, "OpenProcess failed (error %lu); try running as the same user\n",
                 (unsigned long)GetLastError());
+        LocalFree(argv);
         return INJ_OPEN_PROCESS;
     }
 
@@ -78,14 +85,13 @@ int main(int argc, char **argv) {
     int injector_wow64 = 0; /* a 64-bit injector is never WOW64 */
 #else
     BOOL os_is_64 = FALSE;
-    /* On 32-bit Windows every process is 32-bit; on 64-bit Windows this 32-bit
-     * injector is itself WOW64. Either way the target must match is_wow64(self). */
     IsWow64Process(GetCurrentProcess(), &os_is_64);
     int injector_wow64 = os_is_64 ? 1 : 0;
 #endif
     if (is_wow64(process) != injector_wow64) {
         fprintf(stderr, "bitness mismatch: the injector and the target must both be 32-bit\n");
         CloseHandle(process);
+        LocalFree(argv);
         return INJ_BITNESS;
     }
 
@@ -94,6 +100,7 @@ int main(int argc, char **argv) {
     if (remote_path == NULL) {
         fprintf(stderr, "VirtualAllocEx failed (error %lu)\n", (unsigned long)GetLastError());
         CloseHandle(process);
+        LocalFree(argv);
         return INJ_ALLOC;
     }
 
@@ -101,18 +108,20 @@ int main(int argc, char **argv) {
         fprintf(stderr, "WriteProcessMemory failed (error %lu)\n", (unsigned long)GetLastError());
         VirtualFreeEx(process, remote_path, 0, MEM_RELEASE);
         CloseHandle(process);
+        LocalFree(argv);
         return INJ_WRITE;
     }
 
-    /* LoadLibraryA lives in kernel32 at the same address in the target as here
-     * (same bitness), so its address in this process is valid there. Using the
-     * ANSI variant lets us hand over the path as a plain byte string. */
-    HMODULE kernel32 = GetModuleHandleA("kernel32.dll");
-    FARPROC load_library = kernel32 ? GetProcAddress(kernel32, "LoadLibraryA") : NULL;
+    /* The injector and target have the same bitness, so kernel32 is mapped at
+     * the same address in both processes on a given boot. Use LoadLibraryW so
+     * the wide path written above is consumed without an ANSI-codepage round trip. */
+    HMODULE kernel32 = GetModuleHandleW(L"kernel32.dll");
+    FARPROC load_library = kernel32 ? GetProcAddress(kernel32, "LoadLibraryW") : NULL;
     if (load_library == NULL) {
-        fprintf(stderr, "could not resolve LoadLibraryA\n");
+        fprintf(stderr, "could not resolve LoadLibraryW\n");
         VirtualFreeEx(process, remote_path, 0, MEM_RELEASE);
         CloseHandle(process);
+        LocalFree(argv);
         return INJ_LOADLIB;
     }
 
@@ -122,6 +131,7 @@ int main(int argc, char **argv) {
         fprintf(stderr, "CreateRemoteThread failed (error %lu)\n", (unsigned long)GetLastError());
         VirtualFreeEx(process, remote_path, 0, MEM_RELEASE);
         CloseHandle(process);
+        LocalFree(argv);
         return INJ_THREAD;
     }
 
@@ -132,8 +142,6 @@ int main(int argc, char **argv) {
     } else {
         DWORD exit_code = 0;
         GetExitCodeThread(thread, &exit_code);
-        /* LoadLibrary's return (the HMODULE, truncated to 32 bits) is 0 only on
-         * failure. A non-zero value means the DLL loaded and DllMain ran. */
         if (exit_code == 0) {
             fprintf(stderr, "LoadLibrary in the target returned NULL; the DLL failed to load\n");
             status = INJ_LOAD_FAILED;
@@ -143,5 +151,6 @@ int main(int argc, char **argv) {
     CloseHandle(thread);
     VirtualFreeEx(process, remote_path, 0, MEM_RELEASE);
     CloseHandle(process);
+    LocalFree(argv);
     return status;
 }

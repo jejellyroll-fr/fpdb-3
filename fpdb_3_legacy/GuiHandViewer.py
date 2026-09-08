@@ -634,7 +634,7 @@ class GuiHandViewer(QSplitter):
             return str(st)
 
     def _hand_flags(self, hand) -> str:
-        flags = []
+        flags: list[str] = []
         try:
             rit = int(hand.runItTimes)
         except (TypeError, ValueError):

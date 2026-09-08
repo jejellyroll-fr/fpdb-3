@@ -126,3 +126,16 @@ def test_attach_requires_a_running_client(monkeypatch) -> None:
 
     with pytest.raises(RuntimeError, match="not running"):
         swc_native_capture.attach_to_windows_client()
+
+
+def test_native_windows_sources_cover_review_safety_contracts() -> None:
+    source_dir = Path(inj.__file__).resolve().parent
+    injector_source = (source_dir / "swc_inject.c").read_text(encoding="utf-8")
+    tap_source = (source_dir / "swc_native_tap.c").read_text(encoding="utf-8")
+
+    assert "CommandLineToArgvW" in injector_source
+    assert 'GetProcAddress(kernel32, "LoadLibraryW")' in injector_source
+    assert "SuspendThread" in tap_source
+    assert "GetThreadContext" in tap_source
+    assert "CreateToolhelp32Snapshot" in tap_source
+    assert "for (int i = 0; i < 600; i++)" not in tap_source

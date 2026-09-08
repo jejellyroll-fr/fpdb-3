@@ -228,7 +228,9 @@ def build_injector(*, force: bool = False) -> Path:
 
     BUILD_DIR.mkdir(mode=0o700, parents=True, exist_ok=True)
     compiler = resolve_compiler(system_name)
-    command = _windows_compile_command(compiler, INJECTOR_SOURCE_PATH, injector, shared=False, libs=())
+    command = _windows_compile_command(
+        compiler, INJECTOR_SOURCE_PATH, injector, shared=False, libs=("shell32",)
+    )
     subprocess.run(command, check=True)
     return injector
 

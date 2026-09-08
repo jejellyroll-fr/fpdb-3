@@ -39,6 +39,7 @@
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <windows.h>
+#include <tlhelp32.h>
 #include <io.h>
 #include <wchar.h>
 #if defined(_WIN32) && !defined(__MINGW32__)
@@ -434,9 +435,107 @@ static int swc_prologue_len(const uint8_t *code, int min_len) {
     return total;
 }
 
+/* Suspend every other thread while the entry point is changed. Merely writing
+ * the JMP displacement before its opcode is not safe: bytes 1-4 are operands of
+ * the original instruction until byte 0 changes. We also inspect each suspended
+ * thread's instruction pointer and retry if one is currently inside the displaced
+ * prologue, so no thread resumes in bytes whose meaning changed under it. */
+#define SWC_MAX_SUSPENDED_THREADS 256u
+
+struct swc_suspended_threads {
+    HANDLE handles[SWC_MAX_SUSPENDED_THREADS];
+    size_t count;
+};
+
+static void swc_resume_threads(struct swc_suspended_threads *state) {
+    while (state->count > 0) {
+        HANDLE thread = state->handles[--state->count];
+        ResumeThread(thread);
+        CloseHandle(thread);
+    }
+}
+
+/* 0 = failure, 1 = ready to patch, 2 = a thread is inside the prologue. */
+static int swc_suspend_other_threads(struct swc_suspended_threads *state,
+                                     const uint8_t *start, SIZE_T length) {
+    const DWORD process_id = GetCurrentProcessId();
+    const DWORD current_thread_id = GetCurrentThreadId();
+    HANDLE snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, 0);
+    THREADENTRY32 entry;
+
+    state->count = 0;
+    if (snapshot == INVALID_HANDLE_VALUE) {
+        return 0;
+    }
+    memset(&entry, 0, sizeof(entry));
+    entry.dwSize = sizeof(entry);
+    if (!Thread32First(snapshot, &entry)) {
+        CloseHandle(snapshot);
+        return 0;
+    }
+
+    for (;;) {
+        if (entry.th32OwnerProcessID == process_id && entry.th32ThreadID != current_thread_id) {
+            if (state->count >= SWC_MAX_SUSPENDED_THREADS) {
+                CloseHandle(snapshot);
+                swc_resume_threads(state);
+                return 0;
+            }
+
+            HANDLE thread = OpenThread(THREAD_SUSPEND_RESUME | THREAD_GET_CONTEXT, FALSE,
+                                       entry.th32ThreadID);
+            if (thread == NULL) {
+                DWORD error = GetLastError();
+                if (error != ERROR_INVALID_PARAMETER) {
+                    CloseHandle(snapshot);
+                    swc_resume_threads(state);
+                    return 0;
+                }
+            } else {
+                if (SuspendThread(thread) == (DWORD)-1) {
+                    CloseHandle(thread);
+                    CloseHandle(snapshot);
+                    swc_resume_threads(state);
+                    return 0;
+                }
+                state->handles[state->count++] = thread;
+
+                CONTEXT context;
+                memset(&context, 0, sizeof(context));
+                context.ContextFlags = CONTEXT_CONTROL;
+                if (!GetThreadContext(thread, &context)) {
+                    CloseHandle(snapshot);
+                    swc_resume_threads(state);
+                    return 0;
+                }
+#ifdef _WIN64
+                uintptr_t ip = (uintptr_t)context.Rip;
+#else
+                uintptr_t ip = (uintptr_t)context.Eip;
+#endif
+                if (ip >= (uintptr_t)start && ip < (uintptr_t)(start + length)) {
+                    CloseHandle(snapshot);
+                    swc_resume_threads(state);
+                    return 2;
+                }
+            }
+        }
+
+        if (!Thread32Next(snapshot, &entry)) {
+            DWORD error = GetLastError();
+            CloseHandle(snapshot);
+            if (error != ERROR_NO_MORE_FILES) {
+                swc_resume_threads(state);
+                return 0;
+            }
+            return 1;
+        }
+    }
+}
+
 /* Install a 5-byte JMP-rel32 hook over *target*, returning a trampoline that
  * runs the displaced prologue then continues into the original, or NULL if the
- * prologue cannot be relocated safely. */
+ * prologue cannot be relocated or patched safely. */
 static void *swc_install_inline_hook(void *target, void *hook) {
     uint8_t *fn = (uint8_t *)target;
     int steal = swc_prologue_len(fn, 5);
@@ -450,25 +549,55 @@ static void *swc_install_inline_hook(void *target, void *hook) {
         return NULL;
     }
     memcpy(tramp, fn, (size_t)steal);
-    tramp[steal] = 0xE9; /* jmp rel32 back into the original past the stolen bytes */
-    *(int32_t *)(tramp + steal + 1) = (int32_t)((fn + steal) - (tramp + steal + 5));
+    tramp[steal] = 0xE9;
+    int32_t back = (int32_t)((fn + steal) - (tramp + steal + 5));
+    memcpy(tramp + steal + 1, &back, sizeof(back));
 
-    DWORD old_protect = 0;
-    if (!VirtualProtect(fn, 5, PAGE_EXECUTE_READWRITE, &old_protect)) {
+    uint8_t patch[5];
+    int32_t forward = (int32_t)((uint8_t *)hook - (fn + 5));
+    patch[0] = 0xE9;
+    memcpy(patch + 1, &forward, sizeof(forward));
+
+    struct swc_suspended_threads suspended;
+    int suspension = 0;
+    for (int attempt = 0; attempt < 100; attempt++) {
+        suspension = swc_suspend_other_threads(&suspended, fn, (SIZE_T)steal);
+        if (suspension == 1) {
+            break;
+        }
+        if (suspension == 0) {
+            VirtualFree(tramp, 0, MEM_RELEASE);
+            return NULL;
+        }
+        Sleep(1);
+    }
+    if (suspension != 1) {
         VirtualFree(tramp, 0, MEM_RELEASE);
         return NULL;
     }
-    /* We patch a live function that other threads may be calling. Write the
-     * rel32 displacement first, while fn[0] still holds the original opcode, and
-     * only then flip fn[0] to 0xE9 as a single byte store. A thread that reads
-     * the site mid-patch therefore sees either the original first instruction or
-     * a complete jump, never a 0xE9 with a half-written target. (This narrows
-     * the window; it is not a full thread-suspend barrier.) */
-    *(int32_t *)(fn + 1) = (int32_t)((uint8_t *)hook - (fn + 5));
-    MemoryBarrier();
-    fn[0] = 0xE9; /* jmp rel32 to our hook */
-    VirtualProtect(fn, 5, old_protect, &old_protect);
-    FlushInstructionCache(GetCurrentProcess(), fn, (SIZE_T)steal);
+
+    DWORD old_protect = 0;
+    if (!VirtualProtect(fn, sizeof(patch), PAGE_EXECUTE_READWRITE, &old_protect)) {
+        swc_resume_threads(&suspended);
+        VirtualFree(tramp, 0, MEM_RELEASE);
+        return NULL;
+    }
+
+    memcpy(fn, patch, sizeof(patch));
+    FlushInstructionCache(GetCurrentProcess(), fn, sizeof(patch));
+
+    DWORD ignored = 0;
+    if (!VirtualProtect(fn, sizeof(patch), old_protect, &ignored)) {
+        /* Fail closed: restore the original entry point before resuming callers. */
+        memcpy(fn, tramp, sizeof(patch));
+        FlushInstructionCache(GetCurrentProcess(), fn, sizeof(patch));
+        VirtualProtect(fn, sizeof(patch), old_protect, &ignored);
+        swc_resume_threads(&suspended);
+        VirtualFree(tramp, 0, MEM_RELEASE);
+        return NULL;
+    }
+
+    swc_resume_threads(&suspended);
     return tramp;
 }
 
@@ -526,16 +655,16 @@ static int swc_try_install_hooks(void) {
 
 static DWORD WINAPI swc_hook_worker(LPVOID param) {
     (void)param;
-    /* QSslSocket loads ssleay32.dll lazily on the first TLS connection, which
-     * can be seconds after we inject. Poll a while, then give up quietly. */
-    for (int i = 0; i < 600; i++) { /* ~60s at 100ms */
+    /* QSslSocket loads OpenSSL lazily, potentially long after fpdb attaches.
+     * The injected DLL remains resident for the client lifetime, so keep this
+     * lightweight worker alive until TLS appears or hook installation reaches
+     * a terminal result. Re-injecting an already-loaded DLL does not rerun DllMain. */
+    for (;;) {
         if (swc_try_install_hooks()) {
             return 0;
         }
-        Sleep(100);
+        Sleep(250);
     }
-    write_status("tap-ssl-not-found\n");
-    return 0;
 }
 
 #endif /* _WIN32 */
