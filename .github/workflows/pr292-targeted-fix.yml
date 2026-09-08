@@ -1,0 +1,525 @@
+name: PR 292 targeted fixes
+
+on:
+  push:
+    branches:
+      - feat/swc-windows-live-capture
+
+permissions:
+  contents: write
+
+jobs:
+  apply-fixes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/swc-windows-live-capture
+          fetch-depth: 0
+
+      - name: Apply targeted fixes
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          def replace_once(path: str, old: str, new: str) -> None:
+              file = Path(path)
+              text = file.read_text(encoding="utf-8")
+              count = text.count(old)
+              if count != 1:
+                  raise RuntimeError(f"{path}: expected exactly one match, found {count}")
+              file.write_text(text.replace(old, new, 1), encoding="utf-8")
+
+          # CI: configuration template changes require an explicit version bump.
+          replace_once("fpdb_3_legacy/Configuration.py", "CONFIG_VERSION = 84", "CONFIG_VERSION = 85")
+          for xml_path in (
+              "HUD_config.xml",
+              "HUD_config.xml.example",
+              "fpdb_3_legacy/HUD_config.xml.example",
+          ):
+              replace_once(xml_path, '<general version="84"', '<general version="85"')
+
+          # CI: mypy 2.3 rejects int(None) and an untyped empty list.
+          replace_once(
+              "fpdb_3_legacy/http_capture_db_import.py",
+              '''    site_hand_no = hand_data.get("hand_id")
+              try:
+                  site_hand_no = int(site_hand_no)
+              except (TypeError, ValueError):
+                  pass
+          ''',
+              '''    site_hand_no = hand_data.get("hand_id")
+              if site_hand_no is not None:
+                  try:
+                      site_hand_no = int(site_hand_no)
+                  except (TypeError, ValueError):
+                      pass
+          ''',
+          )
+          replace_once(
+              "fpdb_3_legacy/GuiHandViewer.py",
+              '''    def _hand_flags(self, hand) -> str:
+                  flags = []
+          ''',
+              '''    def _hand_flags(self, hand) -> str:
+                  flags: list[str] = []
+          ''',
+          )
+
+          # Codex: Unicode-safe command-line recovery requires CommandLineToArgvW,
+          # which lives in shell32.
+          replace_once(
+              "fpdb_3_legacy/swc_tap_build.py",
+              '''    command = _windows_compile_command(compiler, INJECTOR_SOURCE_PATH, injector, shared=False, libs=())
+          ''',
+              '''    command = _windows_compile_command(
+                  compiler, INJECTOR_SOURCE_PATH, injector, shared=False, libs=("shell32",)
+              )
+          ''',
+          )
+
+          injector = r'''/*
+           * Minimal same-bitness DLL injector for the SwC Windows capture.
+           *
+           *     swc_inject.exe <pid> <absolute-dll-path>
+           *
+           * Windows has no LD_PRELOAD/DYLD_INSERT_LIBRARIES: a DLL is placed into an
+           * already-running process by allocating the DLL path in the target and running
+           * LoadLibraryW there via a remote thread. The command line is recovered with
+           * the wide-character Windows API so paths outside the active ANSI code page
+           * are preserved end to end.
+           *
+           * Exit codes are distinct so the Python launcher can report precisely which
+           * step failed rather than a generic "injection failed".
+           */
+
+          #ifndef WIN32_LEAN_AND_MEAN
+          #define WIN32_LEAN_AND_MEAN 1
+          #endif
+
+          #include <windows.h>
+          #include <shellapi.h>
+          #include <stdio.h>
+          #include <stdlib.h>
+          #include <wchar.h>
+
+          enum {
+              INJ_OK = 0,
+              INJ_USAGE = 2,
+              INJ_BAD_PID = 3,
+              INJ_OPEN_PROCESS = 4,
+              INJ_BITNESS = 5,
+              INJ_ALLOC = 6,
+              INJ_WRITE = 7,
+              INJ_LOADLIB = 8,
+              INJ_THREAD = 9,
+              INJ_TIMEOUT = 10,
+              INJ_LOAD_FAILED = 11,
+          };
+
+          /* True when the target process runs under WOW64 (a 32-bit process on 64-bit
+           * Windows). A 32-bit injector matches a WOW64 target; on 32-bit Windows both
+           * this injector and the target report FALSE, which also matches. */
+          static int is_wow64(HANDLE process) {
+              BOOL wow = FALSE;
+              IsWow64Process(process, &wow);
+              return wow ? 1 : 0;
+          }
+
+          int main(void) {
+              int argc = 0;
+              LPWSTR *argv = CommandLineToArgvW(GetCommandLineW(), &argc);
+              if (argv == NULL || argc != 3) {
+                  fwprintf(stderr, L"usage: swc_inject <pid> <dll-path>\n");
+                  if (argv != NULL) {
+                      LocalFree(argv);
+                  }
+                  return INJ_USAGE;
+              }
+
+              wchar_t *end = NULL;
+              unsigned long parsed_pid = wcstoul(argv[1], &end, 10);
+              if (parsed_pid == 0 || end == argv[1] || *end != L'\0') {
+                  fwprintf(stderr, L"invalid pid: %ls\n", argv[1]);
+                  LocalFree(argv);
+                  return INJ_BAD_PID;
+              }
+              DWORD pid = (DWORD)parsed_pid;
+
+              const wchar_t *dll_path = argv[2];
+              SIZE_T path_bytes = (wcslen(dll_path) + 1) * sizeof(*dll_path);
+
+              HANDLE process = OpenProcess(PROCESS_CREATE_THREAD | PROCESS_QUERY_INFORMATION |
+                                               PROCESS_VM_OPERATION | PROCESS_VM_WRITE | PROCESS_VM_READ,
+                                           FALSE, pid);
+              if (process == NULL) {
+                  fprintf(stderr, "OpenProcess failed (error %lu); try running as the same user\n",
+                          (unsigned long)GetLastError());
+                  LocalFree(argv);
+                  return INJ_OPEN_PROCESS;
+              }
+
+              /* Same-bitness check: this injector is 32-bit, so the target must be too.
+               * Under 64-bit Windows that means it must be a WOW64 process. */
+          #ifdef _WIN64
+              int injector_wow64 = 0; /* a 64-bit injector is never WOW64 */
+          #else
+              BOOL os_is_64 = FALSE;
+              IsWow64Process(GetCurrentProcess(), &os_is_64);
+              int injector_wow64 = os_is_64 ? 1 : 0;
+          #endif
+              if (is_wow64(process) != injector_wow64) {
+                  fprintf(stderr, "bitness mismatch: the injector and the target must both be 32-bit\n");
+                  CloseHandle(process);
+                  LocalFree(argv);
+                  return INJ_BITNESS;
+              }
+
+              void *remote_path = VirtualAllocEx(process, NULL, path_bytes, MEM_COMMIT | MEM_RESERVE,
+                                                 PAGE_READWRITE);
+              if (remote_path == NULL) {
+                  fprintf(stderr, "VirtualAllocEx failed (error %lu)\n", (unsigned long)GetLastError());
+                  CloseHandle(process);
+                  LocalFree(argv);
+                  return INJ_ALLOC;
+              }
+
+              if (!WriteProcessMemory(process, remote_path, dll_path, path_bytes, NULL)) {
+                  fprintf(stderr, "WriteProcessMemory failed (error %lu)\n", (unsigned long)GetLastError());
+                  VirtualFreeEx(process, remote_path, 0, MEM_RELEASE);
+                  CloseHandle(process);
+                  LocalFree(argv);
+                  return INJ_WRITE;
+              }
+
+              /* The injector and target have the same bitness, so kernel32 is mapped at
+               * the same address in both processes on a given boot. Use LoadLibraryW so
+               * the wide path written above is consumed without an ANSI-codepage round trip. */
+              HMODULE kernel32 = GetModuleHandleW(L"kernel32.dll");
+              FARPROC load_library = kernel32 ? GetProcAddress(kernel32, "LoadLibraryW") : NULL;
+              if (load_library == NULL) {
+                  fprintf(stderr, "could not resolve LoadLibraryW\n");
+                  VirtualFreeEx(process, remote_path, 0, MEM_RELEASE);
+                  CloseHandle(process);
+                  LocalFree(argv);
+                  return INJ_LOADLIB;
+              }
+
+              HANDLE thread = CreateRemoteThread(process, NULL, 0, (LPTHREAD_START_ROUTINE)load_library,
+                                                 remote_path, 0, NULL);
+              if (thread == NULL) {
+                  fprintf(stderr, "CreateRemoteThread failed (error %lu)\n", (unsigned long)GetLastError());
+                  VirtualFreeEx(process, remote_path, 0, MEM_RELEASE);
+                  CloseHandle(process);
+                  LocalFree(argv);
+                  return INJ_THREAD;
+              }
+
+              int status = INJ_OK;
+              if (WaitForSingleObject(thread, 30000) != WAIT_OBJECT_0) {
+                  fprintf(stderr, "the injected LoadLibrary did not return within 30s\n");
+                  status = INJ_TIMEOUT;
+              } else {
+                  DWORD exit_code = 0;
+                  GetExitCodeThread(thread, &exit_code);
+                  if (exit_code == 0) {
+                      fprintf(stderr, "LoadLibrary in the target returned NULL; the DLL failed to load\n");
+                      status = INJ_LOAD_FAILED;
+                  }
+              }
+
+              CloseHandle(thread);
+              VirtualFreeEx(process, remote_path, 0, MEM_RELEASE);
+              CloseHandle(process);
+              LocalFree(argv);
+              return status;
+          }
+          '''
+          Path("fpdb_3_legacy/swc_inject.c").write_text(injector, encoding="utf-8")
+
+          tap_path = Path("fpdb_3_legacy/swc_native_tap.c")
+          tap = tap_path.read_text(encoding="utf-8")
+          if "#include <tlhelp32.h>" not in tap:
+              tap = tap.replace("#include <windows.h>\n", "#include <windows.h>\n#include <tlhelp32.h>\n", 1)
+
+          hotpatch_start = tap.index("/* Install a 5-byte JMP-rel32 hook over *target*")
+          hotpatch_end = tap.index("static int __cdecl swc_hook_SSL_read", hotpatch_start)
+          hotpatch = r'''/* Suspend every other thread while the entry point is changed. Merely writing
+           * the JMP displacement before its opcode is not safe: bytes 1-4 are operands of
+           * the original instruction until byte 0 changes. We also inspect each suspended
+           * thread's instruction pointer and retry if one is currently inside the displaced
+           * prologue, so no thread resumes in bytes whose meaning changed under it. */
+          #define SWC_MAX_SUSPENDED_THREADS 256u
+
+          struct swc_suspended_threads {
+              HANDLE handles[SWC_MAX_SUSPENDED_THREADS];
+              size_t count;
+          };
+
+          static void swc_resume_threads(struct swc_suspended_threads *state) {
+              while (state->count > 0) {
+                  HANDLE thread = state->handles[--state->count];
+                  ResumeThread(thread);
+                  CloseHandle(thread);
+              }
+          }
+
+          /* 0 = failure, 1 = ready to patch, 2 = a thread is inside the prologue. */
+          static int swc_suspend_other_threads(struct swc_suspended_threads *state,
+                                               const uint8_t *start, SIZE_T length) {
+              const DWORD process_id = GetCurrentProcessId();
+              const DWORD current_thread_id = GetCurrentThreadId();
+              HANDLE snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, 0);
+              THREADENTRY32 entry;
+
+              state->count = 0;
+              if (snapshot == INVALID_HANDLE_VALUE) {
+                  return 0;
+              }
+              memset(&entry, 0, sizeof(entry));
+              entry.dwSize = sizeof(entry);
+              if (!Thread32First(snapshot, &entry)) {
+                  CloseHandle(snapshot);
+                  return 0;
+              }
+
+              for (;;) {
+                  if (entry.th32OwnerProcessID == process_id && entry.th32ThreadID != current_thread_id) {
+                      if (state->count >= SWC_MAX_SUSPENDED_THREADS) {
+                          CloseHandle(snapshot);
+                          swc_resume_threads(state);
+                          return 0;
+                      }
+
+                      HANDLE thread = OpenThread(THREAD_SUSPEND_RESUME | THREAD_GET_CONTEXT, FALSE,
+                                                 entry.th32ThreadID);
+                      if (thread == NULL) {
+                          DWORD error = GetLastError();
+                          if (error != ERROR_INVALID_PARAMETER) {
+                              CloseHandle(snapshot);
+                              swc_resume_threads(state);
+                              return 0;
+                          }
+                      } else {
+                          if (SuspendThread(thread) == (DWORD)-1) {
+                              CloseHandle(thread);
+                              CloseHandle(snapshot);
+                              swc_resume_threads(state);
+                              return 0;
+                          }
+                          state->handles[state->count++] = thread;
+
+                          CONTEXT context;
+                          memset(&context, 0, sizeof(context));
+                          context.ContextFlags = CONTEXT_CONTROL;
+                          if (!GetThreadContext(thread, &context)) {
+                              CloseHandle(snapshot);
+                              swc_resume_threads(state);
+                              return 0;
+                          }
+          #ifdef _WIN64
+                          uintptr_t ip = (uintptr_t)context.Rip;
+          #else
+                          uintptr_t ip = (uintptr_t)context.Eip;
+          #endif
+                          if (ip >= (uintptr_t)start && ip < (uintptr_t)(start + length)) {
+                              CloseHandle(snapshot);
+                              swc_resume_threads(state);
+                              return 2;
+                          }
+                      }
+                  }
+
+                  if (!Thread32Next(snapshot, &entry)) {
+                      DWORD error = GetLastError();
+                      CloseHandle(snapshot);
+                      if (error != ERROR_NO_MORE_FILES) {
+                          swc_resume_threads(state);
+                          return 0;
+                      }
+                      return 1;
+                  }
+              }
+          }
+
+          /* Install a 5-byte JMP-rel32 hook over *target*, returning a trampoline that
+           * runs the displaced prologue then continues into the original, or NULL if the
+           * prologue cannot be relocated or patched safely. */
+          static void *swc_install_inline_hook(void *target, void *hook) {
+              uint8_t *fn = (uint8_t *)target;
+              int steal = swc_prologue_len(fn, 5);
+              if (steal < 5 || steal > 64) {
+                  return NULL;
+              }
+
+              uint8_t *tramp = (uint8_t *)VirtualAlloc(NULL, (SIZE_T)steal + 5, MEM_COMMIT | MEM_RESERVE,
+                                                       PAGE_EXECUTE_READWRITE);
+              if (tramp == NULL) {
+                  return NULL;
+              }
+              memcpy(tramp, fn, (size_t)steal);
+              tramp[steal] = 0xE9;
+              int32_t back = (int32_t)((fn + steal) - (tramp + steal + 5));
+              memcpy(tramp + steal + 1, &back, sizeof(back));
+
+              uint8_t patch[5];
+              int32_t forward = (int32_t)((uint8_t *)hook - (fn + 5));
+              patch[0] = 0xE9;
+              memcpy(patch + 1, &forward, sizeof(forward));
+
+              struct swc_suspended_threads suspended;
+              int suspension = 0;
+              for (int attempt = 0; attempt < 100; attempt++) {
+                  suspension = swc_suspend_other_threads(&suspended, fn, (SIZE_T)steal);
+                  if (suspension == 1) {
+                      break;
+                  }
+                  if (suspension == 0) {
+                      VirtualFree(tramp, 0, MEM_RELEASE);
+                      return NULL;
+                  }
+                  Sleep(1);
+              }
+              if (suspension != 1) {
+                  VirtualFree(tramp, 0, MEM_RELEASE);
+                  return NULL;
+              }
+
+              DWORD old_protect = 0;
+              if (!VirtualProtect(fn, sizeof(patch), PAGE_EXECUTE_READWRITE, &old_protect)) {
+                  swc_resume_threads(&suspended);
+                  VirtualFree(tramp, 0, MEM_RELEASE);
+                  return NULL;
+              }
+
+              memcpy(fn, patch, sizeof(patch));
+              FlushInstructionCache(GetCurrentProcess(), fn, sizeof(patch));
+
+              DWORD ignored = 0;
+              if (!VirtualProtect(fn, sizeof(patch), old_protect, &ignored)) {
+                  /* Fail closed: restore the original entry point before resuming callers. */
+                  memcpy(fn, tramp, sizeof(patch));
+                  FlushInstructionCache(GetCurrentProcess(), fn, sizeof(patch));
+                  VirtualProtect(fn, sizeof(patch), old_protect, &ignored);
+                  swc_resume_threads(&suspended);
+                  VirtualFree(tramp, 0, MEM_RELEASE);
+                  return NULL;
+              }
+
+              swc_resume_threads(&suspended);
+              return tramp;
+          }
+
+          '''
+          tap = tap[:hotpatch_start] + hotpatch + tap[hotpatch_end:]
+
+          worker_start = tap.index("static DWORD WINAPI swc_hook_worker")
+          worker_end_marker = "\n}\n\n#endif /* _WIN32 */"
+          worker_end = tap.index(worker_end_marker, worker_start) + 3
+          worker = r'''static DWORD WINAPI swc_hook_worker(LPVOID param) {
+              (void)param;
+              /* QSslSocket loads OpenSSL lazily, potentially long after fpdb attaches.
+               * The injected DLL remains resident for the client lifetime, so keep this
+               * lightweight worker alive until TLS appears or hook installation reaches
+               * a terminal result. Re-injecting an already-loaded DLL does not rerun DllMain. */
+              for (;;) {
+                  if (swc_try_install_hooks()) {
+                      return 0;
+                  }
+                  Sleep(250);
+              }
+          }
+          '''
+          tap = tap[:worker_start] + worker + tap[worker_end:]
+          tap_path.write_text(tap, encoding="utf-8")
+
+          # Regression contracts for the three review findings.
+          tests = Path("test/test_swc_windows_inject.py")
+          test_text = tests.read_text(encoding="utf-8")
+          marker = "def test_native_windows_sources_cover_review_safety_contracts() -> None:"
+          if marker not in test_text:
+              test_text += r'''
+
+          def test_native_windows_sources_cover_review_safety_contracts() -> None:
+              source_dir = Path(inj.__file__).resolve().parent
+              injector_source = (source_dir / "swc_inject.c").read_text(encoding="utf-8")
+              tap_source = (source_dir / "swc_native_tap.c").read_text(encoding="utf-8")
+
+              assert "CommandLineToArgvW" in injector_source
+              assert 'GetProcAddress(kernel32, "LoadLibraryW")' in injector_source
+              assert "SuspendThread" in tap_source
+              assert "GetThreadContext" in tap_source
+              assert "CreateToolhelp32Snapshot" in tap_source
+              assert "for (int i = 0; i < 600; i++)" not in tap_source
+          '''
+              tests.write_text(test_text, encoding="utf-8")
+
+          capture_tests = Path("test/test_swc_capture_gate.py")
+          capture_text = capture_tests.read_text(encoding="utf-8")
+          marker = "def test_windows_injector_links_shell32_for_wide_argv"
+          if marker not in capture_text:
+              capture_text += r'''
+
+          def test_windows_injector_links_shell32_for_wide_argv(monkeypatch, tmp_path) -> None:
+              from fpdb_3_legacy import swc_tap_build
+
+              source = tmp_path / "swc_inject.c"
+              source.write_text("int main(void) { return 0; }\n", encoding="utf-8")
+              monkeypatch.setattr(swc_tap_build.platform, "system", lambda: "Windows")
+              monkeypatch.setattr(swc_tap_build, "INJECTOR_SOURCE_PATH", source)
+              monkeypatch.setattr(swc_tap_build, "BUILD_DIR", tmp_path)
+              monkeypatch.setattr(swc_tap_build, "resolve_compiler", lambda _system: "gcc")
+              run = MagicMock()
+              monkeypatch.setattr(swc_tap_build.subprocess, "run", run)
+
+              swc_tap_build.build_injector(force=True)
+
+              command = run.call_args.args[0]
+              assert "-lshell32" in command
+          '''
+              capture_tests.write_text(capture_text, encoding="utf-8")
+          PY
+
+      - name: Verify config version contract
+        shell: bash
+        run: |
+          base_dir="$RUNNER_TEMP/fpdb-config-base"
+          mkdir -p "$base_dir/fpdb_3_legacy"
+          for path in HUD_config.xml HUD_config.xml.example fpdb_3_legacy/HUD_config.xml.example; do
+            git show origin/development:"$path" > "$base_dir/$path"
+          done
+          python tools/check_config_version.py --base-dir "$base_dir"
+
+      - name: Verify edited Python syntax and source contracts
+        shell: bash
+        run: |
+          python -m py_compile \
+            fpdb_3_legacy/Configuration.py \
+            fpdb_3_legacy/http_capture_db_import.py \
+            fpdb_3_legacy/GuiHandViewer.py \
+            fpdb_3_legacy/swc_tap_build.py \
+            test/test_swc_windows_inject.py \
+            test/test_swc_capture_gate.py
+          python - <<'PY'
+          from pathlib import Path
+          tap = Path("fpdb_3_legacy/swc_native_tap.c").read_text(encoding="utf-8")
+          injector = Path("fpdb_3_legacy/swc_inject.c").read_text(encoding="utf-8")
+          assert "SuspendThread" in tap and "GetThreadContext" in tap
+          assert "for (int i = 0; i < 600; i++)" not in tap
+          assert "CommandLineToArgvW" in injector and "LoadLibraryW" in injector
+          PY
+
+      - name: Commit fixes and remove temporary workflow
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/pr292-targeted-fix.yml
+          git add HUD_config.xml HUD_config.xml.example fpdb_3_legacy/HUD_config.xml.example \
+            fpdb_3_legacy/Configuration.py fpdb_3_legacy/http_capture_db_import.py \
+            fpdb_3_legacy/GuiHandViewer.py fpdb_3_legacy/swc_native_tap.c \
+            fpdb_3_legacy/swc_inject.c fpdb_3_legacy/swc_tap_build.py \
+            test/test_swc_windows_inject.py test/test_swc_capture_gate.py
+          git commit -m "fix(pr292): stabilize Windows capture and CI"
+          git push origin HEAD:feat/swc-windows-live-capture
