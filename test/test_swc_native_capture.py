@@ -1528,17 +1528,24 @@ def test_build_tap_cross_platform(tmp_path, monkeypatch):
     machine *should* get is covered by
     test_swc_tap_build_reports_a_missing_compiler.
     """
-    from fpdb_3_legacy import swc_native_capture
+    from fpdb_3_legacy import swc_native_capture, swc_tap_build
     from fpdb_3_legacy.swc_tap_build import COMPILERS
 
     system_name = platform.system()
     if not any(shutil.which(name) for name in COMPILERS.get(system_name, ())):
         pytest.skip(f"no C compiler on this {system_name} machine")
 
-    monkeypatch.setattr(swc_native_capture, "BUILD_DIR", tmp_path)
+    # Build into a scratch dir, not the user's ~/.fpdb tap: get_tap_library_path
+    # / get_injector_path read swc_tap_build.BUILD_DIR at call time, so this is
+    # the global that actually redirects the output (and avoids colliding with a
+    # tap DLL that may be loaded -- and therefore locked -- in a live client).
+    monkeypatch.setattr(swc_tap_build, "BUILD_DIR", tmp_path)
     tap_path = swc_native_capture.build_tap(force=True)
     assert tap_path.exists()
     assert tap_path.name in ("libswc_native_tap.dylib", "libswc_native_tap.so", "swc_native_tap.dll")
+    if system_name == "Windows":
+        # Windows also builds the same-bitness injector alongside the tap.
+        assert (tmp_path / "swc_inject.exe").exists()
 
 
 def _tailing_thread(tmp_path, monkeypatch, hands):

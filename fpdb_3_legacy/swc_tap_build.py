@@ -13,6 +13,7 @@ Only the standard library is imported here, so
 from __future__ import annotations
 
 import argparse
+import os
 import platform
 import shutil
 import subprocess
@@ -22,7 +23,13 @@ from pathlib import Path
 SWC_APP = Path("/Applications/SwC Poker.app")
 SWC_EXECUTABLE = SWC_APP / "Contents/MacOS/SwC Poker"
 SOURCE_PATH = Path(__file__).with_name("swc_native_tap.c")
+INJECTOR_SOURCE_PATH = Path(__file__).with_name("swc_inject.c")
 BUILD_DIR = Path.home() / ".fpdb" / "swc-native-capture"
+
+#: The SwC Windows client is a 32-bit Qt application, so the tap DLL and the
+#: injector that loads it into the client must both be 32-bit. clang targets the
+#: MSVC ABI here; MinGW uses -m32.
+WINDOWS_CLANG_TARGET = "i686-pc-windows-msvc"
 
 
 def get_tap_library_path() -> Path:
@@ -34,19 +41,60 @@ def get_tap_library_path() -> Path:
     return BUILD_DIR / "libswc_native_tap.so"
 
 
-#: The compilers tried for each platform, in order of preference.
+def get_injector_path() -> Path:
+    """Path to the Windows same-bitness DLL injector (Windows only)."""
+    return BUILD_DIR / "swc_inject.exe"
+
+
+#: The compilers tried for each platform, in order of preference. clang leads on
+#: Windows because it ships a single installer, targets the 32-bit MSVC ABI the
+#: client uses, and is what this feature was developed against; MinGW's
+#: 32-bit-capable gcc names are tried after it.
 COMPILERS: dict[str, tuple[str, ...]] = {
     "Darwin": ("clang",),
-    "Windows": ("x86_64-w64-mingw32-gcc", "gcc"),
+    "Windows": ("clang", "i686-w64-mingw32-gcc", "gcc"),
     "Linux": ("clang", "gcc"),
 }
 
 #: What to tell someone who has none of them.
 INSTALL_HINTS: dict[str, str] = {
     "Darwin": "Install the Xcode command line tools: xcode-select --install",
-    "Windows": "Install MSYS2 or another MinGW-w64 distribution and put gcc on PATH.",
+    "Windows": "Install LLVM (clang) from https://llvm.org, or a 32-bit MinGW-w64 gcc, and put it on PATH.",
     "Linux": "Install clang or gcc with your package manager.",
 }
+
+
+def _windows_x86_link_dirs() -> list[str]:
+    """`-L` directories holding the 32-bit import libraries clang links against.
+
+    clang targets the MSVC ABI on Windows, so it needs the Windows SDK (um, ucrt)
+    and MSVC (VC runtime) x86 import libraries. These live under fixed roots but
+    versioned subdirectories; the newest of each is chosen. Returns an empty list
+    when nothing is found -- a MinGW gcc supplies its own libraries and needs
+    none of this, so an empty list is not by itself an error.
+    """
+    program_files_x86 = os.environ.get("ProgramFiles(x86)", r"C:\Program Files (x86)")
+    program_files = os.environ.get("ProgramFiles", r"C:\Program Files")
+    dirs: list[str] = []
+
+    sdk_lib_root = Path(program_files_x86) / "Windows Kits" / "10" / "Lib"
+    if sdk_lib_root.is_dir():
+        versions = sorted((p for p in sdk_lib_root.iterdir() if p.is_dir()), reverse=True)
+        for version in versions:
+            um = version / "um" / "x86"
+            ucrt = version / "ucrt" / "x86"
+            if um.is_dir() and ucrt.is_dir():
+                dirs.extend([str(um), str(ucrt)])
+                break
+
+    for vs_root in (Path(program_files) / "Microsoft Visual Studio", Path(program_files_x86) / "Microsoft Visual Studio"):
+        msvc_root = vs_root.glob("*/*/VC/Tools/MSVC/*/lib/x86")
+        newest = sorted((p for p in msvc_root if p.is_dir()), reverse=True)
+        if newest:
+            dirs.append(str(newest[0]))
+            break
+
+    return dirs
 
 
 def resolve_compiler(system_name: str) -> str:
@@ -74,6 +122,30 @@ def resolve_compiler(system_name: str) -> str:
     raise FileNotFoundError(msg)
 
 
+def _windows_compile_command(compiler: str, source: Path, output: Path, *, shared: bool, libs: tuple[str, ...]) -> list[str]:
+    """Build a 32-bit Windows compile command for either the DLL or the injector.
+
+    clang cross-targets the 32-bit MSVC ABI and needs the SDK/MSVC import-library
+    search paths; a MinGW gcc builds 32-bit with -m32 and brings its own. Both
+    produce a PE32 (x86) matching the 32-bit SwC client.
+    """
+    base = os.path.basename(compiler).lower()
+    is_clang = "clang" in base
+    cmd = [compiler]
+    if is_clang:
+        cmd += [f"--target={WINDOWS_CLANG_TARGET}"]
+    else:
+        cmd += ["-m32"]
+    if shared:
+        cmd += ["-shared"]
+    cmd += ["-O2", "-Wall", "-Wextra", "-o", str(output), str(source)]
+    if is_clang:
+        for lib_dir in _windows_x86_link_dirs():
+            cmd += ["-L", lib_dir]
+    cmd += [f"-l{name}" for name in libs]
+    return cmd
+
+
 def _compile_command(system_name: str, tap_lib: Path) -> list[str]:
     if system_name == "Darwin":
         return [
@@ -92,7 +164,7 @@ def _compile_command(system_name: str, tap_lib: Path) -> list[str]:
         ]
     compiler = resolve_compiler(system_name)
     if system_name == "Windows":
-        return [compiler, "-shared", "-O2", "-Wall", "-Wextra", "-o", str(tap_lib), str(SOURCE_PATH), "-lws2_32"]
+        return _windows_compile_command(compiler, SOURCE_PATH, tap_lib, shared=True, libs=("ws2_32",))
     return [compiler, "-shared", "-fPIC", "-O2", "-Wall", "-Wextra", "-o", str(tap_lib), str(SOURCE_PATH), "-ldl"]
 
 
@@ -127,7 +199,38 @@ def build_tap(*, force: bool = False, check_executable: bool = False) -> Path:
     except OSError:
         # Windows ignores the POSIX mode; the parent directory already restricts access.
         pass
+
+    # Windows needs a second artifact: the DLL cannot inject itself, so build the
+    # same-bitness injector that loads it into the running client.
+    if system_name == "Windows":
+        build_injector(force=force)
     return tap_lib
+
+
+def build_injector(*, force: bool = False) -> Path:
+    """Compile the Windows DLL injector and return its path (Windows only).
+
+    The injector is a tiny standalone exe rather than in-process ctypes because
+    the SwC client is 32-bit while fpdb's Python is 64-bit: a same-bitness
+    LoadLibrary injection is the reliable path, so a 32-bit helper does it.
+    """
+    system_name = platform.system()
+    if system_name != "Windows":
+        msg = "the SwC DLL injector is only built on Windows"
+        raise RuntimeError(msg)
+    if not INJECTOR_SOURCE_PATH.exists():
+        msg = f"SwC injector source file not found at {INJECTOR_SOURCE_PATH}"
+        raise FileNotFoundError(msg)
+
+    injector = get_injector_path()
+    if injector.exists() and not force and injector.stat().st_mtime >= INJECTOR_SOURCE_PATH.stat().st_mtime:
+        return injector
+
+    BUILD_DIR.mkdir(mode=0o700, parents=True, exist_ok=True)
+    compiler = resolve_compiler(system_name)
+    command = _windows_compile_command(compiler, INJECTOR_SOURCE_PATH, injector, shared=False, libs=())
+    subprocess.run(command, check=True)
+    return injector
 
 
 def main(argv: list[str] | None = None) -> int:

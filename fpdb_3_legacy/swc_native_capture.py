@@ -14,6 +14,7 @@ import struct
 import subprocess
 import sys
 import threading
+import time
 from collections import Counter
 from collections.abc import Iterator
 from dataclasses import dataclass
@@ -41,21 +42,80 @@ from fpdb_3_legacy.swc_tap_build import (  # noqa: E402
     get_tap_library_path,
 )
 
-#: The platforms the live capture can actually run on. The tap is loaded into
-#: the client by library interposition -- DYLD_INSERT_LIBRARIES on macOS,
-#: LD_PRELOAD on Linux, see ``native_client_environment`` -- and Windows has no
-#: equivalent, so a tap built there is a library nothing can load. The C source
-#: does carry a Windows branch (GetModuleHandleA over the bundled OpenSSL DLLs)
-#: and CI compiles it on a Windows runner, but no injection path uses it yet:
-#: ``SWC_EXECUTABLE`` is a macOS bundle path and ``running_client_pids`` shells
-#: out to pgrep. Until one exists, building on Windows only produces a compiler
-#: error for a library that would go unused.
+#: Platforms that load the tap by library interposition at client launch --
+#: DYLD_INSERT_LIBRARIES on macOS, LD_PRELOAD on Linux (see
+#: ``native_client_environment``). Windows is deliberately excluded: it has no
+#: launch-time interposition, so the tap is instead *injected* into the already
+#: running client (see ``attach_to_windows_client``), a different code path.
 INTERPOSABLE_SYSTEMS = frozenset({"Darwin", "Linux"})
+
+#: Every platform that can capture live, by whichever mechanism.
+SUPPORTED_SYSTEMS = INTERPOSABLE_SYSTEMS | {"Windows"}
 
 
 def native_capture_supported(system_name: str | None = None) -> bool:
     """Whether the live native capture can be started on this platform."""
-    return (system_name or platform.system()) in INTERPOSABLE_SYSTEMS
+    return (system_name or platform.system()) in SUPPORTED_SYSTEMS
+
+
+def attach_to_windows_client(*, port: int = 0, include_outbound: bool = False) -> str:
+    """Build the tap, inject it into the running SwC client, and report the result.
+
+    Windows counterpart of ``launch_client``: rather than launching the client
+    with an interposition environment (impossible on Windows), it loads the tap
+    into ``SwCPoker.exe`` while it runs. The archive is always the DLL-relative
+    ``DEFAULT_ARCHIVE`` -- the injected DLL derives its own paths from its
+    location and cannot be told a different one through the environment.
+
+    Returns a short human-readable status. Raises RuntimeError when the client
+    is not running or no injection succeeded, so the caller can surface why.
+    """
+    if platform.system() != "Windows":
+        msg = "attach_to_windows_client is only valid on Windows"
+        raise RuntimeError(msg)
+    if not 0 <= port <= 65535:
+        raise ValueError("capture port must be 0 (auto) or between 1 and 65535")
+
+    from fpdb_3_legacy import swc_windows_inject as injector_mod
+    from fpdb_3_legacy.swc_tap_build import BUILD_DIR, build_injector
+
+    tap = build_tap(check_executable=False)
+    injector = build_injector()
+    injector_mod.write_capture_config(BUILD_DIR, port=port, include_outbound=include_outbound)
+
+    DEFAULT_ARCHIVE.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
+    DEFAULT_ARCHIVE.touch(exist_ok=True)
+
+    pids = injector_mod.find_client_pids()
+    if not pids:
+        msg = (
+            f"the SwC client ({injector_mod.SWC_CLIENT_IMAGE}) is not running; "
+            "start it and open a table, then start capture again"
+        )
+        raise RuntimeError(msg)
+
+    results = [injector_mod.inject_into_pid(injector, tap, pid) for pid in pids]
+    ok = [r for r in results if r.ok]
+    if not ok:
+        detail = "; ".join(f"pid {r.pid}: {r.detail}" for r in results)
+        msg = f"could not inject the SwC tap into any client process ({detail})"
+        raise RuntimeError(msg)
+
+    status_path = DEFAULT_ARCHIVE.with_suffix(".status")
+    hook_status = injector_mod.wait_for_hook(status_path)
+    log.info(
+        "SwC tap injected into pid(s) %s; DLL status=%r",
+        ", ".join(str(r.pid) for r in ok),
+        hook_status or "(none yet)",
+    )
+    if hook_status == "tap-hooked":
+        return f"SwC capture active: tap hooked in {len(ok)} client process(es)."
+    if hook_status in ("", "tap-loaded"):
+        return (
+            f"SwC tap loaded into {len(ok)} client process(es); it will start capturing "
+            "as soon as the client opens a secure connection (play or reopen a table)."
+        )
+    return f"SwC tap loaded but hooking reported '{hook_status}'; capture may be incomplete."
 
 
 TAP_LIBRARY = get_tap_library_path()
@@ -3360,6 +3420,32 @@ def main(argv: list[str] | None = None) -> int:
     if args.build or args.force_build:
         print(build_tap(force=args.force_build))
         return 0
+
+    # Windows injects the tap into the running client rather than launching it
+    # with an interposition environment, so it has no process to wait on: inject,
+    # then follow the DLL-relative archive the same way the launch path does.
+    if platform.system() == "Windows":
+        try:
+            status = attach_to_windows_client(port=args.port, include_outbound=args.include_outbound)
+        except (FileNotFoundError, RuntimeError, ValueError) as error:
+            print(f"error: {error}", file=sys.stderr)
+            return 2
+        archive = DEFAULT_ARCHIVE.expanduser().resolve()
+        print(status)
+        print(f"archive={archive}")
+        print("Dealer messages will appear with the [SWC] prefix. Press Ctrl+C to stop following.")
+        stop_follower = threading.Event()
+        follower = threading.Thread(target=follow_dealer_history, args=(archive, stop_follower), daemon=True)
+        follower.start()
+        try:
+            while True:
+                time.sleep(0.5)
+        except KeyboardInterrupt:
+            return 0
+        finally:
+            stop_follower.set()
+            follower.join(timeout=1)
+
     try:
         process = launch_client(args.archive, port=args.port, include_outbound=args.include_outbound)
     except (FileNotFoundError, RuntimeError, ValueError) as error:

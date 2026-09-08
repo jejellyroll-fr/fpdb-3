@@ -577,25 +577,32 @@ class GuiAutoImport(QWidget):
         if not self._swc_capture_wanted():
             return
         try:
+            import platform as _platform
+
             from fpdb_3_legacy.swc_native_capture import (
                 DEFAULT_ARCHIVE,
+                attach_to_windows_client,
                 build_tap,
                 native_capture_supported,
             )
 
             if not native_capture_supported():
-                # The tap is loaded into the client by library interposition,
-                # which Windows has no equivalent of. Building it there was the
-                # compiler failure users kept reporting -- for a library nothing
-                # on the platform could have loaded even if it had built.
-                log.info("SwC live capture needs library interposition, which this platform does not have.")
+                log.info("SwC live capture is not available on %s.", _platform.system())
                 self.addText(
                     _("\nSwC live capture is not available on this platform. Importing SwC files still works."),
                     "info",
                 )
                 return
 
-            build_tap(check_executable=False)
+            if _platform.system() == "Windows":
+                # Windows has no launch-time interposition, so the tap is injected
+                # into the already-running client. This builds the tap + injector
+                # and loads it into SwCPoker.exe; the user must have it running.
+                status = attach_to_windows_client()
+                self.addText(f"\n{status}", "poker")
+            else:
+                build_tap(check_executable=False)
+
             if self.swc_tailing_thread is None or not self.swc_tailing_thread.isRunning():
                 self.swc_tailing_thread = SwCNativeTailingThread(DEFAULT_ARCHIVE, parent=self)
                 self.swc_tailing_thread.hand_imported.connect(self._on_swc_native_hand_imported)
