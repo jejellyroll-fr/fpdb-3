@@ -17,6 +17,7 @@ from types import SimpleNamespace
 import pytest
 
 from fpdb_3_legacy.GuiAutoImport import GuiAutoImport
+from fpdb_3_legacy.http_capture_db_import import import_http_capture_hand
 
 
 class _Gui(SimpleNamespace):
@@ -92,3 +93,72 @@ def test_a_failing_import_does_not_claim_success(gui, monkeypatch) -> None:
     gui.on_hand(_hand())
 
     assert gui.messages == []
+
+
+def _native_public_hand() -> dict:
+    return {
+        "site": "SealsWithClubs",
+        "hand_id": 301461728,
+        "game": {"base": "hold", "category": "holdem", "fpdb_supported": False},
+        "gametype": {"base": "hold", "category": "holdem", "maxSeats": 2},
+        "metadata": {
+            "adapter": "swc_native",
+            "state_model": "snapshot",
+            "action_reconstruction": {"status": "complete"},
+            "importability": {
+                "complete_action_players": True,
+                "settlement_conservation_complete": True,
+                "has_small_blind": True,
+                "has_big_blind": True,
+                "has_collection": True,
+            },
+        },
+        "players": [{"name": "Hero", "seat_idx": 1, "starting_stack": None}],
+        "board": ["10h", "Jd", "2d", "Ks", "10d"],
+        "actions": [
+            {"type": "small blind", "player": "Hero", "street": "BLINDSANTES", "amount": 2},
+            {"type": "big blind", "player": "Villain", "street": "PREFLOP", "amount": 4},
+        ],
+        "collections": [{"player": "Hero", "amount_native": 6}],
+    }
+
+
+def test_native_public_hand_is_sent_through_fpdb_importer(monkeypatch) -> None:
+    seen = {}
+    built = SimpleNamespace()
+
+    def build(hand_data, *, config):
+        seen["hand_data"] = hand_data
+        seen["config"] = config
+        return built
+
+    def store(hand, db, **kwargs):
+        seen["store"] = (hand, db, kwargs)
+        hand.dbid_hands = 42
+
+    monkeypatch.setattr("fpdb_3_legacy.http_capture_db_import.build_fpdb_hand", build)
+    monkeypatch.setattr("fpdb_3_legacy.http_capture_db_import.import_fpdb_hand", store)
+
+    result = import_http_capture_hand(object(), _native_public_hand())
+
+    assert result.status == "imported"
+    assert result.row_id == 42
+    assert result.replay_ref == "native:301461728"
+    assert seen["hand_data"]["game"]["fpdb_supported"] is True
+    assert seen["hand_data"]["players"][0]["starting_stack"] == 0
+    assert seen["hand_data"]["board"] == ["Th", "Jd", "2d", "Ks", "Td"]
+    assert seen["config"].get_site_id("SealsWithClubs") == 23
+
+
+def test_incomplete_native_hand_stays_capture_only(monkeypatch) -> None:
+    monkeypatch.setattr(
+        "fpdb_3_legacy.http_capture_db_import.build_fpdb_hand",
+        lambda **_kwargs: pytest.fail("incomplete native hand must not be built"),
+    )
+    hand = _native_public_hand()
+    hand["metadata"]["importability"]["settlement_conservation_complete"] = False
+
+    result = import_http_capture_hand(object(), hand)
+
+    assert result.status == "skipped"
+    assert "settlement is not proven" in result.message

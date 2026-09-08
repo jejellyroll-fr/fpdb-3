@@ -630,9 +630,16 @@ class GuiAutoImport(QWidget):
             return
 
         try:
-            import_http_capture_hand(database, hand_data)
+            result = import_http_capture_hand(database, hand_data)
         except Exception:
             log.exception("Failed to import SwC live hand %s", hand_data.get("hand_id"))
+            return
+
+        if result is not None and result.status == "skipped":
+            log.info("SwC native hand %s remains capture-only: %s", hand_data.get("hand_id"), result.message)
+            return
+        if result is not None and result.status == "duplicate":
+            self.addText(f"\n[SwC Live] Hand #{hand_data.get('hand_id', 0)} already imported.", "info")
             return
 
         game_cat = hand_data.get("game", {}).get("category", "unknown")
