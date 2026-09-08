@@ -1877,25 +1877,72 @@ def extract_game_state(message: NativeProtocolMessage, table_ids: set[int]) -> N
     return None
 
 
-def extract_native_board(snapshot: NativeGameStateSnapshot, family: str) -> tuple[str, ...]:
-    """Extract the confirmed Hold'em/Omaha board stored before the table footer."""
+def _skip_native_board_hand_evaluations(payload: bytes, cursor: int, end: int) -> int:
+    """Skip showdown hand labels between the native board marker and cards."""
+    while cursor + 2 < end:
+        strlen = int.from_bytes(payload[cursor : cursor + 2], "little")
+        candidate_end = cursor + 2 + strlen
+        candidate = payload[cursor + 2 : candidate_end]
+        if not 4 <= strlen <= 64 or candidate_end > end or not all(32 <= byte <= 126 for byte in candidate):
+            break
+        cursor = candidate_end
+    return cursor
+
+
+def _native_card_block(payload: bytes, count_offset: int, end: int) -> tuple[str, ...] | None:
+    """Decode one count-prefixed native board, if it fits before the footer."""
+    count = payload[count_offset]
+    card_end = count_offset + 1 + count
+    if count not in (3, 4, 5) or card_end > end:
+        return None
+    card_ids = payload[count_offset + 1 : card_end]
+    if not all(card_id <= 51 for card_id in card_ids) or len(set(card_ids)) != count:
+        return None
+    return tuple(card_id_to_str(card_id) for card_id in card_ids)
+
+
+def _native_board_candidate(payload: bytes, count_offset: int, table_offset: int) -> tuple[tuple[str, ...], ...] | None:
+    """Decode the one- or two-board block at a candidate count byte."""
+    first_board = _native_card_block(payload, count_offset, table_offset)
+    if first_board is None:
+        return None
+
+    first_end = count_offset + 1 + len(first_board)
+    second_board = _native_card_block(payload, first_end, table_offset) if first_end < table_offset else None
+    end_boards = first_end + (1 + len(second_board) if second_board else 0)
+    if not 8 <= table_offset - end_boards <= 22:
+        return None
+    return (first_board, second_board) if second_board else (first_board,)
+
+
+def extract_native_boards(snapshot: NativeGameStateSnapshot, family: str) -> tuple[tuple[str, ...], ...]:
+    """Extract confirmed Hold'em/Omaha board(s) stored before the table footer.
+
+    Supports single-board runouts, double-board bomb pots, and run-it-twice runs.
+    """
     if family not in {"holdem", "omaha"} or snapshot.round_number < 2:
         return ()
-    expected_count = min(snapshot.round_number + 1, 5)
     table_offset = snapshot.raw_payload.find(snapshot.table_id.to_bytes(4, "little"), 4)
     if table_offset < 0:
         return ()
     marker = snapshot.raw_payload.rfind(b"\xf0\xbf", 0, table_offset)
     if marker < 0:
         return ()
-    for count_offset in range(marker + 2, min(marker + 8, table_offset)):
-        if snapshot.raw_payload[count_offset] != expected_count:
-            continue
-        card_ids = snapshot.raw_payload[count_offset + 1 : count_offset + 1 + expected_count]
-        footer_size = table_offset - (count_offset + 1 + expected_count)
-        if len(card_ids) == expected_count and all(card_id <= 51 for card_id in card_ids) and 14 <= footer_size <= 18:
-            return tuple(card_id_to_str(card_id) for card_id in card_ids)
+
+    payload = snapshot.raw_payload
+    cursor = _skip_native_board_hand_evaluations(payload, marker + 2, table_offset)
+
+    for count_off in range(cursor, min(cursor + 6, table_offset)):
+        if candidate := _native_board_candidate(payload, count_off, table_offset):
+            return candidate
+
     return ()
+
+
+def extract_native_board(snapshot: NativeGameStateSnapshot, family: str) -> tuple[str, ...]:
+    """Extract the primary confirmed Hold'em/Omaha board stored before the table footer."""
+    boards = extract_native_boards(snapshot, family)
+    return boards[0] if boards else ()
 
 
 def _parse_type_10_event(payload: bytes, cursor: int) -> tuple[int, str | None]:
@@ -2613,6 +2660,45 @@ def promote_native_omaha_importability(hands: list[dict]) -> None:
         audit.update(importable=True, status="importable", reasons=[])
 
 
+def _native_board_output(final_boards: tuple[tuple[str, ...], ...], table_name: str) -> dict:
+    """Build the compatibility board plus the complete parallel-board view."""
+    final_board = final_boards[0] if final_boards else ()
+    community: dict[str, list[str]] = {}
+    board_dicts = []
+    for board_index, board in enumerate(final_boards, start=1):
+        suffix = "" if board_index == 1 else str(board_index)
+        board_dict = {}
+        if len(board) >= 3:
+            community[f"FLOP{suffix}"] = list(board[:3])
+            board_dict["FLOP"] = list(board[:3])
+        if len(board) >= 4:
+            community[f"TURN{suffix}"] = [board[3]]
+            board_dict["TURN"] = [board[3]]
+        if len(board) >= 5:
+            community[f"RIVER{suffix}"] = [board[4]]
+            board_dict["RIVER"] = [board[4]]
+        board_dicts.append(board_dict)
+
+    table_name_lower = table_name.lower()
+    is_bomb_pot = "bomb pot" in table_name_lower
+    is_double_board = len(final_boards) > 1 and (
+        "double board" in table_name_lower
+        or (
+            len(final_boards[0]) >= 3
+            and len(final_boards[1]) >= 3
+            and final_boards[0][:3] != final_boards[1][:3]
+        )
+    )
+    return {
+        "board": list(final_board),
+        "boards": board_dicts,
+        "run_it_times": len(final_boards) if len(final_boards) > 1 else 1,
+        "double_board": is_double_board,
+        "bomb_pot": is_bomb_pot,
+        "community": community,
+    }
+
+
 def normalize_native_hands(  # noqa: PLR0915 - protocol normalization is intentionally linear
     messages: list[NativeProtocolMessage], *, raw_ref: str
 ) -> list[dict]:
@@ -2666,7 +2752,8 @@ def normalize_native_hands(  # noqa: PLR0915 - protocol normalization is intenti
         previous_step = None
         for step_num, snapshot in enumerate(snapshots, 1):
             stacks = {player.name: player.stack_units for player in snapshot.players if player.stack_units is not None}
-            board = extract_native_board(snapshot, family)
+            boards = extract_native_boards(snapshot, family)
+            board = boards[0] if boards else ()
             native_events = extract_native_animation_events(
                 NativeProtocolMessage(
                     snapshot.captured_at,
@@ -2705,6 +2792,7 @@ def normalize_native_hands(  # noqa: PLR0915 - protocol normalization is intenti
                 "stacks": stacks,
                 "bets": {},
                 "board": list(board),
+                "boards": [list(b) for b in boards],
                 "placed": {},
                 "folded": [],
                 "pot": 0,
@@ -2831,7 +2919,12 @@ def normalize_native_hands(  # noqa: PLR0915 - protocol normalization is intenti
             dealer_collections_by_hand.get((table_id, hand_id), []),
         )
         evaluated_hands = evaluated_cards_by_hand.get((table_id, hand_id), set())
-        final_board = max((extract_native_board(snapshot, family) for snapshot in snapshots), key=len, default=())
+        final_boards = max(
+            (extract_native_boards(snapshot, family) for snapshot in snapshots),
+            key=lambda bs: (len(bs), sum(len(b) for b in bs)),
+            default=(),
+        )
+        final_board = final_boards[0] if final_boards else ()
         showdown = _build_native_showdown(collections, evaluated_hands, final_board)
         dealer_events = dealer_events_by_hand.get((table_id, hand_id), [])
         ofc_scores = [parsed for event in dealer_events if (parsed := parse_native_ofc_scores(event["text"]))]
@@ -2886,6 +2979,7 @@ def normalize_native_hands(  # noqa: PLR0915 - protocol normalization is intenti
             dealer_hand_started=any(event["text"] == "New hand started" for event in dealer_events),
             dealer_hand_complete=any(event["text"] == "Hand complete" for event in dealer_events),
         )
+        board_output = _native_board_output(final_boards, table.name or "")
         hands.append(
             {
                 "site": "SealsWithClubs",
@@ -2944,12 +3038,7 @@ def normalize_native_hands(  # noqa: PLR0915 - protocol normalization is intenti
                     for roster_index, player in enumerate(player_order.values())
                 ],
                 "steps": steps,
-                "board": list(final_board),
-                "community": {
-                    **({"FLOP": list(final_board[:3])} if len(final_board) >= 3 else {}),
-                    **({"TURN": [final_board[3]]} if len(final_board) >= 4 else {}),
-                    **({"RIVER": [final_board[4]]} if len(final_board) >= 5 else {}),
-                },
+                **board_output,
                 "holecards": [native_hero_hole_cards] if native_hero_hole_cards else [],
                 "action_evidence": action_evidence,
                 "outbound_action_evidence": outbound_actions_by_hand.get((table_id, hand_id), []),

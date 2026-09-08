@@ -36,6 +36,7 @@ from fpdb_3_legacy.swc_native_capture import (
     extract_native_animation_events,
     extract_native_blind_structure,
     extract_native_board,
+    extract_native_boards,
     extract_native_collections,
     extract_native_hero_hole_cards,
     extract_native_ofc_showdown_rows,
@@ -464,6 +465,87 @@ def test_extract_native_board_reads_observed_pre_footer_cards(round_number, card
 
     assert snapshot is not None
     assert extract_native_board(snapshot, "omaha") == expected
+    assert extract_native_boards(snapshot, "omaha") == (expected,)
+
+
+def test_extract_native_boards_ignores_preflop_state():
+    table_id = 24812
+    hand_id = 298328325
+    payload = (
+        b"\x16\0state\xf0\xbf\0\0\0"
+        + bytes([3, 30, 24, 14])
+        + (b"\0" * 14)
+        + hand_id.to_bytes(4, "little")
+        + table_id.to_bytes(4, "little")
+        + (b"\0" * 5)
+        + b"\x01"
+    )
+    snapshot = extract_game_state(NativeProtocolMessage(datetime.now(UTC), payload), {table_id})
+
+    assert snapshot is not None
+    assert extract_native_boards(snapshot, "holdem") == ()
+
+
+def test_extract_native_boards_reads_double_board_bomb_pot():
+    table_id = 299657213
+    hand_id = 301461736
+    b1_cards = [34, 37, 1, 47, 33]  # 10h, Jd, 2d, Ks, 10d
+    b2_cards = [42, 14, 43, 18, 38]  # Qh, 5h, Qs, 6h, Jh
+    prefix = b"\x16\0state\xf0\xbf\0"
+    board_bytes = bytes([len(b1_cards), *b1_cards, len(b2_cards), *b2_cards])
+    footer = b"\0" * 10
+    payload = (
+        prefix
+        + board_bytes
+        + footer
+        + hand_id.to_bytes(4, "little")
+        + table_id.to_bytes(4, "little")
+        + (b"\0" * 5)
+        + bytes([2])
+    )
+    snapshot = extract_game_state(NativeProtocolMessage(datetime.now(UTC), payload), {table_id})
+
+    assert snapshot is not None
+    boards = extract_native_boards(snapshot, "holdem")
+    assert len(boards) == 2
+    assert boards[0] == ("10h", "Jd", "2d", "Ks", "10d")
+    assert boards[1] == ("Qh", "5h", "Qs", "6h", "Jh")
+    assert extract_native_board(snapshot, "holdem") == boards[0]
+
+
+def test_extract_native_boards_reads_run_it_twice_at_showdown_with_hand_eval_strings():
+    table_id = 299672838
+    hand_id = 301461752
+    b1_cards = [31, 38, 10, 46, 12]  # 9s, Jh, 4h, Kh, 5c
+    b2_cards = [31, 38, 10, 8, 24]   # 9s, Jh, 4h, 4c, 8c (shared flop: 9s, Jh, 4h)
+    eval_text1 = b"Flush high Kh"
+    eval_text2 = b"Two Pairs 9 4 and K"
+    strings_block = (
+        len(eval_text1).to_bytes(2, "little")
+        + eval_text1
+        + len(eval_text2).to_bytes(2, "little")
+        + eval_text2
+        + b"\0\0"
+    )
+    prefix = b"\x16\0state\xf0\xbf" + strings_block
+    board_bytes = bytes([len(b1_cards), *b1_cards, len(b2_cards), *b2_cards])
+    footer = b"\0" * 10
+    payload = (
+        prefix
+        + board_bytes
+        + footer
+        + hand_id.to_bytes(4, "little")
+        + table_id.to_bytes(4, "little")
+        + (b"\0" * 5)
+        + bytes([5])
+    )
+    snapshot = extract_game_state(NativeProtocolMessage(datetime.now(UTC), payload), {table_id})
+
+    assert snapshot is not None
+    boards = extract_native_boards(snapshot, "omaha")
+    assert len(boards) == 2
+    assert boards[0] == ("9s", "Jh", "4h", "Kh", "5c")
+    assert boards[1] == ("9s", "Jh", "4h", "4c", "8c")
 
 
 def test_extract_native_animation_events_reads_observed_type_9_suffix():
@@ -1144,6 +1226,77 @@ def test_normalize_native_hands_builds_capture_only_snapshot_envelope():
     assert hand["action_evidence"] == []
     assert hand["metadata"]["importability"]["poker_event_count"] == 0
     assert "hand start is not fully observed" in hand["metadata"]["importability"]["reasons"][0]
+
+
+def test_normalize_native_hands_decodes_double_board_bomb_pot_and_streets():
+    captured_at = datetime.now(UTC)
+    table_id = 299657213
+    hand_id = 301461736
+    name = b"Player"
+    table_name = b"No-Rake Micro Stakes Double Board Bomb Pots #1"
+    table_payload = (
+        b"\x22\0"
+        + (b"\0" * 4)
+        + table_id.to_bytes(4, "little")
+        + b"\x01"
+        + (b"\0" * 4)
+        + b"H"
+        + len(table_name).to_bytes(2, "little")
+        + table_name
+        + b"UR"
+    )
+    b1_cards = [34, 37, 1, 47, 33]  # 10h, Jd, 2d, Ks, 10d
+    b2_cards = [42, 14, 43, 18, 38]  # Qh, 5h, Qs, 6h, Jh
+    player = (
+        (7).to_bytes(4, "little")
+        + len(name).to_bytes(2, "little")
+        + name
+        + b"\0\0prefix\xf0\xbf\0\x16\x80"
+        + (b"\0" * 6)
+        + (580).to_bytes(3, "little")
+        + b"suffix"
+    )
+    prefix = b"\x16\0" + player + b"\xf0\xbf\0"
+    board_bytes = bytes([len(b1_cards), *b1_cards, len(b2_cards), *b2_cards])
+    footer = b"\0" * 10
+    state_payload = (
+        prefix
+        + board_bytes
+        + footer
+        + hand_id.to_bytes(4, "little")
+        + table_id.to_bytes(4, "little")
+        + (b"\0" * 5)
+        + bytes([2])
+    )
+    hands = normalize_native_hands(
+        [
+            NativeProtocolMessage(captured_at, table_payload),
+            NativeProtocolMessage(captured_at, state_payload, peer_port=20013),
+        ],
+        raw_ref="capture.raw",
+    )
+
+    assert len(hands) == 1
+    hand = hands[0]
+    assert hand["board"] == ["10h", "Jd", "2d", "Ks", "10d"]
+    assert hand["run_it_times"] == 2
+    assert hand["double_board"] is True
+    assert hand["bomb_pot"] is True
+    assert hand["community"] == {
+        "FLOP": ["10h", "Jd", "2d"],
+        "TURN": ["Ks"],
+        "RIVER": ["10d"],
+        "FLOP2": ["Qh", "5h", "Qs"],
+        "TURN2": ["6h"],
+        "RIVER2": ["Jh"],
+    }
+    assert len(hand["boards"]) == 2
+    assert hand["boards"][0] == {"FLOP": ["10h", "Jd", "2d"], "TURN": ["Ks"], "RIVER": ["10d"]}
+    assert hand["boards"][1] == {"FLOP": ["Qh", "5h", "Qs"], "TURN": ["6h"], "RIVER": ["Jh"]}
+    assert hand["steps"][0]["boards"] == [
+        ["10h", "Jd", "2d", "Ks", "10d"],
+        ["Qh", "5h", "Qs", "6h", "Jh"],
+    ]
 
 
 def test_audit_native_hand_reports_unresolved_actions_and_missing_settlement():
