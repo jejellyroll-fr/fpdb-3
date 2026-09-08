@@ -19,6 +19,7 @@ from fpdb_3_legacy.swc_native_capture import (
     NativeSeatEvidence,
     _build_native_action_evidence,
     _collect_native_game_changes,
+    _native_board_output,
     _native_street_profile,
     _retain_bijective_native_seat_evidence,
     add_native_funds_byte_amounts_if_conserved,
@@ -1297,6 +1298,20 @@ def test_normalize_native_hands_decodes_double_board_bomb_pot_and_streets():
         ["10h", "Jd", "2d", "Ks", "10d"],
         ["Qh", "5h", "Qs", "6h", "Jh"],
     ]
+
+
+def test_native_board_output_distinguishes_shared_flop_run_it_twice():
+    output = _native_board_output(
+        (
+            ("9s", "Jh", "4h", "Kh", "5c"),
+            ("9s", "Jh", "4h", "4c", "8c"),
+        ),
+        "No-Rake Micro Stakes PLO Double Board Bomb Pots #1",
+    )
+
+    assert output["double_board"] is False
+    assert output["bomb_pot"] is False
+    assert output["run_it_times"] == 2
 
 
 def test_audit_native_hand_reports_unresolved_actions_and_missing_settlement():

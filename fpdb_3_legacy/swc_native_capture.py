@@ -2680,15 +2680,15 @@ def _native_board_output(final_boards: tuple[tuple[str, ...], ...], table_name: 
         board_dicts.append(board_dict)
 
     table_name_lower = table_name.lower()
-    is_bomb_pot = "bomb pot" in table_name_lower
-    is_double_board = len(final_boards) > 1 and (
-        "double board" in table_name_lower
-        or (
-            len(final_boards[0]) >= 3
-            and len(final_boards[1]) >= 3
-            and final_boards[0][:3] != final_boards[1][:3]
-        )
+    shared_flop = len(final_boards) > 1 and all(
+        len(board) >= 3 and board[:3] == final_boards[0][:3] for board in final_boards[1:]
     )
+    # A room/table label is not enough to call the hand a double-board bomb
+    # pot: this table can also produce a normal hand that runs the turn and
+    # river twice. Independent flops identify a true double-board hand;
+    # identical flops followed by divergent streets identify run-it-twice.
+    is_double_board = len(final_boards) > 1 and not shared_flop
+    is_bomb_pot = "bomb pot" in table_name_lower and not shared_flop
     return {
         "board": list(final_board),
         "boards": board_dicts,
