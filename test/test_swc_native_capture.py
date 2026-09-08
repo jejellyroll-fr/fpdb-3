@@ -1748,6 +1748,74 @@ def test_swc_native_tailing_does_not_reimport_a_known_hand(tmp_path, monkeypatch
     assert thread.poll_once() == []
 
 
+def _tailing_thread_snapshots(tmp_path, monkeypatch, snapshots):
+    """A tailing thread whose decode stage yields one list of hands per poll."""
+    from fpdb_3_legacy import swc_native_capture
+    from fpdb_3_legacy.GuiAutoImport import SwCNativeTailingThread
+
+    stages = [list(stage) for stage in snapshots]
+    monkeypatch.setattr(swc_native_capture, "iter_protocol_messages", lambda records: list(records))
+    monkeypatch.setattr(
+        swc_native_capture,
+        "normalize_native_hands",
+        lambda messages, raw_ref=None: stages.pop(0) if stages else [],
+    )
+
+    raw = tmp_path / "swc-native.raw"
+    raw.write_bytes(_record())
+    return SwCNativeTailingThread(raw_path=raw), raw
+
+
+def _append(raw, payload=b"more"):
+    """Another record, so the next poll has something new to read."""
+    with raw.open("ab") as handle:
+        handle.write(_record(payload))
+
+
+def test_swc_native_tailing_reoffers_a_hand_that_later_becomes_importable(tmp_path, monkeypatch):
+    """The tailer polls every 2.5s, so a hand is normally first seen mid-play.
+
+    Retiring the hand on that first emission discarded it for good: the later
+    records that complete its actions and settlement were decoded, and then
+    suppressed. Only a terminal import result may retire a key.
+    """
+    partial = {"table_id": 7, "hand_id": 1234, "actions": []}
+    complete = {"table_id": 7, "hand_id": 1234, "actions": [{"type": "big blind"}]}
+    thread, raw = _tailing_thread_snapshots(tmp_path, monkeypatch, [[partial], [complete], [complete]])
+
+    assert thread.poll_once() == [partial]
+
+    _append(raw)
+    assert thread.poll_once() == [complete]
+
+    _append(raw)
+    assert thread.poll_once() == []  # an unchanged snapshot is not offered again
+
+
+def test_swc_native_tailing_stops_after_a_terminal_import_result(tmp_path, monkeypatch):
+    hand = {"table_id": 7, "hand_id": 1234}
+    thread, raw = _tailing_thread_snapshots(tmp_path, monkeypatch, [[hand], [{**hand, "actions": [1]}]])
+    assert thread.poll_once() == [hand]
+
+    thread.mark_hand_complete(hand)
+    _append(raw)
+
+    assert thread.poll_once() == []
+
+
+def test_swc_native_tailing_reports_a_capture_only_hand_once(tmp_path, monkeypatch):
+    """A skipped hand is re-offered as it grows, so the log line must not repeat."""
+    hand = {"table_id": 7, "hand_id": 1234}
+    thread, _raw = _tailing_thread(tmp_path, monkeypatch, [hand])
+
+    assert thread.note_capture_only(hand) is True
+    assert thread.note_capture_only(hand) is False
+
+    thread.mark_hand_complete(hand)
+
+    assert thread.note_capture_only(hand) is True
+
+
 def test_swc_native_tailing_consumes_the_archive_once(tmp_path, monkeypatch):
     """A poll must advance past what it read instead of re-parsing from zero."""
     thread, raw = _tailing_thread(tmp_path, monkeypatch, [])

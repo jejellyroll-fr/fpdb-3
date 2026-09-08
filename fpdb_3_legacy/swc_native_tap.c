@@ -100,6 +100,20 @@ static int capture_outbound = 0;
 static wchar_t g_status_path[MAX_PATH] = {0};
 static SRWLOCK g_capture_lock = SRWLOCK_INIT;
 
+/* One archive record is two writes (header, then payload), and the SRWLOCK above
+ * only orders the threads of *this* process. attach_to_windows_client injects
+ * every running SwCPoker.exe, and they all append to the same DLL-relative
+ * archive, so two clients could otherwise put one record's header between
+ * another's header and payload -- which desynchronises iter_capture_records for
+ * good. A named mutex in the client's session namespace makes the pair atomic
+ * across processes, the same guarantee flock gives the POSIX path. */
+#define SWC_CAPTURE_MUTEX_NAME L"Local\\fpdb-swc-native-capture"
+/* Bounded because this runs on the client's network thread: a wedged peer must
+ * not stall the game. Dropping one record keeps the archive readable, which an
+ * interleaved one is not. */
+#define SWC_CAPTURE_LOCK_TIMEOUT_MS 2000u
+static HANDLE g_capture_mutex = NULL;
+
 static void write_status(const char *message) {
     const char *env_path = getenv("SWC_CAPTURE_STATUS_PATH");
     int fd = -1;
@@ -237,10 +251,23 @@ static void record_plaintext(SSL *ssl, const void *buffer, int size, uint8_t dir
         flock(capture_fd, LOCK_UN);
     }
 #else
-    AcquireSRWLockExclusive(&g_capture_lock);
-    write_all(capture_fd, &header, sizeof(header));
-    write_all(capture_fd, buffer, (size_t)size);
-    ReleaseSRWLockExclusive(&g_capture_lock);
+    {
+        DWORD wait = (g_capture_mutex != NULL) ? WaitForSingleObject(g_capture_mutex, SWC_CAPTURE_LOCK_TIMEOUT_MS)
+                                               : WAIT_OBJECT_0;
+        /* WAIT_ABANDONED still grants ownership: a peer died holding the mutex,
+         * and records are only ever appended whole, so there is no shared state
+         * to recover. Anything else drops this record rather than risk writing
+         * it into another process's half-written one. */
+        if (wait == WAIT_OBJECT_0 || wait == WAIT_ABANDONED) {
+            AcquireSRWLockExclusive(&g_capture_lock);
+            write_all(capture_fd, &header, sizeof(header));
+            write_all(capture_fd, buffer, (size_t)size);
+            ReleaseSRWLockExclusive(&g_capture_lock);
+            if (g_capture_mutex != NULL) {
+                ReleaseMutex(g_capture_mutex);
+            }
+        }
+    }
 #endif
 }
 
@@ -442,11 +469,22 @@ static int swc_prologue_len(const uint8_t *code, int min_len) {
  * the JMP displacement before its opcode is not safe: bytes 1-4 are operands of
  * the original instruction until byte 0 changes. We also inspect each suspended
  * thread's instruction pointer and retry if one is currently inside the displaced
- * prologue, so no thread resumes in bytes whose meaning changed under it. */
+ * prologue, so no thread resumes in bytes whose meaning changed under it.
+ *
+ * A thread snapshot is a fixed list, so a thread created after it was taken is
+ * invisible to it and stays runnable through the patch. Suspension therefore
+ * repeats until a whole pass finds nothing new: once every other thread is
+ * stopped, none of them can create another, so a pass that suspends nothing
+ * proves the set is closed. */
 #define SWC_MAX_SUSPENDED_THREADS 256u
+/* Bound on those passes. A client creating threads faster than they can be
+ * suspended would otherwise keep this spinning; failing closed leaves the
+ * client's entry points untouched and the capture simply stays empty. */
+#define SWC_MAX_SUSPEND_PASSES 8u
 
 struct swc_suspended_threads {
     HANDLE handles[SWC_MAX_SUSPENDED_THREADS];
+    DWORD ids[SWC_MAX_SUSPENDED_THREADS];
     size_t count;
 };
 
@@ -458,82 +496,118 @@ static void swc_resume_threads(struct swc_suspended_threads *state) {
     }
 }
 
+static int swc_thread_is_suspended(const struct swc_suspended_threads *state, DWORD thread_id) {
+    for (size_t index = 0; index < state->count; index++) {
+        if (state->ids[index] == thread_id) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+/* Stop one thread and refuse the patch if it is inside the prologue being
+ * displaced. 1 = suspended, 2 = inside the prologue, 0 = failure. A thread that
+ * is rejected here is resumed before returning, so it is never left in `state`. */
+static int swc_suspend_thread(struct swc_suspended_threads *state, DWORD thread_id,
+                              const uint8_t *start, SIZE_T length) {
+    HANDLE thread = OpenThread(THREAD_SUSPEND_RESUME | THREAD_GET_CONTEXT, FALSE, thread_id);
+    CONTEXT context;
+    uintptr_t ip;
+
+    if (thread == NULL) {
+        /* The thread exited between the snapshot and here: nothing left to stop. */
+        return GetLastError() == ERROR_INVALID_PARAMETER ? 1 : 0;
+    }
+    if (SuspendThread(thread) == (DWORD)-1) {
+        CloseHandle(thread);
+        return 0;
+    }
+    memset(&context, 0, sizeof(context));
+    context.ContextFlags = CONTEXT_CONTROL;
+    if (!GetThreadContext(thread, &context)) {
+        ResumeThread(thread);
+        CloseHandle(thread);
+        return 0;
+    }
+#ifdef _WIN64
+    ip = (uintptr_t)context.Rip;
+#else
+    ip = (uintptr_t)context.Eip;
+#endif
+    if (ip >= (uintptr_t)start && ip < (uintptr_t)(start + length)) {
+        ResumeThread(thread);
+        CloseHandle(thread);
+        return 2;
+    }
+    if (state->count >= SWC_MAX_SUSPENDED_THREADS) {
+        ResumeThread(thread);
+        CloseHandle(thread);
+        return 0;
+    }
+    state->handles[state->count] = thread;
+    state->ids[state->count] = thread_id;
+    state->count++;
+    return 1;
+}
+
 /* 0 = failure, 1 = ready to patch, 2 = a thread is inside the prologue. */
 static int swc_suspend_other_threads(struct swc_suspended_threads *state,
                                      const uint8_t *start, SIZE_T length) {
     const DWORD process_id = GetCurrentProcessId();
     const DWORD current_thread_id = GetCurrentThreadId();
-    HANDLE snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, 0);
-    THREADENTRY32 entry;
 
     state->count = 0;
-    if (snapshot == INVALID_HANDLE_VALUE) {
-        return 0;
-    }
-    memset(&entry, 0, sizeof(entry));
-    entry.dwSize = sizeof(entry);
-    if (!Thread32First(snapshot, &entry)) {
-        CloseHandle(snapshot);
-        return 0;
-    }
+    for (DWORD pass = 0; pass < SWC_MAX_SUSPEND_PASSES; pass++) {
+        HANDLE snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, 0);
+        THREADENTRY32 entry;
+        size_t suspended_this_pass = 0;
+        int outcome = 1;
 
-    for (;;) {
-        if (entry.th32OwnerProcessID == process_id && entry.th32ThreadID != current_thread_id) {
-            if (state->count >= SWC_MAX_SUSPENDED_THREADS) {
-                CloseHandle(snapshot);
-                swc_resume_threads(state);
-                return 0;
-            }
-
-            HANDLE thread = OpenThread(THREAD_SUSPEND_RESUME | THREAD_GET_CONTEXT, FALSE,
-                                       entry.th32ThreadID);
-            if (thread == NULL) {
-                DWORD error = GetLastError();
-                if (error != ERROR_INVALID_PARAMETER) {
-                    CloseHandle(snapshot);
-                    swc_resume_threads(state);
-                    return 0;
-                }
-            } else {
-                if (SuspendThread(thread) == (DWORD)-1) {
-                    CloseHandle(thread);
-                    CloseHandle(snapshot);
-                    swc_resume_threads(state);
-                    return 0;
-                }
-                state->handles[state->count++] = thread;
-
-                CONTEXT context;
-                memset(&context, 0, sizeof(context));
-                context.ContextFlags = CONTEXT_CONTROL;
-                if (!GetThreadContext(thread, &context)) {
-                    CloseHandle(snapshot);
-                    swc_resume_threads(state);
-                    return 0;
-                }
-#ifdef _WIN64
-                uintptr_t ip = (uintptr_t)context.Rip;
-#else
-                uintptr_t ip = (uintptr_t)context.Eip;
-#endif
-                if (ip >= (uintptr_t)start && ip < (uintptr_t)(start + length)) {
-                    CloseHandle(snapshot);
-                    swc_resume_threads(state);
-                    return 2;
-                }
-            }
+        if (snapshot == INVALID_HANDLE_VALUE) {
+            swc_resume_threads(state);
+            return 0;
         }
-
-        if (!Thread32Next(snapshot, &entry)) {
-            DWORD error = GetLastError();
+        memset(&entry, 0, sizeof(entry));
+        entry.dwSize = sizeof(entry);
+        if (!Thread32First(snapshot, &entry)) {
             CloseHandle(snapshot);
-            if (error != ERROR_NO_MORE_FILES) {
-                swc_resume_threads(state);
-                return 0;
+            swc_resume_threads(state);
+            return 0;
+        }
+
+        for (;;) {
+            if (entry.th32OwnerProcessID == process_id && entry.th32ThreadID != current_thread_id &&
+                !swc_thread_is_suspended(state, entry.th32ThreadID)) {
+                size_t before = state->count;
+                int suspended = swc_suspend_thread(state, entry.th32ThreadID, start, length);
+                if (suspended != 1) {
+                    outcome = suspended;
+                    break;
+                }
+                /* A thread that was already gone counts as stopped but not as
+                 * new, so it cannot keep this loop asking for another pass. */
+                suspended_this_pass += (state->count > before) ? 1 : 0;
             }
-            return 1;
+            if (!Thread32Next(snapshot, &entry)) {
+                if (GetLastError() != ERROR_NO_MORE_FILES) {
+                    outcome = 0;
+                }
+                break;
+            }
+        }
+        CloseHandle(snapshot);
+
+        if (outcome != 1) {
+            swc_resume_threads(state);
+            return outcome;
+        }
+        if (suspended_this_pass == 0) {
+            return 1; /* every other thread, including ones created mid-pass, is stopped */
         }
     }
+
+    swc_resume_threads(state);
+    return 0;
 }
 
 /* Install a 5-byte JMP-rel32 hook over *target*. The trampoline is published
@@ -771,6 +845,15 @@ static void initialize_swc_tap(HINSTANCE self) {
     _snwprintf(cfg_path, MAX_PATH, L"%sswc-native.cfg", dir);
     swc_read_config(cfg_path);
 
+    /* Opened before any record can be written, and reported before tap-loaded so
+     * that line stays the last status the Python side reads. Without it, records
+     * are ordered per process only; say so, because a desynchronised archive is
+     * otherwise silent. */
+    g_capture_mutex = CreateMutexW(NULL, FALSE, SWC_CAPTURE_MUTEX_NAME);
+    if (g_capture_mutex == NULL) {
+        write_status("tap-cross-process-lock-unavailable\n");
+    }
+
     capture_fd = _wopen(archive_path, _O_CREAT | _O_WRONLY | _O_APPEND | _O_BINARY, _S_IREAD | _S_IWRITE);
     write_status(capture_fd >= 0 ? "tap-loaded\n" : "tap-load-open-failed\n");
 
@@ -789,6 +872,10 @@ static void close_swc_tap(void) {
     if (capture_fd >= 0) {
         _close(capture_fd);
         capture_fd = -1;
+    }
+    if (g_capture_mutex != NULL) {
+        CloseHandle(g_capture_mutex);
+        g_capture_mutex = NULL;
     }
 }
 

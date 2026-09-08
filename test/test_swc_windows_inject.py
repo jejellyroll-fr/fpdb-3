@@ -87,6 +87,13 @@ def test_read_status_returns_the_last_line(tmp_path: Path) -> None:
     assert inj.read_status(status) == "tap-hooked"
 
 
+def test_a_cross_process_lock_warning_does_not_mask_the_hook_status(tmp_path: Path) -> None:
+    """The DLL reports a missing named mutex before tap-loaded, so the wait still ends on the hook."""
+    status = tmp_path / "swc-native.status"
+    status.write_text("tap-cross-process-lock-unavailable\ntap-loaded\ntap-hooked\n", encoding="ascii")
+    assert inj.wait_for_hook(status, timeout=1.0) == "tap-hooked"
+
+
 def test_read_status_missing_file_is_empty(tmp_path: Path) -> None:
     assert inj.read_status(tmp_path / "nope.status") == ""
 
@@ -156,6 +163,24 @@ def test_native_windows_sources_cover_review_safety_contracts() -> None:
     payload_write = tap_source.index("write_all(capture_fd, buffer, (size_t)size);", header_write)
     unlock = tap_source.index("ReleaseSRWLockExclusive(&g_capture_lock);", payload_write)
     assert windows_record < header_write < payload_write < unlock
+
+    # Every running client is injected and they all append to the same archive,
+    # so that pair also needs an inter-process lock: the SRWLOCK orders threads
+    # of one process only, and an interleaved header desynchronises the reader
+    # for the rest of the session.
+    assert "CreateMutexW(NULL, FALSE, SWC_CAPTURE_MUTEX_NAME)" in tap_source
+    cross_process_wait = tap_source.index("WaitForSingleObject(g_capture_mutex, SWC_CAPTURE_LOCK_TIMEOUT_MS)")
+    cross_process_release = tap_source.index("ReleaseMutex(g_capture_mutex);", unlock)
+    assert cross_process_wait < windows_record < unlock < cross_process_release
+    # A wedged peer must not stall the client's network thread indefinitely.
+    assert "SWC_CAPTURE_LOCK_TIMEOUT_MS" in tap_source
+
+    # A thread snapshot is a fixed list: a thread created after it was taken is
+    # invisible to it and would run through the half-written entry point, so
+    # suspension repeats until a whole pass finds nothing new.
+    passes = tap_source.index("for (DWORD pass = 0; pass < SWC_MAX_SUSPEND_PASSES; pass++)")
+    settled = tap_source.index("if (suspended_this_pass == 0)", passes)
+    assert passes < settled
 
     # The trampoline pointer must be visible before any suspended SSL caller can
     # run through the newly patched entry point.

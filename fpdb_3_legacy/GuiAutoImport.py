@@ -7,8 +7,11 @@ import os
 if os.getenv("FPDB_FORCE_X11") == "1":
     os.environ.setdefault("QT_QPA_PLATFORM", "xcb")
 
+import hashlib
+import json
 import subprocess
 import sys
+import threading
 import time
 import traceback
 from optparse import OptionParser
@@ -114,6 +117,11 @@ class AutoImportThread(QThread):
             self.error.emit(str(e))
 
 
+def _hand_snapshot_fingerprint(hand: dict) -> str:
+    """Content hash of one normalized hand, so an unchanged snapshot is not re-offered."""
+    return hashlib.sha256(json.dumps(hand, sort_keys=True, default=str).encode("utf-8")).hexdigest()
+
+
 class SwCNativeTailingThread(QThread):
     """Background thread tailing raw SwC native capture and importing live hands."""
 
@@ -129,7 +137,16 @@ class SwCNativeTailingThread(QThread):
         default = Path.home() / ".fpdb" / "swc-native-capture" / "swc-native.raw"
         self.raw_path = Path(raw_path or default).expanduser().resolve()
         self._stop_requested = False
-        self._imported_keys: set[tuple[int, int]] = set()
+        # Hands are decoded while they are still being played, so a first
+        # snapshot is routinely not importable yet and the same hand has to be
+        # offered again once later records complete it. Only a terminal import
+        # result retires a key; until then a snapshot is re-emitted when its
+        # content changes. The GUI thread writes these through the two methods
+        # below while this thread reads them in poll_once, hence the lock.
+        self._state_lock = threading.Lock()
+        self._completed_keys: set[tuple[int, int]] = set()
+        self._emitted: dict[tuple[int, int], str] = {}
+        self._capture_only_keys: set[tuple[int, int]] = set()
         self._offset = 0
         self._messages: list[Any] = []
         self._consecutive_errors = 0
@@ -137,11 +154,40 @@ class SwCNativeTailingThread(QThread):
     def stop(self) -> None:
         self._stop_requested = True
 
+    @staticmethod
+    def _hand_key(hand_data: dict) -> tuple[int, int]:
+        return (hand_data.get("table_id", 0), hand_data.get("hand_id", 0))
+
+    def mark_hand_complete(self, hand_data: dict) -> None:
+        """Retire a hand whose import reached a terminal result (imported, duplicate, updated)."""
+        key = self._hand_key(hand_data)
+        with self._state_lock:
+            self._completed_keys.add(key)
+            self._emitted.pop(key, None)
+            self._capture_only_keys.discard(key)
+
+    def note_capture_only(self, hand_data: dict) -> bool:
+        """Whether this hand is being reported as not-yet-importable for the first time.
+
+        "Capture-only" is a passing state rather than a verdict, so the hand
+        stays eligible; this only keeps the log from repeating it every poll.
+        """
+        key = self._hand_key(hand_data)
+        with self._state_lock:
+            if key in self._capture_only_keys:
+                return False
+            self._capture_only_keys.add(key)
+            return True
+
     def poll_once(self) -> list[dict]:
         """Decode whatever was appended since the last call and return new hands.
 
         Split out of the polling loop so the decode path can be exercised without
         starting a thread or waiting on its timing.
+
+        A hand already offered is returned again only when its snapshot changed
+        and no terminal import result retired it, which is what lets a hand
+        decoded mid-play be imported once its later records arrive.
         """
         from fpdb_3_legacy.swc_native_capture import (
             iter_protocol_messages,
@@ -159,10 +205,13 @@ class SwCNativeTailingThread(QThread):
 
         fresh: list[dict] = []
         for hand in normalize_native_hands(self._messages, raw_ref=str(self.raw_path)):
-            key = (hand.get("table_id", 0), hand.get("hand_id", 0))
-            if key not in self._imported_keys:
-                self._imported_keys.add(key)
-                fresh.append(hand)
+            key = self._hand_key(hand)
+            fingerprint = _hand_snapshot_fingerprint(hand)
+            with self._state_lock:
+                if key in self._completed_keys or self._emitted.get(key) == fingerprint:
+                    continue
+                self._emitted[key] = fingerprint
+            fresh.append(hand)
         return fresh
 
     def run(self) -> None:
@@ -628,16 +677,26 @@ class GuiAutoImport(QWidget):
         if database is None:
             log.warning("SwC live hand dropped: the importer has no database connection")
             return
+        tailer = getattr(self, "swc_tailing_thread", None)
 
         try:
             result = import_http_capture_hand(database, hand_data)
         except Exception:
+            # Left retryable on purpose: the tailer offers this hand again only
+            # if a later snapshot changes it, so a database outage does not turn
+            # into the same failure once per interval.
             log.exception("Failed to import SwC live hand %s", hand_data.get("hand_id"))
             return
 
         if result is not None and result.status == "skipped":
-            log.info("SwC native hand %s remains capture-only: %s", hand_data.get("hand_id"), result.message)
+            # Not terminal. A hand decoded while it is still being played lacks
+            # the actions and settlement that make it importable, and later
+            # records supply them, so retiring the key here would discard it.
+            report = log.info if tailer is None or tailer.note_capture_only(hand_data) else log.debug
+            report("SwC native hand %s remains capture-only: %s", hand_data.get("hand_id"), result.message)
             return
+        if tailer is not None:
+            tailer.mark_hand_complete(hand_data)
         if result is not None and result.status == "duplicate":
             self.addText(f"\n[SwC Live] Hand #{hand_data.get('hand_id', 0)} already imported.", "info")
             return

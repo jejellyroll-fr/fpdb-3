@@ -12,6 +12,7 @@ cannot go quiet again.
 
 from __future__ import annotations
 
+import logging
 from types import SimpleNamespace
 
 import pytest
@@ -33,6 +34,25 @@ class _Gui(SimpleNamespace):
 
     def on_hand(self, hand_data: dict) -> None:
         GuiAutoImport._on_swc_native_hand_imported(self, hand_data)
+
+
+class _Tailer:
+    """Stands in for SwCNativeTailingThread, recording what the callback told it."""
+
+    def __init__(self) -> None:
+        self.completed: list[dict] = []
+        self.capture_only: list[dict] = []
+
+    def mark_hand_complete(self, hand_data: dict) -> None:
+        self.completed.append(hand_data)
+
+    def note_capture_only(self, hand_data: dict) -> bool:
+        self.capture_only.append(hand_data)
+        return len(self.capture_only) == 1
+
+
+def _result(status: str, message: str = "") -> SimpleNamespace:
+    return SimpleNamespace(site_hand_no="", kind="native", row_id=None, replay_ref=None, status=status, message=message)
 
 
 @pytest.fixture
@@ -89,6 +109,85 @@ def test_a_failing_import_does_not_claim_success(gui, monkeypatch) -> None:
         raise RuntimeError(message)
 
     monkeypatch.setattr("fpdb_3_legacy.http_capture_db_import.import_http_capture_hand", explode)
+
+    gui.on_hand(_hand())
+
+    assert gui.messages == []
+
+
+def test_a_hand_the_importer_could_not_use_yet_stays_retryable(gui, monkeypatch) -> None:
+    """The tailer polls every 2.5s, so a hand is normally decoded mid-play.
+
+    Retiring its key on that first, incomplete snapshot discarded the hand for
+    good: the records completing its actions and settlement arrived later and
+    were suppressed.
+    """
+    gui.importer = SimpleNamespace(database=object())
+    gui.swc_tailing_thread = _Tailer()
+    monkeypatch.setattr(
+        "fpdb_3_legacy.http_capture_db_import.import_http_capture_hand",
+        lambda *_a, **_k: _result("skipped", "native hand is incomplete or its settlement is not proven"),
+    )
+
+    gui.on_hand(_hand())
+
+    assert gui.swc_tailing_thread.completed == []
+    assert gui.messages == []
+
+
+def test_a_failing_import_leaves_the_hand_retryable(gui, monkeypatch) -> None:
+    gui.importer = SimpleNamespace(database=object())
+    gui.swc_tailing_thread = _Tailer()
+
+    def explode(*_args, **_kwargs):
+        message = "database is away"
+        raise RuntimeError(message)
+
+    monkeypatch.setattr("fpdb_3_legacy.http_capture_db_import.import_http_capture_hand", explode)
+
+    gui.on_hand(_hand())
+
+    assert gui.swc_tailing_thread.completed == []
+
+
+@pytest.mark.parametrize("status", ["imported", "duplicate", "updated"])
+def test_a_terminal_import_result_retires_the_hand(gui, monkeypatch, status) -> None:
+    gui.importer = SimpleNamespace(database=object())
+    gui.swc_tailing_thread = _Tailer()
+    monkeypatch.setattr(
+        "fpdb_3_legacy.http_capture_db_import.import_http_capture_hand",
+        lambda *_a, **_k: _result(status),
+    )
+
+    gui.on_hand(_hand())
+
+    assert gui.swc_tailing_thread.completed == [_hand()]
+
+
+def test_a_hand_skipped_again_is_reported_once(gui, monkeypatch, caplog) -> None:
+    """A growing hand is re-offered every poll; the log must not repeat itself."""
+    gui.importer = SimpleNamespace(database=object())
+    gui.swc_tailing_thread = _Tailer()
+    monkeypatch.setattr(
+        "fpdb_3_legacy.http_capture_db_import.import_http_capture_hand",
+        lambda *_a, **_k: _result("skipped", "settlement is not proven"),
+    )
+    caplog.set_level(logging.DEBUG, logger="gui_auto_import")
+
+    gui.on_hand(_hand())
+    gui.on_hand(_hand())
+
+    capture_only = [record for record in caplog.records if "capture-only" in record.getMessage()]
+    assert [record.levelname for record in capture_only] == ["INFO", "DEBUG"]
+
+
+def test_the_callback_survives_a_widget_with_no_tailing_thread(gui, monkeypatch) -> None:
+    """Auto Import can be driven without the live tailer running."""
+    gui.importer = SimpleNamespace(database=object())
+    monkeypatch.setattr(
+        "fpdb_3_legacy.http_capture_db_import.import_http_capture_hand",
+        lambda *_a, **_k: _result("skipped", "settlement is not proven"),
+    )
 
     gui.on_hand(_hand())
 
