@@ -408,6 +408,33 @@ def string_to_bool(string, default=True):
     return default
 
 
+#: A saved layout's width/height is the size of the table window the positions
+#: were captured on, so every position must sit inside it (a block parked just
+#: off the table edge overhangs a little, hence the tolerance). A reference much
+#: smaller than the positions it frames is not a layout, it is a corrupted one:
+#: Aux_Base.create_scale_position() scales by table/reference, so a 336x103
+#: reference framing a position at (1225, 737) throws the HUD blocks thousands
+#: of pixels off a real table and the user sees no HUD at all.
+LAYOUT_REFERENCE_TOLERANCE = 1.5
+
+
+def layout_reference_fits(width, height, positions) -> bool:
+    """Whether ``width``x``height`` can plausibly be the reference for ``positions``.
+
+    ``positions`` is any iterable of (x, y). Missing or non-positive dimensions
+    are rejected outright: they would make the scale factor meaningless (or
+    raise) rather than merely wrong.
+    """
+    points = [p for p in positions if p is not None]
+    if not width or not height or int(width) <= 0 or int(height) <= 0:
+        return False
+    if not points:
+        return True
+    max_x = max(int(x) for x, _y in points)
+    max_y = max(int(y) for _x, y in points)
+    return max_x <= int(width) * LAYOUT_REFERENCE_TOLERANCE and max_y <= int(height) * LAYOUT_REFERENCE_TOLERANCE
+
+
 class Layout:
     def __init__(self, node) -> None:
         self.max = int(node.getAttribute("max"))
@@ -442,6 +469,39 @@ class Layout:
                     int(location_node.getAttribute("x")),
                     int(location_node.getAttribute("y")),
                 )
+
+        self._repair_reference_size()
+
+    def _repair_reference_size(self) -> None:
+        """Widen a reference size that cannot possibly frame this layout's positions.
+
+        Configs in the wild carry layouts whose width/height were saved from the
+        wrong window (a stray HUD label, a rolled-up client), leaving positions
+        several times larger than the frame they are scaled against. Loading such
+        a layout as-is multiplies every block position by table/reference and
+        scatters the HUD far off the table, which reads as "no HUD". Growing the
+        reference to the bounding box keeps the user's own positions and puts
+        them back inside the table window; the layout is not the intended one,
+        but it is visible and can be dragged and re-saved.
+        """
+        positions = [p for p in self.location if p is not None]
+        if getattr(self, "common", None) is not None:
+            positions.append(self.common)
+        if layout_reference_fits(self.width, self.height, positions):
+            return
+        old_width, old_height = self.width, self.height
+        if positions:
+            self.width = max(self.width, max(x for x, _y in positions))
+            self.height = max(self.height, max(y for _x, y in positions))
+        log.warning(
+            "Layout %d-max declares a %dx%d reference that cannot contain its own positions; "
+            "using %dx%d instead so the HUD stays on the table",
+            self.max,
+            old_width,
+            old_height,
+            self.width,
+            self.height,
+        )
 
     def __str__(self) -> str:
         if hasattr(self, "name"):
@@ -2673,6 +2733,23 @@ class Config:
         # wid/height normally not specified when saving common from the mucked display
 
         log.debug(f"saving layout = {ls.name} {max}Max {locations} size: {width}x{height}")
+        # Only a save that carries both dimensions declares a reference; saving
+        # just the common position from the mucked display carries neither.
+        if width and height and not layout_reference_fits(width, height, locations.values()):
+            # The reference is the table the positions were just read from, so
+            # positions far outside it mean the HUD was measuring the wrong
+            # window (a stray label, a rolled-up client). Persisting that pair
+            # is what corrupts a layout set permanently: on the next real table
+            # the blocks get scaled by table/reference and land off-screen.
+            log.error(
+                "Refusing to save layout %s %d-max: positions %s cannot come from a %sx%s table",
+                ls.name,
+                max,
+                locations,
+                width,
+                height,
+            )
+            return
         ls_node = self.get_layout_set_node(ls.name)
         layout_node = self.get_layout_node(ls_node, max)
         if width:

@@ -481,7 +481,7 @@
                 <location seat="8" x="112" y="41"/>
                 <location common="1" x="323" y="232"/>
             </layout>
-            <layout height="9" max="9" width="792">
+            <layout height="546" max="9" width="792">
                 <location seat="1" x="559" y="0"/>
                 <location seat="2" x="671" y="115"/>
                 <location seat="3" x="679" y="244"/>
@@ -659,18 +659,18 @@
                 <location seat="9" hist_seat="10" x="10" y="48"/>
                 <location common="1" x="323" y="232"/>
             </layout>
-            <layout max="10" height="103" width="336">
-                <location seat="1" x="1760" y="-271"/>
-                <location seat="2" x="286" y="9"/>
-                <location seat="3" x="1664" y="201"/>
-                <location seat="4" x="288" y="63"/>
-                <location seat="5" x="928" y="188"/>
-                <location seat="6" x="575" y="158"/>
-                <location seat="7" x="3" y="63"/>
-                <location seat="8" x="612" y="-261"/>
-                <location seat="9" x="1" y="8"/>
-                <location seat="10" x="1249" y="-395"/>
-                <location common="1" x="133" y="41"/>
+            <layout max="10" height="546" width="792">
+                <location seat="1" x="531" y="14"/>
+                <location seat="2" x="678" y="66"/>
+                <location seat="3" x="669" y="278"/>
+                <location seat="4" x="682" y="351"/>
+                <location seat="5" x="508" y="411"/>
+                <location seat="6" x="183" y="411"/>
+                <location seat="7" x="11" y="352"/>
+                <location seat="8" x="1" y="277"/>
+                <location seat="9" x="6" y="65"/>
+                <location seat="10" x="159" y="11"/>
+                <location common="1" x="316" y="237"/>
             </layout>
         </ls>
         <ls name="merge_default">
