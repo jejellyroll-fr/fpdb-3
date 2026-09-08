@@ -589,7 +589,20 @@ class GuiHandViewer(QSplitter):
         "fusion": "Fusion",
     }
     _LIMIT_NAMES = {"nl": "NL", "pl": "PL", "fl": "FL", "cn": "CN", "cp": "CP"}
-    _POSITION_NAMES = {"S": "SB", "B": "BB", "0": "BTN", "1": "CO", "2": "HJ", "3": "LJ", "4": "MP", "5": "MP", "6": "UTG", "7": "UTG"}
+    _POSITION_NAMES = {
+        "S": "SB",
+        "B": "BB",
+        "0": "BTN",
+        "1": "CO",
+        "2": "HJ",
+        "3": "LJ",
+        "4": "MP",
+        "5": "MP",
+        "6": "UTG",
+        "7": "UTG",
+        "8": "Other",
+        "9": "Unknown",
+    }
 
     def _format_game(self, hand) -> str:
         cat = hand.gametype.get("category", "")

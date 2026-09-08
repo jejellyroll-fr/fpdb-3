@@ -3,6 +3,7 @@
 from types import SimpleNamespace
 from unittest.mock import MagicMock
 
+from fpdb_3_legacy.Filters import POSITION_FILTER_VALUES
 from fpdb_3_legacy.GuiHandViewer import GuiHandViewer
 
 
@@ -25,6 +26,10 @@ def test_splash_display_contains_drop_and_hero_share() -> None:
 
     assert "0.20" in display
     assert "won" in display
+
+
+def test_position_filter_includes_native_unknown_position() -> None:
+    assert 9 in POSITION_FILTER_VALUES
 
 
 class _Check:
