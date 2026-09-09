@@ -224,6 +224,21 @@ class SwCNativeTailingThread(QThread):
             self._capture_only_keys.add(key)
             return True
 
+    def _retry_is_due(self, now: float) -> bool:
+        """Whether a deferred hand's delay has elapsed, so a poll is worth doing.
+
+        A hand is deferred precisely when it is *finished* and something outside
+        the capture refused it -- an auto-import cycle held the connection, the
+        database raised, or it is waiting for its text history. A finished hand
+        produces no further records, so waiting for new bytes before looking at
+        the deadline is waiting for something that never comes: the retry has to
+        be reachable on an idle archive or it never fires at all.
+        """
+        with self._state_lock:
+            return any(
+                deadline <= now for key, deadline in self._retry_after.items() if key not in self._completed_keys
+            )
+
     def poll_once(self) -> list[dict]:
         """Decode whatever was appended since the last call and return new hands.
 
@@ -242,14 +257,17 @@ class SwCNativeTailingThread(QThread):
         )
 
         records, self._offset = read_records_since(self.raw_path, self._offset)
-        if not records:
-            return []
-
-        self._messages.extend(iter_protocol_messages(iter(records)))
-        if len(self._messages) > self.MAX_RETAINED_MESSAGES:
-            del self._messages[: len(self._messages) - self.MAX_RETAINED_MESSAGES]
-
         now = time.monotonic()
+
+        if records:
+            self._messages.extend(iter_protocol_messages(iter(records)))
+            if len(self._messages) > self.MAX_RETAINED_MESSAGES:
+                del self._messages[: len(self._messages) - self.MAX_RETAINED_MESSAGES]
+        elif not self._retry_is_due(now):
+            # Nothing new to decode and nothing waiting to be re-offered:
+            # normalizing the retained buffer again could not produce a hand this
+            # poll, and it is the expensive half of the work.
+            return []
         fresh: list[dict] = []
         for hand in normalize_native_hands(self._messages, raw_ref=str(self.raw_path)):
             key = self._hand_key(hand)

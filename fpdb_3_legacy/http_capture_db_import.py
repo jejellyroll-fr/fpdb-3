@@ -22,6 +22,22 @@ SWC_SITE_ID = 23
 _NATIVE_CARD_TOKEN_RE = re.compile(r"^10([cdhs])$")
 
 
+def _rollback_quietly(db: Any) -> None:
+    """Undo an incomplete write, never masking the failure that prompted it.
+
+    Used on the error path, where the exception being handled is the one worth
+    reporting: a rollback that fails as well (a connection already gone) must
+    not replace it.
+    """
+    rollback = getattr(db, "rollback", None)
+    if rollback is None:
+        return
+    try:
+        rollback()
+    except Exception:  # noqa: BLE001 - the original error is the one to raise
+        pass
+
+
 @dataclass(frozen=True)
 class HttpCaptureImportResult:
     site_hand_no: str
@@ -191,6 +207,16 @@ def _import_native_hand(db: Any, hand_data: dict[str, Any], *, doinsert: bool) -
     except FpdbHandDuplicate:
         if hasattr(db, "rollback"):
             db.rollback()
+    except Exception:
+        # Any other failure -- a transient HandsPlayers insert error, the
+        # database going away mid-hand -- can leave an uncommitted Hands row on
+        # this connection. The caller treats such a failure as non-terminal and
+        # retries on the *same* connection, where duplicate detection would see
+        # that uncommitted row, the FpdbHandDuplicate handler above would roll it
+        # back, and the hand would be retired as "already imported" while never
+        # having reached the database. Undo the partial write before the retry.
+        _rollback_quietly(db)
+        raise
         if repaired_hand_id is not None:
             return HttpCaptureImportResult(
                 site_hand_no,

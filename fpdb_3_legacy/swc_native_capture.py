@@ -151,6 +151,10 @@ class NativeCaptureRecord:
     peer_port: int
     payload: bytes
     connection_id: int = 0
+    #: Which injected client wrote this record. Several clients append to one
+    #: archive, so the socket alone does not identify a stream: two processes
+    #: routinely hold the same small socket number.
+    source_id: int = 0
 
 
 @dataclass(frozen=True)
@@ -160,6 +164,7 @@ class NativeProtocolMessage:
     peer_port: int = 0
     connection_id: int = 0
     direction: str = "received"
+    source_id: int = 0
 
 
 @dataclass(frozen=True)
@@ -432,6 +437,7 @@ class NativeProtocolDecoder:
                     peer_port=record.peer_port,
                     connection_id=record.connection_id,
                     direction=record.direction,
+                    source_id=record.source_id,
                 )
             )
             self.message_timestamp = record.captured_at if self.buffer else None
@@ -445,11 +451,14 @@ class NativeProtocolDecoder:
 def iter_protocol_messages(
     records: Iterator[NativeCaptureRecord], *, include_outbound: bool = False
 ) -> Iterator[NativeProtocolMessage]:
-    decoders: dict[tuple[int, int, str], NativeProtocolDecoder] = {}
+    # Keyed by the whole stream identity: two clients sharing one archive can
+    # hold the same peer port and the same socket number, and splicing their
+    # plaintext into one buffer produces invalid message lengths and lost hands.
+    decoders: dict[tuple[int, int, int, str], NativeProtocolDecoder] = {}
     for record in records:
         if record.direction == "sent" and not include_outbound:
             continue
-        key = (record.peer_port, record.connection_id, record.direction)
+        key = (record.source_id, record.peer_port, record.connection_id, record.direction)
         decoder = decoders.setdefault(key, NativeProtocolDecoder(record.direction))
         yield from decoder.feed(record)
     for decoder in decoders.values():
@@ -3104,7 +3113,7 @@ def iter_capture_records(stream: BinaryIO) -> Iterator[NativeCaptureRecord]:
             return
         if len(header) != _HEADER.size:
             raise ValueError("truncated SwC native capture header")
-        magic, version, direction, _reserved, peer_port, connection_id, size, timestamp_us = _HEADER.unpack(header)
+        magic, version, direction, source_id, peer_port, connection_id, size, timestamp_us = _HEADER.unpack(header)
         if magic != _MAGIC or version != _VERSION:
             raise ValueError("invalid SwC native capture header")
         if direction not in (0, 1):
@@ -3120,6 +3129,7 @@ def iter_capture_records(stream: BinaryIO) -> Iterator[NativeCaptureRecord]:
             peer_port=peer_port,
             payload=payload,
             connection_id=connection_id,
+            source_id=source_id,
         )
 
 
@@ -3157,7 +3167,7 @@ def read_records_since(path: Path, offset: int) -> tuple[list[NativeCaptureRecor
             header = stream.read(_HEADER.size)
             if len(header) != _HEADER.size:
                 break  # partial record at the tail; resume here next time
-            magic, version, direction, _reserved, peer_port, connection_id, payload_size, timestamp_us = _HEADER.unpack(
+            magic, version, direction, source_id, peer_port, connection_id, payload_size, timestamp_us = _HEADER.unpack(
                 header
             )
             if magic != _MAGIC or version != _VERSION or direction not in (0, 1) or payload_size > _MAX_PAYLOAD:
@@ -3172,6 +3182,7 @@ def read_records_since(path: Path, offset: int) -> tuple[list[NativeCaptureRecor
                     peer_port=peer_port,
                     payload=payload,
                     connection_id=connection_id,
+                    source_id=source_id,
                 )
             )
             offset += _HEADER.size + payload_size

@@ -174,10 +174,18 @@ static uint64_t now_us(void) {
 #endif
 }
 
-static uint16_t peer_port_for_ssl(SSL *ssl) {
+/* The peer port of this SSL connection, and (through *out_fd) the socket it
+ * runs on. The socket is what tells two concurrent connections apart: the
+ * reassembler downstream has to keep their byte streams separate, and a peer
+ * port alone does not, because two connections can share one. */
+static uint16_t peer_port_for_ssl(SSL *ssl, int *out_fd) {
     int fd;
     struct sockaddr_storage address;
     socklen_t address_len = sizeof(address);
+
+    if (out_fd != NULL) {
+        *out_fd = -1;
+    }
 
 #ifdef __APPLE__
     if (ssl == NULL || (fd = SSL_get_fd(ssl)) < 0) {
@@ -204,6 +212,9 @@ static uint16_t peer_port_for_ssl(SSL *ssl) {
     if (getpeername(fd, (struct sockaddr *)&address, &address_len) != 0) {
         return 0;
     }
+    if (out_fd != NULL) {
+        *out_fd = fd;
+    }
     if (address.ss_family == AF_INET) {
         return ntohs(((struct sockaddr_in *)&address)->sin_port);
     }
@@ -211,6 +222,22 @@ static uint16_t peer_port_for_ssl(SSL *ssl) {
         return ntohs(((struct sockaddr_in6 *)&address)->sin6_port);
     }
     return 0;
+}
+
+/* A byte identifying this process among the clients sharing one archive.
+ * Several injected clients append to the same file, so a stream key built only
+ * from (peer port, socket) can still collide across processes: two processes
+ * routinely hold the same small socket number. Folding the process id in keeps
+ * their streams apart. One byte is enough to separate the handful of clients a
+ * user runs, and it fits the header field that was already reserved. */
+static uint8_t capture_source_id(void) {
+#ifdef _WIN32
+    unsigned long pid = (unsigned long)GetCurrentProcessId();
+#else
+    unsigned long pid = (unsigned long)getpid();
+#endif
+    /* Mix the high bits down so ids that differ only above bit 8 still differ. */
+    return (uint8_t)((pid ^ (pid >> 8) ^ (pid >> 16)) & 0xFFu);
 }
 
 static void write_all(int fd, const void *buffer, size_t size) {
@@ -234,6 +261,7 @@ static void write_all(int fd, const void *buffer, size_t size) {
 
 static void record_plaintext(SSL *ssl, const void *buffer, int size, uint8_t direction) {
     uint16_t peer_port;
+    int socket_fd = -1;
     struct swc_tap_header header;
 
     if (capture_fd < 0 || buffer == NULL || size <= 0 || (uint32_t)size > SWC_MAX_RECORD_SIZE) {
@@ -242,7 +270,7 @@ static void record_plaintext(SSL *ssl, const void *buffer, int size, uint8_t dir
     if (direction == 1 && !capture_outbound) {
         return;
     }
-    peer_port = peer_port_for_ssl(ssl);
+    peer_port = peer_port_for_ssl(ssl, &socket_fd);
     if (capture_port == SWC_AUTO_GAME_PORT) {
         if (peer_port < SWC_FIRST_GAME_PORT || peer_port > SWC_LAST_GAME_PORT || peer_port == SWC_LOBBY_PORT) {
             return;
@@ -256,7 +284,12 @@ static void record_plaintext(SSL *ssl, const void *buffer, int size, uint8_t dir
     header.version = SWC_TAP_VERSION;
     header.direction = direction;
     header.peer_port = peer_port;
-    header.reserved2 = 0;
+    /* Stream identity, so the reassembler never splices two connections'
+     * plaintext into one buffer. Both fields were reserved and written as zero,
+     * so an archive recorded before this still decodes as the single stream it
+     * was. */
+    header.reserved = capture_source_id();
+    header.reserved2 = (uint16_t)(socket_fd >= 0 ? (socket_fd & 0xFFFF) : 0);
     header.payload_size = (uint32_t)size;
     header.timestamp_us = now_us();
 
