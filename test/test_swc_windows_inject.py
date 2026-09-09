@@ -9,6 +9,7 @@ they are exercised here on every platform with those two boundaries mocked.
 from __future__ import annotations
 
 import subprocess
+import time
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
@@ -82,34 +83,55 @@ def test_inject_into_pid_survives_a_launch_failure() -> None:
 
 
 def test_read_status_returns_the_last_line(tmp_path: Path) -> None:
+    """A line with no pid prefix still reads as the latest status."""
     status = tmp_path / "swc-native.status"
     status.write_text("tap-loaded\ntap-hooked\n", encoding="ascii")
+    assert inj.read_status(status) == "tap-hooked"
+
+
+def test_read_statuses_attributes_each_line_to_its_client(tmp_path: Path) -> None:
+    status = tmp_path / "swc-native.status"
+    status.write_text("100 tap-loaded\n200 tap-loaded\n100 tap-hooked\n", encoding="ascii")
+    assert inj.read_statuses(status) == {100: "tap-hooked", 200: "tap-loaded"}
     assert inj.read_status(status) == "tap-hooked"
 
 
 def test_a_cross_process_lock_warning_does_not_mask_the_hook_status(tmp_path: Path) -> None:
     """The DLL reports a missing named mutex before tap-loaded, so the wait still ends on the hook."""
     status = tmp_path / "swc-native.status"
-    status.write_text("tap-cross-process-lock-unavailable\ntap-loaded\ntap-hooked\n", encoding="ascii")
-    assert inj.wait_for_hook(status, timeout=1.0) == "tap-hooked"
+    status.write_text("100 tap-cross-process-lock-unavailable\n100 tap-loaded\n100 tap-hooked\n", encoding="ascii")
+    assert inj.wait_for_hooks(status, [100], timeout=1.0) == {100: "tap-hooked"}
 
 
 def test_read_status_missing_file_is_empty(tmp_path: Path) -> None:
     assert inj.read_status(tmp_path / "nope.status") == ""
+    assert inj.read_statuses(tmp_path / "nope.status") == {}
 
 
-def test_wait_for_hook_returns_on_terminal_status(tmp_path: Path) -> None:
+def test_wait_for_hooks_returns_once_every_client_is_terminal(tmp_path: Path) -> None:
     status = tmp_path / "swc-native.status"
-    status.write_text("tap-loaded\ntap-hooked\n", encoding="ascii")
-    assert inj.wait_for_hook(status, timeout=1.0) == "tap-hooked"
+    status.write_text("100 tap-loaded\n200 tap-loaded\n100 tap-hooked\n200 tap-hook-failed\n", encoding="ascii")
+    assert inj.wait_for_hooks(status, [100, 200], timeout=1.0) == {100: "tap-hooked", 200: "tap-hook-failed"}
 
 
-def test_wait_for_hook_times_out_on_loaded_but_unhooked(tmp_path: Path) -> None:
+def test_wait_for_hooks_does_not_let_one_client_speak_for_another(tmp_path: Path) -> None:
+    """Waiting on the first terminal line reported capture for a client that never hooked."""
+    status = tmp_path / "swc-native.status"
+    status.write_text("100 tap-hooked\n", encoding="ascii")
+
+    started = time.monotonic()
+    statuses = inj.wait_for_hooks(status, [100, 200], timeout=0.4)
+
+    assert time.monotonic() - started >= 0.4
+    assert statuses == {100: "tap-hooked", 200: ""}
+
+
+def test_wait_for_hooks_times_out_on_loaded_but_unhooked(tmp_path: Path) -> None:
     """tap-loaded is not terminal: the client may not have opened TLS yet."""
     status = tmp_path / "swc-native.status"
-    status.write_text("tap-loaded\n", encoding="ascii")
+    status.write_text("100 tap-loaded\n", encoding="ascii")
     # A short timeout so the test does not linger; the best-so-far is returned.
-    assert inj.wait_for_hook(status, timeout=0.4) == "tap-loaded"
+    assert inj.wait_for_hooks(status, [100], timeout=0.4) == {100: "tap-loaded"}
 
 
 @pytest.mark.parametrize("code", list(inj._INJECTOR_ERRORS))
@@ -133,6 +155,54 @@ def test_attach_requires_a_running_client(monkeypatch) -> None:
 
     with pytest.raises(RuntimeError, match="not running"):
         swc_native_capture.attach_to_windows_client()
+
+
+def _attach_with_statuses(tmp_path: Path, monkeypatch, statuses: dict[int, str], pids=(100, 200)) -> str:
+    """Run attach_to_windows_client with the build, injection and status wait mocked out."""
+    from fpdb_3_legacy import swc_native_capture, swc_tap_build
+
+    monkeypatch.setattr(swc_native_capture.platform, "system", lambda: "Windows")
+    monkeypatch.setattr(swc_native_capture, "build_tap", lambda **_: Path("tap.dll"))
+    monkeypatch.setattr(swc_native_capture, "DEFAULT_ARCHIVE", tmp_path / "swc-native.raw")
+    monkeypatch.setattr(swc_tap_build, "build_injector", lambda **_: Path("inj.exe"))
+    monkeypatch.setattr(inj, "write_capture_config", lambda *_a, **_k: Path("swc-native.cfg"))
+    monkeypatch.setattr(inj, "find_client_pids", lambda *_a, **_k: list(pids))
+    monkeypatch.setattr(
+        inj,
+        "inject_into_pid",
+        lambda _injector, _dll, pid: inj.InjectionResult(pid=pid, ok=True, detail="tap DLL loaded"),
+    )
+    monkeypatch.setattr(
+        inj, "wait_for_hooks", lambda _p, injected, **_k: {pid: statuses.get(pid, "") for pid in injected}
+    )
+
+    return swc_native_capture.attach_to_windows_client()
+
+
+def test_attach_reports_capture_active_when_every_client_hooked(tmp_path: Path, monkeypatch) -> None:
+    message = _attach_with_statuses(tmp_path, monkeypatch, {100: "tap-hooked", 200: "tap-hooked"})
+    assert "capture active" in message
+    assert "2 client process(es)" in message
+
+
+def test_attach_names_the_client_that_failed_to_hook(tmp_path: Path, monkeypatch) -> None:
+    """All clients share one status file, so one failure must not be announced as capture for both."""
+    message = _attach_with_statuses(tmp_path, monkeypatch, {100: "tap-hooked", 200: "tap-hook-failed"})
+    assert "1 of 2 client process(es)" in message
+    assert "pid 200 reported tap-hook-failed" in message
+    assert "missing" in message
+
+
+def test_attach_reports_a_client_still_waiting_for_tls(tmp_path: Path, monkeypatch) -> None:
+    message = _attach_with_statuses(tmp_path, monkeypatch, {100: "tap-hooked", 200: "tap-loaded"})
+    assert "1 of 2 client process(es)" in message
+    assert "200" in message
+    assert "capture active" not in message
+
+
+def test_attach_keeps_the_lazy_tls_message_when_no_client_connected(tmp_path: Path, monkeypatch) -> None:
+    message = _attach_with_statuses(tmp_path, monkeypatch, {100: "tap-loaded", 200: ""})
+    assert "as soon as the client opens a secure connection" in message
 
 
 def test_native_windows_sources_cover_review_safety_contracts() -> None:
@@ -174,6 +244,11 @@ def test_native_windows_sources_cover_review_safety_contracts() -> None:
     assert cross_process_wait < windows_record < unlock < cross_process_release
     # A wedged peer must not stall the client's network thread indefinitely.
     assert "SWC_CAPTURE_LOCK_TIMEOUT_MS" in tap_source
+
+    # Those same clients append to one status file, so a line carries its pid:
+    # without it, whichever client hooks first speaks for all of them and one
+    # that failed to hook is announced as capturing.
+    assert '_snprintf(line, sizeof(line), "%lu %s", (unsigned long)GetCurrentProcessId(), message)' in tap_source
 
     # A thread snapshot is a fixed list: a thread created after it was taken is
     # invisible to it and would run through the half-written entry point, so

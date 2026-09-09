@@ -98,11 +98,18 @@ class AutoImportThread(QThread):
     error = Signal(str)
     db_offline = Signal()
 
-    def __init__(self, importer) -> None:
+    def __init__(self, importer, db_write_lock: threading.Lock | None = None) -> None:
         super().__init__()
         self.importer = importer
+        self.db_write_lock = db_write_lock
 
     def run(self) -> None:
+        # Held for the whole cycle: the importer's database is one connection
+        # with one set of bulk buffers, and the live SwC hand callback would
+        # otherwise write through both from the GUI thread mid-cycle.
+        lock = self.db_write_lock
+        if lock is not None:
+            lock.acquire()
         try:
             # Checked here rather than left to fail mid-cycle so the GUI can say
             # the database is away, instead of reporting a raw driver error once
@@ -115,6 +122,9 @@ class AutoImportThread(QThread):
             self.finished.emit()
         except Exception as e:  # intentional broad catch: Qt worker thread surfaces any failure via the error signal
             self.error.emit(str(e))
+        finally:
+            if lock is not None:
+                lock.release()
 
 
 def _hand_snapshot_fingerprint(hand: dict) -> str:
@@ -132,6 +142,16 @@ class SwCNativeTailingThread(QThread):
     #: caps that history: a long session would otherwise grow it without bound.
     MAX_RETAINED_MESSAGES = 20000
 
+    #: An attempt that was not terminal is repeated on a delay that doubles to a
+    #: cap, for a bounded number of offers. Both ends matter: the reasons to
+    #: retry clear on their own (an import cycle finishes, the database comes
+    #: back, the text history of the hand lands), while a hand that will never
+    #: be importable must not reach the database every 2.5s for the rest of the
+    #: session. At these values a hand is retried for about nine minutes.
+    MAX_RETRY_OFFERS = 20
+    RETRY_BACKOFF_SECONDS = 2.5
+    RETRY_BACKOFF_CAP_SECONDS = 30.0
+
     def __init__(self, raw_path: Any = None, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         default = Path.home() / ".fpdb" / "swc-native-capture" / "swc-native.raw"
@@ -141,12 +161,15 @@ class SwCNativeTailingThread(QThread):
         # snapshot is routinely not importable yet and the same hand has to be
         # offered again once later records complete it. Only a terminal import
         # result retires a key; until then a snapshot is re-emitted when its
-        # content changes. The GUI thread writes these through the two methods
-        # below while this thread reads them in poll_once, hence the lock.
+        # content changes, or when a retry was asked for. The GUI thread writes
+        # these through the methods below while this thread reads them in
+        # poll_once, hence the lock.
         self._state_lock = threading.Lock()
         self._completed_keys: set[tuple[int, int]] = set()
         self._emitted: dict[tuple[int, int], str] = {}
         self._capture_only_keys: set[tuple[int, int]] = set()
+        self._retry_offers: dict[tuple[int, int], int] = {}
+        self._retry_after: dict[tuple[int, int], float] = {}
         self._offset = 0
         self._messages: list[Any] = []
         self._consecutive_errors = 0
@@ -165,6 +188,28 @@ class SwCNativeTailingThread(QThread):
             self._completed_keys.add(key)
             self._emitted.pop(key, None)
             self._capture_only_keys.discard(key)
+            self._retry_offers.pop(key, None)
+            self._retry_after.pop(key, None)
+
+    def retry_hand(self, hand_data: dict) -> None:
+        """Offer this hand again later even though its snapshot has not changed.
+
+        For an attempt that was not terminal: the importer could not use the
+        hand yet, the database raised, or an auto-import cycle owned the
+        connection. Waiting for new capture content instead lost the hand,
+        because a finished hand produces no more records.
+        """
+        key = self._hand_key(hand_data)
+        with self._state_lock:
+            offers = self._retry_offers.get(key, 0) + 1
+            if offers > self.MAX_RETRY_OFFERS:
+                # Budget spent: drop the deadline too, or the elapsed one left
+                # behind would keep re-offering this hand every poll.
+                self._retry_after.pop(key, None)
+                return
+            self._retry_offers[key] = offers
+            delay = min(self.RETRY_BACKOFF_SECONDS * 2 ** (offers - 1), self.RETRY_BACKOFF_CAP_SECONDS)
+            self._retry_after[key] = time.monotonic() + delay
 
     def note_capture_only(self, hand_data: dict) -> bool:
         """Whether this hand is being reported as not-yet-importable for the first time.
@@ -185,9 +230,10 @@ class SwCNativeTailingThread(QThread):
         Split out of the polling loop so the decode path can be exercised without
         starting a thread or waiting on its timing.
 
-        A hand already offered is returned again only when its snapshot changed
-        and no terminal import result retired it, which is what lets a hand
-        decoded mid-play be imported once its later records arrive.
+        A hand already offered is returned again only when its snapshot changed,
+        or when a retry was asked for and its delay has elapsed, and never once
+        a terminal import result retired it. That is what lets a hand decoded
+        mid-play be imported once its later records arrive.
         """
         from fpdb_3_legacy.swc_native_capture import (
             iter_protocol_messages,
@@ -203,13 +249,24 @@ class SwCNativeTailingThread(QThread):
         if len(self._messages) > self.MAX_RETAINED_MESSAGES:
             del self._messages[: len(self._messages) - self.MAX_RETAINED_MESSAGES]
 
+        now = time.monotonic()
         fresh: list[dict] = []
         for hand in normalize_native_hands(self._messages, raw_ref=str(self.raw_path)):
             key = self._hand_key(hand)
             fingerprint = _hand_snapshot_fingerprint(hand)
             with self._state_lock:
-                if key in self._completed_keys or self._emitted.get(key) == fingerprint:
+                if key in self._completed_keys:
                     continue
+                offered_before = self._emitted.get(key)
+                if offered_before == fingerprint:
+                    retry_after = self._retry_after.get(key)
+                    if retry_after is None or now < retry_after:
+                        continue
+                elif offered_before is not None:
+                    # New content is new information, so the retry budget is not
+                    # spent by a hand still being played: it bounds how often an
+                    # unchanged, refused snapshot is repeated.
+                    self._retry_offers.pop(key, None)
                 self._emitted[key] = fingerprint
             fresh.append(hand)
         return fresh
@@ -248,6 +305,13 @@ class GuiAutoImport(QWidget):
         self.importtimer: QTimer | None = None
         self.import_thread: AutoImportThread | None = None
         self.swc_tailing_thread: SwCNativeTailingThread | None = None
+        # One writer at a time on the importer's database: a single connection
+        # with a single set of bulk buffers, which no driver here lets two
+        # threads drive at once (see Database._create_new_worker_connection).
+        # AutoImportThread holds it for a whole cycle; the live SwC hand
+        # callback tries it without blocking, since that one runs on the GUI
+        # thread and a cycle can take minutes.
+        self.db_write_lock = threading.Lock()
         # Outage bookkeeping, so the database going away is reported once rather
         # than once per interval, and its return is reported too.
         self._deferred_cycles = 0
@@ -516,7 +580,7 @@ class GuiAutoImport(QWidget):
             self.progressBar.setVisible(True)
             self.progressBar.setMaximum(0)  # Indeterminate progress
 
-            self.import_thread = AutoImportThread(self.importer)
+            self.import_thread = AutoImportThread(self.importer, db_write_lock=self.db_write_lock)
             self.import_thread.finished.connect(self.import_finished)
             self.import_thread.error.connect(self.import_error)
             self.import_thread.db_offline.connect(self.import_db_offline)
@@ -678,21 +742,41 @@ class GuiAutoImport(QWidget):
             log.warning("SwC live hand dropped: the importer has no database connection")
             return
         tailer = getattr(self, "swc_tailing_thread", None)
+        lock = getattr(self, "db_write_lock", None)
+
+        # An auto-import cycle owns that connection while it runs, and importing
+        # from this thread too would reset its bulk buffers and commit inside
+        # its transaction. Tried without blocking, because a cycle can take
+        # minutes and this is the GUI thread: the hand is simply offered again.
+        if lock is not None and not lock.acquire(blocking=False):
+            log.debug("SwC live hand %s waits for the running import cycle", hand_data.get("hand_id"))
+            if tailer is not None:
+                tailer.retry_hand(hand_data)
+            return
 
         try:
             result = import_http_capture_hand(database, hand_data)
         except Exception:
-            # Left retryable on purpose: the tailer offers this hand again only
-            # if a later snapshot changes it, so a database outage does not turn
-            # into the same failure once per interval.
+            # Not terminal: a database that is away comes back, and the hand is
+            # offered again on a delay rather than once per poll.
             log.exception("Failed to import SwC live hand %s", hand_data.get("hand_id"))
+            if tailer is not None:
+                tailer.retry_hand(hand_data)
             return
+        finally:
+            if lock is not None:
+                lock.release()
 
         if result is not None and result.status == "skipped":
-            # Not terminal. A hand decoded while it is still being played lacks
-            # the actions and settlement that make it importable, and later
-            # records supply them, so retiring the key here would discard it.
-            report = log.info if tailer is None or tailer.note_capture_only(hand_data) else log.debug
+            # Not terminal either. A hand decoded while it is still being played
+            # lacks the actions and settlement that make it importable, and a
+            # finished one can be waiting for its text history to be imported:
+            # later records are not the only thing that can complete it.
+            if tailer is not None:
+                tailer.retry_hand(hand_data)
+                report = log.info if tailer.note_capture_only(hand_data) else log.debug
+            else:
+                report = log.info
             report("SwC native hand %s remains capture-only: %s", hand_data.get("hand_id"), result.message)
             return
         if tailer is not None:

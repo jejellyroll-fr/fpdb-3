@@ -102,20 +102,36 @@ def attach_to_windows_client(*, port: int = 0, include_outbound: bool = False) -
         raise RuntimeError(msg)
 
     status_path = DEFAULT_ARCHIVE.with_suffix(".status")
-    hook_status = injector_mod.wait_for_hook(status_path)
+    injected = [r.pid for r in ok]
+    statuses = injector_mod.wait_for_hooks(status_path, injected)
     log.info(
-        "SwC tap injected into pid(s) %s; DLL status=%r",
-        ", ".join(str(r.pid) for r in ok),
-        hook_status or "(none yet)",
+        "SwC tap injected into pid(s) %s; DLL status=%s",
+        ", ".join(str(pid) for pid in injected),
+        ", ".join(f"{pid}:{statuses.get(pid) or 'none yet'}" for pid in injected),
     )
-    if hook_status == "tap-hooked":
-        return f"SwC capture active: tap hooked in {len(ok)} client process(es)."
-    if hook_status in ("", "tap-loaded"):
+
+    hooked = [pid for pid in injected if statuses.get(pid) == "tap-hooked"]
+    failed = [pid for pid in injected if statuses.get(pid) in injector_mod.HOOK_FAILURE_STATUSES]
+    if failed:
+        # Named per client: one shared status file means a failure here is a
+        # client whose hands will simply never arrive.
+        detail = ", ".join(f"pid {pid} reported {statuses[pid]}" for pid in failed)
         return (
-            f"SwC tap loaded into {len(ok)} client process(es); it will start capturing "
+            f"SwC tap hooked in {len(hooked)} of {len(injected)} client process(es); {detail}. "
+            "Hands from those clients will be missing."
+        )
+    if len(hooked) == len(injected):
+        return f"SwC capture active: tap hooked in {len(hooked)} client process(es)."
+    if all(statuses.get(pid) in ("", "tap-loaded") for pid in injected):
+        return (
+            f"SwC tap loaded into {len(injected)} client process(es); it will start capturing "
             "as soon as the client opens a secure connection (play or reopen a table)."
         )
-    return f"SwC tap loaded but hooking reported '{hook_status}'; capture may be incomplete."
+    pending = ", ".join(str(pid) for pid in injected if pid not in hooked)
+    return (
+        f"SwC tap hooked in {len(hooked)} of {len(injected)} client process(es); "
+        f"pid(s) {pending} have not hooked yet and may start capturing later."
+    )
 
 
 TAP_LIBRARY = get_tap_library_path()

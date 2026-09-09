@@ -13,11 +13,12 @@ cannot go quiet again.
 from __future__ import annotations
 
 import logging
+import threading
 from types import SimpleNamespace
 
 import pytest
 
-from fpdb_3_legacy.GuiAutoImport import GuiAutoImport
+from fpdb_3_legacy.GuiAutoImport import AutoImportThread, GuiAutoImport
 from fpdb_3_legacy.http_capture_db_import import _enrich_existing_native_boards, import_http_capture_hand
 
 
@@ -41,10 +42,14 @@ class _Tailer:
 
     def __init__(self) -> None:
         self.completed: list[dict] = []
+        self.retried: list[dict] = []
         self.capture_only: list[dict] = []
 
     def mark_hand_complete(self, hand_data: dict) -> None:
         self.completed.append(hand_data)
+
+    def retry_hand(self, hand_data: dict) -> None:
+        self.retried.append(hand_data)
 
     def note_capture_only(self, hand_data: dict) -> bool:
         self.capture_only.append(hand_data)
@@ -116,11 +121,12 @@ def test_a_failing_import_does_not_claim_success(gui, monkeypatch) -> None:
 
 
 def test_a_hand_the_importer_could_not_use_yet_stays_retryable(gui, monkeypatch) -> None:
-    """The tailer polls every 2.5s, so a hand is normally decoded mid-play.
+    """A hand the importer refused is offered again without waiting for new capture.
 
-    Retiring its key on that first, incomplete snapshot discarded the hand for
-    good: the records completing its actions and settlement arrived later and
-    were suppressed.
+    Two things complete a hand besides its own later records: the tailer polls
+    every 2.5s so a hand is normally decoded mid-play, and a finished hand can
+    be waiting for its text history to be imported -- after which it produces no
+    more records at all, so a content change would never come.
     """
     gui.importer = SimpleNamespace(database=object())
     gui.swc_tailing_thread = _Tailer()
@@ -132,6 +138,7 @@ def test_a_hand_the_importer_could_not_use_yet_stays_retryable(gui, monkeypatch)
     gui.on_hand(_hand())
 
     assert gui.swc_tailing_thread.completed == []
+    assert gui.swc_tailing_thread.retried == [_hand()]
     assert gui.messages == []
 
 
@@ -148,6 +155,7 @@ def test_a_failing_import_leaves_the_hand_retryable(gui, monkeypatch) -> None:
     gui.on_hand(_hand())
 
     assert gui.swc_tailing_thread.completed == []
+    assert gui.swc_tailing_thread.retried == [_hand()]
 
 
 @pytest.mark.parametrize("status", ["imported", "duplicate", "updated"])
@@ -192,6 +200,92 @@ def test_the_callback_survives_a_widget_with_no_tailing_thread(gui, monkeypatch)
     gui.on_hand(_hand())
 
     assert gui.messages == []
+
+
+def _is_held(lock: threading.Lock) -> bool:
+    """Whether `lock` is already taken, without keeping it when it was not."""
+    if lock.acquire(blocking=False):
+        lock.release()
+        return False
+    return True
+
+
+def test_a_hand_waits_while_an_import_cycle_owns_the_database(gui, monkeypatch) -> None:
+    """The cycle drives the same connection and the same bulk buffers, on another thread.
+
+    No DBAPI driver used here lets two threads share one connection (see
+    Database._create_new_worker_connection), and importing through it mid-cycle
+    would reset the cycle's buffers and commit inside its transaction. The lock
+    is tried rather than waited on: this is the GUI thread, and a cycle can run
+    for minutes.
+    """
+    gui.importer = SimpleNamespace(database=object())
+    gui.swc_tailing_thread = _Tailer()
+    gui.db_write_lock = threading.Lock()
+    gui.db_write_lock.acquire()
+    monkeypatch.setattr(
+        "fpdb_3_legacy.http_capture_db_import.import_http_capture_hand",
+        lambda *_a, **_k: pytest.fail("imported while an import cycle owned the connection"),
+    )
+
+    gui.on_hand(_hand())
+
+    assert gui.swc_tailing_thread.retried == [_hand()]
+    assert gui.swc_tailing_thread.completed == []
+    assert gui.messages == []
+    gui.db_write_lock.release()
+
+
+@pytest.mark.parametrize("status", ["imported", "skipped"])
+def test_the_callback_releases_the_write_lock(gui, monkeypatch, status) -> None:
+    """A lock left held would stop every later import cycle."""
+    gui.importer = SimpleNamespace(database=object())
+    gui.db_write_lock = threading.Lock()
+    monkeypatch.setattr(
+        "fpdb_3_legacy.http_capture_db_import.import_http_capture_hand",
+        lambda *_a, **_k: _result(status),
+    )
+
+    gui.on_hand(_hand())
+
+    assert _is_held(gui.db_write_lock) is False
+
+
+def test_the_callback_releases_the_write_lock_after_a_failure(gui, monkeypatch) -> None:
+    gui.importer = SimpleNamespace(database=object())
+    gui.db_write_lock = threading.Lock()
+
+    def explode(*_args, **_kwargs):
+        message = "database is away"
+        raise RuntimeError(message)
+
+    monkeypatch.setattr("fpdb_3_legacy.http_capture_db_import.import_http_capture_hand", explode)
+
+    gui.on_hand(_hand())
+
+    assert _is_held(gui.db_write_lock) is False
+
+
+def test_an_import_cycle_holds_the_write_lock_while_it_runs() -> None:
+    """The other half of the contract: the worker owns the connection for its whole cycle."""
+    lock = threading.Lock()
+    held: list[bool] = []
+
+    class _Importer:
+        database = SimpleNamespace(ensure_connection=lambda: True)
+
+        @staticmethod
+        def autoSummaryGrab() -> None:
+            held.append(_is_held(lock))
+
+        @staticmethod
+        def runUpdated() -> None:
+            held.append(_is_held(lock))
+
+    AutoImportThread(_Importer(), db_write_lock=lock).run()  # the worker body, without a Qt event loop
+
+    assert held == [True, True]
+    assert _is_held(lock) is False
 
 
 def _native_public_hand() -> dict:

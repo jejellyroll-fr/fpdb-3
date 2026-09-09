@@ -41,6 +41,7 @@
 #include <windows.h>
 #include <tlhelp32.h>
 #include <io.h>
+#include <stdio.h>
 #include <wchar.h>
 #if defined(_WIN32) && !defined(__MINGW32__)
 typedef int socklen_t; /* winsock getpeername takes int*; MSVC lacks socklen_t */
@@ -116,14 +117,29 @@ static HANDLE g_capture_mutex = NULL;
 
 static void write_status(const char *message) {
     const char *env_path = getenv("SWC_CAPTURE_STATUS_PATH");
+    const char *text = message;
+    char line[128];
+    int written;
     int fd = -1;
+
+    /* Every injected client appends to this same file, so a bare line cannot be
+     * attributed to a process: with two clients running, one process's
+     * "tap-hooked" reads as the other's and a client that failed to hook goes
+     * unreported. The PID prefix is what lets the Python side wait for one
+     * terminal status per process it injected. Messages are short literals, so
+     * one that would not fit is written unqualified rather than dropped. */
+    written = _snprintf(line, sizeof(line), "%lu %s", (unsigned long)GetCurrentProcessId(), message);
+    if (written > 0 && written < (int)sizeof(line)) {
+        text = line;
+    }
+
     if (env_path != NULL && env_path[0] != '\0') {
         fd = _open(env_path, _O_CREAT | _O_WRONLY | _O_APPEND | _O_BINARY, _S_IREAD | _S_IWRITE);
     } else if (g_status_path[0] != L'\0') {
         fd = _wopen(g_status_path, _O_CREAT | _O_WRONLY | _O_APPEND | _O_BINARY, _S_IREAD | _S_IWRITE);
     }
     if (fd >= 0) {
-        _write(fd, message, (unsigned int)strlen(message));
+        _write(fd, text, (unsigned int)strlen(text));
         _close(fd);
     }
 }

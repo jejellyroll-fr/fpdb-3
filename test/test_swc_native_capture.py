@@ -3,6 +3,7 @@ import platform
 import shutil
 import struct
 import threading
+import time
 from dataclasses import replace
 from datetime import datetime, timezone
 
@@ -1814,6 +1815,89 @@ def test_swc_native_tailing_reports_a_capture_only_hand_once(tmp_path, monkeypat
     thread.mark_hand_complete(hand)
 
     assert thread.note_capture_only(hand) is True
+
+
+def test_swc_native_tailing_reoffers_a_hand_once_its_retry_delay_elapsed(tmp_path, monkeypatch):
+    """A hand that produced no more records still has to be offered again.
+
+    The reasons an import is refused clear on their own -- an import cycle
+    finishes, the database comes back, the text history of the hand lands -- and
+    none of them appends anything to the capture.
+    """
+    hand = {"table_id": 7, "hand_id": 1234}
+    thread, raw = _tailing_thread(tmp_path, monkeypatch, [hand])
+    thread.RETRY_BACKOFF_SECONDS = 0.05
+    thread.RETRY_BACKOFF_CAP_SECONDS = 0.05
+    assert thread.poll_once() == [hand]
+
+    thread.retry_hand(hand)
+    _append(raw)
+    assert thread.poll_once() == []  # still inside the delay
+
+    time.sleep(0.06)
+    _append(raw)
+    assert thread.poll_once() == [hand]
+
+
+def test_swc_native_tailing_stops_retrying_a_hand_that_never_imports(tmp_path, monkeypatch):
+    """A hand that will never be importable must not reach the database forever."""
+    hand = {"table_id": 7, "hand_id": 1234}
+    thread, raw = _tailing_thread(tmp_path, monkeypatch, [hand])
+    thread.MAX_RETRY_OFFERS = 2
+    thread.RETRY_BACKOFF_SECONDS = 0.0
+    thread.RETRY_BACKOFF_CAP_SECONDS = 0.0
+    assert thread.poll_once() == [hand]
+
+    for _ in range(4):
+        thread.retry_hand(hand)
+        _append(raw)
+        thread.poll_once()
+
+    assert thread._retry_offers[(7, 1234)] == 2
+    _append(raw)
+    assert thread.poll_once() == []
+
+
+def test_swc_native_tailing_renews_the_retry_budget_when_a_snapshot_changes(tmp_path, monkeypatch):
+    """The budget bounds how often a refused snapshot is repeated, not a hand still being played."""
+    first = {"table_id": 7, "hand_id": 1234, "actions": []}
+    second = {"table_id": 7, "hand_id": 1234, "actions": [1]}
+    stages = [[first], [first], [first], [second], [second]]
+    thread, raw = _tailing_thread_snapshots(tmp_path, monkeypatch, stages)
+    thread.MAX_RETRY_OFFERS = 1
+    thread.RETRY_BACKOFF_SECONDS = 0.0
+    thread.RETRY_BACKOFF_CAP_SECONDS = 0.0
+    assert thread.poll_once() == [first]
+
+    thread.retry_hand(first)
+    _append(raw)
+    assert thread.poll_once() == [first]  # the one offer it is allowed
+
+    thread.retry_hand(first)
+    _append(raw)
+    assert thread.poll_once() == []  # budget spent for this snapshot
+
+    _append(raw)
+    assert thread.poll_once() == [second]  # changed content is offered anyway
+
+    thread.retry_hand(second)
+    _append(raw)
+    assert thread.poll_once() == [second]  # and that change renewed the budget
+
+
+def test_a_terminal_result_cancels_a_pending_retry(tmp_path, monkeypatch):
+    hand = {"table_id": 7, "hand_id": 1234}
+    thread, raw = _tailing_thread(tmp_path, monkeypatch, [hand])
+    thread.RETRY_BACKOFF_SECONDS = 0.0
+    thread.RETRY_BACKOFF_CAP_SECONDS = 0.0
+    assert thread.poll_once() == [hand]
+
+    thread.retry_hand(hand)
+    thread.mark_hand_complete(hand)
+    _append(raw)
+
+    assert thread.poll_once() == []
+    assert thread._retry_after == {}
 
 
 def test_swc_native_tailing_consumes_the_archive_once(tmp_path, monkeypatch):

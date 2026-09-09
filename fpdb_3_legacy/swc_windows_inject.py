@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import subprocess
 import time
+from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -22,6 +23,13 @@ log = get_logger("swc_windows_inject")
 
 #: The SwC Windows client's process image name.
 SWC_CLIENT_IMAGE = "SwCPoker.exe"
+
+#: Statuses meaning this client will capture nothing, and so worth naming to the
+#: user rather than folding into "capture may be incomplete".
+HOOK_FAILURE_STATUSES = ("tap-hook-failed", "tap-ssl-not-found", "tap-load-open-failed")
+
+#: Statuses after which a process writes nothing further, so waiting on it is over.
+TERMINAL_STATUSES = ("tap-hooked", *HOOK_FAILURE_STATUSES)
 
 #: Injector exit codes worth naming; see swc_inject.c. Anything else is reported
 #: with its raw code.
@@ -107,33 +115,79 @@ def inject_into_pid(injector: Path, dll: Path, pid: int) -> InjectionResult:
     return InjectionResult(pid=pid, ok=False, detail=detail)
 
 
+def _parse_status_lines(text: str) -> tuple[dict[int, str], str]:
+    """Latest status per client pid, and the latest status overall.
+
+    On Windows the DLL prefixes each line with its pid, because every injected
+    client appends to the one file. A line without that prefix (a DLL left over
+    from before it existed) still counts as the latest overall but cannot be
+    attributed to a process.
+    """
+    by_pid: dict[int, str] = {}
+    latest = ""
+    for line in text.splitlines():
+        status = line.strip()
+        if not status:
+            continue
+        pid_text, _, rest = status.partition(" ")
+        if rest and pid_text.isdigit():
+            latest = rest.strip()
+            by_pid[int(pid_text)] = latest
+        else:
+            latest = status
+    return by_pid, latest
+
+
+def _read_status_text(status_path: Path) -> str:
+    try:
+        return status_path.read_text(encoding="ascii", errors="replace")
+    except OSError:
+        return ""
+
+
 def read_status(status_path: Path) -> str:
-    """The last status line the DLL wrote, or '' if none yet.
+    """The last status any injected DLL wrote, without its pid prefix, or '' if none yet.
 
     The DLL appends a line per lifecycle step: ``tap-loaded`` on attach,
     ``tap-hooked`` once SSL_read/SSL_write are patched, or a failure marker. The
     last line is the current state.
     """
-    try:
-        lines = [line.strip() for line in status_path.read_text(encoding="ascii", errors="replace").splitlines() if line.strip()]
-    except OSError:
-        return ""
-    return lines[-1] if lines else ""
+    return _parse_status_lines(_read_status_text(status_path))[1]
 
 
-def wait_for_hook(status_path: Path, *, timeout: float = 10.0) -> str:
-    """Wait until the DLL reports it hooked SSL, or time out; return the status.
+def read_statuses(status_path: Path) -> dict[int, str]:
+    """The last status each client pid wrote, keyed by pid."""
+    return _parse_status_lines(_read_status_text(status_path))[0]
+
+
+def wait_for_hooks(status_path: Path, pids: Sequence[int], *, timeout: float = 10.0) -> dict[int, str]:
+    """Wait until every injected pid has reported a terminal status, or time out.
+
+    Returns the latest status per pid; one that has written nothing yet maps to
+    ``''``.
 
     ``tap-hooked`` is success. ``tap-loaded`` means the DLL is in but the client
-    has not opened a TLS socket yet (the SSL library loads lazily) -- returned as
-    the best-so-far when the wait elapses, since hooking will still happen once
-    the client connects.
+    has not opened a TLS socket yet (the SSL library loads lazily) -- left as
+    that pid's best-so-far when the wait elapses, since hooking will still
+    happen once the client connects.
+
+    The wait is per pid on purpose. With one shared status file, waiting for the
+    first terminal line lets whichever client hooks first speak for all of them:
+    a second client that goes on to report ``tap-hook-failed`` was announced as
+    capturing, and its hands were then silently missing.
     """
     deadline = time.monotonic() + timeout
-    latest = ""
-    while time.monotonic() < deadline:
-        latest = read_status(status_path)
-        if latest in ("tap-hooked", "tap-hook-failed", "tap-ssl-not-found", "tap-load-open-failed"):
-            return latest
+    statuses: dict[int, str] = dict.fromkeys(pids, "")
+    while True:
+        by_pid = read_statuses(status_path)
+        for pid, status in statuses.items():
+            if status in TERMINAL_STATUSES:
+                continue
+            latest = by_pid.get(pid, "")
+            if latest:
+                statuses[pid] = latest
+        if all(status in TERMINAL_STATUSES for status in statuses.values()):
+            return statuses
+        if time.monotonic() >= deadline:
+            return statuses
         time.sleep(0.2)
-    return latest
