@@ -104,10 +104,45 @@ def write_stream_ids(build_dir: Path, pids: list[int]) -> dict[int, int]:
     Ids start at 1: the tap treats 0 as "nothing was assigned" and falls back to
     that hash, which is still better than the constant every client shared.
     """
-    assignment = {pid: (index % 255) + 1 for index, pid in enumerate(sorted(pids))}
+    # An id already handed out has to stay with its process. LoadLibraryW does
+    # not re-run DllMain for a DLL a client already holds, so an attach that
+    # renumbered everyone would leave that client using its old id in memory
+    # while a newly injected one was handed the same number -- putting their
+    # records back on one decoder, which is the splice this exists to prevent.
+    existing = _read_stream_ids(build_dir)
+    assignment = {pid: existing[pid] for pid in pids if pid in existing}
+    taken = set(assignment.values())
+    free = (n for n in range(1, 256) if n not in taken)
+
+    for pid in sorted(pids):
+        if pid in assignment:
+            continue
+        assignment[pid] = next(free, 0) or _fallback_stream_id(pid)
+        taken.add(assignment[pid])
+
     for pid, stream_id in assignment.items():
         (build_dir / f"swc-native-{pid}.cfg").write_text(f"stream={stream_id}\n", encoding="ascii")
     return assignment
+
+
+def _read_stream_ids(build_dir: Path) -> dict[int, int]:
+    """The stream ids already assigned, read back from their sidecars."""
+    assigned: dict[int, int] = {}
+    for path in build_dir.glob("swc-native-*.cfg"):
+        try:
+            pid = int(path.stem.rsplit("-", 1)[1])
+            stream_id = int(path.read_text(encoding="ascii").split("stream=", 1)[1].split()[0])
+        except (OSError, ValueError, IndexError):
+            continue
+        if 1 <= stream_id <= 255:
+            assigned[pid] = stream_id
+    return assigned
+
+
+def _fallback_stream_id(pid: int) -> int:
+    """A last-resort id when all 255 are spoken for -- 255 clients is not a real case."""
+    log.warning("All SwC stream ids are in use; reusing one for pid %s", pid)
+    return ((pid - 1) % 255) + 1
 
 
 def inject_into_pid(injector: Path, dll: Path, pid: int) -> InjectionResult:

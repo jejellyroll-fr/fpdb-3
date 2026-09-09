@@ -33,6 +33,10 @@ class _Gui(SimpleNamespace):
     def addText(self, text: str, _tag: str | None = None) -> None:
         self.messages.append(text)
 
+    def _notify_hud_of_hand(self, row_id) -> None:
+        # Records what a running HUD would have been told, without a ZMQ socket.
+        self.hud_notifications.append(row_id)
+
     def on_hand(self, hand_data: dict) -> None:
         GuiAutoImport._on_swc_native_hand_imported(self, hand_data)
 
@@ -62,7 +66,7 @@ def _result(status: str, message: str = "") -> SimpleNamespace:
 
 @pytest.fixture
 def gui():
-    return _Gui(messages=[])
+    return _Gui(messages=[], hud_notifications=[])
 
 
 def _hand() -> dict:

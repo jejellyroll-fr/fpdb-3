@@ -808,7 +808,32 @@ class GuiAutoImport(QWidget):
 
         game_cat = hand_data.get("game", {}).get("category", "unknown")
         hand_id = hand_data.get("hand_id", 0)
+        self._notify_hud_of_hand(getattr(result, "row_id", None))
         self.addText(f"\n[SwC Live] Imported hand #{hand_id} ({game_cat}).", "poker")
+
+    def _notify_hud_of_hand(self, row_id) -> None:
+        """Push a hand imported outside the auto-import cycle to a running HUD.
+
+        HUD_main queues hands only from its ZMQ receiver, and the ordinary
+        importer pushes ids there once the write is committed. A live native hand
+        that skips that push reaches the database and stops -- the HUD never
+        shows it until some unrelated import happens to wake it, which defeats
+        the point of a live capture. Best effort: the HUD not running is the
+        normal case for someone importing without one.
+        """
+        if not row_id:
+            return
+        importer = getattr(self, "importer", None)
+        if importer is None or not getattr(importer, "callHud", False):
+            return
+        try:
+            from fpdb_3_legacy.Importer import ZMQSender
+
+            if getattr(importer, "zmq_sender", None) is None:
+                importer.zmq_sender = ZMQSender()
+            importer.zmq_sender.send_hand_id(row_id)
+        except Exception:
+            log.exception("Could not tell the HUD about SwC live hand %s", row_id)
 
     def import_error(self, error_msg: str) -> None:
         """Called when auto import cycle fails in the background."""

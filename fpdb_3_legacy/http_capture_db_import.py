@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import datetime
 import json
 import re
 from dataclasses import dataclass
@@ -17,9 +18,49 @@ from fpdb_3_legacy.http_capture_hand_builder import (
     import_fpdb_hand,
 )
 from fpdb_3_legacy.http_capture_ofc import build_ofc_hand, import_ofc_hand
+from fpdb_3_legacy.loggingFpdb import get_logger
+
+log = get_logger("http_capture_db_import")
 
 SWC_SITE_ID = 23
 _NATIVE_CARD_TOKEN_RE = re.compile(r"^10([cdhs])$")
+
+
+#: The Files row every natively captured hand is attached to. Hands.fileId is a
+#: non-null foreign key to Files.id on MySQL and PostgreSQL, and real file ids
+#: start at 1, so importing with 0 breaks that constraint and rolls the hand back
+#: -- on SQLite, which declares no foreign keys, the same import succeeds, which
+#: is why this only bites the server backends. One row is reused for the whole
+#: capture, as the CoinPoker live path does.
+NATIVE_CAPTURE_FILE_NAME = "swc-native-capture"
+
+_native_capture_file_ids: dict[int, int] = {}
+
+
+def _ensure_capture_file(db: Any) -> int:
+    """Return a Files row id the native hands can hang off, creating it once."""
+    cached = _native_capture_file_ids.get(id(db))
+    if cached:
+        return cached
+    if not hasattr(db, "get_id") or not hasattr(db, "storeFile"):
+        return 0
+    try:
+        file_id = db.get_id(NATIVE_CAPTURE_FILE_NAME)
+        if not file_id:
+            now = datetime.datetime.now(datetime.UTC).replace(tzinfo=None)
+            file_id = db.storeFile([NATIVE_CAPTURE_FILE_NAME, "SealsWithClubs", now, now, 0, 0, 0, 0, 0, 0, 0, False])
+        # get_id() opens a PostgreSQL transaction; the capture then waits on
+        # network traffic, so it must not be left holding one idle.
+        db.commit()
+    except Exception:
+        # Falling back to 0 restores the previous behaviour: harmless on SQLite,
+        # and on a server backend the foreign key will say so plainly.
+        log.warning("Could not create the SwC capture Files row", exc_info=True)
+        _rollback_quietly(db)
+        return 0
+    file_id = int(file_id)
+    _native_capture_file_ids[id(db)] = file_id
+    return file_id
 
 
 def _rollback_quietly(db: Any) -> None:
@@ -171,8 +212,25 @@ def _native_public_import_copy(hand_data: dict[str, Any]) -> dict[str, Any] | No
     return candidate
 
 
+def _enrich_or_rollback(db: Any, hand_data: dict[str, Any], *, doinsert: bool) -> int | None:
+    """Repair an existing hand's boards, undoing a partial write if that fails.
+
+    The repair writes (UPDATE/DELETE/INSERT and a commit) before the import's own
+    guarded block begins, so a failure here used to propagate with no rollback --
+    leaving a PostgreSQL connection in an aborted transaction that every later
+    retry and auto-import cycle on that same connection then failed on too.
+    """
+    if not doinsert:
+        return None
+    try:
+        return _enrich_existing_native_boards(db, hand_data)
+    except Exception:
+        _rollback_quietly(db)
+        raise
+
+
 def _import_native_hand(db: Any, hand_data: dict[str, Any], *, doinsert: bool) -> HttpCaptureImportResult:
-    repaired_hand_id = _enrich_existing_native_boards(db, hand_data) if doinsert else None
+    repaired_hand_id = _enrich_or_rollback(db, hand_data, doinsert=doinsert)
     candidate = _native_public_import_copy(hand_data)
     site_hand_no = str(hand_data.get("hand_id") or "")
     if candidate is None:
@@ -201,7 +259,7 @@ def _import_native_hand(db: Any, hand_data: dict[str, Any], *, doinsert: bool) -
         hand = build_fpdb_hand(candidate, config=config)
         if hasattr(db, "resetBulkCache"):
             db.resetBulkCache()
-        import_fpdb_hand(hand, db, file_id=0, doinsert=True)
+        import_fpdb_hand(hand, db, file_id=_ensure_capture_file(db), doinsert=True)
     except CaptureNotImportableError as error:
         return HttpCaptureImportResult(site_hand_no, "native", None, None, "skipped", str(error))
     except FpdbHandDuplicate:

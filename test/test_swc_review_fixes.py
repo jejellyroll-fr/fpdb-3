@@ -353,3 +353,133 @@ def test_a_partly_injected_client_set_says_which_client_was_missed(monkeypatch, 
 
     assert "22" in status, "the client that was not injected must be named"
     assert "access denied" in status
+
+
+# --------------------------------------------------------------------------
+# 7. Hands.fileId is a real foreign key on the server backends.
+# --------------------------------------------------------------------------
+
+
+def test_a_native_hand_is_attached_to_a_real_files_row(monkeypatch) -> None:
+    """file_id=0 violates Hands.fileId -> Files.id on MySQL/PostgreSQL."""
+    from fpdb_3_legacy import http_capture_db_import as mod
+
+    mod._native_capture_file_ids.clear()
+    db = MagicMock()
+    db.get_id.return_value = None
+    db.storeFile.return_value = 77
+    _reaches_the_import(monkeypatch, mod)
+    seen = {}
+    monkeypatch.setattr(mod, "import_fpdb_hand", lambda _h, _db, file_id, doinsert: seen.update(file_id=file_id))
+
+    mod._import_native_hand(db, _native_hand(), doinsert=True)
+
+    assert seen["file_id"] == 77
+    db.storeFile.assert_called_once()
+
+
+def test_the_files_row_is_created_once_per_connection(monkeypatch) -> None:
+    from fpdb_3_legacy import http_capture_db_import as mod
+
+    mod._native_capture_file_ids.clear()
+    db = MagicMock()
+    db.get_id.return_value = 5
+    _reaches_the_import(monkeypatch, mod)
+    monkeypatch.setattr(mod, "import_fpdb_hand", lambda *a, **k: None)
+
+    mod._import_native_hand(db, _native_hand(), doinsert=True)
+    mod._import_native_hand(db, _native_hand(), doinsert=True)
+
+    assert db.get_id.call_count == 1, "the Files row is looked up once and reused"
+
+
+def test_a_database_without_files_helpers_still_imports(monkeypatch) -> None:
+    """A stub connection must not become an error path of its own."""
+    from fpdb_3_legacy import http_capture_db_import as mod
+
+    mod._native_capture_file_ids.clear()
+    assert mod._ensure_capture_file(object()) == 0
+
+
+# --------------------------------------------------------------------------
+# 8. Board repair writes, so its failure needs a rollback too.
+# --------------------------------------------------------------------------
+
+
+def test_a_failing_board_repair_rolls_back(monkeypatch) -> None:
+    """Otherwise PostgreSQL keeps the shared connection in an aborted transaction."""
+    from fpdb_3_legacy import http_capture_db_import as mod
+
+    db = MagicMock()
+
+    def boom(*_a, **_k):
+        msg = "board UPDATE failed"
+        raise RuntimeError(msg)
+
+    monkeypatch.setattr(mod, "_enrich_existing_native_boards", boom)
+
+    with pytest.raises(RuntimeError, match="board UPDATE"):
+        mod._import_native_hand(db, _native_hand(), doinsert=True)
+
+    db.rollback.assert_called_once()
+
+
+# --------------------------------------------------------------------------
+# 9. An imported live hand has to reach the HUD.
+# --------------------------------------------------------------------------
+
+
+def test_an_imported_live_hand_is_pushed_to_the_hud() -> None:
+    """HUD_main queues hands only from its ZMQ receiver."""
+    from fpdb_3_legacy.GuiAutoImport import GuiAutoImport
+
+    sent = []
+
+    class _Importer:
+        callHud = True
+        zmq_sender = SimpleNamespace(send_hand_id=sent.append)
+
+    gui = SimpleNamespace(importer=_Importer())
+    GuiAutoImport._notify_hud_of_hand(gui, 4321)
+
+    assert sent == [4321]
+
+
+def test_nothing_is_pushed_when_the_hud_is_switched_off() -> None:
+    from fpdb_3_legacy.GuiAutoImport import GuiAutoImport
+
+    sent = []
+
+    class _Importer:
+        callHud = False
+        zmq_sender = SimpleNamespace(send_hand_id=sent.append)
+
+    gui = SimpleNamespace(importer=_Importer())
+    GuiAutoImport._notify_hud_of_hand(gui, 4321)
+    GuiAutoImport._notify_hud_of_hand(SimpleNamespace(importer=None), 4321)
+
+    assert sent == []
+
+
+# --------------------------------------------------------------------------
+# 10. A stream id already handed out must stay with its process.
+# --------------------------------------------------------------------------
+
+
+def test_a_reattach_keeps_the_id_an_injected_client_already_holds(tmp_path) -> None:
+    """LoadLibraryW does not re-run DllMain, so that client keeps its old id."""
+    from fpdb_3_legacy import swc_windows_inject as inj
+
+    first = inj.write_stream_ids(tmp_path, [100, 200])
+    # 100 exits; a new client appears. 200 is still injected and still in memory.
+    second = inj.write_stream_ids(tmp_path, [200, 300])
+
+    assert second[200] == first[200], "an injected client keeps the id it is using"
+    assert second[300] != second[200], "the new client must not reuse a live id"
+
+
+def test_stream_ids_survive_a_repeated_attach(tmp_path) -> None:
+    from fpdb_3_legacy import swc_windows_inject as inj
+
+    first = inj.write_stream_ids(tmp_path, [7, 9])
+    assert inj.write_stream_ids(tmp_path, [7, 9]) == first
