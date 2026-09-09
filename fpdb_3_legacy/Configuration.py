@@ -417,6 +417,12 @@ def string_to_bool(string, default=True):
 #: of pixels off a real table and the user sees no HUD at all.
 LAYOUT_REFERENCE_TOLERANCE = 1.5
 
+#: How far a position may sit *before* the table's origin, as a fraction of the
+#: reference. A block parked just above or left of the table is a real user
+#: choice (the shipped layouts contain x="-4"), so the allowance mirrors the
+#: overhang the tolerance above grants on the right and bottom.
+LAYOUT_REFERENCE_UNDERHANG = LAYOUT_REFERENCE_TOLERANCE - 1.0
+
 
 def layout_reference_fits(width, height, positions) -> bool:
     """Whether ``width``x``height`` can plausibly be the reference for ``positions``.
@@ -424,15 +430,26 @@ def layout_reference_fits(width, height, positions) -> bool:
     ``positions`` is any iterable of (x, y). Missing or non-positive dimensions
     are rejected outright: they would make the scale factor meaningless (or
     raise) rather than merely wrong.
+
+    Both directions are checked. Looking only at the maxima accepted a layout
+    whose blocks all sit far above and left of the table -- (-5000, -5000) is as
+    unusable as (5000, 5000), and the corrupt ipoker layout this guard was
+    written for carried y="-395" alongside its oversized x.
     """
     points = [p for p in positions if p is not None]
     if not width or not height or int(width) <= 0 or int(height) <= 0:
         return False
     if not points:
         return True
-    max_x = max(int(x) for x, _y in points)
-    max_y = max(int(y) for _x, y in points)
-    return max_x <= int(width) * LAYOUT_REFERENCE_TOLERANCE and max_y <= int(height) * LAYOUT_REFERENCE_TOLERANCE
+    width, height = int(width), int(height)
+    xs = [int(x) for x, _y in points]
+    ys = [int(y) for _x, y in points]
+    return (
+        max(xs) <= width * LAYOUT_REFERENCE_TOLERANCE
+        and max(ys) <= height * LAYOUT_REFERENCE_TOLERANCE
+        and min(xs) >= -width * LAYOUT_REFERENCE_UNDERHANG
+        and min(ys) >= -height * LAYOUT_REFERENCE_UNDERHANG
+    )
 
 
 class Layout:
@@ -493,15 +510,46 @@ class Layout:
         if positions:
             self.width = max(self.width, max(x for x, _y in positions))
             self.height = max(self.height, max(y for _x, y in positions))
+        # Growing the reference cannot rescue a position that sits *before* the
+        # table's origin: scaling only pushes it further off. Such a block is
+        # lifted back to the edge instead, which is the same bargain the widening
+        # makes -- not the layout the user drew, but one they can see and re-drag.
+        lifted = self._lift_positions_into_view()
         log.warning(
             "Layout %d-max declares a %dx%d reference that cannot contain its own positions; "
-            "using %dx%d instead so the HUD stays on the table",
+            "using %dx%d instead%s so the HUD stays on the table",
             self.max,
             old_width,
             old_height,
             self.width,
             self.height,
+            f" and lifting {lifted} block(s) back onto it" if lifted else "",
         )
+
+    def _lift_positions_into_view(self) -> int:
+        """Clamp positions that sit far before the table origin; return how many."""
+        floor_x = -int(self.width * LAYOUT_REFERENCE_UNDERHANG)
+        floor_y = -int(self.height * LAYOUT_REFERENCE_UNDERHANG)
+
+        def lift(point):
+            x, y = point
+            return (max(x, floor_x), max(y, floor_y))
+
+        lifted = 0
+        for seat, point in enumerate(self.location):
+            if point is None:
+                continue
+            raised = lift(point)
+            if raised != point:
+                self.location[seat] = raised
+                lifted += 1
+        common = getattr(self, "common", None)
+        if common is not None:
+            raised = lift(common)
+            if raised != common:
+                self.common = raised
+                lifted += 1
+        return lifted
 
     def __str__(self) -> str:
         if hasattr(self, "name"):

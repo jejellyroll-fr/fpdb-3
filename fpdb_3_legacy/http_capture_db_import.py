@@ -207,16 +207,6 @@ def _import_native_hand(db: Any, hand_data: dict[str, Any], *, doinsert: bool) -
     except FpdbHandDuplicate:
         if hasattr(db, "rollback"):
             db.rollback()
-    except Exception:
-        # Any other failure -- a transient HandsPlayers insert error, the
-        # database going away mid-hand -- can leave an uncommitted Hands row on
-        # this connection. The caller treats such a failure as non-terminal and
-        # retries on the *same* connection, where duplicate detection would see
-        # that uncommitted row, the FpdbHandDuplicate handler above would roll it
-        # back, and the hand would be retired as "already imported" while never
-        # having reached the database. Undo the partial write before the retry.
-        _rollback_quietly(db)
-        raise
         if repaired_hand_id is not None:
             return HttpCaptureImportResult(
                 site_hand_no,
@@ -229,6 +219,16 @@ def _import_native_hand(db: Any, hand_data: dict[str, Any], *, doinsert: bool) -
         return HttpCaptureImportResult(
             site_hand_no, "native", None, f"native:{site_hand_no}", "duplicate", "hand already imported"
         )
+    except Exception:
+        # Any other failure -- a transient HandsPlayers insert error, the
+        # database going away mid-hand -- can leave an uncommitted Hands row on
+        # this connection. The caller treats such a failure as non-terminal and
+        # retries on the *same* connection, where duplicate detection would see
+        # that uncommitted row, the FpdbHandDuplicate handler above would roll it
+        # back, and the hand would be retired as "already imported" while never
+        # having reached the database. Undo the partial write before the retry.
+        _rollback_quietly(db)
+        raise
 
     return HttpCaptureImportResult(
         site_hand_no,

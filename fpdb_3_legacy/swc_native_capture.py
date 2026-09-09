@@ -94,12 +94,24 @@ def attach_to_windows_client(*, port: int = 0, include_outbound: bool = False) -
         )
         raise RuntimeError(msg)
 
+    # Assigned before injection: the tap reads its id at load time.
+    injector_mod.write_stream_ids(BUILD_DIR, pids)
     results = [injector_mod.inject_into_pid(injector, tap, pid) for pid in pids]
     ok = [r for r in results if r.ok]
     if not ok:
         detail = "; ".join(f"pid {r.pid}: {r.detail}" for r in results)
         msg = f"could not inject the SwC tap into any client process ({detail})"
         raise RuntimeError(msg)
+
+    # A client the tap could not be injected into produces nothing, and saying
+    # only how many succeeded would announce "capture active" while one client's
+    # hands never arrive. Carried into every status below.
+    refused = [r for r in results if not r.ok]
+    refused_note = (
+        " Not injected: " + "; ".join(f"pid {r.pid}: {r.detail}" for r in refused) + "."
+        if refused
+        else ""
+    )
 
     status_path = DEFAULT_ARCHIVE.with_suffix(".status")
     injected = [r.pid for r in ok]
@@ -118,19 +130,19 @@ def attach_to_windows_client(*, port: int = 0, include_outbound: bool = False) -
         detail = ", ".join(f"pid {pid} reported {statuses[pid]}" for pid in failed)
         return (
             f"SwC tap hooked in {len(hooked)} of {len(injected)} client process(es); {detail}. "
-            "Hands from those clients will be missing."
+            f"Hands from those clients will be missing.{refused_note}"
         )
     if len(hooked) == len(injected):
-        return f"SwC capture active: tap hooked in {len(hooked)} client process(es)."
+        return f"SwC capture active: tap hooked in {len(hooked)} client process(es).{refused_note}"
     if all(statuses.get(pid) in ("", "tap-loaded") for pid in injected):
         return (
             f"SwC tap loaded into {len(injected)} client process(es); it will start capturing "
-            "as soon as the client opens a secure connection (play or reopen a table)."
+            f"as soon as the client opens a secure connection (play or reopen a table).{refused_note}"
         )
     pending = ", ".join(str(pid) for pid in injected if pid not in hooked)
     return (
         f"SwC tap hooked in {len(hooked)} of {len(injected)} client process(es); "
-        f"pid(s) {pending} have not hooked yet and may start capturing later."
+        f"pid(s) {pending} have not hooked yet and may start capturing later.{refused_note}"
     )
 
 

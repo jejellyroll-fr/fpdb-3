@@ -230,3 +230,126 @@ def test_an_archive_written_before_stream_ids_still_decodes() -> None:
     ]
 
     assert [m.payload for m in iter_protocol_messages(iter(records))] == [b"F" * 8]
+
+
+# --------------------------------------------------------------------------
+# 4. A duplicate must be reported as a duplicate, not as a fresh import.
+# --------------------------------------------------------------------------
+
+
+def test_a_duplicate_native_hand_is_reported_as_a_duplicate(monkeypatch) -> None:
+    """The generic rollback handler must not swallow the duplicate's own result."""
+    from fpdb_3_legacy import http_capture_db_import as mod
+    from fpdb_3_legacy.Exceptions import FpdbHandDuplicate
+
+    db = MagicMock()
+    _reaches_the_import(monkeypatch, mod)
+
+    def already_there(*_a, **_k):
+        raise FpdbHandDuplicate("already imported")
+
+    monkeypatch.setattr(mod, "import_fpdb_hand", already_there)
+
+    result = mod._import_native_hand(db, _native_hand(), doinsert=True)
+
+    assert result.status == "duplicate"
+    db.rollback.assert_called_once()
+
+
+def test_a_repaired_existing_hand_is_reported_as_updated(monkeypatch) -> None:
+    from fpdb_3_legacy import http_capture_db_import as mod
+    from fpdb_3_legacy.Exceptions import FpdbHandDuplicate
+
+    db = MagicMock()
+    _reaches_the_import(monkeypatch, mod)
+    monkeypatch.setattr(mod, "_enrich_existing_native_boards", lambda *_a, **_k: 4242)
+
+    def already_there(*_a, **_k):
+        raise FpdbHandDuplicate("already imported")
+
+    monkeypatch.setattr(mod, "import_fpdb_hand", already_there)
+
+    result = mod._import_native_hand(db, _native_hand(), doinsert=True)
+
+    assert result.status == "updated"
+    assert result.row_id == 4242
+
+
+# --------------------------------------------------------------------------
+# 5. A layout is as unusable off the top-left as off the bottom-right.
+# --------------------------------------------------------------------------
+
+
+def test_positions_far_before_the_origin_are_rejected() -> None:
+    from fpdb_3_legacy.Configuration import layout_reference_fits
+
+    assert layout_reference_fits(792, 546, [(-5000, -5000)]) is False
+    assert layout_reference_fits(792, 546, [(100, -5000)]) is False
+    assert layout_reference_fits(792, 546, [(-5000, 100)]) is False
+
+
+def test_a_block_parked_just_off_the_top_left_is_still_accepted() -> None:
+    """The shipped layouts carry x="-4"; that is a user choice, not corruption."""
+    from fpdb_3_legacy.Configuration import layout_reference_fits
+
+    assert layout_reference_fits(792, 546, [(-4, -4), (681, 221)]) is True
+
+
+def test_the_load_repair_lifts_blocks_back_onto_the_table() -> None:
+    from xml.dom import minidom
+
+    from fpdb_3_legacy.Configuration import Layout
+
+    node = minidom.parseString(
+        """<layout max="2" height="546" width="792">
+             <location seat="1" x="-5000" y="-5000"/>
+             <location seat="2" x="400" y="300"/>
+           </layout>""",
+    ).documentElement
+    layout = Layout(node)
+
+    # Lifted to the allowed underhang rather than left thousands of pixels away.
+    assert layout.location[1][0] >= -792 * 0.5
+    assert layout.location[1][1] >= -546 * 0.5
+    assert layout.location[2] == (400, 300)
+
+
+# --------------------------------------------------------------------------
+# 6. A client that could not be injected has to be named.
+# --------------------------------------------------------------------------
+
+
+def test_stream_ids_are_distinct_per_client(tmp_path) -> None:
+    from fpdb_3_legacy import swc_windows_inject as inj
+
+    assignment = inj.write_stream_ids(tmp_path, [1024, 4])
+
+    assert len(set(assignment.values())) == 2
+    assert 0 not in assignment.values(), "0 means 'unassigned' to the tap"
+    for pid, stream_id in assignment.items():
+        assert (tmp_path / f"swc-native-{pid}.cfg").read_text(encoding="ascii") == f"stream={stream_id}\n"
+
+
+def test_a_partly_injected_client_set_says_which_client_was_missed(monkeypatch, tmp_path) -> None:
+    """Otherwise "capture active" hides a client whose hands never arrive."""
+    from fpdb_3_legacy import swc_native_capture, swc_tap_build
+    from fpdb_3_legacy import swc_windows_inject as inj
+
+    monkeypatch.setattr(swc_native_capture.platform, "system", lambda: "Windows")
+    monkeypatch.setattr(swc_native_capture, "build_tap", lambda **_: tmp_path / "tap.dll")
+    monkeypatch.setattr(swc_tap_build, "build_injector", lambda **_: tmp_path / "inj.exe")
+    monkeypatch.setattr(swc_native_capture, "BUILD_DIR", tmp_path, raising=False)
+    monkeypatch.setattr(inj, "write_capture_config", lambda *_a, **_k: tmp_path / "c.cfg")
+    monkeypatch.setattr(inj, "write_stream_ids", lambda *_a, **_k: {})
+    monkeypatch.setattr(inj, "find_client_pids", lambda *_a, **_k: [11, 22])
+    monkeypatch.setattr(
+        inj,
+        "inject_into_pid",
+        lambda _i, _d, pid: inj.InjectionResult(pid=pid, ok=(pid == 11), detail="ok" if pid == 11 else "access denied"),
+    )
+    monkeypatch.setattr(inj, "wait_for_hooks", lambda _p, pids: dict.fromkeys(pids, "tap-hooked"))
+
+    status = swc_native_capture.attach_to_windows_client()
+
+    assert "22" in status, "the client that was not injected must be named"
+    assert "access denied" in status

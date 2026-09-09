@@ -227,15 +227,22 @@ static uint16_t peer_port_for_ssl(SSL *ssl, int *out_fd) {
 /* A byte identifying this process among the clients sharing one archive.
  * Several injected clients append to the same file, so a stream key built only
  * from (peer port, socket) can still collide across processes: two processes
- * routinely hold the same small socket number. Folding the process id in keeps
- * their streams apart. One byte is enough to separate the handful of clients a
- * user runs, and it fits the header field that was already reserved. */
+ * routinely hold the same small socket number. Folding the process in keeps
+ * their streams apart.
+ *
+ * The launcher assigns this (see swc_read_stream_id): it knows every client it
+ * is injecting into, so it can hand out distinct ids. Deriving one here instead
+ * could only hash the process id down to a byte, and a hash collides -- pids 4
+ * and 1024 both fold to 4 -- which is exactly the splice this field exists to
+ * prevent. The hash survives only as the fallback for a tap injected without an
+ * assignment, where it still beats the constant every client shared before. */
+static uint8_t g_source_id = 0;
+
 static uint8_t capture_source_id(void) {
-#ifdef _WIN32
-    unsigned long pid = (unsigned long)GetCurrentProcessId();
-#else
-    unsigned long pid = (unsigned long)getpid();
-#endif
+    return g_source_id;
+}
+
+static uint8_t swc_fallback_source_id(unsigned long pid) {
     /* Mix the high bits down so ids that differ only above bit 8 still differ. */
     return (uint8_t)((pid ^ (pid >> 8) ^ (pid >> 16)) & 0xFFu);
 }
@@ -841,6 +848,33 @@ __attribute__((destructor)) static void close_swc_tap(void) {
  * launcher writes it so Windows keeps parity with the POSIX SWC_CAPTURE_PORT /
  * SWC_CAPTURE_OUTBOUND variables, which an injected DLL cannot inherit. Absent
  * or unreadable, the safe defaults hold (auto game ports, inbound only). */
+/* The stream id the launcher assigned this process, or 0 if it assigned none.
+ * Written to a per-pid sidecar so each injected client reads only its own. */
+static uint8_t swc_read_stream_id(const wchar_t *dir, unsigned long pid) {
+    wchar_t path[MAX_PATH];
+    int fd;
+    char buf[64];
+    int n;
+    const char *p;
+
+    _snwprintf(path, MAX_PATH, L"%sswc-native-%lu.cfg", dir, pid);
+    fd = _wopen(path, _O_RDONLY | _O_BINARY);
+    if (fd < 0) {
+        return 0;
+    }
+    n = _read(fd, buf, (unsigned int)(sizeof(buf) - 1));
+    _close(fd);
+    if (n <= 0) {
+        return 0;
+    }
+    buf[n] = '\0';
+    p = strstr(buf, "stream=");
+    if (p == NULL) {
+        return 0;
+    }
+    return (uint8_t)(strtoul(p + 7, NULL, 10) & 0xFFu);
+}
+
 static void swc_read_config(const wchar_t *cfg_path) {
     int fd = _wopen(cfg_path, _O_RDONLY | _O_BINARY);
     char buf[256];
@@ -893,6 +927,14 @@ static void initialize_swc_tap(HINSTANCE self) {
     _snwprintf(g_status_path, MAX_PATH, L"%sswc-native.status", dir);
     _snwprintf(cfg_path, MAX_PATH, L"%sswc-native.cfg", dir);
     swc_read_config(cfg_path);
+
+    {
+        unsigned long pid = (unsigned long)GetCurrentProcessId();
+        g_source_id = swc_read_stream_id(dir, pid);
+        if (g_source_id == 0) {
+            g_source_id = swc_fallback_source_id(pid);
+        }
+    }
 
     /* Opened before any record can be written, and reported before tap-loaded so
      * that line stays the last status the Python side reads. Without it, records

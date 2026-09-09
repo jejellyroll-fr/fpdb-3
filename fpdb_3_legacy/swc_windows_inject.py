@@ -92,6 +92,24 @@ def write_capture_config(build_dir: Path, *, port: int, include_outbound: bool) 
     return config_path
 
 
+def write_stream_ids(build_dir: Path, pids: list[int]) -> dict[int, int]:
+    """Give each client a distinct stream id and return the assignment.
+
+    Every injected client appends to one archive, so a record has to say which
+    client wrote it or the reassembler splices their plaintext together. The
+    launcher is the only party that sees all the clients at once, so it assigns
+    the ids; a tap deriving its own could only hash its process id down to the
+    byte the header has room for, and a hash collides.
+
+    Ids start at 1: the tap treats 0 as "nothing was assigned" and falls back to
+    that hash, which is still better than the constant every client shared.
+    """
+    assignment = {pid: (index % 255) + 1 for index, pid in enumerate(sorted(pids))}
+    for pid, stream_id in assignment.items():
+        (build_dir / f"swc-native-{pid}.cfg").write_text(f"stream={stream_id}\n", encoding="ascii")
+    return assignment
+
+
 def inject_into_pid(injector: Path, dll: Path, pid: int) -> InjectionResult:
     """Run the injector to load ``dll`` into ``pid``; never raises."""
     try:
