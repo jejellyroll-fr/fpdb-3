@@ -46,7 +46,7 @@ def _tailer(tmp_path, monkeypatch, hands):
     from fpdb_3_legacy import swc_native_capture
     from fpdb_3_legacy.GuiAutoImport import SwCNativeTailingThread
 
-    monkeypatch.setattr(swc_native_capture, "iter_protocol_messages", lambda records: list(records))
+    monkeypatch.setattr(swc_native_capture.NativeProtocolStream, "feed", lambda _self, records: list(records))
     monkeypatch.setattr(swc_native_capture, "normalize_native_hands", lambda messages, raw_ref=None: hands)
     raw = tmp_path / "swc-native.raw"
     raw.write_bytes(_record(b"game-state"))
@@ -483,3 +483,130 @@ def test_stream_ids_survive_a_repeated_attach(tmp_path) -> None:
 
     first = inj.write_stream_ids(tmp_path, [7, 9])
     assert inj.write_stream_ids(tmp_path, [7, 9]) == first
+
+
+# --------------------------------------------------------------------------
+# 11. A message split across two polls must survive the batch boundary.
+# --------------------------------------------------------------------------
+
+
+def test_a_message_split_across_batches_is_reassembled() -> None:
+    """SwC sends the 4-byte length in an SSL_read of its own, so this is routine."""
+    from fpdb_3_legacy.swc_native_capture import NativeProtocolStream
+
+    body = _framed(b"Z" * 30)
+    stream = NativeProtocolStream()
+
+    first = stream.feed([NativeCaptureRecord(datetime.now(UTC), "received", 20013, body[:4])])
+    second = stream.feed([NativeCaptureRecord(datetime.now(UTC), "received", 20013, body[4:])])
+
+    assert [m.payload for m in first] == [], "the length prefix alone completes nothing"
+    assert [m.payload for m in second] == [b"Z" * 30]
+
+
+def test_a_half_message_does_not_raise_at_a_batch_boundary() -> None:
+    """iter_protocol_messages finish()es and raises; a tailer must not."""
+    from fpdb_3_legacy.swc_native_capture import NativeProtocolStream
+
+    stream = NativeProtocolStream()
+    assert stream.feed([NativeCaptureRecord(datetime.now(UTC), "received", 20013, _framed(b"Q" * 9)[:6])]) == []
+
+
+def test_the_tailer_keeps_its_decoders_between_polls(tmp_path, monkeypatch) -> None:
+    """End to end: the archive grows by half a message, then by the rest."""
+    from fpdb_3_legacy import swc_native_capture
+    from fpdb_3_legacy.GuiAutoImport import SwCNativeTailingThread
+
+    seen: list[bytes] = []
+    monkeypatch.setattr(
+        swc_native_capture,
+        "normalize_native_hands",
+        lambda messages, raw_ref=None: seen.extend(m.payload for m in messages) or [],
+    )
+
+    body = _framed(b"W" * 24)
+    raw = tmp_path / "swc-native.raw"
+    raw.write_bytes(_record(body[:4]))
+    thread = SwCNativeTailingThread(raw_path=raw)
+
+    thread.poll_once()
+    assert seen == [], "nothing is complete yet"
+
+    with raw.open("ab") as handle:
+        handle.write(_record(body[4:]))
+    thread.poll_once()
+
+    assert seen == [b"W" * 24], "the second batch completed the message"
+
+
+# --------------------------------------------------------------------------
+# 12. Trimming the history must not drop a live table's descriptor.
+# --------------------------------------------------------------------------
+
+
+def test_a_table_descriptor_survives_the_rolling_trim(tmp_path, monkeypatch) -> None:
+    """normalize_native_hands rebuilds its table map from the retained list alone."""
+    from fpdb_3_legacy import swc_native_capture
+    from fpdb_3_legacy.GuiAutoImport import SwCNativeTailingThread
+
+    descriptor = SimpleNamespace(payload=b"table-info", peer_port=1, connection_id=0, source_id=0)
+    filler = [SimpleNamespace(payload=b"x", peer_port=1, connection_id=0, source_id=0) for _ in range(5)]
+
+    monkeypatch.setattr(
+        swc_native_capture,
+        "extract_table_info",
+        lambda m: SimpleNamespace(table_id=42) if m.payload == b"table-info" else None,
+    )
+    monkeypatch.setattr(
+        swc_native_capture.NativeProtocolStream,
+        "feed",
+        lambda _self, _records: [descriptor, *filler],
+    )
+    handed: list[list] = []
+    monkeypatch.setattr(
+        swc_native_capture,
+        "normalize_native_hands",
+        lambda messages, raw_ref=None: handed.append(list(messages)) or [],
+    )
+
+    raw = tmp_path / "swc-native.raw"
+    raw.write_bytes(_record(b"anything"))
+    thread = SwCNativeTailingThread(raw_path=raw)
+    thread.MAX_RETAINED_MESSAGES = 2  # force the trim to eat the descriptor
+    thread.poll_once()
+
+    assert descriptor in handed[0], "the descriptor must outlive the trimmed history"
+
+
+# --------------------------------------------------------------------------
+# 13. A repaired reference must be usable, and stale options must be announced.
+# --------------------------------------------------------------------------
+
+
+def test_a_zero_reference_with_no_positive_coordinate_is_still_repaired() -> None:
+    """Aux_Base refuses to scale by zero, so the repair has to leave a usable one."""
+    from xml.dom import minidom
+
+    from fpdb_3_legacy.Configuration import Layout
+
+    node = minidom.parseString(
+        """<layout max="2" height="0" width="0">
+             <location seat="1" x="0" y="0"/>
+             <location seat="2" x="-10" y="-10"/>
+           </layout>""",
+    ).documentElement
+    layout = Layout(node)
+
+    assert layout.width >= 1
+    assert layout.height >= 1
+
+
+def test_changed_capture_options_are_reported_as_needing_a_restart(tmp_path) -> None:
+    from fpdb_3_legacy import swc_windows_inject as inj
+
+    assert inj.capture_config_changed(tmp_path, port=0, include_outbound=False) is False
+
+    inj.write_capture_config(tmp_path, port=0, include_outbound=False)
+    assert inj.capture_config_changed(tmp_path, port=0, include_outbound=False) is False
+    assert inj.capture_config_changed(tmp_path, port=20020, include_outbound=False) is True
+    assert inj.capture_config_changed(tmp_path, port=0, include_outbound=True) is True

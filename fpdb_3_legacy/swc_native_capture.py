@@ -16,7 +16,7 @@ import sys
 import threading
 import time
 from collections import Counter
-from collections.abc import Iterator
+from collections.abc import Iterable, Iterator
 from dataclasses import dataclass
 from datetime import datetime, timezone
 
@@ -81,6 +81,10 @@ def attach_to_windows_client(*, port: int = 0, include_outbound: bool = False) -
 
     tap = build_tap(check_executable=False)
     injector = build_injector()
+    # Checked before the write: a client already holding the tap read its
+    # configuration once, in DllMain, and injecting again only bumps the module
+    # reference count -- it keeps the old port/outbound filtering until restarted.
+    options_changed = injector_mod.capture_config_changed(BUILD_DIR, port=port, include_outbound=include_outbound)
     injector_mod.write_capture_config(BUILD_DIR, port=port, include_outbound=include_outbound)
 
     DEFAULT_ARCHIVE.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
@@ -112,6 +116,11 @@ def attach_to_windows_client(*, port: int = 0, include_outbound: bool = False) -
         if refused
         else ""
     )
+    if options_changed:
+        refused_note += (
+            " Capture options changed: a client that was already running keeps the previous "
+            "port/outbound settings until it is restarted."
+        )
 
     status_path = DEFAULT_ARCHIVE.with_suffix(".status")
     injected = [r.pid for r in ok]
@@ -458,6 +467,39 @@ class NativeProtocolDecoder:
     def finish(self) -> None:
         if self.buffer:
             raise ValueError("truncated SwC native protocol message")
+
+
+class NativeProtocolStream:
+    """Reassemble protocol messages from records that arrive a batch at a time.
+
+    ``iter_protocol_messages`` is for a complete archive: it builds decoders,
+    drains them, and ``finish()``es them -- which raises when a message is only
+    half written. A tailer never reads a complete archive. It reads whatever
+    landed since the last poll, and a length-prefixed message routinely spans two
+    polls, because SwC sends the 4-byte length in an SSL_read of its own (the
+    archive is full of 4-byte records followed by their payload).
+
+    Rebuilding the decoders every batch therefore raised on that dangling prefix
+    and threw it away, and since the read offset had already advanced those bytes
+    never came back: the next batch read the continuation as a length field and
+    the stream desynchronised for good. Keeping the decoders here is what lets a
+    message be completed by the batch that carries its second half.
+    """
+
+    def __init__(self, *, include_outbound: bool = False) -> None:
+        self._decoders: dict[tuple[int, int, int, str], NativeProtocolDecoder] = {}
+        self._include_outbound = include_outbound
+
+    def feed(self, records: Iterable[NativeCaptureRecord]) -> list[NativeProtocolMessage]:
+        """Every message completed by these records; partial ones stay buffered."""
+        messages: list[NativeProtocolMessage] = []
+        for record in records:
+            if record.direction == "sent" and not self._include_outbound:
+                continue
+            key = (record.source_id, record.peer_port, record.connection_id, record.direction)
+            decoder = self._decoders.setdefault(key, NativeProtocolDecoder(record.direction))
+            messages.extend(decoder.feed(record))
+        return messages
 
 
 def iter_protocol_messages(

@@ -508,8 +508,12 @@ class Layout:
             return
         old_width, old_height = self.width, self.height
         if positions:
-            self.width = max(self.width, max(x for x, _y in positions))
-            self.height = max(self.height, max(y for _x, y in positions))
+            # At least 1: a zero reference whose coordinates are all zero or
+            # negative would otherwise survive the widening unchanged, and
+            # Aux_Base.create_scale_position() refuses to divide by it -- the HUD
+            # would be no more available than before the repair.
+            self.width = max(1, self.width, max(x for x, _y in positions))
+            self.height = max(1, self.height, max(y for _x, y in positions))
         # Growing the reference cannot rescue a position that sits *before* the
         # table's origin: scaling only pushes it further off. Such a block is
         # lifted back to the edge instead, which is the same bargain the widening

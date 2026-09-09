@@ -88,8 +88,28 @@ def write_capture_config(build_dir: Path, *, port: int, include_outbound: bool) 
     through this file instead. Written next to the DLL, where the DLL looks.
     """
     config_path = build_dir / "swc-native.cfg"
-    config_path.write_text(f"port={int(port)}\noutbound={1 if include_outbound else 0}\n", encoding="ascii")
+    config_path.write_text(_capture_config_text(port=port, include_outbound=include_outbound), encoding="ascii")
     return config_path
+
+
+def _capture_config_text(*, port: int, include_outbound: bool) -> str:
+    return f"port={int(port)}\noutbound={1 if include_outbound else 0}\n"
+
+
+def capture_config_changed(build_dir: Path, *, port: int, include_outbound: bool) -> bool:
+    """Whether these options differ from the ones already on disk.
+
+    A client that already holds the tap will not pick them up: the DLL reads its
+    configuration once, in DllMain, and injecting again only increments the
+    module's reference count. Reporting the change lets the caller say so instead
+    of announcing success while the old filtering silently stays in force.
+    """
+    config_path = build_dir / "swc-native.cfg"
+    try:
+        previous = config_path.read_text(encoding="ascii")
+    except OSError:
+        return False  # nothing was configured before, so nothing can be stale
+    return previous != _capture_config_text(port=port, include_outbound=include_outbound)
 
 
 def write_stream_ids(build_dir: Path, pids: list[int]) -> dict[int, int]:

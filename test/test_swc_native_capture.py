@@ -1722,7 +1722,7 @@ def _tailing_thread(tmp_path, monkeypatch, hands):
     from fpdb_3_legacy import swc_native_capture
     from fpdb_3_legacy.GuiAutoImport import SwCNativeTailingThread
 
-    monkeypatch.setattr(swc_native_capture, "iter_protocol_messages", lambda records: list(records))
+    monkeypatch.setattr(swc_native_capture.NativeProtocolStream, "feed", lambda _self, records: list(records))
     monkeypatch.setattr(swc_native_capture, "normalize_native_hands", lambda messages, raw_ref=None: hands)
 
     raw = tmp_path / "swc-native.raw"
@@ -1755,7 +1755,7 @@ def _tailing_thread_snapshots(tmp_path, monkeypatch, snapshots):
     from fpdb_3_legacy.GuiAutoImport import SwCNativeTailingThread
 
     stages = [list(stage) for stage in snapshots]
-    monkeypatch.setattr(swc_native_capture, "iter_protocol_messages", lambda records: list(records))
+    monkeypatch.setattr(swc_native_capture.NativeProtocolStream, "feed", lambda _self, records: list(records))
     monkeypatch.setattr(
         swc_native_capture,
         "normalize_native_hands",

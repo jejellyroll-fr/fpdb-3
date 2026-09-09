@@ -172,6 +172,11 @@ class SwCNativeTailingThread(QThread):
         self._retry_after: dict[tuple[int, int], float] = {}
         self._offset = 0
         self._messages: list[Any] = []
+        # Kept across polls: a protocol message routinely spans two batches, and
+        # a decoder rebuilt each poll loses the half it was holding.
+        self._protocol_stream: Any = None
+        # The latest descriptor per table, exempt from the rolling trim below.
+        self._table_messages: dict[int, Any] = {}
         self._consecutive_errors = 0
 
     def stop(self) -> None:
@@ -251,7 +256,8 @@ class SwCNativeTailingThread(QThread):
         mid-play be imported once its later records arrive.
         """
         from fpdb_3_legacy.swc_native_capture import (
-            iter_protocol_messages,
+            NativeProtocolStream,
+            extract_table_info,
             normalize_native_hands,
             read_records_since,
         )
@@ -260,7 +266,19 @@ class SwCNativeTailingThread(QThread):
         now = time.monotonic()
 
         if records:
-            self._messages.extend(iter_protocol_messages(iter(records)))
+            if self._protocol_stream is None:
+                self._protocol_stream = NativeProtocolStream()
+            decoded = self._protocol_stream.feed(records)
+            for message in decoded:
+                # A table descriptor is what names a table id and its game, and
+                # normalize_native_hands rebuilds its table map from the message
+                # list alone. Held separately so the rolling trim below cannot
+                # drop the descriptor of a table that is still being played --
+                # every later hand from it would otherwise become invisible.
+                info = extract_table_info(message)
+                if info is not None:
+                    self._table_messages[info.table_id] = message
+            self._messages.extend(decoded)
             if len(self._messages) > self.MAX_RETAINED_MESSAGES:
                 del self._messages[: len(self._messages) - self.MAX_RETAINED_MESSAGES]
         elif not self._retry_is_due(now):
@@ -269,7 +287,10 @@ class SwCNativeTailingThread(QThread):
             # poll, and it is the expensive half of the work.
             return []
         fresh: list[dict] = []
-        for hand in normalize_native_hands(self._messages, raw_ref=str(self.raw_path)):
+        # Descriptors first: a duplicate of one still in _messages is harmless
+        # (the table map is a dict, and a descriptor yields no snapshot).
+        retained = [*self._table_messages.values(), *self._messages]
+        for hand in normalize_native_hands(retained, raw_ref=str(self.raw_path)):
             key = self._hand_key(hand)
             fingerprint = _hand_snapshot_fingerprint(hand)
             with self._state_lock:
