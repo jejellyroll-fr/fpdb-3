@@ -151,19 +151,28 @@ def write_stream_ids(build_dir: Path, pids: list[int]) -> dict[int, int]:
     return assignment
 
 
-def reset_stream_ids(build_dir: Path) -> int:
+def reset_stream_ids(build_dir: Path, keep_pids: Sequence[int] = ()) -> int:
     """Release the id pool, for use when the archive holds no records yet.
 
     Ids are reserved for as long as the archive can still contain records that
     carry them. Once it is empty -- a fresh install, or the user rotated it --
     nothing refers to the old ids any more and starting again at 1 keeps the
     pool from creeping toward its 255 ceiling over a long-lived install.
+
+    ``keep_pids`` are the clients still running. Their DLL is already resident
+    and keeps the id it read at load time -- reinjecting does not re-run DllMain
+    -- so releasing their assignment would let a *different* client be handed a
+    number one of them is still stamping on its records, which is the collision
+    the whole scheme exists to avoid.
     """
+    protected = set(keep_pids)
     removed = 0
     for path in build_dir.glob("swc-native-*.cfg"):
         try:
-            int(path.stem.rsplit("-", 1)[1])  # only the per-pid sidecars
+            pid = int(path.stem.rsplit("-", 1)[1])  # only the per-pid sidecars
         except (ValueError, IndexError):
+            continue
+        if pid in protected:
             continue
         try:
             path.unlink()

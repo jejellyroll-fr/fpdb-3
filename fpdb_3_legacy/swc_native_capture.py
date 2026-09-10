@@ -90,10 +90,6 @@ def attach_to_windows_client(*, port: int = 0, include_outbound: bool = False) -
     DEFAULT_ARCHIVE.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
     archive_is_new = not DEFAULT_ARCHIVE.exists() or DEFAULT_ARCHIVE.stat().st_size == 0
     DEFAULT_ARCHIVE.touch(exist_ok=True)
-    if archive_is_new:
-        # No record can still refer to a previously assigned id, so the pool is
-        # free again -- otherwise it would only ever creep toward its ceiling.
-        injector_mod.reset_stream_ids(BUILD_DIR)
 
     pids = injector_mod.find_client_pids()
     if not pids:
@@ -102,6 +98,13 @@ def attach_to_windows_client(*, port: int = 0, include_outbound: bool = False) -
             "start it and open a table, then start capture again"
         )
         raise RuntimeError(msg)
+
+    if archive_is_new:
+        # No record can still refer to a previously assigned id, so the pool is
+        # free again -- otherwise it would only ever creep toward its ceiling.
+        # The clients still running keep theirs: their DLL is already resident
+        # and goes on stamping the id it read at load time.
+        injector_mod.reset_stream_ids(BUILD_DIR, keep_pids=pids)
 
     # Assigned before injection: the tap reads its id at load time.
     injector_mod.write_stream_ids(BUILD_DIR, pids)
@@ -2840,10 +2843,40 @@ def _native_board_output(
     }
 
 
-def normalize_native_hands(  # noqa: PLR0915 - protocol normalization is intentionally linear
+def normalize_native_hands(messages: list[NativeProtocolMessage], *, raw_ref: str) -> list[dict]:
+    """Build capture-only FPDB-aligned envelopes from confirmed native fields.
+
+    Each injected client is normalized on its own. Snapshots are grouped by
+    (table id, hand id), which two clients watching the same table both produce:
+    merged, their independently timed copies become one timeline, with stacks
+    stepping backwards wherever one client lags the other -- enough to synthesize
+    wrong actions, or to fail settlement conservation and drop the hand. Keeping
+    the sources apart and taking the most complete envelope per hand avoids that
+    without changing anything for the single client that is the normal case.
+    """
+    sources = {message.source_id for message in messages}
+    if len(sources) <= 1:
+        return _normalize_native_hands_one_source(messages, raw_ref=raw_ref)
+
+    best: dict[tuple[int, int], dict] = {}
+    order: list[tuple[int, int]] = []
+    for source in sorted(sources):
+        subset = [message for message in messages if message.source_id == source]
+        for hand in _normalize_native_hands_one_source(subset, raw_ref=raw_ref):
+            key = (hand.get("table_id", 0), hand.get("hand_id", 0))
+            previous = best.get(key)
+            if previous is None:
+                order.append(key)
+                best[key] = hand
+            elif len(hand.get("steps", ())) > len(previous.get("steps", ())):
+                best[key] = hand
+    return [best[key] for key in order]
+
+
+def _normalize_native_hands_one_source(  # noqa: PLR0915 - protocol normalization is intentionally linear
     messages: list[NativeProtocolMessage], *, raw_ref: str
 ) -> list[dict]:
-    """Build capture-only FPDB-aligned envelopes from confirmed native fields."""
+    """Normalize the messages of a single capture source."""
     table_infos = {info.table_id: info for message in messages if (info := extract_table_info(message)) is not None}
     outbound_actions_by_hand = _collect_native_outbound_actions(messages)
     login_names = {name for message in messages if (name := extract_native_outbound_login_name(message)) is not None}

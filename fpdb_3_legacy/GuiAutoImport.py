@@ -196,18 +196,26 @@ class SwCNativeTailingThread(QThread):
             self._retry_offers.pop(key, None)
             self._retry_after.pop(key, None)
 
-    def retry_hand(self, hand_data: dict) -> None:
+    def retry_hand(self, hand_data: dict, *, transient: bool = False) -> None:
         """Offer this hand again later even though its snapshot has not changed.
 
         For an attempt that was not terminal: the importer could not use the
         hand yet, the database raised, or an auto-import cycle owned the
         connection. Waiting for new capture content instead lost the hand,
         because a finished hand produces no more records.
+
+        ``transient`` says the refusal came from outside the hand -- a busy
+        connection, a database that is away. Nothing about the hand will change
+        to fix that, and nothing about it is wrong, so it keeps its place in the
+        queue at the capped interval for as long as the outage lasts. The budget
+        applies only to a hand the importer itself judged unusable: that verdict
+        cannot change while its snapshot does not, so re-offering it forever
+        would be work with no possible result.
         """
         key = self._hand_key(hand_data)
         with self._state_lock:
             offers = self._retry_offers.get(key, 0) + 1
-            if offers > self.MAX_RETRY_OFFERS:
+            if offers > self.MAX_RETRY_OFFERS and not transient:
                 # Budget spent: drop the deadline too, or the elapsed one left
                 # behind would keep re-offering this hand every poll.
                 self._retry_after.pop(key, None)
@@ -790,7 +798,7 @@ class GuiAutoImport(QWidget):
         if lock is not None and not lock.acquire(blocking=False):
             log.debug("SwC live hand %s waits for the running import cycle", hand_data.get("hand_id"))
             if tailer is not None:
-                tailer.retry_hand(hand_data)
+                tailer.retry_hand(hand_data, transient=True)
             return
 
         try:
@@ -800,7 +808,7 @@ class GuiAutoImport(QWidget):
             # offered again on a delay rather than once per poll.
             log.exception("Failed to import SwC live hand %s", hand_data.get("hand_id"))
             if tailer is not None:
-                tailer.retry_hand(hand_data)
+                tailer.retry_hand(hand_data, transient=True)
             return
         finally:
             if lock is not None:

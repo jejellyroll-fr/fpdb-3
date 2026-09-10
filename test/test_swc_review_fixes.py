@@ -12,6 +12,7 @@
 from __future__ import annotations
 
 import struct
+import time
 from datetime import UTC, datetime
 from types import SimpleNamespace
 from unittest.mock import MagicMock
@@ -708,3 +709,117 @@ def test_antes_alongside_blinds_are_a_tournament_level_not_a_bomb_pot() -> None:
     ]
 
     assert _native_board_output((("2c", "7h", "Ad"),), evidence)["bomb_pot"] == 0
+
+
+# --------------------------------------------------------------------------
+# 17. An outage longer than the retry budget must not retire a hand.
+# --------------------------------------------------------------------------
+
+
+def test_a_transient_refusal_keeps_its_place_past_the_budget(tmp_path, monkeypatch) -> None:
+    """A database that is away comes back; the hand has to still be waiting."""
+    hand = {"table_id": 7, "hand_id": 1234}
+    thread, _raw = _tailer(tmp_path, monkeypatch, [hand])
+    thread.poll_once()
+    key = thread._hand_key(hand)
+
+    for _ in range(thread.MAX_RETRY_OFFERS + 5):
+        thread.retry_hand(hand, transient=True)
+
+    assert key in thread._retry_after, "a transient refusal never gives up on the hand"
+    assert thread._retry_after[key] - time.monotonic() <= thread.RETRY_BACKOFF_CAP_SECONDS
+
+
+def test_a_hand_the_importer_judged_unusable_still_stops(tmp_path, monkeypatch) -> None:
+    """Its verdict cannot change while its snapshot does not, so the budget holds."""
+    hand = {"table_id": 7, "hand_id": 1234}
+    thread, _raw = _tailer(tmp_path, monkeypatch, [hand])
+    thread.poll_once()
+    key = thread._hand_key(hand)
+
+    for _ in range(thread.MAX_RETRY_OFFERS + 1):
+        thread.retry_hand(hand)
+
+    assert key not in thread._retry_after
+
+
+def test_a_transient_retry_is_re_offered_after_the_budget(tmp_path, monkeypatch) -> None:
+    """End to end: the outage outlasts the budget, the hand still comes back."""
+    hand = {"table_id": 7, "hand_id": 1234}
+    thread, _raw = _tailer(tmp_path, monkeypatch, [hand])
+    thread.poll_once()
+
+    for _ in range(thread.MAX_RETRY_OFFERS + 3):
+        thread.retry_hand(hand, transient=True)
+    thread._retry_after[thread._hand_key(hand)] = 0.0  # its delay has elapsed
+
+    assert thread.poll_once() == [hand]
+
+
+# --------------------------------------------------------------------------
+# 18. Resetting the id pool must not renumber a resident DLL.
+# --------------------------------------------------------------------------
+
+
+def test_a_running_client_keeps_its_id_through_a_pool_reset(tmp_path) -> None:
+    """Its DLL is resident and goes on stamping the id it read at load time."""
+    from fpdb_3_legacy import swc_windows_inject as inj
+
+    assigned = inj.write_stream_ids(tmp_path, [100, 200])
+    inj.reset_stream_ids(tmp_path, keep_pids=[200])  # 100 exited, 200 still runs
+
+    after = inj.write_stream_ids(tmp_path, [200, 300])
+    assert after[200] == assigned[200], "the resident client keeps its id"
+    assert after[300] != after[200]
+
+
+def test_a_reset_with_no_client_running_frees_everything(tmp_path) -> None:
+    from fpdb_3_legacy import swc_windows_inject as inj
+
+    inj.write_stream_ids(tmp_path, [100, 200])
+    assert inj.reset_stream_ids(tmp_path) == 2
+
+
+# --------------------------------------------------------------------------
+# 19. Two clients watching one table must not be merged into one timeline.
+# --------------------------------------------------------------------------
+
+
+def test_two_sources_are_normalized_separately(monkeypatch) -> None:
+    """Merged, their independently timed copies become one impossible timeline."""
+    from fpdb_3_legacy import swc_native_capture
+
+    seen: list[set[int]] = []
+
+    def fake_one_source(messages, *, raw_ref):
+        seen.append({m.source_id for m in messages})
+        return [{"table_id": 1, "hand_id": 9, "steps": [1] * len(messages)}]
+
+    monkeypatch.setattr(swc_native_capture, "_normalize_native_hands_one_source", fake_one_source)
+
+    messages = [
+        swc_native_capture.NativeProtocolMessage(datetime.now(UTC), b"a", source_id=1),
+        swc_native_capture.NativeProtocolMessage(datetime.now(UTC), b"b", source_id=2),
+        swc_native_capture.NativeProtocolMessage(datetime.now(UTC), b"c", source_id=2),
+    ]
+    hands = swc_native_capture.normalize_native_hands(messages, raw_ref="x")
+
+    assert seen == [{1}, {2}], "each source is normalized on its own"
+    assert len(hands) == 1, "the same hand is emitted once"
+    assert len(hands[0]["steps"]) == 2, "the more complete copy wins"
+
+
+def test_a_single_source_takes_the_direct_path(monkeypatch) -> None:
+    """The normal case must not pay for the partitioning."""
+    from fpdb_3_legacy import swc_native_capture
+
+    calls = []
+    monkeypatch.setattr(
+        swc_native_capture,
+        "_normalize_native_hands_one_source",
+        lambda messages, *, raw_ref: calls.append(len(messages)) or [],
+    )
+    messages = [swc_native_capture.NativeProtocolMessage(datetime.now(UTC), b"a", source_id=3) for _ in range(3)]
+
+    assert swc_native_capture.normalize_native_hands(messages, raw_ref="x") == []
+    assert calls == [3], "one pass over every message"

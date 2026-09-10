@@ -15,6 +15,7 @@ from __future__ import annotations
 import logging
 import threading
 from types import SimpleNamespace
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -47,13 +48,17 @@ class _Tailer:
     def __init__(self) -> None:
         self.completed: list[dict] = []
         self.retried: list[dict] = []
+        self.retried_transient: list[bool] = []
         self.capture_only: list[dict] = []
 
     def mark_hand_complete(self, hand_data: dict) -> None:
         self.completed.append(hand_data)
 
-    def retry_hand(self, hand_data: dict) -> None:
+    def retry_hand(self, hand_data: dict, *, transient: bool = False) -> None:
         self.retried.append(hand_data)
+        # A refusal from outside the hand (busy connection, database away) is
+        # retried past the budget; the importer's own verdict is not.
+        self.retried_transient.append(transient)
 
     def note_capture_only(self, hand_data: dict) -> bool:
         self.capture_only.append(hand_data)
@@ -404,3 +409,35 @@ def test_incomplete_native_hand_stays_capture_only(monkeypatch) -> None:
 
     assert result.status == "skipped"
     assert "settlement is not proven" in result.message
+
+
+def test_an_external_refusal_is_marked_transient(gui, monkeypatch) -> None:
+    """A busy connection and a database that is away both clear on their own."""
+    tailer = _Tailer()
+    gui.swc_tailing_thread = tailer
+    gui.importer = SimpleNamespace(database=object())
+    gui.db_write_lock = None
+    monkeypatch.setattr(
+        "fpdb_3_legacy.http_capture_db_import.import_http_capture_hand",
+        MagicMock(side_effect=OSError("database away")),
+    )
+
+    gui.on_hand(_hand())
+
+    assert tailer.retried_transient == [True]
+
+
+def test_the_importers_own_verdict_is_not_transient(gui, monkeypatch) -> None:
+    """A skipped hand cannot become importable while its snapshot is unchanged."""
+    tailer = _Tailer()
+    gui.swc_tailing_thread = tailer
+    gui.importer = SimpleNamespace(database=object())
+    gui.db_write_lock = None
+    monkeypatch.setattr(
+        "fpdb_3_legacy.http_capture_db_import.import_http_capture_hand",
+        MagicMock(return_value=_result("skipped", "not importable yet")),
+    )
+
+    gui.on_hand(_hand())
+
+    assert tailer.retried_transient == [False]
