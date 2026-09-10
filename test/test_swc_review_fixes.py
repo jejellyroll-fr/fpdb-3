@@ -610,3 +610,101 @@ def test_changed_capture_options_are_reported_as_needing_a_restart(tmp_path) -> 
     assert inj.capture_config_changed(tmp_path, port=0, include_outbound=False) is False
     assert inj.capture_config_changed(tmp_path, port=20020, include_outbound=False) is True
     assert inj.capture_config_changed(tmp_path, port=0, include_outbound=True) is True
+
+
+# --------------------------------------------------------------------------
+# 14. Attaching mid-connection must not poison the stream forever.
+# --------------------------------------------------------------------------
+
+
+def test_a_stream_joined_mid_message_realigns() -> None:
+    """The in-flight SSL_read returned before the hook, so we start mid-payload."""
+    from fpdb_3_legacy.swc_native_capture import NativeProtocolStream
+
+    stream = NativeProtocolStream()
+    orphan = b"\xff\xff\xff\x7f" + b"payload-with-no-length-in-front"
+    dropped = stream.feed([NativeCaptureRecord(datetime.now(UTC), "received", 20013, orphan)])
+    assert dropped == [], "unframed bytes yield nothing"
+
+    good = stream.feed([NativeCaptureRecord(datetime.now(UTC), "received", 20013, _framed(b"REAL"))])
+    assert [m.payload for m in good] == [b"REAL"], "the next framed record is decoded"
+
+
+def test_realigning_does_not_raise_on_every_later_poll() -> None:
+    """Persistent decoders made an unreadable length permanent; it must not be."""
+    from fpdb_3_legacy.swc_native_capture import NativeProtocolStream
+
+    stream = NativeProtocolStream()
+    bad = NativeCaptureRecord(datetime.now(UTC), "received", 20013, b"\xff\xff\xff\x7f" + b"junk")
+    for _ in range(3):
+        assert stream.feed([bad]) == []
+
+    assert [m.payload for m in stream.feed([NativeCaptureRecord(datetime.now(UTC), "received", 20013, _framed(b"OK"))])] == [b"OK"]
+
+
+def test_reading_a_finished_archive_still_reports_a_bad_length() -> None:
+    """Resynchronising is for a live tap; an archive's corruption is worth seeing."""
+    records = [NativeCaptureRecord(datetime.now(UTC), "received", 20013, b"\xff\xff\xff\x7f" + b"junk")]
+    with pytest.raises(ValueError, match="too large"):
+        list(iter_protocol_messages(iter(records)))
+
+
+# --------------------------------------------------------------------------
+# 15. An id must not be recycled while the archive still carries its records.
+# --------------------------------------------------------------------------
+
+
+def test_an_id_is_not_reused_after_its_client_exits(tmp_path) -> None:
+    """The archive is append-only: the departed client's records still hold it."""
+    from fpdb_3_legacy import swc_windows_inject as inj
+
+    first = inj.write_stream_ids(tmp_path, [100])
+    second = inj.write_stream_ids(tmp_path, [200])  # 100 has exited
+
+    assert second[200] != first[100]
+
+
+def test_a_fresh_archive_releases_the_id_pool(tmp_path) -> None:
+    from fpdb_3_legacy import swc_windows_inject as inj
+
+    first = inj.write_stream_ids(tmp_path, [100])
+    assert inj.reset_stream_ids(tmp_path) == 1
+
+    assert inj.write_stream_ids(tmp_path, [200])[200] == first[100], "ids start over"
+
+
+# --------------------------------------------------------------------------
+# 16. A bomb pot is what the hand did, not what the table is called.
+# --------------------------------------------------------------------------
+
+
+def test_an_ordinary_blind_hand_on_a_bomb_pot_table_is_not_a_bomb_pot() -> None:
+    """Only 8 of 72 captured hands on such a table were actually bomb pots."""
+    from fpdb_3_legacy.swc_native_capture import _native_board_output
+
+    blinds = [{"action": "small_blind", "amount_native": 2}, {"action": "big_blind", "amount_native": 4}]
+    output = _native_board_output((("9s", "Jh", "4h", "Kh", "5c"),), blinds)
+
+    assert output["bomb_pot"] == 0
+
+
+def test_a_bomb_pot_reports_its_ante_total_in_cents() -> None:
+    """The same unit the hand-history importer stores, not a boolean 1."""
+    from fpdb_3_legacy.swc_native_capture import _native_board_output
+
+    antes = [{"action": "ante", "amount_native": 12} for _ in range(3)]
+    output = _native_board_output((("2c", "7h", "Ad", "Ac", "6d"),), antes)
+
+    assert output["bomb_pot"] == 36
+
+
+def test_antes_alongside_blinds_are_a_tournament_level_not_a_bomb_pot() -> None:
+    from fpdb_3_legacy.swc_native_capture import _native_board_output
+
+    evidence = [
+        {"action": "ante", "amount_native": 5},
+        {"action": "small_blind", "amount_native": 10},
+        {"action": "big_blind", "amount_native": 20},
+    ]
+
+    assert _native_board_output((("2c", "7h", "Ad"),), evidence)["bomb_pot"] == 0

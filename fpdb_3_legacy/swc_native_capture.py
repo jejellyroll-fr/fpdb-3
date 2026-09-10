@@ -88,7 +88,12 @@ def attach_to_windows_client(*, port: int = 0, include_outbound: bool = False) -
     injector_mod.write_capture_config(BUILD_DIR, port=port, include_outbound=include_outbound)
 
     DEFAULT_ARCHIVE.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
+    archive_is_new = not DEFAULT_ARCHIVE.exists() or DEFAULT_ARCHIVE.stat().st_size == 0
     DEFAULT_ARCHIVE.touch(exist_ok=True)
+    if archive_is_new:
+        # No record can still refer to a previously assigned id, so the pool is
+        # free again -- otherwise it would only ever creep toward its ceiling.
+        injector_mod.reset_stream_ids(BUILD_DIR)
 
     pids = injector_mod.find_client_pids()
     if not pids:
@@ -431,10 +436,15 @@ def native_action_street(
 class NativeProtocolDecoder:
     """Reassemble SwC's uint32-le length-prefixed messages across SSL reads."""
 
-    def __init__(self, direction: str = "received") -> None:
+    def __init__(self, direction: str = "received", *, resynchronize: bool = False) -> None:
         self.buffer = bytearray()
         self.message_timestamp: datetime | None = None
         self.direction = direction
+        #: Whether an unreadable length discards the buffer and realigns instead
+        #: of raising. A live tap needs this; reading a finished archive does not
+        #: (there, an unreadable length is a fact worth surfacing).
+        self.resynchronize = resynchronize
+        self.discarded_bytes = 0
 
     def feed(self, record: NativeCaptureRecord) -> list[NativeProtocolMessage]:
         if record.direction != self.direction:
@@ -446,7 +456,21 @@ class NativeProtocolDecoder:
         while len(self.buffer) >= 4:
             size = int.from_bytes(self.buffer[:4], "little")
             if size > _MAX_PAYLOAD:
-                raise ValueError("SwC native protocol message is too large")
+                if not self.resynchronize:
+                    raise ValueError("SwC native protocol message is too large")
+                # Injecting into a client that already holds a TLS connection
+                # lands mid-message: the SSL_read in flight when the hook went in
+                # returned through the unpatched function, so the first bytes we
+                # see are a payload with no length in front of them. Those bytes
+                # can never be framed, and keeping them would make every later
+                # poll re-raise on the same buffer -- the stream would be lost for
+                # good. Drop them and let the next record start a frame; SwC
+                # sends the length in a read of its own, so alignment is regained
+                # almost immediately.
+                self.discarded_bytes += len(self.buffer)
+                self.buffer.clear()
+                self.message_timestamp = None
+                break
             if len(self.buffer) < 4 + size:
                 break
             payload = bytes(self.buffer[4 : 4 + size])
@@ -497,8 +521,19 @@ class NativeProtocolStream:
             if record.direction == "sent" and not self._include_outbound:
                 continue
             key = (record.source_id, record.peer_port, record.connection_id, record.direction)
-            decoder = self._decoders.setdefault(key, NativeProtocolDecoder(record.direction))
+            decoder = self._decoders.get(key)
+            if decoder is None:
+                decoder = NativeProtocolDecoder(record.direction, resynchronize=True)
+                self._decoders[key] = decoder
+            before = decoder.discarded_bytes
             messages.extend(decoder.feed(record))
+            if decoder.discarded_bytes != before:
+                log.info(
+                    "SwC stream %s realigned after %d unframed byte(s); this is expected once "
+                    "when the tap attaches to a connection that was already open",
+                    key,
+                    decoder.discarded_bytes - before,
+                )
         return messages
 
 
@@ -2739,7 +2774,33 @@ def promote_native_omaha_importability(hands: list[dict]) -> None:
         audit.update(importable=True, status="importable", reasons=[])
 
 
-def _native_board_output(final_boards: tuple[tuple[str, ...], ...], table_name: str) -> dict:
+def _native_bomb_pot_amount(action_evidence: list[dict]) -> int:
+    """The ante money that seeded a bomb pot, in cents, or 0 if this is not one.
+
+    Derived from the hand, never from the table's name. A "Bomb Pot" table deals
+    ordinary blind hands between its bomb pots -- on the captured
+    "No-Rake Micro Stakes PLO Double Board Bomb Pots #1" only 8 of 72 hands were
+    bomb pots -- so the name alone mislabelled the great majority of them, and
+    ``_apply_special_hand_fields`` then stored 1 where the hand-history importer
+    stores the ante total.
+
+    A bomb pot is antes with no blind posted, the same test the text parser uses
+    (SealsWithClubsToFpdb.readSTP). For real money one native unit is one cent,
+    so the native total needs no conversion.
+    """
+    antes = [a for a in action_evidence if a.get("action") == "ante" and "amount_native" in a]
+    if not antes:
+        return 0
+    if any(a.get("action") in {"small_blind", "big_blind"} for a in action_evidence):
+        # Antes alongside blinds are an ordinary tournament level, not a bomb pot.
+        return 0
+    return sum(int(a["amount_native"]) for a in antes)
+
+
+def _native_board_output(
+    final_boards: tuple[tuple[str, ...], ...],
+    action_evidence: list[dict] | None = None,
+) -> dict:
     """Build the compatibility board plus the complete parallel-board view."""
     final_board = final_boards[0] if final_boards else ()
     community: dict[str, list[str]] = {}
@@ -2758,7 +2819,6 @@ def _native_board_output(final_boards: tuple[tuple[str, ...], ...], table_name: 
             board_dict["RIVER"] = [board[4]]
         board_dicts.append(board_dict)
 
-    table_name_lower = table_name.lower()
     shared_flop = len(final_boards) > 1 and all(
         len(board) >= 3 and board[:3] == final_boards[0][:3] for board in final_boards[1:]
     )
@@ -2767,13 +2827,15 @@ def _native_board_output(final_boards: tuple[tuple[str, ...], ...], table_name: 
     # river twice. Independent flops identify a true double-board hand;
     # identical flops followed by divergent streets identify run-it-twice.
     is_double_board = len(final_boards) > 1 and not shared_flop
-    is_bomb_pot = "bomb pot" in table_name_lower and not shared_flop
+    # Cents, from this hand's own antes (see _native_bomb_pot_amount): 0 for the
+    # ordinary blind hands a bomb-pot table deals between its bomb pots.
+    bomb_pot_amount = _native_bomb_pot_amount(action_evidence or [])
     return {
         "board": list(final_board),
         "boards": board_dicts,
         "run_it_times": len(final_boards) if len(final_boards) > 1 else 1,
         "double_board": is_double_board,
-        "bomb_pot": is_bomb_pot,
+        "bomb_pot": bomb_pot_amount,
         "community": community,
     }
 
@@ -3058,7 +3120,7 @@ def normalize_native_hands(  # noqa: PLR0915 - protocol normalization is intenti
             dealer_hand_started=any(event["text"] == "New hand started" for event in dealer_events),
             dealer_hand_complete=any(event["text"] == "Hand complete" for event in dealer_events),
         )
-        board_output = _native_board_output(final_boards, table.name or "")
+        board_output = _native_board_output(final_boards, action_evidence)
         hands.append(
             {
                 "site": "SealsWithClubs",

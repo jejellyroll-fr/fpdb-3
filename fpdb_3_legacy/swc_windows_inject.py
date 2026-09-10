@@ -131,7 +131,13 @@ def write_stream_ids(build_dir: Path, pids: list[int]) -> dict[int, int]:
     # records back on one decoder, which is the splice this exists to prevent.
     existing = _read_stream_ids(build_dir)
     assignment = {pid: existing[pid] for pid in pids if pid in existing}
-    taken = set(assignment.values())
+    # Reserved against *every* id ever handed out for this archive, not just the
+    # ids of clients still running. The archive is append-only: records written
+    # by a client that has since exited are still in it, and if that client left
+    # a partial message behind, a new process reusing its id would be spliced
+    # onto that fragment by the very decoder the id exists to keep apart.
+    # reset_stream_ids() releases the pool when the archive itself is new.
+    taken = set(existing.values())
     free = (n for n in range(1, 256) if n not in taken)
 
     for pid in sorted(pids):
@@ -143,6 +149,28 @@ def write_stream_ids(build_dir: Path, pids: list[int]) -> dict[int, int]:
     for pid, stream_id in assignment.items():
         (build_dir / f"swc-native-{pid}.cfg").write_text(f"stream={stream_id}\n", encoding="ascii")
     return assignment
+
+
+def reset_stream_ids(build_dir: Path) -> int:
+    """Release the id pool, for use when the archive holds no records yet.
+
+    Ids are reserved for as long as the archive can still contain records that
+    carry them. Once it is empty -- a fresh install, or the user rotated it --
+    nothing refers to the old ids any more and starting again at 1 keeps the
+    pool from creeping toward its 255 ceiling over a long-lived install.
+    """
+    removed = 0
+    for path in build_dir.glob("swc-native-*.cfg"):
+        try:
+            int(path.stem.rsplit("-", 1)[1])  # only the per-pid sidecars
+        except (ValueError, IndexError):
+            continue
+        try:
+            path.unlink()
+        except OSError:
+            continue
+        removed += 1
+    return removed
 
 
 def _read_stream_ids(build_dir: Path) -> dict[int, int]:

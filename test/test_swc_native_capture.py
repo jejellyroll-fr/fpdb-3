@@ -1283,7 +1283,10 @@ def test_normalize_native_hands_decodes_double_board_bomb_pot_and_streets():
     assert hand["board"] == ["10h", "Jd", "2d", "Ks", "10d"]
     assert hand["run_it_times"] == 2
     assert hand["double_board"] is True
-    assert hand["bomb_pot"] is True
+    # The boards prove a double board; the bomb-pot amount does not follow from
+    # them. This snapshot carries no ante action, so none is claimed -- the table
+    # being named "Bomb Pots" is not evidence about this hand.
+    assert hand["bomb_pot"] == 0
     assert hand["community"] == {
         "FLOP": ["10h", "Jd", "2d"],
         "TURN": ["Ks"],
@@ -1307,11 +1310,11 @@ def test_native_board_output_distinguishes_shared_flop_run_it_twice():
             ("9s", "Jh", "4h", "Kh", "5c"),
             ("9s", "Jh", "4h", "4c", "8c"),
         ),
-        "No-Rake Micro Stakes PLO Double Board Bomb Pots #1",
     )
 
     assert output["double_board"] is False
-    assert output["bomb_pot"] is False
+    # No ante in this hand's evidence, so no bomb pot -- whatever the table is called.
+    assert output["bomb_pot"] == 0
     assert output["run_it_times"] == 2
 
 
