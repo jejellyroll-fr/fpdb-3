@@ -447,11 +447,45 @@ class NativeProtocolDecoder:
         #: of raising. A live tap needs this; reading a finished archive does not
         #: (there, an unreadable length is a fact worth surfacing).
         self.resynchronize = resynchronize
+        #: Whether the next byte is known to start a message. A tap injected into
+        #: a client that already holds a connection joins mid-message, so it must
+        #: prove alignment before decoding anything (see _anchors_a_message).
+        self.aligned = not resynchronize
         self.discarded_bytes = 0
+
+    @staticmethod
+    def _anchors_a_message(payload: bytes) -> bool:
+        """Whether this record self-evidently begins a message.
+
+        Guessing alignment from "the length looks plausible" is not enough: a
+        payload joined mid-message can start with bytes that read as a perfectly
+        ordinary length -- a class-22 body beginning ``16 00 07 00`` announces a
+        458,774-byte frame -- and the decoder would then swallow every correctly
+        framed record after it as filler, losing hands silently rather than
+        loudly. Only two shapes prove alignment on their own:
+
+        * a record that is exactly a length (SwC sends the 4-byte length in an
+          SSL_read of its own -- half the records in a capture are these), or
+        * a record holding exactly one whole message.
+        """
+        if len(payload) < 4:
+            return False
+        size = int.from_bytes(payload[:4], "little")
+        if not 0 < size <= _MAX_PAYLOAD:
+            return False
+        return len(payload) == 4 or len(payload) == 4 + size
 
     def feed(self, record: NativeCaptureRecord) -> list[NativeProtocolMessage]:
         if record.direction != self.direction:
             return []
+        if not self.aligned:
+            if not self._anchors_a_message(record.payload):
+                # Cannot be framed and cannot be trusted: drop it and look at the
+                # next record. SwC starts a message often enough that alignment
+                # returns within a message or two.
+                self.discarded_bytes += len(record.payload)
+                return []
+            self.aligned = True
         if not self.buffer:
             self.message_timestamp = record.captured_at
         self.buffer.extend(record.payload)
@@ -473,6 +507,8 @@ class NativeProtocolDecoder:
                 self.discarded_bytes += len(self.buffer)
                 self.buffer.clear()
                 self.message_timestamp = None
+                # Alignment is lost again, so the next records have to prove it.
+                self.aligned = False
                 break
             if len(self.buffer) < 4 + size:
                 break
@@ -2868,9 +2904,29 @@ def normalize_native_hands(messages: list[NativeProtocolMessage], *, raw_ref: st
             if previous is None:
                 order.append(key)
                 best[key] = hand
-            elif len(hand.get("steps", ())) > len(previous.get("steps", ())):
+            elif _native_envelope_rank(hand) > _native_envelope_rank(previous):
                 best[key] = hand
     return [best[key] for key in order]
+
+
+def _native_envelope_rank(hand: dict) -> tuple:
+    """How usable one copy of a hand is, for choosing between two clients' views.
+
+    Snapshot count alone is the wrong measure: collections, actions and player
+    evidence arrive in their own messages and do not add steps, so one client can
+    hold an importable envelope while another holds the same number of snapshots
+    and nothing else -- and picking the latter skips a hand that was ready.
+    Importability leads, then the evidence that leads to it, and only then size.
+    """
+    audit = (hand.get("metadata") or {}).get("importability") or {}
+    return (
+        bool(audit.get("importable")),
+        bool((hand.get("game") or {}).get("fpdb_supported")),
+        len(hand.get("actions") or ()),
+        len(hand.get("collections") or ()),
+        len(hand.get("action_evidence") or ()),
+        len(hand.get("steps") or ()),
+    )
 
 
 def _normalize_native_hands_one_source(  # noqa: PLR0915 - protocol normalization is intentionally linear

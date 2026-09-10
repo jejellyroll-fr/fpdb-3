@@ -328,7 +328,9 @@ def test_stream_ids_are_distinct_per_client(tmp_path) -> None:
     assert len(set(assignment.values())) == 2
     assert 0 not in assignment.values(), "0 means 'unassigned' to the tap"
     for pid, stream_id in assignment.items():
-        assert (tmp_path / f"swc-native-{pid}.cfg").read_text(encoding="ascii") == f"stream={stream_id}\n"
+        # The sidecar also records the process start time, so only the id line is
+        # pinned here (see test_a_recycled_pid_does_not_inherit_an_id).
+        assert f"stream={stream_id}\n" in (tmp_path / f"swc-native-{pid}.cfg").read_text(encoding="ascii")
 
 
 def test_a_partly_injected_client_set_says_which_client_was_missed(monkeypatch, tmp_path) -> None:
@@ -823,3 +825,129 @@ def test_a_single_source_takes_the_direct_path(monkeypatch) -> None:
 
     assert swc_native_capture.normalize_native_hands(messages, raw_ref="x") == []
     assert calls == [3], "one pass over every message"
+
+
+# --------------------------------------------------------------------------
+# 20. Alignment must be proven, not guessed from a plausible length.
+# --------------------------------------------------------------------------
+
+
+def test_a_plausible_but_wrong_length_does_not_swallow_later_records() -> None:
+    """A class-22 body starting 16 00 07 00 announces a 458,774-byte frame."""
+    from fpdb_3_legacy.swc_native_capture import NativeProtocolStream
+
+    stream = NativeProtocolStream()
+    mid_message = b"\x16\x00\x07\x00" + b"body bytes with no length in front"
+    assert stream.feed([NativeCaptureRecord(datetime.now(UTC), "received", 20013, mid_message)]) == []
+
+    # The correctly framed records that follow must still decode, not be eaten as
+    # filler for the 458 KB frame that was never really there.
+    body = _framed(b"REAL MESSAGE")
+    got = stream.feed(
+        [
+            NativeCaptureRecord(datetime.now(UTC), "received", 20013, body[:4]),
+            NativeCaptureRecord(datetime.now(UTC), "received", 20013, body[4:]),
+        ],
+    )
+    assert [m.payload for m in got] == [b"REAL MESSAGE"]
+
+
+def test_a_length_only_record_anchors_the_stream() -> None:
+    """Half the records in a real capture are exactly a 4-byte length."""
+    from fpdb_3_legacy.swc_native_capture import NativeProtocolDecoder
+
+    assert NativeProtocolDecoder._anchors_a_message((12).to_bytes(4, "little")) is True
+
+
+def test_a_whole_message_in_one_record_anchors_the_stream() -> None:
+    from fpdb_3_legacy.swc_native_capture import NativeProtocolDecoder
+
+    assert NativeProtocolDecoder._anchors_a_message(_framed(b"abcd")) is True
+
+
+def test_a_record_that_proves_nothing_is_not_an_anchor() -> None:
+    from fpdb_3_legacy.swc_native_capture import NativeProtocolDecoder
+
+    anchors = NativeProtocolDecoder._anchors_a_message
+    assert anchors(b"\x16\x00\x07\x00" + b"x" * 10) is False, "length disagrees with the record"
+    assert anchors(b"\x00\x00\x00\x00") is False, "a zero length proves nothing"
+    assert anchors(b"ab") is False, "too short to hold a length"
+
+
+# --------------------------------------------------------------------------
+# 21. The duplicate that wins must be the one that can be imported.
+# --------------------------------------------------------------------------
+
+
+def _envelope(*, steps: int, importable: bool = False, collections: int = 0) -> dict:
+    return {
+        "table_id": 1,
+        "hand_id": 9,
+        "steps": [1] * steps,
+        "collections": [1] * collections,
+        "metadata": {"importability": {"importable": importable}},
+        "game": {"fpdb_supported": importable},
+    }
+
+
+def test_the_importable_copy_wins_over_an_equally_long_one(monkeypatch) -> None:
+    """Collections and actions arrive in their own messages and add no steps."""
+    from fpdb_3_legacy import swc_native_capture
+
+    per_source = {1: _envelope(steps=5), 2: _envelope(steps=5, importable=True, collections=2)}
+    monkeypatch.setattr(
+        swc_native_capture,
+        "_normalize_native_hands_one_source",
+        lambda messages, *, raw_ref: [per_source[next(iter({m.source_id for m in messages}))]],
+    )
+    messages = [
+        swc_native_capture.NativeProtocolMessage(datetime.now(UTC), b"a", source_id=1),
+        swc_native_capture.NativeProtocolMessage(datetime.now(UTC), b"b", source_id=2),
+    ]
+
+    [hand] = swc_native_capture.normalize_native_hands(messages, raw_ref="x")
+    assert hand["metadata"]["importability"]["importable"] is True
+
+
+def test_evidence_breaks_a_tie_before_snapshot_count() -> None:
+    from fpdb_3_legacy.swc_native_capture import _native_envelope_rank
+
+    assert _native_envelope_rank(_envelope(steps=5, collections=2)) > _native_envelope_rank(_envelope(steps=9))
+
+
+# --------------------------------------------------------------------------
+# 22. A recycled pid is not the same client.
+# --------------------------------------------------------------------------
+
+
+def test_a_recycled_pid_does_not_inherit_an_id(tmp_path, monkeypatch) -> None:
+    """Windows reuses pids, and a sidecar outlives the process it was written for."""
+    from fpdb_3_legacy import swc_windows_inject as inj
+
+    monkeypatch.setattr(inj, "process_start_time", lambda _pid: 1000.0)
+    first = inj.write_stream_ids(tmp_path, [4242])
+
+    # Same pid, different run: a later process that Windows handed the number to.
+    monkeypatch.setattr(inj, "process_start_time", lambda _pid: 5000.0)
+    second = inj.write_stream_ids(tmp_path, [4242])
+
+    assert second[4242] != first[4242], "the new process must not inherit the id"
+
+
+def test_the_same_run_keeps_its_id(tmp_path, monkeypatch) -> None:
+    from fpdb_3_legacy import swc_windows_inject as inj
+
+    monkeypatch.setattr(inj, "process_start_time", lambda _pid: 1000.0)
+    first = inj.write_stream_ids(tmp_path, [4242])
+
+    assert inj.write_stream_ids(tmp_path, [4242])[4242] == first[4242]
+
+
+def test_a_sidecar_without_a_start_time_keeps_its_id(tmp_path, monkeypatch) -> None:
+    """Written before start times were recorded; renumbering a resident DLL is worse."""
+    from fpdb_3_legacy import swc_windows_inject as inj
+
+    (tmp_path / "swc-native-4242.cfg").write_text("stream=7\n", encoding="ascii")
+    monkeypatch.setattr(inj, "process_start_time", lambda _pid: 1000.0)
+
+    assert inj.write_stream_ids(tmp_path, [4242])[4242] == 7

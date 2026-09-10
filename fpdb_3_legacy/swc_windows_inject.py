@@ -130,14 +130,23 @@ def write_stream_ids(build_dir: Path, pids: list[int]) -> dict[int, int]:
     # while a newly injected one was handed the same number -- putting their
     # records back on one decoder, which is the splice this exists to prevent.
     existing = _read_stream_ids(build_dir)
-    assignment = {pid: existing[pid] for pid in pids if pid in existing}
+    # A pid is not an identity: Windows reuses them, and a sidecar outlives the
+    # process it was written for. Keeping an assignment on pid equality alone
+    # would hand a new client the id that a *previous* process stamped on records
+    # still sitting in the append-only archive -- the splice this scheme exists to
+    # prevent. The process start time is what makes the pair unrepeatable.
+    assignment = {
+        pid: entry.stream_id
+        for pid in pids
+        if (entry := existing.get(pid)) is not None and _is_the_same_process(pid, entry.started)
+    }
     # Reserved against *every* id ever handed out for this archive, not just the
     # ids of clients still running. The archive is append-only: records written
     # by a client that has since exited are still in it, and if that client left
     # a partial message behind, a new process reusing its id would be spliced
     # onto that fragment by the very decoder the id exists to keep apart.
     # reset_stream_ids() releases the pool when the archive itself is new.
-    taken = set(existing.values())
+    taken = {entry.stream_id for entry in existing.values()}
     free = (n for n in range(1, 256) if n not in taken)
 
     for pid in sorted(pids):
@@ -147,7 +156,11 @@ def write_stream_ids(build_dir: Path, pids: list[int]) -> dict[int, int]:
         taken.add(assignment[pid])
 
     for pid, stream_id in assignment.items():
-        (build_dir / f"swc-native-{pid}.cfg").write_text(f"stream={stream_id}\n", encoding="ascii")
+        started = process_start_time(pid)
+        body = f"stream={stream_id}\n"
+        if started is not None:
+            body += f"started={started!r}\n"
+        (build_dir / f"swc-native-{pid}.cfg").write_text(body, encoding="ascii")
     return assignment
 
 
@@ -182,17 +195,65 @@ def reset_stream_ids(build_dir: Path, keep_pids: Sequence[int] = ()) -> int:
     return removed
 
 
-def _read_stream_ids(build_dir: Path) -> dict[int, int]:
+@dataclass(frozen=True)
+class _StreamAssignment:
+    """One sidecar: the id handed out, and which process run it was handed to."""
+
+    stream_id: int
+    started: float | None
+
+
+def process_start_time(pid: int) -> float | None:
+    """When this process started, or None if it cannot be read.
+
+    Paired with the pid this is an identity a later process cannot inherit, which
+    a pid on its own is not.
+    """
+    try:
+        import psutil
+
+        return float(psutil.Process(pid).create_time())
+    except Exception:  # noqa: BLE001 - a pid that is gone or unreadable is simply unknown
+        return None
+
+
+def _is_the_same_process(pid: int, started: float | None) -> bool:
+    """Whether the process running as ``pid`` now is the one the id was given to.
+
+    An unrecorded start time cannot disprove identity, and of the two mistakes
+    available there, renumbering a client whose DLL is already resident is the
+    worse one -- it puts two live clients on one id, while the other risk needs a
+    recycled pid to bite. So an assignment with no recorded start time is kept
+    (which is also what a sidecar written before start times were recorded has).
+    """
+    if started is None:
+        return True
+    current = process_start_time(pid)
+    if current is None:
+        return False
+    # Whole seconds: the value survives a round trip through the sidecar, and two
+    # runs of one client are never within a second of each other on one pid.
+    return abs(current - started) < 1.0
+
+
+def _read_stream_ids(build_dir: Path) -> dict[int, _StreamAssignment]:
     """The stream ids already assigned, read back from their sidecars."""
-    assigned: dict[int, int] = {}
+    assigned: dict[int, _StreamAssignment] = {}
     for path in build_dir.glob("swc-native-*.cfg"):
         try:
             pid = int(path.stem.rsplit("-", 1)[1])
-            stream_id = int(path.read_text(encoding="ascii").split("stream=", 1)[1].split()[0])
+            body = path.read_text(encoding="ascii")
+            stream_id = int(body.split("stream=", 1)[1].split()[0])
         except (OSError, ValueError, IndexError):
             continue
+        started: float | None = None
+        if "started=" in body:
+            try:
+                started = float(body.split("started=", 1)[1].split()[0])
+            except (ValueError, IndexError):
+                started = None
         if 1 <= stream_id <= 255:
-            assigned[pid] = stream_id
+            assigned[pid] = _StreamAssignment(stream_id, started)
     return assigned
 
 
