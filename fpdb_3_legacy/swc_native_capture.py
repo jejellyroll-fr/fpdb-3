@@ -108,6 +108,17 @@ def attach_to_windows_client(*, port: int = 0, include_outbound: bool = False) -
 
     # Assigned before injection: the tap reads its id at load time.
     injector_mod.write_stream_ids(BUILD_DIR, pids)
+
+    # Marked before injecting, because the DLL starts writing the moment
+    # LoadLibrary runs: the status file is append-only and keyed by pid, and
+    # Windows reuses pids, so a line left by a previous process would otherwise
+    # answer for this attempt -- reporting capture active for a client whose DLL
+    # had written nothing yet. Reading from this offset keeps the wait to what
+    # this attach produced, and taking it any later would skip the DLL's own
+    # first lines and turn every attach into a timeout.
+    status_path = DEFAULT_ARCHIVE.with_suffix(".status")
+    status_mark = injector_mod.status_file_size(status_path)
+
     results = [injector_mod.inject_into_pid(injector, tap, pid) for pid in pids]
     ok = [r for r in results if r.ok]
     if not ok:
@@ -130,9 +141,8 @@ def attach_to_windows_client(*, port: int = 0, include_outbound: bool = False) -
             "port/outbound settings until it is restarted."
         )
 
-    status_path = DEFAULT_ARCHIVE.with_suffix(".status")
     injected = [r.pid for r in ok]
-    statuses = injector_mod.wait_for_hooks(status_path, injected)
+    statuses = injector_mod.wait_for_hooks(status_path, injected, since=status_mark)
     log.info(
         "SwC tap injected into pid(s) %s; DLL status=%s",
         ", ".join(str(pid) for pid in injected),

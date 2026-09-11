@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import subprocess
 import time
-from collections.abc import Sequence
+from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -146,7 +146,12 @@ def write_stream_ids(build_dir: Path, pids: list[int]) -> dict[int, int]:
     # a partial message behind, a new process reusing its id would be spliced
     # onto that fragment by the very decoder the id exists to keep apart.
     # reset_stream_ids() releases the pool when the archive itself is new.
-    taken = {entry.stream_id for entry in existing.values()}
+    # The per-pid sidecars are not enough to know what is reserved. A pid Windows
+    # reused gets a new id here, and writing it overwrites the only record that
+    # the *previous* generation's id was ever used -- while that generation's
+    # records are still in the append-only archive. The ledger keeps every id
+    # handed out for this archive, so one can never be recycled underneath them.
+    taken = _read_reserved_ids(build_dir) | {entry.stream_id for entry in existing.values()}
     free = (n for n in range(1, 256) if n not in taken)
 
     for pid in sorted(pids):
@@ -154,6 +159,7 @@ def write_stream_ids(build_dir: Path, pids: list[int]) -> dict[int, int]:
             continue
         assignment[pid] = next(free, 0) or _fallback_stream_id(pid)
         taken.add(assignment[pid])
+    _reserve_ids(build_dir, assignment.values())
 
     for pid, stream_id in assignment.items():
         started = process_start_time(pid)
@@ -192,6 +198,18 @@ def reset_stream_ids(build_dir: Path, keep_pids: Sequence[int] = ()) -> int:
         except OSError:
             continue
         removed += 1
+
+    # The ledger goes too, or the pool would never actually be released: it holds
+    # every id ever handed out, which is the point while records carrying them
+    # exist and pointless once they do not. The ids of the clients kept above are
+    # written back, since those are still in use.
+    kept = {entry.stream_id for pid, entry in _read_stream_ids(build_dir).items() if pid in protected}
+    try:
+        (build_dir / RESERVED_IDS_FILE).unlink()
+    except OSError:
+        pass
+    if kept:
+        _reserve_ids(build_dir, kept)
     return removed
 
 
@@ -234,6 +252,39 @@ def _is_the_same_process(pid: int, started: float | None) -> bool:
     # Whole seconds: the value survives a round trip through the sidecar, and two
     # runs of one client are never within a second of each other on one pid.
     return abs(current - started) < 1.0
+
+
+#: Every stream id handed out for the current archive, one per line. Separate from
+#: the per-pid sidecars because those are overwritten when a pid is reused, while
+#: the records carrying the superseded id stay in the archive for good.
+RESERVED_IDS_FILE = "swc-native-ids.txt"
+
+
+def _read_reserved_ids(build_dir: Path) -> set[int]:
+    """Ids already handed out for this archive, whoever holds them now."""
+    try:
+        body = (build_dir / RESERVED_IDS_FILE).read_text(encoding="ascii")
+    except OSError:
+        return set()
+    reserved: set[int] = set()
+    for line in body.split():
+        try:
+            value = int(line)
+        except ValueError:
+            continue
+        if 1 <= value <= 255:
+            reserved.add(value)
+    return reserved
+
+
+def _reserve_ids(build_dir: Path, stream_ids: Iterable[int]) -> None:
+    """Record these ids as spent for as long as the archive keeps their records."""
+    reserved = _read_reserved_ids(build_dir) | {int(value) for value in stream_ids}
+    try:
+        body = "\n".join(str(value) for value in sorted(reserved))
+        (build_dir / RESERVED_IDS_FILE).write_text(f"{body}\n", encoding="ascii")
+    except OSError:
+        log.warning("Could not record the SwC stream id reservations", exc_info=True)
 
 
 def _read_stream_ids(build_dir: Path) -> dict[int, _StreamAssignment]:
@@ -314,9 +365,28 @@ def _parse_status_lines(text: str) -> tuple[dict[int, str], str]:
     return by_pid, latest
 
 
-def _read_status_text(status_path: Path) -> str:
+def status_file_size(status_path: Path) -> int:
+    """How long the status file is now, for use as a "read only past here" mark.
+
+    The file is append-only and its lines are keyed by pid, but Windows reuses
+    pids: a previous process that hooked leaves a ``<pid> tap-hooked`` line that
+    a later process inheriting that pid would appear to have written. Recording
+    the length before injecting is what lets the wait look only at what this
+    attempt produced.
+    """
     try:
-        return status_path.read_text(encoding="ascii", errors="replace")
+        return status_path.stat().st_size
+    except OSError:
+        return 0
+
+
+def _read_status_text(status_path: Path, since: int = 0) -> str:
+    """The status file's text, optionally only the part appended after ``since``."""
+    try:
+        with status_path.open("r", encoding="ascii", errors="replace") as handle:
+            if since:
+                handle.seek(since)
+            return handle.read()
     except OSError:
         return ""
 
@@ -331,12 +401,18 @@ def read_status(status_path: Path) -> str:
     return _parse_status_lines(_read_status_text(status_path))[1]
 
 
-def read_statuses(status_path: Path) -> dict[int, str]:
-    """The last status each client pid wrote, keyed by pid."""
-    return _parse_status_lines(_read_status_text(status_path))[0]
+def read_statuses(status_path: Path, since: int = 0) -> dict[int, str]:
+    """The last status each client pid wrote, keyed by pid.
+
+    ``since`` ignores everything written before that offset, so a line left by an
+    earlier process that happened to share a pid cannot answer for this one.
+    """
+    return _parse_status_lines(_read_status_text(status_path, since))[0]
 
 
-def wait_for_hooks(status_path: Path, pids: Sequence[int], *, timeout: float = 10.0) -> dict[int, str]:
+def wait_for_hooks(
+    status_path: Path, pids: Sequence[int], *, timeout: float = 10.0, since: int = 0
+) -> dict[int, str]:
     """Wait until every injected pid has reported a terminal status, or time out.
 
     Returns the latest status per pid; one that has written nothing yet maps to
@@ -355,7 +431,7 @@ def wait_for_hooks(status_path: Path, pids: Sequence[int], *, timeout: float = 1
     deadline = time.monotonic() + timeout
     statuses: dict[int, str] = dict.fromkeys(pids, "")
     while True:
-        by_pid = read_statuses(status_path)
+        by_pid = read_statuses(status_path, since)
         for pid, status in statuses.items():
             if status in TERMINAL_STATUSES:
                 continue

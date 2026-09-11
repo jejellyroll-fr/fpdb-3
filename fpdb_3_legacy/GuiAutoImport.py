@@ -170,6 +170,12 @@ class SwCNativeTailingThread(QThread):
         self._capture_only_keys: set[tuple[int, int]] = set()
         self._retry_offers: dict[tuple[int, int], int] = {}
         self._retry_after: dict[tuple[int, int], float] = {}
+        # The envelope each deferred hand was last offered as. A retry must not
+        # depend on the hand still being reconstructible from the rolling message
+        # window: a finished hand produces no more records, so once busy tables
+        # push its snapshots out of that window normalization can never return it
+        # again, and the deadline would come due forever with nothing to offer.
+        self._pending_envelopes: dict[tuple[int, int], dict] = {}
         self._offset = 0
         self._messages: list[Any] = []
         # Kept across polls: a protocol message routinely spans two batches, and
@@ -195,6 +201,7 @@ class SwCNativeTailingThread(QThread):
             self._capture_only_keys.discard(key)
             self._retry_offers.pop(key, None)
             self._retry_after.pop(key, None)
+            self._pending_envelopes.pop(key, None)
 
     def retry_hand(self, hand_data: dict, *, transient: bool = False) -> None:
         """Offer this hand again later even though its snapshot has not changed.
@@ -219,10 +226,14 @@ class SwCNativeTailingThread(QThread):
                 # Budget spent: drop the deadline too, or the elapsed one left
                 # behind would keep re-offering this hand every poll.
                 self._retry_after.pop(key, None)
+                self._pending_envelopes.pop(key, None)
                 return
             self._retry_offers[key] = offers
             delay = min(self.RETRY_BACKOFF_SECONDS * 2 ** (offers - 1), self.RETRY_BACKOFF_CAP_SECONDS)
             self._retry_after[key] = time.monotonic() + delay
+            # Held so the hand can be offered again from what it was, not from
+            # what the message window still happens to contain.
+            self._pending_envelopes[key] = hand_data
 
     def note_capture_only(self, hand_data: dict) -> bool:
         """Whether this hand is being reported as not-yet-importable for the first time.
@@ -321,8 +332,31 @@ class SwCNativeTailingThread(QThread):
                     # unchanged, refused snapshot is repeated.
                     self._retry_offers.pop(key, None)
                 self._emitted[key] = fingerprint
+                # A fresher view supersedes the copy held for the retry.
+                if key in self._pending_envelopes:
+                    self._pending_envelopes[key] = hand
             fresh.append(hand)
+        fresh.extend(self._due_pending_envelopes(now, {self._hand_key(hand) for hand in fresh}))
         return fresh
+
+    def _due_pending_envelopes(self, now: float, already_offered: set[tuple[int, int]]) -> list[dict]:
+        """Deferred hands whose delay has elapsed but that normalization no longer yields.
+
+        A hand is only deferred once it is finished, so it produces no further
+        records; once busy tables push its snapshots past MAX_RETAINED_MESSAGES it
+        can never be rebuilt from the window again. Without the copy kept at
+        deferral, its deadline would come due forever with nothing behind it --
+        and, because a transient refusal has no budget, forever really means it.
+        """
+        due: list[dict] = []
+        with self._state_lock:
+            for key, deadline in list(self._retry_after.items()):
+                if key in already_offered or key in self._completed_keys or deadline > now:
+                    continue
+                envelope = self._pending_envelopes.get(key)
+                if envelope is not None:
+                    due.append(envelope)
+        return due
 
     def run(self) -> None:
         while not self._stop_requested:

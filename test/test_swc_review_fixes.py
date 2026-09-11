@@ -350,7 +350,7 @@ def test_a_partly_injected_client_set_says_which_client_was_missed(monkeypatch, 
         "inject_into_pid",
         lambda _i, _d, pid: inj.InjectionResult(pid=pid, ok=(pid == 11), detail="ok" if pid == 11 else "access denied"),
     )
-    monkeypatch.setattr(inj, "wait_for_hooks", lambda _p, pids: dict.fromkeys(pids, "tap-hooked"))
+    monkeypatch.setattr(inj, "wait_for_hooks", lambda _p, pids, **_k: dict.fromkeys(pids, "tap-hooked"))
 
     status = swc_native_capture.attach_to_windows_client()
 
@@ -1064,3 +1064,133 @@ def test_an_unaligned_stream_refuses_a_partial_first_record() -> None:
     # The next whole message is decoded normally.
     got = stream.feed([NativeCaptureRecord(datetime.now(UTC), "received", 20013, _framed(b"after"))])
     assert [m.payload for m in got] == [b"after"]
+
+
+# --------------------------------------------------------------------------
+# 25. A deferred hand must outlive the rolling message window.
+# --------------------------------------------------------------------------
+
+
+def test_a_deferred_hand_survives_its_snapshots_being_trimmed(tmp_path, monkeypatch) -> None:
+    """A finished hand writes no more records, so the window is all it ever had."""
+    from fpdb_3_legacy import swc_native_capture
+
+    hand = {"table_id": 7, "hand_id": 1234}
+    thread, raw = _tailer(tmp_path, monkeypatch, [hand])
+    assert thread.poll_once() == [hand]
+
+    # The outage begins; the hand is deferred.
+    thread.retry_hand(hand, transient=True)
+
+    # Busy tables push its snapshots out: normalization can no longer build it.
+    monkeypatch.setattr(swc_native_capture, "normalize_native_hands", lambda messages, raw_ref=None: [])
+    thread._retry_after[thread._hand_key(hand)] = 0.0
+
+    assert thread.poll_once() == [hand], "the copy kept at deferral is offered instead"
+
+
+def test_a_retired_hand_is_not_offered_from_its_kept_copy(tmp_path, monkeypatch) -> None:
+    from fpdb_3_legacy import swc_native_capture
+
+    hand = {"table_id": 7, "hand_id": 1234}
+    thread, _raw = _tailer(tmp_path, monkeypatch, [hand])
+    thread.poll_once()
+    thread.retry_hand(hand, transient=True)
+    thread.mark_hand_complete(hand)
+
+    monkeypatch.setattr(swc_native_capture, "normalize_native_hands", lambda messages, raw_ref=None: [])
+    assert thread.poll_once() == []
+
+
+def test_a_kept_copy_is_not_offered_twice_in_one_poll(tmp_path, monkeypatch) -> None:
+    """Normalization still yielding the hand must not produce a duplicate."""
+    hand = {"table_id": 7, "hand_id": 1234}
+    thread, _raw = _tailer(tmp_path, monkeypatch, [hand])
+    thread.poll_once()
+    thread.retry_hand(hand, transient=True)
+    thread._retry_after[thread._hand_key(hand)] = 0.0
+
+    assert thread.poll_once() == [hand]
+
+
+# --------------------------------------------------------------------------
+# 26. An id superseded by PID reuse stays reserved.
+# --------------------------------------------------------------------------
+
+
+def test_an_id_left_behind_by_pid_reuse_is_never_handed_out_again(tmp_path, monkeypatch) -> None:
+    """Its records are still in the append-only archive, under that id."""
+    from fpdb_3_legacy import swc_windows_inject as inj
+
+    monkeypatch.setattr(inj, "process_start_time", lambda _pid: 1000.0)
+    first = inj.write_stream_ids(tmp_path, [4242])
+
+    # Windows hands 4242 to a different process: a new id, and the sidecar for the
+    # old generation is overwritten -- but its id must stay spoken for.
+    monkeypatch.setattr(inj, "process_start_time", lambda _pid: 5000.0)
+    second = inj.write_stream_ids(tmp_path, [4242])
+    assert second[4242] != first[4242]
+
+    # A third, unrelated client must get neither of the two already used.
+    third = inj.write_stream_ids(tmp_path, [4242, 7777])
+    assert third[7777] not in {first[4242], second[4242]}
+
+
+def test_the_reservation_ledger_is_released_with_the_archive(tmp_path, monkeypatch) -> None:
+    from fpdb_3_legacy import swc_windows_inject as inj
+
+    monkeypatch.setattr(inj, "process_start_time", lambda _pid: 1000.0)
+    first = inj.write_stream_ids(tmp_path, [100])
+    inj.reset_stream_ids(tmp_path)
+
+    assert inj.write_stream_ids(tmp_path, [200])[200] == first[100], "a fresh archive starts over"
+
+
+def test_a_kept_client_keeps_its_reservation_through_a_reset(tmp_path, monkeypatch) -> None:
+    from fpdb_3_legacy import swc_windows_inject as inj
+
+    monkeypatch.setattr(inj, "process_start_time", lambda _pid: 1000.0)
+    assigned = inj.write_stream_ids(tmp_path, [100, 200])
+    inj.reset_stream_ids(tmp_path, keep_pids=[200])
+
+    after = inj.write_stream_ids(tmp_path, [200, 300])
+    assert after[200] == assigned[200]
+    assert after[300] != after[200], "the running client's id is still spoken for"
+
+
+# --------------------------------------------------------------------------
+# 27. A status line from a previous process must not answer for this one.
+# --------------------------------------------------------------------------
+
+
+def test_a_previous_process_status_does_not_satisfy_the_wait(tmp_path) -> None:
+    """Windows reuses pids, and the status file is append-only."""
+    from fpdb_3_legacy import swc_windows_inject as inj
+
+    status = tmp_path / "swc-native.status"
+    status.write_text("4242 tap-hooked\n", encoding="ascii")
+    mark = inj.status_file_size(status)
+
+    # Nothing appended since the mark: the old line must not count.
+    assert inj.wait_for_hooks(status, [4242], timeout=0.3, since=mark) == {4242: ""}
+
+
+def test_a_status_written_after_the_mark_is_accepted(tmp_path) -> None:
+    from fpdb_3_legacy import swc_windows_inject as inj
+
+    status = tmp_path / "swc-native.status"
+    status.write_text("4242 tap-hooked\n", encoding="ascii")
+    mark = inj.status_file_size(status)
+    with status.open("a", encoding="ascii") as handle:
+        handle.write("4242 tap-hook-failed\n")
+
+    assert inj.wait_for_hooks(status, [4242], timeout=1.0, since=mark) == {4242: "tap-hook-failed"}
+
+
+def test_reading_without_a_mark_still_sees_everything(tmp_path) -> None:
+    from fpdb_3_legacy import swc_windows_inject as inj
+
+    status = tmp_path / "swc-native.status"
+    status.write_text("100 tap-loaded\n200 tap-hooked\n", encoding="ascii")
+
+    assert inj.read_statuses(status) == {100: "tap-loaded", 200: "tap-hooked"}
