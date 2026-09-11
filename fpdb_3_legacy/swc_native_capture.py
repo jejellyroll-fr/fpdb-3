@@ -16,7 +16,7 @@ import sys
 import threading
 import time
 from collections import Counter
-from collections.abc import Iterable, Iterator
+from collections.abc import Callable, Iterable, Iterator
 from dataclasses import dataclass
 from datetime import datetime, timezone
 
@@ -3443,7 +3443,12 @@ def iter_capture_records(stream: BinaryIO) -> Iterator[NativeCaptureRecord]:
         )
 
 
-def read_records_since(path: Path, offset: int) -> tuple[list[NativeCaptureRecord], int]:
+def read_records_since(
+    path: Path,
+    offset: int,
+    *,
+    on_restart: Callable[[], None] | None = None,
+) -> tuple[list[NativeCaptureRecord], int]:
     """Read the complete records appended to ``path`` after ``offset``.
 
     Tailing a live archive differs from reading a finished one in two ways, and
@@ -3457,6 +3462,13 @@ def read_records_since(path: Path, offset: int) -> tuple[list[NativeCaptureRecor
     and report the offset of the last complete one. A file shorter than
     ``offset`` has been rotated or truncated, so reading restarts from zero.
 
+    ``on_restart`` is called when that happens, before anything is read. A caller
+    that carries decode state across calls needs to hear about it: the bytes at
+    offset zero are a different stream from the one it was part-way through, and
+    only this function knows the restart happened. The check and the callback sit
+    together deliberately -- a caller comparing sizes itself would miss a
+    truncation that landed between its own stat and this one.
+
     Returns the records read and the offset to resume from.
     """
     try:
@@ -3467,6 +3479,8 @@ def read_records_since(path: Path, offset: int) -> tuple[list[NativeCaptureRecor
     if size < offset:
         log.info("SwC capture archive shrank (%d < %d); restarting from the beginning", size, offset)
         offset = 0
+        if on_restart is not None:
+            on_restart()
     if size == offset:
         return [], offset
 

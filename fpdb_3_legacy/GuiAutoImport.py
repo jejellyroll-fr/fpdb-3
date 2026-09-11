@@ -290,6 +290,24 @@ class SwCNativeTailingThread(QThread):
                 deadline <= now for key, deadline in self._retry_after.items() if key not in self._completed_keys
             )
 
+    def _forget_partial_frame(self) -> None:
+        """Drop the decoder when the archive is truncated or rotated.
+
+        The decoder is kept across polls so a message split over two polls still
+        decodes, which means it can be holding the old archive's half-written
+        tail. Feeding the new archive's first bytes onto that splices two
+        unrelated streams together: the resynchronizer then has to throw away
+        real records before it finds an anchor it can trust.
+
+        Only the decoder goes. The retained messages, the table descriptors, the
+        emitted and completed hand keys, the retry ledger and the deferred
+        envelopes are all keyed by hand, not by byte offset -- clearing them
+        would re-offer hands already imported, blind every table whose descriptor
+        the new archive has not re-announced yet, and lose hands still waiting
+        for a retry.
+        """
+        self._protocol_stream = None
+
     def poll_once(self) -> list[dict]:
         """Decode whatever was appended since the last call and return new hands.
 
@@ -308,7 +326,11 @@ class SwCNativeTailingThread(QThread):
             read_records_since,
         )
 
-        records, self._offset = read_records_since(self.raw_path, self._offset)
+        records, self._offset = read_records_since(
+            self.raw_path,
+            self._offset,
+            on_restart=self._forget_partial_frame,
+        )
         now = time.monotonic()
 
         if records:

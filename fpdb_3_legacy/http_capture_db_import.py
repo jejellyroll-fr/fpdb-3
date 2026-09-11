@@ -6,6 +6,7 @@ import datetime
 import json
 import re
 from dataclasses import dataclass
+from decimal import Decimal
 from pathlib import Path
 from typing import Any
 
@@ -190,6 +191,63 @@ def _enrich_existing_native_boards(db: Any, hand_data: dict[str, Any]) -> int | 
     return hand_ids[0]
 
 
+#: Native units per displayed unit, by game type. The capture envelope says so of
+#: itself (``metadata.money_unit == "room_native_integer"``) and per collection
+#: (``native_units_per_display_unit``); the tournament scale is 1 because a
+#: tournament chip is the unit, real money is counted in cents.
+_NATIVE_UNITS_PER_DISPLAY_UNIT = {"ring": 100, "tour": 1}
+
+
+def _displayed(value: Any, scale: int) -> str:
+    """One native integer as the displayed amount Hand.py expects, or '0'.
+
+    Decimal rather than float division: these become database cents, and 56/100
+    has to be exactly 0.56.
+    """
+    try:
+        return str(Decimal(str(value)) / scale)
+    except (TypeError, ValueError, ArithmeticError):
+        return "0"
+
+
+def _scale_native_money(candidate: dict[str, Any], scale: int) -> None:
+    """Rewrite a native envelope's money in displayed units, in place.
+
+    The envelope counts real money in native integers -- cents -- while
+    ``Hand.addPlayer``/``addBlind``/``addCollectPot`` take displayed currency and
+    DerivedStats multiplies by 100 on the way to the database. Handing the native
+    integers straight to the builder therefore inflated everything a hundredfold:
+    a 2/4-cent blind was stored as 200/400, a 10.00 stack as 1000.00. Collections
+    and returns were worse than unscaled -- they carry no ``amount`` at all, so
+    the builder fell back to ``amount_native`` and a 0.56 pot became 56.
+
+    A tournament is left alone: there the native unit already is the chip.
+    """
+    _scale_keys(candidate.get("gametype"), ("sb", "bb", "ante"), scale)
+    for player in candidate.get("players") or ():
+        _scale_keys(player, ("starting_stack",), scale)
+    for action in candidate.get("actions") or ():
+        _scale_keys(action, ("amount", "to"), scale)
+
+    # The room's own rendering is preferred where it exists: it is what the player
+    # saw, and it needs no arithmetic to trust. Collections and returns carry no
+    # ``amount`` of their own, which is why the builder reached for amount_native.
+    for item in (*(candidate.get("collections") or ()), *(candidate.get("returned") or ())):
+        if not isinstance(item, dict):
+            continue
+        displayed = item.get("amount_displayed")
+        item["amount"] = str(displayed) if displayed is not None else _displayed(item.get("amount_native"), scale)
+
+
+def _scale_keys(target: Any, keys: tuple[str, ...], scale: int) -> None:
+    """Rewrite each present, non-zero key of ``target`` in displayed units."""
+    if not isinstance(target, dict):
+        return
+    for key in keys:
+        if target.get(key):
+            target[key] = _displayed(target[key], scale)
+
+
 def _native_public_import_copy(hand_data: dict[str, Any]) -> dict[str, Any] | None:
     """Prepare a complete native public hand for the legacy Hand.py importer.
 
@@ -221,6 +279,13 @@ def _native_public_import_copy(hand_data: dict[str, Any]) -> dict[str, Any] | No
         {**player, "starting_stack": player.get("starting_stack") or 0}
         for player in hand_data.get("players", [])
     ]
+    # The envelope counts real money in native integers (cents); the generic
+    # builder hands its amounts to Hand.py as displayed currency. Converting here
+    # rather than in the builder keeps the HTTP capture path, whose units are its
+    # own, out of it.
+    scale = _NATIVE_UNITS_PER_DISPLAY_UNIT.get((candidate.get("gametype") or {}).get("type"), 1)
+    if scale != 1:
+        _scale_native_money(candidate, scale)
     return candidate
 
 

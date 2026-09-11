@@ -1363,3 +1363,187 @@ def test_read_status_markers_keeps_every_line_per_client(tmp_path) -> None:
     markers = inj.read_status_markers(status)
     assert inj.CAPTURE_LOCK_UNAVAILABLE in markers[100]
     assert inj.read_statuses(status) == {100: "tap-hooked"}, "the lifecycle view is unchanged"
+
+
+def _native_ring_hand() -> dict:
+    """A real-money native envelope: every amount is a native integer (cents)."""
+    return {
+        "site": "SealsWithClubs",
+        "hand_id": 301461728,
+        "game": {"base": "hold", "category": "holdem"},
+        "gametype": {"base": "hold", "category": "holdem", "type": "ring", "sb": 2, "bb": 4, "ante": 0},
+        "metadata": {
+            "adapter": "swc_native",
+            "money_unit": "room_native_integer",
+            "importability": {
+                "complete_action_players": True,
+                "settlement_conservation_complete": True,
+                "has_small_blind": True,
+                "has_big_blind": True,
+                "has_collection": True,
+            },
+        },
+        "players": [
+            {"name": "Hero", "seat_idx": 1, "starting_stack": 1000},
+            {"name": "Villain", "seat_idx": 2, "starting_stack": None},
+        ],
+        "actions": [
+            {"type": "small blind", "player": "Hero", "street": "BLINDSANTES", "amount": 2},
+            {"type": "raises", "player": "Villain", "street": "PREFLOP", "amount": 8, "to": 12},
+        ],
+        "collections": [{"player": "Hero", "amount_native": 56, "amount_displayed": "0.56"}],
+        "returned": [{"player": "Villain", "amount_native": 4}],
+    }
+
+
+def test_a_real_money_native_hand_reaches_the_builder_in_displayed_units() -> None:
+    """The envelope counts cents; Hand.py takes displayed currency and x100s it."""
+    from fpdb_3_legacy.http_capture_db_import import _native_public_import_copy
+
+    candidate = _native_public_import_copy(_native_ring_hand())
+
+    assert candidate is not None
+    assert candidate["gametype"]["sb"] == "0.02"
+    assert candidate["gametype"]["bb"] == "0.04"
+    assert candidate["players"][0]["starting_stack"] == "10"
+    assert candidate["actions"][0]["amount"] == "0.02"
+    assert candidate["actions"][1]["amount"] == "0.08"
+    assert candidate["actions"][1]["to"] == "0.12"
+    # The room's own rendering wins where it exists; the other falls back to math.
+    assert candidate["collections"][0]["amount"] == "0.56"
+    assert candidate["returned"][0]["amount"] == "0.04"
+
+
+def test_an_unknown_stack_stays_zero_rather_than_becoming_a_scaled_zero() -> None:
+    from fpdb_3_legacy.http_capture_db_import import _native_public_import_copy
+
+    candidate = _native_public_import_copy(_native_ring_hand())
+
+    assert candidate is not None
+    assert candidate["players"][1]["starting_stack"] == 0, "no stack is 0, not '0.00'"
+    assert candidate["gametype"]["ante"] == 0, "an absent ante is not rewritten"
+
+
+def test_a_tournament_native_hand_is_left_in_chips() -> None:
+    """A tournament chip already is the native unit: scaling it would divide it."""
+    from fpdb_3_legacy.http_capture_db_import import _native_public_import_copy
+
+    hand = _native_ring_hand()
+    hand["gametype"]["type"] = "tour"
+
+    candidate = _native_public_import_copy(hand)
+
+    assert candidate is not None
+    assert candidate["gametype"]["sb"] == 2
+    assert candidate["actions"][1]["to"] == 12
+    assert candidate["players"][0]["starting_stack"] == 1000
+    # Nothing is rewritten at all, so the builder keeps reading amount_native --
+    # which is already the chip count it wants.
+    assert "amount" not in candidate["collections"][0]
+    assert candidate["collections"][0]["amount_native"] == 56
+
+
+def test_an_unparsable_native_amount_does_not_abort_the_import() -> None:
+    from fpdb_3_legacy.http_capture_db_import import _native_public_import_copy
+
+    hand = _native_ring_hand()
+    hand["actions"][1]["amount"] = "not a number"
+
+    candidate = _native_public_import_copy(hand)
+
+    assert candidate is not None
+    assert candidate["actions"][1]["amount"] == "0"
+    assert candidate["actions"][1]["to"] == "0.12", "the rest of the hand is untouched"
+
+
+def test_a_truncated_archive_tells_its_reader_to_restart(tmp_path) -> None:
+    """Only read_records_since sees the shrink, so only it can report it."""
+    from fpdb_3_legacy.swc_native_capture import read_records_since
+
+    archive = tmp_path / "swc-native.raw"
+    archive.write_bytes(_record(_framed(b'{"a":1}')) + _record(_framed(b'{"b":2}')))
+    _, offset = read_records_since(archive, 0)
+    assert offset > 0
+
+    restarts: list[int] = []
+    archive.write_bytes(_record(_framed(b'{"c":3}')))
+    records, new_offset = read_records_since(archive, offset, on_restart=lambda: restarts.append(1))
+
+    assert restarts == [1]
+    assert len(records) == 1
+    assert new_offset == len(_record(_framed(b'{"c":3}')))
+
+
+def test_a_growing_archive_does_not_report_a_restart(tmp_path) -> None:
+    from fpdb_3_legacy.swc_native_capture import read_records_since
+
+    archive = tmp_path / "swc-native.raw"
+    archive.write_bytes(_record(_framed(b'{"a":1}')))
+    _, offset = read_records_since(archive, 0)
+
+    restarts: list[int] = []
+    with archive.open("ab") as stream:
+        stream.write(_record(_framed(b'{"b":2}')))
+    records, _ = read_records_since(archive, offset, on_restart=lambda: restarts.append(1))
+
+    assert restarts == []
+    assert len(records) == 1
+
+
+def _real_tailer(raw_path):
+    """A tailer with its real decoder: these tests are about the decoder's state."""
+    from fpdb_3_legacy.GuiAutoImport import SwCNativeTailingThread
+
+    return SwCNativeTailingThread(raw_path=raw_path)
+
+
+def test_the_tailer_drops_its_decoder_when_the_archive_is_rotated(tmp_path) -> None:
+    """A half-read frame from the old tail must not swallow the new archive's head."""
+    from fpdb_3_legacy.swc_native_capture import NativeProtocolStream
+
+    archive = tmp_path / "swc-native.raw"
+    # One whole message, which is what proves alignment, then a bare 4-byte
+    # length -- SwC's normal framing, and the decoder buffers it waiting for the
+    # 200-odd bytes it announces.
+    archive.write_bytes(_record(_framed(b'{"a":1}')) + _record((204).to_bytes(4, "little")))
+
+    tailer = _real_tailer(archive)
+    tailer.poll_once()
+    assert isinstance(tailer._protocol_stream, NativeProtocolStream)
+    assert [m.payload for m in tailer._messages] == [b'{"a":1}']
+
+    # The archive is replaced by a shorter one -- a fresh capture, or the user
+    # deleting a corrupt archive -- whose first record is a whole message.
+    tail = _record(_framed(b'{"x":1}'))
+    archive.write_bytes(tail)
+    tailer.poll_once()
+
+    assert tailer._offset == len(tail)
+    # Without the reset the decoder is still waiting for the dead frame's
+    # remainder, and these 11 bytes disappear into it.
+    assert [m.payload for m in tailer._messages][-1] == b'{"x":1}', "decoded against the new stream alone"
+
+
+def test_the_rotation_reset_keeps_what_is_keyed_by_hand(tmp_path) -> None:
+    """A rotation is not a reason to re-import, nor to forget a deferred hand."""
+    archive = tmp_path / "swc-native.raw"
+    archive.write_bytes(_record(_framed(b'{"a":1}')))
+
+    tailer = _real_tailer(archive)
+    tailer.poll_once()
+    tailer._emitted[7, 11] = "snapshot"
+    tailer._completed_keys.add((7, 12))
+    tailer._retry_offers[7, 13] = 2
+    tailer._retry_after[7, 13] = time.monotonic() + 600
+    tailer._pending_envelopes[7, 13] = {"hand_id": 13}
+    descriptor = object()
+    tailer._table_messages[0, 7] = descriptor
+
+    tailer._forget_partial_frame()
+
+    assert tailer._protocol_stream is None
+    assert tailer._emitted == {(7, 11): "snapshot"}
+    assert tailer._completed_keys == {(7, 12)}
+    assert tailer._retry_offers == {(7, 13): 2}
+    assert tailer._pending_envelopes == {(7, 13): {"hand_id": 13}}
+    assert tailer._table_messages == {(0, 7): descriptor}, "a live table stays visible"
