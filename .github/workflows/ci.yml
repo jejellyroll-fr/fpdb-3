@@ -33,6 +33,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v3
+        with:
+          # Keep in sync with [tool.uv] required-version in pyproject.toml.
+          version: "0.12.7"
       - name: Install Ruff
         run: uv tool install ruff
       - name: Install mypy
@@ -364,6 +367,9 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - uses: astral-sh/setup-uv@v3
+        with:
+          # Keep in sync with [tool.uv] required-version in pyproject.toml.
+          version: "0.12.7"
       - name: Install system dependencies (Linux)
         if: runner.os == 'Linux'
         run: |
@@ -445,6 +451,9 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - uses: astral-sh/setup-uv@v3
+        with:
+          # Keep in sync with [tool.uv] required-version in pyproject.toml.
+          version: "0.12.7"
       - name: Install system dependencies (Linux)
         if: runner.os == 'Linux'
         run: |
@@ -502,6 +511,9 @@ jobs:
         with:
           python-version: "3.11"
       - uses: astral-sh/setup-uv@v3
+        with:
+          # Keep in sync with [tool.uv] required-version in pyproject.toml.
+          version: "0.12.7"
       - name: Install system dependencies
         run: |
           sudo apt-get update
@@ -574,6 +586,9 @@ jobs:
         with:
           python-version: "3.11"
       - uses: astral-sh/setup-uv@v3
+        with:
+          # Keep in sync with [tool.uv] required-version in pyproject.toml.
+          version: "0.12.7"
       - name: Install system dependencies
         run: |
           sudo apt-get update
@@ -607,6 +622,9 @@ jobs:
         with:
           python-version: "3.11"
       - uses: astral-sh/setup-uv@v3
+        with:
+          # Keep in sync with [tool.uv] required-version in pyproject.toml.
+          version: "0.12.7"
       - name: Install system dependencies (Linux)
         if: runner.os == 'Linux'
         run: |
