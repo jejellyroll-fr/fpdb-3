@@ -951,3 +951,116 @@ def test_a_sidecar_without_a_start_time_keeps_its_id(tmp_path, monkeypatch) -> N
     monkeypatch.setattr(inj, "process_start_time", lambda _pid: 1000.0)
 
     assert inj.write_stream_ids(tmp_path, [4242])[4242] == 7
+
+
+# --------------------------------------------------------------------------
+# 23. Table descriptors are per source, because normalization is per source.
+# --------------------------------------------------------------------------
+
+
+def test_each_source_keeps_its_own_table_descriptor(tmp_path, monkeypatch) -> None:
+    """One dict key per table let the last client's descriptor erase the others."""
+    from fpdb_3_legacy import swc_native_capture
+    from fpdb_3_legacy.GuiAutoImport import SwCNativeTailingThread
+
+    # Two clients announce table 42; only the second one's snapshots follow.
+    from_a = SimpleNamespace(payload=b"table-info", peer_port=1, connection_id=0, source_id=1)
+    from_b = SimpleNamespace(payload=b"table-info", peer_port=1, connection_id=0, source_id=2)
+    filler = [SimpleNamespace(payload=b"x", peer_port=1, connection_id=0, source_id=2) for _ in range(4)]
+
+    monkeypatch.setattr(
+        swc_native_capture,
+        "extract_table_info",
+        lambda m: SimpleNamespace(table_id=42) if m.payload == b"table-info" else None,
+    )
+    monkeypatch.setattr(
+        swc_native_capture.NativeProtocolStream,
+        "feed",
+        lambda _self, _records: [from_a, from_b, *filler],
+    )
+    handed: list[list] = []
+    monkeypatch.setattr(
+        swc_native_capture,
+        "normalize_native_hands",
+        lambda messages, raw_ref=None: handed.append(list(messages)) or [],
+    )
+
+    raw = tmp_path / "swc-native.raw"
+    raw.write_bytes(_record(b"anything"))
+    thread = SwCNativeTailingThread(raw_path=raw)
+    thread.MAX_RETAINED_MESSAGES = 2  # force the trim past both descriptors
+    thread.poll_once()
+
+    retained = handed[0]
+    assert from_a in retained, "client 1's descriptor must not be erased by client 2's"
+    assert from_b in retained
+
+
+# --------------------------------------------------------------------------
+# 24. A reconnection reusing a socket number must not inherit a stale frame.
+# --------------------------------------------------------------------------
+
+
+def test_a_stale_half_message_is_abandoned_not_completed() -> None:
+    """Windows recycles socket numbers, so the key alone cannot tell runs apart."""
+    from datetime import timedelta
+
+    from fpdb_3_legacy.swc_native_capture import NativeProtocolStream
+
+    stream = NativeProtocolStream()
+    start = datetime.now(UTC)
+    half = _framed(b"OLD" * 20)[:10]
+    assert stream.feed([NativeCaptureRecord(start, "received", 20013, half, connection_id=5)]) == []
+
+    # Much later, the same socket number is back -- a different connection.
+    later = start + timedelta(minutes=5)
+    body = _framed(b"NEW")
+    got = stream.feed(
+        [
+            NativeCaptureRecord(later, "received", 20013, body[:4], connection_id=5),
+            NativeCaptureRecord(later, "received", 20013, body[4:], connection_id=5),
+        ],
+    )
+    assert [m.payload for m in got] == [b"NEW"], "the new connection decodes on its own terms"
+
+
+def test_a_message_split_across_two_polls_is_not_called_stale() -> None:
+    """A poll is 2.5s, so an ordinary gap must not be read as a dead connection."""
+    from datetime import timedelta
+
+    from fpdb_3_legacy.swc_native_capture import NativeProtocolStream
+
+    stream = NativeProtocolStream()
+    start = datetime.now(UTC)
+    # Alignment is established first, as it is in a live stream, so the split
+    # message below is reassembled rather than refused for want of an anchor.
+    assert [m.payload for m in stream.feed(
+        [NativeCaptureRecord(start, "received", 20013, _framed(b"first"), connection_id=5)],
+    )] == [b"first"]
+
+    body = _framed(b"W" * 40)
+    assert stream.feed([NativeCaptureRecord(start, "received", 20013, body[:10], connection_id=5)]) == []
+    second = stream.feed(
+        [NativeCaptureRecord(start + timedelta(seconds=3), "received", 20013, body[10:], connection_id=5)],
+    )
+    assert [m.payload for m in second] == [b"W" * 40]
+
+
+def test_an_unaligned_stream_refuses_a_partial_first_record() -> None:
+    """The cost of proving alignment: at most the message a stream joins midway.
+
+    A record holding a length plus only part of its payload proves nothing -- the
+    same shape is what a mid-connection attach produces -- so it is dropped and
+    the next message starts the stream. SwC sends the length in a read of its own,
+    so this costs one message at most, and only where the alternative is guessing.
+    """
+    from fpdb_3_legacy.swc_native_capture import NativeProtocolStream
+
+    stream = NativeProtocolStream()
+    body = _framed(b"Z" * 40)
+    assert stream.feed([NativeCaptureRecord(datetime.now(UTC), "received", 20013, body[:10])]) == []
+    assert stream.feed([NativeCaptureRecord(datetime.now(UTC), "received", 20013, body[10:])]) == []
+
+    # The next whole message is decoded normally.
+    got = stream.feed([NativeCaptureRecord(datetime.now(UTC), "received", 20013, _framed(b"after"))])
+    assert [m.payload for m in got] == [b"after"]

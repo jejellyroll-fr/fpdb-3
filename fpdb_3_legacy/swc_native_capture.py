@@ -439,6 +439,14 @@ def native_action_street(
 class NativeProtocolDecoder:
     """Reassemble SwC's uint32-le length-prefixed messages across SSL reads."""
 
+    #: How long a half-written message may wait for its remainder before the
+    #: buffer holding it is treated as belonging to a connection that is gone.
+    #: The two halves of a message share a timestamp in practice, and a tailer's
+    #: poll is 2.5s, so this only ever fires on a real discontinuity -- a client
+    #: that reconnected onto the same socket number, whose correctly framed bytes
+    #: would otherwise be swallowed as the end of the previous connection's frame.
+    STALE_PARTIAL_SECONDS = 30.0
+
     def __init__(self, direction: str = "received", *, resynchronize: bool = False) -> None:
         self.buffer = bytearray()
         self.message_timestamp: datetime | None = None
@@ -452,6 +460,16 @@ class NativeProtocolDecoder:
         #: prove alignment before decoding anything (see _anchors_a_message).
         self.aligned = not resynchronize
         self.discarded_bytes = 0
+        #: When the most recent record of this stream arrived, so a half-message
+        #: left behind by a connection that is gone can be recognised as stale.
+        self.last_record_at: datetime | None = None
+
+    def _partial_is_stale(self, now: datetime) -> bool:
+        """Whether the buffered half-message is too old to still be completed."""
+        last = self.last_record_at
+        if last is None:
+            return False
+        return (now - last).total_seconds() > self.STALE_PARTIAL_SECONDS
 
     @staticmethod
     def _anchors_a_message(payload: bytes) -> bool:
@@ -478,6 +496,14 @@ class NativeProtocolDecoder:
     def feed(self, record: NativeCaptureRecord) -> list[NativeProtocolMessage]:
         if record.direction != self.direction:
             return []
+        if self.resynchronize and self.buffer and self._partial_is_stale(record.captured_at):
+            # Whatever this half-message belonged to is not coming back. Drop it
+            # and make the next records prove alignment, rather than letting a new
+            # connection's bytes complete the previous one's frame.
+            self.discarded_bytes += len(self.buffer)
+            self.buffer.clear()
+            self.message_timestamp = None
+            self.aligned = False
         if not self.aligned:
             if not self._anchors_a_message(record.payload):
                 # Cannot be framed and cannot be trusted: drop it and look at the
@@ -489,6 +515,7 @@ class NativeProtocolDecoder:
         if not self.buffer:
             self.message_timestamp = record.captured_at
         self.buffer.extend(record.payload)
+        self.last_record_at = record.captured_at
         messages = []
         while len(self.buffer) >= 4:
             size = int.from_bytes(self.buffer[:4], "little")
@@ -2726,12 +2753,14 @@ def add_native_starting_stacks(  # noqa: C901
     """Anchor table stacks on the first roster and roll them through exact settlements."""
     login_names = {name for message in messages if (name := extract_native_outbound_login_name(message)) is not None}
     local_player = next(iter(login_names)) if len(login_names) == 1 else None
-    requests = {}
+    # Not named `requests`: shadowing the HTTP library's name makes every static
+    # analyser read `requests.get(table_id)` below as an un-timed web request.
+    seat_requests: dict[int, dict] = {}
     rosters: dict[int, dict] = {}
     for message in messages:
         request = parse_native_outbound_seat_request(message)
         if request is not None:
-            requests[request["table_id"]] = request
+            seat_requests[request["table_id"]] = request
         roster = extract_native_table_player_stacks(message)
         if roster is not None:
             usable_players = [player for player in roster["players"] if player["name"] != "RESERVED"]
@@ -2749,7 +2778,7 @@ def add_native_starting_stacks(  # noqa: C901
                 continue
             if any(player["name"] not in running_stacks for player in hand["players"]):
                 continue
-            request = requests.get(table_id)
+            request = seat_requests.get(table_id)
             for player in hand["players"]:
                 name = player["name"]
                 player["starting_stack"] = running_stacks[name]

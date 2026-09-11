@@ -175,8 +175,8 @@ class SwCNativeTailingThread(QThread):
         # Kept across polls: a protocol message routinely spans two batches, and
         # a decoder rebuilt each poll loses the half it was holding.
         self._protocol_stream: Any = None
-        # The latest descriptor per table, exempt from the rolling trim below.
-        self._table_messages: dict[int, Any] = {}
+        # The latest descriptor per (source, table), exempt from the rolling trim.
+        self._table_messages: dict[tuple[int, int], Any] = {}
         self._consecutive_errors = 0
 
     def stop(self) -> None:
@@ -285,7 +285,13 @@ class SwCNativeTailingThread(QThread):
                 # every later hand from it would otherwise become invisible.
                 info = extract_table_info(message)
                 if info is not None:
-                    self._table_messages[info.table_id] = message
+                    # Keyed by source as well as table, because normalization is
+                    # partitioned by source: two clients watching one table would
+                    # otherwise leave a single descriptor, belonging to whichever
+                    # announced it last. Once the trim dropped the active client's
+                    # own copy, its snapshots would have no table metadata and all
+                    # its later hands would disappear.
+                    self._table_messages[getattr(message, "source_id", 0), info.table_id] = message
             self._messages.extend(decoded)
             if len(self._messages) > self.MAX_RETAINED_MESSAGES:
                 del self._messages[: len(self._messages) - self.MAX_RETAINED_MESSAGES]

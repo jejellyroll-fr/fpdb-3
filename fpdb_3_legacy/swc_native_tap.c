@@ -174,17 +174,17 @@ static uint64_t now_us(void) {
 #endif
 }
 
-/* The peer port of this SSL connection, and (through *out_fd) the socket it
- * runs on. The socket is what tells two concurrent connections apart: the
- * reassembler downstream has to keep their byte streams separate, and a peer
- * port alone does not, because two connections can share one. */
-static uint16_t peer_port_for_ssl(SSL *ssl, int *out_fd) {
+/* The peer port of this SSL connection, and (through *out_connection_id) an
+ * identity for the connection itself. The reassembler downstream has to keep
+ * concurrent byte streams separate, and a peer port alone does not: the client
+ * holds several connections to the same game-server port. */
+static uint16_t peer_port_for_ssl(SSL *ssl, int *out_connection_id) {
     int fd;
     struct sockaddr_storage address;
     socklen_t address_len = sizeof(address);
 
-    if (out_fd != NULL) {
-        *out_fd = -1;
+    if (out_connection_id != NULL) {
+        *out_connection_id = -1;
     }
 
 #ifdef __APPLE__
@@ -212,8 +212,25 @@ static uint16_t peer_port_for_ssl(SSL *ssl, int *out_fd) {
     if (getpeername(fd, (struct sockaddr *)&address, &address_len) != 0) {
         return 0;
     }
-    if (out_fd != NULL) {
-        *out_fd = fd;
+    if (out_connection_id != NULL) {
+        /* The *local* port rather than the socket: a socket number is recycled
+         * the moment the descriptor is, so two successive connections of one
+         * process can share it, and the reassembler downstream would then append
+         * the new connection's bytes to the frame the old one left half-written.
+         * An ephemeral local port is unique to a live connection and is not
+         * handed out again immediately, which is exactly the distinction needed.
+         * Falls back to the socket when getsockname says nothing. */
+        struct sockaddr_storage local;
+        socklen_t local_len = sizeof(local);
+        int identity = fd;
+        if (getsockname(fd, (struct sockaddr *)&local, &local_len) == 0) {
+            if (local.ss_family == AF_INET) {
+                identity = ntohs(((struct sockaddr_in *)&local)->sin_port);
+            } else if (local.ss_family == AF_INET6) {
+                identity = ntohs(((struct sockaddr_in6 *)&local)->sin6_port);
+            }
+        }
+        *out_connection_id = identity;
     }
     if (address.ss_family == AF_INET) {
         return ntohs(((struct sockaddr_in *)&address)->sin_port);
@@ -268,7 +285,7 @@ static void write_all(int fd, const void *buffer, size_t size) {
 
 static void record_plaintext(SSL *ssl, const void *buffer, int size, uint8_t direction) {
     uint16_t peer_port;
-    int socket_fd = -1;
+    int connection_identity = -1;
     struct swc_tap_header header;
 
     if (capture_fd < 0 || buffer == NULL || size <= 0 || (uint32_t)size > SWC_MAX_RECORD_SIZE) {
@@ -277,7 +294,7 @@ static void record_plaintext(SSL *ssl, const void *buffer, int size, uint8_t dir
     if (direction == 1 && !capture_outbound) {
         return;
     }
-    peer_port = peer_port_for_ssl(ssl, &socket_fd);
+    peer_port = peer_port_for_ssl(ssl, &connection_identity);
     if (capture_port == SWC_AUTO_GAME_PORT) {
         if (peer_port < SWC_FIRST_GAME_PORT || peer_port > SWC_LAST_GAME_PORT || peer_port == SWC_LOBBY_PORT) {
             return;
@@ -296,7 +313,7 @@ static void record_plaintext(SSL *ssl, const void *buffer, int size, uint8_t dir
      * so an archive recorded before this still decodes as the single stream it
      * was. */
     header.reserved = capture_source_id();
-    header.reserved2 = (uint16_t)(socket_fd >= 0 ? (socket_fd & 0xFFFF) : 0);
+    header.reserved2 = (uint16_t)(connection_identity >= 0 ? (connection_identity & 0xFFFF) : 0);
     header.payload_size = (uint32_t)size;
     header.timestamp_us = now_us();
 
