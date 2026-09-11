@@ -231,6 +231,12 @@ def build_injector(*, force: bool = False) -> Path:
     command = _windows_compile_command(
         compiler, INJECTOR_SOURCE_PATH, injector, shared=False, libs=("shell32",)
     )
+    # Analysers flag this as a subprocess call built from non-literal parts, and
+    # it cannot be otherwise: the job is to invoke a compiler. What makes it safe
+    # is that no part comes from outside this process -- the executable is one of
+    # the names in COMPILERS, confirmed on PATH by resolve_compiler, and the
+    # source and output paths are module constants under the user's own home --
+    # and that it runs with no shell, so nothing in a path can be interpreted.
     subprocess.run(command, check=True)
     return injector
 

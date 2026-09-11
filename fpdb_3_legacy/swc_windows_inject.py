@@ -266,6 +266,11 @@ def _fallback_stream_id(pid: int) -> int:
 def inject_into_pid(injector: Path, dll: Path, pid: int) -> InjectionResult:
     """Run the injector to load ``dll`` into ``pid``; never raises."""
     try:
+        # A non-literal subprocess call by necessity: this runs the injector that
+        # was just compiled. Both paths are module-derived (get_injector_path,
+        # get_tap_library_path) and the pid comes from find_client_pids, so no
+        # argument originates outside this process; no shell is involved, so a
+        # path cannot be interpreted as anything but a path.
         completed = subprocess.run(
             [str(injector), str(pid), str(dll)],
             check=False,

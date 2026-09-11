@@ -115,12 +115,69 @@ static SRWLOCK g_capture_lock = SRWLOCK_INIT;
 #define SWC_CAPTURE_LOCK_TIMEOUT_MS 2000u
 static HANDLE g_capture_mutex = NULL;
 
+/* A JMP rel32 is one opcode byte and a four-byte displacement. Named because
+ * three things have to agree on it: the patch written over the function, the
+ * bytes VirtualProtect makes writable, and the jump appended to the trampoline. */
+#define SWC_HOOK_PATCH_SIZE 5
+/* The most prologue bytes a hook will relocate. A prologue this long is already
+ * far past anything observed; the ceiling is what bounds the trampoline. */
+#define SWC_HOOK_MAX_STOLEN 64
+
+/* Length of a NUL-terminated string, refusing to walk past `limit`. Used instead
+ * of strlen wherever the bytes come from outside this function: strlen has no way
+ * to stop, so a string that is not terminated reads off the end of its buffer. */
+static size_t swc_bounded_length(const char *text, size_t limit) {
+    size_t length = 0;
+    while (length < limit && text[length] != '\0') {
+        length++;
+    }
+    return length;
+}
+
+/* Write "<pid> <message>" into `out`, returning its length, or 0 if it does not
+ * fit. Hand-rolled rather than _snprintf: that family is the classic
+ * format-string footgun, and on Windows it also leaves the buffer unterminated
+ * when it truncates -- a caller then has no safe way to measure the result.
+ * Returning the length means the caller never has to walk the string again. */
+static size_t swc_status_line(char *out, size_t out_size, unsigned long pid, const char *message) {
+    char digits[24];
+    size_t digit_count = 0;
+    size_t length = 0;
+    size_t message_length = swc_bounded_length(message, out_size);
+
+    do {
+        digits[digit_count++] = (char)('0' + (pid % 10u));
+        pid /= 10u;
+    } while (pid != 0 && digit_count < sizeof(digits));
+
+    /* digits, one space, the message, and room to stay terminated. */
+    if (digit_count + 1 + message_length + 1 > out_size) {
+        return 0;
+    }
+    while (digit_count > 0) {
+        out[length++] = digits[--digit_count];
+    }
+    out[length++] = ' ';
+    memcpy(out + length, message, message_length);
+    length += message_length;
+    out[length] = '\0';
+    return length;
+}
+
 static void write_status(const char *message) {
+    /* Treated as untrusted: it is an environment variable, so its length is
+     * whatever the caller's environment says. Bounded before it is used as a
+     * path, and rejected outright when it does not terminate within one. */
     const char *env_path = getenv("SWC_CAPTURE_STATUS_PATH");
     const char *text = message;
+    size_t text_length;
     char line[128];
-    int written;
+    size_t written;
     int fd = -1;
+
+    if (env_path != NULL && swc_bounded_length(env_path, MAX_PATH) >= MAX_PATH) {
+        env_path = NULL;
+    }
 
     /* Every injected client appends to this same file, so a bare line cannot be
      * attributed to a process: with two clients running, one process's
@@ -128,9 +185,12 @@ static void write_status(const char *message) {
      * unreported. The PID prefix is what lets the Python side wait for one
      * terminal status per process it injected. Messages are short literals, so
      * one that would not fit is written unqualified rather than dropped. */
-    written = _snprintf(line, sizeof(line), "%lu %s", (unsigned long)GetCurrentProcessId(), message);
-    if (written > 0 && written < (int)sizeof(line)) {
+    written = swc_status_line(line, sizeof(line), (unsigned long)GetCurrentProcessId(), message);
+    text_length = written;
+    if (written > 0) {
         text = line;
+    } else {
+        text_length = swc_bounded_length(message, sizeof(line));
     }
 
     if (env_path != NULL && env_path[0] != '\0') {
@@ -139,7 +199,7 @@ static void write_status(const char *message) {
         fd = _wopen(g_status_path, _O_CREAT | _O_WRONLY | _O_APPEND | _O_BINARY, _S_IREAD | _S_IWRITE);
     }
     if (fd >= 0) {
-        _write(fd, text, (unsigned int)strlen(text));
+        _write(fd, text, (unsigned int)text_length);
         _close(fd);
     }
 }
@@ -691,22 +751,27 @@ static void *swc_install_inline_hook(void *target, void *hook, ssl_rw_cdecl_fn *
     if (published_trampoline == NULL) {
         return NULL;
     }
-    int steal = swc_prologue_len(fn, 5);
-    if (steal < 5 || steal > 64) {
+    int steal = swc_prologue_len(fn, SWC_HOOK_PATCH_SIZE);
+    if (steal < SWC_HOOK_PATCH_SIZE || steal > SWC_HOOK_MAX_STOLEN) {
         return NULL;
     }
 
-    uint8_t *tramp = (uint8_t *)VirtualAlloc(NULL, (SIZE_T)steal + 5, MEM_COMMIT | MEM_RESERVE,
+    /* The trampoline holds the displaced prologue followed by a jump back, so its
+     * size is what every copy below is bounded by: `steal` bytes of original code
+     * at offset 0, then the 5-byte JMP at offset `steal`. `steal` is checked above
+     * against both ends, so the two memcpy calls that follow cannot reach past it. */
+    SIZE_T tramp_size = (SIZE_T)steal + SWC_HOOK_PATCH_SIZE;
+    uint8_t *tramp = (uint8_t *)VirtualAlloc(NULL, tramp_size, MEM_COMMIT | MEM_RESERVE,
                                              PAGE_EXECUTE_READWRITE);
     if (tramp == NULL) {
         return NULL;
     }
     memcpy(tramp, fn, (size_t)steal);
     tramp[steal] = 0xE9;
-    int32_t back = (int32_t)((fn + steal) - (tramp + steal + 5));
+    int32_t back = (int32_t)((fn + steal) - (tramp + tramp_size));
     memcpy(tramp + steal + 1, &back, sizeof(back));
 
-    uint8_t patch[5];
+    uint8_t patch[SWC_HOOK_PATCH_SIZE];
     int32_t forward = (int32_t)((uint8_t *)hook - (fn + 5));
     patch[0] = 0xE9;
     memcpy(patch + 1, &forward, sizeof(forward));

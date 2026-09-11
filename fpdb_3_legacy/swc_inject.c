@@ -23,6 +23,10 @@
 #include <stdlib.h>
 #include <wchar.h>
 
+/* Windows' longest path, in wide characters: the ceiling a DLL path is measured
+ * against before it is copied into the target process. */
+#define SWC_MAX_PATH_CHARS 32767
+
 enum {
     INJ_OK = 0,
     INJ_USAGE = 2,
@@ -66,8 +70,22 @@ int main(void) {
     }
     DWORD pid = (DWORD)parsed_pid;
 
+    /* Bounded rather than wcslen: the length is measured to copy the path into
+     * another process, so a string that did not terminate would read off the end
+     * of this one's buffer. Windows' own ceiling is the bound, and a path that
+     * reaches it is refused instead of truncated -- injecting a DLL by a path
+     * that is not the one asked for is not a failure worth recovering from. */
     const wchar_t *dll_path = argv[2];
-    SIZE_T path_bytes = (wcslen(dll_path) + 1) * sizeof(*dll_path);
+    SIZE_T path_length = 0;
+    while (path_length < SWC_MAX_PATH_CHARS && dll_path[path_length] != L'\0') {
+        path_length++;
+    }
+    if (path_length == 0 || path_length >= SWC_MAX_PATH_CHARS) {
+        fwprintf(stderr, L"dll path is empty or longer than %d characters\n", SWC_MAX_PATH_CHARS);
+        LocalFree(argv);
+        return INJ_USAGE;
+    }
+    SIZE_T path_bytes = (path_length + 1) * sizeof(*dll_path);
 
     HANDLE process = OpenProcess(PROCESS_CREATE_THREAD | PROCESS_QUERY_INFORMATION |
                                      PROCESS_VM_OPERATION | PROCESS_VM_WRITE | PROCESS_VM_READ,

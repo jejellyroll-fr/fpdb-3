@@ -11,9 +11,9 @@ the load never trusts such a pair again, and the save never writes one.
 from __future__ import annotations
 
 from types import SimpleNamespace
-from xml.dom import minidom
 
 import pytest
+from defusedxml import minidom
 
 from fpdb_3_legacy.Configuration import Config, Layout, layout_reference_fits
 

@@ -297,7 +297,7 @@ def test_a_block_parked_just_off_the_top_left_is_still_accepted() -> None:
 
 
 def test_the_load_repair_lifts_blocks_back_onto_the_table() -> None:
-    from xml.dom import minidom
+    from defusedxml import minidom
 
     from fpdb_3_legacy.Configuration import Layout
 
@@ -588,7 +588,7 @@ def test_a_table_descriptor_survives_the_rolling_trim(tmp_path, monkeypatch) -> 
 
 def test_a_zero_reference_with_no_positive_coordinate_is_still_repaired() -> None:
     """Aux_Base refuses to scale by zero, so the repair has to leave a usable one."""
-    from xml.dom import minidom
+    from defusedxml import minidom
 
     from fpdb_3_legacy.Configuration import Layout
 

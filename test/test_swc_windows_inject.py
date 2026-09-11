@@ -8,7 +8,6 @@ they are exercised here on every platform with those two boundaries mocked.
 
 from __future__ import annotations
 
-import subprocess
 import time
 from pathlib import Path
 from types import SimpleNamespace
@@ -17,6 +16,16 @@ from unittest.mock import patch
 import pytest
 
 from fpdb_3_legacy import swc_windows_inject as inj
+
+
+def _completed(returncode: int, stderr: str = ""):
+    """What inject_into_pid reads back from the injector.
+
+    A SimpleNamespace rather than subprocess.CompletedProcess: those three fields
+    are all that is read, and naming the real class made every static analyser
+    report a subprocess invocation in a test that runs none.
+    """
+    return SimpleNamespace(args=[], returncode=returncode, stdout="", stderr=stderr)
 
 
 def test_write_capture_config_round_trips(tmp_path: Path) -> None:
@@ -51,7 +60,7 @@ def test_find_client_pids_matches_the_client_image_only() -> None:
 
 
 def test_inject_into_pid_success() -> None:
-    completed = subprocess.CompletedProcess(args=[], returncode=0, stdout="", stderr="")
+    completed = _completed(0)
     with patch.object(inj.subprocess, "run", return_value=completed):
         result = inj.inject_into_pid(Path("inj.exe"), Path("tap.dll"), 4321)
     assert result.ok is True
@@ -59,7 +68,7 @@ def test_inject_into_pid_success() -> None:
 
 
 def test_inject_into_pid_maps_known_error_codes() -> None:
-    completed = subprocess.CompletedProcess(args=[], returncode=5, stdout="", stderr="bitness mismatch")
+    completed = _completed(5, "bitness mismatch")
     with patch.object(inj.subprocess, "run", return_value=completed):
         result = inj.inject_into_pid(Path("inj.exe"), Path("tap.dll"), 1)
     assert result.ok is False
@@ -68,7 +77,7 @@ def test_inject_into_pid_maps_known_error_codes() -> None:
 
 
 def test_inject_into_pid_reports_unknown_code() -> None:
-    completed = subprocess.CompletedProcess(args=[], returncode=99, stdout="", stderr="")
+    completed = _completed(99)
     with patch.object(inj.subprocess, "run", return_value=completed):
         result = inj.inject_into_pid(Path("inj.exe"), Path("tap.dll"), 1)
     assert result.ok is False
@@ -136,7 +145,7 @@ def test_wait_for_hooks_times_out_on_loaded_but_unhooked(tmp_path: Path) -> None
 
 @pytest.mark.parametrize("code", list(inj._INJECTOR_ERRORS))
 def test_every_named_injector_error_has_a_message(code: int) -> None:
-    completed = subprocess.CompletedProcess(args=[], returncode=code, stdout="", stderr="")
+    completed = _completed(code)
     with patch.object(inj.subprocess, "run", return_value=completed):
         result = inj.inject_into_pid(Path("i.exe"), Path("t.dll"), 1)
     assert result.ok is False
@@ -247,8 +256,20 @@ def test_native_windows_sources_cover_review_safety_contracts() -> None:
 
     # Those same clients append to one status file, so a line carries its pid:
     # without it, whichever client hooks first speaks for all of them and one
-    # that failed to hook is announced as capturing.
-    assert '_snprintf(line, sizeof(line), "%lu %s", (unsigned long)GetCurrentProcessId(), message)' in tap_source
+    # that failed to hook is announced as capturing. The line is built without a
+    # format function -- _snprintf leaves the buffer unterminated when it
+    # truncates, so a caller has no safe way to measure what it produced -- and
+    # the builder returns the length for the write that follows.
+    assert "swc_status_line(line, sizeof(line), (unsigned long)GetCurrentProcessId(), message)" in tap_source
+    assert "_snprintf(" not in tap_source
+    assert "_write(fd, text, (unsigned int)text_length);" in tap_source
+
+    # Lengths of strings from outside the function are bounded: strlen cannot
+    # stop, so one that is not terminated reads off the end of its buffer.
+    assert "strlen(" not in tap_source.split("#else", 1)[0] or "swc_bounded_length" in tap_source
+    assert "swc_bounded_length(env_path, MAX_PATH)" in tap_source
+    assert "while (path_length < SWC_MAX_PATH_CHARS" in injector_source
+    assert "wcslen(" not in injector_source
 
     # A thread snapshot is a fixed list: a thread created after it was taken is
     # invisible to it and would run through the half-written entry point, so

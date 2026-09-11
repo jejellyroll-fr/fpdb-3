@@ -25,6 +25,19 @@ log = get_logger("http_capture_db_import")
 SWC_SITE_ID = 23
 _NATIVE_CARD_TOKEN_RE = re.compile(r"^10([cdhs])$")
 
+#: SQL for the native board repair. Held as constants written with the MySQL-style
+#: ``%s`` marker and adapted to the backend's placeholder the way the entries in
+#: ``db.sql.query`` are, rather than interpolated at the call site. Every value
+#: still travels as a bound parameter either way -- the only thing that ever
+#: varied was the placeholder, which is a property of the driver and not of the
+#: data -- but built this way the statement is a constant string, which is what
+#: both a reader and a static analyser need in order to see that.
+_NATIVE_HAND_LOOKUP_SQL = (
+    "SELECT H.id FROM Hands H JOIN Gametypes G ON H.gametypeId=G.id WHERE H.siteHandNo=%s AND G.siteId=%s"
+)
+_NATIVE_RUN_IT_TWICE_SQL = "UPDATE Hands SET runItTwice=%s WHERE id=%s"
+_NATIVE_DELETE_BOARDS_SQL = "DELETE FROM Boards WHERE handId=%s"
+
 
 #: The Files row every natively captured hand is attached to. Hands.fileId is a
 #: non-null foreign key to Files.id on MySQL and PostgreSQL, and real file ids
@@ -75,8 +88,11 @@ def _rollback_quietly(db: Any) -> None:
         return
     try:
         rollback()
-    except Exception:  # noqa: BLE001 - the original error is the one to raise
-        pass
+    except Exception:
+        # Swallowed so the caller can re-raise the failure that brought us here,
+        # but recorded: a rollback that fails is how a connection stays poisoned,
+        # and a silent `pass` would leave nothing to read afterwards.
+        log.debug("Rollback after a failed native import did not succeed", exc_info=True)
 
 
 @dataclass(frozen=True)
@@ -157,17 +173,13 @@ def _enrich_existing_native_boards(db: Any, hand_data: dict[str, Any]) -> int | 
             site_hand_no = int(site_hand_no)
         except (TypeError, ValueError):
             pass
-    lookup = (
-        "SELECT H.id FROM Hands H JOIN Gametypes G ON H.gametypeId=G.id "
-        f"WHERE H.siteHandNo={placeholder} AND G.siteId={placeholder}"
-    )
-    cursor.execute(lookup, (site_hand_no, SWC_SITE_ID))
+    cursor.execute(_NATIVE_HAND_LOOKUP_SQL.replace("%s", placeholder), (site_hand_no, SWC_SITE_ID))
     hand_ids = [row[0] for row in cursor.fetchall()]
     if not hand_ids:
         return None
 
-    update = f"UPDATE Hands SET runItTwice={placeholder} WHERE id={placeholder}"
-    delete = f"DELETE FROM Boards WHERE handId={placeholder}"
+    update = _NATIVE_RUN_IT_TWICE_SQL.replace("%s", placeholder)
+    delete = _NATIVE_DELETE_BOARDS_SQL.replace("%s", placeholder)
     store = db.sql.query["store_boards"].replace("%s", placeholder)
     for hand_id in hand_ids:
         cursor.execute(update, (True, hand_id))
