@@ -287,8 +287,11 @@ def _native_public_import_copy(hand_data: dict[str, Any]) -> dict[str, Any] | No
     # The envelope counts real money in native integers (cents); the generic
     # builder hands its amounts to Hand.py as displayed currency. Converting here
     # rather than in the builder keeps the HTTP capture path, whose units are its
-    # own, out of it.
-    scale = _NATIVE_UNITS_PER_DISPLAY_UNIT.get((candidate.get("gametype") or {}).get("type"), 1)
+    # own, out of it. An envelope that does not say what kind of table it is gets
+    # the scale of 1, which is no conversion at all: rescaling money whose unit is
+    # unknown would be worse than leaving it alone.
+    game_type = (candidate.get("gametype") or {}).get("type")
+    scale = _NATIVE_UNITS_PER_DISPLAY_UNIT.get(game_type or "", 1)
     if scale != 1:
         _scale_native_money(candidate, scale)
     return candidate
