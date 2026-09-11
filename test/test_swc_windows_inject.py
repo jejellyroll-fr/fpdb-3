@@ -266,10 +266,22 @@ def test_native_windows_sources_cover_review_safety_contracts() -> None:
 
     # Lengths of strings from outside the function are bounded: strlen cannot
     # stop, so one that is not terminated reads off the end of its buffer.
-    assert "strlen(" not in tap_source.split("#else", 1)[0] or "swc_bounded_length" in tap_source
-    assert "swc_bounded_length(env_path, MAX_PATH)" in tap_source
+    assert "swc_bounded_length" in tap_source
     assert "while (path_length < SWC_MAX_PATH_CHARS" in injector_source
     assert "wcslen(" not in injector_source
+
+    # Every copy in the Windows half goes through the bounded helper: these write
+    # into live instruction memory or fixed buffers, where memcpy taking the
+    # caller's word for the destination size is not good enough.
+    windows_half = tap_source[tap_source.index("#ifdef _WIN32") : tap_source.index("#else\nstatic void write_status")]
+    assert "memcpy(" not in windows_half
+    assert "swc_copy_into(" in windows_half
+    hook_half = tap_source[tap_source.index("swc_install_inline_hook") :]
+    assert "memcpy(" not in hook_half, "the hook engine patches code; every copy must be bounded"
+
+    # The injected DLL cannot inherit an environment, so it must not pretend to:
+    # reading a status path from one would point it somewhere the archive is not.
+    assert 'getenv("SWC_CAPTURE_STATUS_PATH")' not in windows_half
 
     # A thread snapshot is a fixed list: a thread created after it was taken is
     # invisible to it and would run through the half-written entry point, so

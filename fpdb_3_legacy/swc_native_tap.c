@@ -9,7 +9,7 @@
 #endif
 
 #ifdef _WIN32
-/* _open/_write/getenv are flagged deprecated by MSVC; we use them deliberately. */
+/* _open/_write are flagged deprecated by MSVC; we use them deliberately. */
 #define _CRT_SECURE_NO_WARNINGS 1
 #endif
 
@@ -123,6 +123,27 @@ static HANDLE g_capture_mutex = NULL;
  * far past anything observed; the ceiling is what bounds the trampoline. */
 #define SWC_HOOK_MAX_STOLEN 64
 
+/* Copy `count` bytes to `offset` within a destination of `dst_size`, returning 0
+ * and copying nothing when they would not fit.
+ *
+ * Used instead of a bare memcpy throughout this file. memcpy takes the caller's
+ * word for it that the destination is large enough; every copy here either
+ * patches live instruction memory or fills a fixed buffer, which is where taking
+ * someone's word for it stops being acceptable. Passing the capacity makes the
+ * check the compiler cannot do into one the code does, at each call, for the
+ * price of a branch on a path that runs once per hook. */
+static int swc_copy_into(void *dst, size_t dst_size, size_t offset, const void *src, size_t count) {
+    if (offset > dst_size || count > dst_size - offset) {
+        return 0;
+    }
+    const uint8_t *from = (const uint8_t *)src;
+    uint8_t *to = (uint8_t *)dst + offset;
+    for (size_t i = 0; i < count; i++) {
+        to[i] = from[i];
+    }
+    return 1;
+}
+
 /* Length of a NUL-terminated string, refusing to walk past `limit`. Used instead
  * of strlen wherever the bytes come from outside this function: strlen has no way
  * to stop, so a string that is not terminated reads off the end of its buffer. */
@@ -158,26 +179,27 @@ static size_t swc_status_line(char *out, size_t out_size, unsigned long pid, con
         out[length++] = digits[--digit_count];
     }
     out[length++] = ' ';
-    memcpy(out + length, message, message_length);
+    if (!swc_copy_into(out, out_size, length, message, message_length)) {
+        return 0;
+    }
     length += message_length;
     out[length] = '\0';
     return length;
 }
 
 static void write_status(const char *message) {
-    /* Treated as untrusted: it is an environment variable, so its length is
-     * whatever the caller's environment says. Bounded before it is used as a
-     * path, and rejected outright when it does not terminate within one. */
-    const char *env_path = getenv("SWC_CAPTURE_STATUS_PATH");
+    /* No SWC_CAPTURE_STATUS_PATH here, unlike the POSIX branch. The tap is
+     * injected into a client that is already running, so it never inherits the
+     * launcher's environment -- initialize_swc_tap derives every path from the
+     * DLL's own location for exactly that reason. Reading the variable was
+     * therefore unreachable, and worse than unreachable: had anything managed to
+     * set it, the status file and the archive would have pointed at two
+     * different places. */
     const char *text = message;
     size_t text_length;
     char line[128];
     size_t written;
     int fd = -1;
-
-    if (env_path != NULL && swc_bounded_length(env_path, MAX_PATH) >= MAX_PATH) {
-        env_path = NULL;
-    }
 
     /* Every injected client appends to this same file, so a bare line cannot be
      * attributed to a process: with two clients running, one process's
@@ -193,9 +215,7 @@ static void write_status(const char *message) {
         text_length = swc_bounded_length(message, sizeof(line));
     }
 
-    if (env_path != NULL && env_path[0] != '\0') {
-        fd = _open(env_path, _O_CREAT | _O_WRONLY | _O_APPEND | _O_BINARY, _S_IREAD | _S_IWRITE);
-    } else if (g_status_path[0] != L'\0') {
+    if (g_status_path[0] != L'\0') {
         fd = _wopen(g_status_path, _O_CREAT | _O_WRONLY | _O_APPEND | _O_BINARY, _S_IREAD | _S_IWRITE);
     }
     if (fd >= 0) {
@@ -756,25 +776,30 @@ static void *swc_install_inline_hook(void *target, void *hook, ssl_rw_cdecl_fn *
         return NULL;
     }
 
-    /* The trampoline holds the displaced prologue followed by a jump back, so its
-     * size is what every copy below is bounded by: `steal` bytes of original code
-     * at offset 0, then the 5-byte JMP at offset `steal`. `steal` is checked above
-     * against both ends, so the two memcpy calls that follow cannot reach past it. */
+    /* The trampoline holds the displaced prologue followed by a jump back: `steal`
+     * bytes of original code at offset 0, then the 5-byte JMP at offset `steal`.
+     * Its size is what bounds every copy into it, and is passed to each one. */
     SIZE_T tramp_size = (SIZE_T)steal + SWC_HOOK_PATCH_SIZE;
     uint8_t *tramp = (uint8_t *)VirtualAlloc(NULL, tramp_size, MEM_COMMIT | MEM_RESERVE,
                                              PAGE_EXECUTE_READWRITE);
     if (tramp == NULL) {
         return NULL;
     }
-    memcpy(tramp, fn, (size_t)steal);
-    tramp[steal] = 0xE9;
     int32_t back = (int32_t)((fn + steal) - (tramp + tramp_size));
-    memcpy(tramp + steal + 1, &back, sizeof(back));
+    if (!swc_copy_into(tramp, tramp_size, 0, fn, (size_t)steal) ||
+        !swc_copy_into(tramp, tramp_size, (size_t)steal + 1, &back, sizeof(back))) {
+        VirtualFree(tramp, 0, MEM_RELEASE);
+        return NULL;
+    }
+    tramp[steal] = 0xE9;
 
     uint8_t patch[SWC_HOOK_PATCH_SIZE];
-    int32_t forward = (int32_t)((uint8_t *)hook - (fn + 5));
+    int32_t forward = (int32_t)((uint8_t *)hook - (fn + SWC_HOOK_PATCH_SIZE));
     patch[0] = 0xE9;
-    memcpy(patch + 1, &forward, sizeof(forward));
+    if (!swc_copy_into(patch, sizeof(patch), 1, &forward, sizeof(forward))) {
+        VirtualFree(tramp, 0, MEM_RELEASE);
+        return NULL;
+    }
 
     struct swc_suspended_threads suspended;
     int suspension = 0;
@@ -801,13 +826,13 @@ static void *swc_install_inline_hook(void *target, void *hook, ssl_rw_cdecl_fn *
         return NULL;
     }
 
-    memcpy(fn, patch, sizeof(patch));
+    swc_copy_into(fn, sizeof(patch), 0, patch, sizeof(patch));
     FlushInstructionCache(GetCurrentProcess(), fn, sizeof(patch));
 
     DWORD ignored = 0;
     if (!VirtualProtect(fn, sizeof(patch), old_protect, &ignored)) {
         /* Fail closed: restore the original entry point before resuming callers. */
-        memcpy(fn, tramp, sizeof(patch));
+        swc_copy_into(fn, sizeof(patch), 0, tramp, sizeof(patch));
         FlushInstructionCache(GetCurrentProcess(), fn, sizeof(patch));
         VirtualProtect(fn, sizeof(patch), old_protect, &ignored);
         swc_resume_threads(&suspended);
