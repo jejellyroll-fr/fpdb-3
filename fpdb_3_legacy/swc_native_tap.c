@@ -114,6 +114,9 @@ static SRWLOCK g_capture_lock = SRWLOCK_INIT;
  * interleaved one is not. */
 #define SWC_CAPTURE_LOCK_TIMEOUT_MS 2000u
 static HANDLE g_capture_mutex = NULL;
+/* Set once the missing mutex has been reported, so a client that cannot get one
+ * says so in the status file exactly once instead of on every record. */
+static int g_capture_lock_reported = 0;
 
 /* A JMP rel32 is one opcode byte and a four-byte displacement. Named because
  * three things have to agree on it: the patch written over the function, the
@@ -405,8 +408,30 @@ static void record_plaintext(SSL *ssl, const void *buffer, int size, uint8_t dir
     }
 #else
     {
-        DWORD wait = (g_capture_mutex != NULL) ? WaitForSingleObject(g_capture_mutex, SWC_CAPTURE_LOCK_TIMEOUT_MS)
-                                               : WAIT_OBJECT_0;
+        /* No cross-process mutex, no write. Every injected client appends to this
+         * one archive, and the SRWLOCK below orders only *this* process's
+         * threads: proceeding without the mutex lets one client's header land
+         * between another's header and payload, which desynchronises the reader
+         * for the rest of the session. Treating a missing mutex as acquired
+         * traded a lost record for an unreadable archive -- the wrong way round,
+         * and silently.
+         *
+         * Creation is retried here rather than only at load: a transient failure
+         * (handle pressure) then costs a few records instead of the session. */
+        if (g_capture_mutex == NULL) {
+            g_capture_mutex = CreateMutexW(NULL, FALSE, SWC_CAPTURE_MUTEX_NAME);
+            if (g_capture_mutex == NULL) {
+                if (!g_capture_lock_reported) {
+                    /* Written from the record path, not from load: the launcher
+                     * reads the latest line per client, so a warning written at
+                     * load was superseded by tap-loaded and never surfaced. */
+                    g_capture_lock_reported = 1;
+                    write_status("tap-cross-process-lock-unavailable\n");
+                }
+                return;
+            }
+        }
+        DWORD wait = WaitForSingleObject(g_capture_mutex, SWC_CAPTURE_LOCK_TIMEOUT_MS);
         /* WAIT_ABANDONED still grants ownership: a peer died holding the mutex,
          * and records are only ever appended whole, so there is no shared state
          * to recover. Anything else drops this record rather than risk writing

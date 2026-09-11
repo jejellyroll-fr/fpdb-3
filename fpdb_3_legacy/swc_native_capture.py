@@ -58,6 +58,49 @@ def native_capture_supported(system_name: str | None = None) -> bool:
     return (system_name or platform.system()) in SUPPORTED_SYSTEMS
 
 
+def _attach_warnings(
+    injector_mod,
+    results: list,
+    injected: list[int],
+    *,
+    status_path,
+    status_mark: int,
+    options_changed: bool,
+) -> str:
+    """Everything about this attach that a "capture active" line would otherwise hide.
+
+    Each of these is a client whose hands will not arrive, or will arrive under
+    settings the user did not ask for, so they are appended to whichever status
+    the caller goes on to return rather than logged and forgotten.
+    """
+    notes: list[str] = []
+
+    # A client the tap could not be injected into produces nothing, and saying
+    # only how many succeeded would announce capture for all of them.
+    refused = [r for r in results if not r.ok]
+    if refused:
+        notes.append(" Not injected: " + "; ".join(f"pid {r.pid}: {r.detail}" for r in refused) + ".")
+
+    if options_changed:
+        notes.append(
+            " Capture options changed: a client that was already running keeps the previous "
+            "port/outbound settings until it is restarted."
+        )
+
+    # Looked for across every line this attach produced, not only the latest: a
+    # client that cannot take the cross-process mutex drops all its records, and
+    # writes that warning before the hook status which then supersedes it.
+    markers = injector_mod.read_status_markers(status_path, status_mark)
+    lockless = [pid for pid in injected if injector_mod.CAPTURE_LOCK_UNAVAILABLE in markers.get(pid, ())]
+    if lockless:
+        notes.append(
+            f" pid(s) {', '.join(str(pid) for pid in lockless)} could not take the shared-archive lock "
+            "and are dropping records; restart fpdb and the client."
+        )
+
+    return "".join(notes)
+
+
 def attach_to_windows_client(*, port: int = 0, include_outbound: bool = False) -> str:
     """Build the tap, inject it into the running SwC client, and report the result.
 
@@ -126,27 +169,21 @@ def attach_to_windows_client(*, port: int = 0, include_outbound: bool = False) -
         msg = f"could not inject the SwC tap into any client process ({detail})"
         raise RuntimeError(msg)
 
-    # A client the tap could not be injected into produces nothing, and saying
-    # only how many succeeded would announce "capture active" while one client's
-    # hands never arrive. Carried into every status below.
-    refused = [r for r in results if not r.ok]
-    refused_note = (
-        " Not injected: " + "; ".join(f"pid {r.pid}: {r.detail}" for r in refused) + "."
-        if refused
-        else ""
-    )
-    if options_changed:
-        refused_note += (
-            " Capture options changed: a client that was already running keeps the previous "
-            "port/outbound settings until it is restarted."
-        )
-
     injected = [r.pid for r in ok]
     statuses = injector_mod.wait_for_hooks(status_path, injected, since=status_mark)
     log.info(
         "SwC tap injected into pid(s) %s; DLL status=%s",
         ", ".join(str(pid) for pid in injected),
         ", ".join(f"{pid}:{statuses.get(pid) or 'none yet'}" for pid in injected),
+    )
+
+    refused_note = _attach_warnings(
+        injector_mod,
+        results,
+        injected,
+        status_path=status_path,
+        status_mark=status_mark,
+        options_changed=options_changed,
     )
 
     hooked = [pid for pid in injected if statuses.get(pid) == "tap-hooked"]
@@ -2948,6 +2985,27 @@ def normalize_native_hands(messages: list[NativeProtocolMessage], *, raw_ref: st
     return [best[key] for key in order]
 
 
+def _native_complete_boards(hand: dict) -> int:
+    """How many of this copy's boards are whole, by the repair path's definition.
+
+    ``_native_board_rows`` takes a board only when FLOP+TURN+RIVER give it five
+    cards, and refuses the set outright if any board falls short. Counting the
+    same thing here is what lets the ranking below prefer the copy that can
+    actually be used.
+    """
+    boards = hand.get("boards")
+    if not isinstance(boards, list):
+        return 0
+    complete = 0
+    for board in boards:
+        if not isinstance(board, dict):
+            continue
+        cards = [card for street in ("FLOP", "TURN", "RIVER") for card in board.get(street, [])]
+        if len(cards) >= 5:
+            complete += 1
+    return complete
+
+
 def _native_envelope_rank(hand: dict) -> tuple:
     """How usable one copy of a hand is, for choosing between two clients' views.
 
@@ -2955,11 +3013,19 @@ def _native_envelope_rank(hand: dict) -> tuple:
     evidence arrive in their own messages and do not add steps, so one client can
     hold an importable envelope while another holds the same number of snapshots
     and nothing else -- and picking the latter skips a hand that was ready.
-    Importability leads, then the evidence that leads to it, and only then size.
+
+    Complete boards come second, ahead of every other kind of evidence, because
+    they are what this whole path exists to recover: the text history writes one
+    board of a double board and pays out for two, and _native_board_rows repairs
+    that only from a copy whose boards are all five cards. Ranked below
+    importability but above the rest, because a hand can be worth its boards
+    while still not being importable on its own -- that is exactly the case the
+    repair handles.
     """
     audit = (hand.get("metadata") or {}).get("importability") or {}
     return (
         bool(audit.get("importable")),
+        _native_complete_boards(hand),
         bool((hand.get("game") or {}).get("fpdb_supported")),
         len(hand.get("actions") or ()),
         len(hand.get("collections") or ()),

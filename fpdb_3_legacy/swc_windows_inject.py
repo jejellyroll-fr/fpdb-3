@@ -410,6 +410,28 @@ def read_statuses(status_path: Path, since: int = 0) -> dict[int, str]:
     return _parse_status_lines(_read_status_text(status_path, since))[0]
 
 
+#: A client reporting this has no cross-process lock, so it drops every record
+#: rather than risk interleaving them into the shared archive. It is not a hook
+#: status and is never the last line, so it has to be looked for on its own.
+CAPTURE_LOCK_UNAVAILABLE = "tap-cross-process-lock-unavailable"
+
+
+def read_status_markers(status_path: Path, since: int = 0) -> dict[int, set[str]]:
+    """Every status each pid reported, not only its last.
+
+    wait_for_hooks follows the latest line per client, which is what a lifecycle
+    needs -- but a warning is overtaken by the next step and then invisible. This
+    keeps the whole set so one can still be surfaced.
+    """
+    markers: dict[int, set[str]] = {}
+    for line in _read_status_text(status_path, since).splitlines():
+        status = line.strip()
+        pid_text, _, rest = status.partition(" ")
+        if rest and pid_text.isdigit():
+            markers.setdefault(int(pid_text), set()).add(rest.strip())
+    return markers
+
+
 def wait_for_hooks(
     status_path: Path, pids: Sequence[int], *, timeout: float = 10.0, since: int = 0
 ) -> dict[int, str]:

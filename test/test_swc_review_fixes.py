@@ -1248,3 +1248,118 @@ def test_the_delay_follows_an_instance_override(tmp_path, monkeypatch) -> None:
 
     assert thread._retry_delay(1) == 0.05
     assert thread._retry_delay(1025) == 0.05
+
+
+# --------------------------------------------------------------------------
+# 29. Complete boards decide between two clients' copies of a hand.
+# --------------------------------------------------------------------------
+
+
+def _board(*, complete: bool) -> dict:
+    whole = {"FLOP": ["2c", "7h", "Ad"], "TURN": ["Ac"], "RIVER": ["6d"]}
+    return whole if complete else {"FLOP": ["2c", "7h", "Ad"]}
+
+
+def test_the_copy_with_both_boards_wins_an_otherwise_equal_tie() -> None:
+    """The repair needs five cards per board; one board short and it refuses."""
+    from fpdb_3_legacy.swc_native_capture import _native_envelope_rank
+
+    two_boards = {"boards": [_board(complete=True), _board(complete=True)], "steps": [1]}
+    one_board = {"boards": [_board(complete=True)], "steps": [1]}
+
+    assert _native_envelope_rank(two_boards) > _native_envelope_rank(one_board)
+
+
+def test_an_incomplete_board_does_not_count() -> None:
+    from fpdb_3_legacy.swc_native_capture import _native_complete_boards, _native_envelope_rank
+
+    partial = {"boards": [_board(complete=True), _board(complete=False)]}
+    assert _native_complete_boards(partial) == 1
+    assert _native_envelope_rank({"boards": [_board(complete=True), _board(complete=True)]}) > _native_envelope_rank(
+        partial,
+    )
+
+
+def test_boards_rank_above_the_other_evidence_but_below_importability() -> None:
+    """A copy can be worth its boards while not being importable on its own."""
+    from fpdb_3_legacy.swc_native_capture import _native_envelope_rank
+
+    boards_only = {"boards": [_board(complete=True), _board(complete=True)]}
+    evidence_only = {"collections": [1, 2, 3], "action_evidence": [1, 2, 3], "steps": [1] * 50}
+    importable = {"metadata": {"importability": {"importable": True}}}
+
+    assert _native_envelope_rank(boards_only) > _native_envelope_rank(evidence_only)
+    assert _native_envelope_rank(importable) > _native_envelope_rank(boards_only)
+
+
+def test_the_double_board_copy_is_the_one_normalization_returns(monkeypatch) -> None:
+    from fpdb_3_legacy import swc_native_capture
+
+    per_source = {
+        1: {"table_id": 1, "hand_id": 9, "boards": [_board(complete=True)], "steps": [1]},
+        2: {"table_id": 1, "hand_id": 9, "boards": [_board(complete=True), _board(complete=True)], "steps": [1]},
+    }
+    monkeypatch.setattr(
+        swc_native_capture,
+        "_normalize_native_hands_one_source",
+        lambda messages, *, raw_ref: [per_source[next(iter({m.source_id for m in messages}))]],
+    )
+    messages = [
+        swc_native_capture.NativeProtocolMessage(datetime.now(UTC), b"a", source_id=1),
+        swc_native_capture.NativeProtocolMessage(datetime.now(UTC), b"b", source_id=2),
+    ]
+
+    [hand] = swc_native_capture.normalize_native_hands(messages, raw_ref="x")
+    assert len(hand["boards"]) == 2
+
+
+# --------------------------------------------------------------------------
+# 30. A client with no shared-archive lock must be heard, not assumed fine.
+# --------------------------------------------------------------------------
+
+
+def test_a_lock_warning_is_surfaced_even_though_a_hook_status_follows_it(tmp_path, monkeypatch) -> None:
+    """wait_for_hooks follows the latest line, which buries the warning."""
+    from fpdb_3_legacy import swc_native_capture, swc_tap_build
+    from fpdb_3_legacy import swc_windows_inject as inj
+
+    status = tmp_path / "swc-native.status"
+    monkeypatch.setattr(swc_native_capture.platform, "system", lambda: "Windows")
+    monkeypatch.setattr(swc_native_capture, "build_tap", lambda **_: tmp_path / "tap.dll")
+    monkeypatch.setattr(swc_tap_build, "build_injector", lambda **_: tmp_path / "inj.exe")
+    monkeypatch.setattr(swc_native_capture, "BUILD_DIR", tmp_path, raising=False)
+    monkeypatch.setattr(swc_native_capture, "DEFAULT_ARCHIVE", tmp_path / "swc-native.raw", raising=False)
+    monkeypatch.setattr(inj, "write_capture_config", lambda *_a, **_k: tmp_path / "c.cfg")
+    monkeypatch.setattr(inj, "capture_config_changed", lambda *_a, **_k: False)
+    monkeypatch.setattr(inj, "write_stream_ids", lambda *_a, **_k: {})
+    monkeypatch.setattr(inj, "reset_stream_ids", lambda *_a, **_k: 0)
+    monkeypatch.setattr(inj, "find_client_pids", lambda *_a, **_k: [100])
+    monkeypatch.setattr(
+        inj,
+        "inject_into_pid",
+        lambda _i, _d, pid: inj.InjectionResult(pid=pid, ok=True, detail="ok"),
+    )
+
+    def fake_wait(path, pids, **_kwargs):
+        # The DLL reports the warning, then goes on to hook.
+        path.write_text("100 tap-cross-process-lock-unavailable\n100 tap-hooked\n", encoding="ascii")
+        return dict.fromkeys(pids, "tap-hooked")
+
+    monkeypatch.setattr(inj, "wait_for_hooks", fake_wait)
+
+    message = swc_native_capture.attach_to_windows_client()
+
+    assert "could not take the shared-archive lock" in message
+    assert "100" in message
+    assert status.exists()
+
+
+def test_read_status_markers_keeps_every_line_per_client(tmp_path) -> None:
+    from fpdb_3_legacy import swc_windows_inject as inj
+
+    status = tmp_path / "swc-native.status"
+    status.write_text("100 tap-loaded\n100 tap-cross-process-lock-unavailable\n100 tap-hooked\n", encoding="ascii")
+
+    markers = inj.read_status_markers(status)
+    assert inj.CAPTURE_LOCK_UNAVAILABLE in markers[100]
+    assert inj.read_statuses(status) == {100: "tap-hooked"}, "the lifecycle view is unchanged"
