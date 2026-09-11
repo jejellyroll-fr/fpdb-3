@@ -1194,3 +1194,57 @@ def test_reading_without_a_mark_still_sees_everything(tmp_path) -> None:
     status.write_text("100 tap-loaded\n200 tap-hooked\n", encoding="ascii")
 
     assert inj.read_statuses(status) == {100: "tap-loaded", 200: "tap-hooked"}
+
+
+# --------------------------------------------------------------------------
+# 28. The backoff arithmetic must survive an outage of any length.
+# --------------------------------------------------------------------------
+
+
+def test_the_backoff_does_not_overflow_after_a_long_outage(tmp_path, monkeypatch) -> None:
+    """2.5 * 2 ** 1024 raises rather than being capped, and transient has no limit.
+
+    At the 30s cap that point is about 8.5 hours in. The raise landed after the
+    offer count was stored but before the deadline was, so the elapsed deadline
+    stayed and the hand was re-offered every poll while every reschedule failed.
+    """
+    hand = {"table_id": 7, "hand_id": 1234}
+    thread, _raw = _tailer(tmp_path, monkeypatch, [hand])
+    thread.poll_once()
+    key = thread._hand_key(hand)
+
+    # Jump straight to the offer that used to raise.
+    thread._retry_offers[key] = 1024
+    before = time.monotonic()
+    thread.retry_hand(hand, transient=True)
+
+    assert key in thread._retry_after, "the deadline must have been rescheduled"
+    assert thread._retry_after[key] - before <= thread.RETRY_BACKOFF_CAP_SECONDS + 1
+
+
+@pytest.mark.parametrize("offers", [1, 2, 1025, 10**6])
+def test_the_retry_delay_is_always_within_the_cap(tmp_path, monkeypatch, offers: int) -> None:
+    thread, _raw = _tailer(tmp_path, monkeypatch, [])
+
+    delay = thread._retry_delay(offers)
+    assert 0 < delay <= thread.RETRY_BACKOFF_CAP_SECONDS
+
+
+def test_the_backoff_still_doubles_before_it_is_capped(tmp_path, monkeypatch) -> None:
+    """The clamp must not flatten the early delays it exists to protect."""
+    thread, _raw = _tailer(tmp_path, monkeypatch, [])
+
+    assert thread._retry_delay(1) == thread.RETRY_BACKOFF_SECONDS
+    assert thread._retry_delay(2) == thread.RETRY_BACKOFF_SECONDS * 2
+    assert thread._retry_delay(3) == thread.RETRY_BACKOFF_SECONDS * 4
+    assert thread._retry_delay(99) == thread.RETRY_BACKOFF_CAP_SECONDS
+
+
+def test_the_delay_follows_an_instance_override(tmp_path, monkeypatch) -> None:
+    """The tunables are per instance; a classmethod would have ignored these."""
+    thread, _raw = _tailer(tmp_path, monkeypatch, [])
+    thread.RETRY_BACKOFF_SECONDS = 0.05
+    thread.RETRY_BACKOFF_CAP_SECONDS = 0.05
+
+    assert thread._retry_delay(1) == 0.05
+    assert thread._retry_delay(1025) == 0.05

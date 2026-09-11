@@ -152,6 +152,12 @@ class SwCNativeTailingThread(QThread):
     RETRY_BACKOFF_SECONDS = 2.5
     RETRY_BACKOFF_CAP_SECONDS = 30.0
 
+    #: Ceiling on the doubling exponent, so the backoff arithmetic stays finite
+    #: however long an outage runs (see _retry_delay). Far beyond the four
+    #: doublings these constants need to reach the cap; it exists only to keep
+    #: 2 ** n representable, not to shape the delay.
+    MAX_BACKOFF_DOUBLINGS = 64
+
     def __init__(self, raw_path: Any = None, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         default = Path.home() / ".fpdb" / "swc-native-capture" / "swc-native.raw"
@@ -229,11 +235,32 @@ class SwCNativeTailingThread(QThread):
                 self._pending_envelopes.pop(key, None)
                 return
             self._retry_offers[key] = offers
-            delay = min(self.RETRY_BACKOFF_SECONDS * 2 ** (offers - 1), self.RETRY_BACKOFF_CAP_SECONDS)
+            delay = self._retry_delay(offers)
             self._retry_after[key] = time.monotonic() + delay
             # Held so the hand can be offered again from what it was, not from
             # what the message window still happens to contain.
             self._pending_envelopes[key] = hand_data
+
+    def _retry_delay(self, offers: int) -> float:
+        """How long before this offer is repeated: doubling, then held at the cap.
+
+        The exponent is clamped before it is built. ``2 ** (offers - 1)`` is an
+        arbitrary-precision int, and past ``2 ** 1024`` multiplying it by a float
+        raises OverflowError instead of being capped by the ``min`` around it --
+        and a transient refusal has no offer limit by design, so ``offers`` really
+        does get there: about 8.5 hours of an outage at the 30s cap. The raise
+        landed after the offer count had been stored but before the new deadline
+        was, leaving the elapsed one in place, so the hand was re-offered every
+        poll while every attempt to reschedule it failed the same way.
+
+        The clamp is only there to keep the arithmetic finite; the cap below is
+        what actually bounds the wait, and with these constants it is reached
+        after four doublings.
+        """
+        # Read off self, not the class: these are tunables, and the tests (and any
+        # subclass) set them per instance.
+        doublings = min(max(offers - 1, 0), self.MAX_BACKOFF_DOUBLINGS)
+        return min(self.RETRY_BACKOFF_SECONDS * (2**doublings), self.RETRY_BACKOFF_CAP_SECONDS)
 
     def note_capture_only(self, hand_data: dict) -> bool:
         """Whether this hand is being reported as not-yet-importable for the first time.
