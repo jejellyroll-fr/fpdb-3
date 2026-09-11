@@ -282,8 +282,7 @@ def _native_public_import_copy(hand_data: dict[str, Any]) -> dict[str, Any] | No
     candidate = _legacy_native_card_tokens(hand_data)
     candidate["game"] = {**(hand_data.get("game") or {}), "fpdb_supported": True}
     candidate["players"] = [
-        {**player, "starting_stack": player.get("starting_stack") or 0}
-        for player in hand_data.get("players", [])
+        {**player, "starting_stack": player.get("starting_stack") or 0} for player in hand_data.get("players", [])
     ]
     # The envelope counts real money in native integers (cents); the generic
     # builder hands its amounts to Hand.py as displayed currency. Converting here
@@ -419,7 +418,9 @@ def import_http_capture_file(db: Any, path: str | Path, *, doinsert: bool = True
     return import_http_capture_hand(db, hand_data, doinsert=doinsert)
 
 
-def import_http_capture_directory(db: Any, directory: str | Path, *, doinsert: bool = True) -> list[HttpCaptureImportResult]:
+def import_http_capture_directory(
+    db: Any, directory: str | Path, *, doinsert: bool = True
+) -> list[HttpCaptureImportResult]:
     """Import all normalized hand_*.json files from a capture directory."""
 
     capture_dir = Path(directory).expanduser()
