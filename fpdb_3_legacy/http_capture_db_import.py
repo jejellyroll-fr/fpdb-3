@@ -218,8 +218,8 @@ def _scale_native_money(candidate: dict[str, Any], scale: int) -> None:
     DerivedStats multiplies by 100 on the way to the database. Handing the native
     integers straight to the builder therefore inflated everything a hundredfold:
     a 2/4-cent blind was stored as 200/400, a 10.00 stack as 1000.00. Collections
-    and returns were worse than unscaled -- they carry no ``amount`` at all, so
-    the builder fell back to ``amount_native`` and a 0.56 pot became 56.
+    were worse than merely unscaled -- they carry no ``amount`` at all, so the
+    builder fell back to ``amount_native`` and a 0.56 pot became 56.
 
     A tournament is left alone: there the native unit already is the chip.
     """
@@ -230,8 +230,14 @@ def _scale_native_money(candidate: dict[str, Any], scale: int) -> None:
         _scale_keys(action, ("amount", "to"), scale)
 
     # The room's own rendering is preferred where it exists: it is what the player
-    # saw, and it needs no arithmetic to trust. Collections and returns carry no
-    # ``amount`` of their own, which is why the builder reached for amount_native.
+    # saw, and it needs no arithmetic to trust. A collection carries no ``amount``
+    # of its own, which is why the builder reached for amount_native.
+    #
+    # ``returned`` is converted for symmetry rather than because anything reads it
+    # -- the builder never looks at that key. Its money already reaches Hand.py as
+    # the ``uncalled`` actions build_native_canonical_actions derived from it, and
+    # the loop above scales those like any other action. Writing ``amount`` here
+    # only means the key is already correct should a reader ever appear.
     for item in (*(candidate.get("collections") or ()), *(candidate.get("returned") or ())):
         if not isinstance(item, dict):
             continue
