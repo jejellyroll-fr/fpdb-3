@@ -7,8 +7,11 @@ import os
 if os.getenv("FPDB_FORCE_X11") == "1":
     os.environ.setdefault("QT_QPA_PLATFORM", "xcb")
 
+import hashlib
+import json
 import subprocess
 import sys
+import threading
 import time
 import traceback
 from optparse import OptionParser
@@ -95,11 +98,18 @@ class AutoImportThread(QThread):
     error = Signal(str)
     db_offline = Signal()
 
-    def __init__(self, importer) -> None:
+    def __init__(self, importer, db_write_lock: threading.Lock | None = None) -> None:
         super().__init__()
         self.importer = importer
+        self.db_write_lock = db_write_lock
 
     def run(self) -> None:
+        # Held for the whole cycle: the importer's database is one connection
+        # with one set of bulk buffers, and the live SwC hand callback would
+        # otherwise write through both from the GUI thread mid-cycle.
+        lock = self.db_write_lock
+        if lock is not None:
+            lock.acquire()
         try:
             # Checked here rather than left to fail mid-cycle so the GUI can say
             # the database is away, instead of reporting a raw driver error once
@@ -112,6 +122,14 @@ class AutoImportThread(QThread):
             self.finished.emit()
         except Exception as e:  # intentional broad catch: Qt worker thread surfaces any failure via the error signal
             self.error.emit(str(e))
+        finally:
+            if lock is not None:
+                lock.release()
+
+
+def _hand_snapshot_fingerprint(hand: dict) -> str:
+    """Content hash of one normalized hand, so an unchanged snapshot is not re-offered."""
+    return hashlib.sha256(json.dumps(hand, sort_keys=True, default=str).encode("utf-8")).hexdigest()
 
 
 class SwCNativeTailingThread(QThread):
@@ -124,46 +142,270 @@ class SwCNativeTailingThread(QThread):
     #: caps that history: a long session would otherwise grow it without bound.
     MAX_RETAINED_MESSAGES = 20000
 
+    #: An attempt that was not terminal is repeated on a delay that doubles to a
+    #: cap, for a bounded number of offers. Both ends matter: the reasons to
+    #: retry clear on their own (an import cycle finishes, the database comes
+    #: back, the text history of the hand lands), while a hand that will never
+    #: be importable must not reach the database every 2.5s for the rest of the
+    #: session. At these values a hand is retried for about nine minutes.
+    MAX_RETRY_OFFERS = 20
+    RETRY_BACKOFF_SECONDS = 2.5
+    RETRY_BACKOFF_CAP_SECONDS = 30.0
+
+    #: Ceiling on the doubling exponent, so the backoff arithmetic stays finite
+    #: however long an outage runs (see _retry_delay). Far beyond the four
+    #: doublings these constants need to reach the cap; it exists only to keep
+    #: 2 ** n representable, not to shape the delay.
+    MAX_BACKOFF_DOUBLINGS = 64
+
     def __init__(self, raw_path: Any = None, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         default = Path.home() / ".fpdb" / "swc-native-capture" / "swc-native.raw"
         self.raw_path = Path(raw_path or default).expanduser().resolve()
         self._stop_requested = False
-        self._imported_keys: set[tuple[int, int]] = set()
+        # Hands are decoded while they are still being played, so a first
+        # snapshot is routinely not importable yet and the same hand has to be
+        # offered again once later records complete it. Only a terminal import
+        # result retires a key; until then a snapshot is re-emitted when its
+        # content changes, or when a retry was asked for. The GUI thread writes
+        # these through the methods below while this thread reads them in
+        # poll_once, hence the lock.
+        self._state_lock = threading.Lock()
+        self._completed_keys: set[tuple[int, int]] = set()
+        self._emitted: dict[tuple[int, int], str] = {}
+        self._capture_only_keys: set[tuple[int, int]] = set()
+        self._retry_offers: dict[tuple[int, int], int] = {}
+        self._retry_after: dict[tuple[int, int], float] = {}
+        # The envelope each deferred hand was last offered as. A retry must not
+        # depend on the hand still being reconstructible from the rolling message
+        # window: a finished hand produces no more records, so once busy tables
+        # push its snapshots out of that window normalization can never return it
+        # again, and the deadline would come due forever with nothing to offer.
+        self._pending_envelopes: dict[tuple[int, int], dict] = {}
         self._offset = 0
         self._messages: list[Any] = []
+        # Kept across polls: a protocol message routinely spans two batches, and
+        # a decoder rebuilt each poll loses the half it was holding.
+        self._protocol_stream: Any = None
+        # The latest descriptor per (source, table), exempt from the rolling trim.
+        self._table_messages: dict[tuple[int, int], Any] = {}
         self._consecutive_errors = 0
 
     def stop(self) -> None:
         self._stop_requested = True
+
+    @staticmethod
+    def _hand_key(hand_data: dict) -> tuple[int, int]:
+        return (hand_data.get("table_id", 0), hand_data.get("hand_id", 0))
+
+    def mark_hand_complete(self, hand_data: dict) -> None:
+        """Retire a hand whose import reached a terminal result (imported, duplicate, updated)."""
+        key = self._hand_key(hand_data)
+        with self._state_lock:
+            self._completed_keys.add(key)
+            self._emitted.pop(key, None)
+            self._capture_only_keys.discard(key)
+            self._retry_offers.pop(key, None)
+            self._retry_after.pop(key, None)
+            self._pending_envelopes.pop(key, None)
+
+    def retry_hand(self, hand_data: dict, *, transient: bool = False) -> None:
+        """Offer this hand again later even though its snapshot has not changed.
+
+        For an attempt that was not terminal: the importer could not use the
+        hand yet, the database raised, or an auto-import cycle owned the
+        connection. Waiting for new capture content instead lost the hand,
+        because a finished hand produces no more records.
+
+        ``transient`` says the refusal came from outside the hand -- a busy
+        connection, a database that is away. Nothing about the hand will change
+        to fix that, and nothing about it is wrong, so it keeps its place in the
+        queue at the capped interval for as long as the outage lasts. The budget
+        applies only to a hand the importer itself judged unusable: that verdict
+        cannot change while its snapshot does not, so re-offering it forever
+        would be work with no possible result.
+        """
+        key = self._hand_key(hand_data)
+        with self._state_lock:
+            offers = self._retry_offers.get(key, 0) + 1
+            if offers > self.MAX_RETRY_OFFERS and not transient:
+                # Budget spent: drop the deadline too, or the elapsed one left
+                # behind would keep re-offering this hand every poll.
+                self._retry_after.pop(key, None)
+                self._pending_envelopes.pop(key, None)
+                return
+            self._retry_offers[key] = offers
+            delay = self._retry_delay(offers)
+            self._retry_after[key] = time.monotonic() + delay
+            # Held so the hand can be offered again from what it was, not from
+            # what the message window still happens to contain.
+            self._pending_envelopes[key] = hand_data
+
+    def _retry_delay(self, offers: int) -> float:
+        """How long before this offer is repeated: doubling, then held at the cap.
+
+        The exponent is clamped before it is built. ``2 ** (offers - 1)`` is an
+        arbitrary-precision int, and past ``2 ** 1024`` multiplying it by a float
+        raises OverflowError instead of being capped by the ``min`` around it --
+        and a transient refusal has no offer limit by design, so ``offers`` really
+        does get there: about 8.5 hours of an outage at the 30s cap. The raise
+        landed after the offer count had been stored but before the new deadline
+        was, leaving the elapsed one in place, so the hand was re-offered every
+        poll while every attempt to reschedule it failed the same way.
+
+        The clamp is only there to keep the arithmetic finite; the cap below is
+        what actually bounds the wait, and with these constants it is reached
+        after four doublings.
+        """
+        # Read off self, not the class: these are tunables, and the tests (and any
+        # subclass) set them per instance.
+        doublings = min(max(offers - 1, 0), self.MAX_BACKOFF_DOUBLINGS)
+        return min(self.RETRY_BACKOFF_SECONDS * (2**doublings), self.RETRY_BACKOFF_CAP_SECONDS)
+
+    def note_capture_only(self, hand_data: dict) -> bool:
+        """Whether this hand is being reported as not-yet-importable for the first time.
+
+        "Capture-only" is a passing state rather than a verdict, so the hand
+        stays eligible; this only keeps the log from repeating it every poll.
+        """
+        key = self._hand_key(hand_data)
+        with self._state_lock:
+            if key in self._capture_only_keys:
+                return False
+            self._capture_only_keys.add(key)
+            return True
+
+    def _retry_is_due(self, now: float) -> bool:
+        """Whether a deferred hand's delay has elapsed, so a poll is worth doing.
+
+        A hand is deferred precisely when it is *finished* and something outside
+        the capture refused it -- an auto-import cycle held the connection, the
+        database raised, or it is waiting for its text history. A finished hand
+        produces no further records, so waiting for new bytes before looking at
+        the deadline is waiting for something that never comes: the retry has to
+        be reachable on an idle archive or it never fires at all.
+        """
+        with self._state_lock:
+            return any(
+                deadline <= now for key, deadline in self._retry_after.items() if key not in self._completed_keys
+            )
+
+    def _forget_partial_frame(self) -> None:
+        """Drop the decoder when the archive is truncated or rotated.
+
+        The decoder is kept across polls so a message split over two polls still
+        decodes, which means it can be holding the old archive's half-written
+        tail. Feeding the new archive's first bytes onto that splices two
+        unrelated streams together: the resynchronizer then has to throw away
+        real records before it finds an anchor it can trust.
+
+        Only the decoder goes. The retained messages, the table descriptors, the
+        emitted and completed hand keys, the retry ledger and the deferred
+        envelopes are all keyed by hand, not by byte offset -- clearing them
+        would re-offer hands already imported, blind every table whose descriptor
+        the new archive has not re-announced yet, and lose hands still waiting
+        for a retry.
+        """
+        self._protocol_stream = None
 
     def poll_once(self) -> list[dict]:
         """Decode whatever was appended since the last call and return new hands.
 
         Split out of the polling loop so the decode path can be exercised without
         starting a thread or waiting on its timing.
+
+        A hand already offered is returned again only when its snapshot changed,
+        or when a retry was asked for and its delay has elapsed, and never once
+        a terminal import result retired it. That is what lets a hand decoded
+        mid-play be imported once its later records arrive.
         """
         from fpdb_3_legacy.swc_native_capture import (
-            iter_protocol_messages,
+            NativeProtocolStream,
+            extract_table_info,
             normalize_native_hands,
             read_records_since,
         )
 
-        records, self._offset = read_records_since(self.raw_path, self._offset)
-        if not records:
+        records, self._offset = read_records_since(
+            self.raw_path,
+            self._offset,
+            on_restart=self._forget_partial_frame,
+        )
+        now = time.monotonic()
+
+        if records:
+            if self._protocol_stream is None:
+                self._protocol_stream = NativeProtocolStream()
+            decoded = self._protocol_stream.feed(records)
+            for message in decoded:
+                # A table descriptor is what names a table id and its game, and
+                # normalize_native_hands rebuilds its table map from the message
+                # list alone. Held separately so the rolling trim below cannot
+                # drop the descriptor of a table that is still being played --
+                # every later hand from it would otherwise become invisible.
+                info = extract_table_info(message)
+                if info is not None:
+                    # Keyed by source as well as table, because normalization is
+                    # partitioned by source: two clients watching one table would
+                    # otherwise leave a single descriptor, belonging to whichever
+                    # announced it last. Once the trim dropped the active client's
+                    # own copy, its snapshots would have no table metadata and all
+                    # its later hands would disappear.
+                    self._table_messages[getattr(message, "source_id", 0), info.table_id] = message
+            self._messages.extend(decoded)
+            if len(self._messages) > self.MAX_RETAINED_MESSAGES:
+                del self._messages[: len(self._messages) - self.MAX_RETAINED_MESSAGES]
+        elif not self._retry_is_due(now):
+            # Nothing new to decode and nothing waiting to be re-offered:
+            # normalizing the retained buffer again could not produce a hand this
+            # poll, and it is the expensive half of the work.
             return []
-
-        self._messages.extend(iter_protocol_messages(iter(records)))
-        if len(self._messages) > self.MAX_RETAINED_MESSAGES:
-            del self._messages[: len(self._messages) - self.MAX_RETAINED_MESSAGES]
-
         fresh: list[dict] = []
-        for hand in normalize_native_hands(self._messages, raw_ref=str(self.raw_path)):
-            key = (hand.get("table_id", 0), hand.get("hand_id", 0))
-            if key not in self._imported_keys:
-                self._imported_keys.add(key)
-                fresh.append(hand)
+        # Descriptors first: a duplicate of one still in _messages is harmless
+        # (the table map is a dict, and a descriptor yields no snapshot).
+        retained = [*self._table_messages.values(), *self._messages]
+        for hand in normalize_native_hands(retained, raw_ref=str(self.raw_path)):
+            key = self._hand_key(hand)
+            fingerprint = _hand_snapshot_fingerprint(hand)
+            with self._state_lock:
+                if key in self._completed_keys:
+                    continue
+                offered_before = self._emitted.get(key)
+                if offered_before == fingerprint:
+                    retry_after = self._retry_after.get(key)
+                    if retry_after is None or now < retry_after:
+                        continue
+                elif offered_before is not None:
+                    # New content is new information, so the retry budget is not
+                    # spent by a hand still being played: it bounds how often an
+                    # unchanged, refused snapshot is repeated.
+                    self._retry_offers.pop(key, None)
+                self._emitted[key] = fingerprint
+                # A fresher view supersedes the copy held for the retry.
+                if key in self._pending_envelopes:
+                    self._pending_envelopes[key] = hand
+            fresh.append(hand)
+        fresh.extend(self._due_pending_envelopes(now, {self._hand_key(hand) for hand in fresh}))
         return fresh
+
+    def _due_pending_envelopes(self, now: float, already_offered: set[tuple[int, int]]) -> list[dict]:
+        """Deferred hands whose delay has elapsed but that normalization no longer yields.
+
+        A hand is only deferred once it is finished, so it produces no further
+        records; once busy tables push its snapshots past MAX_RETAINED_MESSAGES it
+        can never be rebuilt from the window again. Without the copy kept at
+        deferral, its deadline would come due forever with nothing behind it --
+        and, because a transient refusal has no budget, forever really means it.
+        """
+        due: list[dict] = []
+        with self._state_lock:
+            for key, deadline in list(self._retry_after.items()):
+                if key in already_offered or key in self._completed_keys or deadline > now:
+                    continue
+                envelope = self._pending_envelopes.get(key)
+                if envelope is not None:
+                    due.append(envelope)
+        return due
 
     def run(self) -> None:
         while not self._stop_requested:
@@ -199,6 +441,13 @@ class GuiAutoImport(QWidget):
         self.importtimer: QTimer | None = None
         self.import_thread: AutoImportThread | None = None
         self.swc_tailing_thread: SwCNativeTailingThread | None = None
+        # One writer at a time on the importer's database: a single connection
+        # with a single set of bulk buffers, which no driver here lets two
+        # threads drive at once (see Database._create_new_worker_connection).
+        # AutoImportThread holds it for a whole cycle; the live SwC hand
+        # callback tries it without blocking, since that one runs on the GUI
+        # thread and a cycle can take minutes.
+        self.db_write_lock = threading.Lock()
         # Outage bookkeeping, so the database going away is reported once rather
         # than once per interval, and its return is reported too.
         self._deferred_cycles = 0
@@ -467,7 +716,7 @@ class GuiAutoImport(QWidget):
             self.progressBar.setVisible(True)
             self.progressBar.setMaximum(0)  # Indeterminate progress
 
-            self.import_thread = AutoImportThread(self.importer)
+            self.import_thread = AutoImportThread(self.importer, db_write_lock=self.db_write_lock)
             self.import_thread.finished.connect(self.import_finished)
             self.import_thread.error.connect(self.import_error)
             self.import_thread.db_offline.connect(self.import_db_offline)
@@ -577,25 +826,32 @@ class GuiAutoImport(QWidget):
         if not self._swc_capture_wanted():
             return
         try:
+            import platform as _platform
+
             from fpdb_3_legacy.swc_native_capture import (
                 DEFAULT_ARCHIVE,
+                attach_to_windows_client,
                 build_tap,
                 native_capture_supported,
             )
 
             if not native_capture_supported():
-                # The tap is loaded into the client by library interposition,
-                # which Windows has no equivalent of. Building it there was the
-                # compiler failure users kept reporting -- for a library nothing
-                # on the platform could have loaded even if it had built.
-                log.info("SwC live capture needs library interposition, which this platform does not have.")
+                log.info("SwC live capture is not available on %s.", _platform.system())
                 self.addText(
                     _("\nSwC live capture is not available on this platform. Importing SwC files still works."),
                     "info",
                 )
                 return
 
-            build_tap(check_executable=False)
+            if _platform.system() == "Windows":
+                # Windows has no launch-time interposition, so the tap is injected
+                # into the already-running client. This builds the tap + injector
+                # and loads it into SwCPoker.exe; the user must have it running.
+                status = attach_to_windows_client()
+                self.addText(f"\n{status}", "poker")
+            else:
+                build_tap(check_executable=False)
+
             if self.swc_tailing_thread is None or not self.swc_tailing_thread.isRunning():
                 self.swc_tailing_thread = SwCNativeTailingThread(DEFAULT_ARCHIVE, parent=self)
                 self.swc_tailing_thread.hand_imported.connect(self._on_swc_native_hand_imported)
@@ -621,16 +877,81 @@ class GuiAutoImport(QWidget):
         if database is None:
             log.warning("SwC live hand dropped: the importer has no database connection")
             return
+        tailer = getattr(self, "swc_tailing_thread", None)
+        lock = getattr(self, "db_write_lock", None)
+
+        # An auto-import cycle owns that connection while it runs, and importing
+        # from this thread too would reset its bulk buffers and commit inside
+        # its transaction. Tried without blocking, because a cycle can take
+        # minutes and this is the GUI thread: the hand is simply offered again.
+        if lock is not None and not lock.acquire(blocking=False):
+            log.debug("SwC live hand %s waits for the running import cycle", hand_data.get("hand_id"))
+            if tailer is not None:
+                tailer.retry_hand(hand_data, transient=True)
+            return
 
         try:
-            import_http_capture_hand(database, hand_data)
+            result = import_http_capture_hand(database, hand_data)
         except Exception:
+            # Not terminal: a database that is away comes back, and the hand is
+            # offered again on a delay rather than once per poll.
             log.exception("Failed to import SwC live hand %s", hand_data.get("hand_id"))
+            if tailer is not None:
+                tailer.retry_hand(hand_data, transient=True)
+            return
+        finally:
+            if lock is not None:
+                lock.release()
+
+        if result is not None and result.status == "skipped":
+            # Not terminal either. A hand decoded while it is still being played
+            # lacks the actions and settlement that make it importable, and a
+            # finished one can be waiting for its text history to be imported:
+            # later records are not the only thing that can complete it.
+            if tailer is not None:
+                tailer.retry_hand(hand_data)
+                report = log.info if tailer.note_capture_only(hand_data) else log.debug
+            else:
+                report = log.info
+            report("SwC native hand %s remains capture-only: %s", hand_data.get("hand_id"), result.message)
+            return
+        if tailer is not None:
+            tailer.mark_hand_complete(hand_data)
+        if result is not None and result.status == "duplicate":
+            self.addText(f"\n[SwC Live] Hand #{hand_data.get('hand_id', 0)} already imported.", "info")
+            return
+        if result is not None and result.status == "updated":
+            self.addText(f"\n[SwC Live] Repaired boards for hand #{hand_data.get('hand_id', 0)}.", "info")
             return
 
         game_cat = hand_data.get("game", {}).get("category", "unknown")
         hand_id = hand_data.get("hand_id", 0)
+        self._notify_hud_of_hand(getattr(result, "row_id", None))
         self.addText(f"\n[SwC Live] Imported hand #{hand_id} ({game_cat}).", "poker")
+
+    def _notify_hud_of_hand(self, row_id) -> None:
+        """Push a hand imported outside the auto-import cycle to a running HUD.
+
+        HUD_main queues hands only from its ZMQ receiver, and the ordinary
+        importer pushes ids there once the write is committed. A live native hand
+        that skips that push reaches the database and stops -- the HUD never
+        shows it until some unrelated import happens to wake it, which defeats
+        the point of a live capture. Best effort: the HUD not running is the
+        normal case for someone importing without one.
+        """
+        if not row_id:
+            return
+        importer = getattr(self, "importer", None)
+        if importer is None or not getattr(importer, "callHud", False):
+            return
+        try:
+            from fpdb_3_legacy.Importer import ZMQSender
+
+            if getattr(importer, "zmq_sender", None) is None:
+                importer.zmq_sender = ZMQSender()
+            importer.zmq_sender.send_hand_id(row_id)
+        except Exception:
+            log.exception("Could not tell the HUD about SwC live hand %s", row_id)
 
     def import_error(self, error_msg: str) -> None:
         """Called when auto import cycle fails in the background."""

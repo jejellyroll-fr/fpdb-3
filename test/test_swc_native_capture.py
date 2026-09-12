@@ -3,6 +3,7 @@ import platform
 import shutil
 import struct
 import threading
+import time
 from dataclasses import replace
 from datetime import datetime, timezone
 
@@ -19,6 +20,7 @@ from fpdb_3_legacy.swc_native_capture import (
     NativeSeatEvidence,
     _build_native_action_evidence,
     _collect_native_game_changes,
+    _native_board_output,
     _native_street_profile,
     _retain_bijective_native_seat_evidence,
     add_native_funds_byte_amounts_if_conserved,
@@ -36,6 +38,7 @@ from fpdb_3_legacy.swc_native_capture import (
     extract_native_animation_events,
     extract_native_blind_structure,
     extract_native_board,
+    extract_native_boards,
     extract_native_collections,
     extract_native_hero_hole_cards,
     extract_native_ofc_showdown_rows,
@@ -464,6 +467,87 @@ def test_extract_native_board_reads_observed_pre_footer_cards(round_number, card
 
     assert snapshot is not None
     assert extract_native_board(snapshot, "omaha") == expected
+    assert extract_native_boards(snapshot, "omaha") == (expected,)
+
+
+def test_extract_native_boards_ignores_preflop_state():
+    table_id = 24812
+    hand_id = 298328325
+    payload = (
+        b"\x16\0state\xf0\xbf\0\0\0"
+        + bytes([3, 30, 24, 14])
+        + (b"\0" * 14)
+        + hand_id.to_bytes(4, "little")
+        + table_id.to_bytes(4, "little")
+        + (b"\0" * 5)
+        + b"\x01"
+    )
+    snapshot = extract_game_state(NativeProtocolMessage(datetime.now(UTC), payload), {table_id})
+
+    assert snapshot is not None
+    assert extract_native_boards(snapshot, "holdem") == ()
+
+
+def test_extract_native_boards_reads_double_board_bomb_pot():
+    table_id = 299657213
+    hand_id = 301461736
+    b1_cards = [34, 37, 1, 47, 33]  # 10h, Jd, 2d, Ks, 10d
+    b2_cards = [42, 14, 43, 18, 38]  # Qh, 5h, Qs, 6h, Jh
+    prefix = b"\x16\0state\xf0\xbf\0"
+    board_bytes = bytes([len(b1_cards), *b1_cards, len(b2_cards), *b2_cards])
+    footer = b"\0" * 10
+    payload = (
+        prefix
+        + board_bytes
+        + footer
+        + hand_id.to_bytes(4, "little")
+        + table_id.to_bytes(4, "little")
+        + (b"\0" * 5)
+        + bytes([2])
+    )
+    snapshot = extract_game_state(NativeProtocolMessage(datetime.now(UTC), payload), {table_id})
+
+    assert snapshot is not None
+    boards = extract_native_boards(snapshot, "holdem")
+    assert len(boards) == 2
+    assert boards[0] == ("10h", "Jd", "2d", "Ks", "10d")
+    assert boards[1] == ("Qh", "5h", "Qs", "6h", "Jh")
+    assert extract_native_board(snapshot, "holdem") == boards[0]
+
+
+def test_extract_native_boards_reads_run_it_twice_at_showdown_with_hand_eval_strings():
+    table_id = 299672838
+    hand_id = 301461752
+    b1_cards = [31, 38, 10, 46, 12]  # 9s, Jh, 4h, Kh, 5c
+    b2_cards = [31, 38, 10, 8, 24]   # 9s, Jh, 4h, 4c, 8c (shared flop: 9s, Jh, 4h)
+    eval_text1 = b"Flush high Kh"
+    eval_text2 = b"Two Pairs 9 4 and K"
+    strings_block = (
+        len(eval_text1).to_bytes(2, "little")
+        + eval_text1
+        + len(eval_text2).to_bytes(2, "little")
+        + eval_text2
+        + b"\0\0"
+    )
+    prefix = b"\x16\0state\xf0\xbf" + strings_block
+    board_bytes = bytes([len(b1_cards), *b1_cards, len(b2_cards), *b2_cards])
+    footer = b"\0" * 10
+    payload = (
+        prefix
+        + board_bytes
+        + footer
+        + hand_id.to_bytes(4, "little")
+        + table_id.to_bytes(4, "little")
+        + (b"\0" * 5)
+        + bytes([5])
+    )
+    snapshot = extract_game_state(NativeProtocolMessage(datetime.now(UTC), payload), {table_id})
+
+    assert snapshot is not None
+    boards = extract_native_boards(snapshot, "omaha")
+    assert len(boards) == 2
+    assert boards[0] == ("9s", "Jh", "4h", "Kh", "5c")
+    assert boards[1] == ("9s", "Jh", "4h", "4c", "8c")
 
 
 def test_extract_native_animation_events_reads_observed_type_9_suffix():
@@ -1146,6 +1230,94 @@ def test_normalize_native_hands_builds_capture_only_snapshot_envelope():
     assert "hand start is not fully observed" in hand["metadata"]["importability"]["reasons"][0]
 
 
+def test_normalize_native_hands_decodes_double_board_bomb_pot_and_streets():
+    captured_at = datetime.now(UTC)
+    table_id = 299657213
+    hand_id = 301461736
+    name = b"Player"
+    table_name = b"No-Rake Micro Stakes Double Board Bomb Pots #1"
+    table_payload = (
+        b"\x22\0"
+        + (b"\0" * 4)
+        + table_id.to_bytes(4, "little")
+        + b"\x01"
+        + (b"\0" * 4)
+        + b"H"
+        + len(table_name).to_bytes(2, "little")
+        + table_name
+        + b"UR"
+    )
+    b1_cards = [34, 37, 1, 47, 33]  # 10h, Jd, 2d, Ks, 10d
+    b2_cards = [42, 14, 43, 18, 38]  # Qh, 5h, Qs, 6h, Jh
+    player = (
+        (7).to_bytes(4, "little")
+        + len(name).to_bytes(2, "little")
+        + name
+        + b"\0\0prefix\xf0\xbf\0\x16\x80"
+        + (b"\0" * 6)
+        + (580).to_bytes(3, "little")
+        + b"suffix"
+    )
+    prefix = b"\x16\0" + player + b"\xf0\xbf\0"
+    board_bytes = bytes([len(b1_cards), *b1_cards, len(b2_cards), *b2_cards])
+    footer = b"\0" * 10
+    state_payload = (
+        prefix
+        + board_bytes
+        + footer
+        + hand_id.to_bytes(4, "little")
+        + table_id.to_bytes(4, "little")
+        + (b"\0" * 5)
+        + bytes([2])
+    )
+    hands = normalize_native_hands(
+        [
+            NativeProtocolMessage(captured_at, table_payload),
+            NativeProtocolMessage(captured_at, state_payload, peer_port=20013),
+        ],
+        raw_ref="capture.raw",
+    )
+
+    assert len(hands) == 1
+    hand = hands[0]
+    assert hand["board"] == ["10h", "Jd", "2d", "Ks", "10d"]
+    assert hand["run_it_times"] == 2
+    assert hand["double_board"] is True
+    # The boards prove a double board; the bomb-pot amount does not follow from
+    # them. This snapshot carries no ante action, so none is claimed -- the table
+    # being named "Bomb Pots" is not evidence about this hand.
+    assert hand["bomb_pot"] == 0
+    assert hand["community"] == {
+        "FLOP": ["10h", "Jd", "2d"],
+        "TURN": ["Ks"],
+        "RIVER": ["10d"],
+        "FLOP2": ["Qh", "5h", "Qs"],
+        "TURN2": ["6h"],
+        "RIVER2": ["Jh"],
+    }
+    assert len(hand["boards"]) == 2
+    assert hand["boards"][0] == {"FLOP": ["10h", "Jd", "2d"], "TURN": ["Ks"], "RIVER": ["10d"]}
+    assert hand["boards"][1] == {"FLOP": ["Qh", "5h", "Qs"], "TURN": ["6h"], "RIVER": ["Jh"]}
+    assert hand["steps"][0]["boards"] == [
+        ["10h", "Jd", "2d", "Ks", "10d"],
+        ["Qh", "5h", "Qs", "6h", "Jh"],
+    ]
+
+
+def test_native_board_output_distinguishes_shared_flop_run_it_twice():
+    output = _native_board_output(
+        (
+            ("9s", "Jh", "4h", "Kh", "5c"),
+            ("9s", "Jh", "4h", "4c", "8c"),
+        ),
+    )
+
+    assert output["double_board"] is False
+    # No ante in this hand's evidence, so no bomb pot -- whatever the table is called.
+    assert output["bomb_pot"] == 0
+    assert output["run_it_times"] == 2
+
+
 def test_audit_native_hand_reports_unresolved_actions_and_missing_settlement():
     steps = [
         {
@@ -1528,17 +1700,24 @@ def test_build_tap_cross_platform(tmp_path, monkeypatch):
     machine *should* get is covered by
     test_swc_tap_build_reports_a_missing_compiler.
     """
-    from fpdb_3_legacy import swc_native_capture
+    from fpdb_3_legacy import swc_native_capture, swc_tap_build
     from fpdb_3_legacy.swc_tap_build import COMPILERS
 
     system_name = platform.system()
     if not any(shutil.which(name) for name in COMPILERS.get(system_name, ())):
         pytest.skip(f"no C compiler on this {system_name} machine")
 
-    monkeypatch.setattr(swc_native_capture, "BUILD_DIR", tmp_path)
+    # Build into a scratch dir, not the user's ~/.fpdb tap: get_tap_library_path
+    # / get_injector_path read swc_tap_build.BUILD_DIR at call time, so this is
+    # the global that actually redirects the output (and avoids colliding with a
+    # tap DLL that may be loaded -- and therefore locked -- in a live client).
+    monkeypatch.setattr(swc_tap_build, "BUILD_DIR", tmp_path)
     tap_path = swc_native_capture.build_tap(force=True)
     assert tap_path.exists()
     assert tap_path.name in ("libswc_native_tap.dylib", "libswc_native_tap.so", "swc_native_tap.dll")
+    if system_name == "Windows":
+        # Windows also builds the same-bitness injector alongside the tap.
+        assert (tmp_path / "swc_inject.exe").exists()
 
 
 def _tailing_thread(tmp_path, monkeypatch, hands):
@@ -1546,7 +1725,7 @@ def _tailing_thread(tmp_path, monkeypatch, hands):
     from fpdb_3_legacy import swc_native_capture
     from fpdb_3_legacy.GuiAutoImport import SwCNativeTailingThread
 
-    monkeypatch.setattr(swc_native_capture, "iter_protocol_messages", lambda records: list(records))
+    monkeypatch.setattr(swc_native_capture.NativeProtocolStream, "feed", lambda _self, records: list(records))
     monkeypatch.setattr(swc_native_capture, "normalize_native_hands", lambda messages, raw_ref=None: hands)
 
     raw = tmp_path / "swc-native.raw"
@@ -1571,6 +1750,157 @@ def test_swc_native_tailing_does_not_reimport_a_known_hand(tmp_path, monkeypatch
         handle.write(_record(b"more"))
 
     assert thread.poll_once() == []
+
+
+def _tailing_thread_snapshots(tmp_path, monkeypatch, snapshots):
+    """A tailing thread whose decode stage yields one list of hands per poll."""
+    from fpdb_3_legacy import swc_native_capture
+    from fpdb_3_legacy.GuiAutoImport import SwCNativeTailingThread
+
+    stages = [list(stage) for stage in snapshots]
+    monkeypatch.setattr(swc_native_capture.NativeProtocolStream, "feed", lambda _self, records: list(records))
+    monkeypatch.setattr(
+        swc_native_capture,
+        "normalize_native_hands",
+        lambda messages, raw_ref=None: stages.pop(0) if stages else [],
+    )
+
+    raw = tmp_path / "swc-native.raw"
+    raw.write_bytes(_record())
+    return SwCNativeTailingThread(raw_path=raw), raw
+
+
+def _append(raw, payload=b"more"):
+    """Another record, so the next poll has something new to read."""
+    with raw.open("ab") as handle:
+        handle.write(_record(payload))
+
+
+def test_swc_native_tailing_reoffers_a_hand_that_later_becomes_importable(tmp_path, monkeypatch):
+    """The tailer polls every 2.5s, so a hand is normally first seen mid-play.
+
+    Retiring the hand on that first emission discarded it for good: the later
+    records that complete its actions and settlement were decoded, and then
+    suppressed. Only a terminal import result may retire a key.
+    """
+    partial = {"table_id": 7, "hand_id": 1234, "actions": []}
+    complete = {"table_id": 7, "hand_id": 1234, "actions": [{"type": "big blind"}]}
+    thread, raw = _tailing_thread_snapshots(tmp_path, monkeypatch, [[partial], [complete], [complete]])
+
+    assert thread.poll_once() == [partial]
+
+    _append(raw)
+    assert thread.poll_once() == [complete]
+
+    _append(raw)
+    assert thread.poll_once() == []  # an unchanged snapshot is not offered again
+
+
+def test_swc_native_tailing_stops_after_a_terminal_import_result(tmp_path, monkeypatch):
+    hand = {"table_id": 7, "hand_id": 1234}
+    thread, raw = _tailing_thread_snapshots(tmp_path, monkeypatch, [[hand], [{**hand, "actions": [1]}]])
+    assert thread.poll_once() == [hand]
+
+    thread.mark_hand_complete(hand)
+    _append(raw)
+
+    assert thread.poll_once() == []
+
+
+def test_swc_native_tailing_reports_a_capture_only_hand_once(tmp_path, monkeypatch):
+    """A skipped hand is re-offered as it grows, so the log line must not repeat."""
+    hand = {"table_id": 7, "hand_id": 1234}
+    thread, _raw = _tailing_thread(tmp_path, monkeypatch, [hand])
+
+    assert thread.note_capture_only(hand) is True
+    assert thread.note_capture_only(hand) is False
+
+    thread.mark_hand_complete(hand)
+
+    assert thread.note_capture_only(hand) is True
+
+
+def test_swc_native_tailing_reoffers_a_hand_once_its_retry_delay_elapsed(tmp_path, monkeypatch):
+    """A hand that produced no more records still has to be offered again.
+
+    The reasons an import is refused clear on their own -- an import cycle
+    finishes, the database comes back, the text history of the hand lands -- and
+    none of them appends anything to the capture.
+    """
+    hand = {"table_id": 7, "hand_id": 1234}
+    thread, raw = _tailing_thread(tmp_path, monkeypatch, [hand])
+    thread.RETRY_BACKOFF_SECONDS = 0.05
+    thread.RETRY_BACKOFF_CAP_SECONDS = 0.05
+    assert thread.poll_once() == [hand]
+
+    thread.retry_hand(hand)
+    _append(raw)
+    assert thread.poll_once() == []  # still inside the delay
+
+    time.sleep(0.06)
+    _append(raw)
+    assert thread.poll_once() == [hand]
+
+
+def test_swc_native_tailing_stops_retrying_a_hand_that_never_imports(tmp_path, monkeypatch):
+    """A hand that will never be importable must not reach the database forever."""
+    hand = {"table_id": 7, "hand_id": 1234}
+    thread, raw = _tailing_thread(tmp_path, monkeypatch, [hand])
+    thread.MAX_RETRY_OFFERS = 2
+    thread.RETRY_BACKOFF_SECONDS = 0.0
+    thread.RETRY_BACKOFF_CAP_SECONDS = 0.0
+    assert thread.poll_once() == [hand]
+
+    for _ in range(4):
+        thread.retry_hand(hand)
+        _append(raw)
+        thread.poll_once()
+
+    assert thread._retry_offers[(7, 1234)] == 2
+    _append(raw)
+    assert thread.poll_once() == []
+
+
+def test_swc_native_tailing_renews_the_retry_budget_when_a_snapshot_changes(tmp_path, monkeypatch):
+    """The budget bounds how often a refused snapshot is repeated, not a hand still being played."""
+    first = {"table_id": 7, "hand_id": 1234, "actions": []}
+    second = {"table_id": 7, "hand_id": 1234, "actions": [1]}
+    stages = [[first], [first], [first], [second], [second]]
+    thread, raw = _tailing_thread_snapshots(tmp_path, monkeypatch, stages)
+    thread.MAX_RETRY_OFFERS = 1
+    thread.RETRY_BACKOFF_SECONDS = 0.0
+    thread.RETRY_BACKOFF_CAP_SECONDS = 0.0
+    assert thread.poll_once() == [first]
+
+    thread.retry_hand(first)
+    _append(raw)
+    assert thread.poll_once() == [first]  # the one offer it is allowed
+
+    thread.retry_hand(first)
+    _append(raw)
+    assert thread.poll_once() == []  # budget spent for this snapshot
+
+    _append(raw)
+    assert thread.poll_once() == [second]  # changed content is offered anyway
+
+    thread.retry_hand(second)
+    _append(raw)
+    assert thread.poll_once() == [second]  # and that change renewed the budget
+
+
+def test_a_terminal_result_cancels_a_pending_retry(tmp_path, monkeypatch):
+    hand = {"table_id": 7, "hand_id": 1234}
+    thread, raw = _tailing_thread(tmp_path, monkeypatch, [hand])
+    thread.RETRY_BACKOFF_SECONDS = 0.0
+    thread.RETRY_BACKOFF_CAP_SECONDS = 0.0
+    assert thread.poll_once() == [hand]
+
+    thread.retry_hand(hand)
+    thread.mark_hand_complete(hand)
+    _append(raw)
+
+    assert thread.poll_once() == []
+    assert thread._retry_after == {}
 
 
 def test_swc_native_tailing_consumes_the_archive_once(tmp_path, monkeypatch):

@@ -61,57 +61,72 @@ def _make_gui(config):
 
 
 def _start_capture(config, *, supported=True):
-    """Run start_swc_native_capture with the compiler and thread mocked out."""
+    """Run start_swc_native_capture with the build/inject/thread steps mocked out.
+
+    Both platform paths are mocked so a test asserts the gate's decision without
+    invoking a compiler or the Windows injector: POSIX calls ``build_tap``,
+    Windows calls ``attach_to_windows_client`` (which internally builds and
+    injects). Returns the mocks so a test can assert which path ran.
+    """
     from fpdb_3_legacy import GuiAutoImport, swc_native_capture
 
     gui = _make_gui(config)
     with (
         patch.object(swc_native_capture, "build_tap") as build_tap,
+        patch.object(swc_native_capture, "attach_to_windows_client", return_value="mock status") as attach,
         patch.object(swc_native_capture, "native_capture_supported", return_value=supported),
         patch.object(GuiAutoImport, "SwCNativeTailingThread") as thread,
     ):
         gui.start_swc_native_capture()
-    return build_tap, thread
+    return build_tap, attach, thread
 
 
 def test_a_site_that_is_not_configured_builds_nothing() -> None:
     """The reported case: no SealsWithClubs entry, so no compiler is invoked."""
-    build_tap, thread = _start_capture(_make_config(KeyError("SealsWithClubs")))
+    build_tap, attach, thread = _start_capture(_make_config(KeyError("SealsWithClubs")))
     build_tap.assert_not_called()
+    attach.assert_not_called()
     thread.assert_not_called()
 
 
 def test_a_configured_but_disabled_site_builds_nothing() -> None:
-    build_tap, thread = _start_capture(_make_config({"enabled": False}))
+    build_tap, attach, thread = _start_capture(_make_config({"enabled": False}))
     build_tap.assert_not_called()
+    attach.assert_not_called()
     thread.assert_not_called()
 
 
 def test_the_capture_still_starts_for_a_swc_player() -> None:
-    build_tap, thread = _start_capture(_make_config({"enabled": True}))
-    build_tap.assert_called_once()
+    import platform
+
+    build_tap, attach, thread = _start_capture(_make_config({"enabled": True}))
+    # Whichever path this platform uses, the live tailing thread must start.
     thread.assert_called_once()
     thread.return_value.start.assert_called_once()
+    if platform.system() == "Windows":
+        # Windows injects into the running client; the build happens inside attach.
+        attach.assert_called_once()
+        build_tap.assert_not_called()
+    else:
+        build_tap.assert_called_once()
+        attach.assert_not_called()
 
 
-def test_nothing_is_built_where_the_tap_could_not_be_loaded() -> None:
-    """Windows has no library interposition, so the tap has nothing to be loaded into.
-
-    Building it there was the compiler failure users kept reporting -- for a
-    library that nothing on the platform could have loaded even if gcc had been
-    installed and it had built.
-    """
-    build_tap, thread = _start_capture(_make_config({"enabled": True}), supported=False)
+def test_nothing_is_built_on_an_unsupported_platform() -> None:
+    """A platform with neither interposition nor injection builds and starts nothing."""
+    build_tap, attach, thread = _start_capture(_make_config({"enabled": True}), supported=False)
     build_tap.assert_not_called()
+    attach.assert_not_called()
     thread.assert_not_called()
 
 
-def test_the_supported_platforms_are_the_ones_that_can_interpose() -> None:
+def test_the_three_desktop_platforms_can_capture() -> None:
+    """macOS/Linux interpose at launch; Windows injects into the running client."""
     from fpdb_3_legacy.swc_native_capture import native_capture_supported
 
     assert native_capture_supported("Darwin") is True
     assert native_capture_supported("Linux") is True
-    assert native_capture_supported("Windows") is False
+    assert native_capture_supported("Windows") is True
 
 
 def test_swc_tap_build_uses_the_first_compiler_on_the_path(monkeypatch) -> None:
@@ -135,8 +150,8 @@ def test_swc_tap_build_reports_a_missing_compiler(monkeypatch) -> None:
         swc_tap_build.resolve_compiler("Windows")
 
     message = str(excinfo.value)
-    assert "x86_64-w64-mingw32-gcc" in message
-    assert "gcc" in message
+    assert "clang" in message
+    assert "i686-w64-mingw32-gcc" in message
     assert "MinGW-w64" in message
 
 
@@ -153,3 +168,21 @@ def test_the_compiler_is_checked_before_it_is_run(monkeypatch, tmp_path) -> None
         swc_tap_build.build_tap(force=True)
 
     run.assert_not_called()
+
+
+def test_windows_injector_links_shell32_for_wide_argv(monkeypatch, tmp_path) -> None:
+    from fpdb_3_legacy import swc_tap_build
+
+    source = tmp_path / "swc_inject.c"
+    source.write_text("int main(void) { return 0; }\n", encoding="utf-8")
+    monkeypatch.setattr(swc_tap_build.platform, "system", lambda: "Windows")
+    monkeypatch.setattr(swc_tap_build, "INJECTOR_SOURCE_PATH", source)
+    monkeypatch.setattr(swc_tap_build, "BUILD_DIR", tmp_path)
+    monkeypatch.setattr(swc_tap_build, "resolve_compiler", lambda _system: "gcc")
+    run = MagicMock()
+    monkeypatch.setattr(swc_tap_build.subprocess, "run", run)
+
+    swc_tap_build.build_injector(force=True)
+
+    command = run.call_args.args[0]
+    assert "-lshell32" in command

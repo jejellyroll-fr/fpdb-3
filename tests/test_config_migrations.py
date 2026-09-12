@@ -123,7 +123,7 @@ def test_load_reports_current_config_errors_and_invalid_version(tmp_path, monkey
     config = configuration.Config(file=str(path))
     assert config.wrongConfigVersion is False
     assert any("unknown" in error for error in config.config_reference_errors)
-    path.write_text(xml.replace('version="84"', 'version="invalid"'), encoding="utf-8")
+    path.write_text(xml.replace(f'version="{CONFIG_VERSION}"', 'version="invalid"', 1), encoding="utf-8")
     assert configuration.Config(file=str(path)).wrongConfigVersion is True
 
 
@@ -133,7 +133,9 @@ def test_upgrade_config_can_be_reloaded_and_does_not_repeat(tmp_path, monkeypatc
     monkeypatch.setattr(configuration, "CONFIG_PATH", str(tmp_path))
     monkeypatch.setattr(configuration, "_find_example_config", lambda _: str(ROOT / "HUD_config.xml.example"))
     path = tmp_path / "HUD_config.xml"
-    old = (ROOT / "HUD_config.xml.example").read_text(encoding="utf-8").replace('version="84"', 'version="83"')
+    old = (ROOT / "HUD_config.xml.example").read_text(encoding="utf-8").replace(
+        f'version="{CONFIG_VERSION}"', 'version="83"', 1
+    )
     old = old.replace('aux="ClassicHud, mucked"', 'aux="Classic_HUD, mucked"')
     path.write_text(old, encoding="utf-8")
     config = configuration.Config(file=str(path))
