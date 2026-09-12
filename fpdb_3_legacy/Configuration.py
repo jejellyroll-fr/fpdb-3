@@ -2785,15 +2785,22 @@ class Config:
         # wid/height normally not specified when saving common from the mucked display
 
         log.debug(f"saving layout = {ls.name} {max}Max {locations} size: {width}x{height}")
-        # A save that carries a dimension at all declares a reference; saving just
-        # the common position from the mucked display passes None for both.
-        # Distinguishing None from 0 matters: a minimized, rolled-up or not yet
-        # realized window measures 0, which is not "no reference given" but a
-        # reference that cannot be true, and the truthiness test used to let it
-        # through -- skipping the guard, writing the positions, and leaving the
-        # previous width/height on the node for them to be scaled against.
-        declares_reference = width is not None or height is not None
-        if declares_reference and not layout_reference_fits(width, height, locations.values()):
+        # A dimension that is present is a measurement; only None means "not
+        # specified", which is how the mucked display saves its common position.
+        # The difference matters because a minimized, rolled-up or not yet
+        # realized window measures exactly 0, and the truthiness test this used
+        # to be read that as "not specified": the guard was skipped, the
+        # positions were written, and `if width:` below left the previous
+        # width/height on the node for them to be scaled against -- the
+        # mismatched reference this guard exists to prevent, reached through the
+        # one path that bypassed it.
+        measured = [value for value in (width, height) if value is not None]
+        broken_measurement = any(int(value) <= 0 for value in measured)
+        # A pair can be checked against the positions it is supposed to frame;
+        # a single dimension cannot (the other one stays whatever the node
+        # already held), so it is only checked for being a real measurement.
+        pair_does_not_fit = len(measured) == 2 and not layout_reference_fits(width, height, locations.values())
+        if broken_measurement or pair_does_not_fit:
             # The reference is the table the positions were just read from, so
             # positions far outside it mean the HUD was measuring the wrong
             # window (a stray label, a rolled-up client). Persisting that pair

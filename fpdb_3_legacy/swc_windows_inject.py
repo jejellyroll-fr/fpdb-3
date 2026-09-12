@@ -11,7 +11,7 @@ and does not drag the capture decoder into a plain injection.
 
 from __future__ import annotations
 
-import subprocess
+import subprocess  # nosec B404
 import time
 from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
@@ -322,7 +322,7 @@ def inject_into_pid(injector: Path, dll: Path, pid: int) -> InjectionResult:
         # get_tap_library_path) and the pid comes from find_client_pids, so no
         # argument originates outside this process; no shell is involved, so a
         # path cannot be interpreted as anything but a path.
-        completed = subprocess.run(
+        completed = subprocess.run(  # nosemgrep  # nosec B603
             [str(injector), str(pid), str(dll)],
             check=False,
             capture_output=True,

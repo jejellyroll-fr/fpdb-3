@@ -16,7 +16,7 @@ import argparse
 import os
 import platform
 import shutil
-import subprocess
+import subprocess  # nosec B404
 import sys
 from pathlib import Path
 
@@ -193,7 +193,7 @@ def build_tap(*, force: bool = False, check_executable: bool = False) -> Path:
         raise FileNotFoundError(msg)
 
     BUILD_DIR.mkdir(mode=0o700, parents=True, exist_ok=True)
-    subprocess.run(_compile_command(system_name, tap_lib), check=True)
+    subprocess.run(_compile_command(system_name, tap_lib), check=True)  # nosemgrep  # nosec B603
     try:
         tap_lib.chmod(0o700)
     except OSError:
@@ -237,7 +237,7 @@ def build_injector(*, force: bool = False) -> Path:
     # the names in COMPILERS, confirmed on PATH by resolve_compiler, and the
     # source and output paths are module constants under the user's own home --
     # and that it runs with no shell, so nothing in a path can be interpreted.
-    subprocess.run(command, check=True)
+    subprocess.run(command, check=True)  # nosemgrep  # nosec B603
     return injector
 
 

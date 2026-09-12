@@ -125,6 +125,7 @@ def build_hand_input(hand_data: dict[str, Any]) -> dict[str, Any]:
         "site": hand_data.get("site"),
         "hand_id": hand_data.get("hand_id"),
         "table_id": hand_data.get("table_id"),
+        "table_name": hand_data.get("table_name"),
         "gametype": hand_data.get("gametype", {}),
         "players": hand_data.get("players", []),
         "streets": hand_data.get("streets", {}),
@@ -526,7 +527,13 @@ def build_fpdb_hand(
         handid=build_input["hand_id"],
     )
     hand.handid = build_input["hand_id"]
-    hand.tablename = str(build_input["table_id"] or "")
+    # The name the client shows, when the capture recorded it. This is what the
+    # HUD matches against a window title (getTableTitleRe) and what the hand
+    # history importers store, so a capture that fell back to the numeric table
+    # id put a number where every other path puts a title: the hand reached the
+    # database but no HUD could find the table it belonged to. The id remains
+    # the fallback -- an unnamed table still has to be identified by something.
+    hand.tablename = str(build_input.get("table_name") or build_input["table_id"] or "")
     hand.maxseats = gametype.get("maxSeats")
     hand.startTime = _parse_capture_start_time(hand_data.get("timestamp"))
     hand.hero = hand_data.get("hero") or ""

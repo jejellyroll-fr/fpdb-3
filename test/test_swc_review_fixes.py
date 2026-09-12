@@ -1577,3 +1577,43 @@ def test_a_native_tournament_hand_gets_the_currency_too() -> None:
     assert candidate is not None
     assert candidate["gametype"]["currency"] == "mBTC"
     assert candidate["gametype"]["sb"] == 2, "and its chips are still chips"
+
+
+def _swc_table_hand(table_name: str) -> dict:
+    hand = _native_ring_hand()
+    hand["table_id"] = 299657213
+    hand["table_name"] = table_name
+    return hand
+
+
+def test_a_native_hand_is_stored_under_the_table_title_the_hud_matches() -> None:
+    """Hands.tableName is what getTableTitleRe searches a window title for.
+
+    The builder took the numeric table id, so a live native hand reached the
+    database with `299657213` where the hand-history importer writes
+    "No-Rake Micro Stakes PLO Double Board Bomb Pots #1" -- and no HUD could
+    find the table the hand belonged to.
+    """
+    from fpdb_3_legacy.http_capture_db_import import _native_public_import_copy
+    from fpdb_3_legacy.http_capture_hand_builder import build_hand_input
+
+    hand = _native_public_import_copy(_swc_table_hand("No-Rake Micro Stakes PLO Double Board Bomb Pots #1"))
+    assert hand is not None
+
+    built = build_hand_input(hand)
+
+    assert built["table_name"] == "No-Rake Micro Stakes PLO Double Board Bomb Pots #1"
+    assert built["table_id"] == 299657213, "the id is still carried"
+
+
+def test_an_unnamed_table_still_falls_back_to_its_id() -> None:
+    """HUD_main refuses a hand with a blank table name, so something must be there."""
+    from fpdb_3_legacy.http_capture_db_import import _native_public_import_copy
+    from fpdb_3_legacy.http_capture_hand_builder import build_hand_input
+
+    hand = _native_public_import_copy(_swc_table_hand(""))
+    assert hand is not None
+
+    built = build_hand_input(hand)
+    assert built["table_name"] == ""
+    assert built["table_id"] == 299657213

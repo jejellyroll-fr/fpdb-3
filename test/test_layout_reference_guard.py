@@ -150,10 +150,21 @@ def test_a_zero_sized_table_is_refused_rather_than_slipping_past_the_guard() -> 
     assert _attempt_save({1: (100, 100)}, 0, 0) is False
 
 
-def test_a_half_measured_table_is_refused_too() -> None:
-    """One dimension alone cannot frame a position, and would be written alone."""
-    assert _attempt_save({1: (100, 100)}, 955, None) is False
-    assert _attempt_save({1: (100, 100)}, None, 650) is False
+def test_one_dimension_alone_still_saves() -> None:
+    """It cannot be checked against the positions -- the other stays as it was.
+
+    No caller does this (Aux_Hud passes both, Mucked passes neither), but it is
+    long-standing behaviour with its own coverage in tests/, and a lone
+    dimension is a real measurement rather than the broken one this guards.
+    """
+    assert _attempt_save({1: (100, 100)}, 955, None) is True
+    assert _attempt_save({1: (100, 100)}, None, 650) is True
+
+
+def test_a_lone_dimension_of_zero_is_still_refused() -> None:
+    """Zero is a measurement of a window that is not there, whichever side it is."""
+    assert _attempt_save({1: (100, 100)}, 0, None) is False
+    assert _attempt_save({1: (100, 100)}, None, 0) is False
 
 
 def test_a_negative_dimension_is_refused() -> None:
