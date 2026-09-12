@@ -191,6 +191,16 @@ def _enrich_existing_native_boards(db: Any, hand_data: dict[str, Any]) -> int | 
     return hand_ids[0]
 
 
+#: The currency SwC hands are stored under. The capture envelope says
+#: ``room_native`` -- an honest statement about its *units*, not a currency --
+#: but currency is part of a gametype's identity (Database.getSqlGameTypeId) and
+#: ``Gametypes.currency`` is varchar(4) on MySQL and PostgreSQL. Left as-is, an
+#: importable native hand could not create its gametype row there at all, and on
+#: SQLite it silently created a second gametype for a table the text importer
+#: already had, splitting one table's stats in two. SealsWithClubsToFpdb writes
+#: mBTC unconditionally, so that is the value both paths have to agree on.
+SWC_IMPORT_CURRENCY = "mBTC"
+
 #: Native units per displayed unit, by game type. The capture envelope says so of
 #: itself (``metadata.money_unit == "room_native_integer"``) and per collection
 #: (``native_units_per_display_unit``); the tournament scale is 1 because a
@@ -290,10 +300,13 @@ def _native_public_import_copy(hand_data: dict[str, Any]) -> dict[str, Any] | No
     # own, out of it. An envelope that does not say what kind of table it is gets
     # the scale of 1, which is no conversion at all: rescaling money whose unit is
     # unknown would be worse than leaving it alone.
-    game_type = (candidate.get("gametype") or {}).get("type")
+    gametype = candidate.get("gametype")
+    game_type = (gametype or {}).get("type")
     scale = _NATIVE_UNITS_PER_DISPLAY_UNIT.get(game_type or "", 1)
     if scale != 1:
         _scale_native_money(candidate, scale)
+    if isinstance(gametype, dict):
+        gametype["currency"] = SWC_IMPORT_CURRENCY
     return candidate
 
 

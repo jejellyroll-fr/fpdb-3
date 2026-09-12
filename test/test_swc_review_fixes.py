@@ -1547,3 +1547,33 @@ def test_the_rotation_reset_keeps_what_is_keyed_by_hand(tmp_path) -> None:
     assert tailer._retry_offers == {(7, 13): 2}
     assert tailer._pending_envelopes == {(7, 13): {"hand_id": 13}}
     assert tailer._table_messages == {(0, 7): descriptor}, "a live table stays visible"
+
+
+def test_a_native_hand_is_imported_under_the_same_currency_as_the_text_parser() -> None:
+    """``room_native`` is a unit, not a currency, and Gametypes.currency is varchar(4)."""
+    from fpdb_3_legacy.http_capture_db_import import _native_public_import_copy
+
+    hand = _native_ring_hand()
+    hand["gametype"]["currency"] = "room_native"
+
+    candidate = _native_public_import_copy(hand)
+
+    assert candidate is not None
+    assert candidate["gametype"]["currency"] == "mBTC", "the value SealsWithClubsToFpdb writes"
+    assert len(candidate["gametype"]["currency"]) <= 4, "Gametypes.currency is varchar(4)"
+    assert hand["gametype"]["currency"] == "room_native", "the capture envelope is left honest"
+
+
+def test_a_native_tournament_hand_gets_the_currency_too() -> None:
+    """The tournament branch skips the money scaling; it must not skip this."""
+    from fpdb_3_legacy.http_capture_db_import import _native_public_import_copy
+
+    hand = _native_ring_hand()
+    hand["gametype"]["type"] = "tour"
+    hand["gametype"]["currency"] = "room_native"
+
+    candidate = _native_public_import_copy(hand)
+
+    assert candidate is not None
+    assert candidate["gametype"]["currency"] == "mBTC"
+    assert candidate["gametype"]["sb"] == 2, "and its chips are still chips"

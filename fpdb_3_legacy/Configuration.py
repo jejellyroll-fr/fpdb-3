@@ -2785,9 +2785,15 @@ class Config:
         # wid/height normally not specified when saving common from the mucked display
 
         log.debug(f"saving layout = {ls.name} {max}Max {locations} size: {width}x{height}")
-        # Only a save that carries both dimensions declares a reference; saving
-        # just the common position from the mucked display carries neither.
-        if width and height and not layout_reference_fits(width, height, locations.values()):
+        # A save that carries a dimension at all declares a reference; saving just
+        # the common position from the mucked display passes None for both.
+        # Distinguishing None from 0 matters: a minimized, rolled-up or not yet
+        # realized window measures 0, which is not "no reference given" but a
+        # reference that cannot be true, and the truthiness test used to let it
+        # through -- skipping the guard, writing the positions, and leaving the
+        # previous width/height on the node for them to be scaled against.
+        declares_reference = width is not None or height is not None
+        if declares_reference and not layout_reference_fits(width, height, locations.values()):
             # The reference is the table the positions were just read from, so
             # positions far outside it mean the HUD was measuring the wrong
             # window (a stray label, a rolled-up client). Persisting that pair

@@ -135,3 +135,35 @@ def test_save_accepts_a_normal_drag() -> None:
 def test_save_without_a_reference_is_not_blocked() -> None:
     """Saving only the common position from the mucked display carries no size."""
     assert _attempt_save({"common": (323, 232)}, None, None) is True
+
+
+def test_a_zero_sized_table_is_refused_rather_than_slipping_past_the_guard() -> None:
+    """A minimized or rolled-up window measures 0, which is not "no reference".
+
+    The truthiness test used to treat 0 as the mucked display's dimensionless
+    save: the guard was skipped, the positions were written, and the node kept
+    the previous width/height for them to be scaled against -- exactly the
+    mismatched pair the guard exists to prevent.
+    """
+    assert _attempt_save({1: (100, 100)}, 0, 650) is False
+    assert _attempt_save({1: (100, 100)}, 955, 0) is False
+    assert _attempt_save({1: (100, 100)}, 0, 0) is False
+
+
+def test_a_half_measured_table_is_refused_too() -> None:
+    """One dimension alone cannot frame a position, and would be written alone."""
+    assert _attempt_save({1: (100, 100)}, 955, None) is False
+    assert _attempt_save({1: (100, 100)}, None, 650) is False
+
+
+def test_a_negative_dimension_is_refused() -> None:
+    assert _attempt_save({1: (100, 100)}, -955, 650) is False
+
+
+def test_the_mucked_display_still_saves_its_common_position() -> None:
+    """Mucked.save_layout passes width=None, height=None and declares nothing."""
+    assert _attempt_save({"common": (10, 20)}, None, None) is True
+
+
+def test_a_real_table_still_saves() -> None:
+    assert _attempt_save({1: (681, 221), 2: (2, 221)}, 955, 650) is True
