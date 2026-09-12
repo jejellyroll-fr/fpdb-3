@@ -219,6 +219,16 @@ _MAGIC = 0x53574354
 _VERSION = 1
 _MAX_PAYLOAD = 16 * 1024 * 1024
 
+#: The largest frame a bare four-byte record is allowed to announce when it is
+#: being used to prove alignment. Deliberately far below _MAX_PAYLOAD, which
+#: bounds what the archive format will carry rather than what this protocol
+#: sends: across 12 026 captured records the largest message was 179 328 bytes
+#: and the 99th percentile 6 907. A record joined mid-payload decodes to an
+#: arbitrary 32-bit number, so the narrower the window the less often one of
+#: those can pass for a length -- 16 MiB accepts 0.39% of them, 1 MiB 0.024%,
+#: and 1 MiB still leaves almost six times the largest message ever seen.
+_MAX_ANCHOR_PAYLOAD = 1024 * 1024
+
 
 @dataclass(frozen=True)
 class NativeCaptureRecord:
@@ -532,13 +542,22 @@ class NativeProtocolDecoder:
         * a record that is exactly a length (SwC sends the 4-byte length in an
           SSL_read of its own -- half the records in a capture are these), or
         * a record holding exactly one whole message.
+
+        The four-byte shape cannot be given up even though it is the weaker of
+        the two: the tap records returned bytes and cannot tell a length prefix
+        from a four-byte tail of a payload, but in 12 026 captured records
+        *nothing* held a whole message (5 861 four-byte records, 5 860 messages),
+        so dropping it would leave a live stream with no way to align at all --
+        not even on a fresh connection, which starts unaligned too. What can be
+        done is to narrow the window a stray four bytes could pass through, hence
+        the tighter bound on what a bare length may announce.
         """
         if len(payload) < 4:
             return False
         size = int.from_bytes(payload[:4], "little")
-        if not 0 < size <= _MAX_PAYLOAD:
-            return False
-        return len(payload) == 4 or len(payload) == 4 + size
+        if len(payload) == 4:
+            return 0 < size <= _MAX_ANCHOR_PAYLOAD
+        return 0 < size <= _MAX_PAYLOAD and len(payload) == 4 + size
 
     def feed(self, record: NativeCaptureRecord) -> list[NativeProtocolMessage]:
         if record.direction != self.direction:
@@ -1272,8 +1291,18 @@ def audit_native_stud_accounting(
 def add_native_funds_byte_amounts_if_conserved(
     actions: list[dict], collections: list[dict], returned: list[dict]
 ) -> bool:
-    """Promote one-byte action amounts only when they exactly conserve settlement."""
-    monetary = {"small_blind", "big_blind", "bring_in", "call", "bet", "raise"}
+    """Promote one-byte action amounts only when they exactly conserve settlement.
+
+    An ante is money the player put in, so it belongs on the contribution side of
+    the identity. Leaving it out did not merely lose the ante: the settlement it
+    was compared against (collections plus returns) always included that money,
+    so the totals could never agree and *nothing* was promoted. A bomb pot, which
+    is antes and no blinds, therefore failed conservation outright -- in the
+    captured hand below, 12 + 12 ante and a 4 bet settle as 24 collected plus 4
+    returned, and the check saw 4 against 28. The hand was never importable, its
+    ante total read as zero, and both of its boards went with it.
+    """
+    monetary = {"ante", "small_blind", "big_blind", "bring_in", "call", "bet", "raise"}
     target = sum(item["amount_native"] for item in collections) + sum(item["amount_native"] for item in returned)
     candidate_total = sum(action["funds_byte"] for action in actions if action["action"] in monetary)
     if not target or candidate_total != target:
@@ -1309,6 +1338,10 @@ def extract_native_blind_structure(actions: list[dict]) -> dict:
 
 
 _NATIVE_CANONICAL_ACTION_TYPES = {
+    # Hand.py routes this to addAnte (ACTION_METHOD_BY_TYPE). Without it,
+    # build_native_canonical_actions refused every hand carrying an ante --
+    # an unmapped action type makes it return no actions at all.
+    "ante": "ante",
     "small_blind": "small blind",
     "big_blind": "big blind",
     "call": "calls",

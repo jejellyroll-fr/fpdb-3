@@ -1617,3 +1617,124 @@ def test_an_unnamed_table_still_falls_back_to_its_id() -> None:
     built = build_hand_input(hand)
     assert built["table_name"] == ""
     assert built["table_id"] == 299657213
+
+
+# --------------------------------------------------------------------------
+# An ante is money the player put in.
+# --------------------------------------------------------------------------
+
+
+def _bomb_pot_evidence() -> list[dict]:
+    """A real captured double-board bomb pot (hand from the dev archive).
+
+    Two players ante 12, both check the empty preflop, one bets 4 on the flop and
+    the other folds: 24 collected plus 4 returned.
+    """
+    return [
+        {"action": "ante", "player": "Perombo", "street": "BLINDSANTES", "funds_byte": 12},
+        {"action": "ante", "player": "edinapoker", "street": "BLINDSANTES", "funds_byte": 12},
+        # A check or a fold is given its zero up front, as the pipeline does.
+        {"action": "check", "player": "edinapoker", "street": "BLINDSANTES", "funds_byte": 0, "amount_native": 0},
+        {"action": "check", "player": "Perombo", "street": "PREFLOP", "funds_byte": 0, "amount_native": 0},
+        {"action": "bet", "player": "edinapoker", "street": "FLOP", "funds_byte": 4},
+        {"action": "fold", "player": "Perombo", "street": "FLOP", "funds_byte": 0, "amount_native": 0},
+    ]
+
+
+def test_a_bomb_pot_conserves_settlement_once_its_antes_are_counted() -> None:
+    """Without the antes the identity compared 4 against 28 and promoted nothing."""
+    from fpdb_3_legacy.swc_native_capture import add_native_funds_byte_amounts_if_conserved
+
+    actions = _bomb_pot_evidence()
+    conserved = add_native_funds_byte_amounts_if_conserved(
+        actions,
+        [{"player": "edinapoker", "amount_native": 24}],
+        [{"player": "edinapoker", "amount_native": 4}],
+    )
+
+    assert conserved is True
+    assert [a["amount_native"] for a in actions if a["action"] == "ante"] == [12, 12]
+    assert next(a["amount_native"] for a in actions if a["action"] == "bet") == 4
+
+
+def test_the_ante_total_is_what_the_bomb_pot_reports() -> None:
+    from fpdb_3_legacy.swc_native_capture import (
+        _native_board_output,
+        add_native_funds_byte_amounts_if_conserved,
+    )
+
+    actions = _bomb_pot_evidence()
+    add_native_funds_byte_amounts_if_conserved(
+        actions,
+        [{"player": "edinapoker", "amount_native": 24}],
+        [{"player": "edinapoker", "amount_native": 4}],
+    )
+
+    assert _native_board_output((("2c", "7h", "Ad", "9s", "4h"),), actions)["bomb_pot"] == 24
+
+
+def test_an_ante_reaches_hand_py_as_an_ante() -> None:
+    """An unmapped action type makes the canonical builder return nothing at all."""
+    from fpdb_3_legacy.http_capture_hand_builder import ACTION_METHOD_BY_TYPE
+    from fpdb_3_legacy.swc_native_capture import (
+        _NATIVE_CANONICAL_ACTION_TYPES,
+        add_native_funds_byte_amounts_if_conserved,
+        build_native_canonical_actions,
+    )
+
+    actions = _bomb_pot_evidence()
+    add_native_funds_byte_amounts_if_conserved(
+        actions,
+        [{"player": "edinapoker", "amount_native": 24}],
+        [{"player": "edinapoker", "amount_native": 4}],
+    )
+
+    canonical = build_native_canonical_actions(actions, [{"player": "edinapoker", "amount_native": 4}])
+
+    antes = [a for a in canonical if a["type"] == "ante"]
+    assert [a["amount"] for a in antes] == [12, 12]
+    assert ACTION_METHOD_BY_TYPE[_NATIVE_CANONICAL_ACTION_TYPES["ante"]] == "addAnte"
+
+
+def test_an_ordinary_blind_hand_still_conserves_without_antes() -> None:
+    from fpdb_3_legacy.swc_native_capture import add_native_funds_byte_amounts_if_conserved
+
+    actions = [
+        {"action": "small_blind", "player": "A", "street": "BLINDSANTES", "funds_byte": 2},
+        {"action": "big_blind", "player": "B", "street": "BLINDSANTES", "funds_byte": 4},
+        {"action": "call", "player": "A", "street": "PREFLOP", "funds_byte": 2},
+        {"action": "check", "player": "B", "street": "PREFLOP", "funds_byte": 0},
+    ]
+
+    assert add_native_funds_byte_amounts_if_conserved(actions, [{"player": "A", "amount_native": 8}], []) is True
+
+
+# --------------------------------------------------------------------------
+# What a bare four-byte record is allowed to claim.
+# --------------------------------------------------------------------------
+
+
+def test_a_bare_length_may_not_announce_an_implausible_frame() -> None:
+    """A record joined mid-payload decodes to an arbitrary 32-bit number.
+
+    The largest message in 12 026 captured records was 179 328 bytes, so a bare
+    length claiming megabytes is far more likely to be four bytes of someone
+    else's payload than a frame.
+    """
+    from fpdb_3_legacy.swc_native_capture import _MAX_ANCHOR_PAYLOAD, NativeProtocolDecoder
+
+    anchors = NativeProtocolDecoder._anchors_a_message
+    assert anchors((200_000).to_bytes(4, "little")) is True
+    assert anchors(_MAX_ANCHOR_PAYLOAD.to_bytes(4, "little")) is True
+    assert anchors((_MAX_ANCHOR_PAYLOAD + 1).to_bytes(4, "little")) is False
+    assert anchors((0).to_bytes(4, "little")) is False
+
+
+def test_a_whole_message_still_anchors_at_any_size_the_format_carries() -> None:
+    """That shape proves itself: the record is exactly a length and its payload."""
+    from fpdb_3_legacy.swc_native_capture import _MAX_ANCHOR_PAYLOAD, NativeProtocolDecoder
+
+    body = b"x" * (_MAX_ANCHOR_PAYLOAD + 10)
+    whole = len(body).to_bytes(4, "little") + body
+
+    assert NativeProtocolDecoder._anchors_a_message(whole) is True
