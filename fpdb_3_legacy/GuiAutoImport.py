@@ -14,6 +14,7 @@ import sys
 import threading
 import time
 import traceback
+from contextlib import suppress
 from optparse import OptionParser
 from pathlib import Path
 from typing import Any
@@ -224,6 +225,15 @@ class SwCNativeTailingThread(QThread):
 
     def stop(self) -> None:
         self._stop_requested = True
+
+    @property
+    def stopping(self) -> bool:
+        """Whether this thread was told to stop, however long it takes to notice.
+
+        A poll that is normalizing a full message window outlasts the wait the
+        stop path gives it, so a thread can be both running and finished with.
+        """
+        return self._stop_requested
 
     @staticmethod
     def _hand_key(hand_data: dict) -> tuple[int, int]:
@@ -812,8 +822,19 @@ class GuiAutoImport(QWidget):
         self._stop_cleanup_pending = False
         if self.swc_tailing_thread is not None:
             self.swc_tailing_thread.stop()
+            # A poll can still be normalizing twenty thousand retained messages
+            # when this wait elapses, and the thread goes on running. Nothing it
+            # finds may reach the importer now: the global lock is released
+            # below, and an import from a thread the user has stopped writes to
+            # a database nothing is holding open for it. The signal goes first,
+            # so a late poll's hands are dropped rather than imported.
+            with suppress(RuntimeError, TypeError):
+                self.swc_tailing_thread.hand_imported.disconnect(self._on_swc_native_hand_imported)
             self.swc_tailing_thread.wait(1000)
-            self.swc_tailing_thread = None
+            # Kept referenced while it drains; start_swc_native_capture will not
+            # adopt a thread that was told to stop, so a restart still gets one.
+            if not self.swc_tailing_thread.isRunning():
+                self.swc_tailing_thread = None
         if self.swc_attach_thread is not None:
             # It cannot be interrupted -- it is inside a compiler, an injector or a
             # wait on the client -- so it is given a moment, and kept referenced if
@@ -900,7 +921,12 @@ class GuiAutoImport(QWidget):
             else:
                 build_tap(check_executable=False)
 
-            if self.swc_tailing_thread is None or not self.swc_tailing_thread.isRunning():
+            tailer = self.swc_tailing_thread
+            if tailer is None or not tailer.isRunning() or tailer.stopping:
+                # A thread still draining its last poll is finished with, not
+                # available: it has been told to stop and its signal is already
+                # disconnected. Qt owns it through its parent, so replacing the
+                # reference here does not destroy it mid-poll.
                 self.swc_tailing_thread = SwCNativeTailingThread(DEFAULT_ARCHIVE, parent=self)
                 self.swc_tailing_thread.hand_imported.connect(self._on_swc_native_hand_imported)
                 self.swc_tailing_thread.start()

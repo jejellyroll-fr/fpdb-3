@@ -279,6 +279,17 @@ def test_native_windows_sources_cover_review_safety_contracts() -> None:
     hook_half = tap_source[tap_source.index("swc_install_inline_hook") :]
     assert "memcpy(" not in hook_half, "the hook engine patches code; every copy must be bounded"
 
+    # Every wide path is built through the checked helper. _snwprintf has the
+    # same flaw as _snprintf -- unterminated on truncation -- and the per-pid
+    # sidecar name is longer than the DLL's own, so a deep enough build
+    # directory fits the DLL under MAX_PATH and not its sidecar. _wopen would
+    # then read past the buffer.
+    assert "static int swc_format_path(" in tap_source
+    assert "written < 0 || written >= MAX_PATH" in tap_source
+    sidecar = tap_source.index("swc_read_stream_id(const wchar_t *dir")
+    assert "swc_format_path(path, " in tap_source[sidecar : tap_source.index("_wopen(path", sidecar)]
+    assert "_snwprintf(" not in tap_source.replace("int written = _snwprintf(out, MAX_PATH, format, dir, value);", "")
+
     # The injected DLL cannot inherit an environment, so it must not pretend to:
     # reading a status path from one would point it somewhere the archive is not.
     assert 'getenv("SWC_CAPTURE_STATUS_PATH")' not in windows_half

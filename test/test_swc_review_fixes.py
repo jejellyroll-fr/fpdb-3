@@ -1987,3 +1987,155 @@ def test_a_failed_attach_reaches_the_user_rather_than_qt(monkeypatch) -> None:
     assert len(reported) == 1
     assert "no compiler on PATH" in reported[0]
     assert "hand history files still works" in reported[0]
+
+
+# --------------------------------------------------------------------------
+# Two clients' copies: importability and boards are not alternatives.
+# --------------------------------------------------------------------------
+
+
+def _two_source_copies(monkeypatch, per_source: dict) -> list[dict]:
+    from fpdb_3_legacy import swc_native_capture
+
+    monkeypatch.setattr(
+        swc_native_capture,
+        "_normalize_native_hands_one_source",
+        lambda messages, *, raw_ref: [per_source[messages[0].source_id]],
+    )
+    messages = [
+        swc_native_capture.NativeProtocolMessage(
+            captured_at=datetime.now(UTC), payload=b"", peer_port=1, connection_id=0, direction="received", source_id=s
+        )
+        for s in per_source
+    ]
+    return swc_native_capture.normalize_native_hands(messages, raw_ref="x")
+
+
+def test_the_importable_copy_keeps_the_other_client_s_second_board(monkeypatch) -> None:
+    """Losing it is permanent: the tailer retires the key once this copy imports.
+
+    Importability has to outrank board completeness -- a copy that cannot be
+    built is no substitute for one that can -- but the two describe one deal, so
+    the chosen copy simply takes the fuller board set.
+    """
+    importable = _importable_envelope(table_id=1, hand_id=9, boards=[_board(complete=True)], run_it_times=1)
+    board_rich = {
+        "table_id": 1,
+        "hand_id": 9,
+        "boards": [_board(complete=True), _board(complete=True)],
+        "run_it_times": 2,
+        "double_board": True,
+        "board": ["2c", "7h", "Ad", "Ac", "6d"],
+        "community": {"FLOP": ["2c", "7h", "Ad"]},
+    }
+
+    hands = _two_source_copies(monkeypatch, {1: importable, 2: board_rich})
+
+    assert len(hands) == 1
+    chosen = hands[0]
+    from fpdb_3_legacy.swc_native_capture import _native_complete_boards, native_hand_is_publicly_importable
+
+    assert native_hand_is_publicly_importable(chosen) is True, "still the copy the importer can build"
+    assert _native_complete_boards(chosen) == 2, "and now carrying both boards"
+    assert chosen["run_it_times"] == 2
+    assert chosen["double_board"] is True
+
+
+def test_a_poorer_board_set_is_not_grafted_onto_the_chosen_copy(monkeypatch) -> None:
+    importable = _importable_envelope(
+        table_id=1,
+        hand_id=9,
+        boards=[_board(complete=True), _board(complete=True)],
+        run_it_times=2,
+    )
+    thin = {"table_id": 1, "hand_id": 9, "boards": [_board(complete=True)], "run_it_times": 1}
+
+    chosen = _two_source_copies(monkeypatch, {1: importable, 2: thin})[0]
+
+    assert chosen["run_it_times"] == 2
+    assert len(chosen["boards"]) == 2
+
+
+def test_the_bomb_pot_amount_stays_with_the_copy_whose_actions_were_chosen(monkeypatch) -> None:
+    """It comes from the antes, not the boards, so it is not board evidence."""
+    importable = _importable_envelope(table_id=1, hand_id=9, boards=[_board(complete=True)], bomb_pot=24)
+    board_rich = {
+        "table_id": 1,
+        "hand_id": 9,
+        "boards": [_board(complete=True), _board(complete=True)],
+        "bomb_pot": 0,
+    }
+
+    chosen = _two_source_copies(monkeypatch, {1: importable, 2: board_rich})[0]
+
+    assert chosen["bomb_pot"] == 24
+
+
+# --------------------------------------------------------------------------
+# A tailer that outlasts its stop must not import, and must not be doubled.
+# --------------------------------------------------------------------------
+
+
+class _SlowTailer:
+    """A tailer whose poll is still running when the stop path's wait elapses."""
+
+    def __init__(self) -> None:
+        self.stopped = False
+        self.disconnected: list = []
+        self.hand_imported = SimpleNamespace(disconnect=self.disconnected.append)
+
+    def stop(self) -> None:
+        self.stopped = True
+
+    @property
+    def stopping(self) -> bool:
+        return self.stopped
+
+    def wait(self, _ms) -> bool:
+        return False
+
+    def isRunning(self) -> bool:  # noqa: N802 - Qt's spelling
+        return True
+
+
+def _finalize(gui) -> None:
+    from fpdb_3_legacy.GuiAutoImport import GuiAutoImport
+
+    GuiAutoImport._finalize_auto_import_stop(gui)
+
+
+def test_a_tailer_that_outlasts_the_stop_can_no_longer_import(monkeypatch) -> None:
+    """Its hands would reach a database nothing is holding open for them."""
+    tailer = _SlowTailer()
+    gui = SimpleNamespace(
+        _stop_cleanup_pending=True,
+        swc_tailing_thread=tailer,
+        swc_attach_thread=None,
+        importer=SimpleNamespace(autoSummaryGrab=lambda _f: None),
+        settings={"global_lock": SimpleNamespace(release=lambda: None)},
+        addText=lambda *_a: None,
+        progressBar=SimpleNamespace(setVisible=lambda _v: None),
+        statusLabel=SimpleNamespace(setText=lambda _t: None),
+        pipe_to_hud=None,
+        intervalEntry=SimpleNamespace(setEnabled=lambda _v: None),
+        startButton=SimpleNamespace(setEnabled=lambda _v: None),
+        _on_swc_native_hand_imported=object(),
+    )
+
+    _finalize(gui)
+
+    assert tailer.stopped is True
+    assert tailer.disconnected == [gui._on_swc_native_hand_imported]
+    assert gui.swc_tailing_thread is tailer, "kept referenced until it has really exited"
+
+
+def test_a_restart_does_not_adopt_a_tailer_that_was_told_to_stop() -> None:
+    """Otherwise a slow stop leaves the restart with a thread on its way out."""
+    from fpdb_3_legacy.GuiAutoImport import SwCNativeTailingThread
+
+    thread = SwCNativeTailingThread.__new__(SwCNativeTailingThread)
+    thread._stop_requested = False
+    assert thread.stopping is False
+
+    thread.stop()
+    assert thread.stopping is True

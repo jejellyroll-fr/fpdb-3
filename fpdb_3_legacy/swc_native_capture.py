@@ -3069,6 +3069,7 @@ def normalize_native_hands(messages: list[NativeProtocolMessage], *, raw_ref: st
         return _normalize_native_hands_one_source(messages, raw_ref=raw_ref)
 
     best: dict[tuple[int, int], dict] = {}
+    richest_boards: dict[tuple[int, int], dict] = {}
     order: list[tuple[int, int]] = []
     for source in sorted(sources):
         subset = [message for message in messages if message.source_id == source]
@@ -3080,7 +3081,38 @@ def normalize_native_hands(messages: list[NativeProtocolMessage], *, raw_ref: st
                 best[key] = hand
             elif _native_envelope_rank(hand) > _native_envelope_rank(previous):
                 best[key] = hand
+            boards = richest_boards.get(key)
+            if boards is None or _native_complete_boards(hand) > _native_complete_boards(boards):
+                richest_boards[key] = hand
+    for key, hand in best.items():
+        _adopt_native_board_evidence(hand, richest_boards[key])
     return [best[key] for key in order]
+
+
+#: What _native_board_output derives from the boards, and nothing else. bomb_pot
+#: is not here: it comes from the hand's antes, so it belongs to the copy whose
+#: actions were chosen.
+_NATIVE_BOARD_FIELDS = ("board", "boards", "run_it_times", "double_board", "community")
+
+
+def _adopt_native_board_evidence(chosen: dict, richer: dict) -> None:
+    """Give the chosen copy the most complete boards any source saw of this hand.
+
+    Importability outranks board completeness, and it has to: a copy that cannot
+    be built is not a substitute for one that can. But that made the two
+    mutually exclusive, and losing the boards is permanent -- once the chosen
+    copy is imported the tailer retires the hand key, so no later copy can repair
+    the stored hand, and the second board of a double board is gone for good.
+
+    They are not alternatives at all. Both copies describe one deal at one table,
+    so the fuller board set is simply more of the same hand, and it can be given
+    to the copy that is actually importable.
+    """
+    if chosen is richer or _native_complete_boards(richer) <= _native_complete_boards(chosen):
+        return
+    for field in _NATIVE_BOARD_FIELDS:
+        if field in richer:
+            chosen[field] = richer[field]
 
 
 def _native_complete_boards(hand: dict) -> int:

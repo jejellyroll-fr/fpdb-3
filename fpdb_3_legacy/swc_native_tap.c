@@ -980,6 +980,23 @@ __attribute__((destructor)) static void close_swc_tap(void) {
  * launcher writes it so Windows keeps parity with the POSIX SWC_CAPTURE_PORT /
  * SWC_CAPTURE_OUTBOUND variables, which an injected DLL cannot inherit. Absent
  * or unreadable, the safe defaults hold (auto game ports, inbound only). */
+/* Build one MAX_PATH path, or report failure. MSVC's _snwprintf returns a
+ * negative value and leaves the buffer *unterminated* when the text does not
+ * fit, so a caller that ignores the result hands an unterminated array to
+ * _wopen, which then reads past it. Truncation is treated as failure rather
+ * than papered over: a path that is not the one asked for opens the wrong file
+ * or none. */
+static int swc_format_path(wchar_t *out, const wchar_t *format, const wchar_t *dir, unsigned long value) {
+    int written = _snwprintf(out, MAX_PATH, format, dir, value);
+
+    if (written < 0 || written >= MAX_PATH) {
+        out[0] = L'\0';
+        return 0;
+    }
+    out[MAX_PATH - 1] = L'\0';
+    return 1;
+}
+
 /* The stream id the launcher assigned this process, or 0 if it assigned none.
  * Written to a per-pid sidecar so each injected client reads only its own. */
 static uint8_t swc_read_stream_id(const wchar_t *dir, unsigned long pid) {
@@ -989,7 +1006,13 @@ static uint8_t swc_read_stream_id(const wchar_t *dir, unsigned long pid) {
     int n;
     const char *p;
 
-    _snwprintf(path, MAX_PATH, L"%sswc-native-%lu.cfg", dir, pid);
+    /* This is the one path here that can be longer than the DLL's own. The DLL
+     * fits under MAX_PATH by definition -- the loader opened it -- but its name
+     * is 18 characters and "swc-native-4294967295.cfg" is 25, so a deep enough
+     * build directory leaves room for one and not the other. */
+    if (!swc_format_path(path, L"%sswc-native-%lu.cfg", dir, pid)) {
+        return 0;
+    }
     fd = _wopen(path, _O_RDONLY | _O_BINARY);
     if (fd < 0) {
         return 0;
@@ -1055,9 +1078,16 @@ static void initialize_swc_tap(HINSTANCE self) {
     }
     slash[1] = L'\0';
 
-    _snwprintf(archive_path, MAX_PATH, L"%sswc-native.raw", dir);
-    _snwprintf(g_status_path, MAX_PATH, L"%sswc-native.status", dir);
-    _snwprintf(cfg_path, MAX_PATH, L"%sswc-native.cfg", dir);
+    /* Shorter than the DLL's own name, so these cannot truncate as things
+     * stand; checked anyway, because "cannot truncate" is a property of the
+     * current file names rather than of this code. The %.0lu prints nothing
+     * and exists only so one helper can serve every path built here. */
+    if (!swc_format_path(archive_path, L"%sswc-native.raw%.0lu", dir, 0UL)
+        || !swc_format_path(g_status_path, L"%sswc-native.status%.0lu", dir, 0UL)
+        || !swc_format_path(cfg_path, L"%sswc-native.cfg%.0lu", dir, 0UL)) {
+        g_status_path[0] = L'\0';
+        return;
+    }
     swc_read_config(cfg_path);
 
     {
