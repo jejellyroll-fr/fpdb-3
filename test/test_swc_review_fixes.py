@@ -1738,3 +1738,159 @@ def test_a_whole_message_still_anchors_at_any_size_the_format_carries() -> None:
     whole = len(body).to_bytes(4, "little") + body
 
     assert NativeProtocolDecoder._anchors_a_message(whole) is True
+
+
+# --------------------------------------------------------------------------
+# A seat index is a seat, not a position in a list of occupants.
+# --------------------------------------------------------------------------
+
+
+def _table_trailer(seats: int, signature: bytes = b"PR") -> bytes:
+    """The fixed block a table descriptor carries after its name."""
+    return bytes([2, 4, 0]) + signature + bytes([3, seats, 18, 0, 192]) + bytes(6)
+
+
+def test_the_room_s_own_seat_capacity_is_read_from_the_descriptor() -> None:
+    """Confirmed against the room's hand histories for the captured tables."""
+    from fpdb_3_legacy.swc_native_capture import _native_table_max_seats
+
+    assert _native_table_max_seats(_table_trailer(9)) == 9
+    assert _native_table_max_seats(_table_trailer(8, b"UR")) == 8
+
+
+def test_a_descriptor_shaped_differently_yields_no_capacity() -> None:
+    """Better nothing than a plausible-looking number from the wrong offset."""
+    from fpdb_3_legacy.swc_native_capture import _native_table_max_seats
+
+    assert _native_table_max_seats(b"") is None
+    assert _native_table_max_seats(bytes([2, 4, 0, 80, 88, 3, 8, 18])) is None, "signature is not xR"
+    assert _native_table_max_seats(bytes([2, 4, 0, 80, 82, 9, 8, 18])) is None, "the 03 marker is missing"
+    assert _native_table_max_seats(_table_trailer(1)) is None, "no table seats one"
+    assert _native_table_max_seats(_table_trailer(11)) is None, "the room addresses ten seats"
+
+
+def test_two_players_in_seats_five_and_seven_are_not_a_two_max_table() -> None:
+    """The reported defect, with the numbers the capture actually produced.
+
+    Hand 301461728 sits its two players at native seat indexes 4 and 6; the
+    room's own history reads "8-max ... Seat 5 ... Seat 7".
+    """
+    from fpdb_3_legacy.swc_native_capture import NativeTableInfo, _native_table_max_seats_for_hand
+
+    table = NativeTableInfo(table_id=299657213, name="t", tournament_id=None, family="holdem", max_seats=8)
+    players = [{"seat_idx": 4}, {"seat_idx": 6}]
+
+    assert _native_table_max_seats_for_hand(table, players) == 8
+
+
+def test_without_a_capacity_the_seats_dealt_into_still_have_to_fit() -> None:
+    from fpdb_3_legacy.swc_native_capture import NativeTableInfo, _native_table_max_seats_for_hand
+
+    table = NativeTableInfo(table_id=1, name="t", tournament_id=None, family="holdem")
+    assert _native_table_max_seats_for_hand(table, [{"seat_idx": 4}, {"seat_idx": 6}]) == 7
+
+
+def test_a_capacity_that_contradicts_the_hand_loses_to_the_hand() -> None:
+    """A decoded number is weaker evidence than a seat someone was dealt into."""
+    from fpdb_3_legacy.swc_native_capture import NativeTableInfo, _native_table_max_seats_for_hand
+
+    table = NativeTableInfo(table_id=1, name="t", tournament_id=None, family="holdem", max_seats=2)
+    assert _native_table_max_seats_for_hand(table, [{"seat_idx": 4}, {"seat_idx": 6}]) == 7
+
+
+def test_seats_nobody_could_be_placed_in_fall_back_to_the_roster() -> None:
+    """seat_idx is often unknown; the count is then all there is."""
+    from fpdb_3_legacy.swc_native_capture import NativeTableInfo, _native_table_max_seats_for_hand
+
+    table = NativeTableInfo(table_id=1, name="t", tournament_id=None, family="holdem")
+    assert _native_table_max_seats_for_hand(table, [{"seat_idx": None}, {"seat_idx": None}, {}]) == 3
+
+
+# --------------------------------------------------------------------------
+# A stack ledger cannot step over a hand it could not account for.
+# --------------------------------------------------------------------------
+
+
+def _ledger_hand(hand_id: int, names: list[str], actions: list[dict], collections: list[dict]) -> dict:
+    return {
+        "table_id": 24812,
+        "hand_id": hand_id,
+        "players": [{"name": name, "seat_idx": index} for index, name in enumerate(names)],
+        "actions": actions,
+        "collections": collections,
+    }
+
+
+def _run_ledger(monkeypatch, hands: list[dict], roster: list[tuple[str, int]]) -> None:
+    from fpdb_3_legacy import swc_native_capture as mod
+
+    monkeypatch.setattr(mod, "extract_native_outbound_login_name", lambda _m: None)
+    monkeypatch.setattr(mod, "parse_native_outbound_seat_request", lambda _m: None)
+    monkeypatch.setattr(
+        mod,
+        "extract_native_table_player_stacks",
+        lambda _m: {
+            "table_id": 24812,
+            "source": "swc_native_received_type_23_table_roster",
+            "players": [{"name": name, "starting_stack": stack} for name, stack in roster],
+        },
+    )
+    mod.add_native_starting_stacks(hands, [object()])
+
+
+def _stacks(hand: dict) -> list[int | None]:
+    return [player.get("starting_stack") for player in hand["players"]]
+
+
+def test_the_ledger_stops_at_a_hand_it_could_not_account_for(monkeypatch) -> None:
+    """Observed on table 24812: hand 301461706 is unaccounted, and the hand after
+    it was labelled 4.10 where the room's own history says 4.34."""
+    anchored = _ledger_hand(
+        1,
+        ["A", "B"],
+        [{"type": "bets", "player": "A", "amount": 4}],
+        [{"player": "B", "amount_native": 4}],
+    )
+    unaccounted = _ledger_hand(2, ["A", "B"], [], [])
+    after = _ledger_hand(3, ["A", "B"], [{"type": "bets", "player": "A", "amount": 2}], [])
+
+    _run_ledger(monkeypatch, [anchored, unaccounted, after], [("A", 400), ("B", 400)])
+
+    assert _stacks(anchored) == [400, 400]
+    assert _stacks(unaccounted) == [None, None]
+    assert _stacks(after) == [None, None], "the gap is not stepped over"
+
+
+def test_a_gap_before_the_anchor_does_not_prevent_it(monkeypatch) -> None:
+    """A capture routinely opens on a hand or two it joined mid-way."""
+    joined_late = _ledger_hand(1, ["A", "B"], [], [])
+    first = _ledger_hand(2, ["A", "B"], [{"type": "bets", "player": "A", "amount": 4}], [])
+
+    _run_ledger(monkeypatch, [joined_late, first], [("A", 400), ("B", 400)])
+
+    assert _stacks(joined_late) == [None, None]
+    assert _stacks(first) == [400, 400]
+
+
+def test_a_newcomer_does_not_stale_the_ledger_behind_them(monkeypatch) -> None:
+    """That hand cannot be labelled, but it is fully accounted for the rest."""
+    anchored = _ledger_hand(
+        1,
+        ["A", "B"],
+        [{"type": "bets", "player": "A", "amount": 4}],
+        [{"player": "B", "amount_native": 4}],
+    )
+    with_newcomer = _ledger_hand(
+        2,
+        ["A", "B", "C"],
+        [{"type": "bets", "player": "A", "amount": 10}],
+        [{"player": "B", "amount_native": 10}],
+    )
+    after = _ledger_hand(3, ["A", "B"], [{"type": "checks", "player": "A", "amount": 0}], [])
+
+    _run_ledger(monkeypatch, [anchored, with_newcomer, after], [("A", 400), ("B", 400)])
+
+    assert _stacks(anchored) == [400, 400]
+    assert _stacks(with_newcomer) == [None, None, None], "C's stack was never observed"
+    # 400 - 4 - 10 for A, 400 + 4 + 10 for B: the newcomer's hand still counted.
+    assert _stacks(after) == [386, 414]

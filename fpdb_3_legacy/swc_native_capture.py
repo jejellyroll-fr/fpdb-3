@@ -279,6 +279,8 @@ class NativeTableInfo:
     name: str
     tournament_id: int | None
     family: str
+    #: The room's seat capacity, when the descriptor's trailer carried it.
+    max_seats: int | None = None
 
 
 @dataclass(frozen=True)
@@ -2030,7 +2032,48 @@ def extract_table_info(message: NativeProtocolMessage) -> NativeTableInfo | None
         name=name,
         tournament_id=tournament_value or None,
         family=family,
+        max_seats=_native_table_max_seats(trailer),
     )
+
+
+#: The highest seat the room addresses; parse_native_outbound_seat_request
+#: rejects anything above it, so a capacity beyond this is a misread trailer.
+_MAX_NATIVE_SEATS = 10
+
+
+def _native_table_max_seats(trailer: bytes) -> int | None:
+    """The table's seat capacity, from the fixed block that follows its name.
+
+    The trailer is a small fixed structure: ``02 04 00``, then the two-byte game
+    signature ``_native_table_family`` already reads below (``PR`` on PLO tables,
+    ``UR`` on Hold'em), then ``03``, then this byte, then ``12 00``. Read only
+    when those neighbours are where they should be, so a descriptor shaped
+    differently yields nothing rather than a plausible-looking wrong number.
+
+    Confirmed against the room's own hand histories for every table in the
+    development capture: table 24812 reads 9 and is written ``9-max``, tables
+    299657213 and 299672838 read 8 and are written ``8-max``.
+    """
+    if len(trailer) < 8 or trailer[4:5] != b"R" or trailer[5] != 3 or trailer[7] != 18:
+        return None
+    seats = trailer[6]
+    return seats if 2 <= seats <= _MAX_NATIVE_SEATS else None
+
+
+def _native_table_max_seats_for_hand(table: NativeTableInfo, players: list[dict]) -> int:
+    """How many seats this table has, never fewer than the seats it dealt into.
+
+    ``seat_idx`` is the physical seat, not a position among the occupants: the
+    capture's two-handed hands sit in seats 5 and 7 of an 8-max table. Counting
+    the players instead recorded those hands as 2-max, and the HUD then built
+    two seat windows for players it had placed in the fifth and the seventh.
+
+    The room's own capacity is used when the descriptor carried it; it still has
+    to cover the seats actually dealt into, because a capacity that contradicts
+    the hand is the one of the two that was decoded rather than observed.
+    """
+    occupied = [player["seat_idx"] + 1 for player in players if isinstance(player.get("seat_idx"), int)]
+    return max(table.max_seats or 0, len(players), *occupied) if occupied else max(table.max_seats or 0, len(players))
 
 
 def _native_table_family(name: str, searchable: str, trailer: bytes) -> str:
@@ -2855,8 +2898,27 @@ def add_native_starting_stacks(  # noqa: C901
         for hand in (item for item in hands if item["table_id"] == table_id):
             actions = hand.get("actions") or []
             if not actions:
+                # Nothing here can say how much money moved in this hand, so the
+                # ledger no longer knows what anyone holds. Before the anchor is
+                # placed that costs nothing -- the roster still describes the
+                # table, and the capture routinely opens on a hand or two it
+                # joined mid-way. Once the ledger is rolling it is fatal: the
+                # next hand would be handed the stacks from before the gap and
+                # they would be stored as its exact starting stacks. Verified
+                # against the room's own history: hand 301461706 on table 24812
+                # is unaccounted, and the hand after it was given 4.10 where the
+                # history says 4.34.
+                if started:
+                    break
                 continue
             if any(player["name"] not in running_stacks for player in hand["players"]):
+                # A player the ledger has never seen sat down: their starting
+                # stack is unknown, so this hand cannot be labelled. It is still
+                # fully accounted for the players it does know -- their
+                # contributions and collections are all in this hand -- so the
+                # ledger rolls on rather than going stale behind them.
+                if started:
+                    _roll_native_stacks_forward(running_stacks, hand, actions)
                 continue
             request = seat_requests.get(table_id)
             for player in hand["players"]:
@@ -2873,21 +2935,24 @@ def add_native_starting_stacks(  # noqa: C901
                     source = "corroborated_native_type_11_and_type_23"
                 player["starting_stack_source"] = source
             started = True
-            for name in running_stacks:
-                contributions = sum(
-                    action.get("amount", 0)
-                    for action in actions
-                    if action.get("player") == name and action.get("type") not in {"folds", "checks", "uncalled"}
-                )
-                returned = sum(
-                    action.get("amount", 0)
-                    for action in actions
-                    if action.get("player") == name and action.get("type") == "uncalled"
-                )
-                collected = sum(
-                    item["amount_native"] for item in hand.get("collections", []) if item.get("player") == name
-                )
-                running_stacks[name] += collected + returned - contributions
+            _roll_native_stacks_forward(running_stacks, hand, actions)
+
+
+def _roll_native_stacks_forward(running_stacks: dict[str, int], hand: dict, actions: list[dict]) -> None:
+    """Apply one fully accounted hand's settlement to every tracked stack."""
+    for name in running_stacks:
+        contributions = sum(
+            action.get("amount", 0)
+            for action in actions
+            if action.get("player") == name and action.get("type") not in {"folds", "checks", "uncalled"}
+        )
+        returned = sum(
+            action.get("amount", 0)
+            for action in actions
+            if action.get("player") == name and action.get("type") == "uncalled"
+        )
+        collected = sum(item["amount_native"] for item in hand.get("collections", []) if item.get("player") == name)
+        running_stacks[name] += collected + returned - contributions
 
 
 def promote_native_omaha_importability(hands: list[dict]) -> None:
@@ -3348,6 +3413,41 @@ def _normalize_native_hands_one_source(  # noqa: PLR0915 - protocol normalizatio
             dealer_hand_complete=any(event["text"] == "Hand complete" for event in dealer_events),
         )
         board_output = _native_board_output(final_boards, action_evidence)
+        native_players = [
+            {
+                "player_id": player.player_id,
+                "name": player.name,
+                "seat_idx": next(
+                    (
+                        seat_idx
+                        for (evidence_table, evidence_hand, seat_idx), item in seat_evidence.items()
+                        if evidence_table == table_id
+                        and evidence_hand == hand_id
+                        and item.player_id == player.player_id
+                    ),
+                    None,
+                ),
+                "roster_index": roster_index,
+                "starting_stack": None,
+                "native_opaque_funds_value": player.stack_units,
+                "native_status_values": sorted(
+                    {
+                        observed.native_status
+                        for snapshot in snapshots
+                        for observed in snapshot.players
+                        if observed.player_id == player.player_id and observed.native_status is not None
+                    }
+                ),
+            }
+            for roster_index, player in enumerate(player_order.values())
+        ]
+        # The room's own capacity when the table descriptor carried it, and
+        # otherwise enough seats to hold everyone who was actually dealt in.
+        # seat_idx is the physical seat, not a position in a list of occupants:
+        # two players at a table can sit in seats 5 and 7, and counting them as
+        # a 2-max table left the HUD building two seat windows for players it
+        # then placed in the fifth and seventh.
+        native_max_seats = _native_table_max_seats_for_hand(table, native_players)
         hands.append(
             {
                 "site": "SealsWithClubs",
@@ -3374,37 +3474,10 @@ def _normalize_native_hands_one_source(  # noqa: PLR0915 - protocol normalizatio
                     "bb": native_blinds["bb"],
                     "ante": 0,
                     "mix": "none",
-                    "maxSeats": len(player_order),
+                    "maxSeats": native_max_seats,
                 },
                 "streets": {"allStreets": _native_street_profile(family, category)},
-                "players": [
-                    {
-                        "player_id": player.player_id,
-                        "name": player.name,
-                        "seat_idx": next(
-                            (
-                                seat_idx
-                                for (evidence_table, evidence_hand, seat_idx), item in seat_evidence.items()
-                                if evidence_table == table_id
-                                and evidence_hand == hand_id
-                                and item.player_id == player.player_id
-                            ),
-                            None,
-                        ),
-                        "roster_index": roster_index,
-                        "starting_stack": None,
-                        "native_opaque_funds_value": player.stack_units,
-                        "native_status_values": sorted(
-                            {
-                                observed.native_status
-                                for snapshot in snapshots
-                                for observed in snapshot.players
-                                if observed.player_id == player.player_id and observed.native_status is not None
-                            }
-                        ),
-                    }
-                    for roster_index, player in enumerate(player_order.values())
-                ],
+                "players": native_players,
                 "steps": steps,
                 **board_output,
                 "holecards": [native_hero_hole_cards] if native_hero_hole_cards else [],
