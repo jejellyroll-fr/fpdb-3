@@ -132,6 +132,37 @@ def _hand_snapshot_fingerprint(hand: dict) -> str:
     return hashlib.sha256(json.dumps(hand, sort_keys=True, default=str).encode("utf-8")).hexdigest()
 
 
+class SwCWindowsAttachThread(QThread):
+    """Load the tap into the running SwC client without stopping the GUI.
+
+    ``attach_to_windows_client`` compiles the tap and the injector, enumerates
+    processes, runs the injector once per client and then waits for each to
+    report that it has hooked its TLS library. The client loads that library
+    lazily, so a lobby with no table open never reports and the wait runs its
+    full ten seconds -- the ordinary case when Auto Import is switched on before
+    sitting down. Called straight from startClicked, that was ten seconds with
+    the Qt event loop stopped, which reads as a frozen application.
+
+    The tailing thread does not wait for this: it reads the archive, and an
+    archive that is not growing yet simply yields nothing.
+    """
+
+    attached = Signal(str)
+
+    def run(self) -> None:
+        from fpdb_3_legacy.swc_native_capture import attach_to_windows_client
+
+        try:
+            self.attached.emit(attach_to_windows_client())
+        except Exception as exc:  # noqa: BLE001 - reported to the user, never raised into Qt
+            log.warning("Could not attach the SwC tap: %s", exc)
+            self.attached.emit(
+                _("SwC live capture could not attach: {reason}. Importing SwC hand history files still works.").format(
+                    reason=exc,
+                ),
+            )
+
+
 class SwCNativeTailingThread(QThread):
     """Background thread tailing raw SwC native capture and importing live hands."""
 
@@ -441,6 +472,7 @@ class GuiAutoImport(QWidget):
         self.importtimer: QTimer | None = None
         self.import_thread: AutoImportThread | None = None
         self.swc_tailing_thread: SwCNativeTailingThread | None = None
+        self.swc_attach_thread: SwCWindowsAttachThread | None = None
         # One writer at a time on the importer's database: a single connection
         # with a single set of bulk buffers, which no driver here lets two
         # threads drive at once (see Database._create_new_worker_connection).
@@ -782,6 +814,16 @@ class GuiAutoImport(QWidget):
             self.swc_tailing_thread.stop()
             self.swc_tailing_thread.wait(1000)
             self.swc_tailing_thread = None
+        if self.swc_attach_thread is not None:
+            # It cannot be interrupted -- it is inside a compiler, an injector or a
+            # wait on the client -- so it is given a moment, and kept referenced if
+            # it needs longer. Dropping the last reference to a running QThread
+            # destroys it mid-run; the guard in start_swc_native_capture will not
+            # replace it while it is still going, so it lives until it finishes and
+            # reports what it found.
+            self.swc_attach_thread.wait(1000)
+            if not self.swc_attach_thread.isRunning():
+                self.swc_attach_thread = None
         self.importer.autoSummaryGrab(True)
         self.settings["global_lock"].release()
         self.addText("\nStopping Auto Import. Global lock released.", "unlock")
@@ -830,7 +872,6 @@ class GuiAutoImport(QWidget):
 
             from fpdb_3_legacy.swc_native_capture import (
                 DEFAULT_ARCHIVE,
-                attach_to_windows_client,
                 build_tap,
                 native_capture_supported,
             )
@@ -845,10 +886,17 @@ class GuiAutoImport(QWidget):
 
             if _platform.system() == "Windows":
                 # Windows has no launch-time interposition, so the tap is injected
-                # into the already-running client. This builds the tap + injector
-                # and loads it into SwCPoker.exe; the user must have it running.
-                status = attach_to_windows_client()
-                self.addText(f"\n{status}", "poker")
+                # into the already-running client: build the tap + injector and
+                # load them into SwCPoker.exe, which the user must have running.
+                # On its own thread because it compiles, injects and then waits on
+                # the client (see SwCWindowsAttachThread).
+                if self.swc_attach_thread is None or not self.swc_attach_thread.isRunning():
+                    # No parent: GuiAutoImport skips QWidget.__init__ in CLI mode,
+                    # and parenting to a half-built widget fails outright. The
+                    # attribute below is what keeps this alive.
+                    self.swc_attach_thread = SwCWindowsAttachThread()
+                    self.swc_attach_thread.attached.connect(self._on_swc_tap_attached)
+                    self.swc_attach_thread.start()
             else:
                 build_tap(check_executable=False)
 
@@ -928,6 +976,10 @@ class GuiAutoImport(QWidget):
         hand_id = hand_data.get("hand_id", 0)
         self._notify_hud_of_hand(getattr(result, "row_id", None))
         self.addText(f"\n[SwC Live] Imported hand #{hand_id} ({game_cat}).", "poker")
+
+    def _on_swc_tap_attached(self, status: str) -> None:
+        """Report what the injection thread found, once it is done."""
+        self.addText(f"\n{status}", "poker")
 
     def _notify_hud_of_hand(self, row_id) -> None:
         """Push a hand imported outside the auto-import cycle to a running HUD.

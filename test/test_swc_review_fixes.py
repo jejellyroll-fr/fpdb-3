@@ -1280,16 +1280,69 @@ def test_an_incomplete_board_does_not_count() -> None:
     )
 
 
+def _importable_envelope(**extra) -> dict:
+    """A copy the legacy importer would actually accept.
+
+    Not ``{"importability": {"importable": True}}``: that flag is written False
+    by audit_native_hand and raised only by the Omaha promoter, so no Hold'em
+    copy ever carries it however complete it is.
+    """
+    from fpdb_3_legacy.swc_native_capture import NATIVE_IMPORT_AUDIT_FLAGS
+
+    return {
+        "game": {"base": "hold"},
+        "metadata": {"importability": dict.fromkeys(NATIVE_IMPORT_AUDIT_FLAGS, True)},
+        "actions": [{"type": "checks", "player": "A", "street": "FLOP", "amount": 0}],
+        "players": [{"name": "A"}],
+        **extra,
+    }
+
+
 def test_boards_rank_above_the_other_evidence_but_below_importability() -> None:
     """A copy can be worth its boards while not being importable on its own."""
     from fpdb_3_legacy.swc_native_capture import _native_envelope_rank
 
     boards_only = {"boards": [_board(complete=True), _board(complete=True)]}
     evidence_only = {"collections": [1, 2, 3], "action_evidence": [1, 2, 3], "steps": [1] * 50}
-    importable = {"metadata": {"importability": {"importable": True}}}
 
     assert _native_envelope_rank(boards_only) > _native_envelope_rank(evidence_only)
-    assert _native_envelope_rank(importable) > _native_envelope_rank(boards_only)
+    assert _native_envelope_rank(_importable_envelope()) > _native_envelope_rank(boards_only)
+
+
+def test_a_holdem_copy_the_importer_would_take_outranks_one_it_would_refuse() -> None:
+    """The reported defect: ranking asked a flag only the Omaha promoter sets.
+
+    An unusable copy carrying more actions therefore outranked the usable one,
+    and the hand the importer could have taken was skipped.
+    """
+    from fpdb_3_legacy.swc_native_capture import _native_envelope_rank, native_hand_is_publicly_importable
+
+    usable = _importable_envelope()
+    refused = _importable_envelope()
+    refused["metadata"]["importability"]["has_big_blind"] = False
+    refused["actions"] = [{"type": "checks"}] * 20
+    refused["steps"] = [1] * 99
+
+    assert native_hand_is_publicly_importable(usable) is True
+    assert native_hand_is_publicly_importable(refused) is False
+    assert _native_envelope_rank(usable) > _native_envelope_rank(refused)
+
+
+def test_the_predicate_and_the_importer_cannot_drift_apart() -> None:
+    """Both ends now ask the one function, so a copy that ranks top is buildable."""
+    from fpdb_3_legacy.http_capture_db_import import _native_public_import_copy
+
+    hand = _importable_envelope(
+        site="SealsWithClubs",
+        hand_id=1,
+        gametype={"base": "hold", "category": "holdem", "type": "ring"},
+    )
+    hand["metadata"]["adapter"] = "swc_native"
+
+    assert _native_public_import_copy(hand) is not None
+
+    hand["metadata"]["importability"]["has_small_blind"] = False
+    assert _native_public_import_copy(hand) is None
 
 
 def test_the_double_board_copy_is_the_one_normalization_returns(monkeypatch) -> None:
@@ -1894,3 +1947,43 @@ def test_a_newcomer_does_not_stale_the_ledger_behind_them(monkeypatch) -> None:
     assert _stacks(with_newcomer) == [None, None, None], "C's stack was never observed"
     # 400 - 4 - 10 for A, 400 + 4 + 10 for B: the newcomer's hand still counted.
     assert _stacks(after) == [386, 414]
+
+
+# --------------------------------------------------------------------------
+# The Windows attach cannot run on the GUI thread.
+# --------------------------------------------------------------------------
+
+
+def test_the_attach_thread_reports_what_it_found(monkeypatch) -> None:
+    from fpdb_3_legacy import swc_native_capture
+    from fpdb_3_legacy.GuiAutoImport import SwCWindowsAttachThread
+
+    monkeypatch.setattr(swc_native_capture, "attach_to_windows_client", lambda: "SwC tap attached to 1 client")
+    thread = SwCWindowsAttachThread()
+    reported: list[str] = []
+    thread.attached.connect(reported.append)
+
+    thread.run()
+
+    assert reported == ["SwC tap attached to 1 client"]
+
+
+def test_a_failed_attach_reaches_the_user_rather_than_qt(monkeypatch) -> None:
+    """run() is called by Qt itself: an exception out of it has nowhere to go."""
+    from fpdb_3_legacy import swc_native_capture
+    from fpdb_3_legacy.GuiAutoImport import SwCWindowsAttachThread
+
+    def explode() -> None:
+        msg = "no compiler on PATH"
+        raise OSError(msg)
+
+    monkeypatch.setattr(swc_native_capture, "attach_to_windows_client", explode)
+    thread = SwCWindowsAttachThread()
+    reported: list[str] = []
+    thread.attached.connect(reported.append)
+
+    thread.run()
+
+    assert len(reported) == 1
+    assert "no compiler on PATH" in reported[0]
+    assert "hand history files still works" in reported[0]

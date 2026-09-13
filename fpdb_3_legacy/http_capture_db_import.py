@@ -20,6 +20,7 @@ from fpdb_3_legacy.http_capture_hand_builder import (
 )
 from fpdb_3_legacy.http_capture_ofc import build_ofc_hand, import_ofc_hand
 from fpdb_3_legacy.loggingFpdb import get_logger
+from fpdb_3_legacy.swc_native_capture import native_hand_is_publicly_importable
 
 log = get_logger("http_capture_db_import")
 
@@ -274,19 +275,12 @@ def _native_public_import_copy(hand_data: dict[str, Any]) -> dict[str, Any] | No
     Unknown stacks are represented as zero because Hand.py requires a value;
     the original opaque native values remain in the capture envelope.
     """
-    if not is_native_capture(hand_data) or (hand_data.get("game") or {}).get("base") != "hold":
-        return None
-    audit = (hand_data.get("metadata") or {}).get("importability") or {}
-    required = (
-        audit.get("complete_action_players") is True,
-        audit.get("settlement_conservation_complete") is True,
-        audit.get("has_small_blind") is True,
-        audit.get("has_big_blind") is True,
-        audit.get("has_collection") is True,
-        bool(hand_data.get("actions")),
-        bool(hand_data.get("players")),
-    )
-    if not all(required):
+    # The same predicate the capture's own ranking uses to choose between two
+    # clients' copies of one hand. Asked in one place because the two used to
+    # disagree: the ranking read audit["importable"], which only the Omaha
+    # promoter ever sets, so an unusable Hold'em copy with more actions outranked
+    # the usable one and the hand was skipped.
+    if not is_native_capture(hand_data) or not native_hand_is_publicly_importable(hand_data):
         return None
 
     candidate = _legacy_native_card_tokens(hand_data)

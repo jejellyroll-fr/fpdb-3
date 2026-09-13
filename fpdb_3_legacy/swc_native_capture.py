@@ -3104,6 +3104,38 @@ def _native_complete_boards(hand: dict) -> int:
     return complete
 
 
+#: The audit flags the legacy importer requires before it will build a hand.
+#: Named here so the ranking below and http_capture_db_import ask the same
+#: question: they used to disagree, and the ranking then preferred a copy the
+#: importer would refuse.
+NATIVE_IMPORT_AUDIT_FLAGS = (
+    "complete_action_players",
+    "settlement_conservation_complete",
+    "has_small_blind",
+    "has_big_blind",
+    "has_collection",
+)
+
+
+def native_hand_is_publicly_importable(hand: dict) -> bool:
+    """Whether the legacy importer would build a Hand.py hand from this copy.
+
+    ``audit["importable"]`` cannot answer this: ``audit_native_hand`` always
+    writes it False and only ``promote_native_omaha_importability`` ever raises
+    it, so every Hold'em copy reads as not importable however complete it is.
+    The importer never looks at that flag -- it reads the individual audit flags
+    below -- which is why this has to as well.
+    """
+    if (hand.get("game") or {}).get("base") != "hold":
+        return False
+    audit = (hand.get("metadata") or {}).get("importability") or {}
+    return (
+        all(audit.get(flag) is True for flag in NATIVE_IMPORT_AUDIT_FLAGS)
+        and bool(hand.get("actions"))
+        and bool(hand.get("players"))
+    )
+
+
 def _native_envelope_rank(hand: dict) -> tuple:
     """How usable one copy of a hand is, for choosing between two clients' views.
 
@@ -3120,9 +3152,8 @@ def _native_envelope_rank(hand: dict) -> tuple:
     while still not being importable on its own -- that is exactly the case the
     repair handles.
     """
-    audit = (hand.get("metadata") or {}).get("importability") or {}
     return (
-        bool(audit.get("importable")),
+        native_hand_is_publicly_importable(hand),
         _native_complete_boards(hand),
         bool((hand.get("game") or {}).get("fpdb_supported")),
         len(hand.get("actions") or ()),
