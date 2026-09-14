@@ -1829,15 +1829,18 @@ def test_swc_native_tailing_reoffers_a_hand_once_its_retry_delay_elapsed(tmp_pat
     """
     hand = {"table_id": 7, "hand_id": 1234}
     thread, raw = _tailing_thread(tmp_path, monkeypatch, [hand])
-    thread.RETRY_BACKOFF_SECONDS = 0.05
-    thread.RETRY_BACKOFF_CAP_SECONDS = 0.05
     assert thread.poll_once() == [hand]
 
     thread.retry_hand(hand)
     _append(raw)
     assert thread.poll_once() == []  # still inside the delay
 
-    time.sleep(0.06)
+    # The deadline is moved rather than slept through. A short backoff plus a
+    # slightly longer sleep is a race against the clock's own resolution: on
+    # Windows time.monotonic() advances in ~16ms steps, so a 10ms margin read
+    # as no time passing at all and the hand stayed deferred.
+    with thread._state_lock:
+        thread._retry_after[(7, 1234)] = time.monotonic() - 1
     _append(raw)
     assert thread.poll_once() == [hand]
 

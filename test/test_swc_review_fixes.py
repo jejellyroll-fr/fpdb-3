@@ -2080,7 +2080,7 @@ def test_the_attach_thread_reports_what_it_found(monkeypatch) -> None:
     from fpdb_3_legacy import swc_native_capture
     from fpdb_3_legacy.GuiAutoImport import SwCWindowsAttachThread
 
-    monkeypatch.setattr(swc_native_capture, "attach_to_windows_client", lambda: "SwC tap attached to 1 client")
+    monkeypatch.setattr(swc_native_capture, "attach_to_windows_client", lambda **_: "SwC tap attached to 1 client")
     thread = SwCWindowsAttachThread()
     reported: list[str] = []
     thread.attached.connect(reported.append)
@@ -2095,7 +2095,7 @@ def test_a_failed_attach_reaches_the_user_rather_than_qt(monkeypatch) -> None:
     from fpdb_3_legacy import swc_native_capture
     from fpdb_3_legacy.GuiAutoImport import SwCWindowsAttachThread
 
-    def explode() -> None:
+    def explode(**_kwargs) -> None:
         msg = "no compiler on PATH"
         raise OSError(msg)
 
@@ -2109,6 +2109,170 @@ def test_a_failed_attach_reaches_the_user_rather_than_qt(monkeypatch) -> None:
     assert len(reported) == 1
     assert "no compiler on PATH" in reported[0]
     assert "hand history files still works" in reported[0]
+
+
+def test_a_cancelled_attach_never_injects_the_tap(tmp_path, monkeypatch) -> None:
+    """The tap has no unload path, so an injection outlives the stop that raced it."""
+    from fpdb_3_legacy import swc_native_capture, swc_tap_build
+    from fpdb_3_legacy import swc_windows_inject as inj
+
+    monkeypatch.setattr(swc_native_capture.platform, "system", lambda: "Windows")
+    monkeypatch.setattr(swc_native_capture, "build_tap", lambda **_: tmp_path / "tap.dll")
+    monkeypatch.setattr(swc_native_capture, "DEFAULT_ARCHIVE", tmp_path / "swc-native.raw")
+    monkeypatch.setattr(swc_tap_build, "build_injector", lambda **_: tmp_path / "inj.exe")
+    monkeypatch.setattr(inj, "write_capture_config", lambda *_a, **_k: tmp_path / "c.cfg")
+    monkeypatch.setattr(inj, "capture_config_changed", lambda *_a, **_k: False)
+    monkeypatch.setattr(inj, "find_client_pids", lambda *_a, **_k: [100])
+    monkeypatch.setattr(inj, "write_stream_ids", lambda *_a, **_k: {})
+    monkeypatch.setattr(inj, "reset_stream_ids", lambda *_a, **_k: 0)
+
+    injected: list[int] = []
+    monkeypatch.setattr(
+        inj,
+        "inject_into_pid",
+        lambda _i, _d, pid: injected.append(pid) or inj.InjectionResult(pid=pid, ok=True, detail="ok"),
+    )
+
+    with pytest.raises(swc_native_capture.CaptureAttachCancelled):
+        swc_native_capture.attach_to_windows_client(should_cancel=lambda: True)
+
+    assert injected == [], "nothing was loaded into the client"
+
+
+def test_an_attach_that_is_not_cancelled_still_injects(tmp_path, monkeypatch) -> None:
+    """The cancellation check must not become a way to never attach at all."""
+    from fpdb_3_legacy import swc_native_capture, swc_tap_build
+    from fpdb_3_legacy import swc_windows_inject as inj
+
+    monkeypatch.setattr(swc_native_capture.platform, "system", lambda: "Windows")
+    monkeypatch.setattr(swc_native_capture, "build_tap", lambda **_: tmp_path / "tap.dll")
+    monkeypatch.setattr(swc_native_capture, "DEFAULT_ARCHIVE", tmp_path / "swc-native.raw")
+    monkeypatch.setattr(swc_tap_build, "build_injector", lambda **_: tmp_path / "inj.exe")
+    monkeypatch.setattr(inj, "write_capture_config", lambda *_a, **_k: tmp_path / "c.cfg")
+    monkeypatch.setattr(inj, "capture_config_changed", lambda *_a, **_k: False)
+    monkeypatch.setattr(inj, "find_client_pids", lambda *_a, **_k: [100])
+    monkeypatch.setattr(inj, "write_stream_ids", lambda *_a, **_k: {})
+    monkeypatch.setattr(inj, "reset_stream_ids", lambda *_a, **_k: 0)
+    monkeypatch.setattr(
+        inj, "inject_into_pid", lambda _i, _d, pid: inj.InjectionResult(pid=pid, ok=True, detail="ok")
+    )
+    monkeypatch.setattr(inj, "wait_for_hooks", lambda _p, pids, **_k: dict.fromkeys(pids, "tap-hooked"))
+
+    message = swc_native_capture.attach_to_windows_client(should_cancel=lambda: False)
+
+    assert "capture active" in message
+
+
+def test_a_cancelled_attach_reports_nothing_to_the_user(monkeypatch) -> None:
+    """A stop the user asked for is not a failure to tell them about."""
+    from fpdb_3_legacy import swc_native_capture
+    from fpdb_3_legacy.GuiAutoImport import SwCWindowsAttachThread
+
+    def cancelled(**_kwargs) -> None:
+        raise swc_native_capture.CaptureAttachCancelled("cancelled before injecting")
+
+    monkeypatch.setattr(swc_native_capture, "attach_to_windows_client", cancelled)
+    thread = SwCWindowsAttachThread()
+    reported: list[str] = []
+    thread.attached.connect(reported.append)
+
+    thread.run()
+
+    assert reported == []
+
+
+def test_the_worker_passes_its_cancellation_through(monkeypatch) -> None:
+    """The flag is only worth setting if the attach can actually read it."""
+    from fpdb_3_legacy import swc_native_capture
+    from fpdb_3_legacy.GuiAutoImport import SwCWindowsAttachThread
+
+    thread = SwCWindowsAttachThread()
+    asked: list[bool] = []
+
+    def attach(*, should_cancel=None) -> str:
+        asked.append(should_cancel())
+        return "ok"
+
+    monkeypatch.setattr(swc_native_capture, "attach_to_windows_client", attach)
+
+    thread.cancel()
+    assert thread.cancelled is True
+    thread.run()
+
+    assert asked == [True]
+
+
+class _SlowAttacher:
+    """An attach worker still compiling when the stop path's wait elapses."""
+
+    def __init__(self) -> None:
+        self.cancelled_called = False
+        self.disconnected: list = []
+        self.attached = SimpleNamespace(disconnect=self.disconnected.append)
+
+    def cancel(self) -> None:
+        self.cancelled_called = True
+
+    @property
+    def cancelled(self) -> bool:
+        return self.cancelled_called
+
+    def wait(self, _ms) -> bool:
+        return False
+
+    def isRunning(self) -> bool:  # noqa: N802 - Qt's spelling
+        return True
+
+
+def test_stopping_cancels_an_attach_that_has_not_injected_yet() -> None:
+    """Otherwise the tap lands after the stop and records until the client exits."""
+    attacher = _SlowAttacher()
+    gui = SimpleNamespace(
+        _stop_cleanup_pending=True,
+        swc_tailing_thread=None,
+        swc_attach_thread=attacher,
+        importer=SimpleNamespace(autoSummaryGrab=lambda _f: None),
+        settings={"global_lock": SimpleNamespace(release=lambda: None)},
+        addText=lambda *_a: None,
+        progressBar=SimpleNamespace(setVisible=lambda _v: None),
+        statusLabel=SimpleNamespace(setText=lambda _t: None),
+        pipe_to_hud=None,
+        intervalEntry=SimpleNamespace(setEnabled=lambda _v: None),
+        startButton=SimpleNamespace(setEnabled=lambda _v: None),
+        _on_swc_tap_attached=object(),
+    )
+
+    _finalize(gui)
+
+    assert attacher.cancelled_called is True
+    assert attacher.disconnected == [gui._on_swc_tap_attached], "and says nothing into a stopped session"
+    assert gui.swc_attach_thread is attacher, "kept referenced until it has really exited"
+
+
+def test_a_restart_replaces_a_cancelled_attach_without_dropping_it() -> None:
+    """It will inject nothing, and it is parentless: it must be neither reused nor freed."""
+    from fpdb_3_legacy.GuiAutoImport import GuiAutoImport
+
+    attacher = _SlowAttacher()
+    gui = SimpleNamespace(swc_attach_thread=attacher, _retiring_attach_threads=[])
+
+    GuiAutoImport._retire_attach_thread(gui)
+
+    assert gui.swc_attach_thread is None, "so the restart builds a new one"
+    assert gui._retiring_attach_threads == [attacher], "and the running one is not garbage"
+
+
+def test_a_finished_attach_is_not_kept_referenced() -> None:
+    """The parking list holds workers still unwinding, not every worker ever made."""
+    from fpdb_3_legacy.GuiAutoImport import GuiAutoImport
+
+    finished = _SlowAttacher()
+    finished.isRunning = lambda: False
+    gui = SimpleNamespace(swc_attach_thread=finished, _retiring_attach_threads=[finished])
+
+    GuiAutoImport._retire_attach_thread(gui)
+
+    assert gui._retiring_attach_threads == []
 
 
 # --------------------------------------------------------------------------

@@ -150,11 +150,37 @@ class SwCWindowsAttachThread(QThread):
 
     attached = Signal(str)
 
+    def __init__(self, parent: QWidget | None = None) -> None:
+        super().__init__(parent)
+        self._cancel_requested = False
+
+    def cancel(self) -> None:
+        """Abandon the attach if the tap has not been injected yet.
+
+        Stopping Auto Import used to leave this worker running: the stop waited
+        a second, gave up, and finalized, while the worker went on to inject.
+        The tap has no unload path, so that injection outlived the stop -- the
+        DLL stayed resident in the client and kept writing decrypted traffic to
+        the archive until the client exited, with the GUI saying capture was
+        off. The worker cannot be interrupted inside a compiler or an injector
+        call, so it reads this before the one step that cannot be undone.
+        """
+        self._cancel_requested = True
+
+    @property
+    def cancelled(self) -> bool:
+        """Whether this attach has been told to abandon its injection."""
+        return self._cancel_requested
+
     def run(self) -> None:
-        from fpdb_3_legacy.swc_native_capture import attach_to_windows_client
+        from fpdb_3_legacy.swc_native_capture import CaptureAttachCancelled, attach_to_windows_client
 
         try:
-            self.attached.emit(attach_to_windows_client())
+            self.attached.emit(attach_to_windows_client(should_cancel=lambda: self._cancel_requested))
+        except CaptureAttachCancelled as exc:
+            # Nothing was injected and nothing is wrong: the user stopped the
+            # capture. Reported to the log, never to the user as a failure.
+            log.info("SwC tap attachment abandoned: %s", exc)
         except Exception as exc:  # noqa: BLE001 - reported to the user, never raised into Qt
             log.warning("Could not attach the SwC tap: %s", exc)
             self.attached.emit(
@@ -483,6 +509,11 @@ class GuiAutoImport(QWidget):
         self.import_thread: AutoImportThread | None = None
         self.swc_tailing_thread: SwCNativeTailingThread | None = None
         self.swc_attach_thread: SwCWindowsAttachThread | None = None
+        # Cancelled attach workers still unwinding. They are parentless -- CLI
+        # mode skips QWidget.__init__, so nothing but a reference can own one --
+        # and dropping the last reference to a running QThread destroys it
+        # mid-run, so a restart parks the old worker here until it has exited.
+        self._retiring_attach_threads: list[SwCWindowsAttachThread] = []
         # One writer at a time on the importer's database: a single connection
         # with a single set of bulk buffers, which no driver here lets two
         # threads drive at once (see Database._create_new_worker_connection).
@@ -836,12 +867,21 @@ class GuiAutoImport(QWidget):
             if not self.swc_tailing_thread.isRunning():
                 self.swc_tailing_thread = None
         if self.swc_attach_thread is not None:
-            # It cannot be interrupted -- it is inside a compiler, an injector or a
-            # wait on the client -- so it is given a moment, and kept referenced if
-            # it needs longer. Dropping the last reference to a running QThread
-            # destroys it mid-run; the guard in start_swc_native_capture will not
-            # replace it while it is still going, so it lives until it finishes and
-            # reports what it found.
+            # Cancelled before anything else: the tap has no unload path, so an
+            # injection that lands after this point would keep recording the
+            # client's decrypted traffic to disk until the client exits, with
+            # Auto Import visibly stopped. The worker cannot be interrupted --
+            # it is inside a compiler, an injector or a wait on the client -- but
+            # it reads the request before it injects, which is the only moment
+            # that can still be taken back.
+            self.swc_attach_thread.cancel()
+            # And it reports nothing afterwards: an attach that did inject
+            # before the request arrived would otherwise announce live capture
+            # into a stopped session.
+            with suppress(RuntimeError, TypeError):
+                self.swc_attach_thread.attached.disconnect(self._on_swc_tap_attached)
+            # Given a moment, and kept referenced if it needs longer: dropping
+            # the last reference to a running QThread destroys it mid-run.
             self.swc_attach_thread.wait(1000)
             if not self.swc_attach_thread.isRunning():
                 self.swc_attach_thread = None
@@ -884,6 +924,20 @@ class GuiAutoImport(QWidget):
             return False
         return True
 
+    def _retire_attach_thread(self) -> None:
+        """Set the current attach worker aside so a new one can replace it.
+
+        It is parentless, so nothing but a reference keeps it alive and dropping
+        the last one destroys a running QThread mid-run. A worker still unwinding
+        is parked until it has exited; the list is swept on the way past, so it
+        holds at most the few that have not finished yet.
+        """
+        thread = self.swc_attach_thread
+        self.swc_attach_thread = None
+        self._retiring_attach_threads = [t for t in self._retiring_attach_threads if t.isRunning()]
+        if thread is not None and thread.isRunning():
+            self._retiring_attach_threads.append(thread)
+
     def start_swc_native_capture(self) -> None:
         """Launch SwC native TLS capture and start live raw tailing thread."""
         if not self._swc_capture_wanted():
@@ -911,7 +965,13 @@ class GuiAutoImport(QWidget):
                 # load them into SwCPoker.exe, which the user must have running.
                 # On its own thread because it compiles, injects and then waits on
                 # the client (see SwCWindowsAttachThread).
-                if self.swc_attach_thread is None or not self.swc_attach_thread.isRunning():
+                attacher = self.swc_attach_thread
+                if attacher is None or not attacher.isRunning() or attacher.cancelled:
+                    # A cancelled attach is finished with even while it is still
+                    # unwinding: it will inject nothing, so a restart that
+                    # adopted it would leave the client untapped while saying
+                    # capture was running.
+                    self._retire_attach_thread()
                     # No parent: GuiAutoImport skips QWidget.__init__ in CLI mode,
                     # and parenting to a half-built widget fails outright. The
                     # attribute below is what keeps this alive.

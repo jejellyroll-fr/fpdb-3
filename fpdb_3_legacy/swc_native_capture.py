@@ -58,6 +58,23 @@ def native_capture_supported(system_name: str | None = None) -> bool:
     return (system_name or platform.system()) in SUPPORTED_SYSTEMS
 
 
+class CaptureAttachCancelled(RuntimeError):
+    """The attach was abandoned before the tap was injected.
+
+    Injection is the step that cannot be taken back: the tap has no unload path,
+    so once ``LoadLibrary`` has run the DLL stays resident in the client and goes
+    on writing decrypted traffic to the archive until the client exits. An
+    attach spends most of its time before that -- compiling the tap and the
+    injector, enumerating processes -- and the user can stop Auto Import during
+    any of it. Those are the moments a stop can still mean something, so they are
+    the moments the request is read.
+
+    A RuntimeError because that is what every other refusal from
+    ``attach_to_windows_client`` already is; callers that only want to report a
+    failure keep working unchanged.
+    """
+
+
 def _attach_warnings(
     injector_mod,
     results: list,
@@ -101,7 +118,21 @@ def _attach_warnings(
     return "".join(notes)
 
 
-def attach_to_windows_client(*, port: int = 0, include_outbound: bool = False) -> str:
+def _abort_attach_if_cancelled(should_cancel: Callable[[], bool] | None, stage: str) -> None:
+    """Raise when the caller has stopped wanting the attach it asked for."""
+    if should_cancel is None or not should_cancel():
+        return
+    log.info("SwC tap attachment abandoned %s: capture was stopped", stage)
+    msg = f"the SwC tap attachment was cancelled {stage}"
+    raise CaptureAttachCancelled(msg)
+
+
+def attach_to_windows_client(
+    *,
+    port: int = 0,
+    include_outbound: bool = False,
+    should_cancel: Callable[[], bool] | None = None,
+) -> str:
     """Build the tap, inject it into the running SwC client, and report the result.
 
     Windows counterpart of ``launch_client``: rather than launching the client
@@ -110,9 +141,17 @@ def attach_to_windows_client(*, port: int = 0, include_outbound: bool = False) -
     ``DEFAULT_ARCHIVE`` -- the injected DLL derives its own paths from its
     location and cannot be told a different one through the environment.
 
+    ``should_cancel`` is polled at the points where the work can still be
+    abandoned -- after the builds, and immediately before the injection -- and
+    raises ``CaptureAttachCancelled`` when it answers True. Nothing in here can
+    be interrupted mid-step (a compiler run, an injector call), so a caller that
+    stops capture gets the guarantee that matters instead: no tap is loaded into
+    a client after the stop.
+
     Returns a short human-readable status. Raises RuntimeError when the client
     is not running or no injection succeeded, so the caller can surface why.
     """
+
     if platform.system() != "Windows":
         msg = "attach_to_windows_client is only valid on Windows"
         raise RuntimeError(msg)
@@ -124,6 +163,9 @@ def attach_to_windows_client(*, port: int = 0, include_outbound: bool = False) -
 
     tap = build_tap(check_executable=False)
     injector = build_injector()
+    # The compiler is the long pole -- on a cold build it is most of the attach,
+    # and it is where a Stop is most likely to land.
+    _abort_attach_if_cancelled(should_cancel, "after building the tap")
     # Checked before the write: a client already holding the tap read its
     # configuration once, in DllMain, and injecting again only bumps the module
     # reference count -- it keeps the old port/outbound filtering until restarted.
@@ -162,6 +204,9 @@ def attach_to_windows_client(*, port: int = 0, include_outbound: bool = False) -
     status_path = DEFAULT_ARCHIVE.with_suffix(".status")
     status_mark = injector_mod.status_file_size(status_path)
 
+    # The last moment that can still be taken back: past this line the DLL is
+    # resident in the client and nothing here can unload it.
+    _abort_attach_if_cancelled(should_cancel, "before injecting")
     results = [injector_mod.inject_into_pid(injector, tap, pid) for pid in pids]
     ok = [r for r in results if r.ok]
     if not ok:
