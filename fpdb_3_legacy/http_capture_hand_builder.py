@@ -159,6 +159,24 @@ def _players_involved(hand_data: dict[str, Any]) -> set[str]:
     return involved
 
 
+def _seat_number(seat_idx: Any) -> Any:
+    """One envelope seat index as the seat number the rest of fpdb uses.
+
+    ``seat_idx`` is a 0-based index into the capture's seat array; every other
+    site numbers seats from 1, and so does the rest of fpdb. Passing the raw
+    index through gave the first player seat 0, which the HUD's ``if seat:``
+    occupancy check reads as empty -- that player silently got no stat panel
+    while everyone else did.
+
+    Every seat the envelope names goes through here, players and button alike,
+    so that the two cannot drift apart: a button left in the envelope's own
+    numbering pointed at a seat nobody held, and ``DerivedStats._pt4_ring_code``
+    then fell back to the first occupied seat and derived every position from
+    there.
+    """
+    return seat_idx + 1 if isinstance(seat_idx, int) else seat_idx
+
+
 def build_hand_operations(hand_data: dict[str, Any]) -> list[dict[str, Any]]:
     """Translate normalized capture data into an ordered Hand.py operation plan."""
 
@@ -172,18 +190,11 @@ def build_hand_operations(hand_data: dict[str, Any]) -> list[dict[str, Any]]:
         name = player.get("name")
         if involved and name and name not in involved:
             continue
-        # seat_idx is a 0-based index into the snapshot's seat array; every other
-        # site numbers seats from 1, and so does the rest of fpdb. Passing the
-        # raw index through gave the first player seat 0, which the HUD's
-        # `if seat:` occupancy check reads as empty -- that player silently got
-        # no stat panel while everyone else did.
-        seat_idx = player.get("seat_idx")
-        seat_number = seat_idx + 1 if isinstance(seat_idx, int) else seat_idx
         operations.append(
             {
                 "method": "addPlayer",
                 "args": [
-                    seat_number,
+                    _seat_number(player.get("seat_idx")),
                     player.get("name"),
                     str(player.get("starting_stack", 0)),
                 ],
@@ -452,6 +463,16 @@ def validate_hand_operations(operations: list[dict[str, Any]]) -> list[str]:
     """Return validation errors for a Hand.py operation plan."""
 
     errors = []
+    # Who already holds each seat, so a second claim on it is reported here.
+    # Hand.addPlayer raises FpdbHandPartial on a repeat seat *while building*,
+    # and the live capture path treats an exception from the build as a
+    # transient failure and offers the hand again -- forever, since nothing
+    # about the hand can change. Two unresolved seats (both ``None``) are the
+    # way that happens: seat evidence comes from the deal and can be missing
+    # for everyone at once. Refused here, the same hand is a plain
+    # CaptureNotImportableError and retires on the retry budget like any other
+    # capture the importer cannot use.
+    seat_holders: dict[Any, Any] = {}
     for index, operation in enumerate(operations, start=1):
         method = operation.get("method")
         args = operation.get("args", [])
@@ -461,6 +482,12 @@ def validate_hand_operations(operations: list[dict[str, Any]]) -> list[str]:
         if method == "addPlayer":
             if len(args) < 3 or args[1] in (None, ""):
                 errors.append(f"operation {index}: addPlayer requires seat, name, chips")
+            elif not isinstance(args[0], int):
+                errors.append(f"operation {index}: addPlayer has no resolved seat for '{args[1]}'")
+            elif args[0] in seat_holders:
+                errors.append(f"operation {index}: seat {args[0]} is already held by '{seat_holders[args[0]]}'")
+            else:
+                seat_holders[args[0]] = args[1]
         elif method in {"addCall", "addBet", "addRaiseTo", "addFold", "addCheck"}:
             if len(args) < 2 or args[0] in (None, "", "UNKNOWN") or args[1] in (None, ""):
                 errors.append(f"operation {index}: {method} requires street and player")
@@ -538,7 +565,7 @@ def build_fpdb_hand(
     hand.startTime = _parse_capture_start_time(hand_data.get("timestamp"))
     hand.hero = hand_data.get("hero") or ""
     if hand_data.get("buttonpos") is not None:
-        hand.buttonpos = hand_data["buttonpos"]
+        hand.buttonpos = _seat_number(hand_data["buttonpos"])
     _apply_tournament_fields(hand, hand_data)
     execute_hand_operations(hand, build_input["operations"])
     _apply_special_hand_fields(hand, hand_data)

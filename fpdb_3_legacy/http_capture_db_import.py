@@ -202,6 +202,14 @@ def _enrich_existing_native_boards(db: Any, hand_data: dict[str, Any]) -> int | 
 #: mBTC unconditionally, so that is the value both paths have to agree on.
 SWC_IMPORT_CURRENCY = "mBTC"
 
+#: The buy-in currency a captured tournament is recorded under. The native
+#: protocol names the tournament and nothing else about it -- no buy-in, no fee,
+#: no currency -- and "NA" is what fpdb's text converters already write when a
+#: hand history does not state one (EverleafToFpdb, FulltiltToFpdb, PartyPoker
+#: and a dozen more). Recording the hand against its real tournament with the
+#: price left unstated is the same bargain they struck.
+NATIVE_TOURNAMENT_BUYIN_CURRENCY = "NA"
+
 #: Native units per displayed unit, by game type. The capture envelope says so of
 #: itself (``metadata.money_unit == "room_native_integer"``) and per collection
 #: (``native_units_per_display_unit``); the tournament scale is 1 because a
@@ -265,6 +273,27 @@ def _scale_keys(target: Any, keys: tuple[str, ...], scale: int) -> None:
             target[key] = _displayed(target[key], scale)
 
 
+def _native_tournament_fields(hand_data: dict[str, Any]) -> dict[str, Any] | None:
+    """The builder's tournament block for a native tour hand, or None.
+
+    Normalization derives ``gametype.type == "tour"`` from the table's
+    ``tournament_id`` but leaves that id at the top level of the envelope, where
+    ``_apply_tournament_fields`` never looks: it reads a ``tournament`` object
+    that this path never built. The hand therefore reached the database with
+    ``tourNo`` unset, and ``Hand.prepInsert`` skips the TourneyTypes, Tourneys
+    and TourneysPlayers rows entirely when it is -- storing a tournament hand
+    with no tournament attached to it, invisible to every tournament view.
+    """
+    tour_no = hand_data.get("tournament_id")
+    if tour_no is None:
+        return None
+    return {
+        "tour_no": tour_no,
+        "name": hand_data.get("table_name"),
+        "buyin_currency": NATIVE_TOURNAMENT_BUYIN_CURRENCY,
+    }
+
+
 def _native_public_import_copy(hand_data: dict[str, Any]) -> dict[str, Any] | None:
     """Prepare a complete native public hand for the legacy Hand.py importer.
 
@@ -301,6 +330,14 @@ def _native_public_import_copy(hand_data: dict[str, Any]) -> dict[str, Any] | No
         _scale_native_money(candidate, scale)
     if isinstance(gametype, dict):
         gametype["currency"] = SWC_IMPORT_CURRENCY
+    if game_type == "tour":
+        tournament = _native_tournament_fields(hand_data)
+        if tournament is None:
+            # The gametype says tournament and nothing says which one. An
+            # orphan row is worse than a hand left in the capture, where the
+            # evidence is still whole and a later copy can carry the id.
+            return None
+        candidate["tournament"] = tournament
     return candidate
 
 

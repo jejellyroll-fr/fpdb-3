@@ -1293,7 +1293,9 @@ def _importable_envelope(**extra) -> dict:
         "game": {"base": "hold"},
         "metadata": {"importability": dict.fromkeys(NATIVE_IMPORT_AUDIT_FLAGS, True)},
         "actions": [{"type": "checks", "player": "A", "street": "FLOP", "amount": 0}],
-        "players": [{"name": "A"}],
+        # Seated, because the importer refuses a participant whose seat is
+        # unresolved: an unseated player is a seat clash waiting to happen.
+        "players": [{"name": "A", "seat_idx": 0}],
         **extra,
     }
 
@@ -1483,6 +1485,7 @@ def test_a_tournament_native_hand_is_left_in_chips() -> None:
 
     hand = _native_ring_hand()
     hand["gametype"]["type"] = "tour"
+    hand["tournament_id"] = 5150
 
     candidate = _native_public_import_copy(hand)
 
@@ -1494,6 +1497,124 @@ def test_a_tournament_native_hand_is_left_in_chips() -> None:
     # which is already the chip count it wants.
     assert "amount" not in candidate["collections"][0]
     assert candidate["collections"][0]["amount_native"] == 56
+
+
+def test_a_native_tournament_hand_carries_its_tournament_identity() -> None:
+    """Without it Hand.prepInsert skips every tourney row and stores an orphan."""
+    from fpdb_3_legacy.http_capture_db_import import _native_public_import_copy
+
+    hand = _native_ring_hand()
+    hand["gametype"]["type"] = "tour"
+    hand["tournament_id"] = 5150
+    hand["table_name"] = "Micro Turbo #5150"
+
+    candidate = _native_public_import_copy(hand)
+
+    assert candidate is not None
+    assert candidate["tournament"]["tour_no"] == 5150
+    assert candidate["tournament"]["name"] == "Micro Turbo #5150"
+    # The room never sends a price over this protocol, and "NA" is what every
+    # text converter writes for a hand history that does not state one.
+    assert candidate["tournament"]["buyin_currency"] == "NA"
+
+
+def test_a_native_tournament_hand_with_no_tournament_id_is_not_imported() -> None:
+    """A tour gametype with nothing naming the tournament cannot be attached."""
+    from fpdb_3_legacy.http_capture_db_import import _native_public_import_copy
+
+    hand = _native_ring_hand()
+    hand["gametype"]["type"] = "tour"
+
+    assert _native_public_import_copy(hand) is None
+
+
+def test_the_tournament_block_reaches_the_hand_as_a_real_tourney_number() -> None:
+    """End to end: the builder only reads tourNo from the tournament object."""
+    from fpdb_3_legacy.http_capture_db_import import _native_public_import_copy
+    from fpdb_3_legacy.http_capture_hand_builder import build_fpdb_hand
+
+    hand_data = _native_ring_hand()
+    hand_data["gametype"]["type"] = "tour"
+    hand_data["gametype"]["limitType"] = "nl"
+    hand_data["gametype"]["maxSeats"] = 2
+    hand_data["tournament_id"] = 5150
+    hand_data["table_name"] = "Micro Turbo #5150"
+
+    candidate = _native_public_import_copy(hand_data)
+    assert candidate is not None
+    hand = build_fpdb_hand(candidate)
+
+    assert hand.tourNo == 5150
+    assert hand.tourneyName == "Micro Turbo #5150"
+    assert hand.buyin == 0
+    assert hand.fee == 0
+    assert hand.buyinCurrency == "NA"
+
+
+def test_an_unresolved_seat_is_refused_instead_of_retried_forever() -> None:
+    """Two seatless players are one duplicate seat to Hand.addPlayer.
+
+    That raises FpdbHandPartial out of the build, and the live path reads an
+    exception from the build as a transient failure and re-offers the hand with
+    no budget -- a deterministic refusal repeated for the rest of the session.
+    """
+    from fpdb_3_legacy.http_capture_hand_builder import build_hand_operations, validate_hand_operations
+
+    hand_data = {
+        "players": [
+            {"name": "Hero", "seat_idx": None, "starting_stack": 100},
+            {"name": "Villain", "seat_idx": None, "starting_stack": 100},
+        ],
+        "actions": [
+            {"type": "small blind", "player": "Hero", "street": "BLINDSANTES", "amount": "1"},
+            {"type": "big blind", "player": "Villain", "street": "BLINDSANTES", "amount": "2"},
+        ],
+    }
+
+    errors = validate_hand_operations(build_hand_operations(hand_data))
+
+    assert errors, "an unseated player is a refusal, not an exception mid-build"
+    assert "no resolved seat" in errors[0]
+
+
+def test_a_hand_whose_participants_have_no_seats_is_not_ranked_importable() -> None:
+    """So the ranking cannot prefer a seatless copy over one that can be seated."""
+    from fpdb_3_legacy.swc_native_capture import native_hand_is_publicly_importable
+
+    hand = _native_ring_hand()
+    assert native_hand_is_publicly_importable(hand) is True
+
+    for player in hand["players"]:
+        player["seat_idx"] = None
+    assert native_hand_is_publicly_importable(hand) is False
+
+
+def test_a_player_sitting_the_hand_out_does_not_need_a_seat() -> None:
+    """Seat evidence comes from the deal, so only participants can have one."""
+    from fpdb_3_legacy.swc_native_capture import native_hand_is_publicly_importable
+
+    hand = _native_ring_hand()
+    hand["players"].append({"name": "Watcher", "seat_idx": None, "starting_stack": None})
+
+    assert native_hand_is_publicly_importable(hand) is True
+
+
+def test_the_native_button_index_reaches_the_hand_in_seat_numbering() -> None:
+    """The envelope's buttonpos is a seat_idx, and seats are stored 1-based."""
+    from fpdb_3_legacy.http_capture_db_import import _native_public_import_copy
+    from fpdb_3_legacy.http_capture_hand_builder import build_fpdb_hand
+
+    hand_data = _native_ring_hand()
+    hand_data["gametype"]["maxSeats"] = 2
+    # promote_native_omaha_importability copies the small blind's seat_idx here.
+    hand_data["buttonpos"] = hand_data["players"][0]["seat_idx"]
+
+    candidate = _native_public_import_copy(hand_data)
+    assert candidate is not None
+    hand = build_fpdb_hand(candidate)
+
+    seats = {name: seat for seat, name, *_rest in hand.players}
+    assert hand.buttonpos == seats["Hero"], "the button names the small blind's stored seat"
 
 
 def test_an_unparsable_native_amount_does_not_abort_the_import() -> None:
@@ -1624,6 +1745,7 @@ def test_a_native_tournament_hand_gets_the_currency_too() -> None:
     hand = _native_ring_hand()
     hand["gametype"]["type"] = "tour"
     hand["gametype"]["currency"] = "room_native"
+    hand["tournament_id"] = 5150
 
     candidate = _native_public_import_copy(hand)
 
@@ -2129,12 +2251,11 @@ def test_a_tailer_that_outlasts_the_stop_can_no_longer_import(monkeypatch) -> No
     assert gui.swc_tailing_thread is tailer, "kept referenced until it has really exited"
 
 
-def test_a_restart_does_not_adopt_a_tailer_that_was_told_to_stop() -> None:
+def test_a_restart_does_not_adopt_a_tailer_that_was_told_to_stop(tmp_path) -> None:
     """Otherwise a slow stop leaves the restart with a thread on its way out."""
     from fpdb_3_legacy.GuiAutoImport import SwCNativeTailingThread
 
-    thread = SwCNativeTailingThread.__new__(SwCNativeTailingThread)
-    thread._stop_requested = False
+    thread = SwCNativeTailingThread(raw_path=tmp_path / "swc-native.raw")
     assert thread.stopping is False
 
     thread.stop()

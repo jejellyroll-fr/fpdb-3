@@ -3149,6 +3149,21 @@ NATIVE_IMPORT_AUDIT_FLAGS = (
 )
 
 
+def _native_hand_participants(hand: dict) -> set[str]:
+    """The players a build would actually seat: the ones who took part.
+
+    The envelope lists everyone sitting at the table, dealt into this hand or
+    not, and the builder drops those who took no part in it. Seat evidence is
+    derived from the deal, so someone sitting the hand out legitimately has no
+    seat -- which is why the seat check below asks about the participants and
+    not about the whole roster.
+    """
+    names = {action.get("player") for action in hand.get("actions") or ()}
+    names.update(item.get("player") for item in hand.get("collections") or ())
+    names.discard(None)
+    return names
+
+
 def native_hand_is_publicly_importable(hand: dict) -> bool:
     """Whether the legacy importer would build a Hand.py hand from this copy.
 
@@ -3161,11 +3176,21 @@ def native_hand_is_publicly_importable(hand: dict) -> bool:
     if (hand.get("game") or {}).get("base") != "hold":
         return False
     audit = (hand.get("metadata") or {}).get("importability") or {}
-    return (
+    if not (
         all(audit.get(flag) is True for flag in NATIVE_IMPORT_AUDIT_FLAGS)
         and bool(hand.get("actions"))
         and bool(hand.get("players"))
-    )
+    ):
+        return False
+    # Action and settlement evidence can be complete while seat evidence is
+    # not, and Hand.addPlayer refuses two players in one seat -- which is what
+    # two unresolved seats are. Asked here as well as in the builder so the
+    # ranking between two clients' copies of a hand prefers the one that can
+    # actually be seated, rather than choosing a seatless copy and losing a
+    # hand the other client had whole.
+    participants = _native_hand_participants(hand)
+    seats = [player.get("seat_idx") for player in hand.get("players") or () if player.get("name") in participants]
+    return all(isinstance(seat, int) for seat in seats) and len(set(seats)) == len(seats)
 
 
 def _native_envelope_rank(hand: dict) -> tuple:
