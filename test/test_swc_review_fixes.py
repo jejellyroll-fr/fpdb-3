@@ -11,9 +11,11 @@
 
 from __future__ import annotations
 
+import gc
 import struct
 import time
 from datetime import UTC, datetime
+from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import MagicMock
 
@@ -2071,6 +2073,109 @@ def test_a_newcomer_does_not_stale_the_ledger_behind_them(monkeypatch) -> None:
     assert _stacks(after) == [386, 414]
 
 
+def _timed_ledger_hand(hand_id: int, timestamp: str, names: list[str], actions: list[dict]) -> dict:
+    hand = _ledger_hand(hand_id, names, actions, [])
+    hand["timestamp"] = timestamp
+    return hand
+
+
+def _run_timed_ledger(monkeypatch, hands: list[dict], roster: list[tuple[str, int]], roster_time: str) -> None:
+    from fpdb_3_legacy import swc_native_capture as mod
+
+    monkeypatch.setattr(mod, "extract_native_outbound_login_name", lambda _m: None)
+    monkeypatch.setattr(mod, "parse_native_outbound_seat_request", lambda _m: None)
+    monkeypatch.setattr(
+        mod,
+        "extract_native_table_player_stacks",
+        lambda _m: {
+            "table_id": 24812,
+            "timestamp": roster_time,
+            "source": "swc_native_received_type_23_table_roster",
+            "players": [{"name": name, "starting_stack": stack} for name, stack in roster],
+        },
+    )
+    mod.add_native_starting_stacks(hands, [object()])
+
+
+def test_a_later_roster_does_not_label_the_hands_that_came_before_it(monkeypatch) -> None:
+    """The anchor is the fullest roster, not the earliest: a player sitting down
+    sends a longer one later, and its balances are that moment's, not the
+    window's. Applied backwards they became an earlier hand's startCash, and
+    every hand after it was rolled forward from the wrong number."""
+    earlier = _timed_ledger_hand(1, "2026-09-14T12:00:00+00:00", ["A", "B"], [{"type": "bets", "player": "A", "amount": 4}])
+    after = _timed_ledger_hand(2, "2026-09-14T12:10:00+00:00", ["A", "B"], [{"type": "bets", "player": "A", "amount": 6}])
+
+    _run_timed_ledger(monkeypatch, [earlier, after], [("A", 400), ("B", 400)], "2026-09-14T12:05:00+00:00")
+
+    assert _stacks(earlier) == [None, None], "it was over before the roster was sent"
+    assert _stacks(after) == [400, 400], "the ledger starts on the first hand the roster can describe"
+
+
+def test_a_roster_sent_before_the_first_hand_still_anchors_it(monkeypatch) -> None:
+    """The ordinary case must not be lost to the guard."""
+    first = _timed_ledger_hand(1, "2026-09-14T12:05:00+00:00", ["A", "B"], [{"type": "bets", "player": "A", "amount": 4}])
+
+    _run_timed_ledger(monkeypatch, [first], [("A", 400), ("B", 400)], "2026-09-14T12:00:00+00:00")
+
+    assert _stacks(first) == [400, 400]
+
+
+def test_an_unreadable_timestamp_leaves_the_ledger_where_it_was(monkeypatch) -> None:
+    """Two moments that cannot be compared must not silently drop hands."""
+    first = _timed_ledger_hand(1, "not a timestamp", ["A", "B"], [{"type": "bets", "player": "A", "amount": 4}])
+
+    _run_timed_ledger(monkeypatch, [first], [("A", 400), ("B", 400)], "2026-09-14T12:00:00+00:00")
+
+    assert _stacks(first) == [400, 400]
+
+
+def test_a_naive_hand_timestamp_is_not_compared_to_an_aware_roster(monkeypatch) -> None:
+    """Comparing them raises; the guard has to answer "cannot tell", not crash."""
+    first = _timed_ledger_hand(1, "2026-09-14T12:05:00", ["A", "B"], [{"type": "bets", "player": "A", "amount": 4}])
+
+    _run_timed_ledger(monkeypatch, [first], [("A", 400), ("B", 400)], "2026-09-14T12:00:00+00:00")
+
+    assert _stacks(first) == [400, 400]
+
+
+def test_the_capture_file_is_forgotten_with_its_connection() -> None:
+    """id(db) was the key, and CPython hands the same address to the next object.
+
+    A reconnect landing where the old Database had been would have been given
+    the previous database's Files id: a foreign key violation on the server
+    backends, and on SQLite a hand attached to an unrelated file row.
+    """
+    from fpdb_3_legacy import http_capture_db_import as mod
+
+    class _Connection:
+        pass
+
+    mod._native_capture_file_ids.clear()
+    first = _Connection()
+    mod._remember_capture_file(first, 77)
+    assert mod._remembered_capture_file(first) == 77
+
+    address = id(first)
+    del first
+    gc.collect()
+
+    successor = _Connection()
+    if id(successor) == address:
+        assert mod._remembered_capture_file(successor) == 0, "the dead connection's row is gone"
+    assert len(mod._native_capture_file_ids) == 0, "nothing outlives the connection it described"
+
+
+def test_a_connection_that_cannot_be_cached_is_simply_not_cached() -> None:
+    """A stub that takes no weak reference must not become an error path."""
+    from fpdb_3_legacy import http_capture_db_import as mod
+
+    stub = object()
+    mod._remember_capture_file(stub, 5)
+
+    assert mod._remembered_capture_file(stub) == 0
+    assert mod._ensure_capture_file(stub) == 0
+
+
 # --------------------------------------------------------------------------
 # The Windows attach cannot run on the GUI thread.
 # --------------------------------------------------------------------------
@@ -2137,6 +2242,66 @@ def test_a_cancelled_attach_never_injects_the_tap(tmp_path, monkeypatch) -> None
         swc_native_capture.attach_to_windows_client(should_cancel=lambda: True)
 
     assert injected == [], "nothing was loaded into the client"
+
+
+def test_a_stop_during_one_injection_spares_the_clients_behind_it(tmp_path, monkeypatch) -> None:
+    """One injection blocks for up to the injector's 45s timeout.
+
+    Read once for the whole batch, a stop arriving during the first client's
+    injection still loaded the tap into every client behind it -- minutes later,
+    and permanently, because the tap has no unload path.
+    """
+    from fpdb_3_legacy import swc_native_capture, swc_tap_build
+    from fpdb_3_legacy import swc_windows_inject as inj
+
+    monkeypatch.setattr(swc_native_capture.platform, "system", lambda: "Windows")
+    monkeypatch.setattr(swc_native_capture, "build_tap", lambda **_: tmp_path / "tap.dll")
+    monkeypatch.setattr(swc_native_capture, "DEFAULT_ARCHIVE", tmp_path / "swc-native.raw")
+    monkeypatch.setattr(swc_tap_build, "build_injector", lambda **_: tmp_path / "inj.exe")
+    monkeypatch.setattr(inj, "write_capture_config", lambda *_a, **_k: tmp_path / "c.cfg")
+    monkeypatch.setattr(inj, "capture_config_changed", lambda *_a, **_k: False)
+    monkeypatch.setattr(inj, "find_client_pids", lambda *_a, **_k: [100, 200, 300])
+    monkeypatch.setattr(inj, "write_stream_ids", lambda *_a, **_k: {})
+    monkeypatch.setattr(inj, "reset_stream_ids", lambda *_a, **_k: 0)
+
+    stopped: list[bool] = [False]
+    injected: list[int] = []
+
+    def inject(_injector, _dll, pid):
+        injected.append(pid)
+        # The user hits Stop while this call is still blocked in the injector.
+        stopped[0] = True
+        return inj.InjectionResult(pid=pid, ok=True, detail="ok")
+
+    monkeypatch.setattr(inj, "inject_into_pid", inject)
+
+    with pytest.raises(swc_native_capture.CaptureAttachCancelled, match="pid 200"):
+        swc_native_capture.attach_to_windows_client(should_cancel=lambda: stopped[0])
+
+    assert injected == [100], "the two clients behind the stop were spared"
+
+
+def test_an_abandoned_injection_names_the_clients_already_tapped() -> None:
+    """Nothing can unload them, so the least the message can do is say who they are."""
+    from fpdb_3_legacy import swc_native_capture
+    from fpdb_3_legacy import swc_windows_inject as inj
+
+    injector_mod = SimpleNamespace(
+        inject_into_pid=lambda _i, _d, pid: inj.InjectionResult(pid=pid, ok=True, detail="ok"),
+    )
+
+    calls: list[int] = []
+
+    def cancel_after_one() -> bool:
+        calls.append(1)
+        return len(calls) > 1
+
+    with pytest.raises(swc_native_capture.CaptureAttachCancelled) as caught:
+        swc_native_capture._inject_into_each_client(
+            injector_mod, Path("inj.exe"), Path("tap.dll"), [100, 200], cancel_after_one
+        )
+
+    assert "100 already hold the tap" in str(caught.value)
 
 
 def test_an_attach_that_is_not_cancelled_still_injects(tmp_path, monkeypatch) -> None:

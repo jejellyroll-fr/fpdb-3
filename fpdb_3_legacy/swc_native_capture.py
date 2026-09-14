@@ -127,6 +127,39 @@ def _abort_attach_if_cancelled(should_cancel: Callable[[], bool] | None, stage: 
     raise CaptureAttachCancelled(msg)
 
 
+def _inject_into_each_client(
+    injector_mod,
+    injector: Path,
+    tap: Path,
+    pids: list[int],
+    should_cancel: Callable[[], bool] | None,
+) -> list:
+    """Load the tap into each client, abandoning the rest if capture is stopped.
+
+    The cancellation is read per client rather than once for the batch. One
+    injection runs the injector as a subprocess with a 45-second timeout, so a
+    stop arriving during the first would otherwise go on loading the tap into
+    every client behind it -- minutes after the user stopped, and each one
+    permanent, since the tap has no unload path.
+
+    That same permanence is why the abandonment names the clients already
+    holding it: they go on recording until they exit, and nothing here can
+    change that, so the least it can do is say so.
+    """
+    results: list = []
+    for pid in pids:
+        loaded = [result.pid for result in results if result.ok]
+        already = (
+            f"; pid(s) {', '.join(str(loaded_pid) for loaded_pid in loaded)} already hold the tap "
+            "and go on recording until they exit"
+            if loaded
+            else ""
+        )
+        _abort_attach_if_cancelled(should_cancel, f"before injecting pid {pid}{already}")
+        results.append(injector_mod.inject_into_pid(injector, tap, pid))
+    return results
+
+
 def attach_to_windows_client(
     *,
     port: int = 0,
@@ -142,11 +175,11 @@ def attach_to_windows_client(
     location and cannot be told a different one through the environment.
 
     ``should_cancel`` is polled at the points where the work can still be
-    abandoned -- after the builds, and immediately before the injection -- and
-    raises ``CaptureAttachCancelled`` when it answers True. Nothing in here can
-    be interrupted mid-step (a compiler run, an injector call), so a caller that
-    stops capture gets the guarantee that matters instead: no tap is loaded into
-    a client after the stop.
+    abandoned -- after the builds, and again before each client is injected --
+    and raises ``CaptureAttachCancelled`` when it answers True. Nothing in here
+    can be interrupted mid-step (a compiler run, an injector call), so a caller
+    that stops capture gets the guarantee that matters instead: no further tap
+    is loaded into a client after the stop.
 
     Returns a short human-readable status. Raises RuntimeError when the client
     is not running or no injection succeeded, so the caller can surface why.
@@ -204,10 +237,7 @@ def attach_to_windows_client(
     status_path = DEFAULT_ARCHIVE.with_suffix(".status")
     status_mark = injector_mod.status_file_size(status_path)
 
-    # The last moment that can still be taken back: past this line the DLL is
-    # resident in the client and nothing here can unload it.
-    _abort_attach_if_cancelled(should_cancel, "before injecting")
-    results = [injector_mod.inject_into_pid(injector, tap, pid) for pid in pids]
+    results = _inject_into_each_client(injector_mod, injector, tap, pids, should_cancel)
     ok = [r for r in results if r.ok]
     if not ok:
         detail = "; ".join(f"pid {r.pid}: {r.detail}" for r in results)
@@ -2915,6 +2945,38 @@ def summarize_native_hands(messages: list[NativeProtocolMessage]) -> list[Native
     ]
 
 
+def _native_capture_moment(value: object) -> datetime | None:
+    """One ISO capture timestamp as a datetime, or None if it cannot be read."""
+    if not isinstance(value, str):
+        return None
+    try:
+        return datetime.fromisoformat(value)
+    except ValueError:
+        return None
+
+
+def _hand_predates_roster(hand: dict, anchor: datetime | None) -> bool:
+    """Whether this hand was already under way when the roster was sent.
+
+    The roster used as the ledger's anchor is the *fullest* one, not the first:
+    a player sitting down makes the room send a longer one later in the capture,
+    and that one wins. Its balances describe the table at its own moment, so a
+    hand that had already been played by then cannot be anchored on it -- doing
+    so wrote a later balance as that hand's startCash and then rolled every hand
+    after it forward from the wrong number.
+
+    Answers False whenever the two moments cannot be compared (a timestamp
+    missing, unparsable, or one aware and the other naive), which leaves the
+    ledger exactly where it was rather than silently dropping hands.
+    """
+    if anchor is None:
+        return False
+    moment = _native_capture_moment(hand.get("timestamp"))
+    if moment is None or (moment.tzinfo is None) != (anchor.tzinfo is None):
+        return False
+    return moment < anchor
+
+
 def add_native_starting_stacks(  # noqa: C901
     hands: list[dict], messages: list[NativeProtocolMessage]
 ) -> None:
@@ -2940,7 +3002,13 @@ def add_native_starting_stacks(  # noqa: C901
     for table_id, roster in rosters.items():
         running_stacks = {player["name"]: player["starting_stack"] for player in roster["players"]}
         started = False
+        anchor = _native_capture_moment(roster.get("timestamp"))
         for hand in (item for item in hands if item["table_id"] == table_id):
+            if _hand_predates_roster(hand, anchor):
+                # Left unlabelled rather than labelled wrongly. `started` is
+                # untouched, so a hand skipped here is not the gap that stops a
+                # ledger already rolling -- the ledger has not begun.
+                continue
             actions = hand.get("actions") or []
             if not actions:
                 # Nothing here can say how much money moved in this hand, so the
@@ -2965,22 +3033,46 @@ def add_native_starting_stacks(  # noqa: C901
                 if started:
                     _roll_native_stacks_forward(running_stacks, hand, actions)
                 continue
-            request = seat_requests.get(table_id)
-            for player in hand["players"]:
-                name = player["name"]
-                player["starting_stack"] = running_stacks[name]
-                source = roster["source"] if not started else "exact_prior_hand_ledger"
-                if (
-                    not started
-                    and request is not None
-                    and name == local_player
-                    and player.get("seat_idx") == request["seat_idx"]
-                    and running_stacks[name] == request["requested_stack_native"]
-                ):
-                    source = "corroborated_native_type_11_and_type_23"
-                player["starting_stack_source"] = source
+            _label_native_starting_stacks(
+                hand,
+                running_stacks,
+                anchored=not started,
+                anchor_source=roster["source"],
+                request=seat_requests.get(table_id),
+                local_player=local_player,
+            )
             started = True
             _roll_native_stacks_forward(running_stacks, hand, actions)
+
+
+def _label_native_starting_stacks(
+    hand: dict,
+    running_stacks: dict[str, int],
+    *,
+    anchored: bool,
+    anchor_source: str,
+    request: dict | None,
+    local_player: str | None,
+) -> None:
+    """Write one hand's starting stacks, and say where each of them came from.
+
+    ``anchored`` marks the hand the ledger starts on: its stacks are the roster's
+    own reading, and only there can the local player's seat request corroborate
+    them. Every hand after it is the arithmetic of the hands before.
+    """
+    for player in hand["players"]:
+        name = player["name"]
+        player["starting_stack"] = running_stacks[name]
+        source = anchor_source if anchored else "exact_prior_hand_ledger"
+        if (
+            anchored
+            and request is not None
+            and name == local_player
+            and player.get("seat_idx") == request["seat_idx"]
+            and running_stacks[name] == request["requested_stack_native"]
+        ):
+            source = "corroborated_native_type_11_and_type_23"
+        player["starting_stack_source"] = source
 
 
 def _roll_native_stacks_forward(running_stacks: dict[str, int], hand: dict, actions: list[dict]) -> None:

@@ -5,6 +5,7 @@ from __future__ import annotations
 import datetime
 import json
 import re
+import weakref
 from dataclasses import dataclass
 from decimal import Decimal
 from pathlib import Path
@@ -49,12 +50,42 @@ _NATIVE_DELETE_BOARDS_SQL = "DELETE FROM Boards WHERE handId=%s"
 #: capture, as the CoinPoker live path does.
 NATIVE_CAPTURE_FILE_NAME = "swc-native-capture"
 
-_native_capture_file_ids: dict[int, int] = {}
+#: Files row id per database connection. Keyed by the connection object and held
+#: weakly, so an entry lives exactly as long as the connection it describes.
+#: Keyed by ``id(db)`` this was a stale-cache waiting to happen: CPython reuses
+#: an address as soon as the object at it is collected, so a reconnect that
+#: landed a new Database where the old one had been would have been handed the
+#: previous database's Files id -- a foreign key violation on the server
+#: backends, and on SQLite a hand quietly attached to an unrelated file row.
+#: A strong dict would have avoided that only by keeping every connection, and
+#: its sockets, alive for the life of the process.
+_native_capture_file_ids: weakref.WeakKeyDictionary[Any, int] = weakref.WeakKeyDictionary()
+
+
+def _remembered_capture_file(db: Any) -> int:
+    """The Files row already made for this connection, or 0.
+
+    A connection that cannot be weakly referenced or hashed -- a stub in a test,
+    an exotic wrapper -- simply is not cached. It is asked again each time, which
+    is the behaviour it would have had with no cache at all.
+    """
+    try:
+        return _native_capture_file_ids.get(db, 0)
+    except TypeError:
+        return 0
+
+
+def _remember_capture_file(db: Any, file_id: int) -> None:
+    """Record the Files row for this connection, where that is possible."""
+    try:
+        _native_capture_file_ids[db] = file_id
+    except TypeError:
+        log.debug("The SwC capture Files row cannot be cached for this connection type")
 
 
 def _ensure_capture_file(db: Any) -> int:
     """Return a Files row id the native hands can hang off, creating it once."""
-    cached = _native_capture_file_ids.get(id(db))
+    cached = _remembered_capture_file(db)
     if cached:
         return cached
     if not hasattr(db, "get_id") or not hasattr(db, "storeFile"):
@@ -74,7 +105,7 @@ def _ensure_capture_file(db: Any) -> int:
         _rollback_quietly(db)
         return 0
     file_id = int(file_id)
-    _native_capture_file_ids[id(db)] = file_id
+    _remember_capture_file(db, file_id)
     return file_id
 
 
