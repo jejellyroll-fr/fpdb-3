@@ -71,6 +71,79 @@ def test_a_deferred_hand_is_re_offered_without_new_records(tmp_path, monkeypatch
     assert thread.poll_once() == [hand], "a due retry must fire even with no new records"
 
 
+def test_a_due_hand_is_offered_once_while_its_callback_is_still_working(tmp_path, monkeypatch) -> None:
+    """The offer consumes the deadline; the answer to it is what sets a new one.
+
+    hand_imported is queued onto the GUI thread, which may be inside a database
+    import, while the poll comes round every 2.5s. With the deadline left
+    standing it read as due on every one of those polls: the backoff was
+    ignored, one refusal spent several of the retry budget's offers, and a hand
+    the first callback imported was imported again by the ones queued behind it.
+    """
+    hand = {"table_id": 7, "hand_id": 1234}
+    thread, _raw = _tailer(tmp_path, monkeypatch, [hand])
+    thread.poll_once()
+
+    thread.retry_hand(hand)
+    thread._retry_after[thread._hand_key(hand)] = 0.0
+
+    assert thread.poll_once() == [hand], "the retry fires"
+    # The callback has not answered yet: no mark_hand_complete, no retry_hand.
+    assert thread.poll_once() == [], "and is not handed out again while in flight"
+    assert thread.poll_once() == []
+
+
+def test_the_hand_comes_back_once_its_callback_asks_for_another_turn(tmp_path, monkeypatch) -> None:
+    """Consuming the deadline must not be a way to lose the hand."""
+    hand = {"table_id": 7, "hand_id": 1234}
+    thread, _raw = _tailer(tmp_path, monkeypatch, [hand])
+    thread.poll_once()
+    key = thread._hand_key(hand)
+
+    thread.retry_hand(hand)
+    thread._retry_after[key] = 0.0
+    assert thread.poll_once() == [hand]
+
+    # The callback refuses it, which is what schedules the next offer.
+    thread.retry_hand(hand)
+    thread._retry_after[key] = 0.0
+
+    assert thread.poll_once() == [hand]
+
+
+def test_one_offer_spends_one_of_the_retry_budget(tmp_path, monkeypatch) -> None:
+    """Re-offering an in-flight hand burned the budget on duplicates of itself."""
+    hand = {"table_id": 7, "hand_id": 1234}
+    thread, _raw = _tailer(tmp_path, monkeypatch, [hand])
+    thread.poll_once()
+    key = thread._hand_key(hand)
+
+    thread.retry_hand(hand)
+    thread._retry_after[key] = 0.0
+    offered = thread.poll_once() + thread.poll_once() + thread.poll_once()
+
+    assert offered == [hand], "three polls, one hand: the callback has answered none of them"
+    assert thread._retry_offers[key] == 1
+
+
+def test_a_deferred_envelope_is_also_handed_out_only_once(tmp_path, monkeypatch) -> None:
+    """The copy kept for a hand aged out of the message window has the same rule."""
+    from fpdb_3_legacy import swc_native_capture
+
+    hand = {"table_id": 7, "hand_id": 1234}
+    thread, _raw = _tailer(tmp_path, monkeypatch, [hand])
+    thread.poll_once()
+
+    thread.retry_hand(hand)
+    thread._retry_after[thread._hand_key(hand)] = 0.0
+    # Its snapshots have fallen out of the retained window, so only the copy
+    # held at deferral can answer for it.
+    monkeypatch.setattr(swc_native_capture, "normalize_native_hands", lambda messages, raw_ref=None: [])
+
+    assert thread.poll_once() == [hand]
+    assert thread.poll_once() == [], "not re-offered until its callback answers"
+
+
 def test_an_idle_archive_with_nothing_due_stays_cheap(tmp_path, monkeypatch) -> None:
     """The early return still guards the expensive normalize when nothing is due."""
     hand = {"table_id": 7, "hand_id": 1234}

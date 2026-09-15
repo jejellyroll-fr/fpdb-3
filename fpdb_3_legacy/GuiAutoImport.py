@@ -448,6 +448,18 @@ class SwCNativeTailingThread(QThread):
                     # unchanged, refused snapshot is repeated.
                     self._retry_offers.pop(key, None)
                 self._emitted[key] = fingerprint
+                # The deadline is spent by the offer, not by the answer to it.
+                # Left standing it went on reading as due until the GUI callback
+                # got round to this hand -- and that callback is queued onto a
+                # thread that may be inside a database import, while this poll
+                # comes round every 2.5s. Every poll in between re-offered the
+                # same hand: the backoff was ignored, one refusal spent several
+                # of the retry budget's offers, and a hand the first callback
+                # imported was imported again by the ones queued behind it.
+                # Removing it here is what "in flight" means: the hand is not
+                # due again until its callback completes it or asks for another
+                # turn.
+                self._retry_after.pop(key, None)
                 # A fresher view supersedes the copy held for the retry.
                 if key in self._pending_envelopes:
                     self._pending_envelopes[key] = hand
@@ -471,6 +483,11 @@ class SwCNativeTailingThread(QThread):
                     continue
                 envelope = self._pending_envelopes.get(key)
                 if envelope is not None:
+                    # Spent by the offer, exactly as in poll_once: the copy stays
+                    # so a later refusal can be offered from it again, but the
+                    # deadline goes, so the polls between this offer and its
+                    # answer do not hand out the same hand over and over.
+                    self._retry_after.pop(key, None)
                     due.append(envelope)
         return due
 
