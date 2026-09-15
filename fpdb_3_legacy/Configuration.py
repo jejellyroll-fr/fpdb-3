@@ -60,7 +60,7 @@ from fpdb_3_legacy.loggingFpdb import get_logger
 # config version is used to flag a warning at runtime if the users config is
 #  out of date.
 # Increment with shipped template changes; add an explicit migration when needed.
-CONFIG_VERSION = 84
+CONFIG_VERSION = 85
 SOURCE_DIR = Path(__file__).resolve().parent
 SOURCE_ROOT_PATH = SOURCE_DIR.parent
 
@@ -408,6 +408,50 @@ def string_to_bool(string, default=True):
     return default
 
 
+#: A saved layout's width/height is the size of the table window the positions
+#: were captured on, so every position must sit inside it (a block parked just
+#: off the table edge overhangs a little, hence the tolerance). A reference much
+#: smaller than the positions it frames is not a layout, it is a corrupted one:
+#: Aux_Base.create_scale_position() scales by table/reference, so a 336x103
+#: reference framing a position at (1225, 737) throws the HUD blocks thousands
+#: of pixels off a real table and the user sees no HUD at all.
+LAYOUT_REFERENCE_TOLERANCE = 1.5
+
+#: How far a position may sit *before* the table's origin, as a fraction of the
+#: reference. A block parked just above or left of the table is a real user
+#: choice (the shipped layouts contain x="-4"), so the allowance mirrors the
+#: overhang the tolerance above grants on the right and bottom.
+LAYOUT_REFERENCE_UNDERHANG = LAYOUT_REFERENCE_TOLERANCE - 1.0
+
+
+def layout_reference_fits(width, height, positions) -> bool:
+    """Whether ``width``x``height`` can plausibly be the reference for ``positions``.
+
+    ``positions`` is any iterable of (x, y). Missing or non-positive dimensions
+    are rejected outright: they would make the scale factor meaningless (or
+    raise) rather than merely wrong.
+
+    Both directions are checked. Looking only at the maxima accepted a layout
+    whose blocks all sit far above and left of the table -- (-5000, -5000) is as
+    unusable as (5000, 5000), and the corrupt ipoker layout this guard was
+    written for carried y="-395" alongside its oversized x.
+    """
+    points = [p for p in positions if p is not None]
+    if not width or not height or int(width) <= 0 or int(height) <= 0:
+        return False
+    if not points:
+        return True
+    width, height = int(width), int(height)
+    xs = [int(x) for x, _y in points]
+    ys = [int(y) for _x, y in points]
+    return (
+        max(xs) <= width * LAYOUT_REFERENCE_TOLERANCE
+        and max(ys) <= height * LAYOUT_REFERENCE_TOLERANCE
+        and min(xs) >= -width * LAYOUT_REFERENCE_UNDERHANG
+        and min(ys) >= -height * LAYOUT_REFERENCE_UNDERHANG
+    )
+
+
 class Layout:
     def __init__(self, node) -> None:
         self.max = int(node.getAttribute("max"))
@@ -442,6 +486,74 @@ class Layout:
                     int(location_node.getAttribute("x")),
                     int(location_node.getAttribute("y")),
                 )
+
+        self._repair_reference_size()
+
+    def _repair_reference_size(self) -> None:
+        """Widen a reference size that cannot possibly frame this layout's positions.
+
+        Configs in the wild carry layouts whose width/height were saved from the
+        wrong window (a stray HUD label, a rolled-up client), leaving positions
+        several times larger than the frame they are scaled against. Loading such
+        a layout as-is multiplies every block position by table/reference and
+        scatters the HUD far off the table, which reads as "no HUD". Growing the
+        reference to the bounding box keeps the user's own positions and puts
+        them back inside the table window; the layout is not the intended one,
+        but it is visible and can be dragged and re-saved.
+        """
+        positions = [p for p in self.location if p is not None]
+        if getattr(self, "common", None) is not None:
+            positions.append(self.common)
+        if layout_reference_fits(self.width, self.height, positions):
+            return
+        old_width, old_height = self.width, self.height
+        if positions:
+            # At least 1: a zero reference whose coordinates are all zero or
+            # negative would otherwise survive the widening unchanged, and
+            # Aux_Base.create_scale_position() refuses to divide by it -- the HUD
+            # would be no more available than before the repair.
+            self.width = max(1, self.width, max(x for x, _y in positions))
+            self.height = max(1, self.height, max(y for _x, y in positions))
+        # Growing the reference cannot rescue a position that sits *before* the
+        # table's origin: scaling only pushes it further off. Such a block is
+        # lifted back to the edge instead, which is the same bargain the widening
+        # makes -- not the layout the user drew, but one they can see and re-drag.
+        lifted = self._lift_positions_into_view()
+        log.warning(
+            "Layout %d-max declares a %dx%d reference that cannot contain its own positions; "
+            "using %dx%d instead%s so the HUD stays on the table",
+            self.max,
+            old_width,
+            old_height,
+            self.width,
+            self.height,
+            f" and lifting {lifted} block(s) back onto it" if lifted else "",
+        )
+
+    def _lift_positions_into_view(self) -> int:
+        """Clamp positions that sit far before the table origin; return how many."""
+        floor_x = -int(self.width * LAYOUT_REFERENCE_UNDERHANG)
+        floor_y = -int(self.height * LAYOUT_REFERENCE_UNDERHANG)
+
+        def lift(point):
+            x, y = point
+            return (max(x, floor_x), max(y, floor_y))
+
+        lifted = 0
+        for seat, point in enumerate(self.location):
+            if point is None:
+                continue
+            raised = lift(point)
+            if raised != point:
+                self.location[seat] = raised
+                lifted += 1
+        common = getattr(self, "common", None)
+        if common is not None:
+            raised = lift(common)
+            if raised != common:
+                self.common = raised
+                lifted += 1
+        return lifted
 
     def __str__(self) -> str:
         if hasattr(self, "name"):
@@ -2673,6 +2785,36 @@ class Config:
         # wid/height normally not specified when saving common from the mucked display
 
         log.debug(f"saving layout = {ls.name} {max}Max {locations} size: {width}x{height}")
+        # A dimension that is present is a measurement; only None means "not
+        # specified", which is how the mucked display saves its common position.
+        # The difference matters because a minimized, rolled-up or not yet
+        # realized window measures exactly 0, and the truthiness test this used
+        # to be read that as "not specified": the guard was skipped, the
+        # positions were written, and `if width:` below left the previous
+        # width/height on the node for them to be scaled against -- the
+        # mismatched reference this guard exists to prevent, reached through the
+        # one path that bypassed it.
+        measured = [value for value in (width, height) if value is not None]
+        broken_measurement = any(int(value) <= 0 for value in measured)
+        # A pair can be checked against the positions it is supposed to frame;
+        # a single dimension cannot (the other one stays whatever the node
+        # already held), so it is only checked for being a real measurement.
+        pair_does_not_fit = len(measured) == 2 and not layout_reference_fits(width, height, locations.values())
+        if broken_measurement or pair_does_not_fit:
+            # The reference is the table the positions were just read from, so
+            # positions far outside it mean the HUD was measuring the wrong
+            # window (a stray label, a rolled-up client). Persisting that pair
+            # is what corrupts a layout set permanently: on the next real table
+            # the blocks get scaled by table/reference and land off-screen.
+            log.error(
+                "Refusing to save layout %s %d-max: positions %s cannot come from a %sx%s table",
+                ls.name,
+                max,
+                locations,
+                width,
+                height,
+            )
+            return
         ls_node = self.get_layout_set_node(ls.name)
         layout_node = self.get_layout_node(ls_node, max)
         if width:

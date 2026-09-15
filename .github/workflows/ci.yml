@@ -33,6 +33,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v3
+        with:
+          # Keep in sync with [tool.uv] required-version in pyproject.toml.
+          version: "0.12.7"
       - name: Install Ruff
         run: uv tool install ruff
       - name: Install mypy
@@ -318,9 +321,11 @@ jobs:
           tests/helpers/parser_regression.py
 
   # The interposer carries a distinct #ifdef branch per platform -- dlsym on
-  # POSIX, GetModuleHandleA over the bundled OpenSSL DLLs on Windows. Compiling
-  # it only where CI happens to run would leave two of the three branches
-  # unbuilt, so each one is compiled on its own runner.
+  # POSIX, and on Windows an inline hook of ssleay32.dll installed by an injected
+  # DLL. Compiling it only where CI happens to run would leave branches unbuilt,
+  # so each one is compiled on its own runner. On Windows this builds two 32-bit
+  # artifacts (the tap DLL and its injector) to match the 32-bit SwC client;
+  # clang cross-targets the MSVC ABI using the runner's Windows SDK.
   #
   # swc_tap_build imports nothing but the standard library, so this needs no
   # project install: it is a compiler check, not an import check.
@@ -337,6 +342,15 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+      - name: Ensure clang is available (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          if (-not (Get-Command clang -ErrorAction SilentlyContinue)) {
+            choco install llvm -y --no-progress
+            echo "C:\Program Files\LLVM\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          }
+          clang --version
       - name: Compile the tap
         run: python -m fpdb_3_legacy.swc_tap_build --build
 
@@ -353,6 +367,9 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - uses: astral-sh/setup-uv@v3
+        with:
+          # Keep in sync with [tool.uv] required-version in pyproject.toml.
+          version: "0.12.7"
       - name: Install system dependencies (Linux)
         if: runner.os == 'Linux'
         run: |
@@ -434,6 +451,9 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - uses: astral-sh/setup-uv@v3
+        with:
+          # Keep in sync with [tool.uv] required-version in pyproject.toml.
+          version: "0.12.7"
       - name: Install system dependencies (Linux)
         if: runner.os == 'Linux'
         run: |
@@ -491,6 +511,9 @@ jobs:
         with:
           python-version: "3.11"
       - uses: astral-sh/setup-uv@v3
+        with:
+          # Keep in sync with [tool.uv] required-version in pyproject.toml.
+          version: "0.12.7"
       - name: Install system dependencies
         run: |
           sudo apt-get update
@@ -563,6 +586,9 @@ jobs:
         with:
           python-version: "3.11"
       - uses: astral-sh/setup-uv@v3
+        with:
+          # Keep in sync with [tool.uv] required-version in pyproject.toml.
+          version: "0.12.7"
       - name: Install system dependencies
         run: |
           sudo apt-get update
@@ -596,6 +622,9 @@ jobs:
         with:
           python-version: "3.11"
       - uses: astral-sh/setup-uv@v3
+        with:
+          # Keep in sync with [tool.uv] required-version in pyproject.toml.
+          version: "0.12.7"
       - name: Install system dependencies (Linux)
         if: runner.os == 'Linux'
         run: |

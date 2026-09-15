@@ -53,6 +53,9 @@ log = get_logger("filter")
 
 # Constants for UI thresholds
 MIN_ITEMS_FOR_CONTROLS = 2  # Minimum number of items to show control buttons
+# Native clients can store ante/all-in hands without a standard seat position.
+# Keep these values selectable so those hands are not silently excluded.
+POSITION_FILTER_VALUES = (0, 1, 2, 3, 4, 5, 6, 7, "S", "B", 8, 9)
 ICONS_DIR = Path(__file__).parent.parent / "icons"
 ROOM_WEB_LOGOS_DIR = ICONS_DIR / "room_logos"
 ROOM_ICON_FILES = {
@@ -1282,7 +1285,7 @@ class Filters(QWidget):
         vbox1 = QVBoxLayout()
         frame.setLayout(vbox1)
 
-        result: list[list[Any]] = [[0], [1], [2], [3], [4], [5], [6], [7], ["S"], ["B"]]
+        result: list[list[Any]] = [[position] for position in POSITION_FILTER_VALUES]
         res_count = len(result)
 
         if res_count > 0:

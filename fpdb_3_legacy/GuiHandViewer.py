@@ -283,7 +283,12 @@ class GuiHandViewer(QSplitter):
         if getattr(self, "flagBombPot", None) and self.flagBombPot.isChecked():
             extra.append("h.bombPot > 0")
         if getattr(self, "flagDoubleBoard", None) and self.flagDoubleBoard.isChecked():
-            extra.append("(SELECT COUNT(*) FROM Boards b WHERE b.handId = h.id) >= 2")
+            # In FPDB a true double-board hand is a bomb pot with two stored
+            # boards. A shared-flop run-it-twice also has two Boards rows, but
+            # is deliberately excluded from this filter.
+            extra.append(
+                "h.bombPot > 0 AND (SELECT COUNT(*) FROM Boards b WHERE b.handId = h.id) >= 2"
+            )
         splash_condition = self._splash_filter_condition()
         if splash_condition:
             extra.append(splash_condition)
@@ -584,7 +589,20 @@ class GuiHandViewer(QSplitter):
         "fusion": "Fusion",
     }
     _LIMIT_NAMES = {"nl": "NL", "pl": "PL", "fl": "FL", "cn": "CN", "cp": "CP"}
-    _POSITION_NAMES = {"S": "SB", "B": "BB", "0": "BTN", "1": "CO", "2": "HJ", "3": "LJ", "4": "MP", "5": "MP", "6": "UTG", "7": "UTG"}
+    _POSITION_NAMES = {
+        "S": "SB",
+        "B": "BB",
+        "0": "BTN",
+        "1": "CO",
+        "2": "HJ",
+        "3": "LJ",
+        "4": "MP",
+        "5": "MP",
+        "6": "UTG",
+        "7": "UTG",
+        "8": "Other",
+        "9": "Unknown",
+    }
 
     def _format_game(self, hand) -> str:
         cat = hand.gametype.get("category", "")
@@ -616,13 +634,18 @@ class GuiHandViewer(QSplitter):
             return str(st)
 
     def _hand_flags(self, hand) -> str:
-        flags = []
+        flags: list[str] = []
         try:
             rit = int(hand.runItTimes)
         except (TypeError, ValueError):
             rit = 0
-        if rit >= 2:
+        bomb_pot = bool(getattr(hand, "bombPot", 0))
+        if rit >= 2 and bomb_pot:
+            flags.extend(("BOMB", "2xB"))
+        elif rit >= 2:
             flags.append(f"RIT×{rit}")
+        elif bomb_pot:
+            flags.append("BOMB")
         cashed = bool(getattr(hand, "cashedOut", False))
         allin = False
         for acts in hand.actions.values():

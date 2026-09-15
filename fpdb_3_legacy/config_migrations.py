@@ -67,6 +67,20 @@ def _merge_83_to_84(doc, template) -> None:
     _repair_renamed_references(doc)
 
 
+def _preserve_84_to_85(doc, template) -> None:
+    """Advance to v85 without replacing a user's customized HUD positions.
+
+    Version 85 ships corrected layout reference sizes and adds a runtime guard for
+    impossible reference/position pairs. Existing layouts are user-editable, so
+    copying the template's coordinates during migration would destroy personal
+    HUD placement. The safe migration is therefore deliberately conservative:
+    preserve the document and only apply the already-safe alias repair before the
+    common reference validation stamps the new version.
+    """
+    del template
+    _repair_renamed_references(doc)
+
+
 def _repair_renamed_references(doc) -> None:
     aux_names = {n.getAttribute("name") for n in doc.getElementsByTagName("aw")}
     if "Classic_HUD" not in aux_names and "ClassicHud" in aux_names:
@@ -81,7 +95,10 @@ def _repair_renamed_references(doc) -> None:
                 node.setAttribute("ls", "bovada_default")
 
 
-MIGRATIONS = ((83, 84, _merge_83_to_84),)
+MIGRATIONS = (
+    (83, 84, _merge_83_to_84),
+    (84, 85, _preserve_84_to_85),
+)
 
 
 def upgrade_document(doc, template, target_version: int):

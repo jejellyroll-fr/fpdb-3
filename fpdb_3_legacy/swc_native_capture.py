@@ -14,8 +14,9 @@ import struct
 import subprocess
 import sys
 import threading
+import time
 from collections import Counter
-from collections.abc import Iterator
+from collections.abc import Callable, Iterable, Iterator
 from dataclasses import dataclass
 from datetime import datetime, timezone
 
@@ -41,21 +42,247 @@ from fpdb_3_legacy.swc_tap_build import (  # noqa: E402
     get_tap_library_path,
 )
 
-#: The platforms the live capture can actually run on. The tap is loaded into
-#: the client by library interposition -- DYLD_INSERT_LIBRARIES on macOS,
-#: LD_PRELOAD on Linux, see ``native_client_environment`` -- and Windows has no
-#: equivalent, so a tap built there is a library nothing can load. The C source
-#: does carry a Windows branch (GetModuleHandleA over the bundled OpenSSL DLLs)
-#: and CI compiles it on a Windows runner, but no injection path uses it yet:
-#: ``SWC_EXECUTABLE`` is a macOS bundle path and ``running_client_pids`` shells
-#: out to pgrep. Until one exists, building on Windows only produces a compiler
-#: error for a library that would go unused.
+#: Platforms that load the tap by library interposition at client launch --
+#: DYLD_INSERT_LIBRARIES on macOS, LD_PRELOAD on Linux (see
+#: ``native_client_environment``). Windows is deliberately excluded: it has no
+#: launch-time interposition, so the tap is instead *injected* into the already
+#: running client (see ``attach_to_windows_client``), a different code path.
 INTERPOSABLE_SYSTEMS = frozenset({"Darwin", "Linux"})
+
+#: Every platform that can capture live, by whichever mechanism.
+SUPPORTED_SYSTEMS = INTERPOSABLE_SYSTEMS | {"Windows"}
 
 
 def native_capture_supported(system_name: str | None = None) -> bool:
     """Whether the live native capture can be started on this platform."""
-    return (system_name or platform.system()) in INTERPOSABLE_SYSTEMS
+    return (system_name or platform.system()) in SUPPORTED_SYSTEMS
+
+
+class CaptureAttachCancelled(RuntimeError):
+    """The attach was abandoned before the tap was injected.
+
+    Injection is the step that cannot be taken back: the tap has no unload path,
+    so once ``LoadLibrary`` has run the DLL stays resident in the client and goes
+    on writing decrypted traffic to the archive until the client exits. An
+    attach spends most of its time before that -- compiling the tap and the
+    injector, enumerating processes -- and the user can stop Auto Import during
+    any of it. Those are the moments a stop can still mean something, so they are
+    the moments the request is read.
+
+    A RuntimeError because that is what every other refusal from
+    ``attach_to_windows_client`` already is; callers that only want to report a
+    failure keep working unchanged.
+    """
+
+
+def _attach_warnings(
+    injector_mod,
+    results: list,
+    injected: list[int],
+    *,
+    status_path,
+    status_mark: int,
+    options_changed: bool,
+) -> str:
+    """Everything about this attach that a "capture active" line would otherwise hide.
+
+    Each of these is a client whose hands will not arrive, or will arrive under
+    settings the user did not ask for, so they are appended to whichever status
+    the caller goes on to return rather than logged and forgotten.
+    """
+    notes: list[str] = []
+
+    # A client the tap could not be injected into produces nothing, and saying
+    # only how many succeeded would announce capture for all of them.
+    refused = [r for r in results if not r.ok]
+    if refused:
+        notes.append(" Not injected: " + "; ".join(f"pid {r.pid}: {r.detail}" for r in refused) + ".")
+
+    if options_changed:
+        notes.append(
+            " Capture options changed: a client that was already running keeps the previous "
+            "port/outbound settings until it is restarted."
+        )
+
+    # Looked for across every line this attach produced, not only the latest: a
+    # client that cannot take the cross-process mutex drops all its records, and
+    # writes that warning before the hook status which then supersedes it.
+    markers = injector_mod.read_status_markers(status_path, status_mark)
+    lockless = [pid for pid in injected if injector_mod.CAPTURE_LOCK_UNAVAILABLE in markers.get(pid, ())]
+    if lockless:
+        notes.append(
+            f" pid(s) {', '.join(str(pid) for pid in lockless)} could not take the shared-archive lock "
+            "and are dropping records; restart fpdb and the client."
+        )
+
+    return "".join(notes)
+
+
+def _abort_attach_if_cancelled(should_cancel: Callable[[], bool] | None, stage: str) -> None:
+    """Raise when the caller has stopped wanting the attach it asked for."""
+    if should_cancel is None or not should_cancel():
+        return
+    log.info("SwC tap attachment abandoned %s: capture was stopped", stage)
+    msg = f"the SwC tap attachment was cancelled {stage}"
+    raise CaptureAttachCancelled(msg)
+
+
+def _inject_into_each_client(
+    injector_mod,
+    injector: Path,
+    tap: Path,
+    pids: list[int],
+    should_cancel: Callable[[], bool] | None,
+) -> list:
+    """Load the tap into each client, abandoning the rest if capture is stopped.
+
+    The cancellation is read per client rather than once for the batch. One
+    injection runs the injector as a subprocess with a 45-second timeout, so a
+    stop arriving during the first would otherwise go on loading the tap into
+    every client behind it -- minutes after the user stopped, and each one
+    permanent, since the tap has no unload path.
+
+    That same permanence is why the abandonment names the clients already
+    holding it: they go on recording until they exit, and nothing here can
+    change that, so the least it can do is say so.
+    """
+    results: list = []
+    for pid in pids:
+        loaded = [result.pid for result in results if result.ok]
+        already = (
+            f"; pid(s) {', '.join(str(loaded_pid) for loaded_pid in loaded)} already hold the tap "
+            "and go on recording until they exit"
+            if loaded
+            else ""
+        )
+        _abort_attach_if_cancelled(should_cancel, f"before injecting pid {pid}{already}")
+        results.append(injector_mod.inject_into_pid(injector, tap, pid))
+    return results
+
+
+def attach_to_windows_client(
+    *,
+    port: int = 0,
+    include_outbound: bool = False,
+    should_cancel: Callable[[], bool] | None = None,
+) -> str:
+    """Build the tap, inject it into the running SwC client, and report the result.
+
+    Windows counterpart of ``launch_client``: rather than launching the client
+    with an interposition environment (impossible on Windows), it loads the tap
+    into ``SwCPoker.exe`` while it runs. The archive is always the DLL-relative
+    ``DEFAULT_ARCHIVE`` -- the injected DLL derives its own paths from its
+    location and cannot be told a different one through the environment.
+
+    ``should_cancel`` is polled at the points where the work can still be
+    abandoned -- after the builds, and again before each client is injected --
+    and raises ``CaptureAttachCancelled`` when it answers True. Nothing in here
+    can be interrupted mid-step (a compiler run, an injector call), so a caller
+    that stops capture gets the guarantee that matters instead: no further tap
+    is loaded into a client after the stop.
+
+    Returns a short human-readable status. Raises RuntimeError when the client
+    is not running or no injection succeeded, so the caller can surface why.
+    """
+
+    if platform.system() != "Windows":
+        msg = "attach_to_windows_client is only valid on Windows"
+        raise RuntimeError(msg)
+    if not 0 <= port <= 65535:
+        raise ValueError("capture port must be 0 (auto) or between 1 and 65535")
+
+    from fpdb_3_legacy import swc_windows_inject as injector_mod
+    from fpdb_3_legacy.swc_tap_build import BUILD_DIR, build_injector
+
+    tap = build_tap(check_executable=False)
+    injector = build_injector()
+    # The compiler is the long pole -- on a cold build it is most of the attach,
+    # and it is where a Stop is most likely to land.
+    _abort_attach_if_cancelled(should_cancel, "after building the tap")
+    # Checked before the write: a client already holding the tap read its
+    # configuration once, in DllMain, and injecting again only bumps the module
+    # reference count -- it keeps the old port/outbound filtering until restarted.
+    options_changed = injector_mod.capture_config_changed(BUILD_DIR, port=port, include_outbound=include_outbound)
+    injector_mod.write_capture_config(BUILD_DIR, port=port, include_outbound=include_outbound)
+
+    DEFAULT_ARCHIVE.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
+    archive_is_new = not DEFAULT_ARCHIVE.exists() or DEFAULT_ARCHIVE.stat().st_size == 0
+    DEFAULT_ARCHIVE.touch(exist_ok=True)
+
+    pids = injector_mod.find_client_pids()
+    if not pids:
+        msg = (
+            f"the SwC client ({injector_mod.SWC_CLIENT_IMAGE}) is not running; "
+            "start it and open a table, then start capture again"
+        )
+        raise RuntimeError(msg)
+
+    if archive_is_new:
+        # No record can still refer to a previously assigned id, so the pool is
+        # free again -- otherwise it would only ever creep toward its ceiling.
+        # The clients still running keep theirs: their DLL is already resident
+        # and goes on stamping the id it read at load time.
+        injector_mod.reset_stream_ids(BUILD_DIR, keep_pids=pids)
+
+    # Assigned before injection: the tap reads its id at load time.
+    injector_mod.write_stream_ids(BUILD_DIR, pids)
+
+    # Marked before injecting, because the DLL starts writing the moment
+    # LoadLibrary runs: the status file is append-only and keyed by pid, and
+    # Windows reuses pids, so a line left by a previous process would otherwise
+    # answer for this attempt -- reporting capture active for a client whose DLL
+    # had written nothing yet. Reading from this offset keeps the wait to what
+    # this attach produced, and taking it any later would skip the DLL's own
+    # first lines and turn every attach into a timeout.
+    status_path = DEFAULT_ARCHIVE.with_suffix(".status")
+    status_mark = injector_mod.status_file_size(status_path)
+
+    results = _inject_into_each_client(injector_mod, injector, tap, pids, should_cancel)
+    ok = [r for r in results if r.ok]
+    if not ok:
+        detail = "; ".join(f"pid {r.pid}: {r.detail}" for r in results)
+        msg = f"could not inject the SwC tap into any client process ({detail})"
+        raise RuntimeError(msg)
+
+    injected = [r.pid for r in ok]
+    statuses = injector_mod.wait_for_hooks(status_path, injected, since=status_mark)
+    log.info(
+        "SwC tap injected into pid(s) %s; DLL status=%s",
+        ", ".join(str(pid) for pid in injected),
+        ", ".join(f"{pid}:{statuses.get(pid) or 'none yet'}" for pid in injected),
+    )
+
+    refused_note = _attach_warnings(
+        injector_mod,
+        results,
+        injected,
+        status_path=status_path,
+        status_mark=status_mark,
+        options_changed=options_changed,
+    )
+
+    hooked = [pid for pid in injected if statuses.get(pid) == "tap-hooked"]
+    failed = [pid for pid in injected if statuses.get(pid) in injector_mod.HOOK_FAILURE_STATUSES]
+    if failed:
+        # Named per client: one shared status file means a failure here is a
+        # client whose hands will simply never arrive.
+        detail = ", ".join(f"pid {pid} reported {statuses[pid]}" for pid in failed)
+        return (
+            f"SwC tap hooked in {len(hooked)} of {len(injected)} client process(es); {detail}. "
+            f"Hands from those clients will be missing.{refused_note}"
+        )
+    if len(hooked) == len(injected):
+        return f"SwC capture active: tap hooked in {len(hooked)} client process(es).{refused_note}"
+    if all(statuses.get(pid) in ("", "tap-loaded") for pid in injected):
+        return (
+            f"SwC tap loaded into {len(injected)} client process(es); it will start capturing "
+            f"as soon as the client opens a secure connection (play or reopen a table).{refused_note}"
+        )
+    pending = ", ".join(str(pid) for pid in injected if pid not in hooked)
+    return (
+        f"SwC tap hooked in {len(hooked)} of {len(injected)} client process(es); "
+        f"pid(s) {pending} have not hooked yet and may start capturing later.{refused_note}"
+    )
 
 
 TAP_LIBRARY = get_tap_library_path()
@@ -67,6 +294,16 @@ _MAGIC = 0x53574354
 _VERSION = 1
 _MAX_PAYLOAD = 16 * 1024 * 1024
 
+#: The largest frame a bare four-byte record is allowed to announce when it is
+#: being used to prove alignment. Deliberately far below _MAX_PAYLOAD, which
+#: bounds what the archive format will carry rather than what this protocol
+#: sends: across 12 026 captured records the largest message was 179 328 bytes
+#: and the 99th percentile 6 907. A record joined mid-payload decodes to an
+#: arbitrary 32-bit number, so the narrower the window the less often one of
+#: those can pass for a length -- 16 MiB accepts 0.39% of them, 1 MiB 0.024%,
+#: and 1 MiB still leaves almost six times the largest message ever seen.
+_MAX_ANCHOR_PAYLOAD = 1024 * 1024
+
 
 @dataclass(frozen=True)
 class NativeCaptureRecord:
@@ -75,6 +312,10 @@ class NativeCaptureRecord:
     peer_port: int
     payload: bytes
     connection_id: int = 0
+    #: Which injected client wrote this record. Several clients append to one
+    #: archive, so the socket alone does not identify a stream: two processes
+    #: routinely hold the same small socket number.
+    source_id: int = 0
 
 
 @dataclass(frozen=True)
@@ -84,6 +325,7 @@ class NativeProtocolMessage:
     peer_port: int = 0
     connection_id: int = 0
     direction: str = "received"
+    source_id: int = 0
 
 
 @dataclass(frozen=True)
@@ -112,6 +354,8 @@ class NativeTableInfo:
     name: str
     tournament_id: int | None
     family: str
+    #: The room's seat capacity, when the descriptor's trailer carried it.
+    max_seats: int | None = None
 
 
 @dataclass(frozen=True)
@@ -329,22 +573,113 @@ def native_action_street(
 class NativeProtocolDecoder:
     """Reassemble SwC's uint32-le length-prefixed messages across SSL reads."""
 
-    def __init__(self, direction: str = "received") -> None:
+    #: How long a half-written message may wait for its remainder before the
+    #: buffer holding it is treated as belonging to a connection that is gone.
+    #: The two halves of a message share a timestamp in practice, and a tailer's
+    #: poll is 2.5s, so this only ever fires on a real discontinuity -- a client
+    #: that reconnected onto the same socket number, whose correctly framed bytes
+    #: would otherwise be swallowed as the end of the previous connection's frame.
+    STALE_PARTIAL_SECONDS = 30.0
+
+    def __init__(self, direction: str = "received", *, resynchronize: bool = False) -> None:
         self.buffer = bytearray()
         self.message_timestamp: datetime | None = None
         self.direction = direction
+        #: Whether an unreadable length discards the buffer and realigns instead
+        #: of raising. A live tap needs this; reading a finished archive does not
+        #: (there, an unreadable length is a fact worth surfacing).
+        self.resynchronize = resynchronize
+        #: Whether the next byte is known to start a message. A tap injected into
+        #: a client that already holds a connection joins mid-message, so it must
+        #: prove alignment before decoding anything (see _anchors_a_message).
+        self.aligned = not resynchronize
+        self.discarded_bytes = 0
+        #: When the most recent record of this stream arrived, so a half-message
+        #: left behind by a connection that is gone can be recognised as stale.
+        self.last_record_at: datetime | None = None
+
+    def _partial_is_stale(self, now: datetime) -> bool:
+        """Whether the buffered half-message is too old to still be completed."""
+        last = self.last_record_at
+        if last is None:
+            return False
+        return (now - last).total_seconds() > self.STALE_PARTIAL_SECONDS
+
+    @staticmethod
+    def _anchors_a_message(payload: bytes) -> bool:
+        """Whether this record self-evidently begins a message.
+
+        Guessing alignment from "the length looks plausible" is not enough: a
+        payload joined mid-message can start with bytes that read as a perfectly
+        ordinary length -- a class-22 body beginning ``16 00 07 00`` announces a
+        458,774-byte frame -- and the decoder would then swallow every correctly
+        framed record after it as filler, losing hands silently rather than
+        loudly. Only two shapes prove alignment on their own:
+
+        * a record that is exactly a length (SwC sends the 4-byte length in an
+          SSL_read of its own -- half the records in a capture are these), or
+        * a record holding exactly one whole message.
+
+        The four-byte shape cannot be given up even though it is the weaker of
+        the two: the tap records returned bytes and cannot tell a length prefix
+        from a four-byte tail of a payload, but in 12 026 captured records
+        *nothing* held a whole message (5 861 four-byte records, 5 860 messages),
+        so dropping it would leave a live stream with no way to align at all --
+        not even on a fresh connection, which starts unaligned too. What can be
+        done is to narrow the window a stray four bytes could pass through, hence
+        the tighter bound on what a bare length may announce.
+        """
+        if len(payload) < 4:
+            return False
+        size = int.from_bytes(payload[:4], "little")
+        if len(payload) == 4:
+            return 0 < size <= _MAX_ANCHOR_PAYLOAD
+        return 0 < size <= _MAX_PAYLOAD and len(payload) == 4 + size
 
     def feed(self, record: NativeCaptureRecord) -> list[NativeProtocolMessage]:
         if record.direction != self.direction:
             return []
+        if self.resynchronize and self.buffer and self._partial_is_stale(record.captured_at):
+            # Whatever this half-message belonged to is not coming back. Drop it
+            # and make the next records prove alignment, rather than letting a new
+            # connection's bytes complete the previous one's frame.
+            self.discarded_bytes += len(self.buffer)
+            self.buffer.clear()
+            self.message_timestamp = None
+            self.aligned = False
+        if not self.aligned:
+            if not self._anchors_a_message(record.payload):
+                # Cannot be framed and cannot be trusted: drop it and look at the
+                # next record. SwC starts a message often enough that alignment
+                # returns within a message or two.
+                self.discarded_bytes += len(record.payload)
+                return []
+            self.aligned = True
         if not self.buffer:
             self.message_timestamp = record.captured_at
         self.buffer.extend(record.payload)
+        self.last_record_at = record.captured_at
         messages = []
         while len(self.buffer) >= 4:
             size = int.from_bytes(self.buffer[:4], "little")
             if size > _MAX_PAYLOAD:
-                raise ValueError("SwC native protocol message is too large")
+                if not self.resynchronize:
+                    raise ValueError("SwC native protocol message is too large")
+                # Injecting into a client that already holds a TLS connection
+                # lands mid-message: the SSL_read in flight when the hook went in
+                # returned through the unpatched function, so the first bytes we
+                # see are a payload with no length in front of them. Those bytes
+                # can never be framed, and keeping them would make every later
+                # poll re-raise on the same buffer -- the stream would be lost for
+                # good. Drop them and let the next record start a frame; SwC
+                # sends the length in a read of its own, so alignment is regained
+                # almost immediately.
+                self.discarded_bytes += len(self.buffer)
+                self.buffer.clear()
+                self.message_timestamp = None
+                # Alignment is lost again, so the next records have to prove it.
+                self.aligned = False
+                break
             if len(self.buffer) < 4 + size:
                 break
             payload = bytes(self.buffer[4 : 4 + size])
@@ -356,6 +691,7 @@ class NativeProtocolDecoder:
                     peer_port=record.peer_port,
                     connection_id=record.connection_id,
                     direction=record.direction,
+                    source_id=record.source_id,
                 )
             )
             self.message_timestamp = record.captured_at if self.buffer else None
@@ -366,14 +702,61 @@ class NativeProtocolDecoder:
             raise ValueError("truncated SwC native protocol message")
 
 
+class NativeProtocolStream:
+    """Reassemble protocol messages from records that arrive a batch at a time.
+
+    ``iter_protocol_messages`` is for a complete archive: it builds decoders,
+    drains them, and ``finish()``es them -- which raises when a message is only
+    half written. A tailer never reads a complete archive. It reads whatever
+    landed since the last poll, and a length-prefixed message routinely spans two
+    polls, because SwC sends the 4-byte length in an SSL_read of its own (the
+    archive is full of 4-byte records followed by their payload).
+
+    Rebuilding the decoders every batch therefore raised on that dangling prefix
+    and threw it away, and since the read offset had already advanced those bytes
+    never came back: the next batch read the continuation as a length field and
+    the stream desynchronised for good. Keeping the decoders here is what lets a
+    message be completed by the batch that carries its second half.
+    """
+
+    def __init__(self, *, include_outbound: bool = False) -> None:
+        self._decoders: dict[tuple[int, int, int, str], NativeProtocolDecoder] = {}
+        self._include_outbound = include_outbound
+
+    def feed(self, records: Iterable[NativeCaptureRecord]) -> list[NativeProtocolMessage]:
+        """Every message completed by these records; partial ones stay buffered."""
+        messages: list[NativeProtocolMessage] = []
+        for record in records:
+            if record.direction == "sent" and not self._include_outbound:
+                continue
+            key = (record.source_id, record.peer_port, record.connection_id, record.direction)
+            decoder = self._decoders.get(key)
+            if decoder is None:
+                decoder = NativeProtocolDecoder(record.direction, resynchronize=True)
+                self._decoders[key] = decoder
+            before = decoder.discarded_bytes
+            messages.extend(decoder.feed(record))
+            if decoder.discarded_bytes != before:
+                log.info(
+                    "SwC stream %s realigned after %d unframed byte(s); this is expected once "
+                    "when the tap attaches to a connection that was already open",
+                    key,
+                    decoder.discarded_bytes - before,
+                )
+        return messages
+
+
 def iter_protocol_messages(
     records: Iterator[NativeCaptureRecord], *, include_outbound: bool = False
 ) -> Iterator[NativeProtocolMessage]:
-    decoders: dict[tuple[int, int, str], NativeProtocolDecoder] = {}
+    # Keyed by the whole stream identity: two clients sharing one archive can
+    # hold the same peer port and the same socket number, and splicing their
+    # plaintext into one buffer produces invalid message lengths and lost hands.
+    decoders: dict[tuple[int, int, int, str], NativeProtocolDecoder] = {}
     for record in records:
         if record.direction == "sent" and not include_outbound:
             continue
-        key = (record.peer_port, record.connection_id, record.direction)
+        key = (record.source_id, record.peer_port, record.connection_id, record.direction)
         decoder = decoders.setdefault(key, NativeProtocolDecoder(record.direction))
         yield from decoder.feed(record)
     for decoder in decoders.values():
@@ -985,8 +1368,18 @@ def audit_native_stud_accounting(
 def add_native_funds_byte_amounts_if_conserved(
     actions: list[dict], collections: list[dict], returned: list[dict]
 ) -> bool:
-    """Promote one-byte action amounts only when they exactly conserve settlement."""
-    monetary = {"small_blind", "big_blind", "bring_in", "call", "bet", "raise"}
+    """Promote one-byte action amounts only when they exactly conserve settlement.
+
+    An ante is money the player put in, so it belongs on the contribution side of
+    the identity. Leaving it out did not merely lose the ante: the settlement it
+    was compared against (collections plus returns) always included that money,
+    so the totals could never agree and *nothing* was promoted. A bomb pot, which
+    is antes and no blinds, therefore failed conservation outright -- in the
+    captured hand below, 12 + 12 ante and a 4 bet settle as 24 collected plus 4
+    returned, and the check saw 4 against 28. The hand was never importable, its
+    ante total read as zero, and both of its boards went with it.
+    """
+    monetary = {"ante", "small_blind", "big_blind", "bring_in", "call", "bet", "raise"}
     target = sum(item["amount_native"] for item in collections) + sum(item["amount_native"] for item in returned)
     candidate_total = sum(action["funds_byte"] for action in actions if action["action"] in monetary)
     if not target or candidate_total != target:
@@ -1022,6 +1415,10 @@ def extract_native_blind_structure(actions: list[dict]) -> dict:
 
 
 _NATIVE_CANONICAL_ACTION_TYPES = {
+    # Hand.py routes this to addAnte (ACTION_METHOD_BY_TYPE). Without it,
+    # build_native_canonical_actions refused every hand carrying an ante --
+    # an unmapped action type makes it return no actions at all.
+    "ante": "ante",
     "small_blind": "small blind",
     "big_blind": "big blind",
     "call": "calls",
@@ -1710,7 +2107,48 @@ def extract_table_info(message: NativeProtocolMessage) -> NativeTableInfo | None
         name=name,
         tournament_id=tournament_value or None,
         family=family,
+        max_seats=_native_table_max_seats(trailer),
     )
+
+
+#: The highest seat the room addresses; parse_native_outbound_seat_request
+#: rejects anything above it, so a capacity beyond this is a misread trailer.
+_MAX_NATIVE_SEATS = 10
+
+
+def _native_table_max_seats(trailer: bytes) -> int | None:
+    """The table's seat capacity, from the fixed block that follows its name.
+
+    The trailer is a small fixed structure: ``02 04 00``, then the two-byte game
+    signature ``_native_table_family`` already reads below (``PR`` on PLO tables,
+    ``UR`` on Hold'em), then ``03``, then this byte, then ``12 00``. Read only
+    when those neighbours are where they should be, so a descriptor shaped
+    differently yields nothing rather than a plausible-looking wrong number.
+
+    Confirmed against the room's own hand histories for every table in the
+    development capture: table 24812 reads 9 and is written ``9-max``, tables
+    299657213 and 299672838 read 8 and are written ``8-max``.
+    """
+    if len(trailer) < 8 or trailer[4:5] != b"R" or trailer[5] != 3 or trailer[7] != 18:
+        return None
+    seats = trailer[6]
+    return seats if 2 <= seats <= _MAX_NATIVE_SEATS else None
+
+
+def _native_table_max_seats_for_hand(table: NativeTableInfo, players: list[dict]) -> int:
+    """How many seats this table has, never fewer than the seats it dealt into.
+
+    ``seat_idx`` is the physical seat, not a position among the occupants: the
+    capture's two-handed hands sit in seats 5 and 7 of an 8-max table. Counting
+    the players instead recorded those hands as 2-max, and the HUD then built
+    two seat windows for players it had placed in the fifth and the seventh.
+
+    The room's own capacity is used when the descriptor carried it; it still has
+    to cover the seats actually dealt into, because a capacity that contradicts
+    the hand is the one of the two that was decoded rather than observed.
+    """
+    occupied = [player["seat_idx"] + 1 for player in players if isinstance(player.get("seat_idx"), int)]
+    return max(table.max_seats or 0, len(players), *occupied) if occupied else max(table.max_seats or 0, len(players))
 
 
 def _native_table_family(name: str, searchable: str, trailer: bytes) -> str:
@@ -1817,25 +2255,72 @@ def extract_game_state(message: NativeProtocolMessage, table_ids: set[int]) -> N
     return None
 
 
-def extract_native_board(snapshot: NativeGameStateSnapshot, family: str) -> tuple[str, ...]:
-    """Extract the confirmed Hold'em/Omaha board stored before the table footer."""
+def _skip_native_board_hand_evaluations(payload: bytes, cursor: int, end: int) -> int:
+    """Skip showdown hand labels between the native board marker and cards."""
+    while cursor + 2 < end:
+        strlen = int.from_bytes(payload[cursor : cursor + 2], "little")
+        candidate_end = cursor + 2 + strlen
+        candidate = payload[cursor + 2 : candidate_end]
+        if not 4 <= strlen <= 64 or candidate_end > end or not all(32 <= byte <= 126 for byte in candidate):
+            break
+        cursor = candidate_end
+    return cursor
+
+
+def _native_card_block(payload: bytes, count_offset: int, end: int) -> tuple[str, ...] | None:
+    """Decode one count-prefixed native board, if it fits before the footer."""
+    count = payload[count_offset]
+    card_end = count_offset + 1 + count
+    if count not in (3, 4, 5) or card_end > end:
+        return None
+    card_ids = payload[count_offset + 1 : card_end]
+    if not all(card_id <= 51 for card_id in card_ids) or len(set(card_ids)) != count:
+        return None
+    return tuple(card_id_to_str(card_id) for card_id in card_ids)
+
+
+def _native_board_candidate(payload: bytes, count_offset: int, table_offset: int) -> tuple[tuple[str, ...], ...] | None:
+    """Decode the one- or two-board block at a candidate count byte."""
+    first_board = _native_card_block(payload, count_offset, table_offset)
+    if first_board is None:
+        return None
+
+    first_end = count_offset + 1 + len(first_board)
+    second_board = _native_card_block(payload, first_end, table_offset) if first_end < table_offset else None
+    end_boards = first_end + (1 + len(second_board) if second_board else 0)
+    if not 8 <= table_offset - end_boards <= 22:
+        return None
+    return (first_board, second_board) if second_board else (first_board,)
+
+
+def extract_native_boards(snapshot: NativeGameStateSnapshot, family: str) -> tuple[tuple[str, ...], ...]:
+    """Extract confirmed Hold'em/Omaha board(s) stored before the table footer.
+
+    Supports single-board runouts, double-board bomb pots, and run-it-twice runs.
+    """
     if family not in {"holdem", "omaha"} or snapshot.round_number < 2:
         return ()
-    expected_count = min(snapshot.round_number + 1, 5)
     table_offset = snapshot.raw_payload.find(snapshot.table_id.to_bytes(4, "little"), 4)
     if table_offset < 0:
         return ()
     marker = snapshot.raw_payload.rfind(b"\xf0\xbf", 0, table_offset)
     if marker < 0:
         return ()
-    for count_offset in range(marker + 2, min(marker + 8, table_offset)):
-        if snapshot.raw_payload[count_offset] != expected_count:
-            continue
-        card_ids = snapshot.raw_payload[count_offset + 1 : count_offset + 1 + expected_count]
-        footer_size = table_offset - (count_offset + 1 + expected_count)
-        if len(card_ids) == expected_count and all(card_id <= 51 for card_id in card_ids) and 14 <= footer_size <= 18:
-            return tuple(card_id_to_str(card_id) for card_id in card_ids)
+
+    payload = snapshot.raw_payload
+    cursor = _skip_native_board_hand_evaluations(payload, marker + 2, table_offset)
+
+    for count_off in range(cursor, min(cursor + 6, table_offset)):
+        if candidate := _native_board_candidate(payload, count_off, table_offset):
+            return candidate
+
     return ()
+
+
+def extract_native_board(snapshot: NativeGameStateSnapshot, family: str) -> tuple[str, ...]:
+    """Extract the primary confirmed Hold'em/Omaha board stored before the table footer."""
+    boards = extract_native_boards(snapshot, family)
+    return boards[0] if boards else ()
 
 
 def _parse_type_10_event(payload: bytes, cursor: int) -> tuple[int, str | None]:
@@ -2460,18 +2945,52 @@ def summarize_native_hands(messages: list[NativeProtocolMessage]) -> list[Native
     ]
 
 
+def _native_capture_moment(value: object) -> datetime | None:
+    """One ISO capture timestamp as a datetime, or None if it cannot be read."""
+    if not isinstance(value, str):
+        return None
+    try:
+        return datetime.fromisoformat(value)
+    except ValueError:
+        return None
+
+
+def _hand_predates_roster(hand: dict, anchor: datetime | None) -> bool:
+    """Whether this hand was already under way when the roster was sent.
+
+    The roster used as the ledger's anchor is the *fullest* one, not the first:
+    a player sitting down makes the room send a longer one later in the capture,
+    and that one wins. Its balances describe the table at its own moment, so a
+    hand that had already been played by then cannot be anchored on it -- doing
+    so wrote a later balance as that hand's startCash and then rolled every hand
+    after it forward from the wrong number.
+
+    Answers False whenever the two moments cannot be compared (a timestamp
+    missing, unparsable, or one aware and the other naive), which leaves the
+    ledger exactly where it was rather than silently dropping hands.
+    """
+    if anchor is None:
+        return False
+    moment = _native_capture_moment(hand.get("timestamp"))
+    if moment is None or (moment.tzinfo is None) != (anchor.tzinfo is None):
+        return False
+    return moment < anchor
+
+
 def add_native_starting_stacks(  # noqa: C901
     hands: list[dict], messages: list[NativeProtocolMessage]
 ) -> None:
     """Anchor table stacks on the first roster and roll them through exact settlements."""
     login_names = {name for message in messages if (name := extract_native_outbound_login_name(message)) is not None}
     local_player = next(iter(login_names)) if len(login_names) == 1 else None
-    requests = {}
+    # Not named `requests`: shadowing the HTTP library's name makes every static
+    # analyser read `requests.get(table_id)` below as an un-timed web request.
+    seat_requests: dict[int, dict] = {}
     rosters: dict[int, dict] = {}
     for message in messages:
         request = parse_native_outbound_seat_request(message)
         if request is not None:
-            requests[request["table_id"]] = request
+            seat_requests[request["table_id"]] = request
         roster = extract_native_table_player_stacks(message)
         if roster is not None:
             usable_players = [player for player in roster["players"] if player["name"] != "RESERVED"]
@@ -2483,42 +3002,94 @@ def add_native_starting_stacks(  # noqa: C901
     for table_id, roster in rosters.items():
         running_stacks = {player["name"]: player["starting_stack"] for player in roster["players"]}
         started = False
+        anchor = _native_capture_moment(roster.get("timestamp"))
         for hand in (item for item in hands if item["table_id"] == table_id):
+            if _hand_predates_roster(hand, anchor):
+                # Left unlabelled rather than labelled wrongly. `started` is
+                # untouched, so a hand skipped here is not the gap that stops a
+                # ledger already rolling -- the ledger has not begun.
+                continue
             actions = hand.get("actions") or []
             if not actions:
+                # Nothing here can say how much money moved in this hand, so the
+                # ledger no longer knows what anyone holds. Before the anchor is
+                # placed that costs nothing -- the roster still describes the
+                # table, and the capture routinely opens on a hand or two it
+                # joined mid-way. Once the ledger is rolling it is fatal: the
+                # next hand would be handed the stacks from before the gap and
+                # they would be stored as its exact starting stacks. Verified
+                # against the room's own history: hand 301461706 on table 24812
+                # is unaccounted, and the hand after it was given 4.10 where the
+                # history says 4.34.
+                if started:
+                    break
                 continue
             if any(player["name"] not in running_stacks for player in hand["players"]):
+                # A player the ledger has never seen sat down: their starting
+                # stack is unknown, so this hand cannot be labelled. It is still
+                # fully accounted for the players it does know -- their
+                # contributions and collections are all in this hand -- so the
+                # ledger rolls on rather than going stale behind them.
+                if started:
+                    _roll_native_stacks_forward(running_stacks, hand, actions)
                 continue
-            request = requests.get(table_id)
-            for player in hand["players"]:
-                name = player["name"]
-                player["starting_stack"] = running_stacks[name]
-                source = roster["source"] if not started else "exact_prior_hand_ledger"
-                if (
-                    not started
-                    and request is not None
-                    and name == local_player
-                    and player.get("seat_idx") == request["seat_idx"]
-                    and running_stacks[name] == request["requested_stack_native"]
-                ):
-                    source = "corroborated_native_type_11_and_type_23"
-                player["starting_stack_source"] = source
+            _label_native_starting_stacks(
+                hand,
+                running_stacks,
+                anchored=not started,
+                anchor_source=roster["source"],
+                request=seat_requests.get(table_id),
+                local_player=local_player,
+            )
             started = True
-            for name in running_stacks:
-                contributions = sum(
-                    action.get("amount", 0)
-                    for action in actions
-                    if action.get("player") == name and action.get("type") not in {"folds", "checks", "uncalled"}
-                )
-                returned = sum(
-                    action.get("amount", 0)
-                    for action in actions
-                    if action.get("player") == name and action.get("type") == "uncalled"
-                )
-                collected = sum(
-                    item["amount_native"] for item in hand.get("collections", []) if item.get("player") == name
-                )
-                running_stacks[name] += collected + returned - contributions
+            _roll_native_stacks_forward(running_stacks, hand, actions)
+
+
+def _label_native_starting_stacks(
+    hand: dict,
+    running_stacks: dict[str, int],
+    *,
+    anchored: bool,
+    anchor_source: str,
+    request: dict | None,
+    local_player: str | None,
+) -> None:
+    """Write one hand's starting stacks, and say where each of them came from.
+
+    ``anchored`` marks the hand the ledger starts on: its stacks are the roster's
+    own reading, and only there can the local player's seat request corroborate
+    them. Every hand after it is the arithmetic of the hands before.
+    """
+    for player in hand["players"]:
+        name = player["name"]
+        player["starting_stack"] = running_stacks[name]
+        source = anchor_source if anchored else "exact_prior_hand_ledger"
+        if (
+            anchored
+            and request is not None
+            and name == local_player
+            and player.get("seat_idx") == request["seat_idx"]
+            and running_stacks[name] == request["requested_stack_native"]
+        ):
+            source = "corroborated_native_type_11_and_type_23"
+        player["starting_stack_source"] = source
+
+
+def _roll_native_stacks_forward(running_stacks: dict[str, int], hand: dict, actions: list[dict]) -> None:
+    """Apply one fully accounted hand's settlement to every tracked stack."""
+    for name in running_stacks:
+        contributions = sum(
+            action.get("amount", 0)
+            for action in actions
+            if action.get("player") == name and action.get("type") not in {"folds", "checks", "uncalled"}
+        )
+        returned = sum(
+            action.get("amount", 0)
+            for action in actions
+            if action.get("player") == name and action.get("type") == "uncalled"
+        )
+        collected = sum(item["amount_native"] for item in hand.get("collections", []) if item.get("player") == name)
+        running_stacks[name] += collected + returned - contributions
 
 
 def promote_native_omaha_importability(hands: list[dict]) -> None:
@@ -2553,10 +3124,243 @@ def promote_native_omaha_importability(hands: list[dict]) -> None:
         audit.update(importable=True, status="importable", reasons=[])
 
 
-def normalize_native_hands(  # noqa: PLR0915 - protocol normalization is intentionally linear
+def _native_bomb_pot_amount(action_evidence: list[dict]) -> int:
+    """The ante money that seeded a bomb pot, in cents, or 0 if this is not one.
+
+    Derived from the hand, never from the table's name. A "Bomb Pot" table deals
+    ordinary blind hands between its bomb pots -- on the captured
+    "No-Rake Micro Stakes PLO Double Board Bomb Pots #1" only 8 of 72 hands were
+    bomb pots -- so the name alone mislabelled the great majority of them, and
+    ``_apply_special_hand_fields`` then stored 1 where the hand-history importer
+    stores the ante total.
+
+    A bomb pot is antes with no blind posted, the same test the text parser uses
+    (SealsWithClubsToFpdb.readSTP). For real money one native unit is one cent,
+    so the native total needs no conversion.
+    """
+    antes = [a for a in action_evidence if a.get("action") == "ante" and "amount_native" in a]
+    if not antes:
+        return 0
+    if any(a.get("action") in {"small_blind", "big_blind"} for a in action_evidence):
+        # Antes alongside blinds are an ordinary tournament level, not a bomb pot.
+        return 0
+    return sum(int(a["amount_native"]) for a in antes)
+
+
+def _native_board_output(
+    final_boards: tuple[tuple[str, ...], ...],
+    action_evidence: list[dict] | None = None,
+) -> dict:
+    """Build the compatibility board plus the complete parallel-board view."""
+    final_board = final_boards[0] if final_boards else ()
+    community: dict[str, list[str]] = {}
+    board_dicts = []
+    for board_index, board in enumerate(final_boards, start=1):
+        suffix = "" if board_index == 1 else str(board_index)
+        board_dict = {}
+        if len(board) >= 3:
+            community[f"FLOP{suffix}"] = list(board[:3])
+            board_dict["FLOP"] = list(board[:3])
+        if len(board) >= 4:
+            community[f"TURN{suffix}"] = [board[3]]
+            board_dict["TURN"] = [board[3]]
+        if len(board) >= 5:
+            community[f"RIVER{suffix}"] = [board[4]]
+            board_dict["RIVER"] = [board[4]]
+        board_dicts.append(board_dict)
+
+    shared_flop = len(final_boards) > 1 and all(
+        len(board) >= 3 and board[:3] == final_boards[0][:3] for board in final_boards[1:]
+    )
+    # A room/table label is not enough to call the hand a double-board bomb
+    # pot: this table can also produce a normal hand that runs the turn and
+    # river twice. Independent flops identify a true double-board hand;
+    # identical flops followed by divergent streets identify run-it-twice.
+    is_double_board = len(final_boards) > 1 and not shared_flop
+    # Cents, from this hand's own antes (see _native_bomb_pot_amount): 0 for the
+    # ordinary blind hands a bomb-pot table deals between its bomb pots.
+    bomb_pot_amount = _native_bomb_pot_amount(action_evidence or [])
+    return {
+        "board": list(final_board),
+        "boards": board_dicts,
+        "run_it_times": len(final_boards) if len(final_boards) > 1 else 1,
+        "double_board": is_double_board,
+        "bomb_pot": bomb_pot_amount,
+        "community": community,
+    }
+
+
+def normalize_native_hands(messages: list[NativeProtocolMessage], *, raw_ref: str) -> list[dict]:
+    """Build capture-only FPDB-aligned envelopes from confirmed native fields.
+
+    Each injected client is normalized on its own. Snapshots are grouped by
+    (table id, hand id), which two clients watching the same table both produce:
+    merged, their independently timed copies become one timeline, with stacks
+    stepping backwards wherever one client lags the other -- enough to synthesize
+    wrong actions, or to fail settlement conservation and drop the hand. Keeping
+    the sources apart and taking the most complete envelope per hand avoids that
+    without changing anything for the single client that is the normal case.
+    """
+    sources = {message.source_id for message in messages}
+    if len(sources) <= 1:
+        return _normalize_native_hands_one_source(messages, raw_ref=raw_ref)
+
+    best: dict[tuple[int, int], dict] = {}
+    richest_boards: dict[tuple[int, int], dict] = {}
+    order: list[tuple[int, int]] = []
+    for source in sorted(sources):
+        subset = [message for message in messages if message.source_id == source]
+        for hand in _normalize_native_hands_one_source(subset, raw_ref=raw_ref):
+            key = (hand.get("table_id", 0), hand.get("hand_id", 0))
+            previous = best.get(key)
+            if previous is None:
+                order.append(key)
+                best[key] = hand
+            elif _native_envelope_rank(hand) > _native_envelope_rank(previous):
+                best[key] = hand
+            boards = richest_boards.get(key)
+            if boards is None or _native_complete_boards(hand) > _native_complete_boards(boards):
+                richest_boards[key] = hand
+    for key, hand in best.items():
+        _adopt_native_board_evidence(hand, richest_boards[key])
+    return [best[key] for key in order]
+
+
+#: What _native_board_output derives from the boards, and nothing else. bomb_pot
+#: is not here: it comes from the hand's antes, so it belongs to the copy whose
+#: actions were chosen.
+_NATIVE_BOARD_FIELDS = ("board", "boards", "run_it_times", "double_board", "community")
+
+
+def _adopt_native_board_evidence(chosen: dict, richer: dict) -> None:
+    """Give the chosen copy the most complete boards any source saw of this hand.
+
+    Importability outranks board completeness, and it has to: a copy that cannot
+    be built is not a substitute for one that can. But that made the two
+    mutually exclusive, and losing the boards is permanent -- once the chosen
+    copy is imported the tailer retires the hand key, so no later copy can repair
+    the stored hand, and the second board of a double board is gone for good.
+
+    They are not alternatives at all. Both copies describe one deal at one table,
+    so the fuller board set is simply more of the same hand, and it can be given
+    to the copy that is actually importable.
+    """
+    if chosen is richer or _native_complete_boards(richer) <= _native_complete_boards(chosen):
+        return
+    for field in _NATIVE_BOARD_FIELDS:
+        if field in richer:
+            chosen[field] = richer[field]
+
+
+def _native_complete_boards(hand: dict) -> int:
+    """How many of this copy's boards are whole, by the repair path's definition.
+
+    ``_native_board_rows`` takes a board only when FLOP+TURN+RIVER give it five
+    cards, and refuses the set outright if any board falls short. Counting the
+    same thing here is what lets the ranking below prefer the copy that can
+    actually be used.
+    """
+    boards = hand.get("boards")
+    if not isinstance(boards, list):
+        return 0
+    complete = 0
+    for board in boards:
+        if not isinstance(board, dict):
+            continue
+        cards = [card for street in ("FLOP", "TURN", "RIVER") for card in board.get(street, [])]
+        if len(cards) >= 5:
+            complete += 1
+    return complete
+
+
+#: The audit flags the legacy importer requires before it will build a hand.
+#: Named here so the ranking below and http_capture_db_import ask the same
+#: question: they used to disagree, and the ranking then preferred a copy the
+#: importer would refuse.
+NATIVE_IMPORT_AUDIT_FLAGS = (
+    "complete_action_players",
+    "settlement_conservation_complete",
+    "has_small_blind",
+    "has_big_blind",
+    "has_collection",
+)
+
+
+def _native_hand_participants(hand: dict) -> set[str]:
+    """The players a build would actually seat: the ones who took part.
+
+    The envelope lists everyone sitting at the table, dealt into this hand or
+    not, and the builder drops those who took no part in it. Seat evidence is
+    derived from the deal, so someone sitting the hand out legitimately has no
+    seat -- which is why the seat check below asks about the participants and
+    not about the whole roster.
+    """
+    names = {action.get("player") for action in hand.get("actions") or ()}
+    names.update(item.get("player") for item in hand.get("collections") or ())
+    names.discard(None)
+    return names
+
+
+def native_hand_is_publicly_importable(hand: dict) -> bool:
+    """Whether the legacy importer would build a Hand.py hand from this copy.
+
+    ``audit["importable"]`` cannot answer this: ``audit_native_hand`` always
+    writes it False and only ``promote_native_omaha_importability`` ever raises
+    it, so every Hold'em copy reads as not importable however complete it is.
+    The importer never looks at that flag -- it reads the individual audit flags
+    below -- which is why this has to as well.
+    """
+    if (hand.get("game") or {}).get("base") != "hold":
+        return False
+    audit = (hand.get("metadata") or {}).get("importability") or {}
+    if not (
+        all(audit.get(flag) is True for flag in NATIVE_IMPORT_AUDIT_FLAGS)
+        and bool(hand.get("actions"))
+        and bool(hand.get("players"))
+    ):
+        return False
+    # Action and settlement evidence can be complete while seat evidence is
+    # not, and Hand.addPlayer refuses two players in one seat -- which is what
+    # two unresolved seats are. Asked here as well as in the builder so the
+    # ranking between two clients' copies of a hand prefers the one that can
+    # actually be seated, rather than choosing a seatless copy and losing a
+    # hand the other client had whole.
+    participants = _native_hand_participants(hand)
+    seats = [player.get("seat_idx") for player in hand.get("players") or () if player.get("name") in participants]
+    return all(isinstance(seat, int) for seat in seats) and len(set(seats)) == len(seats)
+
+
+def _native_envelope_rank(hand: dict) -> tuple:
+    """How usable one copy of a hand is, for choosing between two clients' views.
+
+    Snapshot count alone is the wrong measure: collections, actions and player
+    evidence arrive in their own messages and do not add steps, so one client can
+    hold an importable envelope while another holds the same number of snapshots
+    and nothing else -- and picking the latter skips a hand that was ready.
+
+    Complete boards come second, ahead of every other kind of evidence, because
+    they are what this whole path exists to recover: the text history writes one
+    board of a double board and pays out for two, and _native_board_rows repairs
+    that only from a copy whose boards are all five cards. Ranked below
+    importability but above the rest, because a hand can be worth its boards
+    while still not being importable on its own -- that is exactly the case the
+    repair handles.
+    """
+    return (
+        native_hand_is_publicly_importable(hand),
+        _native_complete_boards(hand),
+        bool((hand.get("game") or {}).get("fpdb_supported")),
+        len(hand.get("actions") or ()),
+        len(hand.get("collections") or ()),
+        len(hand.get("action_evidence") or ()),
+        len(hand.get("steps") or ()),
+    )
+
+
+def _normalize_native_hands_one_source(  # noqa: PLR0915 - protocol normalization is intentionally linear
     messages: list[NativeProtocolMessage], *, raw_ref: str
 ) -> list[dict]:
-    """Build capture-only FPDB-aligned envelopes from confirmed native fields."""
+    """Normalize the messages of a single capture source."""
     table_infos = {info.table_id: info for message in messages if (info := extract_table_info(message)) is not None}
     outbound_actions_by_hand = _collect_native_outbound_actions(messages)
     login_names = {name for message in messages if (name := extract_native_outbound_login_name(message)) is not None}
@@ -2606,7 +3410,8 @@ def normalize_native_hands(  # noqa: PLR0915 - protocol normalization is intenti
         previous_step = None
         for step_num, snapshot in enumerate(snapshots, 1):
             stacks = {player.name: player.stack_units for player in snapshot.players if player.stack_units is not None}
-            board = extract_native_board(snapshot, family)
+            boards = extract_native_boards(snapshot, family)
+            board = boards[0] if boards else ()
             native_events = extract_native_animation_events(
                 NativeProtocolMessage(
                     snapshot.captured_at,
@@ -2645,6 +3450,7 @@ def normalize_native_hands(  # noqa: PLR0915 - protocol normalization is intenti
                 "stacks": stacks,
                 "bets": {},
                 "board": list(board),
+                "boards": [list(b) for b in boards],
                 "placed": {},
                 "folded": [],
                 "pot": 0,
@@ -2771,7 +3577,12 @@ def normalize_native_hands(  # noqa: PLR0915 - protocol normalization is intenti
             dealer_collections_by_hand.get((table_id, hand_id), []),
         )
         evaluated_hands = evaluated_cards_by_hand.get((table_id, hand_id), set())
-        final_board = max((extract_native_board(snapshot, family) for snapshot in snapshots), key=len, default=())
+        final_boards = max(
+            (extract_native_boards(snapshot, family) for snapshot in snapshots),
+            key=lambda bs: (len(bs), sum(len(b) for b in bs)),
+            default=(),
+        )
+        final_board = final_boards[0] if final_boards else ()
         showdown = _build_native_showdown(collections, evaluated_hands, final_board)
         dealer_events = dealer_events_by_hand.get((table_id, hand_id), [])
         ofc_scores = [parsed for event in dealer_events if (parsed := parse_native_ofc_scores(event["text"]))]
@@ -2826,6 +3637,42 @@ def normalize_native_hands(  # noqa: PLR0915 - protocol normalization is intenti
             dealer_hand_started=any(event["text"] == "New hand started" for event in dealer_events),
             dealer_hand_complete=any(event["text"] == "Hand complete" for event in dealer_events),
         )
+        board_output = _native_board_output(final_boards, action_evidence)
+        native_players = [
+            {
+                "player_id": player.player_id,
+                "name": player.name,
+                "seat_idx": next(
+                    (
+                        seat_idx
+                        for (evidence_table, evidence_hand, seat_idx), item in seat_evidence.items()
+                        if evidence_table == table_id
+                        and evidence_hand == hand_id
+                        and item.player_id == player.player_id
+                    ),
+                    None,
+                ),
+                "roster_index": roster_index,
+                "starting_stack": None,
+                "native_opaque_funds_value": player.stack_units,
+                "native_status_values": sorted(
+                    {
+                        observed.native_status
+                        for snapshot in snapshots
+                        for observed in snapshot.players
+                        if observed.player_id == player.player_id and observed.native_status is not None
+                    }
+                ),
+            }
+            for roster_index, player in enumerate(player_order.values())
+        ]
+        # The room's own capacity when the table descriptor carried it, and
+        # otherwise enough seats to hold everyone who was actually dealt in.
+        # seat_idx is the physical seat, not a position in a list of occupants:
+        # two players at a table can sit in seats 5 and 7, and counting them as
+        # a 2-max table left the HUD building two seat windows for players it
+        # then placed in the fifth and seventh.
+        native_max_seats = _native_table_max_seats_for_hand(table, native_players)
         hands.append(
             {
                 "site": "SealsWithClubs",
@@ -2852,44 +3699,12 @@ def normalize_native_hands(  # noqa: PLR0915 - protocol normalization is intenti
                     "bb": native_blinds["bb"],
                     "ante": 0,
                     "mix": "none",
-                    "maxSeats": len(player_order),
+                    "maxSeats": native_max_seats,
                 },
                 "streets": {"allStreets": _native_street_profile(family, category)},
-                "players": [
-                    {
-                        "player_id": player.player_id,
-                        "name": player.name,
-                        "seat_idx": next(
-                            (
-                                seat_idx
-                                for (evidence_table, evidence_hand, seat_idx), item in seat_evidence.items()
-                                if evidence_table == table_id
-                                and evidence_hand == hand_id
-                                and item.player_id == player.player_id
-                            ),
-                            None,
-                        ),
-                        "roster_index": roster_index,
-                        "starting_stack": None,
-                        "native_opaque_funds_value": player.stack_units,
-                        "native_status_values": sorted(
-                            {
-                                observed.native_status
-                                for snapshot in snapshots
-                                for observed in snapshot.players
-                                if observed.player_id == player.player_id and observed.native_status is not None
-                            }
-                        ),
-                    }
-                    for roster_index, player in enumerate(player_order.values())
-                ],
+                "players": native_players,
                 "steps": steps,
-                "board": list(final_board),
-                "community": {
-                    **({"FLOP": list(final_board[:3])} if len(final_board) >= 3 else {}),
-                    **({"TURN": [final_board[3]]} if len(final_board) >= 4 else {}),
-                    **({"RIVER": [final_board[4]]} if len(final_board) >= 5 else {}),
-                },
+                **board_output,
                 "holecards": [native_hero_hole_cards] if native_hero_hole_cards else [],
                 "action_evidence": action_evidence,
                 "outbound_action_evidence": outbound_actions_by_hand.get((table_id, hand_id), []),
@@ -2939,7 +3754,7 @@ def iter_capture_records(stream: BinaryIO) -> Iterator[NativeCaptureRecord]:
             return
         if len(header) != _HEADER.size:
             raise ValueError("truncated SwC native capture header")
-        magic, version, direction, _reserved, peer_port, connection_id, size, timestamp_us = _HEADER.unpack(header)
+        magic, version, direction, source_id, peer_port, connection_id, size, timestamp_us = _HEADER.unpack(header)
         if magic != _MAGIC or version != _VERSION:
             raise ValueError("invalid SwC native capture header")
         if direction not in (0, 1):
@@ -2955,10 +3770,16 @@ def iter_capture_records(stream: BinaryIO) -> Iterator[NativeCaptureRecord]:
             peer_port=peer_port,
             payload=payload,
             connection_id=connection_id,
+            source_id=source_id,
         )
 
 
-def read_records_since(path: Path, offset: int) -> tuple[list[NativeCaptureRecord], int]:
+def read_records_since(
+    path: Path,
+    offset: int,
+    *,
+    on_restart: Callable[[], None] | None = None,
+) -> tuple[list[NativeCaptureRecord], int]:
     """Read the complete records appended to ``path`` after ``offset``.
 
     Tailing a live archive differs from reading a finished one in two ways, and
@@ -2972,6 +3793,13 @@ def read_records_since(path: Path, offset: int) -> tuple[list[NativeCaptureRecor
     and report the offset of the last complete one. A file shorter than
     ``offset`` has been rotated or truncated, so reading restarts from zero.
 
+    ``on_restart`` is called when that happens, before anything is read. A caller
+    that carries decode state across calls needs to hear about it: the bytes at
+    offset zero are a different stream from the one it was part-way through, and
+    only this function knows the restart happened. The check and the callback sit
+    together deliberately -- a caller comparing sizes itself would miss a
+    truncation that landed between its own stat and this one.
+
     Returns the records read and the offset to resume from.
     """
     try:
@@ -2982,6 +3810,8 @@ def read_records_since(path: Path, offset: int) -> tuple[list[NativeCaptureRecor
     if size < offset:
         log.info("SwC capture archive shrank (%d < %d); restarting from the beginning", size, offset)
         offset = 0
+        if on_restart is not None:
+            on_restart()
     if size == offset:
         return [], offset
 
@@ -2992,7 +3822,7 @@ def read_records_since(path: Path, offset: int) -> tuple[list[NativeCaptureRecor
             header = stream.read(_HEADER.size)
             if len(header) != _HEADER.size:
                 break  # partial record at the tail; resume here next time
-            magic, version, direction, _reserved, peer_port, connection_id, payload_size, timestamp_us = _HEADER.unpack(
+            magic, version, direction, source_id, peer_port, connection_id, payload_size, timestamp_us = _HEADER.unpack(
                 header
             )
             if magic != _MAGIC or version != _VERSION or direction not in (0, 1) or payload_size > _MAX_PAYLOAD:
@@ -3007,6 +3837,7 @@ def read_records_since(path: Path, offset: int) -> tuple[list[NativeCaptureRecor
                     peer_port=peer_port,
                     payload=payload,
                     connection_id=connection_id,
+                    source_id=source_id,
                 )
             )
             offset += _HEADER.size + payload_size
@@ -3360,6 +4191,32 @@ def main(argv: list[str] | None = None) -> int:
     if args.build or args.force_build:
         print(build_tap(force=args.force_build))
         return 0
+
+    # Windows injects the tap into the running client rather than launching it
+    # with an interposition environment, so it has no process to wait on: inject,
+    # then follow the DLL-relative archive the same way the launch path does.
+    if platform.system() == "Windows":
+        try:
+            status = attach_to_windows_client(port=args.port, include_outbound=args.include_outbound)
+        except (FileNotFoundError, RuntimeError, ValueError) as error:
+            print(f"error: {error}", file=sys.stderr)
+            return 2
+        archive = DEFAULT_ARCHIVE.expanduser().resolve()
+        print(status)
+        print(f"archive={archive}")
+        print("Dealer messages will appear with the [SWC] prefix. Press Ctrl+C to stop following.")
+        stop_follower = threading.Event()
+        follower = threading.Thread(target=follow_dealer_history, args=(archive, stop_follower), daemon=True)
+        follower.start()
+        try:
+            while True:
+                time.sleep(0.5)
+        except KeyboardInterrupt:
+            return 0
+        finally:
+            stop_follower.set()
+            follower.join(timeout=1)
+
     try:
         process = launch_client(args.archive, port=args.port, include_outbound=args.include_outbound)
     except (FileNotFoundError, RuntimeError, ValueError) as error:

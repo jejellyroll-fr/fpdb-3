@@ -34,7 +34,7 @@ def replayer_queries() -> dict[str, str]:
     # Querry to get all hands in a date range for cash games session variation filter
     ####################################
     query["handsInRangeSessionFilter"] = """
-        select h.id
+        select distinct h.id
         from Hands h
         join Gametypes gt on h.gametypeId = gt.id
         join HandsPlayers hp on h.id = hp.handId  -- utilisation de HandsPlayers

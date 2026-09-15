@@ -79,6 +79,19 @@ mysql = ["mysqlclient==2.2.4"]
 [project.scripts]
 fpdb_3_legacy = "fpdb_3_legacy.legacy_launcher:main"
 
+# uv is pinned exactly, and every setup-uv step in .github/workflows/ci.yml is
+# pinned to the same version, because uv.lock is versioned on purpose (see
+# .gitattributes) and the marker layout inside it is a function of the resolver
+# that wrote it. Two machines on different uv releases would otherwise trade
+# churn in a 4 700-line generated file back and forth, and bury the one
+# meaningful line of a real dependency change under a full re-resolution.
+#
+# This is enforced at runtime: any other uv fails every uv command run against
+# this project, rather than quietly re-resolving. Bump it and the workflow's
+# six version inputs together.
+[tool.uv]
+required-version = "==0.12.7"
+
 [tool.ruff]
 extend-include = ["*.pyw"]
 extend-exclude = ["build", "archives"]
