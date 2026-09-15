@@ -856,6 +856,29 @@ class GuiAutoImport(QWidget):
         )
         return False
 
+    def _cancel_swc_attach(self) -> None:
+        """Tell a pending tap attach to abandon its injection, at once.
+
+        Every second between the click and this request is a second in which
+        the attacher can pass its own check and load a DLL that nothing can
+        unload -- so it is made the moment Stop is asked for, not from the
+        finalizer. The finalizer runs behind the import worker's bounded wait,
+        and when that worker overruns, behind a deferral loop with no bound at
+        all; either delay is a window the injection can slip through.
+
+        The attacher also stops reporting here: one that injected before the
+        request arrived must not announce live capture into a stopped session.
+
+        Idempotent, because the finalizer calls it again for the Stop paths
+        that do not come through the button.
+        """
+        attacher = self.swc_attach_thread
+        if attacher is None:
+            return
+        attacher.cancel()
+        with suppress(RuntimeError, TypeError):
+            attacher.attached.disconnect(self._on_swc_tap_attached)
+
     def _wait_for_import_worker_stop(self) -> None:
         """Finish a pending Stop once the import worker has really exited."""
         if not self._stop_cleanup_pending:
@@ -883,20 +906,10 @@ class GuiAutoImport(QWidget):
             # adopt a thread that was told to stop, so a restart still gets one.
             if not self.swc_tailing_thread.isRunning():
                 self.swc_tailing_thread = None
+        # Already done when Stop came from the button; repeated for the paths
+        # that reach the finalizer without it.
+        self._cancel_swc_attach()
         if self.swc_attach_thread is not None:
-            # Cancelled before anything else: the tap has no unload path, so an
-            # injection that lands after this point would keep recording the
-            # client's decrypted traffic to disk until the client exits, with
-            # Auto Import visibly stopped. The worker cannot be interrupted --
-            # it is inside a compiler, an injector or a wait on the client -- but
-            # it reads the request before it injects, which is the only moment
-            # that can still be taken back.
-            self.swc_attach_thread.cancel()
-            # And it reports nothing afterwards: an attach that did inject
-            # before the request arrived would otherwise announce live capture
-            # into a stopped session.
-            with suppress(RuntimeError, TypeError):
-                self.swc_attach_thread.attached.disconnect(self._on_swc_tap_attached)
             # Given a moment, and kept referenced if it needs longer: dropping
             # the last reference to a running QThread destroys it mid-run.
             self.swc_attach_thread.wait(1000)
@@ -1425,6 +1438,10 @@ class GuiAutoImport(QWidget):
 
         else:  # bouton « Start » décoché → arrêt
             self.doAutoImportBool = False
+            # First, before anything here can wait on a worker: the tap has no
+            # unload path, so the only thing that can still be taken back is an
+            # injection that has not happened yet (see _cancel_swc_attach).
+            self._cancel_swc_attach()
             if self.importtimer:
                 self.importtimer.stop()
                 self.importtimer = None

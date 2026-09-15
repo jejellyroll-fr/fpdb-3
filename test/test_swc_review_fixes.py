@@ -2487,6 +2487,58 @@ def test_stopping_cancels_an_attach_that_has_not_injected_yet() -> None:
     assert gui.swc_attach_thread is attacher, "kept referenced until it has really exited"
 
 
+def test_the_attach_is_cancelled_the_moment_stop_is_clicked() -> None:
+    """Not from the finalizer, which waits on the import worker first.
+
+    That wait is bounded, and when the worker overruns it the finalizer is
+    deferred again on a 250ms loop with no bound at all. Every second of either
+    is a second in which the attacher can pass its own check and load a DLL
+    nothing can unload.
+    """
+    from fpdb_3_legacy.GuiAutoImport import GuiAutoImport
+
+    attacher = _SlowAttacher()
+    order: list[str] = []
+    gui = SimpleNamespace(
+        doAutoImportBool=True,
+        importtimer=None,
+        _stop_cleanup_pending=False,
+        swc_attach_thread=attacher,
+        startButton=SimpleNamespace(setEnabled=lambda _v: None, isChecked=lambda: False),
+        statusLabel=SimpleNamespace(setText=lambda _t: None),
+        _on_swc_tap_attached=object(),
+        _cancel_swc_attach=lambda: order.append("cancel"),
+        # The worker is still running, so Stop defers the whole finalizer.
+        _stop_import_worker=lambda: order.append("wait for worker") or False,
+        _wait_for_import_worker_stop=lambda: order.append("finalize later"),
+    )
+
+    GuiAutoImport.startClicked(gui)
+
+    assert order == ["cancel", "wait for worker"], "the request goes out before anything can wait"
+    assert gui._stop_cleanup_pending is True, "and the finalizer really was deferred"
+
+
+def test_cancelling_the_attach_also_silences_it() -> None:
+    """An attach that injected before the request must not report into a stopped session."""
+    from fpdb_3_legacy.GuiAutoImport import GuiAutoImport
+
+    attacher = _SlowAttacher()
+    gui = SimpleNamespace(swc_attach_thread=attacher, _on_swc_tap_attached=object())
+
+    GuiAutoImport._cancel_swc_attach(gui)
+
+    assert attacher.cancelled_called is True
+    assert attacher.disconnected == [gui._on_swc_tap_attached]
+
+
+def test_cancelling_an_attach_that_was_never_started_is_harmless() -> None:
+    """Stop is reachable on a platform that never builds one."""
+    from fpdb_3_legacy.GuiAutoImport import GuiAutoImport
+
+    GuiAutoImport._cancel_swc_attach(SimpleNamespace(swc_attach_thread=None))
+
+
 def test_a_restart_replaces_a_cancelled_attach_without_dropping_it() -> None:
     """It will inject nothing, and it is parentless: it must be neither reused nor freed."""
     from fpdb_3_legacy.GuiAutoImport import GuiAutoImport
@@ -2625,6 +2677,10 @@ class _SlowTailer:
 def _finalize(gui) -> None:
     from fpdb_3_legacy.GuiAutoImport import GuiAutoImport
 
+    # The finalizer delegates the attach cancellation, which Stop now issues far
+    # earlier. Bound to the real method so these stubs exercise it rather than a
+    # stand-in for it.
+    gui._cancel_swc_attach = lambda: GuiAutoImport._cancel_swc_attach(gui)
     GuiAutoImport._finalize_auto_import_stop(gui)
 
 
