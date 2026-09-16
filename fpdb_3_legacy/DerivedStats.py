@@ -26,6 +26,11 @@ from typing import Any
 
 from fpdb_3_legacy import Card
 from fpdb_3_legacy.action_enum_stats import derive_counters as derive_action_enum_counters
+from fpdb_3_legacy.action_events import (
+    action_chips,
+    attach_action_events,
+    effective_stack_cents,
+)
 from fpdb_3_legacy.autonotes_aof import is_aof_category
 from fpdb_3_legacy.equity import EquityUnavailableError, calculate_equity, expected_pot_share, load_poker_eval
 from fpdb_3_legacy.loggingFpdb import get_logger
@@ -1181,6 +1186,11 @@ class DerivedStats:
 
                     # Additional validation or logging can be added here as needed
 
+            # Second pass over the same stream: the rows above are what the
+            # replayer and the old aggregates read, the events are the context
+            # the analytics layers compose (issue #293).
+            attach_action_events(self.handsactions, hand, self.handsplayers)
+
             log.debug("Completed assembleHandsActions for hand ID: %s", hand.handid)
 
         except Exception:  # intentional broad catch: top-level action assembly context logs hand id before reraising.
@@ -1845,19 +1855,6 @@ class DerivedStats:
         if not getattr(self, "handsplayers", None):
             return
 
-        def chips(a):
-            act = a[1]
-            if act == "raises":
-                try:
-                    return a[2] + a[4]  # Rb + C
-                except (IndexError, TypeError):
-                    return Decimal(0)
-            if act in ("folds", "checks", "stands pat", "discards", "cashout"):
-                return Decimal(0)
-            if len(a) > 2 and isinstance(a[2], (int, float, Decimal)):
-                return a[2]
-            return Decimal(0)
-
         streets_map = {
             "PREFLOP": ("cnt_p_raise_made", "val_p_raise_made_bp", "cnt_p_raise_made_2", "val_p_raise_made_2_bp"),
             "FLOP": ("cnt_f_raise_made", "val_f_raise_made_bp", "cnt_f_raise_made_2", "val_f_raise_made_2_bp"),
@@ -1883,7 +1880,7 @@ class DerivedStats:
                         except (TypeError, ValueError, ZeroDivisionError, IndexError):
                             pass
                     made_count[pname] = n + 1
-                running += int(CENTS_MULTIPLIER * chips(a))
+                running += action_chips(a)
 
     def calcStreetSPR(self, hand: Any) -> None:
         """Record the stack-to-pot ratio (SPR) at the start of each postflop street.
@@ -1898,19 +1895,6 @@ class DerivedStats:
         """
         if not getattr(self, "handsplayers", None):
             return
-
-        def chips(a):
-            act = a[1]
-            if act == "raises":
-                try:
-                    return a[2] + a[4]  # Rb + C
-                except (IndexError, TypeError):
-                    return Decimal(0)
-            if act in ("folds", "checks", "stands pat", "discards", "cashout"):
-                return Decimal(0)
-            if len(a) > 2 and isinstance(a[2], (int, float, Decimal)):
-                return a[2]
-            return Decimal(0)
 
         targets = {
             "FLOP": ("cnt_f_spr", "val_f_spr"),
@@ -1937,10 +1921,7 @@ class DerivedStats:
                     cnt_key, val_key = targets[street]
                     rem = {p: start_cash[p] - committed[p] for p in active}
                     for p in active:
-                        others = [rem[q] for q in active if q != p]
-                        if not others:
-                            continue
-                        eff = min(rem[p], max(others))
+                        eff = effective_stack_cents(rem, p, active)
                         if eff <= 0:
                             continue
                         ps = self.handsplayers[p]
@@ -1949,7 +1930,7 @@ class DerivedStats:
             for a in acts:
                 p = a[0]
                 if p in committed:
-                    committed[p] += int(CENTS_MULTIPLIER * chips(a))
+                    committed[p] += action_chips(a)
 
     def calcBetFacing(self, hand: Any) -> None:
         """Record the size of the first bet *made* on each postflop street.

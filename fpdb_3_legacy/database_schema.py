@@ -16,6 +16,7 @@ import sys
 from typing import TYPE_CHECKING, Any
 
 from fpdb_3_legacy import Card
+from fpdb_3_legacy.action_events import ACTION_EVENT_COLUMNS
 from fpdb_3_legacy.database_caches import CACHE_KEYS, HUDCACHE_EXTRA_KEYS
 from fpdb_3_legacy.loggingFpdb import get_logger
 
@@ -418,6 +419,35 @@ ACTION_ENUM_COLUMNS = [key for key in HANDS_PLAYERS_KEYS if key.startswith("enum
 # "beginning" later.
 HANDS_PLAYERS_KEYS.reverse()
 
+# Column definition per normalized action-event column (issue #293). The
+# mapping is keyed by every column action_events.ACTION_EVENT_COLUMNS declares,
+# and spelled out so that adding a column without deciding how an existing
+# database gains it fails here, at import, rather than in the ALTER of whoever
+# upgrades next.
+_HANDS_ACTIONS_EVENT_TYPES = {
+    "actionType": "VARCHAR(24)",
+    "toCall": "BIGINT DEFAULT 0",
+    "potBefore": "BIGINT DEFAULT 0",
+    "potAfter": "BIGINT DEFAULT 0",
+    "sizingBp": "INT DEFAULT 0",
+    "position": "SMALLINT",
+    "relativePosition": "SMALLINT DEFAULT 0",
+    "inPosition": "BOOLEAN DEFAULT false",
+    "effectiveStack": "BIGINT DEFAULT 0",
+    "effectiveStackBB": "INT DEFAULT 0",
+    "sprBefore": "INT DEFAULT 0",
+    "isAggressor": "BOOLEAN DEFAULT false",
+    "facingActionType": "VARCHAR(24)",
+    "facingAmount": "BIGINT DEFAULT 0",
+    "facingSizingBp": "INT DEFAULT 0",
+    "raiserCount": "SMALLINT DEFAULT 0",
+    "callerCount": "SMALLINT DEFAULT 0",
+    "playersInHand": "SMALLINT DEFAULT 0",
+}
+HANDS_ACTIONS_EVENT_DEFINITIONS: dict[str, str] = {
+    column: _HANDS_ACTIONS_EVENT_TYPES[column] for column in ACTION_EVENT_COLUMNS
+}
+
 # db differences:
 # - note that mysql automatically creates indexes on constrained columns when
 #   foreign keys are created, while postgres does not. Hence the much longer list
@@ -444,6 +474,10 @@ INDEXES: list[list[dict[str, Any]]] = [
         {"tab": "HandsActions", "col": "handId", "drop": 1},
         {"tab": "HandsActions", "col": "playerId", "drop": 1},
         {"tab": "HandsActions", "col": "actionId", "drop": 1},
+        # The event model is queried street by street and by action type
+        # (#293), which the two foreign-key indexes above cannot serve.
+        {"tab": "HandsActions", "col": "street", "drop": 1},
+        {"tab": "HandsActions", "col": "actionType", "drop": 1},
         {"tab": "HandsStove", "col": "handId", "drop": 1},
         {"tab": "HandsStove", "col": "playerId", "drop": 1},
         {"tab": "HandsStove", "col": "hiLo", "drop": 1},
@@ -491,6 +525,8 @@ INDEXES: list[list[dict[str, Any]]] = [
         {"tab": "HandsActions", "col": "handId", "drop": 0},
         {"tab": "HandsActions", "col": "playerId", "drop": 0},
         {"tab": "HandsActions", "col": "actionId", "drop": 1},
+        {"tab": "HandsActions", "col": "street", "drop": 1},
+        {"tab": "HandsActions", "col": "actionType", "drop": 1},
         {"tab": "HandsStove", "col": "handId", "drop": 0},
         {"tab": "HandsStove", "col": "playerId", "drop": 0},
         {"tab": "HandsPots", "col": "handId", "drop": 0},
@@ -1109,6 +1145,7 @@ class DatabaseSchemaMixin:
         self.ensure_hudcache_columns()
         self.ensure_handsplayers_columns()
         self.ensure_hands_columns()
+        self.ensure_handsactions_columns()
 
     def _get_table_columns(self, table: str) -> set[str]:
         c = self.get_cursor()
@@ -1149,6 +1186,16 @@ class DatabaseSchemaMixin:
             "splashPot": "INT DEFAULT 0",
         }
         self._ensure_table_columns("Hands", definitions)
+
+    def ensure_handsactions_columns(self) -> None:
+        """Add missing normalized action-event columns for databases created by older code.
+
+        The event columns (#293) are additive like the stat columns: an existing
+        database gains them empty on its next connection, and the rows already
+        imported keep zeros there until they are rebuilt. Docs:
+        docs/action-event-model.md.
+        """
+        self._ensure_table_columns("HandsActions", HANDS_ACTIONS_EVENT_DEFINITIONS)
 
     def _column_character_length(self, table: str, column: str) -> int | None:
         """Declared width of a character column, or None when there is none.

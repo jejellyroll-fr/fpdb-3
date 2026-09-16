@@ -28,11 +28,13 @@ poker meanings are not.
 from __future__ import annotations
 
 import json
+import re
 from decimal import Decimal
 from pathlib import Path
 from typing import Any, NamedTuple
 
 from fpdb_3_legacy import Card
+from fpdb_3_legacy.action_events import ACTION_EVENT_COLUMNS
 
 GOLDEN_DIR = Path(__file__).resolve().parents[1] / "fixtures" / "analytics" / "golden"
 MANIFEST_PATH = GOLDEN_DIR.parent / "golden.json"
@@ -426,17 +428,26 @@ def _oracle_flop(
 
 
 class GoldenCorpus(NamedTuple):
-    """The imported corpus: hands, per-player rows and the HUD cache rows."""
+    """The imported corpus: hands, per-player rows, action events and HUD cache rows."""
 
     manifest: GoldenManifest
     hands: dict[int, dict[str, Any]]
     players: dict[int, dict[str, dict[str, Any]]]
     hud_cache: dict[str, dict[str, Any]]
+    actions: dict[int, list[dict[str, Any]]]
     hand_count: int
     player_count: int
 
     def player_row(self, hand_id: int, name: str) -> dict[str, Any]:
         return self.players[hand_id][name]
+
+    def action_rows(self, hand_id: int, street: int | None = None) -> list[dict[str, Any]]:
+        """One hand's events in action order, optionally on a single street."""
+        rows = self.actions[hand_id]
+        return [row for row in rows if row["street"] == street] if street is not None else rows
+
+    def event(self, hand_id: int, action_no: int) -> dict[str, Any]:
+        return self.actions[hand_id][action_no - 1]
 
 
 def build_config(tmp_dir: Path) -> Any:
@@ -481,6 +492,7 @@ def import_golden_corpus(tmp_dir: Path) -> GoldenCorpus:
     hands = _read_hands(cursor)
     players = _read_players(cursor, hands)
     hud_cache = _read_hud_cache(cursor)
+    actions = _read_actions(cursor, hands)
     # Hands itself has no rake column: the rake is stored per player.
     for hand_id, rows in players.items():
         hands[hand_id]["rake"] = sum(row["rake"] or 0 for row in rows.values())
@@ -490,6 +502,7 @@ def import_golden_corpus(tmp_dir: Path) -> GoldenCorpus:
         hands=hands,
         players=players,
         hud_cache=hud_cache,
+        actions=actions,
         hand_count=len(hands),
         player_count=sum(len(rows) for rows in players.values()),
     )
@@ -547,6 +560,69 @@ def _read_players(cursor: Any, hands: dict[int, dict[str, Any]]) -> dict[int, di
         hand_id = db_id_to_hand[row["handId"]]
         rows.setdefault(hand_id, {})[row["playerName"]] = row
     return rows
+
+
+# Everything a test needs to reason about one decision: the parser's own
+# columns plus the normalized event context of #293.
+HANDS_ACTIONS_COLUMNS = (
+    "actionNo",
+    "street",
+    "streetActionNo",
+    "actionId",
+    "amount",
+    "raiseTo",
+    "amountCalled",
+    "allIn",
+) + ACTION_EVENT_COLUMNS
+
+
+def _read_actions(cursor: Any, hands: dict[int, dict[str, Any]]) -> dict[int, list[dict[str, Any]]]:
+    """Read the stored action events back, ordered as the hand was played."""
+    db_id_to_hand = {row["id"]: hand_id for hand_id, row in hands.items()}
+    columns = ", ".join(f"hs.{column}" for column in HANDS_ACTIONS_COLUMNS)
+    cursor.execute(
+        f"SELECT hs.handId, p.name AS playerName, {columns}"
+        " FROM HandsActions hs JOIN Players p ON p.id = hs.playerId"
+        " ORDER BY hs.handId, hs.actionNo",
+    )
+    names = [description[0] for description in cursor.description]
+    rows: dict[int, list[dict[str, Any]]] = {hand_id: [] for hand_id in hands}
+    for raw in cursor.fetchall():
+        row = dict(zip(names, raw))
+        # SQLite hands booleans back as 0/1; PostgreSQL does not.
+        for flag in ("inPosition", "isAggressor", "allIn"):
+            row[flag] = bool(row[flag])
+        rows[db_id_to_hand[row["handId"]]].append(row)
+    return rows
+
+
+UNCALLED_LINE = re.compile(r"Uncalled bet \(\$([0-9.]+)\) returned to")
+
+
+def returned_uncalled_cents(scenario_file: Path) -> dict[int, int]:
+    """Amount returned as an uncalled bet per hand, read off the hand history text.
+
+    An independent reading of the file: a bet nobody called is in the pot at the
+    end of the action sequence and handed back afterwards, so the deepest
+    ``potAfter`` a hand reached should exceed its final pot by exactly this.
+    """
+    returned: dict[int, int] = {}
+    hand_id: int | None = None
+    for line in scenario_file.read_text().splitlines():
+        header = HAND_HEADER.search(line)
+        if header:
+            hand_id = int(header.group(1))
+            returned[hand_id] = 0
+            continue
+        if hand_id is None:
+            continue
+        uncalled = UNCALLED_LINE.search(line)
+        if uncalled:
+            returned[hand_id] += int(Decimal(uncalled.group(1)) * 100)
+    return returned
+
+
+HAND_HEADER = re.compile(r"^PokerStars Hand #(\d+)")
 
 
 def _read_hud_cache(cursor: Any) -> dict[str, dict[str, Any]]:
