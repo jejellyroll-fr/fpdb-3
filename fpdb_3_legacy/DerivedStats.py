@@ -34,6 +34,7 @@ from fpdb_3_legacy.action_events import (
 from fpdb_3_legacy.autonotes_aof import is_aof_category
 from fpdb_3_legacy.equity import EquityUnavailableError, calculate_equity, expected_pot_share, load_poker_eval
 from fpdb_3_legacy.loggingFpdb import get_logger
+from fpdb_3_legacy.player_situations import enumerate_situations
 
 pokereval = load_poker_eval()
 
@@ -454,6 +455,7 @@ class DerivedStats:
         self.hands: dict[str, Any] = {}
         self.handsplayers: dict[str, dict[str, Any]] = {}
         self.handsactions: dict[Any, Any] = {}
+        self.situations: list[Any] = []
         self.handsstove: list[Any] = []
         self.handspots: list[Any] = []
 
@@ -474,6 +476,9 @@ class DerivedStats:
         self.assembleHands(hand)
         self.assembleHandsPlayers(hand)
         self.assembleHandsActions(hand)
+        # Third pass, over what the two above produced: one named situation per
+        # decision (issue #294). Purely additive -- no calculator reads it yet.
+        self.situations = list(enumerate_situations(hand, self.handsplayers, self.handsactions))
 
         if pokereval and hand.gametype["category"] in Card.games and getattr(hand, "playerIds", None):
             self.assembleHandsStove(hand)
@@ -490,6 +495,10 @@ class DerivedStats:
     def getHandsActions(self) -> dict:
         """Get hands actions statistics."""
         return self.handsactions
+
+    def getSituations(self) -> list:
+        """Get the named decision situations of the hand (issue #294)."""
+        return self.situations
 
     def getHandsStove(self) -> list:
         """Get hands stove statistics."""
