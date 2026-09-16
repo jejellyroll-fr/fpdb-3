@@ -169,7 +169,8 @@ The columns are **additive**, exactly like the `HandsPlayers` stat columns:
 * **Situations** ("facing a 3-bet as the opener, in position, 100bb") -- #294.
   This model has the facts; naming the situation is a rule over them.
 * **Board texture and runouts** -- #295.
-* **Sizing buckets** -- #296. `sizingBp` is the raw measurement; the buckets cut
+* **Sizing buckets** -- #296, delivered in `sizing_buckets.py` and
+  `docs/sizing-buckets.md`. `sizingBp` is the raw measurement; the buckets cut
   it, and scenario `17_bet_sizing` has one hand per default bucket to cut.
 * **Profitability** -- #300, which needs the event row joined to `HandsPlayers`.
 
