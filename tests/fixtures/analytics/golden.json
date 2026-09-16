@@ -1,0 +1,1373 @@
+{
+  "version": 1,
+  "room": "PokerStars",
+  "description": [
+    "Golden corpus for the analytics epic (#310), one file per scenario listed in #308.",
+    "Six-handed $1/$2 NLHE, every stack $200 (100bb), rake free, so each amount is exact",
+    "and a wrong pot is a wrong number rather than a rounding question.",
+    "The button is always seat 3, so each seat keeps one role across the whole corpus:",
+    "seat 1 Anna is the hijack (position 2), seat 2 Boris the cutoff (1), seat 3 Cara the",
+    "button (0), seat 4 Dave the small blind (S), seat 5 Erin the big blind (B), seat 6",
+    "Frank under the gun (3). Boris is the recorded hero in every hand.",
+    "Expectations use the semantic vocabulary in tests/helpers/analytics_golden.py."
+  ],
+  "deviations": [
+    {
+      "id": "open_limp_counts_any_first_caller",
+      "column": "street0OpenLimp",
+      "observed_true_rows": 28,
+      "note": [
+        "street0OpenLimp is set for the first preflop caller, whether or not the pot was",
+        "raised, so a player who calls an open is recorded exactly like a player who limps",
+        "an unraised pot. Poker says an open-limp is entering an unraised pot; only one row",
+        "in this corpus (hand 3100000002, Frank) is a real open-limp, the other 27 are calls",
+        "of a raise. The corpus pins the count so a fix to the rule is visible here instead",
+        "of silently changing every limp-based stat."
+      ]
+    },
+    {
+      "id": "over_limp_not_recorded",
+      "column": "street0Limp",
+      "observed_true_rows": 0,
+      "note": [
+        "street0Limp is documented as the over-limp flag but calcLimpStreet0 leaves it False",
+        "for an over-limp as well as for an open-limp, so an over-limper is indistinguishable",
+        "from a player who never entered the pot. Hand 3100000002 has Anna over-limp behind",
+        "Frank, which is why that hand is the one asserting it."
+      ]
+    },
+    {
+      "id": "iso_raise_counted_as_rfi",
+      "column": "raisedFirstIn",
+      "observed_true_rows": 30,
+      "note": [
+        "One of the 30 rows that carry raisedFirstIn is an iso-raise over limpers, and the",
+        "same row has raiseFirstInChance false: the pipeline both denies the opportunity and",
+        "records the deed. Poker (and PT4) exclude pots opened by limpers from RFI, so RFI",
+        "stats over-count limped pots, and a stat computed as raisedFirstIn over",
+        "raiseFirstInChance can exceed 100 percent. Hand 3100000002 pins it."
+      ]
+    },
+    {
+      "id": "check_raise_recorded_as_cbet",
+      "column": "street1CBDone",
+      "observed_true_rows": 22,
+      "note": [
+        "One of the 22 rows that carry street1CBDone is a preflop aggressor who checked the",
+        "flop, faced a donk bet and check-raised (hand 3100000010, Boris). Poker counts that",
+        "as a check-raise, not a continuation bet, and the pipeline records the check-raise",
+        "correctly in street1CheckRaiseDone -- so a c-bet-frequency stat built on",
+        "street1CBDone over-counts check-raises."
+      ]
+    },
+    {
+      "id": "effective_stack_uses_remaining_stacks",
+      "column": "effStack",
+      "note": [
+        "effStack is min(own remaining stack, largest opponent remaining stack) taken from the",
+        "stacks as the parser left them once the betting is in, not from the stacks at the",
+        "start of the hand. With everyone on 100bb it reports 19800 for a big blind and 19900",
+        "for a small blind instead of 20000, and a player who is all-in for their whole stack",
+        "reports that whole stack. Hand level stack buckets built on this are shifted by the",
+        "money already committed."
+      ]
+    },
+    {
+      "id": "fold_to_cbet_counts_a_raise_as_cbet",
+      "column": "foldToStreet1CBDone",
+      "observed_true_rows": 19,
+      "note": [
+        "One of the 19 rows that carry foldToStreet1CBDone is a player who bet the flop and",
+        "folded to a raise (hand 3100000010, Cara). The flop aggressor raised rather than",
+        "continuation bet, so the poker-correct flag is fold-to-a-raise, which the pipeline",
+        "records separately in foldToOtherRaisedStreet1."
+      ]
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "rfi_open",
+      "file": "01_rfi_open.txt",
+      "covers": ["#293", "#294", "#296"],
+      "tags": ["preflop", "unopened", "rfi", "steal"],
+      "logic": [
+        "Everyone folds to the cutoff, who opens to 2.5bb and takes the blinds down.",
+        "The reference case for an unopened pot: one voluntary entrant, one raise, no flop.",
+        "Because the raise comes from the cutoff with everyone folded, it is also a steal."
+      ],
+      "hands": [
+        {
+          "hand_id": 3100000001,
+          "pot": "5.00",
+          "rake": "0.00",
+          "players_dealt": 6,
+          "players_vpip": 1,
+          "players_at_flop": 0,
+          "players": {
+            "Anna": {
+              "role": "hijack folding to the open",
+              "expect": {
+                "vpip": false,
+                "rfi_opportunity": true,
+                "folded_street": "preflop",
+                "position_code": "2"
+              }
+            },
+            "Boris": {
+              "role": "cutoff open-raising 2.5bb and winning preflop",
+              "expect": {
+                "vpip": true,
+                "pfr": true,
+                "rfi": true,
+                "steal_opportunity": true,
+                "steal_done": true,
+                "steal_succeeded": true,
+                "two_bet_done": true,
+                "raise_made_bp_preflop": 16666,
+                "saw_flop": false,
+                "position_code": "1"
+              }
+            },
+            "Cara": {
+              "role": "button folding to the open",
+              "expect": {
+                "vpip": false,
+                "three_bet_opportunity": true,
+                "folded_street": "preflop"
+              }
+            },
+            "Dave": {
+              "role": "small blind folding to the steal",
+              "expect": {
+                "vpip": false,
+                "folded_sb_to_steal": true,
+                "position_code": "S"
+              }
+            },
+            "Erin": {
+              "role": "big blind folding to the steal",
+              "expect": {
+                "vpip": false,
+                "folded_bb_to_steal": true,
+                "position_code": "B"
+              }
+            },
+            "Frank": {
+              "role": "under the gun folding",
+              "expect": {
+                "vpip": false,
+                "first_to_act_preflop": true,
+                "position_code": "3"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "limp_iso",
+      "file": "02_limp_iso.txt",
+      "covers": ["#293", "#294", "#296"],
+      "tags": ["preflop", "limp", "over-limp", "iso-raise"],
+      "logic": [
+        "Frank open-limps, Anna over-limps behind him, and the cutoff iso-raises to 5.5bb",
+        "over both limpers; everyone folds and the limpers do not contest it.",
+        "Two things worth pinning: an open-limp and an over-limp are not the same event, and",
+        "the iso-raise is not an unopened-pot raise even though it is the first raise."
+      ],
+      "hands": [
+        {
+          "hand_id": 3100000002,
+          "pot": "9.00",
+          "rake": "0.00",
+          "players_dealt": 6,
+          "players_vpip": 3,
+          "players_at_flop": 0,
+          "players": {
+            "Anna": {
+              "role": "over-limping behind the open-limper",
+              "expect": {
+                "vpip": true,
+                "pfr": false,
+                "calls_preflop": 1,
+                "limpers_faced": 1,
+                "open_limp": false,
+                "over_limp": {
+                  "poker": true,
+                  "current": false,
+                  "deviation": "over_limp_not_recorded"
+                },
+                "folded_street": "preflop"
+              }
+            },
+            "Boris": {
+              "role": "cutoff iso-raising over two limpers",
+              "expect": {
+                "vpip": true,
+                "pfr": true,
+                "two_bet_done": true,
+                "limpers_faced": 2,
+                "raise_made_bp_preflop": 15714,
+                "rfi_opportunity": false,
+                "rfi": {
+                  "poker": false,
+                  "current": true,
+                  "deviation": "iso_raise_counted_as_rfi"
+                }
+              }
+            },
+            "Frank": {
+              "role": "under the gun open-limping, then folding to the iso-raise",
+              "expect": {
+                "vpip": true,
+                "pfr": false,
+                "calls_preflop": 1,
+                "open_limp": true,
+                "limpers_faced": 0,
+                "first_to_act_preflop": true,
+                "folded_street": "preflop"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "open_call",
+      "file": "03_open_call.txt",
+      "covers": ["#293", "#294", "#298"],
+      "tags": ["single-raised-pot", "open-call", "delayed-cbet", "in-position"],
+      "logic": [
+        "The hijack opens and the cutoff calls, so the opener plays the flop out of position.",
+        "Both check the flop; the opener then bets the turn, which is a delayed c-bet rather",
+        "than a c-bet, and the caller folds.",
+        "This is the corpus reference for who is in position after an open-call."
+      ],
+      "hands": [
+        {
+          "hand_id": 3100000003,
+          "pot": "13.00",
+          "rake": "0.00",
+          "players_dealt": 6,
+          "players_vpip": 2,
+          "players_at_flop": 2,
+          "flop": ["Kd", "7s", "2c"],
+          "turn": ["9h"],
+          "players": {
+            "Anna": {
+              "role": "hijack opener, out of position throughout",
+              "expect": {
+                "vpip": true,
+                "pfr": true,
+                "rfi": true,
+                "in_position_flop": false,
+                "first_to_act_flop": true,
+                "cbet_flop_opportunity": true,
+                "cbet_flop_done": false,
+                "delayed_cbet_turn_opportunity": true,
+                "delayed_cbet_turn_done": true,
+                "bet_made_bp_turn": 6153,
+                "winnings_cents": 1300
+              }
+            },
+            "Boris": {
+              "role": "cutoff calling the open, in position on every street",
+              "expect": {
+                "vpip": true,
+                "pfr": false,
+                "in_position_flop": true,
+                "saw_flop": true,
+                "saw_turn": true,
+                "fold_to_other_raise_turn": true,
+                "folded_turn": true,
+                "folded_street": "turn",
+                "open_limp": {
+                  "poker": false,
+                  "current": true,
+                  "deviation": "open_limp_counts_any_first_caller"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "open_3bet",
+      "file": "04_open_3bet.txt",
+      "covers": ["#293", "#294", "#296"],
+      "tags": ["3bet-pot", "open-3bet", "cbet"],
+      "logic": [
+        "The hijack opens, the cutoff 3-bets to 8bb, the opener calls, and the 3-bettor",
+        "c-bets the flop in position and takes it down.",
+        "The reference case for a 3-bet pot: the opener has a 4-bet opportunity, the 3-bettor",
+        "has a c-bet opportunity, and the flop is played with a low SPR."
+      ],
+      "hands": [
+        {
+          "hand_id": 3100000004,
+          "pot": "35.00",
+          "rake": "0.00",
+          "players_dealt": 6,
+          "players_vpip": 2,
+          "players_at_flop": 2,
+          "flop": ["Qs", "8h", "3d"],
+          "players": {
+            "Anna": {
+              "role": "hijack opener calling the 3-bet, then folding to the c-bet",
+              "expect": {
+                "vpip": true,
+                "pfr": true,
+                "rfi": true,
+                "fold_to_three_bet_opportunity": true,
+                "fold_to_three_bet_done": false,
+                "four_bet_opportunity": true,
+                "vs_preflop_3bet_response": "C",
+                "fold_to_cbet_flop_opportunity": true,
+                "fold_to_cbet_flop_done": true,
+                "vs_cbet_flop_response": "F",
+                "folded_street": "flop",
+                "profit_cents": -1600
+              }
+            },
+            "Boris": {
+              "role": "cutoff 3-betting to 8bb and c-betting the flop",
+              "expect": {
+                "vpip": true,
+                "pfr": true,
+                "three_bet_opportunity": true,
+                "three_bet_done": true,
+                "raise_made_bp_preflop": 20000,
+                "in_position_flop": true,
+                "cbet_flop_opportunity": true,
+                "cbet_flop_done": true,
+                "bet_made_bp_flop": 4857,
+                "spr_flop": 525,
+                "winnings_cents": 3500
+              }
+            },
+            "Cara": {
+              "role": "button folding to the 3-bet",
+              "expect": {
+                "vpip": false,
+                "faced_3bet_times": 1,
+                "vs_preflop_3bet_response": "F",
+                "folded_street": "preflop"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "squeeze",
+      "file": "05_squeeze.txt",
+      "covers": ["#293", "#294"],
+      "tags": ["preflop", "squeeze", "3bet-pot"],
+      "logic": [
+        "Under the gun opens, the hijack calls, and the cutoff squeezes to 11bb; both",
+        "players in the pot fold.",
+        "A squeeze is also a 3-bet, which the pipeline records in both columns, and everyone",
+        "who had already put money in faces the squeeze."
+      ],
+      "hands": [
+        {
+          "hand_id": 3100000005,
+          "pot": "18.00",
+          "rake": "0.00",
+          "players_dealt": 6,
+          "players_vpip": 3,
+          "players_at_flop": 0,
+          "players": {
+            "Anna": {
+              "role": "hijack calling the open, then folding to the squeeze",
+              "expect": {
+                "vpip": true,
+                "pfr": false,
+                "vs_squeeze_response": "F",
+                "folded_street": "preflop"
+              }
+            },
+            "Boris": {
+              "role": "cutoff squeezing over a raise and a caller",
+              "expect": {
+                "vpip": true,
+                "pfr": true,
+                "squeeze_opportunity": true,
+                "squeeze_done": true,
+                "three_bet_done": true,
+                "raise_made_bp_preflop": 16923,
+                "winnings_cents": 1800
+              }
+            },
+            "Frank": {
+              "role": "under the gun opener facing the squeeze",
+              "expect": {
+                "vpip": true,
+                "pfr": true,
+                "rfi": true,
+                "four_bet_opportunity": true,
+                "vs_squeeze_response": "F",
+                "folded_street": "preflop"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "four_bet_five_bet_allin",
+      "file": "06_four_bet_five_bet_allin.txt",
+      "covers": ["#293", "#294", "#300"],
+      "tags": ["preflop", "4bet", "5bet", "all-in"],
+      "logic": [
+        "Under the gun opens, the cutoff 3-bets, the opener 4-bets to 20bb and the cutoff",
+        "5-bets all-in for 100bb; the opener folds.",
+        "The reference case for a preflop all-in that is not called: the all-in player takes",
+        "the pot without showdown, and the chips returned uncalled must not be reported as",
+        "profit."
+      ],
+      "hands": [
+        {
+          "hand_id": 3100000006,
+          "pot": "83.00",
+          "rake": "0.00",
+          "players_dealt": 6,
+          "players_vpip": 2,
+          "players_at_flop": 0,
+          "players": {
+            "Boris": {
+              "role": "cutoff 3-betting, then 5-betting all-in and taking the pot",
+              "expect": {
+                "vpip": true,
+                "pfr": true,
+                "three_bet_done": true,
+                "all_in_preflop": true,
+                "went_all_in": true,
+                "vs_preflop_4bet_response": "R",
+                "saw_flop": false,
+                "winnings_cents": 8300,
+                "profit_cents": 4300
+              }
+            },
+            "Frank": {
+              "role": "under the gun opening, 4-betting, then folding to the all-in",
+              "expect": {
+                "vpip": true,
+                "pfr": true,
+                "rfi": true,
+                "four_bet_opportunity": true,
+                "four_bet_done": true,
+                "vs_preflop_3bet_response": "R",
+                "folded_street": "preflop",
+                "went_all_in": false,
+                "profit_cents": -4000
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "srp_cbet",
+      "file": "07_srp_cbet.txt",
+      "covers": ["#293", "#294", "#298", "#299"],
+      "tags": ["single-raised-pot", "cbet", "fold-to-cbet"],
+      "logic": [
+        "The hijack opens, the cutoff calls, and the opener c-bets the flop of Ah 9d 4c;",
+        "the caller folds.",
+        "The smallest possible single-raised-pot c-bet: one opportunity, one fold to c-bet,",
+        "one pot of 6.5bb for the aggressor."
+      ],
+      "hands": [
+        {
+          "hand_id": 3100000007,
+          "pot": "13.00",
+          "rake": "0.00",
+          "players_dealt": 6,
+          "players_vpip": 2,
+          "players_at_flop": 2,
+          "flop": ["Ah", "9d", "4c"],
+          "players": {
+            "Anna": {
+              "role": "hijack opener c-betting the flop",
+              "expect": {
+                "vpip": true,
+                "pfr": true,
+                "rfi": true,
+                "cbet_flop_opportunity": true,
+                "cbet_flop_done": true,
+                "bet_made_bp_flop": 5384,
+                "aggressor_flop": true,
+                "winnings_cents": 1300
+              }
+            },
+            "Boris": {
+              "role": "cutoff caller folding to the c-bet",
+              "expect": {
+                "vpip": true,
+                "pfr": false,
+                "in_position_flop": true,
+                "fold_to_cbet_flop_opportunity": true,
+                "fold_to_cbet_flop_done": true,
+                "vs_cbet_flop_response": "F",
+                "folded_flop": true,
+                "folded_street": "flop"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "delayed_cbet",
+      "file": "08_delayed_cbet.txt",
+      "covers": ["#293", "#294", "#298"],
+      "tags": ["single-raised-pot", "delayed-cbet", "showdown"],
+      "logic": [
+        "The hijack opens and the cutoff calls. Both check the flop, so the opener has no",
+        "c-bet; he bets the turn instead, which is a delayed c-bet, the caller calls, and",
+        "both check the river to showdown.",
+        "The only corpus hand where a delayed c-bet is followed by a showdown, so it also",
+        "covers showed-down, won-at-showdown and the river float opportunity."
+      ],
+      "hands": [
+        {
+          "hand_id": 3100000008,
+          "pot": "29.00",
+          "rake": "0.00",
+          "players_dealt": 6,
+          "players_vpip": 2,
+          "players_at_flop": 2,
+          "players_at_turn": 2,
+          "players_at_river": 2,
+          "players_at_showdown": 2,
+          "flop": ["Td", "6s", "2h"],
+          "turn": ["8c"],
+          "river": ["Qd"],
+          "players": {
+            "Anna": {
+              "role": "hijack opener: no c-bet, delayed c-bet on the turn, then checks the river down",
+              "expect": {
+                "vpip": true,
+                "pfr": true,
+                "cbet_flop_opportunity": true,
+                "cbet_flop_done": false,
+                "delayed_cbet_turn_opportunity": true,
+                "delayed_cbet_turn_done": true,
+                "bet_made_bp_turn": 6153,
+                "aggressor_turn": true,
+                "saw_river": true,
+                "saw_showdown": true,
+                "showed_cards": true,
+                "won_at_showdown": false,
+                "profit_cents": -1300
+              }
+            },
+            "Boris": {
+              "role": "cutoff caller calling the turn, checking back the river, winning at showdown",
+              "expect": {
+                "vpip": true,
+                "pfr": false,
+                "in_position_flop": true,
+                "in_position_turn": true,
+                "in_position_river": true,
+                "float_river_opportunity": true,
+                "saw_showdown": true,
+                "showed_cards": true,
+                "won_at_showdown": true,
+                "winnings_cents": 2900
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "turn_probe",
+      "file": "09_turn_probe.txt",
+      "covers": ["#293", "#294", "#299"],
+      "tags": ["single-raised-pot", "probe", "turn"],
+      "logic": [
+        "The hijack opens and the cutoff calls. The opener checks the flop and checks again",
+        "on the turn, so the caller gets to open the turn with no bet in front of him: that",
+        "bet is a probe, and it takes the pot down.",
+        "The probe is the counterpart of the delayed c-bet: same flop action, opposite actor."
+      ],
+      "hands": [
+        {
+          "hand_id": 3100000009,
+          "pot": "13.00",
+          "rake": "0.00",
+          "players_dealt": 6,
+          "players_vpip": 2,
+          "players_at_flop": 2,
+          "flop": ["Jc", "8d", "3s"],
+          "turn": ["5h"],
+          "players": {
+            "Anna": {
+              "role": "hijack opener checking flop and turn, folding to the probe",
+              "expect": {
+                "vpip": true,
+                "pfr": true,
+                "cbet_flop_opportunity": true,
+                "cbet_flop_done": false,
+                "delayed_cbet_turn_opportunity": true,
+                "delayed_cbet_turn_done": false,
+                "folded_turn": true,
+                "folded_street": "turn"
+              }
+            },
+            "Boris": {
+              "role": "cutoff caller probing the turn",
+              "expect": {
+                "vpip": true,
+                "pfr": false,
+                "probe_turn_opportunity": true,
+                "probe_turn_done": true,
+                "bet_made_bp_turn": 5384,
+                "aggressor_turn": true,
+                "winnings_cents": 1300
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "check_raise",
+      "file": "10_check_raise.txt",
+      "covers": ["#293", "#294", "#299"],
+      "tags": ["single-raised-pot", "donk", "check-raise"],
+      "logic": [
+        "The cutoff opens and the button calls. The opener checks the flop, the caller bets",
+        "7bb into the aggressor (a donk bet), and the opener check-raises to 21bb and takes",
+        "the pot.",
+        "The reference case for a donk bet met by a check-raise: the response is recorded on",
+        "the player who faced the donk, and the raise size on the raiser."
+      ],
+      "hands": [
+        {
+          "hand_id": 3100000010,
+          "pot": "27.00",
+          "rake": "0.00",
+          "players_dealt": 6,
+          "players_vpip": 2,
+          "players_at_flop": 2,
+          "flop": ["9h", "7h", "3c"],
+          "players": {
+            "Boris": {
+              "role": "cutoff opener checking and check-raising the donk bet",
+              "expect": {
+                "vpip": true,
+                "pfr": true,
+                "rfi": true,
+                "first_to_act_flop": true,
+                "check_raise_flop_opportunity": true,
+                "check_raise_flop_done": true,
+                "cbet_flop_done": {
+                  "poker": false,
+                  "current": true,
+                  "deviation": "check_raise_recorded_as_cbet"
+                },
+                "vs_donk_flop_response": "R",
+                "raise_made_bp_flop": 10500,
+                "winnings_cents": 2700
+              }
+            },
+            "Cara": {
+              "role": "button caller donk betting the flop and folding to the check-raise",
+              "expect": {
+                "vpip": true,
+                "pfr": false,
+                "in_position_flop": true,
+                "bets_flop": 1,
+                "bet_made_bp_flop": 5384,
+                "faced_raise_flop": true,
+                "fold_to_cbet_flop_done": {
+                  "poker": false,
+                  "current": true,
+                  "deviation": "fold_to_cbet_counts_a_raise_as_cbet"
+                },
+                "fold_to_other_raise_flop": true,
+                "aggressor_flop": true,
+                "folded_flop": true,
+                "folded_street": "flop"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "float",
+      "file": "11_float.txt",
+      "covers": ["#293", "#294", "#299"],
+      "tags": ["single-raised-pot", "float", "in-position"],
+      "logic": [
+        "The cutoff opens, the button calls, the opener c-bets the flop and the caller calls",
+        "in position. The opener then checks the turn and the caller bets: that bet is a",
+        "float, and the opener folds.",
+        "A float needs two things the golden corpus has to state explicitly: the caller must",
+        "be in position, and the floater bets only after the aggressor declines to barrel."
+      ],
+      "hands": [
+        {
+          "hand_id": 3100000011,
+          "pot": "27.00",
+          "rake": "0.00",
+          "players_dealt": 6,
+          "players_vpip": 2,
+          "players_at_flop": 2,
+          "flop": ["Kc", "8d", "2s"],
+          "turn": ["4h"],
+          "players": {
+            "Boris": {
+              "role": "cutoff opener c-betting the flop, giving up the turn and folding",
+              "expect": {
+                "vpip": true,
+                "pfr": true,
+                "cbet_flop_done": true,
+                "bet_made_bp_flop": 5384,
+                "float_turn_defence_opportunity": true,
+                "folded_turn": true,
+                "folded_street": "turn",
+                "profit_cents": -1200
+              }
+            },
+            "Cara": {
+              "role": "button caller floating the turn in position",
+              "expect": {
+                "vpip": true,
+                "pfr": false,
+                "in_position_flop": true,
+                "float_turn_opportunity": true,
+                "float_turn_done": true,
+                "bet_made_bp_turn": 5555,
+                "aggressor_turn": true,
+                "vs_cbet_flop_response": "C",
+                "winnings_cents": 2700
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "turn_barrel",
+      "file": "12_turn_barrel.txt",
+      "covers": ["#293", "#294", "#296", "#299"],
+      "tags": ["single-raised-pot", "cbet", "turn-barrel"],
+      "logic": [
+        "The cutoff opens, the button calls, and the opener c-bets the flop and barrels the",
+        "turn for 66 percent of the pot; the caller folds.",
+        "The turn barrel is faced by a player who called the flop c-bet in position, so the",
+        "same fold is recorded both as a fold to a turn c-bet and as the float situation."
+      ],
+      "hands": [
+        {
+          "hand_id": 3100000012,
+          "pot": "27.00",
+          "rake": "0.00",
+          "players_dealt": 6,
+          "players_vpip": 2,
+          "players_at_flop": 2,
+          "flop": ["Ac", "9h", "4d"],
+          "turn": ["2s"],
+          "players": {
+            "Boris": {
+              "role": "cutoff opener c-betting the flop and barrelling the turn",
+              "expect": {
+                "vpip": true,
+                "pfr": true,
+                "cbet_flop_done": true,
+                "cbet_turn_opportunity": true,
+                "cbet_turn_done": true,
+                "bet_made_bp_turn": 6666,
+                "spr_turn": 696,
+                "winnings_cents": 2700
+              }
+            },
+            "Cara": {
+              "role": "button caller calling the flop c-bet and folding to the turn barrel",
+              "expect": {
+                "vpip": true,
+                "pfr": false,
+                "vs_cbet_flop_response": "C",
+                "fold_to_cbet_turn_opportunity": true,
+                "fold_to_cbet_turn_done": true,
+                "vs_cbet_turn_response": "F",
+                "vs_float_turn_response": "F",
+                "folded_turn": true,
+                "folded_street": "turn"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "river_barrel",
+      "file": "13_river_barrel.txt",
+      "covers": ["#293", "#294", "#296"],
+      "tags": ["single-raised-pot", "triple-barrel", "river-barrel", "river"],
+      "logic": [
+        "The cutoff opens, the button calls, and the opener bets flop, turn and river with",
+        "the caller calling twice and folding on the river.",
+        "The only three-street barrel in the corpus, so it pins the per-street sizing of one",
+        "player across all three streets and the river fold response."
+      ],
+      "hands": [
+        {
+          "hand_id": 3100000013,
+          "pot": "63.00",
+          "rake": "0.00",
+          "players_dealt": 6,
+          "players_vpip": 2,
+          "players_at_flop": 2,
+          "players_at_turn": 2,
+          "flop": ["Qc", "Jd", "5c"],
+          "turn": ["3s"],
+          "river": ["Td"],
+          "players": {
+            "Boris": {
+              "role": "cutoff opener triple barrelling",
+              "expect": {
+                "vpip": true,
+                "pfr": true,
+                "cbet_flop_done": true,
+                "cbet_turn_done": true,
+                "cbet_river_opportunity": true,
+                "cbet_river_done": true,
+                "bet_made_bp_flop": 5384,
+                "bet_made_bp_turn": 6666,
+                "bet_made_bp_river": 6349,
+                "spr_river": 269,
+                "winnings_cents": 6300
+              }
+            },
+            "Cara": {
+              "role": "button caller calling flop and turn, folding to the river barrel",
+              "expect": {
+                "vpip": true,
+                "pfr": false,
+                "fold_to_cbet_flop_done": false,
+                "vs_cbet_flop_response": "C",
+                "vs_cbet_turn_response": "C",
+                "fold_to_cbet_river_opportunity": true,
+                "fold_to_cbet_river_done": true,
+                "vs_cbet_river_response": "F",
+                "vs_float_river_response": "F",
+                "folded_river": true,
+                "folded_street": "river"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "multiway",
+      "file": "14_multiway.txt",
+      "covers": ["#293", "#294", "#303"],
+      "tags": ["multiway", "single-raised-pot", "squeeze-opportunity"],
+      "logic": [
+        "Under the gun opens, the hijack and the cutoff both call, so three players see the",
+        "flop. The opener bets 9bb into two players, the hijack calls and the cutoff folds;",
+        "the opener gives up the turn and folds to a bet.",
+        "The corpus reference for a multiway pot: three players on the flop, two on the turn,",
+        "and a caller who bets the turn after the aggressor checks is floating, not probing."
+      ],
+      "hands": [
+        {
+          "hand_id": 3100000014,
+          "pot": "36.00",
+          "rake": "0.00",
+          "players_dealt": 6,
+          "players_vpip": 3,
+          "players_at_flop": 3,
+          "players_at_turn": 2,
+          "flop": ["8d", "8c", "2h"],
+          "turn": ["Kh"],
+          "players": {
+            "Anna": {
+              "role": "hijack caller calling the flop bet and betting the turn when checked to",
+              "expect": {
+                "vpip": true,
+                "pfr": false,
+                "saw_flop": true,
+                "in_position_flop": false,
+                "in_position_turn": true,
+                "vs_cbet_flop_response": "C",
+                "float_turn_done": true,
+                "bet_made_bp_turn": 5555,
+                "aggressor_turn": true,
+                "winnings_cents": 3600
+              }
+            },
+            "Boris": {
+              "role": "cutoff caller folding to the flop bet",
+              "expect": {
+                "vpip": true,
+                "pfr": false,
+                "squeeze_opportunity": true,
+                "fold_to_cbet_flop_done": true,
+                "vs_cbet_flop_response": "F",
+                "folded_flop": true,
+                "folded_street": "flop"
+              }
+            },
+            "Frank": {
+              "role": "under the gun opener c-betting into two players, then folding the turn",
+              "expect": {
+                "vpip": true,
+                "pfr": true,
+                "rfi": true,
+                "cbet_flop_done": true,
+                "bet_made_bp_flop": 5000,
+                "spr_flop": 1083,
+                "folded_turn": true,
+                "folded_street": "turn",
+                "profit_cents": -1400
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "allin_before_river",
+      "file": "15_allin_before_river.txt",
+      "covers": ["#293", "#294", "#300", "#302"],
+      "tags": ["3bet-pot", "all-in", "showdown"],
+      "logic": [
+        "Under the gun opens, the hijack 3-bets to 8bb, the opener calls, and both players",
+        "get 92bb in on the flop of Ad Kd Qc: the opener shoves and the 3-bettor calls with",
+        "top set against a lower set, and the board runs out without a scare card.",
+        "Covers an all-in before the river with known hole cards, which is the case the",
+        "all-in EV and hand-strength work has to agree with."
+      ],
+      "hands": [
+        {
+          "hand_id": 3100000015,
+          "pot": "403.00",
+          "rake": "0.00",
+          "players_dealt": 6,
+          "players_vpip": 2,
+          "players_at_flop": 2,
+          "players_at_turn": 2,
+          "players_at_river": 2,
+          "players_at_showdown": 2,
+          "flop": ["Ad", "Kd", "Qc"],
+          "turn": ["2h"],
+          "river": ["7s"],
+          "players": {
+            "Anna": {
+              "role": "hijack 3-betting, calling the flop shove with top set and winning",
+              "expect": {
+                "vpip": true,
+                "pfr": true,
+                "three_bet_done": true,
+                "all_in_flop": true,
+                "went_all_in": true,
+                "faced_all_in_flop": true,
+                "saw_showdown": true,
+                "showed_cards": true,
+                "won_at_showdown": true,
+                "winnings_cents": 40300,
+                "profit_cents": 20300,
+                "effective_stack_cents": {
+                  "poker": 20000,
+                  "current": 20000,
+                  "deviation": "effective_stack_uses_remaining_stacks"
+                }
+              }
+            },
+            "Frank": {
+              "role": "under the gun opening, calling the 3-bet, shoving the flop and losing",
+              "expect": {
+                "vpip": true,
+                "pfr": true,
+                "rfi": true,
+                "fold_to_three_bet_opportunity": true,
+                "vs_preflop_3bet_response": "C",
+                "all_in_flop": true,
+                "went_all_in": true,
+                "saw_showdown": true,
+                "won_at_showdown": false,
+                "profit_cents": -20000
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "board_texture",
+      "file": "16_board_texture.txt",
+      "covers": ["#295", "#301", "#303"],
+      "tags": ["single-raised-pot", "cbet", "board-texture"],
+      "logic": [
+        "Five identical single-raised pots that differ only in the flop, one per texture the",
+        "board classifier has to separate: ace-high rainbow, king-high two-tone, monotone,",
+        "paired and low connected. In each the opener c-bets 7bb into 13bb and takes it down.",
+        "Because the action is the same everywhere, any difference between these hands comes",
+        "from the board. The corpus asserts the stored flop cards; the texture flags #295 adds",
+        "are asserted by the subset of these hands that classifier gets wrong."
+      ],
+      "hands": [
+        {
+          "hand_id": 3100000016,
+          "pot": "13.00",
+          "rake": "0.00",
+          "players_dealt": 6,
+          "players_vpip": 2,
+          "players_at_flop": 2,
+          "flop": ["Ah", "7d", "2c"],
+          "players": {
+            "Boris": {
+              "role": "cutoff opener c-betting an ace-high rainbow flop",
+              "expect": {
+                "vpip": true,
+                "pfr": true,
+                "rfi": true,
+                "cbet_flop_done": true,
+                "bet_made_bp_flop": 5384,
+                "winnings_cents": 1300
+              }
+            },
+            "Cara": {
+              "role": "button caller folding to the c-bet",
+              "expect": {
+                "fold_to_cbet_flop_done": true,
+                "folded_street": "flop"
+              }
+            }
+          }
+        },
+        {
+          "hand_id": 3100000017,
+          "pot": "13.00",
+          "rake": "0.00",
+          "players_dealt": 6,
+          "players_vpip": 2,
+          "players_at_flop": 2,
+          "flop": ["Kh", "9h", "3c"],
+          "players": {
+            "Boris": {
+              "role": "cutoff opener c-betting a king-high two-tone flop",
+              "expect": {
+                "vpip": true,
+                "pfr": true,
+                "rfi": true,
+                "cbet_flop_done": true,
+                "bet_made_bp_flop": 5384,
+                "winnings_cents": 1300
+              }
+            },
+            "Cara": {
+              "role": "button caller folding to the c-bet",
+              "expect": {
+                "fold_to_cbet_flop_done": true,
+                "folded_street": "flop"
+              }
+            }
+          }
+        },
+        {
+          "hand_id": 3100000018,
+          "pot": "13.00",
+          "rake": "0.00",
+          "players_dealt": 6,
+          "players_vpip": 2,
+          "players_at_flop": 2,
+          "flop": ["Qs", "Js", "8s"],
+          "players": {
+            "Boris": {
+              "role": "cutoff opener c-betting a monotone flop",
+              "expect": {
+                "vpip": true,
+                "pfr": true,
+                "rfi": true,
+                "cbet_flop_done": true,
+                "bet_made_bp_flop": 5384,
+                "winnings_cents": 1300
+              }
+            },
+            "Cara": {
+              "role": "button caller folding to the c-bet",
+              "expect": {
+                "fold_to_cbet_flop_done": true,
+                "folded_street": "flop"
+              }
+            }
+          }
+        },
+        {
+          "hand_id": 3100000019,
+          "pot": "13.00",
+          "rake": "0.00",
+          "players_dealt": 6,
+          "players_vpip": 2,
+          "players_at_flop": 2,
+          "flop": ["9d", "9c", "4h"],
+          "players": {
+            "Boris": {
+              "role": "cutoff opener c-betting a paired flop",
+              "expect": {
+                "vpip": true,
+                "pfr": true,
+                "rfi": true,
+                "cbet_flop_done": true,
+                "bet_made_bp_flop": 5384,
+                "winnings_cents": 1300
+              }
+            },
+            "Cara": {
+              "role": "button caller folding to the c-bet",
+              "expect": {
+                "fold_to_cbet_flop_done": true,
+                "folded_street": "flop"
+              }
+            }
+          }
+        },
+        {
+          "hand_id": 3100000020,
+          "pot": "13.00",
+          "rake": "0.00",
+          "players_dealt": 6,
+          "players_vpip": 2,
+          "players_at_flop": 2,
+          "flop": ["7h", "6d", "5c"],
+          "players": {
+            "Boris": {
+              "role": "cutoff opener c-betting a low connected flop",
+              "expect": {
+                "vpip": true,
+                "pfr": true,
+                "rfi": true,
+                "cbet_flop_done": true,
+                "bet_made_bp_flop": 5384,
+                "winnings_cents": 1300
+              }
+            },
+            "Cara": {
+              "role": "button caller folding to the c-bet",
+              "expect": {
+                "fold_to_cbet_flop_done": true,
+                "folded_street": "flop"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "bet_sizing",
+      "file": "17_bet_sizing.txt",
+      "covers": ["#296", "#297", "#303"],
+      "tags": ["single-raised-pot", "cbet", "sizing", "buckets"],
+      "logic": [
+        "Ten identical single-raised pots in which the opener c-bets a different fraction of",
+        "the same 13bb pot, one per default sizing bucket from #296: 23, 31, 38, 46, 62, 77,",
+        "92, 123, 138 and 154 percent of the pot.",
+        "Every hand has the same actors, the same pot and the same board shape, so the only",
+        "variable is the size. The basis-point value the pipeline stores is pinned per hand;",
+        "the bucket each size falls into is named here for #296 to assert."
+      ],
+      "hands": [
+        {
+          "hand_id": 3100000021,
+          "pot": "13.00",
+          "rake": "0.00",
+          "players_dealt": 6,
+          "players_vpip": 2,
+          "players_at_flop": 2,
+          "flop": ["Qd", "8h", "3c"],
+          "players": {
+            "Boris": {
+              "role": "cutoff opener c-betting 3bb into 13bb (23 percent, bucket 0-25)",
+              "expect": {
+                "cbet_flop_done": true,
+                "bet_made_bp_flop": 2307,
+                "winnings_cents": 1300
+              }
+            }
+          }
+        },
+        {
+          "hand_id": 3100000022,
+          "pot": "13.00",
+          "rake": "0.00",
+          "players_dealt": 6,
+          "players_vpip": 2,
+          "players_at_flop": 2,
+          "flop": ["Jc", "7d", "2h"],
+          "players": {
+            "Boris": {
+              "role": "cutoff opener c-betting 4bb into 13bb (31 percent, bucket 25-33)",
+              "expect": {
+                "cbet_flop_done": true,
+                "bet_made_bp_flop": 3076,
+                "winnings_cents": 1300
+              }
+            }
+          }
+        },
+        {
+          "hand_id": 3100000023,
+          "pot": "13.00",
+          "rake": "0.00",
+          "players_dealt": 6,
+          "players_vpip": 2,
+          "players_at_flop": 2,
+          "flop": ["Ts", "6c", "2d"],
+          "players": {
+            "Boris": {
+              "role": "cutoff opener c-betting 5bb into 13bb (38 percent, bucket 33-40)",
+              "expect": {
+                "cbet_flop_done": true,
+                "bet_made_bp_flop": 3846,
+                "winnings_cents": 1300
+              }
+            }
+          }
+        },
+        {
+          "hand_id": 3100000024,
+          "pot": "13.00",
+          "rake": "0.00",
+          "players_dealt": 6,
+          "players_vpip": 2,
+          "players_at_flop": 2,
+          "flop": ["9h", "5s", "2c"],
+          "players": {
+            "Boris": {
+              "role": "cutoff opener c-betting 6bb into 13bb (46 percent, bucket 40-50)",
+              "expect": {
+                "cbet_flop_done": true,
+                "bet_made_bp_flop": 4615,
+                "winnings_cents": 1300
+              }
+            }
+          }
+        },
+        {
+          "hand_id": 3100000025,
+          "pot": "13.00",
+          "rake": "0.00",
+          "players_dealt": 6,
+          "players_vpip": 2,
+          "players_at_flop": 2,
+          "flop": ["Ah", "8d", "3s"],
+          "players": {
+            "Boris": {
+              "role": "cutoff opener c-betting 8bb into 13bb (62 percent, bucket 50-66)",
+              "expect": {
+                "cbet_flop_done": true,
+                "bet_made_bp_flop": 6153,
+                "winnings_cents": 1300
+              }
+            }
+          }
+        },
+        {
+          "hand_id": 3100000026,
+          "pot": "13.00",
+          "rake": "0.00",
+          "players_dealt": 6,
+          "players_vpip": 2,
+          "players_at_flop": 2,
+          "flop": ["Kd", "7c", "4h"],
+          "players": {
+            "Boris": {
+              "role": "cutoff opener c-betting 10bb into 13bb (77 percent, bucket 66-80)",
+              "expect": {
+                "cbet_flop_done": true,
+                "bet_made_bp_flop": 7692,
+                "winnings_cents": 1300
+              }
+            }
+          }
+        },
+        {
+          "hand_id": 3100000027,
+          "pot": "13.00",
+          "rake": "0.00",
+          "players_dealt": 6,
+          "players_vpip": 2,
+          "players_at_flop": 2,
+          "flop": ["Qc", "9d", "4s"],
+          "players": {
+            "Boris": {
+              "role": "cutoff opener c-betting 12bb into 13bb (92 percent, bucket 80-100)",
+              "expect": {
+                "cbet_flop_done": true,
+                "bet_made_bp_flop": 9230,
+                "winnings_cents": 1300
+              }
+            }
+          }
+        },
+        {
+          "hand_id": 3100000028,
+          "pot": "13.00",
+          "rake": "0.00",
+          "players_dealt": 6,
+          "players_vpip": 2,
+          "players_at_flop": 2,
+          "flop": ["Js", "8h", "5d"],
+          "players": {
+            "Boris": {
+              "role": "cutoff opener c-betting 16bb into 13bb (123 percent, bucket 100-125)",
+              "expect": {
+                "cbet_flop_done": true,
+                "bet_made_bp_flop": 12307,
+                "winnings_cents": 1300
+              }
+            }
+          }
+        },
+        {
+          "hand_id": 3100000029,
+          "pot": "13.00",
+          "rake": "0.00",
+          "players_dealt": 6,
+          "players_vpip": 2,
+          "players_at_flop": 2,
+          "flop": ["Th", "7s", "3h"],
+          "players": {
+            "Boris": {
+              "role": "cutoff opener c-betting 18bb into 13bb (138 percent, bucket 125-150)",
+              "expect": {
+                "cbet_flop_done": true,
+                "bet_made_bp_flop": 13846,
+                "winnings_cents": 1300
+              }
+            }
+          }
+        },
+        {
+          "hand_id": 3100000030,
+          "pot": "13.00",
+          "rake": "0.00",
+          "players_dealt": 6,
+          "players_vpip": 2,
+          "players_at_flop": 2,
+          "flop": ["9c", "6h", "2s"],
+          "players": {
+            "Boris": {
+              "role": "cutoff opener c-betting 20bb into 13bb (154 percent, bucket 150+)",
+              "expect": {
+                "cbet_flop_done": true,
+                "bet_made_bp_flop": 15384,
+                "winnings_cents": 1300
+              }
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
