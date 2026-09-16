@@ -477,6 +477,7 @@ class Hand:
         self.hands["fileId"] = fileId
         db.storeHand(self.hands, doinsert, printtest)
         db.storeBoards(self.dbid_hands, self.hands["boards"], doinsert)
+        db.storeBoardFeatures(self.dbid_hands, self.hands["boardfeatures"], doinsert)
 
     def insertHandsPlayers(self, db, doinsert=False, printtest=False) -> None:
         log.info(

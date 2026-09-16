@@ -14,7 +14,8 @@ This module is the shared harness for the golden corpus that does say it:
 * ``tests/fixtures/analytics/golden.json`` holds the manifest: for each
   scenario, the poker logic in prose, the expected money, the expected board
   and the semantic expectations per player -- plus the deviations where the
-  current pipeline does not do what the poker word means.
+  current pipeline does not do what the poker word means, and the board
+  texture and runout the classifier is expected to store (#295).
 * :func:`oracle_semantics` recomputes a handful of core preflop and flop
   semantics straight from the parsed action stream, so the stored flags are
   never the only witness of their own correctness.
@@ -35,6 +36,8 @@ from typing import Any, NamedTuple
 
 from fpdb_3_legacy import Card
 from fpdb_3_legacy.action_events import ACTION_EVENT_COLUMNS
+from fpdb_3_legacy.board_features import FLAG_BITS as BOARD_FLAG_BITS
+from fpdb_3_legacy.board_features import RUNOUT_FLAGS
 
 GOLDEN_DIR = Path(__file__).resolve().parents[1] / "fixtures" / "analytics" / "golden"
 MANIFEST_PATH = GOLDEN_DIR.parent / "golden.json"
@@ -212,6 +215,7 @@ class GoldenHand(NamedTuple):
     pot_cents: int
     rake_cents: int
     board: dict[str, list[str]]
+    board_feature_expect: dict[str, dict[str, Any]]
     hand_expect: dict[str, Any]
     player_expect: dict[str, dict[str, Any]]
 
@@ -259,6 +263,7 @@ def load_manifest(path: Path | None = None) -> GoldenManifest:
                     pot_cents=_cents(hand["pot"]),
                     rake_cents=_cents(hand["rake"]),
                     board={key: hand.get(key, []) for key in BOARD_KEYS},
+                    board_feature_expect=hand.get(BOARD_FEATURE_KEY, {}),
                     hand_expect=hand_expect,
                     player_expect=player_expect,
                 )
@@ -288,6 +293,53 @@ def golden_files() -> list[Path]:
 
 def scenario_file(scenario: GoldenScenario) -> Path:
     return GOLDEN_DIR / scenario.file
+
+
+BOARD_FEATURE_KEY = "board_features"
+
+# The vocabulary a board expectation may name per street: the four mutually
+# exclusive columns, the highest rank, extra orthogonal flags that must be set,
+# and the runout flags the street's cards must raise.
+BOARD_FEATURE_COLUMNS_EXPECTED = (
+    "rankBucket",
+    "suitStructure",
+    "pairing",
+    "connectivity",
+    "topRank",
+)
+BOARD_FEATURE_FLAG_KEYS = ("flags", "runout")
+
+
+def board_feature_mismatches(row: dict[str, Any], expectation: dict[str, Any]) -> list[str]:
+    """Every way a stored board row disagrees with the manifest's expectation.
+
+    Written once and used by both the corpus test and the unit tests, so the two
+    cannot drift on what "the expectation holds" means.
+    """
+    failures = []
+    for column in BOARD_FEATURE_COLUMNS_EXPECTED:
+        if column not in expectation:
+            continue
+        if row[column] != expectation[column]:
+            failures.append(f"{column}: stored {row[column]!r}, expected {expectation[column]!r}")
+    texture = int(row["textureMask"])
+    runout = int(row["runoutMask"])
+    for name in expectation.get("flags", ()):
+        if not texture & BOARD_FLAG_BITS[name]:
+            failures.append(f"flag {name} is not set in textureMask {texture}")
+    for name in expectation.get("runout", ()):
+        if not runout & BOARD_FLAG_BITS[name]:
+            failures.append(f"runout flag {name} is not set in runoutMask {runout}")
+    expected_runout = set(expectation.get("runout", ()))
+    if expected_runout != {name for name, bit in RUNOUT_FLAG_BITS.items() if runout & bit}:
+        failures.append(
+            f"runoutMask {runout} raises {sorted(name for name, bit in RUNOUT_FLAG_BITS.items() if runout & bit)}, "
+            f"expected {sorted(expected_runout)}"
+        )
+    unknown = set(expectation) - set(BOARD_FEATURE_COLUMNS_EXPECTED) - set(BOARD_FEATURE_FLAG_KEYS)
+    if unknown:
+        failures.append(f"unknown expectation keys {sorted(unknown)}")
+    return failures
 
 
 def decode_board(row: dict[str, Any]) -> list[str]:
@@ -435,6 +487,7 @@ class GoldenCorpus(NamedTuple):
     players: dict[int, dict[str, dict[str, Any]]]
     hud_cache: dict[str, dict[str, Any]]
     actions: dict[int, list[dict[str, Any]]]
+    boards: dict[int, list[dict[str, Any]]]
     hand_count: int
     player_count: int
 
@@ -448,6 +501,11 @@ class GoldenCorpus(NamedTuple):
 
     def event(self, hand_id: int, action_no: int) -> dict[str, Any]:
         return self.actions[hand_id][action_no - 1]
+
+    def board_rows(self, hand_id: int, street: int | None = None) -> list[dict[str, Any]]:
+        """One hand's stored board features, optionally on a single street."""
+        rows = self.boards[hand_id]
+        return [row for row in rows if row["street"] == street] if street is not None else rows
 
 
 def build_config(tmp_dir: Path) -> Any:
@@ -493,6 +551,7 @@ def import_golden_corpus(tmp_dir: Path) -> GoldenCorpus:
     players = _read_players(cursor, hands)
     hud_cache = _read_hud_cache(cursor)
     actions = _read_actions(cursor, hands)
+    boards = _read_boards(cursor, hands)
     # Hands itself has no rake column: the rake is stored per player.
     for hand_id, rows in players.items():
         hands[hand_id]["rake"] = sum(row["rake"] or 0 for row in rows.values())
@@ -503,6 +562,7 @@ def import_golden_corpus(tmp_dir: Path) -> GoldenCorpus:
         players=players,
         hud_cache=hud_cache,
         actions=actions,
+        boards=boards,
         hand_count=len(hands),
         player_count=sum(len(rows) for rows in players.values()),
     )
@@ -514,6 +574,9 @@ HANDS_COLUMNS = (
     "finalPot",
     "seats",
     "maxPosition",
+    # Redefined by #295 as the flop texture mask; asserted against the flop
+    # BoardFeatures row, so the legacy column cannot drift from the classifier.
+    "texture",
     "playersVpi",
     "playersAtStreet1",
     "playersAtStreet2",
@@ -599,6 +662,38 @@ def _read_actions(cursor: Any, hands: dict[int, dict[str, Any]]) -> dict[int, li
             row[flag] = bool(row[flag])
         rows[db_id_to_hand[row["handId"]]].append(row)
     return rows
+
+
+# The board features #295 persists: one row per board and community street.
+BOARD_FEATURES_COLUMNS = (
+    "boardId",
+    "street",
+    "streetName",
+    "cardCount",
+    "textureMask",
+    "runoutMask",
+    "topRank",
+    "suitStructure",
+    "pairing",
+    "rankBucket",
+    "connectivity",
+)
+
+
+def _read_boards(cursor: Any, hands: dict[int, dict[str, Any]]) -> dict[int, list[dict[str, Any]]]:
+    """Read the stored board features back, street by street."""
+    db_id_to_hand = {row["id"]: hand_id for hand_id, row in hands.items()}
+    columns = ", ".join(BOARD_FEATURES_COLUMNS)
+    cursor.execute(f"SELECT handId, {columns} FROM BoardFeatures ORDER BY handId, boardId, street")
+    names = [description[0] for description in cursor.description]
+    rows: dict[int, list[dict[str, Any]]] = {hand_id: [] for hand_id in hands}
+    for raw in cursor.fetchall():
+        row = dict(zip(names, raw))
+        rows[db_id_to_hand[row["handId"]]].append(row)
+    return rows
+
+
+RUNOUT_FLAG_BITS = dict(RUNOUT_FLAGS)
 
 
 UNCALLED_LINE = re.compile(r"Uncalled bet \(\$([0-9.]+)\) returned to")

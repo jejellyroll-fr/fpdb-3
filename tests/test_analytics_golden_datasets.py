@@ -256,6 +256,66 @@ def test_declared_board_is_what_the_hand_dealt(corpus: golden.GoldenCorpus) -> N
             assert dealt == declared, f"{scenario.id}: board {dealt} != {declared}"
 
 
+def test_declared_board_features_are_what_the_classifier_stored(corpus: golden.GoldenCorpus) -> None:
+    """Every board expectation is checked against the row #295 persisted.
+
+    The manifest states the poker reading of the cards (``ace-high rainbow``,
+    ``monotone connected``, ``runout_brick``); the classifier has to agree with
+    that sentence, street by street, on the same cards -- and the corpus declares
+    every street it saw, so a street cannot be stored without being described.
+    """
+    failures: list[str] = []
+    for scenario in SCENARIOS:
+        for hand in scenario.hands:
+            rows = {row["streetName"]: row for row in corpus.board_rows(hand.hand_id)}
+            for street, expectation in hand.board_feature_expect.items():
+                if street not in rows:
+                    failures.append(f"{scenario.id} hand {hand.hand_id}: no {street} row stored")
+                    continue
+                for mismatch in golden.board_feature_mismatches(rows[street], expectation):
+                    failures.append(f"{scenario.id} hand {hand.hand_id} {street}: {mismatch}")
+            undeclared = set(rows) - set(hand.board_feature_expect)
+            if undeclared:
+                failures.append(f"{scenario.id} hand {hand.hand_id}: undeclared {sorted(undeclared)} rows")
+    assert not failures, "\n".join(failures)
+
+
+def test_board_features_cover_exactly_the_streets_that_were_dealt(corpus: golden.GoldenCorpus) -> None:
+    """A street row exists for every street with cards, and only for those.
+
+    A preflop-only hand stores nothing; a hand that reached the turn has a flop
+    row and a turn row, in that order, its card count cumulated the way the
+    runout flags need it, and its turn and river carry a runout verdict while
+    the flop -- which changed nothing, having no previous street -- does not.
+    """
+    for scenario in SCENARIOS:
+        for hand in scenario.hands:
+            rows = corpus.board_rows(hand.hand_id)
+            dealt = [street for street in golden.BOARD_KEYS if hand.board[street]]
+
+            assert [row["streetName"] for row in rows] == dealt, (scenario.id, hand.hand_id)
+            assert [row["street"] for row in rows] == list(range(1, len(dealt) + 1))
+            assert all(row["boardId"] == 1 for row in rows), (scenario.id, hand.hand_id)
+            cumulative = 0
+            for street, row in zip(dealt, rows, strict=True):
+                cumulative += len(hand.board[street])
+                assert row["cardCount"] == cumulative, (scenario.id, hand.hand_id, street)
+                assert (row["runoutMask"] == 0) == (street == "flop"), (scenario.id, hand.hand_id, street)
+
+
+def test_hands_texture_is_the_flop_mask_and_zero_means_no_flop(corpus: golden.GoldenCorpus) -> None:
+    """``Hands.texture`` is the flop mask, and 0 means "no flop".
+
+    Every flop sets at least a suit structure flag, so 0 cannot mean "a flop
+    with no features" -- which is what makes the redefined column safe to read
+    as the cheap texture filter the epic's example queries start with.
+    """
+    for hand_id, hand in corpus.hands.items():
+        flop = corpus.board_rows(hand_id, street=1)
+        assert int(hand["texture"]) == (int(flop[0]["textureMask"]) if flop else 0), hand_id
+        assert bool(flop) == bool(hand["texture"]), hand_id
+
+
 def test_declared_player_counts_match(corpus: golden.GoldenCorpus) -> None:
     for scenario in SCENARIOS:
         for hand in scenario.hands:
@@ -427,6 +487,10 @@ def test_the_corpus_derives_the_same_way_twice(
                     failures.append(f"hand {hand_id} {name} {column}: {row[column]} != {other[column]}")
         if corpus.hands[hand_id]["finalPot"] != reparsed_corpus.hands[hand_id]["finalPot"]:
             failures.append(f"hand {hand_id}: finalPot")
+        # The board features are derived, not accumulated, so a second import
+        # has to classify every street exactly as the first one did.
+        if corpus.boards[hand_id] != reparsed_corpus.boards[hand_id]:
+            failures.append(f"hand {hand_id}: board features differ between two imports")
 
     assert not failures, "\n".join(failures)
 

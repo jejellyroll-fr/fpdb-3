@@ -70,6 +70,7 @@ DELETE_BY_HAND = (
     ),
     ("AofDecisions", "DELETE FROM AofDecisions WHERE handId = %s"),
     ("Boards", "DELETE FROM Boards WHERE handId = %s"),
+    ("BoardFeatures", "DELETE FROM BoardFeatures WHERE handId = %s"),
     ("RawHands", "DELETE FROM RawHands WHERE handId = %s"),
     ("PlayerAutoNotes", "DELETE FROM PlayerAutoNotes WHERE handId = %s"),
     ("HandsPlayers", "DELETE FROM HandsPlayers WHERE handId = %s"),

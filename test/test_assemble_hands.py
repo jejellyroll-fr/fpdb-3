@@ -10,6 +10,7 @@ import pytest
 
 # Add parent directory to path
 import fpdb_3_legacy.Card as Card
+from fpdb_3_legacy.board_features import BROADWAY_HEAVY, CONNECTED, RAINBOW, UNPAIRED
 from fpdb_3_legacy.DerivedStats import DerivedStats
 
 
@@ -299,4 +300,7 @@ class TestAssembleHands:
         self._setup_and_assemble_hand(stats)
 
         assert stats.hands["maxPosition"] == -1
-        assert stats.hands["texture"] is None
+        # #295 redefined texture as the flop's texture mask. As-Kh-Qd is a
+        # rainbow, unpaired, connected, Broadway-heavy flop; the table below
+        # checks the whole row rather than this one number.
+        assert stats.hands["texture"] == RAINBOW | UNPAIRED | CONNECTED | BROADWAY_HEAVY

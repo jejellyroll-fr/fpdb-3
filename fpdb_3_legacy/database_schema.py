@@ -1112,6 +1112,7 @@ class DatabaseSchemaMixin:
         for query_name in (
             "createHandsShowdownTable",
             "createHandsCashoutTable",
+            "createBoardFeaturesTable",
             "createPlayerAutoNotesTable",
             "createAofDecisionsTable",
             "createAofDecisionAnalysesTable",
@@ -1124,6 +1125,8 @@ class DatabaseSchemaMixin:
                 self.rollback()
 
         for query_name in (
+            "addBoardFeaturesHandIndex",
+            "addBoardFeaturesTextureIndex",
             "addPlayerAutoNotesPlayerIndex",
             "addPlayerAutoNotesHandIndex",
             "addPlayerAutoNotesRuleIndex",
@@ -1318,6 +1321,7 @@ class DatabaseSchemaMixin:
         c.execute(self.sql.query["createAofDecisionsTable"])
         c.execute(self.sql.query["createAofDecisionAnalysesTable"])
         c.execute(self.sql.query["createHandsPotsTable"])
+        c.execute(self.sql.query["createBoardFeaturesTable"])
         c.execute(self.sql.query["createHudCacheTable"])
         c.execute(self.sql.query["createCardsCacheTable"])
         c.execute(self.sql.query["createPositionsCacheTable"])
