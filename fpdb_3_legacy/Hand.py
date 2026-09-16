@@ -544,6 +544,16 @@ class Hand:
                 hs[0] = self.dbid_hands
         db.storeHandsStove(self.handsstove, doinsert)
 
+    def insertHandsSituations(self, db, doinsert=False) -> None:
+        """Persist the named decisions of this hand (#294, stored since #305)."""
+        if self.saveActions:
+            db.storeHandsSituations(
+                self.dbid_hands,
+                self.playerIds,
+                self.stats.getSituations(),
+                doinsert,
+            )
+
     def insertHandsShowdown(self, db, doinsert=False) -> None:
         """Persist parsed showdown combinations (and winning cards) per player.
 

@@ -1049,6 +1049,12 @@ class DatabaseSchemaMixin:
         self.create_tables()
         self.createAllIndexes()
         self.commit()
+        # A recreated database is born current: everything in it will be
+        # written by the running code, so the extractor versions can be
+        # stamped now and the rebuild tool can trust the record (#305).
+        from fpdb_3_legacy import analytics_lifecycle
+
+        analytics_lifecycle.bootstrap_meta(self)
         self.get_sites()
         log.info("Finished recreating tables")
 
@@ -1116,6 +1122,7 @@ class DatabaseSchemaMixin:
             "createPlayerAutoNotesTable",
             "createAofDecisionsTable",
             "createAofDecisionAnalysesTable",
+            "createHandsSituationsTable",
         ):
             try:
                 c = self.get_cursor()
@@ -1144,6 +1151,14 @@ class DatabaseSchemaMixin:
                 self.rollback()
 
         self._ensure_gametype_category_width()
+
+        # The analytics lifecycle bookkeeping (#305): the meta table itself,
+        # then the version stamps. On a database that predates versioning the
+        # subsystems stay unrecorded (stale by definition) until a rebuild
+        # claims them -- only a fresh recreate_tables gets born current.
+        from fpdb_3_legacy import analytics_lifecycle
+
+        analytics_lifecycle.ensure_analytics_meta(self)
 
         self.ensure_hudcache_columns()
         self.ensure_handsplayers_columns()
@@ -1317,6 +1332,7 @@ class DatabaseSchemaMixin:
         c.execute(self.sql.query["createHandsStoveTable"])
         c.execute(self.sql.query["createHandsShowdownTable"])
         c.execute(self.sql.query["createHandsCashoutTable"])
+        c.execute(self.sql.query["createHandsSituationsTable"])
         c.execute(self.sql.query["createPlayerAutoNotesTable"])
         c.execute(self.sql.query["createAofDecisionsTable"])
         c.execute(self.sql.query["createAofDecisionAnalysesTable"])
