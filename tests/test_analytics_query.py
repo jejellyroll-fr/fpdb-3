@@ -361,6 +361,20 @@ class TestGrouping:
         }
         assert "unknown" in labels  # flop checks and folds carry no size
 
+    def test_faced_sizing_bucket_groups_across_the_situation_join(self, query_db: Database) -> None:
+        """``facingSizingBp`` also exists on HandsSituations; grouping by its
+        bucket while that table is joined must not be an ambiguous column."""
+        grouped = run_query(
+            query_db,
+            Query(
+                metric="fold_frequency",
+                filters={"street": "flop", "situation": "facing_cbet"},
+                group_by=("facing_sizing_bucket",),
+            ),
+        )
+        assert grouped.total_opportunities > 0
+        assert all(isinstance(row.group["facing_sizing_bucket"], str) for row in grouped.rows)
+
     def test_unknown_dimension_is_rejected(self) -> None:
         with pytest.raises(ValueError, match="Unknown group_by"):
             compile_query(Query(metric="opportunities", group_by=("made_up",)))

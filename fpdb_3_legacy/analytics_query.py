@@ -464,8 +464,10 @@ DIMENSIONS: Final[dict[str, tuple[str, tuple[str, ...]]]] = {
     "limit": ("G.limitType", ("G",)),
     "tournament": ("H.tourneyId", ("H",)),
     "session": ("H.sessionId", ("H",)),
-    "sizing_bucket": (bucket_case_expression("sizingBp"), ("A",)),
-    "facing_sizing_bucket": (bucket_case_expression("facingSizingBp"), ("A",)),
+    # Qualified with the fact alias: ``facingSizingBp`` exists on the situation
+    # table too, so an unqualified reference is ambiguous once it is joined.
+    "sizing_bucket": (bucket_case_expression("sizingBp", qualifier="A."), ("A",)),
+    "facing_sizing_bucket": (bucket_case_expression("facingSizingBp", qualifier="A."), ("A",)),
     "board_rank": ("BF.rankBucket", ("BF",)),
     "board_suit": ("BF.suitStructure", ("BF",)),
     "board_pairing": ("BF.pairing", ("BF",)),
