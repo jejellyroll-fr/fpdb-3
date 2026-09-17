@@ -107,6 +107,7 @@ jobs:
           fpdb_3_legacy/analytics_rebuild.py
           fpdb_3_legacy/analytics_query.py
           fpdb_3_legacy/analytics_definitions.py
+          fpdb_3_legacy/analytics_cohorts.py
           fpdb_3_legacy/analytics_profiling.py
           fpdb_3_legacy/analytics_cache.py
           fpdb_3_legacy/analytics_benchmark.py

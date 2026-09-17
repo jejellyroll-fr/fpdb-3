@@ -53,7 +53,8 @@ parameters.
 | `hand_id_from`, `hand_id_to` | `HandsActions.handId` | bound |
 | `date_from`, `date_to` | `Hands.startTime` | bound |
 | `player`, `players` | `Players.name` | set |
-| `hero` | `HandsSituations.isHero` | bool |
+| `identity` | `(Sites.name, Players.name)` pairs | set of pairs |
+| `hero` | `HandsSituations.isHero` | bool (see below) |
 | `position` | `HandsActions.position` (codes or names: `BTN`, `CO`, `SB`, `BB`, …) | set |
 | `opponent_position` | `HandsSituations.facingPosition` | set |
 | `relative_position` | `HandsActions.relativePosition` (players left to act) | range |
@@ -102,6 +103,8 @@ the rate.
 | Metric | Value | Unit |
 | --- | --- | --- |
 | `opportunities` | `COUNT(*)` over the filtered population | count |
+| `hands` | `COUNT(DISTINCT HandsActions.handId)` | count |
+| `players` | `COUNT(DISTINCT HandsActions.playerId)` | count |
 | `action_count` | `COUNT(*)` of the rows matching the query's `numerator` | count |
 | `frequency` | numerator / denominator, both returned | bp |
 | `fold_frequency`, `call_frequency`, `raise_frequency`, `bet_frequency`, `check_frequency` | `frequency` with the numerator already supplied | bp |
@@ -114,8 +117,18 @@ the rate.
 | `all_in_ev` | summed `HandsPlayers.allInEV` | cents |
 | `ev_per_opportunity` | that sum divided by the decision count | cents |
 
-Two conventions make the numbers mean something:
+Three conventions make the numbers mean something:
 
+* **A population metric is a distinct count, not the row count.**
+  `opportunities` counts decisions, `hands` and `players` count what those
+  decisions came from; on a 30-hand corpus that is 326 / 30 / 6, and reading
+  the last two as "the sample" is exactly the mistake they exist to prevent
+  ([cohorts and sample sizes](cohorts.md)).
+* **`hero: False` keeps decisions whose situation is unknown.** Excluding the
+  hero is how a *population* is built, so the filter is
+  `(isHero IS NULL OR NOT isHero)`: the situation join is a `LEFT JOIN`, and an
+  actor the database cannot classify is not the hero. `hero: True` still
+  requires the situation row.
 * **A frequency always carries its sample.** A row is
   `{opportunities, actions, value, frequency_bp}` — the denominator, the
   numerator, the numerator again and the rate — so "folds 40%" can never be
@@ -193,6 +206,11 @@ is what a report or the research browser (#303) can show beside a result.
 * **Backend differences are isolated to two spots**: the placeholder
   (`%s` vs `?`) and the boolean literal (`TRUE` vs `1`), both chosen from an
   explicit `backend` argument.
+* **Every condition names its own sources.** A filter, a `group_by` dimension
+  and the query's `numerator` each contribute the joins they read, so
+  `fold_frequency` with no street filter still joins `HandsSituations` for its
+  implied `response` numerator — a condition on an unjoined alias is invalid
+  SQL, not a missing join to discover at run time.
 
 ## Tests
 
@@ -220,5 +238,7 @@ The engine is the substrate for the rest of Phase 2:
   definitions instead of raw dicts.
 * **#304** adds aggregate caches, indexes and query profiling for large
   databases; the compiled SQL is where those hooks attach.
-* **#307** builds player populations and cohorts as reusable filter sets.
+* **#307** builds player populations and cohorts as reusable filter sets
+  ([cohorts.md](cohorts.md)) — the `hands`/`players` metrics, the `identity`
+  filter and the `hero` semantics above are what that layer stands on.
 * **#303** renders a result and its drill-down hands in the research browser.
