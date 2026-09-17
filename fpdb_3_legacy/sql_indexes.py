@@ -204,4 +204,48 @@ def index_queries(db_server: str) -> dict[str, str]:
     query["addPlayerNameIndex"] = """CREATE INDEX index_playerName ON Players (name)"""
     query["addPlayerHeroesIndex"] = """CREATE INDEX player_heroes ON Players (hero)"""
 
+    _analytics_indexes(query, db_server)
     return query
+
+
+# The analytics indexes (#304), each tied to a query shape the engine really
+# emits (docs/analytics-performance.md). Deliberately absent are the
+# low-cardinality columns that only ever appear inside a full fact scan
+# (``stackBucket``, ``pairing``, ``connectivity`` and friends): an index the
+# planner never chooses is write cost with no read benefit, and the issue is
+# explicit that texture/sizing get indexed only when a real plan justifies it.
+_ANALYTICS_INDEX_SPECS: tuple[tuple[str, str, tuple[str, ...]], ...] = (
+    # The event fact table: the situation join key, the player filter, the
+    # street/position and action/street groupings, and the sizing histogram.
+    ("handactions_hand_idx", "HandsActions", ("handId", "actionNo")),
+    ("handactions_player_idx", "HandsActions", ("playerId", "handId")),
+    ("handactions_street_position_idx", "HandsActions", ("street", "position")),
+    ("handactions_action_street_idx", "HandsActions", ("actionType", "street")),
+    ("handactions_sizing_idx", "HandsActions", ("sizingBp",)),
+    # The situation table: the join key back to the action, the player, and
+    # the street/response and pot/role filters the popups use.
+    ("handssituations_hand_idx", "HandsSituations", ("handId", "actionNo")),
+    ("handssituations_player_idx", "HandsSituations", ("playerId",)),
+    ("handssituations_street_response_idx", "HandsSituations", ("streetName", "response")),
+    ("handssituations_pot_role_idx", "HandsSituations", ("potType", "role")),
+    ("handssituations_aggressor_idx", "HandsSituations", ("isPreflopAggressor",)),
+    # The money side of a profit metric joins per hand and player.
+    ("handsplayers_hand_player_idx", "HandsPlayers", ("handId", "playerId")),
+    # Date and game filters, and the incremental watermark scan.
+    ("hands_start_time_idx", "Hands", ("startTime",)),
+    ("hands_gametype_time_idx", "Hands", ("gametypeId", "startTime")),
+)
+
+ANALYTICS_INDEX_NAMES: tuple[str, ...] = tuple(name for name, _table, _columns in _ANALYTICS_INDEX_SPECS)
+
+
+def _analytics_indexes(query: dict[str, str], db_server: str) -> None:
+    """Install the analytics index DDL, backend-appropriate."""
+    for name, table, columns in _ANALYTICS_INDEX_SPECS:
+        cols = ", ".join(columns)
+        if db_server == "mysql":
+            query[name] = f"ALTER TABLE {table} ADD INDEX {name} ({cols})"
+        elif db_server in ("postgresql", "sqlite"):
+            # IF NOT EXISTS keeps every later connection cheap: these run in the
+            # feature migrations on each connect, and a failed DDL rolls back.
+            query[name] = f"CREATE INDEX IF NOT EXISTS {name} ON {table} ({cols})"

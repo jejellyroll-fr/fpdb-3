@@ -253,6 +253,11 @@ FILTERS: Final[dict[str, _Filter]] = {
     "max_seats": _Filter("G.maxSeats", ("G",), "range"),
     "session": _Filter("H.sessionId", ("H",), "set"),
     "hand_id": _Filter("A.handId", ("A",), "set"),
+    # A hand-id range, for callers that scan forward from a watermark instead
+    # of naming every id: the incremental aggregate cache (#304) does exactly
+    # that after an import.
+    "hand_id_from": _Filter("A.handId", ("A",), "range_low"),
+    "hand_id_to": _Filter("A.handId", ("A",), "range_high"),
     "date_from": _Filter("H.startTime", ("H",), "range_low"),
     "date_to": _Filter("H.startTime", ("H",), "range_high"),
     # -- who ---------------------------------------------------------------
