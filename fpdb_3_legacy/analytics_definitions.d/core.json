@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "stats": [
+    {
+      "name": "fold_to_3bet_preflop",
+      "metric": "fold_frequency",
+      "fragments": ["preflop", "facing_3bet"],
+      "label": {
+        "en": "Fold to 3-bet (preflop)",
+        "fr": "Fold face au 3-bet (préflop)"
+      },
+      "description": {
+        "en": "How often the player folded when facing a preflop 3-bet.",
+        "fr": "Fréquence de fold face à un 3-bet préflop."
+      },
+      "format": "percentage",
+      "min_sample": 5,
+      "category": "Preflop defence"
+    },
+    {
+      "name": "preflop_raise_frequency_by_position",
+      "metric": "raise_frequency",
+      "fragments": ["preflop"],
+      "group_by": ["position"],
+      "label": {
+        "en": "Preflop raise frequency by position",
+        "fr": "Fréquence de relance préflop par position"
+      },
+      "description": {
+        "en": "How often each seat raised when it had a preflop decision.",
+        "fr": "Fréquence de relance de chaque siège lorsqu'il a une décision préflop."
+      },
+      "format": "percentage",
+      "min_sample": 3,
+      "category": "Preflop aggression"
+    },
+    {
+      "name": "fold_to_cbet_flop",
+      "metric": "fold_frequency",
+      "fragments": ["flop", "facing_cbet"],
+      "label": {
+        "en": "Fold to flop c-bet",
+        "fr": "Fold face au c-bet au flop"
+      },
+      "description": {
+        "en": "How often the player folded when facing a continuation bet on the flop.",
+        "fr": "Fréquence de fold face à un c-bet au flop."
+      },
+      "format": "percentage",
+      "min_sample": 5,
+      "category": "Postflop defence"
+    },
+    {
+      "name": "fold_to_cbet_flop_by_size",
+      "metric": "fold_frequency",
+      "fragments": ["flop", "facing_cbet"],
+      "group_by": ["facing_sizing_bucket"],
+      "label": {
+        "en": "Fold to flop c-bet by bet size",
+        "fr": "Fold face au c-bet au flop par taille de mise"
+      },
+      "description": {
+        "en": "How often the player folded to a flop c-bet, split by the size faced.",
+        "fr": "Fréquence de fold face à un c-bet au flop, par tranche de taille affrontée."
+      },
+      "format": "percentage",
+      "min_sample": 3,
+      "category": "Postflop defence"
+    }
+  ]
+}
