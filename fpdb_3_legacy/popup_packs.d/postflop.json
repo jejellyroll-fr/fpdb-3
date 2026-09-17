@@ -1,0 +1,289 @@
+{
+  "schema_version": 1,
+  "packs": [
+    {
+      "name": "srp",
+      "label": {
+        "en": "Single-raised pot",
+        "fr": "Pot relancé une fois"
+      },
+      "description": "Single-raised pots street by street: the preflop aggressor in and out of position, the caller, c-bets, delayed c-bets, probes, check-raises, floats and barrels.",
+      "tags": ["popup", "postflop", "srp"],
+      "root": "srp",
+      "nodes": [
+        {
+          "name": "srp",
+          "class": "ModernSubmenu",
+          "title": "{player}: single-raised pot",
+          "entries": [
+            "cb1",
+            "f_cb1",
+            "cb2",
+            "f_cb2",
+            "cb3",
+            "f_cb3",
+            "cb4",
+            "wtsd",
+            "wwsf",
+            "totalprofit",
+            { "stat": "PFR in position", "submenu": "srp_pfr_ip", "category": "flop" },
+            { "stat": "PFR out of position", "submenu": "srp_pfr_oop", "category": "flop" },
+            { "stat": "Caller on the flop", "submenu": "srp_caller_flop", "category": "flop" },
+            { "stat": "Flop aggression", "submenu": "srp_flop_aggression", "category": "flop" },
+            { "stat": "Turn", "submenu": "srp_turn", "category": "turn" },
+            { "stat": "River", "submenu": "srp_river", "category": "river" }
+          ]
+        },
+        {
+          "name": "srp_pfr_ip",
+          "class": "ModernSubmenu",
+          "title": "{player}: PFR in position",
+          "require_sample": true,
+          "entries": [
+            { "stat": "cb_ip", "label": "C-bet in position" },
+            { "stat": "cb1", "label": "Flop c-bet" },
+            { "stat": "cb2", "label": "Turn barrel" },
+            { "stat": "cb3", "label": "River barrel" },
+            { "stat": "cb4", "label": "Triple barrel" },
+            { "stat": "triple_barrel", "label": "Triple barrel (alt)" },
+            { "stat": "f_cb1", "label": "Faced flop raise" }
+          ]
+        },
+        {
+          "name": "srp_pfr_oop",
+          "class": "ModernSubmenu",
+          "title": "{player}: PFR out of position",
+          "require_sample": true,
+          "entries": [
+            { "stat": "cb_oop", "label": "C-bet out of position" },
+            { "stat": "cb1", "label": "Flop c-bet" },
+            { "stat": "cb2", "label": "Turn barrel" },
+            { "stat": "cb3", "label": "River barrel" },
+            { "stat": "open_turn", "label": "Opens the turn" },
+            { "stat": "open_river", "label": "Opens the river" }
+          ]
+        },
+        {
+          "name": "srp_caller_flop",
+          "class": "ModernSubmenu",
+          "title": "{player}: caller on the flop",
+          "require_sample": true,
+          "entries": [
+            { "stat": "fold_to_cbet_flop", "label": "Fold to a c-bet" },
+            { "stat": "call_vs_flop_cbet", "label": "Call a c-bet" },
+            { "stat": "raise_vs_flop_cbet", "label": "Raise a c-bet" },
+            { "stat": "check_raise_frequency", "label": "Check-raise" },
+            { "stat": "cr1", "label": "Check-raise flop" },
+            { "stat": "fold_vs_flop_cbet", "label": "Fold vs c-bet (alt)" }
+          ]
+        },
+        {
+          "name": "srp_flop_aggression",
+          "class": "ModernSubmenu",
+          "title": "{player}: flop aggression",
+          "require_sample": true,
+          "entries": [
+            { "stat": "bet_frequency_flop", "label": "Bet" },
+            { "stat": "raise_frequency_flop", "label": "Raise" },
+            { "stat": "first_raise_flop", "label": "First raise" },
+            { "stat": "f_dbr1", "label": "Donk-bet" },
+            { "stat": "fold_vs_flop_donk", "label": "Fold vs a donk" },
+            { "stat": "call_vs_flop_donk", "label": "Call a donk" },
+            { "stat": "raise_vs_flop_donk", "label": "Raise a donk" },
+            { "stat": "float_bet", "label": "Float bet" }
+          ]
+        },
+        {
+          "name": "srp_turn",
+          "class": "ModernSubmenu",
+          "title": "{player}: turn",
+          "require_sample": true,
+          "entries": [
+            { "stat": "probe_bet_turn", "label": "Probe the turn" },
+            { "stat": "delayed_cbet_turn", "label": "Delayed c-bet" },
+            { "stat": "fold_to_cbet_turn", "label": "Fold to a barrel" },
+            { "stat": "call_vs_turn_cbet", "label": "Call a barrel" },
+            { "stat": "raise_vs_turn_cbet", "label": "Raise a barrel" },
+            { "stat": "float_turn", "label": "Float the turn" },
+            { "stat": "fold_float_turn", "label": "Fold to a float" },
+            { "stat": "bet_frequency_turn", "label": "Bet the turn" },
+            { "stat": "raise_frequency_turn", "label": "Raise the turn" },
+            { "stat": "cr2", "label": "Check-raise turn" }
+          ]
+        },
+        {
+          "name": "srp_river",
+          "class": "ModernSubmenu",
+          "title": "{player}: river",
+          "require_sample": true,
+          "entries": [
+            { "stat": "probe_bet_river", "label": "Probe the river" },
+            { "stat": "fold_to_cbet_river", "label": "Fold to a river barrel" },
+            { "stat": "call_vs_river_cbet", "label": "Call a river barrel" },
+            { "stat": "raise_vs_river_cbet", "label": "Raise a river barrel" },
+            { "stat": "float_river", "label": "Float the river" },
+            { "stat": "fold_float_river", "label": "Fold to a float" },
+            { "stat": "cr3", "label": "Check-raise river" },
+            { "stat": "wmsd", "label": "Won money at showdown" },
+            { "stat": "wsd", "label": "Won at showdown" }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "threebet_pot",
+      "label": {
+        "en": "3-bet pot",
+        "fr": "Pot 3-bet"
+      },
+      "description": "3-bet pots: the aggressor's and the caller's street-by-street aggression and defence, in and out of position.",
+      "tags": ["popup", "postflop", "3bet"],
+      "root": "threebet_pot",
+      "nodes": [
+        {
+          "name": "threebet_pot",
+          "class": "ModernSubmenu",
+          "title": "{player}: 3-bet pot",
+          "entries": [
+            "three_B",
+            "four_B",
+            { "stat": "three_B_flop", "label": "3-bet the flop" },
+            { "stat": "three_B_turn", "label": "3-bet the turn" },
+            { "stat": "three_B_river", "label": "3-bet the river" },
+            "totalprofit",
+            "bbper100",
+            { "stat": "In position", "submenu": "threebet_pot_ip", "category": "flop" },
+            { "stat": "Out of position", "submenu": "threebet_pot_oop", "category": "flop" },
+            { "stat": "Aggressor's streets", "submenu": "threebet_pot_aggressor", "category": "flop" },
+            { "stat": "Caller's streets", "submenu": "threebet_pot_caller", "category": "flop" }
+          ]
+        },
+        {
+          "name": "threebet_pot_ip",
+          "class": "ModernSubmenu",
+          "title": "{player}: 3-bet pot, in position",
+          "require_sample": true,
+          "entries": [
+            { "stat": "cb_ip", "label": "C-bet in position" },
+            { "stat": "call_vs_flop_cbet", "label": "Call a c-bet" },
+            { "stat": "fold_vs_flop_cbet", "label": "Fold to a c-bet" },
+            { "stat": "raise_vs_flop_cbet", "label": "Raise a c-bet" },
+            { "stat": "call_vs_turn_cbet", "label": "Call a turn barrel" },
+            { "stat": "fold_vs_turn_cbet", "label": "Fold to a turn barrel" },
+            { "stat": "call_vs_river_cbet", "label": "Call a river barrel" },
+            { "stat": "fold_vs_river_cbet", "label": "Fold to a river barrel" }
+          ]
+        },
+        {
+          "name": "threebet_pot_oop",
+          "class": "ModernSubmenu",
+          "title": "{player}: 3-bet pot, out of position",
+          "require_sample": true,
+          "entries": [
+            { "stat": "cb_oop", "label": "C-bet out of position" },
+            { "stat": "probe_bet", "label": "Probe the flop" },
+            { "stat": "probe_bet_turn", "label": "Probe the turn" },
+            { "stat": "probe_bet_river", "label": "Probe the river" },
+            { "stat": "fold_vs_flop_donk", "label": "Fold to a donk" },
+            { "stat": "call_vs_flop_donk", "label": "Call a donk" },
+            { "stat": "raise_vs_flop_donk", "label": "Raise a donk" }
+          ]
+        },
+        {
+          "name": "threebet_pot_aggressor",
+          "class": "ModernSubmenu",
+          "title": "{player}: 3-bettor's streets",
+          "require_sample": true,
+          "entries": [
+            { "stat": "three_B_flop", "label": "3-bet flop" },
+            { "stat": "three_B_turn", "label": "3-bet turn" },
+            { "stat": "three_B_river", "label": "3-bet river" },
+            { "stat": "cb1", "label": "Flop c-bet" },
+            { "stat": "cb2", "label": "Turn barrel" },
+            { "stat": "cb3", "label": "River barrel" },
+            { "stat": "cb4", "label": "Triple barrel" },
+            { "stat": "four_B_flop", "label": "4-bet the flop" },
+            { "stat": "four_B_turn", "label": "4-bet the turn" },
+            { "stat": "four_B_river", "label": "4-bet the river" }
+          ]
+        },
+        {
+          "name": "threebet_pot_caller",
+          "class": "ModernSubmenu",
+          "title": "{player}: caller's streets",
+          "require_sample": true,
+          "entries": [
+            { "stat": "fold_to_three_B_flop", "label": "Fold on the flop" },
+            { "stat": "fold_to_three_B_turn", "label": "Fold on the turn" },
+            { "stat": "fold_to_three_B_river", "label": "Fold on the river" },
+            { "stat": "fold_vs_flop_3bet", "label": "Fold vs a flop 3-bet" },
+            { "stat": "fold_vs_turn_3bet", "label": "Fold vs a turn 3-bet" },
+            { "stat": "fold_vs_river_3bet", "label": "Fold vs a river 3-bet" },
+            { "stat": "call_vs_flop_3bet", "label": "Call a flop 3-bet" },
+            { "stat": "call_vs_turn_3bet", "label": "Call a turn 3-bet" },
+            { "stat": "call_vs_river_3bet", "label": "Call a river 3-bet" },
+            { "stat": "raise_vs_flop_3bet", "label": "Raise a flop 3-bet" }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "fourbet_pot",
+      "label": {
+        "en": "4-bet pot",
+        "fr": "Pot 4-bet"
+      },
+      "description": "4-bet pots: the 4-bettor's and the caller's aggression and defence street by street.",
+      "tags": ["popup", "postflop", "4bet"],
+      "root": "fourbet_pot",
+      "nodes": [
+        {
+          "name": "fourbet_pot",
+          "class": "ModernSubmenu",
+          "title": "{player}: 4-bet pot",
+          "entries": [
+            "four_B",
+            "four_B_flop",
+            "four_B_turn",
+            "four_B_river",
+            "fold_vs_4bet",
+            "totalprofit",
+            "bbper100",
+            { "stat": "4-bettor's streets", "submenu": "fourbet_pot_aggressor", "category": "flop" },
+            { "stat": "Caller's streets", "submenu": "fourbet_pot_caller", "category": "flop" }
+          ]
+        },
+        {
+          "name": "fourbet_pot_aggressor",
+          "class": "ModernSubmenu",
+          "title": "{player}: 4-bettor's streets",
+          "require_sample": true,
+          "entries": [
+            { "stat": "cb1", "label": "Flop c-bet" },
+            { "stat": "cb2", "label": "Turn barrel" },
+            { "stat": "cb3", "label": "River barrel" },
+            { "stat": "four_B_flop", "label": "4-bet flop" },
+            { "stat": "four_B_turn", "label": "4-bet turn" },
+            { "stat": "four_B_river", "label": "4-bet river" },
+            { "stat": "raise_vs_flop_4bet", "label": "Raise a flop 4-bet" }
+          ]
+        },
+        {
+          "name": "fourbet_pot_caller",
+          "class": "ModernSubmenu",
+          "title": "{player}: caller's streets",
+          "require_sample": true,
+          "entries": [
+            { "stat": "call_vs_flop_4bet", "label": "Call a flop 4-bet" },
+            { "stat": "fold_vs_flop_4bet", "label": "Fold to a flop 4-bet" },
+            { "stat": "call_vs_turn_4bet", "label": "Call a turn 4-bet" },
+            { "stat": "fold_vs_turn_4bet", "label": "Fold to a turn 4-bet" },
+            { "stat": "call_vs_river_4bet", "label": "Call a river 4-bet" },
+            { "stat": "fold_vs_river_4bet", "label": "Fold to a river 4-bet" },
+            { "stat": "fold_vs_4bet", "label": "Fold vs any 4-bet" }
+          ]
+        }
+      ]
+    }
+  ]
+}

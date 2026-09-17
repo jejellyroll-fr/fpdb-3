@@ -23,7 +23,7 @@ from PySide6.QtWidgets import (
 from fpdb_3_legacy import Stats
 from fpdb_3_legacy.i18n import translate_hud_category, translate_hud_label
 from fpdb_3_legacy.loggingFpdb import get_logger
-from fpdb_3_legacy.Popup import Popup
+from fpdb_3_legacy.Popup import Popup, popup_factory
 from fpdb_3_legacy.PopupIcons import IconProvider, get_icon_provider, get_stat_category
 from fpdb_3_legacy.PopupThemes import PopupTheme, get_stat_color, get_theme
 
@@ -39,17 +39,40 @@ def resolve_popup_stat_category(pop, index: int, stat_name: str) -> str:
 
 
 class ModernStatRow(QWidget):
-    """A modern stat row with icon, name, value and visual indicators."""
+    """A modern stat row with icon, name, value and visual indicators.
 
-    def __init__(self, stat_name: str, stat_data: tuple, theme: PopupTheme, icon_provider: IconProvider) -> None:
+    A row may also be a *navigation* row: ``submenu`` names another popup and
+    ``on_open`` is called with it when the row is clicked, which is how a
+    hierarchical pack (#299) is walked in the modern popup. Without one the row
+    is a plain statistic, exactly as before.
+    """
+
+    def __init__(
+        self,
+        stat_name: str,
+        stat_data: tuple,
+        theme: PopupTheme,
+        icon_provider: IconProvider,
+        submenu: str = "",
+        on_open=None,
+    ) -> None:
         super().__init__()
         self.stat_name = stat_name
         self.stat_data = stat_data
         self.theme = theme
         self.icon_provider = icon_provider
+        self.submenu = submenu
+        self.on_open = on_open
 
         self.setup_ui()
         self.setup_style()
+
+    def mousePressEvent(self, event) -> None:
+        """Open the submenu this row points at, if it points at one."""
+        if self.submenu and self.on_open is not None:
+            self.on_open(self.submenu)
+            return
+        super().mousePressEvent(event)
 
     def setup_ui(self) -> None:
         """Setup the UI elements."""
@@ -73,8 +96,12 @@ class ModernStatRow(QWidget):
         self.name_label = QLabel(clean_name)
         self.name_label.setMinimumWidth(120)
 
-        # Stat value
-        value_text = self.stat_data[1] if self.stat_data else "N/A"
+        # Stat value: a navigation row has none, and says so with a chevron.
+        if self.submenu:
+            value_text = "›"
+            self.setCursor(Qt.CursorShape.PointingHandCursor)
+        else:
+            value_text = self.stat_data[1] if self.stat_data else "N/A"
         self.value_label = QLabel(str(value_text))
         self.value_label.setMinimumWidth(60)
         self.value_label.setAlignment(Qt.AlignmentFlag.AlignRight)
@@ -87,6 +114,9 @@ class ModernStatRow(QWidget):
         self.indicator.setMaximumHeight(12)
         self.indicator.setTextVisible(False)  # Hide percentage text
         self._update_progress_bar()
+        if self.submenu:
+            # A bar over nothing is noise: a navigation row is a link, not a rate.
+            self.indicator.setVisible(False)
 
         layout.addWidget(self.icon_label)
         layout.addWidget(self.name_label)
@@ -154,7 +184,7 @@ class ModernStatRow(QWidget):
 
     def _update_progress_bar(self) -> None:
         """Update the progress bar based on stat value."""
-        if not self.stat_data or len(self.stat_data) < 2:
+        if self.submenu or not self.stat_data or len(self.stat_data) < 2:
             self.indicator.setValue(0)
             return
 
@@ -257,9 +287,9 @@ class ModernSectionWidget(QFrame):
         self.header_label.setStyleSheet(f"color: {self.theme.get_color('text_primary')};")
         self.header_icon.setStyleSheet(f"color: {self.theme.get_color('text_accent')};")
 
-    def add_stat_row(self, stat_name: str, stat_data: tuple) -> None:
-        """Add a stat row to this section."""
-        row = ModernStatRow(stat_name, stat_data, self.theme, self.icon_provider)
+    def add_stat_row(self, stat_name: str, stat_data: tuple, submenu: str = "", on_open=None) -> None:
+        """Add a stat row to this section, optionally one that opens a submenu."""
+        row = ModernStatRow(stat_name, stat_data, self.theme, self.icon_provider, submenu, on_open)
         self.stat_rows.append(row)
         self.content_layout.addWidget(row)
 
@@ -420,13 +450,14 @@ class ModernSubmenu(Popup):
         # Create sections
         section_order = ["player_info", "preflop", "flop", "turn", "river", "steal", "aggression", "general"]
 
+        def fill(section: ModernSectionWidget, stats: list[tuple[str, tuple, str]]) -> None:
+            for stat, stat_data, submenu in stats:
+                section.add_stat_row(stat, stat_data, submenu or "", self.open_submenu)
+
         for section_name in section_order:
             if section_name in categorized_stats:
                 section = ModernSectionWidget(section_name, self.theme, self.icon_provider)
-
-                for stat, stat_data, _submenu in categorized_stats[section_name]:
-                    section.add_stat_row(stat, stat_data)
-
+                fill(section, categorized_stats[section_name])
                 content_layout.addWidget(section)
                 self.sections[section_name] = section
 
@@ -434,10 +465,7 @@ class ModernSubmenu(Popup):
         for section_name, stats in categorized_stats.items():
             if section_name not in self.sections:
                 section = ModernSectionWidget(section_name, self.theme, self.icon_provider)
-
-                for stat, stat_data, _submenu in stats:
-                    section.add_stat_row(stat, stat_data)
-
+                fill(section, stats)
                 content_layout.addWidget(section)
                 self.sections[section_name] = section
 
@@ -450,6 +478,29 @@ class ModernSubmenu(Popup):
         # Set minimum size
         self.setMinimumSize(320, 400)
         self.setMaximumSize(500, 600)
+
+    def open_submenu(self, name: str) -> None:
+        """Open a nested popup beside this one, one at a time per level.
+
+        Mirrors the classic ``Submenu``: only one child is allowed open at a
+        time, and a name that is not a configured popup logs instead of
+        raising, so a pack with a missing link degrades to a dead row.
+        """
+        if self.submenu_count >= 1:
+            return
+        popup = getattr(self.config, "popup_windows", {}).get(name)
+        if popup is None:
+            log.warning("Submenu %s is not a configured popup", name)
+            return
+        popup_factory(
+            self.seat,
+            self.stat_dict,
+            self.win,
+            popup,
+            self.hand_instance,
+            self.config,
+            self,
+        )
 
     def mousePressEvent(self, event) -> None:
         """Handle mouse press for dragging."""
@@ -586,13 +637,20 @@ class CategorizedPopup(ModernSubmenu):
         self.header_widget = self.player_label
         self.main_layout.addWidget(self.header_widget)
 
-    def _stat_rows(self, player_id: int) -> list[tuple[str, str, str, str, str]]:
-        """Return category, label, value, sample and explicit-colour rows."""
+    def _stat_rows(self, player_id: int) -> list[tuple[str, str, str, str, str, str]]:
+        """Category, label, value, sample, explicit colour and submenu per row.
+
+        The sixth element is the popup a navigation row opens (``""`` for a
+        plain statistic), which is how a hierarchical pack (#299) is walked in
+        this renderer.
+        """
         categories = getattr(self.pop, "pu_stats_category", [])
         labels = getattr(self.pop, "pu_stats_label", [])
         colors = getattr(self.pop, "pu_stats_color", [])
+        submenus = getattr(self.pop, "pu_stats_submenu", [])
         rows = []
         for index, stat_name in enumerate(self.pop.pu_stats):
+            submenu = submenus[index][1] if index < len(submenus) else ""
             try:
                 data = Stats.do_stat(
                     self.stat_dict,
@@ -604,13 +662,28 @@ class CategorizedPopup(ModernSubmenu):
                 log.warning("Unable to render popup statistic %s", stat_name, exc_info=True)
                 data = None
 
+            configured_label = labels[index] if index < len(labels) else ""
+            if configured_label:
+                configured_label = translate_hud_label(configured_label)
+            if submenu:
+                # A navigation row: its text is the row's own name, and the
+                # chevron replaces the value it does not have.
+                raw_cat = categories[index] if index < len(categories) and categories[index] else "general"
+                rows.append(
+                    (
+                        str(translate_hud_category(raw_cat)),
+                        configured_label or stat_name,
+                        "›",
+                        "",
+                        colors[index] if index < len(colors) else "",
+                        submenu,
+                    )
+                )
+                continue
             raw_cat = (
                 categories[index] if index < len(categories) and categories[index] else get_stat_category(stat_name)
             )
             category = translate_hud_category(raw_cat)
-            configured_label = labels[index] if index < len(labels) else ""
-            if configured_label:
-                configured_label = translate_hud_label(configured_label)
             configured_color = colors[index] if index < len(colors) else ""
             if data:
                 long_value = str(data[3]) if len(data) > 3 else stat_name
@@ -619,10 +692,10 @@ class CategorizedPopup(ModernSubmenu):
                 sample = str(data[4]) if len(data) > 4 else ""
             else:
                 inferred_label, value, sample = stat_name, "-", ""
-            rows.append((str(category), configured_label or inferred_label, value, sample, configured_color))
+            rows.append((str(category), configured_label or inferred_label, value, sample, configured_color, ""))
         return rows
 
-    def _rich_html(self, rows: list[tuple[str, str, str, str, str]]) -> str:
+    def _rich_html(self, rows: list[tuple]) -> str:
         """Build the Qt rich-text document for a categorized stat table.
 
         Every colour and size is read from the theme, so a profile changes the
@@ -631,9 +704,12 @@ class CategorizedPopup(ModernSubmenu):
         statistic, not about the surface it is drawn on.
         """
         theme = self.theme
-        grouped: dict[str, list[tuple[str, str, str, str]]] = {}
-        for category, label, value, sample, color in rows:
-            grouped.setdefault(category, []).append((label, value, sample, color))
+        grouped: dict[str, list[tuple[str, str, str, str, str]]] = {}
+        for row in rows:
+            # A caller may pass 5- or 6-element rows: the submenu is optional.
+            category, label, value, sample, color = row[:5]
+            submenu = row[5] if len(row) > 5 else ""
+            grouped.setdefault(category, []).append((label, value, sample, color, submenu))
 
         label_font = theme.get_font("stat_name")
         value_font = theme.get_font("stat_value")
@@ -655,12 +731,20 @@ class CategorizedPopup(ModernSubmenu):
                 f'font-size:{section_font.get("size", 11)}px;font-weight:700;padding:3px 5px;">'
                 f'<span style="color:{escape(accent)};">◆</span>&nbsp; {escape(category)}</td></tr>'
             )
-            for label, value, sample, configured_color in stats:
+            for label, value, sample, configured_color, submenu in stats:
                 value_color = configured_color or self._value_color(value)
+                # A navigation row is an anchor: the categorized popup is a
+                # QTextBrowser, so a submenu link has to be one to be clickable.
+                label_cell = escape(label)
+                if submenu:
+                    label_cell = (
+                        f'<a href="submenu:{escape(submenu)}" style="color:{escape(accent)};'
+                        f'text-decoration:none;">{escape(label)}</a>'
+                    )
                 chunks.append(
                     "<tr>"
                     f'<td width="58%" style="color:{escape(theme.get_color("text_primary"))};'
-                    f'font-size:{label_font.get("size", 11)}px;padding:2px 5px;">{escape(label)}</td>'
+                    f'font-size:{label_font.get("size", 11)}px;padding:2px 5px;">{label_cell}</td>'
                     f'<td width="18%" align="right" style="color:{escape(value_color)};'
                     f'font-size:{value_font.get("size", 12)}px;'
                     f'font-weight:700;padding:2px 5px;">{escape(value)}</td>'
@@ -681,6 +765,12 @@ class CategorizedPopup(ModernSubmenu):
             return self.theme.get_color("stat_high")
         return self.theme.get_color("stat_neutral")
 
+    def _on_anchor_clicked(self, url) -> None:
+        """Follow a ``submenu:`` link from a navigation row (#299)."""
+        target = url.toString()
+        if target.startswith("submenu:"):
+            self.open_submenu(target[len("submenu:") :])
+
     def create_content(self, player_id: int) -> None:
         """Display the categorized HTML in a scrollable, focus-free browser."""
         params = getattr(self.pop, "pu_class_params", {}) or {}
@@ -697,6 +787,7 @@ class CategorizedPopup(ModernSubmenu):
         self.browser.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
         self.browser.document().setDocumentMargin(0)
         self.browser.setHtml(self._rich_html(rows))
+        self.browser.anchorClicked.connect(self._on_anchor_clicked)
         self.browser.setStyleSheet(f"""
             QTextBrowser#categorizedPopupBrowser {{
                 background-color: {self.theme.get_color("window_bg")};

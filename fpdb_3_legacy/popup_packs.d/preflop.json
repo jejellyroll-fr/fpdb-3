@@ -1,0 +1,215 @@
+{
+  "schema_version": 1,
+  "packs": [
+    {
+      "name": "preflop",
+      "label": {
+        "en": "Preflop pack",
+        "fr": "Pack préflop"
+      },
+      "description": "Opening, facing an open, 3-bet, 4-bet, squeeze, blind defence, limps, sizing and stack depth -- every preflop branch the HUD can measure.",
+      "tags": ["popup", "preflop"],
+      "root": "preflop",
+      "nodes": [
+        {
+          "name": "preflop",
+          "class": "ModernSubmenu",
+          "title": "{player}: preflop",
+          "entries": [
+            "playername",
+            { "stat": "n", "label": "Hands" },
+            "vpip",
+            "pfr",
+            "vpip_pfr_ratio",
+            "three_B",
+            "f_3bet",
+            "four_B",
+            "squeeze",
+            "steal",
+            "f_steal",
+            "totalprofit",
+            "bbper100",
+            { "stat": "RFI by position", "submenu": "preflop_rfi", "category": "preflop" },
+            { "stat": "Facing an open", "submenu": "preflop_facing_open", "category": "preflop" },
+            { "stat": "3-bet by position", "submenu": "preflop_three_bet", "category": "preflop" },
+            { "stat": "Facing a 3-bet", "submenu": "preflop_facing_three_bet", "category": "preflop" },
+            { "stat": "4-bet", "submenu": "preflop_four_bet", "category": "preflop" },
+            { "stat": "Facing a 4-bet", "submenu": "preflop_facing_four_bet", "category": "preflop" },
+            { "stat": "Squeeze", "submenu": "preflop_squeeze", "category": "preflop" },
+            { "stat": "Blind defence", "submenu": "preflop_blind_defence", "category": "preflop" },
+            { "stat": "Limps", "submenu": "preflop_limps", "category": "preflop" },
+            { "stat": "Sizing", "submenu": "preflop_sizing", "category": "preflop" },
+            { "stat": "Stack depth", "submenu": "preflop_stacks", "category": "preflop" }
+          ]
+        },
+        {
+          "name": "preflop_rfi",
+          "class": "ModernSubmenu",
+          "title": "{player}: RFI",
+          "require_sample": true,
+          "entries": [
+            "rfi_total",
+            { "stat": "rfi_early_position", "label": "RFI EP" },
+            { "stat": "rfi_middle_position", "label": "RFI MP" },
+            { "stat": "rfi_late_position", "label": "RFI LP" },
+            "open_limp",
+            "iso",
+            "face_limpers"
+          ]
+        },
+        {
+          "name": "preflop_facing_open",
+          "class": "ModernSubmenu",
+          "title": "{player}: facing an open",
+          "require_sample": true,
+          "entries": [
+            "cold_call",
+            { "stat": "three_B", "label": "3-bet" },
+            { "stat": "face_raise_preflop", "label": "Face a raise" },
+            { "stat": "p_2bet_facing", "label": "Fold to a 2-bet" },
+            { "stat": "r_2bet_facing", "label": "Raise a 2-bet" }
+          ]
+        },
+        {
+          "name": "preflop_three_bet",
+          "class": "ModernSubmenu",
+          "title": "{player}: 3-bet",
+          "require_sample": true,
+          "entries": [
+            { "stat": "three_B", "label": "3-bet total" },
+            { "stat": "three_bet_ep", "label": "3-bet EP" },
+            { "stat": "three_bet_mp", "label": "3-bet MP" },
+            { "stat": "three_bet_co", "label": "3-bet CO" },
+            { "stat": "three_bet_btn", "label": "3-bet BTN" },
+            { "stat": "three_bet_sb", "label": "3-bet SB" },
+            { "stat": "three_bet_bb", "label": "3-bet BB" },
+            "three_bet_vs_steal",
+            "resteal"
+          ]
+        },
+        {
+          "name": "preflop_facing_three_bet",
+          "class": "ModernSubmenu",
+          "title": "{player}: facing a 3-bet",
+          "require_sample": true,
+          "entries": [
+            { "stat": "p_3bet_facing", "label": "Faced a 3-bet" },
+            { "stat": "fold_vs_preflop_3bet", "label": "Fold" },
+            { "stat": "call_vs_preflop_3bet", "label": "Call" },
+            { "stat": "raise_vs_preflop_3bet", "label": "4-bet" },
+            { "stat": "fold_to_three_B_flop", "label": "Fold on the flop" },
+            { "stat": "fold_to_three_B_turn", "label": "Fold on the turn" },
+            { "stat": "fold_to_three_B_river", "label": "Fold on the river" }
+          ]
+        },
+        {
+          "name": "preflop_four_bet",
+          "class": "ModernSubmenu",
+          "title": "{player}: 4-bet",
+          "require_sample": true,
+          "entries": [
+            { "stat": "four_B", "label": "4-bet total" },
+            { "stat": "cfour_B", "label": "Cold 4-bet" },
+            { "stat": "four_bet_ep", "label": "4-bet EP" },
+            { "stat": "four_bet_mp", "label": "4-bet MP" },
+            { "stat": "four_bet_co", "label": "4-bet CO" },
+            { "stat": "four_bet_btn", "label": "4-bet BTN" },
+            { "stat": "four_bet_sb", "label": "4-bet SB" },
+            { "stat": "four_bet_bb", "label": "4-bet BB" }
+          ]
+        },
+        {
+          "name": "preflop_facing_four_bet",
+          "class": "ModernSubmenu",
+          "title": "{player}: facing a 4-bet",
+          "require_sample": true,
+          "entries": [
+            { "stat": "p_4bet_facing", "label": "Faced a 4-bet" },
+            { "stat": "fold_vs_preflop_4bet", "label": "Fold" },
+            { "stat": "call_vs_preflop_4bet", "label": "Call" },
+            { "stat": "raise_vs_preflop_4bet", "label": "5-bet" },
+            { "stat": "p_5bet_facing", "label": "Faced a 5-bet" },
+            { "stat": "fold_vs_4bet", "label": "Fold to any 4-bet" }
+          ]
+        },
+        {
+          "name": "preflop_squeeze",
+          "class": "ModernSubmenu",
+          "title": "{player}: squeeze",
+          "require_sample": true,
+          "entries": [
+            { "stat": "squeeze", "label": "Squeeze total" },
+            { "stat": "squeeze_ep", "label": "Squeeze EP" },
+            { "stat": "squeeze_mp", "label": "Squeeze MP" },
+            { "stat": "squeeze_co", "label": "Squeeze CO" },
+            { "stat": "squeeze_btn", "label": "Squeeze BTN" },
+            { "stat": "squeeze_sb", "label": "Squeeze SB" },
+            { "stat": "squeeze_bb", "label": "Squeeze BB" },
+            { "stat": "fold_vs_preflop_squeeze", "label": "Fold to a squeeze" },
+            { "stat": "call_vs_preflop_squeeze", "label": "Call a squeeze" },
+            { "stat": "raise_vs_preflop_squeeze", "label": "Raise a squeeze" }
+          ]
+        },
+        {
+          "name": "preflop_blind_defence",
+          "class": "ModernSubmenu",
+          "title": "{player}: blinds and steals",
+          "require_sample": true,
+          "entries": [
+            { "stat": "steal", "label": "Steal attempted" },
+            { "stat": "s_steal", "label": "Steal succeeded" },
+            { "stat": "f_steal", "label": "Fold to a steal" },
+            { "stat": "f_SB_steal", "label": "SB folds to a steal" },
+            { "stat": "f_BB_steal", "label": "BB folds to a steal" },
+            { "stat": "call_vs_steal", "label": "Call a steal" },
+            { "stat": "resteal", "label": "Re-steal" },
+            { "stat": "raiseToSteal", "label": "Raise to steal" },
+            "fold_to_squeeze"
+          ]
+        },
+        {
+          "name": "preflop_limps",
+          "class": "ModernSubmenu",
+          "title": "{player}: limps",
+          "require_sample": true,
+          "entries": [
+            { "stat": "limp", "label": "Limp" },
+            { "stat": "open_limp", "label": "Open limp" },
+            { "stat": "iso", "label": "Iso-raise" },
+            { "stat": "face_limpers", "label": "Limpers faced" },
+            { "stat": "straddle", "label": "Straddle" }
+          ]
+        },
+        {
+          "name": "preflop_sizing",
+          "class": "ModernSubmenu",
+          "title": "{player}: bet sizing",
+          "entries": [
+            { "stat": "amt_bet_p", "label": "Preflop bet" },
+            { "stat": "amt_blind", "label": "Blinds posted" },
+            { "stat": "p_raise_made", "label": "Raise sizes made" },
+            { "stat": "amt_bet_f", "label": "Flop bet" },
+            { "stat": "amt_bet_t", "label": "Turn bet" },
+            { "stat": "amt_bet_r", "label": "River bet" },
+            { "stat": "overbet_frequency", "label": "Overbet" }
+          ]
+        },
+        {
+          "name": "preflop_stacks",
+          "class": "ModernSubmenu",
+          "title": "{player}: stack depth",
+          "entries": [
+            { "stat": "bbstack", "label": "Stack (bb)" },
+            { "stat": "m_ratio", "label": "M-ratio" },
+            { "stat": "f_spr", "label": "SPR flop" },
+            { "stat": "t_spr", "label": "SPR turn" },
+            { "stat": "r_spr", "label": "SPR river" },
+            { "stat": "gp_2x", "label": "Open <40% stack" },
+            { "stat": "gp_os", "label": "Open shove" },
+            { "stat": "fold_to_allin", "label": "Fold to all-in" }
+          ]
+        }
+      ]
+    }
+  ]
+}

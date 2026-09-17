@@ -1860,6 +1860,11 @@ class Config:
             pu = Popup(node=pu_node)
             self.popup_windows[pu.name] = pu
 
+        # The shipped popup packs (#299) are additive: they never replace a
+        # popup this file defines, so a broken pack library cannot leave the
+        # user without a popup.
+        self.install_popup_packs()
+
         for imp_node in doc.getElementsByTagName("import"):
             imp = Import(node=imp_node)
             self.imp = imp
@@ -2410,6 +2415,9 @@ class Config:
         self.hud_profile_rules = hud_profile_rules
         self.hhcs = hhcs
         self.popup_windows = popup_windows
+        # The packs are re-installed onto the freshly parsed registry, so a
+        # reload is not a way to lose them.
+        self.install_popup_packs()
         if imp is not None:
             self.imp = imp
         if ui is not None:
@@ -2618,6 +2626,25 @@ class Config:
         if site_name in self.supported_sites:
             self.supported_sites[site_name].screen_name = primary
             self.supported_sites[site_name].hero_aliases = ordered
+
+    def install_popup_packs(self) -> None:
+        """Merge the packaged popup packs (#299) into the popup registry.
+
+        Best-effort: a pack library that fails to load is logged and the popups
+        the configuration file defines are left in place, so the HUD always has
+        the classic popups even when the packs are broken.
+        """
+        try:
+            from fpdb_3_legacy import popup_packs
+
+            registry = popup_packs.load_default_registry()
+            report = popup_packs.install_packs(self, [registry.packs[name] for name in registry.names()])
+        except Exception:  # intentional broad catch: a broken pack must not break the HUD
+            log.exception("popup packs could not be installed")
+            return
+        for warning in report.warnings:
+            log.debug("popup pack: %s", warning)
+        log.info("popup packs: %s", report.summary())
 
     def is_hero_name(self, site_name, name) -> bool:
         """True if ``name`` is one of the hero aliases configured for a site."""

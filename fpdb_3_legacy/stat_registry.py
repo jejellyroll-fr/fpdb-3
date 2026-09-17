@@ -215,6 +215,11 @@ class StatDescriptor:
             their true values with a portable ``CASE`` expression instead of
             applying ``SUM`` directly (which PostgreSQL rejects).
         fmt: printf-style format string for display.
+        sample: Optional expression over the same inputs producing the stat's
+            *denominator* (e.g. the chances a frequency was taken over). The HUD
+            popup renders it in its own column next to the value, so a rate is
+            never shown without the sample behind it (#299).
+        sample_fmt: printf-style format for the sample; defaults to a whole count.
         description: Optional long description (tooltip / docs).
     """
 
@@ -230,8 +235,11 @@ class StatDescriptor:
     context: tuple[str, ...] = ()
     boolean_inputs: tuple[str, ...] = ()
     fmt: str = "%s"
+    sample: str = ""
+    sample_fmt: str = "%d"
     description: str = ""
     expression: SafeExpression = field(repr=False, compare=False, default=None)  # type: ignore[assignment]
+    sample_expression: SafeExpression | None = field(repr=False, compare=False, default=None)
 
     def fact_inputs(self) -> tuple[str, ...]:
         """Inputs that must be aggregated from the fact source (not context)."""
@@ -254,6 +262,28 @@ class StatDescriptor:
         except (TypeError, ValueError):
             return str(raw)
 
+    def compute_sample(self, columns: Mapping[str, Any]) -> float | None:
+        """Evaluate the sample (denominator) expression, or ``None`` if absent."""
+        if self.sample_expression is None:
+            return None
+        return self.sample_expression.evaluate(columns)
+
+    def format_sample(self, raw: float | None = None) -> str:
+        """The sample as the HUD popup shows it: ``(1200)``, or empty if none.
+
+        With no expression there is no sample, and an *empty* string is the
+        honest answer -- this used to hand the popup the value expression
+        itself, so the sample column read ``100 * street0VPI / street0VPIChance``.
+        """
+        if self.sample_expression is None:
+            return ""
+        if raw is None:
+            return ""
+        try:
+            return "(" + (self.sample_fmt % raw) + ")"
+        except (TypeError, ValueError):
+            return "(" + str(raw) + ")"
+
 
 # --------------------------------------------------------------------------- #
 # Validation / construction.
@@ -263,6 +293,29 @@ class StatDescriptor:
 def _require(condition: bool, message: str) -> None:
     if not condition:
         raise StatDescriptorError(message)
+
+
+def _build_sample(
+    data: Mapping[str, Any],
+    inputs: tuple[str, ...],
+) -> tuple[str, str, SafeExpression | None]:
+    """The optional sample expression: the denominator a rate is shown with.
+
+    A second expression over the *same* inputs -- ``sample = "street0VPIChance"``
+    -- which the HUD popup renders in its own column (#299), so a rate is never
+    displayed without the sample behind it.
+    """
+    sample = data.get("sample", "")
+    _require(isinstance(sample, str), "sample must be an expression string")
+    sample = cast(str, sample)
+    expression = None
+    if sample.strip():
+        expression = SafeExpression(sample, frozenset(inputs))
+        outside = set(expression.referenced_names) - set(inputs)
+        _require(not outside, f"sample references inputs it does not declare: {sorted(outside)}")
+    sample_fmt = data.get("sample_format", "%d")
+    _require(isinstance(sample_fmt, str), "sample_format must be a format string")
+    return sample, cast(str, sample_fmt), expression
 
 
 def build_descriptor(data: Mapping[str, Any]) -> StatDescriptor:
@@ -345,6 +398,8 @@ def build_descriptor(data: Mapping[str, Any]) -> StatDescriptor:
     _require(isinstance(fmt, str), "format must be a string")
     fmt = cast(str, fmt)
 
+    sample, sample_fmt, sample_expression = _build_sample(data, inputs)
+
     return StatDescriptor(
         name=name,
         label=label,
@@ -358,8 +413,11 @@ def build_descriptor(data: Mapping[str, Any]) -> StatDescriptor:
         context=context,
         boolean_inputs=boolean_inputs,
         fmt=fmt,
+        sample=sample,
+        sample_fmt=sample_fmt,
         description=str(data.get("description", "")),
         expression=expression,
+        sample_expression=sample_expression,
     )
 
 
