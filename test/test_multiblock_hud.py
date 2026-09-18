@@ -236,6 +236,13 @@ def _fake_aw(block_layouts, position="", positional_mode="all"):
     aw._is_hero_player = types.MethodType(Aux_Hud.SimpleHUD._is_hero_player, aw)
     aw._hide_seat_for_villain_only = types.MethodType(Aux_Hud.SimpleHUD._hide_seat_for_villain_only, aw)
     aw._positional_mode = types.MethodType(Aux_Hud.SimpleHUD._positional_mode, aw)
+    # The dynamic panel selection (#298) is part of the same call path the stat
+    # window walks. The fake has no panel rules, so the real methods answer
+    # "panels are off" and the position rule decides -- which is the state these
+    # tests are about, rather than a stub that could drift from production.
+    aw.dynamic_panel_selection = types.MethodType(Aux_Hud.SimpleHUD.dynamic_panel_selection, aw)
+    aw._panel_state = types.MethodType(Aux_Hud.SimpleHUD._panel_state, aw)
+    aw._panel_resolver = types.MethodType(Aux_Hud.SimpleHUD._panel_resolver, aw)
     return aw
 
 

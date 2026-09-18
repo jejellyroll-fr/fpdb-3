@@ -248,4 +248,8 @@ The engine is the substrate for the rest of Phase 2:
   `all_in_ev` metrics above, sums them once per hand-player, and adds the
   `sizing_bucket` / `facing_sizing_bucket` filters so a bucket can be opened as
   hands.
+* **#301** draws a filtered population on the 13x13 grid
+  ([range-explorer.md](range-explorer.md)) — it reads the `starting_hand_id`
+  dimension above, which is the same classification as `Card.twoStartCards`, and
+  the `starting_hand` / `hole_cards_known` filters that go with it.
 * **#303** renders a result and its drill-down hands in the research browser.
