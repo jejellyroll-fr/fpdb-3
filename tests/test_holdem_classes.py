@@ -148,7 +148,7 @@ def test_the_sql_classification_agrees_with_the_python_one_for_every_card_pair()
         connection.execute("CREATE TABLE t (card1 INT, card2 INT)")
         pairs = [(first, second) for first in CARDS for second in CARDS]
         connection.executemany("INSERT INTO t VALUES (?, ?)", pairs)
-        rows = connection.execute(f"SELECT {expression} FROM t").fetchall()
+        rows = connection.execute(f"SELECT {expression} FROM t").fetchall()  # nosec B608  # nosemgrep
     finally:
         connection.close()
     mismatches = [
@@ -166,7 +166,7 @@ def test_the_sql_says_unknown_when_either_card_is_missing():
     try:
         connection.execute("CREATE TABLE t (card1 INT, card2 INT)")
         connection.execute("INSERT INTO t VALUES (0, 52), (52, 0), (0, 0), (52, 51)")
-        assert [row[0] for row in connection.execute(f"SELECT {expression} FROM t")] == [
+        assert [row[0] for row in connection.execute(f"SELECT {expression} FROM t")] == [  # nosec B608  # nosemgrep
             hc.UNKNOWN_ID,
             hc.UNKNOWN_ID,
             hc.UNKNOWN_ID,
