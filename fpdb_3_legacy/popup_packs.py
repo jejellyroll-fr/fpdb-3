@@ -37,9 +37,9 @@ from __future__ import annotations
 import json
 from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass, field
+from html import escape
 from pathlib import Path
 from typing import Any, Final, NoReturn
-from xml.dom.minidom import Document  # nosec B405 - only constructs validated HUD XML; no input is parsed
 
 # The pack file schema this module understands. A file written for a newer
 # schema is refused rather than half-read.
@@ -210,29 +210,11 @@ class PopupNode:
         own class, so a pack-defined popup is byte-identical in shape to one
         from ``HUD_config.xml``: there is no second popup type to keep in step.
         """
+        from defusedxml.minidom import parseString  # noqa: PLC0415 - keeps pack loading import-light
+
         from fpdb_3_legacy.Configuration import Popup as ConfigPopup  # noqa: PLC0415 - avoids a cycle
 
-        document = Document()
-        node = document.createElement("pu")
-        node.setAttribute("pu_name", self.name)
-        node.setAttribute("pu_class", self.pu_class)
-        if self.title:
-            node.setAttribute("pu_title", self.title)
-        for key, value in self.params.items():
-            node.setAttribute(PARAM_ATTRIBUTES[key], str(value))
-        for entry in self.entries:
-            stat_node = document.createElement("pu_stat")
-            stat_node.setAttribute("pu_stat_name", entry.stat)
-            if entry.label:
-                stat_node.setAttribute("pu_stat_label", entry.label)
-            if entry.submenu:
-                stat_node.setAttribute("pu_stat_submenu", entry.submenu)
-            if entry.category:
-                stat_node.setAttribute("pu_stat_category", entry.category)
-            if entry.color:
-                stat_node.setAttribute("pu_stat_color", entry.color)
-            node.appendChild(stat_node)
-        return ConfigPopup(node)
+        return ConfigPopup(parseString(self.to_xml()).documentElement)
 
     def as_dict(self) -> dict[str, Any]:
         out: dict[str, Any] = {"name": self.name, "class": self.pu_class}
@@ -249,23 +231,29 @@ class PopupNode:
 
     def to_xml(self) -> str:
         """The ``<pu>`` element a user could paste into ``HUD_config.xml``."""
-        document = Document()
-        node = document.createElement("pu")
-        node.setAttribute("pu_name", self.name)
-        node.setAttribute("pu_class", self.pu_class)
+        attributes = [f' pu_name="{escape(self.name, quote=True)}"', f' pu_class="{escape(self.pu_class, quote=True)}"']
         if self.title:
-            node.setAttribute("pu_title", self.title)
-        for key, value in self.params.items():
-            node.setAttribute(PARAM_ATTRIBUTES[key], str(value))
+            attributes.append(f' pu_title="{escape(self.title, quote=True)}"')
+        attributes.extend(
+            f' {PARAM_ATTRIBUTES[key]}="{escape(str(value), quote=True)}"' for key, value in self.params.items()
+        )
+        if not self.entries:
+            return f"<pu{''.join(attributes)} />"
+
+        lines = [f"<pu{''.join(attributes)}>"]
         for entry in self.entries:
-            stat_node = document.createElement("pu_stat")
-            stat_node.setAttribute("pu_stat_name", entry.stat)
+            entry_attributes = [f' pu_stat_name="{escape(entry.stat, quote=True)}"']
             if entry.label:
-                stat_node.setAttribute("pu_stat_label", entry.label)
+                entry_attributes.append(f' pu_stat_label="{escape(entry.label, quote=True)}"')
             if entry.submenu:
-                stat_node.setAttribute("pu_stat_submenu", entry.submenu)
-            node.appendChild(stat_node)
-        return node.toprettyxml(indent="    ").strip()
+                entry_attributes.append(f' pu_stat_submenu="{escape(entry.submenu, quote=True)}"')
+            if entry.category:
+                entry_attributes.append(f' pu_stat_category="{escape(entry.category, quote=True)}"')
+            if entry.color:
+                entry_attributes.append(f' pu_stat_color="{escape(entry.color, quote=True)}"')
+            lines.append(f"    <pu_stat{''.join(entry_attributes)} />")
+        lines.append("</pu>")
+        return "\n".join(lines)
 
 
 @dataclass(frozen=True)

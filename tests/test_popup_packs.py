@@ -496,7 +496,7 @@ def _renderer(pop, theme_name: str = "hud_dark"):
     from fpdb_3_legacy.ModernPopup import CategorizedPopup
     from fpdb_3_legacy.PopupThemes import get_theme
 
-    renderer = CategorizedPopup.__new__(CategorizedPopup)
+    renderer = CategorizedPopup.__new__(CategorizedPopup)  # pylint: disable=no-value-for-parameter
     renderer.pop = pop
     renderer.theme = get_theme(theme_name)
     renderer.stat_dict = {7: {"seat": 3, "screen_name": "Anna"}}
@@ -544,7 +544,7 @@ class TestModernPopupRendering:
 
         opened: list[tuple] = []
         monkeypatch.setattr(ModernPopup, "popup_factory", lambda *args: opened.append(args))
-        popup = ModernPopup.ModernSubmenu.__new__(ModernPopup.ModernSubmenu)
+        popup = ModernPopup.ModernSubmenu.__new__(ModernPopup.ModernSubmenu)  # pylint: disable=no-value-for-parameter
         popup.seat = 3
         popup.stat_dict = {7: {"seat": 3}}
         popup.win = object()
