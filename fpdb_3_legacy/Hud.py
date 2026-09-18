@@ -436,6 +436,7 @@ class Hud:
         # dynamic panels (#298): the deepest street it reached, the shape of the
         # preflop round and how many players are still in. Best-effort -- a
         # panel rule set must never be able to cost a HUD its hand.
+        self.live_state.clear()
         try:
             from fpdb_3_legacy import hud_situation
 

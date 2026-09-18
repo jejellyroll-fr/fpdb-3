@@ -600,28 +600,43 @@ def entry_facts(entry: Mapping[str, Any], street: str) -> dict[str, Any]:
     """
     index = STREETS.index(street) if street in STREETS else 0
     columns = _STREET_COLUMNS[index]
+    lowered = {str(key).lower(): value for key, value in entry.items()}
+
+    def value(*names: str) -> Any:
+        """Read both legacy HandsPlayers names and HUD SQL aliases."""
+        for name in names:
+            if name in entry:
+                return entry[name]
+            if name.lower() in lowered:
+                return lowered[name.lower()]
+        return None
+
     facts: dict[str, Any] = {"street_index": index}
-    aggressor = _boolean(entry.get(columns["aggressor"]))
+    aggr_alias = "pfr" if index == 0 else f"aggr_{index}"
+    aggressor = _boolean(value(columns["aggressor"], aggr_alias))
     if aggressor is not None:
         facts["is_aggressor"] = aggressor
     # The row describes one whole hand, so the preflop fact is readable whatever
     # street the hand reached -- and it is the fact most rules ask about: "this
     # seat raised preflop" is what makes a c-bet panel theirs on the flop.
-    preflop_aggressor = _boolean(entry.get(_STREET_COLUMNS[0]["aggressor"]))
+    preflop_aggressor = _boolean(value(_STREET_COLUMNS[0]["aggressor"], "pfr"))
     if preflop_aggressor is not None:
         facts["is_preflop_aggressor"] = preflop_aggressor
-    in_position = _boolean(entry.get(columns["in_position"]))
+    in_position = _boolean(value(columns["in_position"], f"street{index}inposition"))
     if in_position is not None:
         facts["in_position"] = in_position
         facts["in_position_vs_facing"] = in_position
-    if any(_boolean(entry.get(name)) for name in columns["faced_raise"]):
+    raise_alias = ("p_face_raise",) if index == 0 else (f"{'ftr'[index - 1]}_face_raise",)
+    if any(_boolean(value(name, *raise_alias)) for name in columns["faced_raise"]):
         facts["facing_action"] = "raises"
-    elif any(_boolean(entry.get(name)) for name in columns["faced_bet"]):
+    bet_alias = () if index == 0 else (f"{'ftr'[index - 1]}_cb_opp_{index}",)
+    if "facing_action" not in facts and any(_boolean(value(name, *bet_alias)) for name in columns["faced_bet"]):
         facts["facing_action"] = "bets"
     # The deepest level the seat actually faced: a hand cannot face a 3-bet
     # without having faced the 2-bet first, but the columns do not add up, so
     # the largest non-zero one is the level the money stopped at.
-    sizing = max((_number(entry.get(name)) or 0) for name in columns["faced_sizing"])
+    sizing_alias = () if index == 0 else (f"{'ftr'[index - 1]}_bet_facing_bp",)
+    sizing = max((_number(value(name, *sizing_alias)) or 0) for name in columns["faced_sizing"])
     if sizing:
         facts["facing_sizing_bp"] = sizing
     return facts

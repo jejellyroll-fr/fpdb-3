@@ -1258,7 +1258,7 @@ class SimpleStatWindow(Aux_Base.SeatWindow):
         block_index = getattr(self, "block_index", None)
         blocks = [all_blocks[block_index]] if block_index is not None else all_blocks
         self.stat_boxes = []  # one 2D array of SimpleStat per block
-        self.block_widgets = []  # (container widget, position) per block, for show/hide
+        self.block_widgets = []  # (container widget, block metadata) per block, for show/hide
         for blk in blocks:
             container = QWidget()
             if multi:
@@ -1374,7 +1374,7 @@ class SimpleStatWindow(Aux_Base.SeatWindow):
             cl.addLayout(grid)
             outer.addWidget(container)
             self.stat_boxes.append(box)
-            self.block_widgets.append((container, blk.get("position", "")))
+            self.block_widgets.append((container, blk))
         # Legacy alias: keep self.stat_box pointing at the first block's grid.
         self.stat_box = self.stat_boxes[0] if self.stat_boxes else []
 
@@ -1393,7 +1393,7 @@ class SimpleStatWindow(Aux_Base.SeatWindow):
         if i == "table":
             self.show()
             has_visible_block = False
-            for box, (container, block_pos) in zip(self.stat_boxes, self.block_widgets, strict=False):
+            for box, (container, block) in zip(self.stat_boxes, self.block_widgets, strict=False):
                 container.setVisible(True)
                 has_visible_block = True
                 for row in box:
@@ -1432,11 +1432,11 @@ class SimpleStatWindow(Aux_Base.SeatWindow):
         # name keeps the position rule, so the static core is untouched.
         selection = self.aw.dynamic_panel_selection(i, player_id)
         has_visible_block = False
-        for box, (container, block_pos) in zip(self.stat_boxes, self.block_widgets, strict=False):
+        for box, (container, block) in zip(self.stat_boxes, self.block_widgets, strict=False):
             if selection is not None:
-                visible = block_visible_for({"position": block_pos}, selection, player_pos)
+                visible = block_visible_for(block, selection, player_pos)
             else:
-                visible = True if show_all_positions else block_visible(block_pos, player_pos)
+                visible = True if show_all_positions else block_visible(block.get("position", ""), player_pos)
             container.setVisible(visible)
             if not visible:
                 continue
