@@ -477,6 +477,18 @@ DIMENSIONS: Final[dict[str, tuple[str, tuple[str, ...]]]] = {
 }
 
 
+# A dimension is named after the poker concept, which SQL does not always let
+# through: ``limit`` is a keyword, and SELECT ... AS limit is a syntax error
+# before anything runs. The result column keeps a safe name and the rows are
+# read back through this same map.
+_RESERVED_DIMENSION_NAMES: Final[frozenset[str]] = frozenset({"limit", "offset", "order", "group"})
+
+
+def _alias_of(name: str) -> str:
+    """The column name one dimension takes in the result set."""
+    return f"{name}_" if name in _RESERVED_DIMENSION_NAMES else name
+
+
 def _dimension(name: str) -> tuple[str, tuple[str, ...]]:
     if name not in DIMENSIONS:
         raise ValueError(f"Unknown group_by dimension {name!r}; known: {sorted(DIMENSIONS)}")
@@ -609,16 +621,19 @@ def _numerator_case(
     numerator: Mapping[str, Any],
     placeholder: str,
     backend: str,
-) -> tuple[str, list[Any]]:
-    """The CASE condition counting a numerator, and its parameters.
+) -> tuple[str, list[Any], set[str]]:
+    """The CASE condition counting a numerator, its parameters and its tables.
 
     With no numerator filters the condition is a constant, so a plain
     ``action_count`` over a filtered population counts the whole population.
+    The aliases come back because the numerator can be the only thing in the
+    query that reads a table: ``fold_frequency`` counts a situation response
+    over a population that may have named no situation column at all.
     """
-    conditions, params, _aliases = compile_filters(numerator, placeholder, backend)
+    conditions, params, aliases = compile_filters(numerator, placeholder, backend)
     if not conditions:
-        return "1=1", params
-    return " AND ".join(f"({condition})" for condition in conditions), params
+        return "1=1", params, aliases
+    return " AND ".join(f"({condition})" for condition in conditions), params, aliases
 
 
 def _describe(
@@ -654,6 +669,8 @@ def compile_query(
     spec, filters, numerator = query.resolved()
 
     where, where_params, aliases = compile_filters(filters, placeholder, backend)
+    case_condition, case_params, numerator_aliases = _numerator_case(numerator, placeholder, backend)
+    aliases |= numerator_aliases
     for dimension in query.group_by:
         _expression, dimension_aliases = _dimension(dimension)
         aliases.update(dimension_aliases)
@@ -666,12 +683,11 @@ def compile_query(
     group_expressions: list[str] = []
     for dimension in query.group_by:
         expression, _ = _dimension(dimension)
-        select.append(f"{expression} AS {dimension}")
+        select.append(f"{expression} AS {_alias_of(dimension)}")
         group_expressions.append(expression)
 
     select.append("COUNT(*) AS opportunities")
 
-    case_condition, case_params = _numerator_case(numerator, placeholder, backend)
     params.extend(case_params)
     if spec.value_sql is not None:
         select.append(f"{spec.value_sql} AS value")
@@ -683,14 +699,18 @@ def compile_query(
         sql_parts.append("WHERE " + " AND ".join(f"({condition})" for condition in where))
     if group_expressions:
         sql_parts.append("GROUP BY " + ", ".join(group_expressions))
-        sql_parts.append("ORDER BY " + ", ".join(query.group_by))
+        sql_parts.append("ORDER BY " + ", ".join(_alias_of(name) for name in query.group_by))
+    # Parameters bind by position, so they are appended in the order their
+    # placeholders appear: the numerator's CASE in the SELECT, then the WHERE,
+    # then the page. Binding the page first made a filtered, paginated query
+    # silently answer with someone else's rows.
+    params.extend(where_params)
     if query.limit is not None:
         sql_parts.append(f"LIMIT {placeholder}")
         params.append(int(query.limit))
         sql_parts.append(f"OFFSET {placeholder}")
         params.append(int(query.offset))
     sql = "\n".join(sql_parts)
-    params.extend(where_params)
 
     player_sql: str | None = None
     player_params: list[Any] = []
@@ -698,10 +718,10 @@ def compile_query(
         # Sum the money over the distinct (handId, playerId) pairs the filters
         # select: a player's hand profit is a property of the hand, not of each
         # decision they made in it.
-        inner_group = [f"{_dimension(name)[0]} AS {name}" for name in query.group_by]
+        inner_group = [f"{_dimension(name)[0]} AS {_alias_of(name)}" for name in query.group_by]
         inner_select = ", ".join([*inner_group, "A.handId AS handId", "A.playerId AS playerId"])
         inner_where = " AND ".join(f"({condition})" for condition in where) or "1=1"
-        player_columns = [f"P.{name}" for name in query.group_by]
+        player_columns = [f"P.{_alias_of(name)}" for name in query.group_by]
         player_sql = "\n".join(
             [
                 "SELECT\n  " + (",\n  ".join(player_columns + [f"SUM(HP.{_player_column(spec)}) AS value"]))
@@ -749,8 +769,17 @@ def compile_hand_ids(
     ``include_numerator=True`` to narrow to the numerator.
     """
     _spec, filters, numerator = query.resolved()
-    combined = {**filters, **numerator} if include_numerator else dict(filters)
-    where, where_params, aliases = compile_filters(combined, placeholder, backend)
+    where, where_params, aliases = compile_filters(filters, placeholder, backend)
+    where_params = list(where_params)
+    if include_numerator:
+        # Both predicates hold: the numerator narrows the population, it does
+        # not replace it. Merging the two dictionaries dropped the population's
+        # constraint whenever the two constrained the same key, and answered
+        # with hands the metric had never counted.
+        numerator_where, numerator_params, numerator_aliases = compile_filters(numerator, placeholder, backend)
+        where = [*where, *numerator_where]
+        where_params.extend(numerator_params)
+        aliases |= numerator_aliases
     needed = _expand_sources(aliases | {"A"})
     sql_parts = [
         "SELECT DISTINCT A.handId AS handId",
@@ -770,7 +799,14 @@ def compile_hand_ids(
         params=tuple(params),
         group_by=(),
         metric=f"{query.metric} (hand ids)",
-        description=_describe(f"{query.metric} (hand ids)", combined, {}, (), query.limit, query.offset),
+        description=_describe(
+            f"{query.metric} (hand ids)",
+            filters,
+            numerator if include_numerator else {},
+            (),
+            query.limit,
+            query.offset,
+        ),
     )
 
 
@@ -850,14 +886,14 @@ def run_query(db: Any, query: Query) -> QueryResult:
         player_columns = [description[0] for description in cursor.description]
         for raw in cursor.fetchall():
             row = dict(zip(player_columns, raw))
-            key = tuple(row[name] for name in query.group_by)
+            key = tuple(row[_alias_of(name)] for name in query.group_by)
             player_totals[key] = float(row["value"] or 0)
 
     spec, _filters, _numerator = query.resolved()
     result_rows: list[QueryRow] = []
     for row in rows:
-        key = tuple(row[name] for name in query.group_by)
-        group = {name: row[name] for name in query.group_by}
+        key = tuple(row[_alias_of(name)] for name in query.group_by)
+        group = {name: row[_alias_of(name)] for name in query.group_by}
         opportunities = int(row["opportunities"] or 0)
         actions = int(row.get("actions") or 0)
         value: float | None

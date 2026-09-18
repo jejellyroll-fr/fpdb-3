@@ -440,8 +440,9 @@ class TestSqlSafety:
 
     def test_quoted_value_does_not_execute(self, query_db: Database) -> None:
         hostile = "Anna'; DROP TABLE Hands; --"
+        before = _scalar(query_db, "SELECT COUNT(*) FROM Hands")
         run_query(query_db, Query(metric="opportunities", filters={"player": hostile}))
-        assert _scalar(query_db, "SELECT COUNT(*) FROM Hands") == 30
+        assert _scalar(query_db, "SELECT COUNT(*) FROM Hands") == before
 
     def test_placeholder_follows_the_backend(self) -> None:
         query = Query(metric="opportunities", filters={"street": "flop"})
@@ -563,3 +564,60 @@ class TestEquivalenceWithPredefinedStats:
 def test_paths_no_unused_import() -> None:
     """Guard the test module's own imports against drift."""
     assert Path(golden.GOLDEN_DIR).exists()
+
+
+class TestQueriesThatOnlyTheNumeratorNeeds:
+    """Four shapes the compiler used to emit as SQL no backend would run."""
+
+    def test_a_numerator_brings_its_own_table_into_the_join(self, query_db: Database) -> None:
+        """fold_frequency counts a situation response over an unfiltered population.
+
+        Nothing but the numerator names HandsSituations, and the join was
+        planned before the numerator was compiled, so the query selected a
+        column from a table it had not joined.
+        """
+        result = run_query(query_db, Query(metric="fold_frequency"))
+
+        assert result.rows
+        row = result.rows[0]
+        assert row.opportunities > 0
+        assert 0 < row.actions < row.opportunities, "some decisions are folds, not all of them"
+
+    def test_a_filtered_page_binds_its_parameters_in_order(self, query_db: Database) -> None:
+        """The page used to be bound where the filter belonged, and vice versa."""
+        unpaged = run_query(query_db, Query(metric="fold_frequency", filters={"street": "flop"}))
+        assert unpaged.rows
+
+        paged = run_query(
+            query_db,
+            Query(metric="fold_frequency", filters={"street": "flop"}, group_by=("position",), limit=1),
+        )
+
+        assert len(paged.rows) == 1
+        assert paged.rows[0].opportunities > 0
+
+    def test_the_limit_dimension_is_not_the_limit_keyword(self, query_db: Database) -> None:
+        """``group_by=("limit",)`` is the betting limit, and LIMIT is reserved."""
+        result = run_query(query_db, Query(metric="opportunities", group_by=("limit",)))
+
+        assert [row.group["limit"] for row in result.rows] == ["nl"]
+        assert result.rows[0].opportunities > 0
+
+    def test_a_drill_down_narrows_the_population_instead_of_replacing_it(self, query_db: Database) -> None:
+        """A call is not a fold: asking for both has to answer with neither.
+
+        The population and the numerator constrained the same key, and merging
+        the two dictionaries kept only the numerator's -- so the drill-down
+        listed every hand with a fold, including hands the metric had never
+        counted.
+        """
+        population = run_hand_ids(query_db, Query(metric="fold_frequency", filters={"response": "call"}))
+        assert population, "calls happen in this corpus"
+
+        narrowed = run_hand_ids(
+            query_db,
+            Query(metric="fold_frequency", filters={"response": "call"}),
+            include_numerator=True,
+        )
+
+        assert narrowed == [], "no decision is a call and a fold at once"
