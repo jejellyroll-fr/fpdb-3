@@ -227,6 +227,10 @@ def _fake_aw(block_layouts, position="", positional_mode="all"):
         block_layouts=block_layouts, hud=hud, nrows=1, ncols=1,
         game_params=game_params, config=config,
         get_id_from_seat=lambda _s: 1,
+        # The real SimpleHUD exposes dynamic_panel_selection; keep this
+        # lightweight test double on the same contract so the static-grid
+        # rendering tests exercise their intended fallback path.
+        dynamic_panel_selection=lambda _seat, _player_id: None,
     )
     aw._show_hero_hud = types.MethodType(Aux_Hud.SimpleHUD._show_hero_hud, aw)
     aw._is_hero_player = types.MethodType(Aux_Hud.SimpleHUD._is_hero_player, aw)
