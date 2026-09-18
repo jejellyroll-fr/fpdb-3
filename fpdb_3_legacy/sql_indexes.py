@@ -107,6 +107,25 @@ def index_queries(db_server: str) -> dict[str, str]:
         query["addAofAnalysesStatusIndex"] = """CREATE INDEX aofanalyses_status_idx ON AofDecisionAnalyses (status)"""
 
     if db_server == "mysql":
+        # BoardFeatures (#295) is read by hand and by texture: the hand a replayer
+        # or drill-down asks for, and the board shape a filter selects on. The
+        # other columns are low-cardinality names that GROUP BY scans acceptably;
+        # #304 profiles before any of them is indexed.
+        query["addBoardFeaturesHandIndex"] = (
+            """ALTER TABLE BoardFeatures ADD INDEX boardfeatures_hand_idx (handId)"""
+        )
+        query["addBoardFeaturesTextureIndex"] = (
+            """ALTER TABLE BoardFeatures ADD INDEX boardfeatures_texture_idx (textureMask)"""
+        )
+    elif db_server in ("postgresql", "sqlite"):
+        query["addBoardFeaturesHandIndex"] = (
+            """CREATE INDEX boardfeatures_hand_idx ON BoardFeatures (handId)"""
+        )
+        query["addBoardFeaturesTextureIndex"] = (
+            """CREATE INDEX boardfeatures_texture_idx ON BoardFeatures (textureMask)"""
+        )
+
+    if db_server == "mysql":
         query["addStartCashIndex"] = """ALTER TABLE HandsPlayers ADD INDEX cash_idx (startCash)"""
     elif db_server in ("postgresql", "sqlite"):
         query["addStartCashIndex"] = """CREATE INDEX cash_idx ON HandsPlayers (startCash)"""

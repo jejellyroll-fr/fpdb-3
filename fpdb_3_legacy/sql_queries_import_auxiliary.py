@@ -20,6 +20,29 @@ def import_auxiliary_queries() -> dict[str, str]:
                 %s, %s
             )"""
 
+    # One row per board and community street, classified once at import time
+    # (#295). The column order is board_features.BOARD_FEATURE_COLUMNS, and
+    # test_board_features guards the two against drift.
+    query["store_board_features"] = """insert into BoardFeatures (
+                    handId,
+                    boardId,
+                    street,
+                    streetName,
+                    cardCount,
+                    textureMask,
+                    runoutMask,
+                    topRank,
+                    suitStructure,
+                    pairing,
+                    rankBucket,
+                    connectivity
+           )
+           values (
+                %s, %s, %s, %s, %s,
+                %s, %s, %s, %s, %s,
+                %s, %s
+            )"""
+
     query["store_hands_pots"] = """insert into HandsPots (
                     handId,
                     potId,

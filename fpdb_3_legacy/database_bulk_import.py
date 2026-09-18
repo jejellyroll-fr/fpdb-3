@@ -23,6 +23,7 @@ from time import time
 from typing import TYPE_CHECKING, Any
 
 from fpdb_3_legacy.action_events import ACTION_EVENT_COLUMNS, ACTION_EVENT_DEFAULTS
+from fpdb_3_legacy.board_features import BOARD_FEATURE_COLUMNS, BOARD_FEATURE_DEFAULTS
 from fpdb_3_legacy.database_schema import HANDS_PLAYERS_KEYS
 from fpdb_3_legacy.Exceptions import FpdbError
 from fpdb_3_legacy.loggingFpdb import get_logger
@@ -352,6 +353,7 @@ class DatabaseBulkImportMixin:
         self.siteHandNos: list[Any] = []  # cache of siteHandNo
         self.hbulk: list[Any] = []  # Hands bulk inserts
         self.bbulk: list[Any] = []  # Boards bulk inserts
+        self.bfbulk: list[Any] = []  # BoardFeatures bulk inserts
         self.hpbulk: list[Any] = []  # HandsPlayers bulk inserts
         self.habulk: list[Any] = []  # HandsActions bulk inserts
         self.hcbulk: dict[Any, Any] = {}  # HudCache bulk inserts
@@ -481,6 +483,22 @@ class DatabaseBulkImportMixin:
             q = q.replace("%s", self.sql.query["placeholder"])
             c = self.get_cursor()
             self.executemany(c, q, self.bbulk)  # c.executemany(q, self.bbulk)
+
+    def storeBoardFeatures(self, id, feature_rows, doinsert) -> None:
+        """Queue the classified board rows of one hand (#295).
+
+        The feature columns sit in the order board_features.BOARD_FEATURE_COLUMNS
+        declares, defaulted so a hand classified before a column existed still
+        inserts a complete row.
+        """
+        for row in feature_rows or ():
+            features = tuple(row.get(column, BOARD_FEATURE_DEFAULTS[column]) for column in BOARD_FEATURE_COLUMNS)
+            self.bfbulk.append([id, *features])
+        if doinsert and self.bfbulk:
+            q = self.sql.query["store_board_features"]
+            q = q.replace("%s", self.sql.query["placeholder"])
+            c = self.get_cursor()
+            self.executemany(c, q, self.bfbulk)
 
     def storeHandsPlayers(self, hid, pids, pdata, doinsert=False, printdata=False) -> None:
         log.info(

@@ -434,6 +434,7 @@ class Database(
             "Gametypes",
             "Hands",
             "Boards",
+            "BoardFeatures",
             "HandsActions",
             "HandsPlayers",
             "HandsStove",

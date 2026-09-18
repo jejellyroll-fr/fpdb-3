@@ -1363,6 +1363,7 @@ class Importer:
                                 [],
                             )  # making sure we don't insert data from this hand
                             self.database.bbulk = [b for b in self.database.bbulk if hand.dbid_hands != b[0]]
+                            self.database.bfbulk = [b for b in self.database.bfbulk if hand.dbid_hands != b[0]]
                             hand.updateSessionsCache(self.database, None, doinsert)
                             hand.insertHands(
                                 self.database,

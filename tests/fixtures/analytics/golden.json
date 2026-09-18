@@ -285,6 +285,18 @@
           "players_at_flop": 2,
           "flop": ["Kd", "7s", "2c"],
           "turn": ["9h"],
+          "board_features": {
+            "flop": {
+              "rankBucket": "king-high",
+              "suitStructure": "rainbow",
+              "pairing": "unpaired",
+              "connectivity": "disconnected",
+              "topRank": 13
+            },
+            "turn": {
+              "runout": ["runout_brick"]
+            }
+          },
           "players": {
             "Anna": {
               "role": "hijack opener, out of position throughout",
@@ -348,6 +360,15 @@
           "players_vpip": 2,
           "players_at_flop": 2,
           "flop": ["Qs", "8h", "3d"],
+          "board_features": {
+            "flop": {
+              "rankBucket": "broadway",
+              "suitStructure": "rainbow",
+              "pairing": "unpaired",
+              "connectivity": "disconnected",
+              "topRank": 12
+            }
+          },
           "players": {
             "Anna": {
               "role": "hijack opener calling the 3-bet, then folding to the c-bet",
@@ -524,6 +545,15 @@
           "players_vpip": 2,
           "players_at_flop": 2,
           "flop": ["Ah", "9d", "4c"],
+          "board_features": {
+            "flop": {
+              "rankBucket": "ace-high",
+              "suitStructure": "rainbow",
+              "pairing": "unpaired",
+              "connectivity": "disconnected",
+              "topRank": 14
+            }
+          },
           "players": {
             "Anna": {
               "role": "hijack opener c-betting the flop",
@@ -565,7 +595,10 @@
         "c-bet; he bets the turn instead, which is a delayed c-bet, the caller calls, and",
         "both check the river to showdown.",
         "The only corpus hand where a delayed c-bet is followed by a showdown, so it also",
-        "covers showed-down, won-at-showdown and the river float opportunity."
+        "covers showed-down, won-at-showdown and the river float opportunity.",
+        "Its runout is the corpus's two-flag street: the turn eight brings 6-8-T to a straight,",
+        "and the river queen is both an overcard to that board and a straight card itself,",
+        "joining the 8-T it already had."
       ],
       "hands": [
         {
@@ -581,6 +614,31 @@
           "flop": ["Td", "6s", "2h"],
           "turn": ["8c"],
           "river": ["Qd"],
+          "board_features": {
+            "flop": {
+              "rankBucket": "broadway",
+              "suitStructure": "rainbow",
+              "pairing": "unpaired",
+              "connectivity": "disconnected",
+              "topRank": 10
+            },
+            "turn": {
+              "rankBucket": "broadway",
+              "suitStructure": "rainbow",
+              "pairing": "unpaired",
+              "connectivity": "semi-connected",
+              "topRank": 10,
+              "runout": ["runout_straight_completed"]
+            },
+            "river": {
+              "rankBucket": "broadway",
+              "suitStructure": "two-tone",
+              "pairing": "unpaired",
+              "connectivity": "semi-connected",
+              "topRank": 12,
+              "runout": ["runout_overcard", "runout_straight_completed"]
+            }
+          },
           "players": {
             "Anna": {
               "role": "hijack opener: no c-bet, delayed c-bet on the turn, then checks the river down",
@@ -640,6 +698,18 @@
           "players_at_flop": 2,
           "flop": ["Jc", "8d", "3s"],
           "turn": ["5h"],
+          "board_features": {
+            "flop": {
+              "rankBucket": "broadway",
+              "suitStructure": "rainbow",
+              "pairing": "unpaired",
+              "connectivity": "disconnected",
+              "topRank": 11
+            },
+            "turn": {
+              "runout": ["runout_brick"]
+            }
+          },
           "players": {
             "Anna": {
               "role": "hijack opener checking flop and turn, folding to the probe",
@@ -691,6 +761,15 @@
           "players_vpip": 2,
           "players_at_flop": 2,
           "flop": ["9h", "7h", "3c"],
+          "board_features": {
+            "flop": {
+              "rankBucket": "middle",
+              "suitStructure": "two-tone",
+              "pairing": "unpaired",
+              "connectivity": "disconnected",
+              "topRank": 9
+            }
+          },
           "players": {
             "Boris": {
               "role": "cutoff opener checking and check-raising the donk bet",
@@ -757,6 +836,18 @@
           "players_at_flop": 2,
           "flop": ["Kc", "8d", "2s"],
           "turn": ["4h"],
+          "board_features": {
+            "flop": {
+              "rankBucket": "king-high",
+              "suitStructure": "rainbow",
+              "pairing": "unpaired",
+              "connectivity": "disconnected",
+              "topRank": 13
+            },
+            "turn": {
+              "runout": ["runout_brick"]
+            }
+          },
           "players": {
             "Boris": {
               "role": "cutoff opener c-betting the flop, giving up the turn and folding",
@@ -810,6 +901,26 @@
           "players_at_flop": 2,
           "flop": ["Ac", "9h", "4d"],
           "turn": ["2s"],
+          "board_features": {
+            "flop": {
+              "rankBucket": "ace-high",
+              "suitStructure": "rainbow",
+              "pairing": "unpaired",
+              "connectivity": "disconnected",
+              "topRank": 14
+            },
+            "turn": {
+              "rankBucket": "ace-high",
+              "suitStructure": "rainbow",
+              "pairing": "unpaired",
+              "connectivity": "semi-connected",
+              "topRank": 14,
+              "runout": [
+                "runout_straight_completed",
+                "runout_undercard"
+              ]
+            }
+          },
           "players": {
             "Boris": {
               "role": "cutoff opener c-betting the flop and barrelling the turn",
@@ -865,6 +976,32 @@
           "flop": ["Qc", "Jd", "5c"],
           "turn": ["3s"],
           "river": ["Td"],
+          "board_features": {
+            "flop": {
+              "rankBucket": "broadway",
+              "suitStructure": "two-tone",
+              "pairing": "unpaired",
+              "connectivity": "disconnected",
+              "topRank": 12
+            },
+            "turn": {
+              "rankBucket": "broadway",
+              "suitStructure": "two-tone",
+              "pairing": "unpaired",
+              "connectivity": "disconnected",
+              "topRank": 12,
+              "runout": ["runout_undercard"]
+            },
+            "river": {
+              "rankBucket": "broadway",
+              "suitStructure": "two-tone",
+              "pairing": "unpaired",
+              "connectivity": "semi-connected",
+              "topRank": 12,
+              "flags": ["broadway_heavy"],
+              "runout": ["runout_straight_completed"]
+            }
+          },
           "players": {
             "Boris": {
               "role": "cutoff opener triple barrelling",
@@ -925,6 +1062,23 @@
           "players_at_turn": 2,
           "flop": ["8d", "8c", "2h"],
           "turn": ["Kh"],
+          "board_features": {
+            "flop": {
+              "rankBucket": "middle",
+              "suitStructure": "rainbow",
+              "pairing": "paired",
+              "connectivity": "disconnected",
+              "topRank": 8
+            },
+            "turn": {
+              "rankBucket": "king-high",
+              "suitStructure": "two-tone",
+              "pairing": "paired",
+              "connectivity": "disconnected",
+              "topRank": 13,
+              "runout": ["runout_overcard"]
+            }
+          },
           "players": {
             "Anna": {
               "role": "hijack caller calling the flop bet and betting the turn when checked to",
@@ -997,6 +1151,34 @@
           "flop": ["Ad", "Kd", "Qc"],
           "turn": ["2h"],
           "river": ["7s"],
+          "board_features": {
+            "flop": {
+              "rankBucket": "ace-high",
+              "suitStructure": "two-tone",
+              "pairing": "unpaired",
+              "connectivity": "connected",
+              "topRank": 14,
+              "flags": ["broadway_heavy"]
+            },
+            "turn": {
+              "rankBucket": "ace-high",
+              "suitStructure": "two-tone",
+              "pairing": "unpaired",
+              "connectivity": "semi-connected",
+              "topRank": 14,
+              "flags": ["broadway_heavy"],
+              "runout": ["runout_undercard"]
+            },
+            "river": {
+              "rankBucket": "ace-high",
+              "suitStructure": "two-tone",
+              "pairing": "unpaired",
+              "connectivity": "semi-connected",
+              "topRank": 14,
+              "flags": ["broadway_heavy"],
+              "runout": ["runout_brick"]
+            }
+          },
           "players": {
             "Anna": {
               "role": "hijack 3-betting, calling the flop shove with top set and winning",
@@ -1048,8 +1230,9 @@
         "board classifier has to separate: ace-high rainbow, king-high two-tone, monotone,",
         "paired and low connected. In each the opener c-bets 7bb into 13bb and takes it down.",
         "Because the action is the same everywhere, any difference between these hands comes",
-        "from the board. The corpus asserts the stored flop cards; the texture flags #295 adds",
-        "are asserted by the subset of these hands that classifier gets wrong."
+        "from the board, so the five textures #295 persists are asserted one hand at a time in",
+        "the board_features block below: ace-high rainbow, king-high two-tone, monotone,",
+        "paired and low connected, each read off the same three cards the manifest declares."
       ],
       "hands": [
         {
@@ -1060,6 +1243,15 @@
           "players_vpip": 2,
           "players_at_flop": 2,
           "flop": ["Ah", "7d", "2c"],
+          "board_features": {
+            "flop": {
+              "rankBucket": "ace-high",
+              "suitStructure": "rainbow",
+              "pairing": "unpaired",
+              "connectivity": "disconnected",
+              "topRank": 14
+            }
+          },
           "players": {
             "Boris": {
               "role": "cutoff opener c-betting an ace-high rainbow flop",
@@ -1089,6 +1281,15 @@
           "players_vpip": 2,
           "players_at_flop": 2,
           "flop": ["Kh", "9h", "3c"],
+          "board_features": {
+            "flop": {
+              "rankBucket": "king-high",
+              "suitStructure": "two-tone",
+              "pairing": "unpaired",
+              "connectivity": "disconnected",
+              "topRank": 13
+            }
+          },
           "players": {
             "Boris": {
               "role": "cutoff opener c-betting a king-high two-tone flop",
@@ -1118,6 +1319,16 @@
           "players_vpip": 2,
           "players_at_flop": 2,
           "flop": ["Qs", "Js", "8s"],
+          "board_features": {
+            "flop": {
+              "rankBucket": "broadway",
+              "suitStructure": "monotone",
+              "pairing": "unpaired",
+              "connectivity": "connected",
+              "topRank": 12,
+              "flags": ["flush_possible"]
+            }
+          },
           "players": {
             "Boris": {
               "role": "cutoff opener c-betting a monotone flop",
@@ -1147,6 +1358,15 @@
           "players_vpip": 2,
           "players_at_flop": 2,
           "flop": ["9d", "9c", "4h"],
+          "board_features": {
+            "flop": {
+              "rankBucket": "middle",
+              "suitStructure": "rainbow",
+              "pairing": "paired",
+              "connectivity": "disconnected",
+              "topRank": 9
+            }
+          },
           "players": {
             "Boris": {
               "role": "cutoff opener c-betting a paired flop",
@@ -1176,6 +1396,15 @@
           "players_vpip": 2,
           "players_at_flop": 2,
           "flop": ["7h", "6d", "5c"],
+          "board_features": {
+            "flop": {
+              "rankBucket": "low",
+              "suitStructure": "rainbow",
+              "pairing": "unpaired",
+              "connectivity": "connected",
+              "topRank": 7
+            }
+          },
           "players": {
             "Boris": {
               "role": "cutoff opener c-betting a low connected flop",
@@ -1221,6 +1450,15 @@
           "players_vpip": 2,
           "players_at_flop": 2,
           "flop": ["Qd", "8h", "3c"],
+          "board_features": {
+            "flop": {
+              "rankBucket": "broadway",
+              "suitStructure": "rainbow",
+              "pairing": "unpaired",
+              "connectivity": "disconnected",
+              "topRank": 12
+            }
+          },
           "players": {
             "Boris": {
               "role": "cutoff opener c-betting 3bb into 13bb (23 percent, bucket 0-25)",
@@ -1240,6 +1478,15 @@
           "players_vpip": 2,
           "players_at_flop": 2,
           "flop": ["Jc", "7d", "2h"],
+          "board_features": {
+            "flop": {
+              "rankBucket": "broadway",
+              "suitStructure": "rainbow",
+              "pairing": "unpaired",
+              "connectivity": "disconnected",
+              "topRank": 11
+            }
+          },
           "players": {
             "Boris": {
               "role": "cutoff opener c-betting 4bb into 13bb (31 percent, bucket 25-33)",
@@ -1259,6 +1506,15 @@
           "players_vpip": 2,
           "players_at_flop": 2,
           "flop": ["Ts", "6c", "2d"],
+          "board_features": {
+            "flop": {
+              "rankBucket": "broadway",
+              "suitStructure": "rainbow",
+              "pairing": "unpaired",
+              "connectivity": "disconnected",
+              "topRank": 10
+            }
+          },
           "players": {
             "Boris": {
               "role": "cutoff opener c-betting 5bb into 13bb (38 percent, bucket 33-40)",
@@ -1278,6 +1534,15 @@
           "players_vpip": 2,
           "players_at_flop": 2,
           "flop": ["9h", "5s", "2c"],
+          "board_features": {
+            "flop": {
+              "rankBucket": "middle",
+              "suitStructure": "rainbow",
+              "pairing": "unpaired",
+              "connectivity": "disconnected",
+              "topRank": 9
+            }
+          },
           "players": {
             "Boris": {
               "role": "cutoff opener c-betting 6bb into 13bb (46 percent, bucket 40-50)",
@@ -1297,6 +1562,15 @@
           "players_vpip": 2,
           "players_at_flop": 2,
           "flop": ["Ah", "8d", "3s"],
+          "board_features": {
+            "flop": {
+              "rankBucket": "ace-high",
+              "suitStructure": "rainbow",
+              "pairing": "unpaired",
+              "connectivity": "disconnected",
+              "topRank": 14
+            }
+          },
           "players": {
             "Boris": {
               "role": "cutoff opener c-betting 8bb into 13bb (62 percent, bucket 50-66)",
@@ -1316,6 +1590,15 @@
           "players_vpip": 2,
           "players_at_flop": 2,
           "flop": ["Kd", "7c", "4h"],
+          "board_features": {
+            "flop": {
+              "rankBucket": "king-high",
+              "suitStructure": "rainbow",
+              "pairing": "unpaired",
+              "connectivity": "disconnected",
+              "topRank": 13
+            }
+          },
           "players": {
             "Boris": {
               "role": "cutoff opener c-betting 10bb into 13bb (77 percent, bucket 66-80)",
@@ -1335,6 +1618,15 @@
           "players_vpip": 2,
           "players_at_flop": 2,
           "flop": ["Qc", "9d", "4s"],
+          "board_features": {
+            "flop": {
+              "rankBucket": "broadway",
+              "suitStructure": "rainbow",
+              "pairing": "unpaired",
+              "connectivity": "disconnected",
+              "topRank": 12
+            }
+          },
           "players": {
             "Boris": {
               "role": "cutoff opener c-betting 12bb into 13bb (92 percent, bucket 80-100)",
@@ -1354,6 +1646,15 @@
           "players_vpip": 2,
           "players_at_flop": 2,
           "flop": ["Js", "8h", "5d"],
+          "board_features": {
+            "flop": {
+              "rankBucket": "broadway",
+              "suitStructure": "rainbow",
+              "pairing": "unpaired",
+              "connectivity": "disconnected",
+              "topRank": 11
+            }
+          },
           "players": {
             "Boris": {
               "role": "cutoff opener c-betting 16bb into 13bb (123 percent, bucket 100-125)",
@@ -1373,6 +1674,15 @@
           "players_vpip": 2,
           "players_at_flop": 2,
           "flop": ["Th", "7s", "3h"],
+          "board_features": {
+            "flop": {
+              "rankBucket": "broadway",
+              "suitStructure": "two-tone",
+              "pairing": "unpaired",
+              "connectivity": "disconnected",
+              "topRank": 10
+            }
+          },
           "players": {
             "Boris": {
               "role": "cutoff opener c-betting 18bb into 13bb (138 percent, bucket 125-150)",
@@ -1392,6 +1702,15 @@
           "players_vpip": 2,
           "players_at_flop": 2,
           "flop": ["9c", "6h", "2s"],
+          "board_features": {
+            "flop": {
+              "rankBucket": "middle",
+              "suitStructure": "rainbow",
+              "pairing": "unpaired",
+              "connectivity": "disconnected",
+              "topRank": 9
+            }
+          },
           "players": {
             "Boris": {
               "role": "cutoff opener c-betting 20bb into 13bb (154 percent, bucket 150+)",
@@ -1430,6 +1749,25 @@
           "players_at_turn": 2,
           "flop": ["Jh", "7c", "3d"],
           "turn": ["2s"],
+          "board_features": {
+            "flop": {
+              "rankBucket": "broadway",
+              "suitStructure": "rainbow",
+              "pairing": "unpaired",
+              "connectivity": "disconnected",
+              "topRank": 11
+            },
+            "turn": {
+              "rankBucket": "broadway",
+              "suitStructure": "rainbow",
+              "pairing": "unpaired",
+              "connectivity": "disconnected",
+              "topRank": 11,
+              "runout": [
+                "runout_undercard"
+              ]
+            }
+          },
           "players": {
             "Frank": {
               "role": "under the gun open-limping, betting the limped flop, then folding the turn",

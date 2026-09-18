@@ -1112,6 +1112,7 @@ class DatabaseSchemaMixin:
         for query_name in (
             "createHandsShowdownTable",
             "createHandsCashoutTable",
+            "createBoardFeaturesTable",
             "createPlayerAutoNotesTable",
             "createAofDecisionsTable",
             "createAofDecisionAnalysesTable",
@@ -1124,6 +1125,8 @@ class DatabaseSchemaMixin:
                 self.rollback()
 
         for query_name in (
+            "addBoardFeaturesHandIndex",
+            "addBoardFeaturesTextureIndex",
             "addPlayerAutoNotesPlayerIndex",
             "addPlayerAutoNotesHandIndex",
             "addPlayerAutoNotesRuleIndex",
@@ -1318,6 +1321,7 @@ class DatabaseSchemaMixin:
         c.execute(self.sql.query["createAofDecisionsTable"])
         c.execute(self.sql.query["createAofDecisionAnalysesTable"])
         c.execute(self.sql.query["createHandsPotsTable"])
+        c.execute(self.sql.query["createBoardFeaturesTable"])
         c.execute(self.sql.query["createHudCacheTable"])
         c.execute(self.sql.query["createCardsCacheTable"])
         c.execute(self.sql.query["createPositionsCacheTable"])
@@ -1342,6 +1346,11 @@ class DatabaseSchemaMixin:
         c.execute(self.sql.query["addStartCardsIndex"])
         c.execute(self.sql.query["addSeatsIndex"])
         c.execute(self.sql.query["addPositionIndex"])
+        # The feature tables created above index the same way the migration
+        # path does, so a database built from scratch is not left doing full
+        # scans until someone happens to reconnect with an older schema.
+        c.execute(self.sql.query["addBoardFeaturesHandIndex"])
+        c.execute(self.sql.query["addBoardFeaturesTextureIndex"])
         c.execute(self.sql.query["addPlayerAutoNotesPlayerIndex"])
         c.execute(self.sql.query["addPlayerAutoNotesHandIndex"])
         c.execute(self.sql.query["addPlayerAutoNotesRuleIndex"])

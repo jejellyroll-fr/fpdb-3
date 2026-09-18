@@ -32,6 +32,7 @@ from fpdb_3_legacy.action_events import (
     effective_stack_cents,
 )
 from fpdb_3_legacy.autonotes_aof import is_aof_category
+from fpdb_3_legacy.board_features import derive_board_rows, flop_texture_mask
 from fpdb_3_legacy.equity import EquityUnavailableError, calculate_equity, expected_pot_share, load_poker_eval
 from fpdb_3_legacy.loggingFpdb import get_logger
 from fpdb_3_legacy.player_situations import enumerate_situations
@@ -597,7 +598,9 @@ class DerivedStats:
         log.debug("Set seats: %s", self.hands["seats"])
 
         self.hands["maxPosition"] = -1
-        self.hands["texture"] = None  # No calculation done yet
+        # Redefined by _assembleBoardFeatures (#295) as the flop texture mask;
+        # 0 means no flop, since every flop sets at least a suit structure flag.
+        self.hands["texture"] = 0
         self.hands["tourneyId"] = hand.tourneyId
         log.debug("Set tourneyId: %s", hand.tourneyId)
 
@@ -669,6 +672,24 @@ class DerivedStats:
             self.hands["boardcard3"] = 0
             self.hands["boardcard4"] = 0
             self.hands["boardcard5"] = 0
+
+    def _assembleBoardFeatures(self, hand: Any) -> None:
+        """Classify every board street once, for persistence and for filtering.
+
+        The features are derived at import time and stored, so a query never has
+        to re-parse a hand history or recompute a texture (#295).
+        ``Hands.texture`` is redefined here as the flop's texture mask -- the
+        column was written NULL on every hand since the schema was created, and
+        nothing reads it, so giving it that meaning costs no compatibility and
+        saves a join for the commonest filter of all: the flop texture.
+        """
+        try:
+            rows = derive_board_rows(hand)
+        except (AttributeError, KeyError, TypeError, ValueError):
+            log.exception("Error deriving board features for hand %s", hand.handid)
+            rows = []
+        self.hands["boardfeatures"] = rows
+        self.hands["texture"] = flop_texture_mask(rows)
 
     def _assembleRunItTwiceBoards(self, hand: Any) -> None:
         """Encode one board per run when the hand was run several times."""
@@ -826,6 +847,7 @@ class DerivedStats:
             self._assembleHandIdentity(hand)
             self._assembleBoardCards(hand)
             self._assembleRunItTwiceBoards(hand)
+            self._assembleBoardFeatures(hand)
             self._assembleStreetTotals(hand)
             self._assembleStreetSummaries(hand)
             # Log hand details at debug level
