@@ -166,10 +166,17 @@ inherited, invisible, by every filter and report built on top.
 
 Each sub-issue should extend this corpus rather than build a private one:
 
-* **#293** adds action events: assert the event list per hand against the same
-  files (ordering, `amount_to`, `pot_before`, `sizing_bp`). The hands were
-  chosen so each event shape -- check, call, bet, raise, fold, all-in, blinds,
-  forced bets -- appears at least once.
+* **#293** adds action events ([`action-event-model.md`](action-event-model.md),
+  `tests/test_action_events.py`): the event list is asserted per hand against
+  these same files -- ordering, `potBefore`/`potAfter` as a running total,
+  `toCall`, `sizingBp`, position, facing context. The hands were chosen so each
+  event shape -- check, call, bet, raise, fold, all-in, blinds, forced bets --
+  appears at least once. Three of the deviations below are answered there
+  without changing a single aggregate: `callerCount` separates an open-limp
+  from an over-limp, `facingActionType` says a raise was raised rather than
+  c-bet, and `effectiveStack` is measured before the chips go in. The corpus
+  keeps pinning the aggregates, because the events complement them rather than
+  replace them.
 * **#294** adds situations: `16` and `17` vary one dimension each, so a
   situation extractor can be asserted dimension by dimension.
 * **#295** adds board features: `16` already holds the action constant across

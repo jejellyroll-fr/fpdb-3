@@ -6,6 +6,11 @@ from __future__ import annotations
 def hand_artifact_queries() -> dict[str, str]:
     """Return persistence and lookup queries for secondary hand artifacts."""
     query: dict[str, str] = {}
+    # The normalized event columns of issue #293 sit after the original ones,
+    # so a database whose HandsActions was upgraded in place (see
+    # DatabaseSchemaMixin.ensure_handsactions_columns) still matches this list
+    # column for column. action_events.ACTION_EVENT_COLUMNS names them in this
+    # order and test_action_events guards the three against drift.
     query["store_hands_actions"] = """insert into HandsActions (
                     handId,
                     playerId,
@@ -18,12 +23,33 @@ def hand_artifact_queries() -> dict[str, str]:
                     amountCalled,
                     numDiscarded,
                     cardsDiscarded,
-                    allIn
+                    allIn,
+                    actionType,
+                    toCall,
+                    potBefore,
+                    potAfter,
+                    sizingBp,
+                    position,
+                    relativePosition,
+                    inPosition,
+                    effectiveStack,
+                    effectiveStackBB,
+                    sprBefore,
+                    isAggressor,
+                    facingActionType,
+                    facingAmount,
+                    facingSizingBp,
+                    raiserCount,
+                    callerCount,
+                    playersInHand
            )
            values (
                 %s, %s, %s, %s, %s,
                 %s, %s, %s, %s, %s,
-                %s, %s
+                %s, %s, %s, %s, %s,
+                %s, %s, %s, %s, %s,
+                %s, %s, %s, %s, %s,
+                %s, %s, %s, %s, %s
             )"""
 
     query["store_hands_stove"] = """insert into HandsStove (

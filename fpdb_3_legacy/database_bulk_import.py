@@ -22,6 +22,7 @@ from datetime import datetime
 from time import time
 from typing import TYPE_CHECKING, Any
 
+from fpdb_3_legacy.action_events import ACTION_EVENT_COLUMNS, ACTION_EVENT_DEFAULTS
 from fpdb_3_legacy.database_schema import HANDS_PLAYERS_KEYS
 from fpdb_3_legacy.Exceptions import FpdbError
 from fpdb_3_legacy.loggingFpdb import get_logger
@@ -547,20 +548,27 @@ class DatabaseBulkImportMixin:
         #    pp.pprint(adata)
 
         for a in adata:
+            row = adata[a]
+            # The normalized event context, in the order
+            # action_events.ACTION_EVENT_COLUMNS declares it. Defaulted so a
+            # caller that only fills the original columns (an older producer, a
+            # hand built by hand in a test) still inserts a complete row.
+            event = tuple(row.get(column, ACTION_EVENT_DEFAULTS[column]) for column in ACTION_EVENT_COLUMNS)
             self.habulk.append(
                 (
                     hid,
-                    pids[adata[a]["player"]],
-                    adata[a]["street"],
-                    adata[a]["actionNo"],
-                    adata[a]["streetActionNo"],
-                    adata[a]["actionId"],
-                    adata[a]["amount"],
-                    adata[a]["raiseTo"],
-                    adata[a]["amountCalled"],
-                    adata[a]["numDiscarded"],
-                    adata[a]["cardsDiscarded"],
-                    adata[a]["allIn"],
+                    pids[row["player"]],
+                    row["street"],
+                    row["actionNo"],
+                    row["streetActionNo"],
+                    row["actionId"],
+                    row["amount"],
+                    row["raiseTo"],
+                    row["amountCalled"],
+                    row["numDiscarded"],
+                    row["cardsDiscarded"],
+                    row["allIn"],
+                    *event,
                 ),
             )
 
