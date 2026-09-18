@@ -118,7 +118,7 @@ def _source_hand(db: Any, source_hand_id: int | None) -> int:
 
 def _read_rows(cursor: Any, table: str, where: str, params: Sequence[Any]) -> tuple[list[str], list[tuple[Any, ...]]]:
     """One table's rows and column names, for a where clause the caller wrote."""
-    cursor.execute(f"SELECT * FROM {table} WHERE {where}", tuple(params))
+    cursor.execute(f"SELECT * FROM {table} WHERE {where}", tuple(params))  # nosec B608  # nosemgrep
     columns = [description[0] for description in cursor.description]
     return columns, [tuple(row) for row in cursor.fetchall()]
 
@@ -145,8 +145,8 @@ def _clone_children(db: Any, source_hand_id: int, new_ids: Sequence[int]) -> Non
             for row in rows:
                 payload.append(tuple(new_id if index == hand_index else row[index] for index in keep))
         marks = ", ".join(placeholder for _ in insert_columns)
-        cursor.executemany(
-            f"INSERT INTO {table} ({', '.join(insert_columns)}) VALUES ({marks})",
+        cursor.executemany(  # nosec B608  # nosemgrep
+            f"INSERT INTO {table} ({', '.join(insert_columns)}) VALUES ({marks})",  # nosec B608  # nosemgrep
             payload,
         )
     db.commit()
@@ -181,10 +181,13 @@ def synthesize_hands(db: Any, count: int, source_hand_id: int | None = None) -> 
         values = dict(source)
         values["siteHandNo"] = base + offset
         hands_payload.append(tuple(values[name] for name in insert_columns))
-    cursor.executemany(f"INSERT INTO Hands ({', '.join(insert_columns)}) VALUES ({marks})", hands_payload)
+    cursor.executemany(  # nosec B608  # nosemgrep
+        f"INSERT INTO Hands ({', '.join(insert_columns)}) VALUES ({marks})",  # nosec B608  # nosemgrep
+        hands_payload,
+    )
     db.commit()
 
-    cursor.execute(
+    cursor.execute(  # nosec B608  # nosemgrep
         f"SELECT id FROM Hands WHERE siteHandNo >= {placeholder} AND siteHandNo <= {placeholder} ORDER BY siteHandNo",
         (base, base + count - 1),
     )

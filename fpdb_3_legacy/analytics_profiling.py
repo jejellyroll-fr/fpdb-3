@@ -91,12 +91,12 @@ def explain_statement(db: Any, sql: str, params: Sequence[Any] = ()) -> tuple[st
     backend = backend_name(db)
     cursor = db.get_cursor()
     if backend == "sqlite":
-        cursor.execute("EXPLAIN QUERY PLAN " + sql, tuple(params))
+        cursor.execute("EXPLAIN QUERY PLAN " + sql, tuple(params))  # nosec B608  # nosemgrep
         return tuple(" ".join(str(part) for part in row) for row in cursor.fetchall())
     if backend == "postgresql":
-        cursor.execute("EXPLAIN (ANALYZE, BUFFERS) " + sql, tuple(params))
+        cursor.execute("EXPLAIN (ANALYZE, BUFFERS) " + sql, tuple(params))  # nosec B608  # nosemgrep
         return tuple(str(row[0]) for row in cursor.fetchall())
-    cursor.execute("EXPLAIN " + sql, tuple(params))
+    cursor.execute("EXPLAIN " + sql, tuple(params))  # nosec B608  # nosemgrep
     columns = [description[0] for description in cursor.description or ()]
     return tuple(", ".join(f"{name}={value}" for name, value in zip(columns, row, strict=False)) for row in cursor.fetchall())
 

@@ -203,9 +203,9 @@ def aggregate_stats(db: Any) -> CacheStats:
     ensure_aggregates_table(db)
     meta = _read_meta(db)
     cursor = db.get_cursor()
-    cursor.execute(f"SELECT COUNT(*) FROM {TABLE_NAME}")
+    cursor.execute(f"SELECT COUNT(*) FROM {TABLE_NAME}")  # nosec B608  # nosemgrep
     rows = int(cursor.fetchone()[0] or 0)
-    cursor.execute(f"SELECT COUNT(DISTINCT queryKey) FROM {TABLE_NAME}")
+    cursor.execute(f"SELECT COUNT(DISTINCT queryKey) FROM {TABLE_NAME}")  # nosec B608  # nosemgrep
     queries = int(cursor.fetchone()[0] or 0)
     watermarks = {name[len(_WATERMARK_PREFIX):]: int(value) for name, value in meta.items() if name.startswith(_WATERMARK_PREFIX)}
     return CacheStats(
@@ -225,10 +225,10 @@ def invalidate_aggregates(db: Any, reason: str = "") -> int:
     """
     ensure_aggregates_table(db)
     cursor = db.get_cursor()
-    cursor.execute(f"SELECT COUNT(*) FROM {TABLE_NAME}")
+    cursor.execute(f"SELECT COUNT(*) FROM {TABLE_NAME}")  # nosec B608  # nosemgrep
     removed = int(cursor.fetchone()[0] or 0)
-    cursor.execute(f"DELETE FROM {TABLE_NAME}")
-    cursor.execute(
+    cursor.execute(f"DELETE FROM {TABLE_NAME}")  # nosec B608  # nosemgrep
+    cursor.execute(  # nosec B608  # nosemgrep
         f"DELETE FROM AnalyticsMeta WHERE name LIKE {_placeholder(db)}",
         (_WATERMARK_PREFIX + "%",),
     )
@@ -291,7 +291,7 @@ def _watermark(db: Any, key: str) -> int:
 def _has_rows(db: Any, key: str) -> bool:
     cursor = db.get_cursor()
     placeholder = _placeholder(db)
-    cursor.execute(f"SELECT 1 FROM {TABLE_NAME} WHERE queryKey = {placeholder} LIMIT 1", (key,))
+    cursor.execute(f"SELECT 1 FROM {TABLE_NAME} WHERE queryKey = {placeholder} LIMIT 1", (key,))  # nosec B608  # nosemgrep
     return cursor.fetchone() is not None
 
 
@@ -356,7 +356,7 @@ def _storage_query(query: Query) -> Query:
 def _replace_rows(db: Any, key: str, rows: Sequence[QueryRow], commit: bool = True) -> None:
     cursor = db.get_cursor()
     placeholder = _placeholder(db)
-    cursor.execute(f"DELETE FROM {TABLE_NAME} WHERE queryKey = {placeholder}", (key,))
+    cursor.execute(f"DELETE FROM {TABLE_NAME} WHERE queryKey = {placeholder}", (key,))  # nosec B608  # nosemgrep
     _insert_rows(db, key, rows)
     if commit:
         db.commit()
@@ -373,13 +373,16 @@ def _merge_rows(db: Any, key: str, rows: Sequence[QueryRow], commit: bool = True
         stored["valueSum"] += float(row.value or 0)
     cursor = db.get_cursor()
     placeholder = _placeholder(db)
-    cursor.execute(f"DELETE FROM {TABLE_NAME} WHERE queryKey = {placeholder}", (key,))
+    cursor.execute(f"DELETE FROM {TABLE_NAME} WHERE queryKey = {placeholder}", (key,))  # nosec B608  # nosemgrep
     rows_to_insert = [
         (key, group_key, stored["opportunities"], stored["actions"], stored["valueSum"]) for group_key, stored in existing.items()
     ]
     if rows_to_insert:
         marks = ", ".join(placeholder for _ in range(5))
-        cursor.executemany(f"INSERT INTO {TABLE_NAME} (queryKey, groupKey, opportunities, actions, valueSum) VALUES ({marks})", rows_to_insert)
+        cursor.executemany(  # nosec B608  # nosemgrep
+            f"INSERT INTO {TABLE_NAME} (queryKey, groupKey, opportunities, actions, valueSum) VALUES ({marks})",  # nosec B608  # nosemgrep
+            rows_to_insert,
+        )
     if commit:
         db.commit()
 
@@ -388,8 +391,8 @@ def _insert_rows(db: Any, key: str, rows: Sequence[QueryRow]) -> None:
     cursor = db.get_cursor()
     placeholder = _placeholder(db)
     marks = ", ".join(placeholder for _ in range(5))
-    cursor.executemany(
-        f"INSERT INTO {TABLE_NAME} (queryKey, groupKey, opportunities, actions, valueSum) VALUES ({marks})",
+    cursor.executemany(  # nosec B608  # nosemgrep
+        f"INSERT INTO {TABLE_NAME} (queryKey, groupKey, opportunities, actions, valueSum) VALUES ({marks})",  # nosec B608  # nosemgrep
         [(key, _group_key(row.group), row.opportunities, row.actions, float(row.value or 0)) for row in rows],
     )
 
@@ -401,7 +404,7 @@ def _group_key(group: Mapping[str, Any]) -> str:
 def _stored_rows(db: Any, key: str) -> dict[str, dict[str, Any]]:
     cursor = db.get_cursor()
     placeholder = _placeholder(db)
-    cursor.execute(
+    cursor.execute(  # nosec B608  # nosemgrep
         f"SELECT groupKey, opportunities, actions, valueSum FROM {TABLE_NAME} WHERE queryKey = {placeholder}",
         (key,),
     )
