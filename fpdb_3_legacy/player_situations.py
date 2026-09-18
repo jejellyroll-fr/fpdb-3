@@ -90,6 +90,11 @@ STREET_NAMES = ("preflop", "flop", "turn", "river")
 FIRST_ACTION_STREETS = frozenset({"BLINDSANTES", "ANTES", "PREFLOP"})
 # The street letters the postflop PT4 columns use: flop, turn, river.
 STREET_LETTERS = {1: "f", 2: "t", 3: "r"}
+# Where a round sits in the four-street vocabulary, by the name the hand gives
+# it. A game whose first betting round is already a board street -- all-in or
+# fold Omaha deals the flop before anyone acts -- starts at that street rather
+# than at preflop, so its decisions are not read as preflop ones.
+BOARD_STREET_INDEX = {name: index for index, name in enumerate(STREET_NAMES)}
 
 # The shape of the pot, as the player met it. Preflop this is the round as it
 # stands ("the pot is unopened and it is on me"); postflop it is the shape the
@@ -222,6 +227,7 @@ class PlayerSituation:
 
     @property
     def is_preflop(self) -> bool:
+        """Street 0 is preflop; a hand that opens on a board has no street 0."""
         return self.street == 0
 
     @property
@@ -481,6 +487,22 @@ def _donk_spot(situation: PlayerSituation) -> bool:
     )
 
 
+def _unraised_pot_bet(situation: PlayerSituation) -> bool:
+    """Opening the betting in a pot that has never been raised or bet.
+
+    A c-bet, a donk, a probe and a float are all named after an aggressor; a
+    limped pot has none, so its first bet matches none of them. The same holds
+    for a game that deals a board before anyone acts and is then checked round.
+    Without this row the most ordinary bet in poker would be the one decision
+    the model could not name.
+    """
+    return (
+        situation.pot_type in (POT_LIMPED, POT_UNOPENED)
+        and situation.first_aggressor is None
+        and situation.previous_aggressor is None
+    )
+
+
 def _facing_donk_spot(situation: PlayerSituation) -> bool:
     """The previous street's aggressor facing a bet from someone else.
 
@@ -668,6 +690,14 @@ SITUATION_RULES: tuple[SituationRule, ...] = (
         "POSTFLOP_AGGRESSION",
         "donk bet",
         _donk_spot,
+        response=("bet",),
+        streets=(1, 2, 3),
+    ),
+    SituationRule(
+        "limped_pot_bet",
+        "POSTFLOP_AGGRESSION",
+        "first bet in a pot nobody raised",
+        _unraised_pot_bet,
         response=("bet",),
         streets=(1, 2, 3),
     ),
@@ -982,6 +1012,7 @@ class _SituationWalk:
         self.board = getattr(hand, "board", None) or {}
         self.hero = getattr(hand, "hero", "") or ""
         self.street_names = _street_names(hand)
+        self.street_offset = _street_offset(self.street_names)
         self.boards = _boards(hand, self.board)
         self.situations: list[PlayerSituation] = []
         self.round = _round_state(0)
@@ -1169,7 +1200,11 @@ class _SituationWalk:
         return self.situations
 
     def _situation(self, row: dict[str, Any], word: str, index: int, street: int) -> PlayerSituation:
+        """Build one decision. ``street`` is the round index; the situation
+        carries the street that round *is*, which differ when a hand has no
+        preflop round of its own."""
         player = str(row.get("player") or "")
+        street_of_round = street + self.street_offset
         to_call = int(self._fact_value(row, "toCall", 0) or 0)
         pot_before = int(self._fact_value(row, "potBefore", 0) or 0)
         raises_before = int(self._fact_value(row, "raiserCount", 0) or 0)
@@ -1183,7 +1218,7 @@ class _SituationWalk:
         situation = PlayerSituation(
             hand_id=int(getattr(self.hand, "handid", 0) or 0),
             action_no=int(row.get("actionNo") or index + 1),
-            street=street,
+            street=street_of_round,
             street_name=self._street_name(street),
             player=player,
             site=str(getattr(self.hand, "sitename", "") or ""),
@@ -1216,7 +1251,7 @@ class _SituationWalk:
             previous_aggressor_led=self._previous_aggressor_led(),
             previous_aggressor_checked=self._previous_aggressor_checked(),
             previous_aggressor_position=aggressor_position,
-            in_position_vs_previous_aggressor=_in_position_vs(position, aggressor_position),
+            in_position_vs_previous_aggressor=_in_position_vs(position, aggressor_position, street_of_round),
             aggressor_checked_this_street=self._aggressor_checked_this_street(),
             previous_raiser=self._previous_raiser(),
             is_previous_raiser=player == self._previous_raiser(),
@@ -1227,7 +1262,7 @@ class _SituationWalk:
             facing_action=row.get("facingActionType") if facing else None,
             facing_player=facing,
             facing_position=facing_position,
-            in_position_vs_facing=_in_position_vs(position, facing_position),
+            in_position_vs_facing=_in_position_vs(position, facing_position, street_of_round),
             facing_amount=int(self._fact_value(row, "facingAmount", 0) or 0),
             facing_sizing_bp=int(self._fact_value(row, "facingSizingBp", 0) or 0),
             facing_all_in=self._facing_all_in() if facing else False,
@@ -1284,6 +1319,20 @@ def _street_names(hand: Any) -> tuple[str, ...]:
     return tuple(names) or STREET_NAMES
 
 
+def _street_offset(street_names: Sequence[str]) -> int:
+    """The street the hand's first betting round actually is.
+
+    Almost every game opens on preflop and the round index *is* the street. All
+    -in or fold Omaha deals the flop first and has no preflop round at all, so
+    its rounds are the flop, the turn and the river: without this shift its flop
+    would be read as preflop, matching open-limp and steal rules, and no
+    postflop rule could ever match it.
+    """
+    if not street_names:
+        return 0
+    return BOARD_STREET_INDEX.get(street_names[0], 0)
+
+
 def _boards(hand: Any, board: dict[str, Any]) -> list[tuple[str, ...]]:
     """The cards visible entering each street, cumulated from the hand's rounds."""
     cards: tuple[str, ...] = ()
@@ -1321,15 +1370,33 @@ def _position_of(handsplayers: dict[str, dict[str, Any]], player: str | None) ->
     return _position_code(handsplayers.get(player, {}).get("position"))
 
 
-def _in_position_vs(position: int | None, other: int | None) -> bool | None:
-    """Whether the player's seat acts after the other player's, on every street.
+def _acting_rank(position: int, street: int) -> int:
+    """How late a seat acts on ``street``; the smaller the rank, the later.
 
-    A lower code is closer to the button, i.e. later to act; the blinds rank
-    behind every numbered seat. Unknown seats give None rather than a guess.
+    Among the numbered seats the code already says it: 0 is the button and acts
+    last, 3 is under the gun and acts first. The blinds move. On the first
+    betting round they are the last to act, which is what their negative codes
+    already express; from the flop on they are the first, so they rank ahead of
+    every numbered seat instead of behind it.
+    """
+    if street == 0 or position >= 0:
+        return position
+    return _BLIND_POSTFLOP_RANK + position
+
+
+# Larger than any seat code, so that postflop the small blind (-1 -> 999) acts
+# before the big blind (-2 -> 998) and both before every numbered seat.
+_BLIND_POSTFLOP_RANK = 1000
+
+
+def _in_position_vs(position: int | None, other: int | None, street: int) -> bool | None:
+    """Whether the player's seat acts after the other player's, on this street.
+
+    Unknown seats give None rather than a guess.
     """
     if position is None or other is None:
         return None
-    return position < other
+    return _acting_rank(position, street) < _acting_rank(other, street)
 
 
 def _round_state(street: int) -> _RoundState:

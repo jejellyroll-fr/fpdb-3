@@ -26,6 +26,7 @@ has to be one the HUD already displays.
 from __future__ import annotations
 
 import json
+from types import SimpleNamespace
 from typing import Any
 
 import pytest
@@ -230,6 +231,91 @@ def test_context_is_measured_before_the_action(situations) -> None:
             elif situation.response in ("call", "bet", "raise", "complete"):
                 assert situation.pot_after > situation.pot_before
             assert situation.to_call <= situation.pot_before + situation.to_call
+
+
+def _aof_omaha_hand() -> tuple[Any, dict[str, dict[str, Any]], list[dict[str, Any]]]:
+    """All-in or fold Omaha: the flop is dealt first, so there is no preflop round."""
+    hand = SimpleNamespace(
+        handid=4200000001,
+        sitename="Winamax",
+        maxseats=3,
+        hero="Cara",
+        gametype={"category": "aof_omaha", "limitType": "pl", "type": "ring", "sb": "1", "bb": "2", "currency": "EUR"},
+        actionStreets=["BLINDSANTES", "FLOP", "TURN", "RIVER"],
+        board={"FLOP": ["Ah", "8d", "3c"], "TURN": ["Ks"], "RIVER": ["2h"]},
+    )
+    handsplayers = {
+        "Cara": {"position": 0},
+        "Dave": {"position": "S"},
+        "Erin": {"position": "B"},
+    }
+    rows = [
+        {"actionNo": 1, "street": 0, "player": "Cara", "actionType": "bets", "position": 0, "potBefore": 300, "potAfter": 900},
+        {"actionNo": 2, "street": 0, "player": "Dave", "actionType": "folds", "position": "S", "toCall": 600, "potBefore": 900, "potAfter": 900, "facingActionType": "bets"},
+        {"actionNo": 3, "street": 0, "player": "Erin", "actionType": "calls", "position": "B", "toCall": 600, "potBefore": 900, "potAfter": 1500, "facingActionType": "bets"},
+    ]
+    return hand, handsplayers, rows
+
+
+def test_a_hand_without_a_preflop_round_starts_on_the_flop() -> None:
+    """The round index is not the street: all-in or fold Omaha opens on a board.
+
+    Its first betting round is the flop, so reading the round index as preflop
+    would name those decisions open limps and steals, and would leave the flop
+    unable to match a single postflop rule.
+    """
+    hand, handsplayers, rows = _aof_omaha_hand()
+
+    situations = enumerate_situations(hand, handsplayers, rows)
+
+    assert [situation.street for situation in situations] == [FLOP, FLOP, FLOP]
+    assert {situation.street_name for situation in situations} == {"flop"}
+    for situation in situations:
+        assert not situation.is_preflop
+        assert situation.board == ("Ah", "8d", "3c")
+        assert not set(situation.labels) & {"open_limp", "over_limp", "steal", "preflop_unopened", "open_raise"}
+        assert situation.primary, "every decision still gets a name"
+
+    erin = situations_for(situations, "Erin")[0]
+    assert erin.in_position_vs_facing is False, "the big blind acts before the button on a board"
+
+
+def test_the_blinds_act_last_preflop_and_first_afterwards() -> None:
+    """The seat codes are button-relative; the blinds are not where they sit.
+
+    ``-1``/``-2`` read as "past the button", which is the preflop truth: the
+    blinds close the first round. From the flop on they open every round, so a
+    blind is out of position against every numbered seat, never in it.
+    """
+    button, cutoff, small, big = 0, 1, -1, -2
+
+    assert model._in_position_vs(button, cutoff, PREFLOP) is True
+    assert model._in_position_vs(big, button, PREFLOP) is True, "the big blind closes preflop"
+    assert model._in_position_vs(big, small, PREFLOP) is True
+
+    for street in (FLOP, TURN, RIVER):
+        assert model._in_position_vs(big, button, street) is False, "a blind acts first postflop"
+        assert model._in_position_vs(button, big, street) is True
+        assert model._in_position_vs(small, cutoff, street) is False
+        assert model._in_position_vs(big, small, street) is True, "the small blind acts first"
+        assert model._in_position_vs(button, cutoff, street) is True
+
+    assert model._in_position_vs(None, button, FLOP) is None
+    assert model._in_position_vs(button, None, FLOP) is None
+
+
+def test_a_blind_is_never_in_position_postflop(situations) -> None:
+    """The same rule, read off the corpus rather than off the seat codes."""
+    for rows in situations.values():
+        for situation in rows:
+            if situation.street == PREFLOP or situation.position is None or situation.position >= 0:
+                continue
+            for other, verdict in (
+                (situation.facing_position, situation.in_position_vs_facing),
+                (situation.previous_aggressor_position, situation.in_position_vs_previous_aggressor),
+            ):
+                if other is not None and other >= 0:
+                    assert verdict is False, f"{situation.player} is a blind acting first"
 
 
 def test_derived_facts_agree_with_each_other(situations) -> None:
@@ -698,7 +784,7 @@ def test_the_projection_answers_every_enum_column_the_hud_shows() -> None:
 
 
 def test_the_projection_reproduces_the_legacy_columns(parsed, situations) -> None:
-    """204 of the 209 enum cells of the corpus, and the 5 known exceptions.
+    """209 of the 215 enum cells of the corpus, and the 6 known exceptions.
 
     The projection exists so a calculator can move onto the model without the
     HUD noticing. Where it differs, it differs on purpose:
@@ -709,10 +795,11 @@ def test_the_projection_reproduces_the_legacy_columns(parsed, situations) -> Non
       who faced one -- ``test_facing_an_all_in_is_recorded_for_everyone``
       checks the information is all there -- but it does not project a column
       whose legacy shape is that quirk.
-    * ``enum_t_donk_action`` (1 cell): on the turn after a checked-through flop,
-      the legacy chain has no aggressor left, so the defender of a probe bet is
-      left unanswered. The model names them ``facing_donk``, which is what the
-      PT4 column is for.
+    * ``enum_t_donk_action`` (2 cells): when the flop aggressor checks the turn,
+      the legacy chain has no aggressor left, so whoever bets into the weakness
+      leaves them unanswered -- whether the flop was checked through (hand 9) or
+      they led it themselves and gave up (hand 31). The model names them
+      ``facing_donk``, which is what the PT4 column is for.
     """
     differences = []
     compared = 0
@@ -747,13 +834,14 @@ def test_the_projection_reproduces_the_legacy_columns(parsed, situations) -> Non
     assert sorted(differences, key=str) == sorted(EXPECTED_ENUM_DIFFERENCES, key=str)
 
 
-# The five cells the projection deliberately answers differently, with a reason
+# The six cells the projection deliberately answers differently, with a reason
 # in the docstring above. Pinning them keeps the difference visible: fixing the
 # legacy chain moves this list, and the documentation has to move with it.
 EXPECTED_ENUM_DIFFERENCES = (
     (3100000006, "Frank", "enum_face_allin", "p", None),
     (3100000006, "Frank", "enum_face_allin_action", "F", None),
     (3100000009, "Anna", "enum_t_donk_action", None, "F"),
+    (3100000031, "Frank", "enum_t_donk_action", None, "F"),
     (3100000015, "Anna", "enum_face_allin", "F", None),
     (3100000015, "Anna", "enum_face_allin_action", "C", None),
 )

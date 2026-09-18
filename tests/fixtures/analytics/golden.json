@@ -15,14 +15,27 @@
     {
       "id": "open_limp_counts_any_first_caller",
       "column": "street0OpenLimp",
-      "observed_true_rows": 28,
+      "observed_true_rows": 29,
       "note": [
         "street0OpenLimp is set for the first preflop caller, whether or not the pot was",
         "raised, so a player who calls an open is recorded exactly like a player who limps",
-        "an unraised pot. Poker says an open-limp is entering an unraised pot; only one row",
-        "in this corpus (hand 3100000002, Frank) is a real open-limp, the other 27 are calls",
+        "an unraised pot. Poker says an open-limp is entering an unraised pot; only two rows",
+        "in this corpus (Frank in hands 3100000002 and 3100000031) are real open-limps, the",
+        "other 27 are calls",
         "of a raise. The corpus pins the count so a fix to the rule is visible here instead",
         "of silently changing every limp-based stat."
+      ]
+    },
+    {
+      "id": "limped_pot_skips_the_flop_flags",
+      "column": "flg_f_fold",
+      "observed_true_rows": 19,
+      "note": [
+        "calcFlopStats returns as soon as it fails to find a preflop aggressor, so a pot",
+        "nobody raised loses every flop flag it would otherwise set: the fold of the big",
+        "blind in hand 3100000031 is a flop fold the row does not carry, although enum_folded",
+        "records the street correctly. Twenty players fold a flop in this corpus and nineteen",
+        "rows say so. The count is pinned so that lifting the guard shows up here."
       ]
     },
     {
@@ -1385,6 +1398,86 @@
                 "cbet_flop_done": true,
                 "bet_made_bp_flop": 15384,
                 "winnings_cents": 1300
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "limped_pot",
+      "file": "18_limped_pot.txt",
+      "covers": ["#293", "#294"],
+      "tags": ["limped-pot", "postflop", "no-preflop-aggressor", "float"],
+      "logic": [
+        "Under the gun open-limps, the cutoff over-limps and the big blind checks, so three",
+        "players see a flop nobody raised for. The limper bets the flop, the cutoff calls in",
+        "position and the big blind folds; the flop bettor gives up the turn and folds to the",
+        "cutoff's bet.",
+        "The corpus reference for a pot with no preflop aggressor: the flop bet belongs to no",
+        "continuation-bet chain at all, so it is the first bet of a limped pot, and the turn",
+        "bet that follows the flop bettor's check is a float like any other."
+      ],
+      "hands": [
+        {
+          "hand_id": 3100000031,
+          "pot": "15.00",
+          "rake": "0.00",
+          "players_dealt": 6,
+          "players_vpip": 2,
+          "players_at_flop": 3,
+          "players_at_turn": 2,
+          "flop": ["Jh", "7c", "3d"],
+          "turn": ["2s"],
+          "players": {
+            "Frank": {
+              "role": "under the gun open-limping, betting the limped flop, then folding the turn",
+              "expect": {
+                "vpip": true,
+                "pfr": false,
+                "open_limp": true,
+                "limpers_faced": 0,
+                "rfi": false,
+                "bet_made_bp_flop": 5714,
+                "folded_turn": true,
+                "folded_street": "turn",
+                "profit_cents": -600
+              }
+            },
+            "Boris": {
+              "role": "cutoff over-limping, calling the flop bet in position and betting the turn",
+              "expect": {
+                "vpip": true,
+                "pfr": false,
+                "calls_preflop": 1,
+                "limpers_faced": 1,
+                "open_limp": false,
+                "over_limp": {
+                  "poker": true,
+                  "current": false,
+                  "deviation": "over_limp_not_recorded"
+                },
+                "in_position_flop": true,
+                "in_position_turn": true,
+                "float_turn_done": true,
+                "bet_made_bp_turn": 5333,
+                "aggressor_turn": true,
+                "winnings_cents": 1500,
+                "profit_cents": 900
+              }
+            },
+            "Erin": {
+              "role": "big blind checking its option and folding the flop bet",
+              "expect": {
+                "vpip": false,
+                "saw_flop": true,
+                "folded_flop": {
+                  "poker": true,
+                  "current": false,
+                  "deviation": "limped_pot_skips_the_flop_flags"
+                },
+                "folded_street": "flop",
+                "profit_cents": -200
               }
             }
           }

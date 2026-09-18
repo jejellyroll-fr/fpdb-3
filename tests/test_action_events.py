@@ -238,7 +238,7 @@ class TestCorpusEvents:
     """Every golden hand converts to events that are ordered, complete and exact."""
 
     def test_every_hand_has_events(self, corpus: golden.GoldenCorpus) -> None:
-        assert corpus.hand_count == 30
+        assert corpus.hand_count == 31
         for hand_id, rows in corpus.actions.items():
             assert rows, f"hand {hand_id} produced no action events"
 

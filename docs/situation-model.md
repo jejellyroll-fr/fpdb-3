@@ -82,6 +82,11 @@ Conventions worth stating:
   `preflop`, `flop`, `turn`, `river`; a stud or draw hand gets its own names
   (`third`, `firstdraw`, ...) rather than being called a flop it does not have.
   The spot vocabulary of this module is hold'em/Omaha today (see *deferred*).
+* **The round index is not the street.** `street` is the street the round *is*,
+  which is the round's index only because nearly every game opens preflop. All-in
+  or fold Omaha deals the flop before anyone acts and has no preflop round at
+  all: its first round is `street` 1, so its decisions are read as flop decisions
+  instead of as open limps and steals.
 * **`pot_type` is the pot as the player met it.** Preflop that is the round as it
   stands (`unopened`, `limped`, `single_raised`, `three_bet`, `four_bet_plus`),
   postflop it is the shape the preflop round ended in -- what kind of pot this
@@ -118,6 +123,7 @@ plain responses and structure.
 | `isolation_raise`, `over_limp` | limpers in front, raised over or joined |
 | `squeeze`, `three_bet`, `four_bet` | re-raising: with callers behind it, or not |
 | `cbet`, `delayed_cbet`, `probe`, `float_bet`, `donk`, `check_raise` | leading out postflop, one name per reason |
+| `limped_pot_bet` | the first bet of a pot nobody raised, which no aggressor-based name fits |
 | `squeeze_defence`, `facing_cbet`, `facing_delayed_cbet`, `facing_donk`, `facing_float`, `facing_raise`, `facing_3bet`, `facing_4bet`, `five_bet_plus`, `facing_limpers`, `facing_open` | the spot faced |
 | `opener_vs_3bet`, `three_bettor_vs_4bet` | the role inside it (opener, 3-bettor) |
 | `squeeze_spot`, `cbet_spot`, `delayed_cbet_spot`, `probe_spot`, `float_bet_spot`, `donk_spot`, `steal_spot`, `preflop_unopened` | the opportunity declined, whatever the response |
@@ -163,13 +169,13 @@ that `calcActionEnums` fills today -- one char per column per player, `F`/`C`/`R
 first answer of the hand wins. That is the migration path: a calculator can be
 moved onto the model with the HUD unable to tell, and
 `test_the_projection_reproduces_the_legacy_columns` checks it cell by cell on the
-golden corpus: **204 of the 209 cells identical**, and the five exceptions are
+golden corpus: **209 of the 215 cells identical**, and the six exceptions are
 known:
 
 | Cells | Why |
 | --- | --- |
 | `enum_face_allin`, `enum_face_allin_action` (4) | the legacy pass records the *first* all-in faced in the hand and then stops, so at most one player per hand is ever answered. The model knows every player who faced one (`test_facing_an_all_in_is_recorded_for_everyone`) but does not project a column whose legacy shape is that quirk. |
-| `enum_t_donk_action` (1) | on the turn after a checked-through flop the legacy chain has no aggressor left, so the defender of a probe bet is left unanswered. The model names them `facing_donk`, which is what the column is for. |
+| `enum_t_donk_action` (2) | when the flop aggressor checks the turn the legacy chain has no aggressor left, so whoever bets into that weakness leaves them unanswered -- whether the flop was checked through or they led it themselves and gave up. The model names them `facing_donk`, which is what the column is for. |
 
 `test_the_projection_answers_every_enum_column_the_hud_shows` keeps the other
 direction honest: every column in the HUD's `SITUATIONS` table is answerable from
