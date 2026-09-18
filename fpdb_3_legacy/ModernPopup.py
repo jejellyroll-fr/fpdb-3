@@ -55,6 +55,7 @@ class ModernStatRow(QWidget):
         icon_provider: IconProvider,
         submenu: str = "",
         on_open=None,
+        label: str = "",
     ) -> None:
         super().__init__()
         self.stat_name = stat_name
@@ -63,6 +64,7 @@ class ModernStatRow(QWidget):
         self.icon_provider = icon_provider
         self.submenu = submenu
         self.on_open = on_open
+        self.label = label
 
         self.setup_ui()
         self.setup_style()
@@ -86,7 +88,9 @@ class ModernStatRow(QWidget):
         self.icon_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         # Stat name - extract clean name without "n=value" format
-        if self.stat_data:
+        if self.label:
+            clean_name = self.label
+        elif self.stat_data:
             # Get clean stat name by removing the "=value" part
             full_name = self.stat_data[3]
             clean_name = full_name.split("=")[0] if "=" in full_name else full_name
@@ -105,6 +109,9 @@ class ModernStatRow(QWidget):
         self.value_label = QLabel(str(value_text))
         self.value_label.setMinimumWidth(60)
         self.value_label.setAlignment(Qt.AlignmentFlag.AlignRight)
+        self.sample_label = QLabel(str(self.stat_data[4]) if self.stat_data and len(self.stat_data) > 4 else "")
+        self.sample_label.setMinimumWidth(60)
+        self.sample_label.setAlignment(Qt.AlignmentFlag.AlignRight)
 
         # Visual indicator (progress bar style)
         self.indicator = QProgressBar()
@@ -121,6 +128,7 @@ class ModernStatRow(QWidget):
         layout.addWidget(self.icon_label)
         layout.addWidget(self.name_label)
         layout.addWidget(self.value_label)
+        layout.addWidget(self.sample_label)
         layout.addWidget(self.indicator)
         layout.addStretch()
 
@@ -287,9 +295,9 @@ class ModernSectionWidget(QFrame):
         self.header_label.setStyleSheet(f"color: {self.theme.get_color('text_primary')};")
         self.header_icon.setStyleSheet(f"color: {self.theme.get_color('text_accent')};")
 
-    def add_stat_row(self, stat_name: str, stat_data: tuple, submenu: str = "", on_open=None) -> None:
+    def add_stat_row(self, stat_name: str, stat_data: tuple, submenu: str = "", on_open=None, label: str = "") -> None:
         """Add a stat row to this section, optionally one that opens a submenu."""
-        row = ModernStatRow(stat_name, stat_data, self.theme, self.icon_provider, submenu, on_open)
+        row = ModernStatRow(stat_name, stat_data, self.theme, self.icon_provider, submenu, on_open, label)
         self.stat_rows.append(row)
         self.content_layout.addWidget(row)
 
@@ -445,14 +453,15 @@ class ModernSubmenu(Popup):
 
             # Categorize the stat
             category = resolve_popup_stat_category(self.pop, index, stat)
-            categorized_stats[category].append((stat, stat_data, submenu_to_run))
+            label = getattr(self.pop, "pu_stats_label", [])[index] if index < len(getattr(self.pop, "pu_stats_label", [])) else ""
+            categorized_stats[category].append((stat, stat_data, submenu_to_run, label))
 
         # Create sections
         section_order = ["player_info", "preflop", "flop", "turn", "river", "steal", "aggression", "general"]
 
-        def fill(section: ModernSectionWidget, stats: list[tuple[str, tuple, str]]) -> None:
-            for stat, stat_data, submenu in stats:
-                section.add_stat_row(stat, stat_data, submenu or "", self.open_submenu)
+        def fill(section: ModernSectionWidget, stats: list[tuple[str, tuple, str, str]]) -> None:
+            for stat, stat_data, submenu, label in stats:
+                section.add_stat_row(stat, stat_data, submenu or "", self.open_submenu, label)
 
         for section_name in section_order:
             if section_name in categorized_stats:

@@ -444,7 +444,8 @@ def _check_submenus(nodes: Mapping[str, PopupNode], root: str, known: frozenset[
         visiting.discard(name)
         done.add(name)
 
-    walk(root, ())
+    for name in nodes:
+        walk(name, ())
 
 
 def parse_pack(data: Mapping[str, Any], source: str = "", known_popups: Iterable[str] = ()) -> PopupPack:
