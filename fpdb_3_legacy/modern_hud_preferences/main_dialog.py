@@ -720,6 +720,7 @@ class ModernHudPreferences(QDialog):
         # PT-style persistent rules selecting a HUD profile from the table
         # context (room/game/format/seats/etc.).
         self._create_profile_select_tab()
+        self._create_dynamic_panels_tab()
 
         # Tab 3: General Settings
         general_tab = QWidget()
@@ -918,6 +919,12 @@ class ModernHudPreferences(QDialog):
             "hudprefix",
             "hudsuffix",
             "tip",
+            # The declarative binding of an analytics-backed stat (#309). Empty
+            # for a column-backed stat, written back only when it is set.
+            "data_source",
+            "data_definition",
+            "data_format",
+            "data_min_sample",
         ):
             if hasattr(stat, attr):
                 d[attr] = getattr(stat, attr, "")
@@ -1450,6 +1457,7 @@ class ModernHudPreferences(QDialog):
             return
         name = self.profile_combo.currentText()
         profile = self.hud_profiles.get(name, {})
+        self._refresh_panel_stat_blocks()
 
         # Reflect this profile's positional-panel mode in the combo (multi-block
         # only). Block the signal so setting it here doesn't mark a fake edit.
@@ -2819,6 +2827,12 @@ class ModernHudPreferences(QDialog):
             stat_node.setAttribute("colspan", str(int(stat["colspan"])))
         if stat.get("align") and stat["align"] != "center":
             stat_node.setAttribute("align", stat["align"])
+        # An analytics-backed stat (#309) says where its number comes from, so a
+        # configuration is self-describing rather than depending on what the
+        # build knew when it was written.
+        for attr in ("data_source", "data_definition", "data_format", "data_min_sample"):
+            if stat.get(attr):
+                stat_node.setAttribute(attr, str(stat[attr]))
         parent_node.appendChild(stat_node)
 
     def _append_hline_node(self, parent_node, hline: dict) -> None:
@@ -3134,6 +3148,724 @@ class ModernHudPreferences(QDialog):
                 text += "\n" + _("Pick a Game (and Format) to see the default that would apply.")
         self.profile_preview_label.setText(text)
 
+    # ------------------------------------------------------------------ #
+    # Dynamic panels (#309): the panel rules of #298, editable.
+    # ------------------------------------------------------------------ #
+
+    def _create_dynamic_panels_tab(self) -> None:
+        """The tab that writes the ``<hud_panel_rules>`` section of #298.
+
+        The selectors are the conditions a rule may state, and they come from
+        ``hud_panel_editor``, which validates them against the query engine's own
+        vocabulary: this tab cannot offer a condition the HUD would refuse. The
+        preview below runs the production resolver on the context the selectors
+        describe, so what is shown here is what a table would show.
+        """
+        from fpdb_3_legacy import hud_panel_editor as editor
+
+        # The state first: the widget builders below ask for the known panels and
+        # the stat choices, and both read it.
+        self.panel_rules: list[Any] = list(getattr(self.config, "get_hud_panel_rules", lambda: [])())
+        self.panel_rules_fallback = str(getattr(self.config, "hud_panel_fallback", "") or "")
+        self.panel_stat_choices: tuple[Any, ...] = ()
+
+        tab = QWidget()
+        outer = QVBoxLayout(tab)
+        outer.setContentsMargins(12, 10, 12, 10)
+
+        self.panel_rules_enabled = QCheckBox(_("Show the panels that fit the hand"))
+        self.panel_rules_enabled.setToolTip(
+            _(
+                "Off by default. When it is on, the panels a rule names are shown and every "
+                "other block keeps the position rule it has always had."
+            )
+        )
+        outer.addWidget(self.panel_rules_enabled)
+
+        selectors = QGroupBox(_("When this is the spot"))
+        selectors_layout = QVBoxLayout(selectors)
+        grid = QGridLayout()
+        self.panel_selector_widgets: dict[str, Any] = {}
+        for index, field in enumerate(editor.fill_choices(editor.selector_fields(), **self._panel_vocabularies())):
+            row, column = divmod(index, 4)
+            grid.addWidget(QLabel(field.label), row * 2, column)
+            widget = self._panel_selector_widget(field)
+            self.panel_selector_widgets[field.name] = widget
+            grid.addWidget(widget, row * 2 + 1, column)
+            self._panel_selector_hook(widget, field.name)
+        grid_widget = QWidget()
+        grid_widget.setLayout(grid)
+        area = QScrollArea()
+        area.setWidgetResizable(True)
+        area.setWidget(grid_widget)
+        area.setMinimumHeight(190)
+        selectors_layout.addWidget(area)
+        outer.addWidget(selectors)
+
+        behaviour = QGroupBox(_("Then show"))
+        behaviour_grid = QGridLayout(behaviour)
+        self.panel_rule_panel_combo = QComboBox()
+        self.panel_rule_panel_combo.setEditable(True)
+        self.panel_rule_panel_combo.addItems(self._known_panel_names())
+        self.panel_rule_profile_combo = QComboBox()
+        self.panel_rule_profile_combo.addItem(_("all profiles"), "all")
+        for profile in sorted(getattr(self.config, "stat_sets", {}) or {}):
+            self.panel_rule_profile_combo.addItem(profile, profile)
+        self.panel_rule_fallback_combo = QComboBox()
+        self.panel_rule_fallback_combo.addItem(_("(none)"), "")
+        self.panel_rule_fallback_combo.addItems(self._known_panel_names())
+        self.panel_rule_priority = QSpinBox()
+        self.panel_rule_priority.setRange(-100, 100)
+        self.panel_rule_min_sample = QSpinBox()
+        self.panel_rule_min_sample.setRange(0, 1000000)
+        self.panel_rule_min_sample.setToolTip(_("Below this many hands the panel is withheld and the fallback shows."))
+        self.panel_rule_sample = QLineEdit("n")
+        self.panel_rule_id = QLineEdit()
+        self.panel_rule_id.setPlaceholderText(_("optional name"))
+        self.panel_rule_enabled = QCheckBox(_("Enabled"))
+        self.panel_rule_enabled.setChecked(True)
+        for index, (label, widget) in enumerate(
+            (
+                (_("Panel"), self.panel_rule_panel_combo),
+                (_("HUD profile"), self.panel_rule_profile_combo),
+                (_("Priority"), self.panel_rule_priority),
+                (_("Min sample"), self.panel_rule_min_sample),
+                (_("Sample column"), self.panel_rule_sample),
+                (_("Fallback"), self.panel_rule_fallback_combo),
+                (_("Rule name"), self.panel_rule_id),
+            )
+        ):
+            row, column = divmod(index, 4)
+            behaviour_grid.addWidget(QLabel(label), row, column * 2)
+            behaviour_grid.addWidget(widget, row, column * 2 + 1)
+        behaviour_grid.addWidget(self.panel_rule_enabled, 1, 6)
+        outer.addWidget(behaviour)
+
+        buttons = QHBoxLayout()
+        for label, slot in (
+            (_("Add"), self._add_panel_rule),
+            (_("Update selected"), self._update_panel_rule),
+            (_("Delete"), self._delete_panel_rule),
+            (_("Move up"), lambda: self._move_panel_rule(-1)),
+            (_("Move down"), lambda: self._move_panel_rule(1)),
+        ):
+            button = QPushButton(label)
+            button.clicked.connect(slot)
+            buttons.addWidget(button)
+        buttons.addStretch()
+        for label, slot in ((_("Import…"), self._import_panel_rules), (_("Export…"), self._export_panel_rules)):
+            button = QPushButton(label)
+            button.clicked.connect(slot)
+            buttons.addWidget(button)
+        outer.addLayout(buttons)
+
+        active = QGroupBox(_("Panel rules"))
+        active_layout = QVBoxLayout(active)
+        self.panel_rules_table = QTableWidget(0, 8)
+        self.panel_rules_table.setHorizontalHeaderLabels(
+            [
+                _("#"),
+                _("Panel"),
+                _("Conditions"),
+                _("HUD profile"),
+                _("Priority"),
+                _("Min sample"),
+                _("Fallback"),
+                _("Issues"),
+            ]
+        )
+        self.panel_rules_table.verticalHeader().hide()
+        self.panel_rules_table.verticalHeader().setDefaultSectionSize(34)
+        self.panel_rules_table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        self.panel_rules_table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
+        self.panel_rules_table.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
+        self.panel_rules_table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
+        self.panel_rules_table.setAlternatingRowColors(True)
+        self.panel_rules_table.setMinimumHeight(150)
+        self.panel_rules_table.itemSelectionChanged.connect(self._load_panel_rule_into_form)
+        active_layout.addWidget(self.panel_rules_table)
+        outer.addWidget(active, 1)
+
+        preview = QGroupBox(_("Preview, by the same resolver the HUD uses"))
+        preview_layout = QVBoxLayout(preview)
+        self.panel_preview_sample = QSpinBox()
+        self.panel_preview_sample.setRange(0, 1000000)
+        self.panel_preview_sample.setValue(500)
+        self.panel_preview_sample.valueChanged.connect(self._update_panel_preview)
+        sample_row = QHBoxLayout()
+        sample_row.addWidget(QLabel(_("Hands for this seat")))
+        sample_row.addWidget(self.panel_preview_sample)
+        sample_row.addStretch()
+        preview_layout.addLayout(sample_row)
+        self.panel_preview_label = QLabel()
+        self.panel_preview_label.setWordWrap(True)
+        self.panel_preview_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
+        preview_layout.addWidget(self.panel_preview_label)
+        outer.addWidget(preview)
+
+        self._create_panel_stat_picker(outer)
+
+        self.panel_rules_enabled.setChecked(bool(getattr(self.config, "hud_panel_rules_enabled", False)))
+        if self.panel_rules_fallback:
+            index = self.panel_rule_fallback_combo.findText(self.panel_rules_fallback)
+            if index >= 0:
+                self.panel_rule_fallback_combo.setCurrentIndex(index)
+        self._refresh_panel_rules_table()
+        self.tabs.addTab(tab, _("🧩 Dynamic Panels"))
+
+    def _create_panel_stat_picker(self, outer: QVBoxLayout) -> None:
+        """The stat picker: the column-backed stats and the analytics ones.
+
+        The analytics entries of #306 carry what the issue asks the picker to
+        show -- the filters they apply, the format, the sample threshold and the
+        popups that already bind them -- and adding one to a block writes those
+        attributes into the configuration, so the block says where its number
+        comes from instead of depending on what the code knew that day.
+        """
+        box = QGroupBox(_("Analytics-backed stats"))
+        layout = QVBoxLayout(box)
+        self.panel_stat_combo = QComboBox()
+        self.panel_stat_combo.setMinimumWidth(320)
+        self.panel_stat_combo.currentIndexChanged.connect(self._update_panel_stat_detail)
+        self.panel_stat_detail = QLabel()
+        self.panel_stat_detail.setWordWrap(True)
+        self.panel_stat_block_combo = QComboBox()
+        self.panel_stat_add_button = QPushButton(_("Add to block"))
+        self.panel_stat_add_button.clicked.connect(self._add_panel_stat_to_block)
+        row = QHBoxLayout()
+        row.addWidget(self.panel_stat_combo, 1)
+        row.addWidget(self.panel_stat_block_combo)
+        row.addWidget(self.panel_stat_add_button)
+        layout.addLayout(row)
+        layout.addWidget(self.panel_stat_detail)
+        outer.addWidget(box)
+        self._refresh_panel_stat_choices()
+
+    def _panel_vocabularies(self) -> dict[str, list[str]]:
+        """The selector values only the loaded configuration knows."""
+        limits = {"nl", "pl", "fl", "cn"}
+        seats = {str(value) for value in range(2, 11)}
+        for game in (getattr(self.config, "supported_games", {}) or {}):
+            for game_type in ("ring", "tour"):
+                try:
+                    params = self.config.get_supported_games_parameters(game, game_type)
+                except Exception:  # intentional broad catch: a missing game is not a broken tab
+                    continue
+                if not isinstance(params, dict):
+                    continue
+                limit = str(params.get("limitType") or params.get("limit_type") or "").strip()
+                if limit:
+                    limits.add(limit)
+                max_seats = params.get("maxSeats") or params.get("max_seats")
+                if max_seats:
+                    seats.add(str(max_seats))
+        return {
+            "site": sorted(getattr(self.config, "supported_sites", {}) or {}),
+            "game": sorted(getattr(self.config, "supported_games", {}) or {}),
+            "limit": sorted(limits),
+            "seats": sorted(seats, key=int),
+            "profile": sorted(getattr(self.config, "stat_sets", {}) or {}),
+            "situation": list(self._situation_words()),
+            "situation_group": list(self._situation_words(groups=True)),
+            "primary_situation": list(self._situation_words()),
+        }
+
+    @staticmethod
+    def _situation_words(*, groups: bool = False) -> tuple[str, ...]:
+        """The situation vocabulary of #294, so the labels are not typed by hand."""
+        try:
+            from fpdb_3_legacy import player_situations
+        except Exception:  # intentional broad catch: a missing layer must not break the tab
+            return ()
+        attribute = "group" if groups else "label"
+        return tuple(sorted({str(getattr(rule, attribute, "") or "") for rule in player_situations.SITUATION_RULES} - {""}))
+
+    def _panel_selector_widget(self, field) -> Any:
+        if field.kind == "bool":
+            combo = QComboBox()
+            combo.addItem(_("ANY"), None)
+            combo.addItem(_("Yes"), True)
+            combo.addItem(_("No"), False)
+            return combo
+        if field.kind == "range":
+            holder = QWidget()
+            layout = QHBoxLayout(holder)
+            layout.setContentsMargins(0, 0, 0, 0)
+            holder.low_edit = QLineEdit()
+            holder.high_edit = QLineEdit()
+            for entry in (holder.low_edit, holder.high_edit):
+                entry.setMaximumWidth(64)
+                entry.setPlaceholderText("—")
+                layout.addWidget(entry)
+                entry.textChanged.connect(self._update_panel_preview)
+            return holder
+        combo = QComboBox()
+        combo.setEditable(not field.choices)
+        combo.addItem(_("ANY"), "")
+        for choice in field.choices:
+            combo.addItem(str(choice), str(choice))
+        return combo
+
+    def _panel_selector_hook(self, widget, name: str = "") -> None:
+        """Repreview whenever a selector moves."""
+        if isinstance(widget, QComboBox):
+            widget.currentIndexChanged.connect(self._update_panel_preview)
+            if name:
+                widget.currentIndexChanged.connect(
+                    lambda _index, selector=name: getattr(self, "_preserved_selector_values", {}).pop(selector, None)
+                )
+
+    def _known_panel_names(self) -> list[str]:
+        """The panels a block can actually carry: the library, then the config's.
+
+        The library's names come first because they are what a rule means by
+        default -- a user who has not drawn the block yet still has to be able to
+        name the panel, and only the shipped rules know those names.
+
+        The panels the current rules name are deliberately **not** in here: this
+        list is what a rule is checked against, and a rule validating itself
+        would make every typo a known block.
+        """
+        names: list[str] = []
+        try:
+            from fpdb_3_legacy import hud_situation
+
+            for rule in hud_situation.load_source("builtin")[0]:
+                if rule.panel not in names:
+                    names.append(rule.panel)
+        except (OSError, ValueError):  # a broken library must not break the tab
+            log.debug("the shipped panel library could not be read", exc_info=True)
+        for name, profile in (getattr(self, "hud_profiles", None) or {}).items():
+            blocks = profile.get("blocks") if isinstance(profile, dict) else None
+            for block in blocks or []:
+                for key in ("id", "label"):
+                    value = str(block.get(key, "") or "").strip()
+                    if value and value not in names:
+                        names.append(value)
+            if name and name not in names:
+                names.append(name)
+        return names
+
+    def _panel_selector_values(self) -> dict[str, Any]:
+        """The conditions the selector widgets state, in the engine's vocabulary.
+
+        A selector left on ANY states nothing, which is what an unconstrained
+        dimension is: a rule that does not mention the street is a rule about
+        every street.
+        """
+        from fpdb_3_legacy import hud_panel_editor as editor
+
+        values: dict[str, Any] = {}
+        for name, widget in self.panel_selector_widgets.items():
+            field = editor.selector_field(name)
+            if field is None or name == "profile":
+                continue
+            if field.kind == "bool":
+                value = widget.currentData()
+            elif field.kind == "range":
+                low = widget.low_edit.text().strip()
+                high = widget.high_edit.text().strip()
+                if not low and not high:
+                    continue
+                try:
+                    value = [int(low) if low else None, int(high) if high else None]
+                except ValueError:
+                    continue
+            else:
+                preserved = getattr(self, "_preserved_selector_values", {}).get(name)
+                if preserved is not None:
+                    values[name] = list(preserved) if isinstance(preserved, tuple) else preserved
+                    continue
+                text = (widget.currentText() if widget.isEditable() else str(widget.currentData() or "")).strip()
+                if not text:
+                    continue
+                value = [text] if name == "situation" else text
+            if value is None:
+                continue
+            values[name] = value
+        return values
+
+    def _panel_behaviour(self) -> dict[str, Any]:
+        return {
+            "panel": self.panel_rule_panel_combo.currentText().strip(),
+            "profile": str(self.panel_rule_profile_combo.currentData() or "all"),
+            "rule_id": self.panel_rule_id.text().strip(),
+            "min_sample": int(self.panel_rule_min_sample.value()),
+            "sample": self.panel_rule_sample.text().strip() or "n",
+            "fallback": str(self.panel_rule_fallback_combo.currentText() or "").strip(),
+            "priority": int(self.panel_rule_priority.value()),
+            "enabled": self.panel_rule_enabled.isChecked(),
+        }
+
+    def _panel_draft(self):
+        from fpdb_3_legacy import hud_panel_editor as editor
+
+        behaviour = self._panel_behaviour()
+        return editor.PanelRuleDraft(conditions=self._panel_selector_values(), **behaviour)
+
+    def _add_panel_rule(self) -> None:
+        draft = self._panel_draft()
+        try:
+            rule = draft.to_rule(len(self.panel_rules))
+        except ValueError as error:
+            QMessageBox.warning(self, _("Cannot add this rule"), str(error))
+            return
+        if any(existing.selector() == rule.selector() for existing in self.panel_rules):
+            QMessageBox.warning(
+                self, _("Duplicate rule"), _("A panel rule with these conditions and this profile already exists.")
+            )
+            return
+        self.panel_rules.append(rule)
+        self._refresh_panel_rules_table()
+
+    def _update_panel_rule(self) -> None:
+        row = self.panel_rules_table.currentRow()
+        if not 0 <= row < len(self.panel_rules):
+            QMessageBox.information(self, _("Update rule"), _("Select a rule to update first."))
+            return
+        draft = self._panel_draft()
+        try:
+            replaced = draft.to_rule(row)
+        except ValueError as error:
+            QMessageBox.warning(self, _("Cannot update this rule"), str(error))
+            return
+        self.panel_rules[row] = replaced
+        self._refresh_panel_rules_table()
+        self.panel_rules_table.setCurrentCell(row, 0)
+
+    def _delete_panel_rule(self) -> None:
+        row = self.panel_rules_table.currentRow()
+        if not 0 <= row < len(self.panel_rules):
+            return
+        self.panel_rules.pop(row)
+        self._renumber_panel_rules()
+
+    def _move_panel_rule(self, delta: int) -> None:
+        """Reordering matters: file order is the last tie-breaker of the resolver."""
+        row = self.panel_rules_table.currentRow()
+        target = row + delta
+        if not 0 <= row < len(self.panel_rules) or not 0 <= target < len(self.panel_rules):
+            return
+        self.panel_rules[row], self.panel_rules[target] = self.panel_rules[target], self.panel_rules[row]
+        self._renumber_panel_rules()
+        self.panel_rules_table.setCurrentCell(target, 0)
+
+    def _renumber_panel_rules(self) -> None:
+        from fpdb_3_legacy import hud_situation
+
+        self.panel_rules = hud_situation.number_rules(self.panel_rules)
+        self._refresh_panel_rules_table()
+
+    def _load_panel_rule_into_form(self) -> None:
+        """Put the selected row back in the form, so editing is not retyping."""
+        from fpdb_3_legacy import hud_panel_editor as editor
+
+        row = self.panel_rules_table.currentRow()
+        if not 0 <= row < len(self.panel_rules):
+            return
+        draft = editor.PanelRuleDraft.from_rule(self.panel_rules[row])
+        for name, widget in self.panel_selector_widgets.items():
+            field = editor.selector_field(name)
+            value = draft.conditions.get(name)
+            if field is None or field.kind == "range":
+                if field is not None and field.kind == "range":
+                    pair = value if isinstance(value, (list, tuple)) else [value, value]
+                    widget.low_edit.setText("" if pair[0] is None else str(pair[0]))
+                    widget.high_edit.setText("" if len(pair) < 2 or pair[1] is None else str(pair[1]))
+                continue
+            if field.kind == "bool":
+                index = widget.findData(value if value is not None else None)
+                widget.setCurrentIndex(max(0, index))
+                continue
+            text = "" if value is None else (value[0] if isinstance(value, (list, tuple)) and value else str(value))
+            index = widget.findText(str(text))
+            widget.setCurrentIndex(index if index >= 0 else 0)
+            # Set the widget first: currentIndexChanged clears preserved
+            # values when a selector changes. Store the full collection after
+            # that signal so updating a rule does not collapse e.g.
+            # street=["turn", "river"] to only its first item.
+            if isinstance(value, (list, tuple)):
+                if not hasattr(self, "_preserved_selector_values"):
+                    self._preserved_selector_values = {}
+                self._preserved_selector_values[name] = list(value)
+        self.panel_rule_panel_combo.setCurrentText(draft.panel)
+        self.panel_rule_profile_combo.setCurrentIndex(max(0, self.panel_rule_profile_combo.findData(draft.profile)))
+        self.panel_rule_priority.setValue(int(draft.priority))
+        self.panel_rule_min_sample.setValue(int(draft.min_sample))
+        self.panel_rule_sample.setText(draft.sample or "n")
+        self.panel_rule_id.setText(draft.rule_id)
+        self.panel_rule_enabled.setChecked(bool(draft.enabled))
+        index = self.panel_rule_fallback_combo.findText(draft.fallback)
+        self.panel_rule_fallback_combo.setCurrentIndex(index if index >= 0 else 0)
+
+    def _refresh_panel_rules_table(self) -> None:
+        from fpdb_3_legacy import hud_panel_editor as editor
+
+        issues = editor.issues_by_index(self.panel_rules, self._known_panel_names())
+        self.panel_rules_table.blockSignals(True)
+        self.panel_rules_table.setRowCount(len(self.panel_rules))
+        for row, rule in enumerate(self.panel_rules):
+            self.panel_rules_table.setRowHeight(row, 34)
+            conditions = " ".join(f"{name}={editor.readable(value)}" for name, value in sorted(rule.when.items()))
+            values = [
+                str(row + 1),
+                rule.panel,
+                conditions or _("always"),
+                rule.profile,
+                str(rule.priority),
+                str(rule.min_sample) if rule.min_sample else "",
+                rule.fallback,
+                "",
+            ]
+            for column, value in enumerate(values):
+                item = QTableWidgetItem(value)
+                item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+                self.panel_rules_table.setItem(row, column, item)
+            row_issues = issues.get(row, ())
+            if row_issues:
+                issue_item = self.panel_rules_table.item(row, 7)
+                severity = "⚠" if any(issue.severity == "duplicate" for issue in row_issues) else "!"
+                if issue_item is not None:
+                    issue_item.setText(severity)
+                    issue_item.setToolTip("\n".join(issue.message for issue in row_issues))
+            if not rule.enabled:
+                row_item = self.panel_rules_table.item(row, 0)
+                if row_item is not None:
+                    row_item.setToolTip(_("Disabled: this rule never matches."))
+        self.panel_rules_table.blockSignals(False)
+        self._update_panel_preview()
+
+    def _panel_preview_rules(self) -> list[Any]:
+        """The rules as the preview resolves them, including the form's draft."""
+        return list(self.panel_rules)
+
+    def _update_panel_preview(self, *_args: Any) -> None:
+        """Say which panel wins for the selectors, and why the others did not."""
+        from fpdb_3_legacy import hud_panel_editor as editor
+
+        if not hasattr(self, "panel_preview_label"):
+            return
+        fallback = str(self.panel_rule_fallback_combo.currentText() or "").strip()
+        hands = int(self.panel_preview_sample.value())
+        preview = editor.preview(
+            self._panel_selector_values(),
+            self._panel_preview_rules(),
+            profile=str(self.panel_rule_profile_combo.currentData() or "all"),
+            fallback=fallback,
+            samples={"n": hands, "opportunities": hands},
+            panels=self._known_panel_names(),
+            enabled=self.panel_rules_enabled.isChecked() or bool(self.panel_rules),
+        )
+        lines = [preview.describe(), ""]
+        for outcome in preview.outcomes:
+            if outcome.matched or outcome.reason.startswith("condition"):
+                mark = "✔" if outcome.shown else ("∅" if not outcome.matched else "⊘")
+                lines.append(f"{mark} {outcome.panel}: {outcome.reason}")
+        self.panel_preview_label.setText("\n".join(lines))
+
+    def _refresh_panel_stat_choices(self) -> None:
+        from fpdb_3_legacy import hud_panel_editor as editor
+
+        try:
+            from fpdb_3_legacy import popup_packs
+
+            packs = popup_packs.get_registry()
+        except Exception:  # intentional broad catch: a missing pack library must not break the tab
+            log.debug("popup packs unavailable", exc_info=True)
+            packs = None
+        self.panel_stat_choices = editor.stat_choices(config=self.config, packs=packs)
+        self.panel_stat_combo.clear()
+        for choice in self.panel_stat_choices:
+            # The source is part of the key: a registry stat and a declarative one
+            # can share a name, and a picker that cannot tell them apart would
+            # silently add the wrong one.
+            self.panel_stat_combo.addItem(f"{choice.label} [{choice.source}]", editor.choice_key(choice))
+        self._refresh_panel_stat_blocks()
+        self._update_panel_stat_detail()
+
+    def _current_panel_choice(self):
+        from fpdb_3_legacy import hud_panel_editor as editor
+
+        key = self.panel_stat_combo.currentData()
+        return next((choice for choice in self.panel_stat_choices if editor.choice_key(choice) == key), None)
+
+    def _update_panel_stat_detail(self, *_args: Any) -> None:
+        if not hasattr(self, "panel_stat_detail"):
+            return
+        choice = self._current_panel_choice()
+        self.panel_stat_detail.setText(choice.describe() if choice else "")
+
+    def _refresh_panel_stat_blocks(self) -> None:
+        """The blocks the current profile has, as targets for a new stat."""
+        if not hasattr(self, "panel_stat_block_combo"):
+            return
+        self.panel_stat_block_combo.clear()
+        _name, profile = self._current_profile()
+        blocks = profile.get("blocks") if isinstance(profile, dict) else None
+        if blocks:
+            for index, block in enumerate(blocks):
+                label = str(block.get("label") or block.get("id") or f"#{index + 1}")
+                self.panel_stat_block_combo.addItem(label, index)
+        else:
+            self.panel_stat_block_combo.addItem(_("the profile grid"), None)
+
+    def _add_panel_stat_to_block(self) -> None:
+        """Put the chosen stat in the chosen block, declarative attributes and all."""
+        from fpdb_3_legacy import hud_panel_editor as editor
+
+        choice = self._current_panel_choice()
+        _name, profile = self._current_profile()
+        if choice is None or profile is None:
+            QMessageBox.information(self, _("Add stat"), _("Pick a HUD profile first."))
+            return
+        block_index = self.panel_stat_block_combo.currentData()
+        container = self._item_container(profile, block_index)
+        stats = container.setdefault("stats", [])
+        row = len(stats)
+        attributes = editor.stat_entry_attributes(choice, grid=(row, 0))
+        item = {
+            "row": row,
+            "col": 0,
+            "stat": choice.name,
+            "click": "",
+            "popup": "",
+        }
+        for key, value in attributes.items():
+            item[key if key != "name" else "stat"] = value
+        stats.append(item)
+        container["rows"] = max(int(container.get("rows", 1) or 1), row + 1)
+        container["cols"] = max(int(container.get("cols", 1) or 1), 1)
+        self.on_profile_selected(self.profile_combo.currentIndex())
+
+    def _import_panel_rules(self) -> None:
+        from PySide6.QtWidgets import QFileDialog
+
+        from fpdb_3_legacy import hud_panel_editor as editor
+
+        path, _selected = QFileDialog.getOpenFileName(
+            self, _("Import panel rules"), "", _("Panel documents (*.json)")
+        )
+        if not path:
+            return
+        try:
+            document = editor.load_document(path)
+            imported = editor.import_document(
+                document, known_stats=[choice.name for choice in getattr(self, "panel_stat_choices", ())]
+            )
+        except (OSError, ValueError) as error:
+            QMessageBox.critical(self, _("Cannot import"), str(error))
+            return
+        self.panel_rules = list(imported.rules)
+        self._apply_imported_panel_stats(imported.stats)
+        if imported.fallback:
+            self.panel_rules_fallback = imported.fallback
+            index = self.panel_rule_fallback_combo.findText(imported.fallback)
+            if index >= 0:
+                self.panel_rule_fallback_combo.setCurrentIndex(index)
+        self.panel_rules_enabled.setChecked(True)
+        self._refresh_panel_rules_table()
+        message = _("Imported {count} rule(s).").format(count=len(self.panel_rules))
+        if imported.warnings:
+            message += "\n" + "\n".join(imported.warnings)
+        QMessageBox.information(self, _("Import panel rules"), message)
+
+    def _export_panel_rules(self) -> None:
+        from PySide6.QtWidgets import QFileDialog
+
+        from fpdb_3_legacy import hud_panel_editor as editor
+
+        path, _selected = QFileDialog.getSaveFileName(
+            self, _("Export panel rules"), "hud-panels.json", _("Panel documents (*.json)")
+        )
+        if not path:
+            return
+        try:
+            document = editor.export_document(
+                self.panel_rules,
+                fallback=self.panel_rules_fallback,
+                stats=self._panel_stat_bindings(),
+            )
+            editor.save_document(document, path)
+        except (OSError, ValueError) as error:
+            QMessageBox.critical(self, _("Cannot export"), str(error))
+            return
+        QMessageBox.information(self, _("Export panel rules"), _("Wrote {path}").format(path=path))
+
+    def _panel_stat_bindings(self) -> list[dict[str, Any]]:
+        """Serialize analytics-backed bindings with their profile location."""
+        bindings: list[dict[str, Any]] = []
+        for profile_name, profile in (getattr(self, "hud_profiles", {}) or {}).items():
+            blocks = profile.get("blocks") if isinstance(profile, dict) else None
+            containers = enumerate(blocks) if blocks else [(None, profile)]
+            for block_index, container in containers:
+                for stat in container.get("stats", []):
+                    if stat.get("data_source") != "analytics":
+                        continue
+                    entry = {
+                        "name": stat.get("stat", ""),
+                        "source": stat.get("data_source", "analytics"),
+                        "profile": profile_name,
+                        "row": stat.get("row", 0),
+                        "col": stat.get("col", 0),
+                    }
+                    if block_index is not None:
+                        entry["block"] = block_index
+                    entry.update({key: value for key, value in stat.items() if key.startswith("data_")})
+                    bindings.append(entry)
+        return bindings
+
+    def _apply_imported_panel_stats(self, entries: tuple[dict[str, Any], ...]) -> None:
+        """Place imported stat bindings in the selected or named profiles."""
+        from fpdb_3_legacy import hud_panel_editor as editor
+
+        choices = {(choice.source, choice.name): choice for choice in getattr(self, "panel_stat_choices", ())}
+        for entry in entries:
+            name = str(entry.get("name", "")).strip()
+            source = str(entry.get("source", "analytics")).strip() or "analytics"
+            choice = choices.get((source, name)) or choices.get(("analytics", name))
+            if choice is None:
+                continue
+            profile_name = str(entry.get("profile") or self.profile_combo.currentText())
+            profile = self.hud_profiles.get(profile_name)
+            if profile is None:
+                continue
+            block = entry.get("block")
+            try:
+                block_index = int(block) if block is not None else None
+            except (TypeError, ValueError):
+                block_index = None
+            container = self._item_container(profile, block_index)
+            stats = container.setdefault("stats", [])
+            row = int(entry.get("row", len(stats)) or len(stats))
+            col = int(entry.get("col", 0) or 0)
+            item = {"row": row, "col": col, "stat": choice.name, "click": "", "popup": ""}
+            item.update(editor.stat_entry_attributes(choice, grid=(row, col)))
+            item.update({key: value for key, value in entry.items() if key.startswith("data_")})
+            stats.append(item)
+            container["rows"] = max(int(container.get("rows", 1) or 1), row + 1)
+            container["cols"] = max(int(container.get("cols", 1) or 1), col + 1)
+        self.on_profile_selected(self.profile_combo.currentIndex())
+
+    def _persist_panel_rules(self) -> None:
+        """Hand the rules to the configuration, or leave it exactly as it was.
+
+        Untouched means untouched: a user who never opens the tab does not get a
+        section rewritten on every save, which keeps the static HUD static.
+        """
+        from fpdb_3_legacy import hud_panel_editor as editor
+
+        setter = getattr(self.config, "set_hud_panel_rules", None)
+        if setter is None:
+            return
+        enabled = self.panel_rules_enabled.isChecked()
+        touched = enabled or self.panel_rules or bool(getattr(self.config, "hud_panel_rules_enabled", False))
+        if not touched:
+            return
+        duplicates = [issue for issue in editor.rule_issues(self.panel_rules) if issue.severity == "duplicate"]
+        if duplicates:
+            raise ValueError(duplicates[0].message)
+        setter(self.panel_rules, fallback=self.panel_rules_fallback, enabled=enabled)
+
     def save_changes(self) -> None:
         try:
             # We need to update the XML directly for the stat sets
@@ -3297,6 +4029,8 @@ class ModernHudPreferences(QDialog):
                 if duplicates:
                     raise ValueError("Duplicate HUD profile selectors")
                 self.config.set_hud_profile_rules(self.profile_rules)
+
+            self._persist_panel_rules()
 
             # Save to file
             if hasattr(self.config, "save"):
