@@ -46,6 +46,7 @@ the rows themselves are simply stale until rebuilt.
 
 from __future__ import annotations
 
+import json
 import logging
 from collections.abc import Callable, Iterable, Iterator
 from dataclasses import dataclass, field
@@ -55,6 +56,7 @@ from . import analytics_lifecycle as lifecycle
 from .action_events import ACTION_EVENT_COLUMNS, attach_action_events, chips_to_cents
 from .backfill_autonotes import _decode_card, load_hand_from_database
 from .board_features import BOARD_FEATURE_COLUMNS, derive_board_rows, flop_texture_mask
+from .hand_state_store import enumerate_hand_states
 from .player_situations import enumerate_situations
 
 log = logging.getLogger(__name__)
@@ -63,10 +65,28 @@ log = logging.getLogger(__name__)
 # every adapter; callers that pass one get it once per hand.
 ProgressCallback = Callable[[int, int, int], None]
 
+
+@dataclass(frozen=True)
+class StoredSituation:
+    """The stored situation fields needed to rebuild postflop hand states."""
+
+    hand_id: int
+    action_no: int
+    street: int
+    street_name: str
+    player: str
+    board: tuple[str, ...]
+    game: str = "holdem"
+
 # Subsystems whose stored rows are refreshed as a side effect of another's
 # pass. sizing_buckets is a pure function of the event columns, so its rows
 # come back current with the events that carry the sizes.
 GROUPED_WITH: dict[str, str] = {"sizing_buckets": "action_events"}
+
+READS: dict[str, tuple[str, ...]] = {
+    "situations": ("action_events",),
+    "hand_strength": ("situations",),
+}
 
 
 class RebuildCancelled(Exception):
@@ -124,19 +144,21 @@ class RebuildResult:
 def canonical_subsystems(requested: Iterable[str]) -> tuple[str, ...]:
     """Expand sizing_buckets into the pass that refreshes it; validate names.
 
-    ``hand_strength`` fails loudly: it is declared in the lifecycle registry
-    (so staleness is expressible for it) but has no extractor until #302,
-    and silently doing nothing would stamp it current.
+    Dependencies are expanded in execution order: hand states require the
+    situations, which in turn require action events.
     """
     out: list[str] = []
-    for name in requested:
-        if name not in lifecycle.SUBSYSTEMS:
-            raise ValueError(f"Unknown analytics subsystem: {name!r}")
-        if name == "hand_strength":
-            raise ValueError("hand_strength has no extractor yet (#302); nothing to rebuild")
-        name = GROUPED_WITH.get(name, name)
-        if name not in out:
-            out.append(name)
+    def add(name: str) -> None:
+        if name in out:
+            return
+        for required in READS.get(name, ()):
+            add(GROUPED_WITH.get(required, required))
+        out.append(name)
+
+    for requested_name in requested:
+        if requested_name not in lifecycle.SUBSYSTEMS:
+            raise ValueError(f"Unknown analytics subsystem: {requested_name!r}")
+        add(GROUPED_WITH.get(requested_name, requested_name))
     return tuple(out)
 
 
@@ -322,6 +344,50 @@ def _load_action_rows(
     return handsactions
 
 
+def _rebuild_hand_states(db: Any, hand_id: int) -> int:
+    """Reclassify and replace the stored postflop states for one hand."""
+    c = db.get_cursor()
+    ph = db.sql.query["placeholder"]
+    c.execute(
+        "SELECT HS.actionNo, HS.street, HS.streetName, HS.board, HS.playerId, P.name AS player,"
+        " HP.card1, HP.card2"
+        " FROM HandsSituations HS"
+        " JOIN Players P ON P.id = HS.playerId"
+        " LEFT JOIN HandsPlayers HP ON HP.handId = HS.handId AND HP.playerId = HS.playerId"
+        f" WHERE HS.handId = {ph} ORDER BY HS.actionNo",
+        (hand_id,),
+    )
+    names = [description[0] for description in c.description]
+    situations: list[StoredSituation] = []
+    cards: dict[str, Any] = {}
+    player_ids: dict[str, int] = {}
+    for raw in c.fetchall():
+        row = dict(zip(names, raw, strict=True))
+        player = str(row["player"])
+        board = json.loads(row["board"] or "[]") if isinstance(row["board"], str) else list(row["board"] or ())
+        situations.append(
+            StoredSituation(
+                hand_id=hand_id,
+                action_no=int(row["actionNo"]),
+                street=int(row["street"]),
+                street_name=str(row["streetName"]),
+                player=player,
+                board=tuple(board),
+            ),
+        )
+        cards[player] = {"card1": row["card1"], "card2": row["card2"]}
+        player_ids[player] = int(row["playerId"])
+
+    decisions = enumerate_hand_states(situations, cards)
+    c.execute(f"DELETE FROM HandStates WHERE handId = {ph}", (hand_id,))
+    rows = bulk_state_rows(hand_id, player_ids, decisions, lifecycle.EXTRACTOR_VERSIONS["hand_strength"])
+    if rows:
+        columns = ", ".join(("handId", "playerId", *HAND_STATE_COLUMNS, "stateVersion"))
+        placeholders = ", ".join(ph for _ in range(len(rows[0])))
+        c.executemany(f"INSERT INTO HandStates ({columns}) VALUES ({placeholders})", rows)
+    return len(rows)
+
+
 def _rebuild_situations(
     db: Any,
     hand: Any,
@@ -349,6 +415,8 @@ def _rebuild_situations(
 # Late import target: the column list behind the two id columns and the row
 # writer, kept as module-level names so _rebuild_situations stays readable.
 from .situation_store import HANDS_SITUATION_COLUMNS, bulk_rows  # noqa: E402
+from .hand_state_store import HAND_STATE_COLUMNS  # noqa: E402
+from .hand_state_store import bulk_rows as bulk_state_rows  # noqa: E402
 
 
 class AnalyticsRebuilder:
@@ -372,6 +440,7 @@ class AnalyticsRebuilder:
         want_boards = "board_features" in wanted
         want_events = "action_events" in wanted
         want_situations = "situations" in wanted
+        want_states = "hand_strength" in wanted
 
         total = _count_scope_hands(self.db, scope)
         for done, hand_id in enumerate(_iter_scope_hand_ids(self.db, scope), start=1):
@@ -393,14 +462,19 @@ class AnalyticsRebuilder:
                     if hand is None or (needs_actions and not _hand_has_actions(self.db, hand_id)):
                         result.skipped += 1
                         continue
-                    self._rebuild_hand(hand, want_boards, want_events, want_situations)
+                    self._rebuild_hand(hand, want_boards, want_events, want_situations, want_states)
                 result.rebuilt += 1
             except Exception as exc:  # noqa: BLE001 - one bad hand must not stop the run
                 result.failed += 1
                 result.failures.append(f"hand {hand_id}: {exc}")
                 log.exception("Analytics rebuild failed for hand %s", hand_id)
 
-        if not result.cancelled and scope.is_whole_database:
+        if (
+            not result.cancelled
+            and scope.is_whole_database
+            and result.failed == 0
+            and result.skipped == 0
+        ):
             # Only a completed run over the whole database marks the versions
             # current. A cancelled run leaves the hands it never reached stale,
             # and so does a scoped one -- a site, a date range, a --limit: the
@@ -431,7 +505,14 @@ class AnalyticsRebuilder:
             for name, row in handsplayers.items()
         }
 
-    def _rebuild_hand(self, hand: Any, want_boards: bool, want_events: bool, want_situations: bool) -> None:
+    def _rebuild_hand(
+        self,
+        hand: Any,
+        want_boards: bool,
+        want_events: bool,
+        want_situations: bool,
+        want_states: bool,
+    ) -> None:
         """One hand's worth of re-derivation, inside the caller's transaction."""
         if want_boards:
             # The DB adapter carries board cards but no street names; the
@@ -452,6 +533,8 @@ class AnalyticsRebuilder:
             if not want_events:
                 handsactions = _load_action_rows(self.db, hand, handsplayers)
             _rebuild_situations(self.db, hand, handsplayers, handsactions)
+        if want_states:
+            _rebuild_hand_states(self.db, int(hand.dbid_hands))
 
 
 def rebuild_subsystems(
