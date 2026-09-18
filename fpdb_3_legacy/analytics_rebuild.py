@@ -245,7 +245,7 @@ def _rebuild_board_features(db: Any, hand: Any) -> None:
             f"INSERT INTO BoardFeatures ({columns}) VALUES ({placeholders})",  # nosec B608  # nosemgrep
             (hand_id, *(row.get(column) for column in BOARD_FEATURE_COLUMNS)),
         )
-    c.execute(
+    c.execute(  # nosec B608  # nosemgrep
         f"UPDATE Hands SET texture = {ph} WHERE id = {ph}",  # nosec B608  # nosemgrep
         (flop_texture_mask(rows), hand_id),
     )
