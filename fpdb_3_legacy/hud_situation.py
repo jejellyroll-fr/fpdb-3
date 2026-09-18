@@ -70,7 +70,7 @@ import json
 from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass, field, replace
 from pathlib import Path
-from typing import Any, Final, NoReturn
+from typing import Any, Final, NamedTuple, NoReturn
 
 # The panel-rule file schema this module understands. A file written for a newer
 # schema is refused rather than half-read.
@@ -405,6 +405,69 @@ class HudSituationContext:
             for name, value in values.items()
             if value not in (None, "", [], ()) and not (name in zero_is_unknown and not value)
         }
+
+    @classmethod
+    def from_filters(cls, values: Mapping[str, Any], **overrides: Any) -> HudSituationContext:
+        """A context from a mapping in the **query engine's filter vocabulary**.
+
+        Accepts exactly what :meth:`filters` produces, which is the vocabulary a
+        panel rule is written in -- so a caller that has selectors (a
+        configuration section, a command line, a preview form) can build the
+        context the rule will be evaluated against without knowing the two
+        vocabularies differ. Two conversions happen here and only here:
+
+        * ``situation`` is the label tuple, not a scalar;
+        * ``*_pct`` names are basis points of the pot, as the engine compares
+          them, so ``facing_sizing_pct=6600`` is a 66% pot-bet.
+
+        Unknown names are ignored rather than guessed at, so a caller can hand
+        this a whole filter dict. ``street_index`` follows ``street`` when it is
+        not given, because a rule keyed on the index must not read 0 for a flop.
+        """
+        street = _text(values.get("street"), "preflop")
+        labels = values.get("situation")
+        fields: dict[str, Any] = {
+            "site": values.get("site", "all"),
+            "game": values.get("game", "all"),
+            "limit": values.get("limit", "all"),
+            "seats": _number(values.get("seats")) or 0,
+            "tournament": bool(values.get("tournament", False)),
+            "position": values.get("position", ""),
+            "opponent_position": values.get("opponent_position", ""),
+            "relative_position": _number(values.get("relative_position")) or 0,
+            "in_position": _boolean(values.get("in_position")),
+            "street": street,
+            "street_index": (
+                _number(values.get("street_index"))
+                if _number(values.get("street_index")) is not None
+                else STREETS.index(street)
+                if street in STREETS
+                else 0
+            ),
+            "pot_type": values.get("pot_type", ""),
+            "role": values.get("role", ""),
+            "players_in_hand": _number(values.get("players_in_hand")) or 0,
+            "multiway": bool(values.get("multiway", False)),
+            "spr": _number(values.get("spr")) or 0,
+            "effective_stack_bb": _number(values.get("effective_stack_bb")) or 0,
+            "stack_bucket": values.get("stack_bucket", ""),
+            "is_aggressor": bool(values.get("is_aggressor", False)),
+            "is_preflop_aggressor": bool(values.get("is_preflop_aggressor", False)),
+            "is_previous_aggressor": bool(values.get("is_previous_aggressor", False)),
+            "in_position_vs_facing": _boolean(values.get("in_position_vs_facing")),
+            "facing_action": values.get("action_faced", ""),
+            "facing_all_in": bool(values.get("facing_all_in", False)),
+            "action_taken": values.get("action_taken", ""),
+            "facing_sizing_bp": _number(values.get("facing_sizing_bp") or values.get("facing_sizing_pct")) or 0,
+            "sizing_bp": _number(values.get("sizing_bp") or values.get("bet_sizing_pct")) or 0,
+            "to_call": _number(values.get("to_call")) or 0,
+            "pot_before": _number(values.get("pot_before")) or 0,
+            "labels": tuple(_list(labels)) if labels is not None else (),
+            "primary": values.get("primary_situation", ""),
+            "group": values.get("situation_group", ""),
+        }
+        fields.update(overrides)
+        return cls(**fields).normalized()
 
     @classmethod
     def from_situation(cls, situation: Any, **overrides: Any) -> HudSituationContext:
@@ -1164,6 +1227,15 @@ def diff_selections(previous: PanelSelection | None, current: PanelSelection) ->
     return PanelChange(added=added, removed=removed, unchanged=unchanged)
 
 
+def profile_matches(scope: str, wanted: str) -> bool:
+    """Whether a rule scoped to ``scope`` belongs to the profile ``wanted``.
+
+    ``all`` (and an unset scope) means every profile: a rule with no scope is a
+    rule about the hand, not about the HUD layout it happens to be shown in.
+    """
+    return scope in ("all", "", wanted)
+
+
 class HudSituationResolver:
     """Which panels to show, from the live context.
 
@@ -1209,7 +1281,7 @@ class HudSituationResolver:
 
     @staticmethod
     def _profile_matches(scope: str, wanted: str) -> bool:
-        return scope in ("all", "", wanted)
+        return profile_matches(scope, wanted)
 
     def matching_rules(self, context: HudSituationContext, profile: str | None = None) -> list[PanelRule]:
         """Every enabled rule that matches, in precedence order."""
@@ -1504,8 +1576,21 @@ def save_rules(
     return target
 
 
-def validate_rules(resolver: HudSituationResolver, panels: Iterable[str] = ()) -> tuple[str, ...]:
-    """Warnings for a rule set: the things that load but cannot do what they say.
+class RuleWarning(NamedTuple):
+    """One thing a rule set loads with but cannot do what it says.
+
+    ``rule`` is the offending rule when the warning is about one (a duplicate is
+    about a pair), and ``severity`` tells a caller whether it is a mistake
+    (``duplicate``: one of the two can never win) or a suspicion (``warning``).
+    """
+
+    rule: PanelRule | None
+    severity: str
+    message: str
+
+
+def rule_warnings(resolver: HudSituationResolver, panels: Iterable[str] = ()) -> tuple[RuleWarning, ...]:
+    """Warnings for a rule set, each attributed to the rule it is about.
 
     A warning is never a refusal -- a panel that is merely suspicious may still
     be what the author meant. The three that matter:
@@ -1514,21 +1599,41 @@ def validate_rules(resolver: HudSituationResolver, panels: Iterable[str] = ()) -
       show nothing);
     * a ``min_sample`` rule whose fallback is itself;
     * two rules with the same selector, where one can never win.
+
+    Attribution is the point of the typed form: an editor has to mark the row a
+    warning is about, and a message string is not a place to keep that.
     """
-    warnings: list[str] = []
+    warnings: list[RuleWarning] = []
     known = {_text(panel) for panel in panels}
     for rule in resolver.rules:
         if known and not any(
             panel_matches_block(rule.panel, {"id": panel}) or _text(panel) == _text(rule.panel) for panel in known
         ):
-            warnings.append(f"panel {rule.panel!r} (rule {_rule_name(rule)}) is not a known block")
+            warnings.append(
+                RuleWarning(rule, "warning", f"panel {rule.panel!r} (rule {_rule_name(rule)}) is not a known block")
+            )
         if rule.fallback and _text(rule.fallback) == _text(rule.panel):
-            warnings.append(f"rule {_rule_name(rule)} falls back to its own panel {rule.panel!r}")
+            warnings.append(RuleWarning(rule, "warning", f"rule {_rule_name(rule)} falls back to its own panel {rule.panel!r}"))
         if rule.min_sample <= 0 and rule.fallback:
-            warnings.append(f"rule {_rule_name(rule)} names a fallback but has no min_sample")
+            warnings.append(
+                RuleWarning(rule, "warning", f"rule {_rule_name(rule)} names a fallback but has no min_sample")
+            )
     for selector in resolver.duplicate_selectors():
-        warnings.append(f"duplicate panel rule selector {selector!r}; only the first can ever win")
+        for rule in resolver.rules:
+            if rule.selector() == selector:
+                warnings.append(
+                    RuleWarning(
+                        rule,
+                        "duplicate",
+                        f"rule {_rule_name(rule)} duplicates another rule: only the first can ever win",
+                    )
+                )
     return tuple(warnings)
+
+
+def validate_rules(resolver: HudSituationResolver, panels: Iterable[str] = ()) -> tuple[str, ...]:
+    """The messages of :func:`rule_warnings`, for a report that only prints."""
+    return tuple(warning.message for warning in rule_warnings(resolver, panels))
 
 
 def _rule_name(rule: PanelRule) -> str:

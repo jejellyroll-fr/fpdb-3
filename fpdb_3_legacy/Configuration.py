@@ -744,6 +744,15 @@ class Stat:
         cs = node.getAttribute("colspan")
         self.colspan = int(cs) if cs else 1
         self.align = node.getAttribute("align") or "center"
+        # Declarative source of the stat, when the editor bound an
+        # analytics-backed definition to this cell (#309). Absent for every
+        # column-backed stat of Stats.py, which is nearly all of them; kept here
+        # so the binding survives a load/save round-trip instead of being
+        # rewritten into an anonymous name.
+        self.data_source = node.getAttribute("data_source")
+        self.data_definition = node.getAttribute("data_definition")
+        self.data_format = node.getAttribute("data_format")
+        self.data_min_sample = node.getAttribute("data_min_sample")
 
     def __str__(self) -> str:
         temp = f"        _rowcol = {self.rowcol}, _stat_name = {self.stat_name}, \n"

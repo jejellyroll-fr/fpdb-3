@@ -160,6 +160,65 @@ configuration gains it (with its documentation) on first run:
   `Config.get_hud_panel_rules()` returns `[]` for both the disabled and the
   unconfigured case: off and never-configured are the same code path.
 
+## Editing them in the GUI
+
+HUD Preferences → **Dynamic Panels**. The tab is the same rules as data, with a
+form, and its model lives in `fpdb_3_legacy/hud_panel_editor.py` — Qt free, so
+what decides anything is tested without a window.
+
+* **When this is the spot** — one widget per selector in the query engine's
+  vocabulary: site, game, HUD profile, ring/tournament, table size, street, pot
+  type, hero position, opponent position, IP/OOP, action faced, action taken,
+  role, aggressor state, stack bucket, effective stack, SPR, sizing, pot. A
+  selector on **ANY** states nothing, which is what an unconstrained dimension
+  is. The offered names are checked against `analytics_query.FILTERS`, so the tab
+  cannot offer a condition the resolver would refuse, and cannot offer one it
+  would evaluate differently.
+* **Then show** — the panel, the profile scope, priority, `min_sample`, the
+  sample column, the fallback and enabled/disabled.
+* **The list** — add, edit in place, delete, reorder (file order is the last
+  tie-breaker, so the order is real), with the same duplicate and warning checks
+  `tools/hud_panels.py --validate` reports. A duplicate is flagged on **both**
+  rows of the pair: which one wins depends on order, and reordering the list is
+exactly what the person looking at it does next.
+* **Preview** — the production resolver, on the context the selectors describe,
+  with a seat sample you set. It names the winning rule, then says for every
+  other rule what happened: which condition failed and what the context had
+  instead, which panel was withheld and by how much sample, or which rule
+  outranked it and on which of the three keys.
+* **Import / Export** — one JSON document (`.json`) holding the rules, the
+  fallback and the analytics stats a profile binds. A bare rule file is accepted,
+  so the export of the CLI and the export of the tab are one format. A document
+  from a later build imports and **reports** what this build cannot place instead
+  of dropping it.
+* **Save** — the dialog's existing Save writes the section. A configuration the
+  user never opened is not rewritten at all: untouched means untouched.
+
+### Analytics-backed stats in a block
+
+The same tab carries the stat picker. It lists the column-backed stats of
+`Stats.py` **and** the declarative definitions of #306, and says for each one what
+the issue asks: the filters it applies (fragments included — that is the half a
+user cannot see in a definition), the display format, the sample threshold, and
+the popups that already bind it. Adding one to a block writes the binding into
+the configuration:
+
+```xml
+<stat _rowcol="(1,1)" _stat_name="fold_to_cbet_flop"
+      data_source="analytics" data_definition="fold_to_cbet_flop"
+      data_format="percentage" data_min_sample="5"/>
+```
+
+A column-backed stat is written as its name alone, so the XML of the stats that
+already work does not change. The declared attributes survive a load/save cycle
+(`Configuration.Stat` reads them, the editor carries them), which is what the
+issue asks for — and they are what tells a later build where the number comes
+from. **What they do not do yet** is compute the value: a declarative stat is a
+query over the analytics rows (#297/#306), not a column of `HudCache`, so the HUD
+renders it once a live source exists. The binding is the declaration; the value
+source is the next piece of work, and the configuration says which one is needed
+rather than leaving an anonymous name behind.
+
 ## Command line
 
 ```bash
@@ -181,3 +240,9 @@ python tools/hud_panels.py --resolve --street flop --pot-type single_raised \
   falls back to the big-blind bands (20/50/100).
 * A rule never calls out to SQL: it is evaluated in memory against the context,
   so showing a panel costs no query.
+* An analytics-backed stat is **declared** in a block but not yet **computed** by
+  the HUD: its value is a query over the analytics rows, not a `HudCache` column.
+  The binding round-trips and says which definition, format and sample it wants;
+  the live value source is the remaining piece.
+* The tab edits the section, not the blocks: where a block sits and how it is
+  drawn stays the Statistics tab's job.
