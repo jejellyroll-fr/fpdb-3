@@ -579,9 +579,14 @@ HANDS_ACTIONS_COLUMNS = (
 def _read_actions(cursor: Any, hands: dict[int, dict[str, Any]]) -> dict[int, list[dict[str, Any]]]:
     """Read the stored action events back, ordered as the hand was played."""
     db_id_to_hand = {row["id"]: hand_id for hand_id, row in hands.items()}
-    columns = ", ".join(f"hs.{column}" for column in HANDS_ACTIONS_COLUMNS)
     cursor.execute(
-        f"SELECT hs.handId, p.name AS playerName, {columns}"
+        "SELECT hs.handId, p.name AS playerName, hs.actionNo, hs.street, "
+        "hs.streetActionNo, hs.actionId, hs.amount, hs.raiseTo, hs.amountCalled, "
+        "hs.allIn, hs.actionType, hs.toCall, hs.potBefore, hs.potAfter, "
+        "hs.sizingBp, hs.position, hs.relativePosition, hs.inPosition, "
+        "hs.effectiveStack, hs.effectiveStackBB, hs.sprBefore, hs.isAggressor, "
+        "hs.facingActionType, hs.facingAmount, hs.facingSizingBp, hs.raiserCount, "
+        "hs.callerCount, hs.playersInHand"
         " FROM HandsActions hs JOIN Players p ON p.id = hs.playerId"
         " ORDER BY hs.handId, hs.actionNo",
     )
