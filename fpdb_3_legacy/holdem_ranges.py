@@ -37,8 +37,8 @@ from .holdem_classes import (
     UNKNOWN_ID,
     UNKNOWN_LABEL,
     UnknownClass,
-    class_ids,
     class_id_of_label,
+    class_ids,
     combos,
     grid_ids,
     grid_labels,
@@ -588,7 +588,9 @@ def cell_query(query: Query, value: str | int) -> Query:
             filters = dict(query.filters)
             filters["starting_hand"] = []
             return replace(query, filters=filters, group_by=(), limit=query.limit)
-        return replace(query, group_by=(), limit=query.limit)
+        filters = dict(query.filters)
+        filters["starting_hand"] = class_id
+        return replace(query, filters=filters, group_by=(), limit=query.limit)
     return profit.narrow_query(query, {"starting_hand": class_id})
 
 

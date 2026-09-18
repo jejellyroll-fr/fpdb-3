@@ -50,8 +50,8 @@ their own cell — `xx`, the unknown class, 170 in the codebase's numbering — 
 are **never** spread across the other 169. A range that borrows from hands nobody
 saw is a made-up range, and it would make every other cell quietly wrong.
 
-On the golden corpus that is 251 of 326 decisions, and the tests pin it: the grid
-of the whole corpus holds 75 known decisions and 251 unknown ones, a player whose
+On the golden corpus that is 263 of 341 decisions, and the tests pin it: the grid
+of the whole corpus holds 78 known decisions and 263 unknown ones, a player whose
 cards never appear gets an all-unknown grid rather than an empty-looking one, and
 `--filter hole_cards_known=true` moves every decision into the 169 classes with
 nothing left over.

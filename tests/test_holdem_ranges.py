@@ -6,9 +6,9 @@ classes are right, ranges can be explored without inventing the cards nobody
 saw, and a cell drills down to its hands.
 
 The corpus is the constraint that makes this testable: it stores hole cards for
-one player (Boris, the hero, in all 30 hands) and for whoever reached a showdown.
-75 of its 326 decisions have a known pair, over 33 hand-players, and the other
-251 decisions are exactly the cards a range explorer must refuse to guess.
+one player (Boris, the hero, in all 31 hands) and for whoever reached a showdown.
+78 of its 341 decisions have a known pair, over 34 hand-players, and the other
+263 decisions are exactly the cards a range explorer must refuse to guess.
 """
 
 from __future__ import annotations
@@ -25,13 +25,13 @@ from fpdb_3_legacy.Database import Database
 from fpdb_3_legacy.Importer import Importer
 from tests.helpers import analytics_golden as golden
 
-DECISIONS = 326
-HANDS = 30
-PAIRS = 180
-KNOWN_DECISIONS = 75
-UNKNOWN_DECISIONS = DECISIONS - KNOWN_DECISIONS  # 251
-HERO_DECISIONS = 66
-HERO_CLASSES_WITH_DATA = 19
+DECISIONS = 341
+HANDS = 31
+PAIRS = 186
+KNOWN_DECISIONS = 78
+UNKNOWN_DECISIONS = DECISIONS - KNOWN_DECISIONS  # 263
+HERO_DECISIONS = 69
+HERO_CLASSES_WITH_DATA = 20
 
 _MODULE_STATE: list[object] = []
 
@@ -119,7 +119,7 @@ def test_the_cells_share_pairs_but_never_share_decisions(db):
 
 
 def test_unseen_cards_stay_in_their_own_cell(db):
-    """The criterion: no invented range. 251 decisions have no pair to classify."""
+    """The criterion: no invented range. 263 decisions have no pair to classify."""
     matrix = matrix_of(db, metric="opportunities")
     assert matrix.unknown_opportunities() == UNKNOWN_DECISIONS
     unknown = matrix.cell("xx")
@@ -141,8 +141,8 @@ def test_only_known_cards_reach_the_169_classes(db):
 def test_a_player_who_never_showed_has_an_empty_grid(db):
     """Cara's cards are not in the file: the grid must be all-unknown, not empty-looking."""
     matrix = matrix_of(db, metric="opportunities", filters={"player": "Cara"})
-    assert matrix.total_opportunities == 54
-    assert matrix.unknown_opportunities() == 54
+    assert matrix.total_opportunities == 55
+    assert matrix.unknown_opportunities() == 55
     assert sum(cell.opportunities for cell in matrix.known_cells()) == 0
     assert all(cell.metric_value("sample") == 0.0 for cell in matrix.known_cells())
     assert matrix.reconcile() == ()
@@ -194,7 +194,7 @@ def test_the_money_in_the_grid_is_the_report_s_money(db):
     query = Query(metric="opportunities", filters={"hero": True})
     matrix = ranges.build_range(db, query)
     report = profit.profit_report(db, profit.Query(metric="total_profit", filters={"hero": True}))
-    assert matrix.total_realized_cents == report.total.realized_cents == 26500
+    assert matrix.total_realized_cents == report.total.realized_cents == 27400
     assert matrix.total_ev_adjusted_cents == report.total.ev_adjusted_cents
     assert sum(cell.realized_cents for cell in matrix.known_cells()) >= matrix.total_realized_cents
 
@@ -272,6 +272,14 @@ def test_a_cell_query_is_the_filter_the_grid_counted(db):
     assert narrowed.filters == {"hero": True, "starting_hand": hc.class_id_of_label("AKo")}
     assert narrowed.limit is None
     assert run_query(db, narrowed).total_opportunities == ranges.build_range(db, query).cell("AKo").opportunities
+
+
+def test_a_cell_inside_a_starting_hand_restriction_keeps_the_intersection():
+    query = Query(metric="opportunities", filters={"starting_hand": ["AA", "AKs"]})
+    narrowed = ranges.cell_query(query, "AKs")
+    assert narrowed.filters["starting_hand"] == hc.class_id_of_label("AKs")
+    outside = ranges.cell_query(query, "QJs")
+    assert outside.filters["starting_hand"] == []
 
 
 def test_the_unknown_cell_can_be_drilled_down_too(db):
