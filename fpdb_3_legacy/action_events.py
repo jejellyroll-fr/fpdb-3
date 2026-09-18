@@ -193,16 +193,23 @@ def round_order(handsplayers: dict[str, dict[str, Any]], preflop: bool) -> dict[
     the flop on it starts with the small blind and moves away from the button.
     Both are expressed against the same seat numbering, which is why one table
     cannot be used for both.
+
+    Heads-up is the exception the rules make: the button is also the small
+    blind and acts *first* preflop but *last* on every later street, so the
+    postflop order of the two blind seats is reversed when only they are
+    seated (Codex review of #293).
     """
     seats = _max_numeric_position(handsplayers)
+    heads_up = _is_heads_up(handsplayers)
+    sb_first, bb_first = (0, 1) if preflop else ((0, 1) if not heads_up else (1, 0))
     order: dict[str, int] = {}
     for name, row in handsplayers.items():
         code = row.get("position")
         numeric = position_code(code)
         if code == "S":
-            order[name] = seats + 2 if preflop else 0
+            order[name] = seats + 2 if preflop else sb_first
         elif code == "B":
-            order[name] = seats + 3 if preflop else 1
+            order[name] = seats + 3 if preflop else bb_first
         elif numeric is None:
             # No position was derived for this player: assume they act last,
             # which keeps them out of everybody else's "still to act behind me"
@@ -211,6 +218,11 @@ def round_order(handsplayers: dict[str, dict[str, Any]], preflop: bool) -> dict[
         else:
             order[name] = seats - numeric if preflop else 2 + (seats - numeric)
     return order
+
+
+def _is_heads_up(handsplayers: dict[str, dict[str, Any]]) -> bool:
+    """Two players seated: the button is the small blind, not a third seat."""
+    return len(handsplayers) == 2
 
 
 def round_name(street: str) -> str:

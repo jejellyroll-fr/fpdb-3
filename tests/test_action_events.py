@@ -35,6 +35,7 @@ from fpdb_3_legacy.action_events import (
     ACTION_EVENT_DEFAULTS,
     action_chips,
     derive_action_events,
+    round_order,
 )
 from fpdb_3_legacy.database_schema import HANDS_ACTIONS_EVENT_DEFINITIONS
 from fpdb_3_legacy.sql_schema_hand import hand_schema_queries
@@ -95,6 +96,26 @@ def event(corpus: golden.GoldenCorpus, scenario_id: str, action_no: int, hand_in
     """One stored event, by its action number within the hand."""
     rows = hand_events(corpus, scenario_id, hand_index)
     return next(row for row in rows if row["actionNo"] == action_no)
+
+
+class TestRoundOrder:
+    """Who acts before whom, per betting round (Codex review of #293)."""
+
+    HEADS_UP = {"Button": {"position": "S"}, "Blind": {"position": "B"}}
+    THREE_HANDED = {"S": {"position": "S"}, "B": {"position": "B"}, "Btn": {"position": 0}}
+
+    def test_heads_up_blind_acts_first_preflop_and_last_postflop(self) -> None:
+        # Heads-up rules: the button is also the small blind. He opens the
+        # preflop round and acts last from the flop on -- the opposite of a
+        # full table, where the blinds both act first postflop.
+        preflop = round_order(self.HEADS_UP, preflop=True)
+        postflop = round_order(self.HEADS_UP, preflop=False)
+        assert preflop["Button"] < preflop["Blind"]
+        assert postflop["Blind"] < postflop["Button"]
+
+    def test_full_table_blinds_still_act_first_postflop(self) -> None:
+        postflop = round_order(self.THREE_HANDED, preflop=False)
+        assert postflop["S"] < postflop["B"] < postflop["Btn"]
 
 
 class TestEventVocabulary:
