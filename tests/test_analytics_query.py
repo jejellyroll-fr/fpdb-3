@@ -239,6 +239,16 @@ class TestMetrics:
         assert row.value == row.actions
         assert 0 < row.actions < row.opportunities
 
+    def test_population_metrics_are_distinct_counts(self, query_db: Database) -> None:
+        # The corpus is 30 hands played by six players; "decisions" is the
+        # engine's native denominator, and these two must not be read as it.
+        decisions = run_query(query_db, Query(metric="opportunities")).rows[0].opportunities
+        hands = run_query(query_db, Query(metric="hands")).rows[0]
+        players = run_query(query_db, Query(metric="players")).rows[0]
+        assert (hands.value, players.value) == (31, 6)
+        assert decisions > hands.value
+        assert hands.unit == players.unit == "count"
+
     def test_frequency_returns_both_sides_and_the_rate(self, query_db: Database) -> None:
         row = run_query(
             query_db,
@@ -505,6 +515,29 @@ class TestExplainability:
         _conditions, _params, aliases = compile_filters({"board_rank": "ace-high"})
         # A board filter needs the situation join it hangs off.
         assert aliases == {"BF"}
+
+    def test_a_numerator_that_needs_a_join_gets_it(self, query_db: Database) -> None:
+        # ``fold_frequency`` carries ``response=fold``, which lives on the
+        # situation table: a caller who never mentions the street must still
+        # get the join, or the SQL refers to an alias that is not there.
+        compiled = compile_query(Query(metric="fold_frequency"))
+        assert "JOIN HandsSituations SI" in compiled.sql
+        assert run_query(query_db, Query(metric="fold_frequency")).rows[0].opportunities == 341
+
+    def test_an_identity_filter_needs_the_site_join(self) -> None:
+        _conditions, params, aliases = compile_filters({"identity": [("PokerStars", "jeje")]})
+        assert aliases == {"P", "S"}
+        assert params == ["PokerStars", "jeje"]
+
+    def test_hero_exclusion_keeps_decisions_with_no_situation(self, query_db: Database) -> None:
+        # Every decision is either a known hero decision or a non-hero one: the
+        # LEFT JOIN's unknown rows belong to the population, not to the hero.
+        total = run_query(query_db, Query(metric="opportunities")).rows[0].opportunities
+        hero = run_query(query_db, Query(metric="opportunities", filters={"hero": True})).rows[0].opportunities
+        other = run_query(query_db, Query(metric="opportunities", filters={"hero": False})).rows[0].opportunities
+        assert (hero, other) == (69, 272)
+        assert hero + other == total
+        assert "IS NULL" in compile_query(Query(metric="opportunities", filters={"hero": False})).sql
 
 
 # ---------------------------------------------------------------------------

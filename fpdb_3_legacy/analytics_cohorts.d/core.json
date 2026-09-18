@@ -1,0 +1,77 @@
+{
+  "schema_version": 1,
+  "cohorts": [
+    {
+      "name": "all_opponents",
+      "description": "Every player's decisions, with the hero's own rows excluded.",
+      "label": {
+        "en": "All opponents",
+        "fr": "Tous les adversaires"
+      },
+      "exclude_hero": true,
+      "tags": ["population", "hero-excluded"]
+    },
+    {
+      "name": "nlhe_6max_opponents",
+      "description": "Six-handed no-limit hold'em opponents; the hero is excluded.",
+      "label": {
+        "en": "NLHE 6-max opponents",
+        "fr": "Adversaires NLHE 6-max"
+      },
+      "filters": {
+        "game": ["holdem"],
+        "limit": ["nl"],
+        "max_seats": [6, 6]
+      },
+      "exclude_hero": true,
+      "tags": ["population", "holdem", "6max"]
+    },
+    {
+      "name": "regular_tables_only",
+      "description": "Cash-game decisions only; tournaments are excluded.",
+      "label": {
+        "en": "Regular tables only",
+        "fr": "Tables normales uniquement"
+      },
+      "filters": {
+        "tournament": false
+      },
+      "tags": ["cash"]
+    },
+    {
+      "name": "nl200_regular_6max",
+      "description": "A stake-and-table-size population: a $2 big blind (200 cents), six seats, cash only.",
+      "label": {
+        "en": "NL200 6-max regular",
+        "fr": "NL200 6-max tables normales"
+      },
+      "filters": {
+        "big_blind": [200, 200],
+        "max_seats": [6, 6],
+        "tournament": false
+      },
+      "tags": ["population", "stake", "6max"]
+    },
+    {
+      "name": "last_90_days",
+      "description": "The 90 days ending today; resolved at query time so a saved cohort never goes stale.",
+      "label": {
+        "en": "Last 90 days",
+        "fr": "90 derniers jours"
+      },
+      "window_days": 90,
+      "tags": ["window"]
+    },
+    {
+      "name": "previous_90_days",
+      "description": "The 90 days before the last 90; the natural comparison group for last_90_days.",
+      "label": {
+        "en": "Previous 90 days",
+        "fr": "90 jours precedents"
+      },
+      "window_days": 90,
+      "window_offset_days": 90,
+      "tags": ["window", "comparison"]
+    }
+  ]
+}

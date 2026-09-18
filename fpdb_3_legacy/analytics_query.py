@@ -219,6 +219,8 @@ class _Filter:
     ``kind`` picks the translation: ``scalar`` (equality), ``set`` (IN),
     ``range`` (inclusive bounds, either optional), ``bool`` (a boolean column),
     ``null_check`` (a foreign key: True means "set", False "null"),
+    ``hero`` (a nullable situation boolean where False keeps unknown rows),
+    ``identity_set`` (an OR of site/name pairs),
     ``flagset`` (a bitmask column matched against named flags) and ``pattern``
     (JSON text containing a quoted word, e.g. a situation label).
     """
@@ -263,7 +265,8 @@ FILTERS: Final[dict[str, _Filter]] = {
     # -- who ---------------------------------------------------------------
     "player": _Filter("P.name", ("P",), "set"),
     "players": _Filter("P.name", ("P",), "set"),
-    "hero": _Filter("SI.isHero", ("SI",), "bool"),
+    "identity": _Filter("P.name", ("P", "S"), "identity_set"),
+    "hero": _Filter("SI.isHero", ("SI",), "hero"),
     # -- seat / stack ------------------------------------------------------
     "position": _Filter("A.position", ("A",), "set", _positions),
     "opponent_position": _Filter("SI.facingPosition", ("SI",), "set", _positions),
@@ -387,6 +390,34 @@ def _label_fragment(column: str, value: Any, placeholder: str) -> tuple[list[str
     return ["(" + " OR ".join(fragments) + ")"], params
 
 
+def _identity_pairs(value: Any) -> list[tuple[str, str]]:
+    """Normalize linked identities to ``(site, alias)`` pairs."""
+    if isinstance(value, Mapping):
+        return [(str(site), str(alias)) for site, alias in value.items()]
+    pairs: list[tuple[str, str]] = []
+    for entry in _as_list(value):
+        if isinstance(entry, str):
+            site, separator, alias = entry.partition(":")
+            if not separator or not site.strip() or not alias.strip():
+                raise ValueError(f"An identity {entry!r} must read 'Site:alias'")
+            pairs.append((site.strip(), alias.strip()))
+        elif isinstance(entry, (list, tuple)) and len(entry) == 2:
+            pairs.append((str(entry[0]), str(entry[1])))
+        else:
+            raise ValueError(f"An identity must be a 'Site:alias' or a (site, alias) pair, got {entry!r}")
+    return pairs
+
+
+def _identity_fragment(value: Any, placeholder: str) -> tuple[list[str], list[Any]]:
+    """Compile linked identities as parameterized site/name pairs."""
+    pairs = _identity_pairs(value)
+    if not pairs:
+        return ["1=0"], []
+    fragments = [f"(S.name = {placeholder} AND P.name = {placeholder})" for _site, _alias in pairs]
+    params = [part for pair in pairs for part in pair]
+    return ["(" + " OR ".join(fragments) + ")"], params
+
+
 def _compile_filter(
     name: str,
     value: Any,
@@ -404,13 +435,31 @@ def _compile_filter(
         return _set_fragment(column, values, placeholder)
     if spec.kind in ("range", "range_pct", "range_low", "range_high"):
         return _range_for(spec.kind, column, value, placeholder)
-    if spec.kind == "bool":
+    return _compile_condition_filter(name, spec, value, placeholder, backend)
+
+
+def _compile_condition_filter(
+    name: str,
+    spec: _Filter,
+    value: Any,
+    placeholder: str,
+    backend: str,
+) -> tuple[list[str], list[Any]]:
+    """Compile filter kinds that are not simple sets or ranges."""
+    column = spec.column
+    if spec.kind in ("bool", "hero"):
         literal = "1" if backend == "sqlite" else "TRUE"
-        return [f"{column} = {literal}" if value else f"(NOT {column} = {literal})"], []
+        if value:
+            return [f"{column} = {literal}"], []
+        if spec.kind == "hero":
+            return [f"({column} IS NULL OR NOT {column} = {literal})"], []
+        return [f"(NOT {column} = {literal})"], []
     if spec.kind == "null_check":
         return ([f"{column} IS NOT NULL"] if value else [f"{column} IS NULL"]), []
     if spec.kind in ("flagset", "flagset_all"):
         return _flag_fragment(column, spec.kind, value)
+    if spec.kind == "identity_set":
+        return _identity_fragment(value, placeholder)
     if spec.kind == "label":
         return _label_fragment(column, value, placeholder)
     raise ValueError(f"Unknown filter kind for {name!r}: {spec.kind!r}")
@@ -528,6 +577,8 @@ class _Metric:
 
 METRICS: Final[dict[str, _Metric]] = {
     "opportunities": _Metric("opportunities", "count", value_sql="COUNT(*)"),
+    "hands": _Metric("hands", "count", value_sql="COUNT(DISTINCT A.handId)"),
+    "players": _Metric("players", "count", value_sql="COUNT(DISTINCT A.playerId)"),
     "action_count": _Metric("action_count", "count"),
     "frequency": _Metric("frequency", "bp", frequency=True),
     "average_sizing": _Metric(
