@@ -66,6 +66,7 @@ class DatabaseBulkImportMixin:
     pcbulk: dict[Any, Any]
     hsbulk: list[Any]
     hsdbulk: list[Any]
+    hsb2bulk: list[Any]  # HandsSituations bulk inserts (#305)
     hcobulk: list[Any]
     panbulk: list[Any]
     htbulk: list[Any]
@@ -361,6 +362,7 @@ class DatabaseBulkImportMixin:
         self.pcbulk: dict[Any, Any] = {}  # PositionsCache bulk inserts
         self.hsbulk: list[Any] = []  # HandsStove bulk inserts
         self.hsdbulk: list[Any] = []  # HandsShowdown bulk inserts
+        self.hsb2bulk: list[Any] = []  # HandsSituations bulk inserts (#305)
         self.hcobulk: list[Any] = []  # HandsCashout bulk inserts
         self.panbulk: list[Any] = []  # PlayerAutoNotes bulk upserts
         self.htbulk: list[Any] = []  # HandsPots bulk inserts
@@ -612,6 +614,28 @@ class DatabaseBulkImportMixin:
             q = q.replace("%s", self.sql.query["placeholder"])
             c = self.get_cursor()
             self.executemany(c, q, self.hsdbulk)
+
+    def storeHandsSituations(self, hid, pids, situations, doinsert=False) -> None:
+        """Queue the named decisions of one hand (#294, persisted since #305).
+
+        The column order is situation_store.HANDS_SITUATION_COLUMNS behind the
+        hand and player ids, and test_analytics_lifecycle guards the writer,
+        the store query and the DDL against drift.
+        """
+        from fpdb_3_legacy import analytics_lifecycle
+        from fpdb_3_legacy.situation_store import bulk_rows
+
+        self.hsb2bulk += bulk_rows(
+            hid,
+            pids,
+            list(situations or ()),
+            analytics_lifecycle.EXTRACTOR_VERSIONS["situations"],
+        )
+        if doinsert and self.hsb2bulk:
+            q = self.sql.query["store_hands_situations"]
+            q = q.replace("%s", self.sql.query["placeholder"])
+            c = self.get_cursor()
+            self.executemany(c, q, self.hsb2bulk)
 
     def storeHandsCashout(self, sdata, doinsert) -> None:
         """Persist per-player cashout amounts/fees."""

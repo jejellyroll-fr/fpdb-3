@@ -43,6 +43,73 @@ def import_auxiliary_queries() -> dict[str, str]:
                 %s, %s
             )"""
 
+    # One row per persisted decision situation (#294, stored since #305).
+    # The column order is analytics_lifecycle.HANDS_SITUATION_COLUMNS, and
+    # test_analytics_lifecycle guards the two against drift.
+    query["store_hands_situations"] = """insert into HandsSituations (
+                    handId,
+                    playerId,
+                    actionNo,
+                    street,
+                    streetName,
+                    position,
+                    relativePosition,
+                    inPosition,
+                    effectiveStack,
+                    effectiveStackBB,
+                    stackBucket,
+                    sprBefore,
+                    isHero,
+                    potType,
+                    multiway,
+                    playersInHand,
+                    preflopAggressor,
+                    isPreflopAggressor,
+                    streetAggressor,
+                    isAggressor,
+                    previousAggressor,
+                    isPreviousAggressor,
+                    previousAggressorLed,
+                    previousAggressorChecked,
+                    previousAggressorPosition,
+                    inPositionVsPreviousAggressor,
+                    aggressorCheckedThisStreet,
+                    previousRaiser,
+                    isPreviousRaiser,
+                    toCall,
+                    potBefore,
+                    potAfter,
+                    potOddsBp,
+                    facingAction,
+                    facingPlayer,
+                    facingPosition,
+                    inPositionVsFacing,
+                    facingAmount,
+                    facingSizingBp,
+                    facingAllIn,
+                    betLevelFaced,
+                    raisesBefore,
+                    callsBefore,
+                    callersBetweenRaises,
+                    callersSinceRaise,
+                    streetActions,
+                    previousStreetActions,
+                    board,
+                    response,
+                    isAllIn,
+                    role,
+                    labels,
+                    primaryLabel,
+                    groupName,
+                    enumKey,
+                    enumResponse,
+                    enumAnswers,
+                    situationVersion
+           )
+           values (
+                %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
+           )"""
+
     query["store_hands_pots"] = """insert into HandsPots (
                     handId,
                     potId,
@@ -101,4 +168,3 @@ def import_auxiliary_queries() -> dict[str, str]:
                 finished=%s
                 WHERE id=%s"""
     return query
-
