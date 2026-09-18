@@ -2417,7 +2417,7 @@ class Config:
         self.popup_windows = popup_windows
         # The packs are re-installed onto the freshly parsed registry, so a
         # reload is not a way to lose them.
-        self.pack_popups = {}
+        self.pack_popups: dict[str, str] = {}
         self.install_popup_packs()
         if imp is not None:
             self.imp = imp
