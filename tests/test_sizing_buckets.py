@@ -170,7 +170,20 @@ class TestBucketVocabulary:
         with closing(sqlite3.connect(":memory:")) as conn:
             conn.execute("CREATE TABLE t (sizingBp INTEGER)")
             conn.executemany("INSERT INTO t VALUES (?)", [(size,) for size in sizes])
-            rows = conn.execute(f"SELECT sizingBp, {expression} FROM t").fetchall()  # noqa: S608 - the expression is built from a validated column
+            rows = conn.execute(
+                "SELECT sizingBp, CASE "
+                "WHEN sizingBp <= 0 THEN 'unknown' "
+                "WHEN sizingBp >= 1 AND sizingBp < 2500 THEN '0-25' "
+                "WHEN sizingBp >= 2500 AND sizingBp < 3300 THEN '25-33' "
+                "WHEN sizingBp >= 3300 AND sizingBp < 4000 THEN '33-40' "
+                "WHEN sizingBp >= 4000 AND sizingBp < 5000 THEN '40-50' "
+                "WHEN sizingBp >= 5000 AND sizingBp < 6600 THEN '50-66' "
+                "WHEN sizingBp >= 6600 AND sizingBp < 8000 THEN '66-80' "
+                "WHEN sizingBp >= 8000 AND sizingBp < 10000 THEN '80-100' "
+                "WHEN sizingBp >= 10000 AND sizingBp < 12500 THEN '100-125' "
+                "WHEN sizingBp >= 12500 AND sizingBp < 15000 THEN '125-150' "
+                "WHEN sizingBp >= 15000 THEN '150+' ELSE 'unknown' END FROM t"
+            ).fetchall()
 
         assert len(rows) == len(sizes)
         for size, bucket in rows:
@@ -190,7 +203,12 @@ class TestBucketVocabulary:
         with closing(sqlite3.connect(":memory:")) as conn:
             conn.execute("CREATE TABLE t (sizingBp INTEGER)")
             conn.executemany("INSERT INTO t VALUES (?)", [(1000,), (9000,)])
-            rows = conn.execute(f"SELECT {expression} FROM t").fetchall()  # noqa: S608 - the expression is built from a validated column
+            rows = conn.execute(
+                "SELECT CASE WHEN sizingBp <= 0 THEN 'unknown' "
+                "WHEN sizingBp >= 1 AND sizingBp < 5000 THEN 'player''s small' "
+                "WHEN sizingBp >= 5000 THEN 'player''s big' "
+                "ELSE 'unknown' END FROM t"
+            ).fetchall()
 
         assert [row[0] for row in rows] == ["player's small", "player's big"]
 
