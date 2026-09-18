@@ -235,8 +235,12 @@ def holdem_class_expression(alias: str = "HP.") -> str:
     """
     rank1 = f"(({alias}card1 - 1) % 13)"
     rank2 = f"(({alias}card2 - 1) % 13)"
-    suit1 = f"(({alias}card1 - 1) / 13)"
-    suit2 = f"(({alias}card2 - 1) / 13)"
+    # MySQL's ``/`` is decimal division, unlike SQLite's integer result for
+    # these positive card values.  CAST gives all supported backends the same
+    # truncated suit number (0..3) without relying on a dialect-only FLOOR or
+    # DIV operator.
+    suit1 = f"CAST(({alias}card1 - 1) / 13 AS INTEGER)"
+    suit2 = f"CAST(({alias}card2 - 1) / 13 AS INTEGER)"
     return (
         f"CASE WHEN {alias}card1 > 0 AND {alias}card2 > 0 THEN\n"
         f"      CASE\n"

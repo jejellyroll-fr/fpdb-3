@@ -37,6 +37,7 @@ from .holdem_classes import (
     UNKNOWN_ID,
     UNKNOWN_LABEL,
     UnknownClass,
+    class_ids,
     class_id_of_label,
     combos,
     grid_ids,
@@ -577,6 +578,17 @@ def cell_query(query: Query, value: str | int) -> Query:
     population the cell counted -- not a re-derivation of it.
     """
     class_id = value if isinstance(value, int) else _id_of_label(str(value))
+    existing = query.filters.get("starting_hand")
+    if existing is not None:
+        # Keep the source population's restriction.  An out-of-range click is
+        # represented by an empty set, which the query compiler turns into
+        # ``1=0`` instead of widening the drill-down to every AKs hand.
+        allowed = set(class_ids(existing if isinstance(existing, (list, tuple, set, frozenset)) else [existing]))
+        if class_id not in allowed:
+            filters = dict(query.filters)
+            filters["starting_hand"] = []
+            return replace(query, filters=filters, group_by=(), limit=query.limit)
+        return replace(query, group_by=(), limit=query.limit)
     return profit.narrow_query(query, {"starting_hand": class_id})
 
 

@@ -30,6 +30,8 @@ from PySide6.QtWidgets import (
 )
 
 from fpdb_3_legacy import Card, Database, Filters, gui_empty_state
+from fpdb_3_legacy.analytics_query import Query
+from fpdb_3_legacy.holdem_ranges import build_range
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.loggingFpdb import get_logger
 from fpdb_3_legacy.ring_stats.base import ModernStatsWidget
@@ -143,6 +145,7 @@ class GuiRingPlayerStats(QSplitter):
 
         # Onglet 4 : Starting Hands
         self.hands_tab = StartingHandsTab(self.stats_tabs)
+        self.hands_tab.cell_activated.connect(self._on_range_cell_activated)
         self.stats_tabs.addTab(self.hands_tab, _("Starting Hands"))
 
         self.addWidget(self.stats_tabs)
@@ -275,6 +278,7 @@ class GuiRingPlayerStats(QSplitter):
 
                 hand_stats[hand_text] = {"n": n, "net": net, "vpip": vpip}
             self.hands_tab.update_holdem_data(hand_stats)
+            self._refresh_filtered_range()
         else:
             for row in range(model.rowCount()):
                 item_hand = model.item(row, hand_col_idx)
@@ -287,6 +291,68 @@ class GuiRingPlayerStats(QSplitter):
                     n = 0
                 omaha_rows.append({"hand": hand_text, "n": n})
             self.hands_tab.update_omaha_data(omaha_rows, variant)
+
+    def _analytics_range_filters(self) -> dict[str, Any]:
+        """Translate the visible ring-stats filters to the analytics engine."""
+        filters: dict[str, Any] = {}
+        selected = (
+            ("site", self.filters.getSites()),
+            ("game", self.filters.getGames()),
+            ("limit", self.filters.getLimits()),
+            ("currency", self.filters.getCurrencies()),
+        )
+        for name, values in selected:
+            if values:
+                filters[name] = values
+        seats = self.filters.getSeats()
+        if seats:
+            filters["seats"] = {"min": seats.get("from"), "max": seats.get("to")}
+        dates = self.filters.getDates()
+        if dates:
+            filters["date_from"], filters["date_to"] = dates
+        heroes = [name for name in self.filters.getHeroes().values() if name]
+        if heroes:
+            filters["player"] = heroes
+        cards = self.filters.getCards()
+        selected_cards = [hand for hand, enabled in cards.items() if enabled]
+        if selected_cards:
+            filters["starting_hand"] = selected_cards
+        return filters
+
+    def _refresh_filtered_range(self) -> None:
+        """Build and display the analytics range for the active ring filters.
+
+        The legacy hand table remains the fallback if a database lacks the
+        analytics tables or a partially upgraded installation rejects one of
+        the translated filters.  That keeps the production tab usable while
+        making the range entry point part of the normal Hold'em refresh path.
+        """
+        try:
+            query = Query(metric="opportunities", filters=self._analytics_range_filters())
+            matrix = build_range(self.db, query, require_holdem=False)
+        except Exception:  # noqa: BLE001 - analytics is an enhancement to the legacy tab
+            log.warning("Unable to refresh the filtered Hold'em range", exc_info=True)
+            return
+        self.hands_tab.update_range_data(matrix)
+
+    def _on_range_cell_activated(self, hand_text: str) -> None:
+        """Resolve a clicked range cell to its exact hand ids for the host."""
+        matrix = self.hands_tab.range_matrix
+        if matrix is None:
+            return
+        from fpdb_3_legacy.holdem_ranges import cell_hand_ids
+
+        try:
+            hand_ids = cell_hand_ids(self.db, matrix.query, hand_text)
+        except Exception:  # noqa: BLE001 - keep a cell click from breaking the tab
+            log.warning("Unable to drill down into range cell %s", hand_text, exc_info=True)
+            return
+        # Hosts that expose a hand-list hook can open it; keeping the ids on the
+        # tab also gives lightweight integrations a deterministic drill-down.
+        self.hands_tab.range_hand_ids = hand_ids
+        opener = getattr(self.main_window, "open_hand_ids", None)
+        if callable(opener):
+            opener(hand_ids)
 
     def showColumnConfig(self) -> None:
         """Affiche la boîte de dialogue de configuration des colonnes."""
