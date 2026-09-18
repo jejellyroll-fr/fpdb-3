@@ -451,7 +451,6 @@ def build_config(tmp_dir: Path) -> Any:
             "db-host": "localhost",
             "db-server": "sqlite",
             "db-port": 5432,
-            "db-name": str(db_file),
             "db-user": "test",
             "db-password": "test",
             "db-backend": 4,
