@@ -143,6 +143,14 @@ class TestBucketVocabulary:
         with pytest.raises(ValueError, match="bucketable"):
             bucket_case_expression("potBefore")
 
+    def test_sql_case_can_qualify_the_column_for_a_join(self) -> None:
+        """``facingSizingBp`` also exists on HandsSituations; the alias prevents
+        an ambiguous reference when the query engine joins that table."""
+        expression = bucket_case_expression("facingSizingBp", qualifier="A.")
+        assert "A.facingSizingBp" in expression
+        assert " WHEN facingSizingBp" not in expression  # every reference is qualified
+        assert expression.count("A.facingSizingBp") > 1
+
     @pytest.mark.parametrize("column", sorted(SIZING_SOURCE_COLUMNS))
     def test_sql_case_matches_the_python_buckets(self, column: str) -> None:
         """The SQL the query engine groups by must agree with bucket_of."""

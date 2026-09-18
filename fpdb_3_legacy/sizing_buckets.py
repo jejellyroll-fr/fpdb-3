@@ -184,17 +184,24 @@ def _sql_text(label: str) -> str:
 def bucket_case_expression(
     column: str,
     buckets: BucketConfig = DEFAULT_BUCKETS,
+    qualifier: str = "",
 ) -> str:
     """A SQL CASE expression bucketing one sizing column, for GROUP BY histograms.
 
     ``column`` must be one of the known bucket-able decision columns; the
     expression is otherwise plain SQL that any backend accepts. Rows with a
     stored 0 land in ``unknown``, mirroring ``BucketConfig.bucket_of``.
+
+    ``qualifier`` prefixes the table alias (``"A."``) for a query that joins
+    another table: ``facingSizingBp`` also exists on ``HandsSituations``, so
+    an unqualified reference in a join is ambiguous. The bare default keeps
+    the single-table callers unchanged.
     """
     if column not in SIZING_SOURCE_COLUMNS:
         raise ValueError(f"column is not a bucketable sizing decision: {column!r}")
+    ref = f"{qualifier}{column}"
     whens = " ".join(
-        f"WHEN {column} >= {lower} AND {column} < {upper} THEN {_sql_text(label)}"
+        f"WHEN {ref} >= {lower} AND {ref} < {upper} THEN {_sql_text(label)}"
         for lower, upper, label in zip(
             (1, *buckets.upper_bounds_bp[:-1]),
             buckets.upper_bounds_bp,
@@ -202,13 +209,13 @@ def bucket_case_expression(
             strict=True,
         )
     )
-    open_when = f"WHEN {column} >= {buckets.upper_bounds_bp[-1]} THEN {_sql_text(buckets.labels[-1])}"
+    open_when = f"WHEN {ref} >= {buckets.upper_bounds_bp[-1]} THEN {_sql_text(buckets.labels[-1])}"
     unknown = _sql_text(UNKNOWN_BUCKET)
     # Every branch is text, the ELSE included: PostgreSQL resolves the type of
     # a CASE across all of them and refuses one that mixes the bucket names
     # with the integer column. It is also the same answer the Python helpers
     # give a row they cannot place.
-    return f"CASE WHEN {column} <= 0 THEN {unknown} {whens} {open_when} ELSE {unknown} END"
+    return f"CASE WHEN {ref} <= 0 THEN {unknown} {whens} {open_when} ELSE {unknown} END"
 
 
 class BucketResponseStat:
