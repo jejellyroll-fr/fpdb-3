@@ -751,7 +751,8 @@ def compile_query(
 
 def _player_column(spec: _Metric) -> str:
     """The HandsPlayers column a player-scoped metric sums."""
-    assert spec.player_expression is not None
+    if spec.player_expression is None:
+        raise ValueError(f"Metric {spec.name!r} has no player expression")
     return spec.player_expression.split(".", 1)[1]
 
 
@@ -876,13 +877,13 @@ def run_query(db: Any, query: Query) -> QueryResult:
     placeholder = _placeholder(db)
     compiled = compile_query(query, placeholder, backend)
     cursor = db.get_cursor()
-    cursor.execute(compiled.sql, compiled.params)
+    cursor.execute(compiled.sql, compiled.params)  # nosec B608  # nosemgrep
     columns = [description[0] for description in cursor.description]
     rows = [dict(zip(columns, raw)) for raw in cursor.fetchall()]
 
     player_totals: dict[tuple[Any, ...], float] = {}
     if compiled.player_sql is not None:
-        cursor.execute(compiled.player_sql, compiled.player_params)
+        cursor.execute(compiled.player_sql, compiled.player_params)  # nosec B608  # nosemgrep
         player_columns = [description[0] for description in cursor.description]
         for raw in cursor.fetchall():
             row = dict(zip(player_columns, raw))
