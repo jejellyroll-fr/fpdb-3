@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "packs": [
+    {
+      "name": "analytics",
+      "label": {
+        "en": "Analytics packs",
+        "fr": "Packs analytiques"
+      },
+      "description": "The entry point of the shipped popup hierarchy: preflop, single-raised pots, 3-bet pots and 4-bet pots, each a nested pack. Point a HUD stat block at 'analytics' (or link it into a profile's popup) to reach all of them.",
+      "tags": ["popup", "root"],
+      "root": "analytics",
+      "nodes": [
+        {
+          "name": "analytics",
+          "class": "ModernSubmenu",
+          "title": "{player}: analytics",
+          "entries": [
+            "playername",
+            { "stat": "n", "label": "Hands" },
+            "vpip",
+            "pfr",
+            "three_B",
+            "cb1",
+            "f_cb1",
+            "totalprofit",
+            "bbper100",
+            { "stat": "Preflop", "submenu": "preflop", "category": "preflop" },
+            { "stat": "Single-raised pot", "submenu": "srp", "category": "flop" },
+            { "stat": "3-bet pot", "submenu": "threebet_pot", "category": "flop" },
+            { "stat": "4-bet pot", "submenu": "fourbet_pot", "category": "flop" },
+            { "stat": "Sizing", "submenu": "preflop_sizing", "category": "general" }
+          ]
+        }
+      ]
+    }
+  ]
+}
