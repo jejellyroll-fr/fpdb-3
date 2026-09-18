@@ -165,8 +165,11 @@ class Cohort:
         window_offset = self.window_offset_days
         for other in others:
             if other.window_days is not None:
-                if window_days is not None and other.window_days != window_days:
-                    _fail(f"Cohorts {self.name!r} and {other.name!r} disagree on window_days")
+                if window_days is not None:
+                    if other.window_days != window_days:
+                        _fail(f"Cohorts {self.name!r} and {other.name!r} disagree on window_days")
+                    if other.window_offset_days != window_offset:
+                        _fail(f"Cohorts {self.name!r} and {other.name!r} disagree on window_offset_days")
                 window_days = other.window_days
                 window_offset = other.window_offset_days
         combined_last = others[-1] if others else self
@@ -496,7 +499,9 @@ def population_stat(
         per_player_query = applied.query(
             metric=metric,
             numerator=dict(query.numerator),
-            group_by=("player",),
+            # A screen name is not a stable identity across rooms. Keeping
+            # site in the grouping gives each (site, player) pair one vote.
+            group_by=("site", "player"),
         )
         per_player = run_query(db, per_player_query).rows
         used = [row for row in per_player if row.opportunities >= min_player_sample]
@@ -665,7 +670,21 @@ def _cohort_filters(data: Mapping[str, Any], name: str, source: str) -> dict[str
     for key in raw:
         if key not in FILTERS:
             _fail(f"Cohort {name!r}: unknown filter {key!r}; known: {sorted(FILTERS)}", source)
+        _validate_saved_filter_value(key, raw[key], name, source)
     return dict(raw)
+
+
+def _validate_saved_filter_value(key: str, value: Any, name: str, source: str) -> None:
+    """Reject JSON values whose type would change the filter's meaning."""
+    kind = FILTERS[key].kind
+    if kind in {"bool", "hero", "null_check"} and not isinstance(value, bool):
+        _fail(f"Cohort {name!r}: filter {key!r} must be a boolean", source)
+    if kind in {"range", "range_pct"}:
+        valid_shape = isinstance(value, Mapping) or (
+            isinstance(value, (list, tuple)) and len(value) == 2
+        )
+        if not valid_shape:
+            _fail(f"Cohort {name!r}: filter {key!r} must be a two-ended range", source)
 
 
 def _cohort_window(data: Mapping[str, Any], name: str, source: str) -> tuple[int | None, int]:

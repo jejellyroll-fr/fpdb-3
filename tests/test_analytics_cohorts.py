@@ -169,6 +169,12 @@ class TestRelativeWindows:
         with pytest.raises(ValueError, match="must be positive"):
             cohorts.Cohort(name="bad", window_days=0)
 
+    def test_conflicting_window_offsets_are_refused(self) -> None:
+        left = cohorts.date_window(90, offset_days=0, name="recent")
+        right = cohorts.date_window(90, offset_days=90, name="previous")
+        with pytest.raises(ValueError, match="window_offset_days"):
+            left.combine(right)
+
 
 class TestPopulationSources:
     def test_each_source_names_its_filters(self) -> None:
@@ -504,6 +510,13 @@ class TestSavedCohorts:
         path = tmp_path / "bad.json"
         path.write_text(json.dumps({"cohorts": [{"name": "bad", "exclude_hero": "yes"}]}))
         with pytest.raises(ValueError, match="exclude_hero must be a boolean"):
+            cohorts.load_cohorts(path)
+
+    @pytest.mark.parametrize("key", ["hero", "tournament", "in_position"])
+    def test_saved_boolean_filters_require_json_booleans(self, tmp_path: Path, key: str) -> None:
+        path = tmp_path / "bad.json"
+        path.write_text(json.dumps({"cohorts": [{"name": "bad", "filters": {key: "false"}}]}))
+        with pytest.raises(ValueError, match=f"filter '{key}' must be a boolean"):
             cohorts.load_cohorts(path)
 
     def test_a_cohort_file_needs_a_name(self, tmp_path: Path) -> None:
