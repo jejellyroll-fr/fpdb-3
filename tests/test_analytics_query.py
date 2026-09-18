@@ -241,7 +241,7 @@ class TestMetrics:
         assert 0 < row.actions < row.opportunities
 
     def test_population_metrics_are_distinct_counts(self, query_db: Database) -> None:
-        # The corpus is 30 hands played by six players; "decisions" is the
+        # The corpus is 31 hands played by six players; "decisions" is the
         # engine's native denominator, and these two must not be read as it.
         decisions = run_query(query_db, Query(metric="opportunities")).rows[0].opportunities
         hands = run_query(query_db, Query(metric="hands")).rows[0]
@@ -600,16 +600,16 @@ class TestHandStateVocabulary:
 
     def test_the_population_splits_into_classified_and_not(self, query_db: Database) -> None:
         """The two are a partition, and neither is a bucket called "unknown"."""
-        assert _scalar(query_db, "SELECT COUNT(*) FROM HandsActions") == 326
+        assert _scalar(query_db, "SELECT COUNT(*) FROM HandsActions") == 341
         known = run_query(query_db, Query(metric="opportunities", filters={"hand_state_known": True}))
         unknown = run_query(query_db, Query(metric="opportunities", filters={"hand_state_known": False}))
-        assert (known.total_opportunities, unknown.total_opportunities) == (35, 291)
-        assert known.total_opportunities + unknown.total_opportunities == 326
+        assert (known.total_opportunities, unknown.total_opportunities) == (37, 304)
+        assert known.total_opportunities + unknown.total_opportunities == 341
 
     def test_made_hand_and_pair_detail_filters(self, query_db: Database) -> None:
         assert self._count(query_db, {"made_hand": ["high_card"]}) == 19
-        assert self._count(query_db, {"made_hand": ["high_card", "one_pair"]}) == 30
-        assert self._count(query_db, {"pair_detail": ["top_pair"]}) == 3
+        assert self._count(query_db, {"made_hand": ["high_card", "one_pair"]}) == 32
+        assert self._count(query_db, {"pair_detail": ["top_pair"]}) == 5
         assert self._count(query_db, {"made_hand_rank": [3, 9]}) == 5
 
     def test_nutness_filters(self, query_db: Database) -> None:
@@ -617,15 +617,15 @@ class TestHandStateVocabulary:
         assert self._count(query_db, {"nutness": ["weak"]}) == 5
 
     def test_draw_filters_any_all_and_none(self, query_db: Database) -> None:
-        assert self._count(query_db, {"draw": ["backdoor_straight_draw"]}) == 18
-        assert self._count(query_db, {"draw_all": ["backdoor_straight_draw", "backdoor_flush_draw"]}) == 3
-        assert self._count(query_db, {"draw_none": True}) == 15
+        assert self._count(query_db, {"draw": ["backdoor_straight_draw"]}) == 19
+        assert self._count(query_db, {"draw_all": ["backdoor_straight_draw", "backdoor_flush_draw"]}) == 4
+        assert self._count(query_db, {"draw_none": True}) == 16
         # No draw at all, on the flop, is a smaller population than either.
         assert self._count(query_db, {"street": "flop", "draw_none": True}) == 7
 
     def test_blocker_filters(self, query_db: Database) -> None:
         assert self._count(query_db, {"blocker": ["overcard_blocker"]}) == 19
-        assert self._count(query_db, {"blocker_none": True}) == 16
+        assert self._count(query_db, {"blocker_none": True}) == 18
 
     def test_a_flag_name_from_the_wrong_vocabulary_is_refused(self, query_db: Database) -> None:
         """A board-texture name is not a draw, however plausible it looks."""
@@ -656,7 +656,7 @@ class TestHandStateVocabulary:
     def test_grouping_by_a_hand_state_dimension(self, query_db: Database) -> None:
         result = run_query(query_db, Query(metric="opportunities", group_by=("made_hand",)))
         counts = {row.group["made_hand"]: row.opportunities for row in result.rows}
-        assert counts == {None: 291, "high_card": 19, "one_pair": 11, "two_pair": 3, "three_of_a_kind": 2}
+        assert counts == {None: 304, "high_card": 19, "one_pair": 13, "two_pair": 3, "three_of_a_kind": 2}
 
     def test_grouping_by_pair_detail_keeps_the_hands_without_one(self, query_db: Database) -> None:
         """A high-card hand has no pair detail: that is a bucket, not a gap."""
@@ -665,8 +665,8 @@ class TestHandStateVocabulary:
             Query(metric="opportunities", filters={"street": "flop"}, group_by=("pair_detail",)),
         )
         counts = {row.group["pair_detail"]: row.opportunities for row in result.rows}
-        assert counts[None] == 47  # 30 unclassified flops + 17 made hands with no pair detail
-        assert (counts["overpair"], counts["top_pair"], counts["set"]) == (1, 3, 2)
+        assert counts[None] == 50  # 33 unclassified flops + 17 made hands with no pair detail
+        assert (counts["overpair"], counts["top_pair"], counts["set"]) == (1, 4, 2)
 
     def test_a_decision_with_no_state_matches_no_category(self, query_db: Database) -> None:
         """Unknown cards are left out, not guessed into a category."""
@@ -684,7 +684,7 @@ class TestHandStateVocabulary:
             query_db,
             Query(metric="opportunities", filters={"street": ["flop"], "hand_state_known": True}),
         )
-        assert by_hand_state.total_opportunities == by_situation.total_opportunities == 26
+        assert by_hand_state.total_opportunities == by_situation.total_opportunities == 27
 
     @staticmethod
     def _count(db: Database, filters: dict) -> int:

@@ -19,8 +19,8 @@ from fpdb_3_legacy.Database import Database
 from fpdb_3_legacy.Importer import Importer
 from tests.helpers import analytics_golden as golden
 
-_TOTAL_DECISIONS = 326
-_CLASSIFIED_DECISIONS = 35
+_TOTAL_DECISIONS = 341
+_CLASSIFIED_DECISIONS = 37
 
 _MODULE_STATE: list[object] = []
 
@@ -81,13 +81,13 @@ class TestPartitions:
         report = compose(db, "made_hand")
         assert report.total == _TOTAL_DECISIONS
         assert report.classified + report.unclassified == report.total
-        assert report.coverage_bp == 1074  # 35 / 326, in basis points
+        assert report.coverage_bp == 1085  # 37 / 341, in basis points
         assert any("no hand state" in note for note in report.notes)
         assert all("not classified" not in row.label for row in report.rows)
 
     def test_the_made_hand_rows_are_the_corpus_shape(self, db: Database) -> None:
         rows = {row.label: row.decisions for row in compose(db, "made_hand").rows}
-        assert rows == {"high_card": 19, "one_pair": 11, "two_pair": 3, "three_of_a_kind": 2}
+        assert rows == {"high_card": 19, "one_pair": 13, "two_pair": 3, "three_of_a_kind": 2}
 
     def test_a_rank_dimension_is_labelled_like_a_hand(self, db: Database) -> None:
         """The rank column is an int, so the label is the name it stands for."""
@@ -99,7 +99,7 @@ class TestPartitions:
         rows = {row.label: row.decisions for row in report.rows}
         assert sum(rows.values()) == report.classified == _CLASSIFIED_DECISIONS
         assert rows["(no pair to detail)"] == 21
-        assert rows["top_pair"] == 3 and rows["overpair"] == 1
+        assert rows["top_pair"] == 5 and rows["overpair"] == 1
         assert report.kind == "subset" and not report.partitions
 
     def test_the_counts_are_the_stored_rows(self, db: Database) -> None:
@@ -124,8 +124,8 @@ class TestOverlappingDimensions:
 
     def test_the_flag_counts_are_the_engine_filters(self, db: Database) -> None:
         rows = {row.label: row.decisions for row in compose(db, "draw").rows}
-        assert rows["backdoor_straight_draw"] == 18
-        assert rows["backdoor_flush_draw"] == 3
+        assert rows["backdoor_straight_draw"] == 19
+        assert rows["backdoor_flush_draw"] == 4
         assert rows["gutshot"] == 2
         for name, count in rows.items():
             if name == "(no draw)":
@@ -152,7 +152,7 @@ class TestOverlappingDimensions:
     def test_blockers_overlap_too(self, db: Database) -> None:
         rows = {row.label: row.decisions for row in compose(db, "blocker").rows}
         assert rows["overcard_blocker"] == 19
-        assert rows["(no blocker)"] == 16
+        assert rows["(no blocker)"] == 18
         assert sum(rows.values()) > _CLASSIFIED_DECISIONS
 
 
@@ -162,7 +162,7 @@ class TestPopulation:
     def test_a_filter_narrows_the_composition(self, db: Database) -> None:
         query = Query(metric="opportunities", filters={"street": "flop"})
         report = composition.compose(db, query, "made_hand")
-        assert (report.total, report.classified, report.unclassified) == (56, 26, 30)
+        assert (report.total, report.classified, report.unclassified) == (60, 27, 33)
         assert {row.label for row in report.rows} == {"high_card", "one_pair", "two_pair", "three_of_a_kind"}
 
     def test_a_query_that_groups_is_refused(self, db: Database) -> None:
@@ -228,8 +228,8 @@ class TestReporting:
 
     def test_render_names_the_population_it_describes(self, db: Database) -> None:
         text = compose(db, "made_hand").render()
-        assert "35 classified decisions of 326" in text
-        assert "291 not classified" in text
+        assert "37 classified decisions of 341" in text
+        assert "304 not classified" in text
         assert "high_card" in text
 
     def test_render_marks_overlapping_rows(self, db: Database) -> None:

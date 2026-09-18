@@ -231,7 +231,7 @@ class TestHandStatePersistence:
         c = db.get_cursor()
         c.execute("SELECT COUNT(*), MIN(stateVersion), MAX(stateVersion) FROM HandStates")
         count, min_version, max_version = c.fetchone()
-        assert count == 35
+        assert count == 37
         assert (min_version, max_version) == (
             lifecycle.EXTRACTOR_VERSIONS["hand_strength"],
             lifecycle.EXTRACTOR_VERSIONS["hand_strength"],
@@ -258,9 +258,9 @@ class TestHandStatePersistence:
         db, _ = _corpus_db(tmp_path / "statecats")
         c = db.get_cursor()
         c.execute("SELECT madeHand, COUNT(*) FROM HandStates GROUP BY madeHand ORDER BY 2 DESC")
-        assert c.fetchall() == [("high_card", 19), ("one_pair", 11), ("two_pair", 3), ("three_of_a_kind", 2)]
+        assert c.fetchall() == [("high_card", 19), ("one_pair", 13), ("two_pair", 3), ("three_of_a_kind", 2)]
         c.execute("SELECT nutness, COUNT(*) FROM HandStates GROUP BY nutness ORDER BY 2 DESC")
-        assert c.fetchall() == [("medium", 21), ("strong", 8), ("weak", 5), ("near_nuts", 1)]
+        assert c.fetchall() == [("medium", 21), ("strong", 10), ("weak", 5), ("near_nuts", 1)]
 
 
 class TestRebuild:
@@ -417,9 +417,9 @@ class TestRebuild:
         # rebuilds -- one bad hand never stops the run.
         assert result.failed == 0
         assert (result.rebuilt, result.skipped) == (corpus.hand_count - 1, 1)
-        # A skipped hand still leaves the subsystem current: the gap is
-        # visible in the data, and rerunning is safe.
-        assert not lifecycle.is_stale(db, "board_features")
+        # A skipped hand means the full-database rebuild did not complete its
+        # coverage contract, so the subsystem remains stale until repaired.
+        assert lifecycle.is_stale(db, "board_features")
 
     def test_canonical_subsystems_expand_and_validate(self) -> None:
         assert canonical_subsystems(["sizing_buckets"]) == ("action_events",)

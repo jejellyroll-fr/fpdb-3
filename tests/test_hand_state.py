@@ -7,8 +7,8 @@ the hands an opponent can hold, not vibes); the board archetypes are covered
 extensively; and unknown cards are never classified.
 
 The corpus is the constraint that makes the last one testable: it stores cards
-for the players who showed, so its 77 postflop decisions contain 35 that can be
-classified and 42 that cannot -- and a classifier that guessed at the other 42
+for the players who showed, so its 84 postflop decisions contain 37 that can be
+classified and 47 that cannot -- and a classifier that guessed at the other 47
 would produce a composition of hands nobody held.
 """
 
@@ -32,8 +32,8 @@ FLOP_HOLDINGS = 1081
 TURN_HOLDINGS = 1035
 RIVER_HOLDINGS = 990
 
-_POSTFLOP_DECISIONS = 77
-_CLASSIFIED_DECISIONS = 35
+_POSTFLOP_DECISIONS = 84
+_CLASSIFIED_DECISIONS = 37
 
 _MODULE_STATE: list[object] = []
 
@@ -419,7 +419,7 @@ def _stored_states(db: Database) -> list[dict]:
 
 
 class TestCorpus:
-    """The golden corpus is the constraint: 35 of its 77 postflop decisions."""
+    """The golden corpus is the constraint: 37 of its 84 postflop decisions."""
 
     def test_only_the_decisions_with_known_cards_are_stored(self, corpus_db: Database) -> None:
         c = corpus_db.get_cursor()
@@ -451,9 +451,9 @@ class TestCorpus:
     def test_the_composition_is_the_corpus_shape(self, corpus_db: Database) -> None:
         c = corpus_db.get_cursor()
         c.execute("SELECT madeHand, COUNT(*) FROM HandStates GROUP BY madeHand ORDER BY 2 DESC")
-        assert c.fetchall() == [("high_card", 19), ("one_pair", 11), ("two_pair", 3), ("three_of_a_kind", 2)]
+        assert c.fetchall() == [("high_card", 19), ("one_pair", 13), ("two_pair", 3), ("three_of_a_kind", 2)]
         c.execute("SELECT streetName, COUNT(*) FROM HandStates GROUP BY streetName ORDER BY 2 DESC")
-        assert c.fetchall() == [("flop", 26), ("turn", 6), ("river", 3)]
+        assert c.fetchall() == [("flop", 27), ("turn", 7), ("river", 3)]
 
     def test_no_corpus_hand_is_nuts_or_hopeless(self, corpus_db: Database) -> None:
         """Every band that appears is one the corpus can actually contain."""

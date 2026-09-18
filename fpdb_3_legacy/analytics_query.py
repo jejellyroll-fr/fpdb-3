@@ -667,9 +667,14 @@ def _dimension(name: str) -> tuple[str, tuple[str, ...]]:
 _RESERVED_DIMENSION_NAMES: Final[frozenset[str]] = frozenset({"limit", "offset", "order", "group"})
 
 
+def _alias_of(name: str) -> str:
+    """The safe result-column name used for a grouped dimension."""
+    return f"{name}_" if name in _RESERVED_DIMENSION_NAMES else name
+
+
 def _dimension_alias(name: str) -> str:
-    """Quote generated dimension aliases that are SQL keywords."""
-    return f'"{name}"' if name in _RESERVED_DIMENSION_NAMES else name
+    """The SQL alias for a grouped dimension."""
+    return _alias_of(name)
 
 
 # ---------------------------------------------------------------------------
@@ -1043,14 +1048,14 @@ def run_query(db: Any, query: Query) -> QueryResult:
         player_columns = [description[0] for description in cursor.description]
         for raw in cursor.fetchall():
             row = dict(zip(player_columns, raw))
-            key = tuple(row[name] for name in query.group_by)
+            key = tuple(row[_alias_of(name)] for name in query.group_by)
             player_totals[key] = float(row["value"] or 0)
 
     spec, _filters, _numerator = query.resolved()
     result_rows: list[QueryRow] = []
     for row in rows:
-        key = tuple(row[name] for name in query.group_by)
-        group = {name: row[name] for name in query.group_by}
+        key = tuple(row[_alias_of(name)] for name in query.group_by)
+        group = {name: row[_alias_of(name)] for name in query.group_by}
         opportunities = int(row["opportunities"] or 0)
         actions = int(row.get("actions") or 0)
         value: float | None

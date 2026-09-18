@@ -414,9 +414,9 @@ def _rebuild_situations(
 
 # Late import target: the column list behind the two id columns and the row
 # writer, kept as module-level names so _rebuild_situations stays readable.
-from .situation_store import HANDS_SITUATION_COLUMNS, bulk_rows  # noqa: E402
 from .hand_state_store import HAND_STATE_COLUMNS  # noqa: E402
 from .hand_state_store import bulk_rows as bulk_state_rows  # noqa: E402
+from .situation_store import HANDS_SITUATION_COLUMNS, bulk_rows  # noqa: E402
 
 
 class AnalyticsRebuilder:
