@@ -31,7 +31,7 @@ from PySide6.QtWidgets import (
 
 from fpdb_3_legacy import Card, Database, Filters, gui_empty_state
 from fpdb_3_legacy.analytics_query import Query
-from fpdb_3_legacy.holdem_ranges import build_range
+from fpdb_3_legacy.holdem_ranges import build_range, cell_hand_ids
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.loggingFpdb import get_logger
 from fpdb_3_legacy.ring_stats.base import ModernStatsWidget
@@ -330,7 +330,7 @@ class GuiRingPlayerStats(QSplitter):
         try:
             query = Query(metric="opportunities", filters=self._analytics_range_filters())
             matrix = build_range(self.db, query, require_holdem=False)
-        except Exception:  # noqa: BLE001 - analytics is an enhancement to the legacy tab
+        except Exception:  # noqa: BLE001  # pylint: disable=broad-exception-caught
             log.warning("Unable to refresh the filtered Hold'em range", exc_info=True)
             return
         self.hands_tab.update_range_data(matrix)
@@ -340,11 +340,9 @@ class GuiRingPlayerStats(QSplitter):
         matrix = self.hands_tab.range_matrix
         if matrix is None:
             return
-        from fpdb_3_legacy.holdem_ranges import cell_hand_ids
-
         try:
             hand_ids = cell_hand_ids(self.db, matrix.query, hand_text)
-        except Exception:  # noqa: BLE001 - keep a cell click from breaking the tab
+        except Exception:  # noqa: BLE001  # pylint: disable=broad-exception-caught
             log.warning("Unable to drill down into range cell %s", hand_text, exc_info=True)
             return
         # Hosts that expose a hand-list hook can open it; keeping the ids on the

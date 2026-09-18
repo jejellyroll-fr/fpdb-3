@@ -376,7 +376,7 @@ class RangeMatrix:
         lines = [f"{spec.label} per starting hand ({spec.unit}) -- {spec.definition}"]
         header = "      " + " ".join(f"{rank:>{width}}" for rank in RANKS)
         lines.append(header)
-        for row_rank, row in zip(RANKS, self.grid()):
+        for row_rank, row in zip(RANKS, self.grid(), strict=True):
             cells: list[str] = []
             for cell in row:
                 # No decision in a class is not a zero: it is the absence of an
