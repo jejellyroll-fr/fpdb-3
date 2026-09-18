@@ -37,6 +37,8 @@ from dataclasses import dataclass, field
 from typing import Any, Final
 
 from .board_features import FLAG_BITS
+from .holdem_classes import class_ids as holdem_class_ids
+from .holdem_classes import holdem_class_expression
 from .sizing_buckets import bucket_case_expression
 
 # ---------------------------------------------------------------------------
@@ -307,6 +309,15 @@ FILTERS: Final[dict[str, _Filter]] = {
     "enum_key": _Filter("SI.enumKey", ("SI",), "set"),
     "enum_response": _Filter("SI.enumResponse", ("SI",), "set"),
     "raisers_before": _Filter("SI.raisesBefore", ("SI",), "range"),
+    # -- hole cards --------------------------------------------------------
+    # The 169 Hold'em classes, as the canonical id of ``Card.twoStartCards``
+    # (#301). The filter takes labels or ids, and the same expression answers
+    # both, so a grid cell and a drill-down cannot disagree about a class.
+    "starting_hand": _Filter(holdem_class_expression("HP."), ("HP",), "set", holdem_class_ids),
+    # Whether the pot-winning hand was shown at all. A range over hands whose
+    # cards were never revealed is not a range: this is how a caller says "only
+    # the cards that actually exist", without the engine inventing any.
+    "hole_cards_known": _Filter("(HP.card1 > 0 AND HP.card2 > 0)", ("HP",), "bool"),
     # -- sizing ------------------------------------------------------------
     "sizing_bp": _Filter("A.sizingBp", ("A",), "range"),
     "facing_sizing_bp": _Filter("A.facingSizingBp", ("A",), "range"),
@@ -542,6 +553,11 @@ DIMENSIONS: Final[dict[str, tuple[str, tuple[str, ...]]]] = {
     "board_connectivity": ("BF.connectivity", ("BF",)),
     "primary_situation": ("SI.primaryLabel", ("SI",)),
     "enum_key": ("SI.enumKey", ("SI",)),
+    # The starting-hand class of the acting player's own cards: the 13x13 grid's
+    # dimension (#301). It is the class *id* -- the ``StartCards`` primary key,
+    # 170 for "cards not known" -- because a label-valued dimension would need
+    # 169 SQL branches to agree with ``Card.twoStartCardString``.
+    "starting_hand_id": (holdem_class_expression("HP."), ("HP",)),
 }
 
 

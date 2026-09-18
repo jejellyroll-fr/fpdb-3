@@ -109,6 +109,8 @@ jobs:
           fpdb_3_legacy/analytics_definitions.py
           fpdb_3_legacy/analytics_cohorts.py
           fpdb_3_legacy/analytics_profit.py
+          fpdb_3_legacy/holdem_classes.py
+          fpdb_3_legacy/holdem_ranges.py
           fpdb_3_legacy/analytics_profiling.py
           fpdb_3_legacy/analytics_cache.py
           fpdb_3_legacy/analytics_benchmark.py
