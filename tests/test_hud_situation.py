@@ -681,6 +681,16 @@ def test_entry_facts_read_the_seat_own_hand() -> None:
     assert "is_preflop_aggressor" not in facts, "no street0Aggr column means no answer"
 
 
+def test_entry_facts_read_the_actual_hud_sql_aliases() -> None:
+    """The current-hand query exposes lower-cased aliases, not raw column names."""
+    row = {"aggr_1": 1, "street1inposition": 1, "f_cb_opp_1": 1, "f_bet_facing_bp": 6600}
+    facts = hs.entry_facts(row, "flop")
+    assert facts["is_aggressor"] is True
+    assert facts["in_position"] is True
+    assert facts["facing_action"] == "bets"
+    assert facts["facing_sizing_bp"] == 6600
+
+
 def test_entry_facts_answer_the_preflop_question_on_any_street() -> None:
     """The row is one hand: who raised preflop is readable on the flop too."""
     facts = hs.entry_facts({"street0Aggr": 1, "street1Aggr": 0, "street1InPosition": 1}, "flop")
