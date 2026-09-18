@@ -98,11 +98,16 @@ def _source_hand(db: Any, source_hand_id: int | None) -> int:
     if source_hand_id is not None:
         return int(source_hand_id)
     # The richest hand is the best template: one with players, actions, boards
-    # and situations all present, so every cloned table has rows.
+    # and situations all present, so every populated analytics table has rows.
+    # ``Boards`` is only populated for run-it-twice boards; ordinary hands keep
+    # their main board on ``Hands`` while ``BoardFeatures`` is the analytics
+    # fact table. Requiring ``Boards`` here would reject the normal corpus.
     cursor.execute(
         "SELECT H.id FROM Hands H"
         " JOIN HandsActions A ON A.handId = H.id"
-        " LEFT JOIN HandsSituations S ON S.handId = H.id"
+        " JOIN HandsPlayers P ON P.handId = H.id"
+        " JOIN BoardFeatures BF ON BF.handId = H.id"
+        " JOIN HandsSituations S ON S.handId = H.id"
         " GROUP BY H.id ORDER BY COUNT(S.id) DESC, H.id DESC LIMIT 1",
     )
     row = cursor.fetchone()

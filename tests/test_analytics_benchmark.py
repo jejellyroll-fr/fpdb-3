@@ -58,6 +58,7 @@ class TestSynthesis:
     def test_clones_the_analytics_tables(self, corpus_db: Database) -> None:
         source = benchmark._source_hand(corpus_db, None)
         counts_before = {table: _count(corpus_db, table) for table in benchmark.CLONED_TABLES}
+        assert all(counts_before[table] > 0 for table in ("HandsPlayers", "HandsActions", "BoardFeatures", "HandsSituations"))
         benchmark.synthesize_hands(corpus_db, 5, source)
         for table in benchmark.CLONED_TABLES:
             per_hand = _count(corpus_db, table, f"handId = {source}")

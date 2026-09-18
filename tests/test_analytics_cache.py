@@ -103,6 +103,21 @@ class TestEquivalence:
         paged = Query(metric="opportunities", filters={"street": "flop"}, limit=10, offset=20)
         assert cache.query_fingerprint(base) == cache.query_fingerprint(paged)
 
+    def test_range_endpoint_order_changes_the_fingerprint(self) -> None:
+        maximum = Query(metric="opportunities", filters={"big_blind": [None, 100]})
+        minimum = Query(metric="opportunities", filters={"big_blind": [100, None]})
+        assert cache.query_fingerprint(maximum) != cache.query_fingerprint(minimum)
+
+    def test_paged_and_unpaged_reads_share_complete_counters(self, corpus_db: Database) -> None:
+        base = Query(metric="opportunities", filters={"street": "preflop"}, group_by=("position",))
+        paged = Query(metric=base.metric, filters=base.filters, group_by=base.group_by, limit=1)
+        unpaged = _pairs(run_query(corpus_db, base))
+
+        # Whichever form populates the entry first must not change the other.
+        first_page = _pairs(cache.cached_query(corpus_db, paged))
+        assert first_page == unpaged[:1]
+        assert _pairs(cache.cached_query(corpus_db, base)) == unpaged
+
 
 class TestIncrement:
     """New hands are absorbed by the delta, not by a rebuild."""
@@ -171,6 +186,31 @@ class TestInvalidation:
         benchmark.synthesize_hands(corpus_db, 2)
         forced = _pairs(cache.cached_query(corpus_db, query, force=True))
         assert forced == _pairs(run_query(corpus_db, query))
+
+    def test_delta_and_watermark_roll_back_together(self, corpus_db: Database, monkeypatch) -> None:
+        query = Query(metric="opportunities", filters={"street": "flop"})
+        cache.cached_query(corpus_db, query)
+        before = _pairs(cache.cached_query(corpus_db, query))
+        watermark = cache.aggregate_stats(corpus_db).watermarks[cache.query_fingerprint(query)]
+        benchmark.synthesize_hands(corpus_db, 1)
+
+        original = cache._write_meta
+
+        def fail_after_delta(db, name, value, commit=True):
+            if name.startswith(cache._WATERMARK_PREFIX):
+                raise RuntimeError("metadata write failed")
+            return original(db, name, value, commit)
+
+        monkeypatch.setattr(cache, "_write_meta", fail_after_delta)
+        with pytest.raises(RuntimeError, match="metadata write failed"):
+            cache.cached_query(corpus_db, query)
+
+        monkeypatch.undo()
+        assert cache.aggregate_stats(corpus_db).watermarks[cache.query_fingerprint(query)] == watermark
+        assert _pairs(cache.cached_query(corpus_db, query)) == _pairs(run_query(corpus_db, query))
+        # The failed refresh was rolled back; the next successful refresh is
+        # still allowed to consume the new hand exactly once.
+        assert cache.aggregate_stats(corpus_db).watermarks[cache.query_fingerprint(query)] > watermark
 
 
 def test_stats_report_is_json_friendly(corpus_db: Database) -> None:

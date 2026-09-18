@@ -113,8 +113,13 @@ def _canonical(filters: Mapping[str, Any]) -> dict[str, Any]:
     out: dict[str, Any] = {}
     for name in sorted(filters):
         value = filters[name]
-        if isinstance(value, (list, tuple, set, frozenset)):
+        if isinstance(value, (set, frozenset)):
             out[name] = sorted(value, key=str)
+        elif isinstance(value, (list, tuple)):
+            # Range endpoints are ordered: [None, 100] means a maximum while
+            # [100, None] means a minimum.  Only set-style values are
+            # order-independent.
+            out[name] = list(value)
         else:
             out[name] = value
     return out
@@ -172,7 +177,7 @@ def _read_meta(db: Any) -> dict[str, str]:
     return {str(name): str(value) for name, value in cursor.fetchall()}
 
 
-def _write_meta(db: Any, name: str, value: str) -> None:
+def _write_meta(db: Any, name: str, value: str, commit: bool = True) -> None:
     backend = getattr(db, "backend", None)
     if backend == _BACKEND_PGSQL:
         statement = "INSERT INTO AnalyticsMeta (name, value) VALUES (%s, %s) ON CONFLICT (name) DO UPDATE SET value = EXCLUDED.value"
@@ -182,7 +187,8 @@ def _write_meta(db: Any, name: str, value: str) -> None:
         statement = "INSERT INTO AnalyticsMeta (name, value) VALUES (%s, %s) ON DUPLICATE KEY UPDATE value = VALUES(value)"
     cursor = db.get_cursor()
     cursor.execute(statement, (name, value))
-    db.commit()
+    if commit:
+        db.commit()
 
 
 def _max_hand_id(db: Any) -> int:
@@ -300,21 +306,28 @@ def _refresh(db: Any, query: Query, key: str, watermark: int, current: int, full
     """Bring one query's counters up to ``current``, scanning only the delta."""
     # Store the paired total for a per-opportunity metric, not the ratio.
     storage_query = _storage_query(query)
-    if full:
-        result = run_query(db, storage_query)
-        _replace_rows(db, key, result.rows)
-    else:
-        delta_filters = dict(storage_query.filters)
-        delta_filters["hand_id_from"] = watermark + 1
-        delta_query = Query(
-            metric=storage_query.metric,
-            filters=delta_filters,
-            numerator=dict(storage_query.numerator),
-            group_by=storage_query.group_by,
-        )
-        delta = run_query(db, delta_query)
-        _merge_rows(db, key, delta.rows)
-    _write_meta(db, _WATERMARK_PREFIX + key, str(current))
+    try:
+        if full:
+            result = run_query(db, storage_query)
+            _replace_rows(db, key, result.rows, commit=False)
+        else:
+            delta_filters = dict(storage_query.filters)
+            delta_filters["hand_id_from"] = watermark + 1
+            delta_query = Query(
+                metric=storage_query.metric,
+                filters=delta_filters,
+                numerator=dict(storage_query.numerator),
+                group_by=storage_query.group_by,
+            )
+            delta = run_query(db, delta_query)
+            _merge_rows(db, key, delta.rows, commit=False)
+        # The aggregate delta and its watermark are one durable fact.  A
+        # failure in either half must leave both at their previous values.
+        _write_meta(db, _WATERMARK_PREFIX + key, str(current), commit=False)
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
 
 
 def _storage_query(query: Query) -> Query:
@@ -326,20 +339,30 @@ def _storage_query(query: Query) -> Query:
             filters=dict(query.filters),
             numerator=dict(query.numerator),
             group_by=query.group_by,
+            limit=None,
+            offset=0,
         )
     del spec
-    return query
+    return Query(
+        metric=query.metric,
+        filters=dict(query.filters),
+        numerator=dict(query.numerator),
+        group_by=query.group_by,
+        limit=None,
+        offset=0,
+    )
 
 
-def _replace_rows(db: Any, key: str, rows: Sequence[QueryRow]) -> None:
+def _replace_rows(db: Any, key: str, rows: Sequence[QueryRow], commit: bool = True) -> None:
     cursor = db.get_cursor()
     placeholder = _placeholder(db)
     cursor.execute(f"DELETE FROM {TABLE_NAME} WHERE queryKey = {placeholder}", (key,))
     _insert_rows(db, key, rows)
-    db.commit()
+    if commit:
+        db.commit()
 
 
-def _merge_rows(db: Any, key: str, rows: Sequence[QueryRow]) -> None:
+def _merge_rows(db: Any, key: str, rows: Sequence[QueryRow], commit: bool = True) -> None:
     """Add a delta's counters to the stored ones, rewriting the key's rows."""
     existing = _stored_rows(db, key)
     for row in rows:
@@ -357,7 +380,8 @@ def _merge_rows(db: Any, key: str, rows: Sequence[QueryRow]) -> None:
     if rows_to_insert:
         marks = ", ".join(placeholder for _ in range(5))
         cursor.executemany(f"INSERT INTO {TABLE_NAME} (queryKey, groupKey, opportunities, actions, valueSum) VALUES ({marks})", rows_to_insert)
-    db.commit()
+    if commit:
+        db.commit()
 
 
 def _insert_rows(db: Any, key: str, rows: Sequence[QueryRow]) -> None:
@@ -423,6 +447,8 @@ def _read(db: Any, query: Query, key: str) -> QueryResult:
                 frequency_bp=frequency_bp if spec.frequency else None,
             ),
         )
+    if query.limit is not None:
+        rows = rows[query.offset : query.offset + query.limit]
     from .analytics_query import compile_query  # noqa: PLC0415 - only needed for the description
 
     compiled = compile_query(query, _placeholder(db), _backend_name(db))
