@@ -206,6 +206,10 @@ def make_install(exe):
             CWD + "/fpdb_3_legacy/**/*.toml",
             CWD + "/fpdb_3_legacy/**/*.xml",
             CWD + "/fpdb_3_legacy/**/*.sql",
+            # The bundled stat and filter definitions (#306) live in
+            # fpdb_3_legacy/analytics_definitions.d/*.json: without them the
+            # registry is empty and every shipped stat disappears.
+            CWD + "/fpdb_3_legacy/**/*.json",
             CWD + "/fpdb_3_legacy/**/*.md",
             CWD + "/fpdb_3_legacy/**/*.sh",
             CWD + "/gfx/**/*.png",

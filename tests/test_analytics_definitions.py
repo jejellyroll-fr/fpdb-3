@@ -186,6 +186,13 @@ class TestSchemaVersioning:
         with pytest.raises(ValueError, match="newer than supported"):
             dsl.load_definitions(path)
 
+    @pytest.mark.parametrize("version", [0, -1, True, "2"])
+    def test_malformed_file_version_is_refused(self, tmp_path: Path, version) -> None:
+        path = tmp_path / "malformed.json"
+        path.write_text(json.dumps({"schema_version": version, "stats": []}))
+        with pytest.raises(ValueError, match="schema_version must be a positive integer"):
+            dsl.load_definitions(path)
+
     def test_non_integer_version_is_refused(self) -> None:
         with pytest.raises(ValueError, match="must be a positive integer"):
             _definition(schema_version="one")
@@ -436,6 +443,19 @@ class TestConsumers:
         report = dsl.build_report(query_db, [grouped], locale="en")
         assert len(report) > 1
         assert all("facing_sizing_bucket" in entry["group"] for entry in report)
+
+    def test_report_uses_fragments_from_the_originating_registry(self, query_db: Database) -> None:
+        registry = dsl.DefinitionRegistry()
+        registry.add_fragment("custom_turn", {"street": "turn"})
+        definition = dsl.parse_definition(
+            {
+                "name": "custom_turn_checks",
+                "metric": "check_frequency",
+                "fragments": ["custom_turn"],
+            },
+        )
+        report = dsl.build_report(query_db, [definition], fragments=registry.fragments)
+        assert report[0]["opportunities"] > 0
 
     def test_popup_context_filters_to_one_player(self, query_db: Database) -> None:
         definition = dsl.load_default_registry().resolve("fold_to_cbet_flop")

@@ -583,8 +583,12 @@ def _check_document_version(document: Any, path: Path) -> None:
     """Refuse a whole file written for a newer schema than this code knows."""
     if not isinstance(document, Mapping):
         return
-    version = document.get(_SCHEMA_VERSION_FIELD)
-    if isinstance(version, int) and not isinstance(version, bool) and version > DEFINITION_SCHEMA_VERSION:
+    if _SCHEMA_VERSION_FIELD not in document:
+        return
+    version = document[_SCHEMA_VERSION_FIELD]
+    if isinstance(version, bool) or not isinstance(version, int) or version < 1:
+        _fail(f"{_SCHEMA_VERSION_FIELD} must be a positive integer", path.name)
+    if version > DEFINITION_SCHEMA_VERSION:
         _fail(
             f"definition schema version {version} is newer than supported ({DEFINITION_SCHEMA_VERSION}); upgrade fpdb",
             path.name,
@@ -754,6 +758,7 @@ def build_report(
     db: Any,
     definitions: Iterable[StatDefinition],
     context: Mapping[str, Any] | None = None,
+    fragments: Mapping[str, Mapping[str, Any]] | None = None,
     big_blind_cents: int | None = None,
     locale: str = "en",
 ) -> list[dict[str, Any]]:
@@ -764,7 +769,7 @@ def build_report(
     """
     report: list[dict[str, Any]] = []
     for definition in definitions:
-        result = run_definition(db, definition, context)
+        result = run_definition(db, definition, context, fragments)
         if not result.rows:
             report.append(_report_entry(definition, None, locale, big_blind_cents))
             continue
