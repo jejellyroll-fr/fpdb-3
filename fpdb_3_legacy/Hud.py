@@ -119,6 +119,13 @@ class Hud:
         self.stat_dict: dict[Any, Any] = {}
         self.seat_players: dict[Any, Any] = {}
         self.hand_instance: Any = None
+        # What the table feed knows about the hand in progress, for the
+        # context-aware dynamic panels (#298): street, pot type, roles, the
+        # aggressors, the sizing faced. Empty means "nothing known", which is a
+        # valid state a panel rule sees as absent rather than as a value, so an
+        # unknown street never matches a flop rule by accident. The feed writes
+        # it through set_live_state; nothing here depends on it being filled.
+        self.live_state: dict[str, Any] = {}
         self.is_loading = False
         self.is_fast_fold = False
         # Which build of this table's HUD this object is. HUD_main hands out a
@@ -425,6 +432,18 @@ class Hud:
         if not prepared:
             self.cards = self.get_cards(hand)
 
+        # Publish what this hand says about the table, for the context-aware
+        # dynamic panels (#298): the deepest street it reached, the shape of the
+        # preflop round and how many players are still in. Best-effort -- a
+        # panel rule set must never be able to cost a HUD its hand.
+        self.live_state.clear()
+        try:
+            from fpdb_3_legacy import hud_situation
+
+            self.set_live_state(**hud_situation.live_state_from_hand(self.hand_instance))
+        except Exception:  # intentional broad catch: the hand cycle must survive
+            log.exception("Could not publish the live state for hand %s", hand)
+
         # Refresh every aux window with the new hand so the displayed stats
         # update. This is the only place they are refreshed for a new hand, so
         # one failing window must not cost the others theirs.
@@ -433,6 +452,24 @@ class Hud:
                 aux.update_gui(hand)
             except Exception:  # intentional broad catch: aux window callback boundary.
                 log.exception("Error updating aux window %s for hand %s", type(aux).__name__, hand)
+
+    def set_live_state(self, **state: Any) -> None:
+        """Publish what the table feed knows about the hand in progress (#298).
+
+        A partial update: the keys given replace the ones already known and the
+        rest are kept, because a feed learns a street at a time. Passing a value
+        of ``None`` clears that key, which is how a new hand resets the state
+        without the caller having to enumerate every field.
+        """
+        for key, value in state.items():
+            if value is None:
+                self.live_state.pop(key, None)
+            else:
+                self.live_state[key] = value
+        for aux in self.aux_windows:
+            forget = getattr(aux, "forget_dynamic_panels", None)
+            if forget is not None:
+                forget()
 
     def get_cards(self, hand: int | str) -> dict[str, Any]:
         """Get the cards for a given hand."""

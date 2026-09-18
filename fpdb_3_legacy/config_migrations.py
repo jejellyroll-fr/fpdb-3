@@ -81,6 +81,16 @@ def _preserve_84_to_85(doc, template) -> None:
     _repair_renamed_references(doc)
 
 
+def _preserve_85_to_86(doc, template) -> None:
+    """Advance to v86 without changing user-defined HUD panel settings.
+
+    Dynamic panel rules are opt-in and disabled in the shipped template, so an
+    existing configuration must keep its document intact while acquiring the
+    new schema version.
+    """
+    del doc, template
+
+
 def _repair_renamed_references(doc) -> None:
     aux_names = {n.getAttribute("name") for n in doc.getElementsByTagName("aw")}
     if "Classic_HUD" not in aux_names and "ClassicHud" in aux_names:
@@ -98,6 +108,7 @@ def _repair_renamed_references(doc) -> None:
 MIGRATIONS = (
     (83, 84, _merge_83_to_84),
     (84, 85, _preserve_84_to_85),
+    (85, 86, _preserve_85_to_86),
 )
 
 

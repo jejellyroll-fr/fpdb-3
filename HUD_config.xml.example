@@ -3,7 +3,7 @@
     <!-- config_wrap_len  is preferred max line length in this file, -1 means no max
          day_start        is time that logical day starts, e.g. 5 means that any play
                           between 00:00 and 04:59:59 counts as being on the previous day -->
-    <general version="85" config_wrap_len="-1" day_start="5" ui_language="system" config_difficulty="expert"/>
+    <general version="86" config_wrap_len="-1" day_start="5" ui_language="system" config_difficulty="expert"/>
 
     <import callFpdbHud="True" interval="5" fastStoreHudCache="False" saveActions="True" cacheSessions="False" sessionTimeout="30" publicDB="False"/>
 
@@ -2330,6 +2330,43 @@
          throw the documentation away. -->
     <hud_profile_rules>
     </hud_profile_rules>
+
+    <!-- Dynamic HUD panels: show the panels that fit the hand in front of the
+         player, instead of one fixed grid.
+
+         Off unless this section says otherwise: an empty or disabled section
+         leaves the HUD exactly as it has always been, and the static core row
+         is never touched even when it is on.
+
+           enabled="true"        turn the feature on for this configuration
+           fallback="core"       the panel to show when no rule matches
+           source="builtin"      prepend the rules that ship with fpdb; any
+                                 other value is a path to a .json file or a
+                                 directory of them
+
+         Each <hud_panel_rule> names the panel and the conditions it answers.
+         Conditions are written in the analytics query vocabulary (same words
+         as the research screen: street, pot_type, position, in_position,
+         action_faced, stack_bucket, facing_sizing_pct, ...), and every
+         condition listed must hold for the rule to match. The most specific
+         matching rule wins; ties break on priority="...", then on the order
+         the rules appear here.
+
+         Example: the in-position c-bet panel for a single raised pot.
+           <hud_panel_rule panel="srp_cbet_ip" street="flop"
+             pot_type="single_raised" is_preflop_aggressor="true"
+             in_position="true" to_call="[null, 0]"/>
+
+         A rule with min_sample="200" is withheld until the seat has that many
+         hands and shows its fallback="preflop_open" panel instead, so a rate
+         is never drawn off three hands. substitutions='{"BB": "srp_bb"}'
+         renames the panel per position without copying the rule.
+
+         tools/hud_panels.py lists the shipped rules, resolves one against a
+         context given on the command line, reports the rules that cannot do
+         what they say, and prints this section ready to paste. -->
+    <hud_panel_rules enabled="false">
+    </hud_panel_rules>
 
 </FreePokerToolsConfig><!-- IMPORTANT: Please note that fpdb stores your email password in clear text.
 So do not post a config containing a password on the Internet or anywhere else without removing the password! -->

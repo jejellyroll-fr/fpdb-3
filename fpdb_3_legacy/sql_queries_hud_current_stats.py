@@ -10,6 +10,10 @@ def hud_current_stats_queries() -> dict[str, str]:
             SELECT hc.playerId                      AS player_id,
                 hp.seatNo                           AS seat,
                 p.name                              AS screen_name,
+                sum(hc.street1InPosition)           AS street1InPosition,
+                sum(hc.street2InPosition)           AS street2InPosition,
+                sum(hc.street3InPosition)           AS street3InPosition,
+                sum(hc.street4InPosition)           AS street4InPosition,
                 sum(hc.n)                           AS n,
                 sum(hc.street0VPIChance)            AS vpip_opp,
                 sum(hc.street0VPI)                  AS vpip,
@@ -301,4 +305,3 @@ def hud_current_stats_queries() -> dict[str, str]:
             ORDER BY hc.PlayerId, hp.seatNo, p.name
         """
     return query
-

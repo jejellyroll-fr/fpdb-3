@@ -199,36 +199,11 @@ _ALIGN = {
 }
 
 
-def normalize_position(raw: Any) -> str:
-    """Map a stored/labelled position to a canonical panel code.
-
-    Accepts the values DerivedStats stores in HandsPlayers.position (0 = button,
-    "S" = small blind, "B" = big blind, 1.. = seats after the BB) and the panel
-    labels used in configs ("BU"/"SB"/"BB"/...). Returns one of
-    BTN/SB/BB/CO/MP/EP (or "" when unknown/empty).
-    """
-    if raw is None or raw == "":
-        return ""
-    s = str(raw).strip().upper()
-    if s in ("0", "BTN", "BU", "D", "BUTTON"):
-        return "BTN"
-    if s in ("S", "SB"):
-        return "SB"
-    if s in ("B", "BB"):
-        return "BB"
-    after_bb = {"1": "CO", "2": "MP", "3": "MP", "4": "EP", "5": "EP", "6": "EP", "7": "EP", "8": "EP", "9": "EP"}
-    return after_bb.get(s, s)
-
-
-def block_visible(block_position: str, player_position: Any) -> bool:
-    """Whether a panel bound to ``block_position`` shows for ``player_position``.
-
-    A block with no position binding is always visible; otherwise the player's
-    normalized position must match the block's.
-    """
-    if not block_position:
-        return True
-    return normalize_position(block_position) == normalize_position(player_position)
+# The position vocabulary and the position-bound visibility rule live in
+# ``hud_situation`` (#298), which the dynamic panel layer also needs. They are
+# re-exported here because this is where callers have always imported them, and
+# so the two layers cannot disagree about what "B" means.
+from fpdb_3_legacy.hud_situation import block_visible, block_visible_for, normalize_position  # noqa: E402,F401
 
 
 def false_attr(value: Any) -> bool:
@@ -305,6 +280,88 @@ class SimpleHUD(Aux_Base.AuxSeats):
             if mode:
                 return str(mode).strip().lower()
         return "current"
+
+    # -- context-aware dynamic panels (#298) --------------------------------
+
+    def _panel_resolver(self) -> Any:
+        """The panel rules this table's profile enables, or None when it has none.
+
+        Built once per HUD and rebuilt when the stat set changes, because the
+        profile is what scopes the rules. A configuration with no panel rules
+        -- the shipped default -- yields None, and every caller then takes the
+        static path it always did: turning dynamic panels on is what changes
+        behaviour, and turning them off is indistinguishable from not having
+        them, which is what the issue asks for.
+        """
+        resolver = getattr(self, "_panel_resolver_cache", None)
+        cached_profile = getattr(self, "_panel_resolver_profile", None)
+        profile = getattr(self.game_params, "name", "default")
+        if resolver is not None and cached_profile == profile:
+            return resolver
+        try:
+            from fpdb_3_legacy import hud_situation
+
+            configured = self.config.get_hud_panel_rules()
+            if not configured:
+                resolver = None
+            else:
+                resolver = hud_situation.HudSituationResolver(
+                    configured,
+                    fallback=str(getattr(self.config, "hud_panel_fallback", "") or ""),
+                ).for_profile(profile)
+        except Exception:  # intentional broad catch: a broken rule set must not break the HUD
+            log.exception("Dynamic HUD panels could not be resolved; falling back to the static grid")
+            resolver = None
+        self._panel_resolver_cache = resolver
+        self._panel_resolver_profile = profile
+        return resolver
+
+    def _panel_state(self) -> Any:
+        """This table's panel memory, created on first use."""
+        state = getattr(self, "_panel_state_cache", None)
+        if state is not None:
+            return state
+        resolver = self._panel_resolver()
+        if resolver is None:
+            return None
+        from fpdb_3_legacy import hud_situation
+
+        state = hud_situation.PanelState(resolver, getattr(self.game_params, "name", "default"))
+        self._panel_state_cache = state
+        return state
+
+    def forget_dynamic_panels(self) -> None:
+        """Drop the cached panel memory, after a live-state or profile change."""
+        state = getattr(self, "_panel_state_cache", None)
+        if state is not None:
+            state.forget()
+
+    def dynamic_panel_selection(self, seat: int | str, player_id: Any) -> Any:
+        """Which dynamic panels this seat shows right now, or None when disabled.
+
+        None is the answer whenever dynamic panels are off, which is the normal
+        case: the caller then applies the position-bound rule it has always
+        applied. A seat with no live data is no different from a disabled
+        profile -- the static grid stands.
+        """
+        state = self._panel_state()
+        if state is None:
+            return None
+        pdata = self.hud.stat_dict.get(player_id) if self.hud.stat_dict else None
+        if not isinstance(pdata, dict):
+            pdata = {}
+        try:
+            from fpdb_3_legacy import hud_situation
+
+            context = hud_situation.HudSituationContext.from_stat_dict(
+                pdata,
+                getattr(self.hud, "live_state", None),
+            )
+            selection, _change = state.update((seat, 0), context, samples=pdata)
+            return selection
+        except Exception:  # intentional broad catch: a bad rule must not blank a seat
+            log.exception("Dynamic panel selection failed for seat %s; using the static grid", seat)
+            return None
 
     def _show_hero_hud(self) -> bool:
         """Whether this stat-set should display hero stat windows."""
@@ -1201,7 +1258,7 @@ class SimpleStatWindow(Aux_Base.SeatWindow):
         block_index = getattr(self, "block_index", None)
         blocks = [all_blocks[block_index]] if block_index is not None else all_blocks
         self.stat_boxes = []  # one 2D array of SimpleStat per block
-        self.block_widgets = []  # (container widget, position) per block, for show/hide
+        self.block_widgets = []  # (container widget, block metadata) per block, for show/hide
         for blk in blocks:
             container = QWidget()
             if multi:
@@ -1317,7 +1374,7 @@ class SimpleStatWindow(Aux_Base.SeatWindow):
             cl.addLayout(grid)
             outer.addWidget(container)
             self.stat_boxes.append(box)
-            self.block_widgets.append((container, blk.get("position", "")))
+            self.block_widgets.append((container, blk))
         # Legacy alias: keep self.stat_box pointing at the first block's grid.
         self.stat_box = self.stat_boxes[0] if self.stat_boxes else []
 
@@ -1336,7 +1393,7 @@ class SimpleStatWindow(Aux_Base.SeatWindow):
         if i == "table":
             self.show()
             has_visible_block = False
-            for box, (container, block_pos) in zip(self.stat_boxes, self.block_widgets, strict=False):
+            for box, (container, block) in zip(self.stat_boxes, self.block_widgets, strict=False):
                 container.setVisible(True)
                 has_visible_block = True
                 for row in box:
@@ -1370,9 +1427,16 @@ class SimpleStatWindow(Aux_Base.SeatWindow):
         # import-driven HUD only knows the *previous* hand's position and would
         # otherwise display a one-hand-stale panel. "current" filters by position.
         show_all_positions = self.aw._positional_mode() == "all"
+        # Context-aware panels (#298) refine this: when the profile has panel
+        # rules, a block the selection names is shown and a block it does not
+        # name keeps the position rule, so the static core is untouched.
+        selection = self.aw.dynamic_panel_selection(i, player_id)
         has_visible_block = False
-        for box, (container, block_pos) in zip(self.stat_boxes, self.block_widgets, strict=False):
-            visible = True if show_all_positions else block_visible(block_pos, player_pos)
+        for box, (container, block) in zip(self.stat_boxes, self.block_widgets, strict=False):
+            if selection is not None:
+                visible = block_visible_for(block, selection, player_pos)
+            else:
+                visible = True if show_all_positions else block_visible(block.get("position", ""), player_pos)
             container.setVisible(visible)
             if not visible:
                 continue
