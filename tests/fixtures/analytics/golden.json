@@ -61,6 +61,19 @@
       ]
     },
     {
+      "id": "fold_to_other_raise_counts_a_bet",
+      "column": "foldToOtherRaisedStreet2",
+      "observed_true_rows": 5,
+      "note": [
+        "foldToOtherRaisedStreetN reads \"folded to a raise on street N\", but the aggression",
+        "pass that feeds it counts a bet as a raise, so folding to an ordinary lead sets it",
+        "too: in hand 3100000003 Anna bets the turn, nobody raises, and Boris's fold is",
+        "recorded as a fold to a turn raise. Anything built on the column therefore reads",
+        "fold-to-bet and fold-to-raise as one number. The turn count is pinned so that",
+        "separating the two shows up here."
+      ]
+    },
+    {
       "id": "effective_stack_uses_remaining_stacks",
       "column": "effStack",
       "note": [
@@ -145,11 +158,16 @@
               }
             },
             "Erin": {
-              "role": "big blind folding to the steal",
+              "role": "big blind folding to the steal, its blind already out of its stack",
               "expect": {
                 "vpip": false,
                 "folded_bb_to_steal": true,
-                "position_code": "B"
+                "position_code": "B",
+                "effective_stack_cents": {
+                  "poker": 20000,
+                  "current": 19800,
+                  "deviation": "effective_stack_uses_remaining_stacks"
+                }
               }
             },
             "Frank": {
@@ -278,7 +296,11 @@
                 "in_position_flop": true,
                 "saw_flop": true,
                 "saw_turn": true,
-                "fold_to_other_raise_turn": true,
+                "fold_to_other_raise_turn": {
+                  "poker": false,
+                  "current": true,
+                  "deviation": "fold_to_other_raise_counts_a_bet"
+                },
                 "folded_turn": true,
                 "folded_street": "turn",
                 "open_limp": {

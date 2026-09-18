@@ -385,7 +385,16 @@ def test_the_hud_cache_holds_what_the_hand_rows_say(corpus: golden.GoldenCorpus)
     facts, accumulated per player and position bucket.
     """
     failures: list[str] = []
-    for name, cache in corpus.hud_cache.items():
+    # Driven by the players the hands know about, not by the cache: a writer
+    # that skips a player -- or writes nothing at all -- has to fail here
+    # rather than leave nothing to compare.
+    played = {player for hand_rows in corpus.players.values() for player in hand_rows}
+    assert played, "the corpus produced no player rows"
+    missing = sorted(played - set(corpus.hud_cache))
+    assert not missing, f"no HudCache row for {missing}"
+
+    for name in sorted(played):
+        cache = corpus.hud_cache[name]
         rows = [row for hand_rows in corpus.players.values() for player, row in hand_rows.items() if player == name]
         for column in CACHE_COLUMNS:
             per_hand = sum(row[column] or 0 for row in rows)
