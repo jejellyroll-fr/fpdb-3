@@ -267,6 +267,11 @@ reportMissingImports = false
 where = ["."]
 include = ["fpdb_3_legacy", "fpdb_3_legacy.*", "fpdb", "fpdb.*"]
 
+[tool.setuptools.package-data]
+# The bundled stat and filter definitions (#306) are data, not modules, and an
+# installed package without them has an empty registry and no stats at all.
+fpdb_3_legacy = ["analytics_definitions.d/*.json"]
+
 [tool.coverage.run]
 source = ["fpdb_3_legacy", "fpdb"]
 branch = true

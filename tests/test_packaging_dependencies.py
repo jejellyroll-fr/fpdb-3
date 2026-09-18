@@ -106,3 +106,22 @@ def test_the_macos_frameworks_the_hud_needs_are_packaged(briefcase_app, framewor
     packaged = {requirement_name(spec) for spec in briefcase_app["macOS"]["requires"]}
 
     assert framework.lower() in packaged
+
+
+def test_the_bundled_definitions_reach_every_packaging_path(pyproject) -> None:
+    """The stat library is data, and data is what packaging forgets.
+
+    ``analytics_definitions.d/core.json`` is the only bundled definition
+    library: an install without it has an empty registry and every shipped
+    stat quietly disappears -- no error, just nothing to show. PyInstaller
+    copies the package directory whole, but PyOxidizer allowlists extensions
+    and setuptools installs modules only, so both have to name it.
+    """
+    definitions = Path("fpdb_3_legacy/analytics_definitions.d")
+    assert sorted(path.name for path in definitions.glob("*.json")), "no definitions to package"
+
+    manifest = Path("pyoxidizer.bzl").read_text()
+    assert '/fpdb_3_legacy/**/*.json"' in manifest, "PyOxidizer ships no JSON from the package"
+
+    package_data = pyproject["tool"]["setuptools"]["package-data"]["fpdb_3_legacy"]
+    assert any(pattern.startswith("analytics_definitions.d/") for pattern in package_data)

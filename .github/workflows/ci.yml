@@ -106,6 +106,7 @@ jobs:
           fpdb_3_legacy/analytics_lifecycle.py
           fpdb_3_legacy/analytics_rebuild.py
           fpdb_3_legacy/analytics_query.py
+          fpdb_3_legacy/analytics_definitions.py
           fpdb_3_legacy/situation_store.py
           fpdb_3_legacy/stats_action_enums.py
           fpdb_3_legacy/stats_context.py
