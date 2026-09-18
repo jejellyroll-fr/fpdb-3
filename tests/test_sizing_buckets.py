@@ -165,7 +165,6 @@ class TestBucketVocabulary:
         says ``unknown``.
         """
         sizes = [0, -1, 1, 2499, 2500, 5000, 15000, 99999, None]
-        expression = bucket_case_expression("sizingBp")
 
         with closing(sqlite3.connect(":memory:")) as conn:
             conn.execute("CREATE TABLE t (sizingBp INTEGER)")
@@ -193,12 +192,6 @@ class TestBucketVocabulary:
 
     def test_a_label_with_a_quote_in_it_is_a_literal_not_a_hole(self) -> None:
         """Bucket tables are configurable, so their labels are data."""
-        quoted = BucketConfig(
-            name="quoted",
-            upper_bounds_bp=(5000,),
-            labels=("player's small", "player's big"),
-        )
-        expression = bucket_case_expression("sizingBp", quoted)
 
         with closing(sqlite3.connect(":memory:")) as conn:
             conn.execute("CREATE TABLE t (sizingBp INTEGER)")
