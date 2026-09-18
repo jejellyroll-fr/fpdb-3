@@ -249,6 +249,7 @@ FILTERS: Final[dict[str, _Filter]] = {
     "limit": _Filter("G.limitType", ("G",), "set"),
     "currency": _Filter("G.currency", ("G",), "set"),
     "tournament": _Filter("H.tourneyId", ("H",), "null_check"),
+    "tournament_id": _Filter("H.tourneyId", ("H",), "set"),
     "big_blind": _Filter("G.bigBlind", ("G",), "range"),
     "stake_bb": _Filter("G.bigBlind", ("G",), "range"),
     "seats": _Filter("H.seats", ("H",), "range"),
@@ -309,6 +310,14 @@ FILTERS: Final[dict[str, _Filter]] = {
     # -- sizing ------------------------------------------------------------
     "sizing_bp": _Filter("A.sizingBp", ("A",), "range"),
     "facing_sizing_bp": _Filter("A.facingSizingBp", ("A",), "range"),
+    # The bucket *names* #296 groups by, as filters. Grouping by a bucket and
+    # then asking for the hands in one row is the drill-down of a sizing
+    # distribution (#300), and it must select the same rows the histogram
+    # counted, so the two read the same CASE expression.
+    "sizing_bucket": _Filter(bucket_case_expression("sizingBp", qualifier="A."), ("A",), "set"),
+    "facing_sizing_bucket": _Filter(
+        bucket_case_expression("facingSizingBp", qualifier="A."), ("A",), "set",
+    ),
     "bet_sizing_pct": _Filter("A.sizingBp", ("A",), "range_pct"),
     "facing_sizing_pct": _Filter("A.facingSizingBp", ("A",), "range_pct"),
     # -- board -------------------------------------------------------------
@@ -429,6 +438,11 @@ def _compile_filter(
     if spec is None:
         raise ValueError(f"Unknown filter {name!r}; known filters: {sorted(FILTERS)}")
     column = spec.column
+    # ``None`` traditionally means "no filter" to callers. Drill-downs need
+    # an explicit null predicate, so they use this structured value instead of
+    # changing that public convention.
+    if isinstance(value, Mapping) and set(value) == {"is_null"}:
+        return [f"{column} IS {'NULL' if value['is_null'] else 'NOT NULL'}"], []
     if spec.kind in ("scalar", "set"):
         values = _as_list(value)
         values = spec.coerce(values) if spec.coerce is not None else values

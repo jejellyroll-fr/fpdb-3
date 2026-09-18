@@ -242,4 +242,10 @@ The engine is the substrate for the rest of Phase 2:
 * **#307** builds player populations and cohorts as reusable filter sets
   ([cohorts.md](cohorts.md)) — the `hands`/`players` metrics, the `identity`
   filter and the `hero` semantics above are what that layer stands on.
+* **#300** reports the money of a population, with the semantics of each figure
+  spelled out and the theoretical one refused
+  ([profitability-ev.md](profitability-ev.md)) — it reads the `total_profit` and
+  `all_in_ev` metrics above, sums them once per hand-player, and adds the
+  `sizing_bucket` / `facing_sizing_bucket` filters so a bucket can be opened as
+  hands.
 * **#303** renders a result and its drill-down hands in the research browser.
