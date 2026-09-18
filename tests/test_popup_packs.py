@@ -561,7 +561,7 @@ class TestModernPopupRendering:
 
         opened: list[tuple] = []
         monkeypatch.setattr(ModernPopup, "popup_factory", lambda *args: opened.append(args))
-        popup = ModernPopup.ModernSubmenu.__new__(ModernPopup.ModernSubmenu)
+        popup = ModernPopup.ModernSubmenu.__new__(ModernPopup.ModernSubmenu)  # pylint: disable=no-value-for-parameter
         popup.seat = 3
         popup.stat_dict = {}
         popup.win = object()
@@ -574,7 +574,7 @@ class TestModernPopupRendering:
     def test_opening_a_missing_submenu_logs_instead_of_raising(self) -> None:
         from fpdb_3_legacy import ModernPopup
 
-        popup = ModernPopup.ModernSubmenu.__new__(ModernPopup.ModernSubmenu)
+        popup = ModernPopup.ModernSubmenu.__new__(ModernPopup.ModernSubmenu)  # pylint: disable=no-value-for-parameter
         popup.seat = 3
         popup.stat_dict = {}
         popup.win = object()
