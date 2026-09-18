@@ -46,6 +46,7 @@ from .analytics_query import (
     CompiledQuery,
     Query,
     QueryResult,
+    _alias_of,
     _backend_name,
     _expand_sources,
     _from_clause,
@@ -211,6 +212,10 @@ RAKE_ATTRIBUTIONS: Final[dict[str, tuple[str, str]]] = {
     "weighted": ("rakeWeighted", "the hand rake weighted by what each player put in"),
 }
 
+# These dimensions identify one value per hand-player. Grouping by one or a
+# combination of them therefore partitions the money instead of overlapping.
+_PARTITIONING_DIMENSIONS: Final[frozenset[str]] = frozenset({"player", "position", "site"})
+
 
 def _rake_alias(name: str) -> str:
     """The SELECT name of one rake attribution in the pair query."""
@@ -241,8 +246,8 @@ class ProfitRow:
     ev_adjusted_cents: int
     all_in_luck_cents: int
     ev_adjusted_pairs: int
-    rake: dict[str, int]
-    rake_cents: int
+    rake: dict[str, float]
+    rake_cents: float
     bb_pairs: int
     bb_profit: float
     bb_per_100: float | None
@@ -307,7 +312,7 @@ class ProfitReport:
     @property
     def overlapping_groups(self) -> bool:
         """Whether grouping decisions means the rows share hand results."""
-        return bool(self.group_by)
+        return bool(self.group_by) and not set(self.group_by).issubset(_PARTITIONING_DIMENSIONS)
 
     def row(self, **key: Any) -> ProfitRow:
         """One row of the report, by its group values."""
@@ -352,7 +357,7 @@ class ProfitReport:
             return (
                 f"{marker} {prefix}"
                 f"{row.opportunities:>7}  {row.hands:>6}  {row.realized_cents:>10}  "
-                f"{row.ev_adjusted_cents:>10}  {row.all_in_luck_cents:>9}  {bb:>8}  {row.rake_cents:>7}"
+                f"{row.ev_adjusted_cents:>10}  {row.all_in_luck_cents:>9}  {bb:>8}  {_amount_cell(row.rake_cents):>7}"
             )
 
         if self.group_by:
@@ -379,6 +384,16 @@ def _cell(value: Any) -> str:
 def _money(value: Any) -> int:
     """A stored money column as an integer number of cents."""
     return int(round(float(value or 0)))
+
+
+def _rake_amount(value: Any) -> float:
+    """A rake allocation in cents, retaining fractional-cent attribution."""
+    return round(float(value or 0), 8)
+
+
+def _amount_cell(value: float) -> str:
+    """Render integer-valued amounts compactly while keeping fractions visible."""
+    return f"{value:.8f}".rstrip("0").rstrip(".")
 
 
 def _rate(value: Any) -> float:
@@ -425,11 +440,11 @@ def compile_profit_query(
     needed = _expand_sources(aliases | {"A", "G"})
     from_clause = _from_clause(needed)
 
-    inner_select = [f"{expression} AS {name}" for name, expression in expressions]
+    inner_select = [f"{expression} AS {_alias_of(name)}" for name, expression in expressions]
     inner_select += ["A.handId AS handId", "A.playerId AS playerId"]
 
-    outer_group = [f"P.{name}" for name in group_by]
-    outer_select = [f"P.{name} AS {name}" for name in group_by]
+    outer_group = [f"P.{_alias_of(name)}" for name in group_by]
+    outer_select = [f"P.{_alias_of(name)} AS {_alias_of(name)}" for name in group_by]
     outer_select += [
         "COUNT(*) AS hand_players",
         "COUNT(DISTINCT P.handId) AS hands",
@@ -485,7 +500,7 @@ def _row_from_pair_row(
     """One pair-row of SQL as a :class:`ProfitRow`, with the derived figures."""
     realized = _money(raw["realized_cents"])
     adjusted = _money(raw["ev_adjusted_cents"])
-    rake = {name: _money(raw[_rake_alias(name)]) for name in RAKE_ATTRIBUTIONS}
+    rake = {name: _rake_amount(raw[_rake_alias(name)]) for name in RAKE_ATTRIBUTIONS}
     bb_pairs = int(raw["bb_pairs"] or 0)
     bb_profit = _rate(raw["bb_profit"])
     bb_adjusted = _rate(raw["bb_adjusted"])
@@ -525,7 +540,7 @@ def _notes(
         "realized profit is the hand-level result conditioned on the filters; it is not the expected "
         "value of the action",
     ]
-    if group_by:
+    if group_by and set(group_by) - _PARTITIONING_DIMENSIONS:
         notes.append(
             "groups overlap by design: a hand-player is counted in every group its actions fall into, "
             "so the rows do not add up to the total",
@@ -590,7 +605,7 @@ def profit_report(
     counts = run_query(db, counts_query)
 
     cursor = db.get_cursor()
-    cursor.execute(money.sql, money.params)
+    cursor.execute(money.sql, money.params)  # nosec B608  # nosemgrep
     columns = [description[0] for description in cursor.description]
     pair_rows = [dict(zip(columns, raw)) for raw in cursor.fetchall()]
 
@@ -598,7 +613,7 @@ def profit_report(
     rows: list[ProfitRow] = []
     lookup: dict[tuple[Any, ...], ProfitRow] = {}
     for raw in pair_rows:
-        group = {name: raw[name] for name in group_by}
+        group = {name: raw[_alias_of(name)] for name in group_by}
         key = tuple(group[name] for name in group_by)
         # A pair row and a count row are the same group by construction: both
         # group the same expression over the same population.
@@ -641,7 +656,7 @@ def _total_row(
     """
     if not query.group_by:
         cursor = db.get_cursor()
-        cursor.execute(money.sql, money.params)
+        cursor.execute(money.sql, money.params)  # nosec B608  # nosemgrep
         columns = [description[0] for description in cursor.description]
         raw = cursor.fetchone()
         if raw is None:  # pragma: no cover - an aggregate without GROUP BY always returns a row
@@ -659,7 +674,7 @@ def _total_row(
         _backend_name(db),
     )
     cursor = db.get_cursor()
-    cursor.execute(ungrouped.sql, ungrouped.params)
+    cursor.execute(ungrouped.sql, ungrouped.params)  # nosec B608  # nosemgrep
     columns = [description[0] for description in cursor.description]
     raw = cursor.fetchone()
     if raw is None:  # pragma: no cover - an aggregate without GROUP BY always returns a row
@@ -691,10 +706,17 @@ def narrow_query(query: Query, group: Mapping[str, Any]) -> Query:
     filters = dict(query.filters)
     missing: list[str] = []
     for name, value in group.items():
-        if name in FILTERS:
-            filters[name] = value
-        else:
+        filter_name = "tournament_id" if name == "tournament" and value is not None else name
+        spec = FILTERS.get(filter_name)
+        if spec is None:
             missing.append(name)
+            continue
+        if value is None:
+            filters[filter_name] = {"is_null": True}
+        elif spec.kind in ("range", "range_pct", "range_low", "range_high"):
+            filters[filter_name] = [value, value]
+        else:
+            filters[filter_name] = value
     if missing:
         raise ValueError(
             f"Cannot narrow a report by {missing}: no filter of that name exists, so the group's "

@@ -5,8 +5,8 @@ split by action and by sizing bucket, all-in EV kept apart from realized profit,
 labels that do not pretend to be solver EV, hands that can be opened for review,
 and totals reconciled with the money already in the database.
 
-Every number comes from the golden corpus, which is fixed: 30 hands, 326
-decisions, 6 players dealt into all 30 hands, 180 distinct (hand, player) pairs,
+Every number comes from the golden corpus, which is fixed: 31 hands, 341
+decisions, 6 players dealt into all 31 hands, 186 distinct (hand, player) pairs,
 one game type at $2/$4-class stakes with a 200-cent big blind, and rake-free --
 so the money of the whole corpus has to add up to exactly zero. The corpus
 prices the all-in equity of exactly one hand (15), for two of its players, which
@@ -27,13 +27,13 @@ from fpdb_3_legacy.Importer import Importer
 from tests.helpers import analytics_golden as golden
 
 # Read off the corpus (see the module docstring).
-DECISIONS = 326
-HANDS = 30
+DECISIONS = 341
+HANDS = 31
 PLAYERS = 6
-PAIRS = 180
-HERO_DECISIONS = 66
-HERO_REALIZED = 26500
-OPPONENT_REALIZED = -26500
+PAIRS = 186
+HERO_DECISIONS = 69
+HERO_REALIZED = 27400
+OPPONENT_REALIZED = -27400
 EV_ADJUSTED = -40
 PRICED_PAIRS = 2
 BIG_BLIND_CENTS = 200
@@ -41,7 +41,7 @@ BIG_BLIND_CENTS = 200
 # The hand whose all-in equity fpdb could price, and the naive sum a
 # per-decision attribution would report -- the number this module refuses.
 PRICED_HAND = 15
-NAIVE_DECISION_SUM = -29100
+NAIVE_DECISION_SUM = -29800
 
 _MODULE_STATE: list[object] = []
 
@@ -202,6 +202,7 @@ def test_the_unfiltered_report_equals_the_stored_money(db):
 def test_a_player_dimension_partitions_the_money(db):
     """A seat is a property of the hand-player, so its groups do not overlap."""
     report_ = report(db, metric="total_profit", group_by=("player",))
+    assert not report_.overlapping_groups
     assert len(report_.rows) == PLAYERS
     assert sum(row.realized_cents for row in report_.rows) == report_.total.realized_cents == 0
     assert sum(row.hand_players for row in report_.rows) == PAIRS
@@ -213,9 +214,9 @@ def test_the_per_player_money_is_the_pair_level_money(db):
         "Anna": 20000,
         "Boris": HERO_REALIZED,
         "Cara": -11400,
-        "Dave": -3000,
-        "Erin": -6000,
-        "Frank": -26100,
+        "Dave": -3100,
+        "Erin": -6200,
+        "Frank": -26700,
     }
 
 
@@ -231,6 +232,7 @@ def test_the_hero_and_the_opponents_add_up_to_the_corpus(db):
 def test_a_position_dimension_also_partitions_the_money(db):
     """Position is per hand-player too: six groups, one pair in each."""
     report_ = report(db, metric="total_profit", group_by=("position",))
+    assert not report_.overlapping_groups
     assert sum(row.hand_players for row in report_.rows) == PAIRS
     assert sum(row.realized_cents for row in report_.rows) == 0
 
@@ -248,7 +250,7 @@ def test_a_position_dimension_also_partitions_the_money(db):
         ({"primary_situation": "facing_3bet", "response": "call"}, 2, 2, -21600),
         ({"primary_situation": "three_bet", "response": "raise"}, 3, 3, 26500),
         ({"primary_situation": "cbet", "sizing_bucket": ["25-33", "33-40"]}, 2, 2, 1600),
-        ({"primary_situation": "cbet_spot", "response": "check"}, 7, 6, -2100),
+        ({"primary_situation": "cbet_spot", "response": "check"}, 8, 7, -2700),
         ({"primary_situation": "open_raise", "position": "co"}, 20, 20, 17400),
         ({"situation": "squeeze"}, 1, 1, 1300),
     ],
@@ -322,14 +324,14 @@ def test_an_action_split_overlaps_too(db):
     report_ = report(db, metric="total_profit", filters={"role": "aggressor"}, group_by=("street",))
     by_street = {row.group["street"]: row for row in report_.rows}
     assert by_street["preflop"].opportunities == 36
-    assert by_street["flop"].realized_cents == -2800
+    assert by_street["flop"].realized_cents == -3400
     assert sum(row.hand_players for row in report_.rows) >= report_.total.hand_players
 
 
 def test_a_board_texture_split_is_available_per_street(db):
     report_ = report(db, metric="total_profit", filters={"primary_situation": "cbet_spot"}, group_by=("board_rank",))
     by_rank = {row.group["board_rank"]: row.realized_cents for row in report_.rows}
-    assert by_rank == {"broadway": -1800, "king-high": -1800, "middle": 1500}
+    assert by_rank == {"broadway": -2400, "king-high": -1800, "middle": 1500}
 
 
 def test_a_row_can_be_fetched_by_its_group_values(db):
@@ -407,6 +409,21 @@ def test_the_three_attributions_are_reportable_separately(db, raked):
     assert report_.total.rake == {"dealt": 100 * PAIRS, "contributed": 200 * PAIRS, "weighted": 300 * PAIRS}
 
 
+def test_fractional_rake_allocations_are_not_rounded_to_zero(db, raked):
+    cursor = db.get_cursor()
+    cursor.execute(
+        "UPDATE HandsPlayers SET rakeContributed = 1.0 / 6 "
+        "WHERE handId = 1 AND playerId = (SELECT id FROM Players WHERE name = 'Anna')",
+    )
+    try:
+        total = report(db, metric="total_profit").total
+        expected = 200 * (PAIRS - 1) + (1 / 6)
+        assert total.rake_cents == pytest.approx(expected)
+        assert total.rake_cents > 0
+    finally:
+        cursor.execute("UPDATE HandsPlayers SET rakeContributed = 200")
+
+
 def test_the_chosen_attribution_is_the_one_in_the_money_column(db, raked):
     for attribution, expected in (("dealt", 100), ("contributed", 200), ("weighted", 300)):
         report_ = report(db, metric="total_profit", rake=attribution)
@@ -461,7 +478,7 @@ def test_hiding_the_small_rows_leaves_the_total_alone(db):
 def test_an_ungrouped_report_prints_its_one_row_once(db):
     rendered = report(db, metric="total_profit").render()
     assert rendered.count("\n") == sum(1 for _ in rendered.splitlines()) - 1
-    data_lines = [line for line in rendered.splitlines() if line.strip().startswith(("326", "66"))]
+    data_lines = [line for line in rendered.splitlines() if line.strip().startswith(("341", "69"))]
     assert len(data_lines) == 1
 
 
@@ -520,6 +537,29 @@ def test_narrowing_keeps_the_filters_the_report_was_given(db):
     assert narrowed.limit == query.limit
 
 
+def test_narrowing_normalizes_ranges_nulls_and_tournament_ids():
+    base = Query(metric="total_profit", filters={"hero": True})
+    assert profit.narrow_query(base, {"effective_stack_bb": 20}).filters == {
+        "hero": True,
+        "effective_stack_bb": [20, 20],
+    }
+    assert profit.narrow_query(base, {"board_rank": None}).filters == {
+        "hero": True,
+        "board_rank": {"is_null": True},
+    }
+    assert profit.narrow_query(base, {"tournament": 1234}).filters == {
+        "hero": True,
+        "tournament_id": 1234,
+    }
+
+
+def test_limit_dimension_uses_a_safe_sql_alias(db):
+    report_ = report(db, metric="total_profit", group_by=("limit",))
+    assert report_.rows
+    assert {row.group["limit"] for row in report_.rows} == {"nl"}
+    assert "AS limit_" in report_.compiled[0].sql
+
+
 def test_narrowing_by_a_dimension_without_a_filter_is_refused_by_name(db):
     with pytest.raises(ValueError) as caught:
         profit.narrow_query(Query(metric="total_profit"), {"no_such_dimension": 1})
@@ -530,9 +570,11 @@ def test_a_group_can_be_asked_for_its_hands_directly(db):
     query = Query(metric="total_profit", filters={"role": "aggressor"})
     flop = profit.matching_hand_ids(db, profit.narrow_query(query, {"street": "flop"}))
     preflop = profit.matching_hand_ids(db, profit.narrow_query(query, {"street": "preflop"}))
-    assert len(flop) == 23
+    assert len(flop) == 24
     assert len(preflop) == 30
-    assert set(flop) < set(preflop)
+    # The added limped-pot hand has a flop aggressor but no matching preflop
+    # aggressor; all earlier corpus flop matches remain in the preflop set.
+    assert set(flop) - {31} < set(preflop)
 
 
 # --------------------------------------------------------------------------- #
@@ -586,7 +628,7 @@ def test_the_report_serialises_whole_and_readably(db):
         "all_in_luck",
         "immediate_action_ev",
     ]
-    assert decoded["rows"][0]["bb_per_100"] == pytest.approx(441.6667)
+    assert decoded["rows"][0]["bb_per_100"] == pytest.approx(441.9355)
 
 
 def test_a_drill_down_query_fits_in_the_browser_shape(db):
