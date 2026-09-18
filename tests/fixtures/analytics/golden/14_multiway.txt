@@ -1,0 +1,37 @@
+PokerStars Hand #3100000014:  Hold'em No Limit ($1.00/$2.00 USD) - 2026/09/16 12:13:00 ET
+Table 'Golden 14 Multiway' 6-max Seat #3 is the button
+Seat 1: Anna ($200.00 in chips)
+Seat 2: Boris ($200.00 in chips)
+Seat 3: Cara ($200.00 in chips)
+Seat 4: Dave ($200.00 in chips)
+Seat 5: Erin ($200.00 in chips)
+Seat 6: Frank ($200.00 in chips)
+Dave: posts small blind $1.00
+Erin: posts big blind $2.00
+*** HOLE CARDS ***
+Dealt to Boris [6c 5c]
+Frank: raises $3.00 to $5.00
+Anna: calls $5.00
+Boris: calls $5.00
+Cara: folds
+Dave: folds
+Erin: folds
+*** FLOP *** [8d 8c 2h]
+Frank: bets $9.00
+Anna: calls $9.00
+Boris: folds
+*** TURN *** [8d 8c 2h] [Kh]
+Frank: checks
+Anna: bets $20.00
+Frank: folds
+Uncalled bet ($20.00) returned to Anna
+Anna collected $36.00 from pot
+*** SUMMARY ***
+Total pot $36.00 | Rake $0.00
+Board [8d 8c 2h Kh]
+Seat 1: Anna collected ($36.00)
+Seat 2: Boris folded on the Flop
+Seat 3: Cara (button) folded before Flop (didn't bet)
+Seat 4: Dave (small blind) folded before Flop
+Seat 5: Erin (big blind) folded before Flop
+Seat 6: Frank folded on the Turn

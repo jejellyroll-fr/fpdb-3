@@ -1,0 +1,320 @@
+PokerStars Hand #3100000021:  Hold'em No Limit ($1.00/$2.00 USD) - 2026/09/16 12:20:00 ET
+Table 'Golden 17 Sizing' 6-max Seat #3 is the button
+Seat 1: Anna ($200.00 in chips)
+Seat 2: Boris ($200.00 in chips)
+Seat 3: Cara ($200.00 in chips)
+Seat 4: Dave ($200.00 in chips)
+Seat 5: Erin ($200.00 in chips)
+Seat 6: Frank ($200.00 in chips)
+Dave: posts small blind $1.00
+Erin: posts big blind $2.00
+*** HOLE CARDS ***
+Dealt to Boris [Ac Kc]
+Frank: folds
+Anna: folds
+Boris: raises $3.00 to $5.00
+Cara: calls $5.00
+Dave: folds
+Erin: folds
+*** FLOP *** [Qd 8h 3c]
+Boris: bets $3.00
+Cara: folds
+Uncalled bet ($3.00) returned to Boris
+Boris collected $13.00 from pot
+*** SUMMARY ***
+Total pot $13.00 | Rake $0.00
+Board [Qd 8h 3c]
+Seat 1: Anna folded before Flop (didn't bet)
+Seat 2: Boris collected ($13.00)
+Seat 3: Cara (button) folded on the Flop
+Seat 4: Dave (small blind) folded before Flop
+Seat 5: Erin (big blind) folded before Flop
+Seat 6: Frank folded before Flop (didn't bet)
+PokerStars Hand #3100000022:  Hold'em No Limit ($1.00/$2.00 USD) - 2026/09/16 12:21:00 ET
+Table 'Golden 17 Sizing' 6-max Seat #3 is the button
+Seat 1: Anna ($200.00 in chips)
+Seat 2: Boris ($200.00 in chips)
+Seat 3: Cara ($200.00 in chips)
+Seat 4: Dave ($200.00 in chips)
+Seat 5: Erin ($200.00 in chips)
+Seat 6: Frank ($200.00 in chips)
+Dave: posts small blind $1.00
+Erin: posts big blind $2.00
+*** HOLE CARDS ***
+Dealt to Boris [Ad Qs]
+Frank: folds
+Anna: folds
+Boris: raises $3.00 to $5.00
+Cara: calls $5.00
+Dave: folds
+Erin: folds
+*** FLOP *** [Jc 7d 2h]
+Boris: bets $4.00
+Cara: folds
+Uncalled bet ($4.00) returned to Boris
+Boris collected $13.00 from pot
+*** SUMMARY ***
+Total pot $13.00 | Rake $0.00
+Board [Jc 7d 2h]
+Seat 1: Anna folded before Flop (didn't bet)
+Seat 2: Boris collected ($13.00)
+Seat 3: Cara (button) folded on the Flop
+Seat 4: Dave (small blind) folded before Flop
+Seat 5: Erin (big blind) folded before Flop
+Seat 6: Frank folded before Flop (didn't bet)
+PokerStars Hand #3100000023:  Hold'em No Limit ($1.00/$2.00 USD) - 2026/09/16 12:22:00 ET
+Table 'Golden 17 Sizing' 6-max Seat #3 is the button
+Seat 1: Anna ($200.00 in chips)
+Seat 2: Boris ($200.00 in chips)
+Seat 3: Cara ($200.00 in chips)
+Seat 4: Dave ($200.00 in chips)
+Seat 5: Erin ($200.00 in chips)
+Seat 6: Frank ($200.00 in chips)
+Dave: posts small blind $1.00
+Erin: posts big blind $2.00
+*** HOLE CARDS ***
+Dealt to Boris [As Jd]
+Frank: folds
+Anna: folds
+Boris: raises $3.00 to $5.00
+Cara: calls $5.00
+Dave: folds
+Erin: folds
+*** FLOP *** [Ts 6c 2d]
+Boris: bets $5.00
+Cara: folds
+Uncalled bet ($5.00) returned to Boris
+Boris collected $13.00 from pot
+*** SUMMARY ***
+Total pot $13.00 | Rake $0.00
+Board [Ts 6c 2d]
+Seat 1: Anna folded before Flop (didn't bet)
+Seat 2: Boris collected ($13.00)
+Seat 3: Cara (button) folded on the Flop
+Seat 4: Dave (small blind) folded before Flop
+Seat 5: Erin (big blind) folded before Flop
+Seat 6: Frank folded before Flop (didn't bet)
+PokerStars Hand #3100000024:  Hold'em No Limit ($1.00/$2.00 USD) - 2026/09/16 12:23:00 ET
+Table 'Golden 17 Sizing' 6-max Seat #3 is the button
+Seat 1: Anna ($200.00 in chips)
+Seat 2: Boris ($200.00 in chips)
+Seat 3: Cara ($200.00 in chips)
+Seat 4: Dave ($200.00 in chips)
+Seat 5: Erin ($200.00 in chips)
+Seat 6: Frank ($200.00 in chips)
+Dave: posts small blind $1.00
+Erin: posts big blind $2.00
+*** HOLE CARDS ***
+Dealt to Boris [Ah Tc]
+Frank: folds
+Anna: folds
+Boris: raises $3.00 to $5.00
+Cara: calls $5.00
+Dave: folds
+Erin: folds
+*** FLOP *** [9h 5s 2c]
+Boris: bets $6.00
+Cara: folds
+Uncalled bet ($6.00) returned to Boris
+Boris collected $13.00 from pot
+*** SUMMARY ***
+Total pot $13.00 | Rake $0.00
+Board [9h 5s 2c]
+Seat 1: Anna folded before Flop (didn't bet)
+Seat 2: Boris collected ($13.00)
+Seat 3: Cara (button) folded on the Flop
+Seat 4: Dave (small blind) folded before Flop
+Seat 5: Erin (big blind) folded before Flop
+Seat 6: Frank folded before Flop (didn't bet)
+PokerStars Hand #3100000025:  Hold'em No Limit ($1.00/$2.00 USD) - 2026/09/16 12:24:00 ET
+Table 'Golden 17 Sizing' 6-max Seat #3 is the button
+Seat 1: Anna ($200.00 in chips)
+Seat 2: Boris ($200.00 in chips)
+Seat 3: Cara ($200.00 in chips)
+Seat 4: Dave ($200.00 in chips)
+Seat 5: Erin ($200.00 in chips)
+Seat 6: Frank ($200.00 in chips)
+Dave: posts small blind $1.00
+Erin: posts big blind $2.00
+*** HOLE CARDS ***
+Dealt to Boris [Ks Qd]
+Frank: folds
+Anna: folds
+Boris: raises $3.00 to $5.00
+Cara: calls $5.00
+Dave: folds
+Erin: folds
+*** FLOP *** [Ah 8d 3s]
+Boris: bets $8.00
+Cara: folds
+Uncalled bet ($8.00) returned to Boris
+Boris collected $13.00 from pot
+*** SUMMARY ***
+Total pot $13.00 | Rake $0.00
+Board [Ah 8d 3s]
+Seat 1: Anna folded before Flop (didn't bet)
+Seat 2: Boris collected ($13.00)
+Seat 3: Cara (button) folded on the Flop
+Seat 4: Dave (small blind) folded before Flop
+Seat 5: Erin (big blind) folded before Flop
+Seat 6: Frank folded before Flop (didn't bet)
+PokerStars Hand #3100000026:  Hold'em No Limit ($1.00/$2.00 USD) - 2026/09/16 12:25:00 ET
+Table 'Golden 17 Sizing' 6-max Seat #3 is the button
+Seat 1: Anna ($200.00 in chips)
+Seat 2: Boris ($200.00 in chips)
+Seat 3: Cara ($200.00 in chips)
+Seat 4: Dave ($200.00 in chips)
+Seat 5: Erin ($200.00 in chips)
+Seat 6: Frank ($200.00 in chips)
+Dave: posts small blind $1.00
+Erin: posts big blind $2.00
+*** HOLE CARDS ***
+Dealt to Boris [Kc Jh]
+Frank: folds
+Anna: folds
+Boris: raises $3.00 to $5.00
+Cara: calls $5.00
+Dave: folds
+Erin: folds
+*** FLOP *** [Kd 7c 4h]
+Boris: bets $10.00
+Cara: folds
+Uncalled bet ($10.00) returned to Boris
+Boris collected $13.00 from pot
+*** SUMMARY ***
+Total pot $13.00 | Rake $0.00
+Board [Kd 7c 4h]
+Seat 1: Anna folded before Flop (didn't bet)
+Seat 2: Boris collected ($13.00)
+Seat 3: Cara (button) folded on the Flop
+Seat 4: Dave (small blind) folded before Flop
+Seat 5: Erin (big blind) folded before Flop
+Seat 6: Frank folded before Flop (didn't bet)
+PokerStars Hand #3100000027:  Hold'em No Limit ($1.00/$2.00 USD) - 2026/09/16 12:26:00 ET
+Table 'Golden 17 Sizing' 6-max Seat #3 is the button
+Seat 1: Anna ($200.00 in chips)
+Seat 2: Boris ($200.00 in chips)
+Seat 3: Cara ($200.00 in chips)
+Seat 4: Dave ($200.00 in chips)
+Seat 5: Erin ($200.00 in chips)
+Seat 6: Frank ($200.00 in chips)
+Dave: posts small blind $1.00
+Erin: posts big blind $2.00
+*** HOLE CARDS ***
+Dealt to Boris [Qs Td]
+Frank: folds
+Anna: folds
+Boris: raises $3.00 to $5.00
+Cara: calls $5.00
+Dave: folds
+Erin: folds
+*** FLOP *** [Qc 9d 4s]
+Boris: bets $12.00
+Cara: folds
+Uncalled bet ($12.00) returned to Boris
+Boris collected $13.00 from pot
+*** SUMMARY ***
+Total pot $13.00 | Rake $0.00
+Board [Qc 9d 4s]
+Seat 1: Anna folded before Flop (didn't bet)
+Seat 2: Boris collected ($13.00)
+Seat 3: Cara (button) folded on the Flop
+Seat 4: Dave (small blind) folded before Flop
+Seat 5: Erin (big blind) folded before Flop
+Seat 6: Frank folded before Flop (didn't bet)
+PokerStars Hand #3100000028:  Hold'em No Limit ($1.00/$2.00 USD) - 2026/09/16 12:27:00 ET
+Table 'Golden 17 Sizing' 6-max Seat #3 is the button
+Seat 1: Anna ($200.00 in chips)
+Seat 2: Boris ($200.00 in chips)
+Seat 3: Cara ($200.00 in chips)
+Seat 4: Dave ($200.00 in chips)
+Seat 5: Erin ($200.00 in chips)
+Seat 6: Frank ($200.00 in chips)
+Dave: posts small blind $1.00
+Erin: posts big blind $2.00
+*** HOLE CARDS ***
+Dealt to Boris [Jd Th]
+Frank: folds
+Anna: folds
+Boris: raises $3.00 to $5.00
+Cara: calls $5.00
+Dave: folds
+Erin: folds
+*** FLOP *** [Js 8h 5d]
+Boris: bets $16.00
+Cara: folds
+Uncalled bet ($16.00) returned to Boris
+Boris collected $13.00 from pot
+*** SUMMARY ***
+Total pot $13.00 | Rake $0.00
+Board [Js 8h 5d]
+Seat 1: Anna folded before Flop (didn't bet)
+Seat 2: Boris collected ($13.00)
+Seat 3: Cara (button) folded on the Flop
+Seat 4: Dave (small blind) folded before Flop
+Seat 5: Erin (big blind) folded before Flop
+Seat 6: Frank folded before Flop (didn't bet)
+PokerStars Hand #3100000029:  Hold'em No Limit ($1.00/$2.00 USD) - 2026/09/16 12:28:00 ET
+Table 'Golden 17 Sizing' 6-max Seat #3 is the button
+Seat 1: Anna ($200.00 in chips)
+Seat 2: Boris ($200.00 in chips)
+Seat 3: Cara ($200.00 in chips)
+Seat 4: Dave ($200.00 in chips)
+Seat 5: Erin ($200.00 in chips)
+Seat 6: Frank ($200.00 in chips)
+Dave: posts small blind $1.00
+Erin: posts big blind $2.00
+*** HOLE CARDS ***
+Dealt to Boris [Ac Qh]
+Frank: folds
+Anna: folds
+Boris: raises $3.00 to $5.00
+Cara: calls $5.00
+Dave: folds
+Erin: folds
+*** FLOP *** [Th 7s 3h]
+Boris: bets $18.00
+Cara: folds
+Uncalled bet ($18.00) returned to Boris
+Boris collected $13.00 from pot
+*** SUMMARY ***
+Total pot $13.00 | Rake $0.00
+Board [Th 7s 3h]
+Seat 1: Anna folded before Flop (didn't bet)
+Seat 2: Boris collected ($13.00)
+Seat 3: Cara (button) folded on the Flop
+Seat 4: Dave (small blind) folded before Flop
+Seat 5: Erin (big blind) folded before Flop
+Seat 6: Frank folded before Flop (didn't bet)
+PokerStars Hand #3100000030:  Hold'em No Limit ($1.00/$2.00 USD) - 2026/09/16 12:29:00 ET
+Table 'Golden 17 Sizing' 6-max Seat #3 is the button
+Seat 1: Anna ($200.00 in chips)
+Seat 2: Boris ($200.00 in chips)
+Seat 3: Cara ($200.00 in chips)
+Seat 4: Dave ($200.00 in chips)
+Seat 5: Erin ($200.00 in chips)
+Seat 6: Frank ($200.00 in chips)
+Dave: posts small blind $1.00
+Erin: posts big blind $2.00
+*** HOLE CARDS ***
+Dealt to Boris [Ad Kc]
+Frank: folds
+Anna: folds
+Boris: raises $3.00 to $5.00
+Cara: calls $5.00
+Dave: folds
+Erin: folds
+*** FLOP *** [9c 6h 2s]
+Boris: bets $20.00
+Cara: folds
+Uncalled bet ($20.00) returned to Boris
+Boris collected $13.00 from pot
+*** SUMMARY ***
+Total pot $13.00 | Rake $0.00
+Board [9c 6h 2s]
+Seat 1: Anna folded before Flop (didn't bet)
+Seat 2: Boris collected ($13.00)
+Seat 3: Cara (button) folded on the Flop
+Seat 4: Dave (small blind) folded before Flop
+Seat 5: Erin (big blind) folded before Flop
+Seat 6: Frank folded before Flop (didn't bet)

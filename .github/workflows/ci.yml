@@ -4,7 +4,9 @@ on:
   push:
     branches: [ bigbang, main, development ]
   pull_request:
-    branches: [ bigbang, main, development ]
+    # Feature branches too: a stacked pull request targets its parent branch,
+    # and without this it would merge having never run a single test.
+    branches: [ bigbang, main, development, 'feature/**', 'fix/**', 'release/**' ]
   release:
     types: [ published ]
   workflow_dispatch:

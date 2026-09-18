@@ -1,0 +1,40 @@
+PokerStars Hand #3100000008:  Hold'em No Limit ($1.00/$2.00 USD) - 2026/09/16 12:07:00 ET
+Table 'Golden 08 Delayed CBet' 6-max Seat #3 is the button
+Seat 1: Anna ($200.00 in chips)
+Seat 2: Boris ($200.00 in chips)
+Seat 3: Cara ($200.00 in chips)
+Seat 4: Dave ($200.00 in chips)
+Seat 5: Erin ($200.00 in chips)
+Seat 6: Frank ($200.00 in chips)
+Dave: posts small blind $1.00
+Erin: posts big blind $2.00
+*** HOLE CARDS ***
+Dealt to Boris [9s 9h]
+Frank: folds
+Anna: raises $3.00 to $5.00
+Boris: calls $5.00
+Cara: folds
+Dave: folds
+Erin: folds
+*** FLOP *** [Td 6s 2h]
+Anna: checks
+Boris: checks
+*** TURN *** [Td 6s 2h] [8c]
+Anna: bets $8.00
+Boris: calls $8.00
+*** RIVER *** [Td 6s 2h 8c] [Qd]
+Anna: checks
+Boris: checks
+*** SHOW DOWN ***
+Anna: shows [Ac Kc] (high card Ace)
+Boris: shows [9s 9h] (a pair of Nines)
+Boris collected $29.00 from pot
+*** SUMMARY ***
+Total pot $29.00 | Rake $0.00
+Board [Td 6s 2h 8c Qd]
+Seat 1: Anna showed [Ac Kc] and lost with high card Ace
+Seat 2: Boris showed [9s 9h] and won ($29.00) with a pair of Nines
+Seat 3: Cara (button) folded before Flop (didn't bet)
+Seat 4: Dave (small blind) folded before Flop
+Seat 5: Erin (big blind) folded before Flop
+Seat 6: Frank folded before Flop (didn't bet)
