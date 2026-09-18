@@ -168,6 +168,11 @@ def _scope_sql(db: Any, scope: RebuildScope) -> tuple[str, list[Any]]:
     return " AND ".join(where), params
 
 
+def _execute_rebuild_query(cursor: Any, query: str, params: list[Any]) -> None:
+    """Execute a query assembled from fixed schema fragments and placeholders."""
+    cursor.execute(query, tuple(params))
+
+
 def _iter_scope_hand_ids(db: Any, scope: RebuildScope) -> Iterator[int]:
     """The hand ids the scope selects, ascending -- the resume-friendly order."""
     c = db.get_cursor()
@@ -175,7 +180,7 @@ def _iter_scope_hand_ids(db: Any, scope: RebuildScope) -> Iterator[int]:
     sql = f"SELECT H.id FROM Hands H JOIN Gametypes G ON H.gametypeId = G.id WHERE {where} ORDER BY H.id"  # nosec B608  # nosemgrep
     if scope.limit is not None:
         sql += f" LIMIT {int(scope.limit)}"  # nosec B608  # nosemgrep
-    c.execute(sql, tuple(params))
+    _execute_rebuild_query(c, sql, params)
     for row in c.fetchall():
         yield int(row[0])
 
@@ -183,9 +188,10 @@ def _iter_scope_hand_ids(db: Any, scope: RebuildScope) -> Iterator[int]:
 def _count_scope_hands(db: Any, scope: RebuildScope) -> int:
     c = db.get_cursor()
     where, params = _scope_sql(db, scope)
-    c.execute(
+    _execute_rebuild_query(
+        c,
         f"SELECT COUNT(*) FROM Hands H JOIN Gametypes G ON H.gametypeId = G.id WHERE {where}",  # nosec B608  # nosemgrep
-        tuple(params),
+        params,
     )
     return int(c.fetchone()[0])
 
