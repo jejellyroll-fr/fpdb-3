@@ -5,9 +5,9 @@ single player or a population, saved cohorts are reusable, two populations can
 be compared with one definition, hero exclusion is explicit and testable, and
 the sample-size semantics are pinned to numbers on the golden corpus.
 
-Every number asserted here comes from the golden corpus, which is fixed: 30
-hands, 326 decisions, six players, one of whom (Boris) is the hero with 66
-decisions. So "all opponents" is exactly 200 decisions over 5 players, and a
+Every number asserted here comes from the golden corpus, which is fixed: 31
+hands, 341 decisions, six players, one of whom (Boris) is the hero with 69
+decisions. So "all opponents" is exactly 272 decisions over 5 players, and a
 regression in hero exclusion, weighting or the population join moves one of
 these numbers rather than silently returning a plausible one.
 """
@@ -28,15 +28,15 @@ from tests.helpers import analytics_golden as golden
 
 # The corpus, read off the database: total decisions, the hero's decisions,
 # and what the two flop populations look like.
-TOTAL_DECISIONS = 326
-HERO_DECISIONS = 66
+TOTAL_DECISIONS = 341
+HERO_DECISIONS = 69
 OPPONENT_DECISIONS = TOTAL_DECISIONS - HERO_DECISIONS
-CORPUS_HANDS = 30
+CORPUS_HANDS = 31
 CORPUS_PLAYERS = 6
-FLOP_DECISIONS_ALL = 56
-FLOP_FOLDS_ALL = 19
-FLOP_DECISIONS_OPPONENTS = 30
-FLOP_FOLDS_OPPONENTS = 17
+FLOP_DECISIONS_ALL = 60
+FLOP_FOLDS_ALL = 20
+FLOP_DECISIONS_OPPONENTS = 33
+FLOP_FOLDS_OPPONENTS = 18
 
 # The hands are dated 2026-09-16; a reference date makes the relative windows
 # deterministic without freezing them inside the cohort.
@@ -298,7 +298,7 @@ class TestSampleSizes:
     def test_a_single_player_cohort_is_one_player(self, query_db: Database) -> None:
         sample = cohorts.population_sample(query_db, cohorts.players(["Anna"]).apply())
         assert sample.players == 1
-        assert sample.decisions == 47
+        assert sample.decisions == 48
 
     def test_the_hero_alone_is_one_player(self, query_db: Database) -> None:
         hero = cohorts.Cohort(name="hero", filters={"hero": True})
@@ -316,12 +316,12 @@ class TestWeighting:
         query = Query(metric="fold_frequency", filters={"street": "flop"})
         by_decision = cohorts.population_stat(query_db, query, cohorts.all_opponents())
         by_player = cohorts.population_stat(query_db, query, cohorts.all_opponents(), weighting="player")
-        # Decisions: 17 folds in 30 flop decisions. Players: (12.5% + 80% + 0%)/3.
+        # Decisions: 18 folds in 33 flop decisions. Players: (12.5% + 80% + 50% + 0%)/4.
         assert (by_decision.sample.decisions, by_decision.frequency_bp) == (
             FLOP_DECISIONS_OPPONENTS,
             FLOP_FOLDS_OPPONENTS * 10000 // FLOP_DECISIONS_OPPONENTS,
         )
-        assert by_player.frequency_bp == round((1250 + 8000 + 0) / 3)
+        assert by_player.frequency_bp == round((1250 + 8000 + 5000 + 0) / 4)
         assert by_decision.frequency_bp != by_player.frequency_bp
         assert (by_decision.weighting, by_player.weighting) == ("decision", "player")
 
@@ -333,7 +333,7 @@ class TestWeighting:
             query_db, Query(metric="fold_frequency", filters={"street": "flop"}, group_by=("player",)), cohorts.all_opponents(),
         )
         plain = cohorts.population_stat(query_db, query, cohorts.all_opponents())
-        assert grouped.frequency_bp == plain.frequency_bp == 5666
+        assert grouped.frequency_bp == plain.frequency_bp == 5454
 
     def test_min_player_sample_reports_who_was_used(self, query_db: Database) -> None:
         query = Query(metric="fold_frequency", filters={"street": "flop"})
@@ -341,15 +341,15 @@ class TestWeighting:
             query_db, query, cohorts.all_opponents(), weighting="player", min_player_sample=3,
         )
         # Frank has 2 flop decisions, below the bar; Anna and Cara carry it.
-        assert stat.players_used == 2
+        assert stat.players_used == 3
         assert stat.players_skipped == 1
-        assert stat.frequency_bp == round((1250 + 8000) / 2)
+        assert stat.frequency_bp == round((1250 + 8000 + 0) / 3)
 
     def test_the_per_player_breakdown_is_always_available(self, query_db: Database) -> None:
         query = Query(metric="fold_frequency", filters={"street": "flop"})
         stat = cohorts.population_stat(query_db, query, cohorts.all_opponents(), weighting="player")
         by_name = {row.group["player"]: row for row in stat.per_player}
-        assert set(by_name) == {"Anna", "Cara", "Frank"}
+        assert set(by_name) == {"Anna", "Cara", "Erin", "Frank"}
         assert by_name["Cara"].opportunities == 20
         assert by_name["Cara"].frequency_bp == 8000
 
@@ -379,7 +379,7 @@ class TestWeighting:
         stat = cohorts.population_stat(
             query_db, Query(metric="fold_frequency", filters={"street": "flop"}), cohorts.all_opponents(),
         )
-        assert stat.value_label == "56.66%"
+        assert stat.value_label == "54.54%"
 
     def test_an_empty_population_reports_no_number(self, query_db: Database) -> None:
         empty = cohorts.Cohort(name="nobody", filters={"player": ["Nobody"]})
@@ -404,9 +404,9 @@ class TestComparison:
         assert comparison.metric == "fold_frequency"
         assert comparison.filters == {"street": "flop"}
         assert comparison.a.weighting == comparison.b.weighting == "decision"
-        assert comparison.a.frequency_bp == 5666
+        assert comparison.a.frequency_bp == 5454
         assert comparison.b.frequency_bp == 8000
-        assert comparison.frequency_delta_bp == 8000 - 5666
+        assert comparison.frequency_delta_bp == 8000 - 5454
 
     def test_a_comparison_shows_both_sample_sizes(self, query_db: Database) -> None:
         query = Query(metric="fold_frequency", filters={"street": "flop"})
@@ -414,9 +414,9 @@ class TestComparison:
             query_db, query, cohorts.all_opponents(name="everyone"), cohorts.players(["Cara"], name="cara"),
         )
         rendered = cohorts.format_comparison(comparison)
-        assert "everyone: 56.66% [30 decisions, 26 hands, 3 players]" in rendered
+        assert "everyone: 54.54% [33 decisions, 27 hands, 4 players]" in rendered
         assert "cara: 80.00% [20 decisions, 19 hands, 1 players]" in rendered
-        assert "delta (b - a): +23.34 pp" in rendered
+        assert "delta (b - a): +25.46 pp" in rendered
 
     def test_a_comparison_can_be_a_dict(self, query_db: Database) -> None:
         query = Query(metric="opportunities")
@@ -445,8 +445,8 @@ class TestComparison:
             query_db, query, cohorts.players(["Anna"], name="anna"), cohorts.players(["Cara"], name="cara"),
         )
         assert comparison.a.sample.players == comparison.b.sample.players == 1
-        assert comparison.a.sample.decisions == 47
-        assert comparison.b.sample.decisions == 54
+        assert comparison.a.sample.decisions == 48
+        assert comparison.b.sample.decisions == 55
 
 
 # ---------------------------------------------------------------------------

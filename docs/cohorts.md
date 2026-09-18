@@ -68,7 +68,7 @@ It compiles to the engine's `hero: False`, whose semantics are precise:
   a `LEFT JOIN`, and "we do not know this actor" is not "this actor is the
   hero". (`hero: True` still requires the situation row.)
 
-On the golden corpus that is 326 decisions total, 66 by the hero, 260 by the
+On the golden corpus that is 341 decisions total, 69 by the hero, 272 by the
 population -- and the two add up, which is the test.
 
 A *comparison* requires both sides to agree on hero exclusion:

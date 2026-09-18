@@ -121,14 +121,15 @@ Three conventions make the numbers mean something:
 
 * **A population metric is a distinct count, not the row count.**
   `opportunities` counts decisions, `hands` and `players` count what those
-  decisions came from; on a 30-hand corpus that is 326 / 30 / 6, and reading
+  decisions came from; on the 31-hand corpus that is 341 / 31 / 6, and reading
   the last two as "the sample" is exactly the mistake they exist to prevent
   ([cohorts and sample sizes](cohorts.md)).
 * **`hero: False` keeps decisions whose situation is unknown.** Excluding the
   hero is how a *population* is built, so the filter is
   `(isHero IS NULL OR NOT isHero)`: the situation join is a `LEFT JOIN`, and an
   actor the database cannot classify is not the hero. `hero: True` still
-  requires the situation row.
+  requires the situation row; on the current corpus there are 272 non-hero
+  actions and 69 hero actions.
 * **A frequency always carries its sample.** A row is
   `{opportunities, actions, value, frequency_bp}` — the denominator, the
   numerator, the numerator again and the rate — so "folds 40%" can never be

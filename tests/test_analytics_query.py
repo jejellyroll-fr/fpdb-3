@@ -245,7 +245,7 @@ class TestMetrics:
         decisions = run_query(query_db, Query(metric="opportunities")).rows[0].opportunities
         hands = run_query(query_db, Query(metric="hands")).rows[0]
         players = run_query(query_db, Query(metric="players")).rows[0]
-        assert (hands.value, players.value) == (30, 6)
+        assert (hands.value, players.value) == (31, 6)
         assert decisions > hands.value
         assert hands.unit == players.unit == "count"
 
@@ -522,7 +522,7 @@ class TestExplainability:
         # get the join, or the SQL refers to an alias that is not there.
         compiled = compile_query(Query(metric="fold_frequency"))
         assert "JOIN HandsSituations SI" in compiled.sql
-        assert run_query(query_db, Query(metric="fold_frequency")).rows[0].opportunities == 326
+        assert run_query(query_db, Query(metric="fold_frequency")).rows[0].opportunities == 341
 
     def test_an_identity_filter_needs_the_site_join(self) -> None:
         _conditions, params, aliases = compile_filters({"identity": [("PokerStars", "jeje")]})
@@ -535,7 +535,7 @@ class TestExplainability:
         total = run_query(query_db, Query(metric="opportunities")).rows[0].opportunities
         hero = run_query(query_db, Query(metric="opportunities", filters={"hero": True})).rows[0].opportunities
         other = run_query(query_db, Query(metric="opportunities", filters={"hero": False})).rows[0].opportunities
-        assert (hero, other) == (66, 260)
+        assert (hero, other) == (69, 272)
         assert hero + other == total
         assert "IS NULL" in compile_query(Query(metric="opportunities", filters={"hero": False})).sql
 
