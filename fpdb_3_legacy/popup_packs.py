@@ -39,7 +39,7 @@ from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Final, NoReturn
-from xml.dom.minidom import Document
+from xml.dom.minidom import Document  # nosec B405 - only constructs validated HUD XML; no input is parsed
 
 # The pack file schema this module understands. A file written for a newer
 # schema is refused rather than half-read.

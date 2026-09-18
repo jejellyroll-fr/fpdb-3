@@ -17,10 +17,10 @@ Two rules make the packs trustworthy rather than just present:
 from __future__ import annotations
 
 import json
-import xml.dom.minidom as minidom
 from pathlib import Path
 
 import pytest
+from defusedxml.minidom import parseString
 
 from fpdb_3_legacy import popup_packs as packs
 from fpdb_3_legacy.Popup import resolve_popup_class
@@ -286,7 +286,7 @@ class TestCompilation:
 
     def test_the_exported_xml_parses_back_into_the_same_popup(self) -> None:
         node = packs.parse_pack(_pack()).node("pack_root")
-        reparsed = minidom.parseString(node.to_xml()).documentElement
+        reparsed = parseString(node.to_xml()).documentElement
         from fpdb_3_legacy.Configuration import Popup as ConfigPopup
 
         assert ConfigPopup(reparsed).pu_stats == ["vpip", "pfr"]
@@ -518,7 +518,7 @@ class TestModernPopupRendering:
                 root="r",
             ),
         ).node("r")
-        return ConfigPopup(minidom.parseString(node.to_xml()).documentElement)
+        return ConfigPopup(parseString(node.to_xml()).documentElement)
 
     def test_a_navigation_row_shows_a_chevron_and_its_row_text(self) -> None:
         rows = _renderer(self._popup())._stat_rows(7)
