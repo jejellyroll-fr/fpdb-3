@@ -1647,6 +1647,44 @@ def parse_hud_profile_rules(doc: Any) -> list[HudProfileRule]:
     return rules
 
 
+def parse_hud_panel_rules(doc: Any) -> tuple[list[Any], str, bool]:
+    """Read the <hud_panel_rules> section of a configuration document (#298).
+
+    Returns ``(rules, fallback_panel, enabled)``. The section is optional and
+    absent by default, which is what keeps a static HUD static: no rules means
+    the HUD behaves exactly as it always has. ``source="builtin"`` prepends the
+    shipped rule library, so enabling dynamic panels is one attribute rather
+    than a copy of nineteen rules into the user's configuration.
+
+    Shared by the initial load and by ``Config.reload()``, for the same reason
+    the profile rules are: a change the user has just saved has to reach the
+    running HUD.
+    """
+    from fpdb_3_legacy import hud_situation
+
+    sections = doc.getElementsByTagName("hud_panel_rules")
+    if not sections:
+        return [], "", False
+    section = sections[0]
+    enabled = str(section.getAttribute("enabled") or "true").strip().lower() not in ("false", "no", "0", "off")
+    if not enabled:
+        # Off means off: a disabled section is not read, so a source that has
+        # since moved cannot turn a configuration the user turned off into a
+        # configuration that fails to load.
+        return [], "", False
+    fallback = str(section.getAttribute("fallback") or "").strip()
+    source = str(section.getAttribute("source") or "").strip()
+    rules: list[Any] = []
+    if source:
+        loaded, loaded_fallback = hud_situation.load_source(source)
+        rules.extend(loaded)
+        fallback = fallback or loaded_fallback
+    for node in section.getElementsByTagName("hud_panel_rule"):
+        values = {name: node.getAttribute(name) for name in node.attributes.keys()}
+        rules.append(hud_situation.panel_rule_from_attributes(values, len(rules)))
+    return hud_situation.number_rules(rules), fallback, enabled
+
+
 class Config:
     def __init__(
         self,
@@ -1708,6 +1746,12 @@ class Config:
         self.hhcs: dict[str, Any] = {}
         self.popup_windows: dict[str, Any] = {}
         self.hud_profile_rules: list[HudProfileRule] = []
+        # Context-aware dynamic HUD panels (#298). Empty and disabled by
+        # default: the static grid is what a configuration without a
+        # <hud_panel_rules> section gets, and that is the shipped default.
+        self.hud_panel_rules: list[Any] = []
+        self.hud_panel_fallback: str = ""
+        self.hud_panel_rules_enabled: bool = False
         self.db_selected = None  # database the user would like to use
         self.general = General()
         self.emails: dict[str, Any] = {}
@@ -1845,6 +1889,7 @@ class Config:
             self.stat_sets[ss.name] = ss
 
         self.hud_profile_rules = parse_hud_profile_rules(doc)
+        self.hud_panel_rules, self.hud_panel_fallback, self.hud_panel_rules_enabled = parse_hud_panel_rules(doc)
 
         #     s_dbs = doc.getElementsByTagName("mucked_windows")
         for hhc_node in doc.getElementsByTagName("hhc"):
@@ -2372,6 +2417,9 @@ class Config:
             # Profile selection rules
             hud_profile_rules = parse_hud_profile_rules(doc)
 
+            # Context-aware dynamic panel rules (#298)
+            hud_panel_rules, hud_panel_fallback, hud_panel_rules_enabled = parse_hud_panel_rules(doc)
+
             # HHCs (disabled rooms keep no converter binding -- see the
             # matching skip in the initial load)
             for hhc_node in doc.getElementsByTagName("hhc"):
@@ -2413,6 +2461,9 @@ class Config:
         self.layout_sets = layout_sets
         self.stat_sets = stat_sets
         self.hud_profile_rules = hud_profile_rules
+        self.hud_panel_rules = hud_panel_rules
+        self.hud_panel_fallback = hud_panel_fallback
+        self.hud_panel_rules_enabled = hud_panel_rules_enabled
         self.hhcs = hhcs
         self.popup_windows = popup_windows
         # The packs are re-installed onto the freshly parsed registry, so a
@@ -4141,6 +4192,63 @@ class Config:
     def get_hud_profile_rules(self) -> list[HudProfileRule]:
         """Return a copy of the persistent PT-style profile selection rules."""
         return list(self.hud_profile_rules)
+
+    def get_hud_panel_rules(self) -> list[Any]:
+        """The dynamic panel rules (#298), or ``[]`` when they are disabled.
+
+        An empty list is what the HUD reads as "keep the static grid", so the
+        disabled case and the unconfigured case are the same code path: turning
+        dynamic panels off cannot change what a table draws.
+        """
+        if not self.hud_panel_rules_enabled:
+            return []
+        return list(self.hud_panel_rules)
+
+    def set_hud_panel_rules(
+        self,
+        rules: list[Any],
+        *,
+        fallback: str = "",
+        enabled: bool = True,
+    ) -> None:
+        """Replace the dynamic panel rules in memory and in the DOM.
+
+        Each rule is validated on the way in by being rebuilt from its own XML
+        attributes, so what is written is what a reload can read back.
+        """
+        from fpdb_3_legacy import hud_situation
+
+        self.hud_panel_rules = hud_situation.number_rules(
+            hud_situation.panel_rule_from_attributes(rule.as_xml_attributes(), order)
+            for order, rule in enumerate(rules)
+        )
+        self.hud_panel_fallback = str(fallback or "")
+        self.hud_panel_rules_enabled = bool(enabled)
+        if self.doc is None:
+            return
+
+        sections = self.doc.getElementsByTagName("hud_panel_rules")
+        if sections:
+            section = sections[0]
+            section.setAttribute("enabled", "true" if enabled else "false")
+            section.setAttribute("fallback", self.hud_panel_fallback)
+            while section.firstChild:
+                section.removeChild(section.firstChild)
+        else:
+            section = self.doc.createElement("hud_panel_rules")
+            section.setAttribute("enabled", "true" if enabled else "false")
+            section.setAttribute("fallback", self.hud_panel_fallback)
+            self.doc.documentElement.appendChild(self.doc.createTextNode("\n    "))
+            self.doc.documentElement.appendChild(section)
+
+        for rule in self.hud_panel_rules:
+            section.appendChild(self.doc.createTextNode("\n        "))
+            node = self.doc.createElement("hud_panel_rule")
+            for name, value in rule.as_xml_attributes().items():
+                node.setAttribute(name, value)
+            section.appendChild(node)
+        if self.hud_panel_rules:
+            section.appendChild(self.doc.createTextNode("\n    "))
 
     def set_hud_profile_rules(self, rules: list[HudProfileRule]) -> None:
         """Replace profile rules in memory and in the configuration DOM."""
