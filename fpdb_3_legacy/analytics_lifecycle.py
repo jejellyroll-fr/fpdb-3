@@ -37,8 +37,7 @@ from typing import Any, Final
 # The subsystems whose stored rows can go stale, with the version of the
 # rules that produced them. Bumping a version is a semantic claim: the rows
 # already stored were derived by different rules and must be re-derived
-# before they can be read as current. #302 hand strength joins the table
-# when that classifier lands.
+# before they can be read as current.
 SUBSYSTEMS: Final[tuple[str, ...]] = (
     "action_events",
     "situations",
@@ -52,7 +51,10 @@ EXTRACTOR_VERSIONS: Final[dict[str, int]] = {
     "situations": 1,
     "board_features": 1,
     "sizing_buckets": 1,
-    "hand_strength": 0,  # not yet implemented (#302); never current until it is
+    # The postflop hand states (#302). Version 1 is the first extractor: a
+    # database imported before it has no HandStates rows and is stale by
+    # definition, which is what makes a rebuild (not a re-import) the fix.
+    "hand_strength": 1,
 }
 
 # The version of the analytics schema itself (the AnalyticsMeta table and

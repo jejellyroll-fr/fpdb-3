@@ -229,6 +229,15 @@ _ANALYTICS_INDEX_SPECS: tuple[tuple[str, str, tuple[str, ...]], ...] = (
     ("handssituations_street_response_idx", "HandsSituations", ("streetName", "response")),
     ("handssituations_pot_role_idx", "HandsSituations", ("potType", "role")),
     ("handssituations_aggressor_idx", "HandsSituations", ("isPreflopAggressor",)),
+    # The hand-state table (#302) is joined on the same key as the situation it
+    # describes, and grouped by the classification the query asks about: the
+    # made hand and the nutness band are the two dimensions a composition is
+    # read by, so they are worth an index each. The two masks and the pair
+    # detail are not: they are read *within* a scan over one of these.
+    ("handstates_hand_idx", "HandStates", ("handId", "actionNo")),
+    ("handstates_player_idx", "HandStates", ("playerId",)),
+    ("handstates_made_hand_idx", "HandStates", ("madeHand", "streetName")),
+    ("handstates_nutness_idx", "HandStates", ("nutness", "streetName")),
     # The money side of a profit metric joins per hand and player.
     ("handsplayers_hand_player_idx", "HandsPlayers", ("handId", "playerId")),
     # Date and game filters, and the incremental watermark scan.

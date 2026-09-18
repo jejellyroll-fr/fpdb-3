@@ -30,7 +30,7 @@ from fpdb_3_legacy.analytics_rebuild import RebuildScope, rebuild_subsystems
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="Rebuild analytics-derived rows (events, situations, board features) in place.",
+        description="Rebuild analytics-derived rows (events, situations, board features, hand states) in place.",
     )
     parser.add_argument("--config", default="HUD_config.xml", help="Path to the fpdb configuration file")
     parser.add_argument(
@@ -40,8 +40,9 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--subsystems",
         nargs="+",
-        choices=["action_events", "situations", "board_features", "sizing_buckets"],
-        help="Which subsystems to rebuild (sizing_buckets refreshes with action_events)",
+        choices=["action_events", "situations", "board_features", "sizing_buckets", "hand_strength"],
+        help="Which subsystems to rebuild (sizing_buckets refreshes with action_events; "
+        "hand_strength derives from the situations, which derive from the events)",
     )
     parser.add_argument("--site", default=None, help="Restrict the rebuild to one site name")
     parser.add_argument("--from", dest="date_from", default=None, help="Inclusive lower bound on hand start time")
@@ -92,7 +93,7 @@ def main(argv: list[str] | None = None) -> int:
     subsystems = (
         list(args.subsystems)
         if args.subsystems
-        else ["action_events", "situations", "board_features", "sizing_buckets"]
+        else ["action_events", "situations", "board_features", "sizing_buckets", "hand_strength"]
     )
 
     def progress(done: int, total: int, hand_id: int) -> None:

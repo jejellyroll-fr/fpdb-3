@@ -114,6 +114,9 @@ jobs:
           fpdb_3_legacy/analytics_profiling.py
           fpdb_3_legacy/analytics_cache.py
           fpdb_3_legacy/analytics_benchmark.py
+          fpdb_3_legacy/hand_state.py
+          fpdb_3_legacy/hand_state_store.py
+          fpdb_3_legacy/hand_state_composition.py
           fpdb_3_legacy/hud_situation.py
           fpdb_3_legacy/hud_panel_editor.py
           fpdb_3_legacy/situation_store.py

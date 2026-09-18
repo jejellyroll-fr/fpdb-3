@@ -35,6 +35,7 @@ from fpdb_3_legacy.analytics_query import (
     compile_filters,
     compile_hand_ids,
     compile_query,
+    filter_sources,
     run_hand_ids,
     run_query,
 )
@@ -592,6 +593,102 @@ class TestEquivalenceWithPredefinedStats:
         # per-hand tables sum to.
         row = run_query(query_db, Query(metric="opportunities")).rows[0]
         assert row.opportunities == _scalar(query_db, "SELECT COUNT(*) FROM HandsActions")
+
+
+class TestHandStateVocabulary:
+    """The hand-state filters and dimensions (#302), read off the stored rows."""
+
+    def test_the_population_splits_into_classified_and_not(self, query_db: Database) -> None:
+        """The two are a partition, and neither is a bucket called "unknown"."""
+        assert _scalar(query_db, "SELECT COUNT(*) FROM HandsActions") == 326
+        known = run_query(query_db, Query(metric="opportunities", filters={"hand_state_known": True}))
+        unknown = run_query(query_db, Query(metric="opportunities", filters={"hand_state_known": False}))
+        assert (known.total_opportunities, unknown.total_opportunities) == (35, 291)
+        assert known.total_opportunities + unknown.total_opportunities == 326
+
+    def test_made_hand_and_pair_detail_filters(self, query_db: Database) -> None:
+        assert self._count(query_db, {"made_hand": ["high_card"]}) == 19
+        assert self._count(query_db, {"made_hand": ["high_card", "one_pair"]}) == 30
+        assert self._count(query_db, {"pair_detail": ["top_pair"]}) == 3
+        assert self._count(query_db, {"made_hand_rank": [3, 9]}) == 5
+
+    def test_nutness_filters(self, query_db: Database) -> None:
+        assert self._count(query_db, {"nutness": ["nuts", "near_nuts"]}) == 1
+        assert self._count(query_db, {"nutness": ["weak"]}) == 5
+
+    def test_draw_filters_any_all_and_none(self, query_db: Database) -> None:
+        assert self._count(query_db, {"draw": ["backdoor_straight_draw"]}) == 18
+        assert self._count(query_db, {"draw_all": ["backdoor_straight_draw", "backdoor_flush_draw"]}) == 3
+        assert self._count(query_db, {"draw_none": True}) == 15
+        # No draw at all, on the flop, is a smaller population than either.
+        assert self._count(query_db, {"street": "flop", "draw_none": True}) == 7
+
+    def test_blocker_filters(self, query_db: Database) -> None:
+        assert self._count(query_db, {"blocker": ["overcard_blocker"]}) == 19
+        assert self._count(query_db, {"blocker_none": True}) == 16
+
+    def test_a_flag_name_from_the_wrong_vocabulary_is_refused(self, query_db: Database) -> None:
+        """A board-texture name is not a draw, however plausible it looks."""
+        with pytest.raises(ValueError, match="Unknown draw"):
+            run_query(query_db, Query(metric="opportunities", filters={"draw": ["rainbow"]}))
+        with pytest.raises(ValueError, match="Unknown blocker"):
+            run_query(query_db, Query(metric="opportunities", filters={"blocker": ["flush_possible"]}))
+        with pytest.raises(ValueError, match="Unknown board flag"):
+            run_query(query_db, Query(metric="opportunities", filters={"board_texture": ["flush_draw"]}))
+
+    def test_flag_filters_bind_bits_not_names(self) -> None:
+        """The flag name never reaches the SQL: only its bit does."""
+        fragments, params, aliases = compile_filters({"draw": ["flush_draw"]})
+        assert fragments == ["((HS.drawsMask & 1) <> 0)"]
+        assert params == [] and aliases == {"HS"}
+        # "None of them" is one mask test, not one per named flag.
+        none_fragments, _, _ = compile_filters({"draw_none": True})
+        assert none_fragments == ["(HS.drawsMask & 255) = 0"]
+
+    def test_only_the_hand_state_source_is_joined_when_it_is_read(self) -> None:
+        assert filter_sources({"draw": ["flush_draw"]}) == {"HS"}
+        assert filter_sources({"made_hand": ["one_pair"]}) == {"HS"}
+        assert filter_sources({"street": "flop"}) == {"SI"}
+        compiled = compile_query(Query(metric="opportunities", filters={"nutness": ["strong"]}))
+        assert "HandStates HS" in compiled.sql
+        assert "BoardFeatures" not in compiled.sql
+
+    def test_grouping_by_a_hand_state_dimension(self, query_db: Database) -> None:
+        result = run_query(query_db, Query(metric="opportunities", group_by=("made_hand",)))
+        counts = {row.group["made_hand"]: row.opportunities for row in result.rows}
+        assert counts == {None: 291, "high_card": 19, "one_pair": 11, "two_pair": 3, "three_of_a_kind": 2}
+
+    def test_grouping_by_pair_detail_keeps_the_hands_without_one(self, query_db: Database) -> None:
+        """A high-card hand has no pair detail: that is a bucket, not a gap."""
+        result = run_query(
+            query_db,
+            Query(metric="opportunities", filters={"street": "flop"}, group_by=("pair_detail",)),
+        )
+        counts = {row.group["pair_detail"]: row.opportunities for row in result.rows}
+        assert counts[None] == 47  # 30 unclassified flops + 17 made hands with no pair detail
+        assert (counts["overpair"], counts["top_pair"], counts["set"]) == (1, 3, 2)
+
+    def test_a_decision_with_no_state_matches_no_category(self, query_db: Database) -> None:
+        """Unknown cards are left out, not guessed into a category."""
+        known = self._count(query_db, {"hand_state_known": True})
+        for filters in ({"made_hand": ["high_card"]}, {"nutness": ["weak"]}, {"draw": ["gutshot"]}):
+            assert self._count(query_db, filters) <= known
+        # Every classified decision has a made hand and a nutness band.
+        c = query_db.get_cursor()
+        c.execute("SELECT COUNT(*) FROM HandStates WHERE madeHand = '' OR nutness = ''")
+        assert c.fetchone()[0] == 0
+
+    def test_the_hand_state_street_matches_the_situation_street(self, query_db: Database) -> None:
+        by_hand_state = run_query(query_db, Query(metric="opportunities", filters={"hand_state_street": ["flop"]}))
+        by_situation = run_query(
+            query_db,
+            Query(metric="opportunities", filters={"street": ["flop"], "hand_state_known": True}),
+        )
+        assert by_hand_state.total_opportunities == by_situation.total_opportunities == 26
+
+    @staticmethod
+    def _count(db: Database, filters: dict) -> int:
+        return int(run_query(db, Query(metric="opportunities", filters=filters)).total_opportunities)
 
 
 def test_paths_no_unused_import() -> None:

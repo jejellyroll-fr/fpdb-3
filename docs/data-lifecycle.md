@@ -30,7 +30,7 @@ This module answers with three things that work together:
 | `situations` | 1 | the #294 rule table |
 | `board_features` | 1 | the #295 classifier |
 | `sizing_buckets` | 1 | the #296 bucket tables |
-| `hand_strength` | 0 | declared for #302; version 0 means "never current" |
+| `hand_strength` | 1 | the #302 postflop hand-state classifier |
 
 Bumping a version is a semantic claim: it says the rows already stored were
 derived by different rules. The place that changes the rule is the place
@@ -80,9 +80,18 @@ codebase, so the stored rows are the only available source of truth.
 Per subsystem: `board_features` re-classifies from the stored cards and
 overwrites `BoardFeatures` + `Hands.texture`; `action_events` re-derives
 the context and updates the event columns in place; `situations`
-overwrites the hand's `HandsSituations` rows; `sizing_buckets` needs no
-pass (pure functions of the event columns — it is marked current with
-`action_events`, its `GROUPED_WITH` parent).
+overwrites the hand's `HandsSituations` rows; `hand_strength` re-classifies
+the postflop decisions (#302) out of the *stored* situation rows and the
+two encoded cards on `HandsPlayers`, and overwrites `HandStates`;
+`sizing_buckets` needs no pass (pure functions of the event columns — it is
+marked current with `action_events`, its `GROUPED_WITH` parent).
+
+A subsystem whose extractor reads another's rows declares it in `READS`, and
+`canonical_subsystems` expands it depth-first so the passes run in an order
+where each one sees what it derives from: `hand_strength` pulls `situations`,
+which pulls `action_events`. Rebuilding the situations on their own used to be
+possible and produced rows derived from an *empty* action stream; declaring
+the dependency is what removed that.
 
 ### Resilience contract
 
@@ -118,9 +127,9 @@ subsystems, scope=..., progress=..., should_cancel=...)`.
 ## Import integration
 
 New imports populate the current analytics data incrementally — events and
-board features since #293/#295, situations since this change — and a fresh
-database is born with current version stamps. An existing database keeps
-its staleness; only a completed rebuild moves it.
+board features since #293/#295, situations since #305 and hand states since
+#302 — and a fresh database is born with current version stamps. An existing
+database keeps its staleness; only a completed rebuild moves it.
 
 ## What is deliberately not here
 

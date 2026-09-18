@@ -554,6 +554,16 @@ class Hand:
                 doinsert,
             )
 
+    def insertHandStates(self, db, doinsert=False) -> None:
+        """Persist what each postflop decision was holding (#302)."""
+        if self.saveActions:
+            db.storeHandStates(
+                self.dbid_hands,
+                self.playerIds,
+                self.stats.getHandStates(),
+                doinsert,
+            )
+
     def insertHandsShowdown(self, db, doinsert=False) -> None:
         """Persist parsed showdown combinations (and winning cards) per player.
 

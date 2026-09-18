@@ -8,7 +8,7 @@ def test_index_queries_are_installed_exactly() -> None:
     for backend in ("mysql", "postgresql", "sqlite"):
         expected = index_queries(backend)
         assert expected.items() <= Sql(db_server=backend).query.items()
-        assert len(expected) == 52  # 39 core + 13 analytics (#304)
+        assert len(expected) == 56  # 39 core + 13 analytics (#304) + 4 hand states (#302)
 
 
 def test_index_queries_keep_backend_specific_syntax() -> None:
@@ -40,7 +40,7 @@ def test_analytics_indexes_cover_the_query_shapes() -> None:
     the query shape needs it (#304)."""
     from fpdb_3_legacy.sql_indexes import ANALYTICS_INDEX_NAMES
 
-    assert len(ANALYTICS_INDEX_NAMES) == 13
+    assert len(ANALYTICS_INDEX_NAMES) == 17  # 13 for #304, 4 for the hand states (#302)
     mysql = index_queries("mysql")
     postgresql = index_queries("postgresql")
     sqlite = index_queries("sqlite")

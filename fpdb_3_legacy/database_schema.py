@@ -1124,6 +1124,7 @@ class DatabaseSchemaMixin:
             "createAofDecisionsTable",
             "createAofDecisionAnalysesTable",
             "createHandsSituationsTable",
+            "createHandStatesTable",
         ):
             try:
                 c = self.get_cursor()
