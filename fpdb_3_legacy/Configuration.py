@@ -4243,7 +4243,8 @@ class Config:
             section.setAttribute("fallback", self.hud_panel_fallback)
             # These rules are already materialized; retaining the source would
             # make reload append the source rules again.
-            section.removeAttribute("source")
+            if section.hasAttribute("source"):
+                section.removeAttribute("source")
             while section.firstChild:
                 section.removeChild(section.firstChild)
         else:

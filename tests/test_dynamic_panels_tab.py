@@ -239,6 +239,23 @@ def test_a_rule_edited_from_the_row_comes_back_into_the_form(dialog) -> None:
     assert dialog.panel_selector_widgets["pot_type"].currentData() == ""
 
 
+def test_editing_a_multi_value_selector_keeps_all_values(dialog) -> None:
+    from fpdb_3_legacy import hud_situation as hs
+
+    dialog.panel_rules = [
+        hs.PanelRule.from_mapping(
+            {"panel": "srp_probe_ip", "when": {"street": ["turn", "river"]}},
+            0,
+        )
+    ]
+    dialog._refresh_panel_rules_table()
+    dialog.panel_rules_table.setCurrentCell(0, 0)
+
+    dialog._update_panel_rule()
+
+    assert dialog.panel_rules[0].when["street"] == ["turn", "river"]
+
+
 def test_updating_the_selected_row_replaces_it_in_place(dialog) -> None:
     _fill(dialog, "srp_cbet_ip", street="flop")
     dialog.panel_rules_table.setCurrentCell(0, 0)

@@ -3577,13 +3577,17 @@ class ModernHudPreferences(QDialog):
                 index = widget.findData(value if value is not None else None)
                 widget.setCurrentIndex(max(0, index))
                 continue
-            if isinstance(value, (list, tuple)):
-                if not hasattr(self, "_preserved_selector_values"):
-                    self._preserved_selector_values = {}
-                self._preserved_selector_values[name] = value
             text = "" if value is None else (value[0] if isinstance(value, (list, tuple)) and value else str(value))
             index = widget.findText(str(text))
             widget.setCurrentIndex(index if index >= 0 else 0)
+            # Set the widget first: currentIndexChanged clears preserved
+            # values when a selector changes. Store the full collection after
+            # that signal so updating a rule does not collapse e.g.
+            # street=["turn", "river"] to only its first item.
+            if isinstance(value, (list, tuple)):
+                if not hasattr(self, "_preserved_selector_values"):
+                    self._preserved_selector_values = {}
+                self._preserved_selector_values[name] = list(value)
         self.panel_rule_panel_combo.setCurrentText(draft.panel)
         self.panel_rule_profile_combo.setCurrentIndex(max(0, self.panel_rule_profile_combo.findData(draft.profile)))
         self.panel_rule_priority.setValue(int(draft.priority))
@@ -3619,12 +3623,15 @@ class ModernHudPreferences(QDialog):
                 self.panel_rules_table.setItem(row, column, item)
             row_issues = issues.get(row, ())
             if row_issues:
-                item = self.panel_rules_table.item(row, 7)
+                issue_item = self.panel_rules_table.item(row, 7)
                 severity = "⚠" if any(issue.severity == "duplicate" for issue in row_issues) else "!"
-                item.setText(severity)
-                item.setToolTip("\n".join(issue.message for issue in row_issues))
+                if issue_item is not None:
+                    issue_item.setText(severity)
+                    issue_item.setToolTip("\n".join(issue.message for issue in row_issues))
             if not rule.enabled:
-                self.panel_rules_table.item(row, 0).setToolTip(_("Disabled: this rule never matches."))
+                row_item = self.panel_rules_table.item(row, 0)
+                if row_item is not None:
+                    row_item.setToolTip(_("Disabled: this rule never matches."))
         self.panel_rules_table.blockSignals(False)
         self._update_panel_preview()
 
