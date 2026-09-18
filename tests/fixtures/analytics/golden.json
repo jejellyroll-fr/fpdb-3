@@ -76,13 +76,14 @@
     {
       "id": "fold_to_other_raise_counts_a_bet",
       "column": "foldToOtherRaisedStreet2",
-      "observed_true_rows": 5,
+      "observed_true_rows": 6,
       "note": [
         "foldToOtherRaisedStreetN reads \"folded to a raise on street N\", but the aggression",
         "pass that feeds it counts a bet as a raise, so folding to an ordinary lead sets it",
         "too: in hand 3100000003 Anna bets the turn, nobody raises, and Boris's fold is",
         "recorded as a fold to a turn raise. Anything built on the column therefore reads",
-        "fold-to-bet and fold-to-raise as one number. The turn count is pinned so that",
+        "fold-to-bet and fold-to-raise as one number. Hand 3100000031 is the same shape.",
+        "The turn count is pinned so that",
         "separating the two shows up here."
       ]
     },
