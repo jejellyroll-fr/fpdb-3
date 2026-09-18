@@ -606,6 +606,55 @@ class TestDerivedContextEdges:
         assert events[4]["toCall"] == 400, "everyone owes the straddle"
         assert events[5]["toCall"] == 200, "the big blind owes the difference"
 
+    def test_a_short_all_in_call_faces_its_own_stack(self) -> None:
+        """A player with 3bb behind cannot be asked 10bb, whatever is out there."""
+        players = self._players({"a": 1, "b": 0, "c": "S", "d": "B"})
+        players["d"]["startCash"] = 800  # 4bb, of which the blind is already in
+        actions = {
+            "BLINDSANTES": [("c", "small blind", Decimal("1.00"), False), ("d", "big blind", Decimal("2.00"), False)],
+            "PREFLOP": [
+                ("a", "raises", Decimal("18.00"), Decimal("20.00"), Decimal("2.00"), False),
+                ("b", "folds"),
+                ("c", "folds"),
+                ("d", "calls", Decimal("6.00"), True),
+            ],
+        }
+        events = derive_action_events(self._hand(["BLINDSANTES", "PREFLOP"], actions), players)
+        short_call = events[6]
+
+        assert short_call["actionType"] == "calls"
+        assert short_call["toCall"] == 600, "the price is the six the big blind still has"
+        assert short_call["facingAmount"] == 600, "and the size faced is that same price"
+
+    def test_a_returning_player_posts_one_live_blind_and_one_dead_one(self) -> None:
+        """``both`` is a big blind plus a dead small blind; ``secondsb`` is all dead.
+
+        All of it reaches the pot, none of the dead part raises the price the
+        rest of the table has to pay to come in.
+        """
+        players = self._players({"a": 1, "b": 0, "c": "S", "d": "B", "e": 2})
+        actions = {
+            "BLINDSANTES": [
+                ("c", "small blind", Decimal("1.00"), False),
+                ("d", "big blind", Decimal("2.00"), False),
+                ("e", "both", Decimal("3.00"), False),
+            ],
+            "PREFLOP": [("a", "calls", Decimal("2.00"), False), ("e", "checks")],
+        }
+        events = derive_action_events(self._hand(["BLINDSANTES", "PREFLOP"], actions), players)
+
+        assert events[3]["potAfter"] == 600, "the dead small blind is in the pot"
+        assert events[4]["toCall"] == 200, "but the price to enter is still one big blind"
+        assert events[5]["toCall"] == 0, "the poster has paid a big blind and owes nothing"
+
+        actions["BLINDSANTES"][2] = ("e", "secondsb", Decimal("1.00"), False)
+        actions["PREFLOP"][1] = ("e", "calls", Decimal("2.00"), False)
+        events = derive_action_events(self._hand(["BLINDSANTES", "PREFLOP"], actions), players)
+
+        assert events[3]["potAfter"] == 400
+        assert events[4]["toCall"] == 200, "a dead small blind buys nothing"
+        assert events[5]["toCall"] == 200, "least of all for the player who posted it"
+
     def test_a_forced_bet_never_makes_an_aggressor(self) -> None:
         players = self._players({"e": "S", "f": "B"}, start_cash=10000)
         actions = {

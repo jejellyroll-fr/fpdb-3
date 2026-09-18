@@ -62,8 +62,13 @@ PREFLOP_STREET = "PREFLOP"
 # the round with toCall = 0.
 FIRST_ROUND_STREETS = frozenset({"BLINDSANTES", PREFLOP_STREET, "DEAL", "SECOND", "THIRD"})
 # Dead money is in the pot but is not part of the bet level: an ante does not
-# make the player any less behind the big blind. Blinds and straddles are live.
-DEAD_MONEY_ACTIONS = frozenset({"ante"})
+# make the player any less behind the big blind. Blinds and straddles are live,
+# except for the dead posts a returning player makes -- a ``secondsb`` is dead
+# in full, and a ``both`` is a live big blind plus a dead small blind
+# (``Hand.addBlind`` puts the dead part in common money and leaves the whole
+# amount in the action tuple).
+DEAD_MONEY_ACTIONS = frozenset({"ante", "secondsb"})
+PART_DEAD_ACTIONS = frozenset({"both"})
 
 # Position encoding of the events' ``position`` column. It is the
 # HandsPlayers position code (0 = button, 1 = cutoff, 2 = hijack ...) with the
@@ -381,6 +386,12 @@ class _EventWalk:
         # The price of continuing. Forced money raises the bar -- the blinds are
         # what an opener calls -- but is not itself a bet that anybody faces.
         to_call = 0 if forced else max(0, self.bet_level - self.round_bet.get(name, 0))
+        # Nobody is ever asked for more than they have behind. A player calling
+        # all-in for less than the outstanding bet faces their own stack, and
+        # the pot odds and facing size of that decision are that short price,
+        # not the full bet they could not match.
+        if to_call > 0 and name in self.start_cash:
+            to_call = min(to_call, max(0, self.start_cash[name] - self.committed.get(name, 0)))
         sizing = self.sizing_bp(action, word, pot_before)
 
         facing_action, facing_amount, facing_sizing = None, 0, 0
@@ -416,14 +427,28 @@ class _EventWalk:
         )
         return event
 
+    def live_chips(self, word: Any, put_in: int) -> int:
+        """The part of an action that is a live bet the table has to match.
+
+        All of it, for everything but the dead posts: an ante buys nothing, and
+        a returning player's post is a big blind at most, whatever the amount
+        beside it in the action tuple says.
+        """
+        if word in DEAD_MONEY_ACTIONS:
+            return 0
+        if word in PART_DEAD_ACTIONS:
+            return min(put_in, self.big_blind)
+        return put_in
+
     def advance(self, action: Sequence[Any]) -> None:
         """Fold this action into the state the next event is measured against."""
         name = self.acting_player(action)
         word = action[ACTION_TYPE_IDX] if len(action) > ACTION_TYPE_IDX else None
         put_in = action_chips(action)
         self.committed[name] = self.committed.get(name, 0) + put_in
-        if word not in DEAD_MONEY_ACTIONS:
-            self.round_bet[name] = self.round_bet.get(name, 0) + put_in
+        live = self.live_chips(word, put_in)
+        if live:
+            self.round_bet[name] = self.round_bet.get(name, 0) + live
             self.bet_level = max(self.bet_level, self.round_bet[name])
         if word in AGGRESSIVE_ACTIONS:
             self.raise_count += 1
