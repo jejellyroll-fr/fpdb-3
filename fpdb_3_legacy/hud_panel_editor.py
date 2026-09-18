@@ -785,7 +785,7 @@ def _block_bindings(config: Any) -> dict[str, tuple[str, ...]]:
         return {}
     bound: dict[str, list[str]] = {}
     for node in document.getElementsByTagName("stat"):
-        name = str(node.getAttribute("name") or "").strip()
+        name = str(node.getAttribute("_stat_name") or node.getAttribute("name") or "").strip()
         if not name:
             continue
         block = _enclosing_block(node)

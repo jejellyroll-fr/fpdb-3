@@ -1457,6 +1457,7 @@ class ModernHudPreferences(QDialog):
             return
         name = self.profile_combo.currentText()
         profile = self.hud_profiles.get(name, {})
+        self._refresh_panel_stat_blocks()
 
         # Reflect this profile's positional-panel mode in the combo (multi-block
         # only). Block the signal so setting it here doesn't mark a fake edit.
@@ -3191,7 +3192,7 @@ class ModernHudPreferences(QDialog):
             widget = self._panel_selector_widget(field)
             self.panel_selector_widgets[field.name] = widget
             grid.addWidget(widget, row * 2 + 1, column)
-            self._panel_selector_hook(widget)
+            self._panel_selector_hook(widget, field.name)
         grid_widget = QWidget()
         grid_widget.setLayout(grid)
         area = QScrollArea()
@@ -3405,10 +3406,14 @@ class ModernHudPreferences(QDialog):
             combo.addItem(str(choice), str(choice))
         return combo
 
-    def _panel_selector_hook(self, widget) -> None:
+    def _panel_selector_hook(self, widget, name: str = "") -> None:
         """Repreview whenever a selector moves."""
         if isinstance(widget, QComboBox):
             widget.currentIndexChanged.connect(self._update_panel_preview)
+            if name:
+                widget.currentIndexChanged.connect(
+                    lambda _index, selector=name: getattr(self, "_preserved_selector_values", {}).pop(selector, None)
+                )
 
     def _known_panel_names(self) -> list[str]:
         """The panels a block can actually carry: the library, then the config's.
@@ -3467,6 +3472,10 @@ class ModernHudPreferences(QDialog):
                 except ValueError:
                     continue
             else:
+                preserved = getattr(self, "_preserved_selector_values", {}).get(name)
+                if preserved is not None:
+                    values[name] = list(preserved) if isinstance(preserved, tuple) else preserved
+                    continue
                 text = (widget.currentText() if widget.isEditable() else str(widget.currentData() or "")).strip()
                 if not text:
                     continue
@@ -3568,6 +3577,10 @@ class ModernHudPreferences(QDialog):
                 index = widget.findData(value if value is not None else None)
                 widget.setCurrentIndex(max(0, index))
                 continue
+            if isinstance(value, (list, tuple)):
+                if not hasattr(self, "_preserved_selector_values"):
+                    self._preserved_selector_values = {}
+                self._preserved_selector_values[name] = value
             text = "" if value is None else (value[0] if isinstance(value, (list, tuple)) and value else str(value))
             index = widget.findText(str(text))
             widget.setCurrentIndex(index if index >= 0 else 0)
@@ -3736,6 +3749,7 @@ class ModernHudPreferences(QDialog):
             QMessageBox.critical(self, _("Cannot import"), str(error))
             return
         self.panel_rules = list(imported.rules)
+        self._apply_imported_panel_stats(imported.stats)
         if imported.fallback:
             self.panel_rules_fallback = imported.fallback
             index = self.panel_rule_fallback_combo.findText(imported.fallback)
@@ -3759,12 +3773,71 @@ class ModernHudPreferences(QDialog):
         if not path:
             return
         try:
-            document = editor.export_document(self.panel_rules, fallback=self.panel_rules_fallback)
+            document = editor.export_document(
+                self.panel_rules,
+                fallback=self.panel_rules_fallback,
+                stats=self._panel_stat_bindings(),
+            )
             editor.save_document(document, path)
         except (OSError, ValueError) as error:
             QMessageBox.critical(self, _("Cannot export"), str(error))
             return
         QMessageBox.information(self, _("Export panel rules"), _("Wrote {path}").format(path=path))
+
+    def _panel_stat_bindings(self) -> list[dict[str, Any]]:
+        """Serialize analytics-backed bindings with their profile location."""
+        bindings: list[dict[str, Any]] = []
+        for profile_name, profile in (getattr(self, "hud_profiles", {}) or {}).items():
+            blocks = profile.get("blocks") if isinstance(profile, dict) else None
+            containers = enumerate(blocks) if blocks else [(None, profile)]
+            for block_index, container in containers:
+                for stat in container.get("stats", []):
+                    if stat.get("data_source") != "analytics":
+                        continue
+                    entry = {
+                        "name": stat.get("stat", ""),
+                        "source": stat.get("data_source", "analytics"),
+                        "profile": profile_name,
+                        "row": stat.get("row", 0),
+                        "col": stat.get("col", 0),
+                    }
+                    if block_index is not None:
+                        entry["block"] = block_index
+                    entry.update({key: value for key, value in stat.items() if key.startswith("data_")})
+                    bindings.append(entry)
+        return bindings
+
+    def _apply_imported_panel_stats(self, entries: tuple[dict[str, Any], ...]) -> None:
+        """Place imported stat bindings in the selected or named profiles."""
+        from fpdb_3_legacy import hud_panel_editor as editor
+
+        choices = {(choice.source, choice.name): choice for choice in getattr(self, "panel_stat_choices", ())}
+        for entry in entries:
+            name = str(entry.get("name", "")).strip()
+            source = str(entry.get("source", "analytics")).strip() or "analytics"
+            choice = choices.get((source, name)) or choices.get(("analytics", name))
+            if choice is None:
+                continue
+            profile_name = str(entry.get("profile") or self.profile_combo.currentText())
+            profile = self.hud_profiles.get(profile_name)
+            if profile is None:
+                continue
+            block = entry.get("block")
+            try:
+                block_index = int(block) if block is not None else None
+            except (TypeError, ValueError):
+                block_index = None
+            container = self._item_container(profile, block_index)
+            stats = container.setdefault("stats", [])
+            row = int(entry.get("row", len(stats)) or len(stats))
+            col = int(entry.get("col", 0) or 0)
+            item = {"row": row, "col": col, "stat": choice.name, "click": "", "popup": ""}
+            item.update(editor.stat_entry_attributes(choice, grid=(row, col)))
+            item.update({key: value for key, value in entry.items() if key.startswith("data_")})
+            stats.append(item)
+            container["rows"] = max(int(container.get("rows", 1) or 1), row + 1)
+            container["cols"] = max(int(container.get("cols", 1) or 1), col + 1)
+        self.on_profile_selected(self.profile_combo.currentIndex())
 
     def _persist_panel_rules(self) -> None:
         """Hand the rules to the configuration, or leave it exactly as it was.
