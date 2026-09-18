@@ -21,6 +21,7 @@ touching the worker the engine runs on.
 
 from __future__ import annotations
 
+import contextlib
 from typing import Any
 
 from PySide6.QtCore import Qt, QThread, Signal
@@ -49,11 +50,35 @@ from fpdb_3_legacy.ring_stats.styles import get_theme_palette
 log = get_logger("gui_research_browser")
 
 
+class _WorkerDatabase:
+    """Small read-only Database facade around a borrowed DB-API connection."""
+
+    def __init__(self, owner: Any, connection: Any) -> None:
+        self.backend = owner.backend
+        self.sql = owner.sql
+        self._connection = connection
+
+    def get_cursor(self):
+        return self._connection.cursor()
+
+
+@contextlib.contextmanager
+def _worker_database(db: Any):
+    """Give research workers a dedicated connection when the DB supports it."""
+    acquire = getattr(db, "worker_connection", None)
+    if callable(acquire):
+        with acquire() as connection:
+            yield _WorkerDatabase(db, connection)
+    else:
+        # Lightweight test doubles and legacy adapters may not expose the pool.
+        yield db
+
+
 class _QueryWorker(QThread):
     """One analytics query on its own thread; the UI stays responsive."""
 
-    finished_ok = Signal(object)  # ResearchResult (elapsed_ms rides on it)
-    failed = Signal(str)
+    finished_ok = Signal(object, int)  # result, emitting query serial
+    failed = Signal(str, int)
 
     def __init__(self, db: Any, preset: dict[str, Any], serial: int, parent=None) -> None:
         super().__init__(parent)
@@ -67,35 +92,42 @@ class _QueryWorker(QThread):
 
     def run(self) -> None:
         try:
-            result = rb.execute_preset(self._db, self._preset)
+            with _worker_database(self._db) as db:
+                result = rb.execute_preset(db, self._preset)
         except Exception as exc:  # noqa: BLE001 - worker boundary reports errors via signal.
             log.exception("Research query failed")
-            self.failed.emit(str(exc))
+            self.failed.emit(str(exc), self.serial)
             return
-        self.finished_ok.emit(result)
+        self.finished_ok.emit(result, self.serial)
 
 
 class _DrillWorker(QThread):
     """One drill-down: the hands behind a result row."""
 
-    finished_ok = Signal(object)
-    failed = Signal(str)
+    finished_ok = Signal(object, int)
+    failed = Signal(str, int)
 
-    def __init__(self, db: Any, row_query: Any, group: dict[str, Any], numerator: bool, parent=None) -> None:
+    def __init__(self, db: Any, row_query: Any, group: dict[str, Any], numerator: bool, serial: int, parent=None) -> None:
         super().__init__(parent)
         self._db = db
         self._query = row_query
         self._group = group
         self._numerator = numerator
+        self._serial = serial
+
+    @property
+    def serial(self) -> int:
+        return self._serial
 
     def run(self) -> None:
         try:
-            drill = rb.run_drill_down(self._db, self._query, group=self._group, numerator_only=self._numerator)
+            with _worker_database(self._db) as db:
+                drill = rb.run_drill_down(db, self._query, group=self._group, numerator_only=self._numerator)
         except Exception as exc:  # noqa: BLE001
             log.exception("Research drill-down failed")
-            self.failed.emit(str(exc))
+            self.failed.emit(str(exc), self.serial)
             return
-        self.finished_ok.emit(drill)
+        self.finished_ok.emit(drill, self.serial)
 
 
 class _FilterRow(QWidget):
@@ -206,6 +238,7 @@ class GuiResearchBrowser(QWidget):
 
         self.presets = rb.ResearchPresets()
         self._query_serial = 0
+        self._drill_serial = 0
         self._worker: _QueryWorker | None = None
         self._drill_worker: _DrillWorker | None = None
         self._filter_rows: list[_FilterRow] = []
@@ -464,7 +497,7 @@ class GuiResearchBrowser(QWidget):
         self.result_note.setText(_("Query cancelled."))
         self._worker = None
 
-    def _on_query_done(self, result: Any, _serial: int = 0) -> None:
+    def _on_query_done(self, result: Any, serial: int) -> None:
         """A finished query: render it, unless a newer query superseded it.
 
         ``_serial`` is the emitting worker's number, delivered with the result
@@ -472,19 +505,20 @@ class GuiResearchBrowser(QWidget):
         The freshness check therefore reads the serial off the worker object,
         which cannot drift, and falls back to the delivered one.
         """
-        self.cancel_button.setVisible(False)
-        delivered = _serial
-        if self._worker is not None:
-            delivered = self._worker.serial
-            self._worker.deleteLater()
-            self._worker = None
-        if delivered != self._query_serial:
+        if serial != self._query_serial:
             return  # A stale result never replaces a newer query.
+        if self._worker is None or self._worker.serial != serial:
+            return
+        self.cancel_button.setVisible(False)
+        self._worker.deleteLater()
+        self._worker = None
         self._render_result(result)
 
-    def _on_query_failed(self, message: str) -> None:
+    def _on_query_failed(self, message: str, serial: int) -> None:
+        if serial != self._query_serial:
+            return
         self.cancel_button.setVisible(False)
-        if self._worker is not None:
+        if self._worker is not None and self._worker.serial == serial:
             self._worker.deleteLater()
             self._worker = None
         self.sample_label.setText("")
@@ -553,14 +587,17 @@ class GuiResearchBrowser(QWidget):
         if self._current_query is None:
             return
         numerator = self.drill_mode_combo.currentIndex() == 1
+        self._drill_serial += 1
         self.drill_note.setText(_("Loading hands…"))
-        worker = _DrillWorker(self.db, self._current_query, dict(group), numerator, self)
+        worker = _DrillWorker(self.db, self._current_query, dict(group), numerator, self._drill_serial, self)
         worker.finished_ok.connect(self._on_drill_done)
         worker.failed.connect(self._on_drill_failed)
         self._drill_worker = worker
         worker.start()
 
-    def _on_drill_done(self, drill: Any) -> None:
+    def _on_drill_done(self, drill: Any, serial: int) -> None:
+        if serial != self._drill_serial:
+            return
         columns = rb.DRILL_COLUMNS
         self.drill_table.setRowCount(len(drill.rows))
         self.drill_table.setColumnCount(len(columns))
@@ -576,7 +613,9 @@ class GuiResearchBrowser(QWidget):
             note += f" (showing the last {drill.limit})"
         self.drill_note.setText(note)
 
-    def _on_drill_failed(self, message: str) -> None:
+    def _on_drill_failed(self, message: str, serial: int) -> None:
+        if serial != self._drill_serial:
+            return
         self.drill_note.setText(message)
 
     def _open_hand(self, item: QTableWidgetItem) -> None:

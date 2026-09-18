@@ -472,13 +472,14 @@ class DrillDown:
 def _hero_join() -> str:
     """The extra join that names the hand's hero.
 
-    ``HP`` is already scoped to the acting player by the engine; joining the
-    players table on it gives the acting player's name (the column the list
-    shows). The hero of the hand is whoever fpdb recorded in ``H.heroSeat``;
-    for the hero-scoped columns a caller adds ``hero: true`` to the filters
-    and the engine's situation join does the narrowing.
+    The engine's ``HP`` row is scoped to the matching action's player.  The
+    drill-down's hero columns must instead follow the hand's recorded hero
+    seat, independently of whether the query is hero-filtered.
     """
-    return "JOIN Players HERO ON HERO.id = HP.playerId"
+    return (
+        "JOIN HandsPlayers HERO_HP ON HERO_HP.handId = H.id AND HERO_HP.seatNo = H.heroSeat "
+        "JOIN Players HERO ON HERO.id = HERO_HP.playerId"
+    )
 
 
 def _cards_text(card1: Any, card2: Any) -> str:
@@ -525,15 +526,15 @@ def run_drill_down(
         from_clause = _from_clause(_expand_sources(aliases | {"A", "H", "G", "S", "HP"}))
         sql = "\n".join(
             [
-                "SELECT A.handId AS handId,",
+                "SELECT DISTINCT A.handId AS handId,",
                 "  H.startTime AS startTime,",
                 "  S.name AS siteName,",
                 "  G.category AS category,",
                 "  G.bigBlind AS bigBlind,",
                 "  H.seats AS maxSeats,",
                 "  HERO.name AS playerName,",
-                "  HP.totalProfit AS playerProfit,",
-                "  HP.card1 AS card1, HP.card2 AS card2,",
+                "  HERO_HP.totalProfit AS playerProfit,",
+                "  HERO_HP.card1 AS card1, HERO_HP.card2 AS card2,",
                 "  H.boardcard1 AS boardcard1, H.boardcard2 AS boardcard2,",
                 "  H.boardcard3 AS boardcard3, H.boardcard4 AS boardcard4,",
                 "  H.boardcard5 AS boardcard5,",
