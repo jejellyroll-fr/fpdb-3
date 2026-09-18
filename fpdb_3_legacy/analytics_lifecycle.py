@@ -197,6 +197,11 @@ def bootstrap_meta(db: Any) -> None:
     unrecorded = [name for name in SUBSYSTEMS if EXTRACTOR_VERSIONS[name] > 0 and f"{name}_version" not in meta]
     if unrecorded:
         mark_current(db, *unrecorded)
+    # The tables were created by this code, so the schema is this version.
+    # Without this the status of every fresh database read "unrecorded", and
+    # --status told a user to rebuild a database that had just been created.
+    if _get_version(meta.get("analytics_schema_version")) != ANALYTICS_SCHEMA_VERSION:
+        record_schema_version(db)
 
 
 def schema_status(db: Any) -> tuple[bool, int, int]:

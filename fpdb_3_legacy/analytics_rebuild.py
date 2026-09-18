@@ -52,8 +52,8 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from . import analytics_lifecycle as lifecycle
-from .action_events import ACTION_EVENT_COLUMNS, attach_action_events
-from .backfill_autonotes import load_hand_from_database
+from .action_events import ACTION_EVENT_COLUMNS, attach_action_events, chips_to_cents
+from .backfill_autonotes import _decode_card, load_hand_from_database
 from .board_features import BOARD_FEATURE_COLUMNS, derive_board_rows, flop_texture_mask
 from .player_situations import enumerate_situations
 
@@ -86,6 +86,15 @@ class RebuildScope:
     date_to: Any = None  # inclusive upper bound
     hand_ids: list[int] | None = None
     limit: int | None = None
+
+    @property
+    def is_whole_database(self) -> bool:
+        """True when the scope selects every hand, which is what "current" means.
+
+        The version stamped by a run says "every derived row in this database
+        is at this version". Only a run that looked at every hand can say it.
+        """
+        return not any((self.site, self.date_from, self.date_to, self.hand_ids is not None, self.limit))
 
 
 @dataclass
@@ -131,23 +140,30 @@ def canonical_subsystems(requested: Iterable[str]) -> tuple[str, ...]:
     return tuple(out)
 
 
-def _scope_sql(scope: RebuildScope) -> tuple[str, list[Any]]:
+def _scope_sql(db: Any, scope: RebuildScope) -> tuple[str, list[Any]]:
+    """The scope as a WHERE clause, in the backend's own placeholder.
+
+    SQLite marks a parameter with ``?`` and the two server backends with
+    ``%s``; writing one of them here made every scoped rebuild -- a site, a
+    date range, a list of hand ids -- fail on MySQL and PostgreSQL.
+    """
+    ph = db.sql.query["placeholder"]
     where = ["1=1"]
     params: list[Any] = []
     if scope.site is not None:
-        where.append("G.siteId IN (SELECT id FROM Sites WHERE name = ?)")
+        where.append(f"G.siteId IN (SELECT id FROM Sites WHERE name = {ph})")
         params.append(scope.site)
     if scope.date_from is not None:
-        where.append("H.startTime >= ?")
+        where.append(f"H.startTime >= {ph}")
         params.append(scope.date_from)
     if scope.date_to is not None:
-        where.append("H.startTime <= ?")
+        where.append(f"H.startTime <= {ph}")
         params.append(scope.date_to)
     if scope.hand_ids is not None:
         if not scope.hand_ids:
             where.append("1=0")
         else:
-            where.append(f"H.id IN ({', '.join('?' for _ in scope.hand_ids)})")
+            where.append(f"H.id IN ({', '.join(ph for _ in scope.hand_ids)})")
             params.extend(scope.hand_ids)
     return " AND ".join(where), params
 
@@ -155,7 +171,7 @@ def _scope_sql(scope: RebuildScope) -> tuple[str, list[Any]]:
 def _iter_scope_hand_ids(db: Any, scope: RebuildScope) -> Iterator[int]:
     """The hand ids the scope selects, ascending -- the resume-friendly order."""
     c = db.get_cursor()
-    where, params = _scope_sql(scope)
+    where, params = _scope_sql(db, scope)
     sql = f"SELECT H.id FROM Hands H JOIN Gametypes G ON H.gametypeId = G.id WHERE {where} ORDER BY H.id"
     if scope.limit is not None:
         sql += f" LIMIT {int(scope.limit)}"
@@ -166,7 +182,7 @@ def _iter_scope_hand_ids(db: Any, scope: RebuildScope) -> Iterator[int]:
 
 def _count_scope_hands(db: Any, scope: RebuildScope) -> int:
     c = db.get_cursor()
-    where, params = _scope_sql(scope)
+    where, params = _scope_sql(db, scope)
     c.execute(
         f"SELECT COUNT(*) FROM Hands H JOIN Gametypes G ON H.gametypeId = G.id WHERE {where}",
         tuple(params),
@@ -180,6 +196,33 @@ def _hand_has_actions(db: Any, hand_id: int) -> bool:
     ph = db.sql.query["placeholder"]
     c.execute(f"SELECT 1 FROM HandsActions WHERE handId = {ph} LIMIT 1", (hand_id,))
     return c.fetchone() is not None
+
+
+def _restore_extra_boards(db: Any, hand: Any) -> None:
+    """Put the other runs of a run-it-twice hand back on the hand.
+
+    ``Hands`` carries one board and the database adapter reads only that one,
+    so a rebuild saw a single run, deleted the features of every other and
+    wrote none back. The runs are in ``Boards``, one complete five-card row per
+    run, which is the shape ``_assembleRunItTwiceBoards`` wrote them in.
+    """
+    c = db.get_cursor()
+    ph = db.sql.query["placeholder"]
+    c.execute(
+        "SELECT boardId, boardcard1, boardcard2, boardcard3, boardcard4, boardcard5"
+        f" FROM Boards WHERE handId = {ph} ORDER BY boardId",
+        (int(hand.dbid_hands),),
+    )
+    rows = c.fetchall()
+    if len(rows) < 2:  # one board is the hand's own, and it is already there
+        return
+    for index, row in enumerate(rows, start=1):
+        run = int(row[0] or index)
+        cards = [_decode_card(value) for value in row[1:6]]
+        hand.board[f"FLOP{run}"] = [card for card in cards[:3] if card]
+        hand.board[f"TURN{run}"] = [cards[3]] if cards[3] else []
+        hand.board[f"RIVER{run}"] = [cards[4]] if cards[4] else []
+    hand.runItTimes = len(rows)
 
 
 def _rebuild_board_features(db: Any, hand: Any) -> None:
@@ -213,6 +256,31 @@ def _rebuild_action_rows(
     ``attach_action_events`` -- the same derivation the import path uses,
     so the update can only ever agree with a fresh import of the same hand.
     """
+    handsactions = _load_action_rows(db, hand, handsplayers)
+    c = db.get_cursor()
+    ph = db.sql.query["placeholder"]
+    assignments = ", ".join(f"{column} = {ph}" for column in ACTION_EVENT_COLUMNS)
+    for number, event in handsactions.items():
+        values = [event.get(column) for column in ACTION_EVENT_COLUMNS]
+        c.execute(
+            f"UPDATE HandsActions SET {assignments} WHERE handId = {ph} AND actionNo = {ph}",
+            (*values, hand.dbid_hands, number),
+        )
+    return handsactions
+
+
+def _load_action_rows(
+    db: Any,
+    hand: Any,
+    handsplayers: dict[str, Any],
+) -> dict[int, dict[str, Any]]:
+    """One hand's action rows, in order, with their event context derived.
+
+    Reading only: the situations of a hand are a function of its events, so a
+    ``--subsystems situations`` run needs them without touching the rows the
+    action-event pass owns. Deriving them here rather than reading the stored
+    event columns keeps a situations-only rebuild identical to a full one.
+    """
     handsactions: dict[int, dict[str, Any]] = {}
     c = db.get_cursor()
     ph = db.sql.query["placeholder"]
@@ -245,15 +313,6 @@ def _rebuild_action_rows(
             }
         stored.setdefault("actionType", row.get("actionName"))
     attach_action_events(handsactions, hand, handsplayers)
-
-    c = db.get_cursor()
-    assignments = ", ".join(f"{column} = {ph}" for column in ACTION_EVENT_COLUMNS)
-    for number, event in handsactions.items():
-        values = [event.get(column) for column in ACTION_EVENT_COLUMNS]
-        c.execute(
-            f"UPDATE HandsActions SET {assignments} WHERE handId = {ph} AND actionNo = {ph}",
-            (*values, hand.dbid_hands, number),
-        )
     return handsactions
 
 
@@ -320,7 +379,12 @@ class AnalyticsRebuilder:
             try:
                 with self.db.transaction():
                     hand = load_hand_from_database(self.db, hand_id)
-                    if hand is None or not _hand_has_actions(self.db, hand_id):
+                    # Only the passes that read actions need them. A hand
+                    # imported with saveActions off still has its board in
+                    # Hands, and skipping it for a board rebuild left the
+                    # subsystem stamped current with those rows missing.
+                    needs_actions = want_events or want_situations
+                    if hand is None or (needs_actions and not _hand_has_actions(self.db, hand_id)):
                         result.skipped += 1
                         continue
                     self._rebuild_hand(hand, want_boards, want_events, want_situations)
@@ -330,12 +394,36 @@ class AnalyticsRebuilder:
                 result.failures.append(f"hand {hand_id}: {exc}")
                 log.exception("Analytics rebuild failed for hand %s", hand_id)
 
-        if not result.cancelled:
-            # Only a completed run marks the versions current: a cancelled one
-            # leaves the remaining hands' rows stale and must say so.
+        if not result.cancelled and scope.is_whole_database:
+            # Only a completed run over the whole database marks the versions
+            # current. A cancelled run leaves the hands it never reached stale,
+            # and so does a scoped one -- a site, a date range, a --limit: the
+            # hands outside the scope still carry old or missing rows, and
+            # stamping the subsystem current would hide exactly them.
             markable = list(wanted) + [name for name, target in GROUPED_WITH.items() if target in wanted]
             lifecycle.mark_current(self.db, *markable)
         return result
+
+    @staticmethod
+    def _money_in_cents(handsplayers: dict[str, Any]) -> dict[str, Any]:
+        """The per-player context with its money back in the cents the derivators read.
+
+        ``DatabaseAutoNoteHand`` hands money out in chips -- it divides the
+        stored cents by 100, because the note rules it was written for speak in
+        chips -- while the event walk and the situation model read the same
+        columns as the cents ``assembleHandsPlayers`` writes. Left alone, a
+        replayed stack is a hundredth of the real one, which zeroes the
+        effective stack after the first bet and moves every rebuilt SPR and
+        stack bucket away from the imported one.
+        """
+        money = ("startCash", "effStack", "totalProfit", "showdownWinnings")
+        return {
+            name: {
+                **row,
+                **{key: chips_to_cents(row[key]) for key in money if row.get(key) is not None},
+            }
+            for name, row in handsplayers.items()
+        }
 
     def _rebuild_hand(self, hand: Any, want_boards: bool, want_events: bool, want_situations: bool) -> None:
         """One hand's worth of re-derivation, inside the caller's transaction."""
@@ -345,12 +433,19 @@ class AnalyticsRebuilder:
             # actually dealt cards.
             if not getattr(hand, "communityStreets", None):
                 hand.communityStreets = [street for street in ("FLOP", "TURN", "RIVER") if hand.board.get(street)]
+            _restore_extra_boards(self.db, hand)
             _rebuild_board_features(self.db, hand)
+        handsplayers = self._money_in_cents(hand.handsplayers)
         handsactions: dict[int, Any] = {}
         if want_events:
-            handsactions = _rebuild_action_rows(self.db, hand, hand.handsplayers)
+            handsactions = _rebuild_action_rows(self.db, hand, handsplayers)
         if want_situations:
-            _rebuild_situations(self.db, hand, hand.handsplayers, handsactions)
+            # A situations-only run still needs the events they are derived
+            # from; without them every situation of the hand was deleted and
+            # none written back.
+            if not want_events:
+                handsactions = _load_action_rows(self.db, hand, handsplayers)
+            _rebuild_situations(self.db, hand, handsplayers, handsactions)
 
 
 def rebuild_subsystems(

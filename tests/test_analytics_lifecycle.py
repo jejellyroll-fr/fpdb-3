@@ -26,6 +26,7 @@ from __future__ import annotations
 
 import re
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -162,7 +163,13 @@ class TestSituationPersistence:
             "SELECT COUNT(*), MIN(situationVersion), MAX(situationVersion) FROM HandsSituations",
         )
         count, min_version, max_version = c.fetchone()
-        assert count == 266
+        c.execute(
+            "SELECT COUNT(*) FROM HandsActions WHERE actionType IN "
+            "('folds', 'checks', 'calls', 'bets', 'raises', 'completes')",
+        )
+        # One situation per decision, counted from the rows themselves rather
+        # than pinned: a corpus hand added elsewhere must not move this test.
+        assert count == c.fetchone()[0]
         assert (min_version, max_version) == (
             lifecycle.EXTRACTOR_VERSIONS["situations"],
             lifecycle.EXTRACTOR_VERSIONS["situations"],
@@ -221,7 +228,8 @@ class TestRebuild:
         result = AnalyticsRebuilder(db, None).run(
             ["board_features", "action_events", "situations", "sizing_buckets"],
         )
-        assert (result.scanned, result.rebuilt, result.failed, result.cancelled) == (30, 30, 0, False)
+        hands = corpus.hand_count
+        assert (result.scanned, result.rebuilt, result.failed, result.cancelled) == (hands, hands, 0, False)
         assert result.failures == []
         assert lifecycle.stale_subsystems(db) == ()
 
@@ -258,7 +266,7 @@ class TestRebuild:
             ["board_features"],
             scope=RebuildScope(site="PokerStars.COM"),
         )
-        assert result.rebuilt == 30
+        assert result.rebuilt == corpus.hand_count
         result = AnalyticsRebuilder(db, None).run(
             ["board_features"],
             scope=RebuildScope(site="Nowhere"),
@@ -319,9 +327,10 @@ class TestRebuild:
         c.execute("DELETE FROM HandsPlayers WHERE handId = (SELECT MIN(id) FROM Hands)")
         db.commit()
         result = AnalyticsRebuilder(db, None).run(["board_features"])
-        # The stripped hand is skipped (no players to derive), the other 29
-        # rebuild -- one bad hand never stops the run.
-        assert result.failed == 0 and result.rebuilt == 29 and result.skipped == 1
+        # The stripped hand is skipped (no players to derive), every other one
+        # rebuilds -- one bad hand never stops the run.
+        assert result.failed == 0
+        assert (result.rebuilt, result.skipped) == (corpus.hand_count - 1, 1)
         # A skipped hand still leaves the subsystem current: the gap is
         # visible in the data, and rerunning is safe.
         assert not lifecycle.is_stale(db, "board_features")
@@ -346,3 +355,135 @@ class TestRebuild:
         # situations and board_features were untouched and stay stale.
         assert lifecycle.is_stale(db, "situations")
         assert lifecycle.is_stale(db, "board_features")
+
+    def test_a_scoped_rebuild_leaves_the_subsystem_stale(self, corpus, tmp_path: Path) -> None:
+        """"Current" is a claim about the whole database, so a scope cannot make it.
+
+        A rebuild of one site, one date range or the documented ``--limit``
+        leaves every hand outside the scope carrying old or missing rows.
+        Stamping the version current would hide exactly those hands from the
+        staleness check that exists to find them.
+        """
+        db, _ = _corpus_db(tmp_path / "scoped")
+        c = db.get_cursor()
+        c.execute("DELETE FROM BoardFeatures")
+        c.execute("DELETE FROM AnalyticsMeta")
+        db.commit()
+
+        result = AnalyticsRebuilder(db, None).run(["board_features"], scope=RebuildScope(limit=3))
+
+        assert result.rebuilt == 3
+        assert lifecycle.is_stale(db, "board_features"), "a partial rebuild is not a current database"
+
+        assert AnalyticsRebuilder(db, None).run(["board_features"]).rebuilt == corpus.hand_count
+        assert not lifecycle.is_stale(db, "board_features")
+
+    def test_situations_alone_are_rebuilt_from_the_stored_actions(self, corpus, tmp_path: Path) -> None:
+        """The CLI's ``--subsystems situations`` used to delete them and write none."""
+        db, _ = _corpus_db(tmp_path / "situations-only")
+        c = db.get_cursor()
+        c.execute("SELECT handId, actionNo, primaryLabel, response FROM HandsSituations ORDER BY handId, actionNo")
+        before = c.fetchall()
+        assert before
+
+        c.execute("DELETE FROM HandsSituations")
+        db.commit()
+        result = AnalyticsRebuilder(db, None).run(["situations"])
+
+        assert (result.rebuilt, result.failed) == (corpus.hand_count, 0)
+        c.execute("SELECT handId, actionNo, primaryLabel, response FROM HandsSituations ORDER BY handId, actionNo")
+        assert c.fetchall() == before
+
+    def test_board_features_rebuild_needs_no_actions(self, corpus, tmp_path: Path) -> None:
+        """A hand imported with saveActions off still has a board to classify."""
+        db, _ = _corpus_db(tmp_path / "no-actions")
+        c = db.get_cursor()
+        c.execute("SELECT MIN(id) FROM Hands WHERE boardcard1 > 0")
+        (hand_id,) = c.fetchone()
+        c.execute("DELETE FROM HandsActions WHERE handId = ?", (hand_id,))
+        c.execute("DELETE FROM BoardFeatures")
+        db.commit()
+
+        result = AnalyticsRebuilder(db, None).run(["board_features"])
+
+        assert (result.skipped, result.failed) == (0, 0)
+        c.execute("SELECT COUNT(*) FROM BoardFeatures WHERE handId = ?", (hand_id,))
+        assert c.fetchone()[0] > 0, "the board of an action-less hand is still a board"
+
+    def test_the_rebuilt_stacks_are_the_imported_stacks(self, corpus, tmp_path: Path) -> None:
+        """Replayed money is read in cents, as the import wrote it.
+
+        The database adapter hands money out in chips, and read as cents that
+        is a hundredth of the real stack -- zero as soon as anyone bets, which
+        moved every rebuilt SPR and stack bucket away from the imported one.
+        """
+        db, _ = _corpus_db(tmp_path / "stacks")
+        c = db.get_cursor()
+        c.execute(
+            "SELECT handId, actionNo, effectiveStack, effectiveStackBB, sprBefore"
+            " FROM HandsActions ORDER BY handId, actionNo",
+        )
+        before = c.fetchall()
+
+        AnalyticsRebuilder(db, None).run(["action_events"])
+
+        c.execute(
+            "SELECT handId, actionNo, effectiveStack, effectiveStackBB, sprBefore"
+            " FROM HandsActions ORDER BY handId, actionNo",
+        )
+        assert c.fetchall() == before
+        assert any(row[2] > 1000 for row in before), "the corpus stacks are not chips"
+
+    def test_the_other_boards_of_a_run_it_twice_hand_survive(self, corpus, tmp_path: Path) -> None:
+        """The runs live in Boards; a rebuild that reads one deletes the rest."""
+        db, _ = _corpus_db(tmp_path / "run-it-twice")
+        c = db.get_cursor()
+        c.execute("SELECT id, boardcard1, boardcard2, boardcard3, boardcard4, boardcard5 FROM Hands WHERE boardcard5 > 0 ORDER BY id LIMIT 1")
+        hand_id, *cards = c.fetchone()
+        # A second run of the same hand, dealt a different turn and river.
+        c.execute(
+            "INSERT INTO Boards (handId, boardId, boardcard1, boardcard2, boardcard3, boardcard4, boardcard5)"
+            " VALUES (?, 1, ?, ?, ?, ?, ?)",
+            (hand_id, *cards),
+        )
+        c.execute(
+            "INSERT INTO Boards (handId, boardId, boardcard1, boardcard2, boardcard3, boardcard4, boardcard5)"
+            " VALUES (?, 2, ?, ?, ?, ?, ?)",
+            (hand_id, cards[0], cards[1], cards[2], 51, 52),
+        )
+        db.commit()
+
+        AnalyticsRebuilder(db, None).run(["board_features"], scope=RebuildScope(hand_ids=[hand_id]))
+
+        c.execute("SELECT DISTINCT boardId FROM BoardFeatures WHERE handId = ? ORDER BY boardId", (hand_id,))
+        assert [row[0] for row in c.fetchall()] == [1, 2], "both runs are classified"
+
+    def test_the_scope_predicates_use_the_backend_placeholder(self) -> None:
+        """SQLite writes ``?`` and the two server backends ``%s``.
+
+        Every scoped rebuild -- a site, a date range, a list of hand ids --
+        failed outright on MySQL and PostgreSQL while this was hard-coded.
+        """
+        from fpdb_3_legacy.analytics_rebuild import _scope_sql
+
+        scope = RebuildScope(site="PokerStars.COM", date_from="2026-01-01", hand_ids=[1, 2])
+        for placeholder in ("?", "%s"):
+            db = SimpleNamespace(sql=SimpleNamespace(query={"placeholder": placeholder}))
+            where, params = _scope_sql(db, scope)
+
+            assert where.count(placeholder) == len(params) == 4
+            other = "%s" if placeholder == "?" else "?"
+            assert other not in where
+
+
+class TestSchemaVersion:
+    def test_a_fresh_database_records_the_schema_it_was_built_with(self, tmp_path: Path) -> None:
+        """--status used to tell a brand-new database that it was out of date."""
+        db = _fresh_db(tmp_path / "fresh")
+        db.recreate_tables()
+        lifecycle.bootstrap_meta(db)
+
+        current, recorded, code = lifecycle.schema_status(db)
+
+        assert (current, recorded) == (True, code)
+        db.disconnect()

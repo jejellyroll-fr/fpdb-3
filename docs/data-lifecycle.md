@@ -95,7 +95,9 @@ pass (pure functions of the event columns — it is marked current with
   run continues and the subsystem can still be marked current;
 * **progress** is `(done, total, hand_id)` once per hand;
 * **scopes** (`site`, `date_from`/`date_to`, `hand_ids`, `limit`) shrink
-  the work instead of filtering the truth afterwards.
+  the work instead of filtering the truth afterwards, and a scoped run does
+  *not* stamp versions current: "current" is a claim about every hand in the
+  database, and only a run that looked at every hand can make it.
 
 ## CLI
 
