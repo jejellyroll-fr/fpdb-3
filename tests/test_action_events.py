@@ -194,8 +194,11 @@ class TestSchemaMigration:
     def _legacy_database() -> tuple[sqlite3.Connection, Database.Database]:
         """A SQLite connection holding HandsActions as it was before #293."""
         conn = sqlite3.connect(":memory:")
-        columns = ", ".join(f"{column} INT" for column in ORIGINAL_ACTION_COLUMNS)
-        conn.execute(f"CREATE TABLE HandsActions (id INTEGER PRIMARY KEY, {columns})")
+        conn.execute(
+            "CREATE TABLE HandsActions (id INTEGER PRIMARY KEY, handId INT, playerId INT, "
+            "street INT, actionNo INT, streetActionNo INT, actionId INT, amount INT, "
+            "raiseTo INT, amountCalled INT, numDiscarded INT, cardsDiscarded INT, allIn INT)"
+        )
         db = Database.Database.__new__(Database.Database)
         db.backend = Database.Database.SQLITE
         db.connection = conn
@@ -238,7 +241,7 @@ class TestCorpusEvents:
     """Every golden hand converts to events that are ordered, complete and exact."""
 
     def test_every_hand_has_events(self, corpus: golden.GoldenCorpus) -> None:
-        assert corpus.hand_count == 30
+        assert corpus.hand_count == 31
         for hand_id, rows in corpus.actions.items():
             assert rows, f"hand {hand_id} produced no action events"
 

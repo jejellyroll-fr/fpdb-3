@@ -123,7 +123,7 @@ inherited, invisible, by every filter and report built on top.
    in, so everyone on 100bb reports 19800 for a big blind and 19900 for a small
    blind, and an all-in player reports their whole stack. Every stack bucket
    built on it is shifted by the money already committed.
-7. **Folding to a bet is recorded as folding to a raise** (5 rows on the turn).
+7. **Folding to a bet is recorded as folding to a raise** (6 rows on the turn).
    `foldToOtherRaisedStreetN` is fed by the aggression pass, which counts a bet
    as a raise, so a fold to an ordinary lead lands in the same column as a fold
    to a re-raise and nothing downstream can tell the two apart.
