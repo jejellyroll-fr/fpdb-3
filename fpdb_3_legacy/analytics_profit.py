@@ -242,9 +242,9 @@ class ProfitRow:
     players: int
     hand_players: int
     sample_sufficient: bool
-    realized_cents: float
-    ev_adjusted_cents: float
-    all_in_luck_cents: float
+    realized_cents: int
+    ev_adjusted_cents: int
+    all_in_luck_cents: int
     ev_adjusted_pairs: int
     rake: dict[str, float]
     rake_cents: float

@@ -349,7 +349,7 @@ def _rebuild_hand_states(db: Any, hand_id: int) -> int:
     c = db.get_cursor()
     ph = db.sql.query["placeholder"]
     c.execute(
-        "SELECT HS.actionNo, HS.street, HS.streetName, HS.board, HS.playerId, P.name AS player,"
+        "SELECT HS.actionNo, HS.street, HS.streetName, HS.board, HS.playerId, P.name AS player,"  # nosec B608  # nosemgrep
         " HP.card1, HP.card2"
         " FROM HandsSituations HS"
         " JOIN Players P ON P.id = HS.playerId"
@@ -379,12 +379,12 @@ def _rebuild_hand_states(db: Any, hand_id: int) -> int:
         player_ids[player] = int(row["playerId"])
 
     decisions = enumerate_hand_states(situations, cards)
-    c.execute(f"DELETE FROM HandStates WHERE handId = {ph}", (hand_id,))
+    c.execute(f"DELETE FROM HandStates WHERE handId = {ph}", (hand_id,))  # nosec B608  # nosemgrep
     rows = bulk_state_rows(hand_id, player_ids, decisions, lifecycle.EXTRACTOR_VERSIONS["hand_strength"])
     if rows:
         columns = ", ".join(("handId", "playerId", *HAND_STATE_COLUMNS, "stateVersion"))
         placeholders = ", ".join(ph for _ in range(len(rows[0])))
-        c.executemany(f"INSERT INTO HandStates ({columns}) VALUES ({placeholders})", rows)
+        c.executemany(f"INSERT INTO HandStates ({columns}) VALUES ({placeholders})", rows)  # nosec B608  # nosemgrep
     return len(rows)
 
 
