@@ -170,7 +170,7 @@ def _scope_sql(db: Any, scope: RebuildScope) -> tuple[str, list[Any]]:
 
 def _execute_rebuild_query(cursor: Any, query: str, params: list[Any]) -> None:
     """Execute a query assembled from fixed schema fragments and placeholders."""
-    cursor.execute(query, tuple(params))
+    cursor.execute(query, tuple(params))  # nosec B608  # nosemgrep
 
 
 def _iter_scope_hand_ids(db: Any, scope: RebuildScope) -> Iterator[int]:
@@ -241,7 +241,7 @@ def _rebuild_board_features(db: Any, hand: Any) -> None:
     for row in rows:
         columns = ", ".join(("handId", *BOARD_FEATURE_COLUMNS))
         placeholders = ", ".join(ph for _ in range(len(BOARD_FEATURE_COLUMNS) + 1))
-        c.execute(
+        c.execute(  # nosec B608  # nosemgrep
             f"INSERT INTO BoardFeatures ({columns}) VALUES ({placeholders})",  # nosec B608  # nosemgrep
             (hand_id, *(row.get(column) for column in BOARD_FEATURE_COLUMNS)),
         )
