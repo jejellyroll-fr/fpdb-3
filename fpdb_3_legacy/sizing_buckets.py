@@ -85,6 +85,11 @@ class BucketConfig:
             )
         if any(upper <= 0 for upper in self.upper_bounds_bp):
             raise ValueError(f"{self.name}: upper bounds must be positive bp")
+        # The ranges have to tile the domain, which they only do when each one
+        # starts where the previous ended: unordered or repeated bounds give an
+        # empty SQL range and a label bucket_of can never return.
+        if any(b <= a for a, b in zip(self.upper_bounds_bp, self.upper_bounds_bp[1:], strict=False)):
+            raise ValueError(f"{self.name}: upper bounds must be strictly increasing: {self.upper_bounds_bp}")
 
     def bucket_of(self, sizing_bp: int) -> str | None:
         """The bucket label of one stored size, or None for zero.
@@ -162,6 +167,20 @@ def bucket_counts(
     return histogram
 
 
+def _sql_text(label: str) -> str:
+    """One bucket label as a SQL string literal.
+
+    Labels are configurable, so they are data rather than code: the quote is
+    doubled the way every SQL dialect reads it, and a label carrying a NUL or
+    a backslash -- neither of which any backend quotes the same way -- is
+    refused rather than embedded.
+    """
+    if "\x00" in label or "\\" in label:
+        raise ValueError(f"bucket label cannot be written as a SQL literal: {label!r}")
+    escaped = label.replace("'", "''")
+    return f"'{escaped}'"
+
+
 def bucket_case_expression(
     column: str,
     buckets: BucketConfig = DEFAULT_BUCKETS,
@@ -175,7 +194,7 @@ def bucket_case_expression(
     if column not in SIZING_SOURCE_COLUMNS:
         raise ValueError(f"column is not a bucketable sizing decision: {column!r}")
     whens = " ".join(
-        f"WHEN {column} >= {lower} AND {column} < {upper} THEN '{label}'"
+        f"WHEN {column} >= {lower} AND {column} < {upper} THEN {_sql_text(label)}"
         for lower, upper, label in zip(
             (1, *buckets.upper_bounds_bp[:-1]),
             buckets.upper_bounds_bp,
@@ -183,8 +202,13 @@ def bucket_case_expression(
             strict=True,
         )
     )
-    open_when = f"WHEN {column} >= {buckets.upper_bounds_bp[-1]} THEN '{buckets.labels[-1]}'"
-    return f"CASE WHEN {column} <= 0 THEN '{UNKNOWN_BUCKET}' {whens} {open_when} ELSE {column} END"
+    open_when = f"WHEN {column} >= {buckets.upper_bounds_bp[-1]} THEN {_sql_text(buckets.labels[-1])}"
+    unknown = _sql_text(UNKNOWN_BUCKET)
+    # Every branch is text, the ELSE included: PostgreSQL resolves the type of
+    # a CASE across all of them and refuses one that mixes the bucket names
+    # with the integer column. It is also the same answer the Python helpers
+    # give a row they cannot place.
+    return f"CASE WHEN {column} <= 0 THEN {unknown} {whens} {open_when} ELSE {unknown} END"
 
 
 class BucketResponseStat:

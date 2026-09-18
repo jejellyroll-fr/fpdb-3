@@ -25,8 +25,8 @@ cases -- zero and unclear pot state, all-ins, multiway pots -- are covered.
 
 from __future__ import annotations
 
-import tempfile
-from pathlib import Path
+import sqlite3
+from contextlib import closing
 
 import pytest
 
@@ -66,10 +66,15 @@ SIZING_PINS = (
 
 
 @pytest.fixture(scope="module")
-def corpus() -> golden.GoldenCorpus:
-    """The whole golden corpus, imported once into a throwaway database."""
-    with tempfile.TemporaryDirectory() as tmp:
-        yield golden.import_golden_corpus(Path(tmp))
+def corpus(tmp_path_factory) -> golden.GoldenCorpus:
+    """The whole golden corpus, imported once into a throwaway database.
+
+    pytest's own temporary directory, like every other corpus fixture: a
+    TemporaryDirectory deletes itself the moment the fixture ends, and Windows
+    refuses to delete a SQLite file whose connection is still open, which
+    failed the whole run at teardown rather than in a test.
+    """
+    return golden.import_golden_corpus(tmp_path_factory.mktemp("sizing-buckets"))
 
 
 def bet_events(corpus: golden.GoldenCorpus, hand_id: int) -> list[dict]:
@@ -101,6 +106,13 @@ class TestBucketVocabulary:
             BucketConfig(name="bad", upper_bounds_bp=(2500,), labels=("a", "b", "c"))
         with pytest.raises(ValueError, match="positive"):
             BucketConfig(name="bad", upper_bounds_bp=(0,), labels=("a", "b"))
+
+    def test_bounds_out_of_order_are_refused(self) -> None:
+        """Ranges that do not tile leave a label no size can ever reach."""
+        with pytest.raises(ValueError, match="strictly increasing"):
+            BucketConfig(name="bad", upper_bounds_bp=(5000, 3000), labels=("a", "b", "c"))
+        with pytest.raises(ValueError, match="strictly increasing"):
+            BucketConfig(name="bad", upper_bounds_bp=(5000, 5000), labels=("a", "b", "c"))
 
     def test_custom_buckets_are_supported(self) -> None:
         """A caller studies turn bets in thirds without touching this module."""
@@ -142,6 +154,48 @@ class TestBucketVocabulary:
             # first WHEN whose bounds hold names the bucket.
             assert bucket in expression
             assert str(sizing_bp) in rendered  # the column was substituted
+
+
+    def test_the_sql_case_run_on_a_database_answers_what_python_answers(self) -> None:
+        """Executed, not just inspected: every branch has to be one type.
+
+        PostgreSQL resolves a CASE across all its branches, so an ELSE that
+        returned the integer column made every histogram query fail there --
+        and a NULL row came back as no bucket at all, where the Python helper
+        says ``unknown``.
+        """
+        sizes = [0, -1, 1, 2499, 2500, 5000, 15000, 99999, None]
+        expression = bucket_case_expression("sizingBp")
+
+        with closing(sqlite3.connect(":memory:")) as conn:
+            conn.execute("CREATE TABLE t (sizingBp INTEGER)")
+            conn.executemany("INSERT INTO t VALUES (?)", [(size,) for size in sizes])
+            rows = conn.execute(f"SELECT sizingBp, {expression} FROM t").fetchall()  # noqa: S608 - the expression is built from a validated column
+
+        assert len(rows) == len(sizes)
+        for size, bucket in rows:
+            assert isinstance(bucket, str), f"{size} came back as {bucket!r}, not a bucket name"
+            expected = UNKNOWN_BUCKET if size is None else (DEFAULT_BUCKETS.bucket_of(size) or UNKNOWN_BUCKET)
+            assert bucket == expected, f"{size}: SQL says {bucket}, Python says {expected}"
+
+    def test_a_label_with_a_quote_in_it_is_a_literal_not_a_hole(self) -> None:
+        """Bucket tables are configurable, so their labels are data."""
+        quoted = BucketConfig(
+            name="quoted",
+            upper_bounds_bp=(5000,),
+            labels=("player's small", "player's big"),
+        )
+        expression = bucket_case_expression("sizingBp", quoted)
+
+        with closing(sqlite3.connect(":memory:")) as conn:
+            conn.execute("CREATE TABLE t (sizingBp INTEGER)")
+            conn.executemany("INSERT INTO t VALUES (?)", [(1000,), (9000,)])
+            rows = conn.execute(f"SELECT {expression} FROM t").fetchall()  # noqa: S608 - the expression is built from a validated column
+
+        assert [row[0] for row in rows] == ["player's small", "player's big"]
+
+        with pytest.raises(ValueError, match="SQL literal"):
+            bucket_case_expression("sizingBp", BucketConfig("bad", (5000,), ("a", "b\\c")))
 
 
 class TestGoldenCorpusBuckets:
