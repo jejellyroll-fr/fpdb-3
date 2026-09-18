@@ -18,6 +18,7 @@ index catalogue and the cache are justified with (``docs/analytics-performance.m
 
 from __future__ import annotations
 
+import logging
 import re
 import time
 from collections.abc import Iterable, Sequence
@@ -25,6 +26,8 @@ from dataclasses import dataclass
 from typing import Any, Final
 
 from .analytics_query import Query, compile_query
+
+_LOGGER = logging.getLogger(__name__)
 
 # Tables where a sequential scan is worth flagging. The small lookup tables
 # (Gametypes, Sites, Actions) are supposed to be scanned.
@@ -175,7 +178,7 @@ def profile_analytics_query(db: Any, query: Query, name: str = "") -> QueryProfi
     try:
         db.rollback(force=True)
     except Exception:  # noqa: BLE001 - rollback is best-effort bookkeeping
-        pass
+        _LOGGER.debug("Unable to roll back the profiling transaction", exc_info=True)
 
     return QueryProfile(
         name=name or compiled.metric,

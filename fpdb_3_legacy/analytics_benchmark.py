@@ -187,10 +187,12 @@ def synthesize_hands(db: Any, count: int, source_hand_id: int | None = None) -> 
     )
     db.commit()
 
-    cursor.execute(  # nosec B608  # nosemgrep
-        f"SELECT id FROM Hands WHERE siteHandNo >= {placeholder} AND siteHandNo <= {placeholder} ORDER BY siteHandNo",
-        (base, base + count - 1),
+    range_query = (
+        "SELECT id FROM Hands WHERE siteHandNo >= ? AND siteHandNo <= ? ORDER BY siteHandNo"
+        if placeholder == "?"
+        else "SELECT id FROM Hands WHERE siteHandNo >= %s AND siteHandNo <= %s ORDER BY siteHandNo"
     )
+    cursor.execute(range_query, (base, base + count - 1))
     new_ids = [int(row[0]) for row in cursor.fetchall()]
     _clone_children(db, source_hand_id, new_ids)
     return len(new_ids)

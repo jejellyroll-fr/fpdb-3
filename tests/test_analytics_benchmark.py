@@ -42,7 +42,7 @@ _IMPORTERS: list[object] = []
 
 def _count(db: Database, table: str, where: str = "1=1") -> int:
     cursor = db.get_cursor()
-    cursor.execute(f"SELECT COUNT(*) FROM {table} WHERE {where}")
+    cursor.execute(f"SELECT COUNT(*) FROM {table} WHERE {where}")  # nosec B608  # nosemgrep
     return int(cursor.fetchone()[0])
 
 
@@ -65,7 +65,7 @@ class TestSynthesis:
             if per_hand:
                 # Each clone carries exactly the source hand's rows for the table.
                 cursor = corpus_db.get_cursor()
-                cursor.execute(
+                cursor.execute(  # nosec B608  # nosemgrep
                     f"SELECT handId, COUNT(*) FROM {table} GROUP BY handId ORDER BY handId DESC LIMIT 5",
                 )
                 per_clone = {row[1] for row in cursor.fetchall()}

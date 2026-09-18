@@ -228,10 +228,13 @@ def invalidate_aggregates(db: Any, reason: str = "") -> int:
     cursor.execute(f"SELECT COUNT(*) FROM {TABLE_NAME}")  # nosec B608  # nosemgrep
     removed = int(cursor.fetchone()[0] or 0)
     cursor.execute(f"DELETE FROM {TABLE_NAME}")  # nosec B608  # nosemgrep
-    cursor.execute(  # nosec B608  # nosemgrep
-        f"DELETE FROM AnalyticsMeta WHERE name LIKE {_placeholder(db)}",
-        (_WATERMARK_PREFIX + "%",),
+    placeholder = _placeholder(db)
+    meta_delete_query = (
+        "DELETE FROM AnalyticsMeta WHERE name LIKE ?"
+        if placeholder == "?"
+        else "DELETE FROM AnalyticsMeta WHERE name LIKE %s"
     )
+    cursor.execute(meta_delete_query, (_WATERMARK_PREFIX + "%",))
     db.commit()
     del reason
     return removed
@@ -404,10 +407,12 @@ def _group_key(group: Mapping[str, Any]) -> str:
 def _stored_rows(db: Any, key: str) -> dict[str, dict[str, Any]]:
     cursor = db.get_cursor()
     placeholder = _placeholder(db)
-    cursor.execute(  # nosec B608  # nosemgrep
-        f"SELECT groupKey, opportunities, actions, valueSum FROM {TABLE_NAME} WHERE queryKey = {placeholder}",
-        (key,),
+    stored_rows_query = (
+        "SELECT groupKey, opportunities, actions, valueSum FROM AnalyticsAggregates WHERE queryKey = ?"
+        if placeholder == "?"
+        else "SELECT groupKey, opportunities, actions, valueSum FROM AnalyticsAggregates WHERE queryKey = %s"
     )
+    cursor.execute(stored_rows_query, (key,))
     out: dict[str, dict[str, Any]] = {}
     for group_key, opportunities, actions, value_sum in cursor.fetchall():
         out[str(group_key)] = {
