@@ -521,7 +521,13 @@ HANDS_COLUMNS = (
 
 
 def _read_hands(cursor: Any) -> dict[int, dict[str, Any]]:
-    cursor.execute(f"SELECT {', '.join(HANDS_COLUMNS)} FROM Hands")
+    cursor.execute(
+        "SELECT id, siteHandNo, finalPot, seats, maxPosition, playersVpi, "
+        "playersAtStreet1, playersAtStreet2, playersAtStreet3, playersAtStreet4, "
+        "playersAtShowdown, street0Raises, street1Raises, street2Raises, "
+        "street3Raises, street4Raises, boardcard1, boardcard2, boardcard3, "
+        "boardcard4, boardcard5 FROM Hands"
+    )
     columns = [description[0] for description in cursor.description]
     return {
         int(row[columns.index("siteHandNo")]): dict(zip(columns, row))
