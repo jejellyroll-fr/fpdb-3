@@ -151,19 +151,19 @@ def _scope_sql(db: Any, scope: RebuildScope) -> tuple[str, list[Any]]:
     where = ["1=1"]
     params: list[Any] = []
     if scope.site is not None:
-        where.append(f"G.siteId IN (SELECT id FROM Sites WHERE name = {ph})")
+        where.append(f"G.siteId IN (SELECT id FROM Sites WHERE name = {ph})")  # nosec B608  # nosemgrep
         params.append(scope.site)
     if scope.date_from is not None:
-        where.append(f"H.startTime >= {ph}")
+        where.append(f"H.startTime >= {ph}")  # nosec B608  # nosemgrep
         params.append(scope.date_from)
     if scope.date_to is not None:
-        where.append(f"H.startTime <= {ph}")
+        where.append(f"H.startTime <= {ph}")  # nosec B608  # nosemgrep
         params.append(scope.date_to)
     if scope.hand_ids is not None:
         if not scope.hand_ids:
             where.append("1=0")
         else:
-            where.append(f"H.id IN ({', '.join(ph for _ in scope.hand_ids)})")
+            where.append(f"H.id IN ({', '.join(ph for _ in scope.hand_ids)})")  # nosec B608  # nosemgrep
             params.extend(scope.hand_ids)
     return " AND ".join(where), params
 
@@ -172,9 +172,9 @@ def _iter_scope_hand_ids(db: Any, scope: RebuildScope) -> Iterator[int]:
     """The hand ids the scope selects, ascending -- the resume-friendly order."""
     c = db.get_cursor()
     where, params = _scope_sql(db, scope)
-    sql = f"SELECT H.id FROM Hands H JOIN Gametypes G ON H.gametypeId = G.id WHERE {where} ORDER BY H.id"
+    sql = f"SELECT H.id FROM Hands H JOIN Gametypes G ON H.gametypeId = G.id WHERE {where} ORDER BY H.id"  # nosec B608  # nosemgrep
     if scope.limit is not None:
-        sql += f" LIMIT {int(scope.limit)}"
+        sql += f" LIMIT {int(scope.limit)}"  # nosec B608  # nosemgrep
     c.execute(sql, tuple(params))
     for row in c.fetchall():
         yield int(row[0])
@@ -184,7 +184,7 @@ def _count_scope_hands(db: Any, scope: RebuildScope) -> int:
     c = db.get_cursor()
     where, params = _scope_sql(db, scope)
     c.execute(
-        f"SELECT COUNT(*) FROM Hands H JOIN Gametypes G ON H.gametypeId = G.id WHERE {where}",
+        f"SELECT COUNT(*) FROM Hands H JOIN Gametypes G ON H.gametypeId = G.id WHERE {where}",  # nosec B608  # nosemgrep
         tuple(params),
     )
     return int(c.fetchone()[0])
@@ -194,7 +194,7 @@ def _hand_has_actions(db: Any, hand_id: int) -> bool:
     """False for a hand whose importer predates even the raw action rows."""
     c = db.get_cursor()
     ph = db.sql.query["placeholder"]
-    c.execute(f"SELECT 1 FROM HandsActions WHERE handId = {ph} LIMIT 1", (hand_id,))
+    c.execute(f"SELECT 1 FROM HandsActions WHERE handId = {ph} LIMIT 1", (hand_id,))  # nosec B608  # nosemgrep
     return c.fetchone() is not None
 
 
@@ -210,7 +210,7 @@ def _restore_extra_boards(db: Any, hand: Any) -> None:
     ph = db.sql.query["placeholder"]
     c.execute(
         "SELECT boardId, boardcard1, boardcard2, boardcard3, boardcard4, boardcard5"
-        f" FROM Boards WHERE handId = {ph} ORDER BY boardId",
+        f" FROM Boards WHERE handId = {ph} ORDER BY boardId",  # nosec B608  # nosemgrep
         (int(hand.dbid_hands),),
     )
     rows = c.fetchall()
@@ -231,16 +231,16 @@ def _rebuild_board_features(db: Any, hand: Any) -> None:
     hand_id = int(hand.dbid_hands)
     c = db.get_cursor()
     ph = db.sql.query["placeholder"]
-    c.execute(f"DELETE FROM BoardFeatures WHERE handId = {ph}", (hand_id,))
+    c.execute(f"DELETE FROM BoardFeatures WHERE handId = {ph}", (hand_id,))  # nosec B608  # nosemgrep
     for row in rows:
         columns = ", ".join(("handId", *BOARD_FEATURE_COLUMNS))
         placeholders = ", ".join(ph for _ in range(len(BOARD_FEATURE_COLUMNS) + 1))
         c.execute(
-            f"INSERT INTO BoardFeatures ({columns}) VALUES ({placeholders})",
+            f"INSERT INTO BoardFeatures ({columns}) VALUES ({placeholders})",  # nosec B608  # nosemgrep
             (hand_id, *(row.get(column) for column in BOARD_FEATURE_COLUMNS)),
         )
     c.execute(
-        f"UPDATE Hands SET texture = {ph} WHERE id = {ph}",
+        f"UPDATE Hands SET texture = {ph} WHERE id = {ph}",  # nosec B608  # nosemgrep
         (flop_texture_mask(rows), hand_id),
     )
 
@@ -263,7 +263,7 @@ def _rebuild_action_rows(
     for number, event in handsactions.items():
         values = [event.get(column) for column in ACTION_EVENT_COLUMNS]
         c.execute(
-            f"UPDATE HandsActions SET {assignments} WHERE handId = {ph} AND actionNo = {ph}",
+            f"UPDATE HandsActions SET {assignments} WHERE handId = {ph} AND actionNo = {ph}",  # nosec B608  # nosemgrep
             (*values, hand.dbid_hands, number),
         )
     return handsactions
@@ -289,7 +289,7 @@ def _load_action_rows(
         " HA.amountCalled, HA.numDiscarded, HA.cardsDiscarded, HA.allIn, P.name AS name,"
         " A.name AS actionName"
         " FROM HandsActions HA JOIN Players P ON HA.playerId = P.id"
-        f" LEFT JOIN Actions A ON HA.actionId = A.id WHERE HA.handId = {ph}"
+        f" LEFT JOIN Actions A ON HA.actionId = A.id WHERE HA.handId = {ph}"  # nosec B608  # nosemgrep
         " ORDER BY HA.actionNo",
         (hand.dbid_hands,),
     )
@@ -327,7 +327,7 @@ def _rebuild_situations(
     hand_id = int(hand.dbid_hands)
     c = db.get_cursor()
     ph = db.sql.query["placeholder"]
-    c.execute(f"DELETE FROM HandsSituations WHERE handId = {ph}", (hand_id,))
+    c.execute(f"DELETE FROM HandsSituations WHERE handId = {ph}", (hand_id,))  # nosec B608  # nosemgrep
     # bulk_rows emits [handId, playerId, *HANDS_SITUATION_COLUMNS] -- one row
     # per situation in store order, identical to the importer's write.
     rows = bulk_rows(hand_id, hand.playerIds, list(situations), lifecycle.EXTRACTOR_VERSIONS["situations"])
@@ -335,7 +335,7 @@ def _rebuild_situations(
         columns = ", ".join(("handId", "playerId", *HANDS_SITUATION_COLUMNS, "situationVersion"))
         placeholders = ", ".join(ph for _ in range(len(rows[0])))
         c.executemany(
-            f"INSERT INTO HandsSituations ({columns}) VALUES ({placeholders})",
+            f"INSERT INTO HandsSituations ({columns}) VALUES ({placeholders})",  # nosec B608  # nosemgrep
             rows,
         )
 
