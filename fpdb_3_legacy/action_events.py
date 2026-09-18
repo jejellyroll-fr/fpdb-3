@@ -53,9 +53,14 @@ NO_MONEY_ACTIONS = frozenset({"folds", "checks", "stands pat", "discards", "cash
 
 PREFLOP_STREET = "PREFLOP"
 # The blinds and antes street is not a betting round of its own: it holds the
-# forced part of the preflop round, which is why the big blind is the bet level
-# the first opener has to call. Both streets therefore share one round.
-PREFLOP_ROUND_STREETS = frozenset({"BLINDSANTES", PREFLOP_STREET})
+# forced part of the round that follows it, which is why the blind is the bet
+# level the first voluntary action has to call. Hold'em preflop is the case
+# everyone knows; draw games deal on "DEAL" and stud opens on "SECOND"/
+# "THIRD", and their blinds belong to that first betting round just the same
+# (Codex review of #293) -- listing them here keeps the live blind commitments
+# and the bet level alive across the street boundary instead of restarting
+# the round with toCall = 0.
+FIRST_ROUND_STREETS = frozenset({"BLINDSANTES", PREFLOP_STREET, "DEAL", "SECOND", "THIRD"})
 # Dead money is in the pot but is not part of the bet level: an ante does not
 # make the player any less behind the big blind. Blinds and straddles are live.
 DEAD_MONEY_ACTIONS = frozenset({"ante"})
@@ -227,7 +232,7 @@ def _is_heads_up(handsplayers: dict[str, dict[str, Any]]) -> bool:
 
 def round_name(street: str) -> str:
     """The betting round a street belongs to (the blinds count as preflop)."""
-    return PREFLOP_STREET if street in PREFLOP_ROUND_STREETS else street
+    return PREFLOP_STREET if street in FIRST_ROUND_STREETS else street
 
 
 def _streets(hand: Any) -> list[str]:
@@ -306,10 +311,16 @@ class _EventWalk:
             self.advance(action)
 
     def start_round(self, betting_round: str) -> None:
-        """Forget the previous round's betting, keeping the pot as it stands."""
+        """Forget the previous round's betting, keeping the pot as it stands.
+
+        The blind is the price of the first round, so the bet level starts at
+        the big blind whenever the round being entered is one the blinds feed
+        -- hold'em's PREFLOP, draw's DEAL, stud's SECOND/THIRD. A later round
+        starts fresh at zero: there, a bet is what creates the price.
+        """
         self.started_round = betting_round
         self.round_bet = dict.fromkeys(self.handsplayers, 0)
-        self.bet_level = 0
+        self.bet_level = self.big_blind if betting_round == PREFLOP_STREET else 0
         self.raise_count = 0
         self.call_count = 0
         self.aggressor = None

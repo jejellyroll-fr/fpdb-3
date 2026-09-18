@@ -117,6 +117,34 @@ class TestRoundOrder:
         postflop = round_order(self.THREE_HANDED, preflop=False)
         assert postflop["S"] < postflop["B"] < postflop["Btn"]
 
+    def test_draw_blinds_carry_across_the_deal_boundary(self) -> None:
+        """Draw games open their action on DEAL, not PREFLOP: the blinds stay
+        the price of that round instead of a restart at toCall = 0."""
+        from decimal import Decimal
+        from types import SimpleNamespace
+
+        def _action(name, word, amount=0):
+            return [name, word, amount, 0, 0]
+
+        players = {
+            "Hero": {"position": "S", "startCash": 2000000},
+            "Villain": {"position": "B", "startCash": 2000000},
+        }
+        hand = SimpleNamespace(
+            actionStreets=["BLINDSANTES", "DEAL", "DRAWONE"],
+            gametype={"bb": "2.00"},
+            pot=SimpleNamespace(stp=0),
+            actions={
+                "BLINDSANTES": [_action("Hero", "small blind", Decimal("1.00")), _action("Villain", "big blind", Decimal("2.00"))],
+                "DEAL": [_action("Hero", "calls", Decimal("2.00"))],
+                "DRAWONE": [_action("Villain", "checks"), _action("Hero", "checks")],
+            },
+        )
+        events = derive_action_events(hand, players)
+        call = events[3]
+        assert call["toCall"] == 100, "the small blind completes to the big blind"
+        assert call["facingActionType"] is None, "a blind is a price, not a bet faced"
+
 
 class TestEventVocabulary:
     """The column list, the DDL, the migration and the insert must all agree."""
@@ -608,8 +636,8 @@ class TestDerivedContextEdges:
     def test_an_unknown_action_still_produces_a_complete_event(self) -> None:
         """A room-specific word the parser passes through must not lose its context."""
         players = self._players({"a": 0, "b": 1})
-        actions = {"PREFLOP": [("a", "teleports", Decimal("5.00"), False)]}
-        events = derive_action_events(self._hand(["PREFLOP"], actions), players)
+        actions = {"FLOP": [("a", "teleports", Decimal("5.00"), False)]}
+        events = derive_action_events(self._hand(["FLOP"], actions), players)
         assert set(events[1]) == set(ACTION_EVENT_COLUMNS)
         assert events[1]["actionType"] == "teleports"
         assert events[1]["toCall"] == 0 and events[1]["sizingBp"] == 0
@@ -663,7 +691,8 @@ class TestDerivedContextEdges:
                 ("b", "folds"),
             ],
         }
-        events = derive_action_events(self._hand(["BLINDSANTES", "THIRD"], actions), players)
+        # Stud has no big blind: the bring-in alone is the price of third street.
+        events = derive_action_events(self._hand(["BLINDSANTES", "THIRD"], actions, bb="0"), players)
         assert events[1]["actionType"] == "bringin" and events[1]["toCall"] == 0
         assert events[1]["isAggressor"] is False
         assert events[2]["toCall"] == 100, "the raiser owes the difference to the bring-in"
