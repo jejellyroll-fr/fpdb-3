@@ -50,6 +50,7 @@ parameters.
 | `max_seats` | `Gametypes.maxSeats` | range |
 | `session` | `Hands.sessionId` | set |
 | `hand_id` | `HandsActions.handId` | set |
+| `hand_id_from`, `hand_id_to` | `HandsActions.handId` | bound |
 | `date_from`, `date_to` | `Hands.startTime` | bound |
 | `player`, `players` | `Players.name` | set |
 | `hero` | `HandsSituations.isHero` | bool |

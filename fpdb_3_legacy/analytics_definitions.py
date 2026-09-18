@@ -706,7 +706,7 @@ def compile_definition(
     Fragments are merged into the filters first, so the compiled SQL is the
     definition's whole meaning and can be inspected.
     """
-    return compile_query(_resolved_query(definition, context, fragments), placeholder=placeholder, backend=backend)
+    return compile_query(resolve_query(definition, context, fragments), placeholder=placeholder, backend=backend)
 
 
 def run_definition(
@@ -716,11 +716,10 @@ def run_definition(
     fragments: Mapping[str, Mapping[str, Any]] | None = None,
 ) -> QueryResult:
     """Compile and execute a definition against a database."""
-    query = _resolved_query(definition, context, fragments)
-    return run_query(db, query)
+    return run_query(db, resolve_query(definition, context, fragments))
 
 
-def _resolved_query(
+def resolve_query(
     definition: StatDefinition,
     context: Mapping[str, Any] | None = None,
     fragments: Mapping[str, Mapping[str, Any]] | None = None,
@@ -828,5 +827,6 @@ __all__ = [
     "merge_fragments",
     "parse_definition",
     "resolve_metric",
+    "resolve_query",
     "run_definition",
 ]

@@ -87,3 +87,27 @@ def test_gametype_category_alter_failure_rolls_back() -> None:
     db._ensure_gametype_category_width()
 
     assert events == ["rollback"]
+
+
+def test_analytics_indexes_are_installed_by_the_feature_migration(tmp_path) -> None:
+    """An existing database gains the analytics indexes (#304) on connect.
+
+    They are created best-effort in ``ensure_feature_tables`` like the other
+    additive pieces, so a database that predates them does not need a rebuild.
+    """
+    from fpdb_3_legacy.sql_indexes import ANALYTICS_INDEX_NAMES
+    from tests.helpers import analytics_golden as golden
+
+    db = Database(golden.build_config(tmp_path))
+    db.recreate_tables()
+    db.ensure_feature_tables()
+    if db.backend == Database.PGSQL:
+        pytest.skip("the sqlite index probe below needs SQLite")
+    cursor = db.get_cursor()
+    cursor.execute("SELECT name FROM sqlite_master WHERE type = 'index'")
+    installed = {row[0] for row in cursor.fetchall()}
+    missing = [name for name in ANALYTICS_INDEX_NAMES if name not in installed]
+    assert missing == []
+    # Re-running the migration is a no-op, not an error.
+    db.ensure_feature_tables()
+    db.disconnect()

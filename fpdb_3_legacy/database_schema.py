@@ -19,6 +19,7 @@ from fpdb_3_legacy import Card
 from fpdb_3_legacy.action_events import ACTION_EVENT_COLUMNS
 from fpdb_3_legacy.database_caches import CACHE_KEYS, HUDCACHE_EXTRA_KEYS
 from fpdb_3_legacy.loggingFpdb import get_logger
+from fpdb_3_legacy.sql_indexes import ANALYTICS_INDEX_NAMES
 
 log = get_logger("db")
 
@@ -1142,6 +1143,9 @@ class DatabaseSchemaMixin:
             "addAofDecisionsRangeIndex",
             "addAofAnalysesDecisionIndex",
             "addAofAnalysesStatusIndex",
+            # The analytics fact-table indexes (#304). Best-effort like the
+            # rest: a database that already has them rolls back and moves on.
+            *ANALYTICS_INDEX_NAMES,
         ):
             try:
                 c = self.get_cursor()

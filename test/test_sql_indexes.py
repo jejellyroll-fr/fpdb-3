@@ -8,7 +8,7 @@ def test_index_queries_are_installed_exactly() -> None:
     for backend in ("mysql", "postgresql", "sqlite"):
         expected = index_queries(backend)
         assert expected.items() <= Sql(db_server=backend).query.items()
-        assert len(expected) == 39
+        assert len(expected) == 52  # 39 core + 13 analytics (#304)
 
 
 def test_index_queries_keep_backend_specific_syntax() -> None:
@@ -33,3 +33,23 @@ def test_index_queries_keep_backend_specific_syntax() -> None:
         assert "startCards" in queries["addCardsCacheCompundIndex"]
         assert "bombPot" in queries["addBombPotIndex"]
         assert "splashPot" in queries["addSplashPotIndex"]
+
+
+def test_analytics_indexes_cover_the_query_shapes() -> None:
+    """Every analytics index is present, backend-appropriate and composite where
+    the query shape needs it (#304)."""
+    from fpdb_3_legacy.sql_indexes import ANALYTICS_INDEX_NAMES
+
+    assert len(ANALYTICS_INDEX_NAMES) == 13
+    mysql = index_queries("mysql")
+    postgresql = index_queries("postgresql")
+    sqlite = index_queries("sqlite")
+    for name in ANALYTICS_INDEX_NAMES:
+        assert mysql[name].startswith("ALTER TABLE")
+        assert postgresql[name].startswith(f"CREATE INDEX IF NOT EXISTS {name} ON")
+        assert sqlite[name].startswith(f"CREATE INDEX IF NOT EXISTS {name} ON")
+    # The joins and the watermark scan are the ones that must be composite.
+    assert "(handId, actionNo)" in postgresql["handactions_hand_idx"]
+    assert "(handId, actionNo)" in postgresql["handssituations_hand_idx"]
+    assert "(handId, playerId)" in postgresql["handsplayers_hand_player_idx"]
+    assert "(gametypeId, startTime)" in postgresql["hands_gametype_time_idx"]
