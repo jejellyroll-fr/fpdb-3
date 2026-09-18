@@ -598,7 +598,7 @@ HANDS_COLUMNS = (
 
 def _read_hands(cursor: Any) -> dict[int, dict[str, Any]]:
     cursor.execute(
-        "SELECT id, siteHandNo, finalPot, seats, maxPosition, playersVpi, "
+        "SELECT id, siteHandNo, finalPot, seats, maxPosition, texture, playersVpi, "
         "playersAtStreet1, playersAtStreet2, playersAtStreet3, playersAtStreet4, "
         "playersAtShowdown, street0Raises, street1Raises, street2Raises, "
         "street3Raises, street4Raises, boardcard1, boardcard2, boardcard3, "
