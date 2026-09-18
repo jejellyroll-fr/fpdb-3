@@ -547,7 +547,11 @@ class TestPersistenceShape:
 
         row = (
             fresh_db.get_cursor()
-            .execute(f"SELECT {', '.join(BOARD_FEATURE_COLUMNS)} FROM BoardFeatures")
+            .execute(
+                "SELECT boardId, street, streetName, cardCount, textureMask, runoutMask, "
+                "topRank, suitStructure, pairing, rankBucket, connectivity "
+                "FROM BoardFeatures"
+            )
             .fetchone()
         )
 

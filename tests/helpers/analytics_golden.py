@@ -683,8 +683,11 @@ BOARD_FEATURES_COLUMNS = (
 def _read_boards(cursor: Any, hands: dict[int, dict[str, Any]]) -> dict[int, list[dict[str, Any]]]:
     """Read the stored board features back, street by street."""
     db_id_to_hand = {row["id"]: hand_id for hand_id, row in hands.items()}
-    columns = ", ".join(BOARD_FEATURES_COLUMNS)
-    cursor.execute(f"SELECT handId, {columns} FROM BoardFeatures ORDER BY handId, boardId, street")
+    cursor.execute(
+        "SELECT handId, boardId, street, streetName, cardCount, textureMask, "
+        "runoutMask, topRank, suitStructure, pairing, rankBucket, connectivity "
+        "FROM BoardFeatures ORDER BY handId, boardId, street"
+    )
     names = [description[0] for description in cursor.description]
     rows: dict[int, list[dict[str, Any]]] = {hand_id: [] for hand_id in hands}
     for raw in cursor.fetchall():
