@@ -1346,6 +1346,11 @@ class DatabaseSchemaMixin:
         c.execute(self.sql.query["addStartCardsIndex"])
         c.execute(self.sql.query["addSeatsIndex"])
         c.execute(self.sql.query["addPositionIndex"])
+        # The feature tables created above index the same way the migration
+        # path does, so a database built from scratch is not left doing full
+        # scans until someone happens to reconnect with an older schema.
+        c.execute(self.sql.query["addBoardFeaturesHandIndex"])
+        c.execute(self.sql.query["addBoardFeaturesTextureIndex"])
         c.execute(self.sql.query["addPlayerAutoNotesPlayerIndex"])
         c.execute(self.sql.query["addPlayerAutoNotesHandIndex"])
         c.execute(self.sql.query["addPlayerAutoNotesRuleIndex"])

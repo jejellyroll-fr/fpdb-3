@@ -1749,6 +1749,25 @@
           "players_at_turn": 2,
           "flop": ["Jh", "7c", "3d"],
           "turn": ["2s"],
+          "board_features": {
+            "flop": {
+              "rankBucket": "broadway",
+              "suitStructure": "rainbow",
+              "pairing": "unpaired",
+              "connectivity": "disconnected",
+              "topRank": 11
+            },
+            "turn": {
+              "rankBucket": "broadway",
+              "suitStructure": "rainbow",
+              "pairing": "unpaired",
+              "connectivity": "disconnected",
+              "topRank": 11,
+              "runout": [
+                "runout_undercard"
+              ]
+            }
+          },
           "players": {
             "Frank": {
               "role": "under the gun open-limping, betting the limped flop, then folding the turn",

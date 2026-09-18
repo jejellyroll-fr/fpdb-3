@@ -525,6 +525,22 @@ class TestPersistenceShape:
 
             assert conn.execute("SELECT COUNT(*) FROM BoardFeatures").fetchone()[0] == 1
 
+    def test_a_fresh_database_has_the_board_indexes(self, fresh_db: Database) -> None:
+        """The two reads this table exists for are indexed from the first import.
+
+        The migration path creates them on an older database; a database built
+        from scratch never went through it, and used to be left scanning the
+        whole table for the two joins #304 profiles.
+        """
+        names = {
+            row[0]
+            for row in fresh_db.get_cursor()
+            .execute("SELECT name FROM sqlite_master WHERE type = 'index'")
+            .fetchall()
+        }
+
+        assert {"boardfeatures_hand_idx", "boardfeatures_texture_idx"} <= names
+
     def test_the_bulk_store_fills_a_partial_row(self, fresh_db: Database) -> None:
         """A producer that only knows some columns still writes a complete row."""
         fresh_db.storeBoardFeatures(1, [{"cardCount": 3, "textureMask": 5}], True)
