@@ -309,6 +309,14 @@ FILTERS: Final[dict[str, _Filter]] = {
     # -- sizing ------------------------------------------------------------
     "sizing_bp": _Filter("A.sizingBp", ("A",), "range"),
     "facing_sizing_bp": _Filter("A.facingSizingBp", ("A",), "range"),
+    # The bucket *names* #296 groups by, as filters. Grouping by a bucket and
+    # then asking for the hands in one row is the drill-down of a sizing
+    # distribution (#300), and it must select the same rows the histogram
+    # counted, so the two read the same CASE expression.
+    "sizing_bucket": _Filter(bucket_case_expression("sizingBp", qualifier="A."), ("A",), "set"),
+    "facing_sizing_bucket": _Filter(
+        bucket_case_expression("facingSizingBp", qualifier="A."), ("A",), "set",
+    ),
     "bet_sizing_pct": _Filter("A.sizingBp", ("A",), "range_pct"),
     "facing_sizing_pct": _Filter("A.facingSizingBp", ("A",), "range_pct"),
     # -- board -------------------------------------------------------------
