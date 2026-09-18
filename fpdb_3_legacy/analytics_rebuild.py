@@ -268,7 +268,7 @@ def _rebuild_action_rows(
     assignments = ", ".join(f"{column} = {ph}" for column in ACTION_EVENT_COLUMNS)
     for number, event in handsactions.items():
         values = [event.get(column) for column in ACTION_EVENT_COLUMNS]
-        c.execute(
+        c.execute(  # nosec B608  # nosemgrep
             f"UPDATE HandsActions SET {assignments} WHERE handId = {ph} AND actionNo = {ph}",  # nosec B608  # nosemgrep
             (*values, hand.dbid_hands, number),
         )
