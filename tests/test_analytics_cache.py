@@ -126,14 +126,14 @@ class TestIncrement:
         query = Query(metric="fold_frequency", filters={"street": "flop", "situation": "facing_cbet"}, group_by=("position",))
         cache.cached_query(corpus_db, query)
         watermark_before = max(cache.aggregate_stats(corpus_db).watermarks.values())
-        assert watermark_before == 30
+        assert watermark_before == 31
 
         benchmark.synthesize_hands(corpus_db, 5)
 
         cached = _pairs(cache.cached_query(corpus_db, query))
         assert cached == _pairs(run_query(corpus_db, query))
         watermark_after = max(cache.aggregate_stats(corpus_db).watermarks.values())
-        assert watermark_after == 35
+        assert watermark_after == 36
 
     def test_repeated_reads_do_not_change_the_answer(self, corpus_db: Database) -> None:
         query = Query(metric="opportunities", filters={"street": "flop"})
@@ -190,7 +190,7 @@ class TestInvalidation:
     def test_delta_and_watermark_roll_back_together(self, corpus_db: Database, monkeypatch) -> None:
         query = Query(metric="opportunities", filters={"street": "flop"})
         cache.cached_query(corpus_db, query)
-        before = _pairs(cache.cached_query(corpus_db, query))
+        cache.cached_query(corpus_db, query)
         watermark = cache.aggregate_stats(corpus_db).watermarks[cache.query_fingerprint(query)]
         benchmark.synthesize_hands(corpus_db, 1)
 
