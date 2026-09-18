@@ -1338,6 +1338,7 @@ class DatabaseSchemaMixin:
         c.execute(self.sql.query["createHandsShowdownTable"])
         c.execute(self.sql.query["createHandsCashoutTable"])
         c.execute(self.sql.query["createHandsSituationsTable"])
+        c.execute(self.sql.query["createHandStatesTable"])
         c.execute(self.sql.query["createPlayerAutoNotesTable"])
         c.execute(self.sql.query["createAofDecisionsTable"])
         c.execute(self.sql.query["createAofDecisionAnalysesTable"])
