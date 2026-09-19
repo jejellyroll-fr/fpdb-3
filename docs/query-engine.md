@@ -85,6 +85,13 @@ parameters.
 | `board_texture`, `board_texture_all` | `BoardFeatures.textureMask` flags (any / all) | flag set |
 | `board_runout` | `BoardFeatures.runoutMask` flags | flag set |
 | `board_street` | `BoardFeatures.street` (1 = flop) | range |
+| `made_hand`, `pair_detail`, `nutness` | `HandStates` categories ([hand-state.md](hand-state.md)) | set |
+| `made_hand_rank` | `HandStates.madeHandRank` (1 = high card … 9 = straight flush) | range |
+| `nutness_beats`, `nutness_holdings` | the counts behind the band | range |
+| `draw`, `draw_all`, `draw_none` | `HandStates.drawsMask` flags (any / all / none) | flag set |
+| `blocker`, `blocker_all`, `blocker_none` | `HandStates.blockersMask` flags | flag set |
+| `hand_state_street` | `HandStates.streetName` (`flop`, `turn`, `river`) | set |
+| `hand_state_known` | whether the decision was classified at all (a `NULL` check) | bool |
 
 Position names are the hand viewer's: `BTN`/`BU`/`D` → 0, `CO` → 1, `HJ` → 2,
 then `LJ`, `MP`, `UTG`; the blinds are `SB` → −1 and `BB` → −2.
@@ -252,4 +259,8 @@ The engine is the substrate for the rest of Phase 2:
   ([range-explorer.md](range-explorer.md)) — it reads the `starting_hand_id`
   dimension above, which is the same classification as `Card.twoStartCards`, and
   the `starting_hand` / `hole_cards_known` filters that go with it.
+* **#302** classifies the postflop hand of the decisions that *were* shown
+  ([hand-state.md](hand-state.md)) — it reads the `HandStates` source above,
+  whose flag filters carry their own bit vocabulary, and its composition report
+  is one `GROUP BY` over the same columns a caller would filter on.
 * **#303** renders a result and its drill-down hands in the research browser.

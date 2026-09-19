@@ -34,6 +34,7 @@ from fpdb_3_legacy.action_events import (
 from fpdb_3_legacy.autonotes_aof import is_aof_category
 from fpdb_3_legacy.board_features import derive_board_rows, flop_texture_mask
 from fpdb_3_legacy.equity import EquityUnavailableError, calculate_equity, expected_pot_share, load_poker_eval
+from fpdb_3_legacy.hand_state_store import enumerate_hand_states
 from fpdb_3_legacy.loggingFpdb import get_logger
 from fpdb_3_legacy.player_situations import enumerate_situations
 
@@ -457,6 +458,7 @@ class DerivedStats:
         self.handsplayers: dict[str, dict[str, Any]] = {}
         self.handsactions: dict[Any, Any] = {}
         self.situations: list[Any] = []
+        self.hand_states: list[Any] = []
         self.handsstove: list[Any] = []
         self.handspots: list[Any] = []
 
@@ -480,6 +482,11 @@ class DerivedStats:
         # Third pass, over what the two above produced: one named situation per
         # decision (issue #294). Purely additive -- no calculator reads it yet.
         self.situations = list(enumerate_situations(hand, self.handsplayers, self.handsactions))
+        # Fourth pass, over the situations: what each postflop decision was
+        # holding (issue #302). It reads the two encoded cards the player rows
+        # already carry, so a player whose cards were never shown simply has no
+        # state -- there is nothing to guess from.
+        self.hand_states = list(enumerate_hand_states(self.situations, self.handsplayers))
 
         if pokereval and hand.gametype["category"] in Card.games and getattr(hand, "playerIds", None):
             self.assembleHandsStove(hand)
@@ -500,6 +507,10 @@ class DerivedStats:
     def getSituations(self) -> list:
         """Get the named decision situations of the hand (issue #294)."""
         return self.situations
+
+    def getHandStates(self) -> list:
+        """Get the classified postflop decisions of the hand (issue #302)."""
+        return self.hand_states
 
     def getHandsStove(self) -> list:
         """Get hands stove statistics."""

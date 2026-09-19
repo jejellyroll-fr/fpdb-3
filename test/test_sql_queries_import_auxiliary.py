@@ -7,7 +7,7 @@ from fpdb_3_legacy.sql_queries_import_auxiliary import import_auxiliary_queries
 
 def test_import_auxiliary_queries_are_installed_with_sqlite_placeholders() -> None:
     expected = import_auxiliary_queries()
-    assert len(expected) == 7
+    assert len(expected) == 8  # boards, board features, situations, hand states (#302), pots, files…
     for backend in ("mysql", "postgresql"):
         assert expected.items() <= Sql(db_server=backend).query.items()
     sqlite_expected = {key: value.replace("%s", "?") for key, value in expected.items()}

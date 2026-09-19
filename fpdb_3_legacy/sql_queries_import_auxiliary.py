@@ -110,6 +110,34 @@ def import_auxiliary_queries() -> dict[str, str]:
                 %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
            )"""
 
+    # One row per classified decision (#302). Only a postflop decision whose
+    # actor's cards are known gets one, so the table is smaller than
+    # HandsActions by construction. The column order is
+    # hand_state_store.HAND_STATE_COLUMNS, and tests/test_hand_state guards the
+    # two against drift.
+    query["store_hand_states"] = """insert into HandStates (
+                    handId,
+                    playerId,
+                    actionNo,
+                    street,
+                    streetName,
+                    madeHand,
+                    madeHandRank,
+                    madeHandLabel,
+                    pairDetail,
+                    drawsMask,
+                    nutness,
+                    nutnessBeats,
+                    nutnessHoldings,
+                    blockersMask,
+                    stateVersion
+           )
+           values (
+                %s, %s, %s, %s, %s,
+                %s, %s, %s, %s, %s,
+                %s, %s, %s, %s, %s
+            )"""
+
     query["store_hands_pots"] = """insert into HandsPots (
                     handId,
                     potId,

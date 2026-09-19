@@ -37,6 +37,7 @@ from dataclasses import dataclass, field
 from typing import Any, Final
 
 from .board_features import FLAG_BITS
+from .hand_state import BLOCKER_BITS, DRAW_BITS
 from .holdem_classes import class_ids as holdem_class_ids
 from .holdem_classes import holdem_class_expression
 from .sizing_buckets import bucket_case_expression
@@ -80,6 +81,16 @@ SOURCES: Final[dict[str, _Source]] = {
         "SI",
         "HandsSituations",
         "LEFT JOIN HandsSituations SI ON SI.handId = A.handId AND SI.actionNo = A.actionNo",
+        ("A",),
+    ),
+    # The postflop hand state of the acting player (#302), on the same key as the
+    # situation: one row per *classified* decision, so the join is LEFT and a
+    # decision with no cards shown simply has no state. That is the whole of
+    # "unknown opponent cards are never classified": absence, not a bucket.
+    "HS": _Source(
+        "HS",
+        "HandStates",
+        "LEFT JOIN HandStates HS ON HS.handId = A.handId AND HS.actionNo = A.actionNo",
         ("A",),
     ),
     # The first board only: a run-it-twice hand stores a second set of rows and
@@ -223,7 +234,8 @@ class _Filter:
     ``null_check`` (a foreign key: True means "set", False "null"),
     ``hero`` (a nullable situation boolean where False keeps unknown rows),
     ``identity_set`` (an OR of site/name pairs),
-    ``flagset`` (a bitmask column matched against named flags) and ``pattern``
+    ``flagset``/``flagset_all``/``flagset_none`` (a bitmask column matched
+    against named flags -- any, all or none of them) and ``pattern``
     (JSON text containing a quoted word, e.g. a situation label).
     """
 
@@ -231,17 +243,28 @@ class _Filter:
     aliases: tuple[str, ...]
     kind: str = "scalar"
     coerce: Any = None
+    # The flag vocabulary a ``flagset`` filter matches against, and what to call
+    # it when a name is not in it. ``None`` means the board texture flags.
+    bits: Mapping[str, int] | None = None
+    vocabulary: str = "board flag"
 
 
-def _flag_bits(names: Any) -> list[int]:
-    """Named texture/runout flags to their bits, refusing unknown names."""
-    bits: list[int] = []
+def _flag_bits(names: Any, bits: Mapping[str, int] | None = None, vocabulary: str = "board flag") -> list[int]:
+    """Named texture/runout flags to their bits, refusing unknown names.
+
+    ``bits`` is the vocabulary the column was written with -- the board texture
+    flags (#295) or the draw and blocker flags of a hand state (#302). A filter
+    that guessed the wrong vocabulary would match bits that mean something else
+    entirely, so an unknown name is refused rather than silently zero.
+    """
+    known = bits if bits is not None else FLAG_BITS
+    out: list[int] = []
     for name in _as_list(names):
         key = str(name).strip().lower()
-        if key not in FLAG_BITS:
-            raise ValueError(f"Unknown board flag {name!r}; known: {sorted(FLAG_BITS)}")
-        bits.append(FLAG_BITS[key])
-    return bits
+        if key not in known:
+            raise ValueError(f"Unknown {vocabulary} {name!r}; known: {sorted(known)}")
+        out.append(known[key])
+    return out
 
 
 FILTERS: Final[dict[str, _Filter]] = {
@@ -268,6 +291,9 @@ FILTERS: Final[dict[str, _Filter]] = {
     # -- who ---------------------------------------------------------------
     "player": _Filter("P.name", ("P",), "set"),
     "players": _Filter("P.name", ("P",), "set"),
+    # A linked identity is a (site, alias) pair, not a bare name: the same
+    # screen name on two rooms is two different people. The filter is an OR of
+    # pairs, which is why it needs its own kind rather than the ``set`` shape.
     "identity": _Filter("P.name", ("P", "S"), "identity_set"),
     "hero": _Filter("SI.isHero", ("SI",), "hero"),
     # -- seat / stack ------------------------------------------------------
@@ -336,10 +362,33 @@ FILTERS: Final[dict[str, _Filter]] = {
     "board_suit": _Filter("BF.suitStructure", ("BF",), "set"),
     "board_pairing": _Filter("BF.pairing", ("BF",), "set"),
     "board_connectivity": _Filter("BF.connectivity", ("BF",), "set"),
+    "board_present": _Filter("BF.handId", ("BF",), "null_check"),
     "board_texture": _Filter("BF.textureMask", ("BF",), "flagset"),
     "board_texture_all": _Filter("BF.textureMask", ("BF",), "flagset_all"),
     "board_runout": _Filter("BF.runoutMask", ("BF",), "flagset"),
     "board_street": _Filter("BF.street", ("BF",), "range"),
+    # -- hand state (#302) -------------------------------------------------
+    # What the acting player was holding, from the classifier's own vocabulary.
+    # The two masks read the same bits the stored rows were written with, so a
+    # filter and the composition report over the same column cannot disagree
+    # about which decisions a draw contains.
+    "made_hand": _Filter("HS.madeHand", ("HS",), "set"),
+    "made_hand_rank": _Filter("HS.madeHandRank", ("HS",), "range"),
+    "pair_detail": _Filter("HS.pairDetail", ("HS",), "set"),
+    "nutness": _Filter("HS.nutness", ("HS",), "set"),
+    "nutness_beats": _Filter("HS.nutnessBeats", ("HS",), "range"),
+    "nutness_holdings": _Filter("HS.nutnessHoldings", ("HS",), "range"),
+    "draw": _Filter("HS.drawsMask", ("HS",), "flagset", bits=DRAW_BITS, vocabulary="draw"),
+    "draw_all": _Filter("HS.drawsMask", ("HS",), "flagset_all", bits=DRAW_BITS, vocabulary="draw"),
+    "draw_none": _Filter("HS.drawsMask", ("HS",), "flagset_none", bits=DRAW_BITS, vocabulary="draw"),
+    "blocker": _Filter("HS.blockersMask", ("HS",), "flagset", bits=BLOCKER_BITS, vocabulary="blocker"),
+    "blocker_all": _Filter("HS.blockersMask", ("HS",), "flagset_all", bits=BLOCKER_BITS, vocabulary="blocker"),
+    "blocker_none": _Filter("HS.blockersMask", ("HS",), "flagset_none", bits=BLOCKER_BITS, vocabulary="blocker"),
+    "hand_state_street": _Filter("HS.streetName", ("HS",), "set"),
+    # Whether this decision was classified at all. False is "the cards were never
+    # known, or there was no board yet" -- one fact, and the population an
+    # honest range-composition has to report rather than hide.
+    "hand_state_known": _Filter("HS.madeHand", ("HS",), "null_check"),
 }
 
 # Filters whose value is a label present in the situation's JSON ``labels``
@@ -388,11 +437,35 @@ def _range_for(
     return _range_fragment(column, low, high, placeholder)
 
 
-def _flag_fragment(column: str, kind: str, value: Any) -> tuple[list[str], list[Any]]:
-    """Named texture/runout flags matched against a bitmask column."""
-    bits = _flag_bits(value)
+def _flag_fragment(
+    column: str,
+    kind: str,
+    value: Any,
+    spec: _Filter | None = None,
+) -> tuple[list[str], list[Any]]:
+    """Named flags matched against a bitmask column, in the filter's vocabulary.
+
+    Three shapes: any of the named bits, all of them, or none of them. ``None``
+    is what a caller asks for with ``True`` -- "no draw at all" is a real
+    population, and it is the one a share of *something* has to be subtracted
+    from, so it is a filter rather than arithmetic on two other results.
+    """
+    spec = spec or _Filter(column, ())
+    known = spec.bits if spec.bits is not None else FLAG_BITS
+    bits = list(known.values()) if kind == "flagset_none" and value is True else _flag_bits(
+        value,
+        spec.bits,
+        spec.vocabulary,
+    )
     if not bits:
-        return ["1=0"], []
+        # Nothing named: "any of nothing" matches nothing, "none of nothing"
+        # excludes nothing.
+        return (["1=1"], []) if kind == "flagset_none" else (["1=0"], [])
+    if kind == "flagset_none":
+        mask = 0
+        for bit in bits:
+            mask |= bit
+        return [f"({column} & {mask}) = 0"], []
     joiner = " AND " if kind == "flagset_all" else " OR "
     fragments = [f"({column} & {bit}) <> 0" for bit in bits]
     return ["(" + joiner.join(fragments) + ")"], []
@@ -411,7 +484,7 @@ def _label_fragment(column: str, value: Any, placeholder: str) -> tuple[list[str
 
 
 def _identity_pairs(value: Any) -> list[tuple[str, str]]:
-    """Normalize linked identities to ``(site, alias)`` pairs."""
+    """``(site, alias)`` pairs from a mapping, ``"Site:alias"`` or 2-sequences."""
     if isinstance(value, Mapping):
         return [(str(site), str(alias)) for site, alias in value.items()]
     pairs: list[tuple[str, str]] = []
@@ -457,10 +530,16 @@ def _compile_filter(
     if spec.kind in ("scalar", "set"):
         values = _as_list(value)
         values = spec.coerce(values) if spec.coerce is not None else values
-        return _set_fragment(column, values, placeholder)
+        return _set_fragment(spec.column, values, placeholder)
     if spec.kind in ("range", "range_pct", "range_low", "range_high"):
         return _range_for(spec.kind, column, value, placeholder)
     return _compile_condition_filter(name, spec, value, placeholder, backend)
+
+
+# The kinds whose value is not a set or a range: booleans, flags, labels and
+# identities. Split from the shape dispatch above so neither function has to
+# know every kind the other one handles.
+_FLAG_KINDS: Final = ("flagset", "flagset_all", "flagset_none")
 
 
 def _compile_condition_filter(
@@ -470,24 +549,34 @@ def _compile_condition_filter(
     placeholder: str,
     backend: str,
 ) -> tuple[list[str], list[Any]]:
-    """Compile filter kinds that are not simple sets or ranges."""
+    """The condition-shaped filter kinds, not the set or range shapes."""
     column = spec.column
     if spec.kind in ("bool", "hero"):
-        literal = "1" if backend == "sqlite" else "TRUE"
-        if value:
-            return [f"{column} = {literal}"], []
-        if spec.kind == "hero":
-            return [f"({column} IS NULL OR NOT {column} = {literal})"], []
-        return [f"(NOT {column} = {literal})"], []
+        return _boolean_fragment(column, bool(value), spec.kind == "hero", backend)
     if spec.kind == "null_check":
         return ([f"{column} IS NOT NULL"] if value else [f"{column} IS NULL"]), []
-    if spec.kind in ("flagset", "flagset_all"):
-        return _flag_fragment(column, spec.kind, value)
+    if spec.kind in _FLAG_KINDS:
+        return _flag_fragment(column, spec.kind, value, spec)
     if spec.kind == "identity_set":
         return _identity_fragment(value, placeholder)
     if spec.kind == "label":
         return _label_fragment(column, value, placeholder)
     raise ValueError(f"Unknown filter kind for {name!r}: {spec.kind!r}")
+
+
+def _boolean_fragment(column: str, value: bool, keep_unknown: bool, backend: str) -> tuple[list[str], list[Any]]:
+    """A boolean condition, optionally keeping rows the join could not classify.
+
+    ``keep_unknown`` is what makes ``hero: False`` usable for a population: the
+    situation join is a ``LEFT JOIN``, and "we do not know this actor" is not
+    "this actor is the hero". ``hero: True`` still requires the situation row.
+    """
+    literal = "1" if backend == "sqlite" else "TRUE"
+    if value:
+        return [f"{column} = {literal}"], []
+    if keep_unknown:
+        return [f"({column} IS NULL OR NOT {column} = {literal})"], []
+    return [f"(NOT {column} = {literal})"], []
 
 
 def compile_filters(
@@ -558,25 +647,34 @@ DIMENSIONS: Final[dict[str, tuple[str, tuple[str, ...]]]] = {
     # 170 for "cards not known" -- because a label-valued dimension would need
     # 169 SQL branches to agree with ``Card.twoStartCardString``.
     "starting_hand_id": (holdem_class_expression("HP."), ("HP",)),
+    # The hand state dimensions (#302): what the acting player held. Grouped
+    # straight off the stored columns, so a composition and a drill-down group
+    # the same rows the classifier wrote.
+    "made_hand": ("HS.madeHand", ("HS",)),
+    "made_hand_rank": ("HS.madeHandRank", ("HS",)),
+    "pair_detail": ("HS.pairDetail", ("HS",)),
+    "nutness": ("HS.nutness", ("HS",)),
+    "hand_state_street": ("HS.streetName", ("HS",)),
 }
-
-
-# A dimension is named after the poker concept, which SQL does not always let
-# through: ``limit`` is a keyword, and SELECT ... AS limit is a syntax error
-# before anything runs. The result column keeps a safe name and the rows are
-# read back through this same map.
-_RESERVED_DIMENSION_NAMES: Final[frozenset[str]] = frozenset({"limit", "offset", "order", "group"})
-
-
-def _alias_of(name: str) -> str:
-    """The column name one dimension takes in the result set."""
-    return f"{name}_" if name in _RESERVED_DIMENSION_NAMES else name
 
 
 def _dimension(name: str) -> tuple[str, tuple[str, ...]]:
     if name not in DIMENSIONS:
         raise ValueError(f"Unknown group_by dimension {name!r}; known: {sorted(DIMENSIONS)}")
     return DIMENSIONS[name]
+
+
+_RESERVED_DIMENSION_NAMES: Final[frozenset[str]] = frozenset({"limit", "offset", "order", "group"})
+
+
+def _alias_of(name: str) -> str:
+    """The safe result-column name used for a grouped dimension."""
+    return f"{name}_" if name in _RESERVED_DIMENSION_NAMES else name
+
+
+def _dimension_alias(name: str) -> str:
+    """The SQL alias for a grouped dimension."""
+    return _alias_of(name)
 
 
 # ---------------------------------------------------------------------------
@@ -607,6 +705,10 @@ class _Metric:
 
 METRICS: Final[dict[str, _Metric]] = {
     "opportunities": _Metric("opportunities", "count", value_sql="COUNT(*)"),
+    # The population spread of a filtered set (#307): the decision count is the
+    # engine's native denominator, but a population is also described by how
+    # many hands and how many distinct players those decisions came from. Both
+    # are distinct counts, so they must not be read as the row count.
     "hands": _Metric("hands", "count", value_sql="COUNT(DISTINCT A.handId)"),
     "players": _Metric("players", "count", value_sql="COUNT(DISTINCT A.playerId)"),
     "action_count": _Metric("action_count", "count"),
@@ -703,25 +805,6 @@ class CompiledQuery:
         }
 
 
-def _numerator_case(
-    numerator: Mapping[str, Any],
-    placeholder: str,
-    backend: str,
-) -> tuple[str, list[Any], set[str]]:
-    """The CASE condition counting a numerator, its parameters and its tables.
-
-    With no numerator filters the condition is a constant, so a plain
-    ``action_count`` over a filtered population counts the whole population.
-    The aliases come back because the numerator can be the only thing in the
-    query that reads a table: ``fold_frequency`` counts a situation response
-    over a population that may have named no situation column at all.
-    """
-    conditions, params, aliases = compile_filters(numerator, placeholder, backend)
-    if not conditions:
-        return "1=1", params, aliases
-    return " AND ".join(f"({condition})" for condition in conditions), params, aliases
-
-
 def _describe(
     metric: str,
     filters: Mapping[str, Any],
@@ -755,8 +838,11 @@ def compile_query(
     spec, filters, numerator = query.resolved()
 
     where, where_params, aliases = compile_filters(filters, placeholder, backend)
-    case_condition, case_params, numerator_aliases = _numerator_case(numerator, placeholder, backend)
-    aliases |= numerator_aliases
+    # The numerator's own filters are part of the join graph: ``fold_frequency``
+    # counts ``SI.response`` even when the caller's filters never mention the
+    # situation table, and a condition on an unjoined alias is invalid SQL.
+    numerator_conditions, numerator_params, numerator_aliases = compile_filters(numerator, placeholder, backend)
+    aliases.update(numerator_aliases)
     for dimension in query.group_by:
         _expression, dimension_aliases = _dimension(dimension)
         aliases.update(dimension_aliases)
@@ -769,12 +855,14 @@ def compile_query(
     group_expressions: list[str] = []
     for dimension in query.group_by:
         expression, _ = _dimension(dimension)
-        select.append(f"{expression} AS {_alias_of(dimension)}")
+        select.append(f"{expression} AS {_dimension_alias(dimension)}")
         group_expressions.append(expression)
 
     select.append("COUNT(*) AS opportunities")
 
-    params.extend(case_params)
+    case_conditions = [f"({condition})" for condition in numerator_conditions]
+    case_condition = " AND ".join(case_conditions) if case_conditions else "1=1"
+    params.extend(numerator_params)
     if spec.value_sql is not None:
         select.append(f"{spec.value_sql} AS value")
     else:
@@ -785,11 +873,7 @@ def compile_query(
         sql_parts.append("WHERE " + " AND ".join(f"({condition})" for condition in where))
     if group_expressions:
         sql_parts.append("GROUP BY " + ", ".join(group_expressions))
-        sql_parts.append("ORDER BY " + ", ".join(_alias_of(name) for name in query.group_by))
-    # Parameters bind by position, so they are appended in the order their
-    # placeholders appear: the numerator's CASE in the SELECT, then the WHERE,
-    # then the page. Binding the page first made a filtered, paginated query
-    # silently answer with someone else's rows.
+        sql_parts.append("ORDER BY " + ", ".join(_dimension_alias(name) for name in query.group_by))
     params.extend(where_params)
     if query.limit is not None:
         sql_parts.append(f"LIMIT {placeholder}")
@@ -797,17 +881,16 @@ def compile_query(
         sql_parts.append(f"OFFSET {placeholder}")
         params.append(int(query.offset))
     sql = "\n".join(sql_parts)
-
     player_sql: str | None = None
     player_params: list[Any] = []
     if spec.player_expression is not None:
         # Sum the money over the distinct (handId, playerId) pairs the filters
         # select: a player's hand profit is a property of the hand, not of each
         # decision they made in it.
-        inner_group = [f"{_dimension(name)[0]} AS {_alias_of(name)}" for name in query.group_by]
+        inner_group = [f"{_dimension(name)[0]} AS {name}" for name in query.group_by]
         inner_select = ", ".join([*inner_group, "A.handId AS handId", "A.playerId AS playerId"])
         inner_where = " AND ".join(f"({condition})" for condition in where) or "1=1"
-        player_columns = [f"P.{_alias_of(name)}" for name in query.group_by]
+        player_columns = [f"P.{name}" for name in query.group_by]
         player_sql = "\n".join(
             [
                 "SELECT\n  " + (",\n  ".join(player_columns + [f"SUM(HP.{_player_column(spec)}) AS value"]))
@@ -856,17 +939,16 @@ def compile_hand_ids(
     ``include_numerator=True`` to narrow to the numerator.
     """
     _spec, filters, numerator = query.resolved()
-    where, where_params, aliases = compile_filters(filters, placeholder, backend)
-    where_params = list(where_params)
     if include_numerator:
-        # Both predicates hold: the numerator narrows the population, it does
-        # not replace it. Merging the two dictionaries dropped the population's
-        # constraint whenever the two constrained the same key, and answered
-        # with hands the metric had never counted.
+        filter_where, filter_params, filter_aliases = compile_filters(filters, placeholder, backend)
         numerator_where, numerator_params, numerator_aliases = compile_filters(numerator, placeholder, backend)
-        where = [*where, *numerator_where]
-        where_params.extend(numerator_params)
-        aliases |= numerator_aliases
+        where = [*filter_where, *numerator_where]
+        where_params = [*filter_params, *numerator_params]
+        aliases = filter_aliases | numerator_aliases
+        combined = {**filters, **numerator}
+    else:
+        combined = dict(filters)
+        where, where_params, aliases = compile_filters(combined, placeholder, backend)
     needed = _expand_sources(aliases | {"A"})
     sql_parts = [
         "SELECT DISTINCT A.handId AS handId",
@@ -886,14 +968,7 @@ def compile_hand_ids(
         params=tuple(params),
         group_by=(),
         metric=f"{query.metric} (hand ids)",
-        description=_describe(
-            f"{query.metric} (hand ids)",
-            filters,
-            numerator if include_numerator else {},
-            (),
-            query.limit,
-            query.offset,
-        ),
+        description=_describe(f"{query.metric} (hand ids)", combined, {}, (), query.limit, query.offset),
     )
 
 

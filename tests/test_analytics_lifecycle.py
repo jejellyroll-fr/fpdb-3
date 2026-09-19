@@ -33,6 +33,7 @@ import pytest
 from fpdb_3_legacy import analytics_lifecycle as lifecycle
 from fpdb_3_legacy.analytics_rebuild import AnalyticsRebuilder, RebuildScope, canonical_subsystems
 from fpdb_3_legacy.Database import Database
+from fpdb_3_legacy.hand_state_store import HAND_STATE_COLUMNS
 from fpdb_3_legacy.situation_store import HANDS_SITUATION_COLUMNS
 from fpdb_3_legacy.sql_schema_hand import hand_schema_queries
 from tests.helpers import analytics_golden as golden
@@ -87,7 +88,10 @@ class TestVersionRegistry:
         assert lifecycle.stale_subsystems(db) == ()
         statuses = lifecycle.subsystem_statuses(db)
         assert statuses["action_events"].recorded_version == lifecycle.EXTRACTOR_VERSIONS["action_events"]
-        assert statuses["hand_strength"].code_version == 0  # declared, not implemented
+        # hand_strength (#302) is implemented and current on a fresh import.
+        assert statuses["hand_strength"].code_version == lifecycle.EXTRACTOR_VERSIONS["hand_strength"]
+        assert statuses["hand_strength"].recorded_version == lifecycle.EXTRACTOR_VERSIONS["hand_strength"]
+        assert not lifecycle.is_stale(db, "hand_strength")
 
     def test_missing_record_is_stale_not_current(self, corpus, tmp_path: Path) -> None:
         db, _ = _corpus_db(tmp_path / "cleared")
@@ -104,7 +108,13 @@ class TestVersionRegistry:
         c = db.get_cursor()
         c.execute("DELETE FROM AnalyticsMeta")
         db.commit()
-        assert lifecycle.stale_subsystems(db) == ("action_events", "situations", "board_features", "sizing_buckets")
+        assert lifecycle.stale_subsystems(db) == (
+            "action_events",
+            "situations",
+            "board_features",
+            "sizing_buckets",
+            "hand_strength",
+        )
 
     def test_mark_current_and_round_trip(self, corpus, tmp_path: Path) -> None:
         db, _ = _corpus_db(tmp_path / "marked")
@@ -197,6 +207,62 @@ class TestSituationPersistence:
         assert c.fetchone()[0] == 0
 
 
+class TestHandStatePersistence:
+    """The HandStates table (#302): vocabulary, DDL, store query, contents."""
+
+    @pytest.mark.parametrize("backend", BACKENDS)
+    def test_ddl_declares_every_column(self, backend: str) -> None:
+        ddl = hand_schema_queries(backend)["createHandStatesTable"]
+        for column in ("handId", "playerId", *HAND_STATE_COLUMNS, "stateVersion"):
+            assert re.search(rf"\b{column}\b", ddl), f"{column} missing from the {backend} DDL"
+
+    def test_store_query_columns_match_the_vocabulary(self) -> None:
+        from fpdb_3_legacy.sql_queries_import_auxiliary import import_auxiliary_queries
+
+        query = import_auxiliary_queries()["store_hand_states"]
+        head = query[query.index("(") + 1 : query.index("values")]
+        columns = [c.strip().rstrip(")").strip() for c in head.replace("\n", " ").split(",") if c.strip()]
+        assert columns == ["handId", "playerId", *HAND_STATE_COLUMNS, "stateVersion"]
+        assert query.count("%s") == len(columns)
+
+    def test_only_known_postflop_decisions_are_stored(self, corpus, tmp_path: Path) -> None:
+        """A row exists exactly for a postflop decision with known cards."""
+        db, _ = _corpus_db(tmp_path / "states")
+        c = db.get_cursor()
+        c.execute("SELECT COUNT(*), MIN(stateVersion), MAX(stateVersion) FROM HandStates")
+        count, min_version, max_version = c.fetchone()
+        assert count == 37
+        assert (min_version, max_version) == (
+            lifecycle.EXTRACTOR_VERSIONS["hand_strength"],
+            lifecycle.EXTRACTOR_VERSIONS["hand_strength"],
+        )
+        # Every stored state is a postflop decision of a hand-player whose two
+        # cards are known, and nothing else is stored.
+        c.execute(
+            "SELECT COUNT(*) FROM HandStates HS"
+            " JOIN HandsPlayers HP ON HP.handId = HS.handId AND HP.playerId = HS.playerId"
+            " WHERE HS.streetName NOT IN ('flop', 'turn', 'river') OR HP.card1 = 0 OR HP.card2 = 0",
+        )
+        assert c.fetchone()[0] == 0
+
+    def test_states_key_like_handsactions(self, corpus, tmp_path: Path) -> None:
+        db, _ = _corpus_db(tmp_path / "statekeys")
+        c = db.get_cursor()
+        c.execute("SELECT handId, actionNo, COUNT(*) FROM HandStates GROUP BY handId, actionNo HAVING COUNT(*) > 1")
+        assert c.fetchall() == []
+        c.execute("SELECT COUNT(*) FROM HandStates HS WHERE NOT EXISTS (SELECT 1 FROM HandsActions A WHERE A.handId = HS.handId AND A.actionNo = HS.actionNo)")
+        assert c.fetchone()[0] == 0
+
+    def test_stored_categories_are_queryable(self, corpus, tmp_path: Path) -> None:
+        """The classifier's vocabulary lands in columns, ready for GROUP BY."""
+        db, _ = _corpus_db(tmp_path / "statecats")
+        c = db.get_cursor()
+        c.execute("SELECT madeHand, COUNT(*) FROM HandStates GROUP BY madeHand ORDER BY 2 DESC")
+        assert c.fetchall() == [("high_card", 19), ("one_pair", 13), ("two_pair", 3), ("three_of_a_kind", 2)]
+        c.execute("SELECT nutness, COUNT(*) FROM HandStates GROUP BY nutness ORDER BY 2 DESC")
+        assert c.fetchall() == [("medium", 21), ("strong", 10), ("weak", 5), ("near_nuts", 1)]
+
+
 class TestRebuild:
     """Wipe the derived rows, re-derive from stored rows, compare."""
 
@@ -215,18 +281,32 @@ class TestRebuild:
         boards_before = c.fetchall()
         c.execute("SELECT id, texture FROM Hands WHERE texture IS NOT NULL ORDER BY id")
         texture_before = c.fetchall()
+        c.execute(
+            "SELECT handId, actionNo, madeHand, madeHandRank, madeHandLabel, pairDetail,"
+            " drawsMask, nutness, nutnessBeats, nutnessHoldings, blockersMask FROM HandStates"
+            " ORDER BY handId, actionNo",
+        )
+        states_before = c.fetchall()
+        assert states_before, "the corpus must have classified decisions to reproduce"
 
         # Simulate a database from before the analytics layers existed.
         c.execute("UPDATE HandsActions SET sizingBp=0, facingSizingBp=0, potBefore=0, potAfter=0, toCall=0")
         c.execute("DELETE FROM HandsSituations")
         c.execute("DELETE FROM BoardFeatures")
+        c.execute("DELETE FROM HandStates")
         c.execute("UPDATE Hands SET texture = NULL")
         c.execute("DELETE FROM AnalyticsMeta")
         db.commit()
-        assert lifecycle.stale_subsystems(db) == ("action_events", "situations", "board_features", "sizing_buckets")
+        assert lifecycle.stale_subsystems(db) == (
+            "action_events",
+            "situations",
+            "board_features",
+            "sizing_buckets",
+            "hand_strength",
+        )
 
         result = AnalyticsRebuilder(db, None).run(
-            ["board_features", "action_events", "situations", "sizing_buckets"],
+            ["board_features", "action_events", "situations", "sizing_buckets", "hand_strength"],
         )
         hands = corpus.hand_count
         assert (result.scanned, result.rebuilt, result.failed, result.cancelled) == (hands, hands, 0, False)
@@ -245,6 +325,12 @@ class TestRebuild:
         assert c.fetchall() == boards_before
         c.execute("SELECT id, texture FROM Hands WHERE texture IS NOT NULL ORDER BY id")
         assert c.fetchall() == texture_before
+        c.execute(
+            "SELECT handId, actionNo, madeHand, madeHandRank, madeHandLabel, pairDetail,"
+            " drawsMask, nutness, nutnessBeats, nutnessHoldings, blockersMask FROM HandStates"
+            " ORDER BY handId, actionNo",
+        )
+        assert c.fetchall() == states_before
 
     def test_scopes_shrink_the_work(self, corpus, tmp_path: Path) -> None:
         db, _ = _corpus_db(tmp_path / "scopes")
@@ -331,15 +417,17 @@ class TestRebuild:
         # rebuilds -- one bad hand never stops the run.
         assert result.failed == 0
         assert (result.rebuilt, result.skipped) == (corpus.hand_count - 1, 1)
-        # A skipped hand still leaves the subsystem current: the gap is
-        # visible in the data, and rerunning is safe.
-        assert not lifecycle.is_stale(db, "board_features")
+        # A skipped hand means the full-database rebuild did not complete its
+        # coverage contract, so the subsystem remains stale until repaired.
+        assert lifecycle.is_stale(db, "board_features")
 
     def test_canonical_subsystems_expand_and_validate(self) -> None:
         assert canonical_subsystems(["sizing_buckets"]) == ("action_events",)
         assert canonical_subsystems(["sizing_buckets", "board_features"]) == ("action_events", "board_features")
-        with pytest.raises(ValueError, match="hand_strength"):
-            canonical_subsystems(["hand_strength"])
+        # The hand states (#302) read the situation rows, which are derived from
+        # the events: asking for them pulls both passes in front of them.
+        assert canonical_subsystems(["hand_strength"]) == ("action_events", "situations", "hand_strength")
+        assert canonical_subsystems(["situations"]) == ("action_events", "situations")
         with pytest.raises(ValueError, match="Unknown analytics subsystem"):
             canonical_subsystems(["vibes"])
 

@@ -67,6 +67,7 @@ class DatabaseBulkImportMixin:
     hsbulk: list[Any]
     hsdbulk: list[Any]
     hsb2bulk: list[Any]  # HandsSituations bulk inserts (#305)
+    hstbulk: list[Any]  # HandStates bulk inserts (#302)
     hcobulk: list[Any]
     panbulk: list[Any]
     htbulk: list[Any]
@@ -363,6 +364,7 @@ class DatabaseBulkImportMixin:
         self.hsbulk: list[Any] = []  # HandsStove bulk inserts
         self.hsdbulk: list[Any] = []  # HandsShowdown bulk inserts
         self.hsb2bulk: list[Any] = []  # HandsSituations bulk inserts (#305)
+        self.hstbulk: list[Any] = []  # HandStates bulk inserts (#302)
         self.hcobulk: list[Any] = []  # HandsCashout bulk inserts
         self.panbulk: list[Any] = []  # PlayerAutoNotes bulk upserts
         self.htbulk: list[Any] = []  # HandsPots bulk inserts
@@ -636,6 +638,28 @@ class DatabaseBulkImportMixin:
             q = q.replace("%s", self.sql.query["placeholder"])
             c = self.get_cursor()
             self.executemany(c, q, self.hsb2bulk)
+
+    def storeHandStates(self, hid, pids, states, doinsert=False) -> None:
+        """Queue the classified decisions of one hand (#302).
+
+        The column order is hand_state_store.HAND_STATE_COLUMNS behind the hand
+        and player ids, and tests/test_hand_state guards the writer, the store
+        query and the DDL against drift.
+        """
+        from fpdb_3_legacy import analytics_lifecycle
+        from fpdb_3_legacy.hand_state_store import bulk_rows
+
+        self.hstbulk += bulk_rows(
+            hid,
+            pids,
+            list(states or ()),
+            analytics_lifecycle.EXTRACTOR_VERSIONS["hand_strength"],
+        )
+        if doinsert and self.hstbulk:
+            q = self.sql.query["store_hand_states"]
+            q = q.replace("%s", self.sql.query["placeholder"])
+            c = self.get_cursor()
+            self.executemany(c, q, self.hstbulk)
 
     def storeHandsCashout(self, sdata, doinsert) -> None:
         """Persist per-player cashout amounts/fees."""

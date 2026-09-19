@@ -1392,6 +1392,7 @@ class Importer:
                         )
                         hand.insertHandsStove(self.database, doinsert)
                         hand.insertHandsSituations(self.database, doinsert)
+                        hand.insertHandStates(self.database, doinsert)
                         hand.insertHandsShowdown(self.database, doinsert)
                         hand.insertHandsCashout(self.database, doinsert)
 

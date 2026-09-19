@@ -698,10 +698,11 @@ def matching_hand_ids(db: Any, query: Query, limit: int | None = None) -> tuple[
 def narrow_query(query: Query, group: Mapping[str, Any]) -> Query:
     """One group of a report as a query of its own, for its hands and its drill-down.
 
-    Every dimension the report can group by has a filter of the same name, so a
-    group's value *is* a filter value. That is not a coincidence worth relying
-    on silently: a dimension without a filter is refused here, with the name,
-    instead of returning a population that silently ignores it.
+    A grouped value is not always shaped like its corresponding report filter:
+    numeric dimensions need a point range, tournament groups need an exact-id
+    filter rather than the public tournament boolean, and a NULL board bucket
+    needs an explicit left-join presence check.  Keep those translations here
+    so drill-down never broadens a row silently.
     """
     filters = dict(query.filters)
     missing: list[str] = []
