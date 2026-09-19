@@ -149,9 +149,8 @@ class _FilterRow(QWidget):
 
         self.value_edit: QWidget
         if spec.value_kind == "bool":
-            self.value_edit = QCheckBox()
-            check = self.value_edit
-            assert isinstance(check, QCheckBox)
+            check = QCheckBox()
+            self.value_edit = check
             check.stateChanged.connect(lambda _: self.changed.emit())
             layout.addWidget(check)
             layout.addStretch()
@@ -177,9 +176,8 @@ class _FilterRow(QWidget):
             # ``set``, ``flags`` and scalar filters all read a comma-separated
             # text: flags are named, sets are labels or codes, and the engine
             # validates every token when the query is compiled.
-            self.value_edit = QLineEdit()
-            edit = self.value_edit
-            assert isinstance(edit, QLineEdit)
+            edit = QLineEdit()
+            self.value_edit = edit
             edit.editingFinished.connect(self.changed.emit)
             layout.addWidget(edit)
         layout.addStretch()
@@ -197,7 +195,8 @@ class _FilterRow(QWidget):
         kind = self.spec.value_kind
         if kind == "bool":
             check = self.value_edit
-            assert isinstance(check, QCheckBox)
+            if not isinstance(check, QCheckBox):
+                raise TypeError("a boolean filter must use a checkbox")
             return bool(check.isChecked())
         if kind == "range":
             low = self.low_spin.value()
@@ -208,7 +207,8 @@ class _FilterRow(QWidget):
                 return None
             return [out_low, out_high]
         edit = self.value_edit
-        assert isinstance(edit, QLineEdit)
+        if not isinstance(edit, QLineEdit):
+            raise TypeError("a text filter must use a line edit")
         raw = edit.text().strip()
         if not raw:
             return None
@@ -683,7 +683,8 @@ class GuiResearchBrowser(QWidget):
         kind = row.spec.value_kind
         if kind == "bool":
             check = row.value_edit
-            assert isinstance(check, QCheckBox)
+            if not isinstance(check, QCheckBox):
+                raise TypeError("a boolean filter must use a checkbox")
             check.setChecked(bool(value))
         elif kind == "range":
             low, high = (value if isinstance(value, (list, tuple)) else (None, None))
@@ -693,7 +694,8 @@ class GuiResearchBrowser(QWidget):
                 row.high_spin.setValue(float(high))
         else:
             edit = row.value_edit
-            assert isinstance(edit, QLineEdit)
+            if not isinstance(edit, QLineEdit):
+                raise TypeError("a text filter must use a line edit")
             if isinstance(value, (list, tuple)):
                 edit.setText(", ".join(str(part) for part in value))
             else:
@@ -729,8 +731,6 @@ class GuiResearchBrowser(QWidget):
         if self._drill_worker is not None and self._drill_worker.isRunning():
             self._drill_worker.wait(2000)
         if self._owns_db and self.db is not None:
-            try:
+            with contextlib.suppress(Exception):
                 self.db.disconnect()
-            except Exception:  # noqa: BLE001
-                pass
         super().closeEvent(event)
