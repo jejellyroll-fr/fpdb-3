@@ -1801,6 +1801,15 @@ class fpdb(QMainWindow):
             module="fpdb_3_legacy.GuiRingPlayerStats",
         )
 
+    def tab_research_browser(self, widget, data=None) -> None:
+        # Lazily imported like the other tabs: the browser pulls the analytics
+        # engine and its view tree, and most sessions never open this tab.
+        self.open_tab(
+            "Research Browser",
+            lambda module: module.GuiResearchBrowser(self.config, self.sql, self),
+            module="fpdb_3_legacy.GuiResearchBrowser",
+        )
+
     def tab_opponents_report(self, widget, data=None) -> None:
         self.open_tab("Opponents Report", lambda: GuiOpponentsReport.GuiOpponentsReport(self.config, self.sql, self))
 

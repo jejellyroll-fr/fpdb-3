@@ -263,4 +263,8 @@ The engine is the substrate for the rest of Phase 2:
   ([hand-state.md](hand-state.md)) — it reads the `HandStates` source above,
   whose flag filters carry their own bit vocabulary, and its composition report
   is one `GROUP BY` over the same columns a caller would filter on.
-* **#303** renders a result and its drill-down hands in the research browser.
+* **#303** renders a result and its drill-down hands in the research browser
+  ([research-browser.md](research-browser.md)) — the browser is a *reader* of
+  this engine: it offers these filters from `FILTERS`, groups by `DIMENSIONS`,
+  drills down through `compile_hand_ids`, and stores presets as this
+  vocabulary, never as SQL.

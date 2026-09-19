@@ -129,6 +129,7 @@ def menu_layout() -> tuple[Menu, ...]:
                 MenuItem(N_("Graphs"), "tabGraphViewer", "Ctrl+G"),
                 MenuItem(N_("Ring Player Stats"), "tab_ring_player_stats", "Ctrl+P"),
                 MenuItem(N_("Opponents Report"), "tab_opponents_report", "Ctrl+O"),
+                MenuItem(N_("Research Browser"), "tab_research_browser"),
                 MenuItem(N_("Hand Viewer"), "tab_hand_viewer"),
                 MenuItem(N_("Session Stats"), "tab_session_stats", "Ctrl+S"),
             ),
