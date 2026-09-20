@@ -925,11 +925,11 @@ def compile_query(
         player_params.extend(where_params)
 
     return CompiledQuery(
-        sql=sql,
+        sql=escape_literal_percent(sql, placeholder),
         params=tuple(params),
         group_by=tuple(query.group_by),
         metric=query.metric,
-        player_sql=player_sql,
+        player_sql=escape_literal_percent(player_sql, placeholder) if player_sql is not None else None,
         player_params=tuple(player_params),
         description=_describe(query.metric, filters, numerator, tuple(query.group_by), query.limit, query.offset),
     )
@@ -940,6 +940,29 @@ def _player_column(spec: _Metric) -> str:
     if spec.player_expression is None:
         raise ValueError(f"Metric {spec.name!r} has no player expression")
     return spec.player_expression.split(".", 1)[1]
+
+
+def escape_literal_percent(sql: str, placeholder: str) -> str:
+    """Double a literal ``%`` when the driver reads ``%`` as a placeholder.
+
+    psycopg and MySQLdb take pyformat/format parameters, so every ``%`` in a
+    statement starts a placeholder unless it is doubled. The Hold'em class
+    dimension is written with the modulo operator -- ``(card - 1) % 13`` -- so
+    any query grouped by starting hand, which is the range explorer's whole
+    purpose, reached psycopg as::
+
+        ProgrammingError: incomplete placeholder: '%'
+
+    SQLite's ``?`` parameters leave ``%`` alone, which is why this only ever
+    failed against a real PostgreSQL database and never in the test suite.
+
+    The placeholders the compiler inserted are protected first, so only the
+    operators around them are doubled.
+    """
+    if "%" not in placeholder:
+        return sql
+    marker = "\x00"
+    return sql.replace(placeholder, marker).replace("%", "%%").replace(marker, placeholder)
 
 
 def compile_hand_ids(
@@ -981,7 +1004,7 @@ def compile_hand_ids(
         sql_parts.append(f"OFFSET {placeholder}")
         params.append(int(query.offset))
     return CompiledQuery(
-        sql="\n".join(sql_parts),
+        sql=escape_literal_percent("\n".join(sql_parts), placeholder),
         params=tuple(params),
         group_by=(),
         metric=f"{query.metric} (hand ids)",
@@ -1122,6 +1145,7 @@ __all__ = [
     "QueryRow",
     "compile_filters",
     "compile_hand_ids",
+    "escape_literal_percent",
     "compile_query",
     "filter_sources",
     "run_hand_ids",
