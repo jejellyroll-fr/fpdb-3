@@ -44,6 +44,7 @@ def _snapshot_hand(prepared: HudPreparedHand) -> HudPreparedHand:
         hand_instance=prepared.hand_instance,
         winners=copy.deepcopy(prepared.winners),
         actions=copy.deepcopy(prepared.actions),
+        analytics_values=copy.deepcopy(prepared.analytics_values),
         loaded_fields=prepared.loaded_fields,
     )
 
@@ -108,6 +109,13 @@ class HudPreparedHand:
     hand_instance: Any = None
     winners: dict[Any, Any] = field(default_factory=dict)
     actions: list[Any] = field(default_factory=list)
+    """Analytics-backed cell values of this hand (#335), ``{player_id: {stat_name: value}}``.
+
+    Empty for every profile that has no analytics-backed cell, which is the
+    shipped default, so the read path is unchanged unless a configuration asks
+    for it.
+    """
+    analytics_values: dict[Any, dict[str, Any]] = field(default_factory=dict)
     loaded_fields: frozenset[str] = frozenset()
 
 
@@ -228,6 +236,68 @@ class HudReadService:
             dict[int, str],
             dict[int, int],
         ] | None = None
+        # Analytics-backed HUD cells (#335): resolved lazily, and only when the
+        # configuration declares any, so a profile without them pays nothing.
+        # The provider outlives one batch on purpose -- its cache is what makes
+        # two refreshes of the same villain cost one query, not two.
+        self._analytics_bindings: tuple[Any, ...] | None = None
+        self._analytics_provider: Any = None
+
+    def _analytics(self) -> tuple[Any, tuple[Any, ...]]:
+        """The provider and the analytics cells this configuration declares.
+
+        A configuration that cannot be walked -- a mock, or a document with no
+        stats -- yields no bindings and therefore no provider, and the read path
+        behaves exactly as it did before #335.
+        """
+        if self._analytics_bindings is None:
+            from fpdb_3_legacy import hud_analytics_stats
+
+            try:
+                self._analytics_bindings = hud_analytics_stats.bindings_from_config(self.config)
+            except Exception:  # noqa: BLE001 - a HUD with no analytics cells is the normal case
+                log.debug("Could not read analytics-backed HUD cells from the configuration", exc_info=True)
+                self._analytics_bindings = ()
+            if self._analytics_bindings and self._analytics_provider is None:
+                self._analytics_provider = hud_analytics_stats.AnalyticsStatProvider()
+        return self._analytics_provider, self._analytics_bindings
+
+    @staticmethod
+    def _site_name(prepared: HudPreparedHand) -> str:
+        """The room this hand was played on, for the identity filter.
+
+        A seat is asked about as a ``(site, screen name)`` pair, so the site has
+        to travel with the query: the same screen name on two rooms is two
+        different people. The table info already carries it -- reading it here
+        keeps every caller from having to pass it correctly.
+        """
+        info = prepared.table_info
+        if info is None:
+            return ""
+        try:
+            return str(TableInfo.coerce(info).site_name or "")
+        except Exception:  # noqa: BLE001 - an odd table_info must not cost the hand
+            return ""
+
+    def _attach_analytics(self, prepared: HudPreparedHand) -> None:
+        """Compute this hand's analytics-backed cells, on the worker's thread.
+
+        Best-effort on purpose: an analytics query that fails must cost the
+        value, never the hand. The provider already turns a failure into an
+        ``error`` value with a reason, so this only guards a programming error.
+        """
+        provider, bindings = self._analytics()
+        if provider is None or not bindings or not prepared.stat_dict:
+            return
+        try:
+            prepared.analytics_values = provider.compute_for_stat_dict(
+                self.database,
+                bindings,
+                prepared.stat_dict,
+                site=self._site_name(prepared),
+            )
+        except Exception:  # noqa: BLE001 - the hand still has to be painted
+            log.exception("Analytics-backed HUD cells failed for hand %s", prepared.hand_id)
 
     @staticmethod
     def _site_aliases(site: str) -> tuple[str, ...]:
@@ -365,7 +435,7 @@ class HudReadService:
         }
         if needs_mucked_data:
             loaded_fields.update({"winners", "actions"})
-        return HudPreparedHand(
+        prepared = HudPreparedHand(
             hand_id=hand_id,
             table_info=table_info,
             stat_dict=stat_dict,
@@ -378,6 +448,8 @@ class HudReadService:
             actions=actions,
             loaded_fields=frozenset(loaded_fields),
         )
+        self._attach_analytics(prepared)
+        return prepared
 
     def _handle_read_error(self, exc: BaseException) -> None:
         # PostgreSQL statement/lock timeouts leave the connection usable after
@@ -581,6 +653,7 @@ class HudReadService:
             for prepared in prepared_hands:
                 prepared.stat_dict = stats_by_key.get(_hand_key(prepared.hand_id), {})
                 prepared.loaded_fields = prepared.loaded_fields | {"stat_dict"}
+                self._attach_analytics(prepared)
 
     def _load_secondary_stats_individually(
         self,
@@ -606,6 +679,7 @@ class HudReadService:
                     poker_game=context.poker_game,
                 )
                 prepared.loaded_fields = prepared.loaded_fields | {"stat_dict"}
+                self._attach_analytics(prepared)
             except Exception as exc:
                 self._handle_read_error(exc)
                 hands.pop(_hand_key(prepared.hand_id), None)
@@ -617,6 +691,13 @@ class HudReadService:
         progress_callback: Callable[[HudBatchSnapshot], None] | None = None,
     ) -> HudBatchSnapshot:
         """Read one coalesced batch and release its transaction before returning."""
+        # A batch exists because new hands landed, so every analytics value it
+        # would otherwise reuse is behind. Dropping the provider's cache here
+        # keeps the within-batch deduplication -- many cells, one query -- while
+        # never showing yesterday's rate on today's hand.
+        provider, _bindings = self._analytics()
+        if provider is not None:
+            provider.invalidate("new HUD batch")
         contexts = {context.temp_key: context for context in request.tables}
         hands: dict[str, HudPreparedHand] = {}
         failed: list[str] = []

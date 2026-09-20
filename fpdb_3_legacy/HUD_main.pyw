@@ -3066,6 +3066,7 @@ class HudMain(QObject):
                 aw.update_data(args.new_hand_id, self.db_connection)
 
         self.idle_create(args)
+        self._publish_analytics(self.hud_dict[args.temp_key], args.new_hand_id)
         created = self.hud_dict[args.temp_key]
         log.warning(
             "HUD created: session=%s pid=%s generation=%s table=%r window_id=%s hand=%s "
@@ -3341,6 +3342,28 @@ class HudMain(QObject):
 
         return hud_poker_game, None
 
+    def _publish_analytics(self, hud: Any, hand_id: Any) -> None:
+        """Hand a finished batch's analytics values to the table's HUD (#335).
+
+        The values were computed on the worker, so this only stores them on each
+        aux window's session; the seat labels read them on their next refresh.
+        ``aux_windows`` is read defensively because a HUD that is still being
+        built has none yet, and a profile with no analytics cell has no values
+        to store at all.
+        """
+        prepared = self._prepared_hands.get(str(hand_id))
+        values = getattr(prepared, "analytics_values", None)
+        if not values:
+            return
+        for aw in getattr(hud, "aux_windows", None) or ():
+            publish = getattr(aw, "publish_analytics", None)
+            if publish is None:
+                continue
+            try:
+                publish(values)
+            except Exception:  # intentional broad catch: one window must not cost the others theirs
+                log.exception("Could not publish analytics values to %s", type(aw).__name__)
+
     @db_profile.scoped("update_hud")
     def _update_existing_hud(
         self,
@@ -3406,6 +3429,7 @@ class HudMain(QObject):
 
         hud.seat_players = seat_players
         self._set_table_stats(hud, new_hand_id)
+        self._publish_analytics(hud, new_hand_id)
         hud.cards = self.get_cards(new_hand_id, hud.poker_game)
         for aw in hud.aux_windows:
             aw.update_data(new_hand_id, self.db_connection)

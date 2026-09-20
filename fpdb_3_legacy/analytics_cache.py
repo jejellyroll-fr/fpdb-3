@@ -44,6 +44,9 @@ from typing import Any, Final
 
 from .analytics_lifecycle import ensure_analytics_meta
 from .analytics_query import METRICS, Query, QueryResult, QueryRow, run_query
+from .loggingFpdb import get_logger
+
+log = get_logger("analytics_cache")
 
 # The cache's own version. Bumping it invalidates every database's cache on the
 # next read; that is the point, so a semantics change is never served stale.
@@ -281,6 +284,34 @@ def cached_query(db: Any, query: Query, force: bool = False) -> QueryResult:
     if full or watermark < current:
         _refresh(db, query, key, watermark, current, full)
     return _read(db, query, key)
+
+
+def cached_query_if_fresh(db: Any, query: Query) -> QueryResult | None:
+    """The stored result for a query, when it is already up to date.
+
+    Never refreshes and never writes. That matters for the live HUD (#335),
+    which reads inside a transaction its caller rolls back: a refresh triggered
+    from there would be undone while the watermark it wrote stayed, leaving the
+    cache claiming work that never landed. A miss simply costs a direct query,
+    which is the same answer.
+
+    Returns ``None`` for a non-cacheable metric, a cache that is absent, a
+    different cache version, stale derived rows, a query this key has never
+    been stored for, or a cache that is behind the newest hand.
+    """
+    if not is_cacheable(query):
+        return None
+    key = query_fingerprint(query)
+    try:
+        if _stale_reason(db) is not None:
+            return None
+        watermark = _watermark(db, key)
+        if watermark == 0 or not _has_rows(db, key) or watermark < _max_hand_id(db):
+            return None
+        return _read(db, query, key)
+    except Exception:  # noqa: BLE001 - a cache that cannot be read is a miss, not an error
+        log.debug("Analytics aggregate cache unavailable for key %s", key, exc_info=True)
+        return None
 
 
 def _watermark(db: Any, key: str) -> int:
