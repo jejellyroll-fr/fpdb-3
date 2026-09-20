@@ -23,6 +23,15 @@ log = get_logger("help_links")
 #: The repository's docs directory, resolved from this file (``fpdb_3_legacy/``).
 DOCS_DIR: Final[Path] = Path(__file__).resolve().parent.parent / "docs"
 
+#: Where the same guides are published, for a build that has no docs directory.
+#:
+#: The installers ship the application modules, not the repository's
+#: documentation, so ``DOCS_DIR`` points at a directory that is not there. A
+#: missing file used to be logged and answered ``False``, which turns the Help
+#: button into a no-op in exactly the build a new user would open first; the
+#: guide is opened as published instead.
+DOCS_URL: Final[str] = "https://github.com/jejellyroll-fr/fpdb-3/blob/development/docs"
+
 
 @dataclass(frozen=True)
 class HelpTopic:
@@ -40,17 +49,23 @@ class HelpTopic:
         return self.path.is_file()
 
     def url(self) -> str:
-        """The ``file://`` URL a desktop handler can open."""
-        return self.path.as_uri()
+        """The URL a desktop handler opens: the local guide, else the published one."""
+        if self.path.is_file():
+            return self.path.as_uri()
+        return f"{DOCS_URL}/{self.filename}"
 
 
 #: The screens that offer help, in the order the guides introduce them.
 #:
 #: A topic is listed only once its guide is in the tree: an entry pointing at a
 #: document nobody wrote turns the Help button into a log line, which is the
-#: failure mode this table exists to catch.
+#: failure mode this table exists to catch -- and so does a screen that asks for
+#: a topic nobody listed, which is how the Dynamic HUD button reached this table
+#: with nothing behind it. The id is what the button calls; the filename is the
+#: *user* guide, never a developer reference beside it.
 TOPICS: Final[tuple[HelpTopic, ...]] = (
-    HelpTopic("research", "Research Browser", "research-browser.md"),
+    HelpTopic("research", "Research Browser", "research-quick-start.md"),
+    HelpTopic("hud-dynamic", "Dynamic HUD panels", "hud-dynamic-guide.md"),
 )
 
 _BY_ID: Final[dict[str, HelpTopic]] = {topic.id: topic for topic in TOPICS}
@@ -69,14 +84,18 @@ def help_topics() -> tuple[HelpTopic, ...]:
 def open_help(topic_id: str, *, opener: Any = None) -> bool:
     """Open a topic's guide, returning whether anything was opened.
 
-    A missing file is logged and answered ``False`` rather than raising: a Help
+    An unknown topic is logged and answered ``False`` rather than raising: a Help
     button that cannot find its document must not take the window down with it.
-    ``opener`` is injectable so the behaviour can be tested without a desktop.
+    A known topic whose file is absent from this build opens the published
+    guide. ``opener`` is injectable so the behaviour can be tested without a
+    desktop.
     """
     topic = help_topic(topic_id)
-    if topic is None or not topic.exists():
+    if topic is None:
         log.warning("No guide is installed for help topic %r", topic_id)
         return False
+    if not topic.exists():
+        log.info("Help topic %r is not in this build; opening the published guide", topic_id)
     open_url = opener if opener is not None else _desktop_opener()
     if open_url is None:
         log.info("Help for %s: %s", topic_id, topic.path)
@@ -104,6 +123,7 @@ def _desktop_opener() -> Any:
 
 __all__ = [
     "DOCS_DIR",
+    "DOCS_URL",
     "HelpTopic",
     "TOPICS",
     "help_topic",
