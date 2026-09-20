@@ -43,7 +43,7 @@ import json
 import os
 import re
 import sys
-from collections.abc import Iterable, Iterator
+from collections.abc import Iterable, Iterator, Mapping
 from typing import Any
 
 from fpdb_3_legacy.aof_equity import KnownCardsAnalysisCoordinator
@@ -51,6 +51,7 @@ from fpdb_3_legacy.aof_ranges import PopulationActionModel, PopulationObservedRa
 from fpdb_3_legacy.coinpoker_hand_builder import (
     AOF_OMAHA_CATEGORY,
     MINI_GAME_OMAHA,
+    _table_from_hand_id,
     build_hands,
     joined_tournaments,
     tournament_result_announcements,
@@ -440,6 +441,7 @@ class HandPump:
         archive_dir: str | None = None,
         equity_coordinator: KnownCardsAnalysisCoordinator | None = None,
         known_aof_tables: dict[str, Any] | None = None,
+        live_actions=None,
     ) -> None:
         self.db = db
         self.config = config
@@ -448,6 +450,21 @@ class HandPump:
         self.file_id = file_id
         self.notify = notify  # ZMQSender to ping HUD_main after each import
         self.equity_coordinator = equity_coordinator
+        # Where the actions still being played go (#336). Called with one
+        # JSON-safe payload per action, as soon as a sweep has seen it -- before
+        # the hand is complete, which is the whole point: the HUD's dynamic
+        # panels read the decision being taken, not the hand that ended.
+        # ``None`` (the default, and every replay) keeps the pump silent.
+        self.live_actions = live_actions
+        # The live stream is read once per sweep, and every sweep re-offers the
+        # records the previous ones already had. Deduplicating against the key
+        # the hand builder uses, with the hand id added because two tables can
+        # stamp the same millisecond, and numbering from a counter that never
+        # resets, is what makes a replayed sweep a no-op instead of a second
+        # bet -- and keeps the adapter's strictly-increasing rule satisfied
+        # across sweeps, which a per-sweep ordinal would not.
+        self._live_seen: set[tuple] = set()
+        self._live_sequence = 0
         self.imported: set[str] = set()
         self.failed: set[str] = set()
         # Hands of a game fpdb cannot store. Terminal like the other two: what
@@ -754,9 +771,62 @@ class HandPump:
         print(f"[CAPTURE-ONLY] hand #{hid} ({hand_data['gametype']['category']}) — archived, not imported")
         return True
 
+    def _live_action_payloads(self, events: Iterable[tuple]) -> Iterator[dict[str, Any]]:
+        """The actions a sweep is first to see, as JSON-safe HUD payloads.
+
+        The payload carries the hand and the table the hand belongs to (read off
+        the hand number, as the builder does), the action's position in the
+        session's stream, and the room's own record for the HUD to interpret.
+        Records that name no actor are street markers, not decisions, and are
+        skipped without spending a sequence number.
+        """
+        for name, hid, payload in events:
+            if name != "game.dealer_chat_action" or not isinstance(payload, Mapping):
+                continue
+            for record in payload.get("gameActionMessagesHistory") or ():
+                if not isinstance(record, Mapping):
+                    continue
+                key = (
+                    hid,
+                    record.get("initTimestamp"),
+                    record.get("username"),
+                    record.get("action"),
+                    record.get("roundName"),
+                    record.get("actionAmount"),
+                )
+                if key in self._live_seen:
+                    continue
+                self._live_seen.add(key)
+                if not str(record.get("username") or "").strip():
+                    continue
+                self._live_sequence += 1
+                yield {
+                    "table": _table_from_hand_id(hid),
+                    "hand_id": str(hid or ""),
+                    "sequence": self._live_sequence,
+                    "record": dict(record),
+                }
+
+    def _publish_live_actions(self, events: list[tuple]) -> None:
+        """Hand every action this sweep is first to see to the HUD (#336).
+
+        Publishing here, before the hands are built, is what makes the panels
+        move at the decision: a hand reaches the pump complete only when it has
+        already been won. One failing delivery must not stop the stream, and a
+        pump nobody wired a listener into stays silent.
+        """
+        if self.live_actions is None:
+            return
+        for payload in self._live_action_payloads(events):
+            try:
+                self.live_actions(payload)
+            except Exception:  # noqa: BLE001 - the feed must survive a bad send
+                log.exception("Could not publish a live action for hand %s", payload.get("hand_id"))
+
     def process(self, events: list[tuple]) -> int:
         new = 0
         self._remember_tournaments(events)
+        self._publish_live_actions(events)
         for hand_data in build_hands(
             events,
             self.table_category,
@@ -968,6 +1038,12 @@ def run(
         notify = _make_hud_notifier() if notify_hud else None
 
     equity_coordinator = None if dry_run else _make_equity_coordinator(config, notify)
+    # The live actions go out on the same sender the hand notifications use: one
+    # socket, and the same best-effort guarantee. A replay (dry_run, or notify
+    # off) publishes nothing -- the panels must not replay a finished session.
+    live_actions = None
+    if notify is not None and notify_hud and not dry_run:
+        live_actions = notify.send_live_action
     pump = HandPump(
         db,
         config,
@@ -977,6 +1053,7 @@ def run(
         notify=notify,
         equity_coordinator=equity_coordinator,
         known_aof_tables=known_aof_tables,
+        live_actions=live_actions,
     )
     raw_archive = RawEventArchive() if archive else None
     print("[INFO] === CoinPoker live feed active ===" if archive else "[INFO] === CoinPoker archive replay ===")

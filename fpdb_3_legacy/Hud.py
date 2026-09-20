@@ -441,8 +441,13 @@ class Hud:
         if live_session is not None and live_session.adapter.hand_id != str(hand):
             # One hand's live context must never leak into the next. A hand the
             # session is already following is left alone: an import that lands
-            # after its own live events must not wipe the live context.
-            live_session.start_hand(str(hand))
+            # after its own live events must not wipe the live context. Nor may
+            # a hand it has already left be started again: the live stream runs
+            # ahead of the import (actions are published before the hand is even
+            # built), so a notification for a finished hand arriving while the
+            # next one is being played would show a pot nobody is in.
+            if not live_session.adapter.has_left(str(hand)):
+                live_session.start_hand(str(hand))
         try:
             from fpdb_3_legacy import hud_situation
 
@@ -493,16 +498,22 @@ class Hud:
             self._live_context_session = session
         return session
 
-    def accept_live_action(self, action: Any, *, hand_id: str = "", seats: Any = ()) -> Any:
+    def accept_live_action(self, action: Any, *, hand_id: str = "") -> Any:
         """Feed one action from a live source into the dynamic panels.
 
-        A new ``hand_id`` starts a fresh context, so live state cannot cross a
-        hand boundary. Returns the trace of the update, or ``None`` when the
-        action was a duplicate, out of order, or belonged to another hand.
+        The session's adapter owns the hand boundary: an action naming a newer
+        hand starts the next hand, and a late delivery from the previous one is
+        dropped, so live state never moves backwards on a replayed sweep. A
+        caller that knows the hand but carries an action that does not names it
+        with ``hand_id``, which is stamped onto the action here. Returns the
+        trace of the update, or ``None`` when the action was a duplicate, out of
+        order, or a stale delivery from the previous hand.
         """
+        from dataclasses import replace
+
         session = self.live_context_session()
-        if hand_id and session.adapter.hand_id != str(hand_id):
-            session.start_hand(str(hand_id), seats=seats)
+        if hand_id and not getattr(action, "hand_id", ""):
+            action = replace(action, hand_id=str(hand_id))
         return session.update(action)
 
     def accept_live_context(self, context: Any) -> None:

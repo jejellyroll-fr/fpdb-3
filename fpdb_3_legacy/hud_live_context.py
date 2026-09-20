@@ -42,11 +42,16 @@ Units and the shipped rules: ``docs/live-context.md``.
 from __future__ import annotations
 
 import time
+from collections import deque
 from collections.abc import Iterable, Iterator, Mapping
 from dataclasses import dataclass, field
 from typing import Any, Final
 
 from .loggingFpdb import get_logger
+
+#: How many finished hands an adapter keeps the names of. Only the records of
+#: hands around the boundary can still arrive late, so a handful is plenty.
+_RETIRED_HANDS: Final = 8
 
 log = get_logger("hud_live_context")
 
@@ -302,6 +307,11 @@ class ActionStreamAdapter:
         self._seen: set[int] = set()
         self._ignored = 0
         self._street_commits: dict[str, int] = {}
+        # The hands this adapter has already left. Unlike every other field it
+        # outlives a reset, because that is the whole point: it is what lets a
+        # late record of a finished hand be told from the hand now being played.
+        # Bounded, because only the hands around the boundary can still arrive.
+        self._retired: deque[str] = deque(maxlen=_RETIRED_HANDS)
 
     # -- lifecycle ----------------------------------------------------------
 
@@ -318,8 +328,16 @@ class ActionStreamAdapter:
             self.stacks_bb[actor] = int(stack_bb)
 
     def reset(self, hand_id: str = "", *, seats: Iterable[str] = ()) -> None:
-        """Start a new hand: nothing of the previous one survives."""
+        """Start a new hand: nothing of the previous one survives but its name.
+
+        The hand being left is remembered in ``_retired`` -- the one thing a
+        reset keeps -- so a record of it that arrives afterwards is recognised
+        as late rather than mistaken for the table moving on again.
+        """
+        previous = self.hand_id
         self.hand_id = str(hand_id or "")
+        if previous and previous != self.hand_id:
+            self._retired.append(previous)
         self._street = "preflop"
         self._street_index = 0
         self._pot_cents = 0
@@ -337,20 +355,22 @@ class ActionStreamAdapter:
         self._seen = set()
         self._ignored = 0
         self._street_commits = {}
+        # ``__post_init__`` runs once at construction; every one of these fields
+        # is re-established here by hand, because a hand adopted mid-stream
+        # takes this path and not the constructor's. ``_retired`` is the single
+        # exception, and is appended to above rather than cleared.
 
     # -- folding ------------------------------------------------------------
 
     def apply(self, action: LiveAction) -> LiveContext | None:
         """Fold one action in, or answer ``None`` when it must be ignored.
 
-        ``None`` means the action belonged to another hand, repeated a sequence
-        already folded, or named an empty actor -- all of which are dropped
-        rather than guessed at, because the panel state must never move
-        backwards on a resync.
+        ``None`` means the action repeated a sequence already folded, named an
+        empty actor, or arrived late from the hand before this one -- all of
+        which are dropped rather than guessed at, because the panel state must
+        never move backwards on a resync.
         """
-        if action.hand_id and self.hand_id and action.hand_id != self.hand_id:
-            self._ignored += 1
-            log.debug("Live action for hand %s ignored: this adapter follows %s", action.hand_id, self.hand_id)
+        if not self._begin_hand_if_new(action):
             return None
         actor = str(action.actor or "").strip()
         if not actor:
@@ -388,6 +408,45 @@ class ActionStreamAdapter:
         if action.all_in:
             self._all_in.add(actor)
         return self.context
+
+    def has_left(self, hand_id: str) -> bool:
+        """Whether this adapter has already finished with that hand.
+
+        The import path asks before restarting a hand of its own: a hand the
+        live stream has moved past must not be started again by a notification
+        that arrives late, because the panels would show the wrong pot.
+        """
+        return bool(hand_id) and str(hand_id) in self._retired
+
+    def _begin_hand_if_new(self, action: LiveAction) -> bool:
+        """Adopt a newer hand when the action names one, and say whether to fold it.
+
+        A capture replays its sweeps, so a record of the hand just finished can
+        still arrive after the next hand's first action; resetting for it would
+        move the panels backwards, which no later street is allowed to do
+        either. The hands already left are what tells the two apart -- not the
+        sequence, which restarts whenever the capture does. The seats seen at
+        the table carry over -- they are the same chairs -- while the street,
+        pot and aggressor start clean.
+        """
+        if not action.hand_id or action.hand_id == self.hand_id:
+            return True
+        if self.has_left(action.hand_id):
+            self._ignored += 1
+            log.debug(
+                "Live action for hand %s ignored: that hand is over, the table is on %s",
+                action.hand_id,
+                self.hand_id,
+            )
+            return False
+        if not self.hand_id:
+            # An adapter nobody told which hand it follows learns it from the
+            # first action that names one. There is no state to clear: this is
+            # that hand's own beginning, not a boundary crossed mid-stream.
+            self.hand_id = action.hand_id
+            return True
+        self.reset(action.hand_id, seats=self._active)
+        return True
 
     def _accept_sequence(self, sequence: int) -> bool:
         """Whether an event's sequence has not been folded yet.

@@ -5,6 +5,7 @@ Main for FreePokerTools HUD.
 """
 
 import contextlib
+import json
 import os
 import re
 import sys
@@ -24,7 +25,7 @@ if sys.platform.startswith("linux") and os.getenv("FPDB_FORCE_X11") == "1":
 
 import threading
 import time
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field
 from optparse import Values
 from pathlib import Path
@@ -64,6 +65,7 @@ from fpdb_3_legacy.hud_read_service import (
 )
 from fpdb_3_legacy.hud_window_registry import ClaimOutcome, HudWindowRegistry
 from fpdb_3_legacy.HudStatsPersistence import get_hud_stats_persistence
+from fpdb_3_legacy.Importer import LIVE_ACTION_PREFIX
 from fpdb_3_legacy.interlocks import (
     HUD_ALREADY_RUNNING_EXIT_CODE,
     HUD_INSTANCE_LOCK_NAME,
@@ -445,10 +447,45 @@ class HudReadWorker(QThread):
             log.warning("HUD read worker did not stop in time")
 
 
+def parse_live_message(message: str) -> dict[str, Any] | None:
+    """The live-action payload a ZMQ message carries, or ``None``.
+
+    A capture sends two things on one socket: a bare hand id, and a prefixed
+    JSON payload naming an action still being played (#336). Anything malformed
+    answers ``None`` and is logged rather than raised -- one bad packet must
+    not take the receiver thread down with it.
+    """
+    if not message.startswith(LIVE_ACTION_PREFIX):
+        return None
+    try:
+        payload = json.loads(message[len(LIVE_ACTION_PREFIX):])
+    except ValueError:
+        log.warning("Dropping a malformed live-action message (%s chars)", len(message))
+        return None
+    return payload if isinstance(payload, dict) else None
+
+
+def route_live_action(payload: dict[str, Any], tables: Mapping[str, str], huds: Mapping[str, Any]) -> Any:
+    """The HUD a live action belongs to, or ``None`` when no table claims it.
+
+    The capture derives a table id from the hand number; HUD_main learns which
+    of its HUDs serves that table the first time it imports one of its hands,
+    keyed by the table name's last token, which is that same id for a cash game
+    and its trailing number for a tournament. Until a table's first hand has
+    been imported there is no HUD to route to, and the action is dropped: the
+    panels fall back to the hand-refresh path, which is what they did before
+    live context existed.
+    """
+    table = str(payload.get("table") or "").strip()
+    key = tables.get(table)
+    return huds.get(key) if key is not None else None
+
+
 class ZMQReceiver(QObject):
     """A QObject to receive ZMQ messages."""
 
     message_received = Signal(str)
+    live_action_received = Signal(dict)
 
     def __init__(self, port: str = "5555", parent: QObject | None = None) -> None:
         """Initialize the ZMQ receiver."""
@@ -473,9 +510,13 @@ class ZMQReceiver(QObject):
             if self.socket.closed:
                 return
             if self.socket in socks and socks[self.socket] == zmq.POLLIN:
-                hand_id = self.socket.recv_string(zmq.NOBLOCK)
-                log.info("ZMQ received hand ID: %s", hand_id)
-                self.message_received.emit(hand_id)
+                message = self.socket.recv_string(zmq.NOBLOCK)
+                payload = parse_live_message(message)
+                if payload is not None:
+                    self.live_action_received.emit(payload)
+                else:
+                    log.info("ZMQ received hand ID: %s", message)
+                    self.message_received.emit(message)
             else:
                 # Heartbeat
                 log.debug("Heartbeat: No message received")
@@ -921,6 +962,10 @@ class HudMain(QObject):
         try:
             # HUD dictionary and parameters
             self.hud_dict: dict[str, Hud.Hud] = {}
+            # Tables that have shown a hand, by the id a live capture names them
+            # by (#336). Filled as hands are imported; a live action for a table
+            # that has not imported one yet has no HUD to go to.
+            self._live_tables: dict[str, str] = {}
             # Canonical window_id -> temp_key -> generation mapping. hud_dict is
             # keyed by a table's text name, which a Fast-Fold pool shares across
             # several windows; this is what makes "one renderer per window"
@@ -1098,6 +1143,7 @@ class HudMain(QObject):
             self.zmq_receiver: ZMQReceiver | None = ZMQReceiver(parent=self)
             log.info("ZMQ receiver created successfully")
             self.zmq_receiver.message_received.connect(self.handle_message)
+            self.zmq_receiver.live_action_received.connect(self.handle_live_action)
             self.zmq_worker: ZMQWorker | None = ZMQWorker(self.zmq_receiver)
             self.zmq_worker.error_occurred.connect(self.handle_worker_error)
             log.info("Starting ZMQ worker...")
@@ -1574,6 +1620,55 @@ class HudMain(QObject):
         """Handle the close event of the main window."""
         self.destroy()
         event.accept()
+
+    def _remember_live_table(self, temp_key: str, table_name: Any) -> None:
+        """Learn which HUD serves a table id, so live actions can be routed.
+
+        A capture names a table by the id read off its hand numbers; the table
+        name the database spells carries that same id as its last token -- the
+        whole name for a cash game, the trailing number for a tournament. The
+        first imported hand of a table is what teaches this, which is why a
+        table's very first hand is played without live panels.
+        """
+        token = str(table_name or "").strip().split()[-1] if str(table_name or "").strip() else ""
+        if token:
+            self._live_tables[token] = temp_key
+
+    def handle_live_action(self, payload: dict[str, Any]) -> None:
+        """Route one live action to the HUD whose table it belongs to (#336).
+
+        The capture sends actions as they are played, so the dynamic panels can
+        move at the decision instead of one hand behind. Everything here is
+        best-effort: a payload no table claims is dropped with a debug line,
+        and a HUD that rejects the action keeps the context it had.
+        """
+        try:
+            hud = route_live_action(payload, self._live_tables, self.hud_dict)
+            if hud is None:
+                log.debug(
+                    "Live action for table %s has no HUD yet (hand %s)",
+                    payload.get("table"),
+                    payload.get("hand_id"),
+                )
+                return
+            action = self._live_action_from_payload(payload)
+            if action is not None:
+                hud.accept_live_action(action, hand_id=str(payload.get("hand_id") or ""))
+        except Exception:  # noqa: BLE001 - a live feed must never break the HUD loop
+            log.exception("Could not route a live action to its HUD")
+
+    def _live_action_from_payload(self, payload: dict[str, Any]) -> Any:
+        """The room's action record as the live-context module reads it."""
+        from fpdb_3_legacy import hud_live_context
+
+        record = payload.get("record")
+        if not isinstance(record, dict):
+            return None
+        return hud_live_context.coinpoker_action(
+            record,
+            hand_id=str(payload.get("hand_id") or ""),
+            sequence=int(payload.get("sequence") or 0),
+        )
 
     def handle_message(self, hand_id: str) -> None:
         """Handle an incoming message from the ZMQ receiver."""
@@ -4106,6 +4201,7 @@ class HudMain(QObject):
             self._create_new_hud(new_hand_id, temp_key, table_info, site_id, num_seats, hud_site_name)
             if temp_key in self.hud_dict:
                 self._last_processed_hands[temp_key] = new_hand_id
+                self._remember_live_table(temp_key, table_name)
                 return temp_key
             return None
 
@@ -4145,6 +4241,7 @@ class HudMain(QObject):
         if temp_key not in self.hud_dict:
             return None
         self._last_processed_hands[temp_key] = new_hand_id
+        self._remember_live_table(temp_key, table_name)
         if info.fast:
             # Past the idempotence check and past creation: this hand really
             # reached the screen, which is the only case worth announcing.

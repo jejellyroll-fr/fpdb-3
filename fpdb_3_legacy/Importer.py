@@ -17,6 +17,7 @@ from __future__ import annotations
 import builtins
 import contextlib
 import datetime
+import json
 import os
 import re
 import shutil
@@ -72,6 +73,12 @@ log = get_logger("importer")
 IMPORTER_FILE_READ_ERRORS = (OSError, UnicodeDecodeError)
 ZMQ_CLOSE_ERRORS = (RuntimeError, zmq.ZMQError)
 
+#: Prefix marking a ZMQ message that carries a live action instead of a hand id
+#: (#336). A hand id is a bare string, so the receiver tells the two apart by
+#: this prefix; the JSON payload behind it is built by the capture and routed by
+#: HUD_main to the HUD whose table it names.
+LIVE_ACTION_PREFIX = "live:"
+
 # Round-trip profiling (off unless FPDB_DB_PROFILE=1). Module-level rather than
 # per-Importer: the profile it reports is process-wide anyway, and a profiling
 # hook must not be something the import path can trip over.
@@ -109,6 +116,24 @@ class ZMQSender:
             log.warning(f"ZMQ queue full, dropping hand ID {hand_id}")
         except zmq.ZMQError as e:
             log.exception(f"Failed to send hand ID {hand_id}: {e}")
+
+    def send_live_action(self, payload) -> None:
+        """Send one live action payload to the HUD, best effort (#336).
+
+        ``payload`` is a JSON-able dict naming the hand, the table and the room's
+        own action record. Actions arrive many per hand and the stream never
+        stops for them, so a full queue drops the action with a warning rather
+        than blocking the capture: the next action describes the table at least
+        as well as the one lost, and the hand-refresh path remains behind it.
+        """
+        try:
+            message = LIVE_ACTION_PREFIX + json.dumps(payload, default=str)
+            self.socket.send_string(message, zmq.NOBLOCK)
+            log.debug("Sent live action for hand %s via ZMQ", payload.get("hand_id"))
+        except zmq.Again:
+            log.warning("ZMQ queue full, dropping a live action for hand %s", payload.get("hand_id"))
+        except (zmq.ZMQError, TypeError, ValueError) as e:
+            log.warning("Could not send a live action for hand %s: %s", payload.get("hand_id"), e)
 
     def close(self) -> None:
         """Close the ZMQ socket and terminate the context.

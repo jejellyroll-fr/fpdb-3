@@ -187,11 +187,62 @@ class TestLifecycle:
         assert adapter.apply(_action("P2", "raises", to=2000, seq=2)) is None
         assert adapter.context.pot_type == "single_raised"
 
-    def test_an_action_for_another_hand_is_refused(self) -> None:
+    def test_an_action_for_a_newer_hand_adopts_that_hand(self) -> None:
+        """The adapter follows the newest hand it is shown.
+
+        The capture re-offers its whole event list every sweep, so a record of
+        the hand just finished can reach the adapter after the next hand has
+        started -- and carrying a *higher* number than that hand's first action,
+        because the capture numbers records as it first sees them. The hands
+        already left are what tell the two apart: the newer hand is adopted and
+        starts the pot over, the late record is dropped and nothing moves.
+        """
         adapter = _adapter()
         adapter.apply(_action("P1", "raises", to=600, seq=1, hand="h1"))
-        assert adapter.apply(_action("P2", "raises", to=2000, seq=2, hand="h2")) is None
-        assert adapter.context.pot_type == "single_raised"
+        newer = adapter.apply(_action("P2", "raises", to=2000, seq=2, hand="h2"))
+        assert newer is not None and newer.hand_id == "h2"
+        # The pot started over: the new hand's own raise is the only one in it.
+        assert newer.pot_type == "single_raised" and newer.raise_level == 1
+        # The late record of the finished hand: dropped without a reset, which
+        # is the point -- a reset would have let it be folded in.
+        assert adapter.apply(_action("P3", "calls", amount=50, seq=3, hand="h1")) is None
+        assert adapter.context.hand_id == "h2"
+        assert adapter.context.raise_level == 1
+        assert adapter.context.players_in_hand == 3  # the same chairs carry over
+
+    def test_a_restarted_capture_is_followed_rather_than_refused(self) -> None:
+        """A capture that restarts numbers its stream from the beginning again.
+
+        Nothing about a low number means "stale" on its own; a hand the adapter
+        has never left is the table's real hand however the records are counted,
+        and refusing it would leave the panels frozen for the rest of the night.
+        """
+        adapter = _adapter()
+        adapter.apply(_action("P1", "raises", to=600, seq=57, hand="h1"))
+        resumed = adapter.apply(_action("P2", "raises", to=600, seq=1, hand="h9"))
+        assert resumed is not None and resumed.hand_id == "h9"
+        assert adapter.context.raise_level == 1
+
+    def test_a_hand_the_table_has_left_never_comes_back(self) -> None:
+        # Several hands on, a record of the first must still be recognised as
+        # finished: the panels would otherwise show a pot nobody is playing.
+        adapter = _adapter()
+        adapter.apply(_action("P1", "raises", to=600, seq=1, hand="h1"))
+        adapter.apply(_action("P1", "raises", to=600, seq=2, hand="h2"))
+        adapter.apply(_action("P1", "raises", to=600, seq=3, hand="h3"))
+        assert adapter.has_left("h1") and adapter.has_left("h2")
+        assert not adapter.has_left("h3")  # the hand being played is not left
+        assert adapter.apply(_action("P2", "calls", amount=50, seq=4, hand="h1")) is None
+        assert adapter.context.hand_id == "h3"
+
+    def test_a_reset_without_a_sequence_still_adopts_the_newer_hand(self) -> None:
+        # A source that numbers nothing has no way to prove which hand is
+        # newer; a named hand is then adopted outright, which is the contract
+        # ``Hud.accept_live_action`` and the builder adapters were written on.
+        adapter = _adapter()
+        adapter.apply(_action("P1", "raises", to=600, seq=0, hand="h1"))
+        adopted = adapter.apply(_action("P1", "raises", to=600, seq=0, hand="h2"))
+        assert adopted is not None and adopted.hand_id == "h2"
 
     def test_a_new_hand_resets_everything(self) -> None:
         adapter = _adapter()
@@ -333,6 +384,26 @@ class TestSession:
         assert trace is not None
         assert hud.live_state["pot_type"] == "single_raised"
         assert session.source_note.startswith("Live context available")
+
+    def test_the_session_adopts_a_newer_hand_through_update(self) -> None:
+        """One update per action, with the hand boundary inside the adapter.
+
+        ``accept_live_action`` no longer pre-resets: the adapter is what knows
+        whether an action naming another hand is a new hand or a late delivery
+        from the old one, and a session test pins that the wiring stays out of
+        the decision.
+        """
+        hud = _FakeHud()
+        session = live.LiveContextSession(hud)
+        session.update(live.LiveAction(actor="P1", action="raises", to_cents=600, hand_id="h1", sequence=1))
+        adopted = session.update(live.LiveAction(actor="P2", action="raises", to_cents=600, hand_id="h2", sequence=2))
+        assert adopted is not None
+        # The hand id is adapter state, not a published key: what the HUD is
+        # told of the new hand is a pot that starts over at one raise.
+        assert session.adapter.hand_id == "h2"
+        assert hud.live_state["pot_type"] == "single_raised"
+        assert session.last_context is not None and session.last_context.raise_level == 1
+        assert session.updates == 2 and session.ignored == 0
 
     def test_a_duplicate_costs_nothing_and_is_counted(self) -> None:
         session = live.LiveContextSession(_FakeHud())
