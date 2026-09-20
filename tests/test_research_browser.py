@@ -78,6 +78,47 @@ def test_unknown_filter_spec_is_refused_by_name() -> None:
         rb.filter_spec("nope")
 
 
+def test_filter_specs_carry_the_user_metadata_of_329() -> None:
+    """A picker needs the label, the description, the unit and the domain."""
+    stack = rb.filter_spec("effective_stack_bb")
+    assert stack.label != stack.name
+    assert stack.user_description and stack.user_description != stack.description
+    assert stack.unit == "BB"
+    situation = rb.filter_spec("primary_situation")
+    assert situation.choices and all(choice.label for choice in situation.choices)
+    assert situation.multi is True
+
+
+def test_tri_state_is_expressible_without_a_false_default() -> None:
+    """The model half of #329: *Any* is the absence of a filter, not False."""
+    hero = rb.filter_spec("hero")
+    assert hero.value_kind == "bool"
+    preset = rb.validate_preset({"metric": "frequency", "filters": {}})
+    assert "hero" not in preset["filters"]
+    explicit = rb.validate_preset({"metric": "frequency", "filters": {"hero": False}})
+    assert explicit["filters"]["hero"] is False
+
+
+def test_example_questions_are_valid_presets() -> None:
+    """The first-run screen can only offer questions the engine accepts."""
+    questions = rb.example_questions()
+    assert questions
+    for question in questions:
+        assert question.name and question.description
+        clean = rb.validate_preset(dict(question.preset))
+        assert clean["metric"]
+        assert rb.describe_preset(clean)
+
+
+def test_dimension_specs_expose_the_breakdown_picker() -> None:
+    """A breakdown entry needs a label and, when it has one, its domain."""
+    bucket = rb.dimension_spec("facing_sizing_bucket")
+    assert bucket.label == "Bet size faced"
+    assert bucket.choices
+    assert bucket.beginner is True
+    assert rb.dimension_spec("session").beginner is False
+
+
 # ---------------------------------------------------------------------------
 # Presets: validation and the round trip through JSON.
 # ---------------------------------------------------------------------------
