@@ -28,6 +28,17 @@ not fifteen players all at 24/18. The pot arithmetic is exact and the showdowns
 are adjudicated by a real evaluator, so the imported statistics are internally
 consistent.
 
+The players also *play position*: each style opens wider toward the button,
+three-bets and squeezes at a rate of its own, folds or raises against a c-bet,
+and barrels the turn and river as its name suggests. That is not realism for
+its own sake. The analytics views this corpus exists to demonstrate -- RFI by
+position, facing a three-bet, squeeze, c-bet response, sizing buckets, turn and
+river continuation -- are questions about exactly those behaviours, and a
+corpus that never three-bets leaves those screens empty. Bets come from a small
+menu of sizes rather than a continuous range, for the same reason: the sizing
+analysis buckets bets, so arbitrary sizes would fill one bucket and leave the
+others bare.
+
 Deliberately not modelled: all-ins and side pots (stacks are deep and bet sizes
 clamped well below them), tournaments, and any game but Hold'em. They add engine
 complexity the screenshots do not need. Wanting a screenshot of a tournament
@@ -44,6 +55,7 @@ from collections import Counter
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from pathlib import Path
+from typing import Final
 
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
@@ -63,23 +75,108 @@ RAKE_CAP = 0.50
 
 MAX_SEATS = 6
 HERO = "Hero"
-HERO_STYLE = (0.25, 0.20, 0.60)
+
+# The seats named as poker names them, indexed by how far the seat sits from the
+# button: index 0 is the button itself, then the two blinds, then the seats in
+# acting order. ``_position`` indexes this with ``(seat - button) % players``,
+# which is what makes the order of this tuple load-bearing -- read backwards it
+# names every seat one place off, and the position statistics then describe the
+# player to the left of the one they claim. The tables below are keyed by these
+# names, so a different table size would be one tuple here and nothing else.
+POSITIONS = ("BTN", "SB", "BB", "UTG", "HJ", "CO")
+
+# How position bends a style. A nit still opens less under the gun than on the
+# button, the blinds defend rather than open, and a seat with position defends
+# its c-bet-calling range wider -- which is what gives the position views
+# something to separate.
+OPEN_FACTOR = {"UTG": 0.70, "HJ": 0.88, "CO": 1.00, "BTN": 1.30, "SB": 1.05, "BB": 0.0}
+THREE_BET_FACTOR = {"UTG": 0.55, "HJ": 0.72, "CO": 0.95, "BTN": 1.12, "SB": 1.00, "BB": 1.28}
+FOLD_TO_CBET_FACTOR = {"UTG": 1.00, "HJ": 1.00, "CO": 0.94, "BTN": 0.82, "SB": 1.08, "BB": 1.12}
+
+# A raise that already has a cold caller behind it is a squeeze: there is dead
+# money in the pot, so the same player takes it more often than a plain 3-bet.
+SQUEEZE_MULTIPLIER = 1.5
+
+# The open-raise size in big blinds, by position. Wider ranges on the button are
+# raised smaller, and the sizing analysis sees more than one size because of it.
+OPEN_SIZE_BB = {"UTG": 3.0, "HJ": 2.8, "CO": 2.5, "BTN": 2.3, "SB": 3.0, "BB": 3.0}
+
+# The sizes a bet may take, as multipliers of the pot it faces, and how often
+# each is drawn. A menu, not a smooth random size: the sizing analysis buckets
+# bets into "third pot", "half pot", "three quarters", and arbitrary sizes
+# would leave two of those buckets empty.
+BET_SIZES = (0.33, 0.5, 0.66, 0.75, 1.0)
+BET_SIZE_WEIGHTS = (3, 4, 3, 2, 1)
+
+
+@dataclass(frozen=True)
+class Style:
+    """One invented player: the tendencies every decision of theirs is drawn from.
+
+    Every field is the *frequency* of taking that action when the spot offers
+    it, so a player is defined by how often they do a thing rather than by how
+    they play a particular holding. That is what makes the corpus a statistics
+    demo: a few dozen hands in, a player's VPIP has converged on their
+    ``vpip``, and the HUD screenshots show contrast rather than six regulars.
+    """
+
+    name: str
+    vpip: float
+    """Plays an unopened pot at all, before position widens the range."""
+    pfr: float
+    """Total preflop aggressor rate, and the rate of opening when first in."""
+    three_bet: float
+    """Re-raises a single raise, when given the chance."""
+    four_bet: float
+    """Re-raises a three-bet after having opened, or cold four-bets without."""
+    cbet_flop: float
+    """Bets the flop as the preflop aggressor and the action checks to them."""
+    barrel_turn: float
+    """Bets the turn after having bet the flop."""
+    barrel_river: float
+    """Bets the river after having bet the turn."""
+    fold_to_cbet: float
+    """Folds when facing the flop continuation bet."""
+    raise_facing_bet: float
+    """Raises rather than calls when facing a bet on any street."""
+    probe_turn: float
+    """Bets the turn after the preflop aggressor checked the flop."""
+    aggression: float
+    """Appetite to bet when checked to and nothing more specific applies."""
+
+
+HERO_STYLE = Style(
+    name=HERO,
+    vpip=0.25,
+    pfr=0.21,
+    three_bet=0.07,
+    four_bet=0.09,
+    cbet_flop=0.62,
+    barrel_turn=0.55,
+    barrel_river=0.45,
+    fold_to_cbet=0.48,
+    raise_facing_bet=0.11,
+    probe_turn=0.35,
+    aggression=0.55,
+)
+
+# Invented players with invented tendencies, spread out so a HUD screenshot
+# shows contrast: a nit next to a maniac, a station who never folds next to a
+# triple-barreller, two of everything in between. The names are absurd on
+# purpose; nothing here can be mistaken for a real screen name.
 ROSTER = (
-    # (name, vpip, pfr, postflop aggression) -- invented players with invented
-    # tendencies, spread out so a HUD screenshot shows contrast rather than
-    # fifteen shades of the same regular.
-    ("NitPickerNed", 0.13, 0.11, 0.35),
-    ("CallingStation", 0.58, 0.04, 0.10),
-    ("MonsieurRegular", 0.24, 0.19, 0.55),
-    ("LoosePassivePat", 0.46, 0.09, 0.20),
-    ("TripleBarrelTom", 0.29, 0.25, 0.80),
-    ("ManiacMarcel", 0.67, 0.44, 0.72),
-    ("SolidSam", 0.21, 0.17, 0.50),
-    ("FishyFrancis", 0.52, 0.07, 0.15),
-    ("SqueezeQueen", 0.26, 0.22, 0.66),
-    ("RockRoland", 0.15, 0.12, 0.40),
-    ("SplashySteve", 0.61, 0.31, 0.58),
-    ("GrindGaston", 0.23, 0.18, 0.52),
+    Style("NitPickerNed", 0.13, 0.11, 0.045, 0.11, 0.68, 0.36, 0.28, 0.62, 0.06, 0.22, 0.34),
+    Style("CallingStation", 0.58, 0.04, 0.020, 0.01, 0.30, 0.18, 0.10, 0.30, 0.02, 0.12, 0.10),
+    Style("MonsieurRegular", 0.24, 0.19, 0.065, 0.08, 0.62, 0.52, 0.42, 0.48, 0.10, 0.34, 0.55),
+    Style("LoosePassivePat", 0.46, 0.09, 0.035, 0.02, 0.40, 0.25, 0.16, 0.38, 0.04, 0.18, 0.20),
+    Style("TripleBarrelTom", 0.29, 0.25, 0.105, 0.11, 0.74, 0.68, 0.60, 0.40, 0.16, 0.48, 0.80),
+    Style("ManiacMarcel", 0.67, 0.44, 0.160, 0.14, 0.80, 0.70, 0.58, 0.28, 0.22, 0.55, 0.72),
+    Style("SolidSam", 0.21, 0.17, 0.060, 0.08, 0.60, 0.48, 0.38, 0.52, 0.09, 0.32, 0.50),
+    Style("FishyFrancis", 0.52, 0.07, 0.030, 0.015, 0.34, 0.20, 0.12, 0.34, 0.03, 0.15, 0.15),
+    Style("SqueezeQueen", 0.26, 0.22, 0.145, 0.10, 0.66, 0.56, 0.46, 0.44, 0.13, 0.40, 0.66),
+    Style("RockRoland", 0.15, 0.12, 0.050, 0.09, 0.64, 0.34, 0.26, 0.60, 0.07, 0.24, 0.40),
+    Style("SplashySteve", 0.61, 0.31, 0.120, 0.10, 0.72, 0.58, 0.48, 0.32, 0.18, 0.46, 0.58),
+    Style("GrindGaston", 0.23, 0.18, 0.062, 0.075, 0.58, 0.50, 0.40, 0.50, 0.10, 0.33, 0.52),
 )
 TABLE_NAMES = ("Wezen", "Alderamin", "Bellatrix", "Cursa", "Denebola", "Elnath")
 
@@ -182,15 +279,17 @@ def money(amount: float) -> str:
 # --------------------------------------------------------------------------
 
 
-@dataclass
+@dataclass(eq=False)
 class Player:
-    """One seat for the duration of one hand."""
+    """One seat for the duration of one hand.
 
-    name: str
+    Identity, not value: two seats are the same seat only when they are the
+    same object, which is why this is ``eq=False`` -- every lookup in the
+    writer (who raised, who checked) is an identity test.
+    """
+
+    style: Style
     seat: int
-    vpip: float
-    pfr: float
-    aggression: float
     stack: float = STARTING_STACK
     cards: list[str] = field(default_factory=list)
     street_bet: float = 0.0
@@ -198,6 +297,14 @@ class Player:
     folded: bool = False
     last_street_seen: int = 0
     """0 preflop, 1 flop, 2 turn, 3 river -- what the summary line reports."""
+    bet_streets: set[int] = field(default_factory=set)
+    """Streets on which this player bet or raised, for the barrel frequencies."""
+    checked_streets: set[int] = field(default_factory=set)
+    """Streets on which this player checked, which is what opens a probe."""
+
+    @property
+    def name(self) -> str:
+        return self.style.name
 
 
 class HandWriter:
@@ -211,6 +318,17 @@ class HandWriter:
         self.lines: list[str] = []
         self.board: list[str] = []
         self.pot = 0.0
+        # Context the later streets need. The opener is who made it two bets
+        # preflop (the player whose 3-bet defence the analytics care about);
+        # the aggressor is the last raiser on the street being played, and the
+        # preflop aggressor is the one the flop c-bet belongs to.
+        self.street = 0
+        """0 preflop, 1 flop, 2 turn, 3 river."""
+        self.opener: Player | None = None
+        self.aggressor: Player | None = None
+        self.preflop_aggressor: Player | None = None
+        self.sequence: list[tuple[Player, str]] = []
+        """This street's actions so far, in order: what a squeeze is read from."""
 
     # -- betting ---------------------------------------------------------
 
@@ -223,6 +341,25 @@ class HandWriter:
         offset = 3 if preflop else 1
         start = (self.button + offset) % len(self.players)
         return [self.players[(start + step) % len(self.players)] for step in range(len(self.players))]
+
+    def _position(self, player: Player) -> str:
+        """The seat's poker name: SB and BB first, then UTG, HJ, CO and BTN."""
+        return POSITIONS[(self.players.index(player) - self.button) % len(self.players)]
+
+    def _cold_callers_since_raise(self) -> int:
+        """How many players have cold-called the last raise on this street.
+
+        Read from the action sequence rather than tracked separately, so the
+        counter cannot disagree with what was written to the hand history: a
+        caller who called *before* the raise is a limper, not a squeeze.
+        """
+        callers = 0
+        for player, action in self.sequence:
+            if player is self.aggressor:
+                callers = 0
+            elif action == "call":
+                callers += 1
+        return callers
 
     def _commit(self, player: Player, target: float) -> float:
         """Move ``player``'s street total up to ``target``. Returns what was added."""
@@ -244,6 +381,8 @@ class HandWriter:
         size = len(order)
         raises = 1 if preflop else 0
         pending = [index for index in range(size) if not order[index].folded]
+        self.aggressor = None
+        self.sequence = []
 
         while pending and len(self.live) > 1:
             index = pending.pop(0)
@@ -253,11 +392,13 @@ class HandWriter:
 
             to_call = round(current_bet - player.street_bet, 2)
             action, target = self._decide(player, to_call, raises, preflop=preflop)
+            self.sequence.append((player, action))
 
             if action == "fold":
                 player.folded = True
                 self.lines.append(f"{player.name}: folds")
             elif action == "check":
+                player.checked_streets.add(self.street)
                 self.lines.append(f"{player.name}: checks")
             elif action == "call":
                 added = self._commit(player, current_bet)
@@ -272,6 +413,12 @@ class HandWriter:
                     self.lines.append(f"{player.name}: raises {money(increment)} to {money(target)}")
                 current_bet = target
                 raises += 1
+                player.bet_streets.add(self.street)
+                self.aggressor = player
+                if preflop:
+                    self.preflop_aggressor = player
+                    if self.opener is None:
+                        self.opener = player
                 pending = [(index + step) % size for step in range(1, size) if not order[(index + step) % size].folded]
 
         self._return_uncalled()
@@ -293,47 +440,194 @@ class HandWriter:
         self.lines.append(f"Uncalled bet ({money(excess)}) returned to {top.name}")
 
     def _decide(self, player: Player, to_call: float, raises: int, *, preflop: bool) -> tuple[str, float]:
-        """Pick an action from the player's style and the price of continuing."""
+        """Pick an action from the player's style, the spot, and the price."""
         roll = self.rng.random()
         if preflop:
             return self._decide_preflop(player, to_call, raises, roll)
-        return self._decide_postflop(player, to_call, raises, roll)
+        if to_call <= 0:
+            return self._decide_unbet_street(player, raises, roll)
+        return self._decide_facing_bet(player, to_call, raises, roll)
+
+    # -- preflop ---------------------------------------------------------
 
     def _decide_preflop(self, player: Player, to_call: float, raises: int, roll: float) -> tuple[str, float]:
-        """Open, three-bet, call or fold, on the player's VPIP and PFR."""
-        if roll > player.vpip:
-            return ("fold", 0.0) if to_call > 0 else ("check", 0.0)
-        if roll < player.pfr and raises < 3:
-            factor = 3.0 if raises == 1 else 2.6
-            current_bet = player.street_bet + to_call
-            target = self._legal_raise(player, current_bet * factor, current_bet)
+        """Open, three-bet, four-bet, call or fold, on the player's style.
+
+        ``raises`` counts the bets already in and the big blind is one of them,
+        so an unopened pot is ``raises == 1`` and an open makes it two, a
+        three-bet three. Only the big blind ever has no bet to call, which is
+        why checking is possible here at all.
+        """
+        if to_call <= 0:
+            return "check", 0.0
+        return (
+            self._decide_open(player, to_call, roll)
+            if raises == 1
+            else self._decide_facing_raise(player, to_call, raises, roll)
+        )
+
+    def _decide_open(self, player: Player, to_call: float, roll: float) -> tuple[str, float]:
+        """Act first in an unopened pot: raise, limp or complete, or fold.
+
+        Two tendencies, two decisions. The raise is drawn from the player's PFR
+        rate and the *combined* entering range from their VPIP, so a 58/4
+        calling station limps far more often than it raises instead of opening
+        at its VPIP rate -- which is what keeps the demo's own PFR numbers
+        meaning what the HUD calls them.
+        """
+        style = player.style
+        position = self._position(player)
+        # The big blind never limps into its own blind: it either raises or
+        # takes a free flop, and it is not a blind defence spot.
+        raise_rate = style.pfr
+        enter_rate = style.pfr
+        if position != "BB":
+            raise_rate = style.pfr * OPEN_FACTOR[position]
+            enter_rate = max(style.vpip * OPEN_FACTOR[position], raise_rate)
+        if roll < raise_rate:
+            target = self._legal_raise(player, BIG_BLIND * OPEN_SIZE_BB[position], BIG_BLIND)
             if target is not None:
                 return "raise", target
-        return ("call", 0.0) if to_call > 0 else ("check", 0.0)
+        if roll < enter_rate:
+            return "call", 0.0
+        return "fold", 0.0
 
-    def _decide_postflop(self, player: Player, to_call: float, raises: int, roll: float) -> tuple[str, float]:
-        """Bet, raise, call or fold, on the player's aggression."""
-        if to_call <= 0:
-            if roll < player.aggression * 0.55 and raises < 2:
-                target = self._legal_raise(player, max(self.pot * 0.6, BIG_BLIND), 0.0)
-                if target is not None:
-                    return "raise", target
+    def _decide_facing_raise(self, player: Player, to_call: float, raises: int, roll: float) -> tuple[str, float]:
+        """React to a raise: re-raise, call, or fold."""
+        current_bet = round(player.street_bet + to_call, 2)
+        if raises == 2:
+            return self._decide_vs_open(player, current_bet, roll)
+        if raises == 3:
+            return self._decide_vs_three_bet(player, current_bet, roll)
+        return self._decide_vs_four_bet(player, current_bet, roll)
+
+    def _decide_vs_open(self, player: Player, current_bet: float, roll: float) -> tuple[str, float]:
+        """Face a single raise: three-bet, squeeze, call, or fold."""
+        style = player.style
+        rate = style.three_bet * THREE_BET_FACTOR[self._position(player)]
+        if self._cold_callers_since_raise() >= 1:
+            rate *= SQUEEZE_MULTIPLIER
+        if roll < rate:
+            target = self._legal_raise(player, current_bet * 3.4, current_bet)
+            if target is not None:
+                return "raise", target
+        # Calling a raise is a narrower range than playing at all -- a station
+        # still calls with almost anything, a nit still folds -- but nobody
+        # calls as often as they enter a pot.
+        if roll < rate + style.vpip * 0.55 + 0.04:
+            return "call", 0.0
+        return "fold", 0.0
+
+    def _decide_vs_three_bet(self, player: Player, current_bet: float, roll: float) -> tuple[str, float]:
+        """Face a three-bet: four-bet as the opener, cold four-bet rarely, or give up.
+
+        The opener has the stronger range at this point, so they continue more
+        often than a player who has not put money in yet.
+        """
+        style = player.style
+        opened = player is self.opener
+        four_bet_rate = style.four_bet if opened else style.four_bet * 0.35
+        if roll < four_bet_rate:
+            target = self._legal_raise(player, current_bet * 2.4, current_bet)
+            if target is not None:
+                return "raise", target
+        continue_rate = style.vpip * (0.90 if opened else 0.50)
+        if roll < four_bet_rate + continue_rate:
+            return "call", 0.0
+        return "fold", 0.0
+
+    def _decide_vs_four_bet(self, player: Player, current_bet: float, roll: float) -> tuple[str, float]:
+        """A fourth raise or beyond: only the reckless raise again."""
+        style = player.style
+        if roll < style.four_bet * 0.3:
+            target = self._legal_raise(player, current_bet * 2.2, current_bet)
+            if target is not None:
+                return "raise", target
+        if roll < 0.35 + style.vpip * 0.3:
+            return "call", 0.0
+        return "fold", 0.0
+
+    # -- postflop --------------------------------------------------------
+
+    def _decide_unbet_street(self, player: Player, raises: int, roll: float) -> tuple[str, float]:
+        """Betting is opened to ``player``: c-bet, barrel, probe, bet, or check."""
+        if raises >= 3 or roll >= self._open_bet_rate(player):
             return "check", 0.0
+        target = self._legal_raise(player, self._bet_size(), 0.0)
+        return ("raise", target) if target is not None else ("check", 0.0)
 
-        current_bet = player.street_bet + to_call
-        if roll < player.aggression * 0.18 and raises < 3:
+    def _open_bet_rate(self, player: Player) -> float:
+        """How often ``player`` bets when the action checks to them.
+
+        The c-bet and the turn and river barrels are the stats the analytics
+        views are built on, so each reads the style's own frequency. A bet no
+        frequency names -- a lead on a street nobody has bet, a probe after the
+        aggressor checked -- falls back to the general aggression.
+        """
+        style = player.style
+        if self.street == 1:
+            return style.cbet_flop if player is self.preflop_aggressor else style.aggression * 0.5
+        if self.street == 2:
+            if 1 in player.bet_streets:
+                return style.barrel_turn
+            if self._aggressor_checked_the_flop():
+                return style.probe_turn
+            return style.aggression * 0.45
+        if 2 in player.bet_streets:
+            return style.barrel_river
+        if 1 in player.bet_streets:
+            return style.barrel_river * 0.8
+        return style.aggression * 0.3
+
+    def _aggressor_checked_the_flop(self) -> bool:
+        """Whether the preflop aggressor passed on the flop, which opens a probe."""
+        aggressor = self.preflop_aggressor
+        return aggressor is not None and 1 in aggressor.checked_streets
+
+    def _decide_facing_bet(self, player: Player, to_call: float, raises: int, roll: float) -> tuple[str, float]:
+        """Face a bet: raise, call or fold.
+
+        The single roll partitions the outcomes rather than testing them in
+        sequence, so the three frequencies cannot add up to more than one and
+        the resulting stats match the style by construction.
+        """
+        current_bet = round(player.street_bet + to_call, 2)
+        fold_rate, raise_rate = self._defence_rates(player)
+        if raises < 3 and roll < raise_rate:
             target = self._legal_raise(player, current_bet * 2.8, current_bet)
             if target is not None:
                 return "raise", target
-        if roll < player.vpip * 0.8 + player.aggression * 0.2:
-            return "call", 0.0
-        return "fold", 0.0
+        if roll < raise_rate + fold_rate * (1.0 - raise_rate):
+            return "fold", 0.0
+        return "call", 0.0
+
+    def _defence_rates(self, player: Player) -> tuple[float, float]:
+        """(fold, raise) rates for facing a bet, in this spot.
+
+        Facing the flop c-bet is the response the analytics have to get right,
+        so it uses the style's own fold and raise numbers, bent by the seat:
+        the blinds defend wide but fold more, the button folds least. Later
+        streets use the same shape, since a player who folds to c-bets folds to
+        barrels.
+        """
+        style = player.style
+        if self.street == 1 and self.aggressor is self.preflop_aggressor:
+            fold_rate = style.fold_to_cbet * FOLD_TO_CBET_FACTOR[self._position(player)]
+            return min(fold_rate, 0.92), style.raise_facing_bet
+        return 0.30 + (1.0 - style.vpip) * 0.35, style.raise_facing_bet * 0.8
+
+    def _bet_size(self) -> float:
+        """One size from the bet menu, which is what fills the sizing buckets."""
+        multiplier = self.rng.choices(BET_SIZES, BET_SIZE_WEIGHTS)[0]
+        return max(round(self.pot * multiplier, 2), BIG_BLIND)
 
     def _legal_raise(self, player: Player, wanted: float, current_bet: float) -> float | None:
         """``wanted`` clamped to a raise the player can make, or None if they can't.
 
         The ceiling keeps every bet well short of the stack: the generator does
-        not model all-ins, so it must never produce one.
+        not model all-ins, so it must never produce one. The floor is the
+        minimum raise, which also makes this function the legality check for a
+        bet (``current_bet`` of zero).
         """
         ceiling = round((player.stack + player.street_bet) * 0.4, 2)
         target = round(min(wanted, ceiling), 2)
@@ -371,6 +665,7 @@ class HandWriter:
         for street_index, (label, count) in enumerate(streets, start=1):
             if not alive:
                 break
+            self.street = street_index
             self.board.extend(deck.pop() for _ in range(count))
             for player in self.live:
                 player.last_street_seen = street_index
@@ -453,8 +748,20 @@ HANDS_PER_FILE = 120
 SPAN_DAYS = 120
 
 
-def generate(out_dir: Path, hand_count: int, seed: int) -> Path:
-    """Write the invented hand histories, one file per simulated session."""
+# The moment a seeded corpus is dated from. Fixed rather than "now": hand ids,
+# every timestamp inside every hand and the session file names are derived from
+# it, so a second build of the same seed would otherwise be a different corpus
+# with different date-filtered numbers.
+DEMO_ANCHOR: Final = datetime(2026, 6, 1, 19, 0, 0)
+
+
+def generate(out_dir: Path, hand_count: int, seed: int, *, anchor: datetime | None = None) -> Path:
+    """Write the invented hand histories, one file per simulated session.
+
+    ``anchor`` is the day the corpus ends on; it defaults to ``DEMO_ANCHOR`` so
+    two runs of one seed produce byte-identical files. Pass an explicit moment
+    only for an ad-hoc corpus that is meant to end today.
+    """
     rng = random.Random(seed)
     hands_dir = out_dir / "hands"
     if hands_dir.exists():
@@ -462,7 +769,7 @@ def generate(out_dir: Path, hand_count: int, seed: int) -> Path:
     hands_dir.mkdir(parents=True, exist_ok=True)
 
     sessions = max(1, -(-hand_count // HANDS_PER_FILE))
-    first_day = datetime.now() - timedelta(days=SPAN_DAYS)
+    first_day = (anchor or DEMO_ANCHOR) - timedelta(days=SPAN_DAYS)
     hand_id = 240_000_000_000
     written = 0
 
@@ -481,11 +788,8 @@ def generate(out_dir: Path, hand_count: int, seed: int) -> Path:
 
         for offset in range(min(HANDS_PER_FILE, hand_count - written)):
             hand_id += 1
-            seats = [Player(HERO, 1, *HERO_STYLE)]
-            seats += [
-                Player(name, index + 2, vpip, pfr, aggression)
-                for index, (name, vpip, pfr, aggression) in enumerate(opponents)
-            ]
+            seats = [Player(HERO_STYLE, 1)]
+            seats += [Player(style, index + 2) for index, style in enumerate(opponents)]
             writer = HandWriter(rng, seats, (button + offset) % MAX_SEATS, table)
             chunk.append(writer.play(new_deck(rng), hand_id, start + timedelta(minutes=offset)))
             written += 1
