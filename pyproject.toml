@@ -268,9 +268,20 @@ where = ["."]
 include = ["fpdb_3_legacy", "fpdb_3_legacy.*", "fpdb", "fpdb.*"]
 
 [tool.setuptools.package-data]
-# The bundled stat and filter definitions (#306) are data, not modules, and an
-# installed package without them has an empty registry and no stats at all.
-fpdb_3_legacy = ["analytics_definitions.d/*.json"]
+# The bundled declarative libraries are data, not modules, and an installed
+# package without them is quietly broken: an empty stat registry, dynamic
+# panel rules that resolve to nothing, no popup packs, no shipped presets.
+# Every ``*.d`` directory under the package has to be listed here -- PyOxidizer
+# globs the extensions it allows and PyInstaller copies the directory whole,
+# but setuptools installs modules only.
+fpdb_3_legacy = [
+    "analytics_cohorts.d/*.json",
+    "analytics_definitions.d/*.json",
+    "hud_situation.d/*.json",
+    "popup_packs.d/*.json",
+    "research_presets.d/*.json",
+    "stats.d/*.toml",
+]
 
 [tool.coverage.run]
 source = ["fpdb_3_legacy", "fpdb"]

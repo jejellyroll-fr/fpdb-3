@@ -109,19 +109,28 @@ def test_the_macos_frameworks_the_hud_needs_are_packaged(briefcase_app, framewor
 
 
 def test_the_bundled_definitions_reach_every_packaging_path(pyproject) -> None:
-    """The stat library is data, and data is what packaging forgets.
+    """The declarative libraries are data, and data is what packaging forgets.
 
-    ``analytics_definitions.d/core.json`` is the only bundled definition
-    library: an install without it has an empty registry and every shipped
-    stat quietly disappears -- no error, just nothing to show. PyInstaller
-    copies the package directory whole, but PyOxidizer allowlists extensions
-    and setuptools installs modules only, so both have to name it.
+    Every ``*.d`` directory under the package holds a shipped library -- the
+    stat and filter definitions (#306), the dynamic panel rules (#298), the
+    popup packs (#299), the cohorts (#307) and the research presets (#330).
+    An install without one of them is quietly broken: an empty registry, panel
+    rules that resolve to nothing, no presets. PyInstaller copies the package
+    directory whole, but PyOxidizer allowlists extensions and setuptools
+    installs modules only, so both have to name them.
     """
-    definitions = Path("fpdb_3_legacy/analytics_definitions.d")
-    assert sorted(path.name for path in definitions.glob("*.json")), "no definitions to package"
+    libraries = sorted(
+        path for path in Path("fpdb_3_legacy").glob("*.d") if any(path.iterdir())
+    )
+    assert libraries, "no bundled library directories found"
 
     manifest = Path("pyoxidizer.bzl").read_text()
     assert '/fpdb_3_legacy/**/*.json"' in manifest, "PyOxidizer ships no JSON from the package"
 
     package_data = pyproject["tool"]["setuptools"]["package-data"]["fpdb_3_legacy"]
-    assert any(pattern.startswith("analytics_definitions.d/") for pattern in package_data)
+    missing = [
+        library.name
+        for library in libraries
+        if not any(pattern.startswith(f"{library.name}/") for pattern in package_data)
+    ]
+    assert missing == [], f"setuptools would install without {missing}"
