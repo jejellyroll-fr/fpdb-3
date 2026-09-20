@@ -320,11 +320,17 @@ def test_window_pid_non_windows() -> None:
 
 
 def test_get_geometry_uses_cached_geometry_once() -> None:
+    # Pinned off win32 on purpose: 3 and 29 are the fallback border and caption
+    # this code uses when it cannot ask the window manager. On Windows the real
+    # metrics come from GetSystemMetrics, whose values follow the desktop's
+    # theme and DPI -- asserting them here would test the machine, not the
+    # arithmetic. The win32 branch has its own test, with the metrics mocked.
     t = _make_regular_table()
     t.site = "PokerStars"
     t.number = 42
     t._table_geometry = _GEOM
-    geom = t.get_geometry()
+    with patch("sys.platform", "linux"):
+        geom = t.get_geometry()
     assert geom is not None
     assert geom["x"] == _GEOM.x + 3
     assert geom["y"] == _GEOM.y + 29 + 3
@@ -360,10 +366,13 @@ def test_get_geometry_coinpoker_live() -> None:
     t._detector.find_tables.return_value = _windows((957, "930357"))
     t._detector.is_window_displayed.return_value = True
     t._detector.get_window_geometry.return_value = _GEOM
-    with patch("fpdb.infrastructure.platform.windows_process.table_id_for_pid", return_value="930357"):
+    with (
+        patch("fpdb.infrastructure.platform.windows_process.table_id_for_pid", return_value="930357"),
+        patch("sys.platform", "linux"),  # the fallback border, not this desktop's
+    ):
         geom = t.get_geometry()
     assert geom is not None
-    assert geom["width"] == _GEOM.width - 6
+    assert geom["width"] == _GEOM.width - 2 * 3
 
 
 def test_get_window_title() -> None:

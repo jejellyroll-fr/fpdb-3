@@ -894,10 +894,7 @@ def import_missing_paths(paths, config_file="HUD_config.xml", status_callback=No
     file_count = len(getattr(importer, "filelist", {}) or {})
     if file_count == 0:
         importer.clearFileList()
-        if getattr(importer, "database", None):
-            importer.database.close_connection()
-        for writer in getattr(importer, "writerdbs", []) or []:
-            writer.close_connection()
+        importer.close()
         return {
             "import_files": 0,
             "import_stored": 0,
@@ -932,10 +929,7 @@ def import_missing_paths(paths, config_file="HUD_config.xml", status_callback=No
         importer.set_progress_callbacks(import_started, import_progress, import_finished)
     stored, duplicates, partial, skipped, errors, elapsed = importer.runImport()
     importer.clearFileList()
-    if getattr(importer, "database", None):
-        importer.database.close_connection()
-    for writer in getattr(importer, "writerdbs", []) or []:
-        writer.close_connection()
+    importer.close()
     return {
         "import_files": file_count,
         "import_stored": stored,

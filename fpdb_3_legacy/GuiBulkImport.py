@@ -489,6 +489,10 @@ def main(argv=None) -> int:
         comparison_errors = _compare_regression_sidecars(args.filename, importer, quiet=args.quiet)
 
     importer.clearFileList()
+    # The connections go with the importer: this is a one-shot command, and a
+    # caller that deletes or replaces the database next must not find it held
+    # open (#282).
+    importer.close()
 
     print(
         f"Bulk import done: Stored: {format_number(stored, 0)}, "

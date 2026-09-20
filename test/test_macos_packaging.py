@@ -48,13 +48,29 @@ def test_mach_o_detection_ignores_everything_else(tmp_path: Path) -> None:
     assert not adhoc_sign_macos.is_mach_o(script)
 
 
+#: Windows refuses ``symlink_to`` to an account without
+#: SeCreateSymbolicLinkPrivilege, which Developer Mode grants and an ordinary
+#: login does not.
+_WIN_NO_SYMLINK_PRIVILEGE = 1314
+
+
 def test_mach_o_search_covers_extensionless_framework_binaries(tmp_path: Path) -> None:
     """Qt framework binaries have no extension and are not executable."""
     framework = tmp_path / "QtCore.framework" / "Versions" / "A"
     framework.mkdir(parents=True)
     (framework / "QtCore").write_bytes(MACH_O_HEADER)
     (tmp_path / "notes.txt").write_text("data\n")
-    (tmp_path / "alias.dylib").symlink_to(framework / "QtCore")
+    try:
+        # The symlink is part of the subject, not scaffolding: the search must
+        # report the real binary and not the alias pointing at it. So it is
+        # created rather than skipped over, and only an account that cannot
+        # create one at all skips the test -- anyone on Windows with Developer
+        # Mode keeps running it.
+        (tmp_path / "alias.dylib").symlink_to(framework / "QtCore")
+    except OSError as exc:
+        if getattr(exc, "winerror", None) != _WIN_NO_SYMLINK_PRIVILEGE:
+            raise
+        pytest.skip("creating a symlink needs SeCreateSymbolicLinkPrivilege (Developer Mode)")
 
     found = adhoc_sign_macos.find_mach_o_files(tmp_path)
 

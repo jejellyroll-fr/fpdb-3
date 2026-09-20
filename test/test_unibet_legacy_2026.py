@@ -344,10 +344,16 @@ def test_bulk_import_2026_exports_ignore_non_hand_banner() -> None:
     )
     config.get_db_parameters = lambda: db_params
 
-    database = Database(config)
-    database.recreate_tables()
+    # The schema is built and let go before the importer opens anything, so the
+    # only connections on this file are the importer's own -- which is what
+    # ``close()`` can then release. Handing the importer a database built here
+    # instead used to orphan the one its constructor had already opened, and an
+    # orphaned SQLite handle is why Windows refused to delete the file (#282).
+    schema = Database(config)
+    schema.recreate_tables()
+    schema.close_connection()
+
     importer = Importer(caller=None, settings={"testData": False, "threads": 1}, config=config, sql=None)
-    importer.database = database
     importer.set_progress_callbacks(lambda total: None, lambda filename, count: None, lambda: None)
 
     paths = []
@@ -365,7 +371,7 @@ def test_bulk_import_2026_exports_ignore_non_hand_banner() -> None:
             assert skipped == 0
             assert errors == 0
     finally:
-        database.close_connection()
+        importer.close()
         Path(db_file.name).unlink(missing_ok=True)
         for path in paths:
             path.unlink(missing_ok=True)
