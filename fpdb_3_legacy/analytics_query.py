@@ -692,12 +692,20 @@ class _Metric:
     (handId, playerId) pairs in the filtered population, so three decisions by
     one player do not triple their profit. ``per_opportunity`` divides that
     sum by the decision count, which is what "profit per opportunity" means.
+
+    ``distinct_hands`` marks a frequency whose population is counted in *hands*
+    rather than in decisions. The two disagree exactly when a player acts more
+    than once in the street being counted -- call a raise preflop and you made
+    two decisions but entered one hand -- which is why the classic rates (VPIP,
+    PFR) are per hand: counting their decisions would report a player who
+    called a raise after limping as two voluntary entries.
     """
 
     name: str
     unit: str
     value_sql: str | None = None
     frequency: bool = False
+    distinct_hands: bool = False
     player_expression: str | None = None
     per_opportunity: bool = False
     ready: bool = True
@@ -713,6 +721,11 @@ METRICS: Final[dict[str, _Metric]] = {
     "players": _Metric("players", "count", value_sql="COUNT(DISTINCT A.playerId)"),
     "action_count": _Metric("action_count", "count"),
     "frequency": _Metric("frequency", "bp", frequency=True),
+    # The per-hand frequency: the same numerator as ``frequency``, but over the
+    # hands it happened in rather than over the decisions it happened on. It is
+    # what a rate means when a player can act twice in the counted street --
+    # VPIP and PFR, the two stats every HUD has shown this way for twenty years.
+    "hand_frequency": _Metric("hand_frequency", "bp", frequency=True, distinct_hands=True),
     "average_sizing": _Metric(
         "average_sizing",
         "bp",
@@ -858,13 +871,17 @@ def compile_query(
         select.append(f"{expression} AS {_dimension_alias(dimension)}")
         group_expressions.append(expression)
 
-    select.append("COUNT(*) AS opportunities")
+    select.append(
+        "COUNT(DISTINCT A.handId) AS opportunities" if spec.distinct_hands else "COUNT(*) AS opportunities",
+    )
 
     case_conditions = [f"({condition})" for condition in numerator_conditions]
     case_condition = " AND ".join(case_conditions) if case_conditions else "1=1"
     params.extend(numerator_params)
     if spec.value_sql is not None:
         select.append(f"{spec.value_sql} AS value")
+    elif spec.distinct_hands:
+        select.append(f"COUNT(DISTINCT CASE WHEN {case_condition} THEN A.handId END) AS actions")
     else:
         select.append(f"SUM(CASE WHEN {case_condition} THEN 1 ELSE 0 END) AS actions")
 
