@@ -14,7 +14,7 @@ from unittest.mock import Mock, call
 
 import pytest
 
-from fpdb_3_legacy.coinpoker_hand_builder import _build_one, build_hands
+from fpdb_3_legacy.coinpoker_hand_builder import _build_one, _table_from_hand_id, build_hands
 from fpdb_3_legacy.coinpoker_live_capture import (
     COINPOKER_SITE_ID,
     MAX_RESULT_ATTEMPTS,
@@ -1296,3 +1296,92 @@ def test_each_place_stands_on_its_own_transaction() -> None:
 
     assert db.updateTourneyPlayerResult.call_count == 3
     assert db.commit.call_count == 3
+
+
+# --- live actions handed to the HUD (#336) -----------------------------------
+
+
+def _live_pump(**kwargs) -> HandPump:
+    config = HttpCaptureHandConfig(site_ids={"CoinPoker": COINPOKER_SITE_ID, "default": COINPOKER_SITE_ID})
+    return HandPump(
+        db=None,
+        config=config,
+        table_category="PLO4",
+        dry_run=True,
+        archive_dir=None,
+        **kwargs,
+    )
+
+
+def test_live_actions_are_published_once_per_action_across_sweeps() -> None:
+    """A sweep re-offers the records the last one already had.
+
+    The capture feeds the pump the same growing event list every sweep, so a
+    pump that re-published what it saw would hand the HUD every bet twice. The
+    sequence is the session's own counter, not the sweep's: a per-sweep ordinal
+    would restart at one and read as out of order to the adapter.
+    """
+    seen: list[dict] = []
+    pump = _live_pump(live_actions=seen.append)
+    events = _events()
+
+    pump.process(events)
+    first = [(payload["hand_id"], payload["sequence"]) for payload in seen]
+    assert first, "the fixture's actions were not published"
+    assert [sequence for _hid, sequence in first] == sorted(sequence for _hid, sequence in first)
+
+    pump.process(events)
+    assert [(payload["hand_id"], payload["sequence"]) for payload in seen] == first
+
+
+def test_live_payloads_carry_the_table_the_hand_belongs_to() -> None:
+    """The HUD is routed by table, and a hand id names its own table.
+
+    A hand id is the table number followed by a five-digit counter, which is
+    the same derivation the builder uses -- the routing at the HUD side can
+    only be as right as the id sent with the action.
+    """
+    seen: list[dict] = []
+    pump = _live_pump(live_actions=seen.append)
+
+    pump.process(_events())
+
+    assert seen
+    for payload in seen:
+        assert payload["table"] == _table_from_hand_id(payload["hand_id"])
+        assert payload["hand_id"] in {"91426500343", "91426500344"}  # the fixture's hands
+        assert isinstance(payload["record"], dict)
+        assert payload["record"]["username"], "street markers carry no action"
+
+
+def test_street_markers_are_not_published() -> None:
+    # A roundStart record names no actor: it is protocol state, not a decision,
+    # and spending a sequence number on it would shift the ordinal the HUD
+    # compares later actions against.
+    seen: list[dict] = []
+    pump = _live_pump(live_actions=seen.append)
+
+    pump.process(_events())
+
+    assert all(payload["record"].get("type") != "roundStart" for payload in seen)
+
+
+def test_a_failing_listener_never_stops_the_feed() -> None:
+    # The HUD is another process; when it is gone the send fails. The capture
+    # must keep importing hands regardless -- losing the live panels is a
+    # degradation, losing the import is the product.
+    def explode(_payload: dict) -> None:
+        raise ConnectionError("the HUD went away")
+
+    pump = _live_pump(live_actions=explode)
+
+    assert pump.process(_events()) == 2  # both hands still imported
+
+
+def test_a_pump_without_a_listener_publishes_nothing() -> None:
+    # Every existing caller -- the replay, the dry run -- passes no listener,
+    # and the panels must not replay a finished session.
+    pump = _live_pump()
+
+    assert pump.process(_events()) == 2  # imports as before
+    assert pump._live_sequence == 0  # nothing was even numbered
