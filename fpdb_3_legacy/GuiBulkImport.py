@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import os
 import sys
+from contextlib import suppress
 from pathlib import Path
 from time import time
 from typing import Any
@@ -54,6 +55,12 @@ if __name__ == "__main__":
     Configuration.set_logfile("fpdb-log.txt")
 # logging has been set up in fpdb.py or HUD_main.py, use their settings:
 log = get_logger("gui_bulk_import")
+
+#: How long a closing tab waits for a running import, in milliseconds. Bounded
+#: on purpose and matching GuiAutoImport's: the wait runs on the UI thread, and
+#: one against an unresponsive database would freeze the window instead of
+#: closing the tab.
+STOP_WAIT_MS = 5000
 
 
 class BulkImportThread(QThread):
@@ -385,6 +392,64 @@ class GuiBulkImport(QWidget):
         """Push the move-files widget state into the importer before running an import."""
         self.importer.setMoveImportedFiles(self.moveImportedCheck.isChecked(), self.moveImportedDir.text())
         self.importer.setMoveFailedFiles(self.moveFailedCheck.isChecked(), self.moveFailedDir.text())
+
+    def shutdown_workers(self) -> None:
+        """Wait for a running import before this tab is destroyed (#347).
+
+        A widget removed from the tab notebook gets no ``closeEvent``, so this
+        is the only place a closing Bulk Import tab can notice that its worker
+        is still going. The wait is bounded, for the same reason the rest of
+        the application bounds its stops: it runs on the UI thread, and one
+        against an unresponsive database would freeze the window rather than
+        close the tab. An overrunning import is left to finish on its own.
+        """
+        thread = getattr(self, "import_thread", None)
+        if thread is None or not thread.isRunning():
+            return
+        if thread.wait(STOP_WAIT_MS):
+            return
+        # It outlives the tab, so the cleanup has to as well. import_finished
+        # and import_error are the only paths that release the global lock, and
+        # they are slots of a widget about to be deleted; a lock held past this
+        # tab blocks every later import until the application is restarted
+        # (#347). They are disconnected first, so exactly one path releases it.
+        log.warning("Bulk Import tab closed while an import was still running; adopting it to clean up after.")
+        for signal, slot in ((thread.finished, self.import_finished), (thread.error, self.import_error)):
+            with suppress(RuntimeError, TypeError):
+                signal.disconnect(slot)
+        Importer.adopt_orphaned_import(thread, self._detached_cleanup())
+
+    def _detached_cleanup(self):
+        """What an overrunning import still owes, with no widget left in it."""
+        importer = self.importer
+        lock = self.settings["global_lock"]
+
+        def _cleanup() -> None:
+            with suppress(Exception):
+                importer.clearFileList()
+            importer.close()
+            with suppress(Exception):
+                lock.release()
+
+        return _cleanup
+
+    def close_owned_database(self) -> None:
+        """Give back the connections this tab's importer opened (#282, #347).
+
+        An importer holds one connection for itself and one per writer thread,
+        and every open of this tab builds a new one. ``close_tab`` calls this
+        after :meth:`shutdown_workers`, so an import has had its chance to
+        finish; one that overran still holds the importer, and closing
+        underneath it would hand it a dead handle, so it keeps what it holds.
+        """
+        importer = getattr(self, "importer", None)
+        if importer is None:
+            return
+        thread = getattr(self, "import_thread", None)
+        if thread is not None and thread.isRunning():
+            log.warning("Bulk Import: an import is still running; its database connections stay open.")
+            return
+        importer.close()
 
 
 def _compare_regression_sidecars(filename: str, importer, *, quiet: bool) -> int:
