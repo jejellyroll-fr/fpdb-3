@@ -19,6 +19,8 @@ database to be installed.
 
 from __future__ import annotations
 
+import ast
+from pathlib import Path
 from typing import Any
 
 import pytest
@@ -29,6 +31,8 @@ from fpdb_3_legacy.analytics_query import DIMENSIONS, Query, compile_query, esca
 from fpdb_3_legacy.Database import Database
 from fpdb_3_legacy.Importer import Importer
 from tests.helpers import analytics_golden as golden
+
+ROOT = Path(__file__).parents[1]
 
 PG_PLACEHOLDER = "%s"
 SQLITE_PLACEHOLDER = "?"
@@ -177,3 +181,108 @@ def test_folding_the_column_names_changes_nothing_a_caller_sees(golden_db: Datab
 
     assert [row["handId"] for row in folded.rows] == [row["handId"] for row in plain.rows]
     assert folded.total_matches == plain.total_matches
+
+
+# ---------------------------------------------------------------------------
+# The statements the drill-down assembles itself.
+# ---------------------------------------------------------------------------
+
+
+class _RecordingCursor:
+    """A psycopg-shaped cursor that records statements instead of running them.
+
+    The drill-down issues two: the engine's compiled hand-ids query, then a
+    display query it assembles itself. Only the first goes through a compiler,
+    which is how the second kept its bare ``%`` after the compilers were fixed.
+    """
+
+    #: Column names as PostgreSQL returns them for the display query.
+    DISPLAY_COLUMNS = (
+        "handid", "starttime", "sitename", "category", "bigblind", "maxseats",
+        "playername", "playerprofit", "card1", "card2",
+        "boardcard1", "boardcard2", "boardcard3", "boardcard4", "boardcard5", "finalpot",
+    )
+
+    def __init__(self, statements: list[str]) -> None:
+        self._statements = statements
+        self._last = ""
+
+    def execute(self, sql: str, params: Any = ()) -> None:
+        self._statements.append(sql)
+        self._last = sql
+
+    @property
+    def description(self) -> Any:
+        return [(name,) + (None,) * 6 for name in self.DISPLAY_COLUMNS]
+
+    def fetchall(self) -> list[tuple]:
+        if "SELECT DISTINCT A.handId AS handId\n" in self._last:
+            return [(11,), (12,)]  # the hand-ids query
+        return [(11, None, "PokerStars", "holdem", 2, 6, "hero", 100, 0, 0, 0, 0, 0, 0, 0, 500)]
+
+
+class _RecordingDatabase:
+    """A database that binds like psycopg and never touches a server."""
+
+    backend = 3  # PostgreSQL
+    sql = type("_Sql", (), {"query": {"placeholder": PG_PLACEHOLDER}})()
+
+    def __init__(self) -> None:
+        self.statements: list[str] = []
+
+    def get_cursor(self, *args: Any, **kwargs: Any) -> _RecordingCursor:
+        return _RecordingCursor(self.statements)
+
+
+def test_a_range_cell_drill_down_escapes_every_statement_it_runs() -> None:
+    """Clicking a cell of the 13x13 grid filters by starting hand.
+
+    That filter carries the same modulo operators as the dimension, and the
+    drill-down's display query is assembled by hand rather than by a compiler,
+    so escaping the compilers was not enough to make this path work.
+    """
+    db = _RecordingDatabase()
+    query = Query(metric="raise_frequency", filters={"starting_hand": ["AKs"]}, group_by=())
+
+    rb.run_drill_down(db, query)
+
+    assert len(db.statements) == 2, "the hand-ids query and the display query"
+    for statement in db.statements:
+        assert "%%" in statement, "the class expression's modulo operators are there"
+        assert _bare_percents(statement, PG_PLACEHOLDER) == 0
+
+
+@pytest.mark.parametrize(
+    "module",
+    ["analytics_query.py", "analytics_profit.py", "research_browser.py", "holdem_ranges.py", "research_views.py"],
+)
+def test_every_analytics_statement_is_escaped_before_it_is_executed(module: str) -> None:
+    """The rule, enforced rather than remembered.
+
+    Escaping the three compilers left the one statement the drill-down builds
+    by hand still carrying bare ``%``, so the range grid's cells kept failing
+    after the grid itself was fixed. A statement is safe when it comes from a
+    CompiledQuery -- whose compilers escape it -- or when it is escaped at the
+    call. Anything else fails here rather than on a user's database.
+    """
+    tree = ast.parse((ROOT / "fpdb_3_legacy" / module).read_text())
+    offenders = []
+    for node in ast.walk(tree):
+        if not (isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute) and node.func.attr == "execute"):
+            continue
+        if not node.args:
+            continue
+        statement = node.args[0]
+        from_compiled = isinstance(statement, ast.Attribute) and statement.attr in ("sql", "player_sql")
+        escaped = (
+            isinstance(statement, ast.Call)
+            and isinstance(statement.func, ast.Name)
+            and statement.func.id == "escape_literal_percent"
+        )
+        if not (from_compiled or escaped):
+            offenders.append(f"{module}:{node.lineno}")
+
+    assert not offenders, (
+        f"unescaped statement(s) at {', '.join(offenders)}: pass the SQL through "
+        f"escape_literal_percent(sql, placeholder), or build it with a compiler that does"
+    )

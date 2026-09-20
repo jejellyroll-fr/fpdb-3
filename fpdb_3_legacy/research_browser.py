@@ -44,6 +44,7 @@ from .analytics_query import (
     _from_clause,
     _placeholder,
     compile_filters,
+    escape_literal_percent,
     run_hand_ids,
     run_query,
 )
@@ -734,7 +735,11 @@ def run_drill_down(
             ],
         )
         cursor = db.get_cursor()
-        cursor.execute(sql, tuple(params))
+        # Assembled here rather than by compile_query, so it needs the escaping
+        # the compilers do: a drill-down filtered by starting hand -- which is
+        # every range-grid cell -- carries the class expression's modulo
+        # operators in its WHERE (#349).
+        cursor.execute(escape_literal_percent(sql, placeholder), tuple(params))
         for row in _rows_by_alias(cursor):
             rows.append(
                 {
