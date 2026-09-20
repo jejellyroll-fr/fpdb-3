@@ -416,6 +416,30 @@ class Importer:
         # Importer without running __init__ rely on this creating the cache.
         self.failed_files = FailureCache()
 
+    def close(self) -> None:
+        """Release every database connection this importer opened (#282).
+
+        An importer holds its own connection plus one per writer thread, and
+        nothing else owns them. Until this existed the only way to let them go
+        was to end the process, so a caller that imports and then deletes or
+        replaces the database file found it still in use -- harmless on POSIX,
+        which unlinks an open file happily, and a ``WinError 32`` on Windows,
+        where it is not allowed.
+
+        Idempotent and best-effort: closing is what shutdown paths do while
+        something else has already gone wrong, so one connection that refuses
+        must not strand the others behind it.
+        """
+        databases = [getattr(self, "database", None), *(getattr(self, "writerdbs", None) or [])]
+        self.writerdbs = []
+        for database in databases:
+            if database is None:
+                continue
+            try:
+                database.close_connection()
+            except Exception:  # noqa: BLE001 - one bad handle must not keep the rest open
+                log.exception("Could not close an importer database connection")
+
     def logImport(self, type, file, stored, dups, partial, skipped, errs, ttime, id) -> None:
         """Log the results of an import operation to the database.
 
