@@ -1665,6 +1665,11 @@ def parse_hud_panel_rules(doc: Any) -> tuple[list[Any], str, bool]:
     shipped rule library, so enabling dynamic panels is one attribute rather
     than a copy of nineteen rules into the user's configuration.
 
+    A section-level ``profile`` scopes that library to one HUD profile, which
+    is how the Dynamic reference HUD (#332) turns the panels on for its own
+    profile without changing what every other profile does: a table using
+    another profile resolves no rules and keeps its static grid.
+
     Shared by the initial load and by ``Config.reload()``, for the same reason
     the profile rules are: a change the user has just saved has to reach the
     running HUD.
@@ -1691,6 +1696,9 @@ def parse_hud_panel_rules(doc: Any) -> tuple[list[Any], str, bool]:
     for node in section.getElementsByTagName("hud_panel_rule"):
         values = {name: node.getAttribute(name) for name in node.attributes.keys()}
         rules.append(hud_situation.panel_rule_from_attributes(values, len(rules)))
+    scope = str(section.getAttribute("profile") or "").strip()
+    if scope and scope.casefold() != "all":
+        rules = hud_situation.scope_rules(rules, scope)
     return hud_situation.number_rules(rules), fallback, enabled
 
 

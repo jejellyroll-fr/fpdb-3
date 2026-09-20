@@ -15,7 +15,10 @@ from fpdb_3_legacy import Stats
 from fpdb_3_legacy.hud_package import merge_package_profile_rules
 from fpdb_3_legacy.hud_profiles import HudContext, HudProfileResolver, HudProfileRule
 
-PACKAGES = sorted((Path(__file__).parent.parent / "hud-packages").glob("*.fpdbhud"))
+# Only the Fast-Fold packages: hud-packages/ also carries the reference HUDs
+# of #332, which are single-package-many-blocks by design and are validated by
+# tests/test_reference_hud_packages.py instead.
+PACKAGES = sorted((Path(__file__).parent.parent / "hud-packages").glob("fastfold_*.fpdbhud"))
 
 
 def _root(path: Path):

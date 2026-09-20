@@ -139,8 +139,86 @@ def merge_package_profile_rules(
     return changed
 
 
+def _is_panel_rule_placeholder(section: Any) -> bool:
+    """Whether a ``<hud_panel_rules>`` section is the shipped empty one.
+
+    ``HUD_config.xml.example`` carries a disabled, rule-less section so the
+    option is discoverable before it is used. That section is not a user's
+    configuration: refusing to import over it left dynamic panels off on every
+    standard install, which is the opposite of what the reference package is
+    for. A section the user enabled, or one carrying rules of their own, is
+    preserved exactly as before.
+    """
+    enabled = str(section.getAttribute("enabled") or "").strip().lower()
+    if enabled in ("1", "true", "yes", "on"):
+        return False
+    return not section.getElementsByTagName("hud_panel_rule")
+
+
+def merge_package_panel_rules(
+    config_doc: Any,
+    package_root: Any,
+    *,
+    overwrite: bool = False,
+    profile_names: Mapping[str, str] | None = None,
+) -> bool:
+    """Merge a package's ``<hud_panel_rules>`` section into a configuration.
+
+    Dynamic panels (#298) are configured once for the whole application, so a
+    package that ships blocks for them has to be careful: importing the
+    Dynamic reference HUD (#332) must not silently turn dynamic panels on for
+    every other profile. Three rules keep that honest.
+
+    * Only one section ever exists. A configuration that already has one -- the
+      user's own rules, or an earlier import -- is left alone unless it is only
+      the shipped disabled placeholder, or the caller explicitly asks to
+      overwrite it, which is what makes the reference package additive.
+    * The section may scope the shipped library to one profile with a
+      ``profile`` attribute, so enabling the reference blocks enables them for
+      the packaging profile only.
+    * ``profile_names`` rewrites that scope when the imported profile had to be
+      renamed: left behind, the section would enable the panels for the profile
+      that already existed -- the very reason for the rename -- while the newly
+      imported one resolved no rule at all.
+    """
+    sources = _direct_children(package_root, "hud_panel_rules")
+    if not sources:
+        # Also accept the section nested in a wrapper, the way popups are.
+        sources = package_root.getElementsByTagName("hud_panel_rules")
+    if not sources:
+        return False
+
+    existing = config_doc.getElementsByTagName("hud_panel_rules")
+    if existing and not overwrite and not all(_is_panel_rule_placeholder(node) for node in existing):
+        return False
+    for node in existing:
+        node.parentNode.removeChild(node)
+
+    imported = config_doc.importNode(sources[0], True)
+    _repoint_panel_rule_profile(imported, profile_names or {})
+    config_doc.documentElement.appendChild(config_doc.createTextNode("\n    "))
+    config_doc.documentElement.appendChild(imported)
+    config_doc.documentElement.appendChild(config_doc.createTextNode("\n"))
+    return True
+
+
+def _repoint_panel_rule_profile(section: Any, names: Mapping[str, str]) -> None:
+    """Rewrite the profile a panel-rule section is scoped to, after a rename."""
+    scope = section.getAttribute("profile")
+    if scope and scope in names:
+        section.setAttribute("profile", names[scope])
+    for rule in section.getElementsByTagName("hud_panel_rule"):
+        target = rule.getAttribute("profile")
+        if target and target in names:
+            rule.setAttribute("profile", names[target])
+
+
 def install_missing_hud_package(config_doc: Any, package_root: Any) -> bool:
-    """Install missing profiles, popups and bindings without overwriting users."""
+    """Install missing profiles, popups, bindings and panel rules.
+
+    Additive by construction: an existing profile, popup, binding or panel-rule
+    section is the user's, and stays.
+    """
     changed = False
     stat_sets = _container(config_doc, "stat_sets")
 
@@ -163,6 +241,7 @@ def install_missing_hud_package(config_doc: Any, package_root: Any) -> bool:
             package_root,
             overwrite=False,
         )
+        or merge_package_panel_rules(config_doc, package_root, overwrite=False)
         or changed
     )
 

@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  FPDB Advanced — a compact HUD surface over fpdb's hierarchical popups.
+
+  Who it is for: a player who wants the detail of the shipped popup library
+  without giving up a small, stable table surface.
+
+  Design: the grid stays twelve cells — the same handful of numbers as the
+  Basic package, plus the 4-bet pair — and the depth lives one click away.
+  Each cell opens a popup, and the popups navigate into the shipped library:
+  preflop (with position-specific open-raise analysis), single-raised pot,
+  3-bet pot and 4-bet pot, all built from fpdb_3_legacy/popup_packs.d.
+
+  Sizing and samples: popup rows render their own sample column, and the
+  sizing rows come from the shipped preflop_sizing popup, so no number on
+  screen travels without the hands behind it.
+
+  How to use it: Preferences > HUD > Import, then choose "nlhe_6max_advanced"
+  as the profile for your Hold'em tables. Like every reference package it does
+  NOT bind itself to the game: your existing HUD configuration is untouched
+  until you pick this profile.
+
+  Known limitations: the popup library is installed by fpdb itself when a
+  configuration is loaded, so a configuration built by hand outside fpdb may
+  not have the popups this package links into — import the package from the
+  application and they are there.
+-->
+<fpdb_hud_package version="1.1">
+
+  <ss name="nlhe_6max_advanced" rows="3" cols="4" xpad="1" ypad="0" rich_text="True" font_size="10">
+
+    <stat _rowcol="(1,1)" _stat_name="playername" popup="nlhe6_advanced_core"
+          hudbgcolor="#0F172A" hudcolor="#E6EDF3" click="open_comment_dialog"
+          tip="Player name. Double-click to open their notes."/>
+    <stat _rowcol="(1,2)" _stat_name="n" popup="nlhe6_advanced_core"
+          hudbgcolor="#0F172A" hudprefix="H " tip="Hands seen: the sample every other number is based on"
+          stat_loth="25" stat_locolor="#FF6B6B" stat_midcolor="#F2F4E6" stat_hith="200" stat_hicolor="#4ADE80"/>
+    <stat _rowcol="(1,3)" _stat_name="vpip" popup="nlhe6_advanced_core"
+          hudbgcolor="#1E1B4B" hudprefix="VP " tip="Voluntarily put money in pot"
+          stat_loth="18" stat_locolor="#4CC9F0" stat_midcolor="#F2F4E6" stat_hith="32" stat_hicolor="#FF6B6B"/>
+    <stat _rowcol="(1,4)" _stat_name="pfr" popup="nlhe6_advanced_core"
+          hudbgcolor="#1E1B4B" hudprefix="PR " tip="Preflop raise"
+          stat_loth="12" stat_locolor="#4CC9F0" stat_midcolor="#F2F4E6" stat_hith="26" stat_hicolor="#FF6B6B"/>
+
+    <!-- The raising war, each cell opening the popup that analyses that spot. -->
+    <stat _rowcol="(2,1)" _stat_name="three_B" popup="preflop_three_bet"
+          hudbgcolor="#1E1B4B" hudprefix="3B " tip="Three-bet. Opens the 3-bet popup: rate by position and by the opener's seat"
+          stat_loth="4" stat_locolor="#4CC9F0" stat_midcolor="#F2F4E6" stat_hith="11" stat_hicolor="#FF6B6B"/>
+    <stat _rowcol="(2,2)" _stat_name="f_3bet" popup="preflop_facing_three_bet"
+          hudbgcolor="#1E1B4B" hudprefix="F3 " tip="Fold to three-bet. Opens the popup for facing a 3-bet"
+          stat_loth="40" stat_locolor="#4ADE80" stat_midcolor="#F2F4E6" stat_hith="70" stat_hicolor="#FF6B6B"/>
+    <stat _rowcol="(2,3)" _stat_name="four_B" popup="preflop_four_bet"
+          hudbgcolor="#312E81" hudprefix="4B " tip="Four-bet. Opens the 4-bet popup"
+          stat_loth="2" stat_locolor="#4CC9F0" stat_midcolor="#F2F4E6" stat_hith="7" stat_hicolor="#FF6B6B"/>
+    <stat _rowcol="(2,4)" _stat_name="f_4bet" popup="preflop_facing_four_bet"
+          hudbgcolor="#312E81" hudprefix="F4 " tip="Fold to four-bet. Opens the popup for facing a 4-bet"
+          stat_loth="40" stat_locolor="#4ADE80" stat_midcolor="#F2F4E6" stat_hith="75" stat_hicolor="#FF6B6B"/>
+
+    <!-- The pot shapes, each cell an entry point into the pack for that pot. -->
+    <stat _rowcol="(3,1)" _stat_name="cb1" popup="srp"
+          hudbgcolor="#0F172A" hudprefix="CB " tip="Flop continuation bet in single-raised pots. Opens the SRP popup tree"
+          stat_loth="45" stat_locolor="#4CC9F0" stat_midcolor="#F2F4E6" stat_hith="75" stat_hicolor="#FF6B6B"/>
+    <stat _rowcol="(3,2)" _stat_name="f_cb1" popup="srp_caller_flop"
+          hudbgcolor="#0F172A" hudprefix="FC " tip="Fold to flop c-bet. Opens the caller-side SRP popup"
+          stat_loth="35" stat_locolor="#4ADE80" stat_midcolor="#F2F4E6" stat_hith="65" stat_hicolor="#FF6B6B"/>
+    <stat _rowcol="(3,3)" _stat_name="three_B_flop" popup="threebet_pot"
+          hudbgcolor="#1E1B4B" hudprefix="3F " tip="Flop 3-bet. Opens the 3-bet pot popup tree"
+          stat_loth="3" stat_locolor="#4CC9F0" stat_midcolor="#F2F4E6" stat_hith="10" stat_hicolor="#FF6B6B"/>
+    <stat _rowcol="(3,4)" _stat_name="four_B_flop" popup="fourbet_pot"
+          hudbgcolor="#312E81" hudprefix="4F " tip="Flop 4-bet. Opens the 4-bet pot popup tree"
+          stat_loth="2" stat_locolor="#4CC9F0" stat_midcolor="#F2F4E6" stat_hith="8" stat_hicolor="#FF6B6B"/>
+
+  </ss>
+
+  <popup_windows>
+    <!--
+      The core popup. Its own rows are the table's headline numbers; the nav
+      rows open the shipped packs, so the popup navigation is the product,
+      not a copy of it.
+    -->
+    <pu pu_name="nlhe6_advanced_core" pu_class="ModernSubmenu" pu_title="{player}: NLHE 6-max">
+      <pu_stat pu_stat_name="playername"/>
+      <pu_stat pu_stat_name="n"/>
+      <pu_stat pu_stat_name="vpip"/>
+      <pu_stat pu_stat_name="pfr"/>
+      <pu_stat pu_stat_name="vpip_pfr_ratio"/>
+      <pu_stat pu_stat_name="three_B"/>
+      <pu_stat pu_stat_name="four_B"/>
+      <pu_stat pu_stat_name="totalprofit"/>
+      <pu_stat pu_stat_name="bbper100"/>
+      <pu_stat pu_stat_name="Analytics" pu_stat_submenu="analytics"/>
+      <pu_stat pu_stat_name="Preflop" pu_stat_submenu="preflop"/>
+      <pu_stat pu_stat_name="Single-raised pot" pu_stat_submenu="srp"/>
+      <pu_stat pu_stat_name="3-bet pot" pu_stat_submenu="threebet_pot"/>
+      <pu_stat pu_stat_name="4-bet pot" pu_stat_submenu="fourbet_pot"/>
+      <pu_stat pu_stat_name="Preflop sizing" pu_stat_submenu="preflop_sizing"/>
+      <pu_stat pu_stat_name="Opening by position" pu_stat_submenu="nlhe6_advanced_opens"/>
+    </pu>
+
+    <!--
+      Position-specific preflop analysis: the open-raise rate split by seat,
+      which is the read that changes a preflop decision most.
+    -->
+    <pu pu_name="nlhe6_advanced_opens" pu_class="ModernSubmenu" pu_title="{player}: opening by position">
+      <pu_stat pu_stat_name="rfi_total"/>
+      <pu_stat pu_stat_name="rfi_early_position"/>
+      <pu_stat pu_stat_name="rfi_middle_position"/>
+      <pu_stat pu_stat_name="rfi_late_position"/>
+      <pu_stat pu_stat_name="open_limp"/>
+      <pu_stat pu_stat_name="iso"/>
+      <pu_stat pu_stat_name="face_limpers"/>
+      <pu_stat pu_stat_name="Steal and blind defence" pu_stat_submenu="preflop_blind_defence"/>
+      <pu_stat pu_stat_name="Opening by position" pu_stat_submenu="preflop_rfi"/>
+      <pu_stat pu_stat_name="Stacks" pu_stat_submenu="preflop_stacks"/>
+    </pu>
+  </popup_windows>
+
+</fpdb_hud_package>

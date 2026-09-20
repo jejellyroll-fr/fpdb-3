@@ -138,6 +138,19 @@ moving a static one.
 * a block the selection does **not** name keeps the old position rule, so the
   static core of the HUD is untouched by turning the feature on.
 
+That second rule is what a profile shipping resolved panels has to design
+around. A block with no position binding is visible for every seat, so a panel
+that is nobody's turn yet would sit on screen. The reference package therefore
+binds its panels to `position="dynamic"`
+(`hud_situation.DYNAMIC_ONLY_POSITION`), a seat code `normalize_position` never
+returns: unreachable by the position rule, reachable by its own name, and the
+always-visible fallback (`core`) keeps carrying no binding at all.
+
+The panels must also be `<block>` children of the profile the table actually
+runs. `block_visible_for` is asked about the *active* stat set's blocks, so a
+panel shipped as a stat set of its own is a profile nobody selects, and the
+resolver would name a panel no seat window has.
+
 ## Turning it on
 
 Off by default. `HUD_config.xml` needs one section — and an existing

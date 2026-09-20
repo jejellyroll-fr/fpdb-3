@@ -2251,7 +2251,11 @@ class ModernHudPreferences(QDialog):
         import defusedxml.minidom
         from PySide6.QtWidgets import QFileDialog, QInputDialog, QMessageBox
 
-        from fpdb_3_legacy.hud_package import merge_package_game_bindings, merge_package_profile_rules
+        from fpdb_3_legacy.hud_package import (
+            merge_package_game_bindings,
+            merge_package_panel_rules,
+            merge_package_profile_rules,
+        )
 
         filename, _filter = QFileDialog.getOpenFileName(
             self,
@@ -2523,6 +2527,21 @@ class ModernHudPreferences(QDialog):
                 root,
                 profile_names={imported_name: new_profile_name},
                 overwrite=True,
+            )
+
+            # F. Apply the dynamic-panel section a package carries, if any. The
+            # reference Dynamic HUD (#332) ships the blocks the built-in
+            # resolver selects and the section that enables them for its own
+            # profile; a configuration that already has panel rules keeps them,
+            # because those are the user's. The section is scoped to a profile
+            # by name, so a renamed import has to repoint it here -- otherwise
+            # the panels turn on for the profile that already existed and the
+            # one the user just imported resolves nothing.
+            merge_package_panel_rules(
+                self.config.doc,
+                root,
+                overwrite=False,
+                profile_names={imported_name: new_profile_name},
             )
 
             # Save configuration and reload
@@ -3152,6 +3171,15 @@ class ModernHudPreferences(QDialog):
     # Dynamic panels (#309): the panel rules of #298, editable.
     # ------------------------------------------------------------------ #
 
+    def _open_help(self, topic: str) -> None:
+        """Open a user guide from a Help affordance (#334), never raising."""
+        try:
+            from fpdb_3_legacy import help_links
+
+            help_links.open_help(topic)
+        except Exception:  # intentional broad catch: Help must not break the dialog
+            log.exception("Could not open the help topic %r", topic)
+
     def _create_dynamic_panels_tab(self) -> None:
         """The tab that writes the ``<hud_panel_rules>`` section of #298.
 
@@ -3172,6 +3200,18 @@ class ModernHudPreferences(QDialog):
         tab = QWidget()
         outer = QVBoxLayout(tab)
         outer.setContentsMargins(12, 10, 12, 10)
+
+        # In-app help (#334): the dynamic-panel guide, opened from here so the
+        # reader does not have to know the file name.
+        help_row = QHBoxLayout()
+        help_row.addStretch()
+        self.dynamic_help_button = QLabel(_("?"))
+        self.dynamic_help_button.setToolTip(_("Open the Dynamic HUD guide"))
+        self.dynamic_help_button.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.dynamic_help_button.setStyleSheet("font-weight: bold;")
+        self.dynamic_help_button.mousePressEvent = lambda _event: self._open_help("hud-dynamic")  # type: ignore[assignment]
+        help_row.addWidget(self.dynamic_help_button)
+        outer.addLayout(help_row)
 
         self.panel_rules_enabled = QCheckBox(_("Show the panels that fit the hand"))
         self.panel_rules_enabled.setToolTip(
