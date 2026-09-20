@@ -96,6 +96,16 @@ ROLES: Final[tuple[str, ...]] = ("aggressor", "defender", "passive")
 # enabling dynamic panels is one attribute rather than a copy of the library.
 BUILTIN_SOURCE: Final = "builtin"
 
+# The ``position`` binding a block whose panel the rules select carries.
+#
+# A block is shown when a selection *names* its panel, and otherwise keeps the
+# position rule every block has always had -- so a panel that is not selected
+# has to be bound to a seat that cannot exist, or it would sit on screen for
+# every seat that has no binding. ``normalize_position`` maps no seat to this,
+# which is exactly what makes it unreachable, and the always-visible fallback
+# block simply carries no binding at all.
+DYNAMIC_ONLY_POSITION: Final = "dynamic"
+
 # Effective-stack bands in big blinds (``player_situations.SHORT_STACK_BB``),
 # used when a context has no bucket of its own.
 SHORT_STACK_BB: Final = 20
@@ -1544,6 +1554,20 @@ def load_default_resolver(extra_dirs: Iterable[str | Path] = ()) -> HudSituation
         rules.extend(extra)
         fallback = fallback or extra_fallback
     return HudSituationResolver(number_rules(rules), fallback=fallback)
+
+
+def scope_rules(rules: Iterable[PanelRule], profile: str) -> list[PanelRule]:
+    """Re-scope unscoped rules to one HUD profile.
+
+    Used when a configuration enables the shipped library for a single profile
+    (``<hud_panel_rules source="builtin" profile="..."/>``): the library's own
+    rules carry no scope, and turning a whole nineteen-rule library into a
+    per-profile one must not require copying it into the user's file. A rule
+    that already names a profile keeps it -- an explicit scope is a statement
+    about that rule, not a default to be overridden.
+    """
+    wanted = _text(profile, "all")
+    return [rule if rule.profile != "all" else replace(rule, profile=wanted) for rule in rules]
 
 
 def number_rules(rules: Iterable[PanelRule]) -> list[PanelRule]:
