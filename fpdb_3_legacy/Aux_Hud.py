@@ -363,6 +363,49 @@ class SimpleHUD(Aux_Base.AuxSeats):
             log.exception("Dynamic panel selection failed for seat %s; using the static grid", seat)
             return None
 
+    # -- analytics-backed cells (#335) --------------------------------------
+
+    def analytics_session(self) -> Any:
+        """The analytics cells *this profile* binds, or an empty session.
+
+        Scoped to the active stat set, so a cell another profile declared as
+        analytics is never taken over in a profile that has it as a native stat.
+        A profile with no analytics-backed cell gets an empty session: every
+        ``text_for`` answers ``None`` for its names, and every existing stat keeps
+        the path it always took. Cached per profile, like the panel resolver, so a
+        stat-set switch rebuilds it.
+        """
+        profile = str(getattr(self.game_params, "name", "") or "")
+        cached = getattr(self, "_analytics_session_cache", None)
+        if cached is not None and getattr(self, "_analytics_session_profile", None) == profile:
+            return cached
+        try:
+            from fpdb_3_legacy import hud_analytics_stats
+
+            session = hud_analytics_stats.AnalyticsStatSession.from_config(self.config, stat_set=profile)
+        except Exception:  # intentional broad catch: analytics must not cost a HUD its stats
+            log.exception("Could not read the analytics-backed HUD cells; those cells will show no data")
+            session = None
+        self._analytics_session_cache = session
+        self._analytics_session_profile = profile
+        return session
+
+    def publish_analytics(self, values_by_player: Any) -> None:
+        """Adopt the analytics values a finished read batch computed (#335).
+
+        Called on the Qt thread with what the worker already produced, so this
+        is a dict assignment and never a query.
+        """
+        # Built here if the first hand's labels have not refreshed yet: otherwise
+        # the opening hand's values would be dropped on a session that does not
+        # exist yet, and the cells would show no data for that hand.
+        session = self.analytics_session()
+        if session is None:
+            return
+        # Stored, not painted: the seats read it on their next refresh, which is
+        # the same refresh that already follows every new hand.
+        session.publish(values_by_player or {})
+
     def _show_hero_hud(self) -> bool:
         """Whether this stat-set should display hero stat windows."""
         config_stat_set = getattr(self.config, "stat_sets", {}).get(self.game_params.name)
@@ -1484,11 +1527,17 @@ class SimpleStat:
         self.lab.stat_dict = None
         self.widget = self.lab
         self.stat_dict: dict[Any, Any] | None = None
+        self.aw = aw
         self.hud = aw.hud
         self.aux_params = aw.aux_params
         self.font_size = getattr(aw, "font_size", self.aux_params.get("font_size", 8))
         self.colors = colors or {}
         self._bg = ""
+        # The six-tuple Stats returns, declared here rather than inferred from
+        # the first branch that assigns it: the analytics path (#335) builds its
+        # own five strings and a tooltip, and the narrower tuple those literals
+        # imply would then reject ``do_table_stat``'s own return type.
+        self.number: tuple[Any, ...] | None = None
 
     def update(self, player_id: int | str | None, stat_dict: dict) -> None:
         """Update the statistic display for a given player.
@@ -1501,6 +1550,28 @@ class SimpleStat:
         """
         self.stat_dict = stat_dict  # So the Simple_stat obj always has a fresh stat_dict
         self.lab.stat_dict = stat_dict
+
+        # An analytics-backed cell (#335) asks its session first. ``None`` from
+        # ``text_for`` means "not an analytics cell", so a native stat never
+        # takes this branch; a bound cell whose batch has not landed yet shows
+        # the no-data convention rather than falling through to a same-named
+        # column-backed stat, which would be a different number under this name.
+        session = self._analytics_session()
+        if session is not None:
+            text = session.text_for(self.stat, player_id)
+            if text is not None:
+                value = session.value_for(self.stat, player_id)
+                self.number = (
+                    self.stat,
+                    text,
+                    "",
+                    "",
+                    "",
+                    value.tooltip() if value is not None else str(self.stat),
+                )
+                self.lab.setText(str(text))
+                self._apply_color_range()
+                return
 
         # Two scopes, both computed in Stats (the single source of truth), never
         # with inline SQL here (this runs on the UI thread, once per label).
@@ -1522,6 +1593,29 @@ class SimpleStat:
         if self.number:
             self.lab.setText(str(self.number[1]))
         self._apply_color_range()
+
+    def _analytics_session(self) -> Any:
+        """The table's analytics session, or ``None`` when this profile has none.
+
+        The answer is checked by *type*, not merely for truthiness: any object
+        with an ``analytics_session`` attribute would otherwise be accepted, and
+        a duck-typed or auto-mocked ``aw`` would then answer ``text_for`` with
+        something that is not ``None`` for every stat -- silently taking every
+        native stat off the path it has always taken. Only a real session is a
+        session; anything else falls back to the native path.
+        """
+        aw = getattr(self, "aw", None)
+        accessor = getattr(aw, "analytics_session", None)
+        if not callable(accessor):
+            return None
+        try:
+            from fpdb_3_legacy import hud_analytics_stats
+
+            session = accessor()
+        except Exception:  # intentional broad catch: the label must still paint
+            log.exception("Could not reach the analytics session for stat %s", self.stat)
+            return None
+        return session if isinstance(session, hud_analytics_stats.AnalyticsStatSession) else None
 
     def _apply_color_range(self) -> None:
         """Colour the label by value using the PT4-style thresholds (if any).
