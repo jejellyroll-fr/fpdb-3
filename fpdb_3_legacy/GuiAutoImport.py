@@ -1526,10 +1526,40 @@ class GuiAutoImport(QWidget):
             self.importtimer.stop()
             self.importtimer = None
         if not self._stop_import_worker():
-            log.warning("AutoImport tab closed while an import was still running; leaving it to finish.")
+            # It outlives the tab, so the cleanup has to as well: the global
+            # lock is released by the finalizer below, and a lock held past
+            # this tab blocks every later import until the application is
+            # restarted (#347).
+            log.warning("AutoImport tab closed while an import was still running; adopting it to clean up after.")
+            Importer.adopt_orphaned_import(self.import_thread, self._detached_cleanup())
             return
         self._stop_cleanup_pending = False
         self._finalize_auto_import_stop()
+
+    def _detached_cleanup(self):
+        """What an overrunning import still owes, with no widget left in it.
+
+        Everything the finalizer does that outlives a widget, and nothing it
+        does to one: the progress bar and the buttons are about to be deleted,
+        and touching them from a callback that runs seconds later would be the
+        very crash this tab's config observer was already guilty of.
+        """
+        importer = self.importer
+        lock = self.settings["global_lock"]
+        pipe = self.pipe_to_hud
+        self.pipe_to_hud = None
+
+        def _cleanup() -> None:
+            with suppress(Exception):
+                importer.autoSummaryGrab(True)
+            importer.close()
+            with suppress(Exception):
+                lock.release()
+            if pipe is not None and pipe.poll() is None:
+                with suppress(Exception):
+                    pipe.terminate()
+
+        return _cleanup
 
     def close_owned_database(self) -> None:
         """Give back the connections this tab's importer opened (#282, #347).

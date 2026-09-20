@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import os
 import sys
+from contextlib import suppress
 from pathlib import Path
 from time import time
 from typing import Any
@@ -405,8 +406,32 @@ class GuiBulkImport(QWidget):
         thread = getattr(self, "import_thread", None)
         if thread is None or not thread.isRunning():
             return
-        if not thread.wait(STOP_WAIT_MS):
-            log.warning("Bulk Import tab closed while an import was still running; leaving it to finish.")
+        if thread.wait(STOP_WAIT_MS):
+            return
+        # It outlives the tab, so the cleanup has to as well. import_finished
+        # and import_error are the only paths that release the global lock, and
+        # they are slots of a widget about to be deleted; a lock held past this
+        # tab blocks every later import until the application is restarted
+        # (#347). They are disconnected first, so exactly one path releases it.
+        log.warning("Bulk Import tab closed while an import was still running; adopting it to clean up after.")
+        for signal, slot in ((thread.finished, self.import_finished), (thread.error, self.import_error)):
+            with suppress(RuntimeError, TypeError):
+                signal.disconnect(slot)
+        Importer.adopt_orphaned_import(thread, self._detached_cleanup())
+
+    def _detached_cleanup(self):
+        """What an overrunning import still owes, with no widget left in it."""
+        importer = self.importer
+        lock = self.settings["global_lock"]
+
+        def _cleanup() -> None:
+            with suppress(Exception):
+                importer.clearFileList()
+            importer.close()
+            with suppress(Exception):
+                lock.release()
+
+        return _cleanup
 
     def close_owned_database(self) -> None:
         """Give back the connections this tab's importer opened (#282, #347).

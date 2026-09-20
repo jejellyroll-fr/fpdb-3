@@ -27,7 +27,7 @@ from time import process_time, time
 from typing import Any
 
 import zmq as _zmq
-from PySide6.QtCore import QCoreApplication
+from PySide6.QtCore import QCoreApplication, QTimer
 from PySide6.QtWidgets import QDialog, QLabel, QProgressBar, QVBoxLayout
 
 from fpdb_3_legacy import Configuration, Database, IdentifySite, db_profile
@@ -72,6 +72,74 @@ log = get_logger("importer")
 
 IMPORTER_FILE_READ_ERRORS = (OSError, UnicodeDecodeError)
 ZMQ_CLOSE_ERRORS = (RuntimeError, zmq.ZMQError)
+
+#: How often an adopted import is checked for having finished, in milliseconds.
+ORPHAN_POLL_MS = 500
+
+#: Imports still running after the tab that started them was closed (#347), each
+#: mapped to the cleanup its tab owed. The thread is kept referenced here for a
+#: second reason: dropping the last reference to a running QThread destroys it
+#: mid-run.
+_orphaned_imports: dict[Any, Any] = {}
+_orphan_timer: Any = None
+
+
+def adopt_orphaned_import(thread: Any, cleanup: Any) -> None:
+    """Take over a closed tab's running import and clean up after it (#347).
+
+    A tab that closes while its import overruns cannot wait for it -- the wait
+    runs on the UI thread and is bounded on purpose -- so the worker outlives
+    the widget. What it leaves behind is not only database connections: the
+    global lock is released by a slot of that widget, and a lock held past the
+    tab blocks every later import and every database maintenance action until
+    the application is restarted.
+
+    So the thread is kept here and ``cleanup`` is run once it has really
+    finished. ``cleanup`` must touch nothing owned by the UI, because by then
+    the widget it came from is gone.
+
+    Finishing is detected by polling ``isRunning()`` rather than by connecting
+    to the worker's ``finished`` signal: both import threads shadow QThread's
+    own ``finished`` with a signal of their own, emitted from inside ``run()``
+    and not at all on some paths -- the auto-import worker returns without
+    emitting anything when the database is away. Polling is the only check that
+    covers every way a run can end.
+    """
+    if thread is None or not thread.isRunning():
+        _run_orphan_cleanup(cleanup)
+        return
+    _orphaned_imports[thread] = cleanup
+    _start_orphan_timer()
+
+
+def reap_orphaned_imports() -> None:
+    """Run the cleanup owed by every adopted import that has finished."""
+    for thread in [thread for thread in _orphaned_imports if not thread.isRunning()]:
+        _run_orphan_cleanup(_orphaned_imports.pop(thread))
+    if not _orphaned_imports and _orphan_timer is not None:
+        _orphan_timer.stop()
+
+
+def _run_orphan_cleanup(cleanup: Any) -> None:
+    try:
+        cleanup()
+    except Exception:  # noqa: BLE001 - nothing is left to report this to
+        log.exception("Could not clean up after an import that outlived its tab")
+
+
+def _start_orphan_timer() -> None:
+    global _orphan_timer  # noqa: PLW0603 - one timer for the process, owned by no widget
+    if _orphan_timer is None:
+        try:
+            _orphan_timer = QTimer()
+            _orphan_timer.timeout.connect(reap_orphaned_imports)
+        except Exception:  # noqa: BLE001 - no Qt loop (a CLI import): nothing to poll with
+            log.debug("No Qt timer available to reap orphaned imports", exc_info=True)
+            _orphan_timer = None
+            return
+    if not _orphan_timer.isActive():
+        _orphan_timer.start(ORPHAN_POLL_MS)
+
 
 #: Prefix marking a ZMQ message that carries a live action instead of a hand id
 #: (#336). A hand id is a bare string, so the receiver tells the two apart by
