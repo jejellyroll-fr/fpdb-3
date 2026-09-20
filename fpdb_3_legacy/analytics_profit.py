@@ -52,6 +52,7 @@ from .analytics_query import (
     _from_clause,
     _placeholder,
     compile_filters,
+    escape_literal_percent,
     run_hand_ids,
     run_query,
 )
@@ -479,7 +480,10 @@ def compile_profit_query(
 
     params: list[Any] = list(where_params)
     return CompiledQuery(
-        sql="\n".join(sql_parts),
+        # The class dimension carries a modulo operator, and the range explorer
+        # groups the money by it, so this statement needs the same escaping the
+        # count query needs (#349).
+        sql=escape_literal_percent("\n".join(sql_parts), placeholder),
         params=tuple(params),
         group_by=group_by,
         metric=f"{query.metric} (profit)",
