@@ -66,10 +66,11 @@ rest.
 
 ## Look at the hands
 
-Click a row to see which slice it stands for, then **Show hands**. The list is
-the population of that row — every hand the question was asked about — or switch
-to the numerator to see only the ones where it fired. **Double-click a hand to
-open it in the replayer.**
+Click a row and the line under the filters restates which slice it stands for.
+**Double-click the row** to fill the right-hand pane with the hands behind it.
+The selector above that list chooses between *All hands in the population* —
+every hand the question was asked about — and *Only the hands where the metric
+fired*. **Double-click a hand to open it in the replayer.**
 
 ## Save your own question
 
@@ -82,21 +83,40 @@ SQL, so it keeps working as the engine changes and can be shared as a file.
 ### 1. Is my button open too loose?
 
 1. Preset **Open raise (RFI) by position**.
-2. Breakdown **By position**.
-3. Look at the **BTN** row: the numerator over the denominator is your opens
+2. Set **Hero** to *Yes*. The preset asks the question of everyone at the
+   table, so without this the rows are the pool's opens and not your own.
+3. Breakdown **Position**.
+4. Look at the **BTN** row: the numerator over the denominator is your opens
    out of the times it folded to you. Compare with the **CO** row above it.
 
-### 2. Do my c-bets get respect on wet boards?
+Leaving **Hero** at *Any* is a perfectly good question too — it is just a
+different one, and the sentence under the filters says which you asked.
 
-1. Preset **Flop c-bet by board suit structure**.
-2. Run it, then change the breakdown to **This player's response** to see how
-   often you are *folding* to a c-bet on each texture, rather than making one.
+### 2. Do I fold too much to c-bets on wet boards?
 
-### 3. How deep can I 3-bet a limper?
+1. Preset **Fold versus a flop c-bet, by bet size**. Its metric is *fold
+   frequency* and its situation is *facing a continuation bet* — the seat that
+   faced the bet is the only one that can fold to it, which is what makes the
+   question answerable.
+2. Set **Hero** to *Yes*.
+3. Replace the breakdown **Bet size faced** with **Board connectivity** (or
+   **Board suit structure**) to read the fold on each texture.
 
-1. Preset **3-bet by position**.
-2. Add the filter **Effective stack (bb)** with a range such as `40` to `100`.
-3. Breakdown **By effective stack bucket** to see where the 3-bet rate drops.
+The mirror question — how often the c-bet you *made* is respected — is a
+different population: start from **Flop c-bet by board suit structure**, whose
+situation is the c-bet opportunity rather than the defence.
+
+### 3. How deep can I 3-bet?
+
+1. Preset **3-bet by position**. Its denominator is the times you faced a
+   single open raise.
+2. Set **Hero** to *Yes*.
+3. Add the filter **Effective stack (BB)** with a range such as `40` to `100`.
+4. Breakdown **Stack depth** to see where the 3-bet rate drops.
+
+Raising over a *limper* is a different spot — an iso-raise, not a 3-bet — so it
+is a different question rather than a filter on this one: change the
+**Situation** to *facing limpers* and ask it on its own.
 
 ### 4. Which pot types actually pay me?
 
