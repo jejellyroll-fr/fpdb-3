@@ -190,3 +190,412 @@ def test_cancel_bumps_the_serial_and_clears_the_wait(browser) -> None:
     assert browser._query_serial == 4
     assert not browser.cancel_button.isVisible()
     assert "cancelled" in browser.result_note.text().lower()
+
+
+# ---------------------------------------------------------------------------
+# #329: tri-state booleans, typed controls, breakdown, modes, onboarding.
+# ---------------------------------------------------------------------------
+
+
+def _row(browser, name: str):
+    return next(row for row in browser._filter_rows if row.spec.name == name)
+
+
+def test_untouched_boolean_means_any_not_false(browser) -> None:
+    """The issue's core safety rule, proven on the widget that broke it."""
+    hero = _row(browser, "hero")
+    assert hero.value() is None
+    assert "hero" not in browser.current_preset()["filters"]
+    labels = [hero.any_combo.itemText(i) for i in range(hero.any_combo.count())]
+    assert labels == ["Any", "Yes", "No"]
+    assert [hero.any_combo.itemData(i) for i in range(hero.any_combo.count())] == [None, True, False]
+
+
+def test_tri_state_boolean_writes_both_explicit_values(browser) -> None:
+    hero = _row(browser, "hero")
+    hero.any_combo.setCurrentIndex(hero.any_combo.findData(False))
+    assert browser.current_preset()["filters"] == {"hero": False}
+    hero.any_combo.setCurrentIndex(hero.any_combo.findData(True))
+    assert browser.current_preset()["filters"] == {"hero": True}
+    hero.any_combo.setCurrentIndex(0)
+    assert browser.current_preset()["filters"] == {}
+
+
+def test_beginner_controls_speak_poker_not_engine(browser) -> None:
+    from fpdb_3_legacy import research_labels as rlabels
+
+    situation = _row(browser, "primary_situation")
+    assert situation.name_label.text() == "Situation"
+    assert situation.spec.name not in situation.name_label.text()
+    # A closed domain is a selector: the free-text field is read-only.
+    assert situation.value_edit.isReadOnly()
+    assert situation.choice_combo is not None
+    shown = [situation.choice_combo.itemText(i) for i in range(situation.choice_combo.count())]
+    assert any("facing a continuation bet" in text for text in shown)
+    assert rlabels.filter_choices("primary_situation")
+
+
+def test_the_choice_selector_writes_engine_tokens(browser) -> None:
+    situation = _row(browser, "primary_situation")
+    index = next(
+        i for i in range(situation.choice_combo.count())
+        if situation.choice_combo.itemData(i) == "facing_cbet"
+    )
+    situation.choice_combo.setCurrentIndex(index)
+    situation.choice_combo.activated[int].emit(index)
+    assert situation.value() == "facing_cbet"
+    assert browser.current_preset()["filters"]["primary_situation"] == "facing_cbet"
+    assert situation.choice_combo.itemText(index).startswith("✔")
+
+
+def test_breakdown_is_structured_but_still_one_dimension_list(browser) -> None:
+    picker = browser.breakdown_picker
+    index = picker.add_combo.findData("street")
+    assert index >= 0
+    picker.add_combo.setCurrentIndex(index)
+    picker._add_current()
+    # The engine vocabulary stays the single source the query is built from.
+    assert browser.group_edit.text() == "street"
+    assert browser.current_preset()["group_by"] == ("street",)
+    picker._remove("street")
+    assert browser.group_edit.text() == ""
+    assert browser.current_preset()["group_by"] == ()
+
+
+def test_the_expert_text_field_and_the_picker_mirror_each_other(browser) -> None:
+    browser.group_edit.setText("street, position")
+    assert browser.breakdown_picker.dimensions() == ("street", "position")
+    # An invalid dimension typed in expert mode is not adopted by the picker.
+    browser.group_edit.setText("nope")
+    assert browser.breakdown_picker.dimensions() == ()
+
+
+def test_expert_mode_keeps_the_engine_vocabulary_and_the_query(browser) -> None:
+    browser.group_edit.setText("street")
+    _row(browser, "hero").any_combo.setCurrentIndex(_row(browser, "hero").any_combo.findData(False))
+    before = browser.current_preset()
+    browser.mode_combo.setCurrentIndex(browser.mode_combo.findData(True))
+    assert not browser.group_edit.isHidden()
+    assert _row(browser, "hero").name_label.text() == "hero"
+    assert _row(browser, "primary_situation").name_label.text() == "primary_situation"
+    assert _row(browser, "primary_situation").value_edit.isReadOnly() is False
+    assert browser.current_preset() == before
+    # Expert mode offers every dimension, Beginner mode a curated subset.
+    expert_dims = browser.breakdown_picker.add_combo.count()
+    browser.mode_combo.setCurrentIndex(browser.mode_combo.findData(False))
+    assert browser.breakdown_picker.add_combo.count() < expert_dims
+    assert browser.group_edit.isHidden()
+
+
+def test_the_active_question_is_stated_in_plain_language(browser) -> None:
+    browser.metric_combo.setCurrentText("fold_frequency")
+    browser.group_edit.setText("street")
+    _row(browser, "primary_situation").value_edit.setText("facing_cbet")
+    browser._on_filters_changed()
+    summary = browser.summary_label.text()
+    assert "facing a continuation bet" in summary
+    assert "fold frequency" in summary
+    assert "broken down by street" in summary
+    for token in ("primary_situation", "facing_cbet", "group_by", "filters"):
+        assert token not in summary
+
+
+def test_the_first_open_screen_explains_itself(browser) -> None:
+    from PySide6.QtWidgets import QLabel
+
+    assert browser._has_run is False
+    assert browser.empty_state.isVisibleTo(browser)
+    assert browser.example_layout.count() > 0
+    text = " ".join(label.text() for label in browser.empty_state.findChildren(QLabel))
+    assert "Research Browser" in text
+    assert "Run" in text
+    assert "advanced query builder" in text
+    # The rebuild note is only shown when there is something to rebuild.
+    assert browser.stale_note.isVisibleTo(browser) is False
+
+
+def test_a_missing_analytics_subsystem_is_announced(browser, monkeypatch) -> None:
+    monkeypatch.setattr(
+        "fpdb_3_legacy.analytics_lifecycle.stale_subsystems",
+        lambda _db: ("situations", "hand_strength"),
+    )
+    browser._refresh_empty_state()
+    assert browser.stale_note.isVisibleTo(browser)
+    assert "situations" in browser.stale_note.text()
+
+
+def test_loading_a_first_run_question_runs_it(browser, qtbot, tmp_path) -> None:
+    from fpdb_3_legacy import research_browser as rb
+
+    browser.presets = rb.ResearchPresets(directory=tmp_path)
+    question = rb.example_questions()[0]
+    browser._load_example(question.preset)
+    qtbot.waitUntil(lambda: browser._worker is None, timeout=15000)
+    assert browser._has_run is True
+    assert not browser.empty_state.isVisibleTo(browser)
+    assert browser.sample_label.text()
+    assert browser.metric_combo.currentText() == question.preset["metric"]
+
+
+def test_the_advanced_shortcut_switches_mode(browser) -> None:
+    browser._open_advanced_mode()
+    assert browser._expert is True
+    assert browser.mode_combo.currentData() is True
+
+
+# ---------------------------------------------------------------------------
+# #330: the shipped preset library in the picker.
+# ---------------------------------------------------------------------------
+
+
+def _builtin_indexes(browser) -> list[int]:
+    out = []
+    for index in range(browser.preset_combo.count()):
+        data = browser.preset_combo.itemData(index)
+        if isinstance(data, dict) and data.get("kind") == "builtin":
+            out.append(index)
+    return out
+
+
+def test_the_picker_offers_the_shipped_library_without_a_user_file(browser, tmp_path) -> None:
+    from fpdb_3_legacy import research_presets as rp
+    from fpdb_3_legacy.research_browser import ResearchPresets
+
+    # A brand-new install: no research_presets.json at all.
+    browser.presets = ResearchPresets(directory=tmp_path / "empty")
+    browser._refresh_presets()
+    indexes = _builtin_indexes(browser)
+    assert len(indexes) >= 20
+    assert not (tmp_path / "empty" / "research_presets.json").exists()
+    # Grouped by poker topic, with a non-selectable header per pass.
+    headers = [
+        browser.preset_combo.itemText(index)
+        for index in range(browser.preset_combo.count())
+        if browser.preset_combo.itemData(index) is None
+    ]
+    assert any("built-in presets" in text for text in headers)
+    assert any("Preflop" in text for text in headers)
+    assert any("saved presets" in text.lower() for text in headers)
+    shown = {browser.preset_combo.itemData(index)["id"] for index in indexes}
+    assert shown == {preset.id for preset in rp.load_library()}
+
+
+def test_choosing_a_builtin_preset_fills_the_builder_and_says_what_to_adjust(browser, qtbot, tmp_path) -> None:
+    from fpdb_3_legacy import research_presets as rp
+    from fpdb_3_legacy.research_browser import ResearchPresets
+
+    browser.presets = ResearchPresets(directory=tmp_path)
+    browser._refresh_presets()
+    target = rp.find_preset(rp.load_library(), "fold_vs_flop_cbet_by_size")
+    index = next(
+        i for i in _builtin_indexes(browser) if browser.preset_combo.itemData(i)["id"] == target.id
+    )
+    browser.preset_combo.setCurrentIndex(index)
+    qtbot.waitUntil(lambda: browser._worker is None, timeout=15000)
+    assert browser.metric_combo.currentText() == target.metric
+    assert browser.current_preset()["group_by"] == target.group_by
+    assert browser.current_preset()["filters"] == dict(target.filters)
+    assert "Adjust" in browser.preset_note.text()
+    # The question is restated in poker language, not engine vocabulary.
+    assert "fold frequency" in browser.summary_label.text()
+
+
+def test_saving_under_a_builtin_name_keeps_the_shipped_preset(browser, qtbot, tmp_path, monkeypatch) -> None:
+    from fpdb_3_legacy import research_presets as rp
+    from fpdb_3_legacy.research_browser import ResearchPresets
+
+    browser.presets = ResearchPresets(directory=tmp_path)
+    browser._refresh_presets()
+    shipped = rp.load_library()[0]
+    monkeypatch.setattr(
+        "fpdb_3_legacy.GuiResearchBrowser.QInputDialog.getText",
+        lambda *args, **kwargs: (shipped.name, True),
+    )
+    browser._save_preset()
+    saved = browser.presets.load()
+    assert shipped.name not in saved
+    assert f"{shipped.name} (mine)" in saved
+    # The shipped definition is untouched and still offered.
+    still_shipped = rp.find_preset(rp.load_library(), shipped.id)
+    assert still_shipped is not None and still_shipped.group_by == shipped.group_by
+    assert any(
+        browser.preset_combo.itemData(i)["id"] == shipped.id for i in _builtin_indexes(browser)
+    )
+
+
+def test_a_builtin_preset_cannot_be_deleted(browser, tmp_path) -> None:
+    from fpdb_3_legacy.research_browser import ResearchPresets
+
+    browser.presets = ResearchPresets(directory=tmp_path)
+    browser._refresh_presets()
+    browser.preset_combo.setCurrentIndex(_builtin_indexes(browser)[0])
+    browser._delete_preset()
+    assert browser.presets.load() == {}
+    assert _builtin_indexes(browser)
+
+
+# ---------------------------------------------------------------------------
+# The named views (#331): one workbench, four shapes of answer.
+# ---------------------------------------------------------------------------
+
+
+def _view_index(browser, view_id: str) -> int:
+    for index in range(browser.view_combo.count()):
+        if browser.view_combo.currentData() is None and index == 0:
+            continue
+        if browser.view_combo.itemData(index) == view_id:
+            return index
+    raise AssertionError(f"the view picker offers no {view_id!r}")
+
+
+def _choose_view(browser, qtbot, view_id: str) -> None:
+    browser.view_combo.setCurrentIndex(_view_index(browser, view_id))
+    qtbot.waitUntil(lambda: browser._worker is None, timeout=30000)
+    get_qapp().processEvents()
+
+
+def test_the_view_picker_offers_every_view_and_starts_on_the_landing_state(browser) -> None:
+    from fpdb_3_legacy import research_views as rv
+
+    offered = {
+        browser.view_combo.itemData(i)
+        for i in range(browser.view_combo.count())
+        if browser.view_combo.itemData(i) is not None
+    }
+    assert offered == set(rv.VIEW_IDS)
+    # Nothing chosen yet: the tab is the plain browser it was, and the first
+    # thing a reader sees is still the explanation.
+    assert browser.view_combo.currentData() is None
+    assert browser.view_note.isVisibleTo(browser) is False
+    assert browser.view_question.text() == ""
+
+
+def test_choosing_a_view_loads_its_question_into_the_controls(browser, qtbot) -> None:
+    from fpdb_3_legacy import research_views as rv
+
+    _choose_view(browser, qtbot, "sizing")
+    spec = rv.view("sizing")
+    assert browser.current_preset()["metric"] == spec.metric
+    assert browser.current_preset()["group_by"] == spec.group_by
+    assert browser.current_preset()["filters"] == dict(spec.filters)
+    # The question is stated where the controls are, in words.
+    assert spec.question in browser.view_question.text()
+    assert "per cent of the pot" in browser.view_question.text()
+    assert browser.view_note.isVisibleTo(browser) is True
+
+
+def test_choosing_the_range_view_draws_the_grid(browser, qtbot) -> None:
+    _choose_view(browser, qtbot, "range")
+    assert browser.result_stack.currentWidget() is browser.range_grid
+    matrix = browser.range_grid._matrix
+    assert matrix is not None
+    assert len(matrix.known_cells()) == 169
+    assert "sample" in browser.range_grid.legend.text()
+    assert "decisions" in browser.sample_label.text()
+
+
+def test_a_grid_cell_loads_its_hands(browser, qtbot) -> None:
+    _choose_view(browser, qtbot, "range")
+    matrix = browser.range_grid._matrix
+    populated = next((cell for cell in matrix.known_cells() if cell.opportunities), None)
+    if populated is None:
+        pytest.skip("the golden corpus opens no starting hand with known cards")
+    browser._load_cell_hands(populated.label)
+    qtbot.waitUntil(lambda: browser._drill_worker is None, timeout=30000)
+    get_qapp().processEvents()
+    assert browser.drill_table.rowCount() > 0
+    assert "hands" in browser.drill_note.text()
+
+
+def test_choosing_the_hand_strength_view_shows_the_composition(browser, qtbot) -> None:
+    _choose_view(browser, qtbot, "hand_strength")
+    assert browser.result_stack.currentWidget() is browser.composition_view
+    assert browser.composition_view.table.rowCount() > 0
+    headline = browser.composition_view.headline.text()
+    assert "classified" in headline and "covered" in headline
+
+
+def test_choosing_the_profit_view_shows_realized_and_ev_adjusted(browser, qtbot) -> None:
+    _choose_view(browser, qtbot, "profit")
+    assert browser.result_stack.currentWidget() is browser.money_view
+    headings = [
+        browser.money_view.table.horizontalHeaderItem(c).text()
+        for c in range(browser.money_view.table.columnCount())
+    ]
+    assert "Realized" in headings and "EV-adjusted" in headings and "Luck" in headings
+    assert browser.money_view.table.rowCount() > 0
+    assert browser.money_view.notes.text()
+
+
+def test_choosing_the_hands_view_loads_the_populations_hands(browser, qtbot) -> None:
+    _choose_view(browser, qtbot, "hands")
+    qtbot.waitUntil(lambda: browser.drill_table.rowCount() > 0, timeout=30000)
+    assert browser.drill_table.rowCount() > 0
+    assert browser.result_stack.currentIndex() == 0
+
+
+def test_returning_to_your_own_question_leaves_the_builder_alone(browser, qtbot) -> None:
+    _choose_view(browser, qtbot, "position")
+    built = browser.current_preset()
+    browser.view_combo.setCurrentIndex(0)
+    get_qapp().processEvents()
+    assert browser.view_note.isVisibleTo(browser) is False
+    assert browser.view_question.text() == ""
+    # The view filled the controls; going back to "ask your own question" keeps
+    # what it filled rather than emptying the pane under the user.
+    assert browser.current_preset() == built
+
+
+def test_leaving_a_shaped_view_drops_its_outstanding_task(browser, qtbot) -> None:
+    """A grid on its way back must not be handed to the table renderer.
+
+    A ``RangeMatrix`` has no ``sample_text``: rendering one in the table view
+    raises inside the Qt callback and the answer is lost. Leaving the view has
+    to make the outstanding answer stale, whether or not its thread is still
+    running -- a finished thread whose result has not been delivered yet is the
+    case that actually bites.
+    """
+    browser.view_combo.setCurrentIndex(_view_index(browser, "range"))
+    stale = browser._query_serial
+    assert browser._worker is not None
+    browser.view_combo.setCurrentIndex(0)
+    get_qapp().processEvents()
+    assert browser._active_view is None
+    assert browser._query_serial > stale, "the outstanding answer is not stale"
+    # Would raise AttributeError if the serial guard let it through.
+    browser._on_query_done(object(), stale)
+    qtbot.waitUntil(lambda: browser._worker is None, timeout=30000)
+
+
+def test_a_shaped_view_runs_the_builders_population_not_the_views_own(browser, qtbot) -> None:
+    """Deleting a filter the view preloaded has to delete it from the query.
+
+    Merging the view's own filters back in made that impossible: the query kept
+    asking its default situation while the builder above and the plain-language
+    summary both said the filter was gone.
+    """
+    _choose_view(browser, qtbot, "board")
+    removed = [row for row in list(browser._filter_rows) if row.spec.name == "primary_situation"]
+    assert removed, "the board view preloads a situation filter"
+    browser._remove_filter_row(removed[0])
+    browser.run_query()
+    qtbot.waitUntil(lambda: browser._worker is None, timeout=30000)
+    get_qapp().processEvents()
+    assert "primary_situation" not in browser._current_query.filters
+    assert "primary_situation" not in browser.current_preset()["filters"]
+
+
+def test_the_range_grid_selector_names_the_reading_it_draws(browser, qtbot) -> None:
+    """The control, the legend and the colours describe the same metric."""
+    from fpdb_3_legacy import holdem_ranges
+
+    _choose_view(browser, qtbot, "range")
+    grid = browser.range_grid
+    assert grid._view == holdem_ranges.DEFAULT_VIEW
+    assert grid.view_combo.currentData() == holdem_ranges.DEFAULT_VIEW
+    assert "Occurrences" in grid.legend.text()
+
+    grid.view_combo.setCurrentIndex(grid.view_combo.findData("frequency"))
+    get_qapp().processEvents()
+    assert grid._view == "frequency"
+    assert "Action frequency" in grid.legend.text()

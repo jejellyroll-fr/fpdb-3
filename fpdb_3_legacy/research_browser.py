@@ -49,6 +49,19 @@ from .analytics_query import (
 )
 from .Configuration import CONFIG_PATH
 from .loggingFpdb import get_logger
+from .research_labels import (
+    BEGINNER_DIMENSIONS,
+    Choice,
+    describe_query,
+    dimension_choices,
+    dimension_label,
+    filter_choices,
+    filter_description,
+    filter_example,
+    filter_label,
+    filter_unit,
+    is_expert_only,
+)
 
 log = get_logger("research_browser")
 
@@ -60,18 +73,35 @@ log = get_logger("research_browser")
 
 @dataclass(frozen=True)
 class FilterSpec:
-    """One filter as a browser may offer it: its name, group and value shape.
+    """One filter as a browser may offer it: engine metadata *and* user language.
 
-    ``value_kind`` is what a GUI builds an input for -- ``bool`` a checkbox,
-    ``set`` a list, ``range`` two number fields -- and it comes from the
-    engine's own ``kind`` rather than a second table: the browser shapes the
-    input, the engine still validates the value.
+    ``value_kind`` is what a GUI builds an input for -- ``bool`` a tri-state
+    selector, ``set`` a list of choices, ``range`` two number fields, ``flags``
+    a list of named flags -- and it comes from the engine's own ``kind`` rather
+    than a second table: the browser shapes the input, the engine still
+    validates the value.
+
+    ``description`` stays the engine's column, for the expert view and for
+    diagnostics; the issue is explicit that it must *not* be the user-facing
+    description, so ``label`` and ``user_description`` carry poker language and
+    ``choices`` carries the closed domain a selector can offer (issue #329).
     """
 
     name: str
     group: str
     value_kind: str
     description: str
+    label: str = ""
+    user_description: str = ""
+    unit: str = ""
+    choices: tuple[Choice, ...] = ()
+    examples: tuple[str, ...] = ()
+    expert_only: bool = False
+
+    @property
+    def multi(self) -> bool:
+        """Whether several values may be selected at once."""
+        return self.value_kind in ("set", "flags", "scalar")
 
 
 _GROUP_OF: Final = {
@@ -130,17 +160,26 @@ def _value_kind(filter_spec: Any) -> str:
     return _KIND_OF_ENGINE_KIND.get(filter_spec.kind, "scalar")
 
 
+def _make_filter_spec(name: str, spec: Any) -> FilterSpec:
+    """One engine filter, described in the vocabulary a browser offers."""
+    example = filter_example(name)
+    return FilterSpec(
+        name=name,
+        group=_GROUP_OF.get(name, "other"),
+        value_kind=_value_kind(spec),
+        description=spec.column,
+        label=filter_label(name),
+        user_description=filter_description(name),
+        unit=filter_unit(name),
+        choices=filter_choices(name),
+        examples=(example,) if example else (),
+        expert_only=is_expert_only(name),
+    )
+
+
 FILTER_SPECS: Final[tuple[FilterSpec, ...]] = tuple(
     sorted(
-        (
-            FilterSpec(
-                name=name,
-                group=_GROUP_OF.get(name, "other"),
-                value_kind=_value_kind(spec),
-                description=spec.column,
-            )
-            for name, spec in FILTERS.items()
-        ),
+        (_make_filter_spec(name, spec) for name, spec in FILTERS.items()),
         key=lambda spec: (spec.group, spec.name),
     ),
 )
@@ -155,6 +194,47 @@ def filter_spec(name: str) -> FilterSpec:
     if name not in FILTERS:
         raise ValueError(f"Unknown filter {name!r}; known: {sorted(FILTERS)}")
     return next(item for item in FILTER_SPECS if item.name == name)
+
+
+@dataclass(frozen=True)
+class DimensionSpec:
+    """One group-by dimension as the breakdown picker offers it (issue #329).
+
+    A dimension is not a filter -- it decides *how a result is split*, not which
+    decisions are in it -- so it gets its own spec: a label, the closed domain a
+    value has when it has one, and whether Beginner mode should offer it.
+    """
+
+    name: str
+    label: str
+    group: str
+    choices: tuple[Choice, ...] = ()
+    beginner: bool = False
+
+
+def _make_dimension_spec(name: str) -> DimensionSpec:
+    return DimensionSpec(
+        name=name,
+        label=dimension_label(name),
+        group=_GROUP_OF.get(name, "other"),
+        choices=dimension_choices(name),
+        beginner=name in BEGINNER_DIMENSIONS,
+    )
+
+
+DIMENSION_SPECS: Final[tuple[DimensionSpec, ...]] = tuple(
+    sorted(
+        (_make_dimension_spec(name) for name in DIMENSIONS),
+        key=lambda spec: (spec.group, spec.name),
+    ),
+)
+
+
+def dimension_spec(name: str) -> DimensionSpec:
+    """The description of one group-by dimension, for the breakdown picker."""
+    if name not in DIMENSIONS:
+        raise ValueError(f"Unknown dimension {name!r}; known: {sorted(DIMENSIONS)}")
+    return next(item for item in DIMENSION_SPECS if item.name == name)
 
 
 # ---------------------------------------------------------------------------
@@ -202,6 +282,92 @@ def validate_preset(payload: Mapping[str, Any]) -> dict[str, Any]:
         "group_by": tuple(group_by),
         "description": str(payload.get("description", "")).strip(),
     }
+
+
+def describe_preset(preset: Mapping[str, Any]) -> str:
+    """The preset's question in plain poker language (issue #329).
+
+    Re-exported here so a browser has one import for "what the panes express"
+    and "what that means in words": the summary is generated from the same
+    filter metadata the controls are built from, never hand-written per preset.
+    """
+    return describe_query(preset)
+
+
+@dataclass(frozen=True)
+class ExampleQuestion:
+    """A ready-made question the first-run screen can offer (issue #329).
+
+    ``preset`` is engine vocabulary like any other preset -- it is validated by
+    ``validate_preset`` before it is offered -- so an example question and a
+    saved one run through exactly the same path.
+    """
+
+    name: str
+    description: str
+    preset: Mapping[str, Any]
+
+
+# The first-run questions. A bare minimum on purpose: the shipped library of
+# #330 is the real answer, and ``example_questions`` prefers it when it exists.
+EXAMPLES: Final[tuple[ExampleQuestion, ...]] = (
+    ExampleQuestion(
+        "Fold versus a flop c-bet, by bet size",
+        "How often do players fold to a continuation bet, split by how big it was?",
+        {
+            "metric": "fold_frequency",
+            "filters": {"street": "flop", "primary_situation": "facing_cbet"},
+            "group_by": ("facing_sizing_bucket",),
+        },
+    ),
+    ExampleQuestion(
+        "Open raise rate by position",
+        "How often does each seat raise first in when nobody has entered the pot?",
+        {
+            "metric": "raise_frequency",
+            "filters": {"pot_type": "unopened"},
+            "group_by": ("position",),
+        },
+    ),
+    ExampleQuestion(
+        "Continuation bet frequency by board suit",
+        "How often does the preflop raiser bet the flop, split by board suit structure?",
+        {
+            "metric": "bet_frequency",
+            "filters": {"street": "flop", "primary_situation": "cbet"},
+            "group_by": ("board_suit",),
+        },
+    ),
+    ExampleQuestion(
+        "Made hands when facing a turn bet",
+        "What are players holding when they face a bet on the turn?",
+        {
+            "metric": "opportunities",
+            "filters": {"street": "turn", "action_faced": "bets"},
+            "group_by": ("made_hand",),
+        },
+    ),
+)
+
+
+def example_questions() -> tuple[ExampleQuestion, ...]:
+    """The questions the first-run screen offers.
+
+    The shipped preset library (#330) is the product answer and takes precedence
+    as soon as it is available; this small set is what a build without it can
+    still offer, so the first-run screen is never three empty panes.
+    """
+    try:
+        from .research_presets import builtin_presets
+    except ImportError:  # pragma: no cover - a build without the shipped library.
+        return EXAMPLES
+    shipped = builtin_presets()
+    if not shipped:
+        return EXAMPLES
+    return tuple(
+        ExampleQuestion(preset.name, preset.description, dict(preset.query))
+        for preset in shipped[:6]
+    )
 
 
 def preset_to_query(preset: Mapping[str, Any]) -> Query:
@@ -575,16 +741,23 @@ def run_drill_down(
 
 
 __all__ = [
+    "DIMENSION_SPECS",
     "DRILL_COLUMNS",
+    "EXAMPLES",
     "FILTER_GROUPS",
     "FILTER_SPECS",
     "PRESET_VERSION",
+    "DimensionSpec",
     "DrillDown",
+    "ExampleQuestion",
     "FilterSpec",
     "ResearchPresets",
     "ResearchResult",
     "ResultColumn",
+    "describe_preset",
+    "dimension_spec",
     "drill_query",
+    "example_questions",
     "execute_preset",
     "filter_spec",
     "preset_to_query",

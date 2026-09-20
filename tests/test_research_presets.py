@@ -312,3 +312,23 @@ def test_categories_are_in_canonical_order() -> None:
     presets = rp.load_library()
     order = [rp.CATEGORIES.index(category) for category in rp.categories(presets)]
     assert order == sorted(order)
+
+
+# ---------------------------------------------------------------------------
+# The library is what the first-run screen offers (#329).
+# ---------------------------------------------------------------------------
+
+
+def test_example_questions_come_from_the_shipped_library() -> None:
+    questions = rb.example_questions()
+    shipped = {preset.name for preset in rp.load_library()}
+    assert questions
+    assert all(question.name in shipped for question in questions)
+    assert all(question.description for question in questions)
+    assert all(rb.describe_preset(dict(question.preset)) for question in questions)
+
+
+def test_example_questions_fall_back_without_the_library(monkeypatch) -> None:
+    monkeypatch.setenv(rp.DISABLE_BUILTINS_ENV, "1")
+    questions = rb.example_questions()
+    assert questions == rb.EXAMPLES
