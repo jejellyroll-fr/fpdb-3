@@ -437,6 +437,12 @@ class Hud:
         # preflop round and how many players are still in. Best-effort -- a
         # panel rule set must never be able to cost a HUD its hand.
         self.live_state.clear()
+        live_session = getattr(self, "_live_context_session", None)
+        if live_session is not None and live_session.adapter.hand_id != str(hand):
+            # One hand's live context must never leak into the next. A hand the
+            # session is already following is left alone: an import that lands
+            # after its own live events must not wipe the live context.
+            live_session.start_hand(str(hand))
         try:
             from fpdb_3_legacy import hud_situation
 
@@ -470,6 +476,46 @@ class Hud:
             forget = getattr(aux, "forget_dynamic_panels", None)
             if forget is not None:
                 forget()
+
+    def live_context_session(self) -> Any:
+        """This table's action-by-action live context session (#336).
+
+        Created on first use, so a table with no live source never has one and
+        every existing path is unchanged. The session publishes through
+        :meth:`set_live_state`, so the resolver and the redraw are the ones the
+        classic path already uses.
+        """
+        session = getattr(self, "_live_context_session", None)
+        if session is None:
+            from fpdb_3_legacy import hud_live_context
+
+            session = hud_live_context.LiveContextSession(self)
+            self._live_context_session = session
+        return session
+
+    def accept_live_action(self, action: Any, *, hand_id: str = "", seats: Any = ()) -> Any:
+        """Feed one action from a live source into the dynamic panels.
+
+        A new ``hand_id`` starts a fresh context, so live state cannot cross a
+        hand boundary. Returns the trace of the update, or ``None`` when the
+        action was a duplicate, out of order, or belonged to another hand.
+        """
+        session = self.live_context_session()
+        if hand_id and session.adapter.hand_id != str(hand_id):
+            session.start_hand(str(hand_id), seats=seats)
+        return session.update(action)
+
+    def accept_live_context(self, context: Any) -> None:
+        """Publish an already-folded :class:`LiveContext` to the panels (#336)."""
+        from fpdb_3_legacy import hud_live_context
+
+        self.set_live_state(**hud_live_context.context_to_live_state(context))
+
+    def end_live_context(self) -> None:
+        """The table closed or the stream stopped: clear what it published."""
+        session = getattr(self, "_live_context_session", None)
+        if session is not None:
+            session.close()
 
     def get_cards(self, hand: int | str) -> dict[str, Any]:
         """Get the cards for a given hand."""
