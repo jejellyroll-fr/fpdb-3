@@ -1500,6 +1500,55 @@ class GuiAutoImport(QWidget):
             log.debug("Failed to unregister auto-import config observer", exc_info=True)
         self.config_observer = None
 
+    def shutdown_workers(self) -> None:
+        """Stop auto-import before this tab is destroyed (#347).
+
+        A widget removed from the tab notebook is never sent ``closeEvent``,
+        which is what this hook exists for. Without it, closing the tab left
+        the timer firing into a dying widget, the import worker running, the
+        global lock taken for the rest of the session -- and the config
+        observer registered, so the next configuration change called back into
+        a deleted Qt object.
+
+        The stop performed here is the one the Stop button performs, run
+        synchronously: the widget is about to be deleted, so there is nothing
+        left to defer the finish to. A worker that overruns its bounded wait is
+        the one case left alone, because the finalizer releases the lock and
+        touches the importer, and neither is safe while an import is still
+        using them; it finishes on its own, holding what it holds.
+        """
+        self._teardown_config_observer()
+        if not self.doAutoImportBool and self.importtimer is None:
+            return
+        self.doAutoImportBool = False
+        self._cancel_swc_attach()
+        if self.importtimer:
+            self.importtimer.stop()
+            self.importtimer = None
+        if not self._stop_import_worker():
+            log.warning("AutoImport tab closed while an import was still running; leaving it to finish.")
+            return
+        self._stop_cleanup_pending = False
+        self._finalize_auto_import_stop()
+
+    def close_owned_database(self) -> None:
+        """Give back the connections this tab's importer opened (#282, #347).
+
+        An importer holds one connection for itself and one per writer thread.
+        ``close_tab`` calls this after :meth:`shutdown_workers`, so by now no
+        import worker should be running -- but a worker that overran its wait
+        still holds the importer, and closing underneath it would hand it a
+        dead handle. That case keeps its connections until the process ends,
+        which is what happened on every close before this existed.
+        """
+        importer = getattr(self, "importer", None)
+        if importer is None:
+            return
+        if self.import_thread is not None and self.import_thread.isRunning():
+            log.warning("AutoImport: an import is still running; its database connections stay open.")
+            return
+        importer.close()
+
     def closeEvent(self, event) -> None:
         self._teardown_config_observer()
         super().closeEvent(event)
