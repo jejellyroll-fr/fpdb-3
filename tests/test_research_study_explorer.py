@@ -23,10 +23,13 @@ def test_landing_categories_are_generated_from_the_registry(model) -> None:
         "four-bet-pot",
         "population",
     ]
-    assert categories[0].study_count == 5
-    assert categories[1].study_count == 3
-    assert categories[2].study_count == 2
-    assert categories[3].study_count == 1
+    # Counted per game, because the library ships a Hold'em pack and a PLO
+    # one and the landing page offers one game at a time (#368).
+    holdem = model.categories("holdem")
+    assert [category.study_count for category in holdem[:4]] == [5, 3, 2, 1]
+    omaha = model.categories("omahahi")
+    assert [category.study_count for category in omaha[:4]] == [5, 5, 4, 0]
+    assert categories[0].study_count == holdem[0].study_count + omaha[0].study_count
 
 
 @pytest.mark.parametrize("text", ["cbet", "c-bet", "BB defend", "3bet"])

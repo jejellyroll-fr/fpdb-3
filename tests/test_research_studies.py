@@ -225,7 +225,9 @@ def test_registry_loads_mapping_definitions() -> None:
 
 
 def test_builtin_nlhe_pack_has_a_searchable_hierarchy_and_guidance() -> None:
-    (pack,) = studies.load_study_packs()
+    # The library ships more than one pack now (#368), so the Hold'em one is
+    # named rather than assumed to be the only one.
+    pack = next(pack for pack in studies.load_study_packs() if pack.id == "nlhe-6max")
     registry = pack.registry()
     expected = {
         "preflop_rfi",
@@ -252,7 +254,11 @@ def test_builtin_nlhe_pack_executes_every_shipped_panel_on_the_golden_corpus(bro
     registry = studies.builtin_studies()
     executed = 0
 
+    # The golden corpus is Hold'em, so it answers the Hold'em pack. The PLO
+    # pack has a four-card corpus of its own (#368).
     for study in registry.studies:
+        if study.game != "holdem":
+            continue
         for panel in study.panels_compiled():
             result = studies.execute_panel(browser_db, panel)
             assert result is not None, f"{study.id}/{panel.panel_id} did not return a result"
