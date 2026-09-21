@@ -64,11 +64,17 @@ def _run_and_wait(qtbot, browser, preset=None):
 
 
 def test_three_panes_and_the_default_filters(browser) -> None:
+    from fpdb_3_legacy import GuiResearchBrowser as gui
     from fpdb_3_legacy import research_browser as rb
 
-    assert len(browser._filter_rows) == 2
     names = [row.spec.name for row in browser._filter_rows]
-    assert "hero" in names and "primary_situation" in names
+    # Hero says who the question is about; game and limit stop the first answer
+    # a reader ever sees averaging Hold'em with Omaha and two limits without
+    # saying so (#355). All four start empty, so the default question is still
+    # the whole database.
+    assert names == list(gui._DEFAULT_FILTERS)
+    assert {"hero", "game", "limit", "primary_situation"} == set(names)
+    assert all(row.value() is None for row in browser._filter_rows)
     # An unrun tab shows no columns yet: the table is shaped by the first query.
     assert browser.result_table.columnCount() == 0
     assert browser.drill_table.columnCount() == 0

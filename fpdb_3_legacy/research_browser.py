@@ -29,7 +29,7 @@ from __future__ import annotations
 import json
 import time
 from collections.abc import Mapping
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Any, Final
 
@@ -63,6 +63,7 @@ from .research_labels import (
     filter_label,
     filter_unit,
     is_expert_only,
+    value_label,
 )
 
 log = get_logger("research_browser")
@@ -661,6 +662,133 @@ def _board_text(raw: Mapping[str, Any]) -> str:
     """The board as the short text a list shows, '' when there was none."""
     codes = [raw.get(f"boardcard{i}") for i in range(1, 6)]
     return "".join(Card.valueSuitFromCard(int(code)) for code in codes if code)
+
+
+#: Filters whose values are a closed domain the database itself holds, and the
+#: SELECT that lists them. Shipped with no ``choices``, they rendered as an
+#: empty text box in which a user had to guess that the stored token is
+#: ``omahahi`` rather than "Omaha" or "PLO" -- a closed domain offered as free
+#: text (#355). What a database actually holds is a better list than anything
+#: hard-coded here, and it is short.
+#: Each one joins through Hands on purpose. Gametypes and Sites are reference
+#: tables -- Sites holds every room fpdb can parse, roughly a hundred and thirty
+#: of them -- so listing them directly offers a user every room in the world
+#: instead of the two they play. A picker is only an improvement on free text
+#: when it is shorter than the alphabet.
+DATABASE_CHOICES: Final[dict[str, str]] = {
+    "game": (
+        "SELECT DISTINCT G.category FROM Gametypes G"
+        " JOIN Hands H ON H.gametypeId = G.id ORDER BY G.category"
+    ),
+    "limit": (
+        "SELECT DISTINCT G.limitType FROM Gametypes G"
+        " JOIN Hands H ON H.gametypeId = G.id ORDER BY G.limitType"
+    ),
+    "currency": (
+        "SELECT DISTINCT G.currency FROM Gametypes G"
+        " JOIN Hands H ON H.gametypeId = G.id ORDER BY G.currency"
+    ),
+    "site": (
+        "SELECT DISTINCT S.name FROM Sites S"
+        " JOIN Gametypes G ON G.siteId = S.id"
+        " JOIN Hands H ON H.gametypeId = G.id ORDER BY S.name"
+    ),
+}
+
+
+def database_choices(db: Any, name: str) -> tuple[Choice, ...]:
+    """The values this database actually holds for a closed-domain filter.
+
+    Answers ``()`` for anything else, and for any failure: a filter that cannot
+    list its values is still usable as free text, and a picker must never cost
+    the pane its window.
+    """
+    query = DATABASE_CHOICES.get(name)
+    if query is None or db is None:
+        return ()
+    try:
+        cursor = db.get_cursor()
+        # Escaped like every other statement these modules run, although these
+        # hold no ``%`` today: the rule is what makes a fourth site impossible
+        # to get wrong, and a constant that grows a LIKE later is exactly how
+        # the last one happened (#349).
+        cursor.execute(escape_literal_percent(query, _placeholder(db)))
+        values = [row[0] for row in cursor.fetchall() if row and row[0] not in (None, "")]
+    except Exception:  # noqa: BLE001 - an empty picker is a degradation, not a fault
+        log.debug("Could not list the values of filter %r", name, exc_info=True)
+        return ()
+    return tuple(Choice(str(value), value_label(name, str(value))) for value in values)
+
+
+def spec_for_database(db: Any, name: str) -> FilterSpec:
+    """A filter's spec, with the values this database holds when it has them."""
+    spec = filter_spec(name)
+    if spec.choices:
+        return spec
+    choices = database_choices(db, name)
+    return replace(spec, choices=choices) if choices else spec
+
+
+@dataclass(frozen=True)
+class PopulationScope:
+    """What games, limits and rooms one question's population spans (#355).
+
+    A single number over two games is two answers averaged, and nothing on
+    screen said so: one database's "fold to a 3-bet = 47.5%" covered Hold'em at
+    49.2% over 63 decisions and Omaha at 46.5% over 99, in two different limits.
+
+    Stakes are not here, and deliberately: the engine has no stake dimension to
+    group by, so a claim about them would be guesswork. This says what it can
+    check.
+    """
+
+    games: tuple[str, ...] = ()
+    limits: tuple[str, ...] = ()
+    sites: tuple[str, ...] = ()
+
+    @property
+    def is_mixed(self) -> bool:
+        return max(len(self.games), len(self.limits), len(self.sites), 0) > 1
+
+    def describe(self) -> str:
+        """The mixture, named, or ``""`` when there is nothing to warn about."""
+        parts = []
+        if len(self.games) > 1:
+            parts.append("games (" + ", ".join(value_label("game", game) for game in self.games) + ")")
+        if len(self.limits) > 1:
+            parts.append("limits (" + ", ".join(value_label("limit", limit) for limit in self.limits) + ")")
+        if len(self.sites) > 1:
+            parts.append("rooms (" + ", ".join(self.sites) + ")")
+        if not parts:
+            return ""
+        return (
+            "This answer averages " + " and ".join(parts)
+            + ". Add the matching filter to ask about one of them."
+        )
+
+
+def population_scope(db: Any, query: Query) -> PopulationScope:
+    """The games, limits and rooms a query's filters actually select.
+
+    One extra grouped query per run, which is the same shape the 13x13 grid
+    already runs to refuse a non-Hold'em population. A failure answers an empty
+    scope: a warning that cannot be computed must not cost the answer it was
+    going to annotate.
+    """
+    try:
+        result = run_query(
+            db,
+            Query(metric="opportunities", filters=dict(query.filters), group_by=("game", "limit", "site")),
+        )
+    except Exception:  # noqa: BLE001 - an annotation is never worth an exception
+        log.debug("Could not read the population's scope", exc_info=True)
+        return PopulationScope()
+    rows = [row for row in result.rows if row.opportunities]
+    return PopulationScope(
+        games=tuple(sorted({str(row.group["game"]) for row in rows})),
+        limits=tuple(sorted({str(row.group["limit"]) for row in rows})),
+        sites=tuple(sorted({str(row.group["site"]) for row in rows})),
+    )
 
 
 def run_drill_down(

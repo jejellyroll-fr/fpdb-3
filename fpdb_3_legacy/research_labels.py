@@ -135,7 +135,7 @@ FILTER_LABELS: Final[dict[str, str]] = {
     "action_faced": N_("Action faced"),
     "response": N_("Response"),
     "all_in": N_("All-in"),
-    "situation": N_("Situation (any match)"),
+    "situation": N_("Situation, including the ones it led to"),
     "primary_situation": N_("Situation"),
     "situation_group": N_("Situation family"),
     "enum_key": N_("Legacy stat column"),
@@ -228,7 +228,11 @@ FILTER_DESCRIPTIONS: Final[dict[str, str]] = {
     "action_faced": N_("What the actor was facing."),
     "response": N_("The decision, normalized: fold, check, call, bet or raise."),
     "all_in": N_("Whether the action put the player all-in."),
-    "situation": N_("Any situation label the decision matched."),
+    "situation": N_(
+        "Every situation the decision matched, not only the most specific one. "
+        "Use this to ask how often an opportunity was taken: raising an open makes "
+        "the decision a 3-bet, so only this keeps it among the opens faced.",
+    ),
     "primary_situation": N_("The most specific situation the decision matched."),
     "situation_group": N_("A family of situations, such as postflop defence."),
     "enum_key": N_("A legacy PT4 stat column the decision feeds."),
@@ -302,7 +306,12 @@ EXPERT_ONLY_FILTERS: Final[frozenset[str]] = frozenset(
         "tournament_id",
         "enum_key",
         "enum_response",
-        "situation",
+        # "situation" is deliberately NOT here. It is the only way to ask about
+        # an *opportunity*: primary_situation is the most specific label a
+        # decision matched, so raising against an open relabels the decision
+        # three_bet and takes it out of facing_open. A beginner asking "how
+        # often do I 3-bet" needs this column, and hiding it is what made a
+        # third of the shipped presets answer 0% (#355).
         "street_index",
         "board_street",
         "hand_state_street",
@@ -343,6 +352,22 @@ FILTER_EXAMPLES: Final[dict[str, str]] = {
 }
 
 
+#: The seat a button-relative code names. ``_position_choices`` renders the
+#: filter from this too, so a code cannot be labelled one way in a picker and
+#: another in a result row.
+_POSITION_CODE_LABELS: Final[dict[str, str]] = {
+    "0": "BTN",
+    "1": "CO",
+    "2": "HJ",
+    "3": "LJ",
+    "4": "MP",
+    "5": "MP2",
+    "6": "UTG",
+    "-1": "SB",
+    "-2": "BB",
+}
+
+
 def _position_choices() -> tuple[Choice, ...]:
     """The button-relative seats, one entry per code, in table order.
 
@@ -352,17 +377,7 @@ def _position_choices() -> tuple[Choice, ...]:
     """
     preferred = ("btn", "co", "hj", "lj", "mp", "mp2", "utg", "sb", "bb")
     seen: dict[int, str] = {}
-    labels = {
-        0: "BTN",
-        1: "CO",
-        2: "HJ",
-        3: "LJ",
-        4: "MP",
-        5: "MP2",
-        6: "UTG",
-        -1: "SB",
-        -2: "BB",
-    }
+    labels = {int(code): label for code, label in _POSITION_CODE_LABELS.items()}
     for name in preferred:
         code = POSITION_CODES[name]
         seen.setdefault(code, name)
@@ -811,13 +826,32 @@ _CLAUSE_GROUPS: Final[tuple[str, ...]] = (
 # *not* choices -- the value really is open (a room's own game category) -- so
 # they only affect how a value that matches is rendered.
 VALUE_LABELS: Final[dict[str, dict[str, str]]] = {
+    # The stored tokens, not their families: a database holds ``omahahi``, and
+    # a picker built from it offered that back at the reader unchanged (#355).
     "game": {
         "holdem": "Hold'em",
+        "6_holdem": "Six-plus Hold'em",
         "omaha": "Omaha",
+        "omahahi": "Omaha",
+        "omahahilo": "Omaha Hi/Lo",
+        "5_omahahi": "5-card Omaha",
+        "5_omaha8": "5-card Omaha Hi/Lo",
+        "6_omahahi": "6-card Omaha",
+        "cour_hi": "Courchevel",
+        "cour_hilo": "Courchevel Hi/Lo",
         "stud": "Seven-card stud",
+        "studhi": "Seven-card stud",
+        "studhilo": "Seven-card stud Hi/Lo",
         "razz": "Razz",
         "draw": "Draw",
+        "fivedraw": "Five-card draw",
+        "27_1draw": "2-7 single draw",
+        "27_3draw": "2-7 triple draw",
+        "a5_1draw": "A-5 single draw",
+        "a5_3draw": "A-5 triple draw",
         "badugi": "Badugi",
+        "badacey": "Badacey",
+        "badeucey": "Badeucey",
     },
     "limit": {
         "nl": "no limit",
@@ -826,6 +860,12 @@ VALUE_LABELS: Final[dict[str, dict[str, str]]] = {
         "limit": "fixed limit",
     },
     "response": {"complete": "complete"},
+    # Seats are stored as button-relative codes, and the filter's own selector
+    # offers them as BTN/CO/SB/BB -- but a grouped result printed the codes, so
+    # one pane spoke two languages about the same value (#355). Keyed by the
+    # stored code rather than by the filter token, which is what a row holds.
+    "position": _POSITION_CODE_LABELS,
+    "opponent_position": _POSITION_CODE_LABELS,
 }
 
 
@@ -847,6 +887,17 @@ def _render_value(name: str, value: Any) -> str:
     """One token, in the label the matching control would show."""
     label = _choice_labels(name).get(str(value))
     return label if label is not None else str(value)
+
+
+def value_label(name: str, value: Any) -> str:
+    """One stored value, as a reader would say it.
+
+    The same rendering the filter controls and the query sentence use, exposed
+    so a result row can use it too: a seat that reads ``-1`` in a table while
+    its own filter offers ``SB`` is the table asking the reader to translate
+    (#355). Anything with no label renders as itself.
+    """
+    return _render_value(name, value)
 
 
 def _render_values(name: str, value: Any) -> str:
@@ -1008,6 +1059,7 @@ __all__ = [
     "BEGINNER_DIMENSIONS",
     "Choice",
     "VALUE_LABELS",
+    "value_label",
     "DIMENSION_CHOICES",
     "DIMENSION_LABELS",
     "EV_METRICS",

@@ -42,7 +42,7 @@ touching the worker the engine runs on.
 from __future__ import annotations
 
 import contextlib
-from typing import Any
+from typing import Any, Final
 
 from PySide6.QtCore import Qt, QThread, Signal
 from PySide6.QtWidgets import (
@@ -164,6 +164,11 @@ class _DrillWorker(QThread):
             self.failed.emit(str(exc), self.serial)
             return
         self.finished_ok.emit(drill, self.serial)
+
+
+#: The filters the form opens with. Hero says who the question is about;
+#: game and limit stop the first answer silently averaging two games (#355).
+_DEFAULT_FILTERS: Final[tuple[str, ...]] = ("hero", "game", "limit", "primary_situation")
 
 
 class _ChoiceCombo(QComboBox):
@@ -516,6 +521,8 @@ class GuiResearchBrowser(QWidget):
         self.conf = config
         self.main_window = mainwin
         self.sql = querylist
+        self._spec_cache: dict[str, rb.FilterSpec] = {}
+        self._scope: Any = None
         self.db = db
         if self.db is None:
             from fpdb_3_legacy.Database import Database
@@ -874,10 +881,16 @@ class GuiResearchBrowser(QWidget):
 
         ``hero`` starts at *Any*, so the default query covers the whole
         population instead of silently meaning "opponents only".
+
+        ``game`` and ``limit`` are here because a database holds more than one
+        of each: without them the first answer a reader ever sees averages
+        Hold'em with Omaha and micro stakes with high ones, and says nothing
+        about it (#355). Both start empty, so the default question is still the
+        whole database -- but the control is on screen, with this database's own
+        values in it, rather than waiting to be discovered.
         """
-        for name in ("hero", "primary_situation"):
-            spec = rb.filter_spec(name)
-            self._append_filter_row(spec)
+        for name in _DEFAULT_FILTERS:
+            self._append_filter_row(self._spec(name))
 
     # -- mode and labels -----------------------------------------------------
 
@@ -891,8 +904,7 @@ class GuiResearchBrowser(QWidget):
         for row in list(self._filter_rows):
             self._remove_filter_row(row)
         for name, value in captured:
-            spec = rb.filter_spec(name)
-            self._append_filter_row(spec)
+            self._append_filter_row(self._spec(name))
             if value is not None:
                 self._filter_rows[-1].set_value(value)
         self.breakdown_picker.set_expert(expert)
@@ -940,7 +952,25 @@ class GuiResearchBrowser(QWidget):
     def _add_picked_filter(self) -> None:
         spec = self.filter_picker.currentData()
         if spec is not None:
-            self._append_filter_row(spec)
+            self._append_filter_row(self._spec(spec.name))
+
+    def _spec(self, name: str) -> rb.FilterSpec:
+        """A filter's spec, with the values this database holds (#355).
+
+        ``game``, ``limit``, ``currency`` and ``site`` ship with no choices, so
+        they rendered as an empty box in which the reader had to guess that the
+        stored token is ``omahahi``. The values are in the database; they are
+        read once per pane and kept, because they only change on an import.
+        """
+        if name in self._spec_cache:
+            return self._spec_cache[name]
+        try:
+            spec = rb.spec_for_database(self.db, name)
+        except Exception:  # noqa: BLE001 - free text is a fallback, not a failure
+            log.debug("Could not build the picker for filter %r", name, exc_info=True)
+            spec = rb.filter_spec(name)
+        self._spec_cache[name] = spec
+        return spec
 
     def _append_filter_row(self, spec: rb.FilterSpec) -> None:
         row = _FilterRow(spec, expert=self._expert)
@@ -1068,11 +1098,24 @@ class GuiResearchBrowser(QWidget):
         self.empty_state.setVisible(False)
         self.sample_label.setText(_("Running…"))
         self.result_note.setText("")
-        worker = _QueryWorker(self.db, task, self._query_serial, self)
+        worker = _QueryWorker(self.db, self._with_scope(task), self._query_serial, self)
         worker.finished_ok.connect(self._on_query_done)
         worker.failed.connect(self._on_query_failed)
         self._worker = worker
         worker.start()
+
+    def _with_scope(self, task: Any) -> Any:
+        """The view's work and the population's scope, on the same worker (#355).
+
+        The scope costs one grouped query. It runs beside the answer rather
+        than on the UI thread, because a warning is not worth a frozen window.
+        """
+        query = self._current_query
+
+        def _run(db: Any) -> tuple[Any, Any]:
+            return task(db), rb.population_scope(db, query)
+
+        return _run
 
     def _cancel_query(self) -> None:
         """Stop waiting for the running query; its result will be dropped."""
@@ -1097,7 +1140,9 @@ class GuiResearchBrowser(QWidget):
         self.cancel_button.setVisible(False)
         self._worker.deleteLater()
         self._worker = None
-        self._render(result)
+        payload, self._scope = result
+        self._render(payload)
+        self._append_scope_note()
 
     def _on_query_failed(self, message: str, serial: int) -> None:
         if serial != self._query_serial:
@@ -1210,6 +1255,20 @@ class GuiResearchBrowser(QWidget):
             ).format(names=", ".join(older))
         return ""
 
+    def _append_scope_note(self) -> None:
+        """Say when an answer averages populations that should be asked apart.
+
+        Appended to whatever note the view already wrote, so every view carries
+        it: a mixture is a property of the question, not of the shape the
+        answer is drawn in (#355).
+        """
+        scope = getattr(self, "_scope", None)
+        warning = scope.describe() if scope is not None else ""
+        if not warning:
+            return
+        existing = self.result_note.text()
+        self.result_note.setText(f"{existing}  {warning}" if existing else warning)
+
     def _note_when_empty(self, total: Any, default: str = "") -> str:
         """The note under an answer, saying the one thing a zero cannot say.
 
@@ -1286,7 +1345,13 @@ class GuiResearchBrowser(QWidget):
             for c, col in enumerate(columns):
                 value = row.get(col.key)
                 text = "" if value is None else str(value)
-                if col.key == "frequency_bp" and value is not None:
+                if col.source == "dimension" and value is not None:
+                    # A seat reads -1 here while this pane's own filter offers
+                    # SB for the same value: the table was asking the reader to
+                    # translate (#355). The raw value still travels in UserRole,
+                    # so the drill-down keeps filtering on what was stored.
+                    text = rb.value_label(col.key, value)
+                elif col.key == "frequency_bp" and value is not None:
                     text = f"{value / 100:.1f}%"
                 item = QTableWidgetItem(text)
                 if col.source == "dimension":
