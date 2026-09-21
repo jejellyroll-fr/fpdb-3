@@ -162,12 +162,14 @@ class HandStrengthChartWidget(QWidget):
         return 0.0 if category is None or category.share is None else category.share
 
     def _coverage_text(self) -> str:
-        assert self._hero is not None
-        parts = [self._side_coverage("Hero", self._hero)]
+        hero = self._hero
+        if hero is None:
+            return "No hand-state composition loaded"
+        parts = [self._side_coverage("Hero", hero)]
         if self._field is not None:
             parts.append(self._side_coverage("Field", self._field))
-        overlap = " Categories overlap; shares do not sum to 100%." if self._hero.overlapping else ""
-        warning = " Low known-card sample." if self._hero.known_sample_warning else ""
+        overlap = " Categories overlap; shares do not sum to 100%." if hero.overlapping else ""
+        warning = " Low known-card sample." if hero.known_sample_warning else ""
         return " · ".join(parts) + overlap + warning + " Click a category to filter the study."
 
     @staticmethod
