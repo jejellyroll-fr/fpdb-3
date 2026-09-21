@@ -222,3 +222,46 @@ def test_registry_loads_mapping_definitions() -> None:
     registry = studies.StudyRegistry.from_mappings([_srp_study().as_dict()])
 
     assert registry.get("srp_pfr_ip_flop").title == "Single-Raised Pot — PFR IP — Flop"
+
+
+def test_builtin_nlhe_pack_has_a_searchable_hierarchy_and_guidance() -> None:
+    (pack,) = studies.load_study_packs()
+    registry = pack.registry()
+    expected = {
+        "preflop_rfi",
+        "preflop_facing_open",
+        "preflop_facing_3bet",
+        "preflop_squeeze",
+        "preflop_blind_vs_blind",
+        "srp_pfr_ip_flop",
+        "srp_pfr_oop_flop",
+        "srp_defender_oop_flop",
+        "three_bet_pot_aggressor_flop",
+        "three_bet_pot_defender_flop",
+        "four_bet_pot_flop",
+    }
+
+    assert {study.id for study in registry.studies} == expected
+    assert all(study.table_size == 6 and study.min_sample for study in registry.studies)
+    assert all(study.default_panel in {panel.id for panel in study.panels} for study in registry.studies)
+    assert all(study.search_terms for study in registry.studies)
+    assert any(any("c-bet" in term for term in study.search_terms) for study in registry.studies)
+
+
+def test_builtin_nlhe_pack_executes_every_shipped_panel_on_the_golden_corpus(browser_db: Database) -> None:
+    registry = studies.builtin_studies()
+    executed = 0
+
+    for study in registry.studies:
+        for panel in study.panels_compiled():
+            result = studies.execute_panel(browser_db, panel)
+            assert result is not None, f"{study.id}/{panel.panel_id} did not return a result"
+            executed += 1
+
+    assert executed == 68
+
+
+def test_existing_advanced_presets_remain_available() -> None:
+    from fpdb_3_legacy.research_presets import builtin_presets
+
+    assert builtin_presets()
