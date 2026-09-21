@@ -80,14 +80,17 @@ Pot-limit constrains the sizes available, which makes the distribution
 informative rather than arbitrary: a player who only ever bets pot is telling
 you something a no-limit player would not.
 
-### Hand strength (`strength`)
+### Hand strength (`strength`) — Hold'em only, for now
 
-`Made hand`, `Draw (any of)`, `Blocker (any of)`, `Hand strength`, `Pair detail`.
+`Made hand`, `Draw (any of)`, `Blocker (any of)`, `Hand strength`, `Pair detail`
+all read the postflop hand state, and that classifier takes exactly two hole
+cards: an Omaha hand's best two are not a Hold'em holding, so it refuses rather
+than inventing a class. No Omaha decision is classified, and these filters
+return nothing on an Omaha population.
 
-This is where Omaha is actually played, and the hand states are derived for it.
-Only decisions whose cards were shown are classified — nobody's holding is
-guessed at — so these filters narrow the population to the hands you can
-genuinely reason about.
+This is a gap rather than a decision — Omaha is where hand strength matters most
+— but an honest empty answer beats a plausible wrong one, which is what
+classifying the first two of four cards would produce.
 
 ### Street and action context (`street`)
 
@@ -102,26 +105,37 @@ the filters says which one you asked.
 
 ## What does not work in Omaha
 
-**The 13x13 range grid, and the `Starting hand` filter.** Two of a four-card
-hand are not a starting hand: classifying them would produce a full, well-formed
-and meaningless picture. The engine refuses a population that is not Hold'em
-rather than drawing it, and says so. Ignore the *Range 13x13* view; it is not
-broken, it is declining.
+Three things, all for the same reason: two of a four-card hand are not a
+Hold'em holding, and the engine refuses to classify them rather than producing a
+full, well-formed and meaningless answer.
 
-Everything else — situations, positions, boards, sizings, strengths,
-profitability — is yours.
+- **The 13x13 range grid** and the **`Starting hand`** filter. The grid is not
+  broken when it declines your population; it is declining.
+- **The hand-strength filters** above: `Made hand`, `Draw`, `Blocker`,
+  `Hand strength`, `Pair detail`.
+
+Everything else — situations, positions, stacks, boards, sizings,
+profitability — is yours, and those are the majority.
 
 ## Three questions worth asking of an Omaha database
 
-### 1. Do I over-limp too much?
+### 1. What do I do when someone has limped in front of me?
 
-1. **Situation** `over-limp behind limpers`
+1. **Situation family** `POT_LIMPED`
 2. **Hero** *Yes*
-3. **Metric** `frequency`
+3. **Metric** `call_frequency` — then run it again with `raise_frequency` and
+   `fold_frequency`
 4. **Breakdown** `Position`
 
-Read the late-position rows against the early ones. Over-limping on the button is
-a different decision from over-limping under the gun.
+The family is the denominator on purpose: it holds every decision taken in a
+limped pot, so calling, raising and folding are three answers to one question
+and add up like they should.
+
+Asking it the other way round does not work. *Situation* is the **most
+specific** label a decision matched, and `over_limp` is only assigned to a
+decision that called — so "Situation = over-limp, metric = frequency" measures
+over-limps out of over-limps and reports 100% in every populated row. A
+frequency whose denominator is its own numerator is not a statistic.
 
 ### 2. Do I fold too much to c-bets on connected boards?
 
@@ -135,9 +149,11 @@ the question answerable. Compare the connected row with the dry one.
 
 ### 3. Does stack depth change my aggression against limpers?
 
-1. **Situation** `facing limpers`
-2. **Metric** `raise_frequency`
-3. **Breakdown** `Stack depth`
+1. **Situation family** `POT_LIMPED`
+2. **Hero** *Yes* — the question says *my*, and the default *Any* answers for
+   the whole table instead
+3. **Metric** `raise_frequency`
+4. **Breakdown** `Stack depth`
 
 An iso-raise is a different proposition at 40 big blinds and at 200. This asks
 whether your game knows that.

@@ -312,3 +312,54 @@ def test_rows_written_by_a_newer_fpdb_are_left_alone(lifecycle_versions) -> None
     assert "situations" not in rebuildable_subsystems(db)  # but not a rebuild's business
     assert subsystems_ahead_of_code(db) == ("situations",)
     assert rebuildable_subsystems(db) == ("board_features",)
+
+
+# --- a rebuilt hand state must know which game it came from (#353) -----------
+
+
+def test_a_rebuilt_situation_must_state_its_game() -> None:
+    """The guard that skips non-Hold'em is only as good as the field it reads.
+
+    ``enumerate_hand_states`` skips a situation whose game is not Hold'em, via
+    ``getattr(situation, "game", "holdem")``. ``StoredSituation`` carried a
+    default of ``"holdem"``, so every rebuilt situation claimed to be Hold'em
+    and an Omaha hand's first two of four cards were classified as a Hold'em
+    holding -- 130 fabricated rows on the database this was found on, which the
+    classifier exists to refuse. A required field makes the omission impossible.
+    """
+    from fpdb_3_legacy.analytics_rebuild import StoredSituation
+
+    with pytest.raises(TypeError):
+        StoredSituation(  # type: ignore[call-arg]
+            hand_id=1, action_no=1, street=1, street_name="FLOP", player="p", board=("As",)
+        )
+
+
+def test_the_rebuild_reads_the_game_beside_the_cards() -> None:
+    source = (ROOT / "fpdb_3_legacy" / "analytics_rebuild.py").read_text()
+    tree = ast.parse(source)
+    reader = next(
+        node for node in ast.walk(tree) if isinstance(node, ast.FunctionDef) and node.name == "_rebuild_hand_states"
+    )
+    dumped = ast.dump(reader)
+
+    assert "G.category AS game" in source, "the game has to come out of the database"
+    assert "game" in dumped, "and be handed to the situation"
+
+
+def test_a_non_holdem_situation_is_not_classified() -> None:
+    # The end of the chain: whatever the rebuild reads, an Omaha situation must
+    # produce no hand state at all.
+    from fpdb_3_legacy.analytics_rebuild import StoredSituation
+    from fpdb_3_legacy.hand_state_store import enumerate_hand_states
+
+    omaha = StoredSituation(
+        hand_id=1, action_no=1, street=1, street_name="FLOP", player="p", board=("As", "Kd", "7c"), game="omahahi"
+    )
+    holdem = StoredSituation(
+        hand_id=1, action_no=1, street=1, street_name="FLOP", player="p", board=("As", "Kd", "7c"), game="holdem"
+    )
+    cards = {"p": {"card1": 1, "card2": 14}}
+
+    assert enumerate_hand_states([omaha], cards) == []
+    assert enumerate_hand_states([holdem], cards) != []
