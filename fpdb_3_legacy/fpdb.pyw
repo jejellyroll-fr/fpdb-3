@@ -1893,10 +1893,29 @@ class fpdb(QMainWindow):
 
     def tab_study_explorer(self, widget, data=None) -> None:
         """Open the spot-first Study Explorer (#360)."""
+
+        def build_explorer(module):
+            explorer = module.GuiStudyExplorer(self.config, self.sql, self)
+            explorer.study_opened.connect(self._open_study_dashboard)
+            return explorer
+
         self.open_tab(
             "Study Explorer",
-            lambda module: module.GuiStudyExplorer(self.config, self.sql, self),
+            build_explorer,
             module="fpdb_3_legacy.GuiStudyExplorer",
+        )
+
+    def _open_study_dashboard(self, selection) -> None:
+        """Open the synchronized dashboard for a Study Explorer selection (#361)."""
+        self.open_tab(
+            f"Study · {selection.study.title}",
+            lambda module: module.GuiStudyDashboard(
+                self.config,
+                self.sql,
+                self,
+                selection=selection,
+            ),
+            module="fpdb_3_legacy.GuiStudyDashboard",
         )
 
     def tab_opponents_report(self, widget, data=None) -> None:
