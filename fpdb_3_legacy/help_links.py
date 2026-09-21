@@ -65,6 +65,7 @@ class HelpTopic:
 #: *user* guide, never a developer reference beside it.
 TOPICS: Final[tuple[HelpTopic, ...]] = (
     HelpTopic("research", "Research Browser", "research-quick-start.md"),
+    HelpTopic("research-omaha", "Research Browser for Omaha", "research-omaha.md"),
     HelpTopic("hud-dynamic", "Dynamic HUD panels", "hud-dynamic-guide.md"),
 )
 

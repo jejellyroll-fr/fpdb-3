@@ -1017,6 +1017,22 @@ class fpdb(QMainWindow):
                 "Re-start fpdb to use this option.",
             )
 
+    def help_research_omaha(self, widget, data=None) -> None:
+        """Open the Omaha reading of the Research Browser (#353).
+
+        The quick start teaches the browser with Hold'em examples, and the one
+        view that cannot work on a four-card game is the one it leads with. An
+        Omaha player deserves an entry of their own rather than a guide that
+        keeps saying "not for you".
+        """
+        from fpdb_3_legacy import help_links
+
+        if not help_links.open_help("research-omaha"):
+            self.info_box(
+                "Research Browser for Omaha",
+                f"The guide is published at {help_links.DOCS_URL}/research-omaha.md",
+            )
+
     def dia_rebuild_analytics(self, widget, data=None) -> None:
         """Re-derive the analytics rows this database is missing (#351).
 

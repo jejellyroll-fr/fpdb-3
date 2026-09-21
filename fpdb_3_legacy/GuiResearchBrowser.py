@@ -187,6 +187,13 @@ class _ChoiceCombo(QComboBox):
         # ``activated[int]`` names the index overload explicitly: the plain
         # ``activated`` also has a text overload PySide may pick instead.
         self.activated[int].connect(self._toggle)
+        # Nothing is chosen yet, and the control has to say so. Left as Qt
+        # builds it, a combo shows its first item: a filter just added read as
+        # "Situation = open raise" while the query carried no situation at all,
+        # so a question that had been narrowed on screen ran against every
+        # decision in the database and answered something else entirely (#353).
+        self.setPlaceholderText(_("Choose one or more…"))
+        self.sync()
 
     def _toggle(self, index: int) -> None:
         if index < 0:

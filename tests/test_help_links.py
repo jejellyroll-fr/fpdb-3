@@ -103,3 +103,27 @@ def test_a_failing_opener_is_not_raised() -> None:
 def test_help_topic_lookup_is_forgiving() -> None:
     assert help_links.help_topic("  research ") is not None
     assert help_links.help_topic(None) is None
+
+
+def test_the_omaha_guide_is_reachable_from_the_help_menu() -> None:
+    """A guide nobody can open is a file, not help (#353).
+
+    The research topic is opened by the browser's own "?" button; this one has
+    no button of its own, so it needs a menu entry or it is unreachable -- the
+    mirror of the failure this table already guards against.
+    """
+    from fpdb_3_legacy import menu_layout
+
+    help_menu = next(menu for menu in menu_layout.menu_layout() if "Help" in menu.title)
+    handlers = {item.handler for item in help_menu.items}
+
+    assert "help_research_omaha" in handlers
+    assert help_links.help_topic("research-omaha") is not None
+
+
+def test_the_quick_start_sends_omaha_readers_to_their_own_guide() -> None:
+    # Its worked examples are Hold'em and its leading view cannot work on a
+    # four-card game, so an Omaha reader must not be left to discover that.
+    quick_start = (help_links.DOCS_DIR / "research-quick-start.md").read_text()
+
+    assert "research-omaha.md" in quick_start

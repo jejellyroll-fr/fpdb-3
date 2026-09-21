@@ -77,7 +77,11 @@ class StoredSituation:
     street_name: str
     player: str
     board: tuple[str, ...]
-    game: str = "holdem"
+    #: No default: ``enumerate_hand_states`` skips a situation whose game is not
+    #: Hold'em, and a default silently turned that guard off for every rebuilt
+    #: hand -- an Omaha hand's first two cards were classified as a Hold'em
+    #: holding, which is precisely what the classifier refuses to do (#353).
+    game: str
 
 # Subsystems whose stored rows are refreshed as a side effect of another's
 # pass. sizing_buckets is a pure function of the event columns, so its rows
@@ -349,9 +353,11 @@ def _rebuild_hand_states(db: Any, hand_id: int) -> int:
     ph = db.sql.query["placeholder"]
     c.execute(
         "SELECT HS.actionNo, HS.street, HS.streetName, HS.board, HS.playerId, P.name AS player,"  # nosec B608  # nosemgrep
-        " HP.card1, HP.card2"
+        " HP.card1, HP.card2, G.category AS game"
         " FROM HandsSituations HS"
         " JOIN Players P ON P.id = HS.playerId"
+        " JOIN Hands H ON H.id = HS.handId"
+        " JOIN Gametypes G ON G.id = H.gametypeId"
         " LEFT JOIN HandsPlayers HP ON HP.handId = HS.handId AND HP.playerId = HS.playerId"
         f" WHERE HS.handId = {ph} ORDER BY HS.actionNo",
         (hand_id,),
@@ -370,6 +376,7 @@ def _rebuild_hand_states(db: Any, hand_id: int) -> int:
                 street_name=str(row["streetName"]),
                 player=player,
                 board=tuple(board),
+                game=str(row["game"] or ""),
             ),
         )
         cards[player] = {"card1": row["card1"], "card2": row["card2"]}
