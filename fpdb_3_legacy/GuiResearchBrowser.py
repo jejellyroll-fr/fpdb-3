@@ -63,13 +63,16 @@ from PySide6.QtWidgets import (
 )
 
 from fpdb_3_legacy import research_browser as rb
+from fpdb_3_legacy import research_drilldown as rdrill
 from fpdb_3_legacy import research_labels as rlabels
 from fpdb_3_legacy import research_presets as presets_lib
 from fpdb_3_legacy import research_views as rviews
 from fpdb_3_legacy.analytics_query import DIMENSIONS, KNOWN_METRICS
+from fpdb_3_legacy.GuiDrillDown import SourceHandsPane
 from fpdb_3_legacy.GuiResearchViews import CompositionWidget, MoneyWidget, RangeGridWidget
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.loggingFpdb import get_logger
+from fpdb_3_legacy.research_worker_db import WorkerDatabase, worker_database
 from fpdb_3_legacy.ring_stats.styles import get_theme_palette
 
 log = get_logger("gui_research_browser")
@@ -98,28 +101,12 @@ def _comparison_measure_text(value: float | None, unit: str, frequency: bool) ->
     return f"{value:g}"
 
 
-class _WorkerDatabase:
-    """Small read-only Database facade around a borrowed DB-API connection."""
-
-    def __init__(self, owner: Any, connection: Any) -> None:
-        self.backend = owner.backend
-        self.sql = owner.sql
-        self._connection = connection
-
-    def get_cursor(self):
-        return self._connection.cursor()
-
-
-@contextlib.contextmanager
-def _worker_database(db: Any):
-    """Give research workers a dedicated connection when the DB supports it."""
-    acquire = getattr(db, "worker_connection", None)
-    if callable(acquire):
-        with acquire() as connection:
-            yield _WorkerDatabase(db, connection)
-    else:
-        # Lightweight test doubles and legacy adapters may not expose the pool.
-        yield db
+#: Kept under its old name so the panes that already import it from here keep
+#: working; the connection itself now lives in a Qt-free module, because the
+#: drill-down pane needs the same borrowed connection and must not import a
+#: window to get one (#366).
+_WorkerDatabase = WorkerDatabase
+_worker_database = worker_database
 
 
 class _QueryWorker(QThread):
@@ -886,27 +873,45 @@ class GuiResearchBrowser(QWidget):
         return panel
 
     def _build_hands_pane(self, muted: str) -> QWidget:
-        """Pane 3: the drill-down hands behind the selected result row."""
+        """Pane 3: the hands behind the selected result row.
+
+        Two pages, because a row from a comparison is not the same object as a
+        row from a single-population answer. One population has one hand list;
+        a comparison row has four, and the pane that shows them has to name
+        each one rather than merge them (#366).
+        """
         hands_pane = QWidget()
         hands_layout = QVBoxLayout(hands_pane)
-        hands_layout.setContentsMargins(4, 0, 0, 0)
+        hands_layout.setContentsMargins(0, 0, 0, 0)
+        self.hands_stack = QStackedWidget()
+
+        single_page = QWidget()
+        single_layout = QVBoxLayout(single_page)
+        single_layout.setContentsMargins(4, 0, 0, 0)
         self.drill_title = QLabel(_("Matching hands"))
         self.drill_title.setStyleSheet(f"font-weight: bold; color: {muted}; font-size: 11px; text-transform: uppercase;")
-        hands_layout.addWidget(self.drill_title)
+        single_layout.addWidget(self.drill_title)
         self.drill_mode_combo = QComboBox()
         self.drill_mode_combo.addItems([_("All hands in the population"), _("Only the hands where the metric fired")])
-        hands_layout.addWidget(self.drill_mode_combo)
+        single_layout.addWidget(self.drill_mode_combo)
         self.drill_table = QTableWidget()
         self.drill_table.setSortingEnabled(True)
         self.drill_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
         self.drill_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         self.drill_table.verticalHeader().hide()
         self.drill_table.itemDoubleClicked.connect(self._open_hand)
-        hands_layout.addWidget(self.drill_table, 1)
+        single_layout.addWidget(self.drill_table, 1)
         self.drill_note = QLabel(_("Double-click a result row to load its hands."))
         self.drill_note.setStyleSheet(f"color: {muted}; font-size: 11px;")
         self.drill_note.setWordWrap(True)
-        hands_layout.addWidget(self.drill_note)
+        single_layout.addWidget(self.drill_note)
+        self.hands_stack.addWidget(single_page)
+
+        self.source_hands = SourceHandsPane(self.db, self)
+        self.source_hands.hand_activated.connect(lambda hand_id: self._open_in_replayer([hand_id]))
+        self.hands_stack.addWidget(self.source_hands)
+
+        hands_layout.addWidget(self.hands_stack, 1)
         return hands_pane
 
     def _add_default_filters(self) -> None:
@@ -1159,6 +1164,11 @@ texture*. The label already existed; nothing called it. Technical names
             # undo a filter the user deleted, and the summary above the table --
             # which reads those same controls -- would describe another query.
             self._current_query = rviews.query(spec, preset["filters"], replace_filters=True)
+        if self.compare_check.isChecked():
+            # The comparison replaces the view, so the population a row drills
+            # into is the preset's own -- the query ``run_comparison`` runs
+            # twice -- and not the shaped view's.
+            self._current_query = rb.preset_to_query(preset)
         self._start_task(self._task_for(preset))
 
     def _task_for(self, preset: dict[str, Any]) -> Any:
@@ -1329,13 +1339,14 @@ texture*. The label already existed; nothing called it. Technical names
         self._has_run = True
         self.empty_state.setVisible(False)
         self._last_result = comparison
-        # A comparison row contains two populations. There is no single set of
-        # hands to drill into, so leave the drill pane explicit rather than
-        # silently opening the unfiltered question behind the comparison.
-        self._current_query = None
-        self.drill_table.setRowCount(0)
-        self.drill_table.setColumnCount(0)
-        self.drill_note.setText(_("Run without comparison to inspect the hands behind a row."))
+        # A comparison row contains two populations -- which is a reason to
+        # show both, not a reason to show neither. The row's query is kept so
+        # double-clicking it opens the hero and field hands side by side,
+        # instead of asking the reader to rerun the question (#366).
+        self.hands_stack.setCurrentWidget(self.source_hands)
+        self.source_hands.clear(
+            _("Double-click a row to see your hands and the field's, side by side."),
+        )
         headings = [rlabels.dimension_label(name) for name in comparison.group_by]
         headings += [_("you"), _("your sample"), _("the field"), _("its sample"), _("gap")]
         self.result_table.setRowCount(len(comparison.rows))
@@ -1574,7 +1585,38 @@ texture*. The label already existed; nothing called it. Technical names
         group_item = self.result_table.item(row, 0)
         group: dict[str, Any] = group_item.data(Qt.ItemDataRole.UserRole) if group_item else {}
         self._current_group = dict(group or {})
+        if isinstance(self._last_result, rb.Comparison):
+            self._load_comparison_drill(row)
+            return
+        self.hands_stack.setCurrentIndex(0)
         self._load_drill(group=self._current_group)
+
+    def _load_comparison_drill(self, row: int) -> None:
+        """Open one comparison row's four hand sets, hero and field apart.
+
+        The sizes come off the rendered row rather than from the database: the
+        comparison has already counted all four, and asking again would be four
+        queries to learn what is on screen.
+        """
+        if self._current_query is None or not isinstance(self._last_result, rb.Comparison):
+            return
+        if row < 0 or row >= len(self._last_result.rows):
+            return
+        comparison_row = self._last_result.rows[row]
+        label = ", ".join(
+            f"{rlabels.dimension_label(name)}={rb.value_label(name, value)}"
+            for name, value in sorted(comparison_row.group.items())
+        )
+        context = rdrill.context_from_comparison(
+            self._current_query,
+            comparison_row.group,
+            label=label or rlabels.dimension_label(self._last_result.metric),
+        )
+        self.hands_stack.setCurrentWidget(self.source_hands)
+        self.source_hands.set_context(
+            context,
+            rdrill.counts_from_comparison_row(comparison_row),
+        )
 
     def _show_row_group(self, row: int, _column: int) -> None:
         """Single click: say which slice the row stands for, before the drill."""
@@ -1591,6 +1633,7 @@ texture*. The label already existed; nothing called it. Technical names
     def _load_drill(self, group: dict[str, Any]) -> None:
         if self._current_query is None:
             return
+        self.hands_stack.setCurrentIndex(0)
         numerator = self.drill_mode_combo.currentIndex() == 1
         self._drill_serial += 1
         self.drill_note.setText(_("Loading hands…"))
@@ -1873,6 +1916,7 @@ texture*. The label already existed; nothing called it. Technical names
             self._worker.wait(2000)
         if self._drill_worker is not None and self._drill_worker.isRunning():
             self._drill_worker.wait(2000)
+        self.source_hands.stop()
         if self._owns_db and self.db is not None:
             with contextlib.suppress(Exception):
                 self.db.disconnect()

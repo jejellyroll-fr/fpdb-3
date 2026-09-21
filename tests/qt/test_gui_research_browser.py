@@ -101,7 +101,7 @@ def test_running_a_query_renders_rows_and_sample(browser, qtbot) -> None:
     assert "decisions" in headers and "numerator" in headers and "frequency" in headers
 
 
-def test_comparison_renders_both_samples_and_disables_ambiguous_drill(browser, qtbot) -> None:
+def test_comparison_renders_both_samples_and_offers_both_sides_of_the_drill(browser, qtbot) -> None:
     browser.metric_combo.setCurrentIndex(browser.metric_combo.findData("fold_frequency"))
     browser.group_edit.setText("street")
     browser.compare_check.setChecked(True)
@@ -112,8 +112,54 @@ def test_comparison_renders_both_samples_and_disables_ambiguous_drill(browser, q
     ]
     assert {"you", "your sample", "the field", "its sample", "gap"} <= set(headers)
     assert browser.result_table.rowCount() > 0
-    assert browser._current_query is None
-    assert "without comparison" in browser.drill_note.text()
+    # A comparison row has two populations, so it keeps its query and shows
+    # both rather than asking for a rerun without the comparison (#366).
+    assert browser._current_query is not None
+    assert browser.hands_stack.currentWidget() is browser.source_hands
+    assert "side by side" in browser.source_hands.note_label.text()
+
+
+def test_a_comparison_row_opens_hero_and_field_hands_separately(browser, qtbot) -> None:
+    browser.metric_combo.setCurrentIndex(browser.metric_combo.findData("fold_frequency"))
+    browser.group_edit.setText("street")
+    browser.compare_check.setChecked(True)
+    _run_and_wait(qtbot, browser)
+    row = next(
+        index
+        for index in range(browser.result_table.rowCount())
+        if browser._last_result.rows[index].hero_opportunities
+        and browser._last_result.rows[index].field_opportunities
+    )
+
+    browser._on_result_clicked(browser.result_table.item(row, 0))
+    pane = browser.source_hands
+    qtbot.waitUntil(lambda: pane.page is not None and pane.table.rowCount() > 0, timeout=15000)
+
+    comparison_row = browser._last_result.rows[row]
+    assert pane.page.side == "hero"
+    assert pane.page.total_matches == comparison_row.hero_opportunities
+    labels = [button.text() for button in pane._target_buttons.values()]
+    assert [label.split(" (")[0] for label in labels] == [
+        "Your population", "Your actions", "Field population", "Field actions",
+    ]
+
+    pane.select_target("field")
+    qtbot.waitUntil(lambda: pane.page is not None and pane.page.side == "field", timeout=15000)
+    assert pane.page.total_matches == comparison_row.field_opportunities
+
+
+def test_leaving_comparison_returns_the_single_population_hand_list(browser, qtbot) -> None:
+    browser.metric_combo.setCurrentIndex(browser.metric_combo.findData("fold_frequency"))
+    browser.group_edit.setText("street")
+    browser.compare_check.setChecked(True)
+    _run_and_wait(qtbot, browser)
+    assert browser.hands_stack.currentWidget() is browser.source_hands
+
+    browser.compare_check.setChecked(False)
+    _run_and_wait(qtbot, browser)
+    browser._on_result_clicked(browser.result_table.item(0, 0))
+
+    assert browser.hands_stack.currentIndex() == 0
 
 
 def test_comparison_is_offered_for_every_metric(browser) -> None:

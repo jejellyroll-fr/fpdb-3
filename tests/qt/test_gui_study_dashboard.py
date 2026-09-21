@@ -185,3 +185,61 @@ def test_dashboard_switches_hand_state_dimension_and_cross_filters_category(
 
     assert dashboard.model.state.cross_filters[0].name == expected_name
     assert dashboard.model.state.cross_filters[0].value == expected_value
+
+
+def test_source_hands_open_both_sides_of_the_panel_population(
+    qtbot,
+    dashboard_db: Database,
+    tmp_path,
+) -> None:
+    """A study panel drills into hero and field without leaving comparison (#366)."""
+    explorer = StudyExplorerModel(builtin_studies(), tmp_path / "history.json")
+    selection = explorer.open_study("srp_pfr_ip_flop", remember=False)
+    dashboard = GuiStudyDashboard(db=dashboard_db, selection=selection)
+    qtbot.addWidget(dashboard)
+
+    pane = dashboard.source_hands
+    qtbot.waitUntil(lambda: pane.page is not None, timeout=15000)
+    hero_query = dashboard.model.side_query("overview", True)
+    field_query = dashboard.model.side_query("overview", False)
+    context = dashboard.model.drill_context("overview")
+
+    assert context.side_query("hero").filters == hero_query.filters
+    assert context.side_query("field").filters == field_query.filters
+    assert context.sides_agree()
+    assert pane.current_target.side == "hero"
+
+    pane.select_target("field")
+    qtbot.waitUntil(lambda: pane.page is not None and pane.page.side == "field", timeout=15000)
+    assert pane.page.side == "field"
+    dashboard.close()
+
+
+def test_a_visual_selection_reaches_both_sides_of_the_source_hands(
+    qtbot,
+    dashboard_db: Database,
+    tmp_path,
+) -> None:
+    """Clicking a bar narrows hero and field identically, not only the chart (#366)."""
+    explorer = StudyExplorerModel(builtin_studies(), tmp_path / "history.json")
+    selection = explorer.open_study("srp_defender_oop_flop", remember=False)
+    dashboard = GuiStudyDashboard(db=dashboard_db, selection=selection)
+    qtbot.addWidget(dashboard)
+
+    qtbot.waitUntil(lambda: "Hero:" in dashboard.sample_label.text(), timeout=15000)
+    chart = dashboard._distribution_widgets["overview"]
+    expected = chart._bins[0].filter_value
+    chart.click_bin(0)
+
+    qtbot.waitUntil(
+        lambda: dashboard.source_hands._context is not None
+        and dashboard.source_hands._context.side_query("hero").filters.get("response") == expected,
+        timeout=15000,
+    )
+    context = dashboard.source_hands._context
+    assert context.side_query("field").filters["response"] == expected
+    assert context.sides_agree()
+
+    dashboard.remove_cross_filter("response")
+    assert "response" not in dashboard.source_hands._context.side_query("field").filters
+    dashboard.close()

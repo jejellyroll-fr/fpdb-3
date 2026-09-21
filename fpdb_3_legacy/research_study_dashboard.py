@@ -9,6 +9,7 @@ from typing import Any, Final
 
 from .analytics_query import FILTERS, Query
 from .hand_state_composition import DIMENSIONS as COMPOSITION_DIMENSIONS
+from .research_drilldown import DrillContext
 from .research_studies import CompiledStudyPanel, StudySpec, execute_panel
 from .research_study_explorer import StudySelection
 
@@ -131,6 +132,23 @@ class StudyDashboardModel:
         """The exact Hero or Field query used by a comparison panel."""
         query = self.panel_query(panel_id)
         return replace(query, filters={**query.filters, "hero": hero})
+
+    def drill_context(self, panel_id: str | None = None) -> DrillContext:
+        """The Hero and Field hands behind one panel, as one re-askable context.
+
+        The panel query already carries the study population, the variables and
+        every visible cross-filter, so a selection made on a chart reaches both
+        sides of the drill by the same route the panel itself took -- and the
+        sides then differ in ``hero`` alone (#366).
+        """
+        chosen = panel_id or self._state.active_panel
+        compiled = self.panel(chosen)
+        crosses = ", ".join(item.label for item in self._state.cross_filters)
+        title = self.panel_titles().get(chosen, chosen)
+        return DrillContext(
+            query=compiled.query,
+            label=f"{self._study.title} · {title}" + (f" · {crosses}" if crosses else ""),
+        )
 
     def set_active_panel(self, panel_id: str) -> None:
         if panel_id not in self.panel_ids():
@@ -260,5 +278,6 @@ __all__ = [
     "CrossFilter",
     "DashboardComparison",
     "DashboardState",
+    "DrillContext",
     "StudyDashboardModel",
 ]

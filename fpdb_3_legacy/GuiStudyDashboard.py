@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import contextlib
 from typing import Any
 
 from PySide6.QtCore import Qt, QThread, Signal
@@ -20,11 +21,12 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from fpdb_3_legacy.GuiResearchBrowser import _worker_database
+from fpdb_3_legacy.GuiDrillDown import SourceHandsPane
 from fpdb_3_legacy.GuiResearchDistributions import DistributionChartWidget
 from fpdb_3_legacy.GuiResearchHandStrength import HandStrengthChartWidget
 from fpdb_3_legacy.GuiResearchMatrices import MatrixHeatmapWidget
 from fpdb_3_legacy.research_distributions import build_distribution
+from fpdb_3_legacy.research_drilldown import SIDE_FIELD, SIDE_HERO
 from fpdb_3_legacy.research_matrices import POSITION_LABELS, build_matrix
 from fpdb_3_legacy.research_study_dashboard import (
     COMPARISON_FIELD,
@@ -35,6 +37,7 @@ from fpdb_3_legacy.research_study_dashboard import (
     StudyDashboardModel,
 )
 from fpdb_3_legacy.research_study_explorer import StudySelection
+from fpdb_3_legacy.research_worker_db import worker_database
 from fpdb_3_legacy.ring_stats.styles import get_theme_palette
 
 
@@ -53,7 +56,7 @@ class _DashboardWorker(QThread):
 
     def run(self) -> None:
         try:
-            with _worker_database(self._db) as db:
+            with worker_database(self._db) as db:
                 result = self._task(db)
         except Exception as exc:  # noqa: BLE001 - worker boundary reports failures in the UI.
             self.failed.emit(str(exc), self._serial, self._fingerprint)
@@ -97,6 +100,7 @@ class GuiStudyDashboard(QWidget):
         self._matrix_widgets: dict[str, MatrixHeatmapWidget] = {}
         self._hand_strength_widgets: dict[str, HandStrengthChartWidget] = {}
         self._variable_edits: dict[str, QLineEdit] = {}
+        self._replayers: list[Any] = []
         self._build_ui()
         self._load_active_panel()
 
@@ -156,6 +160,12 @@ class GuiStudyDashboard(QWidget):
         self.filter_row.addStretch(1)
         layout.addLayout(self.filter_row)
 
+        # Built before the tabs, because adding the first tab fires
+        # ``currentChanged`` and the panel that loads immediately re-points
+        # the hands pane.
+        self.source_hands = SourceHandsPane(self.db, self)
+        self.source_hands.hand_activated.connect(self._open_in_replayer)
+
         self.tabs = QTabWidget()
         self.tabs.currentChanged.connect(self._panel_changed)
         for panel in self.model.study.panels:
@@ -211,7 +221,56 @@ class GuiStudyDashboard(QWidget):
                 self.tabs.setTabEnabled(index, False)
                 self.tabs.setTabToolTip(index, compiled.unavailable_reason or "Panel unavailable")
                 status.setText(f"Unavailable: {compiled.unavailable_reason}")
+        layout.addWidget(self.tabs, 1)
+        # The hands live below every panel rather than inside one: a selection
+        # made on a chart and a row picked from a table are the same question
+        # about the same population, and the reader should not have to find a
+        # different place to ask it (#366).
+        layout.addWidget(self.source_hands, 1)
         self._render_cross_filters()
+
+    def _refresh_drill_context(self) -> None:
+        """Point the hands pane at whatever the dashboard is currently showing.
+
+        Both sides come from the panel's own query, so every narrowing the
+        page carries -- the study population, the variables, each visible
+        cross-filter -- reaches Hero and Field identically, and they differ in
+        the population identity alone.
+        """
+        panel_id = self.model.state.active_panel
+        try:
+            context = self.model.drill_context(panel_id)
+        except (ValueError, KeyError) as exc:
+            self.source_hands.clear(f"Source hands unavailable: {exc}")
+            return
+        side = SIDE_FIELD if self.model.state.comparison == COMPARISON_FIELD else SIDE_HERO
+        self.source_hands.set_context(context, default_side=side)
+
+    def _open_in_replayer(self, hand_id: int) -> None:
+        """Double-click a source hand: the existing replayer, unchanged."""
+        try:
+            from fpdb_3_legacy import GuiReplayer
+
+            replayer = GuiReplayer.GuiReplayer(
+                self.conf, self.sql, self.main_window, [int(hand_id)], db=self.db,
+            )
+            replayer.play_hand(0)
+            replayer.raise_()
+            replayer.activateWindow()
+            self._replayers.append(replayer)
+        except Exception as exc:  # noqa: BLE001 - a replayer failure must not break the study.
+            self.source_hands.note_label.setText(f"Unable to open hand {hand_id}: {exc}")
+
+    def closeEvent(self, event) -> None:  # noqa: N802 - Qt naming.
+        """Stop waiting for anything still running before the page goes away."""
+        self.source_hands.stop()
+        for worker in list(self._workers):
+            if worker.isRunning():
+                worker.wait(2000)
+        if self._owns_db and self.db is not None:
+            with contextlib.suppress(Exception):
+                self.db.disconnect()
+        super().closeEvent(event)
 
     @staticmethod
     def _segment_label(segment: str) -> str:
@@ -277,6 +336,10 @@ class GuiStudyDashboard(QWidget):
             self.tabs.blockSignals(True)
             self.tabs.setCurrentIndex(index)
             self.tabs.blockSignals(False)
+        # Every route into a panel comes through here -- opening a tab,
+        # applying a variable, adding or removing a cross-filter -- so the
+        # hands pane is re-pointed once, where the panel itself is.
+        self._refresh_drill_context()
         self._run_panel(panel_id)
 
     def _run_panel(self, panel_id: str) -> None:
