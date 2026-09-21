@@ -222,9 +222,13 @@ class Database(
     PGSQL = 3
     SQLITE = 4
 
-    # Global pool for worker connections shared across all Database instances
-    # to strictly bound the maximum concurrent DB connections from workers
-    _worker_conn_pool: queue.Queue[Any] = queue.Queue()
+    # The semaphore is global on purpose: it bounds how many worker
+    # connections this *process* holds open at once, which is a limit about
+    # the process rather than about any one database. The pool is not, and
+    # used to be: a pooled connection is a connection to a particular
+    # database, so one shared queue could hand a worker a cursor on somebody
+    # else's data as soon as a process held two Database objects (#368). Each
+    # instance now keeps its own, created in ``__init__``.
     _worker_conn_semaphore = threading.Semaphore(4)
 
     hero_hudstart_def = "1999-12-31"  # default for length of Hero's stats in HUD
@@ -284,6 +288,7 @@ class Database(
         # backend-defined runtime interface.
         self.connection: Any = None
         self.cursor: Any = None
+        self._worker_conn_pool: queue.Queue[Any] = queue.Queue()
         self.__connected = False
         self.wrongDbVersion = False
         self.settings = {}

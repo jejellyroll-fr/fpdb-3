@@ -55,6 +55,7 @@ from .hand_state import (
 from .hud_situation import POT_TYPES, STREETS
 from .i18n import N_
 from .sizing_buckets import DEFAULT_BUCKETS
+from .spr_buckets import SPR_BUCKET_LABELS, SPR_BUCKETS
 
 
 @dataclass(frozen=True)
@@ -114,6 +115,7 @@ FILTER_LABELS: Final[dict[str, str]] = {
     "effective_stack": N_("Effective stack (chips)"),
     "stack_bucket": N_("Stack depth"),
     "spr": N_("SPR"),
+    "spr_bucket": N_("SPR band"),
     "players_in_hand": N_("Players in the hand"),
     "multiway": N_("Multiway"),
     # -- street / pot -------------------------------------------------------
@@ -209,6 +211,7 @@ FILTER_DESCRIPTIONS: Final[dict[str, str]] = {
     "effective_stack": N_("The smaller of the two stacks, in chips."),
     "stack_bucket": N_("Short, medium, deep or very deep stacks."),
     "spr": N_("Stack-to-pot ratio before the action."),
+    "spr_bucket": N_("The same ratio as the bands a player thinks in."),
     "players_in_hand": N_("How many players were still in the hand."),
     "multiway": N_("Three or more players saw the decision."),
     "street": N_("Preflop, flop, turn or river."),
@@ -397,6 +400,11 @@ def _stack_bucket_choices() -> tuple[Choice, ...]:
     )
 
 
+def _spr_bucket_choices() -> tuple[Choice, ...]:
+    """The SPR bands, named from the module that also writes their SQL."""
+    return tuple(Choice(name, N_(SPR_BUCKET_LABELS[name])) for name in SPR_BUCKETS)
+
+
 def _situation_group_choices() -> tuple[Choice, ...]:
     """The situation families of the rule table, in table order."""
     labels = {
@@ -494,6 +502,7 @@ FILTER_CHOICES: Final[dict[str, tuple[Choice, ...]]] = {
     "blocker_none": tuple(Choice(name, N_(name.replace("_", " "))) for name in BLOCKER_CATEGORIES),
     "sizing_bucket": _bucket_choices(),
     "facing_sizing_bucket": _bucket_choices(),
+    "spr_bucket": _spr_bucket_choices(),
 }
 
 # The human name of each engine filter group (``research_browser.FILTER_GROUPS``).
@@ -554,6 +563,7 @@ DIMENSION_LABELS: Final[dict[str, str]] = {
     "stack_bucket": N_("Stack depth"),
     "effective_stack_bb": N_("Effective stack"),
     "spr": N_("SPR"),
+    "spr_bucket": N_("SPR band"),
     "pot_type": N_("Pot type"),
     "role": N_("Role"),
     "response": N_("Response"),
@@ -601,6 +611,7 @@ BEGINNER_DIMENSIONS: Final[tuple[str, ...]] = (
     "nutness",
     "stack_bucket",
     "effective_stack_bb",
+    "spr_bucket",
     "in_position",
     "multiway",
     "all_in",
@@ -614,6 +625,7 @@ DIMENSION_CHOICES: Final[dict[str, tuple[Choice, ...]]] = {
     "hand_state_street": tuple(Choice(name, N_(name)) for name in STREETS),
     "sizing_bucket": _bucket_choices(),
     "facing_sizing_bucket": _bucket_choices(),
+    "spr_bucket": _spr_bucket_choices(),
 }
 
 

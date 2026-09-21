@@ -83,9 +83,13 @@ class GuiStudyExplorer(QWidget):
         context = QGroupBox("Context (applied when you open a study)")
         context_layout = QFormLayout(context)
         self.game_combo = QComboBox()
+        # The entries come from the shipped studies themselves, keyed by the
+        # game token the database stores. The old list offered "Omaha" as
+        # ``omaha``, which is not a category any hand carries, so the filter
+        # could only ever match nothing (#368).
         self.game_combo.addItem("Any game", None)
-        self.game_combo.addItem("Hold'em", "holdem")
-        self.game_combo.addItem("Omaha", "omaha")
+        for game in self.model.games():
+            self.game_combo.addItem(f"{game.label} ({game.study_count})", game.id)
         self.format_combo = QComboBox()
         self.format_combo.addItem("Any format", None)
         self.format_combo.addItem("Cash games", False)
@@ -121,6 +125,9 @@ class GuiStudyExplorer(QWidget):
         ):
             context_layout.addRow(label, widget)
             widget.currentIndexChanged.connect(self._refresh_selection)
+        # A game is not only context for the study that opens: it decides
+        # which studies exist at all, so it redraws the spots and the list.
+        self.game_combo.currentIndexChanged.connect(self._game_changed)
         context_layout.addRow("Player", self.player_edit)
         context_layout.addRow("Stake (BB)", stake_row)
         context_layout.addRow("Dates", date_row)
@@ -203,12 +210,28 @@ class GuiStudyExplorer(QWidget):
             item = self.category_grid.takeAt(0)
             if item is not None and item.widget() is not None:
                 item.widget().deleteLater()
-        for index, category in enumerate(self.model.categories()):
+        for index, category in enumerate(self.model.categories(self._game())):
             button = QPushButton(f"{category.label}\n{category.study_count} studies")
             button.setToolTip(category.description)
             button.setMinimumHeight(54)
+            button.setEnabled(category.study_count > 0)
+            if not category.study_count:
+                button.setToolTip(f"{category.description}\nNo study covers this spot for the chosen game.")
             button.clicked.connect(lambda _checked=False, category_id=category.id: self._choose_category(category_id))
             self.category_grid.addWidget(button, index // 3, index % 3)
+
+    def _game(self) -> str | None:
+        """The game currently chosen, or ``None`` for every game."""
+        return self.game_combo.currentData()
+
+    def _game_changed(self) -> None:
+        """A different game: different spots, different studies."""
+        if self._category_id is not None and not self.model.studies_for_category(
+            self._category_id, self._game(),
+        ):
+            self._category_id = None
+        self._refresh_categories()
+        self._refresh_studies()
 
     def _choose_category(self, category_id: str) -> None:
         self._category_id = category_id
@@ -217,7 +240,7 @@ class GuiStudyExplorer(QWidget):
     def _refresh_studies(self) -> None:
         selected_id = self._selected.id if self._selected else None
         self.study_list.clear()
-        studies = self.model.search(self.search_edit.text(), self._category_id)
+        studies = self.model.search(self.search_edit.text(), self._category_id, self._game())
         for study in studies:
             item = QListWidgetItem(study.title)
             item.setData(256, study.id)

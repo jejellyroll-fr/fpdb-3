@@ -41,6 +41,7 @@ from .hand_state import BLOCKER_BITS, DRAW_BITS
 from .holdem_classes import class_ids as holdem_class_ids
 from .holdem_classes import holdem_class_expression
 from .sizing_buckets import bucket_case_expression
+from .spr_buckets import SPR_BUCKETS, spr_bucket_expression
 
 # ---------------------------------------------------------------------------
 # Sources: the tables a query can join, and how.
@@ -305,6 +306,9 @@ FILTERS: Final[dict[str, _Filter]] = {
     "effective_stack": _Filter("A.effectiveStack", ("A",), "range"),
     "stack_bucket": _Filter("SI.stackBucket", ("SI",), "set"),
     "spr": _Filter("A.sprBefore", ("A",), "range"),
+    # The banded form of the same column: a panel groups by bands, a query
+    # narrows by them, and both read the one CASE expression (#368).
+    "spr_bucket": _Filter(spr_bucket_expression("A."), ("A",), "set", SPR_BUCKETS),
     "players_in_hand": _Filter("A.playersInHand", ("A",), "range"),
     "multiway": _Filter("SI.multiway", ("SI",), "bool"),
     # -- street / pot ------------------------------------------------------
@@ -619,6 +623,7 @@ DIMENSIONS: Final[dict[str, tuple[str, tuple[str, ...]]]] = {
     "stack_bucket": ("SI.stackBucket", ("SI",)),
     "effective_stack_bb": ("A.effectiveStackBB", ("A",)),
     "spr": ("A.sprBefore", ("A",)),
+    "spr_bucket": (spr_bucket_expression("A."), ("A",)),
     "pot_type": ("SI.potType", ("SI",)),
     "role": ("SI.role", ("SI",)),
     "response": ("SI.response", ("SI",)),

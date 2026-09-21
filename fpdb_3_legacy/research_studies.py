@@ -30,6 +30,7 @@ from .analytics_query import (
     compile_query,
     run_query,
 )
+from .hand_state import CLASSIFIED_GAMES
 from .hand_state_composition import DIMENSIONS as COMPOSITION_DIMENSIONS
 from .hand_state_composition import compose
 from .holdem_ranges import build_range
@@ -367,12 +368,6 @@ class StudySpec:
         except StopIteration:
             raise KeyError(f"Unknown panel {panel_id!r}; known: {[panel.id for panel in self.panels]}") from None
         query = self._panel_query(spec)
-        unavailable_reason = None
-        if (spec.holdem_only or spec.kind == "range_grid") and self.game is not None:
-            if "holdem" not in self.game.lower() or "omaha" in self.game.lower():
-                unavailable_reason = (
-                    f"{spec.title} is a Hold'em-only panel and is unavailable for game {self.game!r}"
-                )
         return CompiledStudyPanel(
             study_id=self.id,
             panel_id=spec.id,
@@ -382,7 +377,7 @@ class StudySpec:
             adapter=_adapter_for(spec.kind),
             dimension=spec.dimension,
             min_sample=spec.min_sample if spec.min_sample is not None else (self.min_sample or 0),
-            unavailable_reason=unavailable_reason,
+            unavailable_reason=panel_unavailable_reason(spec, self.game),
         )
 
     def panels_compiled(self) -> tuple[CompiledStudyPanel, ...]:
@@ -475,6 +470,40 @@ class StudySpec:
             )
         if panel.kind == "range_grid" and not panel.holdem_only:
             raise StudyValidationError(f"{panel.id}: range_grid must declare holdem_only=true")
+
+
+def panel_unavailable_reason(spec: StudyPanelSpec, game: str | None) -> str | None:
+    """Why a valid panel cannot answer for a given game, or ``None``.
+
+    Two rules, both about not showing a Hold'em answer for a four-card hand:
+
+    * a 13x13 starting-hand grid describes two hole cards, so it has no
+      meaning for Omaha -- there is no 13x13 representation of a four-card
+      holding to fall back on (#368);
+    * a hand-state panel asks the classifier, and the classifier is explicit
+      about which games it reads. Rather than restate that rule here, the
+      check is membership of :data:`hand_state.CLASSIFIED_GAMES`, so a variant
+      the classifier learns later becomes available without a second edit.
+
+    An undeclared game (``None``) means the study did not claim one, and a
+    panel is not disabled on a guess.
+    """
+    if game is None:
+        return None
+    if spec.holdem_only or spec.kind == "range_grid":
+        lowered = game.lower()
+        if "holdem" not in lowered or "omaha" in lowered:
+            return (
+                f"{spec.title} reads two hole cards, so it is a Hold'em-only panel "
+                f"and is unavailable for game {game!r}"
+            )
+    if spec.kind == "hand_strength" and game not in CLASSIFIED_GAMES:
+        return (
+            f"{spec.title} needs the postflop hand-state classifier, which reads "
+            f"{sorted(CLASSIFIED_GAMES)} only: a {game!r} hand is never classified by "
+            "its best two cards"
+        )
+    return None
 
 
 def _adapter_for(kind: str) -> str:
@@ -637,5 +666,6 @@ __all__ = [
     "builtin_studies",
     "load_study_packs",
     "load_study_registry",
+    "panel_unavailable_reason",
     "study_library_dir",
 ]

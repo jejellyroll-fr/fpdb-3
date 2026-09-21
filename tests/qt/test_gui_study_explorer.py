@@ -42,6 +42,7 @@ def test_search_finds_common_poker_alias(explorer, qtbot) -> None:
 
 
 def test_category_navigation_is_generated_from_registry(explorer) -> None:
+    explorer.game_combo.setCurrentIndex(explorer.game_combo.findData("holdem"))
     buttons = explorer.category_box.findChildren(type(explorer.open_button))
     next(button for button in buttons if button.text().startswith("3-bet Pots")).click()
 
@@ -49,13 +50,33 @@ def test_category_navigation_is_generated_from_registry(explorer) -> None:
     assert all("3-bet pot" in explorer.study_list.item(row).text().lower() for row in range(explorer.study_list.count()))
 
 
-def test_unsupported_game_is_explained_before_open(explorer) -> None:
-    _select(explorer, "preflop_rfi")
-    explorer.game_combo.setCurrentText("Omaha")
+def test_choosing_omaha_lists_plo_studies_and_no_holdem_only_ones(explorer) -> None:
+    """A PLO player sees a PLO hierarchy, not an empty Hold'em one (#368)."""
+    explorer.game_combo.setCurrentIndex(explorer.game_combo.findData("omahahi"))
+    listed = [
+        explorer.model.registry.get(str(explorer.study_list.item(row).data(256)))
+        for row in range(explorer.study_list.count())
+    ]
 
-    assert not explorer.open_button.isEnabled()
-    assert "Unavailable" in explorer.availability_label.text()
-    assert "holdem" in explorer.availability_label.text().lower()
+    assert listed
+    assert all(study.game == "omahahi" for study in listed)
+    assert any(study.id.startswith("plo_srp") for study in listed)
+    spots = {
+        button.text().split("\n", 1)[0]
+        for button in explorer.category_box.findChildren(type(explorer.open_button))
+        if button.isEnabled()
+    }
+    assert {"Preflop", "Single-Raised Pots", "3-bet Pots"} <= spots
+
+
+def test_the_game_list_offers_the_tokens_the_database_stores(explorer) -> None:
+    """The old list offered 'omaha', which no hand is ever categorised as."""
+    values = [explorer.game_combo.itemData(index) for index in range(explorer.game_combo.count())]
+
+    assert None in values
+    assert "holdem" in values
+    assert "omahahi" in values
+    assert "omaha" not in values
 
 
 def test_open_emits_study_with_inherited_context_and_adds_recent(explorer, qtbot) -> None:

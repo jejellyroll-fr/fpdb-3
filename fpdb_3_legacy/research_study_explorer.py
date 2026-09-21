@@ -70,6 +70,34 @@ class StudyCategory:
 
 
 @dataclass(frozen=True)
+class StudyGame:
+    """One game the shipped study library covers, for the landing page."""
+
+    id: str
+    label: str
+    study_count: int
+
+
+#: The games the shipped packs declare, named the way a player says them
+#: rather than the way the database stores them. The key is the stored
+#: ``Gametypes.category`` token, so choosing one narrows the query as well as
+#: the list; an unlisted token falls back to its own spelling rather than
+#: being hidden.
+GAME_LABELS: Final[dict[str, str]] = {
+    "holdem": "Hold'em",
+    "omahahi": "Pot-Limit Omaha",
+    "omahahilo": "Omaha Hi/Lo",
+    "5_omahahi": "5-card PLO",
+    "6_omahahi": "6-card PLO",
+}
+
+
+def game_label(game: str) -> str:
+    """The readable name of one stored game category."""
+    return GAME_LABELS.get(game, game.replace("_", " ").title())
+
+
+@dataclass(frozen=True)
 class StudySelection:
     """A study opened with the context the user chose on the landing page."""
 
@@ -145,9 +173,34 @@ class StudyExplorerModel:
         self.registry = registry or builtin_studies()
         self.history = StudyHistory(state_path)
 
-    def categories(self) -> tuple[StudyCategory, ...]:
-        counts: dict[str, int] = {}
+    def games(self) -> tuple[StudyGame, ...]:
+        """The games the shipped studies declare, with how many each has.
+
+        A study declares the game it is about, so the landing page can offer
+        the ones this library actually has rather than a hard-coded pair of
+        names. Studies that declare no game apply to any of them and are
+        counted in every entry (#368).
+        """
+        declared: dict[str, int] = {}
         for study in self.registry.studies:
+            if study.game:
+                declared[study.game] = declared.get(study.game, 0) + 1
+        shared = sum(1 for study in self.registry.studies if not study.game)
+        return tuple(
+            StudyGame(id=game, label=game_label(game), study_count=count + shared)
+            for game, count in sorted(declared.items(), key=lambda item: (-item[1], item[0]))
+        )
+
+    def studies_for_game(self, game: str | None) -> tuple[StudySpec, ...]:
+        """Every study that applies to one game, or all of them for ``None``."""
+        if game in (None, "", "any"):
+            return self.registry.studies
+        return tuple(study for study in self.registry.studies if not study.game or study.game == game)
+
+    def categories(self, game: str | None = None) -> tuple[StudyCategory, ...]:
+        studies = self.studies_for_game(game)
+        counts: dict[str, int] = {}
+        for study in studies:
             counts[_category_id(study)] = counts.get(_category_id(study), 0) + 1
         return tuple(
             StudyCategory(
@@ -159,14 +212,21 @@ class StudyExplorerModel:
             for category_id in _CATEGORY_ORDER
         )
 
-    def studies_for_category(self, category_id: str) -> tuple[StudySpec, ...]:
-        return tuple(study for study in self.registry.studies if _category_id(study) == category_id)
+    def studies_for_category(self, category_id: str, game: str | None = None) -> tuple[StudySpec, ...]:
+        return tuple(
+            study for study in self.studies_for_game(game) if _category_id(study) == category_id
+        )
 
-    def search(self, text: str = "", category_id: str | None = None) -> tuple[StudySpec, ...]:
+    def search(
+        self,
+        text: str = "",
+        category_id: str | None = None,
+        game: str | None = None,
+    ) -> tuple[StudySpec, ...]:
         wanted = [_search_key(token) for token in text.split() if token.strip()]
-        studies = self.registry.studies
+        studies = self.studies_for_game(game)
         if category_id is not None:
-            studies = self.studies_for_category(category_id)
+            studies = self.studies_for_category(category_id, game)
         matches = []
         for study in studies:
             haystack = " ".join(
@@ -241,11 +301,14 @@ class StudyExplorerModel:
 
 
 __all__ = [
+    "GAME_LABELS",
     "GLOBAL_CONTEXT_FILTERS",
     "HISTORY_VERSION",
     "MAX_RECENT",
     "StudyCategory",
     "StudyExplorerModel",
+    "StudyGame",
     "StudyHistory",
     "StudySelection",
+    "game_label",
 ]

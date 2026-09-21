@@ -9,6 +9,45 @@ Nothing here is Omaha-only in the engine. The situations, the board features and
 the hand states are derived for every game fpdb stores — an Omaha database is a
 first-class citizen, not a degraded Hold'em one.
 
+## Start from the PLO study pack, not from a blank question
+
+The browser answers one question at a time. **Research → Study Explorer** is the
+other way in: it names the spot first, and a study then reads that one
+population through several coordinated panels. fpdb ships a Pot-Limit Omaha pack,
+so you do not have to build any of the questions below by hand.
+
+Open the Study Explorer, set **Game** to *Pot-Limit Omaha*, and the spots, the
+list and the counts are all the PLO ones — Hold'em studies are not offered,
+because a study declares the game it is about.
+
+| Spot | What the shipped studies cover |
+| --- | --- |
+| **Preflop** | first in, facing an open, the opener facing a 3-bet, squeezing, blind defence |
+| **Single-Raised Pots** | the raiser and the caller, in and out of position, flop and turn |
+| **3-bet Pots** | the aggressor in and out of position, the defender, flop and turn |
+
+Every postflop study reads the same population through the axes a four-card game
+turns on, in this order: **SPR band**, **heads-up versus multiway**, **board suit
+and pairing**, **board connectivity**, **sizing**, **effective stack**, the
+**result**, and the **source hands** behind any of it.
+
+`SPR band` is new here and is the one to look at first. The stored ratio is a
+number, so grouping by it raw gives one row per value; the band groups it the
+way the game does — under 1 (committed), 1–2, 2–4, 4–7, 7–13, 13+ — and an
+unrecorded pot says `SPR not recorded` rather than pretending to be the lowest
+band.
+
+Each study opens in Hero-versus-Field by default, and any selection you make on
+a chart narrows **both** sides identically, so the hands behind your number and
+the hands behind the field's are one click apart.
+
+### What the PLO pack deliberately does not ship
+
+No 13x13 range grid and no hand-strength panel. Both read two hole cards, and a
+four-card hand has no honest two-card reading. A Hold'em study opened against an
+Omaha population disables those panels and says which and why, rather than
+drawing an empty one.
+
 ## Read the value, not the selector
 
 One thing to learn before anything else, because it silently changes answers.
@@ -91,6 +130,11 @@ return nothing on an Omaha population.
 This is a gap rather than a decision — Omaha is where hand strength matters most
 — but an honest empty answer beats a plausible wrong one, which is what
 classifying the first two of four cards would produce.
+
+The Study Explorer applies the same rule to whole panels: a hand-strength panel
+is offered only for a game the classifier reads, and is otherwise disabled with
+the reason on the tab. The rule lives in one place, so a variant the classifier
+learns later becomes available without anything here changing.
 
 ### Street and action context (`street`)
 
