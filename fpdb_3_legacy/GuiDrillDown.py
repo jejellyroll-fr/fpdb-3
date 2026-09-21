@@ -152,8 +152,11 @@ class SourceHandsPane(QWidget):
         self._offset = 0
         self._serial = 0
         self._counts_serial = 0
-        self._worker: _SideDrillWorker | None = None
-        self._counts_worker: _CountsWorker | None = None
+        # Every worker started, retired when Qt says it finished. A
+        # superseded one still runs to completion -- its result is dropped by
+        # the serial check -- and would otherwise stay a child of this pane
+        # for the tab's whole life.
+        self._workers: list[QThread] = []
         self._page: Any = None
         self._build_ui()
 
@@ -343,13 +346,11 @@ class SourceHandsPane(QWidget):
         worker = _CountsWorker(self.db, context, self._counts_serial, self)
         worker.finished_ok.connect(self._counts_done)
         worker.failed.connect(self._counts_failed)
-        self._counts_worker = worker
-        worker.start()
+        self._start(worker)
 
     def _counts_done(self, counts: Any, serial: int) -> None:
         if serial != self._counts_serial or self._context is None:
             return  # A newer row superseded this one; its sizes are not ours.
-        self._retire_counts_worker(serial)
         self._counts = counts
         chosen = self._target
         self._targets = self._targets_for(self._context, counts)
@@ -363,13 +364,17 @@ class SourceHandsPane(QWidget):
     def _counts_failed(self, message: str, serial: int) -> None:
         if serial != self._counts_serial:
             return
-        self._retire_counts_worker(serial)
         log.warning("Source hands counts unavailable: %s", message)
 
-    def _retire_counts_worker(self, serial: int) -> None:
-        if self._counts_worker is not None and self._counts_worker.serial == serial:
-            self._counts_worker.deleteLater()
-            self._counts_worker = None
+    def _start(self, worker: QThread) -> None:
+        worker.finished.connect(lambda worker=worker: self._retire(worker))
+        self._workers.append(worker)
+        worker.start()
+
+    def _retire(self, worker: QThread) -> None:
+        if worker in self._workers:
+            self._workers.remove(worker)
+        worker.deleteLater()
 
     def _load(self) -> None:
         if self._context is None or self._target is None:
@@ -389,8 +394,7 @@ class SourceHandsPane(QWidget):
         )
         worker.finished_ok.connect(self._page_done)
         worker.failed.connect(self._page_failed)
-        self._worker = worker
-        worker.start()
+        self._start(worker)
 
     def _step(self, direction: int) -> None:
         offset = self._offset + direction * self._page_size
@@ -400,9 +404,6 @@ class SourceHandsPane(QWidget):
     def _page_done(self, page: Any, serial: int) -> None:
         if serial != self._serial:
             return  # A stale page never replaces a newer selection.
-        if self._worker is not None and self._worker.serial == serial:
-            self._worker.deleteLater()
-            self._worker = None
         self._page = page
         self.table.setSortingEnabled(False)
         self.table.setRowCount(len(page.rows))
@@ -424,9 +425,6 @@ class SourceHandsPane(QWidget):
     def _page_failed(self, message: str, serial: int) -> None:
         if serial != self._serial:
             return
-        if self._worker is not None and self._worker.serial == serial:
-            self._worker.deleteLater()
-            self._worker = None
         self.table.setRowCount(0)
         self.coverage_label.setText("")
         self.note_label.setText(message)
@@ -459,11 +457,9 @@ class SourceHandsPane(QWidget):
         """Stop waiting for any page; the hosts call this when they close."""
         self._serial += 1
         self._counts_serial += 1
-        for worker in (self._worker, self._counts_worker):
-            if worker is not None and worker.isRunning():
+        for worker in list(self._workers):
+            if worker.isRunning():
                 worker.wait(2000)
-        self._worker = None
-        self._counts_worker = None
 
 
 __all__ = ["SourceHandsPane"]
