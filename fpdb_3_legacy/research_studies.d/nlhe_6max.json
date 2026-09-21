@@ -107,7 +107,7 @@
       "variables": ["effective_stack_bb", "stake_bb", "date_from", "date_to"],
       "min_sample": 100,
       "tags": ["preflop", "blind defence", "bvb"],
-      "aliases": ["BB versus SB", "blind battle", "BvB"],
+      "aliases": ["BB versus SB", "BB defend", "blind battle", "BvB"],
       "default_panel": "overview",
       "default_comparison": true,
       "panels": [

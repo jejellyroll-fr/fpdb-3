@@ -1891,6 +1891,14 @@ class fpdb(QMainWindow):
             module="fpdb_3_legacy.GuiResearchBrowser",
         )
 
+    def tab_study_explorer(self, widget, data=None) -> None:
+        """Open the spot-first Study Explorer (#360)."""
+        self.open_tab(
+            "Study Explorer",
+            lambda module: module.GuiStudyExplorer(self.config, self.sql, self),
+            module="fpdb_3_legacy.GuiStudyExplorer",
+        )
+
     def tab_opponents_report(self, widget, data=None) -> None:
         self.open_tab("Opponents Report", lambda: GuiOpponentsReport.GuiOpponentsReport(self.config, self.sql, self))
 
