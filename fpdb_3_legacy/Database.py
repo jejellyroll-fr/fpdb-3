@@ -962,12 +962,16 @@ class Database(
             self.connection = None
         self.__connected = False
 
-    @classmethod
-    def close_worker_pool(cls) -> None:
-        """Close all connections currently idling in the global worker pool."""
-        while not cls._worker_conn_pool.empty():
+    def close_worker_pool(self) -> None:
+        """Close the connections idling in this database's worker pool.
+
+        An instance method since the pool became one: closing "the" pool from
+        the class would have had to pick a database, and there is more than
+        one only because they are different databases.
+        """
+        while not self._worker_conn_pool.empty():
             try:
-                conn = cls._worker_conn_pool.get_nowait()
+                conn = self._worker_conn_pool.get_nowait()
                 if conn is not None:
                     conn.close()
             except queue.Empty:
