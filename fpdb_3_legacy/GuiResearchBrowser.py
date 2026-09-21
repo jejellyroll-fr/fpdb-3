@@ -79,6 +79,10 @@ log = get_logger("gui_research_browser")
 
 # The three values a boolean filter can hold. ``None`` is *Any* -- the value the
 # engine skips -- and it is the default, which is the whole point of #329.
+#: Where a rendered comparison row keeps the model row it was drawn from, so a
+#: sorted table cannot hand the drill a different row than the one clicked.
+_COMPARISON_ROW_ROLE: Final = Qt.ItemDataRole.UserRole + 1
+
 _ANY: Any = None
 _TRUE: Any = True
 _FALSE: Any = False
@@ -1380,6 +1384,11 @@ texture*. The label already existed; nothing called it. Technical names
                     item.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
                 else:
                     item.setData(Qt.ItemDataRole.UserRole, dict(row.group))
+                if c == 0:
+                    # Carried on the item rather than looked up by row number:
+                    # this table sorts, so a visual index stops naming the row
+                    # it was drawn from as soon as a header is clicked.
+                    item.setData(_COMPARISON_ROW_ROLE, row)
                 self.result_table.setItem(r, c, item)
         self.result_table.resizeColumnsToContents()
         total = comparison.hero_total
@@ -1586,23 +1595,23 @@ texture*. The label already existed; nothing called it. Technical names
         group: dict[str, Any] = group_item.data(Qt.ItemDataRole.UserRole) if group_item else {}
         self._current_group = dict(group or {})
         if isinstance(self._last_result, rb.Comparison):
-            self._load_comparison_drill(row)
+            self._load_comparison_drill(self.result_table.item(row, 0))
             return
         self.hands_stack.setCurrentIndex(0)
         self._load_drill(group=self._current_group)
 
-    def _load_comparison_drill(self, row: int) -> None:
+    def _load_comparison_drill(self, item: QTableWidgetItem | None) -> None:
         """Open one comparison row's four hand sets, hero and field apart.
 
         The sizes come off the rendered row rather than from the database: the
         comparison has already counted all four, and asking again would be four
         queries to learn what is on screen.
         """
-        if self._current_query is None or not isinstance(self._last_result, rb.Comparison):
+        if self._current_query is None or item is None:
             return
-        if row < 0 or row >= len(self._last_result.rows):
+        comparison_row = item.data(_COMPARISON_ROW_ROLE)
+        if not isinstance(comparison_row, rb.ComparisonRow):
             return
-        comparison_row = self._last_result.rows[row]
         label = ", ".join(
             f"{rlabels.dimension_label(name)}={rb.value_label(name, value)}"
             for name, value in sorted(comparison_row.group.items())
@@ -1610,7 +1619,7 @@ texture*. The label already existed; nothing called it. Technical names
         context = rdrill.context_from_comparison(
             self._current_query,
             comparison_row.group,
-            label=label or rlabels.dimension_label(self._last_result.metric),
+            label=label or rlabels.dimension_label(self._current_query.metric),
         )
         self.hands_stack.setCurrentWidget(self.source_hands)
         self.source_hands.set_context(

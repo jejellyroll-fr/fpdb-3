@@ -13,6 +13,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
+from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QApplication
 
 from fpdb_3_legacy.Database import Database
@@ -146,6 +147,26 @@ def test_a_comparison_row_opens_hero_and_field_hands_separately(browser, qtbot) 
     pane.select_target("field")
     qtbot.waitUntil(lambda: pane.page is not None and pane.page.side == "field", timeout=15000)
     assert pane.page.total_matches == comparison_row.field_opportunities
+
+
+def test_a_sorted_comparison_drills_the_row_that_was_clicked(browser, qtbot) -> None:
+    browser.metric_combo.setCurrentIndex(browser.metric_combo.findData("fold_frequency"))
+    browser.group_edit.setText("street")
+    browser.compare_check.setChecked(True)
+    _run_and_wait(qtbot, browser)
+    # Sorting reorders the view but not the model, so a row number stops
+    # naming the row it was drawn from.
+    browser.result_table.sortItems(0, Qt.SortOrder.DescendingOrder)
+    visual_row = 0
+    item = browser.result_table.item(visual_row, 0)
+    expected = item.data(Qt.ItemDataRole.UserRole + 1)
+
+    browser._on_result_clicked(item)
+    pane = browser.source_hands
+    qtbot.waitUntil(lambda: pane.page is not None, timeout=15000)
+
+    assert pane.page.total_matches == expected.hero_opportunities
+    assert item.text() in pane.context_label.text()
 
 
 def test_leaving_comparison_returns_the_single_population_hand_list(browser, qtbot) -> None:
