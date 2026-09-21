@@ -21,6 +21,8 @@ from PySide6.QtWidgets import (
 )
 
 from fpdb_3_legacy.GuiResearchBrowser import _worker_database
+from fpdb_3_legacy.GuiResearchDistributions import DistributionChartWidget
+from fpdb_3_legacy.research_distributions import build_distribution
 from fpdb_3_legacy.research_study_dashboard import (
     COMPARISON_FIELD,
     COMPARISON_HERO,
@@ -88,6 +90,7 @@ class GuiStudyDashboard(QWidget):
         self._workers: list[_DashboardWorker] = []
         self._results: dict[str, Any] = {}
         self._pages: dict[str, tuple[QLabel, QTableWidget]] = {}
+        self._distribution_widgets: dict[str, DistributionChartWidget] = {}
         self._variable_edits: dict[str, QLineEdit] = {}
         self._build_ui()
         self._load_active_panel()
@@ -163,6 +166,11 @@ class GuiStudyDashboard(QWidget):
             table.verticalHeader().hide()
             table.itemDoubleClicked.connect(self._row_double_clicked)
             page_layout.addWidget(status)
+            if panel.kind in {"sizing_distribution", "response_distribution"}:
+                chart = DistributionChartWidget()
+                chart.bin_clicked.connect(self._distribution_bin_clicked)
+                self._distribution_widgets[panel.id] = chart
+                page_layout.addWidget(chart)
             page_layout.addWidget(table, 1)
             self._pages[panel.id] = (status, table)
             index = self.tabs.addTab(page, panel.title)
@@ -253,6 +261,8 @@ class GuiStudyDashboard(QWidget):
             return
         status.setText("Loading panel…")
         table.setRowCount(0)
+        if panel_id in self._distribution_widgets:
+            self._distribution_widgets[panel_id].clear_distribution()
         self._serial += 1
         serial = self._serial
         worker = _DashboardWorker(
@@ -281,6 +291,8 @@ class GuiStudyDashboard(QWidget):
         panel_id = self.model.state.active_panel
         status, table = self._pages[panel_id]
         table.setRowCount(0)
+        if panel_id in self._distribution_widgets:
+            self._distribution_widgets[panel_id].clear_distribution()
         status.setText(f"Panel unavailable: {message}")
 
     def _retire_worker(self, worker: _DashboardWorker) -> None:
@@ -322,6 +334,9 @@ class GuiStudyDashboard(QWidget):
 
     def _render_result(self, panel_id: str, result: Any) -> None:
         status, table = self._pages[panel_id]
+        if panel_id in self._distribution_widgets:
+            self._render_distribution(panel_id, result, status, table)
+            return
         rows = self._rows(result)
         columns = sorted({key for row in rows for key in row})
         table.setColumnCount(len(columns))
@@ -338,6 +353,62 @@ class GuiStudyDashboard(QWidget):
         self.sample_label.setText(sample)
         note = " No matching hands for this context." if "0 decisions" in sample else ""
         status.setText(f"{sample}.{note} Double-click a grouped value to add a temporary cross-filter.")
+
+    def _render_distribution(
+        self,
+        panel_id: str,
+        result: Any,
+        status: QLabel,
+        table: QTableWidget,
+    ) -> None:
+        """Render a real chart while keeping every exact grouped row visible."""
+        group_by = self._group_by(panel_id)
+        if len(group_by) != 1:
+            status.setText("Distribution panels must group by exactly one dimension.")
+            table.setRowCount(0)
+            return
+        dimension = group_by[0]
+        chart = self._distribution_widgets[panel_id]
+        if isinstance(result, DashboardComparison):
+            hero = build_distribution(result.hero, dimension, min_sample=self.model.state.min_sample)
+            field = build_distribution(result.field, dimension, min_sample=self.model.state.min_sample)
+            chart.set_comparison(hero, field)
+            rows = [
+                {"side": "Hero", **row}
+                for row in hero.as_rows()
+            ] + [
+                {"side": "Field", **row}
+                for row in field.as_rows()
+            ]
+            warnings = [warning for warning in (hero.low_sample_warning, field.low_sample_warning) if warning]
+        else:
+            series = build_distribution(result, dimension, min_sample=self.model.state.min_sample)
+            chart.set_series(series)
+            rows = series.as_rows()
+            warnings = [series.low_sample_warning] if series.low_sample_warning else []
+
+        columns = sorted({key for row in rows for key in row})
+        table.setColumnCount(len(columns))
+        table.setHorizontalHeaderLabels(columns)
+        table.setRowCount(len(rows))
+        for row_index, row in enumerate(rows):
+            for column_index, column in enumerate(columns):
+                item = QTableWidgetItem(self._display(row.get(column)))
+                if column == dimension:
+                    item.setData(Qt.ItemDataRole.UserRole, {dimension: row.get(column)})
+                table.setItem(row_index, column_index, item)
+        table.resizeColumnsToContents()
+        sample = self._sample_text(result)
+        self.sample_label.setText(sample)
+        note = " No matching decisions for this context." if "0 decisions" in sample else ""
+        warning_text = f" {' '.join(warnings)}" if warnings else ""
+        status.setText(
+            f"{sample}.{warning_text}{note} "
+            "Bars show share of decisions or response rate; double-click a row to filter."
+        )
+
+    def _distribution_bin_clicked(self, name: str, value: Any, label: str) -> None:
+        self.add_cross_filter(name, value, f"{name.replace('_', ' ').title()}: {label}")
 
     def _row_double_clicked(self, item: QTableWidgetItem) -> None:
         group = item.data(Qt.ItemDataRole.UserRole)
