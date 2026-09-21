@@ -1078,12 +1078,14 @@ texture*. The label already existed; nothing called it. Technical names
         Live queries are not re-run automatically -- the sample size is the
         user's call -- but the question is restated immediately.
         """
+        self._forget_preset_numerator()
         self._update_summary()
 
     # -- the breakdown -------------------------------------------------------
 
     def _on_group_text_changed(self) -> None:
         """The expert text field is the source; the picker mirrors it."""
+        self._forget_preset_numerator()
         parsed = [part.strip() for part in self.group_edit.text().split(",") if part.strip()]
         self._syncing_breakdown = True
         try:
@@ -1096,6 +1098,7 @@ texture*. The label already existed; nothing called it. Technical names
         """The picker changed: write the canonical dimension list back."""
         if self._syncing_breakdown:
             return
+        self._forget_preset_numerator()
         self.group_edit.setText(", ".join(self.breakdown_picker.dimensions()))
         self._update_summary()
 
@@ -1343,9 +1346,17 @@ texture*. The label already existed; nothing called it. Technical names
             cells = [rb.value_label(name, row.group.get(name)) for name in comparison.group_by]
             cells += [
                 _comparison_measure_text(row.hero_measure, comparison.unit, comparison.frequency),
-                f"{row.hero_actions}/{row.hero_opportunities}",
+                (
+                    f"{row.hero_actions}/{row.hero_opportunities}"
+                    if comparison.frequency
+                    else str(row.hero_opportunities)
+                ),
                 _comparison_measure_text(row.field_measure, comparison.unit, comparison.frequency),
-                f"{row.field_actions}/{row.field_opportunities}",
+                (
+                    f"{row.field_actions}/{row.field_opportunities}"
+                    if comparison.frequency
+                    else str(row.field_opportunities)
+                ),
                 "" if row.gap is None else (
                     f"{row.gap * 100:+.1f} pt"
                     if comparison.frequency
@@ -1371,7 +1382,9 @@ texture*. The label already existed; nothing called it. Technical names
         self.result_note.setText(
             self._note_when_empty(
                 total.hero_opportunities + total.field_opportunities,
-                _("A gap is only as good as the smaller of the two samples beside it."),
+                _("No matching hands were found for either population.")
+                if not total.hero_opportunities and not total.field_opportunities
+                else _("A gap is only as good as the smaller of the two samples beside it."),
             ),
         )
 

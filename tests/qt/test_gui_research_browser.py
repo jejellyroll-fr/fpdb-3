@@ -123,6 +123,41 @@ def test_comparison_is_offered_for_every_metric(browser) -> None:
     assert browser.compare_check.isEnabled()
 
 
+def test_non_frequency_comparison_shows_sample_counts_without_a_fake_ratio(browser, qtbot) -> None:
+    browser.metric_combo.setCurrentIndex(browser.metric_combo.findData("opportunities"))
+    browser.group_edit.setText("street")
+    browser.compare_check.setChecked(True)
+    _run_and_wait(qtbot, browser)
+    sample_column = [
+        browser.result_table.horizontalHeaderItem(c).text()
+        for c in range(browser.result_table.columnCount())
+    ].index("your sample")
+    assert "/" not in browser.result_table.item(0, sample_column).text()
+
+
+def test_editing_a_loaded_preset_discards_its_hidden_numerator(browser) -> None:
+    browser._fill_builder(
+        {
+            "metric": "hand_frequency",
+            "group_by": ["position"],
+            "numerator": {"response": ["call", "raise"]},
+        },
+    )
+    assert browser.current_preset()["numerator"] == {"response": ["call", "raise"]}
+    browser.group_edit.setText("street")
+    assert "numerator" not in browser.current_preset()
+
+
+def test_empty_comparison_explains_that_no_hands_matched(browser, qtbot) -> None:
+    from fpdb_3_legacy import research_browser as rb
+
+    browser._append_filter_row(rb.filter_spec("primary_situation"))
+    _row(browser, "primary_situation").value_edit.setText("nope")
+    browser.compare_check.setChecked(True)
+    _run_and_wait(qtbot, browser)
+    assert "No matching hands" in browser.result_note.text()
+
+
 def test_drill_down_loads_a_rows_hands(browser, qtbot, browser_db: Database) -> None:
     from fpdb_3_legacy import research_browser as rb
 
