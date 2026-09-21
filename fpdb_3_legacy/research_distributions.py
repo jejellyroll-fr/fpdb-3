@@ -151,6 +151,7 @@ def build_distribution(
     group_by: str,
     *,
     min_sample: int = 0,
+    label_map: Mapping[Any, str] | None = None,
 ) -> DistributionSeries:
     """Build a chart series from one grouped query result.
 
@@ -176,7 +177,11 @@ def build_distribution(
         if frequency_bp is not None:
             frequency_bp = int(frequency_bp)
         share_bp = opportunities * 10000 // total if total else 0
-        label = "—" if key is None else str(key)
+        label = (
+            "—"
+            if key is None
+            else (label_map.get(key, str(key)) if label_map is not None else str(key))
+        )
         bins.append(
             DistributionBin(
                 key=key,

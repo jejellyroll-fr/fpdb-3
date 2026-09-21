@@ -22,7 +22,9 @@ from PySide6.QtWidgets import (
 
 from fpdb_3_legacy.GuiResearchBrowser import _worker_database
 from fpdb_3_legacy.GuiResearchDistributions import DistributionChartWidget
+from fpdb_3_legacy.GuiResearchMatrices import MatrixHeatmapWidget
 from fpdb_3_legacy.research_distributions import build_distribution
+from fpdb_3_legacy.research_matrices import POSITION_LABELS, build_matrix
 from fpdb_3_legacy.research_study_dashboard import (
     COMPARISON_FIELD,
     COMPARISON_HERO,
@@ -91,6 +93,7 @@ class GuiStudyDashboard(QWidget):
         self._results: dict[str, Any] = {}
         self._pages: dict[str, tuple[QLabel, QTableWidget]] = {}
         self._distribution_widgets: dict[str, DistributionChartWidget] = {}
+        self._matrix_widgets: dict[str, MatrixHeatmapWidget] = {}
         self._variable_edits: dict[str, QLineEdit] = {}
         self._build_ui()
         self._load_active_panel()
@@ -171,6 +174,17 @@ class GuiStudyDashboard(QWidget):
                 chart.bin_clicked.connect(self._distribution_bin_clicked)
                 self._distribution_widgets[panel.id] = chart
                 page_layout.addWidget(chart)
+            elif panel.kind in {"position_matrix", "board_matrix"}:
+                if len(panel.group_by) == 1:
+                    chart = DistributionChartWidget()
+                    chart.bin_clicked.connect(self._distribution_bin_clicked)
+                    self._distribution_widgets[panel.id] = chart
+                    page_layout.addWidget(chart)
+                elif len(panel.group_by) == 2:
+                    matrix = MatrixHeatmapWidget()
+                    matrix.cell_clicked.connect(self._matrix_cell_clicked)
+                    self._matrix_widgets[panel.id] = matrix
+                    page_layout.addWidget(matrix)
             page_layout.addWidget(table, 1)
             self._pages[panel.id] = (status, table)
             index = self.tabs.addTab(page, panel.title)
@@ -263,6 +277,8 @@ class GuiStudyDashboard(QWidget):
         table.setRowCount(0)
         if panel_id in self._distribution_widgets:
             self._distribution_widgets[panel_id].clear_distribution()
+        if panel_id in self._matrix_widgets:
+            self._matrix_widgets[panel_id].clear_matrix()
         self._serial += 1
         serial = self._serial
         worker = _DashboardWorker(
@@ -293,6 +309,8 @@ class GuiStudyDashboard(QWidget):
         table.setRowCount(0)
         if panel_id in self._distribution_widgets:
             self._distribution_widgets[panel_id].clear_distribution()
+        if panel_id in self._matrix_widgets:
+            self._matrix_widgets[panel_id].clear_matrix()
         status.setText(f"Panel unavailable: {message}")
 
     def _retire_worker(self, worker: _DashboardWorker) -> None:
@@ -334,6 +352,9 @@ class GuiStudyDashboard(QWidget):
 
     def _render_result(self, panel_id: str, result: Any) -> None:
         status, table = self._pages[panel_id]
+        if panel_id in self._matrix_widgets:
+            self._render_matrix(panel_id, result, status, table)
+            return
         if panel_id in self._distribution_widgets:
             self._render_distribution(panel_id, result, status, table)
             return
@@ -369,9 +390,20 @@ class GuiStudyDashboard(QWidget):
             return
         dimension = group_by[0]
         chart = self._distribution_widgets[panel_id]
+        label_map = POSITION_LABELS if dimension in {"position", "opponent_position"} else None
         if isinstance(result, DashboardComparison):
-            hero = build_distribution(result.hero, dimension, min_sample=self.model.state.min_sample)
-            field = build_distribution(result.field, dimension, min_sample=self.model.state.min_sample)
+            hero = build_distribution(
+                result.hero,
+                dimension,
+                min_sample=self.model.state.min_sample,
+                label_map=label_map,
+            )
+            field = build_distribution(
+                result.field,
+                dimension,
+                min_sample=self.model.state.min_sample,
+                label_map=label_map,
+            )
             chart.set_comparison(hero, field)
             rows = [
                 {"side": "Hero", **row}
@@ -382,7 +414,12 @@ class GuiStudyDashboard(QWidget):
             ]
             warnings = [warning for warning in (hero.low_sample_warning, field.low_sample_warning) if warning]
         else:
-            series = build_distribution(result, dimension, min_sample=self.model.state.min_sample)
+            series = build_distribution(
+                result,
+                dimension,
+                min_sample=self.model.state.min_sample,
+                label_map=label_map,
+            )
             chart.set_series(series)
             rows = series.as_rows()
             warnings = [series.low_sample_warning] if series.low_sample_warning else []
@@ -407,8 +444,82 @@ class GuiStudyDashboard(QWidget):
             "Bars show share of decisions or response rate; double-click a row to filter."
         )
 
+    def _render_matrix(
+        self,
+        panel_id: str,
+        result: Any,
+        status: QLabel,
+        table: QTableWidget,
+    ) -> None:
+        """Render a two-axis visual and keep all numeric cells in the fallback table."""
+        group_by = self._group_by(panel_id)
+        if len(group_by) != 2:
+            status.setText("Matrix panels must group by exactly two dimensions.")
+            table.setRowCount(0)
+            return
+        matrix = self._matrix_widgets[panel_id]
+        if isinstance(result, DashboardComparison):
+            hero = build_matrix(result.hero, group_by, min_sample=self.model.state.min_sample)
+            field = build_matrix(result.field, group_by, min_sample=self.model.state.min_sample)
+            matrix.set_comparison(hero, field)
+            rows = [
+                {"side": "Hero", **row}
+                for row in hero.as_rows()
+            ] + [
+                {"side": "Field", **row}
+                for row in field.as_rows()
+            ]
+            low_sample = len(hero.low_sample_cells) + len(field.low_sample_cells)
+        else:
+            series = build_matrix(result, group_by, min_sample=self.model.state.min_sample)
+            matrix.set_series(series)
+            rows = series.as_rows()
+            low_sample = len(series.low_sample_cells)
+
+        columns = sorted({key for row in rows for key in row})
+        table.setColumnCount(len(columns))
+        table.setHorizontalHeaderLabels(columns)
+        table.setRowCount(len(rows))
+        for row_index, row in enumerate(rows):
+            for column_index, column in enumerate(columns):
+                item = QTableWidgetItem(self._display(row.get(column)))
+                if column in group_by:
+                    item.setData(Qt.ItemDataRole.UserRole, {column: row.get(column)})
+                table.setItem(row_index, column_index, item)
+        table.resizeColumnsToContents()
+        sample = self._sample_text(result)
+        self.sample_label.setText(sample)
+        warning = f" {low_sample} populated cells are below the minimum sample." if low_sample else ""
+        status.setText(
+            f"{sample}.{warning} Numeric labels include sample and numerator; click a cell to filter both axes."
+        )
+
     def _distribution_bin_clicked(self, name: str, value: Any, label: str) -> None:
         self.add_cross_filter(name, value, f"{name.replace('_', ' ').title()}: {label}")
+
+    def _matrix_cell_clicked(
+        self,
+        row_name: str,
+        row_value: Any,
+        column_name: str,
+        column_value: Any,
+        label: str,
+    ) -> None:
+        """Apply both axes in one refresh so the selected matchup stays atomic."""
+        if row_value is None or column_value is None:
+            self.context_label.setText(
+                "Unknown or unclassified cells stay visible, but cannot create a partial matchup filter."
+            )
+            return
+        try:
+            self.model.add_cross_filter(row_name, row_value, f"{row_name}: {label}")
+            self.model.add_cross_filter(column_name, column_value, f"{column_name}: {label}")
+        except ValueError as exc:
+            self.context_label.setText(f"Cannot filter this cell: {exc}")
+            return
+        self._results.clear()
+        self._render_cross_filters()
+        self._load_active_panel()
 
     def _row_double_clicked(self, item: QTableWidgetItem) -> None:
         group = item.data(Qt.ItemDataRole.UserRole)

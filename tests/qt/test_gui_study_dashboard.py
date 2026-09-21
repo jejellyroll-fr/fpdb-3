@@ -127,3 +127,28 @@ def test_dashboard_renders_response_chart_and_turns_bar_click_into_shared_filter
     chart.click_bin(0)
     assert dashboard.model.state.cross_filters[0].name == "response"
     assert dashboard.model.state.cross_filters[0].value == expected_response
+
+
+def test_dashboard_renders_position_matrix_and_click_filters_both_axes(
+    qtbot,
+    dashboard_db: Database,
+    tmp_path,
+) -> None:
+    explorer = StudyExplorerModel(builtin_studies(), tmp_path / "history.json")
+    selection = explorer.open_study("preflop_facing_open", remember=False)
+    dashboard = GuiStudyDashboard(db=dashboard_db, selection=selection)
+    qtbot.addWidget(dashboard)
+
+    dashboard.model.set_active_panel("position")
+    dashboard._load_active_panel()
+    matrix = dashboard._matrix_widgets["position"]
+    qtbot.waitUntil(lambda: matrix.table.rowCount() > 0 and matrix.table.columnCount() > 0, timeout=15000)
+    populated = next(cell for cell in matrix._cells.values() if cell.opportunities > 0)
+    row_index = matrix._row_values.index(populated.row_key)
+    column_index = matrix._column_values.index(populated.column_key)
+
+    matrix.click_cell(row_index, column_index)
+
+    filters = {item.name: item.value for item in dashboard.model.state.cross_filters}
+    assert filters[populated.filter_names[0]] == populated.row_key
+    assert filters[populated.filter_names[1]] == populated.column_key
