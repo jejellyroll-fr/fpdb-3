@@ -152,3 +152,36 @@ def test_dashboard_renders_position_matrix_and_click_filters_both_axes(
     filters = {item.name: item.value for item in dashboard.model.state.cross_filters}
     assert filters[populated.filter_names[0]] == populated.row_key
     assert filters[populated.filter_names[1]] == populated.column_key
+
+
+def test_dashboard_switches_hand_state_dimension_and_cross_filters_category(
+    qtbot,
+    dashboard_db: Database,
+    tmp_path,
+) -> None:
+    explorer = StudyExplorerModel(builtin_studies(), tmp_path / "history.json")
+    selection = explorer.open_study("srp_pfr_oop_flop", remember=False)
+    dashboard = GuiStudyDashboard(db=dashboard_db, selection=selection)
+    qtbot.addWidget(dashboard)
+
+    qtbot.waitUntil(lambda: "Hero:" in dashboard.sample_label.text(), timeout=15000)
+    dashboard.model.set_active_panel("strength")
+    dashboard._load_active_panel()
+    widget = dashboard._hand_strength_widgets["strength"]
+    qtbot.waitUntil(lambda: "classified" in dashboard.sample_label.text(), timeout=15000)
+    assert "coverage" in widget.coverage_label.text()
+
+    widget.dimension_combo.setCurrentIndex(widget.dimension_combo.findData("draw"))
+    qtbot.waitUntil(
+        lambda: dashboard.model.panel("strength").dimension == "draw"
+        and widget._hero is not None
+        and widget._hero.dimension == "draw",
+        timeout=15000,
+    )
+    category = next(category for category in widget._hero.categories if category.filter_name)
+    expected_name = category.filter_name
+    expected_value = category.filter_value
+    widget.click_category(widget._categories.index(category))
+
+    assert dashboard.model.state.cross_filters[0].name == expected_name
+    assert dashboard.model.state.cross_filters[0].value == expected_value

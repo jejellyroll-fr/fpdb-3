@@ -4,10 +4,11 @@ from __future__ import annotations
 
 import json
 from collections.abc import Mapping
-from dataclasses import dataclass, replace
+from dataclasses import dataclass, field, replace
 from typing import Any, Final
 
 from .analytics_query import FILTERS, Query
+from .hand_state_composition import DIMENSIONS as COMPOSITION_DIMENSIONS
 from .research_studies import CompiledStudyPanel, StudySpec, execute_panel
 from .research_study_explorer import StudySelection
 
@@ -41,6 +42,7 @@ class DashboardState:
     active_panel: str
     cross_filters: tuple[CrossFilter, ...] = ()
     min_sample: int = 0
+    dimension_overrides: Mapping[str, str] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -104,7 +106,13 @@ class StudyDashboardModel:
                 )
             filters[cross_filter.name] = cross_filter.value
         query = replace(compiled.query, filters=filters)
-        return replace(compiled, query=query, base_filters=dict(self._state.base_filters))
+        dimension = self._state.dimension_overrides.get(panel_id, compiled.dimension)
+        return replace(
+            compiled,
+            query=query,
+            dimension=dimension,
+            base_filters=dict(self._state.base_filters),
+        )
 
     def panel_query(self, panel_id: str) -> Query:
         """Return the query used by a panel, useful for drill-down and tests."""
@@ -138,6 +146,20 @@ class StudyDashboardModel:
         if min_sample < 0:
             raise ValueError("minimum sample must not be negative")
         self._state = replace(self._state, min_sample=min_sample)
+
+    def set_panel_dimension(self, panel_id: str, dimension: str) -> None:
+        """Switch a hand-strength composition without rebuilding the study."""
+        compiled = self._study.panel(panel_id)
+        if compiled.kind != "hand_strength":
+            raise ValueError(f"Panel {panel_id!r} does not expose hand-state dimensions")
+        if dimension not in COMPOSITION_DIMENSIONS:
+            raise ValueError(
+                f"Unknown hand-state dimension {dimension!r}; known: {sorted(COMPOSITION_DIMENSIONS)}",
+            )
+        dimensions = dict(self._state.dimension_overrides)
+        dimensions[panel_id] = dimension
+        self._state = replace(self._state, dimension_overrides=dimensions)
+        self._cache.clear()
 
     def set_variable(self, name: str, value: Any) -> None:
         """Change one declared variable and invalidate all derived panel work."""
@@ -193,6 +215,7 @@ class StudyDashboardModel:
             "comparison": self._state.comparison,
             "cross_filters": [item.__dict__ for item in self._state.cross_filters],
             "min_sample": self._state.min_sample,
+            "dimension_overrides": dict(self._state.dimension_overrides),
         }
         return json.dumps(payload, sort_keys=True, default=str, separators=(",", ":"))
 

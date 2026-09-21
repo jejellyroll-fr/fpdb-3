@@ -22,6 +22,7 @@ from PySide6.QtWidgets import (
 
 from fpdb_3_legacy.GuiResearchBrowser import _worker_database
 from fpdb_3_legacy.GuiResearchDistributions import DistributionChartWidget
+from fpdb_3_legacy.GuiResearchHandStrength import HandStrengthChartWidget
 from fpdb_3_legacy.GuiResearchMatrices import MatrixHeatmapWidget
 from fpdb_3_legacy.research_distributions import build_distribution
 from fpdb_3_legacy.research_matrices import POSITION_LABELS, build_matrix
@@ -94,11 +95,12 @@ class GuiStudyDashboard(QWidget):
         self._pages: dict[str, tuple[QLabel, QTableWidget]] = {}
         self._distribution_widgets: dict[str, DistributionChartWidget] = {}
         self._matrix_widgets: dict[str, MatrixHeatmapWidget] = {}
+        self._hand_strength_widgets: dict[str, HandStrengthChartWidget] = {}
         self._variable_edits: dict[str, QLineEdit] = {}
         self._build_ui()
         self._load_active_panel()
 
-    def _build_ui(self) -> None:  # noqa: PLR0915 - one cohesive dashboard widget tree
+    def _build_ui(self) -> None:  # noqa: C901, PLR0915 - one cohesive dashboard widget tree
         colors = get_theme_palette()
         muted = colors.get("muted_text", "#a0aec0")
         layout = QVBoxLayout(self)
@@ -185,6 +187,16 @@ class GuiStudyDashboard(QWidget):
                     matrix.cell_clicked.connect(self._matrix_cell_clicked)
                     self._matrix_widgets[panel.id] = matrix
                     page_layout.addWidget(matrix)
+            elif panel.kind == "hand_strength":
+                chart = HandStrengthChartWidget()
+                chart.dimension_changed.connect(
+                    lambda dimension, panel_id=panel.id: self._hand_strength_dimension_changed(
+                        panel_id, dimension,
+                    ),
+                )
+                chart.category_clicked.connect(self._hand_strength_category_clicked)
+                self._hand_strength_widgets[panel.id] = chart
+                page_layout.addWidget(chart)
             page_layout.addWidget(table, 1)
             self._pages[panel.id] = (status, table)
             index = self.tabs.addTab(page, panel.title)
@@ -279,6 +291,8 @@ class GuiStudyDashboard(QWidget):
             self._distribution_widgets[panel_id].clear_distribution()
         if panel_id in self._matrix_widgets:
             self._matrix_widgets[panel_id].clear_matrix()
+        if panel_id in self._hand_strength_widgets:
+            self._hand_strength_widgets[panel_id].clear_distribution()
         self._serial += 1
         serial = self._serial
         worker = _DashboardWorker(
@@ -311,6 +325,8 @@ class GuiStudyDashboard(QWidget):
             self._distribution_widgets[panel_id].clear_distribution()
         if panel_id in self._matrix_widgets:
             self._matrix_widgets[panel_id].clear_matrix()
+        if panel_id in self._hand_strength_widgets:
+            self._hand_strength_widgets[panel_id].clear_distribution()
         status.setText(f"Panel unavailable: {message}")
 
     def _retire_worker(self, worker: _DashboardWorker) -> None:
@@ -354,6 +370,9 @@ class GuiStudyDashboard(QWidget):
         status, table = self._pages[panel_id]
         if panel_id in self._matrix_widgets:
             self._render_matrix(panel_id, result, status, table)
+            return
+        if panel_id in self._hand_strength_widgets:
+            self._render_hand_strength(panel_id, result, status, table)
             return
         if panel_id in self._distribution_widgets:
             self._render_distribution(panel_id, result, status, table)
@@ -521,6 +540,77 @@ class GuiStudyDashboard(QWidget):
         self._render_cross_filters()
         self._load_active_panel()
 
+    def _hand_strength_dimension_changed(self, panel_id: str, dimension: str) -> None:
+        try:
+            self.model.set_panel_dimension(panel_id, dimension)
+        except ValueError as exc:
+            self.context_label.setText(f"Hand-state dimension error: {exc}")
+            return
+        self._results.clear()
+        self._render_cross_filters()
+        self._load_active_panel()
+
+    def _render_hand_strength(
+        self,
+        panel_id: str,
+        result: Any,
+        status: QLabel,
+        table: QTableWidget,
+    ) -> None:
+        from fpdb_3_legacy.research_hand_strength import build_hand_strength
+
+        widget = self._hand_strength_widgets[panel_id]
+        if isinstance(result, DashboardComparison):
+            hero = build_hand_strength(result.hero)
+            field = build_hand_strength(result.field)
+            widget.set_distribution(hero, field)
+            rows = [
+                {"side": "Hero", **row}
+                for row in hero.as_rows()
+            ] + [
+                {"side": "Field", **row}
+                for row in field.as_rows()
+            ]
+            warnings = [warning for warning in (hero.known_sample_warning, field.known_sample_warning) if warning]
+            overlapping = hero.overlapping or field.overlapping
+        else:
+            distribution = build_hand_strength(result)
+            widget.set_distribution(distribution)
+            rows = distribution.as_rows()
+            warnings = [distribution.known_sample_warning] if distribution.known_sample_warning else []
+            overlapping = distribution.overlapping
+
+        columns = sorted({key for row in rows for key in row})
+        table.setColumnCount(len(columns))
+        table.setHorizontalHeaderLabels(columns)
+        table.setRowCount(len(rows))
+        dimension = self.model.panel(panel_id).dimension
+        for row_index, row in enumerate(rows):
+            for column_index, column in enumerate(columns):
+                item = QTableWidgetItem(self._display(row.get(column)))
+                if column == "key":
+                    filter_name = row.get("filter_name")
+                    item.setData(
+                        Qt.ItemDataRole.UserRole,
+                        ({filter_name: row.get("filter_value")} if filter_name else {}),
+                    )
+                table.setItem(row_index, column_index, item)
+        table.resizeColumnsToContents()
+        sample = self._sample_text(result)
+        self.sample_label.setText(sample)
+        overlap = " Categories overlap; shares do not sum to 100%." if overlapping else ""
+        warning_text = f" {' '.join(warnings)}" if warnings else ""
+        status.setText(
+            f"{sample}.{warning_text}{overlap} "
+            f"Dimension: {dimension}. Bars use classified decisions only; click a category to filter."
+        )
+
+    def _hand_strength_category_clicked(self, name: str, value: Any, label: str) -> None:
+        if not name:
+            self.context_label.setText("This unclassified category has no safe query filter.")
+            return
+        self.add_cross_filter(name, value, f"{name.replace('_', ' ').title()}: {label}")
+
     def _row_double_clicked(self, item: QTableWidgetItem) -> None:
         group = item.data(Qt.ItemDataRole.UserRole)
         if not isinstance(group, dict) or not group:
@@ -562,6 +652,11 @@ class GuiStudyDashboard(QWidget):
     def _sample_text(result: Any) -> str:
         if isinstance(result, DashboardComparison):
             return f"Hero: {GuiStudyDashboard._sample_text(result.hero)} · Field: {GuiStudyDashboard._sample_text(result.field)}"
+        if hasattr(result, "classified") and hasattr(result, "total") and hasattr(result, "coverage_bp"):
+            return (
+                f"{result.classified}/{result.total} classified decisions "
+                f"({result.coverage_bp / 100:.1f}% coverage; {result.unclassified} unknown)"
+            )
         if hasattr(result, "total_opportunities"):
             return f"{result.total_opportunities} decisions"
         if hasattr(result, "total") and hasattr(result.total, "opportunities"):
