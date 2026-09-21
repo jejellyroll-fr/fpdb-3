@@ -150,6 +150,11 @@ def menu_layout() -> tuple[Menu, ...]:
                 MenuItem(N_("Rebuild HUD Cache"), "dia_recreate_hudcache"),
                 MenuItem(N_("Rebuild DB Indexes"), "dia_rebuild_indexes"),
                 MenuItem(
+                    N_("Rebuild Analytics Data"),
+                    "dia_rebuild_analytics",
+                    tip=N_("Re-derive the situations and hand states the Research Browser and HUD read"),
+                ),
+                MenuItem(
                     N_("Dump Database to Textfile"),
                     "dia_dump_db",
                     tip=N_("Export the whole database to a text file (slow)"),

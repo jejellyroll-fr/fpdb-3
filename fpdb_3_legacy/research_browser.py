@@ -49,6 +49,7 @@ from .analytics_query import (
     run_query,
 )
 from .Configuration import CONFIG_PATH
+from .db_rows import rows_by_alias
 from .loggingFpdb import get_logger
 from .research_labels import (
     BEGINNER_DIMENSIONS,
@@ -662,28 +663,6 @@ def _board_text(raw: Mapping[str, Any]) -> str:
     return "".join(Card.valueSuitFromCard(int(code)) for code in codes if code)
 
 
-def _rows_by_alias(cursor: Any) -> list[dict[str, Any]]:
-    """The cursor's rows, keyed by the alias as the SELECT spells it.
-
-    PostgreSQL folds an unquoted alias to lower case, so ``AS handId`` comes
-    back from ``cursor.description`` as ``handid``; SQLite and MySQL hand it
-    back as written. Reading a mixed-case alias by its own spelling therefore
-    worked on two backends and raised ``KeyError: 'handId'`` on the third --
-    which is what the drill-down did on every real PostgreSQL database (#349).
-
-    Keys are kept as the backend gave them and a second, lower-cased index is
-    added, so a lookup by either spelling finds the value and no caller has to
-    know which backend it is talking to.
-    """
-    columns = [description[0] for description in cursor.description]
-    rows = []
-    for raw in cursor.fetchall():
-        row = dict(zip(columns, raw))
-        row.update({name.lower(): value for name, value in zip(columns, raw) if name != name.lower()})
-        rows.append(row)
-    return rows
-
-
 def run_drill_down(
     db: Any,
     row_query: Query,
@@ -740,20 +719,20 @@ def run_drill_down(
         # every range-grid cell -- carries the class expression's modulo
         # operators in its WHERE (#349).
         cursor.execute(escape_literal_percent(sql, placeholder), tuple(params))
-        for row in _rows_by_alias(cursor):
+        for row in rows_by_alias(cursor):
             rows.append(
                 {
-                    "handId": int(row["handid"]),
-                    "startTime": row["starttime"],
-                    "siteName": row["sitename"],
+                    "handId": int(row["handId"]),
+                    "startTime": row["startTime"],
+                    "siteName": row["siteName"],
                     "category": row["category"],
-                    "bigBlind": row["bigblind"],
-                    "maxSeats": row["maxseats"],
-                    "heroName": row["playername"],
-                    "heroProfit": row["playerprofit"],
+                    "bigBlind": row["bigBlind"],
+                    "maxSeats": row["maxSeats"],
+                    "heroName": row["playerName"],
+                    "heroProfit": row["playerProfit"],
                     "heroCards": _cards_text(row["card1"], row["card2"]),
                     "board": _board_text(row),
-                    "finalPot": row["finalpot"],
+                    "finalPot": row["finalPot"],
                 },
             )
     return DrillDown(

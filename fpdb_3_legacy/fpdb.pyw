@@ -1017,6 +1017,59 @@ class fpdb(QMainWindow):
                 "Re-start fpdb to use this option.",
             )
 
+    def dia_rebuild_analytics(self, widget, data=None) -> None:
+        """Re-derive the analytics rows this database is missing (#351).
+
+        A database imported before the analytics layers existed holds hands and
+        actions but none of the rows derived from them, so every Research
+        Browser question answers "0 decisions" and the context-aware HUD panels
+        have nothing to read. The rebuild has existed since #305 and nothing
+        called it: only the demo-workspace tool did, which is no help to a user
+        with their own history.
+        """
+        from fpdb_3_legacy.analytics_lifecycle import stale_subsystems
+        from fpdb_3_legacy.analytics_rebuild import rebuild_subsystems
+
+        if not self.obtain_global_lock("dia_rebuild_analytics"):
+            self.warning_box(
+                "Cannot open Database Maintenance window because"
+                " other windows have been opened. Re-start fpdb to use this option.",
+            )
+            return
+        try:
+            stale = list(stale_subsystems(self.db))
+            if not stale:
+                self.info_box("Rebuild Analytics Data", "This database's analytics data is already up to date.")
+                return
+            confirm = QMessageBox(
+                QMessageBox.Warning,
+                "Rebuild Analytics Data",
+                "Confirm rebuilding the analytics data",
+                QMessageBox.Yes | QMessageBox.No,
+                self,
+            )
+            confirm.setInformativeText(
+                f"These subsystems were derived by older rules, or never derived at all:\n\n"
+                f"    {', '.join(stale)}\n\n"
+                "Re-deriving them reads the hands already stored -- no hand history files are "
+                "needed and no hand ids change. It can take a while on a large database.",
+            )
+            if confirm.exec() != QMessageBox.Yes:
+                log.info("User cancelled rebuilding analytics data")
+                return
+            log.info("Rebuilding analytics data: %s", stale)
+            result = rebuild_subsystems(self.db, self.config, stale)
+            log.info("Analytics rebuild finished: %s", result)
+            summary = f"{result.rebuilt} of {result.scanned} hands re-derived."
+            if result.failed:
+                # Named rather than buried in the log: a rebuild that silently
+                # derived nothing is what left the Research Browser empty in the
+                # first place.
+                summary += f"\n\n{result.failed} hand(s) failed. First: {result.failures[0]}"
+            self.info_box("Rebuild Analytics Data", summary)
+        finally:
+            self.release_global_lock()
+
     def dia_rebuild_indexes(self, widget, data=None) -> None:
         if self.obtain_global_lock("dia_rebuild_indexes"):
             self.dia_confirm = QMessageBox(

@@ -1161,6 +1161,45 @@ class GuiResearchBrowser(QWidget):
             if spec is not None:
                 self._show_view_summary(spec)
 
+    def _analytics_not_built_note(self) -> str:
+        """Why an empty answer may not mean an empty database (#351).
+
+        A database imported before the analytics layers existed holds its hands
+        and its actions but none of the rows derived from them, and every
+        question then answers "0 decisions" -- which reads as "you have no such
+        hands" rather than "this database cannot answer anything yet". The
+        difference is recorded in the analytics meta table, so it can simply be
+        asked rather than guessed at.
+        """
+        db = getattr(self, "db", None)
+        if db is None:
+            return ""
+        try:
+            from fpdb_3_legacy.analytics_lifecycle import stale_subsystems
+
+            stale = stale_subsystems(db)
+        except Exception:  # noqa: BLE001 - a note must never cost a result its display
+            log.debug("Could not read the analytics subsystem status", exc_info=True)
+            return ""
+        if not stale:
+            return ""
+        return _(
+            "This database's analytics data has not been built, so every question answers zero. "
+            "Build it from Database -> Rebuild Analytics Data, then run this again.",
+        )
+
+    def _note_when_empty(self, total: Any, default: str = "") -> str:
+        """The note under an answer, saying the one thing a zero cannot say.
+
+        Used by every view rather than by the table alone: a range grid, a
+        composition and a money report all answer zero on an unbuilt database,
+        and a reader who lands on one of the other three would be told nothing.
+        """
+        if total:
+            return default
+        warning = self._analytics_not_built_note()
+        return warning or default
+
     def _show_view_summary(self, spec: rviews.ViewSpec) -> None:
         """State what the table says in one line, and how to read it."""
         summary = rviews.summarize(self._last_result, spec)
@@ -1175,7 +1214,12 @@ class GuiResearchBrowser(QWidget):
         self.range_grid.set_matrix(matrix)
         self.sample_label.setText(f"{matrix.total_opportunities} decisions")
         self.elapsed_label.setText("")
-        self.result_note.setText(_("Double-click a cell to load the hands behind it."))
+        self.result_note.setText(
+            self._note_when_empty(
+                matrix.total_opportunities,
+                _("Double-click a cell to load the hands behind it."),
+            ),
+        )
         self.view_note.setText(
             _("{question} — {how}").format(question=spec.question, how=spec.how_to_read),
         )
@@ -1186,7 +1230,7 @@ class GuiResearchBrowser(QWidget):
         self.composition_view.set_composition(composition)
         self.sample_label.setText(f"{composition.total} decisions")
         self.elapsed_label.setText("")
-        self.result_note.setText("")
+        self.result_note.setText(self._note_when_empty(composition.total))
         self.view_note.setVisible(False)
 
     def _render_money(self, report: Any) -> None:
@@ -1194,7 +1238,7 @@ class GuiResearchBrowser(QWidget):
         self.money_view.set_report(report)
         self.sample_label.setText(f"{report.total.hands} hands")
         self.elapsed_label.setText("")
-        self.result_note.setText("")
+        self.result_note.setText(self._note_when_empty(report.total.hands))
         self.view_note.setVisible(False)
 
     def _render_result(self, result: Any) -> None:
@@ -1209,7 +1253,7 @@ class GuiResearchBrowser(QWidget):
             self.result_table.setRowCount(0)
             self.result_table.setColumnCount(len(columns))
             self._set_result_headers(columns)
-            self.result_note.setText(result.empty_reason)
+            self.result_note.setText(self._note_when_empty(0, result.empty_reason))
             return
         rows = result.rows
         self.result_table.setRowCount(len(rows))
