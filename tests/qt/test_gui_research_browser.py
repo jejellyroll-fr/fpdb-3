@@ -101,6 +101,28 @@ def test_running_a_query_renders_rows_and_sample(browser, qtbot) -> None:
     assert "decisions" in headers and "numerator" in headers and "frequency" in headers
 
 
+def test_comparison_renders_both_samples_and_disables_ambiguous_drill(browser, qtbot) -> None:
+    browser.metric_combo.setCurrentIndex(browser.metric_combo.findData("fold_frequency"))
+    browser.group_edit.setText("street")
+    browser.compare_check.setChecked(True)
+    _run_and_wait(qtbot, browser)
+    headers = [
+        browser.result_table.horizontalHeaderItem(c).text()
+        for c in range(browser.result_table.columnCount())
+    ]
+    assert {"you", "your sample", "the field", "its sample", "gap"} <= set(headers)
+    assert browser.result_table.rowCount() > 0
+    assert browser._current_query is None
+    assert "without comparison" in browser.drill_note.text()
+
+
+def test_comparison_is_offered_for_every_metric(browser) -> None:
+    browser.metric_combo.setCurrentIndex(browser.metric_combo.findData("total_profit"))
+    assert browser.compare_check.isEnabled()
+    browser.metric_combo.setCurrentIndex(browser.metric_combo.findData("fold_frequency"))
+    assert browser.compare_check.isEnabled()
+
+
 def test_drill_down_loads_a_rows_hands(browser, qtbot, browser_db: Database) -> None:
     from fpdb_3_legacy import research_browser as rb
 
@@ -169,7 +191,7 @@ def test_presets_round_trip_through_the_browser(browser, qtbot, tmp_path: Path) 
     assert index > 0
     browser.preset_combo.setCurrentIndex(index)
     browser._apply_preset()
-    assert browser.metric_combo.currentText() == "fold_frequency"
+    assert browser.metric_combo.currentData() == "fold_frequency"
     assert browser.group_edit.text() == "street"
     names = [row.spec.name for row in browser._filter_rows]
     assert "hero" in names
@@ -271,24 +293,24 @@ def test_breakdown_is_structured_but_still_one_dimension_list(browser) -> None:
 def test_the_expert_text_field_and_the_picker_mirror_each_other(browser) -> None:
     browser.group_edit.setText("street, position")
     assert browser.breakdown_picker.dimensions() == ("street", "position")
-    # An invalid dimension typed in expert mode is not adopted by the picker.
+    # An invalid dimension typed in technical vocabulary is not adopted by the picker.
     browser.group_edit.setText("nope")
     assert browser.breakdown_picker.dimensions() == ()
 
 
-def test_expert_mode_keeps_the_engine_vocabulary_and_the_query(browser) -> None:
+def test_technical_vocabulary_keeps_the_engine_names_and_the_query(browser) -> None:
     browser.group_edit.setText("street")
     _row(browser, "hero").any_combo.setCurrentIndex(_row(browser, "hero").any_combo.findData(False))
     before = browser.current_preset()
-    browser.mode_combo.setCurrentIndex(browser.mode_combo.findData(True))
+    browser.vocabulary_combo.setCurrentIndex(browser.vocabulary_combo.findData(True))
     assert not browser.group_edit.isHidden()
     assert _row(browser, "hero").name_label.text() == "hero"
     assert _row(browser, "primary_situation").name_label.text() == "primary_situation"
     assert _row(browser, "primary_situation").value_edit.isReadOnly() is False
     assert browser.current_preset() == before
-    # Expert mode offers every dimension, Beginner mode a curated subset.
+    # Technical names offer every dimension; poker labels keep a curated subset.
     expert_dims = browser.breakdown_picker.add_combo.count()
-    browser.mode_combo.setCurrentIndex(browser.mode_combo.findData(False))
+    browser.vocabulary_combo.setCurrentIndex(browser.vocabulary_combo.findData(False))
     assert browser.breakdown_picker.add_combo.count() < expert_dims
     assert browser.group_edit.isHidden()
 
@@ -315,7 +337,7 @@ def test_the_first_open_screen_explains_itself(browser) -> None:
     text = " ".join(label.text() for label in browser.empty_state.findChildren(QLabel))
     assert "Research Browser" in text
     assert "Run" in text
-    assert "advanced query builder" in text
+    assert "technical query controls" in text
     # The rebuild note is only shown when there is something to rebuild.
     assert browser.stale_note.isVisibleTo(browser) is False
 
@@ -340,13 +362,13 @@ def test_loading_a_first_run_question_runs_it(browser, qtbot, tmp_path) -> None:
     assert browser._has_run is True
     assert not browser.empty_state.isVisibleTo(browser)
     assert browser.sample_label.text()
-    assert browser.metric_combo.currentText() == question.preset["metric"]
+    assert browser.metric_combo.currentData() == question.preset["metric"]
 
 
-def test_the_advanced_shortcut_switches_mode(browser) -> None:
+def test_the_advanced_shortcut_switches_vocabulary(browser) -> None:
     browser._open_advanced_mode()
     assert browser._expert is True
-    assert browser.mode_combo.currentData() is True
+    assert browser.vocabulary_combo.currentData() is True
 
 
 # ---------------------------------------------------------------------------
@@ -398,7 +420,7 @@ def test_choosing_a_builtin_preset_fills_the_builder_and_says_what_to_adjust(bro
     )
     browser.preset_combo.setCurrentIndex(index)
     qtbot.waitUntil(lambda: browser._worker is None, timeout=15000)
-    assert browser.metric_combo.currentText() == target.metric
+    assert browser.metric_combo.currentData() == target.metric
     assert browser.current_preset()["group_by"] == target.group_by
     assert browser.current_preset()["filters"] == dict(target.filters)
     assert "Adjust" in browser.preset_note.text()
