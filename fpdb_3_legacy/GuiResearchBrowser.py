@@ -317,8 +317,14 @@ class _FilterRow(QWidget):
         self.value_edit = edit
         if not self._expert and self.spec.choices:
             # A closed domain: the selector is the control, and the field is a
-            # read-only echo of the tokens it holds.
-            edit.setReadOnly(True)
+            # read-only echo of the tokens it holds. A list read from the
+            # database is not closed -- it is as fresh as the last read, and an
+            # import can add a game while this pane is open -- so that one stays
+            # typable, or the picker would be a cage rather than a shortcut
+            # (#355).
+            edit.setReadOnly(not self.spec.from_database)
+            if self.spec.from_database:
+                edit.setPlaceholderText(_("or type a value"))
             combo = _ChoiceCombo(self.spec.choices)
             combo.toggled.connect(self._on_choice_toggled)
             self.choice_combo = combo
@@ -951,8 +957,14 @@ class GuiResearchBrowser(QWidget):
 
     def _add_picked_filter(self) -> None:
         spec = self.filter_picker.currentData()
-        if spec is not None:
-            self._append_filter_row(self._spec(spec.name))
+        if spec is None:
+            return
+        # Re-read here and nowhere else: adding a filter is the moment a reader
+        # wants this database's current values, and an import since the pane
+        # opened would otherwise leave the list short (#355). A mode switch or a
+        # preset load keeps the cached one, which costs nothing and is the same.
+        self._spec_cache.pop(spec.name, None)
+        self._append_filter_row(self._spec(spec.name))
 
     def _spec(self, name: str) -> rb.FilterSpec:
         """A filter's spec, with the values this database holds (#355).

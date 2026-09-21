@@ -229,3 +229,68 @@ def test_the_result_table_renders_its_dimensions_through_the_labels() -> None:
     )
 
     assert "value_label" in ast.dump(render), "the rows still print raw stored values"
+
+
+# --- a warning must not contradict the answer it annotates (#355, Codex) ----
+
+
+def test_a_dimension_the_question_splits_is_not_reported_as_averaged() -> None:
+    """Grouping by game gives one row per game; the reader sees the split.
+
+    Warning that such an answer "averages games" contradicts the table right
+    above it, which is worse than saying nothing.
+    """
+    scope = rb.PopulationScope(games=("holdem", "omahahi"), limits=("nl", "pl"), grouped=("game",))
+
+    warning = scope.describe()
+
+    assert "games" not in warning
+    assert "limits" in warning, "the limits are still averaged inside every row"
+
+
+def test_a_question_split_every_way_warns_about_nothing() -> None:
+    scope = rb.PopulationScope(
+        games=("holdem", "omahahi"), limits=("nl", "pl"), sites=("A", "B"), grouped=("game", "limit", "site")
+    )
+
+    assert not scope.is_mixed
+    assert scope.describe() == ""
+
+
+def test_the_scope_carries_the_questions_own_grouping() -> None:
+    db = _Db([])
+    query = rb.preset_to_query({"metric": "fold_frequency", "filters": {}, "group_by": ["game"]})
+
+    assert rb.population_scope(db, query).grouped == ("game",)
+
+
+# --- a picker must not become a cage (#355, Codex) --------------------------
+
+
+def test_a_list_read_from_the_database_says_so() -> None:
+    db = _Db([("omahahi",), ("holdem",)])
+
+    assert rb.spec_for_database(db, "game").from_database
+    assert not rb.filter_spec("game").from_database
+    assert not rb.filter_spec("primary_situation").from_database, "the engine's own vocabulary is closed"
+
+
+def test_a_database_list_stays_typable() -> None:
+    """An import can add a game while this pane is open.
+
+    Before the picker, any value could be typed. Replacing a text box with a
+    list read once would have made a newly imported game unreachable until the
+    whole tab was rebuilt -- a regression dressed as an improvement.
+    """
+    source = (ROOT / "fpdb_3_legacy" / "GuiResearchBrowser.py").read_text()
+
+    assert "setReadOnly(not self.spec.from_database)" in source
+
+
+def test_adding_a_filter_re_reads_its_values() -> None:
+    tree = ast.parse((ROOT / "fpdb_3_legacy" / "GuiResearchBrowser.py").read_text())
+    adder = next(
+        node for node in ast.walk(tree) if isinstance(node, ast.FunctionDef) and node.name == "_add_picked_filter"
+    )
+
+    assert "_spec_cache" in ast.dump(adder), "the cached list is never refreshed"

@@ -98,6 +98,11 @@ class FilterSpec:
     user_description: str = ""
     unit: str = ""
     choices: tuple[Choice, ...] = ()
+    #: True when ``choices`` were read from this database rather than from the
+    #: engine's own vocabulary. Such a list is a shortcut, not a closed set: it
+    #: is only as fresh as the last time it was read, and an import can add a
+    #: value to it while the pane is open (#355).
+    from_database: bool = False
     examples: tuple[str, ...] = ()
     expert_only: bool = False
 
@@ -726,7 +731,7 @@ def spec_for_database(db: Any, name: str) -> FilterSpec:
     if spec.choices:
         return spec
     choices = database_choices(db, name)
-    return replace(spec, choices=choices) if choices else spec
+    return replace(spec, choices=choices, from_database=True) if choices else spec
 
 
 @dataclass(frozen=True)
@@ -745,19 +750,30 @@ class PopulationScope:
     games: tuple[str, ...] = ()
     limits: tuple[str, ...] = ()
     sites: tuple[str, ...] = ()
+    #: The dimensions the question already splits into rows. A query grouped by
+    #: game gives one row per game, so warning that it averages them is simply
+    #: wrong: the reader is looking at the split.
+    grouped: tuple[str, ...] = ()
+
+    def _mixed(self, name: str, values: tuple[str, ...]) -> bool:
+        return len(values) > 1 and name not in self.grouped
 
     @property
     def is_mixed(self) -> bool:
-        return max(len(self.games), len(self.limits), len(self.sites), 0) > 1
+        return (
+            self._mixed("game", self.games)
+            or self._mixed("limit", self.limits)
+            or self._mixed("site", self.sites)
+        )
 
     def describe(self) -> str:
         """The mixture, named, or ``""`` when there is nothing to warn about."""
         parts = []
-        if len(self.games) > 1:
+        if self._mixed("game", self.games):
             parts.append("games (" + ", ".join(value_label("game", game) for game in self.games) + ")")
-        if len(self.limits) > 1:
+        if self._mixed("limit", self.limits):
             parts.append("limits (" + ", ".join(value_label("limit", limit) for limit in self.limits) + ")")
-        if len(self.sites) > 1:
+        if self._mixed("site", self.sites):
             parts.append("rooms (" + ", ".join(self.sites) + ")")
         if not parts:
             return ""
@@ -782,12 +798,15 @@ def population_scope(db: Any, query: Query) -> PopulationScope:
         )
     except Exception:  # noqa: BLE001 - an annotation is never worth an exception
         log.debug("Could not read the population's scope", exc_info=True)
-        return PopulationScope()
+        # The grouping is a property of the question, not of the population, so
+        # it survives a population that could not be read.
+        return PopulationScope(grouped=tuple(query.group_by))
     rows = [row for row in result.rows if row.opportunities]
     return PopulationScope(
         games=tuple(sorted({str(row.group["game"]) for row in rows})),
         limits=tuple(sorted({str(row.group["limit"]) for row in rows})),
         sites=tuple(sorted({str(row.group["site"]) for row in rows})),
+        grouped=tuple(query.group_by),
     )
 
 
