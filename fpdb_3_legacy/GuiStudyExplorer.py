@@ -31,6 +31,7 @@ class GuiStudyExplorer(QWidget):
     """Find a poker spot before exposing metrics and engine filters."""
 
     study_opened = Signal(object)
+    differences_requested = Signal()
     advanced_requested = Signal()
 
     def __init__(
@@ -190,6 +191,13 @@ class GuiStudyExplorer(QWidget):
         self.advanced_button.clicked.connect(self._open_advanced)
         layout.addWidget(self.advanced_button)
 
+        self.differences_button = QPushButton("Biggest Differences vs Field")
+        self.differences_button.setToolTip(
+            "Rank observed Hero-versus-Field frequency gaps and open the matching study."
+        )
+        self.differences_button.clicked.connect(self._open_differences)
+        layout.addWidget(self.differences_button)
+
     def _refresh_categories(self) -> None:
         while self.category_grid.count():
             item = self.category_grid.takeAt(0)
@@ -347,6 +355,9 @@ class GuiStudyExplorer(QWidget):
         self.advanced_requested.emit()
         if self.main_window is not None and hasattr(self.main_window, "tab_research_browser"):
             self.main_window.tab_research_browser(None)
+
+    def _open_differences(self) -> None:
+        self.differences_requested.emit()
 
 
 __all__ = ["GuiStudyExplorer"]

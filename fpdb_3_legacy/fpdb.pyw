@@ -1897,6 +1897,7 @@ class fpdb(QMainWindow):
         def build_explorer(module):
             explorer = module.GuiStudyExplorer(self.config, self.sql, self)
             explorer.study_opened.connect(self._open_study_dashboard)
+            explorer.differences_requested.connect(self._open_study_differences)
             return explorer
 
         self.open_tab(
@@ -1915,6 +1916,43 @@ class fpdb(QMainWindow):
                 self,
                 selection=selection,
             ),
+            module="fpdb_3_legacy.GuiStudyDashboard",
+        )
+
+    def _open_study_differences(self) -> None:
+        """Open the curated Hero-versus-Field discovery page (#365)."""
+
+        def build_differences(module):
+            differences = module.GuiStudyDifferences(self.config, self.sql, self)
+            differences.study_requested.connect(self._open_difference_study)
+            return differences
+
+        self.open_tab(
+            "Biggest Differences vs Field",
+            build_differences,
+            module="fpdb_3_legacy.GuiStudyDifferences",
+        )
+
+    def _open_difference_study(self, detail) -> None:
+        """Open the study and preserve the clicked difference context (#365)."""
+
+        def build_dashboard(module):
+            from fpdb_3_legacy.research_study_dashboard import StudyDashboardModel
+
+            model = StudyDashboardModel(detail.selection)
+            model.set_active_panel(detail.panel_id)
+            for name, value in detail.cross_filters.items():
+                try:
+                    model.add_cross_filter(name, value)
+                except ValueError:
+                    # A dimension can be descriptive without being a legal
+                    # query filter; the study itself remains a valid target.
+                    continue
+            return module.GuiStudyDashboard(self.config, self.sql, self, model=model)
+
+        self.open_tab(
+            f"Study · {detail.row.spot}",
+            build_dashboard,
             module="fpdb_3_legacy.GuiStudyDashboard",
         )
 

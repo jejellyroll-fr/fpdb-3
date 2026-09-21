@@ -98,3 +98,12 @@ def test_custom_advanced_research_remains_reachable(explorer, qtbot) -> None:
     explorer.advanced_button.click()
 
     assert called == [True]
+
+
+def test_biggest_differences_entry_point_is_reachable(explorer, qtbot) -> None:
+    called = []
+    explorer.differences_requested.connect(lambda: called.append(True))
+
+    explorer.differences_button.click()
+
+    assert called == [True]
