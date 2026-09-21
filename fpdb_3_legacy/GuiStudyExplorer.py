@@ -274,7 +274,9 @@ class GuiStudyExplorer(QWidget):
             self._render_selected()
 
     def _render_selected(self) -> None:
-        assert self._selected is not None
+        if self._selected is None:
+            self._render_empty_search()
+            return
         study = self._selected
         selection = self._preview_selection()
         self.breadcrumb_label.setText("  ›  ".join(self.model.breadcrumbs(study)))
@@ -343,9 +345,8 @@ class GuiStudyExplorer(QWidget):
 
     def _open_advanced(self) -> None:
         self.advanced_requested.emit()
-        callback = getattr(self.main_window, "tab_research_browser", None)
-        if callable(callback):
-            callback(None)
+        if self.main_window is not None and hasattr(self.main_window, "tab_research_browser"):
+            self.main_window.tab_research_browser(None)
 
 
 __all__ = ["GuiStudyExplorer"]
