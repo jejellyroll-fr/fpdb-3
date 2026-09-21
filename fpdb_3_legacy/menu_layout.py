@@ -192,6 +192,11 @@ def menu_layout() -> tuple[Menu, ...]:
                     tip=N_("Version, packaging and runtime environment details"),
                 ),
                 MenuItem(N_("Stats Guide"), "tabStatsInfo"),
+                MenuItem(
+                    N_("Research Browser for Omaha"),
+                    "help_research_omaha",
+                    tip=N_("What every filter is for in a four-card game, and the two that are not"),
+                ),
                 MenuItem(N_("Log Messages"), "dia_logs", tip=N_("Log and debug messages")),
                 MenuItem(N_("About"), "dia_about", tip=N_("About the program"), separator_before=True),
             ),

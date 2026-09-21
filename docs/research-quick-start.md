@@ -12,6 +12,10 @@ python tools/make_demo_workspace.py          # writes ~/fpdb-demo
 
 then open `~/fpdb-demo/HUD_config.xml` in fpdb. Every player in it is fictional.
 
+**Playing Omaha?** The examples below are Hold'em, and one view — the 13x13
+range grid — cannot work on a four-card game at all. Read
+[Research Browser for Omaha](research-omaha.md) instead, or after this.
+
 ## Open it
 
 **Cash → Research Browser**. Three panes: the question on the left, the answer
