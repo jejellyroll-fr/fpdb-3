@@ -810,6 +810,148 @@ def population_scope(db: Any, query: Query) -> PopulationScope:
     )
 
 
+@dataclass(frozen=True)
+class ComparisonRow:
+    """One group, answered twice: by hero and by everyone else."""
+
+    group: dict[str, Any]
+    hero_opportunities: int
+    hero_actions: int
+    field_opportunities: int
+    field_actions: int
+    hero_value: float | None = None
+    field_value: float | None = None
+    unit: str = ""
+    frequency: bool = False
+
+    @staticmethod
+    def _rate(actions: int, opportunities: int) -> float | None:
+        return None if not opportunities else actions / opportunities
+
+    @property
+    def hero_rate(self) -> float | None:
+        return self._rate(self.hero_actions, self.hero_opportunities) if self.frequency else None
+
+    @property
+    def field_rate(self) -> float | None:
+        return self._rate(self.field_actions, self.field_opportunities) if self.frequency else None
+
+    @property
+    def hero_measure(self) -> float | None:
+        """The metric value to display for the hero side."""
+        return self.hero_rate if self.frequency else self.hero_value
+
+    @property
+    def field_measure(self) -> float | None:
+        """The metric value to display for the field side."""
+        return self.field_rate if self.frequency else self.field_value
+
+    @property
+    def gap(self) -> float | None:
+        """Hero minus field, or ``None`` when either side has no sample.
+
+        A gap against nothing is not a small gap, it is no reading at all --
+        the one thing a comparison must never round to zero.
+        """
+        hero, field = self.hero_measure, self.field_measure
+        return None if hero is None or field is None else hero - field
+
+
+@dataclass(frozen=True)
+class Comparison:
+    """A question answered for hero and for the field, side by side (#357).
+
+    The browser could answer either -- ``hero`` says which -- but never both at
+    once, so a reader had to run the question twice and hold the first answer in
+    their head. A frequency without a baseline is a measurement; beside one it
+    is a read, which is what the tool is for.
+    """
+
+    rows: tuple[ComparisonRow, ...]
+    metric: str
+    group_by: tuple[str, ...]
+    unit: str = ""
+    frequency: bool = False
+
+    @property
+    def hero_total(self) -> ComparisonRow:
+        return ComparisonRow(
+            group={},
+            hero_opportunities=sum(row.hero_opportunities for row in self.rows),
+            hero_actions=sum(row.hero_actions for row in self.rows),
+            field_opportunities=sum(row.field_opportunities for row in self.rows),
+            field_actions=sum(row.field_actions for row in self.rows),
+            unit=self.unit,
+            frequency=self.frequency,
+        )
+
+
+def run_comparison(db: Any, preset: Mapping[str, Any]) -> Comparison:
+    """Run one question twice: as hero, and as everyone else.
+
+    The ``hero`` filter is replaced rather than merged, so a preset that already
+    picks a side still yields both: a comparison whose two halves are the same
+    population would answer itself.
+    """
+    query = preset_to_query(preset)
+    spec, _filters, _numerator = query.resolved()
+    frequency = spec.frequency
+    sides = {}
+    for name, hero in (("hero", True), ("field", False)):
+        filters = dict(query.filters)
+        filters["hero"] = hero
+        sides[name] = run_query(
+            db,
+            Query(
+                metric=query.metric,
+                filters=filters,
+                numerator=dict(query.numerator),
+                group_by=tuple(query.group_by),
+            ),
+        )
+
+    def _by_group(result: Any) -> dict[tuple, Any]:
+        return {tuple(sorted(row.group.items())): row for row in result.rows}
+
+    hero_rows, field_rows = _by_group(sides["hero"]), _by_group(sides["field"])
+
+    def _metric_value(row: Any | None) -> float | None:
+        if row is None:
+            return None
+        if frequency:
+            return None if row.frequency_bp is None else row.frequency_bp / 10000
+        return row.value
+
+    rows = []
+    # Union, not intersection: a spot hero never reached is a fact about hero,
+    # and dropping it would quietly flatter the comparison.
+    for key in sorted(set(hero_rows) | set(field_rows), key=lambda item: [str(part) for part in item]):
+        hero_row, field_row = hero_rows.get(key), field_rows.get(key)
+        source = hero_row if hero_row is not None else field_row
+        if source is None:  # The union above is non-empty, but keep this total.
+            continue
+        rows.append(
+            ComparisonRow(
+                group=dict(source.group),
+                hero_opportunities=hero_row.opportunities if hero_row is not None else 0,
+                hero_actions=hero_row.actions if hero_row is not None else 0,
+                field_opportunities=field_row.opportunities if field_row is not None else 0,
+                field_actions=field_row.actions if field_row is not None else 0,
+                hero_value=_metric_value(hero_row),
+                field_value=_metric_value(field_row),
+                unit=spec.unit,
+                frequency=frequency,
+            ),
+        )
+    return Comparison(
+        rows=tuple(rows),
+        metric=query.metric,
+        group_by=tuple(query.group_by),
+        unit=spec.unit,
+        frequency=frequency,
+    )
+
+
 def run_drill_down(
     db: Any,
     row_query: Query,

@@ -19,7 +19,7 @@ from pathlib import Path
 import pytest
 
 from fpdb_3_legacy import research_browser as rb
-from fpdb_3_legacy.analytics_query import FILTERS, Query, run_hand_ids
+from fpdb_3_legacy.analytics_query import FILTERS, Query, run_hand_ids, run_query
 from fpdb_3_legacy.Database import Database
 from fpdb_3_legacy.Importer import Importer
 from tests.helpers import analytics_golden as golden
@@ -245,6 +245,59 @@ def test_sample_size_is_stated_prominently(browser_db: Database) -> None:
     )
     assert "decisions" in result.sample_text
     assert result.total_opportunities == 25
+
+
+def test_comparison_answers_hero_and_field_with_the_same_question(browser_db: Database) -> None:
+    preset = {
+        "metric": "hand_frequency",
+        "filters": {"street": "preflop"},
+        "numerator": {"response": ["call", "raise", "complete"]},
+        "group_by": ["position"],
+    }
+    comparison = rb.run_comparison(browser_db, preset)
+    query = rb.preset_to_query(preset)
+    hero = run_query(
+        browser_db,
+        Query(
+            metric=query.metric,
+            filters={**query.filters, "hero": True},
+            numerator=query.numerator,
+            group_by=query.group_by,
+        ),
+    )
+    field = run_query(
+        browser_db,
+        Query(
+            metric=query.metric,
+            filters={**query.filters, "hero": False},
+            numerator=query.numerator,
+            group_by=query.group_by,
+        ),
+    )
+    expected_hero = {row.group["position"]: row for row in hero.rows}
+    expected_field = {row.group["position"]: row for row in field.rows}
+    actual = {row.group["position"]: row for row in comparison.rows}
+    assert set(actual) == set(expected_hero) | set(expected_field)
+    for position, row in actual.items():
+        hero_row = expected_hero.get(position)
+        field_row = expected_field.get(position)
+        assert row.hero_opportunities == (hero_row.opportunities if hero_row else 0)
+        assert row.hero_actions == (hero_row.actions if hero_row else 0)
+        assert row.field_opportunities == (field_row.opportunities if field_row else 0)
+        assert row.field_actions == (field_row.actions if field_row else 0)
+
+
+def test_comparison_gap_is_unknown_without_two_samples() -> None:
+    row = rb.ComparisonRow({}, 0, 0, 4, 1)
+    assert row.hero_rate is None
+    assert row.gap is None
+
+
+def test_comparison_supports_a_non_frequency_metric(browser_db: Database) -> None:
+    comparison = rb.run_comparison(browser_db, {"metric": "opportunities", "group_by": ["position"]})
+    assert comparison.rows
+    assert comparison.frequency is False
+    assert all(row.hero_measure is not None or row.field_measure is not None for row in comparison.rows)
 
 
 def test_ungrouped_zero_population_is_an_empty_state(browser_db: Database) -> None:

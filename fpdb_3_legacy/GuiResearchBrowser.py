@@ -21,13 +21,13 @@ by construction.
   all, so an untouched control can no longer silently mean "No" (#329's
   acceptance criterion, and the reason ``hero`` starts at *Any*);
 * the breakdown is a structured add/remove control, not a comma-separated
-  string, though the string form stays available in Expert mode and remains the
+  string, though the string form stays available with technical names and remains the
   single source the query is built from;
 * the active question is stated in plain language before it runs;
 * the first-open screen explains itself, offers example questions, and says so
   when the analytics tables need rebuilding.
 
-Expert mode keeps the full engine vocabulary -- internal filter names, the free
+Technical vocabulary keeps the full engine vocabulary -- internal filter names, the free
 text Group by field, raw metric names -- so simplifying the default flow never
 removes power.
 
@@ -46,6 +46,7 @@ from typing import Any, Final
 
 from PySide6.QtCore import Qt, QThread, Signal
 from PySide6.QtWidgets import (
+    QCheckBox,
     QComboBox,
     QDoubleSpinBox,
     QHBoxLayout,
@@ -78,6 +79,23 @@ log = get_logger("gui_research_browser")
 _ANY: Any = None
 _TRUE: Any = True
 _FALSE: Any = False
+
+
+def _comparison_measure_text(value: float | None, unit: str, frequency: bool) -> str:
+    """Format one side of a comparison without hiding its unit."""
+    if value is None:
+        return ""
+    if frequency:
+        return f"{value * 100:.1f}%"
+    if unit == "cents":
+        return f"{value:.2f}¢"
+    if unit == "bp":
+        return f"{value / 100:.1f}%"
+    if unit == "centi":
+        return f"{value / 100:.2f}"
+    if float(value).is_integer():
+        return str(int(value))
+    return f"{value:g}"
 
 
 class _WorkerDatabase:
@@ -234,8 +252,8 @@ class _FilterRow(QWidget):
 
     * ``bool``  -> a tri-state combo (Any / Yes / No) in both modes;
     * ``range`` -> two number fields, unit-labelled;
-    * ``set``/``flags`` with a closed domain -> a choice selector in Beginner
-      mode and the raw comma-separated field in Expert mode;
+    * ``set``/``flags`` with a closed domain -> a choice selector with poker
+      labels and the raw comma-separated field with technical names;
     * anything else -> the raw field, because the domain really is open.
     """
 
@@ -249,7 +267,7 @@ class _FilterRow(QWidget):
         layout = QHBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 2)
 
-        # The engine name only shows in Expert mode: #329 is explicit that the
+        # The engine name only shows with technical names: #329 is explicit that the
         # internal vocabulary belongs there and not in the default surface.
         self.name_label = QLabel(spec.name if expert else spec.label)
         tooltip = f"{spec.label}: {spec.user_description}" if spec.user_description else spec.label
@@ -274,7 +292,7 @@ class _FilterRow(QWidget):
         self.remove_button.setToolTip(_("Remove this filter"))
         self.remove_button.setStyleSheet("color: #e06c75; font-weight: bold;")
         self.remove_button.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.remove_button.mousePressEvent = lambda _event: self.removed.emit(self)  # type: ignore[assignment]
+        self.remove_button.mousePressEvent = lambda _event: self.removed.emit(self)  # type: ignore[assignment,misc]
         layout.addWidget(self.remove_button)
 
     # -- widget construction -------------------------------------------------
@@ -461,7 +479,7 @@ class _BreakdownPicker(QWidget):
         self._render()
 
     def set_expert(self, expert: bool) -> None:
-        """Expert mode offers every dimension; Beginner mode the common ones."""
+        """Technical names offer every dimension; poker labels the common ones."""
         self._expert = expert
         self.refresh_choices()
 
@@ -510,7 +528,7 @@ class _BreakdownPicker(QWidget):
             close.setStyleSheet("color: #e06c75; font-weight: bold;")
             close.setCursor(Qt.CursorShape.PointingHandCursor)
             close.setToolTip(_("Remove this breakdown"))
-            close.mousePressEvent = lambda _event, name=name: self._remove(name)  # type: ignore[assignment]
+            close.mousePressEvent = lambda _event, name=name: self._remove(name)  # type: ignore[assignment,misc]
             chip_layout.addWidget(label)
             chip_layout.addWidget(close)
             chip_layout.addStretch()
@@ -528,6 +546,8 @@ class GuiResearchBrowser(QWidget):
         self.main_window = mainwin
         self.sql = querylist
         self._spec_cache: dict[str, rb.FilterSpec] = {}
+        #: A loaded preset's numerator, which no control can hold (#357).
+        self._numerator: dict[str, Any] = {}
         self._scope: Any = None
         self.db = db
         if self.db is None:
@@ -611,7 +631,7 @@ class GuiResearchBrowser(QWidget):
         filters_layout.setContentsMargins(0, 0, 4, 0)
 
         self._build_view_row(filters_layout, muted)
-        self._build_mode_row(filters_layout)
+        self._build_vocabulary_row(filters_layout)
         title = QLabel(_("Filters"))
         title.setStyleSheet(f"font-weight: bold; color: {muted}; font-size: 11px; text-transform: uppercase;")
         filters_layout.addWidget(title)
@@ -654,19 +674,19 @@ class GuiResearchBrowser(QWidget):
         filters_layout.addWidget(self.preset_note)
         return filters_pane
 
-    def _build_mode_row(self, filters_layout: QVBoxLayout) -> None:
-        """Beginner or Expert: which vocabulary the controls speak (#329)."""
+    def _build_vocabulary_row(self, filters_layout: QVBoxLayout) -> None:
+        """Choose readable poker labels or the engine's technical names."""
         mode_row = QHBoxLayout()
-        mode_row.addWidget(QLabel(_("Mode")))
-        self.mode_combo = QComboBox()
-        self.mode_combo.addItem(_("Beginner"), False)
-        self.mode_combo.addItem(_("Expert"), True)
-        self.mode_combo.setToolTip(
-            _("Beginner shows poker labels and selects values from the known list.\n"
-              "Expert shows the engine names and accepts arbitrary values."),
+        mode_row.addWidget(QLabel(_("Vocabulary")))
+        self.vocabulary_combo = QComboBox()
+        self.vocabulary_combo.addItem(_("Poker labels"), False)
+        self.vocabulary_combo.addItem(_("Technical names"), True)
+        self.vocabulary_combo.setToolTip(
+            _("Poker labels use the terminology most readers see at the table.\n"
+              "Technical names expose the analytics engine's fields and values."),
         )
-        self.mode_combo.currentIndexChanged.connect(self._on_mode_changed)
-        mode_row.addWidget(self.mode_combo, 1)
+        self.vocabulary_combo.currentIndexChanged.connect(self._on_vocabulary_changed)
+        mode_row.addWidget(self.vocabulary_combo, 1)
         filters_layout.addLayout(mode_row)
 
     def _build_filter_picker_row(self, filters_layout: QVBoxLayout) -> None:
@@ -690,9 +710,11 @@ class GuiResearchBrowser(QWidget):
     def _build_breakdown_controls(self, filters_layout: QVBoxLayout) -> None:
         """The metric, the structured breakdown and the expert text field."""
         self.metric_combo = QComboBox()
-        self.metric_combo.addItems(list(KNOWN_METRICS))
-        self.metric_combo.setCurrentText("fold_frequency")
+        self._fill_metric_combo()
+        self.set_metric("fold_frequency")
+        self.metric_combo.currentIndexChanged.connect(lambda _index: self._forget_preset_numerator())
         self.metric_combo.currentTextChanged.connect(lambda _: self._update_summary())
+        self.metric_combo.currentTextChanged.connect(lambda _: self._update_comparison_availability())
         filters_layout.addWidget(QLabel(_("Metric")))
         filters_layout.addWidget(self.metric_combo)
 
@@ -705,7 +727,7 @@ class GuiResearchBrowser(QWidget):
         self.group_edit.setPlaceholderText(_("e.g. street, response"))
         self.group_edit.setToolTip(_("Comma-separated group-by dimensions (engine vocabulary)"))
         self.group_edit.textChanged.connect(self._on_group_text_changed)
-        self.group_edit.setVisible(False)  # Expert mode only.
+        self.group_edit.setVisible(False)  # Technical vocabulary only.
         filters_layout.addWidget(self.group_edit)
 
     def _build_run_buttons(self, buttons_layout: QHBoxLayout, muted: str) -> None:
@@ -719,9 +741,14 @@ class GuiResearchBrowser(QWidget):
         self.cancel_button.setCursor(Qt.CursorShape.PointingHandCursor)
         self.cancel_button.setVisible(False)
         self.cancel_button.mousePressEvent = lambda _event: self._cancel_query()  # type: ignore[assignment]
+        self.compare_check = QCheckBox(_("Compare with the field"))
+        self.compare_check.setToolTip(_("Run the same question twice -- yours and the field's -- side by side."))
+        self.compare_check.toggled.connect(lambda _on: self._update_summary())
         buttons_layout.addWidget(self.run_button)
         buttons_layout.addWidget(self.cancel_button)
+        buttons_layout.addWidget(self.compare_check)
         buttons_layout.addStretch()
+        self._update_comparison_availability()
 
     def _open_help(self, topic: str = "research") -> None:
         """Open a user guide from the Help affordance (#334).
@@ -849,7 +876,7 @@ class GuiResearchBrowser(QWidget):
         self.example_layout.setSpacing(2)
         layout.addWidget(self.example_container)
 
-        self.advanced_link = QLabel(_("Open the advanced query builder (Expert mode)"))
+        self.advanced_link = QLabel(_("Show technical query controls"))
         self.advanced_link.setStyleSheet("color: #61afef; text-decoration: underline;")
         self.advanced_link.setCursor(Qt.CursorShape.PointingHandCursor)
         self.advanced_link.setToolTip(_("Show the engine's own filter names and free-text values."))
@@ -900,9 +927,9 @@ class GuiResearchBrowser(QWidget):
 
     # -- mode and labels -----------------------------------------------------
 
-    def _on_mode_changed(self) -> None:
-        """Rebuild the controls in the other vocabulary, keeping the query."""
-        expert = bool(self.mode_combo.currentData())
+    def _on_vocabulary_changed(self) -> None:
+        """Rebuild the controls in the selected vocabulary, keeping the query."""
+        expert = bool(self.vocabulary_combo.currentData())
         if expert == self._expert:
             return
         self._expert = expert
@@ -913,6 +940,7 @@ class GuiResearchBrowser(QWidget):
             self._append_filter_row(self._spec(name))
             if value is not None:
                 self._filter_rows[-1].set_value(value)
+        self._fill_metric_combo()
         self.breakdown_picker.set_expert(expert)
         self.group_edit.setVisible(expert)
         self._fill_group_picker()
@@ -920,9 +948,9 @@ class GuiResearchBrowser(QWidget):
         self._update_summary()
 
     def _open_advanced_mode(self) -> None:
-        """The first-run shortcut into the full engine vocabulary."""
-        self.mode_combo.setCurrentIndex(self.mode_combo.count() - 1)
-        self._on_mode_changed()
+        """The first-run shortcut into the engine's technical vocabulary."""
+        self.vocabulary_combo.setCurrentIndex(self.vocabulary_combo.count() - 1)
+        self._on_vocabulary_changed()
 
     def _expert_mode(self) -> bool:
         return self._expert
@@ -930,7 +958,7 @@ class GuiResearchBrowser(QWidget):
     # -- filter rows ---------------------------------------------------------
 
     def _fill_group_picker(self) -> None:
-        """The filter groups, labelled in poker language in Beginner mode."""
+        """The filter groups, labelled in poker language when selected."""
         current = self.filter_group_combo.currentData()
         self.filter_group_combo.blockSignals(True)
         self.filter_group_combo.clear()
@@ -997,18 +1025,67 @@ class GuiResearchBrowser(QWidget):
             row.setParent(None)
             row.deleteLater()
 
+    def _fill_metric_combo(self) -> None:
+        """The metric, in the same vocabulary as everything beside it (#357).
+
+        Half of every question is the metric, and it was the only control still
+        offering engine names with poker labels -- ``ev_per_opportunity`` next to
+        a filter called *Effective stack* and a breakdown called *Board
+texture*. The label already existed; nothing called it. Technical names
+        keeps the engine name, exactly as the filter picker does.
+        """
+        current = self.metric_combo.currentData() if self.metric_combo.count() else None
+        self.metric_combo.blockSignals(True)
+        try:
+            self.metric_combo.clear()
+            for name in KNOWN_METRICS:
+                self.metric_combo.addItem(name if self._expert else rlabels.metric_label(name), name)
+            if current is not None:
+                self.set_metric(current)
+        finally:
+            self.metric_combo.blockSignals(False)
+
+    def set_metric(self, name: str) -> None:
+        """Select a metric by its engine name, whatever the control shows."""
+        index = self.metric_combo.findData(name)
+        if index >= 0:
+            self.metric_combo.setCurrentIndex(index)
+
+    def selected_metric(self) -> str:
+        """The selected metric as the engine spells it."""
+        return str(self.metric_combo.currentData() or "")
+
+    def _update_comparison_availability(self) -> None:
+        """Comparison is a rate view, so keep it off for non-frequency metrics."""
+        self.compare_check.setEnabled(True)
+        self.compare_check.setToolTip(_("Run the same question twice -- yours and the field's -- side by side."))
+
+    def _forget_preset_numerator(self) -> None:
+        """A hand-built question is the reader's own, numerator included.
+
+        The carried numerator belongs to the preset it came from. Once the
+        metric, the grouping or the filters have been changed by hand, keeping
+        it would narrow a question nobody can see the narrowing of (#357).
+        """
+        self._numerator = {}
+
     def _on_filters_changed(self) -> None:
         """Filters changed: the next run uses them, and the summary says so.
+
+        A preset's numerator does not survive this: the question is the
+        reader's own once they have changed it (#357).
 
         Live queries are not re-run automatically -- the sample size is the
         user's call -- but the question is restated immediately.
         """
+        self._forget_preset_numerator()
         self._update_summary()
 
     # -- the breakdown -------------------------------------------------------
 
     def _on_group_text_changed(self) -> None:
         """The expert text field is the source; the picker mirrors it."""
+        self._forget_preset_numerator()
         parsed = [part.strip() for part in self.group_edit.text().split(",") if part.strip()]
         self._syncing_breakdown = True
         try:
@@ -1021,6 +1098,7 @@ class GuiResearchBrowser(QWidget):
         """The picker changed: write the canonical dimension list back."""
         if self._syncing_breakdown:
             return
+        self._forget_preset_numerator()
         self.group_edit.setText(", ".join(self.breakdown_picker.dimensions()))
         self._update_summary()
 
@@ -1041,11 +1119,14 @@ class GuiResearchBrowser(QWidget):
         group_by = tuple(
             part.strip() for part in self.group_edit.text().split(",") if part.strip()
         )
-        return {
-            "metric": self.metric_combo.currentText(),
+        preset: dict[str, Any] = {
+            "metric": self.selected_metric(),
             "filters": filters,
             "group_by": group_by,
         }
+        if self._numerator:
+            preset["numerator"] = dict(self._numerator)
+        return preset
 
     def run_query(self) -> None:
         preset = self.current_preset()
@@ -1084,6 +1165,12 @@ class GuiResearchBrowser(QWidget):
         """The work the active view needs, as one callable for the worker."""
         spec = self._active_view
         filters = dict(preset["filters"])
+        if self.compare_check.isChecked():
+            # A comparison is the same question asked of two populations, so it
+            # replaces the view rather than decorating one: the grid, the
+            # composition and the money report each answer one population by
+            # construction (#357).
+            return lambda db: rb.run_comparison(db, preset)
         if spec is None or spec.kind == rviews.TABLE:
             return lambda db: rb.execute_preset(db, preset)
         if spec.kind == rviews.GRID:
@@ -1212,6 +1299,9 @@ class GuiResearchBrowser(QWidget):
 
     def _render(self, result: Any) -> None:
         """Draw a finished task in the presentation its view asks for."""
+        if isinstance(result, rb.Comparison):
+            self._render_comparison(result)
+            return
         spec = self._active_view
         kind = spec.kind if spec is not None else rviews.TABLE
         if kind == rviews.GRID and spec is not None:
@@ -1224,6 +1314,79 @@ class GuiResearchBrowser(QWidget):
             self._render_result(result)
             if spec is not None:
                 self._show_view_summary(spec)
+
+    def _render_comparison(self, comparison: Any) -> None:
+        """Your number beside the field's, and the gap between them (#357).
+
+        The gap is the column that makes the rest actionable: a frequency alone
+        is a measurement, and the reason this pane could not answer "am I
+        3-betting enough" was that it had no second number to answer it with.
+
+        A side with no sample prints nothing rather than 0%: no decisions is not
+        a frequency of zero, and a gap against nothing is not a small gap.
+        """
+        self.result_stack.setCurrentIndex(0)
+        self._has_run = True
+        self.empty_state.setVisible(False)
+        self._last_result = comparison
+        # A comparison row contains two populations. There is no single set of
+        # hands to drill into, so leave the drill pane explicit rather than
+        # silently opening the unfiltered question behind the comparison.
+        self._current_query = None
+        self.drill_table.setRowCount(0)
+        self.drill_table.setColumnCount(0)
+        self.drill_note.setText(_("Run without comparison to inspect the hands behind a row."))
+        headings = [rlabels.dimension_label(name) for name in comparison.group_by]
+        headings += [_("you"), _("your sample"), _("the field"), _("its sample"), _("gap")]
+        self.result_table.setRowCount(len(comparison.rows))
+        self.result_table.setColumnCount(len(headings))
+        self.result_table.setHorizontalHeaderLabels(headings)
+
+        for r, row in enumerate(comparison.rows):
+            cells = [rb.value_label(name, row.group.get(name)) for name in comparison.group_by]
+            cells += [
+                _comparison_measure_text(row.hero_measure, comparison.unit, comparison.frequency),
+                (
+                    f"{row.hero_actions}/{row.hero_opportunities}"
+                    if comparison.frequency
+                    else str(row.hero_opportunities)
+                ),
+                _comparison_measure_text(row.field_measure, comparison.unit, comparison.frequency),
+                (
+                    f"{row.field_actions}/{row.field_opportunities}"
+                    if comparison.frequency
+                    else str(row.field_opportunities)
+                ),
+                "" if row.gap is None else (
+                    f"{row.gap * 100:+.1f} pt"
+                    if comparison.frequency
+                    else _comparison_measure_text(row.gap, comparison.unit, comparison.frequency)
+                ),
+            ]
+            for c, text in enumerate(cells):
+                item = QTableWidgetItem(text)
+                if c >= len(comparison.group_by):
+                    item.setTextAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+                else:
+                    item.setData(Qt.ItemDataRole.UserRole, dict(row.group))
+                self.result_table.setItem(r, c, item)
+        self.result_table.resizeColumnsToContents()
+        total = comparison.hero_total
+        self.sample_label.setText(
+            _("{hero} decisions of yours, {field} of the field's").format(
+                hero=total.hero_opportunities, field=total.field_opportunities,
+            ),
+        )
+        self.elapsed_label.setText("")
+        self.view_note.setVisible(False)
+        self.result_note.setText(
+            self._note_when_empty(
+                total.hero_opportunities + total.field_opportunities,
+                _("No matching hands were found for either population.")
+                if not total.hero_opportunities and not total.field_opportunities
+                else _("A gap is only as good as the smaller of the two samples beside it."),
+            ),
+        )
 
     def _analytics_not_built_note(self) -> str:
         """Why an empty answer may not mean an empty database (#351).
@@ -1387,7 +1550,7 @@ class GuiResearchBrowser(QWidget):
         """Write the result headings, and explain the honest ones.
 
         The engine's words stay -- ``decisions`` and ``numerator`` are the pair
-        the analytics epic refuses to hide -- but Beginner mode says what they
+        the analytics epic refuses to hide -- but poker labels say what they
         mean in the tooltip rather than leaving a user to guess.
         """
         self.result_table.setHorizontalHeaderLabels([col.heading for col in columns])
@@ -1513,7 +1676,7 @@ class GuiResearchBrowser(QWidget):
             link.setStyleSheet("color: #61afef;")
             link.setCursor(Qt.CursorShape.PointingHandCursor)
             link.setToolTip(question.description)
-            link.mousePressEvent = lambda _event, preset=question.preset: self._load_example(preset)  # type: ignore[assignment]
+            link.mousePressEvent = lambda _event, preset=question.preset: self._load_example(preset)  # type: ignore[assignment,misc]
             self.example_layout.addWidget(link)
         self.stale_note.setText(self._stale_message())
         self.stale_note.setVisible(bool(self.stale_note.text()))
@@ -1619,7 +1782,7 @@ class GuiResearchBrowser(QWidget):
         except ValueError as exc:
             QMessageBox.warning(self, _("Research browser"), str(exc))
             return
-        self.metric_combo.setCurrentText(clean["metric"])
+        self.set_metric(clean["metric"])
         self.group_edit.setText(", ".join(clean["group_by"]))
         for row in list(self._filter_rows):
             self._remove_filter_row(row)
@@ -1630,6 +1793,12 @@ class GuiResearchBrowser(QWidget):
                 continue
             self._append_filter_row(spec)
             self._filter_rows[-1].set_value(value)
+        # Last, and deliberately: a preset's numerator says *which* of the
+        # filtered decisions count, no control can hold it, and filling the rows
+        # above fires the signal that forgets it. Dropping it turned "VPIP by
+        # position" into 100% at every seat, because every preflop decision then
+        # counted as a VPIP (#357).
+        self._numerator = dict(clean.get("numerator") or {})
         self._update_summary()
 
     @staticmethod
