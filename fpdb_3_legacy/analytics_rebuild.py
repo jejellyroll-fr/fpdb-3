@@ -56,6 +56,7 @@ from . import analytics_lifecycle as lifecycle
 from .action_events import ACTION_EVENT_COLUMNS, attach_action_events, chips_to_cents
 from .backfill_autonotes import _decode_card, load_hand_from_database
 from .board_features import BOARD_FEATURE_COLUMNS, derive_board_rows, flop_texture_mask
+from .db_rows import rows_by_alias
 from .hand_state_store import enumerate_hand_states
 from .player_situations import enumerate_situations
 
@@ -321,9 +322,7 @@ def _load_action_rows(
         " ORDER BY HA.actionNo",
         (hand.dbid_hands,),
     )
-    names = [d[0] for d in c.description]
-    for raw in c.fetchall():
-        row = dict(zip(names, raw, strict=True))
+    for row in rows_by_alias(c):
         number = int(row["actionNo"])
         stored = handsactions.get(number)
         if stored is None:
@@ -357,12 +356,10 @@ def _rebuild_hand_states(db: Any, hand_id: int) -> int:
         f" WHERE HS.handId = {ph} ORDER BY HS.actionNo",
         (hand_id,),
     )
-    names = [description[0] for description in c.description]
     situations: list[StoredSituation] = []
     cards: dict[str, Any] = {}
     player_ids: dict[str, int] = {}
-    for raw in c.fetchall():
-        row = dict(zip(names, raw, strict=True))
+    for row in rows_by_alias(c):
         player = str(row["player"])
         board = json.loads(row["board"] or "[]") if isinstance(row["board"], str) else list(row["board"] or ())
         situations.append(

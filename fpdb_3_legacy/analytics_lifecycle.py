@@ -167,6 +167,39 @@ def is_stale(db: Any, subsystem: str) -> bool:
     return subsystem_statuses(db)[subsystem].is_stale
 
 
+def rebuildable_subsystems(db: Any) -> tuple[str, ...]:
+    """The stale subsystems this code may re-derive: unrecorded, or behind it.
+
+    ``stale_subsystems`` deliberately includes rows written by a *newer*
+    extractor, because older code must not present them as current. That is the
+    right answer for the reading side and the wrong one for a rebuild:
+    re-deriving those rows with this version's rules would overwrite newer data
+    with older, and stamp it with the older version -- a downgrade the lifecycle
+    does not support. A rebuild therefore asks for this list, not that one.
+    """
+    statuses = subsystem_statuses(db)
+    return tuple(
+        name
+        for name in SUBSYSTEMS
+        if EXTRACTOR_VERSIONS[name] > 0 and statuses[name].recorded_version < statuses[name].code_version
+    )
+
+
+def subsystems_ahead_of_code(db: Any) -> tuple[str, ...]:
+    """The subsystems whose stored rows were written by a newer fpdb.
+
+    They are stale to this version, which cannot read them as current, but they
+    are not a rebuild's business: only the newer version knows the rules that
+    wrote them.
+    """
+    statuses = subsystem_statuses(db)
+    return tuple(
+        name
+        for name in SUBSYSTEMS
+        if EXTRACTOR_VERSIONS[name] > 0 and statuses[name].recorded_version > statuses[name].code_version
+    )
+
+
 def stale_subsystems(db: Any) -> tuple[str, ...]:
     """The subsystems whose stored rows were derived by other rules."""
     return tuple(name for name in SUBSYSTEMS if EXTRACTOR_VERSIONS[name] > 0 and subsystem_statuses(db)[name].is_stale)
