@@ -129,6 +129,12 @@ def test_the_rebuild_action_is_defined_and_takes_the_global_lock() -> None:
     assert "obtain_global_lock" in calls
     assert "release_global_lock" in calls
     assert any("rebuild_subsystems" in ast.dump(node) for node in ast.walk(action))
+    dumped = ast.dump(action)
+    # stale_subsystems() includes rows a newer fpdb wrote; re-deriving those
+    # here would replace them with this version's older rules.
+    assert "rebuildable_subsystems" in dumped
+    assert "stale_subsystems" not in dumped
+    assert "subsystems_ahead_of_code" in dumped
 
 
 # --- an empty answer says which kind of empty it is --------------------------
@@ -149,39 +155,72 @@ def _uninitialised(cls):
 
 
 @pytest.fixture
-def stale_patch(monkeypatch):
-    def _set(stale: tuple[str, ...]) -> None:
+def statuses_patch(monkeypatch):
+    """Drive the subsystem versions the note is built from."""
+    from fpdb_3_legacy.analytics_lifecycle import SubsystemStatus
+
+    def _set(**versions: tuple[int, int]) -> None:
         import fpdb_3_legacy.analytics_lifecycle as lifecycle
 
-        monkeypatch.setattr(lifecycle, "stale_subsystems", lambda _db: stale)
+        statuses = {
+            name: SubsystemStatus(name=name, recorded_version=recorded, code_version=code)
+            for name, (recorded, code) in versions.items()
+        }
+        monkeypatch.setattr(lifecycle, "subsystem_statuses", lambda _db: statuses)
 
     return _set
 
 
-def test_an_empty_answer_names_the_unbuilt_analytics(stale_patch) -> None:
-    stale_patch(("situations", "hand_strength"))
-    browser, _ = _browser(("situations",))
+def test_an_empty_answer_names_the_analytics_that_were_never_built(statuses_patch) -> None:
+    statuses_patch(situations=(0, 1), hand_strength=(0, 1))
+    browser, _ = _browser(())
 
     note = browser._note_when_empty(0, "Double-click a cell to load the hands behind it.")
 
-    assert "has not been built" in note
+    assert "never been built" in note
+    assert "situations" in note and "hand_strength" in note
     assert "Rebuild Analytics Data" in note
 
 
-def test_an_answer_with_decisions_keeps_its_own_note(stale_patch) -> None:
+def test_the_note_names_the_stale_subsystems_rather_than_condemning_the_database(statuses_patch) -> None:
+    """A stale subsystem the question never reads must not explain its zero.
+
+    Saying "every question answers zero" turns one bumped extractor version
+    into a diagnosis of a perfectly legitimate empty answer.
+    """
+    statuses_patch(situations=(1, 1), board_features=(1, 2))
+    browser, _ = _browser(())
+
+    note = browser._note_when_empty(0, "no hands matched")
+
+    assert "board_features" in note
+    assert "situations" not in note
+    assert "may answer zero" in note
+
+
+def test_an_answer_with_decisions_keeps_its_own_note(statuses_patch) -> None:
     # The warning belongs to a zero, not to every screen of a stale database.
-    stale_patch(("situations",))
-    browser, _ = _browser(("situations",))
+    statuses_patch(situations=(0, 1))
+    browser, _ = _browser(())
 
     assert browser._note_when_empty(69, "Double-click a cell.") == "Double-click a cell."
 
 
-def test_a_built_database_says_nothing_extra(stale_patch) -> None:
-    stale_patch(())
+def test_a_built_database_says_nothing_extra(statuses_patch) -> None:
+    statuses_patch(situations=(1, 1), board_features=(1, 1))
     browser, _ = _browser(())
 
     assert browser._note_when_empty(0, "no hands matched") == "no hands matched"
     assert browser._note_when_empty(0) == ""
+
+
+def test_rows_from_a_newer_fpdb_are_not_reported_as_unbuilt(statuses_patch) -> None:
+    # Ahead of this code is stale to the reader, but it is not something a
+    # rebuild here can or should fix, so the note must not send them to it.
+    statuses_patch(situations=(2, 1))
+    browser, _ = _browser(())
+
+    assert browser._note_when_empty(0, "no hands matched") == "no hands matched"
 
 
 def test_a_status_that_cannot_be_read_costs_the_result_nothing(monkeypatch) -> None:
@@ -193,7 +232,7 @@ def test_a_status_that_cannot_be_read_costs_the_result_nothing(monkeypatch) -> N
         msg = "no meta table here"
         raise RuntimeError(msg)
 
-    monkeypatch.setattr(lifecycle, "stale_subsystems", _explode)
+    monkeypatch.setattr(lifecycle, "subsystem_statuses", _explode)
     browser, _ = _browser(())
 
     assert browser._note_when_empty(0, "default") == "default"
@@ -216,3 +255,60 @@ def test_every_view_routes_its_empty_note_through_the_one_helper(renderer: str) 
         and node.func.attr == "_note_when_empty"
         for node in ast.walk(method)
     ), f"{renderer} sets its note without asking whether the database can answer at all"
+
+
+# --- a rebuild must not downgrade rows a newer fpdb wrote --------------------
+
+
+class _VersionedDb:
+    """A database whose recorded subsystem versions the test chooses."""
+
+    def __init__(self, recorded: dict[str, int]) -> None:
+        self.recorded = recorded
+
+
+@pytest.fixture
+def lifecycle_versions(monkeypatch):
+    from fpdb_3_legacy import analytics_lifecycle as lifecycle
+
+    def _set(**versions: tuple[int, int]) -> None:
+        statuses = {
+            name: lifecycle.SubsystemStatus(name=name, recorded_version=recorded, code_version=code)
+            for name, (recorded, code) in versions.items()
+        }
+        monkeypatch.setattr(lifecycle, "subsystem_statuses", lambda _db: statuses)
+        monkeypatch.setattr(lifecycle, "SUBSYSTEMS", tuple(statuses))
+        monkeypatch.setattr(
+            lifecycle, "EXTRACTOR_VERSIONS", {name: status.code_version for name, status in statuses.items()}
+        )
+
+    return _set
+
+
+def test_a_rebuild_takes_the_subsystems_this_code_is_newer_than(lifecycle_versions) -> None:
+    from fpdb_3_legacy.analytics_lifecycle import rebuildable_subsystems
+
+    lifecycle_versions(situations=(0, 1), board_features=(1, 2), hand_strength=(1, 1))
+
+    assert rebuildable_subsystems(_VersionedDb({})) == ("situations", "board_features")
+
+
+def test_rows_written_by_a_newer_fpdb_are_left_alone(lifecycle_versions) -> None:
+    """Re-deriving them here would stamp newer data with older rules.
+
+    ``stale_subsystems`` reports them because this code cannot read them as
+    current -- the right answer for a reader and the wrong one for a rebuild.
+    """
+    from fpdb_3_legacy.analytics_lifecycle import (
+        rebuildable_subsystems,
+        stale_subsystems,
+        subsystems_ahead_of_code,
+    )
+
+    lifecycle_versions(situations=(2, 1), board_features=(0, 1))
+    db = _VersionedDb({})
+
+    assert "situations" in stale_subsystems(db)  # stale to a reader
+    assert "situations" not in rebuildable_subsystems(db)  # but not a rebuild's business
+    assert subsystems_ahead_of_code(db) == ("situations",)
+    assert rebuildable_subsystems(db) == ("board_features",)

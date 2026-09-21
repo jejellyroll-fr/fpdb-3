@@ -1175,18 +1175,33 @@ class GuiResearchBrowser(QWidget):
         if db is None:
             return ""
         try:
-            from fpdb_3_legacy.analytics_lifecycle import stale_subsystems
+            from fpdb_3_legacy.analytics_lifecycle import subsystem_statuses
 
-            stale = stale_subsystems(db)
+            statuses = subsystem_statuses(db)
         except Exception:  # noqa: BLE001 - a note must never cost a result its display
             log.debug("Could not read the analytics subsystem status", exc_info=True)
             return ""
-        if not stale:
-            return ""
-        return _(
-            "This database's analytics data has not been built, so every question answers zero. "
-            "Build it from Database -> Rebuild Analytics Data, then run this again.",
-        )
+
+        # Named rather than summarised, and never claimed to explain *this*
+        # zero: one stale subsystem the question does not read would otherwise
+        # tell a reader their perfectly legitimate empty answer is a fault.
+        never = [name for name, status in statuses.items() if status.recorded_version == 0 and status.is_stale]
+        older = [
+            name
+            for name, status in statuses.items()
+            if 0 < status.recorded_version < status.code_version
+        ]
+        if never:
+            return _(
+                "The analytics data for {names} has never been built. A question that reads it "
+                "answers zero until it is: Database -> Rebuild Analytics Data.",
+            ).format(names=", ".join(never))
+        if older:
+            return _(
+                "The analytics data for {names} was derived by older rules, so a question that "
+                "reads it may answer zero: Database -> Rebuild Analytics Data.",
+            ).format(names=", ".join(older))
+        return ""
 
     def _note_when_empty(self, total: Any, default: str = "") -> str:
         """The note under an answer, saying the one thing a zero cannot say.

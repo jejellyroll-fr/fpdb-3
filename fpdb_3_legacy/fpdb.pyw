@@ -1027,7 +1027,7 @@ class fpdb(QMainWindow):
         called it: only the demo-workspace tool did, which is no help to a user
         with their own history.
         """
-        from fpdb_3_legacy.analytics_lifecycle import stale_subsystems
+        from fpdb_3_legacy.analytics_lifecycle import rebuildable_subsystems, subsystems_ahead_of_code
         from fpdb_3_legacy.analytics_rebuild import rebuild_subsystems
 
         if not self.obtain_global_lock("dia_rebuild_analytics"):
@@ -1037,9 +1037,21 @@ class fpdb(QMainWindow):
             )
             return
         try:
-            stale = list(stale_subsystems(self.db))
+            # Deliberately not stale_subsystems(): that list includes rows a
+            # *newer* fpdb wrote, which this version cannot read as current but
+            # must not overwrite with its own older rules either.
+            stale = list(rebuildable_subsystems(self.db))
+            ahead = list(subsystems_ahead_of_code(self.db))
+            if ahead:
+                self.warning_box(
+                    "These analytics rows were written by a newer version of fpdb and are left "
+                    f"untouched, because re-deriving them here would replace them with older "
+                    f"rules:\n\n    {', '.join(ahead)}\n\n"
+                    "Upgrade fpdb to read them.",
+                    "Rebuild Analytics Data",
+                )
             if not stale:
-                self.info_box("Rebuild Analytics Data", "This database's analytics data is already up to date.")
+                self.info_box("Rebuild Analytics Data", "There is nothing for this version to rebuild.")
                 return
             confirm = QMessageBox(
                 QMessageBox.Warning,
