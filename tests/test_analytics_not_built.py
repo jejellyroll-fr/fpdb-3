@@ -329,10 +329,20 @@ def test_a_rebuilt_situation_must_state_its_game() -> None:
     """
     from fpdb_3_legacy.analytics_rebuild import StoredSituation
 
+    # Spelled through a mapping rather than as a literal call: the omission is
+    # the subject of the test, and a static analyser reading it as a mistake in
+    # the test is a fair reading of a literal one.
+    every_field_but_the_game = {
+        "hand_id": 1,
+        "action_no": 1,
+        "street": 1,
+        "street_name": "FLOP",
+        "player": "p",
+        "board": ("As",),
+    }
+
     with pytest.raises(TypeError):
-        StoredSituation(  # type: ignore[call-arg]
-            hand_id=1, action_no=1, street=1, street_name="FLOP", player="p", board=("As",)
-        )
+        StoredSituation(**every_field_but_the_game)
 
 
 def test_the_rebuild_reads_the_game_beside_the_cards() -> None:
