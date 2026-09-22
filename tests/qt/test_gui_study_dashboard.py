@@ -50,6 +50,29 @@ def test_dashboard_has_one_study_context_and_lazy_panel_tabs(qtbot, dashboard_db
     assert dashboard._pages["overview"][1].rowCount() > 0
 
 
+def test_stale_panel_result_cannot_render_into_a_different_active_panel(
+    qtbot,
+    dashboard_db: Database,
+    tmp_path,
+) -> None:
+    explorer = StudyExplorerModel(builtin_studies(), tmp_path / "history.json")
+    selection = explorer.open_study("srp_pfr_ip_flop", remember=False)
+    dashboard = GuiStudyDashboard(db=dashboard_db, selection=selection)
+    qtbot.addWidget(dashboard)
+
+    stale_fingerprint = dashboard.model.fingerprint("overview")
+    dashboard.model.set_active_panel("hands")
+    dashboard._serial = 1
+    dashboard._panel_done((object(), None), 1, stale_fingerprint)
+
+    assert stale_fingerprint not in dashboard._results
+
+
+def test_effective_stack_variable_uses_stored_hundredths_of_bb() -> None:
+    assert GuiStudyDashboard._parse_variable("effective_stack_bb", "80,120") == [8000.0, 12000.0]
+    assert GuiStudyDashboard._parse_variable("stake_bb", "0.25,1") == [0.25, 1.0]
+
+
 def test_cross_filter_is_visible_reversible_and_shared(qtbot, dashboard_db: Database, tmp_path) -> None:
     explorer = StudyExplorerModel(builtin_studies(), tmp_path / "history.json")
     selection = explorer.open_study("srp_pfr_ip_flop", remember=False)

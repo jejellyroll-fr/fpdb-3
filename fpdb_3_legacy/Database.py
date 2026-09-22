@@ -844,8 +844,14 @@ class Database(
             Database._worker_pools.add(self._worker_conn_pool)
             Database._worker_retired_pools.discard(self._worker_conn_pool)
         conn = None
-        active_slot = False
+        slot_acquired = False
         try:
+            # The global semaphore bounds checked-out connections, not just
+            # newly created ones. Reusing an idle connection must consume the
+            # same process-wide capacity or several database instances can
+            # exceed the intended four-worker connection bound.
+            self._worker_conn_semaphore.acquire()
+            slot_acquired = True
             try:
                 with Database._worker_pool_lock:
                     conn = self._worker_conn_pool.get_nowait()
@@ -856,19 +862,12 @@ class Database(
                 # for the active-worker slot, so a newly opened study cannot
                 # be starved by connections retained by another study.
                 self._evict_idle_worker_connections(exclude=self._worker_conn_pool)
-                self._worker_conn_semaphore.acquire()
-                active_slot = True
-                try:
-                    conn = self._create_new_worker_connection()
-                except Exception:
-                    self._worker_conn_semaphore.release()
-                    active_slot = False
-                    raise
+                conn = self._create_new_worker_connection()
 
             yield conn
         finally:
             self._return_worker_connection(conn)
-            if active_slot:
+            if slot_acquired:
                 self._worker_conn_semaphore.release()
 
     @classmethod

@@ -282,6 +282,11 @@ def test_stale_result_does_not_replace_a_newer_query(browser, qtbot) -> None:
     assert browser.sample_label.text() == "0 decisions"
 
 
+def test_browser_exposes_tab_cleanup_hooks(browser) -> None:
+    assert callable(browser.shutdown_workers)
+    assert callable(browser.close_owned_database)
+
+
 def test_presets_round_trip_through_the_browser(browser, qtbot, tmp_path: Path) -> None:
     from fpdb_3_legacy import research_browser as rb
 

@@ -339,6 +339,8 @@ class GuiStudyDashboard(QWidget):
             return None
         if name in {"effective_stack_bb", "stake_bb"}:
             values = [float(part.strip()) for part in text.split(",") if part.strip()]
+            if name == "effective_stack_bb":
+                values = [value * 100 for value in values]
             if len(values) == 1:
                 return [values[0], values[0]]
             if not values:
@@ -425,7 +427,7 @@ class GuiStudyDashboard(QWidget):
         worker.start()
 
     def _panel_done(self, payload: Any, serial: int, fingerprint: str) -> None:
-        if serial != self._serial:
+        if serial != self._serial or fingerprint != self.model.fingerprint(self.model.state.active_panel):
             return
         panel_id = self.model.state.active_panel
         result, self._stack_note = payload
@@ -433,7 +435,7 @@ class GuiStudyDashboard(QWidget):
         self._render_result(panel_id, result)
 
     def _panel_failed(self, message: str, serial: int, fingerprint: str) -> None:
-        if serial != self._serial:
+        if serial != self._serial or fingerprint != self.model.fingerprint(self.model.state.active_panel):
             return
         panel_id = self.model.state.active_panel
         status, table = self._pages[panel_id]

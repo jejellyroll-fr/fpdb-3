@@ -64,6 +64,39 @@ def test_the_concurrency_bound_stays_process_wide(two_databases) -> None:
     assert first._worker_conn_semaphore is second._worker_conn_semaphore
 
 
+def test_reusing_an_idle_connection_consumes_the_process_slot(two_databases) -> None:
+    first, _second = two_databases
+
+    class CountingSemaphore:
+        def __init__(self) -> None:
+            self.acquires = 0
+            self.releases = 0
+
+        def acquire(self) -> None:
+            self.acquires += 1
+
+        def release(self) -> None:
+            self.releases += 1
+
+    previous = Database._worker_conn_semaphore
+    semaphore = CountingSemaphore()
+    Database._worker_conn_semaphore = semaphore  # type: ignore[assignment]
+    try:
+        with first.worker_connection():
+            pass
+        # This borrow is served from the queue populated by the first borrow;
+        # it must still participate in the process-wide active bound.
+        with first.worker_connection():
+            pass
+    finally:
+        Database._worker_conn_semaphore = previous
+        first.close_worker_pool()
+        _second.close_worker_pool()
+
+    assert semaphore.acquires == 2
+    assert semaphore.releases == 2
+
+
 def test_idle_worker_connections_are_bounded_process_wide(two_databases) -> None:
     first, second = two_databases
 

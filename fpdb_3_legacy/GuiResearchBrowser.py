@@ -1920,13 +1920,28 @@ texture*. The label already existed; nothing called it. Technical names
 
     # -- lifecycle -----------------------------------------------------------
 
-    def closeEvent(self, event) -> None:  # noqa: N802 - Qt naming.
-        if self._worker is not None and self._worker.isRunning():
-            self._worker.wait(2000)
-        if self._drill_worker is not None and self._drill_worker.isRunning():
-            self._drill_worker.wait(2000)
+    def shutdown_workers(self) -> None:
+        """Stop browser and source-hand queries before tab destruction.
+
+        ``fpdb.close_tab`` removes a page from the tab widget and calls this
+        hook directly; removed child widgets do not receive ``closeEvent``.
+        """
+        for worker in (self._worker, self._drill_worker):
+            if worker is not None and worker.isRunning():
+                worker.wait(SourceHandsPane.SHUTDOWN_WAIT_MS)
+        self._worker = None
+        self._drill_worker = None
         self.source_hands.stop()
+
+    def close_owned_database(self) -> None:
+        """Release the connection created for this tab."""
         if self._owns_db and self.db is not None:
             with contextlib.suppress(Exception):
                 self.db.disconnect()
+            self._owns_db = False
+
+    def closeEvent(self, event) -> None:  # noqa: N802 - Qt naming.
+        """Delegate native closes to the same hooks used by tab removal."""
+        self.shutdown_workers()
+        self.close_owned_database()
         super().closeEvent(event)
