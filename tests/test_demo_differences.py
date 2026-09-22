@@ -195,7 +195,12 @@ def test_every_picture_a_guide_shows_exists(document: str) -> None:
     import re
 
     docs = Path(__file__).resolve().parents[1] / "docs"
-    referenced = set(re.findall(r"\(images/([^)]+\.png)\)", (docs / document).read_text()))
+    referenced = set(
+        re.findall(
+            r"\(images/([^)]+\.png)\)",
+            (docs / document).read_text(encoding="utf-8"),
+        )
+    )
 
     assert referenced, f"{document} shows no pictures"
     missing = sorted(name for name in referenced if not (docs / "images" / name).exists())
@@ -204,7 +209,7 @@ def test_every_picture_a_guide_shows_exists(document: str) -> None:
 
 def _prose(name: str) -> str:
     """One guide as a single line, so an assertion is about words not wrapping."""
-    text = (Path(__file__).resolve().parents[1] / "docs" / name).read_text()
+    text = (Path(__file__).resolve().parents[1] / "docs" / name).read_text(encoding="utf-8")
     return " ".join(text.split())
 
 
@@ -235,7 +240,7 @@ def test_every_visualization_has_a_reading_guide() -> None:
 
 
 def test_the_readme_leads_with_the_spot_first_workflow() -> None:
-    readme = (Path(__file__).resolve().parents[1] / "README.md").read_text()
+    readme = (Path(__file__).resolve().parents[1] / "README.md").read_text(encoding="utf-8")
     analytics = readme.index("Advanced Poker Analytics")
     spot_first = readme.index("Choose a spot")
     builder = readme.index("Custom / Advanced Research")
