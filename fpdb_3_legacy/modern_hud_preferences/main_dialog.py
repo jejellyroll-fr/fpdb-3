@@ -21,6 +21,7 @@ from PySide6.QtWidgets import (
     QLabel,
     QLineEdit,
     QListWidget,
+    QMenu,
     QMessageBox,
     QPushButton,
     QScrollArea,
@@ -31,6 +32,7 @@ from PySide6.QtWidgets import (
     QTableWidget,
     QTableWidgetItem,
     QTabWidget,
+    QToolButton,
     QVBoxLayout,
     QWidget,
 )
@@ -54,8 +56,28 @@ from fpdb_3_legacy.modern_hud_preferences.preview_widgets import (
 )
 from fpdb_3_legacy.PopupIcons import AVAILABLE_PROVIDERS
 from fpdb_3_legacy.PopupThemes import AVAILABLE_THEMES
+from fpdb_3_legacy.responsive_layout import (
+    CollapsibleSection,
+    ReflowGrid,
+    column_count,
+    fit_window,
+    labelled_field,
+    wrap_in_scroll,
+)
 
 log = get_logger("modern_hud_preferences.main_dialog")
+
+#: ``(minimum width, columns)`` for the Dynamic Panels field grids. Four across
+#: is the layout the tab was designed for; three once a caption would start to
+#: wrap, two once two combos side by side stop being readable, and a single
+#: column at the end so no selector is ever squeezed out of view.
+PANEL_FIELD_BREAKPOINTS = ((1000, 4), (840, 3), (600, 2))
+
+#: Width below which the five profile buttons of the header give way to a single
+#: menu. The five buttons and the profile combo are what set the dialog's
+#: minimum width at 890 px, so the swap has to happen above that or the window
+#: could never be narrowed to the width that needs it.
+NARROW_HEADER_WIDTH = 900
 
 
 class ModernHudPreferences(QDialog):
@@ -63,8 +85,8 @@ class ModernHudPreferences(QDialog):
         super().__init__(parent)
         self.config = config
         self.setWindowTitle(_("HUD Preferences"))
-        self.setMinimumSize(1200, 800)
-        self.resize(1400, 900)
+        # The size is applied at the end of __init__, once the content is known;
+        # see the ``fit_window`` call there.
 
         # Main layout with better spacing
         main_layout = QVBoxLayout(self)
@@ -91,7 +113,11 @@ class ModernHudPreferences(QDialog):
         profile_bar.addWidget(profile_label)
 
         self.profile_combo = QComboBox()
-        self.profile_combo.setMinimumWidth(250)
+        # Wide enough to read a profile name, small enough that the five action
+        # buttons beside it still fit a 1024-wide window. The buttons below take
+        # their natural width instead of a 120 px floor each: five floors were
+        # the single largest contributor to the dialog's minimum width.
+        self.profile_combo.setMinimumWidth(180)
         # Let qt_material manage the style
         self.profile_combo.currentIndexChanged.connect(self.on_profile_selected)
         profile_bar.addWidget(self.profile_combo)
@@ -102,23 +128,18 @@ class ModernHudPreferences(QDialog):
 
         # Profile action buttons with better styling
         self.add_profile_btn = QPushButton(_("➕ New Profile"))
-        self.add_profile_btn.setMinimumWidth(120)
         self.add_profile_btn.clicked.connect(self.add_profile)
 
         self.dup_profile_btn = QPushButton(_("📋 Duplicate"))
-        self.dup_profile_btn.setMinimumWidth(120)
         self.dup_profile_btn.clicked.connect(self.duplicate_profile)
 
         self.del_profile_btn = QPushButton(_("🗑️ Delete"))
-        self.del_profile_btn.setMinimumWidth(120)
         self.del_profile_btn.clicked.connect(self.delete_profile)
 
         self.export_profile_btn = QPushButton(_("📤 Export HUD"))
-        self.export_profile_btn.setMinimumWidth(120)
         self.export_profile_btn.clicked.connect(self.export_profile)
 
         self.import_profile_btn = QPushButton(_("📥 Import HUD"))
-        self.import_profile_btn.setMinimumWidth(120)
         self.import_profile_btn.clicked.connect(self.import_profile)
 
         profile_bar.addWidget(self.add_profile_btn)
@@ -126,6 +147,22 @@ class ModernHudPreferences(QDialog):
         profile_bar.addWidget(self.del_profile_btn)
         profile_bar.addWidget(self.export_profile_btn)
         profile_bar.addWidget(self.import_profile_btn)
+
+        # The same five actions behind one button, for a window too narrow to
+        # hold them. Five buttons are what set the dialog's minimum width at
+        # 890 px, so a reader who wants the preferences beside their table could
+        # not narrow the window. ``_fit_profile_actions`` swaps between the two
+        # as the width changes.
+        self.profile_actions_btn = QToolButton()
+        self.profile_actions_btn.setText(_("Profile actions"))
+        self.profile_actions_btn.setPopupMode(QToolButton.ToolButtonPopupMode.InstantPopup)
+        self.profile_actions_menu = QMenu(self.profile_actions_btn)
+        for button in self._profile_action_buttons():
+            action = self.profile_actions_menu.addAction(button.text())
+            action.triggered.connect(lambda _checked=False, source=button: source.click())
+        self.profile_actions_btn.setMenu(self.profile_actions_menu)
+        self.profile_actions_btn.setVisible(False)
+        profile_bar.addWidget(self.profile_actions_btn)
 
         header_layout.addLayout(profile_bar)
 
@@ -392,9 +429,11 @@ class ModernHudPreferences(QDialog):
         left_layout.addWidget(stat_btn_frame)
         # Wrap the editor in a scroll area: a vertical scrollbar appears when the
         # content is taller than the window, and a horizontal one when the window
-        # is too narrow for the property zones — instead of cramming/truncating,
-        # the editor keeps a comfortable minimum width and scrolls.
-        left_panel.setMinimumWidth(1000)
+        # is too narrow for the property zones. The minimum is the width at which
+        # the four property zones stay legible, not the 1000 px the layout wanted:
+        # that floor alone forced the whole dialog wider than a laptop screen, and
+        # the scroll area already covers the rest by scrolling.
+        left_panel.setMinimumWidth(560)
         left_scroll = QScrollArea()
         left_scroll.setWidgetResizable(True)
         left_scroll.setFrameShape(QFrame.Shape.NoFrame)
@@ -468,7 +507,9 @@ class ModernHudPreferences(QDialog):
         popup_select_layout.addWidget(popup_select_label)
 
         self.popup_combo = QComboBox()
-        self.popup_combo.setMinimumWidth(360)
+        # The 360 px floor plus three 120 px buttons was the widest row in the
+        # dialog and set its minimum width on its own.
+        self.popup_combo.setMinimumWidth(220)
         self.popup_combo.setMinimumHeight(30)
         self.popup_combo.currentIndexChanged.connect(self.on_popup_selected)
         popup_select_layout.addWidget(self.popup_combo)
@@ -477,17 +518,14 @@ class ModernHudPreferences(QDialog):
 
         # Popup action buttons
         self.add_popup_btn = QPushButton(_("➕ New Popup"))
-        self.add_popup_btn.setMinimumWidth(120)
         self.add_popup_btn.setFixedHeight(34)
         self.add_popup_btn.clicked.connect(self.add_popup)
 
         self.dup_popup_btn = QPushButton(_("📋 Duplicate"))
-        self.dup_popup_btn.setMinimumWidth(120)
         self.dup_popup_btn.setFixedHeight(34)
         self.dup_popup_btn.clicked.connect(self.duplicate_popup)
 
         self.del_popup_btn = QPushButton(_("🗑️ Delete"))
-        self.del_popup_btn.setMinimumWidth(120)
         self.del_popup_btn.setFixedHeight(34)
         self.del_popup_btn.clicked.connect(self.delete_popup)
 
@@ -505,7 +543,10 @@ class ModernHudPreferences(QDialog):
         # Left panel: Statistics list
         left_popup_panel = QFrame()
         left_popup_panel.setFrameStyle(QFrame.Shape.StyledPanel)
-        left_popup_panel.setMinimumWidth(1000)
+        # Same reasoning as the statistics editor: the scroll area added below
+        # covers a narrow window, so the floor only has to keep the statistics
+        # list and the item properties readable side by side.
+        left_popup_panel.setMinimumWidth(560)
         left_popup_layout = QVBoxLayout(left_popup_panel)
         left_popup_layout.setContentsMargins(12, 12, 12, 12)
         left_popup_layout.setSpacing(8)
@@ -825,6 +866,12 @@ class ModernHudPreferences(QDialog):
 
         # Update status
         self.update_status()
+
+        # Size the dialog last, once the content is known. The dialog used to
+        # demand 1200 x 800 and open at 1400 x 900 without ever asking the screen
+        # how much room it had, so on a laptop the bottom of a tab sat below the
+        # visible area and the window could not be made smaller.
+        fit_window(self, 1400, 900)
 
     def update_status(self) -> None:
         """Update status label with current profile info."""
@@ -2583,9 +2630,7 @@ class ModernHudPreferences(QDialog):
             self.load_popup_windows()
             self.profile_combo.setCurrentText(summary["name"])
             self.on_profile_selected(self.profile_combo.currentIndex())
-            # Apply live in the running HUD if the parent wired this hook.
-            if hasattr(self, "reload_parent_config"):
-                self.reload_parent_config()
+            self.reload_parent_config()
         except Exception as e:  # intentional broad catch
             log.exception("PT4 .pt4hud import failed")
             QMessageBox.critical(self, "Import Error", f"Could not import {filename}:\n{e}")
@@ -2604,6 +2649,29 @@ class ModernHudPreferences(QDialog):
         if summary["unmapped"]:
             lines.append(f"• {len(summary['unmapped'])} custom formula stat(s) could not be mapped.")
         QMessageBox.information(self, "PT4 HUD imported", "\n".join(lines))
+
+    def reload_parent_config(self) -> None:
+        """Ask the host to apply an import that has already been saved.
+
+        Standalone editors have no host to refresh. A host refresh failure
+        must not report a failed import: the package is already on disk and
+        loaded in this dialog, and importing it again would create conflicts.
+        """
+        try:
+            reload_config = getattr(self.parent(), "reload_config", None)
+            if callable(reload_config):
+                reload_config()
+        except Exception:  # intentional broad catch: optional host callback after a successful save
+            log.exception("HUD import saved, but parent configuration refresh failed")
+            QMessageBox.warning(
+                self,
+                _("HUD imported — refresh required"),
+                _(
+                    "The HUD profile was imported and saved, but the application could not "
+                    "refresh its configuration. Restart fpdb to apply it. "
+                    "You do not need to import the file again."
+                ),
+            )
 
     def get_current_profile(self):
         if self.profile_combo.currentIndex() < 0:
@@ -3037,7 +3105,10 @@ class ModernHudPreferences(QDialog):
 
         self.profile_rules = list(getattr(self.config, "get_hud_profile_rules", lambda: [])())
         self._refresh_profile_rules_table()
-        self.tabs.addTab(tab, _("🎯 Profile Select"))
+        # The selector grid, the preview and the rules table together ask for
+        # more height than a laptop screen has; scrolling keeps the Add button
+        # and the rules table reachable instead of pushing them below the fold.
+        self.tabs.addTab(wrap_in_scroll(tab), _("🎯 Profile Select"))
 
     def _add_profile_rule(self) -> None:
         if self.rule_profile_combo.currentIndex() < 0:
@@ -3202,8 +3273,11 @@ class ModernHudPreferences(QDialog):
         intro.setWordWrap(True)
         layout.addWidget(intro)
         self.reference_preview = ReferenceHudPreview()
+        # Inside a scroll area the preview keeps the height it needs to show a
+        # seat; a window shorter than that scrolls rather than clipping the HUD.
+        self.reference_preview.setMinimumHeight(320)
         layout.addWidget(self.reference_preview, 1)
-        self.tabs.addTab(tab, _("🃏 Reference HUDs"))
+        self.tabs.addTab(wrap_in_scroll(tab), _("🃏 Reference HUDs"))
 
     def _create_dynamic_panels_tab(self) -> None:
         """The tab that writes the ``<hud_panel_rules>`` section of #298.
@@ -3215,6 +3289,12 @@ class ModernHudPreferences(QDialog):
         describe, so what is shown here is what a table would show.
         """
         from fpdb_3_legacy import hud_panel_editor as editor
+        from fpdb_3_legacy.ring_stats.styles import get_theme_palette
+
+        # The captions above the fields follow the active theme's muted colour,
+        # the same one the Study Explorer uses, so a caption never competes with
+        # the value it labels.
+        muted = get_theme_palette().get("muted_text", "#a0aec0")
 
         # The state first: the widget builders below ask for the known panels and
         # the stat choices, and both read it.
@@ -3249,26 +3329,26 @@ class ModernHudPreferences(QDialog):
 
         selectors = QGroupBox(_("When this is the spot"))
         selectors_layout = QVBoxLayout(selectors)
-        grid = QGridLayout()
+        # The selector captions used to be cells of their own in a fixed
+        # four-column grid (``row * 2`` for the caption, ``row * 2 + 1`` for the
+        # field), inside a second scroll area that kept the group at 190 px of
+        # minimum height. A reflowing grid of caption-above-field blocks says the
+        # same thing, follows the window width, and needs no inner scroller now
+        # that the whole tab scrolls.
+        self.panel_selector_grid = ReflowGrid()
         self.panel_selector_widgets: dict[str, Any] = {}
-        for index, field in enumerate(editor.fill_choices(editor.selector_fields(), **self._panel_vocabularies())):
-            row, column = divmod(index, 4)
-            grid.addWidget(QLabel(field.label), row * 2, column)
+        selector_blocks: list[QWidget] = []
+        for field in editor.fill_choices(editor.selector_fields(), **self._panel_vocabularies()):
             widget = self._panel_selector_widget(field)
             self.panel_selector_widgets[field.name] = widget
-            grid.addWidget(widget, row * 2 + 1, column)
             self._panel_selector_hook(widget, field.name)
-        grid_widget = QWidget()
-        grid_widget.setLayout(grid)
-        area = QScrollArea()
-        area.setWidgetResizable(True)
-        area.setWidget(grid_widget)
-        area.setMinimumHeight(190)
-        selectors_layout.addWidget(area)
+            selector_blocks.append(labelled_field(field.label, widget, muted))
+        self.panel_selector_grid.set_items(selector_blocks)
+        selectors_layout.addLayout(self.panel_selector_grid)
         outer.addWidget(selectors)
 
         behaviour = QGroupBox(_("Then show"))
-        behaviour_grid = QGridLayout(behaviour)
+        behaviour_layout = QVBoxLayout(behaviour)
         self.panel_rule_panel_combo = QComboBox()
         self.panel_rule_panel_combo.setEditable(True)
         self.panel_rule_panel_combo.addItems(self._known_panel_names())
@@ -3289,21 +3369,29 @@ class ModernHudPreferences(QDialog):
         self.panel_rule_id.setPlaceholderText(_("optional name"))
         self.panel_rule_enabled = QCheckBox(_("Enabled"))
         self.panel_rule_enabled.setChecked(True)
-        for index, (label, widget) in enumerate(
-            (
-                (_("Panel"), self.panel_rule_panel_combo),
-                (_("HUD profile"), self.panel_rule_profile_combo),
-                (_("Priority"), self.panel_rule_priority),
-                (_("Min sample"), self.panel_rule_min_sample),
-                (_("Sample column"), self.panel_rule_sample),
-                (_("Fallback"), self.panel_rule_fallback_combo),
-                (_("Rule name"), self.panel_rule_id),
-            )
-        ):
-            row, column = divmod(index, 4)
-            behaviour_grid.addWidget(QLabel(label), row, column * 2)
-            behaviour_grid.addWidget(widget, row, column * 2 + 1)
-        behaviour_grid.addWidget(self.panel_rule_enabled, 1, 6)
+        # Same treatment as the selectors: the caption above its field, in a
+        # grid that reflows. The seven fields were two fixed rows of
+        # caption/field pairs before, and "Enabled" was parked in the leftover
+        # cell at (1, 6) -- which the grid silently dropped once the row was
+        # full, so the checkbox is now in a row of its own where nothing can
+        # take its place.
+        self.panel_behaviour_grid = ReflowGrid()
+        self.panel_behaviour_grid.set_items(
+            [
+                labelled_field(_("Panel"), self.panel_rule_panel_combo, muted),
+                labelled_field(_("HUD profile"), self.panel_rule_profile_combo, muted),
+                labelled_field(_("Priority"), self.panel_rule_priority, muted),
+                labelled_field(_("Min sample"), self.panel_rule_min_sample, muted),
+                labelled_field(_("Sample column"), self.panel_rule_sample, muted),
+                labelled_field(_("Fallback"), self.panel_rule_fallback_combo, muted),
+                labelled_field(_("Rule name"), self.panel_rule_id, muted),
+            ]
+        )
+        behaviour_layout.addLayout(self.panel_behaviour_grid)
+        enabled_row = QHBoxLayout()
+        enabled_row.addWidget(self.panel_rule_enabled)
+        enabled_row.addStretch()
+        behaviour_layout.addLayout(enabled_row)
         outer.addWidget(behaviour)
 
         buttons = QHBoxLayout()
@@ -3376,7 +3464,62 @@ class ModernHudPreferences(QDialog):
             if index >= 0:
                 self.panel_rule_fallback_combo.setCurrentIndex(index)
         self._refresh_panel_rules_table()
-        self.tabs.addTab(tab, _("🧩 Dynamic Panels"))
+        # This tab stacked seven sections and measured 880 px of minimum height,
+        # which alone set the height of the whole dialog. It scrolls now, so the
+        # rules table and the preview stay reachable on a short screen.
+        self.tabs.addTab(wrap_in_scroll(tab), _("🧩 Dynamic Panels"))
+        # The grids are laid out once here so the tab is never shown empty; the
+        # width the dialog ends up with arrives with the resize event below.
+        self._reflow_panel_fields(self.width())
+
+    def _profile_action_buttons(self) -> tuple[QPushButton, ...]:
+        """The header's profile actions, in the order the menu shows them."""
+        return (
+            self.add_profile_btn,
+            self.dup_profile_btn,
+            self.del_profile_btn,
+            self.export_profile_btn,
+            self.import_profile_btn,
+        )
+
+    def _fit_profile_actions(self, width: int) -> None:
+        """Five buttons, or one menu when the window cannot hold them.
+
+        Both arrangements carry the same five actions; the menu only changes how
+        many clicks they cost, and it is what lets the dialog be narrowed past
+        the width the buttons need.
+        """
+        wide = width >= NARROW_HEADER_WIDTH
+        for button in self._profile_action_buttons():
+            button.setVisible(wide)
+        self.profile_actions_btn.setVisible(not wide)
+
+    def _reflow_panel_fields(self, width: int) -> None:
+        """Lay the Dynamic Panels fields out for ``width``.
+
+        The selectors and the "Then show" fields are the same widgets at every
+        width; only how many fit on a row changes. Four across is the design,
+        two once the captions would wrap, one when even two combos side by side
+        would be unreadable.
+        """
+        columns = column_count(width, PANEL_FIELD_BREAKPOINTS)
+        for grid in (
+            getattr(self, "panel_selector_grid", None),
+            getattr(self, "panel_behaviour_grid", None),
+        ):
+            if grid is not None:
+                grid.reflow(columns)
+
+    def resizeEvent(self, event) -> None:  # noqa: ANN001 - Qt signature
+        super().resizeEvent(event)
+        width = event.size().width()
+        self._reflow_panel_fields(width)
+        self._fit_profile_actions(width)
+
+    def showEvent(self, event) -> None:  # noqa: ANN001 - Qt signature
+        super().showEvent(event)
+        self._reflow_panel_fields(self.width())
+        self._fit_profile_actions(self.width())
 
     def _create_panel_stat_picker(self, outer: QVBoxLayout) -> None:
         """The stat picker: the column-backed stats and the analytics ones.
@@ -3386,11 +3529,23 @@ class ModernHudPreferences(QDialog):
         popups that already bind them -- and adding one to a block writes those
         attributes into the configuration, so the block says where its number
         comes from instead of depending on what the code knew that day.
+
+        It is folded by default: the catalogue runs to every analytics stat the
+        app knows, and unfolded it pushed the rules table below the fold of the
+        tab. The header keeps the count in view, so a folded section still says
+        what it holds.
         """
-        box = QGroupBox(_("Analytics-backed stats"))
-        layout = QVBoxLayout(box)
+        self.panel_stat_section = CollapsibleSection(
+            _("Analytics-backed stats"),
+            expanded=False,
+            tooltip=_("Stats whose value comes from the analytics layer rather than a column."),
+        )
+        layout = QVBoxLayout(self.panel_stat_section.body())
+        layout.setContentsMargins(0, 0, 0, 0)
         self.panel_stat_combo = QComboBox()
-        self.panel_stat_combo.setMinimumWidth(320)
+        self.panel_stat_combo.setMinimumWidth(0)
+        self.panel_stat_combo.setSizeAdjustPolicy(QComboBox.SizeAdjustPolicy.AdjustToMinimumContentsLengthWithIcon)
+        self.panel_stat_combo.setMinimumContentsLength(18)
         self.panel_stat_combo.currentIndexChanged.connect(self._update_panel_stat_detail)
         self.panel_stat_detail = QLabel()
         self.panel_stat_detail.setWordWrap(True)
@@ -3403,7 +3558,7 @@ class ModernHudPreferences(QDialog):
         row.addWidget(self.panel_stat_add_button)
         layout.addLayout(row)
         layout.addWidget(self.panel_stat_detail)
-        outer.addWidget(box)
+        outer.addWidget(self.panel_stat_section)
         self._refresh_panel_stat_choices()
 
     def _panel_vocabularies(self) -> dict[str, list[str]]:
@@ -3745,6 +3900,9 @@ class ModernHudPreferences(QDialog):
             # can share a name, and a picker that cannot tell them apart would
             # silently add the wrong one.
             self.panel_stat_combo.addItem(f"{choice.label} [{choice.source}]", editor.choice_key(choice))
+        section = getattr(self, "panel_stat_section", None)
+        if section is not None:
+            section.set_summary(f"{len(self.panel_stat_choices)} available")
         self._refresh_panel_stat_blocks()
         self._update_panel_stat_detail()
 

@@ -9,11 +9,11 @@ from PySide6.QtCore import Qt, QThread, Signal
 from PySide6.QtWidgets import (
     QComboBox,
     QFormLayout,
-    QGroupBox,
     QHBoxLayout,
     QLabel,
     QLineEdit,
     QPushButton,
+    QSplitter,
     QTableWidget,
     QTableWidgetItem,
     QTabWidget,
@@ -39,6 +39,7 @@ from fpdb_3_legacy.research_study_dashboard import (
 )
 from fpdb_3_legacy.research_study_explorer import StudySelection
 from fpdb_3_legacy.research_worker_db import worker_database
+from fpdb_3_legacy.responsive_layout import CollapsibleSection, wrap_in_scroll
 from fpdb_3_legacy.ring_stats.styles import get_theme_palette
 
 
@@ -113,21 +114,37 @@ class GuiStudyDashboard(QWidget):
         layout = QVBoxLayout(self)
         layout.setContentsMargins(16, 14, 16, 14)
 
+        # Everything above the panels is context: it explains the study and lets
+        # the reader change the comparison. It scrolls, so a study with several
+        # variables cannot push the panels -- the reason this tab exists -- below
+        # the bottom of the window. Only the panels and the hands grow.
+        header = QWidget()
+        header_layout = QVBoxLayout(header)
+        header_layout.setContentsMargins(0, 0, 0, 0)
+        layout.addWidget(wrap_in_scroll(header))
+
         self.title_label = QLabel(self.model.study.title)
         self.title_label.setStyleSheet("font-size: 20px; font-weight: bold;")
-        layout.addWidget(self.title_label)
+        header_layout.addWidget(self.title_label)
         path = "  ›  ".join(self._segment_label(segment) for segment in self.model.study.path)
         self.breadcrumb_label = QLabel(f"{path}  ›  {self.model.study.title}" if path else self.model.study.title)
         self.breadcrumb_label.setStyleSheet(f"color: {muted}; font-size: 11px;")
-        layout.addWidget(self.breadcrumb_label)
+        header_layout.addWidget(self.breadcrumb_label)
         self.context_label = QLabel(self._context_text())
         self.context_label.setWordWrap(True)
         self.context_label.setStyleSheet(f"color: {muted};")
-        layout.addWidget(self.context_label)
+        header_layout.addWidget(self.context_label)
 
         if self.model.study.variables:
-            variables_box = QGroupBox("Study variables")
-            variables_layout = QFormLayout(variables_box)
+            # Foldable: a study with several variables spent a form row each
+            # before the panels began. The header still says how many are set,
+            # so a folded section never hides that a variable is in force.
+            variables = CollapsibleSection(
+                "Study variables",
+                expanded=True,
+                tooltip="This choice is applied to every compatible panel.",
+            )
+            variables_layout = QFormLayout(variables.body())
             for name in self.model.study.variables:
                 edit = QLineEdit()
                 edit.setText(str(self.model.state.variable_values.get(name, "")))
@@ -138,7 +155,9 @@ class GuiStudyDashboard(QWidget):
             apply_variables = QPushButton("Apply variables")
             apply_variables.clicked.connect(self._apply_variables)
             variables_layout.addRow(apply_variables)
-            layout.addWidget(variables_box)
+            variables.set_summary(f"{len(self.model.study.variables)} variables")
+            self.variables_section = variables
+            header_layout.addWidget(variables)
 
         controls = QHBoxLayout()
         controls.addWidget(QLabel("Compare"))
@@ -156,12 +175,12 @@ class GuiStudyDashboard(QWidget):
         self.refresh_button = QPushButton("Refresh")
         self.refresh_button.clicked.connect(self.refresh)
         controls.addWidget(self.refresh_button)
-        layout.addLayout(controls)
+        header_layout.addLayout(controls)
 
         self.filter_row = QHBoxLayout()
         self.filter_row.addWidget(QLabel("Active cross-filters:"))
         self.filter_row.addStretch(1)
-        layout.addLayout(self.filter_row)
+        header_layout.addLayout(self.filter_row)
 
         # Its own line rather than a clause on the sample text: an answer that
         # averages twelve big blinds with sixty is not a footnote about
@@ -170,7 +189,7 @@ class GuiStudyDashboard(QWidget):
         self.stack_note_label.setWordWrap(True)
         self.stack_note_label.setVisible(False)
         self.stack_note_label.setStyleSheet("color: #e5c07b; font-weight: bold;")
-        layout.addWidget(self.stack_note_label)
+        header_layout.addWidget(self.stack_note_label)
 
         # Built before the tabs, because adding the first tab fires
         # ``currentChanged`` and the panel that loads immediately re-points
@@ -246,12 +265,25 @@ class GuiStudyDashboard(QWidget):
                 self.tabs.setTabToolTip(index, compiled.unavailable_reason or "Panel unavailable")
                 status.setText(f"Unavailable: {compiled.unavailable_reason}")
         self.tabs.blockSignals(False)
-        layout.addWidget(self.tabs, 1)
+
         # The hands live below every panel rather than inside one: a selection
         # made on a chart and a row picked from a table are the same question
         # about the same population, and the reader should not have to find a
         # different place to ask it (#366).
-        layout.addWidget(self.source_hands, 1)
+        #
+        # A splitter rather than two equal stretches: whether the panels or the
+        # hands deserve more room depends on whether the reader is reading
+        # numbers or hands, and that is the reader's call. The panels scroll --
+        # a 13 x 13 range grid is taller than a laptop window and used to set
+        # the height of the whole tab.
+        panels = wrap_in_scroll(self.tabs, top_aligned=False)
+        panels.setMinimumHeight(200)
+        self.splitter = QSplitter(Qt.Orientation.Vertical)
+        self.splitter.setChildrenCollapsible(False)
+        self.splitter.addWidget(panels)
+        self.splitter.addWidget(self.source_hands)
+        self.splitter.setSizes([520, 260])
+        layout.addWidget(self.splitter, 1)
         self._render_cross_filters()
 
     def _refresh_drill_context(self) -> None:

@@ -410,7 +410,11 @@ class HudPreviewWidget(QWidget):
         self.hud_window.adjustSize()
         self.hud_window.show()
         self._position_hud_window()
-        QTimer.singleShot(0, self._position_hud_window)
+        # The deferred pass runs after the current layout settles. ``self`` is
+        # passed as the context so Qt drops the call when the pane is destroyed
+        # -- a bound method alone would be invoked on a deleted C++ object, which
+        # is a RuntimeError raised from the event loop rather than from here.
+        QTimer.singleShot(0, self, self._position_hud_window)
         self.update()
 
     def _position_hud_window(self) -> None:
@@ -441,7 +445,9 @@ class HudPreviewWidget(QWidget):
         # re-position once we are actually shown to avoid a blank preview.
         super().showEvent(event)
         self._position_hud_window()
-        QTimer.singleShot(0, self._position_hud_window)
+        # Same context-object form as above: the pane can be closed before the
+        # event loop reaches this call.
+        QTimer.singleShot(0, self, self._position_hud_window)
 
     def paintEvent(self, event) -> None:
         painter = QPainter(self)

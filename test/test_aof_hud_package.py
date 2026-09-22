@@ -22,6 +22,11 @@ ADVANCED_PROFILE_NAME = "aof_advanced"
 POPUP_NAME = "aof_profile"
 GAME_NAME = "aof_omaha"
 
+#: Strong references to the widgets a test builds. ``qtbot.addWidget`` holds
+#: only a weak reference, and a widget collected mid-test takes its children
+#: with it -- which surfaces as teardown closing a deleted C++ object.
+_KEEP_ALIVE: list[object] = []
+
 
 def _normalized_element(element: ET.Element) -> tuple:
     return (
@@ -314,7 +319,6 @@ def test_startup_migrates_an_existing_user_file_once(tmp_path: Path, monkeypatch
     assert config_path.with_suffix(".xml.backup").read_bytes() == backup_once
 
 
-@pytest.mark.qt
 def _package_popup_names() -> list[str]:
     """The popups this package installs, read from the package itself."""
     import defusedxml.minidom as minidom
@@ -323,12 +327,13 @@ def _package_popup_names() -> list[str]:
     return [pu.getAttribute("pu_name") for pu in document.getElementsByTagName("pu")]
 
 
-def test_preferences_imports_the_profile_and_its_game_binding(tmp_path: Path, monkeypatch) -> None:
-    from PySide6.QtWidgets import QApplication, QComboBox, QFileDialog, QMessageBox
+@pytest.mark.qt
+@pytest.mark.parametrize("host_mode", ["standalone", "reload", "reload_failure"])
+def test_preferences_imports_the_profile_and_its_game_binding(tmp_path: Path, monkeypatch, qtbot, host_mode) -> None:
+    from PySide6.QtWidgets import QFileDialog, QMessageBox, QWidget
 
     from fpdb_3_legacy.ModernHudPreferences import ModernHudPreferences
 
-    QApplication.instance() or QApplication([])
     config_path = tmp_path / "HUD_config.xml"
     shutil.copy(EXAMPLE_CONFIG, config_path)
     config = Config(file=str(config_path))
@@ -349,26 +354,61 @@ def test_preferences_imports_the_profile_and_its_game_binding(tmp_path: Path, mo
         config.popup_windows.pop(popup_name, None)
 
     errors = []
+    notices = []
+    warnings = []
     monkeypatch.setattr(
         QFileDialog,
         "getOpenFileName",
         staticmethod(lambda *args, **kwargs: (str(PACKAGE), "FPDB HUD Files (*.fpdbhud)")),
     )
-    monkeypatch.setattr(QMessageBox, "information", staticmethod(lambda *args, **kwargs: None))
+    monkeypatch.setattr(QMessageBox, "information", staticmethod(lambda *args, **kwargs: notices.append(args)))
     monkeypatch.setattr(QMessageBox, "critical", staticmethod(lambda *args, **kwargs: errors.append(args)))
+    monkeypatch.setattr(QMessageBox, "warning", staticmethod(lambda *args, **kwargs: warnings.append(args)))
+    # A successful import changes the editor's working copy, so closing the real
+    # dialog asks whether to save before closing. Nothing can answer a modal
+    # prompt during teardown, and the import has already written the file, so
+    # Discard is the honest answer: the assertions below read the file on disk,
+    # not the dialog's opinion of it.
+    monkeypatch.setattr(
+        QMessageBox,
+        "question",
+        staticmethod(lambda *args, **kwargs: QMessageBox.StandardButton.Discard),
+    )
 
-    dialog = ModernHudPreferences.__new__(ModernHudPreferences)
-    dialog.config = config
-    dialog.hud_profiles = dict(config.stat_sets)
-    dialog.profile_combo = QComboBox()
-    dialog.load_profiles = lambda: None
-    dialog.load_popup_windows = lambda: None
-    dialog.on_profile_selected = lambda _index: None
-    dialog.reload_parent_config = lambda: None
+    class Host(QWidget):
+        reloads = 0
+
+        def reload_config(self):
+            self.reloads += 1
+            if host_mode == "reload_failure":
+                raise RuntimeError("host refresh unavailable")
+
+    host = None if host_mode == "standalone" else Host()
+    if host is not None:
+        qtbot.addWidget(host)
+    # Exercise the real editor and its real reload hook. Stubbing this method
+    # previously hid the AttributeError seen after a successful package save.
+    dialog = ModernHudPreferences(config, host)
+    qtbot.addWidget(dialog)
+    # ``qtbot.addWidget`` only holds a weak reference, so the host would be
+    # collected before teardown -- and collecting the host destroys the dialog
+    # it parents, leaving teardown to close a widget whose C++ object is gone.
+    _KEEP_ALIVE.extend(widget for widget in (dialog, host) if widget is not None)
 
     dialog.import_profile()
 
     assert errors == []
+    assert len(notices) == 1
+    assert notices[0][1] == "Import Successful"
+    assert len(warnings) == (1 if host_mode == "reload_failure" else 0)
+    if warnings:
+        assert "imported and saved" in warnings[0][2]
+    if host is not None:
+        assert host.reloads == 1
+    assert dialog.profile_combo.currentText() == PROFILE_NAME
+    assert PROFILE_NAME in dialog.hud_profiles
+    assert ADVANCED_PROFILE_NAME in dialog.hud_profiles
+    assert POPUP_NAME in dialog.popup_windows
     saved = ET.parse(config_path).getroot()
     _named_element(saved, "./stat_sets/ss", "name", PROFILE_NAME)
     _named_element(saved, "./stat_sets/ss", "name", ADVANCED_PROFILE_NAME)

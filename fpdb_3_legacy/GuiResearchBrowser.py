@@ -54,8 +54,8 @@ from PySide6.QtWidgets import (
     QLabel,
     QLineEdit,
     QMessageBox,
-    QSplitter,
     QStackedWidget,
+    QTabBar,
     QTableWidget,
     QTableWidgetItem,
     QVBoxLayout,
@@ -73,6 +73,7 @@ from fpdb_3_legacy.GuiResearchViews import CompositionWidget, MoneyWidget, Range
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.loggingFpdb import get_logger
 from fpdb_3_legacy.research_worker_db import WorkerDatabase, worker_database
+from fpdb_3_legacy.responsive_layout import ResponsiveSplitter, wrap_in_scroll
 from fpdb_3_legacy.ring_stats.styles import get_theme_palette
 
 log = get_logger("gui_research_browser")
@@ -178,6 +179,11 @@ class _DrillWorker(QThread):
 #: The filters the form opens with. Hero says who the question is about;
 #: game and limit stop the first answer silently averaging two games (#355).
 _DEFAULT_FILTERS: Final[tuple[str, ...]] = ("hero", "game", "limit", "primary_situation")
+
+#: Width below which the three panes stop being usable side by side. Measured
+#: from the panes' own minimums with the production theme (the filter pane alone
+#: asks for ~530 px), plus room for the two splitter handles.
+STACK_BELOW_WIDTH = 1180
 
 
 class _ChoiceCombo(QComboBox):
@@ -582,14 +588,109 @@ class GuiResearchBrowser(QWidget):
         c = get_theme_palette()
         muted = c.get("muted_text", "#a0aec0")
 
-        splitter = QSplitter(Qt.Orientation.Horizontal, self)
-        layout = QHBoxLayout(self)
+        layout = QVBoxLayout(self)
         layout.setContentsMargins(8, 8, 8, 8)
-        layout.addWidget(splitter)
-        splitter.addWidget(self._build_filters_pane(muted))
-        splitter.addWidget(self._build_results_pane(muted))
-        splitter.addWidget(self._build_hands_pane(muted))
-        splitter.setSizes([320, 480, 420])
+        # Stacked, three panes share the height and each gets a third of it: the
+        # results table shows a handful of rows and the reader scrolls three
+        # times as much to see the same thing. This bar shows one pane at a time
+        # so the chosen pane takes the whole height; it is hidden again as soon
+        # as the panes fit side by side, where the splitter is the better tool.
+        self.narrow_view_bar = QTabBar()
+        self.narrow_view_bar.setDrawBase(False)
+        self.narrow_view_bar.setExpanding(False)
+        for label in (_("Filters"), _("Results"), _("Hands")):
+            self.narrow_view_bar.addTab(label)
+        self.narrow_view_bar.setVisible(False)
+        layout.addWidget(self.narrow_view_bar)
+        # Three panes side by side need the width they were designed for, and
+        # the filter pane is the first to suffer: squeezed, its rows are all
+        # scrollbar and the Run button sits below the fold. Below the measured
+        # width the panes are stacked, which gives each one the full width and
+        # keeps the rows readable. The results get the largest share of the
+        # height because they are what the reader came for.
+        self.splitter = ResponsiveSplitter(Qt.Orientation.Horizontal, self)
+        self.splitter.set_narrow_below(STACK_BELOW_WIDTH)
+        self.splitter.set_narrow_sizes([210, 300, 190])
+        layout.addWidget(self.splitter)
+        # Each pane scrolls. Stacked, three panes add their minimum heights up,
+        # and the tall children -- the 13 x 13 range grid, the tables -- made the
+        # stack taller than the window it was meant to fit. A scroll area reports
+        # the small minimum of a viewport instead of the tall minimum of its
+        # content, so the stack fits any height and each pane scrolls internally.
+        # The filter list is pinned to the top of its pane; the results and the
+        # hands fill theirs, because a table that does not fill its pane is a
+        # table with a strip of dead space above it. Only the filter pane scrolls
+        # sideways: a filter row is wider than the narrowest pane, and a row that
+        # cannot scroll is a row whose controls are simply not there.
+        self.filters_pane = wrap_in_scroll(self._build_filters_pane(muted), horizontal=True)
+        self.filters_pane.setMinimumWidth(280)
+        self.results_pane = wrap_in_scroll(self._build_results_pane(muted), top_aligned=False)
+        self.results_pane.setMinimumWidth(320)
+        self.hands_pane = wrap_in_scroll(self._build_hands_pane(muted), top_aligned=False)
+        self.hands_pane.setMinimumWidth(280)
+        self.splitter.addWidget(self.filters_pane)
+        self.splitter.addWidget(self.results_pane)
+        self.splitter.addWidget(self.hands_pane)
+        self.splitter.setSizes([320, 480, 420])
+
+        # The sizes to come back to once the panes are side by side again. The
+        # splitter remembers its own, but those are read while one pane is
+        # hidden, so the browser keeps the ones from before the panes were
+        # stacked.
+        self._wide_pane_sizes: list[int] = []
+        self._stacked = False
+        self.splitter.stacked_changed.connect(self._on_stacked_changed)
+        self.narrow_view_bar.currentChanged.connect(self._on_narrow_view_changed)
+        self._on_stacked_changed(self.splitter.is_stacked())
+
+    def _panes(self) -> list[QWidget]:
+        return [self.filters_pane, self.results_pane, self.hands_pane]
+
+    def showEvent(self, event) -> None:  # noqa: ANN001 - Qt signature
+        super().showEvent(event)
+        # A window that opens narrow is stacked from the first layout pass and
+        # so never emits a change; syncing here is what puts the bar on screen.
+        self._on_stacked_changed(self.splitter.is_stacked())
+
+    def resizeEvent(self, event) -> None:  # noqa: ANN001 - Qt signature
+        super().resizeEvent(event)
+        # The splitter decides on its own width, which the layout updates before
+        # this handler runs. Re-syncing covers the arrangement that was already
+        # in force, and is a no-op when nothing changed.
+        self._on_stacked_changed(self.splitter.is_stacked())
+
+    def _on_stacked_changed(self, stacked: bool) -> None:
+        """One pane at a time once the panes are stacked, all three when not.
+
+        Nothing is hidden while the widget is off screen: the bar that brings a
+        hidden pane back is not shown either, so hiding panes then would leave
+        them unreachable.
+        """
+        active = stacked and self.isVisible()
+        self.narrow_view_bar.setVisible(active)
+        if not active:
+            if self._stacked:
+                self._stacked = False
+                for pane in self._panes():
+                    pane.setVisible(True)
+                if self._wide_pane_sizes:
+                    self.splitter.setSizes(self._wide_pane_sizes)
+            return
+        if not self._stacked:
+            self._stacked = True
+            self._wide_pane_sizes = self.splitter.sizes()
+        self._apply_narrow_view()
+
+    def _on_narrow_view_changed(self, _index: int) -> None:
+        self._apply_narrow_view()
+
+    def _apply_narrow_view(self) -> None:
+        """Show only the pane the bar selects; a no-op while the panes are wide."""
+        if not self.splitter.is_stacked():
+            return
+        current = max(0, self.narrow_view_bar.currentIndex())
+        for index, pane in enumerate(self._panes()):
+            pane.setVisible(index == current)
 
     def _build_view_row(self, filters_layout: QVBoxLayout, muted: str) -> None:
         """Which question the workbench is answering (#331).
@@ -635,7 +736,12 @@ class GuiResearchBrowser(QWidget):
         self.filter_rows_widget = QWidget()
         self.filter_rows_layout = QVBoxLayout(self.filter_rows_widget)
         self.filter_rows_layout.setContentsMargins(0, 4, 0, 0)
-        filters_layout.addWidget(self.filter_rows_widget, 1)
+        # No stretch on the rows container: giving it the leftover height made
+        # every filter row a tall band with its controls floating in the middle,
+        # which is what pushed Run and the presets off the bottom of the pane.
+        # The stretch below absorbs the leftover room instead, so the rows keep
+        # their natural height and the pane reads top to bottom.
+        filters_layout.addWidget(self.filter_rows_widget)
 
         self._build_breakdown_controls(filters_layout)
 
@@ -667,6 +773,7 @@ class GuiResearchBrowser(QWidget):
         self.preset_note.setWordWrap(True)
         self.preset_note.setStyleSheet(f"color: {muted}; font-size: 11px;")
         filters_layout.addWidget(self.preset_note)
+        filters_layout.addStretch(1)
         return filters_pane
 
     def _build_vocabulary_row(self, filters_layout: QVBoxLayout) -> None:
