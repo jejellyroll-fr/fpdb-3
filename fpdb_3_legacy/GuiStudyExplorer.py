@@ -23,8 +23,10 @@ from fpdb_3_legacy.research_studies import StudyRegistry, StudySpec
 from fpdb_3_legacy.research_study_explorer import StudyExplorerModel, StudySelection
 from fpdb_3_legacy.responsive_layout import (
     CollapsibleSection,
+    PaneSwitcher,
     ReflowGrid,
     ResponsiveSplitter,
+    cap_context_block,
     column_count,
     labelled_field,
     wrap_in_scroll,
@@ -96,12 +98,26 @@ class GuiStudyExplorer(QWidget):
         upper_layout.addWidget(self._build_context_box(muted))
         upper_layout.addWidget(self._build_categories_box())
         upper_layout.addWidget(self._build_recent_box())
-        layout.addWidget(wrap_in_scroll(upper))
+        self.upper_area = wrap_in_scroll(upper)
+        layout.addWidget(self.upper_area)
 
         self.splitter = self._build_studies_splitter(muted)
         self.splitter.set_narrow_below(STACK_BELOW_WIDTH)
         self.splitter.set_narrow_sizes([220, 380])
+        # Stacked, the list and the detail share the height, and a share of a
+        # laptop window is two rows of titles. The bar shows one at a time so the
+        # chosen pane takes the whole height; it is hidden again as soon as the
+        # two fit side by side, where the splitter is the better tool.
+        self.pane_switcher = PaneSwitcher(
+            self,
+            self.splitter,
+            [self.study_list, self.study_detail],
+            ("Studies", "Detail"),
+            sizes=(360, 620),
+        )
+        layout.addWidget(self.pane_switcher.bar)
         layout.addWidget(self.splitter, 1)
+        self.splitter.stacked_changed.connect(self._on_stacked_changed)
 
         # The two alternative entry points are pinned to the bottom: they were
         # the first controls pushed out of view when the page ran out of room,
@@ -128,6 +144,25 @@ class GuiStudyExplorer(QWidget):
     def showEvent(self, event) -> None:  # noqa: ANN001 - Qt signature
         super().showEvent(event)
         self._reflow(self.width())
+        cap_context_block(self.upper_area, self)
+        # A window that opens narrow is stacked from the first layout pass and so
+        # never emits a change; syncing here is what puts the bar on screen.
+        self._on_stacked_changed(self.splitter.is_stacked())
+
+    def _on_stacked_changed(self, stacked: bool) -> None:
+        """One pane at a time once the list and the detail are stacked."""
+        self.pane_switcher.set_switching(stacked)
+
+    def _reveal_detail(self, _item: QListWidgetItem) -> None:
+        """Show the detail of the study the reader just picked.
+
+        Driven by ``itemClicked`` and ``itemActivated`` rather than by
+        ``currentItemChanged``: the page selects a row itself every time the list
+        is rebuilt -- on a search, a category, a game change -- and the detail
+        would then take the screen without anyone having asked for it. Arrow-key
+        browsing stays on the list for the same reason: scanning is not choosing.
+        """
+        self.pane_switcher.set_active(1)
 
     def _build_header(self, upper_layout: QVBoxLayout, muted: str) -> None:
         title = QLabel("Research · Study Explorer")
@@ -273,9 +308,15 @@ class GuiStudyExplorer(QWidget):
         # is stacked below this list before the titles stop being readable.
         self.study_list.setMinimumWidth(240)
         self.study_list.currentItemChanged.connect(self._on_study_changed)
+        # Picking a study is what the detail pane answers, so a click or an
+        # Enter brings it on screen; see ``_reveal_detail`` for why the
+        # selection signal itself is not the trigger.
+        self.study_list.itemClicked.connect(self._reveal_detail)
+        self.study_list.itemActivated.connect(self._reveal_detail)
         splitter.addWidget(self.study_list)
 
         detail = QWidget()
+        self.study_detail = detail
         detail_layout = QVBoxLayout(detail)
         self.breadcrumb_label = QLabel("")
         self.breadcrumb_label.setStyleSheet(f"color: {muted}; font-size: 11px;")
@@ -310,9 +351,16 @@ class GuiStudyExplorer(QWidget):
         return splitter
 
     def resizeEvent(self, event) -> None:  # noqa: ANN001 - Qt signature
-        """Reflow the grids for the new width; nothing else changes."""
+        """Reflow the grids for the new width, and follow the splitter's shape."""
         super().resizeEvent(event)
         self._reflow(event.size().width())
+        # The context block scrolls; without a cap it claims its whole size hint
+        # and the studies get what is left of the window.
+        cap_context_block(self.upper_area, self)
+        # The splitter decides on its own width, which the layout updates before
+        # this handler runs. Re-syncing covers the arrangement already in force,
+        # and is a no-op when nothing changed.
+        self._on_stacked_changed(self.splitter.is_stacked())
 
     def _reflow(self, width: int) -> None:
         """Lay the fields out in as many columns as ``width`` can hold."""

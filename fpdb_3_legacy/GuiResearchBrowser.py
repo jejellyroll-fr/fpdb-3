@@ -55,7 +55,6 @@ from PySide6.QtWidgets import (
     QLineEdit,
     QMessageBox,
     QStackedWidget,
-    QTabBar,
     QTableWidget,
     QTableWidgetItem,
     QVBoxLayout,
@@ -73,7 +72,7 @@ from fpdb_3_legacy.GuiResearchViews import CompositionWidget, MoneyWidget, Range
 from fpdb_3_legacy.i18n import gettext as _
 from fpdb_3_legacy.loggingFpdb import get_logger
 from fpdb_3_legacy.research_worker_db import WorkerDatabase, worker_database
-from fpdb_3_legacy.responsive_layout import ResponsiveSplitter, wrap_in_scroll
+from fpdb_3_legacy.responsive_layout import PaneSwitcher, ResponsiveSplitter, wrap_in_scroll
 from fpdb_3_legacy.ring_stats.styles import get_theme_palette
 
 log = get_logger("gui_research_browser")
@@ -599,18 +598,6 @@ class GuiResearchBrowser(QWidget):
 
         layout = QVBoxLayout(self)
         layout.setContentsMargins(8, 8, 8, 8)
-        # Stacked, three panes share the height and each gets a third of it: the
-        # results table shows a handful of rows and the reader scrolls three
-        # times as much to see the same thing. This bar shows one pane at a time
-        # so the chosen pane takes the whole height; it is hidden again as soon
-        # as the panes fit side by side, where the splitter is the better tool.
-        self.narrow_view_bar = QTabBar()
-        self.narrow_view_bar.setDrawBase(False)
-        self.narrow_view_bar.setExpanding(False)
-        for label in (_("Filters"), _("Results"), _("Hands")):
-            self.narrow_view_bar.addTab(label)
-        self.narrow_view_bar.setVisible(False)
-        layout.addWidget(self.narrow_view_bar)
         # Three panes side by side need the width they were designed for, and
         # the filter pane is the first to suffer: squeezed, its rows are all
         # scrollbar and the Run button sits below the fold. Each pane is
@@ -622,7 +609,6 @@ class GuiResearchBrowser(QWidget):
         self.splitter = ResponsiveSplitter(Qt.Orientation.Horizontal, self)
         self.splitter.set_narrow_below(STACK_BELOW_WIDTH)
         self.splitter.set_narrow_sizes([210, 300, 190])
-        layout.addWidget(self.splitter)
         # Each pane scrolls. Stacked, three panes add their minimum heights up,
         # and the tall children -- the 13 x 13 range grid, the tables -- made the
         # stack taller than the window it was meant to fit. A scroll area reports
@@ -646,16 +632,22 @@ class GuiResearchBrowser(QWidget):
         # content asked for. Extra room on a larger screen is shared between them.
         self.splitter.setSizes(list(PANE_WIDTHS))
 
-        # The widths to come back to once the panes are side by side again. The
-        # splitter's own memory is read while the panes are still wide, but it is
-        # spent the first time it is used; the browser keeps its own so that the
-        # arrangement survives every later round trip. It starts at the measured
-        # widths, and a reader who moves a divider replaces them.
-        self._wide_pane_sizes: list[int] = list(PANE_WIDTHS)
-        self._stacked = False
+        # Stacked, the three panes share the height and each gets a third of it:
+        # the results table shows a handful of rows and the reader scrolls three
+        # times as much to see the same thing. The bar shows one pane at a time
+        # so the chosen pane takes the whole height; it is hidden again as soon
+        # as the panes fit side by side, where the splitter is the better tool.
+        self.pane_switcher = PaneSwitcher(
+            self,
+            self.splitter,
+            self._panes(),
+            (_("Filters"), _("Results"), _("Hands")),
+            sizes=PANE_WIDTHS,
+        )
+        self.narrow_view_bar = self.pane_switcher.bar
+        layout.addWidget(self.narrow_view_bar)
+        layout.addWidget(self.splitter)
         self.splitter.stacked_changed.connect(self._on_stacked_changed)
-        self.splitter.splitterMoved.connect(self._remember_wide_sizes)
-        self.narrow_view_bar.currentChanged.connect(self._on_narrow_view_changed)
         self._on_stacked_changed(self.splitter.is_stacked())
 
     def _panes(self) -> list[QWidget]:
@@ -674,50 +666,9 @@ class GuiResearchBrowser(QWidget):
         # in force, and is a no-op when nothing changed.
         self._on_stacked_changed(self.splitter.is_stacked())
 
-    def _remember_wide_sizes(self) -> None:
-        """Keep the divider positions a reader chose, while the panes are wide.
-
-        ``splitterMoved`` only fires on a drag, so this never records the sizes
-        of the stacked arrangement -- which are heights, and would be handed back
-        as widths the next time the panes went side by side.
-        """
-        if not self.splitter.is_stacked():
-            self._wide_pane_sizes = self.splitter.sizes()
-
     def _on_stacked_changed(self, stacked: bool) -> None:
-        """One pane at a time once the panes are stacked, all three when not.
-
-        Nothing is hidden while the widget is off screen: the bar that brings a
-        hidden pane back is not shown either, so hiding panes then would leave
-        them unreachable.
-        """
-        active = stacked and self.isVisible()
-        self.narrow_view_bar.setVisible(active)
-        if not active:
-            if self._stacked:
-                self._stacked = False
-                for pane in self._panes():
-                    pane.setVisible(True)
-                # Restored after the panes are back on screen: a width given to a
-                # hidden pane is a width the splitter lays out again the moment
-                # that pane reappears, and the arrangement would be lost.
-                if self._wide_pane_sizes:
-                    self.splitter.setSizes(self._wide_pane_sizes)
-            return
-        if not self._stacked:
-            self._stacked = True
-        self._apply_narrow_view()
-
-    def _on_narrow_view_changed(self, _index: int) -> None:
-        self._apply_narrow_view()
-
-    def _apply_narrow_view(self) -> None:
-        """Show only the pane the bar selects; a no-op while the panes are wide."""
-        if not self.splitter.is_stacked():
-            return
-        current = max(0, self.narrow_view_bar.currentIndex())
-        for index, pane in enumerate(self._panes()):
-            pane.setVisible(index == current)
+        """One pane at a time once the panes are stacked, all three when not."""
+        self.pane_switcher.set_switching(stacked)
 
     def _build_view_row(self, filters_layout: QVBoxLayout, muted: str) -> None:
         """Which question the workbench is answering (#331).

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import contextlib
-from typing import Any
+from typing import Any, Final
 
 from PySide6.QtCore import Qt, QThread, Signal
 from PySide6.QtWidgets import (
@@ -15,7 +15,6 @@ from PySide6.QtWidgets import (
     QListWidget,
     QListWidgetItem,
     QPushButton,
-    QSplitter,
     QStackedWidget,
     QTableWidget,
     QTableWidgetItem,
@@ -41,7 +40,13 @@ from fpdb_3_legacy.research_study_dashboard import (
 )
 from fpdb_3_legacy.research_study_explorer import StudySelection
 from fpdb_3_legacy.research_worker_db import worker_database
-from fpdb_3_legacy.responsive_layout import CollapsibleSection, wrap_in_scroll
+from fpdb_3_legacy.responsive_layout import (
+    CollapsibleSection,
+    PaneSwitcher,
+    ReportingSplitter,
+    cap_context_block,
+    wrap_in_scroll,
+)
 from fpdb_3_legacy.ring_stats.styles import get_theme_palette
 
 #: Bounds on the panel rail's width. The rail is as wide as its longest panel
@@ -49,6 +54,18 @@ from fpdb_3_legacy.ring_stats.styles import get_theme_palette
 #: names are short must not pay for the longest name another study has.
 RAIL_MIN_WIDTH = 150
 RAIL_MAX_WIDTH = 280
+
+#: The heights the dashboard's two zones want in order to be read at the same
+#: time, measured from their own content with the production theme: the panel
+#: area asks for 360 px and the hands table for 330. Below their sum the two are
+#: shown one at a time, because a share of a short window is a panel with two
+#: rows of table in it -- at 1080 x 691 the splitter has 432 px, and the panels
+#: were already pinned at their 200 px floor.
+ZONE_HEIGHTS: Final[tuple[int, int]] = (360, 330)
+
+#: Measured on the splitter itself, which is what carries the threshold: the two
+#: heights above and the handle between them.
+SWITCH_BELOW_HEIGHT = sum(ZONE_HEIGHTS) + 8
 
 
 class _DashboardWorker(QThread):
@@ -129,7 +146,8 @@ class GuiStudyDashboard(QWidget):
         header = QWidget()
         header_layout = QVBoxLayout(header)
         header_layout.setContentsMargins(0, 0, 0, 0)
-        layout.addWidget(wrap_in_scroll(header))
+        self.header_area = wrap_in_scroll(header)
+        layout.addWidget(self.header_area)
 
         self.title_label = QLabel(self.model.study.title)
         self.title_label.setStyleSheet("font-size: 20px; font-weight: bold;")
@@ -305,13 +323,48 @@ class GuiStudyDashboard(QWidget):
         content.setMinimumHeight(200)
         panels_layout.addWidget(content, 1)
 
-        self.splitter = QSplitter(Qt.Orientation.Vertical)
+        self.splitter = ReportingSplitter(Qt.Orientation.Vertical)
         self.splitter.setChildrenCollapsible(False)
         self.splitter.addWidget(panels)
         self.splitter.addWidget(self.source_hands)
         self.splitter.setSizes([520, 260])
+        # Short window, one zone at a time. Two zones sharing 432 px is a panel
+        # area of 200 px -- the floor it was pinned at -- and a table of 228.
+        # The bar gives the chosen zone the whole height and is the way back to
+        # the other; it disappears as soon as the two fit together.
+        self.pane_switcher = PaneSwitcher(
+            self,
+            self.splitter,
+            [panels, self.source_hands],
+            ("Panels", "Hands"),
+            sizes=(520, 260),
+        )
+        layout.addWidget(self.pane_switcher.bar)
         layout.addWidget(self.splitter, 1)
+        self.splitter.resized.connect(self._on_splitter_resized)
+        self._on_splitter_resized()
         self._render_cross_filters()
+
+    def showEvent(self, event) -> None:  # noqa: ANN001 - Qt signature
+        super().showEvent(event)
+        # The switcher hides nothing while the widget is off screen, so a window
+        # that opens short is only put into its one-zone-at-a-time shape here.
+        self._on_splitter_resized()
+
+    def resizeEvent(self, event) -> None:  # noqa: ANN001 - Qt signature
+        super().resizeEvent(event)
+        # The context block scrolls; without a cap it claims its whole size hint
+        # and the zones get what is left of the window.
+        cap_context_block(self.header_area, self)
+
+    def _on_splitter_resized(self) -> None:
+        """One zone at a time once the splitter is shorter than the two together.
+
+        Driven by the splitter's own ``resized`` signal: this widget's
+        ``resizeEvent`` runs before the layout has resized its children, so
+        reading the splitter's height there would read the previous one.
+        """
+        self.pane_switcher.set_switching(self.splitter.height() < SWITCH_BELOW_HEIGHT)
 
     def _panel_rail_width(self) -> int:
         """As wide as the longest panel name, within the rail's bounds.

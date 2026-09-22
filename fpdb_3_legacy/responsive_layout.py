@@ -36,17 +36,23 @@ from PySide6.QtWidgets import (
     QScrollArea,
     QSizePolicy,
     QSplitter,
+    QTabBar,
     QToolButton,
     QVBoxLayout,
     QWidget,
 )
 
 __all__ = [
+    "CONTEXT_BLOCK_FLOOR",
+    "CONTEXT_BLOCK_SHARE",
     "SCREEN_MARGIN",
     "CollapsibleSection",
+    "PaneSwitcher",
     "ReflowGrid",
+    "ReportingSplitter",
     "ResponsiveSplitter",
     "available_screen_size",
+    "cap_context_block",
     "column_count",
     "fit_window",
     "labelled_field",
@@ -151,6 +157,29 @@ def wrap_in_scroll(
         content.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Maximum)
     area.setWidget(content)
     return area
+
+
+#: The most of a window's height a scrolling block of context may claim before
+#: the block below it -- the one the reader came for -- is squeezed.
+CONTEXT_BLOCK_SHARE = 4
+
+#: ...and the least, so a short window still shows what the context is about.
+CONTEXT_BLOCK_FLOOR = 200
+
+
+def cap_context_block(block: QScrollArea, window: QWidget) -> None:
+    """Stop a scrolling block of context from crowding out the pane that grows.
+
+    A ``QVBoxLayout`` hands a non-stretch item its size hint before the stretch
+    item gets anything, and a block that scrolls still asks for its full height.
+    The study dashboard's context block asks for 360 px and, left uncapped, took
+    them out of a 691 px window: the panel and the hands were left 260 px
+    between them, which is the opposite of "only the panels and the hands grow".
+    Capping the block at a quarter of the window keeps it scrollable -- which is
+    what it was made for -- and leaves the room to the pane the screen exists
+    for. Call this on every resize; a repeated cap is not a layout change.
+    """
+    block.setMaximumHeight(max(CONTEXT_BLOCK_FLOOR, window.height() // CONTEXT_BLOCK_SHARE))
 
 
 def labelled_field(label: str, widget: QWidget, muted: str) -> QWidget:
@@ -310,6 +339,123 @@ class ResponsiveSplitter(QSplitter):
         elif wanted == self._narrow_orientation and self._narrow_sizes:
             self.setSizes(self._narrow_sizes)
         self.stacked_changed.emit(wanted == self._narrow_orientation)
+
+
+class ReportingSplitter(QSplitter):
+    """A splitter that announces every change of its own extent.
+
+    A parent's ``resizeEvent`` runs before the layout has resized the children,
+    so a screen that decides what to show from a splitter's extent reads the
+    previous one there. ``ResponsiveSplitter`` announces the one decision it
+    makes itself; this reports the extent, for the screens that decide for
+    themselves -- the study dashboard shows its two zones one at a time once the
+    window is too short for both.
+    """
+
+    resized = Signal()
+
+    def resizeEvent(self, event) -> None:  # noqa: ANN001 - Qt signature
+        super().resizeEvent(event)
+        self.resized.emit()
+
+
+class PaneSwitcher:
+    """Show one of a splitter's panes at a time, with a bar to choose which.
+
+    A splitter that stacks its panes gives each of them a share of the extent,
+    and a share is what a table shows a handful of rows in. When the panes no
+    longer fit together -- because the window is narrow, or because it is short
+    -- the bar takes over: the chosen pane gets the whole extent, and the bar is
+    the way back to the others. It stays hidden while the panes do fit, where
+    the splitter is the better tool.
+
+    The switcher never hides anything while the widget it serves is off screen:
+    the bar that would bring a hidden pane back is not shown either, so hiding
+    panes then would leave them unreachable.
+
+    ``bar`` belongs to the caller's layout; everything else is handled here.
+    ``sizes`` is the arrangement to come back to, which the caller knows and
+    the splitter has usually forgotten by the time the panes are switched.
+    """
+
+    def __init__(
+        self,
+        owner: QWidget,
+        splitter: QSplitter,
+        panes: Sequence[QWidget],
+        labels: Sequence[str],
+        *,
+        sizes: Sequence[int] = (),
+    ) -> None:
+        if len(panes) != len(labels):
+            raise ValueError("every pane needs a label")
+        if not panes:
+            raise ValueError("a switcher needs at least one pane")
+        self._owner = owner
+        self._splitter = splitter
+        self._panes = list(panes)
+        self._switching = False
+        self._sizes = [int(size) for size in sizes]
+
+        self.bar = QTabBar()
+        self.bar.setDrawBase(False)
+        self.bar.setExpanding(False)
+        for label in labels:
+            self.bar.addTab(label)
+        self.bar.setVisible(False)
+        self.bar.currentChanged.connect(self._show_current)
+        # A reader who moves a divider replaces the arrangement to come back to.
+        # ``splitterMoved`` only fires on a drag, so the sizes recorded here are
+        # never the ones of the switched arrangement -- which, for a splitter
+        # that changed orientation, are the other axis entirely.
+        self._splitter.splitterMoved.connect(self._remember_sizes)
+
+    def set_switching(self, switching: bool) -> None:
+        """Give one pane the whole extent, or hand the panes back to the splitter."""
+        switching = bool(switching) and self._owner.isVisible()
+        self.bar.setVisible(switching)
+        if switching:
+            if not self._switching:
+                self._switching = True
+                self._remember_sizes()
+            self._show_current()
+            return
+        if not self._switching:
+            return
+        self._switching = False
+        for pane in self._panes:
+            pane.setVisible(True)
+        if self._sizes:
+            self._splitter.setSizes(self._sizes)
+
+    def is_switching(self) -> bool:
+        return self._switching
+
+    def active(self) -> int:
+        """The pane on screen, or the one that would be if the bar were shown."""
+        return max(0, self.bar.currentIndex())
+
+    def set_active(self, index: int) -> None:
+        """Choose a pane, without calling back into whoever asked for it."""
+        if not 0 <= index < len(self._panes):
+            return
+        if self.bar.currentIndex() == index:
+            return
+        self.bar.blockSignals(True)
+        self.bar.setCurrentIndex(index)
+        self.bar.blockSignals(False)
+        self._show_current()
+
+    def _remember_sizes(self) -> None:
+        if not self._switching:
+            self._sizes = self._splitter.sizes()
+
+    def _show_current(self) -> None:
+        if not self._switching:
+            return
+        current = self.active()
+        for index, pane in enumerate(self._panes):
+            pane.setVisible(index == current)
 
 
 class CollapsibleSection(QWidget):

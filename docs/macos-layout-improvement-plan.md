@@ -149,8 +149,24 @@ Nouveau module `fpdb_3_legacy/responsive_layout.py` :
   `QFormLayout` met la légende dans une colonne à part et ne se replie pas.
 - `ResponsiveSplitter` empile ses panneaux sous la largeur mesurée, mémorise
   l’arrangement large et le restaure au retour ; son signal `stacked_changed`
-  annonce le changement d’arrangement (et lui seul), ce qui permet au Research
-  Browser d’afficher un panneau à la fois quand ils sont empilés.
+  annonce le changement d’arrangement (et lui seul).
+- `PaneSwitcher` affiche un panneau à la fois, avec une barre pour choisir
+  lequel : le panneau choisi prend toute la place et la barre est le chemin de
+  retour vers les autres. Elle reste cachée tant que les panneaux tiennent
+  ensemble, là où le splitter est le meilleur outil, et ne cache rien tant que
+  la fenêtre qu’elle sert n’est pas visible — une barre absente ne ramènerait
+  pas le panneau caché. Les trois écrans qui empilent des panneaux s’en
+  servent : Research Browser, Study Explorer et Study Dashboard.
+- `ReportingSplitter` annonce chaque changement de son étendue. Le
+  `resizeEvent` d’un parent s’exécute avant que le layout n’ait redimensionné
+  ses enfants : un écran qui décide de ce qu’il montre d’après l’étendue d’un
+  splitter doit l’entendre du splitter lui-même.
+- `cap_context_block` plafonne un bloc de contexte qui défile à un quart de la
+  fenêtre. Un `QVBoxLayout` donne à un élément sans étirement sa taille
+  souhaitée avant que l’élément étiré ne reçoive quoi que ce soit, et un bloc
+  qui défile réclame quand même toute sa hauteur : l’en-tête du Study
+  Dashboard demande 360 px et, sans plafond, les prenait sur une fenêtre de
+  691 px en ne laissant que 260 aux deux zones.
 - `CollapsibleSection` replie un bloc tout en affichant dans son en-tête ce
   qu’il contient, pour qu’un bloc replié ne cache pas un filtre actif.
 
@@ -161,9 +177,9 @@ Minimums mesurés hors écran, avec le thème de production, avant et après :
 | Écran | Avant | Après |
 | --- | --- | --- |
 | Préférences HUD | 1064 × 1133 ; minimum imposé 1200 × 800 | 890 × 506 ; aucun minimum imposé, et 735 × 504 sous 900 px de large |
-| Study Explorer | 667 × 898 | 410 × 430 |
+| Study Explorer | 667 × 898 | 410 × 280 ; liste et détail empilés sous 900 px, un seul à la fois |
 | Research Browser | 1097 × 497 | 296 × 141 empilé (904 × 141 côte à côte) ; trois colonnes seulement au-delà de 1302 px de large |
-| Study Dashboard | 454 × 1120 | 454 × 554 |
+| Study Dashboard | 454 × 1120 | 318 × 359 ; une zone à la fois sous 698 px de haut, les deux au-dessus |
 
 Le seuil de 1024 × 640 est tenu par les quatre écrans. Les facteurs de hauteur
 étaient l’onglet Dynamic Panels (880 px), l’onglet Profile Select (584 px), le
@@ -204,13 +220,25 @@ l’en-tête résume les filtres actifs ; les cartes de spots se replient en 3/2
 colonnes ; liste et détail s’empilent sous 900 px ; les deux points d’entrée
 secondaires restent épinglés en bas.
 
+Empilés, la liste et le détail se partageaient la hauteur : à 700 × 640 la liste
+n’en avait que 90 px, trois lignes de titres. Une barre Studies / Detail, visible
+seulement dans cet arrangement, donne au panneau choisi la hauteur entière
+(338 px à cette taille). Choisir une étude bascule sur Detail — c’est le motif
+maître-détail des écrans étroits — mais la bascule est déclenchée par
+`itemClicked` et `itemActivated`, jamais par `currentItemChanged` : la page
+sélectionne une ligne elle-même à chaque reconstruction de la liste (recherche,
+catégorie, changement de jeu) et le détail prendrait alors l’écran sans que
+personne ne l’ait demandé. Le parcours au clavier reste donc sur la liste :
+parcourir n’est pas choisir.
+
 **Research Browser** — les trois panneaux sont dans un `ResponsiveSplitter` ;
 chaque panneau défile, ce qui ramène son minimum à celui d’une fenêtre ; le
 conteneur de lignes de filtres ne prend plus l’étirement vertical — c’est ce qui
 étirait chaque ligne et poussait Exécuter hors du panneau. Empilés, les trois
 panneaux se partageaient la hauteur et chacun n’en recevait qu’un tiers : une
 barre Filtres / Résultats / Mains, visible seulement dans cet arrangement, donne
-au panneau choisi la hauteur complète.
+au panneau choisi la hauteur complète. C’est ce motif qui a été extrait en
+`PaneSwitcher` et repris par les deux autres écrans.
 
 La largeur des panneaux est mesurée sur leur contenu, et non plus divisée en
 tiers. Les lignes de filtres réclament 624 px, le tableau de résultats 402 et la
@@ -247,24 +275,50 @@ horizontal ni vertical, et le contenu garde toute la largeur restante. Les
 panneaux indisponibles sont désactivés avec la raison en infobulle, comme
 l’étaient les onglets désactivés.
 
+Deux zones se partageaient la hauteur : les panneaux et les mains. Elles
+réclament 360 px et 330, et le splitter n’en a que 420 dans une fenêtre de
+691 px — soit une zone de panneaux déjà collée à son plancher de 200 px et un
+tableau de 228. Une barre Panels / Hands apparaît donc sous 698 px de haut (la
+somme des deux et leur poignée, `SWITCH_BELOW_HEIGHT`) et donne à la zone
+choisie les 420 px entiers ; au-dessus, le splitter reprend ses droits et les
+deux restent visibles. Le déclencheur est le signal `resized` du splitter et non
+le `resizeEvent` du dashboard : celui-ci s’exécute avant que le layout n’ait
+redimensionné ses enfants, donc y lire la hauteur du splitter lit la
+précédente.
+
+L’en-tête a dû être plafonné au passage. Il défile, donc il n’a pas besoin de
+toute sa hauteur, mais il la réclamait quand même : 360 px pris sur une fenêtre
+de 691 px, laissant 260 aux deux zones — l’inverse de « seuls les panneaux et
+les mains grandissent ». `cap_context_block` le borne au quart de la fenêtre
+(plancher 200 px) ; il défile, et les zones récupèrent 420 px.
+
 ### Tests
 
-`tests/qt/test_responsive_layout.py` : 33 tests, tous verts. Ils couvrent les
+`tests/qt/test_responsive_layout.py` : 41 tests, tous verts. Ils couvrent les
 helpers (dimensionnement, défilement, reflow, bascule d’orientation et le signal
-qui l’annonce, repli avec résumé, légende au-dessus du champ) et les quatre
-écrans, en vérifiant pour chacun que le minimum tient dans 1024 × 640, que les
-commandes du bas restent atteignables, et que redimensionner ne change ni la
-recherche, ni la sélection, ni les filtres. Huit d’entre eux portent sur les
-réorganisations de ce tour :
+qui l’annonce, sélecteur de panneau, plafond du bloc de contexte, repli avec
+résumé, légende au-dessus du champ) et les quatre écrans, en vérifiant pour
+chacun que le minimum tient dans 1024 × 640, que les commandes du bas restent
+atteignables, et que redimensionner ne change ni la recherche, ni la sélection,
+ni les filtres. Seize d’entre eux portent sur les réorganisations de ce tour :
 
 - éditeur Dynamic Panels : repli des colonnes sans perte de sélecteur, absence
   de seconde aire défilante, champs « Then show » et case « Enabled »
   atteignables, catalogue replié avec son compte ;
+- `PaneSwitcher` : un seul panneau à la fois, retour à l’arrangement et aux
+  tailles du splitter, et rien de caché tant que la fenêtre n’est pas visible ;
+- `ReportingSplitter` et `cap_context_block` : l’étendue est annoncée par le
+  splitter, le plafond laisse la place à ce qui grandit et suit une fenêtre plus
+  haute ;
 - Research Browser : un seul panneau à la fois en arrangement empilé, retour aux
   trois panneaux et à leurs tailles en arrangement large, largeurs mesurées sur
   le contenu avec trois colonnes seulement au-dessus de 1302 px, largeurs larges
   conservées à travers un aller-retour par l’empilement, et défilement horizontal
   du panneau des filtres dans une fenêtre plus étroite que ses lignes ;
+- Study Explorer : un seul panneau à la fois sous 900 px, et le détail qui prend
+  l’écran au clic mais pas sur une reconstruction de la liste ;
+- Study Dashboard : une zone à la fois sous 698 px de haut, les deux au-dessus,
+  et un en-tête qui ne prend pas la place des zones ;
 - Préférences HUD : les cinq actions de profil passent derrière un menu sous
   900 px, ce qui abaisse le minimum du dialogue.
 
@@ -274,7 +328,7 @@ tant que les panneaux sont côte à côte, la somme de leurs largeurs minimales
 layout n’ait empilé les panneaux. Un saut direct sous ce total laisse donc la
 fenêtre à l’ancien minimum ; un glissement réel ne saute jamais.
 
-Suites existantes vérifiées hors écran : `tests/qt` (186 tests),
+Suites existantes vérifiées hors écran : `tests/qt` (194 tests),
 `tests/test_dynamic_panels_tab.py` et `tests/test_hud_panel_editor.py` (60),
 `test/test_aof_hud_package.py`, `test/test_modern_hud_preferences.py`,
 `test/test_plo4_hud_package.py`, `test/test_hud_profiles.py`,
