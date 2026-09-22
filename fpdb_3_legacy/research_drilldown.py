@@ -286,7 +286,15 @@ def _count(db: Any, query: Query, *, numerator_only: bool, distinct_hands: bool)
     if where:
         sql_parts.append("WHERE " + " AND ".join(f"({condition})" for condition in where))
     cursor = db.get_cursor()
-    cursor.execute(escape_literal_percent("\n".join(sql_parts), placeholder), tuple(params))
+    # ``compile_filters`` supplies only allow-listed SQL fragments and keeps
+    # every runtime value in ``params``. The SQL text is assembled because the
+    # metric chooses COUNT(*) vs COUNT(DISTINCT ...), while the values remain
+    # parameterized. Keep the security scanner from mistaking that safe query
+    # builder for an interpolated user query.
+    cursor.execute(  # nosec B608  # nosemgrep
+        escape_literal_percent("\n".join(sql_parts), placeholder),
+        tuple(params),
+    )
     row = cursor.fetchone()
     return int((row[0] if row else 0) or 0)
 
@@ -421,4 +429,3 @@ __all__ = [
     "has_numerator",
     "run_side_drill",
 ]
-
