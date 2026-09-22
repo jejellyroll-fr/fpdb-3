@@ -54,3 +54,12 @@ def test_report_renders_reviewable_rows_and_opens_a_study(qtbot, tmp_path) -> No
     assert opened[0].selection.study.id == "preflop_rfi"
     assert opened[0].panel_id == "overview"
     assert opened[0].cross_filters == {"position": 0}
+
+
+def test_omaha_picker_uses_the_database_game_token(qtbot, tmp_path) -> None:
+    widget = GuiStudyDifferences(registry=builtin_studies(), db=object(), state_path=tmp_path / "history.json")
+    qtbot.addWidget(widget)
+
+    widget.game_combo.setCurrentText("Omaha")
+
+    assert widget.game_combo.currentData() == "omahahi"

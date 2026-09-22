@@ -284,6 +284,12 @@ class StudyDashboardModel:
         """Add a temporary, visible filter; adding the same key replaces it."""
         if name not in FILTERS:
             raise ValueError(f"Unknown cross-filter {name!r}")
+        # ``None`` means "no filter" to the query API. A chart's Unknown bin
+        # means an explicit SQL NULL predicate, so preserve that distinction
+        # in the dashboard state instead of displaying a filter that changes
+        # nothing.
+        if value is None:
+            value = {"is_null": True}
         if name in self._state.base_filters and self._state.base_filters[name] != value:
             raise ValueError(
                 f"cross-filter {name!r}={value!r} conflicts with the study population "

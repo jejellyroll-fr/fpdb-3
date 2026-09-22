@@ -43,6 +43,14 @@ def test_variables_and_cross_filters_update_every_panel_explicitly(tmp_path) -> 
     assert all("board_pairing" not in dashboard.panel_query(panel_id).filters for panel_id in dashboard.panel_ids())
 
 
+def test_unknown_cross_filter_becomes_an_explicit_null_predicate(tmp_path) -> None:
+    dashboard = _dashboard(tmp_path)
+
+    dashboard.add_cross_filter("board_pairing", None, "Unknown boards")
+
+    assert dashboard.panel_query("overview").filters["board_pairing"] == {"is_null": True}
+
+
 def test_comparison_is_study_wide_and_uses_the_same_panel_population(tmp_path) -> None:
     dashboard = _dashboard(tmp_path)
     dashboard.set_comparison(COMPARISON_HERO_VS_FIELD)

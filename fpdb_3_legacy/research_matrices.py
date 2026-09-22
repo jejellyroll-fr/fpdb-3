@@ -10,6 +10,7 @@ from .analytics_query import POSITION_CODES
 from .board_features import CONNECTIVITIES, PAIRINGS, RANK_BUCKETS, SUIT_STRUCTURES
 from .research_distributions import _result_rows
 from .research_labels import filter_choices
+from .stack_depth_buckets import STACK_DEPTH_BUCKETS
 
 UNKNOWN_LABEL: Final = "Unknown / unclassified"
 POSITION_DIMENSIONS: Final[frozenset[str]] = frozenset({"position", "opponent_position"})
@@ -142,6 +143,8 @@ def _label(dimension: str, value: Any) -> str:
 def _ordered_values(dimension: str, present: list[Any]) -> tuple[Any, ...]:
     if dimension in POSITION_DIMENSIONS:
         known: list[Any] = list(POSITION_AXIS_ORDER)
+    elif dimension == "effective_stack_bucket":
+        known = list(STACK_DEPTH_BUCKETS)
     else:
         known = list(BOARD_DIMENSION_VALUES.get(dimension, ()))
     # A position matrix stays compact to the seats actually present in the

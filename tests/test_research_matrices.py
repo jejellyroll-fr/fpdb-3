@@ -69,3 +69,21 @@ def test_unknown_values_are_not_redistributed_into_known_cells() -> None:
     assert matrix.cell("rainbow", None).opportunities == 3
     assert matrix.cell("rainbow", "unpaired").opportunities == 0
     assert matrix.has_unknown
+
+
+def test_stack_depth_matrix_uses_canonical_depth_order() -> None:
+    matrix = build_matrix(
+        result(
+            "opportunities",
+            [
+                QueryRow({"effective_stack_bucket": "100_plus", "position": 0}, 1, 1, 1, "count"),
+                QueryRow({"effective_stack_bucket": "under_10", "position": 0}, 1, 1, 1, "count"),
+                QueryRow({"effective_stack_bucket": "10_to_15", "position": 0}, 1, 1, 1, "count"),
+            ],
+        ),
+        ("effective_stack_bucket", "position"),
+    )
+
+    assert matrix.rows[:2] == ("under_10", "10_to_15")
+    assert matrix.rows.index("100_plus") < matrix.rows.index("unknown")
+    assert matrix.rows.index("10_to_15") < matrix.rows.index("100_plus")

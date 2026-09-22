@@ -286,7 +286,9 @@ def _count(db: Any, query: Query, *, numerator_only: bool, distinct_hands: bool)
     if where:
         sql_parts.append("WHERE " + " AND ".join(f"({condition})" for condition in where))
     cursor = db.get_cursor()
-    cursor.execute(escape_literal_percent("\n".join(sql_parts), placeholder), tuple(params))
+    # The SQL structure comes only from the query compiler's allow-listed
+    # aliases and expressions; all values remain bound in ``params``.
+    cursor.execute(escape_literal_percent("\n".join(sql_parts), placeholder), tuple(params))  # nosec B608  # nosemgrep
     row = cursor.fetchone()
     return int((row[0] if row else 0) or 0)
 

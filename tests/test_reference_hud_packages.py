@@ -303,7 +303,7 @@ def test_the_dynamic_section_scopes_the_library_to_the_package_profile() -> None
     context = hud_situation.HudSituationContext(
         street="flop", pot_type="single_raised", in_position=True, is_preflop_aggressor=True,
     )
-    mine = resolver.resolve(context, PRIMARY[DYNAMIC])
+    mine = resolver.resolve(context, PRIMARY[DYNAMIC], samples={"n": 100})
     others = resolver.resolve(context, "someone_elses_profile")
     assert "srp_cbet_ip" in mine.panels
     assert mine.panels and mine.enabled
@@ -319,12 +319,14 @@ def test_the_dynamic_rules_actually_change_panels_with_the_context() -> None:
     flop_cbet = resolver.resolve(
         hud_situation.HudSituationContext(street="flop", pot_type="single_raised", is_preflop_aggressor=True, in_position=True),
         profile,
+        samples={"n": 100},
     )
     facing_cbet = resolver.resolve(
         hud_situation.HudSituationContext(
             street="flop", pot_type="single_raised", facing_action="bets", in_position=False,
         ),
         profile,
+        samples={"n": 100},
     )
     unknown = resolver.resolve(hud_situation.HudSituationContext(), profile)
     assert "srp_cbet_ip" in flop_cbet.panels

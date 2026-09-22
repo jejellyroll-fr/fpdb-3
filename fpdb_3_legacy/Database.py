@@ -230,6 +230,9 @@ class Database(
     # else's data as soon as a process held two Database objects (#368). Each
     # instance now keeps its own, created in ``__init__``.
     _worker_conn_semaphore = threading.Semaphore(4)
+    _worker_pool_lock = threading.Lock()
+    _worker_idle_connections = 0
+    _worker_idle_limit = 4
 
     hero_hudstart_def = "1999-12-31"  # default for length of Hero's stats in HUD
     villain_hudstart_def = "1999-12-31"  # default for length of Villain's stats in HUD
@@ -833,7 +836,9 @@ class Database(
         conn = None
         try:
             try:
-                conn = self._worker_conn_pool.get_nowait()
+                with Database._worker_pool_lock:
+                    conn = self._worker_conn_pool.get_nowait()
+                    Database._worker_idle_connections -= 1
             except queue.Empty:
                 conn = self._create_new_worker_connection()
 
@@ -857,7 +862,13 @@ class Database(
             with contextlib.suppress(Exception):
                 conn.close()
             return
-        self._worker_conn_pool.put(conn)
+        with Database._worker_pool_lock:
+            if Database._worker_idle_connections >= Database._worker_idle_limit:
+                with contextlib.suppress(Exception):
+                    conn.close()
+                return
+            self._worker_conn_pool.put(conn)
+            Database._worker_idle_connections += 1
 
     def _create_new_worker_connection(self):
         """Open a dedicated connection for a background worker thread.
@@ -969,13 +980,19 @@ class Database(
         the class would have had to pick a database, and there is more than
         one only because they are different databases.
         """
-        while not self._worker_conn_pool.empty():
+        pool = getattr(self, "_worker_conn_pool", None)
+        if pool is None:
+            return
+        while True:
             try:
-                conn = self._worker_conn_pool.get_nowait()
-                if conn is not None:
-                    conn.close()
+                with Database._worker_pool_lock:
+                    conn = pool.get_nowait()
+                    Database._worker_idle_connections -= 1
             except queue.Empty:
                 break
+            if conn is not None:
+                with contextlib.suppress(Exception):
+                    conn.close()
 
     def _close_cursor_quietly(self) -> None:
         cursor = getattr(self, "cursor", None)
@@ -991,6 +1008,7 @@ class Database(
         # database closed once already has no connection to commit, and calling
         # disconnect twice -- which shutdown paths do -- should be a no-op
         # rather than an AttributeError on the way out.
+        self.close_worker_pool()
         if self.connection is not None:
             if due_to_error:
                 self.connection.rollback()
@@ -1022,6 +1040,7 @@ class Database(
         what a broken socket cannot do: the recovery path would raise inside its
         own cleanup and never get as far as reconnecting.
         """
+        self.close_worker_pool()
         self._close_cursor_quietly()
         with contextlib.suppress(Exception):
             if self.connection is not None:

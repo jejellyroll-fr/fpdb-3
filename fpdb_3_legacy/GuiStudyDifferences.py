@@ -124,7 +124,8 @@ class GuiStudyDifferences(QWidget):
         self.game_combo = QComboBox()
         self.game_combo.addItem("Any", None)
         self.game_combo.addItem("Hold'em", "holdem")
-        self.game_combo.addItem("Omaha", "omaha")
+        # Gametypes.category uses the canonical legacy token ``omahahi``.
+        self.game_combo.addItem("Omaha", "omahahi")
         controls.addWidget(self.game_combo)
         controls.addWidget(QLabel("Min Hero opportunities"))
         self.hero_sample_spin = QSpinBox()

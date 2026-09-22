@@ -62,3 +62,15 @@ def test_the_concurrency_bound_stays_process_wide(two_databases) -> None:
     first, second = two_databases
 
     assert first._worker_conn_semaphore is second._worker_conn_semaphore
+
+
+def test_idle_worker_connections_are_bounded_process_wide(two_databases) -> None:
+    first, second = two_databases
+
+    for database in (first, second, first, second, first, second):
+        with database.worker_connection():
+            pass
+
+    assert Database._worker_idle_connections <= Database._worker_idle_limit
+    first.close_worker_pool()
+    second.close_worker_pool()
