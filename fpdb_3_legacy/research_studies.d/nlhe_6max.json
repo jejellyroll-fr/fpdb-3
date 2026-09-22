@@ -16,6 +16,7 @@
       "table_size": 6,
       "base_filters": {
         "game": "holdem",
+        "tournament": false,
         "max_seats": [
           6,
           6
@@ -138,6 +139,7 @@
       "table_size": 6,
       "base_filters": {
         "game": "holdem",
+        "tournament": false,
         "max_seats": [
           6,
           6
@@ -265,6 +267,7 @@
       "table_size": 6,
       "base_filters": {
         "game": "holdem",
+        "tournament": false,
         "max_seats": [
           6,
           6
@@ -393,6 +396,7 @@
       "table_size": 6,
       "base_filters": {
         "game": "holdem",
+        "tournament": false,
         "max_seats": [
           6,
           6
@@ -515,6 +519,7 @@
       "table_size": 6,
       "base_filters": {
         "game": "holdem",
+        "tournament": false,
         "max_seats": [
           6,
           6
@@ -626,6 +631,7 @@
       "table_size": 6,
       "base_filters": {
         "game": "holdem",
+        "tournament": false,
         "max_seats": [
           6,
           6
@@ -758,6 +764,7 @@
       "table_size": 6,
       "base_filters": {
         "game": "holdem",
+        "tournament": false,
         "max_seats": [
           6,
           6
@@ -889,6 +896,7 @@
       "table_size": 6,
       "base_filters": {
         "game": "holdem",
+        "tournament": false,
         "max_seats": [
           6,
           6
@@ -1026,6 +1034,7 @@
       "table_size": 6,
       "base_filters": {
         "game": "holdem",
+        "tournament": false,
         "max_seats": [
           6,
           6
@@ -1160,6 +1169,7 @@
       "table_size": 6,
       "base_filters": {
         "game": "holdem",
+        "tournament": false,
         "max_seats": [
           6,
           6
@@ -1278,6 +1288,7 @@
       "table_size": 6,
       "base_filters": {
         "game": "holdem",
+        "tournament": false,
         "max_seats": [
           6,
           6

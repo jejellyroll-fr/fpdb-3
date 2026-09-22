@@ -16,6 +16,7 @@ from __future__ import annotations
 
 from typing import Any
 
+import shiboken6
 from PySide6.QtCore import Qt, QThread, Signal
 from PySide6.QtWidgets import (
     QHBoxLayout,
@@ -44,6 +45,17 @@ from fpdb_3_legacy.research_worker_db import worker_database
 from fpdb_3_legacy.ring_stats.styles import get_theme_palette
 
 log = get_logger("gui_drilldown")
+
+
+def live_workers(workers: list[QThread]) -> list[QThread]:
+    """The workers Qt has not destroyed yet.
+
+    A finished worker deletes itself, which leaves a Python wrapper whose C++
+    object is gone. Touching one -- even to ask whether it is running --
+    raises, and raising inside ``closeEvent`` is not an exception a caller
+    sees: Qt is between C++ frames, and the process goes down with it.
+    """
+    return [worker for worker in workers if shiboken6.isValid(worker)]
 
 
 def _target_labels() -> dict[str, str]:
@@ -367,14 +379,17 @@ class SourceHandsPane(QWidget):
         log.warning("Source hands counts unavailable: %s", message)
 
     def _start(self, worker: QThread) -> None:
-        worker.finished.connect(lambda worker=worker: self._retire(worker))
+        # ``deleteLater`` is connected to Qt's own slot rather than to a
+        # lambda calling back into this widget: a queued signal that reaches a
+        # bound method after the widget has been destroyed does not raise, it
+        # takes the process down. The list is pruned here instead, where the
+        # widget is certainly alive.
+        worker.finished.connect(worker.deleteLater)
+        self._workers = [
+            running for running in live_workers(self._workers) if running.isRunning()
+        ]
         self._workers.append(worker)
         worker.start()
-
-    def _retire(self, worker: QThread) -> None:
-        if worker in self._workers:
-            self._workers.remove(worker)
-        worker.deleteLater()
 
     def _load(self) -> None:
         if self._context is None or self._target is None:
@@ -453,13 +468,20 @@ class SourceHandsPane(QWidget):
             hand_id = int(text)
         self.hand_activated.emit(int(hand_id))
 
+    #: How long a closing pane waits for a query already in flight. Long
+    #: enough for a slow grouped count on a large database, because the
+    #: alternative is destroying a running QThread, which does not raise --
+    #: it takes the process with it.
+    SHUTDOWN_WAIT_MS = 15000
+
     def stop(self) -> None:
         """Stop waiting for any page; the hosts call this when they close."""
         self._serial += 1
         self._counts_serial += 1
-        for worker in list(self._workers):
+        for worker in live_workers(self._workers):
             if worker.isRunning():
-                worker.wait(2000)
+                worker.wait(self.SHUTDOWN_WAIT_MS)
+        self._workers.clear()
 
 
-__all__ = ["SourceHandsPane"]
+__all__ = ["SourceHandsPane", "live_workers"]

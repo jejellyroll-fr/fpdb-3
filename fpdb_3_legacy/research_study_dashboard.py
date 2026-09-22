@@ -7,11 +7,20 @@ from collections.abc import Mapping
 from dataclasses import dataclass, field, replace
 from typing import Any, Final
 
-from .analytics_query import FILTERS, Query
+from .analytics_query import FILTERS, Query, run_query
 from .hand_state_composition import DIMENSIONS as COMPOSITION_DIMENSIONS
 from .research_drilldown import DrillContext
 from .research_studies import CompiledStudyPanel, StudySpec, execute_panel
 from .research_study_explorer import StudySelection
+from .stack_depth_buckets import (
+    STACK_DEPTH_BUCKETS,
+    STACK_DEPTH_LABELS,
+    UNKNOWN_STACK_BUCKET,
+    mixes_stack_depths,
+)
+
+#: The dimension a tournament study breaks stack depth down by.
+STACK_DEPTH_DIMENSION: Final = "effective_stack_bucket"
 
 COMPARISON_HERO: Final = "hero"
 COMPARISON_FIELD: Final = "field"
@@ -150,6 +159,61 @@ class StudyDashboardModel:
             label=f"{self._study.title} · {title}" + (f" · {crosses}" if crosses else ""),
         )
 
+    def stack_depth_note(self, db: Any, panel_id: str | None = None) -> str | None:
+        """Say when a headline averages depths that are different games (#369).
+
+        A tournament answer that folds 12 big blinds in with 60 is not one
+        answer, it is the mean of two: below 25bb a raise is a commitment
+        decision and above it an opening range. The check costs one grouped
+        count, and only for a study that declares itself a tournament one --
+        a cash study's stacks are a distribution, not a regime change.
+
+        ``None`` when there is nothing to warn about, including when stack
+        depth *is* the breakdown axis: a panel that shows the bands separately
+        is not averaging them.
+        """
+        chosen = panel_id or self._state.active_panel
+        compiled = self.panel(chosen)
+        if not compiled.base_filters.get("tournament"):
+            return None
+        if STACK_DEPTH_DIMENSION in compiled.query.group_by:
+            return None
+        counts = self.stack_depth_spread(db, chosen)
+        if not mixes_stack_depths(counts):
+            return None
+        # The bands in depth order rather than by size, and without the
+        # unrecorded ones: the point is the spread, not a leaderboard, and a
+        # decision with no recorded depth is not one of the depths in it.
+        ordered = [
+            (band, counts[band])
+            for band in STACK_DEPTH_BUCKETS
+            if band in counts and band != UNKNOWN_STACK_BUCKET
+        ]
+        named = ", ".join(
+            f"{STACK_DEPTH_LABELS.get(band, band)} ({count})" for band, count in ordered
+        )
+        return (
+            "This answer averages stack depths that play differently: "
+            f"{named}. Break down by stack depth, or narrow to one band, "
+            "before reading the headline as one number."
+        )
+
+    def stack_depth_spread(self, db: Any, panel_id: str | None = None) -> dict[str, int]:
+        """How the panel's population divides across the stack-depth bands."""
+        compiled = self.panel(panel_id or self._state.active_panel)
+        query = replace(
+            compiled.query,
+            metric="opportunities",
+            numerator={},
+            group_by=(STACK_DEPTH_DIMENSION,),
+        )
+        result = run_query(db, query)
+        return {
+            str(row.group[STACK_DEPTH_DIMENSION]): int(row.opportunities)
+            for row in result.rows
+            if row.opportunities
+        }
+
     def set_active_panel(self, panel_id: str) -> None:
         if panel_id not in self.panel_ids():
             raise KeyError(f"Unknown dashboard panel {panel_id!r}; known: {list(self.panel_ids())}")
@@ -275,6 +339,7 @@ __all__ = [
     "COMPARISON_HERO",
     "COMPARISON_HERO_VS_FIELD",
     "COMPARISON_MODES",
+    "STACK_DEPTH_DIMENSION",
     "CrossFilter",
     "DashboardComparison",
     "DashboardState",

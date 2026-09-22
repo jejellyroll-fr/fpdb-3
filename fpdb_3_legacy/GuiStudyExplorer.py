@@ -91,9 +91,14 @@ class GuiStudyExplorer(QWidget):
         for game in self.model.games():
             self.game_combo.addItem(f"{game.label} ({game.study_count})", game.id)
         self.format_combo = QComboBox()
+        # Cash and tournament are different libraries, not one library with a
+        # filter: a tournament hand is played at a depth a cash study never
+        # sees, so the format decides which studies exist (#369).
         self.format_combo.addItem("Any format", None)
-        self.format_combo.addItem("Cash games", False)
-        self.format_combo.addItem("Tournaments", True)
+        for study_format in self.model.formats():
+            self.format_combo.addItem(
+                f"{study_format.label} ({study_format.study_count})", study_format.tournament,
+            )
         self.table_combo = QComboBox()
         self.table_combo.addItem("Any table size", None)
         self.table_combo.addItem("6-max", [6, 6])
@@ -125,9 +130,11 @@ class GuiStudyExplorer(QWidget):
         ):
             context_layout.addRow(label, widget)
             widget.currentIndexChanged.connect(self._refresh_selection)
-        # A game is not only context for the study that opens: it decides
-        # which studies exist at all, so it redraws the spots and the list.
-        self.game_combo.currentIndexChanged.connect(self._game_changed)
+        # Neither the game nor the format is only context for the study that
+        # opens: each decides which studies exist at all, so both redraw the
+        # spots and the list.
+        self.game_combo.currentIndexChanged.connect(self._scope_changed)
+        self.format_combo.currentIndexChanged.connect(self._scope_changed)
         context_layout.addRow("Player", self.player_edit)
         context_layout.addRow("Stake (BB)", stake_row)
         context_layout.addRow("Dates", date_row)
@@ -210,7 +217,7 @@ class GuiStudyExplorer(QWidget):
             item = self.category_grid.takeAt(0)
             if item is not None and item.widget() is not None:
                 item.widget().deleteLater()
-        for index, category in enumerate(self.model.categories(self._game())):
+        for index, category in enumerate(self.model.categories(self._game(), self._tournament())):
             button = QPushButton(f"{category.label}\n{category.study_count} studies")
             button.setToolTip(category.description)
             button.setMinimumHeight(54)
@@ -224,10 +231,14 @@ class GuiStudyExplorer(QWidget):
         """The game currently chosen, or ``None`` for every game."""
         return self.game_combo.currentData()
 
-    def _game_changed(self) -> None:
-        """A different game: different spots, different studies."""
+    def _tournament(self) -> bool | None:
+        """The format currently chosen, or ``None`` for both."""
+        return self.format_combo.currentData()
+
+    def _scope_changed(self) -> None:
+        """A different game or format: different spots, different studies."""
         if self._category_id is not None and not self.model.studies_for_category(
-            self._category_id, self._game(),
+            self._category_id, self._game(), self._tournament(),
         ):
             self._category_id = None
         self._refresh_categories()
@@ -240,7 +251,9 @@ class GuiStudyExplorer(QWidget):
     def _refresh_studies(self) -> None:
         selected_id = self._selected.id if self._selected else None
         self.study_list.clear()
-        studies = self.model.search(self.search_edit.text(), self._category_id, self._game())
+        studies = self.model.search(
+            self.search_edit.text(), self._category_id, self._game(), self._tournament(),
+        )
         for study in studies:
             item = QListWidgetItem(study.title)
             item.setData(256, study.id)

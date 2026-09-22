@@ -121,7 +121,7 @@ _GROUP_OF: Final = {
     "player": "who", "players": "who", "identity": "who", "hero": "who",
     "position": "seat", "opponent_position": "seat", "relative_position": "seat",
     "in_position": "seat", "effective_stack_bb": "seat", "effective_stack": "seat",
-    "stack_bucket": "seat", "spr": "seat", "spr_bucket": "seat", "players_in_hand": "seat",
+    "stack_bucket": "seat", "spr": "seat", "spr_bucket": "seat", "effective_stack_bucket": "seat", "players_in_hand": "seat",
     "multiway": "street", "street": "street", "street_index": "street",
     "pot_type": "street", "pot_before": "street", "to_call": "street",
     "pot_odds_bp": "street", "role": "street", "is_aggressor": "street",

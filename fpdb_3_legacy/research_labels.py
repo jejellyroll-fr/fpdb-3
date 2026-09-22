@@ -56,6 +56,7 @@ from .hud_situation import POT_TYPES, STREETS
 from .i18n import N_
 from .sizing_buckets import DEFAULT_BUCKETS
 from .spr_buckets import SPR_BUCKET_LABELS, SPR_BUCKETS
+from .stack_depth_buckets import STACK_DEPTH_BUCKETS, STACK_DEPTH_LABELS
 
 
 @dataclass(frozen=True)
@@ -116,6 +117,7 @@ FILTER_LABELS: Final[dict[str, str]] = {
     "stack_bucket": N_("Stack depth"),
     "spr": N_("SPR"),
     "spr_bucket": N_("SPR band"),
+    "effective_stack_bucket": N_("Stack depth band"),
     "players_in_hand": N_("Players in the hand"),
     "multiway": N_("Multiway"),
     # -- street / pot -------------------------------------------------------
@@ -212,6 +214,7 @@ FILTER_DESCRIPTIONS: Final[dict[str, str]] = {
     "stack_bucket": N_("Short, medium, deep or very deep stacks."),
     "spr": N_("Stack-to-pot ratio before the action."),
     "spr_bucket": N_("The same ratio as the bands a player thinks in."),
+    "effective_stack_bucket": N_("Effective stack in the bands a tournament is played in."),
     "players_in_hand": N_("How many players were still in the hand."),
     "multiway": N_("Three or more players saw the decision."),
     "street": N_("Preflop, flop, turn or river."),
@@ -400,6 +403,11 @@ def _stack_bucket_choices() -> tuple[Choice, ...]:
     )
 
 
+def _stack_depth_choices() -> tuple[Choice, ...]:
+    """The tournament stack bands, named from the module that writes their SQL."""
+    return tuple(Choice(name, N_(STACK_DEPTH_LABELS[name])) for name in STACK_DEPTH_BUCKETS)
+
+
 def _spr_bucket_choices() -> tuple[Choice, ...]:
     """The SPR bands, named from the module that also writes their SQL."""
     return tuple(Choice(name, N_(SPR_BUCKET_LABELS[name])) for name in SPR_BUCKETS)
@@ -503,6 +511,7 @@ FILTER_CHOICES: Final[dict[str, tuple[Choice, ...]]] = {
     "sizing_bucket": _bucket_choices(),
     "facing_sizing_bucket": _bucket_choices(),
     "spr_bucket": _spr_bucket_choices(),
+    "effective_stack_bucket": _stack_depth_choices(),
 }
 
 # The human name of each engine filter group (``research_browser.FILTER_GROUPS``).
@@ -564,6 +573,7 @@ DIMENSION_LABELS: Final[dict[str, str]] = {
     "effective_stack_bb": N_("Effective stack"),
     "spr": N_("SPR"),
     "spr_bucket": N_("SPR band"),
+    "effective_stack_bucket": N_("Stack depth band"),
     "pot_type": N_("Pot type"),
     "role": N_("Role"),
     "response": N_("Response"),
@@ -611,6 +621,7 @@ BEGINNER_DIMENSIONS: Final[tuple[str, ...]] = (
     "nutness",
     "stack_bucket",
     "effective_stack_bb",
+    "effective_stack_bucket",
     "spr_bucket",
     "in_position",
     "multiway",
@@ -626,6 +637,7 @@ DIMENSION_CHOICES: Final[dict[str, tuple[Choice, ...]]] = {
     "sizing_bucket": _bucket_choices(),
     "facing_sizing_bucket": _bucket_choices(),
     "spr_bucket": _spr_bucket_choices(),
+    "effective_stack_bucket": _stack_depth_choices(),
 }
 
 
@@ -655,6 +667,7 @@ METRIC_LABELS: Final[dict[str, str]] = {
     "raise_frequency": N_("raise frequency"),
     "bet_frequency": N_("bet frequency"),
     "check_frequency": N_("check frequency"),
+    "all_in_frequency": N_("all-in frequency"),
     "average_sizing": N_("average bet size (basis points of the pot)"),
     "average_facing_sizing": N_("average bet size faced (basis points of the pot)"),
     "average_spr": N_("average SPR"),
@@ -677,6 +690,7 @@ FREQUENCY_METRICS: Final[frozenset[str]] = frozenset(
         "raise_frequency",
         "bet_frequency",
         "check_frequency",
+        "all_in_frequency",
     },
 )
 

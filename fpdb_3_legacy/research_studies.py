@@ -408,6 +408,17 @@ class StudySpec:
         return out
 
     @property
+    def tournament(self) -> bool | None:
+        """Whether this study is about tournament hands, cash hands or either.
+
+        Read off the population rather than declared twice: a study that pins
+        ``tournament`` in its base filters *is* a tournament study, and one
+        that does not applies to both (#369).
+        """
+        value = self.base_filters.get("tournament")
+        return None if value is None else bool(value)
+
+    @property
     def search_terms(self) -> tuple[str, ...]:
         """Searchable poker language for a future Study Explorer."""
         return tuple(dict.fromkeys((self.title, *self.aliases, *self.tags, *self.path)))

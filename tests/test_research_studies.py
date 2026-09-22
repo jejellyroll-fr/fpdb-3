@@ -254,10 +254,11 @@ def test_builtin_nlhe_pack_executes_every_shipped_panel_on_the_golden_corpus(bro
     registry = studies.builtin_studies()
     executed = 0
 
-    # The golden corpus is Hold'em, so it answers the Hold'em pack. The PLO
-    # pack has a four-card corpus of its own (#368).
+    # The golden corpus is six-max Hold'em cash, so it answers the Hold'em
+    # cash pack. The PLO pack (#368) and the tournament pack (#369) each have
+    # a corpus of their own.
     for study in registry.studies:
-        if study.game != "holdem":
+        if study.game != "holdem" or study.tournament is not False:
             continue
         for panel in study.panels_compiled():
             result = studies.execute_panel(browser_db, panel)

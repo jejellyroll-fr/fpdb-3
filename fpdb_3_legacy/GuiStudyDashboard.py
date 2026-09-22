@@ -21,7 +21,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from fpdb_3_legacy.GuiDrillDown import SourceHandsPane
+from fpdb_3_legacy.GuiDrillDown import SourceHandsPane, live_workers
 from fpdb_3_legacy.GuiResearchDistributions import DistributionChartWidget
 from fpdb_3_legacy.GuiResearchHandStrength import HandStrengthChartWidget
 from fpdb_3_legacy.GuiResearchMatrices import MatrixHeatmapWidget
@@ -101,6 +101,7 @@ class GuiStudyDashboard(QWidget):
         self._hand_strength_widgets: dict[str, HandStrengthChartWidget] = {}
         self._variable_edits: dict[str, QLineEdit] = {}
         self._replayers: list[Any] = []
+        self._stack_note: str | None = None
         self._build_ui()
         self._load_active_panel()
 
@@ -160,6 +161,15 @@ class GuiStudyDashboard(QWidget):
         self.filter_row.addStretch(1)
         layout.addLayout(self.filter_row)
 
+        # Its own line rather than a clause on the sample text: an answer that
+        # averages twelve big blinds with sixty is not a footnote about
+        # precision, it is a headline about two different games (#369).
+        self.stack_note_label = QLabel("")
+        self.stack_note_label.setWordWrap(True)
+        self.stack_note_label.setVisible(False)
+        self.stack_note_label.setStyleSheet("color: #e5c07b; font-weight: bold;")
+        layout.addWidget(self.stack_note_label)
+
         # Built before the tabs, because adding the first tab fires
         # ``currentChanged`` and the panel that loads immediately re-points
         # the hands pane.
@@ -168,6 +178,11 @@ class GuiStudyDashboard(QWidget):
 
         self.tabs = QTabWidget()
         self.tabs.currentChanged.connect(self._panel_changed)
+        # Adding the first tab emits ``currentChanged``, and the slot writes
+        # the active panel back to the model -- so building the tab strip used
+        # to overwrite whichever panel the study declared as its default with
+        # whichever one happened to be built first (#369).
+        self.tabs.blockSignals(True)
         for panel in self.model.study.panels:
             page = QWidget()
             page.setProperty("panel_id", panel.id)
@@ -221,6 +236,7 @@ class GuiStudyDashboard(QWidget):
                 self.tabs.setTabEnabled(index, False)
                 self.tabs.setTabToolTip(index, compiled.unavailable_reason or "Panel unavailable")
                 status.setText(f"Unavailable: {compiled.unavailable_reason}")
+        self.tabs.blockSignals(False)
         layout.addWidget(self.tabs, 1)
         # The hands live below every panel rather than inside one: a selection
         # made on a chart and a row picked from a table are the same question
@@ -264,9 +280,10 @@ class GuiStudyDashboard(QWidget):
     def closeEvent(self, event) -> None:  # noqa: N802 - Qt naming.
         """Stop waiting for anything still running before the page goes away."""
         self.source_hands.stop()
-        for worker in list(self._workers):
+        for worker in live_workers(self._workers):
             if worker.isRunning():
-                worker.wait(2000)
+                worker.wait(SourceHandsPane.SHUTDOWN_WAIT_MS)
+        self._workers.clear()
         if self._owns_db and self.db is not None:
             with contextlib.suppress(Exception):
                 self.db.disconnect()
@@ -346,9 +363,11 @@ class GuiStudyDashboard(QWidget):
         fingerprint = self.model.fingerprint(panel_id)
         status, table = self._pages[panel_id]
         if fingerprint in self._results:
-            self._render_result(panel_id, self._results[fingerprint])
+            result, self._stack_note = self._results[fingerprint]
+            self._render_result(panel_id, result)
             return
         status.setText("Loading panel…")
+        self.stack_note_label.setVisible(False)
         table.setRowCount(0)
         if panel_id in self._distribution_widgets:
             self._distribution_widgets[panel_id].clear_distribution()
@@ -360,22 +379,36 @@ class GuiStudyDashboard(QWidget):
         serial = self._serial
         worker = _DashboardWorker(
             self.db,
-            lambda db: self.model.execute_panel(db, panel_id),
+            # The stack-depth check rides with the panel rather than costing a
+            # second round trip: it is one grouped count, and only a
+            # tournament study asks for it at all (#369).
+            lambda db: (
+                self.model.execute_panel(db, panel_id),
+                self.model.stack_depth_note(db, panel_id),
+            ),
             serial,
             fingerprint,
             self,
         )
         worker.finished_ok.connect(self._panel_done)
         worker.failed.connect(self._panel_failed)
-        worker.finished.connect(lambda worker=worker: self._retire_worker(worker))
+        # Qt's own slot, not a lambda that calls back into this widget: a
+        # queued signal arriving after the dashboard is destroyed does not
+        # raise, it takes the process down. The list is pruned here, where
+        # the widget is certainly alive.
+        worker.finished.connect(worker.deleteLater)
+        self._workers = [
+            running for running in live_workers(self._workers) if running.isRunning()
+        ]
         self._workers.append(worker)
         worker.start()
 
-    def _panel_done(self, result: Any, serial: int, fingerprint: str) -> None:
+    def _panel_done(self, payload: Any, serial: int, fingerprint: str) -> None:
         if serial != self._serial:
             return
         panel_id = self.model.state.active_panel
-        self._results[fingerprint] = result
+        result, self._stack_note = payload
+        self._results[fingerprint] = payload
         self._render_result(panel_id, result)
 
     def _panel_failed(self, message: str, serial: int, fingerprint: str) -> None:
@@ -390,12 +423,8 @@ class GuiStudyDashboard(QWidget):
             self._matrix_widgets[panel_id].clear_matrix()
         if panel_id in self._hand_strength_widgets:
             self._hand_strength_widgets[panel_id].clear_distribution()
+        self.stack_note_label.setVisible(False)
         status.setText(f"Panel unavailable: {message}")
-
-    def _retire_worker(self, worker: _DashboardWorker) -> None:
-        if worker in self._workers:
-            self._workers.remove(worker)
-        worker.deleteLater()
 
     def refresh(self) -> None:
         self._serial += 1
@@ -431,6 +460,8 @@ class GuiStudyDashboard(QWidget):
 
     def _render_result(self, panel_id: str, result: Any) -> None:
         status, table = self._pages[panel_id]
+        self.stack_note_label.setText(self._stack_note or "")
+        self.stack_note_label.setVisible(bool(self._stack_note))
         if panel_id in self._matrix_widgets:
             self._render_matrix(panel_id, result, status, table)
             return

@@ -23,13 +23,18 @@ def test_landing_categories_are_generated_from_the_registry(model) -> None:
         "four-bet-pot",
         "population",
     ]
-    # Counted per game, because the library ships a Hold'em pack and a PLO
-    # one and the landing page offers one game at a time (#368).
-    holdem = model.categories("holdem")
+    # Counted per game and format, because the library ships a Hold'em cash
+    # pack (#359), a PLO one (#368) and a tournament one (#369), and the
+    # landing page offers one scope at a time.
+    holdem = model.categories("holdem", tournament=False)
     assert [category.study_count for category in holdem[:4]] == [5, 3, 2, 1]
-    omaha = model.categories("omahahi")
+    omaha = model.categories("omahahi", tournament=False)
     assert [category.study_count for category in omaha[:4]] == [5, 5, 4, 0]
-    assert categories[0].study_count == holdem[0].study_count + omaha[0].study_count
+    mtt = model.categories("holdem", tournament=True)
+    assert [category.study_count for category in mtt[:4]] == [6, 4, 0, 0]
+    assert categories[0].study_count == sum(
+        scope[0].study_count for scope in (holdem, omaha, mtt)
+    )
 
 
 @pytest.mark.parametrize("text", ["cbet", "c-bet", "BB defend", "3bet"])

@@ -70,6 +70,16 @@ class StudyCategory:
 
 
 @dataclass(frozen=True)
+class StudyFormat:
+    """Cash or tournament, as the landing page offers it."""
+
+    id: str
+    tournament: bool
+    label: str
+    study_count: int
+
+
+@dataclass(frozen=True)
 class StudyGame:
     """One game the shipped study library covers, for the landing page."""
 
@@ -191,14 +201,56 @@ class StudyExplorerModel:
             for game, count in sorted(declared.items(), key=lambda item: (-item[1], item[0]))
         )
 
+    def formats(self) -> tuple[StudyFormat, ...]:
+        """Cash and tournament, with how many studies each one has.
+
+        The landing page needs this for the same reason it needs the games: a
+        tournament player opening a library of cash studies has no entry point
+        to their own game, and a tournament hand is not a cash hand with one
+        extra filter (#369).
+        """
+        counts = {True: 0, False: 0}
+        shared = 0
+        for study in self.registry.studies:
+            if study.tournament is None:
+                shared += 1
+            else:
+                counts[study.tournament] += 1
+        return (
+            StudyFormat(id="cash", tournament=False, label="Cash games", study_count=counts[False] + shared),
+            StudyFormat(id="tournament", tournament=True, label="Tournaments", study_count=counts[True] + shared),
+        )
+
+    def studies_for_scope(
+        self,
+        game: str | None = None,
+        tournament: bool | None = None,
+    ) -> tuple[StudySpec, ...]:
+        """Every study that applies to one game and format.
+
+        A study declaring neither applies to both, so it is never filtered
+        out; one declaring either is offered only for what it declares.
+        """
+        studies = self.registry.studies
+        if game not in (None, "", "any"):
+            studies = tuple(study for study in studies if not study.game or study.game == game)
+        if tournament is not None:
+            studies = tuple(
+                study for study in studies
+                if study.tournament is None or study.tournament == bool(tournament)
+            )
+        return studies
+
     def studies_for_game(self, game: str | None) -> tuple[StudySpec, ...]:
         """Every study that applies to one game, or all of them for ``None``."""
-        if game in (None, "", "any"):
-            return self.registry.studies
-        return tuple(study for study in self.registry.studies if not study.game or study.game == game)
+        return self.studies_for_scope(game)
 
-    def categories(self, game: str | None = None) -> tuple[StudyCategory, ...]:
-        studies = self.studies_for_game(game)
+    def categories(
+        self,
+        game: str | None = None,
+        tournament: bool | None = None,
+    ) -> tuple[StudyCategory, ...]:
+        studies = self.studies_for_scope(game, tournament)
         counts: dict[str, int] = {}
         for study in studies:
             counts[_category_id(study)] = counts.get(_category_id(study), 0) + 1
@@ -212,9 +264,16 @@ class StudyExplorerModel:
             for category_id in _CATEGORY_ORDER
         )
 
-    def studies_for_category(self, category_id: str, game: str | None = None) -> tuple[StudySpec, ...]:
+    def studies_for_category(
+        self,
+        category_id: str,
+        game: str | None = None,
+        tournament: bool | None = None,
+    ) -> tuple[StudySpec, ...]:
         return tuple(
-            study for study in self.studies_for_game(game) if _category_id(study) == category_id
+            study
+            for study in self.studies_for_scope(game, tournament)
+            if _category_id(study) == category_id
         )
 
     def search(
@@ -222,11 +281,12 @@ class StudyExplorerModel:
         text: str = "",
         category_id: str | None = None,
         game: str | None = None,
+        tournament: bool | None = None,
     ) -> tuple[StudySpec, ...]:
         wanted = [_search_key(token) for token in text.split() if token.strip()]
-        studies = self.studies_for_game(game)
+        studies = self.studies_for_scope(game, tournament)
         if category_id is not None:
-            studies = self.studies_for_category(category_id, game)
+            studies = self.studies_for_category(category_id, game, tournament)
         matches = []
         for study in studies:
             haystack = " ".join(
@@ -307,6 +367,7 @@ __all__ = [
     "MAX_RECENT",
     "StudyCategory",
     "StudyExplorerModel",
+    "StudyFormat",
     "StudyGame",
     "StudyHistory",
     "StudySelection",
