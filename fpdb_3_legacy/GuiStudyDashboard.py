@@ -277,16 +277,29 @@ class GuiStudyDashboard(QWidget):
         except Exception as exc:  # noqa: BLE001 - a replayer failure must not break the study.
             self.source_hands.note_label.setText(f"Unable to open hand {hand_id}: {exc}")
 
-    def closeEvent(self, event) -> None:  # noqa: N802 - Qt naming.
-        """Stop waiting for anything still running before the page goes away."""
+    def shutdown_workers(self) -> None:
+        """Stop dashboard and source-hand queries before tab destruction.
+
+        ``fpdb.close_tab`` removes a page from the tab widget and calls this
+        hook directly; removed child widgets do not receive ``closeEvent``.
+        """
         self.source_hands.stop()
         for worker in live_workers(self._workers):
             if worker.isRunning():
                 worker.wait(SourceHandsPane.SHUTDOWN_WAIT_MS)
         self._workers.clear()
+
+    def close_owned_database(self) -> None:
+        """Release the connection created for this tab."""
         if self._owns_db and self.db is not None:
             with contextlib.suppress(Exception):
                 self.db.disconnect()
+            self._owns_db = False
+
+    def closeEvent(self, event) -> None:  # noqa: N802 - Qt naming.
+        """Delegate native closes to the same hooks used by tab removal."""
+        self.shutdown_workers()
+        self.close_owned_database()
         super().closeEvent(event)
 
     @staticmethod

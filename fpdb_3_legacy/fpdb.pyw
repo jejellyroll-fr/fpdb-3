@@ -1948,6 +1948,7 @@ class fpdb(QMainWindow):
                     # A dimension can be descriptive without being a legal
                     # query filter; the study itself remains a valid target.
                     continue
+            model.set_focus_filters(detail.focus_filters)
             return module.GuiStudyDashboard(self.config, self.sql, self, model=model)
 
         self.open_tab(

@@ -30,6 +30,7 @@ def test_report_renders_reviewable_rows_and_opens_a_study(qtbot, tmp_path) -> No
         unit="frequency",
         context_filters={"game": "holdem"},
         cross_filters={"position": 0},
+        focus_filters={"response": "fold"},
     )
 
     widget._render_report(
@@ -55,6 +56,7 @@ def test_report_renders_reviewable_rows_and_opens_a_study(qtbot, tmp_path) -> No
     assert opened[0].selection.study.id == "preflop_rfi"
     assert opened[0].panel_id == "overview"
     assert opened[0].cross_filters == {"position": 0}
+    assert opened[0].focus_filters == {"response": "fold"}
 
 
 def test_omaha_picker_uses_the_database_game_token(qtbot, tmp_path) -> None:

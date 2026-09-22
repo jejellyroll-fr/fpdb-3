@@ -51,6 +51,7 @@ class DashboardState:
     comparison: str
     active_panel: str
     cross_filters: tuple[CrossFilter, ...] = ()
+    focus_filters: Mapping[str, Any] = field(default_factory=dict)
     min_sample: int = 0
     dimension_overrides: Mapping[str, str] = field(default_factory=dict)
 
@@ -152,12 +153,32 @@ class StudyDashboardModel:
         """
         chosen = panel_id or self._state.active_panel
         compiled = self.panel(chosen)
-        crosses = ", ".join(item.label for item in self._state.cross_filters)
+        filters = dict(compiled.query.filters)
+        for name, value in self._state.focus_filters.items():
+            if name in filters and filters[name] != value:
+                raise ValueError(
+                    f"focus filter {name!r}={value!r} conflicts with the study population "
+                    f"{name!r}={filters[name]!r}",
+                )
+            filters[name] = value
+        query = replace(compiled.query, filters=filters)
+        labels = [item.label for item in self._state.cross_filters]
+        labels.extend(f"{name}={value}" for name, value in self._state.focus_filters.items())
+        crosses = ", ".join(labels)
         title = self.panel_titles().get(chosen, chosen)
         return DrillContext(
-            query=compiled.query,
+            query=query,
             label=f"{self._study.title} · {title}" + (f" · {crosses}" if crosses else ""),
         )
+
+    def set_focus_filters(self, filters: Mapping[str, Any] | None) -> None:
+        """Set a drill-down focus without changing chart populations.
+
+        A focused response bin must retain the distribution's original
+        denominator on the dashboard while still narrowing the source hands
+        pane to the bin that led the reader here.
+        """
+        self._state = replace(self._state, focus_filters=dict(filters or {}))
 
     def stack_depth_note(
         self,

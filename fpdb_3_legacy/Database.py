@@ -233,6 +233,11 @@ class Database(
     _worker_idle_connections = 0
     _worker_idle_limit = 4
     _worker_pools: weakref.WeakSet[Any] = weakref.WeakSet()
+    # A worker may still be inside ``worker_connection`` after its database
+    # tab has retired the idle pool.  Keep that identity briefly so its return
+    # path closes the borrowed connection instead of enqueueing it into an
+    # unreachable queue.
+    _worker_retired_pools: weakref.WeakSet[Any] = weakref.WeakSet()
 
     hero_hudstart_def = "1999-12-31"  # default for length of Hero's stats in HUD
     villain_hudstart_def = "1999-12-31"  # default for length of Villain's stats in HUD
@@ -292,7 +297,9 @@ class Database(
         self.connection: Any = None
         self.cursor: Any = None
         self._worker_conn_pool: queue.Queue[Any] = queue.Queue()
-        Database._worker_pools.add(self._worker_conn_pool)
+        with Database._worker_pool_lock:
+            Database._worker_pools.add(self._worker_conn_pool)
+            Database._worker_retired_pools.discard(self._worker_conn_pool)
         self.__connected = False
         self.wrongDbVersion = False
         self.settings = {}
@@ -833,7 +840,9 @@ class Database(
         failed, it hands the next borrower a connection whose transaction is
         already aborted, so every later query on it fails too.
         """
-        Database._worker_pools.add(self._worker_conn_pool)
+        with Database._worker_pool_lock:
+            Database._worker_pools.add(self._worker_conn_pool)
+            Database._worker_retired_pools.discard(self._worker_conn_pool)
         conn = None
         active_slot = False
         try:
@@ -894,14 +903,20 @@ class Database(
                 conn.close()
             return
         with Database._worker_pool_lock:
+            retired = self._worker_conn_pool in Database._worker_retired_pools
             registered = self._worker_conn_pool in Database._worker_pools
-            if registered and Database._worker_idle_connections >= Database._worker_idle_limit:
-                with contextlib.suppress(Exception):
-                    conn.close()
-                return
-            self._worker_conn_pool.put(conn)
-            if registered:
-                Database._worker_idle_connections += 1
+            if retired:
+                close_connection = True
+            elif registered and Database._worker_idle_connections >= Database._worker_idle_limit:
+                close_connection = True
+            else:
+                close_connection = False
+                self._worker_conn_pool.put(conn)
+                if registered:
+                    Database._worker_idle_connections += 1
+        if close_connection:
+            with contextlib.suppress(Exception):
+                conn.close()
 
     def _create_new_worker_connection(self):
         """Open a dedicated connection for a background worker thread.
@@ -1016,6 +1031,13 @@ class Database(
         pool = getattr(self, "_worker_conn_pool", None)
         if pool is None:
             return
+        retired_connections = []
+        # Retire the identity before draining it, atomically with the queue
+        # transition. A worker that returns between the final empty check and
+        # the retirement marker must not put an untracked connection back.
+        with Database._worker_pool_lock:
+            Database._worker_pools.discard(pool)
+            Database._worker_retired_pools.add(pool)
         while True:
             try:
                 with Database._worker_pool_lock:
@@ -1024,9 +1046,10 @@ class Database(
             except queue.Empty:
                 break
             if conn is not None:
-                with contextlib.suppress(Exception):
-                    conn.close()
-        Database._worker_pools.discard(pool)
+                retired_connections.append(conn)
+        for conn in retired_connections:
+            with contextlib.suppress(Exception):
+                conn.close()
 
     def _close_cursor_quietly(self) -> None:
         cursor = getattr(self, "cursor", None)

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import contextlib
 from pathlib import Path
 from typing import Any
 
@@ -100,8 +101,10 @@ class GuiStudyDifferences(QWidget):
             from fpdb_3_legacy.Database import Database
 
             self.db = Database(config, sql=querylist)
+            self._owns_db = True
         else:
             self.db = db
+            self._owns_db = False
         self._worker: _DifferencesWorker | None = None
         self._report: DifferenceReport | None = None
         self._build_ui()
@@ -237,12 +240,24 @@ class GuiStudyDifferences(QWidget):
         self.run_button.setEnabled(True)
         self.status_label.setText(f"Comparison unavailable: {message}")
 
-    def closeEvent(self, event) -> None:  # noqa: N802 - Qt naming.
-        """Wait for the comparison worker before Qt destroys the page."""
+    def shutdown_workers(self) -> None:
+        """Wait for report work before ``fpdb.close_tab`` destroys the page."""
         worker = self._worker
         if worker is not None and worker.isRunning():
             worker.wait(30_000)
         self._worker = None
+
+    def close_owned_database(self) -> None:
+        """Release the connection created for this tab."""
+        if self._owns_db and self.db is not None:
+            with contextlib.suppress(Exception):
+                self.db.disconnect()
+            self._owns_db = False
+
+    def closeEvent(self, event) -> None:  # noqa: N802 - Qt naming.
+        """Delegate native closes to the same hooks used by tab removal."""
+        self.shutdown_workers()
+        self.close_owned_database()
         super().closeEvent(event)
 
     def _render_report(self, report: DifferenceReport) -> None:
@@ -313,6 +328,7 @@ class GuiStudyDifferences(QWidget):
                 panel_id=row.panel_id,
                 cross_filters=row.cross_filters,
                 row=row,
+                focus_filters=row.focus_filters,
             )
         )
 

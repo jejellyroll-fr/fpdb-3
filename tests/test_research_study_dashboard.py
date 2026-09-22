@@ -51,6 +51,14 @@ def test_unknown_cross_filter_becomes_an_explicit_null_predicate(tmp_path) -> No
     assert dashboard.panel_query("overview").filters["board_pairing"] == {"is_null": True}
 
 
+def test_focus_filter_narrows_hands_without_changing_panel_population(tmp_path) -> None:
+    dashboard = _dashboard(tmp_path)
+    dashboard.set_focus_filters({"response": "fold"})
+
+    assert dashboard.panel_query("overview").filters.get("response") != "fold"
+    assert dashboard.drill_context("overview").query.filters["response"] == "fold"
+
+
 def test_comparison_is_study_wide_and_uses_the_same_panel_population(tmp_path) -> None:
     dashboard = _dashboard(tmp_path)
     dashboard.set_comparison(COMPARISON_HERO_VS_FIELD)

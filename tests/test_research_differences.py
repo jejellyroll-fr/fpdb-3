@@ -56,7 +56,23 @@ def test_report_ranks_real_hero_field_gaps_and_keeps_the_drill_context(golden_db
     assert all(row.score == abs(row.gap_bp) * min(row.hero_sample, row.field_sample) for row in report.rows)
     assert report.rows[0].score >= report.rows[-1].score
     assert "not EV loss" in report.heuristic_description
-    assert any(row.cross_filters for row in report.rows)
+    assert any(row.cross_filters or row.focus_filters for row in report.rows)
+    assert any(row.focus_filters for row in report.rows)
+
+
+def test_response_difference_keeps_the_distribution_denominator_for_the_dashboard(
+    golden_db: Database,
+) -> None:
+    report = build_difference_report(
+        golden_db,
+        builtin_studies(),
+        DifferenceFilters(min_hero_sample=0, min_field_sample=0, max_rows=100),
+    )
+
+    response_rows = [row for row in report.rows if row.focus_filters]
+    assert response_rows
+    assert all(not row.cross_filters for row in response_rows)
+    assert all("response" in row.focus_filters for row in response_rows)
 
 
 def test_sample_controls_can_hide_small_groups_without_changing_the_candidate_set(golden_db: Database) -> None:

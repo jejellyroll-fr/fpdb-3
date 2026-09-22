@@ -86,6 +86,7 @@ class DifferenceRow:
     context_filters: Mapping[str, Any]
     cross_filters: Mapping[str, Any]
     low_sample: bool = False
+    focus_filters: Mapping[str, Any] = field(default_factory=dict)
 
     @property
     def label(self) -> str:
@@ -106,6 +107,7 @@ class DifferenceSelection:
     panel_id: str
     cross_filters: Mapping[str, Any]
     row: DifferenceRow
+    focus_filters: Mapping[str, Any] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -217,6 +219,16 @@ def build_difference_report(
                 for name, value in zip(candidate.group_by, key)
                 if name in FILTERS and value is not None
             }
+            # A response distribution's selected response is a chart group,
+            # not a new population.  Applying it as a dashboard filter would
+            # make the reopened chart's denominator equal the selected bin,
+            # so its bar would read 100%. Keep it as a drill-down focus while
+            # leaving the panel population intact.
+            population_filters = group_filters
+            focus_filters: Mapping[str, Any] = {}
+            if candidate.panel_kind == "response_distribution":
+                population_filters = {}
+                focus_filters = group_filters
             rows.append(
                 DifferenceRow(
                     candidate_id=candidate.id,
@@ -232,11 +244,12 @@ def build_difference_report(
                     score=score,
                     unit="frequency",
                     context_filters=dict(context),
-                    cross_filters=group_filters,
+                    cross_filters=population_filters,
                     low_sample=(
                         hero_point.sample < settings.min_hero_sample
                         or field_point.sample < settings.min_field_sample
                     ),
+                    focus_filters=focus_filters,
                 ),
             )
 
