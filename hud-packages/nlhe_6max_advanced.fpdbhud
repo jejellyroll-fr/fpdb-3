@@ -88,13 +88,19 @@
       <pu_stat pu_stat_name="four_B"/>
       <pu_stat pu_stat_name="totalprofit"/>
       <pu_stat pu_stat_name="bbper100"/>
-      <pu_stat pu_stat_name="Analytics" pu_stat_submenu="analytics"/>
+      <!--
+        Navigation in the order a hand is played, every popup in every
+        package: preflop, then each pot shape, then sizing, then stacks and
+        position, then the population read last. A reader learns the shape
+        once (fpdb_3_legacy/hud_presentation.py, SPOT_ORDER).
+      -->
       <pu_stat pu_stat_name="Preflop" pu_stat_submenu="preflop"/>
       <pu_stat pu_stat_name="Single-raised pot" pu_stat_submenu="srp"/>
       <pu_stat pu_stat_name="3-bet pot" pu_stat_submenu="threebet_pot"/>
       <pu_stat pu_stat_name="4-bet pot" pu_stat_submenu="fourbet_pot"/>
       <pu_stat pu_stat_name="Preflop sizing" pu_stat_submenu="preflop_sizing"/>
       <pu_stat pu_stat_name="Opening by position" pu_stat_submenu="nlhe6_advanced_opens"/>
+      <pu_stat pu_stat_name="Analytics" pu_stat_submenu="analytics"/>
     </pu>
 
     <!--
@@ -109,9 +115,10 @@
       <pu_stat pu_stat_name="open_limp"/>
       <pu_stat pu_stat_name="iso"/>
       <pu_stat pu_stat_name="face_limpers"/>
-      <pu_stat pu_stat_name="Steal and blind defence" pu_stat_submenu="preflop_blind_defence"/>
-      <pu_stat pu_stat_name="Opening by position" pu_stat_submenu="preflop_rfi"/>
+      <!-- Same order as every other popup: stacks before the position packs. -->
       <pu_stat pu_stat_name="Stacks" pu_stat_submenu="preflop_stacks"/>
+      <pu_stat pu_stat_name="Opening by position" pu_stat_submenu="preflop_rfi"/>
+      <pu_stat pu_stat_name="Steal and blind defence" pu_stat_submenu="preflop_blind_defence"/>
     </pu>
   </popup_windows>
 

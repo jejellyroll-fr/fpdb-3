@@ -1,5 +1,9 @@
 # The Dynamic HUD guide
 
+> The presentation rules this package follows — the panel titles and the low-sample rule, what each
+> colour means, and how to preview it without a table — are in
+> [the reference HUD design system](hud-design-system.md).
+
 A **dynamic panel** is a block of stats the HUD shows *only in the situation it is
 about*. Instead of a fixed grid that shows the same twelve numbers at every
 table, a seat can show the preflop panels while the hand is preflop, the

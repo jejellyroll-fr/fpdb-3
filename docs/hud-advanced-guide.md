@@ -1,5 +1,9 @@
 # The Advanced HUD guide
 
+> The presentation rules this package follows — the popup navigation order, what each
+> colour means, and how to preview it without a table — are in
+> [the reference HUD design system](hud-design-system.md).
+
 fpdb ships three reference HUDs you can import and play with immediately. They
 are starting points, not a replacement for the HUD you already have: importing
 one never binds itself to a game, so your tables keep the profile they had until

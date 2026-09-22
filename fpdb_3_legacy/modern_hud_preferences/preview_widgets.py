@@ -265,7 +265,10 @@ class HudPreviewWidget(QWidget):
         if stat_name:
             value = f"{stat.get('hudprefix', '')}{value}{stat.get('hudsuffix', '')}"
         lab.setText(value)
-        lab.setToolTip(stat_name)
+        # The package's own tip when it has one: a preview whose cells cannot
+        # be expanded answers "what does FC mean" no better than the table
+        # does (#370).
+        lab.setToolTip(stat.get("tip") or stat_name)
         lab.setMinimumWidth(max(38, scaled * 4))
         lab.setMinimumHeight(max(20, round(scaled * 1.5)))
         return lab
