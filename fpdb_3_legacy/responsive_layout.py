@@ -46,10 +46,10 @@ __all__ = [
     "CONTEXT_BLOCK_FLOOR",
     "CONTEXT_BLOCK_SHARE",
     "SCREEN_MARGIN",
+    "UNBOUNDED_HEIGHT",
     "CollapsibleSection",
     "PaneSwitcher",
     "ReflowGrid",
-    "ReportingSplitter",
     "ResponsiveSplitter",
     "available_screen_size",
     "cap_context_block",
@@ -159,6 +159,10 @@ def wrap_in_scroll(
     return area
 
 
+#: The largest a widget's maximum height can be in Qt. ``QWIDGETSIZE_MAX`` is a
+#: C++ constant PySide6 does not expose.
+UNBOUNDED_HEIGHT = 16777215
+
 #: The most of a window's height a scrolling block of context may claim before
 #: the block below it -- the one the reader came for -- is squeezed.
 CONTEXT_BLOCK_SHARE = 4
@@ -167,8 +171,8 @@ CONTEXT_BLOCK_SHARE = 4
 CONTEXT_BLOCK_FLOOR = 200
 
 
-def cap_context_block(block: QScrollArea, window: QWidget) -> None:
-    """Stop a scrolling block of context from crowding out the pane that grows.
+def cap_context_block(block: QScrollArea, window: QWidget, *, capped: bool = True) -> None:
+    """Stop a scrolling block of context from crowding out the zone that grows.
 
     A ``QVBoxLayout`` hands a non-stretch item its size hint before the stretch
     item gets anything, and a block that scrolls still asks for its full height.
@@ -176,10 +180,14 @@ def cap_context_block(block: QScrollArea, window: QWidget) -> None:
     them out of a 691 px window: the panel and the hands were left 260 px
     between them, which is the opposite of "only the panels and the hands grow".
     Capping the block at a quarter of the window keeps it scrollable -- which is
-    what it was made for -- and leaves the room to the pane the screen exists
+    what it was made for -- and leaves the room to the zone the screen exists
     for. Call this on every resize; a repeated cap is not a layout change.
+
+    Pass ``capped=False`` when the block *is* the zone on screen: with nothing
+    below it to crowd out, a cap would only make it scroll for nothing.
     """
-    block.setMaximumHeight(max(CONTEXT_BLOCK_FLOOR, window.height() // CONTEXT_BLOCK_SHARE))
+    limit = max(CONTEXT_BLOCK_FLOOR, window.height() // CONTEXT_BLOCK_SHARE) if capped else UNBOUNDED_HEIGHT
+    block.setMaximumHeight(limit)
 
 
 def labelled_field(label: str, widget: QWidget, muted: str) -> QWidget:
@@ -341,41 +349,32 @@ class ResponsiveSplitter(QSplitter):
         self.stacked_changed.emit(wanted == self._narrow_orientation)
 
 
-class ReportingSplitter(QSplitter):
-    """A splitter that announces every change of its own extent.
-
-    A parent's ``resizeEvent`` runs before the layout has resized the children,
-    so a screen that decides what to show from a splitter's extent reads the
-    previous one there. ``ResponsiveSplitter`` announces the one decision it
-    makes itself; this reports the extent, for the screens that decide for
-    themselves -- the study dashboard shows its two zones one at a time once the
-    window is too short for both.
-    """
-
-    resized = Signal()
-
-    def resizeEvent(self, event) -> None:  # noqa: ANN001 - Qt signature
-        super().resizeEvent(event)
-        self.resized.emit()
-
-
 class PaneSwitcher:
-    """Show one of a splitter's panes at a time, with a bar to choose which.
+    """Show one of a screen's zones at a time, with a bar to choose which.
 
     A splitter that stacks its panes gives each of them a share of the extent,
-    and a share is what a table shows a handful of rows in. When the panes no
+    and a share is what a table shows a handful of rows in. When the zones no
     longer fit together -- because the window is narrow, or because it is short
-    -- the bar takes over: the chosen pane gets the whole extent, and the bar is
-    the way back to the others. It stays hidden while the panes do fit, where
+    -- the bar takes over: the chosen zone gets the whole extent, and the bar is
+    the way back to the others. It stays hidden while the zones do fit, where
     the splitter is the better tool.
 
+    A zone may live outside the splitter, above it: the context block that
+    explains a screen is not a pane of the panes it explains. Such a zone takes
+    the whole extent only if the splitter -- which is what grows -- steps aside,
+    so the switcher hides the splitter whenever the zone on screen is not one of
+    its children.
+
     The switcher never hides anything while the widget it serves is off screen:
-    the bar that would bring a hidden pane back is not shown either, so hiding
-    panes then would leave them unreachable.
+    the bar that would bring a hidden zone back is not shown either, so hiding
+    zones then would leave them unreachable.
 
     ``bar`` belongs to the caller's layout; everything else is handled here.
     ``sizes`` is the arrangement to come back to, which the caller knows and
-    the splitter has usually forgotten by the time the panes are switched.
+    the splitter has usually forgotten by the time the zones are switched. It
+    is the *splitter's* arrangement -- one entry per pane the splitter holds --
+    and not one per zone: a zone outside the splitter is not one of the sizes
+    the splitter can be given.
     """
 
     def __init__(
@@ -391,6 +390,8 @@ class PaneSwitcher:
             raise ValueError("every pane needs a label")
         if not panes:
             raise ValueError("a switcher needs at least one pane")
+        if sizes and len(sizes) != splitter.count():
+            raise ValueError("sizes is the splitter's own arrangement, one entry per pane it holds")
         self._owner = owner
         self._splitter = splitter
         self._panes = list(panes)
@@ -425,18 +426,19 @@ class PaneSwitcher:
         self._switching = False
         for pane in self._panes:
             pane.setVisible(True)
-        if self._sizes:
+        self._splitter.setVisible(True)
+        if len(self._sizes) == self._splitter.count():
             self._splitter.setSizes(self._sizes)
 
     def is_switching(self) -> bool:
         return self._switching
 
     def active(self) -> int:
-        """The pane on screen, or the one that would be if the bar were shown."""
+        """The zone on screen, or the one that would be if the bar were shown."""
         return max(0, self.bar.currentIndex())
 
     def set_active(self, index: int) -> None:
-        """Choose a pane, without calling back into whoever asked for it."""
+        """Choose a zone, without calling back into whoever asked for it."""
         if not 0 <= index < len(self._panes):
             return
         if self.bar.currentIndex() == index:
@@ -447,8 +449,19 @@ class PaneSwitcher:
         self._show_current()
 
     def _remember_sizes(self) -> None:
-        if not self._switching:
-            self._sizes = self._splitter.sizes()
+        """Record the splitter's arrangement, once it has one worth keeping.
+
+        ``showEvent`` -- which is where a window that opens short first asks
+        for the switched shape -- runs before the layout has sized the
+        children, so the sizes read there are a row of zeroes. Keeping them
+        would make the arrangement to come back to an empty one, and the panes
+        would then be handed the splitter's raw size hints instead.
+        """
+        if self._switching:
+            return
+        sizes = self._splitter.sizes()
+        if len(sizes) == self._splitter.count() and any(sizes):
+            self._sizes = sizes
 
     def _show_current(self) -> None:
         if not self._switching:
@@ -456,6 +469,9 @@ class PaneSwitcher:
         current = self.active()
         for index, pane in enumerate(self._panes):
             pane.setVisible(index == current)
+        # A zone outside the splitter takes the extent only if the splitter
+        # steps aside; one inside it needs the splitter on screen.
+        self._splitter.setVisible(self._splitter.indexOf(self._panes[current]) >= 0)
 
 
 class CollapsibleSection(QWidget):

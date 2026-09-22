@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any
+from typing import Any, Final
 
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import (
@@ -37,6 +37,36 @@ from fpdb_3_legacy.ring_stats.styles import get_theme_palette
 #: side and are stacked instead. Measured from the two panes' own minimums with
 #: the production theme, plus room for the splitter handle.
 STACK_BELOW_WIDTH = 900
+
+#: The page's own left and right margins, which the splitter does not get.
+PAGE_MARGIN = 16
+
+#: The window width below which the splitter's two panes no longer fit side by
+#: side. Derived from the splitter's own threshold so the two cannot drift, and
+#: measured on the window rather than read from the splitter: while the context
+#: block is the zone on screen the splitter is hidden, and a widget the layout
+#: skips keeps the width -- and so the orientation -- it had before it was.
+STACK_BELOW_WINDOW_WIDTH = STACK_BELOW_WIDTH + 2 * PAGE_MARGIN
+
+#: The heights the page's zones want in order to be read at the same time,
+#: measured from their own content with the production theme: the context block
+#: asks for 357 px, and the studies pane for 213 -- one region for the two panes
+#: that sit side by side, so the taller of the list and the detail, not their
+#: sum. Below their total the page shows one zone at a time, because a share of
+#: a short window is a context form of three rows.
+ZONE_HEIGHTS: Final[tuple[int, int]] = (357, 213)
+
+#: The zone the bar opens on: the studies, not the context block. The reader
+#: came for the studies; the block above is how they are narrowed.
+DEFAULT_ZONE = 1
+
+#: What the page spends outside the zones: the bar, the layout's margins and the
+#: two entry-point buttons pinned at the bottom.
+ZONE_CHROME_HEIGHT = 31 + 28 + 40
+
+#: Measured on the window, because the context block is a zone of its own and
+#: the page is what decides.
+SWITCH_BELOW_HEIGHT = sum(ZONE_HEIGHTS) + ZONE_CHROME_HEIGHT
 
 #: ``(minimum width, columns)`` for the spot cards. Three cards across is the
 #: layout the page was designed for; below that the labels wrap badly.
@@ -84,13 +114,14 @@ class GuiStudyExplorer(QWidget):
         colors = get_theme_palette()
         muted = colors.get("muted_text", "#a0aec0")
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(16, 14, 16, 14)
+        layout.setContentsMargins(PAGE_MARGIN, 14, PAGE_MARGIN, 14)
 
         # The page is two blocks: what the reader is looking for, and the
-        # studies themselves. Only the second one grows. The first one scrolls,
-        # because seven context rows stacked above the spot grid asked for more
-        # height than a laptop screen has and pushed the study list -- the
-        # reason the page exists -- below the fold.
+        # studies themselves. Only the second one grows, and the first is a zone
+        # of its own in the bar below. The first one scrolls, because seven
+        # context rows stacked above the spot grid asked for more height than a
+        # laptop screen has and pushed the study list -- the reason the page
+        # exists -- below the fold.
         upper = QWidget()
         upper_layout = QVBoxLayout(upper)
         upper_layout.setContentsMargins(0, 0, 0, 0)
@@ -104,20 +135,23 @@ class GuiStudyExplorer(QWidget):
         self.splitter = self._build_studies_splitter(muted)
         self.splitter.set_narrow_below(STACK_BELOW_WIDTH)
         self.splitter.set_narrow_sizes([220, 380])
-        # Stacked, the list and the detail share the height, and a share of a
-        # laptop window is two rows of titles. The bar shows one at a time so the
-        # chosen pane takes the whole height; it is hidden again as soon as the
-        # two fit side by side, where the splitter is the better tool.
+        # One bar for the page, not one per region. The context block is a zone
+        # like the studies are: on a window too short for both, a reader wants to
+        # choose between them rather than have a slice of each, and the studies
+        # then get the height that the context form was taking. It stays hidden
+        # while the whole page fits, where the splitter is the better tool.
+        # ``sizes`` is the splitter's own arrangement -- the studies and their
+        # detail -- not one entry per zone; the block above is not its child.
         self.pane_switcher = PaneSwitcher(
             self,
             self.splitter,
-            [self.study_list, self.study_detail],
-            ("Studies", "Detail"),
+            [self.upper_area, self.study_list, self.study_detail],
+            ("Filters", "Studies", "Detail"),
             sizes=(360, 620),
         )
+        self.pane_switcher.set_active(DEFAULT_ZONE)
         layout.addWidget(self.pane_switcher.bar)
         layout.addWidget(self.splitter, 1)
-        self.splitter.stacked_changed.connect(self._on_stacked_changed)
 
         # The two alternative entry points are pinned to the bottom: they were
         # the first controls pushed out of view when the page ran out of room,
@@ -144,14 +178,26 @@ class GuiStudyExplorer(QWidget):
     def showEvent(self, event) -> None:  # noqa: ANN001 - Qt signature
         super().showEvent(event)
         self._reflow(self.width())
-        cap_context_block(self.upper_area, self)
-        # A window that opens narrow is stacked from the first layout pass and so
-        # never emits a change; syncing here is what puts the bar on screen.
-        self._on_stacked_changed(self.splitter.is_stacked())
+        # A window that opens short is put into its one-zone-at-a-time shape
+        # here: the switcher hides nothing while the widget is off screen.
+        self._sync_zones()
 
-    def _on_stacked_changed(self, stacked: bool) -> None:
-        """One pane at a time once the list and the detail are stacked."""
-        self.pane_switcher.set_switching(stacked)
+    def _sync_zones(self) -> None:
+        """One zone at a time when the window is short, or the panes no longer fit.
+
+        Either condition is enough. The list and the detail stop being readable
+        side by side long before the window is short, and the context block is
+        taller than what is left once the splitter has taken its share.
+
+        Both are read from the page rather than from the splitter. While the
+        context block is the zone on screen the splitter is hidden, and a widget
+        the layout skips keeps the width, and so the orientation, it had before
+        it was hidden -- which would hold the page in one-zone mode on a window
+        that has since grown wide enough for both panes again.
+        """
+        switching = self.width() < STACK_BELOW_WINDOW_WIDTH or self.height() < SWITCH_BELOW_HEIGHT
+        self.pane_switcher.set_switching(switching)
+        cap_context_block(self.upper_area, self, capped=not switching)
 
     def _reveal_detail(self, _item: QListWidgetItem) -> None:
         """Show the detail of the study the reader just picked.
@@ -162,7 +208,7 @@ class GuiStudyExplorer(QWidget):
         would then take the screen without anyone having asked for it. Arrow-key
         browsing stays on the list for the same reason: scanning is not choosing.
         """
-        self.pane_switcher.set_active(1)
+        self.pane_switcher.set_active(2)
 
     def _build_header(self, upper_layout: QVBoxLayout, muted: str) -> None:
         title = QLabel("Research · Study Explorer")
@@ -351,16 +397,13 @@ class GuiStudyExplorer(QWidget):
         return splitter
 
     def resizeEvent(self, event) -> None:  # noqa: ANN001 - Qt signature
-        """Reflow the grids for the new width, and follow the splitter's shape."""
+        """Reflow the grids for the new width, and follow the new shape."""
         super().resizeEvent(event)
         self._reflow(event.size().width())
-        # The context block scrolls; without a cap it claims its whole size hint
-        # and the studies get what is left of the window.
-        cap_context_block(self.upper_area, self)
-        # The splitter decides on its own width, which the layout updates before
-        # this handler runs. Re-syncing covers the arrangement already in force,
-        # and is a no-op when nothing changed.
-        self._on_stacked_changed(self.splitter.is_stacked())
+        # The page's own size decides both questions -- whether the panes still
+        # fit and whether the window is short -- so this covers the arrangement
+        # already in force, and is a no-op when nothing changed.
+        self._sync_zones()
 
     def _reflow(self, width: int) -> None:
         """Lay the fields out in as many columns as ``width`` can hold."""

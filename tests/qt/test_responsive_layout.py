@@ -36,10 +36,10 @@ from PySide6.QtWidgets import (
 from fpdb_3_legacy.responsive_layout import (
     CONTEXT_BLOCK_FLOOR,
     CONTEXT_BLOCK_SHARE,
+    UNBOUNDED_HEIGHT,
     CollapsibleSection,
     PaneSwitcher,
     ReflowGrid,
-    ReportingSplitter,
     ResponsiveSplitter,
     cap_context_block,
     column_count,
@@ -312,22 +312,63 @@ def test_a_splitter_without_a_threshold_never_stacks(qtbot) -> None:
     assert splitter.is_stacked() is False
 
 
-def test_a_reporting_splitter_announces_its_own_extent(qtbot) -> None:
-    """A parent's resize runs before the layout, so the extent must be reported."""
+def test_a_pane_switcher_gives_a_zone_outside_its_splitter_the_whole_extent(qtbot) -> None:
+    """A context block above a screen is a zone, not a pane of the panes it explains.
+
+    It takes the extent only if the splitter -- which is what grows -- steps
+    aside: a splitter left on screen keeps the room for itself, and the block
+    would then share the window with the zones it is supposed to give way to.
+    """
     app = get_qapp()
-    splitter = ReportingSplitter(Qt.Orientation.Vertical)
-    qtbot.addWidget(splitter)
-    splitter.addWidget(QWidget())
-    seen: list[int] = []
-    splitter.resized.connect(lambda: seen.append(splitter.height()))
-    splitter.resize(400, 500)
-    splitter.show()
+    owner = QWidget()
+    qtbot.addWidget(owner)
+    layout = QVBoxLayout(owner)
+    block = wrap_in_scroll(QLabel("context"))
+    layout.addWidget(block)
+    splitter = QSplitter(Qt.Orientation.Vertical)
+    layout.addWidget(splitter, 1)
+    panes = [QWidget(), QWidget()]
+    for pane in panes:
+        splitter.addWidget(pane)
+    switcher = PaneSwitcher(owner, splitter, [block, *panes], ("Filters", "First", "Second"), sizes=(300, 200))
+    owner.resize(400, 500)
+    owner.show()
     process(app)
 
-    assert seen, "the splitter never reported being laid out"
-    splitter.resize(400, 300)
+    switcher.set_switching(True)
     process(app)
-    assert seen[-1] == 300
+    assert switcher.active() == 0
+    assert block.isVisibleTo(owner) is True
+    assert splitter.isVisibleTo(owner) is False
+
+    switcher.set_active(1)
+    process(app)
+    assert splitter.isVisibleTo(owner) is True
+    assert block.isVisibleTo(owner) is False
+    assert [pane.isVisibleTo(owner) for pane in panes] == [True, False]
+
+    switcher.set_switching(False)
+    process(app)
+    assert block.isVisibleTo(owner) is True
+    assert splitter.isVisibleTo(owner) is True
+    assert [pane.isVisibleTo(owner) for pane in panes] == [True, True]
+
+
+def test_a_pane_switcher_refuses_sizes_that_are_not_its_splitters(qtbot) -> None:
+    """``sizes`` is the arrangement to come back to: one entry per pane the splitter holds.
+
+    A zone that lives outside the splitter is not one of the sizes it can be
+    given, and Qt ignores the extra values rather than complaining -- so the
+    mistake would only show as an arrangement that never comes back.
+    """
+    owner = QWidget()
+    qtbot.addWidget(owner)
+    splitter = QSplitter(Qt.Orientation.Vertical, owner)
+    splitter.addWidget(QWidget())
+    splitter.addWidget(QWidget())
+
+    with pytest.raises(ValueError, match="one entry per pane"):
+        PaneSwitcher(owner, splitter, [QWidget(), QWidget()], ("First", "Second"), sizes=(200, 300, 400))
 
 
 def test_a_pane_switcher_shows_one_pane_at_a_time(qtbot) -> None:
@@ -419,6 +460,14 @@ def test_capping_a_context_block_leaves_the_room_to_what_grows(qtbot) -> None:
     assert block.height() == min(block.sizeHint().height(), 2000 // CONTEXT_BLOCK_SHARE), (
         "a tall window raises the cap until the block asks for less than it"
     )
+    capped = block.height()
+
+    # The block is the zone on screen: there is nothing below it to crowd out,
+    # so the cap is what would make it scroll for nothing.
+    cap_context_block(block, owner, capped=False)
+    process(app)
+    assert block.maximumHeight() == UNBOUNDED_HEIGHT
+    assert block.height() >= capped
 
 
 # --------------------------------------------------------------------------- #
@@ -517,10 +566,15 @@ def test_study_explorer_keeps_its_search_selection_and_filters_when_resized(qtbo
     assert "Hero" in explorer.advanced_fields.summary(), "the folded section must still say what is set"
 
 
-def test_the_study_explorer_shows_one_pane_at_a_time_when_stacked(qtbot, tmp_path) -> None:
-    """Stacked, the bar gives the studies the height instead of half of it."""
+def test_the_study_explorer_gives_one_zone_the_height_at_a_time(qtbot, tmp_path) -> None:
+    """The page is filters, studies and detail, and the bar hands one of them the lot.
+
+    The context block alone asks for 357 px, so a share each of a laptop window
+    is a form of three rows above a list of three titles. The bar stays hidden
+    while the page fits, and is the way between the zones when it does not.
+    """
     app = get_qapp()
-    from fpdb_3_legacy.GuiStudyExplorer import GuiStudyExplorer
+    from fpdb_3_legacy.GuiStudyExplorer import DEFAULT_ZONE, GuiStudyExplorer
     from fpdb_3_legacy.research_studies import builtin_studies
 
     explorer = GuiStudyExplorer(registry=builtin_studies(), state_path=tmp_path / "history.json")
@@ -530,25 +584,37 @@ def test_the_study_explorer_shows_one_pane_at_a_time_when_stacked(qtbot, tmp_pat
     process(app)
 
     switcher = explorer.pane_switcher
-    panes = (explorer.study_list, explorer.study_detail)
+    panes = (explorer.upper_area, explorer.study_list, explorer.study_detail)
+    assert [switcher.bar.tabText(index) for index in range(switcher.bar.count())] == [
+        "Filters",
+        "Studies",
+        "Detail",
+    ], "one bar for the page, not one per region"
     assert switcher.bar.isVisibleTo(explorer) is False, "side by side, the splitter is the better tool"
-    assert [pane.isVisibleTo(explorer) for pane in panes] == [True, True]
+    assert [pane.isVisibleTo(explorer) for pane in panes] == [True, True, True]
 
     shrink_to(explorer, 700, app, 640)
-    assert explorer.splitter.is_stacked() is True
     assert switcher.bar.isVisibleTo(explorer) is True
-    assert [pane.isVisibleTo(explorer) for pane in panes] == [True, False]
-    assert explorer.study_list.height() > 250, "the list gets the height, not a share of it"
+    assert switcher.active() == DEFAULT_ZONE, "the studies are what the reader came for"
+    assert [pane.isVisibleTo(explorer) for pane in panes] == [False, True, False]
+    assert explorer.study_list.height() > 400, "the list gets the height, not a share of it"
 
-    switcher.set_active(1)
+    switcher.set_active(2)
     process(app)
-    assert [pane.isVisibleTo(explorer) for pane in panes] == [False, True]
-    assert explorer.study_detail.height() > 250
+    assert [pane.isVisibleTo(explorer) for pane in panes] == [False, False, True]
+    assert explorer.study_detail.height() > 400
+
+    switcher.set_active(0)
+    process(app)
+    assert [pane.isVisibleTo(explorer) for pane in panes] == [True, False, False]
+    assert explorer.upper_area.height() > 400, "the block above is a zone like the others"
+    assert explorer.splitter.isVisibleTo(explorer) is False, "the splitter steps aside for a zone outside it"
 
     explorer.resize(1280, 720)
     process(app)
     assert switcher.bar.isVisibleTo(explorer) is False
-    assert [pane.isVisibleTo(explorer) for pane in panes] == [True, True]
+    assert [pane.isVisibleTo(explorer) for pane in panes] == [True, True, True]
+    assert explorer.splitter.isVisibleTo(explorer) is True, "and the splitter comes back with the room"
 
 
 def test_choosing_a_study_shows_its_detail_when_stacked(qtbot, tmp_path) -> None:
@@ -567,20 +633,26 @@ def test_choosing_a_study_shows_its_detail_when_stacked(qtbot, tmp_path) -> None
     explorer.resize(1280, 720)
     process(app)
     shrink_to(explorer, 700, app, 640)
-    assert explorer.pane_switcher.active() == 0
+    assert explorer.pane_switcher.active() == 1, "the bar opens on the studies"
 
     item = explorer.study_list.item(0)
     assert item is not None, "the list must hold something for this test to mean anything"
     explorer.study_list.itemClicked.emit(item)
     process(app)
-    assert explorer.pane_switcher.active() == 1
+    assert explorer.pane_switcher.active() == 2
     assert explorer.study_detail.isVisibleTo(explorer) is True
     assert explorer.study_list.isVisibleTo(explorer) is False
 
-    explorer.pane_switcher.set_active(0)
+    # A rebuild of the list selects a row by itself; that is not a click.
+    explorer.pane_switcher.set_active(1)
     explorer._refresh_studies()
     process(app)
-    assert explorer.pane_switcher.active() == 0, "a programmatic refresh must not take the screen"
+    assert explorer.pane_switcher.active() == 1, "a programmatic refresh must not take the screen"
+
+    explorer.pane_switcher.set_active(2)
+    explorer._refresh_studies()
+    process(app)
+    assert explorer.pane_switcher.active() == 2, "and it must not take the reader off it either"
 
 
 def test_the_folded_advanced_filters_are_still_reachable(qtbot, tmp_path) -> None:
@@ -807,19 +879,27 @@ def test_study_dashboard_keeps_the_panels_and_the_hands_resizable(qtbot, example
 
 
 def test_the_study_dashboard_shows_one_zone_at_a_time_when_the_height_runs_out(qtbot, example_config, tmp_path) -> None:
-    """A short window shows the panels or the hands, never half of each.
+    """A short window shows the filters, the panels or the hands, never a slice of each.
 
-    The two zones want 360 px and 330 between them, and a 1080 x 691 window
-    leaves the splitter 420: side by side that was a panel area pinned at its
-    200 px floor and a table of 228. The bar gives the chosen zone the lot, and
-    steps aside on a window tall enough for both.
+    The three zones want 360, 360 and 330 px, and a 1080 x 691 window -- the one
+    the macOS report showed -- has 691. Sharing them left the panel area at
+    exactly its 200 px floor with a table of 228 under it. The bar gives the
+    chosen zone all 626, and steps aside on a window tall enough for all three.
     """
     app = get_qapp()
-    from fpdb_3_legacy.GuiStudyDashboard import SWITCH_BELOW_HEIGHT, ZONE_HEIGHTS, GuiStudyDashboard
+    from fpdb_3_legacy.GuiStudyDashboard import (
+        DEFAULT_ZONE,
+        SWITCH_BELOW_HEIGHT,
+        ZONE_CHROME_HEIGHT,
+        ZONE_HEIGHTS,
+        GuiStudyDashboard,
+    )
     from fpdb_3_legacy.research_studies import builtin_studies
     from fpdb_3_legacy.research_study_explorer import StudyExplorerModel
 
-    assert SWITCH_BELOW_HEIGHT == sum(ZONE_HEIGHTS) + 8, "the threshold is the two zones plus their handle"
+    assert SWITCH_BELOW_HEIGHT == sum(ZONE_HEIGHTS) + ZONE_CHROME_HEIGHT, (
+        "the threshold is the height at which the zones can be read at the same time"
+    )
 
     model = StudyExplorerModel(builtin_studies(), tmp_path / "history.json")
     selection = model.open_study("srp_pfr_ip_flop", remember=False)
@@ -828,31 +908,50 @@ def test_the_study_dashboard_shows_one_zone_at_a_time_when_the_height_runs_out(q
     dashboard.show()
 
     switcher = dashboard.pane_switcher
-    panels = dashboard.splitter.widget(0)
-    hands = dashboard.splitter.widget(1)
+    zones = (dashboard.header_area, dashboard.splitter.widget(0), dashboard.splitter.widget(1))
+    assert [switcher.bar.tabText(index) for index in range(switcher.bar.count())] == [
+        "Filters",
+        "Panels",
+        "Hands",
+    ], "one bar for the dashboard, not one per region"
 
     dashboard.resize(1080, 691)
     process(app)
     assert switcher.bar.isVisibleTo(dashboard) is True
-    assert [pane.isVisibleTo(dashboard) for pane in (panels, hands)] == [True, False]
-    assert panels.height() > 300, "the panel zone gets the height, not the 200 px floor"
+    assert switcher.active() == DEFAULT_ZONE, "the panels are what the reader came for"
+    assert [zone.isVisibleTo(dashboard) for zone in zones] == [False, True, False]
+    assert zones[1].height() > 500, "the panel zone gets the height, not the 200 px floor"
 
-    switcher.set_active(1)
+    switcher.set_active(0)
     process(app)
-    assert [pane.isVisibleTo(dashboard) for pane in (panels, hands)] == [False, True]
-    assert hands.height() > 300
+    assert [zone.isVisibleTo(dashboard) for zone in zones] == [True, False, False]
+    assert zones[0].height() > 500, "the context block is a zone like the others"
+    assert dashboard.splitter.isVisibleTo(dashboard) is False, "the splitter steps aside for a zone outside it"
 
-    # Tall enough for both: the bar steps aside and the splitter comes back.
+    switcher.set_active(2)
+    process(app)
+    assert [zone.isVisibleTo(dashboard) for zone in zones] == [False, False, True]
+    assert zones[2].height() > 500
+
+    # Tall enough for all three: the bar steps aside and the splitter comes back.
     dashboard.resize(1400, 1200)
     process(app)
     assert switcher.bar.isVisibleTo(dashboard) is False
-    assert [pane.isVisibleTo(dashboard) for pane in (panels, hands)] == [True, True]
+    assert [zone.isVisibleTo(dashboard) for zone in zones] == [True, True, True]
+    assert dashboard.splitter.isVisibleTo(dashboard) is True
+    assert zones[1].height() > 200, "and the splitter has the room to show both again"
+    assert zones[2].height() > 200
 
     dashboard.shutdown_workers()
 
 
 def test_the_study_dashboard_context_does_not_crowd_out_the_zones(qtbot, example_config, tmp_path) -> None:
-    """The header scrolls, so it must not take the room the zones grow into."""
+    """The header scrolls, so it must not take the room the zones grow into.
+
+    It is capped while it shares the window with them, and uncapped while it is
+    the zone on screen -- with nothing below it to crowd out, a cap would only
+    make it scroll for nothing.
+    """
     app = get_qapp()
     from fpdb_3_legacy.GuiStudyDashboard import GuiStudyDashboard
     from fpdb_3_legacy.research_studies import builtin_studies
@@ -863,13 +962,21 @@ def test_the_study_dashboard_context_does_not_crowd_out_the_zones(qtbot, example
     dashboard = GuiStudyDashboard(example_config, None, None, selection=selection)
     qtbot.addWidget(dashboard)
     dashboard.show()
-    dashboard.resize(1080, 691)
-    process(app)
 
+    dashboard.resize(1400, 1200)
+    process(app)
     assert dashboard.header_area.sizeHint().height() > 300, "the block asks for more than it may take"
     cap = max(CONTEXT_BLOCK_FLOOR, dashboard.height() // CONTEXT_BLOCK_SHARE)
-    assert dashboard.header_area.height() <= cap
-    assert dashboard.splitter.height() > 300
+    assert dashboard.pane_switcher.bar.isVisibleTo(dashboard) is False, "this is the shape the cap is for"
+    assert dashboard.header_area.height() == cap
+    assert dashboard.splitter.height() > 700, "the zones that grow get the window instead"
+
+    dashboard.resize(1080, 691)
+    process(app)
+    assert dashboard.header_area.maximumHeight() == UNBOUNDED_HEIGHT, "alone on screen, the block is not capped"
+    dashboard.pane_switcher.set_active(0)
+    process(app)
+    assert dashboard.header_area.height() > 500, "and it gets the height the cap was holding back"
 
     dashboard.shutdown_workers()
 
