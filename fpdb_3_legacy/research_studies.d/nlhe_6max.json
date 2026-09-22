@@ -145,7 +145,7 @@
           6
         ],
         "street": "preflop",
-        "primary_situation": "facing_open"
+        "situation": "facing_open"
       },
       "variables": [
         "position",
@@ -525,7 +525,7 @@
           6
         ],
         "street": "preflop",
-        "primary_situation": "facing_open",
+        "situation": "facing_open",
         "position": "bb",
         "opponent_position": "sb"
       },
@@ -639,6 +639,7 @@
         "street": "flop",
         "pot_type": "single_raised",
         "is_preflop_aggressor": true,
+        "situation": "cbet_spot",
         "in_position": true
       },
       "variables": [
@@ -772,6 +773,7 @@
         "street": "flop",
         "pot_type": "single_raised",
         "is_preflop_aggressor": true,
+        "situation": "cbet_spot",
         "in_position": false
       },
       "variables": [
@@ -903,7 +905,7 @@
         ],
         "street": "flop",
         "pot_type": "single_raised",
-        "primary_situation": "facing_cbet",
+        "situation": "facing_cbet",
         "in_position": false
       },
       "variables": [
@@ -1041,7 +1043,8 @@
         ],
         "street": "flop",
         "pot_type": "three_bet",
-        "is_preflop_aggressor": true
+        "is_preflop_aggressor": true,
+        "situation": "cbet_spot"
       },
       "variables": [
         "in_position",
@@ -1176,7 +1179,7 @@
         ],
         "street": "flop",
         "pot_type": "three_bet",
-        "primary_situation": "facing_cbet"
+        "situation": "facing_cbet"
       },
       "variables": [
         "in_position",
@@ -1295,7 +1298,8 @@
         ],
         "street": "flop",
         "pot_type": "four_bet_plus",
-        "is_preflop_aggressor": true
+        "is_preflop_aggressor": true,
+        "situation": "cbet_spot"
       },
       "variables": [
         "in_position",

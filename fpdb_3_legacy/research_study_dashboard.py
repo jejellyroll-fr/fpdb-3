@@ -159,7 +159,13 @@ class StudyDashboardModel:
             label=f"{self._study.title} · {title}" + (f" · {crosses}" if crosses else ""),
         )
 
-    def stack_depth_note(self, db: Any, panel_id: str | None = None) -> str | None:
+    def stack_depth_note(
+        self,
+        db: Any,
+        panel_id: str | None = None,
+        *,
+        hero: bool | None = None,
+    ) -> str | None:
         """Say when a headline averages depths that are different games (#369).
 
         A tournament answer that folds 12 big blinds in with 60 is not one
@@ -178,7 +184,7 @@ class StudyDashboardModel:
             return None
         if STACK_DEPTH_DIMENSION in compiled.query.group_by:
             return None
-        counts = self.stack_depth_spread(db, chosen)
+        counts = self.stack_depth_spread(db, chosen, hero=hero)
         if not mixes_stack_depths(counts):
             return None
         # The bands in depth order rather than by size, and without the
@@ -198,11 +204,21 @@ class StudyDashboardModel:
             "before reading the headline as one number."
         )
 
-    def stack_depth_spread(self, db: Any, panel_id: str | None = None) -> dict[str, int]:
+    def stack_depth_spread(
+        self,
+        db: Any,
+        panel_id: str | None = None,
+        *,
+        hero: bool | None = None,
+    ) -> dict[str, int]:
         """How the panel's population divides across the stack-depth bands."""
         compiled = self.panel(panel_id or self._state.active_panel)
+        filters = dict(compiled.query.filters)
+        if hero is not None:
+            filters["hero"] = hero
         query = replace(
             compiled.query,
+            filters=filters,
             metric="opportunities",
             numerator={},
             group_by=(STACK_DEPTH_DIMENSION,),

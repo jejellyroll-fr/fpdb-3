@@ -34,7 +34,7 @@ from .hand_state import CLASSIFIED_GAMES
 from .hand_state_composition import DIMENSIONS as COMPOSITION_DIMENSIONS
 from .hand_state_composition import compose
 from .holdem_ranges import build_range
-from .player_situations import SITUATION_RULES
+from .player_situations import RESPONSES, SITUATION_RULES
 from .research_presets import RESULT_VIEWS
 
 STUDY_PACK_SCHEMA_VERSION: Final[int] = 1
@@ -90,6 +90,11 @@ def _tokens(value: Any) -> set[str]:
     return {str(value)}
 
 
+def _normalized_response_tokens(value: Any) -> set[str]:
+    """Compare raw action filters with the model's response vocabulary."""
+    return {RESPONSES.get(token, token) for token in _tokens(value)}
+
+
 def _outcome_responses(situation: str) -> set[str]:
     """Return the responses already encoded by a named situation rule."""
     return {
@@ -119,14 +124,17 @@ def _validate_opportunity_metric(query: Query) -> None:
         )
 
     for name in ("response", "action_taken"):
-        selected = _tokens(filters[name]) if name in filters else set()
+        selected = _normalized_response_tokens(filters[name]) if name in filters else set()
         if selected and responses and selected <= responses:
             raise StudyValidationError(
                 f"{query.metric} measures response {sorted(responses)!r} over a population "
                 f"already restricted to {name}={filters[name]!r}; use the opportunity spot instead",
             )
 
-    situations = _tokens(filters["primary_situation"]) if "primary_situation" in filters else set()
+    situations = set()
+    for name in ("primary_situation", "situation"):
+        if name in filters:
+            situations.update(_tokens(filters[name]))
     for situation in situations:
         encoded = _outcome_responses(situation)
         if encoded and responses and encoded <= responses:
@@ -271,7 +279,7 @@ class StudySpec:
     default_comparison: bool = False
     pack: str = ""
 
-    def __post_init__(self) -> None:
+    def __post_init__(self) -> None:  # noqa: C901 - declarative schema validation stays together.
         if not self.id.strip():
             raise StudyValidationError("study id must not be empty")
         if not self.title.strip():
@@ -288,6 +296,13 @@ class StudySpec:
         object.__setattr__(self, "panels", panels)
         if self.game is not None and not self.game.strip():
             raise StudyValidationError(f"{self.id}.game must not be empty")
+        if self.game is not None and self.base_filters.get("game") is not None:
+            declared = self.game.strip()
+            effective = _tokens(self.base_filters["game"])
+            if declared not in effective:
+                raise StudyValidationError(
+                    f"{self.id}.game={declared!r} conflicts with base_filters.game={self.base_filters['game']!r}",
+                )
         if self.table_size is not None and (
             not isinstance(self.table_size, int) or isinstance(self.table_size, bool) or self.table_size < 2
         ):

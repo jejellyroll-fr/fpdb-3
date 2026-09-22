@@ -392,9 +392,9 @@ def test_a_seat_keeps_its_selection_until_the_context_moves() -> None:
     resolver = hs.load_default_resolver()
     state = hs.PanelState(resolver)
     preflop = hs.HudSituationContext(street="preflop", pot_type="unopened")
-    _, change = state.update("seat-3", preflop)
+    _, change = state.update("seat-3", preflop, samples={"n": 100})
     assert "preflop_open" in change.added
-    _, again = state.update("seat-3", preflop)
+    _, again = state.update("seat-3", preflop, samples={"n": 100})
     assert again.dirty is False
     assert state.active_panels("seat-3")
 
@@ -402,10 +402,15 @@ def test_a_seat_keeps_its_selection_until_the_context_moves() -> None:
 def test_a_street_change_reports_only_the_panels_that_moved() -> None:
     resolver = hs.load_default_resolver()
     state = hs.PanelState(resolver)
-    state.update("seat-3", hs.HudSituationContext(street="preflop", pot_type="unopened"))
+    state.update(
+        "seat-3",
+        hs.HudSituationContext(street="preflop", pot_type="unopened"),
+        samples={"n": 100},
+    )
     _, change = state.update(
         "seat-3",
         hs.HudSituationContext(street="flop", pot_type="single_raised", is_preflop_aggressor=True, in_position=True),
+        samples={"n": 100},
     )
     assert change.added == ("srp_cbet_ip",)
     assert change.removed == ("preflop_open",)
@@ -437,10 +442,10 @@ def test_forgetting_a_seat_replays_the_first_selection() -> None:
     resolver = hs.load_default_resolver()
     state = hs.PanelState(resolver)
     context = hs.HudSituationContext(street="preflop", pot_type="unopened")
-    state.update("seat-3", context)
+    state.update("seat-3", context, samples={"n": 100})
     state.forget("seat-3")
     assert state.active_panels("seat-3") == ()
-    _, change = state.update("seat-3", context)
+    _, change = state.update("seat-3", context, samples={"n": 100})
     assert "preflop_open" in change.added
 
 
@@ -486,7 +491,10 @@ def test_normalize_position_is_the_single_implementation() -> None:
 
 def test_preflop_open_context_supports_the_issue_examples() -> None:
     resolver = hs.load_default_resolver()
-    opening = resolver.resolve(hs.HudSituationContext(street="preflop", pot_type="unopened", position="CO"))
+    opening = resolver.resolve(
+        hs.HudSituationContext(street="preflop", pot_type="unopened", position="CO"),
+        samples={"n": 100},
+    )
     assert "preflop_open" in opening.panels
     facing = resolver.resolve(
         hs.HudSituationContext(
@@ -494,11 +502,13 @@ def test_preflop_open_context_supports_the_issue_examples() -> None:
             pot_type="unopened",
             facing_action="raises",
             position="B",
-        )
+        ),
+        samples={"n": 100},
     )
     assert {"preflop_facing_open", "blinds_defence"} <= set(facing.panels)
     squeezed = resolver.resolve(
-        hs.HudSituationContext(street="preflop", pot_type="single_raised", labels=("squeeze_defence",), to_call=600)
+        hs.HudSituationContext(street="preflop", pot_type="single_raised", labels=("squeeze_defence",), to_call=600),
+        samples={"n": 100},
     )
     assert "preflop_squeeze" in squeezed.panels
 
@@ -506,7 +516,8 @@ def test_preflop_open_context_supports_the_issue_examples() -> None:
 def test_facing_a_three_bet_shows_the_defence_panel() -> None:
     resolver = hs.load_default_resolver()
     selection = resolver.resolve(
-        hs.HudSituationContext(street="preflop", pot_type="single_raised", facing_action="raises", to_call=900)
+        hs.HudSituationContext(street="preflop", pot_type="single_raised", facing_action="raises", to_call=900),
+        samples={"n": 100},
     )
     assert "preflop_facing_three_bet" in selection.panels
 
@@ -516,12 +527,14 @@ def test_postflop_srp_panels_split_on_position() -> None:
     in_position = resolver.resolve(
         hs.HudSituationContext(
             street="flop", pot_type="single_raised", is_preflop_aggressor=True, in_position=True
-        )
+        ),
+        samples={"n": 100},
     )
     out_of_position = resolver.resolve(
         hs.HudSituationContext(
             street="flop", pot_type="single_raised", is_preflop_aggressor=True, in_position=False
-        )
+        ),
+        samples={"n": 100},
     )
     assert "srp_cbet_ip" in in_position.panels
     assert "srp_cbet_oop" not in in_position.panels
@@ -530,9 +543,9 @@ def test_postflop_srp_panels_split_on_position() -> None:
 
 def test_effective_stack_rules_are_honoured() -> None:
     resolver = hs.load_default_resolver()
-    short = resolver.resolve(hs.HudSituationContext(street="preflop", effective_stack_bb=15))
+    short = resolver.resolve(hs.HudSituationContext(street="preflop", effective_stack_bb=15), samples={"n": 100})
     assert "ssh_stack" in short.panels
-    deep = resolver.resolve(hs.HudSituationContext(street="preflop", effective_stack_bb=200))
+    deep = resolver.resolve(hs.HudSituationContext(street="preflop", effective_stack_bb=200), samples={"n": 100})
     assert "ssh_stack" not in deep.panels
 
 
@@ -579,7 +592,7 @@ def test_corpus_contexts_resolve_to_a_panel_on_every_street(corpus: list) -> Non
     per_street: dict[str, set[str]] = {}
     for situation in corpus:
         context = hs.HudSituationContext.from_situation(situation)
-        selection = resolver.resolve(context)
+        selection = resolver.resolve(context, samples={"n": 100})
         assert selection.panels, f"no panel for {context.describe()}"
         per_street.setdefault(context.street, set()).update(selection.panels)
     assert set(per_street) == {"preflop", "flop", "turn", "river"}
@@ -737,8 +750,8 @@ def test_the_aggregate_row_makes_a_postflop_panel_reachable() -> None:
         "street1InPosition": 0,
         "foldToStreet1CBChance": 1,
     }
-    in_position = resolver.resolve(hs.HudSituationContext.from_stat_dict(aggressor, live))
-    facing = resolver.resolve(hs.HudSituationContext.from_stat_dict(defender, live))
+    in_position = resolver.resolve(hs.HudSituationContext.from_stat_dict(aggressor, live), samples={"n": 100})
+    facing = resolver.resolve(hs.HudSituationContext.from_stat_dict(defender, live), samples={"n": 100})
     assert "srp_cbet_ip" in in_position.panels
     assert "srp_face_cbet_oop" in facing.panels
 
@@ -916,7 +929,7 @@ def test_a_configured_profile_answers_with_the_seat_panels() -> None:
     aux.config = SimpleNamespace(get_hud_panel_rules=lambda: rules, hud_panel_fallback="core")
     aux.game_params = SimpleNamespace(name="default")
     aux.hud = SimpleNamespace(
-        stat_dict={7: {"live_position": "0", "street0Aggr": 1, "street1InPosition": 1}},
+        stat_dict={7: {"live_position": "0", "street0Aggr": 1, "street1InPosition": 1, "n": 100}},
         live_state={"street": "flop", "pot_type": "single_raised"},
     )
     selection = aux.dynamic_panel_selection(3, 7)

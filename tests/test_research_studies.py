@@ -170,6 +170,24 @@ def test_opportunity_outcome_mistakes_are_refused() -> None:
             variables=(),
             panels=(studies.StudyPanelSpec("rate", "Rate", "frequency", "bet_frequency"),),
         )
+    with pytest.raises(studies.StudyValidationError, match="action_taken"):
+        studies.StudySpec(
+            id="raw-action-self-selecting",
+            title="Raw action self selecting",
+            path=("test",),
+            base_filters={"action_taken": "bets"},
+            variables=(),
+            panels=(studies.StudyPanelSpec("rate", "Rate", "frequency", "bet_frequency"),),
+        )
+    with pytest.raises(studies.StudyValidationError, match="outcome situation"):
+        studies.StudySpec(
+            id="label-self-selecting",
+            title="Label self selecting",
+            path=("test",),
+            base_filters={"situation": "cbet"},
+            variables=(),
+            panels=(studies.StudyPanelSpec("rate", "Rate", "frequency", "bet_frequency"),),
+        )
     with pytest.raises(studies.StudyValidationError, match="must declare a response"):
         studies.StudySpec(
             id="unanswered",
@@ -195,6 +213,19 @@ def test_holdem_only_panel_has_an_explicit_unavailable_state() -> None:
     panel = study.panel("range")
     assert not panel.available
     assert panel.unavailable_reason and "Hold'em-only" in panel.unavailable_reason
+
+
+def test_declared_game_cannot_disagree_with_the_population() -> None:
+    with pytest.raises(studies.StudyValidationError, match="conflicts"):
+        studies.StudySpec(
+            id="wrong-game",
+            title="Wrong game",
+            path=("test",),
+            base_filters={"game": "omahahi"},
+            variables=(),
+            panels=(studies.StudyPanelSpec("rate", "Rate", "headline"),),
+            game="holdem",
+        )
 
 
 def test_every_panel_adapter_uses_existing_analytics_owners(browser_db: Database) -> None:

@@ -535,6 +535,11 @@ def _compile_filter(
     # an explicit null predicate, so they use this structured value instead of
     # changing that public convention.
     if isinstance(value, Mapping) and set(value) == {"is_null"}:
+        if name == "pair_detail" and value["is_null"]:
+            # A NULL pair detail is a real "no pair" classification only when
+            # the hand-state join exists. Unknown cards have no HandStates row
+            # and must not be pulled into the no-pair bucket (#364).
+            return [f"{column} IS NULL", "HS.madeHand IS NOT NULL"], []
         return [f"{column} IS {'NULL' if value['is_null'] else 'NOT NULL'}"], []
     if spec.kind in ("scalar", "set"):
         values = _as_list(value)

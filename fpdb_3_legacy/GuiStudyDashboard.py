@@ -324,10 +324,12 @@ class GuiStudyDashboard(QWidget):
         text = value.strip()
         if not text:
             return None
-        if name in {"effective_stack_bb", "stake_bb"} and "," in text:
+        if name in {"effective_stack_bb", "stake_bb"}:
             values = [float(part.strip()) for part in text.split(",") if part.strip()]
             if len(values) == 1:
-                return [values[0], None]
+                return [values[0], values[0]]
+            if not values:
+                return None
             return [values[0], values[1]]
         if name == "in_position" and text.casefold() in {"true", "yes", "1"}:
             return True
@@ -384,7 +386,13 @@ class GuiStudyDashboard(QWidget):
             # tournament study asks for it at all (#369).
             lambda db: (
                 self.model.execute_panel(db, panel_id),
-                self.model.stack_depth_note(db, panel_id),
+                self.model.stack_depth_note(
+                    db,
+                    panel_id,
+                    hero={COMPARISON_HERO: True, COMPARISON_FIELD: False}.get(
+                        self.model.state.comparison,
+                    ),
+                ),
             ),
             serial,
             fingerprint,
@@ -732,7 +740,10 @@ class GuiStudyDashboard(QWidget):
         if hasattr(result, "as_dicts"):
             return list(result.as_dicts())
         if hasattr(result, "every_cell"):
-            return [cell.as_dict() for cell in result.every_cell()]
+            return [
+                cell.as_dict(total_opportunities=result.total_opportunities)
+                for cell in result.every_cell()
+            ]
         if hasattr(result, "rows"):
             rows = result.rows
             return [row.as_dict() if hasattr(row, "as_dict") else dict(row) for row in rows]

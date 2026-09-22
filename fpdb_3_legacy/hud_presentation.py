@@ -228,6 +228,9 @@ class PresentationStat:
     background: str = ""
     low_threshold: str = ""
     high_threshold: str = ""
+    low_color: str = ""
+    mid_color: str = ""
+    high_color: str = ""
 
     @property
     def role(self) -> str:
@@ -345,6 +348,9 @@ def _stat_from(node: Any) -> PresentationStat:
         background=node.getAttribute("hudbgcolor"),
         low_threshold=node.getAttribute("stat_loth"),
         high_threshold=node.getAttribute("stat_hith"),
+        low_color=node.getAttribute("stat_locolor"),
+        mid_color=node.getAttribute("stat_midcolor"),
+        high_color=node.getAttribute("stat_hicolor"),
     )
 
 
@@ -436,9 +442,9 @@ DEMO_VALUES: Final[dict[str, str]] = {
     "n": "11",
     "vpip": "33",
     "pfr": "22",
-    "three_B": "4.4",
+    "three_b": "4.4",
     "f_3bet": "61",
-    "four_B": "2.1",
+    "four_b": "2.1",
     "f_4bet": "44",
     "cb1": "50.0",
     "cb2": "50.0",
@@ -446,13 +452,13 @@ DEMO_VALUES: Final[dict[str, str]] = {
     "f_cb1": "80.0",
     "f_cb2": "100.0",
     "f_cb3": "--",
-    "three_B_flop": "6.0",
-    "four_B_flop": "1.8",
+    "three_b_flop": "6.0",
+    "four_b_flop": "1.8",
     "steal": "38",
     "s_steal": "31",
     "f_steal": "57",
-    "f_BB_steal": "62",
-    "f_SB_steal": "70",
+    "f_bb_steal": "62",
+    "f_sb_steal": "70",
     "open_limp": "14",
     "cold_call": "9",
     "squeeze": "6.2",
@@ -463,7 +469,7 @@ DEMO_VALUES: Final[dict[str, str]] = {
     "fold_vs_flop_cbet": "55",
     "call_vs_flop_cbet": "33",
     "raise_vs_flop_cbet": "12",
-    "fold_to_three_B_flop": "48",
+    "fold_to_three_b_flop": "48",
     "fold_to_cbet_flop": "52",
     "float_turn": "18",
     "probe_bet_turn": "24",
@@ -521,6 +527,11 @@ def preview_blocks(
                         "hudbgcolor": stat.background,
                         "tip": stat.tip,
                         "popup": stat.popup,
+                        "stat_loth": stat.low_threshold,
+                        "stat_locolor": stat.low_color,
+                        "stat_midcolor": stat.mid_color,
+                        "stat_hith": stat.high_threshold,
+                        "stat_hicolor": stat.high_color,
                     }
                     for stat in panel.stats
                 ],

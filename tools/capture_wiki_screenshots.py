@@ -413,7 +413,7 @@ def build_research_views(config, sql, window, config_path: Path):  # noqa: C901 
     return views
 
 
-def build_study_views(config, sql, window, _config_path: Path):
+def build_study_views(config, sql, window, _config_path: Path):  # noqa: C901 - view factories share one deterministic setup.
     """``(filename, factory)`` for the Study Explorer surfaces (#371).
 
     The spot-first path is what the docs lead with, so it is what the pictures
@@ -436,7 +436,7 @@ def build_study_views(config, sql, window, _config_path: Path):
             state["db"] = Database.Database(config, sql=sql)
         return state["db"]
 
-    def settle_dashboard(dashboard: Any) -> None:
+    def settle_dashboard(dashboard: Any) -> bool:
         """Wait for the panel and its source hands, then stop everything.
 
         A dashboard left running holds worker threads, and the next capture
@@ -449,9 +449,10 @@ def build_study_views(config, sql, window, _config_path: Path):
         while monotonic() < deadline:
             QApplication.processEvents()
             if dashboard._results and dashboard.source_hands.page is not None:
-                break
+                return True
             sleep(0.02)
         QApplication.processEvents()
+        return bool(dashboard._results and dashboard.source_hands.page is not None)
 
     def dashboard_for(study_id: str, panel_id: str, *, history=None):
         explorer = StudyExplorerModel(builtin_studies(), history)
@@ -463,7 +464,9 @@ def build_study_views(config, sql, window, _config_path: Path):
         dashboard.model.set_min_sample(0)
         dashboard.model.set_active_panel(panel_id)
         dashboard.refresh()
-        settle_dashboard(dashboard)
+        if not settle_dashboard(dashboard):
+            dashboard.close()
+            raise RuntimeError(f"the {study_id!r} dashboard did not finish")
         return dashboard
 
     def explorer_landing():

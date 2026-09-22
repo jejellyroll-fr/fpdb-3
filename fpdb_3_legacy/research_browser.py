@@ -977,6 +977,7 @@ def drill_display_rows(
     page_ids: Sequence[int],
     *,
     actor: bool = False,
+    numerator_only: bool = False,
 ) -> list[dict[str, Any]]:
     """The columns a human scans, for one page of already-selected hand ids.
 
@@ -994,9 +995,10 @@ def drill_display_rows(
     if not page_ids:
         return []
     placeholder = _placeholder(db)
-    where, params, aliases = compile_filters(
-        {**query.filters, "hand_id": list(page_ids)}, placeholder, _backend_name(db),
-    )
+    filters = {**query.filters, "hand_id": list(page_ids)}
+    if numerator_only:
+        filters.update(query.numerator)
+    where, params, aliases = compile_filters(filters, placeholder, _backend_name(db))
     sources = aliases | {"A", "H", "G", "S", "HP"}
     if actor:
         sources.add("P")
@@ -1094,7 +1096,7 @@ def run_drill_down(
             "board": row["board"],
             "finalPot": row["finalPot"],
         }
-        for row in drill_display_rows(db, query, page_ids)
+        for row in drill_display_rows(db, query, page_ids, numerator_only=numerator_only)
     ]
     return DrillDown(
         hand_ids=hand_ids,

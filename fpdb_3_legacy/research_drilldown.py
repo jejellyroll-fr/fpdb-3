@@ -378,7 +378,7 @@ def run_side_drill(
     query = context.side_query(side, numerator_only=numerator_only)
     paged = replace(query, limit=limit, offset=offset)
     hand_ids = run_hand_ids(db, paged, include_numerator=numerator_only)
-    rows = drill_display_rows(db, query, hand_ids, actor=True)
+    rows = drill_display_rows(db, query, hand_ids, actor=True, numerator_only=numerator_only)
     return DrillPage(
         side=side,
         numerator_only=numerator_only,
@@ -421,4 +421,3 @@ __all__ = [
     "has_numerator",
     "run_side_drill",
 ]
-

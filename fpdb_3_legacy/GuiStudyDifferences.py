@@ -33,6 +33,24 @@ from fpdb_3_legacy.research_study_explorer import StudyExplorerModel
 from fpdb_3_legacy.ring_stats.styles import get_theme_palette
 
 
+class _SortableItem(QTableWidgetItem):
+    """Keep display text while sorting numeric difference columns numerically."""
+
+    _SORT_ROLE = Qt.ItemDataRole.UserRole + 1
+
+    def __init__(self, text: str, sort_value: Any = None) -> None:
+        super().__init__(text)
+        if sort_value is not None:
+            self.setData(self._SORT_ROLE, sort_value)
+
+    def __lt__(self, other: QTableWidgetItem) -> bool:
+        left = self.data(self._SORT_ROLE)
+        right = other.data(self._SORT_ROLE)
+        if left is not None and right is not None:
+            return left < right
+        return super().__lt__(other)
+
+
 class _DifferencesWorker(QThread):
     """Run the bounded comparison outside the Qt event loop."""
 
@@ -120,7 +138,7 @@ class GuiStudyDifferences(QWidget):
         controls.addWidget(self.field_sample_spin)
         self.include_low_sample = QCheckBox("Show low-sample leads")
         self.include_low_sample.setToolTip("Keep small samples visible, clearly marked for review.")
-        self.include_low_sample.setChecked(True)
+        self.include_low_sample.setChecked(False)
         controls.addWidget(self.include_low_sample)
         self.run_button = QPushButton("Find differences")
         self.run_button.clicked.connect(self.run_report)
@@ -204,6 +222,14 @@ class GuiStudyDifferences(QWidget):
         self.run_button.setEnabled(True)
         self.status_label.setText(f"Comparison unavailable: {message}")
 
+    def closeEvent(self, event) -> None:  # noqa: N802 - Qt naming.
+        """Wait for the comparison worker before Qt destroys the page."""
+        worker = self._worker
+        if worker is not None and worker.isRunning():
+            worker.wait(30_000)
+        self._worker = None
+        super().closeEvent(event)
+
     def _render_report(self, report: DifferenceReport) -> None:
         self.table.setSortingEnabled(False)
         self.table.setRowCount(len(report.rows))
@@ -218,12 +244,23 @@ class GuiStudyDifferences(QWidget):
                 str(row.field_sample),
                 "Review sample" if row.low_sample else "Open study",
             )
+            numeric_sort_values = {
+                2: row.hero_value_bp,
+                3: row.field_value_bp,
+                4: row.score,
+                5: row.hero_sample,
+                6: row.field_sample,
+            }
             for column, value in enumerate(values):
-                item = QTableWidgetItem(value)
+                item = _SortableItem(value, numeric_sort_values.get(column))
                 if column == 0:
                     item.setData(Qt.ItemDataRole.UserRole, row)
                 self.table.setItem(row_index, column, item)
         self.table.setSortingEnabled(True)
+        # ``build_difference_report`` already sorted by review score. Make the
+        # initial table order explicit after re-enabling Qt sorting; otherwise
+        # QTableWidget applies its default Spot-column ordering (#365).
+        self.table.sortItems(4, Qt.SortOrder.DescendingOrder)
         self.status_label.setText(
             f"{len(report.rows)} differences from {report.panels_executed} grouped panels "
             f"({report.candidates_evaluated} curated candidates). {report.heuristic_description} "

@@ -12,6 +12,7 @@ import pytest
 
 from fpdb_3_legacy import hud_situation
 from fpdb_3_legacy.hud_presentation import (
+    DEMO_VALUES,
     PANEL_TITLES,
     POPUP_CONTEXT_STATS,
     ROLE_BACKGROUNDS,
@@ -238,6 +239,16 @@ def test_preview_rows_are_zero_based_for_the_widget(package) -> None:
         for cell in block["stats"]:
             assert cell["row"] >= 0
             assert cell["col"] >= 0
+
+
+def test_preview_preserves_package_thresholds_and_normalized_demo_keys(dynamic) -> None:
+    blocks = preview_blocks(dynamic, ["core", "srp_cbet_ip"])
+    cells = [cell for block in blocks for cell in block["stats"]]
+    sample = next(cell for cell in cells if cell["stat"] == "n")
+    assert sample["stat_loth"] == str(SAMPLE_LOW)
+    assert sample["stat_hith"] == str(SAMPLE_HIGH)
+    assert "three_b" in DEMO_VALUES
+    assert "three_B" not in DEMO_VALUES
 
 
 # -- import and export ---------------------------------------------------------
